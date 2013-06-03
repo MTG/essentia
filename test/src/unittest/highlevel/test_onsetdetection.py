@@ -1,0 +1,96 @@
+#!/usr/bin/env python
+
+from numpy import *
+from essentia_test import *
+
+framesize = 1024
+hopsize = 512
+
+class TestOnsetDetection(TestCase):
+
+    def testZero(self):
+        # Inputting zeros should return no onsets (empty array)
+        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/britney.wav'),
+                           sampleRate = 44100)()
+        frames = FrameGenerator(audio, frameSize=framesize, hopSize=hopsize)
+        win = Windowing(type='hamming')
+        fft = FFT()
+        onset_hfc = OnsetDetection(method='hfc')
+        onset_complex = OnsetDetection(method='complex')
+        for frame in frames:
+            fft_frame = fft(win(frame))
+            mag, ph = CartesianToPolar()(fft_frame)
+            mag = zeros(len(mag))
+            self.assertEqual(onset_hfc(mag, ph), 0)
+            self.assertEqual(onset_complex(mag, ph), 0)
+
+
+    def testImpulse(self):
+        # tests that for an impulse will yield the correct position
+        audiosize = 10000
+        audio = zeros(audiosize)
+        pos = 5.5  # impulse will be in between frames 4 and 5
+        audio[floor(pos*(hopsize))] = 1.
+        frames = FrameGenerator(audio, frameSize=framesize, hopSize=hopsize,
+                startFromZero=True)
+        win = Windowing(type='hamming')
+        fft = FFT()
+        onset_hfc = OnsetDetection(method='hfc')
+        onset_complex = OnsetDetection(method='complex')
+        nframe = 0
+        for frame in frames:
+            mag, ph = CartesianToPolar()(fft(win(frame)))
+            if nframe == floor(pos)-1: # 4th frame
+                # complex method will yield zero because targetPhase = phase,
+                # so distance=2*spectrum*sin((phase-targetPhase)*0.5) = 0
+                self.assertEqual(onset_complex(mag,ph), 0)
+                self.assertNotEqual(onset_hfc(mag,ph), 0)
+            elif nframe == ceil(pos)-1: #5th frame
+                self.assertNotEqual(onset_complex(mag,ph), 0)
+                self.assertNotEqual(onset_hfc(mag,ph), 0)
+            else:
+                self.assertEqual(onset_complex(mag,ph), 0)
+                self.assertEqual(onset_hfc(mag,ph), 0)
+            nframe += 1
+
+    def testConstantInput(self):
+        audio = ones(44100.0*5)
+        frames = FrameGenerator(audio, frameSize=framesize, hopSize=hopsize)
+        win = Windowing(type='hamming')
+        fft = FFT()
+        onset_hfc = OnsetDetection(method='hfc')
+        onset_complex = OnsetDetection(method='complex')
+        found_complex = []
+        found_hfc = []
+        for frame in frames:
+            fft_frame = fft(win(frame))
+            mag, ph = CartesianToPolar()(fft_frame)
+            mag = zeros(len(mag))
+            found_hfc += [onset_hfc(mag, ph)]
+            found_complex += [onset_complex(mag, ph)]
+        self.assertEqualVector(found_complex, zeros(len(found_complex)))
+        self.assertEqualVector(found_hfc, zeros(len(found_hfc)))
+
+    def testInvalidParam(self):
+        self.assertConfigureFails(OnsetDetection(), { 'sampleRate':-1 })
+        self.assertConfigureFails(OnsetDetection(), { 'method':'unknown' })
+
+    def testEmpty(self):
+        # Empty input should raise an exception
+        spectrum = []
+        phase = []
+        self.assertComputeFails(OnsetDetection(), spectrum, phase)
+        spectrum = ones(1024)
+        self.assertComputeFails(OnsetDetection(method='complex'), spectrum, phase)
+
+
+    def testDifferentSizes(self):
+       spectrum = ones(1024)
+       phase = ones(512)
+       self.assertComputeFails(OnsetDetection(method='complex'),spectrum, phase)
+
+
+suite = allTests(TestOnsetDetection)
+
+if __name__ == '__main__':
+    TextTestRunner(verbosity=2).run(suite)

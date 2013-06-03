@@ -1,0 +1,28 @@
+This folder contains all the files necessary to create a win32 platform
+installer.
+
+
+To create the installer, you must have installed NSIS (Nullsoft Scriptable
+Install System):
+
+    http://nsis.sourceforge.net/Download
+
+This file was last tested on NSIS 2.44.
+
+
+After installing NSIS, you must use the program, makensis.exe, and pass it two
+arguments:
+
+    arg 1. /DTHIRDPARTY=<abs path to 3rdparty folder (no trailing slash)>
+    arg 2. main.nsi
+
+For example:
+
+    c:\NSIS\makensis.exe /DTHIRDPARTY="c:\essentia-thirdparty" main.nsi
+
+'install_essentia.exe' should then be produced.
+
+
+Notes:
+    - If you don't specify the THIRDPARTY define, the default,
+      '..\essentia-thirdparty-msvc2005sp1-32bit', will be used

@@ -1,0 +1,74 @@
+
+equalLoudness: true
+nequalLoudness: false
+shortSound: false
+startTime: 0
+endTime: 4800
+analysisSampleRate: 44100.0
+outputAggregationJSON: true
+outputFrames: true
+outputFramesJSON: true
+
+svm:
+    compute: true
+
+segmentation:
+    compute: false
+    size1: 1000
+    inc1: 300
+    size2: 600
+    inc2: 50
+    cpw: 5
+    minimumSegmentsLength: 10
+
+lowlevel:
+    compute: true
+    frameSize: 2048
+    hopSize: 1024
+    zeroPadding: 0
+    windowType: "blackmanharris62"
+    silentFrames: "noise"
+    stats: [mean, var, min, max, dmean, dmean2, dvar, dvar2]
+    mfccStats: [mean, cov, icov]
+
+average_loudness:
+    compute: true
+    frameSize: 88200
+    hopSize: 44100
+    windowType: "hann"
+    silentFrames: "noise"
+
+rhythm:
+    compute: true
+    frameSize: 1024
+    hopSize: 256
+    useOnset: true
+    useBands: true
+    numberFrames: 1024
+    frameHop: 1024
+    stats: [mean, var, min, max, dmean, dmean2, dvar, dvar2]
+
+tonal:
+    compute: true
+    frameSize: 4096
+    hopSize: 2048
+    zeroPadding: 0
+    windowType: "blackmanharris62"
+    silentFrames: "noise"
+    stats: [mean, var, min, max, dmean, dmean2, dvar, dvar2]
+
+sfx:
+    compute: true
+    stats: [mean, var, min, max, dmean, dmean2, dvar, dvar2]
+
+highlevel:
+    compute: true
+
+panning:
+    compute: false
+    frameSize: 8192
+    hopSize: 2048
+    zeroPadding: 8192
+    windowType: "hann"
+    silentFrames: "noise"
+    # stats: "copy" # provokes an error

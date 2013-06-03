@@ -1,0 +1,9 @@
+#!/usr/bin/env python
+import os
+from os.path import join
+
+file = open(join(os.environ['HOME'], '.bash_profile'), 'a')
+file.write('\n########### Essentia exports ###########\n')
+file.write('export ESSENTIA_THIRDPARTY=/essentia/third_party\n')
+file.write('export DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH:$ESSENTIA_THIRDPARTY/lib\n')
+file.write('export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$ESSENTIA_THIRDPARTY/pkgconfig\n')

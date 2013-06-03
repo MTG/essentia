@@ -1,0 +1,44 @@
+
+
+Vamp - Essentia
+===============
+
+This contains a trimmed down copy of the vamp plugins API to be able to
+compile the plugin wrapper Essentia -> Vamp
+
+For the complete SDK, please visit: http://www.vamp-plugins.org/
+
+
+Licensing
+=========
+
+This plugin SDK is freely redistributable under a "new-style BSD"
+licence.  See the file COPYING for more details.  In short, you may
+modify and redistribute the SDK and example plugins within any
+commercial or non-commercial, proprietary or open-source plugin or
+application under almost any conditions, with no obligation to provide
+source code, provided you retain the original copyright note.
+
+
+See Also
+========
+
+Sonic Visualiser, an interactive open-source graphical audio
+inspection, analysis and visualisation tool supporting Vamp plugins.
+http://www.sonicvisualiser.org/
+
+
+Authors
+=======
+
+Vamp and the Vamp SDK were designed and made at the Centre for Digital
+Music at Queen Mary, University of London.
+
+The SDK was written by Chris Cannam, copyright (c) 2005-2009
+Chris Cannam and QMUL.
+
+Mark Sandler and Christian Landone provided ideas and direction, and
+Mark Levy, Dan Stowell, Martin Gasser and Craig Sapp provided testing
+and other input for the 1.0 API and SDK.  The API also uses some ideas
+from prior plugin systems, notably DSSI (http://dssi.sourceforge.net)
+and FEAPI (http://feapi.sourceforge.net).

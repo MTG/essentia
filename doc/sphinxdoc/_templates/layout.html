@@ -1,0 +1,24 @@
+{% extends "!layout.html" %}
+
+{% block extrahead %}
+{{ super() }}
+{%- if not embedded %}
+<style type="text/css">
+  table.right { float: right; margin-left: 20px; }
+  table.right td { border: 1px solid #ccc; }
+</style>
+{%- endif %}
+{% endblock %}
+
+{% block rootrellink %}
+        <li><a href="https://yucatan.upf.edu/trac/essentia">Essentia home</a>&nbsp;|&nbsp;</li>
+        <li><a href="{{ pathto('index') }}">Essentia documentation</a>&nbsp;|&nbsp;</li>
+        <li><a href="{{ pathto('contents') }}">Documentation contents</a>
+          &raquo;</li>
+{% endblock %}
+
+{% block header %}
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<img src="{{ pathto("_static/essentia_logo.png", 1) }}" alt="Essentia logo" />
+</div>
+{% endblock %}
