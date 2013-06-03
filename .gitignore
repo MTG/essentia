@@ -1,0 +1,60 @@
+*.pyc
+build
+.sconsign.dblite
+*.idb
+*~
+.waf-*
+.lock-waf*
+buildw/
+
+# hide the debian stuff
+build-arch-stamp
+build-indep-stamp
+configure-stamp
+
+debian/*.debhelper.log
+debian/*.debhelper
+debian/*.substvars
+
+debian/files
+debian/libessentia-dev/
+debian/python-essentia/
+debian/essentia-doc/
+
+# VAMP build:
+src/examples/libvamp_essentia.so
+src/examples/vampplugins.os
+src/examples/vamppluginsextra.os
+src/examples/vampwrapper.os
+
+# algorithm registration
+src/algorithms/_registration
+
+# documentation files
+doc/sphinxdoc/_build/
+doc/sphinxdoc/_templates/reference/
+doc/sphinxdoc/essentia_reference.py
+
+# hide auto generated python extractor
+src/examples/python/streaming_extractor/streaming_extractorlevel.cpp
+src/examples/python/streaming_extractor/streaming_extractorlevel.h
+src/examples/python/streaming_extractor/streaming_extractorlowlevelspectral.cpp
+src/examples/python/streaming_extractor/streaming_extractorlowlevelspectral.h
+src/examples/python/streaming_extractor/streaming_extractorlowlevelspectraleqloud.cpp
+src/examples/python/streaming_extractor/streaming_extractorlowlevelspectraleqloud.h
+src/examples/python/streaming_extractor/streaming_extractorpanning.cpp
+src/examples/python/streaming_extractor/streaming_extractorpanning.h
+src/examples/python/streaming_extractor/streaming_extractorpitch.cpp
+src/examples/python/streaming_extractor/streaming_extractorpitch.h
+src/examples/python/streaming_extractor/streaming_extractorrhythmdescriptors.cpp
+src/examples/python/streaming_extractor/streaming_extractorrhythmdescriptors.h
+src/examples/python/streaming_extractor/streaming_extractorsfx.cpp
+src/examples/python/streaming_extractor/streaming_extractorsfx.h
+src/examples/python/streaming_extractor/streaming_extractortonaldescriptors.cpp
+src/examples/python/streaming_extractor/streaming_extractortonaldescriptors.h
+src/examples/python/streaming_extractor/streaming_extractortuningfrequency.cpp
+src/examples/python/streaming_extractor/streaming_extractortuningfrequency.h
+
+# this shouldn't be here, but yeah well...
+test/src/basetest/test_*.o
+src/algorithms/essentia_algorithms_reg.cpp
