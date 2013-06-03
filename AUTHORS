@@ -1,0 +1,24 @@
+Essentia developers
+-----------------
+Nicolas Wack (essentia@wackou.otherinbox.com)
+    general architecture & design, streaming, python bindings, documentation
+Dmitry Bogdanov (dmitry.bogdanov@upf.edu)
+    algorithm development, general architecture, documentation
+Oscar Mayor (oscar.mayor@upf.edu)
+    scripting language for streaming extractors
+Robert Toscano
+    implementation, development, python bindings
+Eduard Aylon
+    implementation, development, python bindings
+Bram de Jong
+    general architecture, algorithm development
+Thomas Aussenac
+    algorithm development, documentation
+Paul Brossier
+    algorithm development
+Vicent akkermans
+    algorithm development
+Gerard Roma (gerard.roma@upf.edu)
+    algorithm development
+Sankalp Gulati (sankalp.gulati@upf.edu)
+    algorithm development

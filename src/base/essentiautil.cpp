@@ -1,0 +1,30 @@
+/*
+ * Copyright (C) 2006-2008 Music Technology Group (MTG)
+ *                         Universitat Pompeu Fabra
+ *
+ */
+
+#include "essentiautil.h"
+
+#ifdef OS_WIN32
+#include <fcntl.h>
+#include <io.h> // _mktemp
+#endif // OS_WIN32
+
+using namespace std;
+
+namespace essentia {
+
+#ifdef OS_WIN32
+#define _S_IREAD 256
+#define _S_IWRITE 128
+int mkstemp(char *tmpl) {
+  int ret=-1;
+
+  _mktemp(tmpl);
+  ret=open(tmpl,O_RDWR|O_BINARY|O_CREAT|O_EXCL|_O_SHORT_LIVED, _S_IREAD|_S_IWRITE);
+  return ret;
+}
+#endif // OS_WIN32
+
+} //namespace essentia

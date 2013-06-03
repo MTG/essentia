@@ -1,0 +1,107 @@
+          Changelog
+          ---------
+
+Essentia 1.0:
+ - first public release
+
+Essentia 1.0.1:
+ - fixed a lot of memory leaks
+ - fixed a crash in the bpm histogram descriptor
+
+Essentia 1.0.2:
+ - fixed all the remaining memory leaks. Essentia is now 100% leak-free!
+
+Essentia 1.0.3:
+ - extractor in windows now prints the message of the exception if any was thrown
+   (just crashed silently before)
+ - added RealAccumulator algorithm
+ - ValueFile can now output string and vector<string>
+ - cleaned examples and made sure they all work
+
+Essentia 1.0.4:
+ - fixed serious bug in the extractor, ReplayGain value was always 0
+ - fixed crash when using deleteNetwork on some AlgorithmComposites
+ - added range description for parameters, also does automatic range checking when
+   configuring an algorithm
+ - added new python unit tests and streaming C++ unit tests
+ - did a white-box review of Essentia's most used algorithms, they now:
+   - have input/output/parameter names which conform better to the guidelines
+   - do input validation
+
+ - some descriptors output by the streaming_extractor have been fixed and now have
+   different values. Here is the list of changes:
+
+   - MFCC are slightly different (negligible), because the bands limits were not
+     correctly taken before (off by 1 error)
+
+   - Barkbands were overlapping before, not anymore so some bands are the same,
+     some others have smaller energy values.
+     differences are significative, and are more significative in lower bands
+     (because we have lower resolution in low frequencies)
+
+     Descriptors dependent on barkbands:
+     - barkbands_kurtosis -> changes a lot, but 4th order moment -> too sensitive to noise
+     - barkbands_skewness -> changes a lot, but 3th order moment -> too sensitive to noise
+     - barkbands_spread -> changes by ~1%, quite stable
+     - spectral_crest -> changes a lot -> uses the max which is way too sensitive to noise
+     - spectral_flatness_db -> changes a little (~5%)
+
+   - average loudness: very small deviation (<1%)
+     due to the framecutter not returning exactly the same number of frames (off by 1)
+     this difference does not appear on all the files (some have the exact same value)
+
+   - tempotap (and dependencies) has negligible variations (<0.01% for all dependencies)
+
+   - beatsloudness_bass varies a lot because we used energybandratio rounds to nearest
+     bin instead of truncating, hence we're not taking into account the bin nº 0,
+     which has lots of energy
+
+Essentia 1.0.5:
+ - did a white-box review of 33 more algorithms
+
+Essentia 1.0.5.1:
+ - Fixed the build on various platforms.
+
+Essentia 1.0.6:
+ - did a white-box review of the remaining algorithms
+
+
+
+      ----------------------------------------------------------------------
+
+
+Essentia 1.1:
+ - Internal refactoring: Parameter, Pool, python bindings are all much cleaner now
+ - New algorithms: Panning, PCA, SpectralContrast, RhythmTransform, YamlInput, SVMClassifier, PoolAggregator, new FFMpeg-based audioloader & writer
+ - Streaming Python bindings (ESX is dead)
+ - Python bindings gained online docstrings
+ - Win32 & Mac OS X packages
+ - bug fixes, more (& better) unittests, etc...
+
+
+      ----------------------------------------------------------------------
+
+Essentia 1.2:
+ - Much better Windows & MacOSX installers!
+ - Better compatibility with python 2.6
+ - Core library changes:
+   - pool.merge (between pools and descriptors), pool.removeNamespace. See src/base/pool.*
+   - PoolAggregator also allows Kurtosis and Skewness as aggregates.
+   - audio loaders can now directly load the audio track from a video (works with youtube videos, etc...)
+   - new GaiaTransform algorithm that can use any classification model trained by Gaia to classify a given Pool. See src/algorithms/highlevel/gaiatransform.*
+   - spline (b, beta, quadratic) and cubicspline approximants. See src/algorithms/standard/spline and src/algorithms/standard/cubicspline
+   - streaming_extractor sub-extractors (lowlevelspectralextractor, lowleveleqlouspectralextractor, rhtythmdescriptors, tuningfrequencyextractor, tonalextractor, etc.) available as highlevel algorithms. See src/algorithms/highlevel
+
+ - External features / examples enhancements:
+   - Most of Essentia descriptors are now wrapped as vamp plugins. see src/examples/vamp*
+   - python to c++ translation and dot graphs (ala esx, i.e. only for composite algorithms not for actual python code). See src/examples/python for more details.
+   - streaming_extractor completely available in python (exact same results as its c++ counterparts). See src/examples/python/streaming_extractor for more details.
+
+
+
+      ----------------------------------------------------------------------
+
+Essentia 1.3:
+ - New rhythm descriptors, bpm and beat tracking using Meinhard Mueller's technique described in his paper from ISMIR 2009.
+ - streaming_extractor can now be configured using a YAML configuration file
+ - the usual assortment of bugfixes.

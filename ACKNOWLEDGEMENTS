@@ -1,0 +1,20 @@
+Thanks goes to
+--------------
+
+- Our QA team, for improving the quality of descriptors (and also being
+  alpha(!) testers): Joshua Eichen, Joachim Neumann and Jens Grivolla)
+
+- The CLAM team, and especially Pau Arumi and David Garcia, for
+  inspiration, interesting discussions and in particular for Essentia:
+  - the typed connections pattern using template classes
+  - the multirate buffer and phantom buffer pattern, which are needed
+    for the streaming algorithms.
+    You can find more about these in this excellent article:
+      http://hillside.net/plop/2006/Papers/Library/audioPatterns_20060809.pdf
+  - and probably much more
+
+- Our patient beta-testers (and users!)
+
+
+
+File last modified on: Fri May 17 19:44:23 CET 2013

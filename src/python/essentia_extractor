@@ -1,0 +1,70 @@
+#!/usr/bin/python
+
+import essentia
+from essentia import essentia_extractor
+import numpy
+import sys
+
+
+#from essentia.extractor.essentia_music import essentia_music, parse_args, essentia_usage
+
+
+essentia_usage = "usage: \'essentia_extractor [options] config_file input_soundfile output_results\'"
+
+def parse_args():
+
+    essentia_version = '%s\n'\
+    'python version: %s\n'\
+    'numpy version: %s' % (essentia.__version__,       # full version
+                           sys.version.split()[0],     # python major version
+                           numpy.__version__)          # numpy version
+
+    from optparse import OptionParser
+    parser = OptionParser(usage=essentia_usage, version=essentia_version)
+
+    parser.add_option("-v","--verbose",
+      action="store_true", dest="verbose", default=False,
+      help="verbose mode")
+
+    parser.add_option("-x","--xml",
+      action="store_true", dest="xml", default=False,
+      help="xml output, default is yaml")
+
+    parser.add_option("-s","--segmentation",
+      action="store_true", dest="segmentation", default=False,
+      help="do segmentation")
+
+    parser.add_option("-p","--profile",
+      action="store", type="string", dest="profile", default="music",
+      help="computation mode: 'music', 'sfx' or 'broadcast'")
+
+    parser.add_option("--start",
+      action="store", dest="startTime", default="0.0",
+      help="time in seconds from which the audio is computed")
+
+    parser.add_option("--end",
+      action="store", dest="endTime", default="600.0",
+      help="time in seconds till which the audio is computed, 'end' means no time limit")
+
+    (options, args) = parser.parse_args()
+
+    return options, args
+
+
+if __name__ == '__main__':
+
+    opt, args = parse_args()
+    # hack to transform opt into a dictionnary
+    exec('options = ' + str(opt))
+
+    if len(args) != 3:
+        import sys
+        print "Incorrect number of arguments\n", essentia_usage
+        sys.exit(1)
+
+
+    profile = args[0]
+    input_file = args[1]
+    output_file = args[2]
+
+    essentia_extractor.compute(profile, input_file, output_file)
