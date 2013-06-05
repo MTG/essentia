@@ -3,13 +3,13 @@
 from essentia_test import *
 from numpy import sin, pi, mean, random
 
-class TestPitchDetection(TestCase):
+class TestPitchYinFFT(TestCase):
 
     def testEmpty(self):
-        self.assertComputeFails(PitchDetection(), [])
+        self.assertComputeFails(PitchYinFFT(), [])
 
     def testZero(self):
-        pitch, confidence = PitchDetection()(zeros(1024))
+        pitch, confidence = PitchYinFFT()(zeros(1024))
         self.assertEqual(pitch, 0)
         self.assertEqual(confidence, 0)
 
@@ -76,7 +76,7 @@ class TestPitchDetection(TestCase):
 
         frames = FrameGenerator(signal, frameSize=frameSize, hopSize=hopsize)
         win = Windowing(type='hann')
-        pitchDetect = PitchDetection(frameSize=frameSize, sampleRate = sr, tolerance = 0.75)
+        pitchDetect = PitchYinFFT(frameSize=frameSize, sampleRate = sr)
         pitch = []
         confidence = []
         for frame in frames:
@@ -88,10 +88,8 @@ class TestPitchDetection(TestCase):
         self.assertAlmostEqual(mean(confidence), 1, conf_precision)
 
     def testInvalidParam(self):
-        self.assertConfigureFails(PitchDetection(), {'frameSize' : 1})
-        self.assertConfigureFails(PitchDetection(), {'sampleRate' : 0})
-        self.assertConfigureFails(PitchDetection(), {'tolerance' : -1})
-        self.assertConfigureFails(PitchDetection(), {'tolerance' : 10})
+        self.assertConfigureFails(PitchYinFFT(), {'frameSize' : 1})
+        self.assertConfigureFails(PitchYinFFT(), {'sampleRate' : 0})
 
     def testARealCase(self):
         frameSize = 1024
@@ -101,7 +99,7 @@ class TestPitchDetection(TestCase):
         audio = MonoLoader(filename=filename, sampleRate=44100)()
         frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
         win = Windowing(type='hann')
-        pitchDetect = PitchDetection(frameSize=frameSize, sampleRate = sr, tolerance = 0.75)
+        pitchDetect = PitchYinFFT(frameSize=frameSize, sampleRate = sr)
         pitch = []
         confidence = []
         for frame in frames:
@@ -116,7 +114,7 @@ class TestPitchDetection(TestCase):
 
 
 
-suite = allTests(TestPitchDetection)
+suite = allTests(TestPitchYinFFT)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
