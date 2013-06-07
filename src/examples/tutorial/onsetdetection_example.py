@@ -1,7 +1,9 @@
 #!/usr/bin/env python
+import sys
 
 from essentia import Pool, array
 from essentia.standard import *
+
 
 # In this example we are going to look at how to perform some onset detection
 # and mark them on the audio using the AudioOnsetsMarker algorithm.
@@ -14,15 +16,20 @@ from essentia.standard import *
 #     detection functions, decide where in the sound there actually are onsets
 
 
-# we're going to work with this small loop downloaded from freesound
+# we're going to work with a file specified as an argument in the command line
+try:
+    filename = sys.argv[1]
+except:
+    print "usage:", sys.argv[0], "<audiofile>"
+    sys.exit()
 
 # don't forget, we can actually instantiate and call an algorithm on the same line!
 print 'Loading audio file...'
-audio = MonoLoader(filename = '554__bebeto__Ambient_loop.mp3')()
+audio = MonoLoader(filename = filename)()
 
 # Phase 1: compute the onset detection function
-# The OnsetDetection algorithm tells us that there are 2 available in Essentia,
-# so let's do both of them
+# The OnsetDetection algorithm tells us that there are several methods available in Essentia,
+# let's do two of them
 
 od1 = OnsetDetection(method = 'hfc')
 od2 = OnsetDetection(method = 'complex')
@@ -76,3 +83,4 @@ MonoWriter(filename = 'onsets_complex.mp3', format = 'mp3')(marker(audio))
 # and now go listen to your nice audio files to see which onset detection function
 # works better!
 print 'All done!'
+print 'Results are written to the files \'onsets_hfc.wav\' and \'onsets_complex.mp3\''
