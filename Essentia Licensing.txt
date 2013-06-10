@@ -39,7 +39,7 @@ C) External Dependant libraries are:
 TagLib – under the GNU Lesser General Public License version 2.1, project page at
 http://taglib.github.com/api/index.html 
 
-libavcodec/libavformat/libavutil – audiocontext.h.c  (modified by MTG) 
+libavcodec/libavformat/libavutil – audiocontext.h, audiocontext.c  (modified by MTG) 
 
 VAMP SDK under the MIT license, with Project page at http://www.vamp-plugins.org/develop.html  
 
