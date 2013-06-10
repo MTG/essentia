@@ -1,5 +1,3 @@
-
-
 #ifndef TNT_ARRAY3D_UTILS_H
 #define TNT_ARRAY3D_UTILS_H
 
