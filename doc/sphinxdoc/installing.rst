@@ -32,6 +32,10 @@ You can install those dependencies on a Debian/Ubuntu system using the following
 
   sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev python-dev libsamplerate0-dev libtag1-dev
 
+In order to use python bindings for the library, you might also need to install python-numpy-dev on Ubuntu::
+
+  sudo apt-get python-numpy-dev
+
 
 Installing dependencies on Mac OS X
 -----------------------------------
@@ -80,7 +84,12 @@ Compiling Essentia
 Once your dependencies are installed, you can compile Essentia (the library) by going into its
 directory and start by configuring it::
 
-  ./waf configure --mode=release --with-python --with-cpptests
+  ./waf configure --mode=release --with-python --with-cpptests --with-examples --with-vamp
+
+Use the keys: 
+   ``--with-python`` to enable python bindings,
+   ``--with-examples`` to build examples based on the library,
+   ``--with-vamp`` to build vamp plugin wrapper.
 
 NOTE: you must *always* configure at least once before building!
 
@@ -107,3 +116,8 @@ To run the python unit tests (include all unittests on algorithms, need python b
 To generate the full documentation (need python bindings installed first)::
 
   ./waf doc
+
+Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
+
+All built examples will be located in ``buildw/src/examples/`` folder, as well as the vamp plugin file ``libvamp_essentia.so``. In order to use the plugin you will need to place this file to the the standard vamp plugin folder of your system (such as ``/usr/local/lib/vamp/`` on Linux).
+
