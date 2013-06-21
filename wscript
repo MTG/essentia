@@ -40,7 +40,7 @@ def configure(ctx):
 
     elif ctx.options.MODE == 'release':
         print '→ Building in release mode'
-        ctx.env.CXXFLAGS += [ '-O2', '-march=native' ] # '-msse3', '-mfpmath=sse' ]
+        ctx.env.CXXFLAGS += [ '-O2' ] # '-march=native' ] # '-msse3', '-mfpmath=sse' ]
 
     else:
         raise ValueError('mode should be either "debug" or "release"')
