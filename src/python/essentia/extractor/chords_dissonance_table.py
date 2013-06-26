@@ -1,3 +1,20 @@
+# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+#
+# This file is part of Essentia
+#
+# Essentia is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Affero General Public License as published by the Free
+# Software Foundation (FSF), either version 3 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the Affero GNU General Public License     
+# version 3 along with this program. If not, see http://www.gnu.org/licenses/
+
 dissonance = {
 
 'A#m': {'A#m': 1098.0000000000002, 'C#m': 1321.9999999999998, 'A#': 1229.3999999999999, 'Dm': 1312.0000000000002, 'C#': 1163.3999999999996, 'Bm': 1526.1999999999998, 'G#': 1383.9999999999998, 'Fm': 1202.8, 'A': 1394.7999999999997, 'C': 1473.7999999999995, 'B': 1466.9999999999998, 'E': 1387.3999999999996, 'D': 1443.3999999999999, 'G': 1487.3999999999996, 'F': 1219.9999999999998, 'G#m': 1404.3999999999999, 'Em': 1407.8, 'D#m': 1296.9999999999998, 'Cm': 1404.3999999999999, 'Am': 1526.1999999999996, 'D#': 1254.7999999999997, 'F#': 1201.1999999999998, 'Gm': 1322.0000000000002, 'F#m': 1288.4000000000001}, 
