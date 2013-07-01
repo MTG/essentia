@@ -14,7 +14,9 @@ descriptors included in-the-box and signal processing algorithms, is easily expa
 experiments and development of large-scale industrial applications.
 
 Documentation online: http://essentia.upf.edu/
+
 Installation HOWTO: http://essentia.upf.edu/documentation/installing.html 
+
 Quick start using python: http://essentia.upf.edu/documentation/python_tutorial.html
 
 Windows platform is not supported until the official release.
