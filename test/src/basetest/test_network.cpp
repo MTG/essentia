@@ -39,7 +39,7 @@ TEST(Network, SimpleVisibleNetwork) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   Algorithm* loader = factory.create("MonoLoader",
-                                     "filename", "test/audio/recorded/britney.wav");
+                                     "filename", "test/audio/recorded/cat_purrrr.wav");
 
   Algorithm* lowpass = factory.create("LowPass");
 
@@ -98,7 +98,7 @@ TEST(Network, ExecutionNetworkWithComposite) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   Algorithm* loader = factory.create("MonoLoader",
-                                     "filename", "test/audio/recorded/britney.wav");
+                                     "filename", "test/audio/recorded/cat_purrrr.wav");
 
   Algorithm* lowpass = factory.create("LowPass");
 
