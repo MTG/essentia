@@ -32,7 +32,7 @@ using namespace essentia::scheduler;
 TEST(AudioLoader, SimpleLoad) {
     AlgorithmFactory& factory = AlgorithmFactory::instance();
     Algorithm* loader =  factory.create("AudioLoader",
-                                        "filename", "test/audio/recorded/britney.wav");
+                                        "filename", "test/audio/recorded/cat_purrrr.wav");
     essentia::Pool p;
 
     loader->output("audio")           >>  PC(p, "audio");
@@ -43,13 +43,13 @@ TEST(AudioLoader, SimpleLoad) {
 
     EXPECT_EQ(44100,   p.value<Real>("samplerate"));
     EXPECT_EQ(2,       p.value<Real>("channels"));
-    EXPECT_EQ(1323588, p.value<vector<StereoSample> >("audio").size());
+    EXPECT_EQ(219343,  p.value<vector<StereoSample> >("audio").size());
 }
 
 TEST(AudioLoader, SampleFormatConversion) {
     AlgorithmFactory& factory = AlgorithmFactory::instance();
     Algorithm* loader24 =  factory.create("AudioLoader",
-                                          "filename", "test/audio/recorded/britney24bit.wav");
+                                          "filename", "test/audio/recorded/cat_purrrr24bit.wav");
     essentia::Pool p;
 
     loader24->output("audio")           >>  PC(p, "audio24");
@@ -60,14 +60,14 @@ TEST(AudioLoader, SampleFormatConversion) {
 
     EXPECT_EQ(44100,   p.value<Real>("samplerate24"));
     EXPECT_EQ(2,       p.value<Real>("channels24"));
-    EXPECT_EQ(1323588, p.value<vector<StereoSample> >("audio24").size());
+    EXPECT_EQ(219343,  p.value<vector<StereoSample> >("audio24").size());
 
     // FIXME: the following should work
     //loader->configure("filename", "test/audio/recorded/britney32bit.wav");
     //p.clear();
 
     Algorithm* loader32 =  factory.create("AudioLoader",
-                                          "filename", "test/audio/recorded/britney32bit.wav");
+                                          "filename", "test/audio/recorded/cat_purrrr32bit.wav");
 
     loader32->output("audio")           >>  PC(p, "audio32");
     loader32->output("sampleRate")      >>  PC(p, "samplerate32");
@@ -77,5 +77,5 @@ TEST(AudioLoader, SampleFormatConversion) {
 
     EXPECT_EQ(44100,   p.value<Real>("samplerate32"));
     EXPECT_EQ(2,       p.value<Real>("channels32"));
-    EXPECT_EQ(1323588, p.value<vector<StereoSample> >("audio32").size());
+    EXPECT_EQ(219343, p.value<vector<StereoSample> >("audio32").size());
 }
