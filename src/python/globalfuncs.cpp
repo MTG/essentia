@@ -1,19 +1,19 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
- * You should have received a copy of the GNU General Public License along with 
+ *
+ * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see http://www.gnu.org/licenses/
  */
 
@@ -46,6 +46,22 @@ set_debug_level(PyObject* self, PyObject* arg) {
   Py_RETURN_NONE;
 }
 
+static PyObject* log_debug(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if (argsV.size() != 2 ||
+      (!PyInt_Check(argsV[0]) && !PyLong_Check(argsV[0])) ||
+      !PyString_Check(argsV[1])) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (DebugLevel, string)");
+    return NULL;
+  }
+
+  long dbgLevel = PyInt_AsLong(argsV[0]);
+
+  E_DEBUG((DebuggingModule)dbgLevel, PyString_AS_STRING(argsV[1]));
+  Py_RETURN_NONE;
+}
+
 static PyObject*
 info_level() {
   if (essentia::infoLevelActive) Py_RETURN_TRUE;
@@ -65,6 +81,17 @@ set_info_level(PyObject* self, PyObject* arg) {
 
   PyErr_SetString(PyExc_TypeError, (char*)"argument needs to be either True or False");
   return NULL;
+}
+
+static PyObject*
+log_info(PyObject* self, PyObject* arg) {
+  if (!PyString_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"argument must be a string");
+    return NULL;
+  }
+
+  E_INFO(PyString_AS_STRING(arg));
+  Py_RETURN_NONE;
 }
 
 static PyObject*
@@ -89,6 +116,17 @@ set_warning_level(PyObject* self, PyObject* arg) {
 }
 
 static PyObject*
+log_warning(PyObject* self, PyObject* arg) {
+  if (!PyString_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"argument must be a string");
+    return NULL;
+  }
+
+  E_WARNING(PyString_AS_STRING(arg));
+  Py_RETURN_NONE;
+}
+
+static PyObject*
 error_level() {
   if (essentia::errorLevelActive) Py_RETURN_TRUE;
   Py_RETURN_FALSE;
@@ -107,6 +145,17 @@ set_error_level(PyObject* self, PyObject* arg) {
 
   PyErr_SetString(PyExc_TypeError, (char*)"argument needs to be either True or False");
   return NULL;
+}
+
+static PyObject*
+log_error(PyObject* self, PyObject* arg) {
+  if (!PyString_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"argument must be a string");
+    return NULL;
+  }
+
+  E_ERROR(PyString_AS_STRING(arg));
+  Py_RETURN_NONE;
 }
 
 
@@ -392,7 +441,7 @@ PyObject* algorithmInfo(T* algo) {
 }
 
 
-static PyObject* sinfo(PyObject* self, PyObject* args) {
+static PyObject* streaming_info(PyObject* self, PyObject* args) {
   char* name;
   if (!PyArg_ParseTuple(args, "s", &name))
     return NULL;
@@ -409,7 +458,7 @@ static PyObject* sinfo(PyObject* self, PyObject* args) {
   return algorithmInfo(algo);
 }
 
-static PyObject* info(PyObject* self, PyObject* args) {
+static PyObject* standard_info(PyObject* self, PyObject* args) {
   char* name;
   if (!PyArg_ParseTuple(args, "s", &name))
     return NULL;
@@ -899,14 +948,19 @@ postProcessTicks(PyObject* self, PyObject* args) {
 
 
 static PyMethodDef Essentia__Methods[] = {
-  { "debugLevel",      (PyCFunction)debug_level,       METH_NOARGS, "return the activated debugging modules." },
-  { "setDebugLevel",   (PyCFunction)set_debug_level,   METH_O,      "set the activated debugging modules." },
-  { "infoLevel",       (PyCFunction)info_level,        METH_NOARGS, "return whether info messages should be displayed." },
-  { "setInfoLevel",    (PyCFunction)set_info_level,    METH_O,      "set whether info messages should be displayed." },
-  { "warningLevel",    (PyCFunction)warning_level,     METH_NOARGS, "return whether warning messages should be displayed." },
-  { "setWarningLevel", (PyCFunction)set_warning_level, METH_O,      "set whether warning messages should be displayed." },
-  { "errorLevel",      (PyCFunction)error_level,       METH_NOARGS, "return whether error messages should be displayed." },
-  { "setErrorLevel",   (PyCFunction)set_error_level,   METH_O,      "set whether error messages should be displayed." },
+  { "debugLevel",      (PyCFunction)debug_level,       METH_NOARGS,  "return the activated debugging modules." },
+  { "setDebugLevel",   (PyCFunction)set_debug_level,   METH_O,       "set the activated debugging modules." },
+  { "infoLevel",       (PyCFunction)info_level,        METH_NOARGS,  "return whether info messages should be displayed." },
+  { "setInfoLevel",    (PyCFunction)set_info_level,    METH_O,       "set whether info messages should be displayed." },
+  { "warningLevel",    (PyCFunction)warning_level,     METH_NOARGS,  "return whether warning messages should be displayed." },
+  { "setWarningLevel", (PyCFunction)set_warning_level, METH_O,       "set whether warning messages should be displayed." },
+  { "errorLevel",      (PyCFunction)error_level,       METH_NOARGS,  "return whether error messages should be displayed." },
+  { "setErrorLevel",   (PyCFunction)set_error_level,   METH_O,       "set whether error messages should be displayed." },
+
+  { "log_debug",       (PyCFunction)log_debug,             METH_VARARGS, "log the string to the given debugging module." },
+  { "log_info",        (PyCFunction)log_info,              METH_O,       "log the string to the info stream." },
+  { "log_warning",     (PyCFunction)log_warning,           METH_O,       "log the string to the warning stream." },
+  { "log_error",       (PyCFunction)log_error,             METH_O,       "log the string to the error stream." },
 
   { "normalize",    normalize,      METH_O,     "returns the normalized array." },
   { "derivative",   derivative,     METH_O,     "returns the derivative of an array." },
@@ -924,8 +978,8 @@ static PyMethodDef Essentia__Methods[] = {
   { "pow2db",       powToDb,        METH_O, "Converts a linear measure of power to a measure in dB" },
   { "db2amp",       dbToAmp,        METH_O, "Converts a dB measure of amplitude to a linear measure" },
   { "amp2db",       ampToDb,        METH_O, "Converts a linear measure of amplitude to a measure in dB" },
-  { "info",         info,           METH_VARARGS, "returns all the information about a given classic algorithm." },
-  { "sinfo",        sinfo,          METH_VARARGS, "returns all the information about a given streaming algorithm." },
+  { "info",         standard_info,  METH_VARARGS, "returns all the information about a given classic algorithm." },
+  { "sinfo",        streaming_info, METH_VARARGS, "returns all the information about a given streaming algorithm." },
 
   { "totalProduced",   (PyCFunction)totalProduced,       METH_VARARGS, "returns the number of tokens written by algorithm's source." },
   { "connect",         (PyCFunction)connect,             METH_VARARGS, "Connects an algorithm's source to another algorithm's sink." },
