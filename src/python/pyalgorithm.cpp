@@ -100,10 +100,10 @@ int PyAlgorithm::init(PyAlgorithm *self, PyObject *args, PyObject *kwds) {
     return -1;
   }
 
-  E_DEBUG(EPython, "Standard : " << algoname << "::init()");
+  E_DEBUG(EPyBindings, "Standard : " << algoname << "::init()");
 
   try {
-    E_DEBUG(EPython, "Standard : creating with name " << algoname);
+    E_DEBUG(EPyBindings, "Standard : creating with name " << algoname);
     self->algo = AlgorithmFactory::create(algoname);
   }
   catch (exception& e) {
@@ -111,7 +111,7 @@ int PyAlgorithm::init(PyAlgorithm *self, PyObject *args, PyObject *kwds) {
     return -1;
   }
 
-  E_DEBUG(EPython, PY_ALGONAME << "::init() done!");
+  E_DEBUG(EPyBindings, PY_ALGONAME << "::init() done!");
   return 0;
 }
 
@@ -119,7 +119,7 @@ int PyAlgorithm::init(PyAlgorithm *self, PyObject *args, PyObject *kwds) {
 
 PyObject* PyAlgorithm::configure(PyAlgorithm* self, PyObject* args, PyObject* keywds) {
 
-  E_DEBUG(EPython, PY_ALGONAME << "::configure()");
+  E_DEBUG(EPyBindings, PY_ALGONAME << "::configure()");
 
   // create the list of named parameters that this algorithm can accept
   ParameterMap pm = self->algo->defaultParameters();
@@ -146,7 +146,7 @@ PyObject* PyAlgorithm::configure(PyAlgorithm* self, PyObject* args, PyObject* ke
     return NULL;
   }
 
-  E_DEBUG(EPython, PY_ALGONAME << "::configure() done!");
+  E_DEBUG(EPyBindings, PY_ALGONAME << "::configure() done!");
 
   Py_RETURN_NONE;
 }
@@ -181,7 +181,7 @@ void deallocate_outputs(vector<void*> outputs, vector<Edt> outputTypes) {
 
 
 PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
-  E_DEBUG(EPython, PY_ALGONAME << "::compute()");
+  E_DEBUG(EPyBindings, PY_ALGONAME << "::compute()");
 
   // parse the arguments into separate python objects
   vector<PyObject*> arg_list = unpack(args);
@@ -202,7 +202,7 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
 
   // parse all inputs given by the python interpreter to the corresponding
   // C++ variables and assign them to the algorithm's input ports
-  E_DEBUG_NONL(EPython, PY_ALGONAME << ": binding inputs...");
+  E_DEBUG_NONL(EPyBindings, PY_ALGONAME << ": binding inputs...");
 
   // parse each python obj to a Cpp pointer and set appropriate input
   vector<void*> givenInputs(nInputs);
@@ -258,11 +258,11 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
     #undef SET_PORT_COPY
     #undef SET_PORT_REF
   }
-  E_DEBUG(EPython, "done!");
+  E_DEBUG(EPyBindings, "done!");
 
   // allocate memory for all C++ output variables for the algorithm and assign
   // them accordingly
-  E_DEBUG_NONL(EPython, PY_ALGONAME << ": binding outputs...");
+  E_DEBUG_NONL(EPyBindings, PY_ALGONAME << ": binding outputs...");
 
   int nOutputs = self->algo->outputs().size();
   vector<const type_info*> outputTypeInfos = self->algo->outputTypes();
@@ -326,12 +326,12 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
 
     #undef SET_PORT
   }
-  E_DEBUG(EPython, "done!");
+  E_DEBUG(EPyBindings, "done!");
 
 
   // now that the algorithm and ready and set to go (all inputs and outputs
   // are correctly bound), we can safely call the compute() method.
-  E_DEBUG(EPython, PY_ALGONAME << ": computing...");
+  E_DEBUG(EPyBindings, PY_ALGONAME << ": computing...");
 
   try {
     self->algo->compute();
@@ -351,7 +351,7 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
 
     return NULL;
   }
-  E_DEBUG(EPython, PY_ALGONAME << ": done!");
+  E_DEBUG(EPyBindings, PY_ALGONAME << ": done!");
 
 
   // now that the processing is done, convert the results back to python
@@ -379,8 +379,8 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
   deallocate_inputs(givenInputs, givenInputTypes);
   deallocate_outputs(outputs, outputTypes);
 
-  E_DEBUG(EPython, PY_ALGONAME << ": returning tuple with " << nOutputs << " outputs");
-  E_DEBUG(EPython, PY_ALGONAME << "::compute() done!");
+  E_DEBUG(EPyBindings, PY_ALGONAME << ": returning tuple with " << nOutputs << " outputs");
+  E_DEBUG(EPyBindings, PY_ALGONAME << "::compute() done!");
 
   return buildReturnValue(result);
 }

@@ -43,7 +43,11 @@ const char* debugModuleDescription(DebuggingModule module) {
   case EMemory:     return "[Memory    ] ";
 
   case EPython:     return "[  PYTHON  ] ";
+  case EPyBindings: return "[  PYBIND  ] ";
   case EUnittest:   return "[ UNITTEST ] ";
+
+  case EUser1:      return "[  USER1   ] ";
+  case EUser2:      return "[  USER2   ] ";
 
   case ENone:       return "[          ] ";
   case EAll:        return "[   ALL    ] ";

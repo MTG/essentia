@@ -106,4 +106,6 @@ init_essentia() {
 
   // register algorithms in the factory
   essentia::init();
+
+  E_DEBUG(EPyBindings, "Successfully initialized _essentia python/C module");
 }

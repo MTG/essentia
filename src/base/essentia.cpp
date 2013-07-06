@@ -35,6 +35,9 @@ const char* version = ESSENTIA_VERSION;
 bool _initialized;
 
 void init() {
+  setDebugLevel(EUser1 | EUser2);
+
+  E_DEBUG(EFactory, "essentia::init()");
   standard::AlgorithmFactory::init();
   standard::registerAlgorithm();
   streaming::AlgorithmFactory::init();
@@ -42,6 +45,7 @@ void init() {
   TypeMap::init();
 
   _initialized = true;
+  E_DEBUG(EFactory, "essentia::init() ok!");
 }
 
 void shutdown() {

@@ -122,6 +122,7 @@ class ESSENTIA_API EssentiaFactory {
       }
       else {
         algoMap.insert(entry.name, entry);
+        E_DEBUG(EFactory, "Registered algorithm " << entry.name);
       }
     }
 

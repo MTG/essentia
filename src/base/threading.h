@@ -32,7 +32,7 @@ typedef tbb::spin_mutex::scoped_lock ForcedMutexLocker;
 
 // The mutex in essentia only needs to be a real mutex when it is possible
 // to call the algorithms in a multithreaded way.
-// If not, it can be replaced with a no-op mutex.
+// If not, it can be replaced with a no-op mutex for performance reasons.
 
 class Mutex {
  public:
