@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -42,10 +42,10 @@ class AudioEngineImpl
       unsigned int devices = rtAudio.getDeviceCount();
       for (unsigned int i=0; i<devices; i++) {
         info = rtAudio.getDeviceInfo(i);
-        
+
         if (iDevice==0 && info.isDefaultInput) iDevice = i;
         if (oDevice==0 && info.isDefaultOutput) oDevice = i;
-        
+
         if (info.name.find("Soundflower")!=std::string::npos) {
           if (info.inputChannels==nChannels) {
             iDevice = i;
@@ -57,7 +57,7 @@ class AudioEngineImpl
           }
         }
       }
-      
+
       unsigned int bufferFrames = 1024;
       RtAudio::StreamParameters iParams, oParams;
       iParams.deviceId = iDevice;
@@ -68,8 +68,8 @@ class AudioEngineImpl
       oParams.firstChannel = 0;
 
       RtAudio::StreamOptions options;
-      
-      float sampleRate = 44100; 
+
+      float sampleRate = 44100;
 
       rtAudio.openStream( &oParams, &iParams, RTAUDIO_FLOAT32, sampleRate, &bufferFrames, &_callback, (void *)this, &options );
     }
@@ -82,7 +82,7 @@ class AudioEngineImpl
     {
       rtAudio.startStream();
     }
-    static int _callback(void *outputBuffer, void *inputBuffer, 
+    static int _callback(void *outputBuffer, void *inputBuffer,
       unsigned int nBufferFrames,
       double streamTime, RtAudioStreamStatus status, void *data )
     {

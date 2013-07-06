@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -65,7 +65,7 @@ void PitchYinFFT::configure() {
   _tauMax = min(int(ceil(_sampleRate / parameter("minFrequency").toReal())), _frameSize/2);
   _tauMin = min(int(floor(_sampleRate / parameter("maxFrequency").toReal())), _frameSize/2);
 
-  if (_tauMax <= _tauMin) {                                
+  if (_tauMax <= _tauMin) {
     throw EssentiaException("PitchYinFFT: maxFrequency is lower than minFrequency, or they are too close, or they are out of the interval of detectable frequencies with respect to the specified frameSize. Minimum detectable frequency is ", _sampleRate / (_frameSize/2), " Hz");
   }
 }
@@ -142,16 +142,16 @@ void PitchYinFFT::compute() {
 	  tmp += _yin[tau];
 	  _yin[tau] *= tau/tmp;
   }
-  
+
   // search for argmin within minTau/maxTau range
   bool first = true;
   Real yinMin;
   for (int i=_tauMin; i<=_tauMax; ++i) {
     if (first) {
-      tau = i; 
+      tau = i;
       yinMin = _yin[i];
       first = false;
-    } 
+    }
     else {
       if (_yin[i] < yinMin) {
         tau = i;

@@ -31,11 +31,11 @@ class LU
 
    /* Array for internal storage of decomposition.  */
    Array2D<Real>  LU_;
-   int m, n, pivsign; 
+   int m, n, pivsign;
    Array1D<int> piv;
 
 
-   Array2D<Real> permute_copy(const Array2D<Real> &A, 
+   Array2D<Real> permute_copy(const Array2D<Real> &A,
    			const Array1D<int> &piv, int j0, int j1)
 	{
 		int piv_length = piv.dim();
@@ -43,14 +43,14 @@ class LU
 		Array2D<Real> X(piv_length, j1-j0+1);
 
 
-         for (int i = 0; i < piv_length; i++) 
-            for (int j = j0; j <= j1; j++) 
+         for (int i = 0; i < piv_length; i++)
+            for (int j = j0; j <= j1; j++)
                X[i][j-j0] = A[piv[i]][j];
 
 		return X;
 	}
 
-   Array1D<Real> permute_copy(const Array1D<Real> &A, 
+   Array1D<Real> permute_copy(const Array1D<Real> &A,
    		const Array1D<int> &piv)
 	{
 		int piv_length = piv.dim();
@@ -60,7 +60,7 @@ class LU
 		Array1D<Real> x(piv_length);
 
 
-         for (int i = 0; i < piv_length; i++) 
+         for (int i = 0; i < piv_length; i++)
                x[i] = A[piv[i]];
 
 		return x;
@@ -74,7 +74,7 @@ class LU
    @return     LU Decomposition object to access L, U and piv.
    */
 
-    LU (const Array2D<Real> &A) : LU_(A.copy()), m(A.dim1()), n(A.dim2()), 
+    LU (const Array2D<Real> &A) : LU_(A.copy()), m(A.dim1()), n(A.dim2()),
 		piv(A.dim1())
 	
 	{
@@ -114,7 +114,7 @@ class LU
 
             LUrowi[j] = LUcolj[i] -= s;
          }
-   
+
          // Find pivot and exchange if necessary.
 
          int p = j;
@@ -126,18 +126,18 @@ class LU
          if (p != j) {
 		    int k=0;
             for (k = 0; k < n; k++) {
-               double t = LU_[p][k]; 
-			   LU_[p][k] = LU_[j][k]; 
+               double t = LU_[p][k];
+			   LU_[p][k] = LU_[j][k];
 			   LU_[j][k] = t;
             }
-            k = piv[p]; 
-			piv[p] = piv[j]; 
+            k = piv[p];
+			piv[p] = piv[j];
 			piv[j] = k;
             pivsign = -pivsign;
          }
 
          // Compute multipliers.
-         
+
          if ((j < m) && (LU_[j][j] != 0.0)) {
             for (int i = j+1; i < m; i++) {
                LU_[i][j] /= LU_[j][j];
@@ -148,7 +148,7 @@ class LU
 
 
    /** Is the matrix nonsingular?
-   @return     1 (true)  if upper triangular factor U (and hence A) 
+   @return     1 (true)  if upper triangular factor U (and hence A)
    				is nonsingular, 0 otherwise.
    */
 
@@ -228,11 +228,11 @@ class LU
    					0x0 (null) array.
    */
 
-   Array2D<Real> solve (const Array2D<Real> &B) 
+   Array2D<Real> solve (const Array2D<Real> &B)
    {
 
 	  /* Dimensions: A is mxn, X is nxk, B is mxk */
-      
+
       if (B.dim1() != m) {
 	  	return Array2D<Real>(0,0);
       }
@@ -278,11 +278,11 @@ class LU
    					returns 0x0 (null) array.
    */
 
-   Array1D<Real> solve (const Array1D<Real> &b) 
+   Array1D<Real> solve (const Array1D<Real> &b)
    {
 
 	  /* Dimensions: A is mxn, X is nxk, B is mxk */
-      
+
       if (b.dim1() != m) {
 	  	return Array1D<Real>();
       }
@@ -299,14 +299,14 @@ class LU
                x[i] -= x[k]*LU_[i][k];
             }
          }
-      
+
 	  // Solve U*X = Y;
       for (int k = n-1; k >= 0; k--) {
             x[k] /= LU_[k][k];
-      		for (int i = 0; i < k; i++) 
+      		for (int i = 0; i < k; i++)
             	x[i] -= x[k]*LU_[i][k];
       }
-     
+
 
       return x;
    }

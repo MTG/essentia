@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -26,7 +26,7 @@ class TestWarpedAutoCorrelation(TestCase):
 
     def testMaxLagLargerThanInputSize(self):
         self.assertComputeFails(
-                WarpedAutoCorrelation(maxLag=101), 
+                WarpedAutoCorrelation(maxLag=101),
                 [1]*100)
 
     def testLambdaTooLarge(self):

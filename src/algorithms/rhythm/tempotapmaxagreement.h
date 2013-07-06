@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -53,13 +53,13 @@ class TempoTapMaxAgreement : public Algorithm {
  private:
   static const Real _minTickTime = 5.;  // ignore peaks before this time [s]
   static const int _numberBins = 40; // number of histogram bins for information gain method
- 
+
   std::vector<Real> _histogramBins;
   std::vector<Real> _binValues;
 
   // parameters for the continuity-based method
-  static const Real _phaseThreshold = 0.175; // size of tolerance window for beat phase 
-  static const Real _periodThreshold = 0.175; // size of tolerance window for beat period 
+  static const Real _phaseThreshold = 0.175; // size of tolerance window for beat phase
+  static const Real _periodThreshold = 0.175; // size of tolerance window for beat period
 
   Real computeBeatInfogain(std::vector<Real>& ticks1, std::vector<Real>& ticks2);
 

@@ -12,12 +12,12 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 #! /usr/bin/python
 
-# example script to compute and plot onsetdetection related descriptors 
+# example script to compute and plot onsetdetection related descriptors
 
 from essentia.extractor.onsetdetection import compute
 
@@ -44,8 +44,8 @@ def parse_args():
 if __name__ == '__main__':
     import sys, os.path, essentia
     options, args = parse_args()
-    input_file = options.input_file 
-      
+    input_file = options.input_file
+
     # load audio file
     audio_file = essentia.AudioFileInput(filename = input_file)
     audio = audio_file()

@@ -1,7 +1,7 @@
 function Y = distributionshape(X, N)
 % X = x-axis (time index, spectral bin/frequency)
 % N = y-axis (signal amplitude, spectral magnitude)
-% For instance, if N is a 1000 bins array you have to put X = [0 1 2 ... 999] 
+% For instance, if N is a 1000 bins array you have to put X = [0 1 2 ... 999]
 
 rawmom1 = sum(X .* N) / sum(N);
 rawmom2 = sum((X.^2) .* N) / sum(N);

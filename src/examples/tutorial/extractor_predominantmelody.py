@@ -12,7 +12,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 import sys, csv
@@ -34,8 +34,8 @@ frameSize = 2048
 sampleRate = 44100
 guessUnvoiced = True
 
-# RUNNING A COMPOSITE ALGORITHM 
-run_predominant_melody = PredominantMelody(guessUnvoiced=guessUnvoiced, 
+# RUNNING A COMPOSITE ALGORITHM
+run_predominant_melody = PredominantMelody(guessUnvoiced=guessUnvoiced,
                                            frameSize=frameSize,
                                            hopSize=hopSize);
 

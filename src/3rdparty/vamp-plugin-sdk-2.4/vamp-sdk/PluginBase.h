@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006 Chris Cannam.
-  
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -57,7 +57,7 @@ namespace Vamp {
  * or other sorts of plugin as well as Vamp plugins.
  */
 
-class PluginBase 
+class PluginBase
 {
 public:
     virtual ~PluginBase() { }
@@ -101,7 +101,7 @@ public:
      * Example: "Detect and count zero crossing points"
      */
     virtual std::string getDescription() const = 0;
-    
+
     /**
      * Get the name of the author or vendor of the plugin in
      * human-readable form.  This should be a short identifying text,
@@ -215,9 +215,9 @@ public:
      * Set a named parameter.  The first argument is the identifier field
      * from that parameter's descriptor.
      */
-    virtual void setParameter(std::string, float) { } 
+    virtual void setParameter(std::string, float) { }
 
-    
+
     typedef std::vector<std::string> ProgramList;
 
     /**

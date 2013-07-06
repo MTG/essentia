@@ -10,7 +10,7 @@ def getAllFilesRelativePaths( domDocument ):
     fileElements = domDocument.getElementsByTagName( "File" )
     for e in fileElements:
         result.append( e.getAttribute("RelativePath") )
-        
+
     return result
 
 def fileListsAreEqual( a, b ):
@@ -53,7 +53,7 @@ def insertFilesIntoProject( domDocument, filesElement, filesToInsert ):
     for f in filesToInsert:
         (directory, filename) = os.path.split(os.path.normpath(f))
         dom_element = filesElement
-        
+
         for d in directory.replace("\\", "/").split("/"):
             chosen_child = None
             # see if we have a child node with the correct name/attributes
@@ -66,7 +66,7 @@ def insertFilesIntoProject( domDocument, filesElement, filesToInsert ):
                 dom_element.appendChild( chosen_child )
             # recurse
             dom_element = chosen_child
-                
+
         dom_element.appendChild( createFileNode( domDocument, f ) )
 
 
@@ -110,7 +110,7 @@ def updateVCProjectFileFileList( projectFileName, newFilesList, newIncludePaths,
 
     if updated:
         vcprojDom.writexml( file(projectFileName,"w") )
-        
+
     #vcprojDom.writexml( sys.stdout )
     return updated
 

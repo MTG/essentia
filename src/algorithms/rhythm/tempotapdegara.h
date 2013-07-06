@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -64,11 +64,11 @@ class TempoTapDegara : public Algorithm {
  private:
   // Davies' beat periods estimation:
   int _smoothingWindowHalfSize;
-  static const int _numberCombs = 4; 
+  static const int _numberCombs = 4;
   static const Real _frameDurationODF = 5.944308390022676;
   Real _sampleRateODF;
   int _hopSizeODF;
-  Real _hopDurationODF; 
+  Real _hopDurationODF;
   int _resample;
   size_t _numberFramesODF;
   int _periodMinIndex;
@@ -80,28 +80,28 @@ class TempoTapDegara : public Algorithm {
   Algorithm* _autocorrelation;
   Algorithm* _movingAverage;
   Algorithm* _frameCutter;
-  void createTempoPreferenceCurve(); 
+  void createTempoPreferenceCurve();
   void createViterbiTransitionMatrix();
-  void findViterbiPath(const std::vector<Real>& prior, 
-                     const std::vector<std::vector<Real> > transitionMatrix, 
-                     const std::vector<std::vector<Real> >& observations, 
+  void findViterbiPath(const std::vector<Real>& prior,
+                     const std::vector<std::vector<Real> > transitionMatrix,
+                     const std::vector<std::vector<Real> >& observations,
                      std::vector<Real>& path);
-  void computeBeatPeriodsDavies(std::vector<Real> detections, 
+  void computeBeatPeriodsDavies(std::vector<Real> detections,
                                 std::vector<Real>& beatPeriods,
                                 std::vector<Real>& beatEndPositions);
   void adaptiveThreshold(std::vector<Real>& array, int smoothingHalfSize);
 
   // Degara's beat tracking from periods:
   static const Real _alpha = 0.5; // decoding weighting parameter
-  static const Real _sigma_ibi = 0.025; // std of the inter-beat interval pdf, 
-                                       // models potential variations in the  
-                                       // inter-beat interval in secs. 
+  static const Real _sigma_ibi = 0.025; // std of the inter-beat interval pdf,
+                                       // models potential variations in the
+                                       // inter-beat interval in secs.
   int _numberStates;    // number HMM states
   Real _resolutionODF;  // time resolution of ODF
-  size_t _numberFrames; // number of ODF values 
-  void computeBeatsDegara(std::vector <Real>& detections,                        
-                          const std::vector<Real>& beatPeriods,                        
-                          const std::vector<Real>& beatEndPositions,                   
+  size_t _numberFrames; // number of ODF values
+  void computeBeatsDegara(std::vector <Real>& detections,
+                          const std::vector<Real>& beatPeriods,
+                          const std::vector<Real>& beatEndPositions,
                           std::vector<Real>& ticks);
   void computeHMMTransitionMatrix(const std::vector<Real>& ibiPDF,
                                   std::vector<std::vector<Real> >& transitions);
@@ -152,11 +152,11 @@ class TempoTapDegara : public AlgorithmComposite {
                                INHERIT("minTempo"));
   }
 
-  void declareProcessOrder() {                                      
+  void declareProcessOrder() {
     declareProcessStep(SingleShot(_poolStorage));
     declareProcessStep(SingleShot(this));
   }
-  
+
   AlgorithmStatus process();
   void reset();
 

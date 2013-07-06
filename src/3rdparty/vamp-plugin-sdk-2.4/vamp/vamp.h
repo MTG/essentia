@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006 Chris Cannam.
-  
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -41,7 +41,7 @@
 extern "C" {
 #endif
 
-/** 
+/**
  * Plugin API version.  This is incremented when a change is made that
  * changes the binary layout of the descriptor records.  When this
  * happens, there should be a mechanism for retaining compatibility
@@ -54,7 +54,7 @@ extern "C" {
 
 /**
  * C language API for Vamp plugins.
- * 
+ *
  * This is the formal plugin API for Vamp.  Plugin authors may prefer
  * to use the C++ classes provided in the Vamp plugin SDK, instead of
  * using this API directly.  There is an adapter class provided that
@@ -140,7 +140,7 @@ typedef struct _VampOutputDescriptor
 
     /** 1 if each returned value falls within the same fixed min/max range. */
     int hasKnownExtents;
-    
+
     /** Minimum value for a returned result in any bin, if hasKnownExtents. */
     float minValue;
 
@@ -293,7 +293,7 @@ typedef struct _VampPluginDescriptor
     /** Initialise an instance following parameter configuration. */
     int (*initialise)(VampPluginHandle,
                       unsigned int inputChannels,
-                      unsigned int stepSize, 
+                      unsigned int stepSize,
                       unsigned int blockSize);
 
     /** Reset an instance, ready to use again on new input data. */
@@ -310,7 +310,7 @@ typedef struct _VampPluginDescriptor
 
     /** Set the current program. May only be called before initialise. */
     void  (*selectProgram)(VampPluginHandle, unsigned int);
-    
+
     /** Get the plugin's preferred processing window increment in samples. */
     unsigned int (*getPreferredStepSize)(VampPluginHandle);
 
