@@ -13,8 +13,8 @@
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
  * details.
  * 
- * You should have received a copy of the GNU General Public License along with 
- * this program.  If not, see http://www.gnu.org/licenses/
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
 #include "essentia_gtest.h"
@@ -37,7 +37,7 @@ TEST(TreeTraversal, DepthFirstMap) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   Algorithm* loader = factory.create("MonoLoader",
-                                     "filename", "test/audio/recorded/britney.wav");
+                                     "filename", "test/audio/recorded/cat_purrrr.wav");
 
   //Algorithm* tonal = factory.create("TonalExtractor");
   Algorithm* lowpass = factory.create("LowPass");
@@ -61,7 +61,7 @@ TEST(TreeTraversal, DepthFirstSearch) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   Algorithm* loader = factory.create("MonoLoader",
-                                     "filename", "test/audio/recorded/britney.wav");
+                                     "filename", "test/audio/recorded/cat_purrrr.wav");
   Algorithm* lowpass = factory.create("LowPass");
   Pool pool;
 

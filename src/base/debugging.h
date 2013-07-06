@@ -1,20 +1,20 @@
-/*
+/* 
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- *
- * Essentia is free software: you can redistribute it and/or modify it under
- * the terms of the GNU Affero General Public License as published by the Free
- * Software Foundation (FSF), either version 3 of the License, or (at your
+ * 
+ * Essentia is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU Affero General Public License as published by the Free 
+ * Software Foundation (FSF), either version 3 of the License, or (at your 
  * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
  * details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program.  If not, see http://www.gnu.org/licenses/
+ * 
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
 #ifndef ESSENTIA_DEBUGGING_H
@@ -41,12 +41,8 @@ enum DebuggingModule {
   EExecution   = 1 << 5,
   EMemory      = 1 << 6, // for mem operations, such as new/delete
 
-  EPython      = 1 << 20, // for use in python scripts
-  EPyBindings  = 1 << 21, // for use in python/C module
-  EUnittest    = 1 << 22,
-
-  EUser1       = 1 << 25, // freely available for the user
-  EUser2       = 1 << 26, // freely available for the user
+  EPython      = 1 << 20,
+  EUnittest    = 1 << 21,
 
   ENone        = 0,
   EAll         = (1 << 30) - 1

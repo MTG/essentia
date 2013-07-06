@@ -1,20 +1,20 @@
-/*
+/* 
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- *
- * Essentia is free software: you can redistribute it and/or modify it under
- * the terms of the GNU Affero General Public License as published by the Free
- * Software Foundation (FSF), either version 3 of the License, or (at your
+ * 
+ * Essentia is free software: you can redistribute it and/or modify it under 
+ * the terms of the GNU Affero General Public License as published by the Free 
+ * Software Foundation (FSF), either version 3 of the License, or (at your 
  * option) any later version.
- *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * 
+ * This program is distributed in the hope that it will be useful, but WITHOUT 
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
  * details.
- *
- * You should have received a copy of the GNU General Public License along with
- * this program.  If not, see http://www.gnu.org/licenses/
+ * 
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
 #ifndef ESSENTIA_THREADING_H
@@ -32,7 +32,7 @@ typedef tbb::spin_mutex::scoped_lock ForcedMutexLocker;
 
 // The mutex in essentia only needs to be a real mutex when it is possible
 // to call the algorithms in a multithreaded way.
-// If not, it can be replaced with a no-op mutex for performance reasons.
+// If not, it can be replaced with a no-op mutex.
 
 class Mutex {
  public:
