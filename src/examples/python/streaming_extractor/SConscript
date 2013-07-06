@@ -26,11 +26,11 @@ env.Alias('python_extractor', env.Alias('python_install'))
 
 def run_command(cmd):
     status = subprocess.call(cmd, stdout=subprocess.PIPE)
-    if status != 0: 
+    if status != 0:
        sys.exit(status)
 
 def translate(files):
-    py_files = [file+'.py' for file in files] 
+    py_files = [file+'.py' for file in files]
     cpp_files = ['streaming_extractor'+file+'.cpp' for file in files]
     for i in range(len(files)):
          env.Command(cpp_files[i], py_files[i], translate_to_cpp)
@@ -43,7 +43,7 @@ def translate_to_cpp(target, source, env):
     audio_file = join(relative_path,'test', 'audio/recorded/britney.wav')
     yaml_file = join(src_dir,'foo.yaml')
     # run the python files to generate cpp code:
-    cmd = ['./'+ py_name, '-c', audio_file, yaml_file] 
+    cmd = ['./'+ py_name, '-c', audio_file, yaml_file]
     run_command(cmd)
     # mv cpp source file to src/examples/python/streaming_extractor:
     cmd = ['mv', join(source_tree_path,cpp_name),join(source_tree_path, str(target[0]))]
@@ -66,9 +66,9 @@ def translate_to_cpp(target, source, env):
 #    py_name = name + '.py'
 #    print 'generating c++ code from:', py_name
 #    audio_file = join(testdir, 'audio/recorded/britney.wav')
-#    cmd = ['./'+py_name, '-c', audio_file, 'foo.yaml'] 
+#    cmd = ['./'+py_name, '-c', audio_file, 'foo.yaml']
 #    status = subprocess.call(cmd, stdout=subprocess.PIPE)
-#    if status != 0: 
+#    if status != 0:
 #       print 'ERROR: translation failed on file:', py_name
 #       sys.exit(status)
 #    status = subprocess.call(['rm', 'foo.yaml'])
@@ -96,11 +96,11 @@ def cleanup(files=[]):
 
 
 extractors = ['lowlevelspectral',
-              'lowlevelspectraleqloud', 
-              'level', 
-              'rhythmdescriptors', 
-              'tonaldescriptors', 
-              'pitch', 
+              'lowlevelspectraleqloud',
+              'level',
+              'rhythmdescriptors',
+              'tonaldescriptors',
+              'pitch',
               'tuningfrequency',
               'sfx',
               'panning']

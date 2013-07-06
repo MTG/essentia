@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -37,7 +37,7 @@ const char* TonicIndianArtMusic::description = DOC("This algorithm estimates the
 
 
 void TonicIndianArtMusic::configure() {
-   
+
   Real sampleRate = parameter("sampleRate").toReal();
   int frameSize = parameter("frameSize").toInt();
   int hopSize = parameter("hopSize").toInt();
@@ -50,7 +50,7 @@ void TonicIndianArtMusic::configure() {
   Real magnitudeCompression = parameter("magnitudeCompression").toReal();
   Real minTonicFrequency = parameter("minTonicFrequency").toReal();
   Real maxTonicFrequency = parameter("maxTonicFrequency").toReal();
-  
+
   _referenceFrequency = parameter("referenceFrequency").toReal();
   _binResolution = parameter("binResolution").toReal();
   _numberSaliencePeaks = parameter("numberSaliencePeaks").toReal();
@@ -66,12 +66,12 @@ void TonicIndianArtMusic::configure() {
   // Spectral peaks
   _spectrum->configure("size", frameSize * zeroPaddingFactor);
 
-  // TODO which value to select for maxFrequency? frequencies up to 1.76kHz * numHarmonics will 
+  // TODO which value to select for maxFrequency? frequencies up to 1.76kHz * numHarmonics will
   //      theoretically affect the salience function computation
-  
+
   _spectralPeaks->configure(
                             "minFrequency", 1,  // to avoid zero frequencies
-                            "maxFrequency", 20000, 
+                            "maxFrequency", 20000,
                             "maxPeaks", maxSpectralPeaks,
                             "sampleRate", sampleRate,
                             "magnitudeThreshold", 0,
@@ -84,7 +84,7 @@ void TonicIndianArtMusic::configure() {
                                     "magnitudeCompression", magnitudeCompression,
                                     "numberHarmonics", numberHarmonics,
                                     "harmonicWeight", harmonicWeight);
-                                    
+
   _pitchSalienceFunctionPeaks->configure("binResolution", _binResolution,
                                          "minFrequency", minTonicFrequency,
                                          "maxFrequency", maxTonicFrequency,
@@ -95,7 +95,7 @@ void TonicIndianArtMusic::configure() {
 void TonicIndianArtMusic::compute() {
   const vector<Real>& signal = _signal.get();
   Real& tonic = _tonic.get();
-  
+
   // Pre-processing
   vector<Real> frame;
   _frameCutter->input("signal").set(signal);
@@ -127,15 +127,15 @@ void TonicIndianArtMusic::compute() {
   _pitchSalienceFunctionPeaks->input("salienceFunction").set(frameSalience);
   _pitchSalienceFunctionPeaks->output("salienceBins").set(frameSalienceBins);
   _pitchSalienceFunctionPeaks->output("salienceValues").set(frameSalienceValues);
-  
+
   // histogram computation
-  vector<Real> histogram;  
+  vector<Real> histogram;
   histogram.resize(_numberBins);
-  
+
   while (true) {
     // get a frame
     _frameCutter->compute();
-    
+
     if (!frame.size()) {
       break;
     }
@@ -147,42 +147,42 @@ void TonicIndianArtMusic::compute() {
 
     // calculate spectral peaks
     _spectralPeaks->compute();
-    
+
     // calculate salience function
     _pitchSalienceFunction->compute();
-   
+
     // calculate peaks of salience function
     _pitchSalienceFunctionPeaks->compute();
-   
-    // consider only those frames where the number of peaks detected are more than minimum peaks needed for histogram    
+
+    // consider only those frames where the number of peaks detected are more than minimum peaks needed for histogram
     if(frameSalienceBins.size()>=_numberSaliencePeaks){
       for (size_t i=0; i<_numberSaliencePeaks; i++) {
 	histogram[frameSalienceBins[i]]+=1;
       }
     }
   }
-  
+
   // computing the peaks of the histogram function
   vector <Real> peak_locs;
   vector <Real> peak_amps;
   Real tonic_loc;
-  
+
     // configure algorithms [#5 peaks]
   _peakDetection->configure("interpolate", false);
-  _peakDetection->configure("range", (int)histogram.size()); 
-  _peakDetection->configure("maxPosition", (int)histogram.size()); 
+  _peakDetection->configure("range", (int)histogram.size());
+  _peakDetection->configure("maxPosition", (int)histogram.size());
   _peakDetection->configure("minPosition", 0);
   _peakDetection->configure("maxPeaks", 5);
   _peakDetection->configure("orderBy", "amplitude");
-  
+
     // find salience function peaks
   _peakDetection->input("array").set(histogram);
   _peakDetection->output("positions").set(peak_locs);
   _peakDetection->output("amplitudes").set(peak_amps);
   _peakDetection->compute();
-  
+
   // this is the decision tree hardcoded to choose the peak in the histogram which corresponds o the tonic
-  /*implementing the decision tree*/  
+  /*implementing the decision tree*/
   Real highest_peak_loc = peak_locs[0];
   Real f2 =peak_locs[1] - highest_peak_loc;
   Real f3 =peak_locs[2] - highest_peak_loc;
@@ -191,7 +191,7 @@ void TonicIndianArtMusic::compute() {
   if (f2>50){
     tonic_loc = peak_locs[0];
   }
-  else{ 
+  else{
     if(f2<=-70){
         if(f3<=50){
           tonic_loc = peak_locs[1];

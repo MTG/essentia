@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -46,9 +46,9 @@ for input_file in all_files:
     patterndetection = essentia.PatternDetection(frameRate = frame_rate, lengthMin = 10.0, lengthMax = 15.0)
     total_frames = frames.num_frames()
     n_frames = 0
-    
+
     for frame in frames:
-        
+
         frame_windowed = window(frame)
         frame_spectrum = spectrum(frame_windowed)
         (frame_peaks_freq, frame_peaks_mag) = spectralpeaks(lin2db(frame_spectrum))
@@ -67,5 +67,5 @@ for input_file in all_files:
         n_frames += 1
 
     (r, rSegments, patternOnsets, patternRate) = patterndetection(chroma);
-   
+
     print patternRate , os.path.basename(input_file)

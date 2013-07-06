@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -49,10 +49,10 @@ class TestMovingAverage(TestCase):
         result = []
         for sample in input:
             result += list(filt([sample]))
-      
+
         self.assertAlmostEqualVector(result, expected)
-        
-        
+
+
     def testZero(self):
         self.assertEqualVector(MovingAverage()(zeros(20)), zeros(20))
 

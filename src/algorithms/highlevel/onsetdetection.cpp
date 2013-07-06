@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -32,8 +32,8 @@ const char* OnsetDetection::description = DOC("This algorithm outputs an onset d
 "  - 'complex', the Complex-Domain spectral difference function [1] taking into account changes in magnitude and phase. It emphasizes note onsets either as a result of significant change in enerty in the magnitude spectrum, and/or a deviation from the expected phase values in the phase spectrum, caused by a change in pitch.\n"
 "  - 'complex_phase', the simplified Complex-Domain spectral difference function [2] taking into account phase changes, weighted by magnitude. TODO:It reacts better on tonal sounds such as bowed string, but tends to over-detect percussive events.\n"
 "  - 'flux', the Spectral Flux detection function which characterizes changes in magnitude spectrum. See Flux algorithm for details.\n"
-"  - 'melflux', the spectral difference function, similar to spectral flux, but using half-rectified energy changes in Mel-frequency bands of the spectrum [3].\n" 
-"  - 'rms', the difference function, measuring the half-rectified change of the RMS of the magnitude spectrum (i.e., measuring overall energy flux) [4].\n" 
+"  - 'melflux', the spectral difference function, similar to spectral flux, but using half-rectified energy changes in Mel-frequency bands of the spectrum [3].\n"
+"  - 'rms', the difference function, measuring the half-rectified change of the RMS of the magnitude spectrum (i.e., measuring overall energy flux) [4].\n"
 "\n"
 "If using the 'HFC' detection function, make sure to adhere to HFC's input requirements when providing an input spectrum. Input vectors of different size or empty input spectra will raise exceptions.\n"
 "If using the 'complex' detection function, suggested parameters for computation of \"spectrum\" and \"phase\" are 44100Hz sample rate, frame size of 1024 and hopSize of 512 samples, which results in a resolution of 11.6ms, and a Hann window.\n"
@@ -58,7 +58,7 @@ void OnsetDetection::configure() {
 
   // Use L1 for both 'melflux' and 'flux' methods. Evaluation by Jose Zapata
   // revealed better performance of L1 for 'flux'
-  _flux->configure("norm", "L1"); 
+  _flux->configure("norm", "L1");
   if (_method == "melflux") {
     _flux->configure("halfRectify", true);
   }
@@ -120,7 +120,7 @@ void OnsetDetection::compute() {
     _phase_1 = phase;
     return;
   }
-  
+
   // Complex-domain detection function for non-percussive onsets (Bello, [1])
   if (_method == "complex") {
     if (spectrum.size() != phase.size()) {
@@ -160,29 +160,29 @@ void OnsetDetection::compute() {
     return;
   }
 
-   
+
   // Detection function similar to spectral flux, but computed on Mel-frequency spectrum [3].
   if (_method == "melflux") {
     /*
-      Original algorithm: 
+      Original algorithm:
         - downsample audio to 8kHz mono
         - cut frames with 32ms window, 4ms hop size
         - compute log-magnitude Mel-frequency spectrum (40 bands) in each frame
         - take first-order difference along time in each Mel band, and sum across frequency
         - high-pass filter (cutoff at 0.4 Hz) to remove DC offset of the computed function
         - smooth by convolving with a Gaussian envelope about 20 ms wide
-    
+
       Modifications:
         - compute Mel bands only for frequencies below 4kHz instead of downsampling
         - skip high-pass filtering and smoothing, they should be done in post-processing
-        - in the case of 44100 sample rate, exact frame size should be 1411 samples to match 32ms, 
+        - in the case of 44100 sample rate, exact frame size should be 1411 samples to match 32ms,
           but we leave this values to be decided by the user
       Note:
-        - We manually remove a click in ODF on the first frame because Flux algorithm is 
-          initialized with zero vector while we feed it with log-magnitudes instead of magnitudes. 
+        - We manually remove a click in ODF on the first frame because Flux algorithm is
+          initialized with zero vector while we feed it with log-magnitudes instead of magnitudes.
 
     */
-    vector <Real> melbands; 
+    vector <Real> melbands;
     _melBands->input("spectrum").set(spectrum);
     _melBands->output("bands").set(melbands);
     _melBands->compute();
@@ -192,15 +192,15 @@ void OnsetDetection::compute() {
       melbands[i] = amp2db(melbands[i]);
     }
     /*
-      Note: D. Ellis implementation looks only at the top 80 dB across all frames. Magnitudes below 
-      the maximum - 80dB are replaced with this dynamic threshold. This requires a post-processing step that 
+      Note: D. Ellis implementation looks only at the top 80 dB across all frames. Magnitudes below
+      the maximum - 80dB are replaced with this dynamic threshold. This requires a post-processing step that
       we want to avoid. Instead, amp2db outputs a fixed silence threshold if values of magnitude are too low.
     */
     _flux->input("spectrum").set(melbands);
     _flux->output("flux").set(onsetDetection);
     _flux->compute();
-    
-    if (_firstFrame) {  // a hack to remove click in the first sample 
+
+    if (_firstFrame) {  // a hack to remove click in the first sample
       onsetDetection = 0;
       _firstFrame = false;
     }
@@ -217,7 +217,7 @@ void OnsetDetection::compute() {
     if (_firstFrame) {  // a hack to remove click in the first sample
       onsetDetection = 0;
       _firstFrame = false;
-    } 
+    }
     else {
       onsetDetection = rms - _rmsOld;
       if (onsetDetection < 0) { // half-rectify

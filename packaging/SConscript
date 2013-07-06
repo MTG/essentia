@@ -34,28 +34,28 @@ if sys.platform in ('darwin',):
     thirdparty_libs = ['taglib', 'libavutil', 'libavcodec', 'libavformat', 'tbb']
     for lib in thirdparty_libs:
         for path in env['ENV']['PATH']:
-            if lib in path: 
-                env['ENV']['PATH'].remove(path) 
+            if lib in path:
+                env['ENV']['PATH'].remove(path)
         for path in env['CPPPATH']:
-            if lib in path: 
-                env['CPPPATH'].remove(path) 
+            if lib in path:
+                env['CPPPATH'].remove(path)
 
     for path in env['ENV']['PATH']:
-        if 'local' in path: 
-            env['PATH'].remove(path) 
+        if 'local' in path:
+            env['PATH'].remove(path)
     for path in env['CPPPATH']:
-        if 'local' in path: 
-            env['CPPPATH'].remove(path) 
-            
+        if 'local' in path:
+            env['CPPPATH'].remove(path)
+
     for lib in conf.LIBPATH:
         if '/local' in lib or '/opt' in lib:
-            conf.LIBPATH.remove(lib) 
+            conf.LIBPATH.remove(lib)
     for lib in env['LIBPATH']:
         if '/local' in lib or '/opt' in lib:
-            env['LIBPATH'].remove(lib) 
+            env['LIBPATH'].remove(lib)
 
     env.Prepend( LIBPATH = [ join(conf.THIRDPARTY,'lib'), join(source_tree_path, 'build') ],
-                 CPPPATH = [ join(conf.THIRDPARTY,'include'), 
+                 CPPPATH = [ join(conf.THIRDPARTY,'include'),
                              [join(conf.THIRDPARTY, 'include', lib) for lib in thirdparty_libs]])
 
 # Set destdir to build so we can dump here temporarily

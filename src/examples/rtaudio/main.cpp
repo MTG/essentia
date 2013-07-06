@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -36,9 +36,9 @@ int main() {
   using essentia::StreamingAlgorithm;
   using essentia::streaming::FileOutputProxy;
   using essentia::streaming::InputCopy;
-     
+
   essentia::init();
-  
+
   essentia::streaming::AlgorithmFactory::Registrar<essentia::streaming::InputCopy> regInputCopy;
 
   //StreamingAlgorithm* generator = AlgorithmFactory::create("MonoLoader","filename","test.wav");
@@ -62,18 +62,18 @@ int main() {
   connect(spectralPeaks,"frequencies",hpcp,"frequencies");
   connect(spectralWhitening,"magnitudes",hpcp,"magnitudes");
   //connect(hpcp->output("hpcp"),*dynamic_cast<FileOutputProxy*>(valueFile));
-  connect(hpcp->output("hpcp"),NOWHERE); 
+  connect(hpcp->output("hpcp"),NOWHERE);
 
 
   checkConnections(generator);
   checkBufferSizes(generator);
-  
+
   InputCopy* inputCopy = dynamic_cast<InputCopy*>(generator);
 
   AudioEngine engine(inputCopy);
 
   engine.run();
- 
+
   getchar();
 
   //float tmp[1024];

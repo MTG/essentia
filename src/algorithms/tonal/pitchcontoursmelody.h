@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -32,8 +32,8 @@ class PitchContoursMelody : public Algorithm {
  private:
   Input<std::vector<std::vector<Real> > > _contoursBins;
   Input<std::vector<std::vector<Real> > > _contoursSaliences;
-  Input<std::vector<Real> > _contoursStartTimes; 
-  Input<Real> _duration;                       
+  Input<std::vector<Real> > _contoursStartTimes;
+  Input<Real> _duration;
   Output<std::vector<Real> > _pitch;
   Output<std::vector<Real> > _pitchConfidence;
 
@@ -55,7 +55,7 @@ class PitchContoursMelody : public Algorithm {
   Real _frameDuration;
   size_t _numberFrames;
   size_t _averagerShift;
-  Real _outlierMaxDistance; 
+  Real _outlierMaxDistance;
   Real _duplicateMaxDistance;
   Real _duplicateMinDistance;
 
@@ -73,7 +73,7 @@ class PitchContoursMelody : public Algorithm {
   Real _vibratoMinFrequency;
   Real _vibratoMaxFrequency;
   Real _vibratodBDropLobe;
-  Real _vibratodBDropSecondPeak; 
+  Real _vibratodBDropSecondPeak;
 
   Real _centToHertzBase;
 
@@ -84,17 +84,17 @@ class PitchContoursMelody : public Algorithm {
   std::vector<Real> _contoursSaliencesMean;
   std::vector<Real> _contoursBinsStddev;
 
-  std::vector<Real> _melodyPitchMean;               // melody pitch mean function 
+  std::vector<Real> _melodyPitchMean;               // melody pitch mean function
   std::vector <std::pair <int,int> > _duplicates;   // pairs of contour duplicates
-  std::vector<size_t> _contoursSelected;    // indices of the selected contours 
+  std::vector<size_t> _contoursSelected;    // indices of the selected contours
   std::vector<size_t> _contoursIgnored;     // indices of the ignored contours
   std::vector<size_t> _contoursSelectedInitially;
   std::vector<size_t> _contoursIgnoredInitially;
   size_t _numberContours;
 
-  void voicingDetection(const std::vector<std::vector<Real> >& contoursBins, 
+  void voicingDetection(const std::vector<std::vector<Real> >& contoursBins,
                         const std::vector<std::vector<Real> >& contoursSaliences,
-                        const std::vector<Real>& contoursStartTimes); 
+                        const std::vector<Real>& contoursStartTimes);
   bool detectVoiceVibrato(std::vector<Real> contourBins, const Real binMean);
   void computeMelodyPitchMean(const std::vector<std::vector<Real> >& contoursBins);
   void detectContourDuplicates(const std::vector<std::vector<Real> >& contoursBins);
@@ -108,7 +108,7 @@ class PitchContoursMelody : public Algorithm {
     declareInput(_contoursStartTimes, "contoursStartTimes", "array of the start times of each contour [s]");
     declareInput(_duration, "duration", "time duration of the input signal [s]");
     declareOutput(_pitch, "pitch", "vector of estimated pitch values (i.e., melody) [Hz]");
-    declareOutput(_pitchConfidence, "pitchConfidence", "confidence with which the pitch was detected"); 
+    declareOutput(_pitchConfidence, "pitchConfidence", "confidence with which the pitch was detected");
 
     _movingAverage = AlgorithmFactory::create("MovingAverage");
     _frameCutter = AlgorithmFactory::create("FrameCutter");
@@ -140,7 +140,7 @@ class PitchContoursMelody : public Algorithm {
 
   void configure();
   void compute();
-  
+
   static const char* name;
   static const char* version;
   static const char* description;
@@ -161,8 +161,8 @@ class PitchContoursMelody : public StreamingAlgorithmWrapper {
  protected:
   Sink<std::vector<std::vector<Real> > > _contoursBins;
   Sink<std::vector<std::vector<Real> > > _contoursSaliences;
-  Sink<std::vector<Real> > _contoursStartTimes;  
-  Sink<Real> _duration;                        
+  Sink<std::vector<Real> > _contoursStartTimes;
+  Sink<Real> _duration;
   Source<std::vector<Real> > _pitch;
   Source<std::vector<Real> > _pitchConfidence;
 

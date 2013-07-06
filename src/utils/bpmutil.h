@@ -1,19 +1,19 @@
 
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -309,7 +309,7 @@ std::vector<Real> postProcessTicks(const std::vector<Real>& origticks,
 
   // if the targetPeriod is differs too much from the preferred period we
   // search for the tick with max amplitude and take that as the reference tick
-  if (targetPeriod < 0.95*preferredPeriod || targetPeriod > 1.05*preferredPeriod) { 
+  if (targetPeriod < 0.95*preferredPeriod || targetPeriod > 1.05*preferredPeriod) {
     idx = idx + argmax(std::vector<Real>(ticksAmplitudes.begin()+idx, ticksAmplitudes.begin()+idx+maxl+1));
     maxl = 0;
     targetPeriod = preferredPeriod;

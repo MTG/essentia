@@ -10,9 +10,9 @@ startTime: 0.0
 endTime: 2000.0
 
 # whether to apply equal loudness contour (filter): yes|no|both
-equalLoudness: true 
-nequalLoudness: true 
-shortSound: false # set to true when analyzing a sample less than 2s 
+equalLoudness: true
+nequalLoudness: true
+shortSound: false # set to true when analyzing a sample less than 2s
 
 # change to true when svm models are trained
 svm:
@@ -22,7 +22,7 @@ segmentation:
     compute: false
     minimumSegmentsLength: 10.0 # seconds
 
-# to be added: 
+# to be added:
 # downmix: 'mix'
 #### OPTIONS SPECIFIC TO EACH EXTRACTOR ####
 
@@ -34,7 +34,7 @@ segmentation:
 #                              spectral_crest, spectral_decrease,
 #                              spectral_energy, spectral_energyband_high,
 #                              spectral_energyband_low,
-#                              spectral_energyband_middle_high, 
+#                              spectral_energyband_middle_high,
 #                              spectral_energyband_middle_low,
 #                              spectral_flatness_db, spectral_flux, spectral_kurtosis,
 #                              spectral_rms, spectral_rolloff, spectral_skewness,
@@ -52,7 +52,7 @@ lowlevel:
 average_loudness:
     compute: true
     frameSize: 88200
-    hopSize: 44100    
+    hopSize: 44100
 
 # tempotap extractor options (beats_loudness, beats_loudness_bass,
 #                             bpm, bpm_confidence,
@@ -97,7 +97,7 @@ sfx: # pitch_max_to_total, pitch_min_to_total, pitch_centroid,
 # sfx not available at the moment...
 # (temporal_decrease, temporal_kurtosis, temporal_skewness
 #  temporal_spread, temporal_centroid, effective_duration,
-#  logattacktime, strong_decay, flatness, 
+#  logattacktime, strong_decay, flatness,
 #  max_to_total, tc_to_total,
 #  der_av_after_max, max_der_befor_max)
 

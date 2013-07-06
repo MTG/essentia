@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -28,20 +28,20 @@ results_path = sys.argv[1]
 
 tree = os.walk(results_path)
 
-genre_map = { 
+genre_map = {
              'Alternative':'Pop-Rock',
-             'Blues':'Blues', 
-             'Classical':'Classical', 
+             'Blues':'Blues',
+             'Classical':'Classical',
              'Country':'Country',
-             'Dance and House':'Electro', 
+             'Dance and House':'Electro',
              'Folk and New Age':'Folk and New Age',
-             'Hip-Hop and Rap':'Hip-Hop and Rap', 
+             'Hip-Hop and Rap':'Hip-Hop and Rap',
              'House & Garage and Grime':'Electro',
-             'Jazz':'Jazz', 
+             'Jazz':'Jazz',
              'Jungle and D&B':'Electro',
              'Latin':'Latin',
-             'Pop':'Pop-Rock', 
-             'R&B and Soul':'R&B and Soul', 
+             'Pop':'Pop-Rock',
+             'R&B and Soul':'R&B and Soul',
              'Reggae':'Reggae',
              'Rock and Metal':'Metal-Punk',
              'Sample':'Sample',
@@ -105,7 +105,7 @@ for genre in eq_genres.keys():
       eq_genre.append(eq_genres[genre]['high'])
       bar(range(4), eq_genre)
       axis([0, 4, 0, 0.7])
-      figfile = genre + '.png' 
+      figfile = genre + '.png'
       savefig( figfile, dpi=60, format='png')
       html += '<div>'
       html += '<h2>%s</h2>' % genre

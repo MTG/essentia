@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -29,7 +29,7 @@ class TestFFT(TestCase):
         # input is [1, 0, 0, ...] which corresponds to an FFT of constant magnitude 1
         signalSize = 512
         fftSize = signalSize/2 + 1
-        
+
         signalDC = zeros(signalSize)
         signalDC[0] = 1.0
 
@@ -54,12 +54,12 @@ class TestFFT(TestCase):
 
     def testZero(self):
         self.assertEqualVector(FFT()(zeros(2048)), zeros(1025))
-        
+
 
 
     def testWeirdSizes(self):
         self.assertComputeFails(FFT(), [])
-        
+
         # values from Matlab/Octave
         self.assertComputeFails(FFT(), [1])
         self.assertComputeFails(FFT(), [1, 0.5, 0.2])
@@ -67,10 +67,10 @@ class TestFFT(TestCase):
         # These tests should be reactivated when the FFT will work on odd-sized arrays
         '''
         self.assertAlmostEqualVector(FFT()([1]), [1])
-        
+
         self.assertAlmostEqualVector(FFT()([1, 0.5, 0.2]),
                                      [ 1.7+0j, 0.65-0.2598076211j ])
-        
+
         self.assertAlmostEqualVector(FFT()([1, 4, 2, 5, 3]),
                                      [ 15+0j, -2.5+0.8122992405j, -2.5-3.4409548011j ])
         '''

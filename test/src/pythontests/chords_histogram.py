@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -50,7 +50,7 @@ for root, dirs, files in tree:
         y = yaml.load( open(results_file).read(), yaml.CLoader )
 
         print y['chords']['values']
-        
+
         key = y['key_key']['value']
         scale = y['key_scale']['value']
 
@@ -75,7 +75,7 @@ for root, dirs, files in tree:
             correct_key += 1
         else:
             false_key += 1
-        
+
         print
 
 #print histo
@@ -89,7 +89,7 @@ for genre, distance in distances.items():
     #xlabel('values')
     #ylabel('files')
     #title( stat )
-    figfile = genre + '.png' 
+    figfile = genre + '.png'
     savefig( figfile, dpi=60, format='png')
     i+=1
 

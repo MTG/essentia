@@ -18,9 +18,9 @@ const char* BeatTrackerDegara::description = DOC("This algorithm estimates the b
 "\n"
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
-"References:\n" 
+"References:\n"
 "  [1] Degara, N., Rua, E. A., Pena, A., Torres-Guijarro, S., Davies, M. E., & Plumbley, M. D. (2012). Reliability-informed beat tracking of musical signals. Audio, Speech, and Language Processing, IEEE Transactions on, 20(1), 290-301.\n"
-"  [2] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n"); 
+"  [2] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n");
 
 // evaluation results on a large collection of tracks [2] for essentia implementations (DBogdanov):
 // *Degara:         65.4407   55.3735   45.6554   66.5149   45.6192   49.9258   69.5233   77.7232    2.2475   68.0827  -- fast
@@ -28,7 +28,7 @@ const char* BeatTrackerDegara::description = DOC("This algorithm estimates the b
 // RhythmExtractor: 49.6150   40.3908   21.4286   55.7790   29.8988   37.5160   41.1232   51.7029    1.5479   48.3133  -- slow
 
 
-BeatTrackerDegara::BeatTrackerDegara() : AlgorithmComposite(), 
+BeatTrackerDegara::BeatTrackerDegara() : AlgorithmComposite(),
     _frameCutter(0), _windowing(0), _fft(0), _cart2polar(0),
     _onsetComplex(0), _ticksComplex(0), _configured(false) {
 
@@ -39,7 +39,7 @@ BeatTrackerDegara::BeatTrackerDegara() : AlgorithmComposite(),
 void BeatTrackerDegara::createInnerNetwork() {
   // internal algorithms
   AlgorithmFactory& factory = AlgorithmFactory::instance();
-  
+
   _frameCutter         = factory.create("FrameCutter");
   _windowing           = factory.create("Windowing");
   _fft                 = factory.create("FFT");
@@ -56,7 +56,7 @@ void BeatTrackerDegara::createInnerNetwork() {
   _cart2polar->output("phase")              >>   _onsetComplex->input("phase");
   _onsetComplex->output("onsetDetection")   >>   _ticksComplex->input("onsetDetections");
   _ticksComplex->output("ticks")            >>   _ticks;
-  
+
   _network = new scheduler::Network(_frameCutter);
 }
 
@@ -79,17 +79,17 @@ void BeatTrackerDegara::configure() {
   _sampleRate = 44100.;
   // TODO will only work with _sampleRate = 44100, check what original
   // RhythmExtractor does with sampleRate parameter
-  
+
   //_sampleRate   = parameter("sampleRate").toReal();
   createInnerNetwork();
-  
+
   // Configure internal algorithms
 
-  int frameSize = 2048; 
+  int frameSize = 2048;
   int hopSize = 1024;
   // NB: 2048/1024 frames followed by x2 resampling of OSD work better than
-  // simply using 1024/512 frames with no resampling for 'complex'  onset 
-  // detection function, according to the evaluation at MTG (JZapata, DBogdanov) 
+  // simply using 1024/512 frames with no resampling for 'complex'  onset
+  // detection function, according to the evaluation at MTG (JZapata, DBogdanov)
 
   _frameCutter->configure("frameSize", frameSize,
                           "hopSize", hopSize,
@@ -99,7 +99,7 @@ void BeatTrackerDegara::configure() {
   _windowing->configure("size", frameSize, "type", "hann");
   _fft->configure("size", frameSize);
   _onsetComplex->configure("method", "complex");
-  _ticksComplex->configure("sampleRateODF", _sampleRate/hopSize, 
+  _ticksComplex->configure("sampleRateODF", _sampleRate/hopSize,
                             "resample", "x2",
                             "minTempo", parameter("minTempo").toInt(),
                             "maxTempo", parameter("maxTempo").toInt());
@@ -125,9 +125,9 @@ const char* BeatTrackerDegara::description = DOC("This algorithm estimates the b
 "\n"
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
-"References:\n" 
+"References:\n"
 "  [1] Degara, N., Rua, E. A., Pena, A., Torres-Guijarro, S., Davies, M. E., & Plumbley, M. D. (2012). Reliability-informed beat tracking of musical signals. Audio, Speech, and Language Processing, IEEE Transactions on, 20(1), 290-301.\n"
-"  [2] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n"); 
+"  [2] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n");
 
 
 BeatTrackerDegara::BeatTrackerDegara() {
@@ -142,8 +142,8 @@ BeatTrackerDegara::~BeatTrackerDegara() {
 }
 
 void BeatTrackerDegara::configure() {
-  _beatTracker->configure(//INHERIT("sampleRate"), 
-                          INHERIT("maxTempo"), 
+  _beatTracker->configure(//INHERIT("sampleRate"),
+                          INHERIT("maxTempo"),
                           INHERIT("minTempo"));
 }
 
@@ -151,7 +151,7 @@ void BeatTrackerDegara::configure() {
 void BeatTrackerDegara::createInnerNetwork() {
   _beatTracker = streaming::AlgorithmFactory::create("BeatTrackerDegara");
   _vectorInput = new streaming::VectorInput<Real>();
-  
+
   *_vectorInput  >>  _beatTracker->input("signal");
   _beatTracker->output("ticks")  >>  PC(_pool, "internal.ticks");
 
@@ -169,7 +169,7 @@ void BeatTrackerDegara::compute() {
   try {
     ticks = _pool.value<vector<Real> >("internal.ticks");
   }
-  catch (EssentiaException&) {                                                  
+  catch (EssentiaException&) {
     // no ticks were found because audio signal was too short
     ticks.clear();
   }

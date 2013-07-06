@@ -39,7 +39,7 @@ void TempoTapMaxAgreement::configure() {
   }
   _histogramBins.pop_back();
 }
-  
+
 
 void TempoTapMaxAgreement::reset() {
   Algorithm::reset();
@@ -59,10 +59,10 @@ void TempoTapMaxAgreement::compute() {
         if (tickCandidates[i][j] <= tickCandidates[i][j-1]) {
           throw EssentiaException("TempoTapMaxAgreement: tick values must be in ascending order");
         }
-      }  
+      }
     }
   }
-  
+
   ticks.clear();
   if (!tickCandidates.size()) {
     return; // no candidates were provided
@@ -82,15 +82,15 @@ void TempoTapMaxAgreement::compute() {
       infogain[i][j] = computeBeatInfogain(tickCandidates[i], tickCandidates[j]);
     }
   }
-  
+
   vector<Real> temp1;
   temp1.reserve(2*numberMethods); // reserve more than maximum we will ever
-  
+
   vector<Real> distanceInfogain;
   distanceInfogain.reserve(numberMethods);
 
-  for (int i=0; i<numberMethods; ++i) { 
-    // gather all combinations in which i-th method was compared 
+  for (int i=0; i<numberMethods; ++i) {
+    // gather all combinations in which i-th method was compared
     for (int j=i+1; j<numberMethods; ++j) {
       temp1.push_back(infogain[i][j]);
     }
@@ -107,11 +107,11 @@ void TempoTapMaxAgreement::compute() {
 }
 
 
-Real TempoTapMaxAgreement::computeBeatInfogain(vector<Real>& ticks1, 
+Real TempoTapMaxAgreement::computeBeatInfogain(vector<Real>& ticks1,
                                                vector<Real>& ticks2) {
-  
+
   // return zero information gain on empty or too short tick sequencies
-  if (ticks1.size()<2 || ticks2.size()<2) { 
+  if (ticks1.size()<2 || ticks2.size()<2) {
     return 0;
   }
 
@@ -141,7 +141,7 @@ void TempoTapMaxAgreement::removeFirstSeconds(vector<Real>& ticks) {
 }
 
 
-void TempoTapMaxAgreement::FindBeatError(const vector<Real>& ticks1, 
+void TempoTapMaxAgreement::FindBeatError(const vector<Real>& ticks1,
                                          const vector<Real>& ticks2,
                                          vector<Real>& beatError) {
   beatError.reserve(ticks2.size());
@@ -150,8 +150,8 @@ void TempoTapMaxAgreement::FindBeatError(const vector<Real>& ticks1,
   for (size_t i=0; i<ticks2.size(); ++i) {
     Real interval;
 
-    // find the closest tick in tick1 to tick2[i]  
-    size_t j = closestTick(ticks1, ticks2[i]);  
+    // find the closest tick in tick1 to tick2[i]
+    size_t j = closestTick(ticks1, ticks2[i]);
     Real error = ticks2[i] - ticks1[j];
 
     if (j==0) { // first tick is the nearest
@@ -159,56 +159,56 @@ void TempoTapMaxAgreement::FindBeatError(const vector<Real>& ticks1,
     }
     else if (j==ticks1.size()-1) {  // last tick is the nearest
       interval = 0.5*(ticks1[j] - ticks1[j-1]);
-    } 
+    }
     // test if the error is positive or negative and choose interval accordingly
-    else if (error < 0) { 
+    else if (error < 0) {
       // nearest tick is before ticks2[i] --> look at the previous interval
       interval = 0.5*(ticks1[j] - ticks1[j-1]);
     }
     else {
       // nearest tick is after ticks2[i] --> look at the next interval
       interval = 0.5*(ticks1[j+1] - ticks1[j]);
-    }     
+    }
     beatError.push_back(0.5 * error / interval); // relative error
   }
 
   // original matlab code: weird trick to deal with bin boundaries:
-  // beatError = round(10000*beatError)/10000;  
+  // beatError = round(10000*beatError)/10000;
 }
 
 
 Real TempoTapMaxAgreement::FindEntropy(vector<Real>& beatError) {
-  // fix the beat errors which are out of range in a way similar to princarg, 
-  // but for [-0.5, 0.5] 
+  // fix the beat errors which are out of range in a way similar to princarg,
+  // but for [-0.5, 0.5]
 
   for (size_t i=0; i<beatError.size(); ++i) {
-    beatError[i] = fmod(beatError[i] + 0.5, 1.) - 0.5; 
+    beatError[i] = fmod(beatError[i] + 0.5, 1.) - 0.5;
   }
   // compute the histogram
-  histogram(beatError, _binValues); 
+  histogram(beatError, _binValues);
 
   // add the last bin frequency to the first bin
   _binValues.front() += _binValues.back();
   _binValues.pop_back();  // remove and add back after the computations
 
   normalizeSum(_binValues);
-  
+
   // compute the entropy
   Real entropy = 0.;
   for (size_t i=0; i<_binValues.size(); ++i) {
-    if (!_binValues[i]) {  // set zero valued bins to 1 
+    if (!_binValues[i]) {  // set zero valued bins to 1
       _binValues[i] = 1;   // to make the entropy calculation well-behaved
     }
     entropy -= log2(_binValues[i]) * _binValues[i];
-  } 
-  _binValues.push_back(0.);  
+  }
+  _binValues.push_back(0.);
   return entropy;
 }
 
 
 size_t TempoTapMaxAgreement::closestTick(const vector<Real>& ticks, Real x) {
   // find closest to x tick in ticks
-  Real minDistance=-1;  
+  Real minDistance=-1;
   size_t j=0;
 
   while(j<ticks.size()) {
@@ -219,7 +219,7 @@ size_t TempoTapMaxAgreement::closestTick(const vector<Real>& ticks, Real x) {
     else if (distance < minDistance) { // distances decrease
       minDistance = distance;
     }
-    else break; // distances start increase, we have passed the minimum 
+    else break; // distances start increase, we have passed the minimum
     j++;
   }
   return j-1;
@@ -228,11 +228,11 @@ size_t TempoTapMaxAgreement::closestTick(const vector<Real>& ticks, Real x) {
 
 void TempoTapMaxAgreement::histogram(const vector<Real>& array, vector<Real>& counter) {
   counter.clear();
-  counter.resize(_histogramBins.size()+1); 
+  counter.resize(_histogramBins.size()+1);
   for (size_t i=0; i<array.size(); ++i) {
     if (array[i] >= _histogramBins.back()) {
       counter.back() += 1;
-    } 
+    }
     else {
       for (size_t b=0; b<_histogramBins.size(); ++b) {
         if (array[i] < _histogramBins[b]) {

@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -86,7 +86,7 @@ class PredominantMelody : public Algorithm {
     declareParameter("magnitudeThreshold", "spectral peak magnitude threshold (maximum allowed difference from the highest peak in dBs)", "[0,inf)",  40);
     declareParameter("magnitudeCompression", "magnitude compression parameter for the salience function (=0 for maximum compression, =1 for no compression)", "(0,1]", 1.0);
     declareParameter("numberHarmonics", "number of considered harmonics", "[1,inf)", 20);
-    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);  
+    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);
 
     // pitch contour tracking
     declareParameter("peakFrameThreshold", "per-frame salience threshold factor (fraction of the highest peak salience in a frame)", "[0,1]", 0.9);
@@ -143,7 +143,7 @@ class PredominantMelody : public AlgorithmComposite {
   SinkProxy<Real> _signal;
   Source<std::vector<Real> > _pitch;
   Source<std::vector<Real> > _pitchConfidence;
-  
+
   Pool _pool;
   Algorithm* _poolStorageBins;
   Algorithm* _poolStorageValues;
@@ -155,7 +155,7 @@ class PredominantMelody : public AlgorithmComposite {
    ~PredominantMelody();
 
   void declareProcessOrder() {
-    declareProcessStep(ChainFrom(_frameCutter));  
+    declareProcessStep(ChainFrom(_frameCutter));
     declareProcessStep(SingleShot(this));
   }
 
@@ -171,12 +171,12 @@ class PredominantMelody : public AlgorithmComposite {
     declareParameter("magnitudeThreshold", "peak magnitude threshold (maximum allowed difference from the highest peak in dBs)", "[0,inf)",  40);
     declareParameter("magnitudeCompression", "magnitude compression parameter (=0 for maximum compression, =1 for no compression)", "(0,1]", 1.0);
     declareParameter("numberHarmonics", "number of considered hamonics", "[1,inf)", 20);
-    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);  
-  
+    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);
+
     // pitch salience function peaks
     declareParameter("minFrequency", "the minimum allowed frequency for salience function peaks (ignore peaks below) [Hz]", "[0,inf)", 80.0);
     declareParameter("maxFrequency", "the maximum allowed frequency for salience function peaks (ignore peaks above) [Hz]", "[0,inf)", 20000.0); // just some very large value
-    
+
     // pitch contour tracking
     declareParameter("peakFrameThreshold", "per-frame salience threshold factor (fraction of the highest peak salience in a frame)", "[0,1]", 0.9);
     declareParameter("peakDistributionThreshold", "allowed deviation below the peak salience mean over all frames (fraction of the standard deviation)", "[0,1]", 0.9);
