@@ -58,11 +58,12 @@ def configure(ctx):
         ctx.env.CC = 'clang'
         ctx.env.CXX = 'clang++'
 
-        ctx.env.CXXFLAGS += [ '-Wno-gnu' ]
+        ctx.env.CXXFLAGS += [ '-Wno-gnu' ] # , '-std=c++11' ]
 
         ctx.env.DEFINES   += [ 'GTEST_HAS_TR1_TUPLE=0' ]
-        #conf.env.LINKFLAGS = [ '-stdlib=libc++' ]
-        #conf.env.FRAMEWORK = [ 'Accelerate' ]
+        #ctx.env.CXXFLAGS = [ '-stdlib=libc++' ]
+        #ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
+        #ctx.env.FRAMEWORK = [ 'Accelerate' ]
 
 
     ctx.load('compiler_cxx compiler_c')

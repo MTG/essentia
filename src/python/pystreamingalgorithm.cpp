@@ -119,7 +119,7 @@ void PyStreamingAlgorithm::tp_dealloc (PyObject* obj) {
 }
 
 PyObject* PyStreamingAlgorithm::configure (PyStreamingAlgorithm* self, PyObject* args, PyObject* keywds) {
-  E_DEBUG(EPython, PY_ALGONAME << "::Configure()");
+  E_DEBUG(EPyBindings, PY_ALGONAME << "::Configure()");
 
   // create the list of named parameters that this algorithm can accept
   ParameterMap pm = self->algo->defaultParameters();
@@ -146,7 +146,7 @@ PyObject* PyStreamingAlgorithm::configure (PyStreamingAlgorithm* self, PyObject*
     return NULL;
   }
 
-  E_DEBUG(EPython, PY_ALGONAME << "::Configure() done!");
+  E_DEBUG(EPyBindings, PY_ALGONAME << "::Configure() done!");
 
   Py_RETURN_NONE;
 }

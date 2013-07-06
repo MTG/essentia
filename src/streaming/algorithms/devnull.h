@@ -32,11 +32,17 @@ class DevNull : public Algorithm {
 
  public:
   DevNull() : Algorithm() {
-    static int devnullId = 0;
+    static ForcedMutex _devnullInitMutex;
+    static int _devnullId = 0;
+
+    ForcedMutexLocker lock(_devnullInitMutex);
+
+    int devnullId = _devnullId++;
     std::ostringstream name;
-    name << "DevNull[" << devnullId++ << "]";
+    name << "DevNull<" << nameOfType(typeid(TokenType)) << ">[" << devnullId << "]";
     setName(name.str());
     declareInput(_frames, 1, "data", "the incoming data to discard");
+    E_DEBUG(EFactory, "Created " << _name);
   }
 
   void declareParameters() {}

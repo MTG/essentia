@@ -39,10 +39,14 @@ enum DebuggingModule {
   ENetwork     = 1 << 3,
   EGraph       = 1 << 4,
   EExecution   = 1 << 5,
-  EMemory      = 1 << 6, // for mem operations, such as new/delete
+  EMemory      = 1 << 6,  // for mem operations, such as new/delete
 
-  EPython      = 1 << 20,
-  EUnittest    = 1 << 21,
+  EPython      = 1 << 20, // for use in python scripts
+  EPyBindings  = 1 << 21, // for use in python/C module
+  EUnittest    = 1 << 22,
+
+  EUser1       = 1 << 25, // freely available for the user
+  EUser2       = 1 << 26, // freely available for the user
 
   ENone        = 0,
   EAll         = (1 << 30) - 1

@@ -182,6 +182,9 @@ class ESSENTIA_API Configurable {
 // and understandable way for StreamingAlgorithmComposite
 #define INHERIT(x) x, parameter(x)
 
+template <typename T> bool compareByName(const T* a, const T* b) {
+  return a->name() < b->name();
+}
 
 } // namespace essentia
 
