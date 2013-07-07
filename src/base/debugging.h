@@ -40,6 +40,7 @@ enum DebuggingModule {
   EGraph       = 1 << 4,
   EExecution   = 1 << 5,
   EMemory      = 1 << 6,  // for mem operations, such as new/delete
+  EScheduler   = 1 << 7,
 
   EPython      = 1 << 20, // for use in python scripts
   EPyBindings  = 1 << 21, // for use in python/C module
@@ -121,7 +122,7 @@ extern Logger loggerInstance;
 
 #  define E_DEBUG_INDENT
 #  define E_DEBUG_OUTDENT
-#  define E_ACTIVE(module)
+#  define E_ACTIVE(module) false
 #  define E_STRINGIFY(msg) ""
 #  define E_DEBUG_NONL(module, msg)
 #  define E_DEBUG(module, msg)

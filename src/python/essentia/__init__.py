@@ -32,6 +32,7 @@ class DebuggingModule:
     EGraph       = 1 << 4
     EExecution   = 1 << 5
     EMemory      = 1 << 6
+    EScheduler   = 1 << 7
 
     EPython      = 1 << 20
     EPyBindings  = 1 << 21

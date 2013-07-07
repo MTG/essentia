@@ -109,7 +109,7 @@ std::vector<NodeType*> depthFirstSearch(NodeType* root) {
 }
 
 inline std::string removeNodeIdFromName(const std::string& name) {
-  std::string::size_type idpos = name.find('[');
+  std::string::size_type idpos = std::min(name.find('<'), name.find('['));
   if (idpos == std::string::npos) return name;
   return name.substr(0, idpos);
 }
