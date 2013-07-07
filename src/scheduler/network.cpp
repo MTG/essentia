@@ -894,7 +894,7 @@ void Network::printBufferFillState() {
 
   for (int i=0; i<(int)algos.size(); i++) {
     Algorithm* algo = algos[i];
-    E_DEBUG(EExecution, pad(algo->name(), 25) << "(called " << algo->nProcess << " times)");
+    E_DEBUG(EScheduler, pad(algo->name(), 25) << "(called " << algo->nProcess << " times)");
     for (Algorithm::OutputMap::const_iterator output = algo->outputs().begin();
          output != algo->outputs().end();
          ++output) {
@@ -904,13 +904,18 @@ void Network::printBufferFillState() {
       int available = output->second->available();
       int used = buf.size - available;
       int percent = 100 * used / buf.size;
-      E_DEBUG(EExecution, "  - " << pad(name, 24)
+      E_DEBUG(EScheduler, "  - " << pad(name, 24)
               << " fill " << pad(percent, 3, ' ', true) << "%   |  "
               << pad(used, 6, ' ', true) << " / " << pad(buf.size, 6)
               << "  |  contiguous: " << buf.maxContiguousElements);
+      // if we compile without debugging
+      NOWARN_UNUSED(name);
+      NOWARN_UNUSED(percent);
     }
   }
 }
+
+
 void Network::checkBufferSizes() {
   // TODO: we should do this on the execution network, right?
   E_DEBUG(ENetwork, "checking buffer sizes");
