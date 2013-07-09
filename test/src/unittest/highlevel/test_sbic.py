@@ -84,7 +84,7 @@ class TestSBic(TestCase):
 
     def atestLargeMinLength(self):
         loader = MonoLoader(filename = join(testdata.audio_dir, 'recorded',
-                                            '01-Allegro__Gloria_in_excelsis_Deo_in_D_Major.wav'),
+                                            'Vivaldi_Sonata_5_II_Allegro.wav'),
                             downmix='left', sampleRate=441000)
 
         if sys.platform == 'win32' and getattr(loader, 'hasDoubleCompute', False):
@@ -126,7 +126,7 @@ class TestSBic(TestCase):
 
     def testRegression(self):
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded',\
-                           '01-Allegro__Gloria_in_excelsis_Deo_in_D_Major.wav'),
+                           'Vivaldi_Sonata_5_II_Allegro.wav'),
                            downmix='left', sampleRate=44100)()
 
         w = Windowing(type='blackmanharris62', size=2048)
@@ -148,7 +148,7 @@ class TestSBic(TestCase):
 
         features_transpose = array(features_transpose)
         segments = SBic(cpw=1.5, size1=1000, inc1=300, size2=600, inc2=50)(features_transpose)
-        expected = [0., 598., 1097., 1796., 2445., 2894., 3693., 4442., 5641., 5728.]
+        expected = [0., 49., 997., 1296., 1845., 2994., 3943., 4196.]
         self.assertEqualVector(segments, expected)
 
     def atestMinLengthEqualToAudioFrames(self):
