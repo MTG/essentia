@@ -34,6 +34,13 @@ class TestBeatsLoudness(TestCase):
         beatDuration = 0.05
         start = (beat - beatWindowDuration/2)*sr
         end = (beat + beatWindowDuration/2 + beatDuration + 0.0001)*sr
+        # SingleBeatLoudness will throw exception if the audio fragment is too short,
+        # this will happen when the beat is too close to the beginning of the signal so that 
+        # the beat window will start actually before it
+        if start < 0:
+            # reposition the window
+            end = start - end
+            start = 0
         return SingleBeatLoudness(frequencyBands = [20,150])(audio[start:end])
 
     def testEmpty(self):
@@ -51,7 +58,7 @@ class TestBeatsLoudness(TestCase):
 
 
     def testRegression(self):
-        loader = sMonoLoader(filename=join(testdata.audio_dir, 'recorded', 'britney.wav'),
+        loader = sMonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'),
                              sampleRate=44100)
         rhythm = RhythmExtractor()
         p = Pool()

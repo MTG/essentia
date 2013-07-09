@@ -34,16 +34,16 @@ class TestDynamicComplexity(TestCase):
         self.assertEqualVector(DynamicComplexity()([0]*44100), (0, -90))
 
     def testRegression(self):
-        filename = join(testdata.audio_dir, 'recorded', 'roxette.wav')
+        filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav')
         audio = MonoLoader(filename=filename, downmix='left', sampleRate=44100)()
         self.assertAlmostEqualVector(DynamicComplexity()(audio),
-                                     (1.904192328453064, -17.803413391113281),1e-1)
+                                     (5.865970134735107, -21.189722061157227),1e-1)
 
     def testStreamingRegression(self):
         from essentia.streaming import MonoLoader as sMonoLoader, \
                                        DynamicComplexity as sDynamicComplexity
 
-        filename = join(testdata.audio_dir, 'recorded', 'roxette.wav')
+        filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav')
         loader = sMonoLoader(filename=filename, downmix='left', sampleRate=44100)
         dyn = sDynamicComplexity()
         pool = Pool()
@@ -53,8 +53,8 @@ class TestDynamicComplexity(TestCase):
         dyn.loudness >> (pool, 'loudness')
         run(loader)
 
-        self.assertAlmostEqual(pool['complexity'], 1.904192328453064, 1e-1)
-        self.assertAlmostEqual(pool['loudness'], -17.803413391113281, 1e-1)
+        self.assertAlmostEqual(pool['complexity'], 5.865970134735107, 1e-1)
+        self.assertAlmostEqual(pool['loudness'], -21.189722061157227, 1e-1)
 
 
 suite = allTests(TestDynamicComplexity)

@@ -35,29 +35,29 @@ class TestIntensity(TestCase):
         algo44 = Intensity(sampleRate=44100)
         algo22 = Intensity(sampleRate=22050)
 
-        filename = join(testdata.audio_dir, 'recorded', 'britney.wav')
-        britney44 = MonoLoader(filename=filename, downmix='left', sampleRate=44100)()
-        filename = join(testdata.audio_dir, 'recorded', 'britney22050.wav')
-        britney22 = MonoLoader(filename=filename, downmix='left', sampleRate=22050)()
+        filename = join(testdata.audio_dir, 'recorded', 'cat_purrrr.wav')
+        cat44 = MonoLoader(filename=filename, downmix='left', sampleRate=44100)()
+        filename = join(testdata.audio_dir, 'recorded', 'cat_purrrr22050.wav')
+        cat22 = MonoLoader(filename=filename, downmix='left', sampleRate=22050)()
 
-        self.assertEqual(algo44(britney44), algo22(britney22))
+        self.assertEqual(algo44(cat44), algo22(cat22))
 
     def testRegression(self):
-        filename = join(testdata.audio_dir, 'recorded', 'britney.wav')
+        filename = join(testdata.audio_dir, 'recorded', 'distorted.wav')
         audio = MonoLoader(filename=filename, downmix='left', sampleRate=44100)()
-        britneyIntensity = Intensity()(audio)
+        distortedIntensity = Intensity()(audio)
 
-        filename = join(testdata.audio_dir, 'recorded', '01-Allegro__Gloria_in_excelsis_Deo_in_D_Major.wav')
+        filename = join(testdata.audio_dir, 'recorded', 'spaceambient.wav')
         audio = MonoLoader(filename=filename, downmix='left', sampleRate=44100)()
-        gloriaIntensity = Intensity()(audio)
+        ambientIntensity = Intensity()(audio)
 
-        filename = join(testdata.audio_dir, 'recorded', 'roxette.wav')
+        filename = join(testdata.audio_dir, 'recorded', 'dubstep.wav')
         audio = MonoLoader(filename=filename, downmix='left', sampleRate=44100)()
-        roxetteIntensity = Intensity()(audio)
+        dubstepIntensity = Intensity()(audio)
 
-        self.assertTrue(britneyIntensity > gloriaIntensity)
-        self.assertTrue(britneyIntensity >= roxetteIntensity)
-        self.assertTrue(roxetteIntensity > gloriaIntensity)
+        self.assertTrue(distortedIntensity > ambientIntensity)
+        self.assertTrue(distortedIntensity >= dubstepIntensity)
+        self.assertTrue(dubstepIntensity > ambientIntensity)
 
 
 suite = allTests(TestIntensity)

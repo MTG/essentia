@@ -50,9 +50,12 @@ class TestOnsetRate(TestCase):
         # therefore in a constant input signal it will always detect an onset
         # on the last frame. Maybe last frame should be skipped in the
         # algorithm?
+        # TODO why not having an onset in the first frame? it seems logical 
+        # to have it there for non-zero constant signals
+        firstFrame = 1*frameTime
         lastFrame = (int(size/hopSize)-1)*frameTime
-        self.assertAlmostEqualVector(times, [lastFrame])
-        self.assertAlmostEqual(rate, 1.0/dur)
+        self.assertAlmostEqualVector(times, [firstFrame, lastFrame])
+        self.assertAlmostEqual(rate, 2.0/dur)
 
     def makeImpulse(self, list, pos):
         if pos >= len(list): return

@@ -33,26 +33,25 @@ class TestDanceability(TestCase):
         self.assertEqual(Danceability()([0]*44100), 0)
 
     def testRegression(self):
-        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded', 'roxette.wav'),
+        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav'),
                             downmix='left', sampleRate=44100)()
-        self.assertAlmostEqual(Danceability()(audio), 1.25313031673, 5e-3)
+        self.assertAlmostEqual(Danceability()(audio), 3.76105952263, 5e-3)
 
     def testSanity(self):
         filename = join(testdata.audio_dir, 'recorded', \
-                        '01-Allegro__Gloria_in_excelsis_Deo_in_D_Major.wav')
-
-        gloriaAudio = MonoLoader(filename=filename,
+                        'spaceambient.wav')
+        ambientAudio = MonoLoader(filename=filename,
                                  downmix='left',
                                  sampleRate=44100)()
-        filename = join(testdata.audio_dir, 'recorded', 'britney.wav')
-        britneyAudio = MonoLoader(filename=filename,
+        filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav')
+        technoAudio = MonoLoader(filename=filename,
                                   downmix='left',
                                   sampleRate=44100)()
 
-        gloriaDanceability = Danceability()(gloriaAudio)
-        britneyDanceability = Danceability()(britneyAudio)
+        ambientDanceability = Danceability()(ambientAudio)
+        technoDanceability = Danceability()(technoAudio)
 
-        self.assertTrue(gloriaDanceability < britneyDanceability)
+        self.assertTrue(ambientDanceability < technoDanceability)
 
     def testMinBiggerThanMaxTau(self):
         self.assertConfigureFails(Danceability(), {'minTau':1000, 'maxTau':500})

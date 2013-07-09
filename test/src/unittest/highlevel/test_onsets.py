@@ -40,6 +40,8 @@ class TestOnsets(TestCase):
         sr = 44100.0
         while (size > 32):
             hopsize = size/2
+            # TODO there will be an onset detected on the first frame for a 
+            # non-zero constant signal, which is probably ok
             frameTime = (size - hopsize)/sr
             frameRate = 1.0/frameTime
             if (size == 1024 and hopsize == 512):
@@ -48,7 +50,9 @@ class TestOnsets(TestCase):
             else:
                 # Onsets does not support other framerates than
                 # (1024-512)/44100
-                self.assertConfigureFails(Onsets(), { 'frameRate': frameRate })
+                # Onsets() outputs a warning instead of exception from now on
+                # self.assertConfigureFails(Onsets(), { 'frameRate': frameRate })
+                pass
             size /= 2
 
     def testImpulse(self):
@@ -72,7 +76,8 @@ class TestOnsets(TestCase):
             else:
                 # Onsets does not support other framerates than
                 # (1024-512)/44100
-                self.assertConfigureFails(Onsets(), { 'frameRate': frameRate })
+                # self.assertConfigureFails(Onsets(), { 'frameRate': frameRate })
+                pass # from now on Onset returns a warning instead of exception
             size /= 2
 
     def testInvalidParam(self):
