@@ -61,7 +61,7 @@ master_doc = 'contents'
 
 # General information about the project.
 project = u'Essentia'
-copyright = u'2005-2011, Universitat Pompeu Fabra'
+copyright = u'2006-2013, Universitat Pompeu Fabra'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -111,7 +111,11 @@ pygments_style = 'friendly'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'sphinxdoc'
+html_theme = 'sphinxdoc_mtg'
+html_theme_path = ['_templates']
+html_theme_options = {
+    "nosidebar": "true"
+}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -152,7 +156,8 @@ html_static_path = ['_static']
 #html_use_smartypants = True
 
 # Custom sidebar templates, maps document names to template names.
-html_sidebars = { 'index': [ 'indexsidebar.html', 'searchbox.html' ] }
+#html_sidebars = { 'index': [ 'indexsidebar.html', 'searchbox.html' ] } 
+#html_sidebars = { '**': [] } # disable sidebar on all pages
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
