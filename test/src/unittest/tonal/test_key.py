@@ -37,7 +37,7 @@ class TestKey(TestCase):
         sampleRate = 44100
         audio = MonoLoader(filename = join(testdata.audio_dir,
                                            join('recorded',
-                                                '01-Allegro__Gloria_in_excelsis_Deo_in_D_Major.wav')),
+                                                'mozart_c_major_30sec.wav')),
                            sampleRate = sampleRate)()
 
         fc = FrameCutter(frameSize=4096, hopSize=512)
@@ -96,11 +96,10 @@ class TestKey(TestCase):
     # are given.
     def testRegression(self):
         (key, scale, strength, firstToSecondRelativeStrength) = self.runAlg()
-
-        self.assertEqual(key, 'D')
+        self.assertEqual(key, 'C')
         self.assertEqual(scale, 'major')
-        self.assertAlmostEqual(strength, 0.788394808769, 1e-6)
-        self.assertAlmostEqual(firstToSecondRelativeStrength, 0.311965376139, 1e-6)
+        self.assertAlmostEqual(strength, 0.760322451591, 1e-6)
+        self.assertAlmostEqual(firstToSecondRelativeStrength, 0.607807099819, 1e-6)
 
     def testUsePolyphonyFalse(self):
         self.assertValidSequence(self.runAlg(usePolyphony=False))

@@ -134,15 +134,23 @@ void PitchYinFFT::compute() {
   }
   sum *= 2;
 
+  if (sum==0) {
+    // a frame with silence or too quiet, cannot predict pitch
+    // as the division by tmp will produce NaN
+    pitch = 0.0;
+    pitchConfidence = 0.0;
+    return;
+  }
+
   _fft->compute();
   _cart2polar->compute();
   _yin[0] = 1.;
   for (tau = 1; tau < int(_yin.size()); ++tau) {
 	  _yin[tau] = sum - _resNorm[tau]*cos(_resPhase[tau]);
-	  tmp += _yin[tau];
+    tmp += _yin[tau];
 	  _yin[tau] *= tau/tmp;
   }
-  
+
   // search for argmin within minTau/maxTau range
   bool first = true;
   Real yinMin;

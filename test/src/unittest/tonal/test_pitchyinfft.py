@@ -114,7 +114,7 @@ class TestPitchYinFFT(TestCase):
         frameSize = 1024
         sr = 44100
         hopSize = 512
-        filename = join(testdata.audio_dir, 'recorded','britney.wav')
+        filename = join(testdata.audio_dir, 'recorded','mozart_c_major_30sec.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
         frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
         win = Windowing(type='hann')
@@ -126,8 +126,8 @@ class TestPitchYinFFT(TestCase):
             f, conf = pitchDetect(spec)
             pitch += [f]
             confidence += [conf]
-        expected_pitch = readVector(join(filedir(), 'pitchdetection/pitch_britney.txt'))
-        expected_conf = readVector(join(filedir(), 'pitchdetection/pitchconfidence_britney.txt'))
+        expected_pitch = readVector(join(filedir(), 'pitchyinfft/pitch_mozart_c_major_30sec.txt'))
+        expected_conf = readVector(join(filedir(), 'pitchyinfft/pitchconfidence_mozart_c_major_30sec.txt'))
         self.assertAlmostEqualVector(pitch, expected_pitch)
         self.assertAlmostEqualVector(confidence, expected_conf, 5e-5)
 
