@@ -298,6 +298,7 @@ void Key::compute() {
 
     if (pcp[sixth] >  pcp[fifth]) {
       keyIndex = sixth;
+      keyIndex = (int) (keyIndex * 12 / pcpsize + .5);
       scale = MINOR;
     }
   }
