@@ -1,17 +1,17 @@
 .. How-to install Essentia
 
-Installing Essentia
-===================
+.. Installing Essentia
+.. ===================
+.. 
+.. Installing Essentia is easily done using the precompiled packages that you can find on the
+.. `MIR-dev Essentia download page <http://static.mtg.upf.edu/mir-dev-download/essentia/>`_.
+.. Packages are available for Debian/Ubuntu, Windows and Mac OS X.
 
-Installing Essentia is easily done using the precompiled packages that you can find on the
-`MIR-dev Essentia download page <http://static.mtg.upf.edu/mir-dev-download/essentia/>`_.
-Packages are available for Debian/Ubuntu, Windows and Mac OS X.
+.. These packages contain development headers to integrate Essentia in a C++ application, Python
+.. bindings to be able to work in a Matlab-like environment, and some C++ examples and extractors.
 
-These packages contain development headers to integrate Essentia in a C++ application, Python
-bindings to be able to work in a Matlab-like environment, and some C++ examples and extractors.
-
-Those who wish to write new descriptors can do it using the provided development headers,
-but it is highly recommended though that they compile Essentia from source.
+.. Those who wish to write new descriptors can do it using the provided development headers,
+.. but it is highly recommended though that they compile Essentia from source.
 
 
 Compiling Essentia from source
@@ -34,7 +34,7 @@ You can install those dependencies on a Debian/Ubuntu system using the following
 
 In order to use python bindings for the library, you might also need to install python-numpy-dev on Ubuntu::
 
-  sudo apt-get python-numpy-dev
+  sudo apt-get install python-numpy-dev
 
 
 Installing dependencies on Mac OS X
