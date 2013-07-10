@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006 Chris Cannam.
-  
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -35,7 +35,7 @@
 */
 
 /*
-   This is a modified version of a source file from the 
+   This is a modified version of a source file from the
    Rosegarden MIDI and audio sequencer and notation editor.
    This file copyright 2000-2006 Chris Cannam.
    Relicensed by the author as detailed above.
@@ -83,7 +83,7 @@ RealTime::RealTime(int s, int n) :
     } else if (sec < 0) {
 	while (nsec <= -ONE_BILLION) { nsec += ONE_BILLION; --sec; }
 	while (nsec > 0)             { nsec -= ONE_BILLION; ++sec; }
-    } else { 
+    } else {
 	while (nsec >=  ONE_BILLION) { nsec -= ONE_BILLION; ++sec; }
 	while (nsec < 0)             { nsec += ONE_BILLION; --sec; }
     }
@@ -128,7 +128,7 @@ std::ostream &operator<<(std::ostream &out, const RealTime &rt)
 	out << "0";
 	nn *= 10;
     }
-    
+
     out << n << "R";
     return out;
 }
@@ -138,7 +138,7 @@ RealTime::toString() const
 {
     std::stringstream out;
     out << *this;
-    
+
 #if (__GNUC__ < 3)
     out << std::ends;
 #endif
@@ -169,7 +169,7 @@ RealTime::toText(bool fixedDp) const
     }
 
     out << (sec % 10);
-    
+
     int ms = msec();
 
     if (ms != 0) {
@@ -208,16 +208,16 @@ RealTime::operator/(int d) const
     int secrem = sec % d;
 
     double nsecdiv = (double(nsec) + ONE_BILLION * double(secrem)) / d;
-    
+
     return RealTime(secdiv, int(nsecdiv + 0.5));
 }
 
-double 
+double
 RealTime::operator/(const RealTime &r) const
 {
     double lTotal = double(sec) * ONE_BILLION + double(nsec);
     double rTotal = double(r.sec) * ONE_BILLION + double(r.nsec);
-    
+
     if (rTotal == 0) return 0.0;
     else return lTotal/rTotal;
 }

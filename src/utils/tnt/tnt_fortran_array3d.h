@@ -33,11 +33,11 @@ namespace TNT
 {
 
 template <class T>
-class Fortran_Array3D 
+class Fortran_Array3D
 {
 
 
-  private: 
+  private:
 
 
 		i_refvec<T> v_;
@@ -76,19 +76,19 @@ Fortran_Array3D<T>::Fortran_Array3D() :  v_(), m_(0), n_(0), k_(0), data_(0) {}
 
 
 template <class T>
-Fortran_Array3D<T>::Fortran_Array3D(const Fortran_Array3D<T> &A) : 
+Fortran_Array3D<T>::Fortran_Array3D(const Fortran_Array3D<T> &A) :
 	v_(A.v_), m_(A.m_), n_(A.n_), k_(A.k_), data_(A.data_) {}
 
 
 
 template <class T>
-Fortran_Array3D<T>::Fortran_Array3D(int m, int n, int k) : 
+Fortran_Array3D<T>::Fortran_Array3D(int m, int n, int k) :
 	v_(m*n*k), m_(m), n_(n), k_(k), data_(v_.begin()) {}
 
 
 
 template <class T>
-Fortran_Array3D<T>::Fortran_Array3D(int m, int n, int k, const T &val) : 
+Fortran_Array3D<T>::Fortran_Array3D(int m, int n, int k, const T &val) :
 	v_(m*n*k), m_(m), n_(n), k_(k), data_(v_.begin())
 {
 	for (T* p = data_; p < data_ + m*n*k; p++)
@@ -96,15 +96,15 @@ Fortran_Array3D<T>::Fortran_Array3D(int m, int n, int k, const T &val) :
 }
 
 template <class T>
-Fortran_Array3D<T>::Fortran_Array3D(int m, int n, int k, T *a) : 
+Fortran_Array3D<T>::Fortran_Array3D(int m, int n, int k, T *a) :
 	v_(a), m_(m), n_(n), k_(k), data_(v_.begin()) {}
 
 
 
 
 template <class T>
-inline T& Fortran_Array3D<T>::operator()(int i, int j, int k) 
-{ 
+inline T& Fortran_Array3D<T>::operator()(int i, int j, int k)
+{
 #ifdef TNT_BOUNDS_CHECK
 	assert(i >= 1);
 	assert(i <= m_);
@@ -120,7 +120,7 @@ inline T& Fortran_Array3D<T>::operator()(int i, int j, int k)
 
 template <class T>
 inline const T& Fortran_Array3D<T>::operator()(int i, int j, int k)  const
-{ 
+{
 #ifdef TNT_BOUNDS_CHECK
 	assert(i >= 1);
 	assert(i <= m_);
@@ -205,9 +205,9 @@ inline int Fortran_Array3D<T>::dim3() const { return k_; }
 
 
 template <class T>
-inline int Fortran_Array3D<T>::ref_count() const 
-{ 
-	return v_.ref_count(); 
+inline int Fortran_Array3D<T>::ref_count() const
+{
+	return v_.ref_count();
 }
 
 template <class T>

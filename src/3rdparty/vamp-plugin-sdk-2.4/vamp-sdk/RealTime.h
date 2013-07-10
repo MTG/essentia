@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006 Chris Cannam.
-  
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -35,7 +35,7 @@
 */
 
 /*
-   This is a modified version of a source file from the 
+   This is a modified version of a source file from the
    Rosegarden MIDI and audio sequencer and notation editor.
    This file copyright 2000-2006 Chris Cannam.
    Relicensed by the author as detailed above.
@@ -58,7 +58,7 @@ namespace Vamp {
 
 /**
  * \class RealTime RealTime.h <vamp-sdk/RealTime.h>
- * 
+ *
  * RealTime represents time values to nanosecond precision
  * with accurate arithmetic and frame-rate conversion functions.
  */
@@ -111,11 +111,11 @@ struct RealTime
     bool operator==(const RealTime &r) const {
         return (sec == r.sec && nsec == r.nsec);
     }
- 
+
     bool operator!=(const RealTime &r) const {
         return !(r == *this);
     }
- 
+
     bool operator>=(const RealTime &r) const {
         if (sec == r.sec) return nsec >= r.nsec;
         else return sec >= r.sec;
@@ -136,7 +136,7 @@ struct RealTime
     /**
      * Return a human-readable debug-type string to full precision
      * (probably not a format to show to a user directly)
-     */ 
+     */
     std::string toString() const;
 
     /**
@@ -163,5 +163,5 @@ std::ostream &operator<<(std::ostream &out, const RealTime &rt);
 }
 
 _VAMP_SDK_PLUGSPACE_END(RealTime.h)
-    
+
 #endif

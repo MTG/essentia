@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -30,7 +30,7 @@ class TonicIndianArtMusic : public Algorithm {
  private:
   Input<std::vector<Real> > _signal;
   Output<Real> _tonic;
-  
+
   // Pre-processing
   Algorithm* _frameCutter;
   Algorithm* _windowing;
@@ -42,7 +42,7 @@ class TonicIndianArtMusic : public Algorithm {
   // Pitch salience contours
   Algorithm* _pitchSalienceFunction;
   Algorithm* _pitchSalienceFunctionPeaks;
-  
+
   // tonic identification histogram processing
   Algorithm* _peakDetection;
 
@@ -50,12 +50,12 @@ class TonicIndianArtMusic : public Algorithm {
   Real _binResolution;
   Real _numberSaliencePeaks;
   Real _numberBins;
- 
+
  public:
   TonicIndianArtMusic() {
     declareInput(_signal, "signal", "the input signal");
     declareOutput(_tonic, "tonic", "the estimated tonic frequency [Hz]");
-    
+
     // Pre-processing
     _frameCutter = AlgorithmFactory::create("FrameCutter");
     _windowing = AlgorithmFactory::create("Windowing");
@@ -67,9 +67,9 @@ class TonicIndianArtMusic : public Algorithm {
     // Pitch salience contours
     _pitchSalienceFunction = AlgorithmFactory::create("PitchSalienceFunction");
     _pitchSalienceFunctionPeaks = AlgorithmFactory::create("PitchSalienceFunctionPeaks");
-    
+
     // Peak detection of the histogram for tonic identification
-    _peakDetection = AlgorithmFactory::create("PeakDetection");    
+    _peakDetection = AlgorithmFactory::create("PeakDetection");
   }
 
   ~TonicIndianArtMusic();
@@ -86,7 +86,7 @@ class TonicIndianArtMusic : public Algorithm {
     declareParameter("magnitudeThreshold", "peak magnitude threshold (maximum allowed difference from the highest peak in dBs)", "[0,inf)",  40.0);
     declareParameter("magnitudeCompression", "magnitude compression parameter (=0 for maximum compression, =1 for no compression)", "(0,1]", 1.0);
     declareParameter("numberHarmonics", "number of considered hamonics", "[1,inf)", 20);
-    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);  
+    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);
 
     // tonic identification using multipitch histogram
     declareParameter("numberSaliencePeaks", " number of top peaks of the salience function which should be considered for constructing histogram", "[1, 15]", 5);

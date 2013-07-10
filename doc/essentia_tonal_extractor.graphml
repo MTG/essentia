@@ -68,7 +68,7 @@
           <y:Geometry height="120.0" width="228.5" x="113.33333333333326" y="394.0"/>
           <y:Fill color="#99CCFF" transparent="false"/>
           <y:BorderStyle hasColor="false" type="line" width="1.0"/>
-          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Liberation Sans" fontSize="24" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="57.625" modelName="internal" modelPosition="r" textColor="#000000" visible="true" width="160.1171875" x="64.3828125" y="31.1875">AudioLoader   
+          <y:NodeLabel alignment="center" autoSizePolicy="content" fontFamily="Liberation Sans" fontSize="24" fontStyle="plain" hasBackgroundColor="false" hasLineColor="false" height="57.625" modelName="internal" modelPosition="r" textColor="#000000" visible="true" width="160.1171875" x="64.3828125" y="31.1875">AudioLoader
 (generator)   </y:NodeLabel>
         </y:GenericNode>
       </data>

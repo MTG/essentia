@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -36,14 +36,14 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "\n"
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
-"References:\n" 
-"  [1] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n"); 
+"References:\n"
+"  [1] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n");
 
 
-BeatTrackerMultiFeature::BeatTrackerMultiFeature() : AlgorithmComposite(), 
+BeatTrackerMultiFeature::BeatTrackerMultiFeature() : AlgorithmComposite(),
     _frameCutter1(0), _windowing1(0), _fft1(0), _cart2polar1(0), _onsetRms1(0),
-    _onsetComplex1(0), _ticksRms1(0), _ticksComplex1(0), _onsetMelFlux1(0), 
-    _ticksMelFlux1(0), _onsetBeatEmphasis3(0), _ticksBeatEmphasis3(0), 
+    _onsetComplex1(0), _ticksRms1(0), _ticksComplex1(0), _onsetMelFlux1(0),
+    _ticksMelFlux1(0), _onsetBeatEmphasis3(0), _ticksBeatEmphasis3(0),
     _onsetInfogain4(0), _ticksInfogain4(0), _scale(0), _configured(false) {
 
   declareInput(_signal, 1024, "signal", "input signal");
@@ -51,7 +51,7 @@ BeatTrackerMultiFeature::BeatTrackerMultiFeature() : AlgorithmComposite(),
 
   // NB: We want to have the same output stream type as in TempoTapTicks for
   // consistency. We need to increase buffer size of the output because the
-  // algorithm works on the level of entire track and we need to push all values 
+  // algorithm works on the level of entire track and we need to push all values
   // in the output source at once.
   _ticks.setBufferType(BufferUsage::forLargeAudioStream);
 
@@ -60,7 +60,7 @@ BeatTrackerMultiFeature::BeatTrackerMultiFeature() : AlgorithmComposite(),
 void BeatTrackerMultiFeature::createInnerNetwork() {
   // internal algorithms
   AlgorithmFactory& factory = AlgorithmFactory::instance();
-  
+
   _frameCutter1         = factory.create("FrameCutter");
   _windowing1           = factory.create("Windowing");
   _fft1                 = factory.create("FFT");
@@ -72,16 +72,16 @@ void BeatTrackerMultiFeature::createInnerNetwork() {
   _ticksComplex1        = factory.create("TempoTapDegara");
   _ticksMelFlux1        = factory.create("TempoTapDegara");
 
-  _onsetBeatEmphasis3   = factory.create("OnsetDetectionGlobal");  
+  _onsetBeatEmphasis3   = factory.create("OnsetDetectionGlobal");
   _ticksBeatEmphasis3   = factory.create("TempoTapDegara");
-  
+
   _onsetInfogain4       = factory.create("OnsetDetectionGlobal");
   _ticksInfogain4       = factory.create("TempoTapDegara");
 
   _tempoTapMaxAgreement = standard::AlgorithmFactory::create("TempoTapMaxAgreement");
 
-  _scale = factory.create("Scale"); 
-  // TODO this is a dummy algorithm (scale factor = 1.) used because SinkProxy 
+  _scale = factory.create("Scale");
+  // TODO this is a dummy algorithm (scale factor = 1.) used because SinkProxy
   // cannot be attached to multiple algorithms, but we need several processing
   // chains starting from the input.
 
@@ -98,20 +98,20 @@ void BeatTrackerMultiFeature::createInnerNetwork() {
   _cart2polar1->output("phase")              >>   _onsetRms1->input("phase");
   _cart2polar1->output("magnitude")          >>   _onsetMelFlux1->input("spectrum");
   _cart2polar1->output("phase")              >>   _onsetMelFlux1->input("phase");
-  
+
   _onsetComplex1->output("onsetDetection")   >>   _ticksComplex1->input("onsetDetections");
   _ticksComplex1->output("ticks")            >>   PC(_pool, "internal.ticksComplex");
   _onsetRms1->output("onsetDetection")       >>   _ticksRms1->input("onsetDetections");
   _ticksRms1->output("ticks")                >>   PC(_pool, "internal.ticksRms");
   _onsetMelFlux1->output("onsetDetection")   >>   _ticksMelFlux1->input("onsetDetections");
   _ticksMelFlux1->output("ticks")            >>   PC(_pool, "internal.ticksMelFlux");
-  
-  //_signal                                           >>   _onsetBeatEmphasis3->input("signal"); 
-  _scale->output("signal")                         >>  _onsetBeatEmphasis3->input("signal"); 
+
+  //_signal                                           >>   _onsetBeatEmphasis3->input("signal");
+  _scale->output("signal")                         >>  _onsetBeatEmphasis3->input("signal");
   _onsetBeatEmphasis3->output("onsetDetections")   >>  _ticksBeatEmphasis3->input("onsetDetections");
   _ticksBeatEmphasis3->output("ticks")             >>  PC(_pool, "internal.ticksBeatEmphasis");
-  
-  //_signal                                           >> _onsetInfogain4->input("signal"); 
+
+  //_signal                                           >> _onsetInfogain4->input("signal");
   _scale->output("signal")  >> _onsetInfogain4->input("signal");
   _onsetInfogain4->output("onsetDetections")        >> _ticksInfogain4->input("onsetDetections");
   _ticksInfogain4->output("ticks")                  >> PC(_pool, "internal.ticksInfogain");
@@ -140,20 +140,20 @@ void BeatTrackerMultiFeature::configure() {
   _sampleRate = 44100.;
   // TODO will only work with _sampleRate = 44100, check what original
   // RhythmExtractor does with sampleRate parameter
-  
+
   //_sampleRate   = parameter("sampleRate").toReal();
   createInnerNetwork();
-  
+
   // Configure internal algorithms
   int minTempo = parameter("minTempo").toInt();
   int maxTempo = parameter("maxTempo").toInt();
 
-  int frameSize1 = 2048; 
+  int frameSize1 = 2048;
   int hopSize1 = 1024;
   // NB: 2048/1024 frames followed by x2 resampling of OSD work better than
   // simply using 1024/512 frames with no resampling for 'complex', 'rms', and
-  // 'melflux' onset detection function, according to the evaluation at MTG 
-  // (JZapata, DBogdanov) 
+  // 'melflux' onset detection function, according to the evaluation at MTG
+  // (JZapata, DBogdanov)
 
   _scale->configure("factor", 1.);
 
@@ -167,22 +167,22 @@ void BeatTrackerMultiFeature::configure() {
   _onsetComplex1->configure("method", "complex");
   _onsetRms1->configure("method", "rms");
   _onsetMelFlux1->configure("method", "melflux");
-  _ticksComplex1->configure("sampleRateODF", _sampleRate/hopSize1, 
+  _ticksComplex1->configure("sampleRateODF", _sampleRate/hopSize1,
                             "resample", "x2",
                             "minTempo", minTempo,
                             "maxTempo", maxTempo);
-  _ticksRms1->configure("sampleRateODF", _sampleRate/hopSize1, 
+  _ticksRms1->configure("sampleRateODF", _sampleRate/hopSize1,
                         "resample", "x2",
                         "minTempo", minTempo,
                         "maxTempo", maxTempo);
-  _ticksMelFlux1->configure("sampleRateODF", 
-                            _sampleRate/hopSize1, 
+  _ticksMelFlux1->configure("sampleRateODF",
+                            _sampleRate/hopSize1,
                             "resample", "x2",
                             "minTempo", minTempo,
                             "maxTempo", maxTempo);
-  
+
   int frameSize3 = 2048;
-  int hopSize3 = 512; 
+  int hopSize3 = 512;
   // NB: better than 2048/1024 plus x2 resampling according to evaluation (JZapata)
   // 2048/512 works better than 1024/512 for 'beat_emphasis' OSD according to
   // evaluation results (DBogdanov)
@@ -190,19 +190,19 @@ void BeatTrackerMultiFeature::configure() {
                                   "sampleRate", _sampleRate,
                                   "frameSize", frameSize3,
                                   "hopSize", hopSize3);
-  _ticksBeatEmphasis3->configure("sampleRateODF", _sampleRate/hopSize3, 
+  _ticksBeatEmphasis3->configure("sampleRateODF", _sampleRate/hopSize3,
                                   "resample", "none",
                                   "minTempo", minTempo,
                                   "maxTempo", maxTempo);
 
   int frameSize4 = 2048;
-  int hopSize4 = 512; 
+  int hopSize4 = 512;
   // NB: 2048/512 performs better than 1024/512 accoding to evaluation (JZapata)
   _onsetInfogain4->configure("method", "infogain",
                              "sampleRate", _sampleRate,
                              "frameSize", frameSize4,
                              "hopSize", hopSize4);
-  _ticksInfogain4->configure("sampleRateODF", _sampleRate/hopSize4, 
+  _ticksInfogain4->configure("sampleRateODF", _sampleRate/hopSize4,
                              "resample", "none",
                              "minTempo", minTempo,
                              "maxTempo", maxTempo);
@@ -215,13 +215,13 @@ AlgorithmStatus BeatTrackerMultiFeature::process() {
 
   vector<vector<Real> > tickCandidates;
   vector<Real> ticks;
-  
+
   tickCandidates.resize(5);
   tickCandidates[0] = _pool.value<vector<Real> >("internal.ticksComplex");
   tickCandidates[1] = _pool.value<vector<Real> >("internal.ticksRms");
   tickCandidates[2] = _pool.value<vector<Real> >("internal.ticksMelFlux");
   tickCandidates[3] = _pool.value<vector<Real> >("internal.ticksBeatEmphasis");
-  tickCandidates[4] = _pool.value<vector<Real> >("internal.ticksInfogain"); 
+  tickCandidates[4] = _pool.value<vector<Real> >("internal.ticksInfogain");
 
   _tempoTapMaxAgreement->input("tickCandidates").set(tickCandidates);
   _tempoTapMaxAgreement->output("ticks").set(ticks);
@@ -257,8 +257,8 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "\n"
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
-"References:\n" 
-"  [1] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n"); 
+"References:\n"
+"  [1] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n");
 
 
 BeatTrackerMultiFeature::BeatTrackerMultiFeature() {
@@ -273,8 +273,8 @@ BeatTrackerMultiFeature::~BeatTrackerMultiFeature() {
 }
 
 void BeatTrackerMultiFeature::configure() {
-  _beatTracker->configure(//INHERIT("sampleRate"), 
-                          INHERIT("maxTempo"), 
+  _beatTracker->configure(//INHERIT("sampleRate"),
+                          INHERIT("maxTempo"),
                           INHERIT("minTempo"));
 }
 
@@ -282,7 +282,7 @@ void BeatTrackerMultiFeature::configure() {
 void BeatTrackerMultiFeature::createInnerNetwork() {
   _beatTracker = streaming::AlgorithmFactory::create("BeatTrackerMultiFeature");
   _vectorInput = new streaming::VectorInput<Real>();
-  
+
   *_vectorInput  >>  _beatTracker->input("signal");
   _beatTracker->output("ticks")  >>  PC(_pool, "internal.ticks");
 
@@ -300,7 +300,7 @@ void BeatTrackerMultiFeature::compute() {
   try {
     ticks = _pool.value<vector<Real> >("internal.ticks");
   }
-  catch (EssentiaException&) {                                                  
+  catch (EssentiaException&) {
     // no ticks were found because audio signal was too short
     ticks.clear();
   }

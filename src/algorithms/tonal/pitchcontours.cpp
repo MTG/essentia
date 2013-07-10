@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -29,10 +29,10 @@ const char* PitchContours::version = "1.0";
 const char* PitchContours::description = DOC("This algorithm tracks a set of predominant pitch contours from an audio signal. This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the PitchSalienceFunctionPeaks algorithm outputs aggregated over all frames in the sequence. The output is a vector of estimated melody pitch values.\n"
 "\n"
 "When input vectors differ in size, an exception is thrown. Input vectors must not contain negative salience values otherwise an exception is thrown. Avoiding erroneous peak duplicates (peaks of the same cent bin) is up to the user's own control and is highly recommended, but no exception will be thrown.\n"
-"\n"  
+"\n"
 "Recommended processing chain: (see [1]): EqualLoudness -> frame slicing with sample rate = 44100, frame size = 2048, hop size = 128 -> Windowing with Hann, x4 zero padding -> Spectrum -> SpectralPeaks -> PitchSalienceFunction (10 cents bin resolution) -> PitchSalienceFunctionPeaks.\n"
 "\n"
-"References:\n" 
+"References:\n"
 "  [1] Salamon, J., & Gómez E. (2012).  Melody Extraction from Polyphonic Music Signals using Pitch Contour Characteristics.\n"
 "      IEEE Transactions on Audio, Speech and Language Processing. 20(6), 1759-1770.\n"
 );
@@ -43,10 +43,10 @@ void PitchContours::configure() {
   _peakDistributionThreshold = parameter("peakDistributionThreshold").toReal();
   _sampleRate = parameter("sampleRate").toReal();
   _hopSize = parameter("hopSize").toInt();
-  
+
   _timeContinuityInFrames = (parameter("timeContinuity").toReal() / 1000.0) * _sampleRate / _hopSize;
   _minDurationInFrames = (parameter("minDuration").toReal() / 1000.0) * _sampleRate / _hopSize;
-  // pitch continuity during 1 frame 
+  // pitch continuity during 1 frame
   _pitchContinuityInBins = parameter("pitchContinuity").toReal() * 1000.0 * _hopSize / _sampleRate / _binResolution;
 
   _frameDuration = _hopSize / _sampleRate;
@@ -54,9 +54,9 @@ void PitchContours::configure() {
 
 void PitchContours::compute() {
   const vector<vector<Real> >& peakBins = _peakBins.get();
-  const vector<vector<Real> >& peakSaliences = _peakSaliences.get(); 
+  const vector<vector<Real> >& peakSaliences = _peakSaliences.get();
 
-  vector<vector<Real> >& contoursBins = _contoursBins.get();  
+  vector<vector<Real> >& contoursBins = _contoursBins.get();
   vector<vector<Real> >& contoursSaliences =_contoursSaliences.get();
   vector<Real>& contoursStartTimes = _contoursStartTimes.get();
   Real& duration = _duration.get();
@@ -68,19 +68,19 @@ void PitchContours::compute() {
   _numberFrames = peakBins.size();
   duration = _numberFrames * _frameDuration;
 
-  if (!_numberFrames) { 
+  if (!_numberFrames) {
     // no peaks -> empty pitch contours output
-    contoursBins.clear(); 
+    contoursBins.clear();
     contoursSaliences.clear();
     contoursStartTimes.clear();
     return;
   }
-  
+
   for (size_t i=0; i<_numberFrames; i++) {
 
     if (peakBins[i].size() != peakSaliences[i].size()) {
       throw EssentiaException("PitchContours: peakBins and peakSaliences input vectors must have the same size");
-    }  
+    }
 
     int numPeaks = peakBins[i].size();
     if (numPeaks==0) {
@@ -90,13 +90,13 @@ void PitchContours::compute() {
     for (int j=0; j<numPeaks; j++) {
       if (peakSaliences[i][j] < 0) {
         throw EssentiaException("PitchContours: salience peaks values input must be non-negative");
-      }  
+      }
     }
 
   }
 
   // compute pitch contours
-  
+
   // per-frame filtering
   _salientPeaksBins.clear();
   _salientPeaksValues.clear();
@@ -125,9 +125,9 @@ void PitchContours::compute() {
       }
     }
   }
-  
+
   // gather distribution statistics for overall peak filtering
-  
+
   vector <Real> allPeakValues;
   for (size_t i=0; i<salientInFrame.size(); i++) {
     size_t ii = salientInFrame[i].first;
@@ -136,7 +136,7 @@ void PitchContours::compute() {
   }
   Real salienceMean = mean(allPeakValues);
   Real overallMeanSalienceThreshold = salienceMean - stddev(allPeakValues, salienceMean) * _peakDistributionThreshold;
-  
+
   // distribution-based filtering
   for (size_t i=0; i<salientInFrame.size(); i++) {
     size_t ii = salientInFrame[i].first;
@@ -150,7 +150,7 @@ void PitchContours::compute() {
       _salientPeaksValues[ii].push_back(peakSaliences[ii][jj]);
     }
   }
-  
+
   // peak streaming
   while(true) {
     size_t index;
@@ -160,36 +160,36 @@ void PitchContours::compute() {
     trackPitchContour(index, contourBins, contourSaliences);
 
     if(contourBins.size() > 0) {
-      // Check if contour exceeds the allowed minimum length. This requirement is not documented in 
+      // Check if contour exceeds the allowed minimum length. This requirement is not documented in
       // the reference [1], but was reported in personal communication with the author.
-      
+
       if (contourBins.size() >= _minDurationInFrames) {
         contoursStartTimes.push_back(Real(index) * _frameDuration);
         contoursBins.push_back(contourBins);
         contoursSaliences.push_back(contourSaliences);
-      }  
-    } 
+      }
+    }
     else {
       break;  // no new contour was found
     }
-  } 
+  }
 }
 
 int PitchContours::findNextPeak(vector<vector<Real> >& peaksBins, vector<Real>& contourBins, size_t i, bool backward) {
   // order = 1 to search forewards, = -1 to search backwards
-  // i refers to a frame to search in for the next peak 
+  // i refers to a frame to search in for the next peak
   Real distance;
   int best_peak_j = -1;
   Real previousBin;
   Real bestPeakDistance = _pitchContinuityInBins;
-  
+
   for (size_t j=0; j<peaksBins[i].size(); j++) {
     previousBin = backward ? contourBins.front() : contourBins.back();
     distance = abs(previousBin - peaksBins[i][j]);
-      
+
     if (distance < bestPeakDistance) {
       best_peak_j = j;
-      bestPeakDistance = distance; 
+      bestPeakDistance = distance;
     }
   }
   return best_peak_j;
@@ -198,7 +198,7 @@ int PitchContours::findNextPeak(vector<vector<Real> >& peaksBins, vector<Real>& 
 void PitchContours::removePeak(vector<vector<Real> >& peaksBins, vector<vector<Real> >& peaksValues, size_t i, int j) {
   peaksBins[i].erase(peaksBins[i].begin() + j);
   peaksValues[i].erase(peaksValues[i].begin() + j);
-}  
+}
 
 void PitchContours::trackPitchContour(size_t& index, vector<Real>& contourBins, vector<Real>& contourSaliences) {
   // find the highest salient peak through all frames
@@ -215,8 +215,8 @@ void PitchContours::trackPitchContour(size_t& index, vector<Real>& contourBins, 
         max_j = j;
       }
     }
-  }  
-  if (maxSalience == 0) { 
+  }
+  if (maxSalience == 0) {
     // no salient peaks left in the set -> no new contours added
     return;
   }
@@ -255,13 +255,13 @@ void PitchContours::trackPitchContour(size_t& index, vector<Real>& contourBins, 
         contourSaliences.push_back(_nonSalientPeaksValues[i][best_peak_j]);
         removeNonSalientPeaks.push_back(make_pair(i, best_peak_j));
         gap += 1;
-      } 
+      }
       else {
         break; // no salient nor non-salient peaks were found -> end of contour
       }
-    }  
-  }  
-  // remove all included non-salient peaks from the tail of the contour, 
+    }
+  }
+  // remove all included non-salient peaks from the tail of the contour,
   // as the contour should always finish with a salient peak
   for (int g=0; g<gap; g++) { // FIXME is using erase() faster?
     contourBins.pop_back();
@@ -272,11 +272,11 @@ void PitchContours::trackPitchContour(size_t& index, vector<Real>& contourBins, 
   if (index == 0) {
     // we reached the starting frame
 
-    // check if the contour exceeds the allowed minimum length 
+    // check if the contour exceeds the allowed minimum length
     if (contourBins.size() < _timeContinuityInFrames) {
       contourBins.clear();
       contourSaliences.clear();
-    }  
+    }
     return;
   }
 
@@ -293,7 +293,7 @@ void PitchContours::trackPitchContour(size_t& index, vector<Real>& contourBins, 
       gap = 0;
     } else {
       // no salient peaks were found -> use non-salient ones
-      if (gap+1 > _timeContinuityInFrames) { 
+      if (gap+1 > _timeContinuityInFrames) {
         // this frame would already exceed the gap --> stop backward tracking
         break;
       }
@@ -304,22 +304,22 @@ void PitchContours::trackPitchContour(size_t& index, vector<Real>& contourBins, 
         removeNonSalientPeaks.push_back(make_pair(i, best_peak_j));
         index--;
         gap += 1;
-      } 
-      else {  
+      }
+      else {
         // no salient nor non-salient peaks were found -> end of contour
         break;
       }
     }
-    
+
     // manual check of loop conditions, as size_t cannot be negative and, therefore, conditions inside "for" cannot be used
     if (i > 0) {
      i--;
-    } 
+    }
     else {
       break;
     }
   }
-  // remove non-salient peaks for the beginning of the contour, 
+  // remove non-salient peaks for the beginning of the contour,
   // as the contour should start with a salient peak
   contourBins.erase(contourBins.begin(), contourBins.begin() + gap);
   contourSaliences.erase(contourSaliences.begin(), contourSaliences.begin() + gap);
@@ -332,7 +332,7 @@ void PitchContours::trackPitchContour(size_t& index, vector<Real>& contourBins, 
       continue;
     }
     int j_p = removeNonSalientPeaks[r].second;
-    removePeak(_nonSalientPeaksBins, _nonSalientPeaksValues, i_p, j_p); 
+    removePeak(_nonSalientPeaksBins, _nonSalientPeaksValues, i_p, j_p);
   }
 }
 

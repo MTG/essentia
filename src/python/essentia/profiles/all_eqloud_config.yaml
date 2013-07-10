@@ -77,7 +77,7 @@ specific:
     average_loudness:
         #preprocessing: eqloud
         frameSize: 88200
-        hopSize:   44100   
+        hopSize:   44100
 
     # options for the onset detection extractor
     onsetdetection:

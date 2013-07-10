@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -31,7 +31,7 @@ class TestIFFT(TestCase):
         # input is [1, 0, 0, ...] which corresponds to an IFFT of constant magnitude 1
         signalSize = 512
         fftSize = signalSize/2 + 1
-        
+
         signalDC = zeros(signalSize)
         signalDC[0] = 1.0
 
@@ -57,7 +57,7 @@ class TestIFFT(TestCase):
 
     def testZero(self):
         self.assertAlmostEqualVector(zeros(2048), IFFT()(numpy.zeros(1025, dtype='c8')))
-        
+
 
     def testEmpty(self):
         self.assertComputeFails(IFFT(), cvec([]))

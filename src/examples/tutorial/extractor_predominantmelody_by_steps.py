@@ -12,7 +12,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 import sys, csv
@@ -39,16 +39,16 @@ guessUnvoiced = True
 # create our algorithms:
 run_windowing = Windowing(type='hann', zeroPadding=3*frameSize) # Hann window with x4 zero padding
 run_spectrum = Spectrum(size=frameSize * 4)
-run_spectral_peaks = SpectralPeaks(minFrequency=1, 
-                                   maxFrequency=20000, 
-                                   maxPeaks=100, 
+run_spectral_peaks = SpectralPeaks(minFrequency=1,
+                                   maxFrequency=20000,
+                                   maxPeaks=100,
                                    sampleRate=sampleRate,
-                                   magnitudeThreshold=0, 
-                                   orderBy="magnitude") 
+                                   magnitudeThreshold=0,
+                                   orderBy="magnitude")
 run_pitch_salience_function = PitchSalienceFunction()
 run_pitch_salience_function_peaks = PitchSalienceFunctionPeaks()
 run_pitch_contours = PitchContours(hopSize=hopSize)
-run_pitch_contours_melody = PitchContoursMelody(guessUnvoiced=guessUnvoiced, 
+run_pitch_contours_melody = PitchContoursMelody(guessUnvoiced=guessUnvoiced,
                                                 frameSize=frameSize,
                                                 hopSize=hopSize)
 pool = Pool();
@@ -60,21 +60,21 @@ run_equal_loudness = EqualLoudness()(audio)
 # per-frame processing: computing peaks of the salience function
 for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
     frame = run_windowing(frame)
-    spectrum = run_spectrum(frame)  
+    spectrum = run_spectrum(frame)
     peak_frequencies, peak_magnitudes = run_spectral_peaks(spectrum)
     salience = run_pitch_salience_function(peak_frequencies, peak_magnitudes)
     salience_peaks_bins, salience_peaks_saliences = run_pitch_salience_function_peaks(salience)
 
     pool.add('allframes_salience_peaks_bins', salience_peaks_bins)
     pool.add('allframes_salience_peaks_saliences', salience_peaks_saliences)
-    
+
 # post-processing: contour tracking and melody detection
 contours_bins, contours_saliences, contours_start_times, duration = run_pitch_contours(
         pool['allframes_salience_peaks_bins'],
         pool['allframes_salience_peaks_saliences'])
-pitch, confidence = run_pitch_contours_melody(contours_bins, 
-                                              contours_saliences, 
-                                              contours_start_times, 
+pitch, confidence = run_pitch_contours_melody(contours_bins,
+                                              contours_saliences,
+                                              contours_start_times,
                                               duration)
 
 

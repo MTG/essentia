@@ -30,7 +30,7 @@ namespace TNT
 	Write an array to a character outstream.  Output format is one that can
 	be read back in via the in-stream operator: one integer
 	denoting the array dimension (n), followed by n elements,
-	one per line.  
+	one per line.
 
 */
 template <class T>

@@ -8,7 +8,7 @@
 namespace JAMA
 {
 
-/** 
+/**
 <p>
 	Classical QR Decompisition:
    for an m-by-n matrix A with m >= n, the QR decomposition is an m-by-n
@@ -24,10 +24,10 @@ namespace JAMA
 <p>
 	The Q and R factors can be retrived via the getQ() and getR()
 	methods. Furthermore, a solve() method is provided to find the
-	least squares solution of Ax=b using the QR factors.  
+	least squares solution of Ax=b using the QR factors.
 
    <p>
-	(Adapted from JAMA, a Java Matrix Library, developed by jointly 
+	(Adapted from JAMA, a Java Matrix Library, developed by jointly
 	by the Mathworks and NIST; see  http://math.nist.gov/javanumerics/jama).
 */
 
@@ -38,7 +38,7 @@ class QR {
    /** Array for internal storage of decomposition.
    @serial internal array storage.
    */
-   
+
    TNT::Array2D<Real> QR_;
 
    /** Row and column dimensions.
@@ -88,7 +88,7 @@ public:
 
             // Apply transformation to remaining columns.
             for (j = k+1; j < n; j++) {
-               Real s = 0.0; 
+               Real s = 0.0;
                for (i = k; i < m; i++) {
                   s += QR_[i][k]*QR_[i][j];
                }
@@ -110,7 +110,7 @@ public:
 */
 	int isFullRank() const		
 	{
-      for (int j = 0; j < n; j++) 
+      for (int j = 0; j < n; j++)
 	  {
          if (Rdiag[j] == 0)
             return 0;
@@ -121,8 +121,8 @@ public:
 	
 
 
-   /** 
-   
+   /**
+
    Retreive the Householder vectors from QR factorization
    @returns lower trapezoidal matrix whose columns define the reflections
    */
@@ -134,9 +134,9 @@ public:
 	  /* note: H is completely filled in by algorithm, so
 	     initializaiton of H is not necessary.
 	  */
-      for (int i = 0; i < m; i++) 
+      for (int i = 0; i < m; i++)
 	  {
-         for (int j = 0; j < n; j++) 
+         for (int j = 0; j < n; j++)
 		 {
             if (i >= j) {
                H[i][j] = QR_[i][j];
@@ -175,7 +175,7 @@ public:
 
 
 
-   /** 
+   /**
    	Generate and return the (economy-sized) orthogonal factor
    @param     Q the (ecnomy-sized) orthogonal factor (Q*R=A).
    */
@@ -227,21 +227,21 @@ public:
 	  TNT::Array1D<Real> x = b.copy();
 
       // Compute Y = transpose(Q)*b
-      for (int k = 0; k < n; k++) 
+      for (int k = 0; k < n; k++)
 	  {
-            Real s = 0.0; 
-            for (int i = k; i < m; i++) 
+            Real s = 0.0;
+            for (int i = k; i < m; i++)
 			{
                s += QR_[i][k]*x[i];
             }
             s = -s/QR_[k][k];
-            for (int i = k; i < m; i++) 
+            for (int i = k; i < m; i++)
 			{
                x[i] += s*QR_[i][k];
             }
       }
       // Solve R*X = Y;
-      for (int k = n-1; k >= 0; k--) 
+      for (int k = n-1; k >= 0; k--)
 	  {
          x[k] /= Rdiag[k];
          for (int i = 0; i < k; i++) {
@@ -275,14 +275,14 @@ public:
 	  	return TNT::Array2D<Real>(0,0);
 	  }
 
-      int nx = B.dim2(); 
+      int nx = B.dim2();
 	  TNT::Array2D<Real> X = B.copy();
 	  int i=0, j=0, k=0;
 
       // Compute Y = transpose(Q)*B
       for (k = 0; k < n; k++) {
          for (j = 0; j < nx; j++) {
-            Real s = 0.0; 
+            Real s = 0.0;
             for (i = k; i < m; i++) {
                s += QR_[i][k]*X[i][j];
             }

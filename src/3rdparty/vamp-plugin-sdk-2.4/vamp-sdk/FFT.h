@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006-2012 Chris Cannam and QMUL.
-  
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -45,7 +45,7 @@ namespace Vamp {
 /**
  * A simple FFT implementation provided for convenience of plugin
  * authors.
- * 
+ *
  * This class provides double-precision FFTs in power-of-two sizes
  * only. It is slower than more sophisticated library
  * implementations. If these requirements aren't suitable, make other

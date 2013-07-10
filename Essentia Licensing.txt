@@ -1,5 +1,5 @@
 A) Affero General Public License
-This licensing file applies to the Essentia software library ("Essentia"), except as described in B) below. 
+This licensing file applies to the Essentia software library ("Essentia"), except as described in B) below.
 
 Essentia is © Universitat Pompeu Fabra 2009-2013
 Original Developers: See AUTHORS file
@@ -18,27 +18,27 @@ You should have received a copy of the GNU Affero General Public License long wi
 B) This product uses certain third party software code
 
 Mersenne Twister © Takuji Nishimura and Makoto Matsumoto, Hiroshima University and The University of Tokyo. Under the
-BSD license terms. Project page at http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html 
+BSD license terms. Project page at http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
 
 splineutil.hpp and splineutil.cpp (from http://people.sc.fsu.edu/~jburkardt/cpp_src/spline/spline.html) under the GNU Lesser General Public
-License v3. at http://people.sc.fsu.edu/~jburkardt/txt/gnu_lgpl.txt 
+License v3. at http://people.sc.fsu.edu/~jburkardt/txt/gnu_lgpl.txt
 
 TNT, in the public domain (project page at http://math.nist.gov/tnt/download.html)
 
 
-C) External Dependant libraries are: 
+C) External Dependant libraries are:
 
 FFTW: Copyright (c) 2003, 2007-11 Matteo Frigo and Copyright (c) 2003, 2007-11 Massachusetts Institute of Technology
-under the terms of the GNU General Public License, Project page at http://www.fftw.org/ 
+under the terms of the GNU General Public License, Project page at http://www.fftw.org/
 
 Libsamplerate, © Erik de Castro Lopo; under the terms of the GNU General Public License. Project page at
-http://www.mega-nerd.com/SRC/   
+http://www.mega-nerd.com/SRC/
 
-TagLib – under the GNU Lesser General Public License version 2.1, project page at http://taglib.github.com/api/index.html 
+TagLib – under the GNU Lesser General Public License version 2.1, project page at http://taglib.github.com/api/index.html
 
-libavcodec/libavformat/libavutil – audiocontext.h, audiocontext.c  (modified by MTG) 
+libavcodec/libavformat/libavutil – audiocontext.h, audiocontext.c  (modified by MTG)
 
-VAMP SDK under the MIT license, with Project page at http://www.vamp-plugins.org/develop.html  
+VAMP SDK under the MIT license, with Project page at http://www.vamp-plugins.org/develop.html
 
 NumPy: Copyright © 2005-2012, NumPy Developers, Project page at http://www.numpy.org/
 
@@ -47,7 +47,7 @@ LibYAML under the MIT license, with Project page at http://pyyaml.org/wiki/LibYA
 
 WRITTEN OFFER
 If you would like a copy of the GPL or LGPL source code contained in this product, please contact mtg@upf.edu. If you have
-questions about the licensing terms for Essentia, please contact us at: mtg@upf.edu 
+questions about the licensing terms for Essentia, please contact us at: mtg@upf.edu
 
 
 Marsenne Twister
@@ -91,10 +91,10 @@ Redistribution and use in source and binary forms, with or without modification,
 •   Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 •   Neither the name of the NumPy Developers nor the names of any contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-Vamp Plugin SDK  
+Vamp Plugin SDK
 Copyright (c) 2005-2006 Chris Cannam
 Copyright (c) 2006-2009 Queen Mary, University of London
 
@@ -523,6 +523,6 @@ NO WARRANTY
 
 15. BECAUSE THE LIBRARY IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR THE LIBRARY, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE LIBRARY "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE LIBRARY IS WITH YOU. SHOULD THE LIBRARY PROVE DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
 
-16. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE THE LIBRARY AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE LIBRARY (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE LIBRARY TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. 
+16. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE THE LIBRARY AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OR INABILITY TO USE THE LIBRARY (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR A FAILURE OF THE LIBRARY TO OPERATE WITH ANY OTHER SOFTWARE), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 

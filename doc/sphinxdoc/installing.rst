@@ -86,7 +86,7 @@ directory and start by configuring it::
 
   ./waf configure --mode=release --with-python --with-cpptests --with-examples --with-vamp
 
-Use the keys: 
+Use the keys:
    ``--with-python`` to enable python bindings,
    ``--with-examples`` to build examples based on the library,
    ``--with-vamp`` to build vamp plugin wrapper.

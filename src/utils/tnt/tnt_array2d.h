@@ -34,7 +34,7 @@ namespace TNT
 {
 
 template <class T>
-class Array2D 
+class Array2D
 {
 
 
@@ -80,10 +80,10 @@ class Array2D
 
 
 template <class T>
-Array2D<T>::Array2D() : data_(), v_(), m_(0), n_(0) {} 
+Array2D<T>::Array2D() : data_(), v_(), m_(0), n_(0) {}
 
 template <class T>
-Array2D<T>::Array2D(const Array2D<T> &A) : data_(A.data_), v_(A.v_), 
+Array2D<T>::Array2D(const Array2D<T> &A) : data_(A.data_), v_(A.v_),
 	m_(A.m_), n_(A.n_) {}
 
 
@@ -106,8 +106,8 @@ Array2D<T>::Array2D(int m, int n) : data_(m*n), v_(m), m_(m), n_(n)
 
 
 template <class T>
-Array2D<T>::Array2D(int m, int n, const T &val) : data_(m*n), v_(m), 
-													m_(m), n_(n) 
+Array2D<T>::Array2D(int m, int n, const T &val) : data_(m*n), v_(m),
+													m_(m), n_(n)
 {
   if (m>0 && n>0)
   {
@@ -138,27 +138,27 @@ Array2D<T>::Array2D(int m, int n, T *a) : data_(m*n, a), v_(m), m_(m), n_(n)
 
 
 template <class T>
-inline T* Array2D<T>::operator[](int i) 
-{ 
+inline T* Array2D<T>::operator[](int i)
+{
 #ifdef TNT_BOUNDS_CHECK
 	assert(i >= 0);
 	assert(i < m_);
 #endif
 
-return v_[i]; 
+return v_[i];
 
 }
 
 
 template <class T>
 inline const T* Array2D<T>::operator[](int i) const
-{ 
+{
 #ifdef TNT_BOUNDS_CHECK
 	assert(i >= 0);
 	assert(i < m_);
 #endif
 
-return v_[i]; 
+return v_[i];
 
 }
 
@@ -260,7 +260,7 @@ inline Array2D<T>::operator const T**()
 
 */
 template <class T>
-Array2D<T> Array2D<T>::subarray(int i0, int i1, int j0, int j1) 
+Array2D<T> Array2D<T>::subarray(int i0, int i1, int j0, int j1)
 {
 	Array2D<T> A;
 	int m = i1-i0+1;

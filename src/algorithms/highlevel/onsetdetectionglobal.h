@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -54,7 +54,7 @@ class OnsetDetectionGlobal : public Algorithm {
   std::vector<Real> _rweights;
 
   // beat emphasis function
-  int _numberERBBands; 
+  int _numberERBBands;
   static const int _smoothingWindowHalfSize=8;
   int _maxPeriodODF;
 
@@ -62,7 +62,7 @@ class OnsetDetectionGlobal : public Algorithm {
   std::vector<Real> _phase_2;
   std::vector<Real> _spectrum_1;
 
- 
+
  public:
   OnsetDetectionGlobal() {
     declareInput(_signal, "signal", "the input signal");
@@ -126,7 +126,7 @@ class OnsetDetectionGlobal : public AlgorithmComposite {
  public:
   OnsetDetectionGlobal();
   ~OnsetDetectionGlobal();
-  
+
   void declareParameters() {
     declareParameter("method", "the method used for onset detection", "{infogain,beat_emphasis}", "infogain");
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.0);
@@ -141,7 +141,7 @@ class OnsetDetectionGlobal : public AlgorithmComposite {
                                      INHERIT("hopSize"));
   }
 
-  void declareProcessOrder() {                                      
+  void declareProcessOrder() {
     declareProcessStep(SingleShot(_poolStorage));
     declareProcessStep(SingleShot(this));
   }

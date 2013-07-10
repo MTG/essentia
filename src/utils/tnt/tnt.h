@@ -25,9 +25,9 @@
 
 //---------------------------------------------------------------------
 // Define this macro if you want  TNT to track some of the out-of-bounds
-// indexing. This can encur a small run-time overhead, but is recommended 
+// indexing. This can encur a small run-time overhead, but is recommended
 // while developing code.  It can be turned off for production runs.
-// 
+//
 //       #define TNT_BOUNDS_CHECK
 //---------------------------------------------------------------------
 //
