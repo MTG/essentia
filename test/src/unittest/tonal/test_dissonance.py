@@ -140,7 +140,7 @@ class TestDissonance(TestCase):
     def testRegression(self):
         sampleRate = 44100
         filename = join(testdata.audio_dir, 'recorded', \
-                       '01-Allegro__Gloria_in_excelsis_Deo_in_D_Major.wav')
+                       'musicbox.wav')
         audio = MonoLoader(filename=filename, downmix='left', sampleRate=44100)()
 
         fc = FrameCutter(frameSize=4096, hopSize=512)
@@ -165,7 +165,7 @@ class TestDissonance(TestCase):
             frame = fc(audio)
 
         dissAvg = float(dissSum) / float(count)
-        self.assertAlmostEqual(dissAvg, 0.492389880499, 1e-6)
+        self.assertAlmostEqual(dissAvg, 0.475740219278, 1e-6)
 
 suite = allTests(TestDissonance)
 

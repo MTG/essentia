@@ -29,7 +29,7 @@ class TestOnsetDetection(TestCase):
 
     def testZero(self):
         # Inputting zeros should return no onsets (empty array)
-        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/britney.wav'),
+        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/techno_loop.wav'),
                            sampleRate = 44100)()
         frames = FrameGenerator(audio, frameSize=framesize, hopSize=hopsize)
         win = Windowing(type='hamming')
@@ -55,21 +55,48 @@ class TestOnsetDetection(TestCase):
         win = Windowing(type='hamming')
         fft = FFT()
         onset_hfc = OnsetDetection(method='hfc')
+        onset_complex_phase = OnsetDetection(method='complex_phase')
+        onset_rms = OnsetDetection(method='rms')
+        onset_flux = OnsetDetection(method='flux')
+        onset_melflux = OnsetDetection(method='melflux')
         onset_complex = OnsetDetection(method='complex')
+
         nframe = 0
         for frame in frames:
             mag, ph = CartesianToPolar()(fft(win(frame)))
+            
+            # 'rms' (energy flux) and 'melflux' method will result in a non-zero value on frames 4 and 5, 
+            # energy flux for frame 6 is zero due to half-rectification
+            # 'flux' on contrary will results in non-zero value for frame 6, as it does not half-rectify
+            
             if nframe == floor(pos)-1: # 4th frame
-                # complex method will yield zero because targetPhase = phase,
-                # so distance=2*spectrum*sin((phase-targetPhase)*0.5) = 0
-                self.assertEqual(onset_complex(mag,ph), 0)
+                self.assertNotEqual(onset_complex_phase(mag,ph), 0)
                 self.assertNotEqual(onset_hfc(mag,ph), 0)
-            elif nframe == ceil(pos)-1: #5th frame
+                self.assertNotEqual(onset_rms(mag,ph), 0)
+                self.assertNotEqual(onset_flux(mag,ph), 0)
+                self.assertNotEqual(onset_melflux(mag,ph), 0)
                 self.assertNotEqual(onset_complex(mag,ph), 0)
+            elif nframe == ceil(pos)-1: #5th frame
+                self.assertNotEqual(onset_complex_phase(mag,ph), 0)
                 self.assertNotEqual(onset_hfc(mag,ph), 0)
-            else:
-                self.assertEqual(onset_complex(mag,ph), 0)
+                self.assertNotEqual(onset_rms(mag,ph), 0)
+                self.assertNotEqual(onset_flux(mag,ph), 0)
+                self.assertNotEqual(onset_melflux(mag,ph), 0)
+                self.assertNotEqual(onset_complex(mag,ph), 0)
+            elif nframe == ceil(pos): #6th frame
+                self.assertEqual(onset_complex_phase(mag,ph), 0)
                 self.assertEqual(onset_hfc(mag,ph), 0)
+                self.assertEqual(onset_rms(mag,ph), 0)
+                self.assertNotEqual(onset_flux(mag,ph), 0)
+                self.assertEqual(onset_melflux(mag,ph), 0)
+                self.assertNotEqual(onset_complex(mag,ph), 0)
+            else:
+                self.assertEqual(onset_complex_phase(mag,ph), 0)
+                self.assertEqual(onset_hfc(mag,ph), 0)
+                self.assertEqual(onset_rms(mag,ph), 0)
+                self.assertEqual(onset_flux(mag,ph), 0)
+                self.assertEqual(onset_melflux(mag,ph), 0)
+                self.assertEqual(onset_complex(mag,ph), 0)
             nframe += 1
 
     def testConstantInput(self):
