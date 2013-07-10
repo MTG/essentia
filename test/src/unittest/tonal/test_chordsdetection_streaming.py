@@ -167,8 +167,8 @@ class TestChordsDetection_Streaming(TestCase):
         EqualLoudness, Windowing, Spectrum, SpectralPeaks, SpectralWhitening,\
         HPCP
 
-        audiofile = '01-Allegro__Gloria_in_excelsis_Deo_in_D_Major.wav'
-        filename = filename=join(testdata.audio_dir,'recorded', audiofile) #'britney.wav')
+        audiofile = 'musicbox.wav'
+        filename = filename=join(testdata.audio_dir,'recorded', audiofile)
 
         p = Pool()
         loader = MonoLoader(filename=filename)

@@ -28,12 +28,11 @@ from math import fabs
 class TestRhythmExtractor(TestCase):
 
     def testRegression(self):
-        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'britney.wav'))()
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
         rhythm = stdRhythmExtractor()
 
         bpm, _, _, _, _, _ = rhythm(audio)
-
-        self.assertAlmostEqualFixedPrecision(bpm, 96, 0)
+        self.assertAlmostEqualFixedPrecision(bpm, 126, 0) # exact value= 125.726791382
 
 
 
@@ -216,8 +215,9 @@ class TestRhythmExtractor(TestCase):
 
 
     def testImpulseTrain(self):
+        
         impulseTrain140 = self.pulseTrain(bpm=140, sr=44100., offset=.1, dur=10)
-
+        
         # expected values
         expectedTicks = [i/44100. for i in xrange(len(impulseTrain140)) if impulseTrain140[i]!= 0]
 
@@ -246,10 +246,10 @@ class TestRhythmExtractor(TestCase):
         # rubato start/stop
         self.assertEqualVector(result[3], expectedRubatoStart)
         self.assertEqualVector(result[4], expectedRubatoStop)
-
+        
         # impulse train at 90bpm no offset
         impulseTrain90 = self.pulseTrain(bpm=60., sr=44100., offset=0., dur=20.)
-
+        
         # impulse train at 200bpm with offset
         impulseTrain200 = self.pulseTrain(bpm=200., sr=44100., offset=.2, dur=10.)
 
@@ -259,12 +259,12 @@ class TestRhythmExtractor(TestCase):
         ## make a new impulse train at 140-90-200-200 bpm
         impulseTrain = impulseTrain140 + impulseTrain90 + impulseTrain200 + \
                        impulseTrain200b
-
+        
         # expected values
 
         # ticks
-        expectedTics = [i/44100. for i in xrange(len(impulseTrain)) if impulseTrain[i]!= 0]
-
+        expectedTicks = [i/44100. for i in xrange(len(impulseTrain)) if impulseTrain[i]!= 0]
+        
         result = self.runInstance(impulseTrain, expectedTicks)
 
         # bpm
@@ -282,16 +282,15 @@ class TestRhythmExtractor(TestCase):
         # 140 and 200.
         expectedBpmIntervals = [60/90., 60/140., 60/200.]
         self.assertVectorWithinVector(result[5], expectedBpmIntervals)
-
+        
         # rubato start/stop
         expectedRubatoStart = [10]
         expectedRubatoStop = [30]
-
+        
         self.assertAlmostEqualVector(result[3], expectedRubatoStart, 0.3)
         self.assertAlmostEqualVector(result[4], expectedRubatoStop, 0.03)
-
+        
         ### run w/o tempoHints ###
-
 
         result = self.runInstance(impulseTrain)
 
@@ -300,20 +299,20 @@ class TestRhythmExtractor(TestCase):
         # bpm: here rhythmextractor is choosing 0.5*expected_bpm, that's why we are
         # comparing the resulting bpm with the expected_bpm_vector:
         self.assertVectorWithinVector([result[0]], expectedBpmVector, 1.)
-
-        # ticks
-        self.assertVectorWithinVector(result[1], expectedTicks, 0.03)
-
+        
         # bpm estimates
         self.assertVectorWithinVector(result[2], expectedBpmVector, 0.5)
+        
+        # ticks # TODO ticks results fail test
+        self.assertVectorWithinVector(result[1], expectedTicks, 0.03)
 
-        # bpm intervals
+        # bpm intervals # TODO ticks results fail test
         self.assertVectorWithinVector(result[5], expectedBpmIntervals, 0.5)
-
+        
         # rubato start/stop
         self.assertAlmostEqualVector(result[3], expectedRubatoStart, .3)
         self.assertAlmostEqualVector(result[4], expectedRubatoStop, .03)
-
+    
     def testRubato(self):
         # beats extracted from bpmrubato test:
         from numpy import mean
