@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -133,7 +133,7 @@ class TestBeatsLoudness(TestCase):
         # (nclicks-1)
         expectedLoudness = [5.22167]*(nClicks-1)
         expectedLoudnessBandRatio = [2.07204e-13]*(nClicks-1)
-      
+
         self.assertAlmostEqualVector(p['beats.loudness'], expectedLoudness, 1e-5)
         self.assertAlmostEqualVector(p['beats.loudnessBandRatio'], expectedLoudnessBandRatio, 2e-2)
 

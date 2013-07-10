@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -44,7 +44,7 @@ class TestDistributionShape(TestCase):
     def testRegression(self):
         inputArray = readVector(join(filedir(), 'stats/input.txt'))
         distShape = readVector(join(filedir(), 'stats/distributionshape.txt'))
-        
+
         moments = CentralMoments(range = len(inputArray)-1)(inputArray)
         spread, skewness, kurtosis = DistributionShape()(moments)
 

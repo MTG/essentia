@@ -12,12 +12,12 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 #! /usr/bin/python
 
-# example script to compute and plot tempo related descriptors 
+# example script to compute and plot tempo related descriptors
 
 def plot_frame(features_array, ground_truth, sampleRate, hop_size, acf, periods, phases, bin2hz,minlag,maxlag, mcomb):
     import numpy
@@ -64,7 +64,7 @@ def plot_frame(features_array, ground_truth, sampleRate, hop_size, acf, periods,
       if periods[i] == 0: continue
       for j in range( len( phout ) ):
         for a in range ( periodnum ):
-          phout[j] += pfeatures[i][a*periods[i] + j] 
+          phout[j] += pfeatures[i][a*periods[i] + j]
       plot (phout/max(phout) + i)
       phase = phases[i]
       if phase >= periods[i]:
@@ -81,7 +81,7 @@ def plot_frame(features_array, ground_truth, sampleRate, hop_size, acf, periods,
 def plot_bpm_file(pool):
     bpm    = pool.descriptors['tempotap_bpm']['values'][0]
     intervals = pool.descriptors['tempotap_intervals']['values'][0]
-    bpm_periods = [60./interval for interval in intervals] 
+    bpm_periods = [60./interval for interval in intervals]
     ticks  = pool.descriptors['tempotap_ticks']['values'][0]
     rubato_start = pool.descriptors['tempotap_rubato_start']['values'][0]
     rubato_stop = pool.descriptors['tempotap_rubato_stop']['values'][0]
@@ -89,7 +89,7 @@ def plot_bpm_file(pool):
     print 'ticks', ticks
     print 'rubato_start', rubato_start
     print 'rubato_stop', rubato_stop
-    print 'intervals', intervals 
+    print 'intervals', intervals
     import pylab
     pylab.plot(ticks,[bpm_periods[0]] + bpm_periods,'r+-')
     pylab.hold(True)
@@ -100,7 +100,7 @@ def plot_bpm_file(pool):
     if 'gt_ticks' in pool.descriptors.keys():
         gt_ticks  = pool.descriptors['gt_ticks']['values'][0]
         if len(gt_ticks) > 1:
-            gt_bpm_periods = [60./(gt_ticks[i] - gt_ticks[i-1]) for i in range(1,len(gt_ticks))] 
+            gt_bpm_periods = [60./(gt_ticks[i] - gt_ticks[i-1]) for i in range(1,len(gt_ticks))]
             p1 = pylab.plot(gt_ticks,[gt_bpm_periods[0]] + gt_bpm_periods,'rx:')
             p2 = pylab.plot(gt_ticks,[gt_bpm_periods[0]] + gt_bpm_periods,'rx:')
             #pylab.legend((p1[0],p2[0]),('Men','Women'))
@@ -142,8 +142,8 @@ def parse_args():
 if __name__ == '__main__':
     import sys, os.path, essentia
     options, args = parse_args()
-    input_file = options.input_file 
-      
+    input_file = options.input_file
+
     # load audio file
     audio_file = essentia.AudioFileInput(filename = input_file)
     audio = audio_file()
@@ -170,7 +170,7 @@ if __name__ == '__main__':
       #else:
       #    print 'no bpm found in ground truth file'
       if 'ticks' in metadata.keys():
-          true_ticks = metadata['ticks'] 
+          true_ticks = metadata['ticks']
           pool.add('gt_ticks', true_ticks, 0)
       #else:
       #    print 'no ticks found in ground truth file'
@@ -184,7 +184,7 @@ if __name__ == '__main__':
     if options.verbose:
       bpm    = pool.descriptors['tempotap_bpm']['values'][0]
       intervals = pool.descriptors['tempotap_intervals']['values'][0]
-      bpm_periods = [60./interval for interval in intervals] 
+      bpm_periods = [60./interval for interval in intervals]
       ticks  = pool.descriptors['tempotap_ticks']['values'][0]
       rubato_start = pool.descriptors['tempotap_rubato_start']['values'][0]
       rubato_stop = pool.descriptors['tempotap_rubato_stop']['values'][0]
@@ -192,5 +192,5 @@ if __name__ == '__main__':
       print 'ticks', ticks
       print 'rubato_start', rubato_start
       print 'rubato_stop', rubato_stop
-      print 'intervals', intervals 
+      print 'intervals', intervals
 

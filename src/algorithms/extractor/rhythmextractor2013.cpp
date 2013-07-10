@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -34,7 +34,7 @@ const char* RhythmExtractor2013::description = DOC("This algorithm estimates the
 "  - 'multifeature', the BeatTrackerMultiFeature algorithm\n"
 "  - 'degara', the BeatTrackerDegara algorithm\n"
 "\n"
-"See BeatTrackerMultiFeature, BeatTrackerDegara, and BpmRubato algorithms for more details.\n"                                          
+"See BeatTrackerMultiFeature, BeatTrackerDegara, and BpmRubato algorithms for more details.\n"
 "\n"
 "Note that the algorithm requires the sample rate of the input signal to be 44100 Hz in order to work correctly.\n");
 
@@ -55,11 +55,11 @@ RhythmExtractor2013::RhythmExtractor2013() : AlgorithmComposite() {
 void RhythmExtractor2013::createInnerNetwork() {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
-  
+
   string method = parameter("method").toLower();
   if (method == "multifeature") {
     _beatTracker = factory.create("BeatTrackerMultiFeature");
-  } 
+  }
   else if (method == "degara") {
     _beatTracker = factory.create("BeatTrackerDegara");
   }
@@ -90,7 +90,7 @@ void RhythmExtractor2013::clearAlgos() {
 }
 
 void RhythmExtractor2013::configure() {
-   if (_configured) { 
+   if (_configured) {
     clearAlgos();
   }
 
@@ -111,7 +111,7 @@ AlgorithmStatus RhythmExtractor2013::process() {
   _ticks.push(ticks);
 
   vector<Real> bpmIntervals;
-  vector<Real> bpmEstimateList; 
+  vector<Real> bpmEstimateList;
   if (ticks.size() > 1) {
     // computing beats intervals
     bpmIntervals.reserve(ticks.size() - 1);
@@ -120,7 +120,7 @@ AlgorithmStatus RhythmExtractor2013::process() {
       bpmIntervals.push_back(ticks[i] - ticks[i-1]);
       bpmEstimateList.push_back(60. / bpmIntervals.back()); // period to bpm
     }
-    
+
     // computing rubato regions
     vector<Real> rubatoStart, rubatoStop;
     _bpmRubato->input("beats").set(ticks);
@@ -185,7 +185,7 @@ const char* RhythmExtractor2013::description = DOC("This algorithm estimates the
 "  - 'multifeature', the BeatTrackerMultiFeature algorithm\n"
 "  - 'degara', the BeatTrackerDegara algorithm\n"
 "\n"
-"See BeatTrackerMultiFeature, BeatTrackerDegara, and BpmRubato algorithms for more details.\n"                                          
+"See BeatTrackerMultiFeature, BeatTrackerDegara, and BpmRubato algorithms for more details.\n"
 "\n"
 "Note that the algorithm requires the sample rate of the input signal to be 44100 Hz in order to work correctly.\n");
 
@@ -207,7 +207,7 @@ RhythmExtractor2013::~RhythmExtractor2013() {
 }
 
 void RhythmExtractor2013::configure() {
-  _rhythmExtractor->configure(INHERIT("maxTempo"), INHERIT("minTempo"), 
+  _rhythmExtractor->configure(INHERIT("maxTempo"), INHERIT("minTempo"),
                               INHERIT("method"));
 }
 

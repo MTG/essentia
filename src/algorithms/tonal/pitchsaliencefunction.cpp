@@ -19,7 +19,7 @@ const char* PitchSalienceFunction::description = DOC("This algorithm computes th
 "\n"
 "When input vectors differ in size or are empty, an exception is thrown. Input vectors must contain positive frequencies and not contain negative magnitudes otherwise an exception is thrown. It is highly recommended to avoid erroneous peak duplicates (peaks of the same frequency occuring more than ones), but it is up to the user's own control and no exception will be thrown.\n"
 "\n"
-"References:\n" 
+"References:\n"
 "  [1] Salamon, J., & Gómez E. (2012).  Melody Extraction from Polyphonic Music Signals using Pitch Contour Characteristics.\n"
 "      IEEE Transactions on Audio, Speech and Language Processing. 20(6), 1759-1770.\n"
 );
@@ -65,7 +65,7 @@ void PitchSalienceFunction::compute() {
     salienceFunction.resize(_numberBins, 0.0);
     return;
   }
-  
+
   int numberPeaks = frequencies.size();
   for (int i=0; i<numberPeaks; i++) {
     if (frequencies[i] <= 0) {
@@ -73,19 +73,19 @@ void PitchSalienceFunction::compute() {
     }
     if (magnitudes[i] <= 0) {
       throw EssentiaException("PitchSalienceFunction: spectral peak magnitudes must be positive");
-    } 
+    }
   }
-  
+
 
   salienceFunction.resize(_numberBins);
-  fill(salienceFunction.begin(), salienceFunction.end(), (Real) 0.0); 
+  fill(salienceFunction.begin(), salienceFunction.end(), (Real) 0.0);
   Real minMagnitude = magnitudes[argmax(magnitudes)] * _magnitudeThresholdLinear;
-  
+
   for (int i=0; i<numberPeaks; i++) {
-    // remove peaks with low magnitudes: 
+    // remove peaks with low magnitudes:
     // 20 * log10(magnitudes[argmax(magnitudes)]/magnitudes[i]) >= _magnitudeThreshold
     if (magnitudes[i] <= minMagnitude) {
-      continue; 
+      continue;
     }
     Real magnitudeFactor = pow(magnitudes[i], _magnitudeCompression);
 
@@ -100,7 +100,7 @@ void PitchSalienceFunction::compute() {
       }
 
       for(int b=max(0, h_bin-_binsInSemitone); b <= min(_numberBins-1, h_bin+_binsInSemitone); b++) {
-        salienceFunction[b] += magnitudeFactor * _nearestBinsWeights[abs(b-h_bin)] * _harmonicWeights[h]; 
+        salienceFunction[b] += magnitudeFactor * _nearestBinsWeights[abs(b-h_bin)] * _harmonicWeights[h];
       }
     }
 
@@ -108,7 +108,7 @@ void PitchSalienceFunction::compute() {
 }
 
 int PitchSalienceFunction::frequencyToCentBin(Real frequency) {
-  // +0.5 term is used instead of +1 (as in [1]) to center 0th bin to 55Hz 
+  // +0.5 term is used instead of +1 (as in [1]) to center 0th bin to 55Hz
   // formula: floor(1200 * log2(frequency / _referenceFrequency) / _binResolution + 0.5)
   //    --> 1200 * (log2(frequency) - log2(_referenceFrequency)) / _binResolution + 0.5
   //    --> 1200 * log2(frequency) / _binResolution + (0.5 - 1200 * log2(_referenceFrequency) / _binResolution)

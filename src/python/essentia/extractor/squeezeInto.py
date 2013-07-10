@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -23,8 +23,8 @@ from numpy import tanh
 
 def squeezeIntoZeroToOne(x1,x2,x):
     '''This function returns values between zero and one
-       with large negative x-values yielding zero and large 
-       positive x-values yielding one. x-value between x1 
+       with large negative x-values yielding zero and large
+       positive x-values yielding one. x-value between x1
        and x2 are mapped to the range of 0.119 to 0.881.
     '''
     return squeezeInto([x1,0],[x2,1],x)
@@ -32,7 +32,7 @@ def squeezeIntoZeroToOne(x1,x2,x):
 
 def squeezeInto(p1,p2,x):
     '''This function returns values between p1[1] and p2[1]
-       with large negative x-values yielding zero and large 
+       with large negative x-values yielding zero and large
        positive x-values yielding one.
     '''
     if p2[0] > p1[0]:

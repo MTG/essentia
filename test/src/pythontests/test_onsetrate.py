@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -40,24 +40,24 @@ for input_file in glob.glob('../../../../audio/recorded/*.wav'):
     onsetdetectionHFC = essentia.OnsetDetection(method = "hfc", sampleRate = sample_rate)
     onsetdetectionComplex = essentia.OnsetDetection(method = "complex", sampleRate = sample_rate)
     onsets = essentia.Onsets(frameRate = frame_rate, alpha = 0.2, delayCoef = 6, silenceTS = 0.075)
-    
+
     total_frames = frames.num_frames()
     n_frames = 0
-    
+
     hfc = []
     complex = []
-    
+
     for frame in frames:
-    
+
         windowed_frame = window(frame)
-        complex_fft = fft(windowed_frame)   
-        (spectrum,phase) = cartesian2polar(complex_fft)   
+        complex_fft = fft(windowed_frame)
+        (spectrum,phase) = cartesian2polar(complex_fft)
         hfc.append(onsetdetectionHFC(spectrum,phase))
         complex.append(onsetdetectionComplex(spectrum,phase))
-        n_frames += 1 
-   
+        n_frames += 1
+
     detections = numpy.concatenate([essentia.array([hfc]),
                                     essentia.array([complex]) ])
     time_onsets = onsets(detections, essentia.array([1, 1]))
-    
+
     print len(time_onsets) / ( len(samples) / sample_rate ), os.path.basename(input_file)

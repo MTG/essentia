@@ -35,11 +35,11 @@ namespace TNT
 {
 
 template <class T>
-class Fortran_Array2D 
+class Fortran_Array2D
 {
 
 
-  private: 
+  private:
   		i_refvec<T> v_;
 		int m_;
 		int n_;
@@ -49,7 +49,7 @@ class Fortran_Array2D
     	void initialize_(int n);
     	void copy_(T* p, const T*  q, int len);
     	void set_(T* begin,  T* end, const T& val);
- 
+
   public:
 
     typedef         T   value_type;
@@ -91,7 +91,7 @@ Fortran_Array2D<T>::Fortran_Array2D(int m, int n) : v_(m*n), m_(m), n_(n),
 	data_(v_.begin()) {}
 
 template <class T>
-Fortran_Array2D<T>::Fortran_Array2D(int m, int n, const T &val) : 
+Fortran_Array2D<T>::Fortran_Array2D(int m, int n, const T &val) :
 	v_(m*n), m_(m), n_(n), data_(v_.begin())
 {
 	set_(data_, data_+m*n, val);
@@ -106,8 +106,8 @@ Fortran_Array2D<T>::Fortran_Array2D(int m, int n, T *a) : v_(a),
 
 
 template <class T>
-inline T& Fortran_Array2D<T>::operator()(int i, int j) 
-{ 
+inline T& Fortran_Array2D<T>::operator()(int i, int j)
+{
 #ifdef TNT_BOUNDS_CHECK
 	assert(i >= 1);
 	assert(i <= m_);
@@ -121,7 +121,7 @@ inline T& Fortran_Array2D<T>::operator()(int i, int j)
 
 template <class T>
 inline const T& Fortran_Array2D<T>::operator()(int i, int j) const
-{ 
+{
 #ifdef TNT_BOUNDS_CHECK
 	assert(i >= 1);
 	assert(i <= m_);
@@ -209,7 +209,7 @@ void Fortran_Array2D<T>::set_(T* begin, T* end, const T& a)
 }
 
 template <class T>
-void Fortran_Array2D<T>::copy_(T* p, const T* q, int len) 
+void Fortran_Array2D<T>::copy_(T* p, const T* q, int len)
 {
 	T *end = p + len;
 	while (p<end )

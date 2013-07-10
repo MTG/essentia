@@ -74,7 +74,7 @@ if get_flag('use_libsamplerate', default=True):
 ffmpeg_install_dir = ARGUMENTS.get('ffmpeg_dir', '')
 
 if get_flag('use_ffmpeg', default=True):
-    ffmpeg_libs = ['avformat', 'avcodec', 'avutil'] 
+    ffmpeg_libs = ['avformat', 'avcodec', 'avutil']
     conf.LIBS += ffmpeg_libs
 
     ffmpeg_dir = ''

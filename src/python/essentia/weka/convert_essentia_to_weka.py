@@ -12,7 +12,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 from wekafile import WekaFile
@@ -39,8 +39,8 @@ output_file = "weka.arff"
 # the descriptors you would like to use inside weka...
 # if you want to use *all* descriptors, set
 use_all_descriptors = False
- 
-# if the previous part was set to True, don't worry about this 
+
+# if the previous part was set to True, don't worry about this
 used_descriptors = ["mfcc",
                     "danceability",
                     "dissonance",
@@ -105,11 +105,11 @@ def convert(inputFilenames, outputFilename):
                         weka_file.add_attribute('descriptors[-%s-][-var-]' % descriptor, "numeric")
 
         weka_file.add_data(values, [inClass])
-        
+
         if first_time:
             weka_file.add_attribute("ground_truth", all_labels)
-        
-        first_time = False        
+
+        first_time = False
 
     weka_file.write(outputFilename)
 

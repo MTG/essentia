@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -894,7 +894,7 @@ void Network::printBufferFillState() {
 
   for (int i=0; i<(int)algos.size(); i++) {
     Algorithm* algo = algos[i];
-    E_DEBUG(EExecution, pad(algo->name(), 25) << "(called " << algo->nProcess << " times)");
+    E_DEBUG(EScheduler, pad(algo->name(), 25) << "(called " << algo->nProcess << " times)");
     for (Algorithm::OutputMap::const_iterator output = algo->outputs().begin();
          output != algo->outputs().end();
          ++output) {
@@ -904,13 +904,18 @@ void Network::printBufferFillState() {
       int available = output->second->available();
       int used = buf.size - available;
       int percent = 100 * used / buf.size;
-      E_DEBUG(EExecution, "  - " << pad(name, 24)
+      E_DEBUG(EScheduler, "  - " << pad(name, 24)
               << " fill " << pad(percent, 3, ' ', true) << "%   |  "
               << pad(used, 6, ' ', true) << " / " << pad(buf.size, 6)
               << "  |  contiguous: " << buf.maxContiguousElements);
+      // if we compile without debugging
+      NOWARN_UNUSED(name);
+      NOWARN_UNUSED(percent);
     }
   }
 }
+
+
 void Network::checkBufferSizes() {
   // TODO: we should do this on the execution network, right?
   E_DEBUG(ENetwork, "checking buffer sizes");

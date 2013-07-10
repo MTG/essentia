@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -51,7 +51,7 @@ class RhythmDescriptors : public AlgorithmComposite {
   SourceProxy<Real> _secondPeakBPM;
   SourceProxy<Real> _secondPeakWeight;
   SourceProxy<Real> _secondPeakSpread;
-  
+
   scheduler::Network* _network;
   Pool _pool;
   bool _configured;
@@ -63,7 +63,7 @@ class RhythmDescriptors : public AlgorithmComposite {
   void declareParameters() {}
 
   void declareProcessOrder() {
-    declareProcessStep(ChainFrom(_rhythmExtractor)); 
+    declareProcessStep(ChainFrom(_rhythmExtractor));
     declareProcessStep(SingleShot(this));
   }
 
@@ -93,14 +93,14 @@ class RhythmDescriptors : public Algorithm {
   Output<std::vector<Real> > _bpmIntervals;
   Output<std::vector<Real> > _rubatoStart;
   Output<std::vector<Real> > _rubatoStop;
-  
+
   Output<Real> _firstPeakBPM;
   Output<Real> _firstPeakSpread;
   Output<Real> _firstPeakWeight;
   Output<Real> _secondPeakBPM;
   Output<Real> _secondPeakSpread;
   Output<Real> _secondPeakWeight;
-  
+
   bool _configured;
 
   streaming::Algorithm* _rhythmDescriptors;

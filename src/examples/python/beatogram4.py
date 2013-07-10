@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -101,7 +101,7 @@ def computeSegmentation(filename, pool):
     spec = Spectrum()
     mfcc = MFCC(highFrequencyBound=8000)
     tmpPool = essentia.Pool()
-    
+
     audio.audio >> fc.signal
     fc.frame >> w.frame >> spec.frame
     spec.spectrum >> mfcc.spectrum
@@ -165,13 +165,13 @@ def computeNoveltyCurve(filename, pool):
 
     # derivative of hfc seems to help in finding more precise beats...
     hfc = std.MovingAverage(size=int(0.1*pool['framerate']))(pool['hfc'])
-    
+
     hfc = normalize(hfc)
     noveltyCurve = normalize(noveltyCurve)
     #noveltyCurve = essentia.normalize(noveltyCurve)
     dhfc = derivative(hfc)
     print max(hfc), max(noveltyCurve)
-    for i, val in enumerate(dhfc): 
+    for i, val in enumerate(dhfc):
         if val< 0: continue
         noveltyCurve[i] += 0.1*val
 
@@ -187,8 +187,8 @@ def computeNoveltyCurve(filename, pool):
         start = i-windowSize
         if start < 0: start = 0
         end = start + windowSize
-        if end > size: 
-            end = size 
+        if end > size:
+            end = size
             start = size-windowSize
         window = env[start:end]
         filtered[i] = env[i] - np.median(window) #max(np.median(window), np.mean(window))
@@ -254,21 +254,21 @@ def computeBeats(filename, pool):
 
         print pool['peaksBpm']
         bpm = pool['harmonicBpm'][0]
-        # align ticks with novelty curve 
+        # align ticks with novelty curve
         #ticks, _ = alignTicks(pool['sinusoid'], pool['original_novelty_curve'], #novelty,
         #                      pool['framerate'], bpm, pool['length'])
         # or don't align ticks?
         ticks = pool['ticks']
         _, _, bestBpm= getMostStableTickLength(ticks)
         print 'estimated bpm:', bpm, 'bestBpm:', bestBpm, 'diff:', fabs(bpm-bestBpm)
-        if first_round: 
+        if first_round:
             pool.set('first_estimated_bpms', pool['peaksBpm'])
             first_round = False
         recompute = False
         if fabs(bestBpm - bpm) < bpmTolerance: recompute = False
-        else: 
+        else:
             count+=1
-            if count >= 5: 
+            if count >= 5:
                 bpmTolerance += 1
                 count = 0
             print "recomputing!!!!"
@@ -324,7 +324,7 @@ def alignTicks(sine, novelty, frameRate, bpm, size):
         prodPulse = zeros(noveltySize, dtype='f4')
         i = 0
         while i < noveltySize:
-            if sine[i] <= 0: 
+            if sine[i] <= 0:
                 i += 1
                 continue
             window = []
@@ -350,7 +350,7 @@ def alignTicks(sine, novelty, frameRate, bpm, size):
                    continue
                ticks.append(newTick)
                ticksAmp.append(x)
-            #if x != 0: 
+            #if x != 0:
             #    newTick = float(i)/frameRate
             #    if newTick < 0 or newTick >= size: continue
             #    if prevTick < 0:
@@ -384,7 +384,7 @@ def getMostStableTickLength(ticks):
     bestPeriod = distx[argmax(hist)] # there may be more than one candidate!!
     bestBpm = 60./bestPeriod
     print 'best period', bestPeriod
-    print 'best bpm:', bestBpm 
+    print 'best bpm:', bestBpm
 
     #print 'hist:', hist, distx
     maxLength = 0
@@ -431,7 +431,7 @@ def postProcessTicks(audioFilename, ticks, ticksAmp, pool):
         tickPos = pos
         for frame in frames:
             rms = RMS(frame)
-            diff = rms - prevRms 
+            diff = rms - prevRms
             if diff > maxDeltaRms:
                 tickPos = pos
                 maxDeltaRms = diff
@@ -569,7 +569,7 @@ def plot(pool, title, outputfile='out.svg', subplot=111):
                                 meanRatiosPerBand[iBand][tick])
             tickThreshold = max(medianRatiosPerTick[tick],
                                 meanRatiosPerTick[tick])
-            if ratio < bandThreshold and ratio <= tickThreshold: 
+            if ratio < bandThreshold and ratio <= tickThreshold:
                 loudnessBand[iBand][tick]=0
             else:
                 loudnessBand[iBand][tick] *= loudness[tick]
@@ -627,7 +627,7 @@ def plot(pool, title, outputfile='out.svg', subplot=111):
                                    range=len(sumCorr)-1)
     peaks = peakDetect(sumCorr)[0]
     peaks = [round(x+1e-15) for x in peaks]
-    print 'Peaks:',peaks 
+    print 'Peaks:',peaks
 
     pyplot.subplot(514)
     maxAlpha = max(sumCorr)

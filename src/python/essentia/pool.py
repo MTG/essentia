@@ -12,7 +12,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 from itertools import izip
@@ -32,7 +32,7 @@ numpy.core.arrayprint.set_printoptions(precision = 10,
 def percentile(values, p):
     values.sort()
     idx = int(p/100.0 * len(values))
-    return values[idx]                
+    return values[idx]
 
 
 # a simple pool of numbers with save to audioclas format and save to textfile
@@ -43,7 +43,7 @@ class Pool:
     def __init__(self):
         self.descriptors = {}
         self.statsBlackList = []
-        
+
         self.__currentNamespace = 'AnonymousNamespace'
         self.__globalScope = [ 0.0, 0.0 ]
         self.__currentScope = [ 0.0, 0.0 ]
@@ -55,7 +55,7 @@ class Pool:
 
     def ns(self):
         return self.__currentNamespace
-    
+
     def setGlobalScope(self, scope):
         self.__globalScope = scope
 

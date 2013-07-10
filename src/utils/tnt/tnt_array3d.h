@@ -35,7 +35,7 @@ namespace TNT
 {
 
 template <class T>
-class Array3D 
+class Array3D
 {
 
 
@@ -75,7 +75,7 @@ class Array3D
 	/* extended interface */
 
 	inline int ref_count(){ return data_.ref_count(); }
-   Array3D subarray(int i0, int i1, int j0, int j1, 
+   Array3D subarray(int i0, int i1, int j0, int j1,
 		   		int k0, int k1);
 };
 
@@ -83,7 +83,7 @@ template <class T>
 Array3D<T>::Array3D() : data_(), v_(), m_(0), n_(0) {}
 
 template <class T>
-Array3D<T>::Array3D(const Array3D<T> &A) : data_(A.data_), 
+Array3D<T>::Array3D(const Array3D<T> &A) : data_(A.data_),
 	v_(A.v_), m_(A.m_), n_(A.n_), g_(A.g_)
 {
 }
@@ -112,7 +112,7 @@ Array3D<T>::Array3D(int m, int n, int g) : data_(m*n*g), v_(m,n),
 
 
 template <class T>
-Array3D<T>::Array3D(int m, int n, int g, T val) : data_(m*n*g, val), 
+Array3D<T>::Array3D(int m, int n, int g, T val) : data_(m*n*g, val),
 	v_(m,n), m_(m), n_(n), g_(g)
 {
   if (m>0 && n>0 && g>0)
@@ -133,7 +133,7 @@ Array3D<T>::Array3D(int m, int n, int g, T val) : data_(m*n*g, val),
 
 
 template <class T>
-Array3D<T>::Array3D(int m, int n, int g, T* a) : 
+Array3D<T>::Array3D(int m, int n, int g, T* a) :
 		data_(m*n*g, a), v_(m,n), m_(m), n_(n), g_(g)
 {
 
@@ -154,19 +154,19 @@ Array3D<T>::Array3D(int m, int n, int g, T* a) :
 
 
 template <class T>
-inline T** Array3D<T>::operator[](int i) 
-{ 
+inline T** Array3D<T>::operator[](int i)
+{
 #ifdef TNT_BOUNDS_CHECK
 	assert(i >= 0);
 	assert(i < m_);
 #endif
 
-return v_[i]; 
+return v_[i];
 
 }
 
 template <class T>
-inline const T* const * Array3D<T>::operator[](int i) const 
+inline const T* const * Array3D<T>::operator[](int i) const
 { return v_[i]; }
 
 template <class T>
@@ -275,7 +275,7 @@ Array3D<T> Array3D<T>::subarray(int i0, int i1, int j0,
 	A.n_ = j1-j0+1;
 	A.g_ = k1-k0+1;
 	A.v_ = Array2D<T*>(A.m_,A.n_);
-	T* p = &(data_[0]) + i0*n_*g_ + j0*g_ + k0; 
+	T* p = &(data_[0]) + i0*n_*g_ + j0*g_ + k0;
 
 	for (int i=0; i<A.m_; i++)
 	{

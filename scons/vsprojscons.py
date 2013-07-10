@@ -21,12 +21,12 @@ def vcprojsync_function(target, source, env):
     vcProjectFileName = os.path.normpath(str(target[0]))
 
     #print(vcProjectFileName)
-    
+
     # our path code can't handle placing the visual studio project
     # above the SConstruct file in the file tree
     if os.path.isabs( vcProjectFileName ):
         print "ERROR: visual studio project must be inside project tree"
-        
+
     # scons file names are relative to the project root directory
     # but the vs project needs the paths relative to its directory
     # so we calculate the relative prefix to use here:

@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006 Chris Cannam.
-  
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -51,7 +51,7 @@ namespace Vamp {
 
 /**
  * \class Plugin Plugin.h <vamp-sdk/Plugin.h>
- * 
+ *
  * Vamp::Plugin is a base class for plugin instance classes
  * that provide feature extraction from audio or related data.
  *
@@ -61,8 +61,8 @@ namespace Vamp {
  *
  * Note that this class inherits several abstract methods from
  * PluginBase.  These must be implemented by the subclass.
- * 
- * 
+ *
+ *
  * PLUGIN LIFECYCLE
  *
  * Feature extraction plugins are managed differently from real-time
@@ -133,7 +133,7 @@ public:
      *
      * The input sample rate should have been already specified at
      * construction time.
-     * 
+     *
      * Return true for successful initialisation, false if the number
      * of input channels, step size and/or block size cannot be
      * supported.
@@ -150,7 +150,7 @@ public:
     virtual void reset() = 0;
 
     enum InputDomain { TimeDomain, FrequencyDomain };
-    
+
     /**
      * Get the plugin's required input domain.
      *
@@ -388,7 +388,7 @@ public:
 
     /**
      * Process a single block of input data.
-     * 
+     *
      * If the plugin's inputDomain is TimeDomain, inputBuffers will
      * point to one array of floats per input channel, and each of
      * these arrays will contain blockSize consecutive audio samples

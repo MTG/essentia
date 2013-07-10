@@ -7,7 +7,7 @@
 
     Centre for Digital Music, Queen Mary, University of London.
     Copyright 2006 Chris Cannam.
-  
+
     Permission is hereby granted, free of charge, to any person
     obtaining a copy of this software and associated documentation
     files (the "Software"), to deal in the Software without
@@ -49,11 +49,11 @@ namespace Vamp {
 
 /**
  * \class PluginAdapterBase PluginAdapter.h <vamp-sdk/PluginAdapter.h>
- * 
+ *
  * PluginAdapter and PluginAdapterBase provide a wrapper class that a
  * plugin library can use to make its C++ Vamp::Plugin objects
  * available through the Vamp C API.
- * 
+ *
  * Almost all Vamp plugin libraries will want to make use of this.  To
  * do so, all they need to do is declare a PluginAdapter<T> for each
  * plugin class T in their library.  It's very simple, and you need to
@@ -84,7 +84,7 @@ protected:
 
 /**
  * \class PluginAdapter PluginAdapter.h <vamp-sdk/PluginAdapter.h>
- * 
+ *
  * PluginAdapter turns a PluginAdapterBase into a specific wrapper for
  * a particular plugin implementation.
  *
@@ -112,7 +112,7 @@ protected:
         return plugin;
     }
 };
-    
+
 }
 
 _VAMP_SDK_PLUGSPACE_END(PluginAdapter.h)

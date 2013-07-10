@@ -36,7 +36,7 @@ namespace TNT
 
 
 template <class T>
-class Matrix 
+class Matrix
 {
 
 
@@ -52,14 +52,14 @@ class Matrix
     typedef const   T&  const_reference;
 
     Subscript lbound() const { return 1;}
- 
+
   protected:
     Subscript m_;
     Subscript n_;
     Subscript mn_;      // total size
-    T* v_;                  
-    T** row_;           
-    T* vm1_ ;       // these point to the same data, but are 1-based 
+    T* v_;
+    T** row_;
+    T* vm1_ ;       // these point to the same data, but are 1-based
     T** rowm1_;
 
     // internal helper function to create the array
@@ -71,7 +71,7 @@ class Matrix
         m_ = M;
         n_ = N;
 
-        v_ = new T[mn_]; 
+        v_ = new T[mn_];
         row_ = new T*[M];
         rowm1_ = new T*[M];
 
@@ -79,19 +79,19 @@ class Matrix
         assert(row_  != NULL);
         assert(rowm1_ != NULL);
 
-        T* p = v_;              
+        T* p = v_;
         vm1_ = v_ - 1;
         for (Subscript i=0; i<M; i++)
         {
             row_[i] = p;
             rowm1_[i] = p-1;
             p += N ;
-            
+
         }
 
         rowm1_ -- ;     // compensate for 1-based offset
     }
-   
+
     void copy(const T*  v)
     {
         Subscript N = m_ * n_;
@@ -115,7 +115,7 @@ class Matrix
 
         for (i=0; i< N; i++)
             v_[i] = v[i];
-#endif      
+#endif
     }
 
     void set(const T& val)
@@ -132,7 +132,7 @@ class Matrix
             v_[i] = val;
             v_[i+1] = val;
             v_[i+2] = val;
-            v_[i+3] = val; 
+            v_[i+3] = val;
         }
 
         for (i=N4; i< N; i++)
@@ -141,19 +141,19 @@ class Matrix
 
         for (i=0; i< N; i++)
             v_[i] = val;
-        
-#endif      
-    }
-    
 
-    
+#endif
+    }
+
+
+
     void destroy()
-    {     
+    {
         /* do nothing, if no memory has been previously allocated */
         if (v_ == NULL) return ;
 
         /* if we are here, then matrix was previously allocated */
-        if (v_ != NULL) delete [] (v_);     
+        if (v_ != NULL) delete [] (v_);
         if (row_ != NULL) delete [] (row_);
 
         /* return rowm1_ back to original value */
@@ -222,7 +222,7 @@ class Matrix
 
         destroy();
         initialize(M,N);
-        
+
         return *this;
     }
 
@@ -248,21 +248,21 @@ class Matrix
 
         return *this;
     }
-        
+
     Matrix<T>& operator=(const T& scalar)
-    { 
-        set(scalar); 
+    {
+        set(scalar);
         return *this;
     }
 
 
-    Subscript dim(Subscript d) const 
+    Subscript dim(Subscript d) const
     {
 #ifdef TNT_BOUNDS_CHECK
         assert( d >= 1);
         assert( d <= 2);
 #endif
-        return (d==1) ? m_ : ((d==2) ? n_ : 0); 
+        return (d==1) ? m_ : ((d==2) ? n_ : 0);
     }
 
     Subscript num_rows() const { return m_; }
@@ -290,38 +290,38 @@ class Matrix
     }
 
     inline reference operator()(Subscript i)
-    { 
+    {
 #ifdef TNT_BOUNDS_CHECK
         assert(1<=i);
         assert(i <= mn_) ;
 #endif
-        return vm1_[i]; 
+        return vm1_[i];
     }
 
     inline const_reference operator()(Subscript i) const
-    { 
+    {
 #ifdef TNT_BOUNDS_CHECK
         assert(1<=i);
         assert(i <= mn_) ;
 #endif
-        return vm1_[i]; 
+        return vm1_[i];
     }
 
 
 
     inline reference operator()(Subscript i, Subscript j)
-    { 
+    {
 #ifdef TNT_BOUNDS_CHECK
         assert(1<=i);
         assert(i <= m_) ;
         assert(1<=j);
         assert(j <= n_);
 #endif
-        return  rowm1_[i][j]; 
+        return  rowm1_[i][j];
     }
 
 
-    
+
     inline const_reference operator() (Subscript i, Subscript j) const
     {
 #ifdef TNT_BOUNDS_CHECK
@@ -330,7 +330,7 @@ class Matrix
         assert(1<=j);
         assert(j <= n_);
 #endif
-        return rowm1_[i][j]; 
+        return rowm1_[i][j];
     }
 
 
@@ -390,7 +390,7 @@ std::istream& operator>>(std::istream &s, Matrix<T> &A)
 
 
 template <class T>
-Matrix<T> operator+(const Matrix<T> &A, 
+Matrix<T> operator+(const Matrix<T> &A,
     const Matrix<T> &B)
 {
     Subscript M = A.num_rows();
@@ -410,7 +410,7 @@ Matrix<T> operator+(const Matrix<T> &A,
 }
 
 template <class T>
-Matrix<T> operator-(const Matrix<T> &A, 
+Matrix<T> operator-(const Matrix<T> &A,
     const Matrix<T> &B)
 {
     Subscript M = A.num_rows();
@@ -430,7 +430,7 @@ Matrix<T> operator-(const Matrix<T> &A,
 }
 
 template <class T>
-Matrix<T> mult_element(const Matrix<T> &A, 
+Matrix<T> mult_element(const Matrix<T> &A,
     const Matrix<T> &B)
 {
     Subscript M = A.num_rows();
@@ -467,9 +467,9 @@ Matrix<T> transpose(const Matrix<T> &A)
 }
 
 
-    
+
 template <class T>
-inline Matrix<T> matmult(const Matrix<T>  &A, 
+inline Matrix<T> matmult(const Matrix<T>  &A,
     const Matrix<T> &B)
 {
 
@@ -491,21 +491,21 @@ inline Matrix<T> matmult(const Matrix<T>  &A,
         for (Subscript j=0; j<N; j++)
             sum = sum +  A[i][j] * B[j][k];
 
-        tmp[i][k] = sum; 
+        tmp[i][k] = sum;
     }
 
     return tmp;
 }
 
 template <class T>
-inline Matrix<T> operator*(const Matrix<T>  &A, 
+inline Matrix<T> operator*(const Matrix<T>  &A,
     const Matrix<T> &B)
 {
     return matmult(A,B);
 }
 
 template <class T>
-inline int matmult(Matrix<T>& C, const Matrix<T>  &A, 
+inline int matmult(Matrix<T>& C, const Matrix<T>  &A,
     const Matrix<T> &B)
 {
 
@@ -534,7 +534,7 @@ inline int matmult(Matrix<T>& C, const Matrix<T>  &A,
             row_i++;
             col_k += K;
         }
-        C[i][k] = sum; 
+        C[i][k] = sum;
     }
 
     return 0;
@@ -562,7 +562,7 @@ Vector<T> matmult(const Matrix<T>  &A, const Vector<T> &x)
         for (Subscript j=0; j<N; j++)
             sum = sum +  rowi[j] * x[j];
 
-        tmp[i] = sum; 
+        tmp[i] = sum;
     }
 
     return tmp;

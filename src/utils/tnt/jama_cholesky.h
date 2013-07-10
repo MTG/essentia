@@ -10,10 +10,10 @@ namespace JAMA
 
 using namespace TNT;
 
-/** 
+/**
    <P>
    For a symmetric, positive definite matrix A, this function
-   computes the Cholesky factorization, i.e. it computes a lower 
+   computes the Cholesky factorization, i.e. it computes a lower
    triangular matrix L such that A = L*L'.
    If the matrix is not symmetric or positive definite, the function
    computes only a partial decomposition.  This can be tested with
@@ -24,7 +24,7 @@ using namespace TNT;
 	Array2D<double> A(n,n);
 	Array2D<double> L;
 
-	 ... 
+	 ...
 
 	Cholesky<double> chol(A);
 
@@ -38,7 +38,7 @@ using namespace TNT;
 
 
    <p>
-	(Adapted from JAMA, a Java Matrix Library, developed by jointly 
+	(Adapted from JAMA, a Java Matrix Library, developed by jointly
 	by the Mathworks and NIST; see  http://math.nist.gov/javanumerics/jama).
 
    */
@@ -64,7 +64,7 @@ template <class Real>
 Cholesky<Real>::Cholesky() : L_(0,0), isspd(0) {}
 
 /**
-	@return 1, if original matrix to be factored was symmetric 
+	@return 1, if original matrix to be factored was symmetric
 		positive-definite (SPD).
 */
 template <class Real>
@@ -108,24 +108,24 @@ Cholesky<Real>::Cholesky(const Array2D<Real> &A)
 
 
       // Main loop.
-     for (int j = 0; j < n; j++) 
+     for (int j = 0; j < n; j++)
 	 {
         double d = 0.0;
-        for (int k = 0; k < j; k++) 
+        for (int k = 0; k < j; k++)
 		{
             Real s = 0.0;
-            for (int i = 0; i < k; i++) 
+            for (int i = 0; i < k; i++)
 			{
                s += L_[k][i]*L_[j][i];
             }
             L_[j][k] = s = (A[j][k] - s)/L_[k][k];
             d = d + s*s;
-            isspd = isspd && (A[k][j] == A[j][k]); 
+            isspd = isspd && (A[k][j] == A[j][k]);
          }
          d = A[j][j] - d;
          isspd = isspd && (d > 0.0);
          L_[j][j] = sqrt(d > 0.0 ? d : 0.0);
-         for (int k = j+1; k < n; k++) 
+         for (int k = j+1; k < n; k++)
 		 {
             L_[j][k] = 0.0;
          }
@@ -154,18 +154,18 @@ Array1D<Real> Cholesky<Real>::solve(const Array1D<Real> &b)
 
 
       // Solve L*y = b;
-      for (int k = 0; k < n; k++) 
+      for (int k = 0; k < n; k++)
 	  {
-         for (int i = 0; i < k; i++) 
+         for (int i = 0; i < k; i++)
                x[k] -= x[i]*L_[k][i];
 		 x[k] /= L_[k][k];
 		
       }
 
       // Solve L'*X = Y;
-      for (int k = n-1; k >= 0; k--) 
+      for (int k = n-1; k >= 0; k--)
 	  {
-         for (int i = k+1; i < n; i++) 
+         for (int i = k+1; i < n; i++)
                x[k] -= x[i]*L_[i][k];
          x[k] /= L_[k][k];
       }
@@ -226,9 +226,9 @@ Array2D<Real> Cholesky<Real>::solve(const Array2D<Real> &B)
       // Solve L*y = b;
   	  for (int j=0; j< nx; j++)
 	  {
-      	for (int k = 0; k < n; k++) 
+      	for (int k = 0; k < n; k++)
 		{
-			for (int i = 0; i < k; i++) 
+			for (int i = 0; i < k; i++)
                X[k][j] -= X[i][j]*L_[k][i];
 		    X[k][j] /= L_[k][k];
 		 }
@@ -237,9 +237,9 @@ Array2D<Real> Cholesky<Real>::solve(const Array2D<Real> &B)
       // Solve L'*X = Y;
      for (int j=0; j<nx; j++)
 	 {
-      	for (int k = n-1; k >= 0; k--) 
+      	for (int k = n-1; k >= 0; k--)
 	  	{
-         	for (int i = k+1; i < n; i++) 
+         	for (int i = k+1; i < n; i++)
                X[k][j] -= X[i][j]*L_[i][k];
          	X[k][j] /= L_[k][k];
 		}

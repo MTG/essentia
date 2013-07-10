@@ -12,7 +12,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 import essentia
@@ -161,4 +161,4 @@ def compute(audio, pool, options):
        pool.add(namespace + '.' + 'pitch_centroid', 0.0)#, pool.GlobalScope)
        pool.add(namespace + '.' + 'pitch_after_max_to_before_max_energy_ratio', 0.0)#, pool.GlobalScope)
 
-    progress.finish() 
+    progress.finish()

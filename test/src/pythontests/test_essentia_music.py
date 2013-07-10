@@ -12,7 +12,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 #!/usr/bin/python
@@ -28,7 +28,7 @@ def test():
     #exec('options = ' + str(options))
     essentia_extractor.compute('music', "../../audio/recorded/britney.wav","foo.sig")
     os.unlink("foo.sig")
-    return 0 
+    return 0
   except:
     raise
     print "Failed to run essentia_music"

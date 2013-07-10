@@ -12,12 +12,12 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 ##############################################################################
 #
-# arff2matlab.py - Writes a Matlab file from a weka source. Vectors are stored 
+# arff2matlab.py - Writes a Matlab file from a weka source. Vectors are stored
 #in rows of a matrix M, descriptors as columns.
 #
 # Class stuff not implemented yet.
@@ -26,7 +26,7 @@
 
 import sys
 import string
- 
+
 ##############################################################################
 
 def comprovate(ok):

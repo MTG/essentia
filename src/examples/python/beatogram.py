@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -100,7 +100,7 @@ def computeSegmentation(filename, pool):
     spec = Spectrum()
     mfcc = MFCC(highFrequencyBound=8000)
     tmpPool = essentia.Pool()
-    
+
     audio.audio >> fc.signal
     fc.frame >> w.frame >> spec.frame
     spec.spectrum >> mfcc.spectrum
@@ -164,7 +164,7 @@ def computeNoveltyCurve(filename, pool):
     # derivative of hfc seems to help in finding more precise beats...
     hfc = essentia.normalize(pool['hfc'])
     dhfc = essentia.derivative(hfc)
-    for i, val in enumerate(dhfc): 
+    for i, val in enumerate(dhfc):
         if val< 0: continue
         noveltyCurve[i] += val
 
@@ -180,8 +180,8 @@ def computeNoveltyCurve(filename, pool):
         start = i-windowSize
         if start < 0: start = 0
         end = start + windowSize
-        if end > size: 
-            end = size 
+        if end > size:
+            end = size
             start = size-windowSize
         filtered[i] = env[i] - np.median(env[start:end])
         if filtered[i] < 0: filtered[i] = 0
@@ -251,7 +251,7 @@ def computeBeats(filename, pool):
         prodPulse = zeros(len(novelty))
         i = 0
         while i < len(novelty):
-            if sine[i] <= 0.1: 
+            if sine[i] <= 0.1:
                 i += 1
                 continue
             window = []
@@ -269,7 +269,7 @@ def computeBeats(filename, pool):
         frameRate = pool['framerate']
         bpms = pool['harmonicBpm']
         print 'estimated bpm:', bpms
-        tatum = 60./bpms[0] 
+        tatum = 60./bpms[0]
         diffTick = 2*tatum
         prevTick = -1
         prevAmp = -1
@@ -279,7 +279,7 @@ def computeBeats(filename, pool):
                if newTick < 0 or newTick > pool['length']: continue
                ticks.append(newTick)
                ticksAmp.append(x)
-        #    if x != 0: 
+        #    if x != 0:
         #        newTick = float(i)/frameRate
         #        if prevTick < 0:
         #           ticks.append(newTick)
@@ -306,9 +306,9 @@ def computeBeats(filename, pool):
         #ticks = essentia.postProcessTicks(ticks, ticksAmp, 60./pool['harmonicBpm'][0]);
         #ticks = essentia.postProcessTicks(ticks)
         if fabs(bestBpm - bpms[0]) < bpmTolerance: recompute = False
-        else: 
+        else:
             count+=1
-            if count >= 5: 
+            if count >= 5:
                 bpmTolerance += 1
                 count = 0
             print "recomputing!!!!"
@@ -361,7 +361,7 @@ def getMostStableTickLength(ticks):
     bestPeriod = distx[argmax(hist)] # there may be more than one candidate!!
     bestBpm = 60./bestPeriod
     print 'best period', bestPeriod
-    print 'best bpm:', bestBpm 
+    print 'best bpm:', bestBpm
 
     #print 'hist:', hist, distx
     maxLength = 0
@@ -411,7 +411,7 @@ def postProcessTicks(audioFilename, pool):
     #    tickPos = pos
     #    for frame in frames:
     #        rms = RMS(frame)
-    #        diff = rms - prevRms 
+    #        diff = rms - prevRms
     #        if diff > maxDeltaRms:
     #            tickPos = pos
     #            maxDeltaRms = diff
@@ -544,7 +544,7 @@ def plot(pool, title, outputfile='out.svg', subplot=111):
                                 meanRatiosPerBand[iBand][tick])
             tickThreshold = max(medianRatiosPerTick[tick],
                                 meanRatiosPerTick[tick])
-            if ratio < bandThreshold and ratio <= tickThreshold: 
+            if ratio < bandThreshold and ratio <= tickThreshold:
                 loudnessBand[iBand][tick]=0
             else:
                 loudnessBand[iBand][tick] *= loudness[tick]
@@ -602,7 +602,7 @@ def plot(pool, title, outputfile='out.svg', subplot=111):
                                    range=len(sumCorr)-1)
     peaks = peakDetect(sumCorr)[0]
     peaks = [round(x+1e-15) for x in peaks]
-    print 'Peaks:',peaks 
+    print 'Peaks:',peaks
 
     pyplot.subplot(514)
     maxAlpha = max(sumCorr)

@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -82,7 +82,7 @@ class TestTempoTap(TestCase):
             features[i][0] = 1
             i += int(math.floor(guessPeriod))
 
-        
+
         tempotap = TempoTap(numberFrames = numberFrames,
                             frameHop = numberFrames)
 
@@ -98,7 +98,7 @@ class TestTempoTap(TestCase):
         # flush current buffer with zeros
         for i in range(inputLength % numberFrames, numberFrames):
             periods, phases = tempotap(zeros(featuresNumber))
-            
+
             periodEstimates += list(periods)
             phaseEstimates += list(phases)
 
@@ -112,7 +112,7 @@ class TestTempoTap(TestCase):
         self.assertEqual(round(periodEstimates[0]), guessPeriod)
         self.assertEqual(round(phaseEstimates[0]), guessPhase)
 
-        
+
         # construct the beats train from the period and estimates candidates and
         # make sure we find a corresponding impulse in the input
         i = 0

@@ -14,7 +14,7 @@
 # FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
 # details.
 #
-# You should have received a copy of the Affero GNU General Public License     
+# You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
@@ -33,7 +33,7 @@ class TestEnergyBandRatio(TestCase):
                               sampleRate = 44100)
 
         self.assertAlmostEqual(ebr(spectrum), expected)
-            
+
 
     def testZero(self):
         ebr = EnergyBandRatio(startFrequency = 0.0,

@@ -1,18 +1,18 @@
-/* 
+/*
  * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
- * 
- * Essentia is free software: you can redistribute it and/or modify it under 
- * the terms of the GNU Affero General Public License as published by the Free 
- * Software Foundation (FSF), either version 3 of the License, or (at your 
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
  * option) any later version.
- * 
- * This program is distributed in the hope that it will be useful, but WITHOUT 
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
- * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more 
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
- * 
+ *
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
@@ -32,7 +32,7 @@ const char* RhythmDescriptors::description = DOC("this algorithm computes low le
 
 RhythmDescriptors::RhythmDescriptors() {
   _configured = false;
-  
+
   declareInput(_signal, "signal", "the input audio signal");
 
   declareOutput(_ticks, "beats_position", "See RhythmExtractor2013 algorithm documentation");
@@ -41,7 +41,7 @@ RhythmDescriptors::RhythmDescriptors() {
   declareOutput(_bpmIntervals, "bpm_intervals", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_rubatoStart, "rubato_start", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_rubatoStop, "rubato_stop", "See RhythmExtractor2013 algorithm documentation");
-  
+
   declareOutput(_firstPeakBPM, "first_peak_bpm", "See BpmHistogramDescriptors algorithm documentation");
   declareOutput(_firstPeakSpread, "first_peak_spread", "See BpmHistogramDescriptors algorithm documentation");
   declareOutput(_firstPeakWeight, "first_peak_weight", "See BpmHistogramDescriptors algorithm documentation");
@@ -55,21 +55,21 @@ void RhythmDescriptors::createInnerNetwork() {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   _bpmHistogramDescriptors = factory.create("BPMHistogramDescriptors");
   _rhythmExtractor = factory.create("RhythmExtractor2013");
-  
+
   _signal >> _rhythmExtractor->input("signal");
 
   _rhythmExtractor->output("ticks") >> PC(_pool, "internal.ticks");
-  _rhythmExtractor->output("bpm") >> PC(_pool, "internal.bpm");  
+  _rhythmExtractor->output("bpm") >> PC(_pool, "internal.bpm");
   _rhythmExtractor->output("estimates")     >> PC(_pool, "internal.estimates");
   _rhythmExtractor->output("bpmIntervals")  >> PC(_pool, "internal.bpmIntervals");
   _rhythmExtractor->output("rubatoStart")   >> PC(_pool, "internal.rubatoStart");
   _rhythmExtractor->output("rubatoStop")    >> PC(_pool, "internal.rubatoStop");
-  
+
   // TODO current limitation: seems like if one output of an algo is connected to
   // SourceProxy, other outputs directed somewhere else will be empty. Bug?
   // Temporal workaround: use pool to store all data instead of routing directly
   // to the source proxies.
-  
+
   _rhythmExtractor->output("bpmIntervals")  >> _bpmHistogramDescriptors->input("bpmIntervals");
   _bpmHistogramDescriptors->output("firstPeakBPM")      >> _firstPeakBPM;
   _bpmHistogramDescriptors->output("firstPeakSpread")   >> _firstPeakSpread;
@@ -77,7 +77,7 @@ void RhythmDescriptors::createInnerNetwork() {
   _bpmHistogramDescriptors->output("secondPeakBPM")     >> _secondPeakBPM;
   _bpmHistogramDescriptors->output("secondPeakSpread")  >> _secondPeakSpread;
   _bpmHistogramDescriptors->output("secondPeakWeight")  >> _secondPeakWeight;
-  
+
   _network = new scheduler::Network(_rhythmExtractor);
 }
 
@@ -91,13 +91,13 @@ void RhythmDescriptors::configure() {
 }
 
 
-void RhythmDescriptors::clearAlgos() {                                        
-  if (!_configured) return;                                                     
-  delete _network;                                                              
-} 
+void RhythmDescriptors::clearAlgos() {
+  if (!_configured) return;
+  delete _network;
+}
 
-                                                                                
-AlgorithmStatus RhythmDescriptors::process() {                            
+
+AlgorithmStatus RhythmDescriptors::process() {
   if (!shouldStop()) return PASS;
 
   _bpm.push(_pool.value<Real>("internal.bpm"));
@@ -116,8 +116,8 @@ RhythmDescriptors::~RhythmDescriptors() {
 }
 
 
-void RhythmDescriptors::reset() {                                         
-    AlgorithmComposite::reset();                                                  
+void RhythmDescriptors::reset() {
+    AlgorithmComposite::reset();
 }
 
 } // namespace streaming

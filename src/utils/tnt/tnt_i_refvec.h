@@ -40,12 +40,12 @@ namespace TNT
 	arrays all use this building block.
 
 	<p>
-	If an array block is created by TNT, then every time 
-	an assignment is made, the left-hand-side reference 
+	If an array block is created by TNT, then every time
+	an assignment is made, the left-hand-side reference
 	is decreased by one, and the right-hand-side refernce
 	count is increased by one.  If the array block was
 	external to TNT, the refernce count is a NULL pointer
-	regardless of how many references are made, since the 
+	regardless of how many references are made, since the
 	memory is not freed by TNT.
 
 
@@ -57,7 +57,7 @@ class i_refvec
 
 
   private:
-    T* data_;                  
+    T* data_;
     int *ref_count_;
 
 
@@ -72,8 +72,8 @@ class i_refvec
 	inline  T& operator[](int i);
 	inline const T& operator[](int i) const;
 	inline  i_refvec<T> & operator=(const i_refvec<T> &V);
-		    void copy_(T* p, const T* q, const T* e); 
-		    void set_(T* p, const T* b, const T* e); 
+		    void copy_(T* p, const T* q, const T* e);
+		    void set_(T* p, const T* b, const T* e);
 	inline 	int	 ref_count() const;
 	inline  int is_null() const;
 	inline  void destroy();
@@ -92,7 +92,7 @@ template <class T>
 i_refvec<T>::i_refvec() : data_(NULL), ref_count_(NULL) {}
 
 /**
-	In case n is 0 or negative, it does NOT call new. 
+	In case n is 0 or negative, it does NOT call new.
 */
 template <class T>
 i_refvec<T>::i_refvec(int n) : data_(NULL), ref_count_(NULL)
@@ -196,7 +196,7 @@ void i_refvec<T>::destroy()
 * return 1 is vector is empty, 0 otherwise
 *
 * if is_null() is false and ref_count() is 0, then
-* 
+*
 */
 template<class T>
 int i_refvec<T>::is_null() const
@@ -205,7 +205,7 @@ int i_refvec<T>::is_null() const
 }
 
 /*
-*  returns -1 if data is external, 
+*  returns -1 if data is external,
 *  returns 0 if a is NULL array,
 *  otherwise returns the positive number of vectors sharing
 *  		this data space.
@@ -216,7 +216,7 @@ int i_refvec<T>::ref_count() const
 	if (data_ == NULL)
 		return 0;
 	else
-		return (ref_count_ != NULL ? *ref_count_ : -1) ; 
+		return (ref_count_ != NULL ? *ref_count_ : -1) ;
 }
 
 template <class T>
