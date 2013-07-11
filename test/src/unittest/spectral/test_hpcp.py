@@ -142,7 +142,7 @@ class TestHPCP(TestCase):
         inputSize = 512
         sampleRate = 44100
 
-        audio = MonoLoader(filename = join(testdata.audio_dir, join('recorded', 'britney.wav')),
+        audio = MonoLoader(filename = join(testdata.audio_dir, join('recorded', 'musicbox.wav')),
                            sampleRate = sampleRate)()
 
         fc = FrameCutter(frameSize = inputSize,

@@ -43,15 +43,19 @@ class TestPanning(TestCase):
         # On this respect, files computed with essentia at the time of this
         # writing (11/11/2008) have been included in order to have a regression
         # test that passes the test.
+
+        # 10/07/2013: We switched to different testing audio files and recomputed 
+        # the files with essentia assuming that Panning algo works correctly since 
+        # it seems no fixes were ever done to it since the original test (11/11/2008)
         testdir = join(filedir(), 'panning')
-        expected = readMatrix(join(testdir, 'essentia', 'santana_essentia.txt'))
+        expected = readMatrix(join(testdir, 'essentia', 'musicbox_essentia_panning.txt'))
 
         framesize = 8192
         hopsize = 2048
         zeropadding = 1
         sampleRate = 44100
 
-        filename = join(testdata.audio_dir, 'recorded', 'Santana.wav')
+        filename = join(testdata.audio_dir, 'recorded', 'musicbox.wav')
 
         left = MonoLoader(filename = filename, downmix = 'left', sampleRate = sampleRate)()
         right = MonoLoader(filename = filename, downmix = 'right', sampleRate = sampleRate)()
@@ -65,6 +69,7 @@ class TestPanning(TestCase):
                            type = 'hann')
         panning = Panning(averageFrames=21) # matlab tests were generated with 21 (1second at 44100Hz)
         output = []
+        
         for i in range(len(frames_left)):
             output = panning(spec(window(frames_left[i])), spec(window(frames_right[i])))
             # readVector messes up with the last digits, so for small numbers

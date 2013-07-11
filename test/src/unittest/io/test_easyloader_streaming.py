@@ -78,7 +78,7 @@ class TestEasyLoader_Streaming(TestCase):
 
     def testResetStandard(self):
         from essentia.standard import EasyLoader as stdEasyLoader
-        audiofile = join(testdata.audio_dir,'recorded','britney.wav')
+        audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
         loader = stdEasyLoader(filename=audiofile, startTime=0, endTime=70)
         audio1 = loader();
         audio2 = loader();

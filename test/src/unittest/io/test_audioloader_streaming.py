@@ -154,7 +154,7 @@ class TestAudioLoader_Streaming(TestCase):
 
     def testResetStandard(self):
         from essentia.standard import AudioLoader as stdAudioLoader
-        audiofile = join(testdata.audio_dir,'recorded','britney.wav')
+        audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
         loader = stdAudioLoader(filename=audiofile)
         audio1, sr1, nChannels1 = loader();
         audio2, sr2, nchannels2 = loader();
@@ -182,10 +182,9 @@ class TestAudioLoader_Streaming(TestCase):
     def testBitrate(self):
         from math import fabs
         dir = join(testdata.audio_dir,'recorded')
-
-        audio16, sr16, ch16 = AudioLoader(filename=join(dir,"britney.wav"))()
-        audio24, sr24, ch24 = AudioLoader(filename=join(dir,"britney24bit.wav"))()
-        audio32, sr32, ch32 = AudioLoader(filename=join(dir,"britney32bit.wav"))()
+        audio16, sr16, ch16 = AudioLoader(filename=join(dir,"cat_purrrr.wav"))()
+        audio24, sr24, ch24 = AudioLoader(filename=join(dir,"cat_purrrr24bit.wav"))()
+        audio32, sr32, ch32 = AudioLoader(filename=join(dir,"cat_purrrr32bit.wav"))()
         audio16L, audio16R = essentia.standard.StereoDemuxer()(audio16)
         audio24L, audio24R = essentia.standard.StereoDemuxer()(audio24)
         audio32L, audio32R = essentia.standard.StereoDemuxer()(audio32)
@@ -206,7 +205,7 @@ class TestAudioLoader_Streaming(TestCase):
         centroid16 = centroid(audio16L)
         centroid24 = centroid(audio24L)
         centroid32 = centroid(audio32L)
-
+        
         self.assertEqual(len(audio16), len(audio24))
         self.assertEqual(len(audio16), len(audio32))
         self.assertAlmostEqual(error24, 0)
