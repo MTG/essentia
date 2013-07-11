@@ -88,7 +88,7 @@ class TestFlux(TestCase):
 
     def testRegression(self):
         filename = join(testdata.audio_dir, 'recorded',
-                        '01-Allegro__Gloria_in_excelsis_Deo_in_D_Major.wav')
+                        'mozart_c_major_30sec.wav')
         audio = MonoLoader(filename=filename, downmix='left', sampleRate=44100)()
 
         fc = FrameCutter(frameSize=4096, hopSize=512)
@@ -108,7 +108,7 @@ class TestFlux(TestCase):
             frame = fc(audio)
 
         fluxAvg = float(fluxSum) / float(count)
-        self.assertAlmostEqual(fluxAvg, 0.0226689558775, 5e-5)
+        self.assertAlmostEqual(fluxAvg, 0.0640958007244, 5e-5)
 
 
 suite = allTests(TestFlux)

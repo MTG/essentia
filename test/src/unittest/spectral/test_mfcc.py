@@ -77,7 +77,7 @@ class TestMFCC(TestCase):
 
     def testRealCase(self):
         from numpy import mean
-        filename = join(testdata.audio_dir, 'recorded','britney.wav')
+        filename = join(testdata.audio_dir, 'recorded','musicbox.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
         frameGenerator = FrameGenerator(audio, frameSize=1024, hopSize=512)
         window = Windowing(type="blackmanharris62")
@@ -89,12 +89,11 @@ class TestMFCC(TestCase):
             pool.add("bands", bands)
             pool.add("mfcc", mfcc)
 
-        expected = [-8.96260986e+02, 6.09997635e+01, -4.36200752e+01, 2.48095875e+01,
-                    -1.55416851e+01, 1.00714369e+01, -6.46236658e+00, 4.16872358e+00,
-                    -2.76266885e+00, 1.83512831e+00, -1.36596978e+00, 8.36851299e-01,
-                    -4.40462381e-01]
-
-
+        expected = [-9.20311523e+02, 5.88643570e+01, -4.10509377e+01, 2.33458538e+01, 
+                    -1.43523417e+01, 8.78132343e+00, -5.37768316e+00, 3.02709007e+00, 
+                    -1.77758980e+00, 1.12805307e+00, -5.64552069e-01, 2.59827942e-01, 
+                    5.14490485e-01]
+    
         self.assertAlmostEqualVector(mean(pool['mfcc'], 0), expected, 1.0e-5)
 
 

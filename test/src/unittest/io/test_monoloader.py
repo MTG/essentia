@@ -212,7 +212,7 @@ class TestMonoLoader(TestCase):
         self.assertConfigureFails(MonoLoader(),{'filename':'unknown.wav'})
 
     def testResetStandard(self):
-        audiofile = join(testdata.audio_dir,'recorded','britney.wav')
+        audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
         loader = MonoLoader(filename=audiofile)
         audio1 = loader();
         audio2 = loader();

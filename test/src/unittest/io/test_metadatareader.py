@@ -69,12 +69,12 @@ class TestMetadataReader(TestCase):
     def testPCM(self):
         if taglibVersion() < '1.7':
             self.assertEqualVector(
-                MetadataReader(filename = join(testdata.audio_dir, 'recorded', 'britney.wav'), failOnError=True)(),
+                MetadataReader(filename = join(testdata.audio_dir, 'recorded', 'musicbox.wav'), failOnError=True)(),
                                ('', '', '', '', '', 0, 0, 0, 1411, 44100, 2))
         else:
             self.assertEqualVector(
-                MetadataReader(filename = join(testdata.audio_dir, 'recorded', 'britney.wav'), failOnError=True)(),
-                               ('', '', '', '', '', 0, 0, 30, 1444, 44100, 2))
+                MetadataReader(filename = join(testdata.audio_dir, 'recorded', 'musicbox.wav'), failOnError=True)(),
+                               ('', '', '', '', '', 0, 0, 45, 1444, 44100, 2))
 
     def testFailOnError(self):
         if taglibVersion() < '1.7':

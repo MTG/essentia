@@ -81,7 +81,7 @@ class TestEqloudLoader_Streaming(TestCase):
 
     def testResetStandard(self):
         from essentia.standard import EqloudLoader as stdEqloudLoader
-        audiofile = join(testdata.audio_dir,'recorded','britney.wav')
+        audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
         loader = stdEqloudLoader(filename=audiofile, endTime=31)
         audio1 = loader();
         audio2 = loader();

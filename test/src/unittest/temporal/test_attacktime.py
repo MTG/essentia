@@ -35,7 +35,7 @@ class TestAttackTime(TestCase):
 
 
     def testFile(self):
-        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/roxette.wav'),
+        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/musicbox.wav'),
                            sampleRate = 44100)()
 
         fc = FrameCutter(frameSize = 1024, hopSize = 512)
