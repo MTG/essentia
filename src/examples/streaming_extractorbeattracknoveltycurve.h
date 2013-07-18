@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef STREAMING_EXTRACTORBEATTRACK_H
-#define STREAMING_EXTRACTORBEATTRACK_H
+#ifndef STREAMING_EXTRACTORBEATTRACKNOVELTYCURVE_H
+#define STREAMING_EXTRACTORBEATTRACKNOVELTYCURVE_H
 
 #include "sourcebase.h"
 #include "pool.h"
@@ -29,4 +29,4 @@ void BeatTrack(essentia::Pool& pool,
                const essentia::Pool& options,
                const std::string& nspace);
 
-#endif // STREAMING_EXTRACTORBEATTRACK_H
+#endif // STREAMING_EXTRACTORBEATTRACKNOVELTYCURVE_H
