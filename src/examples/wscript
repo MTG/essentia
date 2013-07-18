@@ -23,7 +23,7 @@ def build(ctx):
     if ctx.env.WITH_EXAMPLES:
         def build_example(prefix, prog_name, other=None):
             files = [ '%s_%s.cpp' % (prefix, f) for f in [prog_name] + (other or []) ]
-
+            
             ctx.program(source = ctx.path.ant_glob(' '.join(files)),
                         target = '%s_%s' % (prefix, prog_name),
                         includes = [ '.' ] + adjust(ctx.env.INCLUDES, '..'),
@@ -31,9 +31,8 @@ def build(ctx):
                         install_path = None)
 
 
-
         build_example('standard', 'beatsmarker')
-        build_example('standard', 'tempotap')
+        build_example('standard', 'rhythmextractor_tempotap')
         build_example('standard', 'mfcc')
         build_example('standard', 'onsetrate')
         build_example('standard', 'extractorpitch')
@@ -77,11 +76,12 @@ def build(ctx):
                                    'extractorpostprocess' ])
 
 
-        build_example('streaming', 'beattrack')
+        build_example('streaming', 'rhythmextractor_noveltycurve')
         build_example('streaming', 'beatsmarker')
         build_example('streaming', 'mfcc')
         build_example('streaming', 'gfcc')
-        build_example('streaming', 'rhythmextractor')
+        build_example('streaming', 'rhythmextractor_multifeature')
+        build_example('streaming', 'beattracker_multifeature')
         build_example('streaming', 'onsetrate')
         build_example('streaming', 'panning')
         build_example('streaming', 'tuningfrequency')

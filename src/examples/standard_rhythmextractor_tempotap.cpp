@@ -33,6 +33,9 @@ inline Real lagToBpm(Real lag, Real sampleRate, Real hopSize) {
 
 int main(int argc, char* argv[]) {
 
+  cout << "An outdated rhythm extractor (beats, BPM, positions of tempo changes) based on TempoTap algorithm" << endl;
+  cout << "Note, that using streaming_rhythmextractor is recommended instead" << endl;
+
   if (argc != 2) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << argv[0] << " input_audiofile" << endl;

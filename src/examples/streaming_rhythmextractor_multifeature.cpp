@@ -32,6 +32,8 @@ int main(int argc, char* argv[]) {
 
   Pool pool;
 
+  cout << "Rhythm extractor (beat tracker, BPM, positions of tempo changes) based on multifeature beat tracker (see the BeatTrackerMultiFeature algorithm)" << endl;
+
   if (argc != 2) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << argv[0] << " input_audiofile" << endl;
@@ -46,8 +48,8 @@ int main(int argc, char* argv[]) {
 
   Algorithm* mono  = factory.create("MonoMixer");
 
-  Algorithm* tempotap = factory.create("RhythmExtractor2013");
-  tempotap->configure("method", "multifeature");  // best accuracy, but the largest computation time
+  Algorithm* rhythmextractor = factory.create("RhythmExtractor2013");
+  rhythmextractor->configure("method", "multifeature");  // best accuracy, but the largest computation time
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos --------" << endl;
@@ -57,15 +59,15 @@ int main(int argc, char* argv[]) {
   connect(audioloader->output("numberChannels"),   mono->input("numberChannels"));
   connect(audioloader->output("sampleRate"), pool, "metadata.sampleRate");
 
-  // mono -> tempotap
-  connect(mono->output("audio"), tempotap->input("signal"));
+  // mono -> rhythmextractor
+  connect(mono->output("audio"), rhythmextractor->input("signal"));
 
-  connect(tempotap->output("ticks"), pool, "rhythm.ticks");
-  connect(tempotap->output("bpm"), pool, "rhythm.bpm");
-  connect(tempotap->output("estimates"), pool, "rhythm.estimates");
-  connect(tempotap->output("rubatoStart"), pool, "rhythm.rubatoStart");
-  connect(tempotap->output("rubatoStop"), pool, "rhythm.rubatoStop");
-  connect(tempotap->output("bpmIntervals"), pool, "rhythm.bpmIntervals");
+  connect(rhythmextractor->output("ticks"), pool, "rhythm.ticks");
+  connect(rhythmextractor->output("bpm"), pool, "rhythm.bpm");
+  connect(rhythmextractor->output("estimates"), pool, "rhythm.estimates");
+  connect(rhythmextractor->output("rubatoStart"), pool, "rhythm.rubatoStart");
+  connect(rhythmextractor->output("rubatoStop"), pool, "rhythm.rubatoStop");
+  connect(rhythmextractor->output("bpmIntervals"), pool, "rhythm.bpmIntervals");
 
   /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << audioFilename << " --------" << endl;

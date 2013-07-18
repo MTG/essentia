@@ -217,6 +217,8 @@ int main(int argc, char* argv[]) {
 
   Pool pool;
 
+  cout "BPM extractor based on Novetly Curve (probably outdated)" << endl;
+
   if (argc < 4 && argc != 3) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << argv[0] << " inputfile outputfile" << endl;

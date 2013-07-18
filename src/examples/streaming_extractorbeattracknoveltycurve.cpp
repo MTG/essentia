@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "streaming_extractorbeattrack.h"
+#include "streaming_extractorbeattracknoveltycurve.h"
 #include <iostream>
 #include <fstream> // to write ticks to output file
 #include <deque>

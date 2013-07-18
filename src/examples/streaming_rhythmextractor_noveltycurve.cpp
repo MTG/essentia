@@ -607,7 +607,8 @@ int main(int argc, char* argv[]) {
 
   Pool pool;
 
-  cout << "NOTE: this beat tracker is outdated, you might want to use streaming_rhythmextractor instead." << endl;
+  cout << "An outdated rhythm extractor (beat tracker, BPM) based on Novelty Curve (2009)." << endl;
+  cout << "NOTE: this beat tracker is outdated (low accuracy compared to the new one), you might want to use streaming_rhythmextractor instead." << endl;
 
   if (argc < 4 && argc != 3) {
     cout << "Error: wrong number of arguments" << endl;
