@@ -349,7 +349,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime, 
   TuningFrequency(eqloudSource, pool, options, nspace);
 
   // Rhythm descriptors
-  Algorithm* rhythmExtractor = factory.create("RhythmExtractor");
+  Algorithm* rhythmExtractor = factory.create("RhythmExtractor"); // TODO switch to RhythmExtractor2013?
   connect(eqloudSource, rhythmExtractor->input("signal"));
   connect(rhythmExtractor->output("ticks"), pool, rhythmspace + "beats_position");
   connect(rhythmExtractor->output("bpm"), pool, rhythmspace + "bpm");
