@@ -11,6 +11,9 @@ def options(ctx):
     ctx.add_option('--with-examples', action='store_true',
                    dest='WITH_EXAMPLES', default=False,
                    help='build the example programs')
+    ctx.add_option('--with-static-examples', action='store_true',
+                   dest='WITH_STATIC_EXAMPLES', default=False,
+                   help='build the example programs as static executables (WARNING: only works on debian wheezy with custom-compiled ffmpeg)')
     ctx.add_option('--with-vamp', action='store_true',
                    dest='WITH_VAMP', default=False,
                    help='build the vamp plugin wrapper')
@@ -35,15 +38,13 @@ def configure(ctx):
     ctx.env.WITH_EXAMPLES = ctx.options.WITH_EXAMPLES
     ctx.env.WITH_PYTHON   = ctx.options.WITH_PYTHON
     ctx.env.WITH_VAMP     = ctx.options.WITH_VAMP
+    ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
+
+    if ctx.env.WITH_STATIC_EXAMPLES:
+        ctx.env.WITH_EXAMPLES = True
 
     ctx.env.ALGOIGNORE = []
     ctx.env.ALGOIGNORE += ['GaiaTransform']
-
-
-    #ctx.env.ALGOIGNORE += ['MetadataReader']
-
-    #ctx.env.ALGOIGNORE += [ #'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader',
-    #                        'MonoWriter', 'AudioWriter' ]
 
 
     ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
@@ -58,8 +59,11 @@ def configure(ctx):
     ctx.check_cfg(package='libswresample', uselib_store='SWRESAMPLE',
                   args=['--cflags', '--libs'], mandatory=False)
 
-    ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
-                  args=['--cflags', '--libs'], mandatory=False)
+    if ctx.env.WITH_STATIC_EXAMPLES:
+        print 'Static examples incompatible with TagLib, skipping TagLib detection...'
+    else:
+        ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
+                      args=['--cflags', '--libs'], mandatory=False)
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += [ '__STDC_CONSTANT_MACROS' ]
@@ -102,10 +106,10 @@ def configure(ctx):
     ctx.env.USES = 'FFTW YAML'
 
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
-    if has('avcodec') and has('avcodec') and has('avcodec'):
+    if has('avcodec') and has('avformat') and has('avutil'):
         print '- FFmpeg / libav detected!'
         print '  The following algorithms will be included: %s\n' % algos
-        ctx.env.USES += ' AVCODEC AVFORMAT AVUTIL'
+        ctx.env.USES += ' AVFORMAT AVCODEC AVUTIL'
     else:
         print '- FFmpeg (or libav on debian/ubuntu) seems to be missing.'
         print '  The following algorithms will be ignored: %s\n' % algos
@@ -186,6 +190,10 @@ def build(ctx):
     sources += ctx.path.ant_glob('scheduler/*.cpp')
     sources += ctx.path.ant_glob('streaming/**/*.cpp')
     sources += ctx.path.ant_glob('utils/*.cpp')
+
+    # do not compile audiocontext.cpp if we're not compiling ffmpeg
+    if 'AVCODEC' not in ctx.env.USES:
+        sources = [ s for s in sources if 'audiocontext' not in str(s) ]
 
     sources += [ ctx.path.find_resource('algorithms/essentia_algorithms_reg.cpp') ]
     sources += [ ctx.path.find_resource(algo['source']) for algo in algos.values() ]
