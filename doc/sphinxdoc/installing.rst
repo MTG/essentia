@@ -32,9 +32,9 @@ You can install those dependencies on a Debian/Ubuntu system using the following
 
   sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev python-dev libsamplerate0-dev libtag1-dev
 
-In order to use python bindings for the library, you might also need to install python-numpy-dev on Ubuntu::
+In order to use python bindings for the library, you might also need to install python-numpy-dev or python-numpy on Ubuntu::
 
-  sudo apt-get install python-numpy-dev
+  sudo apt-get install python-numpy-dev python-numpy
 
 
 Installing dependencies on Mac OS X
@@ -105,7 +105,7 @@ To run the C++ base unit tests (only test basic library behavior)::
 
   ./waf run_tests
 
-To install the C++ library and the python bindings (if configured)::
+To install the C++ library and the python bindings (if configured successfully; you might need to run this command with sudo)::
 
   ./waf install
 
