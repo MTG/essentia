@@ -21,6 +21,7 @@
 
 
 import essentia.standard
+import essentia.streaming
 import os, re, subprocess
 
 def replace_math_symbols(s):

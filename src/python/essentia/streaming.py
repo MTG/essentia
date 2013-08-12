@@ -16,10 +16,10 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 import _essentia
+import essentia
 import sys as _sys
 import common as _c
 from _essentia import skeys as algorithmNames, sinfo as algorithmInfo
-from essentia import log, EPython
 
 # Used as a place-holder for sources and sinks, implements the right shift
 # operator
@@ -136,7 +136,7 @@ class _StreamConnector:
 
 
 def _create_streaming_algo(givenname):
-    log.debug(EPython, 'Creating essentia.streaming class: %s' % givenname)
+    essentia.log.debug(essentia.EPython, 'Creating essentia.streaming class: %s' % givenname)
 
     _algoInstance = _essentia.StreamingAlgorithm(givenname)
     _algoDoc = _algoInstance.getDoc()

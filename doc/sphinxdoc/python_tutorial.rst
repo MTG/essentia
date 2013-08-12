@@ -14,7 +14,7 @@ Essentia is written in C++ but it has python bindings that makes it very well su
 for use by scientists which are used to Matlab, for instance.
 
 You can run all of the following using the standard python interpreter, however
-it is highly recommended to use a better one, such as `IPython <http://ipython.scipy.org/>`_
+it is highly recommended to use a better one, such as `IPython <http://ipython.org/>`_
 *(recommended)* or `bpython <http://bpython-interpreter.org/>`_.
 
 Some users might also find the `Spyder <http://code.google.com/p/spyderlib/>`_
