@@ -1,7 +1,7 @@
 .. highlight:: c++
 
-General Architecture
-====================
+General architecture / Basic types and classes
+==============================================
 
 Essentia's main purpose is to serve as a library of signal-processing blocks.
 As such, it is intended to provide as many pre-written algorithms as possible,
@@ -181,3 +181,63 @@ Note that although you feed the pool with a ``Real`` value for the energy, the c
 the values that you gave it. Even if you only added one value into the pool, a call
 to ``value()`` will return a vector, of size 1 in that case.
 On the other hand, if you used ``set()``, the value returned is of the same type.
+
+
+Logging framework
+=================
+
+Essentia provides you with a logging framework that is meant to be both efficient
+and easy to use. It tries to learn from other logging frameworks and has 4 logging
+levels that can be activated/deactivated independently at runtime:
+
+* Error
+* Warning
+* Info
+* Debug
+
+Furthermore, the debug level is itself subdivided into different debugging modules,
+defined in the ``DebuggingModule`` enumeration which you can find in the
+:download:`debugging.h <../../src/base/debugging.h>` file.
+
+The way to debug is to use the following macros::
+
+    E_ERROR("This is an error message!");
+    E_WARNING("This is a warning message...");
+    E_INFO("And this is an info message.");
+    E_DEBUG(EMemory, "This is a debug message relating to the memory usage");
+    E_DEBUG(EAlgorithm, "And this one is a debug message relating to an algorithm");
+
+You can also log more than just a string using the stream operator, as you would do
+in a C++ ``std::ostream``::
+
+    E_INFO("You can log ints, such as " << 42 << " floats, as in " << 3.14 << " and " <<
+           "pretty much anything that you can send in a std::ostream");
+
+To activate/deactivate the debugging modules at runtime, use the functions::
+
+    setDebugLevel(EAll);                     // EAll is a special value that contains all modules
+    unsetDebugLevel(EMemory | EConnectors);  // modules are bitmasks
+
+Note that when a logging module is deactivated, the cost on runtime is minimal
+(ie: you only really pay for logging when you use it). If you wish to completely
+turn off logging, this can be done at compile time by setting the ``DEBUGGING_ENABLED``
+variable in the ``config.h`` file to ``0``. Note that in this case, it will not be
+possible to activate *any* logging at runtime at all (the advantage being that you
+pay absolutely nothing for logging, so don't hesitate to (ab)use logging in your
+algorithms for fear of losing efficiency)
+
+Logging in python
+-----------------
+
+In python, you would usually log things using the standard ``logging`` module, but
+Essentia also gives you access to its C++ logger in order to ensure that
+the output is not mangled between the 2 logging frameworks:
+
+.. code-block:: python
+
+    essentia.log.info("This is how you use Essentia's logger in python")
+    essentia.log.debug(essentia.EAlgorithm, 'Debugging modules are also available')
+
+    essentia.log.infoActive = True                   # activate the info level
+    essentia.log.debugLevels += essentia.EAll        # activate all debug modules
+    essentia.log.debugLevels -= essentia.EExecution  # except for the ``Execution`` one
