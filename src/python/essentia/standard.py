@@ -16,15 +16,15 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 import _essentia
+import essentia
 import common as _c
 import sys as _sys
 from _essentia import keys as algorithmNames, info as algorithmInfo
-from essentia import log, EPython
 
 
 # given an essentia algorithm name, create the corresponding class
 def _create_essentia_class(name, moduleName = __name__):
-    log.debug(EPython, 'Creating essentia.standard class: %s' % name)
+    essentia.log.debug(essentia.EPython, 'Creating essentia.standard class: %s' % name)
 
     _algoInstance = _essentia.Algorithm(name)
     _algoDoc = _algoInstance.getDoc()
