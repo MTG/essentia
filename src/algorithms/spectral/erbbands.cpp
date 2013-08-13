@@ -42,6 +42,8 @@ void ERBBands::configure() {
   _width = parameter("width").toReal();
   calculateFilterFrequencies();
   createFilters(parameter("inputSize").toInt());
+
+  _type = parameter("method").toLower();
 }
 
 void ERBBands::calculateFilterFrequencies() {
@@ -140,15 +142,28 @@ void ERBBands::compute() {
 
   bands.resize(filterSize);
 
-  for (int i=0; i<filterSize; ++i) {
-    bands[i] = 0;
-    for (int j=0; j<spectrumSize; ++j) {
-      bands[i] += (spectrum[j]) * _filterCoefficients[i][j];
-      // NB: Band magnitudes are returned, while BarkBands and MelBands algorithms
-      // return energy. Gerard Roma have found magnitudes work better when
-      // working with sound effects. Probably, we can have both as an option
-      // {magnitude,energy} in all *Bands algorithms. Band magnitudes option is
-      // required for OnsetDetectionGlobal algorithm.
+
+  // NB: Band magnitudes are returned, while BarkBands and MelBands algorithms
+  // return energy. Gerard Roma have found magnitudes work better when
+  // working with sound effects.  Band magnitudes option is required for 
+  // OnsetDetectionGlobal algorithm.
+
+  // TODO: probably all *Bands algorithms should have an option {magnitude,energy} 
+
+  if (_type=="magnitude") {
+    for (int i=0; i<filterSize; ++i) {
+      bands[i] = 0;
+      for (int j=0; j<spectrumSize; ++j) {
+        bands[i] += (spectrum[j]) * _filterCoefficients[i][j];
+      }
+    }
+  }
+  else if (_type=="energy") {
+    for (int i=0; i<filterSize; ++i) {
+      bands[i] = 0;
+      for (int j=0; j<spectrumSize; ++j) {
+        bands[i] += (spectrum[j] * spectrum[j]) * _filterCoefficients[i][j];
+      }
     }
   }
 }

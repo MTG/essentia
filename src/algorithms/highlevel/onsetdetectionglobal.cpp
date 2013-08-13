@@ -95,7 +95,8 @@ void OnsetDetectionGlobal::configure() {
     _erbbands->configure("inputSize", frameSize/2 + 1,
                          "numberBands", _numberERBBands,
                          "lowFrequencyBound", 80.,
-                         "highFrequencyBound", sampleRate/2);
+                         "highFrequencyBound", sampleRate/2,
+                         "type", "magnitude");
     // TODO Smoothing window size is set to 8+8 ODF samples as in the paper and
     // matlab code. However, this will result in different time durations for
     // different ODF frame rates. Is a constant time duration required instead?
