@@ -27,11 +27,12 @@ class TestPoolAggregator(TestCase):
     def testAggregateReal(self):
         p = Pool({ 'foo': [ 1, 1, 2, 3, 5, 8, 13, 21, 34 ] })
 
-        pAgg = PoolAggregator(defaultStats=['mean', 'min', 'max', 'var', 'dmean', 'dvar', 'dmean2', 'dvar2'])
+        pAgg = PoolAggregator(defaultStats=['mean', 'min', 'max', 'median', 'var', 'dmean', 'dvar', 'dmean2', 'dvar2'])
 
         results = pAgg(p)
 
         self.assertAlmostEqual(results['foo.mean'], 9.77777777778)
+        self.assertAlmostEqual(results['foo.median'], 5)
         self.assertAlmostEqual(results['foo.min'], 1)
         self.assertAlmostEqual(results['foo.max'], 34)
         self.assertAlmostEqual(results['foo.var'], 112.172839506)
@@ -80,23 +81,29 @@ class TestPoolAggregator(TestCase):
         self.assertEqualVector(results.descriptorNames(), ['foo'])
 
 
-    def atestMatrixRealAggregation(self):
+    def testMatrixRealAggregation(self):
         p = Pool()
         p.add('foo', [1.1, 2.2, 3.3])
         p.add('foo', [4.4, 5.5, 6.6])
         p.add('foo', [7.7, 8.8, 9.9])
 
-        defaultStats = ['mean', 'min', 'max', 'var', 'dmean', 'dvar', 'dmean2', 'dvar2']
+        defaultStats = ['mean', 'min', 'max', 'median', 'var', 'dmean', 'dvar', 'dmean2', 'dvar2']
         results = PoolAggregator(defaultStats=defaultStats)(p)
 
-        #self.assertAlmostEqualVector(results['foo.mean'][0], [4.4, 5.5, 6.6])
-        #self.assertAlmostEqualVector(results['foo.min'][0], [1.1, 2.2, 3.3])
-        #self.assertAlmostEqualVector(results['foo.max'][0], [7.7, 8.8, 9.9])
-        #self.assertAlmostEqualVector(results['foo.var'][0], [7.26]*3)
-        #self.assertAlmostEqualVector(results['foo.dmean'][0], [3.3]*3)
-        #self.assertAlmostEqualVector(results['foo.dvar'][0], [0]*3)
-        #self.assertAlmostEqualVector(results['foo.dmean2'][0], [0]*3)
-        #self.assertAlmostEqualVector(results['foo.dvar2'][0], [0]*3)
+        self.assertAlmostEqualVector(results['foo.mean'], [4.4, 5.5, 6.6])
+        self.assertAlmostEqualVector(results['foo.median'], [4.4, 5.5, 6.6])
+        self.assertAlmostEqualVector(results['foo.min'], [1.1, 2.2, 3.3])
+        self.assertAlmostEqualVector(results['foo.max'], [7.7, 8.8, 9.9])
+        self.assertAlmostEqualVector(results['foo.var'], [7.26]*3)
+        self.assertAlmostEqualVector(results['foo.dmean'], [3.3]*3)
+        self.assertAlmostEqualVector(results['foo.dvar'], [0]*3)
+        self.assertAlmostEqualVector(results['foo.dmean2'], [0]*3, precision=1e-6)
+        self.assertAlmostEqualVector(results['foo.dvar2'], [0]*3, precision=1e-6)
+  
+        # test median for even number of frames
+        p.add('foo', [10.0, 10.0, 10.0])
+        results = PoolAggregator(defaultStats=defaultStats)(p)
+        self.assertAlmostEqualVector(results['foo.median'], [6.05, 7.15, 8.25])
 
         # test cov and icov
         p = Pool({ 'foo': [[32.3, 43.21, 4.3],

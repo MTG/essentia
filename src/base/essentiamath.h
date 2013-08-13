@@ -191,6 +191,45 @@ std::vector<T> meanFrames(const std::vector<std::vector<T> >& frames, int beginI
   return result;
 }
 
+// returns the median of frames
+template <typename T>
+std::vector<T> medianFrames(const std::vector<std::vector<T> >& frames, int beginIdx=0, int endIdx=-1) {
+  if (frames.empty()) {
+    throw EssentiaException("trying to calculate mean of empty array of frames");
+  }
+
+  if (endIdx == -1) endIdx = (int)frames.size();
+
+  uint vsize = frames[0].size();
+  uint fsize = endIdx - beginIdx;
+
+  std::vector<T> result(vsize, (T)0.0);
+  std::vector<T> temp;
+  temp.reserve(fsize);
+
+  for (uint i=0; i<vsize; ++i) {
+    typename std::vector<std::vector<T> >::const_iterator it = frames.begin() + beginIdx;
+    typename std::vector<std::vector<T> >::const_iterator end = frames.begin() + endIdx;
+
+    temp.clear();    
+    for (; it!=end; ++it) {
+      temp.push_back((*it)[i]);
+    }
+    std::sort(temp.begin(), temp.end());
+    
+    // array size is an odd number
+    if (fsize % 2 == 0.0) {
+      result[i] = (temp[uint(fsize/2 - 1)] + temp[uint(fsize/2)]) / 2;
+    }
+    // array size is an even number
+    else {
+      result[i] = temp[uint(fsize/2)];
+    }
+  }
+  return result;
+}
+
+
 // returns the variance of frames
 template <typename T>
 std::vector<T> varianceFrames(const std::vector<std::vector<T> >& frames) {
