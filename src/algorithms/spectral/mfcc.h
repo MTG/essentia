@@ -35,10 +35,12 @@ class MFCC : public Algorithm {
   Algorithm* _melFilter;
   Algorithm* _dct;
 
+  std::vector<Real> _logbands;
+
  public:
   MFCC() {
     declareInput(_spectrum, "spectrum", "the audio spectrum");
-    declareOutput(_bands, "bands" , "the log-energies in mel bands");
+    declareOutput(_bands, "bands" , "the energies in mel bands");
     declareOutput(_mfcc, "mfcc", "the mel frequency cepstrum coefficients");
 
     _melFilter = AlgorithmFactory::create("MelBands");
