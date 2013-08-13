@@ -407,6 +407,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime,
   connect(rhythmExtractor->output("estimates"), pool, rhythmspace + "bpm_estimates");
   connect(rhythmExtractor->output("rubatoStart"), pool, rhythmspace + "rubato_start");
   connect(rhythmExtractor->output("rubatoStop"), pool, rhythmspace + "rubato_stop");
+  connect(rhythmExtractor->output("rubatoNumber"), pool, rhythmspace + "rubato_sections_number");
   connect(rhythmExtractor->output("bpmIntervals"), pool, rhythmspace + "bpm_intervals");
 
   Algorithm* rhythmExtractor2 = factory.create("RhythmExtractor2013");
@@ -416,6 +417,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime,
   connect(rhythmExtractor2->output("estimates"), oldPool, rhythmspace + "bpm_estimates");
   connect(rhythmExtractor2->output("rubatoStart"), oldPool, rhythmspace + "rubato_start");
   connect(rhythmExtractor2->output("rubatoStop"), oldPool, rhythmspace + "rubato_stop");
+  connect(rhythmExtractor2->output("rubatoNumber"), oldPool, rhythmspace + "rubato_sections_number");
   connect(rhythmExtractor2->output("bpmIntervals"), oldPool, rhythmspace + "bpm_intervals");
 
   // BPM Histogram descriptors

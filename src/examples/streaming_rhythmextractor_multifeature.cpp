@@ -67,6 +67,7 @@ int main(int argc, char* argv[]) {
   connect(rhythmextractor->output("estimates"), pool, "rhythm.estimates");
   connect(rhythmextractor->output("rubatoStart"), pool, "rhythm.rubatoStart");
   connect(rhythmextractor->output("rubatoStop"), pool, "rhythm.rubatoStop");
+  connect(rhythmextractor->output("rubatoNumber"), pool, "rhythm.rubatoNumber");
   connect(rhythmextractor->output("bpmIntervals"), pool, "rhythm.bpmIntervals");
 
   /////////// STARTING THE ALGORITHMS //////////////////
@@ -82,6 +83,7 @@ int main(int argc, char* argv[]) {
   cout << "ticks: " << pool.value<vector<Real> >("rhythm.ticks") << endl;
   cout << "estimates: " << pool.value<vector<Real> >("rhythm.estimates") << endl;
   cout << "bpmIntervals: " << pool.value<vector<Real> >("rhythm.bpmIntervals") << endl;
+  cout << "rubatoNumber:" << (int) pool.value<Real>("rhythm.rubatoNumber") << endl;
   try {
       cout << "rubatoStart: " << pool.value<vector<Real> >("rhythm.rubatoStart") << endl;
       cout << "rubatoStop: " << pool.value<vector<Real> >("rhythm.rubatoStop") << endl;

@@ -38,6 +38,7 @@ class RhythmExtractor2013 : public AlgorithmComposite {
   Source<std::vector<Real> > _estimates;
   Source<std::vector<Real> > _rubatoStart;
   Source<std::vector<Real> > _rubatoStop;
+  Source<int> _rubatoNumber;
   Source<std::vector<Real> > _bpmIntervals;
 
   Pool _pool;
@@ -96,6 +97,7 @@ class RhythmExtractor2013 : public Algorithm {
   Output<std::vector<Real> > _estimates;
   Output<std::vector<Real> > _rubatoStart;
   Output<std::vector<Real> > _rubatoStop;
+  Output<int> _rubatoNumber;
   Output<std::vector<Real> > _bpmIntervals;
 
   bool _configured;
