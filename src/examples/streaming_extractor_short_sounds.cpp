@@ -356,6 +356,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime, 
   connect(rhythmExtractor->output("estimates"), pool, rhythmspace + "bpm_estimates");
   connect(rhythmExtractor->output("rubatoStart"), pool, rhythmspace + "rubato_start");
   connect(rhythmExtractor->output("rubatoStop"), pool, rhythmspace + "rubato_stop");
+  connect(rhythmExtractor->output("rubatoNumber"), pool, rhythmspace + "rubato_sections_number");
   connect(rhythmExtractor->output("bpmIntervals"), pool, rhythmspace + "bpm_intervals");
 
   // BPM Histogram descriptors

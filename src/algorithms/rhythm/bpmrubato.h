@@ -34,6 +34,7 @@ class BpmRubato : public Algorithm {
   Output<std::vector<Real> > _rubatoStart;
   // output vector for stop timestamps
   Output<std::vector<Real> > _rubatoStop;
+  Output<int> _rubatoNumber;
   Real _tolerance; // variation in % of the current bpm
   Real _shortestRegion;
   Real _longestRegion;
@@ -44,6 +45,7 @@ class BpmRubato : public Algorithm {
     declareInput(_beats, "beats", "list of detected beat ticks [s]");
     declareOutput(_rubatoStart, "rubatoStart", "list of timestamps where the start of a rubato region was detected [s]");
     declareOutput(_rubatoStop, "rubatoStop", "list of timestamps where the end of a rubato region was detected [s]");
+    declareOutput(_rubatoNumber, "rubatoNumber", "number of detected rubato regions");
   }
 
   ~BpmRubato() {};
@@ -76,6 +78,7 @@ class BpmRubato : public StreamingAlgorithmWrapper {
   Sink<std::vector<Real> > _beats;
   Source<std::vector<Real> > _rubatoStart;
   Source<std::vector<Real> > _rubatoStop;
+  Source<int> _rubatoNumber;
 
  public:
   BpmRubato() {
@@ -83,6 +86,7 @@ class BpmRubato : public StreamingAlgorithmWrapper {
     declareInput(_beats, TOKEN, "beats");
     declareOutput(_rubatoStart, TOKEN, "rubatoStart");
     declareOutput(_rubatoStop, TOKEN, "rubatoStop");
+    declareOutput(_rubatoNumber, TOKEN, "rubatoNumber");
   }
 };
 

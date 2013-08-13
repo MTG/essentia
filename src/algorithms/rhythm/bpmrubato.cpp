@@ -43,6 +43,7 @@ void BpmRubato::compute() {
   const vector<Real>& beats = _beats.get();
   vector<Real>& rubatoStart = _rubatoStart.get();
   vector<Real>& rubatoStop  = _rubatoStop.get();
+  int& rubatoNumber = _rubatoNumber.get();
   _rubatoOn = false; // true means currently in a region of changing rhythm
 
   int size = int(beats.size());
@@ -143,4 +144,5 @@ void BpmRubato::compute() {
       _rubatoOn = false;
     }
   }
+  rubatoNumber = (int) rubatoStop.size();
 }

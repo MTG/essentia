@@ -201,8 +201,9 @@ int main(int argc, char* argv[]) {
   Real bpm;                  // estimated bpm (in beats per minute)
   vector<Real> ticks;        // estimated tick locations (in seconds)
   vector<Real> estimates;    // estimated bpm per frame (in beats per minute)
-  vector<Real> rubatoStart;  // list of start times of rubato positions
-  vector<Real> rubatoStop;   // list of stop times of rubato positions
+  vector<Real> rubatoStart;  // list of start times of rubato regions
+  vector<Real> rubatoStop;   // list of stop times of rubato regions
+  int rubatoNumber;          // number of rubato regions
   vector<Real> bpmIntervals; // list of beats interval (in seconds)
 
 
@@ -412,6 +413,7 @@ int main(int argc, char* argv[]) {
     bpmRubato->input("beats").set(ticks);
     bpmRubato->output("rubatoStart").set(rubatoStart);
     bpmRubato->output("rubatoStop").set(rubatoStop);
+    bpmRubato->output("rubatoNumber").set(rubatoNumber); 
     bpmRubato->compute();
   }
 
@@ -425,6 +427,7 @@ int main(int argc, char* argv[]) {
   cout << "bpmIntervals: " << bpmIntervals << endl;
   cout << "rubatoStart: " << rubatoStart << endl;
   cout << "rubatoStop: " << rubatoStop << endl;
+  cout << "rubatoNumber:" << rubatoNumber << endl;
 
   // ====================== clean up ==================================
 
