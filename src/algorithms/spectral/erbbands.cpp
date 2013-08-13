@@ -43,7 +43,7 @@ void ERBBands::configure() {
   calculateFilterFrequencies();
   createFilters(parameter("inputSize").toInt());
 
-  _type = parameter("method").toLower();
+  _type = parameter("type").toLower();
 }
 
 void ERBBands::calculateFilterFrequencies() {
