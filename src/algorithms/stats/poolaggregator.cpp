@@ -31,6 +31,7 @@ const char* PoolAggregator::name = "PoolAggregator";
 const char* PoolAggregator::description = DOC("This algorithm performs statistical aggregation on a Pool and places the results of the aggregation into a new Pool. Supported statistical units are:\n"
   "\t'min' (minimum),\n"
   "\t'max' (maximum),\n"
+  "\t'median'\n"
   "\t'mean'\n"
   "\t'var' (variance),\n"
   "\t'skew' (skewness),\n"
@@ -56,7 +57,7 @@ const char* PoolAggregator::description = DOC("This algorithm performs statistic
 
 // initialize supported statistics set
 const char* supportedStats[] =
-  {"min", "max", "mean", "var", "skew", "kurt",
+  {"min", "max", "median", "mean", "var", "skew", "kurt",
    "dmean", "dvar", "dmean2", "dvar2",
    "cov", "icov",
    "copy", "value"};
@@ -100,6 +101,9 @@ void PoolAggregator::aggregateRealPool(const Pool& input, Pool& output) {
     Real meanVal = mean(data);
     Real varianceVal = variance(data, meanVal);
 
+    // median
+    Real medianVal = median(data);
+
     // skewness and kurtosis
     Real skewnessVal = skewness(data, meanVal);
     Real kurtosisVal = kurtosis(data, meanVal);
@@ -138,6 +142,7 @@ void PoolAggregator::aggregateRealPool(const Pool& input, Pool& output) {
     const vector<string>& stats = getStats(key);
     for (int i=0; i<(int)stats.size(); ++i) {
       if      (stats[i] == "mean")   output.set(key + ".mean", meanVal);
+      else if (stats[i] == "median") output.set(key + ".median", medianVal);
       else if (stats[i] == "min")    output.set(key + ".min", minVal);
       else if (stats[i] == "max")    output.set(key + ".max", maxVal);
       else if (stats[i] == "var")    output.set(key + ".var", varianceVal);
@@ -211,6 +216,9 @@ void PoolAggregator::aggregateVectorRealPool(const Pool& input, Pool& output) {
     // mean & var
     vector<Real> meanVals = meanFrames(data);
     vector<Real> varVals = varianceFrames(data);
+
+    // median
+    vector<Real> medianVals = medianFrames(data);
 
     // skewness & kurtosis
     vector<Real> skewnessVals = skewnessFrames(data);
@@ -310,6 +318,9 @@ void PoolAggregator::aggregateVectorRealPool(const Pool& input, Pool& output) {
       if (stats[i] == "mean")
         for (int j=0; j<int(meanVals.size()); ++j) output.add(subkey, meanVals[j]);
 
+      else if (stats[i] == "median")
+        for (int j=0; j<int(medianVals.size()); ++j) output.add(subkey, medianVals[j]);
+    
       else if (stats[i] == "min")
         for (int j=0; j<int(minVals.size()); ++j) output.add(subkey, minVals[j]);
 
@@ -503,6 +514,7 @@ void PoolAggregator::aggregateArray2DRealPool(const Pool& input, Pool& output) {
     for (int i=0; i<int(stats.size()); ++i) {
       string subkey = key + "." + stats[i];
       if (stats[i] == "mean") addMatrixAsVectorVector(output, subkey, meanMat);
+      else if (stats[i] == "median") { /* TODO: not implemented */ }
       else if (stats[i] == "min") addMatrixAsVectorVector(output, subkey, minMat);
       else if (stats[i] == "max") addMatrixAsVectorVector(output, subkey, maxMat);
       else if (stats[i] == "var") addMatrixAsVectorVector(output, subkey, varMat);
