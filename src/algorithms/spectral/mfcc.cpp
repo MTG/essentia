@@ -48,6 +48,7 @@ void MFCC::configure() {
 
   _dct->configure("inputSize", parameter("numberBands"),
                   "outputSize", parameter("numberCoefficients"));
+  _logbands.resize(parameter("numberBands").toInt());
 }
 
 void MFCC::compute() {
@@ -64,11 +65,11 @@ void MFCC::compute() {
 
   // take the dB amplitude of the spectrum
   for (int i=0; i<int(bands.size()); ++i) {
-    bands[i] = amp2db(bands[i]);
+    _logbands[i] = amp2db(bands[i]);
   }
 
   // compute the DCT of these bands
-  _dct->input("array").set(bands);
+  _dct->input("array").set(_logbands);
   _dct->output("dct").set(mfcc);
   _dct->compute();
 }
