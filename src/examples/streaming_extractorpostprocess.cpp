@@ -20,6 +20,7 @@
 #include "streaming_extractorpostprocess.h"
 #include "poolstorage.h"
 #include "algorithmfactory.h"
+#include "essentiamath.h"
 
 using namespace std;
 using namespace essentia;
