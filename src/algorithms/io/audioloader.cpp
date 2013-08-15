@@ -347,16 +347,6 @@ int AudioLoader::decodePacket() {
 
     int len = 0;
 
-    // FIXME: this looks like it's not true anymore, and breaks newer versions of ffmpeg
-    //        it was probably a hack for older versions of ffmpeg, we should think about
-    //        removing it if it is not necessary anymore...
-    // make a local copy of the packet as we might modify it if it contains
-    // more than one frame, but we will have to call av_free_packet on the
-    // original packet in the end
-    AVPacket packet;
-    packet.data = _packet.data;
-    packet.size = _packet.size;
-
     // buff is an offset in our output buffer, it points to where we should start
     // writing the next decoded samples
     int16_t* buff = _buffer;
@@ -365,91 +355,70 @@ int AudioLoader::decodePacket() {
     if (_audioConvert) { buff = _buff1; }
 #endif
 
-    int totalBytesWritten = 0;
+    // _dataSize gets the size of the buffer, in bytes
+    _dataSize = FFMPEG_BUFFER_SIZE*sizeof(int16_t);
 
-    while (packet.size > 0) { // while we still have some bytes to read from the input packet
-        buff += totalBytesWritten;
+    // _dataSize  input = number of bytes available for write in buff
+    //           output = number of bytes actually written (actual: S16 data)
+    //E_DEBUG(EAlgorithm, "decode_audio_frame, available bytes in buffer = " << _dataSize);
+    len = decode_audio_frame(_audioCtx, buff, &_dataSize, &_packet);
 
-        // _dataSize gets the size of this remaining buffer, in bytes
-        _dataSize = FFMPEG_BUFFER_SIZE*sizeof(int16_t) - totalBytesWritten;
-
-        //cout << "_dataSize: " << _dataSize << " " << AVCODEC_MAX_AUDIO_FRAME_SIZE << endl;
-        // just to make sure that we dimensioned our buffers correctly. If this assert fails
-        // we're gonna have to save audio frames contained in a packet in a temp place, then
-        // join them later
-        if (_dataSize < AVCODEC_MAX_AUDIO_FRAME_SIZE) {
-            // asserts can be turned off, exceptions can't...
-            throw EssentiaException("INTERNAL ERROR in Audioloader: the output buffer is too small; please report this bug with the corresponding audio file.");
+    if (len < 0) {
+        // only print error msg when file is not an mp3, because mp3 streams can have tag
+        // frames (id3v2?) which libavcodec tries to read as audio anyway, and we don't want
+        // to print an error message for that...
+        if (_audioCtx->codec_id == CODEC_ID_MP3) {
+            E_DEBUG(EAlgorithm, "AudioLoader: invalid frame, probably an mp3 tag frame, skipping it");
         }
-
-        // _dataSize  input = number of bytes available for write in buff
-        //           output = number of bytes actually written (actual: S16 data)
-        //E_DEBUG(EAlgorithm, "decode_audio_frame, available bytes in buffer = " << _dataSize);
-        len = decode_audio_frame(_audioCtx, buff, &_dataSize, &_packet);
-
-        if (len < 0) {
-            // only print error msg when file is not an mp3, because mp3 streams can have tag
-            // frames (id3v2?) which libavcodec tries to read as audio anyway, and we don't want
-            // to print an error message for that...
-            if (_audioCtx->codec_id == CODEC_ID_MP3) {
-                E_DEBUG(EAlgorithm, "AudioLoader: invalid frame, probably an mp3 tag frame, skipping it");
-            }
-            else {
-                E_WARNING("AudioLoader: error while decoding, skipping frame");
-            }
-            break;
+        else {
+            E_WARNING("AudioLoader: error while decoding, skipping frame");
         }
-
-        // advance inside input buffer
-        packet.data += len;
-        packet.size -= len;
-
-        if (_dataSize <= 0) {
-            // No data yet, get more frames
-            //cout << "no data yet, get more frames" << endl;
-            continue;
-        }
-
-#if !HAVE_SWRESAMPLE
-        if (_audioConvert) {
-            // this assumes that all audio is interleaved in the first channel
-            // it works as we're only doing sample format conversion, but we
-            // should be very careful
-            const void* ibuf[6] = { buff };
-                  void* obuf[6] = { _buff2 };
-            int istride[6]      = { av_get_bytes_per_sample(_audioCtx->sample_fmt) };
-            int ostride[6]      = { av_get_bytes_per_sample(AV_SAMPLE_FMT_S16)     };
-            int totalsamples    = _dataSize / istride[0]; // == num_samp_per_channel * num_channels
-
-            if (av_audio_convert(_audioConvert, obuf, ostride, ibuf, istride, totalsamples) < 0) {
-                ostringstream msg;
-                msg << "AudioLoader: Error converting "
-                    << " from " << avcodec_get_sample_fmt_name(_audioCtx->sample_fmt)
-                    << " to "   << avcodec_get_sample_fmt_name(SAMPLE_FMT_S16);
-                throw EssentiaException(msg);
-                break;
-            }
-
-            // when entering the current block, dataSize contained the size in bytes
-            // that the audio was taking in its native format. Now it needs to be set
-            // to the size of the audio we're returning, after conversion
-            _dataSize = totalsamples * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
-        }
-#endif
-
-        totalBytesWritten += _dataSize;
-
-        if (packet.size > 0) {
-            // more than 1 frame in a packet, happens a lot with flac for instance...
-            E_DEBUG(EAlgorithm, "AudioLoader: more than 1 frame in packet, keep on reading from this packet until exhausted...");
-            throw EssentiaException("AudioLoader: more than 1 frame in packet, not supported anymore...");
-        }
+        return 0;
     }
 
-    // now _dataSize should contain the total number of bytes written
-    _dataSize = totalBytesWritten;
+    if (_dataSize <= 0) {
+        // No data yet, get more frames
+        //cout << "no data yet, get more frames" << endl;
+        _dataSize = 0;
+        return 0;
+    }
 
-    av_free_packet(&_packet);
+#if !HAVE_SWRESAMPLE
+    if (_audioConvert) {
+        // this assumes that all audio is interleaved in the first channel
+        // it works as we're only doing sample format conversion, but we
+        // should be very careful
+        const void* ibuf[6] = { buff };
+              void* obuf[6] = { _buff2 };
+        int istride[6]      = { av_get_bytes_per_sample(_audioCtx->sample_fmt) };
+        int ostride[6]      = { av_get_bytes_per_sample(AV_SAMPLE_FMT_S16)     };
+        int totalsamples    = _dataSize / istride[0]; // == num_samp_per_channel * num_channels
+
+        if (av_audio_convert(_audioConvert, obuf, ostride, ibuf, istride, totalsamples) < 0) {
+            ostringstream msg;
+            msg << "AudioLoader: Error converting "
+                << " from " << avcodec_get_sample_fmt_name(_audioCtx->sample_fmt)
+                << " to "   << avcodec_get_sample_fmt_name(SAMPLE_FMT_S16);
+            throw EssentiaException(msg);
+        }
+
+        // when entering the current block, dataSize contained the size in bytes
+        // that the audio was taking in its native format. Now it needs to be set
+        // to the size of the audio we're returning, after conversion
+        _dataSize = totalsamples * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
+    }
+#endif
+
+    if (len != _packet.size) {
+        // FIXME: the following doesn't seem to happen anymore, probably some old
+        //        workaround for ffmpeg. Complain loudly if something looks fishy
+
+        // more than 1 frame in a packet, happens a lot with flac for instance...
+        const char msg[] = "AudioLoader: more than 1 frame in packet, not supported anymore... "
+            "Please report the issue with the file that caused it.";
+        E_ERROR(msg);
+        throw EssentiaException(msg);
+    }
 
     return len;
 }
