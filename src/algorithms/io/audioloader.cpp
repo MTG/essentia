@@ -74,6 +74,7 @@ void AudioLoader::configure() {
 
 
 void AudioLoader::openAudioFile(const string& filename) {
+    E_DEBUG(EAlgorithm, "AudioLoader: opening file: " << parameter("filename").toString());
 
     // Open file
     if (avformat_open_input(&_demuxCtx, filename.c_str(), NULL, NULL) != 0) {
@@ -119,8 +120,7 @@ void AudioLoader::openAudioFile(const string& filename) {
 
 #if HAVE_SWRESAMPLE
 
-        E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from "
-                "libswresample for file: " << parameter("filename").toString());
+        E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libswresample");
 
         // No samplerate conversion yet, only format
         int64_t layout = av_get_default_channel_layout(_audioCtx->channels);
@@ -143,7 +143,7 @@ void AudioLoader::openAudioFile(const string& filename) {
 #else
 
         E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from "
-                "deprecated audioconvert for file: " << parameter("filename").toString());
+                            "deprecated audioconvert");
 
         _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, _audioCtx->sample_fmt, 1, NULL, 0);
 
@@ -155,8 +155,7 @@ void AudioLoader::openAudioFile(const string& filename) {
 
     }
     else {
-        E_DEBUG(EAlgorithm, "AudioLoader: no sample format conversion, direct copy "
-                "for file: " << parameter("filename").toString());
+        E_DEBUG(EAlgorithm, "AudioLoader: no sample format conversion, using direct copy");
     }
 
     av_init_packet(&_packet);
@@ -166,6 +165,17 @@ void AudioLoader::openAudioFile(const string& filename) {
     if (!_decodedFrame) {
         throw EssentiaException("Could not allocate audio frame");
     }
+#endif
+
+
+#if LIBAVCODEC_VERSION_INT < AVCODEC_51_28_0
+    E_DEBUG(EAlgorithm, "AudioLoader: using ffmpeg avcodec_decode_audio() function");
+#elif LIBAVCODEC_VERSION_INT < AVCODEC_52_47_0
+    E_DEBUG(EAlgorithm, "AudioLoader: using ffmpeg avcodec_decode_audio2() function");
+#elif LIBAVCODEC_VERSION_INT < AVCODEC_AUDIO_DECODE4
+    E_DEBUG(EAlgorithm, "AudioLoader: using ffmpeg avcodec_decode_audio3() function");
+#else
+    E_DEBUG(EAlgorithm, "AudioLoader: using ffmpeg avcodec_decode_audio4() function");
 #endif
 
 }
@@ -212,9 +222,10 @@ AlgorithmStatus AudioLoader::process() {
         throw EssentiaException("AudioLoader: Trying to call process() on an AudioLoader algo which hasn't been correctly configured.");
     }
 
-  // read frames until we got a good one
+    // read frames until we get a good one
     do {
         int result = av_read_frame(_demuxCtx, &_packet);
+        //E_DEBUG(EAlgorithm, "AudioLoader: called av_read_frame(), got result = " << result);
 
         if (result != 0) {
             shouldStop(true);
@@ -258,7 +269,8 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
     avcodec_get_frame_defaults(_decodedFrame);
 
     int len = avcodec_decode_audio4(audioCtx, _decodedFrame, &gotFrame, packet);
-    if (len < 0) throw EssentiaException("Error while decoding");
+
+    if (len < 0) return len; // error handling should be done outside
 
     if (gotFrame) {
         int nsamples = _decodedFrame->nb_samples;
@@ -325,16 +337,19 @@ void AudioLoader::flushPacket() {
  * putting them in _buffer, the total number of bytes written begin stored in _dataSize.
  */
 int AudioLoader::decodePacket() {
-  /*
-  cout << "-----------------------------------------------------" << endl;
-  cout << "decoding packet of " << bufSize << " bytes" << endl;
-  cout << "pts: " << _packet.pts << " - dts: " << _packet.dts << endl; //" - pos: " << pkt->pos <<  endl;
-  cout << "flags: " << _packet.flags << endl;
-  cout << "duration: " << _packet.duration << endl;
-  */
+    /*
+    E_DEBUG(EAlgorithm, "-----------------------------------------------------");
+    E_DEBUG(EAlgorithm, "decoding packet of " << _packet.size << " bytes");
+    E_DEBUG(EAlgorithm, "pts: " << _packet.pts << " - dts: " << _packet.dts); //" - pos: " << pkt->pos);
+    E_DEBUG(EAlgorithm, "flags: " << _packet.flags);
+    E_DEBUG(EAlgorithm, "duration: " << _packet.duration);
+    */
 
     int len = 0;
 
+    // FIXME: this looks like it's not true anymore, and breaks newer versions of ffmpeg
+    //        it was probably a hack for older versions of ffmpeg, we should think about
+    //        removing it if it is not necessary anymore...
     // make a local copy of the packet as we might modify it if it contains
     // more than one frame, but we will have to call av_free_packet on the
     // original packet in the end
@@ -369,15 +384,18 @@ int AudioLoader::decodePacket() {
 
         // _dataSize  input = number of bytes available for write in buff
         //           output = number of bytes actually written (actual: S16 data)
-        len = decode_audio_frame(_audioCtx, buff, &_dataSize, &packet);
+        //E_DEBUG(EAlgorithm, "decode_audio_frame, available bytes in buffer = " << _dataSize);
+        len = decode_audio_frame(_audioCtx, buff, &_dataSize, &_packet);
 
         if (len < 0) {
             // only print error msg when file is not an mp3, because mp3 streams can have tag
             // frames (id3v2?) which libavcodec tries to read as audio anyway, and we don't want
             // to print an error message for that...
-            if (_audioCtx->codec_id != CODEC_ID_MP3) {
+            if (_audioCtx->codec_id == CODEC_ID_MP3) {
+                E_DEBUG(EAlgorithm, "AudioLoader: invalid frame, probably an mp3 tag frame, skipping it");
+            }
+            else {
                 E_WARNING("AudioLoader: error while decoding, skipping frame");
-                _packet.size = 0;
             }
             break;
         }
@@ -424,6 +442,7 @@ int AudioLoader::decodePacket() {
         if (packet.size > 0) {
             // more than 1 frame in a packet, happens a lot with flac for instance...
             E_DEBUG(EAlgorithm, "AudioLoader: more than 1 frame in packet, keep on reading from this packet until exhausted...");
+            throw EssentiaException("AudioLoader: more than 1 frame in packet, not supported anymore...");
         }
     }
 
@@ -442,6 +461,7 @@ inline Real scale(int16_t value) {
 
 void AudioLoader::copyFFmpegOutput() {
     int nsamples  = _dataSize / 2 / _nChannels;
+    if (nsamples == 0) return;
 
     // acquire necessary data
     bool ok = _audio.acquire(nsamples);
