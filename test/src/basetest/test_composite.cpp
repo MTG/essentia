@@ -114,9 +114,12 @@ TEST(Composite, ReplaceInnerAlgo) {
 
   EXPECT_EQ(output[0], 1);
 
-  while (vinput->process() == OK) ;
-  while (composite->process() == OK);
-  while (voutput->process() == OK);
+  while (vinput->process() == OK)
+      ;
+  while (composite->process() == OK)
+      ;
+  while (voutput->process() == OK)
+      ;
 
   EXPECT_VEC_EQ(output, expected);
 
