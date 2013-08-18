@@ -75,16 +75,7 @@ public:
 // Atomic for OS_MAC and OS_LINUX:
 //
 
-#if GCC_VERSION >= 40200
-   // atomicity.h has moved to ext/ since g++ 4.2
-  #if defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) && (__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__ <=1050) // not on osx 10.5
-  #  include <bits/atomicity.h>
-  #else
-  #  include <ext/atomicity.h>
-  #endif
-#else
-#  include <bits/atomicity.h>
-#endif
+#include <ext/atomicity.h>
 
 namespace essentia {
 
