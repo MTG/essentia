@@ -106,6 +106,13 @@ def build(ctx):
                                    'extractorpanning',
                                    'extractorpostprocess' ])
 
+        build_example('streaming', 'extractor_archive',
+                                 [ 'extractorutils',
+                                   'extractor_archivetonal',
+                                   'extractor_archivelowlevel',
+                                   'extractorsfx',
+                                   'extractorpanning',
+                                   'extractor_archivepostprocess' ])
 
         build_example('streaming', 'rhythmextractor_noveltycurve')
         build_example('streaming', 'beatsmarker')
