@@ -125,7 +125,7 @@ void setDefaultOptions(Pool& pool) {
   pool.set("panning.silentFrames", silentFrames);
 
   // stats
-  const char* statsArray[] = { "mean", "var", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
+  const char* statsArray[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
   const char* mfccStatsArray[] = { "mean", "cov", "icov" };
   vector<string> stats = arrayToVector<string>(statsArray);
   vector<string> mfccStats = arrayToVector<string>(mfccStatsArray);
