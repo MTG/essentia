@@ -44,7 +44,7 @@ void Configurable::declareParameter(const string& name, const string& desc,
 
 void Configurable::setParameters(const ParameterMap& params) {
 
-#ifdef NO_DEFAULT_PARAMETERS
+#if !ALLOW_DEFAULT_PARAMETERS
 
   vector<string> allParams = _defaultParams.keys();
   vector<string> givenParams = params.keys();
@@ -56,7 +56,7 @@ void Configurable::setParameters(const ParameterMap& params) {
     throw EssentiaException(msg);
   }
 
-#endif // NO_DEFAULT_PARAMETERS
+#endif // !ALLOW_DEFAULT_PARAMETERS
 
 
   // merge the parameters from the new map into the existing one, so that we

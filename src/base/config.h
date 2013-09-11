@@ -20,57 +20,80 @@
 #ifndef ESSENTIA_CONFIG_H
 #define ESSENTIA_CONFIG_H
 
+/**
+ * Essentia version number.
+ */
 #ifndef ESSENTIA_VERSION
-#  define ESSENTIA_VERSION "Unknown"
+#define ESSENTIA_VERSION "Unknown"
 #endif
 
+
 /**
- *
- * Configuration file for compiling Essentia
- *
- * flags and \#define's that have effect on the compilation process
- *
- * - ESSENTIA_EXPORTS:
- *     if defined, essentia will be exporting symbols which are part of the main
- *     API. Use this when compiling it as a shared library.
- *
- * - STRIP_DOCUMENTATION:
- *     if defined, this will remove all documentation strings from the compiled
- *     library or executable
- *
- * - CASE_SENSITIVE:
- *     if defined, all string comparisons in essentia are case-sensitive,
- *     otherwise they are case-insensitive (slower).
- *
- * - SAFE_TYPE_COMPARISONS:
- *     when setting inputs/outputs of an algorithm, use safe type comparisons
- *     i.e.: based on the name of the type, rather than just on the pointer.
- *     This means that type comparisons will work across dynamic libraries
- *     boundaries, but is a little bit slower.
- *
- * - NO_DEFAULT_PARAMETERS:
- *     when configuring an algorithm, you need to specify all of the parameters
- *     when this option is define, otherwise essentia will throw an exception.
- *
- * - DEBUGGING_ENABLED:
- *     when defined, debugging will be enabled and you will be able to control
- *     it using the functions defined in the debugging.h file. It is recommended
- *     to disable it only in the situations where you need the absolute last drop
- *     of performance, because debug levels that are not activated do cost a
- *     little bit, but not that much really.
+ * if set to @c 1, debugging will be enabled and you will be able to control
+ * it using the functions defined in the debugging.h file. It is recommended
+ * to disable it only in the situations where you need the absolute last drop
+ * of performance, because debug levels that are not activated do cost a
+ * little bit, but not that much really.
  */
+#ifndef DEBUGGING_ENABLED
+#define DEBUGGING_ENABLED 1
+#endif
 
 
-#define ESSENTIA_EXPORTS
-//#define STRIP_DOCUMENTATION
-#define CASE_SENSITIVE
-//#define SAFE_TYPE_COMPARISONS
-//#define NO_DEFAULT_PARAMETERS
-#define DEBUGGING_ENABLED
+/**
+ * if set to @c 1, essentia will be exporting symbols which are part of the main
+ * API. Use this when compiling it as a shared library.
+ */
+#ifndef ESSENTIA_EXPORTS
+#define ESSENTIA_EXPORTS 1
+#endif
+
+
+/**
+ * if set to @c 1, this will remove all documentation strings from the compiled
+ * library or executable.
+ */
+#ifndef STRIP_DOCUMENTATION
+#define STRIP_DOCUMENTATION 0
+#endif
+
+
+/**
+ * if set to @c 1, all string comparisons in essentia are case-sensitive,
+ * otherwise they are case-insensitive (slower).
+ */
+#ifndef CASE_SENSITIVE
+#define CASE_SENSITIVE 1
+#endif
+
+
+/**
+ *  if set to @c 1, essentia will use safe type comparisons (i.e.: based on
+ *  the name of the type, rather than just on the pointer) when setting
+ *  inputs/outputs of an algorithm. This allows type comparisons to work across
+ *  dynamic libraries boundaries, but is a little bit slower.
+ */
+#ifndef SAFE_TYPE_COMPARISONS
+#define SAFE_TYPE_COMPARISONS 0
+#endif
+
+
+/**
+ * - if set to @c 1, this allows to use default values for the parameters when
+ *   the algorithm defines them.
+ * - if set to @c 0, this requires algorithm instantiations to always explicitly
+ *   specify all the parameters. If they are not all specified, the
+ *   instantiation of the algorithm will fail and throw an exception.
+ */
+#ifndef ALLOW_DEFAULT_PARAMETERS
+#define ALLOW_DEFAULT_PARAMETERS 1
+#endif
 
 
 
-// tries to identify on which OS we are
+/**
+ * OS type.
+ */
 #ifdef _MSC_VER
 #  define OS_WIN32
 #else
@@ -81,6 +104,8 @@
 #  endif
 #endif
 
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 // some Windows peculiarities that need to be fixed
 #ifdef OS_WIN32
@@ -146,15 +171,15 @@ typedef unsigned int uint;
 
 // define ESSENTIA_EXPORTS when building the DLL, don't when importing it
 // into your application.
-#ifdef ESSENTIA_EXPORTS
+#if ESSENTIA_EXPORTS
 #  define ESSENTIA_API ESSENTIA_DLLEXPORT
 #else
 #  define ESSENTIA_API ESSENTIA_DLLIMPORT
 #endif
 
 
-// do we strip documentation or not?
-#ifdef STRIP_DOCUMENTATION
+// do we strip algorithm documentation from the resulting binary or not?
+#if STRIP_DOCUMENTATION
 #  define DOC(x) "Unavailable"
 #else
 #  define DOC(x) x
@@ -162,13 +187,16 @@ typedef unsigned int uint;
 
 
 // case-insensitive or not?
-#ifdef CASE_SENSITIVE
+#if CASE_SENSITIVE
 #  define string_cmp std::less<std::string>
 #  define charptr_cmp strcmp
 #else
 #  define string_cmp case_insensitive_str_cmp
 #  define charptr_cmp strcasecmp
 #endif
+
+
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 
 #endif // ESSENTIA_CONFIG_H
