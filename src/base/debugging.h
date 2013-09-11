@@ -97,7 +97,7 @@ extern Logger loggerInstance;
 } // namespace essentia
 
 
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
 
 #  define E_DEBUG_INDENT debugIndentLevel++
 #  define E_DEBUG_OUTDENT debugIndentLevel--
@@ -118,7 +118,7 @@ extern Logger loggerInstance;
 #  define E_WARNING(msg) loggerInstance.warning(E_STRINGIFY(msg))
 #  define E_ERROR(msg) loggerInstance.error(E_STRINGIFY(msg))
 
-#else
+#else // DEBUGGING_ENABLED
 
 #  define E_DEBUG_INDENT
 #  define E_DEBUG_OUTDENT
@@ -132,7 +132,7 @@ extern Logger loggerInstance;
 #  define E_WARNING(msg)
 #  define E_ERROR(msg)
 
-#endif
+#endif // DEBUGGING_ENABLED
 
 
 

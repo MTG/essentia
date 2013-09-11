@@ -152,7 +152,7 @@ class ESSENTIA_API Algorithm : public Configurable {
  public:
 
   Algorithm() : _shouldStop(false)
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
       , nProcess(0)
 #endif
       {}
@@ -249,7 +249,7 @@ class ESSENTIA_API Algorithm : public Configurable {
   OutputMap _outputs;
   InputMap _inputs;
 
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
   friend class essentia::scheduler::Network;
 
   /** number of times the process() method has been called */

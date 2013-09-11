@@ -249,7 +249,7 @@ void Algorithm::reset() {
 
 
 void Algorithm::shouldStop(bool stop) {
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
   std::ostringstream msg;
   msg << "Streaming: " << name() << "::shouldStop[" << nProcess << "] = "
       << (stop ? "true" : "false");

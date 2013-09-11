@@ -244,9 +244,9 @@ typedef EssentiaMap<std::string, std::string, string_cmp> DescriptionMap;
 
 
 /**
- * Returns true if the two given types are the same
+ * Return @c true if the two given types are the same.
  */
-#ifdef SAFE_TYPE_COMPARISONS
+#if SAFE_TYPE_COMPARISONS
 
 // comparison of the type is done using the name() method, because type_info
 // are not shared between different linking units.
