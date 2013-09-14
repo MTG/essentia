@@ -120,7 +120,7 @@ Here goes the connection of the algorithms. In streaming mode, you do not need a
 variable to connect the output of an algorithm and the input of another one on it, you just
 connect the output of an algorithm directly to its corresponding input. You can either use
 the ``connect(input, output)`` function or the ``>>`` right-shift operator to connect an
-input to an output. In this example, we use the ``>>`` operator, because it looks nicer! ;-)
+input to an output. In this example, we use the ``>>`` operator, because it looks nicer!
 
 Note the special connector ``NOWHERE``, which you need to specify. It is mandatory to connect
 all inputs/outputs, so if you want to discard one stream, you need to explicitly say it by
@@ -195,10 +195,10 @@ still come from the non-streaming (standard) factory. ::
 
 And the cleanup part, which is also quite simplified with respect to the way it's done in
 the standard way. As all the algorithms are connected in a network, you just need to call
-the ``Network::clear()`` method to delete all of them.
+the :essentia:`Network::clear()` method to delete all of them.
 
-You just need to delete the ``PoolAggregator`` and ``YamlOutput`` you allocated separately,
-call ``essentia::shutdown()``, and you're done!
+You also need to delete the ``PoolAggregator`` and ``YamlOutput`` which you allocated separately,
+call :essentia:`shutdown()`, and you're done!
 
 
 .. _functional: http://en.wikipedia.org/wiki/Functional_programming

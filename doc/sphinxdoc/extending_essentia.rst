@@ -4,9 +4,8 @@ Extending Essentia / Writing a new Algorithm
 ============================================
 
 Essentia comes pre-loaded with quite a list of algorithms, however at some point we
-imagine that you will want to write your own algorithms. This task is actually not
-that hard, and by following the next steps, you should be able to roll up your own
-algorithm within very little time.
+imagine that you will want to write your own algorithms. By following the next steps,
+you should be able to roll up your own algorithm in very little time.
 
 As an example, you should have a look at the implementation of the Centroid algorithm,
 which you can find in the

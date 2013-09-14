@@ -9,13 +9,14 @@ Essentia documentation contents
 .. toctree::
    :maxdepth: 2
 
-   python_tutorial
+   introduction
    algorithms_overview
-
    design_overview
-   streaming_architecture
+
+   python_tutorial
    howto_standard_extractor
    howto_streaming_extractor
+   streaming_architecture
 
    installing
    coding_guidelines
@@ -34,4 +35,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

@@ -242,7 +242,7 @@ void Network::run() {
   }
   */
 
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
   for (int i=0; i<(int)_toposortedNetwork.size(); i++) _toposortedNetwork[i]->nProcess = 0;
 #endif
 
@@ -251,14 +251,14 @@ void Network::run() {
 
   while (!gen->shouldStop()) {
     // first run the generator once
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
       E_DEBUG(ENetwork, "-------- Running generator loop index " << gen->nProcess << " --------");
 #endif
     gen->process();
 
     endOfStream = gen->shouldStop();
 
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
     gen->nProcess++;
 
     //if (gen->nProcess % 100 == 0) {
@@ -273,7 +273,7 @@ void Network::run() {
       do {
         status = _toposortedNetwork[i]->process();
 
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
         if (status == OK || status == FINISHED) _toposortedNetwork[i]->nProcess++;
 #endif
 
@@ -289,7 +289,7 @@ void Network::run() {
     }
   }
 
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
   E_DEBUG(ENetwork, "**** Final buffer states ****");
   printBufferFillState();
 #endif
