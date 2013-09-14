@@ -12,13 +12,6 @@ you expect it the least.
 Even if really fixing a bug needs 3x more time than a simple workaround, DO IT! If you don't
 know how to fix the cause of a bug instead of just hiding it, seek help!
 
-Closing tickets in the trac ticket system
------------------------------------------
-
-when fixing a bug that has been reported in the trac ticket system, you have to include the
-ticket number in the commit message.
-Also, when closing the bug in the track system, include the revision number in which it has
-been fixed (also the version, if it applies).
 
 Doing commits in SVN
 --------------------
@@ -28,8 +21,7 @@ Doing commits in SVN
   file that do 2 different things, then commit it in 2 parts
 * use explicit and useful and descriptive messages. That doesn't prevent you from being
   humorous in them, but messages such as "bsdjfh" are *not* allowed.
-* if you fix a bug, start the commit message with 'fix #123:'
-* if you do an optimization, start the commit message with 'optim:'
+
 
 Coding Guidelines
 =================
@@ -215,5 +207,5 @@ Error checking
 
 
 .. _boost: http://www.boost.org/
-.. _Qt: http://qt.nokia.com/
+.. _Qt: http://qt.digia.com/
 .. _STL: http://www.sgi.com/tech/stl/
