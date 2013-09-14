@@ -76,7 +76,7 @@ class Scale : public StreamingAlgorithmWrapper {
     declareInput(_signal, STREAM, preferredSize, "signal");
     declareOutput(_scaled, STREAM, preferredSize, "signal");
 
-    _scaled.setBufferType(BufferUsage::forAudioStream);
+    _scaled.setBufferType(BufferUsage::forLargeAudioStream);
   }
 };
 
