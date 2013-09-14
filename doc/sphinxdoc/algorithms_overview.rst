@@ -203,10 +203,18 @@ a few useful extractors have been written as algorithms. They are the following:
 
 
 
+What next?
+----------
 
-For more information, please see the `complete reference <algorithms_reference.html>`_.
+For more information about ``Algorithms``, please see the `complete reference <algorithms_reference.html>`_.
 
+For information on the other types and classes of Essentia which are not ``Algorithms``, see the `Design Overview <design_overview.html>`_ page.
 
+For a tutorial showing how to use these algorithms in practice, read the tutorial for either `python <python_tutorial.html>`_ or `C++ <howto_standard_extractor.html>`_.
+
+For more advanced examples, you can also look at the `src/examples`_ directory of Essentia's git repository.
+
+.. _src/examples: https://github.com/MTG/essentia/tree/master/src/examples
 .. _FFmpeg: http://www.ffmpeg.org/
 .. _ReplayGain: http://www.replaygain.org/
 .. _Equal-loudness: http://replaygain.hydrogenaudio.org/equal_loudness.html

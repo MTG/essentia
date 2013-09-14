@@ -657,6 +657,7 @@ WARN_LOGFILE           =
 
 INPUT                  = src/base \
                          src/streaming \
+                         src/scheduler \
                          doc/doxygendoc
 
 # This tag can be used to specify the character encoding of the source files

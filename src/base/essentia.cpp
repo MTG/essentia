@@ -34,6 +34,9 @@ const char* version = ESSENTIA_VERSION;
 
 bool _initialized;
 
+/**
+ * Initialize Essentia and fill the AlgorithmFactories with the Algorithms.
+ */
 void init() {
   setDebugLevel(EUser1 | EUser2);
 
@@ -48,6 +51,9 @@ void init() {
   E_DEBUG(EFactory, "essentia::init() ok!");
 }
 
+/**
+ * Cleanup all resources allocated by Essentia.
+ */
 void shutdown() {
   fftwf_cleanup();
   standard::AlgorithmFactory::shutdown();

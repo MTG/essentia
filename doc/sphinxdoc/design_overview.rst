@@ -51,6 +51,8 @@ Algorithms are stored in an ``essentia::AlgorithmFactory``, which contains infor
 about them and also knows how to instantiate them, using the
 ``essentia::AlgorithmFactory::create(const std::string&)`` method.
 
+Source documentation: :essentia:`standard::Algorithm` and :essentia:`streaming::Algorithm`
+
 
 
 Inputs / outputs
@@ -103,6 +105,7 @@ To (re)configure a Configurable, you need to call the ``configure(const Paramete
 This will check whether the parameters are acceptable, set them, and call the ``configure()`` method,
 which you should have redefined if you want your object to do some specific action when being configured.
 
+Source documentation: :essentia:`Configurable`
 
 
 Parameters
@@ -138,12 +141,14 @@ a map from ``std::string`` (the name of the parameter) to ``Parameter`` (its val
 It represents a set of Parameters, and is mostly used in the call to the
 ``Configurable::configure(const ParameterMap& pmap)`` method.
 
+Source documentation: :essentia:`Parameter` and :essentia:`ParameterMap`
+
 
 
 Pool
 ----
 
-A ``Pool`` (ref: :essentia:`Pool`) is a thread-safe structure that is used to store values. It could be thought of as a cache.
+A ``Pool`` is a thread-safe structure that is used to store values. It could be thought of as a cache.
 Basically, during processing you generate lots of values which you want to post process
 afterwards, and in that case, a ``Pool`` is the perfect candidate for a storage mechanism.
 
@@ -182,9 +187,14 @@ the values that you gave it. Even if you only added one value into the pool, a c
 to ``value()`` will return a vector, of size 1 in that case.
 On the other hand, if you used ``set()``, the value returned is of the same type.
 
+Source documentation: :essentia:`Pool`
+
 
 Logging framework
 =================
+
+Logging in C++
+--------------
 
 Essentia provides you with a logging framework that is meant to be both efficient
 and easy to use. It tries to learn from other logging frameworks and has 4 logging
@@ -196,8 +206,8 @@ levels that can be activated/deactivated independently at runtime:
 * Debug
 
 Furthermore, the debug level is itself subdivided into different debugging modules,
-defined in the ``DebuggingModule`` enumeration which you can find in the
-:download:`debugging.h <../../src/base/debugging.h>` file.
+defined in the :essentia:`DebuggingModule` enumeration which you can find in the
+:essentia:`debugging.h` file.
 
 The way to debug is to use the following macros::
 
@@ -221,10 +231,10 @@ To activate/deactivate the debugging modules at runtime, use the functions::
 Note that when a logging module is deactivated, the cost on runtime is minimal
 (ie: you only really pay for logging when you use it). If you wish to completely
 turn off logging, this can be done at compile time by setting the ``DEBUGGING_ENABLED``
-variable in the ``config.h`` file to ``0``. Note that in this case, it will not be
-possible to activate *any* logging at runtime at all (the advantage being that you
+variable in the :essentia:`config.h` file to ``0``. Note that in this case, it will not be
+possible to activate *any* logging at runtime at all, the advantage being that you
 pay absolutely nothing for logging, so don't hesitate to (ab)use logging in your
-algorithms for fear of losing efficiency)
+algorithms for fear of losing efficiency.
 
 Logging in python
 -----------------
@@ -240,4 +250,4 @@ the output is not mangled between the 2 logging frameworks:
 
     essentia.log.infoActive = True                   # activate the info level
     essentia.log.debugLevels += essentia.EAll        # activate all debug modules
-    essentia.log.debugLevels -= essentia.EExecution  # except for the ``Execution`` one
+    essentia.log.debugLevels -= essentia.EExecution  # deactivate the ``Execution`` one
