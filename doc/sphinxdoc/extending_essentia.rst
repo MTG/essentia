@@ -188,3 +188,16 @@ Example::
 
 1. your outputs won't be stored
 2. you'll be making unnecessary copies of your inputs, which can considerably slow down things.
+
+
+Here are some examples that you can have a look at to get you started:
+
+- RMS *(easy)*
+  (:download:`rms.h <../../src/algorithms/stats/rms.h>` and
+  :download:`rms.cpp <../../src/algorithms/stats/rms.cpp>`)
+- Resample *(medium)*
+  (:download:`resample.h <../../src/algorithms/standard/resample.h>` and
+  :download:`resample.cpp <../../src/algorithms/standard/resample.cpp>`)
+- Trimmer *(medium)*
+  (:download:`trimmer.h <../../src/algorithms/standard/trimmer.h>` and
+  :download:`trimmer.cpp <../../src/algorithms/standard/trimmer.cpp>`)
