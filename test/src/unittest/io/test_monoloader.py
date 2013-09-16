@@ -139,6 +139,19 @@ class TestMonoLoader(TestCase):
         self.assertEqual(self.sum(right), 9)
         self.assertEqual(self.sum(mix), 9)
 
+    def testMp3TimeShift(self):
+        # test mp3s are loaded with no time shift (lost frames) 
+        filename_mp3 = join(mp3_dir, 'impulses_1second_44100.mp3')
+        filename_wav = join(wav_dir, 'impulses_1second_44100.wav')
+        mp3 = self.load(filename_mp3, 'mix', 44100)
+        wav = self.load(filename_wav, 'mix', 44100)
+        
+        # find time shift between impulse positions
+        impulses_mp3 = [x for x in range(len(mp3)) if mp3[x]>0.9]
+        impulses_wav = [x for x in range(len(wav)) if wav[x]>0.9]
+        shift = impulses_mp3[0] - impulses_wav[0]
+        self.assertEqual(abs(shift), 0)
+
 ###############
 # #OGG
 ###############
