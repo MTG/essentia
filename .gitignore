@@ -33,7 +33,11 @@ src/algorithms/_registration
 # documentation files
 doc/sphinxdoc/_build/
 doc/sphinxdoc/_templates/reference/
+doc/sphinxdoc/_templates/algorithms_reference.html
+doc/sphinxdoc/_templates/algo_description_layout_std.html
+doc/sphinxdoc/_templates/algo_description_layout_streaming.html
 doc/sphinxdoc/essentia_reference.py
+doc/sphinxdoc/EssentiaDoxygen.tag
 
 # hide auto generated python extractor
 src/examples/python/streaming_extractor/streaming_extractorlevel.cpp

@@ -10,8 +10,8 @@ order of simplicity.
 
 
 
-Derive from !StreamingAlgorithmWrapper
---------------------------------------
+Derive from StreamingAlgorithmWrapper
+-------------------------------------
 
 This method is by far the easiest, and will actually allow you to wrap already existing
 algorithms in 90% of the cases. As a prerequisite, you will need to have a "standard"
@@ -19,6 +19,7 @@ algorithm working. This way of doing is especially recommended for frame-based a
 (ie: FFT, Centroid, PCP, etc...), but will also work for audio filters.
 
 To wrap it, you will need to:
+
 * derive from ``StreamingAlgorithmWrapper``
 * declare your Sinks and Sources
 * declare the name of the Algorithm you're wrapping
@@ -195,7 +196,8 @@ difficult to master, but also the most powerful.
 It requires you to grasp a few more concepts of what is going on in Essentia, mainly how
 the consumption model works and how algorithms get scheduled.
 
-Please refer to the :doc:`streaming_architecture` for an explanation of these concepts.
+Please refer to the `streaming architecture <streaming_architecture>`_ for an
+explanation of these concepts.
 
 
 More about the consumption model
@@ -273,11 +275,18 @@ to explain further is probably to show examples, so here is a list of algorithms
 directly from ``StreamingAlgorithm``, with the complexity of their implementation indicated
 inside parentheses:
 
-*NB: include :download: links here for those files*
-
-- Max *(easy)*
 - Monomixer *(easy)*
+  (:download:`monomixer.h <../../src/algorithms/standard/monomixer.h>` and
+  :download:`monomixer.cpp <../../src/algorithms/standard/monomixer.cpp>`)
 - Resample *(medium)*
+  (:download:`resample.h <../../src/algorithms/standard/resample.h>` and
+  :download:`resample.cpp <../../src/algorithms/standard/resample.cpp>`)
 - Trimmer *(medium)*
+  (:download:`trimmer.h <../../src/algorithms/standard/trimmer.h>` and
+  :download:`trimmer.cpp <../../src/algorithms/standard/trimmer.cpp>`)
 - Slicer *(hard)*
+  (:download:`slicer.h <../../src/algorithms/standard/slicer.h>` and
+  :download:`slicer.cpp <../../src/algorithms/standard/slicer.cpp>`)
 - FrameCutter *(insanely hard)*
+  (:download:`framecutter.h <../../src/algorithms/standard/framecutter.h>` and
+  :download:`framecutter.cpp <../../src/algorithms/standard/framecutter.cpp>`)

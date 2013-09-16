@@ -211,12 +211,12 @@ std::vector<T> medianFrames(const std::vector<std::vector<T> >& frames, int begi
     typename std::vector<std::vector<T> >::const_iterator it = frames.begin() + beginIdx;
     typename std::vector<std::vector<T> >::const_iterator end = frames.begin() + endIdx;
 
-    temp.clear();    
+    temp.clear();
     for (; it!=end; ++it) {
       temp.push_back((*it)[i]);
     }
     std::sort(temp.begin(), temp.end());
-    
+
     // array size is an odd number
     if (fsize % 2 == 0.0) {
       result[i] = (temp[uint(fsize/2 - 1)] + temp[uint(fsize/2)]) / 2;
@@ -725,7 +725,7 @@ template <typename T> T princarg(T y) {
 
 /**
  * Given a set of values, computes the associated histogram. This method is
- * designed to work the same way as in MatLab/Octave. It is based on the
+ * designed to work the same way as in Matlab/Octave. It is based on the
  * algorithms used in Octave rather than Matlab. The result structures
  * (n_arr, x_arr) have to be allocated before calling this function.
  * @param array the input array, containing the data values

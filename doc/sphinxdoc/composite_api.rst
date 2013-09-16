@@ -25,7 +25,7 @@ When defining an ``AlgorithmComposite`` you will have to implement the pure virt
 ``declareProcessOrder()`` method.
 
 In this method, you will specify a list of execution steps that need to be followed in
-chronological order, and which can be either one of 2 possible steps:
+sequential order, and which can be either one of 2 possible steps:
 
 * ``ChainFrom(algo)``: which will run the given algorithm and all algorithms connected
   to it (and contained in the composite) as if they were an entire network
@@ -87,13 +87,13 @@ irrelevant parts of code dropped) ::
       _mixer       = factory.create("MonoMixer");
       _resample    = factory.create("Resample");
 
-      connect(_audioLoader->output("audio"), _mixer->input("audio"));
-      connect(_audioLoader->output("numberChannels"), _mixer->input("numberChannels"));
-      connect(_mixer->output("audio"), _resample->input("signal"));
+      _audioLoader->output("audio")           >>  _mixer->input("audio");
+      _audioLoader->output("numberChannels")  >>  _mixer->input("numberChannels");
+      _mixer->output("audio")                 >>  _resample->input("signal");
 
       // now attach the output of our last algorithm to the proxy of the composite
       // to allow data to be relayed outside of the composite
-      attachProxy(_resample->output("signal"), _audio);
+      _resample->output("signal")  >>  _audio;
     }
 
     void declareProcessOrder() {
@@ -123,30 +123,30 @@ irrelevant parts of code dropped) ::
       declareOutput(_keyStrength, "strength", "see Key algorithm documentation");
 
       // instantiate all required algorithms
-      _frameCutter = factory.create("FrameCutter");
-      _windowing = factory.create("Windowing", "type", "blackmanharris62");
-      _spectrum = factory.create("Spectrum");
+      _frameCutter   = factory.create("FrameCutter");
+      _windowing     = factory.create("Windowing", "type", "blackmanharris62");
+      _spectrum      = factory.create("Spectrum");
       _spectralPeaks = factory.create("SpectralPeaks",
                                       "orderBy", "magnitude", "magnitudeThreshold", 1e-05,
                                       "minFrequency", 40, "maxFrequency", 5000, "maxPeaks", 10000);
       _hpcpKey = factory.create("HPCP");
-      _key = factory.create("Key");
+      _key     = factory.create("Key");
 
       // attach input proxy(ies)
-      attachProxy(_audio, _frameCutter->input("signal"));
+      _audio  >> _frameCutter->input("signal");
 
       // connect inner algorithms
-      connect(_frameCutter->output("frame"), _windowing->input("frame"));
-      connect(_windowing->output("frame"), _spectrum->input("frame"));
-      connect(_spectrum->output("spectrum"), _spectralPeaks->input("spectrum"));
-      connect(_spectralPeaks->output("magnitudes"), _hpcpKey->input("magnitudes"));
-      connect(_spectralPeaks->output("frequencies"), _hpcpKey->input("frequencies"));
-      connect(_hpcpKey->output("hpcp"), _key->input("pcp"));
+      _frameCutter->output("frame")          >>  _windowing->input("frame");
+      _windowing->output("frame")            >>  _spectrum->input("frame");
+      _spectrum->output("spectrum")          >>  _spectralPeaks->input("spectrum");
+      _spectralPeaks->output("magnitudes")   >>  _hpcpKey->input("magnitudes");
+      _spectralPeaks->output("frequencies")  >>  _hpcpKey->input("frequencies");
+      _hpcpKey->output("hpcp")               >>  _key->input("pcp");
 
       // attach output proxy(ies)
-      attachProxy(_key->output("key"),      _keyKey);
-      attachProxy(_key->output("scale"),    _keyScale);
-      attachProxy(_key->output("strength"), _keyStrength);
+      _key->output("key")       >>  _keyKey;
+      _key->output("scale")     >>  _keyScale;
+      _key->output("strength")  >>  _keyStrength;
     }
 
     void declareProcessOrder() {
@@ -181,7 +181,7 @@ than the previous ones. Let's have a look at it first::
       _keyAlgo = standard::AlgorithmFactory::create("Key");
       _poolStorage = new PoolStorage<std::vector<Real> >(&_pool, "internal.hpcp");
 
-      attachProxy(_pcp, _poolStorage->input("data"));
+      _pcp  >>  _poolStorage->input("data");
     }
 
     void declareProcessOrder() {
@@ -212,13 +212,13 @@ than the previous ones. Let's have a look at it first::
 
 
 So, what can we see here:
-* the sources are actually ``Sources``, not ``SourceProxies``
-* the ``declareProcessOrder()`` method declares a process step on the algorithm itself
-* the ``process()`` method is actually defined here, alongside the ``declareProcessOrder()``
 
-What happens here? Has the Key algorithm become schizophrenic?
+ * the sources are actually ``Sources``, not ``SourceProxies``
+ * the ``declareProcessOrder()`` method declares a process step on the algorithm itself
+ * the ``process()`` method is actually defined here, alongside the ``declareProcessOrder()``
 
-Well no, it hasn't (hah! what a surprise!)
+What happens here? Why are both the ``process()`` and the ``declareProcessOrder()``
+methods defined?
 
 What is actually happening is that the part calling the std version of the key algorithm
 is quite small, and wouldn't warrant the creation of a new algorithm just for this purpose.
