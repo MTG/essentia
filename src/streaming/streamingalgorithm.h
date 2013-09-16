@@ -75,7 +75,7 @@ void connect(Algorithm* sourceAlgo, const std::string& sourcePort,
  * This is the return type of the Algorithm::acquireData() and
  * Algorithm::process() methods.
  *
- * It can have 4 different values:
+ * It can be either one of the following values:
  *
  *  - OK        means that all sources and sinks could acquire enough tokens.
  *              when you return this from the process() method it means you
@@ -115,7 +115,7 @@ enum AlgorithmStatus {
 /**
  * A streaming::Algorithm is an algorithm that can be used in streaming mode.
  * It is very similar to a 'classic' algorithm, but instead of having inputs
- * and outputs you need to set manually each time you want to call the
+ * and outputs that you need to set manually each time you want to call the
  * process() method, they have input stream connectors (called Sinks, because
  * data flows into them as water in a sink) and output stream connectors (called
  * Sources, because data flows out of them).
@@ -152,7 +152,7 @@ class ESSENTIA_API Algorithm : public Configurable {
  public:
 
   Algorithm() : _shouldStop(false)
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
       , nProcess(0)
 #endif
       {}
@@ -249,7 +249,7 @@ class ESSENTIA_API Algorithm : public Configurable {
   OutputMap _outputs;
   InputMap _inputs;
 
-#ifdef DEBUGGING_ENABLED
+#if DEBUGGING_ENABLED
   friend class essentia::scheduler::Network;
 
   /** number of times the process() method has been called */

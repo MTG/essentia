@@ -2,7 +2,7 @@
 
 .. Installing Essentia
 .. ===================
-.. 
+..
 .. Installing Essentia is easily done using the precompiled packages that you can find on the
 .. `MIR-dev Essentia download page <http://static.mtg.upf.edu/mir-dev-download/essentia/>`_.
 .. Packages are available for Debian/Ubuntu, Windows and Mac OS X.
@@ -18,11 +18,11 @@ Compiling Essentia from source
 ==============================
 
 Essentia depends on (at least) the following libraries:
- - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output
  - `FFTW <http://www.fftw.org>`_: for the FFT implementation
- - `libavcodec <http://ffmpeg.org/>`_ (from the FFmpeg project): for loading/saving any type of audio files
+ - `libavcodec <http://ffmpeg.org/>`_ (from the FFmpeg project): for loading/saving any type of audio files *(optional)*
  - `libsamplerate <http://www.mega-nerd.com/SRC/>`_: for resampling audio *(optional)*
  - `TagLib <http://developer.kde.org/~wheeler/taglib.html>`_: for reading audio metadata tags *(optional)*
+ - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
 
 
 Installing dependencies on Linux
@@ -62,7 +62,7 @@ Then run::
 Installing dependencies on Windows
 ----------------------------------
 
-We're sorry, but you're pretty much on your own if you want to develop on Windows...
+We're sorry, but you're pretty much on your own if you want to develop on Windows... (it does compile and run, though, but you will have to set up your Visual Studio project yourself)
 
 
 Additional dependencies (python, all platforms)
@@ -120,4 +120,3 @@ To generate the full documentation (need python bindings installed first)::
 Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
 
 All built examples will be located in ``buildw/src/examples/`` folder, as well as the vamp plugin file ``libvamp_essentia.so``. In order to use the plugin you will need to place this file to the the standard vamp plugin folder of your system (such as ``/usr/local/lib/vamp/`` on Linux).
-
