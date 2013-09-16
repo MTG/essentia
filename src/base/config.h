@@ -21,7 +21,7 @@
 #define ESSENTIA_CONFIG_H
 
 #ifndef ESSENTIA_VERSION
-#  define ESSENTIA_VERSION "Unknown"
+#  define ESSENTIA_VERSION "2.0"
 #endif
 
 /**
