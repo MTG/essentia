@@ -393,7 +393,7 @@ int AudioLoader::decodePacket() {
         int istride[6]      = { av_get_bytes_per_sample(_audioCtx->sample_fmt) };
         int ostride[6]      = { av_get_bytes_per_sample(AV_SAMPLE_FMT_S16)     };
         int totalsamples    = _dataSize / istride[0]; // == num_samp_per_channel * num_channels
-
+  
         if (av_audio_convert(_audioConvert, obuf, ostride, ibuf, istride, totalsamples) < 0) {
             ostringstream msg;
             msg << "AudioLoader: Error converting "
@@ -406,6 +406,7 @@ int AudioLoader::decodePacket() {
         // that the audio was taking in its native format. Now it needs to be set
         // to the size of the audio we're returning, after conversion
         _dataSize = totalsamples * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
+        memcpy(_buffer, _buff2, _dataSize); 
     }
 #endif
 
@@ -443,7 +444,7 @@ void AudioLoader::copyFFmpegOutput() {
     // FIXME: use libswresample
     if (_nChannels == 1) {
         for (int i=0; i<nsamples; i++) {
-            audio[i].left() = scale(_buffer[i]);
+          audio[i].left() = scale(_buffer[i]);
         }
     }
     else { // _nChannels == 2
@@ -455,7 +456,6 @@ void AudioLoader::copyFFmpegOutput() {
 
     // release data
     _audio.release(nsamples);
-
 }
 
 void AudioLoader::reset() {
