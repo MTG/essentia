@@ -148,8 +148,8 @@ void AudioLoader::openAudioFile(const string& filename) {
         _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, _audioCtx->sample_fmt, 1, NULL, 0);
 
         // reserve some more space
-        _buff1 = (int16_t*)av_malloc(AVCODEC_MAX_AUDIO_FRAME_SIZE * 3);
-        _buff2 = (int16_t*)av_malloc(AVCODEC_MAX_AUDIO_FRAME_SIZE * 3);
+        _buff1 = (int16_t*)av_malloc(MAX_AUDIO_FRAME_SIZE * 3);
+        _buff2 = (int16_t*)av_malloc(MAX_AUDIO_FRAME_SIZE * 3);
 
 #endif
 
