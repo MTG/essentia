@@ -62,7 +62,9 @@ Then run::
 Installing dependencies on Windows
 ----------------------------------
 
-We're sorry, but you're pretty much on your own if you want to develop on Windows... (it does compile and run, though, but you will have to set up your Visual Studio project yourself)
+Essentia does compile and run correctly on Windows, however there is no Visual
+Studio project readily available, so you will have to setup one yourself and
+compile the dependencies too.
 
 
 Additional dependencies (python, all platforms)
