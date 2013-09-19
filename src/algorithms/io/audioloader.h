@@ -24,6 +24,7 @@
 #include "network.h"
 #include "ffmpegapi.h"
 
+#define MAX_AUDIO_FRAME_SIZE 192000
 
 namespace essentia {
 namespace streaming {
@@ -35,11 +36,11 @@ class AudioLoader : public Algorithm {
   AbsoluteSource<int> _channels;
   int _nChannels;
 
-  // AVCODEC_MAX_AUDIO_FRAME_SIZE is in bytes, we want FFMPEG_BUFFER_SIZE in sample units
+  // MAX_AUDIO_FRAME_SIZE is in bytes, we want FFMPEG_BUFFER_SIZE in sample units
   // we also multiply by 2 to get some margin, because we might want to decode multiple frames
   // in this buffer (all the frames contained in a packet, which can be more than 1 as in flac),
   // and each time we decode a frame we need to have at least a full buffer of free space.
-  const static int FFMPEG_BUFFER_SIZE = (AVCODEC_MAX_AUDIO_FRAME_SIZE / sizeof(int16_t)) * 2;
+  const static int FFMPEG_BUFFER_SIZE = (MAX_AUDIO_FRAME_SIZE / sizeof(int16_t)) * 2;
 
   int16_t* _buffer;
   int _dataSize;
