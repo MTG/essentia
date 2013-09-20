@@ -167,7 +167,11 @@ AlgorithmStatus StreamingAlgorithmWrapper::process() {
     }
     if (minAvailable != maxAvailable) {
       E_WARNING("something strange happened in " << name() << ":");
-      E_WARNING("we are at the end of the stream, but there is different number of tokens available on the inputs...");
+      E_WARNING("we are at the end of the stream, but there is a different number of tokens available on the inputs:");
+      for (InputMap::const_iterator it = inputs().begin(); it != inputs().end(); ++it) {
+        SinkBase& sink = *it->second;
+        E_WARNING(" - " << sink.fullName() << ": " << sink.available());
+      }
       return NO_INPUT;
     }
 
