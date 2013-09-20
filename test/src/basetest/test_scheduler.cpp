@@ -46,7 +46,7 @@ TEST(Scheduler, SourceProxyFork) {
   Algorithm* loader = factory.create("MonoLoader",
                                      "filename", "test/audio/recorded/cat_purrrr.wav");
 
-  Algorithm* bbands = factory.create("BarkExtractor");
+  Algorithm* bbands = factory.create("BarkExtractorNoCopy");
 
   loader->output("audio")    >>  bbands->input("signal");
 
