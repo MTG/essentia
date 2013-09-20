@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "barkextractor.h"
+#include "barkextractornocopy.h"
 #include "algorithmfactory.h"
 #include "essentiamath.h"
 #include "poolstorage.h"
@@ -27,10 +27,10 @@ using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
 
-const char* BarkExtractor::name = "BarkExtractor";
-const char* BarkExtractor::description = DOC("This algorithm extracts some Bark bands based spectral features from an audio signal");
+const char* BarkExtractorNoCopy::name = "BarkExtractorNoCopy";
+const char* BarkExtractorNoCopy::description = DOC("This algorithm extracts some Bark bands based spectral features from an audio signal");
 
-BarkExtractor::BarkExtractor() : _configured(false) {
+BarkExtractorNoCopy::BarkExtractorNoCopy() : _configured(false) {
   // input:
   declareInput(_signal, "signal", "the input audio signal");
 
@@ -57,11 +57,7 @@ BarkExtractor::BarkExtractor() : _configured(false) {
   // barkbands
   _spectrum->output("spectrum")               >>  _barkBands->input("spectrum");
 
-  // TODO: this is a workaround for a bug in the scheduler tested by
-  //       TEST(Scheduler, SourceProxyFork) in basetest/test_scheduler.cpp
-  //       when the bug is fixed, the copy algorithm can be removed
-  _barkBands->output("bands")                 >>  _copy->input("data");
-  _copy->output("data")                       >>  _bbands;
+  _barkBands->output("bands")                 >>  _bbands; // proxy
 
   _barkBands->output("bands")                 >>  _crest->input("array");
   _crest->output("crest")                     >>  _crestValue;
@@ -78,7 +74,7 @@ BarkExtractor::BarkExtractor() : _configured(false) {
   _network = new scheduler::Network(_frameCutter);
 }
 
-void BarkExtractor::createInnerNetwork() {
+void BarkExtractorNoCopy::createInnerNetwork() {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   _barkBands          = factory.create("BarkBands",
@@ -92,10 +88,9 @@ void BarkExtractor::createInnerNetwork() {
   _spectrum           = factory.create("Spectrum");
   _windowing          = factory.create("Windowing",
                                        "type", "blackmanharris62");
-  _copy = new Copy<std::vector<float> >();
 }
 
-void BarkExtractor::configure() {
+void BarkExtractorNoCopy::configure() {
   int frameSize   = parameter("frameSize").toInt();
   int hopSize     = parameter("hopSize").toInt();
   Real sampleRate = parameter("sampleRate").toReal();
@@ -104,11 +99,11 @@ void BarkExtractor::configure() {
   _frameCutter->configure("silentFrames", "noise", "hopSize", hopSize, "frameSize", frameSize);
 }
 
-BarkExtractor::~BarkExtractor() {
+BarkExtractorNoCopy::~BarkExtractorNoCopy() {
   clearAlgos();
 }
 
-void BarkExtractor::clearAlgos() {
+void BarkExtractorNoCopy::clearAlgos() {
   if (!_configured) return;
   delete _network;
 }

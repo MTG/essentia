@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_BARK_EXTRACTOR_H
-#define ESSENTIA_BARK_EXTRACTOR_H
+#ifndef ESSENTIA_BARK_EXTRACTORNOCOPY_H
+#define ESSENTIA_BARK_EXTRACTORNOCOPY_H
 
 #include "streamingalgorithmcomposite.h"
 #include "pool.h"
@@ -28,7 +28,11 @@
 namespace essentia {
 namespace streaming {
 
-class BarkExtractor : public AlgorithmComposite {
+/**
+ * Extractor used for testing a bug in the scheduler. Once it is solved, the
+ * extractors should
+ */
+class BarkExtractorNoCopy : public AlgorithmComposite {
  protected:
   SinkProxy<Real> _signal;
 
@@ -41,8 +45,7 @@ class BarkExtractor : public AlgorithmComposite {
 
   Algorithm *_barkBands, *_centralMoments, *_crest,
             *_distributionShape, *_flatnessdb,
-            *_frameCutter, *_spectrum, *_windowing,
-            *_copy;
+            *_frameCutter, *_spectrum, *_windowing;
 
   scheduler::Network* _network;
 
@@ -50,8 +53,8 @@ class BarkExtractor : public AlgorithmComposite {
   void clearAlgos();
 
  public:
-  BarkExtractor();
-  ~BarkExtractor();
+  BarkExtractorNoCopy();
+  ~BarkExtractorNoCopy();
 
   void declareParameters() {
     declareParameter("frameSize", "the frame size for computing low level features", "(0,inf)", 2048);
@@ -74,4 +77,4 @@ class BarkExtractor : public AlgorithmComposite {
 } // namespace essentia
 
 
-#endif // ESSENTIA_BARK_EXTRACTOR_H
+#endif // ESSENTIA_BARK_EXTRACTORNOCOPY_H
