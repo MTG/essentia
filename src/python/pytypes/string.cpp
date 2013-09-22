@@ -29,11 +29,23 @@ PyObject* String::toPythonCopy(const string* s) {
 
 
 void* String::fromPythonCopy(PyObject* obj) {
-  if (!PyString_Check(obj)) {
-    throw EssentiaException("String::fromPythonCopy: input not a PyString: ", strtype(obj));
+  if (PyString_Check(obj)) {
+    return new string(PyString_AS_STRING(obj));
   }
 
-  return new string(PyString_AS_STRING(obj));
+  if (PyUnicode_Check(obj)) {
+    PyObject* utf8str = PyUnicode_AsEncodedString(obj, "utf-8", 0);
+    if (!utf8str) {
+      E_ERROR("Error converting unicode to utf8 string");
+      return new string("");
+    }
+
+    string* result = new string(PyString_AS_STRING(utf8str));
+    Py_DECREF(utf8str);
+    return result;
+  }
+
+  throw EssentiaException("String::fromPythonCopy: input not a PyString: ", strtype(obj));
 }
 
 Parameter* String::toParameter(PyObject* obj) {
