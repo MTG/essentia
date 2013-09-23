@@ -184,12 +184,7 @@ def build(ctx):
     algoreg_path = 'src/algorithms/essentia_algorithms_reg.cpp'
     create_registration_cpp(algos, algoreg_path, use_streaming=True)
 
-
-    sources = []
-    sources += ctx.path.ant_glob('base/*.cpp')
-    sources += ctx.path.ant_glob('scheduler/*.cpp')
-    sources += ctx.path.ant_glob('streaming/**/*.cpp')
-    sources += ctx.path.ant_glob('utils/*.cpp')
+    sources = ctx.path.ant_glob('essentia/**/*.cpp')
 
     # do not compile audiocontext.cpp if we're not compiling ffmpeg
     if 'AVCODEC' not in ctx.env.USES:
@@ -198,7 +193,9 @@ def build(ctx):
     sources += [ ctx.path.find_resource('algorithms/essentia_algorithms_reg.cpp') ]
     sources += [ ctx.path.find_resource(algo['source']) for algo in algos.values() ]
 
-    ctx.env.INCLUDES = [ '.', 'base', 'scheduler', 'streaming', 'streaming/algorithms', 'utils', '3rdparty' ]
+    ctx.env.INCLUDES = [ '.', 'essentia', # TODO: remove recursive include of essentia
+                         'essentia/scheduler', 'essentia/streaming', 'essentia/streaming/algorithms',
+                         'essentia/utils', '3rdparty' ]
 
     ctx.stlib(
         source   = sources,
