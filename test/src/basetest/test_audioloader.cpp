@@ -18,7 +18,7 @@
  */
 
 #include "essentia_gtest.h"
-#include "../../../src/scheduler/network.h"
+#include "scheduler/network.h"
 #include "streamingalgorithmcomposite.h"
 #include "vectorinput.h"
 #include "vectoroutput.h"

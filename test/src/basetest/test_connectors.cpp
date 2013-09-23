@@ -18,7 +18,7 @@
  */
 
 #include "essentia_gtest.h"
-#include "../../../src/scheduler/network.h"
+#include "scheduler/network.h"
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
