@@ -68,8 +68,8 @@ class TestBeatsLoudness(TestCase):
         rhythm.bpm >> None
         rhythm.bpmIntervals >> None
         rhythm.estimates >> None
-        rhythm.rubatoStart >> None
-        rhythm.rubatoStop >> None
+        #rhythm.rubatoStart >> None
+        #rhythm.rubatoStop >> None
         rhythm.ticks >> (p, 'beats.locationEstimates')
 
         run(loader)

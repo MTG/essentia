@@ -30,9 +30,11 @@ namespace essentia {
 namespace streaming {
 
 const char* RhythmExtractor::name = "RhythmExtractor";
-const char* RhythmExtractor::description = DOC("This algorithm estimates the tempo in bpm from an input signal, as well as the beat location and a measure of the beat variations. It combines TempoTap, TempoTapTicks and BpmRubato.\n"
+const char* RhythmExtractor::description = DOC("This algorithm estimates the tempo in bpm from an input signal, as well as the beat locations. It combines TempoTap and TempoTapTicks.\n"
 "\n"
 "Note that this algorithm is outdated in terms of beat tracking accuracy, and it is highly recommended to use RhythmExtractor2013 instead.\n"
+"\n"
+"Quality: outdated (use RhythmExtractor2013 instead).\n"
 "\n"
 "An exception is thrown if neither \"useOnset\" nor \"useBands\" are enabled (i.e. set to true).");
 
@@ -47,7 +49,7 @@ inline Real bpmToLag(Real bpm, Real sampleRate, Real hopSize) {
 RhythmExtractor::RhythmExtractor()
   : AlgorithmComposite(), _frameCutter(0), _windowing(0), _fft(0), _cart2polar(0),
     _onsetHfc(0), _onsetComplex(0), _spectrum(0), _tempoTapBands(0), _tempoScaleBands(0),
-    _tempoTap(0), _tempoTapTicks(0), _bpmRubato(0), _multiplexer(0), _startStopSilence(0),
+    _tempoTap(0), _tempoTapTicks(0), /*_bpmRubato(0),*/ _multiplexer(0), _startStopSilence(0),
     _derivative(0), _max(0), _configured(false) {
 
   _preferredBufferSize = 1024;
@@ -56,9 +58,10 @@ RhythmExtractor::RhythmExtractor()
   declareOutput(_bpm, 0, "bpm", "the tempo estimation [bpm]");
   declareOutput(_ticks, 0, "ticks", " the estimated tick locations [s]");
   declareOutput(_estimates, 0, "estimates", "the bpm estimation per frame [bpm]");
-  declareOutput(_rubatoStart, 0, "rubatoStart", "list of start times for rubato section [s]");
-  declareOutput(_rubatoStop, 0, "rubatoStop", "list of stop times of rubato section [s]");
-  declareOutput(_rubatoNumber, 0, "rubatoNumber", "number of rubato section [s]");
+  //TODO we need better rubato estimation algorithm
+  //declareOutput(_rubatoStart, 0, "rubatoStart", "list of start times for rubato section [s]");
+  //declareOutput(_rubatoStop, 0, "rubatoStop", "list of stop times of rubato section [s]");
+  //declareOutput(_rubatoNumber, 0, "rubatoNumber", "number of rubato section [s]");
   declareOutput(_bpmIntervals, 0, "bpmIntervals", "list of beats interval [s]");
 }
 
@@ -73,7 +76,7 @@ void RhythmExtractor::createInnerNetwork() {
   _tempoTap         = factory.create("TempoTap");
   _tempoTapTicks    = factory.create("TempoTapTicks");
   _startStopSilence = factory.create("StartStopSilence");
-  _bpmRubato        = standard::AlgorithmFactory::create("BpmRubato");
+  //_bpmRubato        = standard::AlgorithmFactory::create("BpmRubato");
 
   // Connect internal algorithms
   _signal                                  >>  _frameCutter->input("signal");
@@ -160,7 +163,7 @@ void RhythmExtractor::clearAlgos() {
   // it is safe to call this function here, as the inner network isn't connected to
   // anything outside, so it won't propagate and try to delete stuff twice
   delete _network;
-  delete _bpmRubato;
+  //delete _bpmRubato;
 }
 
 
@@ -385,17 +388,17 @@ AlgorithmStatus RhythmExtractor::process() {
     }
 
     // computing rubato regions
-    vector<Real> rubatoStart, rubatoStop;
-    int rubatoNumber;
-    _bpmRubato->input("beats").set(ticks);
-    _bpmRubato->output("rubatoStart").set(rubatoStart);
-    _bpmRubato->output("rubatoStop").set(rubatoStop);
-    _bpmRubato->output("rubatoNumber").set(rubatoNumber);
-    _bpmRubato->compute();
+    //vector<Real> rubatoStart, rubatoStop;
+    //int rubatoNumber;
+    //_bpmRubato->input("beats").set(ticks);
+    //_bpmRubato->output("rubatoStart").set(rubatoStart);
+    //_bpmRubato->output("rubatoStop").set(rubatoStop);
+    //_bpmRubato->output("rubatoNumber").set(rubatoNumber);
+    //_bpmRubato->compute();
 
-    _rubatoStart.push(rubatoStart);
-    _rubatoStop.push(rubatoStop);
-    _rubatoNumber.push(rubatoNumber);
+    //_rubatoStart.push(rubatoStart);
+    //_rubatoStop.push(rubatoStop);
+    //_rubatoNumber.push(rubatoNumber);
   }
 
   _bpmIntervals.push(bpmIntervals);
@@ -406,7 +409,7 @@ AlgorithmStatus RhythmExtractor::process() {
 
 void RhythmExtractor::reset() {
   AlgorithmComposite::reset();
-  _bpmRubato->reset();
+  //_bpmRubato->reset();
 }
 
 } // namespace streaming
@@ -418,7 +421,7 @@ namespace essentia {
 namespace standard {
 
 const char* RhythmExtractor::name = "RhythmExtractor";
-const char* RhythmExtractor::description = DOC("This algorithm estimates the tempo in bpm from an input signal, as well as the beat location and a measure of the beat variations. It combines TempoTap, TempoTapTicks and BpmRubato.\n"
+const char* RhythmExtractor::description = DOC("This algorithm estimates the tempo in bpm from an input signal, as well as the beat locations. It combines TempoTap and TempoTapTicks.\n"
 "\n"
 "An exception is thrown if neither \"useOnset\" nor \"useBands\" are enabled (i.e. set to true).");
 
@@ -427,9 +430,9 @@ RhythmExtractor::RhythmExtractor() {
   declareOutput(_bpm, "bpm", "the tempo estimation [bpm]");
   declareOutput(_ticks, "ticks", " the estimated tick locations [s]");
   declareOutput(_estimates, "estimates", "the bpm estimation per frame [bpm]");
-  declareOutput(_rubatoStart, "rubatoStart", "list of start times for rubato section [s]");
-  declareOutput(_rubatoStop, "rubatoStop", "list of stop times of rubato section [s]");
-  declareOutput(_rubatoNumber, "rubatoNumber", "number of rubato section");
+  //declareOutput(_rubatoStart, "rubatoStart", "list of start times for rubato section [s]");
+  //declareOutput(_rubatoStop, "rubatoStop", "list of stop times of rubato section [s]");
+  //declareOutput(_rubatoNumber, "rubatoNumber", "number of rubato section");
   declareOutput(_bpmIntervals, "bpmIntervals", "list of beats interval [s]");
 
   createInnerNetwork();
@@ -457,9 +460,9 @@ void RhythmExtractor::createInnerNetwork() {
   _rhythmExtractor->output("ticks")         >>  PC(_pool, "internal.ticks");
   _rhythmExtractor->output("bpm")           >>  PC(_pool, "internal.bpm");
   _rhythmExtractor->output("estimates")     >>  PC(_pool, "internal.estimates");
-  _rhythmExtractor->output("rubatoStart")   >>  PC(_pool, "internal.rubatoStart");
-  _rhythmExtractor->output("rubatoStop")    >>  PC(_pool, "internal.rubatoStop");
-  _rhythmExtractor->output("rubatoNumber")    >>  PC(_pool, "internal.rubatoNumber");
+  //_rhythmExtractor->output("rubatoStart")   >>  PC(_pool, "internal.rubatoStart");
+  //_rhythmExtractor->output("rubatoStop")    >>  PC(_pool, "internal.rubatoStop");
+  //_rhythmExtractor->output("rubatoNumber")    >>  PC(_pool, "internal.rubatoNumber");
   _rhythmExtractor->output("bpmIntervals")  >>  PC(_pool, "internal.bpmIntervals");
 
   _network = new scheduler::Network(_vectorInput);
@@ -475,23 +478,23 @@ void RhythmExtractor::compute() {
   Real& bpm = _bpm.get();
   vector<Real>& ticks = _ticks.get();
   vector<Real>& estimates = _estimates.get();
-  vector<Real>& rubatoStart = _rubatoStart.get();
-  vector<Real>& rubatoStop = _rubatoStop.get();
-  int& rubatoNumber = _rubatoNumber.get();
+  //vector<Real>& rubatoStart = _rubatoStart.get();
+  //vector<Real>& rubatoStop = _rubatoStop.get();
+  //int& rubatoNumber = _rubatoNumber.get();
   vector<Real>& bpmIntervals = _bpmIntervals.get();
 
   bpm = _pool.value<Real>("internal.bpm");
   ticks = _pool.value<vector<Real> >("internal.ticks");
   estimates = _pool.value<vector<Real> >("internal.estimates");
   bpmIntervals = _pool.value<vector<Real> >("internal.bpmIntervals");
-  rubatoNumber = (int) _pool.value<Real>("internal.rubatoNumber");
-  try {
-      rubatoStart = _pool.value<vector<Real> >("internal.rubatoStart");
-      rubatoStop = _pool.value<vector<Real> >("internal.rubatoStop");
-  }
-  catch (EssentiaException&) {
-    // no rubato regions then
-  }
+  //rubatoNumber = (int) _pool.value<Real>("internal.rubatoNumber");
+  //try {
+  //    rubatoStart = _pool.value<vector<Real> >("internal.rubatoStart");
+  //    rubatoStop = _pool.value<vector<Real> >("internal.rubatoStop");
+  //}
+  //catch (EssentiaException&) {
+  //  // no rubato regions then
+  //}
 
 }
 
@@ -502,14 +505,14 @@ void RhythmExtractor::reset() {
   _pool.remove("internal.bpm");
   _pool.remove("internal.estimates");
   _pool.remove("internal.bpmIntervals");
-  _pool.remove("internal.rubatoNumber");
-  try {
-    _pool.remove("internal.rubatoStart");
-    _pool.remove("internal.rubatoStop");
-  }
-  catch (EssentiaException&) {
-    // were not in pool
-  }
+  //_pool.remove("internal.rubatoNumber");
+  //try {
+  //  _pool.remove("internal.rubatoStart");
+  //  _pool.remove("internal.rubatoStop");
+  //}
+  //catch (EssentiaException&) {
+  //  // were not in pool
+  //}
 }
 
 } // namespace standard

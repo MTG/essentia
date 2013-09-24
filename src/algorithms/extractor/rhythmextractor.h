@@ -36,9 +36,9 @@ class RhythmExtractor : public AlgorithmComposite {
   Source<Real> _bpm;
   Source<std::vector<Real> > _ticks;
   Source<std::vector<Real> > _estimates;
-  Source<std::vector<Real> > _rubatoStart;
-  Source<std::vector<Real> > _rubatoStop;
-  Source<int> _rubatoNumber;
+  //Source<std::vector<Real> > _rubatoStart;
+  //Source<std::vector<Real> > _rubatoStop;
+  //Source<int> _rubatoNumber;
   Source<std::vector<Real> > _bpmIntervals;
 
   Pool _pool;
@@ -68,7 +68,7 @@ class RhythmExtractor : public AlgorithmComposite {
   Algorithm* _tempoScaleBands;
   Algorithm* _tempoTap;
   Algorithm* _tempoTapTicks;
-  standard::Algorithm* _bpmRubato;
+  //standard::Algorithm* _bpmRubato;
   Algorithm* _multiplexer;
   Algorithm* _startStopSilence;
   Algorithm* _derivative;
@@ -127,9 +127,9 @@ class RhythmExtractor : public Algorithm {
   Output<Real> _bpm;
   Output<std::vector<Real> > _ticks;
   Output<std::vector<Real> > _estimates;
-  Output<std::vector<Real> > _rubatoStart;
-  Output<std::vector<Real> > _rubatoStop;
-  Output<int> _rubatoNumber;
+  //Output<std::vector<Real> > _rubatoStart;
+  //Output<std::vector<Real> > _rubatoStop;
+  //Output<int> _rubatoNumber;
   Output<std::vector<Real> > _bpmIntervals;
 
   bool _configured;

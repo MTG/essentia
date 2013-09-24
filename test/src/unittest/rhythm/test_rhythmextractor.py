@@ -31,7 +31,7 @@ class TestRhythmExtractor(TestCase):
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
         rhythm = stdRhythmExtractor()
 
-        bpm, _, _, _, _, _ = rhythm(audio)
+        bpm, _, _, _ = rhythm(audio)
         self.assertAlmostEqualFixedPrecision(bpm, 126, 0) # exact value= 125.726791382
 
 
@@ -51,14 +51,15 @@ class TestRhythmExtractor(TestCase):
         rhythm.bpm          >> (p, 'rhythm.bpm')
         rhythm.ticks        >> (p, 'rhythm.ticks')
         rhythm.estimates    >> (p, 'rhythm.estimates')
-        rhythm.rubatoStart  >> (p, 'rhythm.rubatoStart')
-        rhythm.rubatoStop   >> (p, 'rhythm.rubatoStop')
+        #rhythm.rubatoStart  >> (p, 'rhythm.rubatoStart')
+        #rhythm.rubatoStop   >> (p, 'rhythm.rubatoStop')
         rhythm.bpmIntervals >> (p, 'rhythm.bpmIntervals')
 
         run(gen)
 
         outputs = ['rhythm.ticks', 'rhythm.estimates',
-                   'rhythm.rubatoStart', 'rhythm.rubatoStop', 'rhythm.bpmIntervals']
+                   #'rhythm.rubatoStart', 'rhythm.rubatoStop', 
+                   'rhythm.bpmIntervals']
 
         # in case ther was no output from rhythm extractor in any of the output
         # ports, specially common for rubato start/stop:
@@ -71,8 +72,8 @@ class TestRhythmExtractor(TestCase):
         return [ p['rhythm.bpm'],
                  p['rhythm.ticks'],
                  p['rhythm.estimates'],
-                 p['rhythm.rubatoStart'],
-                 p['rhythm.rubatoStop'],
+                 #p['rhythm.rubatoStart'],
+                 #p['rhythm.rubatoStop'],
                  p['rhythm.bpmIntervals'] ]
 
     def pulseTrain(self, bpm, sr, offset, dur):
@@ -114,44 +115,44 @@ class TestRhythmExtractor(TestCase):
         self.assertEqual(result[0], expected[0]) #bpm
         self.assertEqualVector(result[1], expected[1]) # ticks
         self.assertEqualVector(result[2], expected[2]) # estimates
-        self.assertEqualMatrix(result[3], expected[3]) # rubatoStart
-        self.assertEqualMatrix(result[4], expected[4]) # rubatoStop
-        self.assertEqualVector(result[5], expected[5]) # bpmIntervals
+        #self.assertEqualMatrix(result[3], expected[3]) # rubatoStart
+        #self.assertEqualMatrix(result[4], expected[4]) # rubatoStop
+        self.assertEqualVector(result[3], expected[3]) # bpmIntervals
 
 
     def testEmpty(self):
         input = []
-        expected = [0, 0, 0, 0, 0, 0]
+        expected = [0, 0, 0, 0]
         result = self.runInstance(input, poolInit=True)
         self.assertEqualVector(result, expected)
 
     def testEmptyUseBands(self):
         input = []
-        expected = [0, 0, 0, 0, 0, 0]
+        expected = [0, 0, 0, 0]
         result = self.runInstance(input, useBands=True, useOnset=False, poolInit=True)
         self.assertEqualVector(result, expected)
 
     def testEmptyUseOnset(self):
         input = []
-        expected = [0, 0, 0, 0, 0, 0]
+        expected = [0, 0, 0, 0]
         result = self.runInstance(input, useBands=False, useOnset=True, poolInit=True)
         self.assertEqualVector(result, expected)
 
     def testZero(self):
         input = [0.0]*10*1024 # 100 frames of size 1024
-        expected = [0, [], [], [[0]], [[0]], []]
+        expected = [0, [], [], []]
         result = self.runInstance(input, poolInit=True)
         self._assertEqualResults(result, expected)
 
     def testZeroUseBands(self):
         input = array([0.0]*10*1024) # 100 frames of size 1024
-        expected = [0, [], [], [[0]], [[0]], []]
+        expected = [0, [], [], []]
         result = self.runInstance(input, useBands=True, useOnset=False, poolInit=True)
         self._assertEqualResults(result, expected)
 
     def testZeroUseOnset(self):
         input = [0.0]*10*1024 # 100 frames of size 1024
-        expected = [0, [], [], [[0]], [[0]], []]
+        expected = [0, [], [], []]
         result = self.runInstance(input, useBands=True, useOnset=False, poolInit=True)
         self._assertEqualResults(result, expected)
 
@@ -177,11 +178,11 @@ class TestRhythmExtractor(TestCase):
 
         # bpm intervals
         for i in xrange(len(result[3])):
-            self.assertAlmostEqual(result[5][i], 60./expectedBpm, 0.2)
+            self.assertAlmostEqual(result[3][i], 60./expectedBpm, 0.2)
 
-        # rubato start/stop
-        self.assertEqualVector(result[3], expectedRubatoStart)
-        self.assertEqualVector(result[4], expectedRubatoStop)
+        ## rubato start/stop
+        #self.assertEqualVector(result[3], expectedRubatoStart)
+        #self.assertEqualVector(result[4], expectedRubatoStop)
 
 
     def testUseOnset(self):
@@ -207,11 +208,11 @@ class TestRhythmExtractor(TestCase):
 
         # bpm intervals
         for i in xrange(len(result[3])):
-            self.assertAlmostEqual(result[5][i], 60./expectedBpm, 0.2)
+            self.assertAlmostEqual(result[3][i], 60./expectedBpm, 0.2)
 
-        # rubato start/stop
-        self.assertEqualVector(result[3], expectedRubatoStart)
-        self.assertEqualVector(result[4], expectedRubatoStop)
+        ## rubato start/stop
+        #self.assertEqualVector(result[3], expectedRubatoStart)
+        #self.assertEqualVector(result[4], expectedRubatoStop)
 
 
     def testImpulseTrain(self):
@@ -222,10 +223,10 @@ class TestRhythmExtractor(TestCase):
         expectedTicks = [i/44100. for i in xrange(len(impulseTrain140)) if impulseTrain140[i]!= 0]
 
         expectedBpm = 140.
-        # Rubato should be empty in this case, however due to the nature of the
-        # test [0] is manually added to the pool:
-        expectedRubatoStart = []
-        expectedRubatoStop = []
+        ## Rubato should be empty in this case, however due to the nature of the
+        ## test [0] is manually added to the pool:
+        #expectedRubatoStart = []
+        #expectedRubatoStop = []
 
         result = self.runInstance(impulseTrain140)
 
@@ -241,11 +242,11 @@ class TestRhythmExtractor(TestCase):
 
         # bpm intervals
         for i in xrange(len(result[3])):
-            self.assertAlmostEqual(result[5][i], 60./expectedBpm, 0.2)
+            self.assertAlmostEqual(result[3][i], 60./expectedBpm, 0.2)
 
-        # rubato start/stop
-        self.assertEqualVector(result[3], expectedRubatoStart)
-        self.assertEqualVector(result[4], expectedRubatoStop)
+        ## rubato start/stop
+        #self.assertEqualVector(result[3], expectedRubatoStart)
+        #self.assertEqualVector(result[4], expectedRubatoStop)
         
         # impulse train at 90bpm no offset
         impulseTrain90 = self.pulseTrain(bpm=60., sr=44100., offset=0., dur=20.)
@@ -281,14 +282,14 @@ class TestRhythmExtractor(TestCase):
         # bpm intervals: we may need to take into account also multiples of 90,
         # 140 and 200.
         expectedBpmIntervals = [60/90., 60/140., 60/200.]
-        self.assertVectorWithinVector(result[5], expectedBpmIntervals)
+        self.assertVectorWithinVector(result[3], expectedBpmIntervals)
         
-        # rubato start/stop
-        expectedRubatoStart = [10]
-        expectedRubatoStop = [30]
+        ## rubato start/stop
+        #expectedRubatoStart = [10]
+        #expectedRubatoStop = [30]
         
-        self.assertAlmostEqualVector(result[3], expectedRubatoStart, 0.3)
-        self.assertAlmostEqualVector(result[4], expectedRubatoStop, 0.03)
+        #self.assertAlmostEqualVector(result[3], expectedRubatoStart, 0.3)
+        #self.assertAlmostEqualVector(result[4], expectedRubatoStop, 0.03)
         
         ### run w/o tempoHints ###
 
@@ -307,12 +308,13 @@ class TestRhythmExtractor(TestCase):
         self.assertVectorWithinVector(result[1], expectedTicks, 0.03)
 
         # bpm intervals # TODO ticks results fail test
-        self.assertVectorWithinVector(result[5], expectedBpmIntervals, 0.5)
+        self.assertVectorWithinVector(result[3], expectedBpmIntervals, 0.5)
         
-        # rubato start/stop
-        self.assertAlmostEqualVector(result[3], expectedRubatoStart, .3)
-        self.assertAlmostEqualVector(result[4], expectedRubatoStop, .03)
-    
+        ## rubato start/stop
+        #self.assertAlmostEqualVector(result[3], expectedRubatoStart, .3)
+        #self.assertAlmostEqualVector(result[4], expectedRubatoStop, .03)
+   
+    """ 
     def testRubato(self):
         # beats extracted from bpmrubato test:
         from numpy import mean
@@ -348,7 +350,7 @@ class TestRhythmExtractor(TestCase):
         #self.assertAlmostEqualVector(result[4], expectedRubatoStop, .03)
         self.assertVectorWithinVector(result[3], expectedRubatoStart, 0.03)
         self.assertVectorWithinVector(result[4], expectedRubatoStop, 0.1)
-
+    """
 
 
 suite = allTests(TestRhythmExtractor)

@@ -249,9 +249,10 @@ def compute(audio, pool, options):
         print bpm_rubato_python
         return bpm_rubato_python
     '''
-    rubato = essentia.BpmRubato()
-    bpm_rubato_start, bpm_rubato_stop = rubato(ticks)
-    pool.add(namespace + '.' + 'rubato_start', bpm_rubato_start)#, pool.GlobalScope
-    pool.add(namespace + '.' + 'rubato_stop',  bpm_rubato_stop)#,  pool.GlobalScope)
+    # FIXME we need better rubato algorithm
+    #rubato = essentia.BpmRubato()
+    #bpm_rubato_start, bpm_rubato_stop = rubato(ticks)
+    #pool.add(namespace + '.' + 'rubato_start', bpm_rubato_start)#, pool.GlobalScope
+    #pool.add(namespace + '.' + 'rubato_stop',  bpm_rubato_stop)#,  pool.GlobalScope)
 
     INFO('100% done...')
