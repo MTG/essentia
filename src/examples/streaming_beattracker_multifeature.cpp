@@ -19,9 +19,9 @@
 
 #include <iostream>
 #include <fstream> // to write ticks to output file
-#include "algorithmfactory.h"
-#include "poolstorage.h"
-#include "network.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/scheduler/network.h>
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos --------" << endl;
 
-  // monoloader will always resample to 44100 
+  // monoloader will always resample to 44100
   monoloader->output("audio") >> beattracker->input("signal");
   connect(beattracker->output("ticks"), pool, "rhythm.ticks");
 
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
     *fileStream << ticks[i] << "\n";
   }
   delete fileStream;
-  
+
   essentia::shutdown();
   return 0;
 }

@@ -21,7 +21,7 @@
 #define ESSENTIA_SCHEDULER_NETWORKPARSER_H
 
 #include "network.h"
-#include "asciidagparser.h"
+#include "../utils/asciidagparser.h"
 
 namespace essentia {
 namespace scheduler {

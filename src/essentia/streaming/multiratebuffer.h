@@ -21,7 +21,7 @@
 #define ESSENTIA_MULTIRATEBUFFER_H
 
 #include <vector>
-#include "types.h"
+#include "../types.h"
 
 namespace essentia {
 namespace streaming {

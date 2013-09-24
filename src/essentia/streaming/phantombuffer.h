@@ -22,9 +22,9 @@
 
 #include <vector>
 #include "multiratebuffer.h"
-#include "roguevector.h"
-#include "threading.h"
-#include "essentiautil.h"
+#include "../roguevector.h"
+#include "../threading.h"
+#include "../essentiautil.h"
 
 
 namespace essentia {

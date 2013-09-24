@@ -19,9 +19,9 @@
 
 #include <iostream>
 #include <fstream>
-#include "algorithmfactory.h"
-#include "pool.h"
-#include "essentiamath.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/pool.h>
+#include <essentia/essentiamath.h>
 
 //#define INCLUDE_DELTA_SC
 

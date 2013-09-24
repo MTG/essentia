@@ -21,8 +21,8 @@
 #define ESSENTIA_FILEOUTPUT_H
 
 #include <fstream>
-#include "streamingalgorithm.h"
-#include "streamutil.h"
+#include "../streamingalgorithm.h"
+#include "../../streamutil.h"
 
 namespace essentia {
 namespace streaming {

@@ -30,12 +30,12 @@
 #include <limits>
 #include <functional>
 #include <utility> // for pair
-#include "types.h"
-#include "tnt/tnt.h"
-#include "tnt/tnt2essentiautils.h"
 #include <sstream>
 #include <algorithm> // for std::sort
 #include <deque>
+#include "types.h"
+#include "utils/tnt/tnt.h"
+#include "utils/tnt/tnt2essentiautils.h"
 
 #define M_2PI (2 * M_PI)
 

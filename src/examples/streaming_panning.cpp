@@ -18,10 +18,10 @@
  */
 
 #include <iostream>
-#include "algorithmfactory.h"
-#include "fileoutput.h"
-#include "network.h"
-#include "poolstorage.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/scheduler/network.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/streaming/algorithms/fileoutput.h>
 
 using namespace essentia;
 using namespace essentia::streaming;

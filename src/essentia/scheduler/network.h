@@ -23,8 +23,8 @@
 #include <vector>
 #include <set>
 #include <stack>
-#include "streamingalgorithm.h"
-#include "essentiautil.h"
+#include "../streaming/streamingalgorithm.h"
+#include "../essentiautil.h"
 
 namespace essentia {
 namespace streaming {
