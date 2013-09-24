@@ -20,7 +20,7 @@
 #ifndef ESSENTIA_DEVNULL_H
 #define ESSENTIA_DEVNULL_H
 
-#include "streamingalgorithm.h"
+#include "../streamingalgorithm.h"
 
 namespace essentia {
 namespace streaming {

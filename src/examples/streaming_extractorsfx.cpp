@@ -20,9 +20,9 @@
 #include <vector>
 using namespace std;
 
-#include "algorithmfactory.h"
-#include "essentiamath.h"
-#include "poolstorage.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/essentiamath.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
 using namespace essentia;
 using namespace essentia::streaming;
 

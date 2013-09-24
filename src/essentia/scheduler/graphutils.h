@@ -25,7 +25,7 @@
 #include <string>
 #include <algorithm>
 #include "network.h"
-#include "streamingalgorithm.h"
+#include "../streaming/streamingalgorithm.h"
 
 namespace essentia {
 namespace scheduler {

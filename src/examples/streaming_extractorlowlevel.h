@@ -20,9 +20,9 @@
 #ifndef STREAMING_EXTRACTORLOWLEVEL_H
 #define STREAMING_EXTRACTORLOWLEVEL_H
 
-#include "sourcebase.h"
-#include "pool.h"
-#include "types.h"
+#include <essentia/streaming/sourcebase.h>
+#include <essentia/pool.h>
+#include <essentia/types.h>
 
 void LowLevelSpectral(essentia::streaming::SourceBase& input,
                       essentia::Pool& pool,

@@ -20,14 +20,14 @@
 #include <iostream>
 #include <fstream> // to write ticks to output file
 #include <deque>
-#include "algorithmfactory.h"
-#include "poolstorage.h"
-#include "vectorinput.h"
-#include "vectoroutput.h"
-#include "essentiamath.h"
-#include "network.h"
-#include "bpmutil.h"
-#include "tnt/tnt2vector.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/streaming/algorithms/vectorinput.h>
+#include <essentia/streaming/algorithms/vectoroutput.h>
+#include <essentia/essentiamath.h>
+#include <essentia/scheduler/network.h>
+#include <essentia/utils/bpmutil.h>
+#include <essentia/utils/tnt/tnt2vector.h>
 
 using namespace std;
 using namespace essentia;

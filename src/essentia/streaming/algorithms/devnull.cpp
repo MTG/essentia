@@ -18,7 +18,7 @@
  */
 
 #include "devnull.h"
-#include "tnt/tnt.h"
+#include "../../utils/tnt/tnt.h"
 using namespace std;
 
 #define CREATE_DEVNULL(type) if (sameType(sourceType, typeid(type))) devnull = new DevNull<type>();

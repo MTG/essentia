@@ -20,7 +20,7 @@
 #ifndef ESSENTIA_VECTORINPUT_H
 #define ESSENTIA_VECTORINPUT_H
 
-#include "streamingalgorithm.h"
+#include "../streamingalgorithm.h"
 
 namespace essentia {
 namespace streaming {

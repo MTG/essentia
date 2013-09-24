@@ -24,7 +24,7 @@
 #include <cctype>
 #include <string>
 #include <cmath> // isinf, isnan
-#include "tnt/tnt.h"
+#include "utils/tnt/tnt.h"
 #include "types.h"
 
 

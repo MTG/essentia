@@ -22,8 +22,8 @@
 
 #include <string>
 #include "types.h"
-#include "sourcebase.h"
-#include "sinkbase.h"
+#include "streaming/sourcebase.h"
+#include "streaming/sinkbase.h"
 
 namespace essentia {
 namespace standard {

@@ -19,11 +19,11 @@
 
 #include <iostream>
 #include <fstream> // to write ticks to output file
-#include "algorithmfactory.h"
-#include "poolstorage.h"
-#include "vectorinput.h"
-#include "vectoroutput.h"
-#include "essentiamath.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/streaming/algorithms/vectorinput.h>
+#include <essentia/streaming/algorithms/vectoroutput.h>
+#include <essentia/essentiamath.h>
 
 using namespace std;
 using namespace essentia;

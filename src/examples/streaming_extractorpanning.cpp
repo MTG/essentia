@@ -17,9 +17,9 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "streaming_extractorpanning.h"
-#include "algorithmfactory.h"
-#include "poolstorage.h"
+#include <streaming_extractorpanning.h>
+#include <essentia/algorithmfactory.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
 
 using namespace std;
 using namespace essentia;

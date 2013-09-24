@@ -18,9 +18,9 @@
  */
 
 #include "streaming_extractorlowlevel.h"
-#include "algorithmfactory.h"
-#include "essentiamath.h"
-#include "poolstorage.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/essentiamath.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
 
 using namespace std;
 using namespace essentia;
@@ -103,7 +103,7 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   //Algorithm* rhythmtransform = factory.create("RhythmTransform");
   //mfcc->output("bands") >> rhythmtransform->input("melBands");
   //connect(rhythmtransform->output("rhythm"), pool, llspace + "rhythm_transform");
- 
+
 
   // ERBBands and GFCC
   uint nERBBands = 40;
@@ -122,7 +122,7 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   connect(erbs_ds->output("kurtosis"), pool, llspace + "erbbands_kurtosis");
   connect(erbs_ds->output("spread"), pool, llspace + "erbbands_spread");
   connect(erbs_ds->output("skewness"), pool, llspace + "erbbands_skewness");
-  
+
   // Spectral Decrease
   Algorithm* square = factory.create("UnaryOperator", "type", "square");
   Algorithm* decrease = factory.create("Decrease",

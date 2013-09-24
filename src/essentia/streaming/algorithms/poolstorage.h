@@ -20,8 +20,8 @@
 #ifndef ESSENTIA_POOLSTORAGE_H
 #define ESSENTIA_POOLSTORAGE_H
 
-#include "streamingalgorithm.h"
-#include "pool.h"
+#include "../streamingalgorithm.h"
+#include "../../pool.h"
 
 namespace essentia {
 namespace streaming {

@@ -21,7 +21,7 @@
 #ifndef ESSENTIA_BPMUTILS_H
 #define ESSENTIA_BPMUTILS_H
 
-#include "essentiamath.h"
+#include "../essentiamath.h"
 #include <cassert>
 
 namespace essentia {
