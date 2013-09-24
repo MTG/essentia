@@ -19,7 +19,7 @@
 
 import sys, os
 import essentia, essentia.standard, essentia.streaming
-from essentia.streaming import RhythmExtractor, BPMHistogramDescriptors
+from essentia.streaming import RhythmExtractor2013, BPMHistogramDescriptors
 
 class RhythmDescriptorsExtractor(essentia.streaming.CompositeBase):
 
@@ -38,8 +38,6 @@ class RhythmDescriptorsExtractor(essentia.streaming.CompositeBase):
         self.outputs['beats_position'] = rhythm.ticks
         self.outputs['bpm'] = rhythm.bpm
         self.outputs['bpm_estimates'] = rhythm.estimates
-        self.outputs['rubato_start'] = rhythm.rubatoStart
-        self.outputs['rubato_stop'] = rhythm.rubatoStop
         self.outputs['bpm_intervals'] = rhythm.bpmIntervals
         self.outputs['first_peak_bpm'] = bpmHist.firstPeakBPM
         self.outputs['first_peak_weight'] = bpmHist.firstPeakWeight

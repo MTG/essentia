@@ -40,9 +40,9 @@ class RhythmDescriptors : public AlgorithmComposite {
   Source<Real> _bpm;
   Source<std::vector<Real> > _ticks;
   Source<std::vector<Real> > _estimates;
-  Source<std::vector<Real> > _rubatoStart;
-  Source<std::vector<Real> > _rubatoStop;
-  Source<int> _rubatoNumber;
+  //Source<std::vector<Real> > _rubatoStart;
+  //Source<std::vector<Real> > _rubatoStop;
+  //Source<int> _rubatoNumber;
   Source<std::vector<Real> > _bpmIntervals;
 
   // from BPMHistogramDescriptors
@@ -92,9 +92,9 @@ class RhythmDescriptors : public Algorithm {
   Output<std::vector<Real> > _ticks;
   Output<std::vector<Real> > _estimates;
   Output<std::vector<Real> > _bpmIntervals;
-  Output<std::vector<Real> > _rubatoStart;
-  Output<std::vector<Real> > _rubatoStop;
-  Output<int> _rubatoNumber;
+  //Output<std::vector<Real> > _rubatoStart;
+  //Output<std::vector<Real> > _rubatoStop;
+  //Output<int> _rubatoNumber;
 
   Output<Real> _firstPeakBPM;
   Output<Real> _firstPeakSpread;

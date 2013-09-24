@@ -69,10 +69,6 @@ def postProcess(pool, namespace=''):
     if not pool.containsKey(rhythmspace+'beats_loudness'):
       pool.set(rhythmspace + 'beats_loudness', 0.0);
       pool.set(rhythmspace + 'beats_loudness_bass', 0.0);
-    if not pool.containsKey(rhythmspace+'rubato_start'):
-      pool.set(rhythmspace + 'rubato_start', [])
-    if not pool.containsKey(rhythmspace+'rubato_stop'):
-      pool.set(rhythmspace + 'rubato_stop', [])
 
     # PCA analysis of spectral contrast output:
     pca(pool, namespace);
