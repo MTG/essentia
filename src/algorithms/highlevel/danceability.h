@@ -109,5 +109,53 @@ class Danceability : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
+#include "streamingalgorithmcomposite.h" 
+#include "pool.h"
+                                                                                
+namespace essentia {
+namespace streaming {
+
+class Danceability : public AlgorithmComposite {
+
+ protected:
+  SinkProxy<Real> _signal;
+  Source<Real> _danceability;
+
+  Pool _pool;
+  Algorithm* _poolStorage;
+  standard::Algorithm * _danceabilityAlgo;
+
+ public:
+  Danceability();
+  ~Danceability();
+ 
+  void declareParameters() {
+    declareParameter("minTau", "minimum segment length to consider [ms]", "(0,inf)", 310.);
+    declareParameter("maxTau", "maximum segment length to consider [ms]", "(0,inf)", 8800.);
+    declareParameter("tauMultiplier", "multiplier to increment from min to max tau", "[1,inf)", 1.1);
+    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
+  }
+
+  void configure() {
+    _danceabilityAlgo->configure(INHERIT("minTau"),
+                                 INHERIT("maxTau"),
+                                 INHERIT("tauMultiplier"),
+                                 INHERIT("sampleRate"));                       
+  }
+
+  void declareProcessOrder() {                                                  
+    declareProcessStep(SingleShot(_poolStorage));                               
+    declareProcessStep(SingleShot(this));                                       
+  }
+
+  AlgorithmStatus process();
+  void reset();
+
+  static const char* name;
+  static const char* description;
+};                                                                              
+
+} // namespace streaming
+} // namespace essentia
 
 #endif // ESSENTIA_DANCEABILITY_H
