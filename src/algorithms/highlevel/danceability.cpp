@@ -20,8 +20,8 @@
 #include "danceability.h"
 
 using namespace std;
-using namespace essentia;
-using namespace standard;
+namespace essentia {
+namespace standard {
 
 const char* Danceability::name = "Danceability";
 const char* Danceability::description = DOC(
@@ -171,3 +171,55 @@ void Danceability::compute() {
      danceability = 0.0;
   }
 }
+
+} // namespace standard
+} // namespace essentia
+
+#include "poolstorage.h"
+#include "algorithmfactory.h"
+
+namespace essentia {
+namespace streaming {
+
+const char* Danceability::name = standard::Danceability::name;
+const char* Danceability::description = standard::Danceability::description;
+
+
+Danceability::Danceability() : AlgorithmComposite() {
+
+  _danceabilityAlgo = standard::AlgorithmFactory::create("Danceability");
+  _poolStorage = new PoolStorage<Real>(&_pool, "internal.signal");
+
+  declareInput(_signal, 1, "signal", "the input signal");
+  declareOutput(_danceability, 0, "danceability", "the danceability value. Normal values range from 0 to ~3. The higher, the more danceable.");
+
+  _signal >> _poolStorage->input("data"); // attach input proxy
+}
+
+
+Danceability::~Danceability() {
+  delete _danceabilityAlgo;
+  delete _poolStorage;
+}
+
+void Danceability::reset() {
+  AlgorithmComposite::reset();
+  _poolStorage->reset();
+}
+
+
+AlgorithmStatus Danceability::process() {
+  if (!shouldStop()) return PASS;
+
+  Real danceability;
+  
+  _danceabilityAlgo->input("signal").set(_pool.value<vector<Real> >("internal.signal"));
+  _danceabilityAlgo->output("danceability").set(danceability);
+  _danceabilityAlgo->compute();
+  
+  _danceability.push(danceability);
+  return FINISHED;
+}
+
+} // namespace streaming
+} // namespace essentia

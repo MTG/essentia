@@ -475,8 +475,9 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       connect(rhythmExtractor->output("ticks"),        neqloudPool, rhythmspace + "beats_position");
       connect(rhythmExtractor->output("bpm"),          neqloudPool, rhythmspace + "bpm");
       connect(rhythmExtractor->output("estimates"),    neqloudPool, rhythmspace + "bpm_estimates");
-      connect(rhythmExtractor->output("rubatoStart"),  neqloudPool, rhythmspace + "rubato_start");
-      connect(rhythmExtractor->output("rubatoStop"),   neqloudPool, rhythmspace + "rubato_stop");
+      // TODO we need a better rubato estimation algorithm
+      //connect(rhythmExtractor->output("rubatoStart"),  neqloudPool, rhythmspace + "rubato_start");
+      //connect(rhythmExtractor->output("rubatoStop"),   neqloudPool, rhythmspace + "rubato_stop");
       connect(rhythmExtractor->output("bpmIntervals"), neqloudPool, rhythmspace + "bpm_intervals");
 
       // BPM Histogram descriptors
@@ -535,8 +536,8 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       connect(rhythmExtractor->output("ticks"),        eqloudPool, rhythmspace + "beats_position");
       connect(rhythmExtractor->output("bpm"),          eqloudPool, rhythmspace + "bpm");
       connect(rhythmExtractor->output("estimates"),    eqloudPool, rhythmspace + "bpm_estimates");
-      connect(rhythmExtractor->output("rubatoStart"),  eqloudPool, rhythmspace + "rubato_start");
-      connect(rhythmExtractor->output("rubatoStop"),   eqloudPool, rhythmspace + "rubato_stop");
+      //connect(rhythmExtractor->output("rubatoStart"),  eqloudPool, rhythmspace + "rubato_start");
+      //connect(rhythmExtractor->output("rubatoStop"),   eqloudPool, rhythmspace + "rubato_stop");
       connect(rhythmExtractor->output("bpmIntervals"), eqloudPool, rhythmspace + "bpm_intervals");
 
       // BPM Histogram descriptors
