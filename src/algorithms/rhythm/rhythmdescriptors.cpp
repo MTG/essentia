@@ -39,9 +39,10 @@ RhythmDescriptors::RhythmDescriptors() {
   declareOutput(_bpm, "bpm", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_estimates, "bpm_estimates", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_bpmIntervals, "bpm_intervals", "See RhythmExtractor2013 algorithm documentation");
-  declareOutput(_rubatoStart, "rubato_start", "See RhythmExtractor2013 algorithm documentation");
-  declareOutput(_rubatoStop, "rubato_stop", "See RhythmExtractor2013 algorithm documentation");
-  declareOutput(_rubatoNumber, "rubato_number", "See RhythmExtractor2013 algorithm documentation");
+  //FIXME we need better rubato estimation algorithm
+  //declareOutput(_rubatoStart, "rubato_start", "See RhythmExtractor2013 algorithm documentation");
+  //declareOutput(_rubatoStop, "rubato_stop", "See RhythmExtractor2013 algorithm documentation");
+  //declareOutput(_rubatoNumber, "rubato_number", "See RhythmExtractor2013 algorithm documentation");
 
   declareOutput(_firstPeakBPM, "first_peak_bpm", "See BpmHistogramDescriptors algorithm documentation");
   declareOutput(_firstPeakSpread, "first_peak_spread", "See BpmHistogramDescriptors algorithm documentation");
@@ -63,9 +64,9 @@ void RhythmDescriptors::createInnerNetwork() {
   _rhythmExtractor->output("bpm") >> PC(_pool, "internal.bpm");
   _rhythmExtractor->output("estimates")     >> PC(_pool, "internal.estimates");
   _rhythmExtractor->output("bpmIntervals")  >> PC(_pool, "internal.bpmIntervals");
-  _rhythmExtractor->output("rubatoStart")   >> PC(_pool, "internal.rubatoStart");
-  _rhythmExtractor->output("rubatoStop")    >> PC(_pool, "internal.rubatoStop");
-  _rhythmExtractor->output("rubatoNumber")    >> PC(_pool, "internal.rubatoNumber");
+  //_rhythmExtractor->output("rubatoStart")   >> PC(_pool, "internal.rubatoStart");
+  //_rhythmExtractor->output("rubatoStop")    >> PC(_pool, "internal.rubatoStop");
+  //_rhythmExtractor->output("rubatoNumber")    >> PC(_pool, "internal.rubatoNumber");
 
   // TODO current limitation: seems like if one output of an algo is connected to
   // SourceProxy, other outputs directed somewhere else will be empty. Bug?
@@ -106,9 +107,9 @@ AlgorithmStatus RhythmDescriptors::process() {
   _ticks.push(_pool.value<vector<Real> >("internal.ticks"));
   _estimates.push(_pool.value<vector<Real> >("internal.estimates"));
   _bpmIntervals.push(_pool.value<vector<Real> >("internal.bpmIntervals"));
-  _rubatoStart.push(_pool.value<vector<Real> >("internal.rubatoStart"));
-  _rubatoStop.push(_pool.value<vector<Real> >("internal.rubatoStop"));
-  _rubatoNumber.push((int) _pool.value<Real>("internal.rubatoStop"));
+  //_rubatoStart.push(_pool.value<vector<Real> >("internal.rubatoStart"));
+  //_rubatoStop.push(_pool.value<vector<Real> >("internal.rubatoStop"));
+  //_rubatoNumber.push((int) _pool.value<Real>("internal.rubatoStop"));
 
   return FINISHED;
 }
@@ -138,9 +139,9 @@ RhythmDescriptors::RhythmDescriptors() {
   declareOutput(_bpm,             "bpm", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_estimates,       "bpm_estimates", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_bpmIntervals,    "bpm_intervals", "See RhythmExtractor2013 algorithm documentation");
-  declareOutput(_rubatoStart,     "rubato_start", "See RhythmExtractor2013 algorithm documentation");
-  declareOutput(_rubatoStop,      "rubato_stop", "See RhythmExtractor2013 algorithm documentation");
-  declareOutput(_rubatoNumber,    "rubato_number", "See RhythmExtractor2013 algorithm documentation");
+  //declareOutput(_rubatoStart,     "rubato_start", "See RhythmExtractor2013 algorithm documentation");
+  //declareOutput(_rubatoStop,      "rubato_stop", "See RhythmExtractor2013 algorithm documentation");
+  //declareOutput(_rubatoNumber,    "rubato_number", "See RhythmExtractor2013 algorithm documentation");
 
   declareOutput(_firstPeakBPM,    "first_peak_bpm", "See BpmHistogramDescriptors algorithm documentation");
   declareOutput(_firstPeakSpread, "first_peak_spread", "See BpmHistogramDescriptors algorithm documentation");
@@ -174,9 +175,9 @@ void RhythmDescriptors::createInnerNetwork() {
   _rhythmDescriptors->output("bpm")                 >>  PC(_pool, "bpm");
   _rhythmDescriptors->output("bpm_estimates")       >>  PC(_pool, "bpm_estimates");
   _rhythmDescriptors->output("bpm_intervals")       >>  PC(_pool, "bpm_intervals");
-  _rhythmDescriptors->output("rubato_start")        >>  PC(_pool, "rubato_start");
-  _rhythmDescriptors->output("rubato_stop")         >>  PC(_pool, "rubato_stop");
-  _rhythmDescriptors->output("rubato_number")       >>  PC(_pool, "rubato_number");
+  //_rhythmDescriptors->output("rubato_start")        >>  PC(_pool, "rubato_start");
+  //_rhythmDescriptors->output("rubato_stop")         >>  PC(_pool, "rubato_stop");
+  //_rhythmDescriptors->output("rubato_number")       >>  PC(_pool, "rubato_number");
 
   _rhythmDescriptors->output("first_peak_bpm")      >>  PC(_pool, "first_peak_bpm");
   _rhythmDescriptors->output("first_peak_spread")   >>  PC(_pool, "first_peak_spread");
@@ -198,15 +199,15 @@ void RhythmDescriptors::compute() {
   _ticks.get()        = _pool.value<vector<Real> >("beats_position");
   _estimates.get()    = _pool.value<vector<Real> >("bpm_estimates");
   //_bpmIntervals.get() = _pool.value<vector<Real> >("bpm_intervals");
-  _rubatoNumber.get() = (int) _pool.value<Real>("rubato_number");
-  try {
-  _rubatoStart.get()  = _pool.value<vector<Real> >("rubato_start");
-  _rubatoStop.get()   = _pool.value<vector<Real> >("rubato_stop");
-  }
-  catch (EssentiaException &) { // no rubato regions found
-    _rubatoStart.get() = vector<Real>();
-    _rubatoStop.get() = vector<Real>();
-  }
+  //_rubatoNumber.get() = (int) _pool.value<Real>("rubato_number");
+  //try {
+  //_rubatoStart.get()  = _pool.value<vector<Real> >("rubato_start");
+  //_rubatoStop.get()   = _pool.value<vector<Real> >("rubato_stop");
+  //}
+  //catch (EssentiaException &) { // no rubato regions found
+  //  _rubatoStart.get() = vector<Real>();
+  //  _rubatoStop.get() = vector<Real>();
+  //}
 
   _firstPeakBPM.get()     = _pool.value<vector<Real> >("first_peak_bpm")[0];
   _firstPeakSpread.get()  = _pool.value<vector<Real> >("first_peak_spread")[0];

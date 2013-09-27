@@ -433,20 +433,27 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
 
     // Rhythm descriptors
     if (options.value<Real>("rhythm.compute") != 0) {
-      Algorithm* rhythmExtractor = factory.create("RhythmExtractor");
-      rhythmExtractor->configure("useOnset",     options.value<Real>("rhythm.useOnset") != 0,
-                                 "useBands",     options.value<Real>("rhythm.useBands") != 0,
-                                 "frameSize",     int(options.value<Real>("rhythm.frameSize")),
-                                 "hopSize",       int(options.value<Real>("rhythm.hopSize")),
-                                 "numberFrames",  int(options.value<Real>("rhythm.numberFrames")),
-                                 "frameHop",      int(options.value<Real>("rhythm.frameHop")));
+
+      // outdated extrator, using RhythmExtractor2013 instead
+      //Algorithm* rhythmExtractor = factory.create("RhythmExtractor");
+      //rhythmExtractor->configure("useOnset",     options.value<Real>("rhythm.useOnset") != 0,
+      //                           "useBands",     options.value<Real>("rhythm.useBands") != 0,
+      //                           "frameSize",     int(options.value<Real>("rhythm.frameSize")),
+      //                           "hopSize",       int(options.value<Real>("rhythm.hopSize")),
+      //                           "numberFrames",  int(options.value<Real>("rhythm.numberFrames")),
+      //                           "frameHop",      int(options.value<Real>("rhythm.frameHop")));
+      Algorithm* rhythmExtractor = factory.create("RhythmExtractor2013");
+      //rhythmExtractor->configure("method",     options.value<string>("rhythm.method"), // TODO
+      //                           "maxTempo",   options.value<int>("rhythm.maxTempo"),
+      //                           "minTempo",   options.value<int>("rhythm.minTempo"));
 
       connect(neqloudSource, rhythmExtractor->input("signal"));
       connect(rhythmExtractor->output("ticks"),        neqloudPool, rhythmspace + "beats_position");
       connect(rhythmExtractor->output("bpm"),          neqloudPool, rhythmspace + "bpm");
       connect(rhythmExtractor->output("estimates"),    neqloudPool, rhythmspace + "bpm_estimates");
-      connect(rhythmExtractor->output("rubatoStart"),  neqloudPool, rhythmspace + "rubato_start");
-      connect(rhythmExtractor->output("rubatoStop"),   neqloudPool, rhythmspace + "rubato_stop");
+      // FIXME we need better rubato estimation algorithm
+      //connect(rhythmExtractor->output("rubatoStart"),  neqloudPool, rhythmspace + "rubato_start");
+      //connect(rhythmExtractor->output("rubatoStop"),   neqloudPool, rhythmspace + "rubato_stop");
       connect(rhythmExtractor->output("bpmIntervals"), neqloudPool, rhythmspace + "bpm_intervals");
 
       // BPM Histogram descriptors
@@ -487,20 +494,25 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
 
     // Rhythm descriptors
     if (options.value<Real>("rhythm.compute") != 0) {
-      Algorithm* rhythmExtractor = factory.create("RhythmExtractor");
-      rhythmExtractor->configure("useOnset",     options.value<Real>("rhythm.useOnset") != 0,
-                                 "useBands",     options.value<Real>("rhythm.useBands") != 0,
-                                 "frameSize",     int(options.value<Real>("rhythm.frameSize")),
-                                 "hopSize",       int(options.value<Real>("rhythm.hopSize")),
-                                 "numberFrames",  int(options.value<Real>("rhythm.numberFrames")),
-                                 "frameHop",      int(options.value<Real>("rhythm.frameHop")));
+      // outdated extrator, using RhythmExtractor2013 instead
+      //Algorithm* rhythmExtractor = factory.create("RhythmExtractor");
+      //rhythmExtractor->configure("useOnset",     options.value<Real>("rhythm.useOnset") != 0,
+      //                           "useBands",     options.value<Real>("rhythm.useBands") != 0,
+      //                           "frameSize",     int(options.value<Real>("rhythm.frameSize")),
+      //                           "hopSize",       int(options.value<Real>("rhythm.hopSize")),
+      //                           "numberFrames",  int(options.value<Real>("rhythm.numberFrames")),
+      //                           "frameHop",      int(options.value<Real>("rhythm.frameHop")));
+      Algorithm* rhythmExtractor = factory.create("RhythmExtractor2013");
+      //rhythmExtractor->configure("method",     options.value<string>("rhythm.method"), // TODO
+      //                           "maxTempo",   options.value<int>("rhythm.maxTempo"),
+      //                           "minTempo",   options.value<int>("rhythm.minTempo"));
 
       connect(eqloudSource, rhythmExtractor->input("signal"));
       connect(rhythmExtractor->output("ticks"),        eqloudPool, rhythmspace + "beats_position");
       connect(rhythmExtractor->output("bpm"),          eqloudPool, rhythmspace + "bpm");
       connect(rhythmExtractor->output("estimates"),    eqloudPool, rhythmspace + "bpm_estimates");
-      connect(rhythmExtractor->output("rubatoStart"),  eqloudPool, rhythmspace + "rubato_start");
-      connect(rhythmExtractor->output("rubatoStop"),   eqloudPool, rhythmspace + "rubato_stop");
+      //connect(rhythmExtractor->output("rubatoStart"),  eqloudPool, rhythmspace + "rubato_start");
+      //connect(rhythmExtractor->output("rubatoStop"),   eqloudPool, rhythmspace + "rubato_stop");
       connect(rhythmExtractor->output("bpmIntervals"), eqloudPool, rhythmspace + "bpm_intervals");
 
       // BPM Histogram descriptors

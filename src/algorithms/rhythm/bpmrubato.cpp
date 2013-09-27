@@ -29,6 +29,8 @@ const char* BpmRubato::description = DOC("This algorithm extracts the locations 
 "\n"
 "An exception is thrown if the input beats are not in ascending order and/or if the input beats contain duplicate values.\n"
 "\n"
+"Quality: experimental (non-reliable, poor accuracy).\n"
+"\n"
 "References:\n"
 "  [1] Tempo Rubato - Wikipedia, the free encyclopedia,\n"
 "      http://en.wikipedia.org/wiki/Rubato");

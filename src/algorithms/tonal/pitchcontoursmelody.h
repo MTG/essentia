@@ -65,7 +65,7 @@ class PitchContoursMelody : public Algorithm {
   Real _maxBin;
 
   // voice vibrato detection parameters
-  Real _vibratoSampleRate;
+  //Real _vibratoSampleRate;
   int _vibratoFrameSize;
   int _vibratoHopSize;
   int _vibratoZeroPaddingFactor;

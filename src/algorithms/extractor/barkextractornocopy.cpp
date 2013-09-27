@@ -93,7 +93,6 @@ void BarkExtractorNoCopy::createInnerNetwork() {
 void BarkExtractorNoCopy::configure() {
   int frameSize   = parameter("frameSize").toInt();
   int hopSize     = parameter("hopSize").toInt();
-  Real sampleRate = parameter("sampleRate").toReal();
 
   _barkBands->configure(INHERIT("sampleRate"));
   _frameCutter->configure("silentFrames", "noise", "hopSize", hopSize, "frameSize", frameSize);
