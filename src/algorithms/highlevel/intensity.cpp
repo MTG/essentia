@@ -27,6 +27,8 @@ using namespace standard;
 const char* Intensity::name = "Intensity";
 const char* Intensity::description = DOC("This algorithm classifies the input audio signal as either relaxed (-1), moderate (0), or aggressive (1).\n"
 "\n"
+"Quality: outdated (non-reliable, poor accuracy).\n"
+"\n"
 "An exception is thrown if empty input is provided because the \"intensity\" is not defined for that case.");
 
 enum IntensityClass {
