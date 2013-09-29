@@ -22,7 +22,7 @@
 
 #include "types.h"
 #include "threading.h"
-#include "tnt/tnt.h"
+#include "utils/tnt/tnt.h"
 #include "essentiautil.h"
 
 namespace essentia {

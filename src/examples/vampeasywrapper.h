@@ -21,7 +21,7 @@
 #define ESSENTIA_VAMPEASYWRAPPER_H
 
 #include "vampwrapper.h"
-#include "algorithmfactory.h"
+#include <essentia/algorithmfactory.h>
 
 
 #define WRAP_ALGO(algoname, unit, ndim, outputType)                      \

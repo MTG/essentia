@@ -18,9 +18,9 @@
  */
 
 #include <iostream>
-#include "algorithmfactory.h"
-#include "poolstorage.h"
-#include "../scheduler/network.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/scheduler/network.h>
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;

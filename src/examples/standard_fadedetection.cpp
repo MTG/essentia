@@ -18,9 +18,9 @@
  */
 
 #include <iostream>
-#include "algorithmfactory.h"
-#include "tnt/tnt2vector.h"
-#include "pool.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/pool.h>
+#include <essentia/utils/tnt/tnt2vector.h>
 
 using namespace std;
 using namespace essentia;

@@ -19,8 +19,8 @@
 
 #include "network.h"
 #include "graphutils.h"
-#include "streamingalgorithm.h"
-#include "streamingalgorithmcomposite.h"
+#include "../streaming/streamingalgorithm.h"
+#include "../streaming/streamingalgorithmcomposite.h"
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;

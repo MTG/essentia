@@ -18,11 +18,11 @@
  */
 
 #include <iostream>
-#include "algorithmfactory.h"
-#include "essentiamath.h"
-#include "poolstorage.h"
-#include "essentiautil.h"
-#include "network.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/essentiamath.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/essentiautil.h>
+#include <essentia/scheduler/network.h>
 
 // helper functions
 #include "streaming_extractorutils.h"

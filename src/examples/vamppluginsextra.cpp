@@ -18,16 +18,16 @@
  */
 
 #include <deque>
-#include <essentiamath.h>
+#include <essentia/essentiamath.h>
 #include "vamp/vamp.h"
 #include "vamp-sdk/PluginAdapter.h"
 #include "vampeasywrapper.h"
-#include "tnt/tnt.h"
-#include "tnt/tnt2vector.h"
-#include "vectorinput.h"
-#include "vectoroutput.h"
-#include "poolstorage.h"
-#include "network.h"
+#include <essentia/utils/tnt/tnt.h>
+#include <essentia/utils/tnt/tnt2vector.h>
+#include <essentia/streaming/algorithms/vectorinput.h>
+#include <essentia/streaming/algorithms/vectoroutput.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/scheduler/network.h>
 
 using namespace std;
 using namespace essentia;

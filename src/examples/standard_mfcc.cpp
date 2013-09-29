@@ -19,9 +19,9 @@
 
 #include <iostream>
 #include <fstream>
-#include "algorithmfactory.h"
-#include "essentiamath.h"
-#include "pool.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/essentiamath.h>
+#include <essentia/pool.h>
 
 using namespace std;
 using namespace essentia;

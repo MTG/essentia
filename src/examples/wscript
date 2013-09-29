@@ -57,7 +57,7 @@ def build(ctx):
 
             ctx.program(source = ctx.path.ant_glob(' '.join(files)),
                         target = '%s_%s' % (prefix, prog_name),
-                        includes = [ '.' ] + adjust(ctx.env.INCLUDES, '..'),
+                        includes = [ '.', '..' ],
                         use      = 'essentia ' + ctx.env.USES,
                         install_path = None)
 
@@ -144,7 +144,7 @@ def build(ctx):
         vamp = ctx.shlib(
             source   = ctx.path.ant_glob('vamp*.cpp') + vamp_sdk_files,
             target   = 'vamp_essentia',
-            includes = [ '.' ] + adjust(ctx.env.INCLUDES, '..'),
+            includes = [ '.', '..', '../3rdparty/vamp-plugin-sdk-2.4' ],
             use      = 'essentia ' + ctx.env.USES,
             install_path = install_path
         )

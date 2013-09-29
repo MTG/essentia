@@ -18,9 +18,9 @@
  */
 
 #include "streamingalgorithmcomposite.h"
-#include "network.h"
-#include "graphutils.h"
-#include "poolstorage.h"
+#include "algorithms/poolstorage.h"
+#include "../scheduler/network.h"
+#include "../scheduler/graphutils.h"
 using namespace std;
 
 namespace essentia {

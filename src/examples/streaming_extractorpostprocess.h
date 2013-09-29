@@ -20,8 +20,8 @@
 #ifndef STREAMING_EXTRACTOR_POSTPROCESS_H
 #define STREAMING_EXTRACTOR_POSTPROCESS_H
 
-#include "pool.h"
-#include "types.h"
+#include <essentia/pool.h>
+#include <essentia/types.h>
 #include <string>
 
 void PostProcess(essentia::Pool& pool, const essentia::Pool& options, const std::string& nspace="");

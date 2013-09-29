@@ -20,8 +20,8 @@
 #ifndef ESSENTIA_SINKBASE_H
 #define ESSENTIA_SINKBASE_H
 
-#include "types.h"
-#include "connector.h"
+#include "../types.h"
+#include "../connector.h"
 
 namespace essentia {
 namespace streaming {

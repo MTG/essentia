@@ -20,8 +20,8 @@
 #ifndef ESSENTIA_SOURCEBASE_H
 #define ESSENTIA_SOURCEBASE_H
 
-#include "types.h"
-#include "connector.h"
+#include "../types.h"
+#include "../connector.h"
 
 namespace essentia {
 namespace streaming {

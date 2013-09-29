@@ -18,8 +18,8 @@
  */
 
 #include <iostream>
-#include "algorithmfactory.h"
-#include "../scheduler/network.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/scheduler/network.h>
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;

@@ -29,6 +29,8 @@ def options(ctx):
 def configure(ctx):
     print('→ configuring the project in ' + ctx.path.abspath())
 
+    ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
+
     # compiler flags
     ctx.env.CXXFLAGS = [ '-pipe', '-Wall' ]
 
@@ -80,10 +82,10 @@ def build(ctx):
 
     if ctx.env.WITH_CPPTESTS:
         # missing -lpthread flag on Ubuntu
-        if platform.dist()[0] == 'Ubuntu': 
+        if platform.dist()[0] == 'Ubuntu':
             ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
             ctx.read_shlib('pthread', paths=ext_paths)
-            ctx.env.USES += ' pthread'	
+            ctx.env.USES += ' pthread'
 
         ctx.program(
             source   = ctx.path.ant_glob('test/src/basetest/*.cpp test/3rdparty/gtest-1.6.0/src/gtest-all.cc '),

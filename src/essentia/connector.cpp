@@ -18,7 +18,7 @@
  */
 
 #include "connector.h"
-#include "streamingalgorithm.h"
+#include "streaming/streamingalgorithm.h"
 using namespace std;
 
 namespace essentia {
@@ -41,4 +41,3 @@ string Connector::fullName() const {
 
 } // namespace streaming
 } // namespace essentia
-

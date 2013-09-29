@@ -18,9 +18,9 @@
  */
 
 #include "streaming_extractortonal.h"
-#include "algorithmfactory.h"
-#include "essentiamath.h"
-#include "poolstorage.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/essentiamath.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
 
 using namespace std;
 using namespace essentia;
