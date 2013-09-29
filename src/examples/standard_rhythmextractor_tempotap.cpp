@@ -19,9 +19,9 @@
 
 #include <iostream>
 #include <complex>
-#include "algorithmfactory.h"
-#include "essentiamath.h"
-#include "tnt/tnt_array2d.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/essentiamath.h>
+#include <essentia/utils/tnt/tnt_array2d.h>
 
 using namespace std;
 using namespace essentia;
@@ -410,11 +410,11 @@ int main(int argc, char* argv[]) {
     for (uint i = 1; i < ticks.size(); i++) {
       bpmIntervals[i-1] = ticks[i] - ticks[i-1];
     }
-    /* computing rubat regions */
+    /* computing rubato regions */
     //bpmRubato->input("beats").set(ticks);
     //bpmRubato->output("rubatoStart").set(rubatoStart);
     //bpmRubato->output("rubatoStop").set(rubatoStop);
-    //bpmRubato->output("rubatoNumber").set(rubatoNumber); 
+    //bpmRubato->output("rubatoNumber").set(rubatoNumber);
     //bpmRubato->compute();
   }
 

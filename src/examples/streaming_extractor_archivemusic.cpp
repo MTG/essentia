@@ -19,11 +19,11 @@
 
 // Streaming extractor designed for analysis of music collections on Archive.org
 
-#include "algorithmfactory.h"
-#include "essentiamath.h"
-#include "poolstorage.h"
-#include "essentiautil.h"
-#include "network.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/essentiamath.h>
+#include <essentia/essentiautil.h>
+#include <essentia/scheduler/network.h>
 
 // helper functions
 #include "streaming_extractorutils.h"
@@ -116,7 +116,7 @@ void compute(const string& audioFilename, const string& outputFilename,
   if (endTime > neqloudPool.value<Real>("metadata.audio_properties.length")) {
       endTime = neqloudPool.value<Real>("metadata.audio_properties.length");
   }
-  
+
   computeLowLevel(audioFilename, neqloudPool, options, startTime, endTime);
   computeMidLevel(audioFilename, neqloudPool, options, startTime, endTime);
   computeHighlevel(neqloudPool, options);
@@ -125,8 +125,7 @@ void compute(const string& audioFilename, const string& outputFilename,
   Pool stats = computeAggregation(neqloudPool, options);
   //addSVMDescriptors(stats); // not available
   outputToFile(stats, neqOutputFilename, true);
- 
- return;
+  return;
 }
 
 
@@ -218,7 +217,7 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, const Poo
   cout.precision(10);
 }
 
-void computeLowLevel(const string& audioFilename, Pool& neqloudPool, 
+void computeLowLevel(const string& audioFilename, Pool& neqloudPool,
                      const Pool& options, Real startTime, Real endTime, const string& nspace) {
   /*************************************************************************
    *    2nd pass: normalize the audio with replay gain, compute as         *
@@ -309,7 +308,7 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool,
   Algorithm* danceability = factory.create("Danceability");
   neqloudSource >> danceability->input("signal");
   connect(danceability->output("danceability"), neqloudPool, rhythmspace + "danceability");
- 
+
 
   cout << "Process step 2: Low Level" << endl;
   Network network(audio_2);
@@ -374,7 +373,7 @@ void computeMidLevel(const string& audioFilename, Pool& neqloudPool, const Pool&
   connect(neqloudSource, beatsLoudness->input("signal"));
   connect(beatsLoudness->output("loudness"), neqloudPool, rhythmspace + "beats_loudness");
   connect(beatsLoudness->output("loudnessBandRatio"), neqloudPool, rhythmspace + "beats_loudness_band_ratio");
-  
+
   cout << "Process step 3: Mid Level" << endl;
   Network network(audio_3);
   network.run();
@@ -552,4 +551,3 @@ void setExtractorOptions(Pool& pool) {
   for (int i=0; i<(int)mfccStats.size(); i++)
     pool.add("lowlevel.mfccStats", mfccStats[i]);
 }
-

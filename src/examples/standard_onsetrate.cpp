@@ -18,7 +18,7 @@
  */
 
 #include <iostream>
-#include "algorithmfactory.h"
+#include <essentia/algorithmfactory.h>
 using namespace std;
 using namespace essentia;
 using namespace standard;

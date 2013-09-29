@@ -221,7 +221,7 @@ class ESSENTIA_API EssentiaFactory {
 // include these here because most likely a user of the AlgorithmFactory would want to use the
 // returned algorithm :)
 #include "algorithm.h"
-#include "streamingalgorithm.h"
+#include "streaming/streamingalgorithm.h"
 
 namespace essentia {
 

@@ -23,8 +23,8 @@
 #include <vector>
 #include <set>
 #include <stack>
-#include "streamingalgorithm.h"
-#include "essentiautil.h"
+#include "../streaming/streamingalgorithm.h"
+#include "../essentiautil.h"
 
 namespace essentia {
 namespace streaming {
@@ -80,7 +80,21 @@ typedef std::stack<NetworkNode*> NodeStack;
 
 
 
-
+/**
+ * A Network is a structure that holds all algorithms that have been connected
+ * together and is able to run them.
+ *
+ * It contains 2 networks of algorithms:
+ *  - the visible network, which is the network of algorithms explicitly
+ *    connected together by the user, which can contain AlgorithmComposites
+ *  - the execution network, where all the AlgorithmComposites have been
+ *    replaced with their respective constituent algorithms, so that only
+ *    non-composite algorithms are left.
+ *
+ * The main functionality of the Network, once it is built, is to run the
+ * generator node at the root of the Network (an audio loader, usually) and
+ * carry the data through all the other algorithms automatically.
+ */
 class Network {
 
  public:

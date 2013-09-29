@@ -23,7 +23,7 @@
 #include <map>
 #include <vector>
 #include "types.h"
-#include "tnt/tnt_array2d.h"
+#include "utils/tnt/tnt_array2d.h"
 
 namespace essentia {
 

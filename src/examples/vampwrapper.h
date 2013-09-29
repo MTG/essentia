@@ -21,10 +21,10 @@
 #define ESSENTIA_VAMPWRAPPER_H
 
 #include "vamp-sdk/Plugin.h"
-#include "types.h"
-#include "algorithm.h"
-#include "algorithmfactory.h"
-#include "pool.h"
+#include <essentia/types.h>
+#include <essentia/algorithm.h>
+#include <essentia/algorithmfactory.h>
+#include <essentia/pool.h>
 
 #include <iostream>
 

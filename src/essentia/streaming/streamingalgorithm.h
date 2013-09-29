@@ -20,10 +20,10 @@
 #ifndef ESSENTIA_STREAMINGALGORITHM_H
 #define ESSENTIA_STREAMINGALGORITHM_H
 
-#include "configurable.h"
+#include "../configurable.h"
+#include "../threading.h"
 #include "sourcebase.h"
 #include "sinkbase.h"
-#include "threading.h"
 
 namespace essentia {
 namespace scheduler {
@@ -273,7 +273,7 @@ class ESSENTIA_API Algorithm : public Configurable {
 
 // also include template algorithms which are not in the factory, but are still
 // useful most of the time
-#include "devnull.h"
+#include "algorithms/devnull.h"
 
 
 #endif // ESSENTIA_STREAMINGALGORITHM_H

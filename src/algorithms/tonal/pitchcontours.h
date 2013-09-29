@@ -41,7 +41,7 @@ class PitchContours : public Algorithm {
   Real _binResolution;
   Real _peakFrameThreshold;
   Real _peakDistributionThreshold;
-  Real _timeContinuity;
+  //Real _timeContinuity;
 
   std::vector<std::vector<Real> > _salientPeaksBins;
   std::vector<std::vector<Real> > _salientPeaksValues;

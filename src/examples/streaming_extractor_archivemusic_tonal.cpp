@@ -18,9 +18,9 @@
  */
 
 #include "streaming_extractortonal.h"
-#include "algorithmfactory.h"
-#include "essentiamath.h"
-#include "poolstorage.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/essentiamath.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
 
 using namespace std;
 using namespace essentia;
@@ -217,7 +217,7 @@ void TonalDescriptors(SourceBase& input, Pool& pool, const Pool& options, const 
   connect(hpcp_chord->output("hpcp"), schord->input("pcp"));
   // TODO: Chords progression has low practical sense and is based on a very simple algorithm prone to errors.
   // We need to have better algorithm first to include this descriptor.
-  // connect(schord->output("chords"), pool, tonalspace + "chords_progression"); 
+  // connect(schord->output("chords"), pool, tonalspace + "chords_progression");
   connect(schord->output("strength"), pool, tonalspace + "chords_strength");
 
   // native streaming chords descriptors algo

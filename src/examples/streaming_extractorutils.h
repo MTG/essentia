@@ -20,9 +20,9 @@
 #ifndef STREAMING_EXTRACTOR_METADATA_H
 #define STREAMING_EXTRACTOR_METADATA_H
 
-#include "algorithmfactory.h"
-#include "pool.h"
-#include "types.h"
+#include <essentia/algorithmfactory.h>
+#include <essentia/pool.h>
+#include <essentia/types.h>
 #include <string>
 
 void setDefaultOptions(essentia::Pool& pool);

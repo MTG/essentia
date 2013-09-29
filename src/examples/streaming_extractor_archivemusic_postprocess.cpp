@@ -18,9 +18,9 @@
  */
 
 #include "streaming_extractorpostprocess.h"
-#include "poolstorage.h"
-#include "algorithmfactory.h"
-#include "essentiamath.h"
+#include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/algorithmfactory.h>
+#include <essentia/essentiamath.h>
 
 using namespace std;
 using namespace essentia;
@@ -45,4 +45,3 @@ void PostProcess(Pool& pool, const Pool& options, const string& nspace) {
   if (find(descNames.begin(), descNames.end(), rhythmspace + "beats_loudness_band_ratio") == descNames.end())
     pool.add(rhythmspace + "beats_loudness_band_Ratio", vector<Real>());
 }
-

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import os.path
 
 
 def options(ctx):
@@ -34,7 +35,6 @@ def debian_version():
 
 
 def configure(ctx):
-    ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
     ctx.env.WITH_EXAMPLES = ctx.options.WITH_EXAMPLES
     ctx.env.WITH_PYTHON   = ctx.options.WITH_PYTHON
     ctx.env.WITH_VAMP     = ctx.options.WITH_VAMP
@@ -184,21 +184,21 @@ def build(ctx):
     algoreg_path = 'src/algorithms/essentia_algorithms_reg.cpp'
     create_registration_cpp(algos, algoreg_path, use_streaming=True)
 
-
-    sources = []
-    sources += ctx.path.ant_glob('base/*.cpp')
-    sources += ctx.path.ant_glob('scheduler/*.cpp')
-    sources += ctx.path.ant_glob('streaming/**/*.cpp')
-    sources += ctx.path.ant_glob('utils/*.cpp')
+    sources = ctx.path.ant_glob('essentia/**/*.cpp')
 
     # do not compile audiocontext.cpp if we're not compiling ffmpeg
     if 'AVCODEC' not in ctx.env.USES:
         sources = [ s for s in sources if 'audiocontext' not in str(s) ]
 
+    # add all algorithms found in the algorithms/ folder
     sources += [ ctx.path.find_resource('algorithms/essentia_algorithms_reg.cpp') ]
     sources += [ ctx.path.find_resource(algo['source']) for algo in algos.values() ]
 
-    ctx.env.INCLUDES = [ '.', 'base', 'scheduler', 'streaming', 'streaming/algorithms', 'utils', '3rdparty' ]
+    # TODO: recursive includes are needed only for the algorithms, not for the base
+    #       library. See if there's no way to split them.
+    ctx.env.INCLUDES = [ '.', 'essentia', 'essentia/scheduler', 'essentia/streaming',
+                         'essentia/streaming/algorithms', 'essentia/utils',
+                         '3rdparty' ]
 
     ctx.stlib(
         source   = sources,
@@ -208,9 +208,12 @@ def build(ctx):
         #includes = ctx.env.includes
     )
 
-    #ctx.install_as('${PYTHONDIR}/essentia/_essentia.so', 'libessentia_stlib.a')
+    # install headers if asked to
+    headers = ctx.path.ant_glob('essentia/**/*.h')
+    for h in headers:
+        install_dir = os.path.split(h.srcpath())[0][4:]
+        ctx.install_files('${PREFIX}/include/' + install_dir, h)
 
-    #ctx.recurse('unittest')
 
 
     if ctx.env.WITH_EXAMPLES or ctx.env.WITH_VAMP:

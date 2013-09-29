@@ -18,8 +18,8 @@
  */
 
 #include "streaming_extractorutils.h"
-#include "poolstorage.h"
-#include "network.h"
+#include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/scheduler/network.h>
 
 using namespace std;
 using namespace essentia;
