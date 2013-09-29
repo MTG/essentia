@@ -40,7 +40,7 @@ class ERBBands : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("inputSize", "the size of the spectrum", "(1,inf)", 513);
+    declareParameter("inputSize", "the size of the spectrum", "(1,inf)", 1025);
     declareParameter("numberBands", "the number of output bands", "(1,inf)", 40);
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("lowFrequencyBound", "a lower-bound limit for the frequencies to be included in the bands", "[0,inf)", 50.0);
