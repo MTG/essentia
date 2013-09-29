@@ -19,6 +19,7 @@
 
 #include "rhythmtransform.h"
 #include "essentiamath.h"
+#include "tnt/tnt2vector.h"
 #include <cfloat>
 using namespace std;
 
@@ -83,9 +84,9 @@ void RhythmTransform::compute() {
       _w->compute();
       _spec->compute();
 
-      // square the resulting spectrum
+      // square the resulting spectrum, sum periodograms across bands
       for (int bin=0; bin<(int)rhythmSpectrum.size(); ++bin)
-	      bandSpectrum[bin] = rhythmSpectrum[bin]*rhythmSpectrum[bin];
+	      bandSpectrum[bin] += rhythmSpectrum[bin]*rhythmSpectrum[bin];
     }
     output.push_back(bandSpectrum);
     i += _rtHopSize;
@@ -107,13 +108,12 @@ const char* RhythmTransform::description = standard::RhythmTransform::descriptio
 
 RhythmTransform::RhythmTransform() : AlgorithmComposite() {
 
-  declareInput(_melbands, "melBands","the energy in the melbands");
-  declareOutput(_rhythmTransform, 0, "rhythm", "consecutive frames in the rhythm domain");
-
   _poolStorage = new PoolStorage<vector<Real> >(&_pool, "internal.mel_bands");
   _rhythmAlgo = standard::AlgorithmFactory::create("RhythmTransform");
 
-  _melbands  >>  _poolStorage->input("data");
+  declareInput(_poolStorage->input("data"), 1, "melBands","the energy in the melbands");
+  declareOutput(_rhythmTransform, 0, "rhythm", "consecutive frames in the rhythm domain");
+  _rhythmTransform.setBufferType(BufferUsage::forLargeAudioStream);
 }
 
 void RhythmTransform::configure() {
@@ -133,10 +133,10 @@ AlgorithmStatus RhythmTransform::process() {
   vector<vector<Real> > rhythmTransform;
 
   _rhythmAlgo->input("melBands").set(bands);
-  _rhythmAlgo->input("rhythm").set(rhythmTransform);
+  _rhythmAlgo->output("rhythm").set(rhythmTransform);
   _rhythmAlgo->compute();
 
-  _rhythmTransform.push(rhythmTransform);
+  _rhythmTransform.push(vecvecToArray2D(rhythmTransform));
 
   return OK;
 }

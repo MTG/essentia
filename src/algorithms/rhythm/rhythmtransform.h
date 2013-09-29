@@ -78,8 +78,9 @@ namespace streaming {
 class RhythmTransform : public AlgorithmComposite {
 
  protected:
-  SinkProxy<std::vector<Real> > _melbands;
-  Source<std::vector<std::vector<Real> > > _rhythmTransform;
+  Sink<std::vector<Real> > _melbands;
+  // it has to be a TNT::Array cause Pool doesn't support vector<vector<type> >
+  Source<TNT::Array2D<Real> > _rhythmTransform;
 
   Pool _pool;
   Algorithm* _poolStorage;
