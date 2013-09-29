@@ -32,19 +32,17 @@ using namespace standard;
 // complete before that, so just put default values for these.
 // Also make sure that some descriptors that might have fucked up come out nice.
 void PostProcess(Pool& pool, const Pool& options, const string& nspace) {
-  if (options.value<Real>("rhythm.compute") != 0) {
-    string rhythmspace = "rhythm.";
-    if (!nspace.empty()) rhythmspace = nspace + ".rhythm.";
-    const vector<string>& descNames = pool.descriptorNames();
-    // no bpm confidence estimation method nor perceptual_tempo are currently available
-    //if (find(descNames.begin(), descNames.end(), rhythmspace + "bpm_confidence") == descNames.end())
-    //  pool.set(rhythmspace + "bpm_confidence", 0.0);
-    //if (find(descNames.begin(), descNames.end(), rhythmspace + "perceptual_tempo") == descNames.end())
-    //  pool.set(rhythmspace + "perceptual_tempo", "unknown");
-    if (find(descNames.begin(), descNames.end(), rhythmspace + "beats_loudness") == descNames.end())
-      pool.add(rhythmspace + "beats_loudness", Real(0.0));
-    if (find(descNames.begin(), descNames.end(), rhythmspace + "beats_loudness_band_ratio") == descNames.end())
-      pool.add(rhythmspace + "beats_loudness_band_Ratio", vector<Real>());
-  }
+  string rhythmspace = "rhythm.";
+  if (!nspace.empty()) rhythmspace = nspace + ".rhythm.";
+  const vector<string>& descNames = pool.descriptorNames();
+  // no bpm confidence estimation method nor perceptual_tempo are currently available
+  //if (find(descNames.begin(), descNames.end(), rhythmspace + "bpm_confidence") == descNames.end())
+  //  pool.set(rhythmspace + "bpm_confidence", 0.0);
+  //if (find(descNames.begin(), descNames.end(), rhythmspace + "perceptual_tempo") == descNames.end())
+  //  pool.set(rhythmspace + "perceptual_tempo", "unknown");
+  if (find(descNames.begin(), descNames.end(), rhythmspace + "beats_loudness") == descNames.end())
+    pool.add(rhythmspace + "beats_loudness", Real(0.0));
+  if (find(descNames.begin(), descNames.end(), rhythmspace + "beats_loudness_band_ratio") == descNames.end())
+    pool.add(rhythmspace + "beats_loudness_band_Ratio", vector<Real>());
 }
 
