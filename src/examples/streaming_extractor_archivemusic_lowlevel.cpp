@@ -99,11 +99,6 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   connect(mels_ds->output("spread"), pool, llspace + "melbands_spread");
   connect(mels_ds->output("skewness"), pool, llspace + "melbands_skewness");
 
-  // Rhythm transform
-  //Algorithm* rhythmtransform = factory.create("RhythmTransform");
-  //mfcc->output("bands") >> rhythmtransform->input("melBands");
-  //connect(rhythmtransform->output("rhythm"), pool, llspace + "rhythm_transform");
- 
 
   // ERBBands and GFCC
   uint nERBBands = 40;

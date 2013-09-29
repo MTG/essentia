@@ -124,7 +124,7 @@ void compute(const string& audioFilename, const string& outputFilename,
   string neqOutputFilename = outputFilename; // + ".neq";
   Pool stats = computeAggregation(neqloudPool, options);
   //addSVMDescriptors(stats); // not available
-  outputToFile(stats, neqOutputFilename+".json", true);
+  outputToFile(stats, neqOutputFilename, true);
  
  return;
 }
@@ -507,14 +507,13 @@ void addSVMDescriptors(Pool& pool) {
 void setExtractorOptions(Pool& pool) {
   // general
   pool.set("startTime", 0);
-  pool.set("endTime", 2000.0);
+  pool.set("endTime", 1e6);
   pool.set("analysisSampleRate", 44100.0);
   string silentFrames = "noise";
   int zeroPadding = 0;
   string windowType = "hann";
 
   // lowlevel
-  pool.set("lowlevel.compute", true);
   pool.set("lowlevel.frameSize", 2048);
   pool.set("lowlevel.hopSize", 1024);
   pool.set("lowlevel.zeroPadding", zeroPadding);
@@ -528,7 +527,6 @@ void setExtractorOptions(Pool& pool) {
   pool.set("average_loudness.silentFrames", silentFrames);
 
   // rhythm
-  pool.set("rhythm.compute", true);
   pool.set("rhythm.method", "degara");
   pool.set("rhythm.minTempo", 40);
   pool.set("rhythm.maxTempo", 208);
