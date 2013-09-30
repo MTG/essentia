@@ -35,10 +35,12 @@ class GFCC : public Algorithm {
   Algorithm* _gtFilter;
   Algorithm* _dct;
 
+  std::vector<Real> _logbands;
+
  public:
   GFCC() {
     declareInput(_spectrum, "spectrum", "the audio spectrum");
-    declareOutput(_bands, "bands" , "the log-magnitudes of ERB bands");
+    declareOutput(_bands, "bands" , "the energies in ERB bands");
     declareOutput(_gfcc, "gfcc", "the gammatone feature cepstrum coefficients");
 
     _gtFilter = AlgorithmFactory::create("ERBBands");

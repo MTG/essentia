@@ -35,10 +35,11 @@ void GFCC::configure() {
   _gtFilter->configure("sampleRate", parameter("sampleRate"),
                         "numberBands", parameter("numberBands"),
                         "lowFrequencyBound", parameter("lowFrequencyBound"),
-                        "highFrequencyBound", parameter("highFrequencyBound"));
-
+                        "highFrequencyBound", parameter("highFrequencyBound"),
+                        "type", "energy");
   _dct->configure("inputSize", parameter("numberBands"),
                   "outputSize", parameter("numberCoefficients"));
+  _logbands.resize(parameter("numberBands").toInt());
 }
 
 void GFCC::compute() {
@@ -54,11 +55,11 @@ void GFCC::compute() {
 
 
   for (int i=0; i<int(bands.size()); ++i) {
-    bands[i] = amp2db(bands[i]);
+    _logbands[i] = amp2db(bands[i]);
   }
 
   // compute the DCT of these bands
-  _dct->input("array").set(bands);
+  _dct->input("array").set(_logbands);
   _dct->output("dct").set(gfcc);
   _dct->compute();
 }
