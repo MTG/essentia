@@ -33,7 +33,7 @@ const char* PolarToCartesian::description = DOC("This algorithm converts an arra
 "\n"
 "References:\n"
 "  [1] Polar coordinate system - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Polar_coordinates");
+"  http://en.wikipedia.org/wiki/Polar_coordinates");
 
 void PolarToCartesian::compute() {
 

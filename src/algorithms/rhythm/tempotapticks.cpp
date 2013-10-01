@@ -28,7 +28,11 @@ const char* TempoTapTicks::name = "TempoTapTicks";
 const char* TempoTapTicks::description = DOC("This algorithm builds the list of ticks from the period and phase candidates given by the TempoTap algorithm.\n"
 "\n"
 "References:\n"
-"  [1] F. Gouyon, A computational approach to rhythm description -- Audio features for the computation of rhythm periodicity functions and their use in tempo induction and music content processing.\n");
+"  [1] F. Gouyon, \"A computational approach to rhythm description: Audio\n"    
+"  features for the computation of rhythm periodicity functions and their use\n"
+"  in tempo induction and music content processing,\" UPF, Barcelona, Spain,\n" 
+"  2005.\n");
+
 
 void TempoTapTicks::configure() {
   _frameHop = parameter("frameHop").toInt();

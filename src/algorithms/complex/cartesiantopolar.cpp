@@ -36,9 +36,9 @@ const char* CartesianToPolar::description = DOC("This algorithm converts an arra
 "\n"
 "References:\n"
 "  [1] Polar Coordinates -- from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/PolarCoordinates.html\n"
+"  http://mathworld.wolfram.com/PolarCoordinates.html\n\n"
 "  [2] Polar coordinate system - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Polar_coordinates");
+"  http://en.wikipedia.org/wiki/Polar_coordinates");
 
 
 void CartesianToPolar::compute() {

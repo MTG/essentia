@@ -32,8 +32,8 @@ const char* RawMoments::description = DOC("This algorithm computes the first 5 r
 "An exception is thrown if the input array's size is smaller than 2.\n\n"
 
 "References:\n"
-"  [1] Raw Moment -- from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/RawMoment.html");
+"  [1] Raw Moment -- from Wolfram MathWorld,\n"  
+"  http://mathworld.wolfram.com/RawMoment.html");
 
 void RawMoments::compute() {
 

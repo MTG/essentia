@@ -31,9 +31,10 @@ using namespace standard;
 
 const char* PCA::name = "PCA";
 const char* PCA::description = DOC("Karhunen Loeve Transform || Principal Component Analysis based on the covariance matrix of the signal.\n"
+"\n"
 "References:\n"
-"  - [1] Principal component analysis - Wikipedia, the free enciclopedia"
-"    http://en.wikipedia.org/wiki/Principal_component_analysis");
+"  [1] Principal component analysis - Wikipedia, the free enciclopedia\n"
+"  http://en.wikipedia.org/wiki/Principal_component_analysis");
 
 void PCA::compute() {
 

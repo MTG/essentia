@@ -29,12 +29,15 @@ const char* ZeroCrossingRate::name = "ZeroCrossingRate";
 const char* ZeroCrossingRate::description = DOC(
 "This algorithm returns the zero-crossing rate of an audio signal. It is the number of sign changes between consecutive signal values divided by the total number of values. Noisy signals tend to have higher zero-crossing rate.\n"
 "In order to avoid small variations around zero caused by noise, a threshold around zero is given to consider a valid zerocrosing whenever the boundary is crossed.\n"
+"\n"
 "Empty input signals will raise an exception.\n"
+"\n"
 "References:\n"
 "  [1] Zero Crossing - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Zero-crossing_rate\n"
-"  [2] G. Peeters, A large set of audio features for sound description (similarity and classification) in the CUIDADO project,"
-"      CUIDADO I.S.T. Project Report, 2004");
+"  http://en.wikipedia.org/wiki/Zero-crossing_rate\n\n"
+"  [2] G. Peeters, \"A large set of audio features for sound description\n"
+"  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n"
+"  Project Report, 2004");
 
 
 void ZeroCrossingRate::configure() {

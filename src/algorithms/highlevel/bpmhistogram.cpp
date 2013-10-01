@@ -50,12 +50,13 @@ const char* BpmHistogram::description = DOC("Given the novelty curve (see Novelt
 "Another useful trick, is to run the algorithm one time to get an estimation of the bpm and rerun it with a frameSize parameter which is a multiple of the mean bpm.\n"
 "\n"
 "NOTE that using RhythmExtractor2013 is recommended in order to extract beats, as it was found to perform better in evaluations. You can still use BpmHistogram for estimation of the BPM values.\n"
-
+"\n"
 "References:\n"
-"  [1] Peter Grosche and Meinard Müller, A Mid-Level Representation for Capturing Dominant Tempo\n"
-"      and Pulse Information in Music Recordings\n"
-"      Proceedings of the 2009 ISMIR conference\n"
-"      http://ismir2009.ismir.net/proceedings/OS2-3.pdf");
+"  [1] P. Grosche and M. Müller, \"A mid-level representation for capturing\n"
+"  dominant tempo and pulse information in music recordings,\" in\n"
+"  International Society for Music Information Retrieval Conference\n"
+"  (ISMIR’09), 2009, pp. 189–194.");
+
 
 BpmHistogram::BpmHistogram() : _normalize(false), _weightByMagnitude(false) {
 

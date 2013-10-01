@@ -28,9 +28,9 @@ const char* Magnitude::description = DOC("This algorithm computes the absolute v
 "\n"
 "References:\n"
 "  [1] Complex Modulus -- from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/ComplexModulus.html\n"
+"  http://mathworld.wolfram.com/ComplexModulus.html\n\n"
 "  [2] Complex number - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Complex_numbers#Absolute_value.2C_conjugation_and_distance.");
+"  http://en.wikipedia.org/wiki/Complex_numbers#Absolute_value.2C_conjugation_and_distance.");
 
 void Magnitude::compute() {
 

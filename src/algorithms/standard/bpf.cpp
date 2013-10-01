@@ -30,7 +30,7 @@ const char* BPF::description = DOC("A break point function linearly interpolates
 "\n"
 "References:\n"
 "  [1] Linear interpolation - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Linear_interpolation");
+"  http://en.wikipedia.org/wiki/Linear_interpolation");
 
 
 void BPF::compute() {

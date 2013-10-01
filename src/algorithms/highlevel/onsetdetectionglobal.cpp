@@ -40,8 +40,12 @@ const char* OnsetDetectionGlobal::description = DOC("This algorithm outputs an o
 "  Optimal performance of beat detection with TempoTapDegara is not guaranteed for other settings.\n"
 "\n"
 "References:\n"
-"  [1] Hainsworth, S., & Macleod, M. (2003, September). Onset detection in musical audio signals. In Proc. Int. Computer Music Conference (pp. 163-6).\n"
-"  [2] Davies, M. E. P., Plumbley, M. D., & Eck, D. (2009) Towards a Musical Beat Emphasis Function. In Proceedings of the 2009 IEEE Workshop on Applications of Signal Processing to Audio and Acoustics (WASPAA 2009), New Paltz, NY, October 18-21, 2009, pp 61-64, 2009.\n");
+"  [1] S. Hainsworth and M. Macleod, \"Onset detection in musical audio\n"
+"  signals,\" in International Computer Music Conference (ICMC’03), 2003,\n"
+"  pp. 163–6.\n\n"
+"  [2] M. E. P. Davies, M. D. Plumbley, and D. Eck, \"Towards a musical beat\n"
+"  emphasis function,\" in IEEE Workshop on Applications of Signal Processing\n"
+"  to Audio and Acoustics, 2009. WASPAA  ’09, 2009, pp. 61–64.");
 
 
 void OnsetDetectionGlobal::configure() {

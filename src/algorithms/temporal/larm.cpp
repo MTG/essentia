@@ -30,9 +30,9 @@ const char* Larm::description = DOC("This algorithm estimates the long-term loud
 "It accepts a power parameter to define the exponential for computing the power mean. Note that if the parameter's value is 2, this algorithm would be equivalent to RMS and if 1, this algorithm would be the mean of the absolute value.\n"
 "\n"
 "References:\n"
-"  [1] Skovenborg, E. and Nielsen, S., Evaluation of Different Loudness \n"
-"      Models with Music and Speech Material, Proceedings of the AES 117th \n"
-"      Convention, San Francisco, CA, USA, 2004");
+" [1] E. Skovenborg and S. H. Nielsen, \"Evaluation of different loudness\n"
+" models with music and speech material,” in The 117th AES Convention, 2004.");
+
 
 
 void Larm::configure() {

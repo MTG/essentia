@@ -31,8 +31,9 @@ const char* SingleGaussian::description = DOC("This algorithm implements the sin
 "An exception is thrown if the covariance of the input matrix is singular or if the input matrix is empty.\n"
 "\n"
 "References:\n"
-"  [1] E. Pampalk, Computational Models of Music Similarity and their Application in Music Information Retrieval,\n"
-"      PhD thesis at the Johannes Kepler Universität Linz, 2006");
+"  [1] E. Pampalk, \"Computational models of music similarity and their\n"
+"  application in music information retrieval,” Vienna University of\n"
+"  Technology, 2006.");
 
 vector<Real> SingleGaussian::meanMatrix(const Array2D<Real>& matrix, int dim = 1) const {
 

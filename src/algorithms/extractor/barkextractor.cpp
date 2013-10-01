@@ -39,7 +39,6 @@ BarkExtractor::BarkExtractor() : _configured(false) {
   declareOutput(_bbandsKurtosis, "barkbands_kurtosis", "kurtosis from bark bands. See DistributionShape algorithm documentation");
   declareOutput(_bbandsSkewness, "barkbands_skewness", "skewness from bark bands. See DistributionShape algorithm documentation");
   declareOutput(_bbandsSpread, "barkbands_spread", "spread from barkbands. See DistributionShape algorithm documentation");
-
   declareOutput(_crestValue, "spectral_crest", "See Crest algorithm documentation");
   declareOutput(_flatness, "spectral_flatness_db", "See flatnessDB algorithm documentation");
 

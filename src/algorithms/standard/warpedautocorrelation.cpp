@@ -30,11 +30,11 @@ const char* WarpedAutoCorrelation::description = DOC("This algorithm returns the
 "If maxLag is larger than the size of the input array, an exception is thrown.\n"
 "\n"
 "References:\n"
-"  [1] Harma, A., et. al., Frequency-Warped Signal Processing for Audio\n"
-"      Applications, 108th Convention of the Audio Engineering Society,\n"
-"      Paris, France, 2000, http://www.acoustics.hut.fi/~aqi/wwwPhD/P9.PDF\n"
+"  [1] A. Härmä, M. Karjalainen, L. Savioja, V. Välimäki, U. K. Laine, and\n"
+"  J. Huopaniemi, \"Frequency-Warped Signal Processing for Audio Applications,\"\n"
+"  JAES, vol. 48, no. 11, pp. 1011–1031, 2000.\n\n"
 "  [2] WarpTB - Matlab Toolbox for Warped DSP\n"
-"      http://www.acoustics.hut.fi/software/warp");
+"  http://www.acoustics.hut.fi/software/warp");
 
 void WarpedAutoCorrelation::configure() {
 

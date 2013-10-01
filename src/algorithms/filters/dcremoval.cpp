@@ -28,9 +28,8 @@ const char* DCRemoval::name = "DCRemoval";
 const char* DCRemoval::description = DOC("This algorithm removes the DC offset from a signal using a 1st order IIR highpass filter. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"
-"  [1] Smith, J.O. 'DC Blocker', Introduction to Digital Filters with Audio "
-"      Applications, "
-"      http://ccrma-www.stanford.edu/~jos/filters/DC_Blocker.html");
+"  [1] Smith, J.O.  Introduction to Digital Filters with Audio Applications,\n"
+"  http://ccrma-www.stanford.edu/~jos/filters/DC_Blocker.html");
 
 
 void DCRemoval::configure() {

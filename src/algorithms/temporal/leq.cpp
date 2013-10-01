@@ -30,8 +30,8 @@ const char* Leq::description = DOC("This algorithm computes the Equivalent sound
 "This algorithm will throw an exception on empty input.\n"
 "\n"
 "References:\n"
-"  [1] Soulodre, G. A., Evaluation of Objective Loudness Meters,\n"
-"      Proceedings of the AES 116th Convention, Berlin, Germany, 2004");
+"  [1] G. A. Soulodre, \"Evaluation of Objective Loudness Meters,\" in\n"
+"  The 116th AES Convention, 2004.");
 
 void Leq::compute() {
 

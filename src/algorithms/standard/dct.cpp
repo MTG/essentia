@@ -32,7 +32,7 @@ const char* DCT::description = DOC("This algorithm computes the Discrete Cosine 
 "\n"
 "References:\n"
 "  [1] Discrete cosine transform - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Discrete_cosine_transform");
+"  http://en.wikipedia.org/wiki/Discrete_cosine_transform");
 
 
 void DCT::configure() {

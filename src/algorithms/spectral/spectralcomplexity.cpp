@@ -28,8 +28,10 @@ const char* SpectralComplexity::description = DOC("This algorithm computes the s
 "\n"
 "It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. The input \"spectrum\" is passed to the SpectralPeaks algorithm and thus inherits its input requirements and exceptions.\n"
 "References:\n"
-"  [1] C. Laurier, O. Meyers, J. Serrà, M. Blech, P. Herrera, and X. Serra, Indexing music by mood: design and integration of an automatic content-based annotator,\n"
-"      Multimedia Tools and Applications, vol. 48, no. 1, pp. 161–184, 2009.\n");
+"  [1] C. Laurier, O. Meyers, J. Serrà, M. Blech, P. Herrera, and X. Serra,\n"
+"  \"Indexing music by mood: design and integration of an automatic\n"
+"  content-based annotator,\" Multimedia Tools and Applications, vol. 48,\n"
+"  no. 1, pp. 161–184, 2009.\n");
 
 
 void SpectralComplexity::configure() {

@@ -29,8 +29,9 @@ const char* FlatnessDB::description = DOC("This algorithm computes the flatness 
 "The size of the input array must be greater than 0. If the input array is empty an exception will be thrown. This algorithm uses the Flatness algorithm and thus inherits its input requirements and exceptions.\n"
 "\n"
 "References:\n"
-"  [1] G. Peeters, A large set of audio features for sound description (similarity and classification) in the CUIDADO project,"
-"      CUIDADO I.S.T. Project Report, 2004");
+"  [1] G. Peeters, \"A large set of audio features for sound description\n"
+"  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n"
+"  Project Report, 2004");
 
 void FlatnessDB::compute() {
 

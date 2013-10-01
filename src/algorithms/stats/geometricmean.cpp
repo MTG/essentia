@@ -30,9 +30,9 @@ const char* GeometricMean::description = DOC("This algorithm computes the geomet
 "\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Energy_(signal_processing)\n"
+"  http://en.wikipedia.org/wiki/Energy_(signal_processing)\n\n"
 "  [2] Geometric Mean -- from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/GeometricMean.html");
+"  http://mathworld.wolfram.com/GeometricMean.html");
 
 void GeometricMean::compute() {
 

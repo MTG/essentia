@@ -29,10 +29,12 @@ const char* MelBands::description = DOC("This algorithm computes the energy in m
 "It is required that parameter \"highMelFrequencyBound\" not be larger than the Nyquist frequency, but must be larger than the parameter, \"lowMelFrequencyBound\". Also, The input spectrum must contain at least two elements. If any of these requirements are violated, an exception is thrown.\n"
 "\n"
 "References:\n"
-"  [1] T. Ganchev, N. Fakotakis, G. Kokkinakisi, Comparative Evaluation of Various MFCC Implementations on the Speaker Verification Task\n"
-"      Proceedings of the 10th International Conference on Speech and Computer, Patras, Greece, 2005\n"
+"  [1] T. Ganchev, N. Fakotakis, and G. Kokkinakis, \"Comparative evaluation\n"
+"  of various MFCC implementations on the speaker verification task,\" in\n"
+"  International Conference on Speach and Computer (SPECOM’05), 2005,\n"
+"  vol. 1, pp. 191–194.\n\n"
 "  [2] Mel-frequency cepstrum - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient");
+"  http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient");
 
 void MelBands::configure() {
   if (parameter("highFrequencyBound").toReal() > parameter("sampleRate").toReal()*0.5 ) {

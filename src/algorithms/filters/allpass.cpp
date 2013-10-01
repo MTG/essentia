@@ -29,7 +29,7 @@ const char* AllPass::description = DOC("This algorithm implements a IIR all-pass
 "\n"
 "References:\n"
 "  [1] U. Zölzer, DAFX - Digital Audio Effects, p. 43,\n"
-"      John Wiley & Sons, 2002");
+"  John Wiley & Sons, 2002");
 
 
 void AllPass::configure() {

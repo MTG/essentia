@@ -28,7 +28,7 @@ const char* LowPass::name = "LowPass";
 const char* LowPass::description = DOC("This algorithm implements a 1st order IIR low-pass filter. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "References:\n"
 "  [1] U. Zölzer, DAFX - Digital Audio Effects, p. 40,\n"
-"      John Wiley & Sons, 2002");
+"  John Wiley & Sons, 2002");
 
 
 void LowPass::configure() {

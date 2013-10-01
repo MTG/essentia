@@ -26,16 +26,10 @@ using namespace standard;
 
 const char* FlatnessSFX::name = "FlatnessSFX";
 const char* FlatnessSFX::description = DOC(
-  "This algorithm calculates the flatness coefficient of a signal envelope.\n"
-  "There are two thresholds defined: a lower one at 20% and an upper one at 95%. "
-  "The thresholds yield two values: one value which has 20% of the total values underneath, "
-  "and one value which has 95% of the total values underneath. "
-  "The flatness coefficient is then calculated as the ratio of these two values. "
-  "This algorithm is meant to be plugged after Envelope algorithm, however in streaming mode "
-  "a RealAccumulator algorithm should be connected in between the two.\n"
-  "In the current form the algorithm can't be calculated in streaming mode, "
-  "since it would violate the streaming mode policy of having low memory consumption.\n"
-  "An exception is thrown if the input envelope is empty."
+"This algorithm calculates the flatness coefficient of a signal envelope.\n\n"
+"There are two thresholds defined: a lower one at 20% and an upper one at 95%. The thresholds yield two values: one value which has 20% of the total values underneath, and one value which has 95% of the total values underneath. The flatness coefficient is then calculated as the ratio of these two values. This algorithm is meant to be plugged after Envelope algorithm, however in streaming mode a RealAccumulator algorithm should be connected in between the two.\n"
+"In the current form the algorithm can't be calculated in streaming mode, since it would violate the streaming mode policy of having low memory consumption.\n\n"
+"An exception is thrown if the input envelope is empty."
 );
 
 const Real FlatnessSFX::lowerThreshold = 20.0;

@@ -37,7 +37,7 @@ const char* HarmonicPeaks::description = DOC("This algorithm finds the harmonic 
 "\n"
 "References:\n"
 "  [1] Harmonic Spectrum - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Harmonic_spectrum");
+"  http://en.wikipedia.org/wiki/Harmonic_spectrum");
 
 void HarmonicPeaks::compute() {
 

@@ -30,12 +30,13 @@ const char* Dissonance::description = DOC("This algorithm calculates the sensory
 "Exceptions are thrown when the size of the input vectors are not equal or if input frequencies are not ordered ascendantly"
 "\n"
 "References:\n"
-"  [1] R. Plomp, W. J. M. Levelt, Tonal Consonance and Critical Bandwidth\n"
-"      J. Acoust. Soc. Am. 38, 548-560, 1965"
+"  [1] R. Plomp and W. J. M. Levelt, \"Tonal Consonance and Critical\n"
+"  Bandwidth,\" The Journal of the Acoustical Society of America, vol. 38,\n"
+"  no. 4, pp. 548–560, 1965.\n\n"
 "  [2] Critical Band - Handbook for Acoustic Ecology\n"
-"      http://www.sfu.ca/sonic-studio/handbook/Critical_Band.html\n"
+"  http://www.sfu.ca/sonic-studio/handbook/Critical_Band.html\n\n"
 "  [3] Bark Scale -  Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Bark_scale");
+"  http://en.wikipedia.org/wiki/Bark_scale");
 
 Real aWeighting(Real f) {
   // from http://www.cross-spectrum.com/audio/weighting.html

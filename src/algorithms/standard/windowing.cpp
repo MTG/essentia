@@ -33,10 +33,11 @@ const char* Windowing::description = DOC("This algorithm applies windowing to au
 "An exception is thrown if the size of the frame is less than 2.\n"
 "\n"
 "References:\n"
-"  [1] F. J. Harris, On the use of windows for harmonic analysis with the discrete Fourier transform,\n"
-"      Proceedings of the IEEE, vol. 66, no. 1, pp. 51-83, Jan. 1978\n"
+"  [1] F. J. Harris, \"On the use of windows for harmonic analysis with the\n"
+"  discrete Fourier transform, Proceedings of the IEEE, vol. 66, no. 1,\n"
+"  pp. 51-83, Jan. 1978\n\n"
 "  [2] Window function - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Window_function");
+"  http://en.wikipedia.org/wiki/Window_function");
 
 void Windowing::configure() {
   _window.resize(parameter("size").toInt());

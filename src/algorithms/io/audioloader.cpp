@@ -34,15 +34,15 @@ const char* AudioLoader::description = DOC("This algorithm loads the single audi
 "\n"
 "References:\n"
 "  [1] WAV - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Wav\n"
+"  http://en.wikipedia.org/wiki/Wav\n\n"
 "  [2] Audio Interchange File Format - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Aiff\n"
+"  http://en.wikipedia.org/wiki/Aiff\n\n"
 "  [3] Free Lossless Audio Codec - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Flac\n"
+"  http://en.wikipedia.org/wiki/Flac\n\n"
 "  [4] Vorbis - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Vorbis\n"
+"  http://en.wikipedia.org/wiki/Vorbis\n\n"
 "  [5] MP3 - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Mp3");
+"  http://en.wikipedia.org/wiki/Mp3");
 
 
 AudioLoader::~AudioLoader() {

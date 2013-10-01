@@ -34,9 +34,10 @@ const char* DynamicComplexity::description = DOC(
 "range and to the amount of fluctuation in loudness present in a recording.\n"
 "\n"
 "Silence at the beginning and at the end of a track are ignored in the\n"
-"computation in order not to deteriorate the results."
+"computation in order not to deteriorate the results.\n\n"
 "References:\n"
-"  [1] S. Streich, Music complexity: a multi-faceted description of audio content, UPF, Barcelona, Spain, 2007.");
+"  [1] S. Streich, Music complexity: a multi-faceted description of audio\n"
+"  content, UPF, Barcelona, Spain, 2007.");
 
 
 void DynamicComplexity::configure() {
@@ -152,15 +153,6 @@ void DynamicComplexity::filter(vector<Real>& result, const vector<Real>& input) 
 
 namespace essentia {
 namespace streaming {
-
-const char* DynamicComplexity::name = "DynamicComplexity";
-const char* DynamicComplexity::description = DOC(
-  "The dynamic complexity is the average absolute deviation from the global\n"
-  "loudness level estimate on the dB scale. It is related to the dynamic\n"
-  "range and to the amount of fluctuation in loudness present in a recording.\n"
-  "\n"
-  "Silence at the beginning and at the end of a track are ignored in the\n"
-  "computation in order not to deteriorate the results.");
 
 DynamicComplexity::DynamicComplexity() : AlgorithmComposite() {
 

@@ -20,9 +20,9 @@ const char* PitchSalienceFunction::description = DOC("This algorithm computes th
 "When input vectors differ in size or are empty, an exception is thrown. Input vectors must contain positive frequencies and not contain negative magnitudes otherwise an exception is thrown. It is highly recommended to avoid erroneous peak duplicates (peaks of the same frequency occuring more than ones), but it is up to the user's own control and no exception will be thrown.\n"
 "\n"
 "References:\n"
-"  [1] Salamon, J., & Gómez E. (2012).  Melody Extraction from Polyphonic Music Signals using Pitch Contour Characteristics.\n"
-"      IEEE Transactions on Audio, Speech and Language Processing. 20(6), 1759-1770.\n"
-);
+"  [1] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
+"  signals using pitch contour characteristics,\" IEEE Transactions on Audio,\n"
+"  Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n");
 
 void PitchSalienceFunction::configure() {
   _referenceFrequency = parameter("referenceFrequency").toReal();

@@ -33,7 +33,7 @@ const char* CubicSpline::description = DOC("Computes the second derivatives of a
 "  - 2: the second derivative at the [left/right] endpoint should be [left/right]BoundaryFlag\n"
 "References:\n"
 "  [1] Spline interpolation - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Spline_interpolation");
+"  http://en.wikipedia.org/wiki/Spline_interpolation");
 
 void CubicSpline::compute() {
   const double& xInput = _xInput.get();

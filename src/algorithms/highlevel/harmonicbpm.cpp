@@ -33,7 +33,7 @@ const char* HarmonicBpm::description = DOC("This algorithm extracts bpms that ar
 "\n"
 "References:\n"
 "  [1] Greatest common divisor - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Greatest_common_divisor");
+"  http://en.wikipedia.org/wiki/Greatest_common_divisor");
 
 void HarmonicBpm::configure() {
   _threshold = parameter("threshold").toReal();

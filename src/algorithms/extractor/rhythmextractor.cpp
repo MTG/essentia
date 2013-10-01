@@ -423,6 +423,10 @@ namespace standard {
 const char* RhythmExtractor::name = "RhythmExtractor";
 const char* RhythmExtractor::description = DOC("This algorithm estimates the tempo in bpm from an input signal, as well as the beat locations. It combines TempoTap and TempoTapTicks.\n"
 "\n"
+"Note that this algorithm is outdated in terms of beat tracking accuracy, and it is highly recommended to use RhythmExtractor2013 instead.\n"
+"\n"
+"Quality: outdated (use RhythmExtractor2013 instead).\n"
+"\n"
 "An exception is thrown if neither \"useOnset\" nor \"useBands\" are enabled (i.e. set to true).");
 
 RhythmExtractor::RhythmExtractor() {

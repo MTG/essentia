@@ -32,8 +32,9 @@ const char* TonicIndianArtMusic::version = "1.0";
 const char* TonicIndianArtMusic::description = DOC("This algorithm estimates the tonic frequency of the lead artist in Indian art music. It uses multipitch representation of the audio signal (pitch salience) to compute a histogram using which the tonic is identified as one of its peak. The decision is made based on the distance between the prominent peaks, the classification is done using a decision tree.\n"
 "\n"
 "References:\n"
-"  [1] J. Salamon, S. Gulati and X. Serra, A Multipitch Approach to Tonic Identification in Indian Classical Music.\n"
-"      Proc. 13th International Society for Music Information Retrieval Conference (ISMIR 2012), 2012.\n");
+"  [1] J. Salamon, S. Gulati, and X. Serra, \"A Multipitch Approach to Tonic\n"
+"  Identification in Indian Classical Music,\" in International Society for\n"
+"  Music Information Retrieval Conference (ISMIR’12), 2012.");
 
 
 void TonicIndianArtMusic::configure() {

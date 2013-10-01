@@ -30,7 +30,7 @@ const char* MonoMixer::description = DOC("Given a stereo signal, this algorithm 
 "\n"
 "References:\n"
 "  [1] downmixing - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Downmixing\n");
+"  http://en.wikipedia.org/wiki/Downmixing\n");
 
 void MonoMixer::compute() {
   const vector<StereoSample>& input = _inputAudio.get();

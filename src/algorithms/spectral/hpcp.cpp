@@ -29,10 +29,13 @@ const char* HPCP::description = DOC("Computes a Harmonic Pitch Class Profile (HP
 "Regarding frequency parameters, exceptions are thrown if \"minFrequency\", \"splitFrequency\" and \"maxFrequency\" are not separated by at least 200Hz from each other, requiring that \"maxFrequency\" be greater than \"splitFrequency\" and \"splitFrequency\" be greater than \"minFrequenc\"."
 "Other exceptions are thrown if input vectors have different size, if parameter \"size\" is not a positive non-zero multiple of 12 or if \"windowSize\" is less than one hpcp bin (12/size).\n"
 "References:\n"
-"  [1] Fujishima, T., 'Realtime Chord Recognition of Musical Sound: A System Using Common Lisp Music',\n"
-"      ICMC, Beijing, China, 1999, pp. 464-467.\n"
-"  [2] Gomez, E., 'Tonal Description of Polyphonic Audio for Music Content Processing',\n"
-"      INFORMS Journal On Computing, Vol. 18, No. 3, Summer 2006, pp. 294-304.");
+"  [1] T. Fujishima, \"Realtime Chord Recognition of Musical Sound: A System\n"
+"  Using Common Lisp Music,\" in International Computer Music Conference\n"
+"  (ICMC'99), pp. 464-467, 1999.\n"
+"  [2] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
+"  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"
+"  2006.");
+
 
 const Real HPCP::precision = 0.00001;
 

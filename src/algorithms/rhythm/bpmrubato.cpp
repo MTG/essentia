@@ -33,7 +33,7 @@ const char* BpmRubato::description = DOC("This algorithm extracts the locations 
 "\n"
 "References:\n"
 "  [1] Tempo Rubato - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Rubato");
+"  http://en.wikipedia.org/wiki/Rubato");
 
 void BpmRubato::configure() {
   _tolerance = parameter("tolerance").toReal();

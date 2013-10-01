@@ -29,7 +29,7 @@ const char* RMS::description = DOC("This algorithm computes the Root Mean Square
 "\n"
 "References:\n"
 "  [1] Root mean square - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Root_mean_square");
+"  http://en.wikipedia.org/wiki/Root_mean_square");
 
 void RMS::compute() {
 

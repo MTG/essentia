@@ -28,8 +28,9 @@ const char* RollOff::description = DOC("This algorithm computes the roll-off fre
 "\n"
 "An exception is thrown if the input audio spectrum is smaller than 2.\n"
 "References:\n"
-"  [1] G. Peeters, A large set of audio features for sound description (similarity and classification) in the CUIDADO project,"
-"      CUIDADO I.S.T. Project Report, 2004");
+"  [1] G. Peeters, \"A large set of audio features for sound description\n"     
+"  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n"  
+"  Project Report, 2004");
 
 
 void RollOff::compute() {

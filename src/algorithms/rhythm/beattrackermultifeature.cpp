@@ -37,8 +37,10 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
 "References:\n"
-"  [1] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n");
+"  [1] J. Zapata, M.E.P. Davies and E. Gómez, \"Multi Feature Beat tracker,\"\n"
+"  submitted article to IEEE TSALP, 2013.\n");
 
+//TODO update ref [1] when the article gets published
 
 BeatTrackerMultiFeature::BeatTrackerMultiFeature() : AlgorithmComposite(),
     _frameCutter1(0), _windowing1(0), _fft1(0), _cart2polar1(0), _onsetRms1(0),

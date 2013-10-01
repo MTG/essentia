@@ -26,9 +26,10 @@ using namespace standard;
 const char* EnergyBand::name = "EnergyBand";
 const char* EnergyBand::description = DOC("This algorithm computes the spectral energy of the given frequency band, including both start and stop cutoff frequencies.\n"
 "Note that exceptions will be thrown when input spectrum is empty and if startCutoffFrequency is greater than startCutoffFrequency.\n"
+"\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Energy_(signal_processing)");
+"  http://en.wikipedia.org/wiki/Energy_(signal_processing)");
 
 void EnergyBand::configure() {
   Real startFreq  = parameter("startCutoffFrequency").toReal();

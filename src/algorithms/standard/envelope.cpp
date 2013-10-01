@@ -29,7 +29,7 @@ const char* Envelope::description = DOC("This algorithm computes the envelope of
 "\n"
 "References:\n"
 "  [1] U. Zölzer, Digital Audio Signal Processing,\n"
-"      John Wiley & Sons Ltd, 1997, ch.7");
+"  John Wiley & Sons Ltd, 1997, ch.7");
 
 void Envelope::configure()
 {

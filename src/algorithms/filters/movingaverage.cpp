@@ -28,8 +28,7 @@ const char* MovingAverage::name = "MovingAverage";
 const char* MovingAverage::description = DOC("This algorithm implements an FIR Moving Average filter. Because of its dependece on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"
-"  [1] Moving Average Filters,\n"
-"      http://www.dspguide.com/ch15.htm");
+"  [1] Moving Average Filters, http://www.dspguide.com/ch15.htm");
 
 
 void MovingAverage::configure() {

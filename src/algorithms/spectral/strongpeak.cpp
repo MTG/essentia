@@ -31,9 +31,10 @@ const char* StrongPeak::description = DOC("This algorithm extracts the Strong Pe
 "An exception is thrown if the input spectrum contains less than two elements.\n\n"
 
 "References:\n"
-"  [1] Gouyon, F. and Herrera, P., Exploration of techniques for automatic \n"
-"      labeling of audio drum tracks instruments, Music Technology Group, \n"
-"      Pompeu Fabra University, 2001");
+"  [1] F. Gouyon and P. Herrera, \"Exploration of techniques for automatic\n"
+"  labeling of audio drum tracks instruments,” in MOSART: Workshop on Current\n"
+"  Directions in Computer Music, 2001.");
+
 
 void StrongPeak::compute() {
 

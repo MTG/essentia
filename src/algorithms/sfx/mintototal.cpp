@@ -26,7 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* MinToTotal::name = "MinToTotal";
-const char* MinToTotal::description = DOC("This algorithm computes the ratio between the index of the minimum value of the envelope of a signal and the total length of the envelope.\n"
+const char* MinToTotal::description = DOC("This algorithm computes the ratio between the index of the minimum value of the envelope of a signal and the total length of the envelope.\n\n"
 "An exception is thrown if the input envelop is empty.");
 
 void MinToTotal::compute() {

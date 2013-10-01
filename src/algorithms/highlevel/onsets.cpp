@@ -45,8 +45,10 @@ const char* Onsets::description = DOC("This algorithm computes onset times in se
 "As mentioned above, the \"frameRate\" parameter expects a value of 44100/512 (the default), but will work with other values, although the quality of the results is not guaranteed then. An exception is also thrown if the input \"detections\" matrix is empty. Finally, an exception is thrown if the size of the \"weights\" input does not equal the first dimension of the \"detections\" matrix.\n"
 "\n"
 "References:\n"
-"  [1] P. Brossier, J. P. Bello, M. D. Plumbley, Fast labelling of notes in music signals\n"
-"  Proceedings of the 5th International Conference on Music Information Retrieval, Barcelona, Spain, 2004");
+"  [1] P. Brossier, J. P. Bello, and M. D. Plumbley, \"Fast labelling of notes\n"
+"  in music signals,” in International Symposium on Music Information\n"
+"  Retrieval (ISMIR’04), 2004, pp. 331–336.");
+
 
 void Onsets::configure() {
   _alpha = parameter("alpha").toReal(); // alpha is the proportion of the mean we include to reject the smaller peaks

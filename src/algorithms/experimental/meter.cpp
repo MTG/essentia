@@ -28,7 +28,8 @@ using namespace standard;
 const char* Meter::name = "Meter";
 const char* Meter::version = "1.0";
 const char* Meter::description = DOC("This algorithm estimates the time signature of a given beatogram by finding the highest correlation between beats.\n"
-"This algorithm still experimental.\n");
+"\n"
+"Quality: experimental");
 
 void Meter::configure() {
 }

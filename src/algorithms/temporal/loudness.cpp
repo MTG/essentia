@@ -28,9 +28,9 @@ const char* Loudness::description = DOC("This algorithm extracts the loudness of
 "\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia\n"
-"      http://en.wikipedia.org/wiki/Energy_(signal_processing)"
+"  http://en.wikipedia.org/wiki/Energy_(signal_processing)\n\n"
 "  [2] Stevens' power law - Wikipedia, the free encyclopedia\n"
-"      http://en.wikipedia.org/wiki/Stevens%27_power_law\n"
+"  http://en.wikipedia.org/wiki/Stevens%27_power_law\n\n"
 "  [3] S. S. Stevens, Psychophysics. Transaction Publishers, 1975.");
 
 

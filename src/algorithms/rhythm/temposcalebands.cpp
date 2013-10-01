@@ -30,8 +30,11 @@ const char* TempoScaleBands::description = DOC("This algorithm computes features
 "\n"
 "An exception is thrown if less than 1 band is given. An exception is also thrown if the there are not an equal number of bands given as band-gains given.\n"
 "\n"
+"Quality: experimental\n"
+"\n"
 "References:\n"
-"  [1] Innovative algorithm by Fabien Gouyon and Simon Dixon. There is no reference at the time of this writing.\n");
+"  [1] Algorithm by Fabien Gouyon and Simon Dixon. There is no reference at\n"
+"  the time of this writing.\n");
 
 void TempoScaleBands::compute() {
   const vector<Real>& bands = _bands.get();

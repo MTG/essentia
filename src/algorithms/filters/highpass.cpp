@@ -29,7 +29,7 @@ const char* HighPass::description = DOC("This algorithm implements a 1st order I
 "\n"
 "References:\n"
 "  [1] U. Zölzer, DAFX - Digital Audio Effects, p. 40,\n"
-"      John Wiley & Sons, 2002");
+"  John Wiley & Sons, 2002");
 
 void HighPass::configure() {
 

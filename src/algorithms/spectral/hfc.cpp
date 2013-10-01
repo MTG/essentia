@@ -32,10 +32,13 @@ const char* HFC::description = DOC("This algorithm computes the High Frequency C
 "Exception is thrown for empty input spectra.\n"
 "\n"
 "References:\n"
-"  [1] P. Masri, A. Bateman, Improved Modelling of Attack Transients in Music Analysis-Resynthesis\n"
-"      Digital Music Research Group, University of Bristol, 1996\n"
-"  [2] K. Jensen, T. H. Anderson, Beat Estimation On The Beat\n"
-"      Department of Computer Science, University of Copenhagen, 2003\n"
+"  [1] P. Masri and A. Bateman, “Improved modelling of attack transients in\n" 
+"  music analysis-resynthesis,” in Proceedings of the International\n"
+"  Computer Music Conference, 1996, pp. 100–103.\n"
+"\n"
+"  [2] K. Jensen and T. H. Andersen, “Beat estimation on the beat,” in\n"
+"  Applications of Signal Processing to Audio and Acoustics, 2003 IEEE\n"
+"  Workshop on., 2003, pp. 87–90.\n"
 );
 
 void HFC::configure() {

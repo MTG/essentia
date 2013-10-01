@@ -35,10 +35,12 @@ const char* TempoTap::description = DOC("This algorithm estimates the periods an
 "This algorithm is thought to provide the input for TempoTapTicks algorithm. The \"featureFrame\" vectors can be formed by Multiplexer algorithm in the case of combining different features.\n"
 "\n"
 "References:\n"
-"  [1] F. Gouyon, A computational approach to rhythm description -- Audio features for the computation of rhythm periodicity functions and their use in tempo induction and music content processing.\n"
-"      Music Technology Group, Pompeu Fabra University, 2005\n"
-"  [2] M. Davies and M. Plumbley, Causal tempo tracking of audio,\n"
-"      5th International Symposium on Music Information Retrieval, 2004");
+"  [1] F. Gouyon, \"A computational approach to rhythm description: Audio\n"
+"  features for the computation of rhythm periodicity functions and their use\n"
+"  in tempo induction and music content processing,\" UPF, Barcelona, Spain,\n"
+"  2005.\n\n"
+"  [2] M. Davies and M. Plumbley, \"Causal tempo tracking of audio,\" in\n"
+"  International Symposium on Music Information Retrieval (ISMIR'04), 2004.");
 
 
 void TempoTap::reset() {

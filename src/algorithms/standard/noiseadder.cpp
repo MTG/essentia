@@ -28,9 +28,9 @@ const char* NoiseAdder::description = DOC("This algorithm adds some amount of no
 "\n"
 "References:\n"
 "  [1] Mersenne Twister: A random number generator (since 1997/10),\n"
-"      http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html\n"
+"  http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html\n\n"
 "  [2] Mersenne twister - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Mersenne_twister");
+"  http://en.wikipedia.org/wiki/Mersenne_twister");
 
 
 // The implementation uses the MersenneTwister.h file downloaded from:

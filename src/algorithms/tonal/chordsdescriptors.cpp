@@ -36,9 +36,9 @@ const char* ChordsDescriptors::description = DOC("Given a chord progression this
 "\n"
 "References:\n"
 "  [1] Chord progression - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Chord_progression\n"
+"  http://en.wikipedia.org/wiki/Chord_progression\n\n"
 "  [2] Circle of fifths - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Circle_of_fifths");
+"  http://en.wikipedia.org/wiki/Circle_of_fifths");
 
 const char* ChordsDescriptors::circleOfFifth[] = { "C", "Em", "G", "Bm", "D", "F#m", "A", "C#m", "E", "G#m", "B", "D#m", "F#", "A#m", "C#", "Fm", "G#", "Cm", "D#", "Gm", "A#", "Dm", "F", "Am"};
 

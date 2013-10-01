@@ -36,9 +36,10 @@ const char* PredominantMelody::description = DOC("This algorithm estimates the f
 "Note that \"pitchConfidence\" can be negative in the case of \"guessUnvoiced\"=True: the absolute values represent the confidence, negative values correspond to segments for which non-salient contours where selected, zero values correspond to non-voiced segments.\n"
 "\n"
 "References:\n"
-"  [1] Salamon, J., & Gómez E. (2012).  Melody Extraction from Polyphonic Music Signals using Pitch Contour Characteristics.\n"
-"      IEEE Transactions on Audio, Speech and Language Processing. 20(6), 1759-1770.\n"
-"  [2] http://mtg.upf.edu/technologies/melodia\n"
+"  [1] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
+"  signals using pitch contour characteristics,\" IEEE Transactions on Audio,\n"
+"  Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n\n"
+"  [2] http://mtg.upf.edu/technologies/melodia\n\n"
 "  [3] http://www.justinsalamon.com/melody-extraction\n"
 );
 

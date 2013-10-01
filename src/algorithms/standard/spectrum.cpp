@@ -28,7 +28,7 @@ const char* Spectrum::description = DOC("This algorithm calculates the magnitude
 "\n"
 "References:\n"
 "  [1] Frequency spectrum - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Frequency_spectrum");
+"  http://en.wikipedia.org/wiki/Frequency_spectrum");
 
 void Spectrum::configure() {
   // FFT configuration
