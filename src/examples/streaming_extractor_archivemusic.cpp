@@ -412,6 +412,10 @@ Pool computeAggregation(Pool& pool, const Pool& options, int nSegments) {
       exceptions[descNames[i]] = options.value<vector<string> >("lowlevel.mfccStats");
       continue;
     }
+    if (descNames[i].find("lowlevel.gfcc") != string::npos) {
+      exceptions[descNames[i]] = options.value<vector<string> >("lowlevel.gfccStats");
+      continue;
+    }
     if (descNames[i].find("lowlevel.") != string::npos) {
       exceptions[descNames[i]] = options.value<vector<string> >("lowlevel.stats");
       continue;
@@ -540,8 +544,11 @@ void setExtractorOptions(Pool& pool) {
   // stats
   const char* statsArray[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
   const char* mfccStatsArray[] = { "mean", "cov", "icov" };
+  const char* gfccStatsArray[] = { "mean", "cov", "icov" };
+
   vector<string> stats = arrayToVector<string>(statsArray);
   vector<string> mfccStats = arrayToVector<string>(mfccStatsArray);
+  vector<string> gfccStats = arrayToVector<string>(gfccStatsArray);
   for (int i=0; i<(int)stats.size(); i++) {
     pool.add("lowlevel.stats", stats[i]);
     pool.add("tonal.stats", stats[i]);
@@ -550,4 +557,6 @@ void setExtractorOptions(Pool& pool) {
   }
   for (int i=0; i<(int)mfccStats.size(); i++)
     pool.add("lowlevel.mfccStats", mfccStats[i]);
+  for (int i=0; i<(int)gfccStats.size(); i++)
+    pool.add("lowlevel.gfccStats", gfccStats[i]);
 }
