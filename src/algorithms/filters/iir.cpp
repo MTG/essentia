@@ -35,10 +35,10 @@ const char* IIR::description = DOC("This algorithm implements a standard IIR fil
 "An exception is thrown if the \"numerator\" or \"denominator\" parameters are empty. An exception is also thrown if the first coefficient of the \"denominator\" parameter is 0.\n"
 "\n"
 "References:\n"
-"  [1] Introduction to digital filters with audio applications,\n"
-"      http://ccrma-www.stanford.edu/~jos/filters/\n"
+"  [1] Smith, J.O.  Introduction to Digital Filters with Audio Applications,\n" 
+"  http://ccrma-www.stanford.edu/~jos/filters/\n\n"
 "  [2] Infinite Impulse Response - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/IIR");
+"  http://en.wikipedia.org/wiki/IIR");
 
 void IIR::reset() {
   for (int i=0; i<int(_state.size()); ++i) {

@@ -28,11 +28,13 @@ namespace standard {
 
 const char* RhythmTransform::name = "RhythmTransform";
 const char* RhythmTransform::description = DOC("The Rhythm Transform algorithm is based on the rhythm transform as described in [1]. It computes a rhythmical representation of the input signal in the rhythm domain much like FFT computes a representation in the frequency domain. Additionally features as rhythmic centroid and MFCCs can be calculated from this rhythmic representation.\n"
-"Note that parameters \"frameSize\" and \"hopSize\" are defined for the rhythm transformation (fft transform on the rhythm space) and have a different meaning than the sizes in the temporal dimension.\n"
+"Note that parameters \"frameSize\" and \"hopSize\" are defined for the rhythm transformation (FFT transform on the rhythm space) and have a different meaning than the sizes in the temporal dimension.\n"
 "\n"
 "References:\n"
-"  [1] Enric Guaus, Perfecto Herrera, The Rhythm Transform: Towards a Generic Rhythm Descriptor, 2005.\n"
-);
+"  [1] E. Guaus and P. Herrera, \"The rhythm transform: towards a generic\n"
+"  rhythm description,\" in International Computer Music Conference (ICMC’05),\n"
+"  2005.");
+
 
 void RhythmTransform::configure() {
   _rtFrameSize = parameter("frameSize").toInt();

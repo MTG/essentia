@@ -28,11 +28,12 @@ const char* SpectralContrast::name = "SpectralContrast";
 const char* SpectralContrast::description = DOC("The Spectral Contrast feature is based on the Octave Based Spectral Contrast feature as described in [1]. The version implemented here is a modified version to improve discriminative power and robustness. The modifications are described in [2].\n"
 "\n"
 "References:\n"
-"  [1] Dan-Ning Jiang, Lie Lu, Hong-Jiang Zhang, Jian-Hua Tao, Lian-Hong Cai (2002). Music type classification by spectral contrast feature.\n"
-"      IEEE International. Conference on Multimedia and Expo (ICME'02), pp. 113-116\n"
-"  [2] Akkermans, V., Serrà J., & Herrera, P. (2009). Shape-based spectral contrast descriptor.\n"
-"      Sound and Music Computing Conference (SMC'09), pp. 143–148.\n");
-
+"  [1] D.-N. Jiang, L. Lu, H.-J. Zhang, J.-H. Tao, and L.-H. Cai, \"Music type\n"
+"  classification by spectral contrast feature,\" in IEEE International\n"
+"  Conference on Multimedia and Expo (ICME’02), 2002, vol. 1, pp. 113–116.\n\n"
+"  [2] V. Akkermans, J. Serrà, and P. Herrera, \"Shape-based spectral contrast\n"
+"  descriptor,\" in Sound and Music Computing Conference (SMC’09), 2009,\n"
+"  pp. 143–148.\n");
 
 
 void SpectralContrast::configure() {

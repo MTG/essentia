@@ -33,9 +33,9 @@ const char* PitchContours::description = DOC("This algorithm tracks a set of pre
 "Recommended processing chain: (see [1]): EqualLoudness -> frame slicing with sample rate = 44100, frame size = 2048, hop size = 128 -> Windowing with Hann, x4 zero padding -> Spectrum -> SpectralPeaks -> PitchSalienceFunction (10 cents bin resolution) -> PitchSalienceFunctionPeaks.\n"
 "\n"
 "References:\n"
-"  [1] Salamon, J., & Gómez E. (2012).  Melody Extraction from Polyphonic Music Signals using Pitch Contour Characteristics.\n"
-"      IEEE Transactions on Audio, Speech and Language Processing. 20(6), 1759-1770.\n"
-);
+"  [1] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
+"  signals using pitch contour characteristics,\" IEEE Transactions on Audio,\n"
+"  Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n");
 
 void PitchContours::configure() {
   _binResolution = parameter("binResolution").toReal();

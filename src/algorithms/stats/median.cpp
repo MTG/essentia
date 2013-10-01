@@ -28,7 +28,7 @@ const char* Median::description = DOC("This algorithm computes the median of an 
 "\n"
 "References:\n"
 "  [1] Statistical Median -- from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/StatisticalMedian.html");
+"  http://mathworld.wolfram.com/StatisticalMedian.html");
 
 void Median::compute() {
   _median.get() = median(_array.get());

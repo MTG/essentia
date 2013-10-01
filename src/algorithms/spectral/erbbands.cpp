@@ -14,10 +14,10 @@ const char* ERBBands::version = "1.0";
 const char* ERBBands::description = DOC("This algorithm computes magnitudes in bands spaced on an Equivalent Rectangular Bandwidth (ERB) scale, given a spectrum. It applies a frequency domain filterbank using gammatone filters. Adapted from matlab code in:  D. P. W. Ellis (2009). 'Gammatone-like spectrograms', web resource [1].\n"
 "\n"
 "References:\n"
-"  [1] http://www.ee.columbia.edu/~dpwe/resources/matlab/gammatonegram/\n"
-"  [2] Moore, B. C., & Glasberg, B. R. (1983). Suggested formulae for calculating auditory‐filter bandwidths and excitation patterns. The Journal of the Acoustical Society of America, 74, 750."
-
-);
+"  [1] http://www.ee.columbia.edu/~dpwe/resources/matlab/gammatonegram/\n\n"
+"  [2] B. C. Moore and B. R. Glasberg, \"Suggested formulae for calculating\n"
+"  auditory-filter bandwidths and excitation patterns,\" Journal of the\n"
+"  Acoustical Society of America, vol. 74, no. 3, pp. 750–753, 1983.");
 
 const Real ERBBands::EarQ = 9.26449;
 const Real ERBBands::minBW = 24.7;

@@ -29,7 +29,10 @@ const char* GFCC::version = "1.0";
 const char* GFCC::description = DOC("This algorithm computes the equivalent of MFCCs but using a gammatone filterbank (ERBBands) scaled on an Equivalent Rectangular Bandwidth (ERB) scale. These coefficients could be called 'Gammatone Feature Cepstral Coefficients.\n"
 "\n"
 "References:\n"
-"  [1] Shao, Y., Jin, Z., Wang, D., Srinivasan, S.,  An auditory-based feature for robust speech recognition. Proc. ICASSP 2009");
+"  [1] Y. Shao, Z. Jin, D. Wang, and S. Srinivasan, \"An auditory-based feature\n"
+"  for robust speech recognition,\" in IEEE International Conference on\n"
+"  Acoustics, Speech, and Signal Processing (ICASSP’09), 2009,\n"
+"  pp. 4625-4628.");
 
 void GFCC::configure() {
   _gtFilter->configure("sampleRate", parameter("sampleRate"),

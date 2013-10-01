@@ -39,12 +39,16 @@ const char* OnsetDetection::description = DOC("This algorithm outputs an onset d
 "If using the 'complex' detection function, suggested parameters for computation of \"spectrum\" and \"phase\" are 44100Hz sample rate, frame size of 1024 and hopSize of 512 samples, which results in a resolution of 11.6ms, and a Hann window.\n"
 "\n"
 "References:\n"
-"  [1] Bello, Juan P., Chris Duxbury, Mike Davies, and Mark Sandler, On the use of phase and energy for\n"
-"  musical onset detection in the complex domain, Signal Processing Letters, IEEE 11, no. 6 (2004): 553-556.\n"
-"  [2] P. Brossier, J.P. Bello, M.D. Plumbley, Fast labelling of notes in music signals,\n"
-"  Proceedings of the 5th International Conference on Music Information Retrieval, Barcelona, Spain, 2004\n"
-"  [3] Ellis, D. P. (2007). Beat tracking by dynamic programming. Journal of New Music Research, 36(1), 51-60.\n"
-"  [4] J. Laroche, Efficient tempo and beat tracking in audio recordings, Journal of the Audio Engineering Society, vol. 51, no. 4, pp. 226–233, 2003.\n");
+"  [1] Bello, Juan P., Chris Duxbury, Mike Davies, and Mark Sandler, On the\n"
+"  use of phase and energy for musical onset detection in the complex domain,\n"
+"  Signal Processing Letters, IEEE 11, no. 6 (2004): 553-556.\n\n"
+"  [2] P. Brossier, J. P. Bello, and M. D. Plumbley, \"Fast labelling of notes\n" 
+"  in music signals,\" in International Symposium on Music Information\n"
+"  Retrieval (ISMIR’04), 2004, pp. 331–336.\n\n"
+"  [3] D. P. W. Ellis, \"Beat Tracking by Dynamic Programming,\" Journal of\n"
+"  New Music Research, vol. 36, no. 1, pp. 51–60, 2007.\n\n"
+"  [4] J. Laroche, \"Efficient Tempo and Beat Tracking in Audio Recordings,\"\n"
+"  JAES, vol. 51, no. 4, pp. 226–233, 2003.\n");
 
 void OnsetDetection::configure() {
   Real sampleRate = parameter("sampleRate").toReal();

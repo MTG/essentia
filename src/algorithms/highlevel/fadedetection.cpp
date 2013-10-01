@@ -33,7 +33,7 @@ const char* FadeDetection::description = DOC("This algorithm computes two arrays
 "\n"
 "References:\n"
 "  [1] Fade (audio engineering) - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Fade-in");
+"  http://en.wikipedia.org/wiki/Fade-in");
 
 void FadeDetection::configure() {
   _frameRate = parameter("frameRate").toReal();

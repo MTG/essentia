@@ -34,7 +34,7 @@ const char* PeakDetection::description = DOC("The peak detection algorithm detec
 "\n"
 "References:\n"
 "  [1] Peak Detection,\n"
-"      http://ccrma.stanford.edu/~jos/parshl/Peak_Detection_Steps_3.html");
+"  http://ccrma.stanford.edu/~jos/parshl/Peak_Detection_Steps_3.html");
 
 void PeakDetection::configure() {
   _minPos = parameter("minPosition").toReal();

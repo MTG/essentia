@@ -25,18 +25,17 @@ namespace standard {
 
 const char* Danceability::name = "Danceability";
 const char* Danceability::description = DOC(
-  "Calculates the danceability vector for a given signal. The algorithm is\n"
-  "derived from Detrended Fluctuation Analysis (DFA) described in [1]. The\n"
-  "parameters minTau and maxTau are used to define the range of time over\n"
-  "which DFA will be performed. The output of this algorithm is the\n"
-  "danceability of the audio signal. These values usually range from 0 to 3\n"
-  "(higher values meaning more danceable).\n"
-  "Exception is thrown when minTau is greater than maxTau.\n"
-  "References:\n"
-  "  [1] Streich, S. and Herrera, P., Detrended Fluctuation Analysis of Music\n"
-  "      Signals: Danceability Estimation and further Semantic\n"
-  "      Characterization, Proceedings of the AES 118th Convention,\n"
-  "      Barcelona, Spain, 2005");
+"Calculates the danceability vector for a given signal. The algorithm is\n"
+"derived from Detrended Fluctuation Analysis (DFA) described in [1]. The\n"
+"parameters minTau and maxTau are used to define the range of time over\n"
+"which DFA will be performed. The output of this algorithm is the\n"
+"danceability of the audio signal. These values usually range from 0 to 3\n"
+"(higher values meaning more danceable).\n"
+"Exception is thrown when minTau is greater than maxTau.\n"
+"References:\n"
+"  [1] Streich, S. and Herrera, P., Detrended Fluctuation Analysis of Music\n"
+"  Signals: Danceability Estimation and further Semantic Characterization,\n"
+"  Proceedings of the AES 118th Convention, Barcelona, Spain, 2005");
 
 Real Danceability::stddev(const vector<Real>& array, int start, int end) const {
 

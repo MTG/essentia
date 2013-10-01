@@ -31,7 +31,7 @@ const char* Centroid::description = DOC("This algorithm extracts the centroid (f
 "\n"
 "References:\n"
 "  [1] Function Centroid -- from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/FunctionCentroid.html");
+"  http://mathworld.wolfram.com/FunctionCentroid.html");
 
 
 void Centroid::configure() {

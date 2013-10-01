@@ -31,11 +31,11 @@ const char* Inharmonicity::description = DOC("This algorithm calculates the inha
 "Note that DC components should be removed from the signal before obtaining its peaks. An exception is thrown if a peak is given at 0Hz.\n"
 "An exception is thrown if frequency vector is not sorted in ascendently, if it contains duplicates or if any input vector is empty.\n"
 "References:\n"
-"  [1] G. Peeters, A large set of audio features for sound description \n"
-"      (similarity and classification) in the CUIDADO project, \n"
-"      CUIDADO I.S.T. Project Report, 2004.\n"
+"  [1] G. Peeters, \"A large set of audio features for sound description\n"
+"  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n"
+"  Project Report, 2004.\n\n"
 "  [2] Inharmonicity - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Inharmonicity");
+"  http://en.wikipedia.org/wiki/Inharmonicity");
 
 
 void Inharmonicity::compute() {

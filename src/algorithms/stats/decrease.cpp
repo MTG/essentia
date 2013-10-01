@@ -28,7 +28,7 @@ const char* Decrease::description = DOC("This algorithm extracts the decrease of
 "The size of the input array must be at least two elements for \"decrease\" to be computed, otherwise an exception is thrown.\n"
 "References:\n"
 "  [1] Least Squares Fitting -- from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/LeastSquaresFitting.html"
+"  http://mathworld.wolfram.com/LeastSquaresFitting.html"
 );
 
 void Decrease::configure() {

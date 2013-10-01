@@ -42,8 +42,9 @@ const char* HighResolutionFeatures::description = DOC("This algorithm computes h
 "HighFrequencyFeatures is intended to be used in conjunction with HPCP algorithm. Any input vector which size is not a positive multiple of 12, will raise an exception.\n"
 "\n"
 "References:\n"
-"  [1] E. Gómez and P. Herrera, Comparative Analysis of Music Recordings from Western and Non-Western traditions by Automatic Tonal Feature Extraction,\n"
-"      Empirical Musicology Review, vol. 3, pp. 140–156, 2008.");
+"  [1] E. Gómez and P. Herrera, \"Comparative Analysis of Music Recordings\n"
+"  from Western and Non-Western traditions by Automatic Tonal Feature\n"
+"  Extraction,\" Empirical Musicology Review, vol. 3, pp. 140–156, 2008.");
 
 
 vector<Peak> detectPeaks(const vector<Real>& hpcp, int maxPeaks) {

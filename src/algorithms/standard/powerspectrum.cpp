@@ -27,7 +27,7 @@ const char* PowerSpectrum::description = DOC("This algorithm computes the power 
 "\n"
 "References:\n"
 "  [1] Power Spectrum - from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/PowerSpectrum.html");
+"  http://mathworld.wolfram.com/PowerSpectrum.html");
 
 void PowerSpectrum::configure() {
   // FFT configuration

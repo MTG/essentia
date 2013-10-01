@@ -30,7 +30,7 @@ const char* Multiplexer::description = DOC("This algorithm returns a single vect
 "\n"
 "References:\n"
 "  [1] Multiplexer - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Multiplexer\n");
+"  http://en.wikipedia.org/wiki/Multiplexer\n");
 
 
 void Multiplexer::clearInputs() {

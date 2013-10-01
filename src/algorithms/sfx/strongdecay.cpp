@@ -31,9 +31,9 @@ const char* StrongDecay::description = DOC("This algorithm extracts the Strong D
 "This algorithm is not defined for zero signals (i.e. silence) nor when the signal's size is less than two, as it could not compute its centroid.\n"
 "\n"
 "References:\n"
-"  [1] Gouyon, F. and Herrera, P., Exploration of techniques for automatic \n"
-"      labeling of audio drum tracks instruments, Music Technology Group, \n"
-"      Pompeu Fabra University, 2001");
+"  [1] F. Gouyon and P. Herrera, \"Exploration of techniques for automatic\n"
+"  labeling of audio drum tracks instruments,\" in MOSART: Workshop on Current\n"
+"  Directions in Computer Music, 2001.");
 
 void StrongDecay::compute() {
 

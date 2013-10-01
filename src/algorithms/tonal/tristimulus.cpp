@@ -31,9 +31,10 @@ const char* Tristimulus::description = DOC("This algorithm calculates the tristi
 
 "References:\n"
 "  [1] Tristimulus (audio) - Wikipedia, the free encyclopedia\n"
-"      http://en.wikipedia.org/wiki/Tristimulus_(audio)\n"
-"  [2] G. Peeters, A large set of audio features for sound description (similarity and classification) in the CUIDADO project,"
-"      CUIDADO I.S.T. Project Report, 2004");
+"  http://en.wikipedia.org/wiki/Tristimulus_(audio)\n\n"
+"  [2] G. Peeters, \"A large set of audio features for sound description\n" 
+"  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n" 
+"  Project Report, 2004");
 
 void Tristimulus::compute() {
 

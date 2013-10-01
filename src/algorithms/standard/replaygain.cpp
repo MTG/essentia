@@ -32,8 +32,7 @@ const char* ReplayGain::description = DOC("This algorithm returns the Replay Gai
 "This algorithm is only defined for input signals which size is larger than 0.05ms, otherwise an exception will be thrown.\n"
 "\n"
 "References:\n"
-"  [1] Replay Gain - A Proposed Standard,\n"
-"      http://replaygain.hydrogenaudio.org\n");
+"  [1] Replay Gain - A Proposed Standard, http://replaygain.hydrogenaudio.org\n");
 
 
 void ReplayGain::configure() {

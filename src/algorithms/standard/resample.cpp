@@ -30,10 +30,9 @@ const char* Resample::description = DOC("This algorithm resamples the input sign
 "This algorithm is only supported if essentia has been compiled with Real=float, otherwise it will throw an exception. It may also throw an exception if there is an internal error in the SRC library during conversion.\n\n"
 
 "References:\n"
-"  [1] Secret Rabbit Code\n"
-"      http://www.mega-nerd.com/SRC\n"
+"  [1] Secret Rabbit Code, http://www.mega-nerd.com/SRC\n\n"
 "  [2] Resampling - Wikipedia, the free encyclopedia\n"
-"      http://en.wikipedia.org/wiki/Resampling");
+"  http://en.wikipedia.org/wiki/Resampling");
 
 
 void Resample::configure() {

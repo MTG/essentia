@@ -32,12 +32,12 @@ const char* ChordsDetection::description = DOC("Using pitch profile classes, thi
 "  - This algorithm assumes that input pcps have been computed with framesize = 2*hopsize\n"
 "\n"
 "References:\n"
-"  [1] Gomez, E., 'Tonal Description of Polyphonic Audio for Music Content \n"
-"      Processing', INFORMS Journal On Computing, Vol. 18, No. 3, Summer \n"
-"      2006, pp. 294-304.\n"
-"  [2] Temperley, D. 'What's key for key? The Krumhansl-Schmuckler \n"
-"      key-finding algorithm reconsidered', Music Perception 17(1) pp. \n"
-"      65-100, 1999. http://www.links.cs.cmu.edu/music-analysis/key.html");
+"  [1] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
+"  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"
+"  2006.\n\n"
+"  [2] D. Temperley, \"What's key for key? The Krumhansl-Schmuckler\n"
+"  key-finding algorithm reconsidered\", Music Perception vol. 17, no. 1,\n"
+"  pp. 65-100, 1999.");
 
 void ChordsDetection::configure() {
   Real wsize = parameter("windowSize").toReal();

@@ -29,8 +29,9 @@ const char* Flatness::description = DOC("This algorithm computes the flatness of
 "Flatness is undefined for empty input and negative values, therefore an exception is thrown in any both cases.\n"
 "\n"
 "References:\n"
-"  [1] G. Peeters, A large set of audio features for sound description (similarity and classification) in the CUIDADO project,"
-"      CUIDADO I.S.T. Project Report, 2004");
+"  [1] G. Peeters, \"A large set of audio features for sound description\n"
+"  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n"
+"  Project Report, 2004");
 
 void Flatness::compute() {
 

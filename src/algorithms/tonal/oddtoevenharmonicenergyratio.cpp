@@ -32,12 +32,11 @@ const char* OddToEvenHarmonicEnergyRatio::description = DOC("This algorithm comp
 "An exception is thrown if the input frequency and magnitude vectors have different size. Finally, an exception is thrown if the frequency and magnitude vectors are not ordered by ascending frequency.\n"
 "\n"
 "References:\n"
-"  [1] Martin, K. D., Kim, Y. E., Musical Instrument Identification: A \n"
-"      Pattern-Recognition Approach, MIT Media Lab Machine Listening Group, \n"
-"      Presented at the 136th meeting of the Acoustical Society of America, \n"
-"      October 13, 1998, http://sound.media.mit.edu/Papers/kdm-asa98.pdf\n"
-"  [2] Ringgenberg, K., et. al., Musical Instrument Recognition, \n"
-"      http://cnx.org/content/col10313/1.3/pdf");
+"  [1] K. D. Martin and Y. E. Kim, \"Musical instrument identification:\n"
+"  A pattern-recognition approach,\" The Journal of the Acoustical Society of\n"
+"  America, vol. 104, no. 3, pp. 1768–1768, 1998.\n\n"
+"  [2] K. Ringgenberg et al., \"Musical Instrument Recognition,\"\n"
+"  http://cnx.org/content/col10313/1.3/pdf");
 
 void OddToEvenHarmonicEnergyRatio::compute() {
 

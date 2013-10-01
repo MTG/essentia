@@ -30,7 +30,7 @@ const char* PowerMean::description = DOC("This algorithm extracts the Power Mean
 "\n"
 "References:\n"
 "  [1] Power Mean -- from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/PowerMean.html");
+"  http://mathworld.wolfram.com/PowerMean.html");
 
 void PowerMean::compute() {
 

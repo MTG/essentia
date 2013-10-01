@@ -19,8 +19,14 @@ const char* BeatTrackerDegara::description = DOC("This algorithm estimates the b
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
 "References:\n"
-"  [1] Degara, N., Rua, E. A., Pena, A., Torres-Guijarro, S., Davies, M. E., & Plumbley, M. D. (2012). Reliability-informed beat tracking of musical signals. Audio, Speech, and Language Processing, IEEE Transactions on, 20(1), 290-301.\n"
-"  [2] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n");
+"  [1] N. Degara, E. A. Rua, A. Pena, S. Torres-Guijarro, M. E. Davies, and\n"
+"  M. D. Plumbley, \"Reliability-informed beat tracking of musical signals,\"\n"
+"  IEEE Transactions on Audio, Speech, and Language Processing, vol. 20,\n" 
+"  no. 1, pp. 290–301, 2012.\n\n"
+"  [2] J. Zapata, M.E.P. Davies and E. Gómez, \"Multi Feature Beat tracker,\"\n"
+"  submitted article to IEEE TSALP, 2013.\n");
+
+// TODO updated ref [2] when the article gets published
 
 // evaluation results on a large collection of tracks [2] for essentia implementations (DBogdanov):
 // *Degara:         65.4407   55.3735   45.6554   66.5149   45.6192   49.9258   69.5233   77.7232    2.2475   68.0827  -- fast
@@ -119,15 +125,20 @@ void BeatTrackerDegara::reset() {
 namespace essentia {
 namespace standard {
 
-
 const char* BeatTrackerDegara::name = "BeatTrackerDegara";
 const char* BeatTrackerDegara::description = DOC("This algorithm estimates the beat locations given an input signal. It computes 'complex spectral difference' onset detection function and utilizes the beat tracking algorithm (TempoTapDegara) to extract beats [1]. The algorithm works with the optimized settings of 2048/1024 frame/hop size for the computation of the detection function, with its posterior x2 resampling.) While it has a lower accuracy than BeatTrackerMultifeature (see the evaluation results in [2]), its computational speed is significantly higher, which makes reasonable to apply this algorithm for batch processings of large amounts of audio signals.\n"
 "\n"
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
 "References:\n"
-"  [1] Degara, N., Rua, E. A., Pena, A., Torres-Guijarro, S., Davies, M. E., & Plumbley, M. D. (2012). Reliability-informed beat tracking of musical signals. Audio, Speech, and Language Processing, IEEE Transactions on, 20(1), 290-301.\n"
-"  [2] J. Zapata (MTG). Submitted article to IEEE TSALP, 2013. TODO. \n");
+"  [1] N. Degara, E. A. Rua, A. Pena, S. Torres-Guijarro, M. E. Davies, and\n"
+"  M. D. Plumbley, \"Reliability-informed beat tracking of musical signals,\"\n"
+"  IEEE Transactions on Audio, Speech, and Language Processing, vol. 20,\n" 
+"  no. 1, pp. 290–301, 2012.\n\n"
+"  [2] J. Zapata, M.E.P. Davies and E. Gómez, \"Multi Feature Beat tracker,\"\n"
+"  submitted article to IEEE TSALP, 2013.\n");
+
+// TODO updated ref [2] when the article gets published
 
 
 BeatTrackerDegara::BeatTrackerDegara() {

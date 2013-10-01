@@ -32,9 +32,8 @@ const char* PitchFilterMakam::description = DOC("This algorithm corrects the fun
 "ftp://ftp.iyte.edu.tr/share/ktm-nota/TuningMeasurement.html\n"
 "\n"
 "References:\n"
-"  [1] Bozkurt, B. (2008). An Automatic Pitch Analysis Method for Turkish Maqam Music.\n"
-"      Journal of New Music Research. 37(1), 1-13.\n"
-);
+"  [1] B. Bozkurt, \"An Automatic Pitch Analysis Method for Turkish Maqam\n"
+"  Music,\" Journal of New Music Research. 37(1), 1-13.\n");
 
 void PitchFilterMakam::configure() {
   _minChunkSize = parameter("minChunkSize").toInt();

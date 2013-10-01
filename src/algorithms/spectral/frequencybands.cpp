@@ -30,9 +30,9 @@ const char* FrequencyBands::description = DOC("This algorithm computes the energ
 "\n"
 "References:\n"
 "  [1] Frequency Range - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Frequency_band\n"
+"  http://en.wikipedia.org/wiki/Frequency_band\n\n"
 "  [2] Band - Handbook For Acoustic Ecology,\n"
-"      http://www.sfu.ca/sonic-studio/handbook/Band.html");
+"  http://www.sfu.ca/sonic-studio/handbook/Band.html");
 
 void FrequencyBands::configure() {
   _bandFrequencies = parameter("frequencyBands").toVectorReal();

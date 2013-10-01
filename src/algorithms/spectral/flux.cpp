@@ -30,11 +30,12 @@ const char* Flux::description = DOC("This algorithm calculates the spectral flux
 "An exception is thrown if the size of the input spectrum does not equal the previous input spectrum's size.\n"
 "\n"
 "References:\n"
-"  [1] Tzanetakis, G., Cook, P., 'Multifeature Audio Segmentation for\n"
-"      Browsing and Annotation', Proceedings of the 1999 IEEE Workshop on\n"
-"      Applications of Signal Processing to Audio and Acoustics, New Paltz,\n"
-"      NY, USA, 1999, W99 1-4\n"
-"  [2] S. Dixon, “Onset detection revisited,” in Proc. 9th Int. Conf. Digital Audio Effects, pp. 133-137, 2006.\n"
+"  [1] Tzanetakis, G., Cook, P., \"Multifeature Audio Segmentation for\n"
+"  Browsing and Annotation\", Proceedings of the 1999 IEEE Workshop on\n"
+"  Applications of Signal Processing to Audio and Acoustics, New Paltz,\n"
+"  NY, USA, 1999, W99 1-4\n\n"
+"  [2] S. Dixon, \"Onset detection revisited\", in International Conference on\n"
+"  Digital Audio Effects (DAFx'06), 2006, vol. 120, pp. 133-137.\n\n"
 "  [3] http://en.wikipedia.org/wiki/Spectral_flux\n");
 
 void Flux::configure() {

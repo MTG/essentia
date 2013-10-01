@@ -30,7 +30,7 @@ namespace standard {
 const char* FixedBpmEstimator::name = "FixedBpmEstimator";
 const char* FixedBpmEstimator::version = "1.0";
 const char* FixedBpmEstimator::description = DOC("Given the novelty curve (see NoveltyCurve algorithm), this algorithm outputs a histogram of the most probable bpms assuming the signal has constant tempo."
-"This algorithm is based on the autocorrelation of the novelty curve and should only  be used for signals that have a constant tempo or as a first tempo estimator to be used  in conjunction with other algorithms such as bpmhistogram\n");
+"This algorithm is based on the autocorrelation of the novelty curve and should only be used for signals that have a constant tempo or as a first tempo estimator to be used  in conjunction with other algorithms such as BpmHistogram\n");
 
 void FixedBpmEstimator::configure() {
   _sampleRate = parameter("sampleRate").toReal();

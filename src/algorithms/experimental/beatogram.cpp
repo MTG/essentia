@@ -27,7 +27,9 @@ using namespace standard;
 const char* Beatogram::name = "Beatogram";
 const char* Beatogram::version = "1.0";
 const char* Beatogram::description = DOC("This algorithm filters the loudness matrix given by beatsloudness algorithm in order to keep only the most salient beat band representation.\n"
-"This algorithm has been found to be useful for estimating time signatures.\n");
+"This algorithm has been found to be useful for estimating time signatures.\n"
+"\n"
+"Quality: experimental");
 
 void Beatogram::configure() {
   _windowSize = parameter("size").toInt();

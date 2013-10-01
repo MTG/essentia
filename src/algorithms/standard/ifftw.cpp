@@ -31,9 +31,9 @@ const char* IFFTW::description = DOC("This algorithm calculates the inverse STFT
 "\n"
 "References:\n"
 "  [1] Fast Fourier transform - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Fft\n"
+"  http://en.wikipedia.org/wiki/Fft\n\n"
 "  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/FastFourierTransform.html");
+"  http://mathworld.wolfram.com/FastFourierTransform.html");
 
 
 IFFTW::~IFFTW() {

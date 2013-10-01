@@ -32,8 +32,10 @@ const char* LPC::description = DOC("This algorithm computes the Linear Predictiv
 "\n"
 "References:\n"
 "  [1] Linear predictive coding - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Linear_predictive_coding\n"
-"  [2] J. Makhoul, Spectral analysis of speech by linear prediction, IEEE Transactions on Audio and Electroacoustics, vol. 21, no. 3, pp. 140–148, 1973.\n");
+"  http://en.wikipedia.org/wiki/Linear_predictive_coding\n\n"
+"  [2] J. Makhoul, \"Spectral analysis of speech by linear prediction,\" IEEE\n"
+"  Transactions on Audio and Electroacoustics, vol. 21, no. 3, pp. 140–148,\n"
+"  1973.\n");
 
 
 void LPC::configure() {

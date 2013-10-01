@@ -29,7 +29,9 @@ const char* Panning::name = "Panning";
 const char* Panning::description = DOC("This algorithm extracts parameterized curves of the panorama distribution for each audio frame by comparing spectra from the left and right channels. In order to obtain a complete representation of the panorama, the fft of the resulting coefficients must be computed. The resulting spectrum, will show peaks on the initial bins for left panned audio, and right panning will appear as peaks in the upper bins.\n"
 "Note: At present time, the original algorithm has not been tested in multiband mode. That is, numBands must remain 1.\n"
 "References:\n"
-"  [1] E. Gómez, P. Herrera, P. Cano, J. Janer, J. Serrà, J. Bonada, S. El-Hajj, T. Aussenac & G. Holmberg. Music similarity systems and methods using descriptors. United States patent application number 12/128917, filed May 29, 2008.");
+"  [1] E. Gómez, P. Herrera, P. Cano, J. Janer, J. Serrà, J. Bonada,\n"
+"  S. El-Hajj, T. Aussenac, and G. Holmberg, \"Music similarity systems and\n"
+"  methods using descriptors,” U.S. Patent WO 2009/0012022009.");
 
 void Panning::correctAudibleAngle(vector<Real>& ratios) {
   Real x = 0;

@@ -33,7 +33,7 @@ const char* EasyLoader::description = DOC("Given an audio file, this algorithm o
 "\n"
 "References:\n"
 "  [1] Replay Gain - A Proposed Standard,\n"
-"      http://replaygain.hydrogenaudio.org");
+"  http://replaygain.hydrogenaudio.org");
 
 
 EasyLoader::EasyLoader() : AlgorithmComposite(),

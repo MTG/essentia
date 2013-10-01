@@ -36,9 +36,10 @@ const char* SBic::description = DOC("This descriptor segments the audio file int
 "An exception is thrown if the input only contains one frame of features (i.e. second dimension is less than 2).\n"
 "\n"
 "References:\n"
-"  [1] Audioseg, http://audioseg.gforge.inria.fr\n"
-"  [2] G. Gravier, M. Betser, and M. Ben, Audio Segmentation Toolkit, release 1.2, 2010.\n"
-"      Available online: https://gforge.inria.fr/frs/download.php/25187/audioseg-1.2.pdf\n");
+"  [1] Audioseg, http://audioseg.gforge.inria.fr\n\n"
+"  [2] G. Gravier, M. Betser, and M. Ben, Audio Segmentation Toolkit,\n"
+"  release 1.2, 2010. Available online:\n"
+"  https://gforge.inria.fr/frs/download.php/25187/audioseg-1.2.pdf\n");
 
 
 

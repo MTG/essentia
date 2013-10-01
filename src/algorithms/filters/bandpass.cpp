@@ -29,7 +29,7 @@ const char* BandPass::description = DOC("This algorithm implements a 2nd order I
 "\n"
 "References:\n"
 "  [1] U. Zölzer, DAFX - Digital Audio Effects, p. 43,\n"
-"      John Wiley & Sons, 2002");
+"  John Wiley & Sons, 2002");
 
 
 void BandPass::configure() {

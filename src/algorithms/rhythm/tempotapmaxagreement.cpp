@@ -17,8 +17,14 @@ const char* TempoTapMaxAgreement::description = DOC("This algorithm estimates be
 "Note that the input tick times should be in ascending order and that they cannot contain negative values otherwise an exception will be thrown.\n"
 "\n"
 "References:\n"
-"  [1] Zapata, J. R., Holzapfel, A., Davies, M. E., Oliveira, J. L., & Gouyon, F. (2012). Assigning a Confidence Threshold on Automatic Beat Annotation in Large Datasets. In Proceedings of 13th International Society for Music Information Retrieval Conference (ISMIR 2012), Porto.\n"
-"  [2] Holzapfel, A., Davies, M. E., Zapata, J. R., Oliveira, J. L., & Gouyon, F. (2012). Selective sampling for beat tracking evaluation. Audio, Speech, and Language Processing, IEEE Transactions on, 20(9), 2539-2548.\n");
+"  [1] J. R. Zapata, A. Holzapfel, M. E. Davies, J. L. Oliveira, and\n"
+"  F. Gouyon, \"Assigning a confidence threshold on automatic beat annotation\n"
+"  in large datasets,\" in International Society for Music Information\n" 
+"  Retrieval Conference (ISMIR’12), 2012.\n\n"
+"  [2] A. Holzapfel, M. E. Davies, J. R. Zapata, J. L. Oliveira, and\n"
+"  F. Gouyon, \"Selective sampling for beat tracking evaluation,\" IEEE\n" 
+"  Transactions on Audio, Speech, and Language Processing, vol. 13, no. 9,\n"
+"  pp. 2539-2548, 2012.\n");
 
 
 void TempoTapMaxAgreement::configure() {

@@ -28,9 +28,8 @@ const char* LoudnessVickers::name = "LoudnessVickers";
 const char* LoudnessVickers::description = DOC("This algorithm computes Vickers's loudness for a given audio signal. Currently, this algorithm only works for signals with a 44100Hz sampling rate. This algorithm is meant to be given frames of audio as input (not entire audio signals). The algorithm described in the paper performs a weighted average of the loudness value computed for each of the given frames, this step is left as a post processing step and is not performed by this algorithm.\n\n"
 
 "References:\n"
-"  [1] Vickers, E., Automatic Long-Term Loudness and Dynamics Matching,\n"
-"      Proceedings of the AES 111th Convention, New York, NY, USA, 2001,\n"
-"      http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.20.4804&rep=rep1&type=pdf");
+"  [1] E. Vickers, \"Automatic Long-term Loudness and Dynamics Matching,\" in\n" 
+"  The 111th AES Convention, 2001.");
 
 void LoudnessVickers::configure() {
 

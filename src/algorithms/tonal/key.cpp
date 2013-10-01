@@ -31,12 +31,12 @@ const char* Key::description = DOC("Using pitch profile classes, this algorithm 
 "Key will throw exceptions either when the input pcp size is not a positive multiple of 12 or if the key could not be found. Also if parameter \"scale\" is set to \"minor\" and the profile type is set to \"weichai\"\n"
 "\n"
 "References:\n"
-"  [1] Gomez, E., 'Tonal Description of Polyphonic Audio for Music Content \n"
-"      Processing', INFORMS Journal On Computing, Vol. 18, No. 3, Summer \n"
-"      2006, pp. 294-304.\n"
-"  [2] Temperley, D. 'What's key for key? The Krumhansl-Schmuckler \n"
-"      key-finding algorithm reconsidered', Music Perception 17(1) pp. \n"
-"      65-100, 1999. http://www.links.cs.cmu.edu/music-analysis/key.html");
+"  [1] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
+"  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"
+"  2006.\n\n"
+"  [2] D. Temperley, \"What's key for key? The Krumhansl-Schmuckler\n"
+"  key-finding algorithm reconsidered\", Music Perception vol. 17, no. 1,\n"
+"  pp. 65-100, 1999.");
 
 
 void Key::configure() {

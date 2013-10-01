@@ -31,7 +31,7 @@ const char* DerivativeSFX::description = DOC("This algorithm returns two descrip
 "\n"
 "The second descriptor is the maximum derivative, before the maximum value of the input signal occurred. This coefficient helps discriminating sounds that have a smooth attack phase, and therefore a smaller value than sounds with a fast attack.\n"
 "\n"
-"This algorithm is meant to be fed by the ouptuts of the Envelope algorithm. If used in streaming mode, RealAccumulator should be connected in between.\n"
+"This algorithm is meant to be fed by the outputs of the Envelope algorithm. If used in streaming mode, RealAccumulator should be connected in between.\n"
 "An exception is thrown if the input signal is empty.");
 
 void DerivativeSFX::compute() {

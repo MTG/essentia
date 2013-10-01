@@ -34,9 +34,9 @@ const char* EqloudLoader::description = DOC("Given an audio file this algorithm 
 "\n"
 "References:\n"
 "  [1] Replay Gain - A Proposed Standard,\n"
-"      http://replaygain.hydrogenaudio.org"
+"  http://replaygain.hydrogenaudio.org\n\n"
 "  [2] Replay Gain - Equal Loudness Filter,\n"
-"      http://replaygain.hydrogenaudio.org/proposal/equal_loudness.html");
+"  http://replaygain.hydrogenaudio.org/proposal/equal_loudness.html");
 
 EqloudLoader::EqloudLoader() : AlgorithmComposite(),
                                _monoLoader(0), _trimmer(0), _scale(0), _eqloud(0) {

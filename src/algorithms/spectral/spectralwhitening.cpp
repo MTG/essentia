@@ -32,11 +32,9 @@ const char* SpectralWhitening::description = DOC("Performs spectral whitening of
 "An exception is thrown if the input frequency and magnitude input vectors are of different size.\n"
 "\n"
 "References:\n"
-"  [1] Röbel, A., Rodet, X., 'Efficient Spectral Envelope Estimation and \n"
-"      its Application to Pitch Shifting and Envelope Preservation', \n"
-"      Proc. of the 8th Int. Conference on Digital Audio Effects, Madrid, \n"
-"      Spain, September 20-22, 2005. Available at: \n"
-"      http://mediatheque.ircam.fr/articles/textes/Roebel05b");
+"  [1] A. Röbel and X. Rodet, \"Efficient spectral envelope estimation and its\n"
+"  application to pitch shifting and envelope preservation,\" in International\n"
+"  Conference on Digital Audio Effects (DAFx’05), 2005.");
 
 const Real SpectralWhitening::bpfResolution = 100.0;
 

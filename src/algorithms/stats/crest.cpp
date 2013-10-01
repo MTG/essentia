@@ -30,9 +30,9 @@ const char* Crest::description = DOC("This algorithm computes the crest of an ar
 "Crest cannot be computed neither on empty arrays nor arrays which contain negative values. In such cases, exceptions will be thrown.\n"
 "\n"
 "References:\n"
-"  [1] G. Peeters, A large set of audio features for sound description \n"
-"      (similarity and classification) in the CUIDADO project, \n"
-"      CUIDADO I.S.T. Project Report, 2004");
+"  [1] G. Peeters, \"A large set of audio features for sound description\n"
+"  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n"
+"  Project Report, 2004");
 
 void Crest::compute() {
 

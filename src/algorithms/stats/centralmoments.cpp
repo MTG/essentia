@@ -33,9 +33,9 @@ const char* CentralMoments::description = DOC("This algorithm extracts the 0th, 
 "\n"
 "References:\n"
 "  [1] Sample Central Moment -- from Wolfram MathWorld,\n"
-"      http://mathworld.wolfram.com/SampleCentralMoment.html\n"
+"  http://mathworld.wolfram.com/SampleCentralMoment.html\n\n"
 "  [2] Central Moment - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Central_moment");
+"  http://en.wikipedia.org/wiki/Central_moment");
 
 void CentralMoments::configure() {
   _range = parameter("range").toReal();

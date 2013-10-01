@@ -26,15 +26,17 @@ using namespace standard;
 const char* DistributionShape::name = "DistributionShape";
 const char* DistributionShape::description = DOC("This algorithm extracts the spread (variance), skewness and kurtosis excess of an array of Reals given its central moments. These extracted features are good indicators of the shape of the distribution.\n"
 "The size of the input array must be at least 5. An exception will be thrown otherwise.\n"
+"\n"
 "References:\n"
-"  [1] G. Peeters, A large set of audio features for sound description (similarity and classification) in the CUIDADO project,\n"
-"      CUIDADO I.S.T. Project Report, 2004\n"
+"  [1] G. Peeters, \"A large set of audio features for sound description\n"
+"  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n"
+"  Project Report, 2004.\n\n"
 "  [2] Variance - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Variance\n"
+"  http://en.wikipedia.org/wiki/Variance\n\n"
 "  [3] Skewness - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Skewness\n"
+"  http://en.wikipedia.org/wiki/Skewness\n\n"
 "  [4] Kurtosis - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Kurtosis");
+"  http://en.wikipedia.org/wiki/Kurtosis");
 
 
 void DistributionShape::compute() {

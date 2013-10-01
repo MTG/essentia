@@ -31,11 +31,10 @@ const char* NoveltyCurve::description = DOC(
 "Given an audio signal, this algorithm computes the novelty curve, such as defined in [1].\n"
 "\n"
 "References:\n"
-"  [1] Peter Grosche and Meinard Müller, A Mid-Level Representation for Capturing Dominant Tempo\n"
-"      and Pulse Information in Music Recordings\n"
-"      Proceedings of the 2009 ISMIR conference\n"
-"      http://ismir2009.ismir.net/proceedings/OS2-3.pdf");
-
+"  [1] P. Grosche and M. Müller, \"A mid-level representation for capturing\n"
+"  dominant tempo and pulse information in music recordings,\" in\n"
+"  International Society for Music Information Retrieval Conference\n"
+"  (ISMIR’09), 2009, pp. 189–194.");
 
 
 vector<Real> NoveltyCurve::weightCurve(int size) {

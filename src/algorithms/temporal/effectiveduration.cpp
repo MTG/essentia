@@ -28,8 +28,9 @@ const char* EffectiveDuration::description = DOC(
 "This algorithm returns the effective duration of an envelope signal. The effective duration is a measure of the time the signal is perceptually meaningful. This is approximated by the time the envelope is above or equal to a given threshold. This measure allows to distinguish percussive sounds from sustained sounds but depends on the signal length.\n"
 "This algorithm uses 40% of the envelope maximum as the threshold.\n"
 "References:\n"
-"  [1] G. Peeters, A large set of audio features for sound description (similarity and classification) in the CUIDADO project,"
-"      CUIDADO I.S.T. Project Report, 2004");
+"  [1] G. Peeters, \"A large set of audio features for sound description\n"
+"  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n"
+"  Project Report, 2004");
 
 const Real EffectiveDuration::thresholdRatio = 0.4;
 const Real EffectiveDuration::noiseFloor = db2amp(-90); // -90db is silence (see essentiamath.h)

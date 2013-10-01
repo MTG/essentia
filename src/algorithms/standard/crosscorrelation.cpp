@@ -29,7 +29,7 @@ const char* CrossCorrelation::description = DOC("This algorithm computes the cro
 "\n"
 "References:\n"
 "  [1] Cross-correlation - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Cross-correlation");
+"  http://en.wikipedia.org/wiki/Cross-correlation");
 
 void CrossCorrelation::configure() {
   if (parameter("minLag").toInt() > parameter("maxLag").toInt()) {

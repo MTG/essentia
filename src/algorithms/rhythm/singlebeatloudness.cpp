@@ -24,11 +24,13 @@ using namespace essentia;
 using namespace standard;
 
 const char* SingleBeatLoudness::name = "SingleBeatLoudness";
-const char* SingleBeatLoudness::description = DOC("This algorithm computes the loudness of a single beat, on the whole frequency range and on each specified frequency band (bands by default: 0-200 Hz, 200-400 Hz, 400-800 Hz, 800-1600 Hz, 1600-3200 Hz, 3200-22000Hz, following E.Scheirer [1]). See the Loudness algorithm for a description of loudness.\n"
+const char* SingleBeatLoudness::description = DOC("This algorithm computes the loudness of a single beat, on the whole frequency range and on each specified frequency band (bands by default: 0-200 Hz, 200-400 Hz, 400-800 Hz, 800-1600 Hz, 1600-3200 Hz, 3200-22000Hz, following E. Scheirer [1]). See the Loudness algorithm for a description of loudness.\n"
 "\n"
-  "This algorithm throws an exception either when parameter beatDuration is larger than beatWindowSize or when the size of the input beat is less than beatWindowSize plus beatDuration.\n"
+"This algorithm throws an exception either when parameter beatDuration is larger than beatWindowSize or when the size of the input beat is less than beatWindowSize plus beatDuration.\n"
+"\n"
 "References:\n"
-"  [1] E. D. Scheirer, Tempo and beat analysis of acoustic musical signals, The Journal of the Acoustical Society of America, vol. 103, p. 588, 1998.\n");
+"  [1] E. D. Scheirer, \"Tempo and beat analysis of acoustic musical signals,\"\n"
+"  The Journal of the Acoustical Society of America, vol. 103, p. 588, 1998.\n");
 
 
 void SingleBeatLoudness::configure() {

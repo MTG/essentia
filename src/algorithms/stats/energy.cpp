@@ -30,7 +30,7 @@ const char* Energy::description = DOC("This algorithm computes the energy of an 
 "\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Energy_(signal_processing)");
+"  http://en.wikipedia.org/wiki/Energy_(signal_processing)");
 
 void Energy::compute() {
   const std::vector<Real>& array = _array.get();
