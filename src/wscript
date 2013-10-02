@@ -18,6 +18,8 @@ def options(ctx):
     ctx.add_option('--with-vamp', action='store_true',
                    dest='WITH_VAMP', default=False,
                    help='build the vamp plugin wrapper')
+    
+    #add option --with-gaia
 
 
 def debian_version():
@@ -44,7 +46,7 @@ def configure(ctx):
         ctx.env.WITH_EXAMPLES = True
 
     ctx.env.ALGOIGNORE = []
-    ctx.env.ALGOIGNORE += ['GaiaTransform']
+    #ctx.env.ALGOIGNORE += ['GaiaTransform'] #TODO gaia
 
 
     ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
@@ -85,6 +87,8 @@ def configure(ctx):
     ctx.check_cfg(package='samplerate', uselib_store='SAMPLERATE',
                   args=['--cflags', '--libs'])
 
+    ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
+                  args=['--cflags', '--libs']) # TODO gaia2
 
     if ctx.env.WITH_EXAMPLES or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
@@ -142,6 +146,16 @@ def configure(ctx):
         print '  The following algorithms will be ignored: %s\n' % algos
         ctx.env.ALGOIGNORE += algos
 
+    algos = [ 'GaiaTransform' ]
+    if has('gaia2'):
+        print '- Gaia2 detected!'
+        print '  The following algorithms will be included: %s\n' % algos
+        ctx.env.USES += ' GAIA2'
+    else:
+        print '- Gaia2 seems to be missing.'
+        print '  The following algorithms will be ignored: %s\n' % algos
+        ctx.env.ALGOIGNORE += algos
+        
 
     print '======================================================================================='
 
