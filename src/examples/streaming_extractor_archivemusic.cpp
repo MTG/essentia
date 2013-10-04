@@ -283,7 +283,7 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool,
   //connect(rhythmExtractor->output("bpmIntervals"), neqloudPool, rhythmspace + "bpm_intervals");
 
   // BPM Histogram descriptors
-  Algorithm* bpmhist = factory.create("BPMHistogramDescriptors");
+  Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
   connect(rhythmExtractor->output("bpmIntervals"), bpmhist->input("bpmIntervals"));
   connectSingleValue(bpmhist->output("firstPeakBPM"),     neqloudPool, rhythmspace + "bpm_histogram_first_peak");
   connectSingleValue(bpmhist->output("firstPeakWeight"),  neqloudPool, rhythmspace + "bpm_histogram_first_peak_weight");

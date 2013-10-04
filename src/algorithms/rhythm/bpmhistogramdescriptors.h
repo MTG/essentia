@@ -25,7 +25,7 @@
 namespace essentia {
 namespace standard {
 
-class BPMHistogramDescriptors : public Algorithm {
+class BpmHistogramDescriptors : public Algorithm {
 
  private:
   Input<std::vector<Real> > _bpmIntervals;
@@ -38,7 +38,7 @@ class BPMHistogramDescriptors : public Algorithm {
   Output<Real> _secondPeakSpread;
 
  public:
-  BPMHistogramDescriptors() {
+  BpmHistogramDescriptors() {
     declareInput(_bpmIntervals, "bpmIntervals", "the list of bpm intervals [s]");
     declareOutput(_firstPeakBPM, "firstPeakBPM", "value for the highest peak [bpm]");
     declareOutput(_firstPeakWeight, "firstPeakWeight", "weight of the highest peak");
@@ -48,7 +48,7 @@ class BPMHistogramDescriptors : public Algorithm {
     declareOutput(_secondPeakSpread, "secondPeakSpread", "spread of the second highest peak");
   }
 
-  ~BPMHistogramDescriptors() {};
+  ~BpmHistogramDescriptors() {};
 
   void declareParameters() {}
 
@@ -72,7 +72,7 @@ class BPMHistogramDescriptors : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class BPMHistogramDescriptors : public StreamingAlgorithmWrapper {
+class BpmHistogramDescriptors : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<Real> > _bpmIntervals;
@@ -85,8 +85,8 @@ class BPMHistogramDescriptors : public StreamingAlgorithmWrapper {
   Source<Real> _secondPeakSpread;
 
  public:
-  BPMHistogramDescriptors() {
-    declareAlgorithm("BPMHistogramDescriptors");
+  BpmHistogramDescriptors() {
+    declareAlgorithm("BpmHistogramDescriptors");
     declareInput(_bpmIntervals, TOKEN, 1, "bpmIntervals");
     declareOutput(_firstPeakBPM, TOKEN, 1, "firstPeakBPM");
     declareOutput(_firstPeakWeight, TOKEN, 1, "firstPeakWeight");

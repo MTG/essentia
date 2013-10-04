@@ -422,7 +422,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime,
   connect(rhythmExtractor2->output("bpmIntervals"), oldPool, rhythmspace + "bpm_intervals");
 
   // BPM Histogram descriptors
-  Algorithm* bpmhist = factory.create("BPMHistogramDescriptors");
+  Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
   connect(rhythmExtractor->output("bpmIntervals"), bpmhist->input("bpmIntervals"));
   connectSingleValue(bpmhist->output("firstPeakBPM"), pool, rhythmspace + "first_peak_bpm");
   connectSingleValue(bpmhist->output("firstPeakWeight"), pool, rhythmspace + "first_peak_weight");
@@ -431,7 +431,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime,
   connectSingleValue(bpmhist->output("secondPeakWeight"), pool, rhythmspace + "second_peak_weight");
   connectSingleValue(bpmhist->output("secondPeakSpread"), pool, rhythmspace + "second_peak_spread");
 
-  Algorithm* bpmhist2 = factory.create("BPMHistogramDescriptors");
+  Algorithm* bpmhist2 = factory.create("BpmHistogramDescriptors");
   connect(rhythmExtractor2->output("bpmIntervals"), bpmhist2->input("bpmIntervals"));
   connectSingleValue(bpmhist2->output("firstPeakBPM"), oldPool, rhythmspace + "first_peak_bpm");
   connectSingleValue(bpmhist2->output("firstPeakWeight"), oldPool, rhythmspace + "first_peak_weight");

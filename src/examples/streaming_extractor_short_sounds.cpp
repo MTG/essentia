@@ -360,7 +360,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime, 
   connect(rhythmExtractor->output("bpmIntervals"), pool, rhythmspace + "bpm_intervals");
 
   // BPM Histogram descriptors
-  Algorithm* bpmhist = factory.create("BPMHistogramDescriptors");
+  Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
   connect(rhythmExtractor->output("bpmIntervals"), bpmhist->input("bpmIntervals"));
   connect(bpmhist->output("firstPeakBPM"), pool, rhythmspace + "first_peak_bpm");
   connect(bpmhist->output("firstPeakWeight"), pool, rhythmspace + "first_peak_weight");

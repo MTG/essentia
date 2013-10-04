@@ -55,7 +55,7 @@ RhythmDescriptors::RhythmDescriptors() {
 
 void RhythmDescriptors::createInnerNetwork() {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
-  _bpmHistogramDescriptors = factory.create("BPMHistogramDescriptors");
+  _bpmHistogramDescriptors = factory.create("BpmHistogramDescriptors");
   _rhythmExtractor = factory.create("RhythmExtractor2013");
 
   _signal >> _rhythmExtractor->input("signal");
