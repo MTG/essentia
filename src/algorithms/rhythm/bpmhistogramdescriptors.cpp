@@ -24,15 +24,15 @@ using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* BPMHistogramDescriptors::name = "BPMHistogramDescriptors";
-const char* BPMHistogramDescriptors::description = DOC("This algorithm computes statistics for the highest and second highest peak of the beats per minute probability histogram.");
+const char* BpmHistogramDescriptors::name = "BpmHistogramDescriptors";
+const char* BpmHistogramDescriptors::description = DOC("This algorithm computes statistics for the highest and second highest peak of the beats per minute probability histogram.");
 
-const int BPMHistogramDescriptors::maxBPM = 250; // max number of BPM bins
-const int BPMHistogramDescriptors::numPeaks = 2;
-const int BPMHistogramDescriptors::weightWidth = 3;
-const int BPMHistogramDescriptors::spreadWidth = 9;
+const int BpmHistogramDescriptors::maxBPM = 250; // max number of BPM bins
+const int BpmHistogramDescriptors::numPeaks = 2;
+const int BpmHistogramDescriptors::weightWidth = 3;
+const int BpmHistogramDescriptors::spreadWidth = 9;
 
-void BPMHistogramDescriptors::compute() {
+void BpmHistogramDescriptors::compute() {
   // copy input
   vector<Real> bpmValues = _bpmIntervals.get();
 
