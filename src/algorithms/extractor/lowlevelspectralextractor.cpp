@@ -132,11 +132,7 @@ LowLevelSpectralExtractor::LowLevelSpectralExtractor() : _configured(false) {
 
 
   _spectrum->output("spectrum")               >>  _barkBands->input("spectrum");
-  // TODO: this is a workaround for a bug in the scheduler tested by
-  //       TEST(Scheduler, SourceProxyFork) in basetest/test_scheduler.cpp
-  //       when the bug is fixed, the copy algorithm can be removed
-  _barkBands->output("bands")                 >>  _copy->input("data");
-  _copy->output("data")                       >>  _bbands;
+  _barkBands->output("bands")                 >>  _bbands;
   _barkBands->output("bands")                 >>  _crest->input("array");
   _barkBands->output("bands")                 >>  _flatnessdb->input("array");
   _barkBands->output("bands")                 >>  _centralMoments->input("array");
@@ -212,8 +208,6 @@ void LowLevelSpectralExtractor::createInnerNetwork() {
   _windowing          = factory.create("Windowing",
                                        "type", "blackmanharris62");
   _zcr                = factory.create("ZeroCrossingRate");
-
-  _copy = new Copy<std::vector<Real> >();
 
   Real thresholds_dB[] = { -20, -30, -60 };
   vector<Real> thresholds(ARRAY_SIZE(thresholds_dB));
