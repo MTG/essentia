@@ -148,6 +148,14 @@ AlgorithmStatus StreamingAlgorithmWrapper::process() {
     E_DEBUG(EAlgorithm, name() << "::shouldStop(), " << inputs().begin()->second->available() << " tokens available on input, "
             << outputs().begin()->second->available() << " tokens available on output");
 
+#if DEBUGGING_ENABLED
+    for (OutputMap::const_iterator it = outputs().begin(); it != outputs().end(); ++it) {
+        const std::string& name = it->first;
+      SourceBase& source = *it->second;
+      E_DEBUG(EAlgorithm, " + " << name << ": " << source.totalProduced() << " tokens produced");
+    }
+#endif
+
     // use the following heuristic (it will only work in a specific case)
     // - take as many tokens as are available on all the inputs we can
     //   find, and the same number on the first output (in case of stream)
@@ -205,6 +213,16 @@ AlgorithmStatus StreamingAlgorithmWrapper::process() {
 
   releaseData();
   EXEC_DEBUG("data released");
+
+#if DEBUGGING_ENABLED
+  if (shouldStop()) {
+    for (OutputMap::const_iterator it = outputs().begin(); it != outputs().end(); ++it) {
+        const std::string& name = it->first;
+      SourceBase& source = *it->second;
+      E_DEBUG(EAlgorithm, " - " << name << ": " << source.totalProduced() << " tokens produced");
+    }
+  }
+#endif
 
   return OK;
 }
