@@ -41,8 +41,7 @@ class BarkExtractor : public AlgorithmComposite {
 
   Algorithm *_barkBands, *_centralMoments, *_crest,
             *_distributionShape, *_flatnessdb,
-            *_frameCutter, *_spectrum, *_windowing,
-            *_copy;
+            *_frameCutter, *_spectrum, *_windowing;
 
   scheduler::Network* _network;
 
