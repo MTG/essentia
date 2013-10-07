@@ -43,8 +43,8 @@ class TestSpectralContrast(TestCase):
             self.assert_(not any(numpy.isinf(result[1])))
             sc += [result[0]]
             valleys += [result[1]]
-        self.assertAlmostEqual(numpy.mean(sc), -0.604606057431, 1e-7)
-        self.assertAlmostEqual(numpy.mean(valleys), -8.55062127501, 1e-7)
+        self.assertAlmostEqual(numpy.mean(sc), -0.604606057431, 1e-5)
+        self.assertAlmostEqual(numpy.mean(valleys), -8.55062127501, 1e-5)
 
 
     def testZero(self):
