@@ -42,7 +42,8 @@
 
 /**
  * if set to @c 1, essentia will be exporting symbols which are part of the main
- * API. Use this when compiling it as a shared library.
+ * API. Use this when compiling it as a shared library. Also needed for
+ * compiling the python bindings.
  */
 #ifndef ESSENTIA_EXPORTS
 #define ESSENTIA_EXPORTS 1
