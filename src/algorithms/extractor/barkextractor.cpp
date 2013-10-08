@@ -56,11 +56,7 @@ BarkExtractor::BarkExtractor() : _configured(false) {
   // barkbands
   _spectrum->output("spectrum")               >>  _barkBands->input("spectrum");
 
-  // TODO: this is a workaround for a bug in the scheduler tested by
-  //       TEST(Scheduler, SourceProxyFork) in basetest/test_scheduler.cpp
-  //       when the bug is fixed, the copy algorithm can be removed
-  _barkBands->output("bands")                 >>  _copy->input("data");
-  _copy->output("data")                       >>  _bbands;
+  _barkBands->output("bands")                 >>  _bbands;
 
   _barkBands->output("bands")                 >>  _crest->input("array");
   _crest->output("crest")                     >>  _crestValue;
@@ -91,7 +87,6 @@ void BarkExtractor::createInnerNetwork() {
   _spectrum           = factory.create("Spectrum");
   _windowing          = factory.create("Windowing",
                                        "type", "blackmanharris62");
-  _copy = new Copy<std::vector<float> >();
 }
 
 void BarkExtractor::configure() {

@@ -128,6 +128,10 @@ void SourceBase::detachProxy(SourceProxyBase* sproxy) {
   _sproxy = 0;
 }
 
+const vector<SinkBase*>& SourceBase::proxiedSinks() const {
+  return _sproxy->sinks();
+}
+
 
 } // namespace streaming
 } // namespace essentia

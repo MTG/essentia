@@ -71,7 +71,7 @@ class LowLevelSpectralExtractor : public AlgorithmComposite {
             *_mfcc, *_oddToEvenHarmonicEnergyRatio, *_pitchDetection,
             *_pitchSalience, *_rms, *_rollOff, *_silenceRate, *_spectralComplexity,
             *_spectralPeaks, *_spectrum, *_strongPeak, *_tristimulus,
-            *_square, *_windowing, *_zcr, *_copy;
+            *_square, *_windowing, *_zcr;
 
   scheduler::Network* _network;
 

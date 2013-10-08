@@ -65,15 +65,15 @@ map<string, vector<Algorithm*> > mapVisibleDependencies(const Algorithm* algo) {
        output != algo->outputs().end();
        ++output) {
 
-    // we always want to stop whenever we go out of a CompositeAlgorithm, ie:
-    // whenever 1 of our outputs is actually proxied
-    if (output->second->isProxied()) continue;
-
     vector<SinkBase*>& sinks = output->second->sinks();
 
     // ...get the attached sinks and their parent algorithms
     for (vector<SinkBase*>::iterator it = sinks.begin(); it != sinks.end(); ++it) {
-      // add the owning algorithm to the list of dependencies
+      // if the sink is connected through the proxy, don't follow it
+      if (output->second->isProxied() &&
+          indexOf(output->second->proxiedSinks(), *it) != -1) continue;
+
+      // otherwise add the owning algorithm to the list of dependencies
       result[output->second->name()].push_back((*it)->parent());
     }
   }
@@ -915,6 +915,18 @@ void Network::printBufferFillState() {
   }
 }
 
+bool isExcludedFromInfo(const string& algoname) {
+  // list of algorithms for which we don't want to log a resize of
+  // the buffer on the info stream (still gets on the debug stream)
+  static const char* excluded[1] = { "VectorInput" };
+
+  for (int i=0; i<ARRAY_SIZE(excluded); i++) {
+    if (algoname == excluded[i]) {
+      return true;
+    }
+  }
+  return false;
+}
 
 void Network::checkBufferSizes() {
   // TODO: we should do this on the execution network, right?
@@ -932,26 +944,47 @@ void Network::checkBufferSizes() {
       vector<SinkBase*>& sinks = source->sinks();
 
       BufferInfo sbuf = source->bufferInfo();
+      bool noInfo = isExcludedFromInfo(source->parent()->name());
 
       if (sbuf.maxContiguousElements + 1 < source->acquireSize()) {
-        E_INFO("On source " << source->fullName() << ":");
-        E_INFO("BUFFER SIZE MISMATCH: max=" << sbuf.maxContiguousElements
+        if (noInfo) {
+          E_DEBUG(EAlgorithm, "On source " << source->fullName() << ":");
+          E_DEBUG(EAlgorithm, "BUFFER SIZE MISMATCH: max=" << sbuf.maxContiguousElements
                   << " - asked for write size " << source->acquireSize());
-        sbuf.maxContiguousElements = (int)(source->acquireSize() * 1.1);
-        sbuf.size = 8 * sbuf.maxContiguousElements;
-        E_INFO("resizing buffer to " << sbuf.size << "/" << sbuf.maxContiguousElements);
+          sbuf.maxContiguousElements = (int)(source->acquireSize() * 1.1);
+          sbuf.size = 8 * sbuf.maxContiguousElements;
+          E_DEBUG(EAlgorithm, "resizing buffer to " << sbuf.size << "/" << sbuf.maxContiguousElements);
+        }
+        else {
+          E_INFO("On source " << source->fullName() << ":");
+          E_INFO("BUFFER SIZE MISMATCH: max=" << sbuf.maxContiguousElements
+                 << " - asked for write size " << source->acquireSize());
+          sbuf.maxContiguousElements = (int)(source->acquireSize() * 1.1);
+          sbuf.size = 8 * sbuf.maxContiguousElements;
+          E_INFO("resizing buffer to " << sbuf.size << "/" << sbuf.maxContiguousElements);
+        }
       }
 
       for (vector<SinkBase*>::iterator it = sinks.begin(); it!=sinks.end(); ++it) {
         SinkBase* sink = *it;
 
         if (sbuf.maxContiguousElements + 1 < sink->acquireSize()) {
-          E_INFO("On connection " << source->fullName() << " → " << sink->fullName() << ":");
-          E_INFO("BUFFER SIZE MISMATCH: max=" << sbuf.maxContiguousElements
-                    << " - asked for read size " << sink->acquireSize());
-          sbuf.maxContiguousElements = (int)(sink->acquireSize() * 1.1);
-          sbuf.size = 8 * sbuf.maxContiguousElements;
-          E_INFO("resizing buffer to " << sbuf.size << "/" << sbuf.maxContiguousElements);
+          if (noInfo) {
+            E_DEBUG(EAlgorithm, "On connection " << source->fullName() << " → " << sink->fullName() << ":");
+            E_DEBUG(EAlgorithm, "BUFFER SIZE MISMATCH: max=" << sbuf.maxContiguousElements
+                   << " - asked for read size " << sink->acquireSize());
+            sbuf.maxContiguousElements = (int)(sink->acquireSize() * 1.1);
+            sbuf.size = 8 * sbuf.maxContiguousElements;
+            E_DEBUG(EAlgorithm, "resizing buffer to " << sbuf.size << "/" << sbuf.maxContiguousElements);
+          }
+          else {
+            E_INFO("On connection " << source->fullName() << " → " << sink->fullName() << ":");
+            E_INFO("BUFFER SIZE MISMATCH: max=" << sbuf.maxContiguousElements
+                   << " - asked for read size " << sink->acquireSize());
+            sbuf.maxContiguousElements = (int)(sink->acquireSize() * 1.1);
+            sbuf.size = 8 * sbuf.maxContiguousElements;
+            E_INFO("resizing buffer to " << sbuf.size << "/" << sbuf.maxContiguousElements);
+          }
         }
       }
       source->setBufferInfo(sbuf);

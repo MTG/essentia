@@ -85,6 +85,12 @@ class SourceBase : public Connector {
 
   bool isProxied() const { return _sproxy != 0; }
 
+  /**
+   * Return the list of sinks that are connected through a proxy.
+   * Make sure to call isProxied() before.
+   */
+  const std::vector<SinkBase*>& proxiedSinks() const;
+
   template <typename TokenType>
   void push(const TokenType& value) {
     try {
