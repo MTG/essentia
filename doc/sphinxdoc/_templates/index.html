@@ -1,27 +1,40 @@
 {% extends "layout.html" %}
 {% set title = 'Overview' %}
 {% block body %}
-  <h1>Essentia User and Developer Manual</h1>
+  <h1>Essentia {{version}} User and Developer Manual</h1>
 
 
 
   <div class="section" id="what-is-essentia">
     <h2>What is Essentia?<a class="headerlink" href="#what-is-essentia" title="Permalink to this headline">¶</a></h2>
 
-    <p>Essentia is an audio analysis tool. It provides a reusable collection of algorithms and descriptors mainly used to extract features from audio files. It is written in C++, but also provides Python bindings. This means that you can control Essentia from within Python and write scripts that use Essentia&#8217;s features (just as you would in Matlab). There is also a streaming mode in which you connect algorithms and run them automatically instead of specifying explicitly the order of execution (such as PureData, Max/MSP, ...). The advantage of the streaming mode is that it requires less boilerplate code and uses less memory.</p>
+    <p>Essentia is an open-source C++ library for audio analysis and audio-based music information retrieval. It
+    provides a reusable collection of algorithms mainly used to extract features from audio files. The library provide
+    Python bindings, which means that you can control Essentia and write scripts that use Essentia&#8217;s features from
+    within Python (just as you would in Matlab). There is also a streaming mode in which you can connect algorithms and
+    run them automatically instead of specifying explicitly the order of execution (such as PureData or Max/MSP). The
+    advantage of the streaming mode is that it requires less boilerplate code and uses less memory.</p>
 
-    <p>Essentia is not a framework, but rather a collection of algorithms (plus some infrastructure for multithreading and low memory usage) wrapped in a library. It doesn&#8217;t provide common high-level logic for descriptor computation (so you aren&#8217;t locked into a certain way of doing things). It rather focuses on the robustness, performance and optimality of the provided algorithms, as well as ease of use. The flow of the analysis is decided and implemented by the user, while Essentia is taking care of the implementation details of the algorithms being used. An example extractor is provided, but it should be considered as an example only, not &#8220;the&#8221; only correct way of doing things.</p>
+    <p>Essentia is not a framework, but rather a collection of algorithms (plus some infrastructure for multithreading
+    and low memory usage) wrapped in a library. It doesn&#8217;t provide common high-level logic for descriptor
+    computation (therefore, you are not locked into a certain way of doing things). It rather focuses on the robustness,
+    performance and optimality of the provided algorithms, as well as ease of use. The flow of the analysis is decided
+    and implemented by the user, while Essentia is taking care of the implementation details of the algorithms being
+    used. A number of predefined executable extractors for the available music descriptors are provided with the library
+    as examples, however they should not be considered as the only correct way of doing things.</p>
 
-    <p>Essentia currently features the following algorithms and tools (among others):</p>
+    <p>Essentia currently features the following algorithms (among others):</p>
 
     <ul class="simple">
       <li><strong>Audio file input/output:</strong> ability to read and write nearly all audio file formats (wav, mp3, ogg, flac, etc.)</li>
       <li><strong>Standard signal processing blocks:</strong> FFT, DCT, frame cutter, windowing, envelope, smoothing</li>
-      <li><strong>Statistical descriptors:</strong> mean, variance, geometric mean, moments and central moments, spread, kurtosis, skewness, flatness</li>
-      <li><strong>Temporal descriptors:</strong> duration, LARM, Leq, log attack time, loudness, LPC, zero-crossing rate</li>
-      <li><strong>Spectral descriptors:</strong> Bark bands, MFCC, spectral peaks, rolloff, HFC, HPCP, dissonance, tonality</li>
       <li><strong>Filters (FIR &amp; IIR):</strong> low/high/band pass, band reject, DC removal, equal loudness</li>
-      <li><strong>High-level descriptors:</strong> danceability, dynamic complexity, intensity, onset detector, key, tuning frequency, BPM, beat detection, SVM classifier</li>
+      <li><strong>Statistical descriptors:</strong> median, mean, variance, power means, central moments, spread, kurtosis, skewness, flatness</li>
+      <li><strong>Time-domain descriptors:</strong> duration, loudness, LARM, Leq, Vickers' loudness, zero-crossing-rate, log attack time and other signal envelope descriptors</li>
+      <li><strong>Spectral descriptors:</strong> Bark/Mel/ERB bands, MFCC, GFCC, LPC, spectral peaks, complexity, rolloff, contrast, HFC, inharmonicity and dissonance</li>
+      <li><strong>Tonal descriptors</strong> Pitch salience function, predominant melody and pitch, HPCP (chroma) related features, chords, key and scale, tuning frequency</li>
+      <li><strong>Rhythm descriptors</strong> beat detection, BPM, onset detection, rhythm transform, beat loudness</li>
+      <li><strong>Other high-level descriptors:</strong> danceability, dynamic complexity, audio segmentation, SVM classifier</li>
     </ul>
   </div>
 

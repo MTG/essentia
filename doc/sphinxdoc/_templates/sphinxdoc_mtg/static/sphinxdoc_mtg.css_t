@@ -7,7 +7,9 @@
  *
  * :copyright: Copyright 2007-2011 by the Sphinx team, see AUTHORS.
  * :license: BSD, see LICENSE for details.
- *
+ * 
+ * Modified by Music Technology Group
+ * 
  */
 
 @import url("basic.css");
@@ -15,8 +17,7 @@
 /* -- page layout ----------------------------------------------------------- */
 
 body {
-    font-family: 'Lucida Grande', 'Lucida Sans Unicode', 'Geneva',
-                 'Verdana', sans-serif;
+    font-family: Arial,sans-serif;
     font-size: 14px;
     letter-spacing: -0.01em;
     line-height: 150%;
@@ -39,7 +40,7 @@ div.document {
 }
 
 div.bodywrapper {
-    margin: 0 {{ theme_sidebarwidth|toint + 10 }}px 0 0;
+    margin: 0 240px 0 0;
     border-right: 1px solid #ccc;
 }
 
@@ -89,7 +90,7 @@ div.sphinxsidebarwrapper {
 div.sphinxsidebar {
     margin: 0;
     padding: 0.5em 15px 15px 0;
-    width: {{ theme_sidebarwidth|toint - 20 }}px;
+    width: 210px;
     float: right;
     font-size: 1em;
     text-align: left;
@@ -140,38 +141,46 @@ p {
 }
 
 a {
-    color: #CA7900;
+    color: #fff !important;
     text-decoration: none;
 }
 
 a:hover {
-    color: #2491CF;
+    color: #fff !important;
+	text-decoration: underline;
 }
 
 div.body a {
+	color: #c8102e !important;
+}
+
+div.body a:hover {
     text-decoration: underline;
+	color: #c8102e !important;
 }
 
 h1 {
     margin: 0;
     padding: 0.7em 0 0.3em 0;
-    font-size: 1.5em;
-    color: #11557C;
+    font-size: 1.9em;
+    color: #2b3943 !important;
 }
 
 h2 {
     margin: 1.3em 0 0.2em 0;
     font-size: 1.35em;
     padding: 0;
+	color: #2b3943 !important;
 }
 
 h3 {
     margin: 1em 0 -0.3em 0;
     font-size: 1.2em;
+	color: #2b3943 !important;
 }
 
 div.body h1 a, div.body h2 a, div.body h3 a, div.body h4 a, div.body h5 a, div.body h6 a {
-    color: black!important;
+    color: #c8102e !important;
 }
 
 h1 a.anchor, h2 a.anchor, h3 a.anchor, h4 a.anchor, h5 a.anchor, h6 a.anchor {
@@ -338,3 +347,40 @@ div.viewcode-block:target {
     border-top: 1px solid #ac9;
     border-bottom: 1px solid #ac9;
 }
+
+/* customizations */
+
+div.related ul {
+background-image: none;
+background-color:#c81331;
+font-size: 14px !important;
+font-family: Arial,sans-serif !important;
+font-weight: bold !important;
+height: 46px !important;
+}
+
+div.related ul li a {
+color:#fff;
+}
+
+div.related ul li {
+padding-top:10px !important;
+}
+
+body {
+background-color: #ebebeb;
+padding-top:20px;
+padding-bottom:20px;
+border:none;
+//max-width:900px;
+margin-left: auto;
+margin-right: auto;
+}
+
+//.document {
+//-moz-box-shadow: 0px 0px 8px rgba(0,0,0,0.3);
+//-khtml-box-shadow: 0px 0px 8px rgba(0,0,0,0.3);
+//-webkit-box-shadow: 0px 0px 8px rgba(0,0,0,0.3);
+//box-shadow: 0px 0px 8px rgba(0,0,0,0.3);
+//}
+
