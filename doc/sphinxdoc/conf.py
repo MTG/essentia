@@ -172,7 +172,7 @@ html_additional_pages.update(essentia_algorithms)
 #html_domain_indices = True
 
 # If false, no index is generated.
-#html_use_index = True
+html_use_index = False
 
 # If true, the index is split into individual pages for each letter.
 #html_split_index = False
