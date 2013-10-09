@@ -91,10 +91,10 @@ Configurables
 -------------
 
 The ``Configurable`` class is the base class for the ``Algorithm``. A ``Configurable`` instance is
-an named object that can maintain a fixed set of parameters, and which you can reconfigure any
+a named object that can maintain a fixed set of parameters, and which you can reconfigure any
 number of times. To be able to instantiate a ``Configurable``, you need to implement the
 ``essentia::Configurable::declareParameters()`` method, which will declare all the
-parameters that your Configurable object can take. If you later to try to configure it
+parameters that your Configurable object can take. If you later try to configure it
 with a parameter that wasn't declared in the ``declareParameters()`` method, it will fail.
 
 You can access the current value of a parameter by calling the
@@ -116,7 +116,7 @@ For instance, at the moment of this writing, Parameters can represent strings, i
 floating point numbers, booleans, vectors of strings or reals. More type conversions can
 be added if necessary.
 
-This is especially useful in C++ as it is a statically-typed language, but we would to allow
+This is especially useful in C++ as it is a statically-typed language, but we want to allow
 different types of data for configuring an algorithm. In Python, the point of having variant
 types is moot, thanks to the dynamic typing.
 
