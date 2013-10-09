@@ -37,15 +37,11 @@ using namespace essentia;
 using namespace essentia::streaming;
 using namespace essentia::scheduler;
 
-void compute(const string& audioFilename, const string& outputFilename,
-             Pool& neqloudPool, const Pool& options);
-
-void computeReplayGain(const string& audioFilename, Pool& neqloudPool, const Pool& options);
-void computeLowLevel(const string& audioFilename, Pool& neqloudPool, const Pool& options,
-                     Real startTime, Real endTime, const string& nspace = "");
-void computeMidLevel(const string& audioFilename, Pool& neqloudPool, const Pool& options,
-                     Real startTime, Real endTime, const string& nspace = "");
-void computeHighlevel(Pool& pool, const Pool& options, const string& nspace = "");
+void compute(const string& audioFilename, const string& outputFilename, Pool& pool, const Pool& options);
+void computeReplayGain(const string& audioFilename, Pool& pool, const Pool& options);
+void computeStep2(const string& audioFilename, Pool& pool, const Pool& options, Real startTime, Real endTime);
+void computeStep3(const string& audioFilename, Pool& pool, const Pool& options, Real startTime, Real endTime);
+void computeStep4(Pool& pool, const Pool& options);
 Pool computeAggregation(Pool& pool, const Pool& options, int segments=0);
 void addSVMDescriptors(Pool& pool);
 void outputToFile(Pool& pool, const string& outputFilename, bool outputJSON);
@@ -53,7 +49,6 @@ void setExtractorOptions(Pool& pool);
 
 void usage() {
     cout << "Error: wrong number of arguments" << endl;
-    //cout << "Usage: streaming_extractor_archive input_audiofile output_textfile [profile]" << endl;
     cout << "Usage: streaming_extractor_archive input_audiofile output_textfile" << endl;
     exit(1);
 }
@@ -86,10 +81,10 @@ int main(int argc, char* argv[]) {
   setExtractorOptions(options);
 
   // pool for storing results
-  Pool neqloudPool; // non equal loudness pool
+  Pool pool; // non equal loudness pool
 
   try {
-    compute(audioFilename, outputFilename, neqloudPool, options);
+    compute(audioFilename, outputFilename, pool, options);
   }
   catch (EssentiaException& e) {
     cout << e.what() << endl;
@@ -101,35 +96,35 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-void compute(const string& audioFilename, const string& outputFilename,
-             Pool& neqloudPool, const Pool& options) {
+void compute(const string& audioFilename, const string& outputFilename, Pool& pool, const Pool& options) {
+  
   // add extractor version
-  neqloudPool.set("metadata.version.extractor", "archive-music 1.0");
-
-  neqloudPool.set("metadata.audio_properties.equal_loudness", false);
+  pool.set("metadata.version.extractor", "archive-music 1.0");
+  
+  pool.set("metadata.audio_properties.equal_loudness", false);
 
   // compute features for the whole song
-  computeReplayGain(audioFilename, neqloudPool, options);
+  computeReplayGain(audioFilename, pool, options);
   Real startTime = options.value<Real>("startTime");
   Real endTime = options.value<Real>("endTime");
 
-  if (endTime > neqloudPool.value<Real>("metadata.audio_properties.length")) {
-      endTime = neqloudPool.value<Real>("metadata.audio_properties.length");
+  if (endTime > pool.value<Real>("metadata.audio_properties.length")) {
+      endTime = pool.value<Real>("metadata.audio_properties.length");
   }
 
-  computeLowLevel(audioFilename, neqloudPool, options, startTime, endTime);
-  computeMidLevel(audioFilename, neqloudPool, options, startTime, endTime);
-  computeHighlevel(neqloudPool, options);
-
-  string neqOutputFilename = outputFilename; // + ".neq";
-  Pool stats = computeAggregation(neqloudPool, options);
-  //addSVMDescriptors(stats); // not available
-  outputToFile(stats, neqOutputFilename, true);
+  computeStep2(audioFilename, pool, options, startTime, endTime);
+  computeStep3(audioFilename, pool, options, startTime, endTime);
+  computeStep4(pool, options);
+  
+  Pool stats = computeAggregation(pool, options);
+  //addSVMDescriptors(stats); // TODO not available yet
+  
+  outputToFile(stats, outputFilename, true);
   return;
 }
 
 
-void computeReplayGain(const string& audioFilename, Pool& neqloudPool, const Pool& options) {
+void computeReplayGain(const string& audioFilename, Pool& pool, const Pool& options) {
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
@@ -140,7 +135,7 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, const Poo
    *    1st pass: get metadata and replay gain                             *
    *************************************************************************/
 
-  readMetadata(audioFilename, neqloudPool);
+  readMetadata(audioFilename, pool);
   Real startTime = options.value<Real>("startTime");
   Real endTime = options.value<Real>("endTime");
 
@@ -160,11 +155,11 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, const Poo
     Algorithm* rgain = factory.create("ReplayGain",
                                       "applyEqloud", false);
 
-    neqloudPool.set("metadata.audio_properties.analysis_sample_rate", audio_1->parameter("sampleRate").toReal());
-    neqloudPool.set("metadata.audio_properties.downmix", downmix);
+    pool.set("metadata.audio_properties.analysis_sample_rate", audio_1->parameter("sampleRate").toReal());
+    pool.set("metadata.audio_properties.downmix", downmix);
 
     connect(audio_1->output("audio"), rgain->input("signal"));
-    connect(rgain->output("replayGain"), neqloudPool, "metadata.audio_properties.replay_gain");
+    connect(rgain->output("replayGain"), pool, "metadata.audio_properties.replay_gain");
 
     cout << "Process step 1: Replay Gain" << endl;
     try {
@@ -178,8 +173,8 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, const Poo
       if (downmix == "mix") {
         downmix = "left";
         try {
-          neqloudPool.remove("metadata.audio_properties.downmix");
-          neqloudPool.remove("metadata.audio_properties.replay_gain");
+          pool.remove("metadata.audio_properties.downmix");
+          pool.remove("metadata.audio_properties.replay_gain");
         }
         catch (EssentiaException&) {}
 
@@ -191,7 +186,7 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, const Poo
       }
     }
 
-    replayGain = neqloudPool.value<Real>("metadata.audio_properties.replay_gain");
+    replayGain = pool.value<Real>("metadata.audio_properties.replay_gain");
 
     // very high value for replayGain, we are probably analyzing a silence even
     // though it is not a pure digital silence
@@ -202,8 +197,8 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, const Poo
       if (downmix == "mix") {
         downmix = "left";
         tryReallyHard = true;
-        neqloudPool.remove("metadata.audio_properties.downmix");
-        neqloudPool.remove("metadata.audio_properties.replay_gain");
+        pool.remove("metadata.audio_properties.downmix");
+        pool.remove("metadata.audio_properties.replay_gain");
       }
       else {
         cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
@@ -212,31 +207,27 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, const Poo
     }
   }
   // set length (actually duration) of the file:
-  neqloudPool.set("metadata.audio_properties.length", length/analysisSampleRate);
+  pool.set("metadata.audio_properties.length", length/analysisSampleRate);
 
   cout.precision(10);
 }
 
-void computeLowLevel(const string& audioFilename, Pool& neqloudPool,
-                     const Pool& options, Real startTime, Real endTime, const string& nspace) {
+void computeStep2(const string& audioFilename, Pool& pool,
+                     const Pool& options, Real startTime, Real endTime) {
   /*************************************************************************
    *    2nd pass: normalize the audio with replay gain, compute as         *
-   *              many lowlevel descriptors as possible                    *
+   *              many lowlevel/rhythm descriptors as possible             *
    *************************************************************************/
-  // namespace:
+  
   string llspace = "lowlevel.";
   string rhythmspace = "rhythm.";
-  if (!nspace.empty()) {
-    llspace = nspace + ".lowlevel.";
-    rhythmspace = nspace + ".rhythm.";
-  }
 
   Real replayGain = 0;
-  Real analysisSampleRate = options.value<Real>("analysisSampleRate");
   string downmix = "mix";
-
-  replayGain = neqloudPool.value<Real>("metadata.audio_properties.replay_gain");
-  downmix = neqloudPool.value<string>("metadata.audio_properties.downmix");
+  replayGain = pool.value<Real>("metadata.audio_properties.replay_gain");
+  downmix = pool.value<string>("metadata.audio_properties.downmix");
+  
+  Real analysisSampleRate = options.value<Real>("analysisSampleRate");
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
@@ -253,20 +244,20 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool,
   connect(audio_2->output("audio"), eqloud2->input("signal"));
   SourceBase& eqloudSource = eqloud2->output("signal");
 
-  LowLevelSpectral(neqloudSource, neqloudPool, options, nspace);
+  LowLevelSpectral(neqloudSource, pool, options);
 
   // Low-Level Spectral Equal Loudness Descriptors
   // expects the audio source to already be equal-loudness filtered, so it
   // must use the eqloudSouce instead of neqloudSource
-  LowLevelSpectralEqLoud(eqloudSource, neqloudPool, options, nspace);
+  LowLevelSpectralEqLoud(eqloudSource, pool, options);
 
   // Level Descriptor
   // expects the audio source to already be equal-loudness filtered, so it
   // must use the eqloudSouce instead of neqloudSource
-  Level(eqloudSource, neqloudPool, options, nspace);
+  Level(eqloudSource, pool, options);
 
   // Tuning Frequency
-  TuningFrequency(neqloudSource, neqloudPool, options, nspace);
+  TuningFrequency(neqloudSource, pool, options);
 
   // Rhythm descriptors
   Algorithm* rhythmExtractor = factory.create("RhythmExtractor2013");
@@ -274,77 +265,83 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool,
                              "maxTempo", (int) options.value<Real>("rhythm.maxTempo"),
                              "minTempo", (int) options.value<Real>("rhythm.minTempo"));
 
-  connect(neqloudSource, rhythmExtractor->input("signal"));
-  connect(rhythmExtractor->output("ticks"),        neqloudPool, rhythmspace + "beats_position");
-  connect(rhythmExtractor->output("bpm"),          neqloudPool, rhythmspace + "bpm");
-  // NOTE: remove bpm estimates and intervals as they can be deduced from ticks position and occupy too muchspace
+  neqloudSource >> rhythmExtractor->input("signal");
+  connect(rhythmExtractor->output("ticks"),        pool, rhythmspace + "beats_position");
+  connect(rhythmExtractor->output("bpm"),          pool, rhythmspace + "bpm");
+  // NOTE: we do not need bpm estimates and intervals in the pool because
+  //       they can be deduced from ticks position and occupy too much space
   connect(rhythmExtractor->output("estimates"),    NOWHERE);
-  //connect(rhythmExtractor->output("estimates"),    neqloudPool, rhythmspace + "bpm_estimates");
-  //connect(rhythmExtractor->output("bpmIntervals"), neqloudPool, rhythmspace + "bpm_intervals");
 
   // BPM Histogram descriptors
   Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
-  connect(rhythmExtractor->output("bpmIntervals"), bpmhist->input("bpmIntervals"));
-  connectSingleValue(bpmhist->output("firstPeakBPM"),     neqloudPool, rhythmspace + "bpm_histogram_first_peak");
-  connectSingleValue(bpmhist->output("firstPeakWeight"),  neqloudPool, rhythmspace + "bpm_histogram_first_peak_weight");
-  connectSingleValue(bpmhist->output("firstPeakSpread"),  neqloudPool, rhythmspace + "bpm_histogram_first_peak_spread");
-  connectSingleValue(bpmhist->output("secondPeakBPM"),    neqloudPool, rhythmspace + "bpm_histogram_second_peak");
-  connectSingleValue(bpmhist->output("secondPeakWeight"), neqloudPool, rhythmspace + "bpm_histogram_second_peak_weight");
-  connectSingleValue(bpmhist->output("secondPeakSpread"), neqloudPool, rhythmspace + "bpm_histogram_second_peak_spread");
+  rhythmExtractor->output("bpmIntervals") >> bpmhist->input("bpmIntervals");
+  connectSingleValue(bpmhist->output("firstPeakBPM"),     pool, rhythmspace + "bpm_histogram_first_peak");
+  connectSingleValue(bpmhist->output("firstPeakWeight"),  pool, rhythmspace + "bpm_histogram_first_peak_weight");
+  connectSingleValue(bpmhist->output("firstPeakSpread"),  pool, rhythmspace + "bpm_histogram_first_peak_spread");
+  connectSingleValue(bpmhist->output("secondPeakBPM"),    pool, rhythmspace + "bpm_histogram_second_peak");
+  connectSingleValue(bpmhist->output("secondPeakWeight"), pool, rhythmspace + "bpm_histogram_second_peak_weight");
+  connectSingleValue(bpmhist->output("secondPeakSpread"), pool, rhythmspace + "bpm_histogram_second_peak_spread");
 
   // Onset Detection
   Algorithm* onset = factory.create("OnsetRate");
-  connect(neqloudSource, onset->input("signal"));
-  connect(onset->output("onsetTimes"), neqloudPool, rhythmspace + "onset_times");
+  neqloudSource >> onset->input("signal");
+  connect(onset->output("onsetTimes"), pool, rhythmspace + "onset_times");
   connect(onset->output("onsetRate"), NOWHERE ); //pool, rhythmspace + "onset_rate"); // this is done later
 
   // Dynamic complexity
   Algorithm* dc = factory.create("DynamicComplexity");
   neqloudSource >> dc->input("signal");
-  connect(dc->output("dynamicComplexity"), neqloudPool, llspace + "dynamic_complexity");
+  connect(dc->output("dynamicComplexity"), pool, llspace + "dynamic_complexity");
   dc->output("loudness") >> NOWHERE;
 
   // Danceability
   Algorithm* danceability = factory.create("Danceability");
   neqloudSource >> danceability->input("signal");
-  connect(danceability->output("danceability"), neqloudPool, rhythmspace + "danceability");
+  connect(danceability->output("danceability"), pool, rhythmspace + "danceability");
 
-
-  cout << "Process step 2: Low Level" << endl;
+  
+  cout << "Process step 2: Low Level / Rhythm / Tonal" << endl;
   Network network(audio_2);
   network.run();
 
   // check if we processed enough audio for it to be useful, in particular did
   // we manage to get an estimation for the loudness (2 seconds required)
   try {
-    neqloudPool.value<vector<Real> >(llspace + "loudness")[0];
+    pool.value<vector<Real> >(llspace + "loudness")[0];
   }
   catch (EssentiaException&) {
     cout << "ERROR: File is too short (< 2sec)... Aborting..." << endl;
     exit(6);
   }
 
+  // compute average Level
+  LevelAverage(pool);
+
   // compute onset rate = len(onsets) / len(audio)
   // we do not need onset times, as they are most probably incorrect, while onset_rate is more informative
-  neqloudPool.set(rhythmspace + "onset_rate", neqloudPool.value<vector<Real> >(rhythmspace + "onset_times").size()
+  pool.set(rhythmspace + "onset_rate", pool.value<vector<Real> >(rhythmspace + "onset_times").size()
      / (Real)audio_2->output("audio").totalProduced()
-     * neqloudPool.value<Real>("metadata.audio_properties.analysis_sample_rate"));
-  neqloudPool.remove(rhythmspace + "onset_times");
+     * pool.value<Real>("metadata.audio_properties.analysis_sample_rate"));
+  pool.remove(rhythmspace + "onset_times");
 }
 
-void computeMidLevel(const string& audioFilename, Pool& neqloudPool, const Pool& options,
-                     Real startTime, Real endTime, const string& nspace) {
+
+void computeStep3(const string& audioFilename, Pool& pool, 
+                     const Pool& options,Real startTime, Real endTime) {
 
   /*************************************************************************
-   *    3rd pass: HPCP & beats loudness (depend on some descriptors that   *
-   *              have been computed during the 2nd pass)                  *
+   *    3nd pass: normalize the audio with replay gain, compute            *
+   *              rhythm descriptors and tonal descriptors                 *
    *************************************************************************/
+  string llspace = "lowlevel.";
+  string rhythmspace = "rhythm.";
+  
   Real analysisSampleRate = options.value<Real>("analysisSampleRate");
   Real replayGain = 0;
   string downmix = "mix";
 
-  replayGain = neqloudPool.value<Real>("metadata.audio_properties.replay_gain");
-  downmix = neqloudPool.value<string>("metadata.audio_properties.downmix");
+  replayGain = pool.value<Real>("metadata.audio_properties.replay_gain");
+  downmix = pool.value<string>("metadata.audio_properties.downmix");
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
@@ -356,48 +353,41 @@ void computeMidLevel(const string& audioFilename, Pool& neqloudPool, const Pool&
                                       "replayGain", replayGain,
                                       "downmix",    downmix);
 
-
   SourceBase& neqloudSource = audio_3->output("audio");
-  // Compute Tonal descriptors (needed TuningFrequency before)
-  TonalDescriptors(neqloudSource, neqloudPool, options, nspace);
-
 
   // Compute the loudness at the beats position (needed beats position)
-  string rhythmspace = "rhythm.";
-  if (!nspace.empty()) rhythmspace = nspace + ".rhythm.";
-  vector<Real> ticks = neqloudPool.value<vector<Real> >(rhythmspace + "beats_position");
+  vector<Real> ticks = pool.value<vector<Real> >(rhythmspace + "beats_position");
 
   Algorithm* beatsLoudness = factory.create("BeatsLoudness",
                                             "sampleRate", analysisSampleRate,
                                             "beats", ticks);
-  connect(neqloudSource, beatsLoudness->input("signal"));
-  connect(beatsLoudness->output("loudness"), neqloudPool, rhythmspace + "beats_loudness");
-  connect(beatsLoudness->output("loudnessBandRatio"), neqloudPool, rhythmspace + "beats_loudness_band_ratio");
+  neqloudSource >> beatsLoudness->input("signal");
+  connect(beatsLoudness->output("loudness"), pool, rhythmspace + "beats_loudness");
+  connect(beatsLoudness->output("loudnessBandRatio"), pool, rhythmspace + "beats_loudness_band_ratio");
 
-  cout << "Process step 3: Mid Level" << endl;
+
+  // Compute Tonal descriptors (needed TuningFrequency before)
+  TonalDescriptors(neqloudSource, pool, options);
+
+  cout << "Process step 3: Rhythm / Tonal" << endl;
   Network network(audio_3);
   network.run();
+
+  // Tuning System Features
+  TuningSystemFeatures(pool);
 }
 
 
-void computeHighlevel(Pool& pool, const Pool& options, const string& nspace) {
+void computeStep4(Pool& pool, const Pool& options) {
 
   /*************************************************************************
-   *    5th pass: High-level descriptors that depend on others, but we     *
-   *              don't need to stream the audio anymore                   *
+   *    5th pass: Pool cleaning (remove temporary descriptors , but we     *
    *************************************************************************/
 
-  cout << "Process step 4: High Level" << endl;
+  cout << "Process step 4: Post-processing" << endl;
 
-  // Average Level
-  LevelAverage(pool, nspace);
-
-  // Tuning System Features
-  TuningSystemFeatures(pool, nspace);
-  // Pool Cleaning (remove temporary descriptors)
-  TonalPoolCleaning(pool, nspace);
-
-  PostProcess(pool, options, nspace);
+  TonalPoolCleaning(pool);
+  PostProcess(pool, options);
 }
 
 Pool computeAggregation(Pool& pool, const Pool& options, int nSegments) {
