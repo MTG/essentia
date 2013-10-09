@@ -49,7 +49,7 @@ const char* BpmHistogram::description = DOC("Given the novelty curve (see Novelt
 "Although the algorithm tries to find the beats that best fit to the mean bpm, the tempo is not assumed to be constant unless specified in the corresponding parameter.  For this reason and if the tempo differs too much from frame to frame, there may be phase discontinuities when constructing the sinusoid which can yield to too many ticks. When this occurs, one can use the sinusoid output to recursively run this algorithm until the ticks stabilize. At this point it may be useful to induce/infer a specific bpm and set the constant tempo parameter to true.\n"
 "Another useful trick, is to run the algorithm one time to get an estimation of the bpm and rerun it with a frameSize parameter which is a multiple of the mean bpm.\n"
 "\n"
-"NOTE that using RhythmExtractor2013 is recommended in order to extract beats, as it was found to perform better in evaluations. You can still use BpmHistogram for estimation of the BPM values.\n"
+"NOTE that using RhythmExtractor2013 is recommended in order to extract beats, as it was found to perform better in evaluations.\n"
 "\n"
 "References:\n"
 "  [1] P. Grosche and M. Müller, \"A mid-level representation for capturing\n"
