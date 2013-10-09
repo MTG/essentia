@@ -29,9 +29,14 @@ Essentia documentation contents
 
 
 
-Indices and tables
+..
+    Indices and tables
+
+Search
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
+..
+    * :ref:`genindex`
+    * :ref:`modindex`
+
 * :ref:`search`
