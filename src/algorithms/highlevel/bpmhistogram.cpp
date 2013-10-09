@@ -319,7 +319,7 @@ void BpmHistogram::createTicks(Real bpm) { //const vector<Real>& bpms) {
   // TODO: we need a better smoothing!!!! and if possible without delay
   Real mavgSize = 30./maxBpm*_frameRate; //0.5*maxBpm in samples
   standard::Algorithm* mavg = standard::AlgorithmFactory::create("MovingAverage",
-                                                                 "size", mavgSize);
+                                                                 "size", (int)mavgSize);
   vector<Real> sinusoid_ma;
   mavg->input("signal").set(sinusoid);
   mavg->output("signal").set(sinusoid_ma);

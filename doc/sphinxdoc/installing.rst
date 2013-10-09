@@ -121,4 +121,4 @@ To generate the full documentation (need python bindings installed first)::
 
 Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
 
-All built examples (including the out-of-box features extractors) will be located in ``buildw/src/examples/`` folder, as well as the vamp plugin file ``libvamp_essentia.so``. In order to use the plugin you will need to place this file to the the standard vamp plugin folder of your system (such as ``/usr/local/lib/vamp/`` on Linux).
+All built examples (including the out-of-box features extractors) will be located in ``build/src/examples/`` folder, as well as the vamp plugin file ``libvamp_essentia.so``. In order to use the plugin you will need to place this file to the the standard vamp plugin folder of your system (such as ``/usr/local/lib/vamp/`` on Linux).
