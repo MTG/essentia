@@ -9,7 +9,7 @@ APPNAME = 'essentia'
 VERSION = '2.0-dev'
 
 top = '.'
-out = 'buildw'
+out = 'build'
 
 
 def options(ctx):
