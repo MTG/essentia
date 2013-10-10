@@ -152,17 +152,17 @@ void TonalDescriptors(SourceBase& input, Pool& pool, const Pool& options, const 
                                  "frameSize", frameSize,
                                  "hopSize", hopSize,
                                  "silentFrames", silentFrames);
-  connect(input, fc->input("signal"));
+  input >> fc->input("signal");
 
   // Windowing
   Algorithm* w = factory.create("Windowing",
                                 "type", windowType,
                                 "zeroPadding", zeroPadding);
-  connect(fc->output("frame"), w->input("frame"));
+  fc->output("frame") >> w->input("frame");
 
   // Spectrum
   Algorithm* spec = factory.create("Spectrum");
-  connect(w->output("frame"), spec->input("frame"));
+  w->output("frame") >> spec->input("frame");
 
   // Spectral Peaks
   Algorithm* peaks = factory.create("SpectralPeaks",
@@ -186,13 +186,13 @@ void TonalDescriptors(SourceBase& input, Pool& pool, const Pool& options, const 
                                        "weightType", "squaredCosine",
                                        "nonLinear", false,
                                        "windowSize", 4.0/3.0);
-  connect(peaks->output("frequencies"), hpcp_key->input("frequencies"));
-  connect(peaks->output("magnitudes"), hpcp_key->input("magnitudes"));
+  peaks->output("frequencies") >> hpcp_key->input("frequencies");
+  peaks->output("magnitudes") >> hpcp_key->input("magnitudes");
   connect(hpcp_key->output("hpcp"), pool, tonalspace + "hpcp");
 
   // native streaming Key algo
   Algorithm* skey = factory.create("Key");
-  connect(hpcp_key->output("hpcp"), skey->input("pcp"));
+  hpcp_key->output("hpcp") >> skey->input("pcp");
   connect(skey->output("key"), pool, tonalspace + "key_key");
   connect(skey->output("scale"), pool, tonalspace + "key_scale");
   connect(skey->output("strength"), pool, tonalspace + "key_strength");
@@ -209,12 +209,12 @@ void TonalDescriptors(SourceBase& input, Pool& pool, const Pool& options, const 
                                          "weightType", "cosine",
                                          "nonLinear", true,
                                          "windowSize", 0.5);
-  connect(peaks->output("frequencies"), hpcp_chord->input("frequencies"));
-  connect(peaks->output("magnitudes"), hpcp_chord->input("magnitudes"));
+  peaks->output("frequencies") >> hpcp_chord->input("frequencies");
+  peaks->output("magnitudes") >> hpcp_chord->input("magnitudes");
 
   // native streaming chords algo
   Algorithm* schord = factory.create("ChordsDetection");
-  connect(hpcp_chord->output("hpcp"), schord->input("pcp"));
+  hpcp_chord->output("hpcp") >> schord->input("pcp");
   // TODO: Chords progression has low practical sense and is based on a very simple algorithm prone to errors.
   // We need to have better algorithm first to include this descriptor.
   // connect(schord->output("chords"), pool, tonalspace + "chords_progression");
@@ -222,9 +222,9 @@ void TonalDescriptors(SourceBase& input, Pool& pool, const Pool& options, const 
 
   // native streaming chords descriptors algo
   Algorithm* schords_desc = factory.create("ChordsDescriptors");
-  connect(schord->output("chords"), schords_desc->input("chords"));
-  connect(skey->output("key"), schords_desc->input("key"));
-  connect(skey->output("scale"), schords_desc->input("scale"));
+  schord->output("chords") >> schords_desc->input("chords");
+  skey->output("key") >> schords_desc->input("key");
+  skey->output("scale") >> schords_desc->input("scale");
 
   connect(schords_desc->output("chordsHistogram"), pool, tonalspace + "chords_histogram");
   connect(schords_desc->output("chordsNumberRate"), pool, tonalspace + "chords_number_rate");
@@ -244,8 +244,8 @@ void TonalDescriptors(SourceBase& input, Pool& pool, const Pool& options, const 
                                           "weightType", "cosine",
                                           "nonLinear", true,
                                           "windowSize", 0.5);
-  connect(peaks->output("frequencies"), hpcp_tuning->input("frequencies"));
-  connect(peaks->output("magnitudes"), hpcp_tuning->input("magnitudes"));
+  peaks->output("frequencies") >> hpcp_tuning->input("frequencies");
+  peaks->output("magnitudes") >> hpcp_tuning->input("magnitudes");
 
   connect(hpcp_tuning->output("hpcp"), pool, tonalspace + "hpcp_highres");
 }
