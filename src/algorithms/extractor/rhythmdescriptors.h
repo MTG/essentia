@@ -45,7 +45,7 @@ class RhythmDescriptors : public AlgorithmComposite {
   //Source<int> _rubatoNumber;
   Source<std::vector<Real> > _bpmIntervals;
 
-  // from BPMHistogramDescriptors
+  // from BpmHistogramDescriptors
   SourceProxy<Real> _firstPeakBPM;
   SourceProxy<Real> _firstPeakWeight;
   SourceProxy<Real> _firstPeakSpread;
