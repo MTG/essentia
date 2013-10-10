@@ -163,7 +163,7 @@ Essentia also contains the following mid- and high-level descriptors:
 * ``FadeDetection``: detects fade-ins/fade-outs in a song.
 * ``SBic``: segments a song using the Bayesian Information Criterion.
 * ``NoveltyCurve``: computes the novelty curve for the audio signal.
-* ``Onsets``: computes the list of onsets in thge audio signal.
+* ``Onsets``: computes the list of onsets in the audio signal.
 * ``PCA``: does the `Principal Component Analysis <http://en.wikipedia.org/wiki/Principal_component_analysis>`_
   of the given list of arrays.
 * ``GaiaTransform``: applies the given Gaia transformation to a Pool. This is mostly used for

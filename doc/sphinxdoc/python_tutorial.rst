@@ -77,7 +77,7 @@ such as the filename of the audio file in the case of an audio loader.
 
 Once you have instantiated an algorithm, nothing has happened yet, but your algorithm
 is ready to be used and works like a function, that is, *you have to call it to make
-stuff happens* (technically, it is a `function object <http://en.wikipedia.org/wiki/Function_object>`_).
+stuff happen* (technically, it is a `function object <http://en.wikipedia.org/wiki/Function_object>`_).
 
 Which gives::
 
