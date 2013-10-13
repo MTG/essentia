@@ -14,13 +14,13 @@ Each processing block is called an Algorithm, and has 3 differents types of attr
 * Outputs
 * Parameters
 
-Every algorithm can have any number of each of these (0 included).
+Every algorithm can have any number of each of these (zero included).
 For instance, a "Centroid" algorithm will have 1 input (an array), 1 output (the value
 of the centroid) and 1 parameter (the range of the centroid).
 
 Basically, that is all you need to grasp what an Algorithm is in Essentia.
 
-The general workflow will be the following:
+The general workflow is the following:
 
 1. you instantiate (create) an algorithm
 2. you configure it using the desired parameters
@@ -229,12 +229,12 @@ To activate/deactivate the debugging modules at runtime, use the functions::
     unsetDebugLevel(EMemory | EConnectors);  // modules are bitmasks
 
 Note that when a logging module is deactivated, the cost on runtime is minimal
-(ie: you only really pay for logging when you use it). If you wish to completely
+(i.e., you only really pay for logging when you use it). If you wish to completely
 turn off logging, this can be done at compile time by setting the ``DEBUGGING_ENABLED``
 variable in the :essentia:`config.h` file to ``0``. Note that in this case, it will not be
 possible to activate *any* logging at runtime at all, the advantage being that you
 pay absolutely nothing for logging, so don't hesitate to (ab)use logging in your
-algorithms for fear of losing efficiency.
+algorithms because of fear of losing efficiency.
 
 Logging in python
 -----------------
