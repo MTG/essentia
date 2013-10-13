@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "fixedbpmestimator.h"
+#include "noveltycurvefixedbpmestimator.h"
 #include "essentiamath.h"
 #include "bpmutil.h"
 
@@ -27,12 +27,12 @@ using namespace essentia;
 namespace essentia {
 namespace standard {
 
-const char* FixedBpmEstimator::name = "FixedBpmEstimator";
-const char* FixedBpmEstimator::version = "1.0";
-const char* FixedBpmEstimator::description = DOC("Given the novelty curve (see NoveltyCurve algorithm), this algorithm outputs a histogram of the most probable bpms assuming the signal has constant tempo."
+const char* NoveltyCurveFixedBpmEstimator::name = "NoveltyCurveFixedBpmEstimator";
+const char* NoveltyCurveFixedBpmEstimator::version = "1.0";
+const char* NoveltyCurveFixedBpmEstimator::description = DOC("Given the novelty curve (see NoveltyCurve algorithm), this algorithm outputs a histogram of the most probable bpms assuming the signal has constant tempo."
 "This algorithm is based on the autocorrelation of the novelty curve and should only be used for signals that have a constant tempo or as a first tempo estimator to be used  in conjunction with other algorithms such as BpmHistogram\n");
 
-void FixedBpmEstimator::configure() {
+void NoveltyCurveFixedBpmEstimator::configure() {
   _sampleRate = parameter("sampleRate").toReal();
   _hopSize = parameter("hopSize").toInt();
   _minBpm = parameter("minBpm").toReal();
@@ -40,7 +40,7 @@ void FixedBpmEstimator::configure() {
   _bpmTolerance = parameter("tolerance").toReal();
 }
 
-void FixedBpmEstimator::compute() {
+void NoveltyCurveFixedBpmEstimator::compute() {
   const vector<Real>& novelty = _novelty.get();
   vector<Real>& bpmPositions = _bpmPositions.get();
   vector<Real>& bpmAmplitudes = _bpmAmplitudes.get();
@@ -129,7 +129,7 @@ void FixedBpmEstimator::compute() {
   }
 }
 
-void FixedBpmEstimator::histogramPeaks(const vector<Real>& bpms,
+void NoveltyCurveFixedBpmEstimator::histogramPeaks(const vector<Real>& bpms,
                                        vector<Real>& positions,
                                        vector<Real>& amplitudes) {
 
@@ -172,7 +172,7 @@ void FixedBpmEstimator::histogramPeaks(const vector<Real>& bpms,
   }
 }
 
-void FixedBpmEstimator::inplaceMergeBpms(vector<Real>& bpms,
+void NoveltyCurveFixedBpmEstimator::inplaceMergeBpms(vector<Real>& bpms,
                                          vector<Real>& amplitudes) {
   vector<Real>::iterator peaksIter = bpms.begin();
   vector<Real>::iterator ampsIter = amplitudes.begin();
@@ -200,7 +200,7 @@ void FixedBpmEstimator::inplaceMergeBpms(vector<Real>& bpms,
   }
 }
 
-Real FixedBpmEstimator::computeTatum(const vector<Real>& peaks) {
+Real NoveltyCurveFixedBpmEstimator::computeTatum(const vector<Real>& peaks) {
   // it is actually just a very rough estimation of the tatum
   int nPeaks = peaks.size();
   vector<Real> bpms; bpms.reserve(nPeaks-1);
@@ -217,7 +217,7 @@ Real FixedBpmEstimator::computeTatum(const vector<Real>& peaks) {
   return peaksBpm[0];
 }
 
-Real FixedBpmEstimator::mainPeaksMean(const vector<Real>& positions,
+Real NoveltyCurveFixedBpmEstimator::mainPeaksMean(const vector<Real>& positions,
                                       const vector<Real>& amplitudes,
                                       int size) {
   // NOTE: peaks should be ordered by position
