@@ -1,6 +1,6 @@
 .. highlight:: c++
 
-Essentia streaming mode Architecture
+Essentia streaming mode architecture
 ====================================
 
 In Essentia, the standard mode of operation is imperative: once you have created
