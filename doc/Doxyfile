@@ -655,9 +655,10 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = src/base \
-                         src/streaming \
-                         src/scheduler \
+INPUT                  = src/essentia \
+                         src/essentia/streaming \
+                         src/essentia/scheduler \
+                         src/essentia/utils \
                          doc/doxygendoc
 
 # This tag can be used to specify the character encoding of the source files
