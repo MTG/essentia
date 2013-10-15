@@ -12,7 +12,7 @@ composite algorithms.
 The requirements are:
 
 * a network of connected algorithms (composite or not). They are connected via their output sources
-  which connect to one or more input sink(s). Sinks are only connected to a single source.
+  which connect to one or more input sink(s). Every sink is only connected to a single source.
   Composites can only have SourceProxy/SinkProxy.
 
 * Composite define a ``declareProcessOrder()`` method, which defines the steps to be taken when

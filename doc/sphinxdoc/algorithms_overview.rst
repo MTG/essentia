@@ -190,12 +190,10 @@ a few useful extractors have been written as algorithms. They are the following:
 
 * ``LevelExtractor``: computes the loudness of a music track.
 * ``LowLevelSpectralExtractor``: computes a lot of low-level features from a music stream.
-* ``LowLevelSpectralEqloudExtractor``: computes a lot of low-level features from a music
-  stream which should have been previously equal-loudness filtered.
+* ``LowLevelSpectralEqloudExtractor``: computes a lot of low-level features which require preliminary equal-loudness filter from a music stream.
 * ``TuningFrequencyExtractor``: computes the tuning frequency of a music track.
 * ``KeyExtractor``: computes the key and scale of a music track.
-* ``TonalExtractor``: computes the tonal information of a music track (key, scale, chords
-  sequence, chords histogram, ...)
+* ``TonalExtractor``: computes the tonal information of a music track (key, scale, chords sequence, chords histogram, ...)
 * ``RhythmDescriptors``: computes the rhythm information of music track (beat positions, BPM and related histogram statistics).
 * ``Extractor``: extracts pretty much all the features useful as descriptors for doing music similarity.
 
