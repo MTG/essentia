@@ -51,6 +51,8 @@ const char* BpmHistogram::description = DOC("Given the novelty curve (see Novelt
 "\n"
 "NOTE that using RhythmExtractor2013 is recommended in order to extract beats, as it was found to perform better in evaluations.\n"
 "\n"
+"Quality: outdated (use RhythmExtractor2013 instead, still this algorithm might be useful when working with other onset detection functions apart from NoveltyCurve)\n"
+"\n"
 "References:\n"
 "  [1] P. Grosche and M. Müller, \"A mid-level representation for capturing\n"
 "  dominant tempo and pulse information in music recordings,\" in\n"

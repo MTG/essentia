@@ -27,6 +27,8 @@ using namespace standard;
 const char* TempoTapTicks::name = "TempoTapTicks";
 const char* TempoTapTicks::description = DOC("This algorithm builds the list of ticks from the period and phase candidates given by the TempoTap algorithm.\n"
 "\n"
+"Quality: outdated (use TempoTapDegara instead)\n"
+"\n"
 "References:\n"
 "  [1] F. Gouyon, \"A computational approach to rhythm description: Audio\n"    
 "  features for the computation of rhythm periodicity functions and their use\n"
