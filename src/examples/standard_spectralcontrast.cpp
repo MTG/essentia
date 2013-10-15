@@ -23,8 +23,6 @@
 #include <essentia/pool.h>
 #include <essentia/essentiamath.h>
 
-//#define INCLUDE_DELTA_SC
-
 using namespace std;
 using namespace essentia;
 using namespace standard;
@@ -103,12 +101,7 @@ int main(int argc, char* argv[]) {
 
   audio->compute();
 
-  Pool poolSc, poolTransformed, poolOut;
-
-#ifdef INCLUDE_DELTA_SC
-  bool add = false;
-  vector<Real> prevFrame;
-#endif
+  Pool poolSc, poolOut;
 
   /**** frame by frame ****/
   while (true) {
@@ -123,59 +116,19 @@ int main(int argc, char* argv[]) {
     // if the frame is silent, just drop it and go on processing
     if (isSilent(frame)) continue;
 
-    // C.O.M.P.U.T.E.
+    // compute
     window->compute();
     fft->compute();
     sc->compute();
 
-    // merge the valleys and the contrasts so they can be transformed in one go
-    vector<Real> merged;
-    for(uint i=0; i<sccoeffs.size(); i++) {
-      merged.push_back(sccoeffs[i]);
-      merged.push_back(scvalleys[i]);
-    }
-#ifndef INCLUDE_DELTA_SC
-    poolSc.add("contrast", merged);
-#endif
-
-#ifdef INCLUDE_DELTA_SC
-    uint size = merged.size();
-
-    if(add) {
-      vector<Real> diff;
-      for(uint i=0; i<size; i++) {
-  merged.push_back(merged[i]-prevFrame[i]);
-      }
-      poolSc.add("contrast", merged);
-    }
-
-    prevFrame.clear();
-    for(uint i=0; i<size; i++)
-  prevFrame.push_back(merged[i]);
-
-    add = true;
-#endif // INCLUDE_DELTA_SC
+    poolSc.add("contrast_coeffs", sccoeffs);
+    poolSc.add("contrast_valleys", scvalleys);
   }
 
-
-  /**** song by song ****/
-
-  // do the PCA
-  Algorithm* pca    = AlgorithmFactory::create("PCA",
-                                                         "namespaceIn",  "contrast",
-                                                         "namespaceOut", "contrast");
-  pca->input("poolIn").set(poolSc);
-  pca->output("poolOut").set(poolTransformed);
-  pca->compute();
-
-  /* without PCA
-  vector<vector<Real> > rawFeats = poolSC.value<vector<Real> >("contrast");
-  poolOUT.add("contrast.means", meanFrames(rawFeats));
-  poolOUT.add("contrast.vars" , varianceFrames(rawFeats));
-  */
-
-  poolOut.add("contrast.means", meanFrames(poolTransformed.value<vector<vector<Real> > >("contrast")));
-  poolOut.add("contrast.variances", varianceFrames(poolTransformed.value<vector<vector<Real> > >("contrast")));
+  poolOut.add("contrast_coeffs.means", meanFrames(poolSc.value<vector<vector<Real> > >("contrast_coeffs")));
+  poolOut.add("contrast_coeffs.vars" , varianceFrames(poolSc.value<vector<vector<Real> > >("contrast_coeffs")));
+  poolOut.add("contrast_valleys.means", meanFrames(poolSc.value<vector<vector<Real> > >("contrast_valleys")));
+  poolOut.add("contrast_valleys.vars" , varianceFrames(poolSc.value<vector<vector<Real> > >("contrast_valleys")));
 
   // write yaml file
   Algorithm* output = AlgorithmFactory::create("YamlOutput", "filename", outputFilename);
@@ -188,7 +141,6 @@ int main(int argc, char* argv[]) {
   delete window;
   delete fft;
   delete sc;
-  delete pca;
   delete output;
 
   essentia::shutdown();
