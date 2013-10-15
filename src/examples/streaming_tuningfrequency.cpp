@@ -19,6 +19,8 @@
 
 #include <iostream>
 #include <essentia/algorithmfactory.h>
+#include <essentia/essentiamath.h>
+#include <essentia/streaming/algorithms/poolstorage.h>
 #include <essentia/scheduler/network.h>
 using namespace std;
 using namespace essentia;
@@ -35,10 +37,6 @@ int main(int argc, char* argv[]) {
 
   string audioFilename = argv[1];
 
-  //setDebugLevel(EAll);
-  //unsetDebugLevel(EExecution);
-  //unsetDebugLevel(EMemory);
-
   // register the algorithms in the factory(ies)
   essentia::init();
   AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -48,6 +46,7 @@ int main(int argc, char* argv[]) {
 
   Algorithm* tf    = factory.create("TuningFrequencyExtractor");
 
+  Pool pool;
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos --------" << endl;
@@ -55,7 +54,7 @@ int main(int argc, char* argv[]) {
   try {
 
     audio->output("audio")         >>  tf->input("signal");
-    tf->output("tuningFrequency")  >>  NOWHERE;
+    tf->output("tuningFrequency")  >>  PC(pool, "tonal.tuningFrequency");
 
 
   /////////// STARTING THE ALGORITHMS //////////////////
@@ -63,6 +62,9 @@ int main(int argc, char* argv[]) {
 
     Network n(audio);
     n.run();
+
+    cout << "Tuning frequency: " 
+         << mean(pool.value<std::vector<Real> >("tonal.tuningFrequency")) << endl;
   }
   catch (EssentiaException& e) {
       cout << "EXC: " << e.what() << endl;
