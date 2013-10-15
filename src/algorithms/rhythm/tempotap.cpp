@@ -34,6 +34,8 @@ const char* TempoTap::description = DOC("This algorithm estimates the periods an
 "\n"
 "This algorithm is thought to provide the input for TempoTapTicks algorithm. The \"featureFrame\" vectors can be formed by Multiplexer algorithm in the case of combining different features.\n"
 "\n"
+"Quality: outdated (use TempoTapDegara instead)\n"
+"\n"
 "References:\n"
 "  [1] F. Gouyon, \"A computational approach to rhythm description: Audio\n"
 "  features for the computation of rhythm periodicity functions and their use\n"

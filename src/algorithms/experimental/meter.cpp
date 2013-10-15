@@ -29,7 +29,7 @@ const char* Meter::name = "Meter";
 const char* Meter::version = "1.0";
 const char* Meter::description = DOC("This algorithm estimates the time signature of a given beatogram by finding the highest correlation between beats.\n"
 "\n"
-"Quality: experimental");
+"Quality: experimental (not evaluated, do not use)");
 
 void Meter::configure() {
 }
