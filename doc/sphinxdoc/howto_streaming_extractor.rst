@@ -10,7 +10,7 @@ an audio file, computes their average, variance, min and max, and outputs that t
 This tutorial is the equivalent, and intend to achieve the same goal, as the
 :doc:`howto_standard_extractor` tutorial.
 
-**NB:** the source code for this example can be found in the git repository tree, in the
+**Note:** the source code for this example can be found in the git repository tree, in the
 :download:`src/examples/streaming_mfcc.cpp <../../src/examples/streaming_mfcc.cpp>` file.
 
 First of all, let's identify which algorithms we will need. We want to do the following processing:
@@ -21,8 +21,8 @@ The steps we will have to take are the following:
 
 * instantiate these Algorithms (from the ``streaming::AlgorithmFactory``)
 * (possibly) configure them
-* connect them through their inputs/outputs, make sure no input/output is left unconnected
-* create a ``Network`` out of those algorithms, and launch the whole processing with the ``run()`` method
+* connect them through their sinks/sources, make sure no sink/source is left unconnected
+* create a ``Network`` of those algorithms, and launch the whole processing with the ``run()`` method
 
 You will notice that compared to the standard mode, here we don't have to do anything in
 particular once everything is connected. The order of processing is automatically decided
@@ -53,6 +53,7 @@ Let's start again by examining the source code for the streaming_mfcc.cpp exampl
     Pool pool;
 
     /////// PARAMS //////////////
+    Real sampleRate = 44100.0;
     int frameSize = 2048;
     int hopSize = 1024;
 
@@ -73,7 +74,8 @@ Creating the required algorithms
 
   Algorithm* audio = factory.create("MonoLoader",
                                     "filename", audioFilename,
-                                    "sampleRate", 44100.0);
+                                    "sampleRate", sampleRate,
+                                    "silentFrames", "noise");
 
   Algorithm* fc    = factory.create("FrameCutter",
                                     "frameSize", frameSize,
@@ -117,7 +119,7 @@ Connecting the algorithms
 
 
 Here goes the connection of the algorithms. In streaming mode, you do not need an intermediate
-variable to connect the output of an algorithm and the input of another one on it, you just
+variable to connect the output of an algorithm and the input of another one on it, you simply
 connect the output of an algorithm directly to its corresponding input. You can either use
 the ``connect(input, output)`` function or the ``>>`` right-shift operator to connect an
 input to an output. In this example, we use the ``>>`` operator, because it looks nicer!
@@ -151,9 +153,9 @@ You need to create a network of algorithms by constructing it with the topmost a
 in your processing tree, that is the audio loader (all algorithms are connected after it).
 The audio loader is referred to as the *generator* in this case.
 
-And this is all you have to call to make all the processing happen! Basically, all the algorithms
-will do all the processing they can (that is: compute all the MFCCs for all the audio), and
-when the ``run()`` function returns, the Pool will have been filled with the MFCC coefficients.
+And this is all you have to call to make all the processing happen. Basically, all the algorithms
+will do all the processing they can (that is, compute all the MFCCs for all the audio), and
+when the ``run()`` function returns, the Pool will be filled with the MFCC coefficients.
 
 
 Aggregating the results and writing them to disk

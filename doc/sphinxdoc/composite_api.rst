@@ -6,12 +6,12 @@ Composite algorithm description
 Composite algorithms are a special class of algorithms which allow you to create complex
 algorithms using simpler ones. These can either be algorithms which are more complex
 than others, and want to use more atomic operations (e.g.: MFCC would use the MelBands and
-DCT algorithms), or can be entire extractors (e.g.: the KeyExtractor would use the
-following: FrameCutter → Windowing → Spectrum → HPCP → Key).
+DCT algorithms), or can be entire extractors (e.g., the KeyExtractor would use the
+following: FrameCutter → Windowing → Spectrum → SpectralPeaks → HPCP → Key).
 
 The ``AlgorithmComposite`` class inherit the base ``streaming::Algorithm``, so you can use
 them everywhere you would use a normal algorithm otherwise. There is however one big
-advantage to composite algorithms over a normal encapsulation such as what you find in
+advantage of composite algorithms over a normal encapsulation such as what you find in
 object-oriented programming, which is that the scheduler knows about the internals of
 composites, and as such you will keep all the parallelism and fine-grained execution you
 would have by connecting all the constituent components of a composite, all of this while
@@ -25,7 +25,7 @@ When defining an ``AlgorithmComposite`` you will have to implement the pure virt
 ``declareProcessOrder()`` method.
 
 In this method, you will specify a list of execution steps that need to be followed in
-sequential order, and which can be either one of 2 possible steps:
+sequential order, and which can be either one of two possible steps:
 
 * ``ChainFrom(algo)``: which will run the given algorithm and all algorithms connected
   to it (and contained in the composite) as if they were an entire network
@@ -33,25 +33,26 @@ sequential order, and which can be either one of 2 possible steps:
 
 Each step will depend upon the complete execution of the previous one, so if you have a
 small network that branches inside your composite, it will be better to run it using
-ChainFrom(root) rather than !SingleShot(algo) on all algorithms, as this will keep any
+ChainFrom(root) rather than SingleShot(algo) on all algorithms, as this will keep any
 possible parallelization of the branches.
 
 Example
 -------
 
-Here is the schema of a simplified TonalExtractor (KeyExtractor, really).
+Here is the schema of a simplified KeyExtractor in the context of a larger network 
+of algorithms, specified by a user.
 
 .. image:: _static/essentia_tonal_extractor_modes_halfsize.png
 
-You can see that although the user just connected the MonoLoader to the TonalExtractor,
-and the TonalExtractor to the pool, the underlying network is a bit more complex.
+You can see that although the user just connected the MonoLoader to the KeyExtractor,
+and the KeyExtractor to the pool, the underlying network is a bit more complex.
 
 Other things we can note:
 
 * you can nest any number of times a composite into another one. This should be obvious
   due to the fact that a composite algorithm is itself an algorithm, so they can be used
   everywhere a "normal" algorithm can. For instance, here we have the Key algorithm
-  (composite) used inside the TonalExtractor composite.
+  (composite) used inside the KeyExtractor composite.
 
 * composite algorithms need to have ``Sinks`` and ``Sources`` of their own, but in fact
   they just act as relay to/from the source/sink of one of their inner algorithms.
@@ -223,10 +224,10 @@ methods defined?
 What is actually happening is that the part calling the std version of the key algorithm
 is quite small, and wouldn't warrant the creation of a new algorithm just for this purpose.
 So we decided to keep this inside the Key algorithm, as if it were not a composite. This is
-also the reason why the ``Sources`` are actually ``Sources``, because we need them for
+also the reason why the sources are actually ``Sources``, as we need them for
 pushing the data through. If we had ``SourceProxies`` here, we wouldn't know where to attach them.
 
-When the scheduler tries to run the Key algorithm, this is then what happens:
+The following happens when the scheduler tries to run the Key algorithm:
 
 * the scheduler wants to run the Key algorithm, it is a composite
 * it looks at ``Key::declareProcessOrder()``; this contains 2 steps:
@@ -239,9 +240,9 @@ When the scheduler tries to run the Key algorithm, this is then what happens:
 
 * the scheduler then goes on with the following algorithms
 
-This way, there is no infinite recursion and all is well. This might look a hack at first
-sight, but it is actually quite a powerful mechanism that allows composite algorithms to be
-more than just "chains" of other algorithms, but rather they can be a mix of those chains and
+This way, there is no infinite recursion and everything is well-behaved. This might look a hack at first
+sight, but actually it is a rather powerful mechanism that allows composite algorithms to be
+more than just "chains" of other algorithms. Instead, they can be a mix of those chains and
 specific code, without requiring this specific code to be artificially encapsulated in some
 proxy algorithm.
 
