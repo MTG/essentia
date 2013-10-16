@@ -134,7 +134,7 @@ Rhythm descriptors
   account the maximum mutual agreement between them.
 * ``RhythmExtractor2013``: сomputes BPM of a song in addition to the estimated beat positions (using either ``BeatTrackerDegara`` or ``BeatTrackerMultiFeature``).
 * ``BpmHistogramDescriptors``: computes statistics of the BPM histogram of a song.
-* ``NoveltyCurve``: computes the novelty curve for the audio signal. TODO mention BpmHistogram after Q/A.
+* ``NoveltyCurve``: computes the novelty curve for the audio signal.
 * ``OnsetDetection`` and ``OnsetDetectionGlobal`` estimate various onset detection functions useful for beat
   tracking and onset detection.
 * ``Onsets``: computes the list of onsets in the audio signal.

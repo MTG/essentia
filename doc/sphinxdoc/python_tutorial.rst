@@ -277,6 +277,11 @@ The following steps which you might want to take are:
 
 * study the :download:`streaming python tutorial <../../src/examples/tutorial/essentia_tutorial_streaming.py>` file
 * look at the :doc:`algorithms_overview` or the `complete reference`_.
+* check more python examples (standard mode):
+    * :download:`extractor_spectralcentroid.py <../../src/examples/tutorial/extractor_spectralcentroid.py>`
+    * :download:`onsetdetection_example.py <../../src/examples/tutorial/onsetdetection_example.py>`
+    * :download:`extractor_predominantmelody.py <../../src/examples/tutorial/extractor_predominantmelody.py>`
+    * :download:`extractor_predominantmelody_by_steps.py <../../src/examples/tutorial/extractor_predominantmelody_by_steps.py>`
 * read the C++ tutorial for :doc:`howto_standard_extractor` or :doc:`howto_streaming_extractor`
 * become a developer and write algorithms yourself! (see links on the `first page <index.html>`_, in the developer section)
 

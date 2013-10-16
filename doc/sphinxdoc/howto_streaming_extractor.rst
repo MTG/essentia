@@ -204,3 +204,10 @@ call :essentia:`shutdown()`, and you're done!
 
 
 .. _functional: http://en.wikipedia.org/wiki/Functional_programming
+
+
+Compiling extractor
+-------------------
+
+Follow the same instructions as for `standard extractors <howto_standard_extractor.html#compiling-extractors>`_ 
+in order to compile your extractor. 
