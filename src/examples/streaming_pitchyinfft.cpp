@@ -66,9 +66,7 @@ int main(int argc, char* argv[]) {
 
   Algorithm* pitchDetect  = factory.create("PitchYinFFT",
                                            "frameSize", framesize,
-                                           "sampleRate", sr,
-                                           "tolerance", tol);
-
+                                           "sampleRate", sr);
   // data storage
   Pool pool;
 

@@ -87,14 +87,13 @@ onsets_complex = onsets(array([ pool['features.complex'] ]), [ 1 ])
 # we use beeps instead of white noise to mark them, as it's more distinctive
 print 'Writing audio files to disk with onsets marked...'
 
+# mark the 'hfc' onsets:
 marker = AudioOnsetsMarker(onsets = onsets_hfc, type = 'beep')
 marked_audio = marker(audio)
-
 MonoWriter(filename = 'onsets_hfc.wav')(marked_audio)
 
-# mark the 'complex' onsets
+# mark the 'complex' onsets:
 marker = AudioOnsetsMarker(onsets = onsets_complex, type = 'beep')
-
 # mark the audio and make it an mp3 file, all in 1 line, just because we can!
 MonoWriter(filename = 'onsets_complex.mp3', format = 'mp3')(marker(audio))
 

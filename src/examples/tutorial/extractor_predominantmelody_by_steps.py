@@ -20,8 +20,6 @@ from essentia import *
 from essentia.standard import *
 from pylab import *
 from numpy import *
-from math import log
-from math import floor
 
 try:
     filename = sys.argv[1]
@@ -29,14 +27,17 @@ except:
     print "usage:", sys.argv[0], "<input-audiofile>"
     sys.exit()
 
+
+
+# In this example we will extract predominant melody given an audio file by
+# running a chain of algorithms.
+ 
+# First, create our algorithms:
 hopSize = 128
 frameSize = 2048
 sampleRate = 44100
 guessUnvoiced = True
 
-# RUNNING A CHAIN OF ALGORITHMS
-
-# create our algorithms:
 run_windowing = Windowing(type='hann', zeroPadding=3*frameSize) # Hann window with x4 zero padding
 run_spectrum = Spectrum(size=frameSize * 4)
 run_spectral_peaks = SpectralPeaks(minFrequency=1,
@@ -51,24 +52,30 @@ run_pitch_contours = PitchContours(hopSize=hopSize)
 run_pitch_contours_melody = PitchContoursMelody(guessUnvoiced=guessUnvoiced,
                                                 frameSize=frameSize,
                                                 hopSize=hopSize)
+
+# ... and create a Pool
 pool = Pool();
 
-# load audio
+# Now we are ready to start processing.
+# 1. Load audio and pass it through the equal-loudness filter
 audio = MonoLoader(filename = filename)()
-run_equal_loudness = EqualLoudness()(audio)
+audio = EqualLoudness()(audio)
 
-# per-frame processing: computing peaks of the salience function
+# 2. Cut audio into frames and compute for each frame:
+#    spectrum -> spectral peaks -> pitch salience function -> pitch salience function peaks
 for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
     frame = run_windowing(frame)
     spectrum = run_spectrum(frame)
     peak_frequencies, peak_magnitudes = run_spectral_peaks(spectrum)
+    
     salience = run_pitch_salience_function(peak_frequencies, peak_magnitudes)
     salience_peaks_bins, salience_peaks_saliences = run_pitch_salience_function_peaks(salience)
-
+    
     pool.add('allframes_salience_peaks_bins', salience_peaks_bins)
     pool.add('allframes_salience_peaks_saliences', salience_peaks_saliences)
 
-# post-processing: contour tracking and melody detection
+# 3. Now, as we have gathered the required per-frame data, we can feed it to the contour 
+#    tracking and melody detection algorithms:
 contours_bins, contours_saliences, contours_start_times, duration = run_pitch_contours(
         pool['allframes_salience_peaks_bins'],
         pool['allframes_salience_peaks_saliences'])
@@ -77,6 +84,9 @@ pitch, confidence = run_pitch_contours_melody(contours_bins,
                                               contours_start_times,
                                               duration)
 
+# NOTE that we can avoid the majority of intermediate steps by using a composite algorithm
+#      PredominantMelody (see extractor_predominant_melody.py). This script will be usefull 
+#      if you want to get access to pitch salience function and pitch contours.
 
 n_frames = len(pitch)
 print "number of frames:", n_frames

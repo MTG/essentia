@@ -67,13 +67,13 @@ class as well as the ``AlgorithmFactory``. ::
 
 Here we start by calling the ``essentia::init()`` function. If you forget to do that,
 the algorithm factory will be empty and you won't be able to do much with Essentia!
+We then create a Pool, and define some parameters we will use to configure our Algorithms. ::
 
 
 Creating the required algorithms
 --------------------------------
 
-We then create a Pool, and define some parameters we will use to configure our Algorithms. ::
-
+Here we create our Algorithms, configuring them on the fly. :: 
 
   AlgorithmFactory& factory = standard::AlgorithmFactory::instance();
 
@@ -92,10 +92,11 @@ We then create a Pool, and define some parameters we will use to configure our A
   Algorithm* mfcc  = factory.create("MFCC");
 
 
-Here we create our Algorithms, configuring them on the fly. It would have been
-equivalent to first create the Algorithms, and then configure them using a
+It would have been equivalent to first create the Algorithms, and then configure them using a
 ``ParameterMap`` which would have been filled with these parameters.
 However, it is much shorter (and cleaner, in the author's view) to write it like this.
+When necessary, use `algorithm reference <algorithms_reference.html>`_ in order to get to know which parameters 
+are required and what is their type and default values. 
 
 
 Connecting the algorithms
@@ -252,3 +253,24 @@ tell the library to free all the memory it might have allocated for itself. At t
 it is safe to return 0 to the system, as should all well-behaved applications.
 
 .. _imperative: http://en.wikipedia.org/wiki/Imperative_programming
+
+
+Compiling extractors
+--------------------
+
+The simplest way to compile your own extractor is to place its code in ``src/examples`` folder and update 
+the build script located in the same folder (``src/examples/wscript``). Add a new command similar to 
+the ones already present in the script: ::
+
+    build_example('standard', 'myextractorname')
+
+Configure the build system to include compilation of examples if you have not done it before.::
+    
+    ./waf configure --mode=release --with-examples
+
+Compile your examples by running::
+    
+    ./waf
+
+See :doc:`installing` for compilation details.
+
