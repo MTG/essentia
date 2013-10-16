@@ -22,9 +22,9 @@ def build(ctx):
 
     # gets the path from the active virtualenv
     PYLIB = distutils.sysconfig.get_python_lib()
-    #print '-'*100
-    #print 'ctx.env', ctx.env
-    #print '-'*100
+    #print('-'*100)
+    #print('ctx.env', ctx.env)
+    #print('-'*100)
     NUMPY_INCPATH = [ # virtualenv path
                       os.path.join(PYLIB, 'numpy', 'core', 'include'),
                       # system python path

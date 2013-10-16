@@ -62,7 +62,7 @@ def configure(ctx):
                   args=['--cflags', '--libs'], mandatory=False)
 
     if ctx.env.WITH_STATIC_EXAMPLES:
-        print 'Static examples incompatible with TagLib, skipping TagLib detection...'
+        print('Static examples incompatible with TagLib, skipping TagLib detection...')
     else:
         ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
                       args=['--cflags', '--libs'], mandatory=False)
@@ -100,7 +100,7 @@ def configure(ctx):
 
     # prepare the compilation environment using the detected libraries
     print
-    print '================================ CONFIGURATION SUMMARY ================================'
+    print('================================ CONFIGURATION SUMMARY ================================')
 
 
     def has(name):
@@ -111,53 +111,53 @@ def configure(ctx):
 
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
     if has('avcodec') and has('avformat') and has('avutil'):
-        print '- FFmpeg / libav detected!'
-        print '  The following algorithms will be included: %s\n' % algos
+        print('- FFmpeg / libav detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
         ctx.env.USES += ' AVFORMAT AVCODEC AVUTIL'
     else:
-        print '- FFmpeg (or libav on debian/ubuntu) seems to be missing.'
-        print '  The following algorithms will be ignored: %s\n' % algos
+        print('- FFmpeg (or libav on debian/ubuntu) seems to be missing.')
+        print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
 
     if has('swresample'):
         ctx.env.USES += ' SWRESAMPLE'
     else:
-        print '- FFmpeg install with swresample support seems to be missing.'
-        print '  Will be using an embedded copy for doing audio conversion\n'
+        print('- FFmpeg install with swresample support seems to be missing.')
+        print('  Will be using an embedded copy for doing audio conversion\n')
 
     algos = [ 'Resample' ]
     if has('samplerate'):
-        print '- libsamplerate (SRC) detected!'
-        print '  The following algorithms will be included: %s\n' % algos
+        print('- libsamplerate (SRC) detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
         ctx.env.USES += ' SAMPLERATE'
     else:
-        print '- libsamplerate seems to be missing.'
-        print '  The following algorithms will be ignored: %s\n' % algos
+        print('- libsamplerate seems to be missing.')
+        print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
     algos = [ 'MetadataReader' ]
     if has('taglib'):
-        print '- TagLib detected!'
-        print '  The following algorithms will be included: %s\n' % algos
+        print('- TagLib detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
         ctx.env.USES += ' TAGLIB'
     else:
-        print '- TagLib seems to be missing.'
-        print '  The following algorithms will be ignored: %s\n' % algos
+        print('- TagLib seems to be missing.')
+        print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
     algos = [ 'GaiaTransform' ]
     if has('gaia2'):
-        print '- Gaia2 detected!'
-        print '  The following algorithms will be included: %s\n' % algos
+        print('- Gaia2 detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
         ctx.env.USES += ' GAIA2'
     else:
-        print '- Gaia2 seems to be missing.'
-        print '  The following algorithms will be ignored: %s\n' % algos
+        print('- Gaia2 seems to be missing.')
+        print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
 
-    print '======================================================================================='
+    print('=======================================================================================')
 
 
 from waflib.Task import Task
