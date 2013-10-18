@@ -1,27 +1,40 @@
 {% extends "layout.html" %}
 {% set title = 'Overview' %}
 {% block body %}
-  <h1>Essentia User and Developer Manual</h1>
+  <h1>Essentia {{version}} User and Developer Manual</h1>
 
 
 
   <div class="section" id="what-is-essentia">
     <h2>What is Essentia?<a class="headerlink" href="#what-is-essentia" title="Permalink to this headline">¶</a></h2>
 
-    <p>Essentia is an audio analysis tool. It provides a reusable collection of algorithms and descriptors mainly used to extract features from audio files. It is written in C++, but also provides Python bindings. This means that you can control Essentia from within Python and write scripts that use Essentia&#8217;s features (just as you would in Matlab). There is also a streaming mode in which you connect algorithms and run them automatically instead of specifying explicitly the order of execution (such as PureData, Max/MSP, ...). The advantage of the streaming mode is that it requires less boilerplate code and uses less memory.</p>
+    <p>Essentia is an open-source C++ library for audio analysis and audio-based music information retrieval. It
+    provides a reusable collection of algorithms mainly used to extract features from audio files. The library provide
+    Python bindings, which means that you can control Essentia and write scripts that use Essentia&#8217;s features from
+    within Python (just as you would in Matlab). There is also a streaming mode in which you can connect algorithms and
+    run them automatically instead of specifying explicitly the order of execution (such as PureData or Max/MSP). The
+    advantage of the streaming mode is that it requires less boilerplate code and uses less memory.</p>
 
-    <p>Essentia is not a framework, but rather a collection of algorithms (plus some infrastructure for multithreading and low memory usage) wrapped in a library. It doesn&#8217;t provide common high-level logic for descriptor computation (so you aren&#8217;t locked into a certain way of doing things). It rather focuses on the robustness, performance and optimality of the provided algorithms, as well as ease of use. The flow of the analysis is decided and implemented by the user, while Essentia is taking care of the implementation details of the algorithms being used. An example extractor is provided, but it should be considered as an example only, not &#8220;the&#8221; only correct way of doing things.</p>
+    <p>Essentia is not a framework, but rather a collection of algorithms (plus some infrastructure for multithreading
+    and low memory usage) wrapped in a library. It doesn&#8217;t provide common high-level logic for descriptor
+    computation (therefore, you are not locked into a certain way of doing things). It rather focuses on the robustness,
+    performance and optimality of the provided algorithms, as well as ease of use. The flow of the analysis is decided
+    and implemented by the user, while Essentia is taking care of the implementation details of the algorithms being
+    used. A number of predefined executable extractors for the available music descriptors are provided with the library
+    as examples, however they should not be considered as the only correct way of doing things.</p>
 
-    <p>Essentia currently features the following algorithms and tools (among others):</p>
+    <p>Essentia currently features the following algorithms (among others):</p>
 
     <ul class="simple">
       <li><strong>Audio file input/output:</strong> ability to read and write nearly all audio file formats (wav, mp3, ogg, flac, etc.)</li>
       <li><strong>Standard signal processing blocks:</strong> FFT, DCT, frame cutter, windowing, envelope, smoothing</li>
-      <li><strong>Statistical descriptors:</strong> mean, variance, geometric mean, moments and central moments, spread, kurtosis, skewness, flatness</li>
-      <li><strong>Temporal descriptors:</strong> duration, LARM, Leq, log attack time, loudness, LPC, zero-crossing rate</li>
-      <li><strong>Spectral descriptors:</strong> Bark bands, MFCC, spectral peaks, rolloff, HFC, HPCP, dissonance, tonality</li>
       <li><strong>Filters (FIR &amp; IIR):</strong> low/high/band pass, band reject, DC removal, equal loudness</li>
-      <li><strong>High-level descriptors:</strong> danceability, dynamic complexity, intensity, onset detector, key, tuning frequency, BPM, beat detection, SVM classifier</li>
+      <li><strong>Statistical descriptors:</strong> median, mean, variance, power means, raw and central moments, spread, kurtosis, skewness, flatness</li>
+      <li><strong>Time-domain descriptors:</strong> duration, loudness, LARM, Leq, Vickers' loudness, zero-crossing-rate, log attack time and other signal envelope descriptors</li>
+      <li><strong>Spectral descriptors:</strong> Bark/Mel/ERB bands, MFCC, GFCC, LPC, spectral peaks, complexity, rolloff, contrast, HFC, inharmonicity and dissonance</li>
+      <li><strong>Tonal descriptors</strong> Pitch salience function, predominant melody and pitch, HPCP (chroma) related features, chords, key and scale, tuning frequency</li>
+      <li><strong>Rhythm descriptors</strong> beat detection, BPM, onset detection, rhythm transform, beat loudness</li>
+      <li><strong>Other high-level descriptors:</strong> danceability, dynamic complexity, audio segmentation, SVM classifier</li>
     </ul>
   </div>
 
@@ -32,28 +45,36 @@
 
   <table class="contentstable" align="center" style="margin-left: 30px"><tr>
     <td width="50%">
-      <p class="biglink"><a class="biglink" href="{{ pathto("introduction") }}">High-level overview of Essentia</a><br/>
+      <p class="biglink"><a class="biglink" href="{{ pathto("introduction") }}">Introduction</a><br/>
          <span class="linkdescr">An introduction to Essentia's main concepts</span></p>
-      <p class="biglink"><a class="biglink" href="{{ pathto("design_overview") }}">Design Overview</a><br/>
-         <span class="linkdescr">An explanation of Essentia's basic types and classes</span></p>
-      <p class="biglink"><a class="biglink" href="{{ pathto("howto_standard_extractor") }}">"Standard" mode how-to</a><br/>
-         <span class="linkdescr">Learn how to write a "standard" extractor</span></p>
-      <p class="biglink"><a class="biglink" href="{{ pathto("streaming_architecture") }}">Streaming architecture</a><br/>
-         <span class="linkdescr">A description of how the "streaming" mode works</span></p>
-      <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Contents</a><br/>
-         <span class="linkdescr">For a complete overview of the documentation</span></p>
 
-    </td><td width="50%">
+      <p class="biglink"><a class="biglink" href="{{ pathto("installing") }}">Building and installing Essentia</a><br/>
+         <span class="linkdescr">Instructions to get Essentia running on your computer</span></p>
+
       <p class="biglink"><a class="biglink" href="{{ pathto("algorithms_overview") }}">Algorithms overview</a><br/>
          <span class="linkdescr">A quick description of the main algorithms</span></p>
+
       <p class="biglink"><a class="biglink" href="{{ pathto("python_tutorial") }}">Python tutorial for beginners</a><br/>
          <span class="linkdescr">A hands-on introduction to Essentia</span></p>
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("extractors_out_of_box") }}">Using extractors out-of-box</a><br/>
+         <span class="linkdescr">Getting some quick results with no programming required</span></p>
+
+    </td><td width="50%">
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("design_overview") }}">Design Overview</a><br/>
+         <span class="linkdescr">An explanation of Essentia's basic types and classes</span></p>
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("howto_standard_extractor") }}">"Standard" mode how-to</a><br/>
+         <span class="linkdescr">Learn how to write a "standard" extractor</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("streaming_architecture") }}">Streaming mode architecture</a><br/>
+         <span class="linkdescr">A description of how the "streaming" mode works</span></p>
+
       <p class="biglink"><a class="biglink" href="{{ pathto("howto_streaming_extractor") }}">"Streaming" mode how-to</a><br/>
          <span class="linkdescr">Learn how to write a "streaming" extractor</span></p>
+
       <p class="biglink"><a class="biglink" href="{{ pathto("algorithms_reference") }}">Algorithm reference</a><br/>
          <span class="linkdescr">The detailed documentation for all the algorithms</span></p>
-      <p class="biglink"><a class="biglink" href=""></a><br/>
-         <span class="linkdescr">&nbsp;</span></p>
 
     </td></tr>
   </table>
@@ -63,24 +84,36 @@
 
   <table class="contentstable" align="center" style="margin-left: 30px"><tr>
     <td width="50%">
-      <p class="biglink"><a class="biglink" href="{{ pathto("installing") }}">Building and installing Essentia</a><br/>
-         <span class="linkdescr">Instructions to get Essentia running on your computer</span></p>
+
       <p class="biglink"><a class="biglink" href="{{ pathto("extending_essentia") }}">Extending Essentia</a><br/>
          <span class="linkdescr">How to write new "standard" algorithms for Essentia</span></p>
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("extending_essentia_streaming") }}">Extending Essentia "streaming"</a><br/>
+         <span class="linkdescr">How to write new "streaming" algorithms for Essentia</span></p>
+
       <p class="biglink"><a class="biglink" href="{{ pathto("composite_api") }}">Composite API</a><br/>
          <span class="linkdescr">The inner workings of the composite algorithms</span></p>
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("execution_network_algorithm") }}">Execution network algorithm</a><br/>
+         <span class="linkdescr">How Essentia's streaming scheduler works</span></p>
+
+
+    </td><td width="50%">
+
       <p class="biglink"><a class="biglink" href="doxygen/index.html">Doxygen C++ documentation</a><br/>
          <span class="linkdescr">The documentation for the base classes used in Essentia</span></p>
 
-    </td><td width="50%">
+
       <p class="biglink"><a class="biglink" href="{{ pathto("coding_guidelines") }}">Coding guidelines</a><br/>
          <span class="linkdescr">Good practices to follow when developing new algorithms</span></p>
-      <p class="biglink"><a class="biglink" href="{{ pathto("extending_essentia_streaming") }}">Extending Essentia "streaming"</a><br/>
-         <span class="linkdescr">How to write new "streaming" algorithms for Essentia</span></p>
-      <p class="biglink"><a class="biglink" href="{{ pathto("execution_network_algorithm") }}">Execution network algorithm</a><br/>
-         <span class="linkdescr">How Essentia's streaming scheduler works</span></p>
+
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Contents</a><br/>
+         <span class="linkdescr">For a complete overview of the documentation</span></p>
+
       <p class="biglink"><a class="biglink" href=""></a><br/>
          <span class="linkdescr">&nbsp;</span></p>
+
 
     </td></tr>
   </table>

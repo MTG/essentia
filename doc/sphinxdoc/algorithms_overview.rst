@@ -13,7 +13,7 @@ please see the `complete reference <algorithms_reference.html>`_.
 Audio input / output
 --------------------
 
-Essentia has a variety of audio loaders to provide a very convenient way to load audio files from disk.
+Essentia has a variety of audio loaders to provide a very convenient way to load audio files from disk:
 
 * ``AudioLoader``: this is the most basic audio loader. It will load the given audio file and
   return the stream of stereo samples. If the audio file was mono, only the left channel is used.
@@ -31,9 +31,8 @@ Essentia can also write audio files, using the following algorithms:
 
 * ``AudioWriter``: a versatile audio writer that can write a stream of samples to any format
   supported by `FFmpeg`_. Takes as input a stream of stereo samples.
-* ``MonoWriter``: an ``AudioWriter`` that takes as input a stream of mono samples.
-* ``AudioOnsetsMarker``: will write an audio file with the given stream of samples, on which
-  beeps will have been added at the times of the given onsets.
+* ``MonoWriter``: an ``AudioWriter`` that takes a stream of mono samples as input.
+* ``AudioOnsetsMarker``: writes an audio file given the stream of samples adding beeps at the given onset times.
 
 
 Standard signal processing algorithms
@@ -42,14 +41,14 @@ Standard signal processing algorithms
 The following algorithms are quite standard in any signal processing library:
 
 * ``FrameCutter``: takes an input audio stream and cuts it into frames.
-* ``Windowing``: returns a windowed frame (knows a lot of standard window types, such as Hann,
+* ``Windowing``: returns a windowed frame (supports a lot of standard window types, such as Hann,
   Hamming, Blackman-Harris, ...).
 * ``FFT``: the omnipresent (complex) `Fast Fourier Transform`_ algorithm.
 * ``Spectrum``: returns only the magnitude part of the ``FFT`` algorithm.
 * ``DCT``: the type II `Discrete Cosine Transform`_.
 * ``Envelope``: an envelope follower.
-* ``PeakDetection``: to detect peaks in an array of values.
-* ``Resample``: to resample a given audio signal.
+* ``PeakDetection``: detects peaks in an array of values.
+* ``Resample``: resamples a given audio signal.
 * ``Slicer``: returns the given slices (start/end times) of an audio stream.
 * ``ReplayGain``: returns the `ReplayGain`_ value for the given audio.
 * ``CrossCorrelation``: computes the `cross-correlation`_ of two signals.
@@ -63,7 +62,7 @@ Statistics
 The following algorithms compute statistics over an array of values, or do some kind
 of aggregation:
 
-* ``Mean``, ``GeometricMean`` and ``PowerMean``: do what their names hint at.
+* ``Mean``, ``GeometricMean``, ``PowerMean``, and ``Median``: do what their names hint at.
 * ``Energy``: computes the energy of the array.
 * ``RMS``: computes the Root mean square of the array.
 * ``SingleGaussian``: computes a single Gaussian estimation for the given list of arrays (returns the
@@ -71,7 +70,7 @@ of aggregation:
 * ``CentralMoments`` and ``RawMoments``: compute the moments up to the 5th-order of the array.
 * ``Variance``, ``Skewness`` and ``Kurtosis``: are often used to describe probability distributions.
 * ``DistributionShape``: combines the ``Variance``, ``Skewness`` and ``Kurtosis`` values in a single vector.
-* ``Median``, ``Flatness``, ``Crest``, ``InstantPower`` are some others lesser used algorithms.
+* ``Flatness``, ``Crest``, ``InstantPower`` are some others lesser used algorithms.
 
 Filters
 -------
@@ -84,77 +83,80 @@ Essentia implements a nice variety of audio filters:
 * ``DCRemoval``: removes the DC component of a signal.
 * ``EqualLoudness``: filters the signal using an equal-loudness curve approximating filter.
 
-MIR low-level descriptors
--------------------------
+MIR descriptors
+---------------
 
-The following algorithms are either spectral or time based, and are used quite often as descriptors in
-the `Music Information Retrieval`_ community.
+The following algorithms compute low/mid/high-level descriptors frequently used in the `Music Information Retrieval`_ community.
 
 Spectral descriptors
 ^^^^^^^^^^^^^^^^^^^^
 
 * ``BarkBands``: computes the `Bark band <http://en.wikipedia.org/wiki/Bark_scale>`_ energies.
 * ``MelBands``: computes the `Mel band <http://en.wikipedia.org/wiki/Mel_scale>`_ energies.
-* ``MFCC``: computes the `Mel-frequency cepstral coefficients
-  <http://en.wikipedia.org/wiki/Mel-frequency_cepstral_coefficient>`_ of a frame.
+* ``ERBBands``: computes the energies in bands spaced on an `Equivalent Rectangular Bandwidth <http://en.wikipedia.org/wiki/Equivalent_rectangular_bandwidth>`_ scale.
+* ``MFCC``: computes the `Mel-frequency cepstral coefficients <http://en.wikipedia.org/wiki/Mel-frequency_cepstral_coefficient>`_ of a frame.
+* ``GFCC``: computes the gammatone feature cepstrum coefficients similar to MFCCs.
+* ``LPC``: computes the `Linear Predictive Coding <http://en.wikipedia.org/wiki/Linear_predictive_coding>`_ coefficients of a frame as well as the associated reflection coefficients.
 * ``HFC``: computes the `High-Frequency Content <http://en.wikipedia.org/wiki/High_Frequency_Content_measure>`_ measure.
-* ``HPCP``: computes the Harmonic Pitch-Class Profile of a spectrum (also called Chroma features).
-* ``SpectralContrast``: is used for music genre classification.
+* ``SpectralContrast``: computes spectral contrast of a spectrum.
+* ``Inharmonicity`` and ``Dissonance``: both try to estimate whether an audio frame "sounds" harmonic or not.
 * ``SpectralWhitening``: whitens the input spectrum.
-* ``Panning``: computes the `panorama distribution <http://en.wikipedia.org/wiki/Panning_(audio)>`_
-  of a stereo audio frame.
+* ``Panning``: computes the `panorama distribution <http://en.wikipedia.org/wiki/Panning_(audio)>`_ of a stereo audio frame.
 
-Temporal descriptors
-^^^^^^^^^^^^^^^^^^^^
+Time-domain descriptors
+^^^^^^^^^^^^^^^^^^^^^^^
 
-* ``Duration`` and ``EffectiveDuration``: compute the total duration of a signal and the duration
-  of the signal being above a certain energy level.
-* ``LPC``: computes the `Linear Predictive Coding <http://en.wikipedia.org/wiki/Linear_predictive_coding>`_
-  coefficients of a frame as well as the associated reflection coefficients.
+* ``Duration`` and ``EffectiveDuration``: compute the total duration of a signal and the duration of the signal being above a certain energy level.
 * ``ZCR``: computes the `Zero-crossing rate <http://en.wikipedia.org/wiki/ZCR>`_ of the signal.
-* ``Leq``, ``LARM``, ``Loudness`` and ``LoudnessVicker``: are all loudness measures.
+* ``Leq``, ``LARM``, ``Loudness`` and ``LoudnessVicker``: are different loudness measures.
 
 
 
 Tonal descriptors
------------------
+^^^^^^^^^^^^^^^^^
 
-The following algorithms are related to computing a tonal representation of the audio signal:
-
-* ``PitchDetection``: computes the pitch for an audio frame.
+* ``PitchSalienceFunction`` and ``PredominantMelody``: compute pitch salience function and estimate the 
+  fundamental frequency of the predominant melody by the `MELODIA <http://www.justinsalamon.com/melody-extraction.html>`_ algorithm.
+* ``PitchYinFFT``: estimates pitch of a signal by YinFFT algorithm.
+* ``HPCP``: computes the `Harmonic Pitch-Class Profile <http://en.wikipedia.org/wiki/Harmonic_pitch_class_profiles>`_ of a spectrum (also called Chroma features).
 * ``TuningFrequency``: returns the exact frequency on which a song is tuned and the number of cents to 440Hz.
 * ``Key``: returns the key and scale of a song.
 * ``ChordsDetection``: computes the sequence of chords in a song.
 * ``ChordsDescriptors``: computes some descriptors associated with the sequence of chords, such as its histogram, etc.
-* ``Inharmonicity`` and ``Dissonance``: both try to estimate whether an audio frame "sounds" harmonic or not.
 
 
-Rhythmic descriptors
---------------------
 
-The following algorithms are related to computing a rhythmic representation of the audio signal:
+Rhythm descriptors
+^^^^^^^^^^^^^^^^^^
 
-* ``RhythmTransform``: computes a rhythmical representation, similar to an FFT but in the rhythm domain.
-* ``TempoTap``: is Essentia's first BPM extractor.
-* ``RhythmDescriptors``: computes some statistics about the tempogram of a song.
+* ``BeatTrackerDegara``: the beat tracker based on complex spectral difference feature.
+* ``BeatTrackerMultiFeature`` the multifeature beat tracker (combines 5 different beat trackers taking into 
+  account the maximum mutual agreement between them.
+* ``RhythmExtractor2013``: сomputes BPM of a song in addition to the estimated beat positions (using either ``BeatTrackerDegara`` or ``BeatTrackerMultiFeature``).
+* ``BpmHistogramDescriptors``: computes statistics of the BPM histogram of a song.
+* ``NoveltyCurve``: computes the novelty curve for the audio signal.
+* ``OnsetDetection`` and ``OnsetDetectionGlobal`` estimate various onset detection functions useful for beat
+  tracking and onset detection.
+* ``Onsets``: computes the list of onsets in the audio signal.
+* ``RhythmTransform``: computes a rhythmical representation based on the FFT over temporal windows of MFCC frames.
 * ``BeatsLoudness``: computes the loudness of the signal on windows centered around the beat locations.
 
 
 SFX descriptors
----------------
+^^^^^^^^^^^^^^^
 
 Most of the algorithms are designed to deal with music audio files, but the following ones are
 intended to be used with short sounds instead of full-length music tracks:
 
 * ``LogAttackTime``: returns the logarithm of the attack time for the sound.
-* ``MaxToTotal`` and ``MinToTotal``: return a measure of whether the max (resp. min) value of
+* ``MaxToTotal`` and ``MinToTotal``: return a measure of whether the max (respectively, min) value of
   a sound is located towards its beginning or end.
-* ``PitchSalience``: returns whether the pitch is salient (ie: strongly marked) in a sound.
+* ``PitchSalience``: returns whether the pitch is salient (that is, strongly marked) in a sound.
 * ``TCToTotal``: computes the normalized position of the temporal centroid.
 
 
-High-level descriptors
-----------------------
+Other high-level descriptors
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Essentia also contains the following mid- and high-level descriptors:
 
@@ -162,13 +164,11 @@ Essentia also contains the following mid- and high-level descriptors:
 * ``DynamicComplexity``: returns whether a song has a high dynamic range.
 * ``FadeDetection``: detects fade-ins/fade-outs in a song.
 * ``SBic``: segments a song using the Bayesian Information Criterion.
-* ``NoveltyCurve``: computes the novelty curve for the audio signal.
-* ``Onsets``: computes the list of onsets in the audio signal.
 * ``PCA``: does the `Principal Component Analysis <http://en.wikipedia.org/wiki/Principal_component_analysis>`_
   of the given list of arrays.
 * ``GaiaTransform``: applies the given Gaia transformation to a Pool. This is mostly used for
   classifiers which have been trained with Gaia. At the moment, the following classifiers have
-  trained models available in Essentia:
+  trained models available in Essentia (TODO update after publishing models):
 
   * musical genre (4 different databases)
   * ballroom music classification
@@ -179,8 +179,7 @@ Essentia also contains the following mid- and high-level descriptors:
   * voice / instrumental
   * gender (male / female singer)
   * timbre classification
-  * speech / music
-
+  
 
 Extractors
 ----------
@@ -191,15 +190,13 @@ a few useful extractors have been written as algorithms. They are the following:
 
 * ``LevelExtractor``: computes the loudness of a music track.
 * ``LowLevelSpectralExtractor``: computes a lot of low-level features from a music stream.
-* ``LowLevelSpectralEqloudExtractor``: computes a lot of low-level features from a music
-  stream which should have been previously equal-loudness filtered.
-* ``RhythmExtractor``: computes the BPM of a song as well as other rhythm-related features
-  using TempoTap.
+* ``LowLevelSpectralEqloudExtractor``: computes a lot of low-level features which require preliminary equal-loudness filter from a music stream.
 * ``TuningFrequencyExtractor``: computes the tuning frequency of a music track.
 * ``KeyExtractor``: computes the key and scale of a music track.
-* ``TonalExtractor``: computes the tonal information of a music track (key, scale, chords
-  sequence, chords histogram, ...)
+* ``TonalExtractor``: computes the tonal information of a music track (key, scale, chords sequence, chords histogram, ...)
+* ``RhythmDescriptors``: computes the rhythm information of music track (beat positions, BPM and related histogram statistics).
 * ``Extractor``: extracts pretty much all the features useful as descriptors for doing music similarity.
+
 
 
 

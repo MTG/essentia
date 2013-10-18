@@ -63,10 +63,9 @@ def build(ctx):
 
 
         build_example('standard', 'beatsmarker')
-        build_example('standard', 'rhythmextractor_tempotap')
         build_example('standard', 'mfcc')
         build_example('standard', 'onsetrate')
-        build_example('standard', 'extractorpitch')
+        build_example('standard', 'pitchyinfft')
         build_example('standard', 'fadedetection')
         build_example('standard', 'spectralcontrast')
         build_example('standard', 'rhythmtransform')
@@ -89,22 +88,23 @@ def build(ctx):
                                    'extractorpanning',
                                    'extractorpostprocess' ])
 
-        build_example('streaming', 'schizo_extractor',
-                                 [ 'extractorutils',
-                                   'extractormetadata',
-                                   'extractortonal',
-                                   'extractorlowlevel',
-                                   'extractorsfx',
-                                   'extractorpanning',
-                                   'extractorpostprocess' ])
+        # OUTDATED:
+        #build_example('streaming', 'schizo_extractor',
+        #                         [ 'extractorutils',
+        #                           'extractormetadata',
+        #                           'extractortonal',
+        #                           'extractorlowlevel',
+        #                           'extractorsfx',
+        #                           'extractorpanning',
+        #                           'extractorpostprocess' ])
 
-        build_example('streaming', 'extractor_canoris',
-                                 [ 'extractorutils',
-                                   'extractortonal',
-                                   'extractorlowlevel',
-                                   'extractorsfx',
-                                   'extractorpanning',
-                                   'extractorpostprocess' ])
+        #build_example('streaming', 'extractor_canoris',
+        #                         [ 'extractorutils',
+        #                           'extractortonal',
+        #                           'extractorlowlevel',
+        #                           'extractorsfx',
+        #                           'extractorpanning',
+        #                           'extractorpostprocess' ])
 
         build_example('streaming', 'extractor_archivemusic',
                                  [ 'extractorutils',
@@ -114,7 +114,6 @@ def build(ctx):
                                    'extractorpanning',
                                    'extractor_archivemusic_postprocess' ])
 
-        build_example('streaming', 'rhythmextractor_noveltycurve')
         build_example('streaming', 'beatsmarker')
         build_example('streaming', 'mfcc')
         build_example('streaming', 'gfcc')
@@ -123,9 +122,9 @@ def build(ctx):
         build_example('streaming', 'onsetrate')
         build_example('streaming', 'panning')
         build_example('streaming', 'tuningfrequency')
-        build_example('streaming', 'extractorkey')
-        build_example('streaming', 'extractorpitch')
-        build_example('streaming', 'extractorpredominantmelody')
+        build_example('streaming', 'key')
+        build_example('streaming', 'pitchyinfft')
+        build_example('streaming', 'predominantmelody')
 
 
 

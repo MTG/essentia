@@ -9,7 +9,7 @@ APPNAME = 'essentia'
 VERSION = '2.0-dev'
 
 top = '.'
-out = 'buildw'
+out = 'build'
 
 
 def options(ctx):
@@ -38,11 +38,11 @@ def configure(ctx):
     #ctx.env.CXXFLAGS += [ '-Werror' ]
 
     if ctx.options.MODE == 'debug':
-        print '→ Building in debug mode'
+        print ('→ Building in debug mode')
         ctx.env.CXXFLAGS += [ '-g' ]
 
     elif ctx.options.MODE == 'release':
-        print '→ Building in release mode'
+        print ('→ Building in release mode')
         ctx.env.CXXFLAGS += [ '-O2' ] # '-march=native' ] # '-msse3', '-mfpmath=sse' ]
 
     else:

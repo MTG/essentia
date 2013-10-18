@@ -20,8 +20,8 @@ from essentia import *
 from essentia.standard import *
 from pylab import *
 from numpy import *
-from math import log
-from math import floor
+
+# In this script we will extract predominant melody given a music file
 
 try:
     filename = sys.argv[1]
@@ -29,17 +29,20 @@ except:
     print "usage:", sys.argv[0], "<input-audiofile>"
     sys.exit()
 
+
+
+
+# We will use a composite algorithm PredominantMelody, which combines a number of 
+# required steps for us. Let's declare and configure it first: 
 hopSize = 128
 frameSize = 2048
 sampleRate = 44100
-guessUnvoiced = True
-
-# RUNNING A COMPOSITE ALGORITHM
+guessUnvoiced = True # read the algorithm's reference for more details
 run_predominant_melody = PredominantMelody(guessUnvoiced=guessUnvoiced,
                                            frameSize=frameSize,
                                            hopSize=hopSize);
 
-# load audio file, apply equal loudness filter, and compute predominant melody
+# Load audio file, apply equal loudness filter, and compute predominant melody
 audio = MonoLoader(filename = filename, sampleRate=sampleRate)()
 audio = EqualLoudness()(audio)
 pitch, confidence = run_predominant_melody(audio)
@@ -48,7 +51,7 @@ pitch, confidence = run_predominant_melody(audio)
 n_frames = len(pitch)
 print "number of frames:", n_frames
 
-# visualize output pitch
+# Visualize output pitch values
 fig = plt.figure()
 plot(range(n_frames), pitch, 'b')
 n_ticks = 10
@@ -61,7 +64,7 @@ ax.set_xlabel('Time (s)')
 ax.set_ylabel('Pitch (Hz)')
 suptitle("Predominant melody pitch")
 
-# visualize output pitch confidence
+# Visualize output pitch confidence
 fig = plt.figure()
 plot(range(n_frames), confidence, 'b')
 n_ticks = 10

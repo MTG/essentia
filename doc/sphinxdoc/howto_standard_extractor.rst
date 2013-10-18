@@ -9,26 +9,24 @@ an audio file, computes their average, variance, min and max, and outputs that t
 
 If you are more interested in the streaming mode, please have a look at the :doc:`howto_streaming_extractor` tutorial.
 
-**NB:** the source code for this example can be found in the git repository tree,
+**Note:** the source code for this example can be found in the git repository tree,
 :download:`src/examples/standard_mfcc.cpp <../../src/examples/standard_mfcc.cpp>` file.
 
 First of all, let's identify which algorithms we will need. We want to do the following processing:
 
 .. image:: _static/mfcc_extractor_halfsize.png
 
-The steps we will have to take are the following:
+We will have to take the following steps:
 
 * instantiate these Algorithms
 * (possibly) configure them
 * connect their inputs/outputs to the variables they will use for processing
 * call their ``compute()`` method to get the MFCC values for each frame
-* store these in a ``Pool``
+* store computed values in a ``Pool``
 * at the end, output the results of the aggregation of the values in the Pool
 
 As we explicitly tell the computer which action to do at each step, the
-standard mode of Essentia is also called `imperative`_ mode.
-*(You might also find some references to the "classic" mode of Essentia, although
-that denomination is now deprecated in favor of "standard")*
+standard mode of Essentia is `imperative`_.
 
 
 Setting up our program
@@ -62,25 +60,26 @@ class as well as the ``AlgorithmFactory``. ::
     Pool pool;
 
     /////// PARAMS //////////////
+    int sampleRate = 44100;
     int frameSize = 2048;
     int hopSize = 1024;
 
 
 Here we start by calling the ``essentia::init()`` function. If you forget to do that,
 the algorithm factory will be empty and you won't be able to do much with Essentia!
+We then create a Pool, and define some parameters we will use to configure our Algorithms. ::
 
 
 Creating the required algorithms
 --------------------------------
 
-We then create a Pool, and define some parameters we will use to configure our Algorithms. ::
-
+Here we create our Algorithms, configuring them on the fly. :: 
 
   AlgorithmFactory& factory = standard::AlgorithmFactory::instance();
 
   Algorithm* audio = factory.create("MonoLoader",
                                     "filename", audioFilename,
-                                    "sampleRate", 44100);
+                                    "sampleRate", sampleRate);
 
   Algorithm* fc    = factory.create("FrameCreator",
                                     "frameSize", frameSize,
@@ -93,10 +92,11 @@ We then create a Pool, and define some parameters we will use to configure our A
   Algorithm* mfcc  = factory.create("MFCC");
 
 
-Here we create our Algorithms, configuring them on the fly. It would have been
-equivalent to first create the Algorithms, and then configure them using a
+It would have been equivalent to first create the Algorithms, and then configure them using a
 ``ParameterMap`` which would have been filled with these parameters.
 However, it is much shorter (and cleaner, in the author's view) to write it like this.
+When necessary, use `algorithm reference <algorithms_reference.html>`_ in order to get to know which parameters 
+are required and what is their type and default values. 
 
 
 Connecting the algorithms
@@ -141,7 +141,7 @@ Processing the audio
 --------------------
 
 That's it, everything is in place, ready to be processed. We can now start calling
-our algorithms' compute() functions! ::
+our algorithms' compute() functions. ::
 
   /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << audioFilename << " --------" << endl;
@@ -217,7 +217,7 @@ to aggregate them::
 This should be fairly straight-forward by now: instantiate and configure the algorithm,
 set the inputs/outputs and call ``compute()``. Note here that algorithms can indeed take
 any type of data as either input or output; in this case the input and output type of
-data is a ``Pool``! ::
+data is a ``Pool``. ::
 
 
   // write results to file
@@ -253,3 +253,24 @@ tell the library to free all the memory it might have allocated for itself. At t
 it is safe to return 0 to the system, as should all well-behaved applications.
 
 .. _imperative: http://en.wikipedia.org/wiki/Imperative_programming
+
+
+Compiling extractors
+--------------------
+
+The simplest way to compile your own extractor is to place its code in ``src/examples`` folder and update 
+the build script located in the same folder (``src/examples/wscript``). Add a new command similar to 
+the ones already present in the script: ::
+
+    build_example('standard', 'myextractorname')
+
+Configure the build system to include compilation of examples if you have not done it before.::
+    
+    ./waf configure --mode=release --with-examples
+
+Compile your examples by running::
+    
+    ./waf
+
+See :doc:`installing` for compilation details.
+

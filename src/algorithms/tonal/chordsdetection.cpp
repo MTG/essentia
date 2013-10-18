@@ -31,6 +31,8 @@ const char* ChordsDetection::description = DOC("Using pitch profile classes, thi
 "Note:\n"
 "  - This algorithm assumes that input pcps have been computed with framesize = 2*hopsize\n"
 "\n"
+"Quality: experimental (prone to errors, algorithm needs improvement)\n"
+"\n"
 "References:\n"
 "  [1] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
 "  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"

@@ -7,16 +7,15 @@ Fixing bugs
 -----------
 
 **IMPORTANT:** when fixing bugs, try to always fix the real cause of the problem, and do
-not be satisfied with a workaround. I can assure you it will backfire some time later when
-you expect it the least.
+not be satisfied with a workaround as it will backfire some time later when you expect it the least.
 Even if really fixing a bug needs 3x more time than a simple workaround, DO IT! If you don't
 know how to fix the cause of a bug instead of just hiding it, seek help!
 
 
-Doing commits in SVN
---------------------
+Doing commits in Github
+-----------------------
 
-* as much as possible, do commits that are one semantic action: e.g.: if you add a feature
+* as much as possible, do commits that are one semantic action: e.g., if you add a feature
   that changes 5 files, commit the 5 files together, if you change 2 lines inside the same
   file that do 2 different things, then commit it in 2 parts
 * use explicit and useful and descriptive messages. That doesn't prevent you from being
@@ -31,7 +30,7 @@ Coding style guidelines
 
 Coding style guidelines are here to help readability. Everybody is thus **required** to
 follow them. The recommended style is a mix between `boost`_, `Qt`_, and the `STL`_
-(probably the 3 most well-designed C++ libraries), but there's no official written
+(probably the 3 most well-designed C++ libraries), but there is no official written
 guidelines for it now. Have a look at the examples to get the feeling of it.
 
 Specific points:
@@ -61,14 +60,20 @@ Specific points:
   };
 
 
-And for our Windows users: make sure that you don't use Windows end-of-lines, but Unix ones.
+As a rule of thumb: if you can write the same code and use fewer characters while keeping
+the code clean, the shorter version is always the better one.
+Also think about your fellow programmers who don't have an IDE with autocompletion, nor
+a widescreen that spans more than 300 columns, and try to keep your code as short, clean
+and concise as possible.
+
+The key word to remember is **CONSISTENCY**. Whenever in doubt, look at some other file 
+and follow the rules/styles applied in that file. For instance, ``#ifdef __MYFILE_H__`` 
+is *not* correct. If you look at other files, they are all written like this: 
+``#ifdef ESSENTIA_MYFILE_H``, so follow that rule.
+
+For Windows users: make sure that you do not use Windows end-of-lines, but Unix ones.
 Basically, any editor that is not Notepad should be able to deal with that.
 
-The one word to remember if you want to make your life easy: **CONSISTENCY**
-
-Whenever in doubt, look at some other file and follow the rules/styles applied in that file.
-For instance, ``#ifdef __MYFILE_H__`` is *not* correct. If you look at other files, they
-are all written like this: ``#ifdef ESSENTIA_MYFILE_H``, so follow that rule.
 
 General C++ pitfalls
 --------------------
@@ -88,11 +93,7 @@ using namespace xxx:
   in headers, it is **strictly** forbidden to have ``using namespace`` directives, however
   you can have them in the .cpp files (it is even recommended).
 
-  As a rule of thumb: if you can write the same code and use fewer characters while keeping
-  the code clean, the shorter version is always the better one.
-  Also think about your fellow programmers who don't have an IDE with autocompletion, nor
-  a widescreen that spans more than 300 columns, and try to keep your code as short, clean
-  and concise as possible.
+
 
 
 The ``Real`` data type

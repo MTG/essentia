@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
   // Spectrum -> MFCC -> Pool
   spec->output("spectrum")  >>  mfcc->input("spectrum");
 
-  mfcc->output("bands")     >>  NOWHERE;                   // we don't want the mel bands
+  mfcc->output("bands")     >>  NOWHERE;                          // we don't want the mel bands
   mfcc->output("mfcc")      >>  PC(pool, "lowlevel.mfcc"); // store only the mfcc coeffs
 
   // Note: PC is a #define for PoolConnector
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
 
   // aggregate the results
   Pool aggrPool; // the pool with the aggregated MFCC values
-  const char* stats[] = { "mean", "var", "min", "max" };
+  const char* stats[] = { "mean", "var", "min", "max", "cov", "icov" };
 
   standard::Algorithm* aggr = standard::AlgorithmFactory::create("PoolAggregator",
                                                                  "defaultStats", arrayToVector<string>(stats));
@@ -107,6 +107,8 @@ int main(int argc, char* argv[]) {
   aggr->input("input").set(pool);
   aggr->output("output").set(aggrPool);
   aggr->compute();
+
+  aggrPool.merge("lowlevel.mfcc.frames", pool.value<vector<vector<Real> > >("lowlevel.mfcc"));
 
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " --------" << endl;

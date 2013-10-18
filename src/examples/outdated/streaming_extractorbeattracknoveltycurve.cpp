@@ -110,7 +110,7 @@ vector<Real> computeNoveltyCurve(Pool& pool, const Pool& options) {
 void fixedTempoEstimation(const vector<Real>& novelty, Real sampleRate,
                           Real hopSize, vector<Real>& bpms, vector<Real>& amplitudes) {
   standard::Algorithm* fixedTempoAlgo =
-    standard::AlgorithmFactory::create("FixedBpmEstimator",
+    standard::AlgorithmFactory::create("NoveltyCurveFixedBpmEstimator",
                                        "sampleRate", sampleRate,
                                        "hopSize", hopSize,
                                        "minBpm", minBpm,

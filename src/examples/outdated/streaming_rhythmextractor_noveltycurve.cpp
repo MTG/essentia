@@ -159,7 +159,7 @@ vector<Real> computeNoveltyCurve(Pool& pool, const string& audioFilename,
 void fixedTempoEstimation(const vector<Real>& novelty, Real sampleRate,
                           Real hopSize, vector<Real>& bpms, vector<Real>& amplitudes) {
   standard::Algorithm* fixedTempoAlgo =
-    standard::AlgorithmFactory::create("FixedBpmEstimator",
+    standard::AlgorithmFactory::create("NoveltyCurveFixedBpmEstimator",
                                        "sampleRate", sampleRate,
                                        "hopSize", hopSize,
                                        "minBpm", minBpm,
@@ -608,7 +608,7 @@ int main(int argc, char* argv[]) {
   Pool pool;
 
   cout << "An outdated rhythm extractor (beat tracker, BPM) based on Novelty Curve (2009)." << endl;
-  cout << "NOTE: this beat tracker is outdated (low accuracy compared to the new one), you might want to use streaming_rhythmextractor instead." << endl;
+  cout << "NOTE: this beat tracker is outdated (low accuracy compared to the new one), you might want to use streaming_rhythmextractor_multifeature instead." << endl;
 
   if (argc < 4 && argc != 3) {
     cout << "Error: wrong number of arguments" << endl;

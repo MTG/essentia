@@ -30,11 +30,8 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
-  // set namespaces:
   string llspace = "lowlevel.";
-  if (!nspace.empty()) llspace = nspace + ".lowlevel.";
   string sfxspace = "sfx.";
-  if (!nspace.empty()) sfxspace = nspace + ".sfx.";
 
   Real sampleRate = options.value<Real>("analysisSampleRate");
   int frameSize =   int(options.value<Real>("lowlevel.frameSize"));
@@ -48,7 +45,7 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
                                  "frameSize", frameSize,
                                  "hopSize", hopSize,
                                  "silentFrames", silentFrames);
-  connect(input, fc->input("signal"));
+  input >> fc->input("signal");
 
   // Silence Rate
   Real thresholds_dB[] = { -20, -30, -60 };
@@ -69,15 +66,16 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   Algorithm* w = factory.create("Windowing",
                                 "type", windowType,
                                 "zeroPadding", zeroPadding);
-  connect(fc->output("frame"), w->input("frame"));
+  fc->output("frame") >> w->input("frame");
 
   // Spectrum
   Algorithm* spec = factory.create("Spectrum");
-  connect(w->output("frame"), spec->input("frame"));
+  w->output("frame") >> spec->input("frame");
 
   // Temporal Descriptors
   Algorithm* zcr = factory.create("ZeroCrossingRate");
-  connect(zcr->input("signal"), fc->output("frame"));
+
+  fc->output("frame") >> zcr->input("signal");
   connect(zcr->output("zeroCrossingRate"), pool, llspace + "zerocrossingrate");
 
 
@@ -85,7 +83,7 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   uint nMelBands = 40;
   Algorithm* mfcc = factory.create("MFCC",
                                    "numberBands", nMelBands);
-  connect(spec->output("spectrum"), mfcc->input("spectrum"));
+  spec->output("spectrum") >> mfcc->input("spectrum");
   connect(mfcc->output("bands"), pool, llspace + "melbands");
   connect(mfcc->output("mfcc"), pool, llspace + "mfcc");
 
@@ -93,8 +91,8 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   Algorithm* mels_cm = factory.create("CentralMoments",
                                  "range", nMelBands-1);
   Algorithm* mels_ds = factory.create("DistributionShape");
-  connect(mfcc->output("bands"), mels_cm->input("array"));
-  connect(mels_cm->output("centralMoments"), mels_ds->input("centralMoments"));
+  mfcc->output("bands") >> mels_cm->input("array");
+  mels_cm->output("centralMoments") >> mels_ds->input("centralMoments");
   connect(mels_ds->output("kurtosis"), pool, llspace + "melbands_kurtosis");
   connect(mels_ds->output("spread"), pool, llspace + "melbands_spread");
   connect(mels_ds->output("skewness"), pool, llspace + "melbands_skewness");
@@ -103,7 +101,7 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   uint nERBBands = 40;
   Algorithm* gfcc = factory.create("GFCC",
                                    "numberBands", nERBBands);
-  connect(spec->output("spectrum"), gfcc->input("spectrum"));
+  spec->output("spectrum") >> gfcc->input("spectrum");
   connect(gfcc->output("bands"), pool, llspace + "erbbands");
   connect(gfcc->output("gfcc"), pool, llspace + "gfcc");
 
@@ -111,8 +109,8 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   Algorithm* erbs_cm = factory.create("CentralMoments",
                                  "range", nERBBands-1);
   Algorithm* erbs_ds = factory.create("DistributionShape");
-  connect(gfcc->output("bands"), erbs_cm->input("array"));
-  connect(erbs_cm->output("centralMoments"), erbs_ds->input("centralMoments"));
+  gfcc->output("bands") >> erbs_cm->input("array");
+  erbs_cm->output("centralMoments") >> erbs_ds->input("centralMoments");
   connect(erbs_ds->output("kurtosis"), pool, llspace + "erbbands_kurtosis");
   connect(erbs_ds->output("spread"), pool, llspace + "erbbands_spread");
   connect(erbs_ds->output("skewness"), pool, llspace + "erbbands_skewness");
@@ -121,39 +119,39 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   Algorithm* square = factory.create("UnaryOperator", "type", "square");
   Algorithm* decrease = factory.create("Decrease",
                                        "range", sampleRate * 0.5);
-  connect(spec->output("spectrum"), square->input("array"));
-  connect(square->output("array"), decrease->input("array"));
+  spec->output("spectrum") >> square->input("array");
+  square->output("array") >> decrease->input("array");
   connect(decrease->output("decrease"), pool, llspace + "spectral_decrease");
 
   // Spectral Energy
   Algorithm* energy = factory.create("Energy");
-  connect(spec->output("spectrum"), energy->input("array"));
+  spec->output("spectrum") >> energy->input("array");
   connect(energy->output("energy"), pool, llspace + "spectral_energy");
 
   // Spectral Energy Band Ratio
   Algorithm* ebr_low = factory.create("EnergyBand",
                                       "startCutoffFrequency", 20.0,
                                       "stopCutoffFrequency", 150.0);
-  connect(spec->output("spectrum"), ebr_low->input("spectrum"));
+  spec->output("spectrum") >> ebr_low->input("spectrum");
   connect(ebr_low->output("energyBand"), pool, llspace + "spectral_energyband_low");
 
   Algorithm* ebr_mid_low = factory.create("EnergyBand",
                                           "startCutoffFrequency", 150.0,
                                           "stopCutoffFrequency", 800.0);
-  connect(spec->output("spectrum"), ebr_mid_low->input("spectrum"));
+  spec->output("spectrum") >> ebr_mid_low->input("spectrum");
   connect(ebr_mid_low->output("energyBand"), pool, llspace + "spectral_energyband_middle_low");
 
   Algorithm* ebr_mid_hi = factory.create("EnergyBand",
                                          "startCutoffFrequency", 800.0,
                                          "stopCutoffFrequency", 4000.0);
-  connect(spec->output("spectrum"), ebr_mid_hi->input("spectrum"));
+  spec->output("spectrum") >> ebr_mid_hi->input("spectrum");
   connect(ebr_mid_hi->output("energyBand"), pool, llspace + "spectral_energyband_middle_high");
 
 
   Algorithm* ebr_hi = factory.create("EnergyBand",
                                      "startCutoffFrequency", 4000.0,
                                      "stopCutoffFrequency", 20000.0);
-  connect(spec->output("spectrum"), ebr_hi->input("spectrum"));
+  spec->output("spectrum") >> ebr_hi->input("spectrum");
   connect(ebr_hi->output("energyBand"), pool, llspace + "spectral_energyband_high");
 
   // Spectral HFC
@@ -161,56 +159,50 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   connect(spec->output("spectrum"), hfc->input("spectrum"));
   connect(hfc->output("hfc"), pool, llspace + "hfc");
 
-  // Spectral Frequency Bands are redundant: using ERB bands instead is enough
-  // Algorithm* fb = factory.create("FrequencyBands",
-  //                               "sampleRate", sampleRate);
-  // connect(spec->output("spectrum"), fb->input("spectrum"));
-  // connect(fb->output("bands"), pool, llspace + "frequency_bands");
-
   // Spectral RMS
   Algorithm* rms = factory.create("RMS");
-  connect(spec->output("spectrum"), rms->input("array"));
+  spec->output("spectrum") >> rms->input("array");
   connect(rms->output("rms"), pool, llspace + "spectral_rms");
 
   // Spectral Flux
   Algorithm* flux = factory.create("Flux");
-  connect(spec->output("spectrum"), flux->input("spectrum"));
+  spec->output("spectrum") >> flux->input("spectrum");
   connect(flux->output("flux"), pool, llspace + "spectral_flux");
 
   // Spectral Roll Off
   Algorithm* ro = factory.create("RollOff");
-  connect(spec->output("spectrum"), ro->input("spectrum"));
+  spec->output("spectrum") >> ro->input("spectrum");
   connect(ro->output("rollOff"), pool, llspace + "spectral_rolloff");
 
   // Spectral Strong Peak
   Algorithm* sp = factory.create("StrongPeak");
-  connect(spec->output("spectrum"), sp->input("spectrum"));
+  spec->output("spectrum") >> sp->input("spectrum");
   connect(sp->output("strongPeak"), pool, llspace + "spectral_strongpeak");
 
   // BarkBands
   uint nBarkBands = 27;
   Algorithm* barkBands = factory.create("BarkBands",
                                         "numberBands", nBarkBands);
-  connect(spec->output("spectrum"), barkBands->input("spectrum"));
+  spec->output("spectrum") >> barkBands->input("spectrum");
   connect(barkBands->output("bands"), pool, llspace + "barkbands");
 
 
   // Spectral Crest
   Algorithm* crest = factory.create("Crest");
-  connect(barkBands->output("bands"), crest->input("array"));
+  barkBands->output("bands") >> crest->input("array");
   connect(crest->output("crest"), pool, llspace + "spectral_crest");
 
   // Spectral Flatness DB
   Algorithm* flatness = factory.create("FlatnessDB");
-  connect(barkBands->output("bands"), flatness->input("array"));
+  barkBands->output("bands") >> flatness->input("array");
   connect(flatness->output("flatnessDB"), pool, llspace + "spectral_flatness_db");
 
   // Spectral BarkBands Central Moments Statistics
   Algorithm* barks_cm = factory.create("CentralMoments",
                                  "range", nBarkBands-1);
   Algorithm* barks_ds = factory.create("DistributionShape");
-  connect(barkBands->output("bands"), barks_cm->input("array"));
-  connect(barks_cm->output("centralMoments"), barks_ds->input("centralMoments"));
+  barkBands->output("bands") >> barks_cm->input("array");
+  barks_cm->output("centralMoments") >> barks_ds->input("centralMoments");
   connect(barks_ds->output("kurtosis"), pool, llspace + "barkbands_kurtosis");
   connect(barks_ds->output("spread"), pool, llspace + "barkbands_spread");
   connect(barks_ds->output("skewness"), pool, llspace + "barkbands_skewness");
@@ -218,7 +210,7 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
   // Spectral Complexity
   Algorithm* tc = factory.create("SpectralComplexity",
                                  "magnitudeThreshold", 0.005);
-  connect(spec->output("spectrum"), tc->input("spectrum"));
+  spec->output("spectrum") >> tc->input("spectrum");
   connect(tc->output("spectralComplexity"), pool, llspace + "spectral_complexity");
 
   // NB: Removed pitch detection based on PitchYinFFT because it is usefull for monophonic signals only
@@ -232,7 +224,7 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
 
   // Pitch Salience
   Algorithm* ps = factory.create("PitchSalience");
-  connect(spec->output("spectrum"), ps->input("spectrum"));
+  spec->output("spectrum") >> ps->input("spectrum");
   connect(ps->output("pitchSalience"), pool, llspace + "pitch_salience");
 
   // NB: removed descriptors based on pitch estimation by PitchYinFFT
@@ -269,9 +261,7 @@ void LowLevelSpectral(SourceBase& input, Pool& pool, const Pool& options, const 
 // expects the audio source to already be equal-loudness filtered
 void LowLevelSpectralEqLoud(SourceBase& input, Pool& pool, const Pool& options, const string& nspace) {
 
-  // namespaces:
   string llspace = "lowlevel.";
-  if (!nspace.empty()) llspace = nspace + ".lowlevel.";
 
   Real sampleRate = options.value<Real>("analysisSampleRate");
   int frameSize =   int(options.value<Real>("lowlevel.frameSize"));
@@ -347,7 +337,6 @@ void Level(SourceBase& input, Pool& pool, const Pool& options, const string& nsp
 
   // namespace:
   string llspace = "lowlevel.";
-  if (!nspace.empty()) llspace = nspace + ".lowlevel.";
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
@@ -363,7 +352,7 @@ void Level(SourceBase& input, Pool& pool, const Pool& options, const string& nsp
 
   // Dynamic Descriptor
   Algorithm* dy = factory.create("Loudness");
-  connect(fc->output("frame"), dy->input("signal"));
+  fc->output("frame") >> dy->input("signal");
   connect(dy->output("loudness"), pool, llspace + "loudness");
 
 }
@@ -376,9 +365,7 @@ Real squeezeRange(Real& x, Real& x1, Real& x2) {
 
 void LevelAverage(Pool& pool, const string& nspace) {
 
-  // namespace:
   string llspace = "lowlevel.";
-  if (!nspace.empty()) llspace = nspace + ".lowlevel.";
 
   vector<Real> levelArray = pool.value<vector<Real> >(llspace + "loudness");
   pool.remove(llspace + "loudness");

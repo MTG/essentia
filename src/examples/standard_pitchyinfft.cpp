@@ -43,7 +43,6 @@ int main(int argc, char* argv[]) {
   int hopsize = 256;
   int sr = 44100;
   int zeropadding = 0;
-  Real tol = 0.1;
 
 
   // instanciate facgory and create algorithms:
@@ -68,8 +67,7 @@ int main(int argc, char* argv[]) {
 
   Algorithm* pitchDetect = factory.create("PitchYinFFT",
                                           "frameSize", framesize,
-                                          "sampleRate", sr,
-                                          "tolerance", tol);
+                                          "sampleRate", sr);
 
   // data storage
   Pool pool;

@@ -47,7 +47,7 @@ class ExtractorMfcc(essentia.streaming.CompositeBase):
         # Create and configure each inner algorithm
         fc = essentia.streaming.FrameCutter(frameSize=frameSize,
                                             hopSize=hopSize,
-                                            dropSilentFrames='noise')
+                                            silentFrames='noise')
         wnd = essentia.streaming.Windowing(type=windowType)
         spec = essentia.streaming.Spectrum()
         mfcc = essentia.streaming.MFCC()

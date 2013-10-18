@@ -28,7 +28,7 @@ using namespace essentia::streaming;
 
 
 TEST(FileOutput, Real) {
-  string filename = "buildw/test/fileoutput.txt";
+  string filename = "build/test/fileoutput.txt";
   Real inputData[] = {0.0, 0.25, 0.5, 0.75, 1.0};
 
   Algorithm* gen = new VectorInput<Real>(inputData);
@@ -60,7 +60,7 @@ TEST(FileOutput, Real) {
 
 
 TEST(FileOutput, String) {
-  string filename = "buildw/test/fileoutput.txt";
+  string filename = "build/test/fileoutput.txt";
   const char* inputData[] = {"foo", "bar"};
 
   Algorithm* gen = new VectorInput<string>(inputData);
@@ -92,7 +92,7 @@ TEST(FileOutput, String) {
 
 
 TEST(FileOutput, VectorReal) {
-  string filename = "buildw/test/fileoutput.txt";
+  string filename = "build/test/fileoutput.txt";
   Real inputData0[] = {0.0, 0.25, 0.5, 0.75};
   Real inputData1[] = {1.0, 1.25, 1.5, 1.75};
   Real inputData2[] = {2.0, 2.25, 2.5, 2.75};
@@ -127,7 +127,7 @@ TEST(FileOutput, VectorReal) {
 
 
 TEST(FileOutput, VectorString) {
-  string filename = "buildw/test/fileoutput.txt";
+  string filename = "build/test/fileoutput.txt";
   const char* inputData0[] = {"foo0", "foo01"};
   const char* inputData1[] = {"foo1", "foo11"};
   const char* inputData2[] = {"foo2", "foo21"};
@@ -160,7 +160,7 @@ TEST(FileOutput, VectorString) {
 
 
 TEST(FileOutput, Complex) {
-  string filename = "buildw/test/fileoutput.txt";
+  string filename = "build/test/fileoutput.txt";
   complex<Real> inputData[] = {complex<Real>(0,0), complex<Real>(0,1), complex<Real>(0,2), complex<Real>(0,3)};
 
   streaming::Algorithm* gen = new VectorInput<complex<Real> >(inputData);
@@ -186,7 +186,7 @@ TEST(FileOutput, Complex) {
 
 
 TEST(FileOutput, VectorComplexReal) {
-  string filename = "buildw/test/fileoutput.txt";
+  string filename = "build/test/fileoutput.txt";
   complex<Real> inputData0[] = {complex<Real>(0,0), complex<Real>(0,1), complex<Real>(0,2), complex<Real>(0,3)};
   complex<Real> inputData1[] = {complex<Real>(1,0), complex<Real>(1,1), complex<Real>(1,2), complex<Real>(1,3)};
   complex<Real> inputData2[] = {complex<Real>(2,0), complex<Real>(2,1), complex<Real>(2,2), complex<Real>(2,3)};
@@ -221,7 +221,7 @@ TEST(FileOutput, VectorComplexReal) {
 
 
 TEST(FileOutput, Array1D) {
-  string filename = "buildw/test/fileoutput.txt";
+  string filename = "build/test/fileoutput.txt";
   int size = 2;
   TNT::Array1D<Real> inputData0(size);
   TNT::Array1D<Real> inputData1(size);
@@ -276,7 +276,7 @@ TEST(FileOutput, Array1D) {
 
 
 TEST(FileOutput, Array2D) {
-  string filename = "buildw/test/fileoutput.txt";
+  string filename = "build/test/fileoutput.txt";
   int size = 3;     // number of matrices
   int M = 2, N = 3; // matrix dimensions
   vector<TNT::Array2D<Real> > inputData;
@@ -325,7 +325,7 @@ TEST(FileOutput, Array2D) {
 }
 
 TEST(FileOutput, DifferentTypes) {
-  string filename = "buildw/test/fileoutput.txt";
+  string filename = "build/test/fileoutput.txt";
   const char* inputData[] = {"foo", "bar"};
 
   streaming::Algorithm* gen = new VectorInput<string>(inputData);
@@ -339,7 +339,7 @@ TEST(FileOutput, DifferentTypes) {
 }
 
 TEST(FileOutput, DifferentSizes) {
-  string filename = "buildw/test/fileoutput.txt";
+  string filename = "build/test/fileoutput.txt";
   const char* inputData0[] = {"foo0", "foo01"};
   const char* inputData1[] = {"foo1", "foo11, foo12"};
   vector<vector<string> > inputData;
@@ -369,7 +369,7 @@ TEST(FileOutput, DifferentSizes) {
 }
 
 TEST(FileOutput, InvalidParam) {
-  string filename =  "buildw/test/invalidParam.txt";
+  string filename =  "build/test/invalidParam.txt";
   streaming::Algorithm* file = new FileOutput<vector<complex<Real> > >();
   string expected = "Parameter mode=\"unknown\" is not within specified range: {text,binary}";
   ASSERT_THROW(file->configure("filename", filename, "mode", "unknown"),

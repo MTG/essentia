@@ -17,15 +17,15 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_FIXED_BPM_ESTIMATOR_H
-#define ESSENTIA_FIXED_BPM_ESTIMATOR_H
+#ifndef ESSENTIA_NOVELTY_CURVE_FIXED_BPM_ESTIMATOR_H
+#define ESSENTIA_NOVELTY_CURVE_FIXED_BPM_ESTIMATOR_H
 
 #include "algorithm.h"
 #include "algorithmfactory.h"
 
 namespace essentia {
 namespace standard {
-class FixedBpmEstimator : public Algorithm {
+class NoveltyCurveFixedBpmEstimator : public Algorithm {
 
   protected:
     Input<std::vector<Real> > _novelty;
@@ -55,14 +55,14 @@ class FixedBpmEstimator : public Algorithm {
                         std::vector<Real>& positions, std::vector<Real>& amplitudes);
 
   public:
-    FixedBpmEstimator() {
+    NoveltyCurveFixedBpmEstimator() {
     declareInput(_novelty, "novelty", "the novelty curve of the audio signal");
     declareOutput(_bpmPositions, "bpms", "the bpm candidates sorted by magnitude");
     declareOutput(_bpmAmplitudes, "amplitudes", "the magnitude of each bpm candidate");
     _autocor = AlgorithmFactory::create("AutoCorrelation",
                                         "normalization", "unbiased");
     }
-    ~FixedBpmEstimator(){
+    ~NoveltyCurveFixedBpmEstimator(){
       delete _autocor;
     }
 
@@ -86,4 +86,4 @@ class FixedBpmEstimator : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
-#endif // ESSENTIA_FIXED_BPM_ESTIMATOR_H
+#endif // ESSENTIA_NOVELTY_CURVE_FIXED_BPM_ESTIMATOR_H

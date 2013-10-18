@@ -39,6 +39,9 @@ const char* HFC::description = DOC("This algorithm computes the High Frequency C
 "  [2] K. Jensen and T. H. Andersen, “Beat estimation on the beat,” in\n"
 "  Applications of Signal Processing to Audio and Acoustics, 2003 IEEE\n"
 "  Workshop on., 2003, pp. 87–90.\n"
+"\n"
+"  [3] High frequency content measure - Wikipedia, the free encyclopedia,\n"
+"  http://en.wikipedia.org/wiki/High_Frequency_Content_measure\n"
 );
 
 void HFC::configure() {

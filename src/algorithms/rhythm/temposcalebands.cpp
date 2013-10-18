@@ -26,11 +26,11 @@ using namespace standard;
 
 
 const char* TempoScaleBands::name = "TempoScaleBands";
-const char* TempoScaleBands::description = DOC("This algorithm computes features for tempo tracking. The output features should be used with the tempotap algorithm. See standard_tempotapExtractor in examples folder.\n"
+const char* TempoScaleBands::description = DOC("This algorithm computes features for tempo tracking. The output features should be used with the TempoTap algorithm. See standard_tempotapExtractor in examples folder.\n"
 "\n"
 "An exception is thrown if less than 1 band is given. An exception is also thrown if the there are not an equal number of bands given as band-gains given.\n"
 "\n"
-"Quality: experimental\n"
+"Quality: outdated (the associated TempoTap algorithm is outdated, however it can be potentially used as an onset detection function for other tempo estimation algorithms although no evaluation has been done)\n"
 "\n"
 "References:\n"
 "  [1] Algorithm by Fabien Gouyon and Simon Dixon. There is no reference at\n"

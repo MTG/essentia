@@ -26,10 +26,12 @@
 {% endblock %}
 
 {% block rootrellink %}
-    <li><a href="http://essentia.upf.edu">Essentia home</a>&nbsp;|&nbsp;</li>
-    <li><a href="{{ pathto('index') }}">Essentia documentation</a>&nbsp;|&nbsp;</li>
-    <li><a href="{{ pathto('contents') }}">Documentation contents</a>
-    &raquo;</li>
+    <li><a href="http://essentia.upf.edu">HOME</a>&nbsp;|&nbsp;</li>
+    <li><a href="{{ pathto('index') }}">DOCUMENTATION</a>&nbsp;|&nbsp;</li>
+    <li><a href="http://essentia.upf.edu/download">DOWNLOAD</a>&nbsp;|&nbsp;</li>
+    <li><a href="http://essentia.upf.edu/news">NEWS</a>&nbsp;|&nbsp;</li>
+    <li><a href="http://essentia.upf.edu/contact">CONTACT</a>&nbsp;|&nbsp;</li>
+    <!-- <li><a href="{{ pathto('contents') }}">Documentation contents</a>&raquo;</li> -->
 {% endblock %}
 
 {% block header %}
@@ -40,9 +42,12 @@
 
 
 {% block footer %}
-<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
-<a href="http://mtg.upf.edu" title="Universitat Pompeu Fabra - Music Technology Group"><img alt="" src="{{ pathto("_static/upf_mtg_logo.png", 1) }}" style="width: 250px; height: 57px;" /></a>
-<a href="http://www.catalonia.com/en/technology/tecnio.jsp"><img alt="" src="{{ pathto("_static/tecnio_logo.png", 1) }}" style="width: 137px; height: 60px;" /></a>
-<!--<img src="{{ pathto("_static/upf_mtg_logo.png", 1) }}" alt="UPF MTG logo" />-->
+<div style="background-color: #C81331 !important; text-align: left; padding: 10px 10px 15px 15px">
+<a href="http://mtg.upf.edu" title="Universitat Pompeu Fabra - Music Technology Group"><img alt="Universitat Pompeu Fabra - Music Technology Group" src="{{ pathto("_static/upf_mtg_logo.png", 1) }}" style="width: 276px; height: 53px; vertical-align: top; padding-top: 5px;" /></a>
+<a href="http://www.catalonia.com/en/technology/tecnio.jsp"><img alt="" src="{{ pathto("_static/tecnio_logo.png", 1) }}" style="width: 137px; height: 60px; float:right;" /></a>
 </div>
 {% endblock %}
+
+{# Omit the bottom navigation bar. #}
+{% block relbar2 %}
+{% endblock %} 

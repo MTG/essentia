@@ -10,28 +10,34 @@ Essentia documentation contents
    :maxdepth: 2
 
    introduction
-   algorithms_overview
-   design_overview
-
-   python_tutorial
-   howto_standard_extractor
-   howto_streaming_extractor
-   streaming_architecture
-
    installing
-   coding_guidelines
+   algorithms_overview
+   python_tutorial
+   extractors_out_of_box    
+   
+   design_overview
+   howto_standard_extractor
+   streaming_architecture
+   howto_streaming_extractor
+
    extending_essentia
    extending_essentia_streaming
    composite_api
    execution_network_algorithm
+   coding_guidelines
 
    licensing_information
 
 
 
-Indices and tables
+..
+    Indices and tables
+
+Search
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
+..
+    * :ref:`genindex`
+    * :ref:`modindex`
+
 * :ref:`search`
