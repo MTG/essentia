@@ -156,9 +156,9 @@ Essentia 1.1
 
 *(released August 2009)*
 
-Python bindings for the streaming mode were implemented as ESX resulted to be a maintenance 
-burden in the long-run and too limiting in the types of the possibilities it offered (it being 
-a DSL there was no other issue possible, hindsight is 20/20), 
+Python bindings for the streaming mode that were implemented as ESX resulted to be a maintenance
+burden in the long-run and too limiting in the types of the possibilities it offered, and they
+were dropped. Instead, full python bindings for the streaming mode have been written.
 
 This release also introduced the new ffmpeg audio I/O, which allowed
 to get audio from pretty much any source and in any format (even works
@@ -203,18 +203,22 @@ Essentia 2.0
 *(released ??? 2013)*
 
 This major release is the first release to be publicly available as free
-software. 
+software.
 
 It features a refactoring of the core API, a little bit for
 the standard mode to fix small API annoyances, but mostly for the streaming
 mode which is now much better defined, using sound computer science
-techniques. In particular, the scheduler that runs the algorithms in the streaming mode
+techniques (The visible network is a `directed acyclic graph`_, the composites
+have better defined semantics, and the order of execution of the algorithms
+is the `topological sort`_ of the `transitive reduction`_ of the visible network
+after the composites have been expanded). In particular, the scheduler that
+runs the algorithms in the streaming mode
 is now a lot more correct, which permitted to clean all the small hacks that
 had accumulated in the algorithms themselves during the 1.x releases to
 compensate for the deficiencies of the initial scheduler.
 
-Furthermore, the 2.0 release features new state-of-the-art algorithms for onset detection, beat 
-tracking and melody extraction, new and updated features extractors, and an updated 
+Furthermore, the 2.0 release features new state-of-the-art algorithms for onset detection, beat
+tracking and melody extraction, new and updated features extractors, and an updated
 version of the Essentia's Vamp plugin in addition to a number of bugfixes and thoroughly revised documentation.
 
 
@@ -223,3 +227,6 @@ version of the Essentia's Vamp plugin in addition to a number of bugfixes and th
 .. _Python tutorial: python_tutorial.html
 .. _"Standard" mode how-to: howto_standard_extractor.html
 .. _"Streaming" mode how-to: howto_streaming_extractor.html
+.. _directed acyclic graph: https://en.wikipedia.org/wiki/Directed_acyclic_graph
+.. _topological sort: http://en.wikipedia.org/wiki/Topological_sorting
+.. _transitive reduction: https://en.wikipedia.org/wiki/Transitive_reduction
