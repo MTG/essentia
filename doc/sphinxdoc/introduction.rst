@@ -14,9 +14,9 @@ The main design factors are (in this order):
  - performance
  - extensive collection of algorithms
 
-Essentia has been developed in the context of research activities within Music 
-Information Retrieval at hold at `Music Technology Group <http://mtg.upf.edu>`_. 
-It catters for the needs of both rapid prototyping and large-scale analysis, in particular:
+Essentia has been developed in the context of research activities in Music
+Information Retrieval that were held at the `Music Technology Group <http://mtg.upf.edu>`_.
+It caters for the needs of both rapid prototyping and large-scale analysis, in particular:
 
  - to provide an interactive environment for researchers that facilitates
    experimentation and rapid application development
