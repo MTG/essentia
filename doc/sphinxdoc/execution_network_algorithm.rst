@@ -13,10 +13,9 @@ The requirements are:
 
 * a network of connected algorithms (composite or not). They are connected via their output sources
   which connect to one or more input sink(s). Every sink is only connected to a single source.
-  Composites can only have SourceProxy/SinkProxy.
 
 * Composite define a ``declareProcessOrder()`` method, which defines the steps to be taken when
-  this algorithm should be executed. They can be one of two types:
+  this algorithm should be executed. The steps can be one of two types:
 
   * ``ChainFrom(algo)``: which runs the given algorithm and all its dependencies which are contained
     inside the Composite
@@ -32,7 +31,7 @@ Composite algorithms are described more in details in the :doc:`composite_api` p
 Algorithm description
 ---------------------
 
-The following algorithms is used. It is written in (weird) pseudo-code that is a mix of C++
+The following algorithms is used. It is written in pseudo-code that is a mix of C++
 (for showing types) and Python (for avoiding boilerplate code that comes with C++). Hopefully,
 it makes for a clear reading.
 
@@ -177,19 +176,25 @@ There are 2 main ways of running a network:
   get the execution order. Once we have the topological order, we can run each algorithm sequentially
   until the generator signals us that it is over.
 
-- the *multi-threaded* way: in this case, we will have to create tasks (using a wavefront
-  pattern [2]_, for instance) for a task library, such as Intel TBB, and let its scheduler run them.
-  Intel TBB's scheduler seems very adequate, in the sense that it does it in a computer friendly way:
-  any topological ordering is mathematically correct, but it uses
-  `DFS <http://en.wikipedia.org/wiki/Depth-first_search>`_ to build it so as to allow better cache
-  use, and steals tasks from the top of the queue [3]_.
+  This is what is implemented in the :essentia:`Network` class.
+
+- the *multi-threaded* way: in this case, we would have to create tasks (using a `wavefront
+  pattern`_, for instance) for a task library, such as Intel TBB, and let its scheduler run them.
+
+  Note that this is not implemented in Essentia 2.0. It had been implemented in a previous version, but the
+  speedup gained from parallelization was not as high as expected, as most feature extractors have a
+  long sequential part at the beginning when loading and computing the FFT, and only after that fan out
+  in a way that is parallelizable. Given that it is very common to have audio loading + FFT taking up to 30%
+  of execution time, `Amdahl's law`_ shows us that the expected returns indeed are not optimal.
+  In practice, we realized that when computing large databases of audio tracks, it is much more adequate
+  to run each extractor in a single-threaded manner but distribute them on the CPU cores, as this scales
+  linearly with the number of cores thrown at it.
 
 
-
-.. [1] this may lead to situations where we create lots of unnecessary dependencies in the graph.
-       This is not a problem as we can reduce it thereafter with a
+.. [1] this may lead to situations where we create lots of unnecessary dependencies in the execution graph.
+       This is not a problem as we reduce it thereafter with a
        `transitive reduction <http://en.wikipedia.org/wiki/Transitive_reduction>`_.
-.. [2] as shown in pattern 5 of `Intel TBB's design patterns <http://www.threadingbuildingblocks.org/uploads/81/91/Latest%20Open%20Source%20Documentation/Design_Patterns.pdf>`_.
-.. [3] For more information about TBB's scheduler, please refer to
-       `TBB reference manual <http://www.threadingbuildingblocks.org/uploads/81/91/Latest%20Open%20Source%20Documentation/Reference.pdf>`_
-       or to some of the blogs aggregated `here <http://software.intel.com/en-us/blogs/category/intel-threading-building-blocks/>`_.
+
+
+.. _wavefront pattern: http://software.intel.com/sites/products/documentation/doclib/tbb_sa/help/tbb_userguide/Design_Patterns/Wavefront.htm
+.. _Amdahl's law: https://en.wikipedia.org/wiki/Amdahl_law

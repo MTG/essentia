@@ -67,13 +67,13 @@ class as well as the ``AlgorithmFactory``. ::
 
 Here we start by calling the ``essentia::init()`` function. If you forget to do that,
 the algorithm factory will be empty and you won't be able to do much with Essentia!
-We then create a Pool, and define some parameters we will use to configure our Algorithms. ::
+We then create a Pool, and define some parameters we will use to configure our Algorithms.
 
 
 Creating the required algorithms
 --------------------------------
 
-Here we create our Algorithms, configuring them on the fly. :: 
+Here we create our Algorithms, configuring them on the fly. ::
 
   AlgorithmFactory& factory = standard::AlgorithmFactory::instance();
 
