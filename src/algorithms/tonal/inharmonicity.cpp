@@ -25,11 +25,9 @@ using namespace essentia;
 using namespace standard;
 
 const char* Inharmonicity::name = "Inharmonicity";
-const char* Inharmonicity::description = DOC("This algorithm calculates the inharmonicity of a signal given its spectral peaks. \n"
-"The inharmonicity value is computed as an energy weighted divergence of the spectral components from their closest multiple of the fundamental frequency. The fundamental frequency is taken as the first spectral peak from the input. The inharmonicity value ranges from 0 (purely harmonic signal) to 1 (inharmonic signal).\n"
-"Inharmonicity was designed to be fed by the output from the HarmonicPeaks algorithm.\n"
-"Note that DC components should be removed from the signal before obtaining its peaks. An exception is thrown if a peak is given at 0Hz.\n"
-"An exception is thrown if frequency vector is not sorted in ascendently, if it contains duplicates or if any input vector is empty.\n"
+const char* Inharmonicity::description = DOC("This algorithm calculates the inharmonicity of a signal given its spectral peaks. The inharmonicity value is computed as an energy weighted divergence of the spectral components from their closest multiple of the fundamental frequency. The fundamental frequency is taken as the first spectral peak from the input. The inharmonicity value ranges from 0 (purely harmonic signal) to 1 (inharmonic signal).\n\n"
+"Inharmonicity was designed to be fed by the output from the HarmonicPeaks algorithm. Note that DC components should be removed from the signal before obtaining its peaks. An exception is thrown if a peak is given at 0Hz.\n\n"
+"An exception is thrown if frequency vector is not sorted in ascendently, if it contains duplicates or if any input vector is empty.\n\n"
 "References:\n"
 "  [1] G. Peeters, \"A large set of audio features for sound description\n"
 "  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n"
