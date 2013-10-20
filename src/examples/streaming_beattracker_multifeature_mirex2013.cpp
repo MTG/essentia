@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
   Pool pool;
 
   cout << "Multifeature beat tracker based on BeatTrackerMultiFeature algorithm." << endl;
-  cout << "Outputs beat positions." << endl;
+  cout << "Outputs beat positions in MIREX 2013 format." << endl;
 
   if (argc != 3) {
     cout << "Error: wrong number of arguments" << endl;
@@ -57,6 +57,7 @@ int main(int argc, char* argv[]) {
   // monoloader will always resample to 44100
   monoloader->output("audio") >> beattracker->input("signal");
   connect(beattracker->output("ticks"), pool, "rhythm.ticks");
+  beattracker->output("confidence") >> NOWHERE;
 
   /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << audioFilename << " --------" << endl;

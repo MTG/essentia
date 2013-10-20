@@ -118,7 +118,7 @@ def build(ctx):
         build_example('streaming', 'mfcc')
         build_example('streaming', 'gfcc')
         build_example('streaming', 'rhythmextractor_multifeature')
-        build_example('streaming', 'beattracker_multifeature')
+        build_example('streaming', 'beattracker_multifeature_mirex2013')
         build_example('streaming', 'onsetrate')
         build_example('streaming', 'panning')
         build_example('streaming', 'tuningfrequency')

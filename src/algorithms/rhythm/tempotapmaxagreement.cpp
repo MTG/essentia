@@ -12,7 +12,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* TempoTapMaxAgreement::name = "TempoTapMaxAgreement";
-const char* TempoTapMaxAgreement::description = DOC("This algorithm estimates beat positions based on the maximum mutual agreement between given beat postion candidates, estimated by different beat trackers (or using different features) [1,2].\n"
+const char* TempoTapMaxAgreement::description = DOC("This algorithm estimates beat positions and confidence of their estimation based on the maximum mutual agreement between given beat postion candidates, estimated by different beat trackers (or using different features) [1,2].\n"
 "\n"
 "Note that the input tick times should be in ascending order and that they cannot contain negative values otherwise an exception will be thrown.\n"
 "\n"
@@ -54,6 +54,7 @@ void TempoTapMaxAgreement::reset() {
 void TempoTapMaxAgreement::compute() {
   vector<vector<Real> > tickCandidates = _tickCandidates.get(); // we need a copy
   vector<Real>& ticks = _ticks.get();
+  Real& confidence = _confidence.get();
 
   // sanity checks
   for(int i=0; i<(int) tickCandidates.size(); ++i) {
@@ -110,6 +111,7 @@ void TempoTapMaxAgreement::compute() {
 
   int selectedMethod = argmax(distanceInfogain);
   ticks = _tickCandidates.get()[selectedMethod];
+  confidence = mean(distanceInfogain);
 }
 
 

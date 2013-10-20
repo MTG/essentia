@@ -34,11 +34,12 @@ class RhythmExtractor2013 : public AlgorithmComposite {
   SinkProxy<Real> _signal;
 
   Source<std::vector<Real> > _ticks;
+  Source<Real> _confidence;
   Source<Real> _bpm;
   Source<std::vector<Real> > _estimates;
-  Source<std::vector<Real> > _rubatoStart;
-  Source<std::vector<Real> > _rubatoStop;
-  Source<int> _rubatoNumber;
+  //Source<std::vector<Real> > _rubatoStart;
+  //Source<std::vector<Real> > _rubatoStop;
+  //Source<int> _rubatoNumber;
   Source<std::vector<Real> > _bpmIntervals;
 
   Pool _pool;
@@ -51,6 +52,7 @@ class RhythmExtractor2013 : public AlgorithmComposite {
   standard::Algorithm* _bpmRubato;
   scheduler::Network* _network;
 
+  std::string _method;
   bool _configured;
   void createInnerNetwork();
   void clearAlgos();
@@ -94,10 +96,11 @@ class RhythmExtractor2013 : public Algorithm {
   Input<std::vector<Real> > _signal;
   Output<Real> _bpm;
   Output<std::vector<Real> > _ticks;
+  Output<Real> _confidence;
   Output<std::vector<Real> > _estimates;
-  Output<std::vector<Real> > _rubatoStart;
-  Output<std::vector<Real> > _rubatoStop;
-  Output<int> _rubatoNumber;
+  //Output<std::vector<Real> > _rubatoStart;
+  //Output<std::vector<Real> > _rubatoStop;
+  //Output<int> _rubatoNumber;
   Output<std::vector<Real> > _bpmIntervals;
 
   bool _configured;

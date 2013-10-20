@@ -33,6 +33,7 @@ class BeatTrackerMultiFeature : public AlgorithmComposite {
  protected:
   SinkProxy<Real>_signal;
   Source<Real> _ticks;
+  Source<Real> _confidence;
 
   Pool _pool;
 
@@ -102,6 +103,7 @@ class BeatTrackerMultiFeature : public Algorithm {
  protected:
   Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _ticks;
+  Output<Real> _confidence;
 
   streaming::Algorithm* _beatTracker;
   streaming::VectorInput<Real>* _vectorInput;
