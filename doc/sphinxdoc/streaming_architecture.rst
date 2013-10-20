@@ -236,7 +236,7 @@ for a ``Source``:
 * ``Source::acquire()`` makes sure there are enough tokens to write in the buffer and reserves them.
 * ``Source::release()`` actually produces them, and they become available to the readers.
   Remember that before this call, due to the fact that no reader windows can overlap over the
-  writing window, these tokens were inaccessible.
+  writing window, these tokens were not yet accessible.
 
 for a ``Sink``:
 
@@ -245,11 +245,10 @@ for a ``Sink``:
   the writing window does a full cycle.
 
 
-Please note that in both cases, the number of tokens you release does not need to be the
-same as the number of tokens you have reserved.
-For instance, you might want to work on the next 5 tokens of the stream, so you need to
-acquire 5 tokens, but once you're done, you can just release one single token to process
-the stream token by token.
+Please note that you can release a different number of tokens than what you acquired without
+any problem. An algorithm that implements a moving average of the last ``n`` samples would
+acquire ``n`` samples each time (the size of the window), but only release 1 sample each time
+(advance the window by 1 sample).
 
 A signal processing analogy that might help you better visualize this is:
 ``acquire(int n_tokens)`` takes the **frame size** of the data you want to analyze as argument,
