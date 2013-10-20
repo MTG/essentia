@@ -267,6 +267,7 @@ void computeStep2(const string& audioFilename, Pool& pool,
 
   neqloudSource >> rhythmExtractor->input("signal");
   connect(rhythmExtractor->output("ticks"),        pool, rhythmspace + "beats_position");
+  rhythmExtractor->output("confidence") >> NOWHERE; // dummy descriptor as 'degara' method does not estimate confidence
   connect(rhythmExtractor->output("bpm"),          pool, rhythmspace + "bpm");
   // NOTE: we do not need bpm estimates and intervals in the pool because
   //       they can be deduced from ticks position and occupy too much space
