@@ -78,6 +78,10 @@ Other useful dependencies::
 
   pip install pyyaml   # make sure to have libyaml installed first
 
+You might need to install pip before, if you are on Linux::
+  
+  sudo apt-get install python-pip
+
 
 
 Compiling Essentia

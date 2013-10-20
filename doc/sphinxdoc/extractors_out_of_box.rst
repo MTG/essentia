@@ -26,9 +26,10 @@ with the type of descriptors Essentia is able to compute or use them as a refere
   It can store results frame-wisely apart from statistical characterization, and apply segmentation. The 
   descriptor set is somewhat larger but less reliable than of ``streaming_extractor_archivemusic`` (includes 
   some unstable descriptors). 
-* ``standard_pitchyinfft``: extracts pitch for a monophonic signal using `YinFFT <documentation/reference/std_PitchYinFFT.html>`_ algorithm.
+* ``standard_pitchyinfft``: extracts pitch for a monophonic signal using `YinFFT <reference/std_PitchYinFFT.html>`_ algorithm.
+* ``streaming_predominantmelody``: extracts pitch of a predominant melody using `MELODIA <reference/std_PredominantMelody.html>`_ algorithm. 
 * ``streaming_mfcc``: extracts MFCC frames and their statistical characterization.
-* ``standard_rhythmtransform``: computes `rhythm transform <documentation/reference/std_RhythmTransform.html>`_.
+* ``standard_rhythmtransform``: computes `rhythm transform <reference/std_RhythmTransform.html>`_.
 
 Given an audio file these extractors produce a yaml or json file with results.
 

@@ -23,12 +23,10 @@ It catters for the needs of both rapid prototyping and large-scale analysis, in 
  - to compile optimized extractors to be able to run them efficiently on computing
    clusters in order to analyze large databases of audio tracks
 
-The performance requirement dictates that Essentia be written in C or C++, and
-C++ has been chosen as it also allows to have a nicer object-oriented API, which
-fits nicely in the context of audio processing.
 
-Python bindings are also provided in order to be able to use Essentia in an
-interactive development environment, and they fit naturally
+The library is developed in C++ in order to ensure high performance and provide an 
+object-oriented API that suits audio processing. Python bindings are also provided in 
+order to be able to use Essentia in an interactive development environment, and they fit naturally
 with the IPython/NumPy/Matplotlib environment (similar to Matlab).
 
 In order to further facilitate writing feature extractors, Essentia also suppports

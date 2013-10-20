@@ -112,8 +112,8 @@ computation, etc...). As a rule of thumb, you can (and should) initialize everyt
 can in the constructor (i.e., when not knowing any parameters) and initializes the rest of
 it (that is dependent on parameters) in the configure method.
 
-You will be given as input a ``ParameterMap`` where you can assume that *all* the parameters
-you declared in your ``declareParameters`` method will have been filled.
+You will be given as input a ``ParameterMap`` containing all of the parameters that you 
+declared using the ``declareParameters`` statements.
 
 
 Checking if the object is configured
