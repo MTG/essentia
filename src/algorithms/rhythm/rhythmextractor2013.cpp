@@ -30,9 +30,9 @@ namespace essentia {
 namespace streaming {
 
 const char* RhythmExtractor2013::name = "RhythmExtractor2013";
-const char* RhythmExtractor2013::description = DOC("This algorithm estimates the beat locations given an input signal, as well as its tempo in bpm. The beat locations can be computed using:\n"
+const char* RhythmExtractor2013::description = DOC("This algorithm estimates the beat locations and the confidence of their estimation given an input signal, as well as its tempo in bpm. The beat locations can be computed using:\n"
 "  - 'multifeature', the BeatTrackerMultiFeature algorithm\n"
-"  - 'degara', the BeatTrackerDegara algorithm\n"
+"  - 'degara', the BeatTrackerDegara algorithm (note that there is no confidence estimation for this method, the output confidence value is always 0)\n"
 "\n"
 "See BeatTrackerMultiFeature and  BeatTrackerDegara algorithms for more details.\n"
 "\n"
@@ -45,6 +45,7 @@ RhythmExtractor2013::RhythmExtractor2013() : AlgorithmComposite() {
   declareInput(_signal, "signal", "input signal");
 
   declareOutput(_ticks, "ticks", " the estimated tick locations [s]");
+  declareOutput(_confidence, "confidence", "confidence with which the ticks are detected (ignore this value if using 'degara' method)");
   declareOutput(_bpm, 0, "bpm", "the tempo estimation [bpm]");
   declareOutput(_estimates, 0, "estimates", "the list of bpm estimates characterizing the bpm distribution for the signal [bpm]");
   //TODO we need better rubato estimation algorithm
@@ -58,11 +59,12 @@ void RhythmExtractor2013::createInnerNetwork() {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
-  string method = parameter("method").toLower();
-  if (method == "multifeature") {
+  _method = parameter("method").toLower();
+  if (_method == "multifeature") {
     _beatTracker = factory.create("BeatTrackerMultiFeature");
+    _beatTracker->output("confidence") >> PC(_pool, "internal.confidence");
   }
-  else if (method == "degara") {
+  else if (_method == "degara") {
     _beatTracker = factory.create("BeatTrackerDegara");
   }
   //_bpmRubato = standard::AlgorithmFactory::create("BpmRubato");
@@ -71,6 +73,7 @@ void RhythmExtractor2013::createInnerNetwork() {
   _signal                           >>  _beatTracker->input("signal");
   //_beatTracker->output("ticks")     >>  _ticks;
   _beatTracker->output("ticks")     >>  PC(_pool, "internal.ticks");
+
 
   // TODO change SinkProxy in BpmRubato to Real?
   //_beatTracker->output("ticks")     >>  _bpmRubato->input("beats");
@@ -111,6 +114,14 @@ AlgorithmStatus RhythmExtractor2013::process() {
 
   const vector<Real>& ticks = _pool.value<vector<Real> >("internal.ticks");
   _ticks.push(ticks);
+
+  // 'degara' method does not output confidence
+  if (_method == "multifeature") {
+    _confidence.push(_pool.value<Real>("internal.confidence"));
+  }
+  else if (_method == "degara") {
+    _confidence.push((Real) 0);
+  }
 
   vector<Real> bpmIntervals;
   vector<Real> bpmEstimateList;
@@ -186,11 +197,11 @@ namespace essentia {
 namespace standard {
 
 const char* RhythmExtractor2013::name = "RhythmExtractor2013";
-const char* RhythmExtractor2013::description = DOC("This algorithm estimates the beat locations given an input signal, as well as its tempo in bpm and a measure of the beat variations. The beat locations can be computed using:\n"
+const char* RhythmExtractor2013::description = DOC("This algorithm estimates the beat locations and the confidence of their estimation given an input signal, as well as its tempo in bpm. The beat locations can be computed using:\n"
 "  - 'multifeature', the BeatTrackerMultiFeature algorithm\n"
-"  - 'degara', the BeatTrackerDegara algorithm\n"
+"  - 'degara', the BeatTrackerDegara algorithm (note that there is no confidence estimation for this method, the output confidence value is always 0)\n"
 "\n"
-"See BeatTrackerMultiFeature and BeatTrackerDegara algorithms for more details.\n"
+"See BeatTrackerMultiFeature and  BeatTrackerDegara algorithms for more details.\n"
 "\n"
 "Note that the algorithm requires the sample rate of the input signal to be 44100 Hz in order to work correctly.\n");
 
@@ -199,6 +210,7 @@ RhythmExtractor2013::RhythmExtractor2013() {
   declareInput(_signal, "signal", "the audio input signal");
   declareOutput(_bpm, "bpm", "the tempo estimation [bpm]");
   declareOutput(_ticks, "ticks", " the estimated tick locations [s]");
+  declareOutput(_confidence, "confidence", "confidence with which the ticks are detected (ignore this value if using 'degara' method)");
   declareOutput(_estimates, "estimates", "the list of bpm estimates characterizing the bpm distribution for the signal [bpm]");
   //declareOutput(_rubatoStart, "rubatoStart", "list of start times for rubato section [s]");
   //declareOutput(_rubatoStop, "rubatoStop", "list of stop times of rubato section [s]");
@@ -224,6 +236,7 @@ void RhythmExtractor2013::createInnerNetwork() {
 
   *_vectorInput  >>  _rhythmExtractor->input("signal");
   _rhythmExtractor->output("ticks")         >>  PC(_pool, "internal.ticks");
+  _rhythmExtractor->output("confidence")    >>  PC(_pool, "internal.confidence");
   _rhythmExtractor->output("bpm")           >>  PC(_pool, "internal.bpm");
   _rhythmExtractor->output("estimates")     >>  PC(_pool, "internal.estimates");
   //_rhythmExtractor->output("rubatoStart")   >>  PC(_pool, "internal.rubatoStart");
@@ -242,6 +255,7 @@ void RhythmExtractor2013::compute() {
 
   Real& bpm = _bpm.get();
   vector<Real>& ticks = _ticks.get();
+  Real& confidence = _confidence.get();
   vector<Real>& estimates = _estimates.get();
   //vector<Real>& rubatoStart = _rubatoStart.get();
   //vector<Real>& rubatoStop = _rubatoStop.get();
@@ -250,6 +264,7 @@ void RhythmExtractor2013::compute() {
 
   bpm = _pool.value<Real>("internal.bpm");
   ticks = _pool.value<vector<Real> >("internal.ticks");
+  confidence = _pool.value<Real>("internal.confidence");
   estimates = _pool.value<vector<Real> >("internal.estimates");
   bpmIntervals = _pool.value<vector<Real> >("internal.bpmIntervals");
   //rubatoNumber = (int) _pool.value<Real>("internal.rubatoNumber");
@@ -266,6 +281,7 @@ void RhythmExtractor2013::compute() {
 void RhythmExtractor2013::reset() {
   _network->reset();
   _pool.remove("internal.ticks");
+  _pool.remove("internal.confidence");
   _pool.remove("internal.bpm");
   _pool.remove("internal.estimates");
   _pool.remove("internal.bpmIntervals");

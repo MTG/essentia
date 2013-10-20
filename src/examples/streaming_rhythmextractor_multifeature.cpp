@@ -63,6 +63,7 @@ int main(int argc, char* argv[]) {
   connect(mono->output("audio"), rhythmextractor->input("signal"));
 
   connect(rhythmextractor->output("ticks"), pool, "rhythm.ticks");
+  connect(rhythmextractor->output("confidence"), pool, "rhythm.ticks_confidence");
   connect(rhythmextractor->output("bpm"), pool, "rhythm.bpm");
   connect(rhythmextractor->output("estimates"), pool, "rhythm.estimates");
   // FIXME we need better rubato estimation algorithm
@@ -82,6 +83,7 @@ int main(int argc, char* argv[]) {
   cout << "-------- results --------" << endl;
   cout << "bpm: " << pool.value<Real>("rhythm.bpm") << endl;
   cout << "ticks: " << pool.value<vector<Real> >("rhythm.ticks") << endl;
+  cout << "ticks detection confidence: " << pool.value<Real>("rhythm.ticks_confidence") << endl; 
   cout << "estimates: " << pool.value<vector<Real> >("rhythm.estimates") << endl;
   cout << "bpmIntervals: " << pool.value<vector<Real> >("rhythm.bpmIntervals") << endl;
   //cout << "rubatoNumber:" << (int) pool.value<Real>("rhythm.rubatoNumber") << endl;
