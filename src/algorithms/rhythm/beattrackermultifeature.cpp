@@ -227,11 +227,24 @@ AlgorithmStatus BeatTrackerMultiFeature::process() {
   Real confidence;
 
   tickCandidates.resize(5);
-  tickCandidates[0] = _pool.value<vector<Real> >("internal.ticksComplex");
-  tickCandidates[1] = _pool.value<vector<Real> >("internal.ticksRms");
-  tickCandidates[2] = _pool.value<vector<Real> >("internal.ticksMelFlux");
-  tickCandidates[3] = _pool.value<vector<Real> >("internal.ticksBeatEmphasis");
-  tickCandidates[4] = _pool.value<vector<Real> >("internal.ticksInfogain");
+
+  // ticks candidates might be empty for very short signals, but
+  // it is ok to feed empty tick vetors to TempoTapMaxAgreement
+  if (_pool.contains<vector<Real> >("internal.ticksComplex")) {
+    tickCandidates[0] = _pool.value<vector<Real> >("internal.ticksComplex");
+  }
+  if (_pool.contains<vector<Real> >("internal.ticksRms")) {
+    tickCandidates[1] = _pool.value<vector<Real> >("internal.ticksRms");
+  }
+  if (_pool.contains<vector<Real> >("internal.ticksMelFlux")) {
+    tickCandidates[2] = _pool.value<vector<Real> >("internal.ticksMelFlux");
+  }
+  if (_pool.contains<vector<Real> >("internal.ticksBeatEmphasis")) {
+    tickCandidates[3] = _pool.value<vector<Real> >("internal.ticksBeatEmphasis");
+  }
+  if (_pool.contains<vector<Real> >("internal.ticksInfogain")) {
+    tickCandidates[4] = _pool.value<vector<Real> >("internal.ticksInfogain");
+  }
 
   _tempoTapMaxAgreement->input("tickCandidates").set(tickCandidates);
   _tempoTapMaxAgreement->output("ticks").set(ticks);

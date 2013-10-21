@@ -55,8 +55,8 @@ int main(int argc, char* argv[]) {
   cout << "-------- connecting algos --------" << endl;
 
   // monoloader will always resample to 44100
-  monoloader->output("audio") >> beattracker->input("signal");
-  connect(beattracker->output("ticks"), pool, "rhythm.ticks");
+  monoloader->output("audio")       >> beattracker->input("signal");
+  beattracker->output("ticks")      >> PC(pool, "rhythm.ticks");
   beattracker->output("confidence") >> NOWHERE;
 
   /////////// STARTING THE ALGORITHMS //////////////////
@@ -67,7 +67,10 @@ int main(int argc, char* argv[]) {
 
 
   // writing results to file
-  vector<Real> ticks = pool.value<vector<Real> >("rhythm.ticks");
+  vector<Real> ticks;
+  if (pool.contains<vector<Real> >("rhythm.ticks")) { // there might be empty ticks
+    ticks = pool.value<vector<Real> >("rhythm.ticks");
+  }
   ostream* fileStream = new ofstream(outputFilename.c_str());
   for (size_t i=0; i<ticks.size(); ++i) {
     *fileStream << ticks[i] << "\n";

@@ -112,9 +112,6 @@ void RhythmExtractor2013::configure() {
 AlgorithmStatus RhythmExtractor2013::process() {
   if (!shouldStop()) return PASS;
 
-  const vector<Real>& ticks = _pool.value<vector<Real> >("internal.ticks");
-  _ticks.push(ticks);
-
   // 'degara' method does not output confidence
   if (_method == "multifeature") {
     _confidence.push(_pool.value<Real>("internal.confidence"));
@@ -122,31 +119,42 @@ AlgorithmStatus RhythmExtractor2013::process() {
   else if (_method == "degara") {
     _confidence.push((Real) 0);
   }
-
+  
   vector<Real> bpmIntervals;
   vector<Real> bpmEstimateList;
-  if (ticks.size() > 1) {
-    // computing beats intervals
-    bpmIntervals.reserve(ticks.size() - 1);
-    bpmEstimateList.reserve(bpmIntervals.size());
-    for (size_t i = 1; i < ticks.size(); i++) {
-      bpmIntervals.push_back(ticks[i] - ticks[i-1]);
-      bpmEstimateList.push_back(60. / bpmIntervals.back()); // period to bpm
+
+  // push ticks if any, otherwise push an empty vector 
+  if (_pool.contains<vector<Real> >("internal.ticks")) {
+    const vector<Real>& ticks = _pool.value<vector<Real> >("internal.ticks");
+    _ticks.push(ticks);
+
+    if (ticks.size() > 1) {
+      // computing beats intervals
+      bpmIntervals.reserve(ticks.size() - 1);
+      bpmEstimateList.reserve(bpmIntervals.size());
+      for (size_t i = 1; i < ticks.size(); i++) {
+        bpmIntervals.push_back(ticks[i] - ticks[i-1]);
+        bpmEstimateList.push_back(60. / bpmIntervals.back()); // period to bpm
+      }
+
+      // computing rubato regions
+      //vector<Real> rubatoStart, rubatoStop;
+      //int rubatoNumber;
+      //_bpmRubato->input("beats").set(ticks);
+      //_bpmRubato->output("rubatoStart").set(rubatoStart);
+      //_bpmRubato->output("rubatoStop").set(rubatoStop);
+      //_bpmRubato->output("rubatoNumber").set(rubatoNumber);
+      //_bpmRubato->compute();
+
+      //_rubatoStart.push(rubatoStart);
+      //_rubatoStop.push(rubatoStop);
+      //_rubatoNumber.push(rubatoNumber);
     }
-
-    // computing rubato regions
-    //vector<Real> rubatoStart, rubatoStop;
-    //int rubatoNumber;
-    //_bpmRubato->input("beats").set(ticks);
-    //_bpmRubato->output("rubatoStart").set(rubatoStart);
-    //_bpmRubato->output("rubatoStop").set(rubatoStop);
-    //_bpmRubato->output("rubatoNumber").set(rubatoNumber);
-    //_bpmRubato->compute();
-
-    //_rubatoStart.push(rubatoStart);
-    //_rubatoStop.push(rubatoStop);
-    //_rubatoNumber.push(rubatoNumber);
   }
+  else {
+    _ticks.push(vector<Real>());
+  }
+
   _bpmIntervals.push(bpmIntervals);
 
   // estimate bpm. TODO why is _periodTolerance necessary? MAGIC NUMBER?
