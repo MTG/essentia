@@ -82,7 +82,6 @@ void TempoTapMaxAgreement::compute() {
 
   int numberMethods = (int) tickCandidates.size();
   vector<vector<Real> > infogain(numberMethods, vector<Real> (numberMethods, 0.));
-  vector<vector<Real> > accuracy(numberMethods, vector<Real> (numberMethods, 0.));
 
   for (int i=0; i<numberMethods; ++i) {
     for (int j=i+1; j<numberMethods; ++j) {
