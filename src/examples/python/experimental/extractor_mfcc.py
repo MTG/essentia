@@ -18,6 +18,8 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
+# TODO probably this code is completely outdated for Essentia 2.0, storing this code just in case
+
 
 import sys
 import essentia, essentia.streaming, essentia.standard
