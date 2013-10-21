@@ -1,6 +1,6 @@
 Essentia developers
 -----------------
-Nicolas Wack (essentia@wackou.otherinbox.com)
+Nicolas Wack (wackou@gmail.com)
     general architecture & design, streaming, python bindings, documentation
 Dmitry Bogdanov (dmitry.bogdanov@upf.edu)
     algorithm development, general architecture, documentation
@@ -13,6 +13,8 @@ Eduard Aylon
 Bram de Jong
     general architecture, algorithm development
 Thomas Aussenac
+    algorithm development, documentation
+Andreas Beisler
     algorithm development, documentation
 Paul Brossier
     algorithm development
