@@ -26,7 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* MonoMixer::name = "MonoMixer";
-const char* MonoMixer::description = DOC("Given a stereo signal, this algorithm downmixes the signal into a single channel and outputs the number of channels and the sampling rate of the orignal signal. If the signal was already a monoaural, it is left unchanged.\n"
+const char* MonoMixer::description = DOC("Given a stereo signal, this algorithm downmixes the signal into a single channel. If the signal was already a monoaural, it is left unchanged.\n"
 "\n"
 "References:\n"
 "  [1] downmixing - Wikipedia, the free encyclopedia,\n"
