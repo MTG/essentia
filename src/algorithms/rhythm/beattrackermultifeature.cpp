@@ -35,10 +35,10 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "  - spectral flux between histogrammed spectrum frames, measured by the modified information gain (see 'infogain' method in OnsetDetectionGlobal algorithm, 2048/512)\n"
 "\n"
 "You can follow this guidelines [1] to assess the quality of beats estimation based on the computed confidence value:\n"
-"  - [0, 1)     very low confidence, the input signal is hard for the employed candidate beat trackers\n"
-"  - [1, 1.5]   low confidence\n"
-"  - (1.5, 3.5] good confidence, accuracy around 80% in AMLt measure\n"
-"  - > 3.5      excellent confidence\n"
+"  - [0, 1)      very low confidence, the input signal is hard for the employed candidate beat trackers\n"
+"  - [1, 1.5]    low confidence\n"
+"  - (1.5, 3.5]  good confidence, accuracy around 80% in AMLt measure\n"
+"  - (3.5, 5.32] excellent confidence\n"
 "\n"
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
@@ -56,7 +56,7 @@ BeatTrackerMultiFeature::BeatTrackerMultiFeature() : AlgorithmComposite(),
 
   declareInput(_signal, 1024, "signal", "input signal");
   declareOutput(_ticks, 0, "ticks", "the estimated tick locations [s]");
-  declareOutput(_confidence, "confidence", "confidence of the beat tracker");
+  declareOutput(_confidence, "confidence", "confidence of the beat tracker [0, 5.32]");
 
   // NB: We want to have the same output stream type as in TempoTapTicks for
   // consistency. We need to increase buffer size of the output because the
@@ -281,10 +281,10 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "  - spectral flux between histogrammed spectrum frames, measured by the modified information gain (see 'infogain' method in OnsetDetectionGlobal algorithm, 2048/512)\n"
 "\n"
 "You can follow this guidelines [1] to assess the quality of beats estimation based on the computed confidence value:\n"
-"  - [0, 1)     very low confidence, the input signal is hard for the employed candidate beat trackers\n"
-"  - [1, 1.5]   low confidence\n"
-"  - (1.5, 3.5] good confidence, accuracy around 80% in AMLt measure\n"
-"  - > 3.5      excellent confidence\n"
+"  - [0, 1)      very low confidence, the input signal is hard for the employed candidate beat trackers\n"
+"  - [1, 1.5]    low confidence\n"
+"  - (1.5, 3.5]  good confidence, accuracy around 80% in AMLt measure\n"
+"  - (3.5, 5.32] excellent confidence\n"
 "\n"
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
@@ -296,7 +296,7 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 BeatTrackerMultiFeature::BeatTrackerMultiFeature() {
   declareInput(_signal, "signal", "the audio input signal");
   declareOutput(_ticks, "ticks", " the estimated tick locations [s]");
-  declareOutput(_confidence, "confidence", "confidence of the beat tracker");
+  declareOutput(_confidence, "confidence", "confidence of the beat tracker [0, 5.32]");
 
   createInnerNetwork();
 }
