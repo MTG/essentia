@@ -42,12 +42,13 @@ Installing dependencies on Mac OS X
 
 Install a scientific python environment first:
 
-1. install homebrew (package manager): http://mxcl.github.io/homebrew/
-2. install prerequisites: ``brew install pkg-config gfortran readline sqlite gdbm freetype libpng``
-3. install python: ``brew install python --framework``
-4. install ipython and numpy: ``pip install ipython numpy``
-5. install matplotlib: ``pip install matplotlib``
-6. when launching ipython, use:
+1. install Command Line Tools for Xcode: https://github.com/mxcl/homebrew/wiki/Installation
+2. install homebrew (package manager): http://brew.sh/
+3. install prerequisites: ``brew install pkg-config gfortran readline sqlite gdbm freetype libpng``
+4. install python: ``brew install python --framework``
+5. install ipython and numpy: ``pip install ipython numpy``
+6. install matplotlib: ``pip install matplotlib``
+7. when launching ipython, use:
 
   a. ``ipython --pylab``    if you have matplotlib >= 1.3
   b. ``ipython --pylab=tk`` if you have matplotlib < 1.3
