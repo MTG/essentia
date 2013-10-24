@@ -36,7 +36,7 @@ class TempoTapMaxAgreement : public Algorithm {
   TempoTapMaxAgreement() {
     declareInput(_tickCandidates, "tickCandidates", "the tick candidates estimated using different beat trackers (or features) [s]");
     declareOutput(_ticks, "ticks", "the list of resulting ticks [s]");
-    declareOutput(_confidence, "confidence", "confidence with which the ticks were detected");
+    declareOutput(_confidence, "confidence", "confidence with which the ticks were detected [0, 5.32]");
   }
 
   ~TempoTapMaxAgreement() {
@@ -55,6 +55,8 @@ class TempoTapMaxAgreement : public Algorithm {
  private:
   static const Real _minTickTime = 5.;  // ignore peaks before this time [s]
   static const int _numberBins = 40; // number of histogram bins for information gain method
+                                     // corresponds to Log2(40) = 5.32 maximum
+                                     // confidence value
 
   std::vector<Real> _histogramBins;
   std::vector<Real> _binValues;

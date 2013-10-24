@@ -193,7 +193,7 @@ sinks. It is highly recommended to read this paper, as some concepts and vocabul
 http://hillside.net/plop/2006/Papers/Library/audioPatterns_20060809.pdf
 
 If you don't want to read the whole paper, you should make sure that you know and
-understand at least the following concepts: token, typed connections, multiple window circular buffer
+understand at least the following concepts: token, typed connections, multiple window circular buffer.
 
 There is one notable difference with the aforementioned article, which is that in-ports
 (resp. out-ports) are called sinks (resp. sources) in Essentia.
