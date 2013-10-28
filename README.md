@@ -15,10 +15,12 @@ experiments and development of large-scale industrial applications.
 
 Documentation online: http://essentia.upf.edu/
 
-Installation HOWTO: http://essentia.upf.edu/documentation/installing.html
+Installation HOWTO: http://essentia.upf.edu/documentation/installing.html or read the doc/sphinxdoc/installing.rst file
+in the code. 
 
 Quick start using python: http://essentia.upf.edu/documentation/python_tutorial.html
 
-Windows platform is not supported until the official release.
-
+Essentia does compile and run correctly on Windows, however there is no Visual Studio project readily available, so you
+will have to setup one yourself and compile the dependencies too. We will be working on Windows installer in the near
+future.
 
