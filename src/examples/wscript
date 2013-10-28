@@ -125,6 +125,21 @@ def build(ctx):
         build_example('streaming', 'key')
         build_example('streaming', 'pitchyinfft')
         build_example('streaming', 'predominantmelody')
+        
+        freesound_files = [ 'streaming_extractor_freesound.cpp',
+			     'freesound/FreesoundExtractor.cpp',
+			     'freesound/FreesoundLowlevelDescriptors.cpp',
+			     'freesound/FreesoundRhythmDescriptors.cpp',
+			     'freesound/FreesoundTonalDescriptors.cpp',
+			     'freesound/FreesoundSfxDescriptors.cpp'
+	    ]
+
+        ctx.program(source = ctx.path.ant_glob(' '.join(freesound_files)),
+                        target = 'streaming_extractor_freesound',
+                        includes = [ '.', '..' ,'../..'],
+                        use      = 'essentia ' + ctx.env.USES,
+                        install_path = None)
+
 
 
 
