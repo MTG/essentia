@@ -415,14 +415,14 @@ int AudioLoader::decodePacket() {
 #endif
 
     if (len != _packet.size) {
-        // FIXME: the following doesn't seem to happen anymore, probably some old
-        //        workaround for ffmpeg. Complain loudly if something looks fishy
+        // FIXME: investigate why this happens and whether it is a big issue
+        //        (looks like it only loses silent samples at the end of files)
 
         // more than 1 frame in a packet, happens a lot with flac for instance...
-        const char msg[] = "AudioLoader: more than 1 frame in packet, not supported anymore... "
-            "Please report the issue with the file that caused it.";
-        E_ERROR(msg);
-        throw EssentiaException(msg);
+        E_WARNING("AudioLoader: more than 1 frame in packet, dropping remaining bytes...");
+        E_WARNING("at sample index: " << output("audio").totalProduced());
+        E_WARNING("decoded samples: " << len);
+        E_WARNING("packet size: " << _packet.size);
     }
 
     return len;
