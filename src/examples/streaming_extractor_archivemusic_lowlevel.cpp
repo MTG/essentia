@@ -332,7 +332,6 @@ void LowLevelSpectralEqLoud(SourceBase& input, Pool& pool, const Pool& options, 
   connect(sc->output("spectralValley"), pool, llspace + "spectral_contrast_valleys");
 }
 
-// expects the audio source to already be equal-loudness filtered
 void Level(SourceBase& input, Pool& pool, const Pool& options, const string& nspace) {
 
   // namespace:
