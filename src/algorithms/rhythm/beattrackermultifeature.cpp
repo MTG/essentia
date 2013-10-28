@@ -34,7 +34,7 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "  - beat emphasis function (see 'beat_emphasis' method in OnsetDetectionGlobal algorithm, 2048/512)\n"
 "  - spectral flux between histogrammed spectrum frames, measured by the modified information gain (see 'infogain' method in OnsetDetectionGlobal algorithm, 2048/512)\n"
 "\n"
-"You can follow this guidelines [1] to assess the quality of beats estimation based on the computed confidence value:\n"
+"You can follow these guidelines [2] to assess the quality of beats estimation based on the computed confidence value:\n"
 "  - [0, 1)      very low confidence, the input signal is hard for the employed candidate beat trackers\n"
 "  - [1, 1.5]    low confidence\n"
 "  - (1.5, 3.5]  good confidence, accuracy around 80% in AMLt measure\n"
@@ -44,7 +44,11 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "\n"
 "References:\n"
 "  [1] J. Zapata, M.E.P. Davies and E. Gómez, \"Multi Feature Beat tracker,\"\n"
-"  submitted article to IEEE TSALP, 2013.\n");
+"  submitted article to IEEE TSALP, 2013.\n"
+"  [2] J.R. Zapata, A. Holzapfel, M.E.P. Davies, J.L. Oliveira, F. Gouyon,\n"
+"  \"Assigning a confidence threshold on automatic beat annotation in large\n"
+"  datasets\", International Society for Music Information Retrieval Conference\n"
+"  (ISMIR'12), pp. 157-162, 2012\n");
 
 //TODO update ref [1] when the article gets published
 
@@ -280,7 +284,7 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "  - beat emphasis function (see 'beat_emphasis' method in OnsetDetectionGlobal algorithm, 2048/512)\n"
 "  - spectral flux between histogrammed spectrum frames, measured by the modified information gain (see 'infogain' method in OnsetDetectionGlobal algorithm, 2048/512)\n"
 "\n"
-"You can follow this guidelines [1] to assess the quality of beats estimation based on the computed confidence value:\n"
+"You can follow these guidelines [2] to assess the quality of beats estimation based on the computed confidence value:\n"
 "  - [0, 1)      very low confidence, the input signal is hard for the employed candidate beat trackers\n"
 "  - [1, 1.5]    low confidence\n"
 "  - (1.5, 3.5]  good confidence, accuracy around 80% in AMLt measure\n"
@@ -290,7 +294,11 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "\n"
 "References:\n"
 "  [1] J. Zapata, M.E.P. Davies and E. Gómez, \"Multi Feature Beat tracker,\"\n"
-"  submitted article to IEEE TSALP, 2013.\n");
+"  submitted article to IEEE TSALP, 2013.\n"
+"  [2] J.R. Zapata, A. Holzapfel, M.E.P. Davies, J.L. Oliveira, F. Gouyon,\n"
+"  \"Assigning a confidence threshold on automatic beat annotation in large\n"
+"  datasets\", International Society for Music Information Retrieval Conference\n"
+"  (ISMIR'12), pp. 157-162, 2012\n");
 
 
 BeatTrackerMultiFeature::BeatTrackerMultiFeature() {
