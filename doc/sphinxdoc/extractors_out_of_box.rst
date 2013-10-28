@@ -21,6 +21,7 @@ with the type of descriptors Essentia is able to compute or use them as a refere
 * ``streaming_extractor_archivemusic``: computes a large set of spectral, time-domain, rhythm and tonal descriptors. 
   The frame-wise descriptors are summarized by their statistical distribution. This extractor is suited for batch 
   computations on large music collections.
+* ``streaming_extractor_freesound``: similar extractor recommended for sound analysis. This extractor is used by `Freesound <http://freesound.org>`_ in order to provide sound analysis API and search by similar sounds functionality.
 * ``streaming_extractor``: a bit old extractor with a very cumbersome code (that should be rewritten) that 
   computes a large set of descriptors with a possibility of being parametrized given a profile file. 
   It can store results frame-wisely apart from statistical characterization, and apply segmentation. The 
