@@ -105,3 +105,24 @@ Essentia 1.3:
  - New rhythm descriptors, bpm and beat tracking using Meinhard Mueller's technique described in his paper from ISMIR 2009.
  - streaming_extractor can now be configured using a YAML configuration file
  - the usual assortment of bugfixes.
+
+
+
+      ----------------------------------------------------------------------
+
+Essentia 2.0:
+ - First release to be publicly available as free software released under AGPLv3.
+ - Refactoring of the core API
+	- fix small API annoyances for the standard mode
+	- streaming mode refactor. It is now much better defined, using sound computer science techniques (The visible
+	network is a directed acyclic graph, the composites have better defined semantics, and the order of execution of the
+	algorithms is the topological sort of the transitive reduction of the visible network after the composites have been
+	expanded). In particular, the scheduler that runs the algorithms in the streaming mode is now a lot more correct,
+	which permitted to clean all the small hacks that had accumulated in the algorithms themselves during the 1.x
+	releases to compensate for the deficiencies of the initial scheduler.
+ - New algorithms for onset detection, beat tracking and melody extraction
+ - New and updated features extractors
+ - Updated Vamp plugin
+ - Much better documentation, more python examples
+ - Bugfixes, more unittests, etc.
+
