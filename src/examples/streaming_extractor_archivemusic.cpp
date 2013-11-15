@@ -251,10 +251,13 @@ void computeStep2(const string& audioFilename, Pool& pool,
   // must use the eqloudSouce instead of neqloudSource
   LowLevelSpectralEqLoud(eqloudSource, pool, options);
 
-  // Level Descriptor
-  // expects the audio source to already be equal-loudness filtered, so it
-  // must use the eqloudSouce instead of neqloudSource
-  Level(eqloudSource, pool, options);
+  // Compute loudness using non-eqloud signal. Note that we could also use eqloud
+  // signal (as did the extractors in Essentia 1.3) that would correspond to a 
+  // "perceptual loudness". However, we opt for non-eqloud, as we can expect
+  // that the performance  won't change much and there are better perceptual 
+  // loudness estimation techniques.
+  
+  Level(neqloudSource, pool, options);
 
   // Tuning Frequency
   TuningFrequency(neqloudSource, pool, options);
