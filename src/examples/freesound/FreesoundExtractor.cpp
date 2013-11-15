@@ -64,6 +64,9 @@ void FreesoundExtractor::compute(const string& audioFilename){
   Network network2(loader2,false); // what about results as source
   network2.run();
 
+
+
+
   lowlevel->computeAverageLoudness(results);
 
   cout << "Compute Aggregation"<<endl; 
@@ -90,6 +93,23 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
   aggregator->output("output").set(poolStats);
 
   aggregator->compute();
+
+
+
+  // add descriptors that may be missing due to content
+  const Real emptyVector[] = { 0, 0, 0, 0, 0, 0};
+  
+  int statsSize = int(sizeof(defaultStats)/sizeof(defaultStats[0]));
+  
+  if(!pool.contains<vector<Real> >("rhythm.beats_loudness"))
+    for (uint i=0; i<statsSize; i++) 
+        poolStats.set(string("rhythm.beats_loudness.")+defaultStats[i],0);   
+    //results.add("rhythm.beats_loudness",emptyArray);
+  if(!pool.contains<vector<Real> >("rhythm.beats_loudness_band_ratio"))
+    for (uint i=0; i<statsSize; i++) 
+      poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],arrayToVector<Real>(emptyVector));
+
+
 
   delete aggregator;
 
