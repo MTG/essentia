@@ -198,7 +198,7 @@ with a lot of fixes.
 Essentia 2.0
 ^^^^^^^^^^^^
 
-*(released ??? 2013)*
+*(released October 2013)*
 
 This major release is the first release to be publicly available as free
 software.
