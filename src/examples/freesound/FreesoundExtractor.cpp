@@ -94,7 +94,6 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
 
   aggregator->compute();
 
-
   // add descriptors that may be missing due to content
   const Real emptyVector[] = { 0, 0, 0, 0, 0, 0};
   
@@ -108,6 +107,17 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
     for (uint i=0; i<statsSize; i++) 
       poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
         arrayToVector<Real>(emptyVector));
+  else if (pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio").size()<2){
+      poolStats.remove(string("rhythm.beats_loudness_band_ratio"));
+      for (uint i=0; i<statsSize; i++) {
+        if(i==1 || i==6 || i==7)// var, dvar and dvar2 are 0
+          poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
+              arrayToVector<Real>(emptyVector));
+        else
+          poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
+              pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio")[0]);
+      }
+  }
 
   delete aggregator;
 
