@@ -30,7 +30,12 @@ namespace standard {
 const char* NoveltyCurveFixedBpmEstimator::name = "NoveltyCurveFixedBpmEstimator";
 const char* NoveltyCurveFixedBpmEstimator::version = "1.0";
 const char* NoveltyCurveFixedBpmEstimator::description = DOC("Given the novelty curve (see NoveltyCurve algorithm), this algorithm outputs a histogram of the most probable bpms assuming the signal has constant tempo."
-"This algorithm is based on the autocorrelation of the novelty curve and should only be used for signals that have a constant tempo or as a first tempo estimator to be used  in conjunction with other algorithms such as BpmHistogram\n");
+"This algorithm is based on the autocorrelation of the novelty curve and should only be used for signals that have a constant tempo or as a first tempo estimator to be used  in conjunction with other algorithms such as BpmHistogram."
+"It is a simplified version of the algorithm described in [1] as, in order to predict the best BPM candidate,  it computes autocorrelation of the entire novelty curve instead of analyzing it on frames and histogramming the peaks over frames.\n"
+"\n"
+"References:\n"
+"  [1] E. Aylon and N. Wack, \"Beat detection using plp,\" in Music Information\n"
+"  Retrieval Evaluation Exchange (MIREX’10), 2010.\n");
 
 void NoveltyCurveFixedBpmEstimator::configure() {
   _sampleRate = parameter("sampleRate").toReal();
