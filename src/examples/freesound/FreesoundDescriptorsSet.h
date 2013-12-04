@@ -29,6 +29,7 @@
 #include "essentia/streaming/streamingalgorithm.h"
 #include "essentia/algorithmfactory.h"
 #include "essentia/streaming/algorithms/poolstorage.h"
+#include "essentia/streaming/algorithms/vectorinput.h"
 
 using namespace std;
 using namespace essentia;
