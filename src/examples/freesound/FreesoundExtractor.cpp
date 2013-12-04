@@ -25,19 +25,18 @@ using namespace scheduler;
 
 void FreesoundExtractor::compute(const string& audioFilename){
 
-	streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
- 	Real analysisSampleRate = 44100;
+   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
+   Real analysisSampleRate = 44100;
+   results.set("metadata.audio_properties.equal_loudness", false); 
+   results.set("metadata.version.freesound_extractor", EXTRACTOR_VERSION); 
 
-	results.set("metadata.audio_properties.equal_loudness", false); 
-  results.set("metadata.version.freesound_extractor", EXTRACTOR_VERSION); 
-
- 	Algorithm* loader = factory.create("EasyLoader",
+   Algorithm* loader = factory.create("EasyLoader",
                                       "filename",   audioFilename,
                                       "sampleRate", analysisSampleRate);
   
- 	SourceBase& source = loader->output("audio");
+   SourceBase& source = loader->output("audio");
 
- 	
+  
   FreesoundLowlevelDescriptors *lowlevel = new FreesoundLowlevelDescriptors();
   FreesoundRhythmDescriptors *rhythm = new FreesoundRhythmDescriptors();
   FreesoundTonalDescriptors *tonal = new FreesoundTonalDescriptors();
@@ -48,8 +47,8 @@ void FreesoundExtractor::compute(const string& audioFilename){
   tonal->createNetwork(source,results);
   sfx->createNetwork(source,results);
 
- 	Network network(loader,false);
- 	network.run();
+  Network network(loader,false);
+  network.run();
 
   // Descriptors that require values from other descriptors in the previous chain
 
