@@ -28,11 +28,14 @@
 #include  "essentia/streaming/streamingalgorithm.h"
 #include  "essentia/algorithmfactory.h"
 #include  "essentia/streaming/algorithms/poolstorage.h"
+ #include "essentia/streaming/algorithms/vectorinput.h"
 
 #include "FreesoundLowlevelDescriptors.h"
 #include "FreesoundRhythmDescriptors.h"
 #include "FreesoundTonalDescriptors.h"
 #include "FreesoundSfxDescriptors.h"
+
+#define EXTRACTOR_VERSION "0.2"
 
 using namespace std;
 using namespace essentia;
