@@ -25,20 +25,18 @@ using namespace scheduler;
 
 void FreesoundExtractor::compute(const string& audioFilename){
 
+   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
+   Real analysisSampleRate = 44100;
+   results.set("metadata.audio_properties.equal_loudness", false); 
+   results.set("metadata.version.freesound_extractor", EXTRACTOR_VERSION); 
 
-  // make pools here
-	streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
- 	Real analysisSampleRate = 44100;
-
-	results.set("metadata.audio_properties.equal_loudness", false); 
-
- 	Algorithm* loader = factory.create("EasyLoader",
+   Algorithm* loader = factory.create("EasyLoader",
                                       "filename",   audioFilename,
                                       "sampleRate", analysisSampleRate);
   
- 	SourceBase& source = loader->output("audio");
+   SourceBase& source = loader->output("audio");
 
- 	
+  
   FreesoundLowlevelDescriptors *lowlevel = new FreesoundLowlevelDescriptors();
   FreesoundRhythmDescriptors *rhythm = new FreesoundRhythmDescriptors();
   FreesoundTonalDescriptors *tonal = new FreesoundTonalDescriptors();
@@ -49,20 +47,28 @@ void FreesoundExtractor::compute(const string& audioFilename){
   tonal->createNetwork(source,results);
   sfx->createNetwork(source,results);
 
- 	Network network(loader,false);
- 	network.run();
+  Network network(loader,false);
+  network.run();
 
   // Descriptors that require values from other descriptors in the previous chain
 
-  // TODO: should it need new network?
+  vector<Real> pitch = results.value<vector<Real> >("lowlevel.pitch");
+  VectorInput<Real> *pitchVector = new VectorInput<Real>();
+  pitchVector->setVector(&pitch);
+
   Algorithm* loader2 = factory.create("EasyLoader",
                                       "filename",   audioFilename,
                                       "sampleRate", analysisSampleRate);
   rhythm->createBeatsLoudnessNetwork(loader2->output("audio"), results);
-  sfx->createPitchNetwork(loader2->output("audio"), results);
- 
-  Network network2(loader2,false); // what about results as source
+  sfx->createHarmonicityNetwork(loader2->output("audio"), results); 
+
+  Network network2(loader2,false);
   network2.run();
+
+  sfx->createPitchNetwork(*pitchVector, results);
+
+  Network sfxPitchNetwork(pitchVector);
+  sfxPitchNetwork.run();
 
   lowlevel->computeAverageLoudness(results);
 
@@ -81,7 +87,6 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
   map<string, vector<string> > exceptions;
   //TODO: review exceptions
 
-
   standard::Algorithm* aggregator = standard::AlgorithmFactory::create("PoolAggregator",
                                                                        "defaultStats", arrayToVector<string>(defaultStats),
                                                                        "exceptions", exceptions);
@@ -90,6 +95,31 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
   aggregator->output("output").set(poolStats);
 
   aggregator->compute();
+
+  // add descriptors that may be missing due to content
+  const Real emptyVector[] = { 0, 0, 0, 0, 0, 0};
+  
+  int statsSize = int(sizeof(defaultStats)/sizeof(defaultStats[0]));
+
+  if(!pool.contains<vector<Real> >("rhythm.beats_loudness")){
+    for (uint i=0; i<statsSize; i++)
+        poolStats.set(string("rhythm.beats_loudness.")+defaultStats[i],0); 
+    }
+  if(!pool.contains<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio"))
+    for (uint i=0; i<statsSize; i++) 
+      poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
+        arrayToVector<Real>(emptyVector));
+  else if (pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio").size()<2){
+      poolStats.remove(string("rhythm.beats_loudness_band_ratio"));
+      for (uint i=0; i<statsSize; i++) {
+        if(i==1 || i==6 || i==7)// var, dvar and dvar2 are 0
+          poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
+              arrayToVector<Real>(emptyVector));
+        else
+          poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
+              pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio")[0]);
+      }
+  }
 
   delete aggregator;
 
