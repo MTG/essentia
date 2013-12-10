@@ -51,7 +51,7 @@ class Spectrum : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("size", "the expected size of the input audio signal (this is an optional parameter to optimize memory allocation)", "[1,inf)", 1024);
+    declareParameter("size", "the expected size of the input audio signal (this is an optional parameter to optimize memory allocation)", "[1,inf)", 2048);
   }
 
   void configure();
