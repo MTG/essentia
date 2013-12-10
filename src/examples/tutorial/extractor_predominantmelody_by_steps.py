@@ -50,7 +50,6 @@ run_pitch_salience_function = PitchSalienceFunction()
 run_pitch_salience_function_peaks = PitchSalienceFunctionPeaks()
 run_pitch_contours = PitchContours(hopSize=hopSize)
 run_pitch_contours_melody = PitchContoursMelody(guessUnvoiced=guessUnvoiced,
-                                                frameSize=frameSize,
                                                 hopSize=hopSize)
 
 # ... and create a Pool

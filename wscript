@@ -64,8 +64,8 @@ def configure(ctx):
         ctx.env.CXXFLAGS += [ '-Wno-gnu' ] # , '-std=c++11' ]
 
         ctx.env.DEFINES   += [ 'GTEST_HAS_TR1_TUPLE=0' ]
-        #ctx.env.CXXFLAGS = [ '-stdlib=libc++' ]
-        #ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
+        ctx.env.CXXFLAGS = [ '-stdlib=libstdc++' ]
+        ctx.env.LINKFLAGS = [ '-stdlib=libstdc++' ]
         #ctx.env.FRAMEWORK = [ 'Accelerate' ]
 
     ctx.load('compiler_cxx compiler_c')
