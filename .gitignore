@@ -59,6 +59,9 @@ src/examples/python/streaming_extractor/streaming_extractortonaldescriptors.h
 src/examples/python/streaming_extractor/streaming_extractortuningfrequency.cpp
 src/examples/python/streaming_extractor/streaming_extractortuningfrequency.h
 
+# editor stuff
+*.swp
+
 # this shouldn't be here, but yeah well...
 test/src/basetest/test_*.o
 src/algorithms/essentia_algorithms_reg.cpp
