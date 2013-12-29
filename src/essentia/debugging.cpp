@@ -42,6 +42,8 @@ const char* debugModuleDescription(DebuggingModule module) {
   case EExecution:  return "[Execution ] ";
   case EMemory:     return "[Memory    ] ";
   case EScheduler:  return "[Scheduler ] ";
+  case EPool:       return "[Pool      ] ";
+  case EBuffer:     return "[Buffer    ] ";
 
   case EPython:     return "[  PYTHON  ] ";
   case EPyBindings: return "[  PYBIND  ] ";

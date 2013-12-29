@@ -41,6 +41,8 @@ enum DebuggingModule {
   EExecution   = 1 << 5,
   EMemory      = 1 << 6,  // for mem operations, such as new/delete
   EScheduler   = 1 << 7,
+  EPool        = 1 << 8,
+  EBuffer      = 1 << 9,
 
   EPython      = 1 << 20, // for use in python scripts
   EPyBindings  = 1 << 21, // for use in python/C module

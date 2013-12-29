@@ -33,6 +33,8 @@ class DebuggingModule:
     EExecution   = 1 << 5
     EMemory      = 1 << 6
     EScheduler   = 1 << 7
+    EPool        = 1 << 8
+    EBuffer      = 1 << 9
 
     EPython      = 1 << 20
     EPyBindings  = 1 << 21
