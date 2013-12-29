@@ -920,7 +920,7 @@ bool isExcludedFromInfo(const string& algoname) {
   // the buffer on the info stream (still gets on the debug stream)
   static const char* excluded[1] = { "VectorInput" };
 
-  for (int i=0; i<ARRAY_SIZE(excluded); i++) {
+  for (int i=0; i<(int)ARRAY_SIZE(excluded); i++) {
     if (algoname == excluded[i]) {
       return true;
     }

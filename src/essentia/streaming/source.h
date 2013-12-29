@@ -47,8 +47,8 @@ class Source : public SourceBase {
   const void* buffer() const { return _buffer; }
   void* buffer() { return _buffer; }
 
-  MultiRateBuffer<TokenType>& typedBuffer() { return *_buffer; }
   const MultiRateBuffer<TokenType>& typedBuffer() const { return *_buffer; }
+  MultiRateBuffer<TokenType>& typedBuffer() { return *_buffer; }
 
   virtual void setBufferType(BufferUsage::BufferUsageType type) {
     _buffer->setBufferType(type);
