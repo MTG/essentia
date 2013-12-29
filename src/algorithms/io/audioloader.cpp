@@ -215,8 +215,11 @@ void AudioLoader::pushChannelsSampleRateInfo(int nChannels, Real sampleRate) {
 
     _nChannels = nChannels;
 
+    E_INFO("Pushing channel number: " << nChannels);
     _channels.push(nChannels);
+    E_INFO("Pushing sample rate: " << sampleRate);
     _sampleRate.push(sampleRate);
+    E_INFO("Pushing static audio info done");
 }
 
 

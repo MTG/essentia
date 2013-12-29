@@ -49,6 +49,7 @@ SourceBase::~SourceBase() {
 }
 
 void SourceBase::connect(SinkBase& sink) {
+  E_DEBUG(EConnectors, "  SourceBase(" << this << ")::connect(sink = " << &sink << ")");
   checkSameTypeAs(sink);
   // do not connect twice the sink
   if (contains(_sinks, &sink)) {
@@ -56,9 +57,12 @@ void SourceBase::connect(SinkBase& sink) {
     return;
   }
 
+  E_DEBUG(EConnectors, "  SourceBase::connect: id = AddReader();");
+
   ReaderID id = addReader();
 
-  E_DEBUG(EConnectors, "  SourceBase::connect: id = AddReader(); " << sink.fullName() << "::setId(" << id << ")");
+  E_DEBUG(EConnectors, "  SourceBase::connect: id = AddReader(); id = " << id <<
+          " - " << sink.fullName() << "::setId(" << id << ")");
   sink.setId(id);
   _sinks.push_back(&sink);
 }

@@ -146,12 +146,16 @@ namespace streaming {
 template <typename TokenType>
 Source<TokenType>::Source(Algorithm* parent) :
   SourceBase(parent),
-  _buffer(new PhantomBuffer<TokenType>(this, BufferUsage::forSingleFrames)) {}
+  _buffer(new PhantomBuffer<TokenType>(this, BufferUsage::forSingleFrames)) {
+  E_DEBUG(EMemory, "Constructed source " << fullName());
+}
 
 template <typename TokenType>
 Source<TokenType>::Source(const std::string& name) :
   SourceBase(name),
-  _buffer(new PhantomBuffer<TokenType>(this, BufferUsage::forSingleFrames)) {}
+  _buffer(new PhantomBuffer<TokenType>(this, BufferUsage::forSingleFrames)) {
+  E_DEBUG(EMemory, "Constructed source " << fullName());
+}
 
 } // namespace streaming
 } // namespace essentia

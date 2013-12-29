@@ -25,6 +25,8 @@
 
 namespace essentia {
 
+
+
 // Windows implementation
 #ifdef OS_WIN32
 
@@ -100,7 +102,7 @@ class RogueVector : public std::vector<T> {
 #else // __GXX_ABI_VERSION == 102
 
 template <typename T>
-class RogueVector : public std::vector<T> {
+class RogueVector /*: public std::vector<T>*/ {
  protected:
   bool _ownsMemory;
 
@@ -124,11 +126,11 @@ class RogueVector : public std::vector<T> {
     }
   }
 
-  inline void setData(T* data) { this->_M_impl._M_start = data; }
+    inline void setData(T* data) { /*this->_M_impl._M_start = data;*/ }
 
   inline void setSize(size_t size) {
-    this->_M_impl._M_finish = this->_M_impl._M_start + size;
-    this->_M_impl._M_end_of_storage = this->_M_impl._M_start + size;
+      //this->_M_impl._M_finish = this->_M_impl._M_start + size;
+      //this->_M_impl._M_end_of_storage = this->_M_impl._M_start + size;
   }
 };
 

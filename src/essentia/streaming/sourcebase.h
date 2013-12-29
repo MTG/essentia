@@ -93,14 +93,18 @@ class SourceBase : public Connector {
 
   template <typename TokenType>
   void push(const TokenType& value) {
+      E_WARNING("Pushing value to " << fullName());
     try {
       checkType<TokenType>();
       if (!acquire(1))
         throw EssentiaException(fullName(), ": Could not push 1 value, output buffer is full");
 
+      E_WARNING("setting value to " << value);
       *(TokenType*)getFirstToken() = value;
+      E_WARNING("releasing");
 
       release(1);
+      E_WARNING("released");
     }
     catch (EssentiaException& e) {
       throw EssentiaException("While trying to push item into source ", fullName(), ":\n", e.what());
