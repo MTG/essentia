@@ -31,20 +31,20 @@ class VectorInput : public Algorithm {
  protected:
   Source<TokenType> _output;
 
-  const std::vector<TokenType>* _inputVector;
+  const Vector<TokenType>* _inputVector;
   bool _ownVector;
   int _idx;
 
  public:
 
-  VectorInput(const std::vector<TokenType>* input=0, bool own = false)
+  VectorInput(const Vector<TokenType>* input=0, bool own = false)
     : _inputVector(input), _ownVector(own) {
     setName("VectorInput");
     declareOutput(_output, acquireSize, "data", "the values read from the vector");
     reset();
   }
 
-  VectorInput(std::vector<TokenType>* input, bool own = false)
+  VectorInput(Vector<TokenType>* input, bool own = false)
     : _inputVector(input), _ownVector(own) {
     setName("VectorInput");
     declareOutput(_output, acquireSize, "data", "the values read from the vector");
@@ -54,7 +54,7 @@ class VectorInput : public Algorithm {
   template <typename Array>
   VectorInput(const Array& inputArray, bool own = true) {
     setName("VectorInput");
-    _inputVector = new std::vector<TokenType>(arrayToVector<TokenType>(inputArray));
+    _inputVector = new Vector<TokenType>(arrayToVector<TokenType>(inputArray));
     _ownVector = true;
     declareOutput(_output, acquireSize, "data", "the values read from the vector");
     reset();
@@ -68,7 +68,7 @@ class VectorInput : public Algorithm {
     setName("VectorInput");
 
     // convert TNT array to vector-vector
-    std::vector<TokenType>* inputVector = new std::vector<TokenType>();
+    Vector<TokenType>* inputVector = new Vector<TokenType>();
     inputVector->resize(input.dim1());
 
     for (int i=0; i<input.dim1(); ++i) {
@@ -96,7 +96,7 @@ class VectorInput : public Algorithm {
   /**
    * TODO: Should we make a copy of the vector here or only keep the ref?
    */
-  void setVector(const std::vector<TokenType>* input, bool own=false) {
+  void setVector(const Vector<TokenType>* input, bool own=false) {
     clear();
     _inputVector = input;
     _ownVector = own;
@@ -177,7 +177,7 @@ void operator>>(VectorInput<T>& v, SinkBase& sink) {
 // TODO: in order to use this function runGenerator should be able to be called
 // with a vector
 template <typename T>
-void connect(std::vector<T>& v, SinkBase& sink) {
+void connect(Vector<T>& v, SinkBase& sink) {
   VectorInput<T>* vectorInput = new VectorInput<T>(&v);
 
   // optimize acquire/release sizes to seldom sink's sizes
@@ -192,7 +192,7 @@ void connect(std::vector<T>& v, SinkBase& sink) {
 }
 
 template <typename T>
-void operator>>(std::vector<T>& v, SinkBase& sink) {
+void operator>>(Vector<T>& v, SinkBase& sink) {
   connect(v, sink);
 }
 

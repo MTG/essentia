@@ -26,13 +26,14 @@ namespace essentia {
 namespace streaming {
 
 template <typename T>
-const std::vector<T>& PhantomBuffer<T>::readView(ReaderID id) const {
+const Vector<T>& PhantomBuffer<T>::readView(ReaderID id) const {
   return _readView[id];
 }
 
 
 template <typename T>
 ReaderID PhantomBuffer<T>::addReader(bool startFromZero) {
+  E_DEBUG(EBuffer, "--Buffer::addReader(startFromZero = " << startFromZero << ")");
   // add read window & view, just at where our write window is
   Window w;
   if (!startFromZero) {
@@ -42,9 +43,13 @@ ReaderID PhantomBuffer<T>::addReader(bool startFromZero) {
 
   ReaderID id = _readWindow.size() - 1; // index of last one
 
-  _readView.push_back(RogueVector<T>());
+  E_DEBUG(EBuffer, "--Buffer::addReader push_back new VectorView (capacity=" << _readView.capacity() << ")");
+  _readView.push_back(Vector<T>());
+  E_DEBUG(EBuffer, "--Buffer::addReader update read view id = " << id);
   updateReadView(id);
 
+  E_DEBUG(EBuffer, "Added reader, id = " << id);
+  E_DEBUG(EBuffer, "read view owns mem = " << readView(id).ownsMemory());
   return id;
 }
 
@@ -199,16 +204,27 @@ inline void PhantomBuffer<T>::resetTurns() {
 
 template <typename T>
 inline void PhantomBuffer<T>::updateReadView(ReaderID id) {
-  const RogueVector<T>& vconst = static_cast<const RogueVector<T>&>(readView(id));
-  RogueVector<T>& v = const_cast<RogueVector<T>&>(vconst);
-  v.setData(&_buffer[0] + _readWindow[id].begin);
-  v.setSize(_readWindow[id].end - _readWindow[id].begin);
+  E_DEBUG(EBuffer, "--Buffer::updateReadView(" << id << ")");
+  const Vector<T>& vconst = readView(id);
+  Vector<T>& v = const_cast<Vector<T>&>(vconst);
+  E_DEBUG(EBuffer, "--Buffer::updateReadView(" << id << ") data?");
+  T* data = &_buffer[0];
+  E_DEBUG(EBuffer, "--Buffer::updateReadView(" << id << ").setData(" << data << ")");
+  v.setData(data + _readWindow[id].begin,
+            _readWindow[id].end - _readWindow[id].begin);
+  E_DEBUG(EBuffer, "--Buffer::updateReadView(" << id << ") done");
 }
 
 template <typename T>
 inline void PhantomBuffer<T>::updateWriteView() {
-  _writeView.setData(&_buffer[0] + _writeWindow.begin);
-  _writeView.setSize(_writeWindow.end - _writeWindow.begin);
+  E_DEBUG(EBuffer, "--Buffer::updateWriteView()");
+  T* data = &_buffer[0];
+  E_DEBUG(EBuffer, "--Buffer::updateWriteView() setData(" << data <<
+          "+" << _writeWindow.begin << ", " << _writeWindow.end - _writeWindow.begin << ")");
+
+  _writeView.setData(data + _writeWindow.begin,
+                     _writeWindow.end - _writeWindow.begin);
+  E_DEBUG(EBuffer, "--Buffer::updateWriteView() done");
 }
 
 

@@ -19,28 +19,30 @@
 
 #include <algorithm>
 #include "essentia_gtest.h"
+#include "roguevector.h"
 using namespace std;
 using essentia::Real;
+using essentia::Vector;
 using essentia::EssentiaException;
 
 
 // Make sure the basic use case works
 TEST(Pool, RealPoolSimple) {
   Real expectedVal = 6.9;
-  vector<Real> expected;
+  Vector<Real> expected;
   expected.push_back(expectedVal);
 
   essentia::Pool p;
   p.add("foo.bar", expectedVal);
 
-  EXPECT_VEC_EQ(p.value<vector<Real> >("foo.bar"), expected);
+  EXPECT_VEC_EQ(p.value<Vector<Real> >("foo.bar"), expected);
 }
 
 // Make sure we can support having multiple values under one label
 TEST(Pool, RealPoolMultiple) {
   Real expectedVal1 = 6.9;
   Real expectedVal2 = 16.0;
-  vector<Real> expected;
+  Vector<Real> expected;
   expected.push_back(expectedVal1);
   expected.push_back(expectedVal2);
 
@@ -48,15 +50,15 @@ TEST(Pool, RealPoolMultiple) {
   p.add("foo.bar", expectedVal1);
   p.add("foo.bar", expectedVal2);
 
-  EXPECT_VEC_EQ(p.value<vector<Real> >("foo.bar"), expected);
+  EXPECT_VEC_EQ(p.value<Vector<Real> >("foo.bar"), expected);
 }
 
 // Make sure we can support having multiple labels in the same pool
 TEST(Pool, RealPoolMultipleLabels) {
   Real expectedVal1 = 6.9;
   Real expectedVal2 = 16.0;
-  vector<Real> expected1;
-  vector<Real> expected2;
+  Vector<Real> expected1;
+  Vector<Real> expected2;
   expected1.push_back(expectedVal1);
   expected2.push_back(expectedVal2);
 
@@ -64,37 +66,37 @@ TEST(Pool, RealPoolMultipleLabels) {
   p.add("foo.bar", expectedVal1);
   p.add("bar.foo", expectedVal2);
 
-  EXPECT_VEC_EQ(p.value<vector<Real> >("foo.bar"), expected1);
-  EXPECT_VEC_EQ(p.value<vector<Real> >("bar.foo"), expected2);
+  EXPECT_VEC_EQ(p.value<Vector<Real> >("foo.bar"), expected1);
+  EXPECT_VEC_EQ(p.value<Vector<Real> >("bar.foo"), expected2);
 }
 
 TEST(Pool, RealVectorPoolSimple) {
-  vector<Real> expectedVec;
+  Vector<Real> expectedVec;
   expectedVec.push_back(1.6);
   expectedVec.push_back(0.9);
   expectedVec.push_back(19.85);
 
-  vector<vector<Real> > expected;
+  Vector<Vector<Real> > expected;
   expected.push_back(expectedVec);
 
   essentia::Pool p;
   p.add("foo.bar", expectedVec);
 
-  EXPECT_MATRIX_EQ(p.value<vector<vector<Real> > >("foo.bar"), expected);
+  EXPECT_MATRIX_EQ(p.value<Vector<Vector<Real> > >("foo.bar"), expected);
 }
 
 TEST(Pool, RealVectorPoolMultiple) {
-  vector<Real> expectedVec1;
+  Vector<Real> expectedVec1;
   expectedVec1.push_back(1.6);
   expectedVec1.push_back(0.9);
   expectedVec1.push_back(19.85);
 
-  vector<Real> expectedVec2;
+  Vector<Real> expectedVec2;
   expectedVec2.push_back(-5.0);
   expectedVec2.push_back(0.0);
   expectedVec2.push_back(5.0);
 
-  vector<vector<Real> > expected;
+  Vector<Vector<Real> > expected;
   expected.push_back(expectedVec1);
   expected.push_back(expectedVec2);
 
@@ -102,43 +104,43 @@ TEST(Pool, RealVectorPoolMultiple) {
   p.add("foo.bar", expectedVec1);
   p.add("foo.bar", expectedVec2);
 
-  EXPECT_MATRIX_EQ(p.value<vector<vector<Real> > >("foo.bar"), expected);
+  EXPECT_MATRIX_EQ(p.value<Vector<Vector<Real> > >("foo.bar"), expected);
 }
 
 TEST(Pool, RealVectorPoolMultipleLabels) {
-  vector<Real> expectedVec1;
+  Vector<Real> expectedVec1;
   expectedVec1.push_back(1.6);
   expectedVec1.push_back(0.9);
   expectedVec1.push_back(19.85);
 
-  vector<Real> expectedVec2;
+  Vector<Real> expectedVec2;
   expectedVec2.push_back(-5.0);
   expectedVec2.push_back(0.0);
   expectedVec2.push_back(5.0);
 
-  vector<vector<Real> > expected1;
+  Vector<Vector<Real> > expected1;
   expected1.push_back(expectedVec1);
-  vector<vector<Real> > expected2;
+  Vector<Vector<Real> > expected2;
   expected2.push_back(expectedVec2);
 
   essentia::Pool p;
   p.add("foo.bar", expectedVec1);
   p.add("bar.foo", expectedVec2);
 
-  EXPECT_MATRIX_EQ(p.value<vector<vector<Real> > >("foo.bar"), expected1);
-  EXPECT_MATRIX_EQ(p.value<vector<vector<Real> > >("bar.foo"), expected2);
+  EXPECT_MATRIX_EQ(p.value<Vector<Vector<Real> > >("foo.bar"), expected1);
+  EXPECT_MATRIX_EQ(p.value<Vector<Vector<Real> > >("bar.foo"), expected2);
 }
 
-// Test adding an empty vector
+// Test adding an empty Vector
 TEST(Pool, RealVectorEmpty) {
-  vector<Real> emptyVec;
-  vector<vector<Real> > expected;
+  Vector<Real> emptyVec;
+  Vector<Vector<Real> > expected;
   expected.push_back(emptyVec);
 
   essentia::Pool p;
   p.add("foo.bar", emptyVec);
 
-  EXPECT_MATRIX_EQ(p.value<vector<vector<Real> > >("foo.bar"), expected);
+  EXPECT_MATRIX_EQ(p.value<Vector<Vector<Real> > >("foo.bar"), expected);
 }
 
 // Make sure the lookup of a non-existant descriptorName fails
@@ -146,12 +148,12 @@ TEST(Pool, MissingDescriptorName) {
   essentia::Pool p;
   p.add("foo.bar", Real(0.0));
 
-  ASSERT_THROW(p.value<vector<Real> >("bar.bar"), EssentiaException);
+  ASSERT_THROW(p.value<Vector<Real> >("bar.bar"), EssentiaException);
 }
 
 TEST(Pool, Remove) {
   Real expectedVal = 123.456;
-  vector<Real> expected;
+  Vector<Real> expected;
   expected.push_back(expectedVal);
 
   essentia::Pool p;
@@ -160,26 +162,26 @@ TEST(Pool, Remove) {
   p.add("foo.bar", Real(1111.1111));
   p.remove("foo.bar");
 
-  ASSERT_THROW(p.value<vector<Real> >("foo.bar"), EssentiaException);
-  EXPECT_VEC_EQ(p.value<vector<Real> >("foo.rab"), expected);
+  ASSERT_THROW(p.value<Vector<Real> >("foo.bar"), EssentiaException);
+  EXPECT_VEC_EQ(p.value<Vector<Real> >("foo.rab"), expected);
 }
 
 // String type tests
 
 TEST(Pool, StringPoolSimple) {
-  vector<string> expected;
+  Vector<string> expected;
   expected.push_back("simple");
 
   essentia::Pool p;
   p.add("foo.bar", "simple");
 
-  EXPECT_VEC_EQ(p.value<vector<string> >("foo.bar"), expected);
+  EXPECT_VEC_EQ(p.value<Vector<string> >("foo.bar"), expected);
 }
 
 TEST(Pool, StringPoolMultiple) {
   string expectedVal1 = "mul";
   string expectedVal2 = "tiple";
-  vector<string> expected;
+  Vector<string> expected;
   expected.push_back(expectedVal1);
   expected.push_back(expectedVal2);
 
@@ -187,14 +189,14 @@ TEST(Pool, StringPoolMultiple) {
   p.add("foo.bar", expectedVal1);
   p.add("foo.bar", expectedVal2);
 
-  EXPECT_VEC_EQ(p.value<vector<string> >("foo.bar"), expected);
+  EXPECT_VEC_EQ(p.value<Vector<string> >("foo.bar"), expected);
 }
 
 TEST(Pool, StringPoolMultipleLabels) {
   string expectedVal1 = "multiple";
   string expectedVal2 = "labels";
-  vector<string> expected1;
-  vector<string> expected2;
+  Vector<string> expected1;
+  Vector<string> expected2;
   expected1.push_back(expectedVal1);
   expected2.push_back(expectedVal2);
 
@@ -202,44 +204,44 @@ TEST(Pool, StringPoolMultipleLabels) {
   p.add("foo.bar", expectedVal1);
   p.add("bar.foo", expectedVal2);
 
-  EXPECT_VEC_EQ(p.value<vector<string> >("foo.bar"), expected1);
-  EXPECT_VEC_EQ(p.value<vector<string> >("bar.foo"), expected2);
+  EXPECT_VEC_EQ(p.value<Vector<string> >("foo.bar"), expected1);
+  EXPECT_VEC_EQ(p.value<Vector<string> >("bar.foo"), expected2);
 }
 
 TEST(Pool, StringVectorPoolMultiple) {
-  vector<string> expectedVec1;
+  Vector<string> expectedVec1;
   expectedVec1.push_back("1.6");
   expectedVec1.push_back("0.9");
   expectedVec1.push_back("19.85");
 
-  vector<string> expectedVec2;
+  Vector<string> expectedVec2;
   expectedVec2.push_back("-5.0");
   expectedVec2.push_back("0.0");
   expectedVec2.push_back("5.0");
 
-  vector<vector<string> > expected1;
+  Vector<Vector<string> > expected1;
   expected1.push_back(expectedVec1);
-  vector<vector<string> > expected2;
+  Vector<Vector<string> > expected2;
   expected2.push_back(expectedVec2);
 
   essentia::Pool p;
   p.add("foo.bar", expectedVec1);
   p.add("bar.foo", expectedVec2);
 
-  EXPECT_MATRIX_EQ(p.value<vector<vector<string> > >("foo.bar"), expected1);
-  EXPECT_MATRIX_EQ(p.value<vector<vector<string> > >("bar.foo"), expected2);
+  EXPECT_MATRIX_EQ(p.value<Vector<Vector<string> > >("foo.bar"), expected1);
+  EXPECT_MATRIX_EQ(p.value<Vector<Vector<string> > >("bar.foo"), expected2);
 }
 
 // Test adding an empty vector
 TEST(Pool, StringVectorEmpty) {
-  vector<string> emptyVec;
-  vector<vector<string> > expected;
+  Vector<string> emptyVec;
+  Vector<Vector<string> > expected;
   expected.push_back(emptyVec);
 
   essentia::Pool p;
   p.add("foo.bar", emptyVec);
 
-  EXPECT_MATRIX_EQ(p.value<vector<vector<string> > >("foo.bar"), expected);
+  EXPECT_MATRIX_EQ(p.value<Vector<Vector<string> > >("foo.bar"), expected);
 }
 
 TEST(Pool, DescriptorNames) {

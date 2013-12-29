@@ -26,7 +26,7 @@ namespace essentia {
 namespace streaming {
 
 /**
- * VectorOutput class that pushes all data coming at its input into a std::vector.
+ * VectorOutput class that pushes all data coming at its input into a Vector.
  * Note that you don't need to configure the VectorOutput to an optimized acquireSize,
  * as it will figure out by itself what's the maximum number of tokens it can acquire
  * at once, and this in a smart dynamic way.
@@ -35,10 +35,10 @@ template <typename TokenType, typename StorageType = TokenType>
 class VectorOutput : public Algorithm {
  protected:
   Sink<TokenType> _data;
-  std::vector<TokenType>* _v;
+  Vector<TokenType>* _v;
 
  public:
-  VectorOutput(std::vector<TokenType>* v = 0) : Algorithm(), _v(v) {
+  VectorOutput(Vector<TokenType>* v = 0) : Algorithm(), _v(v) {
     setName("VectorOutput");
     declareInput(_data, 1, "data", "the input data");
   }
@@ -48,7 +48,7 @@ class VectorOutput : public Algorithm {
 
   void declareParameters() {}
 
-  void setVector(std::vector<TokenType>* v) {
+  void setVector(Vector<TokenType>* v) {
     _v = v;
   }
 
@@ -100,13 +100,13 @@ void operator>>(SourceBase& source, VectorOutput<TokenType, StorageType>& v) {
  * serve as storage.
  */
 template <typename T>
-void connect(SourceBase& source, std::vector<T>& v) {
+void connect(SourceBase& source, Vector<T>& v) {
   VectorOutput<T> * vectorOutput = new VectorOutput<T>(&v);
   connect(source, vectorOutput->input("data"));
 }
 
 template <typename T>
-void operator>>(SourceBase& source, std::vector<T>& v) {
+void operator>>(SourceBase& source, Vector<T>& v) {
   connect(source, v);
 }
 

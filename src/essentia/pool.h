@@ -24,13 +24,14 @@
 #include "threading.h"
 #include "utils/tnt/tnt.h"
 #include "essentiautil.h"
+#include "roguevector.h"
 
 namespace essentia {
 
 // standard map and not EssentiaMap because we want a new element
 // to be automatically created when it doesn't exist
 /** @todo use intel's tbb concurrent_map */
-#define PoolOf(type) std::map<std::string, std::vector<type > >
+#define PoolOf(type) std::map<std::string, Vector<type > >
 
 typedef std::string DescriptorName;
 
@@ -98,13 +99,13 @@ class Pool {
   // maps for single values:
   std::map<std::string, Real> _poolSingleReal;
   std::map<std::string, std::string> _poolSingleString;
-  std::map<std::string, std::vector<Real> > _poolSingleVectorReal;
+  std::map<std::string, Vector<Real> > _poolSingleVectorReal;
 
   // maps for vectors of values:
   PoolOf(Real) _poolReal;
-  PoolOf(std::vector<Real>) _poolVectorReal;
+  PoolOf(Vector<Real>) _poolVectorReal;
   PoolOf(std::string) _poolString;
-  PoolOf(std::vector<std::string>) _poolVectorString;
+  PoolOf(Vector<std::string>) _poolVectorString;
   PoolOf(TNT::Array2D<Real>) _poolArray2DReal;
   PoolOf(StereoSample) _poolStereoSample;
 
@@ -149,13 +150,13 @@ class Pool {
   void add(const std::string& name, const Real& value, bool validityCheck = false);
 
   /** @copydoc add(const std::string&,const Real&,bool) */
-  void add(const std::string& name, const std::vector<Real>& value, bool validityCheck = false);
+  void add(const std::string& name, const Vector<Real>& value, bool validityCheck = false);
 
   /** @copydoc add(const std::string&,const Real&,bool) */
   void add(const std::string& name, const std::string& value, bool validityCheck = false);
 
   /** @copydoc add(const std::string&,const Real&,bool) */
-  void add(const std::string& name, const std::vector<std::string>& value, bool validityCheck = false);
+  void add(const std::string& name, const Vector<std::string>& value, bool validityCheck = false);
 
   /** @copydoc add(const std::string&,const Real&,bool) */
   void add(const std::string& name, const TNT::Array2D<Real>& value, bool validityCheck = false);
@@ -169,7 +170,7 @@ class Pool {
    * optimization only.
    */
   template <typename T>
-  void append(const std::string& name, const std::vector<T>& values);
+  void append(const std::string& name, const Vector<T>& values);
 
   /**
    * \brief Sets the value of a descriptor name.
@@ -192,7 +193,7 @@ class Pool {
   void set(const std::string& name, const Real& value, bool validityCheck=false);
 
   /** @copydoc set(const std::string&,const Real&, bool) */
-  void set(const std::string& name, const std::vector<Real>& value, bool validityCheck=false);
+  void set(const std::string& name, const Vector<Real>& value, bool validityCheck=false);
 
   /** @copydoc set(const std::string&,const Real&i, bool) */
   void set(const std::string& name, const std::string& value, bool validityCheck=false);
@@ -224,28 +225,28 @@ class Pool {
    * descriptor given by @e name.
    * @copydetails merge(Pool&, const std::string&)
    */
-  void merge(const std::string& name, const std::vector<Real>& value, const std::string& type="");
+  void merge(const std::string& name, const Vector<Real>& value, const std::string& type="");
 
-  /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
-  void merge(const std::string& name, const std::vector<std::vector<Real> >& value, const std::string& type="");
+  /** @copydoc merge(const std::string&, const Vector<Real>&, const std::string&)*/
+  void merge(const std::string& name, const Vector<Vector<Real> >& value, const std::string& type="");
 
-  /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
-  void merge(const std::string& name, const std::vector<std::string>& value, const std::string& type="");
+  /** @copydoc merge(const std::string&, const Vector<Real>&, const std::string&)*/
+  void merge(const std::string& name, const Vector<std::string>& value, const std::string& type="");
 
-  /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
-  void merge(const std::string& name, const std::vector<std::vector<std::string> >& value, const std::string& type="");
+  /** @copydoc merge(const std::string&, const Vector<Real>&, const std::string&)*/
+  void merge(const std::string& name, const Vector<Vector<std::string> >& value, const std::string& type="");
 
-  /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
-  void merge(const std::string& name, const std::vector<TNT::Array2D<Real> >& value, const std::string& type="");
+  /** @copydoc merge(const std::string&, const Vector<Real>&, const std::string&)*/
+  void merge(const std::string& name, const Vector<TNT::Array2D<Real> >& value, const std::string& type="");
 
-  /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
-  void merge(const std::string& name, const std::vector<StereoSample>& value, const std::string& type="");
+  /** @copydoc merge(const std::string&, const Vector<Real>&, const std::string&)*/
+  void merge(const std::string& name, const Vector<StereoSample>& value, const std::string& type="");
 
-  /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
+  /** @copydoc merge(const std::string&, const Vector<Real>&, const std::string&)*/
   void mergeSingle(const std::string& name, const Real& value, const std::string& type="");
-  /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
-  void mergeSingle(const std::string& name, const std::vector<Real>& value, const std::string& type="");
-  /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
+  /** @copydoc merge(const std::string&, const Vector<Real>&, const std::string&)*/
+  void mergeSingle(const std::string& name, const Vector<Real>& value, const std::string& type="");
+  /** @copydoc merge(const std::string&, const Vector<Real>&, const std::string&)*/
   void mergeSingle(const std::string& name, const std::string& value, const std::string& type="");
 
   /**
@@ -301,7 +302,7 @@ class Pool {
    * @returns a map where the key is a descriptor name and the values are
    *          of type vector<Real>
    */
-  const PoolOf(std::vector<Real>)& getVectorRealPool() const { return _poolVectorReal; }
+  const PoolOf(Vector<Real>)& getVectorRealPool() const { return _poolVectorReal; }
 
   /**
    * @returns a std::map where the key is a descriptor name and the values are
@@ -313,7 +314,7 @@ class Pool {
    * @returns a std::map where the key is a descriptor name and the values are
    *          of type vector<string>
    */
-  const PoolOf(std::vector<std::string>)& getVectorStringPool() const { return _poolVectorString; }
+  const PoolOf(Vector<std::string>)& getVectorStringPool() const { return _poolVectorString; }
 
   /**
    * @returns a std::map where the key is a descriptor name and the values are
@@ -343,7 +344,7 @@ class Pool {
    * @returns a std::map where the key is a descriptor name and the value is
    *          of type vector<Real>
    */
-  const std::map<std::string, std::vector<Real> >& getSingleVectorRealPool() const { return _poolSingleVectorReal; }
+  const std::map<std::string, Vector<Real> >& getSingleVectorRealPool() const { return _poolSingleVectorReal; }
 
   /**
    * Checks that no descriptor name is in two different inner pool types at
@@ -384,17 +385,17 @@ inline const type& Pool::value(const std::string& name) const {                \
 
 SPECIALIZE_VALUE(Real, SingleReal);
 SPECIALIZE_VALUE(std::string, SingleString);
-SPECIALIZE_VALUE(std::vector<std::string>, String);
-SPECIALIZE_VALUE(std::vector<std::vector<Real> >, VectorReal);
-SPECIALIZE_VALUE(std::vector<std::vector<std::string> >, VectorString);
-SPECIALIZE_VALUE(std::vector<TNT::Array2D<Real> >, Array2DReal);
-SPECIALIZE_VALUE(std::vector<StereoSample>, StereoSample);
+SPECIALIZE_VALUE(Vector<std::string>, String);
+SPECIALIZE_VALUE(Vector<Vector<Real> >, VectorReal);
+SPECIALIZE_VALUE(Vector<Vector<std::string> >, VectorString);
+SPECIALIZE_VALUE(Vector<TNT::Array2D<Real> >, Array2DReal);
+SPECIALIZE_VALUE(Vector<StereoSample>, StereoSample);
 
 // This value function is not under the macro above because it needs to check
 // in two separate sub-pools (poolReal and poolSingleVectorReal)
 template<>
-inline const std::vector<Real>& Pool::value(const std::string& name) const {
-  std::map<std::string, std::vector<Real> >::const_iterator result;
+inline const Vector<Real>& Pool::value(const std::string& name) const {
+  std::map<std::string, Vector<Real> >::const_iterator result;
   {
     MutexLocker lock(mutexReal);
     result = _poolReal.find(name);
@@ -413,7 +414,7 @@ inline const std::vector<Real>& Pool::value(const std::string& name) const {
 
   std::ostringstream msg;
   msg << "Descriptor name '" << name << "' of type "
-      << nameOfType(typeid(std::vector<Real>)) << " not found";
+      << nameOfType(typeid(Vector<Real>)) << " not found";
   throw EssentiaException(msg);
 }
 
@@ -432,17 +433,17 @@ inline bool Pool::contains<type>(const std::string& name) const {              \
 
 SPECIALIZE_CONTAINS(Real, SingleReal);
 SPECIALIZE_CONTAINS(std::string, SingleString);
-SPECIALIZE_CONTAINS(std::vector<std::string>, String);
-SPECIALIZE_CONTAINS(std::vector<std::vector<Real> >, VectorReal);
-SPECIALIZE_CONTAINS(std::vector<std::vector<std::string> >, VectorString);
-SPECIALIZE_CONTAINS(std::vector<TNT::Array2D<Real> >, Array2DReal);
-SPECIALIZE_CONTAINS(std::vector<StereoSample>, StereoSample);
+SPECIALIZE_CONTAINS(Vector<std::string>, String);
+SPECIALIZE_CONTAINS(Vector<Vector<Real> >, VectorReal);
+SPECIALIZE_CONTAINS(Vector<Vector<std::string> >, VectorString);
+SPECIALIZE_CONTAINS(Vector<TNT::Array2D<Real> >, Array2DReal);
+SPECIALIZE_CONTAINS(Vector<StereoSample>, StereoSample);
 
 // This value function is not under the macro above because it needs to check
 // in two separate sub-pools (poolReal and poolSingleVectorReal)
 template<>
-inline bool Pool::contains<std::vector<Real> >(const std::string& name) const {
-  std::map<std::string, std::vector<Real> >::const_iterator result;
+inline bool Pool::contains<Vector<Real> >(const std::string& name) const {
+  std::map<std::string, Vector<Real> >::const_iterator result;
   {
     MutexLocker lock(mutexReal);
     result = _poolReal.find(name);
@@ -480,36 +481,36 @@ MutexLocker lockSingleVectorReal(mutexSingleVectorReal);
 
 
 template<typename T>
-inline void Pool::append(const std::string& name, const std::vector<T>& values) {
+inline void Pool::append(const std::string& name, const Vector<T>& values) {
   throw EssentiaException("Pool::append not implemented for type: ", nameOfType(typeid(T)));
 }
 
-#define SPECIALIZE_APPEND(type, tname)                                                \
-template <>                                                                           \
-inline void Pool::append(const std::string& name, const std::vector<type>& values) {  \
-  {                                                                                   \
-    MutexLocker lock(mutex##tname);                                                   \
-    PoolOf(type)::iterator result = _pool##tname.find(name);                          \
-    if (result != _pool##tname.end()) {                                               \
-                                                                                      \
-      std::vector<type>& v = result->second;                                          \
-      int vsize = v.size();                                                           \
-      v.resize(vsize + values.size());                                                \
-      fastcopy(&v[vsize], &values[0], values.size());                                 \
-      return;                                                                         \
-    }                                                                                 \
-  }                                                                                   \
-                                                                                      \
-  GLOBAL_LOCK                                                                         \
-  validateKey(name);                                                                  \
-  _pool##tname[name] = values;                                                        \
+#define SPECIALIZE_APPEND(type, tname)                                           \
+template <>                                                                      \
+inline void Pool::append(const std::string& name, const Vector<type>& values) {  \
+  {                                                                              \
+    MutexLocker lock(mutex##tname);                                              \
+    PoolOf(type)::iterator result = _pool##tname.find(name);                     \
+    if (result != _pool##tname.end()) {                                          \
+                                                                                 \
+      Vector<type>& v = result->second;                                     \
+      int vsize = v.size();                                                      \
+      v.resize(vsize + values.size());                                           \
+      fastcopy(&v[vsize], &values[0], values.size());                            \
+      return;                                                                    \
+    }                                                                            \
+  }                                                                              \
+                                                                                 \
+  GLOBAL_LOCK                                                                    \
+  validateKey(name);                                                             \
+  _pool##tname[name] = values;                                                   \
 }
 
 
 SPECIALIZE_APPEND(Real, Real);
-SPECIALIZE_APPEND(std::vector<Real>, VectorReal);
+SPECIALIZE_APPEND(Vector<Real>, VectorReal);
 SPECIALIZE_APPEND(std::string, String);
-SPECIALIZE_APPEND(std::vector<std::string>, VectorString);
+SPECIALIZE_APPEND(Vector<std::string>, VectorString);
 SPECIALIZE_APPEND(StereoSample, StereoSample);
 
 /// @endcond

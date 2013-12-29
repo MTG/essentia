@@ -57,7 +57,7 @@ class Sink : public SinkBase {
   }
 
 
-  const std::vector<TokenType>& tokens() const { return buffer().readView(_id); }
+  const Vector<TokenType>& tokens() const { return buffer().readView(_id); }
   const TokenType& firstToken() const { return buffer().readView(_id)[0]; }
   const TokenType& lastTokenProduced() const { return buffer().lastTokenProduced(); }
 

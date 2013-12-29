@@ -241,6 +241,183 @@ class EssentiaMap : public std::map<KeyType, ValueType, Compare> {
 typedef EssentiaMap<std::string, std::string, string_cmp> DescriptionMap;
 
 
+/**
+ * Vector type to be used in Essentia.
+ * Can either own its memory and act as a std::vector or be
+ * be a const view on some other data it doesn't own.
+ */
+template <typename T>
+class Vector {
+ protected:
+  bool _ownsMemory;
+  // inefficient implementation for now, act as a stupid proxy
+  std::vector<T> _buf;
+  T* _data;
+  Vector<T>* _source; // Vector containing the data if this is a view
+  size_t _size;
+
+ public:
+  Vector() : _ownsMemory(true) {
+    E_WARNING("Creating empty vector - owns = true [@" << this << "]");
+  }
+
+  Vector(uint size, T value = T()) : _ownsMemory(true), _buf(size, value) {
+    E_WARNING("Creating vector, size = " << size << " - owns = true [@" << this << "]");
+  }
+
+  Vector(T* tab, size_t size) : _ownsMemory(false) {
+    E_WARNING("Creating vector from fixed data, size = " << size << " - owns = false");
+    setData(tab, size);
+  }
+
+  Vector(const Vector<T>& v/*, bool copy = false) : _ownsMemory(copy)*/) {
+    bool copy = v.ownsMemory();
+    _ownsMemory = copy;
+    E_WARNING("Creating vector from other vector, size = " << v.size() << " - make copy = " << copy << " [this=@" << this << "] [other=@" << &v << "]");
+    if (copy) {
+      _buf = v.toStdVector();
+    }
+    else {
+      // FIXME: should save a pointer to v, not v.data(),
+      //        in case v does a v.resize(), to not invalidate the pointer
+      //setData(v.data(), v.size());
+      const Vector<T>* src = v.source();
+      if (src) {
+        setSource(*src);
+      }
+      else {
+	setData(v.data(), v.size());
+      }
+    }
+  }
+
+    // FIXME: implement me
+    static Vector* copy(const Vector<T>& v);
+    static Vector* ref(const Vector<T>& v);
+
+  ~Vector() {
+    E_WARNING("deleting vector @" << this);
+  }
+
+  typedef const T* const_iterator;
+  typedef T* iterator;
+
+  const_iterator begin() const { return data(); }
+  const_iterator end() const { return data() + size(); }
+  iterator begin() { return data(); } // FIXME: only if ownsMemory
+  iterator end() { return data() + size(); } // FIXME: only if ownsMemory
+
+  inline bool ownsMemory() const { return _ownsMemory; }
+  inline bool hasSource() const { return _source != 0; }
+  inline const Vector<T>* source() const { return _source; }
+  
+
+  inline const T* data() const {
+      E_WARNING("Buffer->data() const access, ownsMemory = " << _ownsMemory);
+      if (_ownsMemory) return &_buf[0]; // FIXME: this segfaults if size==0
+      else if (_source) return _source->data();
+      else return this->_data;
+  }
+
+  inline T* data() {
+      E_WARNING("Buffer->data() non-const access, ownsMemory = " << _ownsMemory);
+      if (_ownsMemory) return &_buf[0]; // FIXME: this segfaults if size==0
+      else if (_source) return _source->data();
+      else return this->_data;
+  }
+
+  inline size_t size() const {
+      if (_ownsMemory) return _buf.size();
+      else if (_source) return _source->size();
+      else return this->_size;
+  }
+
+  inline bool empty() const {
+      return size() == 0;
+  }
+
+#define DECLARE_IF_OWN(returntype, f)                                                \
+  returntype f() {                                                                   \
+    E_WARNING("Vector::" #f "(), ownsMemory = " << _ownsMemory);                     \
+    if (!_ownsMemory) {                                                              \
+      throw EssentiaException("Cannot " #f " a Vector that doesn't own its memory"); \
+    }                                                                                \
+                                                                                     \
+    return _buf.f();                                                                 \
+  }
+
+#define DECLARE_IF_OWN_1ARG(returntype, f, arg1type)                                 \
+  returntype f(arg1type val) {                                                       \
+    E_WARNING("Vector::" #f "(" #arg1type " val), val = " << val << ", ownsMemory = " << _ownsMemory); \
+    if (!_ownsMemory) {                                                              \
+      throw EssentiaException("Cannot " #f " a Vector that doesn't own its memory"); \
+    }                                                                                \
+                                                                                     \
+    return _buf.f(val);                                                              \
+  }
+
+  DECLARE_IF_OWN(void, clear);
+  DECLARE_IF_OWN(T&, front);
+
+  DECLARE_IF_OWN_1ARG(void, resize, size_t);
+  DECLARE_IF_OWN_1ARG(void, reserve, size_t);
+  DECLARE_IF_OWN_1ARG(void, push_back, const T&);
+
+    inline const T& operator[](int i) const {
+        E_WARNING("Vector::op[] const, i = " << i);
+        return data()[i];
+    }
+
+    inline T& operator[](int i) {
+        E_WARNING("Vector::op[], i = " << i);
+        return data()[i];
+    }
+
+    /**
+     * Sets the data source to be a fixed region of memory.
+     */
+    void setData(const T* data, size_t size) {
+        E_DEBUG(EMemory, "Vector::setData(" << data << ", " << size << ")");
+        _ownsMemory = false;
+        T* d = const_cast<T*>(data); // FIXME: hack
+        this->_data = d;
+        this->_size = size;
+        this->_source = 0;
+    }
+
+    /**
+     * Sets the data source to be another vector. Resizing the source vector
+     * does not invalidate pointers.
+     */
+    void setSource(const Vector<T>& s) {
+        E_DEBUG(EMemory, "Vector::setSource(" << s << ") [@" << &s << "]");
+        _ownsMemory = false;
+        Vector<T>* cs = &const_cast<Vector<T>&>(s); // FIXME: hack
+        this->_data = 0;
+        this->_size = 0;
+        this->_source = cs;
+    }
+
+    std::vector<T> toStdVector() const {
+        return std::vector<T>(begin(), end());
+    }
+
+};
+
+/**
+ * Output an essentia::Vector into an output stream.
+ */
+template <typename T>
+std::ostream& operator<<(std::ostream& out, const Vector<T>& v) {
+  out << '['; if (!v.empty()) {
+    out << *v.begin(); typename Vector<T>::const_iterator it = v.begin();
+    for (++it; it != v.end(); ++it) out << ", " << *it;
+  }
+  return out << ']';
+}
+
+
+// TODO: also define Matrix type, this will allow to phase out TNT smoothly
 
 
 /**
@@ -333,7 +510,7 @@ inline bool sameType(const TypeProxy& lhs, const TypeProxy& rhs) {
     return typeid(TokenType);                              \
   }                                                        \
   virtual const std::type_info& vectorTypeInfo() const {   \
-    return typeid(std::vector<TokenType>);                 \
+    return typeid(Vector<TokenType>);                      \
   }
 
 

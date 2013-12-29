@@ -526,7 +526,7 @@ void AudioLoader::compute() {
 
     Real& sampleRate = _sampleRate.get();
     int& nChannels = _channels.get();
-    vector<StereoSample>& audio = _audio.get();
+    Vector<StereoSample>& audio = _audio.get();
 
     _audioStorage->setVector(&audio);
 

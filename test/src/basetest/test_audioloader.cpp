@@ -43,7 +43,7 @@ TEST(AudioLoader, SimpleLoad) {
 
     EXPECT_EQ(44100,   p.value<Real>("samplerate"));
     EXPECT_EQ(2,       p.value<Real>("channels"));
-    EXPECT_EQ(219343,  (int)p.value<vector<StereoSample> >("audio").size());
+    EXPECT_EQ(219343,  (int)p.value<Vector<StereoSample> >("audio").size());
 }
 
 TEST(AudioLoader, SampleFormatConversion) {
@@ -60,7 +60,7 @@ TEST(AudioLoader, SampleFormatConversion) {
 
     EXPECT_EQ(44100,   p.value<Real>("samplerate24"));
     EXPECT_EQ(2,       p.value<Real>("channels24"));
-    EXPECT_EQ(219343,  (int)p.value<vector<StereoSample> >("audio24").size());
+    EXPECT_EQ(219343,  (int)p.value<Vector<StereoSample> >("audio24").size());
 
     // FIXME: the following should work
     //loader->configure("filename", "test/audio/recorded/britney32bit.wav");
@@ -77,5 +77,5 @@ TEST(AudioLoader, SampleFormatConversion) {
 
     EXPECT_EQ(44100,   p.value<Real>("samplerate32"));
     EXPECT_EQ(2,       p.value<Real>("channels32"));
-    EXPECT_EQ(219343,  (int)p.value<vector<StereoSample> >("audio32").size());
+    EXPECT_EQ(219343,  (int)p.value<Vector<StereoSample> >("audio32").size());
 }

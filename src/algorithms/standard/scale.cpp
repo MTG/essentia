@@ -33,8 +33,8 @@ void Scale::configure() {
 }
 
 void Scale::compute() {
-  const vector<Real>& signal = _signal.get();
-  vector<Real>& scaled = _scaled.get();
+  const Vector<Real>& signal = _signal.get();
+  Vector<Real>& scaled = _scaled.get();
 
   scaled.resize(signal.size());
   fastcopy(scaled.begin(), signal.begin(), scaled.size());

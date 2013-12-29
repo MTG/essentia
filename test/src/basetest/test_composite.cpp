@@ -34,7 +34,7 @@ using namespace essentia::scheduler;
 TEST(Composite, SimplePush) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   float input[] = { 1, 2, 3 };
-  vector<float> output;
+  Vector<float> output;
 
   Algorithm* vinput = new VectorInput<float>(input);
   Algorithm* composite = factory.create("CompositeAlgo");
@@ -59,7 +59,7 @@ TEST(Composite, SimplePush) {
   while (composite->process() == OK);
   while (voutput->process() == OK);
 
-  vector<float> expected = arrayToVector<float>(input);
+  Vector<float> expected = arrayToVector<float>(input);
   EXPECT_VEC_EQ(output, expected);
 
   delete vinput; delete composite; delete voutput;
@@ -68,7 +68,7 @@ TEST(Composite, SimplePush) {
 TEST(Composite, ReplaceInnerAlgo) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   float input[] = { 1, 2, 3 };
-  vector<float> output;
+  Vector<float> output;
 
   Algorithm* vinput = new VectorInput<float>(input);
   Algorithm* composite = factory.create("CompositeAlgo");
@@ -87,7 +87,7 @@ TEST(Composite, ReplaceInnerAlgo) {
   while (composite->process() == OK);
   while (voutput->process() == OK);
 
-  vector<float> expected = arrayToVector<float>(input);
+  Vector<float> expected = arrayToVector<float>(input);
   EXPECT_VEC_EQ(output, expected);
 
   // reset the network
@@ -131,7 +131,7 @@ TEST(Composite, ReplaceInnerAlgo) {
 TEST(Composite, ExecutionNetwork) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   float input[] = { 1, 2, 3 };
-  vector<float> output;
+  Vector<float> output;
 
   Algorithm* vinput = new VectorInput<float>(input);
   Algorithm* composite = factory.create("CompositeAlgo");

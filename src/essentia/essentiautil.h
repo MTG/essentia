@@ -43,12 +43,12 @@ namespace essentia {
 
 
 /**
- * Utility function that converts a C-style array into a C++ std::vector.
+ * Utility function that converts a C-style array into a C++ Vector.
  */
 template <typename T, typename Array>
-std::vector<T> arrayToVector(const Array& array) {
+Vector<T> arrayToVector(const Array& array) {
   int size = ARRAY_SIZE(array);
-  std::vector<T> result(size);
+  Vector<T> result(size);
   for (int i=0; i<size; i++) {
     result[i] = array[i];
   }
@@ -134,15 +134,15 @@ inline bool isValid(const std::string& s) {
 }
 
 template <typename T>
-inline bool isValid(const std::vector<T>& v) {
-  typename std::vector<T>::const_iterator it = v.begin();
+inline bool isValid(const Vector<T>& v) {
+  typename Vector<T>::const_iterator it = v.begin();
   while (it != v.end() && isValid(*it)) ++it;
   return it == v.end();
 }
 
 template <typename T>
-inline bool isValid(const std::vector<std::vector<T> >& mat) {
-  typename std::vector<std::vector<T> >::const_iterator it = mat.begin();
+inline bool isValid(const Vector<Vector<T> >& mat) {
+  typename Vector<Vector<T> >::const_iterator it = mat.begin();
   while (it != mat.end() && isValid(*it)) ++it;
   return it == mat.end();
 }
@@ -181,7 +181,7 @@ inline void fastcopy<Real>(Real* dest, const Real* src, int n) {
 }
 
 // overload for iterators, which allow us to fastcopy(dest.begin(), src.begin(), 0) and not crash
-inline void fastcopy(std::vector<Real>::iterator dest, std::vector<Real>::const_iterator src, int n) {
+inline void fastcopy(Vector<Real>::iterator dest, Vector<Real>::const_iterator src, int n) {
   // need to test this because otherwise it is not legal to dereference the iterator
   if (n > 0) {
     fastcopy(&*dest, &*src, n);

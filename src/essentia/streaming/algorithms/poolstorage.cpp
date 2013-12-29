@@ -33,14 +33,13 @@ void connect(SourceBase& source, Pool& pool, const string& descriptorName, bool 
   const type_info& sourceType = source.typeInfo();
 
   Algorithm* ps = 0;
-  //if (sameType(sourceType, typeid(Real))) ps = new PoolStorage<Real>(&pool, name);
 
   CREATE_POOL_STORAGE(Real);
   CREATE_POOL_STORAGE(string);
-  CREATE_POOL_STORAGE(vector<string>);
+  CREATE_POOL_STORAGE(Vector<string>);
   CREATE_POOL_STORAGE(TNT::Array2D<Real>);
   CREATE_POOL_STORAGE(StereoSample);
-  CREATE_POOL_STORAGE(vector<Real>);
+  CREATE_POOL_STORAGE(Vector<Real>);
 
   // convert int to Real
   if (sameType(sourceType, typeid(int))) ps = new PoolStorage<int, Real>(&pool, descriptorName, setSingle);
@@ -92,8 +91,8 @@ void disconnect(SourceBase& source, Pool& pool, const string& descriptorName) {
 
       GET_POOLSTORAGE_PROPERTIES(Real)
       else GET_POOLSTORAGE_PROPERTIES(string)
-      else GET_POOLSTORAGE_PROPERTIES(vector<string>)
-      else GET_POOLSTORAGE_PROPERTIES(vector<Real>)
+      else GET_POOLSTORAGE_PROPERTIES(Vector<string>)
+      else GET_POOLSTORAGE_PROPERTIES(Vector<Real>)
       else GET_POOLSTORAGE_PROPERTIES(TNT::Array2D<Real>)
       else GET_POOLSTORAGE_PROPERTIES(StereoSample)
       else if (sameType(sourceType, typeid(int))) {

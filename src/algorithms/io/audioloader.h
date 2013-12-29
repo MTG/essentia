@@ -134,7 +134,7 @@ namespace standard {
 class AudioLoader : public Algorithm {
 
  protected:
-  Output<std::vector<StereoSample> > _audio;
+  Output<Vector<StereoSample> > _audio;
   Output<Real> _sampleRate;
   Output<int> _channels;
 
@@ -142,8 +142,8 @@ class AudioLoader : public Algorithm {
   streaming::VectorOutput<StereoSample>* _audioStorage;
   streaming::VectorOutput<Real>* _srStorage;
   streaming::VectorOutput<int>* _cStorage;
-  std::vector<Real> _sampleRateStorage;
-  std::vector<int> _channelsStorage;
+  Vector<Real> _sampleRateStorage;
+  Vector<int> _channelsStorage;
 
   scheduler::Network* _network;
 

@@ -42,8 +42,8 @@ TEST(FileOutput, Real) {
   ifstream fileStream;
   fileStream.open(filename.c_str());
   string line;
-  vector<Real> vectorLine = arrayToVector<Real>(inputData);
-  vector<Real> results;
+  Vector<Real> vectorLine = arrayToVector<Real>(inputData);
+  Vector<Real> results;
 
   // read results
   while (getline(fileStream, line)) {
@@ -74,8 +74,8 @@ TEST(FileOutput, String) {
   ifstream fileStream;
   fileStream.open(filename.c_str());
   string line;
-  vector<string> vectorLine = arrayToVector<string>(inputData);
-  vector<string> results;
+  Vector<string> vectorLine = arrayToVector<string>(inputData);
+  Vector<string> results;
 
   // read results
   while (getline(fileStream, line)) {
@@ -96,13 +96,13 @@ TEST(FileOutput, VectorReal) {
   Real inputData0[] = {0.0, 0.25, 0.5, 0.75};
   Real inputData1[] = {1.0, 1.25, 1.5, 1.75};
   Real inputData2[] = {2.0, 2.25, 2.5, 2.75};
-  vector<vector<Real> > inputData;
+  Vector<Vector<Real> > inputData;
   inputData.push_back(arrayToVector<Real>(inputData0));
   inputData.push_back(arrayToVector<Real>(inputData1));
   inputData.push_back(arrayToVector<Real>(inputData2));
 
-  streaming::Algorithm* gen = new VectorInput<vector<Real> >(&inputData);
-  streaming::Algorithm* file = new FileOutput<vector<Real> >();
+  streaming::Algorithm* gen = new VectorInput<Vector<Real> >(&inputData);
+  streaming::Algorithm* file = new FileOutput<Vector<Real> >();
   file->configure("filename", filename, "mode", "text");
 
   connect(gen->output("data"), file->input("data"));
@@ -111,7 +111,7 @@ TEST(FileOutput, VectorReal) {
 
   ifstream fileStream;
   fileStream.open(filename.c_str());
-  vector<string> lines;
+  Vector<string> lines;
   string line;
   while (getline(fileStream, line)) lines.push_back(line);
 
@@ -131,13 +131,13 @@ TEST(FileOutput, VectorString) {
   const char* inputData0[] = {"foo0", "foo01"};
   const char* inputData1[] = {"foo1", "foo11"};
   const char* inputData2[] = {"foo2", "foo21"};
-  vector<vector<string> > inputData;
+  Vector<Vector<string> > inputData;
   inputData.push_back(arrayToVector<string>(inputData0));
   inputData.push_back(arrayToVector<string>(inputData1));
   inputData.push_back(arrayToVector<string>(inputData2));
 
-  streaming::Algorithm* gen = new VectorInput<vector<string> >(&inputData);
-  streaming::Algorithm* file = new FileOutput<vector<string> >();
+  streaming::Algorithm* gen = new VectorInput<Vector<string> >(&inputData);
+  streaming::Algorithm* file = new FileOutput<Vector<string> >();
   file->configure("filename", filename, "mode", "text");
 
   connect(gen->output("data"), file->input("data"));
@@ -146,7 +146,7 @@ TEST(FileOutput, VectorString) {
 
   ifstream fileStream;
   fileStream.open(filename.c_str());
-  vector<string> lines;
+  Vector<string> lines;
   string line;
   while (getline(fileStream, line)) lines.push_back(line);
 
@@ -173,7 +173,7 @@ TEST(FileOutput, Complex) {
 
   ifstream fileStream;
   fileStream.open(filename.c_str());
-  vector<string> lines;
+  Vector<string> lines;
   string line;
   while (getline(fileStream, line)) lines.push_back(line);
 
@@ -190,13 +190,13 @@ TEST(FileOutput, VectorComplexReal) {
   complex<Real> inputData0[] = {complex<Real>(0,0), complex<Real>(0,1), complex<Real>(0,2), complex<Real>(0,3)};
   complex<Real> inputData1[] = {complex<Real>(1,0), complex<Real>(1,1), complex<Real>(1,2), complex<Real>(1,3)};
   complex<Real> inputData2[] = {complex<Real>(2,0), complex<Real>(2,1), complex<Real>(2,2), complex<Real>(2,3)};
-  vector<vector<complex<Real> > > inputData;
+  Vector<Vector<complex<Real> > > inputData;
   inputData.push_back(arrayToVector<complex<Real> >(inputData0));
   inputData.push_back(arrayToVector<complex<Real> >(inputData1));
   inputData.push_back(arrayToVector<complex<Real> >(inputData2));
 
-  streaming::Algorithm* gen = new VectorInput<vector<complex<Real> > >(&inputData);
-  streaming::Algorithm* file = new FileOutput<vector<complex<Real> > >();
+  streaming::Algorithm* gen = new VectorInput<Vector<complex<Real> > >(&inputData);
+  streaming::Algorithm* file = new FileOutput<Vector<complex<Real> > >();
   file->configure("filename", filename, "mode", "text");
 
   connect(gen->output("data"), file->input("data"));
@@ -205,7 +205,7 @@ TEST(FileOutput, VectorComplexReal) {
 
   ifstream fileStream;
   fileStream.open(filename.c_str());
-  vector<string> lines;
+  Vector<string> lines;
   string line;
   while (getline(fileStream, line)) lines.push_back(line);
 
@@ -233,7 +233,7 @@ TEST(FileOutput, Array1D) {
   for (; i<size*2; i++) inputData1[i-size]=float(i)/float(size);
   for (; i<size*3; i++) inputData2[i-2*size]=float(i)/float(size);
 
-  vector<TNT::Array1D<Real> > inputData;
+  Vector<TNT::Array1D<Real> > inputData;
   inputData.push_back(inputData0);
   inputData.push_back(inputData1);
   inputData.push_back(inputData2);
@@ -248,7 +248,7 @@ TEST(FileOutput, Array1D) {
 
   ifstream fileStream;
   fileStream.open(filename.c_str());
-  vector<string> lines;
+  Vector<string> lines;
   string line;
   while (getline(fileStream, line)) lines.push_back(line);
 
@@ -279,7 +279,7 @@ TEST(FileOutput, Array2D) {
   string filename = "build/test/fileoutput.txt";
   int size = 3;     // number of matrices
   int M = 2, N = 3; // matrix dimensions
-  vector<TNT::Array2D<Real> > inputData;
+  Vector<TNT::Array2D<Real> > inputData;
   inputData.reserve(size);
   // init vector:
   int count=0;
@@ -303,7 +303,7 @@ TEST(FileOutput, Array2D) {
 
   ifstream fileStream;
   fileStream.open(filename.c_str());
-  vector<string> lines;
+  Vector<string> lines;
   string line;
   while (getline(fileStream, line)) lines.push_back(line);
 
@@ -342,12 +342,12 @@ TEST(FileOutput, DifferentSizes) {
   string filename = "build/test/fileoutput.txt";
   const char* inputData0[] = {"foo0", "foo01"};
   const char* inputData1[] = {"foo1", "foo11, foo12"};
-  vector<vector<string> > inputData;
+  Vector<Vector<string> > inputData;
   inputData.push_back(arrayToVector<string>(inputData0));
   inputData.push_back(arrayToVector<string>(inputData1));
 
-  streaming::Algorithm* gen = new VectorInput<vector<string> >(&inputData);
-  streaming::Algorithm* file = new FileOutput<vector<string> >();
+  streaming::Algorithm* gen = new VectorInput<Vector<string> >(&inputData);
+  streaming::Algorithm* file = new FileOutput<Vector<string> >();
   file->configure("filename", filename, "mode", "text");
 
   connect(gen->output("data"), file->input("data"));
@@ -356,7 +356,7 @@ TEST(FileOutput, DifferentSizes) {
 
   ifstream fileStream;
   fileStream.open(filename.c_str());
-  vector<string> lines;
+  Vector<string> lines;
   string line;
   while (getline(fileStream, line)) lines.push_back(line);
 
@@ -370,7 +370,7 @@ TEST(FileOutput, DifferentSizes) {
 
 TEST(FileOutput, InvalidParam) {
   string filename =  "build/test/invalidParam.txt";
-  streaming::Algorithm* file = new FileOutput<vector<complex<Real> > >();
+  streaming::Algorithm* file = new FileOutput<Vector<complex<Real> > >();
   string expected = "Parameter mode=\"unknown\" is not within specified range: {text,binary}";
   ASSERT_THROW(file->configure("filename", filename, "mode", "unknown"),
                EssentiaException /*, e.what(), expected */);
