@@ -687,12 +687,11 @@ template <typename T, typename U, typename Comparator>
 void sortpair(std::vector<T>& v1, std::vector<U>& v2) {
   if (v1.size() != v2.size()) {
     throw EssentiaException("Cannot sort vectors of different size");
-    exit(1);
   }
   int size = v1.size();
   std::vector<std::pair<T, U> > tmp(size);
   for (int i=0; i<size; i++)
-    tmp[i] = std::make_pair<T,U>(v1[i], v2[i]);
+    tmp[i] = std::make_pair(v1[i], v2[i]);
   std::sort(tmp.begin(), tmp.end(), PairCompare<T, U, Comparator>());
   for (int i=0; i<size; i++) {
     v1[i] = tmp[i].first;

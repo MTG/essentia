@@ -61,12 +61,12 @@ def configure(ctx):
         ctx.env.CC = 'clang'
         ctx.env.CXX = 'clang++'
 
-        ctx.env.CXXFLAGS += [ '-Wno-gnu' ] # , '-std=c++11' ]
 
         ctx.env.DEFINES   += [ 'GTEST_HAS_TR1_TUPLE=0' ]
-        ctx.env.CXXFLAGS = [ '-stdlib=libstdc++' ]
-        ctx.env.LINKFLAGS = [ '-stdlib=libstdc++' ]
-        #ctx.env.FRAMEWORK = [ 'Accelerate' ]
+        ctx.env.CXXFLAGS = [ '-stdlib=libc++', '-std=c++11', '-Wno-gnu' ]
+        ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
+        # for defining static const variables in header
+        ctx.env.CXXFLAGS += [ '-Wno-static-float-init' ]
 
     ctx.load('compiler_cxx compiler_c')
 
