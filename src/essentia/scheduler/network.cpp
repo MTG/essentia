@@ -918,7 +918,7 @@ void Network::printBufferFillState() {
 bool isExcludedFromInfo(const string& algoname) {
   // list of algorithms for which we don't want to log a resize of
   // the buffer on the info stream (still gets on the debug stream)
-  static const char* excluded[1] = { "VectorInput" };
+  static const char* excluded[2] = { "VectorInput", "Envelope" };
 
   for (int i=0; i<(int)ARRAY_SIZE(excluded); i++) {
     if (algoname == excluded[i]) {
