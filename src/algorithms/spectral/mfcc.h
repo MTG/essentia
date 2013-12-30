@@ -53,6 +53,7 @@ class MFCC : public Algorithm {
   }
 
   void declareParameters() {
+    declareParameter("inputSize", "the size of input spectrum", "(1,inf)", 1025);
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("numberBands", "the number of mel-bands in the filter", "[1,inf)", 40);
     declareParameter("numberCoefficients", "the number of output mel coefficients", "[1,inf)", 13);

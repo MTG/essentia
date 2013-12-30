@@ -162,12 +162,13 @@ def configure(ctx):
 
 from waflib.Task import Task
 class BuildAlgoReg(Task):
-        def run(self):
-                return self.exec_command('cp %s %s' % (
-                                self.inputs[0].abspath(),
-                                self.outputs[0].abspath()
-                        )
-                )
+    def run(self):
+        return self.exec_command(
+            'cp %s %s' % (
+                self.inputs[0].abspath(),
+                self.outputs[0].abspath()
+            )
+        )
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
@@ -213,6 +214,8 @@ def build(ctx):
     ctx.env.INCLUDES = [ '.', 'essentia', 'essentia/scheduler', 'essentia/streaming',
                          'essentia/streaming/algorithms', 'essentia/utils',
                          '3rdparty' ]
+    if ctx.env.WITH_PYTHON:
+        ctx.env.INCLUDES.append(__import__('numpy').get_include())
 
     ctx.stlib(
         source   = sources,
