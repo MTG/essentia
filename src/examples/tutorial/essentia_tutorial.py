@@ -15,7 +15,7 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-"""Demo of Essentia 1.2 'standard' mode.
+"""Demo of Essentia 'standard' mode.
 
 This first demo will show how to use Essentia in standard mode.
 This will require a little bit of knowledge of python (not that much!) and

@@ -15,7 +15,7 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-"""Demo of Essentia 1.2 'streaming' mode.
+"""Demo of Essentia 'streaming' mode.
 
 This second demo will show how to use Essentia in streaming mode.
 
