@@ -17,6 +17,14 @@
 
 """Demo of Essentia 'streaming' mode.
 
+To run this demo interactively, open IPython and type in the following commands:
+    from IPython.lib.demo import Demo
+    essentia_demo = Demo('essentia_tutorial.py')
+
+Type command
+    essentia_demo()
+to show and execute each block of the demo.
+
 This second demo will show how to use Essentia in streaming mode.
 
 The main difference between standard and streaming is that the standard mode
