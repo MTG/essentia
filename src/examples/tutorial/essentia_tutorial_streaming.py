@@ -46,7 +46,7 @@ from essentia.streaming import *
 
 # and instantiate our algorithms
 
-loader = MonoLoader(filename = 'video.flv')
+loader = MonoLoader(filename = '../../../test/audio/recorded/dubstep.wav')
 frameCutter = FrameCutter(frameSize = 1024, hopSize = 512)
 w = Windowing(type = 'hann')
 spec = Spectrum()
