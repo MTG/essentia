@@ -27,10 +27,16 @@ We will have a look at some basic functionality:
  - how to plot results
  - how to output results to a file
 
-This demo will be run interactively, each block of code being printed before
-it is run. This is another nifty feature of the IPython interpreter.
-As we go along the demo, we will also be looking at a few IPython features that
-make your life easier.
+To run this demo interactively, open IPython and type in the following commands:
+    from IPython.lib.demo import Demo
+    essentia_demo = Demo('essentia_tutorial.py')
+
+Type command
+    essentia_demo()
+to show and execute each block of the demo. Each block of code will be printed to 
+the screen before it is run. This is another nifty feature of the IPython 
+interpreter. As we go along the demo, we will also be looking at a few IPython 
+features that make your life easier.
 
 So, let's start!
 """
@@ -69,7 +75,7 @@ def play(audiofile):
 # So, first things first, let's load an audio
 # to make sure it's not a trick, let's show the original "audio" to you:
 
-play('video.flv')
+play('../../../test/audio/recorded/dubstep.wav')
 
 
 # <demo> --- stop ---
@@ -85,7 +91,7 @@ play('video.flv')
 #
 
 # we start by instantiating the audio loader:
-loader = essentia.standard.MonoLoader(filename = 'video.flv')
+loader = essentia.standard.MonoLoader(filename = '../../../test/audio/recorded/dubstep.wav')
 
 # and then we actually perform the loading:
 audio = loader()
