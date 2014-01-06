@@ -105,7 +105,7 @@ audio = loader()
 from pylab import *
 
 plot(audio[1*44100:2*44100])
-
+show()
 
 # <demo> --- stop ---
 
@@ -129,6 +129,7 @@ frame = audio[5*44100 : 5*44100 + 1024]
 spec = spectrum(w(frame))
 
 plot(spec)
+show()
 
 # <demo> --- stop ---
 
@@ -146,6 +147,7 @@ for fstart in range(0, len(audio)-frameSize, hopSize):
 # and plot them...
 # as this is a 2D array, we need to use imshow() instead of plot()
 imshow(mfccs, aspect = 'auto')
+show()
 
 
 # <demo> --- stop ---
@@ -162,6 +164,7 @@ for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512):
 mfccs = essentia.array(mfccs).T
 
 imshow(mfccs[1:,:], aspect = 'auto')
+show()
 
 # <demo> --- stop ---
 
@@ -185,7 +188,11 @@ for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512):
 
 imshow(pool['lowlevel.mfcc'].T[1:,:], aspect = 'auto')
 figure()
-imshow(pool['lowlevel.mfcc_bands'].T, aspect = 'auto', interpolation = 'nearest')
+# Let's plot mfcc bands on a log-scale so that the energy values will be better 
+# differentiated by color
+from matplotlib.colors import LogNorm
+imshow(pool['lowlevel.mfcc_bands'].T, aspect = 'auto', interpolation = 'nearest', norm = LogNorm())
+show()
 
 
 # <demo> --- stop ---
