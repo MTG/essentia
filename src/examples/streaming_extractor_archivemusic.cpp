@@ -117,7 +117,7 @@ void compute(const string& audioFilename, const string& outputFilename, Pool& po
   computeStep4(pool, options);
   
   Pool stats = computeAggregation(pool, options);
-  //addSVMDescriptors(stats); // TODO not available yet
+  addSVMDescriptors(stats);
   
   outputToFile(stats, outputFilename, true);
   return;
@@ -467,15 +467,16 @@ void outputToFile(Pool& pool, const string& outputFilename, bool outputJSON) {
 void addSVMDescriptors(Pool& pool) {
   cout << "Process step 6: SVM Models" << endl;
   //const char* svmModels[] = {}; // leave this empty if you don't have any SVM models
-  const char* svmModels[] = { "genre_tzanetakis", "genre_dortmund",
-                              "genre_electronica", "genre_rosamerica",
+  const char* svmModels[] = { "danceability",
+                              "genre_dortmund", "genre_electronic",
+                              "genre_rosamerica", "genre_tzanetakis",
+                              "mirex_ballroom",
                               "mood_acoustic", "mood_aggressive",
                               "mood_electronic", "mood_happy",
                               "mood_party", "mood_relaxed", "mood_sad",
-                              "perceptual_speed", "timbre",
-                              "culture", "gender", "live_studio",
-                              "mirex-moods", "ballroom",
-                              "voice_instrumental"
+                              "moods_mirex", "perceptual_speed", 
+                              "tonal_atonal", "voice_instrumental"
+                              //"timbre", "culture", "gender", "live_studio"
   };
 
   string pathToSvmModels;
