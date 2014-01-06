@@ -1,0 +1,24 @@
+SVM model accuracies in 5-fold CV 
+
+Essentia 2.0.1
+
+genre_tzanetakis    76.435045%
+genre_dortmund      59.141494%
+genre_electronic    91.699605%
+genre_rosamerica    87.442922%
+mirex_ballroom      70.343840%
+perceptual_speed    75.966667%
+danceability        92.444444%
+moods_mirex         58.364312%
+mood_happy          82.857143%
+mood_sad            86.956522%
+mood_relaxed        92.917847%
+mood_aggressive     97.500000%
+mood_party          88.381743%
+mood_acoustic       92.982456%
+mood_electronic     84.587814%
+voice_instrumental  94.200000%
+timbre              ---     
+culture             ---     
+gender              ---     
+tonal_atonal        97.674419%
