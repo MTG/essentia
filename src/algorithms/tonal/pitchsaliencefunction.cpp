@@ -38,6 +38,7 @@ void PitchSalienceFunction::configure() {
   _referenceTerm = 0.5 - _binsInOctave * log2(_referenceFrequency);
   _magnitudeThresholdLinear = 1.0 / pow(10.0, _magnitudeThreshold/20.0);
 
+  _harmonicWeights.clear();
   _harmonicWeights.reserve(_numberHarmonics);
   for (int h=0; h<_numberHarmonics; h++) {
     _harmonicWeights.push_back(pow(_harmonicWeight, h));

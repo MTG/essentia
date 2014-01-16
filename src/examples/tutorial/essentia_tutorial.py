@@ -15,7 +15,7 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-"""Demo of Essentia 1.2 'standard' mode.
+"""Demo of Essentia 'standard' mode.
 
 This first demo will show how to use Essentia in standard mode.
 This will require a little bit of knowledge of python (not that much!) and
@@ -27,10 +27,16 @@ We will have a look at some basic functionality:
  - how to plot results
  - how to output results to a file
 
-This demo will be run interactively, each block of code being printed before
-it is run. This is another nifty feature of the IPython interpreter.
-As we go along the demo, we will also be looking at a few IPython features that
-make your life easier.
+To run this demo interactively, open IPython and type in the following commands:
+    from IPython.lib.demo import Demo
+    essentia_demo = Demo('essentia_tutorial.py')
+
+Type command
+    essentia_demo()
+to show and execute each block of the demo. Each block of code will be printed to 
+the screen before it is run. This is another nifty feature of the IPython 
+interpreter. As we go along the demo, we will also be looking at a few IPython 
+features that make your life easier.
 
 So, let's start!
 """
@@ -69,7 +75,7 @@ def play(audiofile):
 # So, first things first, let's load an audio
 # to make sure it's not a trick, let's show the original "audio" to you:
 
-play('video.flv')
+play('../../../test/audio/recorded/dubstep.wav')
 
 
 # <demo> --- stop ---
@@ -85,7 +91,7 @@ play('video.flv')
 #
 
 # we start by instantiating the audio loader:
-loader = essentia.standard.MonoLoader(filename = 'video.flv')
+loader = essentia.standard.MonoLoader(filename = '../../../test/audio/recorded/dubstep.wav')
 
 # and then we actually perform the loading:
 audio = loader()
@@ -99,7 +105,7 @@ audio = loader()
 from pylab import *
 
 plot(audio[1*44100:2*44100])
-
+show()
 
 # <demo> --- stop ---
 
@@ -123,6 +129,7 @@ frame = audio[5*44100 : 5*44100 + 1024]
 spec = spectrum(w(frame))
 
 plot(spec)
+show()
 
 # <demo> --- stop ---
 
@@ -140,6 +147,7 @@ for fstart in range(0, len(audio)-frameSize, hopSize):
 # and plot them...
 # as this is a 2D array, we need to use imshow() instead of plot()
 imshow(mfccs, aspect = 'auto')
+show()
 
 
 # <demo> --- stop ---
@@ -156,6 +164,7 @@ for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512):
 mfccs = essentia.array(mfccs).T
 
 imshow(mfccs[1:,:], aspect = 'auto')
+show()
 
 # <demo> --- stop ---
 
@@ -179,7 +188,11 @@ for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512):
 
 imshow(pool['lowlevel.mfcc'].T[1:,:], aspect = 'auto')
 figure()
-imshow(pool['lowlevel.mfcc_bands'].T, aspect = 'auto', interpolation = 'nearest')
+# Let's plot mfcc bands on a log-scale so that the energy values will be better 
+# differentiated by color
+from matplotlib.colors import LogNorm
+imshow(pool['lowlevel.mfcc_bands'].T, aspect = 'auto', interpolation = 'nearest', norm = LogNorm())
+show()
 
 
 # <demo> --- stop ---
