@@ -50,6 +50,8 @@ class TonicIndianArtMusic : public Algorithm {
   Real _binResolution;
   Real _numberSaliencePeaks;
   Real _numberBins;
+  Real _minTonicFrequency;
+  Real _maxTonicFrequency;
 
  public:
   TonicIndianArtMusic() {
@@ -78,7 +80,7 @@ class TonicIndianArtMusic : public Algorithm {
     // pre-processing
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("frameSize", "the frame size for computing pitch saliecnce", "(0,inf)", 2048);
-    declareParameter("hopSize", "the hop size with which the pitch salience function was computed", "(0,inf)", 128);
+    declareParameter("hopSize", "the hop size with which the pitch salience function was computed", "(0,inf)", 512);
 
     // pitch salience function
     declareParameter("binResolution", "salience function bin resolution [cents]", "(0,inf)", 10.0);
@@ -86,7 +88,7 @@ class TonicIndianArtMusic : public Algorithm {
     declareParameter("magnitudeThreshold", "peak magnitude threshold (maximum allowed difference from the highest peak in dBs)", "[0,inf)",  40.0);
     declareParameter("magnitudeCompression", "magnitude compression parameter (=0 for maximum compression, =1 for no compression)", "(0,1]", 1.0);
     declareParameter("numberHarmonics", "number of considered hamonics", "[1,inf)", 20);
-    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);
+    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.85);
 
     // tonic identification using multipitch histogram
     declareParameter("numberSaliencePeaks", " number of top peaks of the salience function which should be considered for constructing histogram", "[1, 15]", 5);
