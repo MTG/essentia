@@ -53,6 +53,9 @@ Install a scientific python environment first:
   a. ``ipython --pylab``    if you have matplotlib >= 1.3
   b. ``ipython --pylab=tk`` if you have matplotlib < 1.3
 
+Note that you are advised to install python environment **as described here**, i.e., via homebrew and pip. You will most probably encounter installation errors when using
+python/numpy preinstalled with OSX 10.9.
+
 More details can be found at https://github.com/mxcl/homebrew/wiki/Homebrew-and-Python
 
 Then run::
