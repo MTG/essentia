@@ -15,7 +15,15 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-"""Demo of Essentia 1.2 'streaming' mode.
+"""Demo of Essentia 'streaming' mode.
+
+To run this demo interactively, open IPython and type in the following commands:
+    from IPython.lib.demo import Demo
+    essentia_demo = Demo('essentia_tutorial.py')
+
+Type command
+    essentia_demo()
+to show and execute each block of the demo.
 
 This second demo will show how to use Essentia in streaming mode.
 
@@ -38,7 +46,7 @@ from essentia.streaming import *
 
 # and instantiate our algorithms
 
-loader = MonoLoader(filename = 'video.flv')
+loader = MonoLoader(filename = '../../../test/audio/recorded/dubstep.wav')
 frameCutter = FrameCutter(frameSize = 1024, hopSize = 512)
 w = Windowing(type = 'hann')
 spec = Spectrum()
