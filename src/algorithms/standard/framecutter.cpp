@@ -329,10 +329,7 @@ AlgorithmStatus FrameCutter::process() {
 
   if (status != OK) {
     if (status == NO_INPUT) return NO_INPUT;
-    if (status == NO_OUTPUT) {
-      E_WARNING("No more output for FrameCutter. Scheduler needs to do something or we're toast...");
-      return NO_OUTPUT;
-    }
+    if (status == NO_OUTPUT) return NO_OUTPUT;
     throw EssentiaException("FrameCutter: something weird happened.");
   }
 

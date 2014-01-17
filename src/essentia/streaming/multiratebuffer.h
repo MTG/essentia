@@ -49,7 +49,7 @@ class MultiRateBuffer {
   virtual void releaseForWrite(int released) = 0;
 
   virtual int availableForRead(ReaderID id) const = 0;
-  virtual int availableForWrite() const = 0;
+  virtual int availableForWrite(bool contiguous=true) const = 0;
 
   virtual int totalTokensRead(ReaderID id) const = 0;
   virtual int totalTokensWritten() const = 0;
