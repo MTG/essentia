@@ -17,6 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
+#include <stack>
 #include "network.h"
 #include "graphutils.h"
 #include "../streaming/streamingalgorithm.h"
@@ -24,7 +25,9 @@
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
-using namespace essentia::scheduler;
+
+namespace essentia {
+namespace scheduler {
 
 // helper function, was inside Algorithm before but it makes more sense to have
 // it only here, statically defined (ie: not part of Algorithm API)
@@ -148,11 +151,14 @@ vector<NetworkNode*> NetworkNode::addVisibleDependencies(map<Algorithm*, Network
 }
 
 
+Network* Network::lastCreated = 0;
 
 Network::Network(Algorithm* generator, bool takeOwnership) : _takeOwnership(takeOwnership),
                                                              _generator(generator),
                                                              _visibleNetworkRoot(0),
                                                              _executionNetworkRoot(0) {
+  lastCreated = this;
+
   // 1- find the simple list of algorithms connected in this network
   buildVisibleNetwork();
 
@@ -163,6 +169,7 @@ Network::Network(Algorithm* generator, bool takeOwnership) : _takeOwnership(take
 }
 
 Network::~Network() {
+  if (lastCreated == this) lastCreated = 0;
   clear();
 }
 
@@ -248,11 +255,19 @@ void Network::run() {
 
   streaming::Algorithm* gen = _toposortedNetwork[0];
   bool endOfStream = false;
+  string dash(24, '-');
+
+  saveDebugLevels();
 
   while (!gen->shouldStop()) {
     // first run the generator once
 #if DEBUGGING_ENABLED
-      E_DEBUG(ENetwork, "-------- Running generator loop index " << gen->nProcess << " --------");
+    restoreDebugLevels();
+    setDebugLevelForTimeIndex(gen->nProcess);
+    E_DEBUG(ENetwork, "-------- Running generator loop index " << gen->nProcess << " --------");
+
+    E_DEBUG(EScheduler, dash << " Buffer states before running generator, nProcess = " << gen->nProcess << " " << dash);
+    printNetworkBufferFillState();
 #endif
     gen->process();
 
@@ -261,39 +276,62 @@ void Network::run() {
 #if DEBUGGING_ENABLED
     gen->nProcess++;
 
-    //if (gen->nProcess % 100 == 0) {
-    printBufferFillState();
-    //}
+    if (endOfStream) E_DEBUG(ENetwork, "Generator " << gen->name() << " run " <<
+                             gen->nProcess << " times, shouldStop = true " <<
+                             "(end of stream reached, and all tokens produced)");
+
+    //E_DEBUG(EScheduler, dash << " Buffer states after running generator " << dash);
+    //printBufferFillState();
 #endif
 
     // then run each algorithm as many times as needed for them to consume everything on their input
-    for (int i=1; i<(int)_toposortedNetwork.size(); i++) {
-      _toposortedNetwork[i]->shouldStop(endOfStream);
-      AlgorithmStatus status;
-      do {
-        status = _toposortedNetwork[i]->process();
+    stack<int> runStack;
+    runStack.push(1);
+    while (!runStack.empty()) {
+      int startIndex = runStack.top();
+      runStack.pop();
+
+      for (int i=startIndex; i<(int)_toposortedNetwork.size(); i++) {
+        // only propagate the end of stream marker as long as we don't have any
+        // algorithm rescheduled to run
+        _toposortedNetwork[i]->shouldStop(endOfStream && runStack.empty());
+        AlgorithmStatus status;
+        do {
+          status = _toposortedNetwork[i]->process();
 
 #if DEBUGGING_ENABLED
-        if (status == OK || status == FINISHED) _toposortedNetwork[i]->nProcess++;
+          if (status == OK || status == FINISHED) _toposortedNetwork[i]->nProcess++;
 #endif
 
-        // TODO: if status == NO_OUTPUT || status == YIELD, push back i on a stack; execute
-        //       all of its dependencies, then pop i back from the stack and reexecute
-        //       NOTE: be careful with endOfStream, it should probably not be propagated
-        //             as long as we have at least 1 index value on the stack
-        if (status == NO_OUTPUT /*|| status == YIELD*/) {
-          //throw EssentiaException("Error: output buffer full when running algo ", _toposortedNetwork[i]->name());
-        }
-      } while (status == OK);
-      endOfStream = _toposortedNetwork[i]->shouldStop();
+          // if status == NO_OUTPUT, push i on a stack to remember to execute it again later;
+          // execute all of its dependencies, then pop i from the stack and reexecute, as well
+          // as the dependencies
+          // NOTE: be careful with endOfStream, it should not be propagated
+          // as long as we have at least 1 index value on the stack
+          if (status == NO_OUTPUT) {
+            runStack.push(i);
+            E_DEBUG(EScheduler, "Rescheduling algorithm " << _toposortedNetwork[i]->name() <<
+                    " on generator frame " << gen->nProcess <<
+                    " to run later, output buffers temporarily full");
+            /*
+            E_WARNING("Rescheduling algorithm " << _toposortedNetwork[i]->name() <<
+                      " on generator frame " << gen->nProcess <<
+                      " to run later, output buffers temporarily full");
+            E_WARNING("You may want to consider resizing one of the output buffers of " <<
+                      "this algorithm for better performance");
+            */
+            printNetworkBufferFillState();
+          }
+        } while (status == OK);
+
+      }
     }
+    E_DEBUG(EScheduler, dash << " Buffer states after running the generator and all the nodes " << dash);
+    printBufferFillState();
   }
 
-#if DEBUGGING_ENABLED
-  E_DEBUG(ENetwork, "**** Final buffer states ****");
+  E_DEBUG(ENetwork, dash << " Final buffer states " << dash);
   printBufferFillState();
-#endif
-
 }
 
 Algorithm* Network::findAlgorithm(const std::string& name) {
@@ -888,8 +926,9 @@ void Network::checkConnections() {
 }
 
 
-// this is costly, do not call in production!!
 void Network::printBufferFillState() {
+  if (!E_ACTIVE(EScheduler)) return;
+
   vector<Algorithm*> algos = depthFirstMap(_executionNetworkRoot, returnAlgorithm);
 
   for (int i=0; i<(int)algos.size(); i++) {
@@ -907,12 +946,22 @@ void Network::printBufferFillState() {
       E_DEBUG(EScheduler, "  - " << pad(name, 24)
               << " fill " << pad(percent, 3, ' ', true) << "%   |  "
               << pad(used, 6, ' ', true) << " / " << pad(buf.size, 6)
-              << "  |  contiguous: " << buf.maxContiguousElements);
+              << "  |  contiguous: " << pad(buf.maxContiguousElements, 6)
+              << "  |  total produced: " << pad(output->second->totalProduced(), 8));
       // if we compile without debugging
       NOWARN_UNUSED(name);
       NOWARN_UNUSED(percent);
     }
+    E_DEBUG(EScheduler, "");
   }
+}
+
+void printNetworkBufferFillState() {
+  if (!Network::lastCreated) {
+    E_WARNING("No network created, or last created network has been deleted...");
+  }
+
+  Network::lastCreated->printBufferFillState();
 }
 
 bool isExcludedFromInfo(const string& algoname) {
@@ -992,3 +1041,7 @@ void Network::checkBufferSizes() {
   }
   E_DEBUG(ENetwork, "checking buffer sizes ok");
 }
+
+
+} // namespace scheduler
+} // namespace essentia

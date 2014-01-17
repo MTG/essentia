@@ -393,7 +393,6 @@ namespace BufferUsage {
  */
 enum BufferUsageType {
   forSingleFrames,
-  forMultipleFrames,
   forAudioStream,
   forLargeAudioStream
 };

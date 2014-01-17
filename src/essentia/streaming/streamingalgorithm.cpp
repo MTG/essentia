@@ -204,17 +204,20 @@ void Algorithm::disconnectAll() {
 // returns true if it succeeded, otherwise returns false (also frees the
 // resources it may have managed to acquire.
 AlgorithmStatus Algorithm::acquireData() {
+  // Note: check for inputs first, so we're sure we're done and no need to reschedule
+  // the algorithm because of no output
+  for (InputMap::const_iterator input = _inputs.begin(); input!=_inputs.end(); ++input) {
+    if (!input->second->acquire()) {
+      return NO_INPUT;
+    }
+  }
+
   for (OutputMap::const_iterator output = _outputs.begin(); output!=_outputs.end(); ++output) {
     if (!output->second->acquire()) {
       return NO_OUTPUT;
     }
   }
 
-  for (InputMap::const_iterator input = _inputs.begin(); input!=_inputs.end(); ++input) {
-    if (!input->second->acquire()) {
-      return NO_INPUT;
-    }
-  }
 
   return OK;
 }

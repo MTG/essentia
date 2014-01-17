@@ -93,7 +93,7 @@ class Source : public SourceBase {
   }
 
   virtual int available() const {
-    return _buffer->availableForWrite();
+    return _buffer->availableForWrite(false);
   }
 
   virtual void reset() {
