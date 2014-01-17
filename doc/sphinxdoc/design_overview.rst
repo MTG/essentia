@@ -236,6 +236,27 @@ possible to activate *any* logging at runtime at all, the advantage being that y
 pay absolutely nothing for logging, so don't hesitate to (ab)use logging in your
 algorithms because of fear of losing efficiency.
 
+Advanced logging
+^^^^^^^^^^^^^^^^
+
+Sometimes, you wish to only activate logging for a certain period of time, to avoid
+being overwhelmed by too many messages. For example, if your algorithm fails at some point
+in an audio file, you might want to only log some info for the 5 previous calls to the
+generator (frames of the audioloader, usually).
+
+This is done by specifying a list of time ranges (in number of calls to the generator) and
+modules that should be activated during this range. For example::
+
+    DebuggingSchedule s = { {0,   INT_MAX, ENetwork},     // always active
+                            {500, INT_MAX, EAlgorithm },  // from time index 500 until the end
+                            {782, 782,     EScheduler} }; // only for time index 782
+    scheduleDebug(s, ARRAY_SIZE(s));
+
+This will run a network and activate the ENetwork level always, the EAlgorithm
+from the 500th call to the generator until the end, and the EScheduler
+level only on the 782th call to the generator.
+
+
 Logging in python
 -----------------
 

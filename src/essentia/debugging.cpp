@@ -66,6 +66,40 @@ void unsetDebugLevel(int levels) {
 }
 
 
+DebuggingScheduleVector _schedule;
+
+int _savedDebugLevels = ENone;
+
+void scheduleDebug(const DebuggingScheduleVector& schedule) {
+  _schedule = schedule;
+}
+
+void scheduleDebug(DebuggingSchedule schedule, int nentries) {
+  _schedule.resize(nentries);
+  for (int i=0; i<nentries; i++) {
+    _schedule[i].first.first = schedule[i][0];
+    _schedule[i].first.second = schedule[i][1];
+    _schedule[i].second = schedule[i][2];
+  }
+}
+
+void restoreDebugLevels() {
+   activatedDebugLevels = _savedDebugLevels;
+}
+
+void saveDebugLevels() {
+  _savedDebugLevels = activatedDebugLevels;
+}
+
+void setDebugLevelForTimeIndex(int index) {
+  restoreDebugLevels();
+  for (int i=0; i<(int)_schedule.size(); i++) {
+    if (_schedule[i].first.first <= index && index <= _schedule[i].first.second) {
+      setDebugLevel(_schedule[i].second);
+    }
+  }
+}
+
 
 // NOTE: in a thread-safe implementation, the msg queue would be thread-safe and
 //       the flushing would need to happen in a separate thread
