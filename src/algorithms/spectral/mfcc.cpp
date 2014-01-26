@@ -43,7 +43,8 @@ const char* MFCC::description = DOC("This algorithm computes the mel-frequency c
 "  http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient");
 
 void MFCC::configure() {
-  _melFilter->configure("sampleRate", parameter("sampleRate"),
+  _melFilter->configure("inputSize", parameter("inputSize"),
+                        "sampleRate", parameter("sampleRate"),
                         "numberBands", parameter("numberBands"),
                         "lowFrequencyBound", parameter("lowFrequencyBound"),
                         "highFrequencyBound", parameter("highFrequencyBound"));

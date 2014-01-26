@@ -74,11 +74,6 @@ class PhantomBuffer : public MultiRateBuffer<T> {
       buf.maxContiguousElements = 0;
       break;
 
-    case BufferUsage::forMultipleFrames:
-      buf.size = 16;
-      buf.maxContiguousElements = 2;
-      break;
-
     case BufferUsage::forAudioStream:
       buf.size = 65536;
       buf.maxContiguousElements = 4096;
@@ -218,7 +213,7 @@ class PhantomBuffer : public MultiRateBuffer<T> {
   // mutex should be locked before entering this function
   // make sure it doesn't overflow
   int availableForRead(ReaderID id) const;
-  int availableForWrite() const;
+  int availableForWrite(bool contiguous=true) const;
 
   // reposition pointer if we're in the phantom zone
   void relocateReadWindow(ReaderID id);

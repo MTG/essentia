@@ -172,7 +172,7 @@ void PeakDetection::compute() {
     // sort peaks by magnitude, in case of equality,
     // return the one having smaller position
     std::sort(peaks.begin(), peaks.end(),
-              ComparePeakMagnitude<std::greater<Real>, std::less_equal<Real> >());
+              ComparePeakMagnitude<std::greater<Real>, std::less<Real> >());
   }
   else if (_orderBy == "position") {
     // they're already sorted by position

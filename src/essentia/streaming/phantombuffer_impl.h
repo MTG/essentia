@@ -245,7 +245,7 @@ int PhantomBuffer<T>::availableForRead(ReaderID id) const {
  * buffer.
  */
 template <typename T>
-int PhantomBuffer<T>::availableForWrite() const {
+int PhantomBuffer<T>::availableForWrite(bool contiguous) const {
   //relocateWriteWindow(); // this call should be useless, but it's a safety guard to have it
 
   int minTotal = _bufferSize;
@@ -263,9 +263,12 @@ int PhantomBuffer<T>::availableForWrite() const {
   }
 
   int theoretical = minTotal - _writeWindow.total(_bufferSize) + _bufferSize;
-  int contiguous = _bufferSize + _phantomSize - _writeWindow.begin;
+  if (!contiguous) {
+    return theoretical;
+  }
 
-  return std::min(theoretical, contiguous);
+  int ncontiguous = _bufferSize + _phantomSize - _writeWindow.begin;
+  return std::min(theoretical, ncontiguous);
 }
 
 // reposition pointer if we're in the phantom zone

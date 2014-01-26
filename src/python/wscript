@@ -25,7 +25,9 @@ def build(ctx):
     #print('-'*100)
     #print('ctx.env', ctx.env)
     #print('-'*100)
-    NUMPY_INCPATH = [ # virtualenv path
+    NUMPY_INCPATH = [ # importable numpy path
+                      __import__('numpy').get_include(),
+                      # virtualenv path
                       os.path.join(PYLIB, 'numpy', 'core', 'include'),
                       # system python path
                       os.path.join(ctx.env.PYTHONDIR, 'numpy', 'core', 'include') ]

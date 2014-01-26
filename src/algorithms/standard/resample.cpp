@@ -205,7 +205,7 @@ void Resample::reset() {
   _resampled.setAcquireSize(maxElementsAtOnce);
 
   BufferInfo buf;
-  buf.size = maxElementsAtOnce * 16;
+  buf.size = maxElementsAtOnce * 32;
   buf.maxContiguousElements = maxElementsAtOnce*2;
   _resampled.setBufferInfo(buf);
 
