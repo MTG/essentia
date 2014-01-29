@@ -22,7 +22,7 @@
 from essentia_test import *
 from essentia._essentia import version
 import os
-
+import json
 
 
 def getYaml(filename):
@@ -308,6 +308,25 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
     def testInvalidFile(self):
         p = Pool()
         self.assertRaises(RuntimeError, lambda: YamlOutput(filename='')(p))
+
+
+    def testJsonEscapedStrings(self):
+        p = Pool()
+        p.add('vector_string', 'string_1\n\r')
+        p.add('vector_string', 'string_2\n\r')
+        p.add('vector_string', 'string_3\n\r')
+        p.set('string', 'string\n\r')
+
+        YamlOutput(filename='test.yaml', format='json')(p)
+
+
+        raised = False
+        try: 
+            result = json.load(open('test.yaml', 'r'))
+        except:
+            raised = True
+        
+        self.assertEqual(raised, False)
 
 
 suite = allTests(TestYamlOutput)
