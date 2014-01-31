@@ -53,7 +53,7 @@ void PitchYinFFT::configure() {
   // compute buffer sizes
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toReal();
-  //_tolerance = parameter("tolerance").toReal();
+  _interpolate = parameter("interpolate").toBool();
   _sqrMag.resize(_frameSize);
   _weight.resize(_frameSize/2+1);
   _yin.resize(_frameSize/2+1);
@@ -68,6 +68,15 @@ void PitchYinFFT::configure() {
   if (_tauMax <= _tauMin) {
     throw EssentiaException("PitchYinFFT: maxFrequency is lower than minFrequency, or they are too close, or they are out of the interval of detectable frequencies with respect to the specified frameSize. Minimum detectable frequency is ", _sampleRate / (_frameSize/2), " Hz");
   }
+
+  // configure peak detection algorithm
+  ParameterMap config;
+  config.add("range", _frameSize/2+1);
+  config.add("maxPeaks", 1);
+  config.add("minPosition", _tauMin);
+  config.add("maxPosition", _tauMax);
+  config.add("orderBy", "amplitude");
+  _peakDetect->configure(config);     
 }
 
 void PitchYinFFT::spectralWeights() {
@@ -107,8 +116,8 @@ void PitchYinFFT::compute() {
   }
   Real& pitch = _pitch.get();
   Real& pitchConfidence = _pitchConfidence.get();
-  int tau, l = 0;
-  Real tmp = 0, sum = 0;
+  int l = 0;
+  Real yinMin, tau, tmp = 0, sum = 0;
 
   if ((int)spectrum.size() != _frameSize/2+1) {//_sqrMag.size()/2+1) {
     Algorithm::configure( "frameSize", int(2*(spectrum.size()-1)) );
@@ -152,62 +161,40 @@ void PitchYinFFT::compute() {
   }
 
   // search for argmin within minTau/maxTau range
-  bool first = true;
-  Real yinMin;
-  for (int i=_tauMin; i<=_tauMax; ++i) {
-    if (first) {
-      tau = i;
-      yinMin = _yin[i];
-      first = false;
+  if (_interpolate) {
+    // yin values are in the range [0,inf], because we want to detect the minima and peak detection detects the maxima,
+    // yin values will be inverted
+    for(int n=0; n<=_yin.size(); ++n) {
+      _yin[n] = -_yin[n];
     }
-    else {
-      if (_yin[i] < yinMin) {
-        tau = i;
+    // use interal peak detection algorithm
+    _peakDetect->input("array").set(_yin);
+    _peakDetect->output("positions").set(_positions);
+    _peakDetect->output("amplitudes").set(_amplitudes);
+    _peakDetect->compute();    
+    tau = _positions[0];
+    yinMin = -_amplitudes[0];
+  }
+  else {
+	  // with no interpolation is faster to simply search the minimum
+	  int int_tau = _tauMin;
+	  yinMin = _yin[_tauMin];
+	  for (int i=_tauMin; i<=_tauMax; ++i) {
+	  	if (_yin[i] < yinMin) {
+        int_tau = i;
         yinMin = _yin[i];
-      }
-    }
-  }
-
-  //tau = argmin(_yin);
-
-  /*
-  if (_yin[tau] < _tolerance) {
-    //return tau;
-    pitch = _sampleRate / (tau + 0.);
-    pitchConfidence = 1. - _yin[tau];
-  */
-	  /* no interpolation */                //return tau;
-	  /* 3 point quadratic interpolation */ //return vec_quadint_min(yin,tau,1);
-	  /* additional check for (unlikely) octave doubling in higher frequencies */
-    /*
-	  if (tau>35) {
-		  return vec_quadint_min(yin,tau,1);
-	  } else {
-    */
-		  /* should compare the minimum value of each interpolated peaks */
-    /*
-		  halfperiod = FLOOR(tau/2+.5);
-		  if (_yin[halfperiod] < _tolerance)
-			  return vec_quadint_min(_yin,halfperiod,1);
-		  else
-			  return vec_quadint_min(_yin,tau,1);
+	    }
 	  }
-  } else {
-	  return 0;
-    // should throw an exception now
-  */
-  /*
-  } else {
-    pitch = -1.;
-    pitchConfidence = 0.;
+    tau = int_tau + 0.;
   }
-  */
-  if (tau != 0) {
-    pitch = _sampleRate / (tau + 0.);
-    pitchConfidence = 1. - _yin[tau];
+
+  if (tau != 0.0) {
+    pitch = _sampleRate / tau;
+    pitchConfidence = 1. - yinMin;
   }
   else {
     pitch = 0.0;
     pitchConfidence = 0.0;
-  }
+  }      
+
 }

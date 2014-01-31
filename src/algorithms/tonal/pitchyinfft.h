@@ -42,13 +42,17 @@ class PitchYinFFT : public Algorithm {
 
   Algorithm* _fft;
   Algorithm* _cart2polar;
+  Algorithm* _peakDetect;
 
-  std::vector<Real> _resPhase; /** complex vector to compute square difference function */
+  std::vector<Real> _resPhase;    /** complex vector to compute square difference function */
   std::vector<Real> _resNorm;
-  std::vector<Real> _sqrMag;   /** square difference function */
-  std::vector<Real> _weight;   /** spectral weighting window (psychoacoustic model) */
-  std::vector<Real> _yin;      /** Yin function */
-  Real _sampleRate;            /** sampling rate of the audio signal */
+  std::vector<Real> _sqrMag;      /** square difference function */
+  std::vector<Real> _weight;      /** spectral weighting window (psychoacoustic model) */
+  std::vector<Real> _yin;         /** Yin function */
+  std::vector<Real> _positions;   /** autocorrelation peak positions */
+  std::vector<Real> _amplitudes;  /** autocorrelation peak amplitudes */
+  Real _sampleRate;               /** sampling rate of the audio signal */
+  bool _interpolate;              /** whether to use peak interpolation */
   int _frameSize;
   //Real _tolerance;
   int _tauMin;
@@ -63,11 +67,13 @@ class PitchYinFFT : public Algorithm {
 
     _fft = AlgorithmFactory::create("FFT");
     _cart2polar = AlgorithmFactory::create("CartesianToPolar");
+    _peakDetect = AlgorithmFactory::create("PeakDetection");
   }
 
   ~PitchYinFFT() {
     delete _fft;
     delete _cart2polar;
+    delete _peakDetect;
   };
 
   void declareParameters() {
@@ -75,6 +81,7 @@ class PitchYinFFT : public Algorithm {
     declareParameter("sampleRate", "sampling rate of the input spectrum [Hz]", "(0,inf)", 44100.);
     declareParameter("minFrequency", "the minimum allowed frequency [Hz]", "(0,inf)", 20.0);
     declareParameter("maxFrequency", "the maximum allowed frequency [Hz]", "(0,inf)", 22050.0);
+    declareParameter("interpolate", "boolean flag to enable interpolation", "{true,false}", true);
     //declareParameter("tolerance", "tolerance for peak detection", "[0,1]", 0.75);
   }
 
