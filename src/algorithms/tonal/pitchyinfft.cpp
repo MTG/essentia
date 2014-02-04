@@ -71,6 +71,7 @@ void PitchYinFFT::configure() {
 
   // configure peak detection algorithm
   ParameterMap config;
+  config.add("interpolate", _interpolate);
   config.add("range", _frameSize/2+1);
   config.add("maxPeaks", 1);
   config.add("minPosition", _tauMin);
