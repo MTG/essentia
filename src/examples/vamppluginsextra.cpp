@@ -126,7 +126,7 @@ public:
       else if (params[i].identifier == id) parameterMap.add(id, value);
       else parameterMap.add(params[i].identifier, getParameter(params[i].identifier));
       }
-    _algo->configure(parameterMap);    
+    _algo->configure(parameterMap);
   }
 
   FeatureSet process(const float *const *inputBuffers, Vamp::RealTime) {
