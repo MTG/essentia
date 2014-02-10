@@ -130,3 +130,15 @@ To generate the full documentation (need python bindings installed first)::
 Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
 
 All built examples (including the out-of-box features extractors) will be located in ``build/src/examples/`` folder, as well as the vamp plugin file ``libvamp_essentia.so``. In order to use the plugin you will need to place this file to the the standard vamp plugin folder of your system (such as ``/usr/local/lib/vamp/`` on Linux).
+
+
+Using pre-trained high-level models in Essentia
+-----------------------------------------------
+
+The 2.0.1 version of Essentia includes a number of `pre-trained classifier models for genres, moods and instrumentation
+<algorithms_overview.html#other-high-level-descriptors>`_. In order to use them you need to:
+
+* Install Gaia2 library (supported on Linux/OSX): https://github.com/MTG/gaia/blob/master/README.md
+* Build Essentia 2.0.1 with examples
+* Use ``streaming_extractor_archivemusic``
+
