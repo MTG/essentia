@@ -116,7 +116,7 @@ WRAP_TEMPORAL_PLUGIN(RMS, "", 1, float);
 WRAP_TEMPORAL_PLUGIN(StrongDecay, "", 1, float);
 WRAP_TEMPORAL_PLUGIN(Larm, "", 1, float);
 WRAP_TEMPORAL_PLUGIN(LoudnessVickers, "", 1, float);
-
+WRAP_TEMPORAL_PLUGIN(ZeroCrossingRate, "", 1, float);
 
 static Vamp::PluginAdapter<Pitch> aPitch;
 static Vamp::PluginAdapter<DistributionShape> aDistributionShape;
@@ -178,6 +178,7 @@ const VampPluginDescriptor *vampGetPluginDescriptor(unsigned int version,
 
   case 39: return aERBBands.getDescriptor();
   case 40: return aGFCC.getDescriptor();
+  case 41: return tZeroCrossingRate.getDescriptor();
 
   default:
     return 0;
