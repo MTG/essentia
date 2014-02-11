@@ -49,7 +49,7 @@ void setExtractorOptions(Pool& pool);
 
 void usage() {
     cout << "Error: wrong number of arguments" << endl;
-    cout << "Usage: streaming_extractor_archive input_audiofile output_textfile" << endl;
+    cout << "Usage: streaming_extractor_archivemusic input_audiofile output_textfile" << endl;
     exit(1);
 }
 

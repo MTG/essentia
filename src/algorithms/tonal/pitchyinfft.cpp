@@ -53,7 +53,7 @@ void PitchYinFFT::configure() {
   // compute buffer sizes
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toReal();
-  //_tolerance = parameter("tolerance").toReal();
+  _interpolate = parameter("interpolate").toBool();
   _sqrMag.resize(_frameSize);
   _weight.resize(_frameSize/2+1);
   _yin.resize(_frameSize/2+1);
@@ -68,36 +68,44 @@ void PitchYinFFT::configure() {
   if (_tauMax <= _tauMin) {
     throw EssentiaException("PitchYinFFT: maxFrequency is lower than minFrequency, or they are too close, or they are out of the interval of detectable frequencies with respect to the specified frameSize. Minimum detectable frequency is ", _sampleRate / (_frameSize/2), " Hz");
   }
+
+  // configure peak detection algorithm
+  _peakDetect->configure("interpolate", _interpolate,
+                        "range", _frameSize/2+1,
+                        "maxPeaks", 1,
+                        "minPosition", _tauMin,
+                        "maxPosition", _tauMax,
+                        "orderBy", "amplitude");
 }
 
 void PitchYinFFT::spectralWeights() {
-	int i = 0, j = 1;
-	Real freq = 0, a0 = 0, a1 = 0, f0 = 0, f1 = 0;
-	for (i=0; i < int(_weight.size()); ++i) {
-	  freq = (Real)i/(Real)_frameSize*_sampleRate;
-	  while (freq > _freqsMask[j]) {
-		  j +=1;
-	  }
-	  a0 = _weightMask[j-1];
-	  f0 = _freqsMask[j-1];
-	  a1 = _weightMask[j];
-	  f1 = _freqsMask[j];
-	  if (f0 == f1) { // just in case
-		  _weight[i] = a0;
-	  }
+  int i = 0, j = 1;
+  Real freq = 0, a0 = 0, a1 = 0, f0 = 0, f1 = 0;
+  for (i=0; i < int(_weight.size()); ++i) {
+    freq = (Real)i/(Real)_frameSize*_sampleRate;
+    while (freq > _freqsMask[j]) {
+      j +=1;
+    }
+    a0 = _weightMask[j-1];
+    f0 = _freqsMask[j-1];
+    a1 = _weightMask[j];
+    f1 = _freqsMask[j];
+    if (f0 == f1) { // just in case
+      _weight[i] = a0;
+    }
     else if (f0 == 0) { // y = ax+b
-		  _weight[i] = (a1-a0)/f1*freq + a0;
-	  }
+      _weight[i] = (a1-a0)/f1*freq + a0;
+    }
     else {
-		  _weight[i] = (a1-a0)/(f1-f0)*freq +
-			  (a0 - (a1 - a0)/(f1/f0 - 1.));
-	  }
-	  while (freq > _freqsMask[j]) {
-		  j +=1;
-	  }
+      _weight[i] = (a1-a0)/(f1-f0)*freq +
+        (a0 - (a1 - a0)/(f1/f0 - 1.));
+    }
+    while (freq > _freqsMask[j]) {
+      j +=1;
+    }
     // could be sqrt of this too
-	  _weight[i] = db2lin(_weight[i]/2.0);
-	}
+    _weight[i] = db2lin(_weight[i]/2.0);
+  }
 }
 
 void PitchYinFFT::compute() {
@@ -107,8 +115,8 @@ void PitchYinFFT::compute() {
   }
   Real& pitch = _pitch.get();
   Real& pitchConfidence = _pitchConfidence.get();
-  int tau, l = 0;
-  Real tmp = 0, sum = 0;
+  int l = 0;
+  Real yinMin, tau, tmp = 0, sum = 0;
 
   if ((int)spectrum.size() != _frameSize/2+1) {//_sqrMag.size()/2+1) {
     Algorithm::configure( "frameSize", int(2*(spectrum.size()-1)) );
@@ -125,11 +133,11 @@ void PitchYinFFT::compute() {
   _cart2polar->output("magnitude").set(_resNorm);
   _cart2polar->output("phase").set(_resPhase);
 
-	_sqrMag[0] = spectrum[0]*spectrum[0]*_weight[0];
+  _sqrMag[0] = spectrum[0]*spectrum[0]*_weight[0];
   sum += _sqrMag[0];
   for (l=1; l < (int)spectrum.size(); l++) {
-	  _sqrMag[l] = spectrum[l]*spectrum[l]*_weight[l];
-	  _sqrMag[_frameSize-l] = _sqrMag[l];
+    _sqrMag[l] = spectrum[l]*spectrum[l]*_weight[l];
+    _sqrMag[_frameSize-l] = _sqrMag[l];
     sum += _sqrMag[l];
   }
   sum *= 2;
@@ -146,68 +154,46 @@ void PitchYinFFT::compute() {
   _cart2polar->compute();
   _yin[0] = 1.;
   for (tau = 1; tau < int(_yin.size()); ++tau) {
-	  _yin[tau] = sum - _resNorm[tau]*cos(_resPhase[tau]);
+    _yin[tau] = sum - _resNorm[tau]*cos(_resPhase[tau]);
     tmp += _yin[tau];
-	  _yin[tau] *= tau/tmp;
+    _yin[tau] *= tau/tmp;
   }
 
   // search for argmin within minTau/maxTau range
-  bool first = true;
-  Real yinMin;
-  for (int i=_tauMin; i<=_tauMax; ++i) {
-    if (first) {
-      tau = i;
-      yinMin = _yin[i];
-      first = false;
+  if (_interpolate) {
+    // yin values are in the range [0,inf], because we want to detect the minima and peak detection detects the maxima,
+    // yin values will be inverted
+    for(int n=0; n<=_yin.size(); ++n) {
+      _yin[n] = -_yin[n];
     }
-    else {
+    // use interal peak detection algorithm
+    _peakDetect->input("array").set(_yin);
+    _peakDetect->output("positions").set(_positions);
+    _peakDetect->output("amplitudes").set(_amplitudes);
+    _peakDetect->compute();    
+    tau = _positions[0];
+    yinMin = -_amplitudes[0];
+  }
+  else {
+    // with no interpolation is faster to simply search the minimum
+    int int_tau = _tauMin;
+    yinMin = _yin[_tauMin];
+    for (int i=_tauMin; i<=_tauMax; ++i) {
       if (_yin[i] < yinMin) {
-        tau = i;
+        int_tau = i;
         yinMin = _yin[i];
       }
     }
+    tau = int_tau + 0.;
   }
 
-  //tau = argmin(_yin);
-
-  /*
-  if (_yin[tau] < _tolerance) {
-    //return tau;
-    pitch = _sampleRate / (tau + 0.);
-    pitchConfidence = 1. - _yin[tau];
-  */
-	  /* no interpolation */                //return tau;
-	  /* 3 point quadratic interpolation */ //return vec_quadint_min(yin,tau,1);
-	  /* additional check for (unlikely) octave doubling in higher frequencies */
-    /*
-	  if (tau>35) {
-		  return vec_quadint_min(yin,tau,1);
-	  } else {
-    */
-		  /* should compare the minimum value of each interpolated peaks */
-    /*
-		  halfperiod = FLOOR(tau/2+.5);
-		  if (_yin[halfperiod] < _tolerance)
-			  return vec_quadint_min(_yin,halfperiod,1);
-		  else
-			  return vec_quadint_min(_yin,tau,1);
-	  }
-  } else {
-	  return 0;
-    // should throw an exception now
-  */
-  /*
-  } else {
-    pitch = -1.;
-    pitchConfidence = 0.;
-  }
-  */
-  if (tau != 0) {
-    pitch = _sampleRate / (tau + 0.);
-    pitchConfidence = 1. - _yin[tau];
+  if (tau != 0.0) {
+    pitch = _sampleRate / tau;
+    pitchConfidence = 1. - yinMin;
   }
   else {
     pitch = 0.0;
     pitchConfidence = 0.0;
-  }
+  }      
+
 }

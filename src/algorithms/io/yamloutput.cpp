@@ -21,6 +21,8 @@
 #include "essentia.h"
 #include "output.h" // ../utils/output
 #include <fstream>
+#include <sstream> // escapeJsonString
+
 
 using namespace std;
 using namespace essentia;
@@ -94,6 +96,29 @@ vector<string> split(const string& s) {
   return result;
 }
 
+
+// this function escapes utf-8 string to be compatible with JSON standard, 
+// but it does not handle invalid utf-8 characters. Values in the pool are 
+// expected to be correct utf-8 strings, and it is up to the user to provide
+// correct utf-8 strings for the names of descriptors in the Pool. This 
+// function is not called for Pool descriptor names, but only for string values.
+string escapeJsonString(const string& input) {
+  ostringstream escaped;
+  for (string::const_iterator i = input.begin(); i != input.end(); i++) { 
+    switch (*i) {
+      case '\n': escaped << "\\n"; break;
+      case '\r': escaped << "\\r"; break;
+      case '\t': escaped << "\\t"; break;
+      case '\f': escaped << "\\f"; break;
+      case '\b': escaped << "\\b"; break;
+      case '"': escaped << "\\\""; break;
+      case '/': escaped << "\\/"; break;
+      case '\\': escaped << "\\\\"; break;
+      default: escaped << *i; break;
+    } 
+  }
+  return escaped.str();
+}
 
 // A YamlNode represents a node in the YAML tree. A YamlNode without any value
 // is valid, it is simply a namespace identifier. It is required that every
@@ -237,7 +262,24 @@ void emitJson(StreamType* s, YamlNode* n, const string& indent) {
 
   if (n->children.empty()) { // if there are no children, emit the value here
     if (n->value != NULL) {
-      *s << " " << *(n->value);  // Parameters know how to be emitted to streams
+
+      // Escape string or vector of strings values for json compatibility
+      // FIXME Instead, is it possible to add an option to escape strings inside '<<'
+      // implementation for Parameters themselves?
+      Parameter::ParamType nodeType = (*(n->value)).type();
+      if (nodeType == Parameter::STRING) {
+        *s << " " << "\"" << escapeJsonString((*(n->value)).toString()) << "\"";
+      }
+      else if (nodeType == Parameter::VECTOR_STRING) {
+        vector<string> escaped = (*(n->value)).toVectorString();
+        for (size_t i=0; i<escaped.size(); ++i) {
+          escaped[i] = "\"" + escapeJsonString(escaped[i]) + "\"";
+        }
+        *s << " " << escaped;
+      }
+      else {
+        *s << " " << *(n->value); // Parameters know how to be emitted to streams
+      }
     }
     else { // you should never have this case: a key without any children or associated value
       throw EssentiaException("JsonOutput: input pool is invalid, contains key with no associated value");

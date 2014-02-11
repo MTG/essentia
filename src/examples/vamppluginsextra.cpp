@@ -89,20 +89,43 @@ public:
     d.quantizeStep = 1;
     list.push_back(d);
 
+    d.identifier = "interpolate";
+    d.name = "interpolate";
+    d.description = "Use parabolic interpolation to find peaks";
+    d.unit = "";
+    d.minValue = 0;
+    d.maxValue = 1;
+    d.defaultValue = 1;
+    d.isQuantized = true;
+    d.valueNames.push_back("False");
+    d.valueNames.push_back("True");
+    list.push_back(d);
+
     return list;
   }
 
   float getParameter(string id) const {
-    return _algo->parameter(id).toReal();
+    if (id == "interpolate") {
+      if (_algo->parameter("interpolate").toBool()) return 1;
+      else return 0;
+    }
+    else return _algo->parameter(id).toReal();
   }
 
   void setParameter(string id, float value) {
     const vector<ParameterDescriptor>& params = getParameterDescriptors();
     ParameterMap parameterMap;
+    float interpolate_value;
     for (int i=0; i < (int)params.size(); i++) {
-      if (params[i].identifier == id) parameterMap.add(id, value);
+      if (params[i].identifier == "interpolate") {
+        if (params[i].identifier == id) interpolate_value = value;
+        else interpolate_value = getParameter(params[i].identifier);
+        if (interpolate_value == 0.0) parameterMap.add("interpolate", false);
+        else parameterMap.add("interpolate", true);
+      }
+      else if (params[i].identifier == id) parameterMap.add(id, value);
       else parameterMap.add(params[i].identifier, getParameter(params[i].identifier));
-    }
+      }
     _algo->configure(parameterMap);
   }
 

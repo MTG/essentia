@@ -27,6 +27,100 @@
 using namespace std;
 using TagLib::FileRef;
 
+
+string fixInvalidUTF8(const string& str) {
+  // a big fat hack to try to fix invalid utf-8 characters
+  // see http://www.utf8-chartable.de/
+  // http://stackoverflow.com/questions/6555015/check-for-invalid-utf8
+  // http://stackoverflow.com/questions/17316506/strip-invalid-utf8-from-string-in-c-c
+  string fixed;
+  fixed.reserve(str.size());
+  unsigned char c, c2=0, c3=0, c4=0;
+
+  for(int i=0; i<(int)str.size(); i++) {
+    c = (unsigned char)str[i];
+
+    if (c < 127) { // normal ascii
+      if (c==9 || c==10 || c==13 || c >= 32) { // normal char or \t \n \r
+        fixed += c;
+      }
+    }
+    else if (c < 160) { // control character
+      if (c2 == 128) { // fix microsoft mess, add euro
+        fixed += 226;
+        fixed += 130;
+        fixed += 172;
+      }
+      if (c2 == 133) { // fix IBM mess, add NEL = \n\r
+        fixed += 10;
+        fixed += 13;
+      }
+    } 
+    else if (c<192) { // invalid for utf8, converting ascii
+      fixed += (unsigned char)194;
+      fixed += c;
+    } 
+    else if (c<194) { // invalid for utf8, converting ascii
+      fixed += (unsigned char)195;
+      fixed += c-64;
+    } 
+    else if(c < 224) { // possibly two-byte utf8
+      c2=(unsigned char)str[i+1];
+      if (c2>127 && c2<192) { // valid two-byte utf8
+        if (c==194 && c2<160) { // control char, skipping
+          ;
+        }
+        else {
+          fixed += c;
+          fixed += c2;                    
+        }
+        i++;
+      }
+      else { // invalid utf8, converting ascii
+        fixed += (unsigned char)195;
+        fixed += c-64;
+      }
+    } else if (c < 240) { // possibly three-byte utf8
+      c2=(unsigned char)str[i+1];
+      c3=(unsigned char)str[i+2];
+      if (c2>127 && c2<192 && c3>127 && c3<192) { // valid three-byte utf8
+        fixed += c;
+        fixed += c2;
+        fixed += c3;
+        i += 2;
+      } 
+      else { // invalid utf8, converting ascii
+        fixed += (unsigned char)195;
+        fixed += c-64;
+      }
+    } else if (c<245) { // possibly four-byte utf8
+      c2=(unsigned char)str[i+1];
+      c3=(unsigned char)str[i+2];
+      c4=(unsigned char)str[i+3];
+      if (c2>127 && c2<192 && c3>127 && c3<192 && c4>127 && c4<192) { 
+        // valid four-byte utf8
+        fixed += c;
+        fixed += c2;
+        fixed += c3;
+        fixed += c4;
+        i += 3;
+      } else { // invalid utf8, converting ascii
+        fixed += (unsigned char)195;
+        fixed += c-64;
+      }
+    } 
+    else if(c < 256) { // invalid utf8, converting ascii
+      fixed += (unsigned char)195;
+      fixed += c-64;
+    }
+    else {
+      // something weird happend: byte should not have more than 256 values 
+    }
+  }
+  return fixed;
+}
+
+
 bool containsControlChars(const string& str) {
   for (int i=0; i<(int)str.size(); i++) {
     int c = (unsigned char)str[i];
@@ -72,6 +166,9 @@ string formatString(const TagLib::String& str) {
       containsControlChars(str.to8Bit(false))) {
     result = str.to8Bit(false);
   }
+
+  // fix invalid utf-8 characters
+  result = fixInvalidUTF8(result);  
 
   return result;
 }
