@@ -24,7 +24,7 @@
  * Essentia version number.
  */
 #ifndef ESSENTIA_VERSION
-#define ESSENTIA_VERSION "2.0-dev"
+#define ESSENTIA_VERSION "2.0.1"
 #endif
 
 

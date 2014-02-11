@@ -126,3 +126,16 @@ Essentia 2.0:
  - Much better documentation, more python examples
  - Bugfixes, more unittests, etc.
 
+
+
+      ----------------------------------------------------------------------
+
+Essentia 2.0.1:
+ - Added pre-trained classifier models
+ - Improved scheduler in streaming mode
+ - Updated documentation and tutorials
+ - Minor bugfixes, more unittests, etc.
+
+
+
+
