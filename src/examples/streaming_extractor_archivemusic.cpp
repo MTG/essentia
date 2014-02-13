@@ -479,10 +479,9 @@ void addSVMDescriptors(Pool& pool) {
                               "mood_acoustic", "mood_aggressive",
                               "mood_electronic", "mood_happy",
                               "mood_party", "mood_relaxed", "mood_sad",
-                              "moods_mirex", "perceptual_speed", 
+                              "moods_mirex", 
                               "tonal_atonal", "voice_instrumental",
-                              "timbre", "culture", "gender" //, "live_studio"
-  };
+                              "timbre", "culture", "gender"};
 
   string pathToSvmModels;
 
