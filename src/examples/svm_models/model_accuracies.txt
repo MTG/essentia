@@ -14,7 +14,6 @@ mood_sad            86.956522%  results/mood_sad/mood_sad40553487_0.result
 culture             93.495190%  results/culture/culture862388605_0.result
 mood_party          88.381743%  results/mood_party/mood_party810960596_0.result
 mood                58.364312%  results/mood/mood-525915621_0.result
-perceptual_speed    75.966667%  results/perceptual_speed/perceptual_speed1190097618_0.result
 genre_dortmund      59.141494%  results/genre_dortmund/genre_dortmund-1853309960_0.result
 tonal_atonal        97.674419%  results/tonal_atonal/tonal_atonal552770384_0.result
 mood_aggressive     97.500000%  results/mood_aggressive/mood_aggressive-1675548205_0.result

@@ -175,7 +175,6 @@ Essentia also contains the following mid- and high-level descriptors:
   * moods: happy, sad, aggressive, relaxed, acoustic, electronic, party
   * western / non-western music
   * tonal / atonal
-  * perceptual speed (ie: slow, medium, fast)
   * danceability
   * voice / instrumental
   * gender (male / female singer)
