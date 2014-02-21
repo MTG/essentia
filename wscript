@@ -61,7 +61,6 @@ def configure(ctx):
         ctx.env.CC = 'clang'
         ctx.env.CXX = 'clang++'
 
-
         ctx.env.DEFINES   += [ 'GTEST_HAS_TR1_TUPLE=0' ]
         ctx.env.CXXFLAGS = [ '-stdlib=libc++', '-std=c++11', '-Wno-gnu' ]
         ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
@@ -70,6 +69,21 @@ def configure(ctx):
         # add /usr/local/include as the brew formula for yaml doesn't have
         # the cflags properly set
         ctx.env.CXXFLAGS += [ '-I/usr/local/include' ]
+
+    elif sys.platform == 'win32': 
+        # compile libgcc and libstd statically when using MinGW
+        ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
+        
+        # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
+        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8']
+        libs_paths = [';packaging\win32_3rdparty\\' + lib + '\lib\pkgconfig' for lib in libs_3rdparty]
+        os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
+        
+        # TODO why this code does not work?
+        # force the use of mingw gcc compiler instead of msvc
+        #ctx.env.CC = 'gcc'
+        #ctx.env.CXX = 'g++'
+
 
     ctx.load('compiler_cxx compiler_c')
 
