@@ -76,7 +76,7 @@ Additional dependencies (python, all platforms)
 
 To build the documentation you will also need the following dependencies::
 
-  pip install sphinx pyparsing==1.5.7 sphinxcontrib-doxylink docutils
+  pip install sphinx pyparsing sphinxcontrib-doxylink docutils
 
 Other useful dependencies::
 
