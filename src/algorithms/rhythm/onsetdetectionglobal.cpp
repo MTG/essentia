@@ -467,11 +467,10 @@ OnsetDetectionGlobal::OnsetDetectionGlobal() : AlgorithmComposite() {
 
   _signal >> _poolStorage->input("data"); // attach input proxy
 
-  // NB: We want to have the same output stream type as in OnsetDetection for
-  // consistency. We need to increase buffer size of the output because the
-  // algorithm works on the level of entire track and we need to push all values
-  // in the output source at once.
-  _onsetDetections.setBufferType(BufferUsage::forLargeAudioStream);
+  // NB: We need to increase buffer size of the output because the
+  // algorithm works on the level of entire track and we need to push
+  // all values in the output source at once.
+  _onsetDetections.setBufferInfo(BufferInfo(131072));
 }
 
 OnsetDetectionGlobal::~OnsetDetectionGlobal() {
@@ -494,7 +493,7 @@ AlgorithmStatus OnsetDetectionGlobal::process() {
   _onsetDetectionGlobal->output("onsetDetections").set(detections);
   _onsetDetectionGlobal->compute();
 
-  for(size_t i=0; i<detections.size(); ++i) {
+  for (size_t i=0; i<detections.size(); ++i) {
     _onsetDetections.push(detections[i]);
   }
   return FINISHED;

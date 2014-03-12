@@ -116,14 +116,9 @@ ChordsDetection::ChordsDetection() : AlgorithmComposite() {
   // FIXME: this is just a temporary hack...
   //        the correct way to do this is to have the algorithm output the chords
   //        continuously while processing, which requires a FrameCutter for vectors
-  _chords.setBufferType(BufferUsage::forLargeAudioStream);
-  _strength.setBufferType(BufferUsage::forLargeAudioStream);
-  // Some old buffer settings that were not enough for long audio 
-  //BufferInfo binfo;
-  //binfo.size = 16384;
-  //binfo.maxContiguousElements = 0;
-  //_chords.setBufferInfo(binfo);
-  //_strength.setBufferInfo(binfo);
+  BufferInfo binfo(65536);
+  _chords.setBufferInfo(binfo);
+  _strength.setBufferInfo(binfo);
 
   attach(_pcp, _poolStorage->input("data"));
 }
