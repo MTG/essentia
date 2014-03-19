@@ -55,15 +55,15 @@ string fixInvalidUTF8(const string& str) {
         fixed += 10;
         fixed += 13;
       }
-    } 
+    }
     else if (c<192) { // invalid for utf8, converting ascii
       fixed += (unsigned char)194;
       fixed += c;
-    } 
+    }
     else if (c<194) { // invalid for utf8, converting ascii
       fixed += (unsigned char)195;
       fixed += c-64;
-    } 
+    }
     else if(c < 224) { // possibly two-byte utf8
       c2=(unsigned char)str[i+1];
       if (c2>127 && c2<192) { // valid two-byte utf8
@@ -72,7 +72,7 @@ string fixInvalidUTF8(const string& str) {
         }
         else {
           fixed += c;
-          fixed += c2;                    
+          fixed += c2;
         }
         i++;
       }
@@ -88,7 +88,7 @@ string fixInvalidUTF8(const string& str) {
         fixed += c2;
         fixed += c3;
         i += 2;
-      } 
+      }
       else { // invalid utf8, converting ascii
         fixed += (unsigned char)195;
         fixed += c-64;
@@ -97,7 +97,7 @@ string fixInvalidUTF8(const string& str) {
       c2=(unsigned char)str[i+1];
       c3=(unsigned char)str[i+2];
       c4=(unsigned char)str[i+3];
-      if (c2>127 && c2<192 && c3>127 && c3<192 && c4>127 && c4<192) { 
+      if (c2>127 && c2<192 && c3>127 && c3<192 && c4>127 && c4<192) {
         // valid four-byte utf8
         fixed += c;
         fixed += c2;
@@ -108,13 +108,13 @@ string fixInvalidUTF8(const string& str) {
         fixed += (unsigned char)195;
         fixed += c-64;
       }
-    } 
+    }
     else if(c < 256) { // invalid utf8, converting ascii
       fixed += (unsigned char)195;
       fixed += c-64;
     }
     else {
-      // something weird happend: byte should not have more than 256 values 
+      // something weird happend: byte should not have more than 256 values
     }
   }
   return fixed;
@@ -154,6 +154,8 @@ bool isLatin1(const TagLib::String& str) {
 
 // Utility function to format tags so that they can be correctly parsed back
 string formatString(const TagLib::String& str) {
+  if (str.isNull()) return "";
+
   string result = str.to8Bit(true);
 
   // heuristic to detect wrongly encoded tags (ie: twice latin-1 to utf-8, mostly)
@@ -168,7 +170,7 @@ string formatString(const TagLib::String& str) {
   }
 
   // fix invalid utf-8 characters
-  result = fixInvalidUTF8(result);  
+  result = fixInvalidUTF8(result);
 
   return result;
 }
