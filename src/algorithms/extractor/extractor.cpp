@@ -172,7 +172,7 @@ void Extractor::computeMidLevel(const vector<Real>& signal, Pool& pool) {
                                           "beats", ticks);
     connect(*gen, beatsLoudness->input("signal"));
     connect(beatsLoudness->output("loudness"), pool, _rhythmspace + "beats_loudness");
-    connect(beatsLoudness->output("loudnessBass"), pool, _rhythmspace + "beats_loudness_bass");
+    connect(beatsLoudness->output("loudnessBandRatio"), pool, _rhythmspace + "beats_loudness_band_ratio");
   }
 
   scheduler::Network network(gen);
