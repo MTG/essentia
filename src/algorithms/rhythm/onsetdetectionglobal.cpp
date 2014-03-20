@@ -462,15 +462,13 @@ OnsetDetectionGlobal::OnsetDetectionGlobal() : AlgorithmComposite() {
   _onsetDetectionGlobal = standard::AlgorithmFactory::create("OnsetDetectionGlobal");
   _poolStorage = new PoolStorage<Real>(&_pool, "internal.signal");
 
-  declareInput(_signal, 1, "signal", "the input signal");   // 1
-  declareOutput(_onsetDetections, 0, "onsetDetections", "the frame-wise values of the detection function"); // 0
+  declareInput(_signal, 1, "signal", "the input signal");
+  declareOutput(_onsetDetections, 0, "onsetDetections", "the frame-wise values of the detection function");
+  // Need to set the buffer type to multiple frames as all the onsets
+  // are output all at once
+  _onsetDetections.setBufferType(BufferUsage::forMultipleFrames);
 
   _signal >> _poolStorage->input("data"); // attach input proxy
-
-  // NB: We need to increase buffer size of the output because the
-  // algorithm works on the level of entire track and we need to push
-  // all values in the output source at once.
-  _onsetDetections.setBufferInfo(BufferInfo(131072));
 }
 
 OnsetDetectionGlobal::~OnsetDetectionGlobal() {

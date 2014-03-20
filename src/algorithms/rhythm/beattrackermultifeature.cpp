@@ -62,11 +62,9 @@ BeatTrackerMultiFeature::BeatTrackerMultiFeature() : AlgorithmComposite(),
   declareOutput(_ticks, 0, "ticks", "the estimated tick locations [s]");
   declareOutput(_confidence, "confidence", "confidence of the beat tracker [0, 5.32]");
 
-  // NB: We need to increase buffer size of the output because the
-  // algorithm works on the level of entire track and we need to push
-  // all values in the output source at once.
-  _ticks.setBufferInfo(BufferInfo(131072));
-
+  // Need to set the buffer type to multiple frames as all the ticks
+  // are output all at once
+  _ticks.setBufferType(BufferUsage::forMultipleFrames);
 }
 
 void BeatTrackerMultiFeature::createInnerNetwork() {
