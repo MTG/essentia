@@ -466,7 +466,11 @@ OnsetDetectionGlobal::OnsetDetectionGlobal() : AlgorithmComposite() {
   declareOutput(_onsetDetections, 0, "onsetDetections", "the frame-wise values of the detection function");
   // Need to set the buffer type to multiple frames as all the onsets
   // are output all at once
-  _onsetDetections.setBufferType(BufferUsage::forMultipleFrames);
+  //_onsetDetections.setBufferType(BufferUsage::forMultipleFrames); // too small
+  
+  // estimation for required buffer size: 1sec = 44100 samples ~ 87 frames
+  // we want to cover recordings up to 60 min = 3600secs = 310078 frames
+   _onsetDetections.setBufferInfo(BufferInfo(327680, 163840)); // too large?
 
   _signal >> _poolStorage->input("data"); // attach input proxy
 }
