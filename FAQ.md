@@ -16,6 +16,9 @@ Alternatively, if you want to create and build your own examples, the easiest wa
 folder, modify ```src/examples/wscript``` file accordingly and use ```./waf configure --with-examples; ./waf``` to build
 them.
 
+You can build your application using XCode (OSX) following [these
+steps](https://github.com/MTG/essentia/issues/58#issuecomment-38530548).
+
 
 OSX static builds and templates (JUCE/VST and openFrameworks)
 ------------------------------------------------------------------------------------------------------------
