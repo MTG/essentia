@@ -17,3 +17,12 @@ folder, modify ```src/examples/wscript``` file accordingly and use ```./waf conf
 them.
 
 
+OSX static builds and templates (JUCE/VST and openFrameworks)
+------------------------------------------------------------------------------------------------------------
+
+Here you can find portable 32-bit static builds of the Essentia C++ library and its dependencies for OSX (thanks to Cárthach from GiantSteps) as well as templates for JUCE/VST and
+openFrameworks:
+
+https://github.com/GiantSteps/Essentia-Libraries 
+
+
