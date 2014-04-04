@@ -221,7 +221,7 @@ So let's redo the previous computations using a pool::
 
 
 The pool also has the nice advantage that the data you get out of it is already in
-an ``essentia.array`` format (which is equal to numpy.array of floats), so you can 
+an ``essentia.array`` format (which is equal to numpy.array of floats), so you can
 call transpose (``.T``) directly on it.
 
 
@@ -231,8 +231,8 @@ Aggregation and file output
 Let's finish this tutorial by writing our results to a file. As we are using such a
 nice language as Python, we could use its facilities for writing data to a file, but
 for the sake of this tutorial let's do it using the ``YamlOutput`` algorithm,
-which writes a pool in a file using the `YAML <http://yaml.org/>`_ or 
-`JSON <http://en.wikipedia.org/wiki/JSON>_` format. ::
+which writes a pool in a file using the `YAML <http://yaml.org/>`_ or
+`JSON <http://en.wikipedia.org/wiki/JSON>`_ format. ::
 
   output = YamlOutput(filename = 'mfcc.sig') # use "format = 'json'" for JSON output
   output(pool)
