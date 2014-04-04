@@ -21,7 +21,12 @@
 #define ESSENTIA_NOISEADDER_H
 
 #include "algorithm.h"
-#include "MersenneTwister.h"
+
+#ifdef CPP_11
+#  include <random>
+#else
+#  include "MersenneTwister.h"
+#endif
 
 namespace essentia {
 namespace standard {
@@ -32,7 +37,12 @@ class NoiseAdder : public Algorithm {
   Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _noise;
 
+#ifdef CPP_11
+  std::mt19937 _mtrand;
+#else
   MTRand _mtrand;
+#endif
+
   Real _level;
 
  public:

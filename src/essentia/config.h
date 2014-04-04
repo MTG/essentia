@@ -90,7 +90,12 @@
 #define ALLOW_DEFAULT_PARAMETERS 1
 #endif
 
-
+/**
+ * C++ version
+ */
+#if __cplusplus >= 201103L
+#  define CPP_11
+#endif
 
 /**
  * OS type.
