@@ -109,12 +109,9 @@ string fixInvalidUTF8(const string& str) {
         fixed += c-64;
       }
     }
-    else if(c < 256) { // invalid utf8, converting ascii
+    else { // invalid utf8, converting ascii
       fixed += (unsigned char)195;
       fixed += c-64;
-    }
-    else {
-      // something weird happend: byte should not have more than 256 values
     }
   }
   return fixed;
