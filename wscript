@@ -23,7 +23,10 @@ def options(ctx):
     ctx.add_option('--mode', action='store',
                    dest='MODE', default="release",
                    help='debug or release')
-
+    
+    ctx.add_option('--cross-compile-mingw32', action='store_true',
+                   dest='CROSS_COMPILE_MINGW32', default=False,
+                   help='cross-compile for windows using mingw32 on linux')
 
 
 def configure(ctx):
@@ -78,14 +81,27 @@ def configure(ctx):
         libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8']
         libs_paths = [';packaging\win32_3rdparty\\' + lib + '\lib\pkgconfig' for lib in libs_3rdparty]
         os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
-        
+         
         # TODO why this code does not work?
         # force the use of mingw gcc compiler instead of msvc
         #ctx.env.CC = 'gcc'
         #ctx.env.CXX = 'g++'
 
+    
+    if ctx.options.CROSS_COMPILE_MINGW32:
+        # locate mingw32 compilers and use them
+        ctx.find_program('i586-mingw32msvc-gcc', var='CC')
+        ctx.find_program('i586-mingw32msvc-g++', var='CXX')
+        ctx.load('compiler_cxx compiler_c')
 
-    ctx.load('compiler_cxx compiler_c')
+        # compile libgcc and libstd statically when using MinGW
+        ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
+        
+        # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
+        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'taglib-1.9.1']
+        libs_paths = ['packaging/win32_3rdparty/' + lib + '/lib/pkgconfig' for lib in libs_3rdparty]
+        os.environ["PKG_CONFIG_PATH"] = ':'.join(libs_paths)
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
 
     ctx.recurse('src')
 

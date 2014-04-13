@@ -48,9 +48,6 @@ def configure(ctx):
     ctx.env.ALGOIGNORE = []
     #ctx.env.ALGOIGNORE += ['GaiaTransform'] #TODO gaia
     
-    print('Debug: PKG_CONFIG_PATH')
-    print(os.environ['PKG_CONFIG_PATH'])
-
 
     ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
                   args=['--cflags', '--libs'], mandatory=False)
