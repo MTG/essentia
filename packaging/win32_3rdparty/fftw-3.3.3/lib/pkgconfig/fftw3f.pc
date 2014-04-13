@@ -1,4 +1,4 @@
-prefix=c:\tmp\essentia_3rdparty\fftw-3.3.3
+prefix=../packaging/win32_3rdparty/fftw-3.3.3
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include

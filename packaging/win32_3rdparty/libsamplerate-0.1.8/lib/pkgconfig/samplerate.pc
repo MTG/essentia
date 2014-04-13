@@ -1,4 +1,4 @@
-prefix=c:\tmp\essentia_3rdparty\libsamplerate-0.1.8
+prefix=../packaging/win32_3rdparty/libsamplerate-0.1.8
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
