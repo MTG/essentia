@@ -401,8 +401,8 @@ int AudioLoader::decodePacket() {
         if (av_audio_convert(_audioConvert, obuf, ostride, ibuf, istride, totalsamples) < 0) {
             ostringstream msg;
             msg << "AudioLoader: Error converting "
-                << " from " << avcodec_get_sample_fmt_name(_audioCtx->sample_fmt)
-                << " to "   << avcodec_get_sample_fmt_name(SAMPLE_FMT_S16);
+                << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
+                << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16);
             throw EssentiaException(msg);
         }
 
