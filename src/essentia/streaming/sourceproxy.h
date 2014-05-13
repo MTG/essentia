@@ -222,7 +222,7 @@ class SourceProxy : public SourceProxyBase {
 
 
   virtual int available() const {
-    return typedBuffer().availableForWrite();
+    return typedBuffer().availableForWrite(false);
   }
 
   int totalProduced() const {
