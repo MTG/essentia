@@ -74,7 +74,7 @@ compile the dependencies too. We will be working on Windows installer in the nea
 Additional dependencies (python, all platforms)
 -----------------------------------------------
 
-To build the documentation you will also need the following dependencies::
+To build the documentation you will also need the following dependencies (you might need to run this command with sudo)::
 
   pip install sphinx pyparsing sphinxcontrib-doxylink docutils
 
