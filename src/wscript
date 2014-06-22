@@ -160,6 +160,7 @@ def configure(ctx):
     print('=======================================================================================')
 
 
+
 from waflib.Task import Task
 class BuildAlgoReg(Task):
     def run(self):
@@ -219,12 +220,23 @@ def build(ctx):
         #includes = ctx.env.includes
     )
 
+    def write_pcfile(task):
+        open('../essentia.pc', 'w').write(ctx.env.pcfile)
+
+    ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
+    ctx.add_group()
+
+
     # install headers if asked to
     headers = ctx.path.ant_glob('essentia/**/*.h')
     for h in headers:
         install_dir = os.path.split(h.srcpath())[0][4:]
         ctx.install_files('${PREFIX}/include/' + install_dir, h)
 
+    # install pkgconfig file
+    #pc = ctx.path.ant_glob('essentia/build/essentia.pc') #TODO remove
+    #ctx.install_files('${PREFIX}/lib/pkgconfig', pc)     #TODO remove
+    ctx.install_files('${PREFIX}/lib/pkgconfig', '../essentia.pc')
 
 
     if ctx.env.WITH_EXAMPLES or ctx.env.WITH_VAMP:
