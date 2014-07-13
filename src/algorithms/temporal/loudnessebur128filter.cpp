@@ -32,7 +32,7 @@ const char* LoudnessEBUR128Filter::description = DOC("This is an auxilary signal
 "  [1] TODO: J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
 "  signals using pitch contour characteristics,\" IEEE Transactions on Audio,\n"
 "  Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n\n"
-"  [2] TODO http://mtg.upf.edu/technologies/melodia\n"
+"  [2] https://tech.ebu.ch/loudness\n"
 );
 
 LoudnessEBUR128Filter::LoudnessEBUR128Filter() : AlgorithmComposite() {
@@ -133,6 +133,11 @@ void LoudnessEBUR128Filter::configure() {
   _filterRight1->configure("numerator", filterB1, "denominator", filterA1);
   _filterLeft2->configure("numerator", filterB2, "denominator", filterA2);
   _filterRight2->configure("numerator", filterB2, "denominator", filterA2);
+
+  _squareLeft->configure("type", "square");
+  _squareRight->configure("type", "square");
+
+  _sum->configure("type", "add");
 }
 
 

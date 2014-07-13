@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_LOUDNESSEBUR128_H
-#define ESSENTIA_LOUDNESSEBUR128_H
+#ifndef ESSENTIA_LOUDNESSEBUR128FILTER_H
+#define ESSENTIA_LOUDNESSEBUR128FILTER_H
 
 #include "algorithmfactory.h"
 #include "network.h"
@@ -68,4 +68,4 @@ class LoudnessEBUR128Filter : public AlgorithmComposite {
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_LOUDNESSEBUR128_H
+#endif // ESSENTIA_LOUDNESSEBUR128FILTER_H
