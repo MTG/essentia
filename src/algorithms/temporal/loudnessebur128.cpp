@@ -110,6 +110,8 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   _frameCutterIntegrated->output("frame")   >> _meanIntegrated->input("array");
   _meanIntegrated->output("mean")           >> _computeIntegrated->input("array");
   _computeIntegrated->output("array")       >> PC(_pool, "integrated_loudness");
+  // TODO: we don't need to compute logs for each block, instead comprare block 
+  // energies: http://www.hydrogenaud.io/forums/index.php?showtopic=85978&st=50&p=738801&#entry738801
 
   // NOTE: frame size for loudness range is equal to short-term loudness (3 secs)
   // Hop size is allowed to be implementation dependent, with a minimum block 
@@ -136,15 +138,18 @@ void LoudnessEBUR128::configure() {
   
   _frameCutterMomentary->configure("frameSize", int(round(0.4 * sampleRate)), // 400ms
                                    "hopSize", _hopSize,
-                                   "startFromZero", true);
+                                   "startFromZero", true,
+                                   "silentFrames", "keep");
   _frameCutterShortTerm->configure("frameSize", int(3 * sampleRate), // 3 seconds
                                    "hopSize", _hopSize,
-                                   "startFromZero", true);
+                                   "startFromZero", true,
+                                   "silentFrames", "keep");
   // The measurement input to which the gating threshold is applied is the loudness of the
   // 400 ms blocks with a constant overlap between consecutive gating blocks of 75%. 
   _frameCutterIntegrated->configure("frameSize", int(round(0.4 * sampleRate)),
-                                   "hopSize", int(round(0.1 * sampleRate)),
-                                   "startFromZero", true);
+                                    "hopSize", int(round(0.1 * sampleRate)),
+                                    "startFromZero", true,
+                                    "silentFrames", "keep");
 
   // loudness = –0.691 + 10 log_10 (power)
   _computeMomentary->configure("type", "log10",
@@ -178,7 +183,6 @@ AlgorithmStatus LoudnessEBUR128::process() {
   Real threshold = sum / n - 10.;
   cout << "DEBUG threshold=" << threshold << endl;
   cout << "loudnessI=" << loudnessI << endl;
-  threshold = -30.;
 
   // compute gated loudness with relative threshold
   sum = 0;
@@ -189,9 +193,7 @@ AlgorithmStatus LoudnessEBUR128::process() {
       n++;
     }
   }
-  Real gatedLoudness = sum / n;
-
-  _integratedLoudness.push(gatedLoudness);
+  _integratedLoudness.push(sum / n);
 
 
   // Compute loudness range based on short-term loudness
