@@ -24,12 +24,16 @@
 using namespace essentia;
 using namespace standard;
 
+using namespace std;
+
 const char* UnaryOperatorStream::name = "UnaryOperatorStream";
 const char* UnaryOperatorStream::description = DOC("Given a vector of Reals, this algorithm will perform basic arithmetical operations on it, element by element.\n"
 "Note:\n"
 "  - log and ln are equivalent to the natural logarithm\n"
 "  - for log, ln, log10 and lin2db, x is clipped to 1e-30 for x<1e-30\n"
-"  - for x<0, sqrt(x) is invalid");
+"  - for x<0, sqrt(x) is invalid\n"
+"  - scale and shift parameters define linear transformation to be applied to the resulting elements"
+);
 
 UnaryOperatorStream::OpType UnaryOperatorStream::typeFromString(const std::string& name) const {
   if (name == "identity") return IDENTITY;
@@ -55,7 +59,7 @@ inline Real square_func(Real x) {
   for (int i=0; i<int(input.size()); ++i) { \
     output[i] = f(input[i]);            \
   }                                     \
-  return;                               \
+  break;                                \
 }
 
 void UnaryOperatorStream::compute() {
@@ -69,7 +73,7 @@ void UnaryOperatorStream::compute() {
 
   case IDENTITY:
     output = input;
-    return;
+    break;
 
   case ABS: APPLY_FUNCTION(fabs);
 
@@ -84,8 +88,8 @@ void UnaryOperatorStream::compute() {
           output[i] = log10(input[i]);
         }
       }
-      return;
     }
+    break;
 
   case LN:
     {
@@ -98,8 +102,8 @@ void UnaryOperatorStream::compute() {
           output[i] = log(input[i]);
         }
       }
-      return;
     }
+    break;
 
   case LIN2DB: APPLY_FUNCTION(lin2db);
   case DB2LIN: APPLY_FUNCTION(db2lin);
@@ -115,12 +119,22 @@ void UnaryOperatorStream::compute() {
         }
         output[i] = sqrt(input[i]);
       }
-      return;
     }
+    break;
 
   case SQUARE: APPLY_FUNCTION(square_func);
 
   default:
     throw EssentiaException("UnaryOperatorStream: Unknown unary operator type");
   }
+
+  if (_scale != 1. && _shift != 0.) {
+    // compute only if values for shift and scale are non-default
+    for (int i=0; i<int(input.size()); ++i) {
+      output[i] *= _scale;
+      output[i] += _shift;
+    }
+  }
+
+  return;
 }
