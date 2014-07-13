@@ -83,45 +83,46 @@ LoudnessEBUR128Filter::~LoudnessEBUR128Filter() {
 
 void LoudnessEBUR128Filter::configure() {
 
-  vector<Real> filterB1, filterA1, filterB2, filterA2;
+  vector<Real> filterB1(3, 0.), filterA1(3, 0.), 
+               filterB2(3, 0.), filterA2(3, 0.);
+
 
   Real inputSampleRate = parameter("sampleRate").toReal();                           
   Real outputSampleRate = (inputSampleRate == 44100.) ? 44100. : 48000.;
 
   if (inputSampleRate == 44100.) {                                                   
-    // TODO test this C++11 feature works on mingw_port
-    filterB1.push_back(1.535);
-    filterB1.push_back(-2.633);
-    filterB1.push_back(1.151);
+    filterB1[0] = 1.535;
+    filterB1[1] = -2.633;
+    filterB1[2] = 1.151;
 
-    filterA1.push_back(1.);
-    filterA1.push_back(-1.647);
-    filterA1.push_back(0.701);
+    filterA1[0] = 1.;
+    filterA1[1] = -1.647;
+    filterA1[2] = 0.701;
     
-    filterB2.push_back(1.);
-    filterB2.push_back(-2.);
-    filterB2.push_back(1.);
+    filterB2[0] = 1.;
+    filterB2[1] = -2.;
+    filterB2[2] = 1.;
 
-    filterA2.push_back(1.);
-    filterA2.push_back(-1.9891);
-    filterA2.push_back(0.98913);
+    filterA2[0] = 1.;
+    filterA2[1] = -1.9891;
+    filterA2[2] = 0.98913;
   }                  
   else { // values for 48000 Hz                                                 
-    filterB1.push_back(1.53512485958697);
-    filterB1.push_back(-2.69169618940638);
-    filterB1.push_back(1.19839281085285);
+    filterB1[0] = 1.53512485958697;
+    filterB1[1] = -2.69169618940638;
+    filterB1[2] = 1.19839281085285;
 
-    filterA1.push_back(1.0);
-    filterA1.push_back(-1.69065929318241);
-    filterA1.push_back(0.73248077421585);
+    filterA1[0] = 1.0;
+    filterA1[1] = -1.69065929318241;
+    filterA1[2] = 0.73248077421585;
 
-    filterB2.push_back(1.0);
-    filterB2.push_back(-2.0);
-    filterB2.push_back(1.0);
+    filterB2[0] = 1.0;
+    filterB2[1] = -2.0;
+    filterB2[2] = 1.0;
 
-    filterA2.push_back(1.0);
-    filterA2.push_back(-1.99004745483398);
-    filterA2.push_back(0.99007225036621);
+    filterA2[0] = 1.0;
+    filterA2[1] = -1.99004745483398;
+    filterA2[2] = 0.99007225036621;
   } 
 
   _resampleLeft->configure("inputSampleRate", inputSampleRate,
