@@ -59,7 +59,7 @@ void SuperFluxPeaks::compute() {
 // RT parameters
 
 Real _threshold = parameter("threshold").toReal();
-// cout<< _threshold << ":" << this << endl;
+
 
 
   	const vector<Real>& signal = _signal.get();
@@ -84,20 +84,7 @@ Real _threshold = parameter("threshold").toReal();
 	_maxf->input("signal").set(signal);
 	_maxf->output("signal").set(maxs);
 	_maxf->compute();
-/*	for (int i = 0 ; i < maxs.size();i++){
-	cout <<maxs[i] << ",";
-	}cout << endl;
-	for (int i = 0 ; i < signal.size();i++){
-	cout <<signal[i] << ",";
-	}cout << endl;
-	for (int i = 0 ; i < avg.size();i++){
-	cout <<avg[i] << ",";
-	}cout << endl;
-*/
 
-// bool isStream = size <= max(_pre_avg,_pre_max )+1;
-// E_DEBUG(EAlgorithm,"sfpeaks size " << size <<"peaksS" << peaks.size());
-// E_DEBUG(EAlgorithm,"maxSize" << maxs.size() <<"/" << _pre_max << "mov avgsize " << avg.size()<< "/" << _pre_avg);
 
 
 
@@ -126,11 +113,14 @@ if(_rawMode){
 	}
 	
 }
+//we don't know output size
 else{
+	// should we use expensives push_back instead reserving ? although rawmode was used for realtime so "size" was never so big
 	peaks.reserve(size);
 	int nDetec=0;
 	Real peakTime = 0;
 	for( int i =0 ; i < size;i++){
+		//thresholding and double removal
 		if(signal[i]==maxs[i] && signal[i]>avg[i]+_threshold && signal[i]>0){
 
 			peakTime = i/frameRate;
@@ -186,6 +176,7 @@ AlgorithmStatus SuperFluxPeaks::process() {
 	  return status;
 	}
 	
+	// dynamic rease size depending on number of peaks
 	if(!_rawmode){
 		vector<Real> peaks;
 		_algo->input("novelty").set(_signal.tokens());
@@ -195,22 +186,32 @@ AlgorithmStatus SuperFluxPeaks::process() {
 		
 		_peaks.setAcquireSize(peaks.size());
 		_peaks.setReleaseSize(peaks.size());
+		
+		//reacquiring right amount of data
+		status = acquireData();
+        	if (status != OK) {
+		            // acquireData() returns SYNC_OK if we could reserve both inputs and outputs
+		            // being here means that there is either not enough input to process,
+		            // or that the output buffer is full, in which cases we need to return from here
+		            // cout << "peaks no fed" << endl;
+            		return status;
+        		}
 		for (int i = 0 ; i < peaks.size();i++){
-			cout << "11" << peaks.size() <<endl;
-		_peaks.tokens()[i]=peaks[i];
+			_peaks.tokens()[i]=peaks[i];
 		// cout << peaks.acquireSize() <<endl;
 		}
 
 	// 	fastcopy(&_peaks.tokens(),&peaks,peaks.size());
 	}
-else{
+	
+	
+	// raw output for realtime
+		else{
+			_algo->input("novelty").set(_signal.tokens());
+			_algo->output("peaks").set(_peaks.tokens());
+			_algo->compute();
+		}
 
-
-	_algo->input("novelty").set(_signal.tokens());
-	_algo->output("peaks").set(_peaks.tokens());
-	_algo->compute();
-}
-cout << "ok" <<endl;
 	// give back the tokens that were reserved
 	releaseData();
 
