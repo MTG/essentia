@@ -121,6 +121,13 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
       }
   }
 
+    
+    
+  // variable descriptor length counts
+    poolStats.set(string("rhythm.onset_count"), pool.value<vector<Real> >("rhythm.onset_times").size());
+    poolStats.set(string("rhythm.beats_count"), pool.value<vector<Real> >("rhythm.beats_position").size());
+    poolStats.set(string("tonal.chords_count"), pool.value<vector<string> >("tonal.chords_progression").size());
+    
   delete aggregator;
 
   return poolStats;
