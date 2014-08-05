@@ -221,7 +221,7 @@ def build(ctx):
     )
 
     def write_pcfile(task):
-        open('../essentia.pc', 'w').write(ctx.env.pcfile)
+        open('build/essentia.pc', 'w').write(ctx.env.pcfile)
 
     ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
     ctx.add_group()
