@@ -77,12 +77,15 @@ void AudioLoader::openAudioFile(const string& filename) {
     E_DEBUG(EAlgorithm, "AudioLoader: opening file: " << parameter("filename").toString());
 
     // Open file
-    if (avformat_open_input(&_demuxCtx, filename.c_str(), NULL, NULL) != 0) {
-        throw EssentiaException("AudioLoader: Could not open file \"", filename, "\"");
+    int errnum;
+    if ((errnum = avformat_open_input(&_demuxCtx, filename.c_str(), NULL, NULL)) != 0) {
+        char errorstr[128];
+        string error = "Unknown error";
+        if (av_strerror(errnum, errorstr, 128) == 0) error = errorstr;
+        throw EssentiaException("AudioLoader: Could not open file \"", filename, "\", error = ", error);
     }
 
     // Retrieve stream information
-    int errnum;
     if ((errnum = avformat_find_stream_info(_demuxCtx, NULL)) < 0) {
         char errorstr[128];
         string error = "Unknown error";
