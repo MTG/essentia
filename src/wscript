@@ -175,12 +175,12 @@ def build(ctx):
     sys.path = [ctx.path.find_dir('..')] + sys.path
 
     # get list of available algorithms
-    from utils.algorithms_info import get_all_algorithms, create_registration_cpp
+    from utils.algorithms_info import get_all_algorithms, create_registration_cpp, create_version_h
+    
     algos = get_all_algorithms(ctx.path.find_dir('algorithms').abspath(),
                                root_dir = ctx.path.abspath())
 
     # select the algorithms we want to build
-
     if ctx.env['ALGOINCLUDE']:
         print('Building the following algorithms: %s' % ', '.join(ctx.env['ALGOINCLUDE']))
     else:
@@ -190,6 +190,9 @@ def build(ctx):
         print('Ignoring the following algorithms: %s' % ', '.join(ctx.env['ALGOIGNORE']))
         for algoname in ctx.env['ALGOIGNORE']:
             del algos[algoname]
+
+    # create version.h header file
+    create_version_h('src/version.h', ctx.env.VERSION, ctx.env.GIT_SHA)
 
 
     # create algorithms registration file

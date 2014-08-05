@@ -35,6 +35,7 @@
 namespace essentia {
 
 extern const char* version;
+extern const char* version_git_sha;
 
 /**
  * This function registers the algorithms in the factory, so that they are

@@ -5,10 +5,20 @@ import os
 import sys
 import platform
 
+def get_git_version():
+    """ try grab the current version number from git"""
+    version = "Undefined"
+    if os.path.exists(".git"):
+        try:
+            version = os.popen("git describe --dirty --always").read().strip()
+        except Exception, e:
+            print e
+    return version
+
+
 APPNAME = 'essentia'
 VERSION = open('VERSION', 'r').read().strip('\n')
-
-
+GIT_SHA = get_git_version();
 
 top = '.'
 out = 'build'
@@ -32,6 +42,7 @@ def configure(ctx):
     print('→ configuring the project in ' + ctx.path.abspath())
 
     ctx.env.VERSION = VERSION
+    ctx.env.GIT_SHA = GIT_SHA
 
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
 
