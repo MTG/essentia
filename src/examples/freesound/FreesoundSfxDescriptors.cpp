@@ -67,7 +67,7 @@ void  FreesoundSfxDescriptors::createNetwork(SourceBase& source, Pool& pool){
   duration->output("duration") >> PC(pool, nameSpace + "duration");
     
   // Effective Duration
-  Algorithm* effective_duration = factory.create("EffectiveDuration");
+  Algorithm* effective_duration = factory.create("EffectiveDuration","thresholdRatio",0.1);
   accu->output("array") >> effective_duration->input("signal");
   effective_duration->output("effectiveDuration") >> PC(pool, nameSpace + "effective_duration");
 
