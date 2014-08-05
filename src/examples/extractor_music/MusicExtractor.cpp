@@ -32,7 +32,11 @@ void MusicExtractor::compute(const string& audioFilename){
   endTime = options.value<Real>("endTime");
   downmix = "mix";
 
+  results.set("metadata.version.essentia", essentia::version);
+  results.set("metadata.version.essentia_git_sha", essentia::version_git_sha);
   results.set("metadata.version.extractor", EXTRACTOR_VERSION);
+  // TODO: extractor_build_id
+
   results.set("metadata.audio_properties.equal_loudness", false);
   results.set("metadata.audio_properties.analysis_sample_rate", analysisSampleRate);
 
