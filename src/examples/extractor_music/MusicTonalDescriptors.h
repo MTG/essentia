@@ -27,6 +27,12 @@
 
  public:
  	static const string nameSpace;
+
+  MusicTonalDescriptors(Pool& options) {
+    this->options = options;
+  }
+  ~MusicTonalDescriptors();
+
   void createNetworkTuningFrequency(SourceBase& source, Pool& pool);
  	void createNetwork(SourceBase& source, Pool& pool);
   void computeTuningSystemFeatures(Pool& pool);

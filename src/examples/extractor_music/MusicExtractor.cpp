@@ -32,10 +32,6 @@ void MusicExtractor::compute(const string& audioFilename){
   endTime = options.value<Real>("endTime");
   downmix = "mix";
 
-  string llspace = "lowlevel.";
-  string rhythmspace = "rhythm.";
-  string tonalspace = "tonal."
-
   results.set("metadata.version.extractor", EXTRACTOR_VERSION);
   results.set("metadata.audio_properties.equal_loudness", false);
   results.set("metadata.audio_properties.analysis_sample_rate", analysisSampleRate);
@@ -43,8 +39,8 @@ void MusicExtractor::compute(const string& audioFilename){
   // TODO: we still compute some low-level descriptors with equal loudness filter...
   // TODO: remove for consistency? evaluate on classification tasks?
 
-  readMetadata(audioFilename, results);
-  computeReplayGain(audioFilename, results); // compute replay gain and the duration of the track
+  readMetadata(audioFilename);
+  computeReplayGain(audioFilename); // compute replay gain and the duration of the track
   
   if (endTime > results.value<Real>("metadata.audio_properties.length")) {
       endTime = results.value<Real>("metadata.audio_properties.length");
@@ -61,16 +57,16 @@ void MusicExtractor::compute(const string& audioFilename){
                                     "replayGain", replayGain,
                                     "downmix",    downmix);
 
-  MusicLowlevelDescriptors *lowlevel = new MusicLowlevelDescriptors();
-  MusicLowlevelDescriptors *rhythm = new MusicRhythmDescriptors();
-  MusicLowlevelDescriptors *tonal = new MusicTonalDescriptors();
+  MusicLowlevelDescriptors *lowlevel = new MusicLowlevelDescriptors(options);
+  MusicRhythmDescriptors *rhythm = new MusicRhythmDescriptors(options);
+  MusicTonalDescriptors *tonal = new MusicTonalDescriptors(options);
 
   SourceBase& source = loader->output("audio");
-  lowlevel->createNetworkNeqLoud(source,results);
-  lowlevel->createNetworkEqLoud(source,results);
-  lowlevel->createNetworkLoudness(source,results);
-  rhythm->createNetwork(source,results);
-  tonal->createNetworkTuningFrequency(source,results);
+  lowlevel->createNetworkNeqLoud(source, results);
+  lowlevel->createNetworkEqLoud(source, results);
+  lowlevel->createNetworkLoudness(source, results);
+  rhythm->createNetwork(source, results);
+  tonal->createNetworkTuningFrequency(source, results);
   
   Network network(loader,false);
   network.run();
@@ -81,10 +77,10 @@ void MusicExtractor::compute(const string& audioFilename){
   
   // compute onset rate = len(onsets) / len(audio)
   // we do not need onset times, as they are most probably incorrect, while onset_rate is more informative
-  pool.set(rhythmspace + "onset_rate", pool.value<vector<Real> >(rhythmspace + "onset_times").size()
-     / (Real)audio_2->output("audio").totalProduced()
-     * pool.value<Real>("metadata.audio_properties.analysis_sample_rate"));
-  pool.remove(rhythmspace + "onset_times");
+  results.set(rhythm->nameSpace + "onset_rate", results.value<vector<Real> >(rhythm->nameSpace + "onset_times").size()
+     / (Real) loader->output("audio").totalProduced()
+     * results.value<Real>("metadata.audio_properties.analysis_sample_rate"));
+  results.remove(rhythm->nameSpace + "onset_times");
 
 
 
@@ -96,21 +92,21 @@ void MusicExtractor::compute(const string& audioFilename){
                                        "replayGain", replayGain,
                                        "downmix",    downmix);
 
-  SourceBase& source = loader_2->output("audio");
-  rhythm->createNetworkBeatsLoudness(source, results);  // requires 'beat_positions'
-  tonal->createNetwork(source, results);                // requires 'tuning frequency'
+  SourceBase& source_2 = loader_2->output("audio");
+  rhythm->createNetworkBeatsLoudness(source_2, results);  // requires 'beat_positions'
+  tonal->createNetwork(source_2, results);                // requires 'tuning frequency'
 
-  Network network(loader_2);
-  network.run();
+  Network network_2(loader_2);
+  network_2.run();
 
 
   // Descriptors that require values from other descriptors in the previous chain
-  tonal->computeTuningSystemFeatures(pool); // requires 'hpcp_highres'
+  tonal->computeTuningSystemFeatures(results); // requires 'hpcp_highres'
 
   // TODO is this necessary? tuning_frequency should always have one value:
-  Real tuningFreq = pool.value<vector<Real> >(nameSpace + "tuning_frequency").back();
-  pool.remove(nameSpace + "tuning_frequency");
-  pool.set(nameSpace + "tuning_frequency", tuningFreq);
+  Real tuningFreq = results.value<vector<Real> >(tonal->nameSpace + "tuning_frequency").back();
+  results.remove(tonal->nameSpace + "tuning_frequency");
+  results.set(tonal->nameSpace + "tuning_frequency", tuningFreq);
 
 
   cout << "Compute Aggregation"<<endl; 
@@ -120,9 +116,9 @@ void MusicExtractor::compute(const string& audioFilename){
   // (eg: 2.0.1)
   /*
 #if HAVE_GAIA2 
-  addSVMDescriptors(stats); 
+  computeSVMDescriptors(stats); 
 #else 
-  cout << "Warning: Essentia was compiled without Gaia2 library, skipping process step 6 (cannot compute SVM models)" << endl;
+  cout << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
 #endif
   */
 
@@ -183,16 +179,16 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
   int statsSize = int(sizeof(defaultStats)/sizeof(defaultStats[0]));
 
   if(!pool.contains<vector<Real> >("rhythm.beats_loudness")){
-    for (uint i=0; i<statsSize; i++)
+    for (int i=0; i<statsSize; i++)
         poolStats.set(string("rhythm.beats_loudness.")+defaultStats[i],0); 
     }
   if(!pool.contains<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio"))
-    for (uint i=0; i<statsSize; i++) 
+    for (int i=0; i<statsSize; i++) 
       poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
         arrayToVector<Real>(emptyVector));
   else if (pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio").size()<2){
       poolStats.remove(string("rhythm.beats_loudness_band_ratio"));
-      for (uint i=0; i<statsSize; i++) {
+      for (int i=0; i<statsSize; i++) {
         if(i==1 || i==6 || i==7)// var, dvar and dvar2 are 0
           poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
               arrayToVector<Real>(emptyVector));
@@ -215,7 +211,6 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
 }
 
 
-
 void MusicExtractor::readMetadata(const string& audioFilename) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   Algorithm* metadata = factory.create("MetadataReader",
@@ -231,8 +226,8 @@ void MusicExtractor::readMetadata(const string& audioFilename) {
   metadata->output("year")        >> PC(results, "metadata.tags.year");
   metadata->output("bitrate")     >> PC(results, "metadata.audio_properties.bitrate");
   metadata->output("channels")    >> PC(results, "metadata.audio_properties.channels");
-  metadata->output("length")      >> PC(NOWHERE); // let audio loader take care of this // TODO ???
-  metadata->outputmu("sampleRate")  >> PC(NOWHERE); // let the audio loader take care of this // TODO ???
+  metadata->output("length")      >> NOWHERE; // let audio loader take care of this // TODO ???
+  metadata->output("sampleRate")  >> NOWHERE; // let the audio loader take care of this // TODO ???
 
   Network(metadata).run();
 
@@ -312,34 +307,22 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
 }
 
 
-
-
-
-void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename, bool outputJSON){
+void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
 
   cout << "Writing results to file " << outputFilename << endl;
 
+  string format = options.value<string>("outputFormat");
   standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
-                                                                   "filename", outputFilename,
+                                                                   "filename", outputFilename + "." + format,
                                                                    "doubleCheck", true,
-                                                                   "format", outputJSON ? "json" : "yaml");
+                                                                   "format", format);
   output->input("pool").set(pool);
   output->compute();
   delete output;
 }
 
 
-
-
-
-void addSVMDescriptors(Pool& pool);
-void setExtractorOptions(Pool& options, const std::string& filename);
-void setExtractorDefaultOptions(Pool& options);
-
-
-
-
-void addSVMDescriptors(Pool& pool) {
+void MusicExtractor::computeSVMDescriptors(Pool& pool) {
   cout << "Process step 6: SVM Models" << endl;
   //const char* svmModels[] = {}; // leave this empty if you don't have any SVM models
   const char* svmModels[] = { "genre_tzanetakis", "genre_dortmund",
@@ -373,8 +356,8 @@ void addSVMDescriptors(Pool& pool) {
 }
 
 
-void setExtractorOptions(Pool& options, const std::string& filename) {
-  setExtractorDefaultOptions(options);
+void MusicExtractor::setExtractorOptions(const std::string& filename) {
+  setExtractorDefaultOptions();
 
   if (filename.empty()) return;
 
@@ -386,12 +369,14 @@ void setExtractorOptions(Pool& options, const std::string& filename) {
   options.merge(opts, "replace");
 }
 
-void setExtractorDefaultOptions(Pool& options) {
+void MusicExtractor::setExtractorDefaultOptions() {
   // general
   options.set("startTime", 0);
   options.set("endTime", 1e6);
   options.set("analysisSampleRate", 44100.0);
   options.set("outputFrames", false);
+  options.set("outputFormat", "json");
+
   string silentFrames = "noise";
   int zeroPadding = 0;
   string windowType = "hann";

@@ -25,17 +25,20 @@
 
 using namespace std;
 
- class MuysicLowlevelDescriptors : public MusicDescriptorSet{
+ class MusicLowlevelDescriptors : public MusicDescriptorSet{
 
  public:
  	static const string nameSpace;  
 
+  MusicLowlevelDescriptors(Pool& options) {
+    this->options = options;
+  }
+  ~MusicLowlevelDescriptors();
+
  	void createNetworkNeqLoud(SourceBase& source, Pool& pool);
   void createNetworkEqLoud(SourceBase& source, Pool& pool);
   void createNetworkLoudness(SourceBase& source, Pool& pool);
-
 	void computeAverageLoudness(Pool& pool);
-
  };
 
  #endif

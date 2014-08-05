@@ -32,6 +32,11 @@ using namespace essentia::streaming;
 
  	static const string nameSpace;  
 
+  MusicRhythmDescriptors(Pool& options) {
+    this->options = options;
+  }
+  ~MusicRhythmDescriptors();
+
  	void createNetwork(SourceBase& source, Pool& pool);
 	void createNetworkBeatsLoudness(SourceBase& source, Pool& pool);
  };

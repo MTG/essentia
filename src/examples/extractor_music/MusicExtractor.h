@@ -33,12 +33,6 @@
 #include "MusicLowlevelDescriptors.h"
 #include "MusicRhythmDescriptors.h"
 #include "MusicTonalDescriptors.h"
-#include "MusicSfxDescriptors.h"
-// TODO remove:
-#include "../streaming_extractorutils.h"
-#include "../streaming_extractorsfx.h"
-#include "../streaming_extractortonal.h"
-#include "../streaming_extractorpostprocess.h"
 
 
 #define EXTRACTOR_VERSION "music 1.0"
@@ -60,18 +54,18 @@ using namespace streaming;
   Real replayGain;
   string downmix;
 
-  string llspace;
-  string rhythmspace;
-  string tonalspace;
-
  public:
  	Pool results;
  	Pool stats;
   Pool options;
 
  	void compute(const string& audioFilename);
-
-	void outputToFile(Pool& pool, const string& outputFilename, bool outputJSON);
+  void setExtractorOptions(const std::string& filename);
+  void setExtractorDefaultOptions();
+  void readMetadata(const string& audioFilename);
+  void computeReplayGain(const string& audioFilename);
+  void computeSVMDescriptors(Pool& pool);
+  void outputToFile(Pool& pool, const string& outputFilename);
 	
  };
 

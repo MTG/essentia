@@ -24,6 +24,7 @@
 #include "essentia/streaming/sourcebase.h"
 #include "essentia/pool.h"
 #include "essentia/types.h"
+#include "essentia/essentiamath.h"
 #include "essentia/algorithm.h"
 #include "essentia/scheduler/network.h"
 #include "essentia/streaming/streamingalgorithm.h"
@@ -40,7 +41,9 @@ using namespace essentia::streaming;
  public:
  	static const string nameSpace;  
 
- 	void createNetwork(SourceBase& source, Pool& pool);
+ protected:
+  Pool options;
+
  };
 
  #endif

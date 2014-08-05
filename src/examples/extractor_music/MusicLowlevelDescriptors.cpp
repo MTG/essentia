@@ -17,10 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "streaming_extractorlowlevel.h"
-#include <essentia/algorithmfactory.h>
-#include <essentia/essentiamath.h>
-#include <essentia/streaming/algorithms/poolstorage.h>
+#include "MusicLowlevelDescriptors.h"
 
 using namespace std;
 using namespace essentia;
@@ -32,6 +29,7 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
+  Real sampleRate = options.value<Real>("analysisSampleRate");
   int frameSize =   int(options.value<Real>("lowlevel.frameSize"));
   int hopSize =     int(options.value<Real>("lowlevel.hopSize"));
   int zeroPadding = int(options.value<Real>("lowlevel.zeroPadding"));
@@ -236,6 +234,7 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
 void MusicLowlevelDescriptors::createNetworkEqLoud(SourceBase& source, Pool& pool){
   // computes descriptors that require audio source to be equal-loudness filtered
   
+  Real sampleRate = options.value<Real>("analysisSampleRate");
   int frameSize =   int(options.value<Real>("lowlevel.frameSize"));
   int hopSize =     int(options.value<Real>("lowlevel.hopSize"));
   int zeroPadding = int(options.value<Real>("lowlevel.zeroPadding"));
@@ -309,6 +308,8 @@ void MusicLowlevelDescriptors::createNetworkLoudness(SourceBase& source, Pool& p
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
+  Real sampleRate = options.value<Real>("analysisSampleRate");
+
   // Loudness
   int frameSize = int(options.value<Real>("average_loudness.frameSize"));
   int hopSize =   int(options.value<Real>("average_loudness.hopSize"));
@@ -320,14 +321,14 @@ void MusicLowlevelDescriptors::createNetworkLoudness(SourceBase& source, Pool& p
                                  "silentFrames", "noise");
 
   Algorithm* dy = factory.create("Loudness");
-  input                   >> fc->input("signal");
+  source                  >> fc->input("signal");
   fc->output("frame")     >> dy->input("signal");
   dy->output("loudness")  >> PC(pool, nameSpace + "loudness");
 
   // Dynamic complexity
   Algorithm* dc = factory.create("DynamicComplexity", "sampleRate", sampleRate);
   source                          >> dc->input("signal");
-  dc->output("dynamicComplexity") >> PC(pool, llspace + "dynamic_complexity");
+  dc->output("dynamicComplexity") >> PC(pool, nameSpace + "dynamic_complexity");
   dc->output("loudness")          >> NOWHERE; // TODO ??? --> should correspond to average_loudness value, if so --> simplify
 
   // TODO: add ERUR128 loudness and loudness range estimation
@@ -349,7 +350,7 @@ void MusicLowlevelDescriptors::computeAverageLoudness(Pool& pool){ // after comp
     pool.value<vector<Real> >(nameSpace + "loudness")[0];
   }
   catch (EssentiaException&) {
-    cout << "ERROR: File is too short for loudness estimation (< 2sec)... Aborting..." << endl;
+    cout << "ERROR: File is too short for loudness estimation... Aborting..." << endl;
     exit(6);
   }
 

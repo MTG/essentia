@@ -19,14 +19,10 @@
 
 // Streaming extractor designed for analysis of music collections
 
-#include <essentia/algorithmfactory.h>
 #include <essentia/streaming/algorithms/poolstorage.h>
-#include <essentia/essentiamath.h>
 #include <essentia/essentiautil.h>
-#include <essentia/scheduler/network.h>
 
-
-#include "freesound/FreesoundExtractor.h"
+#include "extractor_music/MusicExtractor.h"
 
 using namespace std;
 using namespace essentia;
@@ -67,13 +63,12 @@ int main(int argc, char* argv[]) {
     extractor->setExtractorOptions(profileFilename);
 
     extractor->compute(audioFilename);
-    extractor->outputToFile(extractor->stats, outputFilename+".json", true);
-    extractor->outputToFile(extractor->stats, outputFilename+".yaml", false);
-    extractor->outputToFile(extractor->results, outputFilename+"_frames.json", true);
-  
-    //if (options.value<Real>("outputFrames")) { 
-    //  outputToFile(pool, outputFilename + ".frames", "json");
-    //}
+
+    extractor->outputToFile(extractor->stats, outputFilename);
+    if (extractor->options.value<Real>("outputFrames")) { 
+      extractor->outputToFile(extractor->results, outputFilename+"_frames");
+    }
+      
     essentia::shutdown();
   }
   catch (EssentiaException& e) {

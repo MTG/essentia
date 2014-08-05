@@ -37,8 +37,8 @@ void  MusicRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
                              "minTempo", (int) options.value<Real>("rhythm.minTempo"));
 
   source                                >> rhythmExtractor->input("signal");
-  rhythmExtractor->output("ticks")      >> PC(pool, rhythmspace + "beats_position");
-  rhythmExtractor->output("bpm")        >> PC(pool, rhythmspace + "bpm");
+  rhythmExtractor->output("ticks")      >> PC(pool, nameSpace + "beats_position");
+  rhythmExtractor->output("bpm")        >> PC(pool, nameSpace + "bpm");
   rhythmExtractor->output("confidence") >> NOWHERE; 
   rhythmExtractor->output("estimates")  >> NOWHERE;
   // dummy "confidence" because 'degara' method does not estimate confidence
@@ -48,12 +48,12 @@ void  MusicRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   // BPM Histogram descriptors
   Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
   rhythmExtractor->output("bpmIntervals") >> bpmhist->input("bpmIntervals");
-  bpmhist->output("firstPeakBPM")     >> PC(pool, nameSpace + "first_peak_bpm");
-  bpmhist->output("firstPeakWeight")  >> PC(pool, nameSpace + "first_peak_weight");
-  bpmhist->output("firstPeakSpread")  >> PC(pool, nameSpace + "first_peak_spread");
-  bpmhist->output("secondPeakBPM")    >> PC(pool, nameSpace + "second_peak_bpm");
-  bpmhist->output("secondPeakWeight") >> PC(pool, nameSpace + "second_peak_weight");
-  bpmhist->output("secondPeakSpread") >> PC(pool, nameSpace + "second_peak_spread");
+  bpmhist->output("firstPeakBPM")     >> PC(pool, nameSpace + "bpm_histogram_first_peak_bpm");
+  bpmhist->output("firstPeakWeight")  >> PC(pool, nameSpace + "bpm_histogram_first_peak_weight");
+  bpmhist->output("firstPeakSpread")  >> PC(pool, nameSpace + "bpm_histogram_first_peak_spread");
+  bpmhist->output("secondPeakBPM")    >> PC(pool, nameSpace + "bpm_histogram_second_peak_bpm");
+  bpmhist->output("secondPeakWeight") >> PC(pool, nameSpace + "bpm_histogram_second_peak_weight");
+  bpmhist->output("secondPeakSpread") >> PC(pool, nameSpace + "bpm_histogram_second_peak_spread");
 
   // Onset Detection
   // TODO: use SuperFlux onset rate algorithm!
@@ -71,11 +71,13 @@ void  MusicRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
 }
 
 void MusicRhythmDescriptors::createNetworkBeatsLoudness(SourceBase& source, Pool& pool){
-  string nameSpace = "rhythm.";
+ 
+  Real sampleRate = options.value<Real>("analysisSampleRate");
+
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   vector<Real> ticks = pool.value<vector<Real> >(nameSpace + "beats_position");
   Algorithm* beatsLoudness = factory.create("BeatsLoudness",
-                                            "sampleRate", analysisSampleRate,
+                                            "sampleRate", sampleRate,
                                             "beats", ticks);
   source                                      >> beatsLoudness->input("signal");
   beatsLoudness->output("loudness")           >> PC(pool, nameSpace + "beats_loudness");

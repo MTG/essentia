@@ -17,12 +17,12 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "FreesoundTonalDescriptors.h"
+#include "MusicTonalDescriptors.h"
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
 
-const string FreesoundTonalDescriptors::nameSpace="tonal.";  
+const string MusicTonalDescriptors::nameSpace="tonal.";  
 
 void MusicTonalDescriptors::createNetworkTuningFrequency(SourceBase& source, Pool& pool){
 
