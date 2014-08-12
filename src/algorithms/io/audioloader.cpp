@@ -74,7 +74,7 @@ void AudioLoader::configure() {
 
 
 void AudioLoader::openAudioFile(const string& filename) {
-    E_DEBUG(EAlgorithm, "AudioLoader: opening file: " << parameter("filename").toString());
+    E_DEBUG(EAlgorithm, "AudioLoader: opening file: " << filename);
 
     // Open file
     int errnum;
@@ -233,6 +233,7 @@ AlgorithmStatus AudioLoader::process() {
     do {
         int result = av_read_frame(_demuxCtx, &_packet);
         //E_DEBUG(EAlgorithm, "AudioLoader: called av_read_frame(), got result = " << result);
+        // 0 = OK, < 0 = error or EOF
 
         if (result != 0) {
             shouldStop(true);
