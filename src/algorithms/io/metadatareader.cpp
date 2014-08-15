@@ -18,6 +18,7 @@
  */
 
 #include <fileref.h>
+#include <tpropertymap.h>
 #include <tag.h>
 #include "metadatareader.h"
 #include "metadatautils.h"
@@ -26,7 +27,8 @@
 
 using namespace std;
 using TagLib::FileRef;
-
+using TagLib::PropertyMap;
+using TagLib::String;
 
 string fixInvalidUTF8(const string& str) {
   // a big fat hack to try to fix invalid utf-8 characters
@@ -150,8 +152,9 @@ bool isLatin1(const TagLib::String& str) {
 
 
 // Utility function to format tags so that they can be correctly parsed back
-string formatString(const TagLib::String& str) {
-  if (str.isNull()) return "";
+string formatString(const TagLib::StringList& strList) {
+  String str = strList.toString(";"); // TODO what happens on an empty list?
+  if (str.isEmpty()) return "";
 
   string result = str.to8Bit(true);
 
@@ -229,13 +232,15 @@ void MetadataReader::compute() {
     return;
   }
 
-  _title.get()   = formatString(f.tag()->title());
-  _artist.get()  = formatString(f.tag()->artist());
-  _album.get()   = formatString(f.tag()->album());
-  _comment.get() = formatString(f.tag()->comment());
-  _genre.get()   = formatString(f.tag()->genre());
-  _track.get()   = f.tag()->track();
-  _year.get()    = f.tag()->year();
+  PropertyMap tags = f.file()->properties();
+
+  _title.get()   = formatString(tags["TITLE"]);
+  _artist.get()  = formatString(tags["ARTIST"]);
+  _album.get()   = formatString(tags["ALBUM"]);
+  _comment.get() = formatString(tags["COMMENT"]);
+  _genre.get()   = formatString(tags["GENRE"]);
+  _track.get()   = (int)atoi(formatString(tags["TRACKNUMBER"]).c_str());  // TODO: is tracknumber always an int or it can be a string as well?
+  _year.get()    = (int)atoi(formatString(tags["DATE"]).c_str());         // TODO: is date always an int? is it always a single value or can be a list?
 
   _length.get()     = f.audioProperties()->length();
   _bitrate.get()    = f.audioProperties()->bitrate();
@@ -297,13 +302,33 @@ AlgorithmStatus MetadataReader::process() {
     _channels.push(pcmChannels);
   }
   else {
-    _title.push(formatString(f.tag()->title()));
-    _artist.push(formatString(f.tag()->artist()));
-    _album.push(formatString(f.tag()->album()));
-    _comment.push(formatString(f.tag()->comment()));
-    _genre.push(formatString(f.tag()->genre()));
-    _track.push((int)f.tag()->track());
-    _year.push((int)f.tag()->year());
+    PropertyMap tags = f.file()->properties();
+
+    _title.push(formatString(tags["TITLE"]));
+    _artist.push(formatString(tags["ARTIST"]));
+    _album.push(formatString(tags["ALBUM"]));
+    _comment.push(formatString(tags["COMMENT"]));
+    _genre.push(formatString(tags["GENRE"]));
+    _track.push((int)atoi(formatString(tags["TRACKNUMBER"]).c_str()));  // TODO: is tracknumber always an int or it can be a string as well?
+    _year.push((int)atoi(formatString(tags["DATE"]).c_str()));          // TODO: is date always an int? is it always a single value or can be a list?
+
+    /*
+    cout << "musicbrainz_recordingid = MUSICBRAINZ_TRACKID = " << formatString(tags["MUSICBRAINZ_TRACKID"]) << endl;
+    cout << "musicbrainz_albumid = MUSICBRAINZ_ALBUMID = " << formatString(tags["MUSICBRAINZ_ALBUMID"]) << endl;
+    cout << "musicbrainz_artistid = MUSICBRAINZ_ARTISTID = " << formatString(tags["MUSICBRAINZ_ARTISTID"]) << endl;
+    cout << "musicbrainz_albumartistid = MUSICBRAINZ_ALBUMARTISTID = " << formatString(tags["MUSICBRAINZ_ALBUMARTISTID"]) << endl;
+    cout << "musicbrainz_releasegroupid = MUSICBRAINZ_RELEASEGROUPID = " << formatString(tags["MUSICBRAINZ_RELEASEGROUPID"]) << endl;
+    cout << "musicbrainz_workid = MUSICBRAINZ_WORKID = " << formatString(tags["MUSICBRAINZ_WORKID"]) << endl;
+    cout << "ACOUSTID_ID = " << formatString(tags["ACOUSTID_ID"]) << endl;
+    cout << "ACOUSTID_FINGERPRINT = " << formatString(tags["ACOUSTID_FINGERPRINT"]) << endl;
+    */
+
+    // TODO: missing in taglib?
+    // musicbrainz_trackid = MUSICBRAINZ_RELEASETRACKID
+    // musicbrainz_trmid = MUSICBRAINZ_TRMID
+    // musicbrainz_discid = MUSICBRAINZ_DISCID
+
+    //cout << "PropertyMap = " << formatString(tags.toString()) << endl;
 
     _length.push((int)f.audioProperties()->length());
 
