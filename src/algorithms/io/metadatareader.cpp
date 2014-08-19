@@ -221,8 +221,8 @@ void MetadataReader::compute() {
     _album.get()   = "";
     _comment.get() = "";
     _genre.get()   = "";
-    _track.get()   = 0;
-    _year.get()    = 0;
+    _track.get()   = "";
+    _year.get()    = "";
 
     _length.get()     = 0;
     _bitrate.get()    = pcmBitrate;
@@ -239,8 +239,8 @@ void MetadataReader::compute() {
   _album.get()   = formatString(tags["ALBUM"]);
   _comment.get() = formatString(tags["COMMENT"]);
   _genre.get()   = formatString(tags["GENRE"]);
-  _track.get()   = (int)atoi(formatString(tags["TRACKNUMBER"]).c_str());  // TODO: is tracknumber always an int or it can be a string as well?
-  _year.get()    = (int)atoi(formatString(tags["DATE"]).c_str());         // TODO: is date always an int? is it always a single value or can be a list?
+  _track.get()   = formatString(tags["TRACKNUMBER"]);  
+  _year.get()    = formatString(tags["DATE"]); 
 
   _length.get()     = f.audioProperties()->length();
   _bitrate.get()    = f.audioProperties()->bitrate();
@@ -309,8 +309,8 @@ AlgorithmStatus MetadataReader::process() {
     _album.push(formatString(tags["ALBUM"]));
     _comment.push(formatString(tags["COMMENT"]));
     _genre.push(formatString(tags["GENRE"]));
-    _track.push((int)atoi(formatString(tags["TRACKNUMBER"]).c_str()));  // TODO: is tracknumber always an int or it can be a string as well?
-    _year.push((int)atoi(formatString(tags["DATE"]).c_str()));          // TODO: is date always an int? is it always a single value or can be a list?
+    _track.push(formatString(tags["TRACKNUMBER"]));
+    _year.push(formatString(tags["DATE"]));
 
     /*
     cout << "musicbrainz_recordingid = MUSICBRAINZ_TRACKID = " << formatString(tags["MUSICBRAINZ_TRACKID"]) << endl;

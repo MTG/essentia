@@ -34,8 +34,8 @@ class MetadataReader : public Algorithm {
   Output<std::string> _album;
   Output<std::string> _comment;
   Output<std::string> _genre;
-  Output<int> _track;
-  Output<int> _year;
+  Output<std::string> _track;
+  Output<std::string> _year;
 
   // Audio properties
   Output<int> _length;
@@ -91,8 +91,8 @@ class MetadataReader : public Algorithm {
   Source<std::string> _album;
   Source<std::string> _comment;
   Source<std::string> _genre;
-  Source<int> _track;
-  Source<int> _year;
+  Source<std::string> _track; // not necessarily an int
+  Source<std::string> _year;  // not necessarily an int
 
   // Audio properties
   Source<int> _length;
