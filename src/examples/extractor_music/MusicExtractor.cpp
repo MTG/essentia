@@ -226,11 +226,11 @@ void MusicExtractor::readMetadata(const string& audioFilename) {
   metadata->output("album")       >> PC(results, "metadata.tags.album");
   metadata->output("comment")     >> PC(results, "metadata.tags.comment");
   metadata->output("genre")       >> PC(results, "metadata.tags.genre");
-  metadata->output("track")       >> PC(results, "metadata.tags.track");
-  metadata->output("year")        >> PC(results, "metadata.tags.year");
+  metadata->output("tracknumber") >> PC(results, "metadata.tags.tracknumber");
+  metadata->output("date")        >> PC(results, "metadata.tags.date");
   metadata->output("bitrate")     >> PC(results, "metadata.audio_properties.bitrate");
   metadata->output("channels")    >> PC(results, "metadata.audio_properties.channels");
-  metadata->output("length")      >> NOWHERE; // let audio loader take care of this // TODO ???
+  metadata->output("duration")    >> NOWHERE; // let audio loader take care of this // TODO ???
   metadata->output("sampleRate")  >> NOWHERE; // let the audio loader take care of this // TODO ???
 
   Network(metadata).run();

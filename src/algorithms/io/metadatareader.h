@@ -52,10 +52,10 @@ class MetadataReader : public Algorithm {
     declareOutput(_album, "album", "the album on which this track appears");
     declareOutput(_comment, "comment", "the comment field stored in the tags");
     declareOutput(_genre, "genre", "the genre as stored in the tags");
-    declareOutput(_track, "track", "the track number");
-    declareOutput(_year, "year", "the year of publication");
+    declareOutput(_track, "tracknumber", "the track number");
+    declareOutput(_year, "date", "the date of publication");
 
-    declareOutput(_length, "length", "the length of the track, in seconds");
+    declareOutput(_length, "duration", "the duration of the track, in seconds");
     declareOutput(_bitrate, "bitrate", "the bitrate of the track [kb/s]");
     declareOutput(_sampleRate, "sampleRate", "the sample rate [Hz]");
     declareOutput(_channels, "channels", "the number of channels");
@@ -110,10 +110,10 @@ class MetadataReader : public Algorithm {
     declareOutput(_album, 0, "album", "the album on which this track appears");
     declareOutput(_comment, 0, "comment", "the comment field stored in the tags");
     declareOutput(_genre, 0, "genre", "the genre as stored in the tags");
-    declareOutput(_track, 0, "track", "the track number");
-    declareOutput(_year, 0, "year", "the year of publication");
+    declareOutput(_track, 0, "tracknumber", "the track number");
+    declareOutput(_year, 0, "date", "the date of publication");
 
-    declareOutput(_length, 0, "length", "the length of the track, in seconds");
+    declareOutput(_length, 0, "duration", "the duration of the track, in seconds");
     declareOutput(_bitrate, 0, "bitrate", "the bitrate of the track [kb/s]");
     declareOutput(_sampleRate, 0, "sampleRate", "the sample rate [Hz]");
     declareOutput(_channels, 0, "channels", "the number of channels");
