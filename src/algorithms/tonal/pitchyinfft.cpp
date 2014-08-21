@@ -172,8 +172,15 @@ void PitchYinFFT::compute() {
     _peakDetect->output("amplitudes").set(_amplitudes);
     _peakDetect->compute();    
     try {
-      tau = _positions[0];
-      yinMin = -_amplitudes[0];
+	if (_positions.size() > 0 && _amplitudes.size() > 0) {
+	    tau = _positions[0];
+	    yinMin = -_amplitudes[0];
+	}
+	else {
+	    tau = 0.0;
+	    yinMin = 0.0;
+	    throw EssentiaException("Empty Yin positions or amplitudes");
+	}
     }
     catch (const EssentiaException&) {
       // TODO this should never happen, but some people reported it happening in their real time applications
