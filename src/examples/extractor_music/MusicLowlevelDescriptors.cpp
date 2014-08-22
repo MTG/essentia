@@ -73,7 +73,7 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
   mfcc->output("bands")     >> PC(pool, nameSpace + "melbands");
   mfcc->output("mfcc")      >> PC(pool, nameSpace + "mfcc");
 
-  // Spectral MelBands Central Moments Statistics
+  // Spectral MelBands Central Moments Statistics, Flatness and Crest
   Algorithm* mels_cm = factory.create("CentralMoments", "range", nMelBands-1);
   Algorithm* mels_ds = factory.create("DistributionShape");
   mfcc->output("bands")             >> mels_cm->input("array");
@@ -82,6 +82,14 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
   mels_ds->output("spread")         >> PC(pool, nameSpace + "melbands_spread");
   mels_ds->output("skewness")       >> PC(pool, nameSpace + "melbands_skewness");
 
+  Algorithm* mels_fl = factory.create("FlatnessDB");
+  Algorithm* mels_cr = factory.create("Crest");
+  mfcc->output("bands")      >> mels_fl->input("array");
+  mfcc->output("bands")      >> mels_cr->input("array");
+  mels_fl->output("flatnessDB")  >> PC(pool, nameSpace + "melbands_flatness_db");
+  mels_cr->output("crest")       >> PC(pool, nameSpace + "melbands_crest");
+
+
   // ERBBands and GFCC
   uint nERBBands = 40;
   Algorithm* gfcc = factory.create("GFCC", "numberBands", nERBBands);
@@ -89,7 +97,7 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
   gfcc->output("bands")     >> PC(pool, nameSpace + "erbbands");
   gfcc->output("gfcc")      >> PC(pool, nameSpace + "gfcc");
 
-  // Spectral ERBBands Central Moments Statistics
+  // Spectral ERBBands Central Moments Statistics, Flatness and Crest
   Algorithm* erbs_cm = factory.create("CentralMoments", "range", nERBBands-1);
   Algorithm* erbs_ds = factory.create("DistributionShape");
   gfcc->output("bands")             >> erbs_cm->input("array");
@@ -97,6 +105,35 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
   erbs_ds->output("kurtosis")       >> PC(pool, nameSpace + "erbbands_kurtosis");
   erbs_ds->output("spread")         >> PC(pool, nameSpace + "erbbands_spread");
   erbs_ds->output("skewness")       >> PC(pool, nameSpace + "erbbands_skewness");
+
+  Algorithm* erbs_fl = factory.create("FlatnessDB");
+  Algorithm* erbs_cr = factory.create("Crest");
+  gfcc->output("bands")      >> erbs_fl->input("array");
+  gfcc->output("bands")      >> erbs_cr->input("array");
+  erbs_fl->output("flatnessDB")  >> PC(pool, nameSpace + "erbbands_flatness_db");
+  erbs_cr->output("crest")       >> PC(pool, nameSpace + "erbbands_crest");
+
+  // BarkBands
+  int nBarkBands = 27;
+  Algorithm* barkBands = factory.create("BarkBands", "numberBands", nBarkBands);
+  spec->output("spectrum")    >> barkBands->input("spectrum");
+  barkBands->output("bands")  >> PC(pool, nameSpace + "barkbands");
+
+  // Spectral BarkBands Central Moments Statistics, Flatness and Crest
+  Algorithm* barks_cm = factory.create("CentralMoments", "range", nBarkBands-1);
+  Algorithm* barks_ds = factory.create("DistributionShape");
+  barkBands->output("bands")          >> barks_cm->input("array");
+  barks_cm->output("centralMoments")  >> barks_ds->input("centralMoments");
+  barks_ds->output("kurtosis")        >> PC(pool, nameSpace + "barkbands_kurtosis");
+  barks_ds->output("spread")          >> PC(pool, nameSpace + "barkbands_spread");
+  barks_ds->output("skewness")        >> PC(pool, nameSpace + "barkbands_skewness");
+
+  Algorithm* barks_fl = factory.create("FlatnessDB");
+  Algorithm* barks_cr = factory.create("Crest");
+  barkBands->output("bands")      >> barks_fl->input("array");
+  barkBands->output("bands")      >> barks_cr->input("array");
+  barks_fl->output("flatnessDB")  >> PC(pool, nameSpace + "barkbands_flatness_db");
+  barks_cr->output("crest")       >> PC(pool, nameSpace + "barkbands_crest");
 
   // Spectral Decrease
   Algorithm* square = factory.create("UnaryOperator", "type", "square");
@@ -156,30 +193,6 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
   Algorithm* sp = factory.create("StrongPeak");
   spec->output("spectrum") >> sp->input("spectrum");
   sp->output("strongPeak") >> PC(pool, nameSpace + "spectral_strongpeak");
-
-  // BarkBands
-  int nBarkBands = 27;
-  Algorithm* barkBands = factory.create("BarkBands", "numberBands", nBarkBands);
-  spec->output("spectrum")    >> barkBands->input("spectrum");
-  barkBands->output("bands")  >> PC(pool, nameSpace + "barkbands");
-
-  // Spectral Flatness and Crest 
-  // TODO: should be computed with melbands / erbbands as well for consistency?
-  Algorithm* barks_fl = factory.create("FlatnessDB");
-  Algorithm* barks_cr = factory.create("Crest");
-  barkBands->output("bands")      >> barks_fl->input("array");
-  barkBands->output("bands")      >> barks_cr->input("array");
-  barks_fl->output("flatnessDB")  >> PC(pool, nameSpace + "spectral_flatness_db");
-  barks_cr->output("crest")       >> PC(pool, nameSpace + "spectral_crest");
-
-  // Spectral BarkBands Central Moments Statistics
-  Algorithm* barks_cm = factory.create("CentralMoments", "range", nBarkBands-1);
-  Algorithm* barks_ds = factory.create("DistributionShape");
-  barkBands->output("bands")          >> barks_cm->input("array");
-  barks_cm->output("centralMoments")  >> barks_ds->input("centralMoments");
-  barks_ds->output("kurtosis")        >> PC(pool, nameSpace + "barkbands_kurtosis");
-  barks_ds->output("spread")          >> PC(pool, nameSpace + "barkbands_spread");
-  barks_ds->output("skewness")        >> PC(pool, nameSpace + "barkbands_skewness");
 
   // Spectral Complexity
   Algorithm* tc = factory.create("SpectralComplexity", "magnitudeThreshold", 0.005);
