@@ -30,11 +30,7 @@ void FreesoundExtractor::compute(const string& audioFilename){
    results.set("metadata.audio_properties.equal_loudness", false); 
    results.set("metadata.version.freesound_extractor", EXTRACTOR_VERSION); 
 
-   Algorithm* loader = factory.create("EasyLoader",
-                                      "filename",   audioFilename,
-                                      "sampleRate", analysisSampleRate);
-  
-   SourceBase& source = loader->output("audio");
+
 
   
   FreesoundLowlevelDescriptors *lowlevel = new FreesoundLowlevelDescriptors();
@@ -42,13 +38,31 @@ void FreesoundExtractor::compute(const string& audioFilename){
   FreesoundTonalDescriptors *tonal = new FreesoundTonalDescriptors();
   FreesoundSfxDescriptors *sfx = new FreesoundSfxDescriptors();
 
-  lowlevel->createNetwork(source,results);
-  rhythm->createNetwork(source,results);
-  tonal->createNetwork(source,results);
-  sfx->createNetwork(source,results);
+    
+  Algorithm* loader = factory.create("EasyLoader",
+                                       "filename",   audioFilename,
+                                       "sampleRate", analysisSampleRate);
+    
+  //tonal->createTuningFrequencyNetwork(loader->output("audio"),results);
+  //Network tuningNetwork(loader,false);
+  //tuningNetwork.run();
+  //delete loader;
+  //delete tuningNetwork;
+    
+
+  loader = factory.create("EasyLoader",
+                          "filename", audioFilename,
+                          "sampleRate", analysisSampleRate);
+    
+  lowlevel->createNetwork(loader->output("audio"),results);
+  rhythm->createNetwork(loader->output("audio"),results);
+  tonal->createNetwork(loader->output("audio"),results);
+  sfx->createNetwork(loader->output("audio"),results);
 
   Network network(loader,false);
   network.run();
+  delete loader;
+  //delete network;
 
   // Descriptors that require values from other descriptors in the previous chain
 
@@ -56,13 +70,14 @@ void FreesoundExtractor::compute(const string& audioFilename){
   VectorInput<Real> *pitchVector = new VectorInput<Real>();
   pitchVector->setVector(&pitch);
 
-  Algorithm* loader2 = factory.create("EasyLoader",
-                                      "filename",   audioFilename,
-                                      "sampleRate", analysisSampleRate);
-  rhythm->createBeatsLoudnessNetwork(loader2->output("audio"), results);
-  sfx->createHarmonicityNetwork(loader2->output("audio"), results); 
+  loader = factory.create("EasyLoader",
+                          "filename",   audioFilename,
+                          "sampleRate", analysisSampleRate);
+    
+  rhythm->createBeatsLoudnessNetwork(loader->output("audio"), results);
+  sfx->createHarmonicityNetwork(loader->output("audio"), results);
 
-  Network network2(loader2,false);
+  Network network2(loader,false);
   network2.run();
 
   sfx->createPitchNetwork(*pitchVector, results);
@@ -96,7 +111,7 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
 
   aggregator->compute();
 
-  // add descriptors that may be missing due to content
+  // add descriptors that may be missing due to content (TODO: should be fixed in the respective algorithms)
   const Real emptyVector[] = { 0, 0, 0, 0, 0, 0};
   
   int statsSize = int(sizeof(defaultStats)/sizeof(defaultStats[0]));

@@ -22,16 +22,69 @@ using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
 
-const string FreesoundTonalDescriptors::nameSpace="tonal.";  
+const string FreesoundTonalDescriptors::nameSpace="tonal.";
 
+
+const int frameSize = 4096;
+const int hopSize =   2048;
+const string silentFrames = "noise";
+const string windowType = "blackmanharris92";
+const int zeroPadding = 0;
+
+
+
+void FreesoundTonalDescriptors ::createTuningFrequencyNetwork(SourceBase& source, Pool& pool){
+
+    streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
+    
+    // FrameCutter
+    Algorithm* fc = factory.create("FrameCutter",
+                                   "frameSize", frameSize,
+                                   "hopSize", hopSize,
+                                   "silentFrames", silentFrames);
+
+    source >> fc->input("signal");
+    
+    // Windowing
+    Algorithm* w = factory.create("Windowing",
+                                  "type", windowType,
+                                  "zeroPadding", zeroPadding);
+
+    fc->output("frame") >> w->input("frame");
+    
+    // Spectrum
+    Algorithm* spec = factory.create("Spectrum");
+
+    w->output("frame") >> spec->input("frame");
+    
+    // Spectral Peaks
+    Algorithm* peaks = factory.create("SpectralPeaks",
+                                      "maxPeaks", 10000,
+                                      "magnitudeThreshold", 0.00001,
+                                      "minFrequency", 40,
+                                      "maxFrequency", 5000,
+                                      "orderBy", "frequency");
+
+    spec->output("spectrum") >> peaks->input("spectrum");
+    
+    // Tuning Frequency
+    Algorithm* tuning = factory.create("TuningFrequency");
+    
+    peaks->output("magnitudes") >>  tuning->input("magnitudes");
+    peaks->output("frequencies") >>  tuning->input("frequencies");
+    tuning->output("tuningFrequency") >>  PC(pool, nameSpace + "tuning_frequency");
+    tuning->output("tuningCents") >> NOWHERE;
+    
+}
 
  void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool){
 
-  int frameSize = 8192;
-  int hopSize =   4096;
-  string silentFrames = "noise";
-  string windowType = "blackmanharris92";
-  int zeroPadding = 0;
+     int frameSize = 4096;
+     int hopSize =   2048;
+     string silentFrames = "noise";
+     string windowType = "blackmanharris92";
+     int zeroPadding = 0;
+
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
@@ -63,14 +116,17 @@ const string FreesoundTonalDescriptors::nameSpace="tonal.";
   spec->output("spectrum") >> peaks->input("spectrum");
 
   // Tuning Frequency
+     
   Algorithm* tuning = factory.create("TuningFrequency");
   peaks->output("magnitudes") >> tuning->input("magnitudes");
   peaks->output("frequencies") >> tuning->input("frequencies");
   tuning->output("tuningFrequency") >> PC(pool, nameSpace + "tuning_frequency");
   tuning->output("tuningCents") >> NOWHERE;
 
-  // TODO: tuning frequency is currently provided but not used for HPCP computation
+  // Tuning frequency is currently provided but not used for HPCP computation, not clear if it would make an improvement for freesound sounds
   Real tuningFreq = 440;
+      
+  //Real tuningFreq = pool.value<vector<Real> >(nameSpace + "tuning_frequency").back();
 
   
   Algorithm* hpcp_key = factory.create("HPCP",
