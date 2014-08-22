@@ -233,9 +233,15 @@ AlgorithmStatus AudioLoader::process() {
     do {
         int result = av_read_frame(_demuxCtx, &_packet);
         //E_DEBUG(EAlgorithm, "AudioLoader: called av_read_frame(), got result = " << result);
-        // 0 = OK, < 0 = error or EOF
-
         if (result != 0) {
+            // 0 = OK, < 0 = error or EOF
+            if (result != AVERROR_EOF) {
+                char errstring[1204];
+                av_strerror(result, errstring, sizeof(errstring));
+                ostringstream msg;
+                msg << "AudioLoader: Error reading frame: " << errstring;
+                E_WARNING(msg.str());
+            }
             shouldStop(true);
             flushPacket();
             closeAudioFile();
@@ -372,14 +378,22 @@ int AudioLoader::decodePacket() {
     len = decode_audio_frame(_audioCtx, buff, &_dataSize, &_packet);
 
     if (len < 0) {
-        // only print error msg when file is not an mp3, because mp3 streams can have tag
-        // frames (id3v2?) which libavcodec tries to read as audio anyway, and we don't want
-        // to print an error message for that...
+        char errstring[1204];
+        av_strerror(len, errstring, sizeof(errstring));
+        ostringstream msg;
+
         if (_audioCtx->codec_id == CODEC_ID_MP3) {
-            E_DEBUG(EAlgorithm, "AudioLoader: invalid frame, probably an mp3 tag frame, skipping it");
+            msg << "AudioLoader: invalid frame, probably an mp3 tag frame, skipping it: " << errstring;
+            // mp3 streams can have tag frames (id3v2?) which libavcodec tries to 
+            // read as audio anyway, and we probably don't want print an error 
+            // message for that... 
+            
+            //E_DEBUG(EAlgorithm, msg);
+            E_WARNING(msg.str());
         }
         else {
-            E_WARNING("AudioLoader: error while decoding, skipping frame");
+            msg << "AudioLoader: error while decoding, skipping frame" << errstring;
+            E_WARNING(msg.str());
         }
         return 0;
     }
