@@ -220,7 +220,8 @@ void MusicExtractor::readMetadata(const string& audioFilename) {
   // therefore, using standard mode
   standard::Algorithm* metadata = standard::AlgorithmFactory::create("MetadataReader",
                                                                      "filename", audioFilename,
-                                                                     "failOnError", true);
+                                                                     "failOnError", true,
+                                                                     "tagPoolName", "metadata.tags");
   string title, artist, album, comment, genre, tracknumber, date;
   int duration, sampleRate, bitrate, channels;
 
