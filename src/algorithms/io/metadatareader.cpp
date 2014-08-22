@@ -195,6 +195,7 @@ void MetadataReader::configure() {
   if (parameter("filename").isConfigured()) {
     _filename = parameter("filename").toString();
   }
+  _tagPoolName = parameter("tagPoolName").toString(); 
 }
 
 void MetadataReader::compute() {
@@ -237,18 +238,19 @@ void MetadataReader::compute() {
 
     return;
   }
-/*
-      TagLib::Tag *tag = f.tag();
+  
+  /*
+  TagLib::Tag *tag = f.tag();
 
-      cout << "-- TAG (basic) --" << endl;
-      cout << "title   - \"" << tag->title()   << "\"" << endl;
-      cout << "artist  - \"" << tag->artist()  << "\"" << endl;
-      cout << "album   - \"" << tag->album()   << "\"" << endl;
-      cout << "year    - \"" << tag->year()    << "\"" << endl;
-      cout << "comment - \"" << tag->comment() << "\"" << endl;
-      cout << "track   - \"" << tag->track()   << "\"" << endl;
-      cout << "genre   - \"" << tag->genre()   << "\"" << endl; */
-
+  cout << "-- TAG (basic) --" << endl;
+  cout << "title   - \"" << tag->title()   << "\"" << endl;
+  cout << "artist  - \"" << tag->artist()  << "\"" << endl;
+  cout << "album   - \"" << tag->album()   << "\"" << endl;
+  cout << "year    - \"" << tag->year()    << "\"" << endl;
+  cout << "comment - \"" << tag->comment() << "\"" << endl;
+  cout << "track   - \"" << tag->track()   << "\"" << endl;
+  cout << "genre   - \"" << tag->genre()   << "\"" << endl; 
+  */
 
   TagLib::PropertyMap tags = f.file()->properties();
 
@@ -262,12 +264,17 @@ void MetadataReader::compute() {
 
   // populate tag pool
   for(TagLib::PropertyMap::ConstIterator i = tags.begin(); i != tags.end(); ++i) {
-    //cout << "iterator "  << it->first.to8Bit(true) << endl;
+    string key = i->first.to8Bit(true);
+    // remove '.' chars which are used in Pool descriptor names as a separator
+    // convert to lowercase
+    std::replace(key.begin(), key.end(), '.', '_'); 
+    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+    key = _tagPoolName + "." + key;
+
     for(TagLib::StringList::ConstIterator str = i->second.begin(); str != i->second.end(); ++str) {
-      tagPool.add(i->first.to8Bit(true), str->to8Bit(true));
+      tagPool.add(key, str->to8Bit(true));
     }
   }
-  
 
   _tagPool.get()  = tagPool;
 

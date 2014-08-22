@@ -48,6 +48,7 @@ class MetadataReader : public Algorithm {
   Output<int> _channels;
 
   std::string _filename;
+  std::string _tagPoolName;
 
  public:
   MetadataReader() {
@@ -70,6 +71,7 @@ class MetadataReader : public Algorithm {
   void declareParameters() {
     declareParameter("filename", "the name of the file from which to read the tags", "", Parameter::STRING);
     declareParameter("failOnError", "if true, the algorithm throws an exception when encountering an error (e.g. trying to open an unsupported file format), otherwise the algorithm leaves all fields blank", "{true,false}", false);
+    declareParameter("tagPoolName", "common prefix for tag descriptor names to use in tagPool", "", "metadata.tags");
   }
 
   void configure();
