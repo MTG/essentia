@@ -21,6 +21,8 @@
 #define ESSENTIA_METADATAREADER_H
 
 #include "algorithm.h"
+#include "pool.h"
+
 
 namespace essentia {
 namespace standard {
@@ -35,10 +37,12 @@ class MetadataReader : public Algorithm {
   Output<std::string> _comment;
   Output<std::string> _genre;
   Output<std::string> _track;
-  Output<std::string> _year;
+  Output<std::string> _date;
+
+  Output<Pool> _tagPool;
 
   // Audio properties
-  Output<int> _length;
+  Output<int> _duration;
   Output<int> _bitrate;
   Output<int> _sampleRate;
   Output<int> _channels;
@@ -53,9 +57,11 @@ class MetadataReader : public Algorithm {
     declareOutput(_comment, "comment", "the comment field stored in the tags");
     declareOutput(_genre, "genre", "the genre as stored in the tags");
     declareOutput(_track, "tracknumber", "the track number");
-    declareOutput(_year, "date", "the date of publication");
+    declareOutput(_date, "date", "the date of publication");
 
-    declareOutput(_length, "duration", "the duration of the track, in seconds");
+    declareOutput(_tagPool, "tagPool", "the pool with all tags that were found");
+
+    declareOutput(_duration, "duration", "the duration of the track, in seconds");
     declareOutput(_bitrate, "bitrate", "the bitrate of the track [kb/s]");
     declareOutput(_sampleRate, "sampleRate", "the sample rate [Hz]");
     declareOutput(_channels, "channels", "the number of channels");
@@ -92,10 +98,14 @@ class MetadataReader : public Algorithm {
   Source<std::string> _comment;
   Source<std::string> _genre;
   Source<std::string> _track; // not necessarily an int
-  Source<std::string> _year;  // not necessarily an int
+  Source<std::string> _date;  // not necessarily an int
+
+  //Source<Pool> _tagPool;  
+  // TODO: DevNull class doesn't work for type: essentia::Pool
+  // TODO: Pool Storage doesn't work for type: essentia::Pool
 
   // Audio properties
-  Source<int> _length;
+  Source<int> _duration;
   Source<int> _bitrate;
   Source<int> _sampleRate;
   Source<int> _channels;
@@ -111,13 +121,14 @@ class MetadataReader : public Algorithm {
     declareOutput(_comment, 0, "comment", "the comment field stored in the tags");
     declareOutput(_genre, 0, "genre", "the genre as stored in the tags");
     declareOutput(_track, 0, "tracknumber", "the track number");
-    declareOutput(_year, 0, "date", "the date of publication");
+    declareOutput(_date, 0, "date", "the date of publication");
 
-    declareOutput(_length, 0, "duration", "the duration of the track, in seconds");
+    //declareOutput(_tagPool, 0, "tagPool", "the pool with all tags that were found");
+
+    declareOutput(_duration, 0, "duration", "the duration of the track, in seconds");
     declareOutput(_bitrate, 0, "bitrate", "the bitrate of the track [kb/s]");
     declareOutput(_sampleRate, 0, "sampleRate", "the sample rate [Hz]");
     declareOutput(_channels, 0, "channels", "the number of channels");
-
   }
 
   void declareParameters() {

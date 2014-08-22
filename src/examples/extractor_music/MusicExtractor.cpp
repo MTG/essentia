@@ -216,6 +216,36 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
 
 
 void MusicExtractor::readMetadata(const string& audioFilename) {
+  // Pool Connector in streaming mode currently does not support Pool sources,
+  // therefore, using standard mode
+  standard::Algorithm* metadata = standard::AlgorithmFactory::create("MetadataReader",
+                                                                     "filename", audioFilename,
+                                                                     "failOnError", true);
+  string title, artist, album, comment, genre, tracknumber, date;
+  int duration, sampleRate, bitrate, channels;
+
+  Pool poolTags;
+  metadata->output("title").set(title);
+  metadata->output("artist").set(artist);
+  metadata->output("album").set(album);
+  metadata->output("comment").set(comment);
+  metadata->output("genre").set(genre);
+  metadata->output("tracknumber").set(tracknumber);
+  metadata->output("date").set(date);
+
+  metadata->output("bitrate").set(bitrate);
+  metadata->output("channels").set(channels);
+  metadata->output("duration").set(duration);
+  metadata->output("sampleRate").set(sampleRate);
+
+  metadata->output("tagPool").set(poolTags);
+
+  metadata->compute();
+
+  results.merge(poolTags);
+  delete metadata;
+
+  /*
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   Algorithm* metadata = factory.create("MetadataReader",
                                        "filename", audioFilename,
@@ -228,14 +258,14 @@ void MusicExtractor::readMetadata(const string& audioFilename) {
   metadata->output("genre")       >> PC(results, "metadata.tags.genre");
   metadata->output("tracknumber") >> PC(results, "metadata.tags.tracknumber");
   metadata->output("date")        >> PC(results, "metadata.tags.date");
+  //metadata->output("tagPool")     >> PC(results, "metadata.tags.all");  // currently not supported
   metadata->output("bitrate")     >> PC(results, "metadata.audio_properties.bitrate");
   metadata->output("channels")    >> PC(results, "metadata.audio_properties.channels");
   metadata->output("duration")    >> NOWHERE; // let audio loader take care of this // TODO ???
   metadata->output("sampleRate")  >> NOWHERE; // let the audio loader take care of this // TODO ???
 
   Network(metadata).run();
-
-  // TODO: load as much metadata tags as possible, load musicbrainz id and store it to metadata.musicbrainz.mbid
+  */
 }
 
 
