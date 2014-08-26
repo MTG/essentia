@@ -246,6 +246,13 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
                                  "magnitudeThreshold", 0.005);
   spec->output("spectrum") >> tc->input("spectrum");
   tc->output("spectralComplexity") >> PC(pool, nameSpace + "spectral_complexity");
+    
+    
+  // Spectral Entropy
+  Algorithm* ent = factory.create("Entropy");
+  spec->output("spectrum") >> ent->input("array");
+  ent->output("entropy") >> PC(pool, nameSpace + "spectral_entropy");
+    
 
 
   // Pitch Detection

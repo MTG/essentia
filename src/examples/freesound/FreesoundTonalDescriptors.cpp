@@ -181,4 +181,9 @@ void FreesoundTonalDescriptors ::createTuningFrequencyNetwork(SourceBase& source
   schords_desc->output("chordsChangesRate") >> PC(pool, nameSpace + "chords_changes_rate");
   schords_desc->output("chordsKey") >> PC(pool, nameSpace + "chords_key");
   schords_desc->output("chordsScale") >> PC(pool, nameSpace + "chords_scale");
+     
+  Algorithm* entropy = factory.create("Entropy");
+  hpcp_chord->output("hpcp") >> entropy->input("array");
+  entropy->output("entropy") >> PC(pool, nameSpace + "hpcp_entropy");
+  
  }
