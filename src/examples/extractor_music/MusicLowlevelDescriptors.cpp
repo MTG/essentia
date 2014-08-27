@@ -199,6 +199,11 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
   spec->output("spectrum")          >> tc->input("spectrum");
   tc->output("spectralComplexity")  >> PC(pool, nameSpace + "spectral_complexity");
 
+  // Spectral Entropy
+  Algorithm* ent = factory.create("Entropy");
+  spec->output("spectrum")  >> ent->input("array");
+  ent->output("entropy")    >> PC(pool, nameSpace + "spectral_entropy");
+
   // Pitch Salience
   Algorithm* ps = factory.create("PitchSalience");
   spec->output("spectrum")    >> ps->input("spectrum");
