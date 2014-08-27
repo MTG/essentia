@@ -25,15 +25,14 @@ using namespace essentia;
 using namespace standard;
 
 const char* Entropy::name = "Entropy";
-const char* Entropy::description = DOC("This algorithm computes the Shannon entropy of an array. Entropy can be used to quantify the peakiness of a distribution. This has been used for voiced/unvoiced decision in ASR. \n"
+const char* Entropy::description = DOC("This algorithm computes the Shannon entropy of an array. Entropy can be used to quantify the peakiness of a distribution. This has been used for voiced/unvoiced decision in automatic speech recognition. \n"
 "\n"
 "Entropy cannot be computed neither on empty arrays nor arrays which contain negative values. In such cases, exceptions will be thrown.\n"
 "\n"
 "References:\n"
-"  [1] H. Misra, S. Ikbal, H. Bourlard and H. Hermansky "
-" \"Spectral entropy based feature for robust ASR\" \n"
-" Proceedings of the IEEE International Conference on Acoustics, Speech, and Signal Processing (ICASSP), "
-"May 2004, Montreal, Canada.\n");
+"  [1] H. Misra, S. Ikbal, H. Bourlard and H. Hermansky, \"Spectral entropy\n"
+"  based feature for robust ASR,\" in IEEE International Conference on\n"
+"  Acoustics, Speech, and Signal Processing (ICASSP'04).");
 
 void Entropy::compute() {
     vector<Real> array = _array.get();
