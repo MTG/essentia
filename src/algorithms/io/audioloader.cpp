@@ -96,7 +96,7 @@ void AudioLoader::openAudioFile(const string& filename) {
     }
 
     // Dump information about file onto standard error
-    //dump_format(_demuxCtx, 0, filename.c_str(), 0);
+    //dump_format(_demuxCtx, 0, filename.c_str(), 0); 
 
     // Check that we have only 1 audio stream in the file
     int nAudioStreams = 0;
@@ -112,7 +112,6 @@ void AudioLoader::openAudioFile(const string& filename) {
 
     // Load corresponding audio codec
     _audioCtx = _demuxCtx->streams[_streamIdx]->codec;
-
     _audioCodec = avcodec_find_decoder(_audioCtx->codec_id);
 
     if (!_audioCodec) {
@@ -242,6 +241,8 @@ AlgorithmStatus AudioLoader::process() {
                 msg << "AudioLoader: Error reading frame: " << errstring;
                 E_WARNING(msg.str());
             }
+            // TODO: should try reading again on EAGAIN error?
+            //       https://github.com/FFmpeg/FFmpeg/blob/master/ffmpeg.c
             shouldStop(true);
             flushPacket();
             closeAudioFile();
@@ -249,8 +250,9 @@ AlgorithmStatus AudioLoader::process() {
         }
     } while (_packet.stream_index != _streamIdx);
 
-    decodePacket();
-    copyFFmpegOutput();
+    if(decodePacket()) {
+        copyFFmpegOutput();
+    }
 
     return OK;
 }
@@ -339,7 +341,14 @@ void AudioLoader::flushPacket() {
         empty.data = 0;
         empty.size = 0;
 
-        decode_audio_frame(_audioCtx, _buffer, &_dataSize, &empty);
+        int len = decode_audio_frame(_audioCtx, _buffer, &_dataSize, &empty);
+        if (len < 0) {
+            char errstring[1204];
+            av_strerror(len, errstring, sizeof(errstring));
+            ostringstream msg;
+            msg << "AudioLoader: decoding error while flushing a packet:" << errstring;
+            E_WARNING(msg.str());
+        }
         copyFFmpegOutput();
 
     } while (_dataSize > 0);
@@ -358,7 +367,6 @@ int AudioLoader::decodePacket() {
     E_DEBUG(EAlgorithm, "flags: " << _packet.flags);
     E_DEBUG(EAlgorithm, "duration: " << _packet.duration);
     */
-
     int len = 0;
 
     // buff is an offset in our output buffer, it points to where we should start
@@ -398,9 +406,31 @@ int AudioLoader::decodePacket() {
         return 0;
     }
 
+    if (len != _packet.size) {
+        // TODO: investigate why this happens and whether it is a big issue
+        //        (looks like it only loses silent samples at the end of files)
+
+        // more than 1 frame in a packet, happens a lot with flac for instance...
+
+        // https://www.ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga834bb1b062fbcc2de4cf7fb93f154a3e
+
+        // Some decoders may support multiple frames in a single AVPacket. Such 
+        // decoders would then just decode the first frame and the return value 
+        // would be less than the packet size. In this case, avcodec_decode_audio4 
+        // has to be called again with an AVPacket containing the remaining data 
+        // in order to decode the second frame, etc... Even if no frames are 
+        // returned, the packet needs to be fed to the decoder with remaining 
+        // data until it is completely consumed or an error occurs.
+
+        E_WARNING("AudioLoader: more than 1 frame in packet, dropping remaining bytes...");
+        E_WARNING("at sample index: " << output("audio").totalProduced());
+        E_WARNING("decoded samples: " << len);
+        E_WARNING("packet size: " << _packet.size);
+    }
+
     if (_dataSize <= 0) {
         // No data yet, get more frames
-        //cout << "no data yet, get more frames" << endl;
+        // cout << "no data yet, get more frames" << endl;
         _dataSize = 0;
         return 0;
     }
@@ -431,17 +461,6 @@ int AudioLoader::decodePacket() {
         memcpy(_buffer, _buff2, _dataSize);
     }
 #endif
-
-    if (len != _packet.size) {
-        // FIXME: investigate why this happens and whether it is a big issue
-        //        (looks like it only loses silent samples at the end of files)
-
-        // more than 1 frame in a packet, happens a lot with flac for instance...
-        E_WARNING("AudioLoader: more than 1 frame in packet, dropping remaining bytes...");
-        E_WARNING("at sample index: " << output("audio").totalProduced());
-        E_WARNING("decoded samples: " << len);
-        E_WARNING("packet size: " << _packet.size);
-    }
 
     return len;
 }
