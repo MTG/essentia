@@ -43,12 +43,17 @@ void MusicExtractor::compute(const string& audioFilename){
   // TODO: we still compute some low-level descriptors with equal loudness filter...
   // TODO: remove for consistency? evaluate on classification tasks?
 
+  cout << "Process step: Read metadata" << endl;
   readMetadata(audioFilename);
+
+  cout << "Process step: Replay gain" << endl;
   computeReplayGain(audioFilename); // compute replay gain and the duration of the track
   
   if (endTime > results.value<Real>("metadata.audio_properties.length")) {
       endTime = results.value<Real>("metadata.audio_properties.length");
   }
+
+  cout << "Process step: Compute audio features" << endl;
 
   // normalize the audio with replay gain and compute as many lowlevel, rhythm,
   // and tonal descriptors as possible           
@@ -113,7 +118,7 @@ void MusicExtractor::compute(const string& audioFilename){
   results.set(tonal->nameSpace + "tuning_frequency", tuningFreq);
 
 
-  cout << "Compute Aggregation"<<endl; 
+  cout << "Process step: Compute aggregation"<<endl; 
   this->stats = this->computeAggregation(results);
 
   // pre-trained classifiers are only available in branches devoted for that 
@@ -171,8 +176,6 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
   Pool poolStats;
   aggregator->input("input").set(pool);
   aggregator->output("output").set(poolStats);
-
-  cout << "Process step: Aggregation" << endl;
 
   aggregator->compute();
 
@@ -276,8 +279,6 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
-  cout << "Process step: Replay Gain" << endl;
-
   replayGain = 0.0;
   int length = 0;
   
@@ -358,7 +359,7 @@ void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
 
 
 void MusicExtractor::computeSVMDescriptors(Pool& pool) {
-  cout << "Process step 6: SVM Models" << endl;
+  cout << "Process step: SVM models" << endl;
   //const char* svmModels[] = {}; // leave this empty if you don't have any SVM models
   const char* svmModels[] = { "genre_tzanetakis", "genre_dortmund",
                               "genre_electronica", "genre_rosamerica",
