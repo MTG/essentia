@@ -85,8 +85,15 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   spec->output("spectrum") >> mfcc->input("spectrum");
   mfcc->output("bands") >> NOWHERE;
   mfcc->output("mfcc") >> PC(pool, nameSpace + "mfcc");
-
-
+    
+    
+    // ERB Bands and GFCC
+  Algorithm* gfcc  = factory.create("GFCC","highFrequencyBound",9795, "lowFrequencyBound",26,"numberBands",18);
+  spec->output("spectrum") >> gfcc->input("spectrum");
+  gfcc->output("bands") >>PC(pool, nameSpace + "erb_bands");
+  gfcc->output("gfcc") >> PC(pool, nameSpace + "gfcc");
+    
+    
   // Spectral Decrease
   Algorithm* square = factory.create("UnaryOperator", "type", "square");
   Algorithm* decrease = factory.create("Decrease",
@@ -252,7 +259,6 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   Algorithm* ent = factory.create("Entropy");
   spec->output("spectrum") >> ent->input("array");
   ent->output("entropy") >> PC(pool, nameSpace + "spectral_entropy");
-    
 
 
   // Pitch Detection
