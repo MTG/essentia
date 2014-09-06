@@ -120,11 +120,11 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
     for (uint i=0; i<statsSize; i++)
         poolStats.set(string("rhythm.beats_loudness.")+defaultStats[i],0); 
     }
-  if(!pool.contains<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio"))
-    for (uint i=0; i<statsSize; i++) 
-      poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
-        arrayToVector<Real>(emptyVector));
-  else if (pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio").size()<2){
+
+    if(!pool.contains<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio"))
+        for (uint i=0; i<statsSize; i++)
+            poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],arrayToVector<Real>(emptyVector));
+    else if (pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio").size()<2){
       poolStats.remove(string("rhythm.beats_loudness_band_ratio"));
       for (uint i=0; i<statsSize; i++) {
         if(i==1 || i==6 || i==7)// var, dvar and dvar2 are 0
@@ -134,18 +134,28 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
           poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
               pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio")[0]);
       }
-  }
+    }
 
     
     
-  // variable descriptor length counts
+    // variable descriptor length counts
     poolStats.set(string("rhythm.onset_count"), pool.value<vector<Real> >("rhythm.onset_times").size());
     poolStats.set(string("rhythm.beats_count"), pool.value<vector<Real> >("rhythm.beats_position").size());
     poolStats.set(string("tonal.chords_count"), pool.value<vector<string> >("tonal.chords_progression").size());
     
-  delete aggregator;
-
-  return poolStats;
+    // hpcp_mean peak count
+    vector<Real> hpcp_peak_amps, hpcp_peak_pos;
+    standard::Algorithm* hpcp_peaks = standard::AlgorithmFactory::create("PeakDetection", "threshold",0.1);
+    hpcp_peaks->input("array").set(poolStats.value<vector<Real> >("tonal.hpcp.mean"));
+    hpcp_peaks->output("amplitudes").set(hpcp_peak_amps);
+    hpcp_peaks->output("positions").set(hpcp_peak_pos);
+    hpcp_peaks->compute();
+    poolStats.set(string("tonal.hpcp_peak_count"), hpcp_peak_amps.size());
+    
+    delete aggregator;
+    delete hpcp_peaks;
+    
+    return poolStats;
 }
 
 void FreesoundExtractor::outputToFile(Pool& pool, const string& outputFilename, bool outputJSON){
