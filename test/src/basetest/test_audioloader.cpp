@@ -32,50 +32,60 @@ using namespace essentia::scheduler;
 TEST(AudioLoader, SimpleLoad) {
     AlgorithmFactory& factory = AlgorithmFactory::instance();
     Algorithm* loader =  factory.create("AudioLoader",
-                                        "filename", "test/audio/recorded/cat_purrrr.wav");
+                                        "filename", "test/audio/recorded/cat_purrrr.wav",
+                                        "computeMD5", true);
     essentia::Pool p;
 
     loader->output("audio")           >>  PC(p, "audio");
     loader->output("sampleRate")      >>  PC(p, "samplerate");
     loader->output("numberChannels")  >>  PC(p, "channels");
+    loader->output("md5")             >>  PC(p, "md5");
 
     Network(loader).run();
 
     EXPECT_EQ(44100,   p.value<Real>("samplerate"));
     EXPECT_EQ(2,       p.value<Real>("channels"));
     EXPECT_EQ(219343,  (int)p.value<vector<StereoSample> >("audio").size());
+    EXPECT_EQ("426fe5cf5ac3730f8c8db2a760e2b819", p.value<string>("md5"));
 }
 
 TEST(AudioLoader, SampleFormatConversion) {
     AlgorithmFactory& factory = AlgorithmFactory::instance();
     Algorithm* loader24 =  factory.create("AudioLoader",
-                                          "filename", "test/audio/recorded/cat_purrrr24bit.wav");
+                                          "filename", "test/audio/recorded/cat_purrrr24bit.wav",
+                                          "computeMD5", true);
     essentia::Pool p;
 
     loader24->output("audio")           >>  PC(p, "audio24");
     loader24->output("sampleRate")      >>  PC(p, "samplerate24");
     loader24->output("numberChannels")  >>  PC(p, "channels24");
+    loader24->output("md5")             >>  PC(p, "md5");
 
     Network(loader24).run();
 
     EXPECT_EQ(44100,   p.value<Real>("samplerate24"));
     EXPECT_EQ(2,       p.value<Real>("channels24"));
     EXPECT_EQ(219343,  (int)p.value<vector<StereoSample> >("audio24").size());
+    EXPECT_EQ("0616e4672c8a616a21e4873e39da1739", p.value<string>("md5"));
+
 
     // FIXME: the following should work
     //loader->configure("filename", "test/audio/recorded/britney32bit.wav");
     //p.clear();
 
     Algorithm* loader32 =  factory.create("AudioLoader",
-                                          "filename", "test/audio/recorded/cat_purrrr32bit.wav");
+                                          "filename", "test/audio/recorded/cat_purrrr32bit.wav",
+                                          "computeMD5", true);
 
     loader32->output("audio")           >>  PC(p, "audio32");
     loader32->output("sampleRate")      >>  PC(p, "samplerate32");
     loader32->output("numberChannels")  >>  PC(p, "channels32");
+    loader32->output("md5")             >>  PC(p, "md5");
 
     Network(loader32).run();
 
     EXPECT_EQ(44100,   p.value<Real>("samplerate32"));
     EXPECT_EQ(2,       p.value<Real>("channels32"));
     EXPECT_EQ(219343,  (int)p.value<vector<StereoSample> >("audio32").size());
+    EXPECT_EQ("622be297e9e7f75f6fdf6c571999d1ca", p.value<string>("md5"));
 }

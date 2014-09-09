@@ -139,6 +139,7 @@ def build(ctx):
         build_example('streaming', 'key')
         build_example('streaming', 'pitchyinfft')
         build_example('streaming', 'predominantmelody')
+        build_example('streaming', 'md5')
         
         freesound_files = [ 'streaming_extractor_freesound.cpp',
 			     'freesound/FreesoundExtractor.cpp',
@@ -153,7 +154,6 @@ def build(ctx):
                         includes = [ '.', '..' ,'../..'],
                         use      = 'essentia ' + ctx.env.USES,
                         install_path = None)
-
 
 
 

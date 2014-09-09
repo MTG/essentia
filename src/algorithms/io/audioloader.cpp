@@ -19,7 +19,7 @@
 
 #include "audioloader.h"
 #include "algorithmfactory.h"
-
+#include <iomanip>  //  setw()
 
 using namespace std;
 
@@ -49,6 +49,7 @@ AudioLoader::~AudioLoader() {
     closeAudioFile();
 
     av_freep(&_buffer);
+    av_freep(&_md5Encoded);
 
 #if LIBAVCODEC_VERSION_INT >= AVCODEC_AUDIO_DECODE4
     av_freep(&_decodedFrame);
@@ -68,9 +69,9 @@ void AudioLoader::configure() {
     // set ffmpeg to be silent by default, so we don't have these annoying
     // "invalid new backstep" messages anymore, when everything is actually fine
     av_log_set_level(AV_LOG_QUIET);
+    _computeMD5 = parameter("computeMD5").toBool();
     reset();
 }
-
 
 
 void AudioLoader::openAudioFile(const string& filename) {
@@ -184,6 +185,7 @@ void AudioLoader::openAudioFile(const string& filename) {
     E_DEBUG(EAlgorithm, "AudioLoader: using ffmpeg avcodec_decode_audio4() function");
 #endif
 
+    av_md5_init(_md5Encoded);
 }
 
 
@@ -222,6 +224,14 @@ void AudioLoader::pushChannelsSampleRateInfo(int nChannels, Real sampleRate) {
 }
 
 
+string uint8_t_to_hex(uint8_t* input, int size) {
+    ostringstream result;
+    for(int i=0; i<size; ++i) {
+        result << setw(2) << setfill('0') << hex << (int) input[i];
+    }
+    return result.str();
+}
+
 
 AlgorithmStatus AudioLoader::process() {
     if (!parameter("filename").isConfigured()) {
@@ -246,6 +256,14 @@ AlgorithmStatus AudioLoader::process() {
             shouldStop(true);
             flushPacket();
             closeAudioFile();
+            if (_computeMD5) {
+                av_md5_final(_md5Encoded, _checksum); 
+                _md5.push(uint8_t_to_hex(_checksum, 16));
+            }
+            else {
+                string md5 = "";
+                _md5.push(md5);
+            }
             return FINISHED;
         }
     } while (_packet.stream_index != _streamIdx);
@@ -383,18 +401,31 @@ int AudioLoader::decodePacket() {
     // _dataSize  input = number of bytes available for write in buff
     //           output = number of bytes actually written (actual: S16 data)
     //E_DEBUG(EAlgorithm, "decode_audio_frame, available bytes in buffer = " << _dataSize);
-    len = decode_audio_frame(_audioCtx, buff, &_dataSize, &_packet);
 
+    // Note: md5 should be computed before decoding frame, as the decoding may 
+    // change the content of a packet. Still, not sure if it is correct to 
+    // compute md5 over packet which contains incorrect frames, potentially 
+    // belonging to id3 metadata (TODO: or is it just a missing header issue?), 
+    // but computing md5 hash using ffmpeg will also treat it as audio:
+    //      ffmpeg -i file.mp3 -acodec copy -f md5 -
+
+    if (_computeMD5) {
+        av_md5_update(_md5Encoded, _packet.data, _packet.size);
+    }
+ 
+    len = decode_audio_frame(_audioCtx, buff, &_dataSize, &_packet);
+    
     if (len < 0) {
         char errstring[1204];
         av_strerror(len, errstring, sizeof(errstring));
         ostringstream msg;
 
         if (_audioCtx->codec_id == CODEC_ID_MP3) {
-            msg << "AudioLoader: invalid frame, probably an mp3 tag frame, skipping it: " << errstring;
+            msg << "AudioLoader: invalid frame, skipping it: " << errstring;
             // mp3 streams can have tag frames (id3v2?) which libavcodec tries to 
             // read as audio anyway, and we probably don't want print an error 
             // message for that... 
+            // TODO: Are these frames really id3 tags?
             
             //E_DEBUG(EAlgorithm, msg);
             E_WARNING(msg.str());
@@ -541,18 +572,17 @@ const char* AudioLoader::description = DOC("Given an audio file this algorithm l
 void AudioLoader::createInnerNetwork() {
     _loader = streaming::AlgorithmFactory::create("AudioLoader");
     _audioStorage = new streaming::VectorOutput<StereoSample>();
-    _srStorage = new streaming::VectorOutput<Real>(&_sampleRateStorage);
-    _cStorage = new streaming::VectorOutput<int>(&_channelsStorage);
 
     _loader->output("audio")           >>  _audioStorage->input("data");
-    _loader->output("sampleRate")      >>  _srStorage->input("data");
-    _loader->output("numberChannels")  >>  _cStorage->input("data");
-
+    _loader->output("sampleRate")      >>  PC(_pool, "internal.sampleRate");
+    _loader->output("numberChannels")  >>  PC(_pool, "internal.numberChannels");
+    _loader->output("md5")             >>  PC(_pool, "internal.md5");
     _network = new scheduler::Network(_loader);
 }
 
 void AudioLoader::configure() {
-    _loader->configure(INHERIT("filename"));
+    _loader->configure(INHERIT("filename"),
+                       INHERIT("computeMD5"));
 }
 
 void AudioLoader::compute() {
@@ -562,24 +592,31 @@ void AudioLoader::compute() {
     }
 
     Real& sampleRate = _sampleRate.get();
-    int& nChannels = _channels.get();
+    int& numberChannels = _channels.get();
+    string& md5 = _md5.get();
     vector<StereoSample>& audio = _audio.get();
 
-    _audioStorage->setVector(&audio);
+    _audioStorage->setVector(&audio);   
+    // TODO: is using VectorInput indeed faster than using Pool?
 
     // FIXME:
     // _audio.reserve(sth_meaningful);
 
     _network->run();
 
-    sampleRate = _sampleRateStorage[0];
-    nChannels = _channelsStorage[0];
+    sampleRate = _pool.value<Real>("internal.sampleRate");
+    numberChannels = (int) _pool.value<Real>("internal.numberChannels");
+    md5 = _pool.value<std::string>("internal.md5");
+
     // reset, so it is ready to load audio again
     reset();
 }
 
 void AudioLoader::reset() {
     _network->reset();
+    _pool.remove("internal.md5");
+    _pool.remove("internal.sampleRate");
+    _pool.remove("internal.numberChannels");
 }
 
 } // namespace standard
