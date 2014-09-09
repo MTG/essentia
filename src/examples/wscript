@@ -88,24 +88,6 @@ def build(ctx):
                                    'extractorpanning',
                                    'extractorpostprocess' ])
 
-        # OUTDATED:
-        #build_example('streaming', 'schizo_extractor',
-        #                         [ 'extractorutils',
-        #                           'extractormetadata',
-        #                           'extractortonal',
-        #                           'extractorlowlevel',
-        #                           'extractorsfx',
-        #                           'extractorpanning',
-        #                           'extractorpostprocess' ])
-
-        #build_example('streaming', 'extractor_canoris',
-        #                         [ 'extractorutils',
-        #                           'extractortonal',
-        #                           'extractorlowlevel',
-        #                           'extractorsfx',
-        #                           'extractorpanning',
-        #                           'extractorpostprocess' ])
-
         
         music_files = [ 'streaming_extractor_music.cpp',
                             'extractor_music/MusicExtractor.cpp',
@@ -120,15 +102,7 @@ def build(ctx):
                         use      = 'essentia ' + ctx.env.USES,
                         install_path = None)
 
-        #build_example('streaming', 'extractor_archivemusic',
-        #                         [ 'extractorutils',
-        #                           'extractor_archivemusic_tonal',
-        #                           'extractor_archivemusic_lowlevel',
-        #                           'extractorsfx',
-        #                           'extractorpanning',
-        #                           'extractor_archivemusic_postprocess' ]) 
-
-        build_example('streaming', 'beatsmarker')
+         build_example('streaming', 'beatsmarker')
         build_example('streaming', 'mfcc')
         build_example('streaming', 'gfcc')
         build_example('streaming', 'rhythmextractor_multifeature')
