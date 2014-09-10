@@ -480,11 +480,14 @@ int AudioLoader::decodePacket() {
         int ostride[6]      = { av_get_bytes_per_sample(AV_SAMPLE_FMT_S16)     };
         int totalsamples    = _dataSize / istride[0]; // == num_samp_per_channel * num_channels
 
-        if (av_audio_convert(_audioConvert, obuf, ostride, ibuf, istride, totalsamples) < 0) {
+        if (int result = av_audio_convert(_audioConvert, obuf, ostride, ibuf, istride, totalsamples) < 0) {
+            char errstring[1204];
+            av_strerror(result, errstring, sizeof(errstring));
             ostringstream msg;
             msg << "AudioLoader: Error converting "
                 << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
-                << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16);
+                << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16)
+                << ". " << errstring;
             throw EssentiaException(msg);
         }
 
