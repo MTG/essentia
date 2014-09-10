@@ -102,7 +102,7 @@ def build(ctx):
                         use      = 'essentia ' + ctx.env.USES,
                         install_path = None)
 
-         build_example('streaming', 'beatsmarker')
+        build_example('streaming', 'beatsmarker')
         build_example('streaming', 'mfcc')
         build_example('streaming', 'gfcc')
         build_example('streaming', 'rhythmextractor_multifeature')
