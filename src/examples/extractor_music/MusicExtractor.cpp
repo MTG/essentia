@@ -46,6 +46,9 @@ void MusicExtractor::compute(const string& audioFilename){
   cout << "Process step: Read metadata" << endl;
   readMetadata(audioFilename);
 
+  cout << "Process step: Compute md5 audio hash" << endl;
+  computeMD5(audioFilename);
+
   cout << "Process step: Replay gain" << endl;
   computeReplayGain(audioFilename); // compute replay gain and the duration of the track
   
@@ -272,10 +275,21 @@ void MusicExtractor::readMetadata(const string& audioFilename) {
   */
 }
 
+void MusicExtractor::computeMD5(const string& audioFilename) {
+  AlgorithmFactory& factory = AlgorithmFactory::instance();
+  Algorithm* loader = factory.create("AudioLoader",
+                                     "filename",   audioFilename,
+                                     "computeMD5", true);
+  loader->output("audio")           >> NOWHERE;
+  loader->output("md5")             >> PC(results, "metadata.audio_properties.md5_encoded");
+  loader->output("sampleRate")      >> NOWHERE;
+  loader->output("numberChannels")  >> NOWHERE;
+
+  Network network(loader);
+  network.run();
+}
 
 void MusicExtractor::computeReplayGain(const string& audioFilename) {
-
-  // get metadata and compute replay gain
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
