@@ -268,7 +268,14 @@ AlgorithmStatus AudioLoader::process() {
         }
     } while (_packet.stream_index != _streamIdx);
 
-    if(decodePacket()) {
+    // compute md5 first
+    if (_computeMD5) {
+        av_md5_update(_md5Encoded, _packet.data, _packet.size);
+    }
+
+    // decode frames in packet
+    while(_packet.size > 0) {
+        if (!decodePacket()) break;
         copyFFmpegOutput();
     }
 
@@ -409,10 +416,6 @@ int AudioLoader::decodePacket() {
     // but computing md5 hash using ffmpeg will also treat it as audio:
     //      ffmpeg -i file.mp3 -acodec copy -f md5 -
 
-    if (_computeMD5) {
-        av_md5_update(_md5Encoded, _packet.data, _packet.size);
-    }
- 
     len = decode_audio_frame(_audioCtx, buff, &_dataSize, &_packet);
     
     if (len < 0) {
@@ -438,11 +441,6 @@ int AudioLoader::decodePacket() {
     }
 
     if (len != _packet.size) {
-        // TODO: investigate why this happens and whether it is a big issue
-        //        (looks like it only loses silent samples at the end of files)
-
-        // more than 1 frame in a packet, happens a lot with flac for instance...
-
         // https://www.ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga834bb1b062fbcc2de4cf7fb93f154a3e
 
         // Some decoders may support multiple frames in a single AVPacket. Such 
@@ -453,17 +451,22 @@ int AudioLoader::decodePacket() {
         // returned, the packet needs to be fed to the decoder with remaining 
         // data until it is completely consumed or an error occurs.
 
-        E_WARNING("AudioLoader: more than 1 frame in packet, dropping remaining bytes...");
+        E_WARNING("AudioLoader: more than 1 frame in packet, decoding remaining bytes...");
         E_WARNING("at sample index: " << output("audio").totalProduced());
         E_WARNING("decoded samples: " << len);
         E_WARNING("packet size: " << _packet.size);
     }
+    
+    // update packet data pointer to data left undecoded (if any) 
+    _packet.size -= len;
+    _packet.data += len;
+
 
     if (_dataSize <= 0) {
         // No data yet, get more frames
         // cout << "no data yet, get more frames" << endl;
         _dataSize = 0;
-        return 0;
+        return len;
     }
 
 #if !HAVE_SWRESAMPLE
