@@ -36,13 +36,9 @@ void SuperFluxNovelty::configure() {
  	
  	
     _binW = parameter("binWidth").toInt();
-    //if(_binW%2==0)_binW++;
     _maxf->configure("width",_binW,"Causal",false);
-
-    
 	_frameWi = parameter("frameWidth").toInt();
 
-	_online = parameter("Online").toBool();
 
 
 }
@@ -52,7 +48,7 @@ void SuperFluxNovelty::compute() {
 
   	const vector< vector<Real> >& bands = _bands.get();
   	
-	vector<Real>& diffs = _diffs.get();
+	Real& diffs = _diffs.get();
 
   int nFrames = bands.size();
   if(!nFrames){
@@ -62,19 +58,11 @@ void SuperFluxNovelty::compute() {
   if(!nBands){
   throw EssentiaException("SuperFluxNovelty : empty bands ");
   }
-  E_DEBUG( EAlgorithm, "got " << nFrames <<"frames, for frameWidth" << _frameWi << "with " << nBands<<" bands");
+
   if(_frameWi>=nFrames){
   
   throw EssentiaException("SuperFluxNovelty : no enough frames comparing to frame witdh");
   }
-  
-  
-// ONLINE MODE all results are advanced by frame width
-
-  if (_online){diffs.resize(nFrames-_frameWi);	}
-  else { diffs.resize(nFrames);}
-
-  int onlinestep = _online?_frameWi:0;	
 
   vector<Real> maxsBuffer(nBands,0);
 
@@ -83,19 +71,16 @@ void SuperFluxNovelty::compute() {
 
   for (int i = _frameWi ; i< nFrames;i++){
 
-	diffs[i-onlinestep]=0;
+	diffs=0;
 	_maxf->input("signal").set(bands[i-_frameWi]);
 	_maxf->output("signal").set(maxsBuffer);
 	_maxf->compute();
 	
 	cur_diff = 0;
-	//cout<<bands[i][15]<<"//"<<bands[i-_frameWi][15]<<endl;
-	for (int j = 0;j<nBands;j++){
-	
-		cur_diff= bands[i][j]-maxsBuffer[j];
-		if(cur_diff>0.0){diffs[i-onlinestep] +=cur_diff ; }
 
-		
+	for (int j = 0;j<nBands;j++){
+		cur_diff= bands[i][j]-maxsBuffer[j];
+		if(cur_diff>0.0){diffs +=cur_diff ; }		
 	}
 
 
@@ -103,35 +88,17 @@ void SuperFluxNovelty::compute() {
 return;
 }
 
-
-
-
-
-
-
 void SuperFluxNovelty::reset() {
   Algorithm::reset();
 
 }
 
 
-// TODO in the case of lower accuracy in evaluation
-// implement post-processing steps for methods in OnsetDetection, which required it
-// wrapping the OnsetDetection algo
-// - smoothing?
-// - etc., whatever was requiered in original matlab implementations
+
 
 } // namespace standard
 } // namespace essentia
 
-
-
-
-
-
-
-
-// 
 
 
 
@@ -144,7 +111,7 @@ const char* SuperFluxNovelty::description = standard::SuperFluxNovelty::descript
 
 
 AlgorithmStatus SuperFluxNovelty::process() {
-  bool producedData = false;
+
 
 
     AlgorithmStatus status = acquireData();
@@ -157,7 +124,7 @@ AlgorithmStatus SuperFluxNovelty::process() {
     
 
     _algo->input("bands").set(_bands.tokens());
-    _algo->output("Differences").set(_diffs.tokens());
+    _algo->output("Differences").set(_diffs.firstToken());
 	
     _algo->compute();
 

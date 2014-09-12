@@ -49,6 +49,8 @@ void SuperFluxPeaks::configure() {
 
 	_movAvg->configure("size",_pre_avg);
 	_maxf->configure("width",_pre_max,"Causal",true);
+    
+    _threshold = parameter("threshold").toReal();
 	
 	lastPidx = -1;
 
@@ -58,7 +60,7 @@ void SuperFluxPeaks::configure() {
 void SuperFluxPeaks::compute() {
 // RT parameters
 
-Real _threshold = parameter("threshold").toReal();
+
 
 
 
@@ -88,44 +90,14 @@ Real _threshold = parameter("threshold").toReal();
 
 
 
-if(_rawMode){
-	
-	int zeroStep;
-	if(_startZero){
-	zeroStep = 0;
-	if(peaks.size()!=size)peaks.resize(size);
-	}
-	else{
-	zeroStep = max(_pre_avg,_pre_max)-1;
-	if(peaks.size()!=size-zeroStep)peaks.resize(size-zeroStep);
-	}
-	for( int i =zeroStep ; i < size;i++){
-		peaks[i-zeroStep]=0;
-		if(lastPidx>=0)lastPidx++;
-		if(signal[i]==maxs[i] && signal[i]>avg[i]+_threshold && signal[i]>0){
-			if(!(lastPidx<_combine*frameRate  &&  lastPidx >=0)) {
-				// E_DEBUG(EAlgorithm,"peakDetected");
-				//cout <<"/" << avg.size() <<"/" <<  _threshold <<"/" <<  maxs.size()<<endl;
-				peaks[i-zeroStep]=signal[i];	
-				lastPidx = 0;
-			}	
-		}	
-	}
-	
-}
-//we don't know output size
-else{
-	// should we use expensives push_back instead reserving ? although rawmode was used for realtime so "size" was never so big
-	peaks.reserve(size);
 	int nDetec=0;
 	Real peakTime = 0;
 	for( int i =0 ; i < size;i++){
-		//thresholding and double removal
 		if(signal[i]==maxs[i] && signal[i]>avg[i]+_threshold && signal[i]>0){
 
-			peakTime = i/frameRate;
+			peakTime = i*1.0/frameRate;
 			if((nDetec>0 && peakTime-peaks[nDetec-1]>_combine)  ||  nDetec ==0) {
-				peaks[nDetec]=peakTime;
+				peaks[nDetec] = peakTime;
 				nDetec++;
 			
 			}
@@ -136,8 +108,8 @@ else{
 
 peaks.resize(nDetec);
 
-	
-}
+
+
 
 return;
  
@@ -162,62 +134,30 @@ const char* SuperFluxPeaks::name = standard::SuperFluxPeaks::name;
 const char* SuperFluxPeaks::description = standard::SuperFluxPeaks::description;
 
 
-AlgorithmStatus SuperFluxPeaks::process() {
-
- 	bool producedData = false;
-
-
-	AlgorithmStatus status = acquireData();
-	if (status != OK) {
-	  // acquireData() returns SYNC_OK if we could reserve both inputs and outputs
-	  // being here means that there is either not enough input to process,
-	  // or that the output buffer is full, in which cases we need to return from here
-	  // cout << "peaks no fed" << endl;
-	  return status;
-	}
-	
-	// dynamic rease size depending on number of peaks
-	if(!_rawmode){
-		vector<Real> peaks;
-		_algo->input("novelty").set(_signal.tokens());
-		_algo->output("peaks").set(peaks);
-
-		_algo->compute();
-		
-		_peaks.setAcquireSize(peaks.size());
-		_peaks.setReleaseSize(peaks.size());
-		
-		//reacquiring right amount of data
-		status = acquireData();
-        	if (status != OK) {
-		            // acquireData() returns SYNC_OK if we could reserve both inputs and outputs
-		            // being here means that there is either not enough input to process,
-		            // or that the output buffer is full, in which cases we need to return from here
-		            // cout << "peaks no fed" << endl;
-            		return status;
-        		}
-		for (int i = 0 ; i < peaks.size();i++){
-			_peaks.tokens()[i]=peaks[i];
-		// cout << peaks.acquireSize() <<endl;
-		}
-
-	// 	fastcopy(&_peaks.tokens(),&peaks,peaks.size());
-	}
-	
-	
-	// raw output for realtime
-		else{
-			_algo->input("novelty").set(_signal.tokens());
-			_algo->output("peaks").set(_peaks.tokens());
-			_algo->compute();
-		}
-
-	// give back the tokens that were reserved
-	releaseData();
-
-	return OK;
-  
-}
+    void SuperFluxPeaks::consume() {
+        current_t+=1.0/framerate;
+        std::vector<Real> out = std::vector<Real>(aqs);
+        	_algo->input("novelty").set(_signal.tokens());
+        	_algo->output("peaks").set(out);
+        	_algo->compute();
+        if(out.size()>0 && out[out.size()-1]>0 && ((onsTime.size()>0 && current_t-onsTime.back()>_combine )|| onsTime.size()==0) ){
+            onsTime.push_back(current_t);
+        }
+        
+        
+    }
+    
+    void SuperFluxPeaks::finalProduce() {
+        _peaks.push((std::vector<Real>) onsTime);
+        
+        reset();
+    }
+    
+    
+    void SuperFluxPeaks::reset(){
+        current_t=0;
+        onsTime.clear();
+    }
 
 } // namespace streaming
 } // namespace essentia

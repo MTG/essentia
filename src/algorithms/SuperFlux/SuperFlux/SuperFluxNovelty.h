@@ -31,13 +31,13 @@ class SuperFluxNovelty : public Algorithm{
  private:
  
   Input<std::vector< std::vector<Real> >  > _bands;
-  Output<std::vector<Real> > _diffs;
+  Output<Real > _diffs;
 
 
   
   	int _binW;
   	int _frameWi;
-	bool _online;
+	
 
 
 	Algorithm* _maxf;
@@ -46,7 +46,7 @@ class SuperFluxNovelty : public Algorithm{
  public:
   SuperFluxNovelty() {
     declareInput(_bands, "bands", "the input bands spectrogram");
-    declareOutput(_diffs, "Differences", "SuperFluxNoveltyd input");
+    declareOutput(_diffs, "Differences", "SuperFluxNovelty input");
 	_maxf = AlgorithmFactory::create("MaxFilter");
     
   }
@@ -58,7 +58,7 @@ class SuperFluxNovelty : public Algorithm{
   void declareParameters() {
     declareParameter("binWidth", "height(n of frequency bins) of the SuperFluxNoveltyFilter", "[3,inf)", 3);
 	declareParameter("frameWidth", "differenciate with the N-th previous frame", "(0,inf)", 2);
-	declareParameter("Online", "realign output with audio by frameWidth ; if using streaming mode : set it to true, else for static precision measurement: use false", "{false,true}", false);
+	
 }
 
   void reset();
@@ -80,40 +80,40 @@ class SuperFluxNovelty : public Algorithm{
 namespace essentia {
 namespace streaming {
 
-class SuperFluxNovelty : public Algorithm {
+class SuperFluxNovelty : public Algorithm
+    {
 
  protected:
-  Sink< vector<Real> > _bands;
-   Source<Real  > _diffs;
+    Sink< vector<Real> > _bands;
+    Source<Real  > _diffs;
   
   
-  essentia::standard::Algorithm* _algo;
+    essentia::standard::Algorithm* _algo;
 
-int bufferSize=10;
 
  public:
-  SuperFluxNovelty(){
-    _algo = standard::AlgorithmFactory::create("SuperFluxNovelty");
-    declareInput(_bands, bufferSize,1,"bands","the input bands spectrogram");
-    declareOutput(_diffs,1,"Differences","SuperFlux");
 
-  }
+        SuperFluxNovelty(){
+            declareInput(_bands, "bands", "the input bands spectrogram");
+            declareOutput(_diffs,1,1, "Differences", "SuperFluxNovelty input");
+            _algo = essentia::standard::AlgorithmFactory::create("SuperFluxNovelty");
 
+        }
 
 
 
   void declareParameters() {
     declareParameter("binWidth", "height(n of frequency bins) of the SuperFluxNoveltyFilter", "[3,inf)", 3);
 	declareParameter("frameWidth", "number of frame for differentiation", "(0,inf)", 2);
-	declareParameter("Online", "realign output with audio by frameWidth : if using streaming mode set it to true, else for static precision measurement, use false", "{false,true}", true);
-  }
+    }
    
 void configure() {
+    
      _algo->configure(_params);
-	   _bands.setAcquireSize(_algo->parameter("frameWidth").toInt()+1);
-     _bands.setReleaseSize(1);
+    _bands.setAcquireSize(_algo->parameter("frameWidth").toInt()+1);
+    _bands.setReleaseSize(1);
+    
 
-   // if(!_algo->parameter("Online").toBool()) throw EssentiaException("atm, can not be in streaming mode without online option set to true");
 
   }
 
