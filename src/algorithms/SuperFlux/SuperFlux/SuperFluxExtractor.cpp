@@ -51,6 +51,8 @@ SuperFluxExtractor::SuperFluxExtractor() : _configured(false) {
     triF->output("bands")>>superFluxF->input("bands");
     superFluxF->output("Differences")  >>superFluxP->input("novelty");
     superFluxP->output("peaks") >> _onsets;
+    
+    
 
   _network = new scheduler::Network(_frameCutter);
 }
@@ -58,17 +60,16 @@ SuperFluxExtractor::SuperFluxExtractor() : _configured(false) {
 void SuperFluxExtractor::createInnerNetwork() {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
-
-
-    
 	_frameCutter = factory.create(	"FrameCutter");
     
-    w = factory.create("Windowing","type","hann","zeroPhase",true);
+    w = factory.create("Windowing","type","hann");
     
     spectrum = factory.create("Spectrum");
     triF = factory.create("Triangularbands","Log",true);
     superFluxP = factory.create("SuperFluxPeaks");
-    superFluxF = factory.create("SuperFluxNovelty","Online",true,"binWidth",3,"frameWidth",2);
+    superFluxF = factory.create("SuperFluxNovelty","binWidth",3,"frameWidth",2);
+    
+    vout = new essentia::streaming::VectorOutput<Real>();
    
 }
 
@@ -91,7 +92,7 @@ void SuperFluxExtractor::configure() {
                         		);
 
 
-  superFluxP->configure("rawmode" , false,"threshold" ,threshold/NOVELTY_MULT,"startFromZero",false,"frameRate", sampleRate*1.0/hopSize,"combine",combine);
+  superFluxP->configure("rawmode" , false,"threshold" ,threshold/NOVELTY_MULT,"startFromZero",true,"frameRate", sampleRate*1.0/hopSize,"combine",combine);
 
 
 }
@@ -137,10 +138,11 @@ void SuperFluxExtractor::configure() {
 void SuperFluxExtractor::createInnerNetwork() {
   _SuperFluxExtractor = streaming::AlgorithmFactory::create("SuperFluxExtractor");
   _vectorInput = new streaming::VectorInput<Real>();
-  _vectorOut = new streaming::VectorOutput<Real>();
+    _vectorOut = new streaming::VectorOutput<std::vector<Real> >();
 
   *_vectorInput                        >>  _SuperFluxExtractor->input("signal");
   _SuperFluxExtractor->output("onsets")  >>  _vectorOut->input("data");//PC(_pool, "onsets.times");
+
 
   _network = new scheduler::Network(_vectorInput);
 }
@@ -149,11 +151,12 @@ void SuperFluxExtractor::createInnerNetwork() {
  void SuperFluxExtractor::compute() {
   const vector<Real>& signal = _signal.get();
   _vectorInput->setVector(&signal);
-vector<Real>& onsets = _onsets.get();
- _vectorOut->setVector(&onsets);
-
-  _network->run();
-
+     vector<Real>& onsets = _onsets.get();
+     vector<vector<Real> > ll;
+     _vectorOut->setVector(&ll);
+     _network->run();
+     
+     onsets = ll[0];
   
 
   //onsets = _pool.value<vector<Real> >("onsets.times");

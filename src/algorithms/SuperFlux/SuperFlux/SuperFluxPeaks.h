@@ -37,7 +37,7 @@ class SuperFluxPeaks : public Algorithm {
  	int _pre_avg;
 	int _pre_max;
 	Real _combine;
-// 	Real _threshold;
+ 	Real _threshold;
 
 
   	int hopSize;
@@ -85,75 +85,85 @@ int lastPidx ;
 } // namespace essentia
 
 
-
+#include "accumulatoralgorithm.h"
 
 namespace essentia {
 namespace streaming {
 
-class SuperFluxPeaks : public Algorithm {
-
- protected:
-  Sink<Real> _signal;
-  Source<Real> _peaks;
-
-  standard::Algorithm * _algo;
-
-bool _rawmode;
-
- public:
-  SuperFluxPeaks(){
-  
-    _algo = standard::AlgorithmFactory::create("SuperFluxPeaks");
-    declareInput(_signal, 17,1,"novelty","the input bands spectrogram");
-    declareOutput(_peaks,1,1,"peaks","SuperFlux");
-  };
-  
-
-  void declareParameters() {
-	declareParameter("frameRate", "frameRate", "(0,inf)", 172.);
-    declareParameter("threshold", "threshold for peak-picking", "(0,inf)", 1.25);
-	declareParameter("combine", "ms for onset combination", "(0,inf)", 30.0);
-    declareParameter("pre_avg", "use N miliseconds past information for moving average", "(0,inf)", 100);
-	declareParameter("pre_max", "use N miliseconds past information for moving maximum", "(0,inf)", 30);
-	declareParameter("rawmode", "output mode: if true, returns array of same size as novelty function, with 1 where peaks stands, if false, output list of peaks instants", "{true,false}", true);
-	declareParameter("startFromZero", "if true; output starts at 0, if false; starts at frame corresponding max(pre_avg,pre_max)", "{true,false}", false);
-  };
-
-
-  // link algo parameter with streaming burffer options
-
-void configure(){
-//EXEC_DEBUG("configuring Peaks");
-_algo->configure(this->_params);
-int aqS =  _algo->parameter("frameRate").toReal() * max(_algo->parameter("pre_avg").toInt(),_algo->parameter("pre_max").toInt()) / 1000;
-    EXEC_DEBUG("setAcquireSize" << aqS);
-    _signal.setAcquireSize(aqS);
-    _signal.setReleaseSize(1);
     
     
-    if(_algo->parameter("rawmode").toBool() && !_algo->parameter("startFromZero").toBool()){
-    _peaks.setAcquireSize(1);
-    _peaks.setReleaseSize(1);
-    }
-    else{
-      cout<<"aq"<<aqS<<endl;
-    _peaks.setAcquireSize(aqS);
-    _peaks.setReleaseSize(aqS);
-    }
+    
+    
+    
+    class SuperFluxPeaks : public AccumulatorAlgorithm {
+        
+    protected:
+        Sink<Real> _signal;
+        Source<std::vector<Real> > _peaks;
+        
+        standard::Algorithm * _algo;
+        
+        bool _rawmode;
+        float current_t;
+        float aqs,framerate,_combine;
+        std::vector<Real> onsTime;
+        
+        
+    public:
+        SuperFluxPeaks(){
+            
+            _algo = standard::AlgorithmFactory::create("SuperFluxPeaks");
+            declareInputStream(_signal, "novelty", "the input novelty");
+            declareOutputResult(_peaks, "peaks", "peaks instants [s]");
+        };
+        
+        
+        void declareParameters() {
+            declareParameter("frameRate", "frameRate", "(0,inf)", 172.);
+            declareParameter("threshold", "threshold for peak-picking", "(0,inf)", 1.25);
+            declareParameter("combine", "ms for onset combination", "(0,inf)", 30.0);
+            declareParameter("pre_avg", "use N miliseconds past information for moving average", "(0,inf)", 100);
+            declareParameter("pre_max", "use N miliseconds past information for moving maximum", "(0,inf)", 30);
+            declareParameter("rawmode", "output mode: if true, returns array of same size as novelty function, with 1 where peaks stands, if false, output list of peaks instants", "{true,false}", true);
+            declareParameter("startFromZero", "if true; output starts at 0, if false; starts at frame corresponding max(pre_avg,pre_max)", "{true,false}", false);
+        };
+        
+        
+        // link algo parameter with streaming burffer options
+        
+        void configure(){
+            //EXEC_DEBUG("configuring Peaks");
+            _algo->configure(this->_params);
+            framerate = _algo->parameter("frameRate").toReal();
+            aqs =  framerate * max(_algo->parameter("pre_avg").toInt(),_algo->parameter("pre_max").toInt()) / 1000;
+            _signal.setAcquireSize(aqs);
+            _signal.setReleaseSize(1);
+            
+            
+            _combine = parameter("combine").toReal()/1000.;
+            
+            
+            
+            
+            
+        };
+        void consume();
+        void finalProduce();
+        void reset();
+        
+        
+        
+        
+//        AlgorithmStatus process();
+        
+        
+        static const char* name;
+        static const char* description;
+        
+    };
+    
+    
 
-
-};
-
-
-
-
-  AlgorithmStatus process();
-
-
-  static const char* name;
-  static const char* description;
-
-};
 
 } // namespace streaming
 } // namespace essentia

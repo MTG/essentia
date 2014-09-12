@@ -34,17 +34,17 @@ namespace streaming {
 
 class SuperFluxExtractor : public AlgorithmComposite {
  protected:
-  SinkProxy<Real> _signal;
+    SinkProxy<Real> _signal;
 
-  SourceProxy<Real> _onsets;
-
-
+    SourceProxy<std::vector<Real> > _onsets;
 
 
 
-  essentia::streaming::Algorithm *w,*spectrum,*triF,*superFluxF,*superFluxP, * _frameCutter,*mfccF;
 
-  scheduler::Network* _network;
+
+    essentia::streaming::Algorithm *w,*spectrum,*triF,*superFluxF,*superFluxP, * _frameCutter,*mfccF;
+    essentia::streaming::VectorOutput<Real> *vout;
+    scheduler::Network* _network;
 
   bool _configured;
   void clearAlgos();
@@ -90,13 +90,13 @@ class SuperFluxExtractor : public Algorithm {
  protected:
   Input<std::vector<Real> > _signal;
 
-  Output<std::vector<Real> > _onsets;
+    Output<std::vector<Real> > _onsets;
 
   bool _configured;
 
   streaming::Algorithm* _SuperFluxExtractor;
   streaming::VectorInput<Real>* _vectorInput;
-  streaming::VectorOutput<Real>* _vectorOut;
+    streaming::VectorOutput<std::vector<Real> >* _vectorOut;
   scheduler::Network* _network;
   Pool _pool;
 
