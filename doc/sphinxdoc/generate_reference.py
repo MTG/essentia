@@ -103,7 +103,7 @@ def doc2rst(algo_doc):
         for param in algo_doc['parameters']:
             range_str = param['type']
             if param['range'] is not None:
-                range_str += ' ∈ ' + TR(param['range'])
+                range_str += ' ∈ ' + TR(param['range'].replace(",", ", "))
             if param['default'] is not None:
                 range_str += ', default = ' + TR(param['default'])
 
