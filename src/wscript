@@ -50,7 +50,9 @@ def configure(ctx):
 
 
     ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
-                  args=['--cflags', '--libs'], mandatory=False)
+                  args=['libavcodec >= 53.25.0', '--cflags', '--libs'], 
+                  msg='Checking for \'libavcodec\' >= 53.25.0',
+                  mandatory=False)
 
     ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
                   args=['--cflags', '--libs'], mandatory=False)
@@ -65,7 +67,9 @@ def configure(ctx):
         print('Static examples incompatible with TagLib, skipping TagLib detection...')
     else:
         ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
-                      args=['--cflags', '--libs'], mandatory=False)
+                      args=['taglib >= 1.9', '--cflags', '--libs'], 
+                      msg='Checking for \'taglib\' >= 1.9',
+                      mandatory=False)
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += [ '__STDC_CONSTANT_MACROS' ]

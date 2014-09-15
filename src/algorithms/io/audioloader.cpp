@@ -50,10 +50,7 @@ AudioLoader::~AudioLoader() {
 
     av_freep(&_buffer);
     av_freep(&_md5Encoded);
-
-#if LIBAVCODEC_VERSION_INT >= AVCODEC_AUDIO_DECODE4
     av_freep(&_decodedFrame);
-#endif
 
 #if !HAVE_SWRESAMPLE
     av_freep(&_buff1);
@@ -167,23 +164,10 @@ void AudioLoader::openAudioFile(const string& filename) {
 
     av_init_packet(&_packet);
 
-#if LIBAVCODEC_VERSION_INT >= AVCODEC_AUDIO_DECODE4
     _decodedFrame = avcodec_alloc_frame();
     if (!_decodedFrame) {
         throw EssentiaException("Could not allocate audio frame");
     }
-#endif
-
-
-#if LIBAVCODEC_VERSION_INT < AVCODEC_51_28_0
-    E_DEBUG(EAlgorithm, "AudioLoader: using ffmpeg avcodec_decode_audio() function");
-#elif LIBAVCODEC_VERSION_INT < AVCODEC_52_47_0
-    E_DEBUG(EAlgorithm, "AudioLoader: using ffmpeg avcodec_decode_audio2() function");
-#elif LIBAVCODEC_VERSION_INT < AVCODEC_AUDIO_DECODE4
-    E_DEBUG(EAlgorithm, "AudioLoader: using ffmpeg avcodec_decode_audio3() function");
-#else
-    E_DEBUG(EAlgorithm, "AudioLoader: using ffmpeg avcodec_decode_audio4() function");
-#endif
 
     av_md5_init(_md5Encoded);
 }
@@ -288,24 +272,6 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
                                     int* outputSize,
                                     AVPacket* packet) {
 
-
-#if LIBAVCODEC_VERSION_INT < AVCODEC_51_28_0
-
-    int len = avcodec_decode_audio(audioCtx, output, outputSize,
-                                 packet->data, packet->size);
-
-#elif LIBAVCODEC_VERSION_INT < AVCODEC_52_47_0
-
-    int len = avcodec_decode_audio2(audioCtx, output, outputSize,
-                                    packet->data, packet->size);
-
-#elif LIBAVCODEC_VERSION_INT < AVCODEC_AUDIO_DECODE4
-
-    int len = avcodec_decode_audio3(audioCtx, output, outputSize,
-                                    packet);
-
-#else
-
     int gotFrame = 0;
     avcodec_get_frame_defaults(_decodedFrame);
 
@@ -352,8 +318,6 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
         E_DEBUG(EAlgorithm, "AudioLoader: tried to decode packet but didn't get any frame...");
         *outputSize = 0;
     }
-
-#endif
 
     return len;
 }
@@ -434,7 +398,7 @@ int AudioLoader::decodePacket() {
             E_WARNING(msg.str());
         }
         else {
-            msg << "AudioLoader: error while decoding, skipping frame" << errstring;
+            msg << "AudioLoader: error while decoding, skipping frame: " << errstring;
             E_WARNING(msg.str());
         }
         return 0;
