@@ -35,7 +35,7 @@
 #include "FreesoundTonalDescriptors.h"
 #include "FreesoundSfxDescriptors.h"
 
-#define EXTRACTOR_VERSION "0.2"
+#define EXTRACTOR_VERSION "0.3"
 
 using namespace std;
 using namespace essentia;
