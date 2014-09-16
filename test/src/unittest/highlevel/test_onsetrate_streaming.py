@@ -79,8 +79,7 @@ class TestStreamingOnsetRate(TestCase):
 
         run(gen)
 
-        self.assertAlmostEqual(p['onset.rate'], len(expected)/float(len(inputData))/44100.0, 0.05)
-
+        self.assertAlmostEqual(p['onset.rate'], len(expected)/(float(len(inputData))/44100.0), 0.05)
         self.assertAlmostEqualVector(p['onset.times'], expected, precision)
 
 
