@@ -83,8 +83,17 @@ class TestMonoLoader(TestCase):
         self.assertEqual(self.round(sum(mix)), 9)
 
     def testEmptyWav(self):
-        filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.wav')
-        self.assertEqualVector(MonoLoader(filename=filename, downmix='left', sampleRate=44100)(), [])
+        try: 
+            filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.wav')
+            result = MonoLoader(filename=filename, downmix='left', sampleRate=44100)()
+        except EssentiaException, e:
+            if e.message.count('Could not find stream information'):
+                # "empty.wav" cannot be read by ffmpeg on osx, using "empty.ogg" instead
+                filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.ogg')
+                result = MonoLoader(filename=filename, downmix='left', sampleRate=44100)()
+        
+        self.assertEqualVector(result, [])
+
 
     def testWavLeftRightOffset(self):
         # file with 9 impulses in right channel and 10 in left channel
