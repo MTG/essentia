@@ -40,15 +40,16 @@ class TestStereoDemuxer_Streaming(TestCase):
         self.assertEqualVector(pool['right'], [i for i in range(size)])
 
     def testEmpty(self):
-        filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.wav')
+        filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.aiff')
         loader = AudioLoader(filename=filename)
         mux = StereoDemuxer()
         #gen = VectorInput([{'left':None,'right':None} for i in range(10)])
         pool = Pool()
 
         loader.audio >> mux.audio
-        loader.numberChannels >> (pool, 'channels')
-        loader.sampleRate>> (pool, 'sampleRate')
+        loader.numberChannels >> None
+        loader.sampleRate >> None
+        loader.md5 >> None
         mux.left >> (pool, 'left')
         mux.right >> (pool, 'right')
         run(loader)
