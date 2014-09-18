@@ -128,7 +128,6 @@ class TestSpectralPeaks(TestCase):
         self.assertConfigureFails(SpectralPeaks(), {'maxPeaks': 0})
         self.assertConfigureFails(SpectralPeaks(), {'maxFrequency': 0})
         self.assertConfigureFails(SpectralPeaks(), {'minFrequency': -1})
-        self.assertConfigureFails(SpectralPeaks(), {'magnitudeThreshold': -1})
         self.assertConfigureFails(SpectralPeaks(), {'orderBy': 'Unknown'})
         self.assertConfigureFails(SpectralPeaks(), {'minFrequency': 100, 'maxFrequency': 99})
 
