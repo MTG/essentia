@@ -56,12 +56,14 @@ void  MusicRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   bpmhist->output("secondPeakSpread") >> PC(pool, nameSpace + "bpm_histogram_second_peak_spread");
 
   // Onset Detection
-  // TODO: use SuperFlux onset rate algorithm!
+  // TODO: use SuperFlux onset rate algorithm instead!
+  //       the algorithm that is used is rather outdated, onset times can be 
+  //       inaccurate, however, onset_rate is still very informative for many 
+  //       tasks 
   Algorithm* onset = factory.create("OnsetRate");
   source                      >> onset->input("signal");
-  onset->output("onsetTimes") >> PC(pool, nameSpace + "onset_times");
-  onset->output("onsetRate")  >> NOWHERE; //pool, nameSpace + "onset_rate"); // this is done later // TODO ???
-  // TODO compare onsetRate output with manual estimation, if equal use this one!!
+  onset->output("onsetTimes") >> NOWHERE;
+  onset->output("onsetRate")  >> PC(pool, nameSpace + "onset_rate");
 
   // Danceability
   Algorithm* danceability = factory.create("Danceability");

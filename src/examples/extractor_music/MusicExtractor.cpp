@@ -87,15 +87,6 @@ void MusicExtractor::compute(const string& audioFilename){
   // Descriptors that require values from other descriptors in the previous chain
   lowlevel->computeAverageLoudness(results);  // requires 'loudness'
   
-  // compute onset rate = len(onsets) / len(audio)
-  // we do not need onset times, as they are most probably incorrect, while onset_rate is more informative
-  results.set(rhythm->nameSpace + "onset_rate", results.value<vector<Real> >(rhythm->nameSpace + "onset_times").size()
-     / (Real) loader->output("audio").totalProduced()
-     * results.value<Real>("metadata.audio_properties.analysis_sample_rate"));
-  results.remove(rhythm->nameSpace + "onset_times");
-
-
-
   Algorithm* loader_2 = factory.create("EasyLoader",
                                        "filename",   audioFilename,
                                        "sampleRate", analysisSampleRate,
@@ -268,9 +259,9 @@ void MusicExtractor::readMetadata(const string& audioFilename) {
   //metadata->output("tagPool")     >> PC(results, "metadata.tags.all");  // currently not supported
   metadata->output("bitrate")     >> PC(results, "metadata.audio_properties.bitrate");
   metadata->output("channels")    >> PC(results, "metadata.audio_properties.channels");
-  metadata->output("duration")    >> NOWHERE; // let audio loader take care of this // TODO ???
-  metadata->output("sampleRate")  >> NOWHERE; // let the audio loader take care of this // TODO ???
-
+  // let audio loader take care of duration and samplerate because libtag can be wrong
+  metadata->output("duration")    >> NOWHERE; 
+  metadata->output("sampleRate")  >> NOWHERE;
   Network(metadata).run();
   */
 }
