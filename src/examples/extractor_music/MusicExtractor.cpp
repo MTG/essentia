@@ -466,3 +466,19 @@ void MusicExtractor::setExtractorDefaultOptions() {
   for (int i=0; i<(int)gfccStats.size(); i++)
     options.add("lowlevel.gfccStats", gfccStats[i]);
 }
+
+void MusicExtractor::mergeValues() {
+  // NOTE: 
+  // - no check for if descriptors with the same names as the ones asked to 
+  //   merge exist already
+  // - all descriptors to be merged are expected to be strings
+  // TODO implement a method in Pool to detect the type of a descriptor given its name
+
+  string mergeKeyPrefix = "mergeValues";
+  vector<string> keys = options.descriptorNames(mergeKeyPrefix);
+
+  for (int i=0; i<(int) keys.size(); ++i) {
+    keys[i].replace(0, mergeKeyPrefix.size()+1, ""); 
+    results.set(keys[i], options.value<string>(mergeKeyPrefix + "." + keys[i]));
+  }
+}

@@ -61,6 +61,7 @@ int main(int argc, char* argv[]) {
     MusicExtractor *extractor = new MusicExtractor();
     
     extractor->setExtractorOptions(profileFilename);
+    extractor->mergeValues();
 
     extractor->compute(audioFilename);
 
