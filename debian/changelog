@@ -1,3 +1,9 @@
+essentia (2.0.1-2) precise; urgency=low
+
+  * fix typo in src/python/essentia/plotting.py
+
+ -- andrew bezella <abezella@archive.org>  Mon, 22 Sep 2014 15:03:10 -0700
+
 essentia (2.0.1-1) precise; urgency=low
 
   * New upstream version.
