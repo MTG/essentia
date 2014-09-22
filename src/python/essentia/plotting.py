@@ -52,7 +52,7 @@ def descriptorPlotHTML(namespace, name, audio, pool, options):
         # plot name
         descName = namespace + '.' + name
         # plot x data
-        scopes = pool.value(namespace + '.' + name + '.' + 'scope']
+        scopes = pool.value(namespace + '.' + name + '.' + 'scope')
         descScopes = []
         for scope in scopes:
             descScopes.append(scope[0])
