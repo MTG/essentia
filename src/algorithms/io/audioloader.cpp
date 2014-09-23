@@ -149,7 +149,35 @@ void AudioLoader::openAudioFile(const string& filename) {
         E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from "
                             "deprecated audioconvert");
 
-        _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, _audioCtx->sample_fmt, 1, NULL, 0);
+        if (av_sample_fmt_is_planar(_audioCtx->sample_fmt)) {
+          // Ugly hack to treat planar audio format as interleaved
+          E_WARNING("AudioLoader: using depricated audioconvert and manually converting planar format to interleaved");
+          switch (_audioCtx->sample_fmt) {
+            case AV_SAMPLE_FMT_S16P:
+              _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, AV_SAMPLE_FMT_S16, 1, NULL, 0);
+              break;
+            case AV_SAMPLE_FMT_S32P:
+              _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, AV_SAMPLE_FMT_S32, 1, NULL, 0);
+              break;
+            case AV_SAMPLE_FMT_FLTP:
+              _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, AV_SAMPLE_FMT_FLT, 1, NULL, 0);
+              break;
+            case AV_SAMPLE_FMT_DBLP:
+              _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, AV_SAMPLE_FMT_DBL, 1, NULL, 0);
+              break;
+            default:
+              ostringstream msg;
+              msg << "AudioLoader: Error converting"
+                  << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
+                  << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16) 
+                  << "using deprecated av_audio_convert. Format unsupported.";
+              throw EssentiaException(msg);
+              break;
+          }
+        }
+        else {
+          _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, _audioCtx->sample_fmt, 1, NULL, 0);
+        }
 
         // reserve some more space
         _buff1 = (int16_t*)av_malloc(MAX_AUDIO_FRAME_SIZE * 3);
@@ -309,6 +337,19 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
         }
 #  else
         // direct copy, we do the sample format conversion later if needed
+        
+        // TODO: Libav 9 introduced planar sample formats and converted audio 
+        // codecs to use these instead of interleaving the samples in the 
+        // codec after decoding. Unfortunately av_audio_convert doesn't deal 
+        // with planar formats, so libavresample should be used. 
+        
+        // NOTE: Meanwhile, as we ship outdated av_audio_convert ourselves,
+        // we need to check if the format is planar or interleaved to convert
+        // decoded frame data correctly. We will treat planar data as if it was 
+        // interleaved for convertion, which is safe as long as no sample rate 
+        // conversion is done. Afterwards, we will copy the results to audio
+        // output accordingly to it being planar or interleaved. 
+
         memcpy(output, _decodedFrame->data[0], inputDataSize);
         *outputSize = inputDataSize;
 #  endif
@@ -484,16 +525,27 @@ void AudioLoader::copyFFmpegOutput() {
     vector<StereoSample>& audio = *((vector<StereoSample>*)_audio.getTokens());
 
     // FIXME: use libswresample
+
     if (_nChannels == 1) {
         for (int i=0; i<nsamples; i++) {
           audio[i].left() = scale(_buffer[i]);
         }
     }
     else { // _nChannels == 2
+      if (av_sample_fmt_is_planar(_audioCtx->sample_fmt)) {
+        // planar
+        for (int i=0; i<nsamples; i++) {
+            audio[i].left() = scale(_buffer[i]);
+            audio[i].right() = scale(_buffer[nsamples+i]);
+        }
+      }
+      else {
+        // interleaved  
         for (int i=0; i<nsamples; i++) {
             audio[i].left() = scale(_buffer[2*i]);
             audio[i].right() = scale(_buffer[2*i+1]);
         }
+      }
     }
 
     // release data
