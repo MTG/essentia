@@ -47,8 +47,7 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/md5.h> // TODO: need to check version of libavutil as well, 
-                           // check for this package in wscript, update documentation
+#include <libavutil/md5.h>
 }
 
 // libav* versions for deprecated functions taken from (among other sources):
@@ -63,7 +62,7 @@ extern "C" {
 #define AVFORMAT_53_6_0   AV_VERSION_INT(53,  6, 0)
 #define AVFORMAT_53_17_0  AV_VERSION_INT(53, 17, 0)
 
-#define AVUTIL_51_43_0    AV_VERSION_INT(51, 43, 0) // TODO
+#define AVUTIL_51_43_0    AV_VERSION_INT(51, 43, 0)
 
 // useful aliases
 #define AVCODEC_AUDIO_DECODE4 AVCODEC_53_25_0
