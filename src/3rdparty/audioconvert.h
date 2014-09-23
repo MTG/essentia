@@ -3,20 +3,20 @@
  * Copyright (c) 2006 Michael Niedermayer <michaelni@gmx.at>
  * Copyright (c) 2008 Peter Ross
  *
- * This file is part of FFmpeg.
+ * This file is part of Libav.
  *
- * FFmpeg is free software; you can redistribute it and/or
+ * Libav is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2.1 of the License, or (at your option) any later version.
  *
- * FFmpeg is distributed in the hope that it will be useful,
+ * Libav is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with FFmpeg; if not, write to the Free Software
+ * License along with Libav; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
@@ -29,54 +29,9 @@
  */
 
 
+#include <libavutil/cpu.h>
 #include <libavcodec/avcodec.h>
-
-
-/**
- * Generate string corresponding to the sample format with
- * number sample_fmt, or a header if sample_fmt is negative.
- *
- * @param[in] buf the buffer where to write the string
- * @param[in] buf_size the size of buf
- * @param[in] sample_fmt the number of the sample format to print the corresponding info string, or
- * a negative value to print the corresponding header.
- * Meaningful values for obtaining a sample format info vary from 0 to SAMPLE_FMT_NB -1.
- */
-void avcodec_sample_fmt_string(char *buf, int buf_size, int sample_fmt);
-
-/**
- * @return NULL on error
- */
-const char *avcodec_get_sample_fmt_name(int sample_fmt);
-
-/**
- * @return SAMPLE_FMT_NONE on error
- */
-enum AVSampleFormat avcodec_get_sample_fmt(const char* name);
-
-/**
- * @return NULL on error
- */
-const char *avcodec_get_channel_name(int channel_id);
-
-/**
- * Return description of channel layout
- */
-void avcodec_get_channel_layout_string(char *buf, int buf_size, int nb_channels, int64_t channel_layout);
-
-/**
- * Guess the channel layout
- * @param nb_channels
- * @param codec_id Codec identifier, or CODEC_ID_NONE if unknown
- * @param fmt_name Format name, or NULL if unknown
- * @return Channel layout mask
- */
-int64_t avcodec_guess_channel_layout(int nb_channels, enum CodecID codec_id, const char *fmt_name);
-
-/**
- * @return the number of channels in the channel layout.
- */
-int avcodec_channel_layout_num_channels(int64_t channel_layout);
+#include <libavutil/channel_layout.h>
 
 struct AVAudioConvert;
 typedef struct AVAudioConvert AVAudioConvert;
@@ -88,7 +43,7 @@ typedef struct AVAudioConvert AVAudioConvert;
  * @param in_fmt Input sample format
  * @param in_channels Number of input channels
  * @param[in] matrix Channel mixing matrix (of dimension in_channel*out_channels). Set to NULL to ignore.
- * @param flags See FF_MM_xx
+ * @param flags See AV_CPU_FLAG_xx
  * @return NULL on error
  */
 AVAudioConvert *av_audio_convert_alloc(enum AVSampleFormat out_fmt, int out_channels,
