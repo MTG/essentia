@@ -312,10 +312,10 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
 
     def testJsonEscapedStrings(self):
         p = Pool()
-        p.add('vector_string', 'string_1\n\r')
-        p.add('vector_string', 'string_2\n\r')
-        p.add('vector_string', 'string_3\n\r')
-        p.set('string', 'string\n\r')
+        p.add('vector_string', 'string_1\n\r " \ /')
+        p.add('vector_string', 'string_2\n\r " \ /')
+        p.add('vector_string', 'string_3\n\r " \ /')
+        p.set('string', 'string\n\r " \ /')
 
         YamlOutput(filename='test.yaml', format='json')(p)
 
@@ -327,6 +327,8 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
             raised = True
         
         self.assertEqual(raised, False)
+        os.remove('test.yaml')
+
 
 
 suite = allTests(TestYamlOutput)
