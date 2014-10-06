@@ -17,40 +17,46 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_YAML_INPUT_H
-#define ESSENTIA_YAML_INPUT_H
 
-#include "algorithm.h"
-#include "pool.h"
+#ifndef JSON_CONVERT_H
+#define JSON_CONVERT_H
+
+#include <string>
+#include "yamlast.h"
 
 namespace essentia {
-namespace standard {
 
-class YamlInput : public Algorithm {
-
- protected:
-  Output<Pool> _pool;
-  std::string _filename;
-  bool _inputJson;
+class JsonConvert {
+ private:
+  size_t _pos;
+  std::string _str;
+  std::string _result;
+  size_t _size; 
 
  public:
-  YamlInput() {
-    declareOutput(_pool, "pool", "Pool of deserialized values");
-  }
+  JsonConvert(const std::string& s) : _pos(0), _str(s), _result(""), _size(s.size()) {}
+  virtual ~JsonConvert() {}
+  std::string convert();
 
-  void declareParameters() {
-    declareParameter("filename", "Input filename", "", Parameter::STRING);
-    declareParameter("format", "whether to the input file is in JSON or YAML format", "{json,yaml}", "yaml");
-  }
 
-  void compute();
-  void configure();
-
-  static const char* name;
-  static const char* description;
+ protected:
+  void skipSpaces();
+  int countBackSlashes();
+  std::string parseStringValue();
+  std::string parseNumValue();
+  std::string parseListValue();
+  std::string parseDictKeyAndValue(const int& level);
+ 
+ public: 
+  std::string parseDict(const int& level=0);
 };
 
-} // namespace standard
+
+class JsonException : public YamlException {
+ public: 
+  JsonException(const std::string& msg) : YamlException(msg) {}
+};
+
 } // namespace essentia
 
-#endif // ESSENTIA_EXTRACTOR_YAML_INPUT_H
+#endif // JSON_CONVERT_H
