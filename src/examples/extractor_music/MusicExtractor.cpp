@@ -255,7 +255,7 @@ void MusicExtractor::readMetadata(const string& audioFilename) {
   } else {
     basename = audioFilename;
   }
-  results.set("metadata.audio_properties.file_name", basename);
+  results.set("metadata.tags.file_name", basename);
 
   /*
   AlgorithmFactory& factory = AlgorithmFactory::instance();
