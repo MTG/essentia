@@ -236,6 +236,12 @@ void AudioLoader::pushChannelsSampleRateInfo(int nChannels, Real sampleRate) {
 }
 
 
+void AudioLoader::pushCodecInfo(std::string codec, int bit_rate) {
+    _codec.push(codec);
+    _bit_rate.push(bit_rate);
+}
+
+
 string uint8_t_to_hex(uint8_t* input, int size) {
     ostringstream result;
     for(int i=0; i<size; ++i) {
@@ -563,6 +569,7 @@ void AudioLoader::reset() {
     openAudioFile(filename);
 
     pushChannelsSampleRateInfo(_audioCtx->channels, _audioCtx->sample_rate);
+    pushCodecInfo(_audioCodec->name, _audioCtx->bit_rate);
 }
 
 } // namespace streaming

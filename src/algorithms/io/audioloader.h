@@ -37,6 +37,8 @@ class AudioLoader : public Algorithm {
   AbsoluteSource<Real> _sampleRate;
   AbsoluteSource<int> _channels;
   AbsoluteSource<std::string> _md5;
+  AbsoluteSource<int> _bit_rate;
+  AbsoluteSource<std::string> _codec;
 
   int _nChannels;
 
@@ -78,6 +80,7 @@ class AudioLoader : public Algorithm {
   void closeAudioFile();
 
   void pushChannelsSampleRateInfo(int nChannels, Real sampleRate);
+  void pushCodecInfo(std::string codec, int bit_rate);
   int decode_audio_frame(AVCodecContext* audioCtx, int16_t* output,
                          int* outputSize, AVPacket* packet);
   int decodePacket();
@@ -99,6 +102,8 @@ class AudioLoader : public Algorithm {
     declareOutput(_sampleRate, 0, "sampleRate", "the sampling rate of the audio signal [Hz]");
     declareOutput(_channels, 0, "numberChannels", "the number of channels");
     declareOutput(_md5, 0, "md5", "the MD5 checksum of raw undecoded audio payload");
+    declareOutput(_bit_rate, 0, "bit_rate", "the bit rate of the input audio, as reported by the decoder codec");
+    declareOutput(_codec, 0, "codec", "the codec that is used to decode the input audio");
 
     _audio.setBufferType(BufferUsage::forLargeAudioStream);
 
