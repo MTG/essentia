@@ -64,11 +64,11 @@ using namespace streaming;
   void setExtractorDefaultOptions();
   void mergeValues();
   void readMetadata(const string& audioFilename);
-  void computeMD5(const string& audioFilename);
+  void computeMetadata(const string& audioFilename);
   void computeReplayGain(const string& audioFilename);
   void computeSVMDescriptors(Pool& pool);
   void outputToFile(Pool& pool, const string& outputFilename);
-	
+
  };
 
  #endif
