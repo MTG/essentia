@@ -28,7 +28,11 @@ using namespace essentia;
 using namespace essentia::streaming;
 
 const char* SuperFluxExtractor::name = "SuperFluxExtractor";
-const char* SuperFluxExtractor::description = DOC("This algorithm extracts some Bark bands based spectral features from an audio signal");
+const char* SuperFluxExtractor::description = DOC("This algorithm extracts onsets from audio file following SuperFlux algorithm [1] adapted from python code available in [2]\n \
+                                                  [1] \"Maximum Filter Vibrato Suppression for Onset Detection\" by Sebastian Böck and Gerhard Widmer in Proceedings of the 16th International Conference on Digital Audio Effects (DAFx-13), Maynooth, Ireland, September 2013 \
+                                                  [2] https://github.com/CPJKU/SuperFlux/"
+                                                  
+                                                  );
 
 SuperFluxExtractor::SuperFluxExtractor() : _configured(false) {
   // input:
@@ -92,7 +96,7 @@ void SuperFluxExtractor::configure() {
                         		);
 
 
-  superFluxP->configure("rawmode" , false,"threshold" ,threshold/NOVELTY_MULT,"startFromZero",true,"frameRate", sampleRate*1.0/hopSize,"combine",combine);
+  superFluxP->configure("rawmode" , false,"threshold" ,threshold/NOVELTY_MULT,"startFromZero",true,"frameRate", sampleRate*1.0/(hopSize),"combine",combine);
 
 
 }
@@ -113,12 +117,13 @@ namespace essentia {
 namespace standard {
 
 const char* SuperFluxExtractor::name = "SuperFluxExtractor";
-const char* SuperFluxExtractor::description = DOC("retreive onsets times implementing superflux algorithm");
+    const char* SuperFluxExtractor::description = DOC("This algorithm extracts onsets from audio file following SuperFlux algorithm [1] adapted from python code available in [2]\n \
+                                                      [1] \"Maximum Filter Vibrato Suppression for Onset Detection\" by Sebastian Böck and Gerhard Widmer in Proceedings of the 16th International Conference on Digital Audio Effects (DAFx-13), Maynooth, Ireland, September 2013 \
+                                                      [2] https://github.com/CPJKU/SuperFlux/");
 
 SuperFluxExtractor::SuperFluxExtractor() {
   declareInput(_signal, "signal", "the audio input signal");
   declareOutput(_onsets, "onsets", "the onsets times");
-
   createInnerNetwork();
 }
 
@@ -128,7 +133,7 @@ SuperFluxExtractor::~SuperFluxExtractor() {
 
 void SuperFluxExtractor::reset() {
   _network->reset();
-  _pool.clear();
+ 
 }
 
 void SuperFluxExtractor::configure() {
@@ -142,8 +147,6 @@ void SuperFluxExtractor::createInnerNetwork() {
 
   *_vectorInput                        >>  _SuperFluxExtractor->input("signal");
   _SuperFluxExtractor->output("onsets")  >>  _vectorOut->input("data");//PC(_pool, "onsets.times");
-
-
   _network = new scheduler::Network(_vectorInput);
 }
 
@@ -157,9 +160,7 @@ void SuperFluxExtractor::createInnerNetwork() {
      _network->run();
      
      onsets = ll[0];
-  
 
-  //onsets = _pool.value<vector<Real> >("onsets.times");
 }
 
 } // namespace standard
