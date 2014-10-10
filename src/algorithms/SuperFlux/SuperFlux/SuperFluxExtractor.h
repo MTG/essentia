@@ -58,7 +58,7 @@ class SuperFluxExtractor : public AlgorithmComposite {
     declareParameter("hopSize", "the hop size for computing low level features", "(0,inf)", 256);
     declareParameter("sampleRate", "the audio sampling rate", "(0,inf)", 44100.0);
     declareParameter("threshold","threshold for peak peaking","(0,inf)",20.0);
-    declareParameter("combine","time threshold for double onsets detections","(0,inf)",20.0);
+    declareParameter("combine","time threshold for double onsets detections (ms)","(0,inf)",20.0);
   }
 
   void declareProcessOrder() {
@@ -98,7 +98,7 @@ class SuperFluxExtractor : public Algorithm {
   streaming::VectorInput<Real>* _vectorInput;
     streaming::VectorOutput<std::vector<Real> >* _vectorOut;
   scheduler::Network* _network;
-  Pool _pool;
+
 
  public:
 
@@ -110,7 +110,7 @@ class SuperFluxExtractor : public Algorithm {
     declareParameter("hopSize", "the hop size for computing low level features", "(0,inf)", 256);
     declareParameter("sampleRate", "the audio sampling rate", "(0,inf)", 44100.0);
     declareParameter("threshold","threshold for peak peaking","(0,inf)",20.0);
-    declareParameter("combine","time threshold for double onsets detections","(0,inf)",20.0);
+    declareParameter("combine","time threshold for double onsets detections(ms)","(0,inf)",20.0);
   }
 
   void configure();

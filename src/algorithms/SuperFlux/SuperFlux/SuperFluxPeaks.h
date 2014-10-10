@@ -39,6 +39,7 @@ class SuperFluxPeaks : public Algorithm {
 	Real _combine;
  	Real _threshold;
 
+    Real peakTime;
 
   	int hopSize;
   	Real frameRate;
@@ -54,6 +55,7 @@ int lastPidx ;
 	declareOutput(_peaks, "peaks", "the input novelty");
     _movAvg = AlgorithmFactory::create("MovingAverage");
     _maxf = AlgorithmFactory::create("MaxFilter");
+      peakTime = 0;
     
   }
 
@@ -142,6 +144,7 @@ namespace streaming {
             
             _combine = parameter("combine").toReal()/1000.;
             
+            current_t=1.0/framerate;
             
             
             

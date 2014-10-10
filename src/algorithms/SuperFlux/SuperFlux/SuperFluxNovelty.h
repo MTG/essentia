@@ -89,7 +89,7 @@ class SuperFluxNovelty : public Algorithm
   
   
     essentia::standard::Algorithm* _algo;
-
+        bool initialPad = true;
 
  public:
 
@@ -108,18 +108,15 @@ class SuperFluxNovelty : public Algorithm
     }
    
 void configure() {
-    
      _algo->configure(_params);
     _bands.setAcquireSize(_algo->parameter("frameWidth").toInt()+1);
     _bands.setReleaseSize(1);
-    
-
 
   }
 
   AlgorithmStatus process();
   void reset(){
-//   _algo->reset();
+      initialPad = true;
   };
 
   static const char* name;
