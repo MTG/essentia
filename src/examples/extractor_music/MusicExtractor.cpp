@@ -43,20 +43,20 @@ void MusicExtractor::compute(const string& audioFilename){
   // TODO: we still compute some low-level descriptors with equal loudness filter...
   // TODO: remove for consistency? evaluate on classification tasks?
 
-  cout << "Process step: Read metadata" << endl;
+  cerr << "Process step: Read metadata" << endl;
   readMetadata(audioFilename);
 
-  cout << "Process step: Compute md5 audio hash" << endl;
+  cerr << "Process step: Compute md5 audio hash and codec" << endl;
   computeMetadata(audioFilename);
 
-  cout << "Process step: Replay gain" << endl;
+  cerr << "Process step: Replay gain" << endl;
   computeReplayGain(audioFilename); // compute replay gain and the duration of the track
 
   if (endTime > results.value<Real>("metadata.audio_properties.length")) {
       endTime = results.value<Real>("metadata.audio_properties.length");
   }
 
-  cout << "Process step: Compute audio features" << endl;
+  cerr << "Process step: Compute audio features" << endl;
 
   // normalize the audio with replay gain and compute as many lowlevel, rhythm,
   // and tonal descriptors as possible
@@ -79,7 +79,7 @@ void MusicExtractor::compute(const string& audioFilename){
   lowlevel->createNetworkLoudness(source, results);
   rhythm->createNetwork(source, results);
   tonal->createNetworkTuningFrequency(source, results);
-  
+
   Network network(loader,false);
   network.run();
 
@@ -111,20 +111,20 @@ void MusicExtractor::compute(const string& audioFilename){
   results.set(tonal->nameSpace + "tuning_frequency", tuningFreq);
 
 
-  cout << "Process step: Compute aggregation"<<endl;
+  cerr << "Process step: Compute aggregation"<<endl;
   this->stats = this->computeAggregation(results);
 
-  // pre-trained classifiers are only available in branches devoted for that 
+  // pre-trained classifiers are only available in branches devoted for that
   // (eg: 2.0.1)
   /*
-#if HAVE_GAIA2 
-  computeSVMDescriptors(stats); 
-#else 
-  cout << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
+#if HAVE_GAIA2
+  computeSVMDescriptors(stats);
+#else
+  cerr << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
 #endif
   */
 
-  cout << "All done"<<endl;
+  cerr << "All done"<<endl;
   return;
 }
 
@@ -327,7 +327,7 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
         downmix = "left";
       }
       else {
-        cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+        cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
         exit(4);
       }
 
@@ -352,7 +352,7 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
       results.remove("metadata.audio_properties.replay_gain");
     }
     else {
-      cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+      cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
       exit(5);
     }
   }
@@ -366,11 +366,11 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
 
 void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
 
-  cout << "Writing results to file " << outputFilename << endl;
+  cerr << "Writing results to file " << outputFilename << endl;
 
   string format = options.value<string>("outputFormat");
   standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
-                                                                   "filename", outputFilename + "." + format,
+                                                                   "filename", outputFilename,
                                                                    "doubleCheck", true,
                                                                    "format", format);
   output->input("pool").set(pool);
@@ -380,7 +380,7 @@ void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
 
 
 void MusicExtractor::computeSVMDescriptors(Pool& pool) {
-  cout << "Process step: SVM models" << endl;
+  cerr << "Process step: SVM models" << endl;
   //const char* svmModels[] = {}; // leave this empty if you don't have any SVM models
   const char* svmModels[] = { "genre_tzanetakis", "genre_dortmund",
                               "genre_electronica", "genre_rosamerica",
@@ -399,7 +399,7 @@ void MusicExtractor::computeSVMDescriptors(Pool& pool) {
 #endif
 
   for (int i=0; i<(int)ARRAY_SIZE(svmModels); i++) {
-    //cout << "adding HL desc: " << svmModels[i] << endl;
+    //cerr << "adding HL desc: " << svmModels[i] << endl;
     string modelFilename = pathToSvmModels + string(svmModels[i]) + ".history";
     standard::Algorithm* svm = standard::AlgorithmFactory::create("GaiaTransform",
                                                                   "history", modelFilename);
