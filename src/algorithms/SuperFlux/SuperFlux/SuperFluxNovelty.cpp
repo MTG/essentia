@@ -27,8 +27,7 @@ namespace standard {
 
 
 const char* SuperFluxNovelty::name = "SuperFluxNovelty";
-const char* SuperFluxNovelty::description = DOC("Novelty curve in Superflux algorithm : Maximum filter and differentiation for onset detection robust again vibrato"
-"Input : filterbank like spectrogram");
+const char* SuperFluxNovelty::description = DOC("Novelty curve from Superflux algorithm (see SuperFluxExtractor for references)");
 
 
 void SuperFluxNovelty::configure() {
@@ -66,11 +65,12 @@ void SuperFluxNovelty::compute() {
 
   vector<Real> maxsBuffer(nBands,0);
 
-
+// buffer for differences
   Real cur_diff;
 
   for (int i = _frameWi ; i< nFrames;i++){
 
+      
 	diffs=0;
 	_maxf->input("signal").set(bands[i-_frameWi]);
 	_maxf->output("signal").set(maxsBuffer);
@@ -80,11 +80,16 @@ void SuperFluxNovelty::compute() {
 
 	for (int j = 0;j<nBands;j++){
 		cur_diff= bands[i][j]-maxsBuffer[j];
-		if(cur_diff>0.0){diffs +=cur_diff ; }		
+		if(cur_diff>0.0){
+            diffs +=cur_diff ;
+        }
 	}
 
 
 }
+    
+    
+  
 return;
 }
 
@@ -109,20 +114,29 @@ const char* SuperFluxNovelty::name = standard::SuperFluxNovelty::name;
 const char* SuperFluxNovelty::description = standard::SuperFluxNovelty::description;
 
 
-
 AlgorithmStatus SuperFluxNovelty::process() {
 
 
 
     AlgorithmStatus status = acquireData();
     if (status != OK) {
-      // acquireData() returns SYNC_OK if we could reserve both inputs and outputs
-      // being here means that there is either not enough input to process,
-      // or that the output buffer is full, in which cases we need to return from here
+
       return status;
     }
     
-
+    
+    //Hack for alignement in sliding window types of streaming mode algorithms (input aquire size > 1 && release size  = 1);
+    // should may be generalized in streaming algorithm wrapper
+    if(initialPad){
+    Real pad = 0;
+        for(int i = 0 ; i < _bands.acquireSize() ; i ++){
+            _diffs.push(pad);
+           
+        }
+        initialPad = false;
+        return OK;
+    }
+    
     _algo->input("bands").set(_bands.tokens());
     _algo->output("Differences").set(_diffs.firstToken());
 	

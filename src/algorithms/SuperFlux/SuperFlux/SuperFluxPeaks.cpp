@@ -31,7 +31,7 @@ namespace standard {
 
 
 const char* SuperFluxPeaks::name = "SuperFluxPeaks";
-const char* SuperFluxPeaks::description = DOC("get Peaks");
+const char* SuperFluxPeaks::description = DOC("Peak peaking from Superflux algorithm (see SuperFluxExtractor for references)");
 
 
 void SuperFluxPeaks::configure() {
@@ -53,6 +53,7 @@ void SuperFluxPeaks::configure() {
     _threshold = parameter("threshold").toReal();
 	
 	lastPidx = -1;
+    peakTime = 0;
 
 }
 
@@ -82,7 +83,7 @@ void SuperFluxPeaks::compute() {
 
 
 	vector<Real> maxs(size);
-
+    _maxf->reset();
 	_maxf->input("signal").set(signal);
 	_maxf->output("signal").set(maxs);
 	_maxf->compute();
@@ -91,8 +92,9 @@ void SuperFluxPeaks::compute() {
 
 
 	int nDetec=0;
-	Real peakTime = 0;
-	for( int i =0 ; i < size;i++){
+	int minIdx = max(_pre_avg,_pre_max)-1 ;
+	for( int i =minIdx; i < size;i++){
+        
 		if(signal[i]==maxs[i] && signal[i]>avg[i]+_threshold && signal[i]>0){
 
 			peakTime = i*1.0/frameRate;
@@ -141,7 +143,7 @@ const char* SuperFluxPeaks::description = standard::SuperFluxPeaks::description;
         	_algo->output("peaks").set(out);
         	_algo->compute();
         if(out.size()>0 && out[out.size()-1]>0 && ((onsTime.size()>0 && current_t-onsTime.back()>_combine )|| onsTime.size()==0) ){
-            onsTime.push_back(current_t);
+            onsTime.push_back(current_t+aqs/framerate);
         }
         
         
@@ -150,6 +152,7 @@ const char* SuperFluxPeaks::description = standard::SuperFluxPeaks::description;
     void SuperFluxPeaks::finalProduce() {
         _peaks.push((std::vector<Real>) onsTime);
         
+        current_t = 0;
         reset();
     }
     
