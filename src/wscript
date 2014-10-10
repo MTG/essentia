@@ -12,6 +12,9 @@ def options(ctx):
     ctx.add_option('--with-examples', action='store_true',
                    dest='WITH_EXAMPLES', default=False,
                    help='build the example programs')
+    ctx.add_option('--with-example', action='store',
+                   dest='EXAMPLES', default=False,
+                   help='example programs to build (comma separated, without .cpp)')
     ctx.add_option('--with-static-examples', action='store_true',
                    dest='WITH_STATIC_EXAMPLES', default=False,
                    help='build the example programs as static executables (WARNING: only works on debian wheezy with custom-compiled ffmpeg)')
@@ -41,8 +44,10 @@ def configure(ctx):
     ctx.env.WITH_PYTHON   = ctx.options.WITH_PYTHON
     ctx.env.WITH_VAMP     = ctx.options.WITH_VAMP
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
+    ctx.env.EXAMPLES       = ctx.options.EXAMPLES
+    ctx.env.EXAMPLE_LIST   = []
 
-    if ctx.env.WITH_STATIC_EXAMPLES:
+    if ctx.env.WITH_STATIC_EXAMPLES and not ctx.env.EXAMPLES:
         ctx.env.WITH_EXAMPLES = True
 
     ctx.env.ALGOIGNORE = []
@@ -50,7 +55,7 @@ def configure(ctx):
 
 
     ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
-                  args=['libavcodec >= 53.25.0', '--cflags', '--libs'], 
+                  args=['libavcodec >= 53.25.0', '--cflags', '--libs'],
                   msg='Checking for \'libavcodec\' >= 53.25.0',
                   mandatory=False)
 
@@ -65,17 +70,17 @@ def configure(ctx):
 
     if ctx.env.WITH_STATIC_EXAMPLES:
         #print('Static examples incompatible with TagLib, skipping TagLib detection...')
-        print('Static examples incompatible with Gaia, skipping Gaia detection...')   
+        print('Static examples incompatible with Gaia, skipping Gaia detection...')
     else:
         #ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
-        #              args=['taglib >= 1.9', '--cflags', '--libs'], 
+        #              args=['taglib >= 1.9', '--cflags', '--libs'],
         #              msg='Checking for \'taglib\' >= 1.9',
         #              mandatory=False)
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
                       args=['--cflags', '--libs'], mandatory=False)
 
     ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
-                  args=['taglib >= 1.9', '--cflags', '--libs'], 
+                  args=['taglib >= 1.9', '--cflags', '--libs'],
                   msg='Checking for \'taglib\' >= 1.9',
                   mandatory=False)
 
@@ -99,7 +104,7 @@ def configure(ctx):
     ctx.check_cfg(package='samplerate', uselib_store='SAMPLERATE',
                   args=['--cflags', '--libs'])
 
-    if ctx.env.WITH_EXAMPLES or ctx.env.WITH_VAMP:
+    if ctx.env.WITH_EXAMPLES or ctx.env.EXAMPLES or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
 
     if ctx.env.WITH_PYTHON:
@@ -165,6 +170,11 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
+    lel = len(ctx.env.EXAMPLE_LIST)
+    if lel:
+        print('- Compiling %s example%s' % (lel, "" if lel == 1 else "s"))
+        print('  %s' % ", ".join(ctx.env.EXAMPLE_LIST))
+
 
     print('=======================================================================================')
 
@@ -185,7 +195,7 @@ def build(ctx):
 
     # get list of available algorithms
     from utils.algorithms_info import get_all_algorithms, create_registration_cpp, create_version_h
-    
+
     algos = get_all_algorithms(ctx.path.find_dir('algorithms').abspath(),
                                root_dir = ctx.path.abspath())
 
@@ -251,7 +261,7 @@ def build(ctx):
     ctx.install_files('${PREFIX}/lib/pkgconfig', '../essentia.pc')
 
 
-    if ctx.env.WITH_EXAMPLES or ctx.env.WITH_VAMP:
+    if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
 
     if ctx.env.WITH_PYTHON:
