@@ -97,14 +97,14 @@ vector<string> split(const string& s) {
 }
 
 
-// this function escapes utf-8 string to be compatible with JSON standard, 
-// but it does not handle invalid utf-8 characters. Values in the pool are 
+// this function escapes utf-8 string to be compatible with JSON standard,
+// but it does not handle invalid utf-8 characters. Values in the pool are
 // expected to be correct utf-8 strings, and it is up to the user to provide
-// correct utf-8 strings for the names of descriptors in the Pool. This 
-// function is not called for Pool descriptor names, but only for string values.
+// correct utf-8 strings for the names of descriptors in the Pool. This
+// function is called for both Pool descriptor names and string values.
 string escapeJsonString(const string& input) {
   ostringstream escaped;
-  for (string::const_iterator i = input.begin(); i != input.end(); i++) { 
+  for (string::const_iterator i = input.begin(); i != input.end(); i++) {
     switch (*i) {
       case '\n': escaped << "\\n"; break;
       case '\r': escaped << "\\r"; break;
@@ -115,7 +115,7 @@ string escapeJsonString(const string& input) {
       case '/': escaped << "\\/"; break;
       case '\\': escaped << "\\\\"; break;
       default: escaped << *i; break;
-    } 
+    }
   }
   return escaped.str();
 }
@@ -258,7 +258,7 @@ void emitYaml(StreamType* s, YamlNode* n, const string& indent) {
 
 template <typename StreamType>
 void emitJson(StreamType* s, YamlNode* n, const string& indent) {
-  *s << indent << "\"" << n->name << "\":";
+  *s << indent << "\"" << escapeJsonString(n->name) << "\":";
 
   if (n->children.empty()) { // if there are no children, emit the value here
     if (n->value != NULL) {
