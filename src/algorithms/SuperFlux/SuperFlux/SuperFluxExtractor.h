@@ -57,7 +57,7 @@ class SuperFluxExtractor : public AlgorithmComposite {
     declareParameter("frameSize", "the frame size for computing low level features", "(0,inf)", 2048);
     declareParameter("hopSize", "the hop size for computing low level features", "(0,inf)", 256);
     declareParameter("sampleRate", "the audio sampling rate", "(0,inf)", 44100.0);
-    declareParameter("threshold","threshold for peak peaking","(0,inf)",20.0);
+    declareParameter("threshold","threshold for peak peaking","(0,inf)",1.0);
     declareParameter("combine","time threshold for double onsets detections (ms)","(0,inf)",20.0);
   }
 
