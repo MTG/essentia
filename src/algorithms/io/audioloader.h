@@ -117,7 +117,7 @@ class AudioLoader : public Algorithm {
     _md5Encoded = (AVMD5*) av_malloc(av_md5_size);
 #else
     _md5Encoded = av_md5_alloc();
-#endif   
+#endif
     if (!_md5Encoded) {
         throw EssentiaException("Error allocating the MD5 context");
     }
@@ -159,6 +159,8 @@ class AudioLoader : public Algorithm {
   Output<Real> _sampleRate;
   Output<int> _channels;
   Output<std::string> _md5;
+  Output<int> _bit_rate;
+  Output<std::string> _codec;
 
   streaming::Algorithm* _loader;
   streaming::VectorOutput<StereoSample>* _audioStorage;
@@ -174,6 +176,8 @@ class AudioLoader : public Algorithm {
     declareOutput(_sampleRate, "sampleRate", "the sampling rate of the audio signal [Hz]");
     declareOutput(_channels, "numberChannels", "the number of channels");
     declareOutput(_md5, "md5", "the MD5 checksum of raw undecoded audio payload");
+    declareOutput(_bit_rate, "bit_rate", "the bit rate of the input audio, as reported by the decoder codec");
+    declareOutput(_codec, "codec", "the codec that is used to decode the input audio");
 
     createInnerNetwork();
   }

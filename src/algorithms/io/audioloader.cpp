@@ -94,7 +94,7 @@ void AudioLoader::openAudioFile(const string& filename) {
     }
 
     // Dump information about file onto standard error
-    //dump_format(_demuxCtx, 0, filename.c_str(), 0); 
+    //dump_format(_demuxCtx, 0, filename.c_str(), 0);
 
     // Check that we have only 1 audio stream in the file
     int nAudioStreams = 0;
@@ -169,7 +169,7 @@ void AudioLoader::openAudioFile(const string& filename) {
               ostringstream msg;
               msg << "AudioLoader: Error converting"
                   << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
-                  << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16) 
+                  << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16)
                   << "using deprecated av_audio_convert. Format unsupported.";
               throw EssentiaException(msg);
               break;
@@ -275,7 +275,7 @@ AlgorithmStatus AudioLoader::process() {
             flushPacket();
             closeAudioFile();
             if (_computeMD5) {
-                av_md5_final(_md5Encoded, _checksum); 
+                av_md5_final(_md5Encoded, _checksum);
                 _md5.push(uint8_t_to_hex(_checksum, 16));
             }
             else {
@@ -343,18 +343,18 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
         }
 #  else
         // direct copy, we do the sample format conversion later if needed
-        
-        // TODO: Libav 9 introduced planar sample formats and converted audio 
-        // codecs to use these instead of interleaving the samples in the 
-        // codec after decoding. Unfortunately av_audio_convert doesn't deal 
-        // with planar formats, so libavresample should be used. 
-        
+
+        // TODO: Libav 9 introduced planar sample formats and converted audio
+        // codecs to use these instead of interleaving the samples in the
+        // codec after decoding. Unfortunately av_audio_convert doesn't deal
+        // with planar formats, so libavresample should be used.
+
         // NOTE: Meanwhile, as we ship outdated av_audio_convert ourselves,
         // we need to check if the format is planar or interleaved to convert
-        // decoded frame data correctly. We will treat planar data as if it was 
-        // interleaved for convertion, which is safe as long as no sample rate 
+        // decoded frame data correctly. We will treat planar data as if it was
+        // interleaved for convertion, which is safe as long as no sample rate
         // conversion is done. Afterwards, we will copy the results to audio
-        // output accordingly to it being planar or interleaved. 
+        // output accordingly to it being planar or interleaved.
 
         memcpy(output, _decodedFrame->data[0], inputDataSize);
         *outputSize = inputDataSize;
@@ -420,15 +420,15 @@ int AudioLoader::decodePacket() {
     //           output = number of bytes actually written (actual: S16 data)
     //E_DEBUG(EAlgorithm, "decode_audio_frame, available bytes in buffer = " << _dataSize);
 
-    // Note: md5 should be computed before decoding frame, as the decoding may 
-    // change the content of a packet. Still, not sure if it is correct to 
-    // compute md5 over packet which contains incorrect frames, potentially 
-    // belonging to id3 metadata (TODO: or is it just a missing header issue?), 
+    // Note: md5 should be computed before decoding frame, as the decoding may
+    // change the content of a packet. Still, not sure if it is correct to
+    // compute md5 over packet which contains incorrect frames, potentially
+    // belonging to id3 metadata (TODO: or is it just a missing header issue?),
     // but computing md5 hash using ffmpeg will also treat it as audio:
     //      ffmpeg -i file.mp3 -acodec copy -f md5 -
 
     len = decode_audio_frame(_audioCtx, buff, &_dataSize, &_packet);
-    
+
     if (len < 0) {
         char errstring[1204];
         av_strerror(len, errstring, sizeof(errstring));
@@ -436,11 +436,11 @@ int AudioLoader::decodePacket() {
 
         if (_audioCtx->codec_id == CODEC_ID_MP3) {
             msg << "AudioLoader: invalid frame, skipping it: " << errstring;
-            // mp3 streams can have tag frames (id3v2?) which libavcodec tries to 
-            // read as audio anyway, and we probably don't want print an error 
-            // message for that... 
+            // mp3 streams can have tag frames (id3v2?) which libavcodec tries to
+            // read as audio anyway, and we probably don't want print an error
+            // message for that...
             // TODO: Are these frames really id3 tags?
-            
+
             //E_DEBUG(EAlgorithm, msg);
             E_WARNING(msg.str());
         }
@@ -454,12 +454,12 @@ int AudioLoader::decodePacket() {
     if (len != _packet.size) {
         // https://www.ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga834bb1b062fbcc2de4cf7fb93f154a3e
 
-        // Some decoders may support multiple frames in a single AVPacket. Such 
-        // decoders would then just decode the first frame and the return value 
-        // would be less than the packet size. In this case, avcodec_decode_audio4 
-        // has to be called again with an AVPacket containing the remaining data 
-        // in order to decode the second frame, etc... Even if no frames are 
-        // returned, the packet needs to be fed to the decoder with remaining 
+        // Some decoders may support multiple frames in a single AVPacket. Such
+        // decoders would then just decode the first frame and the return value
+        // would be less than the packet size. In this case, avcodec_decode_audio4
+        // has to be called again with an AVPacket containing the remaining data
+        // in order to decode the second frame, etc... Even if no frames are
+        // returned, the packet needs to be fed to the decoder with remaining
         // data until it is completely consumed or an error occurs.
 
         E_WARNING("AudioLoader: more than 1 frame in packet, decoding remaining bytes...");
@@ -467,8 +467,8 @@ int AudioLoader::decodePacket() {
         E_WARNING("decoded samples: " << len);
         E_WARNING("packet size: " << _packet.size);
     }
-    
-    // update packet data pointer to data left undecoded (if any) 
+
+    // update packet data pointer to data left undecoded (if any)
     _packet.size -= len;
     _packet.data += len;
 
@@ -546,7 +546,7 @@ void AudioLoader::copyFFmpegOutput() {
         }
       }
       else {
-        // interleaved  
+        // interleaved
         for (int i=0; i<nsamples; i++) {
             audio[i].left() = scale(_buffer[2*i]);
             audio[i].right() = scale(_buffer[2*i+1]);
@@ -606,6 +606,8 @@ void AudioLoader::createInnerNetwork() {
     _loader->output("sampleRate")      >>  PC(_pool, "internal.sampleRate");
     _loader->output("numberChannels")  >>  PC(_pool, "internal.numberChannels");
     _loader->output("md5")             >>  PC(_pool, "internal.md5");
+    _loader->output("codec")           >>  PC(_pool, "internal.codec");
+    _loader->output("bit_rate")        >>  PC(_pool, "internal.bit_rate");
     _network = new scheduler::Network(_loader);
 }
 
@@ -623,9 +625,11 @@ void AudioLoader::compute() {
     Real& sampleRate = _sampleRate.get();
     int& numberChannels = _channels.get();
     string& md5 = _md5.get();
+    int& bit_rate = _bit_rate.get();
+    string& codec = _codec.get();
     vector<StereoSample>& audio = _audio.get();
 
-    _audioStorage->setVector(&audio);   
+    _audioStorage->setVector(&audio);
     // TODO: is using VectorInput indeed faster than using Pool?
 
     // FIXME:
@@ -636,6 +640,8 @@ void AudioLoader::compute() {
     sampleRate = _pool.value<Real>("internal.sampleRate");
     numberChannels = (int) _pool.value<Real>("internal.numberChannels");
     md5 = _pool.value<std::string>("internal.md5");
+    bit_rate = (int) _pool.value<Real>("internal.bit_rate");
+    codec = _pool.value<std::string>("internal.codec");
 
     // reset, so it is ready to load audio again
     reset();
@@ -646,6 +652,8 @@ void AudioLoader::reset() {
     _pool.remove("internal.md5");
     _pool.remove("internal.sampleRate");
     _pool.remove("internal.numberChannels");
+    _pool.remove("internal.codec");
+    _pool.remove("internal.bit_rate");
 }
 
 } // namespace standard
