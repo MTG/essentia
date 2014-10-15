@@ -75,8 +75,8 @@ class PhantomBuffer : public MultiRateBuffer<T> {
       break;
 
     case BufferUsage::forMultipleFrames:
-      buf.size = 16384;
-      buf.maxContiguousElements = 8192;
+      buf.size = 262144;
+      buf.maxContiguousElements = 32768;
       break;
 
     case BufferUsage::forAudioStream:
