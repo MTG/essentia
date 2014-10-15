@@ -244,7 +244,7 @@ AlgorithmStatus AudioLoader::process() {
 
     decodePacket();
     copyFFmpegOutput();
-    av_free_packet(&_packet);
+    
     return OK;
 }
 
@@ -463,6 +463,7 @@ void AudioLoader::copyFFmpegOutput() {
 
     // release data
     _audio.release(nsamples);
+    av_free_packet(&_packet);
 }
 
 void AudioLoader::reset() {
