@@ -29,6 +29,11 @@ get_version() {
 }
 
 static PyObject*
+get_version_git_sha() {
+  return PyString_FromString(version_git_sha);
+}
+
+static PyObject*
 debug_level() {
   return PyInt_FromLong(activatedDebugLevels);
 }
@@ -995,6 +1000,7 @@ static PyMethodDef Essentia__Methods[] = {
   { "keys",         (PyCFunction)keys,                   METH_NOARGS, "returns algorithm names" },
   { "skeys",        (PyCFunction)skeys,                  METH_NOARGS, "returns streaming algorithm names" },
   { "version",      (PyCFunction)get_version,            METH_NOARGS, "returns essentia's version number" },
+  { "version_git_sha",      (PyCFunction)get_version_git_sha, METH_NOARGS, "returns essentia's version git commit SHA hash" }, 
   { "almostEqualArray", (PyCFunction)almostEqualArray,   METH_VARARGS, "Returns true if two numpy arrays are within a given precision of each other" },
   { "postProcessTicks", (PyCFunction)postProcessTicks,   METH_VARARGS, "Purges ticks array based on ticks amplitude and the preferred period" },
   { NULL } // Sentinel

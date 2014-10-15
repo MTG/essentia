@@ -55,9 +55,14 @@ class TestNoiseAdder(TestCase):
         b=NoiseAdder(fixSeed=True)(zeros(10))
         self.assertEqualVector(a,b)
 
+        a=NoiseAdder(fixSeed=False)(zeros(10))
+        b=NoiseAdder(fixSeed=False)(zeros(10))
+        for i in range(10):
+            self.assertNotEqual(a[i], b[i])
+
+
 
 suite = allTests(TestNoiseAdder)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
-

@@ -73,6 +73,14 @@ class ESSENTIA_API EssentiaFactory {
 
   /**
    * Creates an instance of the algorithm specified by its name.
+   * All the other overloads of this method do the same thing, and additionally
+   * configure the algorithm using the given parameters.
+   *
+   * @throw EssentiaException in case the algorithm could not be created.
+   *        This can happen because the given name is not a valid name, or
+   *        if any of the given parameters is not a valid one (ie: it is not
+   *        supported by the algorithm, or the value it has been given is not
+   *        an accepted one).
    */
   static BaseAlgorithm* create(const std::string& id) {
     return instance().create_i(id);

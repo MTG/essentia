@@ -171,8 +171,14 @@ void PitchYinFFT::compute() {
     _peakDetect->output("positions").set(_positions);
     _peakDetect->output("amplitudes").set(_amplitudes);
     _peakDetect->compute();    
-    tau = _positions[0];
-    yinMin = -_amplitudes[0];
+    try {
+      tau = _positions[0];
+      yinMin = -_amplitudes[0];
+    }
+    catch (const EssentiaException&) {
+      // TODO this should never happen, but some people reported it happening in their real time applications
+      throw EssentiaException("PitchYinFFT: it appears that no peaks were found by PeakDetection. If you read this message, PLEASE, report this issue to the developers with an example of audio on which it happened.");
+    }
   }
   else {
     // with no interpolation is faster to simply search the minimum

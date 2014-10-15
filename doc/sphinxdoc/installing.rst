@@ -44,7 +44,7 @@ Install a scientific python environment first:
 
 1. install Command Line Tools for Xcode: https://github.com/mxcl/homebrew/wiki/Installation
 2. install homebrew (package manager): http://brew.sh/
-3. install prerequisites: ``brew install pkg-config gfortran readline sqlite gdbm freetype libpng``
+3. install prerequisites: ``brew install pkg-config gcc readline sqlite gdbm freetype libpng``
 4. install python: ``brew install python --framework``
 5. install ipython and numpy: ``pip install ipython numpy``
 6. install matplotlib: ``pip install matplotlib``
@@ -74,9 +74,9 @@ compile the dependencies too. We will be working on Windows installer in the nea
 Additional dependencies (python, all platforms)
 -----------------------------------------------
 
-To build the documentation you will also need the following dependencies::
+To build the documentation you will also need the following dependencies (you might need to run this command with sudo)::
 
-  pip install sphinx pyparsing==1.5.7 sphinxcontrib-doxylink docutils
+  pip install sphinx pyparsing sphinxcontrib-doxylink docutils
 
 Other useful dependencies::
 

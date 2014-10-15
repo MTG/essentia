@@ -56,6 +56,10 @@ int ilog10(T n) {
   return 1 + ilog10(n/10);
 }
 
+/**
+ * Return the next power of two after the given number n.
+ * If n is already a power of two, return n.
+ */
 template <typename T> T nextPowerTwo(T n) {
   n--;
   n |= (n >> 1);
@@ -63,6 +67,17 @@ template <typename T> T nextPowerTwo(T n) {
   n |= (n >> 4);
   n |= (n >> 8);
   n |= (n >> 16);
+  return ++n;
+}
+
+template <> inline long long int nextPowerTwo(long long int n) {
+  n--;
+  n |= (n >> 1);
+  n |= (n >> 2);
+  n |= (n >> 4);
+  n |= (n >> 8);
+  n |= (n >> 16);
+  n |= (n >> 32);
   return ++n;
 }
 

@@ -30,6 +30,7 @@ using namespace std;
 namespace essentia {
 
 const char* version = ESSENTIA_VERSION;
+const char* version_git_sha = ESSENTIA_GIT_SHA;
 
 
 bool _initialized;

@@ -5,8 +5,20 @@ import os
 import sys
 import platform
 
+def get_git_version():
+    """ try grab the current version number from git"""
+    version = "Undefined"
+    if os.path.exists(".git"):
+        try:
+            version = os.popen("git describe --dirty --always").read().strip()
+        except Exception, e:
+            print e
+    return version
+
+
 APPNAME = 'essentia'
-VERSION = '2.0-dev'
+VERSION = open('VERSION', 'r').read().strip('\n')
+GIT_SHA = get_git_version();
 
 top = '.'
 out = 'build'
@@ -28,6 +40,9 @@ def options(ctx):
 
 def configure(ctx):
     print('→ configuring the project in ' + ctx.path.abspath())
+
+    ctx.env.VERSION = VERSION
+    ctx.env.GIT_SHA = GIT_SHA
 
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
 
@@ -72,6 +87,27 @@ def configure(ctx):
         ctx.env.CXXFLAGS += [ '-I/usr/local/include' ]
 
     ctx.load('compiler_cxx compiler_c')
+
+    # write pkg-config file
+    prefix = os.path.normpath(ctx.options.prefix)
+    opts = { 'prefix': prefix,
+             'version': ctx.env.VERSION,
+             }
+
+    pcfile = '''prefix=%(prefix)s
+    libdir=${prefix}/lib
+    includedir=${prefix}/include
+
+    Name: libessentia
+    Description: audio analysis library -- development files
+    Version: %(version)s
+    Libs: -L${libdir} -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lsamplerate -ltag -lfftw3f -lgaia2
+    Cflags: -I${includedir}/essentia I${includedir}/essentia/scheduler I${includedir}/essentia/streaming I${includedir}/essentia/utils 
+    ''' % opts
+
+    pcfile = '\n'.join([ l.strip() for l in pcfile.split('\n') ])
+    ctx.env.pcfile = pcfile
+    #open('build/essentia.pc', 'w').write(pcfile) # we'll do it later on the build stage
 
     ctx.recurse('src')
 

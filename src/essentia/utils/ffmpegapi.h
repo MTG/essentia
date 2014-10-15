@@ -47,6 +47,7 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libavutil/md5.h>
 }
 
 // libav* versions for deprecated functions taken from (among other sources):
@@ -60,6 +61,8 @@ extern "C" {
 #define AVFORMAT_52_26_0  AV_VERSION_INT(52, 26, 0)
 #define AVFORMAT_53_6_0   AV_VERSION_INT(53,  6, 0)
 #define AVFORMAT_53_17_0  AV_VERSION_INT(53, 17, 0)
+
+#define AVUTIL_51_43_0    AV_VERSION_INT(51, 43, 0)
 
 // useful aliases
 #define AVCODEC_AUDIO_DECODE4 AVCODEC_53_25_0
@@ -134,3 +137,14 @@ extern "C" {
 
 
 #endif // ESSENTIA_FFMPEGAPI_H
+
+
+extern "C" {
+
+#if HAVE_SWRESAMPLE
+#   include <libswresample/swresample.h>
+#else
+#   include "audioconvert.h"
+#endif
+
+}

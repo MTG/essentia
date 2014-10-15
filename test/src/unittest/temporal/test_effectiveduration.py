@@ -43,6 +43,17 @@ class TestEffectiveDuration(TestCase):
         input = [100]
         self.assertAlmostEqual(EffectiveDuration()(input), 1/44100.0)
 
+    def testThresholdRatioZero(self):
+        input = [1] * 100
+        print EffectiveDuration(thresholdRatio=0.)(input)
+        self.assertAlmostEqual(EffectiveDuration(thresholdRatio=0.)(input), 
+                               100/44100.)
+
+    def testThresholdRatioOne(self):
+        input = [1,0,0,0,0] * 100
+        self.assertAlmostEqual(EffectiveDuration(thresholdRatio=1.)(input), 
+                               100/44100.0)
+
     def test30Sec(self):
         input = [randint(41, 100) for x in xrange(44100*30)]
         self.assertAlmostEqual(EffectiveDuration()(input), 30)

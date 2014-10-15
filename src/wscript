@@ -50,7 +50,9 @@ def configure(ctx):
 
 
     ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
-                  args=['--cflags', '--libs'], mandatory=False)
+                  args=['libavcodec >= 53.25.0', '--cflags', '--libs'], 
+                  msg='Checking for \'libavcodec\' >= 53.25.0',
+                  mandatory=False)
 
     ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
                   args=['--cflags', '--libs'], mandatory=False)
@@ -62,10 +64,20 @@ def configure(ctx):
                   args=['--cflags', '--libs'], mandatory=False)
 
     if ctx.env.WITH_STATIC_EXAMPLES:
-        print('Static examples incompatible with TagLib, skipping TagLib detection...')
+        #print('Static examples incompatible with TagLib, skipping TagLib detection...')
+        print('Static examples incompatible with Gaia, skipping Gaia detection...')   
     else:
-        ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
+        #ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
+        #              args=['taglib >= 1.9', '--cflags', '--libs'], 
+        #              msg='Checking for \'taglib\' >= 1.9',
+        #              mandatory=False)
+        ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
                       args=['--cflags', '--libs'], mandatory=False)
+
+    ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
+                  args=['taglib >= 1.9', '--cflags', '--libs'], 
+                  msg='Checking for \'taglib\' >= 1.9',
+                  mandatory=False)
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += [ '__STDC_CONSTANT_MACROS' ]
@@ -86,9 +98,6 @@ def configure(ctx):
 
     ctx.check_cfg(package='samplerate', uselib_store='SAMPLERATE',
                   args=['--cflags', '--libs'])
-
-    ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
-                  args=['--cflags', '--libs'], mandatory=False)
 
     if ctx.env.WITH_EXAMPLES or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
@@ -160,6 +169,7 @@ def configure(ctx):
     print('=======================================================================================')
 
 
+
 from waflib.Task import Task
 class BuildAlgoReg(Task):
     def run(self):
@@ -174,12 +184,12 @@ def build(ctx):
     sys.path = [ctx.path.find_dir('..')] + sys.path
 
     # get list of available algorithms
-    from utils.algorithms_info import get_all_algorithms, create_registration_cpp
+    from utils.algorithms_info import get_all_algorithms, create_registration_cpp, create_version_h
+    
     algos = get_all_algorithms(ctx.path.find_dir('algorithms').abspath(),
                                root_dir = ctx.path.abspath())
 
     # select the algorithms we want to build
-
     if ctx.env['ALGOINCLUDE']:
         print('Building the following algorithms: %s' % ', '.join(ctx.env['ALGOINCLUDE']))
     else:
@@ -189,6 +199,9 @@ def build(ctx):
         print('Ignoring the following algorithms: %s' % ', '.join(ctx.env['ALGOIGNORE']))
         for algoname in ctx.env['ALGOIGNORE']:
             del algos[algoname]
+
+    # create version.h header file
+    create_version_h('src/version.h', ctx.env.VERSION, ctx.env.GIT_SHA)
 
 
     # create algorithms registration file
@@ -219,12 +232,23 @@ def build(ctx):
         #includes = ctx.env.includes
     )
 
+    def write_pcfile(task):
+        open('build/essentia.pc', 'w').write(ctx.env.pcfile)
+
+    ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
+    ctx.add_group()
+
+
     # install headers if asked to
     headers = ctx.path.ant_glob('essentia/**/*.h')
     for h in headers:
         install_dir = os.path.split(h.srcpath())[0][4:]
         ctx.install_files('${PREFIX}/include/' + install_dir, h)
 
+    # install pkgconfig file
+    #pc = ctx.path.ant_glob('essentia/build/essentia.pc') #TODO remove
+    #ctx.install_files('${PREFIX}/lib/pkgconfig', pc)     #TODO remove
+    ctx.install_files('${PREFIX}/lib/pkgconfig', '../essentia.pc')
 
 
     if ctx.env.WITH_EXAMPLES or ctx.env.WITH_VAMP:

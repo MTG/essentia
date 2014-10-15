@@ -23,6 +23,8 @@
 #include "streamingalgorithm.h"
 #include "network.h"
 #include "ffmpegapi.h"
+#include "poolstorage.h"
+
 
 #define MAX_AUDIO_FRAME_SIZE 192000
 
@@ -34,6 +36,8 @@ class AudioLoader : public Algorithm {
   Source<StereoSample> _audio;
   AbsoluteSource<Real> _sampleRate;
   AbsoluteSource<int> _channels;
+  AbsoluteSource<std::string> _md5;
+
   int _nChannels;
 
   // MAX_AUDIO_FRAME_SIZE is in bytes, we want FFMPEG_BUFFER_SIZE in sample units
@@ -49,6 +53,10 @@ class AudioLoader : public Algorithm {
   AVCodecContext* _audioCtx;
   AVCodec* _audioCodec;
   AVPacket _packet;
+  AVMD5 *_md5Encoded;
+  uint8_t _checksum[16];
+  bool _computeMD5;
+
 
 #if LIBAVCODEC_VERSION_INT >= AVCODEC_AUDIO_DECODE4
   AVFrame* _decodedFrame;
@@ -79,10 +87,7 @@ class AudioLoader : public Algorithm {
 
  public:
   AudioLoader() : Algorithm(), _buffer(0),  _demuxCtx(0),
-	          _audioCtx(0), _audioCodec(0),
-#if LIBAVCODEC_VERSION_INT >= AVCODEC_AUDIO_DECODE4
-                  _decodedFrame(0),
-#endif
+	          _audioCtx(0), _audioCodec(0), _decodedFrame(0),
 #if HAVE_SWRESAMPLE
                   _convertCtx(0),
 #else
@@ -93,6 +98,7 @@ class AudioLoader : public Algorithm {
     declareOutput(_audio, 1, "audio", "the input audio signal");
     declareOutput(_sampleRate, 0, "sampleRate", "the sampling rate of the audio signal [Hz]");
     declareOutput(_channels, 0, "numberChannels", "the number of channels");
+    declareOutput(_md5, 0, "md5", "the MD5 checksum of raw undecoded audio payload");
 
     _audio.setBufferType(BufferUsage::forLargeAudioStream);
 
@@ -101,6 +107,15 @@ class AudioLoader : public Algorithm {
 
     // use av_malloc, because we _need_ the buffer to be 16-byte aligned
     _buffer = (int16_t*)av_malloc(FFMPEG_BUFFER_SIZE * sizeof(int16_t));
+
+#if LIBAVUTIL_VERSION_INT < AVUTIL_51_43_0
+    _md5Encoded = (AVMD5*) av_malloc(av_md5_size);
+#else
+    _md5Encoded = av_md5_alloc();
+#endif   
+    if (!_md5Encoded) {
+        throw EssentiaException("Error allocating the MD5 context");
+    }
   }
 
   ~AudioLoader();
@@ -110,6 +125,7 @@ class AudioLoader : public Algorithm {
 
   void declareParameters() {
     declareParameter("filename", "the name of the file from which to read", "", Parameter::STRING);
+    declareParameter("computeMD5", "compute the MD5 checksum", "{true,false}", false);
   }
 
   void configure();
@@ -137,15 +153,13 @@ class AudioLoader : public Algorithm {
   Output<std::vector<StereoSample> > _audio;
   Output<Real> _sampleRate;
   Output<int> _channels;
+  Output<std::string> _md5;
 
   streaming::Algorithm* _loader;
   streaming::VectorOutput<StereoSample>* _audioStorage;
-  streaming::VectorOutput<Real>* _srStorage;
-  streaming::VectorOutput<int>* _cStorage;
-  std::vector<Real> _sampleRateStorage;
-  std::vector<int> _channelsStorage;
 
   scheduler::Network* _network;
+  Pool _pool;
 
   void createInnerNetwork();
 
@@ -154,6 +168,7 @@ class AudioLoader : public Algorithm {
     declareOutput(_audio, "audio", "the input audio signal");
     declareOutput(_sampleRate, "sampleRate", "the sampling rate of the audio signal [Hz]");
     declareOutput(_channels, "numberChannels", "the number of channels");
+    declareOutput(_md5, "md5", "the MD5 checksum of raw undecoded audio payload");
 
     createInnerNetwork();
   }
@@ -165,6 +180,7 @@ class AudioLoader : public Algorithm {
 
   void declareParameters() {
     declareParameter("filename", "the name of the file from which to read", "", Parameter::STRING);
+    declareParameter("computeMD5", "compute the MD5 checksum", "{true,false}", false);
   }
 
   void configure();

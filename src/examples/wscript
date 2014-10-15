@@ -88,31 +88,19 @@ def build(ctx):
                                    'extractorpanning',
                                    'extractorpostprocess' ])
 
-        # OUTDATED:
-        #build_example('streaming', 'schizo_extractor',
-        #                         [ 'extractorutils',
-        #                           'extractormetadata',
-        #                           'extractortonal',
-        #                           'extractorlowlevel',
-        #                           'extractorsfx',
-        #                           'extractorpanning',
-        #                           'extractorpostprocess' ])
-
-        #build_example('streaming', 'extractor_canoris',
-        #                         [ 'extractorutils',
-        #                           'extractortonal',
-        #                           'extractorlowlevel',
-        #                           'extractorsfx',
-        #                           'extractorpanning',
-        #                           'extractorpostprocess' ])
-
-        build_example('streaming', 'extractor_archivemusic',
-                                 [ 'extractorutils',
-                                   'extractor_archivemusic_tonal',
-                                   'extractor_archivemusic_lowlevel',
-                                   'extractorsfx',
-                                   'extractorpanning',
-                                   'extractor_archivemusic_postprocess' ])
+        
+        music_files = [ 'streaming_extractor_music.cpp',
+                            'extractor_music/MusicExtractor.cpp',
+                            'extractor_music/MusicLowlevelDescriptors.cpp',
+                            'extractor_music/MusicRhythmDescriptors.cpp',
+                            'extractor_music/MusicTonalDescriptors.cpp'
+        ]
+        
+        ctx.program(source = ctx.path.ant_glob(' '.join(music_files)),
+                        target = 'streaming_extractor_music',
+                        includes = [ '.', '..' ,'../..'],
+                        use      = 'essentia ' + ctx.env.USES,
+                        install_path = None)
 
         build_example('streaming', 'beatsmarker')
         build_example('streaming', 'mfcc')
@@ -125,6 +113,7 @@ def build(ctx):
         build_example('streaming', 'key')
         build_example('streaming', 'pitchyinfft')
         build_example('streaming', 'predominantmelody')
+        build_example('streaming', 'md5')
         
         freesound_files = [ 'streaming_extractor_freesound.cpp',
 			     'freesound/FreesoundExtractor.cpp',
@@ -139,7 +128,6 @@ def build(ctx):
                         includes = [ '.', '..' ,'../..'],
                         use      = 'essentia ' + ctx.env.USES,
                         install_path = None)
-
 
 
 
