@@ -197,6 +197,9 @@ void AudioLoader::closeAudioFile() {
     // Close the codec
     avcodec_close(_audioCtx);
 
+    // free AVPacket
+    av_free_packet(&_packet);
+
     // Close the audio file
     avformat_close_input(&_demuxCtx);
 
@@ -241,7 +244,7 @@ AlgorithmStatus AudioLoader::process() {
 
     decodePacket();
     copyFFmpegOutput();
-
+    av_free_packet(&_packet);
     return OK;
 }
 
