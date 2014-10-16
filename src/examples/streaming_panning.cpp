@@ -96,6 +96,8 @@ int main(int argc, char** argv) {
   loader->output("audio")           >>  demuxer->input("audio");
   loader->output("sampleRate")      >>  NOWHERE;
   loader->output("numberChannels")  >>  NOWHERE;
+  loader->output("codec")           >>  NOWHERE;
+  loader->output("bit_rate")        >>  NOWHERE;
 
   // demuxer
   demuxer->output("left")           >>  fc_left->input("signal");

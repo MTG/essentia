@@ -639,6 +639,8 @@ void computePanning(const string& audioFilename, Real startTime, Real endTime,
   connect(audio_4->output("audio"), trimmer->input("signal"));
   connect(audio_4->output("sampleRate"), NOWHERE);
   connect(audio_4->output("numberChannels"), NOWHERE);
+  connect(audio_4->output("codec"), NOWHERE);
+  connect(audio_4->output("bit_rate"), NOWHERE);
   Algorithm* panningExtractor = factory.create("PanningExtractor",
                                                "frameSize", _panningFrameSize,
                                                "hopSize", _panningHopSize,
