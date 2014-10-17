@@ -19,7 +19,6 @@
 
 #include "audioloader.h"
 #include "algorithmfactory.h"
-#include <iomanip>  //  setw()
 
 
 using namespace std;
@@ -150,6 +149,9 @@ void AudioLoader::openAudioFile(const string& filename) {
         E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from "
                             "deprecated audioconvert");
 
+<<<<<<< HEAD
+        _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, _audioCtx->sample_fmt, 1, NULL, 0);
+=======
         if (av_sample_fmt_is_planar(_audioCtx->sample_fmt)) {
           // Ugly hack to treat planar audio format as interleaved
           E_WARNING("AudioLoader: using depricated audioconvert and manually converting planar format to interleaved");
@@ -179,6 +181,7 @@ void AudioLoader::openAudioFile(const string& filename) {
         else {
           _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, _audioCtx->sample_fmt, 1, NULL, 0);
         }
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
 
         // reserve some more space
         _buff1 = (int16_t*)av_malloc(MAX_AUDIO_FRAME_SIZE * 3);
@@ -252,6 +255,8 @@ void AudioLoader::pushChannelsSampleRateInfo(int nChannels, Real sampleRate) {
 }
 
 
+<<<<<<< HEAD
+=======
 void AudioLoader::pushCodecInfo(std::string codec, int bit_rate) {
     _codec.push(codec);
     _bit_rate.push(bit_rate);
@@ -265,6 +270,8 @@ string uint8_t_to_hex(uint8_t* input, int size) {
     }
     return result.str();
 }
+
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
 
 AlgorithmStatus AudioLoader::process() {
     if (!parameter("filename").isConfigured()) {
@@ -280,6 +287,8 @@ AlgorithmStatus AudioLoader::process() {
             shouldStop(true);
             flushPacket();
             closeAudioFile();
+<<<<<<< HEAD
+=======
             if (_computeMD5) {
                 av_md5_final(_md5Encoded, _checksum);
                 _md5.push(uint8_t_to_hex(_checksum, 16));
@@ -288,6 +297,7 @@ AlgorithmStatus AudioLoader::process() {
                 string md5 = "";
                 _md5.push(md5);
             }
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
             return FINISHED;
         }
     } while (_packet.stream_index != _streamIdx);
@@ -359,6 +369,8 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
         }
 #  else
         // direct copy, we do the sample format conversion later if needed
+<<<<<<< HEAD
+=======
 
         // TODO: Libav 9 introduced planar sample formats and converted audio
         // codecs to use these instead of interleaving the samples in the
@@ -372,6 +384,7 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
         // conversion is done. Afterwards, we will copy the results to audio
         // output accordingly to it being planar or interleaved.
 
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
         memcpy(output, _decodedFrame->data[0], inputDataSize);
         *outputSize = inputDataSize;
 #  endif
@@ -431,6 +444,9 @@ int AudioLoader::decodePacket() {
     // _dataSize  input = number of bytes available for write in buff
     //           output = number of bytes actually written (actual: S16 data)
     //E_DEBUG(EAlgorithm, "decode_audio_frame, available bytes in buffer = " << _dataSize);
+<<<<<<< HEAD
+    len = decode_audio_frame(_audioCtx, buff, &_dataSize, &_packet);
+=======
 
     // Note: md5 should be computed before decoding frame, as the decoding may
     // change the content of a packet. Still, not sure if it is correct to
@@ -445,12 +461,16 @@ int AudioLoader::decodePacket() {
         char errstring[1204];
         av_strerror(len, errstring, sizeof(errstring));
         ostringstream msg;
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
 
     if (len < 0) {
         // only print error msg when file is not an mp3, because mp3 streams can have tag
         // frames (id3v2?) which libavcodec tries to read as audio anyway, and we don't want
         // to print an error message for that...
         if (_audioCtx->codec_id == CODEC_ID_MP3) {
+<<<<<<< HEAD
+            E_DEBUG(EAlgorithm, "AudioLoader: invalid frame, probably an mp3 tag frame, skipping it");
+=======
             msg << "AudioLoader: invalid frame, skipping it: " << errstring;
             // mp3 streams can have tag frames (id3v2?) which libavcodec tries to
             // read as audio anyway, and we probably don't want print an error
@@ -459,6 +479,7 @@ int AudioLoader::decodePacket() {
 
             //E_DEBUG(EAlgorithm, msg);
             E_WARNING(msg.str());
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
         }
         else {
             E_WARNING("AudioLoader: error while decoding, skipping frame");
@@ -466,6 +487,8 @@ int AudioLoader::decodePacket() {
         return 0;
     }
 
+<<<<<<< HEAD
+=======
     if (len != _packet.size) {
         // https://www.ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga834bb1b062fbcc2de4cf7fb93f154a3e
 
@@ -488,6 +511,7 @@ int AudioLoader::decodePacket() {
     _packet.data += len;
 
 
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
     if (_dataSize <= 0) {
         // No data yet, get more frames
         //cout << "no data yet, get more frames" << endl;
@@ -560,6 +584,10 @@ void AudioLoader::copyFFmpegOutput() {
         }
     }
     else { // _nChannels == 2
+<<<<<<< HEAD
+=======
+      if (av_sample_fmt_is_planar(_audioCtx->sample_fmt)) {
+        // planar
         for (int i=0; i<nsamples; i++) {
             audio[i].left() = scale(_buffer[i]);
             audio[i].right() = scale(_buffer[nsamples+i]);
@@ -567,6 +595,7 @@ void AudioLoader::copyFFmpegOutput() {
       }
       else {
         // interleaved
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
         for (int i=0; i<nsamples; i++) {
             audio[i].left() = scale(_buffer[2*i]);
             audio[i].right() = scale(_buffer[2*i+1]);
@@ -625,11 +654,17 @@ void AudioLoader::createInnerNetwork() {
     _cStorage = new streaming::VectorOutput<int>(&_channelsStorage);
 
     _loader->output("audio")           >>  _audioStorage->input("data");
+<<<<<<< HEAD
+    _loader->output("sampleRate")      >>  _srStorage->input("data");
+    _loader->output("numberChannels")  >>  _cStorage->input("data");
+
+=======
     _loader->output("sampleRate")      >>  PC(_pool, "internal.sampleRate");
     _loader->output("numberChannels")  >>  PC(_pool, "internal.numberChannels");
     _loader->output("md5")             >>  PC(_pool, "internal.md5");
     _loader->output("codec")           >>  PC(_pool, "internal.codec");
     _loader->output("bit_rate")        >>  PC(_pool, "internal.bit_rate");
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
     _network = new scheduler::Network(_loader);
 }
 
@@ -644,6 +679,12 @@ void AudioLoader::compute() {
     }
 
     Real& sampleRate = _sampleRate.get();
+<<<<<<< HEAD
+    int& nChannels = _channels.get();
+    vector<StereoSample>& audio = _audio.get();
+
+    _audioStorage->setVector(&audio);
+=======
     int& numberChannels = _channels.get();
     string& md5 = _md5.get();
     int& bit_rate = _bit_rate.get();
@@ -652,29 +693,38 @@ void AudioLoader::compute() {
 
     _audioStorage->setVector(&audio);
     // TODO: is using VectorInput indeed faster than using Pool?
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
 
     // FIXME:
     // _audio.reserve(sth_meaningful);
 
     _network->run();
 
+<<<<<<< HEAD
+    sampleRate = _sampleRateStorage[0];
+    nChannels = _channelsStorage[0];
+=======
     sampleRate = _pool.value<Real>("internal.sampleRate");
     numberChannels = (int) _pool.value<Real>("internal.numberChannels");
     md5 = _pool.value<std::string>("internal.md5");
     bit_rate = (int) _pool.value<Real>("internal.bit_rate");
     codec = _pool.value<std::string>("internal.codec");
 
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
     // reset, so it is ready to load audio again
     reset();
 }
 
 void AudioLoader::reset() {
     _network->reset();
+<<<<<<< HEAD
+=======
     _pool.remove("internal.md5");
     _pool.remove("internal.sampleRate");
     _pool.remove("internal.numberChannels");
     _pool.remove("internal.codec");
     _pool.remove("internal.bit_rate");
+>>>>>>> cc198e9cefd38cb3e98c753a0c78cf6957b5b114
 }
 
 } // namespace standard

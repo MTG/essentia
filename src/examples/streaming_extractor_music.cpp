@@ -57,19 +57,23 @@ int main(int argc, char* argv[]) {
     essentia::init();
 
     cout.precision(10); // TODO ????
-  
+
     MusicExtractor *extractor = new MusicExtractor();
-    
+
     extractor->setExtractorOptions(profileFilename);
     extractor->mergeValues();
 
-    extractor->compute(audioFilename);
+    int result = extractor->compute(audioFilename);
 
-    extractor->outputToFile(extractor->stats, outputFilename);
-    if (extractor->options.value<Real>("outputFrames")) { 
-      extractor->outputToFile(extractor->results, outputFilename+"_frames");
+    if (result > 0) {
+        cerr << "Quitting early." << endl;
+        return result;
+    } else {
+        extractor->outputToFile(extractor->stats, outputFilename);
+        if (extractor->options.value<Real>("outputFrames")) {
+          extractor->outputToFile(extractor->results, outputFilename+"_frames");
+        }
     }
-      
     essentia::shutdown();
   }
   catch (EssentiaException& e) {

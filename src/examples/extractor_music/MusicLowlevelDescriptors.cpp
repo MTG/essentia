@@ -256,7 +256,8 @@ void MusicLowlevelDescriptors::createNetworkEqLoud(SourceBase& source, Pool& poo
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
-  Algorithm* eqloud = factory.create("EqualLoudness");
+  Algorithm* eqloud = factory.create("EqualLoudness",
+                                     "sampleRate", sampleRate);
   Algorithm* fc   = factory.create("FrameCutter",
                                    "frameSize", frameSize,
                                    "hopSize", hopSize,
