@@ -55,18 +55,18 @@ def configure(ctx):
 
 
     ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
-                  args=['libavcodec >= 53.25.0', '--cflags', '--libs'],
+                  args=['libavcodec >= 53.25.0', '--cflags', '--libs', '--modversion'],
                   msg='Checking for \'libavcodec\' >= 53.25.0',
                   mandatory=False)
-
+    
     ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
-                  args=['--cflags', '--libs'], mandatory=False)
+                  args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
     ctx.check_cfg(package='libavutil', uselib_store='AVUTIL',
-                  args=['--cflags', '--libs'], mandatory=False)
+                  args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
     ctx.check_cfg(package='libswresample', uselib_store='SWRESAMPLE',
-                  args=['--cflags', '--libs'], mandatory=False)
+                  args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
     if ctx.env.WITH_STATIC_EXAMPLES:
         #print('Static examples incompatible with TagLib, skipping TagLib detection...')
@@ -77,10 +77,10 @@ def configure(ctx):
         #              msg='Checking for \'taglib\' >= 1.9',
         #              mandatory=False)
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
-                      args=['--cflags', '--libs'], mandatory=False)
+                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
     ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
-                  args=['taglib >= 1.9', '--cflags', '--libs'],
+                  args=['taglib >= 1.9', '--cflags', '--libs', '--modversion'],
                   msg='Checking for \'taglib\' >= 1.9',
                   mandatory=False)
 
@@ -96,13 +96,13 @@ def configure(ctx):
         ctx.env.LINKFLAGS += [ '-lyaml' ]
     else:
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
-                      args=['--cflags', '--libs'])
+                      args=['--cflags', '--libs', '--modversion'])
 
     ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
-                  args=['--cflags', '--libs'])
+                  args=['--cflags', '--libs', '--modversion'])
 
     ctx.check_cfg(package='samplerate', uselib_store='SAMPLERATE',
-                  args=['--cflags', '--libs'])
+                  args=['--cflags', '--libs', '--modversion'])
 
     if ctx.env.WITH_EXAMPLES or ctx.env.EXAMPLES or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
@@ -125,7 +125,7 @@ def configure(ctx):
 
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
     if has('avcodec') and has('avformat') and has('avutil'):
-        print('- FFmpeg / libav detected!')
+        print('- FFmpeg / libav detected!')       
         print('  The following algorithms will be included: %s\n' % algos)
         ctx.env.USES += ' AVFORMAT AVCODEC AVUTIL'
     else:
