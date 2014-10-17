@@ -479,9 +479,9 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       //connect(rhythmExtractor->output("rubatoStart"),  neqloudPool, rhythmspace + "rubato_start");
       //connect(rhythmExtractor->output("rubatoStop"),   neqloudPool, rhythmspace + "rubato_stop");
       connect(rhythmExtractor->output("bpmIntervals"), neqloudPool, rhythmspace + "bpm_intervals");
-      // discard dummy value for confidence as 'degara' beat tracker is not 
+      // discard dummy value for confidence as 'degara' beat tracker is not
       // able to compute it
-      rhythmExtractor->output("confidence") >> NOWHERE; 
+      rhythmExtractor->output("confidence") >> NOWHERE;
 
 
       // BPM Histogram descriptors
@@ -543,9 +543,9 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       //connect(rhythmExtractor->output("rubatoStart"),  eqloudPool, rhythmspace + "rubato_start");
       //connect(rhythmExtractor->output("rubatoStop"),   eqloudPool, rhythmspace + "rubato_stop");
       connect(rhythmExtractor->output("bpmIntervals"), eqloudPool, rhythmspace + "bpm_intervals");
-      // discard dummy value for confidence as 'degara' beat tracker is not 
+      // discard dummy value for confidence as 'degara' beat tracker is not
       // able to compute it
-      rhythmExtractor->output("confidence") >> NOWHERE; 
+      rhythmExtractor->output("confidence") >> NOWHERE;
 
       // BPM Histogram descriptors
       Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
@@ -721,6 +721,8 @@ void computePanning(const string& audioFilename, Pool& neqloudPool,
   connect(audio_4->output("audio"), trimmer->input("signal"));
   connect(audio_4->output("sampleRate"), NOWHERE);
   connect(audio_4->output("numberChannels"), NOWHERE);
+  connect(audio_4->output("codec"), NOWHERE);
+  connect(audio_4->output("bit_rate"), NOWHERE);
   // no difference between eqloud and neqloud, both are taken as non eqloud
   if (neqloud) Panning(audioSource_3, neqloudPool, options, nspace);
   if (eqloud) Panning(audioSource_3, eqloudPool, options, nspace);

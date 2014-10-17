@@ -23,13 +23,14 @@ using namespace essentia;
 using namespace streaming;
 using namespace scheduler;
 
-void MusicExtractor::compute(const string& audioFilename){
-  
+int MusicExtractor::compute(const string& audioFilename){
+
   AlgorithmFactory& factory = AlgorithmFactory::instance();
-  
+
   analysisSampleRate = options.value<Real>("analysisSampleRate");
   startTime = options.value<Real>("startTime");
   endTime = options.value<Real>("endTime");
+  requireMbid = options.value<Real>("requireMbid");
   downmix = "mix";
 
   results.set("metadata.version.essentia", essentia::version);
@@ -43,23 +44,30 @@ void MusicExtractor::compute(const string& audioFilename){
   // TODO: we still compute some low-level descriptors with equal loudness filter...
   // TODO: remove for consistency? evaluate on classification tasks?
 
-  cout << "Process step: Read metadata" << endl;
+  cerr << "Process step: Read metadata" << endl;
   readMetadata(audioFilename);
 
-  cout << "Process step: Compute md5 audio hash" << endl;
-  computeMD5(audioFilename);
+  if (requireMbid
+      && !results.contains<vector<string> >("metadata.tags.musicbrainz_trackid")
+      && !results.contains<string>("metadata.tags.musicbrainz_trackid")) {
+      cerr << "  Cannot find musicbrainz recording id" << endl;
+      return 2;
+  }
 
-  cout << "Process step: Replay gain" << endl;
+  cerr << "Process step: Compute md5 audio hash and codec" << endl;
+  computeMetadata(audioFilename);
+
+  cerr << "Process step: Replay gain" << endl;
   computeReplayGain(audioFilename); // compute replay gain and the duration of the track
-  
+
   if (endTime > results.value<Real>("metadata.audio_properties.length")) {
       endTime = results.value<Real>("metadata.audio_properties.length");
   }
 
-  cout << "Process step: Compute audio features" << endl;
+  cerr << "Process step: Compute audio features" << endl;
 
   // normalize the audio with replay gain and compute as many lowlevel, rhythm,
-  // and tonal descriptors as possible           
+  // and tonal descriptors as possible
 
   Algorithm* loader = factory.create("EasyLoader",
                                     "filename",   audioFilename,
@@ -79,14 +87,14 @@ void MusicExtractor::compute(const string& audioFilename){
   lowlevel->createNetworkLoudness(source, results);
   rhythm->createNetwork(source, results);
   tonal->createNetworkTuningFrequency(source, results);
-  
+
   Network network(loader,false);
   network.run();
 
 
   // Descriptors that require values from other descriptors in the previous chain
   lowlevel->computeAverageLoudness(results);  // requires 'loudness'
-  
+
   Algorithm* loader_2 = factory.create("EasyLoader",
                                        "filename",   audioFilename,
                                        "sampleRate", analysisSampleRate,
@@ -102,7 +110,6 @@ void MusicExtractor::compute(const string& audioFilename){
   Network network_2(loader_2);
   network_2.run();
 
-
   // Descriptors that require values from other descriptors in the previous chain
   tonal->computeTuningSystemFeatures(results); // requires 'hpcp_highres'
 
@@ -112,21 +119,21 @@ void MusicExtractor::compute(const string& audioFilename){
   results.set(tonal->nameSpace + "tuning_frequency", tuningFreq);
 
 
-  cout << "Process step: Compute aggregation"<<endl; 
+  cerr << "Process step: Compute aggregation"<<endl;
   this->stats = this->computeAggregation(results);
 
-  // pre-trained classifiers are only available in branches devoted for that 
+  // pre-trained classifiers are only available in branches devoted for that
   // (eg: 2.0.1)
   /*
-#if HAVE_GAIA2 
-  computeSVMDescriptors(stats); 
-#else 
-  cout << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
+#if HAVE_GAIA2
+  computeSVMDescriptors(stats);
+#else
+  cerr << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
 #endif
   */
 
-  cout << "All done"<<endl;
-  return;
+  cerr << "All done"<<endl;
+  return 0;
 }
 
 
@@ -176,15 +183,15 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
 
   // add descriptors that may be missing due to content
   const Real emptyVector[] = { 0, 0, 0, 0, 0, 0};
-  
+
   int statsSize = int(sizeof(defaultStats)/sizeof(defaultStats[0]));
 
   if(!pool.contains<vector<Real> >("rhythm.beats_loudness")){
     for (int i=0; i<statsSize; i++)
-        poolStats.set(string("rhythm.beats_loudness.")+defaultStats[i],0); 
+        poolStats.set(string("rhythm.beats_loudness.")+defaultStats[i],0);
     }
   if(!pool.contains<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio"))
-    for (int i=0; i<statsSize; i++) 
+    for (int i=0; i<statsSize; i++)
       poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
         arrayToVector<Real>(emptyVector));
   else if (pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio").size()<2){
@@ -199,13 +206,13 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
       }
   }
 
-    
+
   // variable descriptor length counts:
 
   // poolStats.set(string("rhythm.onset_count"), pool.value<vector<Real> >("rhythm.onset_times").size());
   poolStats.set(string("rhythm.beats_count"), pool.value<vector<Real> >("rhythm.beats_position").size());
   //poolStats.set(string("tonal.chords_count"), pool.value<vector<string> >("tonal.chords_progression").size());
-  
+
   delete aggregator;
 
   return poolStats;
@@ -243,6 +250,21 @@ void MusicExtractor::readMetadata(const string& audioFilename) {
   results.merge(poolTags);
   delete metadata;
 
+#if defined(_WIN32) && !defined(__MINGW32__)
+  string slash = "\\";
+#else
+  string slash = "/";
+#endif
+
+  string basename;
+  size_t found = audioFilename.rfind(slash);
+  if (found != string::npos) {
+    basename = audioFilename.substr(found+1);
+  } else {
+    basename = audioFilename;
+  }
+  results.set("metadata.tags.file_name", basename);
+
   /*
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   Algorithm* metadata = factory.create("MetadataReader",
@@ -260,13 +282,13 @@ void MusicExtractor::readMetadata(const string& audioFilename) {
   metadata->output("bitrate")     >> PC(results, "metadata.audio_properties.bitrate");
   metadata->output("channels")    >> PC(results, "metadata.audio_properties.channels");
   // let audio loader take care of duration and samplerate because libtag can be wrong
-  metadata->output("duration")    >> NOWHERE; 
+  metadata->output("duration")    >> NOWHERE;
   metadata->output("sampleRate")  >> NOWHERE;
   Network(metadata).run();
   */
 }
 
-void MusicExtractor::computeMD5(const string& audioFilename) {
+void MusicExtractor::computeMetadata(const string& audioFilename) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   Algorithm* loader = factory.create("AudioLoader",
                                      "filename",   audioFilename,
@@ -275,9 +297,23 @@ void MusicExtractor::computeMD5(const string& audioFilename) {
   loader->output("md5")             >> PC(results, "metadata.audio_properties.md5_encoded");
   loader->output("sampleRate")      >> NOWHERE;
   loader->output("numberChannels")  >> NOWHERE;
+  loader->output("bit_rate")        >> PC(results, "metadata.audio_properties.bit_rate");
+  loader->output("codec")           >> PC(results, "metadata.audio_properties.codec");
 
   Network network(loader);
   network.run();
+
+  // This is just our best guess as to if a file is in a lossless or lossy format
+  // It won't protect us against people converting from (e.g.) mp3 -> flac
+  // before submitting
+  const char* losslessCodecs[] = {"alac", "ape", "flac", "shorten", "tak", "truehd", "tta", "wmalossless"};
+  vector<string> lossless = arrayToVector<string>(losslessCodecs);
+  const string codec = results.value<string>("metadata.audio_properties.codec");
+  bool isLossless = find(lossless.begin(), lossless.end(), codec) != lossless.end();
+  if (!isLossless && codec.substr(0, 4) == "pcm_") {
+      isLossless = true;
+  }
+  results.set("metadata.audio_properties.lossless", isLossless);
 }
 
 void MusicExtractor::computeReplayGain(const string& audioFilename) {
@@ -286,7 +322,7 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
 
   replayGain = 0.0;
   int length = 0;
-  
+
   while (true) {
     Algorithm* audio = factory.create("EqloudLoader",
                                       "filename",   audioFilename,
@@ -311,10 +347,10 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
         downmix = "left";
       }
       else {
-        cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+        cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
         exit(4);
-      }    
-      
+      }
+
       try {
         results.remove("metadata.audio_properties.replay_gain");
       }
@@ -322,27 +358,27 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
       continue;
     }
 
-    if (replayGain <= 40.0) { 
+    if (replayGain <= 40.0) {
       // normal replay gain value; threshold set to 20 was found too conservative
       break;
-    } 
+    }
 
-    // otherwise, a very high value for replayGain: we are probably analyzing a 
-    // silence even though it is not a pure digital silence. except if it was 
-    // some electro music where someone thought it was smart to have opposite 
+    // otherwise, a very high value for replayGain: we are probably analyzing a
+    // silence even though it is not a pure digital silence. except if it was
+    // some electro music where someone thought it was smart to have opposite
     // left and right channels... Try with only the left channel, then.
     if (downmix == "mix") {
       downmix = "left";
       results.remove("metadata.audio_properties.replay_gain");
     }
     else {
-      cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+      cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
       exit(5);
     }
   }
-  
+
   results.set("metadata.audio_properties.downmix", downmix);
-  
+
   // set length (actually duration) of the file
   results.set("metadata.audio_properties.length", length/analysisSampleRate);
 }
@@ -350,11 +386,11 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
 
 void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
 
-  cout << "Writing results to file " << outputFilename << endl;
+  cerr << "Writing results to file " << outputFilename << endl;
 
   string format = options.value<string>("outputFormat");
   standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
-                                                                   "filename", outputFilename + "." + format,
+                                                                   "filename", outputFilename,
                                                                    "doubleCheck", true,
                                                                    "format", format);
   output->input("pool").set(pool);
@@ -364,14 +400,14 @@ void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
 
 
 void MusicExtractor::computeSVMDescriptors(Pool& pool) {
-  cout << "Process step: SVM models" << endl;
+  cerr << "Process step: SVM models" << endl;
   //const char* svmModels[] = {}; // leave this empty if you don't have any SVM models
   const char* svmModels[] = { "genre_tzanetakis", "genre_dortmund",
                               "genre_electronica", "genre_rosamerica",
                               "mood_acoustic", "mood_aggressive",
-                              "mood_electronic", "mood_happy", "mood_party", 
-                              "mood_relaxed", "mood_sad", "timbre", "culture", 
-                              "gender", "mirex-moods", "ballroom", 
+                              "mood_electronic", "mood_happy", "mood_party",
+                              "mood_relaxed", "mood_sad", "timbre", "culture",
+                              "gender", "mirex-moods", "ballroom",
                               "voice_instrumental" };
 
   string pathToSvmModels;
@@ -383,7 +419,7 @@ void MusicExtractor::computeSVMDescriptors(Pool& pool) {
 #endif
 
   for (int i=0; i<(int)ARRAY_SIZE(svmModels); i++) {
-    //cout << "adding HL desc: " << svmModels[i] << endl;
+    //cerr << "adding HL desc: " << svmModels[i] << endl;
     string modelFilename = pathToSvmModels + string(svmModels[i]) + ".history";
     standard::Algorithm* svm = standard::AlgorithmFactory::create("GaiaTransform",
                                                                   "history", modelFilename);
@@ -417,6 +453,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("analysisSampleRate", 44100.0);
   options.set("outputFrames", false);
   options.set("outputFormat", "json");
+  options.set("requireMbid", false);
 
   string silentFrames = "noise";
   int zeroPadding = 0;
@@ -468,8 +505,8 @@ void MusicExtractor::setExtractorDefaultOptions() {
 }
 
 void MusicExtractor::mergeValues() {
-  // NOTE: 
-  // - no check for if descriptors with the same names as the ones asked to 
+  // NOTE:
+  // - no check for if descriptors with the same names as the ones asked to
   //   merge exist already
   // - all descriptors to be merged are expected to be strings
   // TODO implement a method in Pool to detect the type of a descriptor given its name
@@ -478,7 +515,7 @@ void MusicExtractor::mergeValues() {
   vector<string> keys = options.descriptorNames(mergeKeyPrefix);
 
   for (int i=0; i<(int) keys.size(); ++i) {
-    keys[i].replace(0, mergeKeyPrefix.size()+1, ""); 
+    keys[i].replace(0, mergeKeyPrefix.size()+1, "");
     results.set(keys[i], options.value<string>(mergeKeyPrefix + "." + keys[i]));
   }
 }

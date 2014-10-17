@@ -46,6 +46,8 @@ int main(int argc, char* argv[]) {
   loader->output("audio") >> NOWHERE;
   loader->output("sampleRate") >> NOWHERE;
   loader->output("numberChannels") >> NOWHERE;
+  loader->output("codec") >> NOWHERE;
+  loader->output("bit_rate") >> NOWHERE;
   loader->output("md5") >> PC(pool, "md5");
 
   Network network(loader);
