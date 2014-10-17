@@ -23,13 +23,14 @@ using namespace essentia;
 using namespace streaming;
 using namespace scheduler;
 
-void MusicExtractor::compute(const string& audioFilename){
+int MusicExtractor::compute(const string& audioFilename){
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   analysisSampleRate = options.value<Real>("analysisSampleRate");
   startTime = options.value<Real>("startTime");
   endTime = options.value<Real>("endTime");
+  requireMbid = options.value<Real>("requireMbid");
   downmix = "mix";
 
   results.set("metadata.version.essentia", essentia::version);
@@ -45,6 +46,13 @@ void MusicExtractor::compute(const string& audioFilename){
 
   cerr << "Process step: Read metadata" << endl;
   readMetadata(audioFilename);
+
+  if (requireMbid
+      && !results.contains<vector<string> >("metadata.tags.musicbrainz_trackid")
+      && !results.contains<string>("metadata.tags.musicbrainz_trackid")) {
+      cerr << "  Cannot find musicbrainz recording id" << endl;
+      return 2;
+  }
 
   cerr << "Process step: Compute md5 audio hash and codec" << endl;
   computeMetadata(audioFilename);
@@ -125,7 +133,7 @@ void MusicExtractor::compute(const string& audioFilename){
   */
 
   cerr << "All done"<<endl;
-  return;
+  return 0;
 }
 
 
@@ -294,6 +302,18 @@ void MusicExtractor::computeMetadata(const string& audioFilename) {
 
   Network network(loader);
   network.run();
+
+  // This is just our best guess as to if a file is in a lossless or lossy format
+  // It won't protect us against people converting from (e.g.) mp3 -> flac
+  // before submitting
+  const char* losslessCodecs[] = {"alac", "ape", "flac", "shorten", "tak", "truehd", "tta", "wmalossless"};
+  vector<string> lossless = arrayToVector<string>(losslessCodecs);
+  const string codec = results.value<string>("metadata.audio_properties.codec");
+  bool isLossless = find(lossless.begin(), lossless.end(), codec) != lossless.end();
+  if (!isLossless && codec.substr(0, 4) == "pcm_") {
+      isLossless = true;
+  }
+  results.set("metadata.audio_properties.lossless", isLossless);
 }
 
 void MusicExtractor::computeReplayGain(const string& audioFilename) {
@@ -433,6 +453,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("analysisSampleRate", 44100.0);
   options.set("outputFrames", false);
   options.set("outputFormat", "json");
+  options.set("requireMbid", false);
 
   string silentFrames = "noise";
   int zeroPadding = 0;

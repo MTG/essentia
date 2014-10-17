@@ -50,6 +50,7 @@ using namespace streaming;
   Real analysisSampleRate;
   Real startTime;
   Real endTime;
+  bool requireMbid;
 
   Real replayGain;
   string downmix;
@@ -59,7 +60,7 @@ using namespace streaming;
  	Pool stats;
   Pool options;
 
- 	void compute(const string& audioFilename);
+  int compute(const string& audioFilename);
   void setExtractorOptions(const std::string& filename);
   void setExtractorDefaultOptions();
   void mergeValues();
