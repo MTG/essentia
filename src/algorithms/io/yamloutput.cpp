@@ -51,10 +51,20 @@ const char* YamlOutput::description = DOC("This algorithm emits a YAML or JSON r
 // dictionary, when implementing this, it should be made general enough to
 // add other sorting mechanisms (eg numerically, by size, custom ordering).
 
+// Defined here because the json helper functions are
+// not part of the YamlOutput class
+string _jsonN;
+
 void YamlOutput::configure() {
   _filename = parameter("filename").toString();
   _doubleCheck = parameter("doubleCheck").toBool();
   _outputJSON = (parameter("format").toLower() == "json");
+  _indent = parameter("indent").toInt();
+  if (_indent > 0) {
+    _jsonN = "\n";
+  } else {
+    _jsonN = "";
+  }
 
   if (_filename == "") throw EssentiaException("please provide a valid filename");
 }
@@ -97,14 +107,14 @@ vector<string> split(const string& s) {
 }
 
 
-// this function escapes utf-8 string to be compatible with JSON standard, 
-// but it does not handle invalid utf-8 characters. Values in the pool are 
+// this function escapes utf-8 string to be compatible with JSON standard,
+// but it does not handle invalid utf-8 characters. Values in the pool are
 // expected to be correct utf-8 strings, and it is up to the user to provide
-// correct utf-8 strings for the names of descriptors in the Pool. This 
-// function is not called for Pool descriptor names, but only for string values.
+// correct utf-8 strings for the names of descriptors in the Pool. This
+// function is called for both Pool descriptor names and string values.
 string escapeJsonString(const string& input) {
   ostringstream escaped;
-  for (string::const_iterator i = input.begin(); i != input.end(); i++) { 
+  for (string::const_iterator i = input.begin(); i != input.end(); i++) {
     switch (*i) {
       case '\n': escaped << "\\n"; break;
       case '\r': escaped << "\\r"; break;
@@ -115,7 +125,7 @@ string escapeJsonString(const string& input) {
       case '/': escaped << "\\/"; break;
       case '\\': escaped << "\\\\"; break;
       default: escaped << *i; break;
-    } 
+    }
   }
   return escaped.str();
 }
@@ -257,8 +267,9 @@ void emitYaml(StreamType* s, YamlNode* n, const string& indent) {
 
 
 template <typename StreamType>
-void emitJson(StreamType* s, YamlNode* n, const string& indent) {
-  *s << indent << "\"" << n->name << "\":";
+void emitJson(StreamType* s, YamlNode* n, int indentsize, int indentincr) {
+  const string indent = string(indentsize, ' ');
+  *s << indent << "\"" << escapeJsonString(n->name) << "\": ";
 
   if (n->children.empty()) { // if there are no children, emit the value here
     if (n->value != NULL) {
@@ -268,17 +279,17 @@ void emitJson(StreamType* s, YamlNode* n, const string& indent) {
       // implementation for Parameters themselves?
       Parameter::ParamType nodeType = (*(n->value)).type();
       if (nodeType == Parameter::STRING) {
-        *s << " " << "\"" << escapeJsonString((*(n->value)).toString()) << "\"";
+        *s << "\"" << escapeJsonString((*(n->value)).toString()) << "\"";
       }
       else if (nodeType == Parameter::VECTOR_STRING) {
         vector<string> escaped = (*(n->value)).toVectorString();
         for (size_t i=0; i<escaped.size(); ++i) {
           escaped[i] = "\"" + escapeJsonString(escaped[i]) + "\"";
         }
-        *s << " " << escaped;
+        *s << escaped;
       }
       else {
-        *s << " " << *(n->value); // Parameters know how to be emitted to streams
+        *s << *(n->value); // Parameters know how to be emitted to streams
       }
     }
     else { // you should never have this case: a key without any children or associated value
@@ -294,15 +305,16 @@ void emitJson(StreamType* s, YamlNode* n, const string& indent) {
           "value in addition to child keys");
     }
 
-    *s << " {\n";
+    *s << "{" << _jsonN;
 
     // and then emit the json for all of its children, recursive call
-    for (int i=0; i<(int)n->children.size(); ++i) {
-      emitJson(s, n->children[i], indent+"    ");
-      if (i < (int)n->children.size()-1) {
+    int childrensize = (int)n->children.size();
+    for (int i=0; i<childrensize; ++i) {
+      emitJson(s, n->children[i], indentsize + indentincr, indentincr);
+      if (i < childrensize-1) {
           *s << ",";
       }
-      *s << "\n";
+      *s << _jsonN;
     }
 
     *s << indent << "}";
@@ -318,16 +330,16 @@ void outputYamlToStream(YamlNode& root, ostream* out) {
 }
 
 
-void outputJsonToStream(YamlNode& root, ostream* out) {
-  *out << "{\n";
+void outputJsonToStream(YamlNode& root, ostream* out, int indentincr) {
+  *out << "{" << _jsonN;
   for (int i=0; i<(int)root.children.size(); ++i) {
-    emitJson(out, root.children[i], "");
+    emitJson(out, root.children[i], 0, indentincr);
     if (i < (int)root.children.size()-1) {
         *out << ",";
     }
-    *out << "\n";
+    *out << _jsonN;
   }
-  *out << "\n}";
+  *out << "}";
 }
 
 
@@ -357,7 +369,7 @@ void YamlOutput::outputToStream(ostream* out) {
   fillYamlTree(p, &root);
 
   if (_outputJSON) {
-      outputJsonToStream(root, out);
+      outputJsonToStream(root, out, _indent);
   } else {
       outputYamlToStream(root, out);
   }
