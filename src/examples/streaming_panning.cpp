@@ -98,6 +98,7 @@ int main(int argc, char** argv) {
   loader->output("numberChannels")  >>  NOWHERE;
   loader->output("codec")           >>  NOWHERE;
   loader->output("bit_rate")        >>  NOWHERE;
+  loader->output("md5")             >>  NOWHERE;
 
   // demuxer
   demuxer->output("left")           >>  fc_left->input("signal");
