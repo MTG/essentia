@@ -295,7 +295,7 @@ void MusicExtractor::computeMetadata(const string& audioFilename) {
                                      "computeMD5", true);
   loader->output("audio")           >> NOWHERE;
   loader->output("md5")             >> PC(results, "metadata.audio_properties.md5_encoded");
-  loader->output("sampleRate")      >> NOWHERE;
+  loader->output("sampleRate")      >> PC(results, "metadata.audio_properties.sample_rate");
   loader->output("numberChannels")  >> NOWHERE;
   loader->output("bit_rate")        >> PC(results, "metadata.audio_properties.bit_rate");
   loader->output("codec")           >> PC(results, "metadata.audio_properties.codec");
