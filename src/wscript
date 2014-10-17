@@ -254,6 +254,8 @@ def build(ctx):
     for h in headers:
         install_dir = os.path.split(h.srcpath())[0][4:]
         ctx.install_files('${PREFIX}/include/' + install_dir, h)
+    # version.h
+    ctx.install_files('${PREFIX}/include/essentia', 'version.h')
 
     # install pkgconfig file
     #pc = ctx.path.ant_glob('essentia/build/essentia.pc') #TODO remove
