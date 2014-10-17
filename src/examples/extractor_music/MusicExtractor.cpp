@@ -387,12 +387,14 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
 void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
 
   cerr << "Writing results to file " << outputFilename << endl;
+  int indent = (int)options.value<Real>("indent");
 
   string format = options.value<string>("outputFormat");
   standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
                                                                    "filename", outputFilename,
                                                                    "doubleCheck", true,
-                                                                   "format", format);
+                                                                   "format", format,
+                                                                   "indent", indent);
   output->input("pool").set(pool);
   output->compute();
   delete output;
@@ -454,6 +456,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("outputFrames", false);
   options.set("outputFormat", "json");
   options.set("requireMbid", false);
+  options.set("indent", 4);
 
   string silentFrames = "noise";
   int zeroPadding = 0;
