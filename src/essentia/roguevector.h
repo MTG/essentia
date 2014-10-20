@@ -54,13 +54,19 @@ class RogueVector : public std::vector<T> {
   // Those need to be implementation specific
   void setData(T* data);
   void setSize(size_t size);
+
+#if defined(__GNUC__) && GCC_VERSION < 40200
+  T* data();
+  const T* data() const;
+#endif
+
 };
 
 
 
 
-// Windows implementation
-#if defined(OS_WIN32)
+// MSVC implementation
+#if defined(_MSV_VER)
 
 
 template <typename T>
@@ -73,8 +79,8 @@ void RogueVector<T>::setSize(size_t size) {
 }
 
 
-// Linux implementation
-#elif defined(OS_LINUX)
+// GCC implementation
+#elif defined(__GNUC__)
 
 
 template <typename T>
@@ -86,9 +92,23 @@ void RogueVector<T>::setSize(size_t size) {
   this->_M_impl._M_end_of_storage = this->_M_impl._M_start + size;
 }
 
+#if GCC_VERSION < 40200
 
-// Mac implementation
-#elif defined (OS_MAC)
+template <typename T>
+T* RogueVector<T>::data() {
+  return this->_M_impl._M_start;
+}
+
+template <typename T>
+const T* RogueVector<T>::data() const {
+  return this->_M_impl._M_start;
+}
+
+#endif
+
+// clang/libcpp implementation
+#elif defined (_LIBCPP_VERSION)
+
 
 // TODO: this is a big hack that relies on clang/libcpp not changing the memory
 //       layout of the std::vector (very dangerous, but works for now...)
@@ -103,6 +123,10 @@ void RogueVector<T>::setSize(size_t size) {
     *(start+2) = *start + size;
 }
 
+
+#else
+
+#error "unsupported STL vendor"
 
 #endif
 

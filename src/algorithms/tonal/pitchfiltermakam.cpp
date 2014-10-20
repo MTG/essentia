@@ -95,8 +95,8 @@ bool PitchFilterMakam::areClose(Real num1, Real num2) {
 
 void PitchFilterMakam::splitToChunks(const vector <Real>& pitch,
     vector <vector <Real> >& chunks,
-    vector <uint64_t>& chunksIndexes,
-    vector <uint64_t>& chunksSize) {
+    vector <uint64>& chunksIndexes,
+    vector <uint64>& chunksSize) {
 
     // populate chunks
     for (size_t i=0; i<pitch.size(); i++) {
@@ -133,14 +133,14 @@ void PitchFilterMakam::joinChunks(const vector <vector <Real> >& chunks, vector 
   }
 }
 
-Real PitchFilterMakam::energyInChunk(const vector <Real>& energy, uint64_t chunkIndex, uint64_t chunkSize) {
+Real PitchFilterMakam::energyInChunk(const vector <Real>& energy, uint64 chunkIndex, uint64 chunkSize) {
   return accumulate(energy.begin() + chunkIndex, energy.begin() + chunkIndex + chunkSize, 0.0) / chunkSize;
 }
 
 void PitchFilterMakam::correctOctaveErrorsByChunks(vector <Real>& pitch) {
   vector <vector <Real> > chunks;
-  vector <uint64_t> chunksIndexes;
-  vector <uint64_t> chunksSize;
+  vector <uint64> chunksIndexes;
+  vector <uint64> chunksSize;
 
   // split pitch values vector to chunks
   splitToChunks(pitch, chunks, chunksIndexes, chunksSize);
@@ -315,8 +315,8 @@ void PitchFilterMakam::filterChunksByEnergy(std::vector <Real>& pitch, const std
   // we, instead, use spectral energy
 
   vector <vector <Real> > chunks;
-  vector <uint64_t> chunksIndexes;
-  vector <uint64_t> chunksSize;
+  vector <uint64> chunksIndexes;
+  vector <uint64> chunksSize;
 
   // split pitch values vector to chunks
   splitToChunks(pitch, chunks, chunksIndexes, chunksSize);

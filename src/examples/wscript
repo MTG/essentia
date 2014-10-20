@@ -76,7 +76,7 @@ def configure(ctx):
             ctx.env.EXAMPLE_LIST.append(e)
 
     if ctx.env.WITH_STATIC_EXAMPLES:
-        ctx.env.LINKFLAGS = ['-static', '-pthread']
+        ctx.env.LINKFLAGS = ['-static']
         ctx.env.SHLIB_MARKER = '-Wl,-Bstatic'
 
         # NOTE: this list of libs is hardcoded to work on a debian wheezy system

@@ -68,6 +68,42 @@ class Atomic {
 } // namespace essentia
 
 
+#elif defined(OS_MAC)
+
+
+#include <libkern/OSAtomic.h>
+
+namespace essentia {
+
+class Atomic {
+ private:
+  int32_t volatile i_;
+
+ public:
+  inline Atomic(const int &i = 0) : i_(i) {}
+
+  inline operator int() const { return i_; }
+
+  inline void operator-=(const int &i) {
+    OSAtomicAdd32Barrier(-i, &i_);
+  }
+
+  inline void operator+=(const int &i) {
+    OSAtomicAdd32Barrier(i, &i_);
+  }
+
+  inline void operator++() {
+    OSAtomicIncrement32Barrier(&i_);
+  }
+
+  inline void operator--() {
+    OSAtomicDecrement32Barrier(&i_);
+  }
+};
+
+} // namespace essentia
+
+
 #elif defined(OS_LINUX)
 
 
