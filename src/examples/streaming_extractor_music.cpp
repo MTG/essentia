@@ -29,13 +29,15 @@ using namespace essentia;
 using namespace essentia::streaming;
 using namespace essentia::scheduler;
 
-void usage() {
+void usage(char *progname) {
     cout << "Error: wrong number of arguments" << endl;
-    cout << "Usage: streaming_extractor_archivemusic input_audiofile output_textfile [profile]" << endl;
+    cout << "Usage: " << progname << " input_audiofile output_textfile [profile]" << endl;
     exit(1);
 }
 
 int main(int argc, char* argv[]) {
+  // Returns: 1 on essentia error
+  //          2 if there are no tags in the file
 
   string audioFilename, outputFilename, profileFilename;
 
@@ -50,9 +52,9 @@ int main(int argc, char* argv[]) {
       profileFilename = argv[3];
       break;
     default:
-      usage();
+      usage(argv[0]);
   }
-
+  int result;
   try {
     essentia::init();
 
@@ -63,11 +65,10 @@ int main(int argc, char* argv[]) {
     extractor->setExtractorOptions(profileFilename);
     extractor->mergeValues();
 
-    int result = extractor->compute(audioFilename);
+    result = extractor->compute(audioFilename);
 
     if (result > 0) {
         cerr << "Quitting early." << endl;
-        return result;
     } else {
         extractor->outputToFile(extractor->stats, outputFilename);
         if (extractor->options.value<Real>("outputFrames")) {
@@ -80,5 +81,5 @@ int main(int argc, char* argv[]) {
     cout << e.what() << endl;
     return 1;
   }
-  return 0;
+  return result;
 }

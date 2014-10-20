@@ -232,6 +232,9 @@ void AudioLoader::closeAudioFile() {
     // Close the audio file
     avformat_close_input(&_demuxCtx);
 
+    // free AVPacket
+    av_free_packet(&_packet);
+
     _demuxCtx = 0;
     _audioCtx = 0;
 }

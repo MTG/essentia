@@ -295,7 +295,7 @@ void MusicExtractor::computeMetadata(const string& audioFilename) {
                                      "computeMD5", true);
   loader->output("audio")           >> NOWHERE;
   loader->output("md5")             >> PC(results, "metadata.audio_properties.md5_encoded");
-  loader->output("sampleRate")      >> NOWHERE;
+  loader->output("sampleRate")      >> PC(results, "metadata.audio_properties.sample_rate");
   loader->output("numberChannels")  >> NOWHERE;
   loader->output("bit_rate")        >> PC(results, "metadata.audio_properties.bit_rate");
   loader->output("codec")           >> PC(results, "metadata.audio_properties.codec");
@@ -387,12 +387,14 @@ void MusicExtractor::computeReplayGain(const string& audioFilename) {
 void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
 
   cerr << "Writing results to file " << outputFilename << endl;
+  int indent = (int)options.value<Real>("indent");
 
   string format = options.value<string>("outputFormat");
   standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
                                                                    "filename", outputFilename,
                                                                    "doubleCheck", true,
-                                                                   "format", format);
+                                                                   "format", format,
+                                                                   "indent", indent);
   output->input("pool").set(pool);
   output->compute();
   delete output;
@@ -454,6 +456,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("outputFrames", false);
   options.set("outputFormat", "json");
   options.set("requireMbid", false);
+  options.set("indent", 4);
 
   string silentFrames = "noise";
   int zeroPadding = 0;

@@ -51,6 +51,7 @@ using namespace streaming;
   Real startTime;
   Real endTime;
   bool requireMbid;
+  Real indent;
 
   Real replayGain;
   string downmix;
