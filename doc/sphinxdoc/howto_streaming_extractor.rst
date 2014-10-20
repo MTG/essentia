@@ -74,8 +74,7 @@ Creating the required algorithms
 
   Algorithm* audio = factory.create("MonoLoader",
                                     "filename", audioFilename,
-                                    "sampleRate", sampleRate,
-                                    "silentFrames", "noise");
+                                    "sampleRate", sampleRate);
 
   Algorithm* fc    = factory.create("FrameCutter",
                                     "frameSize", frameSize,

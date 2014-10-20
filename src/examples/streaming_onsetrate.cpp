@@ -55,6 +55,9 @@ int main(int argc, char* argv[]) {
   audioloader->output("audio")           >>  mono->input("audio");
   audioloader->output("numberChannels")  >>  mono->input("numberChannels");
   audioloader->output("sampleRate")      >>  PC(pool, "metadata.sampleRate");
+  audioloader->output("codec")           >>  NOWHERE;
+  audioloader->output("bit_rate")        >>  NOWHERE;
+  audioloader->output("md5")             >>  NOWHERE;
 
   // mono -> onsetrate
   mono->output("audio")                  >>  onsetrate->input("signal");

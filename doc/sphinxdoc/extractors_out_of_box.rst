@@ -37,6 +37,8 @@ with the type of descriptors Essentia is able to compute or use them as a refere
 
 * ``streaming_predominantmelody``: extracts pitch of a predominant melody using `MELODIA <reference/std_PredominantMelody.html>`_ algorithm. 
 
+* ``streaming_beattracker_multifeature_mirex2013``: extracts beat postions usign the `multifeature beattracker <reference/std_BeatTrackerMultiFeature.html>`_ algorithm.
+
 * ``streaming_mfcc``: extracts MFCC frames and their statistical characterization.
 
 * ``standard_rhythmtransform``: computes `rhythm transform <reference/std_RhythmTransform.html>`_.

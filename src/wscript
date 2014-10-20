@@ -12,6 +12,9 @@ def options(ctx):
     ctx.add_option('--with-examples', action='store_true',
                    dest='WITH_EXAMPLES', default=False,
                    help='build the example programs')
+    ctx.add_option('--with-example', action='store',
+                   dest='EXAMPLES', default=False,
+                   help='example programs to build (comma separated, without .cpp)')
     ctx.add_option('--with-static-examples', action='store_true',
                    dest='WITH_STATIC_EXAMPLES', default=False,
                    help='build the example programs as static executables (WARNING: only works on debian wheezy with custom-compiled ffmpeg)')
@@ -41,8 +44,10 @@ def configure(ctx):
     ctx.env.WITH_PYTHON   = ctx.options.WITH_PYTHON
     ctx.env.WITH_VAMP     = ctx.options.WITH_VAMP
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
+    ctx.env.EXAMPLES       = ctx.options.EXAMPLES
+    ctx.env.EXAMPLE_LIST   = []
 
-    if ctx.env.WITH_STATIC_EXAMPLES:
+    if ctx.env.WITH_STATIC_EXAMPLES and not ctx.env.EXAMPLES:
         ctx.env.WITH_EXAMPLES = True
 
     ctx.env.ALGOIGNORE = []
@@ -50,22 +55,34 @@ def configure(ctx):
 
 
     ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
-                  args=['--cflags', '--libs'], mandatory=False)
-
+                  args=['libavcodec >= 53.25.0', '--cflags', '--libs', '--modversion'],
+                  msg='Checking for \'libavcodec\' >= 53.25.0',
+                  mandatory=False)
+    
     ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
-                  args=['--cflags', '--libs'], mandatory=False)
+                  args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
     ctx.check_cfg(package='libavutil', uselib_store='AVUTIL',
-                  args=['--cflags', '--libs'], mandatory=False)
+                  args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
     ctx.check_cfg(package='libswresample', uselib_store='SWRESAMPLE',
-                  args=['--cflags', '--libs'], mandatory=False)
+                  args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
     if ctx.env.WITH_STATIC_EXAMPLES:
-        print('Static examples incompatible with TagLib, skipping TagLib detection...')
+        #print('Static examples incompatible with TagLib, skipping TagLib detection...')
+        print('Static examples incompatible with Gaia, skipping Gaia detection...')
     else:
-        ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
-                      args=['--cflags', '--libs'], mandatory=False)
+        #ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
+        #              args=['taglib >= 1.9', '--cflags', '--libs'],
+        #              msg='Checking for \'taglib\' >= 1.9',
+        #              mandatory=False)
+        ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
+                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
+
+    ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
+                  args=['taglib >= 1.9', '--cflags', '--libs', '--modversion'],
+                  msg='Checking for \'taglib\' >= 1.9',
+                  mandatory=False)
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += [ '__STDC_CONSTANT_MACROS' ]
@@ -79,18 +96,15 @@ def configure(ctx):
         ctx.env.LINKFLAGS += [ '-lyaml' ]
     else:
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
-                      args=['--cflags', '--libs'])
+                      args=['--cflags', '--libs', '--modversion'])
 
     ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
-                  args=['--cflags', '--libs'])
+                  args=['--cflags', '--libs', '--modversion'])
 
     ctx.check_cfg(package='samplerate', uselib_store='SAMPLERATE',
-                  args=['--cflags', '--libs'])
+                  args=['--cflags', '--libs', '--modversion'])
 
-    ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
-                  args=['--cflags', '--libs'], mandatory=False)
-
-    if ctx.env.WITH_EXAMPLES or ctx.env.WITH_VAMP:
+    if ctx.env.WITH_EXAMPLES or ctx.env.EXAMPLES or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
 
     if ctx.env.WITH_PYTHON:
@@ -111,7 +125,7 @@ def configure(ctx):
 
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
     if has('avcodec') and has('avformat') and has('avutil'):
-        print('- FFmpeg / libav detected!')
+        print('- FFmpeg / libav detected!')       
         print('  The following algorithms will be included: %s\n' % algos)
         ctx.env.USES += ' AVFORMAT AVCODEC AVUTIL'
     else:
@@ -156,8 +170,14 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
+    lel = len(ctx.env.EXAMPLE_LIST)
+    if lel:
+        print('- Compiling %s example%s' % (lel, "" if lel == 1 else "s"))
+        print('  %s' % ", ".join(ctx.env.EXAMPLE_LIST))
+
 
     print('=======================================================================================')
+
 
 
 from waflib.Task import Task
@@ -174,12 +194,12 @@ def build(ctx):
     sys.path = [ctx.path.find_dir('..')] + sys.path
 
     # get list of available algorithms
-    from utils.algorithms_info import get_all_algorithms, create_registration_cpp
+    from utils.algorithms_info import get_all_algorithms, create_registration_cpp, create_version_h
+
     algos = get_all_algorithms(ctx.path.find_dir('algorithms').abspath(),
                                root_dir = ctx.path.abspath())
 
     # select the algorithms we want to build
-
     if ctx.env['ALGOINCLUDE']:
         print('Building the following algorithms: %s' % ', '.join(ctx.env['ALGOINCLUDE']))
     else:
@@ -189,6 +209,9 @@ def build(ctx):
         print('Ignoring the following algorithms: %s' % ', '.join(ctx.env['ALGOIGNORE']))
         for algoname in ctx.env['ALGOIGNORE']:
             del algos[algoname]
+
+    # create version.h header file
+    create_version_h('src/version.h', ctx.env.VERSION, ctx.env.GIT_SHA)
 
 
     # create algorithms registration file
@@ -219,15 +242,28 @@ def build(ctx):
         #includes = ctx.env.includes
     )
 
+    def write_pcfile(task):
+        open('build/essentia.pc', 'w').write(ctx.env.pcfile)
+
+    ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
+    ctx.add_group()
+
+
     # install headers if asked to
     headers = ctx.path.ant_glob('essentia/**/*.h')
     for h in headers:
         install_dir = os.path.split(h.srcpath())[0][4:]
         ctx.install_files('${PREFIX}/include/' + install_dir, h)
+    # version.h
+    ctx.install_files('${PREFIX}/include/essentia', 'version.h')
+
+    # install pkgconfig file
+    #pc = ctx.path.ant_glob('essentia/build/essentia.pc') #TODO remove
+    #ctx.install_files('${PREFIX}/lib/pkgconfig', pc)     #TODO remove
+    ctx.install_files('${PREFIX}/lib/pkgconfig', '../essentia.pc')
 
 
-
-    if ctx.env.WITH_EXAMPLES or ctx.env.WITH_VAMP:
+    if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
 
     if ctx.env.WITH_PYTHON:

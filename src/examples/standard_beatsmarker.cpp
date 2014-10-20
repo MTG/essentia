@@ -55,12 +55,14 @@ int main(int argc, char* argv[]) {
 
   vector<Real> audio;
   vector<Real> beats;
+  Real confidence;
 
   audioLoader->output("audio").set(audio);
   audioLoader->compute();
 
   beatTracker->input("signal").set(audio);
   beatTracker->output("ticks").set(beats);
+  beatTracker->output("confidence").set(confidence);
   beatTracker->compute();
 
 
