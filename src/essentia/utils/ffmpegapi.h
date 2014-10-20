@@ -24,7 +24,7 @@
 // TODO: as soon as debian sorts its multimedia mess and include ffmpeg again,
 //       this can be removed along with all the outdated code related to it
 #ifndef HAVE_SWRESAMPLE
-#define HAVE_SWRESAMPLE 0
+#define HAVE_SWRESAMPLE 1
 #endif
 
 // TODO Long-term: get rid of audioconvert.* and switch to using official libavresample API.
