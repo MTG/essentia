@@ -77,7 +77,7 @@ namespace essentia {
 
 class Atomic {
  private:
-  int32_t volatile i_;
+  int32_t i_;
 
  public:
   inline Atomic(const int &i = 0) : i_(i) {}
