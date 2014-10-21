@@ -106,7 +106,6 @@ def configure(ctx):
         ctx.find_program('i686-w64-mingw32-gcc', var='CC')
         ctx.find_program('i686-w64-mingw32-g++', var='CXX')
         ctx.find_program('i686-w64-mingw32-ar', var='AR')
-        ctx.find_program('i686-w64-mingw32-ld', var='LD')
 
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]

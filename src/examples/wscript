@@ -111,6 +111,10 @@ def configure(ctx):
         #                'vorbis', 'vorbisenc', 'ogg', 'theora', 'speex',
         #                'openjpeg', 'mp3lame', 'vpx', 'gsm', 'z', 'bz2' ]
         ctx.env.LIB = [ 'avformat', 'avcodec', 'avutil', 'tag' ]
+        
+        if ctx.options.CROSS_COMPILE_MINGW32:
+            # otherwise the __imp__ symbols will be expected at link time 
+            ctx.env.CXXFLAGS += ['-DYAML_DECLARE_STATIC', '-DTAGLIB_STATIC']
 
 
 def build(ctx):
