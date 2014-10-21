@@ -37,6 +37,10 @@ const char* TempoTapDegara::description = DOC("This algorithm estimates beat pos
 "  [2] Davies, M. E., & Plumbley, M. D. (2007). Context-dependent beat tracking of musical audio. Audio, Speech, and Language Processing, IEEE Transactions on, 15(3), 1009-1020.\n"
 "  [3] Stark, A. M., Davies, M. E., & Plumbley, M. D. (2009, September). Real-time beatsynchronous analysis of musical audio. In 12th International Conference on Digital Audio Effects (DAFx-09), Como, Italy.");
 
+const Real TempoTapDegara::_frameDurationODF = 5.944308390022676;
+const Real TempoTapDegara::_alpha = 0.5;
+const Real TempoTapDegara::_sigma_ibi = 0.025;
+
 
 void TempoTapDegara::configure() {
   Real minTempo = parameter("minTempo").toInt();

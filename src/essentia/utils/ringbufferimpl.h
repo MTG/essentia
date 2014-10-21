@@ -20,7 +20,9 @@
 #ifndef ESSENTIA_STREAMING_RINGBUFFERIMPL_H
 #define ESSENTIA_STREAMING_RINGBUFFERIMPL_H
 
+
 #include "atomic.h"
+
 
 #ifdef OS_WIN32
 

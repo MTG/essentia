@@ -111,7 +111,7 @@
 /**
  * OS type.
  */
-#ifdef _MSC_VER
+#ifdef WIN32
 #  define OS_WIN32
 #else
 #  if defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
@@ -124,19 +124,19 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-// some Windows peculiarities that need to be fixed
 #ifdef OS_WIN32
+// tell microsoft we would like to use std::min and std::max
+#undef NOMINMAX
+#define NOMINMAX 1
+#endif // OS_WIN32
 
+// some MSVC peculiarities that need to be fixed
+#ifdef _MSV_VER
   #pragma warning (disable : 4251 4275) // disable the DLL warnings...
   #pragma warning (disable : 4244 4305 4267) // disable float<=>double conversion warnings
   #pragma warning (disable : 4996) // XYZ was declared deprecated
   #pragma warning (disable : 4146) // MersenneTwister.h:273 unary minus operator applied to unsigned type, result still unsigned
   #pragma warning (disable : 4355) // this used in class initialization, but we do it in a safe way
-
-  // tell microsoft we would like to use std::min and std::max
-  #define NOMINMAX
-
-  typedef unsigned int uint;
 
   #define strcasecmp _stricmp
 
@@ -152,12 +152,7 @@
       return _finite(x) == 0;
     }
   }
-#endif // OS_WIN32
-
-
-#ifdef OS_MAC
-typedef unsigned int uint;
-#endif // OS_MAC
+#endif // OS_WIN32_MSVC
 
 
 // returns GCC version as a single constant, valid for both linux & mac
