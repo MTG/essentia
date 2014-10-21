@@ -35,7 +35,10 @@ def options(ctx):
     ctx.add_option('--mode', action='store',
                    dest='MODE', default="release",
                    help='debug or release')
-
+    
+    ctx.add_option('--cross-compile-mingw32', action='store_true',
+                   dest='CROSS_COMPILE_MINGW32', default=False,
+                   help='cross-compile for windows using mingw32 on linux')
 
 
 def configure(ctx):
@@ -63,10 +66,10 @@ def configure(ctx):
     else:
         raise ValueError('mode should be either "debug" or "release"')
 
-
-    # required if we want to use libessentia.a to be linked in the python bindings
-    # (dynamic library, needs -fPIC)
-    ctx.env.CXXFLAGS += [ '-fPIC' ]
+    if not ctx.options.CROSS_COMPILE_MINGW32 and sys.platform != 'win32':
+        # required if we want to use libessentia.a to be linked in the python bindings
+        # (dynamic library, needs -fPIC)
+        ctx.env.CXXFLAGS += [ '-fPIC' ]
 
     # global defines
     ctx.env.DEFINES = []
@@ -76,7 +79,6 @@ def configure(ctx):
         ctx.env.CC = 'clang'
         ctx.env.CXX = 'clang++'
 
-
         ctx.env.DEFINES   += [ 'GTEST_HAS_TR1_TUPLE=0' ]
         ctx.env.CXXFLAGS = [ '-stdlib=libc++', '-std=c++11', '-Wno-gnu' ]
         ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
@@ -85,6 +87,33 @@ def configure(ctx):
         # add /usr/local/include as the brew formula for yaml doesn't have
         # the cflags properly set
         ctx.env.CXXFLAGS += [ '-I/usr/local/include' ]
+
+    elif sys.platform == 'win32': 
+        # compile libgcc and libstd statically when using MinGW
+        ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
+        
+        # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
+        os.environ["PKG_CONFIG_PATH"] = 'packaging\win32_3rdparty\lib\pkgconfig'
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
+         
+        # TODO why this code does not work?
+        # force the use of mingw gcc compiler instead of msvc
+        #ctx.env.CC = 'gcc'
+        #ctx.env.CXX = 'g++'
+
+    if ctx.options.CROSS_COMPILE_MINGW32:
+        # locate mingw32 compilers and use them
+        ctx.find_program('i686-w64-mingw32-gcc', var='CC')
+        ctx.find_program('i686-w64-mingw32-g++', var='CXX')
+        ctx.find_program('i686-w64-mingw32-ar', var='AR')
+        ctx.find_program('i686-w64-mingw32-ld', var='LD')
+
+        # compile libgcc and libstd statically when using MinGW
+        ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
+        
+        # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
+        os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
 
     ctx.load('compiler_cxx compiler_c')
 

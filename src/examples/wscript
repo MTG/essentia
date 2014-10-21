@@ -76,7 +76,7 @@ def configure(ctx):
             ctx.env.EXAMPLE_LIST.append(e)
 
     if ctx.env.WITH_STATIC_EXAMPLES:
-        ctx.env.LINKFLAGS = ['-static', '-pthread']
+        ctx.env.LINKFLAGS = ['-static']
         ctx.env.SHLIB_MARKER = '-Wl,-Bstatic'
 
         # NOTE: this list of libs is hardcoded to work on a debian wheezy system
@@ -107,9 +107,10 @@ def configure(ctx):
 
         # NOTE: the order of the libs in the following list is VERY important,
         #       do not mess with it unless you know what you're doing
-        ctx.env.LIB = [ 'avformat', 'avcodec', 'avutil', 'xvidcore', 'x264',
-                        'vorbis', 'vorbisenc', 'ogg', 'theora', 'speex',
-                        'openjpeg', 'mp3lame', 'vpx', 'gsm', 'z', 'bz2' ]
+        #ctx.env.LIB = [ 'avformat', 'avcodec', 'avutil', 'xvidcore', 'x264',
+        #                'vorbis', 'vorbisenc', 'ogg', 'theora', 'speex',
+        #                'openjpeg', 'mp3lame', 'vpx', 'gsm', 'z', 'bz2' ]
+        ctx.env.LIB = [ 'avformat', 'avcodec', 'avutil', 'tag' ]
 
 
 def build(ctx):
@@ -137,6 +138,7 @@ def build(ctx):
                     build_example(e[0])
                 elif len(e) == 2:
                     build_example(e[0], e[1])
+
 
     if ctx.env.WITH_VAMP:
         ctx.env.INCLUDES += [ '3rdparty/vamp-plugin-sdk-2.4' ]

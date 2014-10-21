@@ -63,6 +63,30 @@ sudo ./waf install
 The static executables will be in the ```build/src/examples``` folder.
 
 
+Cross-compiling for Windows on Linux
+------------------------------------
+
+Install mingw gcc/g++
+```sudo apt-get install gcc-mingw32 ```
+
+Build dependencies
+```
+cd packaging/win32_3rdparty
+build_libav_nomuxers.sh
+build_taglib.sh
+build_fftw3.sh
+build_libsamplerate.sh
+build_yaml.sh
+cd ../../
+```
+
+Build Essentia
+```
+./waf configre --with-examples --cross-compile-mingw32
+./waf
+```
+
+
 How to know which other Algorithms an Algorithm uses?
 -----------------------------------------------------
 

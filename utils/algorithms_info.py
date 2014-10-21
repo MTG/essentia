@@ -33,7 +33,7 @@ def get_all_algorithms(algo_dir, root_dir=None):
                 # get a nicer filename now that it's been read
                 if filename.startswith(root_dir):
                     filename = filename[len(root_dir):]
-                    if filename[0] == '/':
+                    if filename[0] == '/' or filename[0] == '\\': # both linux and win
                         filename = filename[1:]
 
                 algo = ''

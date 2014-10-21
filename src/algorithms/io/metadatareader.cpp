@@ -17,9 +17,9 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include <fileref.h>
-#include <tpropertymap.h>
-#include <tag.h>
+#include <taglib/fileref.h>
+#include <taglib/tpropertymap.h>
+#include <taglib/tag.h>
 
 #include "metadatareader.h"
 #include "metadatautils.h"
