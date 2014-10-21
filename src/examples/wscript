@@ -78,7 +78,7 @@ def configure(ctx):
     if ctx.env.WITH_STATIC_EXAMPLES:
         if ctx.env.DEST_OS != 'darwin':
             ctx.env.LINKFLAGS = ['-static']
-        ctx.env.SHLIB_MARKER = '-Wl,-Bstatic'
+            ctx.env.SHLIB_MARKER = '-Wl,-Bstatic'
         ctx.env.LIB = [ 'avformat', 'avcodec', 'avutil', 'tag' ]
 
 
