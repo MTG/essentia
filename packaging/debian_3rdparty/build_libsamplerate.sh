@@ -10,15 +10,11 @@ tar -xf $LIBSAMPLERATE_VERSION.tar.gz
 cd $LIBSAMPLERATE_VERSION
 
 ./configure \
-    --host=$HOST \
     --prefix=$PREFIX \
-    --disable-fftw \
-    --disable-sndfile \
+    $LIBSAMPLERATE_FLAGS \
     $SHARED_OR_STATIC
 make
 make install
-
-cp src/.libs/libsamplerate-0.dll $PREFIX/lib/libsamplerate.dll
 
 cd ../..
 rm -r tmp

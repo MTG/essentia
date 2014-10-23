@@ -14,7 +14,6 @@ cd $LIBYAML_VERSION
 
 # fails to compile shared library, building only static
 CFLAGS="-DYAML_DECLARE_STATIC" ./configure \
-    --host=$HOST \
     --prefix=$PREFIX \
     $SHARED_OR_STATIC
 make
