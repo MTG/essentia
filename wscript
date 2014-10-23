@@ -93,19 +93,21 @@ def configure(ctx):
         # the cflags properly set
         ctx.env.CXXFLAGS += [ '-I/usr/local/include' ]
 
-    elif sys.platform == 'win32': 
-        # compile libgcc and libstd statically when using MinGW
-        ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
+    #elif sys.platform == 'win32': 
+    #    # compile libgcc and libstd statically when using MinGW
+    #    ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
         
-        # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
-        os.environ["PKG_CONFIG_PATH"] = 'packaging\win32_3rdparty\lib\pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
-         
-        # TODO why this code does not work?
-        # force the use of mingw gcc compiler instead of msvc
-        #ctx.env.CC = 'gcc'
-        #ctx.env.CXX = 'g++'
+    #    # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
+    #    os.environ["PKG_CONFIG_PATH"] = 'packaging\win32_3rdparty\lib\pkgconfig'
+    #    os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
+    #     
+    #    # TODO why this code does not work?
+    #    # force the use of mingw gcc compiler instead of msvc
+    #    #ctx.env.CC = 'gcc'
+    #    #ctx.env.CXX = 'g++'
 
+
+    # use manually prebuilt dependencies in the case of static examples or mingw cross-build
     if ctx.options.CROSS_COMPILE_MINGW32:
         # locate mingw32 compilers and use them
         ctx.find_program('i686-w64-mingw32-gcc', var='CC')
@@ -115,9 +117,15 @@ def configure(ctx):
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
         
-        # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
+        print ("→ Cross-compiling with MinGW32: search for pre-built dependencies in 'packaging/win32_3rdparty'")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
+    
+    elif ctx.options.WITH_STATIC_EXAMPLES and sys.platform.startswith('linux'):
+        print ("→ Compiling with static examples on Linux: search for pre-built dependencies in 'packaging/debian'")
+        os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
+        
 
     ctx.load('compiler_cxx compiler_c')
 

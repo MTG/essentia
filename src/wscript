@@ -46,12 +46,10 @@ def configure(ctx):
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
     ctx.env.EXAMPLES       = ctx.options.EXAMPLES
     ctx.env.EXAMPLE_LIST   = []
+    ctx.env.ALGOIGNORE = []
 
     if ctx.env.WITH_STATIC_EXAMPLES and not ctx.env.EXAMPLES:
         ctx.env.WITH_EXAMPLES = True
-
-    ctx.env.ALGOIGNORE = []
-    #ctx.env.ALGOIGNORE += ['GaiaTransform'] #TODO gaia
 
     ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
                   args=['libavcodec >= 53.25.0', '--cflags', '--libs', '--modversion'],
@@ -67,21 +65,23 @@ def configure(ctx):
     ctx.check_cfg(package='libswresample', uselib_store='SWRESAMPLE',
                   args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
-    if ctx.env.WITH_STATIC_EXAMPLES:
-        #print('Static examples incompatible with TagLib, skipping TagLib detection...')
-        print('Static examples incompatible with Gaia, skipping Gaia detection...')
-    else:
-        #ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
-        #              args=['taglib >= 1.9', '--cflags', '--libs'],
-        #              msg='Checking for \'taglib\' >= 1.9',
-        #              mandatory=False)
-        ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
+    ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
+                  args=['--cflags', '--libs', '--modversion'])
+
+    ctx.check_cfg(package='samplerate', uselib_store='SAMPLERATE',
+                  args=['--cflags', '--libs', '--modversion'])
 
     ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
                   args=['taglib >= 1.9', '--cflags', '--libs', '--modversion'],
                   msg='Checking for \'taglib\' >= 1.9',
                   mandatory=False)
+
+    if ctx.env.WITH_STATIC_EXAMPLES:
+        print('Static examples incompatible with Gaia, skipping Gaia detection...')
+    else:
+        ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
+                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
+
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += [ '__STDC_CONSTANT_MACROS' ]
@@ -97,18 +97,11 @@ def configure(ctx):
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
                       args=['--cflags', '--libs', '--modversion'])
 
-    ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
-                  args=['--cflags', '--libs', '--modversion'])
-
-    ctx.check_cfg(package='samplerate', uselib_store='SAMPLERATE',
-                  args=['--cflags', '--libs', '--modversion'])
-
     if ctx.env.WITH_EXAMPLES or ctx.env.EXAMPLES or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
 
     if ctx.env.WITH_PYTHON:
         ctx.recurse('python')
-
 
 
     # prepare the compilation environment using the detected libraries
