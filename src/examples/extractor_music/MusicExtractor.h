@@ -36,6 +36,7 @@
 
 
 #define EXTRACTOR_VERSION "music 1.0"
+#define EXTRACTOR_HL_VERSION "music_highlevel 1.0"
 
 using namespace std;
 using namespace essentia;

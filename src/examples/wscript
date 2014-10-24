@@ -41,6 +41,12 @@ example_sources = [
                    'extractor_music/MusicLowlevelDescriptors',
                    'extractor_music/MusicRhythmDescriptors',
                    'extractor_music/MusicTonalDescriptors' ]),
+        
+        ('streaming_extractor_music_svm',
+                 [ 'extractor_music/MusicExtractor',
+                   'extractor_music/MusicLowlevelDescriptors',
+                   'extractor_music/MusicRhythmDescriptors',
+                   'extractor_music/MusicTonalDescriptors' ]),
 
         ('streaming_beatsmarker', ),
         ('streaming_mfcc', ),

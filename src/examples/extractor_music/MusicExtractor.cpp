@@ -512,6 +512,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   //options.set("highlevel.compute", false);  
   //cerr << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
 #endif
+  options.set("highlevel.inputFormat", "json");
 
   // do not compute by default, whether Gaia is installed or no
   options.set("highlevel.compute", false);
