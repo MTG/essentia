@@ -124,13 +124,9 @@ int MusicExtractor::compute(const string& audioFilename){
 
   // pre-trained classifiers are only available in branches devoted for that
   // (eg: 2.0.1)
-  /*
-#if HAVE_GAIA2
-  computeSVMDescriptors(stats);
-#else
-  cerr << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
-#endif
-  */
+  if (options.value<Real>("highlevel.compute")) {
+    computeSVMDescriptors(stats);
+  }
 
   cerr << "All done"<<endl;
   return 0;
@@ -403,29 +399,13 @@ void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
 
 void MusicExtractor::computeSVMDescriptors(Pool& pool) {
   cerr << "Process step: SVM models" << endl;
-  //const char* svmModels[] = {}; // leave this empty if you don't have any SVM models
-  const char* svmModels[] = { "genre_tzanetakis", "genre_dortmund",
-                              "genre_electronica", "genre_rosamerica",
-                              "mood_acoustic", "mood_aggressive",
-                              "mood_electronic", "mood_happy", "mood_party",
-                              "mood_relaxed", "mood_sad", "timbre", "culture",
-                              "gender", "mirex-moods", "ballroom",
-                              "voice_instrumental" };
 
-  string pathToSvmModels;
+  vector<string> svmModels = options.value<vector<string> >("highlevel.svm_models");
 
-#ifdef OS_WIN32
-  pathToSvmModels = "svm_models\\";
-#else
-  pathToSvmModels = "svm_models/";
-#endif
-
-  for (int i=0; i<(int)ARRAY_SIZE(svmModels); i++) {
-    //cerr << "adding HL desc: " << svmModels[i] << endl;
-    string modelFilename = pathToSvmModels + string(svmModels[i]) + ".history";
+  for (int i=0; i<(int)svmModels.size(); i++) {
+    cerr << "adding SVM model: " << svmModels[i] << endl;
     standard::Algorithm* svm = standard::AlgorithmFactory::create("GaiaTransform",
-                                                                  "history", modelFilename);
-
+                                                                  "history", svmModels[i]);
     svm->input("pool").set(pool);
     svm->output("pool").set(pool);
     svm->compute();
@@ -447,6 +427,7 @@ void MusicExtractor::setExtractorOptions(const std::string& filename) {
   delete yaml;
   options.merge(opts, "replace");
 }
+
 
 void MusicExtractor::setExtractorDefaultOptions() {
   // general
@@ -505,7 +486,37 @@ void MusicExtractor::setExtractorDefaultOptions() {
     options.add("lowlevel.mfccStats", mfccStats[i]);
   for (int i=0; i<(int)gfccStats.size(); i++)
     options.add("lowlevel.gfccStats", gfccStats[i]);
+
+  // high-level
+#if HAVE_GAIA2
+  //options.set("highlevel.compute", true);
+  const char* svmModelsArray[] = { "genre_tzanetakis", "genre_dortmund",
+                                   "genre_electronica", "genre_rosamerica",
+                                   "mood_acoustic", "mood_aggressive",
+                                   "mood_electronic", "mood_happy", "mood_party",
+                                   "mood_relaxed", "mood_sad", "timbre", "culture",
+                                   "gender", "mirex-moods", "ismir04_rhythm",
+                                   "voice_instrumental" };
+  vector<string> svmModels = arrayToVector<string>(svmModelsArray);
+  string pathToSvmModels;
+#ifdef OS_WIN32
+  pathToSvmModels = "svm_models\\";
+#else
+  pathToSvmModels = "svm_models/";
+#endif
+
+  for (int i=0; i<(int)svmModels.size(); i++) {
+    options.add("highlevel.svm_models", pathToSvmModels + svmModels[i] + ".history");
+  }
+#else
+  //options.set("highlevel.compute", false);  
+  //cerr << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
+#endif
+
+  // do not compute by default, whether Gaia is installed or no
+  options.set("highlevel.compute", false);
 }
+
 
 void MusicExtractor::mergeValues() {
   // NOTE:
