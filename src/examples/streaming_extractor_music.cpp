@@ -19,6 +19,10 @@
 
 // Streaming extractor designed for analysis of music collections
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <essentia/streaming/algorithms/poolstorage.h>
 #include <essentia/essentiautil.h>
 
@@ -35,25 +39,9 @@ void usage(char *progname) {
     exit(1);
 }
 
-int main(int argc, char* argv[]) {
+int essentia_main(string audioFilename, string outputFilename, string profileFilename) {
   // Returns: 1 on essentia error
   //          2 if there are no tags in the file
-
-  string audioFilename, outputFilename, profileFilename;
-
-  switch (argc) {
-    case 3:
-      audioFilename =  argv[1];
-      outputFilename = argv[2];
-      break;
-    case 4: // profile supplied
-      audioFilename =  argv[1];
-      outputFilename = argv[2];
-      profileFilename = argv[3];
-      break;
-    default:
-      usage(argv[0]);
-  }
   int result;
   try {
     essentia::init();
@@ -82,4 +70,73 @@ int main(int argc, char* argv[]) {
     return 1;
   }
   return result;
+
 }
+
+#ifdef _WIN32
+int main(int win32_argc, char **win32_argv)
+{
+  int i, argc = 0, buffsize = 0, offset = 0;
+  char **utf8_argv, *utf8_argv_ptr;
+  wchar_t **argv;
+
+  argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+
+  buffsize = 0;
+  for (i = 0; i < argc; i++) {
+      buffsize += WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, NULL, 0, NULL, NULL);
+  }
+
+  size_t len = sizeof(char *) * (argc + 1) + buffsize;
+  utf8_argv = (char**)malloc(len);
+  memset(utf8_argv, 0, len);
+  utf8_argv_ptr = (char *)utf8_argv + sizeof(char *) * (argc + 1);
+
+  for (i = 0; i < argc; i++) {
+      utf8_argv[i] = &utf8_argv_ptr[offset];
+      offset += WideCharToMultiByte(CP_UTF8, 0, argv[i], -1, &utf8_argv_ptr[offset], buffsize - offset, NULL, NULL);
+  }
+
+  LocalFree(argv);
+
+  string audioFilename, outputFilename, profileFilename;
+
+  switch (argc) {
+    case 3:
+      audioFilename =  utf8_argv[1];
+      outputFilename = utf8_argv[2];
+      break;
+    case 4: // profile supplied
+      audioFilename =  utf8_argv[1];
+      outputFilename = utf8_argv[2];
+      profileFilename = utf8_argv[3];
+      break;
+    default:
+      usage(utf8_argv[0]);
+  }
+
+  return essentia_main(audioFilename, outputFilename, profileFilename);
+}
+
+#else
+int main(int argc, char* argv[]) {
+
+  string audioFilename, outputFilename, profileFilename;
+
+  switch (argc) {
+    case 3:
+      audioFilename =  argv[1];
+      outputFilename = argv[2];
+      break;
+    case 4: // profile supplied
+      audioFilename =  argv[1];
+      outputFilename = argv[2];
+      profileFilename = argv[3];
+      break;
+    default:
+      usage(argv[0]);
+  }
+
+  return essentia_main(audioFilename, outputFilename, profileFilename);
+}
+#endif
