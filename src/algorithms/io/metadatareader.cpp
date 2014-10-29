@@ -17,6 +17,10 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <taglib/fileref.h>
 #include <taglib/tpropertymap.h>
 #include <taglib/tag.h>
@@ -187,6 +191,7 @@ const char* MetadataReader::description = DOC("This algorithm outputs the metada
 "  - ogg\n"
 "An exception is thrown if unsupported filetype is given or if the file does not exist.\n"
 "Please observe that the .wav format is not supported. Also note that this algorithm incorrectly calculates the number of channels for a file in mp3 format only for versions less than 1.5 of taglib in Linux and less or equal to 1.5 in Mac OS X\n"
+"If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8.\n"
 "This algorithm also contains some heuristic to try to deal with encoding errors in the tags and tries to do the appropriate conversion if a problem was found (mostly twice latin1->utf8 conversion).\n"
 );
 
@@ -195,7 +200,7 @@ void MetadataReader::configure() {
   if (parameter("filename").isConfigured()) {
     _filename = parameter("filename").toString();
   }
-  _tagPoolName = parameter("tagPoolName").toString(); 
+  _tagPoolName = parameter("tagPoolName").toString();
 }
 
 void MetadataReader::compute() {
@@ -203,7 +208,16 @@ void MetadataReader::compute() {
     throw EssentiaException("MetadataReader: 'filename' parameter has not been configured");
   }
 
+#ifdef _WIN32
+  int len = MultiByteToWideChar(CP_UTF8, 0, _filename.c_str(), -1, NULL, 0);
+  wchar_t *buf = (wchar_t*)malloc(sizeof(wchar_t)*len);
+  memset(buf, 0, len);
+  MultiByteToWideChar(CP_UTF8, 0, _filename.c_str(), -1, buf, len);
+  TagLib::FileRef f(buf);
+  free(buf);
+#else
   TagLib::FileRef f(_filename.c_str());
+#endif
 
   Pool tagPool;
 
@@ -238,7 +252,7 @@ void MetadataReader::compute() {
 
     return;
   }
-  
+
   /*
   TagLib::Tag *tag = f.tag();
 
@@ -249,7 +263,7 @@ void MetadataReader::compute() {
   cout << "year    - \"" << tag->year()    << "\"" << endl;
   cout << "comment - \"" << tag->comment() << "\"" << endl;
   cout << "track   - \"" << tag->track()   << "\"" << endl;
-  cout << "genre   - \"" << tag->genre()   << "\"" << endl; 
+  cout << "genre   - \"" << tag->genre()   << "\"" << endl;
   */
 
   TagLib::PropertyMap tags = f.file()->properties();
@@ -259,15 +273,15 @@ void MetadataReader::compute() {
   _album.get()   = formatString(tags["ALBUM"]);
   _comment.get() = formatString(tags["COMMENT"]);
   _genre.get()   = formatString(tags["GENRE"]);
-  _track.get()   = formatString(tags["TRACKNUMBER"]);  
-  _date.get()    = formatString(tags["DATE"]); 
+  _track.get()   = formatString(tags["TRACKNUMBER"]);
+  _date.get()    = formatString(tags["DATE"]);
 
   // populate tag pool
   for(TagLib::PropertyMap::ConstIterator i = tags.begin(); i != tags.end(); ++i) {
     string key = i->first.to8Bit(true);
     // remove '.' chars which are used in Pool descriptor names as a separator
     // convert to lowercase
-    std::replace(key.begin(), key.end(), '.', '_'); 
+    std::replace(key.begin(), key.end(), '.', '_');
     std::transform(key.begin(), key.end(), key.begin(), ::tolower);
     key = _tagPoolName + "." + key;
 

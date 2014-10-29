@@ -30,6 +30,7 @@ const char* AudioLoader::name = "AudioLoader";
 const char* AudioLoader::description = DOC("This algorithm loads the single audio stream contained in the given audio or video file, as well as the samplerate and the number of channels. Supported formats are all those supported by the ffmpeg library, which is, virtually everything.\n"
 "\n"
 "This algorithm will throw an exception if it hasn't been properly configured which is normally due to not specifying a valid filename.\n"
+"If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8.\n"
 "Note: ogg files are decoded in reverse phase, due to a (possible) bug in the ffmpeg library.\n"
 "\n"
 "References:\n"
