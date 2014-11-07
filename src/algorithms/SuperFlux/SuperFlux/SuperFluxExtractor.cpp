@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "SuperFluxextractor.h"
+#include "SuperFluxExtractor.h"
 #include "algorithmfactory.h"
 #include "essentiamath.h"
 #include "poolstorage.h"
