@@ -45,17 +45,17 @@ It is possible to customize the parameters of audio analysis, frame summarizatio
 
   highlevel:
       compute: 1
-      svm_models: ['svm_models/genre_tzanetakis', 'svm_models/mood_sad' ]
+      svm_models: ['svm_models/genre_tzanetakis.history', 'svm_models/mood_sad.history' ]
 
 
-High-level descriptors are `computed by classifier models <http://en.wikipedia.org/wiki/Statistical_classification>`_ from a lower-level representation of a music track in terms of summarized spectral, time-domain, rhythm, and tonal descriptors. Each model is basically a `transformation history <reference/std_GaiaTransform.html>`_ that maps a pool (a `feature vector <http://en.wikipedia.org/wiki/Feature_vector>`_) of such lower-level descriptors produced by extractor into probability values of classes on which the model was trained. Due to algorithm improvements, different extractor versions may produce different descriptor values, uncompatible between each other. This implies that **the models you specify to use within the extractor have to be trained using the same version of the extractor to ensure consistency**. 
+High-level descriptors are `computed by classifier models <http://en.wikipedia.org/wiki/Statistical_classification>`_ from a lower-level representation of a music track in terms of summarized spectral, time-domain, rhythm, and tonal descriptors. Each model (a ``*.history`` file) is basically a `transformation history <reference/std_GaiaTransform.html>`_ that maps a pool (a `feature vector <http://en.wikipedia.org/wiki/Feature_vector>`_) of such lower-level descriptors produced by extractor into probability values of classes on which the model was trained. Due to algorithm improvements, different extractor versions may produce different descriptor values, uncompatible between each other. This implies that **the models you specify to use within the extractor have to be trained using the same version of the extractor to ensure consistency**. 
 We provide such models pretrained on our ground truth music collections for each version of the music extractor via a `download page <http://essentia.upf.edu/documentation/svm_models/>`_.
 
 Instead of computing high-level descriptors altogether with lower-level ones, it may be convenient to use ``streaming_extractor_music_svm``, a simplified extractor that computes high-level descriptors given a json/yaml file with spectral, time-domain, rhythm, and tonal descriptors required by classfier models (and produced by ``streaming_extractor_music``). High-level models are to be specified in a similar way via a profile file. ::
 
   highlevel:
       compute: 1
-      svm_models: ['svm_models/genre_tzanetakis', 'svm_models/mood_sad' ]
+      svm_models: ['svm_models/genre_tzanetakis.history', 'svm_models/mood_sad.history' ]
 
 
 Note, that you need to build Essentia with Gaia2 or use our static builds (soon online) in order to be able to run high-level models. Since Essentia version 2.1 high-level models are distributed apart from Essentia via a `download page <http://essentia.upf.edu/documentation/svm_models/>`_. 
