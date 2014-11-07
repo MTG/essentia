@@ -5,7 +5,7 @@ Usage
 -----
 ``streaming_extractor_music`` computes a large set of spectral, time-domain, rhythm, tonal and high-level descriptors. The frame-wise descriptors are `summarized <reference/std_PoolAggregator.html>`_ by their statistical distribution. This extractor is suited for batch computations on large music collections and is used within `AcousticBrainz project <http://acousticbrainz.org/>`_. 
 
-It is possible to customize the parameters of audio analysis, frame summarization, high-level classifier models, and output format, using a yaml profile file. For example, in the following profile, the extractor is set to analyze only the first 30 seconds of audio, output frame values as well as their statistical summarization, and apply two high-level models associated with the respective filepaths ::
+It is possible to customize the parameters of audio analysis, frame summarization, high-level classifier models, and output format, using a yaml profile file. For example, in the following profile, the extractor is set to analyze only the first 30 seconds of audio, output frame values as well as their statistical summarization, and apply two high-level models associated with the respective filepaths. ::
 
   startTime: 0
   endTime: 1e6
@@ -48,7 +48,17 @@ It is possible to customize the parameters of audio analysis, frame summarizatio
       svm_models: ['svm_models/genre_tzanetakis', 'svm_models/mood_sad' ]
 
 
-Note, that you need to build Essentia with Gaia2 or use our static builds (soon online) in order to be able to run high-level models. Since Essentia version 2.1 high-level models are distributed apart from Essentia via a download webpage (to be opened soon). It is important, that the models that you use correspond to your version of Essentia. 
+High-level descriptors are `computed by classifier models <http://en.wikipedia.org/wiki/Statistical_classification>`_ from a lower-level representation of a music track in terms of summarized spectral, time-domain, rhythm, and tonal descriptors. Each model is basically a `transformation history <reference/std_GaiaTransform.html>`_ that maps a pool (a `feature vector <http://en.wikipedia.org/wiki/Feature_vector>`_) of such lower-level descriptors produced by extractor into probability values of classes on which the model was trained. Due to algorithm improvements, different extractor versions may produce different descriptor values, uncompatible between each other. This implies that **the models you specify to use within the extractor have to be trained using the same version of the extractor to ensure consistency**. 
+We provide such models pretrained on our ground truth music collections for each version of the music extractor via a `download page <http://essentia.upf.edu/documentation/svm_models/>`_.
+
+Instead of computing high-level descriptors altogether with lower-level ones, it may be convenient to use ``streaming_extractor_music_svm``, a simplified extractor that computes high-level descriptors given a json/yaml file with spectral, time-domain, rhythm, and tonal descriptors required by classfier models (and produced by ``streaming_extractor_music``). High-level models are to be specified in a similar way via a profile file. ::
+
+  highlevel:
+      compute: 1
+      svm_models: ['svm_models/genre_tzanetakis', 'svm_models/mood_sad' ]
+
+
+Note, that you need to build Essentia with Gaia2 or use our static builds (soon online) in order to be able to run high-level models. Since Essentia version 2.1 high-level models are distributed apart from Essentia via a `download page <http://essentia.upf.edu/documentation/svm_models/>`_. 
 
 
 
