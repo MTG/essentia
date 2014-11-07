@@ -299,7 +299,8 @@ namespace essentia {
                 if (!decodePacket()) break;
                 copyFFmpegOutput();
             }
-            
+            // free AVPacket
+            av_free_packet(&_packet);
             return OK;
         }
         
