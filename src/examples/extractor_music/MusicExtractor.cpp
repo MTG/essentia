@@ -520,7 +520,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
 }
 
 
-void MusicExtractor::mergeValues() {
+void MusicExtractor::mergeValues(Pool &pool) {
   // NOTE:
   // - no check for if descriptors with the same names as the ones asked to
   //   merge exist already
@@ -532,6 +532,6 @@ void MusicExtractor::mergeValues() {
 
   for (int i=0; i<(int) keys.size(); ++i) {
     keys[i].replace(0, mergeKeyPrefix.size()+1, "");
-    results.set(keys[i], options.value<string>(mergeKeyPrefix + "." + keys[i]));
+    pool.set(keys[i], options.value<string>(mergeKeyPrefix + "." + keys[i]));
   }
 }

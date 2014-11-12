@@ -65,7 +65,7 @@ using namespace streaming;
   int compute(const string& audioFilename);
   void setExtractorOptions(const std::string& filename);
   void setExtractorDefaultOptions();
-  void mergeValues();
+  void mergeValues(Pool &pool);
   void readMetadata(const string& audioFilename);
   void computeMetadata(const string& audioFilename);
   void computeReplayGain(const string& audioFilename);

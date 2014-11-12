@@ -53,7 +53,7 @@ int essentia_main(string audioFilename, string outputFilename, string profileFil
     MusicExtractor *extractor = new MusicExtractor();
 
     extractor->setExtractorOptions(profileFilename);
-    extractor->mergeValues();
+    extractor->mergeValues(extractor->results);
 
     result = extractor->compute(audioFilename);
 

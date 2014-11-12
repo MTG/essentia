@@ -72,7 +72,6 @@ int main(int argc, char* argv[]) {
 
     MusicExtractor *extractor = new MusicExtractor();
     extractor->setExtractorOptions(profileFilename);
-    extractor->mergeValues();
 
     string format = extractor->options.value<string>("highlevel.inputFormat");
     if (format != "json" && format != "yaml") {
@@ -110,6 +109,7 @@ int main(int argc, char* argv[]) {
     pool.set("metadata.version.highlevel.gaia", gaia2::version);
     pool.set("metadata.version.highlevel.gaia_git_sha", gaia2::version_git_sha);
 
+    extractor->mergeValues(pool);
     extractor->outputToFile(pool, outputFilename);
 
     essentia::shutdown();
