@@ -65,6 +65,7 @@ void YamlOutput::configure() {
   } else {
     _jsonN = "";
   }
+  _writeVersion = parameter("writeVersion").toBool();
 
   if (_filename == "") throw EssentiaException("please provide a valid filename");
 }
@@ -353,17 +354,19 @@ void YamlOutput::outputToStream(ostream* out) {
   YamlNode root("doesn't matter what I put here, it's not getting emitted");
 
   // add metadata.version.essentia to the tree
-  YamlNode* essentiaNode = new YamlNode("essentia");
+  if (_writeVersion) {
+      YamlNode* essentiaNode = new YamlNode("essentia");
 
-  essentiaNode->value = new Parameter(essentia::version);
+      essentiaNode->value = new Parameter(essentia::version);
 
-  YamlNode* versionNode = new YamlNode("version");
-  versionNode->children.push_back(essentiaNode);
+      YamlNode* versionNode = new YamlNode("version");
+      versionNode->children.push_back(essentiaNode);
 
-  YamlNode* metadataNode = new YamlNode("metadata");
-  metadataNode->children.push_back(versionNode);
+      YamlNode* metadataNode = new YamlNode("metadata");
+      metadataNode->children.push_back(versionNode);
 
-  root.children.push_back(metadataNode);
+      root.children.push_back(metadataNode);
+  }
 
   // fill the YAML tree with the values form the pool
   fillYamlTree(p, &root);
