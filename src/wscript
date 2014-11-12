@@ -159,7 +159,8 @@ def configure(ctx):
         ctx.env.USES += ' GAIA2'
     else:
         print('- Gaia2 seems to be missing.')
-        print('  The following algorithms will be ignored: %s\n' % algos)
+        print('  The following algorithms will be ignored: %s' % algos)
+        print('  Examples requiring Gaia2 will be ignored\n')
         ctx.env.ALGOIGNORE += algos
 
     lel = len(ctx.env.EXAMPLE_LIST)

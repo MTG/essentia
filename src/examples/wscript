@@ -42,12 +42,6 @@ example_sources = [
                    'extractor_music/MusicRhythmDescriptors',
                    'extractor_music/MusicTonalDescriptors' ]),
         
-        ('streaming_extractor_music_svm',
-                 [ 'extractor_music/MusicExtractor',
-                   'extractor_music/MusicLowlevelDescriptors',
-                   'extractor_music/MusicRhythmDescriptors',
-                   'extractor_music/MusicTonalDescriptors' ]),
-
         ('streaming_beatsmarker', ),
         ('streaming_mfcc', ),
         ('streaming_gfcc', ),
@@ -69,15 +63,30 @@ example_sources = [
                    'freesound/FreesoundSfxDescriptors' ])
 ]
 
+example_sources_with_gaia = [
+        ('streaming_extractor_music_svm',
+                 [ 'extractor_music/MusicExtractor',
+                   'extractor_music/MusicLowlevelDescriptors',
+                   'extractor_music/MusicRhythmDescriptors',
+                   'extractor_music/MusicTonalDescriptors' ])
+]
 
 def configure(ctx):
     example_list = [p[0] for p in example_sources]
+    example_list_gaia = [p[0] for p in example_sources_with_gaia]
+
+    if ctx.env.HAVE_GAIA2:
+        example_list += example_list_gaia
+
     if ctx.env.WITH_EXAMPLES:
         ctx.env.EXAMPLE_LIST = example_list
+
     if ctx.env.EXAMPLES:
         for e in ctx.env.EXAMPLES.split(","):
             e = e.strip()
-            if e not in example_list:
+            if e not in example_list and e in example_list_gaia:
+                raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because Gaia2 is missing" % e)
+            elif e not in example_list:
                 raise ctx.errors.ConfigurationError("Specified example [%s] does not exist" % e)
             ctx.env.EXAMPLE_LIST.append(e)
 
