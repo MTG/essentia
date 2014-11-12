@@ -390,6 +390,7 @@ void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
                                                                    "filename", outputFilename,
                                                                    "doubleCheck", true,
                                                                    "format", format,
+                                                                   "writeVersion", false,
                                                                    "indent", indent);
   output->input("pool").set(pool);
   output->compute();
@@ -509,7 +510,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
     options.add("highlevel.svm_models", pathToSvmModels + svmModels[i] + ".history");
   }
 #else
-  //options.set("highlevel.compute", false);  
+  //options.set("highlevel.compute", false);
   //cerr << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
 #endif
   options.set("highlevel.inputFormat", "json");
