@@ -26,6 +26,7 @@
 #include "essentia/algorithmfactory.h"
 #include "essentia/pool.h"
 #include "extractor_music/MusicExtractor.h"
+#include <gaia2/gaia.h>
 
 using namespace std;
 using namespace essentia;
@@ -103,6 +104,8 @@ int main(int argc, char* argv[]) {
     pool.set("metadata.version.highlevel.essentia", essentia::version);
     pool.set("metadata.version.highlevel.essentia_git_sha", essentia::version_git_sha);
     pool.set("metadata.version.highlevel.extractor", EXTRACTOR_VERSION);
+    pool.set("metadata.version.highlevel.gaia", gaia2::version);
+    pool.set("metadata.version.highlevel.gaia_git_sha", gaia2::version_git_sha);
 
     extractor->outputToFile(pool, outputFilename);
 
