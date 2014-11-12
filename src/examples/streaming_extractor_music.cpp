@@ -36,6 +36,8 @@ using namespace essentia::scheduler;
 void usage(char *progname) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << progname << " input_audiofile output_textfile [profile]" << endl;
+    cout << endl << "Music extractor version '" << EXTRACTOR_VERSION << "'" << endl 
+         << "built with Essentia version " << essentia::version_git_sha << endl;
     exit(1);
 }
 
