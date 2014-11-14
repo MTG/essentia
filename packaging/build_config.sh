@@ -19,6 +19,7 @@ TAGLIB_VERSION=taglib-1.9.1
 FFTW_VERSION=fftw-3.3.2
 LIBSAMPLERATE_VERSION=libsamplerate-0.1.8
 LIBYAML_VERSION=yaml-0.1.5
+QT_SOURCE_URL=http://download.qt-project.org/official_releases/qt/4.8/4.8.6/qt-everywhere-opensource-src-4.8.6.tar.gz
 
 LIBAV_AUDIO_FLAGS="
     --disable-doc
@@ -192,3 +193,51 @@ LIBSAMPLERATE_FLAGS="
     --disable-sndfile 
 "
 
+QT_FLAGS="
+    -no-accessibility
+    -no-webkit
+    -no-glib
+    -no-xkb
+    -no-xinput
+    -no-fontconfig
+    -no-mitshm
+    -no-xrender
+    -no-xrandr 
+    -no-xfixes
+    -no-xcursor 
+    -no-xinerama
+    -no-xsync
+    -no-xvideo
+    -no-xshape
+    -no-sm
+    -no-openvg
+    -no-opengl
+    -no-nas-sound
+    -no-gtkstyle
+    -no-dbus
+    -no-pch
+    -no-iconv
+    -no-cups
+    -no-nis
+    -no-gui
+    -no-openssl
+    -no-libjpeg
+    -no-libmng
+    -no-libpng
+    -no-libtiff
+    -no-gif
+    -no-scripttools
+    -no-script
+    -no-javascript-jit
+    -no-svg
+    -no-phonon-backend
+    -no-phonon
+    -no-audio-backend
+    -no-multimedia
+    -no-xmlpatterns
+    -no-qt3support
+    -qt-zlib
+    -nomake demos
+    -nomake examples
+    -nomake tools
+"
