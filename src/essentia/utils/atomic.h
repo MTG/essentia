@@ -68,7 +68,7 @@ class Atomic {
 } // namespace essentia
 
 
-#elif defined(OS_LINUX)
+#else 
 
 
 #include <ext/atomicity.h>

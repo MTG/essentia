@@ -80,18 +80,18 @@ def configure(ctx):
     ctx.env.DEFINES = []
 
     if sys.platform == 'darwin':
-        # force the use of clang as compiler, we don't want gcc anymore on mac
-        ctx.env.CC = 'clang'
-        ctx.env.CXX = 'clang++'
+        # clang fails on 10.7 using <atomic>, because libc++ is not new enough
+        #ctx.env.CC = 'clang'
+        #ctx.env.CXX = 'clang++'
+        #ctx.env.CXXFLAGS = [ '-stdlib=libc++', '-std=c++11', '-Wno-gnu' ]
+        #ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
 
         ctx.env.DEFINES   += [ 'GTEST_HAS_TR1_TUPLE=0' ]
-        ctx.env.CXXFLAGS = [ '-stdlib=libc++', '-std=c++11', '-Wno-gnu' ]
-        ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
         # for defining static const variables in header
-        ctx.env.CXXFLAGS += [ '-Wno-static-float-init' ]
+        # ctx.env.CXXFLAGS += [ '-Wno-static-float-init' ]
         # add /usr/local/include as the brew formula for yaml doesn't have
         # the cflags properly set
-        ctx.env.CXXFLAGS += [ '-I/usr/local/include' ]
+        #ctx.env.CXXFLAGS += [ '-I/usr/local/include' ]
 
     #elif sys.platform == 'win32': 
     #    # compile libgcc and libstd statically when using MinGW
@@ -121,7 +121,7 @@ def configure(ctx):
         os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
     
-    elif ctx.options.WITH_STATIC_EXAMPLES and sys.platform.startswith('linux'):
+    elif ctx.options.WITH_STATIC_EXAMPLES and sys.platform.startswith('linux' or sys.platform == 'darwin'):
         print ("→ Compiling with static examples on Linux: search for pre-built dependencies in 'packaging/debian'")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
