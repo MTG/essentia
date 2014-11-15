@@ -21,8 +21,9 @@ def options(ctx):
     ctx.add_option('--with-vamp', action='store_true',
                    dest='WITH_VAMP', default=False,
                    help='build the vamp plugin wrapper')
-
-    #add option --with-gaia
+    ctx.add_option('--with-gaia', action='store_true',
+                   dest='WITH_GAIA', default=False,
+                   help='build with Gaia support')
 
 
 def debian_version():
@@ -44,6 +45,7 @@ def configure(ctx):
     ctx.env.WITH_PYTHON   = ctx.options.WITH_PYTHON
     ctx.env.WITH_VAMP     = ctx.options.WITH_VAMP
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
+    ctx.env.WITH_GAIA     = ctx.options.WITH_GAIA
     ctx.env.EXAMPLES       = ctx.options.EXAMPLES
     ctx.env.EXAMPLE_LIST   = []
     ctx.env.ALGOIGNORE = []
@@ -76,9 +78,9 @@ def configure(ctx):
                   msg='Checking for \'taglib\' >= 1.9',
                   mandatory=False)
 
-    ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
-                  args=['--cflags', '--libs', '--modversion'], mandatory=False)
-
+    if ctx.env.WITH_GAIA:
+        ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
+                      args=['--cflags', '--libs', '--modversion'], mandatory=True)
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += [ '__STDC_CONSTANT_MACROS' ]
@@ -150,12 +152,13 @@ def configure(ctx):
         ctx.env.ALGOIGNORE += algos
 
     algos = [ 'GaiaTransform' ]
-    if has('gaia2'):
-        print('- Gaia2 detected!')
-        print('  The following algorithms will be included: %s\n' % algos)
-        ctx.env.USES += ' GAIA2'
+    if ctx.env.WITH_GAIA:
+        if has('gaia2'):
+            print('- Gaia2 detected!')
+            print('  The following algorithms will be included: %s\n' % algos)
+            ctx.env.USES += ' GAIA2'
     else:
-        print('- Gaia2 seems to be missing.')
+        print('- Essentia is configured without Gaia2.')
         print('  The following algorithms will be ignored: %s' % algos)
         print('  Examples requiring Gaia2 will be ignored\n')
         ctx.env.ALGOIGNORE += algos
