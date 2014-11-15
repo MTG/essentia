@@ -84,6 +84,7 @@ def configure(ctx):
         #ctx.env.CC = 'clang'
         #ctx.env.CXX = 'clang++'
         #ctx.env.CXXFLAGS = [ '-stdlib=libc++', '-std=c++11', '-Wno-gnu' ]
+        ctx.env.CXXFLAGS = ['-stdlib=libstdc++']
         #ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
 
         ctx.env.DEFINES   += [ 'GTEST_HAS_TR1_TUPLE=0' ]
