@@ -93,40 +93,12 @@ def configure(ctx):
     if ctx.env.WITH_STATIC_EXAMPLES:
         ctx.env.LINKFLAGS = ['-static']
         ctx.env.SHLIB_MARKER = '-Wl,-Bstatic'
-
-        # NOTE: this list of libs is hardcoded to work on a debian wheezy system
-        #       with a custom-compiled version of ffmpeg, to reduce the number of
-        #       dependencies and also remove the ones that only exist as dynamic
-        #       libs in wheezy
-        #
-        # To custom compile an adequate ffmpeg, do the following (on debian wheezy,
-        # should probably adapt a little for other systems)
-        #
-        # $ apt-get source libavcodec53
-        # $ sudo apt-get build-dep libavcodec53
-        # $ cd libav*
-        # $ vi debian/confflags
-        #     -> comment out the following lines
-        #     119: dirac_decoder (no static version of lib in wheezy)
-        #     122: gnutls
-        #     125: rtmp
-        #     126: opencv
-        #     129: schroedinger
-        #     132: va  (no static version of lib in wheezy)
-        #     133: vdpau (no static version of lib in wheezy)
-        #     143: X11 ext
-        # $ dpkg-buildpackage -us -uc
-        #
-        # install the built packages (they're 1 level up, ie: cd ..) and
-        # you should be good to go!
-
-        # NOTE: the order of the libs in the following list is VERY important,
-        #       do not mess with it unless you know what you're doing
-        #ctx.env.LIB = [ 'avformat', 'avcodec', 'avutil', 'xvidcore', 'x264',
-        #                'vorbis', 'vorbisenc', 'ogg', 'theora', 'speex',
-        #                'openjpeg', 'mp3lame', 'vpx', 'gsm', 'z', 'bz2' ]
         ctx.env.LIB = [ 'avformat', 'avcodec', 'avutil', 'tag' ]
         
+        if "HAVE_GAIA2" in ctx.env['define_key']:
+            ctx.env.LIB += [ 'gaia2' ]    
+            ctx.env['LIB_GAIA2'] += [ 'dl' ] # -ldl is required when building with static QtCore
+       
         if ctx.options.CROSS_COMPILE_MINGW32:
             # otherwise the __imp__ symbols will be expected at link time 
             ctx.env.CXXFLAGS += ['-DYAML_DECLARE_STATIC', '-DTAGLIB_STATIC']
@@ -134,7 +106,7 @@ def configure(ctx):
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
-
+    
     if len(ctx.env.EXAMPLE_LIST):
         def build_example(prog_name, other=None):
             files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
