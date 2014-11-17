@@ -127,13 +127,6 @@ def configure(ctx):
         os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
         
-
-    # missing -lpthread flag on Ubuntu
-    if platform.dist()[0] == 'Ubuntu':
-        ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
-        ctx.read_shlib('pthread', paths=ext_paths)
-        ctx.env.USES += ' pthread'
-
     ctx.load('compiler_cxx compiler_c')
 
     # write pkg-config file
@@ -165,6 +158,13 @@ def adjust(objs, path):
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
+
+    # missing -lpthread flag on Ubuntu
+    if platform.dist()[0] == 'Ubuntu':
+        ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
+        ctx.read_shlib('pthread', paths=ext_paths)
+        ctx.env.USES += ' pthread'
+
     ctx.recurse('src')
 
     if ctx.env.WITH_CPPTESTS:
