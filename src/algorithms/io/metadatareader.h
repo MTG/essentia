@@ -49,6 +49,8 @@ class MetadataReader : public Algorithm {
 
   std::string _filename;
   std::string _tagPoolName;
+  bool _filterMetadata;
+  std::vector<std::string> _filterMetadataTags;
 
  public:
   MetadataReader() {
@@ -72,6 +74,8 @@ class MetadataReader : public Algorithm {
     declareParameter("filename", "the name of the file from which to read the tags", "", Parameter::STRING);
     declareParameter("failOnError", "if true, the algorithm throws an exception when encountering an error (e.g. trying to open an unsupported file format), otherwise the algorithm leaves all fields blank", "{true,false}", false);
     declareParameter("tagPoolName", "common prefix for tag descriptor names to use in tagPool", "", "metadata.tags");
+    declareParameter("filterMetadata", "if true, only add tags from filterMetadataTags to the pool", "", false);
+    declareParameter("filterMetadataTags", "the list of tags to whitelist (original taglib names)", "", std::vector<std::string>());
   }
 
   void configure();
@@ -102,7 +106,7 @@ class MetadataReader : public Algorithm {
   Source<std::string> _track; // not necessarily an int
   Source<std::string> _date;  // not necessarily an int
 
-  //Source<Pool> _tagPool;  
+  //Source<Pool> _tagPool;
   // TODO: DevNull class doesn't work for type: essentia::Pool
   // TODO: Pool Storage doesn't work for type: essentia::Pool
 

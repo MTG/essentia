@@ -25,6 +25,8 @@
 #include <taglib/tpropertymap.h>
 #include <taglib/tag.h>
 
+#include <algorithm>
+
 #include "metadatareader.h"
 #include "metadatautils.h"
 #include "essentiautil.h"
@@ -201,6 +203,8 @@ void MetadataReader::configure() {
     _filename = parameter("filename").toString();
   }
   _tagPoolName = parameter("tagPoolName").toString();
+  _filterMetadata = parameter("filterMetadata").toBool();
+  _filterMetadataTags = parameter("filterMetadataTags").toVectorString();
 }
 
 void MetadataReader::compute() {
@@ -279,14 +283,16 @@ void MetadataReader::compute() {
   // populate tag pool
   for(TagLib::PropertyMap::ConstIterator i = tags.begin(); i != tags.end(); ++i) {
     string key = i->first.to8Bit(true);
-    // remove '.' chars which are used in Pool descriptor names as a separator
-    // convert to lowercase
-    std::replace(key.begin(), key.end(), '.', '_');
-    std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-    key = _tagPoolName + "." + key;
+    if (!_filterMetadata || std::find(_filterMetadataTags.begin(), _filterMetadataTags.end(), key) != _filterMetadataTags.end()) {
+        // remove '.' chars which are used in Pool descriptor names as a separator
+        // convert to lowercase
+        std::replace(key.begin(), key.end(), '.', '_');
+        std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+        key = _tagPoolName + "." + key;
 
-    for(TagLib::StringList::ConstIterator str = i->second.begin(); str != i->second.end(); ++str) {
-      tagPool.add(key, str->to8Bit(true));
+        for(TagLib::StringList::ConstIterator str = i->second.begin(); str != i->second.end(); ++str) {
+          tagPool.add(key, str->to8Bit(true));
+        }
     }
   }
 
