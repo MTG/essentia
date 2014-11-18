@@ -18,6 +18,7 @@
  */
 
 #include "MusicExtractor.h"
+#include "tagwhitelist.h"
 using namespace std;
 using namespace essentia;
 using namespace streaming;
@@ -218,10 +219,14 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
 void MusicExtractor::readMetadata(const string& audioFilename) {
   // Pool Connector in streaming mode currently does not support Pool sources,
   // therefore, using standard mode
+
+  vector<string> whitelist = arrayToVector<string>(tagWhitelist);
   standard::Algorithm* metadata = standard::AlgorithmFactory::create("MetadataReader",
                                                                      "filename", audioFilename,
                                                                      "failOnError", true,
-                                                                     "tagPoolName", "metadata.tags");
+                                                                     "tagPoolName", "metadata.tags",
+                                                                     "filterMetadata", true,
+                                                                     "filterMetadataTags", whitelist);
   string title, artist, album, comment, genre, tracknumber, date;
   int duration, sampleRate, bitrate, channels;
 
