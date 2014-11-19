@@ -35,7 +35,7 @@ def options(ctx):
     ctx.add_option('--mode', action='store',
                    dest='MODE', default="release",
                    help='debug or release')
-    
+
     ctx.add_option('--cross-compile-mingw32', action='store_true',
                    dest='CROSS_COMPILE_MINGW32', default=False,
                    help='cross-compile for windows using mingw32 on linux')
@@ -52,8 +52,8 @@ def configure(ctx):
     # compiler flags
     ctx.env.CXXFLAGS = [ '-pipe', '-Wall' ]
 
-    # force using SSE floating point (default for 64bit in gcc) instead of 
-    # 387 floating point (used for 32bit in gcc) to avoid numerical differences 
+    # force using SSE floating point (default for 64bit in gcc) instead of
+    # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
     ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
 
@@ -84,7 +84,6 @@ def configure(ctx):
         #ctx.env.CC = 'clang'
         #ctx.env.CXX = 'clang++'
         #ctx.env.CXXFLAGS = [ '-stdlib=libc++', '-std=c++11', '-Wno-gnu' ]
-        ctx.env.CXXFLAGS = ['-stdlib=libstdc++']
         #ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
 
         ctx.env.DEFINES   += [ 'GTEST_HAS_TR1_TUPLE=0' ]
@@ -94,14 +93,14 @@ def configure(ctx):
         # the cflags properly set
         #ctx.env.CXXFLAGS += [ '-I/usr/local/include' ]
 
-    #elif sys.platform == 'win32': 
+    #elif sys.platform == 'win32':
     #    # compile libgcc and libstd statically when using MinGW
     #    ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
-        
+
     #    # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
     #    os.environ["PKG_CONFIG_PATH"] = 'packaging\win32_3rdparty\lib\pkgconfig'
-    #    os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
-    #     
+    #    os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+    #
     #    # TODO why this code does not work?
     #    # force the use of mingw gcc compiler instead of msvc
     #    #ctx.env.CC = 'gcc'
@@ -117,16 +116,16 @@ def configure(ctx):
 
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
-        
+
         print ("→ Cross-compiling with MinGW32: search for pre-built dependencies in 'packaging/win32_3rdparty'")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
-    
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+
     elif ctx.options.WITH_STATIC_EXAMPLES and sys.platform.startswith('linux' or sys.platform == 'darwin'):
         print ("→ Compiling with static examples on Linux: search for pre-built dependencies in 'packaging/debian'")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]    
-        
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+
     ctx.load('compiler_cxx compiler_c')
 
     # write pkg-config file
@@ -143,7 +142,7 @@ def configure(ctx):
     Description: audio analysis library -- development files
     Version: %(version)s
     Libs: -L${libdir} -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lsamplerate -ltag -lfftw3f -lgaia2
-    Cflags: -I${includedir}/essentia I${includedir}/essentia/scheduler I${includedir}/essentia/streaming I${includedir}/essentia/utils 
+    Cflags: -I${includedir}/essentia I${includedir}/essentia/scheduler I${includedir}/essentia/streaming I${includedir}/essentia/utils
     ''' % opts
 
     pcfile = '\n'.join([ l.strip() for l in pcfile.split('\n') ])
