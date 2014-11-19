@@ -121,7 +121,7 @@ def configure(ctx):
         os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
-    elif ctx.options.WITH_STATIC_EXAMPLES and sys.platform.startswith('linux' or sys.platform == 'darwin'):
+    elif ctx.options.WITH_STATIC_EXAMPLES and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
         print ("→ Compiling with static examples on Linux: search for pre-built dependencies in 'packaging/debian'")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
