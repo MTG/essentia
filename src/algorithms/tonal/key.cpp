@@ -78,7 +78,11 @@ void Key::configure() {
 	
     // Shaath
     { 6.6, 2.0, 3.5, 2.3, 4.6, 4.0, 2.5, 5.2, 2.4, 3.7, 2.3, 3.4 },
-    { 6.5, 2.7, 3.5, 5.4, 2.6, 3.5, 2.5, 5.2, 4.0, 2.7, 4.3, 3.2 }
+    { 6.5, 2.7, 3.5, 5.4, 2.6, 3.5, 2.5, 5.2, 4.0, 2.7, 4.3, 3.2 },
+
+    // Gómez –as specified by Sha'ath in his report...
+    { 0.82, 0.00, 0.55, 0.00, 0.53, 0.30, 0.08, 1.00, 0.00, 0.38, 0.00, 0.47 },
+    { 0.81, 0.00, 0.53, 0.54, 0.00, 0.27, 0.07, 1.00, 0.27, 0.07, 0.10, 0.36 }
 
   };
 
@@ -92,6 +96,7 @@ void Key::configure() {
   else if (_profileType == "temperley2005") { SET_PROFILE(5); }
   else if (_profileType == "thpcp")         { SET_PROFILE(6); }
   else if (_profileType == "shaath")        { SET_PROFILE(7); }
+  else if (_profileType == "gomez")         { SET_PROFILE(8); }
   else {
     throw EssentiaException("Key: Unsupported profile type: ", _profileType);
   }
