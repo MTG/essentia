@@ -58,7 +58,9 @@ class TestMonoMixer_Streaming(TestCase):
         self.assertAlmostEqual(sum(mix), (0.9+0.5)*0.5)
 
     def testEmpty(self):
-        inputFilename = join(testdata.audio_dir, 'generated', 'empty', 'empty.wav')
+        inputFilename = join(testdata.audio_dir, 'generated', 'empty', 'empty.aiff')
+        # NOTE: AudioLoader will through exception on "empty.wav" complaining that 
+        # it cannot read stream info, using "empty.aiff" therefore... 
         loader = AudioLoader(filename=inputFilename)()
         self.assertEqualVector(MonoMixer(type='left')(loader[0], loader[2]), [])
 

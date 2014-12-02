@@ -21,112 +21,120 @@
 #define ESSENTIA_ATOMIC_H
 
 
+// life's easy in C++11
+#if __cplusplus >= 201103L
 
-#ifdef OS_WIN32
+
+#include <atomic>
+
+namespace essentia {
+typedef std::atomic<int> Atomic;
+}
+
+
+#elif defined(OS_WIN32)
+
 
 #include <windows.h>
 
-//
-// Atomic for OS_WIN32
-//
-
 namespace essentia {
 
-class Atomic
-{
-private:
-	LONG volatile i_;
-public:
-	inline Atomic(const int &i = 0) : i_(i)
-	{
-	}
+class Atomic {
+ private:
+  LONG volatile i_;
 
-	inline operator int () const
-	{
-		return i_;
-	}
+ public:
+  inline Atomic(const int &i = 0) : i_(i) {}
 
-	inline void operator -=(const int &i)
-	{
-		InterlockedExchangeAdd(&i_, -i);
-	}
+  inline operator int() const { return i_; }
 
-	inline void operator +=(const int &i)
-	{
-		InterlockedExchangeAdd(&i_, i);
-	}
+  inline void operator-=(const int &i) {
+    InterlockedExchangeAdd(&i_, -i);
+  }
 
-	inline void operator ++()
-	{
-		InterlockedIncrement(&i_);
-	}
+  inline void operator+=(const int &i) {
+    InterlockedExchangeAdd(&i_, i);
+  }
 
-	inline void operator --()
-	{
-		InterlockedDecrement(&i_);
-	}
+  inline void operator++() {
+    InterlockedIncrement(&i_);
+  }
+
+  inline void operator--() {
+    InterlockedDecrement(&i_);
+  }
 };
 
 } // namespace essentia
 
-#else // OS_WIN32
 
-//
-// Atomic for OS_MAC and OS_LINUX:
-//
+#elif defined(OS_MAC)
+
+#include <libkern/OSAtomic.h>
+namespace essentia {
+
+class Atomic {
+ private:
+  int32_t i_;
+
+ public:
+  inline Atomic(const int &i = 0) : i_(i) {}  
+    
+  inline operator int() const { return i_; }
+    
+  inline void operator-=(const int &i) {
+    OSAtomicAdd32Barrier(-i, &i_);
+  }
+
+  inline void operator+=(const int &i) {
+    OSAtomicAdd32Barrier(i, &i_);
+  }
+              
+  inline void operator++() {
+    OSAtomicIncrement32Barrier(&i_);
+  }
+              
+  inline void operator--() {
+    OSAtomicDecrement32Barrier(&i_);
+  }
+};
+
+} // namespace essentia
+
+
+#elif defined(OS_LINUX)
 
 #include <ext/atomicity.h>
 
 namespace essentia {
 
-class Atomic
-{
-public:
-	_Atomic_word _a;
+class Atomic {
+ public:
+  _Atomic_word _a;
 
-	inline Atomic(const int &i = 0)
-	:_a(i)
-	{
-	}
+  inline Atomic(const int &i = 0) : _a(i) {}
 
-	inline operator int () const
-	{
-		return _a;
-	}
+  inline operator int () const { return _a; }
 
-	inline void add(const int& i)
-	{
+  inline void add(const int& i) {
 // not sure 4.0 is the correct version, it happened somewhere between 3.3 and 4.1
 #if GCC_VERSION >= 40000
-		__gnu_cxx::__atomic_add(&_a,i);
+    __gnu_cxx::__atomic_add(&_a,i);
 #else
-                __atomic_add(&_a, i);
+    __atomic_add(&_a, i);
 #endif
-	}
+  }
 
-	inline void operator -=(const int &i)
-	{
-		add(-i);
-	}
+  inline void operator-=(const int &i) { add(-i); }
+  inline void operator+=(const int &i) { add(i); }
 
-	inline void operator +=(const int &i)
-	{
-		add(i);
-	}
-
-	inline void operator ++()
-	{
-		add(1);
-	}
-
-	inline void operator --()
-	{
-		add(-1);
-	}
+  inline void operator++() { add(1); }
+  inline void operator--() { add(-1); }
 };
 
 } // namespace essentia
 
-#endif // OS_WIN32
+
+#endif
 
 #endif // ESSENTIA_ATOMIC_H

@@ -27,20 +27,35 @@ namespace standard {
 
 class BinaryOperator : public Algorithm {
 
- private:
+ protected:
+  enum OpType {
+    ADD,
+    SUBTRACT,
+    MULTIPLY,
+    DIVIDE
+  };
+
+  OpType typeFromString(const std::string& name) const;
+
   Input<std::vector<Real> > _input1;
   Input<std::vector<Real> > _input2;
   Output<std::vector<Real> > _output;
 
+  OpType _type;
+
  public:
   BinaryOperator() {
-    declareInput(_input1, "input1", "the left-hand side input");
-    declareInput(_input2, "input2", "the right-hand side input");
-    declareOutput(_output, "output", "the resulting vector");
+    declareInput(_input1, "array1", "the first operand input array");
+    declareInput(_input2, "array2", "the second operand input array");
+    declareOutput(_output, "array", "the array containing the result of binary operation");
   }
 
   void declareParameters() {
-    declareParameter("type", "the type of the operation", "{+,-,*,/}", "+");
+    declareParameter("type", "the type of the binary operator to apply to the input arrays", "{add,subtract,multiply,divide}", "add");
+  }
+
+  void configure() {
+    _type = typeFromString(parameter("type").toString());
   }
 
   void compute();
@@ -68,13 +83,14 @@ class BinaryOperator : public StreamingAlgorithmWrapper {
  public:
   BinaryOperator() {
     declareAlgorithm("BinaryOperator");
-    declareInput(_input1, TOKEN, "input1");
-    declareInput(_input2, TOKEN, "input2");
-    declareOutput(_output, TOKEN, "output");
+    declareInput(_input1, TOKEN, "array1");
+    declareInput(_input2, TOKEN, "array2");
+    declareOutput(_output, TOKEN, "array");
   }
 };
 
 } // namespace streaming
 } // namespace essentia
+
 
 #endif // ESSENTIA_BINARYOPERATOR_H

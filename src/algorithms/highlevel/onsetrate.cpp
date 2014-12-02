@@ -276,7 +276,7 @@ AlgorithmStatus OnsetRate::process() {
   // the size of the signal is taken as the size of the dectection function
   // multiplied by the hopsize. This is not 100% accurate but it approximates
   // ok
-  _onsetRate.push(Real(onsetTimes.size()) / Real(hfc.size()*_hopSize) / _sampleRate);
+  _onsetRate.push(Real(onsetTimes.size()) / Real(hfc.size()*_hopSize / _sampleRate));
 
   return FINISHED;
 }

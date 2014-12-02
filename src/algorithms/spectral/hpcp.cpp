@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* HPCP::name = "HPCP";
-const char* HPCP::description = DOC("Computes a Harmonic Pitch Class Profile (HPCP), that is a k*12 dimensional vector which represents the intensities of the twelve (k==1) semitone pitch classes, or subdivisions of these (k>1). It does this from the spectral peaks of a signal.\n"
+const char* HPCP::description = DOC("Computes a Harmonic Pitch Class Profile (HPCP), that is a k*12 dimensional vector which represents the intensities of the twelve (k==1) semitone pitch classes (corresponsing to notes from A to G#), or subdivisions of these (k>1). It does this from the spectral peaks of a signal.\n"
 "Regarding frequency parameters, exceptions are thrown if \"minFrequency\", \"splitFrequency\" and \"maxFrequency\" are not separated by at least 200Hz from each other, requiring that \"maxFrequency\" be greater than \"splitFrequency\" and \"splitFrequency\" be greater than \"minFrequenc\"."
 "Other exceptions are thrown if input vectors have different size, if parameter \"size\" is not a positive non-zero multiple of 12 or if \"windowSize\" is less than one hpcp bin (12/size).\n"
 "References:\n"

@@ -39,6 +39,7 @@ class EffectiveDuration : public Algorithm {
 
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
+    declareParameter("thresholdRatio", "the ratio of the envelope maximum to be used as the threshold", "[0,1]", 0.4);   
   }
 
   void compute();
@@ -46,7 +47,6 @@ class EffectiveDuration : public Algorithm {
   static const char* name;
   static const char* description;
 
-  static const Real thresholdRatio;
   static const Real noiseFloor;
 
 };

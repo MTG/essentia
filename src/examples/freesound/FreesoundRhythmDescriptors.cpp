@@ -36,28 +36,28 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   rhythmExtractor->configure("method","degara");
   
   
-  connect(source, rhythmExtractor->input("signal"));
-  connect(rhythmExtractor->output("ticks"),        pool, nameSpace + "beats_position");
-  connect(rhythmExtractor->output("bpm"),          pool, nameSpace + "bpm");
-  connect(rhythmExtractor->output("estimates"),    pool, nameSpace + "bpm_estimates");
-  connect(rhythmExtractor->output("bpmIntervals"), pool, nameSpace + "bpm_intervals");
-  connect(rhythmExtractor->output("confidence"), NOWHERE);
+  source >> rhythmExtractor->input("signal");
+  rhythmExtractor->output("ticks") >>        PC(pool, nameSpace + "beats_position");
+  rhythmExtractor->output("bpm") >>          PC(pool, nameSpace + "bpm");
+  rhythmExtractor->output("estimates") >>    NOWHERE;
+  rhythmExtractor->output("bpmIntervals") >> PC(pool, nameSpace + "bpm_intervals");
+  rhythmExtractor->output("confidence") >>   PC(pool, nameSpace + "bpm_confidence");
 
   // BPM Histogram descriptors
   Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
-  connect(rhythmExtractor->output("bpmIntervals"), bpmhist->input("bpmIntervals"));
-  connectSingleValue(bpmhist->output("firstPeakBPM"),     pool, nameSpace + "first_peak_bpm");
-  connectSingleValue(bpmhist->output("firstPeakWeight"),  pool, nameSpace + "first_peak_weight");
-  connectSingleValue(bpmhist->output("firstPeakSpread"),  pool, nameSpace + "first_peak_spread");
-  connectSingleValue(bpmhist->output("secondPeakBPM"),    pool, nameSpace + "second_peak_bpm");
-  connectSingleValue(bpmhist->output("secondPeakWeight"), pool, nameSpace + "second_peak_weight");
-  connectSingleValue(bpmhist->output("secondPeakSpread"), pool, nameSpace + "second_peak_spread");
+  rhythmExtractor->output("bpmIntervals") >> bpmhist->input("bpmIntervals");
+  bpmhist->output("firstPeakBPM") >>     PC(pool, nameSpace + "first_peak_bpm");
+  bpmhist->output("firstPeakWeight") >>  PC(pool, nameSpace + "first_peak_weight");
+  bpmhist->output("firstPeakSpread") >>  PC(pool, nameSpace + "first_peak_spread");
+  bpmhist->output("secondPeakBPM") >>    PC(pool, nameSpace + "second_peak_bpm");
+  bpmhist->output("secondPeakWeight") >> PC(pool, nameSpace + "second_peak_weight");
+  bpmhist->output("secondPeakSpread") >> PC(pool, nameSpace + "second_peak_spread");
 
-      // Onset Detection
+  // Onset Detection
   Algorithm* onset = factory.create("OnsetRate");
-  connect(source, onset->input("signal"));
-  connect(onset->output("onsetTimes"), pool, nameSpace + "onset_times");
-  connect(onset->output("onsetRate"), pool, nameSpace + "onset_rate"); 
+  source >> onset->input("signal");
+  onset->output("onsetTimes") >> PC(pool, nameSpace + "onset_times");
+  onset->output("onsetRate") >> PC(pool, nameSpace + "onset_rate"); 
 
 }
 
@@ -70,7 +70,7 @@ void FreesoundRhythmDescriptors::createBeatsLoudnessNetwork(SourceBase& source, 
     "sampleRate", analysisSampleRate,
     "beats", ticks
   );
-  connect(source, beatsLoudness->input("signal"));
-  connect(beatsLoudness->output("loudness"), pool, nameSpace + "beats_loudness");
-  connect(beatsLoudness->output("loudnessBandRatio"), pool, nameSpace + "beats_loudness_band_ratio");
+  source >> beatsLoudness->input("signal");
+  beatsLoudness->output("loudness") >> PC(pool, nameSpace + "beats_loudness");
+  beatsLoudness->output("loudnessBandRatio") >> PC(pool, nameSpace + "beats_loudness_band_ratio");
 }

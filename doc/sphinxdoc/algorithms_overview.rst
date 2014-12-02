@@ -168,18 +168,20 @@ Essentia also contains the following mid- and high-level descriptors:
   of the given list of arrays.
 * ``GaiaTransform``: applies the given Gaia transformation to a Pool. This is mostly used for
   classifiers which have been trained with Gaia. At the moment, the following classifiers have
-  trained models available in Essentia (TODO update after publishing models):
+  trained models available in Essentia:
 
   * musical genre (4 different databases)
   * ballroom music classification
-  * moods: happy, sad, aggressive, relaxed, also by extension: acoustic, electronic, party
+  * moods: happy, sad, aggressive, relaxed, acoustic, electronic, party
   * western / non-western music
-  * live / studio recording
-  * perceptual speed (ie: slow, medium, fast)
+  * tonal / atonal
+  * danceability
   * voice / instrumental
   * gender (male / female singer)
   * timbre classification
-  
+
+  Note that you need to `install Essentia version 2.0.1 <installing.html#using-pre-trained-high-level-models-in-essentia>`_, and use or adapt a supplied code example (see :doc:`Using extractors out-of-box <extractors_out_of_box>`) to be able to use these models, as they are trained on particular feature sets.
+
 
 Extractors
 ----------

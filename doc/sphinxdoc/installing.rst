@@ -36,6 +36,8 @@ In order to use python bindings for the library, you might also need to install 
 
   sudo apt-get install python-numpy-dev python-numpy
 
+Note, that the required version of ``libtag1-dev`` is greater or equal to ``1.9.1``. It is distributed with the latest LTS Ubuntu (14.04). If you are using the latest stable Debian (Wheezy), you might want to install it from wheezy-backports repository.
+
 
 Installing dependencies on Mac OS X
 -----------------------------------
@@ -44,7 +46,7 @@ Install a scientific python environment first:
 
 1. install Command Line Tools for Xcode: https://github.com/mxcl/homebrew/wiki/Installation
 2. install homebrew (package manager): http://brew.sh/
-3. install prerequisites: ``brew install pkg-config gfortran readline sqlite gdbm freetype libpng``
+3. install prerequisites: ``brew install pkg-config gcc readline sqlite gdbm freetype libpng``
 4. install python: ``brew install python --framework``
 5. install ipython and numpy: ``pip install ipython numpy``
 6. install matplotlib: ``pip install matplotlib``
@@ -74,9 +76,9 @@ compile the dependencies too. We will be working on Windows installer in the nea
 Additional dependencies (python, all platforms)
 -----------------------------------------------
 
-To build the documentation you will also need the following dependencies::
+To build the documentation you will also need the following dependencies (you might need to run this command with sudo)::
 
-  pip install sphinx pyparsing==1.5.7 sphinxcontrib-doxylink docutils
+  pip install sphinx pyparsing sphinxcontrib-doxylink docutils
 
 Other useful dependencies::
 
@@ -130,3 +132,15 @@ To generate the full documentation (need python bindings installed first)::
 Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
 
 All built examples (including the out-of-box features extractors) will be located in ``build/src/examples/`` folder, as well as the vamp plugin file ``libvamp_essentia.so``. In order to use the plugin you will need to place this file to the the standard vamp plugin folder of your system (such as ``/usr/local/lib/vamp/`` on Linux).
+
+
+Using pre-trained high-level models in Essentia
+-----------------------------------------------
+
+The 2.0.1 version of Essentia includes a number of `pre-trained classifier models for genres, moods and instrumentation
+<algorithms_overview.html#other-high-level-descriptors>`_. In order to use them you need to:
+
+* Install Gaia2 library (supported on Linux/OSX): https://github.com/MTG/gaia/blob/master/README.md
+* Build Essentia 2.0.1 with examples
+* Use ``streaming_extractor_archivemusic``
+

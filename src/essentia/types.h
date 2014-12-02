@@ -382,6 +382,9 @@ class BufferInfo {
  public:
   int size;
   int maxContiguousElements;
+
+  BufferInfo(int size = 0, int contiguous = 0) :
+    size(size), maxContiguousElements(contiguous) {}
 };
 
 namespace BufferUsage {

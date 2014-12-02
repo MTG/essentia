@@ -23,10 +23,10 @@ from essentia_test import *
 
 class TestBinaryOperator(TestCase):
 
-    div = BinaryOperator(type='/')
-    prod = BinaryOperator(type='*')
-    add = BinaryOperator(type='+')
-    sub = BinaryOperator(type='-')
+    div = BinaryOperator(type='divide')
+    prod = BinaryOperator(type='multiply')
+    add = BinaryOperator(type='add')
+    sub = BinaryOperator(type='subtract')
 
     def testRegression(self):
         input1 = [1, 2, 3, 4]

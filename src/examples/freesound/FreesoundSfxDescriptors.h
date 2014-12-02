@@ -30,7 +30,8 @@
  	static const string nameSpace;  
 
  	void createNetwork(SourceBase& source, Pool& pool);
- 	void createPitchNetwork(SourceBase& source, Pool& pool);
+ 	void createPitchNetwork(VectorInput<Real>& pitch, Pool& pool);
+ 	void createHarmonicityNetwork(SourceBase& source, Pool& pool);
 
  };
 

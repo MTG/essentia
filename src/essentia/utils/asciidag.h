@@ -77,7 +77,7 @@ class AsciiCanvas : public std::vector<std::string> {
  public:
   // NB: template is only used so that ARRAY_SIZE can work, we only want const char*[] here
   template <typename NetworkType>
-  AsciiCanvas(const NetworkType& network) {
+  explicit AsciiCanvas(const NetworkType& network) {
     (*this) = makeRectangle(network, ARRAY_SIZE(network));
   }
 

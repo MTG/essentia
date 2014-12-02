@@ -636,11 +636,9 @@ TempoTapDegara::TempoTapDegara() : AlgorithmComposite() {
 
   _onsetDetections >> _poolStorage->input("data"); // attach input proxy
 
-  // NB: We want to have the same output stream type as in TempoTapTicks for
-  // consistency. We need to increase buffer size of the output because the
-  // algorithm works on the level of entire track and we need to push all values
-  // in the output source at once.
-  _ticks.setBufferType(BufferUsage::forLargeAudioStream);
+  // Need to set the buffer type to multiple frames as all the ticks
+  // are output all at once
+  _ticks.setBufferType(BufferUsage::forMultipleFrames);
 }
 
 
@@ -664,7 +662,7 @@ AlgorithmStatus TempoTapDegara::process() {
   _tempoTapDegara->output("ticks").set(ticks);
   _tempoTapDegara->compute();
 
-  for(size_t i=0; i<ticks.size(); ++i) {
+  for (size_t i=0; i<ticks.size(); ++i) {
     _ticks.push(ticks[i]);
   }
   return FINISHED;
@@ -672,4 +670,3 @@ AlgorithmStatus TempoTapDegara::process() {
 
 } // namespace streaming
 } // namespace essentia
-

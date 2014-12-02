@@ -172,6 +172,17 @@ class Network {
    */
   static std::vector<streaming::Algorithm*> innerVisibleAlgorithms(streaming::Algorithm* algo);
 
+  /**
+   * Prints the fill state of all the buffers in the network.
+   */
+  void printBufferFillState();
+
+  /**
+   * Last instance of Network created, 0 if it has been deleted or if
+   * no network has been created yet.
+   */
+  static Network* lastCreated;
+
  protected:
   bool _takeOwnership;
   streaming::Algorithm* _generator;
@@ -217,11 +228,6 @@ class Network {
   void checkConnections();
 
   /**
-   * Prints the fill state of all the buffers in the network.
-   */
-  void printBufferFillState();
-
-  /**
    * Check for all the connections that the source buffer size (phantom size,
    * actually) is at least as big as the preferred size of the connected sink.
    * If not, it automatically resizes the source buffer.
@@ -240,6 +246,11 @@ class Network {
    */
   void clearExecutionNetwork();
 };
+
+/**
+ * Prints the fill state of all the buffers in the last created network.
+ */
+void printNetworkBufferFillState();
 
 AlgoVector computeDependencies(const streaming::Algorithm* algo);
 AlgoVector computeNormalDependencies(const streaming::Algorithm* algo);

@@ -83,7 +83,7 @@ class TestMonoLoader(TestCase):
         self.assertEqual(self.round(sum(mix)), 9)
 
     def testEmptyWav(self):
-        filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.wav')
+        filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.aiff')
         self.assertEqualVector(MonoLoader(filename=filename, downmix='left', sampleRate=44100)(), [])
 
     def testWavLeftRightOffset(self):

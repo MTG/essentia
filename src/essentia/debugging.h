@@ -22,6 +22,7 @@
 
 #include <deque>
 #include <string>
+#include <climits> // for INT_MAX
 #include "config.h"
 #include "streamutil.h"
 #include "stringutil.h"
@@ -71,6 +72,32 @@ extern int debugIndentLevel;
 
 void setDebugLevel(int levels);
 void unsetDebugLevel(int levels);
+
+void saveDebugLevels();
+void restoreDebugLevels();
+
+typedef int DebuggingSchedule[][3];
+typedef std::vector<std::pair<std::pair<int, int>, int> > DebuggingScheduleVector;
+
+/**
+ * the given schedule variable is a vector of pair of ints representing the
+ * range of indices for which to activate the given debugging module.
+ *
+ * Example:
+ *
+ * DebuggingSchedule s = { {0,   INT_MAX, EAlgorithm},         // always active
+ *                         {500, INT_MAX, ENetwork | EMemory}, // from time index 500 until the end
+ *                         {782, 782,     EScheduler};         // only for time index 782
+ * scheduleDebug(s, ARRAY_SIZE(s));
+ */
+void scheduleDebug(DebuggingSchedule schedule, int nentries);
+void scheduleDebug(const DebuggingScheduleVector& schedule);
+
+/**
+ * Set the debugging modules for the given time index as specified by
+ * the scheduleDebug() function call.
+ */
+void setDebugLevelForTimeIndex(int index);
 
 /**
  * Asynchronous thread-safe logger object. (TODO: implementation is still not thread-safe)
