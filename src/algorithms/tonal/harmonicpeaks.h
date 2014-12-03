@@ -48,7 +48,7 @@ class HarmonicPeaks : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("maxHarmonics", "the maximum number of returned harmonics", "[1,inf)", 20);
+    declareParameter("maxHarmonics", "the number of harmonics to return including F0", "[1,inf)", 20);
     declareParameter("tolerance", "the allowed ratio deviation from ideal harmonics", "(0,0.5)", 0.2);
   }
 

@@ -31,6 +31,7 @@ const char* HarmonicPeaks::description = DOC("This algorithm finds the harmonic 
 "  - \"tolerance\" parameter defines the allowed fixed deviation from ideal harmonics, being a percentage over the F0. For example: if the F0 is 100Hz you may decide to allow a deviation of 20%, that is a fixed deviation of 20Hz; for the harmonic series it is: [180-220], [280-320], [380-420], etc.\n" 
 "  - Input pitch is given as a hint in order to consider the closest spectral peak, within the allowed deviation range, as the fundamental frequency. If no peak was found, the specified pitch value was not consistent with the given spectral peaks, and the algorithm returns an empty vector.\n"
 "\n"
+"  - The output frequency and magnitude vectors are of size \"maxHarmonics\". If a particular harmonic was not found among spectral peaks, its ideal frequency value is output together with 0 magnitude.\n"
 "This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the SpectralPeaks algorithm.\n"
 "\n"
 "When input vectors differ in size or are empty, an exception is thrown. Input vectors must be ordered by ascending frequency excluding DC components and not contain duplicates, otherwise an exception is thrown.\n"
