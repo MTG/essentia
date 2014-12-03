@@ -50,7 +50,7 @@ void TuningFrequency(const string& filename,
                      Real rgain, Pool& pool) {
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
-  Algorithm* audio         = factory.create("EqloudLoader",
+  Algorithm* audio         = factory.create("EasyLoader",
                                             "filename", filename,
                                             "sampleRate", 44100,
                                             "replayGain", rgain,
@@ -60,15 +60,17 @@ void TuningFrequency(const string& filename,
                                             "frameSize", framesize,
                                             "hopSize", hopsize,
                                             "silentFrames", "noise",
-                                            "startFromZero", true);
+                                            "startFromZero", false);
 
-  Algorithm* window        = factory.create("Windowing", "type", "blackmanharris62");
+  Algorithm* window        = factory.create("Windowing", 
+                                            "type", "blackmanharris62",
+                                            "zeroPadding", zeropadding);
 
-  Algorithm* spectrum      = factory.create("Spectrum", "size", framesize + zeropadding);
+  Algorithm* spectrum      = factory.create("Spectrum");
 
   Algorithm* spectralPeaks = factory.create("SpectralPeaks",
                                             "sampleRate", 44100,
-                                            "maxPeaks", 40,
+                                            "maxPeaks", 10000,
                                             "maxFrequency", 5000.,
                                             "minFrequency", 40.,
                                             "magnitudeThreshold", 0.00001,
@@ -95,7 +97,7 @@ void TonalDescriptors(const string& filename,
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
-  Algorithm* audio         = factory.create("EqloudLoader",
+  Algorithm* audio         = factory.create("EasyLoader",
                                             "filename", filename,
                                             "sampleRate", 44100,
                                             "replayGain", rgain,
@@ -105,23 +107,23 @@ void TonalDescriptors(const string& filename,
                                             "frameSize", framesize,
                                             "hopSize", hopsize,
                                             "silentFrames", "noise",
-                                            "startFromZero", true);
+                                            "startFromZero", false);
 
-  Algorithm* window        = factory.create("Windowing", "type", "hann");
+  Algorithm* window        = factory.create("Windowing", 
+                                            "type", "blackmanharris62",
+                                            "zeroPadding", zeropadding);
 
-  Algorithm* spectrum      = factory.create("Spectrum", "size", framesize + zeropadding);
+  Algorithm* spectrum      = factory.create("Spectrum");
 
   Algorithm* spectralPeaks = factory.create("SpectralPeaks",
                                             "sampleRate", 44100,
-                                            "maxPeaks", 40,
+                                            "maxPeaks", 10000,
                                             "maxFrequency", 5000,
                                             "minFrequency", 40,
                                             "magnitudeThreshold", 0.00001,
                                             "orderBy", "frequency");
 
-
   Algorithm* key           = factory.create("Key");
-  // key is not configurable in streaming mode!!
 
   Algorithm* hpcp          = factory.create("HPCP",
                                             "size", 36,
