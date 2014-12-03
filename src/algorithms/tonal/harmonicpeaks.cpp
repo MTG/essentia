@@ -27,8 +27,9 @@ using namespace standard;
 const char* HarmonicPeaks::name = "HarmonicPeaks";
 const char* HarmonicPeaks::description = DOC("This algorithm finds the harmonic peaks of a signal given its spectral peaks and its fundamental frequency.\n"
 "Note:\n"
-"  - Input pitch is given as a hint in order to consider the closest spectral peak as the fundamental frequency.\n"
 "  - Frequency and magnitude vectors must be sorted in ascending order.\n"
+"  - \"tolerance\" parameter defines the allowed fixed deviation from ideal harmonics, being a percentage over the F0. For example: if the F0 is 100Hz you may decide to allow a deviation of 20%, that is a fixed deviation of 20Hz; for the harmonic series it is: [180-220], [280-320], [380-420], etc.\n" 
+"  - Input pitch is given as a hint in order to consider the closest spectral peak, within the allowed deviation range, as the fundamental frequency. If no peak was found, the specified pitch value was not consistent with the given spectral peaks, and the algorithm returns an empty vector.\n"
 "\n"
 "This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the SpectralPeaks algorithm.\n"
 "\n"
@@ -38,6 +39,17 @@ const char* HarmonicPeaks::description = DOC("This algorithm finds the harmonic 
 "References:\n"
 "  [1] Harmonic Spectrum - Wikipedia, the free encyclopedia,\n"
 "  http://en.wikipedia.org/wiki/Harmonic_spectrum");
+
+bool sortCandidates(const std::pair<Real, std::pair<int, int> >& x, const std::pair<Real, std::pair<int, int> >& y) {
+  return x.first < y.first;
+}
+
+
+void HarmonicPeaks::configure() {
+  _maxHarmonics = parameter("maxHarmonics").toInt();
+  _ratioTolerance = parameter("tolerance").toReal();
+  _ratioMax = (Real) _maxHarmonics + _ratioTolerance;
+}
 
 void HarmonicPeaks::compute() {
 
@@ -68,15 +80,22 @@ void HarmonicPeaks::compute() {
     return;
   }
 
+  // looking for f0 in the range allowed around pitch frequency
+  Real errorMin = pitch * _ratioTolerance;
 
-  // looking for f0
-  Real f0 = frequencies[0];
-  if (f0 <= 0) {
+  if (frequencies[0] <= 0) {
     throw EssentiaException("HarmonicPeaks: spectral peak frequencies must be greater than 0Hz");
   }
 
-  Real m0 = magnitudes[0];
-  Real errorMin = abs(f0 - pitch);
+  Real f0 = 0.;
+  Real m0 = 0.;
+
+  if (abs(frequencies[0] - pitch) < errorMin) {
+    f0 = frequencies[0];
+    m0 = magnitudes[0];
+    errorMin = abs(f0 - pitch);
+  }
+
   for (int i=1; i<int(frequencies.size()); ++i) {
     if (frequencies[i] < frequencies[i-1]) {
       throw EssentiaException("HarmonicPeaks: spectral peaks input must be ordered by frequency");
@@ -95,11 +114,49 @@ void HarmonicPeaks::compute() {
     }
   }
 
-  Real log_2 = log10(2.0);
+  if (f0 == 0) {
+    // cannot find f0 among peaks for given pitch value -> no harmonic peaks found
+    return;
+  }
+
+
+  // Maximum allowed tolerance is less than 0.5 therefore, each peak can 
+  // correspond only to one ideal harmonic
+
+  cout << "f0=" << f0 << endl;
+  // Init candidates with <-1, 0> -- ideal harmonics
+  vector<pair<int, Real> > candidates (_maxHarmonics, make_pair(-1, 0));
+
   for (int i=0; i<int(frequencies.size()); ++i) {
-    Real semitones = fabs(12.0*log10(frequencies[i]/f0)/log_2);
-    int semitonesRounded = int(round(semitones));
-    if (semitonesRounded%12 == 0 && abs(semitones-semitonesRounded) <= 0.5) {
+    Real ratio = frequencies[i] / f0;
+    int harmonicNumber = round(ratio);
+
+    Real distance = abs(ratio - harmonicNumber);
+    if (distance <= _ratioTolerance && ratio <= _ratioMax) { 
+      if (candidates[harmonicNumber-1].first == -1 || 
+            distance < candidates[harmonicNumber-1].second) {
+        // first occured candidate or a better candidate for harmonic
+        candidates[harmonicNumber-1].first = i;
+        candidates[harmonicNumber-1].second = distance;
+      } 
+      else if (distance == candidates[harmonicNumber-1].second) {
+        // select the one with max amplitude
+        if (magnitudes[i] > magnitudes[candidates[harmonicNumber-1].first]) {
+          candidates[harmonicNumber-1].first = i;
+          candidates[harmonicNumber-1].second = distance;
+        }
+      }
+    }
+  }
+
+  for (int h=0; h < _maxHarmonics; ++h) {
+    int i = candidates[h].first; 
+    if (i < 0) {
+      // harmonic not found, output ideal harmonic with 0 magnitude
+      harmonicFrequencies.push_back((h+1) * f0);
+      harmonicMagnitudes.push_back(0.);
+    }
+    else {
       harmonicFrequencies.push_back(frequencies[i]);
       harmonicMagnitudes.push_back(magnitudes[i]);
     }
