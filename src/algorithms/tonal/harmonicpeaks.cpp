@@ -27,15 +27,11 @@ using namespace standard;
 const char* HarmonicPeaks::name = "HarmonicPeaks";
 const char* HarmonicPeaks::description = DOC("This algorithm finds the harmonic peaks of a signal given its spectral peaks and its fundamental frequency.\n"
 "Note:\n"
-"  - Frequency and magnitude vectors must be sorted in ascending order.\n"
 "  - \"tolerance\" parameter defines the allowed fixed deviation from ideal harmonics, being a percentage over the F0. For example: if the F0 is 100Hz you may decide to allow a deviation of 20%, that is a fixed deviation of 20Hz; for the harmonic series it is: [180-220], [280-320], [380-420], etc.\n" 
-"  - Input pitch is given as a hint in order to consider the closest spectral peak, within the allowed deviation range, as the fundamental frequency. If no peak was found, the specified pitch value was not consistent with the given spectral peaks, and the algorithm returns an empty vector.\n"
-"\n"
+"  - If \"pitch\" is zero, it means its value is unknown, or the sound is unpitched, and in that case the HarmonicPeaks algorithm returns an empty vector.\n"
 "  - The output frequency and magnitude vectors are of size \"maxHarmonics\". If a particular harmonic was not found among spectral peaks, its ideal frequency value is output together with 0 magnitude.\n"
 "This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the SpectralPeaks algorithm.\n"
-"\n"
-"When input vectors differ in size or are empty, an exception is thrown. Input vectors must be ordered by ascending frequency excluding DC components and not contain duplicates, otherwise an exception is thrown.\n"
-"If \"pitch\" is zero, it means its value is unknown, or the sound is unpitched, and in that case the HarmonicPeaks algorithm returns an empty vector.\n"
+"  - When input vectors differ in size or are empty, an exception is thrown. Input vectors must be ordered by ascending frequency excluding DC components and not contain duplicates, otherwise an exception is thrown.\n"
 "\n"
 "References:\n"
 "  [1] Harmonic Spectrum - Wikipedia, the free encyclopedia,\n"
@@ -56,7 +52,7 @@ void HarmonicPeaks::compute() {
 
   const vector<Real>& frequencies = _frequencies.get();
   const vector<Real>& magnitudes = _magnitudes.get();
-  const Real& pitch = _pitch.get();
+  const Real& f0 = _pitch.get();
   vector<Real>& harmonicFrequencies = _harmonicFrequencies.get();
   vector<Real>& harmonicMagnitudes = _harmonicMagnitudes.get();
 
@@ -64,14 +60,14 @@ void HarmonicPeaks::compute() {
     throw EssentiaException("HarmonicPeaks: frequency and magnitude input vectors must have the same size");
   }
 
-  if (pitch < 0) {
+  if (f0 < 0) {
     throw EssentiaException("HarmonicPeaks: input pitch must be greater than zero");
   }
 
   harmonicFrequencies.resize(0);
   harmonicMagnitudes.resize(0);
 
-  if (pitch == 0) {
+  if (f0 == 0) {
     // pitch is unknown -> no harmonic peaks found
     return;
   }
@@ -81,22 +77,9 @@ void HarmonicPeaks::compute() {
     return;
   }
 
-  // looking for f0 in the range allowed around pitch frequency
-  Real errorMin = pitch * _ratioTolerance;
-
   if (frequencies[0] <= 0) {
     throw EssentiaException("HarmonicPeaks: spectral peak frequencies must be greater than 0Hz");
   }
-
-  Real f0 = 0.;
-  Real m0 = 0.;
-
-  if (abs(frequencies[0] - pitch) < errorMin) {
-    f0 = frequencies[0];
-    m0 = magnitudes[0];
-    errorMin = abs(f0 - pitch);
-  }
-
   for (int i=1; i<int(frequencies.size()); ++i) {
     if (frequencies[i] < frequencies[i-1]) {
       throw EssentiaException("HarmonicPeaks: spectral peaks input must be ordered by frequency");
@@ -107,24 +90,12 @@ void HarmonicPeaks::compute() {
     if (frequencies[i] <= 0) {
       throw EssentiaException("HarmonicPeaks: spectral peak frequencies must be greater than 0Hz");
     }
-    Real error = abs(frequencies[i] - pitch);
-    if (error <= errorMin) {
-      f0 = frequencies[i];
-      m0 = magnitudes[i];
-      errorMin = error;
-    }
-  }
-
-  if (f0 == 0) {
-    // cannot find f0 among peaks for given pitch value -> no harmonic peaks found
-    return;
   }
 
 
   // Maximum allowed tolerance is less than 0.5 therefore, each peak can 
   // correspond only to one ideal harmonic
 
-  cout << "f0=" << f0 << endl;
   // Init candidates with <-1, 0> -- ideal harmonics
   vector<pair<int, Real> > candidates (_maxHarmonics, make_pair(-1, 0));
 

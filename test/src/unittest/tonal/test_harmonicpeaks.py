@@ -80,16 +80,15 @@ class TestHarmonicPeaks(TestCase):
         mags = ones(len(freqs))
         self.assertComputeFails(HarmonicPeaks(), freqs, mags, f0)
 
-    def testIncorrectPitch(self):
-        # empty output in the case if no spectral peaks were found close to the pitch
+    def testMissingF0(self):
         f0 = 110
         freqs = [2.9, 3.1]
         mags = [1.0, 0.5]
         freqs = [freq*f0 for freq in freqs]
         
         f, m = HarmonicPeaks(maxHarmonics=3)(freqs, mags, f0)
-        self.assertAlmostEqualVector(f, [])
-        self.assertEqualVector(m, [])
+        self.assertAlmostEqualVector(f, [110, 220, 319])
+        self.assertEqualVector(m, [0, 0, 1])
 
 
     def testEmpty(self):
