@@ -66,6 +66,10 @@ void FreesoundRhythmDescriptors::createBeatsLoudnessNetwork(SourceBase& source, 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
   Real analysisSampleRate = 44100; // TODO: unify analysisSampleRate
   vector<Real> ticks = pool.value<vector<Real> >(nameSpace + "beats_position");
+    if (ticks.size()==0){
+        cout<<"adding 0 to ticks"<<endl;
+        ticks.push_back(0);
+    }
   Algorithm* beatsLoudness = factory.create("BeatsLoudness",
     "sampleRate", analysisSampleRate,
     "beats", ticks
