@@ -36,7 +36,7 @@
 #include "FreesoundSfxDescriptors.h"
 
 #define EXTRACTOR_VERSION "0.4"
-#define SAMPLE_RATE 4100
+#define SAMPLE_RATE 44100
 
 using namespace std;
 using namespace essentia;
