@@ -52,7 +52,7 @@ const char *avcodec_get_sample_fmt_name(int sample_fmt);
 /**
  * @return SAMPLE_FMT_NONE on error
  */
-enum SampleFormat avcodec_get_sample_fmt(const char* name);
+enum AVSampleFormat avcodec_get_sample_fmt(const char* name);
 
 /**
  * @return NULL on error
@@ -71,7 +71,7 @@ void avcodec_get_channel_layout_string(char *buf, int buf_size, int nb_channels,
  * @param fmt_name Format name, or NULL if unknown
  * @return Channel layout mask
  */
-int64_t avcodec_guess_channel_layout(int nb_channels, enum CodecID codec_id, const char *fmt_name);
+int64_t avcodec_guess_channel_layout(int nb_channels, enum AVCodecID codec_id, const char *fmt_name);
 
 /**
  * @return the number of channels in the channel layout.
@@ -91,8 +91,8 @@ typedef struct AVAudioConvert AVAudioConvert;
  * @param flags See FF_MM_xx
  * @return NULL on error
  */
-AVAudioConvert *av_audio_convert_alloc(enum SampleFormat out_fmt, int out_channels,
-                                       enum SampleFormat in_fmt, int in_channels,
+AVAudioConvert *av_audio_convert_alloc(enum AVSampleFormat out_fmt, int out_channels,
+                                       enum AVSampleFormat in_fmt, int in_channels,
                                        const float *matrix, int flags);
 
 /**

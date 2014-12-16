@@ -31,9 +31,14 @@ namespace essentia {
 
 void pcmMetadata(const std::string& filename, int& sr, int& ch, int& bitrate) {
 
-  std::string ext = filename.substr(filename.rfind('.'), std::string::npos);
-  if (ext != ".wav" && ext != ".aiff" && ext != ".aif") {
-    throw EssentiaException("metadatautils: pcmMetadata cannot read files which are neither \"wav\" nor \"aiff");
+  size_t pos = filename.rfind('.');
+  if (pos != std::string::npos) {
+      std::string ext = filename.substr(pos, std::string::npos);
+      if (ext != ".wav" && ext != ".aiff" && ext != ".aif") {
+        throw EssentiaException("metadatautils: pcmMetadata cannot read files which are neither \"wav\" nor \"aiff");
+      }
+  } else {
+      throw EssentiaException("metadatautils: pcmMetadata cannot guess the filetype by extension");
   }
 
   // (trick) create an audioloader to know the original samplerate

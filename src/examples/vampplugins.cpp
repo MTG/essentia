@@ -118,6 +118,7 @@ WRAP_TEMPORAL_PLUGIN(Larm, "", 1, float);
 WRAP_TEMPORAL_PLUGIN(LoudnessVickers, "", 1, float);
 WRAP_TEMPORAL_PLUGIN(ZeroCrossingRate, "", 1, float);
 
+
 static Vamp::PluginAdapter<Pitch> aPitch;
 static Vamp::PluginAdapter<DistributionShape> aDistributionShape;
 static Vamp::PluginAdapter<BarkShape> aBarkShape;

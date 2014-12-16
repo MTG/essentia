@@ -87,7 +87,7 @@ static const char *get_channel_name(int channel_id)
     return channel_names[channel_id];
 }
 
-int64_t avcodec_guess_channel_layout(int nb_channels, enum CodecID codec_id, const char *fmt_name)
+int64_t avcodec_guess_channel_layout(int nb_channels, enum AVCodecID codec_id, const char *fmt_name)
 {
     switch(nb_channels) {
     case 1: return CH_LAYOUT_MONO;

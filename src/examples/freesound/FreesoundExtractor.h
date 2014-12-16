@@ -35,19 +35,22 @@
 #include "FreesoundTonalDescriptors.h"
 #include "FreesoundSfxDescriptors.h"
 
-#define EXTRACTOR_VERSION "0.2"
+#define EXTRACTOR_VERSION "0.4"
+#define SAMPLE_RATE 44100
 
 using namespace std;
 using namespace essentia;
 using namespace streaming;
 
  class FreesoundExtractor{
-
+     
  protected:
 
  	Pool computeAggregation(Pool& pool);
 
  public:
+    //static const Real sampleRate=44100;
+     
  	Pool results;
  	Pool stats;
 
@@ -56,5 +59,6 @@ using namespace streaming;
 	void outputToFile(Pool& pool, const string& outputFilename, bool outputJSON);
 	
  };
+//const FreesoundExtractor::sampleRate=44100;
 
  #endif

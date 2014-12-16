@@ -43,14 +43,14 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
 "References:\n"
-"  [1] J. Zapata, M.E.P. Davies and E. Gómez, \"Multi Feature Beat tracker,\"\n"
-"  submitted article to IEEE TSALP, 2013.\n"
+"  [1] J. Zapata, M. Davies and E. Gómez, \"Multi-feature beat tracker,\"\n"
+"  IEEE/ACM Transactions on Audio, Speech and Language Processing. 22(4),\n"
+"  816-825, 2014\n\n"
 "  [2] J.R. Zapata, A. Holzapfel, M.E.P. Davies, J.L. Oliveira, F. Gouyon,\n"
 "  \"Assigning a confidence threshold on automatic beat annotation in large\n"
 "  datasets\", International Society for Music Information Retrieval Conference\n"
 "  (ISMIR'12), pp. 157-162, 2012\n");
 
-//TODO update ref [1] when the article gets published
 
 BeatTrackerMultiFeature::BeatTrackerMultiFeature() : AlgorithmComposite(),
     _frameCutter1(0), _windowing1(0), _fft1(0), _cart2polar1(0), _onsetRms1(0),
@@ -62,12 +62,9 @@ BeatTrackerMultiFeature::BeatTrackerMultiFeature() : AlgorithmComposite(),
   declareOutput(_ticks, 0, "ticks", "the estimated tick locations [s]");
   declareOutput(_confidence, "confidence", "confidence of the beat tracker [0, 5.32]");
 
-  // NB: We want to have the same output stream type as in TempoTapTicks for
-  // consistency. We need to increase buffer size of the output because the
-  // algorithm works on the level of entire track and we need to push all values
-  // in the output source at once.
-  _ticks.setBufferType(BufferUsage::forLargeAudioStream);
-
+  // Need to set the buffer type to multiple frames as all the ticks
+  // are output all at once
+  _ticks.setBufferType(BufferUsage::forMultipleFrames);
 }
 
 void BeatTrackerMultiFeature::createInnerNetwork() {
@@ -293,8 +290,9 @@ const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates
 "Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
 "\n"
 "References:\n"
-"  [1] J. Zapata, M.E.P. Davies and E. Gómez, \"Multi Feature Beat tracker,\"\n"
-"  submitted article to IEEE TSALP, 2013.\n"
+"  [1] J. Zapata, M. Davies and E. Gómez, \"Multi-feature beat tracker,\"\n"
+"  IEEE/ACM Transactions on Audio, Speech and Language Processing. 22(4),\n"
+"  816-825, 2014\n\n"
 "  [2] J.R. Zapata, A. Holzapfel, M.E.P. Davies, J.L. Oliveira, F. Gouyon,\n"
 "  \"Assigning a confidence threshold on automatic beat annotation in large\n"
 "  datasets\", International Society for Music Information Retrieval Conference\n"

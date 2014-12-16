@@ -65,7 +65,7 @@ class TempoTapDegara : public Algorithm {
   // Davies' beat periods estimation:
   int _smoothingWindowHalfSize;
   static const int _numberCombs = 4;
-  static const Real _frameDurationODF = 5.944308390022676;
+  constexpr static const Real _frameDurationODF = 5.944308390022676;
   Real _sampleRateODF;
   int _hopSizeODF;
   Real _hopDurationODF;
@@ -92,8 +92,8 @@ class TempoTapDegara : public Algorithm {
   void adaptiveThreshold(std::vector<Real>& array, int smoothingHalfSize);
 
   // Degara's beat tracking from periods:
-  static const Real _alpha = 0.5; // decoding weighting parameter
-  static const Real _sigma_ibi = 0.025; // std of the inter-beat interval pdf,
+  constexpr static const Real _alpha = 0.5; // decoding weighting parameter
+  constexpr static const Real _sigma_ibi = 0.025; // std of the inter-beat interval pdf,
                                        // models potential variations in the
                                        // inter-beat interval in secs.
   int _numberStates;    // number HMM states

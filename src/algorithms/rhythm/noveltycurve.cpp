@@ -246,3 +246,59 @@ void NoveltyCurve::reset() {
 
 } // namespace standard
 } // namespace essentia
+
+
+#include "poolstorage.h"
+#include "algorithmfactory.h"
+
+namespace essentia {
+namespace streaming {
+
+const char* NoveltyCurve::name = standard::NoveltyCurve::name;
+const char* NoveltyCurve::description = standard::NoveltyCurve::description;
+
+NoveltyCurve::NoveltyCurve() : AlgorithmComposite() {
+
+  _noveltyCurve = standard::AlgorithmFactory::create("NoveltyCurve");
+  _poolStorage = new PoolStorage<vector<Real> >(&_pool, "internal.frequencyBands");
+
+  declareInput(_frequencyBands, 1, "frequencyBands", "the frequency bands");
+  declareOutput(_novelty, 0, "novelty", "the novelty curve as a single vector");
+
+  _frequencyBands >> _poolStorage->input("data"); // attach input proxy
+
+  // Need to set the buffer type to multiple frames as all the values 
+  // are output all at once
+  _novelty.setBufferType(BufferUsage::forMultipleFrames);
+}
+
+
+NoveltyCurve::~NoveltyCurve() {
+  delete _noveltyCurve;
+  delete _poolStorage;
+}
+
+
+void NoveltyCurve::reset() {
+  AlgorithmComposite::reset();
+  _noveltyCurve->reset();
+}
+
+
+AlgorithmStatus NoveltyCurve::process() {
+  if (!shouldStop()) return PASS;
+
+  vector<Real> novelty;
+  _noveltyCurve->input("frequencyBands").set(_pool.value<vector<vector<Real> > >("internal.frequencyBands"));
+  _noveltyCurve->output("novelty").set(novelty);
+  _noveltyCurve->compute();
+
+  for (size_t i=0; i<novelty.size(); ++i) {
+    _novelty.push(novelty[i]);
+  }
+  return FINISHED;
+}
+
+
+} // namespace streaming
+} // namespace essentia

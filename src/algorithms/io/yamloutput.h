@@ -33,6 +33,8 @@ class YamlOutput : public Algorithm {
   std::string _filename;
   bool _doubleCheck;
   bool _outputJSON;
+  int _indent;
+  bool _writeVersion;
 
   void outputToStream(std::ostream* out);
 
@@ -44,6 +46,8 @@ class YamlOutput : public Algorithm {
 
   void declareParameters() {
     declareParameter("filename", "output filename (use '-' to emit to stdout)", "", "-");
+    declareParameter("indent", "(json only) how many characters to indent each line, or 0 for no newlines", "", 4);
+    declareParameter("writeVersion", "whether to write the essentia version to the output file", "", true);
     declareParameter("doubleCheck", "whether to double-check if the file has been correctly written to the disk", "", false);
     declareParameter("format", "whether to output data in JSON or YAML format", "{json,yaml}", "yaml");
   }

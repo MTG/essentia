@@ -115,7 +115,7 @@ RhythmTransform::RhythmTransform() : AlgorithmComposite() {
 
   declareInput(_poolStorage->input("data"), 1, "melBands","the energy in the melbands");
   declareOutput(_rhythmTransform, 0, "rhythm", "consecutive frames in the rhythm domain");
-  _rhythmTransform.setBufferType(BufferUsage::forLargeAudioStream);
+  _rhythmTransform.setBufferType(BufferUsage::forMultipleFrames);
 }
 
 void RhythmTransform::configure() {

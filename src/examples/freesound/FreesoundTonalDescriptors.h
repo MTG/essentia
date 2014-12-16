@@ -25,8 +25,9 @@
 
  class FreesoundTonalDescriptors : public FreesoundDescriptorSet{
 
- public:
+ public:     
  	static const string nameSpace;
+    void createTuningFrequencyNetwork(SourceBase& source, Pool& pool);
  	void createNetwork(SourceBase& source, Pool& pool);
  };
 

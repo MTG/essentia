@@ -19,6 +19,7 @@
 
 #include "yamlinput.h"
 #include "yamlast.h"
+#include "jsonconvert.h"
 #include <fstream>
 
 using namespace std;
@@ -40,6 +41,33 @@ void YamlInput::configure() {
   if (parameter("filename").isConfigured()) {
     _filename = parameter("filename").toString();
   }
+  _inputJson = (parameter("format").toLower() == "json");
+}
+
+
+string unescapeJsonString(const string& input) {
+  ostringstream escaped;
+  for (string::const_iterator i = input.begin(); i != input.end();) { 
+    if (*i == '\\' && i+1 != input.end()) {
+      switch(*(i+1)) {
+        case 'n': escaped << "\n"; break;
+        case 'r': escaped << "\r"; break;
+        case 't': escaped << "\t"; break;
+        case 'f': escaped << "\f"; break;
+        case 'b': escaped << "\b"; break;
+        //case '"': escaped << '"'; break;   // will be unescaped by yaml parser
+        case '/': escaped << '/'; break;
+        //case '\\': escaped << '\\'; break; // will be unescaped by yaml parser
+        default: escaped << *i << *(i+1); break;
+      }
+      i=i+2;
+    }
+    else {
+      escaped << *i;
+      i++;
+    }
+  }
+  return escaped.str();
 }
 
 
@@ -50,6 +78,7 @@ void YamlInput::compute() {
   if (!parameter("filename").isConfigured()) {
     throw EssentiaException("YamlInput: 'filename' parameter has not been configured");
   }
+  if (_filename == "") throw EssentiaException("YamlInput: please provide a valid filename");
 
   Pool& p = _pool.get();
 
@@ -60,12 +89,36 @@ void YamlInput::compute() {
 
   // First phase, build AST
   YamlNode* root = NULL;
+
   try {
-    root = parseYaml(file);
+    if (_inputJson) {
+      // Loading a string in a C way to be consistent with code for yaml, 
+      // but we could have used ifstream instead
+
+      // Determine file size first
+      fseek(file, 0, SEEK_END);
+      size_t filesize = ftell(file);
+      char* jsonChar = new char[filesize];
+      rewind(file);
+      // Load to string
+      fread(jsonChar, sizeof(char), filesize, file);
+      
+      string yamlString = JsonConvert(string(jsonChar, filesize)).parseDict();
+      yamlString = unescapeJsonString(yamlString);
+      delete[] jsonChar;
+
+      if(yamlString.empty()) {
+        throw EssentiaException("YamlInput: error during parsing: empty json file");
+      }
+      root = parseYaml(file, yamlString);
+    }
+    else {
+      root = parseYaml(file);
+    }
   }
-  catch (const YamlException& e) {
+  catch (exception& e) {
     if (fclose(file) != 0) {
-      cout << "WARNING: YamlInput: an error occured while closing the yaml file" << endl;
+      cout << "WARNING: YamlInput: an error occured while closing the yaml/json file" << endl;
     }
     throw EssentiaException("YamlInput: error during parsing: ", e.what());
   }

@@ -39,31 +39,32 @@ class TestHarmonicPeaks(TestCase):
         self.assertComputeFails(HarmonicPeaks(), freqs, mags, pitch)
 
     def testRegression(self):
-        # frequencies should be in ascendent order
         f0 = 110
-        freqs = [0.5, 0.75, 1.0, 2.0, 3.5, 4.0, 4.09, 4.9, 6]
+        freqs = [0.5, 0.75, 1.0, 2.0, 3.5, 4.0, 4.09, 4.9, 6.25]
         freqs = [freq*f0 for freq in freqs]
-        result = [0.5, 1.0, 2.0, 4.0, 4.09]
-        result = [freq*f0 for freq in result]
         mags = ones(len(freqs))
-        f, m = HarmonicPeaks()(freqs, mags, f0)
-        self.assertAlmostEqualVector(f, result)
-        self.assertEqualVector(m, ones(len(result)))
+        result      = [1., 2., 3., 4., 4.9, 6., 7., 8., 9., 10. ]
+        result_mags = [1,  1,  0,  1,  1,   0,  0,  0,  0,  0]      
+        result_freqs = [freq*f0 for freq in result]
+        
+        f, m = HarmonicPeaks(maxHarmonics=10)(freqs, mags, f0)      
+        self.assertAlmostEqualVector(f, result_freqs)
+        self.assertEqualVector(m, result_mags)
 
-        semitones = [0.5, 0.75, 12.5, 14.0, 23.9, 24.1, 24.9, 26, 32]
-        freqs = [pow(2.0, s/12.0)*f0 for s in semitones]
-        # freqs are [113.22324603078413, 114.87011606701552, 226.44649206156825,
-        #            246.94165062806206, 437.46578647972075, 442.54889406985552,
-        #            463.47885582012776, 493.88330125612401, 698.45646286600777]
-        # in this case the fundamental closest to the given pitch is 113.223
-        # obtaining the following real semitone relations:
-        # [0.0, 0.25, 12.0, 13.5, 23.4, 23.6, 24.4, 25.5, 31.5]
-        result = [0.5, 0.75, 12.5, 24.1, 24.9]
-        result = [pow(2.0, s/12.0)*f0 for s in result]
-        mags = ones(len(freqs))
-        f, m = HarmonicPeaks()(freqs, mags, f0)
-        self.assertAlmostEqualVector(f, result)
-        self.assertAlmostEqualVector(m, ones(len(result)))
+        # in the case when two peaks are equidistant to an ideal harmonic
+        # the peak with greater amplitude should be selected
+        f0 = 110
+        freqs = [1.,2.9, 3.1]
+        mags = [1., 1.0, 0.5]
+        freqs = [freq*f0 for freq in freqs]
+        
+        result = [1., 2., 2.9]
+        result_mags = [1., 0., 1.]
+        result_freqs = [freq*f0 for freq in result]
+
+        f, m = HarmonicPeaks(maxHarmonics=3)(freqs, mags, f0)
+        self.assertAlmostEqualVector(f, result_freqs)
+        self.assertEqualVector(m, result_mags)
 
     def testNegativeFreqs(self):
         f0 = 110
@@ -78,6 +79,17 @@ class TestHarmonicPeaks(TestCase):
         freqs = [freq*f0 for freq in freqs]
         mags = ones(len(freqs))
         self.assertComputeFails(HarmonicPeaks(), freqs, mags, f0)
+
+    def testMissingF0(self):
+        f0 = 110
+        freqs = [2.9, 3.1]
+        mags = [1.0, 0.5]
+        freqs = [freq*f0 for freq in freqs]
+        
+        f, m = HarmonicPeaks(maxHarmonics=3)(freqs, mags, f0)
+        self.assertAlmostEqualVector(f, [110, 220, 319])
+        self.assertEqualVector(m, [0, 0, 1])
+
 
     def testEmpty(self):
         freqs = []
@@ -98,7 +110,7 @@ class TestHarmonicPeaks(TestCase):
         f0 = 110
         freqs = [f0]
         mags = [1]
-        f, m = HarmonicPeaks()(freqs, mags, f0)
+        f, m = HarmonicPeaks(maxHarmonics=1)(freqs, mags, f0)
         self.assertEqualVector(f, freqs)
         self.assertEqualVector(m, mags)
 

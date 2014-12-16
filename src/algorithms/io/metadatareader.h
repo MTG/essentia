@@ -21,6 +21,8 @@
 #define ESSENTIA_METADATAREADER_H
 
 #include "algorithm.h"
+#include "pool.h"
+
 
 namespace essentia {
 namespace standard {
@@ -34,16 +36,21 @@ class MetadataReader : public Algorithm {
   Output<std::string> _album;
   Output<std::string> _comment;
   Output<std::string> _genre;
-  Output<int> _track;
-  Output<int> _year;
+  Output<std::string> _track;
+  Output<std::string> _date;
+
+  Output<Pool> _tagPool;
 
   // Audio properties
-  Output<int> _length;
+  Output<int> _duration;
   Output<int> _bitrate;
   Output<int> _sampleRate;
   Output<int> _channels;
 
   std::string _filename;
+  std::string _tagPoolName;
+  bool _filterMetadata;
+  std::vector<std::string> _filterMetadataTags;
 
  public:
   MetadataReader() {
@@ -52,10 +59,12 @@ class MetadataReader : public Algorithm {
     declareOutput(_album, "album", "the album on which this track appears");
     declareOutput(_comment, "comment", "the comment field stored in the tags");
     declareOutput(_genre, "genre", "the genre as stored in the tags");
-    declareOutput(_track, "track", "the track number");
-    declareOutput(_year, "year", "the year of publication");
+    declareOutput(_track, "tracknumber", "the track number");
+    declareOutput(_date, "date", "the date of publication");
 
-    declareOutput(_length, "length", "the length of the track, in seconds");
+    declareOutput(_tagPool, "tagPool", "the pool with all tags that were found");
+
+    declareOutput(_duration, "duration", "the duration of the track, in seconds");
     declareOutput(_bitrate, "bitrate", "the bitrate of the track [kb/s]");
     declareOutput(_sampleRate, "sampleRate", "the sample rate [Hz]");
     declareOutput(_channels, "channels", "the number of channels");
@@ -64,6 +73,9 @@ class MetadataReader : public Algorithm {
   void declareParameters() {
     declareParameter("filename", "the name of the file from which to read the tags", "", Parameter::STRING);
     declareParameter("failOnError", "if true, the algorithm throws an exception when encountering an error (e.g. trying to open an unsupported file format), otherwise the algorithm leaves all fields blank", "{true,false}", false);
+    declareParameter("tagPoolName", "common prefix for tag descriptor names to use in tagPool", "", "metadata.tags");
+    declareParameter("filterMetadata", "if true, only add tags from filterMetadataTags to the pool", "", false);
+    declareParameter("filterMetadataTags", "the list of tags to whitelist (original taglib names)", "", std::vector<std::string>());
   }
 
   void configure();
@@ -91,11 +103,15 @@ class MetadataReader : public Algorithm {
   Source<std::string> _album;
   Source<std::string> _comment;
   Source<std::string> _genre;
-  Source<int> _track;
-  Source<int> _year;
+  Source<std::string> _track; // not necessarily an int
+  Source<std::string> _date;  // not necessarily an int
+
+  //Source<Pool> _tagPool;
+  // TODO: DevNull class doesn't work for type: essentia::Pool
+  // TODO: Pool Storage doesn't work for type: essentia::Pool
 
   // Audio properties
-  Source<int> _length;
+  Source<int> _duration;
   Source<int> _bitrate;
   Source<int> _sampleRate;
   Source<int> _channels;
@@ -110,14 +126,15 @@ class MetadataReader : public Algorithm {
     declareOutput(_album, 0, "album", "the album on which this track appears");
     declareOutput(_comment, 0, "comment", "the comment field stored in the tags");
     declareOutput(_genre, 0, "genre", "the genre as stored in the tags");
-    declareOutput(_track, 0, "track", "the track number");
-    declareOutput(_year, 0, "year", "the year of publication");
+    declareOutput(_track, 0, "tracknumber", "the track number");
+    declareOutput(_date, 0, "date", "the date of publication");
 
-    declareOutput(_length, 0, "length", "the length of the track, in seconds");
+    //declareOutput(_tagPool, 0, "tagPool", "the pool with all tags that were found");
+
+    declareOutput(_duration, 0, "duration", "the duration of the track, in seconds");
     declareOutput(_bitrate, 0, "bitrate", "the bitrate of the track [kb/s]");
     declareOutput(_sampleRate, 0, "sampleRate", "the sample rate [Hz]");
     declareOutput(_channels, 0, "channels", "the number of channels");
-
   }
 
   void declareParameters() {
