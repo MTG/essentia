@@ -83,7 +83,7 @@ def configure(ctx):
         # clang fails on 10.7 using <atomic>, because libc++ is not new enough
         #ctx.env.CC = 'clang'
         #ctx.env.CXX = 'clang++'
-        #ctx.env.CXXFLAGS = [ '-stdlib=libc++', '-std=c++11', '-Wno-gnu' ]
+        ctx.env.CXXFLAGS = [ '-stdlib=libc++', '-std=c++11', '-Wno-gnu' ]
         #ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
 
         ctx.env.DEFINES   += [ 'GTEST_HAS_TR1_TUPLE=0' ]
