@@ -31,6 +31,7 @@
 #include "essentia/streaming/algorithms/poolstorage.h"
 #include "essentia/streaming/algorithms/vectorinput.h"
 
+
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
@@ -38,9 +39,11 @@ using namespace essentia::streaming;
  class FreesoundDescriptorSet{ 
 
  public:
- 	static const string nameSpace;  
+ 	static const string nameSpace;
+    //static const Real sampleRate=44100;
 
  	void createNetwork(SourceBase& source, Pool& pool);
  };
+
 
  #endif
