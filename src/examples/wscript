@@ -9,7 +9,7 @@ import sys
 # the source file (less the .cpp extension) and is also used as the
 # binary name. The second element (if it exists) is a list of
 # additional files for the extractor
-example_sources = [
+example_sources_fileio = [
         ('standard_beatsmarker', ),
         ('standard_mfcc', ),
         ('standard_onsetrate', ),
@@ -72,11 +72,17 @@ example_sources_with_gaia = [
 ]
 
 def configure(ctx):
-    example_list = [p[0] for p in example_sources]
+    example_list_fileio = [p[0] for p in example_sources_fileio]
     example_list_gaia = [p[0] for p in example_sources_with_gaia]
 
-    if "HAVE_GAIA2" in ctx.env['define_key']:
-        example_list += example_list_gaia
+    example_list = []
+
+    if "HAVE_AVCODEC" in ctx.env['define_key'] and "HAVE_SAMPLERATE" in ctx.env['define_key']:
+        example_list += example_list_fileio
+    
+        if "HAVE_GAIA2" in ctx.env['define_key']:
+            example_list += example_list_gaia
+  
 
     if ctx.env.WITH_EXAMPLES:
         ctx.env.EXAMPLE_LIST = example_list
@@ -86,6 +92,8 @@ def configure(ctx):
             e = e.strip()
             if e not in example_list and e in example_list_gaia:
                 raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because Gaia2 is missing" % e)
+            if e not in example_list and e in example_list_fileio:
+                raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because LibAv/FFMpeg or libresample are missing" % e)
             elif e not in example_list:
                 raise ctx.errors.ConfigurationError("Specified example [%s] does not exist" % e)
             ctx.env.EXAMPLE_LIST.append(e)
