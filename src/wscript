@@ -123,6 +123,7 @@ def configure(ctx):
     print
     print('================================ CONFIGURATION SUMMARY ================================')
 
+    ctx.env.USES = ''
 
     def has(name):
         return ('HAVE_%s' % name.upper()) in ctx.env['define_key']

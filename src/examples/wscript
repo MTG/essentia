@@ -135,7 +135,7 @@ def build(ctx):
                         use      = 'essentia ' + ctx.env.USES,
                         install_path = None)
 
-        for e in example_sources + example_sources_with_gaia:
+        for e in example_sources_fileio + example_sources_with_gaia:
             if e[0] in ctx.env.EXAMPLE_LIST:
                 if len(e) == 1:
                     build_example(e[0])
