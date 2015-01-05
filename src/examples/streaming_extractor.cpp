@@ -493,6 +493,7 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       connectSingleValue(bpmhist->output("secondPeakBPM"),    neqloudPool, rhythmspace + "second_peak_bpm");
       connectSingleValue(bpmhist->output("secondPeakWeight"), neqloudPool, rhythmspace + "second_peak_weight");
       connectSingleValue(bpmhist->output("secondPeakSpread"), neqloudPool, rhythmspace + "second_peak_spread");
+      bpmhist->output("histogram") >> NOWHERE;
 
       // Onset Detection
       Algorithm* onset = factory.create("OnsetRate");

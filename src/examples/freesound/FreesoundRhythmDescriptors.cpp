@@ -52,6 +52,7 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   bpmhist->output("secondPeakBPM") >>    PC(pool, nameSpace + "second_peak_bpm");
   bpmhist->output("secondPeakWeight") >> PC(pool, nameSpace + "second_peak_weight");
   bpmhist->output("secondPeakSpread") >> PC(pool, nameSpace + "second_peak_spread");
+  bpmhist->output("histogram") >> NOWHERE;
 
   // Onset Detection
   Algorithm* onset = factory.create("OnsetRate");
