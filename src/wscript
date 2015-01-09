@@ -97,7 +97,7 @@ def configure(ctx):
                       msg='Checking for \'taglib\' >= 1.9',
                       mandatory=False)
     
-    if 'lyaml' in ctx.env.WITH_LIBS_LIST:
+    if 'yaml' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
