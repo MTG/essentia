@@ -368,7 +368,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime, 
   connect(bpmhist->output("secondPeakBPM"), pool, rhythmspace + "second_peak_bpm");
   connect(bpmhist->output("secondPeakWeight"), pool, rhythmspace + "second_peak_weight");
   connect(bpmhist->output("secondPeakSpread"), pool, rhythmspace + "second_peak_spread");
-  bpmhist->output("secondPeakSpread") >> NOWHERE;
+  bpmhist->output("histogram") >> NOWHERE;
 
   // Onset Detection
   Algorithm* onset = factory.create("OnsetRate");
