@@ -179,6 +179,12 @@ def build(ctx):
     ctx.recurse('src')
 
     if ctx.env.WITH_CPPTESTS:
+        # missing -lpthread flag on Ubuntu and LinuxMint
+        if platform.dist()[0] in ['Ubuntu', 'LinuxMint']:
+            ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
+            ctx.read_shlib('pthread', paths=ext_paths)
+            ctx.env.USES += ' pthread'
+
         ctx.program(
             source   = ctx.path.ant_glob('test/src/basetest/*.cpp test/3rdparty/gtest-1.6.0/src/gtest-all.cc '),
             target   = 'basetest',
