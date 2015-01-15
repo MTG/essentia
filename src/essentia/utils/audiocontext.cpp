@@ -104,17 +104,17 @@ int AudioContext::create(const std::string& filename,
   int dataSize = 1;
 
   switch (_codecCtx->codec_id) {
-    case CODEC_ID_PCM_S16LE:
-    case CODEC_ID_PCM_S16BE:
-    case CODEC_ID_PCM_U16LE:
-    case CODEC_ID_PCM_U16BE:
+    case AV_CODEC_ID_PCM_S16LE:
+    case AV_CODEC_ID_PCM_S16BE:
+    case AV_CODEC_ID_PCM_U16LE:
+    case AV_CODEC_ID_PCM_U16BE:
       _inputBufSize = 4096;
       _outputBufSize = 4096;
       dataSize = _inputBufSize/_codecCtx->channels/SAMPLE_SIZE_RATIO;
       break;
 
-    case CODEC_ID_FLAC:
-    case CODEC_ID_VORBIS:
+    case AV_CODEC_ID_FLAC:
+    case AV_CODEC_ID_VORBIS:
       _isFlac = true;
       _inputBufSize = _codecCtx->frame_size*_codecCtx->channels*SAMPLE_SIZE_RATIO;
       _outputBufSize = 65536;
@@ -274,8 +274,30 @@ void AudioContext::encodePacket(int size) {
   AVPacket packet;
   av_init_packet(&packet);
 
+  AVFrame *frame;
+
+  frame = av_frame_alloc();  
+  if (!frame) {
+    throw EssentiaException("Error allocating audio frame");
+  }
+
+  frame->nb_samples = _codecCtx->frame_size;
+  frame->format = _codecCtx->sample_fmt;
+  frame->channel_layout = _codecCtx->channel_layout;
+
+  if (avcodec_fill_audio_frame(frame, _codecCtx->channels, _codecCtx->sample_fmt,
+                                 (const uint8_t*) _inputBuffer, frame_bytes, 0) < 0) {
+    throw EssentiaException("Could not setup audio frame");
+  }
+
+  int got_output;
+
+  if (avcodec_encode_audio2(_codecCtx, &packet, frame, &got_output) < 0) {
+     throw EssentiaException("Error while encoding audio frame");
+  }
+
   //Real duration = (double)_avStream->pts.val * _avStream->time_base.num / _avStream->time_base.den;
-  packet.size = avcodec_encode_audio(_codecCtx, _outputBuffer, frame_bytes, (short*)_inputBuffer);
+  //packet.size = avcodec_encode_audio(_codecCtx, _outputBuffer, frame_bytes, (short*)_inputBuffer);
   _codecCtx->frame_size = tmp_fs;
 
   /*
@@ -288,23 +310,43 @@ void AudioContext::encodePacket(int size) {
        << endl;
   */
 
-  if (packet.size < 0) throw EssentiaException("Error while encoding audio frame");
+  //if (packet.size < 0) throw EssentiaException("Error while encoding audio frame");
 
-  if (_codecCtx->coded_frame->pts != (int)AV_NOPTS_VALUE) {
-    packet.pts = av_rescale_q(_codecCtx->coded_frame->pts, _codecCtx->time_base, _avStream->time_base);
+  if (!got_output) { // packet is not empty
+    //if (_codecCtx->coded_frame->pts != (int)AV_NOPTS_VALUE) {
+    //  packet.pts = av_rescale_q(_codecCtx->coded_frame->pts, _codecCtx->time_base, _avStream->time_base);
+    //}
+    //packet.flags |= AV_PKT_FLAG_KEY;
+    //packet.stream_index = _avStream->index;
+    //packet.data = _outputBuffer;
+
+    // write the frame in the media file
+    if (av_interleaved_write_frame(_demuxCtx, &packet) != 0 ) {
+      throw EssentiaException("Error while writing audio frame");
+    }
+    av_free_packet(&packet);
   }
 
-  packet.flags |= AV_PKT_FLAG_KEY;
-  packet.stream_index = _avStream->index;
-  packet.data = _outputBuffer;
-
-  // write the frame in the media file
-  if (av_interleaved_write_frame(_demuxCtx, &packet) != 0 ) {
-    throw EssentiaException("Error while writing audio frame");
+  // TODO get the delayed frames here or in writeEOF??
+  for (got_output = 1; got_output;) {
+    if (avcodec_encode_audio2(_codecCtx, &packet, NULL, &got_output) < 0) {
+      throw EssentiaException("Error while encoding audio frame");
+    }
+    if (got_output) {
+      if (av_interleaved_write_frame(_demuxCtx, &packet) != 0 ) {
+        throw EssentiaException("Error while writing audio frame");
+      }
+      av_free_packet(&packet);
+    }
   }
+
+  //av_frame_unref(&inputFrame);
+  av_frame_free(&frame);
 }
 
 void AudioContext::writeEOF() {
+  
+  /*
   if (_codecCtx->frame_size <= 1) return; // pcm
   // the size could be shrinked to 34 (mininum for flac), probably
   int frame_bytes = 128;
@@ -339,6 +381,7 @@ void AudioContext::writeEOF() {
       throw EssentiaException("Error while writing last frames");
     }
   }
+  */
 }
 
 int16_t AudioContext::scale(AudioSample value) {
