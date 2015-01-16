@@ -464,28 +464,24 @@ void AudioLoader::copyFFmpegOutput() {
 
     vector<StereoSample>& audio = *((vector<StereoSample>*)_audio.getTokens());
 
-    // FIXME: use libswresample
-
     if (_nChannels == 1) {
         for (int i=0; i<nsamples; i++) {
           audio[i].left() = scale(_buffer[i]);
         }
     }
     else { // _nChannels == 2
-      if (av_sample_fmt_is_planar(_audioCtx->sample_fmt)) {
-        // planar
-        for (int i=0; i<nsamples; i++) {
-            audio[i].left() = scale(_buffer[i]);
-            audio[i].right() = scale(_buffer[nsamples+i]);
-        }
+      // The output format is always AV_SAMPLE_FMT_S16, which is interleaved
+      for (int i=0; i<nsamples; i++) {
+          audio[i].left() = scale(_buffer[2*i]);
+          audio[i].right() = scale(_buffer[2*i+1]);
       }
-      else {
-        // interleaved
-        for (int i=0; i<nsamples; i++) {
-            audio[i].left() = scale(_buffer[2*i]);
-            audio[i].right() = scale(_buffer[2*i+1]);
-        }
+      /*
+      // planar
+      for (int i=0; i<nsamples; i++) {
+          audio[i].left() = scale(_buffer[i]);
+          audio[i].right() = scale(_buffer[nsamples+i]);
       }
+      */
     }
 
     // release data
