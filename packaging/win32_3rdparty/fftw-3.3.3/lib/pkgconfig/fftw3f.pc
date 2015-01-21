@@ -1,0 +1,10 @@
+prefix=../packaging/win32_3rdparty/fftw-3.3.3
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: FFTW
+Description: fast Fourier transform library
+Version: 3.3.3
+Libs: -L${libdir} -lfftw3f  -lm
+Cflags: -I${includedir}
