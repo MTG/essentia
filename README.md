@@ -45,5 +45,5 @@ If you use example extractors (located in src/examples), or your own code employ
 
 How to contribute
 -----------------
-We are more than happy to collaborate and receive your contributions to Essentia. The best practice of submitting your code is by creating pull requests to [our github repository](https://github.com/MTG/essentia) and sending us a scan of signed Essentia and Gaia Individual Contributor License Agreement. For more detailes see: http://essentia.upf.edu/contribute
+We are more than happy to collaborate and receive your contributions to Essentia. The best practice of submitting your code is by creating pull requests to [our github repository](https://github.com/MTG/essentia) following our contribution policy. By submitting your code you authorize that it complies with the Developer's Certificate of Origin. For more detailes see: http://essentia.upf.edu/contribute
 
