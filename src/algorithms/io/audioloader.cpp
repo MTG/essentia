@@ -120,6 +120,12 @@ void AudioLoader::openAudioFile(const string& filename) {
     get_format_from_sample_fmt(&fmt, _audioCtx->sample_fmt);
     E_DEBUG(EAlgorithm, "AudioLoader: converting from " << (fmt ? fmt : "unknown") << " to S16");
     */
+    if (_audioCtx->sample_fmt == AV_SAMPLE_FMT_S16) {
+        E_DEBUG(EAlgorithm, "AudioLoader: no sample format conversion, using direct copy"); 
+        // TODO: always run format conversion instead? check if it is optimized so that 
+        // it does direct copy itself
+    }
+
 
 #if HAVE_AVRESAMPLE
     E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libavresample");
@@ -299,8 +305,13 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
             throw EssentiaException("AudioLoader: Insufficient buffer size for format conversion");
         }
 
-#  if HAVE_AVRESAMPLE
-        int samplesWrittern = avresample_convert(_convertCtxAv, 
+        if (audioCtx->sample_fmt == AV_SAMPLE_FMT_S16) {
+            // no conversion needed, direct copy from our frame to output buffer
+            memcpy(output, _decodedFrame->data[0], inputPlaneSize);
+        }
+        else {
+#if HAVE_AVRESAMPLE
+            int samplesWrittern = avresample_convert(_convertCtxAv, 
                                             (uint8_t**) &output, 
                                             outputPlaneSize,
                                             outputBufferSamples, 
@@ -308,29 +319,29 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
                                             inputPlaneSize, 
                                             inputSamples);
 
-        if (samplesWrittern < inputSamples) {
-            // TODO: there may be data remaining in the internal FIFO buffer
-            // to get this data: call avresample_convert() with NULL input 
-            // Test if this happens in practice
-            ostringstream msg;
-            msg << "AudioLoader: Incomplete format conversion (some samples missing)"
-                << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
-                << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16);
-            throw EssentiaException(msg);
-        }
+            if (samplesWrittern < inputSamples) {
+                // TODO: there may be data remaining in the internal FIFO buffer
+                // to get this data: call avresample_convert() with NULL input 
+                // Test if this happens in practice
+                ostringstream msg;
+                msg << "AudioLoader: Incomplete format conversion (some samples missing)"
+                    << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
+                    << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16);
+                throw EssentiaException(msg);
+            }
 
-#  elif HAVE_SWRESAMPLE
-        if (swr_convert(_convertCtx,
-                       (uint8_t**) &output, outputBufferSamples,
-                       (const uint8_t**)_decodedFrame->data, inputSamples) < 0) {
-            ostringstream msg;
-            msg << "AudioLoader: Error converting"
-                << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
-                << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16);
-            throw EssentiaException(msg);
+#elif HAVE_SWRESAMPLE
+            if (swr_convert(_convertCtx,
+                           (uint8_t**) &output, outputBufferSamples,
+                           (const uint8_t**)_decodedFrame->data, inputSamples) < 0) {
+                ostringstream msg;
+                msg << "AudioLoader: Error converting"
+                    << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
+                    << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16);
+                throw EssentiaException(msg);
+            }
+#endif
         }
-#  endif
-
         *outputSize = outputPlaneSize;
     }
     else {
@@ -453,7 +464,7 @@ inline Real scale(int16_t value) {
 }
 
 void AudioLoader::copyFFmpegOutput() {
-    int nsamples  = _dataSize / 2 / _nChannels;
+    int nsamples  = _dataSize / 2 /*sizeof(S16)*/ / _nChannels;
     if (nsamples == 0) return;
 
     // acquire necessary data
