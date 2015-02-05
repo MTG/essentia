@@ -63,10 +63,16 @@ void ChordsDetectionBeats::compute() {
   Real str; // strength
 
   chords.reserve(int(hpcp.size()/_numFramesWindow)); // 1478/85 = 17
+  //out << "chords.reserve(int(hpcp.size()/_numFramesWindow)); = " << int(hpcp.size()/_numFramesWindow) << endl;
   strength.reserve(int(hpcp.size()/_numFramesWindow));
 
+  //cout << "int(hpcp.size() = " << (int)hpcp.size() << endl; 
+
+  // for (int j=0; j<ticks.size(); j++) {
+  //   cout << "tick " << j << " " << ticks[j] << endl;
+  // } 
   if(ticks.size() < 2) { 
-  	throw EssentiaException("Ticks vector should contain at least 2 elements.");
+  throw EssentiaException("Ticks vector should contain at least 2 elements.");
   } 
 
   Real diffTicks = 0.0f;
@@ -75,7 +81,9 @@ void ChordsDetectionBeats::compute() {
 
   int frameStart=0;
   int frameEnd=0;
-  
+  //cout << "ticks.size() = "<<ticks.size()<< "from 0 to "<< ticks.size()-1 << ", ticks[size-1]"<<ticks[ticks.size()-1]<< endl; 
+  //cout << "hpcp.size() = length of chords output array in the previous version of the code = " <<hpcp.size()<< endl;
+
   for (int i = 0; i < ticks.size()-1; ++i){
 
     diffTicks = ticks[i+1] - ticks[i];
@@ -107,7 +115,7 @@ void ChordsDetectionBeats::compute() {
   } // for
 
   
-} //compute
+}//method
 
 } // namespace standard
 } // namespace essentia
@@ -177,6 +185,7 @@ AlgorithmStatus ChordsDetectionBeats::process() {
     int indexStart = max(0, i - _numFramesWindow/2);
     int indexEnd = min(i + _numFramesWindow/2, (int)hpcp.size());
 
+    //vector<Real> hpcpAverage = medianFrames(hpcp, indexStart, indexEnd);
     vector<Real> hpcpAverage = meanFrames(hpcp, indexStart, indexEnd);
     normalize(hpcpAverage);
 
