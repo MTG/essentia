@@ -37,7 +37,7 @@ class AudioContext {
   std::string _filename;
 
   AVStream* _avStream;
-  AVFormatContext* _demuxCtx;
+  AVFormatContext* _muxCtx;
   AVCodecContext* _codecCtx;
 
   int _outputBufSize; // (frame)size of output buffer
@@ -45,7 +45,6 @@ class AudioContext {
   int16_t* _inputBuffer; // input buffer interleaved
   uint8_t* _outputBuffer; // output buffer interleaved
 
-  bool _isFlac;
 
  public:
   AudioContext();
