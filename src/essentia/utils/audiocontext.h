@@ -25,6 +25,7 @@
 #include "types.h"
 #include "ffmpegapi.h"
 
+#define MAX_AUDIO_FRAME_SIZE 192000 // the same value as in AudioLoader
 
 namespace essentia {
 
@@ -40,11 +41,20 @@ class AudioContext {
   AVFormatContext* _muxCtx;
   AVCodecContext* _codecCtx;
 
-  int _outputBufSize; // (frame)size of output buffer
-  int _inputBufSize;     // input buffer size
-  int16_t* _inputBuffer; // input buffer interleaved
-  uint8_t* _outputBuffer; // output buffer interleaved
+  int _outputBufSize;  // (frame)size of output buffer
+  int _inputBufSize;   // input buffer size
+  float* _buffer;      // input FLT buffer interleaved
+  uint8_t* _bufferFmt; // input buffer in converted to codec sample format
 
+#if HAVE_AVRESAMPLE
+  struct AVAudioResampleContext* _convertCtxAv;
+#elif HAVE_SWRESAMPLE
+  struct SwrContext* _convertCtx;
+#endif
+
+  const static int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
+  // MAX_AUDIO_FRAME_SIZE is in bytes, multiply it by 2 to get some margin
+  
 
  public:
   AudioContext();

@@ -33,7 +33,13 @@ const int AudioContext::SAMPLE_SIZE_RATIO = sizeof(int16_t)/sizeof(int8_t);
 
 AudioContext::AudioContext()
   : _isOpen(false), _avStream(0), _muxCtx(0), _codecCtx(0),
-    _outputBufSize(0), _inputBufSize(0), _inputBuffer(0), _outputBuffer(0) {
+    _outputBufSize(0), _inputBufSize(0), _buffer(0) 
+#if HAVE_AVRESAMPLE
+    , _convertCtxAv(0)
+#elif HAVE_SWRESAMPLE
+    , _convertCtx(0),
+#endif
+              {
   //av_log_set_level(AV_LOG_VERBOSE);
   av_log_set_level(AV_LOG_QUIET);
   // Register all formats and codecs
@@ -71,11 +77,10 @@ int AudioContext::create(const std::string& filename,
   _codecCtx                 = _avStream->codec;
   _codecCtx->codec_id       = _muxCtx->oformat->audio_codec;
   _codecCtx->codec_type     = AVMEDIA_TYPE_AUDIO;
-  _codecCtx->sample_fmt     = AV_SAMPLE_FMT_S16;
   _codecCtx->bit_rate       = bitrate;
   _codecCtx->sample_rate    = sampleRate;
   _codecCtx->channels       = nChannels;
-  _codecCtx->channel_layout = nChannels == 2 ? AV_CH_LAYOUT_STEREO : AV_CH_LAYOUT_MONO;
+  _codecCtx->channel_layout = av_get_default_channel_layout(nChannels);
   //_codecCtx->extradata_size = FF_MIN_BUFFER_SIZE + FF_INPUT_BUFFER_PADDING_SIZE; // for flac
   //_codecCtx->extradata = (uint8_t*)av_malloc(_codecCtx->extradata_size); //streaminfo;
 
@@ -84,29 +89,29 @@ int AudioContext::create(const std::string& filename,
   AVCodec* audioCodec = avcodec_find_encoder(_codecCtx->codec_id);
   if (!audioCodec) throw EssentiaException("Codec for ", format, " files not found or not supported");
 
-  /*
-  // TODO: add support for FLT
-  if (_codecCtx->codec_id == AV_CODEC_ID_VORBIS) {
-    // AV_CODEC_ID_AAC, AV_CODEC_ID_AC3 codecs requrire FLT as well 
-    // Use FLT format instead of S16
-    // see: https://developer.blender.org/file/data/zj4aupq36lxt3s2qskl3/PHID-FILE-66vxjiw26l4yb4nc36sn/blender_sample_not_supported.diff
-    _codecCtx->sample_fmt = AV_SAMPLE_FMT_FLT;
+
+  switch (_codecCtx->codec_id) {
+    case AV_CODEC_ID_VORBIS:
+      _codecCtx->sample_fmt = AV_SAMPLE_FMT_FLTP;
+      break;
+    case AV_CODEC_ID_MP3:
+      _codecCtx->sample_fmt = AV_SAMPLE_FMT_S16P;
+      break;
+    default:
+    _codecCtx->sample_fmt = AV_SAMPLE_FMT_S16;
   }
-  */
 
   if (audioCodec->sample_fmts) {
-    // check if the specified sample format is supported by the codec
+    // check if the hardcoded sample format is supported by the codec
     const enum AVSampleFormat* p = audioCodec->sample_fmts;
  
-    while (*p != -1) {
+    while (*p != AV_SAMPLE_FMT_NONE) {
       if (*p == _codecCtx->sample_fmt) break;
       p++;
     }
-    if (*p == -1) {
-      // The specified sample format is not supported
-      // Default to a format supported by the coded?
+    if (*p == AV_SAMPLE_FMT_NONE) {
+      // Not supported --> use the first one in the list as default?
       // _codecCtx->sample_fmt = audioCodec->sample_fmts[0];
-
       ostringstream msg;  
       msg << "AudioWriter: Could not open codec \"" << audioCodec->long_name << "\" for " 
           << format << " files: sample format " << av_get_sample_fmt_name(_codecCtx->sample_fmt) << " is not supported";
@@ -136,18 +141,13 @@ int AudioContext::create(const std::string& filename,
     case AV_CODEC_ID_PCM_S16BE:
     case AV_CODEC_ID_PCM_U16LE:
     case AV_CODEC_ID_PCM_U16BE:
-      // PCM codecs do not provide frame size in samples
-      _inputBufSize = 4096;
+      // PCM codecs do not provide frame size in samples, use 4096 bytes on input
+      _codecCtx->frame_size = 4096 / _codecCtx->channels / av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
       _outputBufSize = 4096;
-      _codecCtx->frame_size = _inputBufSize/_codecCtx->channels/SAMPLE_SIZE_RATIO;
       break;
 
     case AV_CODEC_ID_FLAC:
     case AV_CODEC_ID_VORBIS:
-      _inputBufSize = av_samples_get_buffer_size(NULL, 
-                                                _codecCtx->channels, 
-                                                _codecCtx->frame_size, 
-                                                _codecCtx->sample_fmt, 0);
       _outputBufSize = 65536;
       break;
 
@@ -161,19 +161,49 @@ int AudioContext::create(const std::string& filename,
         // so throw an exception instead
         throw EssentiaException("Do not know how to encode given format: ", format);
       }
-      //_inputBufSize = _codecCtx->frame_size*_codecCtx->channels*SAMPLE_SIZE_RATIO;
-      _inputBufSize = av_samples_get_buffer_size(NULL, 
-                                                _codecCtx->channels, 
-                                                _codecCtx->frame_size, 
-                                                _codecCtx->sample_fmt, 0);
       _outputBufSize = FF_MIN_BUFFER_SIZE;
   }
+  _inputBufSize = av_samples_get_buffer_size(NULL, 
+                                             _codecCtx->channels, 
+                                             _codecCtx->frame_size, 
+                                             AV_SAMPLE_FMT_FLT, 0);
 
   // allocate audio buffers
-  _inputBuffer = (int16_t*)av_malloc(_inputBufSize);
-  _outputBuffer = (uint8_t*)av_malloc(_outputBufSize);
+  _buffer = (float*)av_malloc(_inputBufSize);
+  _bufferFmt = (uint8_t*)av_malloc(FFMPEG_BUFFER_SIZE);
 
   strncpy(_muxCtx->filename, _filename.c_str(), sizeof(_muxCtx->filename));
+
+  // configure sample format convertion
+
+#if HAVE_AVRESAMPLE
+    E_DEBUG(EAlgorithm, "AudioContext: using sample format conversion from libavresample");
+    _convertCtxAv = avresample_alloc_context();
+        
+    av_opt_set_int(_convertCtxAv, "in_channel_layout", _codecCtx->channel_layout, 0);
+    av_opt_set_int(_convertCtxAv, "out_channel_layout", _codecCtx->channel_layout, 0);
+    av_opt_set_int(_convertCtxAv, "in_sample_rate", _codecCtx->sample_rate, 0);
+    av_opt_set_int(_convertCtxAv, "out_sample_rate", _codecCtx->sample_rate, 0);
+    av_opt_set_int(_convertCtxAv, "in_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
+    av_opt_set_int(_convertCtxAv, "out_sample_fmt", _codecCtx->sample_fmt, 0);
+
+    if (avresample_open(_convertCtxAv) < 0) {
+        throw EssentiaException("AudioLoader: Could not initialize avresample context");
+    }
+
+#elif HAVE_SWRESAMPLE
+    E_DEBUG(EAlgorithm, "AudioContext: using sample format conversion from libswresample");
+
+    _convertCtx = swr_alloc_set_opts(_convertCtx,
+                                     _codecCtx->channel_layout, _codecCtx->sample_fmt, _codecCtx->sample_rate,
+                                     _codecCtx->channel_layout, AV_SAMPLE_FMT_FLT, _codecCtx->sample_rate,
+                                     0, NULL);
+
+    if (swr_init(_convertCtx) < 0) {
+        throw EssentiaException("AudioLoader: Could not initialize swresample context");
+    }
+
+#endif
 
   return _codecCtx->frame_size;
 }
@@ -214,8 +244,8 @@ void AudioContext::close() {
 
   avcodec_close(_avStream->codec);
 
-  av_freep(&_inputBuffer);
-  av_freep(&_outputBuffer);
+  av_freep(&_buffer);
+  av_freep(&_bufferFmt);
   av_freep(&_avStream->codec);
   av_freep(&_avStream);
   av_freep(&_muxCtx); // also must be av_free, not av_freep
@@ -223,8 +253,19 @@ void AudioContext::close() {
   _muxCtx = 0;
   _avStream = 0;
   _codecCtx = 0;
-  _inputBuffer = 0;
-  _outputBuffer = 0;
+  _buffer = 0;
+
+#if HAVE_AVRESAMPLE
+  if (_convertCtxAv) {
+    avresample_close(_convertCtxAv);
+    avresample_free(&_convertCtxAv);
+  }
+#elif HAVE_SWRESAMPLE
+  if (_convertCtx) {
+    swr_free(&_convertCtx);
+  }
+#endif
+
 
   _isOpen = false;
 }
@@ -247,8 +288,10 @@ void AudioContext::write(const vector<StereoSample>& stereoData) {
   }
 
   for (int i=0; i<dsize; ++i) {
-    _inputBuffer[2*i] = scale(stereoData[i].left());
-    _inputBuffer[2*i+1] = scale(stereoData[i].right());
+    _buffer[2*i] = (float) stereoData[i].left();
+    _buffer[2*i+1] = (float) stereoData[i].right();
+    //_buffer[2*i] = scale(stereoData[i].left());
+    //_buffer[2*i+1] = scale(stereoData[i].right());
   }
 
   encodePacket(dsize);
@@ -269,16 +312,67 @@ void AudioContext::write(const vector<AudioSample>& monoData) {
     throw EssentiaException(msg);
   }
 
-  for (int i=0; i<dsize; ++i) _inputBuffer[i] = scale(monoData[i]);
+  //for (int i=0; i<dsize; ++i) _buffer[i] = scale(monoData[i]);
+  for (int i=0; i<dsize; ++i) _buffer[i] = (float) monoData[i];
+
   encodePacket(dsize);
 }
 
 
 void AudioContext::encodePacket(int size) {
+
   int tmp_fs = _codecCtx->frame_size;
   if (size < _codecCtx->frame_size) {
     _codecCtx->frame_size = size;
   }
+
+  // convert sample format to the one required by codec
+  int inputPlaneSize = av_samples_get_buffer_size(NULL, 
+                                                  _codecCtx->channels, 
+                                                  size, 
+                                                  AV_SAMPLE_FMT_FLT, 0);
+  int outputPlaneSize = av_samples_get_buffer_size(NULL, 
+                                                   _codecCtx->channels, 
+                                                   size,
+                                                   _codecCtx->sample_fmt, 0);
+    
+  // the size of the output buffer in samples
+  int outputBufferSamples = FFMPEG_BUFFER_SIZE / 
+         (av_get_bytes_per_sample(_codecCtx->sample_fmt) * _codecCtx->channels);
+  if (outputBufferSamples < size) { 
+    // this should never happen, throw exception here
+    throw EssentiaException("AudioLoader: Insufficient buffer size for format conversion");
+  }
+
+#if HAVE_AVRESAMPLE
+    /*
+    cout << "DEBUG: avresample_convert" << endl;
+    cout << "size:" << size << endl;
+    cout << "input plain size:" << inputPlaneSize << endl;
+    cout << "output plain size:" << outputPlaneSize << endl;
+    cout << "max output buffer size in samples:" << outputBufferSamples << endl;
+    */
+    int written = avresample_convert(_convertCtxAv,
+                                     (uint8_t**) &_bufferFmt, 
+                                     outputPlaneSize,
+                                     outputBufferSamples, 
+                                     (uint8_t**) &_buffer,               
+                                     inputPlaneSize, 
+                                     size);
+
+    if (written < size) {
+      // The same as in AudioLoader
+      // TODO: there may be data remaining in the internal FIFO buffer
+      // to get this data: call avresample_convert() with NULL input 
+      // Test if this happens in practice
+      ostringstream msg;
+      msg << "AudioLoader: Incomplete format conversion (some samples missing)"
+          << " from " << av_get_sample_fmt_name(AV_SAMPLE_FMT_FLT)
+          << " to "   << av_get_sample_fmt_name(_codecCtx->sample_fmt);
+      throw EssentiaException(msg);
+    }
+#endif
+
 
   AVPacket packet;
   av_init_packet(&packet);
@@ -301,7 +395,7 @@ void AudioContext::encodePacket(int size) {
                                               _codecCtx->frame_size, _codecCtx->sample_fmt, 0); 
 
   int result = avcodec_fill_audio_frame(frame, _codecCtx->channels, _codecCtx->sample_fmt,
-                                 (const uint8_t*) _inputBuffer, frame_bytes, 0);
+                                 (const uint8_t*) _bufferFmt, frame_bytes, 0);
   if (result != 0) {
     char errstring[1204];
     av_strerror(result, errstring, sizeof(errstring));
