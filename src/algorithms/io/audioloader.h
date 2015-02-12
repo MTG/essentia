@@ -42,11 +42,11 @@ class AudioLoader : public Algorithm {
 
   int _nChannels;
 
-  // MAX_AUDIO_FRAME_SIZE is in bytes, we want FFMPEG_BUFFER_SIZE in sample units
-  // we also multiply by 2 to get some margin, because we might want to decode multiple frames
-  // in this buffer (all the frames contained in a packet, which can be more than 1 as in flac),
-  // and each time we decode a frame we need to have at least a full buffer of free space.
-  const static int FFMPEG_BUFFER_SIZE = (MAX_AUDIO_FRAME_SIZE / sizeof(int16_t)) * 2;
+  // MAX_AUDIO_FRAME_SIZE is in bytes, multiply it by 2 to get some margin, 
+  // because we might want to decode multiple frames in this buffer (all the 
+  // frames contained in a packet, which can be more than 1 as in flac), and 
+  // each time we decode a frame we need to have at least a full buffer of free space.
+  const static int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
 
   int16_t* _buffer;
   int _dataSize;
@@ -109,7 +109,7 @@ class AudioLoader : public Algorithm {
     av_register_all();
 
     // use av_malloc, because we _need_ the buffer to be 16-byte aligned
-    _buffer = (int16_t*)av_malloc(FFMPEG_BUFFER_SIZE * sizeof(int16_t));
+    _buffer = (int16_t*)av_malloc(FFMPEG_BUFFER_SIZE);
 
 #if LIBAVUTIL_VERSION_INT < AVUTIL_51_43_0
     _md5Encoded = (AVMD5*) av_malloc(av_md5_size);

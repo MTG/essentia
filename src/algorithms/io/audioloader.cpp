@@ -357,7 +357,7 @@ void AudioLoader::flushPacket() {
     AVPacket empty;
     av_init_packet(&empty);
     do {
-        _dataSize = FFMPEG_BUFFER_SIZE * sizeof(int16_t);
+        _dataSize = FFMPEG_BUFFER_SIZE;
         empty.data = NULL;
         empty.size = 0;
 
@@ -394,7 +394,7 @@ int AudioLoader::decodePacket() {
     int16_t* buff = _buffer;
 
     // _dataSize gets the size of the buffer, in bytes
-    _dataSize = FFMPEG_BUFFER_SIZE * sizeof(int16_t);
+    _dataSize = FFMPEG_BUFFER_SIZE;
 
     // Note: md5 should be computed before decoding frame, as the decoding may
     // change the content of a packet. Still, not sure if it is correct to
