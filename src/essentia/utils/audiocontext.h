@@ -41,7 +41,6 @@ class AudioContext {
   AVFormatContext* _muxCtx;
   AVCodecContext* _codecCtx;
 
-  int _outputBufSize;  // (frame)size of output buffer
   int _inputBufSize;   // input buffer size
   float* _buffer;      // input FLT buffer interleaved
   uint8_t* _bufferFmt; // input buffer in converted to codec sample format

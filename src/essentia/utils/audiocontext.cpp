@@ -20,12 +20,6 @@
 #include "audiocontext.h"
 #include <iostream> // for warning cout
 
-
-extern "C" {
-#include <libavutil/mathematics.h>
-}
-
-
 using namespace std;
 using namespace essentia;
 
@@ -33,7 +27,7 @@ const int AudioContext::SAMPLE_SIZE_RATIO = sizeof(int16_t)/sizeof(int8_t);
 
 AudioContext::AudioContext()
   : _isOpen(false), _avStream(0), _muxCtx(0), _codecCtx(0),
-    _outputBufSize(0), _inputBufSize(0), _buffer(0) 
+    _inputBufSize(0), _buffer(0) 
 #if HAVE_AVRESAMPLE
     , _convertCtxAv(0)
 #elif HAVE_SWRESAMPLE
@@ -98,7 +92,7 @@ int AudioContext::create(const std::string& filename,
       _codecCtx->sample_fmt = AV_SAMPLE_FMT_S16P;
       break;
     default:
-    _codecCtx->sample_fmt = AV_SAMPLE_FMT_S16;
+      _codecCtx->sample_fmt = AV_SAMPLE_FMT_S16;
   }
 
   if (audioCodec->sample_fmts) {
@@ -143,25 +137,16 @@ int AudioContext::create(const std::string& filename,
     case AV_CODEC_ID_PCM_U16BE:
       // PCM codecs do not provide frame size in samples, use 4096 bytes on input
       _codecCtx->frame_size = 4096 / _codecCtx->channels / av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
-      _outputBufSize = 4096;
       break;
 
-    case AV_CODEC_ID_FLAC:
-    case AV_CODEC_ID_VORBIS:
-      _outputBufSize = 65536;
-      break;
+    //case AV_CODEC_ID_FLAC:
+    //case AV_CODEC_ID_VORBIS:
+    //  break;
 
     default:
       if (_codecCtx->frame_size <= 1) {
-        // we could use these defaults, but it might not be desired
-        //_inputBufSize = FF_MIN_BUFFER_SIZE;
-        //_outputBufSize = FF_MIN_BUFFER_SIZE;
-        //dataSize = 1;
-
-        // so throw an exception instead
         throw EssentiaException("Do not know how to encode given format: ", format);
       }
-      _outputBufSize = FF_MIN_BUFFER_SIZE;
   }
   _inputBufSize = av_samples_get_buffer_size(NULL, 
                                              _codecCtx->channels, 
@@ -290,8 +275,6 @@ void AudioContext::write(const vector<StereoSample>& stereoData) {
   for (int i=0; i<dsize; ++i) {
     _buffer[2*i] = (float) stereoData[i].left();
     _buffer[2*i+1] = (float) stereoData[i].right();
-    //_buffer[2*i] = scale(stereoData[i].left());
-    //_buffer[2*i+1] = scale(stereoData[i].right());
   }
 
   encodePacket(dsize);
@@ -312,7 +295,6 @@ void AudioContext::write(const vector<AudioSample>& monoData) {
     throw EssentiaException(msg);
   }
 
-  //for (int i=0; i<dsize; ++i) _buffer[i] = scale(monoData[i]);
   for (int i=0; i<dsize; ++i) _buffer[i] = (float) monoData[i];
 
   encodePacket(dsize);
@@ -417,7 +399,6 @@ void AudioContext::encodePacket(int size) {
   cout << "\tpacket size: " << packet.size
        << "\tnum samples: " << size
        << "\tframe bytes: " << frame_bytes
-       << "\toutput buf size: " << _outputBufSize
        << "\tinput buf size: " << _inputBufSize
        // << "\tduration: " << duration
        << endl;
@@ -452,13 +433,4 @@ void AudioContext::writeEOF() {
     }
     else break;
   }
-}
-
-int16_t AudioContext::scale(AudioSample value) {
-  int32_t result = 0;
-  if( value > 0 ) result = (int32_t)(value*32767+0.5);
-  else if( value < 0 ) result = (int32_t)(value*32767 - 0.5);
-  if (result > 32767) return 32767; 
-  if (result < -32768) return -32768;
-  return result;
 }
