@@ -52,15 +52,6 @@ AudioLoader::~AudioLoader() {
     av_freep(&_buffer);
     av_freep(&_md5Encoded);
     av_freep(&_decodedFrame);
-
-#if !HAVE_SWRESAMPLE
-    av_freep(&_buff1);
-    av_freep(&_buff2);
-    if (_audioConvert) {
-        av_audio_convert_free(_audioConvert);
-        _audioConvert = NULL;
-    }
-#endif
 }
 
 void AudioLoader::configure() {
@@ -120,82 +111,56 @@ void AudioLoader::openAudioFile(const string& filename) {
     if (avcodec_open2(_audioCtx, _audioCodec, NULL) < 0) {
         throw EssentiaException("AudioLoader: Unable to instantiate codec...");
     }
+  
+    // Configure format convertion  (no samplerate conversion yet)
+    int64_t layout = av_get_default_channel_layout(_audioCtx->channels);
 
-    if (_audioCtx->sample_fmt != AV_SAMPLE_FMT_S16) {
+    /*
+    const char* fmt = 0;
+    get_format_from_sample_fmt(&fmt, _audioCtx->sample_fmt);
+    E_DEBUG(EAlgorithm, "AudioLoader: converting from " << (fmt ? fmt : "unknown") << " to S16");
+    */
+    if (_audioCtx->sample_fmt == AV_SAMPLE_FMT_S16) {
+        E_DEBUG(EAlgorithm, "AudioLoader: no sample format conversion, using direct copy"); 
+        // TODO: always run format conversion instead? check if it is optimized so that 
+        // it does direct copy itself
+    }
 
-#if HAVE_SWRESAMPLE
 
-        E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libswresample");
+#if HAVE_AVRESAMPLE
+    E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libavresample");
+    _convertCtxAv = avresample_alloc_context();
+        
+    av_opt_set_int(_convertCtxAv, "in_channel_layout", layout, 0);
+    av_opt_set_int(_convertCtxAv, "out_channel_layout", layout, 0);
+    av_opt_set_int(_convertCtxAv, "in_sample_rate", _audioCtx->sample_rate, 0);
+    av_opt_set_int(_convertCtxAv, "out_sample_rate", _audioCtx->sample_rate, 0);
+    av_opt_set_int(_convertCtxAv, "in_sample_fmt", _audioCtx->sample_fmt, 0);
+    av_opt_set_int(_convertCtxAv, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
 
-        // No samplerate conversion yet, only format
-        int64_t layout = av_get_default_channel_layout(_audioCtx->channels);
+    if (avresample_open(_convertCtxAv) < 0) {
+        throw EssentiaException("AudioLoader: Could not initialize avresample context");
+    }
 
-        _convertCtx = swr_alloc_set_opts(_convertCtx,
-                                         layout, AV_SAMPLE_FMT_S16,     _audioCtx->sample_rate,
-                                         layout, _audioCtx->sample_fmt, _audioCtx->sample_rate,
-                                         0, NULL);
+#elif HAVE_SWRESAMPLE
+    E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libswresample");
 
-        if (swr_init(_convertCtx) < 0) {
-            throw EssentiaException("Could not initialize swresample context");
-        }
+    _convertCtx = swr_alloc_set_opts(_convertCtx,
+                                     layout, AV_SAMPLE_FMT_S16, _audioCtx->sample_rate,
+                                     layout, _audioCtx->sample_fmt, _audioCtx->sample_rate,
+                                     0, NULL);
 
-        /*
-        const char* fmt = 0;
-        get_format_from_sample_fmt(&fmt, _audioCtx->sample_fmt);
-        E_DEBUG(EAlgorithm, "AudioLoader: converting from " << (fmt ? fmt : "unknown") << " to S16");
-        */
-
-#else
-
-        E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from "
-                            "deprecated audioconvert");
-
-        if (av_sample_fmt_is_planar(_audioCtx->sample_fmt)) {
-          // Ugly hack to treat planar audio format as interleaved
-          E_WARNING("AudioLoader: using depricated audioconvert and manually converting planar format to interleaved");
-          switch (_audioCtx->sample_fmt) {
-            case AV_SAMPLE_FMT_S16P:
-              _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, AV_SAMPLE_FMT_S16, 1, NULL, 0);
-              break;
-            case AV_SAMPLE_FMT_S32P:
-              _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, AV_SAMPLE_FMT_S32, 1, NULL, 0);
-              break;
-            case AV_SAMPLE_FMT_FLTP:
-              _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, AV_SAMPLE_FMT_FLT, 1, NULL, 0);
-              break;
-            case AV_SAMPLE_FMT_DBLP:
-              _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, AV_SAMPLE_FMT_DBL, 1, NULL, 0);
-              break;
-            default:
-              ostringstream msg;
-              msg << "AudioLoader: Error converting"
-                  << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
-                  << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16)
-                  << "using deprecated av_audio_convert. Format unsupported.";
-              throw EssentiaException(msg);
-              break;
-          }
-        }
-        else {
-          _audioConvert = av_audio_convert_alloc(AV_SAMPLE_FMT_S16, 1, _audioCtx->sample_fmt, 1, NULL, 0);
-        }
-
-        // reserve some more space
-        _buff1 = (int16_t*)av_malloc(MAX_AUDIO_FRAME_SIZE * 3);
-        _buff2 = (int16_t*)av_malloc(MAX_AUDIO_FRAME_SIZE * 3);
+    if (swr_init(_convertCtx) < 0) {
+        throw EssentiaException("AudioLoader: Could not initialize swresample context");
+    }
 
 #endif
-
-    }
-    else {
-        E_DEBUG(EAlgorithm, "AudioLoader: no sample format conversion, using direct copy");
-    }
 
     av_init_packet(&_packet);
 
     _decodedFrame = avcodec_alloc_frame();
     if (!_decodedFrame) {
-        throw EssentiaException("Could not allocate audio frame");
+        throw EssentiaException("AudioLoader: Could not allocate audio frame");
     }
 
     av_md5_init(_md5Encoded);
@@ -207,8 +172,15 @@ void AudioLoader::closeAudioFile() {
         return;
     }
 
-#if HAVE_SWRESAMPLE
-    if (_convertCtx) swr_free(&_convertCtx);
+#if HAVE_AVRESAMPLE
+    if (_convertCtxAv) {
+        avresample_close(_convertCtxAv);
+        avresample_free(&_convertCtxAv);
+    }
+#elif HAVE_SWRESAMPLE
+    if (_convertCtx) {
+        swr_free(&_convertCtx);
+    }
 #endif
 
     // Close the codec
@@ -310,60 +282,67 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
                                     int* outputSize,
                                     AVPacket* packet) {
 
+    // _dataSize  input = number of bytes available for write in buff
+    //           output = number of bytes actually written (actual: S16 data)
+    //E_DEBUG(EAlgorithm, "decode_audio_frame, available bytes in buffer = " << _dataSize);
     int gotFrame = 0;
-    avcodec_get_frame_defaults(_decodedFrame);
+    av_frame_unref(_decodedFrame); //avcodec_get_frame_defaults(_decodedFrame);
 
     int len = avcodec_decode_audio4(audioCtx, _decodedFrame, &gotFrame, packet);
 
     if (len < 0) return len; // error handling should be done outside
 
     if (gotFrame) {
-        int nsamples = _decodedFrame->nb_samples;
-        int inputDataSize = av_samples_get_buffer_size(NULL, audioCtx->channels, nsamples,
-                                                       audioCtx->sample_fmt, 1);
+        int inputSamples = _decodedFrame->nb_samples;
+        int inputPlaneSize = av_samples_get_buffer_size(NULL, audioCtx->channels, inputSamples,
+                                                        audioCtx->sample_fmt, 1);
+        int outputPlaneSize = inputSamples * (2 /*sizeof(S16)*/ * _nChannels);
 
-#  if HAVE_SWRESAMPLE
-        if (_convertCtx) {
-            int outputSamples = *outputSize / (2 /*sizeof(S16)*/ * _nChannels);
-            //if (outputSamples < nsamples) { cout << "OOPS!!" << endl; }
+        // the size of the output buffer in samples
+        int outputBufferSamples = *outputSize / (2 /*sizeof(S16)*/ * _nChannels);
+        if (outputBufferSamples < inputSamples) { 
+            // this should never happen, throw exception here
+            throw EssentiaException("AudioLoader: Insufficient buffer size for format conversion");
+        }
 
+        if (audioCtx->sample_fmt == AV_SAMPLE_FMT_S16) {
+            // no conversion needed, direct copy from our frame to output buffer
+            memcpy(output, _decodedFrame->data[0], inputPlaneSize);
+        }
+        else {
+#if HAVE_AVRESAMPLE
+            int samplesWrittern = avresample_convert(_convertCtxAv, 
+                                            (uint8_t**) &output, 
+                                            outputPlaneSize,
+                                            outputBufferSamples, 
+                                            (uint8_t**)_decodedFrame->data,               
+                                            inputPlaneSize, 
+                                            inputSamples);
+
+            if (samplesWrittern < inputSamples) {
+                // TODO: there may be data remaining in the internal FIFO buffer
+                // to get this data: call avresample_convert() with NULL input 
+                // Test if this happens in practice
+                ostringstream msg;
+                msg << "AudioLoader: Incomplete format conversion (some samples missing)"
+                    << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
+                    << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16);
+                throw EssentiaException(msg);
+            }
+
+#elif HAVE_SWRESAMPLE
             if (swr_convert(_convertCtx,
-                            (uint8_t**) &output, outputSamples,
-                            (const uint8_t**)_decodedFrame->data, nsamples) < 0) {
+                           (uint8_t**) &output, outputBufferSamples,
+                           (const uint8_t**)_decodedFrame->data, inputSamples) < 0) {
                 ostringstream msg;
                 msg << "AudioLoader: Error converting"
                     << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
                     << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16);
                 throw EssentiaException(msg);
             }
-            *outputSize = nsamples * (2 /*sizeof(S16)*/ * _nChannels);
+#endif
         }
-        else {
-            // no conversion needed, make a direct copy
-            // copy and convert data from our frame to our output audio buffer
-            //E_WARNING("Should use swresample always!");
-            memcpy(output, _decodedFrame->data[0], inputDataSize);
-            *outputSize = inputDataSize;
-        }
-#  else
-        // direct copy, we do the sample format conversion later if needed
-
-        // TODO: Libav 9 introduced planar sample formats and converted audio
-        // codecs to use these instead of interleaving the samples in the
-        // codec after decoding. Unfortunately av_audio_convert doesn't deal
-        // with planar formats, so libavresample should be used.
-
-        // NOTE: Meanwhile, as we ship outdated av_audio_convert ourselves,
-        // we need to check if the format is planar or interleaved to convert
-        // decoded frame data correctly. We will treat planar data as if it was
-        // interleaved for convertion, which is safe as long as no sample rate
-        // conversion is done. Afterwards, we will copy the results to audio
-        // output accordingly to it being planar or interleaved.
-
-        memcpy(output, _decodedFrame->data[0], inputDataSize);
-        *outputSize = inputDataSize;
-#  endif
-
+        *outputSize = outputPlaneSize;
     }
     else {
         E_DEBUG(EAlgorithm, "AudioLoader: tried to decode packet but didn't get any frame...");
@@ -376,9 +355,10 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
 
 void AudioLoader::flushPacket() {
     AVPacket empty;
+    av_init_packet(&empty);
     do {
-        _dataSize = FFMPEG_BUFFER_SIZE * sizeof(int16_t);
-        empty.data = 0;
+        _dataSize = FFMPEG_BUFFER_SIZE;
+        empty.data = NULL;
         empty.size = 0;
 
         int len = decode_audio_frame(_audioCtx, _buffer, &_dataSize, &empty);
@@ -413,16 +393,8 @@ int AudioLoader::decodePacket() {
     // writing the next decoded samples
     int16_t* buff = _buffer;
 
-#if !HAVE_SWRESAMPLE
-    if (_audioConvert) { buff = _buff1; }
-#endif
-
     // _dataSize gets the size of the buffer, in bytes
-    _dataSize = FFMPEG_BUFFER_SIZE*sizeof(int16_t);
-
-    // _dataSize  input = number of bytes available for write in buff
-    //           output = number of bytes actually written (actual: S16 data)
-    //E_DEBUG(EAlgorithm, "decode_audio_frame, available bytes in buffer = " << _dataSize);
+    _dataSize = FFMPEG_BUFFER_SIZE;
 
     // Note: md5 should be computed before decoding frame, as the decoding may
     // change the content of a packet. Still, not sure if it is correct to
@@ -438,7 +410,7 @@ int AudioLoader::decodePacket() {
         av_strerror(len, errstring, sizeof(errstring));
         ostringstream msg;
 
-        if (_audioCtx->codec_id == CODEC_ID_MP3) {
+        if (_audioCtx->codec_id == AV_CODEC_ID_MP3) {
             msg << "AudioLoader: invalid frame, skipping it: " << errstring;
             // mp3 streams can have tag frames (id3v2?) which libavcodec tries to
             // read as audio anyway, and we probably don't want print an error
@@ -481,38 +453,7 @@ int AudioLoader::decodePacket() {
         // No data yet, get more frames
         // cout << "no data yet, get more frames" << endl;
         _dataSize = 0;
-        return len;
     }
-
-#if !HAVE_SWRESAMPLE
-    if (_audioConvert) {
-        // this assumes that all audio is interleaved in the first channel
-        // it works as we're only doing sample format conversion, but we
-        // should be very careful
-        const void* ibuf[6] = { buff };
-              void* obuf[6] = { _buff2 };
-        int istride[6]      = { av_get_bytes_per_sample(_audioCtx->sample_fmt) };
-        int ostride[6]      = { av_get_bytes_per_sample(AV_SAMPLE_FMT_S16)     };
-        int totalsamples    = _dataSize / istride[0]; // == num_samp_per_channel * num_channels
-
-        if (int result = av_audio_convert(_audioConvert, obuf, ostride, ibuf, istride, totalsamples) < 0) {
-            char errstring[1204];
-            av_strerror(result, errstring, sizeof(errstring));
-            ostringstream msg;
-            msg << "AudioLoader: Error converting "
-                << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
-                << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16)
-                << ". " << errstring;
-            throw EssentiaException(msg);
-        }
-
-        // when entering the current block, dataSize contained the size in bytes
-        // that the audio was taking in its native format. Now it needs to be set
-        // to the size of the audio we're returning, after conversion
-        _dataSize = totalsamples * av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
-        memcpy(_buffer, _buff2, _dataSize);
-    }
-#endif
 
     return len;
 }
@@ -523,7 +464,7 @@ inline Real scale(int16_t value) {
 }
 
 void AudioLoader::copyFFmpegOutput() {
-    int nsamples  = _dataSize / 2 / _nChannels;
+    int nsamples  = _dataSize / 2 /*sizeof(S16)*/ / _nChannels;
     if (nsamples == 0) return;
 
     // acquire necessary data
@@ -534,28 +475,24 @@ void AudioLoader::copyFFmpegOutput() {
 
     vector<StereoSample>& audio = *((vector<StereoSample>*)_audio.getTokens());
 
-    // FIXME: use libswresample
-
     if (_nChannels == 1) {
         for (int i=0; i<nsamples; i++) {
           audio[i].left() = scale(_buffer[i]);
         }
     }
     else { // _nChannels == 2
-      if (av_sample_fmt_is_planar(_audioCtx->sample_fmt)) {
-        // planar
-        for (int i=0; i<nsamples; i++) {
-            audio[i].left() = scale(_buffer[i]);
-            audio[i].right() = scale(_buffer[nsamples+i]);
-        }
+      // The output format is always AV_SAMPLE_FMT_S16, which is interleaved
+      for (int i=0; i<nsamples; i++) {
+          audio[i].left() = scale(_buffer[2*i]);
+          audio[i].right() = scale(_buffer[2*i+1]);
       }
-      else {
-        // interleaved
-        for (int i=0; i<nsamples; i++) {
-            audio[i].left() = scale(_buffer[2*i]);
-            audio[i].right() = scale(_buffer[2*i+1]);
-        }
+      /*
+      // planar
+      for (int i=0; i<nsamples; i++) {
+          audio[i].left() = scale(_buffer[i]);
+          audio[i].right() = scale(_buffer[nsamples+i]);
       }
+      */
     }
 
     // release data
