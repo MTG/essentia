@@ -58,6 +58,7 @@ void AudioLoader::configure() {
     // set ffmpeg to be silent by default, so we don't have these annoying
     // "invalid new backstep" messages anymore, when everything is actually fine
     av_log_set_level(AV_LOG_QUIET);
+    //av_log_set_level(AV_LOG_VERBOSE);
     _computeMD5 = parameter("computeMD5").toBool();
     reset();
 }
@@ -118,14 +119,8 @@ void AudioLoader::openAudioFile(const string& filename) {
     /*
     const char* fmt = 0;
     get_format_from_sample_fmt(&fmt, _audioCtx->sample_fmt);
-    E_DEBUG(EAlgorithm, "AudioLoader: converting from " << (fmt ? fmt : "unknown") << " to S16");
+    E_DEBUG(EAlgorithm, "AudioLoader: converting from " << (fmt ? fmt : "unknown") << " to FLT");
     */
-    if (_audioCtx->sample_fmt == AV_SAMPLE_FMT_S16) {
-        E_DEBUG(EAlgorithm, "AudioLoader: no sample format conversion, using direct copy"); 
-        // TODO: always run format conversion instead? check if it is optimized so that 
-        // it does direct copy itself
-    }
-
 
 #if HAVE_AVRESAMPLE
     E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libavresample");
@@ -136,7 +131,7 @@ void AudioLoader::openAudioFile(const string& filename) {
     av_opt_set_int(_convertCtxAv, "in_sample_rate", _audioCtx->sample_rate, 0);
     av_opt_set_int(_convertCtxAv, "out_sample_rate", _audioCtx->sample_rate, 0);
     av_opt_set_int(_convertCtxAv, "in_sample_fmt", _audioCtx->sample_fmt, 0);
-    av_opt_set_int(_convertCtxAv, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
+    av_opt_set_int(_convertCtxAv, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
 
     if (avresample_open(_convertCtxAv) < 0) {
         throw EssentiaException("AudioLoader: Could not initialize avresample context");
@@ -146,7 +141,7 @@ void AudioLoader::openAudioFile(const string& filename) {
     E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libswresample");
 
     _convertCtx = swr_alloc_set_opts(_convertCtx,
-                                     layout, AV_SAMPLE_FMT_S16, _audioCtx->sample_rate,
+                                     layout, AV_SAMPLE_FMT_FLT, _audioCtx->sample_rate,
                                      layout, _audioCtx->sample_fmt, _audioCtx->sample_rate,
                                      0, NULL);
 
@@ -278,12 +273,12 @@ AlgorithmStatus AudioLoader::process() {
 
 
 int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
-                                    int16_t* output,
+                                    float* output,
                                     int* outputSize,
                                     AVPacket* packet) {
 
     // _dataSize  input = number of bytes available for write in buff
-    //           output = number of bytes actually written (actual: S16 data)
+    //           output = number of bytes actually written (actual: FLT data)
     //E_DEBUG(EAlgorithm, "decode_audio_frame, available bytes in buffer = " << _dataSize);
     int gotFrame = 0;
     av_frame_unref(_decodedFrame); //avcodec_get_frame_defaults(_decodedFrame);
@@ -294,18 +289,21 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
 
     if (gotFrame) {
         int inputSamples = _decodedFrame->nb_samples;
-        int inputPlaneSize = av_samples_get_buffer_size(NULL, audioCtx->channels, inputSamples,
+        int inputPlaneSize = av_samples_get_buffer_size(NULL, _nChannels, inputSamples,
                                                         audioCtx->sample_fmt, 1);
-        int outputPlaneSize = inputSamples * (2 /*sizeof(S16)*/ * _nChannels);
-
+        int outputPlaneSize = av_samples_get_buffer_size(NULL, _nChannels, inputSamples,
+                                                        AV_SAMPLE_FMT_FLT, 1);
         // the size of the output buffer in samples
-        int outputBufferSamples = *outputSize / (2 /*sizeof(S16)*/ * _nChannels);
+        int outputBufferSamples = *outputSize / 
+                (av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT) * _nChannels);
+
         if (outputBufferSamples < inputSamples) { 
             // this should never happen, throw exception here
             throw EssentiaException("AudioLoader: Insufficient buffer size for format conversion");
         }
 
-        if (audioCtx->sample_fmt == AV_SAMPLE_FMT_S16) {
+        if (audioCtx->sample_fmt == AV_SAMPLE_FMT_FLT) {
+            // TODO: no need in this check? Not many of common formats support FLT
             // no conversion needed, direct copy from our frame to output buffer
             memcpy(output, _decodedFrame->data[0], inputPlaneSize);
         }
@@ -326,7 +324,7 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
                 ostringstream msg;
                 msg << "AudioLoader: Incomplete format conversion (some samples missing)"
                     << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
-                    << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16);
+                    << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_FLT);
                 throw EssentiaException(msg);
             }
 
@@ -337,7 +335,7 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
                 ostringstream msg;
                 msg << "AudioLoader: Error converting"
                     << " from " << av_get_sample_fmt_name(_audioCtx->sample_fmt)
-                    << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_S16);
+                    << " to "   << av_get_sample_fmt_name(AV_SAMPLE_FMT_FLT);
                 throw EssentiaException(msg);
             }
 #endif
@@ -391,7 +389,7 @@ int AudioLoader::decodePacket() {
 
     // buff is an offset in our output buffer, it points to where we should start
     // writing the next decoded samples
-    int16_t* buff = _buffer;
+    float* buff = _buffer;
 
     // _dataSize gets the size of the buffer, in bytes
     _dataSize = FFMPEG_BUFFER_SIZE;
@@ -458,13 +456,14 @@ int AudioLoader::decodePacket() {
     return len;
 }
 
-
+/*
 inline Real scale(int16_t value) {
     return value / (Real)32767;
 }
+*/
 
 void AudioLoader::copyFFmpegOutput() {
-    int nsamples  = _dataSize / 2 /*sizeof(S16)*/ / _nChannels;
+    int nsamples = _dataSize / (av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT)  * _nChannels);
     if (nsamples == 0) return;
 
     // acquire necessary data
@@ -477,14 +476,17 @@ void AudioLoader::copyFFmpegOutput() {
 
     if (_nChannels == 1) {
         for (int i=0; i<nsamples; i++) {
-          audio[i].left() = scale(_buffer[i]);
+          audio[i].left() = _buffer[i];
+          //audio[i].left() = scale(_buffer[i]);
         }
     }
     else { // _nChannels == 2
-      // The output format is always AV_SAMPLE_FMT_S16, which is interleaved
+      // The output format is always AV_SAMPLE_FMT_FLT, which is interleaved
       for (int i=0; i<nsamples; i++) {
-          audio[i].left() = scale(_buffer[2*i]);
-          audio[i].right() = scale(_buffer[2*i+1]);
+        audio[i].left() = _buffer[2*i];
+        audio[i].right() = _buffer[2*i+1];
+        //audio[i].left() = scale(_buffer[2*i]);
+        //audio[i].right() = scale(_buffer[2*i+1]);
       }
       /*
       // planar
