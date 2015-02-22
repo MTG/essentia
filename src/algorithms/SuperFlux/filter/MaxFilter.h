@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_MaxFilter_H
-#define ESSENTIA_MaxFilter_H
+#ifndef ESSENTIA_MAXFILTER_H
+#define ESSENTIA_MAXFILTER_H
 
 #include "algorithmfactory.h"
 
@@ -29,42 +29,32 @@ namespace standard {
 
 class MaxFilter : public Algorithm {
 
- private:
- 
+ protected:
   Input< vector<Real>  > _array;
   Output< vector<Real> > _filtered;
 
-
-  
-  	int _width;
-  	bool _causal;
+  int _width;
+  bool _causal;
 
  public:
   MaxFilter() {
     declareInput(_array, "signal", "signal to be filtered");
     declareOutput(_filtered, "signal", "filtered output ");
-
-    
   }
 
-  ~MaxFilter() {
-
-  }
+  ~MaxFilter() {}
 
   void declareParameters() {
-    declareParameter("width", "window size for max filter :if centered, has to be odd ", "[2,inf)", 3);
-    declareParameter("Causal", "if the filter is causal: windows is behind current element else windows is centered around ", "{true,false}", true);
-   // declareParameter("startFromZero", "suppress first frames width", "{true,false}", true);
-
-}
+    declareParameter("width", "the window size, has to be odd if the window is centered", "[2,inf)", 3);
+    declareParameter("causal", "use casual filter (window is behind current element otherwise it is centered around)", "{true,false}", true);
+   // declareParameter("startFromZero", "suppress first frames width", "{true,false}", true); //TODO remove?
+  }
 
   void reset();
   void configure();
   void compute();
 
-
   static const char* name;
-  static const char* version;
   static const char* description;
 };
 
@@ -72,7 +62,6 @@ class MaxFilter : public Algorithm {
 } // namespace essentia
 
 #include "streamingalgorithm.h"
-//#include "streamingalgorithmcomposite.h"
 
 namespace essentia {
 namespace streaming {
@@ -82,34 +71,36 @@ class MaxFilter : public Algorithm {
  protected:
   Sink<Real > _array;
   Source<Real > _filtered;
-
- std::vector <Real> buff;
- int idx;
  
-
+  // TODO: remove? 
+  //std::vector <Real> _buff;
+  //int _idx;
+ 
  public:
   MaxFilter(){
-    declareInput(_array,1,1, "signal","signal");
-    declareOutput(_filtered,1,1, "signal","signal");
-
+    declareInput(_array, 1, 1, "signal", "signal to be filtered");
+    declareOutput(_filtered, 1, 1, "signal","filtered output");
   }
   
-    void declareParameters() {
+  void declareParameters() {
     declareParameter("width", "window size for max filter : has to be odd as the window is centered on sample", "[3,inf)", 3);
-}
-void configure() {
-	_array.setAcquireSize(parameter("width").toInt()+1);
-	_array.setReleaseSize(1);
-	buff.resize(parameter("width").toInt()+1);
-    // _filtered.setReleaseSize(1);
-    idx =0;
+  }
 
+  void configure() {
+    _array.setAcquireSize(parameter("width").toInt() + 1);
+    _array.setReleaseSize(1);
+	  //_buff.resize(parameter("width").toInt() + 1);
+    // _filtered.setReleaseSize(1);
+    //_idx =0; TODO remove?
   }
   
-  AlgorithmStatus process();   
+  AlgorithmStatus process();
+
+  static const char* name;
+  static const char* description;
 };
 
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_MaxFilter_H
+#endif // ESSENTIA_MAXFILTER_H
