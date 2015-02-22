@@ -69,14 +69,14 @@ void ChordsDetectionBeats::compute() {
   throw EssentiaException("Ticks vector should contain at least 2 elements.");
   } 
 
-  Real diffTicks = 0.0f;
+  Real diffTicks = 0.;
   int numFramesTick = 0;
   int initFrame = 0;
 
-  int frameStart=0;
-  int frameEnd=0;
+  int frameStart = 0;
+  int frameEnd = 0;
 
-  for (int i = 0; i < ticks.size()-1; ++i){
+  for (int i=0; i < ticks.size()-1; ++i){
 
     diffTicks = ticks[i+1] - ticks[i];
     numFramesTick = int((diffTicks * _sampleRate) / _hopSize);
@@ -105,7 +105,6 @@ void ChordsDetectionBeats::compute() {
     strength.push_back(str);
 
   } // for
-
   
 }//method
 
