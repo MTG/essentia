@@ -43,7 +43,7 @@ class AudioContext {
 
   int _inputBufSize;   // input buffer size
   float* _buffer;      // input FLT buffer interleaved
-  uint8_t* _bufferFmt; // input buffer in converted to codec sample format
+  uint8_t* _buffer_test; // input buffer in converted to codec sample format
 
 #if HAVE_AVRESAMPLE
   struct AVAudioResampleContext* _convertCtxAv;
@@ -51,7 +51,7 @@ class AudioContext {
   struct SwrContext* _convertCtx;
 #endif
 
-  const static int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
+  //const static int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
   // MAX_AUDIO_FRAME_SIZE is in bytes, multiply it by 2 to get some margin
   
 
@@ -70,7 +70,6 @@ class AudioContext {
   int16_t scale(Real value);
   void encodePacket(int size);
   void writeEOF();
-  static const int SAMPLE_SIZE_RATIO;
 };
 
 } // namespace essentia
