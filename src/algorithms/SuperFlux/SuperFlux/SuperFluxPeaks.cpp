@@ -28,100 +28,97 @@ using namespace std;
 
 namespace essentia {
 namespace standard {
-
-
+        
+        
 const char* SuperFluxPeaks::name = "SuperFluxPeaks";
 const char* SuperFluxPeaks::description = DOC("Peak peaking from Superflux algorithm (see SuperFluxExtractor for references)");
 
 
 void SuperFluxPeaks::configure() {
-	frameRate = parameter("frameRate").toReal();
-	_pre_avg = int(frameRate* parameter("pre_avg").toReal() / 1000.);
-	_pre_max = int(frameRate * parameter("pre_max").toReal() / 1000.);
-	
-	// convert to seconds
-	_combine = parameter("combine").toReal()/1000.;
-
-// 	_threshold = parameter("threshold").toReal();
-	
-	_rawMode = parameter("rawmode").toBool();
-	_startZero = parameter("startFromZero").toBool();
-
-	_movAvg->configure("size",_pre_avg);
-	_maxf->configure("width",_pre_max,"Causal",true);
+    frameRate = parameter("frameRate").toReal();
+    
+    // convert to framenumber
+    _pre_avg = int(frameRate* parameter("pre_avg").toReal() / 1000.);
+    _pre_max = int(frameRate * parameter("pre_max").toReal() / 1000.);
+    
+    
+    if(_pre_avg<=1)
+        throw EssentiaException("SuperFluxPeaks: too small _pre_averaging filter size");
+    if(_pre_max<=1)
+        throw EssentiaException("SuperFluxPeaks: too small _pre_maximum filter size");
+    // convert to seconds
+    _combine = parameter("combine").toReal()/1000.;
+    
+    
+    _rawMode = parameter("rawmode").toBool();
+    _startZero = parameter("startFromZero").toBool();
+    
+    _movAvg->configure("size",_pre_avg);
+    _maxf->configure("width",_pre_max,"causal",true);
     
     _threshold = parameter("threshold").toReal();
-	
-	lastPidx = -1;
+    
+    
     peakTime = 0;
-
+    
 }
 
 
 void SuperFluxPeaks::compute() {
-// RT parameters
-
-
-
-
-
-  	const vector<Real>& signal = _signal.get();
-	vector<Real>& peaks = _peaks.get();
-  	if (signal.empty()) {
-		peaks.resize(0);
-    	return;
-  	}
-
-	int size = signal.size();
-
-
-	vector<Real> avg(size);
-	_movAvg->reset();
-	_movAvg->input("signal").set(signal);
-	_movAvg->output("signal").set(avg);
-	_movAvg->compute();
-
-
-	vector<Real> maxs(size);
+    
+    const vector<Real>& signal = _signal.get();
+    vector<Real>& peaks = _peaks.get();
+    if (signal.empty()) {
+        peaks.resize(0);
+        return;
+    }
+    
+    int size = signal.size();
+    
+    
+    vector<Real> avg(size);
+    _movAvg->reset();
+    _movAvg->input("signal").set(signal);
+    _movAvg->output("signal").set(avg);
+    _movAvg->compute();
+    
+    
+    vector<Real> maxs(size);
     _maxf->reset();
-	_maxf->input("signal").set(signal);
-	_maxf->output("signal").set(maxs);
-	_maxf->compute();
-
-
-
-
-	int nDetec=0;
-	int minIdx = max(_pre_avg,_pre_max)-1 ;
-	for( int i =minIdx; i < size;i++){
+    _maxf->input("signal").set(signal);
+    _maxf->output("signal").set(maxs);
+    _maxf->compute();
+    
+    
+    int nDetec=0;
+    int minIdx =max(0,min(_pre_avg,_pre_max)/2 - 2 );
+    //    cout<< minIdx << endl;
+    for( int i =minIdx; i < size;i++){
         
-		if(signal[i]==maxs[i] && signal[i]>avg[i]+_threshold && signal[i]>0){
-
-			peakTime = i*1.0/frameRate;
-			if((nDetec>0 && peakTime-peaks[nDetec-1]>_combine)  ||  nDetec ==0) {
-				peaks[nDetec] = peakTime;
-				nDetec++;
-			
-			}
-		}
-		
-		
-	}
-
-peaks.resize(nDetec);
-
-
-
-
-return;
- 
+        if(signal[i]==maxs[i] && signal[i]>avg[i]+_threshold && signal[i]>0){
+            
+            peakTime = i*1.0/frameRate;
+            if((nDetec>0 && peakTime-peaks[nDetec-1]>_combine)  ||  nDetec ==0) {
+                peaks[nDetec] = peakTime;
+                nDetec++;
+                
+            }
+        }
+        
+        
+    }
+    
+    
+    peaks.resize(nDetec);
+    return;
+    
 }
-
-
-
-
-
-
+    
+    
+    
+    
+    
+    
 } // namespace standard
 } // namespace essentia
 
@@ -136,31 +133,49 @@ const char* SuperFluxPeaks::name = standard::SuperFluxPeaks::name;
 const char* SuperFluxPeaks::description = standard::SuperFluxPeaks::description;
 
 
-    void SuperFluxPeaks::consume() {
-        current_t+=1.0/framerate;
-        std::vector<Real> out = std::vector<Real>(aqs);
-        	_algo->input("novelty").set(_signal.tokens());
-        	_algo->output("peaks").set(out);
-        	_algo->compute();
-        if(out.size()>0 && out[out.size()-1]>0 && ((onsTime.size()>0 && current_t-onsTime.back()>_combine )|| onsTime.size()==0) ){
-            onsTime.push_back(current_t+aqs/framerate);
+void SuperFluxPeaks::consume() {
+    
+    
+    // take care of default accumulator algorithm behavior that fill with last frames even if it's under acquire size
+    // here we need at least the min of max and min filter size to be able to compute
+    // As this happen in end of audio, so we can drop without any problem
+    if(_signal.acquireSize()>=min_aquireSize){
+        
+        hasComputed = true;
+        std::vector<Real> out = std::vector<Real>(_aquireSize);
+        _algo->input("novelty").set(_signal.tokens());
+        _algo->output("peaks").set(out);
+        _algo->compute();
+        // her we supose that _acquireSize is less than combine, e.g. no more than one onset when calling standard
+        if(out.size()>0  && ((onsTime.size()>0 && current_t-onsTime.back()>_combine )|| onsTime.size()==0) ){
+            onsTime.push_back(current_t + out[0]);
         }
-        
-        
+        current_t+=_aquireSize/framerate;
     }
-    
-    void SuperFluxPeaks::finalProduce() {
-        _peaks.push((std::vector<Real>) onsTime);
+    else if(!hasComputed){
         
-        current_t = 0;
-        reset();
+        //TODO: should it throw exception? boring for dataset processing
+//        EXEC_DEBUG(
+                   cout<<
+                   "too short audio ; must be " << _aquireSize*1.0/framerate << " second long"
+        <<endl;
+//        );
     }
+
+}
+
+void SuperFluxPeaks::finalProduce() {
+    _peaks.push((std::vector<Real>) onsTime);
+    current_t = 0;
     
-    
-    void SuperFluxPeaks::reset(){
-        current_t=0;
-        onsTime.clear();
-    }
+    reset();
+}
+
+
+void SuperFluxPeaks::reset(){
+    current_t=0;
+    onsTime.clear();
+}
 
 } // namespace streaming
 } // namespace essentia

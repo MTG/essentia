@@ -47,7 +47,7 @@ SuperFluxExtractor::SuperFluxExtractor() : _configured(false) {
   createInnerNetwork();
 
   // wire all this up!
-  _signal                             >>  _frameCutter->input("signal");
+    _signal    >>  _frameCutter->input("signal");
 
     _frameCutter->output("frame")  >>  w->input("frame");
     w->output("frame") >> spectrum->input("frame");
@@ -69,7 +69,7 @@ void SuperFluxExtractor::createInnerNetwork() {
     w = factory.create("Windowing","type","hann");
     
     spectrum = factory.create("Spectrum");
-    triF = factory.create("Triangularbands","Log",true);
+    triF = factory.create("TriangularBands","log",true);
     superFluxP = factory.create("SuperFluxPeaks");
     superFluxF = factory.create("SuperFluxNovelty","binWidth",3,"frameWidth",2);
     
@@ -89,14 +89,14 @@ void SuperFluxExtractor::configure() {
 	_frameCutter->configure(
                         			"frameSize",frameSize,
                         			"hopSize",hopSize,
-                        			"startFromZero" , true,
-                        			"validFrameThresholdRatio", 1,
-                        			"lastFrameToEndOfFile",true,
+                        			"startFromZero" , false,
+                        			"validFrameThresholdRatio", 0,
+                        			"lastFrameToEndOfFile",false,
                         			"silentFrames","keep"
                         		);
 
 
-  superFluxP->configure("rawmode" , false,"threshold" ,threshold/NOVELTY_MULT,"startFromZero",true,"frameRate", sampleRate*1.0/(hopSize),"combine",combine);
+  superFluxP->configure("rawmode" , false,"threshold" ,threshold,"startFromZero",true,"frameRate", sampleRate*1.0/(hopSize),"combine",combine,"pre_avg",100.,"pre_max",30.);
 
 
 }

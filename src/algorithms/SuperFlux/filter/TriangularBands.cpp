@@ -44,7 +44,7 @@ void TriangularBands::configure() {
       throw EssentiaException("TriangularBands: the values in the 'frequencyBands' parameter are not in ascending order or there exists a duplicate value");
     }
   }
-  _isLog = parameter("Log").toBool();
+  _isLog = parameter("log").toBool();
 }
 
 
@@ -101,7 +101,7 @@ void TriangularBands::compute() {
 	
       bands[i] += TriangF * spectrum[j] * spectrum[j]; 
     }
-    if (_isLog) bands[i] = log10(1 + bands[i]);
+    if (_isLog) bands[i] = log2(1 + bands[i]);
   }
 }
 
