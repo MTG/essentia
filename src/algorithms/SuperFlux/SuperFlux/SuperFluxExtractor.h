@@ -57,7 +57,8 @@ public:
         declareParameter("frameSize", "the frame size for computing low level features", "(0,inf)", 2048);
         declareParameter("hopSize", "the hop size for computing low level features", "(0,inf)", 256);
         declareParameter("sampleRate", "the audio sampling rate", "(0,inf)", 44100.0);
-        declareParameter("threshold","threshold for peak peaking","(0,inf)",1.0);
+        declareParameter("threshold","threshold for peak peaking compared to the difference of novelty_signal and average_signal ,  for peaking onsets in ambien noise","[0,inf)",.05);
+        declareParameter("ratioThreshold", "ratio threshold for peak-picking compared to novelty_signal/novelty_average, 0  disable it ,  for low energy onsets", "[0,inf)", 16.);
         declareParameter("combine","time threshold for double onsets detections (ms)","(0,inf)",20.0);
     }
     
@@ -109,7 +110,8 @@ class SuperFluxExtractor : public Algorithm {
     declareParameter("frameSize", "the frame size for computing low level features", "(0,inf)", 2048);
     declareParameter("hopSize", "the hop size for computing low level features", "(0,inf)", 256);
     declareParameter("sampleRate", "the audio sampling rate", "(0,inf)", 44100.0);
-    declareParameter("threshold","threshold for peak peaking","(0,inf)",20.0);
+    declareParameter("threshold","threshold for peak peaking compared to the difference of novelty_signal and average_signal ,  for peaking onsets in ambien noise","[0,inf)",.05);
+    declareParameter("ratioThreshold", "ratio threshold for peak-picking compared to novelty_signal/novelty_average, 0  disable it ,  for low energy onsets", "[0,inf)", 16.);
     declareParameter("combine","time threshold for double onsets detections(ms)","(0,inf)",20.0);
   }
 

@@ -55,7 +55,6 @@ class MaxFilter : public Algorithm {
   void declareParameters() {
     declareParameter("width", "the window size, has to be odd if the window is centered", "[2,inf)", 3);
     declareParameter("causal", "use casual filter (window is behind current element otherwise it is centered around)", "{true,false}", true);
-   // declareParameter("startFromZero", "suppress first frames width", "{true,false}", true); //TODO remove?
   }
 
   void reset();
@@ -84,9 +83,9 @@ class MaxFilter : public StreamingAlgorithmWrapper {
  
  public:
   MaxFilter(){
-    declareInput(_array,STREAM,4,  "signal");
-    declareOutput(_filtered,STREAM,4,  "signal");
-      declareAlgorithm("MaxFilter");
+    declareInput(_array,STREAM,  "signal");
+    declareOutput(_filtered,STREAM,  "signal");
+    declareAlgorithm("MaxFilter");
   }
   
 

@@ -17,8 +17,6 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-
-//TODO: create a real streaming mode and not standard mode hack...
 #include "SuperFluxPeaks.h"
 #include <complex>
 #include <limits>
@@ -49,15 +47,11 @@ void SuperFluxPeaks::configure() {
     // convert to seconds
     _combine = parameter("combine").toReal()/1000.;
     
-    
-    _rawMode = parameter("rawmode").toBool();
-    _startZero = parameter("startFromZero").toBool();
-    
     _movAvg->configure("size",_pre_avg);
     _maxf->configure("width",_pre_max,"causal",true);
     
     _threshold = parameter("threshold").toReal();
-    
+     _ratioThreshold = parameter("ratioThreshold").toReal();
     
     peakTime = 0;
     
@@ -75,7 +69,6 @@ void SuperFluxPeaks::compute() {
     
     int size = signal.size();
     
-    
     vector<Real> avg(size);
     _movAvg->input("signal").set(signal);
     _movAvg->output("signal").set(avg);
@@ -87,39 +80,32 @@ void SuperFluxPeaks::compute() {
     _maxf->output("signal").set(maxs);
     _maxf->compute();
     
-    cout << signal << endl;
-    cout << maxs << endl;
-    cout << avg << endl;
+//    cout << signal << endl;
+//    cout << maxs << endl;
+//    cout << avg << endl;
     int nDetec=0;
-    peakTime = 0;
+    
     for( int i =0; i <=size;i++){
         
-        if(signal[i]==maxs[i]&& signal[i]>0){
-            bool tst ;
-        if( (tst=
-           signal[i]>avg[i]+
-//           ( (.5+atan( (avg[i]-_threshold*.1)*(100/_threshold) )/3.1415) )*
-           _threshold
-             )
-        ||
-           (
-           signal[i]*1.0/avg[i]>10
-           )
-           ){
+        // we want to avoid ratioThreshold noisy activation in really low flux parts so we set noise floor
+        // set by default to 10-7 (REALLY LOW for a flux)
+        if(signal[i]==maxs[i]&& signal[i]>1e-8){
+            bool isOverLinearThreshold = _threshold>0 &&  signal[i]>avg[i]+_threshold ;
+            bool isOverratioThreshold = _ratioThreshold>0 &&avg[i]>0 && signal[i]*1.0/avg[i]>_ratioThreshold;
+            
+            
+        if( isOverLinearThreshold||isOverratioThreshold)
+           {
             
             peakTime = i*1.0/frameRate;
             if((nDetec>0 && peakTime-peaks[nDetec-1]>_combine)  ||  nDetec ==0) {
                 peaks[nDetec] = peakTime;
                 nDetec++;
-                if(tst){
-                    cout << "linear threshold" << endl;
-                }
             }
         }
         }
         
     }
-    
     
     peaks.resize(nDetec);
     return;
@@ -146,25 +132,34 @@ const char* SuperFluxPeaks::description = standard::SuperFluxPeaks::description;
 
 
 void SuperFluxPeaks::consume() {
+
+
+
+    int _aquireSize = _signal.acquireSize();
     
-    
-    // take care of default accumulator algorithm behavior that fill with last frames even if it's under acquire size
-    // here we need at least the min of max and min filter size to be able to compute
-    // As this happen in end of audio, so we can drop without any problem, throw exception if sample was too short
-//    if(_signal.acquireSize()>=min_aquireSize){
-    
-        hasComputed = true;
         std::vector<Real> out = std::vector<Real>(_aquireSize);
         _algo->input("novelty").set(_signal.tokens());
         _algo->output("peaks").set(out);
         _algo->compute();
-        // her we supose that _acquireSize is less than combine(max of average and maximum filter), e.g. no more than one onset when calling standard from here
-        if(out.size()>0  && ((onsTime.size()>0 && current_t-onsTime.back()>_combine )|| onsTime.size()==0) ){
-            onsTime.push_back(current_t + out[0]);
-            cout << current_t << "/" << onsTime.back() << "/" << out[0]*framerate <<  endl;
-
+    
+    
+    
+    if(out.size()>0){
+        
+        //trim firstpart  if needed
+        bool trimBeg = false;
+        if(onsTime.size()>0 && (current_t+ out[0] - onsTime.back()<_combine)){
+            trimBeg = true;
         }
-        current_t+=_aquireSize/framerate;
+        
+        // copy if there is something to copy
+        if(!trimBeg || onsTime.size()>1){
+            onsTime.insert(onsTime.end(), out.begin(),out.end() - (trimBeg?1:0));
+        }
+        
+    }
+
+    current_t+=_aquireSize/framerate;
     
 }
 

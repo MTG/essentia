@@ -19,8 +19,7 @@
 
 #include "MaxFilter.h"
 #include "essentiamath.h"
-//#define HERKGIL
-//TODO:Validate and adapt for onlinemode HERKGIL
+
 
 namespace essentia {
 namespace standard {
@@ -32,19 +31,19 @@ const char* MaxFilter::description = DOC("Maximum filter for 1d signal (van Herk
 "  TODO\n");
 
 void MaxFilter::configure() {
-    //width has to be odd
+    
     _width = parameter("width").toInt();
     _causal = parameter("causal").toBool();
     _filledBuffer = false;
 
 
-    // offset by width/2 if not causal as it's only a shift of output indexes
-
+    //width has to be odd if causal as we centering
     _halfWidth = _width;
     if (_halfWidth % 2==0) _halfWidth++;
     _halfWidth = (_halfWidth-1) / 2;
-
-
+    
+    
+    // offset by width/2 if not causal as it's only a shift of output indexes
     _bufferFillIdx = _causal?0:_halfWidth;
     
     
@@ -70,7 +69,7 @@ void MaxFilter::compute() {
         
         if(_bufferFillIdx == _causal?0:_halfWidth){
             _curMax = array[0];
-            // we initiate the value here because we need to pad with an array value ( especially in non causal mode where )
+            // we initiate the value here because we need to pad with an array value ( especially in non causal mode as we will take the maximum of the padded vector in first values )
             _buffer.resize(_width, _curMax);
         }
         
@@ -108,6 +107,5 @@ void MaxFilter::reset() {
 } // namespace standard
 } // namespace essentia
 
-//// we may wamt to implement this later, if dealing with big vectors
-//    
+
 
