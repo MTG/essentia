@@ -36,7 +36,6 @@ class ChordsDetectionBeats : public Algorithm {
     Output<std::vector<Real> > _strength;
 
     Algorithm* _chordsAlgo;
-    int _numFramesWindow;
     Real _sampleRate; 
     int _hopSize;
 
@@ -54,7 +53,6 @@ class ChordsDetectionBeats : public Algorithm {
 
     void declareParameters() {
       declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-      declareParameter("windowSize", "the size of the window on which to estimate the chords [s]", "(0,inf)", 2.0);
       declareParameter("hopSize", "the hop size with which the input PCPs were computed", "(0,inf)", 2048);
     }
 
@@ -68,64 +66,11 @@ class ChordsDetectionBeats : public Algorithm {
 
     static const char* name;
     static const char* description;
-
 };
 
 
 } // namespace standard
 } // namespace essentia
 
-
-#include "streamingalgorithmcomposite.h"
-#include "pool.h"
-
-namespace essentia {
-namespace streaming {
-
-// TODO: the implementation of the streaming mode is from the old algorithm 
-// and it was not changed. Implement the streaming mode for the new chords
-// detection algorithm.
-
-class ChordsDetectionBeats : public AlgorithmComposite {
- protected:
-  SinkProxy<std::vector<Real> > _pcp;
-  //SinkProxy<std::vector<Real> > _ticks; //correct? useless for the moment 
-
-  Source<std::string> _chords;
-  Source<Real> _strength;
-
-  Pool _pool;
-  Algorithm* _poolStorage;
-  standard::Algorithm* _chordsAlgo;
-  int _numFramesWindow;
-  
-
- public:
-  ChordsDetectionBeats();
-  ~ChordsDetectionBeats();
-
-  void declareParameters() {
-    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("windowSize", "the size of the window on which to estimate the chords [s]", "(0,inf)", 2.0);
-    declareParameter("hopSize", "the hop size with which the input PCPs were computed", "(0,inf)", 2048);
-  }
-
-  void declareProcessOrder() {
-    declareProcessStep(ChainFrom(_poolStorage));
-    declareProcessStep(SingleShot(this));
-  }
-
-  void configure();
-  AlgorithmStatus process();
-  void reset();
-
-  static const char* name;
-  static const char* description;
-
-};
-
-
-} // namespace streaming
-} // namespace essentia
 
 #endif // ESSENTIA_CHORDSDETECTIONBEATS_H
