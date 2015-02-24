@@ -357,7 +357,7 @@ void AudioContext::encodePacket(int size) {
 
   int result = avcodec_fill_audio_frame(frame, _codecCtx->channels, _codecCtx->sample_fmt,
                                         bufferFmt, outputPlaneSize * _codecCtx->channels, 0);
-  if (result != 0) {
+  if (result < 0) {
     char errstring[1204];
     av_strerror(result, errstring, sizeof(errstring));
     ostringstream msg;
