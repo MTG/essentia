@@ -46,9 +46,9 @@ class ChordsDetectionBeats : public Algorithm {
       _chordsAlgo->configure("profileType", "tonictriad", "usePolyphony", false);
 
       declareInput(_pcp, "pcp", "the pitch class profile from which to detect the chord");
-      declareInput(_ticks, "ticks", "the ticks where is located the beat of the song");
+      declareInput(_ticks, "ticks", "the list of beat positions (in seconds)");
       declareOutput(_chords, "chords", "the resulting chords, from A to G");
-      declareOutput(_strength, "strength", "the strength of the chord");
+      declareOutput(_strength, "strength", "the strength of the chords");
     }
 
     void declareParameters() {

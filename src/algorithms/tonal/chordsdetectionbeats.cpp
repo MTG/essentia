@@ -26,12 +26,9 @@ namespace essentia {
 namespace standard {
 
 const char* ChordsDetectionBeats::name = "ChordsDetectionBeats";
-const char* ChordsDetectionBeats::description = DOC("This algorithm takes the ChordsDetection algorithm from Essentia, and tries to enhance it by using a Beat Tracker for in between estimation.\n"
+const char* ChordsDetectionBeats::description = DOC("This algorithm estimates chords using pitch profile classes similar to ChordsDetection algorithm given a list of beat positions. The chords are estimated on audio segments between each pair of consecutive beats.\n"
 "\n"
-"Note:\n"
-"  - This algorithm assumes that input pcps have been computed with framesize = 2*hopsize\n"
-"\n"
-"Quality: experimental (prone to errors, algorithm needs improvement)\n"
+"Quality: experimental (algorithm needs evaluation)\n"
 "\n"
 "References:\n"
 "  [1] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
