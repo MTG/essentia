@@ -29,7 +29,7 @@ AudioContext::AudioContext()
 #if HAVE_AVRESAMPLE
     , _convertCtxAv(0)
 #elif HAVE_SWRESAMPLE
-    , _convertCtx(0),
+    , _convertCtx(0)
 #endif
               {
   av_log_set_level(AV_LOG_VERBOSE);
