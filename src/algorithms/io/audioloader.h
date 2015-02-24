@@ -48,7 +48,7 @@ class AudioLoader : public Algorithm {
   // each time we decode a frame we need to have at least a full buffer of free space.
   const static int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
 
-  int16_t* _buffer;
+  float* _buffer;
   int _dataSize;
 
   AVFormatContext* _demuxCtx;
@@ -79,7 +79,7 @@ class AudioLoader : public Algorithm {
 
   void pushChannelsSampleRateInfo(int nChannels, Real sampleRate);
   void pushCodecInfo(std::string codec, int bit_rate);
-  int decode_audio_frame(AVCodecContext* audioCtx, int16_t* output,
+  int decode_audio_frame(AVCodecContext* audioCtx, float* output,
                          int* outputSize, AVPacket* packet);
   int decodePacket();
   void flushPacket();
@@ -109,7 +109,7 @@ class AudioLoader : public Algorithm {
     av_register_all();
 
     // use av_malloc, because we _need_ the buffer to be 16-byte aligned
-    _buffer = (int16_t*)av_malloc(FFMPEG_BUFFER_SIZE);
+    _buffer = (float*)av_malloc(FFMPEG_BUFFER_SIZE);
 
 #if LIBAVUTIL_VERSION_INT < AVUTIL_51_43_0
     _md5Encoded = (AVMD5*) av_malloc(av_md5_size);
