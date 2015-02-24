@@ -34,7 +34,7 @@ const char* MaxFilter::description = DOC("Maximum filter for 1d signal (van Herk
 void MaxFilter::configure() {
   //width has to be odd
   _width = parameter("width").toInt();
-  _causal = parameter("Causal").toBool();
+  _causal = parameter("causal").toBool();
 }
 
 #ifdef HERKGIL
@@ -87,8 +87,8 @@ void MaxFilter::compute() {
   vector<Real>& filtered = _filtered.get();
 
   int size = array.size();
-  if (_width >= size) {
-    throw EssentiaException("recieved signal is smaller or equal than width");
+  if (_width > size) {
+    throw EssentiaException("recieved signal : ",size," is smaller than MaximumFilter width : " , _width);
   }
   filtered.resize(size);
 
@@ -101,6 +101,7 @@ void MaxFilter::compute() {
   Real maxs = array[0];
 	filtered[0] = maxs;
 
+    // fill the begining of array < width
   for (int i=1; i < _width; i++) {
     filtered[i]=max(maxs,array[i]);
     maxs=filtered[i];

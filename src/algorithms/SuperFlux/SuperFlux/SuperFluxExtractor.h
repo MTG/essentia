@@ -27,49 +27,49 @@
 #include "vectorinput.h"
 #include "vectoroutput.h"
 
-#define NOVELTY_MULT 1000.
+
 
 namespace essentia {
 namespace streaming {
 
 class SuperFluxExtractor : public AlgorithmComposite {
- protected:
+protected:
     SinkProxy<Real> _signal;
-
+    
     SourceProxy<std::vector<Real> > _onsets;
-
-
-
-
-
+    
+    
+    
+    
+    
     essentia::streaming::Algorithm *w,*spectrum,*triF,*superFluxF,*superFluxP, * _frameCutter,*mfccF;
     essentia::streaming::VectorOutput<Real> *vout;
     scheduler::Network* _network;
-
-  bool _configured;
-  void clearAlgos();
-
- public:
-  SuperFluxExtractor();
-  ~SuperFluxExtractor();
-
-  void declareParameters() {
-    declareParameter("frameSize", "the frame size for computing low level features", "(0,inf)", 2048);
-    declareParameter("hopSize", "the hop size for computing low level features", "(0,inf)", 256);
-    declareParameter("sampleRate", "the audio sampling rate", "(0,inf)", 44100.0);
-    declareParameter("threshold","threshold for peak peaking","(0,inf)",1.0);
-    declareParameter("combine","time threshold for double onsets detections (ms)","(0,inf)",20.0);
-  }
-
-  void declareProcessOrder() {
-    declareProcessStep(ChainFrom(_frameCutter));
-  }
-
-  void configure();
-  void createInnerNetwork();
-
-  static const char* name;
-  static const char* description;
+    
+    bool _configured;
+    void clearAlgos();
+    
+public:
+    SuperFluxExtractor();
+    ~SuperFluxExtractor();
+    
+    void declareParameters() {
+        declareParameter("frameSize", "the frame size for computing low level features", "(0,inf)", 2048);
+        declareParameter("hopSize", "the hop size for computing low level features", "(0,inf)", 256);
+        declareParameter("sampleRate", "the audio sampling rate", "(0,inf)", 44100.0);
+        declareParameter("threshold","threshold for peak peaking","(0,inf)",1.0);
+        declareParameter("combine","time threshold for double onsets detections (ms)","(0,inf)",20.0);
+    }
+    
+    void declareProcessOrder() {
+        declareProcessStep(ChainFrom(_frameCutter));
+    }
+    
+    void configure();
+    void createInnerNetwork();
+    
+    static const char* name;
+    static const char* description;
 };
 
 } // namespace streaming

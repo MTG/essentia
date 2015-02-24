@@ -23,132 +23,134 @@
 
 
 namespace essentia {
-namespace standard {
-
-
-const char* SuperFluxNovelty::name = "SuperFluxNovelty";
-const char* SuperFluxNovelty::description = DOC("Novelty curve from Superflux algorithm (see SuperFluxExtractor for references)");
-
-
-void SuperFluxNovelty::configure() {
- 	
- 	
- 	
-    _binW = parameter("binWidth").toInt();
-    _maxf->configure("width",_binW,"Causal",false);
-	_frameWi = parameter("frameWidth").toInt();
-
-
-
-}
-
-
-void SuperFluxNovelty::compute() {
-
-  	const vector< vector<Real> >& bands = _bands.get();
-  	
-	Real& diffs = _diffs.get();
-
-  int nFrames = bands.size();
-  if(!nFrames){
-  throw EssentiaException("SuperFluxNovelty : empty frames");
-  }  
-  int nBands= bands[0].size();
-  if(!nBands){
-  throw EssentiaException("SuperFluxNovelty : empty bands ");
-  }
-
-  if(_frameWi>=nFrames){
-  
-  throw EssentiaException("SuperFluxNovelty : no enough frames comparing to frame witdh");
-  }
-
-  vector<Real> maxsBuffer(nBands,0);
-
-// buffer for differences
-  Real cur_diff;
-
-  for (int i = _frameWi ; i< nFrames;i++){
-
-      
-	diffs=0;
-	_maxf->input("signal").set(bands[i-_frameWi]);
-	_maxf->output("signal").set(maxsBuffer);
-	_maxf->compute();
-	
-	cur_diff = 0;
-
-	for (int j = 0;j<nBands;j++){
-		cur_diff= bands[i][j]-maxsBuffer[j];
-		if(cur_diff>0.0){
-            diffs +=cur_diff ;
+    namespace standard {
+        
+        
+        const char* SuperFluxNovelty::name = "SuperFluxNovelty";
+        const char* SuperFluxNovelty::description = DOC("Novelty curve from Superflux algorithm (see SuperFluxExtractor for references)");
+        
+        
+        void SuperFluxNovelty::configure() {
+            
+            
+            
+            _binW = parameter("binWidth").toInt();
+            _maxf->configure("width",_binW,"causal",false);
+            _frameWi = parameter("frameWidth").toInt();
+            
+            
+            
         }
-	}
-
-
-}
-    
-    
-  
-return;
-}
-
-void SuperFluxNovelty::reset() {
-  Algorithm::reset();
-
-}
-
-
-
-
-} // namespace standard
+        
+        
+        void SuperFluxNovelty::compute() {
+            
+            const vector< vector<Real> >& bands = _bands.get();
+            
+            Real& diffs = _diffs.get();
+            
+            int nFrames = bands.size();
+            if(!nFrames){
+                throw EssentiaException("SuperFluxNovelty : empty frames");
+            }
+            int nBands= bands[0].size();
+            if(!nBands){
+                throw EssentiaException("SuperFluxNovelty : empty bands ");
+            }
+            
+            if(_frameWi>=nFrames){
+                
+                throw EssentiaException("SuperFluxNovelty : no enough frames comparing to frame witdh");
+            }
+            
+            vector<Real> maxsBuffer(nBands,0);
+            
+            // buffer for differences
+            Real cur_diff;
+            diffs=0;
+            for (int i = _frameWi ; i< nFrames;i++){
+                
+                
+                
+                _maxf->input("signal").set(bands[i-_frameWi]);
+                _maxf->output("signal").set(maxsBuffer);
+                _maxf->compute();
+                
+                cur_diff = 0;
+                
+                for (int j = 0;j<nBands;j++){
+                    cur_diff= bands[i][j]-maxsBuffer[j];
+                    if(cur_diff>0.0){
+                        diffs +=cur_diff ;
+                    }
+                }
+                
+                
+            }
+            
+            
+            
+            return;
+        }
+        
+        void SuperFluxNovelty::reset() {
+            Algorithm::reset();
+            
+        }
+        
+        
+        
+        
+    } // namespace standard
 } // namespace essentia
 
 
 
 
 namespace essentia {
-namespace streaming {
-
-const char* SuperFluxNovelty::name = standard::SuperFluxNovelty::name;
-const char* SuperFluxNovelty::description = standard::SuperFluxNovelty::description;
-
-
-AlgorithmStatus SuperFluxNovelty::process() {
-
-
-
-    AlgorithmStatus status = acquireData();
-    if (status != OK) {
-
-      return status;
-    }
-    
-    
-    //Hack for alignement in sliding window types of streaming mode algorithms (input aquire size > 1 && release size  = 1);
-    // should may be generalized in streaming algorithm wrapper
-    if(initialPad){
-    Real pad = 0;
-        for(int i = 0 ; i < _bands.acquireSize() ; i ++){
-            _diffs.push(pad);
-           
+    namespace streaming {
+        
+        const char* SuperFluxNovelty::name = standard::SuperFluxNovelty::name;
+        const char* SuperFluxNovelty::description = standard::SuperFluxNovelty::description;
+        
+        
+        AlgorithmStatus SuperFluxNovelty::process() {
+            
+            
+            
+            AlgorithmStatus status = acquireData();
+            if (status != OK) {
+                
+                return status;
+            }
+            
+            
+            //Hack for alignement in sliding window types of streaming mode algorithms (input aquire size > 1 && release size  = 1);
+            // without that, the first element sended correspond to the aquireSize-th element recieved, we loose synchronicity (we may want it if we have release size of 1)
+            //  may be it should be generalized in streaming algorithm wrapper
+            if(initialPad){
+                Real pad = 0;
+                for(int i = 0 ; i < _bands.acquireSize() ; i ++){
+                    _diffs.push(pad);
+                    
+                }
+                initialPad = false;
+                //        releaseData();
+                return OK;
+            }
+            
+            _algo->input("bands").set(_bands.tokens());
+            _algo->output("Differences").set(_diffs.firstToken());
+            
+            _algo->compute();
+            
+            // give back the tokens that were reserved
+            releaseData();
+            
+            return OK;
+            
         }
-        initialPad = false;
-        return OK;
-    }
-    
-    _algo->input("bands").set(_bands.tokens());
-    _algo->output("Differences").set(_diffs.firstToken());
-	
-    _algo->compute();
-
-    // give back the tokens that were reserved
-    releaseData();
-
-    return OK;
-  
-}
-
-
-} // namespace streaming
+        
+        
+    } // namespace streaming
 } // namespace essentia
