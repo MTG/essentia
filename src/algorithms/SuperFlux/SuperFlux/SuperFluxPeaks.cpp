@@ -77,34 +77,46 @@ void SuperFluxPeaks::compute() {
     
     
     vector<Real> avg(size);
-    _movAvg->reset();
     _movAvg->input("signal").set(signal);
     _movAvg->output("signal").set(avg);
     _movAvg->compute();
     
     
     vector<Real> maxs(size);
-    _maxf->reset();
     _maxf->input("signal").set(signal);
     _maxf->output("signal").set(maxs);
     _maxf->compute();
     
-    
+    cout << signal << endl;
+    cout << maxs << endl;
+    cout << avg << endl;
     int nDetec=0;
-    int minIdx =max(0,min(_pre_avg,_pre_max)/2 - 2 );
-    //    cout<< minIdx << endl;
-    for( int i =minIdx; i < size;i++){
+    peakTime = 0;
+    for( int i =0; i <=size;i++){
         
-        if(signal[i]==maxs[i] && signal[i]>avg[i]+_threshold && signal[i]>0){
+        if(signal[i]==maxs[i]&& signal[i]>0){
+            bool tst ;
+        if( (tst=
+           signal[i]>avg[i]+
+//           ( (.5+atan( (avg[i]-_threshold*.1)*(100/_threshold) )/3.1415) )*
+           _threshold
+             )
+        ||
+           (
+           signal[i]*1.0/avg[i]>10
+           )
+           ){
             
             peakTime = i*1.0/frameRate;
             if((nDetec>0 && peakTime-peaks[nDetec-1]>_combine)  ||  nDetec ==0) {
                 peaks[nDetec] = peakTime;
                 nDetec++;
-                
+                if(tst){
+                    cout << "linear threshold" << endl;
+                }
             }
         }
-        
+        }
         
     }
     
@@ -138,30 +150,22 @@ void SuperFluxPeaks::consume() {
     
     // take care of default accumulator algorithm behavior that fill with last frames even if it's under acquire size
     // here we need at least the min of max and min filter size to be able to compute
-    // As this happen in end of audio, so we can drop without any problem
-    if(_signal.acquireSize()>=min_aquireSize){
-        
+    // As this happen in end of audio, so we can drop without any problem, throw exception if sample was too short
+//    if(_signal.acquireSize()>=min_aquireSize){
+    
         hasComputed = true;
         std::vector<Real> out = std::vector<Real>(_aquireSize);
         _algo->input("novelty").set(_signal.tokens());
         _algo->output("peaks").set(out);
         _algo->compute();
-        // her we supose that _acquireSize is less than combine, e.g. no more than one onset when calling standard
+        // her we supose that _acquireSize is less than combine(max of average and maximum filter), e.g. no more than one onset when calling standard from here
         if(out.size()>0  && ((onsTime.size()>0 && current_t-onsTime.back()>_combine )|| onsTime.size()==0) ){
             onsTime.push_back(current_t + out[0]);
+            cout << current_t << "/" << onsTime.back() << "/" << out[0]*framerate <<  endl;
+
         }
         current_t+=_aquireSize/framerate;
-    }
-    else if(!hasComputed){
-        
-        //TODO: should it throw exception? boring for dataset processing
-//        EXEC_DEBUG(
-                   cout<<
-                   "too short audio ; must be " << _aquireSize*1.0/framerate << " second long"
-        <<endl;
-//        );
-    }
-
+    
 }
 
 void SuperFluxPeaks::finalProduce() {

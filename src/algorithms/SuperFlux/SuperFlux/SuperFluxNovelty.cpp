@@ -130,6 +130,7 @@ namespace essentia {
             //  may be it should be generalized in streaming algorithm wrapper
             if(initialPad){
                 Real pad = 0;
+                
                 for(int i = 0 ; i < _bands.acquireSize() ; i ++){
                     _diffs.push(pad);
                     

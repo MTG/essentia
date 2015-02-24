@@ -63,7 +63,8 @@ public:
     
     void declareParameters() {
         declareParameter("frameRate", "frameRate", "(0,inf)", 172.);
-        declareParameter("threshold", "threshold for peak-picking", "(0,inf)", 1.25);
+        declareParameter("threshold", "absolute threshold for peak-picking", "(0,inf)", 1.25);
+        declareParameter("logThreshold", "ratio threshold for peak-picking", "(0,inf)", 10.);
         declareParameter("combine", "ms for onset combination", "(0,inf)", 30.);
         declareParameter("pre_avg", "use N miliseconds past information for moving average", "(0,inf)", 100.);
         declareParameter("pre_max", "use N miliseconds past information for moving maximum", "(0,inf)", 30.);
@@ -72,7 +73,7 @@ public:
         
     }
     
-    void reset() {Algorithm::reset();};
+    void reset() {Algorithm::reset();_maxf->reset();_movAvg->reset();};
     void configure();
     void compute();
     
@@ -118,7 +119,8 @@ public:
     
     void declareParameters() {
         declareParameter("frameRate", "frameRate", "(0,inf)", 172.);
-        declareParameter("threshold", "threshold for peak-picking", "(0,inf)", 1.25);
+        declareParameter("threshold", "absolute threshold for peak-picking", "(0,inf)", 1.25);
+        declareParameter("logThreshold", "ratio threshold for peak-picking", "(0,inf)", 10.);
         declareParameter("combine", "ms for onset combination", "(0,inf)", 30.0);
         declareParameter("pre_avg", "use N miliseconds past information for moving average", "(0,inf)", 100.);
         declareParameter("pre_max", "use N miliseconds past information for moving maximum", "(0,inf)", 30.);
@@ -133,7 +135,7 @@ public:
         //EXEC_DEBUG("configuring Peaks");
         _algo->configure(this->_params);
         framerate = _algo->parameter("frameRate").toReal();
-        _aquireSize =   framerate * max(_algo->parameter("pre_avg").toInt(),_algo->parameter("pre_max").toInt()) / 1000;
+        _aquireSize =  1;// framerate * max(_algo->parameter("pre_avg").toInt(),_algo->parameter("pre_max").toInt()) / 1000;
         min_aquireSize = framerate * min(_algo->parameter("pre_avg").toInt(),_algo->parameter("pre_max").toInt()) / 1000;
         _signal.setAcquireSize(_aquireSize);
         
@@ -142,6 +144,10 @@ public:
         
         
         _combine = parameter("combine").toReal()/1000.;
+        if(_combine<_aquireSize*1.0/framerate){
+//            cout << "combine is less than acquireSize : " << _combine <<"/"<< _aquireSize*1.0/framerate<<endl;
+//            _combine = _aquireSize*1.0/framerate;
+        }
         
         current_t=0;
         

@@ -69,7 +69,7 @@ void SuperFluxExtractor::createInnerNetwork() {
     w = factory.create("Windowing","type","hann");
     
     spectrum = factory.create("Spectrum");
-    triF = factory.create("TriangularBands","log",true);
+    triF = factory.create("TriangularBands","log",false);
     superFluxP = factory.create("SuperFluxPeaks");
     superFluxF = factory.create("SuperFluxNovelty","binWidth",3,"frameWidth",2);
     
@@ -96,7 +96,7 @@ void SuperFluxExtractor::configure() {
                         		);
 
 
-  superFluxP->configure("rawmode" , false,"threshold" ,threshold,"startFromZero",true,"frameRate", sampleRate*1.0/(hopSize),"combine",combine,"pre_avg",100.,"pre_max",30.);
+  superFluxP->configure("rawmode" , false,"threshold" ,threshold,"startFromZero",true,"frameRate", sampleRate*1.0/(hopSize),"combine",combine,"pre_avg",200.,"pre_max",30.);
 
 
 }
