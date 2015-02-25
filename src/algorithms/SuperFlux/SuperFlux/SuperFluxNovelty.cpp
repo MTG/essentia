@@ -125,20 +125,6 @@ namespace essentia {
             }
             
             
-            //Hack for alignement in sliding window types of streaming mode algorithms (input aquire size > 1 && release size  = 1);
-            // without that, the first element sended correspond to the aquireSize-th element recieved, we loose synchronicity (we may want it if we have release size of 1)
-            //  may be it should be generalized in streaming algorithm wrapper
-            if(initialPad){
-                Real pad = 0;
-                for(int i = 0 ; i < _bands.acquireSize() ; i ++){
-                    _diffs.push(pad);
-                    
-                }
-                initialPad = false;
-                //        releaseData();
-                return OK;
-            }
-            
             _algo->input("bands").set(_bands.tokens());
             _algo->output("Differences").set(_diffs.firstToken());
             

@@ -33,7 +33,15 @@ class MaxFilter : public Algorithm {
   Input< vector<Real>  > _array;
   Output< vector<Real> > _filtered;
 
-  int _width;
+
+    // circular buffer containing past values
+    vector<Real> _buffer;
+    Real _curMax;
+    bool _filledBuffer;
+    int _bufferFillIdx;
+    
+    
+  int _width,_halfWidth;
   bool _causal;
 
  public:
@@ -47,7 +55,6 @@ class MaxFilter : public Algorithm {
   void declareParameters() {
     declareParameter("width", "the window size, has to be odd if the window is centered", "[2,inf)", 3);
     declareParameter("causal", "use casual filter (window is behind current element otherwise it is centered around)", "{true,false}", true);
-   // declareParameter("startFromZero", "suppress first frames width", "{true,false}", true); //TODO remove?
   }
 
   void reset();
@@ -61,40 +68,27 @@ class MaxFilter : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
-#include "streamingalgorithm.h"
+#include "streamingalgorithmwrapper.h"
 
 namespace essentia {
 namespace streaming {
 
-class MaxFilter : public Algorithm {
+class MaxFilter : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<Real > _array;
   Source<Real > _filtered;
  
-  // TODO: remove? 
-  //std::vector <Real> _buff;
-  //int _idx;
+    
  
  public:
   MaxFilter(){
-    declareInput(_array, 1, 1, "signal", "signal to be filtered");
-    declareOutput(_filtered, 1, 1, "signal","filtered output");
+    declareInput(_array,STREAM,  "signal");
+    declareOutput(_filtered,STREAM,  "signal");
+    declareAlgorithm("MaxFilter");
   }
   
-  void declareParameters() {
-    declareParameter("width", "window size for max filter : has to be odd as the window is centered on sample", "[3,inf)", 3);
-  }
 
-  void configure() {
-    _array.setAcquireSize(parameter("width").toInt() + 1);
-    _array.setReleaseSize(1);
-	  //_buff.resize(parameter("width").toInt() + 1);
-    // _filtered.setReleaseSize(1);
-    //_idx =0; TODO remove?
-  }
-  
-  AlgorithmStatus process();
 
   static const char* name;
   static const char* description;

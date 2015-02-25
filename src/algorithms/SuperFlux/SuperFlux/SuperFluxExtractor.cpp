@@ -69,9 +69,9 @@ void SuperFluxExtractor::createInnerNetwork() {
     w = factory.create("Windowing","type","hann");
     
     spectrum = factory.create("Spectrum");
-    triF = factory.create("TriangularBands","log",true);
+    triF = factory.create("TriangularBands","log",false);
     superFluxP = factory.create("SuperFluxPeaks");
-    superFluxF = factory.create("SuperFluxNovelty","binWidth",3,"frameWidth",2);
+    superFluxF = factory.create("SuperFluxNovelty","binWidth",8,"frameWidth",2);
     
     vout = new essentia::streaming::VectorOutput<Real>();
    
@@ -80,10 +80,7 @@ void SuperFluxExtractor::createInnerNetwork() {
 void SuperFluxExtractor::configure() {
   int frameSize   = parameter("frameSize").toInt();
   int hopSize     = parameter("hopSize").toInt();
-  Real threshold = parameter("threshold").toReal();
   Real sampleRate = parameter("sampleRate").toReal();
-  Real combine = parameter("combine").toReal();
-
 
   
 	_frameCutter->configure(
@@ -96,7 +93,7 @@ void SuperFluxExtractor::configure() {
                         		);
 
 
-  superFluxP->configure("rawmode" , false,"threshold" ,threshold,"startFromZero",true,"frameRate", sampleRate*1.0/(hopSize),"combine",combine,"pre_avg",100.,"pre_max",30.);
+  superFluxP->configure(INHERIT("ratioThreshold"),INHERIT("threshold"),"frameRate", sampleRate*1.0/(hopSize),INHERIT("combine"),"pre_avg",100.,"pre_max",30.);
 
 
 }
@@ -137,7 +134,7 @@ void SuperFluxExtractor::reset() {
 }
 
 void SuperFluxExtractor::configure() {
-  _SuperFluxExtractor->configure(INHERIT("frameSize"), INHERIT("hopSize"),INHERIT("sampleRate"),INHERIT("threshold"),INHERIT("combine"));
+  _SuperFluxExtractor->configure(INHERIT("frameSize"), INHERIT("hopSize"),INHERIT("sampleRate"),INHERIT("threshold"),INHERIT("combine"),INHERIT("ratioThreshold"));
 }
 
 void SuperFluxExtractor::createInnerNetwork() {

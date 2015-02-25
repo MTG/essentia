@@ -52,7 +52,7 @@ class SuperFluxNovelty : public Algorithm{
   }
 
   ~SuperFluxNovelty() {
-
+      delete _maxf;
   }
 
   void declareParameters() {
@@ -89,7 +89,7 @@ class SuperFluxNovelty : public Algorithm
   
   
     essentia::standard::Algorithm* _algo;
-        bool initialPad = true;
+
 
  public:
 
@@ -99,7 +99,9 @@ class SuperFluxNovelty : public Algorithm
             _algo = essentia::standard::AlgorithmFactory::create("SuperFluxNovelty");
 
         }
-
+        ~SuperFluxNovelty(){
+            delete _algo;
+        }
 
 
   void declareParameters() {
@@ -116,7 +118,6 @@ void configure() {
 
   AlgorithmStatus process();
   void reset(){
-      initialPad = true;
   };
 
   static const char* name;
