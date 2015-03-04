@@ -22,6 +22,7 @@
 #include <essentia/essentia.h> 
 
 #include "freesound/FreesoundExtractor.h"
+#include "credit_libav.h"
 
 using namespace std;
 using namespace essentia;
@@ -31,6 +32,7 @@ using namespace essentia::streaming;
 void usage() {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: streaming_extractor input_audiofile output_textfile [profile]" << endl;
+    creditLibAV();
     exit(1);
 }
 

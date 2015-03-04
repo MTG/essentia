@@ -22,6 +22,7 @@
 #include <essentia/algorithmfactory.h>
 #include <essentia/pool.h>
 #include <essentia/essentiamath.h>
+#include "credit_libav.h" 
 
 using namespace std;
 using namespace essentia;
@@ -32,6 +33,7 @@ int main(int argc, char* argv[]) {
   if (argc != 3) {
     cout << "ERROR: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input yaml_output" << endl;
+    creditLibAV();
     exit(1);
   }
 
