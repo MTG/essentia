@@ -54,7 +54,8 @@ void MonoLoader::configure() {
   // if no file has been specified, do not do anything
   if (!filename.isConfigured()) return;
 
-  _audioLoader->configure("filename", filename);
+  _audioLoader->configure("filename", filename,
+                          "computeMD5", false);
 
   int inputSampleRate = (int)lastTokenProduced<Real>(_audioLoader->output("sampleRate"));
 

@@ -22,6 +22,7 @@
 #include <essentia/essentiamath.h>
 #include <essentia/scheduler/network.h>
 #include <essentia/streaming/algorithms/poolstorage.h>
+#include "credit_libav.h" 
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
@@ -50,7 +51,7 @@ void TuningFrequency(const string& filename,
                      Real rgain, Pool& pool) {
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
-  Algorithm* audio         = factory.create("EqloudLoader",
+  Algorithm* audio         = factory.create("EasyLoader",
                                             "filename", filename,
                                             "sampleRate", 44100,
                                             "replayGain", rgain,
@@ -60,15 +61,17 @@ void TuningFrequency(const string& filename,
                                             "frameSize", framesize,
                                             "hopSize", hopsize,
                                             "silentFrames", "noise",
-                                            "startFromZero", true);
+                                            "startFromZero", false);
 
-  Algorithm* window        = factory.create("Windowing", "type", "blackmanharris62");
+  Algorithm* window        = factory.create("Windowing", 
+                                            "type", "blackmanharris62",
+                                            "zeroPadding", zeropadding);
 
-  Algorithm* spectrum      = factory.create("Spectrum", "size", framesize + zeropadding);
+  Algorithm* spectrum      = factory.create("Spectrum");
 
   Algorithm* spectralPeaks = factory.create("SpectralPeaks",
                                             "sampleRate", 44100,
-                                            "maxPeaks", 40,
+                                            "maxPeaks", 10000,
                                             "maxFrequency", 5000.,
                                             "minFrequency", 40.,
                                             "magnitudeThreshold", 0.00001,
@@ -95,7 +98,7 @@ void TonalDescriptors(const string& filename,
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
-  Algorithm* audio         = factory.create("EqloudLoader",
+  Algorithm* audio         = factory.create("EasyLoader",
                                             "filename", filename,
                                             "sampleRate", 44100,
                                             "replayGain", rgain,
@@ -105,23 +108,29 @@ void TonalDescriptors(const string& filename,
                                             "frameSize", framesize,
                                             "hopSize", hopsize,
                                             "silentFrames", "noise",
-                                            "startFromZero", true);
+                                            "startFromZero", false);
 
-  Algorithm* window        = factory.create("Windowing", "type", "hann");
+  Algorithm* window        = factory.create("Windowing", 
+                                            "type", "blackmanharris62",
+                                            "zeroPadding", zeropadding);
 
-  Algorithm* spectrum      = factory.create("Spectrum", "size", framesize + zeropadding);
+  Algorithm* spectrum      = factory.create("Spectrum");
 
   Algorithm* spectralPeaks = factory.create("SpectralPeaks",
                                             "sampleRate", 44100,
-                                            "maxPeaks", 40,
+                                            "maxPeaks", 10000,
                                             "maxFrequency", 5000,
                                             "minFrequency", 40,
                                             "magnitudeThreshold", 0.00001,
                                             "orderBy", "frequency");
 
-
-  Algorithm* key           = factory.create("Key");
-  // key is not configurable in streaming mode!!
+  Algorithm* key           = factory.create("Key",
+                                            "numHarmonics", 4,
+                                            "pcpSize", 36,
+                                            "profileType", "temperley",
+                                            "slope", 0.6,
+                                            "usePolyphony", true,
+                                            "useThreeChords", true);
 
   Algorithm* hpcp          = factory.create("HPCP",
                                             "size", 36,
@@ -157,62 +166,52 @@ int main(int argc, char* argv[]) {
   if (argc != 3) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << argv[0] << " input_audiofile output_yamlfile" << endl;
+    creditLibAV();    
     exit(1);
   }
 
   string filename = argv[1];
 
-  // parameters:
+  // Parameters
   uint framesize = 4096;
   uint hopsize = 2048;
   uint zeropadding = 0;
 
-  Real tuningFrequency = 440.;
-
   essentia::init();
 
-  // data storage:
   Pool pool;
-  // configure the pool to display the statistics we want:
-  vector<string> stats;
-  vector<string> exceptions;
-  stats.push_back("mean");
-  exceptions.push_back("mean");
-  stats.push_back("min");
-  stats.push_back("max");
-  map<string, vector<string> > except;
-  except["tonal.tuning_cents"] = exceptions;;
 
-  //cout << "computing replay gain:\t";
+  // Compute replay gain
   Real rgain = ReplayGain(filename, pool);
-  //cout << rgain << endl;
 
-  cout << "tuning frequency:\t";
-  // compute tuning frequency and store it in the pool:
+  // Compute tuning frequency
   TuningFrequency(filename, framesize, hopsize, zeropadding, rgain,  pool);
-  // retrieve the mean tuning frequency from the pool:
-  tuningFrequency = mean(pool.value<vector<Real> >("tonal.tuning_freq"));
-  cout << tuningFrequency << endl;
+  
+  Real tuningFrequency = mean(pool.value<vector<Real> >("tonal.tuning_freq"));
+  cout << "tuning frequency:\t" << tuningFrequency << endl;
 
-  cout << "key: ";
+  // Compute key
   TonalDescriptors(filename, framesize, hopsize, zeropadding,  rgain, tuningFrequency, pool);
-  cout << "\t" << pool.value<string>("tonal.key")
+  
+  cout << "key:" << "\t" << pool.value<string>("tonal.key") 
        << "  " << pool.value<string>("tonal.key_scale")<< endl;
 
-  // write to yaml file:
-  standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
-                                                                   "filename", argv[2]);
 
-  standard::Algorithm* aggregator = standard::AlgorithmFactory::create("PoolAggregator",
-                                                                       "exceptions", except,
-                                                                       "defaultStats", stats);
+  // Aggregate tuning_frequency values
   Pool poolStats;
-
+  standard::Algorithm* aggregator = standard::AlgorithmFactory::create("PoolAggregator");
+                                                                      // "exceptions", except,
+                                                                      // "defaultStats", stats);
   aggregator->input("input").set(pool);
   aggregator->output("output").set(poolStats);
+  aggregator->compute();
+  delete aggregator;
+
+  // Write to yaml file
+  standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
+                                                                   "filename", argv[2]);
   output->input("pool").set(poolStats);
   output->compute();
-
   delete output;
 
   essentia::shutdown();

@@ -23,6 +23,8 @@
 #include <iostream>
 #include <fstream>
 #include "algorithmfactory.h"
+#include "credit_libav.h"
+
 using namespace std;
 using namespace essentia;
 using namespace standard;
@@ -63,6 +65,7 @@ int main(int argc, char* argv[])
   if (argc != 2) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << argv[0] << " input_audiofile" << endl;
+    creditLibAV();
     exit(1);
   }
 

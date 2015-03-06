@@ -113,7 +113,7 @@ class YamlMappingNode : public YamlNode {
   std::map<std::string, YamlNode*> _data;
 };
 
-YamlNode* parseYaml(FILE*);
+YamlNode* parseYaml(FILE*, const std::string& fileString = std::string());
 
 } // namespace essentia
 

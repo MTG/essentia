@@ -32,6 +32,7 @@
 #include "streaming_extractortonal.h"
 #include "streaming_extractorpanning.h"
 #include "streaming_extractorpostprocess.h"
+#include "credit_libav.h" 
 
 using namespace std;
 using namespace essentia;
@@ -58,6 +59,7 @@ void outputToFile(Pool& pool, const string& outputFilename);
 void usage() {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: streaming_extractor input_audiofile output_textfile [segment=true|false] | [ startTime endTime ]" << endl;
+    creditLibAV();
     exit(1);
 }
 
@@ -368,6 +370,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime, 
   connect(bpmhist->output("secondPeakBPM"), pool, rhythmspace + "second_peak_bpm");
   connect(bpmhist->output("secondPeakWeight"), pool, rhythmspace + "second_peak_weight");
   connect(bpmhist->output("secondPeakSpread"), pool, rhythmspace + "second_peak_spread");
+  bpmhist->output("histogram") >> NOWHERE;
 
   // Onset Detection
   Algorithm* onset = factory.create("OnsetRate");
@@ -470,6 +473,8 @@ void computePanning(const string& audioFilename, Real startTime, Real endTime, P
   SourceBase& audioSource_3 = audio_4->output("audio");
   connect(audio_4->output("sampleRate"), NOWHERE);
   connect(audio_4->output("numberChannels"), NOWHERE);
+  connect(audio_4->output("codec"), NOWHERE);
+  connect(audio_4->output("bit_rate"), NOWHERE);
   Panning(audioSource_3, pool, options, nspace);
   cout << "Process step 4: Panning" << endl;
   Network network(audio_4);

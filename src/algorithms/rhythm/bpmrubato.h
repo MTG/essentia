@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_BPMUBATO_H
+#ifndef ESSENTIA_BPMRUBATO_H
 #define ESSENTIA_BPMRUBATO_H
 
 #include "algorithm.h"
@@ -93,4 +93,4 @@ class BpmRubato : public StreamingAlgorithmWrapper {
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_TEMPOTAP_H
+#endif // ESSENTIA_BPMRUBATO_H

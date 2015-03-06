@@ -61,10 +61,15 @@ void  FreesoundSfxDescriptors::createNetwork(SourceBase& source, Pool& pool){
   accu->output("array") >> centroid->input("array");
   centroid->output("centroid") >> PC(pool, nameSpace + "temporal_centroid");
 
+  // Duration
+  Algorithm* duration = factory.create("Duration");
+  source >> duration->input("signal");
+  duration->output("duration") >> PC(pool, nameSpace + "duration");
+    
   // Effective Duration
-  Algorithm* duration = factory.create("EffectiveDuration");
-  accu->output("array") >> duration->input("signal");
-  duration->output("effectiveDuration") >> PC(pool, nameSpace + "effective_duration");
+  Algorithm* effective_duration = factory.create("EffectiveDuration","thresholdRatio",0.1);
+  accu->output("array") >> effective_duration->input("signal");
+  effective_duration->output("effectiveDuration") >> PC(pool, nameSpace + "effective_duration");
 
   // Log Attack Time
   Algorithm* log = factory.create("LogAttackTime");

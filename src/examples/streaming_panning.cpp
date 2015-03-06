@@ -22,6 +22,7 @@
 #include <essentia/scheduler/network.h>
 #include <essentia/streaming/algorithms/poolstorage.h>
 #include <essentia/streaming/algorithms/fileoutput.h>
+#include "credit_libav.h"
 
 using namespace essentia;
 using namespace essentia::streaming;
@@ -32,6 +33,7 @@ int main(int argc, char** argv) {
   if (argc < 2) {
       cout << "Error: wrong number of arguments" << endl;
       cout << "Usage: " << argv[0] << " input_audiofile" << endl;
+      creditLibAV();
       exit(1);
   }
 
@@ -96,6 +98,9 @@ int main(int argc, char** argv) {
   loader->output("audio")           >>  demuxer->input("audio");
   loader->output("sampleRate")      >>  NOWHERE;
   loader->output("numberChannels")  >>  NOWHERE;
+  loader->output("codec")           >>  NOWHERE;
+  loader->output("bit_rate")        >>  NOWHERE;
+  loader->output("md5")             >>  NOWHERE;
 
   // demuxer
   demuxer->output("left")           >>  fc_left->input("signal");

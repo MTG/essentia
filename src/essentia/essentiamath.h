@@ -56,6 +56,10 @@ int ilog10(T n) {
   return 1 + ilog10(n/10);
 }
 
+/**
+ * Return the next power of two after the given number n.
+ * If n is already a power of two, return n.
+ */
 template <typename T> T nextPowerTwo(T n) {
   n--;
   n |= (n >> 1);
@@ -63,6 +67,17 @@ template <typename T> T nextPowerTwo(T n) {
   n |= (n >> 4);
   n |= (n >> 8);
   n |= (n >> 16);
+  return ++n;
+}
+
+template <> inline long long int nextPowerTwo(long long int n) {
+  n--;
+  n |= (n >> 1);
+  n |= (n >> 2);
+  n |= (n >> 4);
+  n |= (n >> 8);
+  n |= (n >> 16);
+  n |= (n >> 32);
   return ++n;
 }
 
@@ -701,12 +716,14 @@ void sortpair(std::vector<T>& v1, std::vector<U>& v2) {
 
 
 // returns whether a number is a denormal number or not
-// FIXME: this only works on i386 and with Real = float
 inline bool isDenormal(const float& x) {
-  const int& xbits = reinterpret_cast<const int&>(x);
-  const int absMantissa = xbits & 0x007FFFFF;
-  const int biasedExponent = xbits & 0x7F800000;
-  return (biasedExponent == 0 && absMantissa != 0);
+  return std::fpclassify(x) == FP_SUBNORMAL;
+
+  // old version: works only for i386 and float
+  //const int& xbits = reinterpret_cast<const int&>(x);
+  //const int absMantissa = xbits & 0x007FFFFF;
+  //const int biasedExponent = xbits & 0x7F800000;
+  //return (biasedExponent == 0 && absMantissa != 0);
 }
 
 // should always return a positive value, even when a/b is negative

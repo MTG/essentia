@@ -21,7 +21,15 @@
 #define ESSENTIA_NOISEADDER_H
 
 #include "algorithm.h"
-#include "MersenneTwister.h"
+
+#ifdef CPP_11
+#  include <random>
+#else
+// The implementation for non C++11 compilers uses the MersenneTwister.h file
+// downloaded from:
+// http://www-personal.engin.umich.edu/~wagnerr/MersenneTwister.html
+#  include "MersenneTwister.h"
+#endif
 
 namespace essentia {
 namespace standard {
@@ -32,11 +40,20 @@ class NoiseAdder : public Algorithm {
   Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _noise;
 
+#ifdef CPP_11
+  std::mt19937 _mtrand;
+#else
   MTRand _mtrand;
+#endif
+
   Real _level;
 
  public:
-  NoiseAdder() {
+  NoiseAdder()
+#ifdef CPP_11
+      : _mtrand(time(NULL) ^ clock())
+#endif
+  {
     declareInput(_signal, "signal", "the input signal");
     declareOutput(_noise, "signal", "the output signal with the added noise");
   }

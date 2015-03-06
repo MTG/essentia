@@ -31,6 +31,8 @@
 #include "streaming_extractortonal.h"
 #include "streaming_extractorpanning.h"
 #include "streaming_extractorpostprocess.h"
+#include "credit_libav.h"
+
 
 using namespace std;
 using namespace essentia;
@@ -57,6 +59,7 @@ void outputToFile(Pool& pool, const string& outputFilename, const Pool& options)
 void usage() {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: streaming_extractor input_audiofile output_textfile [profile]" << endl;
+    creditLibAV();
     exit(1);
 }
 
@@ -479,9 +482,9 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       //connect(rhythmExtractor->output("rubatoStart"),  neqloudPool, rhythmspace + "rubato_start");
       //connect(rhythmExtractor->output("rubatoStop"),   neqloudPool, rhythmspace + "rubato_stop");
       connect(rhythmExtractor->output("bpmIntervals"), neqloudPool, rhythmspace + "bpm_intervals");
-      // discard dummy value for confidence as 'degara' beat tracker is not 
+      // discard dummy value for confidence as 'degara' beat tracker is not
       // able to compute it
-      rhythmExtractor->output("confidence") >> NOWHERE; 
+      rhythmExtractor->output("confidence") >> NOWHERE;
 
 
       // BPM Histogram descriptors
@@ -493,6 +496,7 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       connectSingleValue(bpmhist->output("secondPeakBPM"),    neqloudPool, rhythmspace + "second_peak_bpm");
       connectSingleValue(bpmhist->output("secondPeakWeight"), neqloudPool, rhythmspace + "second_peak_weight");
       connectSingleValue(bpmhist->output("secondPeakSpread"), neqloudPool, rhythmspace + "second_peak_spread");
+      bpmhist->output("histogram") >> NOWHERE;
 
       // Onset Detection
       Algorithm* onset = factory.create("OnsetRate");
@@ -543,9 +547,9 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       //connect(rhythmExtractor->output("rubatoStart"),  eqloudPool, rhythmspace + "rubato_start");
       //connect(rhythmExtractor->output("rubatoStop"),   eqloudPool, rhythmspace + "rubato_stop");
       connect(rhythmExtractor->output("bpmIntervals"), eqloudPool, rhythmspace + "bpm_intervals");
-      // discard dummy value for confidence as 'degara' beat tracker is not 
+      // discard dummy value for confidence as 'degara' beat tracker is not
       // able to compute it
-      rhythmExtractor->output("confidence") >> NOWHERE; 
+      rhythmExtractor->output("confidence") >> NOWHERE;
 
       // BPM Histogram descriptors
       Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
@@ -556,6 +560,7 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       connectSingleValue(bpmhist->output("secondPeakBPM"),    eqloudPool, rhythmspace + "second_peak_bpm");
       connectSingleValue(bpmhist->output("secondPeakWeight"), eqloudPool, rhythmspace + "second_peak_weight");
       connectSingleValue(bpmhist->output("secondPeakSpread"), eqloudPool, rhythmspace + "second_peak_spread");
+      bpmhist->output("histogram") >> NOWHERE;
 
       // Onset Detection
       Algorithm* onset = factory.create("OnsetRate");
@@ -721,6 +726,8 @@ void computePanning(const string& audioFilename, Pool& neqloudPool,
   connect(audio_4->output("audio"), trimmer->input("signal"));
   connect(audio_4->output("sampleRate"), NOWHERE);
   connect(audio_4->output("numberChannels"), NOWHERE);
+  connect(audio_4->output("codec"), NOWHERE);
+  connect(audio_4->output("bit_rate"), NOWHERE);
   // no difference between eqloud and neqloud, both are taken as non eqloud
   if (neqloud) Panning(audioSource_3, neqloudPool, options, nspace);
   if (eqloud) Panning(audioSource_3, eqloudPool, options, nspace);

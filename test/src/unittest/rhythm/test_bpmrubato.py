@@ -54,9 +54,10 @@ class TestBpmRubato(TestCase):
         # build a 60s pulse train at 100bpm starting at 0.3s:
         # (not a rubato region)
         beats = self.PulseTrain(100, 0.3, 60.)
-        start, stop = BpmRubato()(beats)
+        start, stop, n = BpmRubato()(beats)
         self.assertEqualVector(start, [])
         self.assertEqualVector(stop, [])
+        self.assertEqual(n, 0)
         self.assertTrue( beats[-1] < 60 )
 
         # add a 60s pulse train at 140bpm starting 0.6s later:
@@ -66,18 +67,20 @@ class TestBpmRubato(TestCase):
         newBeats = self.PulseTrain(140, phase, phase+60.)
         expectedStop = [newBeats[2]]
         beats += newBeats
-        start, stop = BpmRubato()(beats)
+        start, stop, n = BpmRubato()(beats)
         self.assertAlmostEqualVector(start, expectedStart, 1e-1)
         self.assertAlmostEqualVector(stop, expectedStop, 1e-1)
+        self.assertEqual(n, 1)
         self.assertTrue( beats[-1] < 120 )
 
         # add 60s more of a pulse train at 140bpm starting 0.3s later
         # (not a rubato region)
         phase = 0.3 + beats[-1]
         beats += self.PulseTrain(140, phase, phase+60.)
-        start, stop = BpmRubato()(beats)
+        start, stop, n = BpmRubato()(beats)
         self.assertAlmostEqualVector(start, expectedStart, 1e-1)
         self.assertAlmostEqualVector(stop, expectedStop, 1e-1)
+        self.assertEqual(n, 1)
         self.assertEqual(True, beats[-1] < 180.6 )
 
         # add a 10s pulse train at 100bpm starting 0.3s later:
@@ -87,10 +90,11 @@ class TestBpmRubato(TestCase):
         expectedStart += [beats[-3]]
         expectedStop += [newBeats[2]]
         beats += newBeats
-        start, stop = BpmRubato()(beats)
+        start, stop, n = BpmRubato()(beats)
         self.assertEqual(len(start), len(stop))
         self.assertAlmostEqualVector(start, expectedStart, 1e-1)
         self.assertAlmostEqualVector(stop, expectedStop, 1e-1)
+        self.assertEqual(n, 2)
         self.assertTrue( beats[-1] < 190.6 )
 
         # add 10s more of increasing train at 110bpm
@@ -99,11 +103,12 @@ class TestBpmRubato(TestCase):
         newBeats = self.IncreasingPulseTrain(110, phase, phase+10.)
         beats += newBeats
 
-        start, stop = BpmRubato()(beats)
+        start, stop, n = BpmRubato()(beats)
 
         self.assertEqual(len(start), len(stop))
         self.assertAlmostEqualVector(start, expectedStart, 1e-1)
         self.assertAlmostEqualVector(stop, expectedStop, 1e-1)
+        self.assertEqual(n, 2)
         self.assertTrue( beats[-1] < 200.6 )
 
         # add 10s more of decreasing train at 110bpm
@@ -116,11 +121,12 @@ class TestBpmRubato(TestCase):
 
         beats += newBeats
 
-        start, stop = BpmRubato()(beats)
+        start, stop, n = BpmRubato()(beats)
 
         self.assertEqual(len(start), len(stop))
         self.assertAlmostEqualVector(start, expectedStart, 1e-1)
         self.assertAlmostEqualVector(stop, expectedStop, 1e-1)
+        self.assertEqual(n, 3)
         self.assertTrue( beats[-1] < 210.6 )
 
         # add more pulses, but no phase offset:
@@ -149,9 +155,10 @@ class TestBpmRubato(TestCase):
 
     def testEmpty(self):
         beats = []
-        start, stop = BpmRubato()(beats)
+        start, stop, n = BpmRubato()(beats)
         self.assertEqualVector(start, [])
         self.assertEqualVector(stop, [])
+        self.assertEqual(n, 0)
 
 
 suite = allTests(TestBpmRubato)

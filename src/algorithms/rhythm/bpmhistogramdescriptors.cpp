@@ -25,7 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* BpmHistogramDescriptors::name = "BpmHistogramDescriptors";
-const char* BpmHistogramDescriptors::description = DOC("This algorithm computes statistics for the highest and second highest peak of the beats per minute probability histogram.");
+const char* BpmHistogramDescriptors::description = DOC("This algorithm computes beats per minute histogram and its statistics for the highest and second highest peak.\n"
+"Note: histogram vector contains occurance frequency for each bpm value, 0-th element corresponds to 0 bpm value.");
 
 const int BpmHistogramDescriptors::maxBPM = 250; // max number of BPM bins
 const int BpmHistogramDescriptors::numPeaks = 2;
@@ -73,6 +74,8 @@ void BpmHistogramDescriptors::compute() {
   for (int i=0; i<int(weights.size()); ++i) {
     weights[i] /= bpmValues.size();
   }
+
+  _histogram.get() = weights;
 
   // peaks stats
   vector<Real> peakBPMs;

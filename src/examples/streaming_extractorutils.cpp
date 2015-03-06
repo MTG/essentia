@@ -38,9 +38,9 @@ void readMetadata(const string& audioFilename, Pool& pool) {
   connect(metadata->output("album"),    pool, "metadata.tags.album");
   connect(metadata->output("comment"),  pool, "metadata.tags.comment");
   connect(metadata->output("genre"),    pool, "metadata.tags.genre");
-  connect(metadata->output("track"),    pool, "metadata.tags.track");
-  connect(metadata->output("year"),     pool, "metadata.tags.year");
-  connect(metadata->output("length"),   NOWHERE); // let audio loader take care of this
+  connect(metadata->output("tracknumber"),    pool, "metadata.tags.tracknumber");
+  connect(metadata->output("date"),     pool, "metadata.tags.date");
+  connect(metadata->output("duration"),   NOWHERE); // let audio loader take care of this
   connect(metadata->output("bitrate"),  pool, "metadata.audio_properties.bitrate");
   connect(metadata->output("sampleRate"), NOWHERE); // let the audio loader take care of this
   connect(metadata->output("channels"), pool, "metadata.audio_properties.channels");

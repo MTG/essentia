@@ -218,7 +218,7 @@ class RingBufferImpl {
     int size = _available;
     if (size > outputSize) size = outputSize;
 
-    assert(size < _bufferSize);
+    assert(size <= _bufferSize);
     if (_readIndex + size > _bufferSize)
     {
       int n = _bufferSize - _readIndex;

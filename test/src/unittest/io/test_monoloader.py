@@ -83,7 +83,7 @@ class TestMonoLoader(TestCase):
         self.assertEqual(self.round(sum(mix)), 9)
 
     def testEmptyWav(self):
-        filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.wav')
+        filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.aiff')
         self.assertEqualVector(MonoLoader(filename=filename, downmix='left', sampleRate=44100)(), [])
 
     def testWavLeftRightOffset(self):
@@ -115,6 +115,7 @@ class TestMonoLoader(TestCase):
         left = self.load(filename, 'left', 44100);
         right = self.load(filename, 'right', 44100);
         mix = self.load(filename, 'mix', 44100);
+
         self.assertEqual(self.sum(left), 9)
         self.assertEqual(self.sum(right), 9)
         self.assertEqual(self.sum(mix), 9)
@@ -125,6 +126,7 @@ class TestMonoLoader(TestCase):
         left = self.load(filename, 'left', 22050);
         right = self.load(filename, 'right', 22050);
         mix = self.load(filename, 'mix', 22050);
+
         self.assertEqual(self.sum(left), 9)
         self.assertEqual(self.sum(right), 9)
         self.assertEqual(self.sum(mix), 9)
@@ -150,7 +152,8 @@ class TestMonoLoader(TestCase):
         impulses_mp3 = [x for x in range(len(mp3)) if mp3[x]>0.9]
         impulses_wav = [x for x in range(len(wav)) if wav[x]>0.9]
         shift = impulses_mp3[0] - impulses_wav[0]
-        self.assertEqual(abs(shift), 0)
+        # the expected shift is 1105 samples
+        self.assertEqual(abs(shift), 1105) 
 
 ###############
 # #OGG

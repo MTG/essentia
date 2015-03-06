@@ -36,53 +36,43 @@ class TestMetadataReader(TestCase):
     audioDir = join(testdata.audio_dir, 'generated', 'metadata')
 
     def testOgg(self):
-        self.assertEqualVector(
-                MetadataReader(filename = join(self.audioDir, 'test.ogg'))(),
-                ('test ogg', 'mtg', 'essentia', 'this is not psychadelic', 'Psychadelic', 1, 2009, 5, 96, 44100, 1))
+        result = MetadataReader(filename = join(self.audioDir, 'test.ogg'))()
+        result = result[:7] + result[8:] # FIXME: ignoring Pool output
+        self.assertEqualVector(result, 
+                               ('test ogg', 'mtg', 'essentia', 'this is not psychadelic', 'Psychadelic', '01', '2009', 5, 96, 44100, 1))
 
     def testMp3(self):
-        # TagLib 1.4 doesn't correctly read the number of channels for mp3, do not run the test on that case
-        try:
-            if taglibVersion() < '1.5':
-                self.assertEqualVector(
-                    MetadataReader(filename = join(self.audioDir,'test.mp3'))()[:-1],
-                    ('test sound', 'mtg', 'essentia', 'this is not reggae', 'Reggae', 1, 2009, 5, 128, 44100))
-                return
-        except:
-            pass
+        result = MetadataReader(filename = join(self.audioDir, 'test.mp3'))()
+        result = result[:7] + result[8:] # FIXME: ignoring Pool output
 
-        # TagLib 1.5 in os x doesn't correctly read the number of channels for mp3, do not run the test on that case
-        if taglibVersion() <= '1.5':
-            self.assertEqualVector(
-                MetadataReader(filename = join(self.audioDir,'test.mp3'))()[:-1],
-                ('test sound', 'mtg', 'essentia', 'this is not reggae', 'Reggae', 1, 2009, 5, 128, 44100))
-        else:
-            self.assertEqualVector(
-                MetadataReader(filename = join(self.audioDir, 'test.mp3'))(),
-                ('test sound', 'mtg', 'essentia', 'this is not reggae', 'Reggae', 1, 2009, 5, 128, 44100, 1))
+        self.assertEqualVector(result,
+                               ('test sound', 'mtg', 'essentia', 'this is not reggae', 'Reggae', '01', '2009', 5, 128, 44100, 1))
 
     def testFlac(self):
+        print MetadataReader(filename = join(self.audioDir, 'test.flac'))()[:7]
+
         self.assertEqualVector(
-                MetadataReader(filename = join(self.audioDir, 'test.flac'))(),
-                ('test flac', 'mtg', 'essentia', 'This is not thrash metal', 'Thrash Metal', 1, 2009, 5, 2201, 44100, 4))
+                MetadataReader(filename = join(self.audioDir, 'test.flac'))()[:7],
+                ('test flac', 'mtg', 'essentia', 'This is not thrash metal', 'Thrash Metal', '01', '2009'))
+        self.assertEqualVector(
+                MetadataReader(filename = join(self.audioDir, 'test.flac'))()[8:],
+                (5, 2201, 44100, 4))
 
     def testPCM(self):
-        if taglibVersion() < '1.7':
-            self.assertEqualVector(
-                MetadataReader(filename = join(testdata.audio_dir, 'recorded', 'musicbox.wav'), failOnError=True)(),
-                               ('', '', '', '', '', 0, 0, 0, 1411, 44100, 2))
-        else:
-            self.assertEqualVector(
-                MetadataReader(filename = join(testdata.audio_dir, 'recorded', 'musicbox.wav'), failOnError=True)(),
-                               ('', '', '', '', '', 0, 0, 45, 1444, 44100, 2))
+        result = MetadataReader(filename = join(testdata.audio_dir, 'recorded', 'musicbox.wav'), failOnError=True)()
+        result = result[:7] + result[8:] # FIXME: ignoring Pool output
+        self.assertEqualVector(result, ('', '', '', '', '', '', '', 45, 1444, 44100, 2))
 
     def testFailOnError(self):
         if taglibVersion() < '1.7':
             self.assertComputeFails(
                 MetadataReader(filename = join(self.audioDir, 'test.ape'), failOnError=True))
         else:
-            self.assertEqualVector(MetadataReader(filename = join(self.audioDir, 'test.ape'), failOnError=True)(),
-                                   ('ape test file', 'mtg', 'essentia', 'this is not porn', 'Porn Groove', 1, 2009, 5, 722, 44100, 1))
+            # FIXME We also need to check if pool output is correct...
+            self.assertEqualVector(MetadataReader(filename = join(self.audioDir, 'test.ape'), failOnError=True)()[:7],
+                                   ('ape test file', 'mtg', 'essentia', 'this is not porn', 'Porn Groove', "01/01", "2009"))
+            self.assertEqualVector(MetadataReader(filename = join(self.audioDir, 'test.ape'), failOnError=True)()[8:],
+                                   (5, 722, 44100, 1))
 
     def testUnicode(self):
         self.assertEqualVector(
@@ -93,14 +83,13 @@ class TestMetadataReader(TestCase):
         self.assertComputeFails(MetadataReader())
 
     def testEmptyTags(self):
-        # results for this type of file will differ depending on taglib's
-        # version:
-        # for version < 1.5: ('""', '""', '""', '""', '""', 0, 0, 0, 0, 0, 0))
-        # for version >= 1.5: ('""', '""', '""', '""', '""', 0, 0, 0, 128, 44100, 1))
-        # therefore, only testing for the first fields:
         self.assertEqualVector(
-                MetadataReader(filename = join(self.audioDir, 'empty.mp3'))()[:-3],
-                ('', '', '', '', '', 0, 0, 0))
+                MetadataReader(filename = join(self.audioDir, 'empty.mp3'))()[:7],
+                ('', '', '', '', '', '', ''))
+        self.assertEqual(MetadataReader(filename = join(self.audioDir, 'empty.mp3'))()[8], 0)
+        self.assertTrue(MetadataReader(filename = join(self.audioDir, 'empty.mp3'))()[7].descriptorNames() == [])
+        # Outputs [-3:] correspond to bitrate, samplerate and channels, and will differ depending on taglib version
+        # Therefore, not testing them.
 
 
 suite = allTests(TestMetadataReader)

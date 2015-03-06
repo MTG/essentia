@@ -7,6 +7,7 @@ from utils import *
 
 
 __version__ = _essentia.version()
+__version_git_sha__ = _essentia.version_git_sha();
 
 
 # base Exception class

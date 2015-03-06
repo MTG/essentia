@@ -21,6 +21,8 @@
 #include <essentia/algorithmfactory.h>
 #include <essentia/scheduler/network.h>
 #include <essentia/streaming/algorithms/poolstorage.h>
+#include "credit_libav.h"
+ 
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
@@ -35,6 +37,7 @@ int main(int argc, char* argv[]) {
   if (argc != 2) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << argv[0] << " input_audiofile" << endl;
+    creditLibAV();
     exit(1);
   }
   string audioFilename = argv[1];
@@ -55,6 +58,9 @@ int main(int argc, char* argv[]) {
   audioloader->output("audio")           >>  mono->input("audio");
   audioloader->output("numberChannels")  >>  mono->input("numberChannels");
   audioloader->output("sampleRate")      >>  PC(pool, "metadata.sampleRate");
+  audioloader->output("codec")           >>  NOWHERE;
+  audioloader->output("bit_rate")        >>  NOWHERE;
+  audioloader->output("md5")             >>  NOWHERE;
 
   // mono -> onsetrate
   mono->output("audio")                  >>  onsetrate->input("signal");

@@ -34,9 +34,9 @@ void readMetadata(const string& audioFilename, Pool& pool) {
   streaming::connect(metadata->output("album"),    pool, "metadata.tags.album");
   streaming::connect(metadata->output("comment"),  pool, "metadata.tags.comment");
   streaming::connect(metadata->output("genre"),    pool, "metadata.tags.genre");
-  streaming::connect(metadata->output("track"),    pool, "metadata.tags.track");
-  streaming::connect(metadata->output("year"),     pool, "metadata.tags.year");
-  streaming::connect(metadata->output("length"),   streaming::NOWHERE); // let audio loader take care of this
+  streaming::connect(metadata->output("tracknumber"),    pool, "metadata.tags.tracknumber");
+  streaming::connect(metadata->output("date"),     pool, "metadata.tags.date");
+  streaming::connect(metadata->output("duration"),   streaming::NOWHERE); // let audio loader take care of this
   streaming::connect(metadata->output("bitrate"),  pool, "metadata.audio_properties.bitrate");
   streaming::connect(metadata->output("sampleRate"), streaming::NOWHERE); // let the audio loader take care of this
   streaming::connect(metadata->output("channels"), pool, "metadata.audio_properties.channels");
