@@ -99,7 +99,7 @@ void PitchYin::compute() {
   }
 
   // Detect best period
-  int period = 0;
+  Real period = 0.;
   int yinMin = 0.;
 
   // Select the local minima below the absolute threshold with the smallest 
@@ -158,7 +158,7 @@ void PitchYin::compute() {
   // Aubio computes it as 1 - min(_yin), but this does not correspond to the peak
   // dound by peakDetectLocal
 
-  if (period != 0.0) {
+  if (period) {
     pitch = _sampleRate / period;
     pitchConfidence = 1. - yinMin;
   }
