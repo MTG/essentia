@@ -26,7 +26,7 @@ using namespace standard;
 
 
 const char* PitchYin::name = "PitchYin";
-const char* PitchYin::description = DOC("This algorithm estimates the fundamental frequency from a given spectrum. It is an implementation of Yin algorithm [1], for computations in the time domain.\n"
+const char* PitchYin::description = DOC("This algorithm estimates the fundamental frequency from a given spectrum. It is an implementation of the Yin algorithm [1] for computations in the time domain.\n"
 "\n"
 "An exception is thrown if an empty signal is provided.\n"
 "\n"
@@ -34,9 +34,9 @@ const char* PitchYin::description = DOC("This algorithm estimates the fundamenta
 "Also note that a null \"pitch\" is never ouput by the algorithm and that \"pitchConfidence\" must always be checked out.\n"
 "\n"
 "References:\n"
-//TODO
-//"  [1] P. M. Brossier, \"Automatic Annotation of Musical Audio for Interactive\n"
-//"  Applications,” QMUL, London, UK, 2007.\n\n"
+"  [1] De Cheveigné, A., & Kawahara, H. \"YIN, a fundamental frequency estimator\n"
+"  for speech and music. The Journal of the Acoustical Society of America,\n"
+"  111(4), 1917-1930, 2002.\n\n"
 "  [2] Pitch detection algorithm - Wikipedia, the free encyclopedia\n"
 "  http://en.wikipedia.org/wiki/Pitch_detection_algorithm");
 
@@ -138,21 +138,6 @@ void PitchYin::compute() {
   // NOTE: not sure if it is faster to run peak detection once to detect many 
   // peaks and process the values manually instead of running peak detection 
   // twice and detecting only two peaks. 
-
-  /*
-  for (int tau=1; tau < _yin.size(); ++tau) {
-    if (_yin[ŧau] < _threshold) {
-      // Check if this is a local minima
-      if (tau < _yin.size()-1 && _yin[ŧau] < _yin[tau+1] || tau = _yin.size()-1) {
-        period = tau;
-      }
-    }
-  }
-
-  if(!period) {
-    period = argmin(_yin);  
-  }
-  */
 
   // TODO: how to compute confidence?
   // Aubio computes it as 1 - min(_yin), but this does not correspond to the peak

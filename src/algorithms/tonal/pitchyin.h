@@ -35,9 +35,7 @@ class PitchYin : public Algorithm {
   Algorithm* _peakDetectLocal;
   Algorithm* _peakDetectGlobal;
 
-
-  std::vector<Real> _df;          // cumulative mean normalized difference function
-  std::vector<Real> _yin;         // Yin function
+  std::vector<Real> _yin;         // Yin function (cumulative mean normalized difference)
   std::vector<Real> _positions;   // Yin function peak positions
   std::vector<Real> _amplitudes;  // Yin function peak amplitudes
 
