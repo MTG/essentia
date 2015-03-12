@@ -83,9 +83,9 @@ class MaxFilter : public StreamingAlgorithmWrapper {
  
  public:
   MaxFilter(){
+    declareAlgorithm("MaxFilter");
     declareInput(_array,STREAM,  "signal");
     declareOutput(_filtered,STREAM,  "signal");
-    declareAlgorithm("MaxFilter");
   }
   
 
