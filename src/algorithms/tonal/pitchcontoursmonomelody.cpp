@@ -335,7 +335,12 @@ void PitchContoursMonoMelody::voicingDetection(const vector<vector<Real> >& cont
 
   // voicing detection
   for (size_t i=0; i<_numberContours; i++) {
+      _contoursStartIndices[i] = (size_t) round(contoursStartTimes[i] / _frameDuration);
+      _contoursEndIndices[i] = _contoursStartIndices[i] + contoursBins[i].size() - 1;
+      _contoursSaliencesTotal[i] = accumulate(contoursSaliences[i].begin(), contoursSaliences[i].end(), 0.0);
+      _contoursSelected.push_back(i);
     // ignore contours with peaks outside of the allowed range
+      /*
     if (contoursBinsMin[i] >= _minBin && contoursBinsMax[i] <= _maxBin) {
       if (_contoursSaliencesMean[i] >= salienceThreshold || _contoursBinsStddev[i] > _vibratoPitchStddev
                                             || detectVoiceVibrato(contoursBins[i], _contoursBinsMean[i]))  {
@@ -352,7 +357,7 @@ void PitchContoursMonoMelody::voicingDetection(const vector<vector<Real> >& cont
           _contoursIgnored.push_back(i);
         }
       }
-    }
+    }*/
   }
   _contoursSelectedInitially = _contoursSelected;
   _contoursIgnoredInitially = _contoursIgnored;
