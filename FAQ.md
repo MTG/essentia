@@ -86,6 +86,22 @@ Build Essentia
 ./waf
 ```
 
+Running tests
+-------------
+In the case you want to assure correct working of Essentia, do the tests.
+
+The most important test is the basetest, it should never fail: 
+```./build/basetest```
+
+Run all python tests: 
+```./waf run_python_tests```
+    
+Run all tests except specific ones:
+```python test/src/unittest/all_tests.py -audioloader_streaming```
+
+Run a specific test
+```python test/src/unittest/all_tests.py audioloader_streaming```
+
 
 How to know which other Algorithms an Algorithm uses?
 -----------------------------------------------------
