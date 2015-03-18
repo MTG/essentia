@@ -26,7 +26,7 @@
 namespace essentia {
 namespace standard {
 
-class MelodiaMonophonic : public Algorithm {
+class PitchMelodia : public Algorithm {
 
  private:
   Input<std::vector<Real> > _signal;
@@ -50,7 +50,7 @@ class MelodiaMonophonic : public Algorithm {
   Algorithm* _pitchContoursMelody;
 
  public:
-  MelodiaMonophonic() {
+  PitchMelodia() {
     declareInput(_signal, "signal", "the input signal");
     declareOutput(_pitch, "pitch", "the estimated pitch values [Hz]");
     declareOutput(_pitchConfidence, "pitchConfidence", "confidence with which the pitch was detected");
@@ -72,7 +72,7 @@ class MelodiaMonophonic : public Algorithm {
     _pitchContoursMelody = AlgorithmFactory::create("PitchContoursMonoMelody");
   }
 
-  ~MelodiaMonophonic();
+  ~PitchMelodia();
 
   void declareParameters() {
     // pre-processing
@@ -96,11 +96,10 @@ class MelodiaMonophonic : public Algorithm {
     declareParameter("minDuration", "the minimum allowed contour duration [ms]", "(0,inf)", 100);
 
     // melody detection
-    declareParameter("voicingTolerance", "allowed deviation below the average contour mean salience of all contours (fraction of the standard deviation)", "[-1.0,1.4]", 0.2);
-    declareParameter("voiceVibrato", "detect voice vibrato", "{true,false}", false);
+
     declareParameter("filterIterations", "number of iterations for the octave errors / pitch outlier filtering process", "[1,inf)", 3);
     declareParameter("guessUnvoiced", "estimate pitch for non-voiced segments by using non-salient contours when no salient ones are present in a frame", "{false,true}", false);
-    declareParameter("minFrequency", "the minimum allowed frequency for salience function peaks (ignore contours with peaks below) [Hz]", "[0,inf)", 80.0);
+    declareParameter("minFrequency", "the minimum allowed frequency for salience function peaks (ignore contours with peaks below) [Hz]", "[0,inf)", 40.0);
     declareParameter("maxFrequency", "the minimum allowed frequency for salience function peaks (ignore contours with peaks above) [Hz]", "[0,inf)", 20000.0); // just some large value greater than anything we would need
   }
 
@@ -128,7 +127,7 @@ class MelodiaMonophonic : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class MelodiaMonophonic : public AlgorithmComposite {
+class PitchMelodia : public AlgorithmComposite {
 
  protected:
   Algorithm* _frameCutter;
@@ -151,8 +150,8 @@ class MelodiaMonophonic : public AlgorithmComposite {
   scheduler::Network* _network;
 
  public:
-  MelodiaMonophonic();
-   ~MelodiaMonophonic();
+  PitchMelodia();
+   ~PitchMelodia();
 
   void declareProcessOrder() {
     declareProcessStep(ChainFrom(_frameCutter));
@@ -185,8 +184,6 @@ class MelodiaMonophonic : public AlgorithmComposite {
     declareParameter("minDuration", "the minimum allowed contour duration [ms]", "(0,inf)", 100);
 
     // melody detection
-    declareParameter("voicingTolerance", "allowed deviation below the average contour mean salience of all contours (fraction of the standard deviation)", "[-1.0,1.4]", 0.2);
-    declareParameter("voiceVibrato", "detect voice vibrato", "{true,false}", false);
     declareParameter("filterIterations", "number of interations for the octave errors / pitch outlier filtering process", "[1,inf)", 3);
     declareParameter("guessUnvoiced", "guess pitch using non-salient contours when no salient ones are present in a frame", "{false,true}", false);
   };

@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "melodiamonophonic.h"
+#include "pitchmelodia.h"
 
 using namespace std;
 
@@ -25,9 +25,9 @@ namespace essentia {
 namespace standard {
 
 
-const char* MelodiaMonophonic::name = "MelodiaMonophonic";
-const char* MelodiaMonophonic::version = "1.0";
-const char* MelodiaMonophonic::description = DOC("This algorithm estimates the fundamental frequency of the predominant melody in the input signal. It implements the MELODIA algorithm described in [1]. The algorithm is specifically suited to extract melody in polyphonic music, but also works for monophonic signals. The approach is based on the creation and characterization of pitch contours, time continuous sequences of pitch candidates grouped using auditory streaming cues. To this end, PitchSalienceFunction, PitchSalienceFunctionPeaks, PitchContours, and PitchContoursMelody algorithms are employed. It is strongly advised to use the default parameter values which are optimized according to [1] (where further details are provided) except for minFrequency, maxFrequency, and voicingTolerance, which will depend on your application.\n"
+const char* PitchMelodia::name = "PitchMelodia";
+const char* PitchMelodia::version = "1.0";
+const char* PitchMelodia::description = DOC("This algorithm estimates the fundamental frequency of the monophonic melody in the input signal. It implements the MELODIA algorithm described in [1]. While the algorithm is originally designed to extract melody in polyphonic music, this implementation is adapted for monophonic signals. The approach is based on the creation and characterization of pitch contours, time continuous sequences of pitch candidates grouped using auditory streaming cues. To this end, PitchSalienceFunction, PitchSalienceFunctionPeaks, PitchContours, and PitchContoursMonoMelody algorithms are employed. It is strongly advised to use the default parameter values which are optimized according to [1] (where further details are provided) except for minFrequency, maxFrequency, and voicingTolerance, which will depend on your application.\n"
 "\n"
 "The output is a vector of estimated melody pitch values and a vector of confidence values.\n"
 "\n"
@@ -43,7 +43,7 @@ const char* MelodiaMonophonic::description = DOC("This algorithm estimates the f
 "  [3] http://www.justinsalamon.com/melody-extraction\n"
 );
 
-void MelodiaMonophonic::configure() {
+void PitchMelodia::configure() {
 
   Real sampleRate = parameter("sampleRate").toReal();
   int frameSize = parameter("frameSize").toInt();
@@ -68,9 +68,7 @@ void MelodiaMonophonic::configure() {
   Real timeContinuity = parameter("timeContinuity").toReal();
   Real minDuration = parameter("minDuration").toReal();
 
-  Real voicingTolerance = parameter("voicingTolerance").toReal();
   int filterIterations = parameter("filterIterations").toInt();
-  bool voiceVibrato = parameter("voiceVibrato").toBool();
   bool guessUnvoiced = parameter("guessUnvoiced").toBool();
 
   // Pre-processing
@@ -125,15 +123,13 @@ void MelodiaMonophonic::configure() {
                                           "binResolution", binResolution,
                                           "sampleRate", sampleRate,
                                           "hopSize", hopSize,
-                                          "voicingTolerance", voicingTolerance,
-                                          "voiceVibrato", voiceVibrato,
                                           "filterIterations", filterIterations,
                                           "guessUnvoiced", guessUnvoiced,
                                           "minFrequency", minFrequency,
                                           "maxFrequency", maxFrequency);
 }
 
-void MelodiaMonophonic::compute() {
+void PitchMelodia::compute() {
   const vector<Real>& signal = _signal.get();
   vector<Real>& pitch = _pitch.get();
   vector<Real>& pitchConfidence = _pitchConfidence.get();
@@ -231,7 +227,7 @@ void MelodiaMonophonic::compute() {
   _pitchContoursMelody->compute();
 }
 
-MelodiaMonophonic::~MelodiaMonophonic() {
+PitchMelodia::~PitchMelodia() {
     // Pre-processing
     delete _frameCutter;
     delete _windowing;
@@ -259,7 +255,7 @@ namespace essentia {
 namespace streaming {
 
 
-MelodiaMonophonic::MelodiaMonophonic() : AlgorithmComposite() {
+PitchMelodia::PitchMelodia() : AlgorithmComposite() {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   _frameCutter                = factory.create("FrameCutter");
@@ -312,13 +308,13 @@ MelodiaMonophonic::MelodiaMonophonic() : AlgorithmComposite() {
   //_pitchContoursMelody->output("pitchConfidence") >> _pitchConfidence;
 }
 
-MelodiaMonophonic::~MelodiaMonophonic() {
+PitchMelodia::~PitchMelodia() {
     //delete _network;
   delete _pitchContours;
   delete _pitchContoursMelody;
 }
 
-void MelodiaMonophonic::configure() {
+void PitchMelodia::configure() {
 
   Real sampleRate = parameter("sampleRate").toReal();
   int frameSize = parameter("frameSize").toInt();
@@ -343,9 +339,9 @@ void MelodiaMonophonic::configure() {
   Real timeContinuity = parameter("timeContinuity").toReal();
   Real minDuration = parameter("minDuration").toReal();
 
-  Real voicingTolerance = parameter("voicingTolerance").toReal();
+  //Real voicingTolerance = parameter("voicingTolerance").toReal();
   int filterIterations = parameter("filterIterations").toInt();
-  bool voiceVibrato = parameter("voiceVibrato").toBool();
+  //bool voiceVibrato = parameter("voiceVibrato").toBool();
   bool guessUnvoiced = parameter("guessUnvoiced").toBool();
 
   // Pre-processing
@@ -395,15 +391,13 @@ void MelodiaMonophonic::configure() {
                                   "binResolution", binResolution,
                                   "sampleRate", sampleRate,
                                   "hopSize", hopSize,
-                                  "voicingTolerance", voicingTolerance,
-                                  "voiceVibrato", voiceVibrato,
                                   "filterIterations", filterIterations,
                                   "guessUnvoiced", guessUnvoiced,
                                   "minFrequency", minFrequency,
                                   "maxFrequency", maxFrequency);
 }
 
-AlgorithmStatus MelodiaMonophonic::process() {
+AlgorithmStatus PitchMelodia::process() {
   if (!shouldStop()) return PASS;
 
   const vector<vector<Real> >& salienceBins = _pool.value<vector<vector<Real> > >("internal.saliencebins");
@@ -440,7 +434,7 @@ AlgorithmStatus MelodiaMonophonic::process() {
   return FINISHED;
 }
 
-void MelodiaMonophonic::reset() {
+void PitchMelodia::reset() {
   AlgorithmComposite::reset();
   _pitchContours->reset();
   _pitchContoursMelody->reset();
