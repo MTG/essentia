@@ -38,15 +38,9 @@ class PitchContoursMonoMelody : public Algorithm {
   Output<std::vector<Real> > _pitchConfidence;
 
   Algorithm* _movingAverage;
-  Algorithm* _frameCutter;
-  Algorithm* _windowing;
-  Algorithm* _spectrum;
-  Algorithm* _spectralPeaks;
 
   Real _binResolution;
   Real _referenceFrequency;
-  Real _voicingTolerance;
-  bool _voiceVibrato;
   Real _sampleRate;
   int _hopSize;
   int _filterIterations;  // number of interations in the octave errors/pitch outliers filtering process
@@ -59,21 +53,8 @@ class PitchContoursMonoMelody : public Algorithm {
   Real _duplicateMaxDistance;
   Real _duplicateMinDistance;
 
-  Real _vibratoPitchStddev;
-
   Real _minBin;
   Real _maxBin;
-
-  // voice vibrato detection parameters
-  //Real _vibratoSampleRate;
-  int _vibratoFrameSize;
-  int _vibratoHopSize;
-  int _vibratoZeroPaddingFactor;
-  int _vibratoFFTSize;
-  Real _vibratoMinFrequency;
-  Real _vibratoMaxFrequency;
-  Real _vibratodBDropLobe;
-  Real _vibratodBDropSecondPeak;
 
   Real _centToHertzBase;
 
@@ -92,10 +73,6 @@ class PitchContoursMonoMelody : public Algorithm {
   std::vector<size_t> _contoursIgnoredInitially;
   size_t _numberContours;
 
-  void voicingDetection(const std::vector<std::vector<Real> >& contoursBins,
-                        const std::vector<std::vector<Real> >& contoursSaliences,
-                        const std::vector<Real>& contoursStartTimes);
-  bool detectVoiceVibrato(std::vector<Real> contourBins, const Real binMean);
   void computeMelodyPitchMean(const std::vector<std::vector<Real> >& contoursBins);
   void detectContourDuplicates(const std::vector<std::vector<Real> >& contoursBins);
   void removeContourDuplicates();
@@ -111,18 +88,10 @@ class PitchContoursMonoMelody : public Algorithm {
     declareOutput(_pitchConfidence, "pitchConfidence", "confidence with which the pitch was detected");
 
     _movingAverage = AlgorithmFactory::create("MovingAverage");
-    _frameCutter = AlgorithmFactory::create("FrameCutter");
-    _windowing = AlgorithmFactory::create("Windowing");
-    _spectrum = AlgorithmFactory::create("Spectrum");
-    _spectralPeaks = AlgorithmFactory::create("SpectralPeaks");
   }
 
   ~PitchContoursMonoMelody() {
     delete _movingAverage;
-    delete _frameCutter;
-    delete _windowing;
-    delete _spectrum;
-    delete _spectralPeaks;
   };
 
   void declareParameters() {
@@ -130,8 +99,6 @@ class PitchContoursMonoMelody : public Algorithm {
     declareParameter("binResolution", "salience function bin resolution [cents]", "(0,inf)", 10.0);
     declareParameter("sampleRate", "the sampling rate of the audio signal (Hz)", "(0,inf)", 44100.);
     declareParameter("hopSize", "the hop size with which the pitch salience function was computed", "(0,inf)", 128);
-    declareParameter("voicingTolerance", "allowed deviation below the average contour mean salience of all contours (fraction of the standard deviation)", "[-1.0,1.4]", 0.2);
-    declareParameter("voiceVibrato", "detect voice vibrato", "{true,false}", false);
     declareParameter("filterIterations", "number of interations for the octave errors / pitch outlier filtering process", "[1,inf)", 3);
     declareParameter("guessUnvoiced", "Estimate pitch for non-voiced segments by using non-salient contours when no salient ones are present in a frame", "{false,true}", false);
     declareParameter("minFrequency", "the minimum allowed frequency for salience function peaks (ignore contours with peaks below) [Hz]", "[0,inf)", 80.0);

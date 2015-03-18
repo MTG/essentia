@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* PitchContoursMonoMelody::name = "PitchContoursMonoMelody";
 const char* PitchContoursMonoMelody::version = "1.0";
-const char* PitchContoursMonoMelody::description = DOC("This algorithm converts a set of pitch contours into a sequence of predominant f0 values in Hz by taking the value of the most predominant contour in each frame.\n"
+const char* PitchContoursMonoMelody::description = DOC("This algorithm converts a set of pitch contours into a sequence of f0 values in Hz by taking the value of the most salient contour in each frame.\n"
 "This algorithm is intended to receive its \"contoursBins\", \"contoursSaliences\", and \"contoursStartTimes\" inputs from the PitchContours algorithm. The \"duration\" input corresponds to the time duration of the input signal. The output is a vector of estimated pitch values and a vector of confidence values.\n"
 "\n"
 "Note that \"pitchConfidence\" can be negative in the case of \"guessUnvoiced\"=True: the absolute values represent the confidence, negative values correspond to segments for which non-salient contours where selected, zero values correspond to non-voiced segments.\n"
@@ -42,13 +42,11 @@ const char* PitchContoursMonoMelody::description = DOC("This algorithm converts 
 
 void PitchContoursMonoMelody::configure() {
   // configurable parameters
-  _voicingTolerance = parameter("voicingTolerance").toReal();
   _sampleRate = parameter("sampleRate").toReal();
   _hopSize = parameter("hopSize").toInt();
   _referenceFrequency = parameter("referenceFrequency").toReal();
   _binResolution = parameter("binResolution").toReal();
   _filterIterations = parameter("filterIterations").toInt();
-  _voiceVibrato = parameter("voiceVibrato").toBool();
   _guessUnvoiced = parameter("guessUnvoiced").toBool();
 
   // minimum and maximum allowed cent bins for contours
@@ -69,33 +67,8 @@ void PitchContoursMonoMelody::configure() {
   averagerSize = averagerSize % 2 == 0 ? averagerSize + 1 : averagerSize; // make the size odd
   _averagerShift = averagerSize / 2;
 
-  _vibratoPitchStddev = 40 / _binResolution; // 40 cents
-
-  // parameters voice vibrato detection
-  // frame size computed given than we need 350ms of audio (as with default settings)
-  Real _vibratoSampleRate = _sampleRate / _hopSize;
-  _vibratoFrameSize = int(0.350 * _vibratoSampleRate);
-  _vibratoHopSize = 1;
-  _vibratoZeroPaddingFactor = 4;
-  _vibratoFFTSize = _vibratoFrameSize * _vibratoZeroPaddingFactor;
-  _vibratoFFTSize = pow(2, ceil(log(_vibratoFFTSize)/log(2)));
-  _vibratoMinFrequency = 5.0;
-  _vibratoMaxFrequency = 8.0;
-  _vibratodBDropLobe = 15;
-  _vibratodBDropSecondPeak = 20;
-
   // conversion to hertz
   _centToHertzBase = pow(2, _binResolution / 1200.0);
-
-  // configure algorithms
-  _movingAverage->configure("size", averagerSize);
-  _frameCutter->configure("frameSize", _vibratoFrameSize, "hopSize", _vibratoHopSize, "startFromZero", true);
-  _spectrum->configure("size", _vibratoFFTSize);
-  _windowing->configure("type", "hann");
-  _windowing->configure("zeroPadding", _vibratoFFTSize - _vibratoFrameSize);
-  _spectralPeaks->configure("sampleRate", _vibratoSampleRate);
-  _spectralPeaks->configure("maxPeaks", 3); // we are only interested in the three most prominent peaks
-  _spectralPeaks->configure("orderBy", "magnitude");
 }
 
 void PitchContoursMonoMelody::compute() {
@@ -107,15 +80,42 @@ void PitchContoursMonoMelody::compute() {
 
   vector <Real>& pitch = _pitch.get();
   vector <Real>& pitchConfidence = _pitchConfidence.get();
+    
+  _numberFrames = (size_t) round(duration / _frameDuration);
+  _numberContours = contoursBins.size();
+    
+  _contoursStartIndices.resize(_numberContours);
+  _contoursEndIndices.resize(_numberContours);
+  _contoursBinsMean.resize(_numberContours);
+  _contoursSaliencesTotal.resize(_numberContours);
+  _contoursSaliencesMean.resize(_numberContours);
+  _contoursBinsStddev.resize(_numberContours);
+    
+  _contoursSelected.clear();
+  _contoursIgnored.clear();
+    
+  // get contour salience and pitch statistics
+  for (size_t i=0; i<_numberContours; i++) {
+    _contoursBinsMean[i] = mean(contoursBins[i]);
+    _contoursBinsStddev[i] = stddev(contoursBins[i], _contoursBinsMean[i]);
+    _contoursSaliencesMean[i] = mean(contoursSaliences[i]);
+  }
+    
+  for (size_t i=0; i<_numberContours; i++) {
+    _contoursStartIndices[i] = (size_t) round(contoursStartTimes[i] / _frameDuration);
+    _contoursEndIndices[i] = _contoursStartIndices[i] + contoursBins[i].size() - 1;
+    _contoursSaliencesTotal[i] = accumulate(contoursSaliences[i].begin(), contoursSaliences[i].end(), 0.0);
+    _contoursSelected.push_back(i);
+  }
+    
+  _contoursSelectedInitially = _contoursSelected;
+  _contoursIgnoredInitially = _contoursIgnored;
+
 
   // do sanity checks
-
   if (duration < 0) {
     throw EssentiaException("PitchContoursMonoMelody: specified duration of the input signal must be non-negative");
   }
-
-  _numberFrames = (size_t) round(duration / _frameDuration);
-  _numberContours = contoursBins.size();
 
   if (_numberContours != contoursSaliences.size() && _numberContours != contoursStartTimes.size()) {
     throw EssentiaException("PitchContoursMelody: contoursBins, contoursSaliences, and contoursStartTimes input vectors must have the same size");
@@ -152,10 +152,7 @@ void PitchContoursMonoMelody::compute() {
     fill(pitchConfidence.begin(), pitchConfidence.end(), (Real) 0.0);
     return;
   }
-
-  // voicing detection
-  voicingDetection(contoursBins, contoursSaliences, contoursStartTimes);
-
+    
   // create a list of all possible duplicates
   detectContourDuplicates(contoursBins);
 
@@ -217,151 +214,6 @@ void PitchContoursMonoMelody::compute() {
   }
 }
 
-bool PitchContoursMonoMelody::detectVoiceVibrato(vector<Real> contourBins, const Real binMean) {
-
-  /*
-    Algorithm details are taken from personal communication with Justin Salamon. There should be only one (and it should be
-    the highest) peak between 5 and 8 Hz, associated with human voice vibrato.  If there is more than 1 peak in this interval,
-    we may not be sure in vibrato --> go to search in next frame.
-
-    Find the 2nd and the 3rd highest peaks above 8Hz (we don't care in peaks below 5Hz, and they are normally not expected
-    to appear). The second peak should be 15 dBs quieter, and the third peak should be 20 dBs quieter than the highest peak.
-    If so, the voice peak is prominent enough --> human voice vibrato found in the contour.
-  */
-
-  if (!_voiceVibrato) {
-    return false;
-  }
-
-  // subtract mean from the contour pitch trajectory
-  for (size_t i=0; i<contourBins.size(); i++) {
-    contourBins[i] -= binMean;
-  }
-
-  // apply FFT and check for a prominent peak in the expected frequency range for human vibrato (5-8Hz)
-
-  vector<Real> frame;
-  _frameCutter->input("signal").set(contourBins);
-  _frameCutter->output("frame").set(frame);
-
-  vector<Real> frameWindow;
-  _windowing->input("frame").set(frame);
-  _windowing->output("frame").set(frameWindow);
-
-  vector<Real> vibratoSpectrum;
-  _spectrum->input("frame").set(frameWindow);
-  _spectrum->output("spectrum").set(vibratoSpectrum);
-
-  vector<Real> peakFrequencies;
-  vector<Real> peakMagnitudes;
-  _spectralPeaks->input("spectrum").set(vibratoSpectrum);
-  _spectralPeaks->output("frequencies").set(peakFrequencies);
-  _spectralPeaks->output("magnitudes").set(peakMagnitudes);
-
-  _frameCutter->reset();
-
-  while (true) {
-    // get a frame
-    _frameCutter->compute();
-    if (!frame.size()) {
-      break;
-    }
-
-    _windowing->compute();
-    _spectrum->compute();
-    _spectralPeaks->compute();
-
-    int numberPeaks = peakFrequencies.size();
-    if (!numberPeaks) {
-      continue;
-    }
-
-    if (peakFrequencies[0] < _vibratoMinFrequency || peakFrequencies[0] > _vibratoMaxFrequency) {
-      continue;
-    }
-
-    if (numberPeaks > 1) {  // there is at least one extra peak
-      if (peakFrequencies[1] <= _vibratoMaxFrequency) {
-        continue;
-      }
-      if (20 * log10(peakMagnitudes[0]/peakMagnitudes[1]) < _vibratodBDropLobe) {
-        continue;
-      }
-    }
-
-    if (numberPeaks > 2) {  // there is a second extra peak
-      if (peakFrequencies[2] <= _vibratoMaxFrequency) {
-        continue;
-      }
-      if (20 * log10(peakMagnitudes[0]/peakMagnitudes[2]) < _vibratodBDropSecondPeak) {
-        continue;
-      }
-    }
-    // prominent peak associated with voice is found
-    return true;
-  }
-  return false;
-}
-
-void PitchContoursMonoMelody::voicingDetection(const vector<vector<Real> >& contoursBins,
-                                           const vector<vector<Real> >& contoursSaliences,
-                                           const vector<Real>& contoursStartTimes) {
-
-  _contoursStartIndices.resize(_numberContours);
-  _contoursEndIndices.resize(_numberContours);
-  _contoursBinsMean.resize(_numberContours);
-  _contoursSaliencesTotal.resize(_numberContours);
-  _contoursSaliencesMean.resize(_numberContours);
-  _contoursBinsStddev.resize(_numberContours);  // TODO make a local variable
-
-  _contoursSelected.clear();
-  _contoursIgnored.clear();
-
-  vector<Real> contoursBinsMin;
-  vector<Real> contoursBinsMax;
-  contoursBinsMin.resize(_numberContours);
-  contoursBinsMax.resize(_numberContours);
-
-  // get contour salience and pitch statistics
-  for (size_t i=0; i<_numberContours; i++) {
-    _contoursBinsMean[i] = mean(contoursBins[i]);
-    _contoursBinsStddev[i] = stddev(contoursBins[i], _contoursBinsMean[i]);
-    _contoursSaliencesMean[i] = mean(contoursSaliences[i]);
-    contoursBinsMin[i] = contoursBins[i][argmin(contoursBins[i])];
-    contoursBinsMax[i] = contoursBins[i][argmax(contoursBins[i])];
-  }
-  Real averageSalienceMean = mean(_contoursSaliencesMean);
-  Real salienceThreshold = averageSalienceMean - _voicingTolerance * stddev(_contoursSaliencesMean, averageSalienceMean);
-
-  // voicing detection
-  for (size_t i=0; i<_numberContours; i++) {
-      _contoursStartIndices[i] = (size_t) round(contoursStartTimes[i] / _frameDuration);
-      _contoursEndIndices[i] = _contoursStartIndices[i] + contoursBins[i].size() - 1;
-      _contoursSaliencesTotal[i] = accumulate(contoursSaliences[i].begin(), contoursSaliences[i].end(), 0.0);
-      _contoursSelected.push_back(i);
-    // ignore contours with peaks outside of the allowed range
-      /*
-    if (contoursBinsMin[i] >= _minBin && contoursBinsMax[i] <= _maxBin) {
-      if (_contoursSaliencesMean[i] >= salienceThreshold || _contoursBinsStddev[i] > _vibratoPitchStddev
-                                            || detectVoiceVibrato(contoursBins[i], _contoursBinsMean[i]))  {
-        _contoursStartIndices[i] = (size_t) round(contoursStartTimes[i] / _frameDuration);
-        _contoursEndIndices[i] = _contoursStartIndices[i] + contoursBins[i].size() - 1;
-        _contoursSaliencesTotal[i] = accumulate(contoursSaliences[i].begin(), contoursSaliences[i].end(), 0.0);
-        _contoursSelected.push_back(i);
-      }
-      else {
-        if (_guessUnvoiced) {
-          _contoursStartIndices[i] = (size_t) round(contoursStartTimes[i] / _frameDuration);
-          _contoursEndIndices[i] = _contoursStartIndices[i] + contoursBins[i].size() - 1;
-          _contoursSaliencesTotal[i] = accumulate(contoursSaliences[i].begin(), contoursSaliences[i].end(), 0.0);
-          _contoursIgnored.push_back(i);
-        }
-      }
-    }*/
-  }
-  _contoursSelectedInitially = _contoursSelected;
-  _contoursIgnoredInitially = _contoursIgnored;
-}
 
 void PitchContoursMonoMelody::computeMelodyPitchMean(const vector<vector<Real> >& contoursBins) {
 
