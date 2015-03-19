@@ -37,18 +37,147 @@ const char* PitchContourSegmentation::description = DOC("This algorithm converts
 void PitchContourSegmentation::configure() {
   _minDur = parameter("minDur").toReal();
   _tuningFreq = parameter("tuningFreq").toReal();
-  reset();
+  _hopSize = parameter("hopSize").toReal();
+  _sampleRate = parameter("sampleRate").toReal();
+  _pitchDistanceThreshold = parameter("pitchDistanceThreshold").toReal();
+  _rmsThreshold = parameter("rmsThreshold").toReal();
 }
 
-void PitchContourSegmentation::reset() {
+void PitchContourSegmentation::reSegment() {
+    
+  // find sequences of consecutive non-zero pitch values
+  startC.clear();
+  endC.clear();
   
+  if (pitch[0]>0){
+    startC.push_back(0);
+  }
+  for (int i=0; i<pitch.size()-1; i++){
+    if (pitch[i+1]>0 && pitch[i]==0){
+      startC.push_back(i+1);
+    }
+    if (pitch[i+1]==0 && pitch[i]>0){
+      endC.push_back(i);
+    }
+  }
+  if (endC.size()<startC.size()){
+    endC.push_back(pitch.size()-1);
+  }
 }
 
 
 void PitchContourSegmentation::compute() {
-  const vector<Real>& pitch = _pitch.get();
+  
+  // PRAMETERS
+  hopSizeFeat=1024;
+  frameSizeFeat=2048;
+    
+  // I/O
+  const vector<Real>& pitchGlob = _pitch.get();
   const vector<Real>& signal = _signal.get();
+  vector<Real>& onset = _onset.get();
+  vector<Real>& duration = _duration.get();
+  vector<int>& MIDIpitch = _MIDIpitch.get();
 
+  // we do not want to access the actual pitch contour -> create copy
+  pitch = pitchGlob;
+  
+  // we assume a note onset at the beginning of a voiced section
+  reSegment();
+  
+  // extract the RMS
+  vector<Real> frame, rms;
+  Real r;
+  frameCutter = AlgorithmFactory::create("FrameCutter", "frameSize", frameSizeFeat, "hopSize", hopSizeFeat);
+  RMS   = AlgorithmFactory::create("RMS");
+  frameCutter->input("signal").set(signal);
+  frameCutter->output("frame").set(frame);
+  RMS->input("array").set(frame);
+  RMS->output("rms").set(r);
+  while (true){
+    frameCutter->compute();
+    if (!frame.size()) {
+      break;
+    }
+    RMS->compute();
+    rms.push_back(r);
+  }
+  delete frameCutter;
+  delete RMS;
+    
+  // segment based on pitch distance ("island building")
+  minDurPitchSamples=round(_minDur*float(_sampleRate)/float(_hopSize));
+  for (int i=0; i<startC.size(); i++){
+    if ((endC[i]-startC[i])>2*minDurPitchSamples){
+      vector<Real> contourH, contourC;
+      // contour in Hz
+      for (int ii=startC[i]; ii<=endC[i]; ii++){
+        contourH.push_back(pitch[ii]);
+      }
+      // contour in cents
+      for (int ii=0; ii<=contourH.size(); ii++){
+        contourC.push_back(1200*log2(contourH[ii]/_tuningFreq));
+      }
+      // running mean
+      Real av=mean(contourC,0,minDurPitchSamples);
+      int j=minDurPitchSamples+1; // running index
+      int k=0; // current note start
+      while (j<contourC.size()-minDurPitchSamples){
+        if (abs(contourC[j]-av)<_pitchDistanceThreshold){
+          av=mean(contourC, k, j);
+          j++;
+        }else{
+          pitch[startC[i]+j]=0;
+          k=j;
+          j=j+minDurPitchSamples;
+          av=mean(contourC, k, j);
+        }
+      }
+    }
+  }
+ 
+  reSegment();
 
-     
+  // segment based on rms
+  float resampleFactor=hopSizeFeat/_hopSize;
+  for (int i=0; i<startC.size(); i++){
+    if ((endC[i]-startC[i])>2*minDurPitchSamples){
+      vector<Real> rmsSeg;
+      for (int ii=startC[i]; ii<=endC[i]; ii++){
+        rmsSeg.push_back(rms[round(float(ii)/resampleFactor)]);
+      }
+      Real m=mean(rmsSeg,0,rmsSeg.size()-1);
+      Real s=stddev(rmsSeg,m);
+      int ii=minDurPitchSamples;
+      while (ii<rmsSeg.size()-minDurPitchSamples){
+        Real zs=(rmsSeg[ii]-m)/s;
+        if (zs<_rmsThreshold){
+          pitch[startC[i]+ii]=0;
+          ii=ii+minDurPitchSamples;
+        }else{
+          ii++;
+        }
+      }
+    }
+  }
+    
+  reSegment();
+    
+  // assign pitch values
+  for (int i=0; i<startC.size(); i++){
+    vector<Real> contour;
+    onset.push_back(float(startC[i])*float(_hopSize)/float(_sampleRate));
+    Real d=endC[i]-startC[i];
+    duration.push_back(d*float(_hopSize)/float(_sampleRate));
+      /*
+    for (int ii=startC[i]; ii<=endC[i]; ii++){
+      contour.push_back(1200*log2(pitch[ii]/_tuningFreq));
+    }
+    float meanPitch=mean(contour, 0, contour.size()-1);
+    float meanFreq=_tuningFreq*pow(2.0,(meanPitch/1200));
+    MIDIpitch.push_back(12*log2(meanFreq/440)+69);
+       */
+    Real meanFreq=mean(pitch,startC[i], endC[i]-1);
+    MIDIpitch.push_back(round(12*log2(meanFreq/440)+69));
+  }
 }

@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_MELODIAMONOPHONIC_H
-#define ESSENTIA_MELODIAMONOPHONIC_H
+#ifndef ESSENTIA_PITCHMELODIA_H
+#define ESSENTIA_PITCHMELODIA_H
 
 #include "algorithmfactory.h"
 #include "network.h"

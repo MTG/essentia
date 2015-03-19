@@ -21,6 +21,7 @@
 #define ESSENTIA_PITCHCONTOURSEGMENTATION_H
 
 #include "algorithm.h"
+#include "algorithmfactory.h"
 
 namespace essentia {
 namespace standard {
@@ -30,9 +31,12 @@ class PitchContourSegmentation : public Algorithm {
  private:
   Input<std::vector<Real> > _pitch;
   Input<std::vector<Real> > _signal;
-  Output<Real> _onset;
-  Output<Real> _duration;
-  Output<int> _MIDIpitch;
+  Output<std::vector<Real> > _onset;
+  Output<std::vector<Real> > _duration;
+  Output<std::vector<int> > _MIDIpitch;
+    
+  Algorithm* frameCutter;
+  Algorithm* RMS;
 
  public:
   PitchContourSegmentation() {
@@ -44,29 +48,35 @@ class PitchContourSegmentation : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("minDur", "minimum note duration [s]", "(0,inf)", 0.05);
+    declareParameter("minDur", "minimum note duration [s]", "(0,inf)", 0.1);
     declareParameter("tuningFreq", "tuning reference frequency  [Hz]", "(0,22000)", 440);
+    declareParameter("sampleRate", "sample rate of the audio signal", "(0,inf)", 44100);
+    declareParameter("hopSize", "hop size of the extracted pitch", "(0,inf)", 128);
+    declareParameter("rmsThreshold", "zscore threshold for note segmentation", "(0,-inf)", -2);
+    declareParameter("pitchDistanceThreshold", "pitch threshold for note segmentation [cents]", "(0,inf)", 60);
   }
 
   void compute();
   void configure();
-  void reset();
+  void reSegment();
 
   static const char* name;
   static const char* description;
 
  protected:
   Real _minDur;
+  int minDurPitchSamples;
   Real _tuningFreq;
-    /*
-  std::vector<Real> _histogram;
-  std::vector<Real> _globalHistogram;
-*/
-    /*
-  Real currentTuningCents() const;
-  Real tuningFrequencyFromCents(Real cents) const;
-  void updateOutputs();
-     */
+  Real _hopSize;
+  Real _sampleRate;
+  std::vector<Real> startC;
+  std::vector<Real> endC;
+  std::vector<Real> pitch;
+  int hopSizeFeat;
+  int frameSizeFeat;
+  Real _pitchDistanceThreshold;
+  Real _rmsThreshold;
+
 };
 
 } // namespace standard
