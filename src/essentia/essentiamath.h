@@ -716,12 +716,14 @@ void sortpair(std::vector<T>& v1, std::vector<U>& v2) {
 
 
 // returns whether a number is a denormal number or not
-// FIXME: this only works on i386 and with Real = float
 inline bool isDenormal(const float& x) {
-  const int& xbits = reinterpret_cast<const int&>(x);
-  const int absMantissa = xbits & 0x007FFFFF;
-  const int biasedExponent = xbits & 0x7F800000;
-  return (biasedExponent == 0 && absMantissa != 0);
+  return std::fpclassify(x) == FP_SUBNORMAL;
+
+  // old version: works only for i386 and float
+  //const int& xbits = reinterpret_cast<const int&>(x);
+  //const int absMantissa = xbits & 0x007FFFFF;
+  //const int biasedExponent = xbits & 0x7F800000;
+  //return (biasedExponent == 0 && absMantissa != 0);
 }
 
 // should always return a positive value, even when a/b is negative

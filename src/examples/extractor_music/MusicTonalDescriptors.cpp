@@ -95,7 +95,13 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                        "weightType", "squaredCosine",
                                        "nonLinear", false,
                                        "windowSize", 4.0/3.0);
-  Algorithm* skey = factory.create("Key");
+  Algorithm* skey = factory.create("Key",
+                                   "numHarmonics", 4,
+                                   "pcpSize", 36,
+                                   "profileType", "temperley",
+                                   "slope", 0.6,
+                                   "usePolyphony", true,
+                                   "useThreeChords", true);
   Algorithm* hpcp_chord = factory.create("HPCP",
                                          "size", 36,
                                          "referenceFrequency", tuningFreq,
@@ -141,6 +147,11 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
   schords_desc->output("chordsKey")         >> PC(pool, nameSpace + "chords_key");
   schords_desc->output("chordsScale")       >> PC(pool, nameSpace + "chords_scale");
 
+  // HPCP Entropy
+  Algorithm* ent = factory.create("Entropy");
+  hpcp_chord->output("hpcp")  >> ent->input("array");
+  ent->output("entropy")      >> PC(pool, nameSpace + "hpcp_entropy");
+
   // HPCP Tuning
   Algorithm* hpcp_tuning = factory.create("HPCP",
                                           "size", 120,
@@ -168,7 +179,13 @@ void MusicTonalDescriptors::computeTuningSystemFeatures(Pool& pool){
   // 1- diatonic strength
   standard::AlgorithmFactory& factory = standard::AlgorithmFactory::instance();
 
-  standard::Algorithm* keyDetect = factory.create("Key", "profileType", "diatonic");
+  standard::Algorithm* keyDetect = factory.create("Key",
+                                                  "numHarmonics", 4,
+                                                  "pcpSize", 36,
+                                                  "profileType", "diatonic",
+                                                  "slope", 0.6,
+                                                  "usePolyphony", true,
+                                                  "useThreeChords", true);
 
   string key, scale;
   Real strength, unused;

@@ -21,10 +21,10 @@
 
 from essentia_test import *
 
-class TestBPMHistogramDescriptors(TestCase):
+class TestBpmHistogramDescriptors(TestCase):
 
     def testEmpty(self):
-        bpm1, weight1, spread1, bpm2, weight2, spread2 = BPMHistogramDescriptors()([])
+        bpm1, weight1, spread1, bpm2, weight2, spread2 = BpmHistogramDescriptors()([])
         self.assertEqual(bpm1, 0)
         self.assertEqual(weight1, 0)
         self.assertEqual(spread1, 0)
@@ -33,7 +33,7 @@ class TestBPMHistogramDescriptors(TestCase):
         self.assertEqual(spread2, 0)
 
     def testZero(self):
-        bpm1, weight1, spread1, bpm2, weight2, spread2 = BPMHistogramDescriptors()([0])
+        bpm1, weight1, spread1, bpm2, weight2, spread2 = BpmHistogramDescriptors()([0])
         self.assertEqual(bpm1, 0)
         self.assertEqual(weight1, 0)
         self.assertEqual(spread1, 0)
@@ -42,7 +42,7 @@ class TestBPMHistogramDescriptors(TestCase):
         self.assertEqual(spread2, 0)
 
     def testOne(self):
-        bpm1, weight1, spread1, bpm2, weight2, spread2 = BPMHistogramDescriptors()([0.5])
+        bpm1, weight1, spread1, bpm2, weight2, spread2 = BpmHistogramDescriptors()([0.5])
         self.assertEqual(bpm1, 120)
         self.assertEqual(weight1, 1)
         self.assertEqual(spread1, 0)
@@ -55,7 +55,7 @@ class TestBPMHistogramDescriptors(TestCase):
         intervals = []
         for bpm in bpms:
             intervals.append(60. / bpm)
-        bpm1, weight1, spread1, bpm2, weight2, spread2 = BPMHistogramDescriptors()(intervals)
+        bpm1, weight1, spread1, bpm2, weight2, spread2 = BpmHistogramDescriptors()(intervals)
         self.assertEqual(bpm1, 0)
         self.assertEqual(weight1, 0)
         self.assertEqual(spread1, 0)
@@ -64,7 +64,7 @@ class TestBPMHistogramDescriptors(TestCase):
         self.assertEqual(spread2, 0)
 
     def testRounding(self):
-        bpm1, weight1, spread1, bpm2, weight2, spread2 = BPMHistogramDescriptors()([60. / 100.5])
+        bpm1, weight1, spread1, bpm2, weight2, spread2 = BpmHistogramDescriptors()([60. / 100.5])
         self.assertEqual(bpm1, 101)
 
     def testRegression(self):
@@ -73,7 +73,7 @@ class TestBPMHistogramDescriptors(TestCase):
         for bpm in bpms:
             intervals.append(60. / bpm)
         intervals.append(0) # Add an extra zero to check if it gets properly dropped
-        bpm1, weight1, spread1, bpm2, weight2, spread2 = BPMHistogramDescriptors()(intervals)
+        bpm1, weight1, spread1, bpm2, weight2, spread2 = BpmHistogramDescriptors()(intervals)
         self.assertAlmostEqual(bpm1, 100, 1e-5)
         self.assertAlmostEqual(weight1, 0.5, 1e-5)
         self.assertAlmostEqual(spread1, 0.2, 1e-5)
@@ -82,7 +82,7 @@ class TestBPMHistogramDescriptors(TestCase):
         self.assertAlmostEqual(spread2, 0.333333, 1e-5)
 
 
-suite = allTests(TestBPMHistogramDescriptors)
+suite = allTests(TestBpmHistogramDescriptors)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

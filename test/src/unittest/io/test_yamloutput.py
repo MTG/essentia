@@ -312,21 +312,55 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
 
     def testJsonEscapedStrings(self):
         p = Pool()
-        p.add('vector_string', 'string_1\n\r')
-        p.add('vector_string', 'string_2\n\r')
-        p.add('vector_string', 'string_3\n\r')
-        p.set('string', 'string\n\r')
+        p.add('vector_string', 'string_1\n\r " \ /')
+        p.add('vector_string', 'string_2\n\r " \ /')
+        p.add('vector_string', 'string_3\n\r " \ /')
+        p.set('string', 'string\n\r " \ /')
 
-        YamlOutput(filename='test.yaml', format='json')(p)
+        YamlOutput(filename='test.json', format='json')(p)
 
 
         raised = False
-        try: 
-            result = json.load(open('test.yaml', 'r'))
+        try:
+            result = json.load(open('test.json', 'r'))
         except:
+            print open('test.json').read()
             raised = True
-        
+
         self.assertEqual(raised, False)
+        os.remove('test.json')
+
+    def testJsonFormat(self):
+        p = Pool()
+        p.add('key', 'value')
+
+        YamlOutput(filename='test.json', format='json', indent=4)(p)
+        actual = open('test.json').read()
+
+        expected = """{
+"metadata": {
+    "version": {
+        "essentia": "2.1-beta1"
+    }
+},
+"key": ["value"]
+}"""
+        self.assertEqual(expected, actual)
+        os.unlink('test.json')
+
+        # No indent flag gives indent 4
+        YamlOutput(filename='test.json', format='json')(p)
+        actual = open('test.json').read()
+        self.assertEqual(expected, actual)
+
+
+        YamlOutput(filename='test.json', format='json', indent=0)(p)
+        actual = open('test.json').read()
+
+        expected = """{"metadata": {"version": {"essentia": "2.1-beta1"}},"key": ["value"]}"""
+        self.assertEqual(expected, actual)
+        os.unlink('test.json')
+
 
 
 suite = allTests(TestYamlOutput)

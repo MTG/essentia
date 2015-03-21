@@ -33,15 +33,15 @@ class PitchFilterMakam : public Algorithm {
   Output<std::vector<Real> > _pitchFiltered;
 
   bool _octaveFilter;
-  uint64_t _minChunkSize;
+  long long _minChunkSize;
 
   bool areClose(Real num1, Real num2);
   void splitToChunks(const std::vector <Real>& pitch,
     std::vector <std::vector <Real> >& chunks,
-    std::vector <uint64_t>& chunksIndexes,
-    std::vector <uint64_t>& chunksSize);
+    std::vector <long long>& chunksIndexes,
+    std::vector <long long>& chunksSize);
   void joinChunks(const std::vector <std::vector <Real> >& chunks, std::vector <Real>& result);
-  Real energyInChunk(const std::vector <Real>& energy, uint64_t chunkIndex, uint64_t chunkSize);
+  Real energyInChunk(const std::vector <Real>& energy, long long chunkIndex, long long chunkSize);
   void correctOctaveErrorsByChunks(std::vector <Real>& pitch);
   void removeExtremeValues(std::vector <Real>& pitch);
   void correctJumps(std::vector <Real>& pitch);

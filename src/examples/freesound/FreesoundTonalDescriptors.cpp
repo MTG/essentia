@@ -164,12 +164,10 @@ void FreesoundTonalDescriptors ::createTuningFrequencyNetwork(SourceBase& source
   peaks->output("frequencies") >> hpcp_chord->input("frequencies");
   peaks->output("magnitudes") >> hpcp_chord->input("magnitudes");
 
-
   Algorithm* schord = factory.create("ChordsDetection");
   hpcp_chord->output("hpcp") >> schord->input("pcp");
   schord->output("chords") >> PC(pool, nameSpace + "chords_progression");
   schord->output("strength") >> PC(pool, nameSpace + "chords_strength");
-
   
   Algorithm* schords_desc = factory.create("ChordsDescriptors");
   schord->output("chords") >> schords_desc->input("chords");
@@ -181,4 +179,18 @@ void FreesoundTonalDescriptors ::createTuningFrequencyNetwork(SourceBase& source
   schords_desc->output("chordsChangesRate") >> PC(pool, nameSpace + "chords_changes_rate");
   schords_desc->output("chordsKey") >> PC(pool, nameSpace + "chords_key");
   schords_desc->output("chordsScale") >> PC(pool, nameSpace + "chords_scale");
+     
+  Algorithm* entropy = factory.create("Entropy");
+  hpcp_chord->output("hpcp") >> entropy->input("array");
+  entropy->output("entropy") >> PC(pool, nameSpace + "hpcp_entropy");
+     
+  Algorithm* crest = factory.create("Crest");
+  hpcp_chord->output("hpcp") >> crest->input("array");
+  crest->output("crest") >> PC(pool, nameSpace + "hpcp_crest");
+    
+    
+
+     
+     
+  
  }

@@ -60,26 +60,29 @@ class TestAudioWriter_Streaming(TestCase):
         loader.audio >> (pool, 'audio')
         loader.numberChannels >> None
         loader.sampleRate >> None
+        loader.md5 >> None
         run(loader)
         os.remove(filename)
 
         self.compare(pool['audio'], signal)
 
     def testEmpty(self):
-        inputFilename = join(testdata.audio_dir, 'generated', 'empty', 'empty.wav')
-        outputFilename = 'audiowritertest.wav'
+        inputFilename = join(testdata.audio_dir, 'generated', 'empty', 'empty.aiff')
+        outputFilename = 'audiowritertest.aiff'
         loader = AudioLoader(filename=inputFilename)
         pool = Pool()
-        writer = AudioWriter(filename=outputFilename)
+        writer = AudioWriter(filename=outputFilename, format='aiff')
         loader.audio >> writer.audio
         loader.numberChannels >> None
         loader.sampleRate >> None
+        loader.md5 >> None
         run(loader)
 
         loader = AudioLoader(filename=outputFilename)
         loader.audio >> (pool, 'audio')
         loader.numberChannels >> None
         loader.sampleRate >> None
+        loader.md5 >> None
         run(loader)
         os.remove(outputFilename)
 
@@ -123,6 +126,7 @@ class TestAudioWriter_Streaming(TestCase):
         loader.audio >> (pool, 'audio')
         loader.numberChannels >> None
         loader.sampleRate >> None
+        loader.md5 >> None
         run(loader)
         os.remove(filename)
         self.compare(pool['audio'], expected)
@@ -144,6 +148,7 @@ class TestAudioWriter_Streaming(TestCase):
         loader.audio >> (pool, 'audio')
         loader.numberChannels >> None
         loader.sampleRate >> None
+        loader.md5 >> None
         run(loader)
         os.remove(filename)
         self.compare(pool['audio'], signal)
@@ -175,6 +180,7 @@ class TestAudioWriter_Streaming(TestCase):
         mixer.audio >> (pool, 'audio')
         loader.numberChannels >> mixer.numberChannels
         loader.sampleRate >> None
+        loader.md5 >> None
         run(loader)
         self.assertAlmostEqual(max(pool['audio']), max(sine), precision)
         from essentia.standard import ZeroCrossingRate

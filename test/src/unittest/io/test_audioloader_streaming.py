@@ -36,6 +36,9 @@ class TestAudioLoader_Streaming(TestCase):
         loader.audio >> (p, 'audio')
         loader.numberChannels >> (p, 'nChannels')
         loader.sampleRate >> (p, 'sampleRate')
+        loader.md5 >> (p, 'md5')
+        loader.bit_rate >> (p, 'bit_rate')
+        loader.codec >> (p, 'codec')
 
         run(loader)
 
@@ -66,6 +69,9 @@ class TestAudioLoader_Streaming(TestCase):
         loader.audio >> (p, 'audio')
         loader.numberChannels >> (p, 'nChannels')
         loader.sampleRate >> (p, 'sampleRate')
+        loader.md5 >> (p, 'md5')
+        loader.bit_rate >> (p, 'bit_rate')
+        loader.codec >> (p, 'codec')
 
         run(loader)
 
@@ -155,24 +161,27 @@ class TestAudioLoader_Streaming(TestCase):
     def testResetStandard(self):
         from essentia.standard import AudioLoader as stdAudioLoader
         audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
-        loader = stdAudioLoader(filename=audiofile)
-        audio1, sr1, nChannels1 = loader();
-        audio2, sr2, nchannels2 = loader();
+        loader = stdAudioLoader(filename=audiofile, computeMD5=True)
+        audio1, sr1, nChannels1, md51, bitrate1, codec1 = loader();
+        audio2, sr2, nchannels2, md52, bitrate2, codec2 = loader();
         loader.reset();
-        audio3, sr3, nChannels3 = loader();
+        audio3, sr3, nChannels3, md53, bitrate3, codec3 = loader();
         self.assertAlmostEqualMatrix(audio3, audio1)
         self.assertEqual(sr3, sr1)
         self.assertEqual(nChannels3, nChannels1)
+        self.assertEqual(md53, md51)
         self.assertEqualMatrix(audio2, audio1)
+        self.assertEqual(bitrate3, bitrate1)
+        self.assertEqual(codec3, codec1)        
 
     def testLoadMultiple(self):
         from essentia.standard import AudioLoader as stdAudioLoader
         aiffpath = join('generated','synthesised','impulse','aiff')
         filename = join(testdata.audio_dir,aiffpath,'impulses_1second_44100.aiff')
         algo = stdAudioLoader(filename=filename)
-        audio1, _, _ = algo()
-        audio2, _, _ = algo()
-        audio3, _, _ = algo()
+        audio1, _, _, _, _, _ = algo()
+        audio2, _, _, _, _, _ = algo()
+        audio3, _, _, _, _, _ = algo()
         self.assertEquals(len(audio1), 441000);
         self.assertEquals(len(audio2), 441000);
         self.assertEquals(len(audio3), 441000);
@@ -182,9 +191,9 @@ class TestAudioLoader_Streaming(TestCase):
     def testBitrate(self):
         from math import fabs
         dir = join(testdata.audio_dir,'recorded')
-        audio16, sr16, ch16 = AudioLoader(filename=join(dir,"cat_purrrr.wav"))()
-        audio24, sr24, ch24 = AudioLoader(filename=join(dir,"cat_purrrr24bit.wav"))()
-        audio32, sr32, ch32 = AudioLoader(filename=join(dir,"cat_purrrr32bit.wav"))()
+        audio16, sr16, ch16, md516, _, _ = AudioLoader(filename=join(dir,"cat_purrrr.wav"))()
+        audio24, sr24, ch24, md524, _, _ = AudioLoader(filename=join(dir,"cat_purrrr24bit.wav"))()
+        audio32, sr32, ch32, md532, _, _ = AudioLoader(filename=join(dir,"cat_purrrr32bit.wav"))()
         audio16L, audio16R = essentia.standard.StereoDemuxer()(audio16)
         audio24L, audio24R = essentia.standard.StereoDemuxer()(audio24)
         audio32L, audio32R = essentia.standard.StereoDemuxer()(audio32)
@@ -215,6 +224,22 @@ class TestAudioLoader_Streaming(TestCase):
         self.assertAlmostEqual(centroid16-centroid24, 0)
         self.assertAlmostEqual(centroid16-centroid32, 0)
 
+    def testMD5(self):
+
+        dir = join(testdata.audio_dir,'recorded')
+        _, _, _, md5_wav, _, _ = AudioLoader(filename=join(dir,"dubstep.wav"), computeMD5=True)()
+        _, _, _, md5_flac, _, _ = AudioLoader(filename=join(dir,"dubstep.flac"), computeMD5=True)()
+        _, _, _, md5_mp3, _, _ = AudioLoader(filename=join(dir,"dubstep.mp3"), computeMD5=True)()
+        _, _, _, md5_ogg, _, _ = AudioLoader(filename=join(dir,"dubstep.ogg"), computeMD5=True)()
+        _, _, _, md5_aac, _, _ = AudioLoader(filename=join(dir,"dubstep.aac"), computeMD5=True)()
+        
+        # results should correspond to ffmpeg output (computed on debian wheezy) 
+        #   ffmpeg -i dubstep.wav -acodec copy -f md5 -
+        self.assertEqual(md5_wav, "bf0f4d0613fab0fa5268ece9b043c441")
+        self.assertEqual(md5_flac, "93ee45bc8776eed656a554b32d0d9616")
+        self.assertEqual(md5_mp3, "1e5a598218e9b19cfe04d6c2f61f84a6")
+        self.assertEqual(md5_ogg, "a87dad40fea0966cc5b967d5412e8868")
+        self.assertEqual(md5_aac, "9a4c7f0da68d4b58767f219c48014f9c")
 
 
 suite = allTests(TestAudioLoader_Streaming)

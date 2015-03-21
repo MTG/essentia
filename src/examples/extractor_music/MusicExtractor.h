@@ -36,6 +36,7 @@
 
 
 #define EXTRACTOR_VERSION "music 1.0"
+#define EXTRACTOR_HL_VERSION "music_highlevel 1.0"
 
 using namespace std;
 using namespace essentia;
@@ -50,6 +51,8 @@ using namespace streaming;
   Real analysisSampleRate;
   Real startTime;
   Real endTime;
+  bool requireMbid;
+  Real indent;
 
   Real replayGain;
   string downmix;
@@ -59,14 +62,16 @@ using namespace streaming;
  	Pool stats;
   Pool options;
 
- 	void compute(const string& audioFilename);
+  int compute(const string& audioFilename);
   void setExtractorOptions(const std::string& filename);
   void setExtractorDefaultOptions();
+  void mergeValues(Pool &pool);
   void readMetadata(const string& audioFilename);
+  void computeMetadata(const string& audioFilename);
   void computeReplayGain(const string& audioFilename);
   void computeSVMDescriptors(Pool& pool);
   void outputToFile(Pool& pool, const string& outputFilename);
-	
+
  };
 
  #endif

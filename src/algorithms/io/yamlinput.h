@@ -31,6 +31,7 @@ class YamlInput : public Algorithm {
  protected:
   Output<Pool> _pool;
   std::string _filename;
+  bool _inputJson;
 
  public:
   YamlInput() {
@@ -38,7 +39,8 @@ class YamlInput : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("filename", "Input filename (must be in YAML format)", "", Parameter::STRING);
+    declareParameter("filename", "Input filename", "", Parameter::STRING);
+    declareParameter("format", "whether to the input file is in JSON or YAML format", "{json,yaml}", "yaml");
   }
 
   void compute();

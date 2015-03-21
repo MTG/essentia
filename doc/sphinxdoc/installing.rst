@@ -36,6 +36,8 @@ In order to use python bindings for the library, you might also need to install 
 
   sudo apt-get install python-numpy-dev python-numpy
 
+Note, that the required version of ``libtag1-dev`` is greater or equal to ``1.9.1``. It is distributed with the latest LTS Ubuntu (14.04). If you are using the latest stable Debian (Wheezy), you might want to install it from wheezy-backports repository.
+
 
 Installing dependencies on Mac OS X
 -----------------------------------
