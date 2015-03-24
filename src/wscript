@@ -224,8 +224,9 @@ def build(ctx):
     # do not complie splineutil.cpp if we are not compiling Spline and CubicSpline
     if 'Spline' not in ctx.env.ALGOIGNORE or 'CubicSpline' not in ctx.env.ALGOIGNORE:
         ctx.env.INCLUDES += ['3rdparty/spline' ]
+        sources += [ ctx.path.find_resource('3rdparty/spline/splineutil.cpp') ]
     else:
-        print ('Building without 3rdparty spline library because Spline and CubicSpline algorithms are ignored')
+        print ('Building without 3rdparty spline library code because Spline and CubicSpline algorithms are ignored')
 
     ctx.stlib(
         source   = sources,
