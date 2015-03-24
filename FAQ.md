@@ -138,3 +138,26 @@ In order to run classification in Essentia you need to prepare a classifier mode
 
 Note that using a specific classifier model implies that you are expected to give a pool with the same descriptor layout as the one used in training as an input to GaiaTransform Algorithm. 
 
+Builing lightweight Essentia with reduced dependencies 
+-----------------------------------------------------
+Since version 2.1, build scripts can be configured to ignore 3rdparty dependencies required by Essentia in order to create a striped-down version of the library.  Use  ```./waf configure``` command with the ```--lightweight``` flag to provide the list of 3rdparty dependencies to be included. For example, the command below will configure to build Essentia avoiding all dependecies except fftw:
+```
+./waf configure --lightweight=fftw
+```
+
+It is also possible to specify algorithms to be ignored using the ```--ignore-algos``` flag, although you need to take care that the ignored algorithm are not required by any of the algorithms and examples that will be compiled. 
+
+Essentia includes in its code the Spline library (LGPLv3) which is used by Spline and CubicSpline algorithms and is built by default. To ignore this library, use the following flag in ```./waf configure``` command:
+```
+--ignore-algos=Spline,CubicSpline
+```
+
+For more details on the build flags, run:
+```
+./waf --help
+```
+
+
+
+
+
