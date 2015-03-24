@@ -25,12 +25,14 @@ def options(ctx):
     ctx.add_option('--with-gaia', action='store_true',
                    dest='WITH_GAIA', default=False,
                    help='build with Gaia support')  
-
     ctx.add_option('--lightweight', action='store',
                    dest='WITH_LIBS', default=False,
-                   #help='build a lightweight version, inlcude only fftw dependency')
                    help='build lightweight version with specified dependencies (comma separated: =' + ','.join(dependencies_list) + ')')
-            
+    ctx.add_option('--ignore-algos', action='store',
+                   dest='IGNORE_ALGOS', default=False,
+                   help='algorithms to ignore (comma separated)')
+
+
 def debian_version():
     try:
         v = open('/etc/debian_version').read().strip()
@@ -55,6 +57,7 @@ def configure(ctx):
     ctx.env.EXAMPLES       = ctx.options.EXAMPLES
     ctx.env.EXAMPLE_LIST   = []
     ctx.env.ALGOIGNORE = []
+    ctx.env.IGNORE_ALGOS  = ctx.options.IGNORE_ALGOS
 
     if ctx.env.WITH_STATIC_EXAMPLES and not ctx.env.EXAMPLES:
         ctx.env.WITH_EXAMPLES = True
@@ -71,6 +74,11 @@ def configure(ctx):
     else:
         ctx.env.WITH_LIBS_LIST = dependencies_list
   
+    if ctx.env.IGNORE_ALGOS:
+        for a in ctx.env.IGNORE_ALGOS.split(","):
+            a = a.strip()
+            ctx.env.ALGOIGNORE.append(a)
+
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
@@ -80,6 +88,7 @@ def configure(ctx):
         
         ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
+
 
         ctx.check_cfg(package='libavutil', uselib_store='AVUTIL',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
@@ -276,7 +285,14 @@ def build(ctx):
     #       library. See if there's no way to split them.
     ctx.env.INCLUDES = [ '.', 'essentia', 'essentia/scheduler', 'essentia/streaming',
                          'essentia/streaming/algorithms', 'essentia/utils',
-                         '3rdparty' ]
+                         '3rdparty']
+
+    # do not complie splineutil.cpp if we are not compiling Spline and CubicSpline
+    if 'Spline' not in ctx.env.ALGOIGNORE or 'CubicSpline' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/spline' ]
+        sources += [ ctx.path.find_resource('3rdparty/spline/splineutil.cpp') ]
+    else:
+        print ('Building without 3rdparty spline library code because Spline and CubicSpline algorithms are ignored')
 
     ctx.stlib(
         source   = sources,
