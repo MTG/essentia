@@ -19,7 +19,7 @@ Compiling Essentia from source
 
 Essentia depends on (at least) the following libraries:
  - `FFTW <http://www.fftw.org>`_: for the FFT implementation
- - `libavcodec <http://ffmpeg.org/>`_ (from the FFmpeg project): for loading/saving any type of audio files *(optional)*
+ - `libavcodec/libavformat/libavutil/libavresample <http://ffmpeg.org/>`_ (from the FFmpeg project): for loading/saving any type of audio files *(optional)*
  - `libsamplerate <http://www.mega-nerd.com/SRC/>`_: for resampling audio *(optional)*
  - `TagLib <http://developer.kde.org/~wheeler/taglib.html>`_: for reading audio metadata tags *(optional)*
  - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
@@ -28,15 +28,21 @@ Essentia depends on (at least) the following libraries:
 Installing dependencies on Linux
 --------------------------------
 
-You can install those dependencies on a Debian/Ubuntu system using the following command::
+You can install those dependencies on a Debian/Ubuntu system from official repositories using the commands provided below. Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. 
+
+In the case of Essentia 2.1, the required version of ``libtag1-dev`` is greater or equal to ``1.9.1``. It is distributed with Ubuntu Trusty (14.04 LTS). If you are using the latest stable Debian (Wheezy), you might want to install it from `wheezy-backports <https://wiki.debian.org/Backports>`_ repository. The required version of ``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev`` is greater or equal to ``10.1``. The appropriate versions are distributed in Ubuntu Utopic (14.10) repository, and in Debian wheezy-backports.
+
+**Essentia 2.0/2.0.1 on Debian Wheezy / Ubuntu 10.04**::
 
   sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev python-dev libsamplerate0-dev libtag1-dev
+
+**Essentia 2.1 on Ubuntu 10.10**::
+
+  sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev
 
 In order to use python bindings for the library, you might also need to install python-numpy-dev or python-numpy on Ubuntu::
 
   sudo apt-get install python-numpy-dev python-numpy
-
-Note, that the required version of ``libtag1-dev`` is greater or equal to ``1.9.1``. It is distributed with the latest LTS Ubuntu (14.04). If you are using the latest stable Debian (Wheezy), you might want to install it from wheezy-backports repository.
 
 
 Installing dependencies on Mac OS X
@@ -73,8 +79,8 @@ Studio project readily available, so you will have to setup one yourself and
 compile the dependencies too. We will be working on Windows installer in the near future. 
 
 
-Additional dependencies (python, all platforms)
------------------------------------------------
+Additional dependencies for building documentation (python, all platforms)
+--------------------------------------------------------------------------
 
 To build the documentation you will also need the following dependencies (you might need to run this command with sudo)::
 
@@ -117,15 +123,15 @@ To install the C++ library and the python bindings (if configured successfully; 
 
   ./waf install
 
-To run the C++ base unit tests (only test basic library behavior)::
+To run the C++ base unit tests (optional, only test basic library behavior)::
 
   ./waf run_tests
 
-To run the python unit tests (include all unittests on algorithms, need python bindings installed first)::
+To run the python unit tests (optional, include all unittests on algorithms, need python bindings installed first)::
 
   ./waf run_python_tests
 
-To generate the full documentation (need python bindings installed first)::
+To generate the full documentation (optional, need python bindings installed first)::
 
   ./waf doc
 
@@ -142,5 +148,5 @@ The 2.0.1 version of Essentia includes a number of `pre-trained classifier model
 
 * Install Gaia2 library (supported on Linux/OSX): https://github.com/MTG/gaia/blob/master/README.md
 * Build Essentia 2.0.1 with examples
-* Use ``streaming_extractor_archivemusic``
+* Use ``streaming_extractor_music`` (see `detailed documentation <streaming_extractor_music.html>`_)
 
