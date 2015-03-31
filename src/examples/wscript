@@ -140,7 +140,9 @@ def build(ctx):
                         use      = 'essentia ' + ctx.env.USES,
                         install_path = None)
 
-
+        # copy svm models to build folder if gaia2 is installed and svm_models folder exists
+        if ctx.env.USES.count('GAIA2'):
+            ctx.install_files('build/src/examples/', ctx.path.ant_glob('svm_models/*'), relative_trick=True)
 
 
     if ctx.env.WITH_VAMP:

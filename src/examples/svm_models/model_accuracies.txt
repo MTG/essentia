@@ -1,0 +1,24 @@
+SVM model accuracies in 5-fold CV 
+
+Essentia 2.0.1
+
+gender              86.451022%  results/gender/gender509645119_0.result
+mood_acoustic       92.982456%  results/mood_acoustic/mood_acoustic494957505_0.result
+mood_happy          82.857143%  results/mood_happy/mood_happy-1352893893_0.result
+voice_instrumental  94.200000%  results/voice_instrumental/voice_instrumental225397205_0.result
+timbre              94.283793%  results/timbre/timbre-172662060_0.result
+genre_rosamerica    87.442922%  results/genre_rosamerica/genre_rosamerica206294540_0.result
+mood_electronic     84.587814%  results/mood_electronic/mood_electronic876208294_0.result
+genre_electronic    91.699605%  results/genre_electronic/genre_electronic-712004846_0.result
+mood_sad            86.956522%  results/mood_sad/mood_sad40553487_0.result
+culture             93.495190%  results/culture/culture862388605_0.result
+mood_party          88.381743%  results/mood_party/mood_party810960596_0.result
+mood                58.364312%  results/mood/mood-525915621_0.result
+genre_dortmund      59.141494%  results/genre_dortmund/genre_dortmund-1853309960_0.result
+tonal_atonal        97.674419%  results/tonal_atonal/tonal_atonal552770384_0.result
+mood_aggressive     97.500000%  results/mood_aggressive/mood_aggressive-1675548205_0.result
+genre_tzanetakis    76.435045%  results/genre_tzanetakis/genre_tzanetakis206294540_0.result
+mood_relaxed        92.917847%  results/mood_relaxed/mood_relaxed2017236702_0.result
+ballroom            70.343840%  results/ballroom/ballroom-1853309960_0.result
+danceability        92.444444%  results/danceability/danceability-1285177590_0.result
+

@@ -117,16 +117,15 @@ void compute(const string& audioFilename, const string& outputFilename, Pool& po
   computeStep4(pool, options);
   
   Pool stats = computeAggregation(pool, options);
-  
+
   // pre-trained classifiers are only available in branches devoted for that 
   // (eg: 2.0.1)
-  /*
-#if HAVE_GAIA2 
-  addSVMDescriptors(stats); 
-#else 
+
+#if HAVE_GAIA2
+  addSVMDescriptors(stats);
+#else
   cout << "Warning: Essentia was compiled without Gaia2 library, skipping process step 6 (cannot compute SVM models)" << endl;
 #endif
-  */
 
   outputToFile(stats, outputFilename, true);
   return;
@@ -476,8 +475,10 @@ void outputToFile(Pool& pool, const string& outputFilename, bool outputJSON) {
 void addSVMDescriptors(Pool& pool) {
   cout << "Process step 6: SVM Models" << endl;
   //const char* svmModels[] = {}; // leave this empty if you don't have any SVM models
-  const char* svmModels[] = { "genre_tzanetakis", "genre_dortmund",
-                              "genre_electronica", "genre_rosamerica",
+  const char* svmModels[] = { "danceability",
+                              "genre_dortmund", "genre_electronic",
+                              "genre_rosamerica", "genre_tzanetakis",
+                              "mirex_ballroom",
                               "mood_acoustic", "mood_aggressive",
                               "mood_electronic", "mood_happy", "mood_party", 
                               "mood_relaxed", "mood_sad", "timbre", "culture", 
