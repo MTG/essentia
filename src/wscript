@@ -18,6 +18,10 @@ def options(ctx):
     ctx.add_option('--with-vamp', action='store_true',
                    dest='WITH_VAMP', default=False,
                    help='build the vamp plugin wrapper')
+    ctx.add_option('--ignore-algos', action='store',
+                   dest='IGNORE_ALGOS', default=False,
+                   help='algorithms to ignore (comma separated)')
+
 
     #add option --with-gaia
 
@@ -41,12 +45,18 @@ def configure(ctx):
     ctx.env.WITH_PYTHON   = ctx.options.WITH_PYTHON
     ctx.env.WITH_VAMP     = ctx.options.WITH_VAMP
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
+    ctx.env.IGNORE_ALGOS  = ctx.options.IGNORE_ALGOS
 
     if ctx.env.WITH_STATIC_EXAMPLES:
         ctx.env.WITH_EXAMPLES = True
 
     ctx.env.ALGOIGNORE = []
     #ctx.env.ALGOIGNORE += ['GaiaTransform'] #TODO gaia
+
+    if ctx.env.IGNORE_ALGOS:
+        for a in ctx.env.IGNORE_ALGOS.split(","):
+            a = a.strip()
+            ctx.env.ALGOIGNORE.append(a)
 
 
     ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
@@ -209,7 +219,14 @@ def build(ctx):
     #       library. See if there's no way to split them.
     ctx.env.INCLUDES = [ '.', 'essentia', 'essentia/scheduler', 'essentia/streaming',
                          'essentia/streaming/algorithms', 'essentia/utils',
-                         '3rdparty' ]
+                         '3rdparty']
+
+    # do not complie splineutil.cpp if we are not compiling Spline and CubicSpline
+    if 'Spline' not in ctx.env.ALGOIGNORE or 'CubicSpline' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/spline' ]
+        sources += [ ctx.path.find_resource('3rdparty/spline/splineutil.cpp') ]
+    else:
+        print ('Building without 3rdparty spline library code because Spline and CubicSpline algorithms are ignored')
 
     ctx.stlib(
         source   = sources,
