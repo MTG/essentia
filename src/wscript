@@ -31,7 +31,9 @@ def options(ctx):
     ctx.add_option('--ignore-algos', action='store',
                    dest='IGNORE_ALGOS', default=False,
                    help='algorithms to ignore (comma separated)')
-
+    ctx.add_option('--fft', action='store',
+                   dest='FFT', default='FFTW',
+                   help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
 
 def debian_version():
     try:
@@ -58,12 +60,14 @@ def configure(ctx):
     ctx.env.EXAMPLE_LIST   = []
     ctx.env.ALGOIGNORE = []
     ctx.env.IGNORE_ALGOS  = ctx.options.IGNORE_ALGOS
+    ctx.env.FFT  = ctx.options.FFT
 
     if ctx.env.WITH_STATIC_EXAMPLES and not ctx.env.EXAMPLES:
         ctx.env.WITH_EXAMPLES = True
 
     if ctx.env.WITH_LIBS:
-        ctx.env.WITH_LIBS_LIST = ['fftw']   # FFTW is still mandatory
+#         ctx.env.WITH_LIBS_LIST = ['fftw']   # FFTW is still mandatory
+        ctx.env.WITH_LIBS_LIST = ['']   # FFTW no longer mandatory
         for e in ctx.env.WITH_LIBS.split(","):
             e = e.strip()
             if e not in dependencies_list:
@@ -115,7 +119,7 @@ def configure(ctx):
 
     if 'fftw' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=True)    
+                      args=['--cflags', '--libs', '--modversion'], mandatory=False)    
 
     if ctx.env.WITH_GAIA:
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
@@ -140,17 +144,23 @@ def configure(ctx):
     def has(name):
         return ('HAVE_%s' % name.upper()) in ctx.env['define_key']
 
-    # FFTW is the only mandatory dependency
+    # FFTW is no longer mandatory, but we still need an FFT/IFFT
     algos = ['FFT', 'IFFT']
-    if has('fftw'):
-        print('- fftw detected!')
-        ctx.env.USES += ' FFTW'
+
+    if 'ACCELERATE' in ctx.env.FFT:
+        print('- using Accelerate Framework for FFT')
+        ctx.env.LINKFLAGS += [ '-framework', 'Accelerate']        
     else:
-        print('- fftw seems to be missing.')
-        print('  The following algorithms will be ignored: %s\n' % algos)
-        ctx.env.ALGOIGNORE += algos
-        print('  IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
-        print('                  We are about to implement a generic FFT that does not rely exclusively on fftw.\n')
+        print('- using FFTW for FFT') 
+        if has('fftw'):
+            print(' - fftw detected!')
+            ctx.env.USES += ' FFTW'
+        else:
+            print(' - fftw seems to be missing.')
+            print('   The following algorithms will be ignored: %s\n' % algos)
+            ctx.env.ALGOIGNORE += algos
+            print('   IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
+            print('                   We are about to implement a generic FFT that does not rely exclusively on fftw.\n')
 
     # MonoLoader, EqloudLoader, and EasyLoader are dependent on Resample
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
@@ -264,6 +274,19 @@ def build(ctx):
 
     # create algorithms registration file
     algoreg_path = 'src/algorithms/essentia_algorithms_reg.cpp'
+
+    # Here we remove the FFTs we don't want from algos 
+    # before creating the algoreg cpp file
+    fftsToRemove = ()
+    if 'ACCELERATE' in ctx.env.FFT:
+        fftsToRemove = ('FFTW', 'IFFTW')
+    else:
+        fftsToRemove = ('AFFT')
+        
+    for key in fftsToRemove:
+        if key in algos:
+            del algos[key]        
+
     create_registration_cpp(algos, algoreg_path, use_streaming=True)
 
     sources = ctx.path.ant_glob('essentia/**/*.cpp')
@@ -301,6 +324,8 @@ def build(ctx):
         install_path = '${PREFIX}/lib',
         #includes = ctx.env.includes
     )
+    
+    print ctx.stlib
 
     def write_pcfile(task):
         open('build/essentia.pc', 'w').write(ctx.env.pcfile)
