@@ -22,6 +22,7 @@
 #include <essentia/essentiamath.h>
 #include <essentia/scheduler/network.h>
 #include <essentia/streaming/algorithms/poolstorage.h>
+#include "credit_libav.h" 
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
@@ -165,6 +166,7 @@ int main(int argc, char* argv[]) {
   if (argc != 3) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << argv[0] << " input_audiofile output_yamlfile" << endl;
+    creditLibAV();    
     exit(1);
   }
 

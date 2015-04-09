@@ -27,6 +27,11 @@
 #define HAVE_SWRESAMPLE 0
 #endif
 
+
+#ifndef HAVE_AVRESAMPLE
+#define HAVE_AVRESAMPLE 0
+#endif
+
 // TODO Long-term: get rid of audioconvert.* and switch to using official libavresample API.
 /* Current libavcodec-dev package is missing /usr/include/libavcodec/audioconvert.h,
    therefore we have a copy of it in the source. Audioconvert is not a public header
@@ -93,18 +98,18 @@ extern "C" {
 #endif
 
 
-// --- audioconvert
-
 extern "C" {
 
-#if HAVE_SWRESAMPLE
+#if HAVE_AVRESAMPLE
+#  include<libavresample/avresample.h>
+#  include<libavutil/opt.h>
+#elif HAVE_SWRESAMPLE
 #   include <libswresample/swresample.h>
 #else
-#   include "audioconvert.h"
+#   error Error in project configuration: neither libavresample nor libswresample were detected
 #endif
 
 }
-
 
 // --- from audiocontext
 
@@ -138,13 +143,3 @@ extern "C" {
 
 #endif // ESSENTIA_FFMPEGAPI_H
 
-
-extern "C" {
-
-#if HAVE_SWRESAMPLE
-#   include <libswresample/swresample.h>
-#else
-#   include "audioconvert.h"
-#endif
-
-}
