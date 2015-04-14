@@ -54,11 +54,6 @@ class IFFTK : public Algorithm {
   static const char* description;
 
  protected:
-//  fftwf_plan _fftPlan;
-//  int _fftPlanSize;
-//  std::complex<Real>* _input;
-//  Real* _output;
-
     kiss_fftr_cfg _fftCfg;
     int _fftPlanSize;
     std::complex<Real>* _input;

@@ -38,6 +38,11 @@ class IFFTA : public Algorithm {
   IFFTA() {
     declareInput(_fft, "fft", "the input frame");
     declareOutput(_signal, "frame", "the IFFT of the input frame");
+      
+      fftSetup = NULL;
+      accelBuffer.realp = NULL;
+      accelBuffer.imagp = NULL;
+      _fftPlanSize = 0;
   }
 
   ~IFFTA();

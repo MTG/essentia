@@ -35,9 +35,14 @@ class FFTA : public Algorithm {
   Output<std::vector<std::complex<Real> > > _fft;
 
  public:
-  FFTA() {
+    FFTA() {
     declareInput(_signal, "frame", "the input audio frame");
     declareOutput(_fft, "fft", "the FFT of the input frame");
+        
+        fftSetup = NULL;
+        accelBuffer.realp = NULL;
+        accelBuffer.imagp = NULL;
+        _fftPlanSize = 0;
   }
 
   ~FFTA();
@@ -59,11 +64,7 @@ class FFTA : public Algorithm {
     FFTSetup fftSetup;
     
     int logSize;
-    
-  int _fftPlanSize;
-    
-//  std::complex<Real>* _output;
-    
+    int _fftPlanSize;    
     DSPSplitComplex accelBuffer;
 
   void createFFTObject(int size);

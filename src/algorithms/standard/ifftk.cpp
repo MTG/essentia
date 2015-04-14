@@ -29,17 +29,23 @@ const char* IFFTK::description = DOC("This algorithm calculates the inverse STFT
 "\n"
 "An exception is thrown if the input's size is not larger than 1.\n"
 "\n"
+"FFT computation will be carried out using the KISS library [3]"
+"\n"
 "References:\n"
 "  [1] Fast Fourier transform - Wikipedia, the free encyclopedia,\n"
 "  http://en.wikipedia.org/wiki/Fft\n\n"
 "  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
-"  http://mathworld.wolfram.com/FastFourierTransform.html");
+"  http://mathworld.wolfram.com/FastFourierTransform.html\n"
+"  [3] KISS -- Keep It Simple, Stupid.\n"
+"  http://kissfft.sourceforge.net/");
 
 
 IFFTK::~IFFTK() {
   ForcedMutexLocker lock(FFTK::globalFFTKMutex);
 
-
+    free(_fftCfg);
+    free(_input);
+    free(_output);
 }
 
 void IFFTK::compute() {
@@ -60,15 +66,12 @@ void IFFTK::compute() {
   // copy input into plan
   memcpy(_input, &fft[0], (size/2+1)*sizeof(complex<Real>));
 
-  // calculate the fft
-//  fftwf_execute(_fftPlan);
-
+    //Perform forward fft
     kiss_fftri(_fftCfg,(const kiss_fft_cpx *) _input,(kiss_fft_scalar * ) _output);
 
   // copy result from plan to output vector
   signal.resize(size);
   memcpy(&signal[0], _output, size*sizeof(Real));
-
 }
 
 void IFFTK::configure() {
@@ -77,12 +80,6 @@ void IFFTK::configure() {
 
 void IFFTK::createFFTObject(int size) {
   ForcedMutexLocker lock(FFTK::globalFFTKMutex);
-
-  // create the temporary storage array
-//  fftwf_free(_input);
-//  fftwf_free(_output);
-//  _input = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
-//  _output = (Real*)fftwf_malloc(sizeof(Real)*size);
     
 //     create the temporary storage array
       free(_input);
@@ -93,9 +90,6 @@ void IFFTK::createFFTObject(int size) {
   if (_fftCfg != 0) {
     free(_fftCfg);
   }
-
-  //_fftPlan = fftwf_plan_dft_c2r_1d(size, (fftwf_complex*)_input, _output, FFTW_MEASURE);
-//  _fftPlan = fftwf_plan_dft_c2r_1d(size, (fftwf_complex*)_input, _output, FFTW_ESTIMATE);
     
     _fftCfg = kiss_fftr_alloc(size, 1, NULL, NULL );
   _fftPlanSize = size;

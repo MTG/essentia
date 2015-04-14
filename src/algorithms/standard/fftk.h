@@ -59,10 +59,7 @@ class FFTK : public Algorithm {
   int _fftPlanSize;
   Real* _input;
   std::complex<Real>* _output;
-    
-//    kiss_fft_scalar * _input;
-//    kiss_fft_cpx * _output;
-    
+        
     kiss_fftr_cfg _fftCfg;
 
   void createFFTObject(int size);

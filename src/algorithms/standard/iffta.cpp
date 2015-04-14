@@ -29,23 +29,22 @@ const char* IFFTA::description = DOC("This algorithm calculates the inverse STFT
 "\n"
 "An exception is thrown if the input's size is not larger than 1.\n"
 "\n"
+"FFT computation will be carried out using the Accelerate Framework [3]"
+"\n"
 "References:\n"
 "  [1] Fast Fourier transform - Wikipedia, the free encyclopedia,\n"
 "  http://en.wikipedia.org/wiki/Fft\n\n"
 "  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
-"  http://mathworld.wolfram.com/FastFourierTransform.html");
+"  http://mathworld.wolfram.com/FastFourierTransform.html\n"
+"  [3] vDSP Programming Guide -- from Apple\n"
+"  https://developer.apple.com/library/ios/documentation/Performance/Conceptual/vDSP_Programming_Guide/UsingFourierTransforms/UsingFourierTransforms.html"
+);
 
 
 IFFTA::~IFFTA() {
   ForcedMutexLocker lock(FFTA::globalFFTAMutex);
 
-//  fftwf_destroy_plan(_fftPlan);
-//  fftwf_free(_input);
-//  fftwf_free(_output);
-
-    //Accelerate memory stuff isn't working with Python, need to investigate
-    if(fftSetup != 0)
-        vDSP_destroy_fftsetup(fftSetup);
+    vDSP_destroy_fftsetup(fftSetup);
     free(accelBuffer.realp);
     free(accelBuffer.imagp);
 }
@@ -64,12 +63,6 @@ void IFFTA::compute() {
       ((fftSetup != 0) && _fftPlanSize != size)) {
     createFFTObject(size);
   }
-
-  // copy input into plan
-//  memcpy(_input, &fft[0], (size/2+1)*sizeof(complex<Real>));
-
-  // calculate the fft
-//  fftwf_execute(_fftPlan);
 
     //Pack
     accelBuffer.realp[0] = fft[0].real();
@@ -94,38 +87,22 @@ void IFFTA::configure() {
 
 void IFFTA::createFFTObject(int size) {
   ForcedMutexLocker lock(FFTA::globalFFTAMutex);
-
-//  // create the temporary storage array
-//  fftwf_free(_input);
-//  fftwf_free(_output);
-//  _input = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
-//  _output = (Real*)fftwf_malloc(sizeof(Real)*size);
-//
-//  if (_fftPlan != 0) {
-//    fftwf_destroy_plan(_fftPlan);
-//  }
-//
-//  //_fftPlan = fftwf_plan_dft_c2r_1d(size, (fftwf_complex*)_input, _output, FFTW_MEASURE);
-//  _fftPlan = fftwf_plan_dft_c2r_1d(size, (fftwf_complex*)_input, _output, FFTW_ESTIMATE);
-    
     
     //Delete stuff before assigning
     free(accelBuffer.realp);
     free(accelBuffer.imagp);
     
+    accelBuffer.realp         = (float *) malloc(sizeof(float) * size/2);
+    accelBuffer.imagp         = (float *) malloc(sizeof(float) * size/2);
+    
     logSize = log2(size);
     
-    //With the Accelerate Framework, you only need to recreate the FFT if your size exceeds
-    //the current
+    //With vDSP you only need to create a new fft if you've increased the size
     if(size > _fftPlanSize) {
-        if(fftSetup != 0)
-            vDSP_destroy_fftsetup(fftSetup);
+        vDSP_destroy_fftsetup(fftSetup);
         
         fftSetup = vDSP_create_fftsetup( logSize, 0 );
     }
-    
-    accelBuffer.realp         = (float *) malloc(sizeof(float) * size/2);
-    accelBuffer.imagp         = (float *) malloc(sizeof(float) * size/2);
     
     _fftPlanSize = size;
 }

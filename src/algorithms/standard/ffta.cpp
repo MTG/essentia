@@ -25,7 +25,19 @@ using namespace essentia;
 using namespace standard;
 
 const char* FFTA::name = "FFT";
-const char* FFTA::description = DOC("FFTA Description");
+const char* FFTW::description = DOC("This algorithm computes the positive complex STFT (Short-term Fourier transform) of an array of Reals using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
+                                    "At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
+                                    "\n"
+                                    "FFT computation will be carried out using the Accelerate Framework [3]"
+                                    "\n"
+                                    "References:\n"
+                                    "  [1] Fast Fourier transform - Wikipedia, the free encyclopedia,\n"
+                                    "  http://en.wikipedia.org/wiki/Fft\n\n"
+                                    "  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
+                                    "  http://mathworld.wolfram.com/FastFourierTransform.html\n"
+                                    "  [3] vDSP Programming Guide -- from Apple\n"
+                                    "  https://developer.apple.com/library/ios/documentation/Performance/Conceptual/vDSP_Programming_Guide/UsingFourierTransforms/UsingFourierTransforms.html"
+                                    );
 
 ForcedMutex FFTA::globalFFTAMutex;
 
@@ -37,16 +49,10 @@ FFTA::~FFTA() {
   // This will cause a memory leak then, but it is definitely a better choice
   // than a crash (right, right??? :-) )
   if (essentia::isInitialized()) {
-//    fftwf_destroy_plan(_fftPlan);
-//    fftwf_free(_input);
-//    fftwf_free(_output);
-      
-      if(fftSetup != 0)
-          vDSP_destroy_fftsetup(fftSetup);
+      vDSP_destroy_fftsetup(fftSetup);
       free(accelBuffer.realp);
       free(accelBuffer.imagp);
   }
-    
 }
 
 void FFTA::compute() {
@@ -105,31 +111,17 @@ void FFTA::createFFTObject(int size) {
     throw EssentiaException("FFT: can only compute FFT of arrays which have an even size");
   }
     
-//  // create the temporary storage array
-//  fftwf_free(_input);
-//  fftwf_free(_output);
-//  _input = (Real*)fftwf_malloc(sizeof(Real)*size);
-//  _output = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
-//
-//  if (_fftPlan != 0) {
-//    fftwf_destroy_plan(_fftPlan);
-//  }
-//
-//  _fftPlan = fftwf_plan_dft_r2c_1d(size, _input, (fftwf_complex*)_output, FFTW_ESTIMATE);
-    
-    logSize = log2(size);
-    
-    //Delete stuff before assigning
     free(accelBuffer.realp);
     free(accelBuffer.imagp);
     
     accelBuffer.realp         = (float *) malloc(sizeof(float) * size/2);
     accelBuffer.imagp         = (float *) malloc(sizeof(float) * size/2);
     
+    logSize = log2(size);
+    
+    //With vDSP you only need to create a new fft if you've increased the size
     if(size > _fftPlanSize) {
-        if(fftSetup != 0)
-            vDSP_destroy_fftsetup(fftSetup);
-        
+        vDSP_destroy_fftsetup(fftSetup);
         fftSetup = vDSP_create_fftsetup( logSize, 0 );
     }
     

@@ -28,11 +28,15 @@ const char* FFTK::name = "FFT";
 const char* FFTK::description = DOC("This algorithm computes the positive complex STFT (Short-term Fourier transform) of an array of Reals using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
 "At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
 "\n"
+"FFT computation will be carried out using the KISS library [3]"
+"\n"
 "References:\n"
 "  [1] Fast Fourier transform - Wikipedia, the free encyclopedia,\n"
 "  http://en.wikipedia.org/wiki/Fft\n\n"
 "  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
-"  http://mathworld.wolfram.com/FastFourierTransform.html");
+"  http://mathworld.wolfram.com/FastFourierTransform.html\n"
+"  [3] KISS -- Keep It Simple, Stupid.\n"
+"  http://kissfft.sourceforge.net/");
 
 ForcedMutex FFTK::globalFFTKMutex;
 
@@ -44,11 +48,9 @@ FFTK::~FFTK() {
   // This will cause a memory leak then, but it is definitely a better choice
   // than a crash (right, right??? :-) )
   if (essentia::isInitialized()) {
-//    fftwf_destroy_plan(_fftPlan);
-//    fftwf_free(_input);
-//    fftwf_free(_output);
-      
       free(_fftCfg);
+      free(_input);
+      free(_output);
   }
 }
 
@@ -92,28 +94,17 @@ void FFTK::createFFTObject(int size) {
     throw EssentiaException("FFT: can only compute FFT of arrays which have an even size");
   }
 
-  // create the temporary storage array
-//  fftwf_free(_input);
-//  fftwf_free(_output);
-//  _input = (Real*)fftwf_malloc(sizeof(Real)*size);
-//  _output = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
-    
+    // create the temporary storage array
     free(_input);
     free(_output);
       _input = (Real*)malloc(sizeof(Real)*size);
       _output = (complex<Real>*)malloc(sizeof(complex<Real>)*size);
 
-//          _input = (kiss_fft_scalar *)malloc(sizeof(kiss_fft_scalar)*size);
-//          _output = (kiss_fft_cpx *)malloc(sizeof(kiss_fft_cpx)*size);
-
     
   if (_fftCfg != 0) {
     free(_fftCfg);
   }
-
-//  _fftPlan = fftwf_plan_dft_r2c_1d(size, _input, (fftwf_complex*)_output, FFTW_ESTIMATE);
     
-    _fftCfg = kiss_fftr_alloc(size, 0, NULL, NULL );
-    
+    _fftCfg = kiss_fftr_alloc(size, 0, NULL, NULL );    
   _fftPlanSize = size;
 }
