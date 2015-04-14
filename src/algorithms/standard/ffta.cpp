@@ -27,10 +27,10 @@ using namespace standard;
 const char* FFTA::name = "FFT";
 const char* FFTA::description = DOC("FFTA Description");
 
-ForcedMutex FFTA::globalFFTWMutex;
+ForcedMutex FFTA::globalFFTAMutex;
 
 FFTA::~FFTA() {
-  ForcedMutexLocker lock(globalFFTWMutex);
+  ForcedMutexLocker lock(globalFFTAMutex);
 
   // we might have called essentia::shutdown() before this algorithm goes out
   // of scope, so make sure we're not doing stupid things here
@@ -40,10 +40,13 @@ FFTA::~FFTA() {
 //    fftwf_destroy_plan(_fftPlan);
 //    fftwf_free(_input);
 //    fftwf_free(_output);
-      vDSP_destroy_fftsetup(fftSetup);
+      
+      if(fftSetup != 0)
+          vDSP_destroy_fftsetup(fftSetup);
       free(accelBuffer.realp);
       free(accelBuffer.imagp);
   }
+    
 }
 
 void FFTA::compute() {
@@ -75,8 +78,6 @@ void FFTA::compute() {
     //Prob a much better way of doing this but for now this works
     //Things to note: need to scale by /2.0f
     //In Accelerate fttOutput[0] contains the real for point 0 and point N/2+1
-    // https://developer.apple.com/library/ios/documentation/Performance/Conceptual/vDSP_Programming_Guide/UsingFourierTransforms/UsingFourierTransforms.html
-    
 
     //Construct first point
     fft[0] = std::complex<Real>(accelBuffer.realp[0]/2.0f, 0.0f);
@@ -87,7 +88,7 @@ void FFTA::compute() {
     }
     
     //Construct the last point
-    fft.push_back(std::complex<Real>(accelBuffer.imagp[0]/2.0f, 0.0f));
+    fft[size/2] = std::complex<Real>(accelBuffer.imagp[0]/2.0f, 0.0f);
 }
 
 void FFTA::configure() {
@@ -95,7 +96,7 @@ void FFTA::configure() {
 }
 
 void FFTA::createFFTObject(int size) {
-  ForcedMutexLocker lock(globalFFTWMutex);
+  ForcedMutexLocker lock(globalFFTAMutex);
 
   // This is only needed because at the moment we return half of the spectrum,
   // which means that there are 2 different input signals that could yield the
@@ -118,14 +119,19 @@ void FFTA::createFFTObject(int size) {
     
     logSize = log2(size);
     
-    //With the Accelerate Framework, you only need to recreate the FFT if your size exceeds
-    //the current
+    //Delete stuff before assigning
+    free(accelBuffer.realp);
+    free(accelBuffer.imagp);
+    
+    accelBuffer.realp         = (float *) malloc(sizeof(float) * size/2);
+    accelBuffer.imagp         = (float *) malloc(sizeof(float) * size/2);
+    
     if(size > _fftPlanSize) {
+        if(fftSetup != 0)
+            vDSP_destroy_fftsetup(fftSetup);
+        
         fftSetup = vDSP_create_fftsetup( logSize, 0 );
     }
-    
-    accelBuffer.realp = new float[size/2];
-    accelBuffer.imagp = new float[size/2];
     
     _fftPlanSize = size;
 }

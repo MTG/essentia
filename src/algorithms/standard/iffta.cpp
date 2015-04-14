@@ -37,12 +37,15 @@ const char* IFFTA::description = DOC("This algorithm calculates the inverse STFT
 
 
 IFFTA::~IFFTA() {
-  ForcedMutexLocker lock(FFTA::globalFFTWMutex);
+  ForcedMutexLocker lock(FFTA::globalFFTAMutex);
 
 //  fftwf_destroy_plan(_fftPlan);
 //  fftwf_free(_input);
 //  fftwf_free(_output);
-    vDSP_destroy_fftsetup(fftSetup);
+
+    //Accelerate memory stuff isn't working with Python, need to investigate
+    if(fftSetup != 0)
+        vDSP_destroy_fftsetup(fftSetup);
     free(accelBuffer.realp);
     free(accelBuffer.imagp);
 }
@@ -82,12 +85,7 @@ void IFFTA::compute() {
     // copy result from plan to output vector
     signal.resize(size);
     
-
-
     vDSP_ztoc(&accelBuffer, 1, (COMPLEX*)&signal[0], 2, size/2);
-    
-    //  memcpy(&signal[0], _output, size*sizeof(Real));
-
 }
 
 void IFFTA::configure() {
@@ -95,7 +93,7 @@ void IFFTA::configure() {
 }
 
 void IFFTA::createFFTObject(int size) {
-  ForcedMutexLocker lock(FFTA::globalFFTWMutex);
+  ForcedMutexLocker lock(FFTA::globalFFTAMutex);
 
 //  // create the temporary storage array
 //  fftwf_free(_input);
@@ -111,18 +109,23 @@ void IFFTA::createFFTObject(int size) {
 //  _fftPlan = fftwf_plan_dft_c2r_1d(size, (fftwf_complex*)_input, _output, FFTW_ESTIMATE);
     
     
+    //Delete stuff before assigning
+    free(accelBuffer.realp);
+    free(accelBuffer.imagp);
+    
     logSize = log2(size);
     
     //With the Accelerate Framework, you only need to recreate the FFT if your size exceeds
     //the current
     if(size > _fftPlanSize) {
+        if(fftSetup != 0)
+            vDSP_destroy_fftsetup(fftSetup);
+        
         fftSetup = vDSP_create_fftsetup( logSize, 0 );
     }
     
-    std::cout << "SIZE: " << size << "\n";
-    
-    accelBuffer.realp = new float[size/2];
-    accelBuffer.imagp = new float[size/2];
+    accelBuffer.realp         = (float *) malloc(sizeof(float) * size/2);
+    accelBuffer.imagp         = (float *) malloc(sizeof(float) * size/2);
     
     _fftPlanSize = size;
 }

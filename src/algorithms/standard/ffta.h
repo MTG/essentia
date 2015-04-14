@@ -54,7 +54,7 @@ class FFTA : public Algorithm {
 
  protected:
   friend class IFFTA;
-  static ForcedMutex globalFFTWMutex;
+  static ForcedMutex globalFFTAMutex;
 
     FFTSetup fftSetup;
     
