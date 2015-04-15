@@ -79,6 +79,8 @@ def configure(ctx):
         # required if we want to use libessentia.a to be linked in the python bindings
         # (dynamic library, needs -fPIC)
         ctx.env.CXXFLAGS += [ '-fPIC' ]
+        ctx.env.CPPFLAGS += [ '-fPIC' ] # need that for KissFFT
+
 
     # global defines
     ctx.env.DEFINES = []
