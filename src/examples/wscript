@@ -82,7 +82,9 @@ def configure(ctx):
     
         if "HAVE_GAIA2" in ctx.env['define_key']:
             example_list += example_list_gaia
-  
+
+    #Don't know where this should be set for compiling examples???
+    ctx.env.LINKFLAGS += [ '-framework', 'Accelerate']
 
     if ctx.env.WITH_EXAMPLES:
         ctx.env.EXAMPLE_LIST = example_list
