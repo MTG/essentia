@@ -1,0 +1,14 @@
+prefix=packaging/win32_3rdparty/libav-0.8.9
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libswscale
+Description: Libav image rescaling library
+Version: 2.1.0
+Requires: 
+Requires.private: libavutil = 51.22.1
+Conflicts:
+Libs: -L${libdir} -lswscale 
+Libs.private: -lm
+Cflags: -I${includedir}

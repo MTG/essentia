@@ -1,0 +1,11 @@
+prefix=../packaging/win32_3rdparty/taglib-1.9.1
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+
+Name: TagLib
+Description: Audio meta-data library
+Requires:
+Version: 1.9.1
+Cflags: -I${includedir}
+Libs: -L${libdir} -ltag
