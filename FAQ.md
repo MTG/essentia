@@ -145,9 +145,21 @@ Since version 2.1, build scripts can be configured to ignore 3rdparty dependenci
 ./waf configure --lightweight=fftw
 ```
 
+Avoid all dependencies including fftw and build with KissFFT instead (BSD, included in Essentia therefore no external linking needed, cross-platform):
+
+```
+./waf configure --lightweight= --fft=KISS
+```
+
+Avoid all dependencies and build with Accelerate FFT (native on OSX/iOS):
+
+```
+./waf configure --lightweight= --fft=ACCELERATE
+```
+
 It is also possible to specify algorithms to be ignored using the ```--ignore-algos``` flag, although you need to take care that the ignored algorithm are not required by any of the algorithms and examples that will be compiled. 
 
-Essentia includes in its code the Spline library (LGPLv3) which is used by Spline and CubicSpline algorithms and is built by default. To ignore this library, use the following flag in ```./waf configure``` command:
+Note, that Essentia includes in its code the Spline library (LGPLv3) which is used by Spline and CubicSpline algorithms and is built by default. To ignore this library, use the following flag in ```./waf configure``` command:
 ```
 --ignore-algos=Spline,CubicSpline
 ```
