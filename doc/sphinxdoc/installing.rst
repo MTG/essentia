@@ -28,9 +28,9 @@ Essentia depends on (at least) the following libraries:
 Installing dependencies on Linux
 --------------------------------
 
-You can install those dependencies on a Debian/Ubuntu system from official repositories using the commands provided below. Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. 
+You can install those dependencies on a Debian/Ubuntu system from official repositories using the commands provided below. Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. See Github release notes on the download page. 
 
-In the case of Essentia 2.1, the required version of ``libtag1-dev`` is greater or equal to ``1.9.1``. It is distributed with Ubuntu Trusty (14.04 LTS). If you are using the latest stable Debian (Wheezy), you might want to install it from `wheezy-backports <https://wiki.debian.org/Backports>`_ repository. The required version of ``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev`` is greater or equal to ``10.1``. The appropriate versions are distributed in Ubuntu Utopic (14.10) repository, and in Debian wheezy-backports.
+In the case of Essentia 2.1, the required version of TagLib (libtag1-dev) is greater or equal to ``1.9``. The suitable version is distributed with Ubuntu Trusty (14.04 LTS). If you are using the latest stable Debian (Wheezy), you might want to install it from `wheezy-backports <https://wiki.debian.org/Backports>`_ repository. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu Utopic (14.10) repository, and in Debian wheezy-backports.
 
 **Essentia 2.1 on Ubuntu 14.10**::
 
