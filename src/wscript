@@ -87,8 +87,8 @@ def configure(ctx):
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
-                      args=['libavcodec >= 53.25.0', '--cflags', '--libs', '--modversion'],
-                      msg='Checking for \'libavcodec\' >= 53.25.0',
+                      args=['libavcodec >= 55.34.1', '--cflags', '--libs', '--modversion'],
+                      msg='Checking for \'libavcodec\' >= 55.34.1',
                       mandatory=False)
         
         ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
