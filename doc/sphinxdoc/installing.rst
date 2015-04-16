@@ -32,11 +32,7 @@ You can install those dependencies on a Debian/Ubuntu system from official repos
 
 In the case of Essentia 2.1, the required version of ``libtag1-dev`` is greater or equal to ``1.9.1``. It is distributed with Ubuntu Trusty (14.04 LTS). If you are using the latest stable Debian (Wheezy), you might want to install it from `wheezy-backports <https://wiki.debian.org/Backports>`_ repository. The required version of ``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev`` is greater or equal to ``10.1``. The appropriate versions are distributed in Ubuntu Utopic (14.10) repository, and in Debian wheezy-backports.
 
-**Essentia 2.0/2.0.1 on Debian Wheezy / Ubuntu 10.04**::
-
-  sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev python-dev libsamplerate0-dev libtag1-dev
-
-**Essentia 2.1 on Ubuntu 10.10**::
+**Essentia 2.1 on Ubuntu 14.10**::
 
   sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev
 
