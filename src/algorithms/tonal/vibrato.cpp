@@ -40,7 +40,7 @@ const char* Vibrato::description = DOC("Given a pitch contour [Hz], this algorit
 void Vibrato::configure() {
     
   _minFrequency = parameter("minFrequency").toReal();
-  _maxFrequency = parameter("minFrequency").toReal();
+  _maxFrequency = parameter("maxFrequency").toReal();
   _minExtend = parameter("minExtend").toReal();
   _maxExtend = parameter("maxExtend").toReal();
     
@@ -77,26 +77,36 @@ void Vibrato::compute() {
     vibExtend[i]=0.0;
   }
   
+  vector<Real> pitchP;
+    
+  // set negative pitch values to zero
+  for (int i=0; i<pitch.size(); i++){
+    if (pitch[i]<0){
+        pitchP.push_back(0.0);
+    }else{
+        pitchP.push_back(pitch[i]);
+    }
+  }
   // get contour start and end indices
   vector<float> startC, endC;
-  if (pitch[0]>0){
+  if (pitchP[0]>0){
     startC.push_back(0);
   }
-  for (int i=0; i<pitch.size()-1; i++){
-    if (pitch[i+1]>0 && pitch[i]==0){
+  for (int i=0; i<pitchP.size()-1; i++){
+    if (pitchP[i+1]>0 && pitchP[i]==0){
       startC.push_back(i+1);
     }
-    if (pitch[i+1]==0 && pitch[i]>0){
+    if (pitchP[i+1]==0 && pitchP[i]>0){
             endC.push_back(i);
     }
   }
   if (endC.size()<startC.size()){
     endC.push_back(pitch.size()-1);
   }
+
     
   // iterate over contour segments
   for (int i=0; i<startC.size(); i++){
-    
     // get a segment in cents
     vector<Real> contour;
     for (int ii=startC[i]; ii<=endC[i]; ii++){
@@ -123,7 +133,6 @@ void Vibrato::compute() {
     
     // frame-wise processing
     while (true){
-      bool vibrato=true;
           
       //get a frame
       frameCutter->compute();
@@ -146,41 +155,42 @@ void Vibrato::compute() {
           
       int numberPeaks = peakFrequencies.size();
       if (!numberPeaks) {
-        vibrato=false;
+        continue;
       }
           
       if (peakFrequencies[0] < _minFrequency || peakFrequencies[0] > _maxFrequency) {
-        vibrato=false;
+        continue;
       }
-          
+
+      
       if (numberPeaks > 1) {  // there is at least one extra peak
         if (peakFrequencies[1] <= _maxFrequency) {
-          vibrato=false;
+          continue;
         }
         if (20 * log10(peakMagnitudes[0]/peakMagnitudes[1]) < vibdBDropLobe) {
-          vibrato=false;
+          continue;
         }
       }
           
       if (numberPeaks > 2) {  // there is a second extra peak
         if (peakFrequencies[2] <= _maxFrequency) {
-          vibrato=false;
+          continue;
         }
         if (20 * log10(peakMagnitudes[0]/peakMagnitudes[2]) < vibdBDropSecondPeak) {
-          vibrato=false;
+          continue;
         }
       }
-          
-      if ((frame[argmax(frame)]-frame[argmin(frame)])>_maxExtend || (frame[argmax(frame)]-frame[argmin(frame)])<_maxExtend){
-        vibrato=false;
+      
+      Real ext=frame[argmax(frame)]+abs(frame[argmin(frame)]);
+      if (ext<_minExtend || ext>_maxExtend){
+        continue;
       }
-          
-      if(vibrato){
-        for (int ii=startC[i]+frameNo; ii<startC[i]+frameNo+frameSize; ii++){
-          vibFrequency[ii]=peakFrequencies[0];
-          vibExtend[ii]=peakMagnitudes[0];
-        }
+    
+      for (int ii=startC[i]+frameNo; ii<startC[i]+frameNo+frameSize; ii++){
+        vibFrequency[ii]=peakFrequencies[0];
+        vibExtend[ii]=ext;
       }
+    
     }
   
   }
