@@ -49,7 +49,7 @@ void Vibrato::configure() {
   fftSize=4*frameSize;
   
   frameCutter->configure("frameSize", frameSize, "hopSize", 1, "startFromZero", true);
-  window->configure("type", "hann");
+  window->configure("type", "hann", "zeroPadding", 3*frameSize);
   spectrum->configure("size", fftSize);
   spectralPeaks->configure("sampleRate", sampleRate, "maxPeaks", 3, "orderBy", "magnitude");
 }
