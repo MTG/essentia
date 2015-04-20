@@ -82,7 +82,6 @@ def configure(ctx):
     
         if "HAVE_GAIA2" in ctx.env['define_key']:
             example_list += example_list_gaia
-  
 
     if ctx.env.WITH_EXAMPLES:
         ctx.env.EXAMPLE_LIST = example_list
@@ -114,6 +113,10 @@ def configure(ctx):
         if ctx.options.CROSS_COMPILE_MINGW32:
             # otherwise the __imp__ symbols will be expected at link time 
             ctx.env.CXXFLAGS += ['-DYAML_DECLARE_STATIC', '-DTAGLIB_STATIC']
+
+    # add flags for support of Accelerate FFT on OSX
+    if 'ACCELERATE' in ctx.env.FFT:
+        ctx.env.LINKFLAGS += [ '-framework', 'Accelerate']
 
 
 def build(ctx):

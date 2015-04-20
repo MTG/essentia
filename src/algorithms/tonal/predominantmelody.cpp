@@ -29,7 +29,7 @@ const char* PredominantMelody::name = "PredominantMelody";
 const char* PredominantMelody::version = "1.0";
 const char* PredominantMelody::description = DOC("This algorithm estimates the fundamental frequency of the predominant melody in the input signal. It implements the MELODIA algorithm described in [1]. The algorithm is specifically suited to extract melody in polyphonic music, but also works for monophonic signals. The approach is based on the creation and characterization of pitch contours, time continuous sequences of pitch candidates grouped using auditory streaming cues. To this end, PitchSalienceFunction, PitchSalienceFunctionPeaks, PitchContours, and PitchContoursMelody algorithms are employed. It is strongly advised to use the default parameter values which are optimized according to [1] (where further details are provided) except for minFrequency, maxFrequency, and voicingTolerance, which will depend on your application.\n"
 "\n"
-"The output is a vector of estimated melody pitch values and a vector of confidence values.\n"
+"The output is a vector of estimated melody pitch values and a vector of confidence values. The first value corresponds to the beginning of the input signal (time 0).\n"
 "\n"
 "It is recommended to apply EqualLoudness on the input signal (see [1]) as a pre-processing stage before running this algorithm.\n"
 "\n"

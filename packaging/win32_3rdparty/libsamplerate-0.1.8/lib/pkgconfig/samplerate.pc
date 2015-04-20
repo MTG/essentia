@@ -1,0 +1,11 @@
+prefix=../packaging/win32_3rdparty/libsamplerate-0.1.8
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: samplerate
+Description: An audio Sample Rate Conversion library
+Requires: 
+Version: @VERSION@
+Libs: -L${libdir} -lsamplerate
+Cflags: -I${includedir} 

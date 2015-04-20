@@ -31,7 +31,9 @@ def options(ctx):
     ctx.add_option('--ignore-algos', action='store',
                    dest='IGNORE_ALGOS', default=False,
                    help='algorithms to ignore (comma separated)')
-
+    ctx.add_option('--fft', action='store',
+                   dest='FFT', default='FFTW',
+                   help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
 
 def debian_version():
     try:
@@ -58,17 +60,20 @@ def configure(ctx):
     ctx.env.EXAMPLE_LIST   = []
     ctx.env.ALGOIGNORE = []
     ctx.env.IGNORE_ALGOS  = ctx.options.IGNORE_ALGOS
+    ctx.env.FFT  = ctx.options.FFT
 
     if ctx.env.WITH_STATIC_EXAMPLES and not ctx.env.EXAMPLES:
         ctx.env.WITH_EXAMPLES = True
 
-    if ctx.env.WITH_LIBS:
-        ctx.env.WITH_LIBS_LIST = ['fftw']   # FFTW is still mandatory
-        for e in ctx.env.WITH_LIBS.split(","):
-            e = e.strip()
-            if e not in dependencies_list:
-                raise ctx.errors.ConfigurationError("Specified dependency [%s] does not exist" % e)
-            ctx.env.WITH_LIBS_LIST.append(e)
+    if ctx.env.WITH_LIBS != False:  
+        # bool value if --lightweight flag was not specified, string otherwise     
+        ctx.env.WITH_LIBS_LIST = ['']
+        if ctx.env.WITH_LIBS:
+            for e in ctx.env.WITH_LIBS.split(","):
+                e = e.strip()
+                if e not in dependencies_list:
+                    raise ctx.errors.ConfigurationError("Specified dependency [%s] does not exist" % e)
+                ctx.env.WITH_LIBS_LIST.append(e)
         ctx.env.WITH_LIBS_LIST = list(set(ctx.env.WITH_LIBS_LIST))
         print("\n=======================Lightweight Mode : Ignoring ALL libraries except %s =======================\n" % ctx.env.WITH_LIBS_LIST)
     else:
@@ -82,8 +87,8 @@ def configure(ctx):
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
-                      args=['libavcodec >= 53.25.0', '--cflags', '--libs', '--modversion'],
-                      msg='Checking for \'libavcodec\' >= 53.25.0',
+                      args=['libavcodec >= 55.34.1', '--cflags', '--libs', '--modversion'],
+                      msg='Checking for \'libavcodec\' >= 55.34.1',
                       mandatory=False)
         
         ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
@@ -115,7 +120,7 @@ def configure(ctx):
 
     if 'fftw' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=True)    
+                      args=['--cflags', '--libs', '--modversion'], mandatory=False)    
 
     if ctx.env.WITH_GAIA:
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
@@ -140,17 +145,25 @@ def configure(ctx):
     def has(name):
         return ('HAVE_%s' % name.upper()) in ctx.env['define_key']
 
-    # FFTW is the only mandatory dependency
-    algos = ['FFT', 'IFFT']
-    if has('fftw'):
-        print('- fftw detected!')
-        ctx.env.USES += ' FFTW'
+    # We need an FFT/IFFT
+    algos = ['FFT']
+
+    if 'ACCELERATE' in ctx.env.FFT:
+        print('- using Accelerate Framework for FFT\n')
+        ctx.env.LINKFLAGS += [ '-framework', 'Accelerate']
+    elif 'KISS' in ctx.env.FFT:
+        print('- using KISS for FFT\n')        
     else:
-        print('- fftw seems to be missing.')
-        print('  The following algorithms will be ignored: %s\n' % algos)
-        ctx.env.ALGOIGNORE += algos
-        print('  IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
-        print('                  We are about to implement a generic FFT that does not rely exclusively on fftw.\n')
+        print('- using FFTW for FFT\n') 
+        if has('fftw'):
+            print(' - fftw detected!')
+            ctx.env.USES += ' FFTW'
+        else:
+            print(' - fftw seems to be missing.')
+            print('   The following algorithms will be ignored: %s\n' % algos)
+            ctx.env.ALGOIGNORE += algos
+            print('   IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
+            print('                   We are about to implement a generic FFT that does not rely exclusively on fftw.\n')
 
     # MonoLoader, EqloudLoader, and EasyLoader are dependent on Resample
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
@@ -264,6 +277,30 @@ def build(ctx):
 
     # create algorithms registration file
     algoreg_path = 'src/algorithms/essentia_algorithms_reg.cpp'
+
+    # Here we remove the FFTs we don't want from algos 
+    # before creating the algoreg cpp file
+
+    import json
+    with open('algos_start.txt', 'w') as outfile:
+        json.dump(algos, outfile, indent=4)
+
+    #Remove the unnecessary FFT algorithms 
+    fftsToRemove = []
+    if 'ACCELERATE' in ctx.env.FFT:
+        fftsToRemove = ['FFTK', 'IFFTK', 'FFTW', 'IFFTW']
+    elif 'KISS' in ctx.env.FFT:
+        fftsToRemove = ['FFTA', 'IFFTA', 'FFTW', 'IFFTW']
+    else:
+        fftsToRemove = ['FFTA', 'IFFTA', 'FFTK', 'IFFTK']
+        
+    for key in fftsToRemove:        
+        if key in algos:            
+            del algos[key]
+
+    with open('algos_end.txt', 'w') as outfile:
+        json.dump(algos, outfile, indent=4)            
+    
     create_registration_cpp(algos, algoreg_path, use_streaming=True)
 
     sources = ctx.path.ant_glob('essentia/**/*.cpp')
@@ -287,12 +324,18 @@ def build(ctx):
                          'essentia/streaming/algorithms', 'essentia/utils',
                          '3rdparty']
 
-    # do not complie splineutil.cpp if we are not compiling Spline and CubicSpline
+    # do not compile splineutil.cpp if we are not compiling Spline and CubicSpline
     if 'Spline' not in ctx.env.ALGOIGNORE or 'CubicSpline' not in ctx.env.ALGOIGNORE:
         ctx.env.INCLUDES += ['3rdparty/spline' ]
         sources += [ ctx.path.find_resource('3rdparty/spline/splineutil.cpp') ]
     else:
         print ('Building without 3rdparty spline library code because Spline and CubicSpline algorithms are ignored')
+
+    # Add Kiss Dependancy stuff
+    if 'KISS' in ctx.env.FFT:        
+        ctx.env.INCLUDES += ['3rdparty/kiss_fft130' ] 
+        sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/kiss_fft.c') ] 
+        sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/tools/kiss_fftr.c') ]        
 
     ctx.stlib(
         source   = sources,
@@ -301,7 +344,7 @@ def build(ctx):
         install_path = '${PREFIX}/lib',
         #includes = ctx.env.includes
     )
-
+    
     def write_pcfile(task):
         open('build/essentia.pc', 'w').write(ctx.env.pcfile)
 

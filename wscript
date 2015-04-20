@@ -79,6 +79,8 @@ def configure(ctx):
         # required if we want to use libessentia.a to be linked in the python bindings
         # (dynamic library, needs -fPIC)
         ctx.env.CXXFLAGS += [ '-fPIC' ]
+        ctx.env.CPPFLAGS += [ '-fPIC' ] # need that for KissFFT
+
 
     # global defines
     ctx.env.DEFINES = []
@@ -111,18 +113,40 @@ def configure(ctx):
         ctx.env.CXXFLAGS += [ '-pthread' ]
 
 
-    #elif sys.platform == 'win32':
-    #    # compile libgcc and libstd statically when using MinGW
-    #    ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
+    elif sys.platform == 'win32':
+        # compile libgcc and libstd statically when using MinGW
+        ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
+        
+        win_path = "packaging/win32_3rdparty"
+        
+        # Establish MINGW locations
+        tdm_root = ctx.options.prefix
+        tdm_bin = tdm_root + "/bin"
+        tdm_include = tdm_root + "/include"
+        tdm_lib = tdm_root + "/lib"        
+        
+        # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
+        # libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8']
+        # libs_paths = [';packaging\win32_3rdparty\\' + lib + '\lib\pkgconfig' for lib in libs_3rdparty]
+        # os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
+        
+        os.environ["PKG_CONFIG_PATH"] = tdm_root + '\lib\pkgconfig'
+         
+        # TODO why this code does not work?
+        # force the use of mingw gcc compiler instead of msvc
+        #ctx.env.CC = 'gcc'
+        #ctx.env.CXX = 'g++'
+        
+        import distutils.dir_util
 
-    #    # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
-    #    os.environ["PKG_CONFIG_PATH"] = 'packaging\win32_3rdparty\lib\pkgconfig'
-    #    os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
-    #
-    #    # TODO why this code does not work?
-    #    # force the use of mingw gcc compiler instead of msvc
-    #    #ctx.env.CC = 'gcc'
-    #    #ctx.env.CXX = 'g++'
+        print "copying pkgconfig ..."
+        distutils.dir_util.copy_tree(win_path + "/pkgconfig/bin", tdm_bin)
+
+        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'taglib-1.9.1']
+        for lib in libs_3rdparty:
+            print "copying " + lib + "..."
+            distutils.dir_util.copy_tree(win_path + "/" + lib + "/include", tdm_include)
+            distutils.dir_util.copy_tree(win_path + "/" + lib + "/lib", tdm_lib)
 
 
     # use manually prebuilt dependencies in the case of static examples or mingw cross-build
