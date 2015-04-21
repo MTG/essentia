@@ -89,7 +89,7 @@ class OverlapAdd : public StreamingAlgorithmWrapper {
     declareAlgorithm("OverlapAdd");
     //declareInput(_windowedFrame, TOKEN, "frame");
 
-    int preferredSize = 4096;
+   // int preferredSize = 4096;
     declareInput(_windowedFrame, TOKEN,"signal");
     declareOutput(_output, TOKEN, "signal");
 
