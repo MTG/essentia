@@ -61,10 +61,6 @@ int MusicExtractor::compute(const string& audioFilename){
   cerr << "Process step: Replay gain" << endl;
   computeReplayGain(audioFilename); // compute replay gain and the duration of the track
 
-  if (endTime > results.value<Real>("metadata.audio_properties.length")) {
-      endTime = results.value<Real>("metadata.audio_properties.length");
-  }
-
   cerr << "Process step: Compute audio features" << endl;
 
   // normalize the audio with replay gain and compute as many lowlevel, rhythm,
