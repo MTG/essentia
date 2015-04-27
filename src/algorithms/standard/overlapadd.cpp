@@ -116,7 +116,7 @@ void OverlapAdd::compute() {
     }
 
 // output
-    float normalizationGain = _hopSize;
+    float normalizationGain = 0.5f * _hopSize / float(_frameSize); // 0.125; //_hopSize;
   for (int i=0; i< _hopSize; i++) {
     output[i] = normalizationGain * _frameHistory[i]; // TODO: check normalization
     }

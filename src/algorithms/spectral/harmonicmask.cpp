@@ -34,8 +34,8 @@ const char* HarmonicMask::description = DOC("This algorithm applies a spectral m
 
 void HarmonicMask::configure() {
 
-  int sampleRate = parameter("sampleRate").toInt();
-  int binWidth = parameter("binWidth").toReal();
+  _sampleRate = parameter("sampleRate").toInt();
+  _binWidth = parameter("binWidth").toReal();
 
 
 }
@@ -58,12 +58,12 @@ void HarmonicMask::compute() {
   Real curPitchHz = pitch[0];
   int nharmonic = 1;
   int cbin, lbin, rbin;
-  int j;
-  while (curPitchHz > 0 && (nharmonic*curPitchHz < (sampleRate / 2.f)){
+  int i, j;
+  while (curPitchHz > 0 && (nharmonic*curPitchHz < (_sampleRate / 2.f))){
 
-    cbin = floor(0.5 + (nharmonic * curPitchHz * fftsize )/ sampleRate);
-    lbin = cbin - binWidth;
-    rbin = cbin + binWidth;
+    cbin = floor(0.5 + (nharmonic * curPitchHz * fftsize )/ _sampleRate);
+    lbin = cbin - _binWidth;
+    rbin = cbin + _binWidth;
 
     // set harmonic partials bins
     for (j=lbin; j<= rbin; ++j){
@@ -75,9 +75,11 @@ void HarmonicMask::compute() {
 
   // apply TF
   for (i=0; i < fftsize; ++i){
+  mask[i]  =  0.1;  // TEST
     outfft[i] = fft[i] * mask[i]; // real
     // check FFTW size management and apply it to complex spectrum
     outfft[fftsize+1-i] = fft[fftsize+1-i] * mask[i]; // imag
+
   }
 
 

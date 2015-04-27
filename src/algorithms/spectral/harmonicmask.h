@@ -33,6 +33,8 @@ class HarmonicMask : public Algorithm {
     Output<std::vector<std::complex<Real> > > _outfft;
 
   //Algorithm* _spectralPeaks;
+  int _sampleRate;
+  int _binWidth;
 
  public:
   HarmonicMask() {
@@ -72,7 +74,12 @@ class HarmonicMask : public StreamingAlgorithmWrapper {
 
  protected:
 
-  Sink<std::vector<std::complex<Real> > > _fft;
+  int _sampleRate;
+  int _binWidth;
+
+
+  Sink<std::vector<std::complex<Real> > > _fft; // input
+  Sink<std::vector<Real> > _pitch; // input
   Source<std::vector<std::complex<Real> > > _outfft;
 
 
