@@ -51,7 +51,7 @@ class HarmonicMask : public Algorithm {
 
   void declareParameters() {
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
-    declareParameter("magnitudeThreshold", "the minimum spectral-peak magnitude that contributes to spectral complexity", "[0,inf)", 0.005);
+    declareParameter("binWidth", "number of bins per harmonic partials applied to the mask. This will depend on the internal FFT size", "[0,inf)", 4);
   }
 
   void configure();

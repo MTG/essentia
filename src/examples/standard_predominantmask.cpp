@@ -71,8 +71,15 @@ int main(int argc, char* argv[]) {
 
   Algorithm* window       = factory.create("Windowing", "type", "hann");
 
+  Algorithm* equalLoudness = factory.create("EqualLoudness");
+
   Algorithm* fft     = factory.create("FFT",
                             "size", framesize);
+
+  Algorithm* predominantMelody = factory.create("PredominantMelody",
+                                                "frameSize", framesize,
+                                                "hopSize", hopsize,
+                                                "sampleRate", sr);
 
   Algorithm* harmonicMask     = factory.create("HarmonicMask",
                             "sampleRate", sr,
@@ -91,8 +98,10 @@ int main(int argc, char* argv[]) {
                                      "filename", outputFilename);
 
 
-
+  vector<Real> pitch;
+  vector<Real> pitchConf;
   vector<Real> audio;
+  vector<Real> eqaudio;
   vector<Real> frame;
   vector<Real> wframe;
   vector<complex<Real> > fftframe;
@@ -104,7 +113,12 @@ int main(int argc, char* argv[]) {
   // analysis
   audioLoader->output("audio").set(audio);
 
+  equalLoudness->input("signal").set(audio);
+  equalLoudness->output("signal").set(eqaudio);
 
+  predominantMelody->input("signal").set(eqaudio);
+  predominantMelody->output("pitch").set(pitch);
+  predominantMelody->output("pitchConfidence").set(pitchConf);
 
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
@@ -115,8 +129,9 @@ int main(int argc, char* argv[]) {
   fft->input("frame").set(wframe);
   fft->output("fft").set(fftframe);
 
-  // processing (apply mask)
+  // processing harmonic mask (apply mask)
   harmonicMask->input("fft").set(fftframe);
+  harmonicMask->input("pitch").set(pitch);
   harmonicMask->output("fft").set(fftmaskframe);
 
 
@@ -138,11 +153,18 @@ int main(int argc, char* argv[]) {
   cout << "-------- start processing " << audioFilename << " --------" << endl;
 
   audioLoader->compute();
-int counter = 0;
+  equalLoudness->compute();
+  predominantMelody->compute();
+
+  int counter = 0;
+
   while (true) {
+cout << "before framecutter";
 
     // compute a frame
     frameCutter->compute();
+
+cout << "after framecutter";
 
     // if it was the last one (ie: it was empty), then we're done.
     if (!frame.size()) {
@@ -151,7 +173,10 @@ int counter = 0;
 
     window->compute();
     fft->compute();
+    cout << "before harmonic mask";
     harmonicMask-> compute();
+    cout << "after harmonic mask";
+
     ifft->compute();
     overlapAdd->compute();
 

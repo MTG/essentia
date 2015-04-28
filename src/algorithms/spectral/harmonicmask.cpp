@@ -73,6 +73,7 @@ void HarmonicMask::compute() {
     nharmonic++;
   }
 
+cout << "inside harmonic mask[100] = " <<  mask[100];
   // apply TF
   for (i=0; i < fftsize; ++i){
 
