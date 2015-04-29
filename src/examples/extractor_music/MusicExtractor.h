@@ -46,7 +46,7 @@ using namespace streaming;
 
  protected:
 
- 	Pool computeAggregation(Pool& pool);
+  Pool computeAggregation(Pool& pool);
 
   Real analysisSampleRate;
   Real startTime;
@@ -56,10 +56,19 @@ using namespace streaming;
 
   Real replayGain;
   string downmix;
+  vector<standard::Algorithm*> svms;
 
  public:
- 	Pool results;
- 	Pool stats;
+
+  virtual ~MusicExtractor() {
+    for (int i = 0; i < (int)svms.size(); i++) {
+      if (svms[i]) {
+        delete svms[i];
+      }
+    }
+  }
+  Pool results;
+  Pool stats;
   Pool options;
 
   int compute(const string& audioFilename);
@@ -70,6 +79,7 @@ using namespace streaming;
   void computeMetadata(const string& audioFilename);
   void computeReplayGain(const string& audioFilename);
   void computeSVMDescriptors(Pool& pool);
+  void loadSVMModels();
   void outputToFile(Pool& pool, const string& outputFilename);
 
  };

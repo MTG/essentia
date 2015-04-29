@@ -122,6 +122,7 @@ int MusicExtractor::compute(const string& audioFilename){
   // pre-trained classifiers are only available in branches devoted for that
   // (eg: 2.0.1)
   if (options.value<Real>("highlevel.compute")) {
+    loadSVMModels();
     computeSVMDescriptors(stats);
   }
 
@@ -398,9 +399,7 @@ void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
   delete output;
 }
 
-
-void MusicExtractor::computeSVMDescriptors(Pool& pool) {
-  cerr << "Process step: SVM models" << endl;
+void MusicExtractor::loadSVMModels() {
 
   vector<string> svmModels = options.value<vector<string> >("highlevel.svm_models");
 
@@ -408,11 +407,19 @@ void MusicExtractor::computeSVMDescriptors(Pool& pool) {
     cerr << "adding SVM model: " << svmModels[i] << endl;
     standard::Algorithm* svm = standard::AlgorithmFactory::create("GaiaTransform",
                                                                   "history", svmModels[i]);
-    svm->input("pool").set(pool);
-    svm->output("pool").set(pool);
-    svm->compute();
+    svms.push_back(svm);
+  }
+}
 
-    delete svm;
+
+void MusicExtractor::computeSVMDescriptors(Pool& pool) {
+  cerr << "Process step: SVM models" << endl;
+  for (int i = 0; i < (int)svms.size(); i++) {
+
+    svms[i]->input("pool").set(pool);
+    svms[i]->output("pool").set(pool);
+    svms[i]->compute();
+
   }
 }
 
