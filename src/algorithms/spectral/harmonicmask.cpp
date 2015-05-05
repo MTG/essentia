@@ -25,67 +25,78 @@ using namespace standard;
 
 const char* HarmonicMask::name = "HarmonicMask";
 const char* HarmonicMask::description = DOC("This algorithm applies a spectral mask to remove a pitched source component from the signal.\n"
-" It computes first an harmonic mask corresponding to the input pitch and applies the mask to the input FFT to remove that pitch. "
-"The bin width determines how many spectral bins are masked per harmonic partial.\n"
-"\n"
-"References:\n"
-" ");
+                                        " It computes first an harmonic mask corresponding to the input pitch and applies the mask to the input FFT to remove that pitch. "
+                                        "The bin width determines how many spectral bins are masked per harmonic partial.\n"
+                                        "\n"
+                                        "References:\n"
+                                        " ");
 
 
-void HarmonicMask::configure() {
+void HarmonicMask::configure()
+{
 
-  _sampleRate = parameter("sampleRate").toInt();
-  _binWidth = parameter("binWidth").toReal();
+    _sampleRate = parameter("sampleRate").toInt();
+    _binWidth = parameter("binWidth").toReal();
 
 
 }
 
-void HarmonicMask::compute() {
+void HarmonicMask::compute()
+{
 
-  //const vector<Real>& spectrum = _spectrum.get();
-  const std::vector<std::complex<Real> >& fft = _fft.get();
-  const std::vector<Real >& pitch = _pitch.get();
-  std::vector<std::complex<Real> >& outfft = _outfft.get();
 
-  int fftsize = fft.size();
+    const std::vector<std::complex<Real> >& fft = _fft.get();
+    //const std::vector<Real >& pitch = _pitch.get(); // if input is a vector (Predominant)
+// const Real &pitch = _pitch.get(); // input pitch is a scalar yinPitch
+    std::vector<std::complex<Real> >& outfft = _outfft.get();
 
-  vector<Real> frequencies;
-  vector<Real> magnitudes;
+    int fftsize = fft.size();
+    outfft.resize(fftsize);
+
+    vector<Real> frequencies;
+    vector<Real> magnitudes;
 
     // create mask
-  vector<Real> mask;
-  mask.resize(fftsize/2);
-  Real curPitchHz = pitch[0];
-  int nharmonic = 1;
-  int cbin, lbin, rbin;
-  int i, j;
-  while (curPitchHz > 0 && (nharmonic*curPitchHz < (_sampleRate / 2.f))){
+    vector<Real> mask;
+    int maskSize = fftsize; // in Essentia the size of FFT output is (frameSize/2 +1).
+    mask.resize(maskSize);
+    int i, j;
 
-    cbin = floor(0.5 + (nharmonic * curPitchHz * fftsize )/ _sampleRate);
-    lbin = cbin - _binWidth;
-    rbin = cbin + _binWidth;
-
-    // set harmonic partials bins
-    for (j=lbin; j<= rbin; ++j){
-      mask[j] = 0;
+    // init mask to ones
+    for (i=0; i < fftsize; ++i)
+    {
+        mask[i] = 1.f;
     }
 
-    nharmonic++;
-  }
+    //Real curPitchHz = pitch[0]; // predominant Meldoy
+    Real curPitchHz = 220; // pitch;
+    int nharmonic = 1;
+    int cbin, lbin, rbin;
 
-cout << "inside harmonic mask[100] = " <<  mask[100];
-  // apply TF
-  for (i=0; i < fftsize; ++i){
+    while (curPitchHz > 0 && (nharmonic*curPitchHz < (_sampleRate / 2.f)))
+    {
 
-    mask[i]  =  0.1;  // TEST
+        cbin = floor(0.5 + (nharmonic * curPitchHz * 2 * fftsize )/ float(_sampleRate));
+        lbin = cbin - _binWidth;
+        rbin = cbin + _binWidth;
+        lbin = max(0, lbin);
+        rbin = min(rbin,maskSize -1);
 
-     outfft[i] =  complex<Real> (fft[i].real() * mask[i], fft[i].imag()); // real
-    // check FFTW size management and apply it to complex spectrum
+        // set harmonic partials bins
+        for (j=lbin; j<= rbin; ++j)
+        {
+            mask[j] = 0.f;
+        }
 
+        nharmonic++;
+    }
 
-  }
+    // apply TF
+    for (int i=0; i < fftsize; ++i)
+    {
+        outfft[i] =  complex<Real> (fft[i].real() * mask[i], fft[i].imag()  * mask[i]); // real
 
-
+    }
 
 
 }
