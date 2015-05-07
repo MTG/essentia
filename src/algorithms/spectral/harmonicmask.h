@@ -29,8 +29,9 @@ class HarmonicMask : public Algorithm {
 
  private:
     Input<std::vector<std::complex<Real> > > _fft;
-    //Input<std::vector<Real> > _pitch; // PRedominantMelody
-//    Input<Real> _pitch; // YinFFT
+    Input<std::vector<Real> > _pitchIn;
+   // Input<std::vector<Real> > _pitch; // PRedominantMelody
+    //Input<Real> _pitch; // YinFFT
     Output<std::vector<std::complex<Real> > > _outfft;
 
 
@@ -39,8 +40,10 @@ class HarmonicMask : public Algorithm {
 
  public:
   HarmonicMask() {
-  //  declareInput(_pitch, "pitch", "the input pitch");
+
     declareInput(_fft, "fft", "the input frame");
+    declareInput(_pitchIn, "pitchIn", "the input frame");
+    //declareInput(_pitch, "pitch", "the input pitch");
     declareOutput(_outfft, "fft", "the output frame");
 
 
@@ -80,6 +83,7 @@ class HarmonicMask : public StreamingAlgorithmWrapper {
 
 
   Sink<std::vector<std::complex<Real> > > _fft; // input
+  Sink<std::vector<std::complex<Real> > > _pitchIn; // input
   //Sink<std::vector<Real> > _pitch; // input  PredominantMelody
   //Sink<Real> _pitch; // input  for YinFFT
   Source<std::vector<std::complex<Real> > > _outfft;
@@ -89,7 +93,8 @@ class HarmonicMask : public StreamingAlgorithmWrapper {
   HarmonicMask() {
     declareAlgorithm("HarmonicMask");
     declareInput(_fft, TOKEN, "fft");
- //   declareInput(_pitch, TOKEN, "pitch");
+    declareInput(_pitchIn, TOKEN, "pitchIn");
+    //declareInput(_pitch, TOKEN, "pitch");
     declareOutput(_outfft, TOKEN, "fft");
   }
 };

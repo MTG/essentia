@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
 
   // processing harmonic mask (apply mask)
   harmonicMask->input("fft").set(fftframe);
- // harmonicMask->input("pitch").set(thisPitch);
+  harmonicMask->input("pitchIn").set(thisPitch);
   harmonicMask->output("fft").set(fftmaskframe);
 
 
