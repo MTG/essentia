@@ -46,8 +46,9 @@ void HarmonicMask::compute()
 
 
     const std::vector<std::complex<Real> >& fft = _fft.get();
+    const std::vector<Real >& pitch = _pitchIn.get();
     //const std::vector<Real >& pitch = _pitch.get(); // if input is a vector (Predominant)
-// const Real &pitch = _pitch.get(); // input pitch is a scalar yinPitch
+    //const Real &pitch = _pitch.get(); // input pitch is a scalar yinPitch
     std::vector<std::complex<Real> >& outfft = _outfft.get();
 
     int fftsize = fft.size();
