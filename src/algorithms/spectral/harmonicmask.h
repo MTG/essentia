@@ -31,7 +31,8 @@ class HarmonicMask : public Algorithm {
     Input<std::vector<std::complex<Real> > > _fft;
     Input<std::vector<Real> > _pitchIn;
    // Input<std::vector<Real> > _pitch; // PRedominantMelody
-    //Input<Real> _pitch; // YinFFT
+   // Input<Real> _pitchIn; // YinFFT
+    Input<Real> _pitch;
     Output<std::vector<std::complex<Real> > > _outfft;
 
 
@@ -42,7 +43,8 @@ class HarmonicMask : public Algorithm {
   HarmonicMask() {
 
     declareInput(_fft, "fft", "the input frame");
-    declareInput(_pitchIn, "pitchIn", "the input frame");
+    declareInput(_pitchIn, "pitchIn", "the input frame pitch");
+    declareInput(_pitch, "pitch", "an estimate of the fundamental frequency of the signal [Hz]");
     //declareInput(_pitch, "pitch", "the input pitch");
     declareOutput(_outfft, "fft", "the output frame");
 
@@ -83,9 +85,9 @@ class HarmonicMask : public StreamingAlgorithmWrapper {
 
 
   Sink<std::vector<std::complex<Real> > > _fft; // input
-  Sink<std::vector<std::complex<Real> > > _pitchIn; // input
+  //Sink<std::vector<std::complex<Real> > > _pitchIn; // input
   //Sink<std::vector<Real> > _pitch; // input  PredominantMelody
-  //Sink<Real> _pitch; // input  for YinFFT
+  Sink<Real> _pitchIn; // input  for YinFFT
   Source<std::vector<std::complex<Real> > > _outfft;
 
 
