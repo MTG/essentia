@@ -1,4 +1,4 @@
-/*
+  /*
  * Copyright (C) 2006-2015  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
@@ -53,8 +53,11 @@ int main(int argc, char* argv[]) {
 
   /////// PARAMS //////////////
   int framesize = 2048;
-  int hopsize = 256;
+  int hopsize = 128; // 128 for predominant melody
   Real sr = 44100;
+  bool usePredominant = true; // set to true if PredmonantMelody extraction is used. Set to false if monhonic Pitch-YinFFT is used,
+
+
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
@@ -76,10 +79,10 @@ int main(int argc, char* argv[]) {
   Algorithm* fft     = factory.create("FFT",
                             "size", framesize);
 
-//  Algorithm* predominantMelody = factory.create("PredominantMelody",
-//                                                "frameSize", framesize,
-//                                                "hopSize", hopsize,
-//                                                "sampleRate", sr);
+  Algorithm* predominantMelody = factory.create("PredominantMelody",
+                                                "frameSize", framesize,
+                                                "hopSize", hopsize,
+                                                "sampleRate", sr);
 //
   Algorithm* spectrum = factory.create("Spectrum",
                                        "size", framesize);
@@ -87,6 +90,8 @@ int main(int argc, char* argv[]) {
   Algorithm* pitchDetect = factory.create("PitchYinFFT",
                                           "frameSize", framesize,
                                           "sampleRate", sr);
+
+//  Algorithm* realAccumulator     = factory.create("RealAccumulator");
 
 
   Algorithm* harmonicMask     = factory.create("HarmonicMask",
@@ -106,7 +111,8 @@ int main(int argc, char* argv[]) {
                                      "filename", outputFilename);
 
 
-  vector<Real> pitch;
+
+  vector<Real> pitchIn;
   vector<Real> pitchConf;
   vector<Real> audio;
   vector<Real> eqaudio;
@@ -124,9 +130,9 @@ int main(int argc, char* argv[]) {
   equalLoudness->input("signal").set(audio);
   equalLoudness->output("signal").set(eqaudio);
 
-//  predominantMelody->input("signal").set(eqaudio);
-//  predominantMelody->output("pitch").set(pitch);
-//  predominantMelody->output("pitchConfidence").set(pitchConf);
+  predominantMelody->input("signal").set(eqaudio);
+  predominantMelody->output("pitch").set(pitchIn);
+  predominantMelody->output("pitchConfidence").set(pitchConf);
 
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
@@ -150,10 +156,11 @@ int main(int argc, char* argv[]) {
   fft->output("fft").set(fftframe);
 
   // processing harmonic mask (apply mask)
-  harmonicMask->input("fft").set(fftframe);
-  harmonicMask->input("pitchIn").set(thisPitch);
-  harmonicMask->output("fft").set(fftmaskframe);
 
+  harmonicMask->input("fft").set(fftframe);
+  harmonicMask->input("pitch").set(thisPitch);
+  harmonicMask->input("pitchIn").set(pitchIn);
+  harmonicMask->output("fft").set(fftmaskframe);
 
   // Synthesis
   ifft->input("fft").set(fftmaskframe);
@@ -173,8 +180,8 @@ int main(int argc, char* argv[]) {
   cout << "-------- start processing " << audioFilename << " --------" << endl;
 
   audioLoader->compute();
-  //equalLoudness->compute();
-  //predominantMelody->compute();
+  equalLoudness->compute();
+  predominantMelody->compute();
 
   int counter = 0;
 
@@ -194,6 +201,12 @@ int main(int argc, char* argv[]) {
     spectrum->compute();
     pitchDetect->compute();
 
+    // get predominant pitch
+    if (usePredominant){
+    thisPitch = pitchIn[counter];
+    }
+
+
     fft->compute();
     harmonicMask-> compute();
     ifft->compute();
@@ -201,10 +214,7 @@ int main(int argc, char* argv[]) {
 
     counter++;
 
-
     alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
-
-
 
   }
 
@@ -221,6 +231,10 @@ int main(int argc, char* argv[]) {
   delete audioLoader;
   delete frameCutter;
   delete fft;
+  delete predominantMelody;
+  delete pitchDetect;
+  //delete realAccumulator;
+  delete harmonicMask;
   delete ifft;
   delete overlapAdd;
   delete audioWriter;

@@ -46,9 +46,10 @@ void HarmonicMask::compute()
 
 
     const std::vector<std::complex<Real> >& fft = _fft.get();
-    const std::vector<Real >& pitch = _pitchIn.get();
+     const std::vector<Real> & pitchIn = _pitchIn.get();
     //const std::vector<Real >& pitch = _pitch.get(); // if input is a vector (Predominant)
-    //const Real &pitch = _pitch.get(); // input pitch is a scalar yinPitch
+    const Real& pitch = _pitch.get(); // input pitch is a scalar yinPitch
+
     std::vector<std::complex<Real> >& outfft = _outfft.get();
 
     int fftsize = fft.size();
@@ -69,8 +70,13 @@ void HarmonicMask::compute()
         mask[i] = 1.f;
     }
 
-    //Real curPitchHz = pitch[0]; // predominant Meldoy
-    Real curPitchHz = 220; // pitch;
+    // get pitch from input
+    Real curPitchHz = 0;
+
+    curPitchHz = pitch;
+
+//cout << "cur pitch / size " << curPitchHz << ", " << pitchIn.size() << " ,";
+
     int nharmonic = 1;
     int cbin, lbin, rbin;
 
