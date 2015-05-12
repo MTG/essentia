@@ -96,7 +96,8 @@ int main(int argc, char* argv[]) {
 
   Algorithm* harmonicMask     = factory.create("HarmonicMask",
                             "sampleRate", sr,
-                            "binWidth", 2);
+                            "binWidth", 2,
+                            "attenuation", 24.f);
 
 
   Algorithm* ifft     = factory.create("IFFT",
@@ -156,10 +157,8 @@ int main(int argc, char* argv[]) {
   fft->output("fft").set(fftframe);
 
   // processing harmonic mask (apply mask)
-
   harmonicMask->input("fft").set(fftframe);
   harmonicMask->input("pitch").set(thisPitch);
-  harmonicMask->input("pitchIn").set(pitchIn);
   harmonicMask->output("fft").set(fftmaskframe);
 
   // Synthesis
@@ -203,7 +202,7 @@ int main(int argc, char* argv[]) {
 
     // get predominant pitch
     if (usePredominant){
-    thisPitch = pitchIn[counter];
+      thisPitch = pitchIn[counter];
     }
 
 

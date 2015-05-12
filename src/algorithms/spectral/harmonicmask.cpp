@@ -26,7 +26,7 @@ using namespace standard;
 const char* HarmonicMask::name = "HarmonicMask";
 const char* HarmonicMask::description = DOC("This algorithm applies a spectral mask to remove a pitched source component from the signal.\n"
                                         " It computes first an harmonic mask corresponding to the input pitch and applies the mask to the input FFT to remove that pitch. "
-                                        "The bin width determines how many spectral bins are masked per harmonic partial.\n"
+                                        "The bin width determines how many spectral bins are masked per harmonic partial. An attenuation value in dB determines the amonut of suppression of the pitched component w.r.t the background. \n"
                                         "\n"
                                         "References:\n"
                                         " ");
@@ -37,7 +37,8 @@ void HarmonicMask::configure()
 
     _sampleRate = parameter("sampleRate").toInt();
     _binWidth = parameter("binWidth").toReal();
-
+    _attenuation  = parameter("attenuation").toReal();
+    _attenuationLin = pow(10.f,-_attenuation / 20.f);
 
 }
 
@@ -46,7 +47,7 @@ void HarmonicMask::compute()
 
 
     const std::vector<std::complex<Real> >& fft = _fft.get();
-     const std::vector<Real> & pitchIn = _pitchIn.get();
+    // const std::vector<Real> & pitchIn = _pitchIn.get();
     //const std::vector<Real >& pitch = _pitch.get(); // if input is a vector (Predominant)
     const Real& pitch = _pitch.get(); // input pitch is a scalar yinPitch
 
@@ -55,8 +56,15 @@ void HarmonicMask::compute()
     int fftsize = fft.size();
     outfft.resize(fftsize);
 
-    vector<Real> frequencies;
-    vector<Real> magnitudes;
+    // mask values for target and other
+
+    Real maskbkgrval = 1.f - _attenuationLin; // target
+    Real maskpitchval = _attenuationLin; // other
+    // if attenuation is negative apply gain to pitched componenet
+    if (_attenuationLin > 1){
+      maskbkgrval = 1.f/_attenuationLin;
+      maskpitchval = 1.f - maskbkgrval;
+    }
 
     // create mask
     vector<Real> mask;
@@ -67,15 +75,11 @@ void HarmonicMask::compute()
     // init mask to ones
     for (i=0; i < fftsize; ++i)
     {
-        mask[i] = 1.f;
+        mask[i] = maskbkgrval; // 1.f;
     }
 
     // get pitch from input
-    Real curPitchHz = 0;
-
-    curPitchHz = pitch;
-
-//cout << "cur pitch / size " << curPitchHz << ", " << pitchIn.size() << " ,";
+    Real curPitchHz = pitch;
 
     int nharmonic = 1;
     int cbin, lbin, rbin;
@@ -92,7 +96,7 @@ void HarmonicMask::compute()
         // set harmonic partials bins
         for (j=lbin; j<= rbin; ++j)
         {
-            mask[j] = 0.f;
+            mask[j] = maskpitchval; // 0.f;
         }
 
         nharmonic++;
