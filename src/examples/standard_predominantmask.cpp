@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
   Algorithm* harmonicMask     = factory.create("HarmonicMask",
                             "sampleRate", sr,
                             "binWidth", 2,
-                            "attenuation", 24.f);
+                            "attenuation", -24.f);
 
 
   Algorithm* ifft     = factory.create("IFFT",
