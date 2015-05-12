@@ -26,7 +26,8 @@ using namespace standard;
 const char* HarmonicMask::name = "HarmonicMask";
 const char* HarmonicMask::description = DOC("This algorithm applies a spectral mask to remove a pitched source component from the signal.\n"
                                         " It computes first an harmonic mask corresponding to the input pitch and applies the mask to the input FFT to remove that pitch. "
-                                        "The bin width determines how many spectral bins are masked per harmonic partial. An attenuation value in dB determines the amonut of suppression of the pitched component w.r.t the background. \n"
+                                        "The bin width determines how many spectral bins are masked per harmonic partial. \n"
+                                        "An attenuation value in dB determines the amount of suppression of the pitched component w.r.t the background for the case of muting. A negative attenuation value allows soloing the pitched component. \n"
                                         "\n"
                                         "References:\n"
                                         " ");

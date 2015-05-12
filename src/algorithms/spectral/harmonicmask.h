@@ -55,7 +55,7 @@ class HarmonicMask : public Algorithm {
   void declareParameters() {
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
     declareParameter("binWidth", "number of bins per harmonic partials applied to the mask. This will depend on the internal FFT size", "[0,inf)", 4);
-    declareParameter("attenuation", "attenuation in dB's of the pitched component. If value is positive the pitched component is attenuated, if the value is negative the background component is attenuated.", "[-inf,inf)", -200.);
+    declareParameter("attenuation", "attenuation in dB's of the muted pitched component. If value is positive the pitched component is attenuated (muted), if the value is negative the pitched component is soloed (i.e. background component is attenuated).", "[-inf,inf)", -200.);
   }
 
   void configure();
