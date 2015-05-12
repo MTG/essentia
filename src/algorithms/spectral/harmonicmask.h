@@ -29,23 +29,20 @@ class HarmonicMask : public Algorithm {
 
  private:
     Input<std::vector<std::complex<Real> > > _fft;
-    Input<std::vector<Real> > _pitchIn;
-   // Input<std::vector<Real> > _pitch; // PRedominantMelody
-   // Input<Real> _pitchIn; // YinFFT
     Input<Real> _pitch;
     Output<std::vector<std::complex<Real> > > _outfft;
 
 
   int _sampleRate;
   int _binWidth;
+  Real _attenuation;
+  Real _attenuationLin;
 
  public:
   HarmonicMask() {
 
     declareInput(_fft, "fft", "the input frame");
-    declareInput(_pitchIn, "pitchIn", "the input frame pitch");
     declareInput(_pitch, "pitch", "an estimate of the fundamental frequency of the signal [Hz]");
-    //declareInput(_pitch, "pitch", "the input pitch");
     declareOutput(_outfft, "fft", "the output frame");
 
 
@@ -58,6 +55,7 @@ class HarmonicMask : public Algorithm {
   void declareParameters() {
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
     declareParameter("binWidth", "number of bins per harmonic partials applied to the mask. This will depend on the internal FFT size", "[0,inf)", 4);
+    declareParameter("attenuation", "attenuation in dB's of the pitched component. If value is positive the pitched component is attenuated, if the value is negative the background component is attenuated.", "[-inf,inf)", -200.);
   }
 
   void configure();
@@ -82,12 +80,12 @@ class HarmonicMask : public StreamingAlgorithmWrapper {
 
   int _sampleRate;
   int _binWidth;
+  Real _attenuation;
+  Real _attenuationLin;
 
 
   Sink<std::vector<std::complex<Real> > > _fft; // input
-  //Sink<std::vector<std::complex<Real> > > _pitchIn; // input
-  //Sink<std::vector<Real> > _pitch; // input  PredominantMelody
-  Sink<Real> _pitchIn; // input  for YinFFT
+  Sink<Real> _pitch; // input  for YinFFT
   Source<std::vector<std::complex<Real> > > _outfft;
 
 
@@ -95,8 +93,7 @@ class HarmonicMask : public StreamingAlgorithmWrapper {
   HarmonicMask() {
     declareAlgorithm("HarmonicMask");
     declareInput(_fft, TOKEN, "fft");
-    declareInput(_pitchIn, TOKEN, "pitchIn");
-    //declareInput(_pitch, TOKEN, "pitch");
+    declareInput(_pitch, TOKEN, "pitch");
     declareOutput(_outfft, TOKEN, "fft");
   }
 };
