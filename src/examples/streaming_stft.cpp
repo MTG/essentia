@@ -54,13 +54,14 @@ int main(int argc, char* argv[]) {
   int hopsize = 256;
   int sr = 44100;
 
-
+  string audioFilename = argv[1];
+  string outputFilename = argv[2];
 
   // instanciate facgory and create algorithms:
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
   Algorithm* audioload    = factory.create("MonoLoader",
-                                           "filename", argv[1],
+                                           "filename", audioFilename,
                                            "sampleRate", sr,
                                            "downmix", "mix");
 
@@ -82,13 +83,11 @@ int main(int argc, char* argv[]) {
                                             "frameSize", framesize,
                                            "hopSize", hopsize);
 
-Algorithm* frameToReal = factory.create("FrameToReal",
-                                           "frameSize", framesize,
-                                           "hopSize", hopsize);
+//Algorithm* frameToReal = factory.create("FrameToReal",
+//                                           "frameSize", framesize,
+//                                           "hopSize", hopsize);
 
 
-  std::string outputFilename = argv[1];
-   outputFilename.append("out.wav");
 //   Algorithm* audiowriter     = factory.create("AudioWriter",
 //                            "filename", outfilename,
 //                            "sampleRate", sr);
@@ -115,13 +114,13 @@ Algorithm* frameToReal = factory.create("FrameToReal",
   fft->output("fft")                 >>  ifft->input("fft");
 
   // ifft -> overlap add -> audio writer
-  ifft->output("frame")                 >> overlapAdd->input("signal");
+  ifft->output("frame")                 >> overlapAdd->input("frame");
   //overlapAdd->output("frame")           >> audiowriter->input("audio");
 
-   overlapAdd->output("signal")  >>  frameToReal->input("frame");
+  // overlapAdd->output("signal")  >>  frameToReal->input("signal");
+  // frameToReal->output("signal")  >>  writer->input("audio");
 
-   frameToReal->output("audio")  >>  writer->input("audio");
-
+  overlapAdd->output("signal")  >>writer->input("audio");
 //  // Spectrum -> pitch detection  -> Pool
 //  spectrum->output("spectrum")            >>  pitchDetect->input("spectrum");
 //  pitchDetect->output("pitch")            >>  PC(pool, "tonal.pitch");
