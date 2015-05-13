@@ -37,7 +37,7 @@ class OverlapAdd : public Algorithm {
   int _frameSize;
   int _hopSize;
   std::vector<Real> _frameHistory;
-int _frameCounter; // debug sawtooth
+  int _frameCounter; // debug sawtooth
 
  public:
   OverlapAdd() {
@@ -49,10 +49,10 @@ int _frameCounter; // debug sawtooth
   void declareParameters() {
     declareParameter("frameSize", "the frame size for computing the overlap-add process", "(0,inf)", 2048);
     declareParameter("hopSize", "the hop size with which the overlap-add function is computed", "(0,inf)", 128);
-
   }
   void compute();
   void configure();
+  // TODO missing reset() method to clean frameHistory vector, the same for streaming mode
 
   static const char* name;
   static const char* description;
@@ -62,43 +62,46 @@ int _frameCounter; // debug sawtooth
 } // namespace standard
 } // namespace essentia
 
-#include "streamingalgorithmwrapper.h"
+#include "streamingalgorithm.h"
 
 namespace essentia {
 namespace streaming {
 
-class OverlapAdd : public StreamingAlgorithmWrapper {
-//class OverlapAdd : public Algorithm {
+class OverlapAdd : public Algorithm {
 
  protected:
-
-//  Sink<std::vector<Real> > _windowedFrame; // input
-//  Source<std::vector<Real> > _output; // output ?? should be like this?
-  Sink<std::vector<Real> > _windowedFrame; // input
+  Sink<std::vector<Real> > _frames;
   Source<Real> _output;
 
   int _frameSize;
   int _hopSize;
-
+  std::vector<Real> _frameHistory;
+  int _frameCounter; // debug sawtooth
 
   bool _configured;
-  std::vector<Real> _frameHistory;
 
  public:
   OverlapAdd() {
-    declareAlgorithm("OverlapAdd");
-    //declareInput(_windowedFrame, TOKEN, "frame");
-
-   // int preferredSize = 4096;
-    declareInput(_windowedFrame, TOKEN,"signal");
-    declareOutput(_output, TOKEN, "signal");
-
+    declareInput(_frames, "frame", "the windowed input audio frame");
+    declareOutput(_output, "signal", "the output overlap-add audio signal");
     _output.setBufferType(BufferUsage::forLargeAudioStream);
-
   }
+  ~OverlapAdd() {}
+
+  void declareParameters() {
+    declareParameter("frameSize", "the frame size for computing the overlap-add process", "(0,inf)", 2048);
+    declareParameter("hopSize", "the hop size with which the overlap-add function is computed", "(0,inf)", 128);
+  }
+
+  void reset();
+  void configure();
+  AlgorithmStatus process();
+
+  static const char* name;
+  static const char* description;
 };
 
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_ZEROCROSSINGRATE_H
+#endif // ESSENTIA_OVERLAPADD_H

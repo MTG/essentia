@@ -59,7 +59,7 @@ void FrameToReal::compute() {
 
     // output
     for (int i=0; i< _hopSize; i++) {
-        audio[i] = frames[i]; // TODO: check normalization
+        audio[i] = frames[i];
     }
 
 
