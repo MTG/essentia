@@ -35,14 +35,21 @@ for (int i=0; i < int(buffer.size()); ++i){
 
 int main(int argc, char* argv[]) {
 
-  if (argc != 3) {
+  if (argc < 3) {
     cout << "ERROR: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " audio_input output_file" << endl;
+    cout << "Usage: " << argv[0] << " audio_input output_file [attenuation_dB]" << endl;
+    cout << "attenuation_dB (optional): value in dB's of the attenuation applied to the predominant pitched component. \n \
+    A positive value 'mutes' the pitched component. A negative value 'soloes' the pitched component." << endl;
     exit(1);
   }
 
   string audioFilename = argv[1];
   string outputFilename = argv[2];
+  Real attenuation_dB = -200.f;
+  if (argc ==4){
+   string attstr = argv[3];
+   sscanf(attstr.c_str(), "%f",&attenuation_dB);
+  }
 
   // register the algorithms in the factory(ies)
   essentia::init();
@@ -97,7 +104,7 @@ int main(int argc, char* argv[]) {
   Algorithm* harmonicMask     = factory.create("HarmonicMask",
                             "sampleRate", sr,
                             "binWidth", 2,
-                            "attenuation", -24.f);
+                            "attenuation", attenuation_dB);
 
 
   Algorithm* ifft     = factory.create("IFFT",

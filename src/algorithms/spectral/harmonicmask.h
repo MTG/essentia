@@ -36,7 +36,7 @@ class HarmonicMask : public Algorithm {
   int _sampleRate;
   int _binWidth;
   Real _attenuation;
-  Real _attenuationLin;
+  Real _gainLin;
 
  public:
   HarmonicMask() {
