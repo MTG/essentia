@@ -64,7 +64,7 @@ void OverlapAdd::compute() {
 
  	int M = _frameSize;
   int hM1 = int(floor((M+1)/2.f));
- // int hM2= int(floor((M)/2.f));
+
 
 
  // check zero-phase
@@ -73,8 +73,6 @@ void OverlapAdd::compute() {
   bool _zeroPhase = true;
   int i = 0;
   int signalSize = _frameSize;
-  //int signalSize = (int)signal.size();
-  //int totalSize = signalSize + _zeroPadding;
 
 
   if (_zeroPhase) {
@@ -115,13 +113,10 @@ void OverlapAdd::compute() {
     }
 
 // output
-    float normalizationGain = 0.5f * _hopSize / float(_frameSize); // 0.125; //_hopSize;
+    float normalizationGain = 0.5f * _hopSize / float(_frameSize);
   for (int i=0; i< _hopSize; i++) {
-    output[i] = normalizationGain * _frameHistory[i]; // TODO: check normalization
+    output[i] = normalizationGain * _frameHistory[i];
     }
-// debug
-//Real maxval = *max_element(output.begin(),output.end());
-//cout <<  maxval << " "; //<< endl;
 
 
 }
@@ -151,7 +146,7 @@ void OverlapAdd::reset() {
   Algorithm::reset();
   _frames.setAcquireSize(1); // single frame
   _frames.setReleaseSize(1);
-  _output.setAcquireSize(_hopSize); 
+  _output.setAcquireSize(_hopSize);
   _output.setReleaseSize(_hopSize);
 }
 
@@ -176,17 +171,17 @@ AlgorithmStatus OverlapAdd::process() {
       return FINISHED;
     }
     // otherwise, there are still some frames
-    
-    //input("frame").setAcquireSize(available);                                  
-    //input("frame").setReleaseSize(available);                                  
-    //output("signal").setAcquireSize(available * _hopSize);                                 
-    //output("signal").setReleaseSize(available * _hopSize);                                 
-                                                                          
-    return CONTINUE;                                                            
-  }      
+
+    //input("frame").setAcquireSize(available);
+    //input("frame").setReleaseSize(available);
+    //output("signal").setAcquireSize(available * _hopSize);
+    //output("signal").setReleaseSize(available * _hopSize);
+
+    return CONTINUE;
+  }
 
   const vector<vector<Real> >& frames = _frames.tokens();
-  vector<Real>& output = _output.tokens();                                      
+  vector<Real>& output = _output.tokens();
 
   //assert(output.size() == input.size() * _hopSize);
   assert(frames.size() == 1 && output.size() == _hopSize);
@@ -205,7 +200,6 @@ AlgorithmStatus OverlapAdd::process() {
 
   int M = _frameSize;
   int hM1 = int(floor((M+1)/2.f));
- // int hM2= int(floor((M)/2.f));
 
 
  // check zero-phase
@@ -214,8 +208,7 @@ AlgorithmStatus OverlapAdd::process() {
   bool _zeroPhase = true;
   int i = 0;
   int signalSize = _frameSize;
-  //int signalSize = (int)signal.size();
-  //int totalSize = signalSize + _zeroPadding;
+
 
   if (_zeroPhase) {
     // first half of the windowed signal is the
@@ -254,18 +247,16 @@ AlgorithmStatus OverlapAdd::process() {
     }
 
 // output
-    float normalizationGain = 0.5f * _hopSize / float(_frameSize); // 0.125; //_hopSize;
+    float normalizationGain = 0.5f * _hopSize / float(_frameSize);
   for (int i=0; i< _hopSize; i++) {
-    output[i] = normalizationGain * _frameHistory[i]; // TODO: check normalization
+    output[i] = normalizationGain * _frameHistory[i];
     }
-// debug
-//Real maxval = *max_element(output.begin(),output.end());
-//cout <<  maxval << " "; //<< endl;
 
-  EXEC_DEBUG("releasing");                                                      
-  releaseData();                                                                
-  EXEC_DEBUG("released");                                                       
-                                                                                
+
+  EXEC_DEBUG("releasing");
+  releaseData();
+  EXEC_DEBUG("released");
+
   return OK;
 }
 
