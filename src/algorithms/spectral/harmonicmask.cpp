@@ -39,7 +39,7 @@ void HarmonicMask::configure()
     _sampleRate = parameter("sampleRate").toInt();
     _binWidth = parameter("binWidth").toReal();
     _attenuation  = parameter("attenuation").toReal();
-    _attenuationLin = pow(10.f,-_attenuation / 20.f);
+    _gainLin = pow(10.f,-_attenuation / 20.f);
 
 }
 
@@ -59,12 +59,12 @@ void HarmonicMask::compute()
 
     // mask values for target and other
 
-    Real maskbkgrval = 1.f - _attenuationLin; // target
-    Real maskpitchval = _attenuationLin; // other
+    Real maskbkgrval = 1.f; // target
+    Real maskpitchval = _gainLin; // other
     // if attenuation is negative apply gain to pitched componenet
-    if (_attenuationLin > 1){
-      maskbkgrval = 1.f/_attenuationLin;
-      maskpitchval = 1.f - maskbkgrval;
+    if (_attenuation < 0){
+      maskbkgrval = 1.f/_gainLin;
+      maskpitchval = 1.f;
     }
 
     // create mask
@@ -73,7 +73,7 @@ void HarmonicMask::compute()
     mask.resize(maskSize);
     int i, j;
 
-    // init mask to ones
+    // init mask to background vaules
     for (i=0; i < fftsize; ++i)
     {
         mask[i] = maskbkgrval; // 1.f;
