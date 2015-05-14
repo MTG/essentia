@@ -17,8 +17,11 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-
+import sys
 import subprocess
+import essentia.standard
+import essentia.streaming
+
 
 def find_dependencies(mode, algo):
 
@@ -51,28 +54,70 @@ loader = es.%s()
                 m = "standard"
                 lines.append(line)
                 algos.append((m, a))
-
-
-    print "---------- %s : %s ----------" % (mode, algo)
     
     algos = sorted(list(set(algos) - set([(mode, algo)])))
+    return algos, lines
+
+
+def find_dependencies_tree(mode, algo):
+    dependencies = find_dependencies(mode, algo)[0]
+    results = {}
+    for d in dependencies:
+        results[d] = find_dependencies_tree(*d) 
+    return results
+
+
+def tree_to_list(dependencies):
+    results = []
+    for d in dependencies.keys():
+        results += [d] + tree_to_list(dependencies[d])
+    return results
+
+
+def print_dependencies(algos, lines=None):
     print "Dependencies:"
     for m,a in algos:
         print m + '\t' + a
     print
+    if lines:
+        print '\n'.join(lines)
+        print 
+        print
 
 
-    print '\n'.join(lines)
-    print 
-    print
+try:
+    algo = sys.argv[1]
+    mode = sys.argv[2]
+except:
+    if len(sys.argv) > 1:
+        print 'usage:', sys.argv[0], '[<algo_name> <streaming|standard>]'
+        sys.exit()
+    algo = None
+    mode = None
+
+algos = { 'standard': essentia.standard.algorithmNames(), 
+          'streaming': essentia.streaming.algorithmNames() }
 
 
-import essentia.standard as es
-for algo in es.algorithmNames():
-    find_dependencies('standard', algo)
+if algo: 
+    # search dependencies recursively for algo
+    try:
+        if algo not in algos[mode]:
+            print 'Algorithm "' + algo + '" not found in essentia.' + mode
+            raise
+    except:
+        # mode != standard|streaming
+        print 'usage:', sys.argv[0], '[<algo_name> <streaming|standard>]'
+        sys.exit()
 
+    print "---------- %s : %s ----------" % (mode, algo)
+    
+    dependencies = find_dependencies_tree(mode, algo)  
+    print_dependencies(list(set(tree_to_list(dependencies))))
 
-import essentia.streaming as es
-for algo in es.algorithmNames():
-    find_dependencies('streaming', algo)
-
+else:
+    # search dependencies non-recursively for all algorithms
+    for mode in ['standard', 'streaming']:
+        for algo in algos[mode]:
+            print "---------- %s : %s ----------" % (mode, algo)
+            print_dependencies(*find_dependencies(mode, algo))
