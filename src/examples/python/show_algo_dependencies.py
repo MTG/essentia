@@ -21,6 +21,7 @@ import sys
 import subprocess
 import essentia.standard
 import essentia.streaming
+import yaml
 
 
 def find_dependencies(mode, algo):
@@ -37,52 +38,68 @@ loader = es.%s()
     proc = subprocess.Popen(["python", "-c", code], stdout=subprocess.PIPE)
     stdout = proc.communicate()[0].split('\n')
 
+    # function to assign nested dict elements by a list of nested keys
+    def set_val(d, keys, val):
+        reduce(lambda x,y: x[y], keys[:-1], d)[keys[-1]] = val
+
     algos = []
     lines = []
-    for line in stdout:
+    tree = {}
+    previous_key = []
+    previous_indent = -8
 
+    # NOTE: the code relies heavily on indentification of output in Essentia's logger
+    for line in stdout:
         if line.startswith("[Factory   ] "):
         
+            line = line.replace("[Factory   ] ", "")
             if line.count("Streaming: Creating algorithm: "):
-                a = line.split("Streaming: Creating algorithm: ")[-1]
+                tab, a = line.split("Streaming: Creating algorithm: ")
                 m = "streaming"
-                lines.append(line)
-                algos.append((m, a))
-
-            if line.count("Standard : Creating algorithm: "):
-                a = line.split("Standard : Creating algorithm: ")[-1]
+            elif line.count("Standard : Creating algorithm: "):
+                tab, a = line.split("Standard : Creating algorithm: ")
                 m = "standard"
-                lines.append(line)
-                algos.append((m, a))
-    
+            else: 
+                continue
+
+            lines.append(line)
+            algos.append((m, a))
+            
+            indent = len(tab)
+
+            if indent < previous_indent:
+                previous_key = previous_key[:-2]
+            if indent == previous_indent:
+                previous_key = previous_key[:-1]
+
+            set_val(tree, previous_key + [(m,a)], {})
+            previous_key += [(m, a)]          
+
+            previous_indent = indent
+ 
     algos = sorted(list(set(algos) - set([(mode, algo)])))
-    return algos, lines
+    return algos, tree, lines
 
 
-def find_dependencies_tree(mode, algo):
-    dependencies = find_dependencies(mode, algo)[0]
-    results = {}
-    for d in dependencies:
-        results[d] = find_dependencies_tree(*d) 
-    return results
-
-
-def tree_to_list(dependencies):
-    results = []
-    for d in dependencies.keys():
-        results += [d] + tree_to_list(dependencies[d])
-    return results
-
-
-def print_dependencies(algos, lines=None):
+def print_dependencies(algos, tree=None, lines=None):
     print "Dependencies:"
     for m,a in algos:
         print m + '\t' + a
     print
+
+    if tree:
+        print "Dependencies tree (yaml)"
+        print yaml.safe_dump(tree, indent=4)
+
+
     if lines:
+        print "Essentia logger output"
         print '\n'.join(lines)
         print 
         print
+
+
+
 
 
 try:
@@ -112,8 +129,8 @@ if algo:
 
     print "---------- %s : %s ----------" % (mode, algo)
     
-    dependencies = find_dependencies_tree(mode, algo)  
-    print_dependencies(list(set(tree_to_list(dependencies))))
+    dependencies, tree, _ = find_dependencies(mode, algo)  
+    print_dependencies(dependencies, tree)
 
 else:
     # search dependencies non-recursively for all algorithms
