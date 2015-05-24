@@ -199,6 +199,10 @@ void MultiPitch::compute() {
     // calculate peaks of salience function
     _pitchSalienceFunctionPeaks->compute();
       
+    // no peaks in this frame
+      if (!frameSalienceBins.size()){
+          continue;
+      }
     ///////////////////////////////////////////////////////////////////////
     // Joint F0 estimation (pitch salience function peaks as candidates) //
     ///////////////////////////////////////////////////////////////////////
@@ -259,8 +263,7 @@ void MultiPitch::compute() {
       for (int j=0; j<numCandidates; j++){
         inh[i][j]=0;
         for (int m=0; m<numberHarmonicsMax; m++){
-          //inh[i][j]+=harmonicWeights[m]*Z[j][kPeaks[i][m]];
-          inh[i][j]+=getWeight(kPeaks[i][m],m)*Z[j][kPeaks[i][m]];
+          inh[i][j]+=getWeight(kPeaks[i][m],m)*centSpectrum[kPeaks[i][m]]*Z[j][kPeaks[i][m]];
         }
       }
     }
@@ -271,7 +274,14 @@ void MultiPitch::compute() {
       G_init[i]=frameSalienceValues[i];
     }
     
-    // TO DO: iteration! This is only for two sources...
+    vector<int> finalSelection;
+      
+    // polyphony estimation init
+    int p=1;
+    float gamma=0.73;
+    float S=frameSalienceValues[argmax(frameSalienceValues)]/(pow(p,gamma));
+    finalSelection.push_back(argmax(frameSalienceValues));
+      
     // goodess function
     vector<vector<float> > G;
     for (int i=0; i<numCandidates; i++){
@@ -280,38 +290,77 @@ void MultiPitch::compute() {
         if(i==j){
           g.push_back(0.0);
         }else{
-          float g_val=G_init[i]+frameSalienceValues[j]-(inh[i][j]+inh[i][j]);
+          float g_val=G_init[i]+frameSalienceValues[j]-(inh[i][j]+inh[j][i]);
           g.push_back(g_val);
         }
       }
       G.push_back(g);
     }
     
+    vector<vector<int> > selCandInd;
+    vector<float> selCandVal;
     
-    // find largest value
+      vector<float> localF0;
+      while (true){
+      
+    // find numCandidates largest values
     float maxVal=-1;
     int maxInd_i=0;
     int maxInd_j=0;
-
-    for (int i=0; i<numCandidates; i++){
-      for (int j=0; j<numCandidates; j++){
-        if (G[i][j]>maxVal){
-          maxVal=G[i][j];
-          maxInd_i=i;
-          maxInd_j=j;
-        }
-      }
-    }
-      
     
-    float f1=referenceFrequency * pow(centToHertzBase, frameSalienceBins[maxInd_i]);
-    float f2=referenceFrequency * pow(centToHertzBase, frameSalienceBins[maxInd_j]);
-    cout << frameSalienceBins[maxInd_i] << "   " << frameSalienceBins[maxInd_j] << endl;
-    vector<float> localF0;
-    localF0.push_back(f1);
-    localF0.push_back(f2);
-    pitch.push_back(localF0);
-  
+    for (int I=0; I<numCandidates; I++){
+        vector<int> localInd;
+        for (int i=0; i<numCandidates; i++){
+            for (int j=0; j<numCandidates; j++){
+                if (G[i][j]>maxVal){
+                    maxVal=G[i][j];
+                    maxInd_i=i;
+                    maxInd_j=j;
+                    
+                }
+            }
+        }
+        localInd.push_back(maxInd_i);
+        localInd.push_back(maxInd_j);
+        selCandInd.push_back(localInd);
+        selCandVal.push_back(G[maxInd_i][maxInd_j]);
+        G[maxInd_i][maxInd_j]=-1;
+        maxVal=-1;
+        maxInd_i=0;
+        maxInd_j=0;
+    }
+    
+    // re-estimate polyphony
+    p++;
+    float Snew=selCandVal[argmax(selCandVal)]/(pow(p,gamma));
+      cout << S << "   " << Snew << endl;
+      if (Snew>S){
+          finalSelection.clear();
+          for (int i=0; i<selCandInd[0].size(); i++){
+              finalSelection.push_back(selCandInd[0][i]);
+          }
+          // re-calculate goddess function
+          for (int i=0; i<numCandidates; i++){
+              for (int j=0; j<numCandidates; j++){
+                  G[i][j]+=frameSalienceValues[j];
+                  for (int ii=0; ii<selCandInd[i].size(); ii++){
+                      G[i][j]-=(inh[selCandInd[i][ii]][j]+inh[j][selCandInd[i][ii]]);
+                  }
+              }
+          }
+          S=Snew;
+      }else{
+          // add estimated f0 to frame
+          for (int i=0; i<finalSelection.size(); i++){
+              float freq=referenceFrequency * pow(centToHertzBase, frameSalienceBins[finalSelection[i]]);
+              localF0.push_back(freq);
+          }
+          break;
+      }
+      
+     
+      }
+      pitch.push_back(localF0);
   }
 
 }
