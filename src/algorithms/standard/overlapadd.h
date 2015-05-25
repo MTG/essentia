@@ -32,17 +32,15 @@ class OverlapAdd : public Algorithm {
   Input<std::vector<Real> > _windowedFrame;
   Output<std::vector<Real> > _output;
 
-
-//    Output<std::vector<AudioSample> > _audio; // ?? check what data type is appropriate
   int _frameSize;
   int _hopSize;
+  float _normalizationGain;
   std::vector<Real> _frameHistory;
-  int _frameCounter; // debug sawtooth
+  std::vector<Real> _tmpFrame;
 
  public:
   OverlapAdd() {
     declareInput(_windowedFrame, "signal", "the windowed input audio frame");
-    //declareOutput(_frame, "frame", "the output overlap-add audio signal frame");
     declareOutput(_output, "signal", "the output overlap-add audio signal frame");
   }
 
@@ -75,8 +73,9 @@ class OverlapAdd : public Algorithm {
 
   int _frameSize;
   int _hopSize;
+  float _normalizationGain;
   std::vector<Real> _frameHistory;
-  int _frameCounter; // debug sawtooth
+  std::vector<Real> _tmpFrame;
 
   bool _configured;
 
