@@ -53,6 +53,8 @@ example_sources_fileio = [
         ('streaming_key', ),
         ('streaming_pitchyinfft', ),
         ('streaming_predominantmelody', ),
+        ('streaming_pitchmelodia', ),
+
         ('streaming_md5', ),
 
         ('streaming_extractor_freesound',

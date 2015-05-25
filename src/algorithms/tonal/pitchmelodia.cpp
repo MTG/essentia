@@ -27,13 +27,11 @@ namespace standard {
 
 const char* PitchMelodia::name = "PitchMelodia";
 const char* PitchMelodia::version = "1.0";
-const char* PitchMelodia::description = DOC("This algorithm estimates the fundamental frequency of the monophonic melody in the input signal. It implements the MELODIA algorithm described in [1]. While the algorithm is originally designed to extract melody in polyphonic music, this implementation is adapted for monophonic signals. The approach is based on the creation and characterization of pitch contours, time continuous sequences of pitch candidates grouped using auditory streaming cues. To this end, PitchSalienceFunction, PitchSalienceFunctionPeaks, PitchContours, and PitchContoursMonoMelody algorithms are employed. It is strongly advised to use the default parameter values which are optimized according to [1] (where further details are provided) except for minFrequency, maxFrequency, and voicingTolerance, which will depend on your application.\n"
+const char* PitchMelodia::description = DOC("This algorithm estimates the fundamental frequency of the monophonic melody in the input signal. It implements the MELODIA algorithm described in [1]. While the algorithm is originally designed to extract melody in polyphonic music, this implementation is adapted for monophonic signals. The approach is based on the creation and characterization of pitch contours, time continuous sequences of pitch candidates grouped using auditory streaming cues. To this end, PitchSalienceFunction, PitchSalienceFunctionPeaks, PitchContours, and PitchContoursMonoMelody algorithms are employed. It is strongly advised to use the default parameter values which are optimized according to [1] (where further details are provided) except for minFrequency and maxFrequency, which will depend on your application.\n"
 "\n"
 "The output is a vector of estimated melody pitch values and a vector of confidence values.\n"
 "\n"
 "It is recommended to apply EqualLoudness on the input signal (see [1]) as a pre-processing stage before running this algorithm.\n"
-"\n"
-"Note that \"pitchConfidence\" can be negative in the case of \"guessUnvoiced\"=True: the absolute values represent the confidence, negative values correspond to segments for which non-salient contours where selected, zero values correspond to non-voiced segments.\n"
 "\n"
 "References:\n"
 "  [1] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
@@ -266,7 +264,7 @@ PitchMelodia::PitchMelodia() : AlgorithmComposite() {
   _pitchSalienceFunctionPeaks = factory.create("PitchSalienceFunctionPeaks");
 
   _pitchContours = standard::AlgorithmFactory::create("PitchContours");
-  _pitchContoursMelody = standard::AlgorithmFactory::create("PitchContoursMelody");
+  _pitchContoursMelody = standard::AlgorithmFactory::create("PitchContoursMonoMelody");
 
   // TODO delete
   //_poolStorageBins = new PoolStorage<vector<vector<Real> > >(&_pool, "internal.saliencebins");
@@ -274,7 +272,7 @@ PitchMelodia::PitchMelodia() : AlgorithmComposite() {
 
   declareInput(_signal, "signal", "the input audio signal");
   declareOutput(_pitch, "pitch", "the estimated pitch values per frames [Hz]");
-  declareOutput(_pitchConfidence, "pitchConfidence", "confidence with which the pitch was detected");
+
 
   // Connect input proxy
   _signal >> _frameCutter->input("signal");
@@ -339,9 +337,7 @@ void PitchMelodia::configure() {
   Real timeContinuity = parameter("timeContinuity").toReal();
   Real minDuration = parameter("minDuration").toReal();
 
-  //Real voicingTolerance = parameter("voicingTolerance").toReal();
   int filterIterations = parameter("filterIterations").toInt();
-  //bool voiceVibrato = parameter("voiceVibrato").toBool();
   bool guessUnvoiced = parameter("guessUnvoiced").toBool();
 
   // Pre-processing
@@ -419,17 +415,14 @@ AlgorithmStatus PitchMelodia::process() {
 
   // compute melody
   vector<Real> pitch;
-  vector<Real> pitchConfidence;
   _pitchContoursMelody->input("contoursBins").set(contoursBins);
   _pitchContoursMelody->input("contoursSaliences").set(contoursSaliences);
   _pitchContoursMelody->input("contoursStartTimes").set(contoursStartTimes);
   _pitchContoursMelody->input("duration").set(duration);
   _pitchContoursMelody->output("pitch").set(pitch);
-  _pitchContoursMelody->output("pitchConfidence").set(pitchConfidence);
   _pitchContoursMelody->compute();
 
   _pitch.push(pitch);
-  _pitchConfidence.push(pitchConfidence);
 
   return FINISHED;
 }
