@@ -43,15 +43,15 @@ void Vibrato::configure() {
   _maxFrequency = parameter("maxFrequency").toReal();
   _minExtend = parameter("minExtend").toReal();
   _maxExtend = parameter("maxExtend").toReal();
+  _sampleRate = parameter("sampleRate").toReal();
     
-    sampleRate= 44100/128;//_sampleRate.get();
-  frameSize=int(0.350 * sampleRate);
+  frameSize=int(0.350 * _sampleRate);
   fftSize=4*frameSize;
   
   frameCutter->configure("frameSize", frameSize, "hopSize", 1, "startFromZero", true);
   window->configure("type", "hann", "zeroPadding", 3*frameSize);
   spectrum->configure("size", fftSize);
-  spectralPeaks->configure("sampleRate", sampleRate, "maxPeaks", 3, "orderBy", "magnitude");
+  spectralPeaks->configure("sampleRate", _sampleRate, "maxPeaks", 3, "orderBy", "magnitude");
 }
 
 
@@ -64,6 +64,7 @@ void Vibrato::compute() {
   vector<Real>& vibFrequency =_vibFrequency.get();
   vector<Real>& vibExtend = _vibExtend.get();
 
+  // pitch vector is empty
   if (pitch.empty()){
     vibFrequency.clear();
     vibExtend.clear();
@@ -72,6 +73,7 @@ void Vibrato::compute() {
     
   vibFrequency.resize(pitch.size());
   vibExtend.resize(pitch.size());
+  
   for (int i=0; i<pitch.size(); i++){
     vibFrequency[i]=0.0;
     vibExtend[i]=0.0;

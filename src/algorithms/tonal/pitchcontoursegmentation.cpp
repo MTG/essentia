@@ -73,11 +73,12 @@ void PitchContourSegmentation::compute() {
   frameSizeFeat=2048;
     
   // I/O
+    cout << "I/0" << endl;
   const vector<Real>& pitchGlob = _pitch.get();
   const vector<Real>& signal = _signal.get();
   vector<Real>& onset = _onset.get();
   vector<Real>& duration = _duration.get();
-  vector<int>& MIDIpitch = _MIDIpitch.get();
+  vector<Real>& MIDIpitch = _MIDIpitch.get();
 
   // we do not want to access the actual pitch contour -> create copy
   pitch = pitchGlob;
@@ -86,6 +87,7 @@ void PitchContourSegmentation::compute() {
   reSegment();
   
   // extract the RMS
+    cout << "extract RMS" << endl;
   vector<Real> frame, rms;
   Real r;
   frameCutter = AlgorithmFactory::create("FrameCutter", "frameSize", frameSizeFeat, "hopSize", hopSizeFeat);
@@ -105,6 +107,7 @@ void PitchContourSegmentation::compute() {
   delete frameCutter;
   delete RMS;
     
+    cout << "segment" << endl;
   // segment based on pitch distance ("island building")
   minDurPitchSamples=round(_minDur*float(_sampleRate)/float(_hopSize));
   for (int i=0; i<startC.size(); i++){
@@ -181,3 +184,4 @@ void PitchContourSegmentation::compute() {
     MIDIpitch.push_back(round(12*log2(meanFreq/440)+69));
   }
 }
+

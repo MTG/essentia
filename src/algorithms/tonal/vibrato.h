@@ -29,7 +29,6 @@ class Vibrato : public Algorithm {
 
  private:
   Input<std::vector<Real> > _pitch;
-  Input<Real> _sampleRate;
   Output<std::vector<Real> > _vibFrequency;
   Output<std::vector<Real> > _vibExtend;
     
@@ -41,7 +40,6 @@ class Vibrato : public Algorithm {
  public:
   Vibrato() {
     declareInput(_pitch, "pitch", "the pitch trajectory [Hz].");
-    declareInput(_sampleRate, "sampleRate", "the sample rate of the input pitch contour.");
     declareOutput(_vibFrequency, "vibratoFrequency", "estimated vibrato frquency [Hz]; zero if no vibrato was detected.");
     declareOutput(_vibExtend, "vibratoExtend","estimated vibrato frquency [Hz]; zero if no vibrato was detected.") ;
       
@@ -56,6 +54,7 @@ class Vibrato : public Algorithm {
     declareParameter("maxFrequency", "maximum considered vibrato frequency [Hz]", "(0,inf)", 8.0);
     declareParameter("minExtend", "minimum considered vibrato extend [cents]", "(0,inf)", 50.0);
     declareParameter("maxExtend", "maximum considered vibrato extend [cents]", "(0,inf)", 250.0);
+    declareParameter("sampleRate", "sample rate of the input pitch contour", "(0,inf)", 44100.0/128.0);
   }
 
   void compute();
@@ -69,10 +68,10 @@ class Vibrato : public Algorithm {
   Real _minFrequency;
   Real _maxExtend;
   Real _minExtend;
+  Real _sampleRate;
   
   int frameSize;
   int fftSize;
-  Real sampleRate;
   
 };
 
@@ -88,7 +87,6 @@ class Vibrato : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<Real> > _pitch;
-  Sink<Real> _sampleRate;
   Source<std::vector<Real> > _vibFrequency;
   Source<std::vector<Real> > _vibExtend;
 
@@ -96,7 +94,6 @@ class Vibrato : public StreamingAlgorithmWrapper {
   Vibrato() {
     declareAlgorithm("Vibrato");
     declareInput(_pitch, TOKEN, "pitch");
-    declareInput(_sampleRate, TOKEN, "sampleRate");
     declareOutput(_vibFrequency, TOKEN, "vibratoFrequency");
     declareOutput(_vibExtend, TOKEN, "vibratoExtend");
   }

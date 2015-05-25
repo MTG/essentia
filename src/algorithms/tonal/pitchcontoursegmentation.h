@@ -33,7 +33,7 @@ class PitchContourSegmentation : public Algorithm {
   Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _onset;
   Output<std::vector<Real> > _duration;
-  Output<std::vector<int> > _MIDIpitch;
+  Output<std::vector<Real> > _MIDIpitch;
     
   Algorithm* frameCutter;
   Algorithm* RMS;
@@ -82,32 +82,4 @@ class PitchContourSegmentation : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
-#include "streamingalgorithmwrapper.h"
-
-namespace essentia {
-namespace streaming {
-
-class PitchContourSegmentation : public StreamingAlgorithmWrapper {
-
- protected:
-  Sink<std::vector<Real> > _pitch;
-  Sink<std::vector<Real> > _signal;
-  Source<Real> _onset;
-  Source<Real> _duration;
-  Source<Real> _MIDIpitch;
-
- public:
-  PitchContourSegmentation() {
-    declareAlgorithm("PitchContourSegmentation");
-    declareInput(_pitch, TOKEN, "pitch");
-    declareInput(_signal, TOKEN, "signal");
-    declareOutput(_onset, TOKEN, "onset");
-    declareOutput(_duration, TOKEN, "duration");
-    declareOutput(_MIDIpitch, TOKEN, "MIDIpitch");
-  }
-};
-
-} // namespace streaming
-} // namespace essentia
-
-#endif // ESSENTIA_TUNINGFREQUENCY_H
+// TO DO: STREAMING MODE!

@@ -272,6 +272,7 @@ PitchMelodia::PitchMelodia() : AlgorithmComposite() {
 
   declareInput(_signal, "signal", "the input audio signal");
   declareOutput(_pitch, "pitch", "the estimated pitch values per frames [Hz]");
+  declareOutput(_pitchConfidence, "pitchConfidence", "the estimated pitch confidence");
 
 
   // Connect input proxy
@@ -414,12 +415,13 @@ AlgorithmStatus PitchMelodia::process() {
   _pitchContours->compute();
 
   // compute melody
-  vector<Real> pitch;
+  vector<Real> pitch, pitchConfidence;
   _pitchContoursMelody->input("contoursBins").set(contoursBins);
   _pitchContoursMelody->input("contoursSaliences").set(contoursSaliences);
   _pitchContoursMelody->input("contoursStartTimes").set(contoursStartTimes);
   _pitchContoursMelody->input("duration").set(duration);
   _pitchContoursMelody->output("pitch").set(pitch);
+  _pitchContoursMelody->output("pitchConfidence").set(pitchConfidence);
   _pitchContoursMelody->compute();
 
   _pitch.push(pitch);
