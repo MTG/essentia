@@ -77,10 +77,13 @@ void PitchYin::compute() {
   if (signal.empty()) {
     throw EssentiaException("PitchYin: Cannot compute pitch detection on empty signal frame.");
   }
+  if ((int) signal.size() != _frameSize) {
+    throw EssentiaException("PitchYin: Unexpected frame size of the input signal frame: ", signal.size(), " instead of ", _frameSize);
+  } 
+
   Real& pitch = _pitch.get();
   Real& pitchConfidence = _pitchConfidence.get();
   
-
   _yin[0] = 1.;
 
   // Compute difference function
@@ -95,7 +98,12 @@ void PitchYin::compute() {
   Real sum = 0.; 
   for (int tau=1; tau < (int) _yin.size(); ++tau) {
     sum += _yin[tau];
-    _yin[tau] = _yin[tau] * tau / sum;
+    if (sum == 0) {
+      _yin[tau] = 1;
+    }
+    else {
+      _yin[tau] = _yin[tau] * tau / sum;
+    }
   }
 
   // Detect best period
@@ -126,12 +134,10 @@ void PitchYin::compute() {
     _peakDetectGlobal->output("positions").set(_positions);
     _peakDetectGlobal->output("amplitudes").set(_amplitudes);
     _peakDetectGlobal->compute();    
-    try {
+
+    if (_positions.size()) {
       period = _positions[0];
       yinMin = -_amplitudes[0];
-    }
-    catch (const EssentiaException&) {
-      throw EssentiaException("PitchYin: it appears that no peaks were found by PeakDetection. If you read this message, PLEASE, report this issue to the developers with an example of audio on which it happened.");
     }
   }
 
