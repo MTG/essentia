@@ -106,7 +106,6 @@ class TestPitchYin(TestCase):
         self.assertConfigureFails(PitchYin(), {'frameSize' : 1})
         self.assertConfigureFails(PitchYin(), {'sampleRate' : 0})
 
-    """
     # TODO: generate pitchyin/pitch_mozart_c_major_30sec.txt 
     #       check if estimations actually have some sense
     #       it is better to have real case using a monophonic audio 
@@ -125,14 +124,12 @@ class TestPitchYin(TestCase):
             f, conf = pitchDetect(frame)
             pitch += [f]
             confidence += [conf]
-        expected_pitch = readVector(join(filedir(), 'pitchyinfft/pitch_mozart_c_major_30sec.txt'))
-        expected_conf = readVector(join(filedir(), 'pitchyinfft/pitchconfidence_mozart_c_major_30sec.txt'))
-        print "pitch=", pitch
-        print
-        print "expected=", expected_pitch
+
+        expected_pitch = readVector(join(filedir(), 'pitchyin/pitch_mozart_c_major_30sec.txt'))
+        expected_conf = readVector(join(filedir(), 'pitchyin/pitchconfidence_mozart_c_major_30sec.txt'))
+
         self.assertAlmostEqualVector(pitch, expected_pitch)
         self.assertAlmostEqualVector(confidence, expected_conf, 5e-5)
-    """
 
 suite = allTests(TestPitchYin)
 
