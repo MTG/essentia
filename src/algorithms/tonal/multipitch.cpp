@@ -329,7 +329,6 @@ void MultiPitch::compute() {
     // re-estimate polyphony
     p++;
     float Snew=selCandVal[argmax(selCandVal)]/(pow(p,gamma));
-      cout << S << "   " << Snew << endl;
       if (Snew>S){
           finalSelection.clear();
           for (int i=0; i<selCandInd[0].size(); i++){
