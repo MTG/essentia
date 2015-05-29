@@ -62,11 +62,11 @@ void MultiPitch::configure() {
   Real minFrequency = parameter("minFrequency").toReal();
   Real maxFrequency = parameter("maxFrequency").toReal();
   numberHarmonicsMax=floor(sampleRate/maxFrequency);
-    numberHarmonicsMax=min(numberHarmonics,numberHarmonicsMax);
+  numberHarmonicsMax=min(numberHarmonics,numberHarmonicsMax);
   binsInSemitone = floor(100.0 / binResolution);
-    centToHertzBase = pow(2, binResolution / 1200.0);
-    binsInOctave = 1200.0 / binResolution;
- referenceTerm = 0.5 - binsInOctave * log2(referenceFrequency);
+  centToHertzBase = pow(2, binResolution / 1200.0);
+  binsInOctave = 1200.0 / binResolution;
+  referenceTerm = 0.5 - binsInOctave * log2(referenceFrequency);
 
   // Pre-processing
   _frameCutter->configure("frameSize", frameSize,
