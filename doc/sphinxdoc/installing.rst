@@ -34,7 +34,7 @@ In the case of Essentia 2.1, the required version of TagLib (libtag1-dev) is gre
 
 **Essentia 2.1 on Ubuntu 14.10**::
 
-  sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev
+  sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev
 
 In order to use python bindings for the library, you might also need to install python-numpy-dev or python-numpy on Ubuntu::
 

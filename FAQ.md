@@ -84,7 +84,7 @@ cd ../../
 
 Build Essentia
 ```
-./waf configre --with-examples --cross-compile-mingw32
+./waf configure --with-examples --cross-compile-mingw32
 ./waf
 ```
 
@@ -140,7 +140,7 @@ Note that using a specific classifier model implies that you are expected to giv
 
 Builing lightweight Essentia with reduced dependencies 
 -----------------------------------------------------
-Since version 2.1, build scripts can be configured to ignore 3rdparty dependencies required by Essentia in order to create a striped-down version of the library.  Use  ```./waf configure``` command with the ```--lightweight``` flag to provide the list of 3rdparty dependencies to be included. For example, the command below will configure to build Essentia avoiding all dependecies except fftw:
+Since version 2.1, build scripts can be configured to ignore 3rdparty dependencies required by Essentia in order to create a striped-down version of the library.  Use  ```./waf configure``` command with the ```--lightweight``` flag to provide the list of 3rdparty dependencies to be included. For example, the command below will configure to build Essentia avoiding all dependencies except fftw:
 ```
 ./waf configure --lightweight=fftw
 ```
@@ -168,6 +168,23 @@ For more details on the build flags, run:
 ```
 ./waf --help
 ```
+
+Using Essentia real-time
+------------------------
+You can use Essentia's streaming mode in real time feeding input audio frames to a network of algorithms via RingBufferInput. The output of the network can be consumed in real time using RingBufferOutput. 
+
+As an example, see the code of [essentiaRT~](https://github.com/GiantSteps/MC-Sonaar/tree/master/essentiaRT~). 
+
+- [EssentiaOnset.cpp#L63](https://github.com/GiantSteps/MC-Sonaar/blob/master/essentiaRT~/EssentiaOnset.cpp#L63)
+- [EssentiaOnset.cpp#L112](https://github.com/GiantSteps/MC-Sonaar/blob/master/essentiaRT~/EssentiaOnset.cpp#L112)
+- [main.cpp#L74](https://github.com/GiantSteps/MC-Sonaar/blob/master/essentiaRT~/main.cpp#L74)
+
+You can also use Essentia's standard mode for real-time computations. 
+
+Not all algorithms available in the library are suited for real-time analysis due to their computational complexity. Some complex algorithms, such as BeatTrackerDegara, BeatTrackerMultiFeatures, and PredominantMelody, require large segments of audio in order to function properly.
+
+
+
 
 
 
