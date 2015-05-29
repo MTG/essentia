@@ -51,8 +51,9 @@ void MultiPitch::configure() {
   string windowType = "hann";
   zeroPaddingFactor = 4;
   int maxSpectralPeaks = 100;
+  int numberBins=frequencyToCentBin(sampleRate/2);
+  centSpectrum.resize(numberBins);
     
-
   referenceFrequency = parameter("referenceFrequency").toReal();
   binResolution = parameter("binResolution").toReal();
   Real magnitudeThreshold = parameter("magnitudeThreshold").toReal();
@@ -105,8 +106,6 @@ void MultiPitch::configure() {
                                          "referenceFrequency", referenceFrequency,
                                          "minFrequency", minFrequency,
                                          "maxFrequency", maxFrequency);
-
-  // conversion to hertz
   
 
 }
@@ -209,9 +208,6 @@ void MultiPitch::compute() {
     ///////////////////////////////////////////////////////////////////////
       
     // compute the cent-scaled spectrum
-    vector<float> centSpectrum;
-    int numberBins=frequencyToCentBin(sampleRate/2);
-    centSpectrum.resize(numberBins);
     fill(centSpectrum.begin(), centSpectrum.end(), (Real) 0.0);
     for (int i=0; i<frameSpectrum.size(); i++){
       float f=(float(i)/float(frameSpectrum.size()))*(sampleRate/2);

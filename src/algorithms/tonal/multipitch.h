@@ -57,6 +57,7 @@ class MultiPitch : public Algorithm {
     int binsInSemitone;
     int binsInOctave;
     Real referenceTerm;
+    vector<float> centSpectrum;
 
  public:
   MultiPitch() {
