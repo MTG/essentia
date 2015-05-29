@@ -1,4 +1,3 @@
-git test
 Essentia
 ========
 
