@@ -30,13 +30,13 @@ namespace standard {
 
 const char* MultiPitch::name = "MultiPitch";
 const char* MultiPitch::version = "1.0";
-const char* MultiPitch::description = DOC("This algorithm performas a joint estimation of the fundamental frequencies in each frame corresponding to the pitch of the sources of polyphonic recording. Similar to [2], the estimation is based on harmonic summation. The implementation is based on the system described in [1] with a slight modifications: The caclculation of the pitch salience function is taken from [2].
+const char* MultiPitch::description = DOC("This algorithm performas a joint estimation of the fundamental frequencies in each frame corresponding to the pitch of the sources of polyphonic recording. Similar to [2], the estimation is based on harmonic summation. The implementation is based on the system described in [1] with a slight modifications: The caclculation of the pitch salience function is taken from [2]."
 "\n"
 "The output is a vector for each frame containing the estimated melody pitch values .\n"
 "\n"
 "References:\n"
 "  [1] A. Klapuri, \"Multiple Fundamental Frequency Estimation by Summing Harmonic\n"
-"  Amplitudes \", International Society for Music Information Retrieval Conference\n
+"  Amplitudes \", International Society for Music Information Retrieval Conference\n"
 "  (2006).\n"
 "  [2] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
 "  signals using pitch contour characteristics,\" IEEE Transactions on Audio,\n"
@@ -51,7 +51,7 @@ void MultiPitch::configure() {
   string windowType = "hann";
   zeroPaddingFactor = 4;
   int maxSpectralPeaks = 100;
-  int numberBins=frequencyToCentBin(sampleRate/2);
+  numberBins=frequencyToCentBin(sampleRate/2);
   centSpectrum.resize(numberBins);
     
   referenceFrequency = parameter("referenceFrequency").toReal();

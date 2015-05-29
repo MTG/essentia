@@ -45,19 +45,20 @@ class MultiPitch : public Algorithm {
   Algorithm* _pitchSalienceFunction;
   Algorithm* _pitchSalienceFunctionPeaks;
 
-    Real sampleRate;
-    int frameSize;
-    int hopSize;
-    int zeroPaddingFactor;
-    Real referenceFrequency;
-    Real binResolution;
-    int numberHarmonics;
-    int numberHarmonicsMax;
-    Real centToHertzBase;
-    int binsInSemitone;
-    int binsInOctave;
-    Real referenceTerm;
-    vector<float> centSpectrum;
+  Real sampleRate;
+  int frameSize;
+  int hopSize;
+  int zeroPaddingFactor;
+  Real referenceFrequency;
+  Real binResolution;
+  int numberHarmonics;
+  int numberHarmonicsMax;
+  Real centToHertzBase;
+  int binsInSemitone;
+  int binsInOctave;
+  Real referenceTerm;
+  std::vector<Real> centSpectrum;
+  int numberBins;
 
  public:
   MultiPitch() {
