@@ -244,10 +244,9 @@ void MultiPitch::compute() {
       z.resize(centSpectrum.size());
       fill(z.begin(), z.end(), (Real) 0.0);
       for (int h=0; h<numberHarmonicsMax; h++) {
-        int h_bin = kPeaks[i][h];
-        for(int b=max(0, h_bin-binsInSemitone); b <= min(numberBins-1, h_bin+binsInSemitone); b++) {
-          //z[b] += nearestBinWeights[abs(b-h_bin)] * harmonicWeights[h] * 0.25; // 0.25 is cancellation parameter
-        z[b] += nearestBinWeights[abs(b-h_bin)] * getWeight(h_bin,h) * 0.25; // 0.25 is cancellation parameter
+        int hBin = kPeaks[i][h];
+        for(int b=max(0, hBin-binsInSemitone); b <= min(numberBins-1, hBin+binsInSemitone); b++) {
+          z[b] += nearestBinWeights[abs(b-hBin)] * getWeight(hBin,h) * 0.25; // 0.25 is cancellation parameter
         }
       }
       Z.push_back(z);
