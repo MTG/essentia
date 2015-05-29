@@ -30,16 +30,17 @@ namespace standard {
 
 const char* MultiPitch::name = "MultiPitch";
 const char* MultiPitch::version = "1.0";
-const char* MultiPitch::description = DOC("TO DO !!!!This algorithm estimates multiple fundamental frequency contours from the input signal. It is a multi pitch version of the MELODIA algorithm described in [1]. While the algorithm is originally designed to extract melody in polyphonic music, this implementation is adapted for multiple sources. The approach is based on the creation and characterization of pitch contours, time continuous sequences of pitch candidates grouped using auditory streaming cues. To this end, PitchSalienceFunction, PitchSalienceFunctionPeaks, PitchContours, and PitchContoursMonoMelody algorithms are employed. It is strongly advised to use the default parameter values which are optimized according to [1] (where further details are provided) except for minFrequency, maxFrequency, and voicingTolerance, which will depend on your application.\n"
+const char* MultiPitch::description = DOC("This algorithm performas a joint estimation of the fundamental frequencies in each frame corresponding to the pitch of the sources of polyphonic recording. Similar to [2], the estimation is based on harmonic summation. The implementation is based on the system described in [1] with a slight modifications: The caclculation of the pitch salience function is taken from [2].
 "\n"
-"The output is a vector of estimated melody pitch values and a vector of confidence values.\n"
+"The output is a vector for each frame containing the estimated melody pitch values .\n"
 "\n"
 "References:\n"
-"  [1] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
+"  [1] A. Klapuri, \"Multiple Fundamental Frequency Estimation by Summing Harmonic\n"
+"  Amplitudes \", International Society for Music Information Retrieval Conference\n
+"  (2006).\n"
+"  [2] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
 "  signals using pitch contour characteristics,\" IEEE Transactions on Audio,\n"
 "  Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n\n"
-"  [2] http://mtg.upf.edu/technologies/melodia\n\n"
-"  [3] http://www.justinsalamon.com/melody-extraction\n"
 );
 
 void MultiPitch::configure() {
