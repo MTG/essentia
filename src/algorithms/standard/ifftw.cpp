@@ -39,9 +39,15 @@ const char* IFFTW::description = DOC("This algorithm calculates the inverse STFT
 IFFTW::~IFFTW() {
   ForcedMutexLocker lock(FFTW::globalFFTWMutex);
 
+#ifdef USE_DOUBLE
+  fftw_destroy_plan(_fftPlan);
+  fftw_free(_input);
+  fftw_free(_output);
+#else
   fftwf_destroy_plan(_fftPlan);
   fftwf_free(_input);
   fftwf_free(_output);
+#endif
 }
 
 void IFFTW::compute() {
@@ -63,7 +69,11 @@ void IFFTW::compute() {
   memcpy(_input, &fft[0], (size/2+1)*sizeof(complex<Real>));
 
   // calculate the fft
+#ifdef USE_DOUBLE  
+  fftw_execute(_fftPlan);
+#else
   fftwf_execute(_fftPlan);
+#endif
 
   // copy result from plan to output vector
   signal.resize(size);
@@ -79,17 +89,30 @@ void IFFTW::createFFTObject(int size) {
   ForcedMutexLocker lock(FFTW::globalFFTWMutex);
 
   // create the temporary storage array
+#ifdef USE_DOUBLE
+  fftw_free(_input);
+  fftw_free(_output);
+  _input = (complex<Real>*)fftw_malloc(sizeof(complex<Real>)*size);
+  _output = (Real*)fftw_malloc(sizeof(Real)*size);
+#else
   fftwf_free(_input);
   fftwf_free(_output);
   _input = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
-  _output = (Real*)fftwf_malloc(sizeof(Real)*size);
+  _output = (Real*)fftwf_malloc(sizeof(Real)*size); 
+#endif
 
   if (_fftPlan != 0) {
-    fftwf_destroy_plan(_fftPlan);
+#ifdef USE_DOUBLE
+    fftw_destroy_plan(_fftPlan);
+#else
+    fftwf_destroy_plan(_fftPlan);   
+#endif
   }
 
-  //_fftPlan = fftwf_plan_dft_c2r_1d(size, (fftwf_complex*)_input, _output, FFTW_MEASURE);
+#ifdef USE_DOUBLE
+  _fftPlan = fftw_plan_dft_c2r_1d(size, (fftw_complex*)_input, _output, FFTW_ESTIMATE);
+#else
   _fftPlan = fftwf_plan_dft_c2r_1d(size, (fftwf_complex*)_input, _output, FFTW_ESTIMATE);
+#endif
   _fftPlanSize = size;
-
 }

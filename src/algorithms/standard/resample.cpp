@@ -38,11 +38,6 @@ const char* Resample::description = DOC("This algorithm resamples the input sign
 void Resample::configure() {
   _quality = parameter("quality").toInt();
   _factor = parameter("outputSampleRate").toReal() / parameter("inputSampleRate").toReal();
-
-  // check to make sure Real is typedef'd as float
-  if (sizeof(Real) != sizeof(float)) {
-    throw EssentiaException("Resample: Error, Essentia has to be compiled with Real=float for resampling to work.");
-  }
 }
 
 void Resample::compute() {
@@ -57,22 +52,35 @@ void Resample::compute() {
   if (signal.empty()) return;
 
   SRC_DATA src;
+  src.src_ratio = _factor;
+  
   src.input_frames = (long)signal.size();
-  src.data_in = const_cast<float*>(&(signal[0]));
-
   // add some samples to make sure we don't crash in a stupid way...
   src.output_frames = (long)((double)signal.size()*_factor + 100.0);
-  resampled.resize(src.output_frames);
-  src.data_out = &(resampled[0]);
 
-  src.src_ratio = _factor;
+  // libsamplerate works only with float, convert double to float
+#ifdef USE_DOUBLE
+  vector<float> signal_f(signal.begin(), signal.end());
+  vector<float> resampled_f;
+#else
+  const vector<float>& signal_f = signal;
+  vector<float>& resampled_f = resampled;
+#endif
+  
+  resampled_f.resize(src.output_frames);
+  
+  src.data_in = const_cast<float*>(&(signal_f[0]));
+  src.data_out = &(resampled_f[0]);
 
   // do the conversion
   int error = src_simple(&src, _quality, 1);
-
   if (error) throw EssentiaException("Resample: Error in resampling: ", src_strerror(error));
 
-  resampled.resize(src.output_frames_gen);
+  resampled_f.resize(src.output_frames_gen);
+
+#ifdef USE_DOUBLE
+  resampled = vector<double> (resampled_f.begin(), resampled_f.end());
+#endif
 }
 
 } // namespace standard
@@ -145,11 +153,19 @@ AlgorithmStatus Resample::process() {
   EXEC_DEBUG("signal size:" << signal.size());
   EXEC_DEBUG("resampled size:" << resampled.size());
 
-  _data.data_in = const_cast<float*>(&(signal[0]));
-  _data.input_frames = (long)signal.size();
+#ifdef USE_DOUBLE
+  vector<float> signal_f(signal.begin(), signal.end());
+  vector<float> resampled_f(resampled.size());
+#else
+  const vector<float>& signal_f = signal;
+  vector<float>& resampled_f = resampled;
+#endif
 
-  _data.data_out = &(resampled[0]);
-  _data.output_frames = (long)resampled.size();
+  _data.data_in = const_cast<float*>(&(signal_f[0]));
+  _data.input_frames = (long)signal_f.size();
+
+  _data.data_out = &(resampled_f[0]);
+  _data.output_frames = (long)resampled_f.size();
 
 
   if (_data.src_ratio == 1.0) {
@@ -169,6 +185,10 @@ AlgorithmStatus Resample::process() {
       throw EssentiaException("Resample: Internal consumption problem while resampling");
     }
   }
+
+#ifdef USE_DOUBLE
+  resampled = vector<double> (resampled_f.begin(), resampled_f.end());
+#endif
 
   EXEC_DEBUG("input frames:" << _data.input_frames_used);
   EXEC_DEBUG("produced:" << _data.output_frames_gen);

@@ -56,7 +56,12 @@ class FFTW : public Algorithm {
   friend class IFFTW;
   static ForcedMutex globalFFTWMutex;
 
+#ifdef USE_DOUBLE
+  fftw_plan _fftPlan;
+#else
   fftwf_plan _fftPlan;
+#endif
+
   int _fftPlanSize;
   Real* _input;
   std::complex<Real>* _output;

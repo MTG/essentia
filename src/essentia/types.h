@@ -59,14 +59,19 @@ typedef __int64 sint64;
 #endif // OS_WIN32
 
 
+#define USE_DOUBLE
 
 namespace essentia {
 
 /**
  * The main typedef for real numbers.
  */
-typedef float Real;
 
+#ifdef USE_DOUBLE
+typedef double Real;
+#else
+typedef float Real
+#endif
 
 /**
  * Exception class for Essentia. It has a whole slew of different constructors

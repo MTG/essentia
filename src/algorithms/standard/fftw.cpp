@@ -44,9 +44,15 @@ FFTW::~FFTW() {
   // This will cause a memory leak then, but it is definitely a better choice
   // than a crash (right, right??? :-) )
   if (essentia::isInitialized()) {
+#ifdef USE_DOUBLE
+    fftw_destroy_plan(_fftPlan);
+    fftw_free(_input);
+    fftw_free(_output);
+#else
     fftwf_destroy_plan(_fftPlan);
     fftwf_free(_input);
     fftwf_free(_output);
+#endif
   }
 }
 
@@ -70,7 +76,11 @@ void FFTW::compute() {
   memcpy(_input, &signal[0], size*sizeof(Real));
 
   // calculate the fft
+#ifdef USE_DOUBLE
+  fftw_execute(_fftPlan);
+#else
   fftwf_execute(_fftPlan);
+#endif
 
   // copy result from plan to output vector
   fft.resize(size/2+1);
@@ -93,15 +103,29 @@ void FFTW::createFFTObject(int size) {
   }
 
   // create the temporary storage array
+#ifdef USE_DOUBLE
+  fftw_free(_input);
+  fftw_free(_output);
+#else
   fftwf_free(_input);
   fftwf_free(_output);
-  _input = (Real*)fftwf_malloc(sizeof(Real)*size);
-  _output = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
+#endif
+
+  _input = (Real*)fftw_malloc(sizeof(Real)*size);
+  _output = (complex<Real>*)fftw_malloc(sizeof(complex<Real>)*size);
 
   if (_fftPlan != 0) {
-    fftwf_destroy_plan(_fftPlan);
+#ifdef USE_DOUBLE    
+    fftw_destroy_plan(_fftPlan);
+#else
+    fftw_destroy_plan(_fftPlan);
+#endif
   }
 
-  _fftPlan = fftwf_plan_dft_r2c_1d(size, _input, (fftwf_complex*)_output, FFTW_ESTIMATE);
+#ifdef USE_DOUBLE
+  _fftPlan = fftw_plan_dft_r2c_1d(size, _input, (fftw_complex*)_output, FFTW_ESTIMATE);
+#else
+  _fftPlan = fftwf_plan_dft_r2c_1d(size, _input, (fftw_complex*)_output, FFTW_ESTIMATE);
+#endif
   _fftPlanSize = size;
 }

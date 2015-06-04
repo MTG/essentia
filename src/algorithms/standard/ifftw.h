@@ -54,7 +54,11 @@ class IFFTW : public Algorithm {
   static const char* description;
 
  protected:
+#ifdef USE_DOUBLE
+  fftw_plan _fftPlan;
+#else
   fftwf_plan _fftPlan;
+#endif
   int _fftPlanSize;
   std::complex<Real>* _input;
   Real* _output;
