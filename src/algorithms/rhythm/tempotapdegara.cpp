@@ -419,7 +419,7 @@ void TempoTapDegara::computeBeatPeriodsDavies(vector<Real> detections,
   // Add noise
   for (size_t t=0; t<_numberFramesODF; ++t) {
     for (int i=0; i<_hopSizeODF; ++i) {
-      observations[t][i] += 0.0001 * observationsMax * (float) rand() / RAND_MAX;
+      observations[t][i] += 0.0001 * observationsMax * (Real) rand() / RAND_MAX;
     }
   }
 

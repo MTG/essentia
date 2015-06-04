@@ -208,12 +208,12 @@ void MultiPitch::compute() {
     ///////////////////////////////////////////////////////////////////////
       
     // compute the cent-scaled spectrum
-    vector<float> centSpectrum;
+    vector<Real> centSpectrum;
     int numberBins=frequencyToCentBin(sampleRate/2);
     centSpectrum.resize(numberBins);
     fill(centSpectrum.begin(), centSpectrum.end(), (Real) 0.0);
     for (int i=0; i<frameSpectrum.size(); i++){
-      float f=(float(i)/float(frameSpectrum.size()))*(sampleRate/2);
+      Real f=(Real(i)/Real(frameSpectrum.size()))*(sampleRate/2);
       int k=frequencyToCentBin(f);
       if (k>0 && k<numberBins){
         centSpectrum[k]=centSpectrum[k]+frameSpectrum[i];
@@ -224,13 +224,13 @@ void MultiPitch::compute() {
     vector<vector<int> > kPeaks;
     for (int i=0; i<frameSalienceBins.size(); i++){
       vector<int> k;
-      float f=referenceFrequency * pow(centToHertzBase, frameSalienceBins[i]);
+      Real f=referenceFrequency * pow(centToHertzBase, frameSalienceBins[i]);
       for (int m=0; m<numberHarmonicsMax; m++){
         // find the exact peak for each harmonic
         int kBin=frequencyToCentBin(f*(m+1));
         int kBinMin=max(0, int(kBin-binsInSemitone));
         int kBinMax=min(numberBins,int(kBin+binsInSemitone));
-        vector<float> specSegment;
+        vector<Real> specSegment;
         for (int ii=kBinMin; ii<=kBinMax; ii++){
             specSegment.push_back(centSpectrum[ii]);
         }
@@ -258,7 +258,7 @@ void MultiPitch::compute() {
 
     // inhibition function
     int numCandidates=frameSalienceBins.size();
-    float inh[numCandidates][numCandidates];
+    Real inh[numCandidates][numCandidates];
     for (int i=0; i<numCandidates; i++){
       for (int j=0; j<numCandidates; j++){
         inh[i][j]=0;
@@ -269,7 +269,7 @@ void MultiPitch::compute() {
     }
     
     // goodess function init
-    float G_init[numCandidates];
+    Real G_init[numCandidates];
     for (int i=0; i<numCandidates; i++){
       G_init[i]=frameSalienceValues[i];
     }
@@ -278,19 +278,19 @@ void MultiPitch::compute() {
       
     // polyphony estimation init
     int p=1;
-    float gamma=0.73;
-    float S=frameSalienceValues[argmax(frameSalienceValues)]/(pow(p,gamma));
+    Real gamma=0.73;
+    Real S=frameSalienceValues[argmax(frameSalienceValues)]/(pow(p,gamma));
     finalSelection.push_back(argmax(frameSalienceValues));
       
     // goodess function
-    vector<vector<float> > G;
+    vector<vector<Real> > G;
     for (int i=0; i<numCandidates; i++){
-      vector<float> g;
+      vector<Real> g;
       for (int j=0; j<numCandidates; j++){
         if(i==j){
           g.push_back(0.0);
         }else{
-          float g_val=G_init[i]+frameSalienceValues[j]-(inh[i][j]+inh[j][i]);
+          Real g_val=G_init[i]+frameSalienceValues[j]-(inh[i][j]+inh[j][i]);
           g.push_back(g_val);
         }
       }
@@ -298,13 +298,13 @@ void MultiPitch::compute() {
     }
     
     vector<vector<int> > selCandInd;
-    vector<float> selCandVal;
+    vector<Real> selCandVal;
     
-      vector<float> localF0;
+      vector<Real> localF0;
       while (true){
       
     // find numCandidates largest values
-    float maxVal=-1;
+    Real maxVal=-1;
     int maxInd_i=0;
     int maxInd_j=0;
     
@@ -332,7 +332,7 @@ void MultiPitch::compute() {
     
     // re-estimate polyphony
     p++;
-    float Snew=selCandVal[argmax(selCandVal)]/(pow(p,gamma));
+    Real Snew=selCandVal[argmax(selCandVal)]/(pow(p,gamma));
       cout << S << "   " << Snew << endl;
       if (Snew>S){
           finalSelection.clear();
@@ -352,7 +352,7 @@ void MultiPitch::compute() {
       }else{
           // add estimated f0 to frame
           for (int i=0; i<finalSelection.size(); i++){
-              float freq=referenceFrequency * pow(centToHertzBase, frameSalienceBins[finalSelection[i]]);
+              Real freq=referenceFrequency * pow(centToHertzBase, frameSalienceBins[finalSelection[i]]);
               localF0.push_back(freq);
           }
           break;
@@ -373,11 +373,11 @@ int MultiPitch::frequencyToCentBin(Real frequency) {
   return floor(binsInOctave * log2(frequency) + referenceTerm);
 }
 
-float MultiPitch::getWeight(int centBin, int harmonicNumber){
-  float f=referenceFrequency * pow(centToHertzBase, centBin);
-  float alpha=27.0;
-  float beta=320.0;
-  float w=(f+alpha)/(harmonicNumber*f+beta);
+Real MultiPitch::getWeight(int centBin, int harmonicNumber){
+  Real f=referenceFrequency * pow(centToHertzBase, centBin);
+  Real alpha=27.0;
+  Real beta=320.0;
+  Real w=(f+alpha)/(harmonicNumber*f+beta);
   return w;
 }
     

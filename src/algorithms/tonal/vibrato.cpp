@@ -90,7 +90,7 @@ void Vibrato::compute() {
     }
   }
   // get contour start and end indices
-  vector<float> startC, endC;
+  vector<Real> startC, endC;
   if (pitchP[0]>0){
     startC.push_back(0);
   }

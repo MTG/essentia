@@ -109,7 +109,7 @@ void PitchContourSegmentation::compute() {
     
     cout << "segment" << endl;
   // segment based on pitch distance ("island building")
-  minDurPitchSamples=round(_minDur*float(_sampleRate)/float(_hopSize));
+  minDurPitchSamples=round(_minDur*Real(_sampleRate)/Real(_hopSize));
   for (int i=0; i<startC.size(); i++){
     if ((endC[i]-startC[i])>2*minDurPitchSamples){
       vector<Real> contourH, contourC;
@@ -142,12 +142,12 @@ void PitchContourSegmentation::compute() {
   reSegment();
 
   // segment based on rms
-  float resampleFactor=hopSizeFeat/_hopSize;
+  Real resampleFactor=hopSizeFeat/_hopSize;
   for (int i=0; i<startC.size(); i++){
     if ((endC[i]-startC[i])>2*minDurPitchSamples){
       vector<Real> rmsSeg;
       for (int ii=startC[i]; ii<=endC[i]; ii++){
-        rmsSeg.push_back(rms[round(float(ii)/resampleFactor)]);
+        rmsSeg.push_back(rms[round(Real(ii)/resampleFactor)]);
       }
       Real m=mean(rmsSeg,0,rmsSeg.size()-1);
       Real s=stddev(rmsSeg,m);
@@ -169,15 +169,15 @@ void PitchContourSegmentation::compute() {
   // assign pitch values
   for (int i=0; i<startC.size(); i++){
     vector<Real> contour;
-    onset.push_back(float(startC[i])*float(_hopSize)/float(_sampleRate));
+    onset.push_back(Real(startC[i])*Real(_hopSize)/Real(_sampleRate));
     Real d=endC[i]-startC[i];
-    duration.push_back(d*float(_hopSize)/float(_sampleRate));
+    duration.push_back(d*Real(_hopSize)/Real(_sampleRate));
       /*
     for (int ii=startC[i]; ii<=endC[i]; ii++){
       contour.push_back(1200*log2(pitch[ii]/_tuningFreq));
     }
-    float meanPitch=mean(contour, 0, contour.size()-1);
-    float meanFreq=_tuningFreq*pow(2.0,(meanPitch/1200));
+    Real meanPitch=mean(contour, 0, contour.size()-1);
+    Real meanFreq=_tuningFreq*pow(2.0,(meanPitch/1200));
     MIDIpitch.push_back(12*log2(meanFreq/440)+69);
        */
     Real meanFreq=mean(pitch,startC[i], endC[i]-1);

@@ -81,7 +81,7 @@ class MultiPitch : public Algorithm {
   ~MultiPitch();
     
   int frequencyToCentBin(Real frequency);
-  float getWeight(int centBin, int harmonicNumber);
+  Real getWeight(int centBin, int harmonicNumber);
     
   void declareParameters() {
       

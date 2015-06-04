@@ -158,7 +158,7 @@ void PeakDetection::compute() {
   }
 
   // check upper boundary here, so peaks are already sorted by position
-  float pos = _maxPos/scale;
+  Real pos = _maxPos/scale;
   if (size-2 <pos && pos <= size-1 && array[size-1] > array[size-2]) {
     if (array[size-1] > _threshold) {
       peaks.push_back(Peak((size-1)*scale, array[size-1]));

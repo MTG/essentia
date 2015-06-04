@@ -119,7 +119,7 @@ void Panning::compute() {
   int specSize = (int)spectrumLeft.size();
   Real fftSize = 2*_panningBins;
   Real halfPi = 0.5 * M_PI,
-       average = _averageFrames ? 1./float(_averageFrames) : 0;
+       average = _averageFrames ? 1./Real(_averageFrames) : 0;
   vector<Real> histogram(_panningBins);
   vector<Real> ratios(specSize);
   vector<Real> specL(specSize);
