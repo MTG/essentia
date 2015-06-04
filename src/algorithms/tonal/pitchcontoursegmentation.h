@@ -83,3 +83,4 @@ class PitchContourSegmentation : public Algorithm {
 } // namespace essentia
 
 // TO DO: STREAMING MODE!
+#endif
