@@ -106,26 +106,29 @@ void FFTW::createFFTObject(int size) {
 #ifdef USE_DOUBLE
   fftw_free(_input);
   fftw_free(_output);
+  _input = (Real*)fftw_malloc(sizeof(Real)*size);
+  _output = (complex<Real>*)fftw_malloc(sizeof(complex<Real>)*size);
 #else
   fftwf_free(_input);
   fftwf_free(_output);
+  _input = (Real*)fftwf_malloc(sizeof(Real)*size);
+  _output = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
+
 #endif
 
-  _input = (Real*)fftw_malloc(sizeof(Real)*size);
-  _output = (complex<Real>*)fftw_malloc(sizeof(complex<Real>)*size);
 
   if (_fftPlan != 0) {
 #ifdef USE_DOUBLE    
     fftw_destroy_plan(_fftPlan);
 #else
-    fftw_destroy_plan(_fftPlan);
+    fftwf_destroy_plan(_fftPlan);
 #endif
   }
 
 #ifdef USE_DOUBLE
   _fftPlan = fftw_plan_dft_r2c_1d(size, _input, (fftw_complex*)_output, FFTW_ESTIMATE);
 #else
-  _fftPlan = fftwf_plan_dft_r2c_1d(size, _input, (fftw_complex*)_output, FFTW_ESTIMATE);
+  _fftPlan = fftwf_plan_dft_r2c_1d(size, _input, (fftwf_complex*)_output, FFTW_ESTIMATE);
 #endif
   _fftPlanSize = size;
 }

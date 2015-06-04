@@ -59,7 +59,7 @@ typedef __int64 sint64;
 #endif // OS_WIN32
 
 
-#define USE_DOUBLE
+//#define USE_DOUBLE
 
 namespace essentia {
 
@@ -70,7 +70,7 @@ namespace essentia {
 #ifdef USE_DOUBLE
 typedef double Real;
 #else
-typedef float Real
+typedef float Real;
 #endif
 
 /**

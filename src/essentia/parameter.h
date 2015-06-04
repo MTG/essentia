@@ -85,7 +85,9 @@ class ESSENTIA_API Parameter {
   SPECIALIZE_CTOR(Real,         REAL,         real);
   SPECIALIZE_CTOR(bool,         BOOL,         boolean);
   SPECIALIZE_CTOR(int,          INT,          real);
-  //SPECIALIZE_CTOR(double,       REAL,         real);
+#ifndef USE_DOUBLE
+  SPECIALIZE_CTOR(double,       REAL,         real);
+#endif
   SPECIALIZE_CTOR(uint,         INT,          real);
   SPECIALIZE_CTOR(StereoSample, STEREOSAMPLE, ssamp);
 
