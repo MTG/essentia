@@ -17,6 +17,9 @@ example_sources_fileio = [
         ('standard_fadedetection', ),
         ('standard_spectralcontrast', ),
         ('standard_rhythmtransform', ),
+        ('standard_vibrato', ),
+        ('standard_pitchmelodia', ),
+        ('standard_notetranscription', ),
 
         ('streaming_extractor',
                  [ 'streaming_extractorutils',
@@ -53,6 +56,10 @@ example_sources_fileio = [
         ('streaming_key', ),
         ('streaming_pitchyinfft', ),
         ('streaming_predominantmelody', ),
+        ('streaming_pitchmelodia', ),
+        ('streaming_vibrato', ),
+        ('streaming_notetranscription', ),
+
         ('streaming_md5', ),
 
         ('streaming_extractor_freesound',
