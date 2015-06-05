@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_VAMPWRAPPER_H_
+#ifndef ESSENTIA_VAMPWRAPPER_H
 #define ESSENTIA_VAMPWRAPPER_H
 
 #include "vamp-sdk/Plugin.h"
