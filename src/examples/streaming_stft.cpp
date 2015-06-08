@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2015  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,16 +27,7 @@ using namespace essentia;
 using namespace essentia::streaming;
 using namespace essentia::scheduler;
 
-// Overlap add function
-// TODO: to be converted into a essentia Algorith
-//float _buffer[2048]; // hardcoded
-//int overlapAdd(std::vector<float> inFrame, std::vector<float>  &outFrame, int hopsize, int framesize)
-//{
-//
-//return 0;
-//}
 
-// end overlap add
 
 int main(int argc, char* argv[]) {
 
@@ -83,22 +74,10 @@ int main(int argc, char* argv[]) {
                                             "frameSize", framesize,
                                            "hopSize", hopsize);
 
-//Algorithm* frameToReal = factory.create("FrameToReal",
-//                                           "frameSize", framesize,
-//                                           "hopSize", hopsize);
-
-
-//   Algorithm* audiowriter     = factory.create("AudioWriter",
-//                            "filename", outfilename,
-//                            "sampleRate", sr);
-
   Algorithm* writer = factory.create("MonoWriter",
                                      "filename", outputFilename);
 
 
-
-  // data storage
-  //Pool pool;
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos --------" << endl;
@@ -111,20 +90,11 @@ int main(int argc, char* argv[]) {
   window->output("frame")                 >>  fft->input("frame");
 
   // fft -> ifft (here possible spectral transformation can be used)
+
   fft->output("fft")                 >>  ifft->input("fft");
-
-  // ifft -> overlap add -> audio writer
   ifft->output("frame")                 >> overlapAdd->input("frame");
-  //overlapAdd->output("frame")           >> audiowriter->input("audio");
-
-  // overlapAdd->output("signal")  >>  frameToReal->input("signal");
-  // frameToReal->output("signal")  >>  writer->input("audio");
-
   overlapAdd->output("signal")  >>writer->input("audio");
-//  // Spectrum -> pitch detection  -> Pool
-//  spectrum->output("spectrum")            >>  pitchDetect->input("spectrum");
-//  pitchDetect->output("pitch")            >>  PC(pool, "tonal.pitch");
-//  pitchDetect->output("pitchConfidence")  >>  PC(pool, "tonal.pitch confidence");
+
 
   /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << argv[1]<< " --------" << endl;
@@ -134,33 +104,6 @@ int main(int argc, char* argv[]) {
 
   // write results to yamlfile
   cout << "-------- writing results to wav file " << argv[2] << " --------" << endl;
-
-//  standard::Algorithm* aggregator = standard::AlgorithmFactory::create("PoolAggregator");
-//
-//  standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
-//                                                                   "filename", argv[2]);
-
-//  Pool poolStats;
-//
-//  aggregator->input("input").set(pool);
-//  aggregator->output("output").set(poolStats);
-//  output->input("pool").set(poolStats);
-//
-//  aggregator->compute();
-//  output->compute();
-
-//  if (argc == 4 && atoi(argv[3])) {
-//    // printing to stdout:
-//    const vector<Real>& pitches = pool.value<vector<Real> >("tonal.pitch");
-//    cout << "number of frames: " << pitches.size() << endl;
-//    cout << pitches << endl;
-//  }
-
-  // clean up:
-
-//  delete output;
-//  delete aggregator;
-//
 
 essentia::shutdown();
 
