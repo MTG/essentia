@@ -29,20 +29,26 @@ namespace essentia {
 namespace streaming {
 
 const char* LoudnessEBUR128::name = "LoudnessEBUR128";
-const char* LoudnessEBUR128::description = DOC("This algorithm computes loudness descriptors in accordance with EBU R128 recommendation (TODO refs to both specifications of filter and loundess computation algorithm).\n"
+const char* LoudnessEBUR128::description = DOC("This algorithm computes loudness descriptors in accordance with EBU R128 recommendation.\n"
+"- The input stereo signal is preprocessed with a K-weighting filter is applied [2], composed of two stages: a shelving filter and a high-pass filter (RLB-weighting curve).\n"
+"- Momentary loudness is computed by integrating the sum of powers over a sliding rectangular window of 400 ms. The measurement is not gated.\n"
+"- Short-term loudness is computed by integrating the sum of powers over a sliding rectangular window of 3 seconds. The measurement is not gated.\n"
+"- Integrated loudness is a loudness value averaged over an arbitrary long time interval with gating of 400 ms blocks with two thresholds [2].\n"
+"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
+"  - Relative gating threshold, 10 LU below the absolute-gated loudness level.\n"
+"- Loudness range is computed from short-term loudness values. It is defined as the difference between the estimates of the 10th and 95th percentiles of the distribution of the loudness values with applied gating [3].\n"
+"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loundess level.\n"
+"  - Relative gating threshold, -20 LU below the absolute-gated loudness level.\n"
 "\n"
 "References:\n"
 "  [1] EBU Tech 3341-2011. \"Loudness Metering: 'EBU Mode' metering to supplement\n"
 "  loudness normalisation in accordance with EBU R 128\"\n"
-"  [2] EBU Tech Doc 3342-2011. \"Loudness Range: A measure to supplement loudness\n"
+"  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\n"
+"  [3] EBU Tech Doc 3342-2011. \"Loudness Range: A measure to supplement loudness\n"
 "  normalisation in accordance with EBU R 128\"\n"
-"  [3] http://tech.ebu.ch/loudness\n"
+"  [4] http://tech.ebu.ch/loudness\n"
+"  [5] http://en.wikipedia.org/wiki/LKFS\n"
 );
-
-// TODO: text to reuse in the description
-
-// The measure ‘Loudness Range’ quantifies the variation in a time-varying loudness measurement; it measures the variation of loudness on a macroscopic timescale. Loudness Range is supplementary to the measure of overall loudness, that is, ‘integrated loudness’. The computation of Loudness Range is based on a measurement of loudness level, as specified in ITU-  BS.1770. The term ‘Loudness Range’ is abbreviated ‘LRA’. LRA is measured in units of ‘LU’. It is noted that 1 LU is equivalent to 1 dB. 
-
 
 
 LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
@@ -60,10 +66,10 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   _computeIntegrated          = factory.create("UnaryOperatorStream");
 
   declareInput(_signal, "signal", "the input stereo audio signal");
-  declareOutput(_momentaryLoudness, "momentaryLoudness", "momentary loudness (computed by integrating the sum of powers over a sliding rectangular window of 400 ms)");
-  declareOutput(_shortTermLoudness, "shortTermLoudness", "short term loudness (computed by integrating the sum of powers over a sliding rectangular window of 3 seconds)");
-  declareOutput(_integratedLoudness, "integratedLoudness", "integrated loudness (a loudness value averaged over an arbitrary long time interval)");
-  declareOutput(_loudnessRange, "loudnessRange", "loudness range over an arbitrary long time interval [2]");
+  declareOutput(_momentaryLoudness, "momentaryLoudness", "momentary loudness (over 400ms) (LUFS)");
+  declareOutput(_shortTermLoudness, "shortTermLoudness", "short-term loudness (over 3 seconds) (LUFS)");
+  declareOutput(_integratedLoudness, "integratedLoudness", "integrated loudness (overall) (LUFS)");
+  declareOutput(_loudnessRange, "loudnessRange", "loudness range over an arbitrary long time interval [3] (dB, LU)");
   declareOutput(_momentaryLoudnessMax, "momentaryLoudnessMax", "observed maximum value for momemtary loudness");
   declareOutput(_momentaryLoudnessMax, "shortTermLoudnessMax", "observed maximum value for short term loudness");
 
@@ -87,44 +93,38 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   _computeMomentary->output("array") >> _momentaryLoudness;
   _computeShortTerm->output("array") >> _shortTermLoudness;
 
-
-  // TODO: implement "live meter" mode once it is necessary for out tasks
-  // for now, gather all values to pool and compute integrated loudness in 
-  // the post-processing step
-  
-  // In a live meter the integrated loudness has to be recalculated from the 
-  // preceding (stored) loudness levels of the blocks from the time the 
-  // measurement was started, by recalculating the threshold, then applying
-  // it to the stored values, every time the meter reading is updated. 
-  
-
-  // The integrated loudness uses gating as described in ITU-R BS.1770-2. 
-  // The update rate for ‘live meters’ shall be at least 1 Hz. 
-
   // NOTE: frame size for integrated loudness is the same as for momentary, 
   // however, a fixed hop size of 75% (100ms) is required, which can differ from
   // the user-specified hop size for momentary loudness. Therefore, we can:
   // a) reuse the momentary loudness frame-cutter (faster, fixed hop size) 
   // b) add another frame cutter (slower, flexible hop size)
+
   _loudnessEBUR128Filter->output("signal")  >> _frameCutterIntegrated->input("signal");
   _frameCutterIntegrated->output("frame")   >> _meanIntegrated->input("array");
   _meanIntegrated->output("mean")           >> _computeIntegrated->input("array");
   _computeIntegrated->output("array")       >> PC(_pool, "integrated_loudness");
-  // TODO: we don't need to compute logs for each block, instead comprare block 
-  // energies: http://www.hydrogenaud.io/forums/index.php?showtopic=85978&st=50&p=738801&#entry738801
+
+  // TODO: we don't need to compute logs for each block when thresholding, 
+  // instead compare block energies: http://www.hydrogenaud.io/forums/index.php?showtopic=85978&st=50&p=738801&#entry738801
 
   // NOTE: frame size for loudness range is equal to short-term loudness (3 secs)
   // Hop size is allowed to be implementation dependent, with a minimum block 
   // overlap of 66%, i.e., 2 secs. Therefore, we reuse short-term loudness values.
   _computeShortTerm->output("array")  >> PC(_pool, "shortterm_loudness");
 
-
-
   // TODO: implement Max streaming algorithm
-  //_computeMomentary->output("array") >> _momentaryLoudnessMax;
+  _computeMomentary->output("array") >> _momentaryLoudnessMax;
   _computeShortTerm->output("array") >> _shortTermLoudnessMax;
-  _loudnessEBUR128Filter->output("signal") >> _momentaryLoudnessMax;
-
+  
+  // TODO: implement "live meter" mode once it will be necessary for our tasks.
+  // For now, gather all values to pool and compute integrated loudness in 
+  // the post-processing step.
+  
+  // In a live meter the integrated loudness has to be recalculated from the 
+  // preceding (stored) loudness levels of the blocks from the time the 
+  // measurement was started, by recalculating the threshold, then applying
+  // it to the stored values, every time the meter reading is updated. 
+  // The update rate for ‘live meters’ shall be at least 1 Hz. 
 }
 
 LoudnessEBUR128::~LoudnessEBUR128() {}
@@ -181,8 +181,6 @@ AlgorithmStatus LoudnessEBUR128::process() {
   }
   // relative threshold = gated loudness - 10 LKFS 
   Real threshold = sum / n - 10.;
-  cout << "DEBUG threshold=" << threshold << endl;
-  cout << "loudnessI=" << loudnessI << endl;
 
   // compute gated loudness with relative threshold
   sum = 0;

@@ -26,13 +26,10 @@ namespace essentia {
 namespace streaming {
 
 const char* LoudnessEBUR128Filter::name = "LoudnessEBUR128Filter";
-const char* LoudnessEBUR128Filter::description = DOC("This is an auxilary signal preprocessing algorithm used within the LoudnessEBUR128 algorithm. It applies the TODO filter and computes signal representation requiered by LoudnessEBUR128 in accordance with the EBU R128 recommendation (TODO refs to both specifications).\n"
+const char* LoudnessEBUR128Filter::description = DOC("This is an auxilary signal preprocessing algorithm used within the LoudnessEBUR128 algorithm. It applies the pre-processing K-weighting filter and computes signal representation requiered by LoudnessEBUR128 in accordance with the EBU R128 recommendation.\n"
 "\n"
 "References:\n"
-"  [1] TODO: J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
-"  signals using pitch contour characteristics,\" IEEE Transactions on Audio,\n"
-"  Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n\n"
-"  [2] https://tech.ebu.ch/loudness\n"
+"  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\n\n"
 );
 
 LoudnessEBUR128Filter::LoudnessEBUR128Filter() : AlgorithmComposite() {
