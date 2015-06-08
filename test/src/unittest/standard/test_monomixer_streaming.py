@@ -107,6 +107,8 @@ class TestMonoMixer_Streaming(TestCase):
         loader.numberChannels >> mixer.numberChannels
         loader.sampleRate >> None
         loader.md5 >> None
+        loader.bit_rate >> None
+        loader.codec >> None
         run(loader)
         self.assertEqualVector(pool.descriptorNames(), [])
 

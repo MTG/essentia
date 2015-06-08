@@ -337,14 +337,15 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
         YamlOutput(filename='test.json', format='json', indent=4)(p)
         actual = open('test.json').read()
 
+        from essentia import __version__ as essentia_version
         expected = """{
 "metadata": {
     "version": {
-        "essentia": "2.1-beta1"
+        "essentia": "%s"
     }
 },
 "key": ["value"]
-}"""
+}""" % (essentia_version)
         self.assertEqual(expected, actual)
         os.unlink('test.json')
 
@@ -357,7 +358,7 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
         YamlOutput(filename='test.json', format='json', indent=0)(p)
         actual = open('test.json').read()
 
-        expected = """{"metadata": {"version": {"essentia": "2.1-beta1"}},"key": ["value"]}"""
+        expected = """{"metadata": {"version": {"essentia": "%s"}},"key": ["value"]}""" % (essentia_version)
         self.assertEqual(expected, actual)
         os.unlink('test.json')
 

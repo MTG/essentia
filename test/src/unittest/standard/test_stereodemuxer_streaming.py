@@ -50,6 +50,8 @@ class TestStereoDemuxer_Streaming(TestCase):
         loader.numberChannels >> None
         loader.sampleRate >> None
         loader.md5 >> None
+        loader.bit_rate >> None
+        loader.codec >> None
         mux.left >> (pool, 'left')
         mux.right >> (pool, 'right')
         run(loader)

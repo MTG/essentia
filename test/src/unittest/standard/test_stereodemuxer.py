@@ -34,7 +34,7 @@ class TestStereoDemuxer_Streaming(TestCase):
 
     def testEmpty(self):
         filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.aiff')
-        audio, _, _, _ = AudioLoader(filename=filename)()
+        audio, _, _, _, _, _ = AudioLoader(filename=filename)()
         left, right = StereoDemuxer()(audio)
         self.assertEqualVector(left , [])
         self.assertEqualVector(right , [])
