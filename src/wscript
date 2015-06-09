@@ -122,12 +122,13 @@ def configure(ctx):
         # check whether Real=float or Real=double
         # TODO replace this ugly hack with waflib.Tools.c_preproc.re_mac method 
         USE_DOUBLE = False;
-        for l in open('src/essentia/types.h', 'r').read():
+        for l in open('src/essentia/types.h', 'r'):
             if l.count('#define USE_DOUBLE'):
                 if not l.count('//'):
                     USE_DOUBLE = True
                     break
         if USE_DOUBLE:
+            print ("Real type is defined as double, using fftw3 instead of fftw3f.")
             ctx.check_cfg(package='fftw3', uselib_store='FFTW',
                           args=['--cflags', '--libs', '--modversion'], mandatory=False)    
         else:
