@@ -31,8 +31,8 @@ class CompositeAlgo : public AlgorithmComposite {
  protected:
   Algorithm* _copy;
 
-  SinkProxy<float> _srcProxy;
-  SourceProxy<float> _destProxy;
+  SinkProxy<Real> _srcProxy;
+  SourceProxy<Real> _destProxy;
 
  public:
   CompositeAlgo() {
@@ -133,8 +133,8 @@ class DiamondShapeAlgo : public AlgorithmComposite {
 
 class CopyAlgo : public Algorithm {
  protected:
-  Sink<float> _src;
-  Source<float> _dest;
+  Sink<Real> _src;
+  Source<Real> _dest;
 
  public:
   CopyAlgo() {
@@ -164,9 +164,9 @@ class CopyAlgo : public Algorithm {
 
 class TeeAlgo : public Algorithm {
  protected:
-  Sink<float> _src;
-  Source<float> _dest1;
-  Source<float> _dest2;
+  Sink<Real> _src;
+  Source<Real> _dest1;
+  Source<Real> _dest2;
 
 public:
   TeeAlgo() {
@@ -235,8 +235,8 @@ class TeeProxyAlgo : public AlgorithmComposite {
 #define DECLARE_TEST_ALGO(AlgoName)                 \
 class AlgoName : public Algorithm {                 \
 protected:                                          \
-  Sink<float> _input;                               \
-  Source<float> _output;                            \
+  Sink<Real> _input;                               \
+  Source<Real> _output;                            \
 public:                                             \
   AlgoName() {                                      \
     declareInput(_input, 1, "in", "the input");     \
@@ -301,8 +301,8 @@ DECLARE_TEST_ALGO(PoolStorageFrame);
 
 class B1 : public Algorithm {
 protected:
-  Source<float> _output1;
-  Source<float> _output2;
+  Source<Real> _output1;
+  Source<Real> _output2;
 public:
   B1() {
     declareOutput(_output1, 1, "out1", "the output");
@@ -322,9 +322,9 @@ public:
 
 class E1 : public Algorithm {
 protected:
-  Sink<float> _input;
-  Source<float> _output1;
-  Source<float> _output2;
+  Sink<Real> _input;
+  Source<Real> _output1;
+  Source<Real> _output2;
 public:
   E1() {
     declareInput(_input, 1, "in", "the input");
@@ -345,9 +345,9 @@ public:
 
 class F1 : public Algorithm {
 protected:
-  Sink<float> _input1;
-  Sink<float> _input2;
-  Source<float> _output;
+  Sink<Real> _input1;
+  Sink<Real> _input2;
+  Source<Real> _output;
 public:
   F1() {
     declareInput(_input1, 1, "in1", "the input");
@@ -368,8 +368,8 @@ public:
 
 class D1 : public AlgorithmComposite {
  protected:
-  SinkProxy<float> _in;
-  SourceProxy<float> _out;
+  SinkProxy<Real> _in;
+  SourceProxy<Real> _out;
 
   Algorithm *_E, *_F;
 
@@ -407,8 +407,8 @@ class D1 : public AlgorithmComposite {
 #define DECLARE_COMPOSITE_A(AlgoName)              \
 class AlgoName : public AlgorithmComposite {       \
  protected:                                        \
-  SourceProxy<float> _out1;                        \
-  SourceProxy<float> _out2;                        \
+  SourceProxy<Real> _out1;                        \
+  SourceProxy<Real> _out2;                        \
                                                    \
   Algorithm *_B, *_C, *_D;                         \
                                                    \
@@ -470,10 +470,10 @@ DECLARE_COMPOSITE_END()
 #define DECLARE_COMPOSITE_Abis(AlgoName)           \
 class AlgoName : public AlgorithmComposite {       \
  protected:                                        \
-  SinkProxy<float> _in;                            \
-  SourceProxy<float> _out1;                        \
-  SourceProxy<float> _out2;                        \
-  SourceProxy<float> _out3;                        \
+  SinkProxy<Real> _in;                            \
+  SourceProxy<Real> _out1;                        \
+  SourceProxy<Real> _out2;                        \
+  SourceProxy<Real> _out3;                        \
                                                    \
   Algorithm *_B, *_C, *_E, *_F, *_G;               \
                                                    \

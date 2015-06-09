@@ -34,11 +34,11 @@ using namespace essentia::scheduler;
 TEST(Composite, SimplePush) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   float input[] = { 1, 2, 3 };
-  vector<float> output;
+  vector<Real> output;
 
-  Algorithm* vinput = new VectorInput<float>(input);
+  Algorithm* vinput = new VectorInput<Real>(input);
   Algorithm* composite = factory.create("CompositeAlgo");
-  Algorithm* voutput = new VectorOutput<float>(&output);
+  Algorithm* voutput = new VectorOutput<Real>(&output);
 
   DBG("connecting");
   connect(vinput->output("data"), composite->input("src"));
@@ -59,7 +59,7 @@ TEST(Composite, SimplePush) {
   while (composite->process() == OK);
   while (voutput->process() == OK);
 
-  vector<float> expected = arrayToVector<float>(input);
+  vector<Real> expected = arrayToVector<Real>(input);
   EXPECT_VEC_EQ(output, expected);
 
   delete vinput; delete composite; delete voutput;
@@ -68,11 +68,11 @@ TEST(Composite, SimplePush) {
 TEST(Composite, ReplaceInnerAlgo) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   float input[] = { 1, 2, 3 };
-  vector<float> output;
+  vector<Real> output;
 
-  Algorithm* vinput = new VectorInput<float>(input);
+  Algorithm* vinput = new VectorInput<Real>(input);
   Algorithm* composite = factory.create("CompositeAlgo");
-  Algorithm* voutput = new VectorOutput<float>(&output);
+  Algorithm* voutput = new VectorOutput<Real>(&output);
 
   connect(vinput->output("data"), composite->input("src"));
   connect(composite->output("dest"), voutput->input("data"));
@@ -87,7 +87,7 @@ TEST(Composite, ReplaceInnerAlgo) {
   while (composite->process() == OK);
   while (voutput->process() == OK);
 
-  vector<float> expected = arrayToVector<float>(input);
+  vector<Real> expected = arrayToVector<Real>(input);
   EXPECT_VEC_EQ(output, expected);
 
   // reset the network
@@ -131,11 +131,11 @@ TEST(Composite, ReplaceInnerAlgo) {
 TEST(Composite, ExecutionNetwork) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   float input[] = { 1, 2, 3 };
-  vector<float> output;
+  vector<Real> output;
 
-  Algorithm* vinput = new VectorInput<float>(input);
+  Algorithm* vinput = new VectorInput<Real>(input);
   Algorithm* composite = factory.create("CompositeAlgo");
-  Algorithm* voutput = new VectorOutput<float>(&output);
+  Algorithm* voutput = new VectorOutput<Real>(&output);
 
   connect(vinput->output("data"), composite->input("src"));
   connect(composite->output("dest"), voutput->input("data"));

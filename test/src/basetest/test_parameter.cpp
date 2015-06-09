@@ -175,12 +175,12 @@ TEST_F(Parameter, ToInt) {
 
 TEST_F(Parameter, ToDouble) {
   Param p(78.456123);
-  EXPECT_EQ(p.toDouble(), (Real)78.456123);
+  EXPECT_EQ(p.toDouble(), (double)78.456123);
 }
 
 TEST_F(Parameter, ToFloat) {
   Param p(3.1459);
-  EXPECT_EQ(p.toFloat(), (Real)3.1459);
+  EXPECT_EQ(p.toFloat(), (float)3.1459);
 }
 
 TEST_F(Parameter, ToVectorReal) {
