@@ -51,8 +51,9 @@ void MultiPitchKlapuri::configure() {
   string windowType = "hann";
   zeroPaddingFactor = 4;
   int maxSpectralPeaks = 100;
-  numberBins=frequencyToCentBin(sampleRate/2);
-  centSpectrum.resize(numberBins);
+  
+  
+    
     
   referenceFrequency = parameter("referenceFrequency").toReal();
   binResolution = parameter("binResolution").toReal();
@@ -117,6 +118,9 @@ void MultiPitchKlapuri::compute() {
     pitch.clear();
     return;
   }
+    
+  numberBins=frequencyToCentBin(sampleRate/2);
+  centSpectrum.resize(numberBins);
 
   // Pre-processing
   vector<Real> frame;
@@ -173,6 +177,7 @@ void MultiPitchKlapuri::compute() {
   for (int h=0; h<numberHarmonicsMax; h++) {
     harmonicWeights.push_back(pow(0.8, h));
   }
+    
     
   while (true) {
     // get a frame
@@ -263,7 +268,7 @@ void MultiPitchKlapuri::compute() {
         }
       }
     }
-    
+
     // goodess function init
     float G_init[numCandidates];
     for (int i=0; i<numCandidates; i++){
@@ -277,7 +282,6 @@ void MultiPitchKlapuri::compute() {
     float gamma=0.73;
     float S=frameSalienceValues[argmax(frameSalienceValues)]/(pow(p,gamma));
     finalSelection.push_back(argmax(frameSalienceValues));
-      
     // goodess function
     vector<vector<float> > G;
     for (int i=0; i<numCandidates; i++){
@@ -298,7 +302,6 @@ void MultiPitchKlapuri::compute() {
     
       vector<float> localF0;
       while (true){
-      
     // find numCandidates largest values
     float maxVal=-1;
     int maxInd_i=0;
@@ -325,6 +328,7 @@ void MultiPitchKlapuri::compute() {
         maxInd_i=0;
         maxInd_j=0;
     }
+          
     
     // re-estimate polyphony
     p++;
@@ -356,8 +360,10 @@ void MultiPitchKlapuri::compute() {
      
       }
       pitch.push_back(localF0);
+      
   }
-
+    
+    
 }
 
 int MultiPitchKlapuri::frequencyToCentBin(Real frequency) {
