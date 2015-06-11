@@ -72,8 +72,8 @@ class PitchContourSegmentation : public Algorithm {
   std::vector<Real> startC;
   std::vector<Real> endC;
   std::vector<Real> pitch;
-  int hopSizeFeat;
-  int frameSizeFeat;
+  int _hopSizeFeat;
+  int _frameSizeFeat;
   Real _pitchDistanceThreshold;
   Real _rmsThreshold;
 

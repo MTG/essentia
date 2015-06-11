@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_PREDOMINANTMELODY_H
-#define ESSENTIA_PREDOMINANTMELODY_H
+#ifndef ESSENTIA_PREDOMINANTPITCHMELODIA_H
+#define ESSENTIA_PREDOMINANTPITCHMELODIA_H
 
 #include "algorithmfactory.h"
 #include "network.h"
@@ -26,7 +26,7 @@
 namespace essentia {
 namespace standard {
 
-class PredominantMelody : public Algorithm {
+class PredominantPitchMelodia : public Algorithm {
 
  private:
   Input<std::vector<Real> > _signal;
@@ -50,7 +50,7 @@ class PredominantMelody : public Algorithm {
   Algorithm* _pitchContoursMelody;
 
  public:
-  PredominantMelody() {
+  PredominantPitchMelodia() {
     declareInput(_signal, "signal", "the input signal");
     declareOutput(_pitch, "pitch", "the estimated pitch values [Hz]");
     declareOutput(_pitchConfidence, "pitchConfidence", "confidence with which the pitch was detected");
@@ -72,7 +72,7 @@ class PredominantMelody : public Algorithm {
     _pitchContoursMelody = AlgorithmFactory::create("PitchContoursMelody");
   }
 
-  ~PredominantMelody();
+  ~PredominantPitchMelodia();
 
   void declareParameters() {
     // pre-processing
@@ -128,7 +128,7 @@ class PredominantMelody : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class PredominantMelody : public AlgorithmComposite {
+class PredominantPitchMelodia : public AlgorithmComposite {
 
  protected:
   Algorithm* _frameCutter;
@@ -151,8 +151,8 @@ class PredominantMelody : public AlgorithmComposite {
   scheduler::Network* _network;
 
  public:
-  PredominantMelody();
-   ~PredominantMelody();
+  PredominantPitchMelodia();
+   ~PredominantPitchMelodia();
 
   void declareProcessOrder() {
     declareProcessStep(ChainFrom(_frameCutter));
