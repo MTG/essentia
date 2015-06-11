@@ -20,6 +20,7 @@ example_sources_fileio = [
         ('standard_vibrato', ),
         ('standard_pitchmelodia', ),
         ('standard_notetranscription', ),
+        ('standard_pitchdemo', ),
 
         ('streaming_extractor',
                  [ 'streaming_extractorutils',
