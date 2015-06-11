@@ -112,7 +112,7 @@ class PitchContoursMonoMelody : public Algorithm {
   static const char* version;
   static const char* description;
 
-}; // class PitchContoursMelody
+}; // class PitchContoursMonoMelody
 
 } // namespace standard
 } // namespace essentia
@@ -135,7 +135,7 @@ class PitchContoursMonoMelody : public StreamingAlgorithmWrapper {
 
  public:
   PitchContoursMonoMelody() {
-    declareAlgorithm("PitchContoursMelody");
+    declareAlgorithm("PitchContoursMonoMelody");
     declareInput(_contoursBins, TOKEN, "contoursBins");
     declareInput(_contoursSaliences, TOKEN, "contoursSaliences");
     declareInput(_contoursStartTimes, TOKEN, "contoursStartTimes");
