@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "predominantmelody.h"
+#include "predominantpitchmelodia.h"
 
 using namespace std;
 
@@ -25,9 +25,9 @@ namespace essentia {
 namespace standard {
 
 
-const char* PredominantMelody::name = "PredominantMelody";
-const char* PredominantMelody::version = "1.0";
-const char* PredominantMelody::description = DOC("This algorithm estimates the fundamental frequency of the predominant melody in the input signal. It implements the MELODIA algorithm described in [1]. The algorithm is specifically suited to extract melody in polyphonic music, but also works for monophonic signals. The approach is based on the creation and characterization of pitch contours, time continuous sequences of pitch candidates grouped using auditory streaming cues. To this end, PitchSalienceFunction, PitchSalienceFunctionPeaks, PitchContours, and PitchContoursMelody algorithms are employed. It is strongly advised to use the default parameter values which are optimized according to [1] (where further details are provided) except for minFrequency, maxFrequency, and voicingTolerance, which will depend on your application.\n"
+const char* PredominantPitchMelodia::name = "PredominantPitchMelodia";
+const char* PredominantPitchMelodia::version = "1.0";
+const char* PredominantPitchMelodia::description = DOC("This algorithm estimates the fundamental frequency of the predominant melody in the input signal. It implements the MELODIA algorithm described in [1]. The algorithm is specifically suited to extract melody in polyphonic music, but also works for monophonic signals. The approach is based on the creation and characterization of pitch contours, time continuous sequences of pitch candidates grouped using auditory streaming cues. To this end, PitchSalienceFunction, PitchSalienceFunctionPeaks, PitchContours, and PitchContoursMelody algorithms are employed. It is strongly advised to use the default parameter values which are optimized according to [1] (where further details are provided) except for minFrequency, maxFrequency, and voicingTolerance, which will depend on your application.\n"
 "\n"
 "The output is a vector of estimated melody pitch values and a vector of confidence values.\n"
 "\n"
@@ -43,7 +43,7 @@ const char* PredominantMelody::description = DOC("This algorithm estimates the f
 "  [3] http://www.justinsalamon.com/melody-extraction\n"
 );
 
-void PredominantMelody::configure() {
+void PredominantPitchMelodia::configure() {
 
   Real sampleRate = parameter("sampleRate").toReal();
   int frameSize = parameter("frameSize").toInt();
@@ -133,7 +133,7 @@ void PredominantMelody::configure() {
                                           "maxFrequency", maxFrequency);
 }
 
-void PredominantMelody::compute() {
+void PredominantPitchMelodia::compute() {
   const vector<Real>& signal = _signal.get();
   vector<Real>& pitch = _pitch.get();
   vector<Real>& pitchConfidence = _pitchConfidence.get();
@@ -231,7 +231,7 @@ void PredominantMelody::compute() {
   _pitchContoursMelody->compute();
 }
 
-PredominantMelody::~PredominantMelody() {
+PredominantPitchMelodia::~PredominantPitchMelodia() {
     // Pre-processing
     delete _frameCutter;
     delete _windowing;
@@ -259,7 +259,7 @@ namespace essentia {
 namespace streaming {
 
 
-PredominantMelody::PredominantMelody() : AlgorithmComposite() {
+PredominantPitchMelodia::PredominantPitchMelodia() : AlgorithmComposite() {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   _frameCutter                = factory.create("FrameCutter");
@@ -312,13 +312,13 @@ PredominantMelody::PredominantMelody() : AlgorithmComposite() {
   //_pitchContoursMelody->output("pitchConfidence") >> _pitchConfidence;
 }
 
-PredominantMelody::~PredominantMelody() {
+PredominantPitchMelodia::~PredominantPitchMelodia() {
     //delete _network;
   delete _pitchContours;
   delete _pitchContoursMelody;
 }
 
-void PredominantMelody::configure() {
+void PredominantPitchMelodia::configure() {
 
   Real sampleRate = parameter("sampleRate").toReal();
   int frameSize = parameter("frameSize").toInt();
@@ -403,7 +403,7 @@ void PredominantMelody::configure() {
                                   "maxFrequency", maxFrequency);
 }
 
-AlgorithmStatus PredominantMelody::process() {
+AlgorithmStatus PredominantPitchMelodia::process() {
   if (!shouldStop()) return PASS;
 
   const vector<vector<Real> >& salienceBins = _pool.value<vector<vector<Real> > >("internal.saliencebins");
@@ -440,7 +440,7 @@ AlgorithmStatus PredominantMelody::process() {
   return FINISHED;
 }
 
-void PredominantMelody::reset() {
+void PredominantPitchMelodia::reset() {
   AlgorithmComposite::reset();
   _pitchContours->reset();
   _pitchContoursMelody->reset();

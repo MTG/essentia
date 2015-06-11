@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_MULTIPITCH_H
-#define ESSENTIA_MULTIPITCH_H
+#ifndef ESSENTIA_MULTIPITCHKLAPURI_H
+#define ESSENTIA_MULTIPITCHKLAPURI_H
 
 #include "algorithmfactory.h"
 #include "network.h"
@@ -26,7 +26,7 @@
 namespace essentia {
 namespace standard {
 
-class MultiPitch : public Algorithm {
+class MultiPitchKlapuri : public Algorithm {
 
  private:
   Input<std::vector<Real> > _signal;
@@ -61,7 +61,7 @@ class MultiPitch : public Algorithm {
   int numberBins;
 
  public:
-  MultiPitch() {
+  MultiPitchKlapuri() {
     declareInput(_signal, "signal", "the input signal");
     declareOutput(_pitch, "pitch", "the estimated pitch values [Hz]");
 
@@ -80,7 +80,7 @@ class MultiPitch : public Algorithm {
       
   }
 
-  ~MultiPitch();
+  ~MultiPitchKlapuri();
     
   int frequencyToCentBin(Real frequency);
   float getWeight(int centBin, int harmonicNumber);

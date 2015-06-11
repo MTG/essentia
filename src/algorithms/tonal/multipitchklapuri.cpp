@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "multipitch.h"
+#include "multipitchklapuri.h"
 #include "essentiamath.h"
 
 using namespace std;
@@ -28,9 +28,9 @@ namespace essentia {
 namespace standard {
 
 
-const char* MultiPitch::name = "MultiPitch";
-const char* MultiPitch::version = "1.0";
-const char* MultiPitch::description = DOC("This algorithm performas a joint estimation of the fundamental frequencies in each frame corresponding to the pitch of the sources of polyphonic recording. Similar to [2], the estimation is based on harmonic summation. The implementation is based on the system described in [1] with a slight modifications: The caclculation of the pitch salience function is taken from [2]."
+const char* MultiPitchKlapuri::name = "MultiPitchKlapuri";
+const char* MultiPitchKlapuri::version = "1.0";
+const char* MultiPitchKlapuri::description = DOC("This algorithm performas a joint estimation of the fundamental frequencies in each frame corresponding to the pitch of the sources of polyphonic recording. Similar to [2], the estimation is based on harmonic summation. The implementation is based on the system described in [1] with a slight modifications: The caclculation of the pitch salience function is taken from [2]."
 "\n"
 "The output is a vector for each frame containing the estimated melody pitch values .\n"
 "\n"
@@ -43,7 +43,7 @@ const char* MultiPitch::description = DOC("This algorithm performas a joint esti
 "  Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n\n"
 );
 
-void MultiPitch::configure() {
+void MultiPitchKlapuri::configure() {
 
   sampleRate = parameter("sampleRate").toReal();
   frameSize = parameter("frameSize").toInt();
@@ -110,7 +110,7 @@ void MultiPitch::configure() {
 
 }
 
-void MultiPitch::compute() {
+void MultiPitchKlapuri::compute() {
   const vector<Real>& signal = _signal.get();
   vector<vector<Real> >& pitch = _pitch.get();
   if (signal.empty()) {
@@ -360,7 +360,7 @@ void MultiPitch::compute() {
 
 }
 
-int MultiPitch::frequencyToCentBin(Real frequency) {
+int MultiPitchKlapuri::frequencyToCentBin(Real frequency) {
         // +0.5 term is used instead of +1 (as in [1]) to center 0th bin to 55Hz
         // formula: floor(1200 * log2(frequency / _referenceFrequency) / _binResolution + 0.5)
         //    --> 1200 * (log2(frequency) - log2(_referenceFrequency)) / _binResolution + 0.5
@@ -368,7 +368,7 @@ int MultiPitch::frequencyToCentBin(Real frequency) {
   return floor(binsInOctave * log2(frequency) + referenceTerm);
 }
 
-float MultiPitch::getWeight(int centBin, int harmonicNumber){
+float MultiPitchKlapuri::getWeight(int centBin, int harmonicNumber){
   float f=referenceFrequency * pow(centToHertzBase, centBin);
   float alpha=27.0;
   float beta=320.0;
@@ -376,7 +376,7 @@ float MultiPitch::getWeight(int centBin, int harmonicNumber){
   return w;
 }
     
-MultiPitch::~MultiPitch() {
+MultiPitchKlapuri::~MultiPitchKlapuri() {
     // Pre-processing
     delete _frameCutter;
     delete _windowing;
