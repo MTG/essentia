@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "multipitch.h"
+#include "multipitchklapuri.h"
 #include "essentiamath.h"
 
 using namespace std;
@@ -28,21 +28,22 @@ namespace essentia {
 namespace standard {
 
 
-const char* MultiPitch::name = "MultiPitch";
-const char* MultiPitch::version = "1.0";
-const char* MultiPitch::description = DOC("TO DO !!!!This algorithm estimates multiple fundamental frequency contours from the input signal. It is a multi pitch version of the MELODIA algorithm described in [1]. While the algorithm is originally designed to extract melody in polyphonic music, this implementation is adapted for multiple sources. The approach is based on the creation and characterization of pitch contours, time continuous sequences of pitch candidates grouped using auditory streaming cues. To this end, PitchSalienceFunction, PitchSalienceFunctionPeaks, PitchContours, and PitchContoursMonoMelody algorithms are employed. It is strongly advised to use the default parameter values which are optimized according to [1] (where further details are provided) except for minFrequency, maxFrequency, and voicingTolerance, which will depend on your application.\n"
+const char* MultiPitchKlapuri::name = "MultiPitchKlapuri";
+const char* MultiPitchKlapuri::version = "1.0";
+const char* MultiPitchKlapuri::description = DOC("This algorithm performas a joint estimation of the fundamental frequencies in each frame corresponding to the pitch of the sources of polyphonic recording. Similar to [2], the estimation is based on harmonic summation. The implementation is based on the system described in [1] with a slight modifications: The caclculation of the pitch salience function is taken from [2]."
 "\n"
-"The output is a vector of estimated melody pitch values and a vector of confidence values.\n"
+"The output is a vector for each frame containing the estimated melody pitch values .\n"
 "\n"
 "References:\n"
-"  [1] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
+"  [1] A. Klapuri, \"Multiple Fundamental Frequency Estimation by Summing Harmonic\n"
+"  Amplitudes \", International Society for Music Information Retrieval Conference\n"
+"  (2006).\n"
+"  [2] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
 "  signals using pitch contour characteristics,\" IEEE Transactions on Audio,\n"
 "  Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n\n"
-"  [2] http://mtg.upf.edu/technologies/melodia\n\n"
-"  [3] http://www.justinsalamon.com/melody-extraction\n"
 );
 
-void MultiPitch::configure() {
+void MultiPitchKlapuri::configure() {
 
   sampleRate = parameter("sampleRate").toReal();
   frameSize = parameter("frameSize").toInt();
@@ -50,8 +51,9 @@ void MultiPitch::configure() {
   string windowType = "hann";
   zeroPaddingFactor = 4;
   int maxSpectralPeaks = 100;
+  numberBins = frequencyToCentBin(sampleRate/2);
+  centSpectrum.resize(numberBins);
     
-
   referenceFrequency = parameter("referenceFrequency").toReal();
   binResolution = parameter("binResolution").toReal();
   Real magnitudeThreshold = parameter("magnitudeThreshold").toReal();
@@ -60,12 +62,12 @@ void MultiPitch::configure() {
   Real harmonicWeight = parameter("harmonicWeight").toReal();
   Real minFrequency = parameter("minFrequency").toReal();
   Real maxFrequency = parameter("maxFrequency").toReal();
-  numberHarmonicsMax=floor(sampleRate/maxFrequency);
-    numberHarmonicsMax=min(numberHarmonics,numberHarmonicsMax);
+  numberHarmonicsMax = floor(sampleRate/maxFrequency);
+  numberHarmonicsMax = min(numberHarmonics,numberHarmonicsMax);
   binsInSemitone = floor(100.0 / binResolution);
-    centToHertzBase = pow(2, binResolution / 1200.0);
-    binsInOctave = 1200.0 / binResolution;
- referenceTerm = 0.5 - binsInOctave * log2(referenceFrequency);
+  centToHertzBase = pow(2, binResolution / 1200.0);
+  binsInOctave = 1200.0 / binResolution;
+  referenceTerm = 0.5 - binsInOctave * log2(referenceFrequency);
 
   // Pre-processing
   _frameCutter->configure("frameSize", frameSize,
@@ -104,13 +106,11 @@ void MultiPitch::configure() {
                                          "referenceFrequency", referenceFrequency,
                                          "minFrequency", minFrequency,
                                          "maxFrequency", maxFrequency);
-
-  // conversion to hertz
   
 
 }
 
-void MultiPitch::compute() {
+void MultiPitchKlapuri::compute() {
   const vector<Real>& signal = _signal.get();
   vector<vector<Real> >& pitch = _pitch.get();
   if (signal.empty()) {
@@ -200,7 +200,7 @@ void MultiPitch::compute() {
     _pitchSalienceFunctionPeaks->compute();
       
     // no peaks in this frame
-      if (!frameSalienceBins.size()){
+      if (!frameSalienceBins.size()) {
           continue;
       }
     ///////////////////////////////////////////////////////////////////////
@@ -208,30 +208,27 @@ void MultiPitch::compute() {
     ///////////////////////////////////////////////////////////////////////
       
     // compute the cent-scaled spectrum
-    vector<Real> centSpectrum;
-    int numberBins=frequencyToCentBin(sampleRate/2);
-    centSpectrum.resize(numberBins);
     fill(centSpectrum.begin(), centSpectrum.end(), (Real) 0.0);
-    for (int i=0; i<frameSpectrum.size(); i++){
+    for (int i=0; i<frameSpectrum.size(); i++) {
       Real f=(Real(i)/Real(frameSpectrum.size()))*(sampleRate/2);
       int k=frequencyToCentBin(f);
-      if (k>0 && k<numberBins){
+      if (k>0 && k<numberBins) {
         centSpectrum[k]=centSpectrum[k]+frameSpectrum[i];
       }
     }
     
     // get indices corresponding to harmonics of each found peak
     vector<vector<int> > kPeaks;
-    for (int i=0; i<frameSalienceBins.size(); i++){
+    for (int i=0; i<frameSalienceBins.size(); i++) {
       vector<int> k;
       Real f=referenceFrequency * pow(centToHertzBase, frameSalienceBins[i]);
-      for (int m=0; m<numberHarmonicsMax; m++){
+      for (int m=0; m<numberHarmonicsMax; m++) {
         // find the exact peak for each harmonic
         int kBin=frequencyToCentBin(f*(m+1));
         int kBinMin=max(0, int(kBin-binsInSemitone));
         int kBinMax=min(numberBins,int(kBin+binsInSemitone));
         vector<Real> specSegment;
-        for (int ii=kBinMin; ii<=kBinMax; ii++){
+        for (int ii=kBinMin; ii<=kBinMax; ii++) {
             specSegment.push_back(centSpectrum[ii]);
         }
         kBin=kBinMin+argmax(specSegment)-1;
@@ -242,15 +239,14 @@ void MultiPitch::compute() {
       
     // candidate Spectra
     vector<vector<Real> > Z;
-    for (int i=0; i<frameSalienceBins.size(); i++){
+    for (int i=0; i<frameSalienceBins.size(); i++) {
       vector<Real> z;
       z.resize(centSpectrum.size());
       fill(z.begin(), z.end(), (Real) 0.0);
       for (int h=0; h<numberHarmonicsMax; h++) {
-        int h_bin = kPeaks[i][h];
-        for(int b=max(0, h_bin-binsInSemitone); b <= min(numberBins-1, h_bin+binsInSemitone); b++) {
-          //z[b] += nearestBinWeights[abs(b-h_bin)] * harmonicWeights[h] * 0.25; // 0.25 is cancellation parameter
-        z[b] += nearestBinWeights[abs(b-h_bin)] * getWeight(h_bin,h) * 0.25; // 0.25 is cancellation parameter
+        int hBin = kPeaks[i][h];
+        for(int b=max(0, hBin-binsInSemitone); b <= min(numberBins-1, hBin+binsInSemitone); b++) {
+          z[b] += nearestBinWeights[abs(b-hBin)] * getWeight(hBin,h) * 0.25; // 0.25 is cancellation parameter
         }
       }
       Z.push_back(z);
@@ -259,10 +255,10 @@ void MultiPitch::compute() {
     // inhibition function
     int numCandidates=frameSalienceBins.size();
     Real inh[numCandidates][numCandidates];
-    for (int i=0; i<numCandidates; i++){
-      for (int j=0; j<numCandidates; j++){
+    for (int i=0; i<numCandidates; i++) {
+      for (int j=0; j<numCandidates; j++) {
         inh[i][j]=0;
-        for (int m=0; m<numberHarmonicsMax; m++){
+        for (int m=0; m<numberHarmonicsMax; m++) {
           inh[i][j]+=getWeight(kPeaks[i][m],m)*centSpectrum[kPeaks[i][m]]*Z[j][kPeaks[i][m]];
         }
       }
@@ -270,7 +266,7 @@ void MultiPitch::compute() {
     
     // goodess function init
     Real G_init[numCandidates];
-    for (int i=0; i<numCandidates; i++){
+    for (int i=0; i<numCandidates; i++) {
       G_init[i]=frameSalienceValues[i];
     }
     
@@ -284,10 +280,10 @@ void MultiPitch::compute() {
       
     // goodess function
     vector<vector<Real> > G;
-    for (int i=0; i<numCandidates; i++){
+    for (int i=0; i<numCandidates; i++) {
       vector<Real> g;
-      for (int j=0; j<numCandidates; j++){
-        if(i==j){
+      for (int j=0; j<numCandidates; j++) {
+        if(i==j) {
           g.push_back(0.0);
         }else{
           Real g_val=G_init[i]+frameSalienceValues[j]-(inh[i][j]+inh[j][i]);
@@ -301,18 +297,18 @@ void MultiPitch::compute() {
     vector<Real> selCandVal;
     
       vector<Real> localF0;
-      while (true){
+      while (true) {
       
     // find numCandidates largest values
     Real maxVal=-1;
     int maxInd_i=0;
     int maxInd_j=0;
     
-    for (int I=0; I<numCandidates; I++){
+    for (int I=0; I<numCandidates; I++) {
         vector<int> localInd;
-        for (int i=0; i<numCandidates; i++){
-            for (int j=0; j<numCandidates; j++){
-                if (G[i][j]>maxVal){
+        for (int i=0; i<numCandidates; i++) {
+            for (int j=0; j<numCandidates; j++) {
+                if (G[i][j]>maxVal) {
                     maxVal=G[i][j];
                     maxInd_i=i;
                     maxInd_j=j;
@@ -332,18 +328,17 @@ void MultiPitch::compute() {
     
     // re-estimate polyphony
     p++;
-    Real Snew=selCandVal[argmax(selCandVal)]/(pow(p,gamma));
-      cout << S << "   " << Snew << endl;
-      if (Snew>S){
+    Real Snew = selCandVal[argmax(selCandVal)] / pow(p,gamma);
+      if (Snew>S) {
           finalSelection.clear();
-          for (int i=0; i<selCandInd[0].size(); i++){
+          for (int i=0; i<selCandInd[0].size(); i++) {
               finalSelection.push_back(selCandInd[0][i]);
           }
           // re-calculate goddess function
-          for (int i=0; i<numCandidates; i++){
-              for (int j=0; j<numCandidates; j++){
+          for (int i=0; i<numCandidates; i++) {
+              for (int j=0; j<numCandidates; j++) {
                   G[i][j]+=frameSalienceValues[j];
-                  for (int ii=0; ii<selCandInd[i].size(); ii++){
+                  for (int ii=0; ii<selCandInd[i].size(); ii++) {
                       G[i][j]-=(inh[selCandInd[i][ii]][j]+inh[j][selCandInd[i][ii]]);
                   }
               }
@@ -351,7 +346,7 @@ void MultiPitch::compute() {
           S=Snew;
       }else{
           // add estimated f0 to frame
-          for (int i=0; i<finalSelection.size(); i++){
+          for (int i=0; i<finalSelection.size(); i++) {
               Real freq=referenceFrequency * pow(centToHertzBase, frameSalienceBins[finalSelection[i]]);
               localF0.push_back(freq);
           }
@@ -365,7 +360,7 @@ void MultiPitch::compute() {
 
 }
 
-int MultiPitch::frequencyToCentBin(Real frequency) {
+int MultiPitchKlapuri::frequencyToCentBin(Real frequency) {
         // +0.5 term is used instead of +1 (as in [1]) to center 0th bin to 55Hz
         // formula: floor(1200 * log2(frequency / _referenceFrequency) / _binResolution + 0.5)
         //    --> 1200 * (log2(frequency) - log2(_referenceFrequency)) / _binResolution + 0.5
@@ -373,15 +368,15 @@ int MultiPitch::frequencyToCentBin(Real frequency) {
   return floor(binsInOctave * log2(frequency) + referenceTerm);
 }
 
-Real MultiPitch::getWeight(int centBin, int harmonicNumber){
-  Real f=referenceFrequency * pow(centToHertzBase, centBin);
-  Real alpha=27.0;
-  Real beta=320.0;
-  Real w=(f+alpha)/(harmonicNumber*f+beta);
+Real MultiPitchKlapuri::getWeight(int centBin, int harmonicNumber) {
+  Real f = referenceFrequency * pow(centToHertzBase, centBin);
+  Real alpha = 27.0;
+  Real beta = 320.0;
+  Real w = (f+alpha) / (harmonicNumber*f+beta);
   return w;
 }
     
-MultiPitch::~MultiPitch() {
+MultiPitchKlapuri::~MultiPitchKlapuri() {
     // Pre-processing
     delete _frameCutter;
     delete _windowing;
@@ -396,9 +391,7 @@ MultiPitch::~MultiPitch() {
     // Pitch salience contours
     delete _pitchSalienceFunction;
     delete _pitchSalienceFunctionPeaks;
-
 }
-
 
 } // namespace standard
 } // namespace essentia
