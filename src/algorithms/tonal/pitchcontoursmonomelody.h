@@ -135,7 +135,7 @@ class PitchContoursMonoMelody : public StreamingAlgorithmWrapper {
 
  public:
   PitchContoursMonoMelody() {
-    declareAlgorithm("PitchContoursMelody");
+    declareAlgorithm("PitchContoursMonoMelody");
     declareInput(_contoursBins, TOKEN, "contoursBins");
     declareInput(_contoursSaliences, TOKEN, "contoursSaliences");
     declareInput(_contoursStartTimes, TOKEN, "contoursStartTimes");
