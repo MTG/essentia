@@ -52,7 +52,7 @@ class PitchContourSegmentation : public Algorithm {
     declareParameter("tuningFreq", "tuning reference frequency  [Hz]", "(0,22000)", 440);
     declareParameter("sampleRate", "sample rate of the audio signal", "(0,inf)", 44100);
     declareParameter("hopSize", "hop size of the extracted pitch", "(0,inf)", 128);
-    declareParameter("rmsThreshold", "zscore threshold for note segmentation", "(0,-inf)", -2);
+    declareParameter("rmsThreshold", "zscore threshold for note segmentation", "(-inf,0)", -2);
     declareParameter("pitchDistanceThreshold", "pitch threshold for note segmentation [cents]", "(0,inf)", 60);
   }
 
