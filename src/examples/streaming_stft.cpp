@@ -82,6 +82,11 @@ int main(int argc, char* argv[]) {
                                             "frameSize", framesize,
                                            "hopSize", hopsize);
 
+Algorithm* frameToReal = factory.create("FrameToReal",
+                                           "frameSize", framesize,
+                                           "hopSize", hopsize);
+
+
   std::string outputFilename = argv[1];
    outputFilename.append("out.wav");
 //   Algorithm* audiowriter     = factory.create("AudioWriter",
@@ -113,7 +118,9 @@ int main(int argc, char* argv[]) {
   ifft->output("frame")                 >> overlapAdd->input("signal");
   //overlapAdd->output("frame")           >> audiowriter->input("audio");
 
-  overlapAdd->output("signal")  >>  writer->input("audio");
+   overlapAdd->output("signal")  >>  frameToReal->input("frame");
+
+   frameToReal->output("audio")  >>  writer->input("audio");
 
 //  // Spectrum -> pitch detection  -> Pool
 //  spectrum->output("spectrum")            >>  pitchDetect->input("spectrum");

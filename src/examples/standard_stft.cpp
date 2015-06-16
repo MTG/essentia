@@ -25,6 +25,14 @@ using namespace std;
 using namespace essentia;
 using namespace standard;
 
+
+void scaleAudioVector(vector<Real> &buffer, const Real scale)
+{
+for (int i=0; i < int(buffer.size()); ++i){
+    buffer[i] = scale * buffer[i];
+}
+}
+
 int main(int argc, char* argv[]) {
 
   if (argc != 3) {
@@ -109,12 +117,9 @@ int main(int argc, char* argv[]) {
 
   vector<Real> audioOutput;
 
- // overlapAdd->input("signal").set(ifftframe); // or frame ?
-  overlapAdd->input("signal").set(wframe); // or frame ?
+  overlapAdd->input("signal").set(ifftframe); // or frame ?
   overlapAdd->output("signal").set(audioOutput);
 
-  //audioWriter->input("audio").set(audioOutput);
-  //audioWriter->input("audio").set(frame); // test output by pass
 
 
 
@@ -140,23 +145,17 @@ int counter = 0;
     overlapAdd->compute();
 
 
-  // cout << " frame... " << counter << endl;
+
+    // skip first half window
+    if (counter >= floor(framesize / (hopsize * 2.f))){
+        alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
+    }
+
+
     counter++;
-
-    alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
-
-  // pool.add("audio", audioOutput);
-
   }
 
-//  // aggregate the results
-//  Pool aggrPool; // the pool with the aggregated audio values
-//
-//  Algorithm* aggr = AlgorithmFactory::create("PoolAggregator");
-//
-//  aggr->input("input").set(pool);
-//  aggr->output("output").set(aggrPool);
-//  aggr->compute();
+
 
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
@@ -177,3 +176,5 @@ int counter = 0;
 
   return 0;
 }
+
+
