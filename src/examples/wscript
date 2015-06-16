@@ -67,7 +67,10 @@ example_sources_fileio = [
                    'freesound/FreesoundLowlevelDescriptors',
                    'freesound/FreesoundRhythmDescriptors',
                    'freesound/FreesoundTonalDescriptors',
-                   'freesound/FreesoundSfxDescriptors' ])
+                   'freesound/FreesoundSfxDescriptors' ]),
+
+        ('standard', 'stft'),
+        ('streaming', 'stft')
 ]
 
 example_sources_with_gaia = [

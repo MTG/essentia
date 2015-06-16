@@ -29,8 +29,10 @@ class FrameToReal : public Algorithm {
 
  private:
 
+
   Input<std::vector<Real> > _frames;
   Output<std::vector<Real> > _audio;
+
 
 
 //    Output<std::vector<AudioSample> > _audio; // ?? check what data type is appropriate
@@ -42,7 +44,8 @@ class FrameToReal : public Algorithm {
   FrameToReal() {
     declareInput(_frames, "signal", "the input audio frame");
     //declareOutput(_frame, "frame", "the output overlap-add audio signal frame");
-    declareOutput(_audio, "signal", "the output audio samples");
+    declareOutput(_audio, "signal", "the output audio samples"); // type should be signal to be consistent??
+
   }
 
   void declareParameters() {
@@ -71,8 +74,13 @@ class FrameToReal : public StreamingAlgorithmWrapper {
 
  protected:
 
+//  Sink<std::vector<Real> > _frames; // input
+//  Source<Real> _audio; // output
+
   Sink<std::vector<Real> > _frames; // input
   Source<Real> _audio; // output
+
+
 
 
   int _frameSize;
@@ -87,10 +95,8 @@ FrameToReal() {
     declareAlgorithm("FrameToReal");
     //declareInput(_windowedFrame, TOKEN, "frame");
 
-    int preferredSize = 4096;
-
-    declareInput(_frames,  1, "frame", "the frames of the audio signal");
-    declareOutput(_audio, _frameSize, 0, "signal", "the input audio signal");
+  declareInput(_frames, TOKEN,"signal");  // TODO: update when algorithmwrapper is fixed
+  declareOutput(_audio, TOKEN, "signal");
 
 
     _audio.setBufferType(BufferUsage::forLargeAudioStream); // TODO: check this
