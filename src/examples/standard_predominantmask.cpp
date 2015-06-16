@@ -52,7 +52,7 @@ int main(int argc, char* argv[]) {
   /////// PARAMS //////////////
 
   /////// PARAMS //////////////
-  int framesize = 1024;
+  int framesize = 2048;
   int hopsize = 256;
   Real sr = 44100;
 
@@ -76,14 +76,22 @@ int main(int argc, char* argv[]) {
   Algorithm* fft     = factory.create("FFT",
                             "size", framesize);
 
-  Algorithm* predominantMelody = factory.create("PredominantMelody",
-                                                "frameSize", framesize,
-                                                "hopSize", hopsize,
-                                                "sampleRate", sr);
+//  Algorithm* predominantMelody = factory.create("PredominantMelody",
+//                                                "frameSize", framesize,
+//                                                "hopSize", hopsize,
+//                                                "sampleRate", sr);
+//
+  Algorithm* spectrum = factory.create("Spectrum",
+                                       "size", framesize);
+
+  Algorithm* pitchDetect = factory.create("PitchYinFFT",
+                                          "frameSize", framesize,
+                                          "sampleRate", sr);
+
 
   Algorithm* harmonicMask     = factory.create("HarmonicMask",
                             "sampleRate", sr,
-                            "binWidth", 4);
+                            "binWidth", 2);
 
 
   Algorithm* ifft     = factory.create("IFFT",
@@ -116,9 +124,9 @@ int main(int argc, char* argv[]) {
   equalLoudness->input("signal").set(audio);
   equalLoudness->output("signal").set(eqaudio);
 
-  predominantMelody->input("signal").set(eqaudio);
-  predominantMelody->output("pitch").set(pitch);
-  predominantMelody->output("pitchConfidence").set(pitchConf);
+//  predominantMelody->input("signal").set(eqaudio);
+//  predominantMelody->output("pitch").set(pitch);
+//  predominantMelody->output("pitchConfidence").set(pitchConf);
 
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
@@ -126,12 +134,24 @@ int main(int argc, char* argv[]) {
   window->input("frame").set(frame);
   window->output("frame").set(wframe);
 
+  // set spectrum:
+  vector<Real> spec;
+  spectrum->input("frame").set(wframe);
+  spectrum->output("spectrum").set(spec);
+
+  // set Yin pitch extraction:
+  Real thisPitch = 0., thisConf = 0;
+  pitchDetect->input("spectrum").set(spec);
+  pitchDetect->output("pitch").set(thisPitch);
+  pitchDetect->output("pitchConfidence").set(thisConf);
+
+
   fft->input("frame").set(wframe);
   fft->output("fft").set(fftframe);
 
   // processing harmonic mask (apply mask)
   harmonicMask->input("fft").set(fftframe);
-  harmonicMask->input("pitch").set(pitch);
+ // harmonicMask->input("pitch").set(thisPitch);
   harmonicMask->output("fft").set(fftmaskframe);
 
 
@@ -153,18 +173,15 @@ int main(int argc, char* argv[]) {
   cout << "-------- start processing " << audioFilename << " --------" << endl;
 
   audioLoader->compute();
-  equalLoudness->compute();
-  predominantMelody->compute();
+  //equalLoudness->compute();
+  //predominantMelody->compute();
 
   int counter = 0;
 
   while (true) {
-cout << "before framecutter";
 
     // compute a frame
     frameCutter->compute();
-
-cout << "after framecutter";
 
     // if it was the last one (ie: it was empty), then we're done.
     if (!frame.size()) {
@@ -172,11 +189,13 @@ cout << "after framecutter";
     }
 
     window->compute();
-    fft->compute();
-    cout << "before harmonic mask";
-    harmonicMask-> compute();
-    cout << "after harmonic mask";
 
+    // pitch extraction
+    spectrum->compute();
+    pitchDetect->compute();
+
+    fft->compute();
+    harmonicMask-> compute();
     ifft->compute();
     overlapAdd->compute();
 
