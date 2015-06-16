@@ -75,10 +75,12 @@ void HarmonicMask::compute() {
 
   // apply TF
   for (i=0; i < fftsize; ++i){
-  mask[i]  =  0.1;  // TEST
-    outfft[i] = fft[i] * mask[i]; // real
+
+    mask[i]  =  0.1;  // TEST
+
+     outfft[i] =  complex<Real> (fft[i].real() * mask[i], fft[i].imag()); // real
     // check FFTW size management and apply it to complex spectrum
-    outfft[fftsize+1-i] = fft[fftsize+1-i] * mask[i]; // imag
+
 
   }
 

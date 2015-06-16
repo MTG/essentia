@@ -70,7 +70,8 @@ example_sources_fileio = [
                    'freesound/FreesoundSfxDescriptors' ]),
 
         ('standard', 'stft'),
-        ('streaming', 'stft')
+        ('streaming', 'stft'),
+        ('standard_predominantmask', )
 ]
 
 example_sources_with_gaia = [
