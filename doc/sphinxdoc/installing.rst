@@ -42,6 +42,7 @@ In order to use python bindings for the library, you might also need to install 
   sudo apt-get install python-numpy-dev python-numpy
 
 Install support for YAML files input/output in python (optional, make sure to have libyaml installed first)::
+
   sudo apt-get install python-pip
   pip install pyyaml
 
