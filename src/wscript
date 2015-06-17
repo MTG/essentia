@@ -113,10 +113,20 @@ def configure(ctx):
                       args=['taglib >= 1.9', '--cflags', '--libs', '--modversion'],
                       msg='Checking for \'taglib\' >= 1.9',
                       mandatory=False)
-    
+	if sys.platform == 'darwin' and ctx.env['INCLUDES_TAGLIB'][0].endswith('/include/taglib'):
+	    # brew package for taglib 1.9.1 has a messed up pkgconfig file
+            ctx.env['INCLUDES_TAGLIB'].append(ctx.env['INCLUDES_TAGLIB'][0].replace('/include/taglib', '/include'))   
+	    print ctx.env['INCLUDES_TAGLIB']
+ 
     if 'yaml' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
+        if not ctx.env.INCLUDES_YAML and sys.platform == 'darwin':
+	    # an ugly hack for osx, because pkg-config file for yaml-0.1.6 installed by brew 
+            # is missing include path
+	    # TODO: file an issue to libyaml brew formula makers?
+            ctx.env['INCLUDES_YAML'] = '/'.join(ctx.env['LIBPATH_YAML'][0].split('/')[:-1] + ['include'])
+            print ctx.env['INCLUDES_YAML']		
 
     if 'fftw' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
