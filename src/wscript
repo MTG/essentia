@@ -113,10 +113,6 @@ def configure(ctx):
                       args=['taglib >= 1.9', '--cflags', '--libs', '--modversion'],
                       msg='Checking for \'taglib\' >= 1.9',
                       mandatory=False)
-	if sys.platform == 'darwin' and ctx.env['INCLUDES_TAGLIB'][0].endswith('/include/taglib'):
-	    # brew package for taglib 1.9.1 has a messed up pkgconfig file
-            ctx.env['INCLUDES_TAGLIB'].append(ctx.env['INCLUDES_TAGLIB'][0].replace('/include/taglib', '/include'))   
-	    print ctx.env['INCLUDES_TAGLIB']
  
     if 'yaml' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
