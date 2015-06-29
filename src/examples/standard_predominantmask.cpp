@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
   Algorithm* fft     = factory.create("FFT",
                             "size", framesize);
 
-  Algorithm* predominantMelody = factory.create("PredominantMelody",
+  Algorithm* predominantMelody = factory.create("PredominantPitchMelodia", //PredominantMelody",
                                                 "frameSize", framesize,
                                                 "hopSize", hopsize,
                                                 "sampleRate", sr);
