@@ -25,8 +25,8 @@ using namespace std;
 
 namespace essentia {
 
-void processFrame(vector<Real>& tmpFrame, const vector<Real>& windowedFrame, 
-                  vector<Real>& output, vector<Real> _frameHistory, 
+void processFrame(vector<Real>& tmpFrame, const vector<Real>& windowedFrame,
+                  vector<Real>& output, vector<Real> &_frameHistory,
                   const int& _frameSize, const int& _hopSize, const float& normalizationGain) {
 
   bool _zeroPhase = true;
@@ -58,7 +58,7 @@ void processFrame(vector<Real>& tmpFrame, const vector<Real>& windowedFrame,
   for (int i=0; i<_frameSize - _hopSize; i++) {
     _frameHistory[i] = _frameHistory[i+_hopSize];
   }
-  
+
   // set the rest of window to 0
   for (int i= (_frameSize - _hopSize); i<_frameSize; i++) {
     _frameHistory[i] = 0.;
@@ -110,8 +110,8 @@ void OverlapAdd::compute() {
   if (windowedFrame.empty()) throw EssentiaException("OverlapAdd: the input frame is empty");
 
   output.resize(_hopSize);
-  
-  processFrame(_tmpFrame, windowedFrame, output, _frameHistory, _frameSize, 
+
+  processFrame(_tmpFrame, windowedFrame, output, _frameHistory, _frameSize,
                _hopSize, _normalizationGain);
 
 }
@@ -175,7 +175,7 @@ AlgorithmStatus OverlapAdd::process() {
 
   if (windowedFrame.empty()) throw EssentiaException("OverlapAdd: the input frame is empty");
 
-  processFrame(_tmpFrame, windowedFrame, output, _frameHistory, _frameSize, 
+  processFrame(_tmpFrame, windowedFrame, output, _frameHistory, _frameSize,
                _hopSize, _normalizationGain);
 
   EXEC_DEBUG("releasing");
