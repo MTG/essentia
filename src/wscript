@@ -113,10 +113,6 @@ def configure(ctx):
                       args=['taglib >= 1.9', '--cflags', '--libs', '--modversion'],
                       msg='Checking for \'taglib\' >= 1.9',
                       mandatory=False)
-	if sys.platform == 'darwin' and ctx.env['INCLUDES_TAGLIB'][0].endswith('/include/taglib'):
-	    # brew package for taglib 1.9.1 has a messed up pkgconfig file
-            ctx.env['INCLUDES_TAGLIB'].append(ctx.env['INCLUDES_TAGLIB'][0].replace('/include/taglib', '/include'))   
-	    print ctx.env['INCLUDES_TAGLIB']
  
     if 'yaml' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
@@ -277,7 +273,9 @@ def build(ctx):
         print('Building all the algorithms')
 
     if ctx.env['ALGOIGNORE']:
+        ctx.env['ALGOIGNORE'] += ['MultiPitchKlapuri'] #TODO: a temp hack to remove MultiPitchKlapuri, which contains a segfault
         ctx.env['ALGOIGNORE'] = list(set(ctx.env['ALGOIGNORE']))
+
         print('Ignoring the following algorithms: %s' % ', '.join(ctx.env['ALGOIGNORE']))
         for algoname in ctx.env['ALGOIGNORE']:
             del algos[algoname]

@@ -21,12 +21,9 @@
 #include "essentiamath.h"
 
 using namespace std;
-using namespace essentia;
-using namespace standard;
 
 namespace essentia {
 namespace standard {
-
 
 const char* MultiPitchKlapuri::name = "MultiPitchKlapuri";
 const char* MultiPitchKlapuri::version = "1.0";
@@ -63,8 +60,8 @@ void MultiPitchKlapuri::configure() {
   Real minFrequency         = parameter("minFrequency").toReal();
   Real maxFrequency         = parameter("maxFrequency").toReal();
 
-  numberHarmonicsMax        = floor(sampleRate/maxFrequency);
-  numberHarmonicsMax        = min(numberHarmonics,numberHarmonicsMax);
+  numberHarmonicsMax        = floor(sampleRate / maxFrequency);
+  numberHarmonicsMax        = min(numberHarmonics, numberHarmonicsMax);
   binsInSemitone            = floor(100.0 / binResolution);
   centToHertzBase           = pow(2, binResolution / 1200.0);
   binsInOctave              = 1200.0 / binResolution;
@@ -72,12 +69,12 @@ void MultiPitchKlapuri::configure() {
 
   // Pre-processing
   _frameCutter->configure("frameSize", frameSize,
-               "hopSize", hopSize,
-               "startFromZero", false);
+                          "hopSize", hopSize,
+                          "startFromZero", false);
 
   _windowing->configure("size", frameSize,
-            "zeroPadding", (zeroPaddingFactor-1) * frameSize,
-            "type", windowType);
+                        "zeroPadding", (zeroPaddingFactor-1) * frameSize,
+                        "type", windowType);
   // Spectral peaks
   _spectrum->configure("size", frameSize * zeroPaddingFactor);
 
@@ -107,8 +104,6 @@ void MultiPitchKlapuri::configure() {
                      "referenceFrequency", referenceFrequency,
                      "minFrequency", minFrequency,
                      "maxFrequency", maxFrequency);
-  
-
 }
 
 void MultiPitchKlapuri::compute() {
@@ -116,7 +111,7 @@ void MultiPitchKlapuri::compute() {
   vector<vector<Real> >& pitch = _pitch.get();
   if (signal.empty()) {
     pitch.clear();
-  return;
+    return;
   }
 
   // Pre-processing
@@ -158,10 +153,6 @@ void MultiPitchKlapuri::compute() {
   _pitchSalienceFunctionPeaks->output("salienceBins").set(frameSalienceBins);
   _pitchSalienceFunctionPeaks->output("salienceValues").set(frameSalienceValues);
 
-
-  vector<vector<Real> > peakBins;
-  vector<vector<Real> > peakSaliences;
-
   vector<Real> nearestBinWeights;
   nearestBinWeights.resize(binsInSemitone + 1);
   for (int b=0; b <= binsInSemitone; b++) {
@@ -193,7 +184,7 @@ void MultiPitchKlapuri::compute() {
   _spectralPeaks->compute();
     
   // whiten the spectrum
-    _spectralWhitening->compute();
+  _spectralWhitening->compute();
 
   // calculate salience function
   _pitchSalienceFunction->compute();
@@ -212,10 +203,10 @@ void MultiPitchKlapuri::compute() {
   // compute the cent-scaled spectrum
   fill(centSpectrum.begin(), centSpectrum.end(), (Real) 0.0);
   for (int i=0; i<frameSpectrum.size(); i++) {
-    Real f = (Real(i)/Real(frameSpectrum.size())) * (sampleRate/2);
+    Real f = (Real(i) / Real(frameSpectrum.size())) * (sampleRate/2);
     int k = frequencyToCentBin(f);
     if (k>0 && k<numberBins) {
-      centSpectrum[k]=centSpectrum[k]+frameSpectrum[i];
+      centSpectrum[k] = centSpectrum[k] + frameSpectrum[i];
     }
   }
   
@@ -228,7 +219,7 @@ void MultiPitchKlapuri::compute() {
       // find the exact peak for each harmonic
       int kBin = frequencyToCentBin(f*(m+1));
       int kBinMin = max(0, int(kBin-binsInSemitone));
-      int kBinMax = min(numberBins, int(kBin+binsInSemitone));
+      int kBinMax = min(numberBins-1, int(kBin+binsInSemitone));
       vector<Real> specSegment;
       for (int ii=kBinMin; ii<=kBinMax; ii++) {
         specSegment.push_back(centSpectrum[ii]);
@@ -242,44 +233,38 @@ void MultiPitchKlapuri::compute() {
   // candidate Spectra
   vector<vector<Real> > Z;
   for (int i=0; i<frameSalienceBins.size(); i++) {
-    vector<Real> z;
-    z.resize(centSpectrum.size());
-    fill(z.begin(), z.end(), (Real) 0.0);
+    vector<Real> z(numberBins, 0.);
     for (int h=0; h<numberHarmonicsMax; h++) {
-    int hBin = kPeaks[i][h];
-    for(int b=max(0, hBin-binsInSemitone); b <= min(numberBins-1, hBin+binsInSemitone); b++) {
-      z[b] += nearestBinWeights[abs(b-hBin)] * getWeight(hBin,h) * 0.25; // 0.25 is cancellation parameter
-    }
+      int hBin = kPeaks[i][h];
+      for(int b=max(0, hBin-binsInSemitone); b <= min(numberBins-1, hBin+binsInSemitone); b++) {
+        z[b] += nearestBinWeights[abs(b-hBin)] * getWeight(hBin,h) * 0.25; // 0.25 is cancellation parameter
+      }
     }
     Z.push_back(z);
   }
 
+  // TODO: segfault somewhere here
   // inhibition function
-  int numCandidates=frameSalienceBins.size();
-  Real inh[numCandidates][numCandidates];
+  int numCandidates = frameSalienceBins.size();
+  vector<vector<Real> > inhibition;
+
   for (int i=0; i<numCandidates; i++) {
+    vector<Real> inh(numCandidates, 0.); 
     for (int j=0; j<numCandidates; j++) {
-    inh[i][j]=0;
-    for (int m=0; m<numberHarmonicsMax; m++) {
-      inh[i][j]+=getWeight(kPeaks[i][m],m)*centSpectrum[kPeaks[i][m]]*Z[j][kPeaks[i][m]];
+      for (int m=0; m<numberHarmonicsMax; m++) {
+        inh[j] += getWeight(kPeaks[i][m], m) * centSpectrum[kPeaks[i][m]] * Z[j][kPeaks[i][m]];
+      }
     }
-    }
+    inhibition.push_back(inh);
   }
 
-  // goodess function init
-  Real G_init[numCandidates];
-  for (int i=0; i<numCandidates; i++) {
-    G_init[i]=frameSalienceValues[i];
-  }
-  
+  // polyphony estimation initialization
   vector<int> finalSelection;
-    
-  // polyphony estimation init
-  int p=1;
-  Real gamma=0.73;
-  Real S=frameSalienceValues[argmax(frameSalienceValues)]/(pow(p,gamma));
+  int p = 1;
+  Real gamma = 0.73;
+  Real S = frameSalienceValues[argmax(frameSalienceValues)] / pow(p,gamma);
   finalSelection.push_back(argmax(frameSalienceValues));
-  // goodess function
+  // goodness function
   vector<vector<Real> > G;
   for (int i=0; i<numCandidates; i++) {
     vector<Real> g;
@@ -287,7 +272,7 @@ void MultiPitchKlapuri::compute() {
     if(i==j) {
       g.push_back(0.0);
     }else{
-      Real g_val=G_init[i]+frameSalienceValues[j]-(inh[i][j]+inh[j][i]);
+      Real g_val = frameSalienceValues[i] + frameSalienceValues[j] - (inhibition[i][j] + inhibition[j][i]);
       g.push_back(g_val);
     }
     }
@@ -297,7 +282,7 @@ void MultiPitchKlapuri::compute() {
   vector<vector<int> > selCandInd;
   vector<Real> selCandVal;
   vector<Real> localF0;
-  
+    
   while (true) {
     // find numCandidates largest values
     Real maxVal=-1;
@@ -305,52 +290,52 @@ void MultiPitchKlapuri::compute() {
     int maxInd_j=0;
   
     for (int I=0; I<numCandidates; I++) {
-    vector<int> localInd;
-    for (int i=0; i<numCandidates; i++) {
-      for (int j=0; j<numCandidates; j++) {
-        if (G[i][j]>maxVal) {
-          maxVal=G[i][j];
-          maxInd_i=i;
-          maxInd_j=j;
+      vector<int> localInd;
+      for (int i=0; i<numCandidates; i++) {
+        for (int j=0; j<numCandidates; j++) {
+          if (G[i][j]>maxVal) {
+            maxVal=G[i][j];
+            maxInd_i=i;
+            maxInd_j=j;
+          }
         }
-      }
-    }
-    localInd.push_back(maxInd_i);
-    localInd.push_back(maxInd_j);
-    selCandInd.push_back(localInd);
-    selCandVal.push_back(G[maxInd_i][maxInd_j]);
-    G[maxInd_i][maxInd_j]=-1;
-    maxVal=-1;
-    maxInd_i=0;
-    maxInd_j=0;
+     }
+      localInd.push_back(maxInd_i);
+      localInd.push_back(maxInd_j);
+      selCandInd.push_back(localInd);
+      selCandVal.push_back(G[maxInd_i][maxInd_j]);
+      G[maxInd_i][maxInd_j]=-1;
+      maxVal=-1;
+      maxInd_i=0;
+      maxInd_j=0;
     }
   
     // re-estimate polyphony
     p++;
     Real Snew = selCandVal[argmax(selCandVal)] / pow(p,gamma);
     if (Snew>S) {
-    finalSelection.clear();
-    for (int i=0; i<selCandInd[0].size(); i++) {
-      finalSelection.push_back(selCandInd[0][i]);
-    }
-    // re-calculate goddess function
-    for (int i=0; i<numCandidates; i++) {
-      for (int j=0; j<numCandidates; j++) {
-      G[i][j]+=frameSalienceValues[j];
-      for (int ii=0; ii<selCandInd[i].size(); ii++) {
-        G[i][j]-=(inh[selCandInd[i][ii]][j]+inh[j][selCandInd[i][ii]]);
+      finalSelection.clear();
+      for (int i=0; i<selCandInd[0].size(); i++) {
+        finalSelection.push_back(selCandInd[0][i]);
       }
+      // re-calculate goddess function
+      for (int i=0; i<numCandidates; i++) {
+        for (int j=0; j<numCandidates; j++) {
+          G[i][j]+=frameSalienceValues[j];
+          for (int ii=0; ii<selCandInd[i].size(); ii++) {
+            G[i][j]-=(inhibition[selCandInd[i][ii]][j]+inhibition[j][selCandInd[i][ii]]);
+          }
+        }
       }
-    }
-    S=Snew;
+      S=Snew;
     } 
     else {
-    // add estimated f0 to frame
-    for (int i=0; i<finalSelection.size(); i++) {
-      Real freq=referenceFrequency * pow(centToHertzBase, frameSalienceBins[finalSelection[i]]);
-      localF0.push_back(freq);
-    }
-    break;
+      // add estimated f0 to frame
+      for (int i=0; i<finalSelection.size(); i++) {
+        Real freq=referenceFrequency * pow(centToHertzBase, frameSalienceBins[finalSelection[i]]);
+        localF0.push_back(freq);
+      }
+      break;
     }
   }
   pitch.push_back(localF0);

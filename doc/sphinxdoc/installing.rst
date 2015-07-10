@@ -29,7 +29,7 @@ Essentia depends on (at least) the following libraries:
 Installing dependencies on Linux
 --------------------------------
 
-You can install those dependencies on a Debian/Ubuntu system from official repositories using the commands provided below. Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. See Github release notes on the download page. 
+You can install those dependencies on a Debian/Ubuntu system from official repositories using the commands provided below. Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. See Github release notes on the download page.
 
 In the case of Essentia 2.1, the required version of TagLib (libtag1-dev) is greater or equal to ``1.9``. The suitable version is distributed with Ubuntu Trusty (14.04 LTS). If you are using the latest stable Debian (Wheezy), you might want to install it from `wheezy-backports <https://wiki.debian.org/Backports>`_ repository. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu Utopic (14.10) repository, and in Debian wheezy-backports.
 
@@ -53,7 +53,7 @@ Installing dependencies on Mac OS X
 
 Install a scientific python environment first:
 
-1. install Command Line Tools for Xcode: https://github.com/mxcl/homebrew/wiki/Installation
+1. install Command Line Tools for Xcode. Even if you install Xcode from the app store you must configure command-line compilation by running: ``xcode-select --install``
 2. install homebrew (package manager): http://brew.sh
 3. install prerequisites: ``brew install pkg-config gcc readline sqlite gdbm freetype libpng``
 4. install python: ``brew install python --framework``
@@ -122,7 +122,7 @@ Building documentation (optional)
 All documentation is provided on the official website of Essentia library. To generate it by your own follow the steps below.
 
 Install pip, if you are on Linux::
-  
+
   sudo apt-get install python-pip
 
 Install additiona dependencies (you might need to run this command with sudo)::
