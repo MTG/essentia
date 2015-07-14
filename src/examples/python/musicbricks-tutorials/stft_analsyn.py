@@ -35,8 +35,13 @@ awrite = MonoWriter (filename = outputFilename, sampleRate = 44100);
 audioout = np.array(0)
 
 for frame in FrameGenerator(audio, frameSize = framesize, hopSize = hopsize):
+    # STFT analysis
     infft = fft(w(frame))
+
+    # here we could apply spectral transformations
     outfft = infft
+
+    # STFT synthesis
     out = overl(ifft(outfft))
     audioout = np.append(audioout, out)
 
