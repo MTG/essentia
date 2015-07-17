@@ -46,7 +46,8 @@ for frame in FrameGenerator(audio, frameSize = framesize, hopSize = hopsize):
     audioout = np.append(audioout, out)
 
 # write audio output
-awrite(audio)
+print audioout.shape
+awrite(audioout.astype(np.float32))
 
 
 
