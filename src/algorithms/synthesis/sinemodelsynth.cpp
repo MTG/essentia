@@ -17,14 +17,14 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "sinemodel.h"
+#include "sinemodelanal.h"
 #include "essentiamath.h"
 
 using namespace essentia;
 using namespace standard;
 
-const char* SineModel::name = "SineModel";
-const char* SineModel::description = DOC("This algorithm computes the sine model without sine tracking.");
+const char* SineModel::name = "SineModelAnal";
+const char* SineModel::description = DOC("This algorithm computes the sine model analysis without sine tracking.");
 
 void SineModel::compute() {
 
@@ -32,7 +32,7 @@ void SineModel::compute() {
   Real& maxMagFreq = _maxMagFreq.get();
 
   if (spectrum.size() < 2) {
-    throw EssentiaException("SineModel: input audio spectrum must be larger than 1 element");
+    throw EssentiaException("SineModelAnal: input audio spectrum must be larger than 1 element");
   }
 
   int index = std::max_element(spectrum.begin(), spectrum.end()) - spectrum.begin();
