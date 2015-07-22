@@ -21,9 +21,7 @@
 #define ESSENTIA_SINEMODELANAL_H
 
 #include "algorithm.h"
-
-// TODO: copy the file as part of Essentia. Check with Dmitry what is the best option
-#include "../../../../musicbricks/sms-tools-master/software/models/utilFunctions_C/utilFunctions.h""
+#include "algorithmfactory.h"
 
 
 namespace essentia {
@@ -31,28 +29,45 @@ namespace standard {
 
 class SineModelAnal : public Algorithm {
 
- private:
-  Input<std::vector<Real> > _spectrum;
-  Output<Real> _maxMagFreq;
-  Real _sampleRate;
+ protected:
+  Input<std::vector<std::complex<Real> > > _fft;
+  Output<std::vector<Real> > _magnitudes;
+  Output<std::vector<Real> > _frequencies;
+  Output<std::vector<Real> > _phases;
+  Algorithm* _peakDetect;
+  Algorithm* _cartesianToPolar;
 
  public:
-  SineModel() {
-    declareInput(_spectrum, "spectrum", "the input spectrum (must have more than 1 element)");
-    declareOutput(_freqs, "freqs", "the frequency with the largest magnitude [Hz]");
-    declareOutput(_mags, "mags", "the frequency with the largest magnitude [Hz]");
-      declareOutput(_phases, "phases", "the phases of the frequency with the largest magnitude [Hz]");
+  SineModelAnal() {
+    declareInput(_fft, "fft", "the input frame");
+    declareOutput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
+    declareOutput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
+    declareOutput(_phases, "phases", "the phases of the sinusoidal peaks");
+
+    _peakDetect = AlgorithmFactory::create("PeakDetection");
+    _cartesianToPolar = AlgorithmFactory::create("CartesianToPolar");
+
+  }
+
+  ~SineModelAnal() {
+    delete _peakDetect;
+    delete _cartesianToPolar;
   }
 
   void declareParameters() {
-    declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
+    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
+    declareParameter("maxPeaks", "the maximum number of returned peaks", "[1,inf)", 100);
+    declareParameter("maxFrequency", "the maximum frequency of the range to evaluate [Hz]", "(0,inf)", 5000.0);
+    declareParameter("minFrequency", "the minimum frequency of the range to evaluate [Hz]", "[0,inf)", 0.0);
+    declareParameter("magnitudeThreshold", "peaks below this given threshold are not outputted", "(-inf,inf)", 0.0);
+    declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
   }
 
-  void configure() {
-    _sampleRate = parameter("sampleRate").toReal();
-  }
-
+  void configure();
   void compute();
+
+  void phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases);
+  void sinusoidalTracking();
 
   static const char* name;
   static const char* description;
@@ -70,19 +85,25 @@ namespace streaming {
 class SineModelAnal : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<Real> > _spectrum;
-  Source<Real> _maxMagFreq;
+  Sink<std::vector<std::complex<Real> > > _fft; // input
+  Source<std::vector<Real> > _frequencies;
+  Source<std::vector<Real> > _magnitudes;
+  Source<std::vector<Real> > _phases;
 
  public:
-  SineModel() {
+  SineModelAnal() {
     declareAlgorithm("SineModelAnal");
-    declareInput(_spectrum, TOKEN, "spectrum");
-    declareOutput(_maxMagFreq, TOKEN, "maxMagFreq");
+    declareInput(_fft, TOKEN, "fft");
+    declareOutput(_frequencies, TOKEN, "frequencies");
+    declareOutput(_magnitudes, TOKEN, "magnitudes");
+    declareOutput(_phases, TOKEN, "phases");
   }
 };
 
 } // namespace streaming
 } // namespace essentia
+
+
 
 
 #endif // ESSENTIA_SINEMODELANAL_H

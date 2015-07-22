@@ -45,7 +45,7 @@ example_sources_fileio = [
                    'extractor_music/MusicLowlevelDescriptors',
                    'extractor_music/MusicRhythmDescriptors',
                    'extractor_music/MusicTonalDescriptors' ]),
-        
+
         ('streaming_beatsmarker', ),
         ('streaming_mfcc', ),
         ('streaming_gfcc', ),
@@ -72,7 +72,8 @@ example_sources_fileio = [
 
         ('standard_stft', ),
         ('streaming_stft', ),
-        ('standard_predominantmask', )
+        ('standard_predominantmask', ),
+        ('standard_sinemodel', )
 ]
 
 example_sources_with_gaia = [
@@ -91,7 +92,7 @@ def configure(ctx):
 
     if "HAVE_AVCODEC" in ctx.env['define_key'] and "HAVE_SAMPLERATE" in ctx.env['define_key']:
         example_list += example_list_fileio
-    
+
         if "HAVE_GAIA2" in ctx.env['define_key']:
             example_list += example_list_gaia
 
@@ -111,19 +112,19 @@ def configure(ctx):
 
     if ctx.env.WITH_STATIC_EXAMPLES:
         if sys.platform != 'darwin':
-            # skip -static flag on OSX, otherwise it will complain because 
+            # skip -static flag on OSX, otherwise it will complain because
             # static linking to system libraries is not supported on OSX
             ctx.env.LINKFLAGS = ['-static']
             ctx.env.SHLIB_MARKER = '-Wl,-Bstatic'
 
         ctx.env.LIB = [ 'avformat', 'avcodec', 'avutil', 'tag' ]
-        
+
         if "HAVE_GAIA2" in ctx.env['define_key']:
-            ctx.env.LIB += [ 'gaia2' ]    
+            ctx.env.LIB += [ 'gaia2' ]
             ctx.env['LIB_GAIA2'] += [ 'dl' ] # -ldl is required when building with static QtCore
-       
+
         if ctx.options.CROSS_COMPILE_MINGW32:
-            # otherwise the __imp__ symbols will be expected at link time 
+            # otherwise the __imp__ symbols will be expected at link time
             ctx.env.CXXFLAGS += ['-DYAML_DECLARE_STATIC', '-DTAGLIB_STATIC']
 
     # add flags for support of Accelerate FFT on OSX
@@ -133,7 +134,7 @@ def configure(ctx):
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
-    
+
     if len(ctx.env.EXAMPLE_LIST):
         def build_example(prog_name, other=None):
             files = ['%s.cpp' % f for f in [prog_name] + (other or [])]

@@ -25,7 +25,7 @@
 namespace essentia {
 namespace standard {
 
-class SineModel : public Algorithm {
+class SineModelSynth : public Algorithm {
 
  private:
   Input<std::vector<Real> > _spectrum;
@@ -33,7 +33,7 @@ class SineModel : public Algorithm {
   Real _sampleRate;
 
  public:
-  SineModel() {
+  SineModelSynth() {
     declareInput(_spectrum, "spectrum", "the input spectrum (must have more than 1 element)");
     declareOutput(_maxMagFreq, "maxMagFreq", "the frequency with the largest magnitude [Hz]");
   }
@@ -61,14 +61,14 @@ class SineModel : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class SineModel : public StreamingAlgorithmWrapper {
+class SineModelSynth : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<Real> > _spectrum;
   Source<Real> _maxMagFreq;
 
  public:
-  SineModel() {
+  SineModelSynth() {
     declareAlgorithm("SineModel");
     declareInput(_spectrum, TOKEN, "spectrum");
     declareOutput(_maxMagFreq, TOKEN, "maxMagFreq");

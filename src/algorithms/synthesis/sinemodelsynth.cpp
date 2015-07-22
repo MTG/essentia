@@ -17,27 +17,28 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "sinemodelanal.h"
+#include "sinemodelsynth.h"
 #include "essentiamath.h"
 
 using namespace essentia;
 using namespace standard;
 
-const char* SineModel::name = "SineModelAnal";
-const char* SineModel::description = DOC("This algorithm computes the sine model analysis without sine tracking.");
+const char* SineModelSynth::name = "SineModelSynth";
+const char* SineModelSynth::description = DOC("This algorithm computes the sine model synthesis from sine model analysis.");
 
-void SineModel::compute() {
-
-  const std::vector<Real>& spectrum = _spectrum.get();
+void SineModelSynth::compute() {
+/*
+  const std::vector<Real>& magnitudes = _magnitudes.get();
+  const std::vector<Real>& frequencies = _frequencies.get();
+  const std::vector<Real>& phases = _phases.get();
   Real& maxMagFreq = _maxMagFreq.get();
 
   if (spectrum.size() < 2) {
-    throw EssentiaException("SineModelAnal: input audio spectrum must be larger than 1 element");
+    throw EssentiaException("SineModelSynth: input audio spectrum must be larger than 1 element");
   }
 
-  int index = std::max_element(spectrum.begin(), spectrum.end()) - spectrum.begin();
 
-  // normalize the maximum to the desired frequency range
-  // (be careful not to confuse with the sampling rate which is the double)
-  maxMagFreq = index * (_sampleRate/2.0) / (spectrum.size()-1);
+
+*/
+
 }
