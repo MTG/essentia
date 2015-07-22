@@ -106,7 +106,12 @@ void SineModelAnal::compute() {
   _peakDetect->output("positions").set(peakFrequency);
   _peakDetect->output("amplitudes").set(peakMagnitude);
 
+  _cartesianToPolar->compute();
   _peakDetect->compute();
+
+  // TODO:
+  phaseInterpolation(fftphase, peakFrequency, peakPhase);
+
 }
 
 
