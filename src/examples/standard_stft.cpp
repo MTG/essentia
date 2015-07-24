@@ -58,7 +58,7 @@ int main(int argc, char* argv[]) {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
-    Algorithm* audioLoader    = factory.create("MonoLoader",
+  Algorithm* audioLoader    = factory.create("MonoLoader",
                                            "filename", audioFilename,
                                            "sampleRate", sr,
                                            "downmix", "mix");

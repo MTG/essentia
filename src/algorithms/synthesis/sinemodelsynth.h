@@ -17,8 +17,14 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_SINEMODEL_H
-#define ESSENTIA_SINEMODEL_H
+#ifndef ESSENTIA_SINEMODELSYNTH_H
+#define ESSENTIA_SINEMODELSYNTH_H
+
+// defines for generateSine function
+#define BH_SIZE 1001
+#define BH_SIZE_BY2 501
+#define MFACTOR 100
+
 
 #include "algorithm.h"
 
@@ -28,25 +34,36 @@ namespace standard {
 class SineModelSynth : public Algorithm {
 
  private:
-  Input<std::vector<Real> > _spectrum;
-  Output<Real> _maxMagFreq;
+  Input<std::vector<Real> > _magnitudes;
+  Input<std::vector<Real> > _frequencies;
+  Input<std::vector<Real> > _phases;
+  Output<std::vector<std::complex<Real> > > _outfft;
+
   Real _sampleRate;
+  int _fftSize;
+
+  void genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > outfft);
 
  public:
   SineModelSynth() {
-    declareInput(_spectrum, "spectrum", "the input spectrum (must have more than 1 element)");
-    declareOutput(_maxMagFreq, "maxMagFreq", "the frequency with the largest magnitude [Hz]");
+    declareInput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
+    declareInput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
+    declareInput(_phases, "phases", "the phases of the sinusoidal peaks");
+    declareOutput(_outfft, "fft", "the output FFT frame");
   }
 
   void declareParameters() {
+    declareParameter("fftSize", "the size of the output FFT frame (full spectrum size)", "[1,inf)", 2048);
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
   }
 
   void configure() {
     _sampleRate = parameter("sampleRate").toReal();
+    _fftSize = parameter("fftSize").toInt();
   }
 
   void compute();
+
 
   static const char* name;
   static const char* description;
@@ -64,14 +81,18 @@ namespace streaming {
 class SineModelSynth : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<Real> > _spectrum;
-  Source<Real> _maxMagFreq;
+  Sink<std::vector<Real> > _magnitudes;
+  Sink<std::vector<Real> > _frequencies;
+  Sink<std::vector<Real> > _phases;
+  Source<std::vector<std::complex<Real> > > _outfft;
 
  public:
   SineModelSynth() {
-    declareAlgorithm("SineModel");
-    declareInput(_spectrum, TOKEN, "spectrum");
-    declareOutput(_maxMagFreq, TOKEN, "maxMagFreq");
+    declareAlgorithm("SineModelSynth");
+    declareInput(_magnitudes, TOKEN, "magnitudes");
+    declareInput(_frequencies, TOKEN, "frequencies");
+    declareInput(_phases, TOKEN, "phases");
+    declareOutput(_outfft, TOKEN, "fft");
   }
 };
 
@@ -79,4 +100,4 @@ class SineModelSynth : public StreamingAlgorithmWrapper {
 } // namespace essentia
 
 
-#endif // ESSENTIA_SINEMODEL_H
+#endif // ESSENTIA_SINEMODELSYNTH_H
