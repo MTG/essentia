@@ -78,8 +78,8 @@ void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipm
 		ploc_int = (int)floor(loc+0.5);
 
 //// debug
-    printf("loc = %f, ", loc);
-    continue;
+    printf("peak %d loc = %f, ", ii , loc);
+
 
 		if((loc>=5)&&(loc<size_spec_half-4))
 		{
