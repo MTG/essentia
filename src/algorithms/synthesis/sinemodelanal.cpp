@@ -71,19 +71,28 @@ void SineModelAnal::phaseInterpolation(std::vector<Real> fftphase, std::vector<R
 
   int N = peakFrequencies.size();
   peakPhases.resize(N);
+
   int idx;
   float  a, pos;
+  int fftSize = fftphase.size();
 
   for (int i=0; i < N; ++i){
     // linear interpolation. (as done in numpy.interp function)
-    pos =  (peakFrequencies[i] / (parameter("sampleRate").toReal()/2.0) );
+    pos =  fftSize * (peakFrequencies[i] / (parameter("sampleRate").toReal()/2.0) );
     idx = int ( 0.5 + pos ); // closest index
+
     a = pos - idx; // interpolate factor
+    // phase diff smaller than PI to do intperolation and avoid jumps
     if (a < 0 && idx > 0){
-      peakPhases[i] = a * fftphase[idx-1] + (1.0 -a) * fftphase[idx];
+      peakPhases[i] =  (abs(fftphase[idx-1] - fftphase[idx]) > Real(M_PI)) ? a * fftphase[idx-1] + (1.0 -a) * fftphase[idx] : fftphase[idx];
     }
-    else if (idx < N-1 ){
-      peakPhases[i] = a * fftphase[idx+1] + (1.0 -a) * fftphase[idx];
+    else {
+      if (idx < fftSize-1 ){
+      peakPhases[i] = (abs(fftphase[idx+1] - fftphase[idx]) > Real(M_PI)) ? a * fftphase[idx+1] + (1.0 -a) * fftphase[idx]: fftphase[idx];
+      }
+      else {
+       peakPhases[i] = fftphase[idx];
+     }
     }
   }
 }
@@ -109,9 +118,7 @@ void SineModelAnal::compute() {
   _cartesianToPolar->compute();
   _peakDetect->compute();
 
-  // TODO:
   phaseInterpolation(fftphase, peakFrequency, peakPhase);
-
 }
 
 

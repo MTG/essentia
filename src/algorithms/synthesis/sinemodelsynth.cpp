@@ -38,18 +38,15 @@ void SineModelSynth::compute() {
 
   std::vector<std::complex<Real> >& outfft = _outfft.get();
 
-  //printf ("mag size is %d -- ", int(magnitudes.size()));
+  int outSize = (int)floor(_fftSize/2.0) + 1;
+  initializeFFT(outfft, outSize);
 
-//  if (magnitudes.size() < 2) {
-//    throw EssentiaException("SineModelSynth: input sinusoidal magnitudes array must be larger than 1 element");
-//  }
 
   // convert frequencies to peak locations
   std::vector<Real> locs(frequencies.size());
   for (int i=0; i < int(frequencies.size()); ++i){
-    locs[i] = _fftSize*frequencies[i]/float(_sampleRate); // check the fftiSzie coreespond ot half of the full spectrum (sr)
+    locs[i] = _fftSize*frequencies[i]/float(_sampleRate);
   }
-
   genSpecSines(locs, magnitudes, phases, outfft);
 
 
@@ -57,7 +54,7 @@ void SineModelSynth::compute() {
 
 
 // C++ replacement of genspecsines_C
-void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > outfft)
+void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > &outfft)
 {
 	int n_peaks = iploc.size(); // num of peaks
 
@@ -65,8 +62,7 @@ void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipm
 	int ii=0,jj=0, ploc_int;
 
 	// get FFT size from input vector
-	//int size_spec_half = (int)floor(size_spec/2); // original code
-	int size_spec_half = outfft.size(); // (int)floor(_fftSize/2.0) + 1;
+	int size_spec_half = outfft.size();
 	int size_spec = _fftSize;
 
 	float bin_remainder,loc,mag;
@@ -77,59 +73,44 @@ void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipm
 		bin_remainder = floor(loc + 0.5)-loc;
 		ploc_int = (int)floor(loc+0.5);
 
-//// debug
-    printf("peak %d loc = %f, ", ii , loc);
-
 
 		if((loc>=5)&&(loc<size_spec_half-4))
 		{
-			mag = pow(10,(ipmag[ii]/20.0));
+      mag = ipmag[ii];
 
 			for(jj=-4;jj<5;jj++)
 			{
-			outfft[ploc_int+jj].real( outfft[ploc_int+jj].real() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
-			outfft[ploc_int+jj].imag( outfft[ploc_int+jj].imag() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]));
-
-//				real[ploc_int+jj] += mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]);
-//				imag[ploc_int+jj] += mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]);
+  			outfft[ploc_int+jj].real( outfft[ploc_int+jj].real() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
+	  		outfft[ploc_int+jj].imag( outfft[ploc_int+jj].imag() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]));
 			}
+
 		}
 		else if((loc>0)&&(loc<5))
 		{
-			mag = pow(10,(ipmag[ii]/20.0));
-
+      mag = ipmag[ii];
 			for(jj=-4;jj<5;jj++)
 			{
-
 				if(ploc_int+jj<0)
 				{
-
 		  		outfft[-1*(ploc_int+jj)].real( outfft[-1*(ploc_int+jj)].real() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
     			outfft[-1*(ploc_int+jj)].imag( outfft[-1*(ploc_int+jj)].imag() + -1*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]));
-
-//					real[-1*(ploc_int+jj)] += mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]);
-//					imag[-1*(ploc_int+jj)] += -1*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]);
 
 				}
 				else if (ploc_int+jj==0)
 				{
           outfft[(ploc_int+jj)].real( outfft[(ploc_int+jj)].real() + 2*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
-					//real[(ploc_int+jj)] += 2*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]);
 				}
 				else
 				{
-
 		    	outfft[(ploc_int+jj)].real( outfft[ploc_int+jj].real() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
        		outfft[ploc_int+jj].imag( outfft[ploc_int+jj].imag() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]));
 
-//				real[(ploc_int+jj)] += mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]);
-//				imag[ploc_int+jj] += mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]);
 				}
 			}
 		}
 		else if((loc>=size_spec_half-4)&&(loc<size_spec_half-1))
 		{
-			mag = pow(10,(ipmag[ii]/20.0));
+      mag = ipmag[ii];
 
 			for(jj=-4;jj<5;jj++)
 			{
@@ -139,15 +120,10 @@ void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipm
 		    	outfft[size_spec-(ploc_int+jj)].real( outfft[size_spec-(ploc_int+jj)].real() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
        		outfft[size_spec-(ploc_int+jj)].imag( outfft[size_spec-(ploc_int+jj)].imag() + -1*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]));
 
-//					real[size_spec-(ploc_int+jj)] += mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]);
-//					imag[size_spec-(ploc_int+jj)] += -1*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]);
-
 				}
 				else if(ploc_int+jj==size_spec_half)
 				{
 					outfft[(ploc_int+jj)].real( outfft[ploc_int+jj].real() + 2*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
-
-				//	real[(ploc_int+jj)] += 2*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]);
 
 				}
 				else
@@ -155,22 +131,18 @@ void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipm
 		    	outfft[(ploc_int+jj)].real( outfft[ploc_int+jj].real() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
        		outfft[(ploc_int+jj)].imag( outfft[ploc_int+jj].imag() + -1*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]));
 
-//					real[(ploc_int+jj)] += mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]);
-//					imag[ploc_int+jj] += mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]);
 				}
 			}
 		}
-
 	}
-
-// Not sure thuis need to be generated since FFT in Essentia only uses half opf the spectrum
-/*	for(ii=1;ii<size_spec_half;ii++)
-	{
-		real[size_spec_half+ii]=real[size_spec_half-ii];
-		imag[size_spec_half+ii]=-1*imag[size_spec_half-ii];
-	}
-*/
 
 }
 
-
+void SineModelSynth::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
+{
+  fft.resize(sizeFFT);
+  for (int i=0; i < sizeFFT; ++i){
+    fft[i].real(0);
+    fft[i].imag(0);
+  }
+}
