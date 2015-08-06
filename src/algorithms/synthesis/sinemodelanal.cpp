@@ -62,8 +62,18 @@ void SineModelAnal::configure() {
 
 
 
-void SineModelAnal::sinusoidalTracking(){
+void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset=20, Real freqDevSlope=0.01){
+//	pfreq, pmag, pphase: frequencies and magnitude of current frame
+//	tfreq: frequencies of incoming tracks from previous frame
+//	freqDevOffset: minimum frequency deviation at 0Hz
+//	freqDevSlope: slope increase of minimum frequency deviation
+
+  freqDevOffset=20;
+  freqDevSlope=0.01;
+
+
  // TODO: if multiple frames as input are given. Only supported in standard mode.
+
 
 }
 

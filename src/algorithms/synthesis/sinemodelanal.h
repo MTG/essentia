@@ -68,6 +68,8 @@ class SineModelAnal : public Algorithm {
 
   void phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases);
   void sinusoidalTracking();
+  void cleaningSineTrack();
+
 
   static const char* name;
   static const char* description;
