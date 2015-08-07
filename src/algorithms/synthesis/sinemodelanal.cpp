@@ -255,7 +255,7 @@ void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<
 
           
           
- // --->>> I AM HERE
+ // --->>> I AM HERE: it does not compile now.
           
 
   // -----
