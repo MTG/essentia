@@ -289,10 +289,6 @@ def build(ctx):
     # Here we remove the FFTs we don't want from algos 
     # before creating the algoreg cpp file
 
-    import json
-    with open('algos_start.txt', 'w') as outfile:
-        json.dump(algos, outfile, indent=4)
-
     #Remove the unnecessary FFT algorithms 
     fftsToRemove = []
     if 'ACCELERATE' in ctx.env.FFT:
@@ -306,9 +302,6 @@ def build(ctx):
         if key in algos:            
             del algos[key]
 
-    with open('algos_end.txt', 'w') as outfile:
-        json.dump(algos, outfile, indent=4)            
-    
     create_registration_cpp(algos, algoreg_path, use_streaming=True)
 
     sources = ctx.path.ant_glob('essentia/**/*.cpp')
