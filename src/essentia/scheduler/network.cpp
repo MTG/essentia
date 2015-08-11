@@ -220,6 +220,15 @@ bool algorithmHasProduced(Algorithm* algo, EssentiaMap<SourceBase*, int>& produc
 }
 
 void Network::run() {
+  runPrepare();
+  while (runStep());
+
+  string dash(24, '-');
+  E_DEBUG(ENetwork, dash << " Final buffer states " << dash);
+  printBufferFillState();
+}
+
+void Network::runPrepare() {
   // 1- build the execution network here as internal configuration of some
   //    algorithms might have changed since we constructed the Network
   buildExecutionNetwork();
@@ -233,105 +242,93 @@ void Network::run() {
   // 4- resize the buffers depending on the requirements of the connected sinks
   checkBufferSizes();
 
-  // 5- actually run the network
-  if (_toposortedNetwork.empty()) return;
-
-  // keep a map of total tokens produced by each output of each algorithm, that
-  // way we can know whether an algorithm produced data or not and re-run it if
-  // necessary
-  /*
-  EssentiaMap<SourceBase*, int> produced;
-  for (int i=0; i<(int)_toposortedNetwork.size(); i++) {
-    Algorithm* algo = _toposortedNetwork[i];
-    for (int j=0; j<(int)algo->outputs().size(); j++) {
-      produced.insert(&algo->output(j), 0);
-    }
-  }
-  */
-
 #if DEBUGGING_ENABLED
   for (int i=0; i<(int)_toposortedNetwork.size(); i++) _toposortedNetwork[i]->nProcess = 0;
 #endif
+  saveDebugLevels();
+}
+
+// returns False when there are no more steps to run
+bool Network::runStep() {
+  // 5- actually run the network
+  if (_toposortedNetwork.empty()) return false;
 
   streaming::Algorithm* gen = _toposortedNetwork[0];
-  bool endOfStream = false;
+
+  if(gen->shouldStop()) return false;
+
+#if DEBUGGING_ENABLED
   string dash(24, '-');
 
-  saveDebugLevels();
+  restoreDebugLevels();
+  setDebugLevelForTimeIndex(gen->nProcess);
+  E_DEBUG(ENetwork, "-------- Running generator loop index " << gen->nProcess << " --------");
 
-  while (!gen->shouldStop()) {
-    // first run the generator once
-#if DEBUGGING_ENABLED
-    restoreDebugLevels();
-    setDebugLevelForTimeIndex(gen->nProcess);
-    E_DEBUG(ENetwork, "-------- Running generator loop index " << gen->nProcess << " --------");
-
-    E_DEBUG(EScheduler, dash << " Buffer states before running generator, nProcess = " << gen->nProcess << " " << dash);
-    printNetworkBufferFillState();
-#endif
-    gen->process();
-
-    endOfStream = gen->shouldStop();
-
-#if DEBUGGING_ENABLED
-    gen->nProcess++;
-
-    if (endOfStream) E_DEBUG(ENetwork, "Generator " << gen->name() << " run " <<
-                             gen->nProcess << " times, shouldStop = true " <<
-                             "(end of stream reached, and all tokens produced)");
-
-    //E_DEBUG(EScheduler, dash << " Buffer states after running generator " << dash);
-    //printBufferFillState();
+  E_DEBUG(EScheduler, dash << " Buffer states before running generator, nProcess = " << gen->nProcess << " " << dash);
+  printNetworkBufferFillState();
 #endif
 
-    // then run each algorithm as many times as needed for them to consume everything on their input
-    stack<int> runStack;
-    runStack.push(1);
-    while (!runStack.empty()) {
-      int startIndex = runStack.top();
-      runStack.pop();
+  // first run the generator once
+  gen->process();
 
-      for (int i=startIndex; i<(int)_toposortedNetwork.size(); i++) {
-        // only propagate the end of stream marker as long as we don't have any
-        // algorithm rescheduled to run
-        _toposortedNetwork[i]->shouldStop(endOfStream && runStack.empty());
-        AlgorithmStatus status;
-        do {
-          status = _toposortedNetwork[i]->process();
+  bool endOfStream = gen->shouldStop();
 
 #if DEBUGGING_ENABLED
-          if (status == OK || status == FINISHED) _toposortedNetwork[i]->nProcess++;
+  gen->nProcess++;
+
+  if (endOfStream) E_DEBUG(ENetwork, "Generator " << gen->name() << " run " <<
+                           gen->nProcess << " times, shouldStop = true " <<
+                           "(end of stream reached, and all tokens produced)");
+
+  //E_DEBUG(EScheduler, dash << " Buffer states after running generator " << dash);
+  //printBufferFillState();
 #endif
 
-          // if status == NO_OUTPUT, push i on a stack to remember to execute it again later;
-          // execute all of its dependencies, then pop i from the stack and reexecute, as well
-          // as the dependencies
-          // NOTE: be careful with endOfStream, it should not be propagated
-          // as long as we have at least 1 index value on the stack
-          if (status == NO_OUTPUT) {
-            runStack.push(i);
-            E_DEBUG(EScheduler, "Rescheduling algorithm " << _toposortedNetwork[i]->name() <<
+  // then run each algorithm as many times as needed for them to consume everything on their input
+  stack<int> runStack;
+  runStack.push(1);
+  while (!runStack.empty()) {
+    int startIndex = runStack.top();
+    runStack.pop();
+
+    for (int i=startIndex; i<(int)_toposortedNetwork.size(); i++) {
+      // only propagate the end of stream marker as long as we don't have any
+      // algorithm rescheduled to run
+      _toposortedNetwork[i]->shouldStop(endOfStream && runStack.empty());
+      AlgorithmStatus status;
+      do {
+        status = _toposortedNetwork[i]->process();
+
+#if DEBUGGING_ENABLED
+        if (status == OK || status == FINISHED) _toposortedNetwork[i]->nProcess++;
+#endif
+
+        // if status == NO_OUTPUT, push i on a stack to remember to execute it again later;
+        // execute all of its dependencies, then pop i from the stack and reexecute, as well
+        // as the dependencies
+        // NOTE: be careful with endOfStream, it should not be propagated
+        // as long as we have at least 1 index value on the stack
+        if (status == NO_OUTPUT) {
+          runStack.push(i);
+          E_DEBUG(EScheduler, "Rescheduling algorithm " << _toposortedNetwork[i]->name() <<
+                  " on generator frame " << gen->nProcess <<
+                  " to run later, output buffers temporarily full");
+          /*
+          E_WARNING("Rescheduling algorithm " << _toposortedNetwork[i]->name() <<
                     " on generator frame " << gen->nProcess <<
                     " to run later, output buffers temporarily full");
-            /*
-            E_WARNING("Rescheduling algorithm " << _toposortedNetwork[i]->name() <<
-                      " on generator frame " << gen->nProcess <<
-                      " to run later, output buffers temporarily full");
-            E_WARNING("You may want to consider resizing one of the output buffers of " <<
-                      "this algorithm for better performance");
-            */
-            printNetworkBufferFillState();
-          }
-        } while (status == OK);
+          E_WARNING("You may want to consider resizing one of the output buffers of " <<
+                    "this algorithm for better performance");
+          */
+          printNetworkBufferFillState();
+        }
+      } while (status == OK);
 
-      }
     }
-    E_DEBUG(EScheduler, dash << " Buffer states after running the generator and all the nodes " << dash);
-    printBufferFillState();
   }
-
-  E_DEBUG(ENetwork, dash << " Final buffer states " << dash);
+  E_DEBUG(EScheduler, dash << " Buffer states after running the generator and all the nodes " << dash);
   printBufferFillState();
+  return true;
 }
 
 Algorithm* Network::findAlgorithm(const std::string& name) {
