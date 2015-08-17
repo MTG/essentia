@@ -74,7 +74,7 @@ void Vibrato::compute() {
   vibFrequency.resize(pitch.size());
   vibExtend.resize(pitch.size());
   
-  for (int i=0; i<pitch.size(); i++){
+  for (int i=0; i<(int)pitch.size(); i++){
     vibFrequency[i]=0.0;
     vibExtend[i]=0.0;
   }
@@ -82,7 +82,7 @@ void Vibrato::compute() {
   vector<Real> pitchP;
     
   // set negative pitch values to zero
-  for (int i=0; i<pitch.size(); i++){
+  for (int i=0; i<(int)pitch.size(); i++){
     if (pitch[i]<0){
         pitchP.push_back(0.0);
     }else{
@@ -94,7 +94,7 @@ void Vibrato::compute() {
   if (pitchP[0]>0){
     startC.push_back(0);
   }
-  for (int i=0; i<pitchP.size()-1; i++){
+  for (int i=0; i<(int)pitchP.size()-1; i++){
     if (pitchP[i+1]>0 && pitchP[i]==0){
       startC.push_back(i+1);
     }
@@ -108,7 +108,7 @@ void Vibrato::compute() {
 
     
   // iterate over contour segments
-  for (int i=0; i<startC.size(); i++){
+  for (int i=0; i<(int)startC.size(); i++){
     // get a segment in cents
     vector<Real> contour;
     for (int ii=startC[i]; ii<=endC[i]; ii++){
@@ -146,7 +146,7 @@ void Vibrato::compute() {
           
       // subtract mean pitch from frame
       Real m=mean(frame, 0, frame.size()-1);
-      for (int ii=0; ii<frame.size(); ii++){
+      for (int ii=0; ii<(int)frame.size(); ii++){
         frame[ii]-=m;
       }
           

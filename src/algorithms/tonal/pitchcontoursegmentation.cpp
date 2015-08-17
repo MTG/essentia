@@ -55,7 +55,7 @@ void PitchContourSegmentation::reSegment() {
   if (pitch[0] > 0) {
     startC.push_back(0);
   }
-  for (int i = 0; i<pitch.size()-1; i++) {
+  for (int i = 0; i<(int)pitch.size()-1; i++) {
     if (pitch[i+1] > 0 && pitch[i] == 0) {
       startC.push_back(i+1);
     }
@@ -106,7 +106,7 @@ void PitchContourSegmentation::compute() {
 
   // segment based on pitch distance ("island building")
   minDurPitchSamples = round(_minDur * Real(_sampleRate)/Real(_hopSize));
-  for (int i=0; i<startC.size(); i++) {
+  for (int i=0; i<(int)startC.size(); i++) {
     if (endC[i]-startC[i] > 2*minDurPitchSamples) {
       vector<Real> contourH, contourC;
       // contour in Hz
@@ -114,14 +114,14 @@ void PitchContourSegmentation::compute() {
         contourH.push_back(pitch[ii]);
       }
       // contour in cents
-      for (int ii = 0; ii <= contourH.size(); ii++){
+      for (int ii = 0; ii <= (int)contourH.size(); ii++){
         contourC.push_back(1200 * log2( contourH[ii] / _tuningFreq ));
       }
       // running mean
       Real av = mean(contourC, 0, minDurPitchSamples);
       int j = minDurPitchSamples + 1; // running index
       int k = 0; // current note start
-      while (j < contourC.size() - minDurPitchSamples){
+      while (j < (int)contourC.size() - minDurPitchSamples){
         if ( abs( contourC[j] - av )< _pitchDistanceThreshold ) {
           av = mean( contourC, k, j );
           j++;
@@ -140,7 +140,7 @@ void PitchContourSegmentation::compute() {
 
   // segment based on rms
   Real resampleFactor = _hopSizeFeat / _hopSize;
-  for (int i=0; i<startC.size(); i++) {
+  for (int i=0; i<(int)startC.size(); i++) {
     if (endC[i]-startC[i] > 2*minDurPitchSamples) {
       vector<Real> rmsSeg;
       for (int ii=startC[i]; ii<=endC[i]; ii++) {
@@ -149,7 +149,7 @@ void PitchContourSegmentation::compute() {
       Real m = mean(rmsSeg, 0, rmsSeg.size()-1);
       Real s = stddev(rmsSeg, m);
       int ii = minDurPitchSamples;
-      while (ii < rmsSeg.size() - minDurPitchSamples) {
+      while (ii < (int)rmsSeg.size() - minDurPitchSamples) {
         Real zs = (rmsSeg[ii] - m) / s;
         if (zs < _rmsThreshold){
           pitch[startC[i] + ii] = 0;
@@ -165,7 +165,7 @@ void PitchContourSegmentation::compute() {
   reSegment();
     
   // assign pitch values
-  for (int i=0; i<startC.size(); i++) {
+  for (int i=0; i<(int)startC.size(); i++) {
     vector<Real> contour;
     onset.push_back(Real(startC[i]) * Real(_hopSize) / Real(_sampleRate));
     Real d = endC[i] - startC[i];
