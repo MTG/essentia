@@ -121,13 +121,13 @@ Building documentation (optional)
 
 All documentation is provided on the official website of Essentia library. To generate it by your own follow the steps below.
 
-Install pip, if you are on Linux::
+Install doxigen and pip, if you are on Linux::
 
-  sudo apt-get install python-pip
+  sudo apt-get install doxygen python-pip
 
 Install additiona dependencies (you might need to run this command with sudo)::
 
-  pip install sphinx pyparsing sphinxcontrib-doxylink docutils
+  sudo pip install sphinx pyparsing sphinxcontrib-doxylink docutils
 
 Make sure to install Essentia with python bindings and run::
 
