@@ -144,7 +144,7 @@ void PitchContoursMultiMelody::compute() {
   if (contoursBins.empty()) {
       vector<Real> zero;
       zero.push_back(0.0);
-      for (int i=0; i<pitch.size(); i++){
+      for (int i=0; i<(int)pitch.size(); i++){
           pitch.push_back(zero);
       }
     return;
