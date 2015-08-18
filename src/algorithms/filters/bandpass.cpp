@@ -37,7 +37,7 @@ void BandPass::configure() {
   Real fc = parameter("cutoffFrequency").toReal();
   Real fb = parameter("bandwidth").toReal();
 
-  Real c = (tan(M_PI*fb/fs) - 1) / (tan(M_2PI*fb/fs) + 1);
+  Real c = (tan(M_PI*fb/fs) - 1) / (tan(M_PI*fb/fs) + 1);
   Real d = -cos(2*M_PI*fc/fs);
 
   vector<Real> b(3, 0.0);
