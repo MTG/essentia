@@ -136,7 +136,7 @@ int main(int argc, char* argv[]) {
   if (argc == 4 && atoi(argv[3])) {
     // printing to stdout:
     cout << "vibrato frequency      vibrato extend" << endl;
-    for (int i=0; i<vibFreq.size(); i++){
+    for (int i=0; i<(int)vibFreq.size(); i++){
         cout << vibFreq[i] << "   " << vibExt[i] << endl;
     }
   }
