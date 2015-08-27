@@ -184,7 +184,7 @@ def configure(ctx):
     Description: audio analysis library -- development files
     Version: %(version)s
     Libs: -L${libdir} -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lsamplerate -ltag -lfftw3f -lgaia2
-    Cflags: -I${includedir}/essentia I${includedir}/essentia/scheduler I${includedir}/essentia/streaming I${includedir}/essentia/utils
+    Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/utils
     ''' % opts
 
     pcfile = '\n'.join([ l.strip() for l in pcfile.split('\n') ])
