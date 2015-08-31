@@ -3,7 +3,7 @@ Maintainer: Dmitry Bogdanov <dmitry.bogdanov@upf.edu>
 Section: libs
 Priority: optional
 Standards-Version: 3.9.6
-Build-Depends: debhelper (>= 9), libyaml-dev (>= 0.1.4), libfftw3-dev (>= 3.3.2), libavcodec-dev, libavformat-dev, libavutil-dev, libavresample-dev, python-dev, libsamplerate0-dev (>= 0.1.8), libtag1-dev (>= 1.9.1)
+Build-Depends: debhelper (>= 9), libyaml-dev (>= 0.1.4), libfftw3-dev (>= 3.3.2), libavcodec-dev, libavformat-dev, libavutil-dev, libavresample-dev, python-dev, libsamplerate0-dev (>= 0.1.8), libtag1-dev (>= 1.9.1), python-numpy
 XS-Python-Version: current
 
 Package: libessentia-dev
@@ -23,8 +23,7 @@ Description: audio analysis tool -- development files
 Package: python-essentia
 Section: python
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-numpy
-XB-Python-Version: ${python:Versions}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
 Description: audio analysis tool -- Python bindings
  Essentia is an audio analysis tool. It provides a reusable collection
  of algorithms and descriptors mainly used to extract features from
@@ -50,7 +49,7 @@ Description: audio analysis tool -- feature extractors
  Essentia.
 
 Package: essentia-doc
-Section: libs
+Section: doc
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: audio analysis tool -- documentation

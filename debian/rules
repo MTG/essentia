@@ -66,14 +66,16 @@ install: install-indep install-arch
 install-indep:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -i
+	dh_prep
+	dh_clean -i
 	dh_installdirs -i
 	dh_install -i --sourcedir=debian/tmp
 
 install-arch:
 	dh_testdir
 	dh_testroot
-	dh_clean -k -s
+	dh_prep
+	dh_clean -s
 	dh_installdirs -s
 	$(WAF) --destdir $(CURDIR)/debian/tmp install
 	dh_install -s --sourcedir=debian/tmp
