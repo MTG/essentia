@@ -183,8 +183,8 @@ def configure(ctx):
     Name: libessentia
     Description: audio analysis library -- development files
     Version: %(version)s
-    Libs: -L${libdir} -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lsamplerate -ltag -lfftw3f -lgaia2
-    Cflags: -I${includedir}/essentia I${includedir}/essentia/scheduler I${includedir}/essentia/streaming I${includedir}/essentia/utils
+    Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f
+    Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/utils
     ''' % opts
 
     pcfile = '\n'.join([ l.strip() for l in pcfile.split('\n') ])

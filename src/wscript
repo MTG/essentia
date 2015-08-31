@@ -364,7 +364,7 @@ def build(ctx):
     # install pkgconfig file
     #pc = ctx.path.ant_glob('essentia/build/essentia.pc') #TODO remove
     #ctx.install_files('${PREFIX}/lib/pkgconfig', pc)     #TODO remove
-    ctx.install_files('${PREFIX}/lib/pkgconfig', '../essentia.pc')
+    ctx.install_files('${PREFIX}/lib/pkgconfig', '../build/essentia.pc')
 
 
     if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
