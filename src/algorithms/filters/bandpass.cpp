@@ -28,8 +28,8 @@ const char* BandPass::name = "BandPass";
 const char* BandPass::description = DOC("This algorithm implements a 2nd order IIR band-pass filter. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"
-"  [1] U. Zölzer, DAFX - Digital Audio Effects, p. 43,\n"
-"  John Wiley & Sons, 2002");
+"  [1] U. Zölzer, DAFX - Digital Audio Effects, 2nd edition, p. 55,\n"
+"  John Wiley & Sons, 2011");
 
 
 void BandPass::configure() {
