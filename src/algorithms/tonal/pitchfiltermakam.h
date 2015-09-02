@@ -33,6 +33,7 @@ class PitchFilterMakam : public Algorithm {
   Output<std::vector<Real> > _pitchFiltered;
 
   bool _octaveFilter;
+  bool _wrapNegativeEnergy;
   long long _minChunkSize;
 
   bool areClose(Real num1, Real num2);
@@ -62,6 +63,7 @@ class PitchFilterMakam : public Algorithm {
   void declareParameters() {
     declareParameter("minChunkSize", "minumum number of frames in non-zero pitch chunks", "[0,inf)",  10);
     declareParameter("octaveFilter", "enable global octave filter", "{true,false}", false);
+    declareParameter("wrapNegativeEnergy", "treat negative energy values as positive", "{true,false}", false);
   }
 
   void configure();

@@ -37,22 +37,35 @@ const char* PitchFilterMakam::description = DOC("This algorithm corrects the fun
 
 void PitchFilterMakam::configure() {
   _minChunkSize = parameter("minChunkSize").toInt();
+  _wrapNegativeEnergy = parameter("wrapNegativeEnergy").toBool();
+  _octaveFilter = parameter("octaveFilter").toBool();
 }
 
 void PitchFilterMakam::compute() {
   const vector<Real>& pitch = _pitch.get();
   const vector<Real>& energy = _energy.get();
+  std::vector<Real> modifiedEnergy(energy.size());
 
   // sanity checks, pitch and energy values should be non-negative
-  if (pitch.size() != energy.size())
-      throw EssentiaException("PitchFilterMakam: Pitch and energy vectors should be of the same size.");
-  if (pitch.size() == 0)
-      throw EssentiaException("PitchFilterMakam: Pitch and energy vectors are empty.");
+  if (pitch.size() != energy.size()) {
+    throw EssentiaException("PitchFilterMakam: Pitch and energy vectors should be of the same size.");
+  }
+  if (pitch.size() == 0) {
+    throw EssentiaException("PitchFilterMakam: Pitch and energy vectors are empty.");
+  }
   for (size_t i=0; i<pitch.size(); i++) {
-    if (pitch[i] < 0)
+    if (pitch[i] < 0) {
       throw EssentiaException("PitchFilterMakam: Pitch values should be non-negative.");
-    if (energy[i] < 0)
-      throw EssentiaException("PitchFilterMakam: Energy values should be non-negative.");
+    }
+    Real con = energy[i];
+    if (con < 0) {
+      if (_wrapNegativeEnergy) {
+        con = -con;
+      } else {
+        throw EssentiaException("PitchFilterMakam: Energy values should be non-negative.");
+      }
+    }
+    modifiedEnergy.push_back(con);
   }
 
   vector <Real>& pitchFiltered = _pitchFiltered.get();
@@ -78,7 +91,7 @@ void PitchFilterMakam::compute() {
   }
   correctOctaveErrorsByChunks(pitchFiltered);
 
-  filterChunksByEnergy(pitchFiltered, energy);
+  filterChunksByEnergy(pitchFiltered, modifiedEnergy);
 }
 
 bool PitchFilterMakam::areClose(Real num1, Real num2) {
