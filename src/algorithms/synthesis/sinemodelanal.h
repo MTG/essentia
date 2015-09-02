@@ -61,15 +61,22 @@ class SineModelAnal : public Algorithm {
     declareParameter("minFrequency", "the minimum frequency of the range to evaluate [Hz]", "[0,inf)", 0.0);
     declareParameter("magnitudeThreshold", "peaks below this given threshold are not outputted", "(-inf,inf)", 0.0);
     declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
+    // sinusoidal tracking
+    declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
+    declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
+    declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
+        declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
+    
   }
 
   void configure();
   void compute();
 
   void phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases);
-  void sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope, std::vector<Real> &tfreqn, std::vector<Real> &tmagn, std::vector<Real> &tphasen );
+  void sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope,  std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen );
   void cleaningSineTrack();
-  //std::vector<int> sort_indexes(const std::vector<Real> &v); // maybe move it to utils
+
+  std::vector<Real> _lasttpeakFrequency;
 
 
   static const char* name;

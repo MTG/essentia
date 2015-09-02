@@ -121,11 +121,23 @@ void SineModelAnal::configure() {
 
 
 void SineModelAnal::compute() {
-  
+  // inputs and outputs
   const std::vector<std::complex<Real> >& fft = _fft.get();
-  std::vector<Real>& peakMagnitude = _magnitudes.get();
-  std::vector<Real>& peakFrequency = _frequencies.get();
-  std::vector<Real>& peakPhase = _phases.get();
+
+  std::vector<Real>& tpeakMagnitude = _magnitudes.get();
+  std::vector<Real>& tpeakFrequency = _frequencies.get();
+  std::vector<Real>& tpeakPhase = _phases.get();
+  
+  // temp arrays
+  std::vector<Real> peakMagnitude;
+  std::vector<Real> peakFrequency;
+  std::vector<Real> peakPhase;
+
+  // for debugging
+//  std::vector<Real>& peakMagnitude = _magnitudes.get();
+//  std::vector<Real>& peakFrequency = _frequencies.get();
+//  std::vector<Real>& peakPhase = _phases.get();
+
   
   std::vector<Real> fftmag;
   std::vector<Real> fftphase;
@@ -141,13 +153,28 @@ void SineModelAnal::compute() {
   _peakDetect->compute();
   
   phaseInterpolation(fftphase, peakFrequency, peakPhase);
+
+//  BUG FIXING: check sine tracking not working. Multiple neighbor peaks, and not evolutiong over time. Without sinetriacking it works well for the sine_down.wav
+  
+  // tracking
+  sinusoidalTracking(peakMagnitude, peakFrequency, peakPhase, _lasttpeakFrequency, parameter("freqDevOffset").toReal(), parameter("freqDevSlope").toReal(), tpeakMagnitude, tpeakFrequency, tpeakPhase);
+
+  // limit number of tracks to maxnSines
+  int maxSines = int ( parameter("maxnSines").toReal() );
+  tpeakFrequency.resize(std::min(maxSines, int (tpeakFrequency.size())));
+  tpeakMagnitude.resize(std::min(maxSines, int (tpeakMagnitude.size())));
+  tpeakPhase.resize(std::min(maxSines, int(tpeakPhase.size())));
+  
+  // keep last frequency peaks for tracking
+  _lasttpeakFrequency = tpeakFrequency;
+
 }
 
 
 // ---------------------------
 // additional methods
 
-void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope, std::vector<Real> &tfreqn, std::vector<Real> &tmagn, std::vector<Real> &tphasen ){
+void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope, std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen ){
 
   //	pfreq, pmag, pphase: frequencies and magnitude of current frame
 //	tfreq: frequencies of incoming tracks from previous frame
@@ -167,9 +194,9 @@ void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<
 //	tfreqn = np.zeros(tfreq.size)                              # initialize array for output frequencies
 //	tmagn = np.zeros(tfreq.size)                               # initialize array for output magnitudes
 //	tphasen = np.zeros(tfreq.size)                             # initialize array for output phases
-    tfreqn.resize (tfreq.size());
-    tmagn.resize (tfreq.size());
-    tphasen.resize (tfreq.size());
+    tfreqn.resize (tfreq.size(), 0.f);
+    tmagn.resize (tfreq.size(), 0.f);
+    tphasen.resize (tfreq.size(), 0.f);
 
 //	pindexes = np.array(np.nonzero(pfreq), dtype=np.int)[0]    # indexes of current peaks
   std::vector<int> pindexes;
@@ -278,15 +305,11 @@ void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<
 //	emptyt = np.array(np.nonzero(tfreq == 0), dtype=np.int)[0]      # indexes of empty incoming tracks
 //	peaksleft = np.argsort(-pmagt)                                  # sort left peaks by magnitude
   
-  //	emptyt = np.array(np.nonzero(tfreq == 0), dtype=np.int)[0]      # indexes of empty incoming tracks
   std::vector<int> emptyt;
-  for (int i=0; i < emptyt.size(); ++i)
+  for (int i=0; i < tfreq.size(); ++i)
   {
     if (tfreq[i] == 0) emptyt.push_back(i);
   }
-
-  
-  
  
   //	peaksleft = np.argsort(-pmagt)                                  # sort left peaks by magnitude
   std::vector<int> peaksleft;
