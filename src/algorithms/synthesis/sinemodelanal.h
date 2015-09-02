@@ -67,9 +67,9 @@ class SineModelAnal : public Algorithm {
   void compute();
 
   void phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases);
-  void sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope);
+  void sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope, std::vector<Real> &tfreqn, std::vector<Real> &tmagn, std::vector<Real> &tphasen );
   void cleaningSineTrack();
-  std::vector<int> sort_indexes(const std::vector<Real> &v); // maybe move it to utils
+  //std::vector<int> sort_indexes(const std::vector<Real> &v); // maybe move it to utils
 
 
   static const char* name;
