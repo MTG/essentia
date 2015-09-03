@@ -26,14 +26,22 @@ using namespace standard;
 
 const char* PitchFilter::name = "PitchFilter";
 const char* PitchFilter::version = "1.0";
-const char* PitchFilter::description = DOC("This algorithm corrects the fundamental frequency estimations for a sequence of frames. The original estimations can be computed with the PitchYinFFT algorithm.\n"
+const char* PitchFilter::description = DOC("This algorithm corrects the fundamental frequency"
+" estimations for a sequence of frames given pitch values together with their confidence values"
+" (e.g., by removing non-confident parts and spurious jumps in pitch, and applying octave corrections).\n"
 "\n"
-"The algorithm is based on the code of Makam Toolbox 1.0.\n"
-"ftp://ftp.iyte.edu.tr/share/ktm-nota/TuningMeasurement.html\n"
+"They can be computed with the PitchYinFFT, PitchYin, or PredominantPitchMelodia algorithms.\n"
+"If you use PredominantPitchMelodia with guessUnvoiced=True, set useAbsolutePitchConfidence=True.\n"
+"\n"
+"The algorithm can be used for any type of monophonic and heterophonic music.\n"
+"\n"
+"The original algorithm [1] was proposed to be used for Makam music and employs signal"
+"\"energy\" of frames instead of pitch confidence.\n"
 "\n"
 "References:\n"
 "  [1] B. Bozkurt, \"An Automatic Pitch Analysis Method for Turkish Maqam\n"
 "  Music,\" Journal of New Music Research. 37(1), 1-13.\n");
+
 
 void PitchFilter::configure() {
   _minChunkSize = parameter("minChunkSize").toInt();
