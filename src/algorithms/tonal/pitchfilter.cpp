@@ -47,6 +47,7 @@ void PitchFilter::configure() {
   _minChunkSize = parameter("minChunkSize").toInt();
   _useAbsolutePitchConfidence = parameter("useAbsolutePitchConfidence").toBool();
   _octaveFilter = parameter("octaveFilter").toBool();
+  _confidenceThreshold = parameter("confidenceThreshold").toInt();
 }
 
 void PitchFilter::compute() {
@@ -345,7 +346,7 @@ void PitchFilter::filterChunksByPitchConfidence(std::vector <Real>& pitch, const
   // compute average confidence of the chunk with maximum length
   size_t max_i = max_element(chunksSize.begin(), chunksSize.end()) - chunksSize.begin();
   Real confidenceOfLongestChunk = confidenceOfChunk(pitchConfidence, chunksIndexes[max_i], chunksSize[max_i]);
-  Real confidenceMinLimit = confidenceOfLongestChunk / 36; // corresponds to squared average amplitude  FIXME make it a parameter
+  Real confidenceMinLimit = confidenceOfLongestChunk / _confidenceThreshold; // corresponds to squared average amplitude
 
   for (size_t i=0; i<chunks.size(); i++) {
     // check only non-zero pitch chunks
