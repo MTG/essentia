@@ -128,7 +128,7 @@ int main(int argc, char* argv[]) {
   sinemodelanal->output("frequencies").set(frequencies);
   sinemodelanal->output("phases").set(phases);
 
-  // TODO: sine model synthesis
+
   sinemodelsynth->input("magnitudes").set(magnitudes);
   sinemodelsynth->input("frequencies").set(frequencies);
   sinemodelsynth->input("phases").set(phases);
@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
 
   vector<Real> audioOutput;
 
-  overlapAdd->input("signal").set(ifftframe); // or frame ?
+  overlapAdd->input("signal").set(ifftframe); 
   overlapAdd->output("signal").set(audioOutput);
 
 
