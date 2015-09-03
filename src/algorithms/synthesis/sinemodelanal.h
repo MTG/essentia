@@ -24,6 +24,7 @@
 #include "algorithmfactory.h"
 
 
+
 namespace essentia {
 namespace standard {
 
@@ -62,7 +63,7 @@ class SineModelAnal : public Algorithm {
     declareParameter("magnitudeThreshold", "peaks below this given threshold are not outputted", "(-inf,inf)", 0.0);
     declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
     // sinusoidal tracking
-    declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
+    declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100); 
     declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
         declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
@@ -82,6 +83,12 @@ class SineModelAnal : public Algorithm {
   static const char* name;
   static const char* description;
 
+ private:
+  void sort_indexes(std::vector<int> &idx, const std::vector<Real> &v, bool ascending);
+  void copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx);
+  void copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx);
+  void erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx);
+  
 };
 
 } // namespace standard

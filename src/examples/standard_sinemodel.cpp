@@ -147,9 +147,6 @@ int main(int argc, char* argv[]) {
 ////////
 /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << audioFilename << " --------" << endl;
-
-  std::ofstream ofs ("/Users/jjaner/MTG/Projects/MusicBricks/devel/synth-tests/log.txt", std::ofstream::out);
-  
   
   audioLoader->compute();
   int counter = 0;
@@ -168,13 +165,6 @@ int main(int argc, char* argv[]) {
 
     // Sine model analysis (without tracking)
     sinemodelanal->compute();
-
-    // debug --
-    for (int j=0; j < frequencies.size(); j++){
-      ofs << frequencies[j] << ", " << magnitudes[j] << ", ";
-    }
-    ofs << endl;
-    // ---
     
     // Sine model synthesis
     sinemodelsynth->compute();
@@ -189,9 +179,6 @@ int main(int argc, char* argv[]) {
 
     counter++;
   }
-
-  // debug
- ofs.close();
 
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;

@@ -33,21 +33,21 @@ const char* SineModelAnal::description = DOC("This algorithm computes the sine m
 "  http://ccrma.stanford.edu/~jos/parshl/Peak_Detection_Steps_3.html");
 
 
-// TODO: process multiple frames at the same time to do tracking in standard mode.
-// Initial implementation witohut tracking for both standard and streaming mode.
-// Next step: implement sine tracking for standard implementation, if we have access to all spectrogram.
-
-
 // ------------------
 // Additional support functions
-
-// sort indexes: get arguments of sorted vector
 typedef std::pair<int,Real> mypair;
-bool comparator ( const mypair& l, const mypair& r)
-{ return l.second < r.second; }
+// sort indexes: get arguments of sorted vector
+bool comparator_up ( const mypair& l, const mypair& r)
+{
+  return l.second < r.second;
+}
+bool comparator_down ( const mypair& l, const mypair& r)
+{
+  return l.second > r.second;
+}
 
 // It sorts the indexes of an input vector v, and outputs the sorted index vector idx
-void sort_indexes(std::vector<int> &idx, const std::vector<Real> &v) {
+void SineModelAnal::sort_indexes(std::vector<int> &idx, const std::vector<Real> &v, bool ascending) {
   
   // initialize original index locations
   std::vector<mypair> pairs(v.size());
@@ -57,7 +57,10 @@ void sort_indexes(std::vector<int> &idx, const std::vector<Real> &v) {
   }
   
   // sort indexes based on comparing values in v
-  sort(pairs.begin(), pairs.end(),comparator);
+  if (ascending)
+    sort(pairs.begin(), pairs.end(),comparator_up);
+  else
+    sort(pairs.begin(), pairs.end(),comparator_down);
   
   // copy sorted indexes
   for (int i = 0; i != pairs.size(); ++i) idx.push_back(pairs[i].first);
@@ -65,7 +68,7 @@ void sort_indexes(std::vector<int> &idx, const std::vector<Real> &v) {
   return;
 }
 
-void copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx){
+void SineModelAnal::copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx){
 
   for (int i = 0; i < idx.size(); ++i){
     out.push_back(v[idx[i]]);
@@ -73,7 +76,7 @@ void copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v,
   return;
 }
 
-void copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx){
+void SineModelAnal::copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx){
 
   for (int i = 0; i < idx.size(); ++i){
     out.push_back(v[idx[i]]);
@@ -81,11 +84,22 @@ void copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> 
   return;
 }
 
-
-void erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx){
-  for (int i = 0; i < idx.size(); ++i){
-    v.erase(v.begin() + idx[i]);
+// erase elements from a vector given a vector of indexes
+void SineModelAnal::erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx){
+  std::vector<Real> tmp;
+  bool found;
+  for (int i = 0; i < v.size(); ++i) {
+    found = false;
+    for (int j = 0; j < idx.size(); ++j){
+      if (i == idx[j])
+        found = true;
+    }
+    if (!found) {
+      tmp.push_back(v[i]);
+    }
   }
+  
+  v = tmp;
   return;
 }
 
@@ -116,6 +130,7 @@ void SineModelAnal::configure() {
                          "threshold", parameter("magnitudeThreshold"),
                          "orderBy", orderBy);
 
+
 }
 
 
@@ -133,11 +148,6 @@ void SineModelAnal::compute() {
   std::vector<Real> peakFrequency;
   std::vector<Real> peakPhase;
 
-  // for debugging
-//  std::vector<Real>& peakMagnitude = _magnitudes.get();
-//  std::vector<Real>& peakFrequency = _frequencies.get();
-//  std::vector<Real>& peakPhase = _phases.get();
-
   
   std::vector<Real> fftmag;
   std::vector<Real> fftphase;
@@ -154,11 +164,10 @@ void SineModelAnal::compute() {
   
   phaseInterpolation(fftphase, peakFrequency, peakPhase);
 
-//  BUG FIXING: check sine tracking not working. Multiple neighbor peaks, and not evolutiong over time. Without sinetriacking it works well for the sine_down.wav
-  
+
   // tracking
   sinusoidalTracking(peakMagnitude, peakFrequency, peakPhase, _lasttpeakFrequency, parameter("freqDevOffset").toReal(), parameter("freqDevSlope").toReal(), tpeakMagnitude, tpeakFrequency, tpeakPhase);
-
+  
   // limit number of tracks to maxnSines
   int maxSines = int ( parameter("maxnSines").toReal() );
   tpeakFrequency.resize(std::min(maxSines, int (tpeakFrequency.size())));
@@ -175,87 +184,71 @@ void SineModelAnal::compute() {
 // additional methods
 
 void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope, std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen ){
-
+  
   //	pfreq, pmag, pphase: frequencies and magnitude of current frame
-//	tfreq: frequencies of incoming tracks from previous frame
-//	freqDevOffset: minimum frequency deviation at 0Hz
-//	freqDevSlope: slope increase of minimum frequency deviation
-
-  freqDevOffset=20;
-  freqDevSlope=0.01;
-
-
+  //	tfreq: frequencies of incoming tracks from previous frame
+  //	freqDevOffset: minimum frequency deviation at 0Hz
+  //	freqDevSlope: slope increase of minimum frequency deviation
+  
+  
   // sort current peaks per magnitude
-
-
-// -----
-// init arrays
-
-//	tfreqn = np.zeros(tfreq.size)                              # initialize array for output frequencies
-//	tmagn = np.zeros(tfreq.size)                               # initialize array for output magnitudes
-//	tphasen = np.zeros(tfreq.size)                             # initialize array for output phases
-    tfreqn.resize (tfreq.size(), 0.f);
-    tmagn.resize (tfreq.size(), 0.f);
-    tphasen.resize (tfreq.size(), 0.f);
-
-//	pindexes = np.array(np.nonzero(pfreq), dtype=np.int)[0]    # indexes of current peaks
+  
+  // -----
+  // init arrays
+  tfreqn.resize (tfreq.size());
+  std::fill(tfreqn.begin(), tfreqn.end(), 0.);
+  tmagn.resize (tfreq.size());
+  std::fill(tmagn.begin(), tmagn.end(), 0.);
+  tphasen.resize (tfreq.size());
+  std::fill(tphasen.begin(), tphasen.end(), 0.);
+  
+  //	pindexes = np.array(np.nonzero(pfreq), dtype=np.int)[0]    # indexes of current peaks
   std::vector<int> pindexes;
   for (int i=0;i < peakFrequencies.size(); ++i){  if (peakFrequencies[i] > 0) pindexes.push_back(i); }
   
-//	incomingTracks = np.array(np.nonzero(tfreq), dtype=np.int)[0] # indexes of incoming tracks
+  //	incomingTracks = np.array(np.nonzero(tfreq), dtype=np.int)[0] # indexes of incoming tracks
   std::vector<Real> incomingTracks ;
   for (int i=0;i < tfreq.size(); ++i){ if (tfreq[i]>0) incomingTracks.push_back(i); }
   //	newTracks = np.zeros(tfreq.size, dtype=np.int) -1           # initialize to -1 new tracks
-  std::vector<int> newTracks(tfreq.size(), -1);
+  std::vector<int> newTracks(tfreq.size());
+  std::fill(newTracks.begin(), newTracks.end(), -1);
   
   //	magOrder = np.argsort(-pmag[pindexes])                      # order current peaks by magnitude
   std::vector<int> magOrder;
-  sort_indexes(magOrder, peakMags);
+  sort_indexes(magOrder, peakMags, false);
+  
   
   // copy temporary arrays (as reference)
-  //	pfreqt = np.copy(pfreq)                                     # copy current peaks to temporary array
-  //	pmagt = np.copy(pmag)                                       # copy current peaks to temporary array
-  //	pphaset = np.copy(pphase)                                   # copy current peaks to temporary array
   std::vector<Real>	&pfreqt = peakFrequencies;
   std::vector<Real>	&pmagt = peakMags;
   std::vector<Real>	&pphaset = peakPhases;
-
   
-
-// -----
-// loop for current peaks
-
-//	# continue incoming tracks
-//	if incomingTracks.size > 0:                                 # if incoming tracks exist
-//		for i in magOrder:                                        # iterate over current peaks
-//			if incomingTracks.size == 0:                            # break when no more incoming tracks
-//				break
-//			track = np.argmin(abs(pfreqt[i] - tfreq[incomingTracks]))   # closest incoming track to peak
-//			freqDistance = abs(pfreq[i] - tfreq[incomingTracks[track]]) # measure freq distance
-//			if freqDistance < (freqDevOffset + freqDevSlope * pfreq[i]):  # choose track if distance is small
-//					newTracks[incomingTracks[track]] = i                      # assign peak index to track index
-//					incomingTracks = np.delete(incomingTracks, track)         # delete index of track in incomming tracks
-
+  
+  // -----
+  // loop for current peaks
+  
   if (incomingTracks.size() > 0 ){
     int i,j;
     int closestIdx;
     Real freqDistance;
     
-    for (j=0; j < magOrder.size(); j++) {
+    
+    for (j=0; j < magOrder.size() ; j++) {
       i = magOrder[j]; // sorted peak index
       if (incomingTracks.size() == 0)
-        break; // all tracks have been processed
+      break; // all tracks have been processed
       
       // find closest peak to incoming track
       closestIdx = 0;
       freqDistance = 1e10;
       for (int k=0; k < incomingTracks.size(); ++k){
-        if (freqDistance < std::abs(pfreqt[i] - tfreq[incomingTracks[k]])){
+        
+        if (freqDistance > std::abs(pfreqt[i] - tfreq[incomingTracks[k]])){
           freqDistance = std::abs(pfreqt[i] - tfreq[incomingTracks[k]]);
           closestIdx = k;
         }
       }
-      if (freqDistance < (freqDevOffset + freqDevSlope * peakFrequencies[i])) //  # choose track if distance is small
+      if (freqDistance < (freqDevOffset + freqDevSlope * pfreqt[i])) //  # choose track if distance is small
       {
         newTracks[incomingTracks[closestIdx]] = i;     //     # assign peak index to track index
         incomingTracks.erase(incomingTracks.begin() + closestIdx);              // # delete index of track in incomming tracks
@@ -263,91 +256,62 @@ void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<
     }
   }
   
-          
-  //	indext = np.array(np.nonzero(newTracks != -1), dtype=np.int)[0]   # indexes of assigned tracks
-          std::vector<int> indext;
-          for (int i=0; i < newTracks.size(); ++i)
-          {
-            if (newTracks[i] != -1) indext.push_back(i);
-          }
-  //	if indext.size > 0:
-        if (indext.size() > 0)
-        {
-          //		indexp = newTracks[indext]                                    # indexes of assigned peaks
-          std::vector<int> indexp;
-          copy_int_vector_from_indexes(indexp, newTracks, indext);
-          //		tfreqn[indext] = pfreqt[indexp]                               # output freq tracks
-          //		tmagn[indext] = pmagt[indexp]                                 # output mag tracks
-          //		tphasen[indext] = pphaset[indexp]                             # output phase tracks
-          for (int i=0; i < indexp.size(); ++i){
-            tfreqn[indext[i]] = pfreqt[indexp[i]];                           //    # output freq tracks
-            tmagn[indext[i]] = pmagt[indexp[i]];                             //    # output mag tracks
-            tphasen[indext[i]] = pphaset[indexp[i]];                         //    # output phase tracks
-          }
-          
-          //		pfreqt= np.delete(pfreqt, indexp)                             # delete used peaks
-          //		pmagt= np.delete(pmagt, indexp)                               # delete used peaks
-          //		pphaset= np.delete(pphaset, indexp)                           # delete used peaks
-          
-          // delete used peaks
-          erase_vector_from_indexes(pfreqt, indexp);
-          erase_vector_from_indexes(pmagt, indexp);
-          erase_vector_from_indexes(pphaset, indexp);
-        }
-
-          
   
-
+  //	indext = np.array(np.nonzero(newTracks != -1), dtype=np.int)[0]   # indexes of assigned tracks
+  std::vector<int> indext;
+  for (int i=0; i < newTracks.size(); ++i)
+  {
+    if (newTracks[i] != -1) indext.push_back(i);
+  }
+  //	if indext.size > 0:
+  if (indext.size() > 0)
+  {
+    //		indexp = newTracks[indext]                                    # indexes of assigned peaks
+    std::vector<int> indexp;
+    copy_int_vector_from_indexes(indexp, newTracks, indext);
+    
+    for (int i=0; i < indexp.size(); ++i){
+      tfreqn[indext[i]] = pfreqt[indexp[i]];                           //    # output freq tracks
+      tmagn[indext[i]] = pmagt[indexp[i]];                             //    # output mag tracks
+      tphasen[indext[i]] = pphaset[indexp[i]];                         //    # output phase tracks
+    }
+    
+    // delete used peaks
+    erase_vector_from_indexes(pfreqt, indexp);
+    erase_vector_from_indexes(pmagt, indexp);
+    erase_vector_from_indexes(pphaset, indexp);
+  }
+  
   // -----
   // create new tracks for non used peaks
-
-//	# create new tracks from non used peaks
-//	emptyt = np.array(np.nonzero(tfreq == 0), dtype=np.int)[0]      # indexes of empty incoming tracks
-//	peaksleft = np.argsort(-pmagt)                                  # sort left peaks by magnitude
-  
   std::vector<int> emptyt;
   for (int i=0; i < tfreq.size(); ++i)
   {
     if (tfreq[i] == 0) emptyt.push_back(i);
   }
- 
+  
   //	peaksleft = np.argsort(-pmagt)                                  # sort left peaks by magnitude
   std::vector<int> peaksleft;
-  sort_indexes(peaksleft, pmagt);
-  
-
-  
-//	if ((peaksleft.size > 0) & (emptyt.size >= peaksleft.size)):    # fill empty tracks
-//			tfreqn[emptyt[:peaksleft.size]] = pfreqt[peaksleft]
-//			tmagn[emptyt[:peaksleft.size]] = pmagt[peaksleft]
-//			tphasen[emptyt[:peaksleft.size]] = pphaset[peaksleft]
+  sort_indexes(peaksleft, pmagt, false);
   
   if ((peaksleft.size() > 0) && (emptyt.size() >= peaksleft.size())){    // fill empty tracks
     
     for (int i=0;i < peaksleft.size(); i++)
     {
-      tfreqn[emptyt[i]] = pfreqt[i];
-      tmagn[emptyt[i]] = pmagt[i];
-      tphasen[emptyt[i]] = pphaset[i];
+      tfreqn[emptyt[i]] = pfreqt[peaksleft[i]];
+      tmagn[emptyt[i]] = pmagt[peaksleft[i]];
+      tphasen[emptyt[i]] = pphaset[peaksleft[i]];
     }
-  
   }
-//	elif ((peaksleft.size > 0) & (emptyt.size < peaksleft.size)):   # add more tracks if necessary
-  //			tfreqn[emptyt] = pfreqt[peaksleft[:emptyt.size]]
-  //			tmagn[emptyt] = pmagt[peaksleft[:emptyt.size]]
-  //			tphasen[emptyt] = pphaset[peaksleft[:emptyt.size]]
-  //			tfreqn = np.append(tfreqn, pfreqt[peaksleft[emptyt.size:]])
-  //			tmagn = np.append(tmagn, pmagt[peaksleft[emptyt.size:]])
-  //			tphasen = np.append(tphasen, pphaset[peaksleft[emptyt.size:]])
-
-  else {
+  else
+  {
     if  ((peaksleft.size() > 0) && (emptyt.size() < peaksleft.size())) { //  add more tracks if necessary
-
+      
       for (int i=0;i < emptyt.size(); i++)
       {
-        tfreqn[i] = pfreqt[peaksleft[i]];
-        tmagn[i] = pmagt[peaksleft[i]];
-        tphasen[i] = pphaset[peaksleft[i]];
+        tfreqn[emptyt[i]] = pfreqt[peaksleft[i]];
+        tmagn[emptyt[i]] = pmagt[peaksleft[i]];
+        tphasen[emptyt[i]] = pphaset[peaksleft[i]];
       }
       for (int i=emptyt.size();i < peaksleft.size(); i++)
       {
@@ -357,16 +321,8 @@ void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<
       }
     }
   }
-
   
   
-//	return tfreqn, tmagn, tphasen
-//
-
-
- // TODO: if multiple frames as input are given. Only supported in standard mode.
-
-
 }
 
 
