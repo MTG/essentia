@@ -28,12 +28,12 @@ namespace standard {
 class PitchFilter : public Algorithm {
 
  private:
-  Input<std::vector<Real> > _energy;
+  Input<std::vector<Real> > _pitchConfidence;
   Input<std::vector<Real> > _pitch;
   Output<std::vector<Real> > _pitchFiltered;
 
   bool _octaveFilter;
-  bool _wrapNegativeEnergy;
+  bool _useAbsolutePitchConfidence;
   long long _minChunkSize;
 
   bool areClose(Real num1, Real num2);
@@ -42,18 +42,18 @@ class PitchFilter : public Algorithm {
     std::vector <long long>& chunksIndexes,
     std::vector <long long>& chunksSize);
   void joinChunks(const std::vector <std::vector <Real> >& chunks, std::vector <Real>& result);
-  Real energyInChunk(const std::vector <Real>& energy, long long chunkIndex, long long chunkSize);
+  Real confidenceOfChunk(const std::vector <Real>& pitchConfidence, long long chunkIndex, long long chunkSize);
   void correctOctaveErrorsByChunks(std::vector <Real>& pitch);
   void removeExtremeValues(std::vector <Real>& pitch);
   void correctJumps(std::vector <Real>& pitch);
   void filterNoiseRegions(std::vector <Real>& pitch);
   void correctOctaveErrors(std::vector <Real>& pitch);
-  void filterChunksByEnergy(std::vector <Real>& pitch, const std::vector <Real>& energy);
+  void filterChunksByPitchConfidence(std::vector <Real>& pitch, const std::vector <Real>& pitchConfidence);
 
  public:
   PitchFilter() {
     declareInput(_pitch, "pitch", "vector of pitch values for the input frames [Hz]");
-    declareInput(_energy, "energy", "vector of energy values for the input frames");
+    declareInput(_pitchConfidence, "pitchConfidence", "vector of pitch confidence values for the input frames");
     declareOutput(_pitchFiltered, "pitchFiltered", "vector of corrected pitch values [Hz]");
   }
 
@@ -63,7 +63,7 @@ class PitchFilter : public Algorithm {
   void declareParameters() {
     declareParameter("minChunkSize", "minumum number of frames in non-zero pitch chunks", "[0,inf)",  10);
     declareParameter("octaveFilter", "enable global octave filter", "{true,false}", false);
-    declareParameter("wrapNegativeEnergy", "treat negative energy values as positive", "{true,false}", false);
+    declareParameter("useAbsolutePitchConfidence", "treat negative pitch confidence values as positive (use with melodia guessUnvoiced=True)", "{true,false}", false);
   }
 
   void configure();
@@ -84,17 +84,17 @@ class PitchFilter : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class PitchFilter: public StreamingAlgorithmWrapper {
+class PitchFilter : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<Real> > _energy;
+  Sink<std::vector<Real> > _pitchConfidence;
   Sink<std::vector<Real> > _pitch;
   Source<Real> _pitchFiltered;
 
  public:
   PitchFilter() {
     declareAlgorithm("PitchFilter");
-    declareInput(_energy, TOKEN, "energy");
+    declareInput(_pitchConfidence, TOKEN, "pitchConfidence");
     declareInput(_pitch, TOKEN, "pitch");
     declareOutput(_pitchFiltered, TOKEN, "pitchFiltered");
   }

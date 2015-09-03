@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "pitchfiltermakam.h"
+#include "pitchfilter.h"
 #include "essentiamath.h"
 
 using namespace std;
@@ -37,35 +37,35 @@ const char* PitchFilter::description = DOC("This algorithm corrects the fundamen
 
 void PitchFilter::configure() {
   _minChunkSize = parameter("minChunkSize").toInt();
-  _wrapNegativeEnergy = parameter("wrapNegativeEnergy").toBool();
+  _useAbsolutePitchConfidence = parameter("useAbsolutePitchConfidence").toBool();
   _octaveFilter = parameter("octaveFilter").toBool();
 }
 
 void PitchFilter::compute() {
   const vector<Real>& pitch = _pitch.get();
-  const vector<Real>& energy = _energy.get();
-  std::vector<Real> modifiedEnergy(energy.size());
+  const vector<Real>& pitchConfidence = _pitchConfidence.get();
+  std::vector<Real> modifiedPitchConfidence(pitchConfidence.size());
 
-  // sanity checks, pitch and energy values should be non-negative
-  if (pitch.size() != energy.size()) {
-    throw EssentiaException("PitchFilter: Pitch and energy vectors should be of the same size.");
+  // sanity checks, pitch and pitchConfidence values should be non-negative
+  if (pitch.size() != pitchConfidence.size()) {
+    throw EssentiaException("PitchFilter: Pitch and pitchConfidence vectors should be of the same size.");
   }
   if (pitch.size() == 0) {
-    throw EssentiaException("PitchFilter: Pitch and energy vectors are empty.");
+    throw EssentiaException("PitchFilter: Pitch and pitchConfidence vectors are empty.");
   }
   for (size_t i=0; i<pitch.size(); i++) {
     if (pitch[i] < 0) {
       throw EssentiaException("PitchFilter: Pitch values should be non-negative.");
     }
-    Real con = energy[i];
+    Real con = pitchConfidence[i];
     if (con < 0) {
-      if (_wrapNegativeEnergy) {
+      if (_useAbsolutePitchConfidence) {
         con = -con;
       } else {
-        throw EssentiaException("PitchFilter: Energy values should be non-negative.");
+        throw EssentiaException("PitchFilter: Pitch confidence values should be non-negative.");
       }
     }
-    modifiedEnergy.push_back(con);
+    modifiedPitchConfidence.push_back(con);
   }
 
   vector <Real>& pitchFiltered = _pitchFiltered.get();
@@ -91,7 +91,7 @@ void PitchFilter::compute() {
   }
   correctOctaveErrorsByChunks(pitchFiltered);
 
-  filterChunksByEnergy(pitchFiltered, modifiedEnergy);
+  filterChunksByPitchConfidence(pitchFiltered, modifiedPitchConfidence);
 }
 
 bool PitchFilter::areClose(Real num1, Real num2) {
@@ -146,8 +146,8 @@ void PitchFilter::joinChunks(const vector <vector <Real> >& chunks, vector <Real
   }
 }
 
-Real PitchFilter::energyInChunk(const vector <Real>& energy, long long chunkIndex, long long chunkSize) {
-  return accumulate(energy.begin() + chunkIndex, energy.begin() + chunkIndex + chunkSize, 0.0) / chunkSize;
+Real PitchFilter::confidenceOfChunk(const vector <Real>& PitchConfidence, long long chunkIndex, long long chunkSize) {
+  return accumulate(PitchConfidence.begin() + chunkIndex, PitchConfidence.begin() + chunkIndex + chunkSize, 0.0) / chunkSize;
 }
 
 void PitchFilter::correctOctaveErrorsByChunks(vector <Real>& pitch) {
@@ -322,10 +322,10 @@ void PitchFilter::correctOctaveErrors(vector <Real>& pitch) {
   }
 }
 
-void PitchFilter::filterChunksByEnergy(std::vector <Real>& pitch, const std::vector <Real>& energy) {
+void PitchFilter::filterChunksByPitchConfidence(std::vector <Real>& pitch, const std::vector <Real>& pitchConfidence) {
   // original algorithm uses average signal amplitude instead of energy
   // short chunks with average amplitude, less than 1/6 of average energy of the longest chunk, are filtered
-  // we, instead, use spectral energy
+  // we, instead, use pitch confidence
 
   vector <vector <Real> > chunks;
   vector <long long> chunksIndexes;
@@ -334,17 +334,16 @@ void PitchFilter::filterChunksByEnergy(std::vector <Real>& pitch, const std::vec
   // split pitch values vector to chunks
   splitToChunks(pitch, chunks, chunksIndexes, chunksSize);
 
-  // compute average energy of the chunk with maximum length
+  // compute average confidence of the chunk with maximum length
   size_t max_i = max_element(chunksSize.begin(), chunksSize.end()) - chunksSize.begin();
-  Real energyInLongestChunk = energyInChunk(energy, chunksIndexes[max_i], chunksSize[max_i]);
-  Real energyMinLimit = energyInLongestChunk / 36; // corresponds to squared average amplitude  FIXME make it a parameter
+  Real confidenceOfLongestChunk = confidenceOfChunk(pitchConfidence, chunksIndexes[max_i], chunksSize[max_i]);
+  Real confidenceMinLimit = confidenceOfLongestChunk / 36; // corresponds to squared average amplitude  FIXME make it a parameter
 
   for (size_t i=0; i<chunks.size(); i++) {
     // check only non-zero pitch chunks
     if (chunks[i][argmax(chunks[i])] > 0) {
-      // cout << "chunk with non-zero pitch, " << "size=" << chunksSize[i] << ", energy=" << energyInChunk(energy, chunksIndexes[i], chunksSize[i]) << endl;
       if ((chunksSize[i] < _minChunkSize) ||
-          (chunksSize[i] < _minChunkSize*3 && energyInChunk(energy, chunksIndexes[i], chunksSize[i]) < energyMinLimit)) {
+          (chunksSize[i] < _minChunkSize*3 && confidenceOfChunk(pitchConfidence, chunksIndexes[i], chunksSize[i]) < confidenceMinLimit)) {
         for (size_t k=0; k<chunks[i].size(); k++)
           chunks[i][k] = 0.0;
       }
