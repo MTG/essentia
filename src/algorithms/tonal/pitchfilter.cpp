@@ -24,9 +24,9 @@ using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* PitchFilterMakam::name = "PitchFilterMakam";
-const char* PitchFilterMakam::version = "1.0";
-const char* PitchFilterMakam::description = DOC("This algorithm corrects the fundamental frequency estimations for a sequence of frames. The original estimations can be computed with the PitchYinFFT algorithm.\n"
+const char* PitchFilter::name = "PitchFilter";
+const char* PitchFilter::version = "1.0";
+const char* PitchFilter::description = DOC("This algorithm corrects the fundamental frequency estimations for a sequence of frames. The original estimations can be computed with the PitchYinFFT algorithm.\n"
 "\n"
 "The algorithm is based on the code of Makam Toolbox 1.0.\n"
 "ftp://ftp.iyte.edu.tr/share/ktm-nota/TuningMeasurement.html\n"
@@ -35,34 +35,34 @@ const char* PitchFilterMakam::description = DOC("This algorithm corrects the fun
 "  [1] B. Bozkurt, \"An Automatic Pitch Analysis Method for Turkish Maqam\n"
 "  Music,\" Journal of New Music Research. 37(1), 1-13.\n");
 
-void PitchFilterMakam::configure() {
+void PitchFilter::configure() {
   _minChunkSize = parameter("minChunkSize").toInt();
   _wrapNegativeEnergy = parameter("wrapNegativeEnergy").toBool();
   _octaveFilter = parameter("octaveFilter").toBool();
 }
 
-void PitchFilterMakam::compute() {
+void PitchFilter::compute() {
   const vector<Real>& pitch = _pitch.get();
   const vector<Real>& energy = _energy.get();
   std::vector<Real> modifiedEnergy(energy.size());
 
   // sanity checks, pitch and energy values should be non-negative
   if (pitch.size() != energy.size()) {
-    throw EssentiaException("PitchFilterMakam: Pitch and energy vectors should be of the same size.");
+    throw EssentiaException("PitchFilter: Pitch and energy vectors should be of the same size.");
   }
   if (pitch.size() == 0) {
-    throw EssentiaException("PitchFilterMakam: Pitch and energy vectors are empty.");
+    throw EssentiaException("PitchFilter: Pitch and energy vectors are empty.");
   }
   for (size_t i=0; i<pitch.size(); i++) {
     if (pitch[i] < 0) {
-      throw EssentiaException("PitchFilterMakam: Pitch values should be non-negative.");
+      throw EssentiaException("PitchFilter: Pitch values should be non-negative.");
     }
     Real con = energy[i];
     if (con < 0) {
       if (_wrapNegativeEnergy) {
         con = -con;
       } else {
-        throw EssentiaException("PitchFilterMakam: Energy values should be non-negative.");
+        throw EssentiaException("PitchFilter: Energy values should be non-negative.");
       }
     }
     modifiedEnergy.push_back(con);
@@ -94,7 +94,7 @@ void PitchFilterMakam::compute() {
   filterChunksByEnergy(pitchFiltered, modifiedEnergy);
 }
 
-bool PitchFilterMakam::areClose(Real num1, Real num2) {
+bool PitchFilter::areClose(Real num1, Real num2) {
   Real d = fabs(num1 - num2);
   Real av = (num1 + num2) / 2;
 
@@ -106,7 +106,7 @@ bool PitchFilterMakam::areClose(Real num1, Real num2) {
     return false;
 }
 
-void PitchFilterMakam::splitToChunks(const vector <Real>& pitch,
+void PitchFilter::splitToChunks(const vector <Real>& pitch,
     vector <vector <Real> >& chunks,
     vector <long long>& chunksIndexes,
     vector <long long>& chunksSize) {
@@ -139,18 +139,18 @@ void PitchFilterMakam::splitToChunks(const vector <Real>& pitch,
     }
 }
 
-void PitchFilterMakam::joinChunks(const vector <vector <Real> >& chunks, vector <Real>& result) {
+void PitchFilter::joinChunks(const vector <vector <Real> >& chunks, vector <Real>& result) {
   result.clear();
   for (size_t i=0; i<chunks.size(); i++) {
     result.insert(result.end(), chunks[i].begin(), chunks[i].end());
   }
 }
 
-Real PitchFilterMakam::energyInChunk(const vector <Real>& energy, long long chunkIndex, long long chunkSize) {
+Real PitchFilter::energyInChunk(const vector <Real>& energy, long long chunkIndex, long long chunkSize) {
   return accumulate(energy.begin() + chunkIndex, energy.begin() + chunkIndex + chunkSize, 0.0) / chunkSize;
 }
 
-void PitchFilterMakam::correctOctaveErrorsByChunks(vector <Real>& pitch) {
+void PitchFilter::correctOctaveErrorsByChunks(vector <Real>& pitch) {
   vector <vector <Real> > chunks;
   vector <long long> chunksIndexes;
   vector <long long> chunksSize;
@@ -184,7 +184,7 @@ void PitchFilterMakam::correctOctaveErrorsByChunks(vector <Real>& pitch) {
   joinChunks(chunks, pitch);
 }
 
-void PitchFilterMakam::removeExtremeValues(vector <Real>& pitch) {
+void PitchFilter::removeExtremeValues(vector <Real>& pitch) {
   // compute pitch statistics
   Real pitchMax = pitch[argmax(pitch)];
   Real pitchMean = mean(pitch);
@@ -229,7 +229,7 @@ void PitchFilterMakam::removeExtremeValues(vector <Real>& pitch) {
       pitch[i] = 0;
 }
 
-void PitchFilterMakam::correctJumps(vector <Real>& pitch) {
+void PitchFilter::correctJumps(vector <Real>& pitch) {
   // corrects jumps/discontinuities within the pitch curve
   for (size_t i=4; i<pitch.size()-6; i++) {
     // if four previous values form continuous curve
@@ -267,7 +267,7 @@ void PitchFilterMakam::correctJumps(vector <Real>& pitch) {
   }
 }
 
-void PitchFilterMakam::filterNoiseRegions(vector <Real>& pitch) {
+void PitchFilter::filterNoiseRegions(vector <Real>& pitch) {
   // assign zero frequency to noisy pitch regions in three rounds
   // in original algorithm, frequency of 8.17579891564371 Hz, refered as 'zero cent frequency',  is used
   for (int m=0; m<3; m++) {
@@ -302,7 +302,7 @@ void PitchFilterMakam::filterNoiseRegions(vector <Real>& pitch) {
   }
 }
 
-void PitchFilterMakam::correctOctaveErrors(vector <Real>& pitch) {
+void PitchFilter::correctOctaveErrors(vector <Real>& pitch) {
   Real pitchMid = (median(pitch)+ mean(pitch)) / 2;
   for (size_t i=4; i<pitch.size()-2; i++) {
     // if previous values are continuous
@@ -322,7 +322,7 @@ void PitchFilterMakam::correctOctaveErrors(vector <Real>& pitch) {
   }
 }
 
-void PitchFilterMakam::filterChunksByEnergy(std::vector <Real>& pitch, const std::vector <Real>& energy) {
+void PitchFilter::filterChunksByEnergy(std::vector <Real>& pitch, const std::vector <Real>& energy) {
   // original algorithm uses average signal amplitude instead of energy
   // short chunks with average amplitude, less than 1/6 of average energy of the longest chunk, are filtered
   // we, instead, use spectral energy

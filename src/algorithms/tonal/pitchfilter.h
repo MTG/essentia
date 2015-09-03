@@ -17,15 +17,15 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_PITCHFILTERMAKAM_H
-#define ESSENTIA_PITCHFILTERMAKAM_H
+#ifndef ESSENTIA_PITCHFILTER_H
+#define ESSENTIA_PITCHFILTER_H
 
 #include "algorithmfactory.h"
 
 namespace essentia {
 namespace standard {
 
-class PitchFilterMakam : public Algorithm {
+class PitchFilter : public Algorithm {
 
  private:
   Input<std::vector<Real> > _energy;
@@ -51,13 +51,13 @@ class PitchFilterMakam : public Algorithm {
   void filterChunksByEnergy(std::vector <Real>& pitch, const std::vector <Real>& energy);
 
  public:
-  PitchFilterMakam() {
+  PitchFilter() {
     declareInput(_pitch, "pitch", "vector of pitch values for the input frames [Hz]");
     declareInput(_energy, "energy", "vector of energy values for the input frames");
     declareOutput(_pitchFiltered, "pitchFiltered", "vector of corrected pitch values [Hz]");
   }
 
-  ~PitchFilterMakam() {
+  ~PitchFilter() {
   };
 
   void declareParameters() {
@@ -73,7 +73,7 @@ class PitchFilterMakam : public Algorithm {
   static const char* version;
   static const char* description;
 
-}; // class PitchFilterMakam
+}; // class PitchFilter
 
 } // namespace standard
 } // namespace essentia
@@ -84,7 +84,7 @@ class PitchFilterMakam : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class PitchFilterMakam : public StreamingAlgorithmWrapper {
+class PitchFilter: public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<Real> > _energy;
@@ -92,8 +92,8 @@ class PitchFilterMakam : public StreamingAlgorithmWrapper {
   Source<Real> _pitchFiltered;
 
  public:
-  PitchFilterMakam() {
-    declareAlgorithm("PitchFilterMakam");
+  PitchFilter() {
+    declareAlgorithm("PitchFilter");
     declareInput(_energy, TOKEN, "energy");
     declareInput(_pitch, TOKEN, "pitch");
     declareOutput(_pitchFiltered, TOKEN, "pitchFiltered");
@@ -103,4 +103,4 @@ class PitchFilterMakam : public StreamingAlgorithmWrapper {
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_PITCHFILTERMAKAM_H
+#endif // ESSENTIA_PITCHFILTER_H
