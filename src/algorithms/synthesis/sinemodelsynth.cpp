@@ -40,15 +40,52 @@ void SineModelSynth::compute() {
 
   int outSize = (int)floor(_fftSize/2.0) + 1;
   initializeFFT(outfft, outSize);
-
+  int i = 0;
 
   // convert frequencies to peak locations
   std::vector<Real> locs(frequencies.size());
-  for (int i=0; i < int(frequencies.size()); ++i){
+  for (i=0; i < int(frequencies.size()); ++i){
     locs[i] = _fftSize*frequencies[i]/float(_sampleRate);
   }
-  genSpecSines(locs, magnitudes, phases, outfft);
+  // init synth phase vector
+  std::vector<Real> ytphase(frequencies.size());
+  std::fill(ytphase.begin(), ytphase.end(), 0.);
 
+  // initialize last phase and frequency vectors
+  if (_lastytphase.size() < ytphase.size())
+  {
+    _lastytphase.resize(ytphase.size());
+    std::fill(_lastytphase.begin(), _lastytphase.end(), 0.);
+  }
+  if (_lastytfreq.size() < frequencies.size())
+  {
+    _lastytfreq.resize(frequencies.size());
+    std::fill(_lastytfreq.begin(), _lastytfreq.end(), 0.);
+  }
+
+
+  // propagate phase if necessary (no input phase vector)
+  if (int(phases.size()) > 0){                                 // if no phases generate them
+	  	ytphase = phases;
+	  }
+  else{
+		for (i=0; i < int(ytphase.size()); ++i)
+		{
+			ytphase[i] = _lastytphase[i] + (M_PI * (_lastytfreq[i] + frequencies[i])/float(_sampleRate)) * _hopSize;     // propagate phases
+    }
+  }
+
+  // generate output fft
+  genSpecSines(locs, magnitudes, ytphase, outfft);
+
+  for (i = 0; i < int(ytphase.size()); ++i)
+  {
+		ytphase[i] = fmod (ytphase[i], float(2*M_PI));                        // make phase inside 2*pi
+  }
+
+  // save frequency and phase for phase propagation
+  _lastytfreq = frequencies;
+  _lastytphase = ytphase;
 
 }
 
@@ -57,7 +94,6 @@ void SineModelSynth::compute() {
 void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > &outfft)
 {
 	int n_peaks = iploc.size(); // num of peaks
-
 
 	int ii=0,jj=0, ploc_int;
 
@@ -72,7 +108,6 @@ void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipm
 		loc = iploc[ii];
 		bin_remainder = floor(loc + 0.5)-loc;
 		ploc_int = (int)floor(loc+0.5);
-
 
 		if((loc>=5)&&(loc<size_spec_half-4))
 		{

@@ -41,6 +41,10 @@ class SineModelSynth : public Algorithm {
 
   Real _sampleRate;
   int _fftSize;
+  int _hopSize;
+
+  std::vector<Real> _lastytfreq;
+  std::vector<Real> _lastytphase;
 
   void genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > &outfft);
   void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
@@ -55,12 +59,15 @@ class SineModelSynth : public Algorithm {
 
   void declareParameters() {
     declareParameter("fftSize", "the size of the output FFT frame (full spectrum size)", "[1,inf)", 2048);
+    declareParameter("hopSize", "the hop size between frames", "[1,inf)", 512);
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
   }
 
   void configure() {
     _sampleRate = parameter("sampleRate").toReal();
     _fftSize = parameter("fftSize").toInt();
+    _hopSize = parameter("hopSize").toInt();
+    // initialize lastfrequencies
   }
 
   void compute();

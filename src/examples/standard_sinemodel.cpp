@@ -78,7 +78,7 @@ int main(int argc, char* argv[]) {
                             "sampleRate", sr);
 
   Algorithm* sinemodelsynth     = factory.create("SineModelSynth",
-                            "sampleRate", sr, "fftSize", framesize);
+                            "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
 
 
   Algorithm* ifft     = factory.create("IFFT",
@@ -140,14 +140,14 @@ int main(int argc, char* argv[]) {
 
   vector<Real> audioOutput;
 
-  overlapAdd->input("signal").set(ifftframe); 
+  overlapAdd->input("signal").set(ifftframe);
   overlapAdd->output("signal").set(audioOutput);
 
 
 ////////
 /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << audioFilename << " --------" << endl;
-  
+
   audioLoader->compute();
   int counter = 0;
   while (true) {
@@ -165,7 +165,9 @@ int main(int argc, char* argv[]) {
 
     // Sine model analysis (without tracking)
     sinemodelanal->compute();
-    
+
+    phases.resize(0); // test for phase propagation
+
     // Sine model synthesis
     sinemodelsynth->compute();
 
