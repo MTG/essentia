@@ -17,14 +17,14 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "sinemodelanal.h"
+#include "spsmodelanal.h"
 #include "essentiamath.h"
 
 using namespace essentia;
 using namespace standard;
 
-const char* SineModelAnal::name = "SineModelAnal";
-const char* SineModelAnal::description = DOC("This algorithm computes the sine model analysis. \n"
+const char* SpsModelAnal::name = "SpsModelAnal";
+const char* SpsModelAnal::description = DOC("This algorithm computes the stochastic model analysis. \n"
 "\n"
 "It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses PeakDetection. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"
 "\n"
@@ -47,7 +47,7 @@ bool comparator_down ( const mypair& l, const mypair& r)
 }
 
 // It sorts the indexes of an input vector v, and outputs the sorted index vector idx
-void SineModelAnal::sort_indexes(std::vector<int> &idx, const std::vector<Real> &v, bool ascending) {
+void SpsModelAnal::sort_indexes(std::vector<int> &idx, const std::vector<Real> &v, bool ascending) {
 
   // initialize original index locations
   std::vector<mypair> pairs(v.size());
@@ -68,7 +68,7 @@ void SineModelAnal::sort_indexes(std::vector<int> &idx, const std::vector<Real> 
   return;
 }
 
-void SineModelAnal::copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx){
+void SpsModelAnal::copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx){
 
   for (int i = 0; i < idx.size(); ++i){
     out.push_back(v[idx[i]]);
@@ -76,7 +76,7 @@ void SineModelAnal::copy_vector_from_indexes(std::vector<Real> &out, const std::
   return;
 }
 
-void SineModelAnal::copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx){
+void SpsModelAnal::copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx){
 
   for (int i = 0; i < idx.size(); ++i){
     out.push_back(v[idx[i]]);
@@ -85,7 +85,7 @@ void SineModelAnal::copy_int_vector_from_indexes(std::vector<int> &out, const st
 }
 
 // erase elements from a vector given a vector of indexes
-void SineModelAnal::erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx){
+void SpsModelAnal::erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx){
   std::vector<Real> tmp;
   bool found;
   for (int i = 0; i < v.size(); ++i) {
@@ -109,7 +109,7 @@ void SineModelAnal::erase_vector_from_indexes(std::vector<Real> &v, const std::v
 
 
 
-void SineModelAnal::configure() {
+void SpsModelAnal::configure() {
 
   std::string orderBy = parameter("orderBy").toLower();
   if (orderBy == "magnitude") {
@@ -135,7 +135,7 @@ void SineModelAnal::configure() {
 
 
 
-void SineModelAnal::compute() {
+void SpsModelAnal::compute() {
   // inputs and outputs
   const std::vector<std::complex<Real> >& fft = _fft.get();
 
@@ -183,7 +183,7 @@ void SineModelAnal::compute() {
 // ---------------------------
 // additional methods
 
-void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope, std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen ){
+void SpsModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope, std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen ){
 
   //	pfreq, pmag, pphase: frequencies and magnitude of current frame
   //	tfreq: frequencies of incoming tracks from previous frame
@@ -327,7 +327,7 @@ void SineModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<
 
 
 
-void SineModelAnal::phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases){
+void SpsModelAnal::phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases){
 
   int N = peakFrequencies.size();
   peakPhases.resize(N);
