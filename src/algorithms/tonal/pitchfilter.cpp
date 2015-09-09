@@ -73,7 +73,7 @@ void PitchFilter::compute() {
         throw EssentiaException("PitchFilter: Pitch confidence values should be non-negative.");
       }
     }
-    modifiedPitchConfidence.push_back(con);
+    modifiedPitchConfidence[i] = con;
   }
 
   vector <Real>& pitchFiltered = _pitchFiltered.get();
