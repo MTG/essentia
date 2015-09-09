@@ -32,7 +32,6 @@ class PitchFilter : public Algorithm {
   Input<std::vector<Real> > _pitch;
   Output<std::vector<Real> > _pitchFiltered;
 
-  bool _octaveFilter;
   bool _useAbsolutePitchConfidence;
   long long _minChunkSize;
   int _confidenceThreshold;
@@ -63,7 +62,6 @@ class PitchFilter : public Algorithm {
 
   void declareParameters() {
     declareParameter("minChunkSize", "minumum number of frames in non-zero pitch chunks", "[0,inf)",  10);
-    declareParameter("octaveFilter", "enable global octave filter", "{true,false}", false);
     declareParameter("useAbsolutePitchConfidence", "treat negative pitch confidence values as positive (use with melodia guessUnvoiced=True)", "{true,false}", false);
     declareParameter("confidenceThreshold", "ratio between the average confidence of the most confident chunk and the minimum allowed average confidence of a chunk", "[0,inf)", 36);
   }

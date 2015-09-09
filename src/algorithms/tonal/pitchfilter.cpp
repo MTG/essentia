@@ -46,7 +46,6 @@ const char* PitchFilter::description = DOC("This algorithm corrects the fundamen
 void PitchFilter::configure() {
   _minChunkSize = parameter("minChunkSize").toInt();
   _useAbsolutePitchConfidence = parameter("useAbsolutePitchConfidence").toBool();
-  _octaveFilter = parameter("octaveFilter").toBool();
   _confidenceThreshold = parameter("confidenceThreshold").toInt();
 }
 
@@ -91,13 +90,11 @@ void PitchFilter::compute() {
 
   filterNoiseRegions(pitchFiltered);
 
-  if (_octaveFilter) {
-    // correct octave errors of pitch curve in both direction (forwards, backwards)
-    correctOctaveErrors(pitchFiltered);
-    reverse(pitchFiltered.begin(), pitchFiltered.end());
-    correctOctaveErrors(pitchFiltered);
-    reverse(pitchFiltered.begin(), pitchFiltered.end());
-  }
+  // correct octave errors of pitch curve in both direction (forwards, backwards)
+  correctOctaveErrors(pitchFiltered);
+  reverse(pitchFiltered.begin(), pitchFiltered.end());
+  correctOctaveErrors(pitchFiltered);
+  reverse(pitchFiltered.begin(), pitchFiltered.end());
   correctOctaveErrorsByChunks(pitchFiltered);
 
   filterChunksByPitchConfidence(pitchFiltered, modifiedPitchConfidence);
@@ -171,7 +168,9 @@ void PitchFilter::correctOctaveErrorsByChunks(vector <Real>& pitch) {
     if (chunks[i].size() < chunks[i-1].size() || chunks[i].size() < chunks[i+1].size()) {
       Real octaveTranspose = 1.;
 
-      // check if transpose is needed
+      // check if transpose is needed. 
+      // TODO: if chunks[i] is all zeros skip comparison
+      // TODO: if either chunks[i-1] or chunks[i+1] is all zeros, try to compare with chunks[i-2] or chunks[i+2] (check until a non-zero chunk is found)
       if (areClose(chunks[i].front() / 2, chunks[i-1].back()) && chunks[i].back() / 1.5 > chunks[i+1].front())
         octaveTranspose = 0.5; // 1 octave down
       else if (areClose(chunks[i].back() / 2, chunks[i+1].front()) && chunks[i].front() / 1.5 > chunks[i-1].back())
