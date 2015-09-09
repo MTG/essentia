@@ -35,13 +35,13 @@ const char* SineModelAnal::description = DOC("This algorithm computes the sine m
 
 // ------------------
 // Additional support functions
-typedef std::pair<int,Real> mypair;
+//typedef std::pair<int,Real> mypair;
 // sort indexes: get arguments of sorted vector
-bool comparator_up ( const mypair& l, const mypair& r)
+bool SineModelAnal::comparator_up ( const mypair& l, const mypair& r)
 {
   return l.second < r.second;
 }
-bool comparator_down ( const mypair& l, const mypair& r)
+bool SineModelAnal::comparator_down ( const mypair& l, const mypair& r)
 {
   return l.second > r.second;
 }
@@ -155,6 +155,7 @@ void SineModelAnal::compute() {
   _cartesianToPolar->input("complex").set(fft);
   _cartesianToPolar->output("magnitude").set(fftmag);
   _cartesianToPolar->output("phase").set(fftphase);
+
   _peakDetect->input("array").set(fftmag);
   _peakDetect->output("positions").set(peakFrequency);
   _peakDetect->output("amplitudes").set(peakMagnitude);
@@ -164,9 +165,9 @@ void SineModelAnal::compute() {
 
   phaseInterpolation(fftphase, peakFrequency, peakPhase);
 
-
   // tracking
   sinusoidalTracking(peakMagnitude, peakFrequency, peakPhase, _lasttpeakFrequency, parameter("freqDevOffset").toReal(), parameter("freqDevSlope").toReal(), tpeakMagnitude, tpeakFrequency, tpeakPhase);
+
 
   // limit number of tracks to maxnSines
   int maxSines = int ( parameter("maxnSines").toReal() );

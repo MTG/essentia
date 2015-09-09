@@ -321,8 +321,6 @@ void SpsModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<R
       }
     }
   }
-
-
 }
 
 

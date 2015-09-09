@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
 
   /////// PARAMS //////////////
   int framesize = 2048;
-  int hopsize = 128;
+  int hopsize = 512;
   Real sr = 44100;
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -165,8 +165,6 @@ int main(int argc, char* argv[]) {
 
     // Sine model analysis (without tracking)
     sinemodelanal->compute();
-
-    phases.resize(0); // test for phase propagation
 
     // Sine model synthesis
     sinemodelsynth->compute();

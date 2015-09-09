@@ -28,6 +28,8 @@
 namespace essentia {
 namespace standard {
 
+typedef std::pair<int,Real> mypair;
+
 class SineModelAnal : public Algorithm {
 
  protected:
@@ -50,6 +52,7 @@ class SineModelAnal : public Algorithm {
 
   }
 
+
   ~SineModelAnal() {
     delete _peakDetect;
     delete _cartesianToPolar;
@@ -63,11 +66,11 @@ class SineModelAnal : public Algorithm {
     declareParameter("magnitudeThreshold", "peaks below this given threshold are not outputted", "(-inf,inf)", 0.0);
     declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
     // sinusoidal tracking
-    declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100); 
+    declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
     declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
-        declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
-    
+    declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.001);
+
   }
 
   void configure();
@@ -88,7 +91,11 @@ class SineModelAnal : public Algorithm {
   void copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx);
   void copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx);
   void erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx);
-  
+
+  // support functions for sort_indexes()
+  static bool comparator_up ( const mypair& l, const mypair& r);
+  static bool comparator_down ( const mypair& l, const mypair& r);
+
 };
 
 } // namespace standard
