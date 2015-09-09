@@ -222,10 +222,20 @@ def run_tests(ctx):
     os.system(out + '/basetest')
 
 def run_python_tests(ctx):
-    os.system('python test/src/unittest/all_tests.py')
+    # create a local python package folder
+    os.system('mkdir -p build/python')
+    os.system('cp -r src/python/essentia build/python/')
+    os.system('cp build/src/python/_essentia.so build/python/essentia')
+
+    os.system('PYTHONPATH=build/python python test/src/unittest/all_tests.py')
 
 def ipython(ctx):
     os.system('ipython --pylab')
 
 def doc(ctx):
-    os.system('doc/build_sphinx_doc.sh')
+    # create a local python package folder
+    os.system('mkdir -p build/python')
+    os.system('cp -r src/python/essentia build/python/essentia')
+    os.system('cp build/src/python/_essentia.so build/python/essentia')
+
+    os.system('PYTHONPATH=build/python doc/build_sphinx_doc.sh')
