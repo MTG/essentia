@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
                                          //  "silentFrames", "noise",
                                            "startFromZero", false );
 
-  Algorithm* window       = factory.create("Windowing", "type", "hann");
+  Algorithm* window       = factory.create("Windowing", "type", "hamming"); // hamming as in the Python examples
 
   Algorithm* fft     = factory.create("FFT",
                             "size", framesize);
@@ -163,8 +163,13 @@ int main(int argc, char* argv[]) {
     window->compute();
     fft->compute();
 
+
     // Sine model analysis (without tracking)
     sinemodelanal->compute();
+
+
+    cout <<  frequencies[0] << " " << magnitudes[0];
+    cout << std::endl;
 
     // Sine model synthesis
     sinemodelsynth->compute();

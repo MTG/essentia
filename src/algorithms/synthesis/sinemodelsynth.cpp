@@ -111,7 +111,7 @@ void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipm
 
 		if((loc>=5)&&(loc<size_spec_half-4))
 		{
-      mag = ipmag[ii];
+      mag = pow(10,(ipmag[ii]/20.0));
 
 			for(jj=-4;jj<5;jj++)
 			{
@@ -122,7 +122,8 @@ void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipm
 		}
 		else if((loc>0)&&(loc<5))
 		{
-      mag = ipmag[ii];
+      mag = pow(10,(ipmag[ii]/20.0));
+
 			for(jj=-4;jj<5;jj++)
 			{
 				if(ploc_int+jj<0)
@@ -145,7 +146,7 @@ void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipm
 		}
 		else if((loc>=size_spec_half-4)&&(loc<size_spec_half-1))
 		{
-      mag = ipmag[ii];
+      mag = pow(10,(ipmag[ii]/20.0));
 
 			for(jj=-4;jj<5;jj++)
 			{
