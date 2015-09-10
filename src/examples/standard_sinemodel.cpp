@@ -163,13 +163,8 @@ int main(int argc, char* argv[]) {
     window->compute();
     fft->compute();
 
-
     // Sine model analysis (without tracking)
     sinemodelanal->compute();
-
-
-    cout <<  frequencies[0] << " " << magnitudes[0];
-    cout << std::endl;
 
     // Sine model synthesis
     sinemodelsynth->compute();

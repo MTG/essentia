@@ -167,7 +167,7 @@ void SineModelAnal::compute() {
 
   // convert to dB
     for (int i=0; i < (int)fftmag.size(); ++i){
-    fftmagdB.push_back(20.f * std::log10(fftmag[i] + 1e-10));
+      fftmagdB.push_back(20.f * std::log10(fftmag[i] + 1e-10));
     }
 
   _peakDetect->compute();
