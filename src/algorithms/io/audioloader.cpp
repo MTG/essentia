@@ -153,12 +153,14 @@ void AudioLoader::openAudioFile(const string& filename) {
 
     av_init_packet(&_packet);
 
-    _decodedFrame = avcodec_alloc_frame();
+    _decodedFrame = av_frame_alloc();
     if (!_decodedFrame) {
         throw EssentiaException("AudioLoader: Could not allocate audio frame");
     }
 
     av_md5_init(_md5Encoded);
+    
+
 }
 
 
@@ -267,7 +269,9 @@ AlgorithmStatus AudioLoader::process() {
         if (!decodePacket()) break;
         copyFFmpegOutput();
     }
-
+    // neds to be freed !!
+    av_free_packet(&_packet);
+    
     return OK;
 }
 
