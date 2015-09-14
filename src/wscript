@@ -242,7 +242,12 @@ def configure(ctx):
     if lel:
         print('- Compiling %s example%s' % (lel, "" if lel == 1 else "s"))
         print('  %s' % ", ".join(ctx.env.EXAMPLE_LIST))
+    
+    print('======================== Creating reg File ===============================================================')
+    
 
+    buildRegFile(ctx);
+    
 
     print('=======================================================================================')
 
@@ -253,14 +258,11 @@ class BuildAlgoReg(Task):
         return self.exec_command('cp %s %s' % (self.inputs[0].abspath(),
                                                self.outputs[0].abspath()))
 
-def build(ctx):
-    print('→ building from ' + ctx.path.abspath())
-    #print('  BUILD ENV:\n%s' % ctx.env)
 
-    # add essentia root folder to path to be able to import utils.algorithms_info
-    sys.path = [ctx.path.find_dir('..')] + sys.path
 
-    # get list of available algorithms
+
+def buildRegFile(ctx):
+        # get list of available algorithms
     from utils.algorithms_info import get_all_algorithms, create_registration_cpp, create_version_h
 
     algos = get_all_algorithms(ctx.path.find_dir('algorithms').abspath(),
@@ -303,6 +305,23 @@ def build(ctx):
             del algos[key]
 
     create_registration_cpp(algos, algoreg_path, use_streaming=True)
+
+
+    return algos
+
+
+
+
+
+
+def build(ctx):
+    print('→ building from ' + ctx.path.abspath())
+    #print('  BUILD ENV:\n%s' % ctx.env)
+
+    # add essentia root folder to path to be able to import utils.algorithms_info
+    sys.path = [ctx.path.find_dir('..')] + sys.path
+
+    algos = buildRegFile(ctx);
 
     sources = ctx.path.ant_glob('essentia/**/*.cpp')
 
