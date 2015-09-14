@@ -30,7 +30,7 @@ namespace standard {
 
 const char* MultiPitchKlapuri::name = "MultiPitchKlapuri";
 const char* MultiPitchKlapuri::version = "1.0";
-const char* MultiPitchKlapuri::description = DOC("This algorithm performas a joint estimation of the fundamental frequencies in each frame corresponding to the pitch of the sources of polyphonic recording. Similar to [2], the estimation is based on harmonic summation. The implementation is based on the system described in [1] with a slight modifications: The caclculation of the pitch salience function is taken from [2]."
+const char* MultiPitchKlapuri::description = DOC("This algorithm estimates multiple pitch values corresponding to the melodic lines present in a polyphonic music signal (i.e. string quartet, piano). This implementation is based on the algorithm in [1]: In each frame, a set of possible fundamental frequency candidates is extracted based on the principle of harmonic summation. In an optimization stage, the number of harmonic sources (polyphony) is estimated and the final set of fundamental frequencies determined. In contrast to the pich salience function proposed in [2], this implementation uses the pitch salience function described in [1].
 "\n"
 "The output is a vector for each frame containing the estimated melody pitch values .\n"
 "\n"
@@ -205,13 +205,13 @@ void MultiPitchKlapuri::compute() {
     _pitchSalienceFunctionPeaks->compute();
       
     // no peaks in this frame
-      if (!frameSalienceBins.size()){
-          continue;
-      }
+    if (!frameSalienceBins.size()){
+        continue;
+    }
     ///////////////////////////////////////////////////////////////////////
     // Joint F0 estimation (pitch salience function peaks as candidates) //
     ///////////////////////////////////////////////////////////////////////
-      
+
     // compute the cent-scaled spectrum
     fill(centSpectrum.begin(), centSpectrum.end(), (Real) 0.0);
     for (int i=0; i<frameSpectrum.size(); i++){
@@ -360,7 +360,7 @@ void MultiPitchKlapuri::compute() {
      
       }
       pitch.push_back(localF0);
-      
+   
   }
     
     
