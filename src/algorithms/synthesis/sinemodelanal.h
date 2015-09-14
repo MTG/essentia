@@ -60,16 +60,16 @@ class SineModelAnal : public Algorithm {
 
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("maxPeaks", "the maximum number of returned peaks", "[1,inf)", 100);
+    declareParameter("maxPeaks", "the maximum number of returned peaks", "[1,inf)", 250);
     declareParameter("maxFrequency", "the maximum frequency of the range to evaluate [Hz]", "(0,inf)", 22050.0);
     declareParameter("minFrequency", "the minimum frequency of the range to evaluate [Hz]", "[0,inf)", 0.0);
-    declareParameter("magnitudeThreshold", "peaks below this given threshold are not outputted", "(-inf,inf)", -80 /*1.0e-4*/); // in linear -80dB
+    declareParameter("magnitudeThreshold", "peaks below this given threshold are not outputted", "(-inf,inf)", -80); // same default threshold as in Python implementation
     declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
     // sinusoidal tracking
     declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
     declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
-    declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.001);
+    declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
 
   }
 

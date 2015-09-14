@@ -103,7 +103,6 @@ void SineModelAnal::erase_vector_from_indexes(std::vector<Real> &v, const std::v
   return;
 }
 
-
 // ------------------
 
 
@@ -176,6 +175,7 @@ void SineModelAnal::compute() {
 
   // tracking
   sinusoidalTracking(peakMagnitude, peakFrequency, peakPhase, _lasttpeakFrequency, parameter("freqDevOffset").toReal(), parameter("freqDevSlope").toReal(), tpeakMagnitude, tpeakFrequency, tpeakPhase);
+
 
 
   // limit number of tracks to maxnSines

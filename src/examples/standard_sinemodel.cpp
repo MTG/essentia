@@ -33,6 +33,12 @@ for (int i=0; i < int(buffer.size()); ++i){
 }
 }
 
+
+void cleaningSineTracks(vector<Real> &freqs, const int minFrames){
+// TODO
+}
+
+
 int main(int argc, char* argv[]) {
 
   if (argc != 3) {
@@ -69,13 +75,20 @@ int main(int argc, char* argv[]) {
                                          //  "silentFrames", "noise",
                                            "startFromZero", false );
 
-  Algorithm* window       = factory.create("Windowing", "type", "hamming"); // hamming as in the Python examples
+  // parameters used in the SMS Python implementation
+  Algorithm* window       = factory.create("Windowing", "type", "hamming");
 
   Algorithm* fft     = factory.create("FFT",
                             "size", framesize);
 
+  // parameters used in the SMS Python implementation
   Algorithm* sinemodelanal     = factory.create("SineModelAnal",
-                            "sampleRate", sr);
+                            "sampleRate", sr,
+                            "maxnSines", 100,
+                            "minSineDur", 0.02,
+                            "freqDevOffset", 10,
+                            "freqDevSlope", 0.001
+                            );
 
   Algorithm* sinemodelsynth     = factory.create("SineModelSynth",
                             "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
@@ -143,6 +156,7 @@ int main(int argc, char* argv[]) {
   overlapAdd->input("signal").set(ifftframe);
   overlapAdd->output("signal").set(audioOutput);
 
+ofstream offs("sines.txt"); // debug
 
 ////////
 /////////// STARTING THE ALGORITHMS //////////////////
@@ -166,6 +180,12 @@ int main(int argc, char* argv[]) {
     // Sine model analysis (without tracking)
     sinemodelanal->compute();
 
+// debug
+    for (int i=0; i < (int) frequencies.size(); ++i){
+    offs << frequencies[i] << " " << magnitudes[i] << " ";
+    }
+    offs << endl;
+
     // Sine model synthesis
     sinemodelsynth->compute();
 
@@ -187,6 +207,7 @@ int main(int argc, char* argv[]) {
     audioWriter->input("audio").set(alladuio);
     audioWriter->compute();
 
+offs.close();// debug
 
   delete audioLoader;
   delete frameCutter;
