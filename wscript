@@ -44,6 +44,10 @@ def options(ctx):
                    dest='CROSS_COMPILE_MINGW32', default=False,
                    help='cross-compile for windows using mingw32 on linux')
 
+    ctx.add_option('--cross-compile-android', action='store_true',
+                   dest='CROSS_COMPILE_ANDROID', default=False,
+                   help='cross-compile for Android using toolchain')    
+
 
 def configure(ctx):
     print('→ configuring the project in ' + ctx.path.abspath())
@@ -59,7 +63,8 @@ def configure(ctx):
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
-    ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
+    if not ctx.options.CROSS_COMPILE_ANDROID:
+        ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
 
     # define this to be stricter, but sometimes some libraries can give problems...
     #ctx.env.CXXFLAGS += [ '-Werror' ]
@@ -148,6 +153,12 @@ def configure(ctx):
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/include", tdm_include)
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/lib", tdm_lib)
 
+    if ctx.options.CROSS_COMPILE_ANDROID:
+        ctx.find_program('arm-linux-androideabi-gcc', var='CC')
+        ctx.find_program('arm-linux-androideabi-g++', var='CXX')
+        ctx.find_program('arm-linux-androideabi-ar', var='AR')
+
+        print ("→ Cross-compiling for Android ARM")
 
     # use manually prebuilt dependencies in the case of static examples or mingw cross-build
     if ctx.options.CROSS_COMPILE_MINGW32:
