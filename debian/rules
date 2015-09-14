@@ -35,10 +35,10 @@ build-arch-stamp: configure-stamp
 	touch $@
 
 build-indep:
-#build-indep: build-indep-stamp
-#build-indep-stamp: configure-stamp
-#	$(WAF) doc
-#	touch $@
+build-indep: build-indep-stamp
+build-indep-stamp: configure-stamp
+	$(WAF) doc
+	touch $@
 
 clean: configure
 	dh_testdir
@@ -84,7 +84,7 @@ binary-common:
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs Changelog
-	#dh_installdocs
+	dh_installdocs
 	dh_installexamples
 	dh_installman
 	dh_link
