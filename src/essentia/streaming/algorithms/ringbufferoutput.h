@@ -20,7 +20,7 @@
 #ifndef ESSENTIA_STREAMING_RINGBUFFEROUTPUT_H
 #define ESSENTIA_STREAMING_RINGBUFFEROUTPUT_H
 
-#include "streamingalgorithm.h"
+#include "../streamingalgorithm.h"
 
 namespace essentia {
 namespace streaming {
