@@ -34,8 +34,44 @@ for (int i=0; i < int(buffer.size()); ++i){
 }
 
 
-void cleaningSineTracks(vector<Real> &freqs, const int minFrames){
-// TODO
+void cleaningSineTracks(vector< vector<Real> >&freqsTotal, const int minFrames){
+
+  int nFrames = freqsTotal.size();
+  int begTrack = 0;
+  if (nFrames > 0 )
+  {
+    int f = 0;
+    int nTracks = freqsTotal[0].size(); // we assume all frames have a fix number of tracks
+    for (int t = 0; t < nTracks; ++t)
+    {
+    cout << "todo: check munber of tracks in the first frames" << endl;
+    cout << "track " << t << "nframes" << nFrames << " " << endl;
+      f = 0;
+      begTrack = f;
+
+      while (f < nFrames-1)
+      {
+        // check if f is begin of track
+        if (freqsTotal[f][t] <= 0 && freqsTotal[f+1][t] > 0 )
+        {
+          begTrack = f+1;
+        }
+
+        // clean track if shorter than min duration
+        if ((freqsTotal[f][t] > 0 && freqsTotal[f+1][t] <= 0 ) && ( (f - begTrack) < minFrames))
+        {
+          for (int i= begTrack; i < f; i++)
+          {
+            freqsTotal[f][t] = 0;
+          }
+        }
+
+        f++;
+      }
+    }
+
+  }
+
 }
 
 
@@ -61,6 +97,7 @@ int main(int argc, char* argv[]) {
   int framesize = 2048;
   int hopsize = 512;
   Real sr = 44100;
+  Real minSineDur = 0.02;
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
@@ -85,7 +122,7 @@ int main(int argc, char* argv[]) {
   Algorithm* sinemodelanal     = factory.create("SineModelAnal",
                             "sampleRate", sr,
                             "maxnSines", 100,
-                            "minSineDur", 0.02,
+                            "minSineDur", minSineDur,
                             "freqDevOffset", 10,
                             "freqDevSlope", 0.001
                             );
@@ -121,10 +158,12 @@ int main(int argc, char* argv[]) {
   vector<Real> alladuio; // concatenated audio file output
  // Real confidence;
 
+  vector< vector<Real> > frequenciesAllFrames;
+  vector< vector<Real> > magnitudesAllFrames;
+  vector< vector<Real> > phasesAllFrames;
+
   // analysis
   audioLoader->output("audio").set(audio);
-
-
 
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
@@ -163,6 +202,11 @@ ofstream offs("sines.txt"); // debug
   cout << "-------- start processing " << audioFilename << " --------" << endl;
 
   audioLoader->compute();
+
+
+//-----------------------------------------------
+// analysis loop
+
   int counter = 0;
   while (true) {
 
@@ -180,11 +224,53 @@ ofstream offs("sines.txt"); // debug
     // Sine model analysis (without tracking)
     sinemodelanal->compute();
 
+    // append frequencies of the curent frame for later cleaningTracks
+    frequenciesAllFrames.push_back(frequencies);
+    magnitudesAllFrames.push_back(magnitudes);
+    phasesAllFrames.push_back(phases);
+
 // debug
-    for (int i=0; i < (int) frequencies.size(); ++i){
-    offs << frequencies[i] << " " << magnitudes[i] << " ";
-    }
-    offs << endl;
+  for (int i=0; i < (int) frequencies.size(); ++i){
+  offs << frequencies[i] << " " << magnitudes[i] << " ";
+  }
+  offs << endl;
+
+//    // Sine model synthesis
+//    sinemodelsynth->compute();
+//
+//    ifft->compute();
+//    overlapAdd->compute();
+//
+//    // skip first half window
+//    if (counter >= floor(framesize / (hopsize * 2.f))){
+//        alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
+//    }
+
+    counter++;
+  }
+
+  offs.close();// debug
+
+
+  // clean sine tracks
+  int minFrames = int( minSineDur * sr / Real(hopsize));
+  cleaningSineTracks(frequenciesAllFrames, minFrames);
+
+return 0; // debug
+
+//-----------------------------------------------
+// synthesis loop
+  counter = 0;
+  while (true) {
+
+
+    // get sine tracks values for the the curent frame, and remove from list
+    frequencies = *(frequenciesAllFrames.begin());
+    magnitudes = *(magnitudesAllFrames.begin());
+    phases = *(phasesAllFrames.begin());
+    frequenciesAllFrames.erase (frequenciesAllFrames.begin());
+    magnitudesAllFrames.erase (magnitudesAllFrames.begin());
+    phasesAllFrames.erase (phasesAllFrames.begin());
 
     // Sine model synthesis
     sinemodelsynth->compute();
@@ -200,6 +286,11 @@ ofstream offs("sines.txt"); // debug
     counter++;
   }
 
+
+
+
+
+
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
 
@@ -207,7 +298,7 @@ ofstream offs("sines.txt"); // debug
     audioWriter->input("audio").set(alladuio);
     audioWriter->compute();
 
-offs.close();// debug
+
 
   delete audioLoader;
   delete frameCutter;
