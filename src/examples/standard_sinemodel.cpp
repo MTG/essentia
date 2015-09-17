@@ -44,8 +44,7 @@ void cleaningSineTracks(vector< vector<Real> >&freqsTotal, const int minFrames){
     int nTracks = freqsTotal[0].size(); // we assume all frames have a fix number of tracks
     for (int t = 0; t < nTracks; ++t)
     {
-    cout << "todo: check munber of tracks in the first frames" << endl;
-    cout << "track " << t << "nframes" << nFrames << " " << endl;
+
       f = 0;
       begTrack = f;
 
@@ -195,7 +194,6 @@ int main(int argc, char* argv[]) {
   overlapAdd->input("signal").set(ifftframe);
   overlapAdd->output("signal").set(audioOutput);
 
-ofstream offs("sines.txt"); // debug
 
 ////////
 /////////// STARTING THE ALGORITHMS //////////////////
@@ -206,7 +204,7 @@ ofstream offs("sines.txt"); // debug
 
 //-----------------------------------------------
 // analysis loop
-
+  cout << "-------- analyzing to sine model parameters" " ---------" << endl;
   int counter = 0;
   while (true) {
 
@@ -221,7 +219,7 @@ ofstream offs("sines.txt"); // debug
     window->compute();
     fft->compute();
 
-    // Sine model analysis (without tracking)
+    // Sine model analysis
     sinemodelanal->compute();
 
     // append frequencies of the curent frame for later cleaningTracks
@@ -229,48 +227,38 @@ ofstream offs("sines.txt"); // debug
     magnitudesAllFrames.push_back(magnitudes);
     phasesAllFrames.push_back(phases);
 
-// debug
-  for (int i=0; i < (int) frequencies.size(); ++i){
-  offs << frequencies[i] << " " << magnitudes[i] << " ";
-  }
-  offs << endl;
-
-//    // Sine model synthesis
-//    sinemodelsynth->compute();
-//
-//    ifft->compute();
-//    overlapAdd->compute();
-//
-//    // skip first half window
-//    if (counter >= floor(framesize / (hopsize * 2.f))){
-//        alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
-//    }
 
     counter++;
   }
-
-  offs.close();// debug
 
 
   // clean sine tracks
   int minFrames = int( minSineDur * sr / Real(hopsize));
   cleaningSineTracks(frequenciesAllFrames, minFrames);
 
-return 0; // debug
 
 //-----------------------------------------------
 // synthesis loop
+  cout << "-------- synthesizing from sine model parameters" " ---------" << endl;
+  int nFrames = counter;
   counter = 0;
+
   while (true) {
 
-
+    // all frames processed
+    if (counter >= nFrames) {
+      break;
+    }
     // get sine tracks values for the the curent frame, and remove from list
-    frequencies = *(frequenciesAllFrames.begin());
-    magnitudes = *(magnitudesAllFrames.begin());
-    phases = *(phasesAllFrames.begin());
-    frequenciesAllFrames.erase (frequenciesAllFrames.begin());
-    magnitudesAllFrames.erase (magnitudesAllFrames.begin());
-    phasesAllFrames.erase (phasesAllFrames.begin());
+    if (frequenciesAllFrames.size() > 0)
+    {
+      frequencies = frequenciesAllFrames[0];
+      magnitudes = magnitudesAllFrames[0];
+      phases = phasesAllFrames[0];
+      frequenciesAllFrames.erase (frequenciesAllFrames.begin());
+      magnitudesAllFrames.erase (magnitudesAllFrames.begin());
+      phasesAllFrames.erase (phasesAllFrames.begin());
+    }
 
     // Sine model synthesis
     sinemodelsynth->compute();
@@ -285,8 +273,6 @@ return 0; // debug
 
     counter++;
   }
-
-
 
 
 

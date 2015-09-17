@@ -180,9 +180,10 @@ void SineModelAnal::compute() {
 
   // limit number of tracks to maxnSines
   int maxSines = int ( parameter("maxnSines").toReal() );
-  tpeakFrequency.resize(std::min(maxSines, int (tpeakFrequency.size())));
-  tpeakMagnitude.resize(std::min(maxSines, int (tpeakMagnitude.size())));
-  tpeakPhase.resize(std::min(maxSines, int(tpeakPhase.size())));
+
+  tpeakFrequency.resize(maxSines);
+  tpeakMagnitude.resize(maxSines);
+  tpeakPhase.resize(maxSines);
 
   // keep last frequency peaks for tracking
   _lasttpeakFrequency = tpeakFrequency;
@@ -354,11 +355,11 @@ void SineModelAnal::phaseInterpolation(std::vector<Real> fftphase, std::vector<R
     a = pos - idx; // interpolate factor
     // phase diff smaller than PI to do intperolation and avoid jumps
     if (a < 0 && idx > 0){
-      peakPhases[i] =  (std::abs(fftphase[idx-1] - fftphase[idx]) > Real(M_PI)) ? a * fftphase[idx-1] + (1.0 -a) * fftphase[idx] : fftphase[idx];
+      peakPhases[i] =  (std::abs(fftphase[idx-1] - fftphase[idx]) < Real(M_PI)) ? a * fftphase[idx-1] + (1.0 -a) * fftphase[idx] : fftphase[idx];
     }
     else {
       if (idx < fftSize-1 ){
-        peakPhases[i] = (std::abs(fftphase[idx+1] - fftphase[idx]) > Real(M_PI)) ? a * fftphase[idx+1] + (1.0 -a) * fftphase[idx]: fftphase[idx];
+        peakPhases[i] = (std::abs(fftphase[idx+1] - fftphase[idx]) < Real(M_PI)) ? a * fftphase[idx+1] + (1.0 -a) * fftphase[idx]: fftphase[idx];
       }
       else {
        peakPhases[i] = fftphase[idx];
