@@ -180,9 +180,10 @@ void SineModelAnal::compute() {
 
   // limit number of tracks to maxnSines
   int maxSines = int ( parameter("maxnSines").toReal() );
-  tpeakFrequency.resize(std::min(maxSines, int (tpeakFrequency.size())));
-  tpeakMagnitude.resize(std::min(maxSines, int (tpeakMagnitude.size())));
-  tpeakPhase.resize(std::min(maxSines, int(tpeakPhase.size())));
+
+  tpeakFrequency.resize(maxSines);
+  tpeakMagnitude.resize(maxSines);
+  tpeakPhase.resize(maxSines);
 
   // keep last frequency peaks for tracking
   _lasttpeakFrequency = tpeakFrequency;
