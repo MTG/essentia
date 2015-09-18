@@ -272,7 +272,6 @@ def buildRegFile(ctx):
         print('Building all the algorithms')
 
     if ctx.env['ALGOIGNORE']:
-        ctx.env['ALGOIGNORE'] += ['MultiPitchKlapuri'] #TODO: a temp hack to remove MultiPitchKlapuri, which contains a segfault
         ctx.env['ALGOIGNORE'] = list(set(ctx.env['ALGOIGNORE']))
 
         print('Ignoring the following algorithms: %s' % ', '.join(ctx.env['ALGOIGNORE']))
