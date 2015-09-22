@@ -33,6 +33,7 @@ class CentralMoments : public Algorithm {
 
  protected:
   Real _range;
+  std::string _mode;
 
  public:
   CentralMoments() {
@@ -41,7 +42,8 @@ class CentralMoments : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("range", "the range of the input array, used for normalizing the results", "(0,inf)", 1.0);
+    declareParameter("mode", "compute central moments considering array values as a probability density function over array index or as sample points of a distribution", "{pdf,sample}", "pdf");
+    declareParameter("range", "the range of the input array, used for normalizing the results in the 'pdf' mode", "(0,inf)", 1.0);
   }
 
   void compute();

@@ -25,7 +25,7 @@ class TestCentralMoments(TestCase):
 
     def testZero(self):
         n = 1000
-        cm = CentralMoments(range = n-1)
+        cm = CentralMoments(mode = 'pdf', range = n-1)
         self.assert_(all(cm(zeros(n)) == 0))
 
     def testEmptyOrOne(self):
@@ -36,11 +36,20 @@ class TestCentralMoments(TestCase):
         inputArray = readVector(join(filedir(), 'stats/input.txt'))
         distShape = readVector(join(filedir(), 'stats/distributionshape.txt'))
 
-        moments = CentralMoments(range = len(inputArray)-1)(inputArray)
+        moments = CentralMoments(mode = 'pdf', 
+                                 range = len(inputArray)-1)(inputArray)
 
         self.assertAlmostEqual(moments[2], distShape[5])
         self.assertAlmostEqual(moments[3], distShape[6])
         self.assertAlmostEqual(moments[4], distShape[7])
+
+        # test the 'sample' mode
+        moments = CentralMoments(mode='sample')([0., 1, 1, 2, 3])
+        distShape = [1.0, 0.0, 1.04, 0.28800000000000037, 2.1152000000000002]
+
+        self.assertAlmostEqual(moments[2], distShape[2])
+        self.assertAlmostEqual(moments[3], distShape[3])
+        self.assertAlmostEqual(moments[4], distShape[4])
 
 
 suite = allTests(TestCentralMoments)
