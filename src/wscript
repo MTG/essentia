@@ -151,25 +151,27 @@ def configure(ctx):
     def has(name):
         return ('HAVE_%s' % name.upper()) in ctx.env['define_key']
 
-    # We need an FFT/IFFT
+    # Select FFT algorithms
     algos = ['FFT']
-
     if 'ACCELERATE' in ctx.env.FFT:
         print('- using Accelerate Framework for FFT\n')
         ctx.env.LINKFLAGS += [ '-framework', 'Accelerate']
+        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW']
     elif 'KISS' in ctx.env.FFT:
-        print('- using KISS for FFT\n')        
+        print('- using KISS for FFT\n')  
+        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTW', 'IFFTW']      
     else:
         print('- using FFTW for FFT\n') 
         if has('fftw'):
-            print(' - fftw detected!')
+            print('- fftw detected!')
             ctx.env.USES += ' FFTW'
+            ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTK', 'IFFTK']
         else:
             print(' - fftw seems to be missing.')
             print('   The following algorithms will be ignored: %s\n' % algos)
-            ctx.env.ALGOIGNORE += algos
+            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW']
             print('   IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
-            print('                   We are about to implement a generic FFT that does not rely exclusively on fftw.\n')
+            print('                   To avoid these errors, use alternative FFT libraries (see the --fft flag).\n')
 
     # MonoLoader, EqloudLoader, and EasyLoader are dependent on Resample
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
@@ -242,7 +244,9 @@ def configure(ctx):
     if lel:
         print('- Compiling %s example%s' % (lel, "" if lel == 1 else "s"))
         print('  %s' % ", ".join(ctx.env.EXAMPLE_LIST))
-
+   
+    buildRegFile(ctx);
+    
 
     print('=======================================================================================')
 
@@ -253,13 +257,8 @@ class BuildAlgoReg(Task):
         return self.exec_command('cp %s %s' % (self.inputs[0].abspath(),
                                                self.outputs[0].abspath()))
 
-def build(ctx):
-    print('→ building from ' + ctx.path.abspath())
-    #print('  BUILD ENV:\n%s' % ctx.env)
 
-    # add essentia root folder to path to be able to import utils.algorithms_info
-    sys.path = [ctx.path.find_dir('..')] + sys.path
-
+def buildRegFile(ctx):
     # get list of available algorithms
     from utils.algorithms_info import get_all_algorithms, create_registration_cpp, create_version_h
 
@@ -273,7 +272,6 @@ def build(ctx):
         print('Building all the algorithms')
 
     if ctx.env['ALGOIGNORE']:
-        ctx.env['ALGOIGNORE'] += ['MultiPitchKlapuri'] #TODO: a temp hack to remove MultiPitchKlapuri, which contains a segfault
         ctx.env['ALGOIGNORE'] = list(set(ctx.env['ALGOIGNORE']))
 
         print('Ignoring the following algorithms: %s' % ', '.join(ctx.env['ALGOIGNORE']))
@@ -285,24 +283,20 @@ def build(ctx):
 
     # create algorithms registration file
     algoreg_path = 'src/algorithms/essentia_algorithms_reg.cpp'
-
-    # Here we remove the FFTs we don't want from algos 
-    # before creating the algoreg cpp file
-
-    #Remove the unnecessary FFT algorithms 
-    fftsToRemove = []
-    if 'ACCELERATE' in ctx.env.FFT:
-        fftsToRemove = ['FFTK', 'IFFTK', 'FFTW', 'IFFTW']
-    elif 'KISS' in ctx.env.FFT:
-        fftsToRemove = ['FFTA', 'IFFTA', 'FFTW', 'IFFTW']
-    else:
-        fftsToRemove = ['FFTA', 'IFFTA', 'FFTK', 'IFFTK']
-        
-    for key in fftsToRemove:        
-        if key in algos:            
-            del algos[key]
-
     create_registration_cpp(algos, algoreg_path, use_streaming=True)
+
+    print('Created algorithms registration file')
+    return algos
+
+
+def build(ctx):
+    print('→ building from ' + ctx.path.abspath())
+    #print('  BUILD ENV:\n%s' % ctx.env)
+
+    # add essentia root folder to path to be able to import utils.algorithms_info
+    sys.path = [ctx.path.find_dir('..')] + sys.path
+
+    algos = buildRegFile(ctx);
 
     sources = ctx.path.ant_glob('essentia/**/*.cpp')
 
