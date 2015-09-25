@@ -59,7 +59,9 @@ def configure(ctx):
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
-    ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
+    is_emscripten = 'EMSCRIPTEN' in os.environ
+    if not is_emscripten:
+        ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
 
     # define this to be stricter, but sometimes some libraries can give problems...
     #ctx.env.CXXFLAGS += [ '-Werror' ]
@@ -85,7 +87,9 @@ def configure(ctx):
     # global defines
     ctx.env.DEFINES = []
 
-    if sys.platform == 'darwin':
+    if is_emscripten:
+        ctx.env.CXXFLAGS += [ '-I' + os.path.join(os.environ['EMSCRIPTEN'], 'system', 'lib', 'libcxxabi', 'include') ]
+    elif sys.platform == 'darwin':
         # clang fails on 10.7 using <atomic>, because libc++ is not new enough
         #ctx.env.CC = 'clang'
         #ctx.env.CXX = 'clang++'
