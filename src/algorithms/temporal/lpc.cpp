@@ -39,12 +39,12 @@ const char* LPC::description = DOC("This algorithm computes the Linear Predictiv
 
 
 void LPC::configure() {
-  _P = parameter("order").toInt();
+  _p = parameter("order").toInt();
 
   delete _correlation;
   if (parameter("type").toString() == "warped") {
     _correlation = AlgorithmFactory::create("WarpedAutoCorrelation",
-                                            "maxLag", _P+1);
+                                            "maxLag", _p+1);
     _correlation->output("warpedAutoCorrelation").set(_r);
   }
   else {
@@ -59,30 +59,30 @@ void LPC::compute() {
   vector<Real>& lpc = _lpc.get();
   vector<Real>& reflection = _reflection.get();
 
-  if (_P > (int)signal.size()) {
+  if (_p > (int)signal.size()) {
     throw EssentiaException("LPC: you can't compute more coefficients than the size of your input");
   }
 
   if (isSilent(signal)) {
-    lpc = vector<Real>(_P+1, 0.0);
-    reflection = vector<Real>(_P, 0.0);
+    lpc = vector<Real>(_p+1, 0.0);
+    reflection = vector<Real>(_p, 0.0);
     return;
   }
 
-  lpc.resize(_P+1);
-  reflection.resize(_P);
+  lpc.resize(_p+1);
+  reflection.resize(_p);
 
   _correlation->input("array").set(signal);
   _correlation->compute();
 
   // Levinson-Durbin algorithm
-  vector<Real> temp(_P);
+  vector<Real> temp(_p);
 
   Real k;
   Real E = _r[0];
   lpc[0] = 1;
 
-  for (int i=1; i<(_P+1); i++) {
+  for (int i=1; i<(_p+1); i++) {
     k = _r[i];
 
     for (int j=1; j<i; j++) {
