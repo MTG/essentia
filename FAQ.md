@@ -88,6 +88,18 @@ Build Essentia
 ./waf
 ```
 
+Cross-compiling for Android
+---------------------------
+
+A lightweight version of Essentia can be compiled using the ```--cross-compile-android``` flag. It requires reducing the dependencies to a bare minimum using KissFFT library for FFT. Specify the installation prefix with ```--prefix``` flag. Update the ```PATH``` variable to point to where you have your Android Standalone Toolchain.
+
+```
+export PATH=~/Dev/android/toolchain/bin:$PATH;
+./waf configure --cross-compile-android --lightweight= --fft=KISS --prefix=/Users/carthach/Dev/android/modules/essentia
+./waf
+./waf install
+```
+
 Running tests
 -------------
 In the case you want to assure correct working of Essentia, do the tests.
