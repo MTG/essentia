@@ -118,18 +118,18 @@ Finally, we do the same with Essentia. We will build it with only FFTW3 support,
 no other 3rd party libraries.
 
 ```sh
+# If you downloaded the SDK manually
 . /path/to/emsdk_env.sh
 
 tar xf fftw-3.3.4.tar.gz
 cd fftw-3.3.4
-emconfigure ./configure --prefix=$EMSCRIPTEN/system/local/ CFLAGS="-Oz" \
-	--disable-fortran --enable-single
+# Spawn a subshell to be able to use $EMSCRIPTEN in the command's args
+emconfigure sh -c './configure --prefix=$EMSCRIPTEN/system/local/ CFLAGS="-Oz" --disable-fortran --enable-single'
 emmake make
 emmake make install
 
 cd essentia
-emconfigure ./waf configure --prefix=$EMSCRIPTEN/system/local/ \
-	--lightweight=fftw --emscripten
+emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=fftw --emscripten'
 emmake ./waf build
 emmake ./waf install
 ```
@@ -141,6 +141,8 @@ Use the emcc compiler, preferably the -Oz option for size optimization, and
 include the static libraries for Essentia and FFTW as you would with source
 files. An example would be:
 ```sh
+# Make sure your script can access the variable $EMSCRIPTEN
+# (available to child processes of emconfigure and emmake)
 LIB_DIR=$EMSCRIPTEN/system/local/lib
 emcc -Oz -c application.cpp application.bc
 emcc -Oz application.bc ${LIB_DIR}/libessentia.a ${LIB_DIR}/libfftw3f.a -o out.js
