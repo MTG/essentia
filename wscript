@@ -60,15 +60,13 @@ def configure(ctx):
     # compiler flags
     ctx.env.CXXFLAGS = [ '-pipe', '-Wall' ]
 
+
+    is_emscripten = 'EMSCRIPTEN' in os.environ
+
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
-<<<<<<< HEAD
-    if not ctx.options.CROSS_COMPILE_ANDROID:
-=======
-    is_emscripten = 'EMSCRIPTEN' in os.environ
-    if not is_emscripten:
->>>>>>> upstream/master
+    if not is_emscripten and not ctx.options.CROSS_COMPILE_ANDROID:
         ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
 
     # define this to be stricter, but sometimes some libraries can give problems...
