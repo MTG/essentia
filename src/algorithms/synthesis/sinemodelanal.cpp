@@ -355,11 +355,11 @@ void SineModelAnal::phaseInterpolation(std::vector<Real> fftphase, std::vector<R
     a = pos - idx; // interpolate factor
     // phase diff smaller than PI to do intperolation and avoid jumps
     if (a < 0 && idx > 0){
-      peakPhases[i] =  (std::abs(fftphase[idx-1] - fftphase[idx]) > Real(M_PI)) ? a * fftphase[idx-1] + (1.0 -a) * fftphase[idx] : fftphase[idx];
+      peakPhases[i] =  (std::abs(fftphase[idx-1] - fftphase[idx]) < Real(M_PI)) ? a * fftphase[idx-1] + (1.0 -a) * fftphase[idx] : fftphase[idx];
     }
     else {
       if (idx < fftSize-1 ){
-        peakPhases[i] = (std::abs(fftphase[idx+1] - fftphase[idx]) > Real(M_PI)) ? a * fftphase[idx+1] + (1.0 -a) * fftphase[idx]: fftphase[idx];
+        peakPhases[i] = (std::abs(fftphase[idx+1] - fftphase[idx]) < Real(M_PI)) ? a * fftphase[idx+1] + (1.0 -a) * fftphase[idx]: fftphase[idx];
       }
       else {
        peakPhases[i] = fftphase[idx];

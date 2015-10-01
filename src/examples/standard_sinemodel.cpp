@@ -195,7 +195,6 @@ int main(int argc, char* argv[]) {
   overlapAdd->output("signal").set(audioOutput);
 
 
-
 ////////
 /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << audioFilename << " --------" << endl;
@@ -227,6 +226,7 @@ int main(int argc, char* argv[]) {
     frequenciesAllFrames.push_back(frequencies);
     magnitudesAllFrames.push_back(magnitudes);
     phasesAllFrames.push_back(phases);
+
 
     counter++;
   }
