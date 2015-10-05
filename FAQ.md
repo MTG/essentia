@@ -176,7 +176,7 @@ Note, that you cannot be sure this list of dependencies is 100% correct as the s
 
 ## How many algorithms are in Essentia?
 
-The amount of algorithms counting streaming and standard mode separatly:
+The amount of algorithms counting streaming and standard mode separately:
 ```
 python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
 cat /tmp/all.txt | grep -- "---------- " | wc -l
@@ -203,7 +203,7 @@ In order to run classification in Essentia you need to prepare a classifier mode
 
 Note that using a specific classifier model implies that you are expected to give a pool with the same descriptor layout as the one used in training as an input to GaiaTransform Algorithm. 
 
-Builing lightweight Essentia with reduced dependencies 
+Building lightweight Essentia with reduced dependencies 
 -----------------------------------------------------
 Since version 2.1, build scripts can be configured to ignore 3rdparty dependencies required by Essentia in order to create a striped-down version of the library.  Use  ```./waf configure``` command with the ```--lightweight``` flag to provide the list of 3rdparty dependencies to be included. For example, the command below will configure to build Essentia avoiding all dependencies except fftw:
 ```
