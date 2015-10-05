@@ -134,6 +134,19 @@ Running the python script ```src/examples/python/show_algo_dependencies.py``` wi
 
 Note, that you cannot be sure this list of dependencies is 100% correct as the script simply instantiates each algorithm to test for its dependencies, but does not run the ```compute``` stage. It is up to developers conscience to keep instantiations in a correct place, and if an Algorithm is being created on the ```compute``` stage, it will be unnoticed.
 
+## How many algorithms are in Essentia?
+
+The amount of algorithms counting streaming and standard mode separatly:
+```
+python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
+cat /tmp/all.txt | grep -- "---------- " | wc -l
+```
+
+The amount of algorithms counting both modes as one algorithm:
+```
+python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
+cat /tmp/all.txt | grep -- "---------- " | cut -c 12- | sed s/"streaming : "// | sed s/"standard : "// | sed s/" ----------"// | sort -u | wc -l
+```
 
 Training and running classifier models in Gaia
 ----------------------------------------------
