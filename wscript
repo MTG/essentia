@@ -48,6 +48,10 @@ def options(ctx):
                    dest='CROSS_COMPILE_ANDROID', default=False,
                    help='cross-compile for Android using toolchain')    
 
+    ctx.add_option('--emscripten', action='store_true',
+                   dest='EMSCRIPTEN', default=False,
+                   help='compile Essentia to Javascript with Emscripten')
+
 
 def configure(ctx):
     print('→ configuring the project in ' + ctx.path.abspath())
@@ -60,13 +64,10 @@ def configure(ctx):
     # compiler flags
     ctx.env.CXXFLAGS = [ '-pipe', '-Wall' ]
 
-
-    is_emscripten = 'EMSCRIPTEN' in os.environ
-
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
-    if not is_emscripten and not ctx.options.CROSS_COMPILE_ANDROID:
+    if not ctx.options.EMSCRIPTEN and not ctx.options.CROSS_COMPILE_ANDROID:
         ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
 
     # define this to be stricter, but sometimes some libraries can give problems...
@@ -93,8 +94,9 @@ def configure(ctx):
     # global defines
     ctx.env.DEFINES = []
 
-    if is_emscripten:
+    if ctx.options.EMSCRIPTEN:
         ctx.env.CXXFLAGS += [ '-I' + os.path.join(os.environ['EMSCRIPTEN'], 'system', 'lib', 'libcxxabi', 'include') ]
+	ctx.env.CXXFLAGS += ['-Oz']
     elif sys.platform == 'darwin':
         # clang fails on 10.7 using <atomic>, because libc++ is not new enough
         #ctx.env.CC = 'clang'

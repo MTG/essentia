@@ -100,6 +100,54 @@ export PATH=~/Dev/android/toolchain/bin:$PATH;
 ./waf install
 ```
 
+Compiling Essentia to Javascript with Emscripten
+------------------------------------------------
+We will compile Essentia with FFTW3 support only. The other libraries Essentia
+can depend on have not been tested, but should work.
+
+Before getting started, install Emscripten following the
+[instructions](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html)
+in their website. Make sure you activate the Emscripten environment by sourcing
+`emsdk_env.sh`.
+
+Then, we get the latest FFTW3 in source mode. We decompress it, go to its
+directory, and prepare it for compilation and installation as an Emscripten
+system library.
+
+Finally, we do the same with Essentia. We will build it with only FFTW3 support,
+no other 3rd party libraries.
+
+```sh
+# If you downloaded the SDK manually
+. /path/to/emsdk_env.sh
+
+tar xf fftw-3.3.4.tar.gz
+cd fftw-3.3.4
+# Spawn a subshell to be able to use $EMSCRIPTEN in the command's args
+emconfigure sh -c './configure --prefix=$EMSCRIPTEN/system/local/ CFLAGS="-Oz" --disable-fortran --enable-single'
+emmake make
+emmake make install
+
+cd essentia
+emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=fftw --emscripten'
+emmake ./waf build
+emmake ./waf install
+```
+
+Essentia is now built. If you want to build applications with Essentia and
+Emscripten, be sure to read their
+[tutorial](https://kripken.github.io/emscripten-site/docs/getting_started/Tutorial.html).
+Use the emcc compiler, preferably the -Oz option for size optimization, and
+include the static libraries for Essentia and FFTW as you would with source
+files. An example would be:
+```sh
+# Make sure your script can access the variable $EMSCRIPTEN
+# (available to child processes of emconfigure and emmake)
+LIB_DIR=$EMSCRIPTEN/system/local/lib
+emcc -Oz -c application.cpp application.bc
+emcc -Oz application.bc ${LIB_DIR}/libessentia.a ${LIB_DIR}/libfftw3f.a -o out.js
+```
+
 Running tests
 -------------
 In the case you want to assure correct working of Essentia, do the tests.
@@ -208,6 +256,7 @@ You can also use Essentia's standard mode for real-time computations.
 
 Not all algorithms available in the library are suited for real-time analysis due to their computational complexity. Some complex algorithms, such as BeatTrackerDegara, BeatTrackerMultiFeatures, and PredominantMelody, require large segments of audio in order to function properly.
 
+Note that you do not need any copying algorithm to multiplex an output to several inputs. You can just assign it and it will work.
 
 
 
