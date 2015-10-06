@@ -17,42 +17,63 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "pitchfiltermakam.h"
+#include "pitchfilter.h"
 #include "essentiamath.h"
 
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* PitchFilterMakam::name = "PitchFilterMakam";
-const char* PitchFilterMakam::version = "1.0";
-const char* PitchFilterMakam::description = DOC("This algorithm corrects the fundamental frequency estimations for a sequence of frames. The original estimations can be computed with the PitchYinFFT algorithm.\n"
+const char* PitchFilter::name = "PitchFilter";
+const char* PitchFilter::version = "1.0";
+const char* PitchFilter::description = DOC("This algorithm corrects the fundamental frequency"
+" estimations for a sequence of frames given pitch values together with their confidence values"
+" (e.g., by removing non-confident parts and spurious jumps in pitch, and applying octave corrections).\n"
 "\n"
-"The algorithm is based on the code of Makam Toolbox 1.0.\n"
-"ftp://ftp.iyte.edu.tr/share/ktm-nota/TuningMeasurement.html\n"
+"They can be computed with the PitchYinFFT, PitchYin, or PredominantPitchMelodia algorithms.\n"
+"If you use PredominantPitchMelodia with guessUnvoiced=True, set useAbsolutePitchConfidence=True.\n"
+"\n"
+"The algorithm can be used for any type of monophonic and heterophonic music.\n"
+"\n"
+"The original algorithm [1] was proposed to be used for Makam music and employs signal"
+"\"energy\" of frames instead of pitch confidence.\n"
 "\n"
 "References:\n"
 "  [1] B. Bozkurt, \"An Automatic Pitch Analysis Method for Turkish Maqam\n"
 "  Music,\" Journal of New Music Research. 37(1), 1-13.\n");
 
-void PitchFilterMakam::configure() {
+
+void PitchFilter::configure() {
   _minChunkSize = parameter("minChunkSize").toInt();
+  _useAbsolutePitchConfidence = parameter("useAbsolutePitchConfidence").toBool();
+  _confidenceThreshold = parameter("confidenceThreshold").toInt();
 }
 
-void PitchFilterMakam::compute() {
+void PitchFilter::compute() {
   const vector<Real>& pitch = _pitch.get();
-  const vector<Real>& energy = _energy.get();
+  const vector<Real>& pitchConfidence = _pitchConfidence.get();
+  std::vector<Real> modifiedPitchConfidence(pitchConfidence.size());
 
-  // sanity checks, pitch and energy values should be non-negative
-  if (pitch.size() != energy.size())
-      throw EssentiaException("PitchFilterMakam: Pitch and energy vectors should be of the same size.");
-  if (pitch.size() == 0)
-      throw EssentiaException("PitchFilterMakam: Pitch and energy vectors are empty.");
+  // sanity checks, pitch and pitchConfidence values should be non-negative
+  if (pitch.size() != pitchConfidence.size()) {
+    throw EssentiaException("PitchFilter: Pitch and pitchConfidence vectors should be of the same size.");
+  }
+  if (pitch.size() == 0) {
+    throw EssentiaException("PitchFilter: Pitch and pitchConfidence vectors are empty.");
+  }
   for (size_t i=0; i<pitch.size(); i++) {
-    if (pitch[i] < 0)
-      throw EssentiaException("PitchFilterMakam: Pitch values should be non-negative.");
-    if (energy[i] < 0)
-      throw EssentiaException("PitchFilterMakam: Energy values should be non-negative.");
+    if (pitch[i] < 0) {
+      throw EssentiaException("PitchFilter: Pitch values should be non-negative.");
+    }
+    Real con = pitchConfidence[i];
+    if (con < 0) {
+      if (_useAbsolutePitchConfidence) {
+        con = -con;
+      } else {
+        throw EssentiaException("PitchFilter: Pitch confidence values should be non-negative.");
+      }
+    }
+    modifiedPitchConfidence[i] = con;
   }
 
   vector <Real>& pitchFiltered = _pitchFiltered.get();
@@ -69,19 +90,17 @@ void PitchFilterMakam::compute() {
 
   filterNoiseRegions(pitchFiltered);
 
-  if (_octaveFilter) {
-    // correct octave errors of pitch curve in both direction (forwards, backwards)
-    correctOctaveErrors(pitchFiltered);
-    reverse(pitchFiltered.begin(), pitchFiltered.end());
-    correctOctaveErrors(pitchFiltered);
-    reverse(pitchFiltered.begin(), pitchFiltered.end());
-  }
+  // correct octave errors of pitch curve in both direction (forwards, backwards)
+  correctOctaveErrors(pitchFiltered);
+  reverse(pitchFiltered.begin(), pitchFiltered.end());
+  correctOctaveErrors(pitchFiltered);
+  reverse(pitchFiltered.begin(), pitchFiltered.end());
   correctOctaveErrorsByChunks(pitchFiltered);
 
-  filterChunksByEnergy(pitchFiltered, energy);
+  filterChunksByPitchConfidence(pitchFiltered, modifiedPitchConfidence);
 }
 
-bool PitchFilterMakam::areClose(Real num1, Real num2) {
+bool PitchFilter::areClose(Real num1, Real num2) {
   Real d = fabs(num1 - num2);
   Real av = (num1 + num2) / 2;
 
@@ -93,7 +112,7 @@ bool PitchFilterMakam::areClose(Real num1, Real num2) {
     return false;
 }
 
-void PitchFilterMakam::splitToChunks(const vector <Real>& pitch,
+void PitchFilter::splitToChunks(const vector <Real>& pitch,
     vector <vector <Real> >& chunks,
     vector <long long>& chunksIndexes,
     vector <long long>& chunksSize) {
@@ -126,18 +145,18 @@ void PitchFilterMakam::splitToChunks(const vector <Real>& pitch,
     }
 }
 
-void PitchFilterMakam::joinChunks(const vector <vector <Real> >& chunks, vector <Real>& result) {
+void PitchFilter::joinChunks(const vector <vector <Real> >& chunks, vector <Real>& result) {
   result.clear();
   for (size_t i=0; i<chunks.size(); i++) {
     result.insert(result.end(), chunks[i].begin(), chunks[i].end());
   }
 }
 
-Real PitchFilterMakam::energyInChunk(const vector <Real>& energy, long long chunkIndex, long long chunkSize) {
-  return accumulate(energy.begin() + chunkIndex, energy.begin() + chunkIndex + chunkSize, 0.0) / chunkSize;
+Real PitchFilter::confidenceOfChunk(const vector <Real>& PitchConfidence, long long chunkIndex, long long chunkSize) {
+  return accumulate(PitchConfidence.begin() + chunkIndex, PitchConfidence.begin() + chunkIndex + chunkSize, 0.0) / chunkSize;
 }
 
-void PitchFilterMakam::correctOctaveErrorsByChunks(vector <Real>& pitch) {
+void PitchFilter::correctOctaveErrorsByChunks(vector <Real>& pitch) {
   vector <vector <Real> > chunks;
   vector <long long> chunksIndexes;
   vector <long long> chunksSize;
@@ -149,7 +168,9 @@ void PitchFilterMakam::correctOctaveErrorsByChunks(vector <Real>& pitch) {
     if (chunks[i].size() < chunks[i-1].size() || chunks[i].size() < chunks[i+1].size()) {
       Real octaveTranspose = 1.;
 
-      // check if transpose is needed
+      // check if transpose is needed. 
+      // TODO: if chunks[i] is all zeros skip comparison
+      // TODO: if either chunks[i-1] or chunks[i+1] is all zeros, try to compare with chunks[i-2] or chunks[i+2] (check until a non-zero chunk is found)
       if (areClose(chunks[i].front() / 2, chunks[i-1].back()) && chunks[i].back() / 1.5 > chunks[i+1].front())
         octaveTranspose = 0.5; // 1 octave down
       else if (areClose(chunks[i].back() / 2, chunks[i+1].front()) && chunks[i].front() / 1.5 > chunks[i-1].back())
@@ -171,7 +192,7 @@ void PitchFilterMakam::correctOctaveErrorsByChunks(vector <Real>& pitch) {
   joinChunks(chunks, pitch);
 }
 
-void PitchFilterMakam::removeExtremeValues(vector <Real>& pitch) {
+void PitchFilter::removeExtremeValues(vector <Real>& pitch) {
   // compute pitch statistics
   Real pitchMax = pitch[argmax(pitch)];
   Real pitchMean = mean(pitch);
@@ -216,7 +237,7 @@ void PitchFilterMakam::removeExtremeValues(vector <Real>& pitch) {
       pitch[i] = 0;
 }
 
-void PitchFilterMakam::correctJumps(vector <Real>& pitch) {
+void PitchFilter::correctJumps(vector <Real>& pitch) {
   // corrects jumps/discontinuities within the pitch curve
   for (size_t i=4; i<pitch.size()-6; i++) {
     // if four previous values form continuous curve
@@ -254,7 +275,7 @@ void PitchFilterMakam::correctJumps(vector <Real>& pitch) {
   }
 }
 
-void PitchFilterMakam::filterNoiseRegions(vector <Real>& pitch) {
+void PitchFilter::filterNoiseRegions(vector <Real>& pitch) {
   // assign zero frequency to noisy pitch regions in three rounds
   // in original algorithm, frequency of 8.17579891564371 Hz, refered as 'zero cent frequency',  is used
   for (int m=0; m<3; m++) {
@@ -289,7 +310,7 @@ void PitchFilterMakam::filterNoiseRegions(vector <Real>& pitch) {
   }
 }
 
-void PitchFilterMakam::correctOctaveErrors(vector <Real>& pitch) {
+void PitchFilter::correctOctaveErrors(vector <Real>& pitch) {
   Real pitchMid = (median(pitch)+ mean(pitch)) / 2;
   for (size_t i=4; i<pitch.size()-2; i++) {
     // if previous values are continuous
@@ -309,10 +330,10 @@ void PitchFilterMakam::correctOctaveErrors(vector <Real>& pitch) {
   }
 }
 
-void PitchFilterMakam::filterChunksByEnergy(std::vector <Real>& pitch, const std::vector <Real>& energy) {
+void PitchFilter::filterChunksByPitchConfidence(std::vector <Real>& pitch, const std::vector <Real>& pitchConfidence) {
   // original algorithm uses average signal amplitude instead of energy
   // short chunks with average amplitude, less than 1/6 of average energy of the longest chunk, are filtered
-  // we, instead, use spectral energy
+  // we, instead, use pitch confidence
 
   vector <vector <Real> > chunks;
   vector <long long> chunksIndexes;
@@ -321,17 +342,16 @@ void PitchFilterMakam::filterChunksByEnergy(std::vector <Real>& pitch, const std
   // split pitch values vector to chunks
   splitToChunks(pitch, chunks, chunksIndexes, chunksSize);
 
-  // compute average energy of the chunk with maximum length
+  // compute average confidence of the chunk with maximum length
   size_t max_i = max_element(chunksSize.begin(), chunksSize.end()) - chunksSize.begin();
-  Real energyInLongestChunk = energyInChunk(energy, chunksIndexes[max_i], chunksSize[max_i]);
-  Real energyMinLimit = energyInLongestChunk / 36; // corresponds to squared average amplitude  FIXME make it a parameter
+  Real confidenceOfLongestChunk = confidenceOfChunk(pitchConfidence, chunksIndexes[max_i], chunksSize[max_i]);
+  Real confidenceMinLimit = confidenceOfLongestChunk / _confidenceThreshold; // corresponds to squared average amplitude
 
   for (size_t i=0; i<chunks.size(); i++) {
     // check only non-zero pitch chunks
     if (chunks[i][argmax(chunks[i])] > 0) {
-      // cout << "chunk with non-zero pitch, " << "size=" << chunksSize[i] << ", energy=" << energyInChunk(energy, chunksIndexes[i], chunksSize[i]) << endl;
       if ((chunksSize[i] < _minChunkSize) ||
-          (chunksSize[i] < _minChunkSize*3 && energyInChunk(energy, chunksIndexes[i], chunksSize[i]) < energyMinLimit)) {
+          (chunksSize[i] < _minChunkSize*3 && confidenceOfChunk(pitchConfidence, chunksIndexes[i], chunksSize[i]) < confidenceMinLimit)) {
         for (size_t k=0; k<chunks[i].size(); k++)
           chunks[i][k] = 0.0;
       }

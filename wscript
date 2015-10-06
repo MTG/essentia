@@ -44,6 +44,14 @@ def options(ctx):
                    dest='CROSS_COMPILE_MINGW32', default=False,
                    help='cross-compile for windows using mingw32 on linux')
 
+    ctx.add_option('--cross-compile-android', action='store_true',
+                   dest='CROSS_COMPILE_ANDROID', default=False,
+                   help='cross-compile for Android using toolchain')    
+
+    ctx.add_option('--emscripten', action='store_true',
+                   dest='EMSCRIPTEN', default=False,
+                   help='compile Essentia to Javascript with Emscripten')
+
 
 def configure(ctx):
     print('→ configuring the project in ' + ctx.path.abspath())
@@ -59,7 +67,8 @@ def configure(ctx):
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
-    ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
+    if not ctx.options.EMSCRIPTEN and not ctx.options.CROSS_COMPILE_ANDROID:
+        ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
 
     # define this to be stricter, but sometimes some libraries can give problems...
     #ctx.env.CXXFLAGS += [ '-Werror' ]
@@ -85,7 +94,10 @@ def configure(ctx):
     # global defines
     ctx.env.DEFINES = []
 
-    if sys.platform == 'darwin':
+    if ctx.options.EMSCRIPTEN:
+        ctx.env.CXXFLAGS += [ '-I' + os.path.join(os.environ['EMSCRIPTEN'], 'system', 'lib', 'libcxxabi', 'include') ]
+	ctx.env.CXXFLAGS += ['-Oz']
+    elif sys.platform == 'darwin':
         # clang fails on 10.7 using <atomic>, because libc++ is not new enough
         #ctx.env.CC = 'clang'
         #ctx.env.CXX = 'clang++'
@@ -148,6 +160,12 @@ def configure(ctx):
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/include", tdm_include)
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/lib", tdm_lib)
 
+    if ctx.options.CROSS_COMPILE_ANDROID:
+        ctx.find_program('arm-linux-androideabi-gcc', var='CC')
+        ctx.find_program('arm-linux-androideabi-g++', var='CXX')
+        ctx.find_program('arm-linux-androideabi-ar', var='AR')
+
+        print ("→ Cross-compiling for Android ARM")
 
     # use manually prebuilt dependencies in the case of static examples or mingw cross-build
     if ctx.options.CROSS_COMPILE_MINGW32:
@@ -183,8 +201,8 @@ def configure(ctx):
     Name: libessentia
     Description: audio analysis library -- development files
     Version: %(version)s
-    Libs: -L${libdir} -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lsamplerate -ltag -lfftw3f -lgaia2
-    Cflags: -I${includedir}/essentia I${includedir}/essentia/scheduler I${includedir}/essentia/streaming I${includedir}/essentia/utils
+    Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f
+    Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/utils
     ''' % opts
 
     pcfile = '\n'.join([ l.strip() for l in pcfile.split('\n') ])

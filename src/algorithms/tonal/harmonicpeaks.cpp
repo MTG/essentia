@@ -104,7 +104,7 @@ void HarmonicPeaks::compute() {
     int harmonicNumber = round(ratio);
 
     Real distance = abs(ratio - harmonicNumber);
-    if (distance <= _ratioTolerance && ratio <= _ratioMax) { 
+    if (distance <= _ratioTolerance && ratio <= _ratioMax && harmonicNumber>0) {
       if (candidates[harmonicNumber-1].first == -1 || 
             distance < candidates[harmonicNumber-1].second) {
         // first occured candidate or a better candidate for harmonic

@@ -110,7 +110,26 @@ class Network {
 
   ~Network();
 
+  /**
+   * Executes all the algorithms in the network until all the tokens given by
+   * the source generator are processed by all the algorithms.
+   *
+   * Internally it just calls runPrepare and then runStep repeatedly.
+   */
   void run();
+
+  /**
+   * Does the preparation needed to process the tokens of the network
+   */
+  void runPrepare();
+
+  /**
+   * Processes all tokens generated with one call of process() on the
+   * generator.
+   *
+   * Returns False if there are no more tokens to process.
+   */
+  bool runStep();
 
   /**
    * Rebuilds the visible and execution network.

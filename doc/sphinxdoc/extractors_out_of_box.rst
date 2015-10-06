@@ -30,7 +30,7 @@ with the type of descriptors Essentia is able to compute or use them as a refere
 
 * ``standard_pitchyinfft``: extracts pitch for a monophonic signal using `YinFFT <reference/std_PitchYinFFT.html>`_ algorithm.
 
-* ``streaming_predominantmelody``: extracts pitch of a predominant melody using `MELODIA <reference/std_PredominantMelody.html>`_ algorithm. 
+* ``streaming_predominantpitchmelodia``: extracts pitch of a predominant melody using `MELODIA <reference/std_PredominantMelody.html>`_ algorithm. 
 
 * ``streaming_beattracker_multifeature_mirex2013``: extracts beat postions usign the `multifeature beattracker <reference/std_BeatTrackerMultiFeature.html>`_ algorithm.
 

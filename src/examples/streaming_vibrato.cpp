@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
     const vector<Real>& vibratoExtend = pool.value<vector<Real> >("tonal.vibrato extend");
     const vector<Real>& vibratoFrequency = pool.value<vector<Real> >("tonal.vibrato frequency");
     cout << "number of frames: " << vibratoExtend.size() << endl;
-    for (int i=0; i<vibratoExtend.size(); i++){
+    for (int i=0; i<(int)vibratoExtend.size(); i++){
         cout << vibratoFrequency[i] << "   " << vibratoExtend[i]<< endl;
     }
   }

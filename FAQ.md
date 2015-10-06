@@ -88,6 +88,58 @@ Build Essentia
 ./waf
 ```
 
+Cross-compiling for Android
+---------------------------
+
+A lightweight version of Essentia can be compiled using the ```--cross-compile-android``` flag. It requires reducing the dependencies to a bare minimum using KissFFT library for FFT. Specify the installation prefix with ```--prefix``` flag. Update the ```PATH``` variable to point to where you have your Android Standalone Toolchain.
+
+```
+export PATH=~/Dev/android/toolchain/bin:$PATH;
+./waf configure --cross-compile-android --lightweight= --fft=KISS --prefix=/Users/carthach/Dev/android/modules/essentia
+./waf
+./waf install
+```
+
+Compiling Essentia to Javascript with Emscripten
+------------------------------------------------
+Use the instructions below to compile Essentia with FFTW3 support only. The rest of dependencies have not been tested, but they should work as well.
+
+Install Emscripten following the [instructions](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html) on their website. If you downloaded the SDK manually, make sure to activate the Emscripten environment by executing `emsdk_env.sh`.
+```
+./path/to/emsdk_env.sh
+```
+Alternatively, you can install from Ubuntu/Debian repository (the environment will be activated by default).
+```
+sudo apt-get install emscripten
+```
+
+Get the latest FFTW3 source code, and prepare it for compilation and installation as an Emscripten system library and build it.
+```
+tar xf fftw-3.3.4.tar.gz
+cd fftw-3.3.4
+# Spawn a subshell to be able to use $EMSCRIPTEN in the command's args
+emconfigure sh -c './configure --prefix=$EMSCRIPTEN/system/local/ CFLAGS="-Oz" --disable-fortran --enable-single'
+emmake make
+emmake make install
+```
+
+Finally, compile Essentia for Emscripten.
+```
+cd path/to/essentia
+emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=fftw --emscripten'
+emmake ./waf
+emmake ./waf install
+```
+Essentia is now built. If you want to build applications with Essentia and Emscripten, be sure to read their [tutorial](https://kripken.github.io/emscripten-site/docs/getting_started/Tutorial.html). Use the emcc compiler, preferably the ```-Oz``` option for size optimization, and include the static libraries for Essentia and FFTW as you would with source files. An example would be:
+```
+# Make sure your script can access the variable $EMSCRIPTEN
+# (available to child processes of emconfigure and emmake)
+LIB_DIR=$EMSCRIPTEN/system/local/lib
+emcc -Oz -c application.cpp application.bc
+emcc -Oz application.bc ${LIB_DIR}/libessentia.a ${LIB_DIR}/libfftw3f.a -o out.js
+```
+
+
 Running tests
 -------------
 In the case you want to assure correct working of Essentia, do the tests.
@@ -122,6 +174,19 @@ Running the python script ```src/examples/python/show_algo_dependencies.py``` wi
 
 Note, that you cannot be sure this list of dependencies is 100% correct as the script simply instantiates each algorithm to test for its dependencies, but does not run the ```compute``` stage. It is up to developers conscience to keep instantiations in a correct place, and if an Algorithm is being created on the ```compute``` stage, it will be unnoticed.
 
+## How many algorithms are in Essentia?
+
+The amount of algorithms counting streaming and standard mode separately:
+```
+python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
+cat /tmp/all.txt | grep -- "---------- " | wc -l
+```
+
+The amount of algorithms counting both modes as one algorithm:
+```
+python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
+cat /tmp/all.txt | grep -- "---------- " | cut -c 12- | sed s/"streaming : "// | sed s/"standard : "// | sed s/" ----------"// | sort -u | wc -l
+```
 
 Training and running classifier models in Gaia
 ----------------------------------------------
@@ -138,7 +203,7 @@ In order to run classification in Essentia you need to prepare a classifier mode
 
 Note that using a specific classifier model implies that you are expected to give a pool with the same descriptor layout as the one used in training as an input to GaiaTransform Algorithm. 
 
-Builing lightweight Essentia with reduced dependencies 
+Building lightweight Essentia with reduced dependencies 
 -----------------------------------------------------
 Since version 2.1, build scripts can be configured to ignore 3rdparty dependencies required by Essentia in order to create a striped-down version of the library.  Use  ```./waf configure``` command with the ```--lightweight``` flag to provide the list of 3rdparty dependencies to be included. For example, the command below will configure to build Essentia avoiding all dependencies except fftw:
 ```
@@ -183,6 +248,7 @@ You can also use Essentia's standard mode for real-time computations.
 
 Not all algorithms available in the library are suited for real-time analysis due to their computational complexity. Some complex algorithms, such as BeatTrackerDegara, BeatTrackerMultiFeatures, and PredominantMelody, require large segments of audio in order to function properly.
 
+Note that you do not need any copying algorithm to multiplex an output to several inputs. You can just assign it and it will work.
 
 
 

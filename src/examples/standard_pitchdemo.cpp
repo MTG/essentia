@@ -137,7 +137,7 @@ int main(int argc, char* argv[]) {
             // write to csv file
             ofstream outfile(argv[2]);
             cout << "time   pitch [Hz]  pitch confidence" << endl;
-            for (int i=0; i<time.size(); i++){
+            for (int i=0; i<(int)time.size(); i++){
                 outfile << time[i] << ", " << allPitches[i] << ", " << allConf[i] << endl;
             }
             outfile.close();
@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
             // write to csv file
             ofstream outfile(argv[2]);
             cout << "time   pitch [Hz]  pitch confidence" << endl;
-            for (int i=0; i<pitch.size(); i++){
+            for (int i=0; i<(int)pitch.size(); i++){
                 outfile << float(i)*float(hopsize)/float(sr) << ", " << pitch[i] << ", " << pitchConfidence[i] << endl;
             }
             outfile.close();
@@ -218,7 +218,7 @@ int main(int argc, char* argv[]) {
             // write to csv file
             ofstream outfile(argv[2]);
             cout << "onset [s]   duration [s]  MIDI pitch" << endl;
-            for (int i=0; i<MIDIpitch.size(); i++){
+            for (int i=0; i<(int)MIDIpitch.size(); i++){
                 outfile << onset[i] << ", " << duration[i] << ", " << MIDIpitch[i] << endl;
             }
             outfile.close();
@@ -248,8 +248,8 @@ int main(int argc, char* argv[]) {
             // write to file
             ofstream outfile(argv[2]);
             cout << "time   pitch [Hz]" << endl;
-            for (int ii=0; ii<pitchMulti.size(); ii++){
-                for (int jj=0; jj<pitchMulti[ii].size(); jj++){
+            for (int ii=0; ii<(int)pitchMulti.size(); ii++){
+                for (int jj=0; jj<(int)pitchMulti[ii].size(); jj++){
                     outfile <<  float(ii)*hopsize/sr << ", " << pitchMulti[ii][jj] << endl;
                 }
             }
@@ -284,8 +284,8 @@ int main(int argc, char* argv[]) {
             // write to file
             ofstream outfile(argv[2]);
             cout << "time   pitch [Hz]" << endl;
-            for (int ii=0; ii<pitchMulti.size(); ii++){
-                for (int jj=0; jj<pitchMulti[ii].size(); jj++){
+            for (int ii=0; ii<(int)pitchMulti.size(); ii++){
+                for (int jj=0; jj<(int)pitchMulti[ii].size(); jj++){
                     outfile <<  float(ii)*float(hopsize)/float(sr) << ", " << pitchMulti[ii][jj] << endl;
                 }
             }
@@ -317,7 +317,7 @@ int main(int argc, char* argv[]) {
             // write to csv file
             ofstream outfile(argv[2]);
             cout << "time [s]   pitch [Hz]  pitch confidence" << endl;
-            for (int i=0; i<pitch.size(); i++){
+            for (int i=0; i<(int)pitch.size(); i++){
                 outfile <<  float(i)*hopsize/sr << ", " << pitch[i] << ", " << pitchConfidence[i] << endl;
             }
             outfile.close();
