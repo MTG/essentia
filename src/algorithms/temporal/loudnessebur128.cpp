@@ -69,8 +69,8 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   declareOutput(_shortTermLoudness, "shortTermLoudness", "short-term loudness (over 3 seconds) (LUFS)");
   declareOutput(_integratedLoudness, "integratedLoudness", "integrated loudness (overall) (LUFS)");
   declareOutput(_loudnessRange, "loudnessRange", "loudness range over an arbitrary long time interval [3] (dB, LU)");
-  declareOutput(_momentaryLoudnessMax, "momentaryLoudnessMax", "observed maximum value for momentary loudness");
-  declareOutput(_momentaryLoudnessMax, "shortTermLoudnessMax", "observed maximum value for short term loudness");
+  //declareOutput(_momentaryLoudnessMax, "momentaryLoudnessMax", "observed maximum value for momentary loudness");
+  //declareOutput(_momentaryLoudnessMax, "shortTermLoudnessMax", "observed maximum value for short term loudness");
 
   // Connect input proxy
   _signal >> _loudnessEBUR128Filter->input("signal");
@@ -112,8 +112,8 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   _meanShortTerm->output("mean")  >> PC(_pool, "shortterm_power");
 
   // TODO: implement Max streaming algorithm
-  _computeMomentary->output("array") >> _momentaryLoudnessMax;
-  _computeShortTerm->output("array") >> _shortTermLoudnessMax;
+  //_computeMomentary->output("array") >> _momentaryLoudnessMax;
+  //_computeShortTerm->output("array") >> _shortTermLoudnessMax;
 
   // TODO: implement "live meter" mode once it will be necessary for our tasks.
   // For now, gather all values to pool and compute integrated loudness in 
@@ -293,8 +293,8 @@ LoudnessEBUR128::LoudnessEBUR128() {
   declareOutput(_shortTermLoudness, "shortTermLoudness", "short-term loudness (over 3 seconds) (LUFS)");
   declareOutput(_integratedLoudness, "integratedLoudness", "integrated loudness (overall) (LUFS)");
   declareOutput(_loudnessRange, "loudnessRange", "loudness range over an arbitrary long time interval [3] (dB, LU)");
-  declareOutput(_momentaryLoudnessMax, "momentaryLoudnessMax", "observed maximum value for momentary loudness");
-  declareOutput(_shortTermLoudnessMax, "shortTermLoudnessMax", "observed maximum value for short term loudness");
+  //declareOutput(_momentaryLoudnessMax, "momentaryLoudnessMax", "observed maximum value for momentary loudness");
+  //declareOutput(_shortTermLoudnessMax, "shortTermLoudnessMax", "observed maximum value for short term loudness");
 
   createInnerNetwork();
 }
@@ -317,8 +317,8 @@ void LoudnessEBUR128::createInnerNetwork() {
   _loudnessEBUR128->output("shortTermLoudness")    >> PC(_pool, "shortTermLoudness");
   _loudnessEBUR128->output("integratedLoudness")   >> PC(_pool, "integratedLoudness");
   _loudnessEBUR128->output("loudnessRange")        >> PC(_pool, "loudnessRange");
-  _loudnessEBUR128->output("momentaryLoudnessMax") >> PC(_pool, "momentaryLoudnessMax");
-  _loudnessEBUR128->output("shortTermLoudnessMax") >> PC(_pool, "shortTermLoudnessMax");
+  //_loudnessEBUR128->output("momentaryLoudnessMax") >> PC(_pool, "momentaryLoudnessMax");
+  //_loudnessEBUR128->output("shortTermLoudnessMax") >> PC(_pool, "shortTermLoudnessMax");
 
   _network = new scheduler::Network(_vectorInput);
 }
@@ -333,15 +333,25 @@ void LoudnessEBUR128::compute() {
   vector<Real>& shortTermLoudness = _shortTermLoudness.get();
   Real& integratedLoudness = _integratedLoudness.get();
   Real& loudnessRange = _loudnessRange.get();
-  vector<Real>& momentaryLoudnessMax = _momentaryLoudnessMax.get();
-  vector<Real>& shortTermLoudnessMax = _shortTermLoudnessMax.get();
+  //vector<Real>& momentaryLoudnessMax = _momentaryLoudnessMax.get();
+  //vector<Real>& shortTermLoudnessMax = _shortTermLoudnessMax.get();
 
   momentaryLoudness = _pool.value<vector<Real> >("momentaryLoudness");
   shortTermLoudness = _pool.value<vector<Real> >("shortTermLoudness");
   integratedLoudness = _pool.value<Real>("integratedLoudness");
   loudnessRange = _pool.value<Real>("loudnessRange");
-  momentaryLoudnessMax = _pool.value<vector<Real> >("momentaryLoudnessMax");
-  shortTermLoudnessMax = _pool.value<vector<Real> >("shortTermLoudnessMax");
+  
+  //TODO: add *Max outputs in the future when users will ask for them. 
+  //Meanwhile, the *Max values can be computed from the loudness outputs.
+  //We are not interested to be 100% with EBU R128 requirements unless someone
+  //will desire to build a real-time loudness meter for broadcasting 
+  //applications.
+
+  //momentaryLoudnessMax = _pool.value<vector<Real> >("momentaryLoudnessMax");
+  //shortTermLoudnessMax = _pool.value<vector<Real> >("shortTermLoudnessMax");
+
+  //TODO: should output the final max values instead of all observed max values 
+  //      as the analysis goes through frames?
 }
 
 void LoudnessEBUR128::reset() {
@@ -350,8 +360,8 @@ void LoudnessEBUR128::reset() {
   _pool.remove("shortTermLoudness");
   _pool.remove("integratedLoudness");
   _pool.remove("loudnessRange");
-  _pool.remove("momentaryLoudnessMax");
-  _pool.remove("shortTermLoudnessMax");
+  //_pool.remove("momentaryLoudnessMax");
+  //_pool.remove("shortTermLoudnessMax");
 }
 
 } // namespace standard

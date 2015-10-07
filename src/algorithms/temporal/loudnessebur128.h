@@ -46,8 +46,8 @@ class LoudnessEBUR128 : public AlgorithmComposite {
   SourceProxy<Real> _shortTermLoudness;
   Source<Real> _integratedLoudness;
   Source<Real> _loudnessRange;
-  SourceProxy<Real> _momentaryLoudnessMax;
-  SourceProxy<Real> _shortTermLoudnessMax;
+  //SourceProxy<Real> _momentaryLoudnessMax;
+  //SourceProxy<Real> _shortTermLoudnessMax;
 
   Pool _pool;
   Real _absoluteThreshold;
@@ -95,8 +95,8 @@ class LoudnessEBUR128 : public Algorithm {
   Output<std::vector<Real> > _shortTermLoudness;
   Output<Real> _integratedLoudness;
   Output<Real> _loudnessRange;
-  Output<std::vector<Real> > _momentaryLoudnessMax;
-  Output<std::vector<Real> > _shortTermLoudnessMax;
+  //Output<std::vector<Real> > _momentaryLoudnessMax;
+  //Output<std::vector<Real> > _shortTermLoudnessMax;
 
   streaming::Algorithm* _loudnessEBUR128;
   streaming::VectorInput<StereoSample>* _vectorInput;
