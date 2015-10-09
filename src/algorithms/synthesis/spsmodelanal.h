@@ -35,8 +35,10 @@ class SpsModelAnal : public Algorithm {
   Output<std::vector<Real> > _magnitudes;
   Output<std::vector<Real> > _frequencies;
   Output<std::vector<Real> > _phases;
-  Algorithm* _peakDetect;
-  Algorithm* _cartesianToPolar;
+//  Algorithm* _peakDetect;
+//  Algorithm* _cartesianToPolar;
+  Algorithm* _sineModelAnal;
+  Algorithm* _sineModelSynth;
 
  public:
   SpsModelAnal() {
@@ -45,14 +47,19 @@ class SpsModelAnal : public Algorithm {
     declareOutput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareOutput(_phases, "phases", "the phases of the sinusoidal peaks");
 
-    _peakDetect = AlgorithmFactory::create("PeakDetection");
-    _cartesianToPolar = AlgorithmFactory::create("CartesianToPolar");
+    _sineModelAnal = AlgorithmFactory::create("SineModelAnal");
+    _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
+//    _peakDetect = AlgorithmFactory::create("PeakDetection");
+//    _cartesianToPolar = AlgorithmFactory::create("CartesianToPolar");
+
 
   }
 
   ~SpsModelAnal() {
-    delete _peakDetect;
-    delete _cartesianToPolar;
+//    delete _peakDetect;
+//    delete _cartesianToPolar;
+  delete _sineModelAnal;
+  delete _sineModelSynth;
   }
 
   void declareParameters() {
@@ -64,30 +71,31 @@ class SpsModelAnal : public Algorithm {
     declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
     // sinusoidal tracking
     declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
-    declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
+   // declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
-        declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
+    declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
 
   }
 
   void configure();
   void compute();
 
-  void phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases);
-  void sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope,  std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen );
-  void cleaningSineTrack();
+  void stochasticModelAnal(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv);
+//  void phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases);
+//  void sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope,  std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen );
+  //void cleaningSineTrack();
 
-  std::vector<Real> _lasttpeakFrequency;
+//  std::vector<Real> _lasttpeakFrequency;
 
 
   static const char* name;
   static const char* description;
 
  private:
-  void sort_indexes(std::vector<int> &idx, const std::vector<Real> &v, bool ascending);
-  void copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx);
-  void copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx);
-  void erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx);
+//  void sort_indexes(std::vector<int> &idx, const std::vector<Real> &v, bool ascending);
+//  void copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx);
+//  void copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx);
+//  void erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx);
 
 };
 

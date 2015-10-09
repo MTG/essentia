@@ -26,13 +26,14 @@ using namespace standard;
 const char* SpsModelAnal::name = "SpsModelAnal";
 const char* SpsModelAnal::description = DOC("This algorithm computes the stochastic model analysis. \n"
 "\n"
-"It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses PeakDetection. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"
+"It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses SineModelAnal. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"
 "\n"
 "References:\n"
-"  [1] Peak Detection,\n"
-"  http://ccrma.stanford.edu/~jos/parshl/Peak_Detection_Steps_3.html");
+"  https://github.com/MTG/sms-tools\n"
+"  http://mtg.upf.edu/technologies/sms\n"
+);
 
-
+/*
 // ------------------
 // Additional support functions
 typedef std::pair<int,Real> mypair;
@@ -103,7 +104,7 @@ void SpsModelAnal::erase_vector_from_indexes(std::vector<Real> &v, const std::ve
   return;
 }
 
-
+*/
 // ------------------
 
 
@@ -111,25 +112,34 @@ void SpsModelAnal::erase_vector_from_indexes(std::vector<Real> &v, const std::ve
 
 void SpsModelAnal::configure() {
 
-  std::string orderBy = parameter("orderBy").toLower();
-  if (orderBy == "magnitude") {
-    orderBy = "amplitude";
-  }
-  else if (orderBy == "frequency") {
-    orderBy = "position";
-  }
-  else {
-    throw EssentiaException("Unsupported ordering type: '" + orderBy + "'");
-  }
+//  std::string orderBy = parameter("orderBy").toLower();
+//  if (orderBy == "magnitude") {
+//    orderBy = "amplitude";
+//  }
+//  else if (orderBy == "frequency") {
+//    orderBy = "position";
+//  }
+//  else {
+//    throw EssentiaException("Unsupported ordering type: '" + orderBy + "'");
+//  }
 
-  _peakDetect->configure("interpolate", true,
-                         "range", parameter("sampleRate").toReal()/2.0,
-                         "maxPeaks", parameter("maxPeaks"),
-                         "minPosition", parameter("minFrequency"),
-                         "maxPosition", parameter("maxFrequency"),
-                         "threshold", parameter("magnitudeThreshold"),
-                         "orderBy", orderBy);
+//  _peakDetect->configure("interpolate", true,
+//                         "range", parameter("sampleRate").toReal()/2.0,
+//                         "maxPeaks", parameter("maxPeaks"),
+//                         "minPosition", parameter("minFrequency"),
+//                         "maxPosition", parameter("maxFrequency"),
+//                         "threshold", parameter("magnitudeThreshold"),
+//                         "orderBy", orderBy);
+_sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
+                            "maxnSines", parameter("maxnSines").toReal() ,
+                            "freqDevOffset", parameter("freqDevOffset").toReal(),
+                            "freqDevSlope",  parameter("freqDevSlope").toReal()
+                            );
 
+_sineModelSynth->configure( "sampleRate", parameter("sampleRate").toReal(),
+                            "fftSize", parameter("frameSize").toReal(),
+                            "hopSize", parameter("hopSize").toReal()
+                            );
 
 }
 
@@ -139,43 +149,23 @@ void SpsModelAnal::compute() {
   // inputs and outputs
   const std::vector<std::complex<Real> >& fft = _fft.get();
 
-  std::vector<Real>& tpeakMagnitude = _magnitudes.get();
-  std::vector<Real>& tpeakFrequency = _frequencies.get();
-  std::vector<Real>& tpeakPhase = _phases.get();
-
-  // temp arrays
-  std::vector<Real> peakMagnitude;
-  std::vector<Real> peakFrequency;
-  std::vector<Real> peakPhase;
-
+  std::vector<Real>& peakMagnitude = _magnitudes.get();
+  std::vector<Real>& peakFrequency = _frequencies.get();
+  std::vector<Real>& peakPhase = _phases.get();
+  std::vector<Real>& stocEnv = _stocenv.get();
 
   std::vector<Real> fftmag;
   std::vector<Real> fftphase;
 
-  _cartesianToPolar->input("complex").set(fft);
-  _cartesianToPolar->output("magnitude").set(fftmag);
-  _cartesianToPolar->output("phase").set(fftphase);
-  _peakDetect->input("array").set(fftmag);
-  _peakDetect->output("positions").set(peakFrequency);
-  _peakDetect->output("amplitudes").set(peakMagnitude);
+ _sineModelAnal->input("complex").set(fft);
+ _sineModelAnal->output("magnitudes").set(peakMagnitude);
+ _sineModelAnal->output("frequencies").set(peakFrequency);
+ _sineModelAnal->output("phases").set(peakPhase);
 
-  _cartesianToPolar->compute();
-  _peakDetect->compute();
+  _sineModelAnal->compute();
 
-  phaseInterpolation(fftphase, peakFrequency, peakPhase);
-
-
-  // tracking
-  sinusoidalTracking(peakMagnitude, peakFrequency, peakPhase, _lasttpeakFrequency, parameter("freqDevOffset").toReal(), parameter("freqDevSlope").toReal(), tpeakMagnitude, tpeakFrequency, tpeakPhase);
-
-  // limit number of tracks to maxnSines
-  int maxSines = int ( parameter("maxnSines").toReal() );
-  tpeakFrequency.resize(std::min(maxSines, int (tpeakFrequency.size())));
-  tpeakMagnitude.resize(std::min(maxSines, int (tpeakMagnitude.size())));
-  tpeakPhase.resize(std::min(maxSines, int(tpeakPhase.size())));
-
-  // keep last frequency peaks for tracking
-  _lasttpeakFrequency = tpeakFrequency;
+  // compute stochastic envelope
+  stochasticModelAnal(fft, peakMagnitude, peakFrequency, peakPhase, &stocEnv);
 
 }
 
@@ -183,6 +173,45 @@ void SpsModelAnal::compute() {
 // ---------------------------
 // additional methods
 
+
+void spsModelAnal::stochasticModelAnal(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv)
+{
+
+  // subtract sines
+  std::vector<std::complex<Real> > fftSines;
+  std::vector<std::complex<Real> > fftRes;
+
+  _sineModelSynth->input("magnitudes").set(magnitudes);
+  _sineModelSynth->input("frequencies").set(frequencies);
+  _sineModelSynth->input("phases").set(phases);
+  _sineModelSynth->output("fft").set(fftSines);
+
+  _sineModelSynth->compute();
+
+  fftRes = fftInput; // initialize output
+
+  for (int i= 0; i < (int)fftRes.size(); ++i)
+  {
+    fftRes[i].real(fftRes[i].real() - fftSines[i].real());
+    fftRes[i].imag(fftRes[i].imag() - fftSines[i].imag());
+  }
+
+  // compute residual envelope
+/*
+		mXr = 20*np.log10(abs(Xr[:hN]))                     # magnitude spectrum of residual
+		mXrenv = resample(np.maximum(-200, mXr), mXr.size*stocf)  # decimate the mag spectrum
+		if l == 0:                                          # if first frame
+			stocEnv = np.array([mXrenv])
+		else:                                               # rest of frames
+			stocEnv = np.vstack((stocEnv, np.array([mXrenv])))
+		pin += H                                            # advance sound pointer
+	return stocEnv
+	*/
+
+}
+
+
+/*
 void SpsModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope, std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen ){
 
   //	pfreq, pmag, pphase: frequencies and magnitude of current frame
@@ -355,3 +384,4 @@ void SpsModelAnal::phaseInterpolation(std::vector<Real> fftphase, std::vector<Re
   }
 }
 
+*/

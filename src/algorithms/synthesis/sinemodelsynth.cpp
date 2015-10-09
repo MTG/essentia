@@ -19,7 +19,7 @@
 
 #include "sinemodelsynth.h"
 #include "essentiamath.h"
-
+#include "synth_utils.h"
 
 using namespace essentia;
 using namespace standard;
@@ -89,7 +89,7 @@ void SineModelSynth::compute() {
 
 }
 
-
+/*  // Function moved  to synth_utils.cpp
 // C++ replacement of genspecsines_C
 void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > &outfft)
 {
@@ -173,6 +173,7 @@ void SineModelSynth::genSpecSines(std::vector<Real> iploc, std::vector<Real> ipm
 	}
 
 }
+*/
 
 void SineModelSynth::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
 {
