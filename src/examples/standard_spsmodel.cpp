@@ -22,60 +22,13 @@
 #include <essentia/algorithmfactory.h>
 #include <essentia/pool.h>
 
-#include "synth_utils.h"
+#include <essentia/utils/synth_utils.h>
 
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
-/*
-void scaleAudioVector(vector<Real> &buffer, const Real scale)
-{
-for (int i=0; i < int(buffer.size()); ++i){
-    buffer[i] = scale * buffer[i];
-}
-}
 
-
-void cleaningSineTracks(vector< vector<Real> >&freqsTotal, const int minFrames){
-
-  int nFrames = freqsTotal.size();
-  int begTrack = 0;
-  if (nFrames > 0 )
-  {
-    int f = 0;
-    int nTracks = freqsTotal[0].size(); // we assume all frames have a fix number of tracks
-    for (int t = 0; t < nTracks; ++t)
-    {
-
-      f = 0;
-      begTrack = f;
-
-      while (f < nFrames-1)
-      {
-        // check if f is begin of track
-        if (freqsTotal[f][t] <= 0 && freqsTotal[f+1][t] > 0 )
-        {
-          begTrack = f+1;
-        }
-
-        // clean track if shorter than min duration
-        if ((freqsTotal[f][t] > 0 && freqsTotal[f+1][t] <= 0 ) && ( (f - begTrack) < minFrames))
-        {
-          for (int i= begTrack; i < f; i++)
-          {
-            freqsTotal[f][t] = 0;
-          }
-        }
-
-        f++;
-      }
-    }
-
-  }
-
-}
-*/
 
 int main(int argc, char* argv[]) {
 
@@ -103,7 +56,7 @@ int main(int argc, char* argv[]) {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
-    Algorithm* audioLoader    = factory.create("MonoLoader",
+  Algorithm* audioLoader    = factory.create("MonoLoader",
                                            "filename", audioFilename,
                                            "sampleRate", sr,
                                            "downmix", "mix");
@@ -115,21 +68,22 @@ int main(int argc, char* argv[]) {
                                            "startFromZero", false );
 
   // parameters used in the SMS Python implementation
-  Algorithm* window       = factory.create("Windowing", "type", "hamming");
+  Algorithm* window    = factory.create("Windowing", "type", "hamming");
 
   Algorithm* fft     = factory.create("FFT",
                             "size", framesize);
 
   // parameters used in the SMS Python implementation
-  Algorithm* sinemodelanal     = factory.create("SpsModelAnal",
+  Algorithm* spsmodelanal   = factory.create("SpsModelAnal",
                             "sampleRate", sr,
                             "maxnSines", 100,
                             "minSineDur", minSineDur,
                             "freqDevOffset", 10,
-                            "freqDevSlope", 0.001
+                            "freqDevSlope", 0.001,
+                            "stocf", 0.2
                             );
 /* --- TODO
-  Algorithm* sinemodelsynth     = factory.create("SpsModelSynth",
+  Algorithm* spsmodelsynth     = factory.create("SpsModelSynth",
                             "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
 */
 
@@ -158,7 +112,7 @@ int main(int argc, char* argv[]) {
   vector<complex<Real> >  sfftframe; // sine model FFT frame
   vector<Real> ifftframe;
   vector<Real> alladuio; // concatenated audio file output
- // Real confidence;
+
 
   vector< vector<Real> > frequenciesAllFrames;
   vector< vector<Real> > magnitudesAllFrames;
@@ -183,10 +137,10 @@ int main(int argc, char* argv[]) {
   spsmodelanal->output("phases").set(phases);
 
 
-  spsmodelsynth->input("magnitudes").set(magnitudes);
-  spsmodelsynth->input("frequencies").set(frequencies);
-  spsmodelsynth->input("phases").set(phases);
-  spsmodelsynth->output("fft").set(sfftframe);
+//  spsmodelsynth->input("magnitudes").set(magnitudes);
+//  spsmodelsynth->input("frequencies").set(frequencies);
+//  spsmodelsynth->input("phases").set(phases);
+//  spsmodelsynth->output("fft").set(sfftframe);
 
   // Synthesis
   //ifft->input("fft").set(sfftframe); // taking SpsModelSynth output
@@ -224,7 +178,7 @@ int main(int argc, char* argv[]) {
     fft->compute();
 
     // Sine model analysis
-    sinemodelanal->compute();
+    spsmodelanal->compute();
 
     // append frequencies of the curent frame for later cleaningTracks
     frequenciesAllFrames.push_back(frequencies);
@@ -292,8 +246,8 @@ int main(int argc, char* argv[]) {
   delete audioLoader;
   delete frameCutter;
   delete fft;
-  delete sinemodelanal;
-  delete sinemodelsynth;
+  delete spsmodelanal;
+  //delete spsmodelsynth;
   delete ifft;
   delete overlapAdd;
   delete audioWriter;

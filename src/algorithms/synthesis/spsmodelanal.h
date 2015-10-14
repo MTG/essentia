@@ -35,6 +35,7 @@ class SpsModelAnal : public Algorithm {
   Output<std::vector<Real> > _magnitudes;
   Output<std::vector<Real> > _frequencies;
   Output<std::vector<Real> > _phases;
+  Output<std::vector<Real> > _stocenv;
 //  Algorithm* _peakDetect;
 //  Algorithm* _cartesianToPolar;
   Algorithm* _sineModelAnal;
@@ -46,6 +47,7 @@ class SpsModelAnal : public Algorithm {
     declareOutput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareOutput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareOutput(_phases, "phases", "the phases of the sinusoidal peaks");
+    declareOutput(_stocenv, "stocenv", "the stochastic envelope");
 
     _sineModelAnal = AlgorithmFactory::create("SineModelAnal");
     _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
@@ -74,6 +76,7 @@ class SpsModelAnal : public Algorithm {
    // declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
     declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
+    declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1)", 0.2);
 
   }
 
@@ -114,6 +117,7 @@ class SpsModelAnal : public StreamingAlgorithmWrapper {
   Source<std::vector<Real> > _frequencies;
   Source<std::vector<Real> > _magnitudes;
   Source<std::vector<Real> > _phases;
+  Source<std::vector<Real> > _stocenv;
 
  public:
   SpsModelAnal() {
@@ -122,6 +126,7 @@ class SpsModelAnal : public StreamingAlgorithmWrapper {
     declareOutput(_frequencies, TOKEN, "frequencies");
     declareOutput(_magnitudes, TOKEN, "magnitudes");
     declareOutput(_phases, TOKEN, "phases");
+    declareOutput(_stocenv, TOKEN, "stocenv");
   }
 };
 
