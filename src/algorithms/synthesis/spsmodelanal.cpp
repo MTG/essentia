@@ -38,33 +38,16 @@ const char* SpsModelAnal::description = DOC("This algorithm computes the stochas
 
 void SpsModelAnal::configure() {
 
-//  std::string orderBy = parameter("orderBy").toLower();
-//  if (orderBy == "magnitude") {
-//    orderBy = "amplitude";
-//  }
-//  else if (orderBy == "frequency") {
-//    orderBy = "position";
-//  }
-//  else {
-//    throw EssentiaException("Unsupported ordering type: '" + orderBy + "'");
-//  }
 
-//  _peakDetect->configure("interpolate", true,
-//                         "range", parameter("sampleRate").toReal()/2.0,
-//                         "maxPeaks", parameter("maxPeaks"),
-//                         "minPosition", parameter("minFrequency"),
-//                         "maxPosition", parameter("maxFrequency"),
-//                         "threshold", parameter("magnitudeThreshold"),
-//                         "orderBy", orderBy);
 _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
-                            "maxnSines", parameter("maxnSines").toReal() ,
-                            "freqDevOffset", parameter("freqDevOffset").toReal(),
+                            "maxnSines", parameter("maxnSines").toInt() ,
+                            "freqDevOffset", parameter("freqDevOffset").toInt(),
                             "freqDevSlope",  parameter("freqDevSlope").toReal()
                             );
 
 _sineModelSynth->configure( "sampleRate", parameter("sampleRate").toReal(),
-                            "fftSize", parameter("frameSize").toReal(),
-                            "hopSize", parameter("hopSize").toReal()
+                            "fftSize", parameter("frameSize").toInt(),
+                            "hopSize", parameter("hopSize").toInt()
                             );
 
 }
@@ -83,7 +66,7 @@ void SpsModelAnal::compute() {
   std::vector<Real> fftmag;
   std::vector<Real> fftphase;
 
- _sineModelAnal->input("complex").set(fft);
+ _sineModelAnal->input("fft").set(fft);
  _sineModelAnal->output("magnitudes").set(peakMagnitude);
  _sineModelAnal->output("frequencies").set(peakFrequency);
  _sineModelAnal->output("phases").set(peakPhase);

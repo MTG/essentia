@@ -76,8 +76,9 @@ int main(int argc, char* argv[]) {
   // parameters used in the SMS Python implementation
   Algorithm* spsmodelanal   = factory.create("SpsModelAnal",
                             "sampleRate", sr,
+                            "hopSize", hopsize,
+                            "frameSize", framesize,
                             "maxnSines", 100,
-                            "minSineDur", minSineDur,
                             "freqDevOffset", 10,
                             "freqDevSlope", 0.001,
                             "stocf", 0.2
@@ -99,7 +100,6 @@ int main(int argc, char* argv[]) {
                                      "filename", outputFilename);
 
 
-
   vector<Real> audio;
   vector<Real> frame;
   vector<Real> wframe;
@@ -108,6 +108,7 @@ int main(int argc, char* argv[]) {
   vector<Real> magnitudes;
   vector<Real> frequencies;
   vector<Real> phases;
+  vector<Real> stocenv;
 
   vector<complex<Real> >  sfftframe; // sine model FFT frame
   vector<Real> ifftframe;
@@ -135,11 +136,13 @@ int main(int argc, char* argv[]) {
   spsmodelanal->output("magnitudes").set(magnitudes);
   spsmodelanal->output("frequencies").set(frequencies);
   spsmodelanal->output("phases").set(phases);
+  spsmodelanal->output("stocenv").set(stocenv);
 
 
 //  spsmodelsynth->input("magnitudes").set(magnitudes);
 //  spsmodelsynth->input("frequencies").set(frequencies);
 //  spsmodelsynth->input("phases").set(phases);
+//  spsmodelsynth->input("phases").set(stocenv);
 //  spsmodelsynth->output("fft").set(sfftframe);
 
   // Synthesis

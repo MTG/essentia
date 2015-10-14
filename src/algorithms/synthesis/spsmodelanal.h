@@ -66,6 +66,8 @@ class SpsModelAnal : public Algorithm {
 
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
+    declareParameter("hopSize", "the hop size between frames", "[1,inf)", 512);
+    declareParameter("frameSize", "the size of the internal FFT frame size (full spectrum size)", "[1,inf)", 2048);
     declareParameter("maxPeaks", "the maximum number of returned peaks", "[1,inf)", 100);
     declareParameter("maxFrequency", "the maximum frequency of the range to evaluate [Hz]", "(0,inf)", 5000.0);
     declareParameter("minFrequency", "the minimum frequency of the range to evaluate [Hz]", "[0,inf)", 0.0);
@@ -84,21 +86,11 @@ class SpsModelAnal : public Algorithm {
   void compute();
 
   void stochasticModelAnal(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv);
-//  void phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases);
-//  void sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope,  std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen );
-  //void cleaningSineTrack();
-
-//  std::vector<Real> _lasttpeakFrequency;
-
 
   static const char* name;
   static const char* description;
 
  private:
-//  void sort_indexes(std::vector<int> &idx, const std::vector<Real> &v, bool ascending);
-//  void copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx);
-//  void copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx);
-//  void erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx);
 
 };
 

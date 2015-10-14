@@ -76,7 +76,6 @@ int main(int argc, char* argv[]) {
   Algorithm* sinemodelanal     = factory.create("SineModelAnal",
                             "sampleRate", sr,
                             "maxnSines", 100,
-                            "minSineDur", minSineDur,
                             "freqDevOffset", 10,
                             "freqDevSlope", 0.001
                             );
