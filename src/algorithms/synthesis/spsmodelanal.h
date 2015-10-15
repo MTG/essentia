@@ -67,7 +67,7 @@ class SpsModelAnal : public Algorithm {
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("hopSize", "the hop size between frames", "[1,inf)", 512);
-    declareParameter("frameSize", "the size of the internal FFT frame size (full spectrum size)", "[1,inf)", 2048);
+    declareParameter("fftSize", "the size of the internal FFT size (full spectrum size)", "[1,inf)", 2048);
     declareParameter("maxPeaks", "the maximum number of returned peaks", "[1,inf)", 100);
     declareParameter("maxFrequency", "the maximum frequency of the range to evaluate [Hz]", "(0,inf)", 5000.0);
     declareParameter("minFrequency", "the minimum frequency of the range to evaluate [Hz]", "[0,inf)", 0.0);

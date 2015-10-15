@@ -46,7 +46,7 @@ _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
                             );
 
 _sineModelSynth->configure( "sampleRate", parameter("sampleRate").toReal(),
-                            "fftSize", parameter("frameSize").toInt(),
+                            "fftSize", parameter("fftSize").toInt(),
                             "hopSize", parameter("hopSize").toInt()
                             );
 

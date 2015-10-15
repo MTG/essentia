@@ -20,41 +20,45 @@
 #ifndef ESSENTIA_SPSMODELSYNTH_H
 #define ESSENTIA_SPSMODELSYNTH_H
 
-// defines for generateSine function
-#define BH_SIZE 1001
-#define BH_SIZE_BY2 501
-#define MFACTOR 100
-
 
 #include "algorithm.h"
+#include "algorithmfactory.h"
 
 namespace essentia {
 namespace standard {
 
 class SpsModelSynth : public Algorithm {
 
- private:
+ protected:
   Input<std::vector<Real> > _magnitudes;
   Input<std::vector<Real> > _frequencies;
   Input<std::vector<Real> > _phases;
+  Input<std::vector<Real> > _stocenv;
   Output<std::vector<std::complex<Real> > > _outfft;
 
   Real _sampleRate;
   int _fftSize;
   int _hopSize;
 
-  std::vector<Real> _lastytfreq;
-  std::vector<Real> _lastytphase;
+  Algorithm* _sineModelSynth;
 
-  void genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > &outfft);
   void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
+  void stochasticModelSynth(const std::vector<Real> stocEnv, const int H, const int N,std::vector<std::complex<Real> > &fftStoc);
 
  public:
   SpsModelSynth() {
     declareInput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareInput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareInput(_phases, "phases", "the phases of the sinusoidal peaks");
+    declareInput(_stocenv, "stocenv", "the stochastic envelope");
     declareOutput(_outfft, "fft", "the output FFT frame");
+
+    _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
+  }
+
+  ~SpsModelSynth() {
+
+    delete _sineModelSynth;
   }
 
   void declareParameters() {
@@ -63,15 +67,8 @@ class SpsModelSynth : public Algorithm {
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
   }
 
-  void configure() {
-    _sampleRate = parameter("sampleRate").toReal();
-    _fftSize = parameter("fftSize").toInt();
-    _hopSize = parameter("hopSize").toInt();
-    // initialize lastfrequencies
-  }
-
+  void configure();
   void compute();
-
 
   static const char* name;
   static const char* description;
@@ -92,6 +89,7 @@ class SpsModelSynth : public StreamingAlgorithmWrapper {
   Sink<std::vector<Real> > _magnitudes;
   Sink<std::vector<Real> > _frequencies;
   Sink<std::vector<Real> > _phases;
+  Sink<std::vector<Real> > _stocenv;
   Source<std::vector<std::complex<Real> > > _outfft;
 
  public:
@@ -100,6 +98,7 @@ class SpsModelSynth : public StreamingAlgorithmWrapper {
     declareInput(_magnitudes, TOKEN, "magnitudes");
     declareInput(_frequencies, TOKEN, "frequencies");
     declareInput(_phases, TOKEN, "phases");
+    declareInput(_stocenv, TOKEN, "stocenv");
     declareOutput(_outfft, TOKEN, "fft");
   }
 };

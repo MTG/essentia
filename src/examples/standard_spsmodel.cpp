@@ -54,6 +54,8 @@ int main(int argc, char* argv[]) {
   Real sr = 44100;
   Real minSineDur = 0.02;
 
+
+
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   Algorithm* audioLoader    = factory.create("MonoLoader",
@@ -77,16 +79,16 @@ int main(int argc, char* argv[]) {
   Algorithm* spsmodelanal   = factory.create("SpsModelAnal",
                             "sampleRate", sr,
                             "hopSize", hopsize,
-                            "frameSize", framesize,
+                            "fftSize", framesize,
                             "maxnSines", 100,
                             "freqDevOffset", 10,
                             "freqDevSlope", 0.001,
                             "stocf", 0.2
                             );
-/* --- TODO
-  Algorithm* spsmodelsynth     = factory.create("SpsModelSynth",
+
+  Algorithm* spsmodelsynth  = factory.create("SpsModelSynth",
                             "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
-*/
+
 
   Algorithm* ifft     = factory.create("IFFT",
                                 "size", framesize);
@@ -139,15 +141,14 @@ int main(int argc, char* argv[]) {
   spsmodelanal->output("stocenv").set(stocenv);
 
 
-//  spsmodelsynth->input("magnitudes").set(magnitudes);
-//  spsmodelsynth->input("frequencies").set(frequencies);
-//  spsmodelsynth->input("phases").set(phases);
-//  spsmodelsynth->input("phases").set(stocenv);
-//  spsmodelsynth->output("fft").set(sfftframe);
+  spsmodelsynth->input("magnitudes").set(magnitudes);
+  spsmodelsynth->input("frequencies").set(frequencies);
+  spsmodelsynth->input("phases").set(phases);
+  spsmodelsynth->input("stocenv").set(stocenv);
+  spsmodelsynth->output("fft").set(sfftframe);
 
   // Synthesis
-  //ifft->input("fft").set(sfftframe); // taking SpsModelSynth output
-  ifft->input("fft").set(fftframe); // taking FFt output for testing
+  ifft->input("fft").set(sfftframe); // taking SpsModelSynth output
   ifft->output("frame").set(ifftframe);
 
   vector<Real> audioOutput;
@@ -156,17 +157,18 @@ int main(int argc, char* argv[]) {
   overlapAdd->output("signal").set(audioOutput);
 
 
+
 ////////
 /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << audioFilename << " --------" << endl;
 
   audioLoader->compute();
 
-
 //-----------------------------------------------
 // analysis loop
   cout << "-------- analyzing to sine model parameters" " ---------" << endl;
   int counter = 0;
+
   while (true) {
 
     // compute a frame
@@ -196,7 +198,6 @@ int main(int argc, char* argv[]) {
   int minFrames = int( minSineDur * sr / Real(hopsize));
   cleaningSineTracks(frequenciesAllFrames, minFrames);
 
-
 //-----------------------------------------------
 // synthesis loop
   cout << "-------- synthesizing from stochastic model parameters" " ---------" << endl;
@@ -221,7 +222,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Sine model synthesis
-//    spsmodelsynth->compute();
+    spsmodelsynth->compute();
 
     ifft->compute();
     overlapAdd->compute();
@@ -233,8 +234,6 @@ int main(int argc, char* argv[]) {
 
     counter++;
   }
-
-
 
 
   // write results to file
@@ -250,7 +249,7 @@ int main(int argc, char* argv[]) {
   delete frameCutter;
   delete fft;
   delete spsmodelanal;
-  //delete spsmodelsynth;
+  delete spsmodelsynth;
   delete ifft;
   delete overlapAdd;
   delete audioWriter;
