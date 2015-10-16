@@ -41,6 +41,9 @@ class SpsModelSynth : public Algorithm {
   int _hopSize;
 
   Algorithm* _sineModelSynth;
+  // for resample function
+  Algorithm* _fft;
+  Algorithm* _ifft;
 
   void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
   void stochasticModelSynth(const std::vector<Real> stocEnv, const int H, const int N,std::vector<std::complex<Real> > &fftStoc);
@@ -54,21 +57,32 @@ class SpsModelSynth : public Algorithm {
     declareOutput(_outfft, "fft", "the output FFT frame");
 
     _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
+    // for resample
+    _fft = AlgorithmFactory::create("fft");
+    _ifft = AlgorithmFactory::create("ifft");
+
   }
 
   ~SpsModelSynth() {
 
     delete _sineModelSynth;
+    delete _fft;
+    delete _ifft;
   }
 
   void declareParameters() {
     declareParameter("fftSize", "the size of the output FFT frame (full spectrum size)", "[1,inf)", 2048);
     declareParameter("hopSize", "the hop size between frames", "[1,inf)", 512);
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
+    declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1)", 0.2);
   }
 
   void configure();
   void compute();
+
+  void resample(const std::vector<float> in, std::vector<float> &out, const int sizeOut);
+
+
 
   static const char* name;
   static const char* description;

@@ -40,8 +40,15 @@ void SpsModelSynth::configure()
                             "fftSize", parameter("fftSize").toInt(),
                             "hopSize", parameter("hopSize").toInt()
                             );
-}
 
+  // resample for stochastic envelope
+  int stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal());
+  _fft->configure( "FFT",
+                            "size", stocSize);
+  _ifft->configure("IFFT",
+                            "size", parameter("fftSize").toInt());
+
+}
 
 
 void SpsModelSynth::compute() {
@@ -65,16 +72,13 @@ void SpsModelSynth::compute() {
 
   _sineModelSynth->compute();
 
-  // test debug
-  fftStoc = outfft;
-std::cout << "beug in stochasticModelenv: CHECK THIS!!!" << std::endl;
-//	stochasticModelSynth(stocenv, parameter("hopSize").toInt(), outSize, fftStoc);          //# synthesize stochastic residual
+  stochasticModelSynth(stocenv, parameter("hopSize").toInt(), outSize, fftStoc);          //# synthesize stochastic residual
 
   // mix stoachastic and sinusoidal components
   for (i = 0; i < (int)outfft.size(); ++i)
   {
      outfft[i].real( outfft[i].real() + fftStoc[i].real());
-     outfft[i].imag(  outfft[i].imag() + fftStoc[i].imag());
+     outfft[i].imag( outfft[i].imag() + fftStoc[i].imag());
   }
 }
 
@@ -103,18 +107,18 @@ void SpsModelSynth::stochasticModelSynth(const std::vector<Real> stocEnv, const 
 // New c++ code: WIP
   Real magdB;
   Real phase;
+
   for (int i = 0; i < hN; ++i)
   {
-    phase = 0; // 2 * PI * rand()
-    magdB = 1; //interpolate(stocEnv, x);
+    phase = 2 * M_PI *  Real(rand()/Real(RAND_MAX));
+    magdB = 1; //resample(stocEnv, x);
 
     // positive spectrums
     fftStoc[i].real( powf(10.f, (magdB / 20.f)) * cos(phase) ) ;
     fftStoc[i].imag( powf(10.f, (magdB / 20.f)) * sin(phase) ) ;
     // negative spectrums
-    fftStoc[N-i].real( powf(10.f, (magdB / 20.f)) * cos(phase) ) ;
-    fftStoc[N-i].imag( powf(10.f, (magdB / 20.f)) * sin(phase) ) ;
-
+    fftStoc[N-i-1].real( powf(10.f, (magdB / 20.f)) * cos(phase) ) ;
+    fftStoc[N-i-1].imag( powf(10.f, (magdB / 20.f)) * sin(phase) ) ;
 
   }
 
@@ -129,3 +133,36 @@ void SpsModelSynth::initializeFFT(std::vector<std::complex<Real> >&fft, int size
   }
 }
 
+// function to resample based on the FFT
+// Use the same function than in python code
+// http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
+void SpsModelSynth::resample(const std::vector<float> in, std::vector<float> &out, const int sizeOut)
+{
+  std::vector<std::complex<Real> >&fftin; // temp vectors
+  std::vector<std::complex<Real> >&fftout; // temp vectors
+
+  fft->input("frame").set(in);
+  fft->output("fft").set(fftin);
+  int sizeIn = (int) fftin.size();
+
+  initializeFFT(fftout, sizeOut);
+
+  int hN = (sizeIn/2.)+1;
+  for (int i = 0; i < hN; ++i)
+  {
+    // positive spectrums
+    fftout[i].real( fftin[i].real());
+    fftout[i].imag( fftin[i].imag());
+    // negative spectrums
+    fftout[sizeOut-i-1].real(fftin[i].real());
+    fftout[sizeOut-i-1].imag(fftin[i].imag());
+  }
+
+  ifft->input("fft").set(fftout); // taking SpsModelSynth output
+  ifft->output("frame").set(out);
+
+  fft->compute();
+  ifft->compute();
+
+
+}

@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
                             );
 
   Algorithm* spsmodelsynth  = factory.create("SpsModelSynth",
-                            "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
+                            "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize, "stocf", 0.2);
 
 
   Algorithm* ifft     = factory.create("IFFT",
