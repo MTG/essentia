@@ -39,6 +39,7 @@ class SpsModelSynth : public Algorithm {
   Real _sampleRate;
   int _fftSize;
   int _hopSize;
+  int _stocSize;
 
   Algorithm* _sineModelSynth;
   // for resample function
@@ -58,8 +59,8 @@ class SpsModelSynth : public Algorithm {
 
     _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
     // for resample
-    _fft = AlgorithmFactory::create("fft");
-    _ifft = AlgorithmFactory::create("ifft");
+    _fft = AlgorithmFactory::create("FFT");
+    _ifft = AlgorithmFactory::create("IFFT");
 
   }
 

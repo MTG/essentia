@@ -41,12 +41,11 @@ void SpsModelSynth::configure()
                             "hopSize", parameter("hopSize").toInt()
                             );
 
-  // resample for stochastic envelope
-  int stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal());
-  _fft->configure( "FFT",
-                            "size", stocSize);
-  _ifft->configure("IFFT",
-                            "size", parameter("fftSize").toInt());
+  // resample for stochastic envelope using FFT
+  _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
+  _stocSize += _stocSize % 2;
+  _fft->configure("size", _stocSize);
+  _ifft->configure("size", parameter("fftSize").toInt()/2);
 
 }
 
@@ -61,7 +60,7 @@ void SpsModelSynth::compute() {
   std::vector<std::complex<Real> >& outfft = _outfft.get();
   std::vector<std::complex<Real> > fftStoc;
 
-  int outSize = (int)floor(_fftSize/2.0) + 1;
+  int outSize =  (int)floor(_fftSize/2.0) + 1;
   initializeFFT(outfft, outSize);
   int i = 0;
 
@@ -74,11 +73,13 @@ void SpsModelSynth::compute() {
 
   stochasticModelSynth(stocenv, parameter("hopSize").toInt(), outSize, fftStoc);          //# synthesize stochastic residual
 
+std::cout << " I AM HERE: debuggin stochastic output / discontinuities at framerate??" << std::endl;
   // mix stoachastic and sinusoidal components
   for (i = 0; i < (int)outfft.size(); ++i)
   {
-     outfft[i].real( outfft[i].real() + fftStoc[i].real());
-     outfft[i].imag( outfft[i].imag() + fftStoc[i].imag());
+
+     outfft[i].real( 0*outfft[i].real() + fftStoc[i].real());
+     outfft[i].imag( 0*outfft[i].imag() + fftStoc[i].imag());
   }
 }
 
@@ -90,8 +91,8 @@ void SpsModelSynth::stochasticModelSynth(const std::vector<Real> stocEnv, const 
 //	returns y: output FFT magitude
 //	"""
 
-
-	int hN = (N/2.)+1;                                            		//# positive size of fft
+//	int hN = (N/2.)+1;
+//	printf("HN: %d ", hN);                                          		//# positive size of fft
 	//hN = N; // if FFT size is only the positive size. Check!
 
   // init stochastic FFT
@@ -107,22 +108,25 @@ void SpsModelSynth::stochasticModelSynth(const std::vector<Real> stocEnv, const 
 // New c++ code: WIP
   Real magdB;
   Real phase;
+  std::vector<Real> stocEnvOut;
 
-  for (int i = 0; i < hN; ++i)
+  // resampling will produce a eve-sized verctor due to itnernal FFT algorithm
+  resample(stocEnv, stocEnvOut, N);
+
+  // copy last value
+  while (N > stocEnvOut.size())
+    stocEnvOut.push_back(stocEnvOut[stocEnvOut.size()-1]);
+
+  for (int i = 0; i < N; ++i)
   {
     phase = 2 * M_PI *  Real(rand()/Real(RAND_MAX));
-    magdB = 1; //resample(stocEnv, x);
-
+    magdB = stocEnvOut[i];
     // positive spectrums
     fftStoc[i].real( powf(10.f, (magdB / 20.f)) * cos(phase) ) ;
     fftStoc[i].imag( powf(10.f, (magdB / 20.f)) * sin(phase) ) ;
-    // negative spectrums
-    fftStoc[N-i-1].real( powf(10.f, (magdB / 20.f)) * cos(phase) ) ;
-    fftStoc[N-i-1].imag( powf(10.f, (magdB / 20.f)) * sin(phase) ) ;
-
   }
-
 }
+
 
 void SpsModelSynth::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
 {
@@ -138,31 +142,40 @@ void SpsModelSynth::initializeFFT(std::vector<std::complex<Real> >&fft, int size
 // http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
 void SpsModelSynth::resample(const std::vector<float> in, std::vector<float> &out, const int sizeOut)
 {
-  std::vector<std::complex<Real> >&fftin; // temp vectors
-  std::vector<std::complex<Real> >&fftout; // temp vectors
 
-  fft->input("frame").set(in);
-  fft->output("fft").set(fftin);
-  int sizeIn = (int) fftin.size();
+// TODO: consider adding this algorithhms as an essentia standard algorithm
 
-  initializeFFT(fftout, sizeOut);
+  std::vector<std::complex<Real> >fftin; // temp vectors
+  std::vector<std::complex<Real> >fftout; // temp vectors
+
+  int sizeIn = (int) in.size();
+
+  _fft->input("frame").set(in);
+  _fft->output("fft").set(fftin);
+  _fft->compute();
+
 
   int hN = (sizeIn/2.)+1;
-  for (int i = 0; i < hN; ++i)
+  int hNout = (sizeOut/2.)+1;
+  initializeFFT(fftout, hNout);
+  // fill positive spectrum to hN (upsampling zeros will be padded) or hNout (downsampling and high frequencies will be removed)
+  for (int i = 0; i < std::min(hN, hNout); ++i)
   {
     // positive spectrums
     fftout[i].real( fftin[i].real());
     fftout[i].imag( fftin[i].imag());
-    // negative spectrums
-    fftout[sizeOut-i-1].real(fftin[i].real());
-    fftout[sizeOut-i-1].imag(fftin[i].imag());
   }
 
-  ifft->input("fft").set(fftout); // taking SpsModelSynth output
-  ifft->output("frame").set(out);
+  _ifft->input("fft").set(fftout);
+  _ifft->output("frame").set(out);
 
-  fft->compute();
-  ifft->compute();
+  _ifft->compute();
 
+  // normalize
+  Real normalizationGain = 1. / float(sizeIn);
+  for (int i = 0; i < sizeOut; ++i)
+  {
+   out[i] *= normalizationGain ;
+  }
 
 }

@@ -106,18 +106,22 @@ void SpsModelAnal::stochasticModelAnal(const std::vector<std::complex<Real> > ff
   }
 
   // the decimation factor must be in a range (0.01 and 1) Default 0 0.2
-  //Real stocf = ;
   Real stocf = std::min( std::max(0.01f, parameter("stocf").toReal()), 1.f);
+  // To obtain the stochastic envelope, we resample only half of the FFT size (i.e. fftRes.size()-1)
+  int stocSize =  int( stocf * parameter("fftSize").toInt() / 2.);
+  stocSize += stocSize % 2; // make it even for FFT-based resample function. (Essentia FFT algorithms only accepts even size).
 
-  stocEnv.resize ( int( stocf * fftRes.size()));
+  stocEnv.resize (stocSize);
+
   Real logMag = 0.;
   int decIdx = 0;
-  //  std::fill(stocEnv.begin(), stocEnv.end(), 0.);
+  std::cout << "TODO: stocEnv use resample function instead" << std::endl;
   for (int i=0; i< (int) stocEnv.size(); i++)
   {
+
     decIdx = int(0.5 + (i / stocf));
-    logMag = log10( sqrt( fftRes[decIdx].real() * fftRes[decIdx].real() +  fftRes[decIdx].imag() * fftRes[decIdx].imag()));
-    stocEnv[i] = std::max(-200., (20.f * std::log10(logMag + 1e-10)));
+    logMag = log10( sqrt( fftRes[decIdx].real() * fftRes[decIdx].real() +  fftRes[decIdx].imag() * fftRes[decIdx].imag()) + 1e-10);
+    stocEnv[i] = std::max(-200.f, 20.f * logMag);
   }
 
 

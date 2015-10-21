@@ -120,6 +120,7 @@ int main(int argc, char* argv[]) {
   vector< vector<Real> > frequenciesAllFrames;
   vector< vector<Real> > magnitudesAllFrames;
   vector< vector<Real> > phasesAllFrames;
+  vector< vector<Real> > stocEnvAllFrames;
 
   // analysis
   audioLoader->output("audio").set(audio);
@@ -189,7 +190,7 @@ int main(int argc, char* argv[]) {
     frequenciesAllFrames.push_back(frequencies);
     magnitudesAllFrames.push_back(magnitudes);
     phasesAllFrames.push_back(phases);
-
+    stocEnvAllFrames.push_back(stocenv);
     counter++;
   }
 
@@ -216,9 +217,11 @@ int main(int argc, char* argv[]) {
       frequencies = frequenciesAllFrames[0];
       magnitudes = magnitudesAllFrames[0];
       phases = phasesAllFrames[0];
+      stocenv = stocEnvAllFrames[0];
       frequenciesAllFrames.erase (frequenciesAllFrames.begin());
       magnitudesAllFrames.erase (magnitudesAllFrames.begin());
       phasesAllFrames.erase (phasesAllFrames.begin());
+      stocEnvAllFrames.erase (stocEnvAllFrames.begin());
     }
 
     // Sine model synthesis
