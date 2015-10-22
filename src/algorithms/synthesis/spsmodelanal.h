@@ -36,10 +36,15 @@ class SpsModelAnal : public Algorithm {
   Output<std::vector<Real> > _frequencies;
   Output<std::vector<Real> > _phases;
   Output<std::vector<Real> > _stocenv;
-//  Algorithm* _peakDetect;
-//  Algorithm* _cartesianToPolar;
+
+  int _stocSize;
   Algorithm* _sineModelAnal;
   Algorithm* _sineModelSynth;
+
+  // for resample
+  Algorithm* _fftres;
+  Algorithm* _ifftres;
+  void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
 
  public:
   SpsModelAnal() {
@@ -51,9 +56,10 @@ class SpsModelAnal : public Algorithm {
 
     _sineModelAnal = AlgorithmFactory::create("SineModelAnal");
     _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
-//    _peakDetect = AlgorithmFactory::create("PeakDetection");
-//    _cartesianToPolar = AlgorithmFactory::create("CartesianToPolar");
 
+    // for resample
+    _fftres = AlgorithmFactory::create("FFT");
+    _ifftres = AlgorithmFactory::create("IFFT");
 
   }
 
@@ -62,6 +68,10 @@ class SpsModelAnal : public Algorithm {
 //    delete _cartesianToPolar;
   delete _sineModelAnal;
   delete _sineModelSynth;
+
+  // for resample
+  delete _fftres;
+  delete _ifftres;
   }
 
   void declareParameters() {
@@ -86,6 +96,7 @@ class SpsModelAnal : public Algorithm {
   void compute();
 
   void stochasticModelAnal(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv);
+  void resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut);
 
   static const char* name;
   static const char* description;

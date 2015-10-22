@@ -28,7 +28,6 @@ using namespace standard;
 const char* SpsModelSynth::name = "SpsModelSynth";
 const char* SpsModelSynth::description = DOC("This algorithm computes the stochastic model synthesis from stochastic model analysis.");
 
-
 // configure
 void SpsModelSynth::configure()
 {
@@ -71,16 +70,16 @@ void SpsModelSynth::compute() {
 
   _sineModelSynth->compute();
 
-  stochasticModelSynth(stocenv, parameter("hopSize").toInt(), outSize, fftStoc);          //# synthesize stochastic residual
+  //# synthesize stochastic residual
+  stochasticModelSynth(stocenv, parameter("hopSize").toInt(), outSize, fftStoc);
 
-std::cout << " I AM HERE: debuggin stochastic output / discontinuities at framerate??" << std::endl;
   // mix stoachastic and sinusoidal components
   for (i = 0; i < (int)outfft.size(); ++i)
   {
-
-     outfft[i].real( 0*outfft[i].real() + fftStoc[i].real());
-     outfft[i].imag( 0*outfft[i].imag() + fftStoc[i].imag());
+     outfft[i].real( outfft[i].real() + fftStoc[i].real());
+     outfft[i].imag( outfft[i].imag() + fftStoc[i].imag());
   }
+
 }
 
 void SpsModelSynth::stochasticModelSynth(const std::vector<Real> stocEnv, const int H, const int N, std::vector<std::complex<Real> > &fftStoc)
@@ -91,27 +90,13 @@ void SpsModelSynth::stochasticModelSynth(const std::vector<Real> stocEnv, const 
 //	returns y: output FFT magitude
 //	"""
 
-//	int hN = (N/2.)+1;
-//	printf("HN: %d ", hN);                                          		//# positive size of fft
-	//hN = N; // if FFT size is only the positive size. Check!
+  fftStoc.resize(N);  // init stochastic FFT
 
-  // init stochastic FFT
-  fftStoc.resize(N);
-
-// orignial python code
-//		mY = resample(stocEnv[:], hN)                        # interpolate to original size
-//		pY = 2* PI *np.random.rand(hN)                        # generate phase random values
-//		Y = np.zeros(N, dtype = complex)                       # initialize synthesis spectrum
-//		Y[:hN] = 10.f^(mY/20.) * np.exp(1j*pY)                   # generate positive freq.
-
-
-// New c++ code: WIP
   Real magdB;
   Real phase;
   std::vector<Real> stocEnvOut;
 
-  // resampling will produce a eve-sized verctor due to itnernal FFT algorithm
-  resample(stocEnv, stocEnvOut, N);
+  resample(stocEnv, stocEnvOut, N);   // resampling will produce a eve-sized verctor due to itnernal FFT algorithm
 
   // copy last value
   while (N > stocEnvOut.size())
@@ -140,7 +125,7 @@ void SpsModelSynth::initializeFFT(std::vector<std::complex<Real> >&fft, int size
 // function to resample based on the FFT
 // Use the same function than in python code
 // http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
-void SpsModelSynth::resample(const std::vector<float> in, std::vector<float> &out, const int sizeOut)
+void SpsModelSynth::resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut)
 {
 
 // TODO: consider adding this algorithhms as an essentia standard algorithm
@@ -168,14 +153,13 @@ void SpsModelSynth::resample(const std::vector<float> in, std::vector<float> &ou
 
   _ifft->input("fft").set(fftout);
   _ifft->output("frame").set(out);
-
   _ifft->compute();
 
   // normalize
   Real normalizationGain = 1. / float(sizeIn);
   for (int i = 0; i < sizeOut; ++i)
   {
-   out[i] *= normalizationGain ;
+    out[i] *= normalizationGain ;
   }
 
 }

@@ -50,6 +50,12 @@ _sineModelSynth->configure( "sampleRate", parameter("sampleRate").toReal(),
                             "hopSize", parameter("hopSize").toInt()
                             );
 
+  // resample for stochastic envelope using FFT
+  _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
+  _stocSize += _stocSize % 2;
+  _fftres->configure("size", parameter("fftSize").toInt()/2);
+  _ifftres->configure("size", _stocSize);
+
 }
 
 
@@ -111,20 +117,70 @@ void SpsModelAnal::stochasticModelAnal(const std::vector<std::complex<Real> > ff
   int stocSize =  int( stocf * parameter("fftSize").toInt() / 2.);
   stocSize += stocSize % 2; // make it even for FFT-based resample function. (Essentia FFT algorithms only accepts even size).
 
-  stocEnv.resize (stocSize);
-
-  Real logMag = 0.;
-  int decIdx = 0;
-  std::cout << "TODO: stocEnv use resample function instead" << std::endl;
-  for (int i=0; i< (int) stocEnv.size(); i++)
+ // resampling to decimate residual envelope
+ std::vector<Real> magResDB;
+ Real mag;
+ for (int i=0; i< (int) fftRes.size()-1; i++)
   {
-
-    decIdx = int(0.5 + (i / stocf));
-    logMag = log10( sqrt( fftRes[decIdx].real() * fftRes[decIdx].real() +  fftRes[decIdx].imag() * fftRes[decIdx].imag()) + 1e-10);
-    stocEnv[i] = std::max(-200.f, 20.f * logMag);
+    mag =  sqrt( fftRes[i].real() * fftRes[i].real() +  fftRes[i].imag() * fftRes[i].imag());
+    magResDB.push_back( std::max(-200., 20. * log10( mag + 1e-10)));
   }
-
+  // magResDB needs to be of even size to use resample with essentia FFT algorithms.
+  resample(magResDB, stocEnv, stocSize);
 
 }
 
+
+// Move this to new algorithm for ResampleFFT
+void SpsModelAnal::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
+{
+  fft.resize(sizeFFT);
+  for (int i=0; i < sizeFFT; ++i){
+    fft[i].real(0);
+    fft[i].imag(0);
+  }
+}
+
+// function to resample based on the FFT
+// Use the same function than in python code
+// http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
+void SpsModelAnal::resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut)
+{
+
+// TODO: consider adding this algorithhms as an essentia standard algorithm
+
+  std::vector<std::complex<Real> >fftin; // temp vectors
+  std::vector<std::complex<Real> >fftout; // temp vectors
+
+  int sizeIn = (int) in.size();
+
+  _fftres->input("frame").set(in);
+  _fftres->output("fft").set(fftin);
+  _fftres->compute();
+
+
+  int hN = (sizeIn/2.)+1;
+  int hNout = (sizeOut/2.)+1;
+  initializeFFT(fftout, hNout);
+  // fill positive spectrum to hN (upsampling zeros will be padded) or hNout (downsampling and high frequencies will be removed)
+  for (int i = 0; i < std::min(hN, hNout); ++i)
+  {
+    // positive spectrums
+    fftout[i].real( fftin[i].real());
+    fftout[i].imag( fftin[i].imag());
+  }
+
+  _ifftres->input("fft").set(fftout);
+  _ifftres->output("frame").set(out);
+
+  _ifftres->compute();
+
+  // normalize
+  Real normalizationGain = 1. / float(sizeIn);
+  for (int i = 0; i < sizeOut; ++i)
+  {
+   out[i] *= normalizationGain ;
+  }
+
+}
 

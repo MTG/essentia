@@ -81,7 +81,7 @@ class SpsModelSynth : public Algorithm {
   void configure();
   void compute();
 
-  void resample(const std::vector<float> in, std::vector<float> &out, const int sizeOut);
+  void resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut);
 
 
 
