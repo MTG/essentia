@@ -56,6 +56,7 @@ _sineModelSynth->configure( "sampleRate", parameter("sampleRate").toReal(),
   _fftres->configure("size", parameter("fftSize").toInt()/2);
   _ifftres->configure("size", _stocSize);
 
+_log.open("anal.log");
 }
 
 
@@ -119,14 +120,26 @@ void SpsModelAnal::stochasticModelAnal(const std::vector<std::complex<Real> > ff
 
  // resampling to decimate residual envelope
  std::vector<Real> magResDB;
- Real mag;
+ Real mag, magdB;
+
  for (int i=0; i< (int) fftRes.size()-1; i++)
   {
     mag =  sqrt( fftRes[i].real() * fftRes[i].real() +  fftRes[i].imag() * fftRes[i].imag());
-    magResDB.push_back( std::max(-200., 20. * log10( mag + 1e-10)));
+    magdB =  std::max(-200., 20. * log10( mag + 1e-10));
+    magResDB.push_back(magdB);
+
+   // _log << magdB << " ";
   }
+ // _log << std::endl;
+
   // magResDB needs to be of even size to use resample with essentia FFT algorithms.
   resample(magResDB, stocEnv, stocSize);
+
+// resampled envelope
+for (int i=0; i< (int) stocEnv.size(); i++)
+{ _log << stocEnv[i] << " ";
+}
+_log << std::endl;
 
 }
 

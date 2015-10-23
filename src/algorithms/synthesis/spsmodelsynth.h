@@ -24,6 +24,8 @@
 #include "algorithm.h"
 #include "algorithmfactory.h"
 
+#include <fstream>
+
 namespace essentia {
 namespace standard {
 
@@ -49,6 +51,9 @@ class SpsModelSynth : public Algorithm {
   void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
   void stochasticModelSynth(const std::vector<Real> stocEnv, const int H, const int N,std::vector<std::complex<Real> > &fftStoc);
 
+// debug
+std::ofstream _log;
+
  public:
   SpsModelSynth() {
     declareInput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
@@ -69,6 +74,8 @@ class SpsModelSynth : public Algorithm {
     delete _sineModelSynth;
     delete _fft;
     delete _ifft;
+
+    _log.close();
   }
 
   void declareParameters() {
@@ -87,6 +94,7 @@ class SpsModelSynth : public Algorithm {
 
   static const char* name;
   static const char* description;
+
 
 };
 

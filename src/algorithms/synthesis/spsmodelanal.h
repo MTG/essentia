@@ -22,7 +22,7 @@
 
 #include "algorithm.h"
 #include "algorithmfactory.h"
-
+#include <fstream>
 
 
 namespace essentia {
@@ -45,6 +45,9 @@ class SpsModelAnal : public Algorithm {
   Algorithm* _fftres;
   Algorithm* _ifftres;
   void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
+
+// debug
+std::ofstream _log;
 
  public:
   SpsModelAnal() {
@@ -72,6 +75,8 @@ class SpsModelAnal : public Algorithm {
   // for resample
   delete _fftres;
   delete _ifftres;
+
+  _log.close(); // debug
   }
 
   void declareParameters() {
@@ -100,6 +105,8 @@ class SpsModelAnal : public Algorithm {
 
   static const char* name;
   static const char* description;
+
+
 
  private:
 

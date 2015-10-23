@@ -28,6 +28,8 @@ using namespace standard;
 const char* SpsModelSynth::name = "SpsModelSynth";
 const char* SpsModelSynth::description = DOC("This algorithm computes the stochastic model synthesis from stochastic model analysis.");
 
+
+
 // configure
 void SpsModelSynth::configure()
 {
@@ -46,6 +48,7 @@ void SpsModelSynth::configure()
   _fft->configure("size", _stocSize);
   _ifft->configure("size", parameter("fftSize").toInt()/2);
 
+_log.open("synth.log");
 }
 
 
@@ -98,18 +101,25 @@ void SpsModelSynth::stochasticModelSynth(const std::vector<Real> stocEnv, const 
 
   resample(stocEnv, stocEnvOut, N);   // resampling will produce a eve-sized verctor due to itnernal FFT algorithm
 
+for (int i = 0; i < (int)stocEnv.size(); ++i){
+_log << stocEnv[i] << " ";
+}
+
   // copy last value
-  while (N > stocEnvOut.size())
+  while (N > (int)stocEnvOut.size())
     stocEnvOut.push_back(stocEnvOut[stocEnvOut.size()-1]);
 
   for (int i = 0; i < N; ++i)
   {
     phase = 2 * M_PI *  Real(rand()/Real(RAND_MAX));
     magdB = stocEnvOut[i];
+
+//_log << magdB << " ";
     // positive spectrums
     fftStoc[i].real( powf(10.f, (magdB / 20.f)) * cos(phase) ) ;
     fftStoc[i].imag( powf(10.f, (magdB / 20.f)) * sin(phase) ) ;
   }
+  _log << std::endl;
 }
 
 
