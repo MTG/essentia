@@ -93,7 +93,7 @@ std::ofstream _log;
    // declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
     declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
-    declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1)", 0.2);
+    declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1]", 0.2);
 
   }
 

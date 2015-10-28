@@ -42,11 +42,16 @@ void SpsModelSynth::configure()
                             "hopSize", parameter("hopSize").toInt()
                             );
 
-  // resample for stochastic envelope using FFT
+  // resample for stochastic envelope using FFT / IFFT
   _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
-  _stocSize += _stocSize % 2;
+  _stocSize += 1; // to avoid discontinuities at Nyquist freq.
+  _stocSize += _stocSize % 2; // make it even size (Essentia FFT requirement)
   _fft->configure("size", _stocSize);
-  _ifft->configure("size", parameter("fftSize").toInt()/2);
+
+  _stocSpecSize = parameter("fftSize").toInt()/2;
+  _stocSpecSize += int( 2. / parameter("stocf").toReal()); // increase to avoid discontinuities at Nyquist freq.
+  _stocSpecSize += _stocSpecSize % 2; // make it even size (Essentia FFT requirement)
+  _ifft->configure("size", _stocSpecSize);
 
 _log.open("synth.log");
 }
@@ -60,32 +65,64 @@ void SpsModelSynth::compute() {
   const std::vector<Real>& stocenv = _stocenv.get();
 
   std::vector<std::complex<Real> >& outfft = _outfft.get();
+  std::vector<Real>& outaudio = _outaudio.get();
+
+
+  // temp vectors
+  std::vector<std::complex<Real> > fftSines;
   std::vector<std::complex<Real> > fftStoc;
 
-  int outSize =  (int)floor(_fftSize/2.0) + 1;
-  initializeFFT(outfft, outSize);
+
   int i = 0;
 
   _sineModelSynth->input("magnitudes").set(magnitudes);
   _sineModelSynth->input("frequencies").set(frequencies);
   _sineModelSynth->input("phases").set(phases);
-  _sineModelSynth->output("fft").set(outfft);
+  _sineModelSynth->output("fft").set(fftSines);
 
   _sineModelSynth->compute();
 
+// TODO: add new essentia algorithms for synthesis of sines to audio samples
+std::vector<Real> sineAudio, resAudio;
+std::cout << "TODO: add new algoirithms for synthesis:"
+_ifftSine->input("ifft").set(fftSines);
+_ifftSine->output("frame").set(sineFrame);
+_ifftSine->compute();
+_overlappAdd->input("frame").set(sineFrame);
+_overlappAdd->output("audio").set(sineAudio);
+ _overlappAdd->compute()
+
+// synthesis of the stochastic component
+  _stochasticModelSynth->input("stocenv").set(stocEnv);
+  _stochasticModelSynth->output("audio").set(resAudio);
+  _stochasticModelSynth->compute();
+
+// add sine and sotchastic copmponents
+ for (i = 0; i < (int)resAudio.size(); ++i)
+  {
+    outaudio.push_back(sineAudio[i] + resAudio[i]);
+  }
+
+/* OLD code
+  // stochastic
+  int outSize =  (int)floor(_fftSize/2.0) + 1;
+  initializeFFT(outfft, outSize);
+
   //# synthesize stochastic residual
-  stochasticModelSynth(stocenv, parameter("hopSize").toInt(), outSize, fftStoc);
+  stochasticModelSynthOLD(stocenv, parameter("hopSize").toInt(), outSize, fftStoc);
 
   // mix stoachastic and sinusoidal components
   for (i = 0; i < (int)outfft.size(); ++i)
   {
-     outfft[i].real( outfft[i].real() + fftStoc[i].real());
-     outfft[i].imag( outfft[i].imag() + fftStoc[i].imag());
-  }
 
+     outfft[i].real(0*fftSines[i].real() + fftStoc[i].real());
+     outfft[i].imag( 0*fftSines[i].imag() + fftStoc[i].imag());
+  }
+  */
+// output is an audio frame / already overlapp-add. Directly to write inot output buffer.
 }
 
-void SpsModelSynth::stochasticModelSynth(const std::vector<Real> stocEnv, const int H, const int N, std::vector<std::complex<Real> > &fftStoc)
+void SpsModelSynth::stochasticModelSynthOLD(const std::vector<Real> stocEnv, const int H, const int N, std::vector<std::complex<Real> > &fftStoc)
 {
 //	"""
 //	Stochastic synthesis of a sound
@@ -97,24 +134,38 @@ void SpsModelSynth::stochasticModelSynth(const std::vector<Real> stocEnv, const 
 
   Real magdB;
   Real phase;
+  std::vector<Real> stocEnv2;
   std::vector<Real> stocEnvOut;
 
-  resample(stocEnv, stocEnvOut, N);   // resampling will produce a eve-sized verctor due to itnernal FFT algorithm
+  // copy last value to avoid discotninuities at Nyquist frequency
+  if (parameter("stocf").toReal() == 1.)
+  {
+    stocEnvOut = stocEnv;
+    std::cout << "synth debug: copy do not resample: stocenv size= " << stocEnvOut.size() <<std::endl;
+  }
+  else
+  {
+  stocEnv2 = stocEnv;
+  while (_stocSize > (int)stocEnv2.size()){
+    stocEnv2.push_back(stocEnv2[stocEnv2.size()-1]);
+    }
+  resample(stocEnv2, stocEnvOut, N);   // resampling will produce a eve-sized vector due to itnernal FFT algorithm
+ }
 
-for (int i = 0; i < (int)stocEnv.size(); ++i){
-_log << stocEnv[i] << " ";
-}
-
-  // copy last value
+  // copy last value if size differ
   while (N > (int)stocEnvOut.size())
     stocEnvOut.push_back(stocEnvOut[stocEnvOut.size()-1]);
 
+for (int i = 0; i < (int)stocEnvOut.size(); ++i){
+_log  <<stocEnvOut[i] << " ";
+}
+
   for (int i = 0; i < N; ++i)
   {
-    phase = 2 * M_PI *  Real(rand()/Real(RAND_MAX));
+    phase =  2 * M_PI *  Real(rand()/Real(RAND_MAX));
     magdB = stocEnvOut[i];
-
-//_log << magdB << " ";
+//if (i > N/2)
+//  magdB = -200;
     // positive spectrums
     fftStoc[i].real( powf(10.f, (magdB / 20.f)) * cos(phase) ) ;
     fftStoc[i].imag( powf(10.f, (magdB / 20.f)) * sin(phase) ) ;
@@ -142,6 +193,7 @@ void SpsModelSynth::resample(const std::vector<Real> in, std::vector<Real> &out,
 
   std::vector<std::complex<Real> >fftin; // temp vectors
   std::vector<std::complex<Real> >fftout; // temp vectors
+  std::vector<Real> ifftout; // temp vectors
 
   int sizeIn = (int) in.size();
 
@@ -151,7 +203,7 @@ void SpsModelSynth::resample(const std::vector<Real> in, std::vector<Real> &out,
 
 
   int hN = (sizeIn/2.)+1;
-  int hNout = (sizeOut/2.)+1;
+  int hNout = (_stocSpecSize/2.)+1;; // (sizeOut/2.)+1;
   initializeFFT(fftout, hNout);
   // fill positive spectrum to hN (upsampling zeros will be padded) or hNout (downsampling and high frequencies will be removed)
   for (int i = 0; i < std::min(hN, hNout); ++i)
@@ -162,14 +214,15 @@ void SpsModelSynth::resample(const std::vector<Real> in, std::vector<Real> &out,
   }
 
   _ifft->input("fft").set(fftout);
-  _ifft->output("frame").set(out);
+  _ifft->output("frame").set(ifftout);
   _ifft->compute();
 
+//std::cout << "res out: " <<ifftout.size() << " _stocSpecSize: " << _stocSpecSize << std::endl;
   // normalize
   Real normalizationGain = 1. / float(sizeIn);
   for (int i = 0; i < sizeOut; ++i)
   {
-    out[i] *= normalizationGain ;
+    out.push_back(ifftout[i] * normalizationGain) ;
   }
 
 }

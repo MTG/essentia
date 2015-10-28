@@ -80,8 +80,26 @@ void SpsModelAnal::compute() {
 
   _sineModelAnal->compute();
 
+std::cout << "TODO: add new algorithms for : SineSubtraction (input: audio, sine_params, output: audio)"
+std::vector<Real> frameOut;
+
+// this needs to take into account overlap-add issues, introducing delay
+// _sineSubtraction->input("audio").set(frame);
+//  _sineSubtraction->input("magnitudes").set(magnitudes);
+//  _sineSubtraction->input("frequencies").set(frequencies);
+//  _sineSubtraction->input("phases").set(phases);
+//  _sineSubtraction->output("audio").set(frameOut);
+// _sineSubtraction->compute();
+
+std::cout << "TODO: add new algorithms for : stochasticModelAnal (input: audio, output: stocenv)"
+// this needs to take into account overlap-add issues, introducing delay
+// _stochasticModelAnal->input("audio").set(frameOut);
+//  _stochasticModelAnal->output("stocenv").set(stocEnv);
+// _stochasticModelAnal->compute();
+
+
   // compute stochastic envelope
-  stochasticModelAnal(fft, peakMagnitude, peakFrequency, peakPhase, stocEnv);
+ // stochasticModelAnal(fft, peakMagnitude, peakFrequency, peakPhase, stocEnv);
 
 }
 
@@ -90,8 +108,11 @@ void SpsModelAnal::compute() {
 // additional methods
 
 
-void SpsModelAnal::stochasticModelAnal(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv)
+
+void SpsModelAnal::stochasticModelAnalOld(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv)
 {
+
+// TOD: refactor this function in two new essentia algorithms: sineSubctraction and sotchasticModelAnal
 
   // subtract sines
   std::vector<std::complex<Real> > fftSines;
@@ -106,10 +127,11 @@ void SpsModelAnal::stochasticModelAnal(const std::vector<std::complex<Real> > ff
 
   fftRes = fftInput; // initialize output
 
+
   for (int i= 0; i < (int)fftRes.size(); ++i)
   {
-    fftRes[i].real(fftRes[i].real() - fftSines[i].real());
-    fftRes[i].imag(fftRes[i].imag() - fftSines[i].imag());
+    fftRes[i].real(fftInput[i].real() - fftSines[i].real());
+    fftRes[i].imag(fftInput[i].imag() - fftSines[i].imag());
   }
 
   // the decimation factor must be in a range (0.01 and 1) Default 0 0.2
@@ -118,26 +140,49 @@ void SpsModelAnal::stochasticModelAnal(const std::vector<std::complex<Real> > ff
   int stocSize =  int( stocf * parameter("fftSize").toInt() / 2.);
   stocSize += stocSize % 2; // make it even for FFT-based resample function. (Essentia FFT algorithms only accepts even size).
 
+
  // resampling to decimate residual envelope
  std::vector<Real> magResDB;
  Real mag, magdB;
 
- for (int i=0; i< (int) fftRes.size()-1; i++)
+ for (int i=0; i< (int) fftRes.size(); i++)
   {
+
     mag =  sqrt( fftRes[i].real() * fftRes[i].real() +  fftRes[i].imag() * fftRes[i].imag());
-    magdB =  std::max(-200., 20. * log10( mag + 1e-10));
+    magdB = std::max(-200., 20. * log10( mag + 1e-10));
     magResDB.push_back(magdB);
 
    // _log << magdB << " ";
   }
  // _log << std::endl;
 
+if (stocf == 1.){
+  stocEnv = magResDB;
+  std::cout << "do not resample stocenv. size= " << stocEnv.size() << std::endl;
+}
+else{
   // magResDB needs to be of even size to use resample with essentia FFT algorithms.
+  if ((magResDB.size() % 2) > 0)
+    magResDB.erase(magResDB.end()); // remove last  idx = (N/2) +1
   resample(magResDB, stocEnv, stocSize);
+}
+
+
 
 // resampled envelope
-for (int i=0; i< (int) stocEnv.size(); i++)
-{ _log << stocEnv[i] << " ";
+for (int i=0; i< (int) stocEnv.size(); i++) {
+Real magInput =       sqrt( fftInput[i].real() * fftInput[i].real() +  fftInput[i].imag() * fftInput[i].imag());
+    Real magInputdB = std::max(-200., 20. * log10( magInput + 1e-10));
+
+Real magSine =       sqrt( fftSines[i].real() * fftSines[i].real() +  fftSines[i].imag() * fftSines[i].imag());
+    Real magSinedB = std::max(-200., 20. * log10( magSine + 1e-10));
+
+Real magRes =       sqrt( fftRes[i].real() * fftRes[i].real() +  fftRes[i].imag() * fftRes[i].imag());
+    Real magResdB = std::max(-200., 20. * log10( magRes + 1e-10));
+
+ //_log << magSinedB << " " << magResdB << " " << magInputdB << " ";
+ _log << fftSines[i].real() << " " << fftSines[i].imag() << " " << fftRes[i].real() << " " << fftRes[i].imag() << " " << fftInput[i].real() << " " << fftInput[i].imag() << " ";
+ //_log << stocEnv[i] << " " ;
 }
 _log << std::endl;
 

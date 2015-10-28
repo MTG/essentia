@@ -28,7 +28,7 @@ using namespace std;
 using namespace essentia;
 using namespace standard;
 
-
+std::vector< std::vector<Real> > readIn2dData(const char* filename);
 
 int main(int argc, char* argv[]) {
 
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]) {
   int hopsize = 512;
   Real sr = 44100;
   Real minSineDur = 0.02;
-
+  Real stocf = 1.; // 0.2; //1.; // stochastic envelope factor. Default 0.2
 
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -70,7 +70,8 @@ int main(int argc, char* argv[]) {
                                            "startFromZero", false );
 
   // parameters used in the SMS Python implementation
-  Algorithm* window    = factory.create("Windowing", "type", "hamming");
+  std::string wtype = "blackmanharris92"; // default "hamming"
+  Algorithm* window    = factory.create("Windowing", "type", wtype.c_str());
 
   Algorithm* fft     = factory.create("FFT",
                             "size", framesize);
@@ -83,11 +84,11 @@ int main(int argc, char* argv[]) {
                             "maxnSines", 100,
                             "freqDevOffset", 10,
                             "freqDevSlope", 0.001,
-                            "stocf", 0.2
+                            "stocf", stocf
                             );
 
   Algorithm* spsmodelsynth  = factory.create("SpsModelSynth",
-                            "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize, "stocf", 0.2);
+                            "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize, "stocf", stocf);
 
 
   Algorithm* ifft     = factory.create("IFFT",
@@ -199,6 +200,10 @@ int main(int argc, char* argv[]) {
   int minFrames = int( minSineDur * sr / Real(hopsize));
   cleaningSineTracks(frequenciesAllFrames, minFrames);
 
+  // debug: load from python exported file
+//  stocEnvAllFrames.clear();
+//  stocEnvAllFrames = readIn2dData("stocenv.txt");
+//  std::cout << stocEnvAllFrames.size() << std::endl;
 //-----------------------------------------------
 // synthesis loop
   cout << "-------- synthesizing from stochastic model parameters" " ---------" << endl;
@@ -260,6 +265,52 @@ int main(int argc, char* argv[]) {
   essentia::shutdown();
 
   return 0;
+}
+
+
+// support functinos to read data from numpy
+std::vector< std::vector<Real> > readIn2dData(const char* filename)
+{
+    /* Function takes a char* filename argument and returns a
+     * 2d dynamic array containing the data
+     */
+
+    std::vector< std::vector<Real> > table;
+    std::fstream ifs;
+
+    /*  open file  */
+    ifs.open(filename);
+
+    while (true)
+    {
+        std::string line;
+        Real buf;
+        getline(ifs, line);
+
+        std::stringstream ss(line, std::ios_base::out|std::ios_base::in|std::ios_base::binary);
+
+        if (!ifs)
+            // mainly catch EOF
+            break;
+
+        if (line[0] == '#' || line.empty())
+            // catch empty lines or comment lines
+            continue;
+
+
+        std::vector<Real> row;
+
+        while (ss >> buf)
+            row.push_back(buf);
+
+std::cout << "row size from numpy is: " << row.size() << std::endl;
+        table.push_back(row);
+
+    }
+
+    ifs.close();
+
+    return table;
 }
 
 
