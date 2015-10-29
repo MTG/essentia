@@ -1,0 +1,8 @@
+Package: essentia
+Version: 2.0.1
+Section: libs
+Priority: optional
+Architecture: amd64
+Depends: libyaml libfftw3 libavcodec libavformat python libsamplerate0 libtag1
+Maintainer: Nicolas Wack <nicolas.wack@upf.edu>
+Description: audio analysis tool
