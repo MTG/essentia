@@ -24,8 +24,7 @@ import math
 
 
 def cutFrames(params, input = range(100)):
-    print input.shape
-    print params
+
     if not 'validFrameThresholdRatio' in params:
       params['validFrameThresholdRatio'] = 0
       framegen = FrameGenerator(input,
@@ -36,27 +35,33 @@ def cutFrames(params, input = range(100)):
                                   
     return [ frame for frame in framegen ]
 
+def analysisSynthesis(params, signal):
+
+    outsignal = array(0)
+    # framecutter >  windowing > FFT > IFFT > OverlapAdd
+    #    frames = cutFrames({ 'frameSize': framesize, 'hopSize': hopsize, 'startFromZero': False }, signal)
+    frames = cutFrames(params, signal)
+    for f in frames:
+      outframe = OverlapAdd(frameSize = params['frameSize'], hopSize = params['hopSize'])(IFFT(size = params['frameSize'])(FFT(size = params['frameSize'])(Windowing()(f))))
+      outsignal = numpy.append(outsignal,outframe)
+    
+    return outsignal
+
 
 class TestSTFT(TestCase):
 
 
     def testZero(self):
-        sr = 44100.
-        dur = 0.2
-        signalSize = int(sr * dur)
+      
+        params = { 'frameSize': 2048, 'hopSize': 512, 'startFromZero': False }
+        
+        signalSize = 10 * params['frameSize'] # test duration
         signal = zeros(signalSize)
         
-        outsignal = array(0)
-        print 'signal duration:' + str(signal.shape[0])
-        # framecutter >  windowing > FFT > IFFT > OverlapAdd
-        frames = cutFrames({ 'frameSize': 2048, 'hopSize': 512, 'startFromZero': True }, signal)
-        for f in frames:
-          outframe = OverlapAdd()(IFFT()(FFT()(Windowing()(f))))
-          outsignal = numpy.append(outsignal,outframe)
-          print (outframe.shape)
-        
-        print (outsignal.shape)
-        print type(outsignal)
+        outsignal = analysisSynthesis(params, signal)
+        # cut to duration of input signal
+        outsignal = outsignal[:signalSize]
+
         self.assertEqualVector(outsignal, signal)
 
 
