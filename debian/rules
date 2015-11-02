@@ -16,60 +16,56 @@
 # This has to be exported to make some magic below work.
 export DH_OPTIONS
 
+PYTHON=/usr/bin/python
+WAF=$(PYTHON) waf
+#WAF_EXTRA_FLAGS=-v --with-tbb
+WAF_EXTRA_FLAGS=-j1
 
-
-CFLAGS = -Wall -g
-
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
-else
-	CFLAGS += -O2
-endif
-
-SCONS := scons
-SCONS_ARGS := destdir=$(PWD)/debian/tmp prefix=usr
+#CFLAGS = -Wall -g
+#
+#ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+#	CFLAGS += -O0
+#else
+#	CFLAGS += -O2
+#endif
 
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
+	$(WAF) configure --mode=release --with-python --with-cpptests --with-examples --with-vamp --prefix=/usr $(WAF_EXTRA_FLAGS)
 	touch configure-stamp
 
+#Architecture
 build: build-arch build-indep
-
-#build: build-arch build-indep run-tests
 
 build-arch: build-arch-stamp
 build-arch-stamp: configure-stamp
-	$(SCONS) $(SCONS_ARGS)
-	$(SCONS) python $(SCONS_ARGS)
+	# Add here commands to compile the arch part of the package.
+	$(WAF)
 	touch $@
 
 build-indep: build-indep-stamp
 build-indep-stamp: configure-stamp
-	$(SCONS) doc $(SCONS_ARGS)
+	$(WAF) doc
 	touch $@
 
-clean:
+clean: configure
 	dh_testdir
 	dh_testroot
-	-rm -f build-arch-stamp build-indep-stamp configure-stamp run-tests-stamp
-	-$(SCONS) -c $(SCONS_ARGS)
-	-$(SCONS) -c check_filenames $(SCONS_ARGS)
-	-$(SCONS) -c check_test_filenames $(SCONS_ARGS)
-	-$(SCONS) -c doc $(SCONS_ARGS)
-	-$(SCONS) -c test $(SCONS_ARGS)
-	-$(SCONS) -c python $(SCONS_ARGS)
-	-$(SCONS) -c $(SCONS_ARGS)
-	-rm -f src/algorithms/_registration/essentia_algorithms_reg.cpp
+	-$(RM) -f build-arch-stamp build-indep-stamp configure-stamp run-tests-stamp
+	$(WAF) configure
+	$(WAF) clean
+	$(WAF) distclean
+	-$(RM) -f src/algorithms/_registration/essentia_algorithms_reg.cpp
 	-find $(CURDIR) \( -name '*\.pyc' -o -name .sconsign.dblite \) -exec rm -rf {} \;
 	dh_clean
 
 # Additional rules for testing binary
 run-tests: run-tests-stamp
 run-tests-stamp:
-	$(SCONS) test $(SCONS_ARGS)
-	$(SCONS) run_tests $(SCONS_ARGS)
+	$(WAF) run_tests
+	$(WAF) run_python_tests
 	# test python external
 	PYTHONPATH=$(CURDIR)/build/python:$(CURDIR)/src/python \
 		python src/python/essentia/extractor/extractor_tempotap.py -i audio/recorded/christina_aguilera.wav
@@ -88,8 +84,7 @@ install-arch:
 	dh_testroot
 	dh_clean -k -s
 	dh_installdirs -s
-	$(SCONS) install $(SCONS_ARGS)
-	$(SCONS) python_install $(SCONS_ARGS)
+	$(WAF) --destdir $(CURDIR)/debian/tmp install
 	dh_install -s --sourcedir=debian/tmp
 
 binary-common:
