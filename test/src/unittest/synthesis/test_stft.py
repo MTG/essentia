@@ -27,22 +27,28 @@ def cutFrames(params, input = range(100)):
 
     if not 'validFrameThresholdRatio' in params:
       params['validFrameThresholdRatio'] = 0
-      framegen = FrameGenerator(input,
-                                  frameSize = params['frameSize'],
-                                  hopSize = params['hopSize'],
-                                  validFrameThresholdRatio = params['validFrameThresholdRatio'],
-                                  startFromZero = params['startFromZero'])
-                                  
+    framegen = FrameGenerator(input,
+                                frameSize = params['frameSize'],
+                                hopSize = params['hopSize'],
+                                validFrameThresholdRatio = params['validFrameThresholdRatio'],
+                                startFromZero = params['startFromZero'])
+                                
     return [ frame for frame in framegen ]
 
 def analysisSynthesis(params, signal):
 
     outsignal = array(0)
     # framecutter >  windowing > FFT > IFFT > OverlapAdd
-    #    frames = cutFrames({ 'frameSize': framesize, 'hopSize': hopsize, 'startFromZero': False }, signal)
     frames = cutFrames(params, signal)
+    
+    w = Windowing(type = "hann");
+    fft = FFT(size = params['frameSize']);
+    ifft = IFFT(size = params['frameSize']);
+    overl = OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
+
     for f in frames:
-      outframe = OverlapAdd(frameSize = params['frameSize'], hopSize = params['hopSize'])(IFFT(size = params['frameSize'])(FFT(size = params['frameSize'])(Windowing()(f))))
+      #outframe = OverlapAdd(frameSize = params['frameSize'], hopSize = params['hopSize'])(IFFT(size = params['frameSize'])(FFT(size = params['frameSize'])(Windowing()(f))))
+      outframe = overl(ifft(fft(w(f))))
       outsignal = numpy.append(outsignal,outframe)
     
     return outsignal
@@ -50,52 +56,59 @@ def analysisSynthesis(params, signal):
 
 class TestSTFT(TestCase):
 
-
-    def testZero(self):
-      
-        params = { 'frameSize': 2048, 'hopSize': 512, 'startFromZero': False }
-        
-        signalSize = 10 * params['frameSize'] # test duration
-        signal = zeros(signalSize)
-        
-        outsignal = analysisSynthesis(params, signal)
-        # cut to duration of input signal
-        outsignal = outsignal[:signalSize]
-
-        self.assertEqualVector(outsignal, signal)
-
+    params = { 'frameSize': 2048, 'hopSize': 256, 'startFromZero': False }
+#
+#    def testZero(self):
+#      
+#        # generate test signal
+#        signalSize = 10 * self.params['frameSize']
+#        signal = zeros(signalSize)
+#        
+#        outsignal = analysisSynthesis(self.params, signal)
+#        # cut to duration of input signal
+#        outsignal = outsignal[:signalSize]
+#
+#        self.assertEqualVector(outsignal, signal)
+#
 
 #    def testWhiteNoise(self):
-#        # input is [1, -1, 1, -1, ...] which corresponds to a sine of frequency Fs/2
-#        sr = 44100.
-#        dur = 0.2
-#        signalSize = int(sr * dur)
-#        fftSize = signalSize/2 + 1
+#        from random import random
+#        # generate test signal
+#        signalSize = 10 * self.params['frameSize']
+#        signal = [2*(random()-0.5)*i for i in ones(signalSize)]
+#        print max(signal), min(signal)
+#
+#        outsignal = analysisSynthesis(self.params, signal)
+#        # cut to duration of input signal
+#        outsignal = outsignal[:signalSize]
+#        # compare without half-window bounds to avoid windowing effect
 #        
-#        inputNyquist = ones(signalSize)
-#          for i in range(signalSize):
-#            if i % 2 == 1:
-#              inputNyquist[i] = -1.0
+#        numpy.savetxt('noise.txt',signal)
+#        numpy.savetxt('noise_out.txt',outsignal)
 #        
-#          expected = [ 0+0j ] * fftSize
-#          expected[-1] = (1+0j) * signalSize
-#      
-#        self.assertAlmostEqualVector(FFT()(inputNyquist), expected)
-#  
+#        halfwin = (self.params['frameSize']/2)
+#        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin])
+
+
 #
-#
-#    def testRegression(self):
-#      # use longer signal
-#        signal = numpy.sin(numpy.arange(1024, dtype='f4')/1024. * 441 * 2*math.pi)
-#        self.assertAlmostEqualVector(signal*len(signal), IFFT()(FFT()(signal)), 1e-2)
-#
-#        # readjust to our precision, otherwise 0.001 compared to 1e-12 would
-#        # give a 1e9 difference...
-#        for i, value in enumerate(expected):
-#            if abs(value) < 1e-7:
-#                expected[i] = 0+0j
-#
-#        self.assertAlmostEqualVector(FFT()(inputSignal), expected, 1e-2)
+    def testRegression(self):
+
+        # generate test signal: sine 110Hz @44100kHz
+        signalSize = 10 * self.params['frameSize']
+        signal = 0.5 * numpy.sin( (array(range(signalSize))/44100.) * 110 * 2*math.pi)
+    
+      
+        outsignal = analysisSynthesis(self.params, signal)
+        # cut to duration of input signal
+        outsignal = outsignal[:signalSize]
+        # compare without half-window bounds to avoid windowing effect
+        
+        numpy.savetxt('sine.txt',signal)
+        numpy.savetxt('sine_out.txt',outsignal)
+        
+        halfwin = (self.params['frameSize']/2)
+        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin])
+
 
 
 
