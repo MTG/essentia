@@ -80,6 +80,8 @@ def analysisSynthesisStreaming(params, signal):
     ifft = es.IFFT(size = params['frameSize']);
     overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
     
+    # add half window of zeros to input signal to reach same ooutput length
+    signal  = numpy.append(signal, zeros(params['frameSize']/2))
     insignal = VectorInput (signal)
     insignal.data >> fcut.signal
     fcut.frame >> w.frame
@@ -91,65 +93,67 @@ def analysisSynthesisStreaming(params, signal):
     
     essentia.run(insignal)
     
-    return pool['audio']
+    # remove first half window frames
+    outaudio = pool['audio']
+    outaudio = outaudio [2*params['hopSize']:]
+    return outaudio
 
 
 class TestSTFT(TestCase):
 
     params = { 'frameSize': 1024, 'hopSize': 256, 'startFromZero': False }
-#
-#    def testZero(self):
-#      
-#        # generate test signal
-#        signalSize = 10 * self.params['frameSize']
-#        signal = zeros(signalSize)
-#        
-#        outsignal = analysisSynthesis(self.params, signal)
-#        # cut to duration of input signal
-#        outsignal = outsignal[:signalSize]
-#
-#        self.assertEqualVector(outsignal, signal)
-#
+    # emprical value from a test signal x(t) = (0.5*sine(440*t)).
+    # Assert diffference is computed as a relative value (abs(*y - *x)/abs(*y))
+    # for audio signals another function measuring absolute value could be implemented instead.
+    precision = 0.02
 
-#    def testWhiteNoise(self):
-#        from random import random
-#        # generate test signal
-#        signalSize = 10 * self.params['frameSize']
-#        signal = [2*(random()-0.5)*i for i in ones(signalSize)]
-#        print max(signal), min(signal)
-#
-#        outsignal = analysisSynthesis(self.params, signal)
-#        # cut to duration of input signal
-#        outsignal = outsignal[:signalSize]
-#        # compare without half-window bounds to avoid windowing effect
-#        
+    def testZero(self):
+      
+        # generate test signal
+        signalSize = 10 * self.params['frameSize']
+        signal = zeros(signalSize)
+        
+        outsignal = analysisSynthesisStreaming(self.params, signal)
+        # cut to duration of input signal
+        outsignal = outsignal[:signalSize]
+
+        # compare without half-window bounds to avoid windowing effect
+        halfwin = (self.params['frameSize']/2)
+        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precision)
+
+    def testWhiteNoise(self):
+        from random import random
+        # generate test signal
+        signalSize = 10 * self.params['frameSize']
+        signal = array([2*(random()-0.5)*i for i in ones(signalSize)])
+
+        outsignal = analysisSynthesisStreaming(self.params, signal)
+        outsignal = outsignal[:signalSize] # cut to duration of input signal
+        
 #        numpy.savetxt('noise.txt',signal)
 #        numpy.savetxt('noise_out.txt',outsignal)
-#        
-#        halfwin = (self.params['frameSize']/2)
-#        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin])
+
+        # compare without half-window bounds to avoid windowing effect
+        halfwin = (self.params['frameSize']/2)
+        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precision)
 
 
-#
     def testRegression(self):
 
         # generate test signal: sine 110Hz @44100kHz
         signalSize = 10 * self.params['frameSize']
         signal = 0.5 * numpy.sin( (array(range(signalSize))/44100.) * 110 * 2*math.pi)
-    
-      
-      #        outsignal = analysisSynthesis(self.params, signal)
-        outsignal = analysisSynthesisStreaming(self.params, signal)
         
-        # cut to duration of input signal
-        outsignal = outsignal[:signalSize]
-        
-        numpy.savetxt('sine.txt',signal)
-        numpy.savetxt('sine_out.txt',outsignal)
-        
+        # outsignal = analysisSynthesis(self.params, signal)
+        outsignal = analysisSynthesisStreaming(self.params, signal)                 
+        outsignal = outsignal[:signalSize] # cut to durations of input and output signal
+
+#        numpy.savetxt('sine.txt',signal)
+#        numpy.savetxt('sine_out.txt',outsignal)
+
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
-        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin])
+        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precision)
 
 
 
