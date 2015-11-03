@@ -145,7 +145,7 @@ class TestSTFT(TestCase):
         signal = 0.5 * numpy.sin( (array(range(signalSize))/44100.) * 110 * 2*math.pi)
         
         # outsignal = analysisSynthesis(self.params, signal)
-        outsignal = analysisSynthesisStreaming(self.params, signal)                 
+        outsignal = analysisSynthesisStreaming(self.params, signal)
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
 #        numpy.savetxt('sine.txt',signal)
