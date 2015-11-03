@@ -11,17 +11,27 @@ import essentia.standard as std
 # import matplotlib for plotting
 import matplotlib.pyplot as plt
 import numpy as np
+import sys
+
+mode = 'streaming' #'standard' #'streaming'
 
 
-# audio filename
-inputFilename = '/Users/jjaner/VoctroLabs/Projects/MusicMastermind/test-perfanalysis/sine_12_6dB.wav' # 'predom.wav'
-outputFilename = 'out_stft.wav'
+if len(sys.argv)<3:
+  print ("analysis / synthesis STFT example")
+  print ("Usage: stft_analsynth.py in_wav out_wav [mode]")
+  print("mode can be: streaming or standard")
+  exit()
+else:
+  inputFilename = sys.argv[1]
+  outputFilename = sys.argv[2]
+  
+if len(sys.argv) == 4:
+  mode = sys.argv[3]
 
 
 # algorithm parameters
 framesize = 1024
 hopsize = 256
-mode = 'standard_mode'#''streaming_mode'
 
 
 # loop over all frames
@@ -31,7 +41,7 @@ counter = 0
 
 import matplotlib.pylab as plt
 
-if mode == 'standard_mode':
+if mode == 'standard':
 
   # create an audio loader and import audio file
   loader = std.MonoLoader(filename = inputFilename, sampleRate = 44100)
@@ -40,7 +50,6 @@ if mode == 'standard_mode':
   print("Duration of the audio sample [sec]:")
   print(len(audio)/44100.0)
 
-  fcut = std.FrameCutter(frameSize = framesize, hopSize = hopsize, startFromZero =  False);
   w = std.Windowing(type = "hann");
   fft = std.FFT(size = framesize);
   ifft = std.IFFT(size = framesize);
@@ -57,19 +66,7 @@ if mode == 'standard_mode':
 
     # STFT synthesis
     ifftframe = ifft(outfft)
-    out = overl(ifftframe)
-    
-#    print out.shape
-#    #plt debug
-#    plt.subplot(3,1,1)
-#    plt.plot(w(frame))
-#    plt.subplot(3,1,2)
-#    plt.plot(ifftframe,'r')
-#    plt.subplot(3,1,3)
-#    plt.plot(out,'g')
-#    plt.show()
-#    if counter > 10:
-#      break;
+    out = overl(ifftframe)    
 
     if counter >= (framesize/(2*hopsize)):
       audioout = np.append(audioout, out)
@@ -80,7 +77,7 @@ if mode == 'standard_mode':
   awrite(audioout.astype(np.float32))
 
 
-if mode == 'streaming_mode':
+if mode == 'streaming':
   out = np.array(0)
   loader = es.MonoLoader(filename = inputFilename, sampleRate = 44100)
   pool = essentia.Pool()
@@ -92,21 +89,19 @@ if mode == 'streaming_mode':
   awrite = es.MonoWriter (filename = outputFilename, sampleRate = 44100);
   
   #gen = audio #VectorInput(audio)
-  #  pool = Pool()
   loader.audio >> fcut.signal
   fcut.frame >> w.frame
   w.frame >> fft.frame
   fft.fft >> ifft.fft
   ifft.frame >> overl.frame
-  overl.signal >> (pool, 'audio')
   overl.signal >> awrite.audio
-  
+  overl.signal >> (pool, 'audio')
   
   
   essentia.run(loader)
-#audioout = np.append(audioout, out)
 
-
+  print type(pool['audio'])
+  print pool['audio'].shape
 
 
 

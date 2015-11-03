@@ -22,12 +22,15 @@
 from essentia_test import *
 import math
 
+import essentia
+import essentia.streaming as es
+import essentia.standard as std
 
 def cutFrames(params, input = range(100)):
 
     if not 'validFrameThresholdRatio' in params:
       params['validFrameThresholdRatio'] = 0
-    framegen = FrameGenerator(input,
+    framegen = std.FrameGenerator(input,
                                 frameSize = params['frameSize'],
                                 hopSize = params['hopSize'],
                                 validFrameThresholdRatio = params['validFrameThresholdRatio'],
@@ -41,22 +44,59 @@ def analysisSynthesis(params, signal):
     # framecutter >  windowing > FFT > IFFT > OverlapAdd
     frames = cutFrames(params, signal)
     
-    w = Windowing(type = "hann");
-    fft = FFT(size = params['frameSize']);
-    ifft = IFFT(size = params['frameSize']);
-    overl = OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
-
+    w = std.Windowing(type = "hann");
+    fft = std.FFT(size = params['frameSize']);
+    ifft = std.IFFT(size = params['frameSize']);
+    overl = std.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
+    counter = 0
     for f in frames:
       #outframe = OverlapAdd(frameSize = params['frameSize'], hopSize = params['hopSize'])(IFFT(size = params['frameSize'])(FFT(size = params['frameSize'])(Windowing()(f))))
-      outframe = overl(ifft(fft(w(f))))
-      outsignal = numpy.append(outsignal,outframe)
+      
+      # STFT analysis
+      infft = fft(w(f))
+      # here we could apply spectral transformations
+      outfft = infft
+    
+      # STFT synthesis
+      ifftframe = ifft(outfft)
+      of = ifftframe
+      outframe = overl(of)
+      
+      if counter >= (params['frameSize']/(2*params['hopSize'])):
+        outsignal = numpy.append(outsignal,outframe)
+
+      counter += 1
+
     
     return outsignal
+
+def analysisSynthesisStreaming(params, signal):
+
+    out = numpy.array(0)
+    pool = essentia.Pool()
+    fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
+    w = es.Windowing(type = "hann");
+    fft = es.FFT(size = params['frameSize']);
+    ifft = es.IFFT(size = params['frameSize']);
+    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
+    
+    insignal = VectorInput (signal)
+    insignal.data >> fcut.signal
+    fcut.frame >> w.frame
+    w.frame >> fft.frame
+    fft.fft >> ifft.fft
+    ifft.frame >> overl.frame
+    overl.signal >> (pool, 'audio')
+    
+    
+    essentia.run(insignal)
+    
+    return pool['audio']
 
 
 class TestSTFT(TestCase):
 
-    params = { 'frameSize': 2048, 'hopSize': 256, 'startFromZero': False }
+    params = { 'frameSize': 1024, 'hopSize': 256, 'startFromZero': False }
 #
 #    def testZero(self):
 #      
@@ -98,14 +138,16 @@ class TestSTFT(TestCase):
         signal = 0.5 * numpy.sin( (array(range(signalSize))/44100.) * 110 * 2*math.pi)
     
       
-        outsignal = analysisSynthesis(self.params, signal)
+      #        outsignal = analysisSynthesis(self.params, signal)
+        outsignal = analysisSynthesisStreaming(self.params, signal)
+        
         # cut to duration of input signal
         outsignal = outsignal[:signalSize]
-        # compare without half-window bounds to avoid windowing effect
         
         numpy.savetxt('sine.txt',signal)
         numpy.savetxt('sine_out.txt',outsignal)
         
+        # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
         self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin])
 
