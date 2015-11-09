@@ -38,40 +38,73 @@ def cutFrames(params, input = range(100)):
                                 
     return [ frame for frame in framegen ]
 
-def analysisSynthesis(params, signal):
 
-    outsignal = array(0)
+def cleaningSineTracks(freqsTotal, minFrames):
+  
+  nFrames = freqsTotal.shape[0];
+  begTrack = 0;
+  print 'size frequencies', freqsTotal.shape
+  if (nFrames > 0 ):
+    
+    f = 0;
+    nTracks = freqsTotal.shape[1]# we assume all frames have a fix number of tracks
+    
+    for t in range (nTracks):
+      
+      f = 0;
+      begTrack = f;
+      
+      while (f < nFrames-1):
+        
+        #// check if f is begin of track
+        if (freqsTotal[f][t] <= 0 and freqsTotal[f+1][t] > 0 ):
+          begTrack = f+1;
+        
+        # clean track if shorter than min duration
+        if ((freqsTotal[f][t] > 0 and freqsTotal[f+1][t] <= 0 ) and ( (f - begTrack) < minFrames)):
+          for (int i= begTrack; i < f; i++):
+            freqsTotal[f][t] = 0;
+        
+        f++;
+
+  return freqsTotal
+
+
+
+def analysisSineModelStreaming(params, signal):
+  
+  #out = numpy.array(0)
+    pool = essentia.Pool()
+    fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
+    w = es.Windowing(type = "hann");
+    fft = es.FFT(size = params['frameSize']);
+    smanal = es.SineModelanal(frameSize = params['frameSize'], hopSize = params['hopSize'], sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], minSineDur = params['minSineDur'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
+    
+    # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
-    # framecutter >  windowing > FFT > IFFT > OverlapAdd
-    frames = cutFrames(params, signal)
+    insignal = VectorInput (signal)
+    insignal.data >> fcut.signal
+    fcut.frame >> w.frame
+    w.frame >> fft.frame
+    fft.fft >> smanal.fft
+    smanal.magnitudes >> (pool, 'magnitudes')
+    smanal.frequencies >> (pool, 'frequencies')
+    smanal.phases >> (pool, 'phases')
     
-    w = std.Windowing(type = "hann");
-    fft = std.FFT(size = params['frameSize']);
-    ifft = std.IFFT(size = params['frameSize']);
-    overl = std.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
-    counter = 0
-    for f in frames:
-      #outframe = OverlapAdd(frameSize = params['frameSize'], hopSize = params['hopSize'])(IFFT(size = params['frameSize'])(FFT(size = params['frameSize'])(Windowing()(f))))
-      
-      # STFT analysis
-      infft = fft(w(f))
-      # here we could apply spectral transformations
-      outfft = infft
+    essentia.run(insignal)
     
-      # STFT synthesis
-      ifftframe = ifft(outfft)
-      of = ifftframe
-      outframe = overl(of)
-      
-      if counter >= (params['frameSize']/(2*params['hopSize'])):
-        outsignal = numpy.append(outsignal,outframe)
-
-      counter += 1
-
+    # remove first half window frames
+    mags = pool['magnitudes']
+    freqs = pool['frequencies']
+    phases = pool['phases']
     
-    return outsignal
+    # remove short tracks
+    freqsClean = cleaningSineTracks(freqs, params['minFrames'])
+    
+    return mags, freqsClean, phases
 
-def analysisSynthesisStreaming(params, signal):
+
+def synthesisSineModelStreaming(params, signal):
 
     out = numpy.array(0)
     pool = essentia.Pool()
@@ -91,7 +124,6 @@ def analysisSynthesisStreaming(params, signal):
     ifft.frame >> overl.frame
     overl.signal >> (pool, 'audio')
     
-    
     essentia.run(insignal)
     
     # remove first half window frames
@@ -100,9 +132,16 @@ def analysisSynthesisStreaming(params, signal):
     return outaudio
 
 
-class TestSTFT(TestCase):
 
-    params = { 'frameSize': 1024, 'hopSize': 256, 'startFromZero': False }
+
+
+
+#-------------------------------------
+
+class TestSineModel(TestCase):
+
+    params = { 'frameSize': 1024, 'hopSize': 256, 'startFromZero': False, 'sampleRate': 44100,'maxnSines': 100,'minSineDur': 0.02,'freqDevOffset': 10, 'freqDevSlope': 0.001}
+    
     # emprical value from a test signal x(t) = (0.5*sine(440*t)).
     # Assert diffference is computed as a relative value (abs(*y - *x)/abs(*y))
     # for audio signals another function measuring absolute value could be implemented instead.
@@ -114,7 +153,7 @@ class TestSTFT(TestCase):
         signalSize = 10 * self.params['frameSize']
         signal = zeros(signalSize)
         
-        outsignal = analysisSynthesisStreaming(self.params, signal)
+        outsignal = analysisSineModelStreaming(self.params, signal)
         # cut to duration of input signal
         outsignal = outsignal[:signalSize]
 
@@ -143,7 +182,7 @@ class TestSTFT(TestCase):
 
         # generate test signal: sine 110Hz @44100kHz
         signalSize = 10 * self.params['frameSize']
-        signal = 0.5 * numpy.sin( (array(range(signalSize))/44100.) * 110 * 2*math.pi)
+        signal = 0.5 * numpy.sin( (array(range(signalSize))/se.f.params['sampleRate']) * 110 * 2*math.pi)
         
         # outsignal = analysisSynthesis(self.params, signal)
         outsignal = analysisSynthesisStreaming(self.params, signal)

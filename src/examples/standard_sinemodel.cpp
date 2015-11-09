@@ -35,7 +35,7 @@ for (int i=0; i < int(buffer.size()); ++i){
 
 
 void cleaningSineTracks(vector< vector<Real> >&freqsTotal, const int minFrames){
-
+  
   int nFrames = freqsTotal.size();
   int begTrack = 0;
   if (nFrames > 0 )
@@ -44,10 +44,10 @@ void cleaningSineTracks(vector< vector<Real> >&freqsTotal, const int minFrames){
     int nTracks = freqsTotal[0].size(); // we assume all frames have a fix number of tracks
     for (int t = 0; t < nTracks; ++t)
     {
-
+      
       f = 0;
       begTrack = f;
-
+      
       while (f < nFrames-1)
       {
         // check if f is begin of track
@@ -55,7 +55,7 @@ void cleaningSineTracks(vector< vector<Real> >&freqsTotal, const int minFrames){
         {
           begTrack = f+1;
         }
-
+        
         // clean track if shorter than min duration
         if ((freqsTotal[f][t] > 0 && freqsTotal[f+1][t] <= 0 ) && ( (f - begTrack) < minFrames))
         {
@@ -64,13 +64,14 @@ void cleaningSineTracks(vector< vector<Real> >&freqsTotal, const int minFrames){
             freqsTotal[f][t] = 0;
           }
         }
-
+        
         f++;
       }
+      
     }
-
+    
   }
-
+  
 }
 
 
