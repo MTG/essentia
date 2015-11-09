@@ -1,8 +1,12 @@
 .. How-to install Essentia
 
-.. Installing Essentia
-.. ===================
-..
+Installing Essentia
+===================
+
+OSX
+---
+Installing Essentia on OSX is easily done using `our Homebrew formula <https://github.com/MTG/homebrew-essentia>`_. You can both install by compiling the code (slower) or install from a bottle (faster).
+
 .. Installing Essentia is easily done using the precompiled packages that you can find on the
 .. `MIR-dev Essentia download page <http://static.mtg.upf.edu/mir-dev-download/essentia/>`_.
 .. Packages are available for Debian/Ubuntu, Windows and Mac OS X.
