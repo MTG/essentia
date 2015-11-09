@@ -113,27 +113,38 @@ int main(int argc, char* argv[]) {
       outputFilenames.push_back(argv[i+1]);
   }
 
+  MusicExtractor *extractor = new MusicExtractor();
   try {
     essentia::init();
 
     cout.precision(10); // TODO ????
 
-    MusicExtractor *extractor = new MusicExtractor();
     extractor->setExtractorOptions(profileFilename);
     extractor->loadSVMModels();
+  }
+  catch (EssentiaException& e) {
+    cout << e.what() << endl;
+    return 1;
+  }
 
-    string format = extractor->options.value<string>("highlevel.inputFormat");
-    if (format != "json" && format != "yaml") {
-      cerr << "incorrect format specified: " << format << endl;
-      return 1;
-    }
+  string format = extractor->options.value<string>("highlevel.inputFormat");
+  if (format != "json" && format != "yaml") {
+    cerr << "incorrect format specified: " << format << endl;
+    return 1;
+  }
 
-    for (int i = 0; i < (int)inputFilenames.size(); i++) {
-        string inputFilename = inputFilenames[i];
-        string outputFilename = outputFilenames[i];
+  for (int i = 0; i < (int)inputFilenames.size(); i++) {
+      string inputFilename = inputFilenames[i];
+      string outputFilename = outputFilenames[i];
+      try {
         process_single_file(extractor, inputFilename, outputFilename, format);
-    }
+      // On Essentia Exception for a single file, skip it
+      } catch (EssentiaException& e) {
+        cerr << "skipping " << inputFilename << " due to error" << endl;
+      }
+  }
 
+  try {
     essentia::shutdown();
   }
   catch (EssentiaException& e) {
