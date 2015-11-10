@@ -61,7 +61,7 @@ void cleaningSineTracks(vector< vector<Real> >&freqsTotal, const int minFrames){
         {
           for (int i= begTrack; i < f; i++)
           {
-            freqsTotal[f][t] = 0;
+            freqsTotal[i][t] = 0;
           }
         }
         
