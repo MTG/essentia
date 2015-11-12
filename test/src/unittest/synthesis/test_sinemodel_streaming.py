@@ -44,9 +44,6 @@ def cleaningSineTracks(freqsTotal, minFrames):
   
   nFrames = freqsTotal.shape[0];
   begTrack = 0;
-  print 'size frequencies', freqsTotal.shape
-  print '%d frames , %d tracks' % (freqsTotal.shape[0], freqsTotal.shape[1])
-
   freqsClean = freqsTotal.copy()
   
   if (nFrames > 0 ):
@@ -69,7 +66,6 @@ def cleaningSineTracks(freqsTotal, minFrames):
         if ((freqsClean[f][t] > 0 and freqsClean[f+1][t] <= 0 ) and ( (f - begTrack) < minFrames)):
           for i in range(begTrack, f+1):
             freqsClean[i][t] = 0;
-            print i,t, 0
               
         f+=1;
 
@@ -77,14 +73,14 @@ def cleaningSineTracks(freqsTotal, minFrames):
 
 
 
-def analysisSineModelStreaming(params, signal):
+def analSineModelStreaming(params, signal):
   
-  #out = numpy.array(0)
+    #out = numpy.array(0)
     pool = essentia.Pool()
     fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
     w = es.Windowing(type = "hann");
     fft = es.FFT(size = params['frameSize']);
-    smanal = es.SineModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], minSineDur = params['minSineDur'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
+    smanal = es.SineModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
     
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
@@ -104,49 +100,61 @@ def analysisSineModelStreaming(params, signal):
     freqs = pool['frequencies']
     phases = pool['phases']
 
-    print 'MAX '
-    print numpy.max(freqs)
-
     # remove short tracks
     minFrames = int( params['minSineDur'] * params['sampleRate'] / params['hopSize']);
     freqsClean = cleaningSineTracks(freqs, minFrames)
-    
-
-    numpy.savetxt('freqs.txt', freqs)
-    numpy.savetxt('freqsclean.txt', freqsClean)
-    print 'MAX clean'
-    print numpy.max(freqsClean)
+    pool['frequencies'].data = freqsClean
     
     return mags, freqsClean, phases
 
-
-def synthesisSineModelStreaming(params, signal):
-
+def analsynthSineModelStreaming(params, signal):
+  
     out = numpy.array(0)
+  
     pool = essentia.Pool()
     fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
-    w = es.Windowing(type = "hann");
+    w = es.Windowing(type = "blackmanharris92");
     fft = es.FFT(size = params['frameSize']);
+    smanal = es.SineModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
+    smsyn = es.SineModelSynth(sampleRate = params['sampleRate'], fftSize = params['frameSize'], hopSize = params['hopSize'])
     ifft = es.IFFT(size = params['frameSize']);
     overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
-    
+
+
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
     insignal = VectorInput (signal)
+    # analysis
     insignal.data >> fcut.signal
     fcut.frame >> w.frame
     w.frame >> fft.frame
-    fft.fft >> ifft.fft
+    fft.fft >> smanal.fft
+    smanal.magnitudes >> (pool, 'magnitudes')
+    smanal.frequencies >> (pool, 'frequencies')
+    smanal.phases >> (pool, 'phases')
+    # synthesis
+    smanal.magnitudes >> smsyn.magnitudes
+    smanal.frequencies >> smsyn.frequencies
+    smanal.phases >> smsyn.phases
+    smsyn.fft >> ifft.fft
+    #    fft.fft >> ifft.fft # debug
     ifft.frame >> overl.frame
     overl.signal >> (pool, 'audio')
-    
+
     essentia.run(insignal)
     
+
+    # remove short tracks
+    freqs = pool['frequencies']
+    minFrames = int( params['minSineDur'] * params['sampleRate'] / params['hopSize']);
+    freqsClean = cleaningSineTracks(freqs, minFrames)
+    pool['frequencies'].data = freqsClean
+
     # remove first half window frames
     outaudio = pool['audio']
     outaudio = outaudio [2*params['hopSize']:]
-    return outaudio
 
+    return outaudio, pool
 
 
 
@@ -156,24 +164,24 @@ def synthesisSineModelStreaming(params, signal):
 
 class TestSineModel(TestCase):
 
-    params = { 'frameSize': 1024, 'hopSize': 256, 'startFromZero': False, 'sampleRate': 44100,'maxnSines': 100,'minSineDur': 0.02,'freqDevOffset': 10, 'freqDevSlope': 0.001}
+    params = { 'frameSize': 2048, 'hopSize': 512, 'startFromZero': False, 'sampleRate': 44100,'maxnSines': 100,'magnitudeThreshold': -74,'minSineDur': 0.02,'freqDevOffset': 10, 'freqDevSlope': 0.001}
     
-    # emprical value from a test signal x(t) = (0.5*sine(440*t)).
+    # emprical value from a test signal x(t) = (0.5*sine(110*t)).
     # Assert diffference is computed as a relative value (abs(*y - *x)/abs(*y))
     # for audio signals another function measuring absolute value could be implemented instead.
-    precision = 0.02
+    precision = 0.2
 
-#    def testZero(self):
-#      
-#        # generate test signal
-#        signalSize = 10 * self.params['frameSize']
-#        signal = zeros(signalSize)
-#        
-#        [mags, freqs, phases] = analysisSineModelStreaming(self.params, signal)
-#
-#        # compare
-#        zerofreqs = numpy.zeros(freqs.shape)
-#        self.assertAlmostEqualMatrix(freqs, zerofreqs)
+    def testZero(self):
+      
+        # generate test signal
+        signalSize = 10 * self.params['frameSize']
+        signal = zeros(signalSize)
+        
+        [mags, freqs, phases] = analSineModelStreaming(self.params, signal)
+
+        # compare
+        zerofreqs = numpy.zeros(freqs.shape)
+        self.assertAlmostEqualMatrix(freqs, zerofreqs)
 
 
     def testWhiteNoise(self):
@@ -181,38 +189,42 @@ class TestSineModel(TestCase):
         # generate test signal
         signalSize = 10 * self.params['frameSize']
         signal = array([2*(random()-0.5)*i for i in ones(signalSize)])
+        
+        # for white noise test set sine minimum duration to 50ms, and min threshold of -24dB
+        self.params['minSineDur'] = 0.05
+        self.params['magnitudeThreshold']= -20
+    
+        [mags, freqs, phases]  = analSineModelStreaming(self.params, signal)
+        
 
-        [mags, freqs, phases] = analysisSineModelStreaming(self.params, signal)
-          
-#        numpy.savetxt('noise.txt',freqs)
-#        numpy.savetxt('noise_out.txt',outsignal)
-        print 'printing freqs'
-        for i in freqs:
-          print i
-  
         # compare
         zerofreqs = numpy.zeros(freqs.shape)
         self.assertAlmostEqualMatrix(freqs, zerofreqs)
 
 
-#
-#    def testRegression(self):
-#
-#        # generate test signal: sine 110Hz @44100kHz
-#        signalSize = 10 * self.params['frameSize']
-#        signal = 0.5 * numpy.sin( (array(range(signalSize))/se.f.params['sampleRate']) * 110 * 2*math.pi)
-#        
-#        # outsignal = analysisSynthesis(self.params, signal)
-#        outsignal = analysisSynthesisStreaming(self.params, signal)
-#        outsignal = outsignal[:signalSize] # cut to durations of input and output signal
-#
-##        numpy.savetxt('sine.txt',signal)
-##        numpy.savetxt('sine_out.txt',outsignal)
-#
-#        # compare without half-window bounds to avoid windowing effect
-#        halfwin = (self.params['frameSize']/2)
-#        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precision)
-#
+
+    def testRegression(self):
+
+        # generate test signal: sine 110Hz @44100kHz
+        signalSize = 10 * self.params['frameSize']
+        signal = 0.5 * numpy.sin( (array(range(signalSize))/self.params['sampleRate']) * 110 * 2*math.pi)
+        
+        outsignal,pool = analsynthSineModelStreaming(self.params, signal)
+
+        outsignal = outsignal[:signalSize] # cut to durations of input and output signal
+
+        # compare without half-window bounds to avoid windowing effect
+        halfwin = (self.params['frameSize']/2)
+        
+        numpy.savetxt('sine.txt',signal[halfwin:-halfwin])
+        numpy.savetxt('sine_out.txt',outsignal[halfwin:-halfwin])
+        
+        # computing max difference between waveforms
+        diffference = numpy.max(abs(outsignal[halfwin:-halfwin] - signal[halfwin:-halfwin]))
+        ref_diff = 0.00616494
+          
+        self.assertAlmostEqual(diffference/ref_diff, 1, 1e-6)
+
 
 
 
