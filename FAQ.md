@@ -248,8 +248,9 @@ You can also use Essentia's standard mode for real-time computations.
 
 Not all algorithms available in the library are suited for real-time analysis due to their computational complexity. Some complex algorithms, such as BeatTrackerDegara, BeatTrackerMultiFeatures, and PredominantMelody, require large segments of audio in order to function properly.
 
-Note that you do not need any copying algorithm to multiplex an output to several inputs. You can just assign it and it will work.
-
+libessentia.so is not found after installing from source
+--------------------------------------------------------
+The library is installed into /usr/local and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
 
 
 

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+ #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import distutils.sysconfig
@@ -145,10 +145,10 @@ def build(ctx):
                 includes.append("../..")
 
             ctx.program(source  = ctx.path.ant_glob(' '.join(files)),
-                        target  = prog_name,
+                        target  = 'essentia_' + prog_name,
                         includes = includes,
                         use      = 'essentia ' + ctx.env.USES,
-                        install_path = None)
+                        install_path = '${PREFIX}/bin')
 
         for e in example_sources_fileio + example_sources_with_gaia:
             if e[0] in ctx.env.EXAMPLE_LIST:

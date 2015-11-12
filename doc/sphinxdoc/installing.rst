@@ -82,7 +82,7 @@ Compiling Essentia
 Once your dependencies are installed, you can compile Essentia (the library) by going into its
 directory and start by configuring it::
 
-  ./waf configure --mode=release --with-python --with-cpptests --with-examples --with-vamp --with-gaia
+  ./waf configure --mode=release --build-static --with-python --with-cpptests --with-examples --with-vamp --with-gaia
 
 Use the keys:
    ``--with-python`` to enable python bindings,
