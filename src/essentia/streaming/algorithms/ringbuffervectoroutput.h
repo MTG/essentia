@@ -17,33 +17,29 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_STREAMING_RINGBUFFERINPUT_H
-#define ESSENTIA_STREAMING_RINGBUFFERINPUT_H
+#ifndef ESSENTIA_STREAMING_RINGBUFFERVECTOROUTPUT_H
+#define ESSENTIA_STREAMING_RINGBUFFERVECTOROUTPUT_H
 
-#include "streamingalgorithm.h"
+#include "../streamingalgorithm.h"
 
 namespace essentia {
 namespace streaming {
 
-class RingBufferInput : public Algorithm {
+class RingBufferVectorOutput : public Algorithm {
  protected:
-  Source<Real> _output;
+  Sink< std::vector<Real> > _input;
   class RingBufferImpl* _impl;
 
  public:
-  RingBufferInput();
-  ~RingBufferInput();
+  RingBufferVectorOutput();
+  ~RingBufferVectorOutput();
 
-  void add(Real* inputData, int size);
+  int get(Real* outputData, int max);
 
   AlgorithmStatus process();
 
-  void shouldStop(bool stop) {
-    E_DEBUG(EExecution, "RBI should stop...");
-  }
-
   void declareParameters() {
-    declareParameter("bufferSize", "the size of the ringbuffer", "", 8192);
+    declareParameter("bufferSize", "size of the ringbuffer", "", 8192);
   }
 
   void configure();
@@ -57,4 +53,4 @@ class RingBufferInput : public Algorithm {
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_STREAMING_RINGBUFFERINPUT_H
+#endif // ESSENTIA_STREAMING_RINGBUFFEROUTPUT_H

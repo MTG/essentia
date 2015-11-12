@@ -25,11 +25,10 @@ using namespace standard;
 
 const char* CentralMoments::name = "CentralMoments";
 const char* CentralMoments::description = DOC("This algorithm extracts the 0th, 1st, 2nd, 3rd and 4th central moments of an array (i.e. it returns a 5-tuple in which the index corresponds to the order of the moment).\n"
-"Note:\n"
-" - For a spectral centroid, frequency range should be equal to samplerate/2\n"
-" - For an audio centroid, frequency range should be equal to (audio_size-1) / samplerate\n"
 "\n"
 "Central moments cannot be computed on arrays which size is less than 2, in which case an exception is thrown.\n"
+"\n"
+"Note: the 'mode' parameter defines whether to treat array values as a probability distribution function (pdf) or as sample points of a distribution (sample).\n"
 "\n"
 "References:\n"
 "  [1] Sample Central Moment -- from Wolfram MathWorld,\n"
@@ -38,13 +37,11 @@ const char* CentralMoments::description = DOC("This algorithm extracts the 0th, 
 "  http://en.wikipedia.org/wiki/Central_moment");
 
 void CentralMoments::configure() {
+  _mode = parameter("mode").toLower();
   _range = parameter("range").toReal();
 }
 
 void CentralMoments::compute() {
-
-  // For precision reasons, we first compute the central moments with a normalized
-  // range [0,1], and we multiply by the desired range at the end only.
 
   const std::vector<Real>& array = _array.get();
   std::vector<Real>& centralMoments = _centralMoments.get();
@@ -58,54 +55,86 @@ void CentralMoments::compute() {
     throw EssentiaException("CentralMoments: cannot compute the central moments of an array of size 1");
   }
 
-  int arraySize = array.size();
+  if (_mode == "sample") {
+    // treat array values as a sample of distribution
 
-  // scale is the horizontal scale, thus i*scale corresponds to the
-  // normalized frequency, i.e.: between 0 and 1
-  double scale = (double)1.0 / (arraySize - 1);
-
-  double norm = 0.0;
-  for (int i=0; i<arraySize; i++) norm += array[i];
-
-  if (norm == 0.0) {
-    for (int k=0; k<5; k++) {
-      centralMoments[k] = 0.0;
+    // compute mean
+    double m = 0.;
+    for (int i=0; i<(int)array.size(); i++) {
+      m += array[i]; 
     }
-    return;
+    m /= array.size();
+
+    // compute central moments
+    double sum2 = 0., sum3 = 0., sum4 = 0.;
+    double x, x2;
+
+    for (int i=0; i<(int)array.size(); i++) {
+      x = array[i] - m;
+      x2 = x * x;
+      sum2 += x2;
+      sum3 += x2 * x;
+      sum4 += x2 * x2;
+    }
+
+    centralMoments[0] = 1.;
+    centralMoments[1] = 0.;
+    centralMoments[2] = sum2 / array.size();
+    centralMoments[3] = sum3 / array.size();
+    centralMoments[4] = sum4 / array.size();
   }
+  else if (_mode == "pdf") {
+    // treat array values as a probability density function
 
-  // centroid is also in normalized frequency, i.e.: between 0 and 1
-  double centroid = 0.0;
-  for (int i=0; i<arraySize; i++) {
-    centroid += (i*scale) * array[i];
-  }
-  centroid /= norm;
+    // For precision reasons, we first compute the central moments with a normalized
+    // range [0,1], and we multiply by the desired range at the end only.
 
-  centralMoments[0] = 1.0;
-  centralMoments[1] = 0.0;
+    // scale is the horizontal scale, thus i*scale corresponds to the
+    // normalized frequency, i.e.: between 0 and 1
+    double scale = (double)1.0 / (array.size() - 1);
 
-  double m2 = 0.0, m3 = 0.0, m4 = 0.0;
-  double v, v2, v2f;
+    double norm = 0.0;
+    for (int i=0; i<(int)array.size(); i++) norm += array[i];
 
-  for (int i=0; i<arraySize; i++) {
-    v = (i*scale) - centroid;
-    v2 = v*v;
-    v2f = v2 * array[i];
-    m2 += v2f;
-    m3 += v2f * v;
-    m4 += v2f * v2;
-  }
+    if (norm == 0.0) {
+      for (int k=0; k<5; k++) {
+        centralMoments[k] = 0.0;
+      }
+      return;
+    }
 
-  m2 /= norm;
-  m3 /= norm;
-  m4 /= norm;
+    // centroid is also in normalized frequency, i.e.: between 0 and 1
+    double centroid = 0.0;
+    for (int i=0; i<(int)array.size(); i++) {
+      centroid += (i*scale) * array[i];
+    }
+    centroid /= norm;
 
-  // we want the results inside the specified range, so as we factored it out
-  // in the above formula, we have to inject it again to get back the results
-  // relative to the desired range.
-  double r = _range;
-  centralMoments[2] = m2 * r*r;
-  centralMoments[3] = m3 * r*r*r;
-  centralMoments[4] = m4 * r*r*r*r;
+    centralMoments[0] = 1.0;
+    centralMoments[1] = 0.0;
 
+    double m2 = 0.0, m3 = 0.0, m4 = 0.0;
+    double v, v2, v2f;
+
+    for (int i=0; i<(int)array.size(); i++) {
+      v = (i*scale) - centroid;
+      v2 = v*v;
+      v2f = v2 * array[i];
+      m2 += v2f;
+      m3 += v2f * v;
+      m4 += v2f * v2;
+    }
+
+    m2 /= norm;
+    m3 /= norm;
+    m4 /= norm;
+
+    // we want the results inside the specified range, so as we factored it out
+    // in the above formula, we have to inject it again to get back the results
+    // relative to the desired range.
+    double r = _range;
+    centralMoments[2] = m2 * r*r;
+    centralMoments[3] = m3 * r*r*r;
+    centralMoments[4] = m4 * r*r*r*r;
+  } 
 }

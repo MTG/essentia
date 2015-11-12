@@ -33,7 +33,7 @@ class LPC : public Algorithm {
   Output<std::vector<Real> > _reflection;
   Algorithm* _correlation;
   std::vector<Real> _r;
-  int _P;
+  int _p;
 
  public:
   LPC() : _correlation(0) {

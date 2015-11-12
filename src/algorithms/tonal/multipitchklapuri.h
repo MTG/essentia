@@ -45,20 +45,20 @@ class MultiPitchKlapuri : public Algorithm {
   Algorithm* _pitchSalienceFunction;
   Algorithm* _pitchSalienceFunctionPeaks;
 
-  Real sampleRate;
-  int frameSize;
-  int hopSize;
-  int zeroPaddingFactor;
-  Real referenceFrequency;
-  Real binResolution;
-  int numberHarmonics;
-  int numberHarmonicsMax;
-  Real centToHertzBase;
-  int binsInSemitone;
-  int binsInOctave;
-  Real referenceTerm;
-  std::vector<Real> centSpectrum;
-  int numberBins;
+  Real _sampleRate;
+  int _frameSize;
+  int _hopSize;
+  int _zeroPaddingFactor;
+  Real _referenceFrequency;
+  Real _binResolution;
+  int _numberHarmonics;
+  int _numberHarmonicsMax;
+  Real _centToHertzBase;
+  int _binsInSemitone;
+  int _binsInOctave;
+  Real _referenceTerm;
+  std::vector<Real> _centSpectrum;
+  int _numberBins;
 
  public:
   MultiPitchKlapuri() {

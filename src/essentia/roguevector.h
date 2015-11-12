@@ -56,9 +56,25 @@ class RogueVector : public std::vector<T> {
   void setSize(size_t size);
 };
 
+// Clang/LLVM implementation
+#if defined (OS_MAC) || defined(OS_FREEBSD) || defined(__EMSCRIPTEN__)
+
+// TODO: this is a big hack that relies on clang/libcpp not changing the memory
+//       layout of the std::vector (very dangerous, but works for now...)
+
+template <typename T>
+void RogueVector<T>::setData(T* data) { *reinterpret_cast<T**>(this) = data; }
+
+template <typename T>
+void RogueVector<T>::setSize(size_t size) {
+    T** start = reinterpret_cast<T**>(this);
+    *(start+1) = *start + size;
+    *(start+2) = *start + size;
+}
+
 
 // Windows implementation
-#if defined(OS_WIN32)
+#elif defined(OS_WIN32)
 
 // TODO probably outdated, as we want to use MINGW
 /*
@@ -94,23 +110,6 @@ template <typename T>
 void RogueVector<T>::setSize(size_t size) {
   this->_M_impl._M_finish = this->_M_impl._M_start + size;
   this->_M_impl._M_end_of_storage = this->_M_impl._M_start + size;
-}
-
-
-// Mac implementation
-#elif defined (OS_MAC) || defined(OS_FREEBSD)
-
-// TODO: this is a big hack that relies on clang/libcpp not changing the memory
-//       layout of the std::vector (very dangerous, but works for now...)
-
-template <typename T>
-void RogueVector<T>::setData(T* data) { *reinterpret_cast<T**>(this) = data; }
-
-template <typename T>
-void RogueVector<T>::setSize(size_t size) {
-    T** start = reinterpret_cast<T**>(this);
-    *(start+1) = *start + size;
-    *(start+2) = *start + size;
 }
 
 
