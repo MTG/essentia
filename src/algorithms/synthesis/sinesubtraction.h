@@ -44,6 +44,8 @@ class SineSubtraction : public Algorithm {
   int _fftSize;
   int _hopSize;
 
+  std::vector<Real> _synwindow;
+
   std::vector<Real> _lastytfreq;
   std::vector<Real> _lastytphase;
 
@@ -64,6 +66,7 @@ class SineSubtraction : public Algorithm {
     declareInput(_phases, "phases", "the phases of the sinusoidal peaks");
     declareOutput(_outframe, "frame", "the output audio frame");
 
+    _window = AlgorithmFactory::create("Windowing");
     _fft = AlgorithmFactory::create("FFT");
     _ifft = AlgorithmFactory::create("IFFT");
     _overlapadd = AlgorithmFactory::create("OverlapAdd");
@@ -71,6 +74,7 @@ class SineSubtraction : public Algorithm {
   }
 
     ~SineSubtraction() {
+    delete _window;
     delete _fft;
     delete _ifft;
     delete _overlapadd;
@@ -82,13 +86,7 @@ class SineSubtraction : public Algorithm {
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
   }
 
-  void configure() {
-    _sampleRate = parameter("sampleRate").toReal();
-    _fftSize = parameter("fftSize").toInt();
-    _hopSize = parameter("hopSize").toInt();
-    // initialize lastfrequencies
-  }
-
+  void configure();
   void compute();
 
 

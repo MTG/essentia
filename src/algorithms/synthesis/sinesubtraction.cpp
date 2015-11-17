@@ -65,6 +65,23 @@ using namespace standard;
 const char* SineSubtraction::name = "SineSubtraction";
 const char* SineSubtraction::description = DOC("This algorithm subtracts the sinusoids computed with the sine model analysis from an input audio signal. It ouputs an audio signal.");
 
+
+void SineSubtraction::configure() {
+
+    _sampleRate = parameter("sampleRate").toReal();
+    _fftSize = parameter("fftSize").toInt();
+    _hopSize = parameter("hopSize").toInt();
+
+	 	std::string wtype = "blackmanharris92"; // default "hamming"
+		_window->configure( "type", wtype.c_str());
+
+	// create synthesis window
+	createSynthesisWindow(_synwindow, _fftSize);
+
+
+  }
+}
+
 void SineSubtraction::compute() {
 
   const std::vector<Real>& inframe = _inframe.get();
@@ -87,8 +104,8 @@ void SineSubtraction::compute() {
 	}
 	printf("size synframe %d, ", sinframe.size());
 
-	windowing->input("frame").set(synframe);
-	windowing->output("frame").set(wsynframe);
+	_window->input("frame").set(synframe);
+	_window->output("frame").set(wsynframe);
 
 	fft->input("frame").set(wsynframe);
 	fft->output("fft").set(synfft);
@@ -188,3 +205,41 @@ void Sinesubtraction::generateSines(const std::vector<Real> magnitudes, const st
 
 
 }
+
+void SineSubtraction::createSynthesisWindow(std::vector<Real> &synwindow, int hopSize, int winSize)
+{
+std::vector<Real> ones;
+std::vector<Real> triangle;
+std::vector<Real> win;
+
+for (int i=0; i < winSize;++i){
+	ones.push_back(1.f);
+}
+
+_window->input.set(ones);
+_window->output.set(win);
+_window->compute();
+
+// create traingular
+std::string wtype = "triangular"; // default "hamming"
+Algorithm* trinagular = factory.create("Windowing", "type", wtype.c_str());
+ones.reisze(2*hopSize);
+triangular->input.set(ones);
+triangular->output.set(triangle);
+triangular->compute();
+
+// init synthesis window
+synwindow.resize(winSize);
+std::fill(synwindow.begin(), synwindow.end(), 0.);
+int hN = winSize / 2;
+for (int i= hN-hopSize; i < hN+ hopSize;++i){
+	synwindow[i] = triangle[i-(hN-hopSize)] / win[i];
+}
+
+
+
+delete triangular;
+
+}
+
+
