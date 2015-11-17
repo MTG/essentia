@@ -102,7 +102,7 @@ export PATH=~/Dev/android/toolchain/bin:$PATH;
 
 Compiling Essentia to Javascript with Emscripten
 ------------------------------------------------
-Use the instructions below to compile Essentia with FFTW3 support only. The rest of dependencies have not been tested, but they should work as well.
+Use the instructions below to compile Essentia to Javascript. Among the dependencies, only FFTW3 is currently supported (see instructions to build it below). The rest of dependencies have not been tested, but they should work as well.
 
 Install Emscripten following the [instructions](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html) on their website. If you downloaded the SDK manually, make sure to activate the Emscripten environment by executing `emsdk_env.sh`.
 ```
