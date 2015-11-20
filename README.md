@@ -14,6 +14,9 @@ The library is cross-platform and currently supports Linux, Mac OS X, Windows, i
 -  http://essentia.upf.edu/documentation/installing.html 
 -  [doc/sphinxdoc/installing.rst](doc/sphinxdoc/installing.rst)
 
+You can download and use prebuilt static binaries for a number of Essentia's command-line music extractors instead of installing the complete library
+
+- [doc/sphinxdoc/extractors_out_of_box.rst](doc/sphinxdoc/extractors_out_of_box.rst)
 
 Quick start
 -----------
