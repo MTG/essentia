@@ -14,8 +14,6 @@ The library is cross-platform and currently supports Linux, Mac OS X, Windows, i
 -  http://essentia.upf.edu/documentation/installing.html 
 -  [doc/sphinxdoc/installing.rst](doc/sphinxdoc/installing.rst)
 
-Essentia does compile and run correctly on Windows, however there is no Visual Studio project readily available, so you will have to setup one yourself and compile the dependencies too. We will be working on Windows installer in the near future.
-
 
 Quick start
 -----------
