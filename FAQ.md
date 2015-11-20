@@ -1,9 +1,18 @@
 Frequently Asked Questions
 ==========================
 
+How to compute music descriptors using Essentia?
+------------------------------------------------
+
+Because Essentia is a library you are very fexible in the ways you can compute descriptors out of audio:
+
+- using [premade extractors out-of-box](doc/sphinxdoc/extractors_out_of_box.rst) (the easiest way without programming)
+- using python (see [python tutorial](doc/sphinxdoc/python_tutorial.rst))
+- writing your own C++ extractor (see the premade extractors as examples)
+
+
 How to compile my own C++ code that uses Essentia?
 --------------------------------------------------
-
 
 Here is an example how to compile [standard_mfcc.cpp](https://github.com/MTG/essentia/blob/2.0.1/src/examples/standard_mfcc.cpp) example on Linux linking with a system-wide installation of Essentia (done by ```./waf install```) and all its dependencies. Modify to your needs. 
 
