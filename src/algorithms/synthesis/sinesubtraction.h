@@ -27,6 +27,8 @@
 
 
 #include "algorithm.h"
+#include "algorithmfactory.h"
+
 
 namespace essentia {
 namespace standard {
@@ -49,14 +51,15 @@ class SineSubtraction : public Algorithm {
   std::vector<Real> _lastytfreq;
   std::vector<Real> _lastytphase;
 
+  Algorithm* _window;
   Algorithm* _fft;
   Algorithm* _ifft;
   Algorithm* _overlapadd;
 
-  //void genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > &outfft);
   void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
   void subtractFFT(std::vector<std::complex<Real> >&fft1, const std::vector<std::complex<Real> >&fft2);
-  void generateSines(const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<std::complex<Real> >&outfft, int outsize );
+  void generateSines(const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<std::complex<Real> >&outfft);
+  void createSynthesisWindow(std::vector<Real> &synwindow, int hopSize, int winSize);
 
  public:
   SineSubtraction() {

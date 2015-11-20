@@ -136,7 +136,8 @@ int main(int argc, char* argv[]) {
   fft->output("fft").set(fftframe);
 
   // Sine model analysis
-  spsmodelanal->input("fft").set(fftframe);
+  //spsmodelanal->input("fft").set(fftframe); // old version
+  spsmodelanal->input("frame").set(frame); // inputs a frame
   spsmodelanal->output("magnitudes").set(magnitudes);
   spsmodelanal->output("frequencies").set(frequencies);
   spsmodelanal->output("phases").set(phases);
@@ -147,11 +148,12 @@ int main(int argc, char* argv[]) {
   spsmodelsynth->input("frequencies").set(frequencies);
   spsmodelsynth->input("phases").set(phases);
   spsmodelsynth->input("stocenv").set(stocenv);
-  spsmodelsynth->output("fft").set(sfftframe);
+  //spsmodelsynth->output("fft").set(sfftframe);
+  spsmodelsynth->output("frame").set(ifftframe); // outputs a frame
 
   // Synthesis
-  ifft->input("fft").set(sfftframe); // taking SpsModelSynth output
-  ifft->output("frame").set(ifftframe);
+//  ifft->input("fft").set(sfftframe); // taking SpsModelSynth output
+//  ifft->output("frame").set(ifftframe);
 
   vector<Real> audioOutput;
 
@@ -181,8 +183,7 @@ int main(int argc, char* argv[]) {
       break;
     }
 
-    window->compute();
-    fft->compute();
+
 
     // Sine model analysis
     spsmodelanal->compute();

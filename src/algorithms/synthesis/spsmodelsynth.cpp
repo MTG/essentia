@@ -46,12 +46,12 @@ void SpsModelSynth::configure()
   _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
   _stocSize += 1; // to avoid discontinuities at Nyquist freq.
   _stocSize += _stocSize % 2; // make it even size (Essentia FFT requirement)
-  _fft->configure("size", _stocSize);
+  //_fft->configure("size", _stocSize);
 
   _stocSpecSize = parameter("fftSize").toInt()/2;
   _stocSpecSize += int( 2. / parameter("stocf").toReal()); // increase to avoid discontinuities at Nyquist freq.
   _stocSpecSize += _stocSpecSize % 2; // make it even size (Essentia FFT requirement)
-  _ifft->configure("size", _stocSpecSize);
+  _ifftSine->configure("size", _stocSpecSize);
 
 _log.open("synth.log");
 }
@@ -64,14 +64,14 @@ void SpsModelSynth::compute() {
   const std::vector<Real>& phases = _phases.get();
   const std::vector<Real>& stocenv = _stocenv.get();
 
-  std::vector<std::complex<Real> >& outfft = _outfft.get();
-  std::vector<Real>& outaudio = _outaudio.get();
+  //std::vector<std::complex<Real> >& outfft = _outfft.get();
+  std::vector<Real>& outframe = _outframe.get();
 
-
+/*
   // temp vectors
   std::vector<std::complex<Real> > fftSines;
   std::vector<std::complex<Real> > fftStoc;
-
+  std::vector<Real> sineFrame;
 
   int i = 0;
 
@@ -83,25 +83,28 @@ void SpsModelSynth::compute() {
   _sineModelSynth->compute();
 
 // TODO: add new essentia algorithms for synthesis of sines to audio samples
-std::vector<Real> sineAudio, resAudio;
-std::cout << "TODO: add new algoirithms for synthesis:"
-_ifftSine->input("ifft").set(fftSines);
-_ifftSine->output("frame").set(sineFrame);
-_ifftSine->compute();
-_overlappAdd->input("frame").set(sineFrame);
-_overlappAdd->output("audio").set(sineAudio);
- _overlappAdd->compute()
+  std::vector<Real> sineAudio, resAudio;
+  std::cout << "TODO: add new algoirithms for synthesis:";
+  _ifftSine->input("ifft").set(fftSines);
+  _ifftSine->output("frame").set(sineFrame);
+  _ifftSine->compute();
+  _overlappAdd->input("frame").set(sineFrame);
+  _overlappAdd->output("audio").set(sineAudio);
+  _overlappAdd->compute()
 
+// TODO: implement
 // synthesis of the stochastic component
   _stochasticModelSynth->input("stocenv").set(stocEnv);
   _stochasticModelSynth->output("audio").set(resAudio);
   _stochasticModelSynth->compute();
 
+
 // add sine and sotchastic copmponents
  for (i = 0; i < (int)resAudio.size(); ++i)
   {
-    outaudio.push_back(sineAudio[i] + resAudio[i]);
+    outframe.push_back(sineAudio[i] + resAudio[i]);
   }
+*/
 
 /* OLD code
   // stochastic
@@ -122,6 +125,7 @@ _overlappAdd->output("audio").set(sineAudio);
 // output is an audio frame / already overlapp-add. Directly to write inot output buffer.
 }
 
+/*
 void SpsModelSynth::stochasticModelSynthOLD(const std::vector<Real> stocEnv, const int H, const int N, std::vector<std::complex<Real> > &fftStoc)
 {
 //	"""
@@ -226,3 +230,5 @@ void SpsModelSynth::resample(const std::vector<Real> in, std::vector<Real> &out,
   }
 
 }
+
+*/

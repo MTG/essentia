@@ -39,22 +39,34 @@ const char* SpsModelAnal::description = DOC("This algorithm computes the stochas
 void SpsModelAnal::configure() {
 
 
-_sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
-                            "maxnSines", parameter("maxnSines").toInt() ,
-                            "freqDevOffset", parameter("freqDevOffset").toInt(),
-                            "freqDevSlope",  parameter("freqDevSlope").toReal()
-                            );
+  _window->configure( );
 
-_sineModelSynth->configure( "sampleRate", parameter("sampleRate").toReal(),
-                            "fftSize", parameter("fftSize").toInt(),
-                            "hopSize", parameter("hopSize").toInt()
-                            );
+  _fft->configure( );
 
-  // resample for stochastic envelope using FFT
-  _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
-  _stocSize += _stocSize % 2;
-  _fftres->configure("size", parameter("fftSize").toInt()/2);
-  _ifftres->configure("size", _stocSize);
+
+  _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
+                              "maxnSines", parameter("maxnSines").toInt() ,
+                              "freqDevOffset", parameter("freqDevOffset").toInt(),
+                              "freqDevSlope",  parameter("freqDevSlope").toReal()
+                              );
+
+  _sineSubtraction->configure( "sampleRate", parameter("sampleRate").toReal(),
+                              "fftSize", parameter("fftSize").toInt(),
+                              "hopSize", parameter("hopSize").toInt()
+                              );
+
+
+//_sineModelSynth->configure( "sampleRate", parameter("sampleRate").toReal(),
+//                            "fftSize", parameter("fftSize").toInt(),
+//                            "hopSize", parameter("hopSize").toInt()
+//                            );
+
+//  // resample for stochastic envelope using FFT
+//  _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
+//  _stocSize += _stocSize % 2;
+//  _fftres->configure("size", parameter("fftSize").toInt()/2);
+//  _ifftres->configure("size", _stocSize);
+ // _fftSize = parameter("fftSize").toInt();
 
 _log.open("anal.log");
 }
@@ -63,36 +75,53 @@ _log.open("anal.log");
 
 void SpsModelAnal::compute() {
   // inputs and outputs
-  const std::vector<std::complex<Real> >& fft = _fft.get();
+  //const std::vector<std::complex<Real> >& fft = _fft.get();
+  const std::vector<Real>& frame = _frame.get();
 
   std::vector<Real>& peakMagnitude = _magnitudes.get();
   std::vector<Real>& peakFrequency = _frequencies.get();
   std::vector<Real>& peakPhase = _phases.get();
   std::vector<Real>& stocEnv = _stocenv.get();
 
+  std::vector<Real> wframe;
+  std::vector<std::complex<Real> > fftin;
   std::vector<Real> fftmag;
   std::vector<Real> fftphase;
 
- _sineModelAnal->input("fft").set(fft);
+
+  _window->input("frame").set(frame);
+  _window->output("frame").set(wframe);
+  _window->compute();
+
+  _fft->input("frame").set(wframe);
+  _fft->output("fft").set(fftin);
+  _fft->compute();
+
+ _sineModelAnal->input("fft").set(fftin);
  _sineModelAnal->output("magnitudes").set(peakMagnitude);
  _sineModelAnal->output("frequencies").set(peakFrequency);
  _sineModelAnal->output("phases").set(peakPhase);
 
   _sineModelAnal->compute();
 
-std::cout << "TODO: add new algorithms for : SineSubtraction (input: audio, sine_params, output: audio)"
+std::cout << "TODO: add new algorithms for : SineSubtraction (input: audio, sine_params, output: audio)";
 std::vector<Real> frameOut;
 
 // this needs to take into account overlap-add issues, introducing delay
-// _sineSubtraction->input("audio").set(frame);
-//  _sineSubtraction->input("magnitudes").set(magnitudes);
-//  _sineSubtraction->input("frequencies").set(frequencies);
-//  _sineSubtraction->input("phases").set(phases);
-//  _sineSubtraction->output("audio").set(frameOut);
-// _sineSubtraction->compute();
+ _sineSubtraction->input("frame").set(frame); // size is iput _fftSize
+ _sineSubtraction->input("magnitudes").set(peakMagnitude);
+ _sineSubtraction->input("frequencies").set(peakFrequency);
+ _sineSubtraction->input("phases").set(peakPhase);
+ _sineSubtraction->output("frame").set(frameOut); // Nsyn size
+ _sineSubtraction->compute();
 
-std::cout << "TODO: add new algorithms for : stochasticModelAnal (input: audio, output: stocenv)"
+std::cout << "TODO: add new algorithms for : stochasticModelAnal (input: audio, output: stocenv)";
 // this needs to take into account overlap-add issues, introducing delay
+Real stocf = std::min( std::max(0.01f, parameter("stocf").toReal()), 1.f);
+int stocSize =  int( stocf * parameter("fftSize").toInt() / 2.);
+stocEnv.resize(stocSize);
+std::fill(stocEnv.begin(), stocEnv.end(), 0.);
+
 // _stochasticModelAnal->input("audio").set(frameOut);
 //  _stochasticModelAnal->output("stocenv").set(stocEnv);
 // _stochasticModelAnal->compute();
@@ -108,7 +137,7 @@ std::cout << "TODO: add new algorithms for : stochasticModelAnal (input: audio, 
 // additional methods
 
 
-
+/*
 void SpsModelAnal::stochasticModelAnalOld(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv)
 {
 
@@ -188,6 +217,7 @@ _log << std::endl;
 
 }
 
+*/
 
 // Move this to new algorithm for ResampleFFT
 void SpsModelAnal::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
@@ -199,6 +229,7 @@ void SpsModelAnal::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeF
   }
 }
 
+/*
 // function to resample based on the FFT
 // Use the same function than in python code
 // http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
@@ -242,3 +273,4 @@ void SpsModelAnal::resample(const std::vector<Real> in, std::vector<Real> &out, 
 
 }
 
+*/

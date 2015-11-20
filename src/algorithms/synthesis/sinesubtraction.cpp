@@ -76,10 +76,9 @@ void SineSubtraction::configure() {
 		_window->configure( "type", wtype.c_str());
 
 	// create synthesis window
-	createSynthesisWindow(_synwindow, _fftSize);
+	createSynthesisWindow(_synwindow, _hopSize, _fftSize);
 
 
-  }
 }
 
 void SineSubtraction::compute() {
@@ -89,44 +88,43 @@ void SineSubtraction::compute() {
   const std::vector<Real>& frequencies = _frequencies.get();
   const std::vector<Real>& phases = _phases.get();
 
-
   std::vector<Real>& outframe = _outframe.get();
-
-  std::vector<Real> sinesframe;
-
-	// compute input frame FFT
-	std::vector<Real> synframe;
-	std::vector<Real> wsynframe;
-	std::vector<std::complex<Real> > synfft;
-	for (int i= (inframe.size()/2) - _fftSize/2; i <=  (inframe.size()/2) + _fftSize/2; ++i)
-	{
-		synframe.push_back(inframe[i]);
-	}
-	printf("size synframe %d, ", sinframe.size());
-
-	_window->input("frame").set(synframe);
-	_window->output("frame").set(wsynframe);
-
-	fft->input("frame").set(wsynframe);
-	fft->output("fft").set(synfft);
-	fft->compute();
-
-	// generate sine spectrum
-	std::vector<std::complex<Real> > sinefft;
-	generateSines(magnitudes, frequencies, phases, sinefft);
-
-
-  // subtract  sines in FFT domain
-	subtractFFT(synfft, sinefft);
-
-  // IFFT of subtracted spectra
-	ifft->input("fft").set(synfft);
-	ifft->output("frame").set(synframeout);
-	ifft->compute();
-	// overlapp add synthesized audio
-	overlapadd->input("frame").set(synframeout);
-	overlapadd->output("frame").set(outframe);
-	overlapadd->compute();
+//
+//  std::vector<Real> sinesframe;
+//
+//	// compute input frame FFT
+//	std::vector<Real> synframe;
+//	std::vector<Real> wsynframe;
+//	std::vector<std::complex<Real> > synfft;
+//	for (int i= (inframe.size()/2) - _fftSize/2; i <=  (inframe.size()/2) + _fftSize/2; ++i)
+//	{
+//		synframe.push_back(inframe[i]);
+//	}
+//	printf("size synframe %d, ", sinframe.size());
+//
+//	_window->input("frame").set(synframe);
+//	_window->output("frame").set(wsynframe);
+//
+//	fft->input("frame").set(wsynframe);
+//	fft->output("fft").set(synfft);
+//	fft->compute();
+//
+//	// generate sine spectrum
+//	std::vector<std::complex<Real> > sinefft;
+//	generateSines(magnitudes, frequencies, phases, sinefft);
+//
+//
+//  // subtract  sines in FFT domain
+//	subtractFFT(synfft, sinefft);
+//
+//  // IFFT of subtracted spectra
+//	ifft->input("fft").set(synfft);
+//	ifft->output("frame").set(synframeout);
+//	ifft->compute();
+//	// overlapp add synthesized audio
+//	overlapadd->input("frame").set(synframeout);
+//	overlapadd->output("frame").set(outframe);
+//	overlapadd->compute();
 
 }
 
@@ -152,7 +150,7 @@ void SineSubtraction::initializeFFT(std::vector<std::complex<Real> >&fft, int si
 
 
 
-void Sinesubtraction::generateSines(const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<std::complex<Real> >&outfft)
+void SineSubtraction::generateSines(const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<std::complex<Real> >&outfft)
 {
 	int outSize = (int)floor(_fftSize/2.0) + 1;
   initializeFFT(outfft, outSize);
@@ -208,37 +206,38 @@ void Sinesubtraction::generateSines(const std::vector<Real> magnitudes, const st
 
 void SineSubtraction::createSynthesisWindow(std::vector<Real> &synwindow, int hopSize, int winSize)
 {
-std::vector<Real> ones;
-std::vector<Real> triangle;
-std::vector<Real> win;
+	std::vector<Real> ones;
+	std::vector<Real> triangle;
+	std::vector<Real> win;
 
-for (int i=0; i < winSize;++i){
-	ones.push_back(1.f);
-}
+	for (int i=0; i < winSize;++i){
+		ones.push_back(1.f);
+	}
 
-_window->input.set(ones);
-_window->output.set(win);
-_window->compute();
+	_window->input("frame").set(ones);
+	_window->output("frame").set(win);
+	_window->compute();
 
-// create traingular
-std::string wtype = "triangular"; // default "hamming"
-Algorithm* trinagular = factory.create("Windowing", "type", wtype.c_str());
-ones.reisze(2*hopSize);
-triangular->input.set(ones);
-triangular->output.set(triangle);
-triangular->compute();
+	// create traingular
+	Algorithm* triangular;
+	std::string wtype = "triangular"; // default "hamming"
+	triangular = AlgorithmFactory::create("Windowing", "type", wtype.c_str());
+	ones.resize(2*hopSize); // trim to size 2*hopsize
+	triangular->input("frame").set(ones);
+	triangular->output("frame").set(triangle);
+	triangular->compute();
 
-// init synthesis window
-synwindow.resize(winSize);
-std::fill(synwindow.begin(), synwindow.end(), 0.);
-int hN = winSize / 2;
-for (int i= hN-hopSize; i < hN+ hopSize;++i){
-	synwindow[i] = triangle[i-(hN-hopSize)] / win[i];
-}
+	// init synthesis window
+	synwindow.resize(winSize);
+	std::fill(synwindow.begin(), synwindow.end(), 0.);
+	int hN = winSize / 2;
+	for (int i= hN-hopSize; i < hN+ hopSize;++i){
+		synwindow[i] = triangle[i-(hN-hopSize)] / win[i];
+	}
 
 
 
-delete triangular;
+	delete triangular;
 
 }
 
