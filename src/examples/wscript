@@ -1,4 +1,4 @@
- #!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import distutils.sysconfig
@@ -167,6 +167,8 @@ def build(ctx):
 
         if sys.platform == 'darwin':
             install_path = os.environ['HOME'] + '/Library/Audio/Plug-Ins/Vamp'
+        elif sys.platform.startswith('linux'):
+            install_path = '/usr/local/lib/vamp'
         else:
             install_path = None
 
