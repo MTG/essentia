@@ -18,7 +18,7 @@ def options(ctx):
                    help='example programs to build (comma separated, without .cpp)')
     ctx.add_option('--with-static-examples', action='store_true',
                    dest='WITH_STATIC_EXAMPLES', default=False,
-                   help='build the example programs as static executables (WARNING: only works on debian wheezy with custom-compiled ffmpeg)')
+                   help='build the example programs as static executables')
     ctx.add_option('--with-vamp', action='store_true',
                    dest='WITH_VAMP', default=False,
                    help='build the vamp plugin wrapper')
