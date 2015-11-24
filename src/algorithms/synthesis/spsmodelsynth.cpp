@@ -123,6 +123,9 @@ void SpsModelSynth::compute() {
   }
   */
 // output is an audio frame / already overlapp-add. Directly to write inot output buffer.
+outframe.resize(parameter("hopSize").toInt());
+std::fill(outframe.begin(), outframe.end(), 0.);
+
 }
 
 /*

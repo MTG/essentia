@@ -50,11 +50,12 @@ int main(int argc, char* argv[]) {
 
   /////// PARAMS //////////////
   int framesize = 2048;
-  int hopsize = 512;
+  int hopsize = 128;
   Real sr = 44100;
   Real minSineDur = 0.02;
   Real stocf = 1.; // 0.2; //1.; // stochastic envelope factor. Default 0.2
 
+bool testSubtraction = true;
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
@@ -86,6 +87,12 @@ int main(int argc, char* argv[]) {
                             "freqDevSlope", 0.001,
                             "stocf", stocf
                             );
+
+  // ONLY FOR DEBUG
+  int subtrFFTSize = std::min(512, 4*hopsize);
+  Algorithm* sinesubtraction  = factory.create("SineSubtraction",
+                            "sampleRate", sr, "fftSize", subtrFFTSize, "hopSize", hopsize);
+  // ENd Debug
 
   Algorithm* spsmodelsynth  = factory.create("SpsModelSynth",
                             "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize, "stocf", stocf);
@@ -143,6 +150,16 @@ int main(int argc, char* argv[]) {
   spsmodelanal->output("phases").set(phases);
   spsmodelanal->output("stocenv").set(stocenv);
 
+  vector<Real> audioOutput;
+
+if (testSubtraction){
+ sinesubtraction->input("frame").set(frame); // size is iput _fftSize
+ sinesubtraction->input("magnitudes").set(magnitudes);
+ sinesubtraction->input("frequencies").set(frequencies);
+ sinesubtraction->input("phases").set(phases);
+ sinesubtraction->output("frame").set(audioOutput); // Nsyn size
+}
+else{
 
   spsmodelsynth->input("magnitudes").set(magnitudes);
   spsmodelsynth->input("frequencies").set(frequencies);
@@ -155,11 +172,9 @@ int main(int argc, char* argv[]) {
 //  ifft->input("fft").set(sfftframe); // taking SpsModelSynth output
 //  ifft->output("frame").set(ifftframe);
 
-  vector<Real> audioOutput;
-
   overlapAdd->input("signal").set(ifftframe);
   overlapAdd->output("signal").set(audioOutput);
-
+}
 
 
 ////////
@@ -193,6 +208,17 @@ int main(int argc, char* argv[]) {
     magnitudesAllFrames.push_back(magnitudes);
     phasesAllFrames.push_back(phases);
     stocEnvAllFrames.push_back(stocenv);
+
+    if (testSubtraction)
+    {
+      sinesubtraction->compute();
+
+    // skip first half window
+    if (counter >= floor(framesize / (hopsize * 2.f))){
+        alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
+      }
+    }
+
     counter++;
   }
 
@@ -211,6 +237,7 @@ int main(int argc, char* argv[]) {
   int nFrames = counter;
   counter = 0;
 
+  /*
   while (true) {
 
     // all frames processed
@@ -230,10 +257,11 @@ int main(int argc, char* argv[]) {
       stocEnvAllFrames.erase (stocEnvAllFrames.begin());
     }
 
+
     // Sine model synthesis
     spsmodelsynth->compute();
 
-    ifft->compute();
+    //ifft->compute();
     overlapAdd->compute();
 
     // skip first half window
@@ -243,7 +271,7 @@ int main(int argc, char* argv[]) {
 
     counter++;
   }
-
+*/
 
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
@@ -259,6 +287,7 @@ int main(int argc, char* argv[]) {
   delete fft;
   delete spsmodelanal;
   delete spsmodelsynth;
+  delete sinesubtraction; // ONLY FOR DEBUG
   delete ifft;
   delete overlapAdd;
   delete audioWriter;

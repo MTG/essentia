@@ -60,6 +60,7 @@ class SineSubtraction : public Algorithm {
   void subtractFFT(std::vector<std::complex<Real> >&fft1, const std::vector<std::complex<Real> >&fft2);
   void generateSines(const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<std::complex<Real> >&outfft);
   void createSynthesisWindow(std::vector<Real> &synwindow, int hopSize, int winSize);
+  void applySynthesisWindow(std::vector<Real> &inframe, const std::vector<Real> synwindow);
 
  public:
   SineSubtraction() {

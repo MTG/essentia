@@ -90,41 +90,45 @@ void SineSubtraction::compute() {
 
   std::vector<Real>& outframe = _outframe.get();
 //
-//  std::vector<Real> sinesframe;
-//
-//	// compute input frame FFT
-//	std::vector<Real> synframe;
-//	std::vector<Real> wsynframe;
-//	std::vector<std::complex<Real> > synfft;
-//	for (int i= (inframe.size()/2) - _fftSize/2; i <=  (inframe.size()/2) + _fftSize/2; ++i)
-//	{
-//		synframe.push_back(inframe[i]);
-//	}
-//	printf("size synframe %d, ", sinframe.size());
-//
-//	_window->input("frame").set(synframe);
-//	_window->output("frame").set(wsynframe);
-//
-//	fft->input("frame").set(wsynframe);
-//	fft->output("fft").set(synfft);
-//	fft->compute();
-//
-//	// generate sine spectrum
-//	std::vector<std::complex<Real> > sinefft;
-//	generateSines(magnitudes, frequencies, phases, sinefft);
-//
-//
-//  // subtract  sines in FFT domain
-//	subtractFFT(synfft, sinefft);
-//
-//  // IFFT of subtracted spectra
-//	ifft->input("fft").set(synfft);
-//	ifft->output("frame").set(synframeout);
-//	ifft->compute();
-//	// overlapp add synthesized audio
-//	overlapadd->input("frame").set(synframeout);
-//	overlapadd->output("frame").set(outframe);
-//	overlapadd->compute();
+  std::vector<Real> sinesframe;
+
+	// compute input frame FFT
+	std::vector<Real> synframe;
+	std::vector<Real> wsynframe;
+	std::vector<Real> synframeout;
+
+	std::vector<std::complex<Real> > synfft;
+	for (int i= (int) ((inframe.size()/2) - _fftSize/2); i <  (int) ((inframe.size()/2) + _fftSize/2); ++i)
+	{
+		synframe.push_back(inframe[i]);
+	}
+
+	_window->input("frame").set(synframe);
+	_window->output("frame").set(wsynframe);
+	_window->compute();
+
+	_fft->input("frame").set(wsynframe);
+	_fft->output("fft").set(synfft);
+	_fft->compute();
+
+	// generate sine spectrum
+	std::vector<std::complex<Real> > sinefft;
+	generateSines(magnitudes, frequencies, phases, sinefft);
+
+  // subtract  sines in FFT domain
+	subtractFFT(synfft, sinefft);
+
+  // IFFT of subtracted spectra
+	_ifft->input("fft").set(synfft);
+	_ifft->output("frame").set(synframeout);
+	_ifft->compute();
+
+	applySynthesisWindow(synframeout, _synwindow);
+
+	// overlapp add synthesized audio
+	_overlapadd->input("signal").set(synframeout);
+	_overlapadd->output("signal").set(outframe);
+	_overlapadd->compute();
 
 }
 
@@ -230,15 +234,52 @@ void SineSubtraction::createSynthesisWindow(std::vector<Real> &synwindow, int ho
 	// init synthesis window
 	synwindow.resize(winSize);
 	std::fill(synwindow.begin(), synwindow.end(), 0.);
+
 	int hN = winSize / 2;
-	for (int i= hN-hopSize; i < hN+ hopSize;++i){
-		synwindow[i] = triangle[i-(hN-hopSize)] / win[i];
+
+	// first half of the windowed signal is the
+	// second half of the signal with windowing!
+	int i=0;
+	for (int j=hN; j<hN + hopSize; j++) {
+		synwindow[i++] = triangle[j - hN + hopSize] / win[j];
 	}
 
+	// second half of the signal
+	i = winSize - hopSize;
+	for (int j=hN - hopSize; j<hN; j++) {
+		synwindow[i++] = triangle[j - hN + hopSize] / win[j];
+	}
 
 
 	delete triangular;
 
 }
 
+void SineSubtraction::applySynthesisWindow(std::vector<Real> &inframe, const std::vector<Real> synwindow)
+{
+// it considers zero-phase window shift
 
+printf("TODO: Still testign the synthesis window values!!\n");
+	int signalSize = (int)inframe.size();
+	for (int i= 0 ; i < signalSize ;++i){
+
+		inframe[i] *= synwindow[i];
+	}
+
+//
+//    // first half of the windowed signal is the
+//    // second half of the signal with windowing!
+//    int i=0;
+//    for (int j=signalSize/2; j<signalSize; j++) {
+//      inframe[i++] *= synwindow[j] ;
+//    }
+//
+//    // second half of the signal
+//    for (int j=0; j<signalSize/2; j++) {
+//      inframe[i++] *= synwindow[j] ;
+//    }
+
+
+
+
+}

@@ -50,8 +50,9 @@ void SpsModelAnal::configure() {
                               "freqDevSlope",  parameter("freqDevSlope").toReal()
                               );
 
+  int subtrFFTSize = std::min(512, 4*parameter("hopSize").toInt());  // make sure the FFT size is at least twice the hopsize
   _sineSubtraction->configure( "sampleRate", parameter("sampleRate").toReal(),
-                              "fftSize", parameter("fftSize").toInt(),
+                              "fftSize", subtrFFTSize,
                               "hopSize", parameter("hopSize").toInt()
                               );
 
@@ -104,8 +105,8 @@ void SpsModelAnal::compute() {
 
   _sineModelAnal->compute();
 
-std::cout << "TODO: add new algorithms for : SineSubtraction (input: audio, sine_params, output: audio)";
-std::vector<Real> frameOut;
+  //std::cout << "TODO: add new algorithms for : SineSubtraction (input: audio, sine_params, output: audio)";
+  std::vector<Real> frameOut;
 
 // this needs to take into account overlap-add issues, introducing delay
  _sineSubtraction->input("frame").set(frame); // size is iput _fftSize
@@ -115,7 +116,7 @@ std::vector<Real> frameOut;
  _sineSubtraction->output("frame").set(frameOut); // Nsyn size
  _sineSubtraction->compute();
 
-std::cout << "TODO: add new algorithms for : stochasticModelAnal (input: audio, output: stocenv)";
+//std::cout << "TODO: add new algorithms for : stochasticModelAnal (input: audio, output: stocenv)";
 // this needs to take into account overlap-add issues, introducing delay
 Real stocf = std::min( std::max(0.01f, parameter("stocf").toReal()), 1.f);
 int stocSize =  int( stocf * parameter("fftSize").toInt() / 2.);
