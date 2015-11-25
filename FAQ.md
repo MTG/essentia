@@ -77,7 +77,7 @@ Cross-compiling for Windows on Linux
 
 Install mingw gcc/g++
 ```
-sudo apt-get install gcc-mingw32 
+sudo apt-get install  gcc-mingw-w64 
 ```
 
 Build dependencies
@@ -265,6 +265,20 @@ Not all algorithms available in the library are suited for real-time analysis du
 libessentia.so is not found after installing from source
 --------------------------------------------------------
 The library is installed into /usr/local and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
+
+
+Building standalone Essentia Vamp plugin
+----------------------------------------
+
+It is possible to create a standalone binary for Essentia's Vamp plugin (works for Linux and OSX).
+
+```
+./waf configure --build-static --with-vamp --mode=release --lightweight= --fft=KISS
+./waf
+```
+
+The resulting binary ```build/src/examples/libvamp_essentia.so``` is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
+
 
 
 
