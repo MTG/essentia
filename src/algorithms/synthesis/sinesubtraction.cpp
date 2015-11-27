@@ -72,12 +72,18 @@ void SineSubtraction::configure() {
     _fftSize = parameter("fftSize").toInt();
     _hopSize = parameter("hopSize").toInt();
 
+// configure algorithms
 	 	std::string wtype = "blackmanharris92"; // default "hamming"
 		_window->configure( "type", wtype.c_str());
 
+	_fft->configure("size", _fftSize);
+
+	_overlapadd->configure( "frameSize", _fftSize, // uses synthesis window
+													"hopSize", _hopSize);
 	// create synthesis window
 	createSynthesisWindow(_synwindow, _hopSize, _fftSize);
 
+// configure algorithms
 
 }
 
@@ -240,16 +246,16 @@ void SineSubtraction::createSynthesisWindow(std::vector<Real> &synwindow, int ho
 	// first half of the windowed signal is the
 	// second half of the signal with windowing!
 	int i=0;
-	for (int j=hN; j<hN + hopSize; j++) {
-		synwindow[i++] = triangle[j - hN + hopSize] / win[j];
+	for (int j=0; j< hopSize; j++) {
+		synwindow[i++] = triangle[j] / win[j];
 	}
 
 	// second half of the signal
 	i = winSize - hopSize;
-	for (int j=hN - hopSize; j<hN; j++) {
-		synwindow[i++] = triangle[j - hN + hopSize] / win[j];
+	for (int j= hopSize; j< 2 * hopSize; j++) {
+		synwindow[i] = triangle[j] / win[i];
+		i++;
 	}
-
 
 	delete triangular;
 
@@ -257,29 +263,12 @@ void SineSubtraction::createSynthesisWindow(std::vector<Real> &synwindow, int ho
 
 void SineSubtraction::applySynthesisWindow(std::vector<Real> &inframe, const std::vector<Real> synwindow)
 {
-// it considers zero-phase window shift
-
-printf("TODO: Still testign the synthesis window values!!\n");
+// it considers already the zero-phase window shift
 	int signalSize = (int)inframe.size();
-	for (int i= 0 ; i < signalSize ;++i){
 
+	for (int i= 0 ; i < signalSize ;++i){
 		inframe[i] *= synwindow[i];
 	}
-
-//
-//    // first half of the windowed signal is the
-//    // second half of the signal with windowing!
-//    int i=0;
-//    for (int j=signalSize/2; j<signalSize; j++) {
-//      inframe[i++] *= synwindow[j] ;
-//    }
-//
-//    // second half of the signal
-//    for (int j=0; j<signalSize/2; j++) {
-//      inframe[i++] *= synwindow[j] ;
-//    }
-
-
 
 
 }
