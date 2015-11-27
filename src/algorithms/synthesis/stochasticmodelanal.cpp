@@ -17,16 +17,16 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "spsmodelanal.h"
+#include "stochasticmodelanal.h"
 #include "essentiamath.h"
 
 using namespace essentia;
 using namespace standard;
 
-const char* SpsModelAnal::name = "SpsModelAnal";
-const char* SpsModelAnal::description = DOC("This algorithm computes the stochastic model analysis. \n"
+const char* StochasticModelAnal::name = "StochasticModelAnal";
+const char* StochasticModelAnal::description = DOC("This algorithm computes the stochastic model analysis. \n"
 "\n"
-"It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses SineModelAnal. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"
+"It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses SineModelAnal and ResampleFFT. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"
 "\n"
 "References:\n"
 "  https://github.com/MTG/sms-tools\n"
@@ -36,54 +36,39 @@ const char* SpsModelAnal::description = DOC("This algorithm computes the stochas
 
 
 
-void SpsModelAnal::configure() {
+void StochasticModelAnal::configure() {
+
+
+_stocf = parameter("stocf").toReal();
+_fftSize = parameter("fftSize").toInt();
 
 
   _window->configure( );
-
   _fft->configure( );
 
 
-  _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
-                              "maxnSines", parameter("maxnSines").toInt() ,
-                              "freqDevOffset", parameter("freqDevOffset").toInt(),
-                              "freqDevSlope",  parameter("freqDevSlope").toReal()
-                              );
-
-  int subtrFFTSize = std::min(512, 4*parameter("hopSize").toInt());  // make sure the FFT size is at least twice the hopsize
-  _sineSubtraction->configure( "sampleRate", parameter("sampleRate").toReal(),
-                              "fftSize", subtrFFTSize,
-                              "hopSize", parameter("hopSize").toInt()
-                              );
-
-  // accumulates two output frames from the sinesubtraction
-  _stocFrameIn.resize(2*parameter("hopSize").toInt());
-
-//_sineModelSynth->configure( "sampleRate", parameter("sampleRate").toReal(),
-//                            "fftSize", parameter("fftSize").toInt(),
-//                            "hopSize", parameter("hopSize").toInt()
-//                            );
-
 //  // resample for stochastic envelope using FFT
-//  _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
-//  _stocSize += _stocSize % 2;
-//  _fftres->configure("size", parameter("fftSize").toInt()/2);
-//  _ifftres->configure("size", _stocSize);
- // _fftSize = parameter("fftSize").toInt();
+  int hN = int(parameter("fftSize").toInt()/2.) + 1;
+  _stocf = std::max(_stocf, 3.f / hN); //  limits  Stochastic decimation factor too small
 
-_log.open("anal.log");
+>>> I AM HERE
+
+  _stocSize = int (parameter("fftSize").toInt() * _stocf / 2.);
+  _stocSize += _stocSize % 2;
+
+  _resample->configure("size", parameter("fftSize").toInt()/2);
+
+
+
+
 }
 
 
 
-void SpsModelAnal::compute() {
+void StochasticModelAnal::compute() {
   // inputs and outputs
   //const std::vector<std::complex<Real> >& fft = _fft.get();
   const std::vector<Real>& frame = _frame.get();
-
-  std::vector<Real>& peakMagnitude = _magnitudes.get();
-  std::vector<Real>& peakFrequency = _frequencies.get();
-  std::vector<Real>& peakPhase = _phases.get();
   std::vector<Real>& stocEnv = _stocenv.get();
 
   std::vector<Real> wframe;
@@ -145,7 +130,7 @@ std::fill(stocEnv.begin(), stocEnv.end(), 0.);
 
 
 /*
-void SpsModelAnal::stochasticModelAnalOld(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv)
+void StochasticModelAnal::stochasticModelAnalOld(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv)
 {
 
 // TOD: refactor this function in two new essentia algorithms: sineSubctraction and sotchasticModelAnal
@@ -227,7 +212,7 @@ _log << std::endl;
 */
 
 // Move this to new algorithm for ResampleFFT
-void SpsModelAnal::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
+void StochasticModelAnal::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
 {
   fft.resize(sizeFFT);
   for (int i=0; i < sizeFFT; ++i){
@@ -236,48 +221,4 @@ void SpsModelAnal::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeF
   }
 }
 
-/*
-// function to resample based on the FFT
-// Use the same function than in python code
-// http://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.resample.html
-void SpsModelAnal::resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut)
-{
 
-// TODO: consider adding this algorithhms as an essentia standard algorithm
-
-  std::vector<std::complex<Real> >fftin; // temp vectors
-  std::vector<std::complex<Real> >fftout; // temp vectors
-
-  int sizeIn = (int) in.size();
-
-  _fftres->input("frame").set(in);
-  _fftres->output("fft").set(fftin);
-  _fftres->compute();
-
-
-  int hN = (sizeIn/2.)+1;
-  int hNout = (sizeOut/2.)+1;
-  initializeFFT(fftout, hNout);
-  // fill positive spectrum to hN (upsampling zeros will be padded) or hNout (downsampling and high frequencies will be removed)
-  for (int i = 0; i < std::min(hN, hNout); ++i)
-  {
-    // positive spectrums
-    fftout[i].real( fftin[i].real());
-    fftout[i].imag( fftin[i].imag());
-  }
-
-  _ifftres->input("fft").set(fftout);
-  _ifftres->output("frame").set(out);
-
-  _ifftres->compute();
-
-  // normalize
-  Real normalizationGain = 1. / float(sizeIn);
-  for (int i = 0; i < sizeOut; ++i)
-  {
-   out[i] *= normalizationGain ;
-  }
-
-}
-
-*/

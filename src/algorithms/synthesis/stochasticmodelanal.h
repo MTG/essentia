@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_SPSMODELANAL_H
-#define ESSENTIA_SPSMODELANAL_H
+#ifndef ESSENTIA_STOCHASTICMODELANAL_H
+#define ESSENTIA_STOCHASTICMODELANAL_H
 
 #include "algorithm.h"
 #include "algorithmfactory.h"
@@ -28,7 +28,7 @@
 namespace essentia {
 namespace standard {
 
-class SpsModelAnal : public Algorithm {
+class StochasticModelAnal : public Algorithm {
 
  protected:
   //Input<std::vector<std::complex<Real> > > _fft;
@@ -56,7 +56,7 @@ class SpsModelAnal : public Algorithm {
 std::ofstream _log;
 
  public:
-  SpsModelAnal() {
+  StochasticModelAnal() {
     declareInput(_frame, "frame", "the input frame");
     //declareInput(_fft, "fft", "the input frame");
     declareOutput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
@@ -80,7 +80,7 @@ std::ofstream _log;
 
   }
 
-  ~SpsModelAnal() {
+  ~StochasticModelAnal() {
 //    delete _peakDetect;
 //    delete _cartesianToPolar;
   delete _window;
@@ -101,16 +101,6 @@ std::ofstream _log;
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("hopSize", "the hop size between frames", "[1,inf)", 512);
     declareParameter("fftSize", "the size of the internal FFT size (full spectrum size)", "[1,inf)", 2048);
-    declareParameter("maxPeaks", "the maximum number of returned peaks", "[1,inf)", 100);
-    declareParameter("maxFrequency", "the maximum frequency of the range to evaluate [Hz]", "(0,inf)", 5000.0);
-    declareParameter("minFrequency", "the minimum frequency of the range to evaluate [Hz]", "[0,inf)", 0.0);
-    declareParameter("magnitudeThreshold", "peaks below this given threshold are not outputted", "(-inf,inf)", 0.0);
-    declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
-    // sinusoidal tracking
-    declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
-   // declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
-    declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
-    declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
     declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1]", 0.2);
 
   }
@@ -138,24 +128,18 @@ std::ofstream _log;
 namespace essentia {
 namespace streaming {
 
-class SpsModelAnal : public StreamingAlgorithmWrapper {
+class StochasticModelAnal : public StreamingAlgorithmWrapper {
 
  protected:
   //Sink<std::vector<std::complex<Real> > > _fft; // input
   Sink<std::vector<Real> > _frame; // input
-  Source<std::vector<Real> > _frequencies;
-  Source<std::vector<Real> > _magnitudes;
-  Source<std::vector<Real> > _phases;
   Source<std::vector<Real> > _stocenv;
 
  public:
-  SpsModelAnal() {
-    declareAlgorithm("SpsModelAnal");
+  StochasticModelAnal() {
+    declareAlgorithm("StochasticModelAnal");
     declareInput(_frame, TOKEN, "frame");
     //declareInput(_fft, TOKEN, "fft");
-    declareOutput(_frequencies, TOKEN, "frequencies");
-    declareOutput(_magnitudes, TOKEN, "magnitudes");
-    declareOutput(_phases, TOKEN, "phases");
     declareOutput(_stocenv, TOKEN, "stocenv");
   }
 };
@@ -166,4 +150,4 @@ class SpsModelAnal : public StreamingAlgorithmWrapper {
 
 
 
-#endif // ESSENTIA_SPSMODELANAL_H
+#endif // ESSENTIA_STOCHASTICMODELANAL_H
