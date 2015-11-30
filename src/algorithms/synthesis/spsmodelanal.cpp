@@ -35,7 +35,6 @@ const char* SpsModelAnal::description = DOC("This algorithm computes the stochas
 
 
 
-
 void SpsModelAnal::configure() {
 
 
@@ -56,22 +55,17 @@ void SpsModelAnal::configure() {
                               "hopSize", parameter("hopSize").toInt()
                               );
 
-  // accumulates two output frames from the sinesubtraction
+  // initialize array to accumulates two output frames from the sinesubtraction output
   _stocFrameIn.resize(2*parameter("hopSize").toInt());
+  std::fill(_stocFrameIn.begin(), _stocFrameIn.end(), 0.);
 
-//_sineModelSynth->configure( "sampleRate", parameter("sampleRate").toReal(),
-//                            "fftSize", parameter("fftSize").toInt(),
-//                            "hopSize", parameter("hopSize").toInt()
-//                            );
+  _stochasticModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
+                              "fftSize", 2*parameter("hopSize").toInt(),
+                              "hopSize", parameter("hopSize").toInt(),
+                              "stocf", parameter("stocf").toReal());
 
-//  // resample for stochastic envelope using FFT
-//  _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
-//  _stocSize += _stocSize % 2;
-//  _fftres->configure("size", parameter("fftSize").toInt()/2);
-//  _ifftres->configure("size", _stocSize);
- // _fftSize = parameter("fftSize").toInt();
 
-_log.open("anal.log");
+  _log.open("anal.log");
 }
 
 
@@ -107,7 +101,7 @@ void SpsModelAnal::compute() {
 
   _sineModelAnal->compute();
 
-  //std::cout << "TODO: add new algorithms for : SineSubtraction (input: audio, sine_params, output: audio)";
+
   std::vector<Real> subtrFrameOut;
 
 // this needs to take into account overlap-add issues, introducing delay
@@ -118,24 +112,16 @@ void SpsModelAnal::compute() {
  _sineSubtraction->output("frame").set(subtrFrameOut); // Nsyn size
  _sineSubtraction->compute();
 
+  updateStocInFrame(subtrFrameOut, _stocFrameIn); // shift and copy frame for stochastic model analysis
 
-  updateStocInFrame(subtrFrameOut, _stocFrameIn); // shift and copy frmae for stochastic model analysis
-
-
-//std::cout << "TODO: add new algorithms for : stochasticModelAnal (input: audio, output: stocenv)";
-// this needs to take into account overlap-add issues, introducing delay
-Real stocf = std::min( std::max(0.01f, parameter("stocf").toReal()), 1.f);
-int stocSize =  int( stocf * parameter("fftSize").toInt() / 2.);
-stocEnv.resize(stocSize);
-std::fill(stocEnv.begin(), stocEnv.end(), 0.);
-
-  _stochasticModelAnal->input("frame").set(frameOut);
+  _stochasticModelAnal->input("frame").set(_stocFrameIn);
   _stochasticModelAnal->output("stocenv").set(stocEnv);
   _stochasticModelAnal->compute();
 
-
-  // compute stochastic envelope
- // stochasticModelAnal(fft, peakMagnitude, peakFrequency, peakPhase, stocEnv);
+// debug
+  for (int i=0; i < (int) stocEnv.size(); i++)
+    _log << stocEnv[i] << " ";
+  _log << std::endl;
 
 }
 
@@ -143,6 +129,16 @@ std::fill(stocEnv.begin(), stocEnv.end(), 0.);
 // ---------------------------
 // additional methods
 
+ // shift and copy frame for stochastic model analysis
+void SpsModelAnal::updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator)
+{
+  for (int i =0; i < (int) frameIn.size(); ++i){
+    if (i+ (int) frameIn.size() < (int) frameAccumulator.size()){
+      frameAccumulator[i] = frameAccumulator[ i+ (int) frameIn.size()];
+      frameAccumulator[i+ (int) frameIn.size()] = frameIn[i];
+    }
+  }
+}
 
 /*
 void SpsModelAnal::stochasticModelAnalOld(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv)

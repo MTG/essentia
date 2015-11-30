@@ -24,9 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* StochasticModelAnal::name = "StochasticModelAnal";
-const char* StochasticModelAnal::description = DOC("This algorithm computes the stochastic model analysis. \n"
-"\n"
-"It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses SineModelAnal and ResampleFFT. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"
+const char* StochasticModelAnal::description = DOC("This algorithm computes the stochastic model analysis. It gets the resampled spectral envelope of the stochastic component.\n"
 "\n"
 "References:\n"
 "  https://github.com/MTG/sms-tools\n"
@@ -35,31 +33,23 @@ const char* StochasticModelAnal::description = DOC("This algorithm computes the 
 
 
 
-
 void StochasticModelAnal::configure() {
 
+  _stocf = parameter("stocf").toReal();
+  _fftSize = parameter("fftSize").toInt();
 
-_stocf = parameter("stocf").toReal();
-_fftSize = parameter("fftSize").toInt();
+  _window->configure("type", "hann", "size", _fftSize);
+  _fft->configure("size", _fftSize );
 
+  // resample for stochastic envelope using FFT
+  _hN = int(_fftSize/2.) + 1;
+  _stocf = std::max(_stocf, 3.f / _hN); //  limits  Stochastic decimation factor too small
 
-  _window->configure( );
-  _fft->configure( );
-
-
-//  // resample for stochastic envelope using FFT
-  int hN = int(parameter("fftSize").toInt()/2.) + 1;
-  _stocf = std::max(_stocf, 3.f / hN); //  limits  Stochastic decimation factor too small
-
->>> I AM HERE
-
-  _stocSize = int (parameter("fftSize").toInt() * _stocf / 2.);
+  _stocSize = int (_fftSize * _stocf / 2.);
   _stocSize += _stocSize % 2;
 
-  _resample->configure("size", parameter("fftSize").toInt()/2);
-
-
-
+printf ("config: stocsize %d\n", _stocSize );
+  _resample->configure("inSize", _hN + 1, "outSize", _stocSize);
 
 }
 
@@ -73,10 +63,9 @@ void StochasticModelAnal::compute() {
 
   std::vector<Real> wframe;
   std::vector<std::complex<Real> > fftin;
-  std::vector<Real> fftmag;
-  std::vector<Real> fftphase;
+  std::vector<Real> magResDB;
 
-
+  // frame is of size 2*hopsize
   _window->input("frame").set(frame);
   _window->output("frame").set(wframe);
   _window->compute();
@@ -85,42 +74,20 @@ void StochasticModelAnal::compute() {
   _fft->output("fft").set(fftin);
   _fft->compute();
 
- _sineModelAnal->input("fft").set(fftin);
- _sineModelAnal->output("magnitudes").set(peakMagnitude);
- _sineModelAnal->output("frequencies").set(peakFrequency);
- _sineModelAnal->output("phases").set(peakPhase);
+  getSpecEnvelope(fftin, magResDB);
 
-  _sineModelAnal->compute();
+  if (magResDB.size() < (int) _hN+1)
+    magResDB.push_back(magResDB[magResDB.size()-1]); // copy last value
 
-  //std::cout << "TODO: add new algorithms for : SineSubtraction (input: audio, sine_params, output: audio)";
-  std::vector<Real> subtrFrameOut;
+//  stocEnv.resize(stocSize);
+//  std::fill(stocEnv.begin(), stocEnv.end(), 0.);
 
-// this needs to take into account overlap-add issues, introducing delay
- _sineSubtraction->input("frame").set(frame); // size is iput _fftSize
- _sineSubtraction->input("magnitudes").set(peakMagnitude);
- _sineSubtraction->input("frequencies").set(peakFrequency);
- _sineSubtraction->input("phases").set(peakPhase);
- _sineSubtraction->output("frame").set(subtrFrameOut); // Nsyn size
- _sineSubtraction->compute();
+  _resample->input("input").set(magResDB);
+  _resample->output("output").set(stocEnv);
+  _resample->compute();
 
-
-  updateStocInFrame(subtrFrameOut, _stocFrameIn); // shift and copy frmae for stochastic model analysis
-
-
-//std::cout << "TODO: add new algorithms for : stochasticModelAnal (input: audio, output: stocenv)";
-// this needs to take into account overlap-add issues, introducing delay
-Real stocf = std::min( std::max(0.01f, parameter("stocf").toReal()), 1.f);
-int stocSize =  int( stocf * parameter("fftSize").toInt() / 2.);
-stocEnv.resize(stocSize);
-std::fill(stocEnv.begin(), stocEnv.end(), 0.);
-
-  _stochasticModelAnal->input("frame").set(frameOut);
-  _stochasticModelAnal->output("stocenv").set(stocEnv);
-  _stochasticModelAnal->compute();
-
-
-  // compute stochastic envelope
- // stochasticModelAnal(fft, peakMagnitude, peakFrequency, peakPhase, stocEnv);
+//printf("res in:%d, res out:%d ", magResDB.size(), stocEnv.size());
+ // adapt size of input spectral envelope and resampled vector (FFT algorihm requires even sizes)
 
 }
 
@@ -128,6 +95,20 @@ std::fill(stocEnv.begin(), stocEnv.end(), 0.);
 // ---------------------------
 // additional methods
 
+void StochasticModelAnal::getSpecEnvelope(const std::vector<std::complex<Real> > fftRes,std::vector<Real> &magResDB)
+{
+
+// get spectral envelope in DB
+ Real mag, magdB;
+
+ for (int i=0; i< (int) fftRes.size(); i++)
+  {
+    // compute fft abs
+    mag =  sqrt( fftRes[i].real() * fftRes[i].real() +  fftRes[i].imag() * fftRes[i].imag());
+    magdB = std::max(-200., 20. * log10( mag + 1e-10));
+    magResDB.push_back(magdB);
+  }
+}
 
 /*
 void StochasticModelAnal::stochasticModelAnalOld(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv)
@@ -209,7 +190,7 @@ _log << std::endl;
 
 }
 
-*/
+
 
 // Move this to new algorithm for ResampleFFT
 void StochasticModelAnal::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
@@ -221,4 +202,5 @@ void StochasticModelAnal::initializeFFT(std::vector<std::complex<Real> >&fft, in
   }
 }
 
+*/
 

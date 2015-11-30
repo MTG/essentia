@@ -43,13 +43,10 @@ class SpsModelAnal : public Algorithm {
   Algorithm* _fft;
   Algorithm* _sineModelAnal;
   Algorithm* _sineSubtraction;
-  Algorithm* _sineModelSynth;
+  Algorithm* _stochasticModelAnal;
 
   std::vector<Real> _stocFrameIn; // input frame for the stochaastic analysis algorithm
 
-  // for resample
-//  Algorithm* _fftres;
-//  Algorithm* _ifftres;
   void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
 
 // debug
@@ -72,27 +69,15 @@ std::ofstream _log;
 
     _stochasticModelAnal = AlgorithmFactory::create("StochasticModelAnal");
 
-    _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
-
-    // for resample
-//    _fftres = AlgorithmFactory::create("FFT");
-//    _ifftres = AlgorithmFactory::create("IFFT");
-
   }
 
   ~SpsModelAnal() {
-//    delete _peakDetect;
-//    delete _cartesianToPolar;
+
   delete _window;
   delete _fft;
   delete _sineModelAnal;
   delete _sineSubtraction;
-  delete _sineModelSynth;
-
-
-  // for resample
-//  delete _fftres;
-//  delete _ifftres;
+  delete _stochasticModelAnal;
 
   _log.close(); // debug
   }
@@ -119,7 +104,8 @@ std::ofstream _log;
   void compute();
 
  // void stochasticModelAnal(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv);
-  void resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut);
+  //void resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut);
+  void updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator);
 
   static const char* name;
   static const char* description;
