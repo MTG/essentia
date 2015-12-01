@@ -48,7 +48,6 @@ void StochasticModelAnal::configure() {
   _stocSize = int (_fftSize * _stocf / 2.);
   _stocSize += _stocSize % 2;
 
-printf ("config: stocsize %d\n", _stocSize );
   _resample->configure("inSize", _hN + 1, "outSize", _stocSize);
 
 }
@@ -79,15 +78,10 @@ void StochasticModelAnal::compute() {
   if (magResDB.size() < (int) _hN+1)
     magResDB.push_back(magResDB[magResDB.size()-1]); // copy last value
 
-//  stocEnv.resize(stocSize);
-//  std::fill(stocEnv.begin(), stocEnv.end(), 0.);
-
+   // adapt size of input spectral envelope and resampled vector (FFT algorihm requires even sizes)
   _resample->input("input").set(magResDB);
   _resample->output("output").set(stocEnv);
   _resample->compute();
-
-//printf("res in:%d, res out:%d ", magResDB.size(), stocEnv.size());
- // adapt size of input spectral envelope and resampled vector (FFT algorihm requires even sizes)
 
 }
 

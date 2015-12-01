@@ -53,9 +53,9 @@ int main(int argc, char* argv[]) {
   int hopsize = 128;
   Real sr = 44100;
   Real minSineDur = 0.02;
-  Real stocf = 1.; // 0.2; //1.; // stochastic envelope factor. Default 0.2
+  Real stocf = 0.2; // 0.2; //1.; // stochastic envelope factor. Default 0.2
 
-bool testSubtraction = true;
+  bool testSubtraction = false;
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 

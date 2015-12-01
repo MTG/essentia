@@ -26,7 +26,7 @@ using namespace standard;
 
 
 const char* SpsModelSynth::name = "SpsModelSynth";
-const char* SpsModelSynth::description = DOC("This algorithm computes the stochastic model synthesis from stochastic model analysis.");
+const char* SpsModelSynth::description = DOC("This algorithm computes the sinusoidal plus stochastic model synthesis from SPS model analysis.");
 
 
 
@@ -43,15 +43,22 @@ void SpsModelSynth::configure()
                             );
 
   // resample for stochastic envelope using FFT / IFFT
-  _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
-  _stocSize += 1; // to avoid discontinuities at Nyquist freq.
-  _stocSize += _stocSize % 2; // make it even size (Essentia FFT requirement)
+//  _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
+//  _stocSize += 1; // to avoid discontinuities at Nyquist freq.
+//  _stocSize += _stocSize % 2; // make it even size (Essentia FFT requirement)
   //_fft->configure("size", _stocSize);
 
-  _stocSpecSize = parameter("fftSize").toInt()/2;
-  _stocSpecSize += int( 2. / parameter("stocf").toReal()); // increase to avoid discontinuities at Nyquist freq.
-  _stocSpecSize += _stocSpecSize % 2; // make it even size (Essentia FFT requirement)
-  _ifftSine->configure("size", _stocSpecSize);
+
+ _stochasticModelSynth->configure("fftSize", 2* parameter("hopSize").toInt(),
+                            "hopSize", parameter("hopSize").toInt(),
+                            "stocf", parameter("stocf").toReal());
+
+
+  _ifftSine->configure("size", parameter("fftSize").toInt());
+
+  _overlapAdd->configure( "frameSize", _fftSize, // uses synthesis window
+													"hopSize", _hopSize);
+
 
 _log.open("synth.log");
 }
@@ -67,11 +74,13 @@ void SpsModelSynth::compute() {
   //std::vector<std::complex<Real> >& outfft = _outfft.get();
   std::vector<Real>& outframe = _outframe.get();
 
-/*
+
   // temp vectors
   std::vector<std::complex<Real> > fftSines;
   std::vector<std::complex<Real> > fftStoc;
-  std::vector<Real> sineFrame;
+  std::vector<Real> wsineFrame; // windowed frames
+  std::vector<Real> sineFrame;  // overlap output frame
+  std::vector<Real> stocFrame;  // output stochastic frame
 
   int i = 0;
 
@@ -86,25 +95,25 @@ void SpsModelSynth::compute() {
   std::vector<Real> sineAudio, resAudio;
   std::cout << "TODO: add new algoirithms for synthesis:";
   _ifftSine->input("ifft").set(fftSines);
-  _ifftSine->output("frame").set(sineFrame);
+  _ifftSine->output("frame").set(wsineFrame);
   _ifftSine->compute();
-  _overlappAdd->input("frame").set(sineFrame);
-  _overlappAdd->output("audio").set(sineAudio);
-  _overlappAdd->compute()
+  _overlapAdd->input("signal").set(wsineFrame);
+  _overlapAdd->output("signal").set(sineFrame);
+  _overlapAdd->compute();
 
 // TODO: implement
 // synthesis of the stochastic component
-  _stochasticModelSynth->input("stocenv").set(stocEnv);
-  _stochasticModelSynth->output("audio").set(resAudio);
+  _stochasticModelSynth->input("stocenv").set(stocenv);
+  _stochasticModelSynth->output("frame").set(stocFrame);
   _stochasticModelSynth->compute();
 
 
-// add sine and sotchastic copmponents
- for (i = 0; i < (int)resAudio.size(); ++i)
+// add sine and stochastic copmponents
+ for (i = 0; i < (int)stocFrame.size(); ++i)
   {
-    outframe.push_back(sineAudio[i] + resAudio[i]);
+    outframe.push_back(sineFrame[i] + stocFrame[i]);
   }
-*/
+
 
 /* OLD code
   // stochastic
@@ -122,9 +131,11 @@ void SpsModelSynth::compute() {
      outfft[i].imag( 0*fftSines[i].imag() + fftStoc[i].imag());
   }
   */
+
+// DEBUG
 // output is an audio frame / already overlapp-add. Directly to write inot output buffer.
-outframe.resize(parameter("hopSize").toInt());
-std::fill(outframe.begin(), outframe.end(), 0.);
+//outframe.resize(parameter("hopSize").toInt());
+//std::fill(outframe.begin(), outframe.end(), 0.);
 
 }
 

@@ -45,13 +45,17 @@ class SpsModelSynth : public Algorithm {
   int _stocSize;
   int stocSpecSize;
   Algorithm* _sineModelSynth;
+  Algorithm* _stochasticModelSynth;
   // for resample function
  // Algorithm* _fft;
   Algorithm* _ifftSine;
+  Algorithm* _overlapAdd;
+
+
   int _stocSpecSize;
 
   void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
-  void stochasticModelSynth(const std::vector<Real> stocEnv, const int H, const int N,std::vector<std::complex<Real> > &fftStoc);
+  //void stochasticModelSynth(const std::vector<Real> stocEnv, const int H, const int N,std::vector<std::complex<Real> > &fftStoc);
 
 // debug
 std::ofstream _log;
@@ -66,17 +70,22 @@ std::ofstream _log;
     declareOutput(_outframe, "frame", "the output audio frame");
 
     _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
+    _stochasticModelSynth = AlgorithmFactory::create("StochasticModelSynth");
+
     // for resample
    // _fft = AlgorithmFactory::create("FFT");
     _ifftSine = AlgorithmFactory::create("IFFT");
+    _overlapAdd = AlgorithmFactory::create("OverlapAdd");
 
   }
 
   ~SpsModelSynth() {
 
     delete _sineModelSynth;
+    delete _stochasticModelSynth;
   //  delete _fft;
     delete _ifftSine;
+    delete _overlapAdd;
 
     _log.close();
   }
@@ -91,7 +100,7 @@ std::ofstream _log;
   void configure();
   void compute();
 
-  void resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut);
+//  void resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut);
 
 
 
