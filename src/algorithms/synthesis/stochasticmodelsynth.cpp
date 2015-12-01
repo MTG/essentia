@@ -55,6 +55,9 @@ void StochasticModelSynth::configure() {
 
 
 void StochasticModelSynth::compute() {
+
+printf("TODO: here debug in StochasticModelSynth. seg fault\n");
+return;
   // inputs and outputs
  const  std::vector<Real>& stocEnv = _stocenv.get();
  std::vector<Real>& frame = _frame.get();

@@ -55,7 +55,6 @@ int main(int argc, char* argv[]) {
   Real minSineDur = 0.02;
   Real stocf = 0.2; // 0.2; //1.; // stochastic envelope factor. Default 0.2
 
-  bool testSubtraction = false;
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
@@ -152,29 +151,20 @@ int main(int argc, char* argv[]) {
 
   vector<Real> audioOutput;
 
-if (testSubtraction){
- sinesubtraction->input("frame").set(frame); // size is iput _fftSize
- sinesubtraction->input("magnitudes").set(magnitudes);
- sinesubtraction->input("frequencies").set(frequencies);
- sinesubtraction->input("phases").set(phases);
- sinesubtraction->output("frame").set(audioOutput); // Nsyn size
-}
-else{
 
   spsmodelsynth->input("magnitudes").set(magnitudes);
   spsmodelsynth->input("frequencies").set(frequencies);
   spsmodelsynth->input("phases").set(phases);
   spsmodelsynth->input("stocenv").set(stocenv);
   //spsmodelsynth->output("fft").set(sfftframe);
-  spsmodelsynth->output("frame").set(ifftframe); // outputs a frame
+  spsmodelsynth->output("frame").set(audioOutput); // outputs a frame
 
   // Synthesis
 //  ifft->input("fft").set(sfftframe); // taking SpsModelSynth output
 //  ifft->output("frame").set(ifftframe);
 
-  overlapAdd->input("signal").set(ifftframe);
-  overlapAdd->output("signal").set(audioOutput);
-}
+//  overlapAdd->input("signal").set(ifftframe);
+//  overlapAdd->output("signal").set(audioOutput);
 
 
 ////////
@@ -209,15 +199,6 @@ else{
     phasesAllFrames.push_back(phases);
     stocEnvAllFrames.push_back(stocenv);
 
-    if (testSubtraction)
-    {
-      sinesubtraction->compute();
-
-    // skip first half window
-    if (counter >= floor(framesize / (hopsize * 2.f))){
-        alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
-      }
-    }
 
     counter++;
   }
@@ -237,7 +218,7 @@ else{
   int nFrames = counter;
   counter = 0;
 
-  /*
+
   while (true) {
 
     // all frames processed
@@ -261,8 +242,8 @@ else{
     // Sine model synthesis
     spsmodelsynth->compute();
 
-    //ifft->compute();
-    overlapAdd->compute();
+//    //ifft->compute();
+//    overlapAdd->compute();
 
     // skip first half window
     if (counter >= floor(framesize / (hopsize * 2.f))){
@@ -271,7 +252,7 @@ else{
 
     counter++;
   }
-*/
+
 
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;

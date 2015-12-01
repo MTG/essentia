@@ -91,10 +91,8 @@ void SpsModelSynth::compute() {
 
   _sineModelSynth->compute();
 
-// TODO: add new essentia algorithms for synthesis of sines to audio samples
   std::vector<Real> sineAudio, resAudio;
-  std::cout << "TODO: add new algoirithms for synthesis:";
-  _ifftSine->input("ifft").set(fftSines);
+  _ifftSine->input("fft").set(fftSines);
   _ifftSine->output("frame").set(wsineFrame);
   _ifftSine->compute();
   _overlapAdd->input("signal").set(wsineFrame);
