@@ -64,11 +64,7 @@ class AudioLoader : public Algorithm {
   AVFrame* _decodedFrame;
 #endif
 
-#if HAVE_AVRESAMPLE
   struct AVAudioResampleContext* _convertCtxAv;
-#elif HAVE_SWRESAMPLE
-  struct SwrContext* _convertCtx;
-#endif
 
   int _streamIdx; // index of the audio stream among all the streams contained in the file
   bool _configured;
@@ -89,12 +85,7 @@ class AudioLoader : public Algorithm {
  public:
   AudioLoader() : Algorithm(), _buffer(0),  _demuxCtx(0),
 	          _audioCtx(0), _audioCodec(0), _decodedFrame(0),
-#if HAVE_AVRESAMPLE
-                  _convertCtxAv(0),
-#elif HAVE_SWRESAMPLE
-                  _convertCtx(0),
-#endif
-                  _configured(false) {
+            _convertCtxAv(0), _configured(false) {
 
     declareOutput(_audio, 1, "audio", "the input audio signal");
     declareOutput(_sampleRate, 0, "sampleRate", "the sampling rate of the audio signal [Hz]");

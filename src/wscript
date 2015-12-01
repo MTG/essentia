@@ -102,14 +102,10 @@ def configure(ctx):
         ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
-
         ctx.check_cfg(package='libavutil', uselib_store='AVUTIL',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
         ctx.check_cfg(package='libavresample', uselib_store='AVRESAMPLE',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
-
-        ctx.check_cfg(package='libswresample', uselib_store='SWRESAMPLE',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
     if 'libsamplerate' in ctx.env.WITH_LIBS_LIST:
@@ -183,18 +179,10 @@ def configure(ctx):
 
     # MonoLoader, EqloudLoader, and EasyLoader are dependent on Resample
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
-    if has('avcodec') and has('avformat') and has('avutil') and ( has('avresample') or has('swresample') ):
+    if has('avcodec') and has('avformat') and has('avutil') and has('avresample'):
         print('- FFmpeg / libav detected!')       
-        ctx.env.USES += ' AVFORMAT AVCODEC AVUTIL'
-    
-        # NOTE: always use libavresample if found, otherwise check for swresample
-        if has('avresample'):
-            ctx.env.USES += ' AVRESAMPLE'
-            print('- Using LibAV/FFmpeg install with libavresample support')     
+        ctx.env.USES += ' AVFORMAT AVCODEC AVUTIL AVRESAMPLE'
 
-        elif has('swresample'):
-            ctx.env.USES += ' SWRESAMPLE'
-            print('- Using LibAV/FFmpeg install with swresample support')
     else:
         print('- FFmpeg (or LibAv on debian/ubuntu) seems to be missing.')
         print('  The following algorithms will be ignored: %s\n' % algos)

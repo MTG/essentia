@@ -20,40 +20,14 @@
 #ifndef ESSENTIA_FFMPEGAPI_H
 #define ESSENTIA_FFMPEGAPI_H
 
-
-// TODO: as soon as debian sorts its multimedia mess and include ffmpeg again,
-//       this can be removed along with all the outdated code related to it
-#ifndef HAVE_SWRESAMPLE
-#define HAVE_SWRESAMPLE 0
-#endif
-
-
-#ifndef HAVE_AVRESAMPLE
-#define HAVE_AVRESAMPLE 0
-#endif
-
-// TODO Long-term: get rid of audioconvert.* and switch to using official libavresample API.
-/* Current libavcodec-dev package is missing /usr/include/libavcodec/audioconvert.h,
-   therefore we have a copy of it in the source. Audioconvert is not a public header
-   in either libav or ffmpeg. What is supposed to be used for this functionality is
-   libavresample or libswresample.
-
-   The problem with that is that audioconvert.h is not part of the public
-   API. Moreover, most of the APIs have already been removed in current
-   libav/master in favor of the newly introduced libavresample library.
-   Therefore, I do not think it would be a good idea to ship this header.
-
-   The proper long-term solution is to port handbrake to 'libavresample'
-   (it is in experimental and is not going to be included in wheezy). As short-term workaround,
-   the audioconvert.h and audioconvert.c are copied.
-*/
-
-
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 #include <libavutil/md5.h>
+#include<libavresample/avresample.h>
+#include<libavutil/opt.h>
 }
+
 
 // libav* versions for deprecated functions taken from (among other sources):
 // https://github.com/tuttleofx/TuttleOFX/pull/23#issuecomment-6350715
@@ -97,19 +71,6 @@ extern "C" {
 #   define avformat_alloc_context av_alloc_format_context
 #endif
 
-
-extern "C" {
-
-#if HAVE_AVRESAMPLE
-#  include<libavresample/avresample.h>
-#  include<libavutil/opt.h>
-#elif HAVE_SWRESAMPLE
-#   include <libswresample/swresample.h>
-#else
-#   error Error in project configuration: neither libavresample nor libswresample were detected
-#endif
-
-}
 
 // --- from audiocontext
 
