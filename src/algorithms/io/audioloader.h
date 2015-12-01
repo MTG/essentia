@@ -58,11 +58,7 @@ class AudioLoader : public Algorithm {
   AVMD5 *_md5Encoded;
   uint8_t _checksum[16];
   bool _computeMD5;
-
-
-#if LIBAVCODEC_VERSION_INT >= AVCODEC_AUDIO_DECODE4
   AVFrame* _decodedFrame;
-#endif
 
   struct AVAudioResampleContext* _convertCtxAv;
 
@@ -102,11 +98,7 @@ class AudioLoader : public Algorithm {
     // use av_malloc, because we _need_ the buffer to be 16-byte aligned
     _buffer = (float*)av_malloc(FFMPEG_BUFFER_SIZE);
 
-#if LIBAVUTIL_VERSION_INT < AVUTIL_51_43_0
-    _md5Encoded = (AVMD5*) av_malloc(av_md5_size);
-#else
     _md5Encoded = av_md5_alloc();
-#endif
     if (!_md5Encoded) {
         throw EssentiaException("Error allocating the MD5 context");
     }
