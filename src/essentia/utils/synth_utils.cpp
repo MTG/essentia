@@ -80,6 +80,16 @@ void cleaningSineTracks(std::vector< std::vector<Real> >&freqsTotal, const int m
 }
 
 
+void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
+{
+  fft.resize(sizeFFT);
+  for (int i=0; i < sizeFFT; ++i){
+    fft[i].real(0);
+    fft[i].imag(0);
+  }
+}
+
+
 // originally in class SineModelSynth::
 void genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > &outfft, const int fftSize)
 {

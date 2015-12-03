@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
   /////// PARAMS //////////////
 
   /////// PARAMS //////////////
-  int framesize = 2048;
+  int framesize = 512; //2048;
   int hopsize = 128;
   Real sr = 44100;
   Real minSineDur = 0.02;
@@ -87,22 +87,22 @@ int main(int argc, char* argv[]) {
                             "stocf", stocf
                             );
 
-  // ONLY FOR DEBUG
-  int subtrFFTSize = std::min(512, 4*hopsize);
-  Algorithm* sinesubtraction  = factory.create("SineSubtraction",
-                            "sampleRate", sr, "fftSize", subtrFFTSize, "hopSize", hopsize);
-  // ENd Debug
+//  // ONLY FOR DEBUG
+//  int subtrFFTSize = std::min(512, 4*hopsize);
+//  Algorithm* sinesubtraction  = factory.create("SineSubtraction",
+//                            "sampleRate", sr, "fftSize", subtrFFTSize, "hopSize", hopsize);
+//  // ENd Debug
 
   Algorithm* spsmodelsynth  = factory.create("SpsModelSynth",
                             "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize, "stocf", stocf);
 
 
-  Algorithm* ifft     = factory.create("IFFT",
-                                "size", framesize);
-
-  Algorithm* overlapAdd = factory.create("OverlapAdd",
-                                            "frameSize", framesize,
-                                           "hopSize", hopsize);
+//  Algorithm* ifft     = factory.create("IFFT",
+//                                "size", framesize);
+//
+//  Algorithm* overlapAdd = factory.create("OverlapAdd",
+//                                            "frameSize", framesize,
+//                                           "hopSize", hopsize);
 
 
   Algorithm* audioWriter = factory.create("MonoWriter",
@@ -238,7 +238,6 @@ int main(int argc, char* argv[]) {
       stocEnvAllFrames.erase (stocEnvAllFrames.begin());
     }
 
-
     // Sine model synthesis
     spsmodelsynth->compute();
 
@@ -268,9 +267,9 @@ int main(int argc, char* argv[]) {
   delete fft;
   delete spsmodelanal;
   delete spsmodelsynth;
-  delete sinesubtraction; // ONLY FOR DEBUG
-  delete ifft;
-  delete overlapAdd;
+ // delete sinesubtraction; // ONLY FOR DEBUG
+//  delete ifft;
+//  delete overlapAdd;
   delete audioWriter;
 
   essentia::shutdown();

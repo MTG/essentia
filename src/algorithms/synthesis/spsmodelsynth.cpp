@@ -37,24 +37,17 @@ void SpsModelSynth::configure()
   _fftSize = parameter("fftSize").toInt();
   _hopSize = parameter("hopSize").toInt();
 
-  _sineModelSynth->configure( "sampleRate", parameter("sampleRate").toReal(),
-                            "fftSize", parameter("fftSize").toInt(),
-                            "hopSize", parameter("hopSize").toInt()
+  _sineModelSynth->configure( "sampleRate", _sampleRate,
+                            "fftSize", _fftSize,
+                            "hopSize", _hopSize
                             );
-
-  // resample for stochastic envelope using FFT / IFFT
-//  _stocSize = int (parameter("fftSize").toInt() * parameter("stocf").toReal() / 2.);
-//  _stocSize += 1; // to avoid discontinuities at Nyquist freq.
-//  _stocSize += _stocSize % 2; // make it even size (Essentia FFT requirement)
-  //_fft->configure("size", _stocSize);
-
 
  _stochasticModelSynth->configure("fftSize", 2* parameter("hopSize").toInt(),
                             "hopSize", parameter("hopSize").toInt(),
                             "stocf", parameter("stocf").toReal());
 
 
-  _ifftSine->configure("size", parameter("fftSize").toInt());
+  _ifftSine->configure("size", _fftSize);
 
   _overlapAdd->configure( "frameSize", _fftSize, // uses synthesis window
 													"hopSize", _hopSize);
@@ -91,7 +84,7 @@ void SpsModelSynth::compute() {
 
   _sineModelSynth->compute();
 
-  std::vector<Real> sineAudio, resAudio;
+  //std::vector<Real> sineAudio, resAudio;
   _ifftSine->input("fft").set(fftSines);
   _ifftSine->output("frame").set(wsineFrame);
   _ifftSine->compute();
@@ -105,11 +98,12 @@ void SpsModelSynth::compute() {
   _stochasticModelSynth->output("frame").set(stocFrame);
   _stochasticModelSynth->compute();
 
-
+printf("ifftout:%d, olap:%d, stoc:%d \t", wsineFrame.size(), sineFrame.size(), stocFrame.size());
 // add sine and stochastic copmponents
  for (i = 0; i < (int)stocFrame.size(); ++i)
   {
-    outframe.push_back(sineFrame[i] + stocFrame[i]);
+    outframe.push_back(sineFrame[i] + 0*stocFrame[i]);
+    outframe.push_back(sineFrame[i] + 0*stocFrame[i]);
   }
 
 

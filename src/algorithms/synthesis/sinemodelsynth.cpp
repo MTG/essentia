@@ -88,11 +88,11 @@ void SineModelSynth::compute() {
 }
 
 
-void SineModelSynth::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
-{
-  fft.resize(sizeFFT);
-  for (int i=0; i < sizeFFT; ++i){
-    fft[i].real(0);
-    fft[i].imag(0);
-  }
-}
+//void SineModelSynth::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
+//{
+//  fft.resize(sizeFFT);
+//  for (int i=0; i < sizeFFT; ++i){
+//    fft[i].real(0);
+//    fft[i].imag(0);
+//  }
+//}

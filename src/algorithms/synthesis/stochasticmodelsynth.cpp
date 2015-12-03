@@ -19,6 +19,7 @@
 
 #include "stochasticmodelsynth.h"
 #include "essentiamath.h"
+#include <essentia/utils/synth_utils.h>
 
 using namespace essentia;
 using namespace standard;
@@ -56,18 +57,20 @@ void StochasticModelSynth::configure() {
 
 void StochasticModelSynth::compute() {
 
-printf("TODO: here debug in StochasticModelSynth. seg fault\n");
-return;
   // inputs and outputs
  const  std::vector<Real>& stocEnv = _stocenv.get();
  std::vector<Real>& frame = _frame.get();
 
-  std::vector<Real> wframe;
-  std::vector<std::complex<Real> > fftout;
+
   std::vector<Real> magResDB;
+  std::vector<std::complex<Real> > fftMagRes;
+  std::vector<Real> ifftframe;
+  std::vector<Real> wframe;
+
 
   // limit size of input envelope before resampling
   std::vector<Real> stocEnv2 = stocEnv;
+
   if (_stocSize < (int) stocEnv2.size())
   {
    stocEnv2.erase (stocEnv2.begin()+_stocSize, stocEnv2.end());
@@ -79,19 +82,17 @@ return;
 
   // adapt size of input spectral envelope and resampled vector (FFT algorihm requires even sizes)
   if ((int) magResDB.size() > _hN)
-    magResDB.erase(magResDB.end()); // remove last value
+    magResDB.pop_back(); // remove last value
 
-printf("stoch synth: magres size: %d (%d) ", (int)magResDB.size(), _hN);
+  getFFTFromEnvelope(magResDB, fftMagRes);
 
-  getFFTFromEnvelope(magResDB, fftout);
-
-  _ifft->input("fft").set(fftout);
-  _ifft->output("frame").set(wframe);
+  _ifft->input("fft").set(fftMagRes);
+  _ifft->output("frame").set(ifftframe);
   _ifft->compute();
 
   // synthesis window
   // frame is of size 2*hopsize
-  _window->input("frame").set(frame);
+  _window->input("frame").set(ifftframe);
   _window->output("frame").set(wframe);
   _window->compute();
 
@@ -112,6 +113,8 @@ void StochasticModelSynth::getFFTFromEnvelope(const std::vector<Real> magResDB, 
   // get spectral envelope in DB
   Real magdB, phase;
   int N = (int)magResDB.size();
+
+  initializeFFT(fftStoc,N);
 
   for (int i = 0; i < N; ++i)
   {
