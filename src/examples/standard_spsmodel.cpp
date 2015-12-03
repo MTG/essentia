@@ -49,8 +49,8 @@ int main(int argc, char* argv[]) {
   /////// PARAMS //////////////
 
   /////// PARAMS //////////////
-  int framesize = 512; //2048;
-  int hopsize = 128;
+  int framesize = 2048;
+  int hopsize = 128; //128;
   Real sr = 44100;
   Real minSineDur = 0.02;
   Real stocf = 0.2; // 0.2; //1.; // stochastic envelope factor. Default 0.2
@@ -121,7 +121,7 @@ int main(int argc, char* argv[]) {
 
   vector<complex<Real> >  sfftframe; // sine model FFT frame
   vector<Real> ifftframe;
-  vector<Real> alladuio; // concatenated audio file output
+  vector<Real> allaudio; // concatenated audio file output
 
 
   vector< vector<Real> > frequenciesAllFrames;
@@ -214,10 +214,9 @@ int main(int argc, char* argv[]) {
 //  std::cout << stocEnvAllFrames.size() << std::endl;
 //-----------------------------------------------
 // synthesis loop
-  cout << "-------- synthesizing from stochastic model parameters" " ---------" << endl;
+  cout << "-------- synthesizing from stochastic model parameters" "----"  << counter<< " frames (hopsize: " << hopsize << ") ---------"<< endl;
   int nFrames = counter;
   counter = 0;
-
 
   while (true) {
 
@@ -243,10 +242,11 @@ int main(int argc, char* argv[]) {
 
 //    //ifft->compute();
 //    overlapAdd->compute();
+printf("audioout %d allaudio %d\n", audioOutput.size(), allaudio.size());
 
     // skip first half window
     if (counter >= floor(framesize / (hopsize * 2.f))){
-        alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
+        allaudio.insert(allaudio.end(), audioOutput.begin(), audioOutput.end());
     }
 
     counter++;
@@ -255,9 +255,10 @@ int main(int argc, char* argv[]) {
 
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
+  cout << "-------- "  << counter<< " frames (hopsize: " << hopsize << ") ---------"<< endl;
 
     // write to output file
-    audioWriter->input("audio").set(alladuio);
+    audioWriter->input("audio").set(allaudio);
     audioWriter->compute();
 
 
