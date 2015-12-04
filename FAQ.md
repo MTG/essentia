@@ -80,7 +80,17 @@ Install mingw gcc/g++
 sudo apt-get install  gcc-mingw-w64 
 ```
 
-Build dependencies
+Install cmake, it is required to build some dependencies
+```
+sudo apt-get install cmake
+```
+
+Build all dependencies
+```
+./packaging/build_3rdparty_static_win32.sh
+```
+
+Alternatively you can build each dependency apart using these scripts
 ```
 cd packaging/win32_3rdparty
 build_libav_nomuxers.sh
@@ -96,6 +106,13 @@ Build Essentia
 ./waf configure --with-examples --cross-compile-mingw32
 ./waf
 ```
+
+In order to build static examples:
+```
+./waf configure --with-static-examples --cross-compile-mingw32
+./waf
+```
+
 
 Cross-compiling for Android
 ---------------------------
