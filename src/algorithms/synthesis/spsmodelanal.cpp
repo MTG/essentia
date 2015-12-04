@@ -19,6 +19,7 @@
 
 #include "spsmodelanal.h"
 #include "essentiamath.h"
+#include <essentia/utils/synth_utils.h>
 
 using namespace essentia;
 using namespace standard;
@@ -119,8 +120,8 @@ void SpsModelAnal::compute() {
   _stochasticModelAnal->compute();
 
 // debug
-  for (int i=0; i < (int) stocEnv.size(); i++)
-    _log << stocEnv[i] << " ";
+  for (int i=0; i < (int) _stocFrameIn.size(); i++)
+    _log << _stocFrameIn[i] << " ";
   _log << std::endl;
 
 }
@@ -223,14 +224,14 @@ _log << std::endl;
 */
 
 // Move this to new algorithm for ResampleFFT
-void SpsModelAnal::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
-{
-  fft.resize(sizeFFT);
-  for (int i=0; i < sizeFFT; ++i){
-    fft[i].real(0);
-    fft[i].imag(0);
-  }
-}
+//void SpsModelAnal::initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT)
+//{
+//  fft.resize(sizeFFT);
+//  for (int i=0; i < sizeFFT; ++i){
+//    fft[i].real(0);
+//    fft[i].imag(0);
+//  }
+//}
 
 /*
 // function to resample based on the FFT

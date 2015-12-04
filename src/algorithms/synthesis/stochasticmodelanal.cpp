@@ -64,6 +64,7 @@ void StochasticModelAnal::compute() {
   std::vector<std::complex<Real> > fftin;
   std::vector<Real> magResDB;
 
+
   // frame is of size 2*hopsize
   _window->input("frame").set(frame);
   _window->output("frame").set(wframe);
@@ -75,13 +76,15 @@ void StochasticModelAnal::compute() {
 
   getSpecEnvelope(fftin, magResDB);
 
-  if (magResDB.size() < (int) _hN+1)
+  if ((int) magResDB.size() <  _hN+1)
     magResDB.push_back(magResDB[magResDB.size()-1]); // copy last value
 
    // adapt size of input spectral envelope and resampled vector (FFT algorihm requires even sizes)
   _resample->input("input").set(magResDB);
   _resample->output("output").set(stocEnv);
   _resample->compute();
+
+
 
 }
 

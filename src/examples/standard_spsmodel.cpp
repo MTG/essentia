@@ -240,10 +240,6 @@ int main(int argc, char* argv[]) {
     // Sine model synthesis
     spsmodelsynth->compute();
 
-//    //ifft->compute();
-//    overlapAdd->compute();
-printf("audioout %d allaudio %d\n", audioOutput.size(), allaudio.size());
-
     // skip first half window
     if (counter >= floor(framesize / (hopsize * 2.f))){
         allaudio.insert(allaudio.end(), audioOutput.begin(), audioOutput.end());

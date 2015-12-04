@@ -51,6 +51,8 @@ void StochasticModelSynth::configure() {
   _stocSize += _stocSize % 2;
   _resample->configure("inSize", _stocSize, "outSize", _hN + 1);
 
+  _overlapadd->configure( "frameSize", _fftSize, // uses synthesis window
+													"hopSize", parameter("hopSize").toInt());
 }
 
 
@@ -84,11 +86,14 @@ void StochasticModelSynth::compute() {
   if ((int) magResDB.size() > _hN)
     magResDB.pop_back(); // remove last value
 
+
+
   getFFTFromEnvelope(magResDB, fftMagRes);
 
   _ifft->input("fft").set(fftMagRes);
   _ifft->output("frame").set(ifftframe);
   _ifft->compute();
+
 
   // synthesis window
   // frame is of size 2*hopsize
@@ -115,15 +120,17 @@ void StochasticModelSynth::getFFTFromEnvelope(const std::vector<Real> magResDB, 
   int N = (int)magResDB.size();
 
   initializeFFT(fftStoc,N);
+  Real scale = .5f; // normalization to match stochastic analysis input energy
 
   for (int i = 0; i < N; ++i)
   {
     phase =  2 * M_PI *  Real(rand()/Real(RAND_MAX));
     magdB = magResDB[i];
 
+
     // positive spectrums
-    fftStoc[i].real( powf(10.f, (magdB / 20.f)) * cos(phase) ) ;
-    fftStoc[i].imag( powf(10.f, (magdB / 20.f)) * sin(phase) ) ;
+    fftStoc[i].real(scale * powf(10.f, (magdB / 20.f)) * cos(phase) ) ;
+    fftStoc[i].imag(scale * powf(10.f, (magdB / 20.f)) * sin(phase) ) ;
   }
 
 }

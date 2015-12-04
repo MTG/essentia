@@ -98,13 +98,12 @@ void SpsModelSynth::compute() {
   _stochasticModelSynth->output("frame").set(stocFrame);
   _stochasticModelSynth->compute();
 
-printf("ifftout:%d, olap:%d, stoc:%d (hopsize %d)\t", wsineFrame.size(), sineFrame.size(), stocFrame.size(), _hopSize);
-// add sine and stochastic copmponents
+  // add sine and stochastic copmponents
  outframe.clear();
  for (i = 0; i < _hopSize; ++i)
   {
     //outframe.push_back(sineFrame[i] + 0*stocFrame[i]);
-    outframe.push_back(sineFrame[i] + stocFrame[i]);
+    outframe.push_back(0.* sineFrame[i] + stocFrame[i]);
   }
 
 
