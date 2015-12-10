@@ -40,7 +40,12 @@ int main(int argc, char* argv[]) {
 
   string audioFilename = argv[1];
   string outputFilename = argv[2];
+  string outputSineFilename = outputFilename;
+  string outputStocFilename = outputFilename;
+  outputSineFilename.replace(outputSineFilename.end()-4,outputSineFilename.end(), "_sine.wav");
+  outputStocFilename.replace(outputStocFilename.end()-4,outputStocFilename.end(), "_stoc.wav");
 
+cout << outputSineFilename<< "" << outputStocFilename << endl;
   // register the algorithms in the factory(ies)
   essentia::init();
 
@@ -53,7 +58,7 @@ int main(int argc, char* argv[]) {
   int hopsize = 128; //128;
   Real sr = 44100;
   Real minSineDur = 0.02;
-  Real stocf = 0.2; // 0.2; //1.; // stochastic envelope factor. Default 0.2
+  Real stocf = 1; //0.2; // 0.2; //1.; // stochastic envelope factor. Default 0.2
 
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -81,7 +86,7 @@ int main(int argc, char* argv[]) {
                             "sampleRate", sr,
                             "hopSize", hopsize,
                             "fftSize", framesize,
-                            "maxnSines", 100,
+                            "maxnSines", 10, // 100
                             "freqDevOffset", 10,
                             "freqDevSlope", 0.001,
                             "stocf", stocf
@@ -107,6 +112,10 @@ int main(int argc, char* argv[]) {
 
   Algorithm* audioWriter = factory.create("MonoWriter",
                                      "filename", outputFilename);
+  Algorithm* audioWriterSine = factory.create("MonoWriter",
+                                     "filename", outputSineFilename);
+  Algorithm* audioWriterStoc = factory.create("MonoWriter",
+                                     "filename", outputStocFilename);
 
 
   vector<Real> audio;
@@ -121,7 +130,10 @@ int main(int argc, char* argv[]) {
 
   vector<complex<Real> >  sfftframe; // sine model FFT frame
   vector<Real> ifftframe;
+
   vector<Real> allaudio; // concatenated audio file output
+  vector<Real> allsineaudio; // concatenated audio file output
+  vector<Real> allstocaudio; // concatenated audio file output
 
 
   vector< vector<Real> > frequenciesAllFrames;
@@ -150,7 +162,8 @@ int main(int argc, char* argv[]) {
   spsmodelanal->output("stocenv").set(stocenv);
 
   vector<Real> audioOutput;
-
+  vector<Real> audioSineOutput;
+  vector<Real> audioStocOutput;
 
   spsmodelsynth->input("magnitudes").set(magnitudes);
   spsmodelsynth->input("frequencies").set(frequencies);
@@ -158,6 +171,8 @@ int main(int argc, char* argv[]) {
   spsmodelsynth->input("stocenv").set(stocenv);
   //spsmodelsynth->output("fft").set(sfftframe);
   spsmodelsynth->output("frame").set(audioOutput); // outputs a frame
+  spsmodelsynth->output("sineframe").set(audioSineOutput); // outputs a frame
+  spsmodelsynth->output("stocframe").set(audioStocOutput); // outputs a frame
 
   // Synthesis
 //  ifft->input("fft").set(sfftframe); // taking SpsModelSynth output
@@ -217,7 +232,7 @@ int main(int argc, char* argv[]) {
   cout << "-------- synthesizing from stochastic model parameters" "----"  << counter<< " frames (hopsize: " << hopsize << ") ---------"<< endl;
   int nFrames = counter;
   counter = 0;
-
+cout << "TODO (10/12/2015): debugging:  compmensate energy of stochasticanal and stochasticsynth. Cehck stocenv values, and how magnitude values propagate" << endl;
   while (true) {
 
     // all frames processed
@@ -242,7 +257,9 @@ int main(int argc, char* argv[]) {
 
     // skip first half window
     if (counter >= floor(framesize / (hopsize * 2.f))){
-        allaudio.insert(allaudio.end(), audioOutput.begin(), audioOutput.end());
+       allaudio.insert(allaudio.end(), audioOutput.begin(), audioOutput.end());
+       allsineaudio.insert(allsineaudio.end(), audioSineOutput.begin(), audioSineOutput.end());
+       allstocaudio.insert(allstocaudio.end(), audioStocOutput.begin(), audioStocOutput.end());
     }
 
     counter++;
@@ -253,10 +270,17 @@ int main(int argc, char* argv[]) {
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
   cout << "-------- "  << counter<< " frames (hopsize: " << hopsize << ") ---------"<< endl;
 
-    // write to output file
-    audioWriter->input("audio").set(allaudio);
-    audioWriter->compute();
+  // write to output file
+  audioWriter->input("audio").set(allaudio);
+  audioWriter->compute();
 
+  // write sinusoidal and stochastic components
+  audioWriterSine->input("audio").set(allsineaudio);
+  audioWriterSine->compute();
+
+
+  audioWriterStoc->input("audio").set(allstocaudio);
+  audioWriterStoc->compute();
 
 
   delete audioLoader;
@@ -268,6 +292,8 @@ int main(int argc, char* argv[]) {
 //  delete ifft;
 //  delete overlapAdd;
   delete audioWriter;
+  delete audioWriterSine;
+  delete audioWriterStoc;
 
   essentia::shutdown();
 

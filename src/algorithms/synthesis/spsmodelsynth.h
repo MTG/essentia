@@ -38,6 +38,8 @@ class SpsModelSynth : public Algorithm {
   Input<std::vector<Real> > _stocenv;
   //Output<std::vector<std::complex<Real> > > _outfft;
   Output<std::vector<Real> > _outframe;
+  Output<std::vector<Real> > _outsineframe;
+  Output<std::vector<Real> > _outstocframe;
 
   Real _sampleRate;
   int _fftSize;
@@ -67,7 +69,9 @@ std::ofstream _log;
     declareInput(_phases, "phases", "the phases of the sinusoidal peaks");
     declareInput(_stocenv, "stocenv", "the stochastic envelope");
     //declareOutput(_outfft, "fft", "the output FFT frame");
-    declareOutput(_outframe, "frame", "the output audio frame");
+    declareOutput(_outframe, "frame", "the output audio frame of the Sinusoidal Plus Stochastic model");
+    declareOutput(_outsineframe, "sineframe", "the output audio frame for sinusoidal component ");
+    declareOutput(_outstocframe, "stocframe", "the output audio frame for stochastic component ");
 
     _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
     _stochasticModelSynth = AlgorithmFactory::create("StochasticModelSynth");
@@ -127,6 +131,8 @@ class SpsModelSynth : public StreamingAlgorithmWrapper {
   Sink<std::vector<Real> > _stocenv;
   //Source<std::vector<std::complex<Real> > > _outfft;
   Source<std::vector<Real> > _outframe;
+  Source<std::vector<Real> > _outsineframe;
+  Source<std::vector<Real> > _outstocframe;
 
  public:
   SpsModelSynth() {
@@ -137,6 +143,8 @@ class SpsModelSynth : public StreamingAlgorithmWrapper {
     declareInput(_stocenv, TOKEN, "stocenv");
    // declareOutput(_outfft, TOKEN, "fft");
     declareOutput(_outframe, TOKEN, "frame");
+    declareOutput(_outsineframe, TOKEN, "sinesframe");
+    declareOutput(_outstocframe, TOKEN, "stocframe");
   }
 };
 

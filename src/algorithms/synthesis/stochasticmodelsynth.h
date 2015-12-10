@@ -38,6 +38,7 @@ class StochasticModelSynth : public Algorithm {
   Real _stocf;
   int _fftSize;
   int _stocSize;
+  int _hopSize;
   int _hN ; // half fftsize
 
   Algorithm* _window;
