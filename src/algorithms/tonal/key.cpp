@@ -30,13 +30,27 @@ const char* Key::description = DOC("Using pitch profile classes, this algorithm 
 "\n"
 "Key will throw exceptions either when the input pcp size is not a positive multiple of 12 or if the key could not be found. Also if parameter \"scale\" is set to \"minor\" and the profile type is set to \"weichai\"\n"
 "\n"
+"  Abouth the Key Profiles:\n"
+"  - 'Diatonic' - binary profile with diatonic notes of both modes. Could be useful for ambient music or diatonic music which is not strictly 'tonal fuctional'.\n"
+"  - 'Tonic Triad' - just the notes of the major and minor chords. Exclusively for testing.\n"
+"  - 'Krumhansl' - reference key profiles after cognitive experiments with users. They should work generally fine for pop music.\n"
+"  - 'Temperley' - key profiles extracted from corpus analysis of euroclassical music. Therefore, they perform best on this repertoire (especially in minor).\n"
+"  - 'Shaath' -  profiles based on Krumhansl's specifically tuned to popular and electronic music.\n"
+"  - 'Noland' - profiles from Bach's 'Well Tempered Klavier'.\n" 
+"  - 'edma' - automatic profiles extracted from corpus analysis of electronic dance music [3]. They normally perform better that Shaath's\n"
+"  - 'edmm' - automatic profiles extracted from corpus analysis of electronic dance music and manually tweaked according to heuristic observation. It will report major modes (which are poorly represented in EDM) as minor, but improve performance otherwise [3].\n"
+"  - Other key profiles ('Faraldo', 'Pentatonic') are experimental and will be removed on due time.\n"
+
 "References:\n"
 "  [1] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
 "  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"
 "  2006.\n\n"
 "  [2] D. Temperley, \"What's key for key? The Krumhansl-Schmuckler\n"
 "  key-finding algorithm reconsidered\", Music Perception vol. 17, no. 1,\n"
-"  pp. 65-100, 1999.");
+"  pp. 65-100, 1999."
+"  [3] Á. Faraldo, E. Gómez, S. Jordà, P.Herrera, \"Key Estimation in Electronic\n"
+"  Dance Music. Proceedings of the 38th International Conference on information\n"
+"  Retrieval, Padova, 2016. (In Press.)");
 
 
 void Key::configure() {
