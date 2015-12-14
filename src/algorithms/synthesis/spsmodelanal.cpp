@@ -38,10 +38,10 @@ const char* SpsModelAnal::description = DOC("This algorithm computes the stochas
 
 void SpsModelAnal::configure() {
 
+  std::string wtype = "blackmanharris92"; // default "hamming"
+  _window->configure("type", wtype.c_str());
 
-  _window->configure( );
-
-  _fft->configure( );
+  _fft->configure("size", parameter("fftSize").toInt()  );
 
 
   _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),

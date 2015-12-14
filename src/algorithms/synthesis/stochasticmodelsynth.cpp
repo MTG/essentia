@@ -121,7 +121,7 @@ void StochasticModelSynth::getFFTFromEnvelope(const std::vector<Real> magResDB, 
   int N = (int)magResDB.size();
 
   initializeFFT(fftStoc,N);
-  Real scale = 1; //Real(_fftSize)/_hopSize; // normalization to match stochastic analysis input energy
+  Real scale = Real(_fftSize)/2.f; // normalization to match stochastic analysis input energy.
 
   for (int i = 0; i < N; ++i)
   {

@@ -75,18 +75,18 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
                                            "startFromZero", false );
 
   // parameters used in the SMS Python implementation
-  std::string wtype = "blackmanharris92"; // default "hamming"
-  Algorithm* window    = factory.create("Windowing", "type", wtype.c_str());
-
-  Algorithm* fft     = factory.create("FFT",
-                            "size", framesize);
+//  std::string wtype = "blackmanharris92"; // default "hamming"
+//  Algorithm* window    = factory.create("Windowing", "type", wtype.c_str());
+//
+//  Algorithm* fft     = factory.create("FFT",
+//                            "size", framesize);
 
   // parameters used in the SMS Python implementation
   Algorithm* spsmodelanal   = factory.create("SpsModelAnal",
                             "sampleRate", sr,
                             "hopSize", hopsize,
                             "fftSize", framesize,
-                            "maxnSines", 10, // 100
+                            "maxnSines", 100, // 100
                             "freqDevOffset", 10,
                             "freqDevSlope", 0.001,
                             "stocf", stocf
@@ -147,11 +147,11 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
 
-  window->input("frame").set(frame);
-  window->output("frame").set(wframe);
-
-  fft->input("frame").set(wframe);
-  fft->output("fft").set(fftframe);
+//  window->input("frame").set(frame);
+//  window->output("frame").set(wframe);
+//
+//  fft->input("frame").set(wframe);
+//  fft->output("fft").set(fftframe);
 
   // Sine model analysis
   //spsmodelanal->input("fft").set(fftframe); // old version
@@ -285,7 +285,7 @@ cout << "TODO (10/12/2015): debugging:  compmensate energy of stochasticanal and
 
   delete audioLoader;
   delete frameCutter;
-  delete fft;
+ // delete fft;
   delete spsmodelanal;
   delete spsmodelsynth;
  // delete sinesubtraction; // ONLY FOR DEBUG
