@@ -31,6 +31,9 @@ def options(ctx):
     ctx.add_option('--ignore-algos', action='store',
                    dest='IGNORE_ALGOS', default=False,
                    help='algorithms to ignore (comma separated)')
+    ctx.add_option('--include-algos', action='store',
+                   dest='INCLUDE_ALGOS', default=False,
+                   help='algorithms to install (comma separated)')
     ctx.add_option('--fft', action='store',
                    dest='FFT', default='FFTW',
                    help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
@@ -64,6 +67,8 @@ def configure(ctx):
     ctx.env.EXAMPLE_LIST         = []
     ctx.env.ALGOIGNORE           = []
     ctx.env.IGNORE_ALGOS         = ctx.options.IGNORE_ALGOS
+    ctx.env.ALGOINCLUDE          = []
+    ctx.env.INCLUDE_ALGOS        = ctx.options.INCLUDE_ALGOS
     ctx.env.FFT                  = ctx.options.FFT
     ctx.env.BUILD_STATIC         = ctx.options.BUILD_STATIC
 
@@ -91,6 +96,11 @@ def configure(ctx):
         for a in ctx.env.IGNORE_ALGOS.split(","):
             a = a.strip()
             ctx.env.ALGOIGNORE.append(a)
+
+    if ctx.env.INCLUDE_ALGOS:
+        for a in ctx.env.INCLUDE_ALGOS.split(","):
+            a = a.strip()
+            ctx.env.ALGOINCLUDE.append(a)
 
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
@@ -122,11 +132,11 @@ def configure(ctx):
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
         if not ctx.env.INCLUDES_YAML and sys.platform == 'darwin':
-	    # an ugly hack for osx, because pkg-config file for yaml-0.1.6 installed by brew 
+            # an ugly hack for osx, because pkg-config file for yaml-0.1.6 installed by brew
             # is missing include path
-	    # TODO: file an issue to libyaml brew formula makers?
+            # TODO: file an issue to libyaml brew formula makers?
             ctx.env['INCLUDES_YAML'] = '/'.join(ctx.env['LIBPATH_YAML'][0].split('/')[:-1] + ['include'])
-            print ctx.env['INCLUDES_YAML']		
+            print ctx.env['INCLUDES_YAML']
 
     if 'fftw' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
@@ -263,16 +273,37 @@ def buildRegFile(ctx):
 
     # select the algorithms we want to build
     if ctx.env['ALGOINCLUDE']:
-        print('Building the following algorithms: %s' % ', '.join(ctx.env['ALGOINCLUDE']))
+        algos_included = {}
+        algos_not_found = []
+        # hack to automatically include the detected version of FFT when FFT is included
+        fft_algos = ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW']
+        for alg in ctx.env['ALGOINCLUDE']:
+            if alg not in algos.keys() and alg != 'FFT':
+                algos_not_found.append(alg)
+                continue
+            if alg == 'FFT':
+                selected_ffts = [alg for alg in fft_algos if alg not in ctx.env.ALGOIGNORE]
+                for fft_alg in selected_ffts:
+                    algos_included[fft_alg] = algos[fft_alg]
+                continue
+            algos_included[alg] = algos[alg]
+        algos = algos_included
+        if algos_not_found:
+            print ('Warning: the following algorithms could not be found: %s' % ', '.join(algos_not_found))
+        print('Building the following algorithms: %s' % ', '.join(algos.keys()))
     else:
         print('Building all the algorithms')
 
     if ctx.env['ALGOIGNORE']:
         ctx.env['ALGOIGNORE'] = list(set(ctx.env['ALGOIGNORE']))
-
-        print('Ignoring the following algorithms: %s' % ', '.join(ctx.env['ALGOIGNORE']))
-        for algoname in ctx.env['ALGOIGNORE']:
-            del algos[algoname]
+        algos_ignored = []
+        for alg in ctx.env['ALGOIGNORE']:
+            if alg in algos.keys():
+                algos_ignored.append(alg)
+        if algos_ignored:
+            print('Ignoring the following algorithms: %s' % ', '.join(algos_ignored))
+            for algoname in algos_ignored:
+                del algos[algoname]
 
     # create version.h header file
     create_version_h('src/version.h', ctx.env.VERSION, ctx.env.GIT_SHA)
