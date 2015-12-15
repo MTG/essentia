@@ -31,7 +31,7 @@ namespace standard {
 class StochasticModelAnal : public Algorithm {
 
  protected:
-  //Input<std::vector<std::complex<Real> > > _fft;
+
   Input<std::vector<Real> > _frame;
   Output<std::vector<Real> > _stocenv;
 
@@ -44,21 +44,11 @@ class StochasticModelAnal : public Algorithm {
   Algorithm* _fft;
   Algorithm* _resample;
 
-//  std::vector<Real> _stocFrameIn; // input frame for the stochaastic analysis algorithm
-
-  // for resample
-//  Algorithm* _fftres;
-//  Algorithm* _ifftres;
-  //void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
-
-// debug
-std::ofstream _log;
 
  public:
   StochasticModelAnal() {
     declareInput(_frame, "frame", "the input frame");
     declareOutput(_stocenv, "stocenv", "the stochastic envelope");
-
 
     _window = AlgorithmFactory::create("Windowing");
     _fft = AlgorithmFactory::create("FFT");
@@ -67,13 +57,11 @@ std::ofstream _log;
   }
 
   ~StochasticModelAnal() {
-//    delete _peakDetect;
-//    delete _cartesianToPolar;
+
   delete _window;
   delete _fft;
   delete _resample;
 
-  _log.close(); // debug
   }
 
   void declareParameters() {
@@ -87,8 +75,6 @@ std::ofstream _log;
   void configure();
   void compute();
 
- // void stochasticModelAnal(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv);
-  //void resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut);
   void getSpecEnvelope(const std::vector<std::complex<Real> > fftRes,std::vector<Real> &magResDB);
 
   static const char* name;
@@ -111,7 +97,7 @@ namespace streaming {
 class StochasticModelAnal : public StreamingAlgorithmWrapper {
 
  protected:
-  //Sink<std::vector<std::complex<Real> > > _fft; // input
+
   Sink<std::vector<Real> > _frame; // input
   Source<std::vector<Real> > _stocenv;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2015  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -58,7 +58,7 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
   int hopsize = 128; //128;
   Real sr = 44100;
   Real minSineDur = 0.02;
-  Real stocf = 0.2; //0.2; // 0.2; //1.; // stochastic envelope factor. Default 0.2
+  Real stocf = 0.2; // stochastic envelope factor. Default 0.2
 
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -73,13 +73,6 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
                                            "hopSize", hopsize,
                                          //  "silentFrames", "noise",
                                            "startFromZero", false );
-
-  // parameters used in the SMS Python implementation
-//  std::string wtype = "blackmanharris92"; // default "hamming"
-//  Algorithm* window    = factory.create("Windowing", "type", wtype.c_str());
-//
-//  Algorithm* fft     = factory.create("FFT",
-//                            "size", framesize);
 
   // parameters used in the SMS Python implementation
   Algorithm* spsmodelanal   = factory.create("SpsModelAnal",
@@ -177,8 +170,6 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
       break;
     }
 
-
-
     // Sine model analysis
     spsmodelanal->compute();
 
@@ -188,12 +179,11 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
     phasesAllFrames.push_back(phases);
     stocEnvAllFrames.push_back(stocenv);
 
-
     counter++;
   }
 
-
-  // clean sine tracks
+//-----------------------------------------------
+// clean sine tracks
   int minFrames = int( minSineDur * sr / Real(hopsize));
   cleaningSineTracks(frequenciesAllFrames, minFrames);
 

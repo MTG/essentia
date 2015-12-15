@@ -31,7 +31,7 @@ namespace standard {
 class SpsModelAnal : public Algorithm {
 
  protected:
-  //Input<std::vector<std::complex<Real> > > _fft;
+
   Input<std::vector<Real> > _frame;
   Output<std::vector<Real> > _magnitudes;
   Output<std::vector<Real> > _frequencies;
@@ -47,26 +47,19 @@ class SpsModelAnal : public Algorithm {
 
   std::vector<Real> _stocFrameIn; // input frame for the stochaastic analysis algorithm
 
-  void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
-
-// debug
-std::ofstream _log;
 
  public:
   SpsModelAnal() {
     declareInput(_frame, "frame", "the input frame");
-    //declareInput(_fft, "fft", "the input frame");
     declareOutput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareOutput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareOutput(_phases, "phases", "the phases of the sinusoidal peaks");
     declareOutput(_stocenv, "stocenv", "the stochastic envelope");
 
-
     _window = AlgorithmFactory::create("Windowing");
     _fft = AlgorithmFactory::create("FFT");
     _sineModelAnal = AlgorithmFactory::create("SineModelAnal");
     _sineSubtraction = AlgorithmFactory::create("SineSubtraction");
-
     _stochasticModelAnal = AlgorithmFactory::create("StochasticModelAnal");
 
   }
@@ -78,8 +71,6 @@ std::ofstream _log;
   delete _sineModelAnal;
   delete _sineSubtraction;
   delete _stochasticModelAnal;
-
-  _log.close(); // debug
   }
 
   void declareParameters() {
@@ -93,7 +84,6 @@ std::ofstream _log;
     declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
     // sinusoidal tracking
     declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
-   // declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
     declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
     declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1]", 0.2);
@@ -103,8 +93,6 @@ std::ofstream _log;
   void configure();
   void compute();
 
- // void stochasticModelAnal(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv);
-  //void resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut);
   void updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator);
 
   static const char* name;
@@ -138,7 +126,6 @@ class SpsModelAnal : public StreamingAlgorithmWrapper {
   SpsModelAnal() {
     declareAlgorithm("SpsModelAnal");
     declareInput(_frame, TOKEN, "frame");
-    //declareInput(_fft, TOKEN, "fft");
     declareOutput(_frequencies, TOKEN, "frequencies");
     declareOutput(_magnitudes, TOKEN, "magnitudes");
     declareOutput(_phases, TOKEN, "phases");

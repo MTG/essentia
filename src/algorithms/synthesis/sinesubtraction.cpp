@@ -24,43 +24,6 @@
 using namespace essentia;
 using namespace standard;
 
-/*
-	"""
-	Subtract sinusoids from a sound
-	x: input sound, N: fft-size, H: hop-size
-	sfreq, smag, sphase: sinusoidal frequencies, magnitudes and phases
-	returns xr: residual sound
-	"""
-
-	hN = N/2                                           # half of fft size
-	x = np.append(np.zeros(hN),x)                      # add zeros at beginning to center first window at sample 0
-	x = np.append(x,np.zeros(hN))                      # add zeros at the end to analyze last sample
-	bh = blackmanharris(N)                             # blackman harris window
-	w = bh/ sum(bh)                                    # normalize window
-	sw = np.zeros(N)                                   # initialize synthesis window
-	sw[hN-H:hN+H] = triang(2*H) / w[hN-H:hN+H]         # synthesis window
-	L = sfreq.shape[0]                                 # number of frames, this works if no sines
-	xr = np.zeros(x.size)                              # initialize output array
-	pin = 0
-	# jjaner debug
-	outresmag = []
-	for l in range(L):
-		xw = x[pin:pin+N]*w                              # window the input sound
-		X = fft(fftshift(xw))                            # compute FFT
-		Yh = UF_C.genSpecSines(N*sfreq[l,:]/fs, smag[l,:], sphase[l,:], N)   # generate spec sines
-		Xr = X-Yh
-		print Xr.shape                                     # subtract sines from original spectrum
-		outresmag = np.append(outresmag, abs(Xr))
-		xrw = np.real(fftshift(ifft(Xr)))                # inverse FFT
-		xr[pin:pin+N] += xrw*sw                          # overlap-add
-		pin += H                                         # advance sound pointer
-	xr = np.delete(xr, range(hN))                      # delete half of first window which was added in stftAnal
-	xr = np.delete(xr, range(xr.size-hN, xr.size))     # delete half of last window which was added in stftAnal
-
-	print("jj debug: writing output residual magnitude")
-	np.savetxt('outresmag.txt',outresmag)
-	return xr
-	*/
 
 const char* SineSubtraction::name = "SineSubtraction";
 const char* SineSubtraction::description = DOC("This algorithm subtracts the sinusoids computed with the sine model analysis from an input audio signal. It ouputs an audio signal.");
@@ -72,7 +35,7 @@ void SineSubtraction::configure() {
     _fftSize = parameter("fftSize").toInt();
     _hopSize = parameter("hopSize").toInt();
 
-// configure algorithms
+		// configure algorithms
 	 	std::string wtype = "blackmanharris92"; // default "hamming"
 		_window->configure( "type", wtype.c_str());
 
@@ -82,8 +45,6 @@ void SineSubtraction::configure() {
 													"hopSize", _hopSize);
 	// create synthesis window
 	createSynthesisWindow(_synwindow, _hopSize, _fftSize);
-
-// configure algorithms
 
 }
 

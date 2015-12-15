@@ -31,7 +31,7 @@ namespace standard {
 class StochasticModelSynth : public Algorithm {
 
  protected:
-  //Input<std::vector<std::complex<Real> > > _fft;
+
   Input<std::vector<Real> > _stocenv;
   Output<std::vector<Real> > _frame;
 
@@ -46,18 +46,10 @@ class StochasticModelSynth : public Algorithm {
   Algorithm* _resample;
   Algorithm* _overlapadd;
 
-//  std::vector<Real> _stocFrameIn; // input frame for the stochaastic Synthysis algorithm
-
-  // for resample
-//  Algorithm* _fftres;
-//  Algorithm* _ifftres;
-  //void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
-
-// debug
-std::ofstream _log;
 
  public:
   StochasticModelSynth() {
+
     declareInput(_stocenv, "stocenv", "the stochastic envelope input");
     declareOutput(_frame, "frame", "the output frame");
 
@@ -69,14 +61,11 @@ std::ofstream _log;
   }
 
   ~StochasticModelSynth() {
-//    delete _peakDetect;
-//    delete _cartesianToPolar;
+
   delete _window;
   delete _ifft;
   delete _overlapadd;
   delete _resample;
-
-  _log.close(); // debug
   }
 
   void declareParameters() {
@@ -90,8 +79,6 @@ std::ofstream _log;
   void configure();
   void compute();
 
- // void stochasticModelSynth(const std::vector<std::complex<Real> > fftInput, const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<Real> &stocEnv);
-  //void resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut);
   void getFFTFromEnvelope(const std::vector<Real> magResDB, std::vector<std::complex<Real> > &fftStoc);
 
   static const char* name;
@@ -115,7 +102,6 @@ class StochasticModelSynth : public StreamingAlgorithmWrapper {
 
  protected:
 
- // Sink<std::vector<Real> > _frame; // input
   Sink<std::vector<Real> > _stocenv;
   Source<std::vector<Real> > _frame; // output
 

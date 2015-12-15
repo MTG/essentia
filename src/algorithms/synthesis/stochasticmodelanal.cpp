@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2015  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -56,7 +56,6 @@ void StochasticModelAnal::configure() {
 
 void StochasticModelAnal::compute() {
   // inputs and outputs
-  //const std::vector<std::complex<Real> >& fft = _fft.get();
   const std::vector<Real>& frame = _frame.get();
   std::vector<Real>& stocEnv = _stocenv.get();
 

@@ -93,9 +93,6 @@ void StochasticModelSynth::compute() {
   _ifft->output("frame").set(ifftframe);
   _ifft->compute();
 
-//for (int i=0; i < ifftframe.size();i++){
-//ifftframe[i] = _fftSize/2.;
-//}
   // synthesis window
   // frame is of size 2*hopsize
   _window->input("frame").set(ifftframe);
@@ -106,7 +103,6 @@ void StochasticModelSynth::compute() {
 	_overlapadd->input("signal").set(wframe);
 	_overlapadd->output("signal").set(frame);
 	_overlapadd->compute();
-
 
 }
 
@@ -128,14 +124,9 @@ void StochasticModelSynth::getFFTFromEnvelope(const std::vector<Real> magResDB, 
     phase =  2 * M_PI *  Real(rand()/Real(RAND_MAX));
     magdB = magResDB[i];
 
-
-//    // positive spectrums
+    // positive spectrums
     fftStoc[i].real(scale * powf(10.f, (magdB / 20.f)) * cos(phase) ) ;
     fftStoc[i].imag(scale * powf(10.f, (magdB / 20.f)) * sin(phase) ) ;
-    // positive spectrums
-//    fftStoc[i].real(scale * cos(phase) ) ;
-//    fftStoc[i].imag(scale * sin(phase) ) ;
-
   }
 
 }

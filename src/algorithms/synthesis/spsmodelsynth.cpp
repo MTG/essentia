@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2015  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -52,8 +52,6 @@ void SpsModelSynth::configure()
   _overlapAdd->configure( "frameSize", _fftSize, // uses synthesis window
 													"hopSize", _hopSize);
 
-
-_log.open("synth.log");
 }
 
 
@@ -64,7 +62,6 @@ void SpsModelSynth::compute() {
   const std::vector<Real>& phases = _phases.get();
   const std::vector<Real>& stocenv = _stocenv.get();
 
-  //std::vector<std::complex<Real> >& outfft = _outfft.get();
   std::vector<Real>& outframe = _outframe.get();
   std::vector<Real>& outsineframe = _outsineframe.get();
   std::vector<Real>& outstocframe = _outstocframe.get();
@@ -86,7 +83,6 @@ void SpsModelSynth::compute() {
 
   _sineModelSynth->compute();
 
-  //std::vector<Real> sineAudio, resAudio;
   _ifftSine->input("fft").set(fftSines);
   _ifftSine->output("frame").set(wsineFrame);
   _ifftSine->compute();
@@ -94,8 +90,7 @@ void SpsModelSynth::compute() {
   _overlapAdd->output("signal").set(sineFrame);
   _overlapAdd->compute();
 
-// TODO: implement
-// synthesis of the stochastic component
+  // synthesis of the stochastic component
   _stochasticModelSynth->input("stocenv").set(stocenv);
   _stochasticModelSynth->output("frame").set(stocFrame);
   _stochasticModelSynth->compute();
@@ -111,12 +106,6 @@ void SpsModelSynth::compute() {
     outsineframe.push_back(sineFrame[i]) ;
     outstocframe.push_back(stocFrame[i]);
   }
-
-
-// DEBUG
-// output is an audio frame / already overlapp-add. Directly to write inot output buffer.
-//outframe.resize(parameter("hopSize").toInt());
-//std::fill(outframe.begin(), outframe.end(), 0.);
 
 }
 

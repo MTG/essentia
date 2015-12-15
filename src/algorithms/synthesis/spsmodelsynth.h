@@ -36,7 +36,7 @@ class SpsModelSynth : public Algorithm {
   Input<std::vector<Real> > _frequencies;
   Input<std::vector<Real> > _phases;
   Input<std::vector<Real> > _stocenv;
-  //Output<std::vector<std::complex<Real> > > _outfft;
+
   Output<std::vector<Real> > _outframe;
   Output<std::vector<Real> > _outsineframe;
   Output<std::vector<Real> > _outstocframe;
@@ -44,23 +44,13 @@ class SpsModelSynth : public Algorithm {
   Real _sampleRate;
   int _fftSize;
   int _hopSize;
-  int _stocSize;
-  int stocSpecSize;
+
   Algorithm* _sineModelSynth;
   Algorithm* _stochasticModelSynth;
-  // for resample function
- // Algorithm* _fft;
   Algorithm* _ifftSine;
   Algorithm* _overlapAdd;
 
 
-  int _stocSpecSize;
-
-  void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
-  //void stochasticModelSynth(const std::vector<Real> stocEnv, const int H, const int N,std::vector<std::complex<Real> > &fftStoc);
-
-// debug
-std::ofstream _log;
 
  public:
   SpsModelSynth() {
@@ -68,7 +58,7 @@ std::ofstream _log;
     declareInput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareInput(_phases, "phases", "the phases of the sinusoidal peaks");
     declareInput(_stocenv, "stocenv", "the stochastic envelope");
-    //declareOutput(_outfft, "fft", "the output FFT frame");
+
     declareOutput(_outframe, "frame", "the output audio frame of the Sinusoidal Plus Stochastic model");
     declareOutput(_outsineframe, "sineframe", "the output audio frame for sinusoidal component ");
     declareOutput(_outstocframe, "stocframe", "the output audio frame for stochastic component ");
@@ -76,8 +66,6 @@ std::ofstream _log;
     _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
     _stochasticModelSynth = AlgorithmFactory::create("StochasticModelSynth");
 
-    // for resample
-   // _fft = AlgorithmFactory::create("FFT");
     _ifftSine = AlgorithmFactory::create("IFFT");
     _overlapAdd = AlgorithmFactory::create("OverlapAdd");
 
@@ -87,11 +75,9 @@ std::ofstream _log;
 
     delete _sineModelSynth;
     delete _stochasticModelSynth;
-  //  delete _fft;
     delete _ifftSine;
     delete _overlapAdd;
 
-    _log.close();
   }
 
   void declareParameters() {
@@ -103,10 +89,6 @@ std::ofstream _log;
 
   void configure();
   void compute();
-
-//  void resample(const std::vector<Real> in, std::vector<Real> &out, const int sizeOut);
-
-
 
   static const char* name;
   static const char* description;
@@ -141,7 +123,7 @@ class SpsModelSynth : public StreamingAlgorithmWrapper {
     declareInput(_frequencies, TOKEN, "frequencies");
     declareInput(_phases, TOKEN, "phases");
     declareInput(_stocenv, TOKEN, "stocenv");
-   // declareOutput(_outfft, TOKEN, "fft");
+
     declareOutput(_outframe, TOKEN, "frame");
     declareOutput(_outsineframe, TOKEN, "sinesframe");
     declareOutput(_outstocframe, TOKEN, "stocframe");
