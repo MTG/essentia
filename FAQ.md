@@ -294,7 +294,7 @@ It is possible to create a standalone binary for Essentia's Vamp plugin (works f
 ./waf
 ```
 
-The resulting binary ```build/src/examples/libvamp_essentia.so``` is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
+The resulting binary (```build/src/examples/libvamp_essentia.so``` on Linux, ```build/src/examples/libvamp_essentia.dylib``` on OSX) is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
 
 
 
