@@ -58,7 +58,7 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
   int hopsize = 128; //128;
   Real sr = 44100;
   Real minSineDur = 0.02;
-  Real stocf = 1; //0.2; // 0.2; //1.; // stochastic envelope factor. Default 0.2
+  Real stocf = 0.2; //0.2; // 0.2; //1.; // stochastic envelope factor. Default 0.2
 
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -92,22 +92,9 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
                             "stocf", stocf
                             );
 
-//  // ONLY FOR DEBUG
-//  int subtrFFTSize = std::min(512, 4*hopsize);
-//  Algorithm* sinesubtraction  = factory.create("SineSubtraction",
-//                            "sampleRate", sr, "fftSize", subtrFFTSize, "hopSize", hopsize);
-//  // ENd Debug
-
+  int frameSizeSynth = 512; // frameSize
   Algorithm* spsmodelsynth  = factory.create("SpsModelSynth",
-                            "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize, "stocf", stocf);
-
-
-//  Algorithm* ifft     = factory.create("IFFT",
-//                                "size", framesize);
-//
-//  Algorithm* overlapAdd = factory.create("OverlapAdd",
-//                                            "frameSize", framesize,
-//                                           "hopSize", hopsize);
+                            "sampleRate", sr, "fftSize", frameSizeSynth, "hopSize", hopsize, "stocf", stocf);
 
 
   Algorithm* audioWriter = factory.create("MonoWriter",
@@ -147,14 +134,7 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
 
-//  window->input("frame").set(frame);
-//  window->output("frame").set(wframe);
-//
-//  fft->input("frame").set(wframe);
-//  fft->output("fft").set(fftframe);
-
   // Sine model analysis
-  //spsmodelanal->input("fft").set(fftframe); // old version
   spsmodelanal->input("frame").set(frame); // inputs a frame
   spsmodelanal->output("magnitudes").set(magnitudes);
   spsmodelanal->output("frequencies").set(frequencies);
@@ -169,17 +149,11 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
   spsmodelsynth->input("frequencies").set(frequencies);
   spsmodelsynth->input("phases").set(phases);
   spsmodelsynth->input("stocenv").set(stocenv);
-  //spsmodelsynth->output("fft").set(sfftframe);
   spsmodelsynth->output("frame").set(audioOutput); // outputs a frame
   spsmodelsynth->output("sineframe").set(audioSineOutput); // outputs a frame
   spsmodelsynth->output("stocframe").set(audioStocOutput); // outputs a frame
 
-  // Synthesis
-//  ifft->input("fft").set(sfftframe); // taking SpsModelSynth output
-//  ifft->output("frame").set(ifftframe);
 
-//  overlapAdd->input("signal").set(ifftframe);
-//  overlapAdd->output("signal").set(audioOutput);
 
 
 ////////
@@ -223,16 +197,13 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
   int minFrames = int( minSineDur * sr / Real(hopsize));
   cleaningSineTracks(frequenciesAllFrames, minFrames);
 
-  // debug: load from python exported file
-//  stocEnvAllFrames.clear();
-//  stocEnvAllFrames = readIn2dData("stocenv.txt");
-//  std::cout << stocEnvAllFrames.size() << std::endl;
+
 //-----------------------------------------------
 // synthesis loop
   cout << "-------- synthesizing from stochastic model parameters" "----"  << counter<< " frames (hopsize: " << hopsize << ") ---------"<< endl;
   int nFrames = counter;
   counter = 0;
-cout << "TODO (10/12/2015): debugging:  compmensate energy of stochasticanal and stochasticsynth. Cehck stocenv values, and how magnitude values propagate" << endl;
+
   while (true) {
 
     // all frames processed
@@ -285,12 +256,8 @@ cout << "TODO (10/12/2015): debugging:  compmensate energy of stochasticanal and
 
   delete audioLoader;
   delete frameCutter;
- // delete fft;
   delete spsmodelanal;
   delete spsmodelsynth;
- // delete sinesubtraction; // ONLY FOR DEBUG
-//  delete ifft;
-//  delete overlapAdd;
   delete audioWriter;
   delete audioWriterSine;
   delete audioWriterStoc;
