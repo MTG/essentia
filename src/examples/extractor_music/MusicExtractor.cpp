@@ -450,7 +450,6 @@ void MusicExtractor::setExtractorDefaultOptions() {
 
   string silentFrames = "noise";
   int zeroPadding = 0;
-  string windowType = "hann";
 
   // lowlevel
   options.set("lowlevel.frameSize", 2048);
@@ -462,7 +461,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   // average_loudness
   options.set("average_loudness.frameSize", 88200);
   options.set("average_loudness.hopSize", 44100);
-  options.set("average_loudness.windowType", windowType);
+  options.set("average_loudness.windowType", "hann");
   options.set("average_loudness.silentFrames", silentFrames);
 
   // rhythm
