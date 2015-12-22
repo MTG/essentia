@@ -34,65 +34,31 @@ https://github.com/GiantSteps/Essentia-Libraries
 
 
 
-Linux static builds
+Linux/OSX static builds
 -------------------
 
-To create static build of the library and executable example extractors:
+Follow the steps below to create static build of the library and executable example extractors.
 
-Prepare static build of Libav 0.8.16:
-```
-git clone git://git.libav.org/libav.git
-cd libav
-git checkout tags/v0.8.16
-./configure --disable-doc --disable-ffmpeg --disable-avconv --disable-avplay --disable-avprobe --disable-avserver --disable-avdevice  --disable-swscale --disable-avfilter --disable-network --disable-indevs --disable-outdevs
-make
-sudo make install
-``` 
+Install additional tools required to build some of the dependencies. 
 
-Prepare static build of Taglib 1.9.1:
-  
+On Linux:
 ```
-wget http://taglib.github.io/releases/taglib-1.9.1.tar.gz
-tar xf taglib-1.9.1.tar.gz
-cd taglib-1.9.1
-cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_RELEASE_TYPE=Release -DENABLE_STATIC=ON
-make
-sudo make install
-```
-Make sure you did not have libtag1-dev package installed via apt-get (if so, uninstall it).
-
-
-Build Essentia:
-```
-./waf configure  --with-static-examples
-./waf
-sudo ./waf install
+apt-get install yasm cmake
 ```
 
-The static executables will be in the ```build/src/examples``` folder.
-
-
-Cross-compiling for Windows on Linux
-------------------------------------
-
-Install mingw gcc/g++
+On OSX:
 ```
-sudo apt-get install  gcc-mingw-w64 
+brew install yasm cmake
 ```
 
-Install cmake, it is required to build some dependencies
+Prepare static builds for dependencies running a script (works both for Linux and OSX):
 ```
-sudo apt-get install cmake
-```
-
-Build all dependencies
-```
-./packaging/build_3rdparty_static_win32.sh
+packaging/build_3rdparty_static_debian.sh
 ```
 
-Alternatively you can build each dependency apart using these scripts
+Alternatively, you can build each dependency apart running corresponding scripts inside ```packaging/debian_3rdparty``` folder:
 ```
-cd packaging/win32_3rdparty
+cd packaging/debian_3rdparty
 build_libav_nomuxers.sh
 build_taglib.sh
 build_fftw3.sh
@@ -101,7 +67,29 @@ build_yaml.sh
 cd ../../
 ```
 
-Build Essentia
+Build Essentia:
+```
+./waf configure  --with-static-examples
+./waf
+```
+
+The static executables will be in the ```build/src/examples``` folder.
+
+
+Cross-compiling for Windows on Linux
+------------------------------------
+
+Install Mingw-w64 GCC:
+```
+sudo apt-get install  gcc-mingw-w64 
+```
+
+Build all dependencies (similarly to Linux static builds, make sure you have required tools installed):
+```
+./packaging/build_3rdparty_static_win32.sh
+```
+
+Build Essentia:
 ```
 ./waf configure --with-examples --cross-compile-mingw32
 ./waf
