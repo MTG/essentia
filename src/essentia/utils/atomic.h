@@ -21,8 +21,35 @@
 #define ESSENTIA_ATOMIC_H
 
 
+#if defined(__EMSCRIPTEN__)
+
+namespace essentia {
+
+class Atomic {
+ public:
+  int _a;
+
+  inline Atomic(const int &i = 0) : _a(i) {}
+
+  inline operator int () const { return _a; }
+
+  inline void add(const int& i) {
+      // Javascript is single-threaded
+      _a += i;
+  }
+
+  inline void operator-=(const int &i) { add(-i); }
+  inline void operator+=(const int &i) { add(i); }
+
+  inline void operator++() { add(1); }
+  inline void operator--() { add(-1); }
+};
+
+} // namespace essentia
+
+
 // life's easy in C++11
-#if __cplusplus >= 201103L
+#elif __cplusplus >= 201103L
 
 
 #include <atomic>
@@ -68,8 +95,41 @@ class Atomic {
 } // namespace essentia
 
 
-#else 
+#elif defined(OS_MAC)
 
+#include <libkern/OSAtomic.h>
+namespace essentia {
+
+class Atomic {
+ private:
+  int32_t i_;
+
+ public:
+  inline Atomic(const int &i = 0) : i_(i) {}  
+    
+  inline operator int() const { return i_; }
+    
+  inline void operator-=(const int &i) {
+    OSAtomicAdd32Barrier(-i, &i_);
+  }
+
+  inline void operator+=(const int &i) {
+    OSAtomicAdd32Barrier(i, &i_);
+  }
+              
+  inline void operator++() {
+    OSAtomicIncrement32Barrier(&i_);
+  }
+              
+  inline void operator--() {
+    OSAtomicDecrement32Barrier(&i_);
+  }
+};
+
+} // namespace essentia
+
+
+#elif defined(OS_LINUX)
 
 #include <ext/atomicity.h>
 

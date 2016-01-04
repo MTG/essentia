@@ -52,6 +52,7 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   bpmhist->output("secondPeakBPM") >>    PC(pool, nameSpace + "second_peak_bpm");
   bpmhist->output("secondPeakWeight") >> PC(pool, nameSpace + "second_peak_weight");
   bpmhist->output("secondPeakSpread") >> PC(pool, nameSpace + "second_peak_spread");
+  bpmhist->output("histogram") >> NOWHERE;
 
   // Onset Detection
   Algorithm* onset = factory.create("OnsetRate");
@@ -66,6 +67,10 @@ void FreesoundRhythmDescriptors::createBeatsLoudnessNetwork(SourceBase& source, 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
   Real analysisSampleRate = 44100; // TODO: unify analysisSampleRate
   vector<Real> ticks = pool.value<vector<Real> >(nameSpace + "beats_position");
+    if (ticks.size()==0){
+        cout<<"adding 0 to ticks"<<endl;
+        ticks.push_back(0);
+    }
   Algorithm* beatsLoudness = factory.create("BeatsLoudness",
     "sampleRate", analysisSampleRate,
     "beats", ticks

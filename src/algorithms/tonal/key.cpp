@@ -48,9 +48,9 @@ void Key::configure() {
   _keys = arrayToVector<string>(keyNames);
 
   Real profileTypes[][12] = {
-    // Diatonic
-    { 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1 },
-    { 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1 },
+      // Diatonic
+      { 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1 },
+      { 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1 },
 
     // Krumhansl
     { 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88 },
@@ -74,7 +74,15 @@ void Key::configure() {
 
     // Statistics THPCP over all the evaluation set
     { 0.95162, 0.20742, 0.71758, 0.22007, 0.71341, 0.48841, 0.31431, 1.00000, 0.20957, 0.53657, 0.22585, 0.55363 },
-    { 0.94409, 0.21742, 0.64525, 0.63229, 0.27897, 0.57709, 0.26428, 1.0000, 0.26428, 0.30633, 0.45924, 0.35929 }
+    { 0.94409, 0.21742, 0.64525, 0.63229, 0.27897, 0.57709, 0.26428, 1.0000, 0.26428, 0.30633, 0.45924, 0.35929 },
+	
+    // Shaath
+    { 6.6, 2.0, 3.5, 2.3, 4.6, 4.0, 2.5, 5.2, 2.4, 3.7, 2.3, 3.4 },
+    { 6.5, 2.7, 3.5, 5.4, 2.6, 3.5, 2.5, 5.2, 4.0, 2.7, 4.3, 3.2 },
+
+    // Gómez –as specified by Sha'ath in his report...
+    { 0.82, 0.00, 0.55, 0.00, 0.53, 0.30, 0.08, 1.00, 0.00, 0.38, 0.00, 0.47 },
+    { 0.81, 0.00, 0.53, 0.54, 0.00, 0.27, 0.07, 1.00, 0.27, 0.07, 0.10, 0.36 }
 
   };
 
@@ -87,6 +95,8 @@ void Key::configure() {
   else if (_profileType == "tonictriad")    { SET_PROFILE(4); }
   else if (_profileType == "temperley2005") { SET_PROFILE(5); }
   else if (_profileType == "thpcp")         { SET_PROFILE(6); }
+  else if (_profileType == "shaath")        { SET_PROFILE(7); }
+  else if (_profileType == "gomez")         { SET_PROFILE(8); }
   else {
     throw EssentiaException("Key: Unsupported profile type: ", _profileType);
   }

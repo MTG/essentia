@@ -21,9 +21,9 @@
 #include <windows.h>
 #endif
 
-#include <taglib/fileref.h>
-#include <taglib/tpropertymap.h>
-#include <taglib/tag.h>
+#include <fileref.h>
+#include <tpropertymap.h>
+#include <tag.h>
 
 #include <algorithm>
 
@@ -195,7 +195,12 @@ const char* MetadataReader::description = DOC("This algorithm outputs the metada
 "Please observe that the .wav format is not supported. Also note that this algorithm incorrectly calculates the number of channels for a file in mp3 format only for versions less than 1.5 of taglib in Linux and less or equal to 1.5 in Mac OS X\n"
 "If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8.\n"
 "This algorithm also contains some heuristic to try to deal with encoding errors in the tags and tries to do the appropriate conversion if a problem was found (mostly twice latin1->utf8 conversion).\n"
-);
+"\n"
+"MetadataReader reads all metadata tags found in audio and stores them in the pool tagPool. Standard metadata tags found in audio files include strings mentioned in [1,2]. Tag strings are case-sensitive and they are converted to lower-case when stored to the pool. It is possible to filter these tags by using 'filterMetadataTags' parameter. This parameter should specify a white-list of tag strings as they are found in the audio file (e.g., \"ARTIST\").\n"
+"\n"
+"References:\n"
+"  [1] https://taglib.github.io/api/classTagLib_1_1PropertyMap.html#details\n\n"
+"  [2] https://picard.musicbrainz.org/docs/mappings/");
 
 
 void MetadataReader::configure() {

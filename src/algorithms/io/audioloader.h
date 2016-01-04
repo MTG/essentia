@@ -42,13 +42,13 @@ class AudioLoader : public Algorithm {
 
   int _nChannels;
 
-  // MAX_AUDIO_FRAME_SIZE is in bytes, we want FFMPEG_BUFFER_SIZE in sample units
-  // we also multiply by 2 to get some margin, because we might want to decode multiple frames
-  // in this buffer (all the frames contained in a packet, which can be more than 1 as in flac),
-  // and each time we decode a frame we need to have at least a full buffer of free space.
-  const static int FFMPEG_BUFFER_SIZE = (MAX_AUDIO_FRAME_SIZE / sizeof(int16_t)) * 2;
+  // MAX_AUDIO_FRAME_SIZE is in bytes, multiply it by 2 to get some margin, 
+  // because we might want to decode multiple frames in this buffer (all the 
+  // frames contained in a packet, which can be more than 1 as in flac), and 
+  // each time we decode a frame we need to have at least a full buffer of free space.
+  const static int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
 
-  int16_t* _buffer;
+  float* _buffer;
   int _dataSize;
 
   AVFormatContext* _demuxCtx;
@@ -58,19 +58,9 @@ class AudioLoader : public Algorithm {
   AVMD5 *_md5Encoded;
   uint8_t _checksum[16];
   bool _computeMD5;
-
-
-#if LIBAVCODEC_VERSION_INT >= AVCODEC_AUDIO_DECODE4
   AVFrame* _decodedFrame;
-#endif
 
-#if HAVE_SWRESAMPLE
-  struct SwrContext* _convertCtx;
-#else
-  AVAudioConvert* _audioConvert;
-  int16_t* _buff1;
-  int16_t* _buff2;
-#endif
+  struct AVAudioResampleContext* _convertCtxAv;
 
   int _streamIdx; // index of the audio stream among all the streams contained in the file
   bool _configured;
@@ -81,7 +71,7 @@ class AudioLoader : public Algorithm {
 
   void pushChannelsSampleRateInfo(int nChannels, Real sampleRate);
   void pushCodecInfo(std::string codec, int bit_rate);
-  int decode_audio_frame(AVCodecContext* audioCtx, int16_t* output,
+  int decode_audio_frame(AVCodecContext* audioCtx, float* output,
                          int* outputSize, AVPacket* packet);
   int decodePacket();
   void flushPacket();
@@ -91,12 +81,7 @@ class AudioLoader : public Algorithm {
  public:
   AudioLoader() : Algorithm(), _buffer(0),  _demuxCtx(0),
 	          _audioCtx(0), _audioCodec(0), _decodedFrame(0),
-#if HAVE_SWRESAMPLE
-                  _convertCtx(0),
-#else
-                  _audioConvert(0), _buff1(0), _buff2(0),
-#endif
-                  _configured(false) {
+            _convertCtxAv(0), _configured(false) {
 
     declareOutput(_audio, 1, "audio", "the input audio signal");
     declareOutput(_sampleRate, 0, "sampleRate", "the sampling rate of the audio signal [Hz]");
@@ -111,13 +96,9 @@ class AudioLoader : public Algorithm {
     av_register_all();
 
     // use av_malloc, because we _need_ the buffer to be 16-byte aligned
-    _buffer = (int16_t*)av_malloc(FFMPEG_BUFFER_SIZE * sizeof(int16_t));
+    _buffer = (float*)av_malloc(FFMPEG_BUFFER_SIZE);
 
-#if LIBAVUTIL_VERSION_INT < AVUTIL_51_43_0
-    _md5Encoded = (AVMD5*) av_malloc(av_md5_size);
-#else
     _md5Encoded = av_md5_alloc();
-#endif
     if (!_md5Encoded) {
         throw EssentiaException("Error allocating the MD5 context");
     }

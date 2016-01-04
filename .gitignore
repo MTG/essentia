@@ -1,3 +1,6 @@
+.DS_Store
+
+
 *.pyc
 build
 .sconsign.dblite

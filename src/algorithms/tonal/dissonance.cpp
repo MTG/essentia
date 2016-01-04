@@ -57,7 +57,7 @@ Real plompLevelt(Real df) {
   //
   //   #include <iostream>
   //   int main() {
-  //       for (float i = 0; i <= 1.2; i+=0.01) {
+  //       for (Real i = 0; i <= 1.2; i+=0.01) {
   //           std::cout << plompLevelt(i) << std::endl;
   //       }
   //   }
@@ -111,7 +111,7 @@ Real calcDissonance(const vector<Real>& frequencies, const vector<Real>& magnitu
   //vector<Real> loudness(size);
   //for (int i=0; i<size; i++) partialLoudness = loudness[i]/totalLoudness;
 
-  float totalDissonance = 0;
+  Real totalDissonance = 0;
   for (int p1 = 0; p1 < size; p1++) {
     if (frequencies[p1] > 50) { // ignore frequencies below 50 Hz
       Real barkFreq = hz2bark(frequencies[p1]);
@@ -121,7 +121,7 @@ Real calcDissonance(const vector<Real>& frequencies, const vector<Real>& magnitu
       Real peakDissonance = 0;
       while (p2 < size && frequencies[p2] < startF && frequencies[p2] < 50) p2++;
       while (p2 < size && frequencies[p2] < endF && frequencies[p2] < 10000) {
-        float d = 1.0 - consonance(frequencies[p1], frequencies[p2]);
+        Real d = 1.0 - consonance(frequencies[p1], frequencies[p2]);
         // Dissonance from p1 to p2, should be the same as dissonance from p2
         // to p1, this is the reason for using both peaks' loudness as
         // weight

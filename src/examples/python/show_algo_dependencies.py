@@ -17,8 +17,12 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-
+import sys
 import subprocess
+import essentia.standard
+import essentia.streaming
+import yaml
+
 
 def find_dependencies(mode, algo):
 
@@ -34,45 +38,103 @@ loader = es.%s()
     proc = subprocess.Popen(["python", "-c", code], stdout=subprocess.PIPE)
     stdout = proc.communicate()[0].split('\n')
 
+    # function to assign nested dict elements by a list of nested keys
+    def set_val(d, keys, val):
+        reduce(lambda x,y: x[y], keys[:-1], d)[keys[-1]] = val
+
     algos = []
     lines = []
-    for line in stdout:
+    tree = {}
+    previous_key = []
+    previous_indent = -8
 
+    # NOTE: the code relies heavily on indentification of output in Essentia's logger
+    for line in stdout:
         if line.startswith("[Factory   ] "):
         
+            line = line.replace("[Factory   ] ", "")
             if line.count("Streaming: Creating algorithm: "):
-                a = line.split("Streaming: Creating algorithm: ")[-1]
+                tab, a = line.split("Streaming: Creating algorithm: ")
                 m = "streaming"
-                lines.append(line)
-                algos.append((m, a))
-
-            if line.count("Standard : Creating algorithm: "):
-                a = line.split("Standard : Creating algorithm: ")[-1]
+            elif line.count("Standard : Creating algorithm: "):
+                tab, a = line.split("Standard : Creating algorithm: ")
                 m = "standard"
-                lines.append(line)
-                algos.append((m, a))
+            else: 
+                continue
 
+            lines.append(line)
+            algos.append((m, a))
+            
+            indent = len(tab)
 
-    print "---------- %s : %s ----------" % (mode, algo)
-    
+            if indent < previous_indent:
+                previous_key = previous_key[:-2]
+            if indent == previous_indent:
+                previous_key = previous_key[:-1]
+
+            set_val(tree, previous_key + [(m,a)], {})
+            previous_key += [(m, a)]          
+
+            previous_indent = indent
+ 
     algos = sorted(list(set(algos) - set([(mode, algo)])))
+    return algos, tree, lines
+
+
+def print_dependencies(algos, tree=None, lines=None):
     print "Dependencies:"
     for m,a in algos:
         print m + '\t' + a
     print
 
-
-    print '\n'.join(lines)
-    print 
-    print
-
-
-import essentia.standard as es
-for algo in es.algorithmNames():
-    find_dependencies('standard', algo)
+    if tree:
+        print "Dependencies tree (yaml)"
+        print yaml.safe_dump(tree, indent=4)
 
 
-import essentia.streaming as es
-for algo in es.algorithmNames():
-    find_dependencies('streaming', algo)
+    if lines:
+        print "Essentia logger output"
+        print '\n'.join(lines)
+        print 
+        print
 
+
+
+
+
+try:
+    algo = sys.argv[1]
+    mode = sys.argv[2]
+except:
+    if len(sys.argv) > 1:
+        print 'usage:', sys.argv[0], '[<algo_name> <streaming|standard>]'
+        sys.exit()
+    algo = None
+    mode = None
+
+algos = { 'standard': essentia.standard.algorithmNames(), 
+          'streaming': essentia.streaming.algorithmNames() }
+
+
+if algo: 
+    # search dependencies recursively for algo
+    try:
+        if algo not in algos[mode]:
+            print 'Algorithm "' + algo + '" not found in essentia.' + mode
+            raise
+    except:
+        # mode != standard|streaming
+        print 'usage:', sys.argv[0], '[<algo_name> <streaming|standard>]'
+        sys.exit()
+
+    print "---------- %s : %s ----------" % (mode, algo)
+    
+    dependencies, tree, _ = find_dependencies(mode, algo)  
+    print_dependencies(dependencies, tree)
+
+else:
+    # search dependencies non-recursively for all algorithms
+    for mode in ['standard', 'streaming']:
+        for algo in algos[mode]:
+            print "---------- %s : %s ----------" % (mode, algo)
+            print_dependencies(*find_dependencies(mode, algo))

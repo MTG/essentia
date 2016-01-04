@@ -15,7 +15,7 @@ const char* PitchSalienceFunction::name = "PitchSalienceFunction";
 const char* PitchSalienceFunction::version = "1.0";
 const char* PitchSalienceFunction::description = DOC("This algorithm computes the pitch salience function of a signal frame given its spectral peaks. The salience function covers a pitch range of nearly five octaves (i.e., 6000 cents), starting from the \"referenceFrequency\", and is quantized into cent bins according to the specified \"binResolution\". The salience of a given frequency is computed as the sum of the weighted energies found at integer multiples (harmonics) of that frequency. \n"
 "\n"
-"This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the SpectralPeaks algorithm. The output is a vector of salience values computed for the cent bins.\n"
+"This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the SpectralPeaks algorithm. The output is a vector of salience values computed for the cent bins. The 0th bin corresponds to the specified \"referenceFrequency\".\n"
 "\n"
 "When input vectors differ in size or are empty, an exception is thrown. Input vectors must contain positive frequencies and not contain negative magnitudes otherwise an exception is thrown. It is highly recommended to avoid erroneous peak duplicates (peaks of the same frequency occuring more than ones), but it is up to the user's own control and no exception will be thrown.\n"
 "\n"

@@ -69,35 +69,40 @@ void TonalExtractor::createInnerNetwork() {
   _hpcpTuning        = factory.create("HPCP");
 
   _signal                                >>  _frameCutter->input("signal");
-
   _frameCutter->output("frame")          >>  _windowing->input("frame");
-  _hpcpKey->output("hpcp")               >>  _key->input("pcp");
-  _hpcpChord->output("hpcp")             >>  _chordsDetection->input("pcp");
-  _chordsDetection->output("chords")     >>  _chordsDescriptors->input("chords");
-  _key->output("key")                    >>  _chordsDescriptors->input("key");
-  _key->output("scale")                  >>  _chordsDescriptors->input("scale");
+  _windowing->output("frame")            >>  _spectrum->input("frame");
+  _spectrum->output("spectrum")          >>  _spectralPeaks->input("spectrum");
+
   _spectralPeaks->output("magnitudes")   >>  _hpcpKey->input("magnitudes");
   _spectralPeaks->output("magnitudes")   >>  _hpcpChord->input("magnitudes");
   _spectralPeaks->output("magnitudes")   >>  _hpcpTuning->input("magnitudes");
   _spectralPeaks->output("frequencies")  >>  _hpcpKey->input("frequencies");
   _spectralPeaks->output("frequencies")  >>  _hpcpChord->input("frequencies");
   _spectralPeaks->output("frequencies")  >>  _hpcpTuning->input("frequencies");
-  _spectrum->output("spectrum")          >>  _spectralPeaks->input("spectrum");
-  _windowing->output("frame")            >>  _spectrum->input("frame");
 
+  _hpcpTuning->output("hpcp")            >>  _hpcpsTuning;
+
+  _hpcpKey->output("hpcp")               >>  _hpcps;
+  _hpcpKey->output("hpcp")               >>  _key->input("pcp");
+  _key->output("key")                    >>  _keyKey ;
+  _key->output("scale")                  >>  _keyScale;
+  _key->output("strength")               >>  _keyStrength;
+
+  _key->output("key")                    >>  _chordsDescriptors->input("key");
+  _key->output("scale")                  >>  _chordsDescriptors->input("scale");
+
+  _hpcpChord->output("hpcp")             >>  _chordsDetection->input("pcp");
+  
+  _chordsDetection->output("chords")     >>  _chordsProgression;
+  _chordsDetection->output("strength")   >>  _chordsStrength;
+  _chordsDetection->output("chords")     >>  _chordsDescriptors->input("chords");
+  
   _chordsDescriptors->output("chordsChangesRate")  >>  _chordsChangesRate;
   _chordsDescriptors->output("chordsHistogram")    >>  _chordsHistogram;
   _chordsDescriptors->output("chordsKey")          >>  _chordsKey;
   _chordsDescriptors->output("chordsNumberRate")   >>  _chordsNumberRate;
-  _chordsDetection->output("chords")               >>  _chordsProgression ;
   _chordsDescriptors->output("chordsScale")        >>  _chordsScale;
-  _chordsDetection->output("strength")             >>  _chordsStrength;
-  _hpcpKey->output("hpcp")                         >>  _hpcps;
-  _hpcpTuning->output("hpcp")                      >>  _hpcpsTuning;
-  _key->output("key")                              >>  _keyKey ;
-  _key->output("scale")                            >>  _keyScale;
-  _key->output("strength")                         >>  _keyStrength;
-
+ 
   _network = new scheduler::Network(_frameCutter);
 }
 

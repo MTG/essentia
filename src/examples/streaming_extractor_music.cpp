@@ -27,6 +27,7 @@
 #include <essentia/essentiautil.h>
 
 #include "extractor_music/MusicExtractor.h"
+#include "credit_libav.h" 
 
 using namespace std;
 using namespace essentia;
@@ -38,6 +39,7 @@ void usage(char *progname) {
     cout << "Usage: " << progname << " input_audiofile output_textfile [profile]" << endl;
     cout << endl << "Music extractor version '" << EXTRACTOR_VERSION << "'" << endl 
          << "built with Essentia version " << essentia::version_git_sha << endl;
+    creditLibAV();
     exit(1);
 }
 

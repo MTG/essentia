@@ -26,7 +26,7 @@ const string FreesoundLowlevelDescriptors::nameSpace="lowlevel.";
 
 void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool){
 
-  Real analysisSampleRate =  44100;// TODO: unify
+  //Real analysisSampleRate =  44100;// TODO: unify
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
@@ -97,7 +97,7 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   // Spectral Decrease
   Algorithm* square = factory.create("UnaryOperator", "type", "square");
   Algorithm* decrease = factory.create("Decrease",
-                                       "range", analysisSampleRate * 0.5);
+                                       "range", sampleRate * 0.5);
   spec->output("spectrum") >> square->input("array");
   square->output("array") >> decrease->input("array");
   decrease->output("decrease") >> PC(pool, nameSpace + "spectral_decrease");
@@ -144,7 +144,7 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
 
   // Spectral Frequency Bands
   Algorithm* fb = factory.create("FrequencyBands",
-                                 "sampleRate", analysisSampleRate);
+                                 "sampleRate", sampleRate);
   spec->output("spectrum") >> fb->input("spectrum");
   fb->output("bands") >> PC(pool, nameSpace + "frequency_bands");
 
@@ -196,7 +196,7 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   // Spectral Centroid
   Algorithm* square2 = factory.create("UnaryOperator", "type", "square");
   Algorithm* centroid = factory.create("Centroid",
-                                       "range", analysisSampleRate * 0.5);
+                                       "range", sampleRate * 0.5);
   spec->output("spectrum") >> square2->input("array");
   square2->output("array") >> centroid->input("array");
   centroid->output("centroid") >> PC(pool, nameSpace + "spectral_centroid");
@@ -204,7 +204,7 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
 
   // Spectral Central Moments Statistics
   Algorithm* cm = factory.create("CentralMoments",
-                                 "range", analysisSampleRate * 0.5);
+                                 "range", sampleRate * 0.5);
   Algorithm* ds = factory.create("DistributionShape");
   spec->output("spectrum") >> cm->input("array");
   cm->output("centralMoments") >> ds->input("centralMoments");
@@ -225,7 +225,7 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   // Spectral Contrast
   Algorithm* sc = factory.create("SpectralContrast",
                                  "frameSize", frameSize,
-                                 "sampleRate", analysisSampleRate,
+                                 "sampleRate", sampleRate,
                                  "numberBands", 6,
                                  "lowFrequencyBound", 20,
                                  "highFrequencyBound", 11000,

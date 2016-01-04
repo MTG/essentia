@@ -34,6 +34,7 @@ const char* MonoWriter::description = DOC("This algorithm writes a mono audio st
 
 void MonoWriter::reset() {
   Algorithm::reset();
+
   int recommendedBufferSize;
   try {
     recommendedBufferSize = _audioCtx.create(parameter("filename").toString(),
@@ -134,21 +135,10 @@ void MonoWriter::createInnerNetwork() {
 }
 
 void MonoWriter::configure() {
-  try {
-    _writer->configure(INHERIT("filename"),
-                       INHERIT("format"),
-                       INHERIT("sampleRate"));
-  }
-  catch (EssentiaException&) {
-    // no file has been specified, do not do anything
-    // we let the inner loader take care of correctness and sending a nice
-    // error message if necessary
-    _configured = false;
-    return;
-  }
-
+  _writer->configure(INHERIT("filename"),
+                     INHERIT("format"),
+                     INHERIT("sampleRate"));
   _configured = true;
-
 }
 
 void MonoWriter::compute() {

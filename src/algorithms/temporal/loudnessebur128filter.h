@@ -31,12 +31,8 @@ class LoudnessEBUR128Filter : public AlgorithmComposite {
 
  protected:
   Algorithm* _stereoDemuxer;
-  Algorithm* _resampleLeft;
-  Algorithm* _resampleRight;
-  Algorithm* _filterLeft1;
-  Algorithm* _filterLeft2;
-  Algorithm* _filterRight1;
-  Algorithm* _filterRight2;
+  Algorithm* _filterLeft;
+  Algorithm* _filterRight; 
   Algorithm* _squareLeft;
   Algorithm* _squareRight;
   Algorithm* _sum;

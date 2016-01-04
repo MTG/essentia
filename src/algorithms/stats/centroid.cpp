@@ -23,15 +23,27 @@ using namespace essentia;
 using namespace standard;
 
 const char* Centroid::name = "Centroid";
-const char* Centroid::description = DOC("This algorithm extracts the centroid (first order central moment), normalized to a specified range, of the input array.\n"
+const char* Centroid::description = DOC("This algorithm extracts the centroid, normalized to a specified range, of the input array [1]. In particular, it can be used to compute spectral centroid or temporal centroid.\n"
+"\n"
+"The spectral centroid is a measure that indicates where the \"center of mass\" of the spectrum is. Perceptually, it has a robust connection with the impression of \"brightness\" of a sound, and therefore is used to characterise musical timbre. It is calculated as the weighted mean of the frequencies present in the signal, with their magnitudes as the weights.\n"
+"\n"
+"The temporal centroid is the point in time in a signal that is a temporal balancing point of the sound event energy. It can be computed from the envelope of the signal across audio samples [3] (see Envelope algorithm) or over the RMS level of signal across frames [4] (see RMS algorithm).\n"
+"\n"
 "Note:\n"
-" - For a spectral centroid [hz], frequency range should be equal to samplerate/2\n"
-" - For an audio centroid [s], frequency range should be equal to (audio_size-1) / samplerate\n"
-"Exceptions are thrown when input array contains less than 2 elements.\n"
+"- For a spectral centroid [hz], frequency range should be equal to samplerate/2\n"
+"- For a temporal envelope centroid [s], range should be equal to (audio_size_in_samples-1) / samplerate\n"
+"- Exceptions are thrown when input array contains less than 2 elements.\n"
 "\n"
 "References:\n"
 "  [1] Function Centroid -- from Wolfram MathWorld,\n"
-"  http://mathworld.wolfram.com/FunctionCentroid.html");
+"  http://mathworld.wolfram.com/FunctionCentroid.html\n"
+"  [2] Spectral centroid - Wikipedia, the free encyclopedia,\n"
+"  https://en.wikipedia.org/wiki/Spectral_centroid\n"
+"  [3] G. Peeters, \"A large set of audio features for sound description\n"     
+"  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n"  
+"  Project Report, 2004.\n" 
+"  [4] Klapuri, A., & Davy, M. (Eds.). (2007). Signal processing methods for\n"
+"  music transcription. Springer Science & Business Media.");
 
 
 void Centroid::configure() {

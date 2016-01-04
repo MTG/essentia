@@ -31,6 +31,8 @@
 #include "streaming_extractortonal.h"
 #include "streaming_extractorpanning.h"
 #include "streaming_extractorpostprocess.h"
+#include "credit_libav.h"
+
 
 using namespace std;
 using namespace essentia;
@@ -57,6 +59,7 @@ void outputToFile(Pool& pool, const string& outputFilename, const Pool& options)
 void usage() {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: streaming_extractor input_audiofile output_textfile [profile]" << endl;
+    creditLibAV();
     exit(1);
 }
 
@@ -493,6 +496,7 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       connectSingleValue(bpmhist->output("secondPeakBPM"),    neqloudPool, rhythmspace + "second_peak_bpm");
       connectSingleValue(bpmhist->output("secondPeakWeight"), neqloudPool, rhythmspace + "second_peak_weight");
       connectSingleValue(bpmhist->output("secondPeakSpread"), neqloudPool, rhythmspace + "second_peak_spread");
+      bpmhist->output("histogram") >> NOWHERE;
 
       // Onset Detection
       Algorithm* onset = factory.create("OnsetRate");
@@ -556,6 +560,7 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       connectSingleValue(bpmhist->output("secondPeakBPM"),    eqloudPool, rhythmspace + "second_peak_bpm");
       connectSingleValue(bpmhist->output("secondPeakWeight"), eqloudPool, rhythmspace + "second_peak_weight");
       connectSingleValue(bpmhist->output("secondPeakSpread"), eqloudPool, rhythmspace + "second_peak_spread");
+      bpmhist->output("histogram") >> NOWHERE;
 
       // Onset Detection
       Algorithm* onset = factory.create("OnsetRate");

@@ -54,6 +54,7 @@ void  MusicRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   bpmhist->output("secondPeakBPM")    >> PC(pool, nameSpace + "bpm_histogram_second_peak_bpm");
   bpmhist->output("secondPeakWeight") >> PC(pool, nameSpace + "bpm_histogram_second_peak_weight");
   bpmhist->output("secondPeakSpread") >> PC(pool, nameSpace + "bpm_histogram_second_peak_spread");
+  bpmhist->output("histogram") >> NOWHERE;
 
   // Onset Detection
   // TODO: use SuperFlux onset rate algorithm instead!
