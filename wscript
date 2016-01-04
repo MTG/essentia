@@ -91,6 +91,8 @@ def configure(ctx):
         ctx.env.CPPFLAGS += [ '-fPIC' ] # need that for KissFFT
 
 
+    ctx.env.CROSS_COMPILE_MINGW32 = ctx.options.CROSS_COMPILE_MINGW32
+
     # global defines
     ctx.env.DEFINES = []
 
@@ -179,6 +181,8 @@ def configure(ctx):
 
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
+        print ctx.env
+
 
     elif ctx.options.WITH_STATIC_EXAMPLES and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
         print ("→ Compiling with static examples on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
@@ -216,6 +220,12 @@ def adjust(objs, path):
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
+
+    # missing -lpthread flag on Ubuntu
+    if platform.dist()[0] == 'Ubuntu' and not ctx.env.CROSS_COMPILE_MINGW32:
+        ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
+        ctx.read_shlib('pthread', paths=ext_paths)
+        ctx.env.USES += ' pthread'
 
     ctx.recurse('src')
 
