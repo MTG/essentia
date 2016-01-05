@@ -162,5 +162,18 @@ AlgorithmStatus Trimmer::process() {
   return OK;
 }
 
+
+void Trimmer::reset() {
+  Algorithm::reset();
+  _consumed = 0;
+  _preferredSize = defaultPreferredSize;
+
+  // make sure to reset I/O sizes
+  _input.setAcquireSize(_preferredSize);
+  _input.setReleaseSize(_preferredSize);
+  _output.setAcquireSize(_preferredSize);
+  _output.setReleaseSize(_preferredSize);
+} 
+
 } // namespace streaming
 } // namespace essentia

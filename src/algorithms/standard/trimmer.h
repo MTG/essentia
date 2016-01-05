@@ -92,11 +92,7 @@ class Trimmer : public Algorithm {
 
   void configure();
   AlgorithmStatus process();
-
-  void reset() {
-    Algorithm::reset();
-    _consumed = 0;
-  }
+  void reset();
 
   static const char* name;
   static const char* description;
