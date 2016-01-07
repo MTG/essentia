@@ -32,19 +32,4 @@ make install
 cd ../..
 rm -r tmp
 
-TAGLIB_PC="
-prefix=$PREFIX
-exec_prefix=\${prefix}
-includedir=\${prefix}/include
-libdir=\${exec_prefix}/lib
-
-Name: TagLib
-Description: Audio meta-data library
-Requires:
-Version: 1.9.1
-Cflags: -I\${includedir}
-Libs: -L\${libdir} -ltag
-"
-echo "$TAGLIB_PC" > $PREFIX/lib/pkgconfig/taglib.pc
-
 mv $PREFIX/bin/libtag.dll $PREFIX/lib
