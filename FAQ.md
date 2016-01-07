@@ -89,13 +89,7 @@ Build all dependencies (similarly to Linux static builds, make sure you have req
 ./packaging/build_3rdparty_static_win32.sh
 ```
 
-Build Essentia:
-```
-./waf configure --with-examples --cross-compile-mingw32
-./waf
-```
-
-In order to build static examples:
+Build Essentia with static examples:
 ```
 ./waf configure --with-static-examples --cross-compile-mingw32
 ./waf

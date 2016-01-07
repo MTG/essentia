@@ -181,8 +181,6 @@ def configure(ctx):
 
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
-        print ctx.env
-
 
     elif ctx.options.WITH_STATIC_EXAMPLES and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
         print ("→ Compiling with static examples on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
