@@ -498,13 +498,29 @@ void MusicExtractor::setExtractorDefaultOptions() {
   // high-level
 #if HAVE_GAIA2
   //options.set("highlevel.compute", true);
-  const char* svmModelsArray[] = { "genre_tzanetakis", "genre_dortmund",
-                                   "genre_electronica", "genre_rosamerica",
-                                   "mood_acoustic", "mood_aggressive",
-                                   "mood_electronic", "mood_happy", "mood_party",
-                                   "mood_relaxed", "mood_sad", "timbre", "culture",
-                                   "gender", "mirex-moods", "ismir04_rhythm",
-                                   "voice_instrumental" };
+  
+  // This list includes classifier models hosted on Essentia's website
+  const char* svmModelsArray[] = { 
+                                   "danceability",
+                                   "gender",
+                                   "genre_dortmund",
+                                   "genre_electronic",
+                                   "genre_rosamerica",
+                                   "genre_tzanetakis",
+                                   "ismir04_rhythm",
+                                   "mood_acoustic",
+                                   "mood_aggressive",
+                                   "mood_electronic",
+                                   "mood_happy",
+                                   "mood_party",
+                                   "mood_relaxed",
+                                   "mood_sad",
+                                   "moods_mirex",
+                                   "timbre",
+                                   "tonal_atonal",
+                                   "voice_instrumental" 
+                                 };
+  
   vector<string> svmModels = arrayToVector<string>(svmModelsArray);
   string pathToSvmModels;
 #ifdef OS_WIN32
