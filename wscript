@@ -220,7 +220,7 @@ def build(ctx):
     print('→ building from ' + ctx.path.abspath())
 
     # missing -lpthread flag on Ubuntu
-    if platform.dist()[0] == 'Ubuntu' and not ctx.env.CROSS_COMPILE_MINGW32:
+    if platform.dist()[0] == 'Ubuntu' and not ctx.env.CROSS_COMPILE_MINGW32 and not ctx.env.WITH_STATIC_EXAMPLES:
         ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
         ctx.read_shlib('pthread', paths=ext_paths)
         ctx.env.USES += ' pthread'
