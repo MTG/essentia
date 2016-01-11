@@ -31,7 +31,7 @@ const char* Key::description = DOC("Using pitch profile classes, this algorithm 
 "Key will throw exceptions either when the input pcp size is not a positive multiple of 12 or if the key could not be found. Also if parameter \"scale\" is set to \"minor\" and the profile type is set to \"weichai\"\n"
 "\n"
 "  Abouth the Key Profiles:\n"
-"  - 'Diatonic' - binary profile with diatonic notes of both modes. Could be useful for ambient music or diatonic music which is not strictly 'tonal fuctional'.\n"
+"  - 'Diatonic' - binary profile with diatonic notes of both modes. Could be useful for ambient music or diatonic music which is not strictly 'tonal functional'.\n"
 "  - 'Tonic Triad' - just the notes of the major and minor chords. Exclusively for testing.\n"
 "  - 'Krumhansl' - reference key profiles after cognitive experiments with users. They should work generally fine for pop music.\n"
 "  - 'Temperley' - key profiles extracted from corpus analysis of euroclassical music. Therefore, they perform best on this repertoire (especially in minor).\n"
