@@ -44,7 +44,8 @@ const char* HighResolutionFeatures::description = DOC("This algorithm computes h
 "References:\n"
 "  [1] E. Gómez and P. Herrera, \"Comparative Analysis of Music Recordings\n"
 "  from Western and Non-Western traditions by Automatic Tonal Feature\n"
-"  Extraction,\" Empirical Musicology Review, vol. 3, pp. 140–156, 2008.");
+"  Extraction,\" Empirical Musicology Review, vol. 3, pp. 140–156, 2008.\n\n"
+"  [2] https://en.wikipedia.org/wiki/Equal_temperament");
 
 
 vector<Peak> detectPeaks(const vector<Real>& hpcp, int maxPeaks) {
