@@ -280,7 +280,7 @@ The following steps which you might want to take are:
 * check more python examples
     * standard mode:
         * :download:`extractor_spectralcentroid.py <../../src/examples/tutorial/extractor_spectralcentroid.py>`
-        * :download:`onsetdetection_example.py <../../src/examples/tutorial/onsetdetection_example.py>`
+        * :download:`example_onsetdetection.py <../../src/examples/tutorial/example_onsetdetection.py>`
         * :download:`extractor_predominantmelody.py <../../src/examples/tutorial/extractor_predominantmelody.py>`
         * :download:`extractor_predominantmelody_by_steps.py <../../src/examples/tutorial/extractor_predominantmelody_by_steps.py>`
     * streaming mode:
