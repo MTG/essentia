@@ -238,6 +238,9 @@ void MetadataReader::compute() {
 
     try {
       pcmMetadata(_filename, pcmSampleRate, pcmChannels, pcmBitrate);
+      // works only for 16bit wavs/pcm; it should output incorrect value for 
+      // 24bit or 32bit float files, therefore, print a warning
+      E_WARNING("MetadataReader: TagLib could not get metadata for this file. The output bitrate is estimated treating the input as 16-bit PCM, and therefore may be incorrect.");
     }
     catch (EssentiaException& e) {
       if (parameter("failOnError").toBool())
