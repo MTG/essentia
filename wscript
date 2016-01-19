@@ -46,7 +46,15 @@ def options(ctx):
 
     ctx.add_option('--cross-compile-android', action='store_true',
                    dest='CROSS_COMPILE_ANDROID', default=False,
-                   help='cross-compile for Android using toolchain')    
+                   help='cross-compile for Android using toolchain')
+
+    ctx.add_option('--cross-compile-ios', action='store_true',
+                   dest='CROSS_COMPILE_IOS', default=False,
+                   help='cross-compile for iOS (ARMv7 and ARM64)')
+
+    ctx.add_option('--cross-compile-ios-sim', action='store_true',
+                   dest='CROSS_COMPILE_IOS_SIM', default=False,
+                   help='cross-compile for iOS (i386)')                   
 
     ctx.add_option('--emscripten', action='store_true',
                    dest='EMSCRIPTEN', default=False,
@@ -67,7 +75,7 @@ def configure(ctx):
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
-    if not ctx.options.EMSCRIPTEN and not ctx.options.CROSS_COMPILE_ANDROID:
+    if not ctx.options.EMSCRIPTEN and not ctx.options.CROSS_COMPILE_ANDROID and not ctx.options.CROSS_COMPILE_IOS:
         ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
 
     # define this to be stricter, but sometimes some libraries can give problems...
@@ -167,6 +175,29 @@ def configure(ctx):
         ctx.find_program('arm-linux-androideabi-gcc', var='CC')
         ctx.find_program('arm-linux-androideabi-g++', var='CXX')
         ctx.find_program('arm-linux-androideabi-ar', var='AR')
+
+    if ctx.options.CROSS_COMPILE_IOS:
+        print ("→ Cross-compiling for iOS (ARMv7 and ARM64)")
+        ctx.env.CXXFLAGS += [ '-arch' , 'armv7']        
+        ctx.env.LINKFLAGS += [ '-arch', 'armv7']
+        ctx.env.LDFLAGS += ['-arch', 'armv7']        
+        ctx.env.CXXFLAGS += [ '-arch' , 'arm64']        
+        ctx.env.LINKFLAGS += [ '-arch', 'arm64']
+        ctx.env.LDFLAGS += ['-arch', 'armv64']                
+        
+        ctx.env.CXXFLAGS += ['-stdlib=libc++']
+        ctx.env.CXXFLAGS += ['-miphoneos-version-min=5.0']    
+        ctx.env.CXXFLAGS += [ '-isysroot' , '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk']
+
+    if ctx.options.CROSS_COMPILE_IOS_SIM:
+        print ("→ Cross-compiling for iOS Simulator (i386)")
+        ctx.env.CXXFLAGS += [ '-arch' , 'i386']        
+        ctx.env.LINKFLAGS += [ '-arch', 'i386']
+        ctx.env.LDFLAGS += ['-arch', 'i386']        
+                    
+        ctx.env.CXXFLAGS += ['-stdlib=libc++']
+        ctx.env.CXXFLAGS += ['-miphoneos-version-min=5.0']    
+        ctx.env.CXXFLAGS += [ '-isysroot' , '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk']        
 
     # use manually prebuilt dependencies in the case of static examples or mingw cross-build
     if ctx.options.CROSS_COMPILE_MINGW32:
