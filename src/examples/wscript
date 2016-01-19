@@ -73,7 +73,10 @@ example_sources_fileio = [
         ('standard_stft', ),
         ('streaming_stft', ),
         ('standard_predominantmask', ),
-        ('standard_sinemodel', )
+        ('standard_sinemodel', ),
+	    ('standard_sinesubtraction', ),
+	    ('standard_stochasticmodel', ),
+        ('standard_spsmodel', )
 ]
 
 example_sources_with_gaia = [

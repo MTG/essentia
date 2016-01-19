@@ -21,58 +21,12 @@
 #include <fstream>
 #include <essentia/algorithmfactory.h>
 #include <essentia/pool.h>
+#include <essentia/utils/synth_utils.h>
+
+
 using namespace std;
 using namespace essentia;
 using namespace standard;
-
-
-void scaleAudioVector(vector<Real> &buffer, const Real scale)
-{
-for (int i=0; i < int(buffer.size()); ++i){
-    buffer[i] = scale * buffer[i];
-}
-}
-
-
-void cleaningSineTracks(vector< vector<Real> >&freqsTotal, const int minFrames){
-  
-  int nFrames = freqsTotal.size();
-  int begTrack = 0;
-  if (nFrames > 0 )
-  {
-    int f = 0;
-    int nTracks = freqsTotal[0].size(); // we assume all frames have a fix number of tracks
-    for (int t = 0; t < nTracks; ++t)
-    {
-      
-      f = 0;
-      begTrack = f;
-      
-      while (f < nFrames-1)
-      {
-        // check if f is begin of track
-        if (freqsTotal[f][t] <= 0 && freqsTotal[f+1][t] > 0 )
-        {
-          begTrack = f+1;
-        }
-        
-        // clean track if shorter than min duration
-        if ((freqsTotal[f][t] > 0 && freqsTotal[f+1][t] <= 0 ) && ( (f - begTrack) < minFrames))
-        {
-          for (int i= begTrack; i < f; i++)
-          {
-            freqsTotal[i][t] = 0;
-          }
-        }
-        
-        f++;
-      }
-      
-    }
-    
-  }
-  
-}
 
 
 int main(int argc, char* argv[]) {
@@ -122,7 +76,6 @@ int main(int argc, char* argv[]) {
   Algorithm* sinemodelanal     = factory.create("SineModelAnal",
                             "sampleRate", sr,
                             "maxnSines", 100,
-                            "minSineDur", minSineDur,
                             "freqDevOffset", 10,
                             "freqDevSlope", 0.001
                             );

@@ -13,12 +13,13 @@
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
  *
- * You should have received a copy of the Affero GNU General Public License
+ * You should ha ve received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
 #include "spsmodelanal.h"
 #include "essentiamath.h"
+#include <essentia/utils/synth_utils.h>
 
 using namespace essentia;
 using namespace standard;
@@ -26,156 +27,95 @@ using namespace standard;
 const char* SpsModelAnal::name = "SpsModelAnal";
 const char* SpsModelAnal::description = DOC("This algorithm computes the stochastic model analysis. \n"
 "\n"
-"It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses PeakDetection. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"
+"It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses SineModelAnal. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"
 "\n"
 "References:\n"
-"  [1] Peak Detection,\n"
-"  http://ccrma.stanford.edu/~jos/parshl/Peak_Detection_Steps_3.html");
-
-
-// ------------------
-// Additional support functions
-typedef std::pair<int,Real> mypair;
-// sort indexes: get arguments of sorted vector
-bool comparator_up ( const mypair& l, const mypair& r)
-{
-  return l.second < r.second;
-}
-bool comparator_down ( const mypair& l, const mypair& r)
-{
-  return l.second > r.second;
-}
-
-// It sorts the indexes of an input vector v, and outputs the sorted index vector idx
-void SpsModelAnal::sort_indexes(std::vector<int> &idx, const std::vector<Real> &v, bool ascending) {
-
-  // initialize original index locations
-  std::vector<mypair> pairs(v.size());
-  for (int i = 0; i != pairs.size(); ++i){
-    pairs[i].first = i;
-    pairs[i].second = v[i];
-  }
-
-  // sort indexes based on comparing values in v
-  if (ascending)
-    sort(pairs.begin(), pairs.end(),comparator_up);
-  else
-    sort(pairs.begin(), pairs.end(),comparator_down);
-
-  // copy sorted indexes
-  for (int i = 0; i != pairs.size(); ++i) idx.push_back(pairs[i].first);
-
-  return;
-}
-
-void SpsModelAnal::copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx){
-
-  for (int i = 0; i < idx.size(); ++i){
-    out.push_back(v[idx[i]]);
-  }
-  return;
-}
-
-void SpsModelAnal::copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx){
-
-  for (int i = 0; i < idx.size(); ++i){
-    out.push_back(v[idx[i]]);
-  }
-  return;
-}
-
-// erase elements from a vector given a vector of indexes
-void SpsModelAnal::erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx){
-  std::vector<Real> tmp;
-  bool found;
-  for (int i = 0; i < v.size(); ++i) {
-    found = false;
-    for (int j = 0; j < idx.size(); ++j){
-      if (i == idx[j])
-        found = true;
-    }
-    if (!found) {
-      tmp.push_back(v[i]);
-    }
-  }
-
-  v = tmp;
-  return;
-}
-
-
-// ------------------
-
+"  https://github.com/MTG/sms-tools\n"
+"  http://mtg.upf.edu/technologies/sms\n"
+);
 
 
 
 void SpsModelAnal::configure() {
 
-  std::string orderBy = parameter("orderBy").toLower();
-  if (orderBy == "magnitude") {
-    orderBy = "amplitude";
-  }
-  else if (orderBy == "frequency") {
-    orderBy = "position";
-  }
-  else {
-    throw EssentiaException("Unsupported ordering type: '" + orderBy + "'");
-  }
+  std::string wtype = "blackmanharris92"; // default "hamming"
+  _window->configure("type", wtype.c_str());
 
-  _peakDetect->configure("interpolate", true,
-                         "range", parameter("sampleRate").toReal()/2.0,
-                         "maxPeaks", parameter("maxPeaks"),
-                         "minPosition", parameter("minFrequency"),
-                         "maxPosition", parameter("maxFrequency"),
-                         "threshold", parameter("magnitudeThreshold"),
-                         "orderBy", orderBy);
+  _fft->configure("size", parameter("fftSize").toInt()  );
 
+
+  _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
+                              "maxnSines", parameter("maxnSines").toInt() ,
+                              "freqDevOffset", parameter("freqDevOffset").toInt(),
+                              "freqDevSlope",  parameter("freqDevSlope").toReal()
+                              );
+
+  int subtrFFTSize = std::min(512, 4*parameter("hopSize").toInt());  // make sure the FFT size is at least twice the hopsize
+  _sineSubtraction->configure( "sampleRate", parameter("sampleRate").toReal(),
+                              "fftSize", subtrFFTSize,
+                              "hopSize", parameter("hopSize").toInt()
+                              );
+
+  // initialize array to accumulates two output frames from the sinesubtraction output
+  _stocFrameIn.resize(2*parameter("hopSize").toInt());
+  std::fill(_stocFrameIn.begin(), _stocFrameIn.end(), 0.);
+
+  _stochasticModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
+                              "fftSize", 2*parameter("hopSize").toInt(),
+                              "hopSize", parameter("hopSize").toInt(),
+                              "stocf", parameter("stocf").toReal());
 
 }
 
 
-
 void SpsModelAnal::compute() {
+
   // inputs and outputs
-  const std::vector<std::complex<Real> >& fft = _fft.get();
+  const std::vector<Real>& frame = _frame.get();
 
-  std::vector<Real>& tpeakMagnitude = _magnitudes.get();
-  std::vector<Real>& tpeakFrequency = _frequencies.get();
-  std::vector<Real>& tpeakPhase = _phases.get();
+  std::vector<Real>& peakMagnitude = _magnitudes.get();
+  std::vector<Real>& peakFrequency = _frequencies.get();
+  std::vector<Real>& peakPhase = _phases.get();
+  std::vector<Real>& stocEnv = _stocenv.get();
 
-  // temp arrays
-  std::vector<Real> peakMagnitude;
-  std::vector<Real> peakFrequency;
-  std::vector<Real> peakPhase;
-
-
+  std::vector<Real> wframe;
+  std::vector<std::complex<Real> > fftin;
   std::vector<Real> fftmag;
   std::vector<Real> fftphase;
 
-  _cartesianToPolar->input("complex").set(fft);
-  _cartesianToPolar->output("magnitude").set(fftmag);
-  _cartesianToPolar->output("phase").set(fftphase);
-  _peakDetect->input("array").set(fftmag);
-  _peakDetect->output("positions").set(peakFrequency);
-  _peakDetect->output("amplitudes").set(peakMagnitude);
 
-  _cartesianToPolar->compute();
-  _peakDetect->compute();
+  _window->input("frame").set(frame);
+  _window->output("frame").set(wframe);
+  _window->compute();
 
-  phaseInterpolation(fftphase, peakFrequency, peakPhase);
+  _fft->input("frame").set(wframe);
+  _fft->output("fft").set(fftin);
+  _fft->compute();
+
+ _sineModelAnal->input("fft").set(fftin);
+ _sineModelAnal->output("magnitudes").set(peakMagnitude);
+ _sineModelAnal->output("frequencies").set(peakFrequency);
+ _sineModelAnal->output("phases").set(peakPhase);
+
+  _sineModelAnal->compute();
 
 
-  // tracking
-  sinusoidalTracking(peakMagnitude, peakFrequency, peakPhase, _lasttpeakFrequency, parameter("freqDevOffset").toReal(), parameter("freqDevSlope").toReal(), tpeakMagnitude, tpeakFrequency, tpeakPhase);
+  std::vector<Real> subtrFrameOut;
 
-  // limit number of tracks to maxnSines
-  int maxSines = int ( parameter("maxnSines").toReal() );
-  tpeakFrequency.resize(std::min(maxSines, int (tpeakFrequency.size())));
-  tpeakMagnitude.resize(std::min(maxSines, int (tpeakMagnitude.size())));
-  tpeakPhase.resize(std::min(maxSines, int(tpeakPhase.size())));
+// this needs to take into account overlap-add issues, introducing delay
+ _sineSubtraction->input("frame").set(frame); // size is iput _fftSize
+ _sineSubtraction->input("magnitudes").set(peakMagnitude);
+ _sineSubtraction->input("frequencies").set(peakFrequency);
+ _sineSubtraction->input("phases").set(peakPhase);
+ _sineSubtraction->output("frame").set(subtrFrameOut); // Nsyn size
+ _sineSubtraction->compute();
 
-  // keep last frequency peaks for tracking
-  _lasttpeakFrequency = tpeakFrequency;
+  updateStocInFrame(subtrFrameOut, _stocFrameIn); // shift and copy frame for stochastic model analysis
+
+  _stochasticModelAnal->input("frame").set(_stocFrameIn);
+  _stochasticModelAnal->output("stocenv").set(stocEnv);
+  _stochasticModelAnal->compute();
+
 
 }
 
@@ -183,174 +123,13 @@ void SpsModelAnal::compute() {
 // ---------------------------
 // additional methods
 
-void SpsModelAnal::sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope, std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen ){
-
-  //	pfreq, pmag, pphase: frequencies and magnitude of current frame
-  //	tfreq: frequencies of incoming tracks from previous frame
-  //	freqDevOffset: minimum frequency deviation at 0Hz
-  //	freqDevSlope: slope increase of minimum frequency deviation
-
-
-  // sort current peaks per magnitude
-
-  // -----
-  // init arrays
-  tfreqn.resize (tfreq.size());
-  std::fill(tfreqn.begin(), tfreqn.end(), 0.);
-  tmagn.resize (tfreq.size());
-  std::fill(tmagn.begin(), tmagn.end(), 0.);
-  tphasen.resize (tfreq.size());
-  std::fill(tphasen.begin(), tphasen.end(), 0.);
-
-  //	pindexes = np.array(np.nonzero(pfreq), dtype=np.int)[0]    # indexes of current peaks
-  std::vector<int> pindexes;
-  for (int i=0;i < peakFrequencies.size(); ++i){  if (peakFrequencies[i] > 0) pindexes.push_back(i); }
-
-  //	incomingTracks = np.array(np.nonzero(tfreq), dtype=np.int)[0] # indexes of incoming tracks
-  std::vector<Real> incomingTracks ;
-  for (int i=0;i < tfreq.size(); ++i){ if (tfreq[i]>0) incomingTracks.push_back(i); }
-  //	newTracks = np.zeros(tfreq.size, dtype=np.int) -1           # initialize to -1 new tracks
-  std::vector<int> newTracks(tfreq.size());
-  std::fill(newTracks.begin(), newTracks.end(), -1);
-
-  //	magOrder = np.argsort(-pmag[pindexes])                      # order current peaks by magnitude
-  std::vector<int> magOrder;
-  sort_indexes(magOrder, peakMags, false);
-
-
-  // copy temporary arrays (as reference)
-  std::vector<Real>	&pfreqt = peakFrequencies;
-  std::vector<Real>	&pmagt = peakMags;
-  std::vector<Real>	&pphaset = peakPhases;
-
-
-  // -----
-  // loop for current peaks
-
-  if (incomingTracks.size() > 0 ){
-    int i,j;
-    int closestIdx;
-    Real freqDistance;
-
-
-    for (j=0; j < magOrder.size() ; j++) {
-      i = magOrder[j]; // sorted peak index
-      if (incomingTracks.size() == 0)
-      break; // all tracks have been processed
-
-      // find closest peak to incoming track
-      closestIdx = 0;
-      freqDistance = 1e10;
-      for (int k=0; k < incomingTracks.size(); ++k){
-
-        if (freqDistance > std::abs(pfreqt[i] - tfreq[incomingTracks[k]])){
-          freqDistance = std::abs(pfreqt[i] - tfreq[incomingTracks[k]]);
-          closestIdx = k;
-        }
-      }
-      if (freqDistance < (freqDevOffset + freqDevSlope * pfreqt[i])) //  # choose track if distance is small
-      {
-        newTracks[incomingTracks[closestIdx]] = i;     //     # assign peak index to track index
-        incomingTracks.erase(incomingTracks.begin() + closestIdx);              // # delete index of track in incomming tracks
-      }
-    }
-  }
-
-
-  //	indext = np.array(np.nonzero(newTracks != -1), dtype=np.int)[0]   # indexes of assigned tracks
-  std::vector<int> indext;
-  for (int i=0; i < newTracks.size(); ++i)
-  {
-    if (newTracks[i] != -1) indext.push_back(i);
-  }
-  //	if indext.size > 0:
-  if (indext.size() > 0)
-  {
-    //		indexp = newTracks[indext]                                    # indexes of assigned peaks
-    std::vector<int> indexp;
-    copy_int_vector_from_indexes(indexp, newTracks, indext);
-
-    for (int i=0; i < indexp.size(); ++i){
-      tfreqn[indext[i]] = pfreqt[indexp[i]];                           //    # output freq tracks
-      tmagn[indext[i]] = pmagt[indexp[i]];                             //    # output mag tracks
-      tphasen[indext[i]] = pphaset[indexp[i]];                         //    # output phase tracks
-    }
-
-    // delete used peaks
-    erase_vector_from_indexes(pfreqt, indexp);
-    erase_vector_from_indexes(pmagt, indexp);
-    erase_vector_from_indexes(pphaset, indexp);
-  }
-
-  // -----
-  // create new tracks for non used peaks
-  std::vector<int> emptyt;
-  for (int i=0; i < tfreq.size(); ++i)
-  {
-    if (tfreq[i] == 0) emptyt.push_back(i);
-  }
-
-  //	peaksleft = np.argsort(-pmagt)                                  # sort left peaks by magnitude
-  std::vector<int> peaksleft;
-  sort_indexes(peaksleft, pmagt, false);
-
-  if ((peaksleft.size() > 0) && (emptyt.size() >= peaksleft.size())){    // fill empty tracks
-
-    for (int i=0;i < peaksleft.size(); i++)
-    {
-      tfreqn[emptyt[i]] = pfreqt[peaksleft[i]];
-      tmagn[emptyt[i]] = pmagt[peaksleft[i]];
-      tphasen[emptyt[i]] = pphaset[peaksleft[i]];
-    }
-  }
-  else
-  {
-    if  ((peaksleft.size() > 0) && (emptyt.size() < peaksleft.size())) { //  add more tracks if necessary
-
-      for (int i=0;i < emptyt.size(); i++)
-      {
-        tfreqn[emptyt[i]] = pfreqt[peaksleft[i]];
-        tmagn[emptyt[i]] = pmagt[peaksleft[i]];
-        tphasen[emptyt[i]] = pphaset[peaksleft[i]];
-      }
-      for (int i=emptyt.size();i < peaksleft.size(); i++)
-      {
-        tfreqn.push_back(pfreqt[peaksleft[i]]);
-        tmagn.push_back(pmagt[peaksleft[i]]);
-        tphasen.push_back(pphaset[peaksleft[i]]);
-      }
-    }
-  }
-}
-
-
-
-void SpsModelAnal::phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases){
-
-  int N = peakFrequencies.size();
-  peakPhases.resize(N);
-
-  int idx;
-  float  a, pos;
-  int fftSize = fftphase.size();
-
-  for (int i=0; i < N; ++i){
-    // linear interpolation. (as done in numpy.interp function)
-    pos =  fftSize * (peakFrequencies[i] / (parameter("sampleRate").toReal()/2.0) );
-    idx = int ( 0.5 + pos ); // closest index
-
-    a = pos - idx; // interpolate factor
-    // phase diff smaller than PI to do intperolation and avoid jumps
-    if (a < 0 && idx > 0){
-      peakPhases[i] =  (std::abs(fftphase[idx-1] - fftphase[idx]) > Real(M_PI)) ? a * fftphase[idx-1] + (1.0 -a) * fftphase[idx] : fftphase[idx];
-    }
-    else {
-      if (idx < fftSize-1 ){
-        peakPhases[i] = (std::abs(fftphase[idx+1] - fftphase[idx]) > Real(M_PI)) ? a * fftphase[idx+1] + (1.0 -a) * fftphase[idx]: fftphase[idx];
-      }
-      else {
-       peakPhases[i] = fftphase[idx];
-     }
+ // shift and copy frame for stochastic model analysis
+void SpsModelAnal::updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator)
+{
+  for (int i =0; i < (int) frameIn.size(); ++i){
+    if (i+ (int) frameIn.size() < (int) frameAccumulator.size()){
+      frameAccumulator[i] = frameAccumulator[ i+ (int) frameIn.size()];
+      frameAccumulator[i+ (int) frameIn.size()] = frameIn[i];
     }
   }
 }

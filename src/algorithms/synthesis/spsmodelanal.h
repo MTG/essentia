@@ -22,7 +22,7 @@
 
 #include "algorithm.h"
 #include "algorithmfactory.h"
-
+#include <fstream>
 
 
 namespace essentia {
@@ -31,32 +31,52 @@ namespace standard {
 class SpsModelAnal : public Algorithm {
 
  protected:
-  Input<std::vector<std::complex<Real> > > _fft;
+
+  Input<std::vector<Real> > _frame;
   Output<std::vector<Real> > _magnitudes;
   Output<std::vector<Real> > _frequencies;
   Output<std::vector<Real> > _phases;
-  Algorithm* _peakDetect;
-  Algorithm* _cartesianToPolar;
+  Output<std::vector<Real> > _stocenv;
+
+  int _stocSize;
+  Algorithm* _window;
+  Algorithm* _fft;
+  Algorithm* _sineModelAnal;
+  Algorithm* _sineSubtraction;
+  Algorithm* _stochasticModelAnal;
+
+  std::vector<Real> _stocFrameIn; // input frame for the stochaastic analysis algorithm
+
 
  public:
   SpsModelAnal() {
-    declareInput(_fft, "fft", "the input frame");
+    declareInput(_frame, "frame", "the input frame");
     declareOutput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareOutput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareOutput(_phases, "phases", "the phases of the sinusoidal peaks");
+    declareOutput(_stocenv, "stocenv", "the stochastic envelope");
 
-    _peakDetect = AlgorithmFactory::create("PeakDetection");
-    _cartesianToPolar = AlgorithmFactory::create("CartesianToPolar");
+    _window = AlgorithmFactory::create("Windowing");
+    _fft = AlgorithmFactory::create("FFT");
+    _sineModelAnal = AlgorithmFactory::create("SineModelAnal");
+    _sineSubtraction = AlgorithmFactory::create("SineSubtraction");
+    _stochasticModelAnal = AlgorithmFactory::create("StochasticModelAnal");
 
   }
 
   ~SpsModelAnal() {
-    delete _peakDetect;
-    delete _cartesianToPolar;
+
+  delete _window;
+  delete _fft;
+  delete _sineModelAnal;
+  delete _sineSubtraction;
+  delete _stochasticModelAnal;
   }
 
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
+    declareParameter("hopSize", "the hop size between frames", "[1,inf)", 512);
+    declareParameter("fftSize", "the size of the internal FFT size (full spectrum size)", "[1,inf)", 2048);
     declareParameter("maxPeaks", "the maximum number of returned peaks", "[1,inf)", 100);
     declareParameter("maxFrequency", "the maximum frequency of the range to evaluate [Hz]", "(0,inf)", 5000.0);
     declareParameter("minFrequency", "the minimum frequency of the range to evaluate [Hz]", "[0,inf)", 0.0);
@@ -64,30 +84,23 @@ class SpsModelAnal : public Algorithm {
     declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
     // sinusoidal tracking
     declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
-    declareParameter("minSineDur", "minimum duration of sines in seconds", "(0,inf)", 0.01);
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
-        declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
+    declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
+    declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1]", 0.2);
 
   }
 
   void configure();
   void compute();
 
-  void phaseInterpolation(std::vector<Real> fftphase, std::vector<Real> peakFrequencies, std::vector<Real>& peakPhases);
-  void sinusoidalTracking(std::vector<Real>& peakMags, std::vector<Real>& peakFrequencies, std::vector<Real>& peakPhases, const std::vector<Real> tfreq, Real freqDevOffset, Real freqDevSlope,  std::vector<Real> &tmagn, std::vector<Real> &tfreqn, std::vector<Real> &tphasen );
-  void cleaningSineTrack();
-
-  std::vector<Real> _lasttpeakFrequency;
-
+  void updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator);
 
   static const char* name;
   static const char* description;
 
+
+
  private:
-  void sort_indexes(std::vector<int> &idx, const std::vector<Real> &v, bool ascending);
-  void copy_vector_from_indexes(std::vector<Real> &out, const std::vector<Real> v, const std::vector<int> idx);
-  void copy_int_vector_from_indexes(std::vector<int> &out, const std::vector<int> v, const std::vector<int> idx);
-  void erase_vector_from_indexes(std::vector<Real> &v, const std::vector<int> idx);
 
 };
 
@@ -102,18 +115,21 @@ namespace streaming {
 class SpsModelAnal : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<std::complex<Real> > > _fft; // input
+  //Sink<std::vector<std::complex<Real> > > _fft; // input
+  Sink<std::vector<Real> > _frame; // input
   Source<std::vector<Real> > _frequencies;
   Source<std::vector<Real> > _magnitudes;
   Source<std::vector<Real> > _phases;
+  Source<std::vector<Real> > _stocenv;
 
  public:
   SpsModelAnal() {
     declareAlgorithm("SpsModelAnal");
-    declareInput(_fft, TOKEN, "fft");
+    declareInput(_frame, TOKEN, "frame");
     declareOutput(_frequencies, TOKEN, "frequencies");
     declareOutput(_magnitudes, TOKEN, "magnitudes");
     declareOutput(_phases, TOKEN, "phases");
+    declareOutput(_stocenv, TOKEN, "stocenv");
   }
 };
 

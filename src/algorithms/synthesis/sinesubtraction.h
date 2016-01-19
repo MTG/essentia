@@ -17,82 +17,85 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_SPSMODELSYNTH_H
-#define ESSENTIA_SPSMODELSYNTH_H
+#ifndef ESSENTIA_SINESUBTRACTION_H
+#define ESSENTIA_SINESUBTRACTION_H
+
+// defines for generateSine function
+#define BH_SIZE 1001
+#define BH_SIZE_BY2 501
+#define MFACTOR 100
 
 
 #include "algorithm.h"
 #include "algorithmfactory.h"
 
-#include <fstream>
 
 namespace essentia {
 namespace standard {
 
-class SpsModelSynth : public Algorithm {
+class SineSubtraction : public Algorithm {
 
- protected:
+ private:
+  Input<std::vector<Real> > _inframe;
   Input<std::vector<Real> > _magnitudes;
   Input<std::vector<Real> > _frequencies;
   Input<std::vector<Real> > _phases;
-  Input<std::vector<Real> > _stocenv;
-
   Output<std::vector<Real> > _outframe;
-  Output<std::vector<Real> > _outsineframe;
-  Output<std::vector<Real> > _outstocframe;
 
   Real _sampleRate;
   int _fftSize;
   int _hopSize;
 
-  Algorithm* _sineModelSynth;
-  Algorithm* _stochasticModelSynth;
-  Algorithm* _ifftSine;
-  Algorithm* _overlapAdd;
+  std::vector<Real> _synwindow;
 
+  std::vector<Real> _lastytfreq;
+  std::vector<Real> _lastytphase;
 
+  Algorithm* _window;
+  Algorithm* _fft;
+  Algorithm* _ifft;
+  Algorithm* _overlapadd;
+
+  void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
+  void subtractFFT(std::vector<std::complex<Real> >&fft1, const std::vector<std::complex<Real> >&fft2);
+  void generateSines(const std::vector<Real> magnitudes, const std::vector<Real> frequencies, const std::vector<Real> phases, std::vector<std::complex<Real> >&outfft);
+  void createSynthesisWindow(std::vector<Real> &synwindow, int hopSize, int winSize);
+  void applySynthesisWindow(std::vector<Real> &inframe, const std::vector<Real> synwindow);
 
  public:
-  SpsModelSynth() {
+  SineSubtraction() {
+    declareInput(_inframe, "frame", "the input audio frame to subtract from");
     declareInput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareInput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareInput(_phases, "phases", "the phases of the sinusoidal peaks");
-    declareInput(_stocenv, "stocenv", "the stochastic envelope");
+    declareOutput(_outframe, "frame", "the output audio frame");
 
-    declareOutput(_outframe, "frame", "the output audio frame of the Sinusoidal Plus Stochastic model");
-    declareOutput(_outsineframe, "sineframe", "the output audio frame for sinusoidal component ");
-    declareOutput(_outstocframe, "stocframe", "the output audio frame for stochastic component ");
-
-    _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
-    _stochasticModelSynth = AlgorithmFactory::create("StochasticModelSynth");
-
-    _ifftSine = AlgorithmFactory::create("IFFT");
-    _overlapAdd = AlgorithmFactory::create("OverlapAdd");
+    _window = AlgorithmFactory::create("Windowing");
+    _fft = AlgorithmFactory::create("FFT");
+    _ifft = AlgorithmFactory::create("IFFT");
+    _overlapadd = AlgorithmFactory::create("OverlapAdd");
 
   }
 
-  ~SpsModelSynth() {
-
-    delete _sineModelSynth;
-    delete _stochasticModelSynth;
-    delete _ifftSine;
-    delete _overlapAdd;
-
+    ~SineSubtraction() {
+    delete _window;
+    delete _fft;
+    delete _ifft;
+    delete _overlapadd;
   }
 
   void declareParameters() {
-    declareParameter("fftSize", "the size of the output FFT frame (full spectrum size)", "[1,inf)", 2048);
-    declareParameter("hopSize", "the hop size between frames", "[1,inf)", 512);
+    declareParameter("fftSize", "the size of the FFT internal process (full spectrum size) and output frame. Minimum twice the hopsize.", "[1,inf)", 512);
+    declareParameter("hopSize", "the hop size between frames", "[1,inf)", 128);
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
-    declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1]", 0.2);
   }
 
   void configure();
   void compute();
 
+
   static const char* name;
   static const char* description;
-
 
 };
 
@@ -104,29 +107,24 @@ class SpsModelSynth : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class SpsModelSynth : public StreamingAlgorithmWrapper {
+class SineSubtraction : public StreamingAlgorithmWrapper {
 
  protected:
+  Sink<std::vector<Real> > _inframe;
   Sink<std::vector<Real> > _magnitudes;
   Sink<std::vector<Real> > _frequencies;
   Sink<std::vector<Real> > _phases;
-  Sink<std::vector<Real> > _stocenv;
-  //Source<std::vector<std::complex<Real> > > _outfft;
   Source<std::vector<Real> > _outframe;
-  Source<std::vector<Real> > _outsineframe;
-  Source<std::vector<Real> > _outstocframe;
+
 
  public:
-  SpsModelSynth() {
-    declareAlgorithm("SpsModelSynth");
+  SineSubtraction() {
+    declareAlgorithm("SineSubtraction");
+    declareInput(_inframe, TOKEN, "frame");
     declareInput(_magnitudes, TOKEN, "magnitudes");
     declareInput(_frequencies, TOKEN, "frequencies");
     declareInput(_phases, TOKEN, "phases");
-    declareInput(_stocenv, TOKEN, "stocenv");
-
     declareOutput(_outframe, TOKEN, "frame");
-    declareOutput(_outsineframe, TOKEN, "sinesframe");
-    declareOutput(_outstocframe, TOKEN, "stocframe");
   }
 };
 
@@ -134,4 +132,4 @@ class SpsModelSynth : public StreamingAlgorithmWrapper {
 } // namespace essentia
 
 
-#endif // ESSENTIA_SPSMODELSYNTH_H
+#endif // ESSENTIA_SINESUBTRACTION_H
