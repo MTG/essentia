@@ -82,6 +82,11 @@ class OnsetDetectionGlobal : public Algorithm {
     if (_frameCutter) delete _frameCutter;
     if (_windowing) delete _windowing;
     if (_spectrum) delete _spectrum;
+    if (_fft) delete _fft;
+    if (_cartesian2polar) delete _cartesian2polar;
+    if (_movingAverage) delete _movingAverage;
+    if (_erbbands) delete _erbbands;
+    if (_autocorrelation) delete _autocorrelation;
   }
 
   void declareParameters() {
