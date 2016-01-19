@@ -91,6 +91,8 @@ def configure(ctx):
         ctx.env.CPPFLAGS += [ '-fPIC' ] # need that for KissFFT
 
 
+    ctx.env.CROSS_COMPILE_MINGW32 = ctx.options.CROSS_COMPILE_MINGW32
+
     # global defines
     ctx.env.DEFINES = []
 
@@ -161,15 +163,18 @@ def configure(ctx):
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/lib", tdm_lib)
 
     if ctx.options.CROSS_COMPILE_ANDROID:
+        print ("→ Cross-compiling for Android ARM")
         ctx.find_program('arm-linux-androideabi-gcc', var='CC')
         ctx.find_program('arm-linux-androideabi-g++', var='CXX')
         ctx.find_program('arm-linux-androideabi-ar', var='AR')
 
-        print ("→ Cross-compiling for Android ARM")
-
     # use manually prebuilt dependencies in the case of static examples or mingw cross-build
     if ctx.options.CROSS_COMPILE_MINGW32:
-        # locate mingw32 compilers and use them
+        print ("→ Cross-compiling for Windows with MinGW: search for pre-built dependencies in 'packaging/win32_3rdparty'")
+        os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+
+        # locate MinGW compilers and use them
         ctx.find_program('i686-w64-mingw32-gcc', var='CC')
         ctx.find_program('i686-w64-mingw32-g++', var='CXX')
         ctx.find_program('i686-w64-mingw32-ar', var='AR')
@@ -177,12 +182,8 @@ def configure(ctx):
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
 
-        print ("→ Cross-compiling with MinGW32: search for pre-built dependencies in 'packaging/win32_3rdparty'")
-        os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
-
     elif ctx.options.WITH_STATIC_EXAMPLES and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
-        print ("→ Compiling with static examples on Linux: search for pre-built dependencies in 'packaging/debian'")
+        print ("→ Compiling with static examples on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
@@ -218,6 +219,12 @@ def adjust(objs, path):
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
 
+    # missing -lpthread flag on Ubuntu
+    if platform.dist()[0] == 'Ubuntu' and not ctx.env.CROSS_COMPILE_MINGW32 and not ctx.env.WITH_STATIC_EXAMPLES:
+        ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
+        ctx.read_shlib('pthread', paths=ext_paths)
+        ctx.env.USES += ' pthread'
+
     ctx.recurse('src')
 
     if ctx.env.WITH_CPPTESTS:
@@ -240,10 +247,20 @@ def run_tests(ctx):
     os.system(out + '/basetest')
 
 def run_python_tests(ctx):
-    os.system('python test/src/unittest/all_tests.py')
+    # create a local python package folder
+    os.system('mkdir -p build/python')
+    os.system('cp -r src/python/essentia build/python/')
+    os.system('cp build/src/python/_essentia.so build/python/essentia')
+
+    os.system('PYTHONPATH=build/python python test/src/unittest/all_tests.py')
 
 def ipython(ctx):
     os.system('ipython --pylab')
 
 def doc(ctx):
-    os.system('doc/build_sphinx_doc.sh')
+    # create a local python package folder
+    os.system('mkdir -p build/python')
+    os.system('cp -r src/python/essentia build/python/essentia')
+    os.system('cp build/src/python/_essentia.so build/python/essentia')
+
+    os.system('PYTHONPATH=build/python doc/build_sphinx_doc.sh')

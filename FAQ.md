@@ -1,9 +1,18 @@
 Frequently Asked Questions
 ==========================
 
+How to compute music descriptors using Essentia?
+------------------------------------------------
+
+Because Essentia is a library you are very fexible in the ways you can compute descriptors out of audio:
+
+- using [premade extractors out-of-box](doc/sphinxdoc/extractors_out_of_box.rst) (the easiest way without programming)
+- using python (see [python tutorial](doc/sphinxdoc/python_tutorial.rst))
+- writing your own C++ extractor (see the premade extractors as examples)
+
+
 How to compile my own C++ code that uses Essentia?
 --------------------------------------------------
-
 
 Here is an example how to compile [standard_mfcc.cpp](https://github.com/MTG/essentia/blob/2.0.1/src/examples/standard_mfcc.cpp) example on Linux linking with a system-wide installation of Essentia (done by ```./waf install```) and all its dependencies. Modify to your needs. 
 
@@ -25,55 +34,31 @@ https://github.com/GiantSteps/Essentia-Libraries
 
 
 
-Linux static builds
+Linux/OSX static builds
 -------------------
 
-To create static build of the library and executable example extractors:
+Follow the steps below to create static build of the library and executable example extractors.
 
-Prepare static build of Libav 0.8.16:
-```
-git clone git://git.libav.org/libav.git
-cd libav
-git checkout tags/v0.8.16
-./configure --disable-doc --disable-ffmpeg --disable-avconv --disable-avplay --disable-avprobe --disable-avserver --disable-avdevice  --disable-swscale --disable-avfilter --disable-network --disable-indevs --disable-outdevs
-make
-sudo make install
-``` 
+Install additional tools required to build some of the dependencies. 
 
-Prepare static build of Taglib 1.9.1:
-  
+On Linux:
 ```
-wget http://taglib.github.io/releases/taglib-1.9.1.tar.gz
-tar xf taglib-1.9.1.tar.gz
-cd taglib-1.9.1
-cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_RELEASE_TYPE=Release -DENABLE_STATIC=ON
-make
-sudo make install
-```
-Make sure you did not have libtag1-dev package installed via apt-get (if so, uninstall it).
-
-
-Build Essentia:
-```
-./waf configure  --with-static-examples
-./waf
-sudo ./waf install
+apt-get install yasm cmake
 ```
 
-The static executables will be in the ```build/src/examples``` folder.
-
-
-Cross-compiling for Windows on Linux
-------------------------------------
-
-Install mingw gcc/g++
+On OSX:
 ```
-sudo apt-get install gcc-mingw32 
+brew install yasm cmake
 ```
 
-Build dependencies
+Prepare static builds for dependencies running a script (works both for Linux and OSX):
 ```
-cd packaging/win32_3rdparty
+packaging/build_3rdparty_static_debian.sh
+```
+
+Alternatively, you can build each dependency apart running corresponding scripts inside ```packaging/debian_3rdparty``` folder:
+```
+cd packaging/debian_3rdparty
 build_libav_nomuxers.sh
 build_taglib.sh
 build_fftw3.sh
@@ -82,11 +67,34 @@ build_yaml.sh
 cd ../../
 ```
 
-Build Essentia
+Build Essentia:
 ```
-./waf configure --with-examples --cross-compile-mingw32
+./waf configure  --with-static-examples
 ./waf
 ```
+
+The static executables will be in the ```build/src/examples``` folder.
+
+
+Cross-compiling for Windows on Linux
+------------------------------------
+
+Install Mingw-w64 GCC:
+```
+sudo apt-get install  gcc-mingw-w64 
+```
+
+Build all dependencies (similarly to Linux static builds, make sure you have required tools installed):
+```
+./packaging/build_3rdparty_static_win32.sh
+```
+
+Build Essentia with static examples:
+```
+./waf configure --with-static-examples --cross-compile-mingw32
+./waf
+```
+
 
 Cross-compiling for Android
 ---------------------------
@@ -102,7 +110,7 @@ export PATH=~/Dev/android/toolchain/bin:$PATH;
 
 Compiling Essentia to Javascript with Emscripten
 ------------------------------------------------
-Use the instructions below to compile Essentia with FFTW3 support only. The rest of dependencies have not been tested, but they should work as well.
+Use the instructions below to compile Essentia to Javascript. Among the dependencies, only FFTW3 is currently supported (see instructions to build it below). The rest of dependencies have not been tested, but they should work as well.
 
 Install Emscripten following the [instructions](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html) on their website. If you downloaded the SDK manually, make sure to activate the Emscripten environment by executing `emsdk_env.sh`.
 ```
@@ -199,9 +207,14 @@ In order to run classification in Essentia you need to prepare a classifier mode
     - Filelist file maps these identifiers to the actual paths to the descriptor files for each audio track. 
 4. Currently Gaia does not support loading descriptors in json format, as a workaround you can configure the extractor output to yaml format in Step 1, or run ```json_to_sig.py``` [conversion script](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/json_to_sig.py).  
 5. Run ```train_model.py``` script in Gaia ([here](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/train_model.py)) with these groundtruth and filelist files. The script will create the classifier model file. 
+
 6. The model file can now be used by a GaiaTransform algorithm inside ```streaming_music_extractor```. 
 
 Note that using a specific classifier model implies that you are expected to give a pool with the same descriptor layout as the one used in training as an input to GaiaTransform Algorithm. 
+
+The training script automatically creates an SVM model given a ground-truth dataset.  It allows to select for the best combination of SVM parameters (polynomial or RBF kernels, various gamma and C coefficients) in a grid search. In addition it also allows to do feature selection/preprocessing and select the best preprocessing among several that were identified as useful (e.g., all descriptors vs only spectral descriptors, or where to apply or not normalization; Currently, only means and variances are are used for descriptors summarized across frames). The combinations of parameters tested in a grid search are mentioned [in the code](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/classification_project_template.yaml). Users are able to modify these parameters according to their needs by creating such a classification project file on their own.
+
+To train the SVMs Gaia internally uses LibSVM library. For each combination of parameters in a grid search, 5-fold cross-validation evaluation is run splitting  ground-truth dataset into train and test splits and averaging results across folds (including the confusion matrix). After all combinations have been evaluated, the winner combination is selected according to the best accuracy and the final SVM classifier model is trained using *all* ground-truth data.
 
 Building lightweight Essentia with reduced dependencies 
 -----------------------------------------------------
@@ -248,7 +261,25 @@ You can also use Essentia's standard mode for real-time computations.
 
 Not all algorithms available in the library are suited for real-time analysis due to their computational complexity. Some complex algorithms, such as BeatTrackerDegara, BeatTrackerMultiFeatures, and PredominantMelody, require large segments of audio in order to function properly.
 
-Note that you do not need any copying algorithm to multiplex an output to several inputs. You can just assign it and it will work.
+Make sure that you do not reconfigure an algorithm (from the main UI thread, most likely) while an audio callback (from an audio thread) is currently being called, as the algorithms are not thread-safe.
+
+
+libessentia.so is not found after installing from source
+--------------------------------------------------------
+The library is installed into /usr/local and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
+
+
+Building standalone Essentia Vamp plugin
+----------------------------------------
+
+It is possible to create a standalone binary for Essentia's Vamp plugin (works for Linux and OSX).
+
+```
+./waf configure --build-static --with-vamp --mode=release --lightweight= --fft=KISS
+./waf
+```
+
+The resulting binary (```build/src/examples/libvamp_essentia.so``` on Linux, ```build/src/examples/libvamp_essentia.dylib``` on OSX) is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
 
 
 

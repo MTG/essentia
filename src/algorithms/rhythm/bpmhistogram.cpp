@@ -39,7 +39,7 @@ const char* BpmHistogram::description = DOC("Given the novelty curve (see Novelt
 "The outputs of the algorithm are the following: \n"
 " - bpm: is the mean of the most salient bpm.\n"
 " - bpmCandidates: list of the strongest bpms present in the signal.\n"
-" - bpmMagnitudes: list containing the normalized strength of each of the bpms from the previous output. These two outputs can be used to construct a histogram and take your own decision when mean bpm is wrong\n."
+" - bpmMagnitudes: list containing the normalized strength of each of the bpms from the previous output. These two outputs can be used to construct a histogram and take your own decision when mean bpm is wrong.\n"
 " - tempogram: kind of a spectrogram indexed by bpm where the value at each index is the magnitude of the bpm. Very useful for detecting tempo variations and for plotting the evolution of tempi.\n"
 " - frameBpms: list containing the candidate bpms at each frame that are most similar to the meanBpm. If no candidates are found to be similar to the mean bpm, the meanBpm will be kept unless \"tempoChange\" seconds have triggered a variation in the tempo.\n"
 " - ticks: outputs the ticks' positions in seconds.\n"

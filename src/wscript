@@ -18,7 +18,7 @@ def options(ctx):
                    help='example programs to build (comma separated, without .cpp)')
     ctx.add_option('--with-static-examples', action='store_true',
                    dest='WITH_STATIC_EXAMPLES', default=False,
-                   help='build the example programs as static executables (WARNING: only works on debian wheezy with custom-compiled ffmpeg)')
+                   help='build the example programs as static executables')
     ctx.add_option('--with-vamp', action='store_true',
                    dest='WITH_VAMP', default=False,
                    help='build the vamp plugin wrapper')
@@ -31,9 +31,16 @@ def options(ctx):
     ctx.add_option('--ignore-algos', action='store',
                    dest='IGNORE_ALGOS', default=False,
                    help='algorithms to ignore (comma separated)')
+    ctx.add_option('--include-algos', action='store',
+                   dest='INCLUDE_ALGOS', default=False,
+                   help='algorithms to install (comma separated)')
     ctx.add_option('--fft', action='store',
                    dest='FFT', default='FFTW',
                    help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
+    ctx.add_option('--build-static', action='store_true',
+                   dest='BUILD_STATIC', default=False,
+                   help='build static library')
+
 
 def debian_version():
     try:
@@ -50,20 +57,26 @@ def debian_version():
 
 
 def configure(ctx):
-    ctx.env.WITH_EXAMPLES = ctx.options.WITH_EXAMPLES
-    ctx.env.WITH_PYTHON   = ctx.options.WITH_PYTHON
-    ctx.env.WITH_VAMP     = ctx.options.WITH_VAMP
+    ctx.env.WITH_EXAMPLES        = ctx.options.WITH_EXAMPLES
+    ctx.env.WITH_PYTHON          = ctx.options.WITH_PYTHON
+    ctx.env.WITH_VAMP            = ctx.options.WITH_VAMP
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
-    ctx.env.WITH_GAIA      = ctx.options.WITH_GAIA
-    ctx.env.WITH_LIBS    = ctx.options.WITH_LIBS    
-    ctx.env.EXAMPLES       = ctx.options.EXAMPLES
-    ctx.env.EXAMPLE_LIST   = []
-    ctx.env.ALGOIGNORE = []
-    ctx.env.IGNORE_ALGOS  = ctx.options.IGNORE_ALGOS
-    ctx.env.FFT  = ctx.options.FFT
+    ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
+    ctx.env.WITH_LIBS            = ctx.options.WITH_LIBS    
+    ctx.env.EXAMPLES             = ctx.options.EXAMPLES
+    ctx.env.EXAMPLE_LIST         = []
+    ctx.env.ALGOIGNORE           = []
+    ctx.env.IGNORE_ALGOS         = ctx.options.IGNORE_ALGOS
+    ctx.env.ALGOINCLUDE          = []
+    ctx.env.INCLUDE_ALGOS        = ctx.options.INCLUDE_ALGOS
+    ctx.env.FFT                  = ctx.options.FFT
+    ctx.env.BUILD_STATIC         = ctx.options.BUILD_STATIC
 
     if ctx.env.WITH_STATIC_EXAMPLES and not ctx.env.EXAMPLES:
         ctx.env.WITH_EXAMPLES = True
+
+    if ctx.env.WITH_STATIC_EXAMPLES:
+        ctx.env.BUILD_STATIC = True
 
     if ctx.env.WITH_LIBS != False:  
         # bool value if --lightweight flag was not specified, string otherwise     
@@ -84,6 +97,11 @@ def configure(ctx):
             a = a.strip()
             ctx.env.ALGOIGNORE.append(a)
 
+    if ctx.env.INCLUDE_ALGOS:
+        for a in ctx.env.INCLUDE_ALGOS.split(","):
+            a = a.strip()
+            ctx.env.ALGOINCLUDE.append(a)
+
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
@@ -94,14 +112,10 @@ def configure(ctx):
         ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
-
         ctx.check_cfg(package='libavutil', uselib_store='AVUTIL',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
         ctx.check_cfg(package='libavresample', uselib_store='AVRESAMPLE',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
-
-        ctx.check_cfg(package='libswresample', uselib_store='SWRESAMPLE',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
 
     if 'libsamplerate' in ctx.env.WITH_LIBS_LIST:
@@ -118,11 +132,11 @@ def configure(ctx):
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
                       args=['--cflags', '--libs', '--modversion'], mandatory=False)
         if not ctx.env.INCLUDES_YAML and sys.platform == 'darwin':
-	    # an ugly hack for osx, because pkg-config file for yaml-0.1.6 installed by brew 
+            # an ugly hack for osx, because pkg-config file for yaml-0.1.6 installed by brew
             # is missing include path
-	    # TODO: file an issue to libyaml brew formula makers?
+            # TODO: file an issue to libyaml brew formula makers?
             ctx.env['INCLUDES_YAML'] = '/'.join(ctx.env['LIBPATH_YAML'][0].split('/')[:-1] + ['include'])
-            print ctx.env['INCLUDES_YAML']		
+            print ctx.env['INCLUDES_YAML']
 
     if 'fftw' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
@@ -175,18 +189,10 @@ def configure(ctx):
 
     # MonoLoader, EqloudLoader, and EasyLoader are dependent on Resample
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
-    if has('avcodec') and has('avformat') and has('avutil') and ( has('avresample') or has('swresample') ):
+    if has('avcodec') and has('avformat') and has('avutil') and has('avresample'):
         print('- FFmpeg / libav detected!')       
-        ctx.env.USES += ' AVFORMAT AVCODEC AVUTIL'
-    
-        # NOTE: always use libavresample if found, otherwise check for swresample
-        if has('avresample'):
-            ctx.env.USES += ' AVRESAMPLE'
-            print('- Using LibAV/FFmpeg install with libavresample support')     
+        ctx.env.USES += ' AVFORMAT AVCODEC AVUTIL AVRESAMPLE'
 
-        elif has('swresample'):
-            ctx.env.USES += ' SWRESAMPLE'
-            print('- Using LibAV/FFmpeg install with swresample support')
     else:
         print('- FFmpeg (or LibAv on debian/ubuntu) seems to be missing.')
         print('  The following algorithms will be ignored: %s\n' % algos)
@@ -267,16 +273,37 @@ def buildRegFile(ctx):
 
     # select the algorithms we want to build
     if ctx.env['ALGOINCLUDE']:
-        print('Building the following algorithms: %s' % ', '.join(ctx.env['ALGOINCLUDE']))
+        algos_included = {}
+        algos_not_found = []
+        # hack to automatically include the detected version of FFT when FFT is included
+        fft_algos = ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW']
+        for alg in ctx.env['ALGOINCLUDE']:
+            if alg not in algos.keys() and alg != 'FFT':
+                algos_not_found.append(alg)
+                continue
+            if alg == 'FFT':
+                selected_ffts = [alg for alg in fft_algos if alg not in ctx.env.ALGOIGNORE]
+                for fft_alg in selected_ffts:
+                    algos_included[fft_alg] = algos[fft_alg]
+                continue
+            algos_included[alg] = algos[alg]
+        algos = algos_included
+        if algos_not_found:
+            print ('Warning: the following algorithms could not be found: %s' % ', '.join(algos_not_found))
+        print('Building the following algorithms: %s' % ', '.join(algos.keys()))
     else:
         print('Building all the algorithms')
 
     if ctx.env['ALGOIGNORE']:
         ctx.env['ALGOIGNORE'] = list(set(ctx.env['ALGOIGNORE']))
-
-        print('Ignoring the following algorithms: %s' % ', '.join(ctx.env['ALGOIGNORE']))
-        for algoname in ctx.env['ALGOIGNORE']:
-            del algos[algoname]
+        algos_ignored = []
+        for alg in ctx.env['ALGOIGNORE']:
+            if alg in algos.keys():
+                algos_ignored.append(alg)
+        if algos_ignored:
+            print('Ignoring the following algorithms: %s' % ', '.join(algos_ignored))
+            for algoname in algos_ignored:
+                del algos[algoname]
 
     # create version.h header file
     create_version_h('src/version.h', ctx.env.VERSION, ctx.env.GIT_SHA)
@@ -332,14 +359,26 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/kiss_fft.c') ] 
         sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/tools/kiss_fftr.c') ]        
 
-    ctx.stlib(
-        source   = sources,
-        target   = 'essentia',
-        use      = ctx.env.USES,
-        install_path = '${PREFIX}/lib',
-        #includes = ctx.env.includes
-    )
-    
+
+    if ctx.env.BUILD_STATIC:
+        ctx.stlib(
+            source   = sources,
+            target   = 'essentia',
+            use      = ctx.env.USES,
+            install_path = '${PREFIX}/lib',
+            #includes = ctx.env.includes
+        )
+    else:
+        ctx.shlib(
+            source   = sources, 
+            target   = 'essentia',
+            use      = ctx.env.USES,
+            includes = ctx.env.INCLUDES,
+            cxxflags = [ '-w' ],
+            install_path = '${PREFIX}/lib'
+        )
+
+
     def write_pcfile(task):
         open('build/essentia.pc', 'w').write(ctx.env.pcfile)
 

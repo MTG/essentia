@@ -14,8 +14,8 @@ SHARED_OR_STATIC="
 --enable-static
 "
 
-LIBAV_VERSION=libav-0.8.16
-TAGLIB_VERSION=taglib-1.9.1
+LIBAV_VERSION=libav-11.2
+TAGLIB_VERSION=taglib-1.10
 FFTW_VERSION=fftw-3.3.2
 LIBSAMPLERATE_VERSION=libsamplerate-0.1.8
 LIBYAML_VERSION=yaml-0.1.5
@@ -25,7 +25,6 @@ GAIA_VERSION=v2.4.4
 LIBAV_AUDIO_FLAGS="
     --disable-doc
     --disable-debug
-    --disable-ffmpeg
     --disable-avconv
     --disable-avplay
     --disable-avprobe 
@@ -45,8 +44,6 @@ LIBAV_AUDIO_FLAGS="
     --disable-parsers
     --disable-protocols
     --disable-hwaccels
-
-    --disable-bzlib
 
     --enable-protocol=file
     --enable-protocol=pipe

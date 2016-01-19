@@ -62,6 +62,7 @@ void Envelope::compute() {
   vector<Real>& envelope = _envelope.get();
 
   envelope.resize(signal.size());
+  reset();
 
   for (int i=0; i<int(signal.size()); ++i) {
 

@@ -102,6 +102,10 @@ def configure(ctx):
     if ctx.env.WITH_EXAMPLES:
         ctx.env.EXAMPLE_LIST = example_list
 
+        if ctx.options.CROSS_COMPILE_MINGW32:
+            print('WARNING: Use --with-static-examples flag instead of --with-examples for cross-compilation with MinGW')
+
+
     if ctx.env.EXAMPLES:
         for e in ctx.env.EXAMPLES.split(","):
             e = e.strip()
@@ -149,10 +153,10 @@ def build(ctx):
                 includes.append("../..")
 
             ctx.program(source  = ctx.path.ant_glob(' '.join(files)),
-                        target  = prog_name,
+                        target  = 'essentia_' + prog_name,
                         includes = includes,
                         use      = 'essentia ' + ctx.env.USES,
-                        install_path = None)
+                        install_path = '${PREFIX}/bin')
 
         for e in example_sources_fileio + example_sources_with_gaia:
             if e[0] in ctx.env.EXAMPLE_LIST:
@@ -171,6 +175,8 @@ def build(ctx):
 
         if sys.platform == 'darwin':
             install_path = os.environ['HOME'] + '/Library/Audio/Plug-Ins/Vamp'
+        elif sys.platform.startswith('linux'):
+            install_path = '/usr/local/lib/vamp'
         else:
             install_path = None
 
