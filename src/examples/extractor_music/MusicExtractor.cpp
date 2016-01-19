@@ -450,7 +450,6 @@ void MusicExtractor::setExtractorDefaultOptions() {
 
   string silentFrames = "noise";
   int zeroPadding = 0;
-  string windowType = "hann";
 
   // lowlevel
   options.set("lowlevel.frameSize", 2048);
@@ -462,7 +461,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   // average_loudness
   options.set("average_loudness.frameSize", 88200);
   options.set("average_loudness.hopSize", 44100);
-  options.set("average_loudness.windowType", windowType);
+  options.set("average_loudness.windowType", "hann");
   options.set("average_loudness.silentFrames", silentFrames);
 
   // rhythm
@@ -499,13 +498,29 @@ void MusicExtractor::setExtractorDefaultOptions() {
   // high-level
 #if HAVE_GAIA2
   //options.set("highlevel.compute", true);
-  const char* svmModelsArray[] = { "genre_tzanetakis", "genre_dortmund",
-                                   "genre_electronica", "genre_rosamerica",
-                                   "mood_acoustic", "mood_aggressive",
-                                   "mood_electronic", "mood_happy", "mood_party",
-                                   "mood_relaxed", "mood_sad", "timbre", "culture",
-                                   "gender", "mirex-moods", "ismir04_rhythm",
-                                   "voice_instrumental" };
+  
+  // This list includes classifier models hosted on Essentia's website
+  const char* svmModelsArray[] = { 
+                                   "danceability",
+                                   "gender",
+                                   "genre_dortmund",
+                                   "genre_electronic",
+                                   "genre_rosamerica",
+                                   "genre_tzanetakis",
+                                   "ismir04_rhythm",
+                                   "mood_acoustic",
+                                   "mood_aggressive",
+                                   "mood_electronic",
+                                   "mood_happy",
+                                   "mood_party",
+                                   "mood_relaxed",
+                                   "mood_sad",
+                                   "moods_mirex",
+                                   "timbre",
+                                   "tonal_atonal",
+                                   "voice_instrumental" 
+                                 };
+  
   vector<string> svmModels = arrayToVector<string>(svmModelsArray);
   string pathToSvmModels;
 #ifdef OS_WIN32

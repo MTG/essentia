@@ -62,7 +62,7 @@ public:
   InputDomain getInputDomain() const { return FrequencyDomain; }
 
   std::string getMaker() const { return "Music Technology Group"; }
-  std::string getCopyright() const { return "(C) 2012 MTG, Universitat Pompeu Fabra"; }
+  std::string getCopyright() const { return "(C) 2015 MTG, Universitat Pompeu Fabra"; }
   int getPluginVersion() const { return 2; }
 
   essentia::AlgorithmInfo<essentia::standard::Algorithm> info() const {

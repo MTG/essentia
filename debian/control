@@ -1,9 +1,20 @@
 Source: essentia
-Section: libs
-Priority: extra
-Maintainer: Nicolas Wack <nicolas.wack@upf.edu>
-Build-Depends: debhelper (>= 5), python-central (>= 0.5), scons, doxygen, fftw3-dev, libsamplerate-dev, libavcodec-dev, libavformat-dev, python-dev, python-numpy
-Standards-Version: 3.7.2
+Maintainer: Dmitry Bogdanov <dmitry.bogdanov@upf.edu>
+Section: sound
+Priority: optional
+Standards-Version: 3.9.6
+Build-Depends: debhelper (>= 9), 
+               libyaml-dev (>= 0.1.4), 
+               libfftw3-dev (>= 3.3.2), 
+               libavcodec-dev, 
+               libavformat-dev, 
+               libavutil-dev, 
+               libavresample-dev, 
+               libsamplerate0-dev (>= 0.1.8), 
+               libtag1-dev (>= 1.9.1), 
+               python-dev, 
+               python-numpy
+Build-Depends-Indep: doxygen
 XS-Python-Version: current
 
 Package: libessentia-dev
@@ -17,16 +28,12 @@ Description: audio analysis tool -- development files
  meaning you can control it from within Python, and write scripts that
  use Essentia features (just as you would in Matlab).
  .
- This package contains all the development files required to build
- software using Essentia features.
+ This package contains the development files for libessentia.
 
 Package: python-essentia
 Section: python
 Architecture: any
-Replaces: libessentia-python
-Conflicts: libessentia-python
-Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}, python-numpy
-XB-Python-Version: ${python:Versions}
+Depends: ${shlibs:Depends}, ${misc:Depends}, ${python:Depends}
 Description: audio analysis tool -- Python bindings
  Essentia is an audio analysis tool. It provides a reusable collection
  of algorithms and descriptors mainly used to extract features from
@@ -37,11 +44,24 @@ Description: audio analysis tool -- Python bindings
  This package contains all the required files to write applications using
  the Python language, plus some handy tools to work with audio files.
 
-Package: essentia-doc
-Section: libs
-Architecture: all
-Replaces: libessentia-doc
+Package: essentia-extractors
+Section: sound
+Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: audio analysis tool -- feature extractors
+ Essentia is an audio analysis tool. It provides a reusable collection
+ of algorithms and descriptors mainly used to extract features from
+ audio files. It is written in C++, but also has Python bindings,
+ meaning you can control it from within Python, and write scripts that
+ use Essentia features (just as you would in Matlab).
+ .
+ This package contains command-line feature extractors based on 
+ Essentia.
+
+Package: essentia-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
 Description: audio analysis tool -- documentation
  Essentia is an audio analysis tool. It provides a reusable collection
  of algorithms and descriptors mainly used to extract features from

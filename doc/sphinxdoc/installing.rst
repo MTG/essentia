@@ -1,8 +1,23 @@
 .. How-to install Essentia
 
-.. Installing Essentia
-.. ===================
-..
+Installing Essentia
+===================
+
+Mac OSX
+-------
+The easiest way to install Essentia on OSX is by using `our Homebrew formula <https://github.com/MTG/homebrew-essentia>`_. You will need to install `Homebrew package manager <http://brew.sh>`_ first (and there are other good reasons to do it apart from Essentia).
+
+
+Linux
+-----
+We are currently preparing deb packages for Ubuntu and Debian. Meanwhile, you need to compile Essentia from source (see below).
+
+
+Windows, Android
+----------------
+Cross-compile Essentia from Linux/OSX (see below).
+
+
 .. Installing Essentia is easily done using the precompiled packages that you can find on the
 .. `MIR-dev Essentia download page <http://static.mtg.upf.edu/mir-dev-download/essentia/>`_.
 .. Packages are available for Debian/Ubuntu, Windows and Mac OS X.
@@ -29,66 +44,67 @@ Essentia depends on (at least) the following libraries:
 Installing dependencies on Linux
 --------------------------------
 
-You can install those dependencies on a Debian/Ubuntu system from official repositories using the commands provided below. Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. See Github release notes on the download page.
-
-In the case of Essentia 2.1, the required version of TagLib (libtag1-dev) is greater or equal to ``1.9``. The suitable version is distributed with Ubuntu Trusty (14.04 LTS). If you are using the latest stable Debian (Wheezy), you might want to install it from `wheezy-backports <https://wiki.debian.org/Backports>`_ repository. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu Utopic (14.10) repository, and in Debian wheezy-backports.
-
-**Essentia 2.1 on Ubuntu 14.10**::
+You can install those dependencies on a Debian/Ubuntu system from official repositories using the commands provided below::
 
   sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev
 
-In order to use python bindings for the library, you might also need to install python-numpy-dev or python-numpy on Ubuntu::
+In order to use python bindings for the library, you might also need to install python-numpy-dev (or python-numpy on Ubuntu) and python-yaml for YAML support in python::
 
-  sudo apt-get install python-numpy-dev python-numpy
+  sudo apt-get install python-numpy-dev python-numpy python-yaml
 
-Install support for YAML files input/output in python (optional, make sure to have libyaml installed first)::
 
-  sudo apt-get install python-pip
-  pip install pyyaml
-
+Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_. In the case of Essentia's **master branch**, the required version of TagLib (libtag1-dev) is greater or equal to ``1.9``. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu Utopic (14.10) repository, and in Debian wheezy-backports.
 
 
 Installing dependencies on Mac OS X
 -----------------------------------
 
-Install a scientific python environment first:
+Install Command Line Tools for Xcode. Even if you install Xcode from the app store you must configure command-line compilation by running::
 
-1. install Command Line Tools for Xcode. Even if you install Xcode from the app store you must configure command-line compilation by running: ``xcode-select --install``
-2. install homebrew (package manager): http://brew.sh
-3. install prerequisites: ``brew install pkg-config gcc readline sqlite gdbm freetype libpng``
-4. install python: ``brew install python --framework``
-5. install ipython and numpy, matplotlib, and pyyaml: ``pip install ipython numpy matplotlib pyyaml``
-6. when launching ipython, use:
+  xcode-select --install
 
-  a. ``ipython --pylab``    if you have matplotlib   >= 1.3
-  b. ``ipython --pylab=tk`` if you have matplotlib < 1.3
+Install `Homebrew package manager <http://brew.sh>`_.
 
-Note that you are advised to install python environment **as described here**, i.e., via homebrew and pip. You will most probably encounter installation errors when using
-python/numpy preinstalled with OSX 10.9. More details can be found at https://github.com/mxcl/homebrew/wiki/Homebrew-and-Python
+Insert the Homebrew directory at the top of your PATH environment variable by adding the following line at the bottom of your ``~/.profile`` file::
 
-Then run::
+  export PATH=/usr/local/bin:/usr/local/sbin:$PATH
+
+Install prerequisites::
+
+  brew install pkg-config gcc readline sqlite gdbm freetype libpng
+
+Install Essentia's dependencies::
 
   brew install libyaml fftw ffmpeg libsamplerate libtag
+
+`Install python environment using Homebrew <http://docs.python-guide.org/en/latest/starting/install/osx>`_ (Note that you are advised to do as described here and there are `good reasons to do so <http://docs.python-guide.org/en/latest/starting/install/osx/>`_. You will most probably encounter installation errors when using python/numpy preinstalled with OSX.)::
+
+  brew install python --framework
+  pip install ipython numpy matplotlib pyyaml
 
 
 
 Compiling Essentia
 ------------------
 
-Once your dependencies are installed, you can compile Essentia (the library) by going into its
-directory and start by configuring it::
+Once your dependencies are installed, you can proceed to compiling Essentia. Download Essentia's source code at `Github <https://github.com/MTG/essentia>`_.  Due to different dependencies requirement (see `release notes for official releases <https://github.com/MTG/essentia/releases>`_), make sure to download the version compatible with your system:
+ - **2.1 beta2** is the official version currently recommended to install, it is supported on **Ubuntu 14.04 LTS or higher**, **Debian Jessie or higher** and **OSX**.
+ - **master** branch is the most updated version of Essentia in development, it is supported on **Ubuntu 14.10 or higher**, **Debian Jessie or higher** and **OSX**.
 
-  ./waf configure --mode=release --with-python --with-cpptests --with-examples --with-vamp --with-gaia
+
+Go into its source code directory and start by configuring it::
+
+  ./waf configure --mode=release --build-static --with-python --with-cpptests --with-examples --with-vamp --with-gaia
 
 Use the keys:
-   ``--with-python`` to enable python bindings,
-   ``--with-examples`` to build examples based on the library,
-   ``--with-vamp`` to build vamp plugin wrapper,
-   ``--with-gaia`` to build with Gaia library support.
+ - ``--with-python`` to enable python bindings,
+ - ``--with-examples`` to build examples based on the library,
+ - ``--with-vamp`` to build vamp plugin wrapper,
+ - ``--with-gaia`` to build with Gaia library support.
 
 NOTE: you must *always* configure at least once before building!
 
-The following will give you a list of options::
+The following will give you a full list of options::
 
   ./waf --help
 
@@ -139,15 +155,13 @@ Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
 Building Essentia on Windows
 ----------------------------
 
-Essentia does compile and run correctly on Windows (python bindings were not tested). The easiest way to build Essentia is by cross-compilation on Linux using MinGW: https://github.com/MTG/essentia/blob/master/FAQ.md#cross-compiling-for-windows-on-linux
-
-However, if you want to use Visual Studio, there is no project readily available, so you will have to setup one yourself and compile the dependencies too. It appears that binaries for the library generated by cross-compilation are not compatible with Visual Studio.
+Essentia C++ library and extractors based on it can be compiled and run correctly on Windows, but python bindings are currently not supported. The easiest way to build Essentia is by `cross-compilation on Linux using MinGW <https://github.com/MTG/essentia/blob/master/FAQ.md#cross-compiling-for-windows-on-linux>`_. However the resulting library binaries are only compatible within C++ projects using MinGW compilers, and therefore they are not compatible with Visual Studio. If you want to use Visual Studio, there is no project readily available, so you will have to setup one yourself and compile the dependencies too.
 
 
 Building Essentia on Android
 ----------------------------
 
-A lightweight version of Essentia can be cross-compiled for Android from Linux or Mac OSX: https://github.com/MTG/essentia/blob/master/FAQ.md#cross-compiling-for-android
+A lightweight version of Essentia can be `cross-compiled for Android <https://github.com/MTG/essentia/blob/master/FAQ.md#cross-compiling-for-android>`_ from Linux or Mac OSX.
 
 
 Using pre-trained high-level models in Essentia
@@ -156,9 +170,9 @@ Using pre-trained high-level models in Essentia
 Essentia includes a number of `pre-trained classifier models for genres, moods and instrumentation
 <algorithms_overview.html#other-high-level-descriptors>`_. In order to use them you need to:
 
-* Install Gaia2 library (supported on Linux/OSX): https://github.com/MTG/gaia/blob/master/README.md
+* Install `Gaia2 library <https://github.com/MTG/gaia/blob/master/README.md>`_ (supported on Linux/OSX)
 * Build Essentia with examples and Gaia (--with-examples --with-gaia)
 * Use ``streaming_extractor_music`` (see `detailed documentation <streaming_extractor_music.html>`_)
 
-You can also use classifier models trained by your own: https://github.com/MTG/essentia/blob/master/FAQ.md#training-and-running-classifier-models-in-gaia
+You can `train your own classifier models <https://github.com/MTG/essentia/blob/master/FAQ.md#training-and-running-classifier-models-in-gaia>`_.
 

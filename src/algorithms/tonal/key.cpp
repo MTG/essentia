@@ -30,13 +30,27 @@ const char* Key::description = DOC("Using pitch profile classes, this algorithm 
 "\n"
 "Key will throw exceptions either when the input pcp size is not a positive multiple of 12 or if the key could not be found. Also if parameter \"scale\" is set to \"minor\" and the profile type is set to \"weichai\"\n"
 "\n"
+"  Abouth the Key Profiles:\n"
+"  - 'Diatonic' - binary profile with diatonic notes of both modes. Could be useful for ambient music or diatonic music which is not strictly 'tonal functional'.\n"
+"  - 'Tonic Triad' - just the notes of the major and minor chords. Exclusively for testing.\n"
+"  - 'Krumhansl' - reference key profiles after cognitive experiments with users. They should work generally fine for pop music.\n"
+"  - 'Temperley' - key profiles extracted from corpus analysis of euroclassical music. Therefore, they perform best on this repertoire (especially in minor).\n"
+"  - 'Shaath' -  profiles based on Krumhansl's specifically tuned to popular and electronic music.\n"
+"  - 'Noland' - profiles from Bach's 'Well Tempered Klavier'.\n" 
+"  - 'edma' - automatic profiles extracted from corpus analysis of electronic dance music [3]. They normally perform better that Shaath's\n"
+"  - 'edmm' - automatic profiles extracted from corpus analysis of electronic dance music and manually tweaked according to heuristic observation. It will report major modes (which are poorly represented in EDM) as minor, but improve performance otherwise [3].\n"
+"  - Other key profiles ('Faraldo', 'Pentatonic') are experimental and will be removed on due time.\n"
+
 "References:\n"
 "  [1] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
 "  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"
 "  2006.\n\n"
 "  [2] D. Temperley, \"What's key for key? The Krumhansl-Schmuckler\n"
 "  key-finding algorithm reconsidered\", Music Perception vol. 17, no. 1,\n"
-"  pp. 65-100, 1999.");
+"  pp. 65-100, 1999."
+"  [3] Á. Faraldo, E. Gómez, S. Jordà, P.Herrera, \"Key Estimation in Electronic\n"
+"  Dance Music. Proceedings of the 38th International Conference on information\n"
+"  Retrieval, Padova, 2016. (In Press.)");
 
 
 void Key::configure() {
@@ -48,9 +62,9 @@ void Key::configure() {
   _keys = arrayToVector<string>(keyNames);
 
   Real profileTypes[][12] = {
-      // Diatonic
-      { 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1 },
-      { 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1 },
+    // Diatonic
+    { 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1 },
+    { 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1 },
 
     // Krumhansl
     { 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88 },
@@ -64,7 +78,7 @@ void Key::configure() {
     { 81302, 320, 65719, 1916, 77469, 40928, 2223, 83997, 1218, 39853, 1579, 28908 },
     { 39853, 1579, 28908, 81302, 320, 65719, 1916, 77469, 40928, 2223, 83997, 1218 },
 
-    // Tonic triad
+    // Tonic triad.
     { 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0 },
     { 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0 },
 
@@ -75,28 +89,53 @@ void Key::configure() {
     // Statistics THPCP over all the evaluation set
     { 0.95162, 0.20742, 0.71758, 0.22007, 0.71341, 0.48841, 0.31431, 1.00000, 0.20957, 0.53657, 0.22585, 0.55363 },
     { 0.94409, 0.21742, 0.64525, 0.63229, 0.27897, 0.57709, 0.26428, 1.0000, 0.26428, 0.30633, 0.45924, 0.35929 },
-	
+
     // Shaath
     { 6.6, 2.0, 3.5, 2.3, 4.6, 4.0, 2.5, 5.2, 2.4, 3.7, 2.3, 3.4 },
     { 6.5, 2.7, 3.5, 5.4, 2.6, 3.5, 2.5, 5.2, 4.0, 2.7, 4.3, 3.2 },
 
-    // Gómez –as specified by Sha'ath in his report...
+    // Gómez (as specified by Shaath)
     { 0.82, 0.00, 0.55, 0.00, 0.53, 0.30, 0.08, 1.00, 0.00, 0.38, 0.00, 0.47 },
-    { 0.81, 0.00, 0.53, 0.54, 0.00, 0.27, 0.07, 1.00, 0.27, 0.07, 0.10, 0.36 }
+    { 0.81, 0.00, 0.53, 0.54, 0.00, 0.27, 0.07, 1.00, 0.27, 0.07, 0.10, 0.36 },
 
-  };
+    // Noland
+    { 0.0629, 0.0146, 0.061, 0.0121, 0.0623, 0.0414, 0.0248, 0.0631, 0.015, 0.0521, 0.0142, 0.0478 },
+    { 0.0682, 0.0138, 0.0543, 0.0519, 0.0234, 0.0544, 0.0176, 0.067, 0.0349, 0.0297, 0.0401, 0.027 },
+
+    // Faraldo
+    { 7.0, 2.0, 3.8, 2.3, 4.7, 4.1, 2.5, 5.2, 2.0, 3.7, 3.0, 3.4 },
+    { 7.0, 3.0, 3.8, 4.5, 2.6, 3.5, 2.5, 5.2, 4.0, 2.5, 4.5, 3.0 },
+
+    // Pentatonic
+    { 1.0, 0.1, 0.25, 0.1, 0.5, 0.7, 0.1, 0.8, 0.1, 0.25, 0.1, 0.5 },
+    { 1.0, 0.2, 0.25, 0.5, 0.1, 0.7, 0.1, 0.8, 0.3, 0.2, 0.6, 0.2  },
+
+    // edmm
+    { 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083 },
+    { 0.17235348, 0.04, 0.0761009,  0.12, 0.05621498, 0.08527853, 0.0497915,  0.13451001, 0.07458916, 0.05003023, 0.09187879, 0.05545106 },
+
+    // edma
+    { 0.16519551, 0.04749026, 0.08293076, 0.06687112, 0.09994645, 0.09274123, 0.05294487, 0.13159476, 0.05218986, 0.07443653, 0.06940723, 0.0642515  },
+    { 0.17235348, 0.05336489, 0.0761009,  0.10043649, 0.05621498, 0.08527853, 0.0497915,  0.13451001, 0.07458916, 0.05003023, 0.09187879, 0.05545106 }
+};
+
 
 #define SET_PROFILE(i) _M = arrayToVector<Real>(profileTypes[2*i]); _m = arrayToVector<Real>(profileTypes[2*i+1])
 
-  if      (_profileType == "diatonic")      { SET_PROFILE(0); }
-  else if (_profileType == "krumhansl")     { SET_PROFILE(1); }
-  else if (_profileType == "temperley")     { SET_PROFILE(2); }
-  else if (_profileType == "weichai")       { SET_PROFILE(3); }
-  else if (_profileType == "tonictriad")    { SET_PROFILE(4); }
-  else if (_profileType == "temperley2005") { SET_PROFILE(5); }
-  else if (_profileType == "thpcp")         { SET_PROFILE(6); }
-  else if (_profileType == "shaath")        { SET_PROFILE(7); }
-  else if (_profileType == "gomez")         { SET_PROFILE(8); }
+  if      (_profileType == "diatonic")      { SET_PROFILE(0);  }
+  else if (_profileType == "krumhansl")     { SET_PROFILE(1);  }
+  else if (_profileType == "temperley")     { SET_PROFILE(2);  }
+  else if (_profileType == "weichai")       { SET_PROFILE(3);  }
+  else if (_profileType == "tonictriad")    { SET_PROFILE(4);  }
+  else if (_profileType == "temperley2005") { SET_PROFILE(5);  }
+  else if (_profileType == "thpcp")         { SET_PROFILE(6);  }
+  else if (_profileType == "shaath")        { SET_PROFILE(7);  }
+  else if (_profileType == "gomez")         { SET_PROFILE(8);  }
+  else if (_profileType == "noland")        { SET_PROFILE(9);  }
+  else if (_profileType == "faraldo")       { SET_PROFILE(10); }
+  else if (_profileType == "pentatonic")    { SET_PROFILE(11); }
+  else if (_profileType == "edmm")          { SET_PROFILE(12); }
+  else if (_profileType == "edma")          { SET_PROFILE(13); }
   else {
     throw EssentiaException("Key: Unsupported profile type: ", _profileType);
   }
