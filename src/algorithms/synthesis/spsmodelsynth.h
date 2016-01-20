@@ -125,7 +125,7 @@ class SpsModelSynth : public StreamingAlgorithmWrapper {
     declareInput(_stocenv, TOKEN, "stocenv");
 
     declareOutput(_outframe, TOKEN, "frame");
-    declareOutput(_outsineframe, TOKEN, "sinesframe");
+    declareOutput(_outsineframe, TOKEN, "sineframe");
     declareOutput(_outstocframe, TOKEN, "stocframe");
   }
 };
