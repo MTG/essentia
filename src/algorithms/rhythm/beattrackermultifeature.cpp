@@ -165,7 +165,9 @@ void BeatTrackerMultiFeature::configure() {
   // 'melflux' onset detection function, according to the evaluation at MTG
   // (JZapata, DBogdanov)
 
-  _scale->configure("factor", 1.);
+  // _scale is used as a dummy algorithm, turn off clipping so that it goes faster
+  _scale->configure("factor", 1., 
+                    "clipping", false);
 
   _frameCutter1->configure("frameSize", frameSize1,
                           "hopSize", hopSize1,
