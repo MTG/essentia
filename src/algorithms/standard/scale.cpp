@@ -40,8 +40,10 @@ void Scale::compute() {
   fastcopy(scaled.begin(), signal.begin(), scaled.size());
 
   // scales first
-  for (int i=0; i<(int)scaled.size(); i++) {
-    scaled[i] *= _factor;
+  if (_factor != 1.) {
+    for (int i=0; i<(int)scaled.size(); i++) {
+      scaled[i] *= _factor;
+    }
   }
 
   // does clipping, if applies
