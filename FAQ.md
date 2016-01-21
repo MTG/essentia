@@ -108,6 +108,17 @@ export PATH=~/Dev/android/toolchain/bin:$PATH;
 ./waf install
 ```
 
+Cross-compiling for iOS
+-----------------------
+A lightweight version of Essentia for iOS can be compiled using the ```--cross-compile-ios``` flag. It requires reducing the dependencies to a bare minimum using Accelerate Framework for FFT. 
+
+```
+./waf configure --cross-compile-ios --lightweight= --fft=ACCELERATE --build-static
+```
+
+You can also compile it for iOS simulator (so that you can test on your desktop) using ```--cross-compile-ios-sim``` flag.
+
+
 Compiling Essentia to Javascript with Emscripten
 ------------------------------------------------
 Use the instructions below to compile Essentia to Javascript. Among the dependencies, only FFTW3 is currently supported (see instructions to build it below). The rest of dependencies have not been tested, but they should work as well.
