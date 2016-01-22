@@ -39,7 +39,7 @@ class TempoTap : public Algorithm {
 
  public:
   TempoTap() {
-    declareInput(_featuresFrame, "featuresFrame", "input temporal features");
+    declareInput(_featuresFrame, "featuresFrame", "input temporal features of a frame");
     declareOutput(_periods, "periods", "list of tempo estimates found for each input feature, in frames");
     declareOutput(_phases, "phases", "list of initial phase candidates found for each input feature, in frames");
 
