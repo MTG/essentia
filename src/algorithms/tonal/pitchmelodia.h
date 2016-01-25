@@ -196,4 +196,4 @@ class PitchMelodia : public AlgorithmComposite {
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_MELODIAMONOPHONIC_H
+#endif // ESSENTIA_PITCHMELODIA_H
