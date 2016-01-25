@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef STREAMINGEXTRACTORTEMPOTAP_H
-#define STREAMINGEXTRACTORTEMPOTAP_H
+#ifndef RHYTHMEXTRACTOR_H
+#define RHYTHMEXTRACTOR_H
 
 #include "streamingalgorithmcomposite.h"
 #include "pool.h"
@@ -107,10 +107,6 @@ class RhythmExtractor : public AlgorithmComposite {
   void configure();
   AlgorithmStatus process();
   void reset();
-
-  static const char* name;
-  static const char* description;
-
 };
 
 } // namespace streaming
@@ -171,4 +167,4 @@ class RhythmExtractor : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
-#endif // STREAMINGEXTRACTORTEMPOTAP_H
+#endif // RHYTHMEXTRACTOR_H
