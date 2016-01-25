@@ -55,8 +55,7 @@ using namespace streaming;
  	Pool stats;
 
  	void compute(const string& audioFilename);
-
-	void outputToFile(Pool& pool, const string& outputFilename, bool outputJSON);
+	void outputToFile(Pool& pool, const string& outputFilename, const string& format);
 	
  };
 //const FreesoundExtractor::sampleRate=44100;
