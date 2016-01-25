@@ -48,7 +48,7 @@ RhythmExtractor::RhythmExtractor()
 
   declareOutput(_bpm, 0, "bpm", "the tempo estimation [bpm]");
   declareOutput(_ticks, 0, "ticks", " the estimated tick locations [s]");
-  declareOutput(_estimates, 0, "estimates", "the bpm estimation per frame [bpm]");
+  declareOutput(_estimates, 0, "estimates", "the list of bpm estimates characterizing the bpm distribution for the signal [bpm]");
   //TODO we need better rubato estimation algorithm
   //declareOutput(_rubatoStart, 0, "rubatoStart", "list of start times for rubato section [s]");
   //declareOutput(_rubatoStop, 0, "rubatoStop", "list of stop times of rubato section [s]");
@@ -102,7 +102,6 @@ void RhythmExtractor::createInnerNetwork() {
 
     // connect algos:
     _windowing->output("frame")              >>  _fft->input("frame");
-
     _fft->output("fft")                      >>  _cart2polar->input("complex");
 
     _cart2polar->output("magnitude")         >>  _onsetHfc->input("spectrum");
@@ -412,7 +411,10 @@ namespace essentia {
 namespace standard {
 
 const char* RhythmExtractor::name = "RhythmExtractor";
-const char* RhythmExtractor::description = DOC("This algorithm estimates the tempo in bpm from an input signal, as well as the beat locations. It combines TempoTap and TempoTapTicks.\n"
+const char* RhythmExtractor::description = DOC("This algorithm estimates the tempo in bpm from an input signal, as well as the beat locations. The algorithm combines several periodicity functions and estimates beats using TempoTap and TempoTapTicks. It combines:\n"
+"- onset detection functions based on high-frequency content (see OnsetDetection)\n"
+"- complex-domain spectral difference function (see OnsetDetection)\n"
+"- periodicity function based on energy bands (see FrequencyBands, TempoScaleBands)\n"
 "\n"
 "Note that this algorithm is outdated in terms of beat tracking accuracy, and it is highly recommended to use RhythmExtractor2013 instead.\n"
 "\n"
