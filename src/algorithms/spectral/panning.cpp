@@ -168,7 +168,6 @@ void Panning::compute() {
     ratios[i] = atan(specR[i] / specL[i]) / (0.5 * M_PI);
   }
 
-  cout << "DEBUG 1" << endl;
   for (int i = 0; i < _numBands; i++) {
     // Group spectra into Mel bands
     int begin =  (int)floor(melBands[i]);
@@ -184,7 +183,6 @@ void Panning::compute() {
     // Compute energy weight histogram by weighting each frequency bin 
     // by the energy of spectrum in that bin. 
     calculateHistogram(subSpecL, subSpecR, subRatios, histogram);
-    cout << "DEBUG 2" << endl;
   
     if ((_averageFrames == 0) || (_nFrames == 0)) {
       _histogramAccumulated = histogram;
@@ -199,11 +197,8 @@ void Panning::compute() {
     // Normalize (unit-sum) to produce an averaged histogram that is independent 
     // of the energy in the audio signal. Take log of the histogram.
     calculateCoefficients(_histogramAccumulated, inputCoeffs);
-    cout << "DEBUG 3" << endl;
   
     _ifft->compute();
-    cout << "DEBUG IFFT done" << endl;
-
 
     for (int j = 0; j < _numCoeffs; j++) {
       //scale coefficients to conform with the results obtained with matlab, as
@@ -213,7 +208,6 @@ void Panning::compute() {
   }
   _nFrames++;
 
-  cout << "DEBUG 4" << endl;
   // copy resulting panCoeffs to output:
   if (panningCoeffs.dim1() != (int)panCoeffs.size()) {
     panningCoeffs = Array2D<Real>(panCoeffs.size(), panCoeffs[0].size());
