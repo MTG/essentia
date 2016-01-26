@@ -60,7 +60,7 @@ class FFTK : public Algorithm {
   Real* _input;
   std::complex<Real>* _output;
         
-    kiss_fftr_cfg _fftCfg;
+  kiss_fftr_cfg _fftCfg;
 
   void createFFTObject(int size);
 };

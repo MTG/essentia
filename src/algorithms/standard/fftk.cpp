@@ -48,9 +48,9 @@ FFTK::~FFTK() {
   // This will cause a memory leak then, but it is definitely a better choice
   // than a crash (right, right??? :-) )
   if (essentia::isInitialized()) {
-      free(_fftCfg);
-      free(_input);
-      free(_output);
+    free(_fftCfg);
+    free(_input);
+    free(_output);
   }
 }
 
@@ -65,15 +65,14 @@ void FFTK::compute() {
     throw EssentiaException("FFT: Input size cannot be 0");
   }
 
-  if ((_fftCfg == 0) ||
-      ((_fftCfg != 0) && _fftPlanSize != size)) {
+  if (_fftCfg == 0 || (_fftCfg != 0 && _fftPlanSize != size)) {
     createFFTObject(size);
   }
 
   // copy input into plan
   memcpy(_input, &signal[0], size*sizeof(Real));
     
-    kiss_fftr(_fftCfg, (kiss_fft_scalar *) _input, (kiss_fft_cpx *) _output);
+  kiss_fftr(_fftCfg, (kiss_fft_scalar *) _input, (kiss_fft_cpx *) _output);
 
   // copy result from plan to output vector
   fft.resize(size/2+1);
@@ -94,17 +93,17 @@ void FFTK::createFFTObject(int size) {
     throw EssentiaException("FFT: can only compute FFT of arrays which have an even size");
   }
 
-    // create the temporary storage array
-    free(_input);
-    free(_output);
-      _input = (Real*)malloc(sizeof(Real)*size);
-      _output = (complex<Real>*)malloc(sizeof(complex<Real>)*size);
+  // create the temporary storage array
+  free(_input);
+  free(_output);
+  _input = (Real*)malloc(sizeof(Real)*size);
+  _output = (complex<Real>*)malloc(sizeof(complex<Real>)*size);
 
     
   if (_fftCfg != 0) {
     free(_fftCfg);
   }
     
-    _fftCfg = kiss_fftr_alloc(size, 0, NULL, NULL );    
+  _fftCfg = kiss_fftr_alloc(size, 0, NULL, NULL );    
   _fftPlanSize = size;
 }
