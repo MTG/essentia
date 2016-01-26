@@ -41,8 +41,8 @@ void EqualLoudness::reset() {
 void EqualLoudness::configure() {
   Real fs = parameter("sampleRate").toReal();
 
-  if ((fs != 44100.0) && (fs != 48000.0) && (fs != 32000.0)) {
-    throw EssentiaException("EqualLoudness: the sample rate is neither 44100, 48000 nor 32000 Hz, it must be one of these values");
+  if ((fs != 44100.0) && (fs != 48000.0) && (fs != 32000.0) && (fs != 8000.0)) {
+    throw EssentiaException("EqualLoudness: the sample rate is neither 44100, 48000, 32000 nor 8000 Hz, it must be one of these values");
   }
 
   vector<Real> By(11, 0.0);
@@ -160,6 +160,42 @@ void EqualLoudness::configure() {
     Ab[1] = -1.95835380975398;
     Ab[2] =  0.95920349965459;
 
+  }
+  else if (fs == 8000.0) {
+
+    // Yulewalk filter coefficients:
+    By[0] =  0.536487892551045;
+    By[1] = -0.421630343506963;
+    By[2] = -0.002759536119290;
+    By[3] =  0.042678422194153;
+    By[4] = -0.102148641796756;
+    By[5] =  0.145907722893880;
+    By[6] = -0.024598648593454;
+    By[7] = -0.112023151953880;
+    By[8] = -0.040600341270002;
+    By[9] =  0.047886655481804;
+    By[10] = -0.02217936801134;
+
+    Ay[0] =  1;
+    Ay[1] = -0.250498719560207;
+    Ay[2] = -0.431939423111139;
+    Ay[3] = -0.034246810176745;
+    Ay[4] = -0.046783287842416;
+    Ay[5] =  0.264083002009554;
+    Ay[6] =  0.151131305332161;
+    Ay[7] = -0.175564933664496;
+    Ay[8] = -0.188230092621155;
+    Ay[9] =  0.054777204286738;
+    Ay[10] =  0.04704409688120;
+
+    // Butterworth Coefficients:
+    Bb[0] =  0.92006615842917;
+    Bb[1] = -1.84013231685834;
+    Bb[2] =  0.92006615842917;
+
+    Ab[0] =  1;
+    Ab[1] = -1.83373265892465;
+    Ab[2] =  0.84653197479202;
   }
 
   // configure both filters and set them ready to go
