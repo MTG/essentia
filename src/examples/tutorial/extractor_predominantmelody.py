@@ -38,9 +38,9 @@ hopSize = 128
 frameSize = 2048
 sampleRate = 44100
 guessUnvoiced = True # read the algorithm's reference for more details
-run_predominant_melody = PredominantMelody(guessUnvoiced=guessUnvoiced,
-                                           frameSize=frameSize,
-                                           hopSize=hopSize);
+run_predominant_melody = PitchMelodia(guessUnvoiced=guessUnvoiced,
+                                      frameSize=frameSize,
+                                      hopSize=hopSize);
 
 # Load audio file, apply equal loudness filter, and compute predominant melody
 audio = MonoLoader(filename = filename, sampleRate=sampleRate)()
