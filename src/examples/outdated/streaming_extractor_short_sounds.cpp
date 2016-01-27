@@ -41,8 +41,6 @@ using namespace essentia::scheduler;
 
 void computeSegments(const string& audioFilename, Real startTime, Real endTime,
                      Pool& pool, const Pool& options);
-void compute(const string& audioFilename, const string& outputFilename,
-             Real startTime, Real endTime, Pool& pool, const Pool& options);
 
 void computeReplayGain(const string& audioFilename, Real startTime, Real endTime,
                        Pool& pool, const Pool& options);
@@ -141,7 +139,13 @@ int main(int argc, char* argv[]) {
   }
   else {
     try {
-      compute(audioFilename, outputFilename, startTime, endTime, pool, options);
+      computeReplayGain(audioFilename, startTime, endTime, pool, options);
+      computeLowLevel(audioFilename, startTime, endTime, pool, options);
+      computeMidLevel(audioFilename, startTime, endTime, pool, options);
+      //computePanning(audioFilename, startTime, endTime, pool, options);
+      computeHighlevel(pool, options);
+      Pool stats = computeAggregation(pool);
+      outputToFile(stats, outputFilename);
     }
     catch (EssentiaException& e) {
       cout << e.what() << endl;
@@ -154,17 +158,6 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-void compute(const string& audioFilename, const string& outputFilename,
-             Real startTime, Real endTime, Pool& pool, const Pool& options) {
-  computeReplayGain(audioFilename, startTime, endTime, pool, options);
-  computeLowLevel(audioFilename, startTime, endTime, pool, options);
-  computeMidLevel(audioFilename, startTime, endTime, pool, options);
-  //computePanning(audioFilename, startTime, endTime, pool, options);
-  computeHighlevel(pool, options);
-  Pool stats = computeAggregation(pool);
-  outputToFile(stats, outputFilename);
-
-}
 
 void computeSegments(const string& audioFilename, Real startTime, Real endTime, Pool& pool, const Pool& options) {
 
