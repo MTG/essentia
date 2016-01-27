@@ -57,8 +57,8 @@ int main(int argc, char* argv[]) {
     FreesoundExtractor *extractor = new FreesoundExtractor();
     extractor->compute(audioFilename);
     //extractor->outputToFile(extractor->stats, outputFilename+".json", true);
-    extractor->outputToFile(extractor->stats, outputFilename+"_statistics.yaml", false);
-    extractor->outputToFile(extractor->results, outputFilename+"_frames.json", true);
+    extractor->outputToFile(extractor->stats, outputFilename+"_statistics.yaml", "yaml");
+    extractor->outputToFile(extractor->results, outputFilename+"_frames.json", "json");
   
     essentia::shutdown();
   }
