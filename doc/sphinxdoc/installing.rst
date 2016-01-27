@@ -13,8 +13,8 @@ Linux
 We are currently preparing deb packages for Ubuntu and Debian. Meanwhile, you need to compile Essentia from source (see below).
 
 
-Windows, Android
-----------------
+Windows, Android, iOS
+---------------------
 Cross-compile Essentia from Linux/OSX (see below).
 
 
@@ -162,6 +162,12 @@ Building Essentia on Android
 ----------------------------
 
 A lightweight version of Essentia can be `cross-compiled for Android <https://github.com/MTG/essentia/blob/master/FAQ.md#cross-compiling-for-android>`_ from Linux or Mac OSX.
+
+
+Building Essentia on iOS
+------------------------
+
+A lightweight version of Essentia can be `cross-compiled for iOS <https://github.com/MTG/essentia/blob/master/FAQ.md#cross-compiling-for-ios>`_ from Mac OSX.
 
 
 Using pre-trained high-level models in Essentia
