@@ -22,12 +22,7 @@ with the type of descriptors Essentia is able to compute or use them as a refere
 * ``streaming_extractor_music``: computes a large set of spectral, time-domain, rhythm, tonal and high-level descriptors. 
   The frame-wise descriptors are summarized by their statistical distribution and can be optionally output per frames. This extractor was designed for batch computations on large music collections and is the easiest way to get the most of music descriptors out of Essentia without programming. See `detailed documentation <streaming_extractor_music.html>`_.
 
- 
-
 * ``streaming_extractor_freesound``: similar extractor recommended for sound analysis. This extractor is used by `Freesound <http://freesound.org>`_ in order to provide sound analysis API and search by similar sounds functionality.
-
-* ``streaming_extractor``: outdated extractor with a large set of descriptors and segmentation. The 
-  descriptor set include some unstable descriptors and is less reliable than of ``streaming_extractor_music``. Not recommended for use.
 
 * ``standard_pitchyinfft``: extracts pitch for a monophonic signal using `YinFFT <reference/std_PitchYinFFT.html>`_ algorithm.
 
