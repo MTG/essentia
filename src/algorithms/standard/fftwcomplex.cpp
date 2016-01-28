@@ -24,8 +24,8 @@ using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* FFTWCOMPLEX::name = "FFTC";
-const char* FFTWCOMPLEX::description = DOC("This algorithm computes the positive complex STFT (Short-term Fourier transform) of an array of Reals using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
+const char* FFTWComplex::name = "FFTWC";
+const char* FFTWComplex::description = DOC("This algorithm computes the positive complex STFT (Short-term Fourier transform) of an array of Reals using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
 "At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
 "\n"
 "References:\n"
@@ -34,9 +34,9 @@ const char* FFTWCOMPLEX::description = DOC("This algorithm computes the positive
 "  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
 "  http://mathworld.wolfram.com/FastFourierTransform.html");
 
-ForcedMutex FFTWCOMPLEX::globalFFTWCOMPLEXMutex;
+ForcedMutex FFTWComplex::globalFFTWCOMPLEXMutex;
 
-FFTWCOMPLEX::~FFTWCOMPLEX() {
+FFTWComplex::~FFTWComplex() {
   ForcedMutexLocker lock(globalFFTWCOMPLEXMutex);
 
   // we might have called essentia::shutdown() before this algorithm goes out
@@ -50,7 +50,7 @@ FFTWCOMPLEX::~FFTWCOMPLEX() {
   }
 }
 
-void FFTWCOMPLEX::compute() {
+void FFTWComplex::compute() {
 
   const std::vector<std::complex<Real> >& signal = _signal.get();
   std::vector<std::complex<Real> >& fft = _fft.get();
@@ -78,11 +78,11 @@ void FFTWCOMPLEX::compute() {
 
 }
 
-void FFTWCOMPLEX::configure() {
+void FFTWComplex::configure() {
   createFFTObject(parameter("size").toInt());
 }
 
-void FFTWCOMPLEX::createFFTObject(int size) {
+void FFTWComplex::createFFTObject(int size) {
   ForcedMutexLocker lock(globalFFTWCOMPLEXMutex);
 
   // This is only needed because at the moment we return half of the spectrum,

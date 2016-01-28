@@ -17,20 +17,21 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "ConstantQ.h"
+#include "constantq.h"
 #include "essentia.h"
+#include "essentiamath.h"
+#include <iostream>
 
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
 const char* ConstantQ::name = "ConstantQ";
-const char* ConstantQ::description = DOC("\n"
-                                    "\n"
+const char* ConstantQ::description = DOC("This algorithm implements Constant Q Transform employing FFT for fast calculation [1].\n"
                                     "\n"
                                     "References:\n"
                                     "  [1] Constant Q transform - Wikipedia, the free encyclopedia,\n"
-                                    "  hhttps://en.wikipedia.org/wiki/Constant_Q_transform\n\n"
+                                    "  https://en.wikipedia.org/wiki/Constant_Q_transform\n\n"
                                     );
 
 
@@ -56,8 +57,7 @@ ConstantQ::~ConstantQ() {
 
 void ConstantQ::compute() {
 
-  const std::vector<std::complex<Real> >& signalR = _signal.get();
-  std::vector<std::complex<double> >  signal(signalR.begin(), signalR.end());
+  const std::vector<std::complex<Real> >& signal = _signal.get();
   std::vector<std::complex<Real> >& constantQ = _constantQ.get();
 
   if (!m_sparseKernel) {
@@ -86,8 +86,8 @@ void ConstantQ::compute() {
     const unsigned col = fftbin[i];
     const double & r1  = real[i];
     const double & i1  = imag[i];
-    const double & r2  = signal.at( _FFTLength - col - 1 ).real();
-    const double & i2  = signal.at( _FFTLength - col - 1 ).imag();
+    const double & r2  = (double) signal.at( _FFTLength - col - 1 ).real();
+    const double & i2  = (double) signal.at( _FFTLength - col - 1 ).imag();
     // add the multiplication
     constantQ.at(row) += complex <Real>((r1*r2 - i1*i2), (r1*i2 + i1*r2));
   }    
@@ -103,16 +103,15 @@ void ConstantQ::configure() {
   _threshold = parameter("threshold").toDouble();
 
   _dQ = 1/(pow(2,(1/(double)_binsPerOctave))-1);  // Work out Q value for Filter bank
-  _uK = (unsigned int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));  // No. of constant Q bins
-
-
+  _uK = (unsigned int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));  // Number of constant Q bins
+  
   _FFTLength = (int) pow(2, nextpow2(ceil( _dQ * _sampleRate / _minFrequency )));
+
 
   _hop = _FFTLength/8; // <------ hop size is window length divided by 32
 
 
 
-  /* begin Sparse Kernel */
   SparseKernel *sk = new SparseKernel();
 
   // initialise temporal kernel with zeros, twice length to deal w. complex numbers
@@ -143,21 +142,20 @@ void ConstantQ::configure() {
       const double imag = sin(angle);
       const double absol = hamming(hammingLength, i)/hammingLength;
 
-      hammingWindow.at( origin + i) = complex <double>(absol*real, absol*imag);
+      hammingWindow[ origin + i] = complex <double>(absol*real, absol*imag);
     }
 
     std::complex<double> temp;
 
     for (unsigned i = 0; i < _FFTLength/2; ++i) {
       
-      temp = hammingWindow.at(i); //
-      hammingWindow.at(i) = hammingWindow.at(i + _FFTLength/2);
-      hammingWindow.at(i + _FFTLength/2) = temp;
+      temp = hammingWindow[i]; //
+      hammingWindow[i] = hammingWindow[i + _FFTLength/2];
+      hammingWindow[i + _FFTLength/2] = temp;
     }
 
 
     std::vector<std::complex<Real> >  hammingWindowR(hammingWindow.begin(), hammingWindow.end()); //conversion to Real for the FFT algorithm
-    
     //do fft of hammingWindow
     _fft->input("frame").set(hammingWindowR);
     _fft->output("fft").set(transfHammingWindowR);
@@ -176,7 +174,7 @@ void ConstantQ::configure() {
 
     for (unsigned j=0; j<( _FFTLength ); j++) {
       // perform thresholding
-      const double squaredBin = squaredModule( transfHammingWindow.at(j));
+      const double squaredBin = squaredModule( transfHammingWindow[j]);
       
       if (squaredBin <= squareThreshold) continue;
 
@@ -185,16 +183,13 @@ void ConstantQ::configure() {
       sk->_sparseKernelJs.push_back(k);
 
       // // take conjugate, normalise and add to array sparkernel
-      sk->_sparseKernelReal.push_back( transfHammingWindow.at( j ).real()/_FFTLength);
-      sk->_sparseKernelImag.push_back( -transfHammingWindow.at( j ).imag()/_FFTLength);
+      sk->_sparseKernelReal.push_back( transfHammingWindow[ j ].real()/_FFTLength);
+      sk->_sparseKernelImag.push_back( -transfHammingWindow[ j ].imag()/_FFTLength);
     }
 
   }
 
   m_sparseKernel = sk;
-  /* end of Sparse Kernel */
-
-
 
 }
 

@@ -28,19 +28,19 @@
 namespace essentia {
 namespace standard {
 
-class FFTWCOMPLEX : public Algorithm {
+class FFTWComplex : public Algorithm {
 
  protected:
   Input<std::vector<std::complex<Real> > >  _signal;
   Output<std::vector<std::complex<Real> > > _fft;
 
  public:
-  FFTWCOMPLEX() : _fftPlan(0), _input(0), _output(0) {
+  FFTWComplex() : _fftPlan(0), _input(0), _output(0) {
     declareInput(_signal, "frame", "the input audio frame");
     declareOutput(_fft, "fft", "the FFT of the input frame");
   }
 
-  ~FFTWCOMPLEX();
+  ~FFTWComplex();
 
   void declareParameters() {
     declareParameter("size", "the expected size of the input frame. This is purely optional and only targeted at optimizing the creation time of the FFT object", "[1,inf)", 1024);
@@ -72,15 +72,15 @@ class FFTWCOMPLEX : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class FFTWCOMPLEX : public StreamingAlgorithmWrapper {
+class FFTWComplex : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<std::complex<Real> > > _signal;
   Source<std::vector<std::complex<Real> > > _fft;
 
  public:
-  FFTWCOMPLEX() {
-    declareAlgorithm("FFTC");
+  FFTWComplex() {
+    declareAlgorithm("FFTWC");
     declareInput(_signal, TOKEN, "frame");
     declareOutput(_fft, TOKEN, "fft");
   }

@@ -26,7 +26,6 @@
 #include <complex>
 #include <vector>
 
-//#include <Accelerate/Accelerate.h>
 
 namespace essentia {
 namespace standard {
@@ -43,7 +42,7 @@ class ConstantQ : public Algorithm {
   declareInput(_signal, "frame", "the input audio frame");
   declareOutput(_constantQ, "constantq", "the constantq of the input frame");
 
-  _fft = AlgorithmFactory::create("FFTC");  //FFT with complex input
+  _fft = AlgorithmFactory::create("FFTWC");  //FFT with complex input
 
   }
 
@@ -56,19 +55,16 @@ class ConstantQ : public Algorithm {
 
     declareParameter("minFrequency", "the minimum frequency", "[1,inf)", 55.);
     declareParameter("maxFrequency", "the maximum frequency", "[1,inf)", 7040.);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    //BPO
-    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);  //FS
-    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);       //CQThresh
+    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    
+    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);  
+    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);       
   }
 
 
   void compute();
   void configure();
 
-  double hamming(int len, int n) {
-    double out = 0.54 - 0.46*cos(2 * M_PI * n / len);
-    return(out);
-  }
+  
 
   static const char* name;
   static const char* description;
@@ -86,7 +82,7 @@ class ConstantQ : public Algorithm {
   unsigned int _hop;
   unsigned int _binsPerOctave;  
   unsigned int _FFTLength;
-  unsigned int _uK;   // No. of constant Q bins
+  unsigned int _uK;   // Number of constant Q bins
 
   struct SparseKernel {
     std::vector<double> _sparseKernelReal;
@@ -94,6 +90,11 @@ class ConstantQ : public Algorithm {
     std::vector<unsigned> _sparseKernelIs; 
     std::vector<unsigned> _sparseKernelJs;
   };
+
+  double hamming(int len, int n) {
+    double out = 0.54 - 0.46*cos(2 * M_PI * n / len);
+    return(out);
+  }
 
   SparseKernel *m_sparseKernel;
 };
