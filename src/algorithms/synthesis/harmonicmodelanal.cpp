@@ -100,8 +100,7 @@ void HarmonicModelAnal::compute() {
 
 	harmonicDetection(peakFrequency, peakMagnitude, peakPhase, pitch, _nH, _lasthfreq,  _sampleRate,  _harmDevSlope,  hpeakFrequency,  hpeakMagnitude,  hpeakPhase);
 
-
-	_lasthfreq = hpeakFrequency;
+	_lasthfreq = hpeakFrequency;  // copy last harmonic frequencies for tracking
 
 
 
@@ -126,29 +125,6 @@ void HarmonicModelAnal::harmonicDetection(const std::vector<Real> pfreq, const s
 */
 
 
-
-/*	if (f0<=0):                                          # if no f0 return no harmonics
-		return np.zeros(nH), np.zeros(nH), np.zeros(nH)
-	hfreq = np.zeros(nH)                                 # initialize harmonic frequencies
-	hmag = np.zeros(nH)-100                              # initialize harmonic magnitudes
-	hphase = np.zeros(nH)                                # initialize harmonic phases
-	hf = f0*np.arange(1, nH+1)                           # initialize harmonic frequencies
-	hi = 0                                               # initialize harmonic index
-	if hfreqp == []:                                     # if no incomming harmonic tracks initialize to harmonic series
-		hfreqp = hf
-	while (f0>0) and (hi<nH) and (hf[hi]<fs/2):          # find harmonic peaks
-		pei = np.argmin(abs(pfreq - hf[hi]))               # closest peak
-		dev1 = abs(pfreq[pei] - hf[hi])                    # deviation from perfect harmonic
-		dev2 = (abs(pfreq[pei] - hfreqp[hi]) if hfreqp[hi]>0 else fs) # deviation from previous frame
-		threshold = f0/3 + harmDevSlope * pfreq[pei]
-		if ((dev1<threshold) or (dev2<threshold)):         # accept peak if deviation is small
-			hfreq[hi] = pfreq[pei]                           # harmonic frequencies
-			hmag[hi] = pmag[pei]                             # harmonic magnitudes
-			hphase[hi] = pphase[pei]                         # harmonic phases
-		hi += 1                                            # increase harmonic index
-	return hfreq, hmag, hphase*/
-
-
 	// init vectors  
 	hfreq.resize(_nH); // initialize harmonic frequencies
 	std::fill(hfreq.begin(), hfreq.end(), 0.);
@@ -163,26 +139,31 @@ void HarmonicModelAnal::harmonicDetection(const std::vector<Real> pfreq, const s
 			std::vector<Real> hf(nH);
 			for (int i=1;i<=nH;i++)
 			{
-				hf [i]= f0*i;
+				hf [i-1]= f0*i;       
 			}		
-		int hi = 0 ;                                              // initialize harmonic index
+      
+		int hi = 0 ;                                                          // initialize harmonic index
 		if (hfreqp.size() == 0)                                   // if no incomming harmonic tracks initialize to harmonic series
 			{
 				hfreqp = hf;			
 			}
 			
 			std::vector<Real> difftmp =  pfreq;
+      
+      
 		while ((f0>0) && (hi<nH) && (hf[hi]<fs/2.))          // find harmonic peaks
 		{	
 			
 			for (int j=0;j<(int) difftmp.size(); j++)
 			{
-				difftmp[j] -= hf[hi];
+				difftmp[j] = abs(pfreq[j] - hf[hi]);      
 			}
+      
+      
 			//int pei = np.argmin(abs(pfreq - hf[hi]))               // closest peak
 			int pei = std::min_element(difftmp.begin(), difftmp.end()) - difftmp.begin();
-			
-			Real dev1 = abs(pfreq[pei] - hf[hi])  ;                // deviation from perfect harmonic			
+			      
+			Real dev1 = abs(pfreq[pei] - hf[hi])  ;                // deviation from perfect harmonic			      
 			 Real dev2 =  fs; 														// deviation from previous frame
 			 if (hfreqp[hi]>0 )
 			 {
@@ -190,16 +171,17 @@ void HarmonicModelAnal::harmonicDetection(const std::vector<Real> pfreq, const s
 			 }
 			
 			Real threshold = f0/3. + harmDevSlope * pfreq[pei];
+        
 			if ((dev1<threshold) || (dev2<threshold))         //accept peak if deviation is small
 			{
 				hfreq[hi] = pfreq[pei]  ;                        // harmonic frequencies
 				hmag[hi] = pmag[pei] ;                         // harmonic magnitudes
-				hphase[hi] = pphase[pei] ;                  // harmonic phases
+				hphase[hi] = pphase[pei] ;                  // harmonic phases                     
 			}
-			hi += 1  ;                                   				// increase harmonic index
+			hi += 1 ;                                   				// increase harmonic index
 		}
-	}
-	
+	}	
+  
 	return ;
 
 }

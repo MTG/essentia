@@ -97,8 +97,7 @@ int main(int argc, char* argv[]) {
                             "sampleRate", sr,
                             "hopSize", hopsize,
                             "fftSize", framesize,
-                            "nHarmonics", 100,
-                           // "freqDevOffset", 10,
+                            "nHarmonics", 100,                           
                             "harmDevSlope", 0.01
                             );
 
