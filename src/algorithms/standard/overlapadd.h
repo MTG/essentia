@@ -50,7 +50,7 @@ class OverlapAdd : public Algorithm {
   }
   void compute();
   void configure();
-  // TODO missing reset() method to clean frameHistory vector, the same for streaming mode
+  void reset();
 
   static const char* name;
   static const char* description;

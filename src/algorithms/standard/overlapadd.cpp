@@ -101,6 +101,9 @@ void OverlapAdd::configure() {
   _tmpFrame.resize(_frameSize);
 }
 
+void OverlapAdd::reset() {
+}
+  
 void OverlapAdd::compute() {
 
   const vector<Real>& windowedFrame = _windowedFrame.get();

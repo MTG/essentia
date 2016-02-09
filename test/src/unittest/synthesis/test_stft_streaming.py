@@ -103,10 +103,9 @@ def analysisSynthesisStreaming(params, signal):
 class TestSTFT(TestCase):
 
     params = { 'frameSize': 1024, 'hopSize': 256, 'startFromZero': False }
-    # emprical value from a test signal x(t) = (0.5*sine(440*t)).
-    # Assert diffference is computed as a relative value (abs(*y - *x)/abs(*y))
-    # for audio signals another function measuring absolute value could be implemented instead.
-    precision = 0.02
+    
+    precisiondB = -60. # -60dB of allowed noise floor.
+    precisionDigits = int(-numpy.round(precisiondB/20.))
 
     def testZero(self):
       
@@ -120,7 +119,7 @@ class TestSTFT(TestCase):
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
-        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precision)
+        self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
     def testWhiteNoise(self):
         from random import random
@@ -136,8 +135,22 @@ class TestSTFT(TestCase):
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
-        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precision)
+        self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
+    def testRamp(self):
+        # generate test signal
+        signalSize = 10 * self.params['frameSize']
+        signal = 0.5 * array([float(2*i%signalSize)/signalSize for i in range(signalSize)])
+          
+        outsignal = analysisSynthesisStreaming(self.params, signal)
+        outsignal = outsignal[:signalSize] # cut to duration of input signal
+            
+#        numpy.savetxt('ramp.txt',signal)
+#        numpy.savetxt('ramp_out.txt',outsignal)
+
+        # compare without half-window bounds to avoid windowing effect
+        halfwin = (self.params['frameSize']/2)
+        self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
     def testRegression(self):
 
@@ -154,7 +167,7 @@ class TestSTFT(TestCase):
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
-        self.assertAlmostEqualVector(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precision)
+        self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
 
 
