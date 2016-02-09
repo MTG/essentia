@@ -166,10 +166,9 @@ class TestSineModel(TestCase):
 
     params = { 'frameSize': 2048, 'hopSize': 512, 'startFromZero': False, 'sampleRate': 44100,'maxnSines': 100,'magnitudeThreshold': -74,'minSineDur': 0.02,'freqDevOffset': 10, 'freqDevSlope': 0.001}
     
-    # emprical value from a test signal x(t) = (0.5*sine(110*t)).
-    # Assert diffference is computed as a relative value (abs(*y - *x)/abs(*y))
-    # for audio signals another function measuring absolute value could be implemented instead.
-    precision = 0.2
+    precisiondB = -40. # -60dB of allowed noise floor.
+    precisionDigits = int(-numpy.round(precisiondB/20.))
+    print precisionDigits
 
     def testZero(self):
       
@@ -190,7 +189,7 @@ class TestSineModel(TestCase):
         signalSize = 10 * self.params['frameSize']
         signal = array([2*(random()-0.5)*i for i in ones(signalSize)])
         
-        # for white noise test set sine minimum duration to 50ms, and min threshold of -24dB
+        # for white noise test set sine minimum duration to 50ms, and min threshold of -20dB
         self.params['minSineDur'] = 0.05
         self.params['magnitudeThreshold']= -20
     
@@ -207,7 +206,7 @@ class TestSineModel(TestCase):
 
         # generate test signal: sine 110Hz @44100kHz
         signalSize = 10 * self.params['frameSize']
-        signal = 0.5 * numpy.sin( (array(range(signalSize))/self.params['sampleRate']) * 110 * 2*math.pi)
+        signal = .5 * numpy.sin( (array(range(signalSize))/self.params['sampleRate']) * 110 * 2*math.pi)
         
         outsignal,pool = analsynthSineModelStreaming(self.params, signal)
 
@@ -220,10 +219,11 @@ class TestSineModel(TestCase):
         numpy.savetxt('sine_out.txt',outsignal[halfwin:-halfwin])
         
         # computing max difference between waveforms
-        diffference = numpy.max(abs(outsignal[halfwin:-halfwin] - signal[halfwin:-halfwin]))
-        ref_diff = 0.00616494
-          
-        self.assertAlmostEqual(diffference/ref_diff, 1, 1e-6)
+#        diffference = numpy.max(abs(outsignal[halfwin:-halfwin] - signal[halfwin:-halfwin]))
+#        print 'diffference', diffference
+
+        self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
+
 
 
 
