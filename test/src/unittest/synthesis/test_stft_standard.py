@@ -58,7 +58,6 @@ def analysisSynthesisStandard(params, signal):
     for f in frames:
       
       outframe = overl(ifft(fft(w(f))))
-      #outframe = f[:params['hopSize']] # test
       outsignal = numpy.append(outsignal,outframe)
 
 
@@ -88,8 +87,8 @@ class TestSTFT(TestCase):
         # cut to duration of input signal
         outsignal = outsignal[:signalSize]
 
-        numpy.savetxt('zeros.txt',signal)
-        numpy.savetxt('zeros_out.txt',outsignal)
+#        numpy.savetxt('zeros.txt',signal)
+#        numpy.savetxt('zeros_out.txt',outsignal)
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
@@ -105,8 +104,8 @@ class TestSTFT(TestCase):
         outsignal = analysisSynthesisStandard(self.params, signal)
         outsignal = outsignal[:signalSize] # cut to duration of input signal
         
-        numpy.savetxt('noise.txt',signal)
-        numpy.savetxt('noise_out.txt',outsignal)
+#        numpy.savetxt('noise.txt',signal)
+#        numpy.savetxt('noise_out.txt',outsignal)
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
@@ -120,9 +119,9 @@ class TestSTFT(TestCase):
         outsignal = analysisSynthesisStandard(self.params, signal)
         outsignal = outsignal[:signalSize] # cut to duration of input signal
         
-        numpy.savetxt('ramp.txt',signal)
-        numpy.savetxt('ramp_out.txt',outsignal)
-        
+#        numpy.savetxt('ramp.txt',signal)
+#        numpy.savetxt('ramp_out.txt',outsignal)
+
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
@@ -136,8 +135,8 @@ class TestSTFT(TestCase):
         outsignal = analysisSynthesisStandard(self.params, signal)
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
-        numpy.savetxt('sine.txt',signal)
-        numpy.savetxt('sine_out.txt',outsignal)
+#        numpy.savetxt('sine.txt',signal)
+#        numpy.savetxt('sine_out.txt',outsignal)
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
