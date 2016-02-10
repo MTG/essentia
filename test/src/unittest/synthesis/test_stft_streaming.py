@@ -104,8 +104,8 @@ class TestSTFT(TestCase):
 
     params = { 'frameSize': 1024, 'hopSize': 256, 'startFromZero': False }
     
-    precisiondB = -60. # -60dB of allowed noise floor.
-    precisionDigits = int(-numpy.round(precisiondB/20.))
+    precisiondB = -80. # -60dB of allowed noise floor.
+    precisionDigits = int(-numpy.round(precisiondB/20.) -1)
 
     def testZero(self):
       

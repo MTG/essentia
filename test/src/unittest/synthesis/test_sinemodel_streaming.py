@@ -166,9 +166,9 @@ class TestSineModel(TestCase):
 
     params = { 'frameSize': 2048, 'hopSize': 512, 'startFromZero': False, 'sampleRate': 44100,'maxnSines': 100,'magnitudeThreshold': -74,'minSineDur': 0.02,'freqDevOffset': 10, 'freqDevSlope': 0.001}
     
-    precisiondB = -40. # -60dB of allowed noise floor.
-    precisionDigits = int(-numpy.round(precisiondB/20.))
-    print precisionDigits
+    precisiondB = -40. # -40dB of allowed noise floor for sinusoidal model
+    precisionDigits = int(-numpy.round(precisiondB/20.) -1) # -1 due to the rounding digit comparison.
+    
 
     def testZero(self):
       
@@ -219,8 +219,7 @@ class TestSineModel(TestCase):
         numpy.savetxt('sine_out.txt',outsignal[halfwin:-halfwin])
         
         # computing max difference between waveforms
-#        diffference = numpy.max(abs(outsignal[halfwin:-halfwin] - signal[halfwin:-halfwin]))
-#        print 'diffference', diffference
+        #diffference = numpy.max(abs(outsignal[halfwin:-halfwin] - signal[halfwin:-halfwin]))
 
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
