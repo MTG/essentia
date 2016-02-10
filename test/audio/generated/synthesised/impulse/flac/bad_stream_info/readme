@@ -1,1 +1,0 @@
-these files (*_bad_stream_info.flac) have been kept to find out why ffmpeg from whithin essentia fails when issuing av_find_stream_info()
