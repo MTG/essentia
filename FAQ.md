@@ -48,7 +48,7 @@ apt-get install yasm cmake
 
 On OSX:
 ```
-brew install yasm cmake
+brew install yasm cmake wget
 ```
 
 Prepare static builds for dependencies running a script (works both for Linux and OSX):
