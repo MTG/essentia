@@ -32,15 +32,28 @@ std::vector< std::vector<Real> > readIn2dData(const char* filename);
 
 int main(int argc, char* argv[]) {
 
-  if (argc != 3) {
+  if (argc < 3) {
     cout << "Standard_HarmonicModel ERROR: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " audio_input output_file" << endl;
+    cout << "Usage: " << argv[0] << " audio_input output_file [predominant]. " << endl;
+    cout << "\t [predominant]: Optional argument. It is a flag value that can be 0 or 1 .  Set to 1  if PredominantPitchMelodia extraction is used  Default uses Pitch-YinFFT. " << endl;
+
+
     exit(1);
   }
 
   string audioFilename = argv[1];
   string outputFilename = argv[2];
 
+   bool usePredominant = false;  
+  if   (argc == 4) {
+     string usePredominantStr = argv[3];
+    if (usePredominantStr == "1")
+    {
+      usePredominant = true;  
+      cout << "Using PredominantPitchMelodia instead of  the default PitchYinFFT."  << endl;
+    }
+  
+  }
   // register the algorithms in the factory(ies)
   essentia::init();
 
@@ -53,12 +66,14 @@ int main(int argc, char* argv[]) {
   int hopsize = 128; //128;
   Real sr = 44100;
   
-   bool usePredominant = true; // set to true if PredmonantMelody extraction is used. Set to false if monhonic Pitch-YinFFT is used,
+  Real minF0 = 65.;
+  Real maxF0 = 550.;
+ 
+  
+ 
 
 
  Real minSineDur = 0.02;
- //Real stocf = 0.2; // 0.2; //1.; // stochastic envelope factor. Default 0.2
-
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
@@ -74,42 +89,26 @@ int main(int argc, char* argv[]) {
                                            "startFromZero", false );
 
 
+
  Algorithm* equalLoudness = factory.create("EqualLoudness");
-
-
-  Algorithm* window      = factory.create("Windowing", "type", "hann");
-
-  Algorithm* spectrum = factory.create("Spectrum",
-                                       "size", framesize);
-
-  Algorithm* pitchDetect = factory.create("PitchYinFFT",
-                                          "frameSize", framesize,
-                                          "sampleRate", sr);
                                        
-  Algorithm* predominantMelody = factory.create("PredominantPitchMelodia", //PredominantMelody",
+  Algorithm* predominantMelody = factory.create("PredominantPitchMelodia", 
                                                 "frameSize", framesize,
                                                 "hopSize", hopsize,
                                                 "sampleRate", sr);
 
-    
+
   // parameters used in the SMS Python implementation
   Algorithm* harmonicmodelanal   = factory.create("HarmonicModelAnal",
                             "sampleRate", sr,
                             "hopSize", hopsize,
                             "fftSize", framesize,
                             "nHarmonics", 100,                           
-                            "harmDevSlope", 0.01
+                            "harmDevSlope", 0.01,
+                            "maxFrequency", maxF0,
+                            "minFrequency", minF0,
+                            "useExternalPitch", usePredominant
                             );
-
-
-//  printf("TODO: replace this workflow (harmonicdemodelanal and sinesubtraction)     by a call to    HprModelAnal algorithm\n");
-
-/*  int subtrFFTSize = std::min(512, 4*hopsize);  // make sure the FFT size is at least twice the hopsize
-  Algorithm* sinesubtraction = factory.create("SineSubtraction",
-                              "sampleRate", sr,
-                              "fftSize", subtrFFTSize,
-                              "hopSize", hopsize
-                              );*/
 
 
   Algorithm* sinemodelsynth     = factory.create("SineModelSynth",
@@ -125,8 +124,8 @@ int main(int argc, char* argv[]) {
 
   Algorithm* audioWriter = factory.create("MonoWriter",
                                      "filename", outputFilename);
-
-
+  
+ 
   vector<Real> audio;
   vector<Real> frame;
   vector<Real> eqaudio;
@@ -138,7 +137,6 @@ int main(int argc, char* argv[]) {
   vector<Real> magnitudes;
   vector<Real> frequencies;
   vector<Real> phases;
-  vector<Real> stocenv;
 
   // accumulate estimated values   for all frames for cleaning tracks before synthesis
   vector< vector<Real> > frequenciesAllFrames;
@@ -165,23 +163,9 @@ int main(int argc, char* argv[]) {
   predominantMelody->output("pitch").set(predPitch);
   predominantMelody->output("pitchConfidence").set(predConf);
 
-// YIN pitch analysis
- window->input("frame").set(frame);
-  window->output("frame").set(wframe);
+ Real thisPitch = 0.;
 
-  // set spectrum:
-  vector<Real> spec;
-  spectrum->input("frame").set(wframe);
-  spectrum->output("spectrum").set(spec);
-
-  // set Yin pitch extraction:
-  Real thisPitch = 0.;
-  Real thisConf = 0;
-  pitchDetect->input("spectrum").set(spec);
-  pitchDetect->output("pitch").set(thisPitch);
-  pitchDetect->output("pitchConfidence").set(thisConf);
-  
-  
+   
   // Harmonic model analysis
   harmonicmodelanal->input("frame").set(frame); // inputs a frame
   harmonicmodelanal->input("pitch").set(thisPitch); // inputs a pitch
@@ -230,12 +214,6 @@ int main(int argc, char* argv[]) {
     if (!frame.size()) {
       break;
     }
-
-    window->compute();
-
-    // pitch extraction
-    spectrum->compute();
-    pitchDetect->compute();
 
     // get predominant pitch
     if (usePredominant){
@@ -311,11 +289,9 @@ int main(int argc, char* argv[]) {
 
   delete audioLoader;
   delete frameCutter;
-  delete window;
-  delete harmonicmodelanal;
+   delete harmonicmodelanal;
 	delete predominantMelody;
-  delete pitchDetect;
-  delete sinemodelsynth;
+   delete sinemodelsynth;
   delete audioWriter;
 
   essentia::shutdown();
@@ -359,7 +335,7 @@ std::vector< std::vector<Real> > readIn2dData(const char* filename)
         while (ss >> buf)
             row.push_back(buf);
 
-std::cout << "row size from numpy is: " << row.size() << std::endl;
+        std::cout << "row size from numpy is: " << row.size() << std::endl;
         table.push_back(row);
 
     }

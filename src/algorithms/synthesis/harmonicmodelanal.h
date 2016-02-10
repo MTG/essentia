@@ -40,8 +40,10 @@ class HarmonicModelAnal : public Algorithm {
   //Output<std::vector<Real> > _stocenv;
 
 //  int _stocSize;
+  Algorithm* _spectrum ;
   Algorithm* _window;
   Algorithm* _fft;
+  Algorithm*   _pitchDetect;
   Algorithm* _sineModelAnal;
  /* Algorithm* _sineSubtraction;
   Algorithm* _stochasticModelAnal;*/
@@ -52,18 +54,21 @@ class HarmonicModelAnal : public Algorithm {
   int _nH ; // number of harmonics
  Real _harmDevSlope;
   std::vector<Real> _lasthfreq;
-
+  bool _useExtPitch;
+  
 
 
  public:
   HarmonicModelAnal() {
     declareInput(_frame, "frame", "the input frame");
-    declareInput(_pitch, "pitch", "an estimate of the fundamental frequency of the signal [Hz]");
+    declareInput(_pitch, "pitch", "external pitch input [Hz]. Optional input.");
     declareOutput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareOutput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareOutput(_phases, "phases", "the phases of the sinusoidal peaks");
 
     _window = AlgorithmFactory::create("Windowing");
+    _spectrum =  AlgorithmFactory::create("Spectrum");
+    _pitchDetect = AlgorithmFactory::create("PitchYinFFT");
     _fft = AlgorithmFactory::create("FFT");
     _sineModelAnal = AlgorithmFactory::create("SineModelAnal");
 
@@ -71,7 +76,10 @@ class HarmonicModelAnal : public Algorithm {
 
   ~HarmonicModelAnal() {
 
+    
   delete _window;
+  delete _spectrum;
+ delete  _pitchDetect;
   delete _fft;
   delete _sineModelAnal;
 
@@ -90,8 +98,9 @@ class HarmonicModelAnal : public Algorithm {
     declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
      declareParameter("nHarmonics", "maximum number of harmonics per frame", "(0,inf)", 100);
     declareParameter("harmDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
+    // external pitch input 
+    declareParameter("useExternalPitch", "flag to use the external pitch input","{true,false}", false); // if set to true it gets the external pìtch 
    
-
   }
 
   void configure();

@@ -25,9 +25,9 @@ using namespace essentia;
 using namespace standard;
 
 const char* HarmonicModelAnal::name = "HarmonicModelAnal";
-const char* HarmonicModelAnal::description = DOC("This algorithm computes the harmonic model analysis. \n"
+const char* HarmonicModelAnal::description = DOC("This algorithm computes the harmonic model analysis.  \n"
 "\n"
-"It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses SineModelAnal. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"
+".This algorithm uses SineModelAnal and keeps only the harmonic partials. It estimates the pitch using the YinPitchFFT algorithm. Optionally an external pitch value can be given as input, setting the useExternalPithc flag accordingly .\n"
 "\n"
 "References:\n"
 "  https://github.com/MTG/sms-tools\n"
@@ -41,18 +41,27 @@ void HarmonicModelAnal::configure() {
   std::string wtype = "blackmanharris92"; // default "hamming"
   _window->configure("type", wtype.c_str());
 
+  _spectrum->configure("size", parameter("fftSize").toInt() );
+
   _fft->configure("size", parameter("fftSize").toInt()  );
 
 
+  _pitchDetect->configure("frameSize", parameter("fftSize").toInt() ,
+                                          "sampleRate", parameter("sampleRate").toReal(),
+                                            "maxFrequency", parameter("maxFrequency").toReal(),
+                                            "minFrequency", parameter("minFrequency").toReal()
+                                          );
+                                       
+
   _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
                               "maxnSines", parameter("maxnSines").toInt() 
-                              /*"freqDevOffset", parameter("freqDevOffset").toInt(),
-                              "freqDevSlope",  parameter("freqDevSlope").toReal()*/
                               );
 
-_sampleRate =  parameter("sampleRate").toReal();
-_nH = parameter("nHarmonics").toInt() ; // number of harmonics
+  // get parameters
+  _sampleRate =  parameter("sampleRate").toReal();
+  _nH = parameter("nHarmonics").toInt() ; // number of harmonics
  _harmDevSlope =  parameter("harmDevSlope").toReal();
+ _useExtPitch = parameter("useExternalPitch").toBool();
  
  _lasthfreq.clear();
 
@@ -70,17 +79,29 @@ void HarmonicModelAnal::compute() {
   std::vector<Real>& hpeakFrequency = _frequencies.get();
   std::vector<Real>& hpeakPhase = _phases.get();
  
-
+  std::vector<Real> spec;
   std::vector<Real> wframe;
   std::vector<std::complex<Real> > fftin;
   std::vector<Real> fftmag;
   std::vector<Real> fftphase;
 
-
   _window->input("frame").set(frame);
   _window->output("frame").set(wframe);
   _window->compute();
 
+  // set spectrum:
+  _spectrum->input("frame").set(wframe);
+  _spectrum->output("spectrum").set(spec);
+  _spectrum->compute();
+
+  // set Yin pitch extraction:
+  Real thisPitch = 0.;
+  Real thisConf = 0;
+  _pitchDetect->input("spectrum").set(spec);
+  _pitchDetect->output("pitch").set(thisPitch);
+  _pitchDetect->output("pitchConfidence").set(thisConf);
+  _pitchDetect->compute();
+  
   _fft->input("frame").set(wframe);
   _fft->output("fft").set(fftin);
   _fft->compute();
@@ -94,11 +115,15 @@ void HarmonicModelAnal::compute() {
  _sineModelAnal->output("magnitudes").set(peakMagnitude);
  _sineModelAnal->output("frequencies").set(peakFrequency);
  _sineModelAnal->output("phases").set(peakPhase);
-
   _sineModelAnal->compute();
 
+   if  (_useExtPitch)
+   {
+      thisPitch = pitch;      
+     }
+   
 
-	harmonicDetection(peakFrequency, peakMagnitude, peakPhase, pitch, _nH, _lasthfreq,  _sampleRate,  _harmDevSlope,  hpeakFrequency,  hpeakMagnitude,  hpeakPhase);
+	harmonicDetection(peakFrequency, peakMagnitude, peakPhase, thisPitch, _nH, _lasthfreq,  _sampleRate,  _harmDevSlope,  hpeakFrequency,  hpeakMagnitude,  hpeakPhase);
 
 	_lasthfreq = hpeakFrequency;  // copy last harmonic frequencies for tracking
 
@@ -160,7 +185,7 @@ void HarmonicModelAnal::harmonicDetection(const std::vector<Real> pfreq, const s
 			}
       
       
-			//int pei = np.argmin(abs(pfreq - hf[hi]))               // closest peak
+			 // get closest peak
 			int pei = std::min_element(difftmp.begin(), difftmp.end()) - difftmp.begin();
 			      
 			Real dev1 = abs(pfreq[pei] - hf[hi])  ;                // deviation from perfect harmonic			      
