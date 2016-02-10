@@ -136,7 +136,7 @@ void ERBBands::compute() {
 
   if (_filterCoefficients.empty() ||
       int(_filterCoefficients[0].size()) != spectrumSize) {
-    cout << "ERBBands: input spectrum size does not correspond to the \"inputSize\" parameter. Recomputing the filter bank." << endl;
+    E_INFO("ERBBands: input spectrum size (" << spectrumSize << ") does not correspond to the \"inputSize\" parameter (" << _filterCoefficients[0].size() << "). Recomputing the filter bank.");
     createFilters(spectrumSize);
   }
 
