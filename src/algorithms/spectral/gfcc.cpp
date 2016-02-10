@@ -35,11 +35,12 @@ const char* GFCC::description = DOC("This algorithm computes the equivalent of M
 "  pp. 4625-4628.");
 
 void GFCC::configure() {
-  _gtFilter->configure("sampleRate", parameter("sampleRate"),
-                        "numberBands", parameter("numberBands"),
-                        "lowFrequencyBound", parameter("lowFrequencyBound"),
-                        "highFrequencyBound", parameter("highFrequencyBound"),
-                        "type", "energy");
+  _gtFilter->configure("inputSize", parameter("inputSize"),
+		        "sampleRate", parameter("sampleRate"),
+                       "numberBands", parameter("numberBands"),
+                       "lowFrequencyBound", parameter("lowFrequencyBound"),
+                       "highFrequencyBound", parameter("highFrequencyBound"),
+                       "type", "energy");
   _dct->configure("inputSize", parameter("numberBands"),
                   "outputSize", parameter("numberCoefficients"));
   _logbands.resize(parameter("numberBands").toInt());
