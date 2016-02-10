@@ -17,23 +17,23 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "cheapspectralcentroid.h"
+#include "spectralcentroidtime.h"
 #include "essentiamath.h"
 
 using namespace essentia;
 using namespace standard;
 
-const char* CheapSpectralCentroid::name = "CheapSpectralCentroid";
-const char* CheapSpectralCentroid::description = DOC("This algorithm computes the spectral centroid of a signal.\n"
+const char* SpectralCentroidTime::name = "SpectralCentroidTime";
+const char* SpectralCentroidTime::description = DOC("This algorithm computes the spectral centroid of a signal.\n"
  "A first difference filter is applied to the input signal. Then the centroid is computed by dividing the norm of the resulting signal by the norm of the input signal. The centroid is given in hertz.\n"
- "References:\n
- " [1] Udo Zölzer (2002). DAFX Digital Audio Effects pag.364-365");
+ "References:\n"
+ " [1] Udo Zölzer (2002). DAFX Digital Audio Effects pag.364-365\n");
 
-void CheapSpectralCentroid::configure() {
+void SpectralCentroidTime::configure() {
   _sampleRate = parameter("sampleRate").toReal();
 }
 
-void CheapSpectralCentroid::compute() {
+void SpectralCentroidTime::compute() {
 
   const std::vector<Real>& signal = _signal.get();
   Real& centroid = _centroid.get();
@@ -54,7 +54,12 @@ void CheapSpectralCentroid::compute() {
     aPowerSum += a * a;
     bPowerSum += b * b;
   }
-
+  // event from nan if input signal is empty
+  if (bPowerSum == 0 || aPowerSum == 0) {
+  centroid = 0;
+  }
+  else {
   centroid = (sqrt(bPowerSum)/sqrt(aPowerSum))*(_sampleRate/M_2PI);
+  }
 
 }

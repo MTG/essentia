@@ -17,15 +17,15 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef CHEAPSPECTRALCENTROID_H
-#define CHEAPSPECTRALCENTROID_H
+#ifndef SPECTRALCENTROIDTIME_H
+#define SPECTRALCENTROIDTIME_H
 
 #include "algorithm.h"
 
 namespace essentia {
 namespace standard {
 
-class CheapSpectralCentroid : public Algorithm {
+class SpectralCentroidTime : public Algorithm {
 
  protected:
   Input<std::vector<Real> > _signal;
@@ -34,7 +34,7 @@ class CheapSpectralCentroid : public Algorithm {
   Real _sampleRate; /** sampling rate of the audio signal */
 
  public:
-  CheapSpectralCentroid() {
+  SpectralCentroidTime() {
     declareInput(_signal, "array", "the input array");
     declareOutput(_centroid, "centroid", "the spectral centroid of the signal");
   }
@@ -49,7 +49,7 @@ class CheapSpectralCentroid : public Algorithm {
   static const char* name;
   static const char* description;
 
-}; //class CheapSpectralCentroid
+}; //class SpectralCentroidTime
 
 } // namespace standard
 } // namespace essentia
@@ -59,15 +59,15 @@ class CheapSpectralCentroid : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class CheapSpectralCentroid : public StreamingAlgorithmWrapper {
+class SpectralCentroidTime : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<Real> > _signal;
   Source<Real> _centroid;
 
  public:
-  CheapSpectralCentroid() {
-    declareAlgorithm("CheapSpectralCentroid");
+  SpectralCentroidTime() {
+    declareAlgorithm("SpectralCentroidTime");
     declareInput(_signal, TOKEN, "array");
     declareOutput(_centroid, TOKEN, "centroid");
   }
@@ -76,4 +76,4 @@ class CheapSpectralCentroid : public StreamingAlgorithmWrapper {
 } // namespace streaming
 } // namespace essentia
 
-#endif // CHEAPSPECTRALCENTROID_H
+#endif // SPECTRALCENTROIDTIME_H
