@@ -123,6 +123,8 @@ void HarmonicModelAnal::compute() {
  _sineModelAnal->output("phases").set(peakPhase);
   _sineModelAnal->compute();
 
+
+
    if  (_useExtPitch)
    {
       thisPitch = pitch;      
