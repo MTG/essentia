@@ -27,7 +27,7 @@ using namespace standard;
 const char* HarmonicModelAnal::name = "HarmonicModelAnal";
 const char* HarmonicModelAnal::description = DOC("This algorithm computes the harmonic model analysis.  \n"
 "\n"
-".This algorithm uses SineModelAnal and keeps only the harmonic partials. It estimates the pitch using the YinPitchFFT algorithm. Optionally an external pitch value can be given as input, setting the useExternalPithc flag accordingly .\n"
+"This algorithm uses SineModelAnal and keeps only the harmonic partials. It estimates the pitch using the YinPitchFFT algorithm. Optionally an external pitch value can be given as input, setting the useExternalPithc flag accordingly .\n"
 "\n"
 "References:\n"
 "  https://github.com/MTG/sms-tools\n"
@@ -54,7 +54,13 @@ void HarmonicModelAnal::configure() {
                                        
 
   _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
-                              "maxnSines", parameter("maxnSines").toInt() 
+                            // sinusoidal tracking
+                              "maxnSines", parameter("maxnSines").toInt() ,
+                              "maxPeaks", parameter("maxPeaks").toInt() ,                           
+                              "freqDevOffset", parameter("freqDevOffset").toReal(),
+                              "freqDevSlope",  parameter("freqDevSlope").toReal(),
+                              "magnitudeThreshold", parameter("magnitudeThreshold").toReal(),
+                              "orderBy", parameter("orderBy")
                               );
 
   // get parameters

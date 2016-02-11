@@ -77,7 +77,8 @@ example_sources_fileio = [
         ('standard_sinesubtraction', ),
         ('standard_stochasticmodel', ),
         ('standard_spsmodel', ),
-        ('standard_harmonicmodel', )
+        ('standard_harmonicmodel', ),
+        ('standard_hpsmodel', )
 ]
 
 example_sources_with_gaia = [
