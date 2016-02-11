@@ -188,12 +188,16 @@ def configure(ctx):
         ctx.env.CXXFLAGS += ['-stdlib=libc++']
         ctx.env.CXXFLAGS += ['-miphoneos-version-min=5.0']    
         ctx.env.CXXFLAGS += [ '-isysroot' , '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk']
+        ctx.env.CXXFLAGS += [ '-fembed-bitcode']
 
     if ctx.options.CROSS_COMPILE_IOS_SIM:
         print ("→ Cross-compiling for iOS Simulator (i386)")
         ctx.env.CXXFLAGS += [ '-arch' , 'i386']        
         ctx.env.LINKFLAGS += [ '-arch', 'i386']
         ctx.env.LDFLAGS += ['-arch', 'i386']        
+        ctx.env.CXXFLAGS += [ '-arch' , 'x86_64']        
+        ctx.env.LINKFLAGS += [ '-arch', 'x86_64']
+        ctx.env.LDFLAGS += ['-arch', 'x86_64']        
                     
         ctx.env.CXXFLAGS += ['-stdlib=libc++']
         ctx.env.CXXFLAGS += ['-miphoneos-version-min=5.0']    
