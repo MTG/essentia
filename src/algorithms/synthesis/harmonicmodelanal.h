@@ -93,7 +93,7 @@ class HarmonicModelAnal : public Algorithm {
     declareParameter("maxPeaks", "the maximum number of returned peaks", "[1,inf)", 100);
     declareParameter("maxFrequency", "the maximum frequency of the F0 [Hz]", "(0,inf)", 5000.0);
     declareParameter("minFrequency", "the minimum frequency of the F0 [Hz]", "(0,inf)", 20.0); 
-    declareParameter("magnitudeThreshold", "peaks below this given threshold are not outputted", "(-inf,inf)", 0.0);
+    declareParameter("magnitudeThreshold", "peaks below this given threshold are not outputted", "(-inf,inf)", -74.);
     declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20.);
     declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);                                      
