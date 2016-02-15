@@ -130,8 +130,11 @@ void HarmonicModelAnal::compute() {
       thisPitch = pitch;      
      }
    
+printf("in pitch: %f ", pitch);
 
 	harmonicDetection(peakFrequency, peakMagnitude, peakPhase, thisPitch, _nH, _lasthfreq,  _sampleRate,  _harmDevSlope,  hpeakFrequency,  hpeakMagnitude,  hpeakPhase);
+
+printf("out first harmh:   f", hpeakFrequency[0]);
 
 	_lasthfreq = hpeakFrequency;  // copy last harmonic frequencies for tracking
 
