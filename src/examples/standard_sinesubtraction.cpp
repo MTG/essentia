@@ -28,7 +28,6 @@ using namespace std;
 using namespace essentia;
 using namespace standard;
 
-std::vector< std::vector<Real> > readIn2dData(const char* filename);
 
 int main(int argc, char* argv[]) {
 
@@ -110,7 +109,6 @@ int main(int argc, char* argv[]) {
   frameCutter->output("frame").set(frame);
 
   // Sine model analysis
-  //spsmodelanal->input("fft").set(fftframe); // old version
   spsmodelanal->input("frame").set(frame); // inputs a frame
   spsmodelanal->output("magnitudes").set(magnitudes);
   spsmodelanal->output("frequencies").set(frequencies);
@@ -182,50 +180,5 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-
-// support functinos to read data from numpy
-std::vector< std::vector<Real> > readIn2dData(const char* filename)
-{
-    /* Function takes a char* filename argument and returns a
-     * 2d dynamic array containing the data
-     */
-
-    std::vector< std::vector<Real> > table;
-    std::fstream ifs;
-
-    /*  open file  */
-    ifs.open(filename);
-
-    while (true)
-    {
-        std::string line;
-        Real buf;
-        getline(ifs, line);
-
-        std::stringstream ss(line, std::ios_base::out|std::ios_base::in|std::ios_base::binary);
-
-        if (!ifs)
-            // mainly catch EOF
-            break;
-
-        if (line[0] == '#' || line.empty())
-            // catch empty lines or comment lines
-            continue;
-
-
-        std::vector<Real> row;
-
-        while (ss >> buf)
-            row.push_back(buf);
-
-std::cout << "row size from numpy is: " << row.size() << std::endl;
-        table.push_back(row);
-
-    }
-
-    ifs.close();
-
-    return table;
-}
 
 

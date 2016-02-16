@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -21,8 +21,8 @@
 #include <fstream>
 #include <essentia/algorithmfactory.h>
 #include <essentia/pool.h>
-#include <essentia/utils/synth_utils.h>
 
+#include <essentia/utils/synth_utils.h>
 
 using namespace std;
 using namespace essentia;
@@ -32,30 +32,41 @@ using namespace standard;
 int main(int argc, char* argv[]) {
 
   if (argc != 3) {
-    cout << "Standard_SineModel ERROR: incorrect number of arguments." << endl;
+    cout << "Standard_HpSModel ERROR: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input output_file" << endl;
     exit(1);
   }
 
   string audioFilename = argv[1];
   string outputFilename = argv[2];
+  string outputSineFilename = outputFilename;
+  string outputStocFilename = outputFilename;
+  outputSineFilename.replace(outputSineFilename.end()-4,outputSineFilename.end(), "_sine.wav");
+  outputStocFilename.replace(outputStocFilename.end()-4,outputStocFilename.end(), "_stoc.wav");
 
   // register the algorithms in the factory(ies)
   essentia::init();
 
   Pool pool;
 
+
   /////// PARAMS //////////////
 
   /////// PARAMS //////////////
   int framesize = 2048;
-  int hopsize = 512;
+  int hopsize = 128; //128;
   Real sr = 44100;
-  Real minSineDur = 0.02;
+    
+  Real minF0 = 65.;
+  Real maxF0 = 550.;
+
+ Real minSineDur = 0.02;
+ Real stocf = 0.2;  // stochastic envelope factor. Default 0.2
+  
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
-    Algorithm* audioLoader    = factory.create("MonoLoader",
+  Algorithm* audioLoader    = factory.create("MonoLoader",
                                            "filename", audioFilename,
                                            "sampleRate", sr,
                                            "downmix", "mix");
@@ -66,54 +77,53 @@ int main(int argc, char* argv[]) {
                                          //  "silentFrames", "noise",
                                            "startFromZero", false );
 
-  // parameters used in the SMS Python implementation
-  Algorithm* window       = factory.create("Windowing", "type", "hamming");
-
-  Algorithm* fft     = factory.create("FFT",
-                            "size", framesize);
 
   // parameters used in the SMS Python implementation
-  Algorithm* sinemodelanal     = factory.create("SineModelAnal",
+  Algorithm* hpsmodelanal   = factory.create("HpsModelAnal",
                             "sampleRate", sr,
-                            "maxnSines", 100,
-                            "freqDevOffset", 10,
-                            "freqDevSlope", 0.001
+                            "hopSize", hopsize,
+                            "fftSize", framesize,
+                            "maxFrequency", maxF0,
+                            "minFrequency", minF0,
+                            "nHarmonics", 100,                           
+                            "harmDevSlope", 0.01               
                             );
 
-  Algorithm* sinemodelsynth     = factory.create("SineModelSynth",
-                            "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
 
 
-  Algorithm* ifft     = factory.create("IFFT",
-                                "size", framesize);
-
-  Algorithm* overlapAdd = factory.create("OverlapAdd",
-                                            "frameSize", framesize,
-                                           "hopSize", hopsize);
-
-
+  int frameSizeSynth = 512; // frameSize
+  Algorithm* spsmodelsynth  = factory.create("SpsModelSynth",
+                            "sampleRate", sr, "fftSize", frameSizeSynth, "hopSize", hopsize, "stocf", stocf);
+ 
+  
   Algorithm* audioWriter = factory.create("MonoWriter",
                                      "filename", outputFilename);
-
-
-
+  Algorithm* audioWriterSine = factory.create("MonoWriter",
+                                     "filename", outputSineFilename);
+  Algorithm* audioWriterStoc = factory.create("MonoWriter",
+                                     "filename", outputStocFilename);
+                                     
+ 
   vector<Real> audio;
   vector<Real> frame;
-  vector<Real> wframe;
-  vector<complex<Real> > fftframe;
 
   vector<Real> magnitudes;
   vector<Real> frequencies;
   vector<Real> phases;
+  vector<Real> stocenv;
 
-  vector<complex<Real> >  sfftframe; // sine model FFT frame
-  vector<Real> ifftframe;
-  vector<Real> alladuio; // concatenated audio file output
- 
 
+  vector<Real> allaudio; // concatenated audio file output
+  vector<Real> allsineaudio; // concatenated audio file output
+  vector<Real> allstocaudio; // concatenated audio file output
+  
+  
+  // accumulate estimated values   for all frames for cleaning tracks before synthesis
   vector< vector<Real> > frequenciesAllFrames;
   vector< vector<Real> > magnitudesAllFrames;
   vector< vector<Real> > phasesAllFrames;
+  vector< vector<Real> > stocEnvAllFrames;
+
 
   // analysis
   audioLoader->output("audio").set(audio);
@@ -121,45 +131,38 @@ int main(int argc, char* argv[]) {
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
 
-  window->input("frame").set(frame);
-  window->output("frame").set(wframe);
+   
+  // Harmonic model analysis
+  hpsmodelanal->input("frame").set(frame); // inputs a frame
+  hpsmodelanal->output("magnitudes").set(magnitudes);
+  hpsmodelanal->output("frequencies").set(frequencies);
+  hpsmodelanal->output("phases").set(phases);
+  hpsmodelanal->output("stocenv").set(stocenv);
+  
 
-  fft->input("frame").set(wframe);
-  fft->output("fft").set(fftframe);
+ vector<Real> audioOutput;
+  vector<Real> audioSineOutput;
+  vector<Real> audioStocOutput;
 
-  // Sine model analysis
-  sinemodelanal->input("fft").set(fftframe);
-  sinemodelanal->output("magnitudes").set(magnitudes);
-  sinemodelanal->output("frequencies").set(frequencies);
-  sinemodelanal->output("phases").set(phases);
-
-
-  sinemodelsynth->input("magnitudes").set(magnitudes);
-  sinemodelsynth->input("frequencies").set(frequencies);
-  sinemodelsynth->input("phases").set(phases);
-  sinemodelsynth->output("fft").set(sfftframe);
-
-  // Synthesis
-  ifft->input("fft").set(sfftframe);
-  ifft->output("frame").set(ifftframe);
-
-  vector<Real> audioOutput;
-
-  overlapAdd->input("signal").set(ifftframe);
-  overlapAdd->output("signal").set(audioOutput);
+  spsmodelsynth->input("magnitudes").set(magnitudes);
+  spsmodelsynth->input("frequencies").set(frequencies);
+  spsmodelsynth->input("phases").set(phases);
+  spsmodelsynth->input("stocenv").set(stocenv);
+  spsmodelsynth->output("frame").set(audioOutput); // outputs a frame
+  spsmodelsynth->output("sineframe").set(audioSineOutput); // outputs a frame
+  spsmodelsynth->output("stocframe").set(audioStocOutput); // outputs a frame
 
 
-////////
 /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << audioFilename << " --------" << endl;
 
   audioLoader->compute();
 
-
 //-----------------------------------------------
 // analysis loop
-  cout << "-------- analyzing to sine model parameters" " ---------" << endl;
+  cout << "-------- analyzing to harmonic model parameters" " ---------" << endl;
   int counter = 0;
+
   while (true) {
 
     // compute a frame
@@ -170,21 +173,20 @@ int main(int argc, char* argv[]) {
       break;
     }
 
-    window->compute();
-    fft->compute();
 
-    // Sine model analysis
-    sinemodelanal->compute();
-
+    // HpS model analysis
+    hpsmodelanal->compute();
+     
+    
     // append frequencies of the curent frame for later cleaningTracks
     frequenciesAllFrames.push_back(frequencies);
     magnitudesAllFrames.push_back(magnitudes);
     phasesAllFrames.push_back(phases);
-
-
+    stocEnvAllFrames.push_back(stocenv);
+    
     counter++;
   }
-
+  
 
   // clean sine tracks
   int minFrames = int( minSineDur * sr / Real(hopsize));
@@ -193,7 +195,7 @@ int main(int argc, char* argv[]) {
 
 //-----------------------------------------------
 // synthesis loop
-  cout << "-------- synthesizing from sine model parameters" " ---------" << endl;
+  cout << "-------- synthesizing from harmonic model parameters" " ---------" << endl;
   int nFrames = counter;
   counter = 0;
 
@@ -209,20 +211,22 @@ int main(int argc, char* argv[]) {
       frequencies = frequenciesAllFrames[0];
       magnitudes = magnitudesAllFrames[0];
       phases = phasesAllFrames[0];
+      stocenv = stocEnvAllFrames[0];
       frequenciesAllFrames.erase (frequenciesAllFrames.begin());
       magnitudesAllFrames.erase (magnitudesAllFrames.begin());
       phasesAllFrames.erase (phasesAllFrames.begin());
+      stocEnvAllFrames.erase (stocEnvAllFrames.begin());
     }
 
-    // Sine model synthesis
-    sinemodelsynth->compute();
 
-    ifft->compute();
-    overlapAdd->compute();
+    // Sine model synthesis
+    spsmodelsynth->compute();
 
     // skip first half window
     if (counter >= floor(framesize / (hopsize * 2.f))){
-        alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
+       allaudio.insert(allaudio.end(), audioOutput.begin(), audioOutput.end());
+       allsineaudio.insert(allsineaudio.end(), audioSineOutput.begin(), audioSineOutput.end());
+       allstocaudio.insert(allstocaudio.end(), audioStocOutput.begin(), audioStocOutput.end());
     }
 
     counter++;
@@ -233,25 +237,30 @@ int main(int argc, char* argv[]) {
 
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
+  cout << "-------- "  << counter<< " frames (hopsize: " << hopsize << ") ---------"<< endl;
 
-    // write to output file
-    audioWriter->input("audio").set(alladuio);
-    audioWriter->compute();
+  // write to output file
+  audioWriter->input("audio").set(allaudio);
+  audioWriter->compute();
+
+  // write sinusoidal and stochastic components
+  audioWriterSine->input("audio").set(allsineaudio);
+  audioWriterSine->compute();
 
 
+  audioWriterStoc->input("audio").set(allstocaudio);
+  audioWriterStoc->compute();
 
   delete audioLoader;
   delete frameCutter;
-  delete fft;
-  delete sinemodelanal;
-  delete sinemodelsynth;
-  delete ifft;
-  delete overlapAdd;
+  delete hpsmodelanal;
+  delete spsmodelsynth;
   delete audioWriter;
-
+  delete audioWriterSine;
+  delete audioWriterStoc;
+  
   essentia::shutdown();
 
   return 0;
 }
-
 

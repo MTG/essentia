@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2015  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_SPSMODELSYNTH_H
-#define ESSENTIA_SPSMODELSYNTH_H
+#ifndef ESSENTIA_SPRMODELSYNTH_H
+#define ESSENTIA_SPRMODELSYNTH_H
 
 
 #include "algorithm.h"
@@ -29,52 +29,49 @@
 namespace essentia {
 namespace standard {
 
-class SpsModelSynth : public Algorithm {
+class SprModelSynth : public Algorithm {
 
  protected:
   Input<std::vector<Real> > _magnitudes;
   Input<std::vector<Real> > _frequencies;
   Input<std::vector<Real> > _phases;
-  Input<std::vector<Real> > _stocenv;
+  Input<std::vector<Real> > _res;
 
   Output<std::vector<Real> > _outframe;
   Output<std::vector<Real> > _outsineframe;
-  Output<std::vector<Real> > _outstocframe;
+  Output<std::vector<Real> > _outresframe;
 
   Real _sampleRate;
   int _fftSize;
   int _hopSize;
 
   Algorithm* _sineModelSynth;
-  Algorithm* _stochasticModelSynth;
   Algorithm* _ifftSine;
   Algorithm* _overlapAdd;
 
 
 
  public:
-  SpsModelSynth() {
+  SprModelSynth() {
     declareInput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareInput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareInput(_phases, "phases", "the phases of the sinusoidal peaks");
-    declareInput(_stocenv, "stocenv", "the stochastic envelope");
+    declareInput(_res, "res", "the residual frame");
 
     declareOutput(_outframe, "frame", "the output audio frame of the Sinusoidal Plus Stochastic model");
     declareOutput(_outsineframe, "sineframe", "the output audio frame for sinusoidal component ");
-    declareOutput(_outstocframe, "stocframe", "the output audio frame for stochastic component ");
+    declareOutput(_outresframe, "resframe", "the output audio frame for stochastic component ");
 
     _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
-    _stochasticModelSynth = AlgorithmFactory::create("StochasticModelSynth");
 
     _ifftSine = AlgorithmFactory::create("IFFT");
     _overlapAdd = AlgorithmFactory::create("OverlapAdd");
 
   }
 
-  ~SpsModelSynth() {
+  ~SprModelSynth() {
 
     delete _sineModelSynth;
-    delete _stochasticModelSynth;
     delete _ifftSine;
     delete _overlapAdd;
 
@@ -84,7 +81,6 @@ class SpsModelSynth : public Algorithm {
     declareParameter("fftSize", "the size of the output FFT frame (full spectrum size)", "[1,inf)", 2048);
     declareParameter("hopSize", "the hop size between frames", "[1,inf)", 512);
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
-    declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1]", 0.2);
   }
 
   void configure();
@@ -104,29 +100,29 @@ class SpsModelSynth : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class SpsModelSynth : public StreamingAlgorithmWrapper {
+class SprModelSynth : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<Real> > _magnitudes;
   Sink<std::vector<Real> > _frequencies;
   Sink<std::vector<Real> > _phases;
-  Sink<std::vector<Real> > _stocenv;
-
+  Sink<std::vector<Real> > _res;
+  
   Source<std::vector<Real> > _outframe;
   Source<std::vector<Real> > _outsineframe;
-  Source<std::vector<Real> > _outstocframe;
+  Source<std::vector<Real> > _outresframe;
 
  public:
-  SpsModelSynth() {
-    declareAlgorithm("SpsModelSynth");
+  SprModelSynth() {
+    declareAlgorithm("SprModelSynth");
     declareInput(_magnitudes, TOKEN, "magnitudes");
     declareInput(_frequencies, TOKEN, "frequencies");
     declareInput(_phases, TOKEN, "phases");
-    declareInput(_stocenv, TOKEN, "stocenv");
+    declareInput(_res, TOKEN, "res");
 
     declareOutput(_outframe, TOKEN, "frame");
     declareOutput(_outsineframe, TOKEN, "sineframe");
-    declareOutput(_outstocframe, TOKEN, "stocframe");
+    declareOutput(_outresframe, TOKEN, "resframe");
   }
 };
 
@@ -134,4 +130,4 @@ class SpsModelSynth : public StreamingAlgorithmWrapper {
 } // namespace essentia
 
 
-#endif // ESSENTIA_SPSMODELSYNTH_H
+#endif // ESSENTIA_SPRMODELSYNTH_H

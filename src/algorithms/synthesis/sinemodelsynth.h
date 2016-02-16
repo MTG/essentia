@@ -46,8 +46,6 @@ class SineModelSynth : public Algorithm {
   std::vector<Real> _lastytfreq;
   std::vector<Real> _lastytphase;
 
-  //void genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > &outfft);
- // void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT); moved to synth_utils.cpp
 
  public:
   SineModelSynth() {
@@ -67,7 +65,7 @@ class SineModelSynth : public Algorithm {
     _sampleRate = parameter("sampleRate").toReal();
     _fftSize = parameter("fftSize").toInt();
     _hopSize = parameter("hopSize").toInt();
-    // initialize lastfrequencies
+    
   }
 
   void compute();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -21,25 +21,39 @@
 #include <fstream>
 #include <essentia/algorithmfactory.h>
 #include <essentia/pool.h>
-#include <essentia/utils/synth_utils.h>
 
+#include <essentia/utils/synth_utils.h>
 
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
+std::vector< std::vector<Real> > readIn2dData(const char* filename);
 
 int main(int argc, char* argv[]) {
 
-  if (argc != 3) {
-    cout << "Standard_SineModel ERROR: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " audio_input output_file" << endl;
+  if (argc < 3) {
+    cout << "Standard_HarmonicModel ERROR: incorrect number of arguments." << endl;
+    cout << "Usage: " << argv[0] << " audio_input output_file [predominant]. " << endl;
+    cout << "\t [predominant]: Optional argument. It is a flag value that can be 0 or 1 .  Set to 1  if PredominantPitchMelodia extraction is used  Default uses Pitch-YinFFT. " << endl;
+
+
     exit(1);
   }
 
   string audioFilename = argv[1];
   string outputFilename = argv[2];
 
+   bool usePredominant = false;  
+  if   (argc == 4) {
+     string usePredominantStr = argv[3];
+    if (usePredominantStr == "1")
+    {
+      usePredominant = true;  
+      cout << "Using PredominantPitchMelodia instead of  the default PitchYinFFT."  << endl;
+    }
+  
+  }
   // register the algorithms in the factory(ies)
   essentia::init();
 
@@ -49,13 +63,21 @@ int main(int argc, char* argv[]) {
 
   /////// PARAMS //////////////
   int framesize = 2048;
-  int hopsize = 512;
+  int hopsize = 128; //128;
   Real sr = 44100;
-  Real minSineDur = 0.02;
+  
+  Real minF0 = 65.;
+  Real maxF0 = 550.;
+ 
+  
+ 
+
+
+ Real minSineDur = 0.02;
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
-    Algorithm* audioLoader    = factory.create("MonoLoader",
+  Algorithm* audioLoader    = factory.create("MonoLoader",
                                            "filename", audioFilename,
                                            "sampleRate", sr,
                                            "downmix", "mix");
@@ -66,23 +88,31 @@ int main(int argc, char* argv[]) {
                                          //  "silentFrames", "noise",
                                            "startFromZero", false );
 
-  // parameters used in the SMS Python implementation
-  Algorithm* window       = factory.create("Windowing", "type", "hamming");
 
-  Algorithm* fft     = factory.create("FFT",
-                            "size", framesize);
+
+ Algorithm* equalLoudness = factory.create("EqualLoudness");
+                                       
+  Algorithm* predominantMelody = factory.create("PredominantPitchMelodia", 
+                                                "frameSize", framesize,
+                                                "hopSize", hopsize,
+                                                "sampleRate", sr);
+
 
   // parameters used in the SMS Python implementation
-  Algorithm* sinemodelanal     = factory.create("SineModelAnal",
+  Algorithm* harmonicmodelanal   = factory.create("HarmonicModelAnal",
                             "sampleRate", sr,
-                            "maxnSines", 100,
-                            "freqDevOffset", 10,
-                            "freqDevSlope", 0.001
+                            "hopSize", hopsize,
+                            "fftSize", framesize,
+                            "nHarmonics", 100,                           
+                            "harmDevSlope", 0.01,
+                            "maxFrequency", maxF0,
+                            "minFrequency", minF0,
+                            "useExternalPitch", usePredominant
                             );
+
 
   Algorithm* sinemodelsynth     = factory.create("SineModelSynth",
                             "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
-
 
   Algorithm* ifft     = factory.create("IFFT",
                                 "size", framesize);
@@ -94,26 +124,29 @@ int main(int argc, char* argv[]) {
 
   Algorithm* audioWriter = factory.create("MonoWriter",
                                      "filename", outputFilename);
-
-
-
+  
+ 
   vector<Real> audio;
   vector<Real> frame;
+  vector<Real> eqaudio;
   vector<Real> wframe;
-  vector<complex<Real> > fftframe;
+
+  vector<Real> predPitch;
+  vector<Real> predConf;
 
   vector<Real> magnitudes;
   vector<Real> frequencies;
   vector<Real> phases;
 
-  vector<complex<Real> >  sfftframe; // sine model FFT frame
-  vector<Real> ifftframe;
-  vector<Real> alladuio; // concatenated audio file output
- 
-
+  // accumulate estimated values   for all frames for cleaning tracks before synthesis
   vector< vector<Real> > frequenciesAllFrames;
   vector< vector<Real> > magnitudesAllFrames;
   vector< vector<Real> > phasesAllFrames;
+
+  vector<complex<Real> >  sfftframe; // sine model FFT frame
+  vector<Real> ifftframe; //  sine model IFFT frame
+  vector<Real> allaudio; // concatenated audio file output
+
 
   // analysis
   audioLoader->output("audio").set(audio);
@@ -121,19 +154,27 @@ int main(int argc, char* argv[]) {
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
 
-  window->input("frame").set(frame);
-  window->output("frame").set(wframe);
-
-  fft->input("frame").set(wframe);
-  fft->output("fft").set(fftframe);
-
-  // Sine model analysis
-  sinemodelanal->input("fft").set(fftframe);
-  sinemodelanal->output("magnitudes").set(magnitudes);
-  sinemodelanal->output("frequencies").set(frequencies);
-  sinemodelanal->output("phases").set(phases);
+  equalLoudness->input("signal").set(audio);
+  equalLoudness->output("signal").set(eqaudio);
 
 
+// PREDOMINANT  pitch analysis
+  predominantMelody->input("signal").set(eqaudio);
+  predominantMelody->output("pitch").set(predPitch);
+  predominantMelody->output("pitchConfidence").set(predConf);
+
+ Real thisPitch = 0.;
+
+   
+  // Harmonic model analysis
+  harmonicmodelanal->input("frame").set(frame); // inputs a frame
+  harmonicmodelanal->input("pitch").set(thisPitch); // inputs a pitch
+  harmonicmodelanal->output("magnitudes").set(magnitudes);
+  harmonicmodelanal->output("frequencies").set(frequencies);
+  harmonicmodelanal->output("phases").set(phases);
+  
+
+// Sinusoidal Model Synthesis (only harmonics)
   sinemodelsynth->input("magnitudes").set(magnitudes);
   sinemodelsynth->input("frequencies").set(frequencies);
   sinemodelsynth->input("phases").set(phases);
@@ -149,17 +190,21 @@ int main(int argc, char* argv[]) {
   overlapAdd->output("signal").set(audioOutput);
 
 
-////////
+
+
 /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << audioFilename << " --------" << endl;
 
   audioLoader->compute();
+  equalLoudness->compute();
+  predominantMelody->compute();
 
 
 //-----------------------------------------------
 // analysis loop
-  cout << "-------- analyzing to sine model parameters" " ---------" << endl;
+  cout << "-------- analyzing to harmonic model parameters" " ---------" << endl;
   int counter = 0;
+
   while (true) {
 
     // compute a frame
@@ -170,21 +215,23 @@ int main(int argc, char* argv[]) {
       break;
     }
 
-    window->compute();
-    fft->compute();
+    // get predominant pitch
+    if (usePredominant){
+      thisPitch = predPitch[counter];
+    }
 
-    // Sine model analysis
-    sinemodelanal->compute();
+
+    // Harmonic model analysis
+    harmonicmodelanal->compute();
 
     // append frequencies of the curent frame for later cleaningTracks
     frequenciesAllFrames.push_back(frequencies);
     magnitudesAllFrames.push_back(magnitudes);
     phasesAllFrames.push_back(phases);
 
-
     counter++;
   }
-
+  
 
   // clean sine tracks
   int minFrames = int( minSineDur * sr / Real(hopsize));
@@ -193,7 +240,7 @@ int main(int argc, char* argv[]) {
 
 //-----------------------------------------------
 // synthesis loop
-  cout << "-------- synthesizing from sine model parameters" " ---------" << endl;
+  cout << "-------- synthesizing from harmonic model parameters" " ---------" << endl;
   int nFrames = counter;
   counter = 0;
 
@@ -222,7 +269,7 @@ int main(int argc, char* argv[]) {
 
     // skip first half window
     if (counter >= floor(framesize / (hopsize * 2.f))){
-        alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
+        allaudio.insert(allaudio.end(), audioOutput.begin(), audioOutput.end());
     }
 
     counter++;
@@ -233,25 +280,69 @@ int main(int argc, char* argv[]) {
 
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
+  cout << "-------- "  << counter<< " frames (hopsize: " << hopsize << ") ---------"<< endl;
 
     // write to output file
-    audioWriter->input("audio").set(alladuio);
+    audioWriter->input("audio").set(allaudio);
     audioWriter->compute();
-
 
 
   delete audioLoader;
   delete frameCutter;
-  delete fft;
-  delete sinemodelanal;
-  delete sinemodelsynth;
-  delete ifft;
-  delete overlapAdd;
+   delete harmonicmodelanal;
+	delete predominantMelody;
+   delete sinemodelsynth;
   delete audioWriter;
 
   essentia::shutdown();
 
   return 0;
+}
+
+
+// support functinos to read data from numpy
+std::vector< std::vector<Real> > readIn2dData(const char* filename)
+{
+    /* Function takes a char* filename argument and returns a
+     * 2d dynamic array containing the data
+     */
+
+    std::vector< std::vector<Real> > table;
+    std::fstream ifs;
+
+    /*  open file  */
+    ifs.open(filename);
+
+    while (true)
+    {
+        std::string line;
+        Real buf;
+        getline(ifs, line);
+
+        std::stringstream ss(line, std::ios_base::out|std::ios_base::in|std::ios_base::binary);
+
+        if (!ifs)
+            // mainly catch EOF
+            break;
+
+        if (line[0] == '#' || line.empty())
+            // catch empty lines or comment lines
+            continue;
+
+
+        std::vector<Real> row;
+
+        while (ss >> buf)
+            row.push_back(buf);
+
+        std::cout << "row size from numpy is: " << row.size() << std::endl;
+        table.push_back(row);
+
+    }
+
+    ifs.close();
+
+    return table;
 }
 
 
