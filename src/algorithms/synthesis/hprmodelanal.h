@@ -38,7 +38,7 @@ class HprModelAnal : public Algorithm {
   Output<std::vector<Real> > _phases;
   Output<std::vector<Real> >_res;
 
-  int _stocSize;
+//  int _stocSize;
 /*  Algorithm* _window;
   Algorithm* _fft;*/
   Algorithm* _harmonicModelAnal;

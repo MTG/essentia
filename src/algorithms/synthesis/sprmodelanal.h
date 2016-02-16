@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_SPSMODELANAL_H
-#define ESSENTIA_SPSMODELANAL_H
+#ifndef ESSENTIA_SPRMODELANAL_H
+#define ESSENTIA_SPRMODELANAL_H
 
 #include "algorithm.h"
 #include "algorithmfactory.h"
@@ -28,7 +28,7 @@
 namespace essentia {
 namespace standard {
 
-class SpsModelAnal : public Algorithm {
+class SprModelAnal : public Algorithm {
 
  protected:
 
@@ -36,41 +36,41 @@ class SpsModelAnal : public Algorithm {
   Output<std::vector<Real> > _magnitudes;
   Output<std::vector<Real> > _frequencies;
   Output<std::vector<Real> > _phases;
-  Output<std::vector<Real> > _stocenv;
+  Output<std::vector<Real> >_res;
 
   int _stocSize;
   Algorithm* _window;
   Algorithm* _fft;
   Algorithm* _sineModelAnal;
   Algorithm* _sineSubtraction;
-  Algorithm* _stochasticModelAnal;
+  //Algorithm* _stochasticModelAnal;
 
-  std::vector<Real> _stocFrameIn; // input frame for the stochaastic analysis algorithm
+  //std::vector<Real> _stocFrameIn; // input frame for the stochaastic analysis algorithm
 
 
  public:
-  SpsModelAnal() {
+  SprModelAnal() {
     declareInput(_frame, "frame", "the input frame");
     declareOutput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareOutput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareOutput(_phases, "phases", "the phases of the sinusoidal peaks");
-    declareOutput(_stocenv, "stocenv", "the stochastic envelope");
+    declareOutput(_res, "res", "output residual frame");
 
     _window = AlgorithmFactory::create("Windowing");
     _fft = AlgorithmFactory::create("FFT");
     _sineModelAnal = AlgorithmFactory::create("SineModelAnal");
     _sineSubtraction = AlgorithmFactory::create("SineSubtraction");
-    _stochasticModelAnal = AlgorithmFactory::create("StochasticModelAnal");
+//    _stochasticModelAnal = AlgorithmFactory::create("StochasticModelAnal");
 
   }
 
-  ~SpsModelAnal() {
+  ~SprModelAnal() {
 
   delete _window;
   delete _fft;
   delete _sineModelAnal;
   delete _sineSubtraction;
-  delete _stochasticModelAnal;
+ // delete _stochasticModelAnal;
   }
 
   void declareParameters() {
@@ -86,14 +86,14 @@ class SpsModelAnal : public Algorithm {
     declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);
     declareParameter("freqDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
-    declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1]", 0.2);
+    
 
   }
 
   void configure();
   void compute();
 
-  void updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator);
+//  void updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator);
 
   static const char* name;
   static const char* description;
@@ -112,7 +112,7 @@ class SpsModelAnal : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class SpsModelAnal : public StreamingAlgorithmWrapper {
+class SprModelAnal : public StreamingAlgorithmWrapper {
 
  protected:
   //Sink<std::vector<std::complex<Real> > > _fft; // input
@@ -120,16 +120,16 @@ class SpsModelAnal : public StreamingAlgorithmWrapper {
   Source<std::vector<Real> > _frequencies;
   Source<std::vector<Real> > _magnitudes;
   Source<std::vector<Real> > _phases;
-  Source<std::vector<Real> > _stocenv;
+  Source<std::vector<Real> > _res;
 
  public:
-  SpsModelAnal() {
-    declareAlgorithm("SpsModelAnal");
+  SprModelAnal() {
+    declareAlgorithm("SprModelAnal");
     declareInput(_frame, TOKEN, "frame");
     declareOutput(_frequencies, TOKEN, "frequencies");
     declareOutput(_magnitudes, TOKEN, "magnitudes");
     declareOutput(_phases, TOKEN, "phases");
-    declareOutput(_stocenv, TOKEN, "stocenv");
+    declareOutput(_res, TOKEN, "res");
   }
 };
 
@@ -139,4 +139,4 @@ class SpsModelAnal : public StreamingAlgorithmWrapper {
 
 
 
-#endif // ESSENTIA_SPSMODELANAL_H
+#endif // ESSENTIA_SPRMODELANAL_H

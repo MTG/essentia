@@ -89,15 +89,15 @@ int main(int argc, char* argv[]) {
                             );
 
 
-  Algorithm* ifft     = factory.create("IFFT",
-                                "size", framesize);
+/*  Algorithm* ifft     = factory.create("IFFT",
+                                "size", framesize);*/
 
-   Algorithm* sinemodelsynth     = factory.create("SineModelSynth",
+   Algorithm* sprmodelsynth     = factory.create("SprModelSynth",
                             "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
   
-    Algorithm* overlapAdd = factory.create("OverlapAdd",
+/*    Algorithm* overlapAdd = factory.create("OverlapAdd",
                                             "frameSize", framesize,
-                                           "hopSize", hopsize);
+                                           "hopSize", hopsize);*/
   
   Algorithm* audioWriter = factory.create("MonoWriter",
                                      "filename", outputFilename);
@@ -151,19 +151,22 @@ int main(int argc, char* argv[]) {
   vector<Real> audioResOutput;
 
 // Sinusoidal Model Synthesis (only harmonics)
-  sinemodelsynth->input("magnitudes").set(magnitudes);
-  sinemodelsynth->input("frequencies").set(frequencies);
-  sinemodelsynth->input("phases").set(phases);
-  sinemodelsynth->output("fft").set(sfftframe);
+  sprmodelsynth->input("magnitudes").set(magnitudes);
+  sprmodelsynth->input("frequencies").set(frequencies);
+  sprmodelsynth->input("phases").set(phases);
+  sprmodelsynth->input("res").set(res);
+  sprmodelsynth->output("frame").set(audioOutput);
+  sprmodelsynth->output("sineframe").set(audioSineOutput);
+  sprmodelsynth->output("resframe").set(audioResOutput);
 
-  // Synthesis
+/*  // Synthesis
   ifft->input("fft").set(sfftframe);
   ifft->output("frame").set(ifftframe);
 
   
 
   overlapAdd->input("signal").set(ifftframe);
-  overlapAdd->output("signal").set(audioSineOutput);
+  overlapAdd->output("signal").set(audioSineOutput);*/
 
 
 
@@ -235,19 +238,21 @@ int main(int argc, char* argv[]) {
 
 
     // Sine model synthesis
-    sinemodelsynth->compute();
+    //sinemodelsynth->compute();
+    sprmodelsynth->compute();
 
+/*
     ifft->compute();
     overlapAdd->compute();
     
     // compute sinusoidal plus residual output    
-    mixAudioVectors(audioSineOutput, res, 1.0, 1.0, audioOutput);
+    mixAudioVectors(audioSineOutput, res, 1.0, 1.0, audioOutput);*/
     
     // skip first half window
     if (counter >= floor(framesize / (hopsize * 2.f))){
        allaudio.insert(allaudio.end(), audioOutput.begin(), audioOutput.end());
        allsineaudio.insert(allsineaudio.end(), audioSineOutput.begin(), audioSineOutput.end());
-       allresaudio.insert(allresaudio.end(), res.begin(), res.end());
+       allresaudio.insert(allresaudio.end(), audioResOutput.begin(), audioResOutput.end());
     }
 
     counter++;
@@ -261,13 +266,12 @@ int main(int argc, char* argv[]) {
   cout << "-------- "  << counter<< " frames (hopsize: " << hopsize << ") ---------"<< endl;
 
   // write to output file
-  audioWriter->input("audio").set(allaudio);
+  audioWriter->input("audio").set(allaudio);  
   audioWriter->compute();
 
-  // write sinusoidal and stochastic components
+  // write sinusoidal and residual components
   audioWriterSine->input("audio").set(allsineaudio);
   audioWriterSine->compute();
-
 
   audioWriterRes->input("audio").set(allresaudio);
   audioWriterRes->compute();
@@ -275,7 +279,7 @@ int main(int argc, char* argv[]) {
   delete audioLoader;
   delete frameCutter;
   delete hprmodelanal;
-  delete sinemodelsynth;
+  delete sprmodelsynth;
   delete audioWriter;
   delete audioWriterSine;
   delete audioWriterRes;

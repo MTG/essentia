@@ -17,15 +17,15 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "spsmodelanal.h"
+#include "sprmodelanal.h"
 #include "essentiamath.h"
 #include <essentia/utils/synth_utils.h>
 
 using namespace essentia;
 using namespace standard;
 
-const char* SpsModelAnal::name = "SpsModelAnal";
-const char* SpsModelAnal::description = DOC("This algorithm computes the stochastic model analysis. \n"
+const char* SprModelAnal::name = "SprModelAnal";
+const char* SprModelAnal::description = DOC("This algorithm computes the sinusoidal plus residual model analysis. \n"
 "\n"
 "It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses SineModelAnal. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"
 "\n"
@@ -36,7 +36,7 @@ const char* SpsModelAnal::description = DOC("This algorithm computes the stochas
 
 
 
-void SpsModelAnal::configure() {
+void SprModelAnal::configure() {
 
   std::string wtype = "blackmanharris92"; // default "hamming"
   _window->configure("type", wtype.c_str());
@@ -56,19 +56,19 @@ void SpsModelAnal::configure() {
                               "hopSize", parameter("hopSize").toInt()
                               );
 
-  // initialize array to accumulates two output frames from the sinesubtraction output
+/*  // initialize array to accumulates two output frames from the sinesubtraction output
   _stocFrameIn.resize(2*parameter("hopSize").toInt());
   std::fill(_stocFrameIn.begin(), _stocFrameIn.end(), 0.);
 
   _stochasticModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
                               "fftSize", 2*parameter("hopSize").toInt(),
                               "hopSize", parameter("hopSize").toInt(),
-                              "stocf", parameter("stocf").toReal());
+                              "stocf", parameter("stocf").toReal());*/
 
 }
 
 
-void SpsModelAnal::compute() {
+void SprModelAnal::compute() {
 
   // inputs and outputs
   const std::vector<Real>& frame = _frame.get();
@@ -76,7 +76,7 @@ void SpsModelAnal::compute() {
   std::vector<Real>& peakMagnitude = _magnitudes.get();
   std::vector<Real>& peakFrequency = _frequencies.get();
   std::vector<Real>& peakPhase = _phases.get();
-  std::vector<Real>& stocEnv = _stocenv.get();
+  std::vector<Real>& res = _res.get();
 
   std::vector<Real> wframe;
   std::vector<std::complex<Real> > fftin;
@@ -107,14 +107,14 @@ void SpsModelAnal::compute() {
  _sineSubtraction->input("magnitudes").set(peakMagnitude);
  _sineSubtraction->input("frequencies").set(peakFrequency);
  _sineSubtraction->input("phases").set(peakPhase);
- _sineSubtraction->output("frame").set(subtrFrameOut); // Nsyn size
+ _sineSubtraction->output("frame").set(res); // Nsyn size
  _sineSubtraction->compute();
 
-  updateStocInFrame(subtrFrameOut, _stocFrameIn); // shift and copy frame for stochastic model analysis
+/*  updateStocInFrame(subtrFrameOut, _stocFrameIn); // shift and copy frame for stochastic model analysis
 
   _stochasticModelAnal->input("frame").set(_stocFrameIn);
   _stochasticModelAnal->output("stocenv").set(stocEnv);
-  _stochasticModelAnal->compute();
+  _stochasticModelAnal->compute();*/
 
 
 }
@@ -123,8 +123,8 @@ void SpsModelAnal::compute() {
 // ---------------------------
 // additional methods
 
- // shift and copy frame for stochastic model analysis
-void SpsModelAnal::updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator)
+/* // shift and copy frame for stochastic model analysis
+void SprModelAnal::updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator)
 {
   for (int i =0; i < (int) frameIn.size(); ++i){
     if (i+ (int) frameIn.size() < (int) frameAccumulator.size()){
@@ -132,5 +132,5 @@ void SpsModelAnal::updateStocInFrame(const std::vector<Real> frameIn, std::vecto
       frameAccumulator[i+ (int) frameIn.size()] = frameIn[i];
     }
   }
-}
+}*/
 
