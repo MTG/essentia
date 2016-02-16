@@ -56,14 +56,6 @@ void SprModelAnal::configure() {
                               "hopSize", parameter("hopSize").toInt()
                               );
 
-/*  // initialize array to accumulates two output frames from the sinesubtraction output
-  _stocFrameIn.resize(2*parameter("hopSize").toInt());
-  std::fill(_stocFrameIn.begin(), _stocFrameIn.end(), 0.);
-
-  _stochasticModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
-                              "fftSize", 2*parameter("hopSize").toInt(),
-                              "hopSize", parameter("hopSize").toInt(),
-                              "stocf", parameter("stocf").toReal());*/
 
 }
 
@@ -110,27 +102,9 @@ void SprModelAnal::compute() {
  _sineSubtraction->output("frame").set(res); // Nsyn size
  _sineSubtraction->compute();
 
-/*  updateStocInFrame(subtrFrameOut, _stocFrameIn); // shift and copy frame for stochastic model analysis
-
-  _stochasticModelAnal->input("frame").set(_stocFrameIn);
-  _stochasticModelAnal->output("stocenv").set(stocEnv);
-  _stochasticModelAnal->compute();*/
 
 
 }
 
 
-// ---------------------------
-// additional methods
-
-/* // shift and copy frame for stochastic model analysis
-void SprModelAnal::updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator)
-{
-  for (int i =0; i < (int) frameIn.size(); ++i){
-    if (i+ (int) frameIn.size() < (int) frameAccumulator.size()){
-      frameAccumulator[i] = frameAccumulator[ i+ (int) frameIn.size()];
-      frameAccumulator[i+ (int) frameIn.size()] = frameIn[i];
-    }
-  }
-}*/
 

@@ -88,17 +88,9 @@ int main(int argc, char* argv[]) {
                             "harmDevSlope", 0.01               
                             );
 
-
-/*  Algorithm* ifft     = factory.create("IFFT",
-                                "size", framesize);*/
-
    Algorithm* sprmodelsynth     = factory.create("SprModelSynth",
                             "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
-  
-/*    Algorithm* overlapAdd = factory.create("OverlapAdd",
-                                            "frameSize", framesize,
-                                           "hopSize", hopsize);*/
-  
+   
   Algorithm* audioWriter = factory.create("MonoWriter",
                                      "filename", outputFilename);
   Algorithm* audioWriterSine = factory.create("MonoWriter",
@@ -158,16 +150,6 @@ int main(int argc, char* argv[]) {
   sprmodelsynth->output("frame").set(audioOutput);
   sprmodelsynth->output("sineframe").set(audioSineOutput);
   sprmodelsynth->output("resframe").set(audioResOutput);
-
-/*  // Synthesis
-  ifft->input("fft").set(sfftframe);
-  ifft->output("frame").set(ifftframe);
-
-  
-
-  overlapAdd->input("signal").set(ifftframe);
-  overlapAdd->output("signal").set(audioSineOutput);*/
-
 
 
 
@@ -237,16 +219,10 @@ int main(int argc, char* argv[]) {
     }
 
 
-    // Sine model synthesis
-    //sinemodelsynth->compute();
+    // SPR model synthesis
     sprmodelsynth->compute();
 
-/*
-    ifft->compute();
-    overlapAdd->compute();
-    
-    // compute sinusoidal plus residual output    
-    mixAudioVectors(audioSineOutput, res, 1.0, 1.0, audioOutput);*/
+
     
     // skip first half window
     if (counter >= floor(framesize / (hopsize * 2.f))){
@@ -257,7 +233,6 @@ int main(int argc, char* argv[]) {
 
     counter++;
   }
-
 
 
 

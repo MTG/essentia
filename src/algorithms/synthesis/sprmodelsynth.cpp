@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2015  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -42,10 +42,6 @@ void SprModelSynth::configure()
                             "hopSize", _hopSize
                             );
 
-/* _stochasticModelSynth->configure("fftSize", 2* parameter("hopSize").toInt(),
-                            "hopSize", parameter("hopSize").toInt(),
-                            "stocf", parameter("stocf").toReal());
-*/
 
   _ifftSine->configure("size", _fftSize);
 
@@ -69,7 +65,6 @@ void SprModelSynth::compute() {
 
   // temp vectors
   std::vector<std::complex<Real> > fftSines;
-  //std::vector<std::complex<Real> > fftStoc;
   std::vector<Real> wsineFrame; // windowed frames
   std::vector<Real> sineFrame;  // overlap output frame
   std::vector<Real> resFrame = res;  // copy input residual to output residual frame
@@ -90,12 +85,7 @@ void SprModelSynth::compute() {
   _overlapAdd->output("signal").set(sineFrame);
   _overlapAdd->compute();
 
-/*  // synthesis of the stochastic component
-  _stochasticModelSynth->input("stocenv").set(stocenv);
-  _stochasticModelSynth->output("frame").set(stocFrame);
-  _stochasticModelSynth->compute();*/
-
-  // add sine and stochastic copmponents
+  // add sine and residual  copmponents
  outframe.clear();
  outsineframe.clear();
  outresframe.clear();

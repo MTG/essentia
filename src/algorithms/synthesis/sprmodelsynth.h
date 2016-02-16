@@ -46,7 +46,6 @@ class SprModelSynth : public Algorithm {
   int _hopSize;
 
   Algorithm* _sineModelSynth;
-//  Algorithm* _stochasticModelSynth;
   Algorithm* _ifftSine;
   Algorithm* _overlapAdd;
 
@@ -64,7 +63,6 @@ class SprModelSynth : public Algorithm {
     declareOutput(_outresframe, "resframe", "the output audio frame for stochastic component ");
 
     _sineModelSynth = AlgorithmFactory::create("SineModelSynth");
-//    _stochasticModelSynth = AlgorithmFactory::create("StochasticModelSynth");
 
     _ifftSine = AlgorithmFactory::create("IFFT");
     _overlapAdd = AlgorithmFactory::create("OverlapAdd");
@@ -74,7 +72,6 @@ class SprModelSynth : public Algorithm {
   ~SprModelSynth() {
 
     delete _sineModelSynth;
-  //  delete _stochasticModelSynth;
     delete _ifftSine;
     delete _overlapAdd;
 
@@ -84,7 +81,6 @@ class SprModelSynth : public Algorithm {
     declareParameter("fftSize", "the size of the output FFT frame (full spectrum size)", "[1,inf)", 2048);
     declareParameter("hopSize", "the hop size between frames", "[1,inf)", 512);
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
-    //declareParameter("stocf", "decimation factor used for the stochastic approximation", "(0,1]", 0.2);
   }
 
   void configure();
@@ -111,7 +107,7 @@ class SprModelSynth : public StreamingAlgorithmWrapper {
   Sink<std::vector<Real> > _frequencies;
   Sink<std::vector<Real> > _phases;
   Sink<std::vector<Real> > _res;
-  //Source<std::vector<std::complex<Real> > > _outfft;
+  
   Source<std::vector<Real> > _outframe;
   Source<std::vector<Real> > _outsineframe;
   Source<std::vector<Real> > _outresframe;

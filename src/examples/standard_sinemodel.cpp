@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
   vector<complex<Real> >  sfftframe; // sine model FFT frame
   vector<Real> ifftframe;
   vector<Real> alladuio; // concatenated audio file output
- // Real confidence;
+ 
 
   vector< vector<Real> > frequenciesAllFrames;
   vector< vector<Real> > magnitudesAllFrames;

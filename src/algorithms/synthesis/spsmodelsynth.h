@@ -111,7 +111,7 @@ class SpsModelSynth : public StreamingAlgorithmWrapper {
   Sink<std::vector<Real> > _frequencies;
   Sink<std::vector<Real> > _phases;
   Sink<std::vector<Real> > _stocenv;
-  //Source<std::vector<std::complex<Real> > > _outfft;
+
   Source<std::vector<Real> > _outframe;
   Source<std::vector<Real> > _outsineframe;
   Source<std::vector<Real> > _outstocframe;

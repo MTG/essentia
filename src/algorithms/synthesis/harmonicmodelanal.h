@@ -37,18 +37,14 @@ class HarmonicModelAnal : public Algorithm {
   Output<std::vector<Real> > _magnitudes;
   Output<std::vector<Real> > _frequencies;
   Output<std::vector<Real> > _phases;
-  //Output<std::vector<Real> > _stocenv;
 
-//  int _stocSize;
+
   Algorithm* _spectrum ;
   Algorithm* _window;
   Algorithm* _fft;
   Algorithm*   _pitchDetect;
   Algorithm* _sineModelAnal;
- /* Algorithm* _sineSubtraction;
-  Algorithm* _stochasticModelAnal;*/
-
- // std::vector<Real> _stocFrameIn; // input frame for the stochaastic analysis algorithm
+ 
 
   Real _sampleRate;
   int _nH ; // number of harmonics
@@ -109,8 +105,7 @@ class HarmonicModelAnal : public Algorithm {
   void configure();
   void compute();
 
-  //void updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator);
-void harmonicDetection(const std::vector<Real> pfreq, const std::vector<Real> pmag, const std::vector<Real> pphase, const Real f0, const int nH,  std::vector<Real> hfreqp, Real fs, Real harmDevSlope/*=0.01*/,  std::vector<Real> &hfreq,  std::vector<Real> &hmag,  std::vector<Real> &hphase);
+  void harmonicDetection(const std::vector<Real> pfreq, const std::vector<Real> pmag, const std::vector<Real> pphase, const Real f0, const int nH,  std::vector<Real> hfreqp, Real fs, Real harmDevSlope/*=0.01*/,  std::vector<Real> &hfreq,  std::vector<Real> &hmag,  std::vector<Real> &hphase);
 
 
   static const char* name;
@@ -133,7 +128,6 @@ namespace streaming {
 class HarmonicModelAnal : public StreamingAlgorithmWrapper {
 
  protected:
-  //Sink<std::vector<std::complex<Real> > > _fft; // input
   Sink<std::vector<Real> > _frame; // input
   Sink<Real> _pitch; // input
   Source<std::vector<Real> > _frequencies;

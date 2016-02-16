@@ -38,9 +38,6 @@ class HprModelAnal : public Algorithm {
   Output<std::vector<Real> > _phases;
   Output<std::vector<Real> >_res;
 
-//  int _stocSize;
-/*  Algorithm* _window;
-  Algorithm* _fft;*/
   Algorithm* _harmonicModelAnal;
   Algorithm* _sineSubtraction;
 
@@ -54,8 +51,6 @@ class HprModelAnal : public Algorithm {
     declareOutput(_phases, "phases", "the phases of the sinusoidal peaks");
     declareOutput(_res, "res", "output residual frame");
 
-/*    _window = AlgorithmFactory::create("Windowing");
-    _fft = AlgorithmFactory::create("FFT");*/
     _harmonicModelAnal = AlgorithmFactory::create("HarmonicModelAnal");
     _sineSubtraction = AlgorithmFactory::create("SineSubtraction");
   
@@ -64,8 +59,6 @@ class HprModelAnal : public Algorithm {
 
   ~HprModelAnal() {
 
-/*  delete _window;
-  delete _fft;*/
   delete _harmonicModelAnal;
   delete _sineSubtraction;
 

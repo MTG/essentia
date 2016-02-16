@@ -43,9 +43,7 @@ class SprModelAnal : public Algorithm {
   Algorithm* _fft;
   Algorithm* _sineModelAnal;
   Algorithm* _sineSubtraction;
-  //Algorithm* _stochasticModelAnal;
-
-  //std::vector<Real> _stocFrameIn; // input frame for the stochaastic analysis algorithm
+  
 
 
  public:
@@ -60,7 +58,6 @@ class SprModelAnal : public Algorithm {
     _fft = AlgorithmFactory::create("FFT");
     _sineModelAnal = AlgorithmFactory::create("SineModelAnal");
     _sineSubtraction = AlgorithmFactory::create("SineSubtraction");
-//    _stochasticModelAnal = AlgorithmFactory::create("StochasticModelAnal");
 
   }
 
@@ -70,7 +67,7 @@ class SprModelAnal : public Algorithm {
   delete _fft;
   delete _sineModelAnal;
   delete _sineSubtraction;
- // delete _stochasticModelAnal;
+ 
   }
 
   void declareParameters() {
@@ -93,8 +90,6 @@ class SprModelAnal : public Algorithm {
   void configure();
   void compute();
 
-//  void updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator);
-
   static const char* name;
   static const char* description;
 
@@ -115,7 +110,7 @@ namespace streaming {
 class SprModelAnal : public StreamingAlgorithmWrapper {
 
  protected:
-  //Sink<std::vector<std::complex<Real> > > _fft; // input
+  
   Sink<std::vector<Real> > _frame; // input
   Source<std::vector<Real> > _frequencies;
   Source<std::vector<Real> > _magnitudes;

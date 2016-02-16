@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* HprModelAnal::name = "HprModelAnal";
-const char* HprModelAnal::description = DOC("This algorithm computes the harmonic plus Residual model analysis. \n"
+const char* HprModelAnal::description = DOC("This algorithm computes the Harmonic plus Residual model analysis. \n"
 "\n"
 "It uses the algorithms HarmonicModelAnal and SineSubtraction .\n"
 "\n"
@@ -39,16 +39,6 @@ const char* HprModelAnal::description = DOC("This algorithm computes the harmoni
 void HprModelAnal::configure() {
 
   std::string wtype = "blackmanharris92"; // default "hamming"
-/*  _window->configure("type", wtype.c_str());
-
-  _fft->configure("size", parameter("fftSize").toInt()  );*/
-
-
-/*  _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
-                              "maxnSines", parameter("maxnSines").toInt() ,
-                              "freqDevOffset", parameter("freqDevOffset").toInt(),
-                              "freqDevSlope",  parameter("freqDevSlope").toReal()
-                              );*/
 
   _harmonicModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),                                                           
                               "hopSize", parameter("hopSize").toInt(),
@@ -85,20 +75,6 @@ void HprModelAnal::compute() {
   std::vector<Real>& peakPhase = _phases.get();
   std::vector<Real>& res = _res.get();
 
-/*  std::vector<Real> wframe;
-  std::vector<std::complex<Real> > fftin;*/
-/*  std::vector<Real> fftmag;
-  std::vector<Real> fftphase;*/
-
-
-/*  _window->input("frame").set(frame);
-  _window->output("frame").set(wframe);
-  _window->compute();
-
-  _fft->input("frame").set(wframe);
-  _fft->output("fft").set(fftin);
-  _fft->compute();*/
-
   Real extPitch  = 0.;  // external pitch not used in this model. Set to 0.
  _harmonicModelAnal->input("frame").set(frame);
  _harmonicModelAnal->input("pitch").set(extPitch);
@@ -107,9 +83,6 @@ void HprModelAnal::compute() {
  _harmonicModelAnal->output("phases").set(peakPhase);
 
   _harmonicModelAnal->compute();
-
-
-
 
 // this needs to take into account overlap-add issues, introducing delay
  _sineSubtraction->input("frame").set(frame); // size is iput _fftSize
