@@ -40,6 +40,18 @@ void scaleAudioVector(std::vector<Real> &buffer, const Real scale)
 }
 
 
+void mixAudioVectors(const std::vector<Real> ina, const std::vector<Real> inb, const Real gaina, const Real gainb, std::vector<Real> &out)
+{
+  int outsize = std::max(ina.size(), inb.size());
+  out.resize(outsize);
+  std::fill(out.begin(), out.end(), 0.);
+  for (int i=0; i<outsize; ++i )
+  {
+    out[i] = gaina * ina[i] + gainb * inb[i];
+   }
+  
+ }
+
 void cleaningSineTracks(std::vector< std::vector<Real> >&freqsTotal, const int minFrames){
 
   int nFrames = freqsTotal.size();
@@ -54,7 +66,27 @@ void cleaningSineTracks(std::vector< std::vector<Real> >&freqsTotal, const int m
       f = 0;
       begTrack = f;
 
-      while (f < nFrames-1)
+      while (f < nFrames-1)/*
+ * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ *
+ * This file is part of Essentia
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
+ */
+
+
+
       {
         // check if f is begin of track
         if (freqsTotal[f][t] <= 0 && freqsTotal[f+1][t] > 0 )

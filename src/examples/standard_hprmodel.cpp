@@ -50,18 +50,17 @@ int main(int argc, char* argv[]) {
   Pool pool;
 
 
-  /////// PARAMS //////////////
+
 
   /////// PARAMS //////////////
   int framesize = 2048;
-  int hopsize = 128; //128;
+  int hopsize = 128; 
   Real sr = 44100;
     
   Real minF0 = 65.;
   Real maxF0 = 550.;
 
  Real minSineDur = 0.02;
- Real stocf = 0.2;  // stochastic envelope factor. Default 0.2
   
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -90,10 +89,15 @@ int main(int argc, char* argv[]) {
                             );
 
 
+  Algorithm* ifft     = factory.create("IFFT",
+                                "size", framesize);
 
-  int frameSizeSynth = 512; // frameSize
    Algorithm* sinemodelsynth     = factory.create("SineModelSynth",
                             "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
+  
+    Algorithm* overlapAdd = factory.create("OverlapAdd",
+                                            "frameSize", framesize,
+                                           "hopSize", hopsize);
   
   Algorithm* audioWriter = factory.create("MonoWriter",
                                      "filename", outputFilename);
@@ -123,6 +127,9 @@ int main(int argc, char* argv[]) {
   vector< vector<Real> > phasesAllFrames;
   vector< vector<Real> > resAllFrames;
 
+  vector<complex<Real> >  sfftframe; // sine model FFT frame
+  vector<Real> ifftframe; //  sine model IFFT frame
+
 
   // analysis
   audioLoader->output("audio").set(audio);
@@ -141,7 +148,7 @@ int main(int argc, char* argv[]) {
 
  vector<Real> audioOutput;
   vector<Real> audioSineOutput;
-  vector<Real> audioStocOutput;
+  vector<Real> audioResOutput;
 
 // Sinusoidal Model Synthesis (only harmonics)
   sinemodelsynth->input("magnitudes").set(magnitudes);
@@ -153,7 +160,7 @@ int main(int argc, char* argv[]) {
   ifft->input("fft").set(sfftframe);
   ifft->output("frame").set(ifftframe);
 
-  vector<Real> audioOutput;
+  
 
   overlapAdd->input("signal").set(ifftframe);
   overlapAdd->output("signal").set(audioSineOutput);
@@ -232,6 +239,9 @@ int main(int argc, char* argv[]) {
 
     ifft->compute();
     overlapAdd->compute();
+    
+    // compute sinusoidal plus residual output    
+    mixAudioVectors(audioSineOutput, res, 1.0, 1.0, audioOutput);
     
     // skip first half window
     if (counter >= floor(framesize / (hopsize * 2.f))){
