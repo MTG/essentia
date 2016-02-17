@@ -38,7 +38,7 @@ LoudnessEBUR128Filter::LoudnessEBUR128Filter() : AlgorithmComposite() {
   _stereoDemuxer  = factory.create("StereoDemuxer");
 
   _filterLeft     = factory.create("IIR");
-  _filterRight     = factory.create("IIR");
+  _filterRight    = factory.create("IIR");
   _squareLeft     = factory.create("UnaryOperatorStream");
   _squareRight    = factory.create("UnaryOperatorStream");
   _sum            = factory.create("BinaryOperatorStream");
