@@ -78,7 +78,7 @@ void PitchYin::compute() {
     throw EssentiaException("PitchYin: Cannot compute pitch detection on empty signal frame.");
   }
   if ((int) signal.size() != _frameSize) {
-    throw EssentiaException("PitchYin: Unexpected frame size of the input signal frame: ", signal.size(), " instead of ", _frameSize);
+    Algorithm::configure( "frameSize", int(signal.size()) );
   } 
 
   Real& pitch = _pitch.get();
