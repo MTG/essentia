@@ -52,8 +52,6 @@ class LoudnessEBUR128 : public AlgorithmComposite {
   Pool _pool;
   Real _absoluteThreshold;
 
-  scheduler::Network* _network;
-
   int _hopSize;
 
  public:

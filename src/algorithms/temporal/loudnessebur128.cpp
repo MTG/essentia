@@ -196,8 +196,8 @@ AlgorithmStatus LoudnessEBUR128::process() {
   }
   // relative threshold = gated loudness in LKFS - 10 LKFS 
   // 10 dB difference means 10 times less power 
-  Real threshold = max(sum / n / 10, _absoluteThreshold);
-  
+  Real threshold = n ? max(sum / n / 10, _absoluteThreshold) : _absoluteThreshold;
+
   // compute gated loudness with relative threshold
   sum = 0.;
   n = 0;
@@ -207,8 +207,8 @@ AlgorithmStatus LoudnessEBUR128::process() {
       n++;
     }
   }
-  _integratedLoudness.push(power2loudness(sum / n));
-
+  _integratedLoudness.push(power2loudness(n ? sum / n : _absoluteThreshold));
+  
   // Compute loudness range based on short-term loudness
   const vector<Real>& powerST = _pool.value<vector<Real> >("shortterm_power");
 
@@ -224,8 +224,8 @@ AlgorithmStatus LoudnessEBUR128::process() {
   }
   // relative threshold = gated loudness - 20 LKFS
   // 20 dB difference means 100 times less power
-  threshold = max(sum / n / 100, _absoluteThreshold);
-
+  threshold = n ? max(sum / n / 100, _absoluteThreshold) : _absoluteThreshold;
+  
   // remove values lower than the relative threshold
   vector<Real> powerSTGated;
   powerSTGated.reserve(powerST.size());
@@ -238,21 +238,28 @@ AlgorithmStatus LoudnessEBUR128::process() {
   //copy_if(loudnessST.begin(), loudnessST.end(), loudnessSTGated.begin(), 
   //        bind2nd(less<Real>(),threshold)));
 
-  sort(powerSTGated.begin(), powerSTGated.end());
+  if (powerSTGated.size()) {
 
-  // LRA is defined as the difference between the estimates of the 10th and 
-  // the 95th percentiles of the distribution
-  size_t iHigh = (size_t) round(0.95*(powerSTGated.size()-1));
-  size_t iLow = (size_t) round(0.1*(powerSTGated.size()-1));
+    sort(powerSTGated.begin(), powerSTGated.end());
 
-  _loudnessRange.push(power2loudness(powerSTGated[iHigh]) 
+    // LRA is defined as the difference between the estimates of the 10th and 
+    // the 95th percentiles of the distribution
+    size_t iHigh = (size_t) round(0.95*(powerSTGated.size()-1));
+    size_t iLow = (size_t) round(0.1*(powerSTGated.size()-1));
+
+    _loudnessRange.push(power2loudness(powerSTGated[iHigh]) 
                                      - power2loudness(powerSTGated[iLow]));
+  }
+  else {
+    // Consider the dynamic range value of silence to be zero
+    _loudnessRange.push((Real) 0.);
+  }
+
   return FINISHED;
 }
 
 void LoudnessEBUR128::reset() {
   AlgorithmComposite::reset();
-  _network->reset();
   _pool.remove("shortterm_power");
   _pool.remove("integrated_power");
 }
@@ -264,27 +271,8 @@ void LoudnessEBUR128::reset() {
 namespace essentia {
 namespace standard {
 
-const char* LoudnessEBUR128::name = "LoudnessEBUR128";
-const char* LoudnessEBUR128::description = DOC("This algorithm computes loudness descriptors in accordance with EBU R128 recommendation.\n"
-"- The input stereo signal is preprocessed with a K-weighting filter [2] (see LoudnessEBUR128Filter algorithm), composed of two stages: a shelving filter and a high-pass filter (RLB-weighting curve).\n"
-"- Momentary loudness is computed by integrating the sum of powers over a sliding rectangular window of 400 ms. The measurement is not gated.\n"
-"- Short-term loudness is computed by integrating the sum of powers over a sliding rectangular window of 3 seconds. The measurement is not gated.\n"
-"- Integrated loudness is a loudness value averaged over an arbitrary long time interval with gating of 400 ms blocks with two thresholds [2].\n"
-"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
-"  - Relative gating threshold, 10 LU below the absolute-gated loudness level.\n"
-"- Loudness range is computed from short-term loudness values. It is defined as the difference between the estimates of the 10th and 95th percentiles of the distribution of the loudness values with applied gating [3].\n"
-"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
-"  - Relative gating threshold, -20 LU below the absolute-gated loudness level.\n"
-"\n"
-"References:\n"
-"  [1] EBU Tech 3341-2011. \"Loudness Metering: 'EBU Mode' metering to supplement\n"
-"  loudness normalisation in accordance with EBU R 128\"\n"
-"  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\n"
-"  [3] EBU Tech Doc 3342-2011. \"Loudness Range: A measure to supplement loudness\n"
-"  normalisation in accordance with EBU R 128\"\n"
-"  [4] http://tech.ebu.ch/loudness\n"
-"  [5] http://en.wikipedia.org/wiki/LKFS\n"
-);
+const char* LoudnessEBUR128::name = essentia::streaming::LoudnessEBUR128::name;
+const char* LoudnessEBUR128::description = essentia::streaming::LoudnessEBUR128::description;
 
 
 LoudnessEBUR128::LoudnessEBUR128() {
@@ -340,7 +328,7 @@ void LoudnessEBUR128::compute() {
   shortTermLoudness = _pool.value<vector<Real> >("shortTermLoudness");
   integratedLoudness = _pool.value<Real>("integratedLoudness");
   loudnessRange = _pool.value<Real>("loudnessRange");
-  
+
   //TODO: add *Max outputs in the future when users will ask for them. 
   //Meanwhile, the *Max values can be computed from the loudness outputs.
   //We are not interested to be 100% with EBU R128 requirements unless someone
@@ -352,6 +340,7 @@ void LoudnessEBUR128::compute() {
 
   //TODO: should output the final max values instead of all observed max values 
   //      as the analysis goes through frames?
+  reset();
 }
 
 void LoudnessEBUR128::reset() {

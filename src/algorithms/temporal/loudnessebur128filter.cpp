@@ -142,8 +142,6 @@ void LoudnessEBUR128Filter::configure() {
 
 void LoudnessEBUR128Filter::reset() {
   AlgorithmComposite::reset();
-  _network->reset();
-
 }
 
 } // namespace streaming
