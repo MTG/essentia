@@ -163,7 +163,7 @@ void PitchYinFFT::compute() {
   if (_interpolate) {
     // yin values are in the range [0,inf], because we want to detect the minima and peak detection detects the maxima,
     // yin values will be inverted
-    for(int n=0; n<=_yin.size(); ++n) {
+    for(int n=0; n<int(_yin.size()); ++n) {
       _yin[n] = -_yin[n];
     }
     // use interal peak detection algorithm
