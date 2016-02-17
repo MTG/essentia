@@ -204,14 +204,8 @@ void RhythmExtractor2013::reset() {
 namespace essentia {
 namespace standard {
 
-const char* RhythmExtractor2013::name = "RhythmExtractor2013";
-const char* RhythmExtractor2013::description = DOC("This algorithm estimates the beat locations and the confidence of their estimation given an input signal, as well as its tempo in bpm. The beat locations can be computed using:\n"
-"  - 'multifeature', the BeatTrackerMultiFeature algorithm\n"
-"  - 'degara', the BeatTrackerDegara algorithm (note that there is no confidence estimation for this method, the output confidence value is always 0)\n"
-"\n"
-"See BeatTrackerMultiFeature and  BeatTrackerDegara algorithms for more details.\n"
-"\n"
-"Note that the algorithm requires the sample rate of the input signal to be 44100 Hz in order to work correctly.\n");
+const char* RhythmExtractor2013::name = essentia::streaming::RhythmExtractor2013::name;
+const char* RhythmExtractor2013::description = essentia::streaming::RhythmExtractor2013::description;
 
 
 RhythmExtractor2013::RhythmExtractor2013() {
