@@ -133,7 +133,8 @@ def analsynthHarmonicModelStreaming(params, signal):
     fcut.frame >> smanal.frame
     # set  constant  external pitch   to 0.
     extPitch = VectorInput ([0.])
-    extPitch.data >> smanal.pitch
+    # TODO: this makes the code to hang in this point. Probably it waits for new inputs at each frame.
+    #extPitch.data >> smanal.pitch  
     smanal.magnitudes >> (pool, 'magnitudes')
     smanal.frequencies >> (pool, 'frequencies')
     smanal.phases >> (pool, 'phases')
