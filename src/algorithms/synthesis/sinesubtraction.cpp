@@ -148,7 +148,6 @@ void SineSubtraction::generateSines(const std::vector<Real> magnitudes, const st
     std::fill(_lastytfreq.begin(), _lastytfreq.end(), 0.);
   }
 
-
   // propagate phase if necessary (no input phase vector)
   if (int(phases.size()) > 0){                                 // if no phases generate them
 	  	ytphase = phases;

@@ -141,14 +141,16 @@ void genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<
 		bin_remainder = floor(loc + 0.5)-loc;
 		ploc_int = (int)floor(loc+0.5);
 
-		if((loc>=5)&&(loc<size_spec_half-4))
+		if((loc>=5)&&(loc<size_spec_half-5))
 		{
-      mag = pow(10,(ipmag[ii]/20.0));
+      mag =  pow(10,(ipmag[ii]/20.0));
 
 			for(jj=-4;jj<5;jj++)
 			{
-  			outfft[ploc_int+jj].real( outfft[ploc_int+jj].real() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
-	  		outfft[ploc_int+jj].imag( outfft[ploc_int+jj].imag() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]));
+        
+        outfft[ploc_int+jj].real( outfft[ploc_int+jj].real() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
+	  		outfft[ploc_int+jj].imag( outfft[ploc_int+jj].imag() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]));     
+
 			}
 
 		}
@@ -176,20 +178,20 @@ void genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<
 				}
 			}
 		}
-		else if((loc>=size_spec_half-4)&&(loc<size_spec_half-1))
+		else if((loc>=size_spec_half-5)&&(loc<size_spec_half-1))
 		{
       mag = pow(10,(ipmag[ii]/20.0));
 
 			for(jj=-4;jj<5;jj++)
 			{
-				if(ploc_int+jj>size_spec_half)
+				if(ploc_int+jj>size_spec_half-1)
 				{
 
 		    	outfft[size_spec-(ploc_int+jj)].real( outfft[size_spec-(ploc_int+jj)].real() + mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
        		outfft[size_spec-(ploc_int+jj)].imag( outfft[size_spec-(ploc_int+jj)].imag() + -1*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*sin(ipphase[ii]));
 
 				}
-				else if(ploc_int+jj==size_spec_half)
+				else if(ploc_int+jj==size_spec_half-1)
 				{
 					outfft[(ploc_int+jj)].real( outfft[ploc_int+jj].real() + 2*mag*bh_92_1001[(int)((bin_remainder+jj)*100) + BH_SIZE_BY2]*cos(ipphase[ii]));
 
