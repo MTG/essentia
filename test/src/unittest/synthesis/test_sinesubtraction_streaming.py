@@ -26,6 +26,7 @@ import essentia
 import essentia.streaming as es
 import essentia.standard as std
 
+import numpy as np
 
 def cutFrames(params, input = range(100)):
 
@@ -73,11 +74,16 @@ def cleaningSineTracks(freqsTotal, minFrames):
 
 
 
+def framesToAudio(frames):
+
+    audio = frames.flatten()      
+    return audio
+    
+
 
 def analsynthSineSubtractionStreaming(params, signal):
   
     out = numpy.array(0)
-  
     pool = essentia.Pool()
     fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
     w = es.Windowing(type = "blackmanharris92");
@@ -87,9 +93,9 @@ def analsynthSineSubtractionStreaming(params, signal):
     subtrFFTSize = min(512, 4* params['hopSize'])
     smsub = es.SineSubtraction(sampleRate = params['sampleRate'], fftSize = subtrFFTSize, hopSize = params['hopSize'])
 
-
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    
     insignal = VectorInput (signal)
     # analysis
     insignal.data >> fcut.signal
@@ -104,21 +110,71 @@ def analsynthSineSubtractionStreaming(params, signal):
     smanal.magnitudes >> smsub.magnitudes
     smanal.frequencies >> smsub.frequencies
     smanal.phases >> smsub.phases
-    smsub.frame >> (pool, 'audio')
-
-    essentia.run(insignal)
+    smsub.frame >> (pool, 'frames')
     
-
-    # remove first half window frames
-    outaudio = pool['audio']
+    essentia.run(insignal)
+       
+    outaudio = framesToAudio(pool['frames'])    
     outaudio = outaudio [2*params['hopSize']:]
-    freqs =  pool['frequencies']
-    numpy.savetxt('freqs.txt', freqs)
-    print numpy.min(freqs), numpy.max(freqs)
-    print 'size out' , signal.size, outaudio.size, pool['frequencies'].shape
-    print(' TODO: bug fixing to find why sinesubtractio is not outputtingn a array')
     
     return outaudio, pool
+
+def analSineSubtractionStreaming(params, signal):
+  
+    out = numpy.array(0)
+    pool = essentia.Pool()
+    fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
+    w = es.Windowing(type = "blackmanharris92");
+    fft = es.FFT(size = params['frameSize']);
+    smanal = es.SineModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
+    
+    # add half window of zeros to input signal to reach same ooutput length
+    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    
+    insignal = VectorInput (signal)
+    # analysis
+    insignal.data >> fcut.signal
+    fcut.frame >> w.frame
+    w.frame >> fft.frame
+    fft.fft >> smanal.fft
+    smanal.magnitudes >> (pool, 'magnitudes')
+    smanal.frequencies >> (pool, 'frequencies')
+    smanal.phases >> (pool, 'phases')
+    
+    essentia.run(insignal)
+       
+
+    
+    return pool
+
+
+
+def synthSineSubtractionStreaming(params, signal, pool):
+  
+    fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
+    subtrFFTSize = min(512, 4* params['hopSize'])
+    smsub = es.SineSubtraction(sampleRate = params['sampleRate'], fftSize = subtrFFTSize, hopSize = params['hopSize'])
+
+    # add half window of zeros to input signal to reach same ooutput length
+    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    
+    insignal = VectorInput (signal)
+    # analysis
+    insignal.data >> fcut.signal
+    # subtraction
+    fcut.frame >> smsub.frame
+    (pool, 'magnitudes') >> smsub.magnitudes
+    (pool, 'frequencies') >> smsub.frequencies
+    (pool, 'phases') >> smsub.phases
+    smsub.frame >> (pool, 'frames')
+    
+    essentia.run(insignal)
+       
+    outaudio = framesToAudio(pool['frames'])    
+    outaudio = outaudio [2*params['hopSize']:]
+    
+    return outaudio, pool
+
 
 
 
@@ -140,10 +196,9 @@ class TestSineSubtraction(TestCase):
         signalSize = 10 * self.params['frameSize']
         signal = zeros(signalSize)
         
-        #outsignal,pool = analsynthSineSubtractionStreaming(self.params, signal)
+        outsignal,pool = analsynthSineSubtractionStreaming(self.params, signal)
 
-        #outsignal = outsignal[:signalSize] # cut to durations of input and output signal
-        outsignal = signal # debug
+        outsignal = outsignal[:signalSize] # cut to durations of input and output signal        
         
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
@@ -163,10 +218,10 @@ class TestSineSubtraction(TestCase):
         self.params['magnitudeThreshold']= -20
             
         
-        #outsignal,pool = analsynthSineSubtractionStreaming(self.params, signal)
+        outsignal,pool = analsynthSineSubtractionStreaming(self.params, signal)
 
-       # outsignal = outsignal[:signalSize] # cut to durations of input and output signal
-        outsignal = signal # debug
+        outsignal = outsignal[:signalSize] # cut to durations of input and output signal
+        
  
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
@@ -175,27 +230,34 @@ class TestSineSubtraction(TestCase):
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
 
+
+
     def testRegression(self):
 
         # generate test signal: sine 110Hz @44100kHz
         signalSize = 10 * self.params['frameSize']
         signal = .5 * numpy.sin( (array(range(signalSize))/self.params['sampleRate']) * 110 * 2*math.pi)
+                      
+        pool = analSineSubtractionStreaming(self.params, signal)        
         
-        #signal = signal[:6 * self.params['frameSize']]
+        # clean tracks
+        minFrames = int(  self.params['minSineDur'] * self.params['sampleRate']) / self.params['hopSize']))
+        pool['frequencies'] = cleaningSineTracks(pool['frequencies'], self.params['minFrames'])
         
-        outsignal,pool = analsynthSineSubtractionStreaming(self.params, signal)
-
-        outsignal = outsignal[:signalSize] # cut to durations of input and output signal
-        #outsignal = signal # debug
+        # subtract
+        outsignal = synthSineSubtractionStreaming(self.params, signal, pool)        
+        
+#        outsignal,pool = analsynthSineSubtractionStreaming(self.params, signal)        
+        
+                
+        outsignal = outsignal[:signalSize] # cut to durations of input and output signal        
         
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
-
-        
-        # computing max difference between waveforms
-        #diffference = numpy.max(abs(outsignal[halfwin:-halfwin] - signal[halfwin:-halfwin]))
-
-        self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
+             
+        # comparing signals: reference and output 
+        refsignal =  zeros(signalSize) # reference signal is vector of silecens after subtracting the sinusoidal  copmonents
+        self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], refsignal[halfwin:-halfwin], self.precisionDigits)
 
 
 

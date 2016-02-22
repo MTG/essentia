@@ -137,7 +137,6 @@ def analsynthSineModelStreaming(params, signal):
     smanal.frequencies >> smsyn.frequencies
     smanal.phases >> smsyn.phases
     smsyn.fft >> ifft.fft
-    #    fft.fft >> ifft.fft # debug
     ifft.frame >> overl.frame
     overl.signal >> (pool, 'audio')
 
@@ -218,9 +217,6 @@ class TestSineModel(TestCase):
         numpy.savetxt('sine.txt',signal[halfwin:-halfwin])
         numpy.savetxt('sine_out.txt',outsignal[halfwin:-halfwin])
         
-        # computing max difference between waveforms
-        #diffference = numpy.max(abs(outsignal[halfwin:-halfwin] - signal[halfwin:-halfwin]))
-
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
 
