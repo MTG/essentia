@@ -40,6 +40,7 @@ def cutFrames(params, input = range(100)):
     return [ frame for frame in framegen ]
 
 
+
 def cleaningSineTracks(freqsTotal, minFrames):
   
   nFrames = freqsTotal.shape[0];
@@ -118,26 +119,35 @@ def analsynthHarmonicModelStreaming(params, signal):
   
     pool = essentia.Pool()
     fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
+    w = es.Windowing(type = "blackmanharris92");
+    fft = es.FFT(size = params['frameSize']);
+    spec = es.Spectrum(size = params['frameSize']);
+
+    pitchDetect = es.PitchYinFFT(frameSize=params['frameSize'], sampleRate =  params['sampleRate'])    
     smanal = es.HarmonicModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'])
     smsyn = es.SineModelSynth(sampleRate = params['sampleRate'], fftSize = params['frameSize'], hopSize = params['hopSize'])
     ifft = es.IFFT(size = params['frameSize']);
     overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
 
-
+    
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
     insignal = VectorInput (signal)
-    
+        
+      
     # analysis
     insignal.data >> fcut.signal
+    fcut.frame >> w.frame
+    w.frame >> spec.frame
+    spec.spectrum >> pitchDetect.spectrum
+    
     fcut.frame >> smanal.frame
-    # set  constant  external pitch   to 0.
-    extPitch = VectorInput ([0.])
-    # TODO: this makes the code to hang in this point. Probably it waits for new inputs at each frame.
-    #extPitch.data >> smanal.pitch  
+    pitchDetect.pitch >> smanal.pitch  
+    pitchDetect.pitchConfidence >> (pool, 'pitchConfidence')  
     smanal.magnitudes >> (pool, 'magnitudes')
     smanal.frequencies >> (pool, 'frequencies')
     smanal.phases >> (pool, 'phases')
+    
     # synthesis
     smanal.magnitudes >> smsyn.magnitudes
     smanal.frequencies >> smsyn.frequencies
