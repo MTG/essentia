@@ -51,6 +51,8 @@ void BpmHistogramDescriptors::compute() {
     }
   }
 
+  vector<Real> weights(maxBPM, 0.0);
+
   if (bpmValues.empty()) {
     _firstPeakBPM.get() = 0.0;
     _firstPeakWeight.get() = 0.0;
@@ -59,12 +61,12 @@ void BpmHistogramDescriptors::compute() {
     _secondPeakBPM.get() = 0.0;
     _secondPeakWeight.get() = 0.0;
     _secondPeakSpread.get() = 0.0;
+    _histogram.get() = weights;
 
     return;
   }
 
   // compute histogram
-  vector<Real> weights(maxBPM, 0.0);
   for (int i=0; i<int(bpmValues.size()); ++i) {
     int idx = min( maxBPM-1, int(round(bpmValues[i])));
     weights[idx]++;
