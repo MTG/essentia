@@ -40,17 +40,20 @@ void HprModelAnal::configure() {
 
   std::string wtype = "blackmanharris92"; // default "hamming"
 
+  _window->configure("type", wtype.c_str());
+
+  _fft->configure("size", parameter("fftSize").toInt()  );
+
   _harmonicModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),                                                           
-                              "hopSize", parameter("hopSize").toInt(),
-                              "fftSize", parameter("fftSize").toInt(),
+                              "hopSize", parameter("hopSize").toInt(),                     
                               "maxnSines", parameter("maxnSines").toInt() ,
                               "freqDevOffset", parameter("freqDevOffset").toReal(),
                               "freqDevSlope",  parameter("freqDevSlope").toReal(),
                               "nHarmonics",   parameter("nHarmonics").toInt(),                     
                               "harmDevSlope",   parameter("harmDevSlope").toReal(),
                               "maxFrequency",  parameter("maxFrequency").toReal(),
-                              "minFrequency",  parameter("minFrequency").toReal(),
-                              "useExternalPitch", false
+                              "minFrequency",  parameter("minFrequency").toReal()
+                              
 );
 
   int subtrFFTSize = std::min(512, 4*parameter("hopSize").toInt());  // make sure the FFT size is at least twice the hopsize
@@ -60,8 +63,6 @@ void HprModelAnal::configure() {
                               "hopSize", parameter("hopSize").toInt()
                               );
 
-  
-
 }
 
 
@@ -69,15 +70,27 @@ void HprModelAnal::compute() {
 
   // inputs and outputs
   const std::vector<Real>& frame = _frame.get();
-
+  const Real & pitch = _pitch.get();
+  
   std::vector<Real>& peakMagnitude = _magnitudes.get();
   std::vector<Real>& peakFrequency = _frequencies.get();
   std::vector<Real>& peakPhase = _phases.get();
   std::vector<Real>& res = _res.get();
 
-  Real extPitch  = 0.;  // external pitch not used in this model. Set to 0.
- _harmonicModelAnal->input("frame").set(frame);
- _harmonicModelAnal->input("pitch").set(extPitch);
+  std::vector<Real> wframe;
+  std::vector<std::complex<Real> > fftin;
+  
+  _window->input("frame").set(frame);
+  _window->output("frame").set(wframe);
+  _window->compute();
+  
+  
+  _fft->input("frame").set(wframe);
+  _fft->output("fft").set(fftin);
+  _fft->compute();
+  
+ _harmonicModelAnal->input("fft").set(fftin);
+ _harmonicModelAnal->input("pitch").set(pitch);
  _harmonicModelAnal->output("magnitudes").set(peakMagnitude);
  _harmonicModelAnal->output("frequencies").set(peakFrequency);
  _harmonicModelAnal->output("phases").set(peakPhase);

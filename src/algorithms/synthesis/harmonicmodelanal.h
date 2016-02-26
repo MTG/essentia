@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2015  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -32,17 +32,13 @@ class HarmonicModelAnal : public Algorithm {
 
  protected:
 
-  Input<std::vector<Real> > _frame;
+
+  Input<std::vector<std::complex<Real> > > _fft;
   Input<Real> _pitch;
   Output<std::vector<Real> > _magnitudes;
   Output<std::vector<Real> > _frequencies;
   Output<std::vector<Real> > _phases;
 
-
-  Algorithm* _spectrum ;
-  Algorithm* _window;
-  Algorithm* _fft;
-  Algorithm*   _pitchDetect;
   Algorithm* _sineModelAnal;
  
 
@@ -50,33 +46,25 @@ class HarmonicModelAnal : public Algorithm {
   int _nH ; // number of harmonics
  Real _harmDevSlope;
   std::vector<Real> _lasthfreq;
-  bool _useExtPitch;
-  
+
 
 
  public:
   HarmonicModelAnal() {
-    declareInput(_frame, "frame", "the input frame");
-    declareInput(_pitch, "pitch", "external pitch input [Hz]. Optional input.");
+  
+    declareInput(_fft, "fft", "the input fft");
+    declareInput(_pitch, "pitch", "external pitch input [Hz].");
     declareOutput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareOutput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareOutput(_phases, "phases", "the phases of the sinusoidal peaks");
 
-    _window = AlgorithmFactory::create("Windowing");
-    _spectrum =  AlgorithmFactory::create("Spectrum");
-    _pitchDetect = AlgorithmFactory::create("PitchYinFFT");
-    _fft = AlgorithmFactory::create("FFT");
     _sineModelAnal = AlgorithmFactory::create("SineModelAnal");
 
   }
 
   ~HarmonicModelAnal() {
 
-    
-  delete _window;
-  delete _spectrum;
- delete  _pitchDetect;
-  delete _fft;
+
   delete _sineModelAnal;
 
   }
@@ -84,7 +72,7 @@ class HarmonicModelAnal : public Algorithm {
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("hopSize", "the hop size between frames", "[1,inf)", 512);
-    declareParameter("fftSize", "the size of the internal FFT size (full spectrum size)", "[1,inf)", 2048);
+    
     // sinusoidal tracking
     declareParameter("maxPeaks", "the maximum number of returned peaks", "[1,inf)", 100);
     declareParameter("maxFrequency", "the maximum frequency of the F0 [Hz]", "(0,inf)", 5000.0);
@@ -96,10 +84,7 @@ class HarmonicModelAnal : public Algorithm {
     declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
     // harmonic tracking
      declareParameter("nHarmonics", "maximum number of harmonics per frame", "(0,inf)", 100);
-    declareParameter("harmDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);
-    // external pitch input 
-    declareParameter("useExternalPitch", "flag to use the external pitch input","{true,false}", false); // if set to true it gets the external pìtch 
-   
+    declareParameter("harmDevSlope", "slope increase of minimum frequency deviation", "(-inf,inf)", 0.01);   
   }
 
   void configure();
@@ -128,7 +113,8 @@ namespace streaming {
 class HarmonicModelAnal : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<Real> > _frame; // input
+  
+  Sink<std::vector<std::complex<Real> > > _fft; // input
   Sink<Real> _pitch; // input
   Source<std::vector<Real> > _frequencies;
   Source<std::vector<Real> > _magnitudes;
@@ -138,7 +124,7 @@ class HarmonicModelAnal : public StreamingAlgorithmWrapper {
  public:
   HarmonicModelAnal() {
     declareAlgorithm("HarmonicModelAnal");
-    declareInput(_frame, TOKEN, "frame");
+    declareInput(_fft, TOKEN, "fft");
     declareInput(_pitch, TOKEN, "pitch");
     declareOutput(_frequencies, TOKEN, "frequencies");
     declareOutput(_magnitudes, TOKEN, "magnitudes");

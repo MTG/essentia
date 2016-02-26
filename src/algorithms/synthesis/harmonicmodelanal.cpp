@@ -27,7 +27,7 @@ using namespace standard;
 const char* HarmonicModelAnal::name = "HarmonicModelAnal";
 const char* HarmonicModelAnal::description = DOC("This algorithm computes the harmonic model analysis.  \n"
 "\n"
-"This algorithm uses SineModelAnal and keeps only the harmonic partials. It estimates the pitch using the YinPitchFFT algorithm. Optionally an external pitch value can be given as input, setting the useExternalPithc flag accordingly .\n"
+"This algorithm uses SineModelAnal and keeps only the harmonic partials. It receives an external pitch value as input. You can use PitchYinFft algorithm to compute the pitch per frame.\n"
 "\n"
 "References:\n"
 "  https://github.com/MTG/sms-tools\n"
@@ -37,22 +37,6 @@ const char* HarmonicModelAnal::description = DOC("This algorithm computes the ha
 
 
 void HarmonicModelAnal::configure() {
-
-  std::string wtype = "blackmanharris92"; // default "hamming"
-  _window->configure("type", wtype.c_str());
-
-  _spectrum->configure("size", parameter("fftSize").toInt() );
-
-  _fft->configure("size", parameter("fftSize").toInt()  );
-
-
-  _pitchDetect->configure("frameSize", parameter("fftSize").toInt() ,
-                                          "sampleRate", parameter("sampleRate").toReal(),
-                                            "maxFrequency", parameter("maxFrequency").toReal(),
-                                            "minFrequency", parameter("minFrequency").toReal()
-                                          );
-                                       
-
 
                             
   _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
@@ -70,7 +54,6 @@ void HarmonicModelAnal::configure() {
   _sampleRate =  parameter("sampleRate").toReal();
   _nH = parameter("nHarmonics").toInt() ; // number of harmonics
  _harmDevSlope =  parameter("harmDevSlope").toReal();
- _useExtPitch = parameter("useExternalPitch").toBool();
  
  _lasthfreq.clear();
 
@@ -81,39 +64,15 @@ void HarmonicModelAnal::configure() {
 void HarmonicModelAnal::compute() {
 
   // inputs and outputs
-  const std::vector<Real>& frame = _frame.get();
+  const std::vector<std::complex<Real> >& fftin = _fft.get();
   const Real& pitch = _pitch.get();
 
   std::vector<Real>& hpeakMagnitude = _magnitudes.get();
   std::vector<Real>& hpeakFrequency = _frequencies.get();
   std::vector<Real>& hpeakPhase = _phases.get();
  
-  std::vector<Real> spec;
-  std::vector<Real> wframe;
-  std::vector<std::complex<Real> > fftin;
   std::vector<Real> fftmag;
   std::vector<Real> fftphase;
-
-  _window->input("frame").set(frame);
-  _window->output("frame").set(wframe);
-  _window->compute();
-
-  // set spectrum:
-  _spectrum->input("frame").set(wframe);
-  _spectrum->output("spectrum").set(spec);
-  _spectrum->compute();
-
-  // set Yin pitch extraction:
-  Real thisPitch = 0.;
-  Real thisConf = 0;
-  _pitchDetect->input("spectrum").set(spec);
-  _pitchDetect->output("pitch").set(thisPitch);
-  _pitchDetect->output("pitchConfidence").set(thisConf);
-  _pitchDetect->compute();
-  
-  _fft->input("frame").set(wframe);
-  _fft->output("fft").set(fftin);
-  _fft->compute();
 
   std::vector<Real> peakMagnitude ;
   std::vector<Real> peakFrequency;
@@ -127,18 +86,9 @@ void HarmonicModelAnal::compute() {
   _sineModelAnal->compute();
 
 
-
-   if  (_useExtPitch)
-   {
-      thisPitch = pitch;      
-     }
-   
-
-	harmonicDetection(peakFrequency, peakMagnitude, peakPhase, thisPitch, _nH, _lasthfreq,  _sampleRate,  _harmDevSlope,  hpeakFrequency,  hpeakMagnitude,  hpeakPhase);
-
+	harmonicDetection(peakFrequency, peakMagnitude, peakPhase, pitch, _nH, _lasthfreq,  _sampleRate,  _harmDevSlope,  hpeakFrequency,  hpeakMagnitude,  hpeakPhase);
 
 	_lasthfreq = hpeakFrequency;  // copy last harmonic frequencies for tracking
-
 
 
 }

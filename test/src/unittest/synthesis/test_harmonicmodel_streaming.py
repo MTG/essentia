@@ -80,19 +80,32 @@ def analHarmonicModelStreaming(params, signal):
   
     #out = numpy.array(0)
     pool = essentia.Pool()
+
+   # windowing and FFT
     fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
-  #  w = es.Windowing(type = "hann");
-   # fft = es.FFT(size = params['frameSize']);
+    w = es.Windowing(type = "blackmanharris92");
+    fft = es.FFT(size = params['frameSize']);
+    spec = es.Spectrum(size = params['frameSize']);
+    
+    # pitch detection
+    pitchDetect = es.PitchYinFFT(frameSize=params['frameSize'], sampleRate =  params['sampleRate'])    
+
     smanal = es.HarmonicModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
     
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
     insignal = VectorInput (signal)
     insignal.data >> fcut.signal
-    fcut.frame >> smanal.frame    
-    extPitch =  array(0.) # set external pitch to 0.
-    inPitch = VectorInput (extPitch)
-    inPitch.data >> smanal.pitch
+    
+    fcut.frame >> w.frame
+    w.frame >> spec.frame
+    w.frame >> fft.frame
+    spec.spectrum >> pitchDetect.spectrum
+    
+    fft.fft >> smanal.fft
+    pitchDetect.pitch >> smanal.pitch  
+    pitchDetect.pitchConfidence >> (pool, 'pitchConfidence')  
+    
     smanal.magnitudes >> (pool, 'magnitudes')
     smanal.frequencies >> (pool, 'frequencies')
     smanal.phases >> (pool, 'phases')
@@ -104,7 +117,6 @@ def analHarmonicModelStreaming(params, signal):
     freqs = pool['frequencies']
     phases = pool['phases']
 
-    print 'before clean tracks'
     
     # remove short tracks
     minFrames = int( params['minSineDur'] * params['sampleRate'] / params['hopSize']);
@@ -118,12 +130,15 @@ def analsynthHarmonicModelStreaming(params, signal):
     out = array([0.])
   
     pool = essentia.Pool()
+    # windowing and FFT
     fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
     w = es.Windowing(type = "blackmanharris92");
     fft = es.FFT(size = params['frameSize']);
     spec = es.Spectrum(size = params['frameSize']);
-
+    
+    # pitch detection
     pitchDetect = es.PitchYinFFT(frameSize=params['frameSize'], sampleRate =  params['sampleRate'])    
+    
     smanal = es.HarmonicModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'])
     smsyn = es.SineModelSynth(sampleRate = params['sampleRate'], fftSize = params['frameSize'], hopSize = params['hopSize'])
     ifft = es.IFFT(size = params['frameSize']);
@@ -139,9 +154,10 @@ def analsynthHarmonicModelStreaming(params, signal):
     insignal.data >> fcut.signal
     fcut.frame >> w.frame
     w.frame >> spec.frame
+    w.frame >> fft.frame
     spec.spectrum >> pitchDetect.spectrum
     
-    fcut.frame >> smanal.frame
+    fft.fft >> smanal.fft
     pitchDetect.pitch >> smanal.pitch  
     pitchDetect.pitchConfidence >> (pool, 'pitchConfidence')  
     smanal.magnitudes >> (pool, 'magnitudes')

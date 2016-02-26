@@ -33,11 +33,14 @@ class HprModelAnal : public Algorithm {
  protected:
 
   Input<std::vector<Real> > _frame;
+  Input<Real> _pitch;
   Output<std::vector<Real> > _magnitudes;
   Output<std::vector<Real> > _frequencies;
   Output<std::vector<Real> > _phases;
   Output<std::vector<Real> >_res;
 
+  Algorithm* _window;
+  Algorithm* _fft;
   Algorithm* _harmonicModelAnal;
   Algorithm* _sineSubtraction;
 
@@ -46,11 +49,14 @@ class HprModelAnal : public Algorithm {
  public:
   HprModelAnal() {
     declareInput(_frame, "frame", "the input frame");
+    declareInput(_pitch, "pitch", "external pitch input [Hz].");
     declareOutput(_frequencies, "frequencies", "the frequencies of the sinusoidal peaks [Hz]");
     declareOutput(_magnitudes, "magnitudes", "the magnitudes of the sinusoidal peaks");
     declareOutput(_phases, "phases", "the phases of the sinusoidal peaks");
     declareOutput(_res, "res", "output residual frame");
 
+    _window = AlgorithmFactory::create("Windowing");
+    _fft = AlgorithmFactory::create("FFT");
     _harmonicModelAnal = AlgorithmFactory::create("HarmonicModelAnal");
     _sineSubtraction = AlgorithmFactory::create("SineSubtraction");
   
@@ -58,9 +64,10 @@ class HprModelAnal : public Algorithm {
   }
 
   ~HprModelAnal() {
-
-  delete _harmonicModelAnal;
-  delete _sineSubtraction;
+    delete _window;
+    delete _fft;
+    delete _harmonicModelAnal;
+    delete _sineSubtraction;
 
   }
 
@@ -111,6 +118,7 @@ class HprModelAnal : public StreamingAlgorithmWrapper {
  protected:
   
   Sink<std::vector<Real> > _frame; // input
+  Sink<Real> _pitch; // input
   Source<std::vector<Real> > _frequencies;
   Source<std::vector<Real> > _magnitudes;
   Source<std::vector<Real> > _phases;
@@ -120,6 +128,7 @@ class HprModelAnal : public StreamingAlgorithmWrapper {
   HprModelAnal() {
     declareAlgorithm("HprModelAnal");
     declareInput(_frame, TOKEN, "frame");
+    declareInput(_pitch, TOKEN, "pitch");
     declareOutput(_frequencies, TOKEN, "frequencies");
     declareOutput(_magnitudes, TOKEN, "magnitudes");
     declareOutput(_phases, TOKEN, "phases");
