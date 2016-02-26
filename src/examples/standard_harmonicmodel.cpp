@@ -88,8 +88,18 @@ int main(int argc, char* argv[]) {
                                          //  "silentFrames", "noise",
                                            "startFromZero", false );
 
+  Algorithm* window       = factory.create("Windowing", "type", "hamming");
 
+  Algorithm* fft     = factory.create("FFT",
+                            "size", framesize);
 
+  Algorithm* spectrum = factory.create("Spectrum",
+                                       "size", framesize);
+
+  Algorithm* pitchDetect = factory.create("PitchYinFFT",
+                                          "frameSize", framesize,
+                                          "sampleRate", sr);
+                  
  Algorithm* equalLoudness = factory.create("EqualLoudness");
                                        
   Algorithm* predominantMelody = factory.create("PredominantPitchMelodia", 
@@ -130,6 +140,7 @@ int main(int argc, char* argv[]) {
   vector<Real> frame;
   vector<Real> eqaudio;
   vector<Real> wframe;
+  vector<complex<Real> > fftframe;
 
   vector<Real> predPitch;
   vector<Real> predConf;
@@ -154,6 +165,17 @@ int main(int argc, char* argv[]) {
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
 
+  window->input("frame").set(frame);
+  window->output("frame").set(wframe);
+
+  fft->input("frame").set(wframe);
+  fft->output("fft").set(fftframe);
+  
+  // configure spectrum:
+  vector<Real> spec;
+  spectrum->input("frame").set(wframe);
+  spectrum->output("spectrum").set(spec);
+  
   equalLoudness->input("signal").set(audio);
   equalLoudness->output("signal").set(eqaudio);
 
@@ -163,11 +185,14 @@ int main(int argc, char* argv[]) {
   predominantMelody->output("pitch").set(predPitch);
   predominantMelody->output("pitchConfidence").set(predConf);
 
- Real thisPitch = 0.;
+  Real thisPitch = 0. ,thisConf = 0;
 
+  pitchDetect->input("spectrum").set(spec);
+  pitchDetect->output("pitch").set(thisPitch);
+  pitchDetect->output("pitchConfidence").set(thisConf);
    
   // Harmonic model analysis
-  harmonicmodelanal->input("frame").set(frame); // inputs a frame
+  harmonicmodelanal->input("fft").set(fftframe); // input fft
   harmonicmodelanal->input("pitch").set(thisPitch); // inputs a pitch
   harmonicmodelanal->output("magnitudes").set(magnitudes);
   harmonicmodelanal->output("frequencies").set(frequencies);
@@ -215,6 +240,10 @@ int main(int argc, char* argv[]) {
       break;
     }
 
+     window->compute();
+     spectrum->compute();
+     pitchDetect->compute();
+                
     // get predominant pitch
     if (usePredominant){
       thisPitch = predPitch[counter];

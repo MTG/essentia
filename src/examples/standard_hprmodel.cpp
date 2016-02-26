@@ -101,7 +101,9 @@ int main(int argc, char* argv[]) {
  
   vector<Real> audio;
   vector<Real> frame;
-
+  vector<Real> wframe;
+  vector<complex<Real> > fftframe;
+  
   vector<Real> magnitudes;
   vector<Real> frequencies;
   vector<Real> phases;
@@ -129,6 +131,22 @@ int main(int argc, char* argv[]) {
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
 
+  window->input("frame").set(frame);
+  window->output("frame").set(wframe);
+
+  fft->input("frame").set(wframe);
+  fft->output("fft").set(fftframe);
+  
+  // configure spectrum:
+  vector<Real> spec;
+  spectrum->input("frame").set(wframe);
+  spectrum->output("spectrum").set(spec);  
+
+  Real thisPitch = 0. ,thisConf = 0;
+  pitchDetect->input("spectrum").set(spec);
+  pitchDetect->output("pitch").set(thisPitch);
+  pitchDetect->output("pitchConfidence").set(thisConf);
+   
    
   // Harmonic model analysis
   hprmodelanal->input("frame").set(frame); // inputs a frame
@@ -173,11 +191,14 @@ int main(int argc, char* argv[]) {
       break;
     }
 
-
+     window->compute();
+     spectrum->compute();
+     pitchDetect->compute();
+     
     // HpS model analysis
     hprmodelanal->compute();
-     
     
+  
     // append frequencies of the curent frame for later cleaningTracks
     frequenciesAllFrames.push_back(frequencies);
     magnitudesAllFrames.push_back(magnitudes);
