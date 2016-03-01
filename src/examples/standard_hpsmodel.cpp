@@ -77,6 +77,17 @@ int main(int argc, char* argv[]) {
                                          //  "silentFrames", "noise",
                                            "startFromZero", false );
 
+  Algorithm* window       = factory.create("Windowing", "type", "hamming");
+
+  Algorithm* fft     = factory.create("FFT",
+                            "size", framesize);
+
+  Algorithm* spectrum = factory.create("Spectrum",
+                                       "size", framesize);
+
+  Algorithm* pitchDetect = factory.create("PitchYinFFT",
+                                          "frameSize", framesize,
+                                          "sampleRate", sr);
 
   // parameters used in the SMS Python implementation
   Algorithm* hpsmodelanal   = factory.create("HpsModelAnal",
@@ -106,7 +117,9 @@ int main(int argc, char* argv[]) {
  
   vector<Real> audio;
   vector<Real> frame;
-
+  vector<Real> wframe;
+  vector<complex<Real> > fftframe;
+  
   vector<Real> magnitudes;
   vector<Real> frequencies;
   vector<Real> phases;
@@ -131,6 +144,22 @@ int main(int argc, char* argv[]) {
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
 
+   window->input("frame").set(frame);
+  window->output("frame").set(wframe);
+
+  fft->input("frame").set(wframe);
+  fft->output("fft").set(fftframe);
+  
+  // configure spectrum:
+  vector<Real> spec;
+  spectrum->input("frame").set(wframe);
+  spectrum->output("spectrum").set(spec);  
+
+  Real thisPitch = 0. ,thisConf = 0;
+  pitchDetect->input("spectrum").set(spec);
+  pitchDetect->output("pitch").set(thisPitch);
+  pitchDetect->output("pitchConfidence").set(thisConf);
+   
    
   // Harmonic model analysis
   hpsmodelanal->input("frame").set(frame); // inputs a frame
@@ -173,6 +202,10 @@ int main(int argc, char* argv[]) {
       break;
     }
 
+    window->compute();
+    fft->compute();
+     spectrum->compute();
+     pitchDetect->compute();
 
     // HpS model analysis
     hpsmodelanal->compute();
@@ -253,6 +286,10 @@ int main(int argc, char* argv[]) {
 
   delete audioLoader;
   delete frameCutter;
+  delete   window;
+  delete   fft;
+  delete  spectrum;  
+  delete  pitchDetect; 
   delete hpsmodelanal;
   delete spsmodelsynth;
   delete audioWriter;

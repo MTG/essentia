@@ -112,12 +112,10 @@ int main(int argc, char* argv[]) {
   Algorithm* harmonicmodelanal   = factory.create("HarmonicModelAnal",
                             "sampleRate", sr,
                             "hopSize", hopsize,
-                            "fftSize", framesize,
                             "nHarmonics", 100,                           
                             "harmDevSlope", 0.01,
                             "maxFrequency", maxF0,
-                            "minFrequency", minF0,
-                            "useExternalPitch", usePredominant
+                            "minFrequency", minF0
                             );
 
 
@@ -241,6 +239,7 @@ int main(int argc, char* argv[]) {
     }
 
      window->compute();
+      fft->compute();
      spectrum->compute();
      pitchDetect->compute();
                 
@@ -318,6 +317,11 @@ int main(int argc, char* argv[]) {
 
   delete audioLoader;
   delete frameCutter;
+  delete   window;
+  delete   fft;
+  delete  spectrum;
+  delete equalLoudness; 
+  delete  pitchDetect; 
    delete harmonicmodelanal;
 	delete predominantMelody;
    delete sinemodelsynth;

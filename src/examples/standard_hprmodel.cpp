@@ -77,6 +77,19 @@ int main(int argc, char* argv[]) {
                                            "startFromZero", false );
 
 
+  Algorithm* window       = factory.create("Windowing", "type", "hamming");
+
+  Algorithm* fft     = factory.create("FFT",
+                            "size", framesize);
+
+  Algorithm* spectrum = factory.create("Spectrum",
+                                       "size", framesize);
+
+  Algorithm* pitchDetect = factory.create("PitchYinFFT",
+                                          "frameSize", framesize,
+                                          "sampleRate", sr);
+                  
+
   // parameters used in the SMS Python implementation
   Algorithm* hprmodelanal   = factory.create("HprModelAnal",
                             "sampleRate", sr,
@@ -192,6 +205,7 @@ int main(int argc, char* argv[]) {
     }
 
      window->compute();
+     fft->compute();
      spectrum->compute();
      pitchDetect->compute();
      
@@ -274,6 +288,10 @@ int main(int argc, char* argv[]) {
 
   delete audioLoader;
   delete frameCutter;
+  delete   window;
+  delete   fft;
+  delete  spectrum;  
+  delete  pitchDetect; 
   delete hprmodelanal;
   delete sprmodelsynth;
   delete audioWriter;
