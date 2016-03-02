@@ -95,7 +95,7 @@ class TestMonoLoader(TestCase):
         mix = self.load(filename, 'mix', 44100);
         self.assertEqual(self.round(sum(left)), 10)
         self.assertEqual(self.round(sum(right)), 9)
-        self.assertEqual(sum(mix), 9.5) # 0.5*left + 0.5*right
+        self.assertAlmostEqualFixedPrecision(sum(mix), 9.5, 3) # 0.5*left + 0.5*right
 
 ###############
 # #mp3
@@ -249,7 +249,6 @@ class TestMonoLoader(TestCase):
         self.assertEquals(len(audio3), 441000);
         self.assertEqualVector(audio2, audio1)
         self.assertEqualVector(audio2, audio3)
-
 
 
 
