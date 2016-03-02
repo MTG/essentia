@@ -89,6 +89,10 @@ def _create_essentia_class(name, moduleName = __name__):
             if name in ('YamlInput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'Extractor'):
                 return _c.Pool(results)
 
+            # In the case of MetadataReader, the 7th output is also a Pool
+            if name in ('MetadataReader'):
+                return results[:7] + (_c.Pool(results[7]),) + results[8:]
+
             else:
                 return results
 
