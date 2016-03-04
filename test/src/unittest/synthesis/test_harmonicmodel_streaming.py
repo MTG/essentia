@@ -241,7 +241,7 @@ class TestHarmonicModel(TestCase):
 
         # generate test signal: sine 110Hz @44100kHz
         signalSize = 10 * self.params['frameSize']
-        signal = .5 * numpy.sin( (array(range(signalSize))/self.params['sampleRate']) * 110 * 2*math.pi)
+        signal = .5 * numpy.sin( (array(range(signalSize))/self.params['sampleRate']) * 110 * 2*math.pi)        
         
         outsignal,pool = analsynthHarmonicModelStreaming(self.params, signal)
 
@@ -249,12 +249,7 @@ class TestHarmonicModel(TestCase):
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
-        
-        numpy.savetxt('sine.txt',signal[halfwin:-halfwin])
-        numpy.savetxt('sine_out.txt',outsignal[halfwin:-halfwin])
-        
-        # computing max difference between waveforms
-        #diffference = numpy.max(abs(outsignal[halfwin:-halfwin] - signal[halfwin:-halfwin]))
+              
 
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 

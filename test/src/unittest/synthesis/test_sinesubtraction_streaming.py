@@ -91,7 +91,7 @@ def analsynthSineSubtractionStreaming(params, signal):
     fft = es.FFT(size = params['frameSize']);
     smanal = es.SineModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
     
-    subtrFFTSize = min(512, 4* params['hopSize'])
+    subtrFFTSize = min(params['frameSize']/4, 4* params['hopSize'])
     smsub = es.SineSubtraction(sampleRate = params['sampleRate'], fftSize = subtrFFTSize, hopSize = params['hopSize'])
 
     # add half window of zeros to input signal to reach same ooutput length
@@ -114,7 +114,8 @@ def analsynthSineSubtractionStreaming(params, signal):
     smsub.frame >> (pool, 'frames')
     
     essentia.run(insignal)
-       
+    
+    print pool['frames'].shape
     outaudio = framesToAudio(pool['frames'])    
     outaudio = outaudio [2*params['hopSize']:]
     

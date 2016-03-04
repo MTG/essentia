@@ -163,6 +163,7 @@ int main(int argc, char* argv[]) {
    
   // Harmonic model analysis
   hprmodelanal->input("frame").set(frame); // inputs a frame
+  hprmodelanal->input("pitch").set(thisPitch); // inputs a pitch
   hprmodelanal->output("magnitudes").set(magnitudes);
   hprmodelanal->output("frequencies").set(frequencies);
   hprmodelanal->output("phases").set(phases);

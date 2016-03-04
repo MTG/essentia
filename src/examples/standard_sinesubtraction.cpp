@@ -51,8 +51,8 @@ int main(int argc, char* argv[]) {
   int framesize = 2048;
   int hopsize = 128; //128;
   Real sr = 44100;
-  Real minSineDur = 0.02;
-  Real stocf = 0.2; // 0.2; //1.; // stochastic envelope factor. Default 0.2
+  
+
 
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -70,17 +70,17 @@ int main(int argc, char* argv[]) {
 
 
   // parameters used in the SMS Python implementation
-  Algorithm* spsmodelanal   = factory.create("SpsModelAnal",
+
+  Algorithm* sinemodelanal     = factory.create("SineModelAnal",
                             "sampleRate", sr,
-                            "hopSize", hopsize,
-                            "fftSize", framesize,
                             "maxnSines", 100,
                             "freqDevOffset", 10,
-                            "freqDevSlope", 0.001,
-                            "stocf", stocf
+                            "freqDevSlope", 0.001
                             );
+                            
 
-  int subtrFFTSize = std::min(512, 4*hopsize);  // make sure the FFT size is at least twice the hopsize
+  
+  int subtrFFTSize = std::min(framesize/4, 4*hopsize);  // make sure the FFT size 
   Algorithm* sinesubtraction = factory.create("SineSubtraction",
                               "sampleRate", sr,
                               "fftSize", subtrFFTSize,
@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
   vector<Real> magnitudes;
   vector<Real> frequencies;
   vector<Real> phases;
-  vector<Real> stocenv;
+
 
   vector<Real> allaudio; // concatenated audio file output
 
@@ -109,11 +109,11 @@ int main(int argc, char* argv[]) {
   frameCutter->output("frame").set(frame);
 
   // Sine model analysis
-  spsmodelanal->input("frame").set(frame); // inputs a frame
-  spsmodelanal->output("magnitudes").set(magnitudes);
-  spsmodelanal->output("frequencies").set(frequencies);
-  spsmodelanal->output("phases").set(phases);
-  spsmodelanal->output("stocenv").set(stocenv);
+  sinemodelanal->input("frame").set(frame); // inputs a frame
+  sinemodelanal->output("magnitudes").set(magnitudes);
+  sinemodelanal->output("frequencies").set(frequencies);
+  sinemodelanal->output("phases").set(phases);
+  
 
   vector<Real> audioOutput;
 
@@ -146,7 +146,7 @@ int main(int argc, char* argv[]) {
     }
 
     // Sine model analysis
-    spsmodelanal->compute();
+    sinemodelanal->compute();
 
     sinesubtraction->compute();
 
@@ -171,7 +171,7 @@ int main(int argc, char* argv[]) {
 
   delete audioLoader;
   delete frameCutter;
-  delete spsmodelanal;
+  delete sinemodelanal;
   delete sinesubtraction;
   delete audioWriter;
 

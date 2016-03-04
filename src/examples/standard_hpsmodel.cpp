@@ -97,14 +97,15 @@ int main(int argc, char* argv[]) {
                             "maxFrequency", maxF0,
                             "minFrequency", minF0,
                             "nHarmonics", 100,                           
-                            "harmDevSlope", 0.01               
+                            "harmDevSlope", 0.01,
+                            "freqDevOffset", 10,
+                            "freqDevSlope", 0.001,
+                            "stocf", stocf
                             );
 
 
-
-  int frameSizeSynth = 512; // frameSize
   Algorithm* spsmodelsynth  = factory.create("SpsModelSynth",
-                            "sampleRate", sr, "fftSize", frameSizeSynth, "hopSize", hopsize, "stocf", stocf);
+                            "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize, "stocf", stocf);
  
   
   Algorithm* audioWriter = factory.create("MonoWriter",
@@ -163,6 +164,7 @@ int main(int argc, char* argv[]) {
    
   // Harmonic model analysis
   hpsmodelanal->input("frame").set(frame); // inputs a frame
+  hpsmodelanal->input("pitch").set(thisPitch); // inputs a pitch
   hpsmodelanal->output("magnitudes").set(magnitudes);
   hpsmodelanal->output("frequencies").set(frequencies);
   hpsmodelanal->output("phases").set(phases);

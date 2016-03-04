@@ -50,7 +50,7 @@ void SprModelAnal::configure() {
                               "freqDevSlope",  parameter("freqDevSlope").toReal()
                               );
 
-  int subtrFFTSize = std::min(512, 4*parameter("hopSize").toInt());  // make sure the FFT size is at least twice the hopsize
+  int subtrFFTSize = std::min(parameter("fftSize").toInt()/4, 4*parameter("hopSize").toInt());  // make sure the FFT size i
   _sineSubtraction->configure( "sampleRate", parameter("sampleRate").toReal(),
                               "fftSize", subtrFFTSize,
                               "hopSize", parameter("hopSize").toInt()
@@ -99,7 +99,7 @@ void SprModelAnal::compute() {
  _sineSubtraction->input("magnitudes").set(peakMagnitude);
  _sineSubtraction->input("frequencies").set(peakFrequency);
  _sineSubtraction->input("phases").set(peakPhase);
- _sineSubtraction->output("frame").set(res); // Nsyn size
+ _sineSubtraction->output("frame").set(res); // Nsyn size (subtrFFTSize)
  _sineSubtraction->compute();
 
 

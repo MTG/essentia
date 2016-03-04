@@ -84,6 +84,7 @@ class HpsModelAnal : public Algorithm {
     declareParameter("minFrequency", "the minimum frequency of the range to evaluate [Hz]", "(0,inf)", 20.0);
     declareParameter("magnitudeThreshold", "peaks below this given threshold are not outputted", "(-inf,inf)", 0.0);
     declareParameter("orderBy", "the ordering type of the outputted peaks (ascending by frequency or descending by magnitude)", "{frequency,magnitude}", "frequency");
+    
     // sinusoidal tracking
     declareParameter("maxnSines", "maximum number of sines per frame", "(0,inf)", 100);
     declareParameter("freqDevOffset", "minimum frequency deviation at 0Hz", "(0,inf)", 20);

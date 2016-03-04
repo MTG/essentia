@@ -84,6 +84,7 @@ int main(int argc, char* argv[]) {
                             "freqDevSlope", 0.001       
                             );
 
+  
    Algorithm* sprmodelsynth     = factory.create("SprModelSynth",
                             "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
    
