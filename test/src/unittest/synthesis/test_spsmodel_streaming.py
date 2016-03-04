@@ -196,8 +196,8 @@ class TestSpsModel(TestCase):
         signalSize = 10 * self.params['frameSize']
         signal = array([2*(random()-0.5)*i for i in ones(signalSize)])
         
-        # for white noise test set sine minimum duration to 50ms, and min threshold of -20dB
-        self.params['minSineDur'] = 0.35 # limit pitch tracks of a nimumim length of 350ms for the case of white noise input
+        # for white noise test set sine minimum duration to 500ms, and min threshold of -20dB
+        self.params['minSineDur'] = 0.5 # limit pitch tracks of a nimumim length of 350ms for the case of white noise input
         self.params['magnitudeThreshold']= -20
     
         [mags, freqs, phases]  = analSpsModelStreaming(self.params, signal)
