@@ -85,7 +85,7 @@ def framesToAudio(frames):
     
 
 # computes  analysis only
-def analHprModelStreaming(params, signal):
+def analHpsModelStreaming(params, signal):
   
     #out = numpy.array(0)
     pool = essentia.Pool()
@@ -95,7 +95,7 @@ def analHprModelStreaming(params, signal):
     
     # pitch detection
     pitchDetect = es.PitchYinFFT(frameSize=params['frameSize'], sampleRate =  params['sampleRate'])    
-    smanal = es.HprModelAnal(sampleRate = params['sampleRate'], hopSize = params['hopSize'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'])
+    smanal = es.HpsModelAnal(sampleRate = params['sampleRate'], hopSize = params['hopSize'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'], stocf = params['stocf'])
     
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
@@ -115,7 +115,7 @@ def analHprModelStreaming(params, signal):
     smanal.magnitudes >> (pool, 'magnitudes')
     smanal.frequencies >> (pool, 'frequencies')
     smanal.phases >> (pool, 'phases')
-    smanal.res >> (pool, 'res')
+    smanal.stocenv >> (pool, 'stocenv')
     
     
     essentia.run(insignal)
@@ -137,7 +137,7 @@ def analHprModelStreaming(params, signal):
 
 
 # computes analysis/stynthesis
-def analsynthHprModelStreaming(params, signal):
+def analsynthHpsModelStreaming(params, signal):
   
     out = array([0.])
   
@@ -150,15 +150,15 @@ def analsynthHprModelStreaming(params, signal):
     # pitch detection
     pitchDetect = es.PitchYinFFT(frameSize=params['frameSize'], sampleRate =  params['sampleRate'])    
     
-    smanal = es.HprModelAnal(sampleRate = params['sampleRate'], hopSize = params['hopSize'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'])
+    smanal = es.HpsModelAnal(sampleRate = params['sampleRate'], hopSize = params['hopSize'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'], stocf = params['stocf'])
     synFFTSize = min(params['frameSize']/4, 4*params['hopSize']);  # make sure the FFT size is appropriate
-    smsyn = es.SprModelSynth(sampleRate = params['sampleRate'], fftSize = synFFTSize, hopSize = params['hopSize'])    
+    smsyn = es.SpsModelSynth(sampleRate = params['sampleRate'], fftSize = synFFTSize, hopSize = params['hopSize'], stocf = params['stocf'])    
     
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
     insignal = VectorInput (signal)
         
-      
+
     # analysis
     insignal.data >> fcut.signal
     fcut.frame >> w.frame
@@ -169,16 +169,16 @@ def analsynthHprModelStreaming(params, signal):
     pitchDetect.pitch >> smanal.pitch  
     pitchDetect.pitchConfidence >> (pool, 'pitchConfidence')  
     pitchDetect.pitch >> (pool, 'pitch')  
-    print freqsClean
+    
     # synthesis
     smanal.magnitudes >> smsyn.magnitudes
     smanal.frequencies >> smsyn.frequencies
     smanal.phases >> smsyn.phases
-    smanal.res >> smsyn.res
+    smanal.stocenv >> smsyn.stocenv
     
     smsyn.frame >> (pool, 'frames')
     smsyn.sineframe >> (pool, 'sineframes')
-    smsyn.resframe >> (pool, 'resframes')
+    smsyn.stocframe >> (pool, 'stocframes')
     
     essentia.run(insignal)
        
@@ -192,9 +192,9 @@ def analsynthHprModelStreaming(params, signal):
 
 #-------------------------------------
 
-class TestHprModel(TestCase):
+class TestHpsModel(TestCase):
 
-    params = { 'frameSize': 2048, 'hopSize': 128, 'startFromZero': False, 'sampleRate': 44100,'maxnSines': 100,'magnitudeThreshold': -74,'minSineDur': 0.02,'freqDevOffset': 10, 'freqDevSlope': 0.001, 'maxFrequency': 550.,'minFrequency': 65.}
+    params = { 'frameSize': 2048, 'hopSize': 128, 'startFromZero': False, 'sampleRate': 44100,'maxnSines': 100,'magnitudeThreshold': -74,'minSineDur': 0.02,'freqDevOffset': 10, 'freqDevSlope': 0.001, 'maxFrequency': 550.,'minFrequency': 65., 'stocf':.2}
     
     precisiondB = -40. # -40dB of allowed noise floor for sinusoidal model
     precisionDigits = int(-numpy.round(precisiondB/20.) -1) # -1 due to the rounding digit comparison.
@@ -206,7 +206,7 @@ class TestHprModel(TestCase):
         signalSize = 10 * self.params['frameSize']
         signal = zeros(signalSize)
         
-        [mags, freqs, phases] = analHprModelStreaming(self.params, signal)
+        [mags, freqs, phases] = analHpsModelStreaming(self.params, signal)
 
         # compare
         zerofreqs = numpy.zeros(freqs.shape)
@@ -223,7 +223,7 @@ class TestHprModel(TestCase):
         self.params['minSineDur'] = 0.35 # limit pitch tracks of a nimumim length of 500ms for the case of white noise input
         self.params['magnitudeThreshold']= -20
     
-        [mags, freqs, phases]  = analHprModelStreaming(self.params, signal)
+        [mags, freqs, phases]  = analHpsModelStreaming(self.params, signal)
 
         # compare: no frequencies  should be found
         zerofreqs = numpy.zeros(freqs.shape)
@@ -237,17 +237,18 @@ class TestHprModel(TestCase):
 
         # generate noise components        
         from random import random            
-        noise = 0.1 * array([2*(random()-0.5)*i for i in ones(signalSize)]) # -10dB
+        noise = 0.01 * array([2*(random()-0.5)*i for i in ones(signalSize)]) # -40dB
         signal = signal + noise
 
-        outsignal,pool = analsynthHprModelStreaming(self.params, signal)
+        outsignal,pool = analsynthHpsModelStreaming(self.params, signal)
 
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
+        
 
-                
+        
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
 
@@ -255,7 +256,7 @@ class TestHprModel(TestCase):
 
 
 
-suite = allTests(TestHprModel)
+suite = allTests(TestHpsModel)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

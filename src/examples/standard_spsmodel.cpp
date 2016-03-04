@@ -58,7 +58,7 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
   int hopsize = 128; //128;
   Real sr = 44100;
   Real minSineDur = 0.02;
-  Real stocf = 0.2; // stochastic envelope factor. Default 0.2
+  Real stocf =  0.2; // stochastic envelope factor. Default 0.2
 
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -85,9 +85,9 @@ cout << outputSineFilename<< "" << outputStocFilename << endl;
                             "stocf", stocf
                             );
 
-  int frameSizeSynth = 512; // frameSize
+
   Algorithm* spsmodelsynth  = factory.create("SpsModelSynth",
-                            "sampleRate", sr, "fftSize", frameSizeSynth, "hopSize", hopsize, "stocf", stocf);
+                            "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize, "stocf", stocf);
 
 
   Algorithm* audioWriter = factory.create("MonoWriter",

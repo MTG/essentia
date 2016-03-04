@@ -50,7 +50,7 @@ void SpsModelAnal::configure() {
                               "freqDevSlope",  parameter("freqDevSlope").toReal()
                               );
 
-  int subtrFFTSize = std::min(512, 4*parameter("hopSize").toInt());  // make sure the FFT size is at least twice the hopsize
+  int subtrFFTSize = std::min(parameter("fftSize").toInt()/4, 4*parameter("hopSize").toInt());  // make sure the FFT size 
   _sineSubtraction->configure( "sampleRate", parameter("sampleRate").toReal(),
                               "fftSize", subtrFFTSize,
                               "hopSize", parameter("hopSize").toInt()

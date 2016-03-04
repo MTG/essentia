@@ -67,9 +67,14 @@ void SprModelSynth::compute() {
   std::vector<std::complex<Real> > fftSines;
   std::vector<Real> wsineFrame; // windowed frames
   std::vector<Real> sineFrame;  // overlap output frame
-  std::vector<Real> resFrame = res;  // copy input residual to output residual frame
+  std::vector<Real> resFrame;
+  
+    int i = 0;
+  // copy input residual to output residual frame
+  for (i=0; i < (int)  res.size();  i++)
+    resFrame.push_back(res[i]);  
 
-  int i = 0;
+
 
   _sineModelSynth->input("magnitudes").set(magnitudes);
   _sineModelSynth->input("frequencies").set(frequencies);
