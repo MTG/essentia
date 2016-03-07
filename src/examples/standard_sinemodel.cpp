@@ -1,5 +1,5 @@
-  /*
- * Copyright (C) 2006-2015  Music Technology Group - Universitat Pompeu Fabra
+/*
+ * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -21,35 +21,24 @@
 #include <fstream>
 #include <essentia/algorithmfactory.h>
 #include <essentia/pool.h>
+#include <essentia/utils/synth_utils.h>
+
+
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
 
-void scaleAudioVector(vector<Real> &buffer, const Real scale)
-{
-for (int i=0; i < int(buffer.size()); ++i){
-    buffer[i] = scale * buffer[i];
-}
-}
-
 int main(int argc, char* argv[]) {
 
-  if (argc < 3) {
-    cout << "ERROR: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " audio_input output_file [attenuation_dB]" << endl;
-    cout << "attenuation_dB (optional): value in dB's of the attenuation applied to the predominant pitched component. \n \
-    A positive value 'mutes' the pitched component. A negative value 'soloes' the pitched component." << endl;
+  if (argc != 3) {
+    cout << "Standard_SineModel ERROR: incorrect number of arguments." << endl;
+    cout << "Usage: " << argv[0] << " audio_input output_file" << endl;
     exit(1);
   }
 
   string audioFilename = argv[1];
   string outputFilename = argv[2];
-  Real attenuation_dB = -200.f;
-  if (argc ==4){
-   string attstr = argv[3];
-   sscanf(attstr.c_str(), "%f",&attenuation_dB);
-  }
 
   // register the algorithms in the factory(ies)
   essentia::init();
@@ -60,11 +49,9 @@ int main(int argc, char* argv[]) {
 
   /////// PARAMS //////////////
   int framesize = 2048;
-  int hopsize = 128; // 128 for predominant melody
+  int hopsize = 512;
   Real sr = 44100;
-  bool usePredominant = true; // set to true if PredmonantMelody extraction is used. Set to false if monhonic Pitch-YinFFT is used,
-
-
+  Real minSineDur = 0.02;
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
@@ -79,32 +66,22 @@ int main(int argc, char* argv[]) {
                                          //  "silentFrames", "noise",
                                            "startFromZero", false );
 
-  Algorithm* window       = factory.create("Windowing", "type", "hann");
-
-  Algorithm* equalLoudness = factory.create("EqualLoudness");
+  // parameters used in the SMS Python implementation
+  Algorithm* window       = factory.create("Windowing", "type", "hamming");
 
   Algorithm* fft     = factory.create("FFT",
                             "size", framesize);
 
-  Algorithm* predominantMelody = factory.create("PredominantPitchMelodia", //PredominantMelody",
-                                                "frameSize", framesize,
-                                                "hopSize", hopsize,
-                                                "sampleRate", sr);
-//
-  Algorithm* spectrum = factory.create("Spectrum",
-                                       "size", framesize);
-
-  Algorithm* pitchDetect = factory.create("PitchYinFFT",
-                                          "frameSize", framesize,
-                                          "sampleRate", sr);
-
-//  Algorithm* realAccumulator     = factory.create("RealAccumulator");
-
-
-  Algorithm* harmonicMask     = factory.create("HarmonicMask",
+  // parameters used in the SMS Python implementation
+  Algorithm* sinemodelanal     = factory.create("SineModelAnal",
                             "sampleRate", sr,
-                            "binWidth", 2,
-                            "attenuation", attenuation_dB);
+                            "maxnSines", 100,
+                            "freqDevOffset", 10,
+                            "freqDevSlope", 0.001
+                            );
+
+  Algorithm* sinemodelsynth     = factory.create("SineModelSynth",
+                            "sampleRate", sr, "fftSize", framesize, "hopSize", hopsize);
 
 
   Algorithm* ifft     = factory.create("IFFT",
@@ -120,27 +97,26 @@ int main(int argc, char* argv[]) {
 
 
 
-  vector<Real> pitchIn;
-  vector<Real> pitchConf;
   vector<Real> audio;
-  vector<Real> eqaudio;
   vector<Real> frame;
   vector<Real> wframe;
   vector<complex<Real> > fftframe;
-  vector<complex<Real> > fftmaskframe;
+
+  vector<Real> magnitudes;
+  vector<Real> frequencies;
+  vector<Real> phases;
+
+  vector<complex<Real> >  sfftframe; // sine model FFT frame
   vector<Real> ifftframe;
   vector<Real> alladuio; // concatenated audio file output
- // Real confidence;
+ 
+
+  vector< vector<Real> > frequenciesAllFrames;
+  vector< vector<Real> > magnitudesAllFrames;
+  vector< vector<Real> > phasesAllFrames;
 
   // analysis
   audioLoader->output("audio").set(audio);
-
-  equalLoudness->input("signal").set(audio);
-  equalLoudness->output("signal").set(eqaudio);
-
-  predominantMelody->input("signal").set(eqaudio);
-  predominantMelody->output("pitch").set(pitchIn);
-  predominantMelody->output("pitchConfidence").set(pitchConf);
 
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
@@ -148,37 +124,29 @@ int main(int argc, char* argv[]) {
   window->input("frame").set(frame);
   window->output("frame").set(wframe);
 
-  // set spectrum:
-  vector<Real> spec;
-  spectrum->input("frame").set(wframe);
-  spectrum->output("spectrum").set(spec);
-
-  // set Yin pitch extraction:
-  Real thisPitch = 0., thisConf = 0;
-  pitchDetect->input("spectrum").set(spec);
-  pitchDetect->output("pitch").set(thisPitch);
-  pitchDetect->output("pitchConfidence").set(thisConf);
-
-
   fft->input("frame").set(wframe);
   fft->output("fft").set(fftframe);
 
-  // processing harmonic mask (apply mask)
-  harmonicMask->input("fft").set(fftframe);
-  harmonicMask->input("pitch").set(thisPitch);
-  harmonicMask->output("fft").set(fftmaskframe);
+  // Sine model analysis
+  sinemodelanal->input("fft").set(fftframe);
+  sinemodelanal->output("magnitudes").set(magnitudes);
+  sinemodelanal->output("frequencies").set(frequencies);
+  sinemodelanal->output("phases").set(phases);
+
+
+  sinemodelsynth->input("magnitudes").set(magnitudes);
+  sinemodelsynth->input("frequencies").set(frequencies);
+  sinemodelsynth->input("phases").set(phases);
+  sinemodelsynth->output("fft").set(sfftframe);
 
   // Synthesis
-  ifft->input("fft").set(fftmaskframe);
+  ifft->input("fft").set(sfftframe);
   ifft->output("frame").set(ifftframe);
-
 
   vector<Real> audioOutput;
 
-  overlapAdd->input("signal").set(ifftframe); // or frame ?
+  overlapAdd->input("signal").set(ifftframe);
   overlapAdd->output("signal").set(audioOutput);
-
-
 
 
 ////////
@@ -186,11 +154,12 @@ int main(int argc, char* argv[]) {
   cout << "-------- start processing " << audioFilename << " --------" << endl;
 
   audioLoader->compute();
-  equalLoudness->compute();
-  predominantMelody->compute();
 
+
+//-----------------------------------------------
+// analysis loop
+  cout << "-------- analyzing to sine model parameters" " ---------" << endl;
   int counter = 0;
-
   while (true) {
 
     // compute a frame
@@ -202,27 +171,63 @@ int main(int argc, char* argv[]) {
     }
 
     window->compute();
+    fft->compute();
 
-    // pitch extraction
-    spectrum->compute();
-    pitchDetect->compute();
+    // Sine model analysis
+    sinemodelanal->compute();
 
-    // get predominant pitch
-    if (usePredominant){
-      thisPitch = pitchIn[counter];
+    // append frequencies of the curent frame for later cleaningTracks
+    frequenciesAllFrames.push_back(frequencies);
+    magnitudesAllFrames.push_back(magnitudes);
+    phasesAllFrames.push_back(phases);
+
+
+    counter++;
+  }
+
+
+  // clean sine tracks
+  int minFrames = int( minSineDur * sr / Real(hopsize));
+  cleaningSineTracks(frequenciesAllFrames, minFrames);
+
+
+//-----------------------------------------------
+// synthesis loop
+  cout << "-------- synthesizing from sine model parameters" " ---------" << endl;
+  int nFrames = counter;
+  counter = 0;
+
+  while (true) {
+
+    // all frames processed
+    if (counter >= nFrames) {
+      break;
+    }
+    // get sine tracks values for the the curent frame, and remove from list
+    if (frequenciesAllFrames.size() > 0)
+    {
+      frequencies = frequenciesAllFrames[0];
+      magnitudes = magnitudesAllFrames[0];
+      phases = phasesAllFrames[0];
+      frequenciesAllFrames.erase (frequenciesAllFrames.begin());
+      magnitudesAllFrames.erase (magnitudesAllFrames.begin());
+      phasesAllFrames.erase (phasesAllFrames.begin());
     }
 
+    // Sine model synthesis
+    sinemodelsynth->compute();
 
-    fft->compute();
-    harmonicMask-> compute();
     ifft->compute();
     overlapAdd->compute();
 
+    // skip first half window
+    if (counter >= floor(framesize / (hopsize * 2.f))){
+        alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
+    }
+
     counter++;
-
-    alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
-
   }
+
 
 
 
@@ -234,13 +239,12 @@ int main(int argc, char* argv[]) {
     audioWriter->compute();
 
 
+
   delete audioLoader;
   delete frameCutter;
   delete fft;
-  delete predominantMelody;
-  delete pitchDetect;
-  //delete realAccumulator;
-  delete harmonicMask;
+  delete sinemodelanal;
+  delete sinemodelsynth;
   delete ifft;
   delete overlapAdd;
   delete audioWriter;
