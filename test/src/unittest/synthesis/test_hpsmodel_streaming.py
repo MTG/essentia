@@ -68,9 +68,9 @@ def cleaningHarmonicTracks(freqsTotal, minFrames, pitchConf):
           for i in range(begTrack, f+1):
             freqsClean[i][t] = 0;
             
-          # clean track if  pitch confidence for that frameis below a ionfidence threshold
-          if (pitchConf[f] < confThreshold) :
-              freqsClean[f][t] = 0;
+        # clean track if  pitch confidence for that frameis below a ionfidence threshold
+        if (pitchConf[f] < confThreshold) :        
+          freqsClean[f][t] = 0;
               
         f+=1;
 
@@ -203,7 +203,7 @@ class TestHpsModel(TestCase):
     def testZero(self):
       
         # generate test signal
-        signalSize = 10 * self.params['frameSize']
+        signalSize = 20 * self.params['frameSize']
         signal = zeros(signalSize)
         
         [mags, freqs, phases] = analHpsModelStreaming(self.params, signal)
@@ -216,7 +216,7 @@ class TestHpsModel(TestCase):
     def testWhiteNoise(self):
         from random import random
         # generate test signal
-        signalSize = 10 * self.params['frameSize']
+        signalSize = 20 * self.params['frameSize']
         signal = array([2*(random()-0.5)*i for i in ones(signalSize)])
         
         # for white noise test set sine minimum duration to 350ms, and min threshold of -20dB
@@ -232,7 +232,7 @@ class TestHpsModel(TestCase):
     def testRegression(self):
 
         # generate test signal: sine 220Hz @44100kHz
-        signalSize = 10 * self.params['frameSize']
+        signalSize = 20 * self.params['frameSize']
         signal = .5 * numpy.sin( (array(range(signalSize))/self.params['sampleRate']) * 220 * 2*math.pi)
 
         # generate noise components        
