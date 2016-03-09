@@ -293,8 +293,22 @@ It is possible to create a standalone binary for Essentia's Vamp plugin (works f
 The resulting binary (```build/src/examples/libvamp_essentia.so``` on Linux, ```build/src/examples/libvamp_essentia.dylib``` on OSX) is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
 
 
+Essentia Music Extractor
+------------------------
 
+### Converting descriptor files to CSV
 
+Many researchers are still unfamiliar with [JSON](https://en.wikipedia.org/wiki/JSON) and instead commonly use [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) file format. We have provided a python script that can convert a bunch of input JSON descriptor files (produced by Music Extractor or Freesound extractor) into a CSV file, where each raw represents analysis results for a particular audio recording. 
+
+For more help, run: 
+```
+python src/examples/python/json_to_csv.py -h
+```
+
+Example command that merges analysis for two recordings, ignoring a bunch of descriptors:
+```
+python src/examples/python/json_to_csv.py -i /tmp/1.json /tmp/2.json -o /tmp/foo.csv --include metadata.audio_properties.* metadata.tags.musicbrainz_recordingid.0 lowlevel.* rhythm.* tonal.* --ignore *.min *.min.* *.max *.max.* *.dvar *.dvar2 *.dvar.* *.dvar2.* *.dmean *.dmean2 *.dmean.* *.dmean2.* *.cov.* *.icov.* rhythm.beats_position.*  --add-filename
+```
 
 
 
