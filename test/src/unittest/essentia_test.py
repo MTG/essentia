@@ -114,6 +114,19 @@ class TestCase(BaseTestCase):
         for val1, val2 in zip(found, expected):
             self.assertAlmostEqual(val1, val2, precision)
 
+    def assertAlmostEqualAudio(self, found, expected, precision = 1e-7):
+        # we can use the optimized version if the two arrays are 1D numpy float arrays
+        if isinstance(found, numpy.ndarray) and \
+            isinstance(expected, numpy.ndarray) and \
+            found.ndim == 1 and expected.ndim == 1 and \
+            found.dtype == expected.dtype and \
+            found.dtype == numpy.float32:
+              return self.assertTrue(almostEqualAudioArray(found, expected, precision))
+      
+        self.assertEqual(len(found), len(expected))
+        for val1, val2 in zip(found, expected):
+          self.assertAlmostEqualAudio(val1, val2, precision)
+
     def assertEqualVector(self, found, expected):
         self.assertEqual(len(found), len(expected))
         for val1, val2 in zip(found, expected):

@@ -17,39 +17,58 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_SINEMODEL_H
-#define ESSENTIA_SINEMODEL_H
+#ifndef ESSENTIA_ResampleFFT_H
+#define ESSENTIA_ResampleFFT_H
+
 
 #include "algorithm.h"
+#include "algorithmfactory.h"
+
+#include <fstream>
 
 namespace essentia {
 namespace standard {
 
-class SineModel : public Algorithm {
+class ResampleFFT : public Algorithm {
 
- private:
-  Input<std::vector<Real> > _spectrum;
-  Output<Real> _maxMagFreq;
-  Real _sampleRate;
+ protected:
+  Input<std::vector<Real> > _input;
+  Output<std::vector<Real> > _output;
+
+  // for resample function
+  Algorithm* _fft;
+  Algorithm* _ifft;
 
  public:
-  SineModel() {
-    declareInput(_spectrum, "spectrum", "the input spectrum (must have more than 1 element)");
-    declareOutput(_maxMagFreq, "maxMagFreq", "the frequency with the largest magnitude [Hz]");
+  ResampleFFT() {
+    declareInput(_input, "input", "input array");
+    declareOutput(_output, "output", "output resample array");
+
+    // for resample
+    _fft = AlgorithmFactory::create("FFT");
+    _ifft = AlgorithmFactory::create("IFFT");
+
+  }
+
+  ~ResampleFFT() {
+
+    delete _fft;
+    delete _ifft;
+
   }
 
   void declareParameters() {
-    declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
+    declareParameter("inSize", "the size of the input sequence. It needss to be even-sized.", "[1,inf)", 128);
+    declareParameter("outSize", "the size of the output sequence. It needss to be even-sized.", "[1,inf)", 128);
   }
 
-  void configure() {
-    _sampleRate = parameter("sampleRate").toReal();
-  }
-
+  void configure();
   void compute();
+
 
   static const char* name;
   static const char* description;
+
 
 };
 
@@ -61,17 +80,17 @@ class SineModel : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class SineModel : public StreamingAlgorithmWrapper {
+class ResampleFFT : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<Real> > _spectrum;
-  Source<Real> _maxMagFreq;
+  Sink<std::vector<Real> > _input;
+  Source<std::vector<Real> > _output;
 
  public:
-  SineModel() {
-    declareAlgorithm("SineModel");
-    declareInput(_spectrum, TOKEN, "spectrum");
-    declareOutput(_maxMagFreq, TOKEN, "maxMagFreq");
+  ResampleFFT() {
+    declareAlgorithm("ResampleFFT");
+    declareInput(_input, TOKEN, "input");
+    declareOutput(_output, TOKEN, "output");
   }
 };
 
@@ -79,4 +98,4 @@ class SineModel : public StreamingAlgorithmWrapper {
 } // namespace essentia
 
 
-#endif // ESSENTIA_SINEMODEL_H
+#endif // ESSENTIA_ResampleFFT_H

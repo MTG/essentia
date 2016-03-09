@@ -25,8 +25,8 @@ using namespace std;
 
 namespace essentia {
 
-void processFrame(vector<Real>& tmpFrame, const vector<Real>& windowedFrame, 
-                  vector<Real>& output, vector<Real> _frameHistory, 
+void processFrame(vector<Real>& tmpFrame, const vector<Real>& windowedFrame,
+                  vector<Real>& output, vector<Real> &frameHistory,
                   const int& _frameSize, const int& _hopSize, const float& normalizationGain) {
 
   bool _zeroPhase = true;
@@ -56,23 +56,24 @@ void processFrame(vector<Real>& tmpFrame, const vector<Real>& windowedFrame,
 
   // init buffer by shifting last frame.  TODO: optimize
   for (int i=0; i<_frameSize - _hopSize; i++) {
-    _frameHistory[i] = _frameHistory[i+_hopSize];
+    frameHistory[i] = frameHistory[i+_hopSize];
   }
-  
+
   // set the rest of window to 0
   for (int i= (_frameSize - _hopSize); i<_frameSize; i++) {
-    _frameHistory[i] = 0.;
+    frameHistory[i] = 0.;
   }
 
   // overlap-add
   for (int i=0; i<_frameSize; i++) {
-    _frameHistory[i] += tmpFrame[i];
+    frameHistory[i] += tmpFrame[i];
   }
 
   // output
   for (int i=0; i< _hopSize; i++) {
-    output[i] = normalizationGain * _frameHistory[i];
+    output[i] = normalizationGain * frameHistory[i];
   }
+
 }
 
 
@@ -100,6 +101,9 @@ void OverlapAdd::configure() {
   _tmpFrame.resize(_frameSize);
 }
 
+void OverlapAdd::reset() {
+}
+  
 void OverlapAdd::compute() {
 
   const vector<Real>& windowedFrame = _windowedFrame.get();
@@ -110,8 +114,8 @@ void OverlapAdd::compute() {
   if (windowedFrame.empty()) throw EssentiaException("OverlapAdd: the input frame is empty");
 
   output.resize(_hopSize);
-  
-  processFrame(_tmpFrame, windowedFrame, output, _frameHistory, _frameSize, 
+
+  processFrame(_tmpFrame, windowedFrame, output, _frameHistory, _frameSize,
                _hopSize, _normalizationGain);
 
 }
@@ -175,7 +179,7 @@ AlgorithmStatus OverlapAdd::process() {
 
   if (windowedFrame.empty()) throw EssentiaException("OverlapAdd: the input frame is empty");
 
-  processFrame(_tmpFrame, windowedFrame, output, _frameHistory, _frameSize, 
+  processFrame(_tmpFrame, windowedFrame, output, _frameHistory, _frameSize,
                _hopSize, _normalizationGain);
 
   EXEC_DEBUG("releasing");

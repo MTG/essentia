@@ -17,27 +17,22 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "sinemodel.h"
-#include "essentiamath.h"
 
-using namespace essentia;
-using namespace standard;
+#ifndef ESSENTIA_SYNTH_UTILS_H
+#define ESSENTIA_SYNTH_UTILS_H
 
-const char* SineModel::name = "SineModel";
-const char* SineModel::description = DOC("This algorithm computes the sine model without sine tracking.");
+#include <essentia/algorithmfactory.h>
 
-void SineModel::compute() {
 
-  const std::vector<Real>& spectrum = _spectrum.get();
-  Real& maxMagFreq = _maxMagFreq.get();
+namespace essentia{
 
-  if (spectrum.size() < 2) {
-    throw EssentiaException("SineModel: input audio spectrum must be larger than 1 element");
-  }
 
-  int index = std::max_element(spectrum.begin(), spectrum.end()) - spectrum.begin();
+void scaleAudioVector(std::vector<Real> &buffer, const Real scale);
+//void mixAudioVectors(const std::vector<Real> ina, const std::vector<Real> inb, const Real gaina, const Real gainb, std::vector<Real> &out);
+void cleaningSineTracks(std::vector< std::vector<Real> >&freqsTotal, const int minFrames);
+void genSpecSines(std::vector<Real> iploc, std::vector<Real> ipmag, std::vector<Real> ipphase, std::vector<std::complex<Real> > &outfft, const int fftSize);
+void initializeFFT(std::vector<std::complex<Real> >&fft, int sizeFFT);
 
-  // normalize the maximum to the desired frequency range
-  // (be careful not to confuse with the sampling rate which is the double)
-  maxMagFreq = index * (_sampleRate/2.0) / (spectrum.size()-1);
-}
+} // namespace essentia
+
+#endif // ESSENTIA_SYNTH_UTILS_H

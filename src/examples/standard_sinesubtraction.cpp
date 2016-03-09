@@ -21,22 +21,18 @@
 #include <fstream>
 #include <essentia/algorithmfactory.h>
 #include <essentia/pool.h>
+
+#include <essentia/utils/synth_utils.h>
+
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
 
-void scaleAudioVector(vector<Real> &buffer, const Real scale)
-{
-for (int i=0; i < int(buffer.size()); ++i){
-    buffer[i] = scale * buffer[i];
-}
-}
-
 int main(int argc, char* argv[]) {
 
   if (argc != 3) {
-    cout << "ERROR: incorrect number of arguments." << endl;
+    cout << "Standard_Sinesubtraction ERROR: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input output_file" << endl;
     exit(1);
   }
@@ -52,9 +48,12 @@ int main(int argc, char* argv[]) {
   /////// PARAMS //////////////
 
   /////// PARAMS //////////////
-  int framesize = 1024;
-  int hopsize = 256;
+  int framesize = 2048;
+  int hopsize = 128; //128;
   Real sr = 44100;
+  
+
+
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
@@ -69,66 +68,73 @@ int main(int argc, char* argv[]) {
                                          //  "silentFrames", "noise",
                                            "startFromZero", false );
 
-  Algorithm* window       = factory.create("Windowing", "type", "hann");
 
-  Algorithm* fft     = factory.create("FFT",
-                            "size", framesize);
+  // parameters used in the SMS Python implementation
 
-  Algorithm* ifft     = factory.create("IFFT",
-                                "size", framesize);
+  Algorithm* sinemodelanal     = factory.create("SineModelAnal",
+                            "sampleRate", sr,
+                            "maxnSines", 100,
+                            "freqDevOffset", 10,
+                            "freqDevSlope", 0.001
+                            );
+                            
 
-  Algorithm* overlapAdd = factory.create("OverlapAdd",
-                                            "frameSize", framesize,
-                                           "hopSize", hopsize);
-
+  
+  int subtrFFTSize = std::min(framesize/4, 4*hopsize);  // make sure the FFT size 
+  Algorithm* sinesubtraction = factory.create("SineSubtraction",
+                              "sampleRate", sr,
+                              "fftSize", subtrFFTSize,
+                              "hopSize", hopsize
+                              );
 
   Algorithm* audioWriter = factory.create("MonoWriter",
                                      "filename", outputFilename);
 
 
-
   vector<Real> audio;
   vector<Real> frame;
-  vector<Real> wframe;
-  vector<complex<Real> > fftframe;
-  vector<Real> ifftframe;
-  vector<Real> alladuio; // concatenated audio file output
- // Real confidence;
+
+  vector<Real> magnitudes;
+  vector<Real> frequencies;
+  vector<Real> phases;
+
+
+  vector<Real> allaudio; // concatenated audio file output
+
 
   // analysis
   audioLoader->output("audio").set(audio);
 
-
-
   frameCutter->input("signal").set(audio);
   frameCutter->output("frame").set(frame);
 
-  window->input("frame").set(frame);
-  window->output("frame").set(wframe);
-
-  fft->input("frame").set(wframe);
-  fft->output("fft").set(fftframe);
-
-
-  // Synthesis
-  ifft->input("fft").set(fftframe);
-  ifft->output("frame").set(ifftframe);
-
+  // Sine model analysis
+  sinemodelanal->input("frame").set(frame); // inputs a frame
+  sinemodelanal->output("magnitudes").set(magnitudes);
+  sinemodelanal->output("frequencies").set(frequencies);
+  sinemodelanal->output("phases").set(phases);
+  
 
   vector<Real> audioOutput;
 
-  overlapAdd->input("signal").set(ifftframe); // or frame ?
-  overlapAdd->output("signal").set(audioOutput);
-
-
-
+// this needs to take into account overlap-add issues, introducing delay
+ sinesubtraction->input("frame").set(frame); // size is iput _fftSize
+ sinesubtraction->input("magnitudes").set(magnitudes);
+ sinesubtraction->input("frequencies").set(frequencies);
+ sinesubtraction->input("phases").set(phases);
+ sinesubtraction->output("frame").set(audioOutput); // Nsyn size
 
 ////////
 /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << audioFilename << " --------" << endl;
 
   audioLoader->compute();
-int counter = 0;
+
+//-----------------------------------------------
+// analysis loop
+  cout << "-------- analyzing to sine model parameters" " ---------" << endl;
+  int counter = 0;
+
   while (true) {
 
     // compute a frame
@@ -139,42 +145,40 @@ int counter = 0;
       break;
     }
 
-    window->compute();
-    fft->compute();
-    ifft->compute();
-    overlapAdd->compute();
+    // Sine model analysis
+    sinemodelanal->compute();
 
+    sinesubtraction->compute();
 
-
-    // skip first half window
+     // skip first half window
     if (counter >= floor(framesize / (hopsize * 2.f))){
-        alladuio.insert(alladuio.end(), audioOutput.begin(), audioOutput.end());
+        allaudio.insert(allaudio.end(), audioOutput.begin(), audioOutput.end());
     }
-
 
     counter++;
   }
 
 
-
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
+  cout << "-------- "  << counter<< " frames (hopsize: " << hopsize << ") ---------"<< endl;
 
     // write to output file
-    audioWriter->input("audio").set(alladuio);
+    audioWriter->input("audio").set(allaudio);
     audioWriter->compute();
+
 
 
   delete audioLoader;
   delete frameCutter;
-  delete fft;
-  delete ifft;
-  delete overlapAdd;
+  delete sinemodelanal;
+  delete sinesubtraction;
   delete audioWriter;
 
   essentia::shutdown();
 
   return 0;
 }
+
 
 
