@@ -49,8 +49,9 @@ void SpsModelSynth::configure()
 
   _ifftSine->configure("size", _fftSize);
 
+  Real gain = 1.f/Real(_fftSize);
   _overlapAdd->configure( "frameSize", _fftSize, // uses synthesis window
-													"hopSize", _hopSize);
+													"hopSize", _hopSize,"gain", gain);
 
 }
 

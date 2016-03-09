@@ -84,11 +84,7 @@ def analysisSynthesisStreaming(params, signal):
     
     # remove first half window frames
     outaudio = pool['audio']
-    outaudio = outaudio [2*params['hopSize']:]
-    
-    # normalize (overlap-add is normalizing for  using FFT/IFFT chain )
-    normalizationGain =  float( params['frameSize'])
-    outaudio *= normalizationGain 
+    outaudio = outaudio [2*params['hopSize']:]    
     
     return outaudio
 

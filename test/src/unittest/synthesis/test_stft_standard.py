@@ -44,9 +44,8 @@ def analysisSynthesisStandard(params, signal):
   
     w = std.Windowing(type = "hann");
     fft = std.FFT(size = params['frameSize']);
-    ifft = std.IFFT(size = params['frameSize']);
-    overl = std.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
-
+    ifft = std.IFFT(size = params['frameSize']);    
+    overl = std.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'], gain = 1./params['frameSize']);
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
     

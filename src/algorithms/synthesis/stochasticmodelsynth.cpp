@@ -52,8 +52,9 @@ void StochasticModelSynth::configure() {
   _stocSize += _stocSize % 2;
   _resample->configure("inSize", _stocSize, "outSize", _hN + 1);
 
+  Real gain = 1.f/Real(_fftSize);
   _overlapadd->configure( "frameSize", _fftSize, // uses synthesis window
-													"hopSize", parameter("hopSize").toInt());
+													"hopSize", parameter("hopSize").toInt(),"gain", gain);
 }
 
 

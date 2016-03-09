@@ -34,6 +34,7 @@ class OverlapAdd : public Algorithm {
 
   int _frameSize;
   int _hopSize;
+  Real _gain;
   float _normalizationGain;
   std::vector<Real> _frameHistory;
   std::vector<Real> _tmpFrame;
@@ -47,6 +48,7 @@ class OverlapAdd : public Algorithm {
   void declareParameters() {
     declareParameter("frameSize", "the frame size for computing the overlap-add process", "(0,inf)", 2048);
     declareParameter("hopSize", "the hop size with which the overlap-add function is computed", "(0,inf)", 128);
+    declareParameter("gain", "the normalization gain that scales the output signal. Useful for IFFT output", "(0.,inf)", 1.);
   }
   void compute();
   void configure();
@@ -73,6 +75,7 @@ class OverlapAdd : public Algorithm {
 
   int _frameSize;
   int _hopSize;
+  Real _gain;
   float _normalizationGain;
   std::vector<Real> _frameHistory;
   std::vector<Real> _tmpFrame;
@@ -90,6 +93,7 @@ class OverlapAdd : public Algorithm {
   void declareParameters() {
     declareParameter("frameSize", "the frame size for computing the overlap-add process", "(0,inf)", 2048);
     declareParameter("hopSize", "the hop size with which the overlap-add function is computed", "(0,inf)", 128);
+    declareParameter("gain", "the normalization gain that scales the output signal. Useful for IFFT output", "(0.,inf)", 1.);
   }
 
   void reset();
