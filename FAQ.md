@@ -221,6 +221,9 @@ In order to run classification in Essentia you need to prepare a classifier mode
 
 6. The model file can now be used by a GaiaTransform algorithm inside ```streaming_music_extractor```. 
 
+Alternatively to steps 3-5, you can use a simplified [script](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/train_model_from_sigs.py) that trains a model given a folder with sub-folders corresponding to class names and containing descriptor files for these classes. 
+
+
 Note that using a specific classifier model implies that you are expected to give a pool with the same descriptor layout as the one used in training as an input to GaiaTransform Algorithm. 
 
 The training script automatically creates an SVM model given a ground-truth dataset.  It allows to select for the best combination of SVM parameters (polynomial or RBF kernels, various gamma and C coefficients) in a grid search. In addition it also allows to do feature selection/preprocessing and select the best preprocessing among several that were identified as useful (e.g., all descriptors vs only spectral descriptors, or where to apply or not normalization; Currently, only means and variances are are used for descriptors summarized across frames). The combinations of parameters tested in a grid search are mentioned [in the code](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/classification_project_template.yaml). Users are able to modify these parameters according to their needs by creating such a classification project file on their own.
