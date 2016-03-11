@@ -35,8 +35,8 @@ const char* PitchContourSegmentation::description = DOC("This algorithm converts
 
 
 void PitchContourSegmentation::configure() {
-  _minDur = parameter("minDur").toReal();
-  _tuningFreq = parameter("tuningFreq").toReal();
+  _minDur = parameter("minDuration").toReal();
+  _tuningFreq = parameter("tuningFrequency").toReal();
   _hopSize = parameter("hopSize").toReal();
   _sampleRate = parameter("sampleRate").toReal();
   _pitchDistanceThreshold = parameter("pitchDistanceThreshold").toReal();
