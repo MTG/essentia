@@ -82,8 +82,8 @@ def configure(ctx):
     if "HAVE_AVCODEC" in ctx.env['define_key'] and "HAVE_SAMPLERATE" in ctx.env['define_key']:
         example_list += example_list_fileio
 
-        if "HAVE_GAIA2" in ctx.env['define_key']:
-            example_list += example_list_gaia
+    if "HAVE_GAIA2" in ctx.env['define_key']:
+        example_list += example_list_gaia
 
     if ctx.env.WITH_EXAMPLES:
         ctx.env.EXAMPLE_LIST = example_list
