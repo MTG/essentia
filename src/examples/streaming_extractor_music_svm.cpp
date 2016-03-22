@@ -26,7 +26,7 @@
 #include "essentia/algorithmfactory.h"
 #include "essentia/pool.h"
 #include "extractor_music/MusicExtractor.h"
-#include <gaia.h>
+#include <gaia2/gaia.h>
 
 using namespace std;
 using namespace essentia;
