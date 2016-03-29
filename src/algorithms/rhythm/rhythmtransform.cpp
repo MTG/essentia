@@ -30,6 +30,8 @@ const char* RhythmTransform::name = "RhythmTransform";
 const char* RhythmTransform::description = DOC("The Rhythm Transform algorithm is based on the rhythm transform as described in [1]. It computes a rhythmical representation of the input signal in the rhythm domain much like FFT computes a representation in the frequency domain. Additionally features as rhythmic centroid and MFCCs can be calculated from this rhythmic representation.\n"
 "Note that parameters \"frameSize\" and \"hopSize\" are defined for the rhythm transformation (FFT transform on the rhythm space) and have a different meaning than the sizes in the temporal dimension.\n"
 "\n"
+"The algorithm relies on a time sequence of frames of Mel bands energies as an input (see MelBands), but other types of frequency bands can be used as well (BarkBands, ERBBands). For each band, the derivative of the frame to frame energy evolution is computed, and the periodicity of the resulting signal is computed: the signal is cut into frames of \"frameSize\" size and is analyzed with FFT. For each frame, the obtained power spectrums are summed across all bands forming a frame of rhythm transform values.\n"
+"\n"
 "References:\n"
 "  [1] E. Guaus and P. Herrera, \"The rhythm transform: towards a generic\n"
 "  rhythm description,\" in International Computer Music Conference (ICMC’05),\n"
