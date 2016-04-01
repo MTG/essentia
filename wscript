@@ -175,6 +175,7 @@ def configure(ctx):
         ctx.find_program('arm-linux-androideabi-gcc', var='CC')
         ctx.find_program('arm-linux-androideabi-g++', var='CXX')
         ctx.find_program('arm-linux-androideabi-ar', var='AR')
+        ctx.env.LINKFLAGS += ['-Wl,-soname,libessentia.so']
 
     if ctx.options.CROSS_COMPILE_IOS:
         print ("→ Cross-compiling for iOS (ARMv7 and ARM64)")
