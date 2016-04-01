@@ -223,12 +223,27 @@ In order to run classification in Essentia you need to prepare a classifier mode
 
 Alternatively to steps 3-5, you can use a simplified [script](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/train_model_from_sigs.py) that trains a model given a folder with sub-folders corresponding to class names and containing descriptor files for these classes. 
 
-
 Note that using a specific classifier model implies that you are expected to give a pool with the same descriptor layout as the one used in training as an input to GaiaTransform Algorithm. 
 
-The training script automatically creates an SVM model given a ground-truth dataset.  It allows to select for the best combination of SVM parameters (polynomial or RBF kernels, various gamma and C coefficients) in a grid search. In addition it also allows to do feature selection/preprocessing and select the best preprocessing among several that were identified as useful (e.g., all descriptors vs only spectral descriptors, or where to apply or not normalization; Currently, only means and variances are are used for descriptors summarized across frames). The combinations of parameters tested in a grid search are mentioned [in the code](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/classification_project_template.yaml). Users are able to modify these parameters according to their needs by creating such a classification project file on their own.
+### How it works
+To train the SVMs Gaia internally uses [LibSVM](https://www.csie.ntu.edu.tw/~cjlin/libsvm/) library. The training script automatically creates an SVM model given a ground-truth dataset using the best combination of parameters for data preprocessing and SVM that it can find in a grid search. Testing all possible combinations the script conducts a 5-fold cross-validation for each one of them: The ground-truth dataset is split into train and test sets, the model is trained on the train set and is evaluated on the test set. Results are averaged across 5 folds including the confusion matrix. After all combinations of parameters have been evaluated, the winner combination is selected according to the best accuracy obtained in cross-validation and the final SVM classifier model is trained using *all* ground-truth data. See the "Cross-validation and Grid-search" section in the [practical guide to SVM classification](https://www.csie.ntu.edu.tw/~cjlin/papers/guide/guide.pdf) for more details.
 
-To train the SVMs Gaia internally uses LibSVM library. For each combination of parameters in a grid search, 5-fold cross-validation evaluation is run splitting  ground-truth dataset into train and test splits and averaging results across folds (including the confusion matrix). After all combinations have been evaluated, the winner combination is selected according to the best accuracy and the final SVM classifier model is trained using *all* ground-truth data.
+The combinations of parameters tested in a grid search by default are mentioned [in the code](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/classification_project_template.yaml). Users are able to modify these parameters according to their needs by creating such a classification project file on their own.
+
+The parameters include:
+- SVM kernel type: polynomial or RBF
+- SVM type: currently only C-SVC
+- SVM C and gamma parameters
+- preprocessing type:
+    - use all descriptors, no preprocessing
+    - use ```lowlevel.*``` descriptors only
+    - discard energy bands descriptors (```*barkbands*```, ```*energyband*```, ```*melbands*```, ```*erbbands*```)
+    - use all descriptors, normalize values
+    - use all descriptors, normalize and gaussianize values
+- number of folds in cross-validation: 5 by default
+
+In the preprocessing stage, training script loads all descriptor files according to the preprocessing type. Additionally, a number of descriptors are always ignored, including all ```metadata*``` that is the information not directly associated with audio analysis. The ```*.dmean```, ```*.dvar```, ```*.min```, ```*.max```, ```*.cov``` descriptors are also ignored, and therefore, currently only means and variances are used for descriptors summarized across frames. Non-numerical descriptors are enumerated (```tonal.chords_key```, ```tonal.chords_scale```, ```tonal.key_key```, ```tonal.key_scale```).
+
 
 Building lightweight Essentia with reduced dependencies 
 -----------------------------------------------------
