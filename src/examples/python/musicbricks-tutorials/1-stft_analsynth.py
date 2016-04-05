@@ -7,9 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 
-mode = 'streaming' #'standard' #'streaming'
-
-
 # algorithm parameters
 framesize = 1024
 hopsize = 256
@@ -40,7 +37,6 @@ fft.fft >> ifft.fft
 ifft.frame >> overl.frame
 overl.signal >> awrite.audio
 overl.signal >> (pool, 'audio')
-
 
 essentia.run(loader)
 
