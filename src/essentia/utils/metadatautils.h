@@ -35,7 +35,7 @@ void pcmMetadata(const std::string& filename, int& sr, int& ch, int& bitrate) {
   if (pos != std::string::npos) {
       std::string ext = filename.substr(pos, std::string::npos);
       if (ext != ".wav" && ext != ".aiff" && ext != ".aif") {
-        throw EssentiaException("metadatautils: pcmMetadata cannot read files which are neither \"wav\" nor \"aiff");
+        throw EssentiaException("metadatautils: pcmMetadata cannot read files which are neither \"wav\" nor \"aiff\"");
       }
   } else {
       throw EssentiaException("metadatautils: pcmMetadata cannot guess the filetype by extension");
