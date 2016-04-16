@@ -47,7 +47,7 @@ int save_onsets(const std::string& outputName,const vector<Real>& onsets)
   }
   catch(const char* text)
   {
-    cout << "Fatal error : " << text << ", exiting... " << std::endl;
+    cerr << "Fatal error : " << text << ", exiting... " << std::endl;
     return EXIT_FAILURE;
   }
   catch(std::exception& e)

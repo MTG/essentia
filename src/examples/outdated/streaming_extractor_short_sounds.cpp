@@ -173,7 +173,7 @@ void computeSegments(const string& audioFilename, Real startTime, Real endTime, 
     features = pool.value<vector<vector<Real> > >("lowlevel.mfcc");
   }
   catch(const EssentiaException&) {
-    cout << "Error: could not find MFCC features in low level pool. Aborting..." << endl;
+    cerr << "Error: could not find MFCC features in low level pool. Aborting..." << endl;
     exit(3);
   }
 
@@ -253,7 +253,7 @@ void computeReplayGain(const string& audioFilename, Real startTime, Real endTime
         continue;
       }
       else {
-        cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+        cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
         exit(4);
       }
     }
@@ -273,7 +273,7 @@ void computeReplayGain(const string& audioFilename, Real startTime, Real endTime
         pool.remove("metadata.audio_properties.replay_gain");
       }
       else {
-        cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+        cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
         exit(5);
       }
     }

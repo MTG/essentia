@@ -209,7 +209,7 @@ void computeSegments(const string& audioFilename, Real startTime, Real endTime, 
     features = pool.value<vector<vector<Real> > >("lowlevel.mfcc");
   }
   catch(const EssentiaException&) {
-    cout << "Error: could not find MFCC features in low level pool. Aborting..." << endl;
+    cerr << "Error: could not find MFCC features in low level pool. Aborting..." << endl;
     exit(3);
   }
 
@@ -290,7 +290,7 @@ void computeReplayGain(const string& audioFilename, Real startTime, Real endTime
       tryReallyHard = false;
     }
     catch (EssentiaException&) {
-      cout << "ERROR: File is a completely silent file... Aborting..." << endl;
+      cerr << "ERROR: File is a completely silent file... Aborting..." << endl;
       exit(2);
     }
 
@@ -310,7 +310,7 @@ void computeReplayGain(const string& audioFilename, Real startTime, Real endTime
         oldPool.remove("metadata.audio_properties.downmix");
       }
       else {
-        cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+        cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
         exit(3);
       }
     }
@@ -347,7 +347,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime,
     replayGain = pool.value<Real>("metadata.audio_properties.replay_gain");
   }
   else {
-    cout << "Error: StreamingExtractor::computeLowLevel, replay gain not found in pool but it is mandatory for computing descriptors. Aborting...";
+    cerr << "Error: StreamingExtractor::computeLowLevel, replay gain not found in pool but it is mandatory for computing descriptors. Aborting...";
     exit(4);
   }
   try {
@@ -464,7 +464,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime,
     pool.value<vector<Real> >(llspace + "loudness");
   }
   catch (EssentiaException&) {
-    cout << "ERROR: File is too short (< 2sec)... Aborting..." << endl;
+    cerr << "ERROR: File is too short (< 2sec)... Aborting..." << endl;
     exit(1);
   }
 
@@ -494,7 +494,7 @@ void computeMidLevel(const string& audioFilename, Real startTime, Real endTime,
     replayGain = pool.value<Real>("metadata.audio_properties.replay_gain");
   }
   else {
-    cout << "Error: StreamingExtractor::computeMidLevel, replay gain not found in pool but it is mandatory for computing descriptors. Aborting...";
+    cerr << "Error: StreamingExtractor::computeMidLevel, replay gain not found in pool but it is mandatory for computing descriptors. Aborting...";
     exit(4);
   }
   try {

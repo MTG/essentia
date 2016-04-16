@@ -52,7 +52,7 @@ public:                                                                  \
       return returnFeature(value);                                       \
     }                                                                    \
     else {                                                               \
-      std::cout << "ERROR: EasyWrapper not defined in temporal domain yet" << std::endl; \
+      std::cerr << "ERROR: EasyWrapper not defined in temporal domain yet" << std::endl; \
       return FeatureSet();                                               \
     }                                                                    \
   }                                                                      \
