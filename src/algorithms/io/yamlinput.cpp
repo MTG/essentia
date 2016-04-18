@@ -118,13 +118,13 @@ void YamlInput::compute() {
   }
   catch (exception& e) {
     if (fclose(file) != 0) {
-      cout << "WARNING: YamlInput: an error occured while closing the yaml/json file" << endl;
+      E_WARNING("YamlInput: an error occured while closing the yaml/json file");
     }
     throw EssentiaException("YamlInput: error during parsing: ", e.what());
   }
 
   if (fclose(file) != 0) {
-    cout << "WARNING: YamlInput: an error occured while closing the yaml file" << endl;
+    E_WARNING("YamlInput: an error occured while closing the yaml file");
   }
 
   YamlMappingNode* rootMap = dynamic_cast<YamlMappingNode*>(root);

@@ -327,7 +327,7 @@ void TempoTapDegara::computeHMMTransitionMatrix(const vector<Real>& ibiPDF,
 
     // Matlab: check for numerical problems (probabilities should be within [0,1])
     if (transitions[i][0] < 0 || transitions[i][0] > 1) {
-      cerr << "Numerical problems in TempoTapDegara::computeHMMTransitionMatrix" << endl;
+      E_WARNING("Numerical problems in TempoTapDegara::computeHMMTransitionMatrix");
       // TODO should be Essentia exception instead?
       // truncate to 1 to avoid further NaNs in log computation
       if (transitions[i][0] < 0) {

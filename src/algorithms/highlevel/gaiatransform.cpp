@@ -173,7 +173,7 @@ void pointToPool(const gaia2::Point* p, Pool& pool, const Pool& origPool) {
 
       // assert we're not doing something potentially stupid
       if ((rows*cols + 2) != desc.size()) {
-        cout << "Oops, internal error in GaiaTransform::pointToPool, ignoring..." << endl;
+        E_WARNING("Oops, internal error in GaiaTransform::pointToPool, ignoring...");
         continue;
       }
       pool.remove(pooldesc);
