@@ -107,7 +107,8 @@ void setDebugLevelForTimeIndex(int index) {
 
 void Logger::flush() {
   while (!_msgQueue.empty()) {
-    std::cout << _msgQueue.front() << std::flush;
+    std::cerr << _msgQueue.front();
+    //std::cout << _msgQueue.front() << std::flush;
     _msgQueue.pop_front();
   }
 }
