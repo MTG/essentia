@@ -33,7 +33,7 @@ std::vector< std::vector<Real> > readIn2dData(const char* filename);
 int main(int argc, char* argv[]) {
 
   if (argc != 3) {
-    cout << "Standard_StochasticModel ERROR: incorrect number of arguments." << endl;
+    cout << "Standard_StochasticModel Error: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input output_file" << endl;
     exit(1);
   }

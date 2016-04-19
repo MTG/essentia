@@ -32,7 +32,7 @@ using namespace standard;
 int main(int argc, char* argv[]) {
 
   if (argc != 3) {
-    cout << "Standard_HpSModel ERROR: incorrect number of arguments." << endl;
+    cout << "Standard_HpSModel Error: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input output_file" << endl;
     exit(1);
   }

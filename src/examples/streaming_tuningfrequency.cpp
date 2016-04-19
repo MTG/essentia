@@ -32,7 +32,7 @@ using namespace essentia::scheduler;
 int main(int argc, char* argv[]) {
 
   if (argc != 2) {
-    cout << "ERROR: incorrect number of arguments." << endl;
+    cout << "Error: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input" << endl;
     creditLibAV();
     exit(1);
@@ -70,7 +70,7 @@ int main(int argc, char* argv[]) {
          << mean(pool.value<std::vector<Real> >("tonal.tuningFrequency")) << endl;
   }
   catch (EssentiaException& e) {
-      cout << "EXC: " << e.what() << endl;
+      cerr << "Error: " << e.what() << endl;
   }
 
   essentia::shutdown();

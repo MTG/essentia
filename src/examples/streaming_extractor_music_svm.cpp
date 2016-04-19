@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
     extractor->loadSVMModels();
   }
   catch (EssentiaException& e) {
-    cout << e.what() << endl;
+    cerr << e.what() << endl;
     return 1;
   }
 

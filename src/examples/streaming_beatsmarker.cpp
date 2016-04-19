@@ -32,7 +32,7 @@ using namespace essentia::scheduler;
 int main(int argc, char* argv[]) {
 
   if (argc != 4) {
-    cout << "ERROR: incorrect number of arguments." << endl;
+    cout << "Error: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input beats_list_file output_file" << endl;
     creditLibAV();
     exit(1);

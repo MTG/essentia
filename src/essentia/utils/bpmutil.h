@@ -178,7 +178,7 @@ std::vector<Real> postProcessTicks(const std::vector<Real>& origticks) {
   }
 
   if (idx == 0 && maxl == 0) {
-    std::cout << "Internal error while processing the beats, returning the original ones" << std::endl;
+    std::cerr << "Internal error while processing the beats, returning the original ones" << std::endl;
     return origticks;
   }
 

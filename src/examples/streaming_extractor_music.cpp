@@ -70,7 +70,7 @@ int essentia_main(string audioFilename, string outputFilename, string profileFil
     essentia::shutdown();
   }
   catch (EssentiaException& e) {
-    cout << e.what() << endl;
+    cerr << e.what() << endl;
     return 1;
   }
   return result;

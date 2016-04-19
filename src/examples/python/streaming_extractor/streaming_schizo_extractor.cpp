@@ -192,7 +192,7 @@ int main(int argc, char* argv[]) {
       compute(audioFilename, outputFilename, startTime, endTime, eqPool, neqPool);
     }
     catch (EssentiaException& e) {
-      cout << e.what() << endl;
+      cerr << e.what() << endl;
       throw;
     }
   }
@@ -238,7 +238,7 @@ void computeSegments(const string& audioFilename, Real startTime, Real endTime, 
     features = eqPool.value<vector<vector<Real> > >("lowlevel.mfcc");
   }
   catch(const EssentiaException&) {
-    cout << "Error: could not find MFCC features in low level eqPool. Aborting..." << endl;
+    cerr << "Error: could not find MFCC features in low level eqPool. Aborting..." << endl;
     exit(3);
   }
 
@@ -324,7 +324,7 @@ void computeReplayGain(const string& audioFilename, Real startTime, Real endTime
         continue;
       }
       else {
-        cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+        cerr << "Error: File looks like a completely silent file... Aborting..." << endl;
         exit(4);
       }
     }
@@ -344,7 +344,7 @@ void computeReplayGain(const string& audioFilename, Real startTime, Real endTime
         pool.remove("metadata.audio_properties.replay_gain");
       }
       else {
-        cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+        cerr << "Error: File looks like a completely silent file... Aborting..." << endl;
         exit(5);
       }
     }
@@ -516,7 +516,7 @@ void computeLowLevel(const string& audioFilename, Real startTime, Real endTime,
     eqPool.value<vector<Real> >(llspace + "loudness")[0];
   }
   catch (const EssentiaException& e) {
-    cout << "ERROR: File is too short (< 2sec)... Aborting..." << endl;
+    cerr << "Error: File is too short (< 2sec)... Aborting..." << endl;
     exit(6);
   }
 
