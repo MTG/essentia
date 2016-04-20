@@ -33,10 +33,6 @@
 
 
 using namespace std;
-//using TagLib::FileRef;
-//using TagLib::PropertyMap;
-//using TagLib::String;
-//using TagLib::StringList;
 
 string fixInvalidUTF8(const string& str) {
   // a big fat hack to try to fix invalid utf-8 characters
@@ -140,23 +136,9 @@ bool containsControlChars(const string& str) {
   return false;
 }
 
-#if TAGLIB_MAJOR_VERSION == 1 && TAGLIB_MINOR_VERSION >= 5
-
 bool isLatin1(const TagLib::String& str) {
   return str.isLatin1();
 }
-
-#else // TAGLIB_VERSION < 1.5
-
-bool isLatin1(const TagLib::String& str) {
-  // adapted from taglib 1.5
-  for (int i=0; i<(int)str.size(); i++) {
-    if (str[i] >= 256) return false;
-  }
-  return true;
-}
-
-#endif // TAGLIB_VERSION >=? 1.5
 
 
 // Utility function to format tags so that they can be correctly parsed back
@@ -265,19 +247,6 @@ void MetadataReader::compute() {
     return;
   }
 
-  /*
-  TagLib::Tag *tag = f.tag();
-
-  cout << "-- TAG (basic) --" << endl;
-  cout << "title   - \"" << tag->title()   << "\"" << endl;
-  cout << "artist  - \"" << tag->artist()  << "\"" << endl;
-  cout << "album   - \"" << tag->album()   << "\"" << endl;
-  cout << "year    - \"" << tag->year()    << "\"" << endl;
-  cout << "comment - \"" << tag->comment() << "\"" << endl;
-  cout << "track   - \"" << tag->track()   << "\"" << endl;
-  cout << "genre   - \"" << tag->genre()   << "\"" << endl;
-  */
-
   TagLib::PropertyMap tags = f.file()->properties();
 
   _title.get()   = formatString(tags["TITLE"]);
@@ -379,36 +348,16 @@ AlgorithmStatus MetadataReader::process() {
     _track.push(formatString(tags["TRACKNUMBER"]));
     _date.push(formatString(tags["DATE"]));
 
-    // populate tag pool
+
     /*
+    // populate tag pool
     for(PropertyMap::Iterator it = tags.begin(); it != tags.end(); ++it) {
       for(StringList::Iterator str = it->second.begin(); str != it->second.end(); ++str) {
         tagPool.add(it->first.to8Bit(true), str->to8Bit(true));
       }
     }
+    _tagPool.push(tagPool);
     */
-
-
-    /*
-    cout << "musicbrainz_recordingid = MUSICBRAINZ_TRACKID = " << formatString(tags["MUSICBRAINZ_TRACKID"]) << endl;
-    cout << "musicbrainz_albumid = MUSICBRAINZ_ALBUMID = " << formatString(tags["MUSICBRAINZ_ALBUMID"]) << endl;
-    cout << "musicbrainz_artistid = MUSICBRAINZ_ARTISTID = " << formatString(tags["MUSICBRAINZ_ARTISTID"]) << endl;
-    cout << "musicbrainz_albumartistid = MUSICBRAINZ_ALBUMARTISTID = " << formatString(tags["MUSICBRAINZ_ALBUMARTISTID"]) << endl;
-    cout << "musicbrainz_releasegroupid = MUSICBRAINZ_RELEASEGROUPID = " << formatString(tags["MUSICBRAINZ_RELEASEGROUPID"]) << endl;
-    cout << "musicbrainz_workid = MUSICBRAINZ_WORKID = " << formatString(tags["MUSICBRAINZ_WORKID"]) << endl;
-    cout << "ACOUSTID_ID = " << formatString(tags["ACOUSTID_ID"]) << endl;
-    cout << "ACOUSTID_FINGERPRINT = " << formatString(tags["ACOUSTID_FINGERPRINT"]) << endl;
-    */
-
-    // TODO: missing in taglib?
-    // musicbrainz_trackid = MUSICBRAINZ_RELEASETRACKID
-    // musicbrainz_trmid = MUSICBRAINZ_TRMID
-    // musicbrainz_discid = MUSICBRAINZ_DISCID
-
-    //cout << "PropertyMap = " << formatString(tags.toString()) << endl;
-
-    //_tagPool.push(tagPool);
-
 
     _duration.push((int)f.audioProperties()->length());
 
