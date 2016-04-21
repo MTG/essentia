@@ -59,7 +59,7 @@ const char* debugModuleDescription(DebuggingModule module);
 /**
  * A bitmask representing which debug levels are currently activated.
  */
-extern int activatedDebugLevels;
+extern int ESSENTIA_API activatedDebugLevels;
 
 extern bool infoLevelActive;
 extern bool warningLevelActive;
@@ -102,7 +102,7 @@ void setDebugLevelForTimeIndex(int index);
 /**
  * Asynchronous thread-safe logger object. (TODO: implementation is still not thread-safe)
  */
-class Logger {
+class ESSENTIA_API Logger {
  protected:
   std::deque<std::string> _msgQueue;
   bool _addHeader;
@@ -119,7 +119,7 @@ class Logger {
 
 };
 
-extern Logger loggerInstance;
+extern Logger ESSENTIA_API loggerInstance;
 
 } // namespace essentia
 

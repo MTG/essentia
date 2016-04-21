@@ -264,7 +264,7 @@ inline bool sameType(const std::type_info& t1, const std::type_info& t2) {
 
 
 // defined in src/base/essentia.cpp
-std::string nameOfType(const std::type_info& type);
+std::string ESSENTIA_API nameOfType(const std::type_info& type);
 
 /**
  * Subclasses of this interface have the ability to check their type against

@@ -37,7 +37,7 @@ class Algorithm;
  * and is aware (through TypeProxy) of which type of data is supposed to flow
  * through it.
  */
-class Connector : public TypeProxy, public StreamConnector {
+class ESSENTIA_API Connector : public TypeProxy, public StreamConnector {
  protected:
   Algorithm* _parent;
 

@@ -95,7 +95,7 @@ typedef std::stack<NetworkNode*> NodeStack;
  * generator node at the root of the Network (an audio loader, usually) and
  * carry the data through all the other algorithms automatically.
  */
-class Network {
+class ESSENTIA_API Network {
 
  public:
   /**

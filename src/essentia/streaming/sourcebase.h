@@ -32,11 +32,11 @@ class SourceProxyBase;
 class SinkBase;
 class Algorithm;
 
-void connect(SourceBase& source, SinkBase& sink);
-void disconnect(SourceBase& source, SinkBase& sink);
+void ESSENTIA_API connect(SourceBase& source, SinkBase& sink);
+void ESSENTIA_API disconnect(SourceBase& source, SinkBase& sink);
 
-void attach(SourceBase& innerSource, SourceProxyBase& proxy);
-void detach(SourceBase& innerSource, SourceProxyBase& proxy);
+void ESSENTIA_API attach(SourceBase& innerSource, SourceProxyBase& proxy);
+void ESSENTIA_API detach(SourceBase& innerSource, SourceProxyBase& proxy);
 
 
 /**
@@ -49,7 +49,7 @@ void detach(SourceBase& innerSource, SourceProxyBase& proxy);
  * the template being the token type). Look at the Source implementation for more
  * information.
  */
-class SourceBase : public Connector {
+class ESSENTIA_API SourceBase : public Connector {
  protected:
   std::vector<SinkBase*> _sinks;
 
