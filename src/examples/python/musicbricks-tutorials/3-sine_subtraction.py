@@ -15,9 +15,10 @@ params = { 'frameSize': 2048, 'hopSize': 128, 'startFromZero': False, 'sampleRat
 audioout = np.array(0)
 counter = 0
 
-
+# input and output files
 inputFilename = 'singing-female.wav'
 outputFilename = 'singing-female-out-sinesubtraction.wav'
+
 
 out = np.array(0)
 loader = es.MonoLoader(filename = inputFilename, sampleRate =  params['sampleRate'])
@@ -26,7 +27,6 @@ fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize
 w = es.Windowing(type = "blackmanharris92");
 fft = es.FFT(size = params['frameSize']);
 smanal = es.SineModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
-
 subtrFFTSize = min(params['frameSize']/4, 4* params['hopSize'])
 smsub = es.SineSubtraction(sampleRate = params['sampleRate'], fftSize = subtrFFTSize, hopSize = params['hopSize'])
 
