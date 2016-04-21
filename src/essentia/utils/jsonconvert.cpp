@@ -40,7 +40,7 @@ int JsonConvert::countBackSlashes() {
   while(i >= 0 && _str[i] == '\\') {
     i--;
   }
-  return -_pos - 1 - i;
+  return -((int)_pos) - 1 - i;
 }
 
 
