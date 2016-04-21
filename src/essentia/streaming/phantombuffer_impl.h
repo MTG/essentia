@@ -134,13 +134,13 @@ void PhantomBuffer<T>::releaseForWrite(int released) {
   // replicate from the beginning to the phantom zone if necessary
   if (_writeWindow.begin < _phantomSize) {
     T* first  = &_buffer[_writeWindow.begin];
-    T* last   = &_buffer[std::min(_writeWindow.begin + released, _phantomSize)];
+    T* last   = &_buffer[(std::min)(_writeWindow.begin + released, _phantomSize)];
     T* result = &_buffer[_writeWindow.begin + _bufferSize];
     fastcopy(result, first, last-first);
   }
   // replicate from the phantom zone to the beginning if necessary
   else if (_writeWindow.end > _bufferSize) {
-    int beginIdx = std::max(_writeWindow.begin, (int)_bufferSize);
+    int beginIdx = (std::max)(_writeWindow.begin, (int)_bufferSize);
     T* first  = &_buffer[beginIdx];
     T* last   = &_buffer[_writeWindow.end];
     T* result = &_buffer[beginIdx - _bufferSize];
@@ -234,7 +234,7 @@ int PhantomBuffer<T>::availableForRead(ReaderID id) const {
         << " final: " << min(theoretical, contiguous));
   */
 
-  return std::min(theoretical, contiguous);
+  return (std::min)(theoretical, contiguous);
 }
 
 /**
@@ -259,7 +259,7 @@ int PhantomBuffer<T>::availableForWrite(bool contiguous) const {
   // that the write window should not overtake.
   for (uint i=0; i<_readWindow.size(); i++) {
     const Window& w = _readWindow[i];
-    minTotal = std::min(minTotal, w.total(_bufferSize));
+    minTotal = (std::min)(minTotal, w.total(_bufferSize));
   }
 
   int theoretical = minTotal - _writeWindow.total(_bufferSize) + _bufferSize;
@@ -268,7 +268,7 @@ int PhantomBuffer<T>::availableForWrite(bool contiguous) const {
   }
 
   int ncontiguous = _bufferSize + _phantomSize - _writeWindow.begin;
-  return std::min(theoretical, ncontiguous);
+  return (std::min)(theoretical, ncontiguous);
 }
 
 // reposition pointer if we're in the phantom zone
