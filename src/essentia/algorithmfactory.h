@@ -243,8 +243,10 @@ namespace streaming {
 
 } // namespace essentia
 
-
+#if ESSENTIA_EXPORTS
 // include implementation, because the factory is now templated
 #include "algorithmfactory_impl.h"
+
+#endif
 
 #endif // ESSENTIA_ALGORITHMFACTORY_H
