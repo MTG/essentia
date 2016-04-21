@@ -30,14 +30,17 @@ for filename in files:
     i += 1
     print 'Extracting metadata:', filename
     namespace = 'track_' + str(i)
-    meta = MetadataReader(filename=filename, failOnError=True, tagPoolName=namespace + '.metadata')()
-    pool_meta, duration, bitrate, samplerate, channels = meta[7:]
-    pool_meta.set(namespace + ".file_path", os.path.relpath(filename))
-    pool_meta.set(namespace + ".duration", duration)
-    pool_meta.set(namespace + ".bit_rate", bitrate)
-    pool_meta.set(namespace + ".sample_rate", samplerate)
-    pool_meta.set(namespace + ".channels", channels)
-    result.merge(pool_meta)
+    try:
+        meta = MetadataReader(filename=filename, failOnError=True, tagPoolName=namespace + '.metadata')()
+        pool_meta, duration, bitrate, samplerate, channels = meta[7:]
+        pool_meta.set(namespace + ".file_path", os.path.relpath(filename))
+        pool_meta.set(namespace + ".duration", duration)
+        pool_meta.set(namespace + ".bit_rate", bitrate)
+        pool_meta.set(namespace + ".sample_rate", samplerate)
+        pool_meta.set(namespace + ".channels", channels)
+        result.merge(pool_meta)
+    except Exception, e:
+        print str(e)
 
 print "Saving results to", result_file
 YamlOutput(filename=result_file, format='json', doubleCheck=True, writeVersion=False)(result)
