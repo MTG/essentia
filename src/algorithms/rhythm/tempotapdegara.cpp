@@ -26,6 +26,11 @@ using namespace std;
 namespace essentia {
 namespace standard {
 
+const Real TempoTapDegara::_alpha = 0.5;
+const Real TempoTapDegara::_sigma_ibi = 0.025;
+
+const int TempoTapDegara::_numberCombs = 4;
+const Real TempoTapDegara::_frameDurationODF = 5.944308390022676;
 
 const char* TempoTapDegara::name = "TempoTapDegara";
 const char* TempoTapDegara::description = DOC("This algorithm estimates beat positions given an onset detection function.  The detection function is partitioned into 6-second frames with a 1.5-second increment, and the autocorrelation is computed for each frame, and is weighted by a tempo preference curve [2]. Periodicity estimations are done frame-wisely, searching for the best match with the Viterbi algorith [3]. The estimated periods are then passed to the probabilistic beat tracking algorithm [1], which computes beat positions.\n"

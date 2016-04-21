@@ -24,6 +24,11 @@ using namespace std;
 using namespace essentia;
 using namespace standard;
 
+const Real TempoTapMaxAgreement::_phaseThreshold = 0.175;
+const Real TempoTapMaxAgreement::_periodThreshold = 0.175;
+const Real TempoTapMaxAgreement::_minTickTime = 5.;
+const int TempoTapMaxAgreement::_numberBins = 40;
+
 const char* TempoTapMaxAgreement::name = "TempoTapMaxAgreement";
 const char* TempoTapMaxAgreement::description = DOC("This algorithm estimates beat positions and confidence of their estimation based on the maximum mutual agreement between given beat postion candidates, estimated by different beat trackers (or using different features) [1,2].\n"
 "\n"

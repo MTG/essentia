@@ -53,8 +53,8 @@ class TempoTapMaxAgreement : public Algorithm {
   static const char* description;
 
  private:
-  static const Real _minTickTime = 5.;  // ignore peaks before this time [s]
-  static const int _numberBins = 40; // number of histogram bins for information gain method
+  static const Real _minTickTime;  // ignore peaks before this time [s]
+  static const int _numberBins; // number of histogram bins for information gain method
                                      // corresponds to Log2(40) = 5.32 maximum
                                      // confidence value
 
@@ -62,8 +62,8 @@ class TempoTapMaxAgreement : public Algorithm {
   std::vector<Real> _binValues;
 
   // parameters for the continuity-based method
-  static const Real _phaseThreshold = 0.175; // size of tolerance window for beat phase
-  static const Real _periodThreshold = 0.175; // size of tolerance window for beat period
+  static const Real _phaseThreshold; // size of tolerance window for beat phase
+  static const Real _periodThreshold; // size of tolerance window for beat period
 
   Real computeBeatInfogain(std::vector<Real>& ticks1, std::vector<Real>& ticks2);
 
