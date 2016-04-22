@@ -243,7 +243,7 @@ namespace streaming {
 
 } // namespace essentia
 
-#if ESSENTIA_EXPORTS
+#if (ESSENTIA_EXPORTS == 1 && defined(OS_WIN32)) || !defined(OS_WIN32)
 // include implementation, because the factory is now templated
 #include "algorithmfactory_impl.h"
 
