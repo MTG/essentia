@@ -40,8 +40,8 @@ class ChordsDescriptors : public Algorithm {
 
   static const char* circleOfFifth[];
   int chordIndex(const std::string& chord);
-  std::map<std::string, Real> chordsHistogram(const std::vector<std::string>& chords);
-  std::map<std::string, Real> chordsHistogramNorm(std::map<std::string, Real>& histogram,
+  std::map<int, Real> chordsHistogram(const std::vector<std::string>& chords);
+  std::map<int, Real> chordsHistogramNorm(std::map<int, Real>& histogram,
                                                   const std::string& key);
 
  public:

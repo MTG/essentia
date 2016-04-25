@@ -54,22 +54,22 @@ int ChordsDescriptors::chordIndex(const string& chord) {
 }
 
 
-map<string, Real> ChordsDescriptors::chordsHistogram(const vector<string>& chords) {
-  map<string, Real> histogram;
+map<int, Real> ChordsDescriptors::chordsHistogram(const vector<string>& chords) {
+  map<int, Real> histogram;
 
   // Initialize
   for (int i=0; i<int(ARRAY_SIZE(circleOfFifth)); ++i) {
-    histogram[circleOfFifth[i]] = 0.0;
+    histogram[i] = 0.0;
   }
 
   // Increment
   for (int i=0; i<int(chords.size()); ++i) {
-    histogram[chords[i]] += 1.0;
+    histogram[chordIndex(chords[i])] += 1.0;
   }
 
   // Normalize
   for (int i=0; i<int(histogram.size()); ++i) {
-    histogram[circleOfFifth[i]] *= 100.0 / (Real)chords.size();
+    histogram[i] *= 100.0 / (Real)chords.size();
   }
 
   return histogram;
@@ -77,16 +77,16 @@ map<string, Real> ChordsDescriptors::chordsHistogram(const vector<string>& chord
 
 
 // offset the list of indices making key as the root index (or 0-index)
-map<string, Real> ChordsDescriptors::chordsHistogramNorm(map<string, Real>& histogram, const string& key) {
+map<int, Real> ChordsDescriptors::chordsHistogramNorm(map<int, Real>& histogram, const string& key) {
   int keyIndex = chordIndex(key);
-  map<string, Real> histogramNorm = histogram;
+  map<int, Real> histogramNorm = histogram;
 
   for (int i=0; i<int(histogramNorm.size()); ++i) {
     int chordIndex = i - keyIndex;
     if (chordIndex < 0) {
       chordIndex += ARRAY_SIZE(circleOfFifth);
     }
-    histogramNorm[circleOfFifth[chordIndex]] = histogram[circleOfFifth[i]];
+    histogramNorm[chordIndex] = histogram[i];
   }
 
   return histogramNorm;
@@ -108,13 +108,13 @@ void ChordsDescriptors::compute() {
   }
 
     // Chords Histogram
-  map<string, Real> chordsHist = chordsHistogram(chords);
-  map<string, Real> chordsHistNorm = chordsHistogramNorm(chordsHist, key);
+  map<int, Real> chordsHist = chordsHistogram(chords);
+  map<int, Real> chordsHistNorm = chordsHistogramNorm(chordsHist, key);
 
   vector<Real>& chordsHistNormVect = _chordsHistogram.get();
   chordsHistNormVect.resize(0); // erase anything that was in there
   for (int i=0; i<int(ARRAY_SIZE(circleOfFifth)); ++i) {
-    chordsHistNormVect.push_back(chordsHistNorm[circleOfFifth[i]]);
+    chordsHistNormVect.push_back(chordsHistNorm[i]);
   }
 
   // Chords Number Rate
@@ -144,8 +144,8 @@ void ChordsDescriptors::compute() {
   Real maxValue = 0.0;
 
   for (int i=0; i<int(ARRAY_SIZE(circleOfFifth)); ++i) {
-    if (chordsHist[circleOfFifth[i]] > maxValue) {
-      maxValue = chordsHist[circleOfFifth[i]];
+    if (chordsHist[i] > maxValue) {
+      maxValue = chordsHist[i];
       chordsKey = circleOfFifth[i];
     }
   }
