@@ -49,7 +49,7 @@ class PowerSpectrum : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("size", "the expected size of the input frame (this is purely optional and only targeted at optimizing the creation time of the FFT object)", "[1,inf)", 1024);
+    declareParameter("size", "the expected size of the input frame (this is purely optional and only targeted at optimizing the creation time of the FFT object)", "[1,inf)", 2048);
   }
 
   void configure();
