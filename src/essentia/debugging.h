@@ -26,6 +26,7 @@
 #include "config.h"
 #include "streamutil.h"
 #include "stringutil.h"
+#include <algorithm>
 
 namespace essentia {
 

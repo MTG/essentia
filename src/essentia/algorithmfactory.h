@@ -23,6 +23,7 @@
 #include <map>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 #include "types.h"
 #include "essentia.h"
 #include "parameter.h"
