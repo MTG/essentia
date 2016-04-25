@@ -42,16 +42,16 @@ def analysisSynthesis(params, signal):
 
     outsignal = array(0)
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
-    # framecutter >  windowing > FFT > IFFT > OverlapAdd
+    
     frames = cutFrames(params, signal)
     
     w = std.Windowing(type = "hann");
     fft = std.FFT(size = params['frameSize']);
-    ifft = std.IFFT(size = params['frameSize']);
-    overl = std.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
+    ifft = std.IFFT(size = params['frameSize']);    
+    overl = std.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'], gain = 1./params['frameSize']);    
     counter = 0
     for f in frames:
-      #outframe = OverlapAdd(frameSize = params['frameSize'], hopSize = params['hopSize'])(IFFT(size = params['frameSize'])(FFT(size = params['frameSize'])(Windowing()(f))))
+      
       
       # STFT analysis
       infft = fft(w(f))
@@ -79,7 +79,7 @@ def analysisSynthesisStreaming(params, signal):
     w = es.Windowing(type = "hann");
     fft = es.FFT(size = params['frameSize']);
     ifft = es.IFFT(size = params['frameSize']);
-    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
+    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'], gain = 1./params['frameSize']);    
     
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
@@ -130,9 +130,6 @@ class TestSTFT(TestCase):
         outsignal = analysisSynthesisStreaming(self.params, signal)
         outsignal = outsignal[:signalSize] # cut to duration of input signal
         
-#        numpy.savetxt('noise.txt',signal)
-#        numpy.savetxt('noise_out.txt',outsignal)
-
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
@@ -143,10 +140,7 @@ class TestSTFT(TestCase):
         signal = 0.5 * array([float(2*i%signalSize)/signalSize for i in range(signalSize)])
           
         outsignal = analysisSynthesisStreaming(self.params, signal)
-        outsignal = outsignal[:signalSize] # cut to duration of input signal
-            
-#        numpy.savetxt('ramp.txt',signal)
-#        numpy.savetxt('ramp_out.txt',outsignal)
+        outsignal = outsignal[:signalSize] # cut to duration of input signal          
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)
@@ -161,9 +155,6 @@ class TestSTFT(TestCase):
         # outsignal = analysisSynthesis(self.params, signal)
         outsignal = analysisSynthesisStreaming(self.params, signal)
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
-
-#        numpy.savetxt('sine.txt',signal)
-#        numpy.savetxt('sine_out.txt',outsignal)
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize']/2)

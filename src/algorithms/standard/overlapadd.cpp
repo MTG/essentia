@@ -82,7 +82,7 @@ namespace standard {
 
 const char* OverlapAdd::name = "OverlapAdd";
 const char* OverlapAdd::description = DOC(
-"This algorithm returns the output of an overlap-add process of a sequence of input audio signal frames. It considers that the input audio frames are windowed audio signals. Giving the size of the frame and the hop size, overlapping and adding consecutive frames with produce a continuous signal. \n"
+"This algorithm returns the output of an overlap-add process of a sequence of input audio signal frames. It considers that the input audio frames are windowed audio signals. Giving the size of the frame and the hop size, overlapping and adding consecutive frames with produce a continuous signal. A normalization gain can be passed as parameter. \n"
 ".\n"
 "\n"
 "Empty input signals will raise an exception.\n"
@@ -96,7 +96,9 @@ const char* OverlapAdd::description = DOC(
 void OverlapAdd::configure() {
   _frameSize = parameter("frameSize").toInt();
   _hopSize = parameter("hopSize").toInt();
-  _normalizationGain = 0.5 * _hopSize / float(_frameSize);
+  _gain =  parameter("gain").toReal();
+
+  _normalizationGain = 0.5 * _hopSize * _gain ;
   _frameHistory.resize(_frameSize);
   _tmpFrame.resize(_frameSize);
 }
@@ -148,7 +150,8 @@ void OverlapAdd::reset() {
 void OverlapAdd::configure() {
   _frameSize = parameter("frameSize").toInt();
   _hopSize = parameter("hopSize").toInt();
-  _normalizationGain = 0.5 * _hopSize / float(_frameSize);
+
+  _normalizationGain =  0.5 * _hopSize * parameter("gain").toReal();
   _frameHistory.resize(_frameSize);
   _tmpFrame.resize(_frameSize);
   reset();

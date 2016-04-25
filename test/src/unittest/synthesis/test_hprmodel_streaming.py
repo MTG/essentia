@@ -68,10 +68,10 @@ def cleaningHarmonicTracks(freqsTotal, minFrames, pitchConf):
           for i in range(begTrack, f+1):
             freqsClean[i][t] = 0;
             
-          # clean track if  pitch confidence for that frameis below a ionfidence threshold
-          if (pitchConf[f] < confThreshold) :
-              freqsClean[f][t] = 0;
-              
+        # clean track if  pitch confidence for that frameis below a ionfidence threshold
+        if (pitchConf[f] < confThreshold) :        
+          freqsClean[f][t] = 0;
+          
         f+=1;
 
   return freqsClean
@@ -169,7 +169,7 @@ def analsynthHprModelStreaming(params, signal):
     pitchDetect.pitch >> smanal.pitch  
     pitchDetect.pitchConfidence >> (pool, 'pitchConfidence')  
     pitchDetect.pitch >> (pool, 'pitch')  
-    print freqsClean
+    
     # synthesis
     smanal.magnitudes >> smsyn.magnitudes
     smanal.frequencies >> smsyn.frequencies
@@ -203,7 +203,7 @@ class TestHprModel(TestCase):
     def testZero(self):
       
         # generate test signal
-        signalSize = 10 * self.params['frameSize']
+        signalSize = 20 * self.params['frameSize']
         signal = zeros(signalSize)
         
         [mags, freqs, phases] = analHprModelStreaming(self.params, signal)
@@ -216,15 +216,16 @@ class TestHprModel(TestCase):
     def testWhiteNoise(self):
         from random import random
         # generate test signal
-        signalSize = 10 * self.params['frameSize']
+        signalSize = 20 * self.params['frameSize']
         signal = array([2*(random()-0.5)*i for i in ones(signalSize)])
         
+        
         # for white noise test set sine minimum duration to 350ms, and min threshold of -20dB
-        self.params['minSineDur'] = 0.35 # limit pitch tracks of a nimumim length of 500ms for the case of white noise input
+        self.params['minSineDur'] = 0.35 # limit pitch tracks of a nimumim length of 350ms for the case of white noise input
         self.params['magnitudeThreshold']= -20
     
         [mags, freqs, phases]  = analHprModelStreaming(self.params, signal)
-
+        
         # compare: no frequencies  should be found
         zerofreqs = numpy.zeros(freqs.shape)
         self.assertAlmostEqualMatrix(freqs, zerofreqs)
@@ -232,7 +233,7 @@ class TestHprModel(TestCase):
     def testRegression(self):
 
         # generate test signal: sine 220Hz @44100kHz
-        signalSize = 10 * self.params['frameSize']
+        signalSize = 20 * self.params['frameSize']
         signal = .5 * numpy.sin( (array(range(signalSize))/self.params['sampleRate']) * 220 * 2*math.pi)
 
         # generate noise components        

@@ -34,15 +34,17 @@ void SineSubtraction::configure() {
     _sampleRate = parameter("sampleRate").toReal();
     _fftSize = parameter("fftSize").toInt();
     _hopSize = parameter("hopSize").toInt();
-
+    
 		// configure algorithms
 	 	std::string wtype = "blackmanharris92"; // default "hamming"
 		_window->configure( "type", wtype.c_str());
 
 	_fft->configure("size", _fftSize);
 
+    
+   Real gain = 1.f/Real(_fftSize);
 	_overlapadd->configure( "frameSize", _fftSize, // uses synthesis window
-													"hopSize", _hopSize);
+													"hopSize", _hopSize,"gain", gain);
 	// create synthesis window
 	createSynthesisWindow(_synwindow, _hopSize, _fftSize);
 
