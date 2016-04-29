@@ -24,10 +24,15 @@ from essentia_test import *
 class TestPowerSpectrum(TestCase):
 
     def testRegression(self):
-        input = readVector( join(filedir(), 'powerspectrum', 'input.txt') )
-        expected = readVector( join(filedir(), 'powerspectrum', 'output.txt') )
+        input = readVector( join(filedir(), 'spectrum', 'input.txt') )
+        expected = readVector( join(filedir(), 'spectrum', 'output.txt') )
 
         result = PowerSpectrum(size=len(input))(input)
+        expected = [x*x for x in expected]
+
+        #result = Spectrum(size=len(input))(input)
+        #result = [x*x for x in result]
+
         self.assertAlmostEqualVector(result, expected, 1e-3)
 
     def testEmpty(self):
