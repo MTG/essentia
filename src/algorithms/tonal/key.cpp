@@ -568,7 +568,6 @@ AlgorithmStatus Key::process() {
   string scale;
   Real strength;
   Real firstToSecondRelativeStrength;
-  _keyAlgo->configure("profileType", "temperley");
   _keyAlgo->input("pcp").set(hpcpAverage);
   _keyAlgo->output("key").set(key);
   _keyAlgo->output("scale").set(scale);
