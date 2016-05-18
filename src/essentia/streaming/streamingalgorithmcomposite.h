@@ -49,7 +49,7 @@ public:
 };
 
 
-class AlgorithmComposite : public Algorithm {
+class ESSENTIA_API AlgorithmComposite : public Algorithm {
 
  public:
 
