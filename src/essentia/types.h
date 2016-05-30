@@ -73,7 +73,7 @@ typedef float Real;
  * to make it as easy as possible to throw an exception with a descriptive
  * message.
  */
-class EssentiaException : public std::exception {
+class ESSENTIA_API EssentiaException : public std::exception {
 
  public:
   EssentiaException(const char* msg) : exception(), _msg(msg) {}
@@ -348,7 +348,7 @@ typedef int ReaderID;
 typedef Real AudioSample;
 
 template <typename T>
-class Tuple2 {
+class ESSENTIA_API Tuple2 {
  public:
   T first;
   T second;
