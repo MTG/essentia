@@ -284,9 +284,9 @@ You can use Essentia's streaming mode in real time feeding input audio frames to
 
 As an example, see the code of [essentiaRT~](https://github.com/GiantSteps/MC-Sonaar/tree/master/essentiaRT~). 
 
-- [EssentiaOnset.cpp#L63](https://github.com/GiantSteps/MC-Sonaar/blob/master/essentiaRT~/EssentiaOnset.cpp#L63)
-- [EssentiaOnset.cpp#L112](https://github.com/GiantSteps/MC-Sonaar/blob/master/essentiaRT~/EssentiaOnset.cpp#L112)
-- [main.cpp#L74](https://github.com/GiantSteps/MC-Sonaar/blob/master/essentiaRT~/main.cpp#L74)
+- [EssentiaOnset.cpp#L70](https://github.com/GiantSteps/MC-Sonaar/blob/master/essentiaRT~/EssentiaOnset.cpp#L70)
+- [EssentiaOnset.cpp#L127](https://github.com/GiantSteps/MC-Sonaar/blob/master/essentiaRT~/EssentiaOnset.cpp#L127)
+- [main.cpp](https://github.com/GiantSteps/MC-Sonaar/blob/master/essentiaRT~/main.cpp)
 
 You can also use Essentia's standard mode for real-time computations. 
 
