@@ -54,6 +54,8 @@ void SuperFluxPeaks::configure() {
      _ratioThreshold = parameter("ratioThreshold").toReal();
     
     peakTime = 0;
+	startPeakTime = 0;
+	nDetec=0;
     
 }
 
@@ -79,12 +81,9 @@ void SuperFluxPeaks::compute() {
     _maxf->input("signal").set(signal);
     _maxf->output("signal").set(maxs);
     _maxf->compute();
+
     
-//    cout << signal << endl;
-//    cout << maxs << endl;
-//    cout << avg << endl;
-    int nDetec=0;
-    
+    int localnDetec = 0;
     for( int i =0; i <=size;i++){
         
         // we want to avoid ratioThreshold noisy activation in really low flux parts so we set noise floor
@@ -97,17 +96,19 @@ void SuperFluxPeaks::compute() {
         if( isOverLinearThreshold||isOverratioThreshold)
            {
             
-            peakTime = i*1.0/frameRate;
-            if((nDetec>0 && peakTime-peaks[nDetec-1]>_combine)  ||  nDetec ==0) {
-                peaks[nDetec] = peakTime;
+            peakTime = startPeakTime + i*1.0/frameRate;
+            if((localnDetec>0 && peakTime-peaks[localnDetec-1]>_combine)  ||  localnDetec ==0) {
+                peaks[localnDetec] = peakTime;
                 nDetec++;
+				localnDetec++;
             }
         }
         }
         
     }
+	startPeakTime += size*1.0/frameRate;
     
-    peaks.resize(nDetec);
+    peaks.resize(localnDetec);
     return;
     
 }
