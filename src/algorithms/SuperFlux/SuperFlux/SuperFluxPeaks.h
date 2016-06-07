@@ -41,6 +41,8 @@ private:
     Real _ratioThreshold;
     
     Real peakTime;
+	Real startPeakTime;
+	int nDetec;
     
     int hopSize;
     Real frameRate;
