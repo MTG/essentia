@@ -26,45 +26,36 @@ using namespace std;
 namespace essentia {
 namespace standard {
 
-class SuperFluxNovelty : public Algorithm{
+class SuperFluxNovelty : public Algorithm {
 
  private:
- 
   Input<std::vector< std::vector<Real> >  > _bands;
   Output<Real > _diffs;
 
+ 	int _binWidth;
+  int _frameWidth;
 
-  
-  	int _binW;
-  	int _frameWi;
-	
-
-
-	Algorithm* _maxf;
-
+  Algorithm* _maxFilter;
 
  public:
   SuperFluxNovelty() {
     declareInput(_bands, "bands", "the input bands spectrogram");
     declareOutput(_diffs, "Differences", "SuperFluxNovelty input");
-	_maxf = AlgorithmFactory::create("MaxFilter");
-    
+	 _maxFilter = AlgorithmFactory::create("MaxFilter"); 
   }
 
   ~SuperFluxNovelty() {
-      delete _maxf;
+    delete _maxFilter;
   }
 
   void declareParameters() {
-    declareParameter("binWidth", "height(n of frequency bins) of the SuperFluxNoveltyFilter", "[3,inf)", 3);
-	declareParameter("frameWidth", "differenciate with the N-th previous frame", "(0,inf)", 2);
-	
-}
+    declareParameter("binWidth", "width of the SuperFluxNoveltyFilter (number of frequency bins)", "[3,inf)", 3);
+    declareParameter("frameWidth", "differenciate with the N-th previous frame", "(0,inf)", 2);
+  }
 
   void reset();
   void configure();
   void compute();
-
 
   static const char* name;
   static const char* version;
@@ -76,56 +67,48 @@ class SuperFluxNovelty : public Algorithm{
 
 
 #include "streamingalgorithm.h"
-// #include "streamingalgorithmcomposite.h"
+
 namespace essentia {
 namespace streaming {
 
-class SuperFluxNovelty : public Algorithm
-    {
+class SuperFluxNovelty : public Algorithm {
 
  protected:
-    Sink< vector<Real> > _bands;
-    Source<Real  > _diffs;
-  
-  
-    essentia::standard::Algorithm* _algo;
+  Sink< vector<Real> > _bands;
+  Source<Real  > _diffs;
 
+  essentia::standard::Algorithm* _algo;
 
  public:
-
-        SuperFluxNovelty(){
-            declareInput(_bands, "bands", "the input bands spectrogram");
-            declareOutput(_diffs,1,1, "Differences", "SuperFluxNovelty input");
-            _algo = essentia::standard::AlgorithmFactory::create("SuperFluxNovelty");
-
-        }
-        ~SuperFluxNovelty(){
-            delete _algo;
-        }
-
+  SuperFluxNovelty() {
+    declareInput(_bands, "bands", "the input bands spectrogram");
+    declareOutput(_diffs,1,1, "differences", "SuperFluxNovelty input");
+    _algo = essentia::standard::AlgorithmFactory::create("SuperFluxNovelty");
+  }
+  
+  ~SuperFluxNovelty() {
+    delete _algo;
+  }
 
   void declareParameters() {
-    declareParameter("binWidth", "height(n of frequency bins) of the SuperFluxNoveltyFilter", "[3,inf)", 3);
-	declareParameter("frameWidth", "number of frame for differentiation", "(0,inf)", 2);
-    }
+    declareParameter("binWidth", "width of the SuperFluxNoveltyFilter (number of frequency bins)", "[3,inf)", 3);
+    declareParameter("frameWidth", "number of frame for differentiation", "(0,inf)", 2);
+  }
    
-void configure() {
-     _algo->configure(_params);
-    _bands.setAcquireSize(_algo->parameter("frameWidth").toInt()+1);
+  void configure() {
+    _algo->configure(_params);
+    _bands.setAcquireSize(_algo->parameter("frameWidth").toInt() + 1);
     _bands.setReleaseSize(1);
-
   }
 
   AlgorithmStatus process();
-  void reset(){
-  };
+  void reset() {};
 
   static const char* name;
   static const char* description;
-
 };
 
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_SuperFluxNovelty_H
+#endif // ESSENTIA_SUPERFLUXNOVELTY_H

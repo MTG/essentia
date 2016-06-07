@@ -51,7 +51,7 @@ class TriangularBands : public Algorithm {
 
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("frequencyBands", "list of frequency ranges into which the spectrum is divided (these must be in ascending order and connot contain duplicates),"\
-    					"each triangle is build as x(i-1)=, x(i)=1, x(i+1)=0 over i, the resulting number of bands is size of input array - 2", "", arrayToVector<Real>(freqBands));
+    					"each triangle is build as x(i-1)=0, x(i)=1, x(i+1)=0 over i, the resulting number of bands is size of input array - 2", "", arrayToVector<Real>(freqBands));
     declareParameter("log", "taking log10 (1 + magnitude) in each band","{true,false}", true);
   }
 
