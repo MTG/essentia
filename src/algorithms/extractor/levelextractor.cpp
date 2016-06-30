@@ -28,7 +28,7 @@ namespace streaming {
 
 
 const char* LevelExtractor::name = "LevelExtractor";
-const char* LevelExtractor::description = DOC("this algorithm extracts the loudness of an audio signal");
+const char* LevelExtractor::description = DOC("This algorithm extracts the loudness of an audio signal in frames using Loudness algorithm.");
 
 LevelExtractor::LevelExtractor() {
 
