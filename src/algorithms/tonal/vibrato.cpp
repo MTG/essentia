@@ -65,27 +65,22 @@ void Vibrato::compute() {
   vector<Real>& vibExtend = _vibExtend.get();
 
   // pitch vector is empty
-  if (pitch.empty()){
+  if (pitch.empty()) {
     vibFrequency.clear();
     vibExtend.clear();
     return;
   }
-    
-  vibFrequency.resize(pitch.size());
-  vibExtend.resize(pitch.size());
-  
-  for (int i=0; i<(int)pitch.size(); i++){
-    vibFrequency[i]=0.0;
-    vibExtend[i]=0.0;
-  }
+
+  vibFrequency.assign(pitch.size(), 0.);
+  vibExtend.assign(pitch.size(), 0.);
   
   vector<Real> pitchP;
     
   // set negative pitch values to zero
-  for (int i=0; i<(int)pitch.size(); i++){
-    if (pitch[i]<0){
+  for (int i=0; i<(int)pitch.size(); i++) {
+    if (pitch[i]<0) {
         pitchP.push_back(0.0);
-    }else{
+    } else {
         pitchP.push_back(pitch[i]);
     }
   }
@@ -94,24 +89,24 @@ void Vibrato::compute() {
   if (pitchP[0]>0){
     startC.push_back(0);
   }
-  for (int i=0; i<(int)pitchP.size()-1; i++){
+  for (int i=0; i<(int)pitchP.size()-1; i++) {
     if (pitchP[i+1]>0 && pitchP[i]==0){
       startC.push_back(i+1);
     }
-    if (pitchP[i+1]==0 && pitchP[i]>0){
-            endC.push_back(i);
+    if (pitchP[i+1]==0 && pitchP[i]>0) {
+      endC.push_back(i);
     }
   }
-  if (endC.size()<startC.size()){
+  if (endC.size()<startC.size()) {
     endC.push_back(pitch.size()-1);
   }
 
     
   // iterate over contour segments
-  for (int i=0; i<(int)startC.size(); i++){
+  for (int i=0; i<(int)startC.size(); i++) {
     // get a segment in cents
     vector<Real> contour;
-    for (int ii=startC[i]; ii<=endC[i]; ii++){
+    for (int ii=startC[i]; ii<=endC[i]; ii++) {
       contour.push_back(1200*log2(pitch[ii]/55.0));
     }
       
@@ -134,19 +129,19 @@ void Vibrato::compute() {
     int frameNo=0;
     
     // frame-wise processing
-    while (true){
+    while (true) {
           
       //get a frame
       frameCutter->compute();
       frameNo++;
           
-      if(!frame.size()){
+      if(!frame.size()) {
         break;
       }
           
       // subtract mean pitch from frame
       Real m=mean(frame, 0, frame.size()-1);
-      for (int ii=0; ii<(int)frame.size(); ii++){
+      for (int ii=0; ii<(int)frame.size(); ii++) {
         frame[ii]-=m;
       }
           
@@ -183,24 +178,30 @@ void Vibrato::compute() {
         }
       }
       
-      Real ext=frame[argmax(frame)]+abs(frame[argmin(frame)]);
+      Real ext = frame[argmax(frame)] + abs(frame[argmin(frame)]);
       if (ext<_minExtend || ext>_maxExtend){
         continue;
       }
     
-      for (int ii=startC[i]+frameNo; ii<startC[i]+frameNo+frameSize; ii++){
+      for (int ii=startC[i]+frameNo; ii<startC[i]+frameNo+frameSize; ii++) {
         vibFrequency[ii]=peakFrequencies[0];
         vibExtend[ii]=ext;
       }
-    
     }
-  
   }
+}
 
-  // clean up
+Vibrato::~Vibrato() {
   delete frameCutter;
-  delete spectralPeaks;
-  delete spectrum;
   delete window;
+  delete spectrum;
+  delete spectralPeaks;
+}
 
+void Vibrato::reset() {
+  Algorithm::reset();
+  frameCutter->reset();
+  spectralPeaks->reset();
+  spectrum->reset();
+  window->reset();
 }

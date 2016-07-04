@@ -49,6 +49,8 @@ class Vibrato : public Algorithm {
     spectralPeaks = AlgorithmFactory::create("SpectralPeaks");
   }
 
+  ~Vibrato();
+
   void declareParameters() {
     declareParameter("minFrequency", "minimum considered vibrato frequency [Hz]", "(0,inf)", 4.0);
     declareParameter("maxFrequency", "maximum considered vibrato frequency [Hz]", "(0,inf)", 8.0);
@@ -59,6 +61,7 @@ class Vibrato : public Algorithm {
 
   void compute();
   void configure();
+  void reset();
 
   static const char* name;
   static const char* description;
