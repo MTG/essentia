@@ -244,7 +244,7 @@ The parameters include:
 
 In the preprocessing stage, training script loads all descriptor files according to the preprocessing type. Additionally, a number of descriptors are always ignored, including all ```metadata*``` that is the information not directly associated with audio analysis. The ```*.dmean```, ```*.dvar```, ```*.min```, ```*.max```, ```*.cov``` descriptors are also ignored, and therefore, currently only means and variances are used for descriptors summarized across frames. Non-numerical descriptors are enumerated (```tonal.chords_key```, ```tonal.chords_scale```, ```tonal.key_key```, ```tonal.key_scale```).
 
-Not that cross-validation script splits the ground-truth dataset into train and test sets randomly. In the case of music classification tasks one may want to assure artist/album filtering (that is, no artist/album occures in the test set if it occures in train set). Current way to achieve it is to ensure that the whole input dataset contains only one item per artist/album. Alternatively, you can adapt the scripts to suit your needs.
+Note that cross-validation script splits the ground-truth dataset into train and test sets randomly. In the case of music classification tasks one may want to assure artist/album filtering (that is, no artist/album occures in the test set if it occures in train set). Current way to achieve it is to ensure that the whole input dataset contains only one item per artist/album. Alternatively, you can adapt the scripts to suit your needs.
 
 
 Building lightweight Essentia with reduced dependencies 
