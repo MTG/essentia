@@ -582,7 +582,97 @@ AlgorithmStatus BpmHistogram::process() {
   return FINISHED;
 }
 
-
-
 } // namespace streaming
+} // namespace essentia
+
+
+namespace essentia {
+namespace standard {
+
+const char* BpmHistogram::name = essentia::streaming::BpmHistogram::name;
+const char* BpmHistogram::description = essentia::streaming::BpmHistogram::description;
+
+BpmHistogram::BpmHistogram() {
+  declareInput(_signal, "novelty", "the novelty curve");
+
+  declareOutput(_bpm, "bpm", "the mean of the most salient tempo");
+  declareOutput(_bpmCandidates, "bpmCandidates", "the list of bpm candidates");
+  declareOutput(_bpmMagnitudes, "bpmMagnitudes", "the strength of bpm candidates");
+  declareOutput(_tempogram, "tempogram", "the bpm spectrogram");
+  declareOutput(_frameBpms, "frameBpms", "the bpm at each frame that is most related to the mean bpm");
+  declareOutput(_ticks, "ticks", "the list of ticks' positions [s]");
+  declareOutput(_ticksMagnitude, "ticksMagnitude", "the strength of the ticks");
+  declareOutput(_sinusoid, "sinusoid", "the sinusoid whose peaks indicate the ticks' positions");
+
+  createInnerNetwork();
+}
+
+BpmHistogram::~BpmHistogram() {
+  delete _network;
+}
+
+void BpmHistogram::configure() {
+  _bpmHistogram->configure(INHERIT("frameRate"), INHERIT("frameSize"),
+                              INHERIT("zeroPadding"), INHERIT("overlap"),
+                              INHERIT("windowType"), INHERIT("maxPeaks"),
+                              INHERIT("minBpm"), INHERIT("maxBpm"),
+                              INHERIT("weightByMagnitude"), INHERIT("constantTempo"),
+                              INHERIT("tempoChange"), INHERIT("bpm"));
+}
+
+void BpmHistogram::createInnerNetwork() {
+  _bpmHistogram = streaming::AlgorithmFactory::create("BpmHistogram");
+  _vectorInput = new streaming::VectorInput<Real>();
+
+  *_vectorInput  >>  _bpmHistogram->input("novelty");
+  _bpmHistogram->output("bpm") >> PC(_pool, "internal.bpm");
+  _bpmHistogram->output("bpmCandidates") >> PC(_pool, "internal.bpmCandidates");
+  _bpmHistogram->output("bpmMagnitudes") >> PC(_pool, "internal.bpmMagnitudes");
+  _bpmHistogram->output("tempogram") >> PC(_pool, "internal.tempogram");
+  _bpmHistogram->output("frameBpms") >> PC(_pool, "internal.frameBpms");
+  _bpmHistogram->output("ticks") >> PC(_pool, "internal.ticks");
+  _bpmHistogram->output("ticksMagnitude") >> PC(_pool, "internal.ticksMagnitude");
+  _bpmHistogram->output("sinusoid") >> PC(_pool, "internal.sinusoid");
+
+  _network = new scheduler::Network(_vectorInput);
+}
+
+void BpmHistogram::compute() {
+  const vector<Real>& signal = _signal.get();
+  _vectorInput->setVector(&signal);
+
+  _network->run();
+
+  Real& bpm = _bpm.get();
+  vector<Real>& bpmCandidates = _bpmCandidates.get();
+  vector<Real>& bpmMagnitudes = _bpmMagnitudes.get();
+  TNT::Array2D<Real>& tempogram = _tempogram.get();
+  vector<Real>& frameBpms = _frameBpms.get();
+  vector<Real>& ticks = _ticks.get();
+  vector<Real>& ticksMagnitude = _ticksMagnitude.get();
+  vector<Real>& sinusoid = _sinusoid.get();
+
+  bpm = _pool.value<Real>("internal.bpm");
+  bpmCandidates = _pool.value<vector<Real> >("internal.bpmCandidates");
+  bpmMagnitudes = _pool.value<vector<Real> >("internal.bpmMagnitudes");
+  tempogram = _pool.value<vector<TNT::Array2D<Real> > >("internal.tempogram")[0];
+  frameBpms = _pool.value<vector<Real> >("internal.frameBpms");
+  ticks = _pool.value<vector<Real> >("internal.ticks");
+  ticksMagnitude = _pool.value<vector<Real> >("internal.ticksMagnitude");
+  sinusoid = _pool.value<vector<Real> >("internal.sinusoid");
+}
+
+void BpmHistogram::reset() {
+  _network->reset();
+  _pool.remove("internal.bpm");
+  _pool.remove("internal.bpmCandidates");
+  _pool.remove("internal.bpmMagnitudes");
+  _pool.remove("internal.tempogram");
+  _pool.remove("internal.frameBpms");
+  _pool.remove("internal.ticks");
+  _pool.remove("internal.ticksMagnitude");
+  _pool.remove("internal.sinusoid");  
+}
+
+} // namespace standard
 } // namespace essentia
