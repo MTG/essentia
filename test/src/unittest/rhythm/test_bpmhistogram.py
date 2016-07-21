@@ -32,7 +32,7 @@ from numpy import argmax
 class TestBpmHistogram(TestCase):
 
     def computeNoveltyCurve(self, filename, frameSize=1024, hopSize=512, windowType='hann',
-                            weightCurveType='inverse_quadratic', sampleRate=44100.0,
+                            weightCurveType='hybrid', sampleRate=44100.0,
                             startTime=0, endTime=2000):
 
         loader = EasyLoader(filename=filename, startTime=startTime,

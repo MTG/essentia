@@ -44,14 +44,14 @@ const char* NoveltyCurve::description = DOC(
 "  http://resources.mpi-inf.mpg.de/MIR/tempogramtoolbox\n");
 
 
-vector<Real> NoveltyCurve::weightCurve(int size) {
+vector<Real> NoveltyCurve::weightCurve(int size, WeightType type) {
   vector<Real> result(size, 0.0);
   int halfSize = size/2;
   int sqrHalfSize = halfSize*halfSize;
   int sqrSize = size*size;
 
   // NB:some of these curves have a +1 so we don't reach zero!!
-  switch(_type) {
+  switch(type) {
     case FLAT:
       fill(result.begin(), result.end(), Real(1.0));
       break;
@@ -156,9 +156,6 @@ vector<Real> NoveltyCurve::noveltyFunction(const vector<Real>& spec, Real C, int
   mavg->compute();
   delete mavg;
   return novelty_ma;
-
-
-  //return novelty;
 }
 
 void NoveltyCurve::configure() {
@@ -172,6 +169,7 @@ void NoveltyCurve::configure() {
   else if (type == "quadratic") _type = QUADRATIC;
   else if (type == "inverse_quadratic") _type = INVERSE_QUADRATIC;
   else if (type == "supplied") _type = SUPPLIED;
+  else if (type == "hybrid") _type = HYBRID;
   _frameRate = parameter("frameRate").toReal();
   _normalize = parameter("normalize").toBool();
 }
@@ -199,41 +197,50 @@ void NoveltyCurve::compute() {
   for (int bandIdx=0; bandIdx<nBands; bandIdx++) {
     noveltyBands[bandIdx] = noveltyFunction(t_frequencyBands[bandIdx], 1000, meanSize);
   }
-  /////////////////////////////////////////////////////////////////////////////
-  // TODO: EAylon: By trial-&-error I found that combining weightings (flat, quadratic,
-  // linear and inverse quadratic) was giving better results. Should this be
-  // left as is or should we allow the algorithm to work with the given
-  // weightings from the configuration. This overrides the parameters, so if
-  // left as is, they should be removed as well.
-  /////////////////////////////////////////////////////////////////////////////
-  _type = FLAT;
-  vector<Real> aweights = weightCurve(nBands);
-  _type = QUADRATIC;
-  vector<Real> bweights = weightCurve(nBands);
-  _type = LINEAR;
-  vector<Real> cweights = weightCurve(nBands);
-  _type = INVERSE_QUADRATIC;
-  vector<Real> dweights = weightCurve(nBands);
+
+
   //sum novelty on all bands (weighted) to get a single novelty value per frame
   noveltyBands = essentia::transpose(noveltyBands); // back to [frames x bands]
-  vector<Real> bnovelty(nFrames-1, 0.0);
-  vector<Real> cnovelty(nFrames-1, 0.0);
-  vector<Real> dnovelty(nFrames-1, 0.0);
-  for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) { // nFrames -1 as noveltyBands is a derivative whose size is nframes-1
-    for (int bandIdx=0; bandIdx<nBands; bandIdx++) {
-      novelty[frameIdx] += aweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
-      bnovelty[frameIdx] += bweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
-      cnovelty[frameIdx] += cweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
-      dnovelty[frameIdx] += dweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+
+  // TODO: weight curves should be pre-computed in configure() method
+  if (_type == HYBRID) {
+    // EAylon: By trial-&-error I found that combining weightings (flat, quadratic,
+    // linear and inverse quadratic) was giving better results.   
+    vector<Real> aweights = weightCurve(nBands, FLAT);
+    vector<Real> bweights = weightCurve(nBands, QUADRATIC);
+    vector<Real> cweights = weightCurve(nBands, LINEAR);
+    vector<Real> dweights = weightCurve(nBands, INVERSE_QUADRATIC);
+
+    vector<Real> bnovelty(nFrames-1, 0.0);
+    vector<Real> cnovelty(nFrames-1, 0.0);
+    vector<Real> dnovelty(nFrames-1, 0.0);
+
+    for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) { // noveltyBands is a derivative whose size is nframes-1
+      for (int bandIdx=0; bandIdx<nBands; bandIdx++) {
+        novelty[frameIdx] += aweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+        bnovelty[frameIdx] += bweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+        cnovelty[frameIdx] += cweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+        dnovelty[frameIdx] += dweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+      }
     }
-  }
-  for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) {
+    for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) {
+      // TODO why multiplication instead of sum (or mean)? 
       novelty[frameIdx] *= bnovelty[frameIdx];
       novelty[frameIdx] *= cnovelty[frameIdx];
       novelty[frameIdx] *= dnovelty[frameIdx];
+    }
+  }
+  else {
+    vector<Real> weights = weightCurve(nBands, _type);
+
+    for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) {
+      for (int bandIdx=0; bandIdx<nBands; bandIdx++) {
+        novelty[frameIdx] += weights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+      }
+    }
   }
 
-
+  // smoothing
   Algorithm * mavg = AlgorithmFactory::create("MovingAverage", "size", meanSize);
   vector<Real> novelty_ma;
   mavg->input("signal").set(novelty);
