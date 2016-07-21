@@ -28,12 +28,13 @@ namespace standard {
 
 const char* NoveltyCurve::name = "NoveltyCurve";
 const char* NoveltyCurve::description = DOC(
-"This algorithm computes the novelty curve based on a given frame sequence of energies in frequency bands as defined in [1].\n"
+"This algorithm computes the novelty curve which is a type of onset detection function defined in [1]. It expects as an input a frame-wise sequence of frequency-bands energies or spectrum magnitudes as originally proposed in [1] (see FrequencyBands and Spectrum algorithms). Novelty in each band (or frequency bin) is computed as a derivative between log-compressed energy (magnitude) values in consequent frames. The overall novelty value is then computed as a weighted sum that can be configured using 'weightCurve' parameter. The resulting novelty curve can be used for beat tracking and onset detection (see BpmHistogram and Onsets).\n"
 "\n"
 "Notes:\n"
-"- Recommended frame/hop size for computation of input frequency bands is 2048/1024 samples (44.1 kHz sampling rate) [2].\n"
+"- Recommended frame/hop size for spectrum computation is 2048/1024 samples (44.1 kHz sampling rate) [2].\n"
 "- Log compression is applied with C=1000 as in [1].\n"
 "- Frequency bands energies (see FrequencyBands) as well as bin magnitudes for the whole spectrum can be used as an input. The implementation for the original algorithm [2] works with spectrum bin magnitudes for which novelty functions are computed separately and are then summarized into bands.\n"
+"- In the case if 'weightCurve' is set to 'hybrid' a complex combination of flat, quadratic, linear and inverse quadratic weight curves is used. It was reported to improve performance of beat tracking in some informal in-house experiments (Note: this information is probably outdated).\n"
 "\n"
 "References:\n"
 "  [1] P. Grosche and M. Müller, \"A mid-level representation for capturing\n"
@@ -231,6 +232,7 @@ void NoveltyCurve::compute() {
     }
   }
   else {
+    // TODO weight curve should be pre-computed in configure() method
     vector<Real> weights = weightCurve(nBands, _type);
 
     for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) {
