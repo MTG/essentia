@@ -34,11 +34,11 @@ namespace essentia {
 namespace streaming {
 
 const char* BpmHistogram::name = "BpmHistogram";
-const char* BpmHistogram::description = DOC("This algorithm analyzes predominant periodicities in a signal given its novelty curve (see NoveltyCurve algorithm) or another onset detection function (see OnsetDetection and OnsetDetectionGlobal). It estimates pulse BPM values and time positions together with a half-wave rectified sinusoid whose peaks represent the pulses present in the audio signal and their magnitudes.\n\n"
+const char* BpmHistogram::description = DOC("This algorithm analyzes predominant periodicities in a signal given its novelty curve (see NoveltyCurve algorithm) or another onset detection function (see OnsetDetection and OnsetDetectionGlobal). It estimates pulse BPM values and time positions together with a half-wave rectified sinusoid whose peaks represent the pulses present in the audio signal and their magnitudes. The analysis is based on the FFT of the input novelty curve from which salient periodicities are detected by thresholding.\n\n"
 "The algorithm outputs: \n"
 " - bpm: the mean of the most salient BPM values representing periodicities in the signal (the mean BPM).\n"
 " - bpmCandidates and bpmMagnitudes: list of the most salient BPM values and their magnitudes (intensity). These two outputs can be helpful for taking an alternative decision on estimation of the overall BPM.\n"
-" - tempogram: spectrogram-like representation of the estimated periodicities and their intensities over time (per-frame BPM magnitudes). It is useful for detecting tempo variations and visualization of tempo evolution.\n"
+" - tempogram: spectrogram-like representation of the estimated salient periodicities and their intensities over time (per-frame BPM magnitudes). It is useful for detecting tempo variations and visualization of tempo evolution.\n"
 " - frameBpms: list of candidate BPM values at each frame. The candidate values are similar to the mean BPM. If no candidates are found to be similar, the mean value itself is used unless \"tempoChange\" seconds have triggered a variation in tempo.\n"
 " - ticks: time positions of ticks in seconds.\n"
 " - ticksMagnitude: magnitude of each tick. Higher values correspond to higher probability of correctly identified ticks.\n"
@@ -153,36 +153,44 @@ void BpmHistogram::computeBpm() {
   const vector<vector<Real> >& magnitudes = _pool.value<vector<vector<Real> > >("magnitudes");
   const vector<vector<Real> >& peaks = _pool.value<vector<vector<Real> > >("peaks_positions");
   const vector<vector<Real> >& peaksValue = _pool.value<vector<vector<Real> > >("peaks_value");
+  
   Real bpmRatio = _binWidth*60.0;
-  Real threshold = 0;
-  //TODO: scheduling problem!! seems that there are more vectors in magnitudes than peaks
-  //for (int i=0; i<(int)magnitudes.size();i++) {
+  Real threshold = 0.;
+  
   for (int i=0; i<(int)peaks.size();i++) {
-    vector<Real> tempogram(int(_maxBpm+1), Real(0));
+    vector<Real> tempogram(int(_maxBpm+1), 0.);
     try {
-      //threshold = max(Real(1e-4), max(median(peaksValue), mean(peaksValue))); // only use peaks that are VERY prominent
-      threshold = min(Real(1e-6), min(median(magnitudes[i]), mean(magnitudes[i]))); // be permissive
+      // only use peaks that are VERY prominent
+      //threshold = max(Real(1e-4), max(median(peaksValue), mean(peaksValue)));
+
+      // be permissive
+      threshold = min(Real(1e-6), min(median(magnitudes[i]), mean(magnitudes[i]))); 
+
       //threshold = max(Real(1e-4), min(median(peaksValue), mean(peaksValue)));
     }
     catch(const EssentiaException& ) { // no peaks found
       threshold = numeric_limits<int>::max();
     }
+
     vector<Real> mainPeaks, mainBpms;
     mainPeaks.reserve(peaks[i].size());
     mainBpms.reserve(peaks[i].size());
+
     for (int j=0; j<(int)peaks[i].size(); j++) {
       if (peaksValue[i][j] < threshold) continue;
+
       Real bpm = round(peaks[i][j]*bpmRatio);
-      // as peakdetection minPosition is rounded by bins we must double check
-      // that we don't get a bpm outside the parameter ranges
+      // double check that we do not get a BPM value outside of the configured range
       if (bpm > _maxBpm || bpm < _minBpm) continue;
+
       mainPeaks.push_back(peaks[i][j]);
       mainBpms.push_back(bpm);
       _pool.add("bpmCandidates", bpm);
       _pool.add("bpmAmplitudes", peaksValue[i][j]);
       tempogram[int(bpm)] = peaksValue[i][j];
     }
-    // check for silent frame or dc offset or possible constant input. Normally more than one peak should be found
+
+    // Check for silent frame or DC offset or possible constant input. Normally more than one peak should be found
     if (mainPeaks.size() < 1) {
       mainPeaks.clear();
       mainBpms.clear();
@@ -190,6 +198,7 @@ void BpmHistogram::computeBpm() {
       _pool.add("bpmCandidates", 0);
       _pool.add("bpmAmplitudes", 0);
     }
+
     _pool.add("tempogram", tempogram);
   }
 
