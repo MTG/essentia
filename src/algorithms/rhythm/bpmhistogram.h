@@ -86,10 +86,10 @@ class BpmHistogram : public AlgorithmComposite {
 
   void declareParameters() {
     declareParameter("frameRate", "the sampling rate of the novelty curve [frame/s]", "[1,inf)", 44100./512.);
-    declareParameter("frameSize", "the minimum length to compute the fft [s]", "[1,inf)", 4.0);
-    declareParameter("zeroPadding", "zero padding factor to compute the fft [s]", "[0,inf)", 0);
+    declareParameter("frameSize", "the minimum length to compute the FFT [s]", "[1,inf)", 4.0);
+    declareParameter("zeroPadding", "zero padding factor to compute the FFT [s]", "[0,inf)", 0);
     declareParameter("overlap", "the overlap factor", "(0,inf)", 16);
-    declareParameter("windowType", "the window type to be used when computing the fft", "", "hann");
+    declareParameter("windowType", "the window type to be used when computing the FFT", "", "hann");
     declareParameter("maxPeaks", "the number of peaks to be considered at each spectrum", "(0,inf]", 50);
     declareParameter("minBpm", "the minimum bpm to consider", "[0,inf)", 30.);
     declareParameter("maxBpm", "the maximum bpm to consider", "(0,inf)", 560.);
@@ -144,10 +144,10 @@ class BpmHistogram : public Algorithm {
 
   void declareParameters() {
     declareParameter("frameRate", "the sampling rate of the novelty curve [frame/s]", "[1,inf)", 44100./512.);
-    declareParameter("frameSize", "the minimum length to compute the fft [s]", "[1,inf)", 4.0);
-    declareParameter("zeroPadding", "zero padding factor to compute the fft [s]", "[0,inf)", 0);
+    declareParameter("frameSize", "the minimum length to compute the FFT [s]", "[1,inf)", 4.0);
+    declareParameter("zeroPadding", "zero padding factor to compute the FFT [s]", "[0,inf)", 0);
     declareParameter("overlap", "the overlap factor", "(0,inf)", 16);
-    declareParameter("windowType", "the window type to be used when computing the fft", "", "hann");
+    declareParameter("windowType", "the window type to be used when computing the FFT", "", "hann");
     declareParameter("maxPeaks", "the number of peaks to be considered at each spectrum", "(0,inf]", 50);
     declareParameter("minBpm", "the minimum bpm to consider", "[0,inf)", 30.);
     declareParameter("maxBpm", "the maximum bpm to consider", "(0,inf)", 560.);
