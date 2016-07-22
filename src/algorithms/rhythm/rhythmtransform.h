@@ -39,7 +39,7 @@ class RhythmTransform : public Algorithm {
 
  public:
   RhythmTransform() {
-    declareInput(_melBands, "melBands", "the energy in the melbands");
+    declareInput(_melBands, "melBands", "the energies in the mel bands");
     declareOutput(_rhythmTransform, "rhythm", "consecutive frames in the rhythm domain");
 
     AlgorithmFactory& factory = AlgorithmFactory::instance();
