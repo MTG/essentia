@@ -105,32 +105,32 @@ def configure(ctx):
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
-                      args=['libavcodec >= 55.34.1', '--cflags', '--libs', '--modversion'],
+                      args=['libavcodec >= 55.34.1', '--cflags', '--libs'],
                       msg='Checking for \'libavcodec\' >= 55.34.1',
                       mandatory=False)
         
         ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
+                      args=['--cflags', '--libs'], mandatory=False)
 
         ctx.check_cfg(package='libavutil', uselib_store='AVUTIL',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
+                      args=['--cflags', '--libs'], mandatory=False)
 
         ctx.check_cfg(package='libavresample', uselib_store='AVRESAMPLE',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
+                      args=['--cflags', '--libs'], mandatory=False)
 
     if 'libsamplerate' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='samplerate', uselib_store='SAMPLERATE',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
+                      args=['--cflags', '--libs'], mandatory=False)
 
     if 'taglib' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
-                      args=['taglib >= 1.9', '--cflags', '--libs', '--modversion'],
+                      args=['taglib >= 1.9', '--cflags', '--libs'],
                       msg='Checking for \'taglib\' >= 1.9',
                       mandatory=False)
  
     if 'yaml' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=False)
+                      args=['--cflags', '--libs'], mandatory=False)
         if not ctx.env.INCLUDES_YAML and sys.platform == 'darwin':
             # an ugly hack for osx, because pkg-config file for yaml-0.1.6 installed by brew
             # is missing include path
@@ -140,11 +140,11 @@ def configure(ctx):
 
     if 'fftw' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=False)    
+                      args=['--cflags', '--libs'], mandatory=False)
 
     if ctx.env.WITH_GAIA:
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
-                      args=['--cflags', '--libs', '--modversion'], mandatory=True)
+                      args=['--cflags', '--libs'], mandatory=True)
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += [ '__STDC_CONSTANT_MACROS' ]
