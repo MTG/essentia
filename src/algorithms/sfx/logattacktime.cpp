@@ -32,6 +32,7 @@ const char* LogAttackTime::description = DOC("This algorithm computes the log (b
 void LogAttackTime::configure() {
   _startThreshold = parameter("startAttackThreshold").toReal();
   _stopThreshold = parameter("stopAttackThreshold").toReal();
+  _sampleRate = parameter("sampleRate").toReal();
 
   if (_startThreshold > _stopThreshold) {
     throw EssentiaException("LogAttackTime: stopAttackThreshold is not greater than startAttackThreshold");
@@ -42,6 +43,8 @@ void LogAttackTime::compute() {
 
   const std::vector<Real>& signal = _signal.get();
   Real& logAttackTime = _logAttackTime.get();
+  Real& attackStart = _attackStart.get();
+  Real& attackStop = _attackStop.get();
 
   if (signal.empty()) {
     throw EssentiaException("LogAttackTime: logAttackTime not defined for empty input");
@@ -70,7 +73,10 @@ void LogAttackTime::compute() {
     }
   }
 
-  Real attackTime = (stopAttack - startAttack)/parameter("sampleRate").toReal();
+  attackStart = startAttack / _sampleRate;
+  attackStop = stopAttack / _sampleRate;
+
+  Real attackTime = attackStop - attackStart;
 
   if (attackTime > 10e-5) {
     logAttackTime = log10(attackTime);
