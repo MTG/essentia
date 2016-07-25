@@ -75,6 +75,8 @@ void  FreesoundSfxDescriptors::createNetwork(SourceBase& source, Pool& pool){
   Algorithm* log = factory.create("LogAttackTime");
   accu->output("array") >> log->input("signal");
   log->output("logAttackTime") >> PC(pool, nameSpace + "logattacktime");
+  log->output("attackStart") >> NOWHERE;
+  log->output("attackStop") >> NOWHERE;
 
   // Strong Decay
   Algorithm* decay = factory.create("StrongDecay");
