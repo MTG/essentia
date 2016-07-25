@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,9 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* Chromagram::name = "Chromagram";
-const char* Chromagram::description = DOC("This algorithm calculates the chromagram of constant-Q tranform.\n"
-                                          "\n");
-
+const char* Chromagram::description = DOC("This algorithm calculates the chromagram of the Constant Q Transform.\n"
+"\n");
 
 
 void Chromagram::configure() {
@@ -39,29 +38,27 @@ void Chromagram::configure() {
   _threshold = parameter("threshold").toDouble();
 
   string normalizeType = parameter("normalizeType").toString();
-  if      (normalizeType == "none") _normalizeType = NormalizeNone;
+  if (normalizeType == "none") _normalizeType = NormalizeNone;
   else if (normalizeType == "unit_sum") _normalizeType = NormalizeUnitSum;
   else if (normalizeType == "unit_max") _normalizeType = NormalizeUnitMax;
-  else throw EssentiaException("Invalid normalise type for chromagram (none / unit_sum / unit_max): ", normalizeType);
+  else throw EssentiaException("Invalid normalize type for chromagram (none/unit_sum/unit_max): ", normalizeType);
 
-  _uK = ( unsigned int ) ceil( _binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0)); 
-  
+  unsigned int uK = (unsigned int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0)); 
+  _octaves = (int)floor(double(uK/_binsPerOctave))-1;  
 
   _constantq->configure("minFrequency", _minFrequency,
-                          "maxFrequency", _maxFrequency,
-                          "binsPerOctave", _binsPerOctave,
-                          "sampleRate", _sampleRate,
-                          "threshold", _threshold);
+                        "maxFrequency", _maxFrequency,
+                        "binsPerOctave", _binsPerOctave,
+                        "sampleRate", _sampleRate,
+                        "threshold", _threshold);
 
-  
   _constantq->output("constantq").set(_CQBuffer);
-  
   _magnitude->input("complex").set(_CQBuffer);
 }
 
 void Chromagram::compute() {
 
-  const std::vector<std::complex<Real> >& signal = _signal.get();
+  const vector<complex<Real> >& signal = _signal.get();
   vector<Real>& chromagram = _chromagram.get();
 
   chromagram.assign(_binsPerOctave, 0.0);
@@ -72,17 +69,12 @@ void Chromagram::compute() {
   _magnitude->output("magnitude").set(_ChromaBuffer);
   _magnitude->compute();
 
-  const unsigned octaves = (int)floor(double( _uK/_binsPerOctave))-1;
-
-  for (unsigned octave = 0; octave <= octaves; octave++) {
+  for (unsigned octave=0; octave <= _octaves; octave++) {
     unsigned firstBin = octave*_binsPerOctave;
     for (unsigned i = 0; i < _binsPerOctave; i++) {
-
         chromagram[i] += _ChromaBuffer[firstBin+i];
-    
     }
   }
-
   
   if (_normalizeType == NormalizeUnitSum) {
     normalizeSum(chromagram);
@@ -90,6 +82,4 @@ void Chromagram::compute() {
   else if (_normalizeType == NormalizeUnitMax) {
     normalize(chromagram);
   }
-  
-
 }

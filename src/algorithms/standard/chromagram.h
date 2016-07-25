@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -40,26 +40,37 @@ class Chromagram : public Algorithm {
   std::vector<std::complex<Real> > _CQBuffer;
   std::vector<Real> _ChromaBuffer;
 
+  std::vector<double> _CQdata;
+  double _sampleRate;
+  double _minFrequency;
+  double _maxFrequency;
+  unsigned int _binsPerOctave;
+  double _threshold;
+  unsigned _octaves;
 
+  enum NormalizeType {
+        NormalizeNone,
+        NormalizeUnitSum,
+        NormalizeUnitMax
+      }; 
+
+  NormalizeType _normalizeType;
+ 
  public:
   Chromagram() {
-    declareInput(_signal, "frame", "the input audio frame");
+    declareInput(_signal, "frame", "the input frame (complex)");
     declareOutput(_chromagram, "chromagram", "the magnitude chromagram of the input audio signal");
 
     _constantq = AlgorithmFactory::create("ConstantQ");
-    _magnitude = AlgorithmFactory::create("Magnitude");
-    
+    _magnitude = AlgorithmFactory::create("Magnitude"); 
   }
 
   ~Chromagram() {
     delete _constantq;
     delete _magnitude;
-    
   }
 
-
   void declareParameters() {
-
     declareParameter("minFrequency", "the minimum frequency", "[1,inf)", 55.);
     declareParameter("maxFrequency", "the maximum frequency", "[1,inf)", 7040.);
     declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    
@@ -68,38 +79,16 @@ class Chromagram : public Algorithm {
     declareParameter("normalizeType", "normalize type", "{none,unit_sum,unit_max}", "unit_max");   
   }
 
-
   void configure();
   void compute();
 
-
   static const char* name;
   static const char* description;
-
-  protected:
-
-    std::vector<double> _CQdata;
-    double _sampleRate;
-    double _minFrequency;
-    double _maxFrequency;
-    unsigned int _binsPerOctave;
-    double _threshold;
-    unsigned int _uK;
-
-    enum NormalizeType {
-          NormalizeNone,
-          NormalizeUnitSum,
-          NormalizeUnitMax
-      }; 
-
-    
-
-    NormalizeType _normalizeType;
-
 };
 
 } // namespace standard
 } // namespace essentia
+
 
 #include "streamingalgorithmwrapper.h"
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -36,7 +36,7 @@ class FFTWComplex : public Algorithm {
 
  public:
   FFTWComplex() : _fftPlan(0), _input(0), _output(0) {
-    declareInput(_signal, "frame", "the input audio frame");
+    declareInput(_signal, "frame", "the input frame (complex)");
     declareOutput(_fft, "fft", "the FFT of the input frame");
   }
 

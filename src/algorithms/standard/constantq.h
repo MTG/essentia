@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -22,7 +22,6 @@
 
 #include "algorithm.h"
 #include "algorithmfactory.h"
-#include "threading.h"
 #include <complex>
 #include <vector>
 
@@ -37,52 +36,18 @@ class ConstantQ : public Algorithm {
 
   Algorithm* _fft;
 
- public:
-  ConstantQ() {
-  declareInput(_signal, "frame", "the input audio frame");
-  declareOutput(_constantQ, "constantq", "the constantq of the input frame");
-
-  _fft = AlgorithmFactory::create("FFTWC");  //FFT with complex input
-
-  }
-
-  ~ConstantQ();
-
-  int sizeFFT() { return _FFTLength; }
-
-
-  void declareParameters() {
-
-    declareParameter("minFrequency", "the minimum frequency", "[1,inf)", 55.);
-    declareParameter("maxFrequency", "the maximum frequency", "[1,inf)", 7040.);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    
-    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);  
-    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);       
-  }
-
-
-  void compute();
-  void configure();
-
-  
-
-  static const char* name;
-  static const char* description;
-
-
- protected:
-
   std::vector<double> _CQdata;
+  
   double _sampleRate; //unsigned int _FS;
   double _minFrequency;
   double _maxFrequency;
-  double _dQ;       // Work out Q value for Filter bank
+  double _dQ; // Work out Q value for Filter bank
   double _threshold; // ConstantQ threshold for kernel generation
   unsigned int _numWin;
   unsigned int _hop;
   unsigned int _binsPerOctave;  
   unsigned int _FFTLength;
-  unsigned int _uK;   // Number of constant Q bins
+  unsigned int _uK; // Number of constant Q bins
 
   struct SparseKernel {
     std::vector<double> _sparseKernelReal;
@@ -91,16 +56,45 @@ class ConstantQ : public Algorithm {
     std::vector<unsigned> _sparseKernelJs;
   };
 
+  SparseKernel *m_sparseKernel;
+
   double hamming(int len, int n) {
-    double out = 0.54 - 0.46*cos(2 * M_PI * n / len);
-    return(out);
+    return 0.54 - 0.46*cos(2 * M_PI * n / len);
   }
 
-  SparseKernel *m_sparseKernel;
+ public:
+  ConstantQ() {
+    declareInput(_signal, "frame", "the input frame (complex)");
+    declareOutput(_constantQ, "constantq", "the Constant Q transform of the input frame");
+
+    _fft = AlgorithmFactory::create("FFTWC"); //FFT with complex input
+  }
+
+  ~ConstantQ() {
+    delete _fft;
+    if (m_sparseKernel) delete m_sparseKernel;
+  }
+
+  int sizeFFT() { return _FFTLength; }
+
+  void declareParameters() {
+    declareParameter("minFrequency", "the minimum frequency", "[1,inf)", 55.);
+    declareParameter("maxFrequency", "the maximum frequency", "[1,inf)", 7040.);
+    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    
+    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);  
+    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);       
+  }
+
+  void compute();
+  void configure();
+
+  static const char* name;
+  static const char* description;
 };
 
 } // namespace standard
 } // namespace essentia
+
 
 #include "streamingalgorithmwrapper.h"
 
@@ -124,4 +118,4 @@ class ConstantQ : public StreamingAlgorithmWrapper {
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_ConstantQ_H
+#endif // ESSENTIA_CONSTANTQ_H
