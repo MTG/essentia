@@ -27,7 +27,7 @@ namespace standard {
 
 class BpmHistogramDescriptors : public Algorithm {
 
- private:
+ protected:
   Input<std::vector<Real> > _bpmIntervals;
 
   Output<Real> _firstPeakBPM;
