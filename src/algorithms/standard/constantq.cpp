@@ -114,7 +114,7 @@ void ConstantQ::configure() {
   double squareThreshold = _threshold * _threshold;
 
   for (unsigned k=_uK; k--; ) {
-      
+
     // Compute a hamming window
     hammingWindow.assign(_FFTLength, 0.0 + 0.0j);
     const unsigned hammingLength = (int) ceil( _dQ * _sampleRate / ( _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave)));
@@ -144,10 +144,10 @@ void ConstantQ::configure() {
     vector<complex<double> > transfHammingWindow(transfHammingWindowR.begin(), transfHammingWindowR.end());
 
     // Increase the output size of the FFT to _FFTLength by mirroring the data
-    vector<complex<double> > :: iterator itHamm = transfHammingWindow.end()-1;
+    int ind = transfHammingWindow.size() - 1;
     transfHammingWindow.resize(_FFTLength);
     for (int i=0; i <_FFTLength/2; ++i) {
-      transfHammingWindow.push_back(*itHamm--);
+      transfHammingWindow.push_back(transfHammingWindow[ind--]);
     }
 
     for (int j=0; j<_FFTLength; j++) {
