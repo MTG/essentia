@@ -80,7 +80,7 @@ class FFTWComplex : public StreamingAlgorithmWrapper {
 
  public:
   FFTWComplex() {
-    declareAlgorithm("FFTWC");
+    declareAlgorithm("FFTC");
     declareInput(_signal, TOKEN, "frame");
     declareOutput(_fft, TOKEN, "fft");
   }
