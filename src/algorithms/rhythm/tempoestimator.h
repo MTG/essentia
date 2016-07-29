@@ -42,14 +42,17 @@ class TempoEstimator : public AlgorithmComposite {
   int _hopSizeOSS;
 
   Algorithm* _frameCutter;
-  Algorithm* _powerSpectrum;
+  Algorithm* _windowing;
+  Algorithm* _spectrum;
+  Algorithm* _normSpectrum;
+  Algorithm* _scaleSpectrum;
+  Algorithm* _shiftSpectrum;
+  Algorithm* _logSpectrum;
   Algorithm* _flux;
   Algorithm* _lowPass;
   Algorithm* _frameCutterOSS;
   Algorithm* _autoCorrelation;
   Algorithm* _peakDetection;
-
-  Algorithm* _fileOutputOSS;
 
   scheduler::Network* _network;
   bool _configured;

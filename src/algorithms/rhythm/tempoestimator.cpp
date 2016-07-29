@@ -19,8 +19,6 @@
 
 #include <complex>
 #include "tempoestimator.h"
-#include "tnt/tnt.h"
-#include "essentiamath.h"
 #include "poolstorage.h"
 #include "algorithmfactory.h"
  #include <essentia/streaming/algorithms/fileoutput.h>
@@ -41,8 +39,9 @@ const char* TempoEstimator::description = DOC("This algorithm estimates the temp
 
 
 TempoEstimator::TempoEstimator()
-  : AlgorithmComposite(), _frameCutter(0), _powerSpectrum(0), _flux(0), _lowPass(0), 
-  _fileOutputOSS(0), _frameCutterOSS(0), _autoCorrelation(0), _peakDetection(0), _configured(false) {
+  : AlgorithmComposite(), _frameCutter(0), _windowing(0), _spectrum(0), _scaleSpectrum(0),
+  _shiftSpectrum(0), _logSpectrum(0), _normSpectrum(0), _flux(0), _lowPass(0), 
+  _frameCutterOSS(0), _autoCorrelation(0), _peakDetection(0), _configured(false) {
   declareInput(_signal, "signal", "input signal");
   declareOutput(_bpm, 0, "bpm", "the tempo estimation [bpm]");
 }
@@ -52,27 +51,63 @@ void TempoEstimator::createInnerNetwork() {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   _frameCutter      = factory.create("FrameCutter");
-  _powerSpectrum    = factory.create("PowerSpectrum");
+  _windowing        = factory.create("Windowing");
+  _spectrum         = factory.create("Spectrum");
+  _scaleSpectrum    = factory.create("UnaryOperator");
+  _shiftSpectrum    = factory.create("UnaryOperator");
+  _logSpectrum    = factory.create("UnaryOperator");
+  _normSpectrum    = factory.create("UnaryOperator");
   _flux             = factory.create("Flux");
   _lowPass          = factory.create("LowPass");
   _frameCutterOSS   = factory.create("FrameCutter");
   _autoCorrelation  = factory.create("AutoCorrelation");
   _peakDetection    = factory.create("PeakDetection");
 
-  _fileOutputOSS    = new FileOutput<Real >();
-
   // Connect internal algorithms
   _signal                                     >>  _frameCutter->input("signal");
-  _frameCutter->output("frame")               >>  _powerSpectrum->input("signal");
-  _powerSpectrum->output("powerSpectrum")     >>  _flux->input("spectrum");
+  _frameCutter->output("frame")               >>  _windowing->input("frame");
+  _windowing->output("frame")                 >>  _spectrum->input("frame");
+  _spectrum->output("spectrum")               >>  _normSpectrum->input("array");
+  _normSpectrum->output("array")              >>  _scaleSpectrum->input("array");
+  _scaleSpectrum->output("array")             >>  _shiftSpectrum->input("array");
+  _shiftSpectrum->output("array")             >>  _logSpectrum->input("array");
+  _logSpectrum->output("array")               >>  _flux->input("spectrum");
   _flux->output("flux")                       >>  _lowPass->input("signal");
   _lowPass->output("signal")                  >>  _frameCutterOSS->input("signal");
   _frameCutterOSS->output("frame")            >>  _autoCorrelation->input("array");
   _autoCorrelation->output("autoCorrelation") >>  _peakDetection->input("array");
   _peakDetection->output("positions")         >>  NOWHERE;
 
-  _flux->output("flux")                       >>  _fileOutputOSS->input("data");
+
+  Algorithm* outSignalFrames = new FileOutput<std::vector<Real> >();
+  outSignalFrames->configure("filename", "frames.txt", "mode", "text");
+  _windowing->output("frame") >> outSignalFrames->input("data");
+
+  Algorithm* outSpectrum = new FileOutput<std::vector<Real> >();
+  outSpectrum->configure("filename", "spectrum.txt", "mode", "text");
+  _logSpectrum->output("array") >> outSpectrum->input("data");
+
+  Algorithm* outFlux = new FileOutput<Real >();
+  outFlux->configure("filename", "flux.txt", "mode", "text");
+  _flux->output("flux") >> outFlux->input("data");
+
+  Algorithm* outLowpass = new FileOutput<Real >();
+  outLowpass->configure("filename", "lowpass.txt", "mode", "text");
+  _lowPass->output("signal") >> outLowpass->input("data");
+
+  Algorithm* outOSSFrames = new FileOutput<std::vector<Real> >();
+  outOSSFrames->configure("filename", "oss_frames.txt", "mode", "text");
+  _frameCutterOSS->output("frame") >> outOSSFrames->input("data");
+
+  Algorithm* outXcorr = new FileOutput<std::vector<Real> >();
+  outXcorr->configure("filename", "xcorr.txt", "mode", "text");
+  _autoCorrelation->output("autoCorrelation") >> outXcorr->input("data");
+
+  Algorithm* outPeaks = new FileOutput<std::vector<Real> >();
+  outPeaks->configure("filename", "peaks.txt", "mode", "text");
+  _peakDetection->output("positions") >> outPeaks->input("data");
   
+
   _network = new scheduler::Network(_frameCutter);
 }
 
@@ -105,15 +140,35 @@ void TempoEstimator::configure() {
 
   // Configure internal algorithms
   _frameCutter->configure("frameSize", _frameSize,
-                          "hopSize", _hopSize);
-  _flux->configure("halfRectify", false,
-                   "norm", "L2");
+                          "hopSize", _hopSize,
+                          "startFromZero", true,
+                          "validFrameThresholdRatio", 1,
+                          "silentFrames", "keep");
+  _windowing->configure("size", _frameSize,
+                        "type", "hamming",
+                        "normalized", false,
+                        "zeroPhase", false);
+  _spectrum->configure("size", _frameSize);
+  _normSpectrum->configure("type", "identity", "scale", 1.0/_frameSize);
+  _scaleSpectrum->configure("type", "identity", "scale", 1000.0);
+  _shiftSpectrum->configure("type", "identity", "shift", 1.0);
+  _logSpectrum->configure("type", "log");
+  _flux->configure("halfRectify", true,
+                   "norm", "L1");
   _lowPass->configure("cutoffFrequency", 7,
-                      "sampleRate", _sampleRate);
+                      "sampleRate", 0.5 * (_sampleRate / _hopSize));
   _frameCutterOSS->configure("frameSize", _frameSizeOSS,
-                             "hopSize", _hopSizeOSS);
-  _peakDetection->configure("maxPeaks", 10);
-  _fileOutputOSS->configure("filename", "oss.txt", "mode", "text");
+                             "hopSize", _hopSizeOSS,
+                             "startFromZero", true,
+                             "validFrameThresholdRatio", 1,
+                             "silentFrames", "keep");
+  _autoCorrelation->configure("normalization", "standard",
+                              "generalized", true,
+                              "frequencyDomainCompression", 0.5);
+  _peakDetection->configure("maxPeaks", 10,
+                            "range", 1000.0,
+                            "minPosition", 98, // TODO: Should depend on min/max bpm parameters
+                            "maxPosition",  414 );
   _configured = true;
 
 }
