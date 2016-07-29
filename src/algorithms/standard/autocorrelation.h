@@ -32,6 +32,8 @@ class AutoCorrelation : public Algorithm {
   Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _correlation;
   bool _unbiasedNormalization;
+  bool _generalized;
+  Real _frequencyDomainCompression;
   std::vector<std::complex<Real> > _fftBuffer;
   std::vector<Real> _corr;
   std::vector<Real> _paddedSignal;
@@ -55,6 +57,8 @@ class AutoCorrelation : public Algorithm {
 
   void declareParameters() {
     declareParameter("normalization", "type of normalization to compute: either 'standard' (default) or 'unbiased'", "{standard,unbiased}", "standard");
+    declareParameter("generalized", "bool value to indicate whether to compute the 'generalized' autocorrelation as described in [3]", "{true,false}", false);
+    declareParameter("frequencyDomainCompression", "factor at which FFT magnitude is compressed (only used if 'generalized' is set to true, see [3])", "(0, inf)", 0.5);
   }
 
   void configure();
