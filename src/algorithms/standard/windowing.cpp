@@ -40,9 +40,9 @@ const char* Windowing::description = DOC("This algorithm applies windowing to au
 "  http://en.wikipedia.org/wiki/Window_function");
 
 void Windowing::configure() {
+  _normalized = parameter("normalized").toBool();
   _window.resize(parameter("size").toInt());
   createWindow(parameter("type").toLower());
-
   _zeroPadding = parameter("zeroPadding").toInt();
   _zeroPhase = parameter("zeroPhase").toBool();
 }
@@ -57,10 +57,13 @@ void Windowing::createWindow(const std::string& windowtype) {
   else if (windowtype == "blackmanharris74") blackmanHarris74();
   else if (windowtype == "blackmanharris92") blackmanHarris92();
 
-  normalize();
+  if (_normalized) {
+    normalize();  
+  }
 }
 
 void Windowing::compute() {
+
   const std::vector<Real>& signal = _frame.get();
   std::vector<Real>& windowedSignal = _windowedFrame.get();
 
