@@ -35,17 +35,11 @@ void EnhanceHarmonics::configure() {
 void EnhanceHarmonics::compute() {
   const vector<Real>& input = _input.get();
   vector<Real>& output = _output.get();
-
-  /*
-  Pseudocode:
-
-  // TODO: boost harmonically related peaks
-  output.reserve(...);
-  for i in range(0, len(input)/4:
-  	output.push(input[i] + input[2*i] + input[4*i]);
-  */
-
-  output = input;  
+  
+  output = input;
+  for (int i=0; i<(int)(input.size()/4); ++i) {
+    output[i] += output[2*i] + output[4*i];
+  }
 }
 
 } // namespace standard
