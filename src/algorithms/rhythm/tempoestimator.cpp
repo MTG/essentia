@@ -55,15 +55,18 @@ void TempoEstimator::createInnerNetwork() {
   _spectrum         = factory.create("Spectrum");
   _scaleSpectrum    = factory.create("UnaryOperator");
   _shiftSpectrum    = factory.create("UnaryOperator");
-  _logSpectrum    = factory.create("UnaryOperator");
-  _normSpectrum    = factory.create("UnaryOperator");
+  _logSpectrum      = factory.create("UnaryOperator");
+  _normSpectrum     = factory.create("UnaryOperator");
   _flux             = factory.create("Flux");
   _lowPass          = factory.create("LowPass");
   _frameCutterOSS   = factory.create("FrameCutter");
   _autoCorrelation  = factory.create("AutoCorrelation");
+  _enhanceHarmonics = factory.create("EnhanceHarmonics");
   _peakDetection    = factory.create("PeakDetection");
+  _evaluatePulseTrains = factory.create("EvaluatePulseTrains");
 
   // Connect internal algorithms
+  // Compute Step 1 of algorithm
   _signal                                     >>  _frameCutter->input("signal");
   _frameCutter->output("frame")               >>  _windowing->input("frame");
   _windowing->output("frame")                 >>  _spectrum->input("frame");
@@ -73,11 +76,14 @@ void TempoEstimator::createInnerNetwork() {
   _shiftSpectrum->output("array")             >>  _logSpectrum->input("array");
   _logSpectrum->output("array")               >>  _flux->input("spectrum");
   _flux->output("flux")                       >>  _lowPass->input("signal");
+  // Compute Step 2 of algorithm
   _lowPass->output("signal")                  >>  _frameCutterOSS->input("signal");
   _frameCutterOSS->output("frame")            >>  _autoCorrelation->input("array");
-  _autoCorrelation->output("autoCorrelation") >>  _peakDetection->input("array");
-  _peakDetection->output("positions")         >>  NOWHERE;
-
+  _autoCorrelation->output("autoCorrelation") >>  _enhanceHarmonics->input("array");
+  _enhanceHarmonics->output("array")          >>  _peakDetection->input("array");
+  _peakDetection->output("positions")         >>  _evaluatePulseTrains->input("positions");
+  _frameCutterOSS->output("frame")            >>  _evaluatePulseTrains->input("oss");
+  _evaluatePulseTrains->output("lag")         >>  PC(_pool, "lags");
 
   Algorithm* outSignalFrames = new FileOutput<std::vector<Real> >();
   outSignalFrames->configure("filename", "frames.txt", "mode", "text");
@@ -102,11 +108,6 @@ void TempoEstimator::createInnerNetwork() {
   Algorithm* outXcorr = new FileOutput<std::vector<Real> >();
   outXcorr->configure("filename", "xcorr.txt", "mode", "text");
   _autoCorrelation->output("autoCorrelation") >> outXcorr->input("data");
-
-  Algorithm* outPeaks = new FileOutput<std::vector<Real> >();
-  outPeaks->configure("filename", "peaks.txt", "mode", "text");
-  _peakDetection->output("positions") >> outPeaks->input("data");
-  
 
   _network = new scheduler::Network(_frameCutter);
 }
@@ -134,9 +135,13 @@ void TempoEstimator::configure() {
   _hopSize      = parameter("hopSize").toInt();
   _frameSizeOSS = parameter("frameSizeOSS").toInt();
   _hopSizeOSS   = parameter("hopSizeOSS").toInt();
+  _minBPM       = parameter("minBPM").toInt();
+  _maxBPM       = parameter("maxBPM").toInt();
+  _srOSS        = _sampleRate / _hopSize;
+
+  // TODO: Check that maxBPM > minBPM
 
   createInnerNetwork();
-
 
   // Configure internal algorithms
   _frameCutter->configure("frameSize", _frameSize,
@@ -155,6 +160,7 @@ void TempoEstimator::configure() {
   _logSpectrum->configure("type", "log");
   _flux->configure("halfRectify", true,
                    "norm", "L1");
+  // NOTE: Original implementation uses 14 order low-pass FIR filter
   _lowPass->configure("cutoffFrequency", 7,
                       "sampleRate", 0.5 * (_sampleRate / _hopSize));
   _frameCutterOSS->configure("frameSize", _frameSizeOSS,
@@ -166,9 +172,10 @@ void TempoEstimator::configure() {
                               "generalized", true,
                               "frequencyDomainCompression", 0.5);
   _peakDetection->configure("maxPeaks", 10,
-                            "range", 1000.0,
-                            "minPosition", 98, // TODO: Should depend on min/max bpm parameters
-                            "maxPosition",  414 );
+                            "range", _frameSizeOSS,
+                            "minPosition", (int) (_srOSS * 60.0 / _maxBPM),
+                            "maxPosition",  (int) (_srOSS * 60.0 / _minBPM),
+                            "orderBy", "amplitude");
   _configured = true;
 
 }
@@ -176,7 +183,14 @@ void TempoEstimator::configure() {
 AlgorithmStatus TempoEstimator::process() {
   if (!shouldStop()) return PASS;
 
-  Real bpm = 120.0;  
+  // Compute Step 3 of algorithm
+  // TODO: convert to gaussian
+  // TODO: accumulator (sum)
+  // TODO: pick 1 peak
+  // TODO: octave decider
+
+  //  CURRENT FAKE IMPLEMENTATION: take the first tempo lag and return it as BPM
+  Real bpm = _srOSS * 60.0 / _pool.value<vector<Real> >("lags")[0];  
   _bpm.push(bpm);
   return FINISHED;
 }

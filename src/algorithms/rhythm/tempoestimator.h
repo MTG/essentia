@@ -40,6 +40,9 @@ class TempoEstimator : public AlgorithmComposite {
   int _hopSize;
   int _frameSizeOSS;
   int _hopSizeOSS;
+  int _minBPM;
+  int _maxBPM;
+  Real _srOSS;
 
   Algorithm* _frameCutter;
   Algorithm* _windowing;
@@ -52,7 +55,9 @@ class TempoEstimator : public AlgorithmComposite {
   Algorithm* _lowPass;
   Algorithm* _frameCutterOSS;
   Algorithm* _autoCorrelation;
+  Algorithm* _enhanceHarmonics;
   Algorithm* _peakDetection;
+  Algorithm* _evaluatePulseTrains;
 
   scheduler::Network* _network;
   bool _configured;
@@ -72,6 +77,8 @@ class TempoEstimator : public AlgorithmComposite {
     // Parameters for step 2 (Beat Period Detection)
     declareParameter("frameSizeOSS", "frame size for the analysis of the Onset Strength Signal", "(0,inf)", 2048);
     declareParameter("hopSizeOSS", "hop size for the analysis of the Onset Strength Signal", "(0,inf)", 128);
+    declareParameter("minBPM", "minimum BPM to detect", "(0,inf)", 50);
+    declareParameter("maxBPM", "maximum BPM to detect", "(0,inf)", 210);
   }
 
   void declareProcessOrder() {
