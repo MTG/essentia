@@ -31,6 +31,11 @@ class EvaluatePulseTrains : public Algorithm {
     Input<std::vector<Real> > _peakPositions;
     Output<Real> _lag;
 
+    void calculatePulseTrains(const std::vector<Real>& ossWindow,
+                              const int lag,
+                              Real& magScore,
+                              Real& varScore);
+
   public:
     EvaluatePulseTrains() {
     declareInput(_oss, "oss", "onset strength signal (or other novelty curve)");

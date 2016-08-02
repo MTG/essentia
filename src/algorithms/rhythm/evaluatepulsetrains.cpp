@@ -32,16 +32,69 @@ const char* EvaluatePulseTrains::description = DOC("TODO add description\n");
 void EvaluatePulseTrains::configure() {
 }
 
+void EvaluatePulseTrains::calculatePulseTrains(const std::vector<Real>& ossWindow,
+											   const int lag,
+											   Real& magScore,
+											   Real& varScore) {
+    vector<Real> bpMagnitudes;
+    int period = lag;
+    bpMagnitudes.resize(lag);
+    int samples = ossWindow.size();
+    for (int phase=(samples - 1); phase > (samples - 1 - period); --phase){
+    	Real currentMagScore;
+    	currentMagScore = 0.0;
+    	for (int b=0; b < 4; ++b){
+    		int ind;
+    		ind = (int)(phase - b * period);
+    		if (ind >= 0){
+    			currentMagScore += ossWindow[ind];
+    		}
+    		ind = (int)(phase - b * period * 2);
+    		if (ind >= 0){
+    			currentMagScore += 0.5 * ossWindow[ind];
+    		}
+    		ind = (int)(phase - b * period * 3 / 2);
+    		if (ind >= 0){
+    			currentMagScore += 0.5 * ossWindow[ind];
+    		}
+    	}
+    	bpMagnitudes[samples - 1 - phase] = currentMagScore;
+    }
+    magScore = *std::max_element(bpMagnitudes.begin(), bpMagnitudes.end());
+    varScore = variance(bpMagnitudes, mean(bpMagnitudes));
+}
+
 void EvaluatePulseTrains::compute() {
   const vector<Real>& oss = _oss.get();
   const vector<Real>& peakPositions = _peakPositions.get();
   Real& lag = _lag.get();
 
-  // TODO: Correlate OSS signal with ideal expected pulse trains for different peak positions
-  // Return the best correlate
-
-  // CURRENT FAKE IMPLEMENTATION: return first peak position
-  lag = peakPositions[0];
+  vector<Real> tempoScores;
+  tempoScores.resize(peakPositions.size());
+  vector<Real> onsetScores;
+  onsetScores.resize(peakPositions.size());
+  for (int i=0; i< peakPositions.size(); ++i) {
+  	Real candidate = peakPositions[i];
+  	if (candidate != 0) {
+  		int lag = (int) round(candidate);
+  		Real magScore;
+  		Real varScore;
+  		calculatePulseTrains(oss, lag, magScore, varScore);
+		tempoScores[i] = magScore;
+  		onsetScores[i] = varScore;
+  	}
+  }
+  vector<Real> comboScores;
+  comboScores.resize(peakPositions.size());
+  Real sumTempoScores = sum(tempoScores);
+  Real sumOnsetScroes = sum(onsetScores);
+  for (int i=0; i< peakPositions.size(); ++i) {
+  	comboScores[i] = tempoScores[i]/sumTempoScores + onsetScores[i]/sumOnsetScroes;
+  }
+  // NOTE: original python implementation normalizes comboScores (like tempoScores and onsetScore).
+  // As we are only taking argmax, we assume there is no need for this normalization.
+  Real bestScorePosition = argmax(comboScores);
+  lag = round(peakPositions[bestScorePosition]);
 }
 
 } // namespace standard
