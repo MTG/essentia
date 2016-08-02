@@ -41,7 +41,8 @@ const char* TempoEstimator::description = DOC("This algorithm estimates the temp
 TempoEstimator::TempoEstimator()
   : AlgorithmComposite(), _frameCutter(0), _windowing(0), _spectrum(0), _scaleSpectrum(0),
   _shiftSpectrum(0), _logSpectrum(0), _normSpectrum(0), _flux(0), _lowPass(0), 
-  _frameCutterOSS(0), _autoCorrelation(0), _peakDetection(0), _configured(false) {
+  _frameCutterOSS(0), _autoCorrelation(0), _enhanceHarmonics(0), _peakDetection(0), 
+  _evaluatePulseTrains(0), _configured(false) {
   declareInput(_signal, "signal", "input signal");
   declareOutput(_bpm, 0, "bpm", "the tempo estimation [bpm]");
 }
@@ -108,6 +109,10 @@ void TempoEstimator::createInnerNetwork() {
   Algorithm* outXcorr = new FileOutput<std::vector<Real> >();
   outXcorr->configure("filename", "xcorr.txt", "mode", "text");
   _autoCorrelation->output("autoCorrelation") >> outXcorr->input("data");
+
+  Algorithm* outEXcorr = new FileOutput<std::vector<Real> >();
+  outEXcorr->configure("filename", "excorr.txt", "mode", "text");
+  _enhanceHarmonics->output("array") >> outEXcorr->input("data");
 
   _network = new scheduler::Network(_frameCutter);
 }
