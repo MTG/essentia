@@ -21,7 +21,8 @@
 #include "tempoestimator.h"
 #include "poolstorage.h"
 #include "algorithmfactory.h"
- #include <essentia/streaming/algorithms/fileoutput.h>
+#include "essentiamath.h"
+#include <essentia/streaming/algorithms/fileoutput.h>
 
 using namespace std;
 
@@ -142,7 +143,7 @@ void TempoEstimator::configure() {
   _hopSizeOSS   = parameter("hopSizeOSS").toInt();
   _minBPM       = parameter("minBPM").toInt();
   _maxBPM       = parameter("maxBPM").toInt();
-  _srOSS        = _sampleRate / _hopSize;
+  _srOSS        = (Real)_sampleRate / _hopSize;
 
   // TODO: Check that maxBPM > minBPM
 
@@ -185,18 +186,119 @@ void TempoEstimator::configure() {
 
 }
 
+Real TempoEstimator::energyInRange(const std::vector<Real>& array,
+                                   const Real low,
+                                   const Real high,
+                                   const Real scale) {
+    int indexLow = round(low);
+    int indexHigh = round(high);
+    if (indexHigh > (array.size() - 1)){
+      indexHigh = array.size() - 1;
+    }
+    if (indexLow < 0){
+      indexLow = 0;
+    }
+    return scale * (Real)sum(array, indexLow, indexHigh + 1);
+}
+
 AlgorithmStatus TempoEstimator::process() {
   if (!shouldStop()) return PASS;
 
   // Compute Step 3 of algorithm
-  // TODO: convert to gaussian
-  // TODO: accumulator (sum)
-  // TODO: pick 1 peak
-  // TODO: octave decider
 
-  //  CURRENT FAKE IMPLEMENTATION: take the first tempo lag and return it as BPM
-  Real bpm = _srOSS * 60.0 / _pool.value<vector<Real> >("lags")[0];  
-  _bpm.push(bpm);
+  // Create single gaussian template
+  std::vector<Real> gaussian;
+  int gaussianSize = 2000;
+  gaussian.resize(gaussianSize);
+  Real gaussianStd = 10.0;
+  Real gaussianMean = gaussianSize / 2.0;
+  for (int i=0; i < (int)(gaussianMean * 2); ++i){
+    Real term1 = 1. / (gaussianStd * sqrt(2*M_PI));
+    Real term2 = -2 * pow(gaussianStd, 2);
+    gaussian[i] = term1 * exp(pow((i-gaussianMean), 2) / term2);
+    //if (gaussian[i] < 1e-12) { // TODO: check if we need this
+    //  gaussian[i] = 0; // null very low numbers to avoid numerical errors
+    //}
+  }
+
+  // Accumulate (sum gaussians for every estimated lag)
+  std::vector<Real> accum;
+  accum.resize(414);  // 414 "long enough to accommodate all possible tempo lags"
+  for (int i=0; i<_pool.value<vector<Real> >("lags").size(); ++i){
+    int lag = (int)_pool.value<vector<Real> >("lags")[i];
+    for (int j=0; j<accum.size(); ++j){
+      accum[j] += gaussian[(int)(gaussianSize/2) - lag + j];
+    }
+  }
+
+  // Pick highest peak
+  int selectedLag = argmax(accum);
+  Real bpm = _srOSS * 60.0 / selectedLag;
+
+  // Octave decider (svm classifier)
+
+  // Get features
+  Real tolerance = 10.0;
+  std::vector<Real> features;
+  features.resize(3);
+  Real energyTotal = energyInRange(accum, 0, accum.size() - 1, 1.0);
+  Real energyUnder = energyInRange(accum, 0, selectedLag - tolerance, 1.0/energyTotal);
+  Real str05 = energyInRange(accum, 0.5*selectedLag - tolerance, 0.5*selectedLag + tolerance, 1.0/energyTotal);
+  features[0] = energyUnder;
+  features[1] = str05;
+  features[2] = bpm;
+
+  // Hard-coded values provided by original authors
+  // Apparently list initializer is not enabled so must initialize in this way...
+  std::vector<Real> mins;
+  mins.resize(3);  
+  mins[0] = 0.0321812;
+  mins[1] = 1.68126e-83;
+  mins[2] = 50.1745;
+  std::vector<Real> maxs;
+  maxs.resize(3); 
+  maxs[0] = 0.863237;
+  maxs[1] = 0.449184;
+  maxs[2] = 208.807;
+  std::vector<Real> svmWeights51;
+  svmWeights51.resize(4);
+  svmWeights51[0] = -1.955100;
+  svmWeights51[1] = 0.434800;
+  svmWeights51[2] = -4.644200;
+  svmWeights51[3] = 3.289600;
+  std::vector<Real> svmWeights52;
+  svmWeights52.resize(4);
+  svmWeights52[0] = -3.040800;
+  svmWeights52[1] = 2.759100;
+  svmWeights52[2] = -6.536700;
+  svmWeights52[3] = 3.081000;
+  std::vector<Real> svmWeights12;
+  svmWeights12.resize(4);
+  svmWeights12[0] = -3.462400;
+  svmWeights12[1] = 3.439700;
+  svmWeights12[2] = -9.489700;
+  svmWeights12[3] = 1.629700;
+  
+  // Normalize features
+  for (int i=0; i<features.size(); ++i){
+    features[i] = (features[i] - mins[i]) / (maxs[i] - mins[i]);
+  }
+
+  // Do classification to get the multiplier for the bpm
+  Real svmSum51, svmSum52, svmSum12;
+  svmSum51 = svmWeights51[svmWeights51.size()-1] + features[0] * svmWeights51[0] + features[1] * svmWeights51[1] + features[2] * svmWeights51[2];
+  svmSum52 = svmWeights52[svmWeights52.size()-1] + features[0] * svmWeights52[0] + features[1] * svmWeights52[1] + features[2] * svmWeights52[2];
+  svmSum12 = svmWeights12[svmWeights12.size()-1] + features[0] * svmWeights12[0] + features[1] * svmWeights12[1] + features[2] * svmWeights12[2];
+  Real mult = 1.0;
+  if ((svmSum52 > 0.0) && (svmSum12 > 0.0)){
+    mult = 2.0;
+  }
+  if ((svmSum51 <= 0.0) && (svmSum52 <= 0.0)){
+    mult = 0.5;
+  }
+
+  // Return final bpm
+  _bpm.push(mult * bpm);
   return FINISHED;
 }
 

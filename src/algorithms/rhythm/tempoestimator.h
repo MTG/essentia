@@ -63,6 +63,10 @@ class TempoEstimator : public AlgorithmComposite {
   bool _configured;
   void createInnerNetwork();
   void clearAlgos();
+  Real energyInRange(const std::vector<Real>& array, 
+                     const Real low, 
+                     const Real high, 
+                     const Real scale);
 
  public:
   TempoEstimator();
