@@ -172,7 +172,7 @@ void TempoEstimator::configure() {
   _frameCutterOSS->configure("frameSize", _frameSizeOSS,
                              "hopSize", _hopSizeOSS,
                              "startFromZero", true,
-                             "validFrameThresholdRatio", 1,
+                             "validFrameThresholdRatio", 0,
                              "silentFrames", "keep");
   _autoCorrelation->configure("normalization", "standard",
                               "generalized", true,
