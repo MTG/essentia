@@ -30,7 +30,7 @@ namespace essentia {
 namespace streaming {
 
 const char* TempoEstimator::name = "TempoEstimator";
-const char* TempoEstimator::description = DOC("This algorithm estimates the tempo in bpm from an input signal as described in [1]." 
+const char* TempoEstimator::description = DOC("This algorithm estimates the tempo in bpm from an input signal as described in [1]."
 "Status: work in progress.\n"
 "\n"
 "\n"
@@ -41,11 +41,11 @@ const char* TempoEstimator::description = DOC("This algorithm estimates the temp
 
 TempoEstimator::TempoEstimator()
   : AlgorithmComposite(), _frameCutter(0), _windowing(0), _spectrum(0), _scaleSpectrum(0),
-  _shiftSpectrum(0), _logSpectrum(0), _normSpectrum(0), _flux(0), _lowPass(0), 
-  _frameCutterOSS(0), _autoCorrelation(0), _enhanceHarmonics(0), _peakDetection(0), 
+  _shiftSpectrum(0), _logSpectrum(0), _normSpectrum(0), _flux(0), _lowPass(0),
+  _frameCutterOSS(0), _autoCorrelation(0), _enhanceHarmonics(0), _peakDetection(0),
   _evaluatePulseTrains(0), _configured(false) {
   declareInput(_signal, "signal", "input signal");
-  declareOutput(_bpm, 0, "bpm", "the tempo estimation [bpm]");
+  declareOutput(_bpm, "bpm", "the tempo estimation [bpm]");
 }
 
 void TempoEstimator::createInnerNetwork() {
@@ -87,6 +87,7 @@ void TempoEstimator::createInnerNetwork() {
   _frameCutterOSS->output("frame")            >>  _evaluatePulseTrains->input("oss");
   _evaluatePulseTrains->output("lag")         >>  PC(_pool, "lags");
 
+  /*
   Algorithm* outSignalFrames = new FileOutput<std::vector<Real> >();
   outSignalFrames->configure("filename", "frames.txt", "mode", "text");
   _windowing->output("frame") >> outSignalFrames->input("data");
@@ -114,7 +115,8 @@ void TempoEstimator::createInnerNetwork() {
   Algorithm* outEXcorr = new FileOutput<std::vector<Real> >();
   outEXcorr->configure("filename", "excorr.txt", "mode", "text");
   _enhanceHarmonics->output("array") >> outEXcorr->input("data");
-
+  */
+  
   _network = new scheduler::Network(_frameCutter);
 }
 
@@ -251,12 +253,12 @@ AlgorithmStatus TempoEstimator::process() {
   // Hard-coded values provided by original authors
   // Apparently list initializer is not enabled so must initialize in this way...
   std::vector<Real> mins;
-  mins.resize(3);  
+  mins.resize(3);
   mins[0] = 0.0321812;
   mins[1] = 1.68126e-83;
   mins[2] = 50.1745;
   std::vector<Real> maxs;
-  maxs.resize(3); 
+  maxs.resize(3);
   maxs[0] = 0.863237;
   maxs[1] = 0.449184;
   maxs[2] = 208.807;
@@ -278,7 +280,7 @@ AlgorithmStatus TempoEstimator::process() {
   svmWeights12[1] = 3.439700;
   svmWeights12[2] = -9.489700;
   svmWeights12[3] = 1.629700;
-  
+
   // Normalize features
   for (int i=0; i<features.size(); ++i){
     features[i] = (features[i] - mins[i]) / (maxs[i] - mins[i]);
@@ -308,4 +310,64 @@ void TempoEstimator::reset() {
 }
 
 } // namespace streaming
+} // namespace essentia
+
+namespace essentia {
+namespace standard {
+
+const char* TempoEstimator::name = "TempoEstimator";
+const char* TempoEstimator::description = DOC("This algorithm estimates the tempo in bpm from an input signal as described in [1]."
+"Status: work in progress.\n"
+"\n"
+"\n"
+"References:\n"
+"  [1] Percival, G., & Tzanetakis, G. (2014). Streamlined tempo estimation based on autocorrelation and cross-correlation with pulses.\n"
+"  IEEE/ACM Transactions on Audio, Speech, and Language Processing, 22(12), 1765–1776.\n\n");
+
+TempoEstimator::TempoEstimator() {
+  declareInput(_signal, "signal", "input signal");
+  declareOutput(_bpm, "bpm", "the tempo estimation [bpm]");
+  createInnerNetwork();
+}
+
+TempoEstimator::~TempoEstimator() {
+  delete _network;
+}
+
+void TempoEstimator::configure() {
+  _tempoEstimator->configure(
+    INHERIT("sampleRate"),
+    INHERIT("frameSize"),
+    INHERIT("hopSize"),
+    INHERIT("frameSizeOSS"),
+    INHERIT("hopSizeOSS"),
+    INHERIT("minBPM"),
+    INHERIT("maxBPM"));
+}
+
+void TempoEstimator::createInnerNetwork() {
+  _tempoEstimator = streaming::AlgorithmFactory::create("TempoEstimator");
+  _vectorInput = new streaming::VectorInput<Real>();
+
+  *_vectorInput  >>  _tempoEstimator->input("signal");
+  _tempoEstimator->output("bpm")  >>  PC(_pool, "bpm");
+
+  _network = new scheduler::Network(_vectorInput);
+}
+
+void TempoEstimator::compute() {
+  const vector<Real>& signal = _signal.get();
+  Real& bpm = _bpm.get();
+
+  _vectorInput->setVector(&signal);
+  _network->run();
+  bpm = _pool.value<Real >("bpm");
+}
+
+void TempoEstimator::reset() {
+  _network->reset();
+  _pool.remove("bpm");
+}
+
+} // namespace standard
 } // namespace essentia

@@ -33,7 +33,7 @@ class TempoEstimator : public AlgorithmComposite {
  protected:
   SinkProxy<Real> _signal;
   Source<Real> _bpm;
-  
+
   Pool _pool;
   int _sampleRate;
   int _frameSize;
@@ -63,9 +63,9 @@ class TempoEstimator : public AlgorithmComposite {
   bool _configured;
   void createInnerNetwork();
   void clearAlgos();
-  Real energyInRange(const std::vector<Real>& array, 
-                     const Real low, 
-                     const Real high, 
+  Real energyInRange(const std::vector<Real>& array,
+                     const Real low,
+                     const Real high,
                      const Real scale);
 
  public:
@@ -75,10 +75,8 @@ class TempoEstimator : public AlgorithmComposite {
 
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100);
-    // Parameters for step 1 (Generate OSS)
     declareParameter("frameSize", "frame size for the analysis of the input signal", "(0,inf)", 1024);
     declareParameter("hopSize", "hop size for the analysis of the input signal", "(0,inf)", 128);
-    // Parameters for step 2 (Beat Period Detection)
     declareParameter("frameSizeOSS", "frame size for the analysis of the Onset Strength Signal", "(0,inf)", 2048);
     declareParameter("hopSizeOSS", "hop size for the analysis of the Onset Strength Signal", "(0,inf)", 128);
     declareParameter("minBPM", "minimum BPM to detect", "(0,inf)", 50);
@@ -99,6 +97,48 @@ class TempoEstimator : public AlgorithmComposite {
 };
 
 } // namespace streaming
+} // namespace essentia
+
+#include "vectorinput.h"
+
+namespace essentia {
+namespace standard {
+
+class TempoEstimator : public Algorithm {
+ protected:
+  Input<std::vector<Real> > _signal;
+  Output<Real > _bpm;
+
+  streaming::Algorithm* _tempoEstimator;
+  streaming::VectorInput<Real>* _vectorInput;
+  scheduler::Network* _network;
+  Pool _pool;
+
+ public:
+
+  TempoEstimator();
+  ~TempoEstimator();
+
+  void declareParameters() {
+    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100);
+    declareParameter("frameSize", "frame size for the analysis of the input signal", "(0,inf)", 1024);
+    declareParameter("hopSize", "hop size for the analysis of the input signal", "(0,inf)", 128);
+    declareParameter("frameSizeOSS", "frame size for the analysis of the Onset Strength Signal", "(0,inf)", 2048);
+    declareParameter("hopSizeOSS", "hop size for the analysis of the Onset Strength Signal", "(0,inf)", 128);
+    declareParameter("minBPM", "minimum BPM to detect", "(0,inf)", 50);
+    declareParameter("maxBPM", "maximum BPM to detect", "(0,inf)", 210);
+  }
+
+  void configure();
+  void compute();
+  void reset();
+  void createInnerNetwork();
+
+  static const char* name;
+  static const char* description;
+};
+
+} // namespace standard
 } // namespace essentia
 
 
