@@ -84,6 +84,7 @@ void TempoEstimator::createInnerNetwork() {
   _autoCorrelation->output("autoCorrelation") >>  _enhanceHarmonics->input("array");
   _enhanceHarmonics->output("array")          >>  _peakDetection->input("array");
   _peakDetection->output("positions")         >>  _evaluatePulseTrains->input("positions");
+  _peakDetection->output("amplitudes")        >>  NOWHERE;
   _frameCutterOSS->output("frame")            >>  _evaluatePulseTrains->input("oss");
   _evaluatePulseTrains->output("lag")         >>  PC(_pool, "lags");
 
