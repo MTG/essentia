@@ -116,7 +116,7 @@ void TempoEstimator::createInnerNetwork() {
   outEXcorr->configure("filename", "excorr.txt", "mode", "text");
   _enhanceHarmonics->output("array") >> outEXcorr->input("data");
   */
-  
+
   _network = new scheduler::Network(_frameCutter);
 }
 
@@ -155,7 +155,7 @@ void TempoEstimator::configure() {
   _frameCutter->configure("frameSize", _frameSize,
                           "hopSize", _hopSize,
                           "startFromZero", true,
-                          "validFrameThresholdRatio", 1,
+                          "validFrameThresholdRatio", 0,
                           "silentFrames", "keep");
   _windowing->configure("size", _frameSize,
                         "type", "hamming",
