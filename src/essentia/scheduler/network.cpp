@@ -45,6 +45,10 @@ set<Algorithm*> visibleDependencies(const Algorithm* algo) {
 
     vector<SinkBase*>& sinks = output->second->sinks();
 
+    if (!sinks.size()) {
+      E_WARNING("Unconnected source (" << output->first << ") in " << algo->name());
+    }
+
     // ...get the attached sinks and their parent algorithms
     for (vector<SinkBase*>::iterator it = sinks.begin(); it != sinks.end(); ++it) {
       // add the owning algorithm to the list of dependencies
