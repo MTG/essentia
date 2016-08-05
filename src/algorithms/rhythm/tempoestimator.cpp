@@ -207,6 +207,22 @@ Real TempoEstimator::energyInRange(const std::vector<Real>& array,
 AlgorithmStatus TempoEstimator::process() {
   if (!shouldStop()) return PASS;
 
+  // Skip invalid lag candidates (lag=-1)
+  std::vector<int> lags;
+  lags.reserve(_pool.value<vector<Real> >("lags").size());
+  for (int i=0; i<_pool.value<vector<Real> >("lags").size(); ++i){
+    int lag = (int)_pool.value<vector<Real> >("lags")[i];
+    if (lag > -1) {
+        lags.push_back(lag);
+    }
+  }
+
+  // If there are no lag estimates, return bpm 0
+  if (lags.size() == 0) {
+    _bpm.push(0.0);
+    return FINISHED;
+  }
+
   // Compute Step 3 of algorithm
 
   // Create single gaussian template
@@ -227,10 +243,9 @@ AlgorithmStatus TempoEstimator::process() {
   // Accumulate (sum gaussians for every estimated lag)
   std::vector<Real> accum;
   accum.resize(414);  // 414 "long enough to accommodate all possible tempo lags"
-  for (int i=0; i<_pool.value<vector<Real> >("lags").size(); ++i){
-    int lag = (int)_pool.value<vector<Real> >("lags")[i];
+  for (int i=0; i<lags.size(); ++i){
     for (int j=0; j<accum.size(); ++j){
-      accum[j] += gaussian[(int)(gaussianSize/2) - lag + j];
+      accum[j] += gaussian[(int)(gaussianSize/2) - lags[i] + j];
     }
   }
 
