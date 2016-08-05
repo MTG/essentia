@@ -69,6 +69,12 @@ void EvaluatePulseTrains::compute() {
   const vector<Real>& peakPositions = _peakPositions.get();
   Real& lag = _lag.get();
 
+	if (peakPositions.size() == 0){
+		// No peaks have been detected, return lag -1
+		lag = -1;
+		return;
+	}
+
   vector<Real> tempoScores;
   tempoScores.resize(peakPositions.size());
   vector<Real> onsetScores;
