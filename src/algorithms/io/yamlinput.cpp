@@ -27,7 +27,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* YamlInput::name = "YamlInput";
-const char* YamlInput::category = "";
+const char* YamlInput::category = "Input/output";
 const char* YamlInput::description = DOC("This algorithm deserializes a file formatted in YAML to a Pool. This file can be serialized back into a YAML file using the YamlOutput algorithm. See the documentation for YamlOutput for more information on the specification of the YAML file.\n"
 "\n"
 "Note: If an empty sequence is encountered (i.e. \"[]\"), this algorithm will assume it was intended to be a sequence of Reals and will add it to the output pool accordingly. This only applies to sequences which contain empty sequences. Empty sequences (which are not subsequences) are not possible in a Pool and therefore will be ignored if encountered (i.e. foo: [] (ignored), but foo: [[]] (added as a vector of one empty vector of reals).");

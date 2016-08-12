@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Flux::name = "Flux";
-const char* Flux::category = "";
+const char* Flux::category = "Spectral";
 const char* Flux::description = DOC("This algorithm calculates the spectral flux of a given spectrum. Flux is defined as the L2-norm [1] or L1-norm [2] of the difference between two consecutive frames of the magnitude spectrum. The frames have to be of the same size in order to yield a meaningful result. The default L2-norm is used more commonly.\n"
 "\n"
 "An exception is thrown if the size of the input spectrum does not equal the previous input spectrum's size.\n"

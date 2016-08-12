@@ -26,7 +26,7 @@ namespace essentia {
 namespace streaming {
 
 const char* MonoLoader::name = "MonoLoader";
-const char* MonoLoader::category = "";
+const char* MonoLoader::category = "Input/output";
 const char* MonoLoader::description = DOC("Given an audio file this algorithm outputs the raw audio data downmixed to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal.\n"
 "\n"
 "This algorithm uses AudioLoader and thus inherits all of its input requirements and exceptions.");
@@ -81,7 +81,7 @@ namespace essentia {
 namespace standard {
 
 const char* MonoLoader::name = "MonoLoader";
-const char* MonoLoader::category = "";
+const char* MonoLoader::category = "Input/output";
 const char* MonoLoader::description = DOC("Given an audio file this algorithm outputs the raw audio data downmixed to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal.\n"
 "\n"
 "This algorithm uses AudioLoader and thus inherits all of its input requirements and exceptions.");

@@ -24,7 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Variance::name = "Variance";
-const char* Variance::category = "";
+const char* Variance::category = "Statistics";
 const char* Variance::description = DOC(
   "This algorithm calculates the variance of an array of Reals.");
 

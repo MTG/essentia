@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* UnaryOperator::name = "UnaryOperator";
-const char* UnaryOperator::category = "";
+const char* UnaryOperator::category = "Standard";
 const char* UnaryOperator::description = DOC("Given a vector of Reals, this algorithm will perform basic arithmetical operations on it, element by element.\n"
 "Note:\n"
 "  - log and ln are equivalent to the natural logarithm\n"

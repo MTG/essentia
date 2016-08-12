@@ -28,7 +28,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PoolAggregator::name = "PoolAggregator";
-const char* PoolAggregator::category = "";
+const char* PoolAggregator::category = "Statistics";
 const char* PoolAggregator::description = DOC("This algorithm performs statistical aggregation on a Pool and places the results of the aggregation into a new Pool. Supported statistical units are:\n"
   "\t'min' (minimum),\n"
   "\t'max' (maximum),\n"

@@ -26,7 +26,7 @@ using namespace standard;
 
 
 const char* SineModelSynth::name = "SineModelSynth";
-const char* SineModelSynth::category = "";
+const char* SineModelSynth::category = "Synthesis";
 const char* SineModelSynth::description = DOC("This algorithm computes the sine model synthesis from sine model analysis.");
 
 void SineModelSynth::compute() {

@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Windowing::name = "Windowing";
-const char* Windowing::category = "";
+const char* Windowing::category = "Standard";
 const char* Windowing::description = DOC("This algorithm applies windowing to audio signals.\n"
 "It optionally applies zero-phase windowing and optionally adds zero-padding.\n"
 "The resulting windowed frame size is equal to the incoming frame size plus the number of padded zeros.\n"

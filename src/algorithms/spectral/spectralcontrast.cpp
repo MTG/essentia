@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* SpectralContrast::name = "SpectralContrast";
-const char* SpectralContrast::category = "";
+const char* SpectralContrast::category = "Spectral";
 const char* SpectralContrast::description = DOC("The Spectral Contrast feature is based on the Octave Based Spectral Contrast feature as described in [1]. The version implemented here is a modified version to improve discriminative power and robustness. The modifications are described in [2].\n"
 "\n"
 "References:\n"

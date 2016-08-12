@@ -27,7 +27,7 @@ namespace essentia {
 namespace streaming {
 
 const char* AudioLoader::name = "AudioLoader";
-const char* AudioLoader::category = "";
+const char* AudioLoader::category = "Input/output";
 const char* AudioLoader::description = DOC("This algorithm loads the single audio stream contained in the given audio or video file, as well as the samplerate and the number of channels. Supported formats are all those supported by the ffmpeg library, which is, virtually everything.\n"
 "\n"
 "This algorithm will throw an exception if it hasn't been properly configured which is normally due to not specifying a valid filename.\n"
@@ -492,7 +492,7 @@ namespace essentia {
 namespace standard {
 
 const char* AudioLoader::name = "AudioLoader";
-const char* AudioLoader::category = "";
+const char* AudioLoader::category = "Input/output";
 const char* AudioLoader::description = DOC("Given an audio file this algorithm loads an audio file and outputs the raw signal data, the samplerate and the number of channels. Supported formats are: wav, aiff, flac (not supported on Windows), ogg and mp3.\n"
 "\n"
 "This algorithm will throw an exception if it hasn't been properly configured which normally is due to not specifying a valid filename. Invalid names comprise those with extensions different than the supported  formats and non existent files.\n"

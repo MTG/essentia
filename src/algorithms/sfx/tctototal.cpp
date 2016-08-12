@@ -25,7 +25,7 @@ namespace essentia {
 namespace standard {
 
 const char* TCToTotal::name = "TCToTotal";
-const char* TCToTotal::category = "";
+const char* TCToTotal::category = "SFX";
 const char* TCToTotal::description = DOC("This algorithm calculates the ratio of the temporal centroid to the total length of a signal envelope. This ratio shows how the sound is 'balanced'. Its value is close to 0 if most of the energy lies at the beginning of the sound (e.g. decrescendo or impulsive sounds), close to 0.5 if the sound is symetric (e.g. 'delta unvarying' sounds), and close to 1 if most of the energy lies at the end of the sound (e.g. crescendo sounds).\n"
 "\n"
 "Please note that the TCToTotal ratio is not defined for a zero signal (a signal consisting of only zeros), nor it is defined for a signal of less than 2 elements."

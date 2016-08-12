@@ -27,7 +27,7 @@ using namespace standard;
 
 
 const char* FrameToReal::name = "FrameToReal";
-const char* FrameToReal::category = "";
+const char* FrameToReal::category = "Standard";
 const char* FrameToReal::description = DOC(
 "This algorithm converts a sequence of input audio signal frames into a sequence of audio samples.\n\n"
 "Empty input signals will raise an exception."

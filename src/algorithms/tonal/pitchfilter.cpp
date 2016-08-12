@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchFilter::name = "PitchFilter";
-const char* PitchFilter::category = "";
+const char* PitchFilter::category = "Pitch";
 const char* PitchFilter::description = DOC("This algorithm corrects the fundamental frequency"
 " estimations for a sequence of frames given pitch values together with their confidence values"
 " (e.g., by removing non-confident parts and spurious jumps in pitch, and applying octave corrections).\n"

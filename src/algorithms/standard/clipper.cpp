@@ -24,7 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Clipper::name = "Clipper";
-const char* Clipper::category = "";
+const char* Clipper::category = "Standard";
 const char* Clipper::description = DOC("This algorithm clips the input signal to fit between the range given by the min and max parameters.\n"
 "\n"
 "References:\n"

@@ -24,7 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Scale::name = "Scale";
-const char* Scale::category = "";
+const char* Scale::category = "Standard";
 const char* Scale::description = DOC("This algorithm scales the audio by the specified factor, using clipping if required.");
 
 void Scale::configure() {

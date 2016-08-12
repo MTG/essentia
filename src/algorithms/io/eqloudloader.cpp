@@ -28,7 +28,7 @@ namespace essentia {
 namespace streaming {
 
 const char* EqloudLoader::name = "EqloudLoader";
-const char* EqloudLoader::category = "";
+const char* EqloudLoader::category = "Input/output";
 const char* EqloudLoader::description = DOC("Given an audio file this algorithm outputs the raw audio data downmixed to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and normalized by the given replayGain gain. In addition, audio data is filtered through an equal-loudness filter.\n"
 "\n"
 "This algorithm uses MonoLoader and thus inherits all of its input requirements and exceptions.\n"
@@ -85,7 +85,7 @@ namespace essentia {
 namespace standard {
 
 const char* EqloudLoader::name = "EqloudLoader";
-const char* EqloudLoader::category = "";
+const char* EqloudLoader::category = "Input/output";
 const char* EqloudLoader::description = DOC("Given an audio file this algorithm outputs the raw audio data downmixed to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and normalized by the given replayGain gain. In addition, audio data is filtered through an equal-loudness filter.\n"
 "\n"
 "This algorithm uses MonoLoader and thus inherits all of its input requirements and exceptions.\n"

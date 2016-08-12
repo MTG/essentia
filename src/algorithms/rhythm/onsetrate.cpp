@@ -29,7 +29,7 @@ namespace standard {
 
 
 const char* OnsetRate::name = "OnsetRate";
-const char* OnsetRate::category = "";
+const char* OnsetRate::category = "Rhythm";
 const char* OnsetRate::description = DOC("Given an audio signal, this algorithm outputs the rate at which onsets occur and the onsets' position in time. Onset detection functions are computed using both high frequency content and complex-domain methods available in OnsetDetection algorithm. See OnsetDetection for more information.\n"
 "Please note that due to a dependence on the Onsets algorithm, this algorithm is only valid for audio signals with a sampling rate of 44100Hz.\n"
 "This algorithm throws an exception if the input signal is empty.");

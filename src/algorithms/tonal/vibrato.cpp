@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Vibrato::name = "Vibrato";
-const char* Vibrato::category = "";
+const char* Vibrato::category = "Pitch";
 const char* Vibrato::description = DOC("Given a pitch contour [Hz], this algorithm detects the presence of vibrato and estimates the corresponding parameters. The result is the vibrato frequency in Hz and the extend (peak to peak) in cents. If no vibrato is detected in a frame, the output of both values is zero.\n"
 "\n"
 "This algorithm should be given the outputs of a pitch estimator, i.e. PredominantMelody, PitchYinFFT or PitchMelodia and the corresponding sample rate with which it was computed.\n"

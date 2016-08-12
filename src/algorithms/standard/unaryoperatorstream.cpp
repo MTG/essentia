@@ -27,7 +27,7 @@ using namespace standard;
 using namespace std;
 
 const char* UnaryOperatorStream::name = "UnaryOperatorStream";
-const char* UnaryOperatorStream::category = "";
+const char* UnaryOperatorStream::category = "Standard";
 const char* UnaryOperatorStream::description = DOC("Given a vector of Reals, this algorithm will perform basic arithmetical operations on it, element by element.\n"
 "Note:\n"
 "  - log and ln are equivalent to the natural logarithm\n"

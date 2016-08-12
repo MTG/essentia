@@ -26,7 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* ChordsDetection::name = "ChordsDetection";
-const char* ChordsDetection::category = "";
+const char* ChordsDetection::category = "Tonal";
 const char* ChordsDetection::description = DOC("Using pitch profile classes, this algorithm calculates the best matching major or minor triad and outputs the result as a string (e.g. A#, Bm, G#m, C). This algorithm uses the Sharp versions of each Flatted note (i.e. Bb -> A#).\n"
 "\n"
 "Note:\n"

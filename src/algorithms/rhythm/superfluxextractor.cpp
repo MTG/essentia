@@ -28,7 +28,7 @@ using namespace essentia;
 using namespace essentia::streaming;
 
 const char* SuperFluxExtractor::name = "SuperFluxExtractor";
-const char* SuperFluxExtractor::category = "";
+const char* SuperFluxExtractor::category = "Rhythm";
 const char* SuperFluxExtractor::description = DOC(
 "This algorithm detects onsets given an audio signal using SuperFlux algorithm [1]. This implementation is based on the available reference implementation in python [2].\n"
 "\n"

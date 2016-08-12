@@ -29,7 +29,7 @@ namespace standard {
 
 
 const char* OnsetDetectionGlobal::name = "OnsetDetectionGlobal";
-const char* OnsetDetectionGlobal::category = "";
+const char* OnsetDetectionGlobal::category = "Rhythm";
 const char* OnsetDetectionGlobal::description = DOC("This algorithm outputs an onset detection function useful for describing onset occurrences. Detection values are computed frame-wisely given an input signal. The output of this algorithm should be post-processed in order to determine whether the frame contains an onset or not. Namely, it could be fed to the Onsets algorithm.\n"
 "The following method are available:\n"
 "  - 'infogain', the spectral difference measured by the modified information gain [1]. For each frame, it accounts for energy change in between preceding and consecutive frames, histogrammed together, in order to suppress short-term variations on frame-by-frame basis.\n"

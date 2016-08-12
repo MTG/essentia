@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* BpmHistogramDescriptors::name = "BpmHistogramDescriptors";
-const char* BpmHistogramDescriptors::category = "";
+const char* BpmHistogramDescriptors::category = "Rhythm";
 const char* BpmHistogramDescriptors::description = DOC("This algorithm computes beats per minute histogram and its statistics for the highest and second highest peak.\n"
 "Note: histogram vector contains occurance frequency for each bpm value, 0-th element corresponds to 0 bpm value.");
 

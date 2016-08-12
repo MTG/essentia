@@ -27,7 +27,7 @@ namespace essentia {
 namespace standard {
 
 const char* AudioOnsetsMarker::name = "AudioOnsetsMarker";
-const char* AudioOnsetsMarker::category = "";
+const char* AudioOnsetsMarker::category = "Input/output";
 const char* AudioOnsetsMarker::description = DOC("This algorithm creates a wave file in which a given audio signal is mixed with a series of time onsets. The sonification of the onsets can be heard as beeps, or as short white noise pulses if configured to do so.\n"
 "\n"
 "This algorithm will throw an exception if parameter \"filename\" is not supplied");

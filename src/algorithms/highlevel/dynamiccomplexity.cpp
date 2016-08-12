@@ -28,7 +28,7 @@ namespace standard {
 
 
 const char* DynamicComplexity::name = "DynamicComplexity";
-const char* DynamicComplexity::category = "";
+const char* DynamicComplexity::category = "Loudness/dynamics";
 const char* DynamicComplexity::description = DOC(
 "The dynamic complexity is the average absolute deviation from the global\n"
 "loudness level estimate on the dB scale. It is related to the dynamic\n"

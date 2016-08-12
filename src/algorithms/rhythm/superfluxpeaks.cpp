@@ -28,7 +28,7 @@ namespace essentia {
 namespace standard {
     
 const char* SuperFluxPeaks::name = "SuperFluxPeaks";
-const char* SuperFluxPeaks::category = "";
+const char* SuperFluxPeaks::category = "Rhythm";
 const char* SuperFluxPeaks::description = DOC("Detection of novelty peaks for Superflux algorithm (see SuperFluxExtractor for more details)");
 
 

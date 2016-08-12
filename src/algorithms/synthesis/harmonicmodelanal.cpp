@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* HarmonicModelAnal::name = "HarmonicModelAnal";
-const char* HarmonicModelAnal::category = "";
+const char* HarmonicModelAnal::category = "Synthesis";
 const char* HarmonicModelAnal::description = DOC("This algorithm computes the harmonic model analysis.\n"
 "\n"
 "This algorithm uses SineModelAnal and keeps only the harmonic partials. It receives an external pitch value as input. You can use PitchYinFft algorithm to compute the pitch per frame.\n"

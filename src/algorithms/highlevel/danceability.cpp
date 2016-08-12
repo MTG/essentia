@@ -24,7 +24,7 @@ namespace essentia {
 namespace standard {
 
 const char* Danceability::name = "Danceability";
-const char* Danceability::category = "";
+const char* Danceability::category = "Rhythm";
 const char* Danceability::description = DOC(
 "Calculates the danceability vector for a given signal. The algorithm is\n"
 "derived from Detrended Fluctuation Analysis (DFA) described in [1]. The\n"

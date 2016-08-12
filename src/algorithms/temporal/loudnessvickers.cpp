@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* LoudnessVickers::name = "LoudnessVickers";
-const char* LoudnessVickers::category = "";
+const char* LoudnessVickers::category = "Loudness/dynamics";
 const char* LoudnessVickers::description = DOC("This algorithm computes Vickers's loudness for a given audio signal. Currently, this algorithm only works for signals with a 44100Hz sampling rate. This algorithm is meant to be given frames of audio as input (not entire audio signals). The algorithm described in the paper performs a weighted average of the loudness value computed for each of the given frames, this step is left as a post processing step and is not performed by this algorithm.\n\n"
 
 "References:\n"

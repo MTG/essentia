@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchSalienceFunctionPeaks::name = "PitchSalienceFunctionPeaks";
-const char* PitchSalienceFunctionPeaks::category = "";
+const char* PitchSalienceFunctionPeaks::category = "Pitch";
 const char* PitchSalienceFunctionPeaks::description = DOC("This algorithm computes the peaks of a given pitch salience function.\n"
 "\n"
 "This algorithm is intended to receive its \"salienceFunction\" input from the PitchSalienceFunction algorithm. The peaks are detected using PeakDetection algorithm. The outputs are two arrays of bin numbers and salience values corresponding to the peaks.\n"

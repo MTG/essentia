@@ -24,7 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* BarkBands::name = "BarkBands";
-const char* BarkBands::category = "";
+const char* BarkBands::category = "Spectral";
 const char* BarkBands::description = DOC("This algorithm computes the spectral energy contained in a given number of bands, which correspond to an extrapolation of the Bark band scale [1]: \n"
 "[0.0, 50.0, 100.0, 150.0, 200.0, 300.0, 400.0, 510.0, 630.0, 770.0, 920.0, 1080.0, 1270.0, 1480.0, 1720.0, 2000.0, 2320.0, 2700.0, 3150.0, 3700.0, 4400.0, 5300.0, 6400.0, 7700.0, 9500.0, 12000.0, 15500.0, 20500.0, 27000.0]\n"
 "\n"

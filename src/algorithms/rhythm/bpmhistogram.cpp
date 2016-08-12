@@ -34,7 +34,7 @@ namespace essentia {
 namespace streaming {
 
 const char* BpmHistogram::name = "BpmHistogram";
-const char* BpmHistogram::category = "";
+const char* BpmHistogram::category = "Rhythm";
 const char* BpmHistogram::description = DOC("This algorithm analyzes predominant periodicities in a signal given its novelty curve [1] (see NoveltyCurve algorithm) or another onset detection function (see OnsetDetection and OnsetDetectionGlobal). It estimates pulse BPM values and time positions together with a half-wave rectified sinusoid whose peaks represent the pulses present in the audio signal and their magnitudes. The analysis is based on the FFT of the input novelty curve from which salient periodicities are detected by thresholding. Temporal evolution of these periodicities is output in the \"tempogram\". Candidate BPMs are then detected based on a histogram of the observed periodicities weighted by their energy in the tempogram. The sinusoidal model is constructed based on the observed periodicities and their magnitudes with the estimated overall BPM as a reference.\n\n"
 "The algorithm outputs: \n"
 " - bpm: the mean of the most salient BPM values representing periodicities in the signal (the mean BPM).\n"

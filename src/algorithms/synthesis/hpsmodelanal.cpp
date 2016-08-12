@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* HpsModelAnal::name = "HpsModelAnal";
-const char* HpsModelAnal::category = "";
+const char* HpsModelAnal::category = "Synthesis";
 const char* HpsModelAnal::description = DOC("This algorithm computes the harmonic plus stochastic model analysis. \n"
 "\n"
 "It uses the algorithms HarmonicModelAnal and StochasticModelAnal .\n"

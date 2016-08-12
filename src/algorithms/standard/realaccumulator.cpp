@@ -25,7 +25,7 @@ namespace essentia {
 namespace streaming {
 
 const char* RealAccumulator::name = "RealAccumulator";
-const char* RealAccumulator::category = "";
+const char* RealAccumulator::category = "Standard";
 const char* RealAccumulator::description = DOC("This algorithm takes a stream of Real values "
 "and outputs them as a single vector when the end of the stream is reached.");
 
