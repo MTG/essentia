@@ -26,7 +26,6 @@ using namespace essentia;
 using namespace standard;
 
 const char* HarmonicBpm::name = "HarmonicBpm";
-const char* HarmonicBpm::version = "1.0";
 const char* HarmonicBpm::description = DOC("This algorithm extracts bpms that are harmonically related to the tempo given by the \'bpm\' parameter.\n"
 "The algorithm assumes a certain bpm is harmonically related to parameter bpm, when the greatest common divisor between both bpms is greater than threshold.\n"
 "The \'tolerance\' parameter is needed in order to consider if two bpms are related. For instance, 120, 122 and 236 may be related or not depending on how much tolerance is given\n"

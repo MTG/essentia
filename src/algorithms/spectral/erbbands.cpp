@@ -10,7 +10,6 @@ using namespace essentia;
 using namespace standard;
 
 const char* ERBBands::name = "ERBBands";
-const char* ERBBands::version = "1.0";
 const char* ERBBands::description = DOC("This algorithm computes energies/magnitudes in bands spaced on an Equivalent Rectangular Bandwidth (ERB) scale, given a spectrum. It applies a frequency domain filterbank using gammatone filters. Adapted from matlab code in:  D. P. W. Ellis (2009). 'Gammatone-like spectrograms', web resource [1].\n"
 "\n"
 "References:\n"
