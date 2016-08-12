@@ -25,6 +25,7 @@ namespace essentia {
 namespace streaming {
 
 const char* VectorRealAccumulator::name = "VectorRealAccumulator";
+const char* VectorRealAccumulator::category = "";
 const char* VectorRealAccumulator::description = DOC("This algorithm takes a stream of Real values "
 "and outputs them as a single vector when the end of the stream is reached.");
 

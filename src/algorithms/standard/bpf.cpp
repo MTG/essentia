@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* BPF::name = "BPF";
+const char* BPF::category = "";
 const char* BPF::description = DOC("A break point function linearly interpolates between discrete xy-coordinates to construct a continuous function.\n"
 "\n"
 "Exceptions are thrown when the size the vectors specified in parameters is not equal and at least they contain two elements. Also if the parameter vector for x-coordinates is not sorted ascendantly. A break point function cannot interpolate outside the range specified in parameter \"xPoints\". In that case an exception is thrown.\n "

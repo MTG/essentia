@@ -411,6 +411,7 @@ namespace essentia {
 namespace standard {
 
 const char* RhythmExtractor::name = "RhythmExtractor";
+const char* RhythmExtractor::category = "";
 const char* RhythmExtractor::description = DOC("This algorithm estimates the tempo in bpm from an input signal, as well as the beat locations. The algorithm combines several periodicity functions and estimates beats using TempoTap and TempoTapTicks. It combines:\n"
 "- onset detection functions based on high-frequency content (see OnsetDetection)\n"
 "- complex-domain spectral difference function (see OnsetDetection)\n"

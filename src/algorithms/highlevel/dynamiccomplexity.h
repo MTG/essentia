@@ -52,6 +52,7 @@ class DynamicComplexity : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
  protected:
@@ -100,6 +101,7 @@ class DynamicComplexity : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

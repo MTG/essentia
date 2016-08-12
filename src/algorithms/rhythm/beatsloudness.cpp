@@ -27,6 +27,7 @@ namespace essentia {
 namespace streaming {
 
 const char* BeatsLoudness::name = "BeatsLoudness";
+const char* BeatsLoudness::category = "";
 const char* BeatsLoudness::description = DOC("Calculates the loudness computed only on the beats, both on the whole frequency range and on each specified frequency band. See the Loudness algorithm for a description of loudness and SingleBeatLoudness for a more detailed explanation.\n"
 "\n"
 "Note that the algorithm will output empty results in the case if no beats are specified in the \"beats\" parameter.");
@@ -98,6 +99,7 @@ namespace essentia {
 namespace standard {
 
 const char* BeatsLoudness::name = "BeatsLoudness";
+const char* BeatsLoudness::category = "";
 const char* BeatsLoudness::description = DOC("Calculates the loudness computed only on the beats, both on the whole frequency range and on each specified frequency band. See the Loudness algorithm for a description of loudness and SingleBeatLoudness for a more detailed explanation.\n"
 "\n"
 "Note that the algorithm will output empty results in the case if no beats are specified in the \"beats\" parameter.");

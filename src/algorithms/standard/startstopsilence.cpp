@@ -26,6 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* StartStopSilence::name = "StartStopSilence";
+const char* StartStopSilence::category = "";
 const char* StartStopSilence::description = DOC("This algorithm outputs the frame at which sound begins and the frame at which sound ends.");
 
 void StartStopSilence::configure() {
@@ -79,6 +80,7 @@ namespace essentia {
 namespace streaming {
 
 const char* StartStopSilence::name = "StartStopSilence";
+const char* StartStopSilence::category = "";
 const char* StartStopSilence::description = DOC("This algorithm outputs the frame at which sound begins and the frame at which sound ends.");
 
 void StartStopSilence::configure() {

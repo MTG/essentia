@@ -50,6 +50,7 @@ class Trimmer : public Algorithm {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -95,6 +96,7 @@ class Trimmer : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

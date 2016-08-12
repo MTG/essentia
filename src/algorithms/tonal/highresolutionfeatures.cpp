@@ -28,6 +28,7 @@ namespace essentia {
 namespace standard {
 
 const char* HighResolutionFeatures::name = "HighResolutionFeatures";
+const char* HighResolutionFeatures::category = "";
 const char* HighResolutionFeatures::description = DOC("This algorithm computes high-resolution chroma features from an HPCP vector. The vector's size must be a multiple of 12 and it is recommended that it be larger than 120. In otherwords, the HPCP's resolution should be 10 Cents or more.\n"
 "The high-resolution features being computed are:\n"
 "\n"

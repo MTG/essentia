@@ -26,6 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* MultiPitchKlapuri::name = "MultiPitchKlapuri";
+const char* MultiPitchKlapuri::category = "";
 const char* MultiPitchKlapuri::description = DOC("This algorithm estimates multiple pitch values corresponding to the melodic lines present in a polyphonic music signal (i.e. string quartet, piano). This implementation is based on the algorithm in [1]: In each frame, a set of possible fundamental frequency candidates is extracted based on the principle of harmonic summation. In an optimization stage, the number of harmonic sources (polyphony) is estimated and the final set of fundamental frequencies determined. In contrast to the pich salience function proposed in [2], this implementation uses the pitch salience function described in [1]."
 "\n"
 "The output is a vector for each frame containing the estimated melody pitch values.\n"

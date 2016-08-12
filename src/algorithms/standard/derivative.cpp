@@ -25,6 +25,7 @@ namespace essentia {
 namespace standard {
 
 const char* Derivative::name = "Derivative";
+const char* Derivative::category = "";
 const char* Derivative::description = DOC("This algorithm returns the first-order derivative of the input signal, ie: for each input value, it returns the value minus the previous one.");
 
 void Derivative::compute() {

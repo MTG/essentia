@@ -26,6 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* Trimmer::name = "Trimmer";
+const char* Trimmer::category = "";
 const char* Trimmer::description = DOC("Given an audio signal, this algorithm it extracts a slice of the signal between startTime and endTime.\n"
 "Giving \"startTime\" greater than \"endTime\" will raise an exception.");
 
@@ -63,6 +64,7 @@ namespace essentia {
 namespace streaming {
 
 const char* Trimmer::name = "Trimmer";
+const char* Trimmer::category = "";
 const char* Trimmer::description = DOC("Given an audio signal, this algorithm it extracts a slice of the signal between startTime and endTime.\n"
 "Giving \"startTime\" greater than \"endTime\" will raise an exception.");
 

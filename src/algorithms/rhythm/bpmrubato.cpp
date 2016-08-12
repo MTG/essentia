@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* BpmRubato::name = "BpmRubato";
+const char* BpmRubato::category = "";
 const char* BpmRubato::description = DOC("This algorithm extracts the locations of large tempo changes from a list of beat ticks.\n"
 "\n"
 "An exception is thrown if the input beats are not in ascending order and/or if the input beats contain duplicate values.\n"

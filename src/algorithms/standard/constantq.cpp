@@ -27,6 +27,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* ConstantQ::name = "ConstantQ";
+const char* ConstantQ::category = "";
 const char* ConstantQ::description = DOC("This algorithm implements Constant Q Transform employing FFT for fast calculation [1].\n"
 "\n"
 "References:\n"

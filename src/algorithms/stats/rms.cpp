@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* RMS::name = "RMS";
+const char* RMS::category = "";
 const char* RMS::description = DOC("This algorithm computes the Root Mean Square (quadratic mean) of an array of Reals.\n"
 "RMS is not defined for empty arrays. In such case, an exception will be thrown\n."
 "\n"

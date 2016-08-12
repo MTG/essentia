@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PowerMean::name = "PowerMean";
+const char* PowerMean::category = "";
 const char* PowerMean::description = DOC("This algorithm extracts the Power Mean of an array of Reals. It accepts one parameter, p, which is the power (or order or degree) of the Power Mean. Note that if p=-1, the Power Mean is equal to the Harmonic Mean, if p=0, the Power Mean is equal to the Geometric Mean, if p=1, the Power Mean is equal to the Arithmetic Mean, if p=2, the Power Mean is equal to the Root Mean Square.\n"
 "\n"
 "Exceptions are thrown if input array either is empty or it contains non positive numbers.\n"

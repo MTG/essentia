@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* SpectralComplexity::name = "SpectralComplexity";
+const char* SpectralComplexity::category = "";
 const char* SpectralComplexity::description = DOC("This algorithm computes the spectral complexity of an spectrum of Reals. The spectral complexity is based on the number of peaks in the input spectrum.\n"
 "\n"
 "It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. The input \"spectrum\" is passed to the SpectralPeaks algorithm and thus inherits its input requirements and exceptions.\n"

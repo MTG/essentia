@@ -54,6 +54,7 @@ class StrongDecay : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -93,6 +94,7 @@ class StrongDecay : public AccumulatorAlgorithm {
   void finalProduce();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

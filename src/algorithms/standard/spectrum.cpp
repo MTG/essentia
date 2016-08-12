@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Spectrum::name = "Spectrum";
+const char* Spectrum::category = "";
 const char* Spectrum::description = DOC("This algorithm calculates the magnitude spectrum of an array of Reals. The resulting magnitude spectrum has a size which is half the size of the input array plus one.\n"
 "\n"
 "References:\n"

@@ -28,6 +28,7 @@ using namespace essentia;
 using namespace essentia::streaming;
 
 const char* BarkExtractor::name = "BarkExtractor";
+const char* BarkExtractor::category = "";
 const char* BarkExtractor::description = DOC("This algorithm extracts some Bark bands based spectral features from an audio signal");
 
 BarkExtractor::BarkExtractor() : _configured(false) {

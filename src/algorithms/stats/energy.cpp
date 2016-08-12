@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Energy::name = "Energy";
+const char* Energy::category = "";
 const char* Energy::description = DOC("This algorithm computes the energy of an array of Reals.\n"
 "\n"
 "The input array should not be empty or an exception will be thrown.\n"

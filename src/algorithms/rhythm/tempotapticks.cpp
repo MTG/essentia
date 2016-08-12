@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* TempoTapTicks::name = "TempoTapTicks";
+const char* TempoTapTicks::category = "";
 const char* TempoTapTicks::description = DOC("This algorithm builds the list of ticks from the period and phase candidates given by the TempoTap algorithm.\n"
 "\n"
 "Quality: outdated (use TempoTapDegara instead)\n"

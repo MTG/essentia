@@ -26,6 +26,7 @@ using namespace standard;
 using namespace util; // peak class
 
 const char* PeakDetection::name = "PeakDetection";
+const char* PeakDetection::category = "";
 const char* PeakDetection::description = DOC("The peak detection algorithm detects local maxima (peaks) in a data array.\n"
 "The algorithm finds positive slopes and detects a peak when the slope changes sign and the peak is above the threshold.\n"
 "It optionally interpolates using parabolic curve fitting.\n"

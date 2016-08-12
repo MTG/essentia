@@ -26,6 +26,7 @@ namespace essentia {
 namespace streaming {
 
 const char* LoudnessEBUR128Filter::name = "LoudnessEBUR128Filter";
+const char* LoudnessEBUR128Filter::category = "";
 const char* LoudnessEBUR128Filter::description = DOC("This is an auxilary signal preprocessing algorithm used within the LoudnessEBUR128 algorithm. It applies the pre-processing K-weighting filter and computes signal representation requiered by LoudnessEBUR128 in accordance with the EBU R128 recommendation.\n"
 "\n"
 "References:\n"

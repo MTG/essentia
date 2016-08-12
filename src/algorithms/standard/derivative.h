@@ -42,6 +42,7 @@ class Derivative : public Algorithm {
   void configure() {}
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -75,6 +76,7 @@ class Derivative : public Algorithm {
   AlgorithmStatus process();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

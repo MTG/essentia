@@ -58,6 +58,7 @@ class Key : public Algorithm {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 protected:
@@ -141,6 +142,7 @@ class Key : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

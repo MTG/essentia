@@ -42,6 +42,7 @@ class FlatnessSFX : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
   // these thresholds are given in percentage of the total signal length

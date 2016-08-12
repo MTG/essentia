@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Beatogram::name = "Beatogram";
+const char* Beatogram::category = "";
 const char* Beatogram::description = DOC("This algorithm filters the loudness matrix given by BeatsLoudness algorithm in order to keep only the most salient beat band representation.\n"
 "This algorithm has been found to be useful for estimating time signatures.\n"
 "\n"

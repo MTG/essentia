@@ -24,6 +24,7 @@ namespace essentia {
 namespace standard {
         
 const char* SuperFluxNovelty::name = "SuperFluxNovelty";
+const char* SuperFluxNovelty::category = "";
 const char* SuperFluxNovelty::description = DOC("Novelty curve for Superflux algorithm (see SuperFluxExtractor for more details).");
         
 void SuperFluxNovelty::configure() {

@@ -30,6 +30,7 @@ namespace essentia {
 namespace streaming {
 
 const char* AudioWriter::name = "AudioWriter";
+const char* AudioWriter::category = "";
 const char* AudioWriter::description = DOC("This algorithm encodes an input signal into a stereo audio file.\n\n"
 
 "Supported formats are wav, aiff, mp3, flac and ogg.\n\n"
@@ -121,6 +122,7 @@ namespace essentia {
 namespace standard {
 
 const char* AudioWriter::name = "AudioWriter";
+const char* AudioWriter::category = "";
 const char* AudioWriter::description = DOC("This algorithm encodes an input signal into a stereo audio file.\n\n"
 
 "Supported formats are wav, aiff, mp3, flac and ogg.\n\n"

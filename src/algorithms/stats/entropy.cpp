@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Entropy::name = "Entropy";
+const char* Entropy::category = "";
 const char* Entropy::description = DOC("This algorithm computes the Shannon entropy of an array. Entropy can be used to quantify the peakiness of a distribution. This has been used for voiced/unvoiced decision in automatic speech recognition. \n"
 "\n"
 "Entropy cannot be computed neither on empty arrays nor arrays which contain negative values. In such cases, exceptions will be thrown.\n"

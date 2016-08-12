@@ -24,6 +24,7 @@ namespace essentia {
 namespace standard {
 
 const char* TriangularBands::name = "TriangularBands";
+const char* TriangularBands::category = "";
 const char* TriangularBands::description = DOC("This algorithm computes the energy of an input spectrum for an arbitrary number of overlapping Triangular frequency bands. For each band the power-spectrum (mag-squared) is summed.\n"
 "\n"
 "Parameter \"frequencyBands\" must contain at least two frequencies, they all must be positive and must be ordered ascentdantly, otherwise an exception will be thrown. TriangularBands is only defined for spectrum, which size is greater than 1.\n");

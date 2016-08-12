@@ -25,6 +25,7 @@ using namespace standard;
 using namespace std;
 
 const char* BandPass::name = "BandPass";
+const char* BandPass::category = "";
 const char* BandPass::description = DOC("This algorithm implements a 2nd order IIR band-pass filter. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"

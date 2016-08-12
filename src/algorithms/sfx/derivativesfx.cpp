@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* DerivativeSFX::name = "DerivativeSFX";
+const char* DerivativeSFX::category = "";
 const char* DerivativeSFX::description = DOC("This algorithm returns two descriptors that are based on the derivative of a signal envelope.\n"
 "\n"
 "The first descriptor is calculated after the maximum value of the input signal occurred. It is the average of the signal's derivative weighted by its amplitude. This coefficient helps discriminating impulsive sounds, which have a steep release phase, from non-impulsive sounds. The smaller the value the more impulsive.\n"

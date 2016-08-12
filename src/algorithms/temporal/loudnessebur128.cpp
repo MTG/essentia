@@ -29,6 +29,7 @@ namespace essentia {
 namespace streaming {
 
 const char* LoudnessEBUR128::name = "LoudnessEBUR128";
+const char* LoudnessEBUR128::category = "";
 const char* LoudnessEBUR128::description = DOC("This algorithm computes loudness descriptors in accordance with EBU R128 recommendation.\n"
 "- The input stereo signal is preprocessed with a K-weighting filter [2] (see LoudnessEBUR128Filter algorithm), composed of two stages: a shelving filter and a high-pass filter (RLB-weighting curve).\n"
 "- Momentary loudness is computed by integrating the sum of powers over a sliding rectangular window of 400 ms. The measurement is not gated.\n"
@@ -272,6 +273,7 @@ namespace essentia {
 namespace standard {
 
 const char* LoudnessEBUR128::name = essentia::streaming::LoudnessEBUR128::name;
+const char* LoudnessEBUR128::category = essentia::streaming::LoudnessEBUR128::category;
 const char* LoudnessEBUR128::description = essentia::streaming::LoudnessEBUR128::description;
 
 

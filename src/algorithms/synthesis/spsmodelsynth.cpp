@@ -26,6 +26,7 @@ using namespace standard;
 
 
 const char* SpsModelSynth::name = "SpsModelSynth";
+const char* SpsModelSynth::category = "";
 const char* SpsModelSynth::description = DOC("This algorithm computes the sinusoidal plus stochastic model synthesis from SPS model analysis.");
 
 

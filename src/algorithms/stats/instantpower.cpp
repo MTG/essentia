@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* InstantPower::name = "InstantPower";
+const char* InstantPower::category = "";
 const char* InstantPower::description = DOC("This algorithm computes the instant power of an array. That is, the energy of the array over its size.\n"
 "\n"
 "An exception is thrown when input array is empty.\n"

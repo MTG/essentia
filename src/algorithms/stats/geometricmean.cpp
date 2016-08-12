@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* GeometricMean::name = "GeometricMean";
+const char* GeometricMean::category = "";
 const char* GeometricMean::description = DOC("This algorithm computes the geometric mean of an array of positive Reals.\n"
 "\n"
 "An exception is thrown if the input array does not contain strict positive numbers or the array is empty.\n"

@@ -25,7 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* HarmonicModelAnal::name = "HarmonicModelAnal";
-const char* HarmonicModelAnal::description = DOC("This algorithm computes the harmonic model analysis.  \n"
+const char* HarmonicModelAnal::category = "";
+const char* HarmonicModelAnal::description = DOC("This algorithm computes the harmonic model analysis.\n"
 "\n"
 "This algorithm uses SineModelAnal and keeps only the harmonic partials. It receives an external pitch value as input. You can use PitchYinFft algorithm to compute the pitch per frame.\n"
 "\n"
@@ -36,9 +37,7 @@ const char* HarmonicModelAnal::description = DOC("This algorithm computes the ha
 
 
 
-void HarmonicModelAnal::configure() {
-
-                            
+void HarmonicModelAnal::configure() {                      
   _sineModelAnal->configure( "sampleRate", parameter("sampleRate").toReal(),
                             // sinusoidal tracking
                               "maxnSines", parameter("maxnSines").toInt() ,
@@ -56,8 +55,6 @@ void HarmonicModelAnal::configure() {
  _harmDevSlope =  parameter("harmDevSlope").toReal();
  
  _lasthfreq.clear();
-
-
 }
 
 
@@ -79,14 +76,14 @@ void HarmonicModelAnal::compute() {
   std::vector<Real> peakPhase;
  
 
- _sineModelAnal->input("fft").set(fftin);
- _sineModelAnal->output("magnitudes").set(peakMagnitude);
- _sineModelAnal->output("frequencies").set(peakFrequency);
- _sineModelAnal->output("phases").set(peakPhase);
+  _sineModelAnal->input("fft").set(fftin);
+  _sineModelAnal->output("magnitudes").set(peakMagnitude);
+  _sineModelAnal->output("frequencies").set(peakFrequency);
+  _sineModelAnal->output("phases").set(peakPhase);
   _sineModelAnal->compute();
 
 
-	harmonicDetection(peakFrequency, peakMagnitude, peakPhase, pitch, _nH, _lasthfreq,  _sampleRate,  _harmDevSlope,  hpeakFrequency,  hpeakMagnitude,  hpeakPhase);
+  harmonicDetection(peakFrequency, peakMagnitude, peakPhase, pitch, _nH, _lasthfreq,  _sampleRate,  _harmDevSlope,  hpeakFrequency,  hpeakMagnitude,  hpeakPhase);
 
 	_lasthfreq = hpeakFrequency;  // copy last harmonic frequencies for tracking
 

@@ -87,6 +87,7 @@ class BeatTrackerMultiFeature : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -127,6 +128,7 @@ class BeatTrackerMultiFeature : public Algorithm {
   void createInnerNetwork();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

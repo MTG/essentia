@@ -44,6 +44,7 @@ class TCToTotal : public Algorithm {
   void declareParameters() {}
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -79,6 +80,7 @@ class TCToTotal : public AccumulatorAlgorithm {
   void finalProduce();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

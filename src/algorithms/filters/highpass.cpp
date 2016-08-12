@@ -25,6 +25,7 @@ using namespace standard;
 using namespace std;
 
 const char* HighPass::name = "HighPass";
+const char* HighPass::category = "";
 const char* HighPass::description = DOC("This algorithm implements a 1st order IIR high-pass filter. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"

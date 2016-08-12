@@ -53,6 +53,7 @@ class HighResolutionFeatures : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -99,6 +100,7 @@ class HighResolutionFeatures : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

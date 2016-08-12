@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* SineModelAnal::name = "SineModelAnal";
+const char* SineModelAnal::category = "";
 const char* SineModelAnal::description = DOC("This algorithm computes the sine model analysis. \n"
 "\n"
 "It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses PeakDetection. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"

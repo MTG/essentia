@@ -81,6 +81,7 @@ void processFrame(vector<Real>& tmpFrame, const vector<Real>& windowedFrame,
 namespace standard {
 
 const char* OverlapAdd::name = "OverlapAdd";
+const char* OverlapAdd::category = "";
 const char* OverlapAdd::description = DOC(
 "This algorithm returns the output of an overlap-add process of a sequence of input audio signal frames. It considers that the input audio frames are windowed audio signals. Giving the size of the frame and the hop size, overlapping and adding consecutive frames with produce a continuous signal. A normalization gain can be passed as parameter. \n"
 ".\n"
@@ -126,6 +127,7 @@ void OverlapAdd::compute() {
 namespace streaming {
 
 const char* OverlapAdd::name = "OverlapAdd";
+const char* OverlapAdd::category = "";
 const char* OverlapAdd::description = DOC(
 "This algorithm returns the output of an overlap-add process of a sequence of input audio signal frames. It considers that the input audio frames are windowed audio signals. Giving the size of the frame and the hop size, overlapping and adding consecutive frames with produce a continuous signal. \n"
 ".\n"

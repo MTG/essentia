@@ -64,6 +64,7 @@ class ChordsDescriptors : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -118,6 +119,7 @@ class ChordsDescriptors : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

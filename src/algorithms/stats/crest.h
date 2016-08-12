@@ -42,6 +42,7 @@ class Crest : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

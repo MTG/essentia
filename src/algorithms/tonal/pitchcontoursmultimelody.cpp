@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchContoursMultiMelody::name = "PitchContoursMultiMelody";
+const char* PitchContoursMultiMelody::category = "";
 const char* PitchContoursMultiMelody::description = DOC("This algorithm post-processes a set of pitch contours into a sequence of mutliple f0 values in Hz.\n"
 "This algorithm is intended to receive its \"contoursBins\", \"contoursSaliences\", and \"contoursStartTimes\" inputs from the PitchContours algorithm. The \"duration\" input corresponds to the time duration of the input signal. The output is a vector of estimated pitch values\n"
 "\n"

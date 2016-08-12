@@ -26,6 +26,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Panning::name = "Panning";
+const char* Panning::category = "";
 const char* Panning::description = DOC("This algorithm characterizes panorama distribution by comparing spectra from the left and right channels. The panning coefficients are extracted by:\n\n"
 "- determining the spatial location of frequency bins given left and right channel spectra;\n\n"
 "- computing panorama histogram weighted by the energy of frequency bins, averaging it across frames and normalizing;\n\n"

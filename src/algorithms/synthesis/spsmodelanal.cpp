@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* SpsModelAnal::name = "SpsModelAnal";
+const char* SpsModelAnal::category = "";
 const char* SpsModelAnal::description = DOC("This algorithm computes the stochastic model analysis. \n"
 "\n"
 "It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. This algorithm uses SineModelAnal. See documentation for possible exceptions and input requirements on input \"spectrum\".\n"

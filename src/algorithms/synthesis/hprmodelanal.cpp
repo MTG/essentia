@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* HprModelAnal::name = "HprModelAnal";
+const char* HprModelAnal::category = "";
 const char* HprModelAnal::description = DOC("This algorithm computes the Harmonic plus Residual model analysis. \n"
 "\n"
 "It uses the algorithms HarmonicModelAnal and SineSubtraction .\n"

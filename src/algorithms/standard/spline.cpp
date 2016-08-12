@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Spline::name = "Spline";
+const char* Spline::category = "";
 const char* Spline::description = DOC("Evaluates a piecewise spline of type b, beta or quadratic.\n"
 "The input value, i.e. the point at which the spline is to be evaluated typically should be between xPoins[0] and xPoinst[size-1]. If the value lies outside this range, extrapolation is used."
 "\n"

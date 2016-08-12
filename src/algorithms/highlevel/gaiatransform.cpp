@@ -27,6 +27,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* GaiaTransform::name = "GaiaTransform";
+const char* GaiaTransform::category = "";
 const char* GaiaTransform::description = DOC(
 "Applies a given Gaia2 transformation history to a given pool. It first converts the pool into a gaia2::Point suitable for the history, applies the history, and converts back the resulting point into an essentia Pool. In particular, it allows classification.\n"
 "\n"

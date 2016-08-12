@@ -42,6 +42,7 @@ class MinToTotal : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -77,6 +78,7 @@ class MinToTotal : public AccumulatorAlgorithm {
   void finalProduce();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

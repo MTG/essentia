@@ -40,7 +40,7 @@ class SuperFluxNovelty : public Algorithm {
  public:
   SuperFluxNovelty() {
     declareInput(_bands, "bands", "the input bands spectrogram");
-    declareOutput(_diffs, "Differences", "SuperFluxNovelty input");
+    declareOutput(_diffs, "differences", "SuperFluxNovelty input");
 	 _maxFilter = AlgorithmFactory::create("MaxFilter"); 
   }
 
@@ -58,6 +58,7 @@ class SuperFluxNovelty : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;  
   static const char* description;
 };
 
@@ -104,6 +105,7 @@ class SuperFluxNovelty : public Algorithm {
   void reset() {};
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

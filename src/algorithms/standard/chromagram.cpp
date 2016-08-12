@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Chromagram::name = "Chromagram";
+const char* Chromagram::category = "";
 const char* Chromagram::description = DOC("This algorithm calculates the chromagram of the Constant Q Transform.\n"
 "\n");
 

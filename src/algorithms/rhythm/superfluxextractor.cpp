@@ -28,6 +28,7 @@ using namespace essentia;
 using namespace essentia::streaming;
 
 const char* SuperFluxExtractor::name = "SuperFluxExtractor";
+const char* SuperFluxExtractor::category = "";
 const char* SuperFluxExtractor::description = DOC(
 "This algorithm detects onsets given an audio signal using SuperFlux algorithm [1]. This implementation is based on the available reference implementation in python [2].\n"
 "\n"
@@ -51,7 +52,7 @@ SuperFluxExtractor::SuperFluxExtractor() : _configured(false) {
   _w->output("frame")                >> _spectrum->input("frame");
   _spectrum->output("spectrum")      >> _triF->input("spectrum");
   _triF->output("bands")             >> _superFluxF->input("bands");
-  _superFluxF->output("Differences") >> _superFluxP->input("novelty");
+  _superFluxF->output("differences") >> _superFluxP->input("novelty");
   _superFluxP->output("peaks")       >> _onsets;
 
   _network = new scheduler::Network(_frameCutter);
@@ -105,6 +106,7 @@ namespace essentia {
 namespace standard {
 
 const char* SuperFluxExtractor::name = "SuperFluxExtractor";
+const char* SuperFluxExtractor::category = "";
 const char* SuperFluxExtractor::description = streaming::SuperFluxExtractor::description;
 
 SuperFluxExtractor::SuperFluxExtractor() {

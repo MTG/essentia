@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* RawMoments::name = "RawMoments";
+const char* RawMoments::category = "";
 const char* RawMoments::description = DOC("This algorithm computes the first 5 raw moments of an array of Reals. The output array is of size 6 because the zero-ith moment is used for padding so that the first moment corresponds to index 1.\n\n"
 
 "Note:\n"

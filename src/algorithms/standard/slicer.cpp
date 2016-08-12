@@ -26,6 +26,7 @@ namespace essentia {
 namespace streaming {
 
 const char* Slicer::name = "Slicer";
+const char* Slicer::category = "";
 const char* Slicer::description = DOC("This algorithm returns a vector of slices, which start and end times are given as parameters.\n"
 "\n"
 "The parameters, \"startTimes\" and \"endTimes\" must be coherent. If these parameters differ in size, an exception is thrown. If a particular startTime is larger than its corresponding endTime, an exception is thrown.");
@@ -211,6 +212,7 @@ namespace essentia {
 namespace standard {
 
 const char* Slicer::name = "Slicer";
+const char* Slicer::category = "";
 const char* Slicer::description = DOC("This algorithm returns a vector of slices, which start and end times are given as parameters.\n"
 "\n"
 "The parameters, \"startTimes\" and \"endTimes\" must be coherent. If these parameters differ in size, an exception is thrown. If a particular startTime is larger than its corresponding endTime, an exception is thrown.");

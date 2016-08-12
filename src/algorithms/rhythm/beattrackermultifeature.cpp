@@ -27,6 +27,7 @@ namespace essentia {
 namespace streaming {
 
 const char* BeatTrackerMultiFeature::name = "BeatTrackerMultiFeature";
+const char* BeatTrackerMultiFeature::category = "";
 const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates the beat locations given an input signal. It computes a number of onset detection functions and estimates beat location candidates from them using TempoTapDegara algorithm. Thereafter the best candidates are selected using TempoTapMaxAgreement. The employed detection functions, and the optimal frame/hop sizes used for their computation are:\n"
 "  - complex spectral difference (see 'complex' method in OnsetDetection algorithm, 2048/1024 with posterior x2 upsample or the detection function)\n"
 "  - energy flux (see 'rms' method in OnsetDetection algorithm, the same settings)\n"
@@ -276,6 +277,7 @@ namespace essentia {
 namespace standard {
 
 const char* BeatTrackerMultiFeature::name = "BeatTrackerMultiFeature";
+const char* BeatTrackerMultiFeature::category = "";
 const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates the beat locations given an input signal. It computes a number of onset detection functions and estimates beat location candidates from them using TempoTapDegara algorithm. Thereafter the best candidates are selected using TempoTapMaxAgreement. The employed detection functions, and the optimal frame/hop sizes used for their computation are:\n"
 "  - complex spectral difference (see 'complex' method in OnsetDetection algorithm, 2048/1024 with posterior x2 upsample or the detection function)\n"
 "  - energy flux (see 'rms' method in OnsetDetection algorithm, the same settings)\n"

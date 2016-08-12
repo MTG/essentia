@@ -26,6 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* ChordsDescriptors::name = "ChordsDescriptors";
+const char* ChordsDescriptors::category = "";
 const char* ChordsDescriptors::description = DOC("Given a chord progression this algorithm describes it by means of key, scale, histogram, and rate of change.\n"
 "Note:\n"
 "  - chordsHistogram indexes follow the circle of fifths order, while being shifted to the input key and scale\n"

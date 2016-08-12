@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Loudness::name = "Loudness";
+const char* Loudness::category = "";
 const char* Loudness::description = DOC("This algorithm extracts the loudness of a signal, which is defined by Steven's power law as its energy raised to the power of 0.67.\n"
 "\n"
 "References:\n"

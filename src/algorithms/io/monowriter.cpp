@@ -25,6 +25,7 @@ namespace essentia {
 namespace streaming {
 
 const char* MonoWriter::name = "MonoWriter";
+const char* MonoWriter::category = "";
 const char* MonoWriter::description = DOC("This algorithm writes a mono audio stream to a file.\n\n"
 
 "Supported formats are wav, aiff, mp3, flac and ogg. An exception is thrown when other extensions are given. Note that to encode in mp3 format it is mandatory that ffmpeg was configured with mp3 enabled.\n\n"
@@ -118,6 +119,7 @@ namespace essentia {
 namespace standard {
 
 const char* MonoWriter::name = "MonoWriter";
+const char* MonoWriter::category = "";
 const char* MonoWriter::description = DOC("This algorithm writes a mono audio stream to a file.\n\n"
 
 "Supported formats are wav, aiff, mp3, flac and ogg. An exception is thrown when other extensions are given. Note that to encode in mp3 format it is mandatory that ffmpeg was configured with mp3 enabled.\n\n"
