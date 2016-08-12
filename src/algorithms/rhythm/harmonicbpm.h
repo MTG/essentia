@@ -53,7 +53,6 @@ class HarmonicBpm : public Algorithm {
   void configure();
 
   static const char* name;
-  static const char* version;
   static const char* description;
 
  private:

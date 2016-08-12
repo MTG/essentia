@@ -79,7 +79,6 @@ class NoveltyCurveFixedBpmEstimator : public Algorithm {
     void reset() {}
 
     static const char* name;
-    static const char* version;
     static const char* description;
 };
 

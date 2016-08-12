@@ -114,7 +114,6 @@ class MultiPitchKlapuri : public Algorithm {
   }
 
   static const char* name;
-  static const char* version;
   static const char* description;
 
 };

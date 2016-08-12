@@ -142,7 +142,6 @@ class PitchContoursMelody : public Algorithm {
   void compute();
 
   static const char* name;
-  static const char* version;
   static const char* description;
 
 }; // class PitchContoursMelody
