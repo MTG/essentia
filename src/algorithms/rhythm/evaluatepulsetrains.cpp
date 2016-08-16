@@ -69,32 +69,37 @@ void EvaluatePulseTrains::compute() {
   const vector<Real>& peakPositions = _peakPositions.get();
   Real& lag = _lag.get();
 
-  vector<Real> tempoScores;
-  tempoScores.resize(peakPositions.size());
-  vector<Real> onsetScores;
-  onsetScores.resize(peakPositions.size());
-  for (int i=0; i< peakPositions.size(); ++i) {
-  	Real candidate = peakPositions[i];
-  	if (candidate != 0) {
-  		int lag = (int) round(candidate);
-  		Real magScore;
-  		Real varScore;
-  		calculatePulseTrains(oss, lag, magScore, varScore);
-		tempoScores[i] = magScore;
-  		onsetScores[i] = varScore;
-  	}
+  if (peakPositions.size() == 0) {
+    // If no peaks detected, return 0
+    lag = 1;
+  } else {
+    vector<Real> tempoScores;
+    tempoScores.resize(peakPositions.size());
+    vector<Real> onsetScores;
+    onsetScores.resize(peakPositions.size());
+    for (int i=0; i< peakPositions.size(); ++i) {
+      Real candidate = peakPositions[i];
+      if (candidate != 0) {
+        int lag = (int) round(candidate);
+        Real magScore;
+        Real varScore;
+        calculatePulseTrains(oss, lag, magScore, varScore);
+      tempoScores[i] = magScore;
+        onsetScores[i] = varScore;
+      }
+    }
+    vector<Real> comboScores;
+    comboScores.resize(peakPositions.size());
+    Real sumTempoScores = sum(tempoScores);
+    Real sumOnsetScroes = sum(onsetScores);
+    for (int i=0; i< peakPositions.size(); ++i) {
+      comboScores[i] = tempoScores[i]/sumTempoScores + onsetScores[i]/sumOnsetScroes;
+    }
+    // NOTE: original python implementation normalizes comboScores (like tempoScores and onsetScore).
+    // As we are only taking argmax, we assume there is no need for this normalization.
+    Real bestScorePosition = argmax(comboScores);
+    lag = round(peakPositions[bestScorePosition]);
   }
-  vector<Real> comboScores;
-  comboScores.resize(peakPositions.size());
-  Real sumTempoScores = sum(tempoScores);
-  Real sumOnsetScroes = sum(onsetScores);
-  for (int i=0; i< peakPositions.size(); ++i) {
-  	comboScores[i] = tempoScores[i]/sumTempoScores + onsetScores[i]/sumOnsetScroes;
-  }
-  // NOTE: original python implementation normalizes comboScores (like tempoScores and onsetScore).
-  // As we are only taking argmax, we assume there is no need for this normalization.
-  Real bestScorePosition = argmax(comboScores);
-  lag = round(peakPositions[bestScorePosition]);
 }
 
 } // namespace standard
