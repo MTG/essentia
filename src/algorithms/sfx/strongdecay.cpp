@@ -26,7 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* StrongDecay::name = "StrongDecay";
-const char* StrongDecay::category = "SFX";
+const char* StrongDecay::category = "Envelope/SFX";
 const char* StrongDecay::description = DOC("This algorithm extracts the Strong Decay of an audio signal. The Strong Decay is built from the non-linear combination of the signal energy and the signal temporal centroid, the latter being the balance of the absolute value of the signal. A signal containing a temporal centroid near its start boundary and a strong energy is said to have a strong decay.\n"
 "\n"
 "This algorithm is not defined for zero signals (i.e. silence) nor when the signal's size is less than two, as it could not compute its centroid.\n"

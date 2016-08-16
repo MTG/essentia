@@ -83,7 +83,7 @@ namespace essentia {
 namespace standard {
 
 const char* StereoDemuxer::name = "StereoDemuxer";
-const char* StereoDemuxer::category = "";
+const char* StereoDemuxer::category = "Standard";
 const char* StereoDemuxer::description = DOC(
 "Given a stereo signal, this algorithm outputs left and right channel separately."
 "If the signal is monophonic, it outputs a zero signal on the right channel."

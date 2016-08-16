@@ -27,7 +27,7 @@ namespace essentia {
 namespace standard {
 
 const char* ReplayGain::name = "ReplayGain";
-const char* ReplayGain::category = "Standard";
+const char* ReplayGain::category = "Loudness/dynamics";
 const char* ReplayGain::description = DOC("This algorithm returns the Replay Gain loudness value of the audio. The algorithm is described in detail at [1]. The value returned is the 'standard' ReplayGain value, not the value with 6dB preamplification as it is computed by lame, mp3gain, vorbisgain, and all widely used ReplayGain programs.\n"
 "\n"
 "This algorithm is only defined for input signals which size is larger than 0.05ms, otherwise an exception will be thrown.\n"

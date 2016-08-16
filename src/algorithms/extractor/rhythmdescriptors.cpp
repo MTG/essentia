@@ -28,7 +28,7 @@ namespace essentia {
 namespace streaming {
 
 const char* RhythmDescriptors::name = "RhythmDescriptors";
-const char* RhythmDescriptors::category = "";
+const char* RhythmDescriptors::category = "Rhythm";
 const char* RhythmDescriptors::description = DOC("This algorithm computes rhythm features. It combines RhythmExtractor2013 for beat tracking and BPM estimation with BpmHistogramDescriptors algorithms.");
 
 RhythmDescriptors::RhythmDescriptors() {
@@ -132,7 +132,7 @@ namespace essentia {
 namespace standard {
 
 const char* RhythmDescriptors::name = "RhythmDescriptors";
-const char* RhythmDescriptors::category = "";
+const char* RhythmDescriptors::category = "Rhythm";
 const char* RhythmDescriptors::description = DOC("this algorithm computes low level rhythm features");
 
 RhythmDescriptors::RhythmDescriptors() {

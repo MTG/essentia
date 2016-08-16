@@ -127,7 +127,7 @@ namespace essentia {
 namespace standard {
 
 const char* Multiplexer::name = "Multiplexer";
-const char* Multiplexer::category = "";
+const char* Multiplexer::category = "Standard";
 const char* Multiplexer::description = DOC("This algorithm returns a single vector from a given number of real values and/or frames. Frames from different inputs are multiplexed onto a single stream in an alternating fashion.\n"
 "\n"
 "This algorithm throws an exception if the number of input reals (or vector<real>) is less than the number specified in configuration parameters or if the user tries to acces an input which has not been specified.\n"

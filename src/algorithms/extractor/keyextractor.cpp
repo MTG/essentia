@@ -27,7 +27,7 @@ namespace essentia {
 namespace streaming {
 
 const char* KeyExtractor::name = "KeyExtractor";
-const char* KeyExtractor::category = "";
+const char* KeyExtractor::category = "Tonal";
 const char* KeyExtractor::description = DOC("this algorithm extracts key/scale for an audio stream");
 
 KeyExtractor::KeyExtractor(): _frameCutter(0), _windowing(0), _spectrum(0), _spectralPeaks(0),
@@ -107,7 +107,7 @@ namespace essentia {
 namespace standard {
 
 const char* KeyExtractor::name = "KeyExtractor";
-const char* KeyExtractor::category = "";
+const char* KeyExtractor::category = "Tonal";
 const char* KeyExtractor::description = DOC("this algorithm extracts tonal features");
 
 KeyExtractor::KeyExtractor() {

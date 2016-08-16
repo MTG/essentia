@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* HPCP::name = "HPCP";
-const char* HPCP::category = "Spectral";
+const char* HPCP::category = "Tonal";
 const char* HPCP::description = DOC("Computes a Harmonic Pitch Class Profile (HPCP), that is a k*12 dimensional vector which represents the intensities of the twelve (k==1) semitone pitch classes (corresponsing to notes from A to G#), or subdivisions of these (k>1). It does this from the spectral peaks of a signal.\n"
 "Regarding frequency parameters, exceptions are thrown if \"minFrequency\", \"splitFrequency\" and \"maxFrequency\" are not separated by at least 200Hz from each other, requiring that \"maxFrequency\" be greater than \"splitFrequency\" and \"splitFrequency\" be greater than \"minFrequenc\"."
 "Other exceptions are thrown if input vectors have different size, if parameter \"size\" is not a positive non-zero multiple of 12 or if \"windowSize\" is less than one hpcp bin (12/size).\n"
@@ -35,7 +35,9 @@ const char* HPCP::description = DOC("Computes a Harmonic Pitch Class Profile (HP
 "  (ICMC'99), pp. 464-467, 1999.\n"
 "  [2] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
 "  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"
-"  2006.");
+"  2006.\n"
+"  [3] Harmonic pitch class profiles - Wikipedia, the free encyclopedia,\n"
+"  https://en.wikipedia.org/wiki/Harmonic_pitch_class_profiles");
 
 
 const Real HPCP::precision = 0.00001;

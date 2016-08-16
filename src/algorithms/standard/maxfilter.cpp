@@ -26,7 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* MaxFilter::name = "MaxFilter";
-const char* MaxFilter::category = "Standard";
+const char* MaxFilter::category = "Filters";
 const char* MaxFilter::description = DOC("Maximum filter for 1d signal using van Herk/Gil-Werman (HGW) algorithm.\n"
 "\n"
 "References:\n"

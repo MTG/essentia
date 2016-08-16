@@ -23,7 +23,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PowerSpectrum::name = "PowerSpectrum";
-const char* PowerSpectrum::category = "Standard";
+const char* PowerSpectrum::category = "Spectral";
 const char* PowerSpectrum::description = DOC("This algorithm computes the power spectrum of an array of Reals. The resulting power spectrum has a size which is half the size of the input array plus one.\n"
 "\n"
 "References:\n"

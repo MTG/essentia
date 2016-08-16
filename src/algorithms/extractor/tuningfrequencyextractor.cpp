@@ -27,7 +27,7 @@ namespace essentia {
 namespace streaming {
 
 const char* TuningFrequencyExtractor::name = "TuningFrequencyExtractor";
-const char* TuningFrequencyExtractor::category = "";
+const char* TuningFrequencyExtractor::category = "Tonal";
 const char* TuningFrequencyExtractor::description = DOC("This algorithm extracts the tuning frequency of an audio signal");
 
 TuningFrequencyExtractor::TuningFrequencyExtractor(): _frameCutter(0), _spectralPeaks(0), _spectrum(0), _tuningFrequency(0), _windowing(0) {
@@ -88,7 +88,7 @@ namespace essentia {
 namespace standard {
 
 const char* TuningFrequencyExtractor::name = "TuningFrequencyExtractor";
-const char* TuningFrequencyExtractor::category = "";
+const char* TuningFrequencyExtractor::category = "Tonal";
 const char* TuningFrequencyExtractor::description = DOC("this algorithm extracts the tuning frequency of an audio signal");
 
 TuningFrequencyExtractor::TuningFrequencyExtractor() {

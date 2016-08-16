@@ -106,7 +106,7 @@ namespace essentia {
 namespace standard {
 
 const char* SuperFluxExtractor::name = "SuperFluxExtractor";
-const char* SuperFluxExtractor::category = "";
+const char* SuperFluxExtractor::category = "Rhythm";
 const char* SuperFluxExtractor::description = streaming::SuperFluxExtractor::description;
 
 SuperFluxExtractor::SuperFluxExtractor() {

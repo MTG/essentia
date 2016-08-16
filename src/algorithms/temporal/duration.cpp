@@ -24,7 +24,7 @@ namespace essentia {
 namespace standard {
 
 const char* Duration::name = "Duration";
-const char* Duration::category = "";
+const char* Duration::category = "Duration/silence";
 const char* Duration::description = DOC("This algorithm returns the total length of a signal recording in seconds.");
 
 void Duration::compute() {
@@ -43,7 +43,7 @@ namespace essentia {
 namespace streaming {
 
 const char* Duration::name = "Duration";
-const char* Duration::category = "";
+const char* Duration::category = "Duration/silence";
 const char* Duration::description = DOC("This algorithm returns the total length of a signal recording in seconds.");
 
 void Duration::reset() {
