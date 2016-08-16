@@ -87,9 +87,9 @@ TuningFrequencyExtractor::~TuningFrequencyExtractor() {
 namespace essentia {
 namespace standard {
 
-const char* TuningFrequencyExtractor::name = "TuningFrequencyExtractor";
-const char* TuningFrequencyExtractor::category = "Tonal";
-const char* TuningFrequencyExtractor::description = DOC("this algorithm extracts the tuning frequency of an audio signal");
+const char* TuningFrequencyExtractor::name = essentia::streaming::TuningFrequencyExtractor::name;
+const char* TuningFrequencyExtractor::category = essentia::streaming::TuningFrequencyExtractor::category;
+const char* TuningFrequencyExtractor::description = essentia::streaming::TuningFrequencyExtractor::description;
 
 TuningFrequencyExtractor::TuningFrequencyExtractor() {
   declareInput(_signal, "signal", "the audio input signal");

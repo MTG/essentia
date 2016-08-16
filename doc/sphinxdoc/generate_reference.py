@@ -177,7 +177,7 @@ def write_algorithms_reference():
 
     # write the algorithms reference organized by categories
     std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
-    streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase', 'VectorInput' ] ]
+    streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase'] ]
 
     std_algo_categories = {}
     streaming_algo_categories = {}
@@ -240,7 +240,7 @@ def write_algorithms_reference():
     for category, algonames in streaming_algo_categories.items():
         streaming_algo_categories_html[category] = []
         for algoname in algonames:
-            print 'generating doc for standard algorithm:', algoname, '...'
+            print 'generating doc for streaming algorithm:', algoname, '...'
 
             streaming_algo_categories_html[category] += [ '<a class="reference internal" href="reference/streaming_' + algoname + '.html">' +
                                                     '<em>' + algoname + '</em></a> / ' ]

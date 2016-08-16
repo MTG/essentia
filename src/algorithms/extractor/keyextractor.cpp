@@ -106,9 +106,9 @@ KeyExtractor::~KeyExtractor() {
 namespace essentia {
 namespace standard {
 
-const char* KeyExtractor::name = "KeyExtractor";
-const char* KeyExtractor::category = "Tonal";
-const char* KeyExtractor::description = DOC("this algorithm extracts tonal features");
+const char* KeyExtractor::name = essentia::streaming::KeyExtractor::name;
+const char* KeyExtractor::category = essentia::streaming::KeyExtractor::category;
+const char* KeyExtractor::description = essentia::streaming::KeyExtractor::description;
 
 KeyExtractor::KeyExtractor() {
   declareInput(_audio, "audio", "the audio input signal");

@@ -70,10 +70,9 @@ void SilenceRate::compute() {
 namespace essentia {
 namespace streaming {
 
-const char* SilenceRate::name = "SilenceRate";
-const char* SilenceRate::category = "Duration/silence";
-const char* SilenceRate::description = DOC("Given a list of thresholds, this algorithm creates a equally-sized list of outputs and returns 1 on a given output whenever the instant power of the input frame is below the given output's respective threshold, and returns 0 otherwise. This is done for each frame with respect to all outputs. In other words, if a given frame's instant power is below several given thresholds, then each of the corresponding outputs will emit a 1."
-);
+const char* SilenceRate::name = essentia::standard::SilenceRate::name;
+const char* SilenceRate::category = essentia::standard::SilenceRate::category;
+const char* SilenceRate::description = essentia::standard::SilenceRate::description;
 
 void SilenceRate::clearOutputs() {
   for (int i=0; i<(int)_outputs.size(); i++) delete _outputs[i];

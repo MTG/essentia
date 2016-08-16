@@ -131,9 +131,9 @@ void RhythmDescriptors::reset() {
 namespace essentia {
 namespace standard {
 
-const char* RhythmDescriptors::name = "RhythmDescriptors";
-const char* RhythmDescriptors::category = "Rhythm";
-const char* RhythmDescriptors::description = DOC("this algorithm computes low level rhythm features");
+const char* RhythmDescriptors::name = essentia::streaming::RhythmDescriptors::name;
+const char* RhythmDescriptors::category = essentia::streaming::RhythmDescriptors::category;
+const char* RhythmDescriptors::description = essentia::streaming::RhythmDescriptors::description;
 
 RhythmDescriptors::RhythmDescriptors() {
   declareInput(_signal, "signal", "the audio input signal");

@@ -42,9 +42,9 @@ void Duration::compute() {
 namespace essentia {
 namespace streaming {
 
-const char* Duration::name = "Duration";
-const char* Duration::category = "Duration/silence";
-const char* Duration::description = DOC("This algorithm returns the total length of a signal recording in seconds.");
+const char* Duration::name = essentia::standard::Duration::name;
+const char* Duration::category = essentia::standard::Duration::category;
+const char* Duration::description = essentia::standard::Duration::description;
 
 void Duration::reset() {
   AccumulatorAlgorithm::reset();

@@ -35,7 +35,7 @@ const char* EqloudLoader::description = DOC("Given an audio file this algorithm 
 "\n"
 "References:\n"
 "  [1] Replay Gain - A Proposed Standard,\n"
-"  http://replaygain.hydrogenaudio.org\n\n"
+"  http://replaygain.hydrogenaudio.org\n"
 "  [2] Replay Gain - Equal Loudness Filter,\n"
 "  http://replaygain.hydrogenaudio.org/proposal/equal_loudness.html");
 
@@ -84,17 +84,9 @@ void EqloudLoader::configure() {
 namespace essentia {
 namespace standard {
 
-const char* EqloudLoader::name = "EqloudLoader";
-const char* EqloudLoader::category = "Input/output";
-const char* EqloudLoader::description = DOC("Given an audio file this algorithm outputs the raw audio data downmixed to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and normalized by the given replayGain gain. In addition, audio data is filtered through an equal-loudness filter.\n"
-"\n"
-"This algorithm uses MonoLoader and thus inherits all of its input requirements and exceptions.\n"
-"\n"
-"References:\n"
-"  [1] Replay Gain - A Proposed Standard,\n"
-"      http://replaygain.hydrogenaudio.org"
-"  [2] Replay Gain - Equal Loudness Filter,\n"
-"      http://replaygain.hydrogenaudio.org/equal_loudness.html");
+const char* EqloudLoader::name = essentia::streaming::EqloudLoader::name;
+const char* EqloudLoader::category = essentia::streaming::EqloudLoader::category;
+const char* EqloudLoader::description = essentia::streaming::EqloudLoader::description;
 
 
 void EqloudLoader::createInnerNetwork() {

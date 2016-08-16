@@ -80,11 +80,9 @@ void MonoLoader::configure() {
 namespace essentia {
 namespace standard {
 
-const char* MonoLoader::name = "MonoLoader";
-const char* MonoLoader::category = "Input/output";
-const char* MonoLoader::description = DOC("Given an audio file this algorithm outputs the raw audio data downmixed to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal.\n"
-"\n"
-"This algorithm uses AudioLoader and thus inherits all of its input requirements and exceptions.");
+const char* MonoLoader::name = essentia::streaming::MonoLoader::name;
+const char* MonoLoader::category = essentia::streaming::MonoLoader::category;
+const char* MonoLoader::description = essentia::streaming::MonoLoader::description;
 
 
 void MonoLoader::createInnerNetwork() {

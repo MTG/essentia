@@ -211,11 +211,9 @@ AlgorithmStatus Slicer::process() {
 namespace essentia {
 namespace standard {
 
-const char* Slicer::name = "Slicer";
-const char* Slicer::category = "Standard";
-const char* Slicer::description = DOC("This algorithm returns a vector of slices, which start and end times are given as parameters.\n"
-"\n"
-"The parameters, \"startTimes\" and \"endTimes\" must be coherent. If these parameters differ in size, an exception is thrown. If a particular startTime is larger than its corresponding endTime, an exception is thrown.");
+const char* Slicer::name = essentia::streaming::Slicer::name;
+const char* Slicer::category = essentia::streaming::Slicer::category;
+const char* Slicer::description = essentia::streaming::Slicer::description;
 
 void Slicer::configure() {
   _slicer->configure(INHERIT("sampleRate"),

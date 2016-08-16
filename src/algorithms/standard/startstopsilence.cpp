@@ -79,9 +79,9 @@ void StartStopSilence::reset() {
 namespace essentia {
 namespace streaming {
 
-const char* StartStopSilence::name = "StartStopSilence";
-const char* StartStopSilence::category = "Duration/silence";
-const char* StartStopSilence::description = DOC("This algorithm outputs the frame at which sound begins and the frame at which sound ends.");
+const char* StartStopSilence::name = essentia::standard::StartStopSilence::name;
+const char* StartStopSilence::category = essentia::standard::StartStopSilence::category;
+const char* StartStopSilence::description = essentia::standard::StartStopSilence::description;
 
 void StartStopSilence::configure() {
   _startSilence = 0;

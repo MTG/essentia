@@ -28,23 +28,22 @@ namespace streaming {
 
 const char* AudioLoader::name = "AudioLoader";
 const char* AudioLoader::category = "Input/output";
-const char* AudioLoader::description = DOC("This algorithm loads the single audio stream contained in the given audio or video file, as well as the samplerate and the number of channels. Supported formats are all those supported by the ffmpeg library, which is, virtually everything.\n"
+const char* AudioLoader::description = DOC("This algorithm loads the single audio stream contained in the given audio or video file as well as the samplerate and the number of channels. Supported formats are all those supported by the ffmpeg library including wav, aiff, flac, ogg and mp3.\n"
 "\n"
-"This algorithm will throw an exception if it hasn't been properly configured which is normally due to not specifying a valid filename.\n"
-"If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8.\n"
-"Note: ogg files are decoded in reverse phase, due to a (possible) bug in the ffmpeg library.\n"
+"This algorithm will throw an exception if it was not properly configured which is normally due to not specifying a valid filename. Invalid names comprise those with extensions different than the supported  formats and non existent files. If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8\n\n"
+"Note: ogg files are decoded in reverse phase, due to be using ffmpeg library.\n"
 "\n"
 "References:\n"
 "  [1] WAV - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Wav\n\n"
+"      http://en.wikipedia.org/wiki/Wav\n"
 "  [2] Audio Interchange File Format - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Aiff\n\n"
+"      http://en.wikipedia.org/wiki/Aiff\n"
 "  [3] Free Lossless Audio Codec - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Flac\n\n"
+"      http://en.wikipedia.org/wiki/Flac\n"
 "  [4] Vorbis - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Vorbis\n\n"
+"      http://en.wikipedia.org/wiki/Vorbis\n"
 "  [5] MP3 - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Mp3");
+"      http://en.wikipedia.org/wiki/Mp3");
 
 
 AudioLoader::~AudioLoader() {
@@ -491,24 +490,9 @@ void AudioLoader::reset() {
 namespace essentia {
 namespace standard {
 
-const char* AudioLoader::name = "AudioLoader";
-const char* AudioLoader::category = "Input/output";
-const char* AudioLoader::description = DOC("Given an audio file this algorithm loads an audio file and outputs the raw signal data, the samplerate and the number of channels. Supported formats are: wav, aiff, flac (not supported on Windows), ogg and mp3.\n"
-"\n"
-"This algorithm will throw an exception if it hasn't been properly configured which normally is due to not specifying a valid filename. Invalid names comprise those with extensions different than the supported  formats and non existent files.\n"
-"Note: ogg files are decoded in reverse phase, due to be using ffmpeg library.\n"
-"\n"
-"References:\n"
-"  [1] WAV - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Wav\n"
-"  [2] Audio Interchange File Format - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Aiff\n"
-"  [3] Free Lossless Audio Codec - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Flac\n"
-"  [4] Vorbis - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Vorbis\n"
-"  [5] MP3 - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Mp3");
+const char* AudioLoader::name = essentia::streaming::AudioLoader::name;
+const char* AudioLoader::category = essentia::streaming::AudioLoader::category;
+const char* AudioLoader::description = essentia::streaming::AudioLoader::description;
 
 
 void AudioLoader::createInnerNetwork() {
