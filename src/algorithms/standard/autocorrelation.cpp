@@ -97,7 +97,7 @@ void AutoCorrelation::compute() {
     } else {
       // Apply magnitude compression
       _fftBuffer[i] = complex<Real>(
-        pow(sqrt(pow(_fftBuffer[i].real() / (2 * sizeFFT), 2) + pow(_fftBuffer[i].imag() / (2 * sizeFFT), 2)), _frequencyDomainCompression),
+        pow(sqrt(pow(_fftBuffer[i].real() / sizeFFT, 2) + pow(_fftBuffer[i].imag() / sizeFFT, 2)), _frequencyDomainCompression),
         0.0); // squared amplitude -> complex part = 0
     }
   }
@@ -108,7 +108,7 @@ void AutoCorrelation::compute() {
   // copy results in output array, scaling on the go (normalizing the output of the IFFT)
   Real scale = 1.0 / sizeFFT;
   if (_generalized) {
-    scale = 2 * sizeFFT * scale;
+    scale = sizeFFT * scale;
   }
   correlation.resize(size);
 

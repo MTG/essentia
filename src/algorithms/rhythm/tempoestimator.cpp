@@ -22,7 +22,6 @@
 #include "poolstorage.h"
 #include "algorithmfactory.h"
 #include "essentiamath.h"
-#include <essentia/streaming/algorithms/fileoutput.h>
 
 using namespace std;
 
@@ -60,7 +59,7 @@ void TempoEstimator::createInnerNetwork() {
   _logSpectrum      = factory.create("UnaryOperator");
   _normSpectrum     = factory.create("UnaryOperator");
   _flux             = factory.create("Flux");
-  _lowPass          = factory.create("LowPass");
+  _lowPass          = factory.create("IIR");
   _frameCutterOSS   = factory.create("FrameCutter");
   _autoCorrelation  = factory.create("AutoCorrelation");
   _enhanceHarmonics = factory.create("EnhanceHarmonics");
@@ -87,36 +86,6 @@ void TempoEstimator::createInnerNetwork() {
   _peakDetection->output("amplitudes")        >>  NOWHERE;
   _frameCutterOSS->output("frame")            >>  _evaluatePulseTrains->input("oss");
   _evaluatePulseTrains->output("lag")         >>  PC(_pool, "lags");
-
-  /*
-  Algorithm* outSignalFrames = new FileOutput<std::vector<Real> >();
-  outSignalFrames->configure("filename", "frames.txt", "mode", "text");
-  _windowing->output("frame") >> outSignalFrames->input("data");
-
-  Algorithm* outSpectrum = new FileOutput<std::vector<Real> >();
-  outSpectrum->configure("filename", "spectrum.txt", "mode", "text");
-  _logSpectrum->output("array") >> outSpectrum->input("data");
-
-  Algorithm* outFlux = new FileOutput<Real >();
-  outFlux->configure("filename", "flux.txt", "mode", "text");
-  _flux->output("flux") >> outFlux->input("data");
-
-  Algorithm* outLowpass = new FileOutput<Real >();
-  outLowpass->configure("filename", "lowpass.txt", "mode", "text");
-  _lowPass->output("signal") >> outLowpass->input("data");
-
-  Algorithm* outOSSFrames = new FileOutput<std::vector<Real> >();
-  outOSSFrames->configure("filename", "oss_frames.txt", "mode", "text");
-  _frameCutterOSS->output("frame") >> outOSSFrames->input("data");
-
-  Algorithm* outXcorr = new FileOutput<std::vector<Real> >();
-  outXcorr->configure("filename", "xcorr.txt", "mode", "text");
-  _autoCorrelation->output("autoCorrelation") >> outXcorr->input("data");
-
-  Algorithm* outEXcorr = new FileOutput<std::vector<Real> >();
-  outEXcorr->configure("filename", "excorr.txt", "mode", "text");
-  _enhanceHarmonics->output("array") >> outEXcorr->input("data");
-  */
 
   _network = new scheduler::Network(_frameCutter);
 }
@@ -169,9 +138,6 @@ void TempoEstimator::configure() {
   _logSpectrum->configure("type", "log");
   _flux->configure("halfRectify", true,
                    "norm", "L1");
-  // NOTE: Original implementation uses 14 order low-pass FIR filter
-  _lowPass->configure("cutoffFrequency", 7,
-                      "sampleRate", 0.5 * (_sampleRate / _hopSize));
   _frameCutterOSS->configure("frameSize", _frameSizeOSS,
                              "hopSize", _hopSizeOSS,
                              "startFromZero", true,
@@ -181,12 +147,38 @@ void TempoEstimator::configure() {
                               "generalized", true,
                               "frequencyDomainCompression", 0.5);
   _peakDetection->configure("maxPeaks", 10,
-                            "range", _frameSizeOSS,
+                            "range", _frameSizeOSS - 1,
                             "minPosition", (int) (_srOSS * 60.0 / _maxBPM),
                             "maxPosition",  (int) (_srOSS * 60.0 / _minBPM),
-                            "orderBy", "amplitude");
-  _configured = true;
+                            "orderBy", "amplitude", 
+                            "interpolate", true);
 
+  // Configure filter (FIR lowpass)
+  // Filter coefficients from: scipy.signal.firwin(15, 7 / (oss_sr/2.0))
+  std::vector<Real> b;
+  b.resize(15);
+  b[0] = 0.00933978;
+  b[1] = 0.01521148;
+  b[2] = 0.03163891;
+  b[3] = 0.05607187;
+  b[4] = 0.08390299;
+  b[5] = 0.10948195;
+  b[6] = 0.12742038;
+  b[7] = 0.13386527;
+  b[8] = 0.12742038;
+  b[9] = 0.10948195;
+  b[10] = 0.08390299;
+  b[11] = 0.05607187;
+  b[12] = 0.03163891;
+  b[13] = 0.01521148;
+  b[14] = 0.00933978;
+
+  std::vector<Real> a;
+  a.resize(15);
+  a[0] = 1.0;  // FIR filter, denominator a0=1 and ai=0 (no feedback terms)
+  _lowPass->configure("numerator", b, "denominator", a);
+
+  _configured = true;
 }
 
 Real TempoEstimator::energyInRange(const std::vector<Real>& array,
