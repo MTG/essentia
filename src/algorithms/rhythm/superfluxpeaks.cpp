@@ -55,8 +55,7 @@ void SuperFluxPeaks::configure() {
   _threshold = parameter("threshold").toReal();
   _ratioThreshold = parameter("ratioThreshold").toReal();
   
-  peakTime = 0;
-  startPeakTime = 0;
+  _startPeakTime = 0;
   nDetec=0;
 }
 
@@ -91,7 +90,7 @@ void SuperFluxPeaks::compute() {
       bool isOverratioThreshold = _ratioThreshold > 0 && avg[i] > 0 && signal[i]/avg[i] > _ratioThreshold;
     
       if(isOverLinearThreshold || isOverratioThreshold) {
-        peakTime = startPeakTime + i*1.0/frameRate;
+        Real peakTime = _startPeakTime + i*1.0/frameRate;
         if((localnDetec > 0 && peakTime-peaks[localnDetec-1] > _combine) || localnDetec == 0) {
           peaks[localnDetec] = peakTime;
           nDetec++;
@@ -100,7 +99,7 @@ void SuperFluxPeaks::compute() {
       }
     } 
   }
-  startPeakTime += size*1.0/frameRate;
+  _startPeakTime += size*1.0/frameRate;
 
   peaks.resize(localnDetec);
 }
@@ -154,6 +153,7 @@ void SuperFluxPeaks::finalProduce() {
 void SuperFluxPeaks::reset(){
   current_t = 0;
   onsetTimes.clear();
+  _algo->reset();
 }
 
 } // namespace streaming

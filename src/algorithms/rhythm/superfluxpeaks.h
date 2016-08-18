@@ -41,8 +41,7 @@ class SuperFluxPeaks : public Algorithm {
   Real _threshold;
   Real _ratioThreshold;
     
-  Real peakTime;
-  Real startPeakTime;
+  Real _startPeakTime;
   int nDetec;
     
   int hopSize;
@@ -56,7 +55,6 @@ public:
     
     _movAvg = AlgorithmFactory::create("MovingAverage");
     _maxf = AlgorithmFactory::create("MaxFilter");
-    peakTime = 0;  
   }
     
   ~SuperFluxPeaks() {
@@ -77,7 +75,7 @@ public:
     Algorithm::reset();
     _maxf->reset();
     _movAvg->reset();
-    peakTime = 0;
+    _startPeakTime = 0;
   };
   
   void configure();
