@@ -27,6 +27,8 @@ import essentia.streaming as es
 import essentia.standard as std
 
 
+import numpy as np
+
 def cutFrames(params, input = range(100)):
 
     if not 'validFrameThresholdRatio' in params:
@@ -125,6 +127,8 @@ def analHarmonicModelStreaming(params, signal):
     
     return mags, freqsClean, phases
 
+
+
 def analsynthHarmonicModelStreaming(params, signal):
   
     out = array([0.])
@@ -142,7 +146,7 @@ def analsynthHarmonicModelStreaming(params, signal):
     smanal = es.HarmonicModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'])
     smsyn = es.SineModelSynth(sampleRate = params['sampleRate'], fftSize = params['frameSize'], hopSize = params['hopSize'])
     ifft = es.IFFT(size = params['frameSize']);
-    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
+    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'], gain = 1./params['frameSize']);
 
     
     # add half window of zeros to input signal to reach same ooutput length
@@ -178,10 +182,11 @@ def analsynthHarmonicModelStreaming(params, signal):
 
     # remove short tracks
     freqs = pool['frequencies']
+    
     minFrames = int( params['minSineDur'] * params['sampleRate'] / params['hopSize']);
     freqsClean = cleaningSineTracks(freqs, minFrames)
     pool['frequencies'].data = freqsClean
-
+    
     # remove first half window frames
     outaudio = pool['audio']
     outaudio = outaudio [2*params['hopSize']:]
@@ -248,9 +253,8 @@ class TestHarmonicModel(TestCase):
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
-              
-
+        halfwin = (self.params['frameSize']/2)              
+               
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
 
