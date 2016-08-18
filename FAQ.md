@@ -205,9 +205,10 @@ A number of assert methods are available:
 - ```assertComputeFails``` (test if algorithm's compute method fails)
 - ```assertRaises``` (test if exception is raised)
 - ```assertValidNumber``` (test if a number is not NaN nor Inf)
-- ```assertAlmostEqualFixedPrecision```, ```assertAlmostEqualVectorFixedPrecision``` (test if observed and expected values are approximately equal by computing the difference, rounding to the given number on decimal places, and comparing to zero)
-- ```assertAlmostEqual```, ```assertAlmostEqualVector```, ```assertAlmostEqualMatrix``` (test if observed and expected values are approximately equal by computing the ratio of the difference to the expected value and comparing to the given precision value)
 - ```assertEqual```, ```assertEqualVector```, ```assertEqualMatrix``` (test if observed and expected values are equal)
+- ```assertAlmostEqualFixedPrecision```, ```assertAlmostEqualVectorFixedPrecision``` (test if observed and expected values are approximately equal by computing the difference, rounding to the given number on decimal places, and comparing to zero)
+- ```assertAlmostEqual```, ```assertAlmostEqualVector```, ```assertAlmostEqualMatrix``` (test if observed and expected values are approximately equal according to the given allowed relative error.
+- ```assertAlmostEqualAbs```, ```assertAlmostEqualVectorAbs``` (test if the difference between observed and expected value is lower than then the given absolute threshold)
 
 
 How to know which other Algorithms an Algorithm uses?
