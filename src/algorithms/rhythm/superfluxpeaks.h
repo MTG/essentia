@@ -51,8 +51,8 @@ class SuperFluxPeaks : public Algorithm {
     
 public:
   SuperFluxPeaks() {
-    declareInput(_signal, "novelty", "the input novelty");
-    declareOutput(_peaks, "peaks", "peaks instants [s]");
+    declareInput(_signal, "novelty", "the input onset detection function");
+    declareOutput(_peaks, "peaks", "detected peaks' instants [s]");
     
     _movAvg = AlgorithmFactory::create("MovingAverage");
     _maxf = AlgorithmFactory::create("MaxFilter");
@@ -68,7 +68,7 @@ public:
     declareParameter("frameRate", "frameRate", "(0,inf)", 172.);
     declareParameter("threshold", "threshold for peak peaking with respect to the difference between novelty_signal and average_signal (for onsets in ambient noise)", "[0,inf)", .05);
     declareParameter("ratioThreshold", "ratio threshold for peak picking with respect to novelty_signal/novelty_average rate, use 0 to disable it (for low-energy onsets)", "[0,inf)", 16.);
-    declareParameter("combine", "ms for onset combination", "(0,inf)", 30.);
+    declareParameter("combine", "time threshold for double onsets detections (ms)", "(0,inf)", 30.);
     declareParameter("pre_avg", "look back duration for moving average filter [ms]", "(0,inf)", 100.);
     declareParameter("pre_max", "look back duration for moving maximum filter [ms]", "(0,inf)", 30.);
   }
@@ -143,6 +143,7 @@ class SuperFluxPeaks : public AccumulatorAlgorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;  
 };
 

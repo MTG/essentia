@@ -25,7 +25,7 @@ namespace standard {
         
 const char* SuperFluxNovelty::name = "SuperFluxNovelty";
 const char* SuperFluxNovelty::category = "Rhythm";
-const char* SuperFluxNovelty::description = DOC("Novelty curve for Superflux algorithm (see SuperFluxExtractor for more details).");
+const char* SuperFluxNovelty::description = DOC("Onset detection function (novelty curve) for Superflux algorithm (see SuperFluxExtractor for more details).");
         
 void SuperFluxNovelty::configure() {
   _binWidth = parameter("binWidth").toInt();

@@ -30,7 +30,7 @@ class SuperFluxNovelty : public Algorithm {
 
  private:
   Input<std::vector< std::vector<Real> >  > _bands;
-  Output<Real > _diffs;
+  Output<Real> _diffs;
 
  	int _binWidth;
   int _frameWidth;
@@ -40,7 +40,7 @@ class SuperFluxNovelty : public Algorithm {
  public:
   SuperFluxNovelty() {
     declareInput(_bands, "bands", "the input bands spectrogram");
-    declareOutput(_diffs, "differences", "SuperFluxNovelty input");
+    declareOutput(_diffs, "differences", "SuperFlux novelty curve");
 	 _maxFilter = AlgorithmFactory::create("MaxFilter"); 
   }
 
@@ -49,8 +49,8 @@ class SuperFluxNovelty : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("binWidth", "width of the SuperFluxNoveltyFilter (number of frequency bins)", "[3,inf)", 3);
-    declareParameter("frameWidth", "differenciate with the N-th previous frame", "(0,inf)", 2);
+    declareParameter("binWidth", "filter width (number of frequency bins)", "[3,inf)", 3);
+    declareParameter("frameWidth", "differentiation offset (compute the difference with the N-th previous frame)", "(0,inf)", 2);
   }
 
   void reset();
@@ -82,7 +82,7 @@ class SuperFluxNovelty : public Algorithm {
  public:
   SuperFluxNovelty() {
     declareInput(_bands, "bands", "the input bands spectrogram");
-    declareOutput(_diffs,1,1, "differences", "SuperFluxNovelty input");
+    declareOutput(_diffs,1,1, "differences", "SuperFlux novelty curve");
     _algo = essentia::standard::AlgorithmFactory::create("SuperFluxNovelty");
   }
   
@@ -91,8 +91,8 @@ class SuperFluxNovelty : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("binWidth", "width of the SuperFluxNoveltyFilter (number of frequency bins)", "[3,inf)", 3);
-    declareParameter("frameWidth", "number of frame for differentiation", "(0,inf)", 2);
+    declareParameter("binWidth", "filter width (number of frequency bins)", "[3,inf)", 3);
+    declareParameter("frameWidth", "differentiation offset (compute the difference with the N-th previous frame)", "(0,inf)", 2);
   }
    
   void configure() {

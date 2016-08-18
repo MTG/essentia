@@ -98,8 +98,8 @@ class SuperFluxExtractor : public Algorithm {
   ~SuperFluxExtractor();
 
   void declareParameters() {
-    declareParameter("frameSize", "the frame size for computing low level features", "(0,inf)", 2048);
-    declareParameter("hopSize", "the hop size for computing low level features", "(0,inf)", 256);
+    declareParameter("frameSize", "the frame size for computing low-level features", "(0,inf)", 2048);
+    declareParameter("hopSize", "the hop size for computing low-level features", "(0,inf)", 256);
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.0);
     declareParameter("threshold", "threshold for peak peaking with respect to the difference between novelty_signal and average_signal (for onsets in ambient noise)", "[0,inf)", .05);
     declareParameter("ratioThreshold", "ratio threshold for peak picking with respect to novelty_signal/novelty_average rate, use 0 to disable it (for low-energy onsets)", "[0,inf)", 16.);

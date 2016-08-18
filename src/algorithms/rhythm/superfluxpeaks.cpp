@@ -29,7 +29,7 @@ namespace standard {
     
 const char* SuperFluxPeaks::name = "SuperFluxPeaks";
 const char* SuperFluxPeaks::category = "Rhythm";
-const char* SuperFluxPeaks::description = DOC("Detection of novelty peaks for Superflux algorithm (see SuperFluxExtractor for more details)");
+const char* SuperFluxPeaks::description = DOC("This algorithm detects peaks of an onset detection function computed by SuperFluxNovelty algorithm. See SuperFluxExtractor for more details.");
 
 
 void SuperFluxPeaks::configure() {
@@ -116,6 +116,7 @@ namespace essentia {
 namespace streaming {
 
 const char* SuperFluxPeaks::name = standard::SuperFluxPeaks::name;
+const char* SuperFluxPeaks::category = standard::SuperFluxPeaks::category;
 const char* SuperFluxPeaks::description = standard::SuperFluxPeaks::description;
 
 void SuperFluxPeaks::consume() {
