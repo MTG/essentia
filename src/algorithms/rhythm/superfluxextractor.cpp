@@ -145,7 +145,13 @@ void SuperFluxExtractor::createInnerNetwork() {
   _vectorInput->setVector(&signal);
   _vectorOut->setVector(&ll);
   _network->run(); 
-  onsets = ll[0]; // FIXME will this ever fail?
+
+  if (ll.size()) {
+    onsets = ll[0]; // FIXME will this ever fail?
+  } 
+  else {
+    onsets.clear();
+  }
 }
 
 } // namespace standard
