@@ -184,6 +184,32 @@ python test/src/unittest/all_tests.py audioloader_streaming
 ```
 
 
+Writing tests
+-------------
+It is manadatory to write python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittest).
+
+All unit tests for algorithms are located in ```test/src/unittest``` folder. They are organized by sub-folders similarly to the code for the algorithms. 
+
+Typically tests include:
+
+- Tests for invalid parameters
+- Tests for incorrect inputs
+- Tests for empty, silence or constant-value inputs
+- Tests for simulated data inputs for which the output is known
+- Regression tests for real data inputs for which the reference output was previously computed.
+    - These tests are able to detect if there was a change in output values according to the expected reference. The reference is not necessarily a 100% correct ground truth. In many case the reference is built using an earlier version of the same algorithm being tested or is obtained from other software.
+
+A number of assert methods are available: 
+
+- ```assertConfigureFails``` (test if algorithm configuration fails)
+- ```assertComputeFails``` (test if algorithm's compute method fails)
+- ```assertRaises``` (test if exception is raised)
+- ```assertValidNumber``` (test if a number is not NaN nor Inf)
+- ```assertAlmostEqualFixedPrecision```, ```assertAlmostEqualVectorFixedPrecision``` (test if observed and expected values are approximately equal by computing the difference, rounding to the given number on decimal places, and comparing to zero)
+- ```assertAlmostEqual```, ```assertAlmostEqualVector```, ```assertAlmostEqualMatrix``` (test if observed and expected values are approximately equal by computing the ratio of the difference to the expected value and comparing to the given precision value)
+- ```assertEqual```, ```assertEqualVector```, ```assertEqualMatrix``` (test if observed and expected values are equal)
+
+
 How to know which other Algorithms an Algorithm uses?
 -----------------------------------------------------
 
