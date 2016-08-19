@@ -36,6 +36,7 @@ class TriangularBands : public Algorithm {
   
   std::vector<Real> _bandFrequencies;
   std::vector<Real> _freqBands;
+  int _nBands;
   Real _sampleRate;
   bool _isLog;
 

@@ -32,6 +32,8 @@ const char* TriangularBands::description = DOC("This algorithm computes the ener
 
 void TriangularBands::configure() {
   _bandFrequencies = parameter("frequencyBands").toVectorReal();
+  _nBands = int(_bandFrequencies.size() - 2);
+
   _sampleRate = parameter("sampleRate").toReal();
   if ( _bandFrequencies.size() < 2 ) {
     throw EssentiaException("TriangularBands: the 'frequencyBands' parameter contains only one element (at least two elements are required)");
@@ -58,12 +60,11 @@ void TriangularBands::compute() {
   }
 
   Real frequencyScale = (_sampleRate / 2.0) / (spectrum.size() - 1);
-  int nBands = int(_bandFrequencies.size() - 2);
 
-  bands.resize(nBands);
+  bands.resize(_nBands);
   fill(bands.begin(), bands.end(), (Real) 0.0);
 
-  for (int i=0; i<nBands; i++) {
+  for (int i=0; i<_nBands; i++) {
 
     int startBin = int(_bandFrequencies[i] / frequencyScale + 0.5);
     int midBin = int(_bandFrequencies[i + 1] / frequencyScale + 0.5);
@@ -76,19 +77,13 @@ void TriangularBands::compute() {
     if (endBin > int(spectrum.size())) endBin = spectrum.size();
 	
     // Compute normalization factor
-    Real norm = 0;
-    if (midBin != startBin && midBin != endBin && endBin != startBin) {
-      for (int j=startBin; j<=endBin; j++) {
-        norm +=  j < midBin ? (j-startBin) / (midBin - startBin) 
-                            : 1 - (j-midBin) / (endBin-midBin);
-      }
-    }
+    Real norm = Real(endBin-startBin)/2;
 
     for (int j=startBin; j <= endBin; j++) {
       Real TriangF;
       if (midBin != startBin && midBin != endBin && endBin != startBin) {
-        TriangF = j < midBin ? (j-startBin) / (midBin - startBin) 
-                             : 1 - (j-midBin) / (endBin-midBin);
+        TriangF = j < midBin ? Real(j-startBin) / (midBin - startBin) 
+                             : 1 - Real(j-midBin) / (endBin-midBin);
         TriangF /= norm;
 	    }
       else if (startBin == endBin) {
@@ -100,7 +95,7 @@ void TriangularBands::compute() {
 		    TriangF = 0.5;
 	    }
 	
-      bands[i] += TriangF * spectrum[j] * spectrum[j]; 
+      bands[i] += TriangF * spectrum[j] * spectrum[j];
     }
     if (_isLog) bands[i] = log2(1 + bands[i]);
   }
