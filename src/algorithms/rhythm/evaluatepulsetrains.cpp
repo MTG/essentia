@@ -40,25 +40,25 @@ void EvaluatePulseTrains::calculatePulseTrains(const std::vector<Real>& ossWindo
     int period = lag;
     bpMagnitudes.resize(lag);
     int samples = ossWindow.size();
-    for (int phase=(samples - 1); phase > (samples - 1 - period); --phase){
+    for (int phase=0; phase < period; ++phase){
     	Real currentMagScore;
     	currentMagScore = 0.0;
     	for (int b=0; b < 4; ++b){
     		int ind;
-    		ind = (int)(phase - b * period);
+    		ind = (int)(phase + b * period);
     		if (ind >= 0){
     			currentMagScore += ossWindow[ind];
     		}
-    		ind = (int)(phase - b * period * 2);
+    		ind = (int)(phase + b * period * 2);
     		if (ind >= 0){
     			currentMagScore += 0.5 * ossWindow[ind];
     		}
-    		ind = (int)(phase - b * period * 3 / 2);
+    		ind = (int)(phase + b * period * 3 / 2);
     		if (ind >= 0){
     			currentMagScore += 0.5 * ossWindow[ind];
     		}
     	}
-    	bpMagnitudes[samples - 1 - phase] = currentMagScore;
+    	bpMagnitudes[phase] = currentMagScore;
     }
     magScore = *std::max_element(bpMagnitudes.begin(), bpMagnitudes.end());
     varScore = variance(bpMagnitudes, mean(bpMagnitudes));
