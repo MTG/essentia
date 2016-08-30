@@ -125,7 +125,7 @@ void TempoEstimator::configure() {
   _frameCutter->configure("frameSize", _frameSize,
                           "hopSize", _hopSize,
                           "startFromZero", true,
-                          "validFrameThresholdRatio", 0,
+                          "validFrameThresholdRatio", 1,
                           "silentFrames", "keep");
   _windowing->configure("size", _frameSize,
                         "type", "hamming",
@@ -366,7 +366,6 @@ void TempoEstimator::createInnerNetwork() {
 void TempoEstimator::compute() {
   const vector<Real>& signal = _signal.get();
   Real& bpm = _bpm.get();
-
   _vectorInput->setVector(&signal);
   _network->run();
   bpm = _pool.value<Real >("bpm");
