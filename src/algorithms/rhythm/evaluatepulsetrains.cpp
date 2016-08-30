@@ -27,7 +27,16 @@ namespace essentia {
 namespace standard {
 
 const char* EvaluatePulseTrains::name = "EvaluatePulseTrains";
-const char* EvaluatePulseTrains::description = DOC("TODO add description\n");
+const char* EvaluatePulseTrains::description = DOC("This algorithm implements the 'Evaluate Pulse Trains' step as described in [1]."
+"Given an input onset strength signal (OSS) and a number of candidate tempo lag positions, the OSS is correlated with ideal expected pulse "
+"trains (for each candidate tempo lag) shifted in time by different amounts. The candidate tempo lag which generates the pulse train "
+"that better correlates with the OSS is returned as the preferred tempo candidate.\n"
+"For more details check the referenced paper."
+"\n"
+"\n"
+"References:\n"
+"  [1] Percival, G., & Tzanetakis, G. (2014). Streamlined tempo estimation based on autocorrelation and cross-correlation with pulses.\n"
+"  IEEE/ACM Transactions on Audio, Speech, and Language Processing, 22(12), 1765–1776.\n\n");
 
 void EvaluatePulseTrains::configure() {
 }

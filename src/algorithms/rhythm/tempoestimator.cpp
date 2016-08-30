@@ -29,8 +29,7 @@ namespace essentia {
 namespace streaming {
 
 const char* TempoEstimator::name = "TempoEstimator";
-const char* TempoEstimator::description = DOC("This algorithm estimates the tempo in bpm from an input signal as described in [1]."
-"Status: work in progress.\n"
+const char* TempoEstimator::description = DOC("This algorithm estimates the tempo in beats per minute (BPM) from an input signal as described in [1]."
 "\n"
 "\n"
 "References:\n"
