@@ -117,7 +117,9 @@ void TempoEstimator::configure() {
   _maxBPM       = parameter("maxBPM").toInt();
   _srOSS        = (Real)_sampleRate / _hopSize;
 
-  // TODO: Check that maxBPM > minBPM
+  if (_minBPM >= _maxBPM) {
+    throw EssentiaException("TempoEstimator: The minimum BPM should not be equal or larger than the maximum BPM");
+  }
 
   createInnerNetwork();
 
@@ -227,9 +229,6 @@ AlgorithmStatus TempoEstimator::process() {
     Real term1 = 1. / (gaussianStd * sqrt(2*M_PI));
     Real term2 = -2 * pow(gaussianStd, 2);
     gaussian[i] = term1 * exp(pow((i-gaussianMean), 2) / term2);
-    //if (gaussian[i] < 1e-12) { // TODO: check if we need this
-    //  gaussian[i] = 0; // null very low numbers to avoid numerical errors
-    //}
   }
 
   // Accumulate (sum gaussians for every estimated lag)
