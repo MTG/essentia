@@ -384,3 +384,11 @@ margin-right: auto;
 //box-shadow: 0px 0px 8px rgba(0,0,0,0.3);
 //}
 
+#algorithms-reference section h3 {
+    
+}
+
+.algo-info h4, .algo-info header {
+    display: inline-block;
+    margin-right: 10px;
+}
