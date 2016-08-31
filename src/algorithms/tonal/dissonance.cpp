@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* Dissonance::name = "Dissonance";
 const char* Dissonance::category = "Tonal";
-const char* Dissonance::description = DOC("This algorithm calculates the sensory dissonance (to distinguish from musical or theoretical dissonance) of an audio signal given its spectral peaks. Sensory dissonance measures perceptual roughness of the sound and is based on the roughness of its spectral peaks. Given the spectral peaks, the algorithm estimates total dissonance by summing up the normalized dissonance values for each pair of peaks. These values are computed using dissonance curves, which define dissonace between two spectral peaks according to their frequency and amplitude relations. The dissonance curves are based on perceptual experiments conducted in [1]."
+const char* Dissonance::description = DOC("This algorithm computes the sensory dissonance of an audio signal given its spectral peaks. Sensory dissonance (to be distinguished from musical or theoretical dissonance) measures perceptual roughness of the sound and is based on the roughness of its spectral peaks. Given the spectral peaks, the algorithm estimates total dissonance by summing up the normalized dissonance values for each pair of peaks. These values are computed using dissonance curves, which define dissonace between two spectral peaks according to their frequency and amplitude relations. The dissonance curves are based on perceptual experiments conducted in [1]."
 "\n"
 "Exceptions are thrown when the size of the input vectors are not equal or if input frequencies are not ordered ascendantly"
 "\n"

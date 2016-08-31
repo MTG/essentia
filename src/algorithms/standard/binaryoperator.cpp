@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* BinaryOperator::name = "BinaryOperator";
 const char* BinaryOperator::category = "Standard";
-const char* BinaryOperator::description = DOC("Given two vectors of Reals, this algorithm will perform basic arithmetical operations on it, element by element.\n"
+const char* BinaryOperator::description = DOC("This algorithm performs basic arithmetical operations element by element given two arrays.\n"
 "Note:\n"
 "  - using this algorithm in streaming mode can cause diamond shape graphs which have not been tested with the current scheduler. There is NO GUARANTEE of its correct work for diamond shape graphs.\n"
 "  - for y<0, x/y is invalid");

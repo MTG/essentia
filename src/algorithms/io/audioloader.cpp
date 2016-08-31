@@ -28,7 +28,7 @@ namespace streaming {
 
 const char* AudioLoader::name = "AudioLoader";
 const char* AudioLoader::category = "Input/output";
-const char* AudioLoader::description = DOC("This algorithm loads the single audio stream contained in the given audio or video file as well as the samplerate and the number of channels. Supported formats are all those supported by the ffmpeg library including wav, aiff, flac, ogg and mp3.\n"
+const char* AudioLoader::description = DOC("This algorithm loads the single audio stream contained in a given audio or video file. Supported formats are all those supported by the ffmpeg library including wav, aiff, flac, ogg and mp3.\n"
 "\n"
 "This algorithm will throw an exception if it was not properly configured which is normally due to not specifying a valid filename. Invalid names comprise those with extensions different than the supported  formats and non existent files. If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8\n\n"
 "Note: ogg files are decoded in reverse phase, due to be using ffmpeg library.\n"

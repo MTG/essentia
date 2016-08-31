@@ -27,7 +27,7 @@ namespace standard {
 
 const char* ChordsDetection::name = "ChordsDetection";
 const char* ChordsDetection::category = "Tonal";
-const char* ChordsDetection::description = DOC("Using pitch profile classes, this algorithm calculates the best matching major or minor triad and outputs the result as a string (e.g. A#, Bm, G#m, C). This algorithm uses the Sharp versions of each Flatted note (i.e. Bb -> A#).\n"
+const char* ChordsDetection::description = DOC("This algorithm estimates chords using pitch profile classes. It finds the best matching major or minor triad and outputs the result as a string (e.g. A#, Bm, G#m, C). This algorithm uses the Sharp versions of each Flatted note (i.e. Bb -> A#).\n"
 "\n"
 "Note:\n"
 "  - This algorithm assumes that input pcps have been computed with framesize = 2*hopsize\n"

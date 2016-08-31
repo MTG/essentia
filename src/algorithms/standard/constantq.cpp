@@ -28,7 +28,7 @@ using namespace standard;
 
 const char* ConstantQ::name = "ConstantQ";
 const char* ConstantQ::category = "Standard";
-const char* ConstantQ::description = DOC("This algorithm implements Constant Q Transform employing FFT for fast calculation [1].\n"
+const char* ConstantQ::description = DOC("This algorithm implements Constant Q Transform using the FFT for fast calculation.\n"
 "\n"
 "References:\n"
 "  [1] Constant Q transform - Wikipedia, the free encyclopedia,\n"

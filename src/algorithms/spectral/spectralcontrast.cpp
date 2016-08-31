@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* SpectralContrast::name = "SpectralContrast";
 const char* SpectralContrast::category = "Spectral";
-const char* SpectralContrast::description = DOC("The Spectral Contrast feature is based on the Octave Based Spectral Contrast feature as described in [1]. The version implemented here is a modified version to improve discriminative power and robustness. The modifications are described in [2].\n"
+const char* SpectralContrast::description = DOC("This algorithm computes the Spectral Contrast feature of a spectrum. It is based on the Octave Based Spectral Contrast feature as described in [1]. The version implemented here is a modified version to improve discriminative power and robustness. The modifications are described in [2].\n"
 "\n"
 "References:\n"
 "  [1] D.-N. Jiang, L. Lu, H.-J. Zhang, J.-H. Tao, and L.-H. Cai, \"Music type\n"

@@ -30,7 +30,7 @@ namespace streaming {
 
 const char* LoudnessEBUR128::name = "LoudnessEBUR128";
 const char* LoudnessEBUR128::category = "Loudness/dynamics";
-const char* LoudnessEBUR128::description = DOC("This algorithm computes loudness descriptors in accordance with EBU R128 recommendation.\n"
+const char* LoudnessEBUR128::description = DOC("This algorithm computes the EBU R128 loudness descriptors of an audio signal.\n"
 "- The input stereo signal is preprocessed with a K-weighting filter [2] (see LoudnessEBUR128Filter algorithm), composed of two stages: a shelving filter and a high-pass filter (RLB-weighting curve).\n"
 "- Momentary loudness is computed by integrating the sum of powers over a sliding rectangular window of 400 ms. The measurement is not gated.\n"
 "- Short-term loudness is computed by integrating the sum of powers over a sliding rectangular window of 3 seconds. The measurement is not gated.\n"

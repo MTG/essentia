@@ -26,8 +26,7 @@ using namespace standard;
 
 const char* MFCC::name = "MFCC";
 const char* MFCC::category = "Spectral";
-const char* MFCC::description = DOC("This algorithm computes the mel-frequency cepstrum coefficients.\n"
-"As there is no standard implementation, the MFCC-FB40 is used by default:\n"
+const char* MFCC::description = DOC("This algorithm computes the mel-frequency cepstrum coefficients of a spectrum. As there is no standard implementation, the MFCC-FB40 is used by default:\n"
 "  - filterbank of 40 bands from 0 to 11000Hz\n"
 "  - take the log value of the spectrum energy in each mel band\n"
 "  - DCT of the 40 bands down to 13 mel coefficients\n"

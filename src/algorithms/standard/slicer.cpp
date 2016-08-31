@@ -27,7 +27,7 @@ namespace streaming {
 
 const char* Slicer::name = "Slicer";
 const char* Slicer::category = "Standard";
-const char* Slicer::description = DOC("This algorithm returns a vector of slices, which start and end times are given as parameters.\n"
+const char* Slicer::description = DOC("This algorithm splits an audio signal into segments given their start and end times.\n"
 "\n"
 "The parameters, \"startTimes\" and \"endTimes\" must be coherent. If these parameters differ in size, an exception is thrown. If a particular startTime is larger than its corresponding endTime, an exception is thrown.");
 

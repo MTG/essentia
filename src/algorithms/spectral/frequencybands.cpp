@@ -25,7 +25,7 @@ using namespace standard;
 
 const char* FrequencyBands::name = "FrequencyBands";
 const char* FrequencyBands::category = "Spectral";
-const char* FrequencyBands::description = DOC("This algorithm computes the energy of an input spectrum for an arbitrary number of non overlapping frequency bands. For each band the power-spectrum (mag-squared) is summed.\n"
+const char* FrequencyBands::description = DOC("This algorithm computes energy in rectangular frequency bands of a spectrum. The bands are non-overlapping. For each band the power-spectrum (mag-squared) is summed.\n"
 "\n"
 "Parameter \"frequencyBands\" must contain at least 2 frequencies, they all must be positive and must be ordered ascentdantly, otherwise an exception will be thrown. FrequencyBands is only defined for spectra, which size is greater than 1.\n"
 "\n"

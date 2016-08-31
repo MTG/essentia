@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* FFTWComplex::name = "FFTC";
 const char* FFTWComplex::category = "Standard";
-const char* FFTWComplex::description = DOC("This algorithm computes the positive complex STFT (Short-term Fourier transform) of an array of Reals using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
+const char* FFTWComplex::description = DOC("This algorithm computes the positive complex short-term Fourier transform (STFT) of a complex array using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
 "At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
 "\n"
 "References:\n"

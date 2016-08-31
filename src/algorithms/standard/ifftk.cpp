@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* IFFTK::name = "IFFT";
 const char* IFFTK::category = "Standard";
-const char* IFFTK::description = DOC("This algorithm calculates the inverse STFT (Short-term Fourier transform) of an array of complex values using the FFT algorithm. The resulting frame has a size of (s-1)*2, where s is the size of the input fft frame. The inverse Fourier transform is not defined for frames which size is less than 2 samples. Otherwise an exception is thrown.\n"
+const char* IFFTK::description = DOC("This algorithm calculates the inverse short-term Fourier transform (STFT) of an array of complex values using the FFT algorithm. The resulting frame has a size of (s-1)*2, where s is the size of the input fft frame. The inverse Fourier transform is not defined for frames which size is less than 2 samples. Otherwise an exception is thrown.\n"
 "\n"
 "An exception is thrown if the input's size is not larger than 1.\n"
 "\n"

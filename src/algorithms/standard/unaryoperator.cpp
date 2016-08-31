@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* UnaryOperator::name = "UnaryOperator";
 const char* UnaryOperator::category = "Standard";
-const char* UnaryOperator::description = DOC("Given a vector of Reals, this algorithm will perform basic arithmetical operations on it, element by element.\n"
+const char* UnaryOperator::description = DOC("This algorithm performs basic arithmetical operations element by element given an array.\n"
 "Note:\n"
 "  - log and ln are equivalent to the natural logarithm\n"
 "  - for log, ln, log10 and lin2db, x is clipped to 1e-30 for x<1e-30\n"

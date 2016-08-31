@@ -28,7 +28,7 @@ using namespace standard;
 
 const char* SBic::name = "SBic";
 const char* SBic::category = "Segmentation";
-const char* SBic::description = DOC("This descriptor segments the audio file into homogeneous portions using the Bayesian Information Criterion. The algorithm searches segments for which the feature vectors have the same probability distribution based on the implementation in [1]. The input matrix is assumed to have features along dim1 (horizontal) while frames along dim2 (vertical).\n"
+const char* SBic::description = DOC("This algorithm segments audio using the Bayesian Information Criterion given a matrix of frame features. The algorithm searches homogeneous segments for which the feature vectors have the same probability distribution based on the implementation in [1]. The input matrix is assumed to have features along dim1 (horizontal) while frames along dim2 (vertical).\n"
 "\n"
 "The segmentation is done in three phases: coarse segmentation, fine segmentation and segment validation. The first phase uses parameters 'size1' and 'inc1' to perform BIC segmentation. The second phase uses parameters 'size2' and 'inc2' to perform a local search for segmentation around the segmentation done by the first phase. Finally, the validation phase verifies that BIC differentials at segmentation points are positive as well as filters out any segments that are smaller than 'minLength'.\n"
 "\n"

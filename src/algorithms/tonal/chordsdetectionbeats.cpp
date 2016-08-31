@@ -27,7 +27,7 @@ namespace standard {
 
 const char* ChordsDetectionBeats::name = "ChordsDetectionBeats";
 const char* ChordsDetectionBeats::category = "Tonal";
-const char* ChordsDetectionBeats::description = DOC("This algorithm estimates chords using pitch profile classes similar to ChordsDetection algorithm given a list of beat positions. The chords are estimated on audio segments between each pair of consecutive beats.\n"
+const char* ChordsDetectionBeats::description = DOC("This algorithm estimates chords using pitch profile classes on segments between beats. It is similar to ChordsDetection algorithm, but the chords are estimated on audio segments between each pair of consecutive beats.\n"
 "\n"
 "Quality: experimental (algorithm needs evaluation)\n"
 "\n"

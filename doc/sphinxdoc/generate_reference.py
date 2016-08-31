@@ -309,6 +309,11 @@ essentia_algorithms.update(streaming_algorithms)
             category = streaming_algo['category']
             description = streaming_algo['description'].split('.')[0]
 
+        # Description for many algorithms starts with "This algorithm..." and we do not want to show that
+        description = description.replace('This algorithm ', '')
+        if len(description): 
+            description = description[0].capitalize() + description[1:]
+
         links = []
         if std_algo:
             links.append('<a class="reference internal" href="reference/std_' + algoname + '.html"><em>standard</em></a>')

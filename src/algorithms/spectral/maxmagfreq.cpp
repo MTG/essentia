@@ -25,7 +25,7 @@ using namespace standard;
 
 const char* MaxMagFreq::name = "MaxMagFreq";
 const char* MaxMagFreq::category = "Spectral";
-const char* MaxMagFreq::description = DOC("This algorithm computes the frequency with the largest magnitude.\n"
+const char* MaxMagFreq::description = DOC("This algorithm computes the frequency with the largest magnitude in a spectrum.\n"
 "Note that a spectrum must contain at least two elements otherwise an exception is thrown");
 
 void MaxMagFreq::compute() {

@@ -25,7 +25,7 @@ namespace standard {
 
 const char* Duration::name = "Duration";
 const char* Duration::category = "Duration/silence";
-const char* Duration::description = DOC("This algorithm returns the total length of a signal recording in seconds.");
+const char* Duration::description = DOC("This algorithm outputs the total duration of an audio signal.");
 
 void Duration::compute() {
   const vector<Real>& signal = _signal.get();

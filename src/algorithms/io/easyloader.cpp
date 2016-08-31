@@ -28,7 +28,7 @@ namespace streaming {
 
 const char* EasyLoader::name = "EasyLoader";
 const char* EasyLoader::category = "Input/output";
-const char* EasyLoader::description = DOC("Given an audio file, this algorithm outputs the raw audio data, downmixed to mono. The audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and is normalized by the given replayGain value.\n"
+const char* EasyLoader::description = DOC("This algorithm loads the raw audio data from an audio file, downmixes it to mono and normalizes using replayGain. The audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and is normalized by the given replayGain value.\n"
 "\n"
 "This algorithm uses MonoLoader and therefore inherits all of its input requirements and exceptions.\n"
 "\n"

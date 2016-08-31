@@ -33,7 +33,7 @@ using streaming::VectorInput;
 
 const char* Extractor::name = "Extractor";
 const char* Extractor::category = "Extractors";
-const char* Extractor::description = DOC("This algorithm extracts all low level, mid level and high level features from an audio signal and stores them in a pool.");
+const char* Extractor::description = DOC("This algorithm extracts all low-level, mid-level and high-level features from an audio signal and stores them in a pool.");
 
 void Extractor::configure() {
   _lowLevelFrameSize = parameter("lowLevelFrameSize").toInt();
