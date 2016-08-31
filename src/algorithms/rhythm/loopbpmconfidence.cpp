@@ -98,7 +98,7 @@ void LoopBpmConfidence::compute() {
       int minDistance = duration_samples; // Set maximum duration
       for (int j=1; j<128; j++) { // Iterate over possible beat lengths (1-127)
         int nBeatDuration = (int)round(beatDuration * j);
-        int distance = abs(duration_samples - nBeatDuration);
+        int distance = abs(duration - nBeatDuration);
         if (distance < minDistance) {
           minDistance = distance;
         }
@@ -108,8 +108,8 @@ void LoopBpmConfidence::compute() {
       } else {
         confidences[i] = 1.0 - (Real)minDistance / lambdaThreshold;
       }
-    }
-    confidence = *std::max_element(confidences.begin(), confidences.end()); 
+    }  
+    confidence = *std::max_element(confidences.begin(), confidences.end());
   }
 }
 
