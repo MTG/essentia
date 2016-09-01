@@ -25,7 +25,7 @@ namespace standard {
 
 const char* Danceability::name = "Danceability";
 const char* Danceability::category = "Rhythm";
-const char* Danceability::description = DOC("Calculates the danceability vector for a given signal. The algorithm is derived from Detrended Fluctuation Analysis (DFA) described in [1]. The parameters minTau and maxTau are used to define the range of time over which DFA will be performed. The output of this algorithm is the danceability of the audio signal. These values usually range from 0 to 3 (higher values meaning more danceable).\n\n"
+const char* Danceability::description = DOC("Calculates the danceability vector for a given audio signal. The algorithm is derived from Detrended Fluctuation Analysis (DFA) described in [1]. The parameters minTau and maxTau are used to define the range of time over which DFA will be performed. The output of this algorithm is the danceability of the audio signal. These values usually range from 0 to 3 (higher values meaning more danceable).\n\n"
 "Exception is thrown when minTau is greater than maxTau.\n\n"
 "References:\n"
 "  [1] Streich, S. and Herrera, P., Detrended Fluctuation Analysis of Music\n"

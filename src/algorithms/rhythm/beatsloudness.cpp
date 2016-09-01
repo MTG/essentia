@@ -28,7 +28,7 @@ namespace streaming {
 
 const char* BeatsLoudness::name = "BeatsLoudness";
 const char* BeatsLoudness::category = "Rhythm";
-const char* BeatsLoudness::description = DOC("Calculates the loudness computed only on the beats, both on the whole frequency range and on each specified frequency band. See the Loudness algorithm for a description of loudness and SingleBeatLoudness for a more detailed explanation.\n"
+const char* BeatsLoudness::description = DOC("This algorithm computes the loudness of beats in an audio signal given their positions. The loudness is computes both on the whole frequency range and for each the specified frequency bands. See the Loudness algorithm for a description of loudness and SingleBeatLoudness for a more detailed explanation.\n"
 "\n"
 "Note that the algorithm will output empty results in the case if no beats are specified in the \"beats\" parameter.");
 

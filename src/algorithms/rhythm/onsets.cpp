@@ -27,7 +27,7 @@ using namespace standard;
 
 const char* Onsets::name = "Onsets";
 const char* Onsets::category = "Rhythm";
-const char* Onsets::description = DOC("This algorithm computes onset times in seconds from an array of detection functions extracted from an audio file.\n"
+const char* Onsets::description = DOC("This algorithm computes onset positions given various onset detection functions.\n"
 "\n"
 "The main operations are:\n"
 "  - normalizing detection functions,\n"
