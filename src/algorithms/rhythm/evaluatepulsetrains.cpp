@@ -27,6 +27,7 @@ namespace essentia {
 namespace standard {
 
 const char* EvaluatePulseTrains::name = "EvaluatePulseTrains";
+const char* EvaluatePulseTrains::category = "Rhythm";
 const char* EvaluatePulseTrains::description = DOC("This algorithm implements the 'Evaluate Pulse Trains' step as described in [1]."
 "Given an input onset strength signal (OSS) and a number of candidate tempo lag positions, the OSS is correlated with ideal expected pulse "
 "trains (for each candidate tempo lag) shifted in time by different amounts. The candidate tempo lag which generates the pulse train "

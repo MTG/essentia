@@ -46,6 +46,7 @@ class EnhanceHarmonics : public Algorithm {
     void reset() {}
 
     static const char* name;
+    static const char* category;
     static const char* description;
 };
 

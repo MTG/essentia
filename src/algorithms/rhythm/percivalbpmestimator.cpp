@@ -29,6 +29,7 @@ namespace essentia {
 namespace streaming {
 
 const char* PercivalBpmEstimator::name = "PercivalBpmEstimator";
+const char* PercivalBpmEstimator::category = "Rhythm";
 const char* PercivalBpmEstimator::description = DOC("This algorithm estimates the tempo in beats per minute (BPM) from an input signal as described in [1]."
 "\n"
 "\n"
@@ -322,8 +323,8 @@ namespace essentia {
 namespace standard {
 
 const char* PercivalBpmEstimator::name = "PercivalBpmEstimator";
-const char* PercivalBpmEstimator::description = DOC("This algorithm estimates the tempo in bpm from an input signal as described in [1]."
-"Status: work in progress.\n"
+const char* PercivalBpmEstimator::category = "Rhythm";
+const char* PercivalBpmEstimator::description = DOC("This algorithm estimates the tempo in beats per minute (BPM) from an input signal as described in [1]."
 "\n"
 "\n"
 "References:\n"

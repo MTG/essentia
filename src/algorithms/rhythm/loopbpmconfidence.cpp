@@ -27,7 +27,11 @@ namespace essentia {
 namespace standard {
 
 const char* LoopBpmConfidence::name = "LoopBpmConfidence";
-const char* LoopBpmConfidence::description = DOC("TODO description."
+const char* LoopBpmConfidence::category = "Rhythm";
+const char* LoopBpmConfidence::description = DOC("This algorithm takes an audio signal and a BPM estimate for that signal "
+  "and predicts the reliability of the BPM estimate in a value from 0 to 1. The audio signal is assumed to be a musical loop "
+  "with constant tempo. The confidence returned is based on comparing the duration of the signal with multiples of the BPM estimate "
+  "(see [1] for more details)."
 "\n"
 "\n"
 "References:\n"

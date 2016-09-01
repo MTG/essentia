@@ -26,6 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* LoopBpmEstimator::name = "LoopBpmEstimator";
+const char* LoopBpmEstimator::category = "Rhythm";
 const char* LoopBpmEstimator::description = DOC("This algorithm estimates the BPM of audio loops. It internally uses "
   "PercivalBpmEstimator algorithm to produce a BPM estimate and LoopBpmConfidence to asses the reliability of the estimate. "
   "If the provided estimate is below the given confidenceThreshold, the algorithm outputs a BPM 0.0, otherwise it outputs "
