@@ -17,32 +17,25 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_EVALUATE_PULSE_TRAINS_H
-#define ESSENTIA_EVALUATE_PULSE_TRAINS_H
+#ifndef ESSENTIA_PERCIVALENHANCEHARMONICS_H
+#define ESSENTIA_PERCIVALENHANCEHARMONICS_H
 
 #include "algorithm.h"
 
 namespace essentia {
 namespace standard {
-class EvaluatePulseTrains : public Algorithm {
+class PercivalEnhanceHarmonics : public Algorithm {
 
   protected:
-    Input<std::vector<Real> > _oss;
-    Input<std::vector<Real> > _peakPositions;
-    Output<Real> _lag;
-
-    void calculatePulseTrains(const std::vector<Real>& ossWindow,
-                              const int lag,
-                              Real& magScore,
-                              Real& varScore);
+    Input<std::vector<Real> > _input;
+    Output<std::vector<Real> > _output;
 
   public:
-    EvaluatePulseTrains() {
-    declareInput(_oss, "oss", "onset strength signal (or other novelty curve)");
-    declareInput(_peakPositions, "positions", "peak positions of BPM candidates");
-    declareOutput(_lag, "lag", "best tempo lag estimate");
+    PercivalEnhanceHarmonics() {
+    declareInput(_input, "array", "the input signal");
+    declareOutput(_output, "array", "the input signal with enhanced harmonics");
     }
-    ~EvaluatePulseTrains(){
+    ~PercivalEnhanceHarmonics(){
     }
 
     void declareParameters() {
@@ -65,23 +58,21 @@ class EvaluatePulseTrains : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class EvaluatePulseTrains : public StreamingAlgorithmWrapper {
+class PercivalEnhanceHarmonics : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<Real> > _oss;
-  Sink<std::vector<Real> > _peakPositions;
-  Source<Real> _lag;
+  Sink<std::vector<Real> > _input;
+  Source<std::vector<Real> > _output;
 
  public:
-  EvaluatePulseTrains() {
-    declareAlgorithm("EvaluatePulseTrains");
-    declareInput(_oss, TOKEN, "oss");
-    declareInput(_peakPositions, TOKEN, "positions");
-    declareOutput(_lag, TOKEN, "lag");
+  PercivalEnhanceHarmonics() {
+    declareAlgorithm("PercivalEnhanceHarmonics");
+    declareInput(_input, TOKEN, "array");
+    declareOutput(_output, TOKEN, "array");
   }
 };
 
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_EVALUATE_PULSE_TRAINS_H
+#endif // ESSENTIA_PERCIVALENHANCEHARMONICS_H

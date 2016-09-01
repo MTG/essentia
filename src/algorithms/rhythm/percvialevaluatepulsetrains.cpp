@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "evaluatepulsetrains.h"
+#include "percivalevaluatepulsetrains.h"
 #include "essentiamath.h"
 
 using namespace std;
@@ -26,9 +26,9 @@ using namespace essentia;
 namespace essentia {
 namespace standard {
 
-const char* EvaluatePulseTrains::name = "EvaluatePulseTrains";
-const char* EvaluatePulseTrains::category = "Rhythm";
-const char* EvaluatePulseTrains::description = DOC("This algorithm implements the 'Evaluate Pulse Trains' step as described in [1]."
+const char* PercivalEvaluatePulseTrains::name = "PercivalEvaluatePulseTrains";
+const char* PercivalEvaluatePulseTrains::category = "Rhythm";
+const char* PercivalEvaluatePulseTrains::description = DOC("This algorithm implements the 'Evaluate Pulse Trains' step as described in [1]."
 "Given an input onset strength signal (OSS) and a number of candidate tempo lag positions, the OSS is correlated with ideal expected pulse "
 "trains (for each candidate tempo lag) shifted in time by different amounts. The candidate tempo lag which generates the pulse train "
 "that better correlates with the OSS is returned as the preferred tempo candidate.\n"
@@ -39,10 +39,10 @@ const char* EvaluatePulseTrains::description = DOC("This algorithm implements th
 "  [1] Percival, G., & Tzanetakis, G. (2014). Streamlined tempo estimation based on autocorrelation and cross-correlation with pulses.\n"
 "  IEEE/ACM Transactions on Audio, Speech, and Language Processing, 22(12), 1765–1776.\n\n");
 
-void EvaluatePulseTrains::configure() {
+void PercivalEvaluatePulseTrains::configure() {
 }
 
-void EvaluatePulseTrains::calculatePulseTrains(const std::vector<Real>& ossWindow,
+void PercivalEvaluatePulseTrains::calculatePulseTrains(const std::vector<Real>& ossWindow,
 											   const int lag,
 											   Real& magScore,
 											   Real& varScore) {
@@ -74,7 +74,7 @@ void EvaluatePulseTrains::calculatePulseTrains(const std::vector<Real>& ossWindo
     varScore = variance(bpMagnitudes, mean(bpMagnitudes));
 }
 
-void EvaluatePulseTrains::compute() {
+void PercivalEvaluatePulseTrains::compute() {
   const vector<Real>& oss = _oss.get();
   const vector<Real>& peakPositions = _peakPositions.get();
   Real& lag = _lag.get();

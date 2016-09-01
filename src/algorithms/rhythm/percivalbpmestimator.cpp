@@ -62,9 +62,9 @@ void PercivalBpmEstimator::createInnerNetwork() {
   _lowPass          = factory.create("IIR");
   _frameCutterOSS   = factory.create("FrameCutter");
   _autoCorrelation  = factory.create("AutoCorrelation");
-  _enhanceHarmonics = factory.create("EnhanceHarmonics");
+  _enhanceHarmonics = factory.create("PercivalEnhanceHarmonics");
   _peakDetection    = factory.create("PeakDetection");
-  _evaluatePulseTrains = factory.create("EvaluatePulseTrains");
+  _evaluatePulseTrains = factory.create("PercivalEvaluatePulseTrains");
 
   // Connect internal algorithms
   // Compute Step 1 of algorithm

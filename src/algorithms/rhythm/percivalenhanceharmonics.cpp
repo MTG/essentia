@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "enhanceharmonics.h"
+#include "percivalenhanceharmonics.h"
 #include "essentiamath.h"
 
 using namespace std;
@@ -26,9 +26,9 @@ using namespace essentia;
 namespace essentia {
 namespace standard {
 
-const char* EnhanceHarmonics::name = "EnhanceHarmonics";
-const char* EnhanceHarmonics::category = "Rhythm";
-const char* EnhanceHarmonics::description = DOC("This algorithm implements the 'Enhance Harmonics' step as described in [1]."
+const char* PercivalEnhanceHarmonics::name = "PercivalEnhanceHarmonics";
+const char* PercivalEnhanceHarmonics::category = "Rhythm";
+const char* PercivalEnhanceHarmonics::description = DOC("This algorithm implements the 'Enhance Harmonics' step as described in [1]."
 "Given an input autocorrelation signal, two time-stretched versions of it (by factors of 2 and 4) are added to the original."
 "In this way, peaks with an harmonic relation are boosted.\n"
 "For more details check the referenced paper."
@@ -38,10 +38,10 @@ const char* EnhanceHarmonics::description = DOC("This algorithm implements the '
 "  [1] Percival, G., & Tzanetakis, G. (2014). Streamlined tempo estimation based on autocorrelation and cross-correlation with pulses.\n"
 "  IEEE/ACM Transactions on Audio, Speech, and Language Processing, 22(12), 1765–1776.\n\n");
 
-void EnhanceHarmonics::configure() {
+void PercivalEnhanceHarmonics::configure() {
 }
 
-void EnhanceHarmonics::compute() {
+void PercivalEnhanceHarmonics::compute() {
   const vector<Real>& input = _input.get();
   vector<Real>& output = _output.get();
   
