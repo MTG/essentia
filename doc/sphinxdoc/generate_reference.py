@@ -71,6 +71,7 @@ def doc2rst(algo_doc):
               '=' * len(algo_doc['name']),
               ''
               ]
+    lines += [algo_doc['mode'] + ' | ' + algo_doc['category'] + ' category', '']
 
     if algo_doc['inputs']:
         lines += [ 'Inputs',
@@ -184,6 +185,9 @@ def write_algorithms_reference():
     for algoname in std_algo_list:
         algos.setdefault(algoname, {})
         algos[algoname]['standard'] = getattr(essentia.standard, algoname).__struct__
+        # __struct__ does not contain mode (perhaps it should), 
+        # therefore, doing a workaround so that doc2rst can know the mode
+        algos[algoname]['standard']['mode'] = 'standard mode'
 
         print 'generating doc for standard algorithm:', algoname, '...'
         write_html_doc('_templates/reference/std_' + algoname + '.html',
@@ -193,6 +197,7 @@ def write_algorithms_reference():
     for algoname in streaming_algo_list:
         algos.setdefault(algoname, {})
         algos[algoname]['streaming'] = getattr(essentia.streaming, algoname).__struct__
+        algos[algoname]['streaming']['mode'] = 'streaming mode'
 
         print 'generating doc for streaming algorithm:', algoname, '...'
         write_html_doc('_templates/reference/streaming_' + algoname + '.html',
@@ -223,6 +228,7 @@ def write_algorithms_reference():
 '''
     open('_templates/algo_description_layout_std.html', 'w').write(html)
 
+
     # write the template for the streaming algorithms
     html = '''
 {% extends "layout.html" %}
@@ -238,8 +244,8 @@ def write_algorithms_reference():
 
 '''
 
-    for algoname in streaming_algo_list:
-        html += '<div><a href="streaming_%s.html">%s</a></div>\n' % (algoname, algoname)
+    links = ['<a href="std_%s.html">%s</a>' % (algoname, algoname) for algoname in streaming_algo_list]
+    html += ' | '.join(links)
 
     html += '''
 </div>
@@ -337,7 +343,7 @@ and hence are not available in python.</p>
         category_id = re.sub('[^0-9a-zA-Z]+', '', category.lower())
         html += '<section><h2 id=' + category_id + '>' + category + \
             '<a class="headerlink" href="#' + category_id + '" title="Permalink to this headline">¶</a>' + '</h2>'
-        html += '\n'.join(algo_categories_html[category])
+        html += '\n'.join(sorted(algo_categories_html[category]))
         html += '</section>'
     html += '''
 </div>
