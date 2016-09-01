@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 import distutils.sysconfig
 import os
 import sys
@@ -44,6 +46,7 @@ example_sources_fileio = [
         ('streaming_notetranscription', ),
 
         ('streaming_md5', ),
+        ('streaming_memoryleak', ),
 
         ('streaming_extractor_freesound',
                  [ 'freesound/FreesoundExtractor',

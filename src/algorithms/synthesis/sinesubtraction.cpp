@@ -26,6 +26,7 @@ using namespace standard;
 
 
 const char* SineSubtraction::name = "SineSubtraction";
+const char* SineSubtraction::category = "Synthesis";
 const char* SineSubtraction::description = DOC("This algorithm subtracts the sinusoids computed with the sine model analysis from an input audio signal. It ouputs an audio signal.");
 
 

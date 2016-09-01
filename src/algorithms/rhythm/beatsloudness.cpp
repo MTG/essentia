@@ -27,6 +27,7 @@ namespace essentia {
 namespace streaming {
 
 const char* BeatsLoudness::name = "BeatsLoudness";
+const char* BeatsLoudness::category = "Rhythm";
 const char* BeatsLoudness::description = DOC("Calculates the loudness computed only on the beats, both on the whole frequency range and on each specified frequency band. See the Loudness algorithm for a description of loudness and SingleBeatLoudness for a more detailed explanation.\n"
 "\n"
 "Note that the algorithm will output empty results in the case if no beats are specified in the \"beats\" parameter.");
@@ -97,11 +98,9 @@ void BeatsLoudness::configure() {
 namespace essentia {
 namespace standard {
 
-const char* BeatsLoudness::name = "BeatsLoudness";
-const char* BeatsLoudness::description = DOC("Calculates the loudness computed only on the beats, both on the whole frequency range and on each specified frequency band. See the Loudness algorithm for a description of loudness and SingleBeatLoudness for a more detailed explanation.\n"
-"\n"
-"Note that the algorithm will output empty results in the case if no beats are specified in the \"beats\" parameter.");
-
+const char* BeatsLoudness::name = essentia::streaming::BeatsLoudness::name;
+const char* BeatsLoudness::category = essentia::streaming::BeatsLoudness::category;
+const char* BeatsLoudness::description = essentia::streaming::BeatsLoudness::description;
 
 void BeatsLoudness::createInnerNetwork() {
   _beatLoud = streaming::AlgorithmFactory::create("BeatsLoudness");

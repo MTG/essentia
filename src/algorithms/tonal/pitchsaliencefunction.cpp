@@ -12,7 +12,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchSalienceFunction::name = "PitchSalienceFunction";
-const char* PitchSalienceFunction::version = "1.0";
+const char* PitchSalienceFunction::category = "Pitch";
 const char* PitchSalienceFunction::description = DOC("This algorithm computes the pitch salience function of a signal frame given its spectral peaks. The salience function covers a pitch range of nearly five octaves (i.e., 6000 cents), starting from the \"referenceFrequency\", and is quantized into cent bins according to the specified \"binResolution\". The salience of a given frequency is computed as the sum of the weighted energies found at integer multiples (harmonics) of that frequency. \n"
 "\n"
 "This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the SpectralPeaks algorithm. The output is a vector of salience values computed for the cent bins. The 0th bin corresponds to the specified \"referenceFrequency\".\n"

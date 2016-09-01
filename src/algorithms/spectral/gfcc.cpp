@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* GFCC::name = "GFCC";
-const char* GFCC::version = "1.0";
+const char* GFCC::category = "Spectral";
 const char* GFCC::description = DOC("This algorithm computes the equivalent of MFCCs but using a gammatone filterbank (ERBBands) scaled on an Equivalent Rectangular Bandwidth (ERB) scale. These coefficients could be called 'Gammatone Feature Cepstral Coefficients.\n"
 "\n"
 "References:\n"

@@ -54,6 +54,7 @@ class LevelExtractor : public AlgorithmComposite {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -92,6 +93,7 @@ class LevelExtractor : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

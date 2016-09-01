@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* AutoCorrelation::name = "AutoCorrelation";
+const char* AutoCorrelation::category = "Standard";
 const char* AutoCorrelation::description = DOC(
 "This algorithm returns the autocorrelation vector of a signal.\n"
 "It uses the version most commonly used in signal processing, which doesn't remove "

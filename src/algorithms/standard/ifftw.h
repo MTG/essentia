@@ -51,6 +51,7 @@ class IFFTW : public Algorithm {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
  protected:

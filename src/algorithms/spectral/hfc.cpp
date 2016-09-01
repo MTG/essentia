@@ -23,6 +23,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* HFC::name = "HFC";
+const char* HFC::category = "Spectral";
 const char* HFC::description = DOC("This algorithm computes the High Frequency Content of a signal spectrum.\n"
 "It can be computed according to the following techniques:\n"
 "  - 'Masri' (default) which does: sum |X(n)|^2*k,\n"

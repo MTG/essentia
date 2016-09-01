@@ -57,6 +57,7 @@ class TempoScaleBands : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
   Real scale(const Real& value, const Real& c1, const Real& c2, const Real& pwr);

@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* CentralMoments::name = "CentralMoments";
+const char* CentralMoments::category = "Statistics";
 const char* CentralMoments::description = DOC("This algorithm extracts the 0th, 1st, 2nd, 3rd and 4th central moments of an array (i.e. it returns a 5-tuple in which the index corresponds to the order of the moment).\n"
 "\n"
 "Central moments cannot be computed on arrays which size is less than 2, in which case an exception is thrown.\n"

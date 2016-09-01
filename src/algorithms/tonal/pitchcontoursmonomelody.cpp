@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchContoursMonoMelody::name = "PitchContoursMonoMelody";
-const char* PitchContoursMonoMelody::version = "1.0";
+const char* PitchContoursMonoMelody::category = "Pitch";
 const char* PitchContoursMonoMelody::description = DOC("This algorithm converts a set of pitch contours into a sequence of f0 values in Hz by taking the value of the most salient contour in each frame.\n"
 "In contrast to pitchContoursMelody, it assumes a single source. \n"
 "This algorithm is intended to receive its \"contoursBins\", \"contoursSaliences\", and \"contoursStartTimes\" inputs from the PitchContours algorithm. The \"duration\" input corresponds to the time duration of the input signal. The output is a vector of estimated pitch values and a vector of confidence values.\n"

@@ -30,24 +30,22 @@ namespace standard {
 class MaxFilter : public Algorithm {
 
  protected:
-  Input< vector<Real>  > _array;
-  Output< vector<Real> > _filtered;
+  Input<vector<Real> > _array;
+  Output<vector<Real> > _filtered;
 
+  // circular buffer containing past values
+  vector<Real> _buffer;
+  Real _curMax;
+  bool _filledBuffer;
+  int _bufferFillIdx;   
 
-    // circular buffer containing past values
-    vector<Real> _buffer;
-    Real _curMax;
-    bool _filledBuffer;
-    int _bufferFillIdx;
-    
-    
-  int _width,_halfWidth;
+  int _width, _halfWidth;
   bool _causal;
 
  public:
   MaxFilter() {
     declareInput(_array, "signal", "signal to be filtered");
-    declareOutput(_filtered, "signal", "filtered output ");
+    declareOutput(_filtered, "signal", "filtered output");
   }
 
   ~MaxFilter() {}
@@ -62,6 +60,7 @@ class MaxFilter : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -76,22 +75,15 @@ namespace streaming {
 class MaxFilter : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<Real > _array;
-  Source<Real > _filtered;
- 
-    
- 
+  Sink<Real> _array;
+  Source<Real> _filtered;  
+
  public:
   MaxFilter(){
     declareAlgorithm("MaxFilter");
-    declareInput(_array,STREAM,  "signal");
-    declareOutput(_filtered,STREAM,  "signal");
+    declareInput(_array, STREAM, "signal");
+    declareOutput(_filtered, STREAM, "signal");
   }
-  
-
-
-  static const char* name;
-  static const char* description;
 };
 
 } // namespace streaming

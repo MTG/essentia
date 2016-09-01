@@ -51,7 +51,7 @@ class Beatogram : public Algorithm {
   void configure();
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 };
 

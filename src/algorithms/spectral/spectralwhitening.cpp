@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* SpectralWhitening::name = "SpectralWhitening";
+const char* SpectralWhitening::category = "Spectral";
 const char* SpectralWhitening::description = DOC("Performs spectral whitening of spectral peaks of a given spectrum. The algorithm works in dB scale, but the conversion is done by the algorithm so input should be in linear scale. The concept of 'whitening' refers to 'white noise' or a non-zero flat spectrum. It first computes a spectral envelope similar to the 'true envelope' in [1], and then modifies the amplitude of each peak relative to the envelope. For example, the predominant peaks will have a value close to 0dB because they are very close to the envelope. On the other hand, minor peaks between significant peaks will have lower amplitudes such as -30dB.\n"
 "\n"
 "The input \"frequencies\" and \"magnitudes\" can be computed using the SpectralPeaks algorithm.\n"

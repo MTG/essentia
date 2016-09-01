@@ -27,6 +27,7 @@ namespace essentia {
 namespace streaming {
 
 const char* TonalExtractor::name = "TonalExtractor";
+const char* TonalExtractor::category = "Tonal";
 const char* TonalExtractor::description = DOC("This algorithm extracts tonal features");
 
 TonalExtractor::TonalExtractor(): _frameCutter(0), _windowing(0), _spectrum(0), _spectralPeaks(0),
@@ -159,8 +160,9 @@ TonalExtractor::~TonalExtractor() {
 namespace essentia {
 namespace standard {
 
-const char* TonalExtractor::name = "TonalExtractor";
-const char* TonalExtractor::description = DOC("this algorithm extracts tonal features");
+const char* TonalExtractor::name = essentia::streaming::TonalExtractor::name;
+const char* TonalExtractor::category = essentia::streaming::TonalExtractor::category;
+const char* TonalExtractor::description = essentia::streaming::TonalExtractor::description;
 
 TonalExtractor::TonalExtractor() {
   declareInput(_signal, "signal", "the audio input signal");

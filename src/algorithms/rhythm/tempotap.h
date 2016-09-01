@@ -70,6 +70,7 @@ class TempoTap : public Algorithm {
   void computePhases(const std::vector<std::vector<Real> >& features);
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 

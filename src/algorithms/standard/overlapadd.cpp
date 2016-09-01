@@ -76,13 +76,12 @@ void processFrame(vector<Real>& tmpFrame, const vector<Real>& windowedFrame,
 
 }
 
-
-//namespace essentia {
 namespace standard {
 
 const char* OverlapAdd::name = "OverlapAdd";
+const char* OverlapAdd::category = "Standard";
 const char* OverlapAdd::description = DOC(
-"This algorithm returns the output of an overlap-add process of a sequence of input audio signal frames. It considers that the input audio frames are windowed audio signals. Giving the size of the frame and the hop size, overlapping and adding consecutive frames with produce a continuous signal. A normalization gain can be passed as parameter. \n"
+"This algorithm returns the output of an overlap-add process of a sequence of input audio signal frames. It considers that the input audio frames are windowed audio signals. Giving the size of the frame and the hop size, overlapping and adding consecutive frames will produce a continuous signal. A normalization gain can be passed as parameter. \n"
 ".\n"
 "\n"
 "Empty input signals will raise an exception.\n"
@@ -125,17 +124,9 @@ void OverlapAdd::compute() {
 
 namespace streaming {
 
-const char* OverlapAdd::name = "OverlapAdd";
-const char* OverlapAdd::description = DOC(
-"This algorithm returns the output of an overlap-add process of a sequence of input audio signal frames. It considers that the input audio frames are windowed audio signals. Giving the size of the frame and the hop size, overlapping and adding consecutive frames with produce a continuous signal. \n"
-".\n"
-"\n"
-"Empty input signals will raise an exception.\n"
-"\n"
-"References:\n"
-"  [1] Overlap-Add - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Overlap-Add\n\n"
-);
+const char* OverlapAdd::name = essentia::standard::OverlapAdd::name;
+const char* OverlapAdd::category = essentia::standard::OverlapAdd::category;
+const char* OverlapAdd::description = essentia::standard::OverlapAdd::description;
 
 
 void OverlapAdd::reset() {

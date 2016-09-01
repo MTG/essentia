@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* RollOff::name = "RollOff";
+const char* RollOff::category = "Spectral";
 const char* RollOff::description = DOC("This algorithm computes the roll-off frequency of a spectrum. The roll-off frequency is defined as the frequency under which some percentage (cutoff) of the total energy of the spectrum is contained. The roll-off frequency can be used to distinguish between harmonic (below roll-off) and noisy sounds (above roll-off).\n"
 "\n"
 "An exception is thrown if the input audio spectrum is smaller than 2.\n"

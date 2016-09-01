@@ -54,6 +54,7 @@ class StereoDemuxer : public Algorithm {
   void configure() {}
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -108,6 +109,7 @@ class StereoDemuxer : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

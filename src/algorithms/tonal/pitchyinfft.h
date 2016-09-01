@@ -91,6 +91,7 @@ class PitchYinFFT : public Algorithm {
   void spectralWeights();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 }; // class PitchYinFFT

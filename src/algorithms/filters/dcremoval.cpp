@@ -25,6 +25,7 @@ using namespace standard;
 using namespace std;
 
 const char* DCRemoval::name = "DCRemoval";
+const char* DCRemoval::category = "Filters";
 const char* DCRemoval::description = DOC("This algorithm removes the DC offset from a signal using a 1st order IIR highpass filter. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"

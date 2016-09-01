@@ -108,6 +108,7 @@ class BpmHistogram : public AlgorithmComposite {
   AlgorithmStatus process();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -163,6 +164,7 @@ class BpmHistogram : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

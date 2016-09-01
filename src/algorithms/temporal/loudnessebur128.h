@@ -74,6 +74,7 @@ class LoudnessEBUR128 : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -118,6 +119,7 @@ class LoudnessEBUR128 : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

@@ -27,6 +27,7 @@ namespace essentia {
 namespace streaming {
 
 const char* EasyLoader::name = "EasyLoader";
+const char* EasyLoader::category = "Input/output";
 const char* EasyLoader::description = DOC("Given an audio file, this algorithm outputs the raw audio data, downmixed to mono. The audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and is normalized by the given replayGain value.\n"
 "\n"
 "This algorithm uses MonoLoader and therefore inherits all of its input requirements and exceptions.\n"
@@ -86,15 +87,9 @@ void EasyLoader::configure() {
 namespace essentia {
 namespace standard {
 
-const char* EasyLoader::name = "EasyLoader";
-const char* EasyLoader::description = DOC("Given an audio file, this algorithm outputs the raw audio data, downmixed to mono. The audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and is normalized by the given replayGain value.\n"
-"\n"
-"This algorithm uses MonoLoader and therefore inherits all of its input requirements and exceptions.\n"
-"\n"
-"References:\n"
-"  [1] Replay Gain - A Proposed Standard,\n"
-"      http://replaygain.hydrogenaudio.org");
-
+const char* EasyLoader::name = essentia::streaming::EasyLoader::name;
+const char* EasyLoader::category = essentia::streaming::EasyLoader::category;
+const char* EasyLoader::description = essentia::streaming::EasyLoader::description;
 
 void EasyLoader::createInnerNetwork() {
   _loader = streaming::AlgorithmFactory::create("EasyLoader");

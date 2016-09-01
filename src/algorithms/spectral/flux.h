@@ -54,6 +54,7 @@ class Flux : public Algorithm {
   }
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

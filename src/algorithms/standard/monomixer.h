@@ -54,6 +54,7 @@ class MonoMixer : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -99,6 +100,7 @@ class MonoMixer : public Algorithm {
   }
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

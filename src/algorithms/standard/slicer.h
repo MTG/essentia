@@ -65,6 +65,7 @@ class Slicer : public Algorithm {
   AlgorithmStatus process();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -125,6 +126,7 @@ class Slicer : public Algorithm {
   void reset() { _network->reset(); }
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

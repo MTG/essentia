@@ -26,6 +26,7 @@ using namespace standard;
 
 
 const char* TempoScaleBands::name = "TempoScaleBands";
+const char* TempoScaleBands::category = "Rhythm";
 const char* TempoScaleBands::description = DOC("This algorithm computes features for tempo tracking. The output features should be used with the TempoTap algorithm. See standard_rhythmextractor_tempotap in examples folder.\n"
 "\n"
 "An exception is thrown if less than 1 band is given. An exception is also thrown if the there are not an equal number of bands given as band-gains given.\n"

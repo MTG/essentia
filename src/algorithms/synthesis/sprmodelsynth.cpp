@@ -26,6 +26,7 @@ using namespace standard;
 
 
 const char* SprModelSynth::name = "SprModelSynth";
+const char* SprModelSynth::category = "Synthesis";
 const char* SprModelSynth::description = DOC("This algorithm computes the sinusoidal plus Residual model synthesis from SPS model analysis.");
 
 

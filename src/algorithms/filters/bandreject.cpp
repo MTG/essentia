@@ -25,6 +25,7 @@ using namespace standard;
 using namespace std;
 
 const char* BandReject::name = "BandReject";
+const char* BandReject::category = "Filters";
 const char* BandReject::description = DOC("This algorithm implements a 2nd order IIR band-reject filter. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"

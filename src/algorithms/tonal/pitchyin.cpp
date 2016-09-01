@@ -26,6 +26,7 @@ using namespace standard;
 
 
 const char* PitchYin::name = "PitchYin";
+const char* PitchYin::category = "Pitch";
 const char* PitchYin::description = DOC("This algorithm estimates the fundamental frequency from a given spectrum. It is an implementation of the Yin algorithm [1] for computations in the time domain.\n"
 "\n"
 "An exception is thrown if an empty signal is provided.\n"

@@ -82,6 +82,7 @@ class StochasticModelSynth : public Algorithm {
   void getFFTFromEnvelope(const std::vector<Real> magResDB, std::vector<std::complex<Real> > &fftStoc);
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 

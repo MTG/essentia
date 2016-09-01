@@ -78,6 +78,7 @@ class StochasticModelAnal : public Algorithm {
   void getSpecEnvelope(const std::vector<std::complex<Real> > fftRes,std::vector<Real> &magResDB);
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 

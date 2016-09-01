@@ -50,6 +50,7 @@ class FFTWComplex : public Algorithm {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
  protected:
@@ -80,7 +81,7 @@ class FFTWComplex : public StreamingAlgorithmWrapper {
 
  public:
   FFTWComplex() {
-    declareAlgorithm("FFTWC");
+    declareAlgorithm("FFTC");
     declareInput(_signal, TOKEN, "frame");
     declareOutput(_fft, TOKEN, "fft");
   }

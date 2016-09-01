@@ -26,6 +26,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* SingleGaussian::name = "SingleGaussian";
+const char* SingleGaussian::category = "Statistics";
 const char* SingleGaussian::description = DOC("This algorithm implements the single gaussian method. For example, using the single gaussian on descriptors like MFCC with the symmetric Kullback-Leibler divergence might be a much better option than just the mean and variance of the descriptors over a whole signal.\n"
 "\n"
 "An exception is thrown if the covariance of the input matrix is singular or if the input matrix is empty.\n"

@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* StochasticModelAnal::name = "StochasticModelAnal";
+const char* StochasticModelAnal::category = "Synthesis";
 const char* StochasticModelAnal::description = DOC("This algorithm computes the stochastic model analysis. It gets the resampled spectral envelope of the stochastic component.\n"
 "\n"
 "References:\n"

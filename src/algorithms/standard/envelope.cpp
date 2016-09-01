@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Envelope::name = "Envelope";
+const char* Envelope::category = "Envelope/SFX";
 const char* Envelope::description = DOC("This algorithm computes the envelope of a signal by applying a non-symmetric lowpass filter on a signal. By default it rectifies the signal, but that is optional.\n"
 "\n"
 "References:\n"

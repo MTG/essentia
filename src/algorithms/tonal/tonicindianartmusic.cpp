@@ -28,7 +28,7 @@ namespace standard {
 
 
 const char* TonicIndianArtMusic::name = "TonicIndianArtMusic";
-const char* TonicIndianArtMusic::version = "1.0";
+const char* TonicIndianArtMusic::category = "Tonal";
 const char* TonicIndianArtMusic::description = DOC("This algorithm estimates the tonic frequency of the lead artist in Indian art music. It uses multipitch representation of the audio signal (pitch salience) to compute a histogram using which the tonic is identified as one of its peak. The decision is made based on the distance between the prominent peaks, the classification is done using a decision tree.\n"
 "\n"
 "References:\n"

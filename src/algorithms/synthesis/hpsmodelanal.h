@@ -102,6 +102,7 @@ class HpsModelAnal : public Algorithm {
   void updateStocInFrame(const std::vector<Real> frameIn, std::vector<Real> &frameAccumulator);
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 

@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
         process_single_file(extractor, inputFilename, outputFilename, format);
       // On Essentia Exception for a single file, skip it
       } catch (EssentiaException& e) {
-        cerr << "skipping " << inputFilename << " due to error" << endl;
+        cerr << "skipping " << inputFilename << " due to error: " << e.what() << endl;
       }
   }
 

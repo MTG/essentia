@@ -69,6 +69,7 @@ def create_python_algorithms(essentia):
     # FrameGenerator
     class FrameGenerator(object):
         __struct__ = { 'name': 'FrameGenerator',
+                       'category': 'Standard',
                        'inputs': [],
                        'outputs': [],
                        'parameters': [],

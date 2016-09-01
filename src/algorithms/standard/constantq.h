@@ -67,7 +67,7 @@ class ConstantQ : public Algorithm {
     declareInput(_signal, "frame", "the input frame (complex)");
     declareOutput(_constantQ, "constantq", "the Constant Q transform of the input frame");
 
-    _fft = AlgorithmFactory::create("FFTWC"); //FFT with complex input
+    _fft = AlgorithmFactory::create("FFTC"); //FFT with complex input
   }
 
   ~ConstantQ() {
@@ -89,6 +89,7 @@ class ConstantQ : public Algorithm {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

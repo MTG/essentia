@@ -104,7 +104,7 @@ class OnsetDetectionGlobal : public Algorithm {
   void computeBeatEmphasis();
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 };
 
@@ -155,6 +155,7 @@ class OnsetDetectionGlobal : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

@@ -64,6 +64,7 @@ class OnsetDetection : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
   std::vector<Real> _phase_1;

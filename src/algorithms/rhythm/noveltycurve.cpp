@@ -27,8 +27,8 @@ namespace essentia {
 namespace standard {
 
 const char* NoveltyCurve::name = "NoveltyCurve";
-const char* NoveltyCurve::description = DOC(
-"This algorithm computes the novelty curve which is a type of onset detection function defined in [1]. It expects as an input a frame-wise sequence of frequency-bands energies or spectrum magnitudes as originally proposed in [1] (see FrequencyBands and Spectrum algorithms). Novelty in each band (or frequency bin) is computed as a derivative between log-compressed energy (magnitude) values in consequent frames. The overall novelty value is then computed as a weighted sum that can be configured using 'weightCurve' parameter. The resulting novelty curve can be used for beat tracking and onset detection (see BpmHistogram and Onsets).\n"
+const char* NoveltyCurve::category = "Rhythm";
+const char* NoveltyCurve::description = DOC("This algorithm computes the novelty curve which is a type of onset detection function defined in [1]. It expects as an input a frame-wise sequence of frequency-bands energies or spectrum magnitudes as originally proposed in [1] (see FrequencyBands and Spectrum algorithms). Novelty in each band (or frequency bin) is computed as a derivative between log-compressed energy (magnitude) values in consequent frames. The overall novelty value is then computed as a weighted sum that can be configured using 'weightCurve' parameter. The resulting novelty curve can be used for beat tracking and onset detection (see BpmHistogram and Onsets).\n"
 "\n"
 "Notes:\n"
 "- Recommended frame/hop size for spectrum computation is 2048/1024 samples (44.1 kHz sampling rate) [2].\n"

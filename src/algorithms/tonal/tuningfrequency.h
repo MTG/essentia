@@ -52,6 +52,7 @@ class TuningFrequency : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
   // -35: estimated by looking at the distribution histogram of the tuning

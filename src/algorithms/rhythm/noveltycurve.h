@@ -65,6 +65,7 @@ class NoveltyCurve : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -116,6 +117,7 @@ class NoveltyCurve : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

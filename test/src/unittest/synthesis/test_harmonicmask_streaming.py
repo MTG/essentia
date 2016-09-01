@@ -59,7 +59,7 @@ def analsynthHarmonicMaskStreaming(params, signal):
     hmask= es.HarmonicMask(sampleRate = params['sampleRate'], binWidth = params['binWidth'], attenuation = params['attenuation_dB'])
     
     ifft = es.IFFT(size = params['frameSize']);
-    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
+    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'], gain = 1./params['frameSize']);
 
     
     # add half window of zeros to input signal to reach same ooutput length

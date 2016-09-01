@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Mean::name = "Mean";
+const char* Mean::category = "Statistics";
 const char* Mean::description = DOC("This algorithm extracts the mean of an array of Reals.");
 
 void Mean::compute() {

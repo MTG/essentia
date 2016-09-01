@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* StochasticModelSynth::name = "StochasticModelSynth";
+const char* StochasticModelSynth::category = "Synthesis";
 const char* StochasticModelSynth::description = DOC("This algorithm computes the stochastic model synthesis. It generates the noisy spectrum from a resampled spectral envelope of the stochastic component.\n"
 "\n"
 "References:\n"

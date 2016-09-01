@@ -25,6 +25,7 @@ using namespace standard;
 using namespace std;
 
 const char* MovingAverage::name = "MovingAverage";
+const char* MovingAverage::category = "Filters";
 const char* MovingAverage::description = DOC("This algorithm implements an FIR Moving Average filter. Because of its dependece on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"
