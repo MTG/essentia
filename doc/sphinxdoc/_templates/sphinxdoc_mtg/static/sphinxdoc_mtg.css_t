@@ -7,9 +7,9 @@
  *
  * :copyright: Copyright 2007-2011 by the Sphinx team, see AUTHORS.
  * :license: BSD, see LICENSE for details.
- * 
+ *
  * Modified by Music Technology Group
- * 
+ *
  */
 
 @import url("basic.css");
@@ -17,13 +17,12 @@
 /* -- page layout ----------------------------------------------------------- */
 
 body {
-    font-family: Arial,sans-serif;
-    font-size: 14px;
-    letter-spacing: -0.01em;
+    font-family: sans-serif;
+    font-size: 16px;
     line-height: 150%;
     text-align: center;
     background-color: #BFD1D4;
-    color: black;
+    color: #292a2f;
     padding: 0;
     border: 1px solid #aaa;
 
@@ -45,7 +44,9 @@ div.bodywrapper {
 }
 
 div.body {
-    margin: 0;
+    max-width: 960px;
+    margin: 0 auto;
+    box-sizing: border-box;
     padding: 0.5em 20px 20px 20px;
 }
 
@@ -136,7 +137,7 @@ div.footer a {
 
 /* -- body styles ----------------------------------------------------------- */
 
-p {    
+p {
     margin: 0.8em 0 0.5em 0;
 }
 
@@ -147,40 +148,45 @@ a {
 
 a:hover {
     color: #fff !important;
-	text-decoration: underline;
+    text-decoration: underline;
 }
 
 div.body a {
-	color: #c8102e !important;
+	color: #c37777 !important;
 }
 
 div.body a:hover {
     text-decoration: underline;
-	color: #c8102e !important;
+	color: #c37777 !important;
 }
 
 h1 {
     margin: 0;
     padding: 0.7em 0 0.3em 0;
-    font-size: 1.9em;
-    color: #2b3943 !important;
+    font-size: 40px;
+    color: #5a5959;
+    line-height: 115%;
 }
 
 h2 {
     margin: 1.3em 0 0.2em 0;
-    font-size: 1.35em;
+    font-size: 32px;
+    margin-bottom: 15px;
     padding: 0;
-	color: #2b3943 !important;
+    padding-bottom: 10px;
+    color: #c37777;
+    border-bottom: 2px solid #c37777;
 }
 
 h3 {
-    margin: 1em 0 -0.3em 0;
-    font-size: 1.2em;
-	color: #2b3943 !important;
+    margin: 13px 0 10px 0;
+    font-size: 24px;
+    color: #5a5959;
 }
 
+
 div.body h1 a, div.body h2 a, div.body h3 a, div.body h4 a, div.body h5 a, div.body h6 a {
-    color: #c8102e !important;
+    color: #c37777 !important;
 }
 
 h1 a.anchor, h2 a.anchor, h3 a.anchor, h4 a.anchor, h5 a.anchor, h6 a.anchor {
@@ -202,7 +208,7 @@ h5 a.anchor:hover, h6 a.anchor:hover {
 }
 
 a.headerlink {
-    color: #c60f0f!important;
+    color: #c37777!important;
     font-size: 1em;
     margin-left: 6px;
     padding: 0 4px 0 4px;
@@ -384,11 +390,24 @@ margin-right: auto;
 //box-shadow: 0px 0px 8px rgba(0,0,0,0.3);
 //}
 
-#algorithms-reference section h3 {
-    
+.section {
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 20px 0;
 }
 
 .algo-info h4, .algo-info header {
     display: inline-block;
     margin-right: 10px;
+}
+
+.algo-list {
+  margin: 130px 0 50px;
+  padding: 20px 25px;
+  background: #ececec;
+}
+
+.body .algo-list a {
+  color: #777777!important;
 }

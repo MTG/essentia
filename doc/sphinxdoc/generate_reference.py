@@ -184,7 +184,7 @@ def write_algorithms_reference():
     for algoname in std_algo_list:
         algos.setdefault(algoname, {})
         algos[algoname]['standard'] = getattr(essentia.standard, algoname).__struct__
-        
+
         print 'generating doc for standard algorithm:', algoname, '...'
         write_html_doc('_templates/reference/std_' + algoname + '.html',
                        algos[algoname]['standard'],
@@ -193,7 +193,7 @@ def write_algorithms_reference():
     for algoname in streaming_algo_list:
         algos.setdefault(algoname, {})
         algos[algoname]['streaming'] = getattr(essentia.streaming, algoname).__struct__
-        
+
         print 'generating doc for streaming algorithm:', algoname, '...'
         write_html_doc('_templates/reference/streaming_' + algoname + '.html',
                        algos[algoname]['streaming'],
@@ -205,22 +205,19 @@ def write_algorithms_reference():
 {% extends "layout.html" %}
 {% block body %}
 
-<div class="sphinxsidebar">
-  <div class="sphinxsidebarwrapper">
-
-    <p><strong>Standard algorithms</strong></p>
-
-'''
-
-    for algoname in std_algo_list:
-        html += '<div><a href="std_%s.html">%s</a></div>\n' % (algoname, algoname)
-
-    html += '''
-  </div>
-</div>
-
+<div class="algo-description-container">
 {% block algo_description %}
 {% endblock %}
+</div>
+<div class="algo-list">
+    <h4><strong>Standard algorithms</strong></h4>
+'''
+
+    links = ['<a href="std_%s.html">%s</a>' % (algoname, algoname) for algoname in std_algo_list]
+    html += ' | '.join(links)
+
+    html += '''
+</div>
 
 {% endblock %}
 '''
@@ -231,10 +228,13 @@ def write_algorithms_reference():
 {% extends "layout.html" %}
 {% block body %}
 
-<div class="sphinxsidebar">
-  <div class="sphinxsidebarwrapper">
+<div class="algo-description-container">
+{% block algo_description %}
+{% endblock %}
+</div>
 
-    <p><strong>Streaming algorithms</strong></p>
+<div class="algo-list">
+    <h4><strong>Streaming algorithms</strong></h4>
 
 '''
 
@@ -242,11 +242,7 @@ def write_algorithms_reference():
         html += '<div><a href="streaming_%s.html">%s</a></div>\n' % (algoname, algoname)
 
     html += '''
-  </div>
 </div>
-
-{% block algo_description %}
-{% endblock %}
 
 {% endblock %}
 '''
@@ -284,11 +280,11 @@ essentia_algorithms.update(streaming_algorithms)
         std_algo = None
         streaming_algo = None
         if 'standard' in algos[algoname]:
-            std_algo = algos[algoname]['standard']        
+            std_algo = algos[algoname]['standard']
         if 'streaming' in algos[algoname]:
             streaming_algo = algos[algoname]['streaming']
 
-        if std_algo and streaming_algo: 
+        if std_algo and streaming_algo:
             # both standard and streaming mode exist
             if (std_algo['category'] == streaming_algo['category']):
                 category = std_algo['category']
@@ -311,7 +307,7 @@ essentia_algorithms.update(streaming_algorithms)
 
         # Description for many algorithms starts with "This algorithm..." and we do not want to show that
         description = description.replace('This algorithm ', '')
-        if len(description): 
+        if len(description):
             description = description[0].capitalize() + description[1:]
 
         links = []
@@ -319,7 +315,7 @@ essentia_algorithms.update(streaming_algorithms)
             links.append('<a class="reference internal" href="reference/std_' + algoname + '.html"><em>standard</em></a>')
         if streaming_algo:
             links.append('<a class="reference internal" href="reference/streaming_' + algoname + '.html"><em>streaming</em></a>')
-        algo_html = '<div class="algo-info">' + '<header><h4>' + algoname + '</h4></header>' + '<span>(' + ', '.join(links) + ')</span>' + '<div>' + description + '</div></div>'
+        algo_html = '<div class="algo-info">' + '<header><h3>' + algoname + '</h3></header>' + '<span>(' + ', '.join(links) + ')</span>' + '<div>' + description + '</div></div>'
         algo_categories_html.setdefault(category, [])
         algo_categories_html[category].append(algo_html)
 
@@ -336,10 +332,11 @@ essentia_algorithms.update(streaming_algorithms)
 and hence are not available in python.</p>
 
 <div class="section" id="algorithms">
-<h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this headline">¶</a></h2>
 '''
     for category in algo_categories_html:
-        html += '<section><h3>' + category + '</h3>'
+        category_id = re.sub('[^0-9a-zA-Z]+', '', category.lower())
+        html += '<section><h2 id=' + category_id + '>' + category + \
+            '<a class="headerlink" href="#' + category_id + '" title="Permalink to this headline">¶</a>' + '</h2>'
         html += '\n'.join(algo_categories_html[category])
         html += '</section>'
     html += '''
