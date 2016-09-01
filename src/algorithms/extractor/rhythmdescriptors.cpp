@@ -31,12 +31,14 @@ const char* RhythmDescriptors::name = "RhythmDescriptors";
 const char* RhythmDescriptors::category = "Rhythm";
 const char* RhythmDescriptors::description = DOC("This algorithm computes rhythm features. It combines RhythmExtractor2013 for beat tracking and BPM estimation with BpmHistogramDescriptors algorithms.");
 
+
 RhythmDescriptors::RhythmDescriptors() {
   _configured = false;
 
   declareInput(_signal, "signal", "the input audio signal");
 
   declareOutput(_ticks, "beats_position", "See RhythmExtractor2013 algorithm documentation");
+  declareOutput(_confidence, "confidence", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_bpm, "bpm", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_estimates, "bpm_estimates", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_bpmIntervals, "bpm_intervals", "See RhythmExtractor2013 algorithm documentation");
@@ -51,6 +53,7 @@ RhythmDescriptors::RhythmDescriptors() {
   declareOutput(_secondPeakBPM, "second_peak_bpm", "See BpmHistogramDescriptors algorithm documentation");
   declareOutput(_secondPeakSpread, "second_peak_spread", "See BpmHistogramDescriptors algorithm documentation");
   declareOutput(_secondPeakWeight, "second_peak_weight", "See BpmHistogramDescriptors algorithm documentation");
+  declareOutput(_histogram, "histogram", "bpm histogram [bpm]");
 }
 
 
@@ -61,10 +64,11 @@ void RhythmDescriptors::createInnerNetwork() {
 
   _signal >> _rhythmExtractor->input("signal");
 
-  _rhythmExtractor->output("ticks") >> PC(_pool, "internal.ticks");
-  _rhythmExtractor->output("bpm") >> PC(_pool, "internal.bpm");
-  _rhythmExtractor->output("estimates")     >> PC(_pool, "internal.estimates");
-  _rhythmExtractor->output("bpmIntervals")  >> PC(_pool, "internal.bpmIntervals");
+  _rhythmExtractor->output("ticks")        >> PC(_pool, "internal.ticks");
+  _rhythmExtractor->output("bpm")          >> PC(_pool, "internal.bpm");
+  _rhythmExtractor->output("estimates")    >> PC(_pool, "internal.estimates");
+  _rhythmExtractor->output("bpmIntervals") >> PC(_pool, "internal.bpmIntervals");
+  _rhythmExtractor->output("confidence")   >> PC(_pool, "internal.confidence");
   //_rhythmExtractor->output("rubatoStart")   >> PC(_pool, "internal.rubatoStart");
   //_rhythmExtractor->output("rubatoStop")    >> PC(_pool, "internal.rubatoStop");
   //_rhythmExtractor->output("rubatoNumber")    >> PC(_pool, "internal.rubatoNumber");
@@ -81,6 +85,7 @@ void RhythmDescriptors::createInnerNetwork() {
   _bpmHistogramDescriptors->output("secondPeakBPM")     >> _secondPeakBPM;
   _bpmHistogramDescriptors->output("secondPeakSpread")  >> _secondPeakSpread;
   _bpmHistogramDescriptors->output("secondPeakWeight")  >> _secondPeakWeight;
+  _bpmHistogramDescriptors->output("histogram")         >> _histogram;
 
   _network = new scheduler::Network(_rhythmExtractor);
 }
@@ -106,6 +111,7 @@ AlgorithmStatus RhythmDescriptors::process() {
 
   _bpm.push(_pool.value<Real>("internal.bpm"));
   _ticks.push(_pool.value<vector<Real> >("internal.ticks"));
+  _confidence.push(_pool.value<Real>("internal.confidence")); 
   _estimates.push(_pool.value<vector<Real> >("internal.estimates"));
   _bpmIntervals.push(_pool.value<vector<Real> >("internal.bpmIntervals"));
   //_rubatoStart.push(_pool.value<vector<Real> >("internal.rubatoStart"));
@@ -138,6 +144,7 @@ const char* RhythmDescriptors::description = essentia::streaming::RhythmDescript
 RhythmDescriptors::RhythmDescriptors() {
   declareInput(_signal, "signal", "the audio input signal");
   declareOutput(_ticks,           "beats_position", "See RhythmExtractor2013 algorithm documentation");
+  declareOutput(_confidence,      "confidence", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_bpm,             "bpm", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_estimates,       "bpm_estimates", "See RhythmExtractor2013 algorithm documentation");
   declareOutput(_bpmIntervals,    "bpm_intervals", "See RhythmExtractor2013 algorithm documentation");
@@ -151,6 +158,7 @@ RhythmDescriptors::RhythmDescriptors() {
   declareOutput(_secondPeakBPM,   "second_peak_bpm", "See BpmHistogramDescriptors algorithm documentation");
   declareOutput(_secondPeakSpread,"second_peak_spread", "See BpmHistogramDescriptors algorithm documentation");
   declareOutput(_secondPeakWeight,"second_peak_weight", "See BpmHistogramDescriptors algorithm documentation");
+  declareOutput(_histogram, "histogram", "bpm histogram [bpm]");
 
   createInnerNetwork();
 }
@@ -174,6 +182,7 @@ void RhythmDescriptors::createInnerNetwork() {
   *_vectorInput  >>  _rhythmDescriptors->input("signal");
 
   _rhythmDescriptors->output("beats_position")      >>  PC(_pool, "beats_position");
+  _rhythmDescriptors->output("confidence")          >>  PC(_pool, "confidence");  
   _rhythmDescriptors->output("bpm")                 >>  PC(_pool, "bpm");
   _rhythmDescriptors->output("bpm_estimates")       >>  PC(_pool, "bpm_estimates");
   _rhythmDescriptors->output("bpm_intervals")       >>  PC(_pool, "bpm_intervals");
@@ -187,6 +196,7 @@ void RhythmDescriptors::createInnerNetwork() {
   _rhythmDescriptors->output("second_peak_bpm")     >>  PC(_pool, "second_peak_bpm");
   _rhythmDescriptors->output("second_peak_spread")  >>  PC(_pool, "second_peak_spread");
   _rhythmDescriptors->output("second_peak_weight")  >>  PC(_pool, "second_peak_weight");
+  _rhythmDescriptors->output("histogram")           >>  PC(_pool, "histogram");
 
   _network = new scheduler::Network(_vectorInput);
 }
@@ -199,6 +209,7 @@ void RhythmDescriptors::compute() {
 
   _bpm.get()          = _pool.value<Real>("bpm");
   _ticks.get()        = _pool.value<vector<Real> >("beats_position");
+  _confidence.get()   = _pool.value<Real>("confidence");
   _estimates.get()    = _pool.value<vector<Real> >("bpm_estimates");
   //_bpmIntervals.get() = _pool.value<vector<Real> >("bpm_intervals");
   //_rubatoNumber.get() = (int) _pool.value<Real>("rubato_number");
@@ -217,6 +228,7 @@ void RhythmDescriptors::compute() {
   _secondPeakBPM.get()    = _pool.value<vector<Real> >("second_peak_bpm")[0];
   _secondPeakSpread.get() = _pool.value<vector<Real> >("second_peak_spread")[0];
   _secondPeakWeight.get() = _pool.value<vector<Real> >("second_peak_weight")[0];
+  _histogram.get()        = _pool.value<vector<vector<Real> > > ("histogram")[0];
 }
 
 } // namespace standard

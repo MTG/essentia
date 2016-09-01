@@ -47,6 +47,8 @@ class UnaryOperator : public Algorithm {
   Output<std::vector<Real> > _output;
 
   OpType _type;
+  Real _scale;
+  Real _shift;
 
  public:
   UnaryOperator() {
@@ -56,10 +58,14 @@ class UnaryOperator : public Algorithm {
 
   void declareParameters() {
     declareParameter("type", "the type of the unary operator to apply to input array", "{identity,abs,log10,log,ln,lin2db,db2lin,sin,cos,sqrt,square}", "identity");
+    declareParameter("scale", "multiply result by factor", "(-inf,inf)", 1.);
+    declareParameter("shift", "shift result by value (add value)", "(-inf,inf)", 0.);   
   }
 
   void configure() {
     _type = typeFromString(parameter("type").toString());
+    _scale = parameter("scale").toReal();
+    _shift = parameter("shift").toReal();  
   }
 
   void compute();
