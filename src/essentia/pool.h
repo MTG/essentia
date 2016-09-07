@@ -92,7 +92,7 @@ typedef std::string DescriptorName;
  * To release the locks, the order should be reversed!
  *
  */
-class Pool {
+class ESSENTIA_API Pool {
 
  protected:
   // maps for single values:

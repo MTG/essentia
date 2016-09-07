@@ -32,11 +32,11 @@ class SourceBase;
 class Algorithm;
 
 
-void connect(SourceBase& source, SinkBase& sink);
-void disconnect(SourceBase& source, SinkBase& sink);
+void ESSENTIA_API connect(SourceBase& source, SinkBase& sink);
+void ESSENTIA_API disconnect(SourceBase& source, SinkBase& sink);
 
-void attach(SinkProxyBase& proxy, SinkBase& innerSink);
-void detach(SinkProxyBase& proxy, SinkBase& innerSink);
+void ESSENTIA_API attach(SinkProxyBase& proxy, SinkBase& innerSink);
+void ESSENTIA_API detach(SinkProxyBase& proxy, SinkBase& innerSink);
 
 
 /**
@@ -49,7 +49,7 @@ void detach(SinkProxyBase& proxy, SinkBase& innerSink);
  * the template being the token type). Look at the Sink implementation for more
  * information.
  */
-class SinkBase : public Connector {
+class ESSENTIA_API SinkBase : public Connector {
  protected:
   SourceBase* _source;
   ReaderID _id; // ID to use to identify this reader for the source (to know which reader is requesting tokens, etc...)

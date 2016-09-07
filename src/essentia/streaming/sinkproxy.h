@@ -27,7 +27,7 @@ namespace essentia {
 namespace streaming {
 
 
-class SinkProxyBase : public SinkBase {
+class ESSENTIA_API SinkProxyBase : public SinkBase {
  protected:
   SinkBase* _proxiedSink;
 

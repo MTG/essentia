@@ -23,6 +23,7 @@
 #include <map>
 #include <sstream>
 #include <iostream>
+#include <algorithm>
 #include "types.h"
 #include "essentia.h"
 #include "parameter.h"
@@ -245,8 +246,10 @@ namespace streaming {
 
 } // namespace essentia
 
-
+#if (ESSENTIA_EXPORTS == 1 && defined(OS_WIN32)) || !defined(OS_WIN32)
 // include implementation, because the factory is now templated
 #include "algorithmfactory_impl.h"
+
+#endif
 
 #endif // ESSENTIA_ALGORITHMFACTORY_H

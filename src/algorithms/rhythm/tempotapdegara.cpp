@@ -26,6 +26,11 @@ using namespace std;
 namespace essentia {
 namespace standard {
 
+const Real TempoTapDegara::_alpha = 0.5;
+const Real TempoTapDegara::_sigma_ibi = 0.025;
+
+const int TempoTapDegara::_numberCombs = 4;
+const Real TempoTapDegara::_frameDurationODF = 5.944308390022676;
 
 const char* TempoTapDegara::name = "TempoTapDegara";
 const char* TempoTapDegara::category = "Rhythm";

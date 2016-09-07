@@ -43,11 +43,11 @@ extern const char* version_git_sha;
  * "human-readable" representations. You need to call this function before
  * doing anything with essentia.
  */
-void init();
+void ESSENTIA_API init();
 
-bool isInitialized();
+bool ESSENTIA_API isInitialized();
 
-void shutdown();
+void ESSENTIA_API shutdown();
 
 namespace standard {
   /**

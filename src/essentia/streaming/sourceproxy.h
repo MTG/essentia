@@ -34,7 +34,7 @@ namespace streaming {
  * Non template base class for the proxy source, contains a pointer to the actual
  * Source being proxied.
  */
-class SourceProxyBase : public SourceBase {
+class ESSENTIA_API SourceProxyBase : public SourceBase {
  protected:
   SourceBase* _proxiedSource;
 

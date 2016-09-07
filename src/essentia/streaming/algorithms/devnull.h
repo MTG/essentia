@@ -76,7 +76,7 @@ enum DevNullConnector {
  * Connect a source (eg: the output of an algorithm) to a DevNull, so the data
  * the source outputs does not block the whole processing.
  */
-void connect(SourceBase& source, DevNullConnector devnull);
+void ESSENTIA_API connect(SourceBase& source, DevNullConnector devnull);
 
 inline void operator>>(SourceBase& source, DevNullConnector devnull) {
   connect(source, devnull);
@@ -86,7 +86,7 @@ inline void operator>>(SourceBase& source, DevNullConnector devnull) {
 /**
  * Disconnect a source (eg: the output of an algorithm) from a DevNull.
  */
-void disconnect(SourceBase& source, DevNullConnector devnull);
+void ESSENTIA_API disconnect(SourceBase& source, DevNullConnector devnull);
 
 } // namespace streaming
 } // namespace essentia
