@@ -39,7 +39,17 @@ const char* TempoTapDegara::description = DOC("This algorithm estimates beat pos
 "  [3] Stark, A. M., Davies, M. E., & Plumbley, M. D. (2009, September). Real-time beatsynchronous analysis of musical audio. In 12th International Conference on Digital Audio Effects (DAFx-09), Como, Italy.");
 
 
+
 void TempoTapDegara::configure() {
+  _frameDurationODF = 5.944308390022676;
+  
+  // decoding weighting parameter
+  _alpha = 0.5; 
+
+  // std of the inter-beat interval pdf, 
+  // it models potential variations in the inter-beat interval in secs.
+  _sigma_ibi = 0.025; 
+  
   Real minTempo = parameter("minTempo").toInt();
   Real maxTempo = parameter("maxTempo").toInt();
 

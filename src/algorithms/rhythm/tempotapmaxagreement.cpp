@@ -43,6 +43,10 @@ const char* TempoTapMaxAgreement::description = DOC("This algorithm estimates be
 
 void TempoTapMaxAgreement::configure() {
 
+  _phaseThreshold = 0.175;
+  _periodThreshold = 0.175;
+  _minTickTime = 5.;
+
   // assign histogram bin centers
   _histogramBins.reserve(_numberBins+1);
   _histogramBins.push_back(-0.5);
