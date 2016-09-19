@@ -8,6 +8,9 @@ Mac OSX
 The easiest way to install Essentia on OSX is by using `our Homebrew formula <https://github.com/MTG/homebrew-essentia>`_. You will need to install `Homebrew package manager <http://brew.sh>`_ first (and there are other good reasons to do it apart from Essentia).
 
 
+Note that packages location for Python installed via Homebrew is different from the system Python. If you plan to use Essentia with Python, `make sure the Homebrew directory is at the top of your PATH environment variable <http://docs.python-guide.org/en/latest/starting/install/osx/>`_. More information about using Python and Homebrew is `here <https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Homebrew-and-Python.md>`_.
+
+
 Linux
 -----
 We are currently preparing deb packages for Ubuntu and Debian. Meanwhile, you need to compile Essentia from source (see below).
