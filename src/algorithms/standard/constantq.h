@@ -38,16 +38,15 @@ class ConstantQ : public Algorithm {
 
   std::vector<double> _CQdata;
   
-  double _sampleRate; //unsigned int _FS;
+  double _sampleRate;
   double _minFrequency;
   double _maxFrequency;
-  double _dQ; // Work out Q value for Filter bank
-  double _threshold; // ConstantQ threshold for kernel generation
+  double _dQ;
+  double _threshold; // threshold for kernel generation
   unsigned int _numWin;
-  unsigned int _hop;
   unsigned int _binsPerOctave;  
   unsigned int _FFTLength;
-  unsigned int _uK; // Number of constant Q bins
+  unsigned int _uK;
 
   struct SparseKernel {
     std::vector<double> _sparseKernelReal;
@@ -81,7 +80,7 @@ class ConstantQ : public Algorithm {
     declareParameter("minFrequency", "the minimum frequency", "[1,inf)", 55.);
     declareParameter("maxFrequency", "the maximum frequency", "[1,inf)", 7040.);
     declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    
-    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);  
+    declareParameter("sampleRate", "the sampling rate [Hz]", "[0,inf)", 44100.);  
     declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);       
   }
 

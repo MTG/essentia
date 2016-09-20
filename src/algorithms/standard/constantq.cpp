@@ -28,18 +28,12 @@ using namespace standard;
 
 const char* ConstantQ::name = "ConstantQ";
 const char* ConstantQ::category = "Standard";
-const char* ConstantQ::description = DOC("This algorithm implements Constant Q Transform employing FFT for fast calculation [1].\n"
+const char* ConstantQ::description = DOC("This algorithm implements Constant Q Transform employing FFT for fast calculation.\n"
 "\n"
 "References:\n"
 "  [1] Constant Q transform - Wikipedia, the free encyclopedia,\n"
 "  https://en.wikipedia.org/wiki/Constant_Q_transform");
 
-
-// nextpow2 returns the smallest integer n such that 2^n >= x.
-static double nextpow2(double x) {
-  double y = ceil(log(x)/log(2.0));
-  return(y);
-}
 
 static double squaredModule(const complex<double> xx) {
   complex<double> multComplex = xx * xx;
@@ -57,7 +51,7 @@ void ConstantQ::compute() {
   }
 
   if (signal.size() != _FFTLength) {
-    throw EssentiaException("ERROR: ConstantQ::compute: The ConstantQ input size must be equal to the FFTLength : ", _FFTLength);
+    throw EssentiaException("ERROR: ConstantQ::compute: input signal size must be equal to the FFTLength: ", _FFTLength);
   }
 
   SparseKernel *sk = m_sparseKernel;
@@ -90,13 +84,14 @@ void ConstantQ::configure() {
   _binsPerOctave = parameter("binsPerOctave").toInt();
   _threshold = parameter("threshold").toDouble();
 
-  // Work out Q value for Filter bank
-  _dQ = 1/(pow(2,(1/(double)_binsPerOctave))-1); 
-  // Number of Constant Q bins
-  _uK = (unsigned int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));  
+  // Q value for filter bank
+  _dQ = 1 / (pow(2, (1/(double)_binsPerOctave)) - 1);
   
-  _FFTLength = (int) pow(2, nextpow2(ceil(_dQ *_sampleRate/_minFrequency)));
-  _hop = _FFTLength/8; // hop size is window length divided by 32
+  // number of Constant-Q bins
+  _uK = (unsigned int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));
+  
+  // FIXME convert double to long long? 
+  _FFTLength = (int) pow(2, nextPowerTwo((unsigned int) ceil(_dQ *_sampleRate/_minFrequency)));
 
   SparseKernel *sk = new SparseKernel();
 
