@@ -46,8 +46,8 @@ void Vibrato::configure() {
   _maxExtend = parameter("maxExtend").toReal();
   _sampleRate = parameter("sampleRate").toReal();
     
-  frameSize=int(0.350 * _sampleRate);
-  fftSize=4*frameSize;
+  frameSize = int(0.350 * _sampleRate);
+  fftSize = 4*frameSize;
   
   frameCutter->configure("frameSize", frameSize, "hopSize", 1, "startFromZero", true);
   window->configure("type", "hann", "zeroPadding", 3*frameSize);
@@ -55,25 +55,24 @@ void Vibrato::configure() {
   spectralPeaks->configure("sampleRate", _sampleRate, "maxPeaks", 3, "orderBy", "magnitude");
 }
 
-
 void Vibrato::compute() {
-    
-  Real vibdBDropLobe=15;
-  Real vibdBDropSecondPeak=20;
+  
+  Real vibdBDropLobe = 15.;
+  Real vibdBDropSecondPeak = 20.;
     
   const vector<Real>& pitch = _pitch.get();
-  vector<Real>& vibFrequency =_vibFrequency.get();
-  vector<Real>& vibExtend = _vibExtend.get();
+  vector<Real>& vibratoFrequency =_vibratoFrequency.get();
+  vector<Real>& vibratoExtend = _vibratoExtend.get();
 
-  // pitch vector is empty
+  // if pitch vector is empty
   if (pitch.empty()) {
-    vibFrequency.clear();
-    vibExtend.clear();
+    vibratoFrequency.clear();
+    vibratoExtend.clear();
     return;
   }
 
-  vibFrequency.assign(pitch.size(), 0.);
-  vibExtend.assign(pitch.size(), 0.);
+  vibratoFrequency.assign(pitch.size(), 0.);
+  vibratoExtend.assign(pitch.size(), 0.);
   
   vector<Real> pitchP;
     
@@ -85,6 +84,7 @@ void Vibrato::compute() {
         pitchP.push_back(pitch[i]);
     }
   }
+
   // get contour start and end indices
   vector<Real> startC, endC;
   if (pitchP[0]>0){
@@ -102,7 +102,6 @@ void Vibrato::compute() {
     endC.push_back(pitch.size()-1);
   }
 
-    
   // iterate over contour segments
   for (int i=0; i<(int)startC.size(); i++) {
     // get a segment in cents
@@ -127,21 +126,21 @@ void Vibrato::compute() {
     spectralPeaks->output("magnitudes").set(peakMagnitudes);
     frameCutter->reset();
     
-    int frameNo=0;
-    
+    int frameNumber=0;
+  
     // frame-wise processing
     while (true) {
           
       //get a frame
       frameCutter->compute();
-      frameNo++;
-          
+      frameNumber++;
+ 
       if(!frame.size()) {
         break;
       }
           
       // subtract mean pitch from frame
-      Real m=mean(frame, 0, frame.size()-1);
+      Real m = mean(frame, 0, frame.size()-1);
       for (int ii=0; ii<(int)frame.size(); ii++) {
         frame[ii]-=m;
       }
@@ -160,7 +159,6 @@ void Vibrato::compute() {
         continue;
       }
 
-      
       if (numberPeaks > 1) {  // there is at least one extra peak
         if (peakFrequencies[1] <= _maxFrequency) {
           continue;
@@ -184,9 +182,9 @@ void Vibrato::compute() {
         continue;
       }
     
-      for (int ii=startC[i]+frameNo; ii<startC[i]+frameNo+frameSize; ii++) {
-        vibFrequency[ii]=peakFrequencies[0];
-        vibExtend[ii]=ext;
+      for (int ii=startC[i]+frameNumber-1; ii<startC[i]+frameNumber+frameSize-1; ii++) {
+        vibratoFrequency[ii]=peakFrequencies[0];
+        vibratoExtend[ii]=ext;
       }
     }
   }
