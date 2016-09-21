@@ -56,7 +56,11 @@ In order to use python bindings for the library, you might also need to install 
   sudo apt-get install python-numpy-dev python-numpy python-yaml
 
 
-Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_. In the case of Essentia's **master branch**, the required version of TagLib (libtag1-dev) is greater or equal to ``1.9``. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu Utopic (14.10) repository, and in Debian wheezy-backports.
+Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_. 
+
+In the case of Essentia's **master branch**, the required version of TagLib (libtag1-dev) is greater or equal to ``1.9``. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu Utopic (14.10) repository, and in Debian wheezy-backports.
+
+If you want to install Essentia  **master** branch on older versions of Ubuntu/Debian, you will have to `install a proper LibAv version from source <https://github.com/MTG/essentia/blob/master/FAQ.md#build-essentia-on-ubuntu-1404-or-earlier>`_.
 
 
 Installing dependencies on Mac OS X
