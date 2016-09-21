@@ -1,41 +1,35 @@
-Frequently Asked Questions
-==========================
+# Frequently Asked Questions
 
-How to compute music descriptors using Essentia?
-------------------------------------------------
-
-Because Essentia is a library you are very fexible in the ways you can compute descriptors out of audio:
-
-- using [premade extractors out-of-box](doc/sphinxdoc/extractors_out_of_box.rst) (the easiest way without programming)
-- using python (see [python tutorial](doc/sphinxdoc/python_tutorial.rst))
-- writing your own C++ extractor (see the premade extractors as examples)
+libessentia.so is not found after installing from source
+--------------------------------------------------------
+The library is installed into /usr/local and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
 
 
-How to compile my own C++ code that uses Essentia?
---------------------------------------------------
+Build Essentia on Ubuntu 14.04 or earlier
+-----------------------------------------
+As it is noted in the [installation guide](http://essentia.upf.edu/documentation/installing.html), Essentia is only compatible with LibAv versions greater or equal to 10. The appropriate versions are distributed since Ubuntu 14.10 and Debian Jessie. If you have an earlier system (e.g., Ubuntu 14.04), you can choose one of the two options:
 
-Here is an example how to compile [standard_mfcc.cpp](https://github.com/MTG/essentia/blob/2.0.1/src/examples/standard_mfcc.cpp) example on Linux linking with a system-wide installation of Essentia (done by ```./waf install```) and all its dependencies. Modify to your needs. 
+- upgrade your system which is recommended to do anyways in the long-term (e.g., to the latest Ubuntu LTS 16.04)
+- install the LibAv dependency from source
 
-```
-g++ -pipe -Wall -O2 -fPIC -I/usr/local/include/essentia/ -I/usr/local/include/essentia/scheduler/ -I/usr/local/include/essentia/streaming/  -I/usr/local/include/essentia/utils -I/usr/include/taglib -I/usr/local/include/gaia2 -I/usr/include/qt4 -I/usr/include/qt4/QtCore -D__STDC_CONSTANT_MACROS standard_mfcc.cpp -o standard_mfcc -L/usr/local/lib -lessentia -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lsamplerate -ltag -lfftw3f -lQtCore -lgaia2
-```
+To install LibAv from source:
 
-Alternatively, if you want to create and build your own examples, the easiest way is to add them to ```src/examples``` folder, modify ```src/examples/wscript``` file accordingly and use ```./waf configure --with-examples; ./waf``` to build them.
-
-You can build your application using XCode (OSX) following [these steps](https://github.com/MTG/essentia/issues/58#issuecomment-38530548).
-
-
-OSX static builds and templates (JUCE/VST and openFrameworks)
-------------------------------------------------------------------------------------------------------------
-
-Here you can find portable 32-bit static builds of the Essentia C++ library and its dependencies for OSX (thanks to Cárthach from GiantSteps) as well as templates for JUCE/VST and openFrameworks:
-
-https://github.com/GiantSteps/Essentia-Libraries 
-
+- If you have installed LibAv before, remove it so that it does not mess up Essentia installation 
+    ```
+    sudo apt-get remove libavcodec-dev libavformat-dev libavutil-dev libavresample-dev
+    ```
+- Download and unpack [LibAv source code](https://libav.org/download/)
+- Configure and build LibAv. The library will be installed to ```/usr/local```.
+    ```
+    ./configure --disable-yasm --enable-shared
+    make
+    sudo make install
+    ```
+- [Configure and build Essentia](http://essentia.upf.edu/documentation/installing.html#compiling-essentia)
 
 
 Linux/OSX static builds
--------------------
+-----------------------
 
 Follow the steps below to create static build of the library and executable example extractors.
 
@@ -76,6 +70,38 @@ Build Essentia:
 The static executables will be in the ```build/src/examples``` folder.
 
 
+Building lightweight Essentia with reduced dependencies 
+-----------------------------------------------------
+Since version 2.1, build scripts can be configured to ignore 3rdparty dependencies required by Essentia in order to create a striped-down version of the library.  Use  ```./waf configure``` command with the ```--lightweight``` flag to provide the list of 3rdparty dependencies to be included. For example, the command below will configure to build Essentia avoiding all dependencies except fftw:
+```
+./waf configure --lightweight=fftw
+```
+
+Avoid all dependencies including fftw and build with KissFFT instead (BSD, included in Essentia therefore no external linking needed, cross-platform):
+
+```
+./waf configure --lightweight= --fft=KISS
+```
+
+Avoid all dependencies and build with Accelerate FFT (native on OSX/iOS):
+
+```
+./waf configure --lightweight= --fft=ACCELERATE
+```
+
+It is also possible to specify algorithms to be ignored using the ```--ignore-algos``` flag, although you need to take care that the ignored algorithm are not required by any of the algorithms and examples that will be compiled. 
+
+Note, that Essentia includes in its code the Spline library (LGPLv3) which is used by Spline and CubicSpline algorithms and is built by default. To ignore this library, use the following flag in ```./waf configure``` command:
+```
+--ignore-algos=Spline,CubicSpline
+```
+
+For more details on the build flags, run:
+```
+./waf --help
+```
+
+
 Cross-compiling for Windows on Linux
 ------------------------------------
 
@@ -107,6 +133,7 @@ export PATH=~/Dev/android/toolchain/bin:$PATH;
 ./waf
 ./waf install
 ```
+
 
 Cross-compiling for iOS
 -----------------------
@@ -157,6 +184,27 @@ LIB_DIR=$EMSCRIPTEN/system/local/lib
 emcc -Oz -c application.cpp application.bc
 emcc -Oz application.bc ${LIB_DIR}/libessentia.a ${LIB_DIR}/libfftw3f.a -o out.js
 ```
+
+
+OSX static builds and templates (JUCE/VST and openFrameworks)
+-------------------------------------------------------------
+
+Here you can find portable 32-bit static builds of the Essentia C++ library and its dependencies for OSX (thanks to Cárthach from GiantSteps) as well as templates for JUCE/VST and openFrameworks:
+
+https://github.com/GiantSteps/Essentia-Libraries
+
+
+Building standalone Essentia Vamp plugin
+----------------------------------------
+
+It is possible to create a standalone binary for Essentia's Vamp plugin (works for Linux and OSX).
+
+```
+./waf configure --build-static --with-vamp --mode=release --lightweight= --fft=KISS
+./waf
+```
+
+The resulting binary (```build/src/examples/libvamp_essentia.so``` on Linux, ```build/src/examples/libvamp_essentia.dylib``` on OSX) is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
 
 
 Running tests
@@ -211,28 +259,29 @@ A number of assert methods are available:
 - ```assertAlmostEqualAbs```, ```assertAlmostEqualVectorAbs``` (test if the difference between observed and expected value is lower than then the given absolute threshold)
 
 
-How to know which other Algorithms an Algorithm uses?
------------------------------------------------------
+How to compile my own C++ code that uses Essentia?
+--------------------------------------------------
 
-The most obvious answer is: by reading its code. However, it is also possible to generate such a list automatically. 
+Here is an example how to compile [standard_mfcc.cpp](https://github.com/MTG/essentia/blob/2.0.1/src/examples/standard_mfcc.cpp) example on Linux linking with a system-wide installation of Essentia (done by ```./waf install```) and all its dependencies. Modify to your needs. 
 
-Running the python script ```src/examples/python/show_algo_dependencies.py``` will output a list of all intermediate Algorithms created within each Algorithm in Essentia. It utilizes the logging framework and watches for messages generated by AlgorithmFactory at the moment of running ```create()``` method for each internal algorithm.  
-
-Note, that you cannot be sure this list of dependencies is 100% correct as the script simply instantiates each algorithm to test for its dependencies, but does not run the ```compute``` stage. It is up to developers conscience to keep instantiations in a correct place, and if an Algorithm is being created on the ```compute``` stage, it will be unnoticed.
-
-## How many algorithms are in Essentia?
-
-The amount of algorithms counting streaming and standard mode separately:
 ```
-python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
-cat /tmp/all.txt | grep -- "---------- " | wc -l
+g++ -pipe -Wall -O2 -fPIC -I/usr/local/include/essentia/ -I/usr/local/include/essentia/scheduler/ -I/usr/local/include/essentia/streaming/  -I/usr/local/include/essentia/utils -I/usr/include/taglib -I/usr/local/include/gaia2 -I/usr/include/qt4 -I/usr/include/qt4/QtCore -D__STDC_CONSTANT_MACROS standard_mfcc.cpp -o standard_mfcc -L/usr/local/lib -lessentia -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lsamplerate -ltag -lfftw3f -lQtCore -lgaia2
 ```
 
-The amount of algorithms counting both modes as one algorithm:
-```
-python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
-cat /tmp/all.txt | grep -- "---------- " | cut -c 12- | sed s/"streaming : "// | sed s/"standard : "// | sed s/" ----------"// | sort -u | wc -l
-```
+Alternatively, if you want to create and build your own examples, the easiest way is to add them to ```src/examples``` folder, modify ```src/examples/wscript``` file accordingly and use ```./waf configure --with-examples; ./waf``` to build them.
+
+You can build your application using XCode (OSX) following [these steps](https://github.com/MTG/essentia/issues/58#issuecomment-38530548).
+
+
+How to compute music descriptors using Essentia?
+------------------------------------------------
+
+Because Essentia is a library you are very fexible in the ways you can compute descriptors out of audio:
+
+- using [premade extractors out-of-box](doc/sphinxdoc/extractors_out_of_box.rst) (the easiest way without programming)
+- using python (see [python tutorial](doc/sphinxdoc/python_tutorial.rst))
+- writing your own C++ extractor (see the premade extractors as examples)
+
 
 Training and running classifier models in Gaia
 ----------------------------------------------
@@ -274,36 +323,29 @@ In the preprocessing stage, training script loads all descriptor files according
 Note that cross-validation script splits the ground-truth dataset into train and test sets randomly. In the case of music classification tasks one may want to assure artist/album filtering (that is, no artist/album occures in the test set if it occures in train set). Current way to achieve it is to ensure that the whole input dataset contains only one item per artist/album. Alternatively, you can adapt the scripts to suit your needs.
 
 
-Building lightweight Essentia with reduced dependencies 
+How to know which other Algorithms an Algorithm uses?
 -----------------------------------------------------
-Since version 2.1, build scripts can be configured to ignore 3rdparty dependencies required by Essentia in order to create a striped-down version of the library.  Use  ```./waf configure``` command with the ```--lightweight``` flag to provide the list of 3rdparty dependencies to be included. For example, the command below will configure to build Essentia avoiding all dependencies except fftw:
+
+The most obvious answer is: by reading its code. However, it is also possible to generate such a list automatically. 
+
+Running the python script ```src/examples/python/show_algo_dependencies.py``` will output a list of all intermediate Algorithms created within each Algorithm in Essentia. It utilizes the logging framework and watches for messages generated by AlgorithmFactory at the moment of running ```create()``` method for each internal algorithm.  
+
+Note, that you cannot be sure this list of dependencies is 100% correct as the script simply instantiates each algorithm to test for its dependencies, but does not run the ```compute``` stage. It is up to developers conscience to keep instantiations in a correct place, and if an Algorithm is being created on the ```compute``` stage, it will be unnoticed.
+
+## How many algorithms are in Essentia?
+
+The amount of algorithms counting streaming and standard mode separately:
 ```
-./waf configure --lightweight=fftw
+python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
+cat /tmp/all.txt | grep -- "---------- " | wc -l
 ```
 
-Avoid all dependencies including fftw and build with KissFFT instead (BSD, included in Essentia therefore no external linking needed, cross-platform):
-
+The amount of algorithms counting both modes as one algorithm:
 ```
-./waf configure --lightweight= --fft=KISS
-```
-
-Avoid all dependencies and build with Accelerate FFT (native on OSX/iOS):
-
-```
-./waf configure --lightweight= --fft=ACCELERATE
+python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
+cat /tmp/all.txt | grep -- "---------- " | cut -c 12- | sed s/"streaming : "// | sed s/"standard : "// | sed s/" ----------"// | sort -u | wc -l
 ```
 
-It is also possible to specify algorithms to be ignored using the ```--ignore-algos``` flag, although you need to take care that the ignored algorithm are not required by any of the algorithms and examples that will be compiled. 
-
-Note, that Essentia includes in its code the Spline library (LGPLv3) which is used by Spline and CubicSpline algorithms and is built by default. To ignore this library, use the following flag in ```./waf configure``` command:
-```
---ignore-algos=Spline,CubicSpline
-```
-
-For more details on the build flags, run:
-```
-./waf --help
-```
 
 Using Essentia real-time
 ------------------------
@@ -320,24 +362,6 @@ You can also use Essentia's standard mode for real-time computations.
 Not all algorithms available in the library are suited for real-time analysis due to their computational complexity. Some complex algorithms, such as BeatTrackerDegara, BeatTrackerMultiFeatures, and PredominantMelody, require large segments of audio in order to function properly.
 
 Make sure that you do not reconfigure an algorithm (from the main UI thread, most likely) while an audio callback (from an audio thread) is currently being called, as the algorithms are not thread-safe.
-
-
-libessentia.so is not found after installing from source
---------------------------------------------------------
-The library is installed into /usr/local and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
-
-
-Building standalone Essentia Vamp plugin
-----------------------------------------
-
-It is possible to create a standalone binary for Essentia's Vamp plugin (works for Linux and OSX).
-
-```
-./waf configure --build-static --with-vamp --mode=release --lightweight= --fft=KISS
-./waf
-```
-
-The resulting binary (```build/src/examples/libvamp_essentia.so``` on Linux, ```build/src/examples/libvamp_essentia.dylib``` on OSX) is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
 
 
 Essentia Music Extractor
