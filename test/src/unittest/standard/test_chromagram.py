@@ -58,11 +58,10 @@ class TestChromagram(TestCase):
        
         DiverPer = abs(sum(((QMChroma_out-Chroma_data)/QMChroma_out)*100)/len(QMChroma_out) )#divergence mean percentage 
         
-        
-        print '\n'
+        """
         print 'Divergence mean percentage is : '+str(DiverPer)[:5]+'%'
         print 'Difference Mean is : '+str(DifferMean)
-
+        """
        
 
 
