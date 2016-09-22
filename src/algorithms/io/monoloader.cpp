@@ -47,6 +47,11 @@ MonoLoader::MonoLoader() : AlgorithmComposite(),
   _audioLoader->output("numberChannels")  >>  _mixer->input("numberChannels");
   _mixer->output("audio")                 >>  _resample->input("signal");
 
+  _audioLoader->output("md5")        >> NOWHERE;
+  _audioLoader->output("bit_rate")   >> NOWHERE;
+  _audioLoader->output("codec")      >> NOWHERE;
+  _audioLoader->output("sampleRate") >> NOWHERE;
+
   attach(_resample->output("signal"), _audio);
 }
 
