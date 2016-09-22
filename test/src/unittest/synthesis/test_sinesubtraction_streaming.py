@@ -115,17 +115,10 @@ def analsynthSineSubtractionStreaming(params, signal):
     
     essentia.run(insignal)
     
-    print pool['frames'].shape
     outaudio = framesToAudio(pool['frames'])    
     outaudio = outaudio [2*params['hopSize']:]
     
     return outaudio, pool
-
-
-
-
-
-
 
 
 #-------------------------------------
