@@ -67,10 +67,10 @@ class TestCQ(TestCase):
         DiverPer = (DiverPerReal + DiverPerImag) / 2
 
         
-        print '\n'
+        """
         print 'Divergence mean percentage is : '+str(DiverPer)[:5]+'%'
         print 'Difference Mean is : '+str(DifferMean)[:9]
-        
+        """
 
 
 

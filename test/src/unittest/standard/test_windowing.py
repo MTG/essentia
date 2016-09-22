@@ -74,7 +74,7 @@ class TestWindowing(TestCase):
         self.assertEqualVector([0] * (inputSize + paddingSize),  output)
 
     def normalize(self, window = []):
-        if window == None:
+        if window is None:
             return None
         sum_win = sum(window)
         return [2.0*i/sum_win for i in window]
