@@ -51,9 +51,7 @@ class ReplayGain : public Algorithm {
   }
 
   void configure();
-
   void reset();
-
   void compute();
 
   static const char* name;
