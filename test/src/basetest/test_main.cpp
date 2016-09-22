@@ -99,7 +99,9 @@ DEFINE_TEST_ALGO(A5);
 DEFINE_TEST_ALGO(A6);
 
 const char* essentia::streaming::DevNullSample::name = "DevNull";
+const char* essentia::streaming::DevNullSample::category = "Aux";
 const char* essentia::streaming::DevNullSample::description = "";
 
 const char* essentia::streaming::PoolStorageFrame::name = "PoolStorage";
+const char* essentia::streaming::PoolStorageFrame::category = "Aux";
 const char* essentia::streaming::PoolStorageFrame::description = "";
