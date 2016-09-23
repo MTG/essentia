@@ -356,6 +356,10 @@ and hence are not available in python.</p>
     open('_templates/algorithms_reference.html', 'w').write(html)
 
 
+    # Copy convert FAQ.md to rst and copy to documenation folder
+    subprocess.call(['pandoc', '../../FAQ.md', '-o', 'FAQ.rst'])
+
+
 
 if __name__ == '__main__':
     write_algorithms_reference()
