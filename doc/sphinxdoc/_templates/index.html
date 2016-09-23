@@ -58,9 +58,8 @@
     industrial applications. Large part of Essentia's algorithms is well-suited for
     <a href="https://github.com/MTG/essentia/blob/master/FAQ.md#using-essentia-real-time"><strong>real-time</strong></a> applications.</p>
 
-  </div>
 
-    <h2>Crediting Essentia</h2>
+    <h2>Crediting Essentia<a class="headerlink" href="#crediting-essentia" title="Permalink to this headline">¶</a></h2>
     <p>Please credit properly your use of Essentia! If you use the Essentia library in your software please
     acknowledge it and specify its origen as <a>http://essentia.upf.edu</a>. If you do some research and publish an article,
     cite both the Essentia paper [1] and the specific references mentioned in the documentation of the algorithms used.
@@ -72,62 +71,83 @@
     href="http://mtg.upf.edu/node/2793">ESSENTIA: an Audio Analysis
     Library for Music Information Retrieval.</a> International Society for Music Information Retrieval Conference
     (ISMIR'13). 493-498.</p>
+  </div>
+
+  <div class="section" id="contents">
+  <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+
+  <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Contents and search</a><br/>
+      <span class="linkdescr">For a complete overview of the documentation</span></p>
 
 
-  <h2>User Documentation</h2>
-
+  <h2>Getting started</h2>
   <table class="contentstable" align="center" style="margin-left: 30px"><tr>
     <td width="50%">
+      
       <p class="biglink"><a class="biglink" href="{{ pathto("introduction") }}">Introduction</a><br/>
          <span class="linkdescr">An introduction to Essentia's main concepts</span></p>
 
       <p class="biglink"><a class="biglink" href="{{ pathto("installing") }}">Building and installing Essentia</a><br/>
-         <span class="linkdescr">Instructions to get Essentia running on your computer</span></p>
+          <span class="linkdescr">Instructions to get Essentia running on your computer</span></p>
 
-      <p class="biglink"><a class="biglink" href="{{ pathto("algorithms_overview") }}">Algorithms overview</a><br/>
-         <span class="linkdescr">A quick description of the main algorithms</span></p>
+  <p class="biglink"><a class="biglink" href="{{ pathto("algorithms_overview") }}">Algorithms overview</a><br/>
+     <span class="linkdescr">A quick description of the main algorithms</span></p>
+    </td><td width="50%">
 
       <p class="biglink"><a class="biglink" href="{{ pathto("python_tutorial") }}">Python tutorial for beginners</a><br/>
          <span class="linkdescr">A hands-on introduction to Essentia</span></p>
 
       <p class="biglink"><a class="biglink" href="{{ pathto("extractors_out_of_box") }}">Using extractors out-of-box</a><br/>
-         <span class="linkdescr">Getting some quick results with no programming required</span></p>
+         <span class="linkdescr">Quick results with no programming required</span></p>
 
-    </td><td width="50%">
-
-      <p class="biglink"><a class="biglink" href="{{ pathto("design_overview") }}">Design Overview</a><br/>
-         <span class="linkdescr">An explanation of Essentia's basic types and classes</span></p>
-
-      <p class="biglink"><a class="biglink" href="{{ pathto("howto_standard_extractor") }}">"Standard" mode how-to</a><br/>
-         <span class="linkdescr">Learn how to write a "standard" extractor</span></p>
-      <p class="biglink"><a class="biglink" href="{{ pathto("streaming_architecture") }}">Streaming mode architecture</a><br/>
-         <span class="linkdescr">A description of how the "streaming" mode works</span></p>
-
-      <p class="biglink"><a class="biglink" href="{{ pathto("howto_streaming_extractor") }}">"Streaming" mode how-to</a><br/>
-         <span class="linkdescr">Learn how to write a "streaming" extractor</span></p>
-
-      <p class="biglink"><a class="biglink" href="{{ pathto("algorithms_reference") }}">Algorithm reference</a><br/>
-         <span class="linkdescr">The detailed documentation for all the algorithms</span></p>
+      <p class="biglink"><a class="biglink" href="{{ pathto("FAQ") }}">Frequently asked questions</a><br/>
+        <span class="linkdescr">Various tips on how to build and use Essentia</span></p>
 
     </td></tr>
   </table>
 
 
-  <h2>Developer Documentation</h2>
+  <h2>Using Essentia</h2>
 
   <table class="contentstable" align="center" style="margin-left: 30px"><tr>
     <td width="50%">
 
-      <p class="biglink"><a class="biglink" href="{{ pathto("extending_essentia") }}">Extending Essentia</a><br/>
+      <p class="biglink"><a class="biglink" href="{{ pathto("design_overview") }}">Design overview</a><br/>
+         <span class="linkdescr">An explanation of Essentia's basic types and classes</span></p>
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("algorithms_reference") }}">Algorithm reference</a><br/>
+        <span class="linkdescr">The detailed documentation for all the algorithms</span></p>
+
+    </td><td width="50%">
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("howto_standard_extractor") }}">Using standard mode</a><br/>
+         <span class="linkdescr">Learn how to write a "standard" extractor</span></p>
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("howto_streaming_extractor") }}">Using streaming mode</a><br/>
+         <span class="linkdescr">Learn how to write a "streaming" extractor</span></p>
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("streaming_architecture") }}">Streaming mode architecture</a><br/>
+         <span class="linkdescr">A description of how the "streaming" mode works</span></p>
+
+    </td></tr>
+  </table>
+
+
+  <h2>Extending Essentia</h2>
+
+  <table class="contentstable" align="center" style="margin-left: 30px"><tr>
+    <td width="50%">
+
+      <p class="biglink"><a class="biglink" href="{{ pathto("extending_essentia") }}">Standard algorithms</a><br/>
          <span class="linkdescr">How to write new "standard" algorithms for Essentia</span></p>
 
-      <p class="biglink"><a class="biglink" href="{{ pathto("extending_essentia_streaming") }}">Extending Essentia "streaming"</a><br/>
+      <p class="biglink"><a class="biglink" href="{{ pathto("extending_essentia_streaming") }}">Streaming algorithms</a><br/>
          <span class="linkdescr">How to write new "streaming" algorithms for Essentia</span></p>
 
-      <p class="biglink"><a class="biglink" href="{{ pathto("composite_api") }}">Composite API</a><br/>
+      <p class="biglink"><a class="biglink" href="{{ pathto("composite_api") }}">AlgorithmComposite algorithms</a><br/>
          <span class="linkdescr">The inner workings of the composite algorithms</span></p>
 
-      <p class="biglink"><a class="biglink" href="{{ pathto("execution_network_algorithm") }}">Execution network algorithm</a><br/>
+      <p class="biglink"><a class="biglink" href="{{ pathto("execution_network_algorithm") }}">Streaming network execution</a><br/>
          <span class="linkdescr">How Essentia's streaming scheduler works</span></p>
 
 
@@ -139,18 +159,9 @@
 
       <p class="biglink"><a class="biglink" href="{{ pathto("coding_guidelines") }}">Coding guidelines</a><br/>
          <span class="linkdescr">Good practices to follow when developing new algorithms</span></p>
-
-
-      <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Contents</a><br/>
-         <span class="linkdescr">For a complete overview of the documentation</span></p>
-
-      <p class="biglink"><a class="biglink" href="{{ pathto("FAQ") }}">Frequently asked questions</a><br/>
-         <span class="linkdescr">&nbsp;</span></p>
-
-
     </td></tr>
   </table>
-
+  </div>
 
 <!--
 <div class="section" id="examples">
