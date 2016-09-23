@@ -51,7 +51,7 @@ class TestAudioOnsetsMarker(TestCase):
         j = 0
         i = 0
         while i < inputSize:
-          if diff[i] > epsilon:
+          if diff[int(i)] > epsilon:
             found[j] = float(i)/float(sr)
             j += 1
             i += onsetWidth

@@ -100,7 +100,7 @@ class TestOnsetDetection(TestCase):
             nframe += 1
 
     def testConstantInput(self):
-        audio = ones(44100.0*5)
+        audio = ones(44100*5)
         frames = FrameGenerator(audio, frameSize=framesize, hopSize=hopsize)
         win = Windowing(type='hamming')
         fft = FFT()

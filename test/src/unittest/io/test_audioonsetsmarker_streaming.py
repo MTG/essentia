@@ -60,7 +60,7 @@ class TestAudioOnsetsMarker_Streaming(TestCase):
           if diff[i] > epsilon:
             found.append(float(i)/float(sr))
             j += 1
-            i += onsetWidth
+            i = int(i + onsetWidth)
           else: i+=1
         self.assertAlmostEqualVector(found, onsets, 1.5e-3)
 

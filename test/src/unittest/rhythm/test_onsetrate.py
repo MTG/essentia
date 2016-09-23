@@ -32,7 +32,7 @@ class TestOnsetRate(TestCase):
 
     def testZero(self):
         # zeros should return no onsets
-        size = 5*sr
+        size = int(5*sr)
         times, rate = OnsetRate()(zeros(size))
         self.assertEqualVector(times, [])
         self.assertEqual(rate, 0)

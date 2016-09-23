@@ -151,9 +151,16 @@ class TestMonoLoader(TestCase):
         # find time shift between impulse positions
         impulses_mp3 = [x for x in range(len(mp3)) if mp3[x]>0.9]
         impulses_wav = [x for x in range(len(wav)) if wav[x]>0.9]
+
         shift = impulses_mp3[0] - impulses_wav[0]
-        # the expected shift is 1105 samples
-        self.assertEqual(abs(shift), 1105) 
+        # FIXME:
+        # For this particular audio files in essentia 2.1_beta2 with an older libav version
+        # the expected shift was 1105 samples, however now there is no shift
+        # Nevertheless time shift can be observed on other examples but we still do not have such tests 
+
+        #self.assertEqual(abs(shift), 1105)
+        self.assertEqual(abs(shift), 0)
+
 
 ###############
 # #OGG
