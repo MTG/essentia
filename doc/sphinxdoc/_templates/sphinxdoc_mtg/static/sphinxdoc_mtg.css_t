@@ -168,7 +168,7 @@ a:not(.header-logo, .footer__link, .headerlink):hover {
 
 h1 {
     font-weight: lighter;
-    font-size: 50px;
+    font-size: 2em;
     margin: 0;
     padding: 0.7em 0 0.3em 0;
     font-size: 40px;
@@ -178,7 +178,7 @@ h1 {
 
 h2 {
     margin: 1.3em 0 0.2em 0;
-    font-size: 32px;
+    font-size: 1.7em;
     margin-bottom: 15px;
     padding: 0;
     padding-bottom: 10px;
@@ -189,7 +189,7 @@ h2 {
 
 h3 {
     margin: 13px 0 10px 0;
-    font-size: 24px;
+    font-size: 1.5em;
     color: #5a5959;
     line-height: 1.1;
 }
@@ -464,9 +464,9 @@ table td, table th {
     display: inline-block;
     float: right;
     margin: 0;
-    height: 100%;
+    height: 100%!important;
     max-height: 75px;
-    padding-bottom: 0;
+    padding-bottom: 0!important;
     transform: translateY(0);
     opacity: 1;
     pointer-events: all;
@@ -475,7 +475,6 @@ table td, table th {
   .navbar__menu__item {
     display: inline-block;
     vertical-align: middle;
-    font-weight: lighter;
   }
 
   .header {
