@@ -113,43 +113,50 @@ ReplayGain::ReplayGain() : _applyEqloud(false) {
   _fc       = factory.create("FrameCutter");
   _instantp = factory.create("InstantPower");
 
-  // _applyEqloud = false at construction time, do not connect the _eqloud algorithm
-  _signal                     >>  _fc->input("signal");
-  
+  // Do not apply equal-loudness filter by default
+  _applyEqloud = false;
+  _signal                    >>  _fc->input("signal");
+  _fc->output("frame")       >> _instantp->input("array");
+  _instantp->output("power") >> PC(_pool, "internal.power");
 }
 
 
 ReplayGain::~ReplayGain() {
-  _network->deleteAlgorithms();
-  delete _network;
+  if (!_network) {
+    _network->deleteAlgorithms();
+    delete _network;
+  }
   if (!_applyEqloud) delete _eqloud;
 }
 
 
 void ReplayGain::configure() {
-  int sampleRate = parameter("sampleRate").toInt();
+  if (!_network) {
+    delete _network;
+  } 
+  _signal.detach();
+  if (_applyEqloud) {
+    disconnect(_eqloud->output("signal"), _fc->input("signal"));
+  }
+
   _applyEqloud = parameter("applyEqloud").toBool();
+  int sampleRate = parameter("sampleRate").toInt();
 
   // use a 50ms window
   _fc->configure("silentFrames", "noise", 
                  "startFromZero", true,
                  "frameSize", int(0.05 * sampleRate),
                  "hopSize", int(0.05 * sampleRate));
-  if (!_network) delete _network;
-  _signal.detach();  
-
-  _fc->output("frame")       >> _instantp->input("array");
-  _instantp->output("power") >> PC(_pool, "internal.power");
-
+  
   if (_applyEqloud) {
-    _signal                   >> _eqloud->input("signal");
-    _eqloud->output("signal") >> _fc->input("signal");
+    _signal                    >> _eqloud->input("signal");
+    _eqloud->output("signal")  >> _fc->input("signal");
 
     _eqloud->configure("sampleRate", sampleRate);
     _network = new scheduler::Network(_eqloud, false);
   }
   else {
-    _signal  >>  _fc->input("signal");
+    _signal                    >>  _fc->input("signal");    
     _network = new scheduler::Network(_fc, false);
   } 
 }
