@@ -32,8 +32,8 @@ class TestBeatsLoudness(TestCase):
     def computeSingleBeatLoudness(self, beat, audio, sr):
         beatWindowDuration = 0.1
         beatDuration = 0.05
-        start = (beat - beatWindowDuration/2)*sr
-        end = (beat + beatWindowDuration/2 + beatDuration + 0.0001)*sr
+        start = int(round((beat - beatWindowDuration/2)*sr))
+        end = int(round((beat + beatWindowDuration/2 + beatDuration + 0.0001)*sr))
         # SingleBeatLoudness will throw exception if the audio fragment is too short,
         # this will happen when the beat is too close to the beginning of the signal so that 
         # the beat window will start actually before it
@@ -41,7 +41,7 @@ class TestBeatsLoudness(TestCase):
             # reposition the window
             end = start - end
             start = 0
-        return SingleBeatLoudness(frequencyBands = [20,150])(audio[start:end])
+        return SingleBeatLoudness(frequencyBands=[20, 150])(audio[start:end])
 
     def testEmpty(self):
         gen = VectorInput([])

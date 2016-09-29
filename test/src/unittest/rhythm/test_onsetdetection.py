@@ -49,7 +49,7 @@ class TestOnsetDetection(TestCase):
         audiosize = 10000
         audio = zeros(audiosize)
         pos = 5.5  # impulse will be in between frames 4 and 5
-        audio[floor(pos*(hopsize))] = 1.
+        audio[int(floor(pos*(hopsize)))] = 1.
         frames = FrameGenerator(audio, frameSize=framesize, hopSize=hopsize,
                 startFromZero=True)
         win = Windowing(type='hamming')
@@ -100,7 +100,7 @@ class TestOnsetDetection(TestCase):
             nframe += 1
 
     def testConstantInput(self):
-        audio = ones(44100.0*5)
+        audio = ones(44100*5)
         frames = FrameGenerator(audio, frameSize=framesize, hopSize=hopsize)
         win = Windowing(type='hamming')
         fft = FFT()

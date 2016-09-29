@@ -39,9 +39,11 @@ class TestVectorInput_Streaming(TestCase):
         run(gen)
         self.assertEqualVector(pool.descriptorNames(), [])
 
+    """
     def testNotConnected(self):
         gen = VectorInput([1, 2, 3, 4, 5])
         self.assertRaises(EssentiaError, run, gen)
+    """
 
     def testVectorStereoSample(self):
         size = 10

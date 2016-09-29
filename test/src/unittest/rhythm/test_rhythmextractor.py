@@ -111,6 +111,16 @@ class TestRhythmExtractor(TestCase):
                     else:
                         self.assertAlmostEqual(found[i], expected[j], precision)
 
+    def assertVectorWithinVectorFixedPrecision(self, found, expected, precision=2):
+        for i in xrange(len(found)):
+            for j in xrange(1,len(expected)):
+                if found[i] <= expected[j] and found[i] >= expected[j-1]:
+                    if fabs(found[i] - expected[j-1]) < fabs(expected[j] - found[i]):
+                        self.assertAlmostEqualFixedPrecision(found[i], expected[j-1], precision)
+                    else:
+                        self.assertAlmostEqualFixedPrecision(found[i], expected[j], precision)
+
+
     def _assertEqualResults(self, result, expected):
         self.assertEqual(result[0], expected[0]) #bpm
         self.assertEqualVector(result[1], expected[1]) # ticks
@@ -267,13 +277,15 @@ class TestRhythmExtractor(TestCase):
         expectedTicks = [i/44100. for i in xrange(len(impulseTrain)) if impulseTrain[i]!= 0]
         
         result = self.runInstance(impulseTrain, expectedTicks)
+        print "DEBUG", expectedTicks
+        print "result:", result[1]
 
         # bpm
         expectedBpm = 200
         self.assertAlmostEqual(result[0], expectedBpm, .5)
 
         # ticks
-        self.assertVectorWithinVector(result[1], expectedTicks, .1)
+        self.assertVectorWithinVectorFixedPrecision(result[1], expectedTicks, 1)
 
         # bpm estimates
         for i in xrange(len(result[2])):

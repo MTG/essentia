@@ -57,7 +57,7 @@ class TestWindowing(TestCase):
     def testZeropadding(self):
         # Checks whether the signal gets zero-padded correctly
         inputSize = 9
-        halfInputSize = math.ceil(inputSize / 2.0)
+        halfInputSize = int(math.ceil(inputSize / 2.0))
         paddingSize = 9
 
         input = [1] * inputSize

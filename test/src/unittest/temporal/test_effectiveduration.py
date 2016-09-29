@@ -45,7 +45,6 @@ class TestEffectiveDuration(TestCase):
 
     def testThresholdRatioZero(self):
         input = [1] * 100
-        print EffectiveDuration(thresholdRatio=0.)(input)
         self.assertAlmostEqual(EffectiveDuration(thresholdRatio=0.)(input), 
                                100/44100.)
 
