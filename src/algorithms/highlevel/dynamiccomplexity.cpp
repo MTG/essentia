@@ -28,7 +28,7 @@ namespace standard {
 
 const char* DynamicComplexity::name = "DynamicComplexity";
 const char* DynamicComplexity::category = "Loudness/dynamics";
-const char* DynamicComplexity::description = DOC("The dynamic complexity is the average absolute deviation from the global loudness level estimate on the dB scale. It is related to the dynamic range and to the amount of fluctuation in loudness present in a recording. Silence at the beginning and at the end of a track are ignored in the computation in order not to deteriorate the results.\n\n"
+const char* DynamicComplexity::description = DOC("This algorithm computes the dynamic complexity defined as the average absolute deviation from the global loudness level estimate on the dB scale. It is related to the dynamic range and to the amount of fluctuation in loudness present in a recording. Silence at the beginning and at the end of a track are ignored in the computation in order not to deteriorate the results.\n\n"
 "References:\n"
 "  [1] S. Streich, Music complexity: a multi-faceted description of audio\n"
 "  content, UPF, Barcelona, Spain, 2007.");

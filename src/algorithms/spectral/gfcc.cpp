@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* GFCC::name = "GFCC";
 const char* GFCC::category = "Spectral";
-const char* GFCC::description = DOC("This algorithm computes the equivalent of MFCCs but using a gammatone filterbank (ERBBands) scaled on an Equivalent Rectangular Bandwidth (ERB) scale. These coefficients could be called 'Gammatone Feature Cepstral Coefficients.\n"
+const char* GFCC::description = DOC("This algorithm computes the Gammatone-frequency cepstral coefficients of a spectrum. This is an equivalent of MFCCs, but using a gammatone filterbank (ERBBands) scaled on an Equivalent Rectangular Bandwidth (ERB) scale.\n"
 "\n"
 "References:\n"
 "  [1] Y. Shao, Z. Jin, D. Wang, and S. Srinivasan, \"An auditory-based feature\n"

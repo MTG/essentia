@@ -80,16 +80,13 @@ namespace standard {
 
 const char* OverlapAdd::name = "OverlapAdd";
 const char* OverlapAdd::category = "Standard";
-const char* OverlapAdd::description = DOC(
-"This algorithm returns the output of an overlap-add process of a sequence of input audio signal frames. It considers that the input audio frames are windowed audio signals. Giving the size of the frame and the hop size, overlapping and adding consecutive frames will produce a continuous signal. A normalization gain can be passed as parameter. \n"
-".\n"
+const char* OverlapAdd::description = DOC("This algorithm returns the output of an overlap-add process for a sequence of frames of an audio signal. It considers that the input audio frames are windowed audio signals. Giving the size of the frame and the hop size, overlapping and adding consecutive frames will produce a continuous signal. A normalization gain can be passed as a parameter.\n"
 "\n"
 "Empty input signals will raise an exception.\n"
 "\n"
 "References:\n"
 "  [1] Overlap–add method - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Overlap-add_method\n\n"
-);
+"  http://en.wikipedia.org/wiki/Overlap-add_method");
 
 
 void OverlapAdd::configure() {

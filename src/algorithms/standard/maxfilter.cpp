@@ -27,7 +27,7 @@ namespace standard {
 
 const char* MaxFilter::name = "MaxFilter";
 const char* MaxFilter::category = "Filters";
-const char* MaxFilter::description = DOC("Maximum filter for 1d signal using van Herk/Gil-Werman (HGW) algorithm.\n"
+const char* MaxFilter::description = DOC("This algorithm implements a maximum filter for 1d signal using van Herk/Gil-Werman (HGW) algorithm.\n"
 "\n"
 "References:\n"
 "  [1] Kutil, R., and Mraz, E., Short vector SIMD parallelization of maximum filter,\n"

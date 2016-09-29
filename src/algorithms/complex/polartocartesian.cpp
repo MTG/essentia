@@ -25,7 +25,7 @@ using namespace standard;
 
 const char* PolarToCartesian::name = "PolarToCartesian";
 const char* PolarToCartesian::category = "Math";
-const char* PolarToCartesian::description = DOC("This algorithm converts an array of complex numbers from its polar form to its cartesian form through the Euler formula:\n"
+const char* PolarToCartesian::description = DOC("This algorithm converts an array of complex numbers from polar to cartesian form. It uses the Euler formula:\n"
 "  z = x + i*y = |z|(cos(α) + i sin(α))\n"
 "    where x = Real part, y = Imaginary part,\n"
 "    and |z| = modulus = magnitude, α = phase\n"

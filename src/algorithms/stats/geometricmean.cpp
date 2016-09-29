@@ -25,9 +25,9 @@ using namespace standard;
 
 const char* GeometricMean::name = "GeometricMean";
 const char* GeometricMean::category = "Statistics";
-const char* GeometricMean::description = DOC("This algorithm computes the geometric mean of an array of positive Reals.\n"
+const char* GeometricMean::description = DOC("This algorithm computes the geometric mean of an array of positive values.\n"
 "\n"
-"An exception is thrown if the input array does not contain strict positive numbers or the array is empty.\n"
+"An exception is thrown if the input array does not contain strictly positive numbers or the array is empty.\n"
 "\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia,\n"

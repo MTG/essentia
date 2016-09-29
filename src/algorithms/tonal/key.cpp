@@ -27,7 +27,7 @@ namespace standard {
 
 const char* Key::name = "Key";
 const char* Key::category = "Tonal";
-const char* Key::description = DOC("Using pitch profile classes, this algorithm calculates the best matching key estimate for a given HPCP. The algorithm was severely adapted and changed from the original implementation for readability and speed.\n"
+const char* Key::description = DOC("This algorithm computes key estimate given a pitch class profile (HPCP). The algorithm was severely adapted and changed from the original implementation for readability and speed.\n"
 "\n"
 "Key will throw exceptions either when the input pcp size is not a positive multiple of 12 or if the key could not be found. Also if parameter \"scale\" is set to \"minor\" and the profile type is set to \"weichai\"\n"
 "\n"

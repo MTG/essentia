@@ -142,7 +142,7 @@ To run the python unit tests (include all unittests on algorithms, need python b
 Building documentation (optional)
 ---------------------------------
 
-All documentation is provided on the official website of Essentia library. To generate it by your own follow the steps below.
+All documentation is provided on the official website of Essentia library. Follow the steps below to generate it by yourself.
 
 Install doxigen and pip, if you are on Linux::
 
@@ -151,6 +151,7 @@ Install doxigen and pip, if you are on Linux::
 Install additiona dependencies (you might need to run this command with sudo)::
 
   sudo pip install sphinx pyparsing sphinxcontrib-doxylink docutils
+  sudo apt-get install pandoc
 
 Make sure to install Essentia with python bindings and run::
 

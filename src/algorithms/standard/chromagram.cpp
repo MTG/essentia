@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* Chromagram::name = "Chromagram";
 const char* Chromagram::category = "Tonal";
-const char* Chromagram::description = DOC("This algorithm calculates the chromagram of the Constant Q Transform.\n"
+const char* Chromagram::description = DOC("This algorithm computes the chromagram of the Constant Q Transform.\n"
 "\n");
 
 

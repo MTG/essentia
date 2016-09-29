@@ -27,7 +27,7 @@ namespace streaming {
 
 const char* LoudnessEBUR128Filter::name = "LoudnessEBUR128Filter";
 const char* LoudnessEBUR128Filter::category = "Loudness/dynamics";
-const char* LoudnessEBUR128Filter::description = DOC("This is an auxilary signal preprocessing algorithm used within the LoudnessEBUR128 algorithm. It applies the pre-processing K-weighting filter and computes signal representation requiered by LoudnessEBUR128 in accordance with the EBU R128 recommendation.\n"
+const char* LoudnessEBUR128Filter::description = DOC("An auxilary signal preprocessing algorithm used within the LoudnessEBUR128 algorithm. It applies the pre-processing K-weighting filter and computes signal representation requiered by LoudnessEBUR128 in accordance with the EBU R128 recommendation.\n"
 "\n"
 "References:\n"
 "  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\n\n"

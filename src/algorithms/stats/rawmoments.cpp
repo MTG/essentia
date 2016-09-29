@@ -25,7 +25,7 @@ using namespace standard;
 
 const char* RawMoments::name = "RawMoments";
 const char* RawMoments::category = "Statistics";
-const char* RawMoments::description = DOC("This algorithm computes the first 5 raw moments of an array of Reals. The output array is of size 6 because the zero-ith moment is used for padding so that the first moment corresponds to index 1.\n\n"
+const char* RawMoments::description = DOC("This algorithm computes the first 5 raw moments of an array. The output array is of size 6 because the zero-ith moment is used for padding so that the first moment corresponds to index 1.\n\n"
 
 "Note:\n"
 "  This algorithm has a range parameter, which usually represents a frequency (results will range from 0 to range). For a spectral centroid, the range should be equal to samplerate / 2. For an audio centroid, the frequency range should be equal to (audio_size-1) / samplerate.\n\n"

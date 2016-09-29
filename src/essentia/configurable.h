@@ -179,7 +179,7 @@ class ESSENTIA_API Configurable {
 };
 
 // macro which is little useful, but allows to write configure() in a very clean
-// and understandable way for StreamingAlgorithmComposite
+// and understandable way for AlgorithmComposite
 #define INHERIT(x) x, parameter(x)
 
 template <typename T> bool compareByName(const T* a, const T* b) {

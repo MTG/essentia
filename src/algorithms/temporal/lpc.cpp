@@ -27,7 +27,7 @@ using namespace standard;
 
 const char* LPC::name = "LPC";
 const char* LPC::category = "Spectral";
-const char* LPC::description = DOC("This algorithm computes the Linear Predictive Coefficients of a signal and the associated Reflection coefficients.\n"
+const char* LPC::description = DOC("This algorithm computes Linear Predictive Coefficients and associated reflection coefficients of a signal.\n"
 "\n"
 "An exception is thrown if the \"order\" provided is larger than the size of the input signal.\n"
 "\n"

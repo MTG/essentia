@@ -25,7 +25,7 @@ using namespace standard;
 
 const char* Energy::name = "Energy";
 const char* Energy::category = "Statistics";
-const char* Energy::description = DOC("This algorithm computes the energy of an array of Reals.\n"
+const char* Energy::description = DOC("This algorithm computes the energy of an array.\n"
 "\n"
 "The input array should not be empty or an exception will be thrown.\n"
 "\n"

@@ -13,7 +13,8 @@ Essentia documentation contents
    installing
    algorithms_overview
    python_tutorial
-   extractors_out_of_box    
+   extractors_out_of_box
+   streaming_extractor_music
    
    design_overview
    howto_standard_extractor
@@ -27,8 +28,7 @@ Essentia documentation contents
    coding_guidelines
 
    licensing_information
-
-
+   FAQ
 
 ..
     Indices and tables

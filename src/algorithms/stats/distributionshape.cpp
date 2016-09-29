@@ -25,7 +25,7 @@ using namespace standard;
 
 const char* DistributionShape::name = "DistributionShape";
 const char* DistributionShape::category = "Statistics";
-const char* DistributionShape::description = DOC("This algorithm extracts the spread (variance), skewness and kurtosis excess of an array of Reals given its central moments (see CentralMoments algorithm). These extracted features are good indicators of the shape of the distribution.\n"
+const char* DistributionShape::description = DOC("This algorithm computes the spread (variance), skewness and kurtosis of an array given its central moments. The extracted features are good indicators of the shape of the distribution. For the required input see CentralMoments algorithm.\n"
 "The size of the input array must be at least 5. An exception will be thrown otherwise.\n"
 "\n"
 "References:\n"

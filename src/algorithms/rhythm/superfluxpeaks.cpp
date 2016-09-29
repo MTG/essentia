@@ -29,7 +29,7 @@ namespace standard {
     
 const char* SuperFluxPeaks::name = "SuperFluxPeaks";
 const char* SuperFluxPeaks::category = "Rhythm";
-const char* SuperFluxPeaks::description = DOC("This algorithm detects peaks of an onset detection function computed by SuperFluxNovelty algorithm. See SuperFluxExtractor for more details.");
+const char* SuperFluxPeaks::description = DOC("This algorithm detects peaks of an onset detection function computed by the SuperFluxNovelty algorithm. See SuperFluxExtractor for more details.");
 
 
 void SuperFluxPeaks::configure() {

@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* TempoTapMaxAgreement::name = "TempoTapMaxAgreement";
 const char* TempoTapMaxAgreement::category = "Rhythm";
-const char* TempoTapMaxAgreement::description = DOC("This algorithm estimates beat positions and confidence of their estimation based on the maximum mutual agreement between given beat postion candidates, estimated by different beat trackers (or using different features) [1,2].\n"
+const char* TempoTapMaxAgreement::description = DOC("This algorithm outputs beat positions and confidence of their estimation based on the maximum mutual agreement between beat candidates estimated by different beat trackers (or using different features).\n"
 "\n"
 "Note that the input tick times should be in ascending order and that they cannot contain negative values otherwise an exception will be thrown.\n"
 "\n"

@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* PitchContourSegmentation::name = "PitchContourSegmentation";
 const char* PitchContourSegmentation::category = "Pitch";
-const char* PitchContourSegmentation::description = DOC("This algorithm converts a pitch sequence estimated from an audio signal into a set of discrete note event. Each note is defined by its onset time, duration and MIDI pitch value, quantized to the equal tempered scale.\n"
+const char* PitchContourSegmentation::description = DOC("This algorithm converts a pitch sequence estimated from an audio signal into a set of discrete note events. Each note is defined by its onset time, duration and MIDI pitch value, quantized to the equal tempered scale.\n"
 "\n"
 "Note segmentation is performed based on pitch contour characteristics (island building) and signal RMS. Notes below an adjustable minimum duration are rejected.\n"
 "\n"

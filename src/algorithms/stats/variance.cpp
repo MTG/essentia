@@ -25,8 +25,7 @@ using namespace standard;
 
 const char* Variance::name = "Variance";
 const char* Variance::category = "Statistics";
-const char* Variance::description = DOC(
-  "This algorithm calculates the variance of an array of Reals.");
+const char* Variance::description = DOC("This algorithm computes the variance of an array.");
 
 void Variance::compute() {
   _variance.get() = variance(_array.get(),mean(_array.get()));

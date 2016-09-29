@@ -11,7 +11,7 @@ using namespace standard;
 
 const char* ERBBands::name = "ERBBands";
 const char* ERBBands::category = "Spectral";
-const char* ERBBands::description = DOC("This algorithm computes energies/magnitudes in bands spaced on an Equivalent Rectangular Bandwidth (ERB) scale, given a spectrum. It applies a frequency domain filterbank using gammatone filters. Adapted from matlab code in:  D. P. W. Ellis (2009). 'Gammatone-like spectrograms', web resource [1].\n"
+const char* ERBBands::description = DOC("This algorithm computes energies/magnitudes in ERB bands of a spectrum. The Equivalent Rectangular Bandwidth (ERB) scale is used. The algorithm applies a frequency domain filterbank using gammatone filters. Adapted from matlab code in:  D. P. W. Ellis (2009). 'Gammatone-like spectrograms', web resource [1].\n"
 "\n"
 "References:\n"
 "  [1] http://www.ee.columbia.edu/~dpwe/resources/matlab/gammatonegram/\n\n"

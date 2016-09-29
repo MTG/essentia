@@ -412,7 +412,7 @@ namespace standard {
 
 const char* RhythmExtractor::name = "RhythmExtractor";
 const char* RhythmExtractor::category = "Rhythm";
-const char* RhythmExtractor::description = DOC("This algorithm estimates the tempo in bpm from an input signal, as well as the beat locations. The algorithm combines several periodicity functions and estimates beats using TempoTap and TempoTapTicks. It combines:\n"
+const char* RhythmExtractor::description = DOC("This algorithm estimates the tempo in bpm and beat positions given an audio signal. The algorithm combines several periodicity functions and estimates beats using TempoTap and TempoTapTicks. It combines:\n"
 "- onset detection functions based on high-frequency content (see OnsetDetection)\n"
 "- complex-domain spectral difference function (see OnsetDetection)\n"
 "- periodicity function based on energy bands (see FrequencyBands, TempoScaleBands)\n"

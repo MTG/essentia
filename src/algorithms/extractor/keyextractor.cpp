@@ -28,7 +28,7 @@ namespace streaming {
 
 const char* KeyExtractor::name = "KeyExtractor";
 const char* KeyExtractor::category = "Tonal";
-const char* KeyExtractor::description = DOC("this algorithm extracts key/scale for an audio stream");
+const char* KeyExtractor::description = DOC("This algorithm extracts key/scale for an audio signal");
 
 KeyExtractor::KeyExtractor(): _frameCutter(0), _windowing(0), _spectrum(0), _spectralPeaks(0),
                               _hpcpKey(0), _key(0) {

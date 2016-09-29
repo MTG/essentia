@@ -25,7 +25,7 @@ using namespace standard;
 
 const char* Decrease::name = "Decrease";
 const char* Decrease::category = "Statistics";
-const char* Decrease::description = DOC("This algorithm extracts the decrease of an array of Reals (which is defined as the linear regression coefficient). The range parameter is used to normalize the result. For a spectral centroid, the range should be equal to Nyquist and for an audio centroid the range should be equal to (audiosize - 1) / samplerate.\n"
+const char* Decrease::description = DOC("This algorithm computes the decrease of an array defined as the linear regression coefficient. The range parameter is used to normalize the result. For a spectral centroid, the range should be equal to Nyquist and for an audio centroid the range should be equal to (audiosize - 1) / samplerate.\n"
 "The size of the input array must be at least two elements for \"decrease\" to be computed, otherwise an exception is thrown.\n"
 "References:\n"
 "  [1] Least Squares Fitting -- from Wolfram MathWorld,\n"

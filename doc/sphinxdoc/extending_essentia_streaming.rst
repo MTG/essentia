@@ -1,7 +1,7 @@
 .. highlight:: cpp
 
-How to write a StreamingAlgorithm
-=================================
+How to write a streaming algorithm
+==================================
 
 There are many ways to write a streaming algorithm, all of which involve deriving from
 the base class ``StreamingAlgorithm`` or one of its subclasses.
@@ -142,13 +142,12 @@ as soon as that many tokens are available on the input Sink.
 
 
 
-Derive from StreamingAlgorithmComposite
+Derive from AlgorithmComposite
 ---------------------------------------
 
-Deriving from ``StreamingAlgorithmComposite`` allows you to create blocks of algorithms,
+Deriving from ``AlgorithmComposite`` allows you to create blocks of algorithms,
 which is nice to encapsulate functionality while still keeping the modularity of small
-algorithms.
-You can thus wrap a long and complex network of algorithms which does some very complex
+algorithms. You can thus wrap a long and complex network of algorithms which does some very complex
 task into a single black-box, which can later be used as a single algorithm while keeping
 the advantage of the streaming mode (everything stays multi-threaded, etc...)
 
@@ -180,7 +179,7 @@ There is one important thing to know when writing composite algorithms, and that
 necessary only when you have generators inside of your composite algorithm:
 (Such is the case for the MonoLoader, because the AudioLoader is a generator).
 
-*You have to declare your generators by putting them in the member variable ``StreamingAlgorithmComposite::_generators``.*
+*You have to declare your generators by putting them in the member variable ``AlgorithmComposite::_generators``.*
 
 If you forget to do that, the scheduler will be unable to work correctly. It is not necessary
 to do this for any other algorithm, because they are all connected. Generators are the only

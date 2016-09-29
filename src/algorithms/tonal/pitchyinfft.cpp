@@ -37,7 +37,7 @@ static const Real _weightMask[] = {-75.8, -70.1, -60.8, -52.1, -44.2, -37.5,
 
 const char* PitchYinFFT::name = "PitchYinFFT";
 const char* PitchYinFFT::category = "Pitch";
-const char* PitchYinFFT::description = DOC("This algorithm estimates the fundamental frequency corresponding to the melody of a monophonic music signal (i.e. solo violin or solo singing voice). It is an implementation of YinFFT algorithm [1], which is an optimized version of Yin algorithm for computation in the frequency domain. It is recommended to window the input spectrum with a Hann window. The raw spectrum can be computed with the Spectrum algorithm.\n"
+const char* PitchYinFFT::description = DOC("This algorithm estimates the fundamental frequency given the spectrum of a monophonic music signal. It is an implementation of YinFFT algorithm [1], which is an optimized version of Yin algorithm for computation in the frequency domain. It is recommended to window the input spectrum with a Hann window. The raw spectrum can be computed with the Spectrum algorithm.\n"
 "\n"
 "An exception is thrown if an empty spectrum is provided.\n"
 "\n"

@@ -25,7 +25,7 @@ using namespace standard;
 
 const char* NoiseAdder::name = "NoiseAdder";
 const char* NoiseAdder::category = "Standard";
-const char* NoiseAdder::description = DOC("This algorithm adds some amount of noise to an input signal, and returns the resulting output signal. The average energy of the noise in dB is defined by the level parameter, and is generated using the Mersenne Twister random number generator.\n"
+const char* NoiseAdder::description = DOC("This algorithm adds noise to an input signal. The average energy of the noise in dB is defined by the level parameter, and is generated using the Mersenne Twister random number generator.\n"
 "\n"
 "References:\n"
 "  [1] Mersenne Twister: A random number generator (since 1997/10),\n"

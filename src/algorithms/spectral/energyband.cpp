@@ -25,7 +25,7 @@ using namespace standard;
 
 const char* EnergyBand::name = "EnergyBand";
 const char* EnergyBand::category = "Spectral";
-const char* EnergyBand::description = DOC("This algorithm computes the spectral energy of the given frequency band, including both start and stop cutoff frequencies.\n"
+const char* EnergyBand::description = DOC("This algorithm computes energy in a given frequency band of a spectrum including both start and stop cutoff frequencies.\n"
 "Note that exceptions will be thrown when input spectrum is empty and if startCutoffFrequency is greater than stopCutoffFrequency.\n"
 "\n"
 "References:\n"

@@ -170,7 +170,7 @@ namespace standard {
 
 const char* MetadataReader::name = "MetadataReader";
 const char* MetadataReader::category = "Input/output";
-const char* MetadataReader::description = DOC("This algorithm outputs the metadata tags associated with audio files, as well as their audio properties (e.g. bitrate, length, etc.). Supported audio file types are:\n"
+const char* MetadataReader::description = DOC("This algorithm loads the metadata tags from an audio file as well as outputs its audio properties. Supported audio file types are:\n"
 "  - mp3\n"
 "  - flac\n"
 "  - ogg\n"
