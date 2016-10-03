@@ -27,7 +27,9 @@ namespace standard {
 
 const char* StartStopSilence::name = "StartStopSilence";
 const char* StartStopSilence::category = "Duration/silence";
-const char* StartStopSilence::description = DOC("This algorithm outputs the frame at which sound begins and the frame at which sound ends.");
+const char* StartStopSilence::description = DOC("This algorithm outputs the frame at which sound begins and the frame at which sound ends.\n"
+"\n"
+"Note: In standard mode the algorithm is to be run iteratively on a sequence of frames. The outputs are updated on each iteration, and the final result is produced at the end of the sequence.");
 
 void StartStopSilence::configure() {
     _threshold = db2pow(parameter("threshold").toReal());
