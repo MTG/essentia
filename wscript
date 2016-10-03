@@ -282,7 +282,9 @@ def build(ctx):
             )
 
 def run_tests(ctx):
-    os.system(out + '/basetest')
+    ret = os.system(out + '/basetest')
+    if ret:
+        ctx.fatal('failed to run tests. Check test output')
 
 def run_python_tests(ctx):
     # create a local python package folder
@@ -290,7 +292,9 @@ def run_python_tests(ctx):
     os.system('cp -r src/python/essentia build/python/')
     os.system('cp build/src/python/_essentia.so build/python/essentia')
 
-    os.system('PYTHONPATH=build/python python test/src/unittest/all_tests.py')
+    ret = os.system('PYTHONPATH=build/python python test/src/unittest/all_tests.py')
+    if ret:
+        ctx.fatal('failed to run python tests. Check test output')
 
 def ipython(ctx):
     os.system('ipython --pylab')
