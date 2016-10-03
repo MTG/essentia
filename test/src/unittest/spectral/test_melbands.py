@@ -31,25 +31,24 @@ class TestMelBands(TestCase):
                         highFrequencyBound=44100*.5)
 
     def testRegression(self):
-        # only testing that it yields to valid result, but still need to check for
-        # correct results
         spectrum = [1]*1024
         mbands = self.InitMelBands(24)(spectrum)
         self.assertEqual(len(mbands), 24 )
         self.assert_(not any(numpy.isnan(mbands)))
         self.assert_(not any(numpy.isinf(mbands)))
-        self.assert_(all(mbands >= 0.0))
+        self.assertAlmostEqualVector(mbands, [1]*24, 1e-5)
 
-        mbands = self.InitMelBands(22050)(spectrum)
-        self.assertEqual(len(mbands), 22050 )
+        mbands = self.InitMelBands(128)(spectrum)
+        self.assertEqual(len(mbands), 128 )
         self.assert_(not any(numpy.isnan(mbands)))
         self.assert_(not any(numpy.isinf(mbands)))
-        self.assert_(all(mbands >= 0.0))
+        self.assertAlmostEqualVector(mbands, [1]*128, 1e-5)
+
 
     def testZero(self):
         # Inputting zeros should return zero. Try with different sizes
         size = 1024
-        while (size > 1 ):
+        while (size >= 256 ):
             self.assertEqualVector(MelBands()(zeros(size)), zeros(24))
             size /= 2
 
@@ -66,7 +65,7 @@ class TestMelBands(TestCase):
         self.assertConfigureFails(MelBands(), { 'lowFrequencyBound': 100,
                                                 'highFrequencyBound': 50 })
         self.assertConfigureFails(MelBands(), { 'highFrequencyBound': 30000,
-                                                'sampleRate': 22050} )
+                                                'sampleRate': 22050})
 
     def testWrongInputSize(self):
         # This test makes sure that even though the inputSize given at
@@ -81,6 +80,10 @@ class TestMelBands(TestCase):
                   0.0674537048,  0.0679484159,  0.0672798753,  0.0671581551,  0.0671161041,
                   0.0674532652,  0.0679644048,  0.067266494,   0.0671510249],
                 1e-6)
+
+    def testNotEnoughSpectrumBins(self):
+        self.assertConfigureFails(MelBands(), {'numberBands': 256, 
+                                               'inputSize': 1025})
 
 
 suite = allTests(TestMelBands)

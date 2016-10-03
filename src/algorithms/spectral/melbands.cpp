@@ -29,6 +29,8 @@ const char* MelBands::description = DOC("This algorithm computes energy in mel b
 "\n"
 "It is required that parameter \"highMelFrequencyBound\" not be larger than the Nyquist frequency, but must be larger than the parameter, \"lowMelFrequencyBound\". Also, The input spectrum must contain at least two elements. If any of these requirements are violated, an exception is thrown.\n"
 "\n"
+"Note: an exception will be thrown in the case when the number of spectrum bins (FFT size) is insufficient to compute the specified number of mel bands: in such cases the start and end bin of a band can be the same bin or adjacent bins, which will result in zero energy when summing bins for that band. Use zero padding to increase the number of spectrum bins in these cases.\n"
+"\n"
 "References:\n"
 "  [1] T. Ganchev, N. Fakotakis, and G. Kokkinakis, \"Comparative evaluation\n"
 "  of various MFCC implementations on the speaker verification task,\" in\n"
@@ -104,6 +106,10 @@ void MelBands::createFilters(int spectrumSize) {
 
     int jbegin = int(_filterFrequencies[i] / frequencyScale + 0.5);
     int jend = int(_filterFrequencies[i+2] / frequencyScale + 0.5);
+
+    if (jend-jbegin <= 1) {
+      throw EssentiaException("MelBands: the number of spectrum bins is insufficient for the specified number of mel bands. Use zero padding to increase the number of FFT bins.");
+    }
 
     for (int j=jbegin; j<jend; ++j) {
       Real binfreq = j*frequencyScale;
