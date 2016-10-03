@@ -77,12 +77,12 @@ class PredominantPitchMelodia : public Algorithm {
   void declareParameters() {
     // pre-processing
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("frameSize", "the frame size for computing pitch saliecnce", "(0,inf)", 2048);
+    declareParameter("frameSize", "the frame size for computing pitch salience", "(0,inf)", 2048);
     declareParameter("hopSize", "the hop size with which the pitch salience function was computed", "(0,inf)", 128);
 
     // pitch salience function
     declareParameter("binResolution", "salience function bin resolution [cents]", "(0,inf)", 10.0);
-    declareParameter("referenceFrequency", "the reference frequency for Hertz to cent convertion [Hz], corresponding to the 0th cent bin", "(0,inf)", 55.0);
+    declareParameter("referenceFrequency", "the reference frequency for Hertz to cent conversion [Hz], corresponding to the 0th cent bin", "(0,inf)", 55.0);
     declareParameter("magnitudeThreshold", "spectral peak magnitude threshold (maximum allowed difference from the highest peak in dBs)", "[0,inf)",  40);
     declareParameter("magnitudeCompression", "magnitude compression parameter for the salience function (=0 for maximum compression, =1 for no compression)", "(0,1]", 1.0);
     declareParameter("numberHarmonics", "number of considered harmonics", "[1,inf)", 20);
