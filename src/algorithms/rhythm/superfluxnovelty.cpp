@@ -86,6 +86,7 @@ namespace essentia {
 namespace streaming {
         
 const char* SuperFluxNovelty::name = standard::SuperFluxNovelty::name;
+const char* SuperFluxNovelty::category = standard::SuperFluxNovelty::category;
 const char* SuperFluxNovelty::description = standard::SuperFluxNovelty::description;
 
 AlgorithmStatus SuperFluxNovelty::process() {
