@@ -359,6 +359,9 @@ and hence are not available in python.</p>
     # Copy convert FAQ.md to rst and copy to documenation folder
     subprocess.call(['pandoc', '../../FAQ.md', '-o', 'FAQ.rst'])
 
+    # Convert python notebook tutorials to rst
+    subprocess.call(['jupyter', 'nbconvert', '../../src/examples/tutorial/essentia_tutorial_standard.ipynb', '--to', 'rst'])
+    subprocess.call(['jupyter', 'nbconvert', '../../src/examples/tutorial/essentia_tutorial_streaming.ipynb', '--to', 'rst'])
 
 
 if __name__ == '__main__':
