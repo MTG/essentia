@@ -45,9 +45,9 @@ class SingleBeatLoudness : public Algorithm {
 
  public:
   SingleBeatLoudness() {
-    declareInput(_beat, "beat", "the sliced beat");
-    declareOutput(_loudness, "loudness", "the beat's energy in the whole spectrum");
-    declareOutput(_loudnessBand, "loudnessBandRatio", "the beat's energy ratio on each band");
+    declareInput(_beat, "beat", "audio segement containing a beat");
+    declareOutput(_loudness, "loudness", "the beat's energy across the whole spectrum");
+    declareOutput(_loudnessBand, "loudnessBandRatio", "the beat's energy ratio for each band");
 
    AlgorithmFactory& factory = AlgorithmFactory::instance();
    _window     = factory.create("Windowing", "zeroPhase", false,
@@ -68,9 +68,9 @@ class SingleBeatLoudness : public Algorithm {
   void declareParameters() {
     Real defaultBands[] = { 0.0, 200.0, 400.0, 800.0, 1600.0, 3200.0, 22000.0 };
     declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
-    declareParameter("beatWindowDuration", "the size of the window in which to look for the beginning of the beat [s]", "(0,inf)", 0.1);
-    declareParameter("beatDuration", "the size of the window in which the beat will be restricted [s]", "(0,inf)", 0.05);
-    declareParameter("frequencyBands", "the bands", "", arrayToVector<Real>(defaultBands));
+    declareParameter("beatWindowDuration", "window size for the beat's onset detection [s]", "(0,inf)", 0.1);
+    declareParameter("beatDuration", "window size for the beat's energy computation (the window starts at the onset) [s]", "(0,inf)", 0.05);
+    declareParameter("frequencyBands", "frequency bands", "", arrayToVector<Real>(defaultBands));
     declareParameter("onsetStart", "criteria for finding the start of the beat", "{sumEnergy, peakEnergy}", "sumEnergy");
   }
 

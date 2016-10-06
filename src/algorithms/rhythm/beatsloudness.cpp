@@ -28,7 +28,7 @@ namespace streaming {
 
 const char* BeatsLoudness::name = "BeatsLoudness";
 const char* BeatsLoudness::category = "Rhythm";
-const char* BeatsLoudness::description = DOC("This algorithm computes the loudness of beats in an audio signal given their positions. The loudness is computes both on the whole frequency range and for each the specified frequency bands. See the Loudness algorithm for a description of loudness and SingleBeatLoudness for a more detailed explanation.\n"
+const char* BeatsLoudness::description = DOC("This algorithm computes the spectrum energy of beats in an audio signal given their positions. The energy is computed both on the whole frequency range and for each of the specified frequency bands. See the SingleBeatLoudness algorithm for a more detailed explanation.\n"
 "\n"
 "Note that the algorithm will output empty results in the case if no beats are specified in the \"beats\" parameter.");
 
@@ -65,7 +65,7 @@ void BeatsLoudness::configure() {
     startTimes[i] = ticks[i] - beatWindowDuration/2.0;
     // make sure we don't cause an assert to fail because we missed one sample
     // due to rounding errors...
-    endTimes[i] = ticks[i] + beatWindowDuration/2.0 + beatDuration + 0.0001;
+    endTimes[i] = ticks[i] + beatWindowDuration/2.0 + beatDuration + 0.001;
 
     // in case the window started before the beginning of the sound, slide it
     // just what's needed to the right (temporally speaking)

@@ -47,10 +47,10 @@ class BeatsLoudness : public AlgorithmComposite {
     declareParameter("sampleRate", "the audio sampling rate [Hz]",
                      "(0,inf)", 44100.);
     declareParameter("beats", "the list of beat positions (each position is in seconds)", "", std::vector<Real>());
-    declareParameter("beatWindowDuration", "the duration of the window in which to look for the beginning of the beat (centered around the positions in 'beats') [s]", "(0,inf)", 0.1);
+    declareParameter("beatWindowDuration", "window size for the beats' onset detection (the windows are centered around the positions in 'beats') [s]", "(0,inf)", 0.1);
     // 50ms default value estimation after checking some drums' kicks duration on Freesound
-    declareParameter("beatDuration", "the duration of the window in which the beat will be restricted [s]", "(0,inf)", 0.05);
-    declareParameter("frequencyBands", "the list of bands to compute energy ratios [Hz]", "", arrayToVector<Real>(defaultBands));
+    declareParameter("beatDuration", "window size for the beats' energy computation (the windows start at the onset)[s]", "(0,inf)", 0.05);
+    declareParameter("frequencyBands", "the list of frequency bands to compute energy ratios [Hz]", "", arrayToVector<Real>(defaultBands));
   }
 
   void declareProcessOrder() {
@@ -100,20 +100,12 @@ class BeatsLoudness : public Algorithm {
 
   void declareParameters() {
     Real defaultBands[] = { 20.0, 150.0, 400.0, 3200.0, 7000.0, 22000.0};
-    declareParameter("sampleRate", "the audio sampling rate [Hz]",
-                     "(0,inf)", 44100.);
-    declareParameter("beats", "the list of beat positions (each position is in "
-                     "seconds)",
-                     "", std::vector<Real>());
-    declareParameter("beatWindowDuration", "the duration of the window in "
-                     "which to look for the beginning of the beat (centered "
-                     "around the positions in 'beats') [s]",
-                     "(0,inf)", 0.1);
+    declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
+    declareParameter("beats", "the list of beat positions (each position is in seconds)", "", std::vector<Real>());
+    declareParameter("beatWindowDuration", "the duration of the window in which to look for the beginning of the beat (centered around the positions in 'beats') [s]", "(0,inf)", 0.1);
     // 50ms default value estimation after checking some drums' kicks duration
     // on Freesound
-    declareParameter("beatDuration", "the duration of the window in which the "
-                     "beat will be restricted [s]",
-                     "(0,inf)", 0.05);
+    declareParameter("beatDuration", "the duration of the window in which the beat will be restricted [s]", "(0,inf)", 0.05);
     declareParameter("frequencyBands", "the list of bands to compute energy ratios [Hz", "", arrayToVector<Real>(defaultBands));
   }
 

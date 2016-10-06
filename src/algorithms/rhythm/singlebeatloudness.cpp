@@ -25,9 +25,9 @@ using namespace standard;
 
 const char* SingleBeatLoudness::name = "SingleBeatLoudness";
 const char* SingleBeatLoudness::category = "Rhythm";
-const char* SingleBeatLoudness::description = DOC("This algorithm computes the loudness of a single beat on the whole frequency range and on each specified frequency band. The bands used by default are: 0-200 Hz, 200-400 Hz, 400-800 Hz, 800-1600 Hz, 1600-3200 Hz, 3200-22000Hz, following E. Scheirer [1]. See the Loudness algorithm for a description of loudness.\n"
+const char* SingleBeatLoudness::description = DOC("This algorithm computes the spectrum energy of a single beat across the whole frequency range and on each specified frequency band given an audio segment. It detects the onset of the beat within the input segment, computes spectrum on a window starting on this onset, and estimates energy (see Energy and EnergyBandRatio algorithms). The frequency bands used by default are: 0-200 Hz, 200-400 Hz, 400-800 Hz, 800-1600 Hz, 1600-3200 Hz, 3200-22000Hz, following E. Scheirer [1].\n"
 "\n"
-"This algorithm throws an exception either when parameter beatDuration is larger than beatWindowSize or when the size of the input beat is less than beatWindowSize plus beatDuration.\n"
+"This algorithm throws an exception either when parameter beatDuration is larger than beatWindowSize or when the size of the input beat segment is less than beatWindowSize plus beatDuration.\n"
 "\n"
 "References:\n"
 "  [1] E. D. Scheirer, \"Tempo and beat analysis of acoustic musical signals,\"\n"
@@ -81,7 +81,7 @@ void SingleBeatLoudness::compute() {
   vector<Real>& loudnessBand = _loudnessBand.get();
 
   if (int(beat.size()) < _beatWindowSize + _beatDuration) {
-    throw EssentiaException("SingleBeatLoudness: size of input beat cannot be smaller than beatWindowSize + beatDuration");
+    throw EssentiaException("SingleBeatLoudness: the size of the input beat segment cannot be smaller than beatWindowSize + beatDuration");
   }
 
   // first find the max peak of energy in the window size, this will be the
