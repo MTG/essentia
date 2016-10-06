@@ -145,7 +145,15 @@ void LowLevelSpectralEqloudExtractor::configure() {
 }
 
 void LowLevelSpectralEqloudExtractor::reset() {
-  delete _network;
+  _network->reset();
+
+  _pool.remove("internal.dissonance");
+  _pool.remove("internal.sccoeffs");
+  _pool.remove("internal.scvalleys");
+  _pool.remove("internal.centroid");
+  _pool.remove("internal.kurtosis");
+  _pool.remove("internal.skewness");
+  _pool.remove("internal.spread");
 }
 
 void LowLevelSpectralEqloudExtractor::createInnerNetwork() {
