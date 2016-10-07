@@ -360,9 +360,7 @@ and hence are not available in python.</p>
     subprocess.call(['pandoc', '../../FAQ.md', '-o', 'FAQ.rst'])
 
     # Convert python notebook tutorials to rst
-    subprocess.call(['jupyter', 'nbconvert', '../../src/examples/tutorial/essentia_tutorial_standard.ipynb', '--to', 'rst'])
-    subprocess.call(['jupyter', 'nbconvert', '../../src/examples/tutorial/essentia_tutorial_streaming.ipynb', '--to', 'rst'])
-
+    subprocess.call(['jupyter', 'nbconvert', '../../src/examples/tutorial/*.ipynb', '--to', 'rst'])
 
 if __name__ == '__main__':
     write_algorithms_reference()

@@ -12,7 +12,7 @@ Essentia documentation contents
    introduction
    installing
    algorithms_overview
-   python_tutorial
+   essentia_python_tutorial
    extractors_out_of_box
    streaming_extractor_music
    
