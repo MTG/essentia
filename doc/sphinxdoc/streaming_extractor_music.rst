@@ -1,7 +1,7 @@
 Music extractor
 ===============
 
-``streaming_extractor_music`` is a configurable command-line feature extractor that computes a large set of spectral, time-domain, rhythm, tonal and high-level descriptors. Using this extractor is probably the easiest way to get many common music descriptors out of audio files using Essentia without any programming. The extractor is suited for batch computations on large music collections and is used within `AcousticBrainz project <http://acousticbrainz.org/>`_. The prebuilt static binaries of this extractor are available via `Essentia website <http://essentia.upf.edu/documentation/extractors/>`_ and `AcousticBrainz website <http://acousticbrainz.org/download>`_.
+``essentia_streaming_extractor_music`` is a configurable command-line feature extractor that computes a large set of spectral, time-domain, rhythm, tonal and high-level descriptors. Using this extractor is probably the easiest way to get many common music descriptors out of audio files using Essentia without any programming. The extractor is suited for batch computations on large music collections and is used within `AcousticBrainz project <http://acousticbrainz.org/>`_. The prebuilt static binaries of this extractor are available via `Essentia website <http://essentia.upf.edu/documentation/extractors/>`_ and `AcousticBrainz website <http://acousticbrainz.org/download>`_.
 
 It is possible to customize the parameters of audio analysis, frame summarization, high-level classifier models, and output format, using a yaml profile file (`see below <streaming_extractor_music.html#configuration>`_). Writing your own custom profile file you can specify:
 
