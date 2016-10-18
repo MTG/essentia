@@ -36,7 +36,7 @@ const char* AutoCorrelation::description = DOC(
 "  [1] Autocorrelation -- from Wolfram MathWorld,\n"
 "  http://mathworld.wolfram.com/Autocorrelation.html\n\n"
 "  [2] Autocorrelation - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Autocorrelation"
+"  http://en.wikipedia.org/wiki/Autocorrelation\n\n"
 "  [3] Tolonen T., and Karjalainen, M. (2000). A computationally efficient multipitch analysis model.\n"
 "  IEEE Transactions on Audio, Speech, and Language Processing, 8(6), 708-716.\n\n"
 );
