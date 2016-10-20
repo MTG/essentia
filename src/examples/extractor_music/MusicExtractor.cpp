@@ -159,7 +159,7 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
       exceptions[descNames[i]] = options.value<vector<string> >("tonal.stats");
       continue;
     }
-    if (descNames[i].find("sfx.") != string::npos) {  // sfx not computed for music
+    if (descNames[i].find("sfx.") != string::npos) {  // TODO sfx not computed for music?
       exceptions[descNames[i]] = options.value<vector<string> >("sfx.stats");
       continue;
     }
@@ -180,25 +180,29 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
 
   int statsSize = int(sizeof(defaultStats)/sizeof(defaultStats[0]));
 
-  if(!pool.contains<vector<Real> >("rhythm.beats_loudness")){
+  if (!pool.contains<vector<Real> >("rhythm.beats_loudness")) {
     for (int i=0; i<statsSize; i++)
-        poolStats.set(string("rhythm.beats_loudness.")+defaultStats[i],0);
-    }
-  if(!pool.contains<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio"))
-    for (int i=0; i<statsSize; i++)
-      poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
-        arrayToVector<Real>(emptyVector));
-  else if (pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio").size()<2){
-      poolStats.remove(string("rhythm.beats_loudness_band_ratio"));
-      for (int i=0; i<statsSize; i++) {
-        if(i==1 || i==6 || i==7)// var, dvar and dvar2 are 0
-          poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
-              arrayToVector<Real>(emptyVector));
-        else
-          poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i],
-              pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio")[0]);
-      }
+        poolStats.set(string("rhythm.beats_loudness.")+defaultStats[i], 0);
   }
+
+  if (!pool.contains<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio")) {
+    for (int i=0; i<statsSize; i++)
+      poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i], arrayToVector<Real>(emptyVector));
+  }
+
+  // Code below was a workaround for the cases when beats_loudness_band_ratio contains a single vector.
+  // Now, PoolAggregator computes the statistics is this case too.
+  /*
+  else if (pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio").size() < 2) {
+    poolStats.remove(string("rhythm.beats_loudness_band_ratio"));
+    for (int i=0; i<statsSize; i++) {
+      if(i==1 || i==6 || i==7)// var, dvar and dvar2 are 0
+        poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i], arrayToVector<Real>(emptyVector));
+      else
+        poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i], pool.value<vector<vector<Real> > >("rhythm.beats_loudness_band_ratio")[0]);
+    }
+  }
+  */
 
 
   // variable descriptor length counts:
@@ -477,7 +481,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("tonal.silentFrames", silentFrames);
 
   // stats
-  const char* statsArray[] = { "mean", "var", "stdev", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
+  const char* statsArray[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
   const char* mfccStatsArray[] = { "mean", "cov", "icov" };
   const char* gfccStatsArray[] = { "mean", "cov", "icov" };
 
