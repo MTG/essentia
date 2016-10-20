@@ -134,7 +134,7 @@ int MusicExtractor::compute(const string& audioFilename){
 Pool MusicExtractor::computeAggregation(Pool& pool){
 
   // choose which descriptors stats to output
-  const char* defaultStats[] = { "mean", "var", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
+  const char* defaultStats[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
 
   map<string, vector<string> > exceptions;
   const vector<string>& descNames = pool.descriptorNames();
@@ -159,7 +159,7 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
       exceptions[descNames[i]] = options.value<vector<string> >("tonal.stats");
       continue;
     }
-    if (descNames[i].find("sfx.") != string::npos) {  // TODO sfx not computed for music?
+    if (descNames[i].find("sfx.") != string::npos) {  // sfx not computed for music
       exceptions[descNames[i]] = options.value<vector<string> >("sfx.stats");
       continue;
     }
@@ -477,7 +477,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("tonal.silentFrames", silentFrames);
 
   // stats
-  const char* statsArray[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
+  const char* statsArray[] = { "mean", "var", "stdev", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
   const char* mfccStatsArray[] = { "mean", "cov", "icov" };
   const char* gfccStatsArray[] = { "mean", "cov", "icov" };
 
