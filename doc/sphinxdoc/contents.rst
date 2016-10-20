@@ -30,6 +30,7 @@ Essentia documentation contents
    licensing_information
    FAQ
 
+   research_papers
 ..
     Indices and tables
 
