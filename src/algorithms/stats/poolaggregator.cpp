@@ -51,7 +51,9 @@ const char* PoolAggregator::description = DOC("This algorithm performs statistic
 
 "An additional restriction for using the 'icov' statistic is that the covariance matrix for a particular descriptor must be invertible. The 'cov' and 'icov' aggregation statistics each return a square matrix with dimension equal to the length of the vectors under the given descriptor.\n\n"
 
-"Please also note that only the absolute values of the first and second derivates are considered when calculating the mean ('dmean' and 'dmean2') as well as for the variance ('dvar' and 'dvar2'). This is to avoid a trivial solution for the mean.");
+"Please also note that only the absolute values of the first and second derivates are considered when calculating the mean ('dmean' and 'dmean2') as well as for the variance ('dvar' and 'dvar2'). This is to avoid a trivial solution for the mean.\n\n"
+
+"For vectors, if the input pool value consists of only one vector, its aggregation will be skipped, and the vector itself will be added to the output.");
 
 
 // initialize supported statistics set
@@ -195,10 +197,10 @@ void PoolAggregator::aggregateVectorRealPool(const Pool& input, Pool& output) {
 
     // if pool value consists of only one vector, don't perform aggregation,
     // just add it to the output
-    if (dsize == 1) {
-      output.add(key, data[0]);
-      continue;
-    }
+    //if (dsize == 1) {
+    //  output.add(key, data[0]);
+    //  continue;
+    //}
 
     int vsize = data[0].size();
 
@@ -432,6 +434,7 @@ void PoolAggregator::aggregateArray2DRealPool(const Pool& input, Pool& output) {
     // if pool value consists of only one vector, don't perform aggregation,
     // just add it to the output
     if (dsize == 1) {
+      E_WARNING("WARNING: PoolAggregator: not aggregating \"" << key << "\" because it contains a single Array2D value");
       output.add(key, data[0]);
       continue;
     }
