@@ -30,7 +30,7 @@ const char* UnaryOperator::description = DOC("This algorithm performs basic arit
 "Note:\n"
 "  - log and ln are equivalent to the natural logarithm\n"
 "  - for log, ln, log10 and lin2db, x is clipped to 1e-30 for x<1e-30\n"
-"  - for x<0, sqrt(x) is invalid"
+"  - for x<0, sqrt(x) is invalid\n"
 "  - scale and shift parameters define linear transformation to be applied to the resulting elements"
 );
 
