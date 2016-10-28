@@ -54,7 +54,7 @@ class PoolAggregator : public Algorithm {
   }
 
   void declareParameters() {
-    const char* defaultStatsC[] = { "mean", "var", "min", "max", "median" };
+    const char* defaultStatsC[] = { "mean", "stdev", "min", "max", "median" };
     std::vector<std::string> defaultStats = arrayToVector<std::string>(defaultStatsC);
 
     declareParameter("defaultStats", "the default statistics to be computed for each descriptor in the input pool", "", defaultStats);
