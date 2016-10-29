@@ -61,12 +61,12 @@ void SpectrumToCent::compute() {
 
 void SpectrumToCent::calculateFilterFrequencies() {
   int maxInCents = 1200 * log2( _maxFrequency / _minFrequency );
-  _nBands = maxInCents / ( _centBinRes * 1);
+  _nBands = maxInCents / ( _centBinRes );
 
-  _bandFrequencies.resize(_nBands);
+  _bandFrequencies.resize(_nBands + 2);
 
-  for (int i=0; i<_nBands ; ++i) {
-    _bandFrequencies[i] = _minFrequency * pow( 2, _centBinRes * i / ( 2 * 1200.0 ) );
+  for (int i=-1; i<=_nBands ; ++i) {
+    _bandFrequencies[i+1] = _minFrequency * pow( 2, _centBinRes * i / ( 1200.0 ) );
   }
 
 }
