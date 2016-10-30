@@ -48,8 +48,8 @@ class SpectrumToCent : public Algorithm {
 
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("log", "compute log-energies (log10 (1 + energy))","{true,false}", true);
-    declareParameter("minimumFrequency","the frequency of the lower boundary of the first band of the bank [Hz][REVIEW]", "(0, inf)", 164 );
-    declareParameter("maximumFrequency","the frequency of the higher boundary of the last band of the bank [Hz][REVIEW]", "(0,inf)", 10548 );
+    declareParameter("minimumFrequency","the frequency of the lower boundary of the first band of the bank [Hz][REVIEW]", "(0, inf)", 164.0 );
+    declareParameter("maximumFrequency","the frequency of the higher boundary of the last band of the bank [Hz][REVIEW]", "(0,inf)", 10548.0 );
     declareParameter("centBinResolution", "number of cents in bins. default: 10 cents[REVIEW]","(1,inf)", 10);
   }
 

@@ -82,3 +82,8 @@ packaging/win32_3rdparty/bin
 packaging/win32_3rdparty/share
 packaging/win32_3rdparty/lib
 packaging/win32_3rdparty/include
+
+#  eclipse project 
+.cproject
+.project
+.settings/language.settings.xml
