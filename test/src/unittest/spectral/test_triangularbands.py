@@ -49,6 +49,9 @@ class TestTriangularBands(TestCase):
         output = TriangularBands(frequencyBands=fbands, log=False)(input)
         self.assertEqualVector(output, expected)
 
+    def testInsufficientResolution(self):
+        self.assertRaises(EssentiaException, lambda: TriangularBands(sampleRate = 44100)([0] * 513))
+
     """
     def testSingleBand(self):
         # input is a flat spectrum
