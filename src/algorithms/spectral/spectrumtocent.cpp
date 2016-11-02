@@ -21,25 +21,23 @@ const char* SpectrumToCent::description = DOC("This algorithm computes energy in
 void SpectrumToCent::configure() {
 
   _centBinRes= parameter("centBinResolution").toReal();
+  _nBands= parameter("bands").toReal();
   _minFrequency = parameter("minimumFrequency").toReal();
-  _maxFrequency = parameter("maximumFrequency").toReal();
-  if ( _maxFrequency <= _minFrequency ) {
-    throw EssentiaException("SpectrumToCent: 'maximumFrequency' parameter should be greater than 'minimumFrequency'");
-  }
-
   _sampleRate = parameter("sampleRate").toReal();
 
   if ( _minFrequency >= _sampleRate / 2 ) {
     throw EssentiaException("SpectrumToCent: 'minimumFrequency' parameter is out of the range (0 - fs/2)");
   }
-  if ( _maxFrequency > _sampleRate / 2 ) {
-    throw EssentiaException("SpectrumToCent: 'maximumFrequency' is out of the range (0 - fs/2)");
-  }
 
   calculateFilterFrequencies();
 
+  if ( _bandFrequencies.back() > _sampleRate / 2 ) {
+    throw EssentiaException("SpectrumToCent: Attempted to create a band above the Nyquist cut-off frequency.");
+  }
+
   _isLog = parameter("log").toBool();
   _triangularBands->configure("frequencyBands", _bandFrequencies, "log", _isLog, "sampleRate", _sampleRate);
+
 
 }
 
@@ -47,6 +45,13 @@ void SpectrumToCent::configure() {
 void SpectrumToCent::compute() {
   const vector<Real>& spectrum = _spectrumInput.get();
   vector<Real>& bands = _bandsOutput.get();
+  vector<Real>& freqs = _freqOutput.get();
+
+  freqs.resize( _nBands );
+
+  for (int i = 0; i<_nBands; ++i) {
+    freqs[i]= _bandFrequencies[i+1];
+  }
 
   if (spectrum.size() <= 1) {
     throw EssentiaException("SpectrumToCent: the size of the input spectrum is not greater than one");
@@ -56,19 +61,20 @@ void SpectrumToCent::compute() {
   _triangularBands->output("bands").set(bands);
   _triangularBands->compute();
 
+
+
 }
 
 
 void SpectrumToCent::calculateFilterFrequencies() {
-  Real maxInCents = 1200 * log2( _maxFrequency / _minFrequency );
-  _nBands = int (ceil(maxInCents / ( _centBinRes )));
+  //Real maxInCents = 1200 * log2( _maxFrequency / _minFrequency );
+  //_nBands = int (ceil(maxInCents / ( _centBinRes )));
 
-  _bandFrequencies.resize( _nBands + 1  );
+  _bandFrequencies.resize( _nBands + 2 );
 
-  for (int i=-1; i<_nBands ; ++i) {
+  for (int i=-1; i<=_nBands ; ++i) {
     _bandFrequencies[i+1] = _minFrequency * pow( 2, _centBinRes * i / ( 1200.0 ) );
   }
-
 }
 
 } // namespace standard
