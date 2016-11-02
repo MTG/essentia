@@ -86,13 +86,18 @@ void TriangularBands::compute() {
                              : 1 - Real(j-midBin) / (endBin-midBin);
         TriangF /= norm;
 	    }
-      else if (startBin == endBin) {
-        // case of single bin band
-        TriangF = 1;
-      }
       else {
-        // double bin band
-		    TriangF = 0.5;
+        throw EssentiaException("TriangularBands: the number of spectrum bins is insufficient to compute the band (",
+                                _bandFrequencies[i+1], "Hz). Use zero padding to increase the number of FFT bins.");
+        // Use the code below in the case we don't want to through an exception.
+        /*
+        if (startBin == endBin) { 
+          TriangF = 1; // single bin band
+        }
+        else {
+          TriangF = 0.5; // double bin band
+        }
+        */
 	    }
 	
       bands[i] += TriangF * spectrum[j] * spectrum[j];
