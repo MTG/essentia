@@ -41,7 +41,7 @@ class SpectrumToCent : public Algorithm {
   SpectrumToCent() {
     declareInput(_spectrumInput, "spectrum", "the input spectrum (must be greater than size one)");
     declareOutput(_bandsOutput, "bands", "the energy in each band");
-    declareOutput(_freqOutput, "frequencies", "the central frequency band");
+    declareOutput(_freqOutput, "frequencies", "the central frequency of each band");
     _triangularBands = AlgorithmFactory::create("TriangularBands");
   }
 
