@@ -20,23 +20,26 @@ const char* SpectrumToCent::description = DOC("This algorithm computes energy in
 
 void SpectrumToCent::configure() {
 
-  _centBinRes= parameter("centBinResolution").toReal();
-  _nBands= parameter("bands").toReal();
-  _minFrequency = parameter("minimumFrequency").toReal();
   _sampleRate = parameter("sampleRate").toReal();
+  _minFrequency = parameter("minimumFrequency").toReal();
 
   if ( _minFrequency >= _sampleRate / 2 ) {
     throw EssentiaException("SpectrumToCent: 'minimumFrequency' parameter is out of the range (0 - fs/2)");
   }
+
+  _centBinRes= parameter("centBinResolution").toReal();
+  _nBands= parameter("bands").toReal();
 
   calculateFilterFrequencies();
 
   if ( _bandFrequencies.back() > _sampleRate / 2 ) {
     throw EssentiaException("SpectrumToCent: Attempted to create a band above the Nyquist cut-off frequency.");
   }
-
   _isLog = parameter("log").toBool();
+
   _triangularBands->configure("frequencyBands", _bandFrequencies, "log", _isLog, "sampleRate", _sampleRate);
+
+
 
 
 }
@@ -47,28 +50,44 @@ void SpectrumToCent::compute() {
   vector<Real>& bands = _bandsOutput.get();
   vector<Real>& freqs = _freqOutput.get();
 
-  freqs.resize( _nBands );
+  if (spectrum.size() <= 1) {
+    throw EssentiaException("SpectrumToCent: the size of the input spectrum is not greater than one");
+  }
+
+  Real frequencyScale = (_sampleRate / 2.0) / (spectrum.size() - 1);
+
+  for (int i=0; i<_nBands; i++) {
+
+    int startBin = int(_bandFrequencies[i] / frequencyScale + 0.5);
+    int midBin = int(_bandFrequencies[i + 1] / frequencyScale + 0.5);
+    int endBin = int(_bandFrequencies[i + 2] / frequencyScale + 0.5);
+
+    // finished
+    if (startBin >= int(spectrum.size())) break;
+
+    // going to far
+    if (endBin > int(spectrum.size())) endBin = spectrum.size();
+
+    if ((midBin == startBin) || (midBin == endBin) || (endBin == startBin)) {
+      throw EssentiaException("SpectrumToCent: the number of spectrum bins is insufficient to compute the band (",
+                              _bandFrequencies[i+1], "Hz). Use zero padding to increase the number of FFT bins.");
+    }
+  }
+
+  freqs.resize(_nBands);
 
   for (int i = 0; i<_nBands; ++i) {
     freqs[i]= _bandFrequencies[i+1];
-  }
-
-  if (spectrum.size() <= 1) {
-    throw EssentiaException("SpectrumToCent: the size of the input spectrum is not greater than one");
   }
 
   _triangularBands->input("spectrum").set(spectrum);
   _triangularBands->output("bands").set(bands);
   _triangularBands->compute();
 
-
-
 }
 
 
 void SpectrumToCent::calculateFilterFrequencies() {
-  //Real maxInCents = 1200 * log2( _maxFrequency / _minFrequency );
-  //_nBands = int (ceil(maxInCents / ( _centBinRes )));
 
   _bandFrequencies.resize( _nBands + 2 );
 

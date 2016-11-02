@@ -26,14 +26,12 @@ class SpectrumToCent : public Algorithm {
 
   std::vector<Real> _bandFrequencies;
   std::vector<Real> _freqBands;
+
   int _nBands;
+  Real _centBinRes;
+  Real _minFrequency;
   Real _sampleRate;
   bool _isLog;
-
-  Real _minFrequency;
-  //Real _maxFrequency;
-  int _centBinRes;
-
 
   Algorithm* _triangularBands;
 
@@ -48,12 +46,11 @@ class SpectrumToCent : public Algorithm {
   }
 
   void declareParameters() {
-
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("log", "compute log-energies (log10 (1 + energy))","{true,false}", true);
-    declareParameter("minimumFrequency","central frequency of the first band of the bank [Hz]", "(0, inf)", 164.0 );
-    declareParameter("centBinResolution", "number of cents in bins. default: 10 cents[REVIEW]","(0,inf)", 10);
-    declareParameter("bands", "number of bins to compute. default: 720 (6 octaves)","[1,inf)", 720);
+    declareParameter("minimumFrequency","central frequency of the first band of the bank [Hz]", "(0, inf)", 164.);
+    declareParameter("centBinResolution", "Width of each band in cents. Default is 10 cents","(0,inf)", 10.);
+    declareParameter("bands", "number of bins to compute. Default is 720 (6 octaves with the default 'centBinResolution')","[1,inf)", 720);
   }
 
   void compute();
