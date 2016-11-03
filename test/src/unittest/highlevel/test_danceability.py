@@ -20,27 +20,29 @@
 
 
 from essentia_test import *
+import numpy
 
 
 class TestDanceability(TestCase):
+
     def testEmpty(self):
         d, dfa = Danceability()([])
         self.assertEqual(d, 0)
-        self.assertEqualVector(dfa, [0.] * 36)
+        self.assertEqualVector(dfa, [0.] * 35)
 
     def testOne(self):
         d, dfa = Danceability()([10])
         self.assertEqual(d, 0)
-        self.assertEqualVector(dfa, [0.] * 36)
+        self.assertEqualVector(dfa, [0.] * 35)
 
     def testSilence(self):
         d, dfa = Danceability()([0]*44100)
         self.assertEqual(d, 0)
-        self.assertEqualVector(dfa, [0.] * 36)
+        self.assertEqualVector(dfa, [0.] * 35)
 
         d, dfa = Danceability()([0]*100000)
         self.assertEqual(d, 0)
-        self.assertEqualVector(dfa, [0.] * 36)
+        self.assertEqualVector(dfa, [0.] * 35)
 
     def testRegression(self):
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav'),
@@ -54,7 +56,7 @@ class TestDanceability(TestCase):
                         2.14674041e-01, 1.73826352e-01, 1.41980320e-01, 1.62845716e-01,
                         1.35091081e-01, 1.59601390e-01, 1.93217084e-01, 1.67348266e-01,
                         7.95856640e-02, 4.29583378e-02, 8.19148670e-04, -4.16366570e-02,
-                        1.58639736e-02, 3.06910593e-02, 3.92476730e-02, 0.00000000e+00]
+                        1.58639736e-02, 3.06910593e-02, 3.92476730e-02]
 
         self.assertAlmostEqual(d, 3.76105952263, 5e-3)
         self.assertAlmostEqualVector(dfa, dfa_expected, 5e-3)
@@ -79,9 +81,32 @@ class TestDanceability(TestCase):
 
 
     def testWhiteNoise(self):
-        # 5 seconds of white noise
-        wn_44100 = np.random.randn(44100 * 5)
-        print Danceability()(wn_44100)
+        # we expect a constant value of 0.5 for all DFA exponents for white noise
+        # the values vary a little, so let's permit up to 0.1 absolute deviation
+        wn_44100 = array(numpy.random.normal(loc=0, scale=1, size=44100*60*10))
+        d, dfa = Danceability()(wn_44100)
+        self.assertAlmostEqualVectorAbs(dfa, [0.5] * 35, 0.1)
+
+    def testPinkNoise(self):
+        # we expect a constant value of 1.0 for all DFA exponents for pink noise
+
+        # generate pink noise: 
+        # https://github.com/python-acoustics/python-acoustics/blob/master/acoustics/generator.py
+        size = 44100*60*5
+        X = numpy.random.randn(size/2+1) + 1j * numpy.random.randn(size/2+1)
+        S = numpy.sqrt(numpy.arange(len(X))+1.) # adding +1 to avoid division by zero
+        pn_44100 = array((numpy.fft.irfft(X/S)).real)
+        d, dfa = Danceability()(pn_44100)
+        self.assertAlmostEqualVectorAbs(dfa, [1.0] * 35, 0.1)
+
+    def testBrownNoise(self):
+        # for brown noise we expect a constant value of 1.5
+        size = 44100*60*5
+        X = numpy.random.randn(size/2+1) + 1j * numpy.random.randn(size/2+1)
+        S = (numpy.arange(len(X))+1)
+        bn_44100 = array((numpy.fft.irfft(X/S)).real)
+        d, dfa = Danceability()(bn_44100)
+        self.assertAlmostEqualVectorAbs(dfa, [1.5] * 35, 0.1)
 
 
 suite = allTests(TestDanceability)
