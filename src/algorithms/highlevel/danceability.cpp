@@ -87,7 +87,8 @@ void Danceability::compute() {
     s[i] = stddev(signal, frameBegin, frameEnd);
   }
 
-  // subtract the mean from the array to make it have 0 DC
+  // subtract the mean from the array to make it have 0 DC 
+  // (this is optional, that is, it does not affect result)
   Real mean_s = mean(s, 0, s.size());
   for (int i=0; i<numFrames; i++)
     s[i] -= mean_s;
@@ -145,7 +146,7 @@ void Danceability::compute() {
   }
 
   danceability = 0.0;
-  dfa.assign(_tau.size(), 0.);
+  dfa.assign(_tau.size()-1, 0.);
 
   // the original article tells us: for small tau's we need to adjust alpha (danceability)
   for (int i=0; i<nFValues-1; i++) {
