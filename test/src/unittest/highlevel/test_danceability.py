@@ -78,6 +78,12 @@ class TestDanceability(TestCase):
         self.assertConfigureFails(Danceability(), {'minTau':1000, 'maxTau':500})
 
 
+    def testWhiteNoise(self):
+        # 5 seconds of white noise
+        wn_44100 = np.random.randn(44100 * 5)
+        print Danceability()(wn_44100)
+
+
 suite = allTests(TestDanceability)
 
 if __name__ == '__main__':
