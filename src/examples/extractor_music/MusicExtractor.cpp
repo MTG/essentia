@@ -58,6 +58,9 @@ int MusicExtractor::compute(const string& audioFilename){
   cerr << "Process step: Compute md5 audio hash and codec" << endl;
   computeMetadata(audioFilename);
 
+  cerr << "Process step: Compute EBU R128 loudness" << endl;
+  computeLoudnessEBUR128(audioFilename);
+
   cerr << "Process step: Replay gain" << endl;
   computeReplayGain(audioFilename); // compute replay gain and the duration of the track
 
@@ -295,6 +298,7 @@ void MusicExtractor::computeMetadata(const string& audioFilename) {
   Algorithm* loader = factory.create("AudioLoader",
                                      "filename",   audioFilename,
                                      "computeMD5", true);
+
   loader->output("audio")           >> NOWHERE;
   loader->output("md5")             >> PC(results, "metadata.audio_properties.md5_encoded");
   loader->output("sampleRate")      >> PC(results, "metadata.audio_properties.sample_rate");
@@ -317,6 +321,53 @@ void MusicExtractor::computeMetadata(const string& audioFilename) {
   }
   results.set("metadata.audio_properties.lossless", isLossless);
 }
+
+
+void MusicExtractor::computeLoudnessEBUR128(const string& audioFilename) {
+  // Note: we can merge into the network used in computeMetadata to avoid
+  //       loading audio another time. Keeping the code separate for now for
+  //       the sake of code simplicity.
+
+  AlgorithmFactory& factory = AlgorithmFactory::instance();
+  Algorithm* loader = factory.create("AudioLoader", "filename",   audioFilename);
+  Algorithm* demuxer = factory.create("StereoDemuxer");
+  Algorithm* muxer = factory.create("StereoMuxer");
+  Algorithm* resampleR = factory.create("Resample");
+  Algorithm* resampleL = factory.create("Resample");
+  Algorithm* trimmer = factory.create("StereoTrimmer");
+  Algorithm* loudness = factory.create("LoudnessEBUR128");
+
+  int inputSampleRate = (int)lastTokenProduced<Real>(loader->output("sampleRate"));
+  resampleR->configure("inputSampleRate", inputSampleRate,
+                       "outputSampleRate", analysisSampleRate);
+  resampleL->configure("inputSampleRate", inputSampleRate,
+                       "outputSampleRate", analysisSampleRate);
+  trimmer->configure("sampleRate", analysisSampleRate,
+                     "startTime", startTime,
+                     "endTime", endTime);
+
+  loader->output("audio")           >> demuxer->input("audio");
+  loader->output("md5")             >> NOWHERE;
+  loader->output("sampleRate")      >> NOWHERE;
+  loader->output("numberChannels")  >> NOWHERE;
+  loader->output("bit_rate")        >> NOWHERE;
+  loader->output("codec")           >> NOWHERE;
+
+  demuxer->output("left")      >> resampleL->input("signal");
+  demuxer->output("right")     >> resampleR->input("signal");
+  resampleR->output("signal")  >> muxer->input("right");
+  resampleL->output("signal")  >> muxer->input("left");
+  muxer->output("audio")       >> trimmer->input("signal");
+  trimmer->output("signal")    >> loudness->input("signal");
+  loudness->output("integratedLoudness") >> PC(results, "lowlevel.loudness_ebu128.integrated");
+  loudness->output("momentaryLoudness") >> PC(results, "lowlevel.loudness_ebu128.momentary");;
+  loudness->output("shortTermLoudness") >> PC(results, "lowlevel.loudness_ebu128.short_term");;
+  loudness->output("loudnessRange") >> PC(results, "lowlevel.loudness_ebu128.loudness_range");
+  
+  Network network(loader);
+  network.run();
+}
+
 
 void MusicExtractor::computeReplayGain(const string& audioFilename) {
 

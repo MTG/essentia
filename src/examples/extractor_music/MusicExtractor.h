@@ -77,6 +77,7 @@ using namespace streaming;
   void mergeValues(Pool &pool);
   void readMetadata(const string& audioFilename);
   void computeMetadata(const string& audioFilename);
+  void computeLoudnessEBUR128(const string& audioFilename);
   void computeReplayGain(const string& audioFilename);
   void computeSVMDescriptors(Pool& pool);
   void loadSVMModels();
