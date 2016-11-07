@@ -149,6 +149,9 @@ void Danceability::compute() {
   for (int i=0; i<nFValues - 1; i++) {
     if (F[i+1] != 0.0) {
       danceability += log10(F[i+1] / F[i]) / log10( ((Real)_tau[i+1]+3.0) / ((Real)_tau[i]+3.0));
+      if (log10(F[i+1] / F[i]) < 0) {
+        cout << "DEBUG:" << i <<", " << F[i+1] << ", " << F[i] << endl;
+      }
     }
     else {
       danceability = 0.0;
@@ -158,8 +161,9 @@ void Danceability::compute() {
 
   danceability /= (nFValues-1);
 
-  if (danceability != 0.0) {
-     danceability = 1.0 / danceability;
+  if (danceability > 0.0) {
+    // negative values occur very very seldom, therefore we can ignore them
+    danceability = 1.0 / danceability;
   }
   else {
      danceability = 0.0;
