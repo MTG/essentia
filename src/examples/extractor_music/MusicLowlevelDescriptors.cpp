@@ -67,14 +67,13 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
   zcr->output("zeroCrossingRate") >> PC(pool, nameSpace + "zerocrossingrate");
 
   // MelBands and MFCC
-  int nMelBands = 40;
-  Algorithm* mfcc = factory.create("MFCC", "numberBands", nMelBands);
+  Algorithm* mfcc = factory.create("MFCC", "numberBands", 40);
   spec->output("spectrum")  >> mfcc->input("spectrum");
   mfcc->output("bands")     >> PC(pool, nameSpace + "melbands");
   mfcc->output("mfcc")      >> PC(pool, nameSpace + "mfcc");
 
   // Spectral MelBands Central Moments Statistics, Flatness and Crest
-  Algorithm* mels_cm = factory.create("CentralMoments", "range", nMelBands-1);
+  Algorithm* mels_cm = factory.create("CentralMoments", "range", 40-1);
   Algorithm* mels_ds = factory.create("DistributionShape");
   mfcc->output("bands")             >> mels_cm->input("array");
   mels_cm->output("centralMoments") >> mels_ds->input("centralMoments");
@@ -89,6 +88,10 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
   mels_fl->output("flatnessDB")  >> PC(pool, nameSpace + "melbands_flatness_db");
   mels_cr->output("crest")       >> PC(pool, nameSpace + "melbands_crest");
 
+  // MelBands 128 
+  Algorithm* melbands128 = factory.create("MelBands", "numberBands", 128);
+  spec->output("spectrum")     >> melbands128->input("spectrum");
+  melbands128->output("bands") >> PC(pool, nameSpace + "melbands128");
 
   // ERBBands and GFCC
   uint nERBBands = 40;
