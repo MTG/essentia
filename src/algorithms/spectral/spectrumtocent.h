@@ -1,8 +1,20 @@
 /*
- * spectrumtocent.h
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
- *  Created on: Oct 26, 2016
- *      Author: pablo
+ * This file is part of Essentia
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
 #ifndef ESSENTIA_SPECTRUMTOCENT_H
@@ -64,4 +76,29 @@ class SpectrumToCent : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
-#endif /* SRC_ALGORITHMS_SPECTRAL_SPECTRUMTOCENT_H_ */
+#include "streamingalgorithmwrapper.h"
+
+namespace essentia {
+namespace streaming {
+
+class SpectrumToCent : public StreamingAlgorithmWrapper {
+
+ protected:
+  Sink<std::vector<Real> > _spectrumInput;
+  Source<std::vector<Real> > _bandsOutput;
+  Source<std::vector<Real> > _freqOutput;
+
+ public:
+  SpectrumToCent() {
+    declareAlgorithm("SpectrumToCent");
+    declareInput(_spectrumInput, TOKEN, "spectrum");
+    declareOutput(_bandsOutput, TOKEN, "bands");
+    declareOutput(_freqOutput, TOKEN, "frequencies");
+  }
+};
+
+} // namespace streaming
+} // namespace essentia
+
+
+#endif // ESSENTIA_SPECTRUMTOCENT_H
