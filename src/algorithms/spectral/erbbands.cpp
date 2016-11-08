@@ -148,8 +148,6 @@ void ERBBands::compute() {
   // working with sound effects.  Band magnitudes option is required for 
   // OnsetDetectionGlobal algorithm.
 
-  // TODO: probably all *Bands algorithms should have an option {magnitude,energy} 
-
   if (_type=="magnitude") {
     for (int i=0; i<filterSize; ++i) {
       bands[i] = 0;
@@ -158,7 +156,7 @@ void ERBBands::compute() {
       }
     }
   }
-  else if (_type=="energy") {
+  else if (_type=="power") {
     for (int i=0; i<filterSize; ++i) {
       bands[i] = 0;
       for (int j=0; j<spectrumSize; ++j) {
