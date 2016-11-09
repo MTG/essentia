@@ -40,7 +40,7 @@ void GFCC::configure() {
                        "numberBands", parameter("numberBands"),
                        "lowFrequencyBound", parameter("lowFrequencyBound"),
                        "highFrequencyBound", parameter("highFrequencyBound"),
-                       "type", "energy");
+                       "type", "power");
   _dct->configure("inputSize", parameter("numberBands"),
                   "outputSize", parameter("numberCoefficients"));
   _logbands.resize(parameter("numberBands").toInt());
