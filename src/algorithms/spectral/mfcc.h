@@ -59,6 +59,10 @@ class MFCC : public Algorithm {
     declareParameter("numberCoefficients", "the number of output mel coefficients", "[1,inf)", 13);
     declareParameter("lowFrequencyBound", "the lower bound of the frequency range [Hz]", "[0,inf)", 0.);
     declareParameter("highFrequencyBound", "the upper bound of the frequency range [Hz]", "(0,inf)", 11000.);
+    declareParameter("scale", "The scale implementation type. use 'htk' to emulate its behaviour. Default mel.","{mel,htk}","mel");
+    declareParameter("normalization", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
+    declareParameter("type", "'power' to output squared units, 'magnitude' to keep it as the input","{magnitude,power}", "power");
+
   }
 
   void configure();

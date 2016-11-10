@@ -47,7 +47,10 @@ void MFCC::configure() {
                         "sampleRate", parameter("sampleRate"),
                         "numberBands", parameter("numberBands"),
                         "lowFrequencyBound", parameter("lowFrequencyBound"),
-                        "highFrequencyBound", parameter("highFrequencyBound"));
+                        "highFrequencyBound", parameter("highFrequencyBound"),
+                        "scale", parameter("scale"),
+                        "normalization", parameter("normalization"),
+                        "type", parameter("type").toString());
 
   _dct->configure("inputSize", parameter("numberBands"),
                   "outputSize", parameter("numberCoefficients"));
