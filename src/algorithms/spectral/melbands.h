@@ -45,6 +45,9 @@ class MelBands : public Algorithm {
     declareParameter("lowFrequencyBound", "a lower-bound limit for the frequencies to be included in the bands", "[0,inf)", 0.0);
     declareParameter("highFrequencyBound", "an upper-bound limit for the frequencies to be included in the bands", "[0,inf)", 22050.0);
     declareParameter("scale", "The scale implementation type. use 'htk' to emulate its behaviour. Default mel.","{mel,htk}","mel");
+    declareParameter("normalization", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
+    declareParameter("type", "'power' to output squared units, 'magnitude' to keep it as the input","{magnitude,power}", "power");
+
   }
 
   void configure();
@@ -65,7 +68,10 @@ class MelBands : public Algorithm {
   std::vector<Real> _filterFrequencies;
   int _numBands;
   Real _sampleRate;
+
   std::string _scale;
+  std::string _normalization;
+  std::string _type;
 };
 
 } // namespace standard

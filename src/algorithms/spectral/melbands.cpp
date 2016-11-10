@@ -50,6 +50,8 @@ void MelBands::configure() {
   _numBands = parameter("numberBands").toInt();
   _sampleRate = parameter("sampleRate").toReal();
   _scale = parameter("scale").toString();
+  _normalization = parameter("normalization").toString();
+  _type = parameter("type").toString();
 
   calculateFilterFrequencies();
   createFilters(parameter("inputSize").toInt());
@@ -126,17 +128,19 @@ void MelBands::createFilters(int spectrumSize) {
   }
 
   // normalize the filter weights
-  for (int i=0; i<filterSize; ++i) {
-    Real weight = 0.0;
+  if ( _normalization.compare("unit_sum") == 0 ){
+    for (int i=0; i<filterSize; ++i) {
+      Real weight = 0.0;
 
-    for (int j=0; j<spectrumSize; ++j) {
-      weight += _filterCoefficients[i][j];
-    }
+      for (int j=0; j<spectrumSize; ++j) {
+        weight += _filterCoefficients[i][j];
+      }
 
-    if (weight == 0) continue;
+      if (weight == 0) continue;
 
-    for (int j=0; j<spectrumSize; ++j) {
-      _filterCoefficients[i][j] = _filterCoefficients[i][j] / weight;
+      for (int j=0; j<spectrumSize; ++j) {
+        _filterCoefficients[i][j] = _filterCoefficients[i][j] / weight;
+      }
     }
   }
 }
@@ -166,7 +170,13 @@ void MelBands::compute() {
     int jend = int(_filterFrequencies[i+2] / frequencyScale + 0.5);
 
     for (int j=jbegin; j<jend; ++j) {
-      bands[i] += (spectrum[j] * spectrum[j]) * _filterCoefficients[i][j];
+      if ( _type.compare("power") == 0){
+        bands[i] += (spectrum[j] * spectrum[j]) * _filterCoefficients[i][j];
+      }
+
+      if ( _type.compare("magnitude") == 0){
+        bands[i] += (spectrum[j]) * _filterCoefficients[i][j];
+      }
     }
   }
 }
