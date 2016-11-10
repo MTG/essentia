@@ -58,7 +58,8 @@ class MelBands : public Algorithm {
 
   void createFilters(int spectrumSize);
   void calculateFilterFrequencies();
-  Real scale(Real hz);
+  Real hz2scale(Real hz);
+  Real scale2hz(Real scale);
 
   std::vector<std::vector<Real> > _filterCoefficients;
   std::vector<Real> _filterFrequencies;
