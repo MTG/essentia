@@ -44,6 +44,7 @@ class MelBands : public Algorithm {
     declareParameter("sampleRate", "the sample rate", "(0,inf)", 44100.);
     declareParameter("lowFrequencyBound", "a lower-bound limit for the frequencies to be included in the bands", "[0,inf)", 0.0);
     declareParameter("highFrequencyBound", "an upper-bound limit for the frequencies to be included in the bands", "[0,inf)", 22050.0);
+    declareParameter("scale", "The scale implementation type. use 'htk' to emulate its behaviour. Default mel.","{mel,htk}","htk");
   }
 
   void configure();
@@ -57,11 +58,13 @@ class MelBands : public Algorithm {
 
   void createFilters(int spectrumSize);
   void calculateFilterFrequencies();
+  Real scale(Real hz);
 
   std::vector<std::vector<Real> > _filterCoefficients;
   std::vector<Real> _filterFrequencies;
   int _numBands;
   Real _sampleRate;
+  std::string _scale;
 };
 
 } // namespace standard

@@ -628,6 +628,9 @@ inline Real hz2mel(Real hz) {
   return 1127.01048 * log(hz/700.0 + 1.0);
 }
 
+inline Real hz2mel10(Real hz) {
+  return 2595 * log10(hz/700.0 + 1.0);
+}
 
 inline int argmin(const std::vector<Real>& input) {
   return std::min_element(input.begin(), input.end()) - input.begin();
