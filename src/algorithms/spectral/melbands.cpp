@@ -49,7 +49,7 @@ void MelBands::configure() {
 
   _numBands = parameter("numberBands").toInt();
   _sampleRate = parameter("sampleRate").toReal();
-  _scale = parameter("scale").toString();
+  _scale = parameter("warpingFormula").toString();
   _normalization = parameter("normalization").toString();
   _type = parameter("type").toString();
 
@@ -184,10 +184,10 @@ void MelBands::compute() {
 Real MelBands::hz2scale(Real hz){
   Real scaled = 0.0;
 
-  if (_scale.compare("mel") == 0 ){
+  if (_scale.compare("slaneyMel") == 0 ){
     scaled = hz2mel(hz);
   }
-  if (_scale.compare("htk") == 0 ){
+  if (_scale.compare("htkMel") == 0 ){
     scaled = hz2mel10(hz);
   }
 
@@ -197,10 +197,10 @@ Real MelBands::hz2scale(Real hz){
 Real MelBands::scale2hz(Real scale){
   Real hz = 0.0;
 
-  if (_scale.compare("mel") == 0 ){
+  if (_scale.compare("slaneyMel") == 0 ){
     hz = mel2hz(scale);
   }
-  if (_scale.compare("htk") == 0 ){
+  if (_scale.compare("htkMel") == 0 ){
     hz = mel102hz(scale);
   }
 

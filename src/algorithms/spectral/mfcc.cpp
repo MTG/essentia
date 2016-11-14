@@ -48,7 +48,7 @@ void MFCC::configure() {
                         "numberBands", parameter("numberBands"),
                         "lowFrequencyBound", parameter("lowFrequencyBound"),
                         "highFrequencyBound", parameter("highFrequencyBound"),
-                        "scale", parameter("scale"),
+                        "warpingFormula", parameter("warpingFormula"),
                         "normalization", parameter("normalization"),
                         "type", parameter("type").toString());
 
