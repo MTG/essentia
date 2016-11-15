@@ -95,13 +95,30 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                        "weightType", "squaredCosine",
                                        "nonLinear", false,
                                        "windowSize", 4.0/3.0);
-  Algorithm* skey = factory.create("Key",
+  Algorithm* skey_temperley = factory.create("Key",
                                    "numHarmonics", 4,
                                    "pcpSize", 36,
                                    "profileType", "temperley",
                                    "slope", 0.6,
                                    "usePolyphony", true,
                                    "useThreeChords", true);
+
+  Algorithm* skey_krumhansl = factory.create("Key",
+                                   "numHarmonics", 4,
+                                   "pcpSize", 36,
+                                   "profileType", "krumhansl",
+                                   "slope", 0.6,
+                                   "usePolyphony", true,
+                                   "useThreeChords", true);
+
+  Algorithm* skey_edma = factory.create("Key",
+                                   "numHarmonics", 4,
+                                   "pcpSize", 36,
+                                   "profileType", "edma",
+                                   "slope", 0.6,
+                                   "usePolyphony", true,
+                                   "useThreeChords", true);
+
   Algorithm* hpcp_chord = factory.create("HPCP",
                                          "size", 36,
                                          "referenceFrequency", tuningFreq,
@@ -116,7 +133,6 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
   Algorithm* schord = factory.create("ChordsDetection");
   Algorithm* schords_desc = factory.create("ChordsDescriptors");
 
-
   source                       >> fc->input("signal");
   fc->output("frame")          >> w->input("frame");
   w->output("frame")           >> spec->input("frame");
@@ -125,22 +141,38 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
   peaks->output("frequencies") >> hpcp_key->input("frequencies");
   peaks->output("magnitudes")  >> hpcp_key->input("magnitudes");
   hpcp_key->output("hpcp")     >> PC(pool, nameSpace + "hpcp");
-  hpcp_key->output("hpcp")     >> skey->input("pcp");
-  skey->output("key")          >> PC(pool, nameSpace + "key_key");
-  skey->output("scale")        >> PC(pool, nameSpace + "key_scale");
-  skey->output("strength")     >> PC(pool, nameSpace + "key_strength");
+  hpcp_key->output("hpcp")     >> skey_temperley->input("pcp");
+  hpcp_key->output("hpcp")     >> skey_krumhansl->input("pcp");
+  hpcp_key->output("hpcp")     >> skey_edma->input("pcp");
+
+  skey_temperley->output("key")          >> PC(pool, nameSpace + "key_temperley.key");
+  skey_temperley->output("scale")        >> PC(pool, nameSpace + "key_temperley.scale");
+  skey_temperley->output("strength")     >> PC(pool, nameSpace + "key_temperley.strength");
+
+  skey_krumhansl->output("key")          >> PC(pool, nameSpace + "key_krumhansl.key");
+  skey_krumhansl->output("scale")        >> PC(pool, nameSpace + "key_krumhansl.scale");
+  skey_krumhansl->output("strength")     >> PC(pool, nameSpace + "key_krumhansl.strength");
+
+  skey_edma->output("key")          >> PC(pool, nameSpace + "key_edma.key");
+  skey_edma->output("scale")        >> PC(pool, nameSpace + "key_edma.scale");
+  skey_edma->output("strength")     >> PC(pool, nameSpace + "key_edma.strength");
+
 
   peaks->output("frequencies") >> hpcp_chord->input("frequencies");
   peaks->output("magnitudes")  >> hpcp_chord->input("magnitudes");
   hpcp_chord->output("hpcp")   >> schord->input("pcp");
   schord->output("strength")   >> PC(pool, nameSpace + "chords_strength");
+  
   // TODO: Chords progression has low practical sense and is based on a very simple algorithm prone to errors.
   // We need to have better algorithm first to include this descriptor.
   // schord->output("chords") >> PC(pool, nameSpace + "chords_progression");
   
-  schord->output("chords")     >> schords_desc->input("chords");
-  skey->output("key")          >> schords_desc->input("key");
-  skey->output("scale")        >> schords_desc->input("scale");
+  // TODO: chord histogram is aligned so than the first bin is the overall key
+  //       estimated using temperley profile. Should we align to the most 
+  //       frequent chord instead?  
+  schord->output("chords")               >> schords_desc->input("chords");
+  skey_temperley->output("key")          >> schords_desc->input("key");
+  skey_temperley->output("scale")        >> schords_desc->input("scale");
   schords_desc->output("chordsHistogram")   >> PC(pool, nameSpace + "chords_histogram");
   schords_desc->output("chordsNumberRate")  >> PC(pool, nameSpace + "chords_number_rate");
   schords_desc->output("chordsChangesRate") >> PC(pool, nameSpace + "chords_changes_rate");
