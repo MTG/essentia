@@ -35,7 +35,7 @@ void TriangularBands::configure() {
   _nBands = int(_bandFrequencies.size() - 2);
   _inputSize = parameter("inputSize").toReal();
   _sampleRate = parameter("sampleRate").toReal();
-  _normalization = parameter("normalization").toLower();
+  _normalization = parameter("normalize").toLower();
   _type = parameter("type").toLower();
   if ( _bandFrequencies.size() < 2 ) {
     throw EssentiaException("TriangularBands: the 'frequencyBands' parameter contains only one element (at least two elements are required)");
