@@ -37,6 +37,8 @@ void TriangularBands::configure() {
   _sampleRate = parameter("sampleRate").toReal();
   _normalization = parameter("normalize").toLower();
   _type = parameter("type").toLower();
+  _weighting = parameter("weighting").toLower();
+
   if ( _bandFrequencies.size() < 2 ) {
     throw EssentiaException("TriangularBands: the 'frequencyBands' parameter contains only one element (at least two elements are required)");
   }
@@ -51,6 +53,14 @@ void TriangularBands::configure() {
   }
   _isLog = parameter("log").toBool();
   createFilters(_inputSize);
+
+  _weightingFunctions["linear"] = linear;
+  _weightingFunctions["sanleyMel"] = hz2mel;
+  _weightingFunctions["htkMel"] = hz2mel10;
+
+  _inverseWeightingFunctions["linear"] = linear;
+  _inverseWeightingFunctions["sanleyMel"] = mel2hz;
+  _inverseWeightingFunctions["htkMel"] = mel102hz;
 }
 
 
@@ -135,6 +145,7 @@ void TriangularBands::compute() {
     if (_isLog) bands[i] = log2(1 + bands[i]);
   }
   */
+
 }
 
 void TriangularBands::createFilters(int spectrumSize) {
@@ -167,8 +178,8 @@ void TriangularBands::createFilters(int spectrumSize) {
   Real frequencyScale = ( _sampleRate / 2.0) / (spectrumSize - 1);
 
   for (int i=0; i<filterSize; ++i) {
-    Real fstep1 = _bandFrequencies[i+1] - _bandFrequencies[i];
-    Real fstep2 = _bandFrequencies[i+2] - _bandFrequencies[i+1];
+    Real fstep1 = hz2scale(_bandFrequencies[i+1]) - hz2scale(_bandFrequencies[i]);
+    Real fstep2 = hz2scale(_bandFrequencies[i+2]) - hz2scale(_bandFrequencies[i+1]);
 
     int jbegin = int(_bandFrequencies[i] / frequencyScale + 0.5);
     int jend = int(_bandFrequencies[i+2] / frequencyScale + 0.5);
@@ -181,11 +192,11 @@ void TriangularBands::createFilters(int spectrumSize) {
       Real binfreq = j*frequencyScale;
       // in the ascending part of the triangle...
       if ((binfreq >= _bandFrequencies[i]) && (binfreq < _bandFrequencies[i+1])) {
-        _filterCoefficients[i][j] = (binfreq - _bandFrequencies[i]) / fstep1;
+        _filterCoefficients[i][j] = (hz2scale(binfreq) - hz2scale(_bandFrequencies[i])) / fstep1;
       }
       // in the descending part of the triangle...
       else if ((binfreq >= _bandFrequencies[i+1]) && (binfreq < _bandFrequencies[i+2])) {
-        _filterCoefficients[i][j] = (_bandFrequencies[i+2] - binfreq) / fstep2;
+        _filterCoefficients[i][j] = (hz2scale(_bandFrequencies[i+2]) - hz2scale(binfreq)) / fstep2;
       }
     }
   }
@@ -208,6 +219,26 @@ void TriangularBands::createFilters(int spectrumSize) {
   }
 }
 
+Real TriangularBands::hz2scale(Real hz){
+  Real scaled = 0.0;
+  warpingFunction warper = _weightingFunctions[_weighting];
+
+  scaled = (*warper)(hz);
+
+  return scaled;
+}
+
+Real TriangularBands::scale2hz(Real scale){
+  Real hz = 0.0;
+  warpingFunction warper = _inverseWeightingFunctions[_weighting];
+
+  hz = (*warper)(scale);
+
+  return hz;
+}
+
+
 } // namespace standard
 } // namespace essentia
+
 

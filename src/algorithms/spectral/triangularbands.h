@@ -30,7 +30,9 @@ namespace standard {
 
 class TriangularBands : public Algorithm {
 
- protected:
+  typedef Real (*warpingFunction)(Real);
+
+protected:
   Input<std::vector<Real> > _spectrumInput;
   Output<std::vector<Real> > _bandsOutput;
   
@@ -43,7 +45,21 @@ class TriangularBands : public Algorithm {
   Real _inputSize;
   std::string _normalization;
   std::string _type;
+  std::string _weighting;
+
   void createFilters(int spectrumSize);
+
+  Real hz2scale(Real hz);
+  Real scale2hz(Real scale);
+
+  warpingFunction linear(Real hz){
+    return hz;
+  }
+
+  std::map<string, warpingFunction> _weightingFunctions;
+  std::map<string, warpingFunction> _inverseWeightingFunctions;
+
+
 
  public:
   TriangularBands() {
@@ -61,6 +77,7 @@ class TriangularBands : public Algorithm {
     declareParameter("log", "compute log-energies (log10 (1 + energy))","{true,false}", true);
     declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
     declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
+    declareParameter("weighting", "type of weighting function for determining triangle area","{linear,cents,slaneyMel,htkMel}","linear");
   }
 
   void compute();
