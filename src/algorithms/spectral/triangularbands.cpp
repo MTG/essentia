@@ -35,8 +35,8 @@ void TriangularBands::configure() {
   _nBands = int(_bandFrequencies.size() - 2);
   _inputSize = parameter("inputSize").toReal();
   _sampleRate = parameter("sampleRate").toReal();
-  _normalization = parameter("normalization").toString();
-  _type = parameter("type").toString();
+  _normalization = parameter("normalize").toLower();
+  _type = parameter("type").toLower();
   if ( _bandFrequencies.size() < 2 ) {
     throw EssentiaException("TriangularBands: the 'frequencyBands' parameter contains only one element (at least two elements are required)");
   }
@@ -82,11 +82,11 @@ void TriangularBands::compute() {
 
     for (int j=jbegin; j<jend; ++j) {
 
-      if ( _type.compare("power") == 0){
+      if (_type == "power"){
         bands[i] += (spectrum[j] * spectrum[j]) * _filterCoefficients[i][j];
       }
 
-      if ( _type.compare("magnitude") == 0){
+      if (_type == "magnitude"){
         bands[i] += (spectrum[j]) * _filterCoefficients[i][j];
       }
 
