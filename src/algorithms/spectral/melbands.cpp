@@ -50,7 +50,7 @@ void MelBands::configure() {
   _numBands = parameter("numberBands").toInt();
   _sampleRate = parameter("sampleRate").toReal();
   _scale = parameter("warpingFormula").toString();
-  _normalization = parameter("normalization").toString();
+  _normalization = parameter("normalize").toString();
   _type = parameter("type").toString();
 
   calculateFilterFrequencies();
