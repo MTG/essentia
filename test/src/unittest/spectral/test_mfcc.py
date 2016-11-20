@@ -25,7 +25,8 @@ from math import *
 class TestMFCC(TestCase):
 
     def InitMFCC(self, numCoeffs):
-        return MFCC(sampleRate = 44100,
+        return MFCC(inputSize = 1024,
+                    sampleRate = 44100,
                     numberBands = 40,
                     numberCoefficients = numCoeffs,
                     lowFrequencyBound = 0,
