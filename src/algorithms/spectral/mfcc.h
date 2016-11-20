@@ -60,8 +60,9 @@ class MFCC : public Algorithm {
     declareParameter("lowFrequencyBound", "the lower bound of the frequency range [Hz]", "[0,inf)", 0.);
     declareParameter("highFrequencyBound", "the upper bound of the frequency range [Hz]", "(0,inf)", 11000.);
     declareParameter("warpingFormula", "The scale implementation type. use 'htkMel' to emulate its behaviour. Default slaneyMel.","{slaneyMel,htkMel}","slaneyMel");
-    declareParameter("normalization", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
+    declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
     declareParameter("type", "'power' to output squared units, 'magnitude' to keep it as the input","{magnitude,power}", "power");
+    declareParameter("dctType", "the DCT type", "[2,3]", 2);
 
   }
 
