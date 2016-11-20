@@ -40,6 +40,7 @@ class DCT : public Algorithm {
   void declareParameters() {
     declareParameter("inputSize", "the size of the input array", "[1,inf)", 10);
     declareParameter("outputSize", "the number of output coefficients", "[1,inf)", 10);
+    declareParameter("dctType", "the DCT type", "[2,3]", 2);
   }
 
   void configure();
@@ -52,9 +53,10 @@ class DCT : public Algorithm {
 
  protected:
   int _outputSize;
-  void createDctTable(int inputSize, int outputSize);
-
+  void createDctTableII(int inputSize, int outputSize);
+  void createDctTableIII(int inputSize, int outputSize);
   std::vector<std::vector<Real> > _dctTable;
+  int _type;
 };
 
 } // namespace essentia

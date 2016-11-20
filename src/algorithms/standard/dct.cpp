@@ -39,11 +39,20 @@ const char* DCT::description = DOC("This algorithm computes the Discrete Cosine 
 void DCT::configure() {
   int inputSize = parameter("inputSize").toInt();
   _outputSize = parameter("outputSize").toInt();
+  _type = parameter("dctType").toInt();
 
-  createDctTable(inputSize, _outputSize);
+  if (_type == 2){
+    createDctTableII(inputSize, _outputSize);
+  }
+  else if (_type == 3){
+    createDctTableIII(inputSize, _outputSize);
+  }
+  else {
+    throw EssentiaException("Bad DCT type.");
+  }
 }
 
-void DCT::createDctTable(int inputSize, int outputSize) {
+void DCT::createDctTableII(int inputSize, int outputSize) {
   // simple implementation using matrix multiplication, can probably be sped up
   // using a library like FFTW, for instance.
   if (outputSize > inputSize) {
@@ -69,6 +78,33 @@ void DCT::createDctTable(int inputSize, int outputSize) {
   }
 }
 
+void DCT::createDctTableIII(int inputSize, int outputSize) {
+  // simple implementation using matrix multiplication, can probably be sped up
+  // using a library like FFTW, for instance.
+  if (outputSize > inputSize) {
+    throw EssentiaException("DCT: 'outputSize' is greater than 'inputSize'. You can only compute the DCT with an output size smaller than the input size (i.e. you can only compress information)");
+  }
+
+  _dctTable = vector<vector<Real> >(outputSize, vector<Real>(inputSize));
+
+  // scale for index = 0
+  Real scale0 = 1.0 / sqrt(Real(inputSize));
+
+  // scale for index != 0
+  Real scale1 = Real(sqrt(2.0/inputSize));
+
+  Real freqMultiplier;
+
+  for (int i=0; i<outputSize; ++i) {
+
+    _dctTable[i][0] = scale1 * scale0;  // 0.5 or sqrt (0.5)??
+
+    for (int j=1; j<inputSize; ++j) {
+      freqMultiplier = Real(M_PI / inputSize * j);
+      _dctTable[i][j] = (Real)(scale1 * cos( freqMultiplier * ((Real)i + 0.5) ));
+    }
+  }
+}
 
 void DCT::compute() {
 
@@ -83,7 +119,15 @@ void DCT::compute() {
   if (_dctTable.empty() ||
       inputSize != int(_dctTable[0].size()) ||
       _outputSize != int(_dctTable.size())) {
-    createDctTable(inputSize, _outputSize);
+    if (_type == 2){
+      createDctTableII(inputSize, _outputSize);
+    }
+    else if (_type == 3){
+      createDctTableIII(inputSize, _outputSize);
+    }
+    else {
+      throw EssentiaException("Bad DCT type.");
+    }
   }
 
   dct.resize(_outputSize);
