@@ -13,7 +13,7 @@ namespace standard {
 
 const char* SpectrumToCent::name = "SpectrumToCent";
 const char* SpectrumToCent::category = "Spectral";
-const char* SpectrumToCent::description = DOC("This algorithm computes energy in triangular frequency bands of a spectrum. Each band is computed to have a constant wideness in the cent scale. For each band the power-spectrum (mag-squared) is summed.\n"
+const char* SpectrumToCent::description = DOC("This algorithm computes energy in triangular frequency bands of a spectrum equally spaced on the cent scale. Each band is computed to have a constant wideness in the cent scale. For each band the power-spectrum (mag-squared) is summed.\n"
 "\n"
 "Parameter \"centBinResolution\" should be and integer greater than 1, otherwise an exception will be thrown. TriangularBands is only defined for spectrum, which size is greater than 1.\n");
 
@@ -33,15 +33,16 @@ void SpectrumToCent::configure() {
   calculateFilterFrequencies();
 
   if ( _bandFrequencies.back() > _sampleRate / 2 ) {
-    throw EssentiaException("SpectrumToCent: Attempted to create a band above the Nyquist cut-off frequency.");
+    E_INFO("Attempted to create bands up to " << _bandFrequencies.back() << "Hz with a Nyquist frequency of " << _sampleRate / 2 << "Hz.");
+    throw EssentiaException("SpectrumToCent: Band frequencies cannot be above the Nyquist frequency.");
   }
-  _isLog = parameter("log").toBool();
 
-  _triangularBands->configure("frequencyBands", _bandFrequencies, "log", _isLog, "sampleRate", _sampleRate);
-
-
-
-
+  _triangularBands->configure(INHERIT("inputSize"),
+                              INHERIT("sampleRate"),
+                              "frequencyBands", _bandFrequencies,
+                              INHERIT("log"),
+                              INHERIT("normalize"),
+                              INHERIT("type"));
 }
 
 
