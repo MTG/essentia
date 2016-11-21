@@ -46,12 +46,22 @@ void MelBands::configure() {
   if (parameter("highFrequencyBound").toReal() <= parameter("lowFrequencyBound").toReal()) {
     throw EssentiaException("MelBands: High frequency bound cannot be lower than the low frequency bound.");
   }
-
   _numBands = parameter("numberBands").toInt();
   _sampleRate = parameter("sampleRate").toReal();
   _scale = parameter("warpingFormula").toString();
   _normalization = parameter("normalize").toString();
   _type = parameter("type").toString();
+  std::string weighting = parameter("weighting").toLower();
+
+  if (weighting == "warping"){
+    _weighting = _scale;
+  }
+  else if (weighting == "linear"){
+    _weighting = "linear";
+  }
+  else{
+    throw EssentiaException("Bad 'weighting' parameter");
+  }
 
   calculateFilterFrequencies();
   createFilters(parameter("inputSize").toInt());
@@ -63,13 +73,13 @@ void MelBands::calculateFilterFrequencies() {
   _filterFrequencies.resize(filterSize + 2);
 
   // get the low and high frequency bounds in mel frequency
-  Real lowMelFrequencyBound = hz2scale(parameter("lowFrequencyBound").toReal());
-  Real highMelFrequencyBound = hz2scale(parameter("highFrequencyBound").toReal());
+  Real lowMelFrequencyBound = hz2scale(parameter("lowFrequencyBound").toReal(),_scale);
+  Real highMelFrequencyBound = hz2scale(parameter("highFrequencyBound").toReal(),_scale);
   Real melFrequencyIncrement = (highMelFrequencyBound - lowMelFrequencyBound)/(filterSize + 1);
 
   Real melFreq = lowMelFrequencyBound;
   for (int i=0; i<filterSize + 2; ++i) {
-    _filterFrequencies[i] = scale2hz(melFreq);
+    _filterFrequencies[i] = scale2hz(melFreq,_scale);
     melFreq += melFrequencyIncrement; // increment linearly in mel-scale
   }
 }
@@ -104,8 +114,8 @@ void MelBands::createFilters(int spectrumSize) {
   Real frequencyScale = (parameter("sampleRate").toReal() / 2.0) / (spectrumSize - 1);
 
   for (int i=0; i<filterSize; ++i) {
-    Real fstep1 =hz2scale(_filterFrequencies[i+1]) - hz2scale(_filterFrequencies[i]);
-    Real fstep2 =hz2scale(_filterFrequencies[i+2]) - hz2scale(_filterFrequencies[i+1]);
+    Real fstep1 =hz2scale(_filterFrequencies[i+1],_weighting) - hz2scale(_filterFrequencies[i],_weighting);
+    Real fstep2 =hz2scale(_filterFrequencies[i+2],_weighting) - hz2scale(_filterFrequencies[i+1],_weighting);
 
     int jbegin = int(_filterFrequencies[i] / frequencyScale + 0.5);
     int jend = int(_filterFrequencies[i+2] / frequencyScale + 0.5);
@@ -118,11 +128,11 @@ void MelBands::createFilters(int spectrumSize) {
       Real binfreq = j*frequencyScale;
       // in the ascending part of the triangle...
       if ((binfreq >= _filterFrequencies[i]) && (binfreq < _filterFrequencies[i+1])) {
-        _filterCoefficients[i][j] = (hz2scale(binfreq) - hz2scale(_filterFrequencies[i])) / fstep1;
+        _filterCoefficients[i][j] = (hz2scale(binfreq,_weighting) - hz2scale(_filterFrequencies[i],_weighting)) / fstep1;
       }
       // in the descending part of the triangle...
       else if ((binfreq >= _filterFrequencies[i+1]) && (binfreq < _filterFrequencies[i+2])) {
-        _filterCoefficients[i][j] = (hz2scale(_filterFrequencies[i+2]) -hz2scale(binfreq)) / fstep2;
+        _filterCoefficients[i][j] = (hz2scale(_filterFrequencies[i+2],_weighting) -hz2scale(binfreq,_weighting)) / fstep2;
       }
     }
   }
@@ -181,27 +191,33 @@ void MelBands::compute() {
   }
 }
 
-Real MelBands::hz2scale(Real hz){
+Real MelBands::hz2scale(Real hz, std::string scale){
   Real scaled = 0.0;
 
-  if (_scale.compare("slaneyMel") == 0 ){
+  if (scale.compare("slaneyMel") == 0 ){
     scaled = hz2mel(hz);
   }
-  if (_scale.compare("htkMel") == 0 ){
+  if (scale.compare("htkMel") == 0 ){
     scaled = hz2mel10(hz);
+  }
+  if (scale.compare("linear") == 0 ){
+    scaled = hz;
   }
 
   return scaled;
 }
 
-Real MelBands::scale2hz(Real scale){
+Real MelBands::scale2hz(Real scaled, std::string scale){
   Real hz = 0.0;
 
-  if (_scale.compare("slaneyMel") == 0 ){
-    hz = mel2hz(scale);
+  if (scale.compare("slaneyMel") == 0 ){
+    hz = mel2hz(scaled);
   }
-  if (_scale.compare("htkMel") == 0 ){
-    hz = mel102hz(scale);
+  if (scale.compare("htkMel") == 0 ){
+    hz = mel102hz(scaled);
+  }
+  if (scale.compare("linear") == 0 ){
+    hz = scaled;
   }
 
   return hz;
