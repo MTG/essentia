@@ -48,22 +48,14 @@ void MelBands::configure() {
   }
   _numBands = parameter("numberBands").toInt();
   _sampleRate = parameter("sampleRate").toReal();
-  _scale = parameter("warpingFormula").toString();
   _normalization = parameter("normalize").toString();
   _type = parameter("type").toString();
-  std::string weighting = parameter("weighting").toLower();
 
-  if (weighting == "warping"){
-    _weighting = _scale;
-  }
-  else if (weighting == "linear"){
-    _weighting = "linear";
-  }
-  else{
-    throw EssentiaException("Bad 'weighting' parameter");
-  }
+  setWarpingFunctions(parameter("warpingFormula").toString(),
+                      parameter("weighting").toString());
 
   calculateFilterFrequencies();
+
   createFilters(parameter("inputSize").toInt());
 }
 
@@ -73,13 +65,13 @@ void MelBands::calculateFilterFrequencies() {
   _filterFrequencies.resize(filterSize + 2);
 
   // get the low and high frequency bounds in mel frequency
-  Real lowMelFrequencyBound = hz2scale(parameter("lowFrequencyBound").toReal(),_scale);
-  Real highMelFrequencyBound = hz2scale(parameter("highFrequencyBound").toReal(),_scale);
+  Real lowMelFrequencyBound = (*_warper)(parameter("lowFrequencyBound").toReal());
+  Real highMelFrequencyBound = (*_warper)(parameter("highFrequencyBound").toReal());
   Real melFrequencyIncrement = (highMelFrequencyBound - lowMelFrequencyBound)/(filterSize + 1);
 
   Real melFreq = lowMelFrequencyBound;
   for (int i=0; i<filterSize + 2; ++i) {
-    _filterFrequencies[i] = scale2hz(melFreq,_scale);
+    _filterFrequencies[i] = (*_inverseWarper)(melFreq);
     melFreq += melFrequencyIncrement; // increment linearly in mel-scale
   }
 }
@@ -114,8 +106,8 @@ void MelBands::createFilters(int spectrumSize) {
   Real frequencyScale = (parameter("sampleRate").toReal() / 2.0) / (spectrumSize - 1);
 
   for (int i=0; i<filterSize; ++i) {
-    Real fstep1 =hz2scale(_filterFrequencies[i+1],_weighting) - hz2scale(_filterFrequencies[i],_weighting);
-    Real fstep2 =hz2scale(_filterFrequencies[i+2],_weighting) - hz2scale(_filterFrequencies[i+1],_weighting);
+    Real fstep1 =(*_weighter)(_filterFrequencies[i+1]) - (*_weighter)(_filterFrequencies[i]);
+    Real fstep2 =(*_weighter)(_filterFrequencies[i+2]) - (*_weighter)(_filterFrequencies[i+1]);
 
     int jbegin = int(_filterFrequencies[i] / frequencyScale + 0.5);
     int jend = int(_filterFrequencies[i+2] / frequencyScale + 0.5);
@@ -128,11 +120,11 @@ void MelBands::createFilters(int spectrumSize) {
       Real binfreq = j*frequencyScale;
       // in the ascending part of the triangle...
       if ((binfreq >= _filterFrequencies[i]) && (binfreq < _filterFrequencies[i+1])) {
-        _filterCoefficients[i][j] = (hz2scale(binfreq,_weighting) - hz2scale(_filterFrequencies[i],_weighting)) / fstep1;
+        _filterCoefficients[i][j] = ((*_weighter)(binfreq) - (*_weighter)(_filterFrequencies[i])) / fstep1;
       }
       // in the descending part of the triangle...
       else if ((binfreq >= _filterFrequencies[i+1]) && (binfreq < _filterFrequencies[i+2])) {
-        _filterCoefficients[i][j] = (hz2scale(_filterFrequencies[i+2],_weighting) -hz2scale(binfreq,_weighting)) / fstep2;
+        _filterCoefficients[i][j] = ((*_weighter)(_filterFrequencies[i+2]) -(*_weighter)(binfreq)) / fstep2;
       }
     }
   }
@@ -221,5 +213,32 @@ Real MelBands::scale2hz(Real scaled, std::string scale){
   }
 
   return hz;
+}
+
+void MelBands::setWarpingFunctions(std::string warping, std::string weighting){
+
+  if ( warping == "htkMel" ){
+    _warper = hz2mel10;
+    _inverseWarper = mel102hz;
+  }
+  else if ( warping == "slaneyMel" ){
+    _warper = hz2mel;
+    _inverseWarper = mel2hz;
+  }
+  else{
+    E_INFO("warping "<<warping);
+    throw EssentiaException("Bad 'warpingFormula' parameter");
+  }
+
+  if (weighting == "warping"){
+    _weighter = _warper;
+  }
+  else if (weighting == "linear"){
+    _weighter = hz2hz;
+  }
+  else{
+    throw EssentiaException("Bad 'weighting' parameter");
+  }
+
 }
 

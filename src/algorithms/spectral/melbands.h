@@ -62,6 +62,7 @@ class MelBands : public Algorithm {
 
   void createFilters(int spectrumSize);
   void calculateFilterFrequencies();
+  void setWarpingFunctions(std::string warping, std::string weighting);
   Real hz2scale(Real hz, std::string scale);
   Real scale2hz(Real scaled, std::string scale );
 
@@ -70,10 +71,14 @@ class MelBands : public Algorithm {
   int _numBands;
   Real _sampleRate;
 
-  std::string _scale;
-  std::string _weighting;
   std::string _normalization;
   std::string _type;
+
+  typedef  Real (*funcPointer)(Real);
+
+  funcPointer _warper;
+  funcPointer _inverseWarper;
+  funcPointer _weighter;
 };
 
 } // namespace standard
