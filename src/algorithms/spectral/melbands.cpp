@@ -56,7 +56,13 @@ void MelBands::configure() {
 
   calculateFilterFrequencies();
 
-  createFilters(parameter("inputSize").toInt());
+  _triangularBands->configure(INHERIT("inputSize"),
+                              INHERIT("sampleRate"),
+                              INHERIT("log"),
+                              INHERIT("normalize"),
+                              INHERIT("type"),
+                              "frequencyBands", _filterFrequencies,
+                              "weighting",_weighting);
 }
 
 void MelBands::calculateFilterFrequencies() {
@@ -76,144 +82,16 @@ void MelBands::calculateFilterFrequencies() {
   }
 }
 
-void MelBands::createFilters(int spectrumSize) {
-  /*
-  Calculate the filter coefficients...
-  Basically what we're doing here is the following. Every filter is
-  a triangle starting at frequency [i] and going to frequency [i+2].
-  This way we have overlap for each filter with the next and the previous one.
-
-        /\
-  _____/  \_________
-      i    i+2
-
-  After that we normalize the filter over the whole range making sure it's
-  norm is 1.
-
-  We could use the optimized scheme from HTK/CLAM/Amadeus, but this makes
-  it so much harder to understand what's going on. And you can't have more
-  than half-band overlaps either (if needed).
-  */
-
-  if (spectrumSize < 2) {
-    throw EssentiaException("MelBands: Filter bank cannot be computed from a spectrum with less than 2 bins");
-  }
-
-  int filterSize = parameter("numberBands").toInt();
-
-  _filterCoefficients = vector<vector<Real> >(filterSize, vector<Real>(spectrumSize, 0.0));
-
-  Real frequencyScale = (parameter("sampleRate").toReal() / 2.0) / (spectrumSize - 1);
-
-  for (int i=0; i<filterSize; ++i) {
-    Real fstep1 =(*_weighter)(_filterFrequencies[i+1]) - (*_weighter)(_filterFrequencies[i]);
-    Real fstep2 =(*_weighter)(_filterFrequencies[i+2]) - (*_weighter)(_filterFrequencies[i+1]);
-
-    int jbegin = int(_filterFrequencies[i] / frequencyScale + 0.5);
-    int jend = int(_filterFrequencies[i+2] / frequencyScale + 0.5);
-
-    if (jend-jbegin <= 1) {
-      throw EssentiaException("MelBands: the number of spectrum bins is insufficient for the specified number of mel bands. Use zero padding to increase the number of FFT bins.");
-    }
-
-    for (int j=jbegin; j<jend; ++j) {
-      Real binfreq = j*frequencyScale;
-      // in the ascending part of the triangle...
-      if ((binfreq >= _filterFrequencies[i]) && (binfreq < _filterFrequencies[i+1])) {
-        _filterCoefficients[i][j] = ((*_weighter)(binfreq) - (*_weighter)(_filterFrequencies[i])) / fstep1;
-      }
-      // in the descending part of the triangle...
-      else if ((binfreq >= _filterFrequencies[i+1]) && (binfreq < _filterFrequencies[i+2])) {
-        _filterCoefficients[i][j] = ((*_weighter)(_filterFrequencies[i+2]) -(*_weighter)(binfreq)) / fstep2;
-      }
-    }
-  }
-
-  // normalize the filter weights
-  if ( _normalization.compare("unit_sum") == 0 ){
-    for (int i=0; i<filterSize; ++i) {
-      Real weight = 0.0;
-
-      for (int j=0; j<spectrumSize; ++j) {
-        weight += _filterCoefficients[i][j];
-      }
-
-      if (weight == 0) continue;
-
-      for (int j=0; j<spectrumSize; ++j) {
-        _filterCoefficients[i][j] = _filterCoefficients[i][j] / weight;
-      }
-    }
-  }
-}
 
 void MelBands::compute() {
   const std::vector<Real>& spectrum = _spectrumInput.get();
   std::vector<Real>& bands = _bandsOutput.get();
 
-  int filterSize = _numBands;
-  int spectrumSize = spectrum.size();
-
-  if (_filterCoefficients.empty() || int(_filterCoefficients[0].size()) != spectrumSize) {
-      E_INFO("MelBands: input spectrum size (" << spectrumSize << ") does not correspond to the \"inputSize\" parameter (" << _filterCoefficients[0].size() << "). Recomputing the filter bank.");
-    createFilters(spectrumSize);
-  }
-
-  // calculate all the bands
-  bands.resize(filterSize);
-
-  Real frequencyScale = (_sampleRate / 2.0) / (spectrumSize - 1);
-
-  // apply the filters
-  for (int i=0; i<filterSize; ++i) {
-    bands[i] = 0;
-
-    int jbegin = int(_filterFrequencies[i] / frequencyScale + 0.5);
-    int jend = int(_filterFrequencies[i+2] / frequencyScale + 0.5);
-
-    for (int j=jbegin; j<jend; ++j) {
-      if ( _type.compare("power") == 0){
-        bands[i] += (spectrum[j] * spectrum[j]) * _filterCoefficients[i][j];
-      }
-
-      if ( _type.compare("magnitude") == 0){
-        bands[i] += (spectrum[j]) * _filterCoefficients[i][j];
-      }
-    }
-  }
+  _triangularBands->input("spectrum").set(spectrum);
+  _triangularBands->output("bands").set(bands);
+  _triangularBands->compute();
 }
 
-Real MelBands::hz2scale(Real hz, std::string scale){
-  Real scaled = 0.0;
-
-  if (scale.compare("slaneyMel") == 0 ){
-    scaled = hz2mel(hz);
-  }
-  if (scale.compare("htkMel") == 0 ){
-    scaled = hz2mel10(hz);
-  }
-  if (scale.compare("linear") == 0 ){
-    scaled = hz;
-  }
-
-  return scaled;
-}
-
-Real MelBands::scale2hz(Real scaled, std::string scale){
-  Real hz = 0.0;
-
-  if (scale.compare("slaneyMel") == 0 ){
-    hz = mel2hz(scaled);
-  }
-  if (scale.compare("htkMel") == 0 ){
-    hz = mel102hz(scaled);
-  }
-  if (scale.compare("linear") == 0 ){
-    hz = scaled;
-  }
-
-  return hz;
-}
 
 void MelBands::setWarpingFunctions(std::string warping, std::string weighting){
 
@@ -226,18 +104,18 @@ void MelBands::setWarpingFunctions(std::string warping, std::string weighting){
     _inverseWarper = mel2hz;
   }
   else{
-    E_INFO("warping "<<warping);
-    throw EssentiaException("Bad 'warpingFormula' parameter");
+    E_INFO("Melbands: 'warpingFormula' = "<<warping);
+    throw EssentiaException(" Melbands: Bad 'warpingFormula' parameter");
   }
 
   if (weighting == "warping"){
-    _weighter = _warper;
+    _weighting = warping;
   }
   else if (weighting == "linear"){
-    _weighter = hz2hz;
+    _weighting = "linear";
   }
   else{
-    throw EssentiaException("Bad 'weighting' parameter");
+    throw EssentiaException("Melbands: Bad 'weighting' parameter");
   }
 
 }

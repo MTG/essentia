@@ -44,6 +44,10 @@ class TriangularBands : public Algorithm {
   std::string _normalization;
   std::string _type;
   void createFilters(int spectrumSize);
+  void setWeightingFunctions(std::string weighting);
+
+  typedef  Real (*funcPointer)(Real);
+  funcPointer _weighter;
 
  public:
   TriangularBands() {
@@ -61,6 +65,8 @@ class TriangularBands : public Algorithm {
     declareParameter("log", "compute log-energies (log10 (1 + energy))","{true,false}", true);
     declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
     declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
+    declareParameter("weighting", "type of weighting function for determining triangle area","{linear,slaneyMel,htkMel}","linear");
+
   }
 
   void compute();
