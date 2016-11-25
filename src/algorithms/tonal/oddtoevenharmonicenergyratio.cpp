@@ -75,7 +75,7 @@ void OddToEvenHarmonicEnergyRatio::compute() {
      oddtoevenharmonicenergyratio = odd_energy / even_energy;
   }
   if (oddtoevenharmonicenergyratio >= 1000.) {
-    cerr << "DEBUG: clipping oddtoevenharmonicenergyratio to max value" << endl;
+    E_WARNING("clipping oddtoevenharmonicenergyratio to maximum allowed value");
     oddtoevenharmonicenergyratio = 1000.;
   }
 }
