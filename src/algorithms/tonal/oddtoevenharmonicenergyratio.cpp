@@ -68,8 +68,12 @@ void OddToEvenHarmonicEnergyRatio::compute() {
     else           odd_energy += magnitudes[i] * magnitudes[i];
   }
 
-  if (even_energy == 0.0) {
-     oddtoevenharmonicenergyratio = numeric_limits<Real>::max();
+  if (even_energy == 0.0 && odd_energy > 0.01) {
+     // oddtoevenharmonicenergyratio = numeric_limits<Real>::max();
+     oddtoevenharmonicenergyratio = 1000.;
+  }
+  else if (even_energy == 0.0 && odd_energy < 0.01 ) {
+     oddtoevenharmonicenergyratio = 1;
   }
   else {
      oddtoevenharmonicenergyratio = odd_energy / even_energy;
