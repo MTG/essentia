@@ -46,7 +46,7 @@ class ERBBands : public Algorithm {
     declareParameter("lowFrequencyBound", "a lower-bound limit for the frequencies to be included in the bands", "[0,inf)", 50.0);
     declareParameter("highFrequencyBound", "an upper-bound limit for the frequencies to be included in the bands", "[0,inf)", 22050.0);
     declareParameter("width", "filter width with respect to ERB", "(0,inf)", 1.0);
-    declareParameter("type", "compute energies or magnitudes", "{energy,magnitude}", "energy");
+    declareParameter("type", "use magnitude or power spectrum", "{magnitude,power}", "power");
   }
 
   void configure();

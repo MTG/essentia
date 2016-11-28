@@ -23,6 +23,9 @@ import essentia.standard
 import essentia.streaming
 import yaml
 
+import argparse
+
+
 
 def find_dependencies(mode, algo):
 
@@ -35,8 +38,8 @@ essentia.log.debugLevels += essentia.EFactory
 loader = es.%s()
 """ % (mode, algo)
 
-    proc = subprocess.Popen(["python", "-c", code], stdout=subprocess.PIPE)
-    stdout = proc.communicate()[0].split('\n')
+    proc = subprocess.Popen(["python", "-c", code], stderr=subprocess.PIPE)
+    stderr = proc.communicate()[1].split('\n')
 
     # function to assign nested dict elements by a list of nested keys
     def set_val(d, keys, val):
@@ -49,7 +52,7 @@ loader = es.%s()
     previous_indent = -8
 
     # NOTE: the code relies heavily on indentification of output in Essentia's logger
-    for line in stdout:
+    for line in stderr:
         if line.startswith("[Factory   ] "):
         
             line = line.replace("[Factory   ] ", "")
@@ -83,7 +86,7 @@ loader = es.%s()
 
 def print_dependencies(algos, tree=None, lines=None):
     print "Dependencies:"
-    for m,a in algos:
+    for m,a in set(algos):
         print m + '\t' + a
     print
 
@@ -95,46 +98,65 @@ def print_dependencies(algos, tree=None, lines=None):
     if lines:
         print "Essentia logger output"
         print '\n'.join(lines)
-        print 
+        print
         print
 
 
 
+if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser(description="Analyze Essentia's algorithm dependencies.")
 
-try:
-    algo = sys.argv[1]
-    mode = sys.argv[2]
-except:
-    if len(sys.argv) > 1:
-        print 'usage:', sys.argv[0], '[<algo_name> <streaming|standard>]'
+    parser.add_argument("-a", "--algorithm", dest="algo", 
+                                             help="algorithm to inspect",
+                                             action="append",
+                                             choices=set(essentia.standard.algorithmNames() + essentia.streaming.algorithmNames()))
+    parser.add_argument("-m", "--mode", dest="mode", 
+                                        help="mode (streaming, standard)", 
+                                        choices=set(("standard", "streaming")))
+
+    args = vars(parser.parse_args())
+
+    streaming = essentia.streaming.algorithmNames()
+    standard = essentia.standard.algorithmNames()
+
+    print "Found", len(streaming), "streaming algorithms"
+    print "Found", len(standard), "standard algorithms"
+    print len(set(streaming) & set(standard)), "algorithms in total"
+    print
+
+    algos = [(a, "standard") for a in standard] + [(a, "streaming") for a in streaming]
+
+    if args['algo']:
+        algos = [(a, m) for a, m in algos if a in args['algo']]
+    else:
+        print "Algorithm was not specified. Analyze dependencies for all algorithms"
+
+    if args['mode']: 
+        algos = [(a, m) for a, m in algos if m==args['mode']]
+    else:
+        print "Mode was not specified. Analyze dependencies for both modes"
+
+    if not algos and args['algo'] and args['mode']:
+        print 'Algorithm "' + args['algo'] + '" not found in essentia.' + args['mode']
         sys.exit()
-    algo = None
-    mode = None
 
-algos = { 'standard': essentia.standard.algorithmNames(), 
-          'streaming': essentia.streaming.algorithmNames() }
+    all_dependencies = []
+
+    for algo, mode in algos:
+        print "---------- %s : %s ----------" % (mode, algo)   
+        dependencies, tree, _ = find_dependencies(mode, algo)  
+        #print_dependencies(dependencies, tree)
+        print_dependencies(dependencies)
+        all_dependencies += dependencies
+
+    print "The following algorithms will be required for building Essentia:"
+
+    for a in set([a for m,a in all_dependencies]):
+        print a
 
 
-if algo: 
-    # search dependencies recursively for algo
-    try:
-        if algo not in algos[mode]:
-            print 'Algorithm "' + algo + '" not found in essentia.' + mode
-            raise
-    except:
-        # mode != standard|streaming
-        print 'usage:', sys.argv[0], '[<algo_name> <streaming|standard>]'
-        sys.exit()
 
-    print "---------- %s : %s ----------" % (mode, algo)
-    
-    dependencies, tree, _ = find_dependencies(mode, algo)  
-    print_dependencies(dependencies, tree)
 
-else:
-    # search dependencies non-recursively for all algorithms
-    for mode in ['standard', 'streaming']:
-        for algo in algos[mode]:
-            print "---------- %s : %s ----------" % (mode, algo)
-            print_dependencies(*find_dependencies(mode, algo))
+
+

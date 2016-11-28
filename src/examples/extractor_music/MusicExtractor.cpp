@@ -449,12 +449,11 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("indent", 4);
 
   string silentFrames = "noise";
-  int zeroPadding = 0;
 
   // lowlevel
   options.set("lowlevel.frameSize", 2048);
   options.set("lowlevel.hopSize", 1024);
-  options.set("lowlevel.zeroPadding", zeroPadding);
+  options.set("lowlevel.zeroPadding", 0);
   options.set("lowlevel.windowType", "blackmanharris62");
   options.set("lowlevel.silentFrames", silentFrames);
 
@@ -472,7 +471,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   // tonal
   options.set("tonal.frameSize", 4096);
   options.set("tonal.hopSize", 2048);
-  options.set("tonal.zeroPadding", zeroPadding);
+  options.set("tonal.zeroPadding", 0);
   options.set("tonal.windowType", "blackmanharris62");
   options.set("tonal.silentFrames", silentFrames);
 

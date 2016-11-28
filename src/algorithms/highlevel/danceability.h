@@ -31,11 +31,13 @@ class Danceability : public Algorithm {
  protected:
   Input<std::vector<Real> > _signal;
   Output<Real> _danceability;
+  Output<std::vector<Real> > _dfa;
 
  public:
   Danceability() {
     declareInput(_signal, "signal", "the input signal");
     declareOutput(_danceability, "danceability", "the danceability value. Normal values range from 0 to ~3. The higher, the more danceable.");
+    declareOutput(_dfa, "dfa", "the DFA exponent vector for considered segment length (tau) values");
   }
 
   void declareParameters() {
@@ -121,6 +123,7 @@ class Danceability : public AlgorithmComposite {
  protected:
   SinkProxy<Real> _signal;
   Source<Real> _danceability;
+  Source<std::vector<Real> > _dfa;
 
   Pool _pool;
   Algorithm* _poolStorage;

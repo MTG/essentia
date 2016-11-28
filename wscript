@@ -27,7 +27,7 @@ out = 'build'
 
 
 def options(ctx):
-    ctx.load('compiler_cxx compiler_c')
+    ctx.load('compiler_cxx compiler_c python')
     ctx.recurse('src')
 
     ctx.add_option('--with-cpptests', action='store_true',
