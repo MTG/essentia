@@ -44,7 +44,7 @@ class TestMelBands(TestCase):
         self.assert_(not any(numpy.isinf(mbands)))
         self.assertAlmostEqualVector(mbands, [1]*128, 1e-5)
 
-    def testRegressionHthMode(self):
+    def testRegressionHtkMode(self):
         audio = essentia.array(np.loadtxt(join(filedir(), 'melbands', 'audio.txt')))
         htkBands = np.loadtxt(join(filedir(), 'melbands', 'htk_bands.txt'))
         frameSize = 1102
