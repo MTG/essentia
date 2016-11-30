@@ -86,24 +86,46 @@ void DCT::createDctTableIII(int inputSize, int outputSize) {
   }
 
   _dctTable = vector<vector<Real> >(outputSize, vector<Real>(inputSize));
-
+/*
   // scale for index = 0
   Real scale0 = 1.0 / sqrt(Real(inputSize));
 
   // scale for index != 0
-  Real scale1 = Real(sqrt(2.0/inputSize));
+  Real scale1 = sqrt(Real(2.0)/inputSize);
 
   Real freqMultiplier;
 
   for (int i=0; i<outputSize; ++i) {
 
-    _dctTable[i][0] = scale1 * scale0;  // 0.5 or sqrt (0.5)??
+    _dctTable[i][0] = scale0;  // Imported from librosa.
+    freqMultiplier = Real( ( M_PI / Real(inputSize) ) * Real(i));
 
     for (int j=1; j<inputSize; ++j) {
-      freqMultiplier = Real(M_PI / inputSize * j);
-      _dctTable[i][j] = (Real)(scale1 * cos( freqMultiplier * ((Real)i + 0.5) ));
+      _dctTable[i][j] = (Real)(scale1 * cos( freqMultiplier * ((Real)j + 0.5) ));
     }
   }
+*/
+  // scale for index = 0
+   Real scale0 = 1.0 / sqrt(Real(inputSize));
+
+   // scale for index != 0
+   Real scale1 = Real(sqrt(2.0/inputSize));
+
+   for (int i=0; i<outputSize; ++i) {
+     Real scale = (i==0)? scale0 : scale1;
+
+     Real freqMultiplier = Real(M_PI / inputSize * i);
+
+     for (int j=0; j<inputSize; ++j) {
+       if ( i == 0 ){
+         _dctTable[i][j] = (Real)(scale);
+       }
+       else{
+         _dctTable[i][j] = (Real)(scale * cos( freqMultiplier * ((Real)j + 0.5) ));
+       }
+     }
+
+   }
 }
 
 void DCT::compute() {
