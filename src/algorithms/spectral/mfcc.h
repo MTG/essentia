@@ -37,6 +37,11 @@ class MFCC : public Algorithm {
 
   std::vector<Real> _logbands;
 
+  typedef  Real (*funcPointer)(Real);
+  funcPointer _compressor;
+
+  void setCompressor(std::string logType);
+
  public:
   MFCC() {
     declareInput(_spectrum, "spectrum", "the audio spectrum");
@@ -60,9 +65,11 @@ class MFCC : public Algorithm {
     declareParameter("lowFrequencyBound", "the lower bound of the frequency range [Hz]", "[0,inf)", 0.);
     declareParameter("highFrequencyBound", "the upper bound of the frequency range [Hz]", "(0,inf)", 11000.);
     declareParameter("warpingFormula", "The scale implementation type. use 'htkMel' to emulate its behaviour. Default slaneyMel.","{slaneyMel,htkMel}","slaneyMel");
+    declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
     declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
-    declareParameter("type", "'power' to output squared units, 'magnitude' to keep it as the input","{magnitude,power}", "power");
+    declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
     declareParameter("dctType", "the DCT type", "[2,3]", 2);
+    declareParameter("logType","logarithmic compression type. Use 'dbpow' if working with power and 'dbamp' if working with magnitudes","{natural,dbpow,dbamp,log}","dbamp");
 
   }
 
