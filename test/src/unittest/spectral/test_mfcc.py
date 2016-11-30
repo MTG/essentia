@@ -21,11 +21,12 @@
 
 from essentia_test import *
 from math import *
+import numpy as np
 
 class TestMFCC(TestCase):
 
     def InitMFCC(self, numCoeffs):
-        return MFCC(inputSize = 1024,
+        return MFCC(inputSize = 1025,
                     sampleRate = 44100,
                     numberBands = 40,
                     numberCoefficients = numCoeffs,
@@ -38,22 +39,57 @@ class TestMFCC(TestCase):
         # correct results.. no ground truth provided
         size = 20
         while (size > 0) :
-            bands, mfcc = self.InitMFCC(size)(ones(1024))
+            bands, mfcc = self.InitMFCC(size)(ones(1025))
             self.assertEqual(len(mfcc), size )
             self.assertEqual(len(bands), 40 )
             self.assert_(not any(numpy.isnan(mfcc)))
             self.assert_(not any(numpy.isinf(mfcc)))
             size -= 1
 
+    def testRegressionHtkMode(self):
+        audio = essentia.array(np.loadtxt(join(filedir(), 'mfcc', 'audio.txt')))
+        trueMFCC = np.loadtxt(join(filedir(), 'mfcc', 'true_mfcc.txt'))
+        frameSize = 1102
+        hopSize = 447
+        spectrumSize = frameSize/2 + 1
+        w = Windowing(type = 'hamming', 
+                      size = frameSize, 
+                      zeroPadding = 0,
+                      normalized = True)
+
+        spectrum = Spectrum()
+
+        mfccEssentia = MFCC(inputSize = spectrumSize,
+                            type = 'magnitude', 
+                            warpingFormula = 'htkMel',
+                            highFrequencyBound = 8000,
+                            numberBands = 26,
+                            numberCoefficients = 20,
+                            normalize = 'unit_max',
+                            dctType = 3,
+                            logType = 'dbpow')
+        essentia_mfcc_list = []
+        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize):
+            bands, mfccs = mfccEssentia(spectrum(w(frame)))
+            essentia_mfcc_list.append(mfccs)
+
+        essentiaMFCC = np.array(essentia_mfcc_list)        
+        essentiaMFCC = essentiaMFCC.T
+
+
+        self.assertAlmostEqualVector( np.mean(essentiaMFCC,1), np.mean(trueMFCC,1) ,1e0)    
+
+
     def testZero(self):
         # zero input should return dct(lin2db(0)). Try with different sizes
-        size = 1024
+        size = 1025
         val = amp2db(-90.0)
         expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
-        while (size > 1 ):
+        while (size > 256 ):
             bands, mfcc = MFCC()(zeros(size))
             self.assertEqualVector(mfcc, expected)
             size /= 2
+
 
     def testInvalidInput(self):
         # mel bands should fail for a spectrum with less than 2 bins
