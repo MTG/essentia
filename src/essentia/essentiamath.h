@@ -525,6 +525,10 @@ inline Real db2amp(Real amplitude) {
   return db2lin(0.5*amplitude);
 }
 
+inline Real linear(Real input) {
+  return input;
+}
+
 #ifdef OS_WIN32
 // The following function hz2bark needs the function asinh,
 // which is not included in ANSI math.h and thus does not
