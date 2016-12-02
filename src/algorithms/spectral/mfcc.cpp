@@ -43,15 +43,23 @@ const char* MFCC::description = DOC("This algorithm computes the mel-frequency c
 "  http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient");
 
 void MFCC::configure() {
-  _melFilter->configure("inputSize", parameter("inputSize"),
-                        "sampleRate", parameter("sampleRate"),
-                        "numberBands", parameter("numberBands"),
-                        "lowFrequencyBound", parameter("lowFrequencyBound"),
-                        "highFrequencyBound", parameter("highFrequencyBound"));
+  _melFilter->configure(INHERIT("inputSize"),
+                        INHERIT("sampleRate"),
+                        INHERIT("numberBands"),
+                        INHERIT("lowFrequencyBound"),
+                        INHERIT("highFrequencyBound"),
+                        INHERIT("warpingFormula"),
+                        INHERIT("weighting"),
+                        INHERIT("normalize"),
+                        INHERIT("type"));
 
   _dct->configure("inputSize", parameter("numberBands"),
-                  "outputSize", parameter("numberCoefficients"));
+                  "outputSize", parameter("numberCoefficients"),
+                  INHERIT("dctType"));
   _logbands.resize(parameter("numberBands").toInt());
+
+  setCompressor(parameter("logType").toString());
+
 }
 
 void MFCC::compute() {
@@ -68,11 +76,30 @@ void MFCC::compute() {
 
   // take the dB amplitude of the spectrum
   for (int i=0; i<int(bands.size()); ++i) {
-    _logbands[i] = amp2db(bands[i]);
+    _logbands[i] = (*_compressor)(bands[i]);
   }
 
   // compute the DCT of these bands
   _dct->input("array").set(_logbands);
   _dct->output("dct").set(mfcc);
   _dct->compute();
+}
+
+void MFCC::setCompressor(std::string logType){
+  if (logType == "natural"){
+    _compressor = linear;
+  }
+  else if (logType == "dbpow"){
+    _compressor = pow2db;
+  }
+  else if (logType == "dbamp"){
+    _compressor = amp2db;
+  }
+  else if (logType == "log"){
+    _compressor = log;
+  }
+  else{
+    throw EssentiaException("MFCC: Bad 'logType' parameter");
+  }
+
 }

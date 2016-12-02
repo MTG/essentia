@@ -21,11 +21,13 @@
 
 from essentia_test import *
 from math import *
+import numpy as np
 
 class TestMFCC(TestCase):
 
     def InitMFCC(self, numCoeffs):
-        return MFCC(sampleRate = 44100,
+        return MFCC(inputSize = 1025,
+                    sampleRate = 44100,
                     numberBands = 40,
                     numberCoefficients = numCoeffs,
                     lowFrequencyBound = 0,
@@ -37,22 +39,65 @@ class TestMFCC(TestCase):
         # correct results.. no ground truth provided
         size = 20
         while (size > 0) :
-            bands, mfcc = self.InitMFCC(size)(ones(1024))
+            bands, mfcc = self.InitMFCC(size)(ones(1025))
             self.assertEqual(len(mfcc), size )
             self.assertEqual(len(bands), 40 )
             self.assert_(not any(numpy.isnan(mfcc)))
             self.assert_(not any(numpy.isinf(mfcc)))
             size -= 1
 
+    def testRegressionHtkMode(self):
+        from numpy import mean
+        frameSize = 1102
+        hopSize = 447
+        spectrumSize = frameSize/2 + 1
+        expected = array([ -1.08226103e+02,   1.46761551e+01,   1.13774971e+01,
+                            5.83035703e+00,   7.47306579e+00,   4.79414578e+00,
+                            4.20280102e+00,   8.54437208e-01,  -3.07543739e+00,
+                           -4.51076590e-01,   2.11380442e+00,   8.62887135e-01,
+                            1.72976345e+00,   9.60940800e-01,  -4.70028894e-01,
+                           -2.78938844e-01,   3.06727338e-01,   1.49077380e+00,
+                           -6.11831054e-02,   1.66070999e+00])
+
+        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/cat_purrrr.wav'),
+                           sampleRate = 44100)()      
+
+        w = Windowing(type = 'hamming', 
+                      size = frameSize, 
+                      zeroPadding = 0,
+                      normalized = True)
+
+        spectrum = Spectrum()
+
+        mfccEssentia = MFCC(inputSize = spectrumSize,
+                            type = 'magnitude', 
+                            warpingFormula = 'htkMel',
+                            highFrequencyBound = 8000,
+                            numberBands = 26,
+                            numberCoefficients = 20,
+                            normalize = 'unit_max',
+                            dctType = 3,
+                            logType = 'dbpow')
+
+        pool = Pool()
+        
+        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize):
+            bands, mfcc = mfccEssentia(spectrum(w(frame)))
+            pool.add("mfcc", mfcc)
+
+        self.assertAlmostEqualVector( mean(pool['mfcc'], 0), expected ,1e-1)    
+
+
     def testZero(self):
         # zero input should return dct(lin2db(0)). Try with different sizes
-        size = 1024
+        size = 1025
         val = amp2db(-90.0)
         expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
-        while (size > 1 ):
+        while (size > 256 ):
             bands, mfcc = MFCC()(zeros(size))
             self.assertEqualVector(mfcc, expected)
             size /= 2
+
 
     def testInvalidInput(self):
         # mel bands should fail for a spectrum with less than 2 bins
@@ -79,7 +124,7 @@ class TestMFCC(TestCase):
         from numpy import mean
         filename = join(testdata.audio_dir, 'recorded','musicbox.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
-        frameGenerator = FrameGenerator(audio, frameSize=1024, hopSize=512)
+        frameGenerator = FrameGenerator(audio, frameSize=1025, hopSize=512)
         window = Windowing(type="blackmanharris62")
         pool=Pool()
         mfccAlgo = self.InitMFCC(13)
@@ -89,11 +134,12 @@ class TestMFCC(TestCase):
             pool.add("bands", bands)
             pool.add("mfcc", mfcc)
 
-        expected = [-9.20311523e+02, 5.88643570e+01, -4.10509377e+01, 2.33458538e+01, 
-                    -1.43523417e+01, 8.78132343e+00, -5.37768316e+00, 3.02709007e+00, 
-                    -1.77758980e+00, 1.12805307e+00, -5.64552069e-01, 2.59827942e-01, 
-                    5.14490485e-01]
-    
+        expected = [ -9.20199646e+02,   5.87043839e+01,  -4.10174484e+01,
+                      2.33621140e+01,  -1.43552504e+01,   8.82298851e+00,
+                     -5.39049816e+00,   3.08949327e+00,  -1.79325986e+00,
+                      1.15834820e+00,  -5.67521632e-01,   3.01115632e-01,
+                      4.70408946e-01]
+
         self.assertAlmostEqualVector(mean(pool['mfcc'], 0), expected, 1.0e-5)
 
 

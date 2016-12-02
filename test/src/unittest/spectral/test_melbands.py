@@ -20,7 +20,7 @@
 
 
 from essentia_test import *
-
+import numpy as np
 
 class TestMelBands(TestCase):
 
@@ -43,6 +43,47 @@ class TestMelBands(TestCase):
         self.assert_(not any(numpy.isnan(mbands)))
         self.assert_(not any(numpy.isinf(mbands)))
         self.assertAlmostEqualVector(mbands, [1]*128, 1e-5)
+
+    def testRegressionHtkMode(self):
+        audio = essentia.array(np.loadtxt(join(filedir(), 'melbands', 'audio.txt')))
+        htkBands = np.loadtxt(join(filedir(), 'melbands', 'htk_bands.txt'))
+        frameSize = 1102
+        hopSize = 447
+        fftsize = 2**15
+        paddingSize = fftsize - frameSize
+        spectrumSize = fftsize/2 + 1
+        w = Windowing(type = 'hamming', 
+                      size = frameSize, 
+                      zeroPadding = 0,
+                      normalized = False)
+
+        spectrum = Spectrum()
+
+        mbands = MelBands(inputSize= spectrumSize,
+                          type = 'magnitude',
+                          highFrequencyBound = 8000,
+                          numberBands = 26,
+                          warpingFormula = 'htkMel',
+                          weighting = 'linear', 
+                          normalize = 'unit_max')
+
+
+
+
+        essentiaBands = []
+        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize):
+            essentiaBands.append(mbands(spectrum(w(frame))))
+
+        MelHTKnp = np.array(essentiaBands)        
+        MelHTKnp = MelHTKnp.T
+
+        htkBands = np.exp(htkBands)
+
+        htkBands = htkBands/np.max(htkBands)
+        MelHTKnp = MelHTKnp/np.max(MelHTKnp)
+
+        for i in range(len(htkBands)):
+            self.assertAlmostEqualVector(htkBands[i], MelHTKnp[i],1e3)    
 
 
     def testZero(self):
