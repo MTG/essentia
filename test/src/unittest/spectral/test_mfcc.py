@@ -47,7 +47,7 @@ class TestMFCC(TestCase):
             size -= 1
 
     def testRegressionHtkMode(self):
-        
+        from numpy import mean
         frameSize = 1102
         hopSize = 447
         spectrumSize = frameSize/2 + 1
@@ -134,10 +134,11 @@ class TestMFCC(TestCase):
             pool.add("bands", bands)
             pool.add("mfcc", mfcc)
 
-        expected = [-9.20311523e+02, 5.88643570e+01, -4.10509377e+01, 2.33458538e+01, 
-                    -1.43523417e+01, 8.78132343e+00, -5.37768316e+00, 3.02709007e+00, 
-                    -1.77758980e+00, 1.12805307e+00, -5.64552069e-01, 2.59827942e-01, 
-                    5.14490485e-01]
+        expected = [ -9.20199646e+02,   5.87043839e+01,  -4.10174484e+01,
+                      2.33621140e+01,  -1.43552504e+01,   8.82298851e+00,
+                     -5.39049816e+00,   3.08949327e+00,  -1.79325986e+00,
+                      1.15834820e+00,  -5.67521632e-01,   3.01115632e-01,
+                      4.70408946e-01]
 
         self.assertAlmostEqualVector(mean(pool['mfcc'], 0), expected, 1.0e-5)
 
