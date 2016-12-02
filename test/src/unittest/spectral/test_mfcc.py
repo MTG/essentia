@@ -47,11 +47,21 @@ class TestMFCC(TestCase):
             size -= 1
 
     def testRegressionHtkMode(self):
-        audio = essentia.array(np.loadtxt(join(filedir(), 'mfcc', 'audio.txt')))
-        trueMFCC = np.loadtxt(join(filedir(), 'mfcc', 'true_mfcc.txt'))
+        
         frameSize = 1102
         hopSize = 447
         spectrumSize = frameSize/2 + 1
+        expected = array([ -1.08226103e+02,   1.46761551e+01,   1.13774971e+01,
+                            5.83035703e+00,   7.47306579e+00,   4.79414578e+00,
+                            4.20280102e+00,   8.54437208e-01,  -3.07543739e+00,
+                           -4.51076590e-01,   2.11380442e+00,   8.62887135e-01,
+                            1.72976345e+00,   9.60940800e-01,  -4.70028894e-01,
+                           -2.78938844e-01,   3.06727338e-01,   1.49077380e+00,
+                           -6.11831054e-02,   1.66070999e+00])
+
+        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/cat_purrrr.wav'),
+                           sampleRate = 44100)()      
+
         w = Windowing(type = 'hamming', 
                       size = frameSize, 
                       zeroPadding = 0,
@@ -68,16 +78,14 @@ class TestMFCC(TestCase):
                             normalize = 'unit_max',
                             dctType = 3,
                             logType = 'dbpow')
-        essentia_mfcc_list = []
+
+        pool = Pool()
+        
         for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize):
-            bands, mfccs = mfccEssentia(spectrum(w(frame)))
-            essentia_mfcc_list.append(mfccs)
+            bands, mfcc = mfccEssentia(spectrum(w(frame)))
+            pool.add("mfcc", mfcc)
 
-        essentiaMFCC = np.array(essentia_mfcc_list)        
-        essentiaMFCC = essentiaMFCC.T
-
-
-        self.assertAlmostEqualVector( np.mean(essentiaMFCC,1), np.mean(trueMFCC,1) ,1e0)    
+        self.assertAlmostEqualVector( mean(pool['mfcc'], 0), expected ,1e-1)    
 
 
     def testZero(self):
@@ -116,7 +124,7 @@ class TestMFCC(TestCase):
         from numpy import mean
         filename = join(testdata.audio_dir, 'recorded','musicbox.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
-        frameGenerator = FrameGenerator(audio, frameSize=1024, hopSize=512)
+        frameGenerator = FrameGenerator(audio, frameSize=1025, hopSize=512)
         window = Windowing(type="blackmanharris62")
         pool=Pool()
         mfccAlgo = self.InitMFCC(13)
@@ -130,7 +138,7 @@ class TestMFCC(TestCase):
                     -1.43523417e+01, 8.78132343e+00, -5.37768316e+00, 3.02709007e+00, 
                     -1.77758980e+00, 1.12805307e+00, -5.64552069e-01, 2.59827942e-01, 
                     5.14490485e-01]
-    
+
         self.assertAlmostEqualVector(mean(pool['mfcc'], 0), expected, 1.0e-5)
 
 
