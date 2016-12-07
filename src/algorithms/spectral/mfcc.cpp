@@ -55,7 +55,8 @@ void MFCC::configure() {
 
   _dct->configure("inputSize", parameter("numberBands"),
                   "outputSize", parameter("numberCoefficients"),
-                  INHERIT("dctType"));
+                  INHERIT("dctType"),
+                  INHERIT("liftering"));
   _logbands.resize(parameter("numberBands").toInt());
 
   setCompressor(parameter("logType").toString());
