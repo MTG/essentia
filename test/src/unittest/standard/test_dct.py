@@ -35,6 +35,15 @@ class TestDCT(TestCase):
         expected = [ 0.89442719099, -0.60150095500, -0.12078825843, -0.37174803446, 0.82789503961 ]
         self.assertAlmostEqualVector(DCT(outputSize=len(inputArray))(inputArray), expected, 1e-6)
 
+    def testLifteringRegression(self):
+        # DCT III values from Librosa, Liftening computed using PLP and RASTA matlab toolbox.
+        inputArray = [1, 1, 0, 0, 1]
+        expected = [1.34164079, 0.74349607, 0.82789504, -0., -0.12078826]
+
+        self.assertAlmostEqualVector(DCT(inputSize=len(inputArray), 
+                                         outputSize=len(expected), 
+                                         dctType = 3, 
+                                         liftering = 2)(inputArray), expected, 1e-5)
 
     def testZero(self):
         self.assertEqualVector(DCT(outputSize=10)(zeros(20)), zeros(10))
