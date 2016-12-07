@@ -40,7 +40,7 @@ void DCT::configure() {
   int inputSize = parameter("inputSize").toInt();
   _outputSize = parameter("outputSize").toInt();
   _type = parameter("dctType").toInt();
-
+  _lifter = parameter("liftering").toReal();
   if (_type == 2){
     createDctTableII(inputSize, _outputSize);
   }
@@ -105,6 +105,9 @@ void DCT::createDctTableIII(int inputSize, int outputSize) {
     }
   }
 */
+  // This implementation is used instead of the referenced in order to match the behaviour of the Librosa DCT
+  // http://librosa.github.io/librosa/generated/librosa.filters.dct.html
+
   // scale for index = 0
    Real scale0 = 1.0 / sqrt(Real(inputSize));
 
@@ -127,6 +130,7 @@ void DCT::createDctTableIII(int inputSize, int outputSize) {
 
    }
 }
+
 
 void DCT::compute() {
 
@@ -158,6 +162,12 @@ void DCT::compute() {
     dct[i] = 0.0;
     for (int j=0; j<inputSize; ++j) {
       dct[i] += array[j] * _dctTable[i][j];
+    }
+  }
+
+  if (_lifter != 0.0){
+    for (int i=1; i<_outputSize; ++i) {
+        dct[i] *= 1.0  + (_lifter / 2 ) * sin( (M_PI * i) / (double)_lifter );
     }
   }
 }

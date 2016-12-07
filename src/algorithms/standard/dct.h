@@ -41,6 +41,7 @@ class DCT : public Algorithm {
     declareParameter("inputSize", "the size of the input array", "[1,inf)", 10);
     declareParameter("outputSize", "the number of output coefficients", "[1,inf)", 10);
     declareParameter("dctType", "the DCT type", "[2,3]", 2);
+    declareParameter("liftering", " amount of liftering. Use '0' to bypass it", "[0,inf)", 0.0);
   }
 
   void configure();
@@ -53,6 +54,7 @@ class DCT : public Algorithm {
 
  protected:
   int _outputSize;
+  Real _lifter;
   void createDctTableII(int inputSize, int outputSize);
   void createDctTableIII(int inputSize, int outputSize);
   std::vector<std::vector<Real> > _dctTable;
