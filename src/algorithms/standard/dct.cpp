@@ -40,7 +40,7 @@ void DCT::configure() {
   int inputSize = parameter("inputSize").toInt();
   _outputSize = parameter("outputSize").toInt();
   _type = parameter("dctType").toInt();
-  _lifter = parameter("liftering").toReal();
+  _lifter = parameter("liftering").toInt();
   if (_type == 2){
     createDctTableII(inputSize, _outputSize);
   }

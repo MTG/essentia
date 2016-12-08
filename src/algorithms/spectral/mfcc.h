@@ -69,7 +69,7 @@ class MFCC : public Algorithm {
     declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
     declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
     declareParameter("dctType", "the DCT type", "[2,3]", 2);
-    declareParameter("liftering", " amount of liftering. Use '0' to bypass it", "[0,inf)", 0.0);
+    declareParameter("liftering", "the liftering coefficient. Use '0' to bypass it", "[0,inf)", 0);
     declareParameter("logType","logarithmic compression type. Use 'dbpow' if working with power and 'dbamp' if working with magnitudes","{natural,dbpow,dbamp,log}","dbamp");
 
   }
