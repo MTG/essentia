@@ -97,17 +97,17 @@ class TestGFCC(TestCase):
                            type="blackmanharris62")
         spectrum = Spectrum()
         pool=Pool()
-        gfccAlgo = self.InitGFCC(13,'natural')
+        gfccAlgo = self.InitGFCC(13,'dbamp')
 
         for frame in frameGenerator:
             bands, gfcc = gfccAlgo(spectrum(window(frame)))
             pool.add("bands", bands)
             pool.add("gfcc", gfcc)
 
-        expected = [ 398.78009033,  272.66052246, -192.00653076, -328.17059326,
-       -180.25398254,  -52.98754883,    0.61827064,   98.50186157,
-        151.67419434,   50.76211166,  -60.87889099,  -28.52173042,
-        33.24774933]
+        expected = [ -32.09788513,  108.49235535, -118.94884491,  -97.3769455 ,
+        -84.4560318 ,  -42.14659119,  -53.62257767,  -33.75775909,
+        -12.94090176,  -16.27241516,  -27.33692932,   -5.6728158 ,
+         -3.05162358]
 
         self.assertAlmostEqualVector(mean(pool['gfcc'], 0), expected, 1.0e-5)
 
