@@ -57,13 +57,34 @@ void GFCC::compute() {
   _gtFilter->output("bands").set(bands);
   _gtFilter->compute();
 
+  setCompressor(parameter("logType").toString());
+
 
   for (int i=0; i<int(bands.size()); ++i) {
-    _logbands[i] = amp2db(bands[i]);
+    _logbands[i] = (*_compressor)(bands[i]);
   }
 
   // compute the DCT of these bands
   _dct->input("array").set(_logbands);
   _dct->output("dct").set(gfcc);
   _dct->compute();
+}
+
+void GFCC::setCompressor(std::string logType){
+  if (logType == "natural"){
+    _compressor = linear;
+  }
+  else if (logType == "dbpow"){
+    _compressor = pow2db;
+  }
+  else if (logType == "dbamp"){
+    _compressor = amp2db;
+  }
+  else if (logType == "log"){
+    _compressor = log;
+  }
+  else{
+    throw EssentiaException("GFCC: Bad 'logType' parameter");
+  }
+
 }
