@@ -56,9 +56,10 @@ class FrameCutter : public Algorithm {
                      "never discard frames and a value of 1 will only keep "
                      "frames that are of length 'frameSize')",
                      "[0,1]", 0.);
-    declareParameter("startFromZero", "whether to start the first frame at "
-                     "time 0 if true, or -frameSize/2 otherwise (zero-centered)",
+    declareParameter("startFromZero", "whether to start the first frame at time 0 "
+                     "(centered at frameSize/2) if true, or -frameSize/2 otherwise (zero-centered)",
                      "{true,false}", false);
+
     declareParameter("lastFrameToEndOfFile", "whether the beginning of the last "
                      "frame should reach the end of file. Only applicable if "
                      "startFromZero is true",
@@ -131,10 +132,9 @@ class FrameCutter : public Algorithm {
                      "never discard frames and a value of 1 will only keep "
                      "frames that are of length 'frameSize')",
                      "[0,1]", 0.);
-    declareParameter("startFromZero", "whether to start the first frame at "
-                     "time 0 if true, or -frameSize/2 otherwise (zero-centered)",
-                     "{true,false}",
-                     false);
+    declareParameter("startFromZero", "whether to start the first frame at time 0 "
+                     "(centered at frameSize/2) if true, or -frameSize/2 otherwise (zero-centered)",
+                     "{true,false}", false);
     declareParameter("lastFrameToEndOfFile", "whether the beginning of the last "
                      "frame should reach the end of file. Only applicable if "
                      "startFromZero is true",
