@@ -62,6 +62,12 @@ void MusicTonalDescriptors::createNetworkTuningFrequency(SourceBase& source, Poo
 
 void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
 
+  // Using the 20-3500 Hz frequency ranges as suggested by Angel Faraldo
+  // This range improves key estimation significantly for electronic music 
+  // (lowering max frequency removes harmonics that would confuse  estimation).
+  // It does not degrate estimation for pop music. Not evaluated on classical.
+  // Previous range: 40-5000 Hz
+
   int frameSize = int(options.value<Real>("tonal.frameSize"));
   int hopSize =   int(options.value<Real>("tonal.hopSize"));
   string silentFrames = options.value<string>("tonal.silentFrames");
@@ -81,20 +87,32 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                 "zeroPadding", zeroPadding);
   Algorithm* spec = factory.create("Spectrum");
   Algorithm* peaks = factory.create("SpectralPeaks",
-                                    "maxPeaks", 10000,
+                                    "maxPeaks", 60,
                                     "magnitudeThreshold", 0.00001,
-                                    "minFrequency", 40,
-                                    "maxFrequency", 5000,
+                                    "minFrequency", 20.0,
+                                    "maxFrequency", 3500.0,
                                     "orderBy", "magnitude");
+  // Detecting 60 peaks instead of all of them as it may be better not to 
+  // consider too many harmonics, especially for electronic music
+
+  // Using HPCP parameters recommended for electronic music:
   Algorithm* hpcp_key = factory.create("HPCP",
                                        "size", 36,
                                        "referenceFrequency", tuningFreq,
                                        "bandPreset", false,
-                                       "minFrequency", 40.0,
-                                       "maxFrequency", 5000.0,
-                                       "weightType", "squaredCosine",
+                                       "minFrequency", 20.0,
+                                       //"splitFrequency", 250.0,
+                                       "maxFrequency", 3500.0,
+                                       "weightType", "cosine",
                                        "nonLinear", false,
-                                       "windowSize", 4.0/3.0);
+                                       "windowSize", 1.);
+  // Previously used parameter values: 
+  // - nonLinear = false
+  // - weightType = squaredCosine
+  // - windowSize = 4.0/3.0
+  // - bandPreset = true
+
+
   Algorithm* skey_temperley = factory.create("Key",
                                    "numHarmonics", 4,
                                    "pcpSize", 36,
@@ -124,8 +142,8 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                          "referenceFrequency", tuningFreq,
                                          "harmonics", 8,
                                          "bandPreset", true,
-                                         "minFrequency", 40.0,
-                                         "maxFrequency", 5000.0,
+                                         "minFrequency", 20.0,
+                                         "maxFrequency", 3500.0,
                                          "splitFrequency", 500.0,
                                          "weightType", "cosine",
                                          "nonLinear", true,
@@ -190,8 +208,8 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                           "referenceFrequency", tuningFreq,
                                           "harmonics", 8,
                                           "bandPreset", true,
-                                          "minFrequency", 40.0,
-                                          "maxFrequency", 5000.0,
+                                          "minFrequency", 20.0,
+                                          "maxFrequency", 3500.0,
                                           "splitFrequency", 500.0,
                                           "weightType", "cosine",
                                           "nonLinear", true,
