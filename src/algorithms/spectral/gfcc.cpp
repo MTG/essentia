@@ -84,7 +84,7 @@ void GFCC::setCompressor(std::string logType){
     _compressor = log;
   }
   else{
-    throw EssentiaException("MFCC: Bad 'logType' parameter");
+    throw EssentiaException("GFCC: Bad 'logType' parameter");
   }
 
 }
