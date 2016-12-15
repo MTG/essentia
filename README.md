@@ -24,7 +24,7 @@ Quick start
 Quick start using python: 
 
 - http://essentia.upf.edu/documentation/python_tutorial.html
-- [IPython Notebook Essentia tutorial](src/examples/tutorial/essentia_tutorial_standard.ipynb)
+- [IPython Notebook Essentia tutorial](/src/examples/tutorial/essentia_python_tutorial.ipynb)
 
 Command-line tools to compute common music descriptors:
 
