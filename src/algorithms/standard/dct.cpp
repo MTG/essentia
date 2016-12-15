@@ -105,29 +105,18 @@ void DCT::createDctTableIII(int inputSize, int outputSize) {
     }
   }
 */
-  // This implementation is used instead of the referenced in order to match the behaviour of the Librosa DCT
-  // http://librosa.github.io/librosa/generated/librosa.filters.dct.html
+  // This implementation is used instead of the referenced in order to match the behaviour of the HTK
+  // http://speech.ee.ntu.edu.tw/homework/DSP_HW2-1/htkbook.pdf
 
-  // scale for index = 0
-   Real scale0 = 1.0 / sqrt(Real(inputSize));
-
-   // scale for index != 0
-   Real scale1 = Real(sqrt(2.0/inputSize));
+   Real scale = Real(sqrt(2.0/inputSize));
 
    for (int i=0; i<outputSize; ++i) {
-     Real scale = (i==0)? scale0 : scale1;
-
      Real freqMultiplier = Real(M_PI / inputSize * i);
 
      for (int j=0; j<inputSize; ++j) {
-       if ( i == 0 ){
-         _dctTable[i][j] = (Real)(scale);
-       }
-       else{
-         _dctTable[i][j] = (Real)(scale * cos( freqMultiplier * ((Real)j + 0.5) ));
-       }
-     }
+       _dctTable[i][j] = (Real)(scale * cos( freqMultiplier * ( (Real)j + 0.5) ) );
 
+     }
    }
 }
 
