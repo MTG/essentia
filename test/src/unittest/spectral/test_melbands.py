@@ -54,8 +54,8 @@ class TestMelBands(TestCase):
                      11.13694966,  10.49976274,  11.3370437,   12.06821492,  12.1631667,
                      11.84755549]
 
-        frameSize = 1103
-        hopSize = 443
+        frameSize = 1102
+        hopSize = 441
         fftsize = 2048
         paddingSize = fftsize - frameSize
         spectrumSize = fftsize/2 + 1
@@ -65,21 +65,22 @@ class TestMelBands(TestCase):
                       normalized = False,
                       zeroPhase = False)
 
-        spectrum = Spectrum()
+        spectrum = Spectrum(size = fftsize)
 
         mbands = MelBands(inputSize= spectrumSize,
                           type = 'magnitude',
                           highFrequencyBound = 8000,
+                          lowFrequencyBound = 0,
                           numberBands = 26,
                           warpingFormula = 'htkMel',
                           weighting = 'linear', 
                           normalize = 'unit_max')
 
         pool = Pool()
-        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize, startFromZero = True):
+        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize, startFromZero = True, validFrameThresholdRatio = 1):
             pool.add('melBands', mbands(spectrum(w(frame))))
 
-        self.assertAlmostEqualVector( np.mean(np.log(pool['melBands']),0), expected,1e-1)    
+        self.assertAlmostEqualVector( np.mean(np.log(pool['melBands']),0), expected,1e-2)    
 
 
     def testZero(self):
