@@ -35,15 +35,17 @@ const char* GFCC::description = DOC("This algorithm computes the Gammatone-frequ
 "  pp. 4625-4628.");
 
 void GFCC::configure() {
-  _gtFilter->configure("inputSize", parameter("inputSize"),
-		        "sampleRate", parameter("sampleRate"),
-                       "numberBands", parameter("numberBands"),
-                       "lowFrequencyBound", parameter("lowFrequencyBound"),
-                       "highFrequencyBound", parameter("highFrequencyBound"),
-                       "type", "power");
+  _gtFilter->configure(INHERIT("inputSize"),
+                       INHERIT("sampleRate"),
+                       INHERIT("numberBands"),
+                       INHERIT("lowFrequencyBound"),
+                       INHERIT("highFrequencyBound"),
+                       INHERIT("type"));
   _dct->configure("inputSize", parameter("numberBands"),
-                  "outputSize", parameter("numberCoefficients"));
+                  "outputSize", parameter("numberCoefficients"),
+                  INHERIT("dctType"));
   _logbands.resize(parameter("numberBands").toInt());
+  setCompressor(parameter("logType").toString());
 }
 
 void GFCC::compute() {
@@ -57,7 +59,7 @@ void GFCC::compute() {
   _gtFilter->output("bands").set(bands);
   _gtFilter->compute();
 
-  setCompressor(parameter("logType").toString());
+
 
 
   for (int i=0; i<int(bands.size()); ++i) {
