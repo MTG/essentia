@@ -38,7 +38,7 @@ class TestDCT(TestCase):
     def testLifteringRegression(self):
         # DCT III values from Librosa, Liftening computed using PLP and RASTA matlab toolbox.
         inputArray = [1, 1, 0, 0, 1]
-        expected = [1.34164079, 0.74349607, 0.82789504, -0., -0.12078826]
+        expected = [1.8973666010509538, 0.74349607, 0.82789504, -0., -0.12078826]
 
         self.assertAlmostEqualVector(DCT(inputSize=len(inputArray), 
                                          outputSize=len(expected), 
