@@ -45,17 +45,25 @@ class TestMelBands(TestCase):
         self.assertAlmostEqualVector(mbands, [1]*128, 1e-5)
 
     def testRegressionHtkMode(self):
-        audio = essentia.array(np.loadtxt(join(filedir(), 'melbands', 'audio.txt')))
-        htkBands = np.loadtxt(join(filedir(), 'melbands', 'htk_bands.txt'))
-        frameSize = 1102
-        hopSize = 447
-        fftsize = 2**15
+        audio = essentia.standard.MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'), 
+                                            sampleRate = 44100)()*2**15
+        expected = [ 10.35452019,  12.97260263,  13.87114479,  12.92819811,  13.53927989,
+                     13.65001411,  13.7067006,   12.72165126,  12.16052112,  12.29371287,
+                     12.49577573,  12.68672873,  13.08112941,  12.59404232,  11.71325616,
+                     11.48389955,  12.27751253,  12.07873884,  12.02260756,  12.42848721,
+                     11.13694966,  10.49976274,  11.3370437,   12.06821492,  12.1631667,
+                     11.84755549]
+
+        frameSize = 1103
+        hopSize = 443
+        fftsize = 2048
         paddingSize = fftsize - frameSize
         spectrumSize = fftsize/2 + 1
         w = Windowing(type = 'hamming', 
                       size = frameSize, 
-                      zeroPadding = 0,
-                      normalized = False)
+                      zeroPadding = paddingSize,
+                      normalized = False,
+                      zeroPhase = False)
 
         spectrum = Spectrum()
 
@@ -67,23 +75,11 @@ class TestMelBands(TestCase):
                           weighting = 'linear', 
                           normalize = 'unit_max')
 
+        pool = Pool()
+        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize, startFromZero = True):
+            pool.add('melBands', mbands(spectrum(w(frame))))
 
-
-
-        essentiaBands = []
-        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize):
-            essentiaBands.append(mbands(spectrum(w(frame))))
-
-        MelHTKnp = np.array(essentiaBands)        
-        MelHTKnp = MelHTKnp.T
-
-        htkBands = np.exp(htkBands)
-
-        htkBands = htkBands/np.max(htkBands)
-        MelHTKnp = MelHTKnp/np.max(MelHTKnp)
-
-        for i in range(len(htkBands)):
-            self.assertAlmostEqualVector(htkBands[i], MelHTKnp[i],1e3)    
+        self.assertAlmostEqualVector( np.mean(np.log(pool['melBands']),0), expected,1e-1)    
 
 
     def testZero(self):
