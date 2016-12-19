@@ -169,7 +169,7 @@ Essentia C++ library and extractors based on it can be compiled and run correctl
 
 Building Essentia on Windows 10 via Bash on Ubuntu
 --------------------------------------------------
-It is possible to install Essentia easily via *bash on Ubuntu* on Windows 10. Bash on Ubuntu allows to run the same command-line utilities that could be run within a native Ubuntu 14.04 environment. Note that bash on Ubuntu is still a beta product, hence there are some missing features and several issues. In addition, you cannot call Windows applications from bash.
+It is possible to install Essentia easily via *bash on Ubuntu* on Windows 10. Bash on Ubuntu allows to run the same command-line utilities that could be run within a native Ubuntu 14.04 environment. Note that Bash on Ubuntu is still a beta product, hence there are some missing features and several issues. In addition, you cannot call Windows applications from bash.
 
 To install bash on Ubuntu, follow the `official guide <https://msdn.microsoft.com/commandline/wsl/install_guide>`_ in the Microsoft Developer Network.
 
