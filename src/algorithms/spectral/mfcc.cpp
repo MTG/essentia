@@ -32,7 +32,7 @@ const char* MFCC::description = DOC("This algorithm computes the mel-frequency c
 "  - DCT of the 40 bands down to 13 mel coefficients\n"
 "There is a paper describing various MFCC implementations [1].\n"
 "\n"
-"The parameters of this algorithm can be configured in order to behave like HTK [3] as follows.\n"
+"The parameters of this algorithm can be configured in order to behave like HTK [3] as follows:\n"
 "  - type = 'magnitude' \n"
 "  - warpingFormula = 'htkMel' \n"
 "  - weighting = 'linear'\n"
@@ -63,12 +63,13 @@ const char* MFCC::description = DOC("This algorithm computes the mel-frequency c
 "References:\n"
 "  [1] T. Ganchev, N. Fakotakis, and G. Kokkinakis, \"Comparative evaluation\n"
 "  of various MFCC implementations on the speaker verification task,\" in\n"
-"  International Conference on Speach and Computer (SPECOM’05), 2005, vol. 1,\n"
-"  pp. 191–194.\n\n"
+"  International Conference on Speach and Computer (SPECOM’05), 2005,\n"
+"  vol. 1, pp. 191–194.\n\n"
 "  [2] Mel-frequency cepstrum - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient\n"
-"  [3] Young, S. J., Evermann, G., Gales, M. J. F., Hain, T., Kershaw, D., Liu, X., … Woodland, P. C. (2009). The HTK Book (for HTK Version 3.4). Construction, (July 2000), 384.,\n"
-"  https://doi.org/http://htk.eng.cam.ac.uk");
+"  http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient\n\n"
+"  [3] Young, S. J., Evermann, G., Gales, M. J. F., Hain, T., Kershaw, D.,\n"
+"  Liu, X., … Woodland, P. C. (2009). The HTK Book (for HTK Version 3.4).\n"
+"  Construction, (July 2000), 384, https://doi.org/http://htk.eng.cam.ac.uk");
 
 void MFCC::configure() {
   _melFilter->configure(INHERIT("inputSize"),

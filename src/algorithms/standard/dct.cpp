@@ -28,6 +28,7 @@ const char* DCT::name = "DCT";
 const char* DCT::category = "Standard";
 const char* DCT::description = DOC("This algorithm computes the Discrete Cosine Transform of an array.\n"
 "It uses the DCT-II form, with the 1/sqrt(2) scaling factor for the first coefficient.\n"
+"\n"
 "Note: The 'inputSize' parameter is only used as an optimization when the algorithm is configured. "
 "The DCT will automatically adjust to the size of any input.\n"
 "\n"
