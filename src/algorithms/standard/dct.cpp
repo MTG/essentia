@@ -28,6 +28,7 @@ const char* DCT::name = "DCT";
 const char* DCT::category = "Standard";
 const char* DCT::description = DOC("This algorithm computes the Discrete Cosine Transform of an array.\n"
 "It uses the DCT-II form, with the 1/sqrt(2) scaling factor for the first coefficient.\n"
+"\n"
 "Note: The 'inputSize' parameter is only used as an optimization when the algorithm is configured. "
 "The DCT will automatically adjust to the size of any input.\n"
 "\n"
@@ -40,7 +41,7 @@ void DCT::configure() {
   int inputSize = parameter("inputSize").toInt();
   _outputSize = parameter("outputSize").toInt();
   _type = parameter("dctType").toInt();
-
+  _lifter = parameter("liftering").toInt();
   if (_type == 2){
     createDctTableII(inputSize, _outputSize);
   }
@@ -105,28 +106,21 @@ void DCT::createDctTableIII(int inputSize, int outputSize) {
     }
   }
 */
-  // scale for index = 0
-   Real scale0 = 1.0 / sqrt(Real(inputSize));
+  // This implementation is used instead of the referenced in order to match the behaviour of the HTK
+  // http://speech.ee.ntu.edu.tw/homework/DSP_HW2-1/htkbook.pdf
 
-   // scale for index != 0
-   Real scale1 = Real(sqrt(2.0/inputSize));
+   Real scale = Real(sqrt(2.0/inputSize));
 
    for (int i=0; i<outputSize; ++i) {
-     Real scale = (i==0)? scale0 : scale1;
-
      Real freqMultiplier = Real(M_PI / inputSize * i);
 
      for (int j=0; j<inputSize; ++j) {
-       if ( i == 0 ){
-         _dctTable[i][j] = (Real)(scale);
-       }
-       else{
-         _dctTable[i][j] = (Real)(scale * cos( freqMultiplier * ((Real)j + 0.5) ));
-       }
-     }
+       _dctTable[i][j] = (Real)(scale * cos( freqMultiplier * ( (Real)j + 0.5) ) );
 
+     }
    }
 }
+
 
 void DCT::compute() {
 
@@ -158,6 +152,12 @@ void DCT::compute() {
     dct[i] = 0.0;
     for (int j=0; j<inputSize; ++j) {
       dct[i] += array[j] * _dctTable[i][j];
+    }
+  }
+
+  if (_lifter != 0.0){
+    for (int i=1; i<_outputSize; ++i) {
+        dct[i] *= 1.0  + (_lifter / 2 ) * sin( (M_PI * i) / (double)_lifter );
     }
   }
 }

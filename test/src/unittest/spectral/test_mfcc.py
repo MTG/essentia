@@ -49,43 +49,44 @@ class TestMFCC(TestCase):
     def testRegressionHtkMode(self):
         from numpy import mean
         frameSize = 1102
-        hopSize = 447
-        spectrumSize = frameSize/2 + 1
-        expected = array([ -1.08226103e+02,   1.46761551e+01,   1.13774971e+01,
-                            5.83035703e+00,   7.47306579e+00,   4.79414578e+00,
-                            4.20280102e+00,   8.54437208e-01,  -3.07543739e+00,
-                           -4.51076590e-01,   2.11380442e+00,   8.62887135e-01,
-                            1.72976345e+00,   9.60940800e-01,  -4.70028894e-01,
-                           -2.78938844e-01,   3.06727338e-01,   1.49077380e+00,
-                           -6.11831054e-02,   1.66070999e+00])
+        hopSize = 441
+        fftSize= 2048
+        zeroPadding = fftSize - frameSize
+        spectrumSize = fftSize/2 + 1
+        expected = array([ 88.78342438, 6.36632776,  -1.62886882,  -5.30124903,
+                          -3.92886806, -13.52705765, -7.62559938,  -18.51092339,
+                           2.24103594,  3.10329103,  -16.25634193, -5.46565485, 
+                          -14.56163502])
 
-        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/cat_purrrr.wav'),
-                           sampleRate = 44100)()      
+        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'),
+                           sampleRate = 44100)()*2**15     
 
         w = Windowing(type = 'hamming', 
                       size = frameSize, 
-                      zeroPadding = 0,
-                      normalized = True)
+                      zeroPadding = zeroPadding,
+                      normalized = False,
+                      zeroPhase = False)
 
-        spectrum = Spectrum()
+        spectrum = Spectrum(size = fftSize)
 
         mfccEssentia = MFCC(inputSize = spectrumSize,
                             type = 'magnitude', 
                             warpingFormula = 'htkMel',
+                            weighting = 'warping',
                             highFrequencyBound = 8000,
                             numberBands = 26,
-                            numberCoefficients = 20,
+                            numberCoefficients = 13,
                             normalize = 'unit_max',
                             dctType = 3,
-                            logType = 'dbpow')
+                            logType = 'log',
+                            liftering = 22)
 
         pool = Pool()
         
-        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize):
-            bands, mfcc = mfccEssentia(spectrum(w(frame)))
-            pool.add("mfcc", mfcc)
+        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize , startFromZero = True, validFrameThresholdRatio = 1):
+            pool.add("mfcc",mfccEssentia(spectrum(w(frame)))[1])
 
-        self.assertAlmostEqualVector( mean(pool['mfcc'], 0), expected ,1e-1)    
+        self.assertAlmostEqualVector( mean(pool['mfcc'], 0), expected ,1e0)    
 
 
     def testZero(self):
