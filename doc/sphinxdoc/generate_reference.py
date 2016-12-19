@@ -244,7 +244,7 @@ def write_algorithms_reference():
 
 '''
 
-    links = ['<a href="std_%s.html">%s</a>' % (algoname, algoname) for algoname in streaming_algo_list]
+    links = ['<a href="streaming_%s.html">%s</a>' % (algoname, algoname) for algoname in streaming_algo_list]
     html += ' | '.join(links)
 
     html += '''
