@@ -173,8 +173,7 @@ It is possible to install Essentia easily via *bash on Ubuntu* on Windows 10. Ba
 
 To install bash on Ubuntu, follow the `official guide <https://msdn.microsoft.com/commandline/wsl/install_guide>`_ in the Microsoft Developer Network.
 
-
-After bash on Ubuntu is successfully installed, you should open a bash terminal and install the dependencies (see: `Installing dependencies on Linux`_). Since the bash provided by Windows runs on a Ubuntu 14.04 environment, don't forget to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
+After bash on Ubuntu is successfully installed, you should open a bash terminal and install the dependencies (see: `Installing dependencies on Linux`_). Remember that bash on Windows runs on an Ubuntu 14.04 environment. Therefore, you may need to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
 
 Finally, you can compile the Essentia (see: `Compiling Essentia from source`_).
 
