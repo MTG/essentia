@@ -65,7 +65,8 @@ class TestERBBands(TestCase):
                                                 'highFrequencyBound': 50 })
         self.assertConfigureFails(ERBBands(), { 'highFrequencyBound': 30000,
                                                 'sampleRate': 22050})
-
+        self.assertConfigureFails(ERBBands(), { 'width': 0 })
+        
     def testWrongInputSize(self):
         # This test makes sure that even though the inputSize given at
         # configure time does not match the input spectrum, the algorithm does
