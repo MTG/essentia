@@ -32,7 +32,7 @@ const char* IDCT::description = DOC("This algorithm computes the Inverse Discret
 "IDCT can be used to compute smoothed Mel Bands. In order to do this: \n "
 "- compute MFCC\n"
 "- smoothedMelBands = 10^(IDCT(MFCC)/20) \n"
-"Note: The second step assumes that the default 'logType' were used to compute MFCCs, otherwise that formula should be changed in order to be consistent.\n"
+"Note: The second step assumes that 'logType' = 'dbamp' was used to compute MFCCs, otherwise that formula should be changed in order to be consistent.\n"
 "\n"
 "Note: The 'inputSize' parameter is only used as an optimization when the algorithm is configured. "
 "The IDCT will automatically adjust to the size of any input.\n"
