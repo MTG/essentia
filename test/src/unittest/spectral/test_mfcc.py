@@ -92,7 +92,7 @@ class TestMFCC(TestCase):
     def testZero(self):
         # zero input should return dct(lin2db(0)). Try with different sizes
         size = 1025
-        val = amp2db(-90.0)
+        val = amp2db(0)
         expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
         while (size > 256 ):
             bands, mfcc = MFCC()(zeros(size))
