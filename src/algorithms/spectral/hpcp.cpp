@@ -33,10 +33,10 @@ const char* HPCP::description = DOC("Computes a Harmonic Pitch Class Profile (HP
 "References:\n"
 "  [1] T. Fujishima, \"Realtime Chord Recognition of Musical Sound: A System\n"
 "  Using Common Lisp Music,\" in International Computer Music Conference\n"
-"  (ICMC'99), pp. 464-467, 1999.\n"
+"  (ICMC'99), pp. 464-467, 1999.\n\n"
 "  [2] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
 "  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"
-"  2006.\n"
+"  2006.\n\n"
 "  [3] Harmonic pitch class profiles - Wikipedia, the free encyclopedia,\n"
 "  https://en.wikipedia.org/wiki/Harmonic_pitch_class_profiles");
 
