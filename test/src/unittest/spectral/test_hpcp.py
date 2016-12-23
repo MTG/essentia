@@ -136,6 +136,25 @@ class TestHPCP(TestCase):
         expected = [0., 0., 0., 0.1340538263, 0., 0.2476127148, 0., 0., 0., 0., 1., 0.]
         self.assertAlmostEqualVector(hpcp, expected, 1e-4)
 
+    def testWhiteNoise(self):
+        # ideal white noise spectrum would be a plain line
+        spectrum_size = 1024 * 4 * 4 * 4 * 4
+        bin_resolution = 20050. / spectrum_size
+
+        freqs = [i * bin_resolution for i in range(1, spectrum_size+1)]
+        mags = [1.] * len(freqs)
+
+        hpcp = HPCP(minFrequency=440, maxFrequency=440 * 2, bandPreset=False, weightType="none", normalized="none")(freqs, mags)
+
+        # There are more bins in each consequent semitone, therefore we need 
+        # to normalize HPCP numbers by the number of corresponding frequency bins
+        # to get a straight line.
+        weights = [pow(2, i/12.) for i in range(0, 13)]
+        weights[0] = weights[0]/2 + weights[12]/2 # same semitone, different octaves
+        weights = weights[:12]
+        hpcp = normalize([h/w for h, w in zip(hpcp, weights)])
+        self.assertAlmostEqualVector(hpcp, [1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.], precision=1e-2)
+
     def testRegression(self):
         # Just makes sure algorithm does not crash on a real data source. This
         # test is not really looking for correctness. Maybe consider revising
