@@ -114,10 +114,10 @@ class TestHPCP(TestCase):
         self.assertEqualVector(hpcp, [0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.])
 
     def testSmallMinRange(self):
-        self.assertConfigureFails(HPCP(), {'minFrequency':1, 'splitFrequency':200})
+        self.assertConfigureFails(HPCP(), {'minFrequency':1, 'bandSplitFrequency':200})
 
     def testSmallMaxRange(self):
-        self.assertConfigureFails(HPCP(), {'maxFrequency':1199, 'splitFrequency':1000})
+        self.assertConfigureFails(HPCP(), {'maxFrequency':1199, 'bandSplitFrequency':1000})
 
     def testSmallMinMaxRange(self):
         self.assertConfigureFails(HPCP(), {'bandPreset':False, 'maxFrequency':200, 'minFrequency':1})
