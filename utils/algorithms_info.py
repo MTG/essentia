@@ -20,7 +20,6 @@ import os
 import sys
 import glob
 
-
 def get_all_algorithms(algo_dir, root_dir=None):
     algorithms = {}
 
