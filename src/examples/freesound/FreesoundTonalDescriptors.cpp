@@ -157,7 +157,7 @@ void FreesoundTonalDescriptors ::createTuningFrequencyNetwork(SourceBase& source
                                          "bandPreset", true,
                                          "minFrequency", 40.0,
                                          "maxFrequency", 5000.0,
-                                         "splitFrequency", 500.0,
+                                         "bandSplitFrequency", 500.0,
                                          "weightType", "cosine",
                                          "nonLinear", true,
                                          "windowSize", 0.5);
