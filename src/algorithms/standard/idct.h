@@ -17,24 +17,24 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_DCT_H
-#define ESSENTIA_DCT_H
+#ifndef ESSENTIA_IDCT_H
+#define ESSENTIA_IDCT_H
 
 #include "algorithm.h"
 
 namespace essentia {
 namespace standard {
 
-class DCT : public Algorithm {
+class IDCT : public Algorithm {
 
  protected:
-  Input<std::vector<Real> > _array;
-  Output<std::vector<Real> > _dct;
+  Input<std::vector<Real> > _dct;
+  Output<std::vector<Real> > _idct;
 
  public:
-  DCT() {
-    declareInput(_array, "array", "the input array");
-    declareOutput(_dct, "dct", "the discrete cosine transform of the input array");
+  IDCT() {
+    declareInput(_dct, "dct", "the discrete cosine transform");
+    declareOutput(_idct, "idct", "the inverse cosine transform of the input array");
   }
 
   void declareParameters() {
@@ -55,9 +55,9 @@ class DCT : public Algorithm {
  protected:
   int _outputSize;
   Real _lifter;
-  void createDctTableII(int inputSize, int outputSize);
-  void createDctTableIII(int inputSize, int outputSize);
-  std::vector<std::vector<Real> > _dctTable;
+  void createIDctTableII(int inputSize, int outputSize);
+  void createIDctTableIII(int inputSize, int outputSize);
+  std::vector<std::vector<Real> > _idctTable;
   int _type;
 };
 
@@ -70,21 +70,21 @@ class DCT : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class DCT : public StreamingAlgorithmWrapper {
+class IDCT : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<Real> > _array;
-  Source<std::vector<Real> > _dct;
+  Sink<std::vector<Real> > _dct;
+  Source<std::vector<Real> > _idct;
 
  public:
-  DCT() {
-    declareAlgorithm("DCT");
-    declareInput(_array, TOKEN, "array");
-    declareOutput(_dct, TOKEN, "dct");
+  IDCT() {
+    declareAlgorithm("IDCT");
+    declareInput(_dct, TOKEN, "dct");
+    declareOutput(_idct, TOKEN, "idct");
   }
 };
 
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_DCT_H
+#endif // ESSENTIA_IDCT_H

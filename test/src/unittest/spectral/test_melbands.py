@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -20,7 +20,7 @@
 
 
 from essentia_test import *
-
+import numpy as np
 
 class TestMelBands(TestCase):
 
@@ -31,25 +31,62 @@ class TestMelBands(TestCase):
                         highFrequencyBound=44100*.5)
 
     def testRegression(self):
-        # only testing that it yields to valid result, but still need to check for
-        # correct results
         spectrum = [1]*1024
         mbands = self.InitMelBands(24)(spectrum)
         self.assertEqual(len(mbands), 24 )
         self.assert_(not any(numpy.isnan(mbands)))
         self.assert_(not any(numpy.isinf(mbands)))
-        self.assert_(all(mbands >= 0.0))
+        self.assertAlmostEqualVector(mbands, [1]*24, 1e-5)
 
-        mbands = self.InitMelBands(22050)(spectrum)
-        self.assertEqual(len(mbands), 22050 )
+        mbands = self.InitMelBands(128)(spectrum)
+        self.assertEqual(len(mbands), 128 )
         self.assert_(not any(numpy.isnan(mbands)))
         self.assert_(not any(numpy.isinf(mbands)))
-        self.assert_(all(mbands >= 0.0))
+        self.assertAlmostEqualVector(mbands, [1]*128, 1e-5)
+
+    def testRegressionHtkMode(self):
+        audio = essentia.standard.MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'), 
+                                            sampleRate = 44100)()*2**15
+        expected = [ 10.35452019,  12.97260263,  13.87114479,  12.92819811,  13.53927989,
+                     13.65001411,  13.7067006,   12.72165126,  12.16052112,  12.29371287,
+                     12.49577573,  12.68672873,  13.08112941,  12.59404232,  11.71325616,
+                     11.48389955,  12.27751253,  12.07873884,  12.02260756,  12.42848721,
+                     11.13694966,  10.49976274,  11.3370437,   12.06821492,  12.1631667,
+                     11.84755549]
+
+        frameSize = 1102
+        hopSize = 441
+        fftsize = 2048
+        paddingSize = fftsize - frameSize
+        spectrumSize = fftsize/2 + 1
+        w = Windowing(type = 'hamming', 
+                      size = frameSize, 
+                      zeroPadding = paddingSize,
+                      normalized = False,
+                      zeroPhase = False)
+
+        spectrum = Spectrum(size = fftsize)
+
+        mbands = MelBands(inputSize= spectrumSize,
+                          type = 'magnitude',
+                          highFrequencyBound = 8000,
+                          lowFrequencyBound = 0,
+                          numberBands = 26,
+                          warpingFormula = 'htkMel',
+                          weighting = 'linear', 
+                          normalize = 'unit_max')
+
+        pool = Pool()
+        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize, startFromZero = True, validFrameThresholdRatio = 1):
+            pool.add('melBands', mbands(spectrum(w(frame))))
+
+        self.assertAlmostEqualVector( np.mean(np.log(pool['melBands']),0), expected,1e-2)    
+
 
     def testZero(self):
         # Inputting zeros should return zero. Try with different sizes
         size = 1024
-        while (size > 1 ):
+        while (size >= 256 ):
             self.assertEqualVector(MelBands()(zeros(size)), zeros(24))
             size /= 2
 
@@ -66,7 +103,7 @@ class TestMelBands(TestCase):
         self.assertConfigureFails(MelBands(), { 'lowFrequencyBound': 100,
                                                 'highFrequencyBound': 50 })
         self.assertConfigureFails(MelBands(), { 'highFrequencyBound': 30000,
-                                                'sampleRate': 22050} )
+                                                'sampleRate': 22050})
 
     def testWrongInputSize(self):
         # This test makes sure that even though the inputSize given at
@@ -81,6 +118,10 @@ class TestMelBands(TestCase):
                   0.0674537048,  0.0679484159,  0.0672798753,  0.0671581551,  0.0671161041,
                   0.0674532652,  0.0679644048,  0.067266494,   0.0671510249],
                 1e-6)
+
+    def testNotEnoughSpectrumBins(self):
+        self.assertConfigureFails(MelBands(), {'numberBands': 256, 
+                                               'inputSize': 1025})
 
 
 suite = allTests(TestMelBands)

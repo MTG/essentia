@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -525,6 +525,10 @@ inline Real db2amp(Real amplitude) {
   return db2lin(0.5*amplitude);
 }
 
+inline Real linear(Real input) {
+  return input;
+}
+
 #ifdef OS_WIN32
 // The following function hz2bark needs the function asinh,
 // which is not included in ANSI math.h and thus does not
@@ -624,10 +628,21 @@ inline Real mel2hz(Real mel) {
   return 700.0 * (exp(mel/1127.01048) - 1.0);
 }
 
+inline Real mel102hz(Real mel) {
+  return 700.0 * (pow(10.0, mel/2595.0) - 1.0);
+}
+
 inline Real hz2mel(Real hz) {
   return 1127.01048 * log(hz/700.0 + 1.0);
 }
 
+inline Real hz2mel10(Real hz) {
+  return 2595.0 * log10(hz/700.0 + 1.0);
+}
+
+inline Real hz2hz(Real hz){
+  return hz;
+}
 
 inline int argmin(const std::vector<Real>& input) {
   return std::min_element(input.begin(), input.end()) - input.begin();
