@@ -101,9 +101,7 @@ void setDebugLevelForTimeIndex(int index) {
 }
 
 
-// NOTE: in a thread-safe implementation, the msg queue would be thread-safe and
-//       the flushing would need to happen in a separate thread
-//       This can be achieved using tbb::concurrent_queue
+//TODO: flushing using tbb::concurrent_queue in a seperate thread?
 
 void Logger::flush() {
   while (!_msgQueue.empty()) {
@@ -115,6 +113,7 @@ void Logger::flush() {
 
 void Logger::debug(DebuggingModule module, const string& msg, bool resetHeader) {
   if (module & activatedDebugLevels) {
+    _msgQueueMutex.lock();
     if (_addHeader) {
       _msgQueue.push_back(E_STRINGIFY(debugModuleDescription(module)      // module name
                                       + string(debugIndentLevel * 8, ' ') // indentation
@@ -126,6 +125,7 @@ void Logger::debug(DebuggingModule module, const string& msg, bool resetHeader) 
 
     _addHeader = resetHeader;
     flush();
+    _msgQueueMutex.unlock();
   }
 }
 
@@ -133,24 +133,30 @@ void Logger::info(const string& msg) {
   if (!infoLevelActive) return;
   static const string GREEN_FONT = "\x1B[0;32m";
   static const string RESET_FONT = "\x1B[0m";
+  _msgQueueMutex.lock();
   _msgQueue.push_back(E_STRINGIFY(GREEN_FONT << "[   INFO   ] " << RESET_FONT << msg << '\n'));
   flush();
+  _msgQueueMutex.unlock();
 }
 
 void Logger::warning(const string& msg) {
   if (!warningLevelActive) return;
   static const string YELLOW_FONT = "\x1B[0;33m";
   static const string RESET_FONT = "\x1B[0m";
+  _msgQueueMutex.lock();
   _msgQueue.push_back(E_STRINGIFY(YELLOW_FONT << "[ WARNING  ] " << RESET_FONT << msg << '\n'));
   flush();
+  _msgQueueMutex.unlock();
 }
 
 void Logger::error(const string& msg) {
   if (!errorLevelActive) return;
   static const string RED_FONT = "\x1B[0;31m";
   static const string RESET_FONT = "\x1B[0m";
+  _msgQueueMutex.lock();
   _msgQueue.push_back(E_STRINGIFY(RED_FONT << "[  ERROR   ] " << RESET_FONT << msg << '\n'));
   flush();
+  _msgQueueMutex.unlock();
 }
 
 } // namespace essentia

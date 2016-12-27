@@ -23,6 +23,7 @@
 #include <deque>
 #include <string>
 #include <climits> // for INT_MAX
+#include <mutex>
 #include "config.h"
 #include "streamutil.h"
 #include "stringutil.h"
@@ -105,6 +106,7 @@ void setDebugLevelForTimeIndex(int index);
 class Logger {
  protected:
   std::deque<std::string> _msgQueue;
+  std::mutex _msgQueueMutex;
   bool _addHeader;
 
   void flush();
