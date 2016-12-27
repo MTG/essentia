@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -34,6 +34,10 @@ class HarmonicPeaks : public Algorithm {
   Output<std::vector<Real> > _harmonicFrequencies;
   Output<std::vector<Real> > _harmonicMagnitudes;
 
+  int _maxHarmonics;
+  Real _ratioTolerance;
+  Real _ratioMax;
+
  public:
   HarmonicPeaks() {
     declareInput(_frequencies, "frequencies", "the frequencies of the spectral peaks [Hz] (ascending order)");
@@ -43,11 +47,16 @@ class HarmonicPeaks : public Algorithm {
     declareOutput(_harmonicMagnitudes, "harmonicMagnitudes", "the magnitudes of harmonic peaks");
   }
 
-  void declareParameters() {}
+  void declareParameters() {
+    declareParameter("maxHarmonics", "the number of harmonics to return including F0", "[1,inf)", 20);
+    declareParameter("tolerance", "the allowed ratio deviation from ideal harmonics", "(0,0.5)", 0.2);
+  }
 
+  void configure(); 
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

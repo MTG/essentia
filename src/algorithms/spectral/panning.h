@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -47,9 +47,9 @@ class Panning : public Algorithm {
 
  public:
   Panning() {
-    declareInput(_spectrumLeft, "spectrumLeft", "Left channel's spectrum");
-    declareInput(_spectrumRight, "spectrumRight", "Right channel's spectrum");
-    declareOutput(_panningCoeffs, "panningCoeffs", "Parameters that define the panning curve at each frame");
+    declareInput(_spectrumLeft, "spectrumLeft", "left channel's spectrum");
+    declareInput(_spectrumRight, "spectrumRight", "right channel's spectrum");
+    declareOutput(_panningCoeffs, "panningCoeffs", "parameters that define the panning curve at each frame");
 
     // Pre-processing
     _ifft = AlgorithmFactory::create("IFFT");
@@ -61,7 +61,7 @@ class Panning : public Algorithm {
 
   void declareParameters() {
     declareParameter("averageFrames", "number of frames to take into account for averaging", "[0,inf)", 43);
-    declareParameter("panningBins", "size of the histogram of ratios (in bins)", "(1,inf)", 512);
+    declareParameter("panningBins", "size of panorama histogram (in bins)", "(1,inf)", 512);
     declareParameter("numCoeffs", "number of coefficients used to define the panning curve at each frame", "(0,inf)", 20);
     declareParameter("numBands", "number of mel bands", "[1,inf)", 1);
     declareParameter("warpedPanorama", "if true, warped panorama is applied, having more resolution in the center area", "{false,true}", true);
@@ -73,6 +73,7 @@ class Panning : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
  protected:

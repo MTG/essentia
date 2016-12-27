@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,7 +26,10 @@ namespace essentia {
 namespace standard {
 
 const char* StartStopSilence::name = "StartStopSilence";
-const char* StartStopSilence::description = DOC("This algorithm outputs the frame at which sound begins and the frame at which sound ends.");
+const char* StartStopSilence::category = "Duration/silence";
+const char* StartStopSilence::description = DOC("This algorithm outputs the frame at which sound begins and the frame at which sound ends.\n"
+"\n"
+"Note: In standard mode the algorithm is to be run iteratively on a sequence of frames. The outputs are updated on each iteration, and the final result is produced at the end of the sequence.");
 
 void StartStopSilence::configure() {
     _threshold = db2pow(parameter("threshold").toReal());
@@ -78,8 +81,9 @@ void StartStopSilence::reset() {
 namespace essentia {
 namespace streaming {
 
-const char* StartStopSilence::name = "StartStopSilence";
-const char* StartStopSilence::description = DOC("This algorithm outputs the frame at which sound begins and the frame at which sound ends.");
+const char* StartStopSilence::name = essentia::standard::StartStopSilence::name;
+const char* StartStopSilence::category = essentia::standard::StartStopSilence::category;
+const char* StartStopSilence::description = essentia::standard::StartStopSilence::description;
 
 void StartStopSilence::configure() {
   _startSilence = 0;

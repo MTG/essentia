@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -59,13 +59,14 @@ class TempoTapDegara : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
  private:
   // Davies' beat periods estimation:
   int _smoothingWindowHalfSize;
   static const int _numberCombs = 4;
-  static const Real _frameDurationODF = 5.944308390022676;
+  Real _frameDurationODF;
   Real _sampleRateODF;
   int _hopSizeODF;
   Real _hopDurationODF;
@@ -92,10 +93,8 @@ class TempoTapDegara : public Algorithm {
   void adaptiveThreshold(std::vector<Real>& array, int smoothingHalfSize);
 
   // Degara's beat tracking from periods:
-  static const Real _alpha = 0.5; // decoding weighting parameter
-  static const Real _sigma_ibi = 0.025; // std of the inter-beat interval pdf,
-                                       // models potential variations in the
-                                       // inter-beat interval in secs.
+  Real _alpha;
+  Real _sigma_ibi;
   int _numberStates;    // number HMM states
   Real _resolutionODF;  // time resolution of ODF
   size_t _numberFrames; // number of ODF values
@@ -161,6 +160,7 @@ class TempoTapDegara : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

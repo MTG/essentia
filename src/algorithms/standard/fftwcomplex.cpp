@@ -1,0 +1,108 @@
+/*
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ *
+ * This file is part of Essentia
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
+ */
+
+#include "fftwcomplex.h"
+#include "essentia.h"
+
+using namespace std;
+using namespace essentia;
+using namespace standard;
+
+const char* FFTWComplex::name = "FFTC";
+const char* FFTWComplex::category = "Standard";
+const char* FFTWComplex::description = DOC("This algorithm computes the positive complex short-term Fourier transform (STFT) of a complex array using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
+"At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
+"\n"
+"References:\n"
+"  [1] Fast Fourier transform - Wikipedia, the free encyclopedia,\n"
+"  http://en.wikipedia.org/wiki/Fft\n\n"
+"  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
+"  http://mathworld.wolfram.com/FastFourierTransform.html");
+
+ForcedMutex FFTWComplex::globalFFTWCOMPLEXMutex;
+
+FFTWComplex::~FFTWComplex() {
+  ForcedMutexLocker lock(globalFFTWCOMPLEXMutex);
+
+  // we might have called essentia::shutdown() before this algorithm goes out
+  // of scope, so make sure we're not doing stupid things here
+  // This will cause a memory leak then, but it is definitely a better choice
+  // than a crash (right, right??? :-) )
+  if (essentia::isInitialized()) {
+    fftwf_destroy_plan(_fftPlan);
+    fftwf_free(_input);
+    fftwf_free(_output);
+  }
+}
+
+void FFTWComplex::compute() {
+
+  const std::vector<std::complex<Real> >& signal = _signal.get();
+  std::vector<std::complex<Real> >& fft = _fft.get();
+
+  // check if input is OK
+  int size = int(signal.size());
+  if (size == 0) {
+    throw EssentiaException("FFT: Input size cannot be 0");
+  }
+
+  if ((_fftPlan == 0) ||
+      ((_fftPlan != 0) && _fftPlanSize != size)) {
+    createFFTObject(size);
+  }
+
+  // copy input into plan
+  memcpy(_input, &signal[0], size*sizeof(complex<Real>));
+
+  // calculate the fft
+  fftwf_execute(_fftPlan);
+
+  // copy result from plan to output vector
+  fft.resize(size/2+1);
+  memcpy(&fft[0], _output, (size/2+1)*sizeof(complex<Real>));
+
+}
+
+void FFTWComplex::configure() {
+  createFFTObject(parameter("size").toInt());
+}
+
+void FFTWComplex::createFFTObject(int size) {
+  ForcedMutexLocker lock(globalFFTWCOMPLEXMutex);
+
+  // This is only needed because at the moment we return half of the spectrum,
+  // which means that there are 2 different input signals that could yield the
+  // same FFT...
+  if (size % 2 == 1) {
+    throw EssentiaException("FFT: can only compute FFT of arrays which have an even size");
+  }
+
+  // create the temporary storage array
+  fftwf_free(_input);
+  fftwf_free(_output);
+  _input = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
+  _output = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
+
+  if (_fftPlan != 0) {
+    fftwf_destroy_plan(_fftPlan);
+  }
+
+  _fftPlan = fftwf_plan_dft_1d(size, (fftwf_complex*)_input, (fftwf_complex*)_output, FFTW_FORWARD, FFTW_ESTIMATE);
+  _fftPlanSize = size;
+}

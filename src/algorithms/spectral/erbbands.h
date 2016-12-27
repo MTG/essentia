@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -46,14 +46,14 @@ class ERBBands : public Algorithm {
     declareParameter("lowFrequencyBound", "a lower-bound limit for the frequencies to be included in the bands", "[0,inf)", 50.0);
     declareParameter("highFrequencyBound", "an upper-bound limit for the frequencies to be included in the bands", "[0,inf)", 22050.0);
     declareParameter("width", "filter width with respect to ERB", "(0,inf)", 1.0);
-    declareParameter("type", "compute energies or magnitudes", "{energy,magnitude}", "energy");
+    declareParameter("type", "use magnitude or power spectrum", "{magnitude,power}", "power");
   }
 
   void configure();
   void compute();
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 
  protected:

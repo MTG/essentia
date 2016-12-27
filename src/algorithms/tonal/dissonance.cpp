@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* Dissonance::name = "Dissonance";
-const char* Dissonance::description = DOC("This algorithm calculates the sensory dissonance (to distinguish from musical or theoretical dissonance) of an audio signal given its spectral peaks. Sensory dissonance measures perceptual roughness of the sound and is based on the roughness of its spectral peaks. Given the spectral peaks, the algorithm estimates total dissonance by summing up the normalized dissonance values for each pair of peaks. These values are computed using dissonance curves, which define dissonace between two spectral peaks according to their frequency and amplitude relations. The dissonance curves are based on perceptual experiments conducted in [1]."
+const char* Dissonance::category = "Tonal";
+const char* Dissonance::description = DOC("This algorithm computes the sensory dissonance of an audio signal given its spectral peaks. Sensory dissonance (to be distinguished from musical or theoretical dissonance) measures perceptual roughness of the sound and is based on the roughness of its spectral peaks. Given the spectral peaks, the algorithm estimates total dissonance by summing up the normalized dissonance values for each pair of peaks. These values are computed using dissonance curves, which define dissonace between two spectral peaks according to their frequency and amplitude relations. The dissonance curves are based on perceptual experiments conducted in [1]."
 "\n"
 "Exceptions are thrown when the size of the input vectors are not equal or if input frequencies are not ordered ascendantly"
 "\n"
@@ -57,7 +58,7 @@ Real plompLevelt(Real df) {
   //
   //   #include <iostream>
   //   int main() {
-  //       for (float i = 0; i <= 1.2; i+=0.01) {
+  //       for (Real i = 0; i <= 1.2; i+=0.01) {
   //           std::cout << plompLevelt(i) << std::endl;
   //       }
   //   }
@@ -111,7 +112,7 @@ Real calcDissonance(const vector<Real>& frequencies, const vector<Real>& magnitu
   //vector<Real> loudness(size);
   //for (int i=0; i<size; i++) partialLoudness = loudness[i]/totalLoudness;
 
-  float totalDissonance = 0;
+  Real totalDissonance = 0;
   for (int p1 = 0; p1 < size; p1++) {
     if (frequencies[p1] > 50) { // ignore frequencies below 50 Hz
       Real barkFreq = hz2bark(frequencies[p1]);
@@ -121,7 +122,7 @@ Real calcDissonance(const vector<Real>& frequencies, const vector<Real>& magnitu
       Real peakDissonance = 0;
       while (p2 < size && frequencies[p2] < startF && frequencies[p2] < 50) p2++;
       while (p2 < size && frequencies[p2] < endF && frequencies[p2] < 10000) {
-        float d = 1.0 - consonance(frequencies[p1], frequencies[p2]);
+        Real d = 1.0 - consonance(frequencies[p1], frequencies[p2]);
         // Dissonance from p1 to p2, should be the same as dissonance from p2
         // to p1, this is the reason for using both peaks' loudness as
         // weight

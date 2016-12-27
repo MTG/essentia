@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,8 +26,8 @@ using namespace standard;
 
 
 const char* ZeroCrossingRate::name = "ZeroCrossingRate";
-const char* ZeroCrossingRate::description = DOC(
-"This algorithm returns the zero-crossing rate of an audio signal. It is the number of sign changes between consecutive signal values divided by the total number of values. Noisy signals tend to have higher zero-crossing rate.\n"
+const char* ZeroCrossingRate::category = "Standard";
+const char* ZeroCrossingRate::description = DOC("This algorithm computes the zero-crossing rate of an audio signal. It is the number of sign changes between consecutive signal values divided by the total number of values. Noisy signals tend to have higher zero-crossing rate.\n"
 "In order to avoid small variations around zero caused by noise, a threshold around zero is given to consider a valid zerocrosing whenever the boundary is crossed.\n"
 "\n"
 "Empty input signals will raise an exception.\n"

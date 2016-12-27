@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -369,7 +369,7 @@ void MusicLowlevelDescriptors::computeAverageLoudness(Pool& pool){ // after comp
     pool.value<vector<Real> >(nameSpace + "loudness")[0];
   }
   catch (EssentiaException&) {
-    cout << "ERROR: File is too short for loudness estimation... Aborting..." << endl;
+    cerr << "ERROR: File is too short for loudness estimation... Aborting..." << endl;
     exit(6);
   }
 

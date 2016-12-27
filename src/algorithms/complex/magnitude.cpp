@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Magnitude::name = "Magnitude";
+const char* Magnitude::category = "Math";
 const char* Magnitude::description = DOC("This algorithm computes the absolute value of each element in a vector of complex numbers.\n"
 "\n"
 "References:\n"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Beatogram::name = "Beatogram";
-const char* Beatogram::version = "1.0";
+const char* Beatogram::category = "Rhythm";
 const char* Beatogram::description = DOC("This algorithm filters the loudness matrix given by BeatsLoudness algorithm in order to keep only the most salient beat band representation.\n"
 "This algorithm has been found to be useful for estimating time signatures.\n"
 "\n"

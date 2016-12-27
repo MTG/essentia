@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,11 +25,14 @@ using namespace essentia;
 using namespace standard;
 
 const char* UnaryOperator::name = "UnaryOperator";
-const char* UnaryOperator::description = DOC("Given a vector of Reals, this algorithm will perform basic arithmetical operations on it, element by element.\n"
+const char* UnaryOperator::category = "Standard";
+const char* UnaryOperator::description = DOC("This algorithm performs basic arithmetical operations element by element given an array.\n"
 "Note:\n"
 "  - log and ln are equivalent to the natural logarithm\n"
 "  - for log, ln, log10 and lin2db, x is clipped to 1e-30 for x<1e-30\n"
-"  - for x<0, sqrt(x) is invalid");
+"  - for x<0, sqrt(x) is invalid\n"
+"  - scale and shift parameters define linear transformation to be applied to the resulting elements"
+);
 
 UnaryOperator::OpType UnaryOperator::typeFromString(const std::string& name) const {
   if (name == "identity") return IDENTITY;
@@ -69,7 +72,7 @@ void UnaryOperator::compute() {
 
   case IDENTITY:
     output = input;
-    return;
+    break;
 
   case ABS: APPLY_FUNCTION(fabs);
 
@@ -84,7 +87,7 @@ void UnaryOperator::compute() {
           output[i] = log10(input[i]);
         }
       }
-      return;
+      break;
     }
 
   case LN:
@@ -98,7 +101,7 @@ void UnaryOperator::compute() {
           output[i] = log(input[i]);
         }
       }
-      return;
+      break;
     }
 
   case LIN2DB: APPLY_FUNCTION(lin2db);
@@ -115,7 +118,7 @@ void UnaryOperator::compute() {
         }
         output[i] = sqrt(input[i]);
       }
-      return;
+      break;
     }
 
   case SQUARE: APPLY_FUNCTION(square_func);
@@ -123,4 +126,14 @@ void UnaryOperator::compute() {
   default:
     throw EssentiaException("UnaryOperator: Unknown unary operator type");
   }
+
+  if (_scale != 1. || _shift != 0.) {
+    // compute only if values for shift and scale are non-default
+    for (int i=0; i<int(input.size()); ++i) {
+      output[i] *= _scale;
+      output[i] += _shift;
+    }
+  }
+
+  return;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -52,21 +52,22 @@ class HPCP : public Algorithm {
     declareParameter("referenceFrequency", "the reference frequency for semitone index calculation, corresponding to A3 [Hz]", "(0,inf)", 440.0);
     declareParameter("harmonics", "number of harmonics for frequency contribution, 0 indicates exclusive fundamental frequency contribution", "[0,inf)", 0); // 8 for chord estimation
     declareParameter("bandPreset", "enables whether to use a band preset", "{true,false}", true);
+    declareParameter("bandSplitFrequency", "the split frequency for low and high bands, not used if bandPreset is false [Hz]", "(0,inf)", 500.0);
     declareParameter("minFrequency", "the minimum frequency that contributes to the HPCP [Hz] (the difference between the min and split frequencies must not be less than 200.0 Hz)", "(0,inf)", 40.0);
     declareParameter("maxFrequency", "the maximum frequency that contributes to the HPCP [Hz] (the difference between the max and split frequencies must not be less than 200.0 Hz)", "(0,inf)", 5000.0);
-    declareParameter("splitFrequency", "the split frequency for low and high bands, not used if bandPreset is false [Hz]", "(0,inf)", 500.0);
     declareParameter("weightType", "type of weighting function for determining frequency contribution", "{none,cosine,squaredCosine}", "squaredCosine");
-    declareParameter("nonLinear", "enables whether to apply a Jordi non-linear post-processing function to the output", "{true,false}", false);
+    declareParameter("nonLinear", "apply non-linear post-processing to the output (use with normalized='unitMax'). Boosts values close to 1, decreases values close to 0.", "{true,false}", false);
     declareParameter("windowSize", "the size, in semitones, of the window used for the weighting", "(0,12]", 1.0);
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("maxShifted", "whether to shift the HPCP vector so that the maximum peak is at index 0", "{true,false}", false);
-    declareParameter("normalized", "whether to normalize the HPCP vector", "{true,false}", true);
+    declareParameter("normalized", "whether to normalize the HPCP vector", "{none,unitSum,unitMax}", "unitMax");
   }
 
   void configure();
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
   static const Real precision;
 
@@ -89,9 +90,14 @@ class HPCP : public Algorithm {
     NONE, COSINE, SQUARED_COSINE
   };
   WeightType _weightType;
+
+  enum NormalizeType {
+    N_NONE, N_UNIT_MAX, N_UNIT_SUM
+  };
+  NormalizeType _normalized;
+
   bool _nonLinear;
   bool _maxShifted;
-  bool _normalized;
 
   std::vector<HarmonicPeak> _harmonicPeaks;
 };

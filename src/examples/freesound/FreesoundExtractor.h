@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -35,26 +35,29 @@
 #include "FreesoundTonalDescriptors.h"
 #include "FreesoundSfxDescriptors.h"
 
-#define EXTRACTOR_VERSION "0.3"
+#define EXTRACTOR_VERSION "0.4"
+#define SAMPLE_RATE 44100
 
 using namespace std;
 using namespace essentia;
 using namespace streaming;
 
  class FreesoundExtractor{
-
+     
  protected:
 
  	Pool computeAggregation(Pool& pool);
 
  public:
+    //static const Real sampleRate=44100;
+     
  	Pool results;
  	Pool stats;
 
  	void compute(const string& audioFilename);
-
-	void outputToFile(Pool& pool, const string& outputFilename, bool outputJSON);
+	void outputToFile(Pool& pool, const string& outputFilename, const string& format);
 	
  };
+//const FreesoundExtractor::sampleRate=44100;
 
  #endif

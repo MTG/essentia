@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,10 +24,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* BarkBands::name = "BarkBands";
-const char* BarkBands::description = DOC("This algorithm computes the spectral energy contained in a given number of bands, which correspond to an extrapolation of the Bark band scale [1]: \n"
-"[0.0, 50.0, 100.0, 150.0, 200.0, 300.0, 400.0, 510.0, 630.0, 770.0, 920.0, 1080.0, 1270.0, 1480.0, 1720.0, 2000.0, 2320.0, 2700.0, 3150.0, 3700.0, 4400.0, 5300.0, 6400.0, 7700.0, 9500.0, 12000.0, 15500.0, 20500.0, 27000.0]\n"
-"\n"
-"For each bark band the power-spectrum (mag-squared) is summed. The first two bands [0,100] and [100,200] have been split in half for better resolution. It was observed that beat detection is better when this is done.\n"
+const char* BarkBands::category = "Spectral";
+const char* BarkBands::description = DOC("This algorithm computes energy in Bark bands of a spectrum. The band frequencies are: [0.0, 50.0, 100.0, 150.0, 200.0, 300.0, 400.0, 510.0, 630.0, 770.0, 920.0, 1080.0, 1270.0, 1480.0, 1720.0, 2000.0, 2320.0, 2700.0, 3150.0, 3700.0, 4400.0, 5300.0, 6400.0, 7700.0, 9500.0, 12000.0, 15500.0, 20500.0, 27000.0]. The first two Bark bands [0,100] and [100,200] have been split in half for better resolution (because of an observed better performance in beat detection). For each bark band the power-spectrum (mag-squared) is summed.\n"
 "\n"
 "This algorithm uses FrequencyBands and thus inherits its input requirements and exceptions.\n"
 "\n"

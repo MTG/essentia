@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -23,6 +23,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* CrossCorrelation::name = "CrossCorrelation";
+const char* CrossCorrelation::category = "Standard";
 const char* CrossCorrelation::description = DOC("This algorithm computes the cross-correlation vector of two signals. It accepts 2 parameters, minLag and maxLag which define the range of the computation of the innerproduct.\n"
 "\n"
 "An exception is thrown if \"minLag\" is larger than \"maxLag\". An exception is also thrown if the input vectors are empty.\n"

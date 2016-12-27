@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,10 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* Windowing::name = "Windowing";
-const char* Windowing::description = DOC("This algorithm applies windowing to audio signals.\n"
-"It optionally applies zero-phase windowing and optionally adds zero-padding.\n"
-"The resulting windowed frame size is equal to the incoming frame size plus the number of padded zeros.\n"
-"The available windows are normalized (to have an area of 1) and then scaled by a factor of 2.\n"
+const char* Windowing::category = "Standard";
+const char* Windowing::description = DOC("This algorithm applies windowing to an audio signal. It optionally applies zero-phase windowing and optionally adds zero-padding. The resulting windowed frame size is equal to the incoming frame size plus the number of padded zeros. The available windows are normalized (to have an area of 1) and then scaled by a factor of 2.\n"
 "\n"
 "An exception is thrown if the size of the frame is less than 2.\n"
 "\n"
@@ -40,9 +38,9 @@ const char* Windowing::description = DOC("This algorithm applies windowing to au
 "  http://en.wikipedia.org/wiki/Window_function");
 
 void Windowing::configure() {
+  _normalized = parameter("normalized").toBool();
   _window.resize(parameter("size").toInt());
   createWindow(parameter("type").toLower());
-
   _zeroPadding = parameter("zeroPadding").toInt();
   _zeroPhase = parameter("zeroPhase").toBool();
 }
@@ -57,10 +55,13 @@ void Windowing::createWindow(const std::string& windowtype) {
   else if (windowtype == "blackmanharris74") blackmanHarris74();
   else if (windowtype == "blackmanharris92") blackmanHarris92();
 
-  normalize();
+  if (_normalized) {
+    normalize();  
+  }
 }
 
 void Windowing::compute() {
+
   const std::vector<Real>& signal = _frame.get();
   std::vector<Real>& windowedSignal = _windowedFrame.get();
 

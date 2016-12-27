@@ -1,0 +1,10 @@
+prefix=../packaging/win32_3rdparty/yaml-0.1.5
+exec_prefix=${prefix}
+includedir=${prefix}/include
+libdir=${exec_prefix}/lib
+
+Name: LibYAML
+Description: Library to parse and emit YAML
+Version: 0.1.5
+Cflags: -I${includedir}
+Libs: -L${libdir} -lyaml

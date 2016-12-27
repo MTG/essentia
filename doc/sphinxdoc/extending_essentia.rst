@@ -1,7 +1,7 @@
 .. highlight:: cpp
 
-Extending Essentia / Writing a new Algorithm
-============================================
+Writing a new Algorithm
+=======================
 
 Although Essentia comes pre-loaded with a considerable list of algorithms, we imagine 
 that you will want to write your own algorithms at some point. By following the next steps,

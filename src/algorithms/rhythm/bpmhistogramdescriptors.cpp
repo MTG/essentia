@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,9 @@ using namespace essentia;
 using namespace standard;
 
 const char* BpmHistogramDescriptors::name = "BpmHistogramDescriptors";
-const char* BpmHistogramDescriptors::description = DOC("This algorithm computes statistics for the highest and second highest peak of the beats per minute probability histogram.");
+const char* BpmHistogramDescriptors::category = "Rhythm";
+const char* BpmHistogramDescriptors::description = DOC("This algorithm computes beats per minute histogram and its statistics for the highest and second highest peak.\n"
+"Note: histogram vector contains occurance frequency for each bpm value, 0-th element corresponds to 0 bpm value.");
 
 const int BpmHistogramDescriptors::maxBPM = 250; // max number of BPM bins
 const int BpmHistogramDescriptors::numPeaks = 2;
@@ -33,6 +35,7 @@ const int BpmHistogramDescriptors::weightWidth = 3;
 const int BpmHistogramDescriptors::spreadWidth = 9;
 
 void BpmHistogramDescriptors::compute() {
+  
   // copy input
   vector<Real> bpmValues = _bpmIntervals.get();
 
@@ -50,6 +53,8 @@ void BpmHistogramDescriptors::compute() {
     }
   }
 
+  vector<Real> weights(maxBPM, 0.0);
+
   if (bpmValues.empty()) {
     _firstPeakBPM.get() = 0.0;
     _firstPeakWeight.get() = 0.0;
@@ -58,12 +63,12 @@ void BpmHistogramDescriptors::compute() {
     _secondPeakBPM.get() = 0.0;
     _secondPeakWeight.get() = 0.0;
     _secondPeakSpread.get() = 0.0;
+    _histogram.get() = weights;
 
     return;
   }
 
   // compute histogram
-  vector<Real> weights(maxBPM, 0.0);
   for (int i=0; i<int(bpmValues.size()); ++i) {
     int idx = min( maxBPM-1, int(round(bpmValues[i])));
     weights[idx]++;
@@ -74,14 +79,11 @@ void BpmHistogramDescriptors::compute() {
     weights[i] /= bpmValues.size();
   }
 
-  // peaks stats
-  vector<Real> peakBPMs;
-  vector<Real> peakWeights;
-  vector<Real> peakSpreads;
+  _histogram.get() = weights;
 
   for (int i=0; i<numPeaks; ++i) {
+  
     int idx = argmax(weights);
-
     Real peakBPM = idx;
 
     // peak weight is the weight of the peak and the weights of its two neighbors
@@ -92,28 +94,27 @@ void BpmHistogramDescriptors::compute() {
 
     Real peakSpread = 0.0;
     int minIndex = max(idx - ((spreadWidth-1) / 2), 0);
-    int maxIndex = min(idx + ((spreadWidth-1) / 2), int(weights.size()));
+    int maxIndex = min(idx + ((spreadWidth-1) / 2), int(weights.size())-1);
 
     for (int i=minIndex; i<=maxIndex; ++i) {
       peakSpread += weights[i];
       weights[i] = 0.0;
     }
-
+  
     if (peakSpread > 0) {
       peakSpread = 1 - peakWeight / peakSpread;
     }
-
-    peakBPMs.push_back(peakBPM);
-    peakWeights.push_back(peakWeight);
-    peakSpreads.push_back(peakSpread);
+    
+    if (i==0) {
+      _firstPeakBPM.get() = peakBPM;
+      _firstPeakWeight.get() = peakWeight;
+      _firstPeakSpread.get() = peakSpread;
+    }
+    else if (i==1) {
+      _secondPeakBPM.get() = peakBPM;
+      _secondPeakWeight.get() = peakWeight;
+      _secondPeakSpread.get() = peakSpread;
+      return;
+    }
   }
-
-  // output results
-  _firstPeakBPM.get() = peakBPMs[0];
-  _firstPeakWeight.get() = peakWeights[0];
-  _firstPeakSpread.get() = peakSpreads[0];
-
-  _secondPeakBPM.get() = peakBPMs[1];
-  _secondPeakWeight.get() = peakWeights[1];
-  _secondPeakSpread.get() = peakSpreads[1];
 }

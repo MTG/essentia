@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,7 +24,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* StrongPeak::name = "StrongPeak";
-const char* StrongPeak::description = DOC("This algorithm extracts the Strong Peak from an audio spectrum. The Strong Peak is defined as the ratio between the spectrum's maximum peak's magnitude and the \"bandwidth\" of the peak above a threshold (half its amplitude). This ratio reveals whether the spectrum presents a very \"pronounced\" maximum peak (i.e. the thinner and the higher the maximum of the spectrum is, the higher the ratio value).\n\n"
+const char* StrongPeak::category = "Spectral";
+const char* StrongPeak::description = DOC("This algorithm computes the Strong Peak of a spectrum. The Strong Peak is defined as the ratio between the spectrum's maximum peak's magnitude and the \"bandwidth\" of the peak above a threshold (half its amplitude). This ratio reveals whether the spectrum presents a very \"pronounced\" maximum peak (i.e. the thinner and the higher the maximum of the spectrum is, the higher the ratio value).\n\n"
 
 "Note that \"bandwidth\" is defined as the width of the peak in the log10-frequency domain. This is different than as implemented in [1]. Using the log10-frequency domain allows this algorithm to compare strong peaks at lower frequencies with those from higher frequencies.\n\n"
 

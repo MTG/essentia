@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -82,6 +82,11 @@ class OnsetDetectionGlobal : public Algorithm {
     if (_frameCutter) delete _frameCutter;
     if (_windowing) delete _windowing;
     if (_spectrum) delete _spectrum;
+    if (_fft) delete _fft;
+    if (_cartesian2polar) delete _cartesian2polar;
+    if (_movingAverage) delete _movingAverage;
+    if (_erbbands) delete _erbbands;
+    if (_autocorrelation) delete _autocorrelation;
   }
 
   void declareParameters() {
@@ -99,7 +104,7 @@ class OnsetDetectionGlobal : public Algorithm {
   void computeBeatEmphasis();
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 };
 
@@ -150,6 +155,7 @@ class OnsetDetectionGlobal : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

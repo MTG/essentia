@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -46,6 +46,7 @@ class ESSENTIA_API AlgorithmInfo {
   AlgorithmCreator create;
   std::string name; // do we need this one or is it redundant
   std::string description;
+  std::string category;
 };
 
 
@@ -121,6 +122,7 @@ class ESSENTIA_API EssentiaFactory {
       entry.create = &create;
       entry.name = ReferenceConcreteProduct::name;
       entry.description = ReferenceConcreteProduct::description;
+      entry.category = ReferenceConcreteProduct::category;
 
       // insert object into the factory, or overwrite the existing one if any
       CreatorMap& algoMap = EssentiaFactory::instance()._map;

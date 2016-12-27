@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace standard;
 using namespace std;
 
 const char* AllPass::name = "AllPass";
+const char* AllPass::category = "Filters";
 const char* AllPass::description = DOC("This algorithm implements a IIR all-pass filter of order 1 or 2. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"

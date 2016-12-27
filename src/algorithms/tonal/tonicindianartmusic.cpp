@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,7 +28,7 @@ namespace standard {
 
 
 const char* TonicIndianArtMusic::name = "TonicIndianArtMusic";
-const char* TonicIndianArtMusic::version = "1.0";
+const char* TonicIndianArtMusic::category = "Tonal";
 const char* TonicIndianArtMusic::description = DOC("This algorithm estimates the tonic frequency of the lead artist in Indian art music. It uses multipitch representation of the audio signal (pitch salience) to compute a histogram using which the tonic is identified as one of its peak. The decision is made based on the distance between the prominent peaks, the classification is done using a decision tree.\n"
 "\n"
 "References:\n"
@@ -49,14 +49,15 @@ void TonicIndianArtMusic::configure() {
   Real harmonicWeight = parameter("harmonicWeight").toReal();
   Real magnitudeThreshold = parameter("magnitudeThreshold").toReal();
   Real magnitudeCompression = parameter("magnitudeCompression").toReal();
-  Real minTonicFrequency = parameter("minTonicFrequency").toReal();
-  Real maxTonicFrequency = parameter("maxTonicFrequency").toReal();
-
+  
+  
+  _minTonicFrequency = parameter("minTonicFrequency").toReal();
+  _maxTonicFrequency = parameter("maxTonicFrequency").toReal();
   _referenceFrequency = parameter("referenceFrequency").toReal();
   _binResolution = parameter("binResolution").toReal();
   _numberSaliencePeaks = parameter("numberSaliencePeaks").toReal();
   _numberBins = floor(6000.0 / _binResolution) - 1;
-
+  
   // Pre-processing
   _frameCutter->configure("frameSize", frameSize,
                            "hopSize", hopSize);
@@ -71,11 +72,11 @@ void TonicIndianArtMusic::configure() {
   //      theoretically affect the salience function computation
 
   _spectralPeaks->configure(
-                            "minFrequency", 1,  // to avoid zero frequencies
-                            "maxFrequency", 20000,
+                            "minFrequency", 55,  // to avoid zero frequencies
+                            "maxFrequency", 7200,
                             "maxPeaks", maxSpectralPeaks,
                             "sampleRate", sampleRate,
-                            "magnitudeThreshold", 0,
+                            "magnitudeThreshold", .001,
                             "orderBy", "magnitude");
 
   // Pitch salience contours
@@ -87,8 +88,8 @@ void TonicIndianArtMusic::configure() {
                                     "harmonicWeight", harmonicWeight);
 
   _pitchSalienceFunctionPeaks->configure("binResolution", _binResolution,
-                                         "minFrequency", minTonicFrequency,
-                                         "maxFrequency", maxTonicFrequency,
+                                         "minFrequency", _referenceFrequency*1.4909,
+                                         "maxFrequency", _referenceFrequency*10.0909,
                                          "referenceFrequency", _referenceFrequency);
 }
 
@@ -167,12 +168,16 @@ void TonicIndianArtMusic::compute() {
   vector <Real> peak_locs;
   vector <Real> peak_amps;
   Real tonic_loc;
+  Real binsInOctave = 1200.0 / _binResolution;
+  
+  Real minBin = max(0.0, floor(binsInOctave * log2(_minTonicFrequency/_referenceFrequency) + 0.5));
+  Real maxBin = max(0.0, floor(binsInOctave * log2(_maxTonicFrequency/_referenceFrequency) + 0.5));
 
     // configure algorithms [#5 peaks]
   _peakDetection->configure("interpolate", false);
-  _peakDetection->configure("range", (int)histogram.size());
-  _peakDetection->configure("maxPosition", (int)histogram.size());
-  _peakDetection->configure("minPosition", 0);
+  _peakDetection->configure("range", _numberBins);
+  _peakDetection->configure("maxPosition", maxBin);
+  _peakDetection->configure("minPosition",minBin);
   _peakDetection->configure("maxPeaks", 5);
   _peakDetection->configure("orderBy", "amplitude");
 

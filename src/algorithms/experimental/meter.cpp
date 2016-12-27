@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,7 +26,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Meter::name = "Meter";
-const char* Meter::version = "1.0";
+const char* Meter::category = "Rhythm";
 const char* Meter::description = DOC("This algorithm estimates the time signature of a given beatogram by finding the highest correlation between beats.\n"
 "\n"
 "Quality: experimental (not evaluated, do not use)");

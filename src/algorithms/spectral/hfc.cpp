@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -23,8 +23,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* HFC::name = "HFC";
-const char* HFC::description = DOC("This algorithm computes the High Frequency Content of a signal spectrum.\n"
-"It can be computed according to the following techniques:\n"
+const char* HFC::category = "Spectral";
+const char* HFC::description = DOC("This algorithm computes the High Frequency Content of a spectrum. It can be computed according to the following techniques:\n"
 "  - 'Masri' (default) which does: sum |X(n)|^2*k,\n"
 "  - 'Jensen' which does: sum |X(n)|*k^2\n"
 "  - 'Brossier' which does: sum |X(n)|*k\n"

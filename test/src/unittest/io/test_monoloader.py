@@ -2,7 +2,7 @@
 
 
 #
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -95,7 +95,7 @@ class TestMonoLoader(TestCase):
         mix = self.load(filename, 'mix', 44100);
         self.assertEqual(self.round(sum(left)), 10)
         self.assertEqual(self.round(sum(right)), 9)
-        self.assertEqual(sum(mix), 9.5) # 0.5*left + 0.5*right
+        self.assertAlmostEqualFixedPrecision(sum(mix), 9.5, 3) # 0.5*left + 0.5*right
 
 ###############
 # #mp3
@@ -115,6 +115,7 @@ class TestMonoLoader(TestCase):
         left = self.load(filename, 'left', 44100);
         right = self.load(filename, 'right', 44100);
         mix = self.load(filename, 'mix', 44100);
+
         self.assertEqual(self.sum(left), 9)
         self.assertEqual(self.sum(right), 9)
         self.assertEqual(self.sum(mix), 9)
@@ -125,6 +126,7 @@ class TestMonoLoader(TestCase):
         left = self.load(filename, 'left', 22050);
         right = self.load(filename, 'right', 22050);
         mix = self.load(filename, 'mix', 22050);
+
         self.assertEqual(self.sum(left), 9)
         self.assertEqual(self.sum(right), 9)
         self.assertEqual(self.sum(mix), 9)
@@ -149,8 +151,16 @@ class TestMonoLoader(TestCase):
         # find time shift between impulse positions
         impulses_mp3 = [x for x in range(len(mp3)) if mp3[x]>0.9]
         impulses_wav = [x for x in range(len(wav)) if wav[x]>0.9]
+
         shift = impulses_mp3[0] - impulses_wav[0]
+        # FIXME:
+        # For this particular audio files in essentia 2.1_beta2 with an older libav version
+        # the expected shift was 1105 samples, however now there is no shift
+        # Nevertheless time shift can be observed on other examples but we still do not have such tests 
+
+        #self.assertEqual(abs(shift), 1105)
         self.assertEqual(abs(shift), 0)
+
 
 ###############
 # #OGG
@@ -246,7 +256,6 @@ class TestMonoLoader(TestCase):
         self.assertEquals(len(audio3), 441000);
         self.assertEqualVector(audio2, audio1)
         self.assertEqualVector(audio2, audio3)
-
 
 
 

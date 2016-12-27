@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -36,6 +36,7 @@ namespace essentia {
 namespace streaming {
 
 const char* FileOutputProxy::name = "FileOutput";
+const char* FileOutputProxy::category = "Input/output";
 const char* FileOutputProxy::description = DOC("Stores alphanumeric data into text or binary files");
 
 void connect(SourceBase& source, FileOutputProxy& file) {

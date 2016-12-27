@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,7 +28,8 @@ using namespace essentia;
 using namespace essentia::streaming;
 
 const char* LowLevelSpectralExtractor::name = "LowLevelSpectralExtractor";
-const char* LowLevelSpectralExtractor::description = DOC("This algorithm extracts all low level spectral features, which do not require an equal-loudness filter for their computation, from an audio signal");
+const char* LowLevelSpectralExtractor::category = "Extractors";
+const char* LowLevelSpectralExtractor::description = DOC("This algorithm extracts all low-level spectral features, which do not require an equal-loudness filter for their computation, from an audio signal");
 
 LowLevelSpectralExtractor::LowLevelSpectralExtractor() : _configured(false) {
 
@@ -241,8 +242,9 @@ void LowLevelSpectralExtractor::clearAlgos() {
 namespace essentia {
 namespace standard {
 
-const char* LowLevelSpectralExtractor::name = "LowLevelSpectralExtractor";
-const char* LowLevelSpectralExtractor::description = DOC("This algorithm extracts all low level spectral features from an audio signal");
+const char* LowLevelSpectralExtractor::name = essentia::streaming::LowLevelSpectralExtractor::name;
+const char* LowLevelSpectralExtractor::category = essentia::streaming::LowLevelSpectralExtractor::category;
+const char* LowLevelSpectralExtractor::description = essentia::streaming::LowLevelSpectralExtractor::description;
 
 LowLevelSpectralExtractor::LowLevelSpectralExtractor() {
   declareInput(_signal, "signal", "the audio input signal");
@@ -288,6 +290,35 @@ LowLevelSpectralExtractor::~LowLevelSpectralExtractor() {
 
 void LowLevelSpectralExtractor::reset() {
   _network->reset();
+  _pool.remove("barkbands");
+  _pool.remove("kurtosis");
+  _pool.remove("skewness");
+  _pool.remove("spread");
+  _pool.remove("hfc");
+  _pool.remove("mfcc");
+  _pool.remove("pitch");
+  _pool.remove("pitchConfidence");
+  _pool.remove("pitchSalience");
+  _pool.remove("silence_rate_20dB");
+  _pool.remove("silence_rate_30dB");
+  _pool.remove("silence_rate_60dB");
+  _pool.remove("spectralComplexity");
+  _pool.remove("crest");
+  _pool.remove("decrease");
+  _pool.remove("energy");
+  _pool.remove("energyBand_0");
+  _pool.remove("energyBand_1");
+  _pool.remove("energyBand_2");
+  _pool.remove("energyBand_3");
+  _pool.remove("flatnessdb");
+  _pool.remove("flux");
+  _pool.remove("rms");
+  _pool.remove("rollOff");
+  _pool.remove("strongPeak");
+  _pool.remove("zeroCrossingRate");    
+  _pool.remove("inharmonicity");
+  _pool.remove("tristimulus");
+  _pool.remove("oddToEvenHarmonicEnergyRatio");
 }
 
 void LowLevelSpectralExtractor::configure() {
@@ -295,37 +326,36 @@ void LowLevelSpectralExtractor::configure() {
 }
 
 void LowLevelSpectralExtractor::createInnerNetwork() {
-  streaming::connect(*_vectorInput, _lowLevelExtractor->input("signal"));
-  streaming::connect(_lowLevelExtractor->output("barkbands"), _pool, "barkbands");
-  streaming::connect(_lowLevelExtractor->output("barkbands_kurtosis"), _pool, "kurtosis");
-  streaming::connect(_lowLevelExtractor->output("barkbands_skewness"), _pool, "skewness");
-  streaming::connect(_lowLevelExtractor->output("barkbands_spread"), _pool, "spread");
-  streaming::connect(_lowLevelExtractor->output("hfc"), _pool, "hfc");
-  streaming::connect(_lowLevelExtractor->output("mfcc"), _pool, "mfcc");
-  streaming::connect(_lowLevelExtractor->output("pitch"), _pool, "pitch");
-  streaming::connect(_lowLevelExtractor->output("pitch_instantaneous_confidence"), _pool, "pitchConfidence");
-  streaming::connect(_lowLevelExtractor->output("pitch_salience"), _pool, "pitchSalience");
-  streaming::connect(_lowLevelExtractor->output("silence_rate_20dB"), _pool, "silence_rate_20dB");
-  streaming::connect(_lowLevelExtractor->output("silence_rate_30dB"), _pool, "silence_rate_30dB");
-  streaming::connect(_lowLevelExtractor->output("silence_rate_60dB"), _pool, "silence_rate_60dB");
-  streaming::connect(_lowLevelExtractor->output("spectral_complexity"), _pool, "spectralComplexity");
-  streaming::connect(_lowLevelExtractor->output("spectral_crest"), _pool, "crest");
-  streaming::connect(_lowLevelExtractor->output("spectral_decrease"), _pool, "decrease");
-  streaming::connect(_lowLevelExtractor->output("spectral_energy"), _pool, "energy");
-  streaming::connect(_lowLevelExtractor->output("spectral_energyband_low"), _pool, "energyBand_0");
-  streaming::connect(_lowLevelExtractor->output("spectral_energyband_middle_low"), _pool, "energyBand_1");
-  streaming::connect(_lowLevelExtractor->output("spectral_energyband_middle_high"), _pool, "energyBand_2");
-  streaming::connect(_lowLevelExtractor->output("spectral_energyband_high"), _pool, "energyBand_3");
-  streaming::connect(_lowLevelExtractor->output("spectral_flatness_db"), _pool, "flatnessdb");
-  streaming::connect(_lowLevelExtractor->output("spectral_flux"), _pool, "flux");
-  streaming::connect(_lowLevelExtractor->output("spectral_rms"), _pool, "rms");
-  streaming::connect(_lowLevelExtractor->output("spectral_rolloff"), _pool, "rollOff");
-  streaming::connect(_lowLevelExtractor->output("spectral_strongpeak"), _pool, "strongPeak");
-  streaming::connect(_lowLevelExtractor->output("zerocrossingrate"), _pool, "zeroCrossingRate");
-
-  streaming::connect(_lowLevelExtractor->output("inharmonicity"), _pool, "inharmonicity");
-  streaming::connect(_lowLevelExtractor->output("tristimulus"), _pool, "tristimulus");
-  streaming::connect(_lowLevelExtractor->output("oddtoevenharmonicenergyratio"), _pool, "oddToEvenHarmonicEnergyRatio");
+  *_vectorInput >> _lowLevelExtractor->input("signal");
+  _lowLevelExtractor->output("barkbands") >> PC(_pool, "barkbands");
+  _lowLevelExtractor->output("barkbands_kurtosis") >> PC(_pool, "kurtosis");
+  _lowLevelExtractor->output("barkbands_skewness") >> PC(_pool, "skewness");
+  _lowLevelExtractor->output("barkbands_spread") >> PC(_pool, "spread");
+  _lowLevelExtractor->output("hfc") >> PC(_pool, "hfc");
+  _lowLevelExtractor->output("mfcc") >> PC(_pool, "mfcc");
+  _lowLevelExtractor->output("pitch") >> PC(_pool, "pitch");
+  _lowLevelExtractor->output("pitch_instantaneous_confidence") >> PC(_pool, "pitchConfidence");
+  _lowLevelExtractor->output("pitch_salience") >> PC(_pool, "pitchSalience");
+  _lowLevelExtractor->output("silence_rate_20dB") >> PC(_pool, "silence_rate_20dB");
+  _lowLevelExtractor->output("silence_rate_30dB") >> PC(_pool, "silence_rate_30dB");
+  _lowLevelExtractor->output("silence_rate_60dB") >> PC(_pool, "silence_rate_60dB");
+  _lowLevelExtractor->output("spectral_complexity") >> PC(_pool, "spectralComplexity");
+  _lowLevelExtractor->output("spectral_crest") >> PC(_pool, "crest");
+  _lowLevelExtractor->output("spectral_decrease") >> PC(_pool, "decrease");
+  _lowLevelExtractor->output("spectral_energy") >> PC(_pool, "energy");
+  _lowLevelExtractor->output("spectral_energyband_low") >> PC(_pool, "energyBand_0");
+  _lowLevelExtractor->output("spectral_energyband_middle_low") >> PC(_pool, "energyBand_1");
+  _lowLevelExtractor->output("spectral_energyband_middle_high") >> PC(_pool, "energyBand_2");
+  _lowLevelExtractor->output("spectral_energyband_high") >> PC(_pool, "energyBand_3");
+  _lowLevelExtractor->output("spectral_flatness_db") >> PC(_pool, "flatnessdb");
+  _lowLevelExtractor->output("spectral_flux") >> PC(_pool, "flux");
+  _lowLevelExtractor->output("spectral_rms") >> PC(_pool, "rms");
+  _lowLevelExtractor->output("spectral_rolloff") >> PC(_pool, "rollOff");
+  _lowLevelExtractor->output("spectral_strongpeak") >> PC(_pool, "strongPeak");
+  _lowLevelExtractor->output("zerocrossingrate") >> PC(_pool, "zeroCrossingRate");
+  _lowLevelExtractor->output("inharmonicity") >> PC(_pool, "inharmonicity");
+  _lowLevelExtractor->output("tristimulus") >> PC(_pool, "tristimulus");
+  _lowLevelExtractor->output("oddtoevenharmonicenergyratio") >> PC(_pool, "oddToEvenHarmonicEnergyRatio");
 
   _network = new scheduler::Network(_vectorInput);
 }
@@ -395,6 +425,8 @@ void LowLevelSpectralExtractor::compute() {
   inharmonicity =      _pool.value<vector<Real> >("inharmonicity");
   tristimulus =        _pool.value<vector<vector<Real> > >("tristimulus");
   oddToEvenHarmonicEnergyRatio = _pool.value<vector<Real> >("oddToEvenHarmonicEnergyRatio");
+
+  reset();
 }
 
 } // namespace standard

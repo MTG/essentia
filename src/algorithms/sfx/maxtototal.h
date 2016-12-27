@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -42,6 +42,7 @@ class MaxToTotal : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -76,6 +77,7 @@ class MaxToTotal : public AccumulatorAlgorithm {
   void finalProduce();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

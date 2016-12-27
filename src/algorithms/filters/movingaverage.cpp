@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,8 @@ using namespace standard;
 using namespace std;
 
 const char* MovingAverage::name = "MovingAverage";
-const char* MovingAverage::description = DOC("This algorithm implements an FIR Moving Average filter. Because of its dependece on IIR, IIR's requirements are inherited.\n"
+const char* MovingAverage::category = "Filters";
+const char* MovingAverage::description = DOC("This algorithm implements a FIR Moving Average filter. Because of its dependece on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"
 "  [1] Moving Average Filters, http://www.dspguide.com/ch15.htm");

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,7 +26,8 @@ namespace essentia {
 namespace streaming {
 
 const char* MonoLoader::name = "MonoLoader";
-const char* MonoLoader::description = DOC("Given an audio file this algorithm outputs the raw audio data downmixed to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal.\n"
+const char* MonoLoader::category = "Input/output";
+const char* MonoLoader::description = DOC("This algorithm loads the raw audio data from an audio file and downmixes it to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal.\n"
 "\n"
 "This algorithm uses AudioLoader and thus inherits all of its input requirements and exceptions.");
 
@@ -45,6 +46,11 @@ MonoLoader::MonoLoader() : AlgorithmComposite(),
   _audioLoader->output("audio")           >>  _mixer->input("audio");
   _audioLoader->output("numberChannels")  >>  _mixer->input("numberChannels");
   _mixer->output("audio")                 >>  _resample->input("signal");
+
+  _audioLoader->output("md5")        >> NOWHERE;
+  _audioLoader->output("bit_rate")   >> NOWHERE;
+  _audioLoader->output("codec")      >> NOWHERE;
+  _audioLoader->output("sampleRate") >> NOWHERE;
 
   attach(_resample->output("signal"), _audio);
 }
@@ -79,10 +85,9 @@ void MonoLoader::configure() {
 namespace essentia {
 namespace standard {
 
-const char* MonoLoader::name = "MonoLoader";
-const char* MonoLoader::description = DOC("Given an audio file this algorithm outputs the raw audio data downmixed to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal.\n"
-"\n"
-"This algorithm uses AudioLoader and thus inherits all of its input requirements and exceptions.");
+const char* MonoLoader::name = essentia::streaming::MonoLoader::name;
+const char* MonoLoader::category = essentia::streaming::MonoLoader::category;
+const char* MonoLoader::description = essentia::streaming::MonoLoader::description;
 
 
 void MonoLoader::createInnerNetwork() {

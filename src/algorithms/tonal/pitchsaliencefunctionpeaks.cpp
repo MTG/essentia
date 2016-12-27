@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchSalienceFunctionPeaks::name = "PitchSalienceFunctionPeaks";
-const char* PitchSalienceFunctionPeaks::version = "1.0";
+const char* PitchSalienceFunctionPeaks::category = "Pitch";
 const char* PitchSalienceFunctionPeaks::description = DOC("This algorithm computes the peaks of a given pitch salience function.\n"
 "\n"
 "This algorithm is intended to receive its \"salienceFunction\" input from the PitchSalienceFunction algorithm. The peaks are detected using PeakDetection algorithm. The outputs are two arrays of bin numbers and salience values corresponding to the peaks.\n"

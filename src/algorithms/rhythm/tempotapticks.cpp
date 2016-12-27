@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* TempoTapTicks::name = "TempoTapTicks";
+const char* TempoTapTicks::category = "Rhythm";
 const char* TempoTapTicks::description = DOC("This algorithm builds the list of ticks from the period and phase candidates given by the TempoTap algorithm.\n"
 "\n"
 "Quality: outdated (use TempoTapDegara instead)\n"

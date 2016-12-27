@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -76,16 +76,9 @@ class TestChordsDescriptors(TestCase):
           self.assertEqual(result[4], 'major') #scale
 
       def testUnknownChord(self):
-          chords = [ 'Cb', 'G', 'C', 'G', 'C', 'G' ] # Cb will be ignored
-          result = ChordsDescriptors()(chords, 'C', 'major')
-          expectedHist = [2./6., 0, 0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                          0, 0, 0, 0, 0, 0, 0, 0]
-
-          self.assertAlmostEqualVector(result[0], [hist*100 for hist in expectedHist])
-          self.assertAlmostEqual(result[1], 2.0/6.0) #chord rate
-          self.assertAlmostEqual(result[2], 5.0/6.0) #change rate
-          self.assertEqual(result[3], 'G')     #key
-          self.assertEqual(result[4], 'major') #scale
+          chords = [ 'Cb', 'G', 'C', 'G', 'C', 'G' ] # Cb will raise exception
+          chordsAlgo = ChordsDescriptors()
+          self.assertRaises(EssentiaException, chordsAlgo, chords, 'C', 'major')
 
       def testUnknownKey(self):
           self.assertComputeFails(ChordsDescriptors(), ['C', 'C'], 'Cb', 'major')

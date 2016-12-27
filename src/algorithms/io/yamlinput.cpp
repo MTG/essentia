@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,6 +27,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* YamlInput::name = "YamlInput";
+const char* YamlInput::category = "Input/output";
 const char* YamlInput::description = DOC("This algorithm deserializes a file formatted in YAML to a Pool. This file can be serialized back into a YAML file using the YamlOutput algorithm. See the documentation for YamlOutput for more information on the specification of the YAML file.\n"
 "\n"
 "Note: If an empty sequence is encountered (i.e. \"[]\"), this algorithm will assume it was intended to be a sequence of Reals and will add it to the output pool accordingly. This only applies to sequences which contain empty sequences. Empty sequences (which are not subsequences) are not possible in a Pool and therefore will be ignored if encountered (i.e. foo: [] (ignored), but foo: [[]] (added as a vector of one empty vector of reals).");
@@ -118,13 +119,13 @@ void YamlInput::compute() {
   }
   catch (exception& e) {
     if (fclose(file) != 0) {
-      cout << "WARNING: YamlInput: an error occured while closing the yaml/json file" << endl;
+      E_WARNING("YamlInput: an error occured while closing the yaml/json file");
     }
     throw EssentiaException("YamlInput: error during parsing: ", e.what());
   }
 
   if (fclose(file) != 0) {
-    cout << "WARNING: YamlInput: an error occured while closing the yaml file" << endl;
+    E_WARNING("YamlInput: an error occured while closing the yaml file");
   }
 
   YamlMappingNode* rootMap = dynamic_cast<YamlMappingNode*>(root);

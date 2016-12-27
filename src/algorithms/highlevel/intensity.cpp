@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Intensity::name = "Intensity";
+const char* Intensity::category = "Loudness/dynamics";
 const char* Intensity::description = DOC("This algorithm classifies the input audio signal as either relaxed (-1), moderate (0), or aggressive (1).\n"
 "\n"
 "Quality: outdated (non-reliable, poor accuracy).\n"

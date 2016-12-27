@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,6 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Flatness::name = "Flatness";
+const char* Flatness::category = "Statistics";
 const char* Flatness::description = DOC("This algorithm computes the flatness of an array, which is defined as the ratio between the geometric mean and the arithmetic mean.\n"
 "\n"
 "Flatness is undefined for empty input and negative values, therefore an exception is thrown in any both cases.\n"

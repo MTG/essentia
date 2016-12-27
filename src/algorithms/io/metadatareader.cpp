@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -21,9 +21,9 @@
 #include <windows.h>
 #endif
 
-#include <taglib/fileref.h>
-#include <taglib/tpropertymap.h>
-#include <taglib/tag.h>
+#include <fileref.h>
+#include <tpropertymap.h>
+#include <tag.h>
 
 #include <algorithm>
 
@@ -33,10 +33,6 @@
 
 
 using namespace std;
-//using TagLib::FileRef;
-//using TagLib::PropertyMap;
-//using TagLib::String;
-//using TagLib::StringList;
 
 string fixInvalidUTF8(const string& str) {
   // a big fat hack to try to fix invalid utf-8 characters
@@ -140,23 +136,9 @@ bool containsControlChars(const string& str) {
   return false;
 }
 
-#if TAGLIB_MAJOR_VERSION == 1 && TAGLIB_MINOR_VERSION >= 5
-
 bool isLatin1(const TagLib::String& str) {
   return str.isLatin1();
 }
-
-#else // TAGLIB_VERSION < 1.5
-
-bool isLatin1(const TagLib::String& str) {
-  // adapted from taglib 1.5
-  for (int i=0; i<(int)str.size(); i++) {
-    if (str[i] >= 256) return false;
-  }
-  return true;
-}
-
-#endif // TAGLIB_VERSION >=? 1.5
 
 
 // Utility function to format tags so that they can be correctly parsed back
@@ -187,7 +169,8 @@ namespace essentia {
 namespace standard {
 
 const char* MetadataReader::name = "MetadataReader";
-const char* MetadataReader::description = DOC("This algorithm outputs the metadata tags associated with audio files, as well as their audio properties (e.g. bitrate, length, etc.). Supported audio file types are:\n"
+const char* MetadataReader::category = "Input/output";
+const char* MetadataReader::description = DOC("This algorithm loads the metadata tags from an audio file as well as outputs its audio properties. Supported audio file types are:\n"
 "  - mp3\n"
 "  - flac\n"
 "  - ogg\n"
@@ -195,7 +178,12 @@ const char* MetadataReader::description = DOC("This algorithm outputs the metada
 "Please observe that the .wav format is not supported. Also note that this algorithm incorrectly calculates the number of channels for a file in mp3 format only for versions less than 1.5 of taglib in Linux and less or equal to 1.5 in Mac OS X\n"
 "If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8.\n"
 "This algorithm also contains some heuristic to try to deal with encoding errors in the tags and tries to do the appropriate conversion if a problem was found (mostly twice latin1->utf8 conversion).\n"
-);
+"\n"
+"MetadataReader reads all metadata tags found in audio and stores them in the pool tagPool. Standard metadata tags found in audio files include strings mentioned in [1,2]. Tag strings are case-sensitive and they are converted to lower-case when stored to the pool. It is possible to filter these tags by using 'filterMetadataTags' parameter. This parameter should specify a white-list of tag strings as they are found in the audio file (e.g., \"ARTIST\").\n"
+"\n"
+"References:\n"
+"  [1] https://taglib.github.io/api/classTagLib_1_1PropertyMap.html#details\n\n"
+"  [2] https://picard.musicbrainz.org/docs/mappings/");
 
 
 void MetadataReader::configure() {
@@ -233,6 +221,9 @@ void MetadataReader::compute() {
 
     try {
       pcmMetadata(_filename, pcmSampleRate, pcmChannels, pcmBitrate);
+      // works only for 16bit wavs/pcm; it should output incorrect value for 
+      // 24bit or 32bit float files, therefore, print a warning
+      E_WARNING("MetadataReader: TagLib could not get metadata for this file. The output bitrate is estimated treating the input as 16-bit PCM, and therefore may be incorrect.");
     }
     catch (EssentiaException& e) {
       if (parameter("failOnError").toBool())
@@ -256,19 +247,6 @@ void MetadataReader::compute() {
 
     return;
   }
-
-  /*
-  TagLib::Tag *tag = f.tag();
-
-  cout << "-- TAG (basic) --" << endl;
-  cout << "title   - \"" << tag->title()   << "\"" << endl;
-  cout << "artist  - \"" << tag->artist()  << "\"" << endl;
-  cout << "album   - \"" << tag->album()   << "\"" << endl;
-  cout << "year    - \"" << tag->year()    << "\"" << endl;
-  cout << "comment - \"" << tag->comment() << "\"" << endl;
-  cout << "track   - \"" << tag->track()   << "\"" << endl;
-  cout << "genre   - \"" << tag->genre()   << "\"" << endl;
-  */
 
   TagLib::PropertyMap tags = f.file()->properties();
 
@@ -371,36 +349,16 @@ AlgorithmStatus MetadataReader::process() {
     _track.push(formatString(tags["TRACKNUMBER"]));
     _date.push(formatString(tags["DATE"]));
 
-    // populate tag pool
+
     /*
+    // populate tag pool
     for(PropertyMap::Iterator it = tags.begin(); it != tags.end(); ++it) {
       for(StringList::Iterator str = it->second.begin(); str != it->second.end(); ++str) {
         tagPool.add(it->first.to8Bit(true), str->to8Bit(true));
       }
     }
+    _tagPool.push(tagPool);
     */
-
-
-    /*
-    cout << "musicbrainz_recordingid = MUSICBRAINZ_TRACKID = " << formatString(tags["MUSICBRAINZ_TRACKID"]) << endl;
-    cout << "musicbrainz_albumid = MUSICBRAINZ_ALBUMID = " << formatString(tags["MUSICBRAINZ_ALBUMID"]) << endl;
-    cout << "musicbrainz_artistid = MUSICBRAINZ_ARTISTID = " << formatString(tags["MUSICBRAINZ_ARTISTID"]) << endl;
-    cout << "musicbrainz_albumartistid = MUSICBRAINZ_ALBUMARTISTID = " << formatString(tags["MUSICBRAINZ_ALBUMARTISTID"]) << endl;
-    cout << "musicbrainz_releasegroupid = MUSICBRAINZ_RELEASEGROUPID = " << formatString(tags["MUSICBRAINZ_RELEASEGROUPID"]) << endl;
-    cout << "musicbrainz_workid = MUSICBRAINZ_WORKID = " << formatString(tags["MUSICBRAINZ_WORKID"]) << endl;
-    cout << "ACOUSTID_ID = " << formatString(tags["ACOUSTID_ID"]) << endl;
-    cout << "ACOUSTID_FINGERPRINT = " << formatString(tags["ACOUSTID_FINGERPRINT"]) << endl;
-    */
-
-    // TODO: missing in taglib?
-    // musicbrainz_trackid = MUSICBRAINZ_RELEASETRACKID
-    // musicbrainz_trmid = MUSICBRAINZ_TRMID
-    // musicbrainz_discid = MUSICBRAINZ_DISCID
-
-    //cout << "PropertyMap = " << formatString(tags.toString()) << endl;
-
-    //_tagPool.push(tagPool);
-
 
     _duration.push((int)f.audioProperties()->length());
 

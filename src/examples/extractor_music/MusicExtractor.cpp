@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -60,10 +60,6 @@ int MusicExtractor::compute(const string& audioFilename){
 
   cerr << "Process step: Replay gain" << endl;
   computeReplayGain(audioFilename); // compute replay gain and the duration of the track
-
-  if (endTime > results.value<Real>("metadata.audio_properties.length")) {
-      endTime = results.value<Real>("metadata.audio_properties.length");
-  }
 
   cerr << "Process step: Compute audio features" << endl;
 
@@ -126,6 +122,7 @@ int MusicExtractor::compute(const string& audioFilename){
   // pre-trained classifiers are only available in branches devoted for that
   // (eg: 2.0.1)
   if (options.value<Real>("highlevel.compute")) {
+    loadSVMModels();
     computeSVMDescriptors(stats);
   }
 
@@ -402,9 +399,7 @@ void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
   delete output;
 }
 
-
-void MusicExtractor::computeSVMDescriptors(Pool& pool) {
-  cerr << "Process step: SVM models" << endl;
+void MusicExtractor::loadSVMModels() {
 
   vector<string> svmModels = options.value<vector<string> >("highlevel.svm_models");
 
@@ -412,11 +407,19 @@ void MusicExtractor::computeSVMDescriptors(Pool& pool) {
     cerr << "adding SVM model: " << svmModels[i] << endl;
     standard::Algorithm* svm = standard::AlgorithmFactory::create("GaiaTransform",
                                                                   "history", svmModels[i]);
-    svm->input("pool").set(pool);
-    svm->output("pool").set(pool);
-    svm->compute();
+    svms.push_back(svm);
+  }
+}
 
-    delete svm;
+
+void MusicExtractor::computeSVMDescriptors(Pool& pool) {
+  cerr << "Process step: SVM models" << endl;
+  for (int i = 0; i < (int)svms.size(); i++) {
+
+    svms[i]->input("pool").set(pool);
+    svms[i]->output("pool").set(pool);
+    svms[i]->compute();
+
   }
 }
 
@@ -446,20 +449,18 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("indent", 4);
 
   string silentFrames = "noise";
-  int zeroPadding = 0;
-  string windowType = "hann";
 
   // lowlevel
   options.set("lowlevel.frameSize", 2048);
   options.set("lowlevel.hopSize", 1024);
-  options.set("lowlevel.zeroPadding", zeroPadding);
+  options.set("lowlevel.zeroPadding", 0);
   options.set("lowlevel.windowType", "blackmanharris62");
   options.set("lowlevel.silentFrames", silentFrames);
 
   // average_loudness
   options.set("average_loudness.frameSize", 88200);
   options.set("average_loudness.hopSize", 44100);
-  options.set("average_loudness.windowType", windowType);
+  options.set("average_loudness.windowType", "hann");
   options.set("average_loudness.silentFrames", silentFrames);
 
   // rhythm
@@ -470,7 +471,7 @@ void MusicExtractor::setExtractorDefaultOptions() {
   // tonal
   options.set("tonal.frameSize", 4096);
   options.set("tonal.hopSize", 2048);
-  options.set("tonal.zeroPadding", zeroPadding);
+  options.set("tonal.zeroPadding", 0);
   options.set("tonal.windowType", "blackmanharris62");
   options.set("tonal.silentFrames", silentFrames);
 
@@ -496,13 +497,29 @@ void MusicExtractor::setExtractorDefaultOptions() {
   // high-level
 #if HAVE_GAIA2
   //options.set("highlevel.compute", true);
-  const char* svmModelsArray[] = { "genre_tzanetakis", "genre_dortmund",
-                                   "genre_electronica", "genre_rosamerica",
-                                   "mood_acoustic", "mood_aggressive",
-                                   "mood_electronic", "mood_happy", "mood_party",
-                                   "mood_relaxed", "mood_sad", "timbre", "culture",
-                                   "gender", "mirex-moods", "ismir04_rhythm",
-                                   "voice_instrumental" };
+  
+  // This list includes classifier models hosted on Essentia's website
+  const char* svmModelsArray[] = { 
+                                   "danceability",
+                                   "gender",
+                                   "genre_dortmund",
+                                   "genre_electronic",
+                                   "genre_rosamerica",
+                                   "genre_tzanetakis",
+                                   "ismir04_rhythm",
+                                   "mood_acoustic",
+                                   "mood_aggressive",
+                                   "mood_electronic",
+                                   "mood_happy",
+                                   "mood_party",
+                                   "mood_relaxed",
+                                   "mood_sad",
+                                   "moods_mirex",
+                                   "timbre",
+                                   "tonal_atonal",
+                                   "voice_instrumental" 
+                                 };
+  
   vector<string> svmModels = arrayToVector<string>(svmModelsArray);
   string pathToSvmModels;
 #ifdef OS_WIN32

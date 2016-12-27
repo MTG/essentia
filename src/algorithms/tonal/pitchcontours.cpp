@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,8 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchContours::name = "PitchContours";
-const char* PitchContours::version = "1.0";
-const char* PitchContours::description = DOC("This algorithm tracks a set of predominant pitch contours from an audio signal. This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the PitchSalienceFunctionPeaks algorithm outputs aggregated over all frames in the sequence. The output is a vector of estimated melody pitch values.\n"
+const char* PitchContours::category = "Pitch";
+const char* PitchContours::description = DOC("This algorithm tracks a set of predominant pitch contours of an audio signal. This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the PitchSalienceFunctionPeaks algorithm outputs aggregated over all frames in the sequence. The output is a vector of estimated melody pitch values.\n"
 "\n"
 "When input vectors differ in size, an exception is thrown. Input vectors must not contain negative salience values otherwise an exception is thrown. Avoiding erroneous peak duplicates (peaks of the same cent bin) is up to the user's own control and is highly recommended, but no exception will be thrown.\n"
 "\n"

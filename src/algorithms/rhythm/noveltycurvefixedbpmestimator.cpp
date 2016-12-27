@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,9 +28,8 @@ namespace essentia {
 namespace standard {
 
 const char* NoveltyCurveFixedBpmEstimator::name = "NoveltyCurveFixedBpmEstimator";
-const char* NoveltyCurveFixedBpmEstimator::version = "1.0";
-const char* NoveltyCurveFixedBpmEstimator::description = DOC("Given the novelty curve (see NoveltyCurve algorithm), this algorithm outputs a histogram of the most probable bpms assuming the signal has constant tempo."
-"This algorithm is based on the autocorrelation of the novelty curve and should only be used for signals that have a constant tempo or as a first tempo estimator to be used  in conjunction with other algorithms such as BpmHistogram."
+const char* NoveltyCurveFixedBpmEstimator::category = "Rhythm";
+const char* NoveltyCurveFixedBpmEstimator::description = DOC("This algorithm outputs a histogram of the most probable bpms assuming the signal has constant tempo given the novelty curve. This algorithm is based on the autocorrelation of the novelty curve (see NoveltyCurve algorithm) and should only be used for signals that have a constant tempo or as a first tempo estimator to be used in conjunction with other algorithms such as BpmHistogram."
 "It is a simplified version of the algorithm described in [1] as, in order to predict the best BPM candidate,  it computes autocorrelation of the entire novelty curve instead of analyzing it on frames and histogramming the peaks over frames.\n"
 "\n"
 "References:\n"

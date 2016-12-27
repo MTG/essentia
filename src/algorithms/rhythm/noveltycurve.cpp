@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,24 +27,32 @@ namespace essentia {
 namespace standard {
 
 const char* NoveltyCurve::name = "NoveltyCurve";
-const char* NoveltyCurve::description = DOC(
-"Given an audio signal, this algorithm computes the novelty curve, such as defined in [1].\n"
+const char* NoveltyCurve::category = "Rhythm";
+const char* NoveltyCurve::description = DOC("This algorithm computes the \"novelty curve\" (Grosche & Müller, 2009) onset detection function. The algorithm expects as an input a frame-wise sequence of frequency-bands energies or spectrum magnitudes as originally proposed in [1] (see FrequencyBands and Spectrum algorithms). Novelty in each band (or frequency bin) is computed as a derivative between log-compressed energy (magnitude) values in consequent frames. The overall novelty value is then computed as a weighted sum that can be configured using 'weightCurve' parameter. The resulting novelty curve can be used for beat tracking and onset detection (see BpmHistogram and Onsets).\n"
+"\n"
+"Notes:\n"
+"- Recommended frame/hop size for spectrum computation is 2048/1024 samples (44.1 kHz sampling rate) [2].\n"
+"- Log compression is applied with C=1000 as in [1].\n"
+"- Frequency bands energies (see FrequencyBands) as well as bin magnitudes for the whole spectrum can be used as an input. The implementation for the original algorithm [2] works with spectrum bin magnitudes for which novelty functions are computed separately and are then summarized into bands.\n"
+"- In the case if 'weightCurve' is set to 'hybrid' a complex combination of flat, quadratic, linear and inverse quadratic weight curves is used. It was reported to improve performance of beat tracking in some informal in-house experiments (Note: this information is probably outdated).\n"
 "\n"
 "References:\n"
 "  [1] P. Grosche and M. Müller, \"A mid-level representation for capturing\n"
 "  dominant tempo and pulse information in music recordings,\" in\n"
 "  International Society for Music Information Retrieval Conference\n"
-"  (ISMIR’09), 2009, pp. 189–194.");
+"  (ISMIR’09), 2009, pp. 189–194.\n"
+"  [2] Tempogram Toolbox (Matlab implementation),\n"
+"  http://resources.mpi-inf.mpg.de/MIR/tempogramtoolbox\n");
 
 
-vector<Real> NoveltyCurve::weightCurve(int size) {
+vector<Real> NoveltyCurve::weightCurve(int size, WeightType type) {
   vector<Real> result(size, 0.0);
   int halfSize = size/2;
   int sqrHalfSize = halfSize*halfSize;
   int sqrSize = size*size;
 
   // NB:some of these curves have a +1 so we don't reach zero!!
-  switch(_type) {
+  switch(type) {
     case FLAT:
       fill(result.begin(), result.end(), Real(1.0));
       break;
@@ -99,8 +107,8 @@ vector<Real> NoveltyCurve::weightCurve(int size) {
 
 /**
  * Compute the novelty curve for a single variable (energy band, spectrum bin, ...).
- * Returns a vector of as many values as were on the input. As we are derivating, the first
- * coefficient can't be computed and thus will be set to 0.
+ * Resulting output vector size is equal to the input vector. The first value is always set 
+ * to 0 because for it the derivative cannot be defined.
  */
 vector<Real> NoveltyCurve::noveltyFunction(const vector<Real>& spec, Real C, int meanSize) {
   int size = spec.size();
@@ -115,25 +123,22 @@ vector<Real> NoveltyCurve::noveltyFunction(const vector<Real>& spec, Real C, int
     if (d>0) novelty[i-1] = d;
   }
 
-  // substract local mean
+  // subtract local mean
   for (int i=0; i<dsize; i++) {
     int start = i - meanSize/2, end = i + meanSize/2;
     // TODO: decide on which option to choose
-    if (false) {
-      // nico adjust
-      start = max(start, 0);
-      end = min(end, size-1);
-    }
-    else {
-      // edu adjust
-      //int dsize = size-1;
-      if (start<0 && end>=dsize) {start=0; end=dsize;}
-      else {
-        if (start<0) { start=0; end=meanSize;}
-        if (end>=dsize) { end=dsize; start=dsize-meanSize;}
-      }
-    }
 
+    // Nico adjust
+    //start = max(start, 0);
+    //end = min(end, size-1);
+    
+    // Edu adjust
+    if (start<0 && end>=dsize) {start=0; end=dsize;}
+    else {
+      if (start<0) { start=0; end=meanSize;}
+      if (end>=dsize) { end=dsize; start=dsize-meanSize;}
+    }
+  
     Real m = essentia::mean(novelty, start, end);
     if (novelty[i] < m) novelty[i]=0.0;
     else novelty[i] -= m;
@@ -152,9 +157,6 @@ vector<Real> NoveltyCurve::noveltyFunction(const vector<Real>& spec, Real C, int
   mavg->compute();
   delete mavg;
   return novelty_ma;
-
-
-  //return novelty;
 }
 
 void NoveltyCurve::configure() {
@@ -168,6 +170,7 @@ void NoveltyCurve::configure() {
   else if (type == "quadratic") _type = QUADRATIC;
   else if (type == "inverse_quadratic") _type = INVERSE_QUADRATIC;
   else if (type == "supplied") _type = SUPPLIED;
+  else if (type == "hybrid") _type = HYBRID;
   _frameRate = parameter("frameRate").toReal();
   _normalize = parameter("normalize").toBool();
 }
@@ -195,42 +198,51 @@ void NoveltyCurve::compute() {
   for (int bandIdx=0; bandIdx<nBands; bandIdx++) {
     noveltyBands[bandIdx] = noveltyFunction(t_frequencyBands[bandIdx], 1000, meanSize);
   }
-  /////////////////////////////////////////////////////////////////////////////
-  // TODO: By trial-&-error I found that combining weightings (flat, quadratic,
-  // linear and inverse quadratic) was giving better results. Should this be
-  // left as is or should we allow the algorithm to work with the given
-  // weightings from the configuration. This overrides the parameters, so if
-  // left as is, they should be removed as well.
-  /////////////////////////////////////////////////////////////////////////////
-  _type = FLAT;
-  vector<Real> aweights = weightCurve(nBands);
-  _type = QUADRATIC;
-  vector<Real> bweights = weightCurve(nBands);
-  _type = LINEAR;
-  vector<Real> cweights = weightCurve(nBands);
-  _type = INVERSE_QUADRATIC;
-  vector<Real> dweights = weightCurve(nBands);
+
+
   //sum novelty on all bands (weighted) to get a single novelty value per frame
   noveltyBands = essentia::transpose(noveltyBands); // back to [frames x bands]
-  vector<Real> bnovelty(nFrames-1, 0.0);
-  vector<Real> cnovelty(nFrames-1, 0.0);
-  vector<Real> dnovelty(nFrames-1, 0.0);
-  for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) { // nFrames -1 as noveltyBands is a derivative whose size is nframes-1
-    const vector<Real>& frame = noveltyBands[frameIdx];
-    for (int bandIdx=0; bandIdx<nBands; bandIdx++) {
-      novelty[frameIdx] += aweights[bandIdx] * frame[bandIdx];
-      bnovelty[frameIdx] += bweights[bandIdx] * frame[bandIdx];
-      cnovelty[frameIdx] += cweights[bandIdx] * frame[bandIdx];
-      dnovelty[frameIdx] += dweights[bandIdx] * frame[bandIdx];
+
+  // TODO: weight curves should be pre-computed in configure() method
+  if (_type == HYBRID) {
+    // EAylon: By trial-&-error I found that combining weightings (flat, quadratic,
+    // linear and inverse quadratic) was giving better results.   
+    vector<Real> aweights = weightCurve(nBands, FLAT);
+    vector<Real> bweights = weightCurve(nBands, QUADRATIC);
+    vector<Real> cweights = weightCurve(nBands, LINEAR);
+    vector<Real> dweights = weightCurve(nBands, INVERSE_QUADRATIC);
+
+    vector<Real> bnovelty(nFrames-1, 0.0);
+    vector<Real> cnovelty(nFrames-1, 0.0);
+    vector<Real> dnovelty(nFrames-1, 0.0);
+
+    for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) { // noveltyBands is a derivative whose size is nframes-1
+      for (int bandIdx=0; bandIdx<nBands; bandIdx++) {
+        novelty[frameIdx] += aweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+        bnovelty[frameIdx] += bweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+        cnovelty[frameIdx] += cweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+        dnovelty[frameIdx] += dweights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+      }
     }
-  }
-  for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) {
+    for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) {
+      // TODO why multiplication instead of sum (or mean)? 
       novelty[frameIdx] *= bnovelty[frameIdx];
       novelty[frameIdx] *= cnovelty[frameIdx];
       novelty[frameIdx] *= dnovelty[frameIdx];
+    }
+  }
+  else {
+    // TODO weight curve should be pre-computed in configure() method
+    vector<Real> weights = weightCurve(nBands, _type);
+
+    for (int frameIdx=0; frameIdx<nFrames-1; frameIdx++) {
+      for (int bandIdx=0; bandIdx<nBands; bandIdx++) {
+        novelty[frameIdx] += weights[bandIdx] * noveltyBands[frameIdx][bandIdx];
+      }
+    }
   }
 
-
+  // smoothing
   Algorithm * mavg = AlgorithmFactory::create("MovingAverage", "size", meanSize);
   vector<Real> novelty_ma;
   mavg->input("signal").set(novelty);
@@ -245,4 +257,60 @@ void NoveltyCurve::reset() {
 }
 
 } // namespace standard
+} // namespace essentia
+
+
+#include "poolstorage.h"
+#include "algorithmfactory.h"
+
+namespace essentia {
+namespace streaming {
+
+const char* NoveltyCurve::name = standard::NoveltyCurve::name;
+const char* NoveltyCurve::description = standard::NoveltyCurve::description;
+
+NoveltyCurve::NoveltyCurve() : AlgorithmComposite() {
+
+  _noveltyCurve = standard::AlgorithmFactory::create("NoveltyCurve");
+  _poolStorage = new PoolStorage<vector<Real> >(&_pool, "internal.frequencyBands");
+
+  declareInput(_frequencyBands, 1, "frequencyBands", "the frequency bands");
+  declareOutput(_novelty, 0, "novelty", "the novelty curve as a single vector");
+
+  _frequencyBands >> _poolStorage->input("data"); // attach input proxy
+
+  // Need to set the buffer type to multiple frames as all the values 
+  // are output all at once
+  _novelty.setBufferType(BufferUsage::forMultipleFrames);
+}
+
+
+NoveltyCurve::~NoveltyCurve() {
+  delete _noveltyCurve;
+  delete _poolStorage;
+}
+
+
+void NoveltyCurve::reset() {
+  AlgorithmComposite::reset();
+  _noveltyCurve->reset();
+}
+
+
+AlgorithmStatus NoveltyCurve::process() {
+  if (!shouldStop()) return PASS;
+
+  vector<Real> novelty;
+  _noveltyCurve->input("frequencyBands").set(_pool.value<vector<vector<Real> > >("internal.frequencyBands"));
+  _noveltyCurve->output("novelty").set(novelty);
+  _noveltyCurve->compute();
+
+  for (size_t i=0; i<novelty.size(); ++i) {
+    _novelty.push(novelty[i]);
+  }
+  return FINISHED;
+}
+
+
+} // namespace streaming
 } // namespace essentia

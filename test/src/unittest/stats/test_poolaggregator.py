@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -27,7 +27,7 @@ class TestPoolAggregator(TestCase):
     def testAggregateReal(self):
         p = Pool({ 'foo': [ 1, 1, 2, 3, 5, 8, 13, 21, 34 ] })
 
-        pAgg = PoolAggregator(defaultStats=['mean', 'min', 'max', 'median', 'var', 'dmean', 'dvar', 'dmean2', 'dvar2'])
+        pAgg = PoolAggregator(defaultStats=['mean', 'min', 'max', 'median', 'var', 'stdev', 'dmean', 'dvar', 'dmean2', 'dvar2'])
 
         results = pAgg(p)
 
@@ -36,6 +36,7 @@ class TestPoolAggregator(TestCase):
         self.assertAlmostEqual(results['foo.min'], 1)
         self.assertAlmostEqual(results['foo.max'], 34)
         self.assertAlmostEqual(results['foo.var'], 112.172839506)
+        self.assertAlmostEqual(results['foo.stdev'], 10.591167995362929)
         self.assertAlmostEqual(results['foo.dmean'], 4.125)
         self.assertAlmostEqual(results['foo.dvar'], 17.109375)
         self.assertAlmostEqual(results['foo.dmean2'], 1.85714285714)
@@ -87,7 +88,7 @@ class TestPoolAggregator(TestCase):
         p.add('foo', [4.4, 5.5, 6.6])
         p.add('foo', [7.7, 8.8, 9.9])
 
-        defaultStats = ['mean', 'min', 'max', 'median', 'var', 'dmean', 'dvar', 'dmean2', 'dvar2']
+        defaultStats = ['mean', 'min', 'max', 'median', 'var', 'stdev', 'dmean', 'dvar', 'dmean2', 'dvar2']
         results = PoolAggregator(defaultStats=defaultStats)(p)
 
         self.assertAlmostEqualVector(results['foo.mean'], [4.4, 5.5, 6.6])
@@ -95,6 +96,7 @@ class TestPoolAggregator(TestCase):
         self.assertAlmostEqualVector(results['foo.min'], [1.1, 2.2, 3.3])
         self.assertAlmostEqualVector(results['foo.max'], [7.7, 8.8, 9.9])
         self.assertAlmostEqualVector(results['foo.var'], [7.26]*3)
+        self.assertAlmostEqualVector(results['foo.stdev'], [2.694438717061496]*3)      
         self.assertAlmostEqualVector(results['foo.dmean'], [3.3]*3)
         self.assertAlmostEqualVector(results['foo.dvar'], [0]*3)
         self.assertAlmostEqualVector(results['foo.dmean2'], [0]*3, precision=1e-6)
@@ -221,6 +223,8 @@ class TestPoolAggregator(TestCase):
 
 
         defaultStats = ['mean', 'min', 'max', 'var', 'dmean', 'dvar', 'dmean2', 'dvar2']
+        # median, stdev, cov, and icov are not implemented, and therefore not tested
+
         results = PoolAggregator(defaultStats=defaultStats)(p)
 
         #mat is [[[0,1],[2,3]],[[1,2],[3,4]],[[2,3],[4,5]]]

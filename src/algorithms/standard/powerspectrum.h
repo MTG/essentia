@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -49,13 +49,14 @@ class PowerSpectrum : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("size", "the expected size of the input frame (this is purely optional and only targeted at optimizing the creation time of the FFT object)", "[1,inf)", 1024);
+    declareParameter("size", "the expected size of the input frame (this is purely optional and only targeted at optimizing the creation time of the FFT object)", "[1,inf)", 2048);
   }
 
   void configure();
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

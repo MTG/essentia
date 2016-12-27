@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -107,6 +107,8 @@ class TestMonoMixer_Streaming(TestCase):
         loader.numberChannels >> mixer.numberChannels
         loader.sampleRate >> None
         loader.md5 >> None
+        loader.bit_rate >> None
+        loader.codec >> None
         run(loader)
         self.assertEqualVector(pool.descriptorNames(), [])
 

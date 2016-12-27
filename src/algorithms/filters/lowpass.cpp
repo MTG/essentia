@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace standard;
 using namespace std;
 
 const char* LowPass::name = "LowPass";
+const char* LowPass::category = "Filters";
 const char* LowPass::description = DOC("This algorithm implements a 1st order IIR low-pass filter. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "References:\n"
 "  [1] U. Zölzer, DAFX - Digital Audio Effects, p. 40,\n"

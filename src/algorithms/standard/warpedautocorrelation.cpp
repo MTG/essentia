@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* WarpedAutoCorrelation::name = "WarpedAutoCorrelation";
-const char* WarpedAutoCorrelation::description = DOC("This algorithm returns the warped auto-correlation of an audio signal. The implementation is an adapted version of K. Schmidt's implementation of the matlab algorithm from the 'warped toolbox' by Aki Harma and Matti Karjalainen found [2]. For a detailed explanation of the algorithm, see [1].\n"
+const char* WarpedAutoCorrelation::category = "Standard";
+const char* WarpedAutoCorrelation::description = DOC("This algorithm computes the warped auto-correlation of an audio signal. The implementation is an adapted version of K. Schmidt's implementation of the matlab algorithm from the 'warped toolbox' by Aki Harma and Matti Karjalainen found [2]. For a detailed explanation of the algorithm, see [1].\n"
 "This algorithm is only defined for positive lambda = 1.0674*sqrt(2.0*atan(0.00006583*sampleRate)/PI) - 0.1916, thus it will throw an exception when the supplied sampling rate does not pass the requirements.\n"
 "If maxLag is larger than the size of the input array, an exception is thrown.\n"
 "\n"

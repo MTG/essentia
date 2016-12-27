@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -33,6 +33,8 @@ class TestLogAttackTime_Streaming(TestCase):
         gen.data >> accu.data
         accu.array >> logAttack.signal
         logAttack.logAttackTime >> (p, 'logAttackTime')
+        logAttack.attackStart >> (p, 'attackStart')
+        logAttack.attackStop >> (p, 'attackStop')
 
         run(gen)
 
@@ -53,10 +55,12 @@ class TestLogAttackTime_Streaming(TestCase):
         gen.data >> accu.data
         accu.array >> logAttack.signal
         logAttack.logAttackTime >> (p, 'logAttackTime')
+        logAttack.attackStart >> (p, 'attackStart')
+        logAttack.attackStop >> (p, 'attackStop')
 
         run(gen)
 
-        self.assertAlmostEqual(p['logAttackTime'][0], LogAttackTime()(input))
+        self.assertAlmostEqual(p['logAttackTime'][0], LogAttackTime()(input)[0])
 
 
 suite = allTests(TestLogAttackTime_Streaming)

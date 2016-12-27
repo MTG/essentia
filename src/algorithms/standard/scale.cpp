@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,7 +24,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* Scale::name = "Scale";
-const char* Scale::description = DOC("This algorithm scales the audio by the specified factor, using clipping if required.");
+const char* Scale::category = "Standard";
+const char* Scale::description = DOC("This algorithm scales the audio by the specified factor using clipping if required.");
 
 void Scale::configure() {
   _factor = parameter("factor").toReal();
@@ -40,8 +41,10 @@ void Scale::compute() {
   fastcopy(scaled.begin(), signal.begin(), scaled.size());
 
   // scales first
-  for (int i=0; i<(int)scaled.size(); i++) {
-    scaled[i] *= _factor;
+  if (_factor != 1.) {
+    for (int i=0; i<(int)scaled.size(); i++) {
+      scaled[i] *= _factor;
+    }
   }
 
   // does clipping, if applies

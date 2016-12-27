@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -57,7 +57,7 @@ class TestWindowing(TestCase):
     def testZeropadding(self):
         # Checks whether the signal gets zero-padded correctly
         inputSize = 9
-        halfInputSize = math.ceil(inputSize / 2.0)
+        halfInputSize = int(math.ceil(inputSize / 2.0))
         paddingSize = 9
 
         input = [1] * inputSize
@@ -74,7 +74,7 @@ class TestWindowing(TestCase):
         self.assertEqualVector([0] * (inputSize + paddingSize),  output)
 
     def normalize(self, window = []):
-        if window == None:
+        if window is None:
             return None
         sum_win = sum(window)
         return [2.0*i/sum_win for i in window]

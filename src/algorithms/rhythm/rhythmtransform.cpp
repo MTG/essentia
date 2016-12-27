@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,8 +27,11 @@ namespace essentia {
 namespace standard {
 
 const char* RhythmTransform::name = "RhythmTransform";
-const char* RhythmTransform::description = DOC("The Rhythm Transform algorithm is based on the rhythm transform as described in [1]. It computes a rhythmical representation of the input signal in the rhythm domain much like FFT computes a representation in the frequency domain. Additionally features as rhythmic centroid and MFCCs can be calculated from this rhythmic representation.\n"
-"Note that parameters \"frameSize\" and \"hopSize\" are defined for the rhythm transformation (FFT transform on the rhythm space) and have a different meaning than the sizes in the temporal dimension.\n"
+const char* RhythmTransform::category = "Rhythm";
+const char* RhythmTransform::description = DOC("This algorithm implements the rhythm transform. It computes a tempogram, a representation of rhythmic periodicities in the input signal in the rhythm domain, by using FFT similarly to computation of spectrum in the frequency domain [1]. Additional features, including rhythmic centroid and a rhythmic counterpart of MFCCs, can be derived from this rhythmic representation.\n\n"
+"The algorithm relies on a time sequence of frames of Mel bands energies as an input (see MelBands), but other types of frequency bands can be used as well (see BarkBands, ERBBands, FrequencyBands). For each band, the derivative of the frame to frame energy evolution is computed, and the periodicity of the resulting signal is computed: the signal is cut into frames of \"frameSize\" size and is analyzed with FFT. For each frame, the obtained power spectrums are summed across all bands forming a frame of rhythm transform values.\n"
+"\n"
+"Quality: experimental (non-reliable, poor accuracy according to tests on simple loops, more tests are necessary)\n"
 "\n"
 "References:\n"
 "  [1] E. Guaus and P. Herrera, \"The rhythm transform: towards a generic\n"

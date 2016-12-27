@@ -1,2 +1,3 @@
-build/doc/doxygen/html
-build/doc/_essentia_documentation/*
+COPYING.txt
+README.md
+doc/sphinxdoc/_build/html/*

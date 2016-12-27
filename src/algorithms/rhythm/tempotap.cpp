@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* TempoTap::name = "TempoTap";
+const char* TempoTap::category = "Rhythm";
 const char* TempoTap::description = DOC("This algorithm estimates the periods and phases of a periodic signal, represented by a sequence of values of any number of detection functions, such as energy bands, onsets locations, etc. It requires to be sequentially run on a vector of such values (\"featuresFrame\") for each particular audio frame in order to get estimations related to that frames. The estimations are done for each detection function separately, utilizing the latest \"frameHop\" frames, including the present one, to compute autocorrelation. Empty estimations will be returned until enough frames are accumulated in the algorithm's buffer.\n"
 "The algorithm uses elements of the following beat-tracking methods:\n"
 " - BeatIt, elaborated by Fabien Gouyon and Simon Dixon (input features) [1]\n"

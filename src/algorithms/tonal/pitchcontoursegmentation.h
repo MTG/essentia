@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -48,8 +49,9 @@ class PitchContourSegmentation : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("minDur", "minimum note duration [s]", "(0,inf)", 0.1);
-    declareParameter("tuningFreq", "tuning reference frequency  [Hz]", "(0,22000)", 440);
+    declareParameter("minDuration", "minimum note duration [s]", "(0,inf)", 0.1);
+    declareParameter("tuningFrequency", "tuning reference frequency  [Hz]", "(0,22000)", 440);
+
     declareParameter("sampleRate", "sample rate of the audio signal", "(0,inf)", 44100);
     declareParameter("hopSize", "hop size of the extracted pitch", "(0,inf)", 128);
     declareParameter("rmsThreshold", "zscore threshold for note segmentation", "(-inf,0)", -2);
@@ -61,6 +63,8 @@ class PitchContourSegmentation : public Algorithm {
   void reSegment();
 
   static const char* name;
+
+  static const char* category;
   static const char* description;
 
  protected:

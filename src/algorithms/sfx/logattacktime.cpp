@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* LogAttackTime::name = "LogAttackTime";
+const char* LogAttackTime::category = "Envelope/SFX";
 const char* LogAttackTime::description = DOC("This algorithm computes the log (base 10) of the attack time of a signal envelope. The attack time is defined as the time duration from when the sound becomes perceptually audible to when it reaches its maximum intensity. By default, the start of the attack is estimated as the point where the signal envelope reaches 20% of its maximum value in order to account for possible noise presence. Also by default, the end of the attack is estimated as as the point where the signal envelope has reached 90% of its maximum value, in order to account for the possibility that the max value occurres after the logAttack, as in trumpet sounds.\n\n"
 "With this said, LogAttackTime's input is intended to be fed by the output of the Envelope algorithm. In streaming mode, the RealAccumulator algorithm should be connected between Envelope and LogAttackTime.\n\n"
 "Note that startAttackThreshold cannot be greater than stopAttackThreshold and the input signal should not be empty. In any of these cases an exception will be thrown.\n");
@@ -32,6 +33,7 @@ const char* LogAttackTime::description = DOC("This algorithm computes the log (b
 void LogAttackTime::configure() {
   _startThreshold = parameter("startAttackThreshold").toReal();
   _stopThreshold = parameter("stopAttackThreshold").toReal();
+  _sampleRate = parameter("sampleRate").toReal();
 
   if (_startThreshold > _stopThreshold) {
     throw EssentiaException("LogAttackTime: stopAttackThreshold is not greater than startAttackThreshold");
@@ -42,6 +44,8 @@ void LogAttackTime::compute() {
 
   const std::vector<Real>& signal = _signal.get();
   Real& logAttackTime = _logAttackTime.get();
+  Real& attackStart = _attackStart.get();
+  Real& attackStop = _attackStop.get();
 
   if (signal.empty()) {
     throw EssentiaException("LogAttackTime: logAttackTime not defined for empty input");
@@ -70,7 +74,10 @@ void LogAttackTime::compute() {
     }
   }
 
-  Real attackTime = (stopAttack - startAttack)/parameter("sampleRate").toReal();
+  attackStart = startAttack / _sampleRate;
+  attackStop = stopAttack / _sampleRate;
+
+  Real attackTime = attackStop - attackStart;
 
   if (attackTime > 10e-5) {
     logAttackTime = log10(attackTime);

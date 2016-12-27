@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -22,7 +22,7 @@
 from essentia_test import *
 from essentia.standard import AudioLoader, StereoDemuxer
 
-class TestStereoDemuxer_Streaming(TestCase):
+class TestStereoDemuxer(TestCase):
 
     def testRegression(self):
         size = 10
@@ -34,13 +34,13 @@ class TestStereoDemuxer_Streaming(TestCase):
 
     def testEmpty(self):
         filename = join(testdata.audio_dir, 'generated', 'empty', 'empty.aiff')
-        audio, _, _, _ = AudioLoader(filename=filename)()
+        audio, _, _, _, _, _ = AudioLoader(filename=filename)()
         left, right = StereoDemuxer()(audio)
         self.assertEqualVector(left , [])
         self.assertEqualVector(right , [])
 
 
-suite = allTests(TestStereoDemuxer_Streaming)
+suite = allTests(TestStereoDemuxer)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

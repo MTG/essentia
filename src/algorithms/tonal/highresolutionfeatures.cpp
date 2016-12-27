@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,6 +28,7 @@ namespace essentia {
 namespace standard {
 
 const char* HighResolutionFeatures::name = "HighResolutionFeatures";
+const char* HighResolutionFeatures::category = "Tonal";
 const char* HighResolutionFeatures::description = DOC("This algorithm computes high-resolution chroma features from an HPCP vector. The vector's size must be a multiple of 12 and it is recommended that it be larger than 120. In otherwords, the HPCP's resolution should be 10 Cents or more.\n"
 "The high-resolution features being computed are:\n"
 "\n"
@@ -44,7 +45,8 @@ const char* HighResolutionFeatures::description = DOC("This algorithm computes h
 "References:\n"
 "  [1] E. Gómez and P. Herrera, \"Comparative Analysis of Music Recordings\n"
 "  from Western and Non-Western traditions by Automatic Tonal Feature\n"
-"  Extraction,\" Empirical Musicology Review, vol. 3, pp. 140–156, 2008.");
+"  Extraction,\" Empirical Musicology Review, vol. 3, pp. 140–156, 2008.\n\n"
+"  [2] https://en.wikipedia.org/wiki/Equal_temperament");
 
 
 vector<Peak> detectPeaks(const vector<Real>& hpcp, int maxPeaks) {

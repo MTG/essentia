@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace standard;
 using namespace std;
 
 const char* DCRemoval::name = "DCRemoval";
+const char* DCRemoval::category = "Filters";
 const char* DCRemoval::description = DOC("This algorithm removes the DC offset from a signal using a 1st order IIR highpass filter. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"

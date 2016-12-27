@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -21,8 +21,35 @@
 #define ESSENTIA_ATOMIC_H
 
 
+#if defined(__EMSCRIPTEN__)
+
+namespace essentia {
+
+class Atomic {
+ public:
+  int _a;
+
+  inline Atomic(const int &i = 0) : _a(i) {}
+
+  inline operator int () const { return _a; }
+
+  inline void add(const int& i) {
+      // Javascript is single-threaded
+      _a += i;
+  }
+
+  inline void operator-=(const int &i) { add(-i); }
+  inline void operator+=(const int &i) { add(i); }
+
+  inline void operator++() { add(1); }
+  inline void operator--() { add(-1); }
+};
+
+} // namespace essentia
+
+
 // life's easy in C++11
-#if __cplusplus >= 201103L
+#elif __cplusplus >= 201103L
 
 
 #include <atomic>

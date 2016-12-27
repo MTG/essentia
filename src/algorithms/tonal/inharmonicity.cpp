@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Inharmonicity::name = "Inharmonicity";
+const char* Inharmonicity::category = "Tonal";
 const char* Inharmonicity::description = DOC("This algorithm calculates the inharmonicity of a signal given its spectral peaks. The inharmonicity value is computed as an energy weighted divergence of the spectral components from their closest multiple of the fundamental frequency. The fundamental frequency is taken as the first spectral peak from the input. The inharmonicity value ranges from 0 (purely harmonic signal) to 1 (inharmonic signal).\n\n"
 "Inharmonicity was designed to be fed by the output from the HarmonicPeaks algorithm. Note that DC components should be removed from the signal before obtaining its peaks. An exception is thrown if a peak is given at 0Hz.\n\n"
 "An exception is thrown if frequency vector is not sorted in ascendently, if it contains duplicates or if any input vector is empty.\n\n"

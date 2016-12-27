@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -41,7 +41,7 @@ class MonoWriter : public Algorithm {
   void declareParameters() {
     declareParameter("filename", "the name of the encoded file", "", Parameter::STRING);
     declareParameter("sampleRate", "the audio sampling rate [Hz]","(0,inf)", 44100.);
-    declareParameter("format", "the audio output format","{wav,aiff,aif,mp3,ogg,flac}", "wav");
+    declareParameter("format", "the audio output format","{wav,aiff,mp3,ogg,flac}", "wav");
     declareParameter("bitrate", "the audio bit rate for compressed formats [kbps]",
 		     "{32,40,48,56,64,80,96,112,128,144,160,192,224,256,320}", 192);
   }
@@ -51,6 +51,7 @@ class MonoWriter : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -96,7 +97,7 @@ class MonoWriter : public Algorithm {
 
   void declareParameters() {
     declareParameter("filename", "the name of the encoded file", "", Parameter::STRING);
-    declareParameter("format", "the audio output format","{wav,aiff,aif,mp3,ogg,flac}", "wav");
+    declareParameter("format", "the audio output format","{wav,aiff,mp3,ogg,flac}", "wav");
     declareParameter("sampleRate", "the audio sampling rate [Hz]","(0,inf)", 44100.);
     declareParameter("bitrate", "the audio bit rate for compressed formats [kbps]",
 		     "{32,40,48,56,64,80,96,112,128,144,160,192,224,256,320}", 192);
@@ -107,6 +108,7 @@ class MonoWriter : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

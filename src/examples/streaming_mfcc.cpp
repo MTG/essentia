@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -21,6 +21,8 @@
 #include <essentia/algorithmfactory.h>
 #include <essentia/streaming/algorithms/poolstorage.h>
 #include <essentia/scheduler/network.h>
+#include "credit_libav.h"
+
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
@@ -29,8 +31,9 @@ using namespace essentia::scheduler;
 int main(int argc, char* argv[]) {
 
   if (argc != 3) {
-    cout << "ERROR: incorrect number of arguments." << endl;
+    cout << "Error: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input yaml_output" << endl;
+    creditLibAV();
     exit(1);
   }
 

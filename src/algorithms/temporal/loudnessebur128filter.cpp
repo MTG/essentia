@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,25 +26,20 @@ namespace essentia {
 namespace streaming {
 
 const char* LoudnessEBUR128Filter::name = "LoudnessEBUR128Filter";
-const char* LoudnessEBUR128Filter::description = DOC("This is an auxilary signal preprocessing algorithm used within the LoudnessEBUR128 algorithm. It applies the TODO filter and computes signal representation requiered by LoudnessEBUR128 in accordance with the EBU R128 recommendation (TODO refs to both specifications).\n"
+const char* LoudnessEBUR128Filter::category = "Loudness/dynamics";
+const char* LoudnessEBUR128Filter::description = DOC("An auxilary signal preprocessing algorithm used within the LoudnessEBUR128 algorithm. It applies the pre-processing K-weighting filter and computes signal representation requiered by LoudnessEBUR128 in accordance with the EBU R128 recommendation.\n"
 "\n"
 "References:\n"
-"  [1] TODO: J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
-"  signals using pitch contour characteristics,\" IEEE Transactions on Audio,\n"
-"  Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n\n"
-"  [2] https://tech.ebu.ch/loudness\n"
+"  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\n\n"
 );
 
 LoudnessEBUR128Filter::LoudnessEBUR128Filter() : AlgorithmComposite() {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   _stereoDemuxer  = factory.create("StereoDemuxer");
-  _resampleLeft   = factory.create("Resample");
-  _resampleRight  = factory.create("Resample");
-  _filterLeft1    = factory.create("IIR");
-  _filterLeft2    = factory.create("IIR");
-  _filterRight1   = factory.create("IIR");
-  _filterRight2   = factory.create("IIR");
+
+  _filterLeft     = factory.create("IIR");
+  _filterRight    = factory.create("IIR");
   _squareLeft     = factory.create("UnaryOperatorStream");
   _squareRight    = factory.create("UnaryOperatorStream");
   _sum            = factory.create("BinaryOperatorStream");
@@ -55,22 +50,16 @@ LoudnessEBUR128Filter::LoudnessEBUR128Filter() : AlgorithmComposite() {
   // Connect input proxy
   _signal >> _stereoDemuxer->input("audio");
 
-  // Connect algos 
-  _stereoDemuxer->output("left")    >> _resampleLeft->input("signal");
-  _stereoDemuxer->output("right")   >> _resampleRight->input("signal");
+  // Connect algos  
+  _stereoDemuxer->output("left")    >> _filterLeft->input("signal");
+  _stereoDemuxer->output("right")   >> _filterRight->input("signal");
 
-  _resampleLeft->output("signal")   >> _filterLeft1->input("signal");
-  _resampleRight->output("signal")  >> _filterRight1->input("signal");
+  _filterLeft->output("signal")    >> _squareLeft->input("array");
+  _filterRight->output("signal")   >> _squareRight->input("array");
 
-  _filterLeft1->output("signal")    >> _filterLeft2->input("signal");
-  _filterRight1->output("signal")   >> _filterRight2->input("signal");
-
-  _filterLeft2->output("signal")    >> _squareLeft->input("array");
-  _filterRight2->output("signal")   >> _squareRight->input("array");
-
-  // TODO ideally, scheduler should work with diamond shape graphs, so that we
-  // can use here an algorithm BinaryOperator to sum both left and right values.
-  // Test if this works in practise 
+  // NOTE: It is not recommended to use scheduler with diamond shape graphs 
+  // according to documentation. However, this works in practise. The agorithm 
+  // BinaryOperator sums both left and right values.
   _squareLeft->output("array")      >> _sum->input("array1");
   _squareRight->output("array")     >> _sum->input("array2");
 
@@ -83,57 +72,67 @@ LoudnessEBUR128Filter::~LoudnessEBUR128Filter() {
 
 void LoudnessEBUR128Filter::configure() {
 
+  Real sampleRate = parameter("sampleRate").toReal(); 
+
   vector<Real> filterB1(3, 0.), filterA1(3, 0.), 
                filterB2(3, 0.), filterA2(3, 0.);
 
+  // NOTE: ITU-R BS.1770-2 provides precomputed values for filter coefficients.
+  // However, our tests on reference files revealed incorrect integrated loudness 
+  // when using these values. Therefore, instead of hardcoding the coeffcients, 
+  // we use a formula to compute them for any sample rate taken from: 
+  // https://github.com/jiixyj/libebur128/blob/v1.0.2/ebur128/ebur128.c#L82
+  // The original code is released under MIT license: 
+  //         https://github.com/jiixyj/libebur128/blob/v1.0.2/COPYING
+  // This formula is generic for any sample rate, therefore we do not need to 
+  // resample the signal
+  
+  double f0 = 1681.974450955533;
+  double G  = 3.999843853973347;
+  double Q  = 0.7071752369554196;
 
-  Real inputSampleRate = parameter("sampleRate").toReal();                           
-  Real outputSampleRate = (inputSampleRate == 44100.) ? 44100. : 48000.;
+  double K  = tan(M_PI * f0 / (double) sampleRate);
+  double Vh = pow(10.0, G / 20.0);
+  double Vb = pow(Vh, 0.4996667741545416);
+  double a0 = 1.0 + K / Q + K * K;
+  
+  filterB1[0] = (Vh + Vb * K / Q + K * K) / a0;
+  filterB1[1] = 2.0 * (K * K -  Vh) / a0;
+  filterB1[2] = (Vh - Vb * K / Q + K * K) / a0;
 
-  if (inputSampleRate == 44100.) {                                                   
-    filterB1[0] = 1.535;
-    filterB1[1] = -2.633;
-    filterB1[2] = 1.151;
+  filterA1[0] = 1.;
+  filterA1[1] = 2.0 * (K * K - 1.0) / a0;
+  filterA1[2] = (1.0 - K / Q + K * K) / a0;
 
-    filterA1[0] = 1.;
-    filterA1[1] = -1.647;
-    filterA1[2] = 0.701;
-    
-    filterB2[0] = 1.;
-    filterB2[1] = -2.;
-    filterB2[2] = 1.;
+  f0 = 38.13547087602444;
+  Q  = 0.5003270373238773;
+  K  = tan(M_PI * f0 / (double) sampleRate);
 
-    filterA2[0] = 1.;
-    filterA2[1] = -1.9891;
-    filterA2[2] = 0.98913;
-  }                  
-  else { // values for 48000 Hz                                                 
-    filterB1[0] = 1.53512485958697;
-    filterB1[1] = -2.69169618940638;
-    filterB1[2] = 1.19839281085285;
+  filterB2[0] = 1.;
+  filterB2[1] = -2.;
+  filterB2[2] = 1.;
 
-    filterA1[0] = 1.0;
-    filterA1[1] = -1.69065929318241;
-    filterA1[2] = 0.73248077421585;
+  filterA2[0] = 1.;
+  filterA2[1] = 2.0 * (K * K - 1.0) / (1.0 + K / Q + K * K);
+  filterA2[2] = (1.0 - K / Q + K * K) / (1.0 + K / Q + K * K);
 
-    filterB2[0] = 1.0;
-    filterB2[1] = -2.0;
-    filterB2[2] = 1.0;
+  // combine two filters into one
+  vector<Real> filterB(5, 0.), filterA(5, 0.);
 
-    filterA2[0] = 1.0;
-    filterA2[1] = -1.99004745483398;
-    filterA2[2] = 0.99007225036621;
-  } 
+  filterB[0] = filterB1[0] * filterB2[0];
+  filterB[1] = filterB1[0] * filterB2[1] + filterB1[1] * filterB2[0];
+  filterB[2] = filterB1[0] * filterB2[2] + filterB1[1] * filterB2[1] + filterB1[2] * filterB2[0];
+  filterB[3] = filterB1[1] * filterB2[2] + filterB1[2] * filterB2[1];
+  filterB[4] = filterB1[2] * filterB2[2];
 
-  _resampleLeft->configure("inputSampleRate", inputSampleRate,
-                           "outputSampleRate", outputSampleRate);
-  _resampleRight->configure("inputSampleRate", inputSampleRate,
-                            "outputSampleRate", outputSampleRate);
+  filterA[0] = filterA1[0] * filterA2[0];
+  filterA[1] = filterA1[0] * filterA2[1] + filterA1[1] * filterA2[0];
+  filterA[2] = filterA1[0] * filterA2[2] + filterA1[1] * filterA2[1] + filterA1[2] * filterA2[0];
+  filterA[3] = filterA1[1] * filterA2[2] + filterA1[2] * filterA2[1];
+  filterA[4] = filterA1[2] * filterA2[2];
 
-  _filterLeft1->configure("numerator", filterB1, "denominator", filterA1);
-  _filterRight1->configure("numerator", filterB1, "denominator", filterA1);
-  _filterLeft2->configure("numerator", filterB2, "denominator", filterA2);
-  _filterRight2->configure("numerator", filterB2, "denominator", filterA2);
+  _filterLeft->configure("numerator", filterB, "denominator", filterA);
+  _filterRight->configure("numerator", filterB, "denominator", filterA);
 
   _squareLeft->configure("type", "square");
   _squareRight->configure("type", "square");
@@ -144,8 +143,6 @@ void LoudnessEBUR128Filter::configure() {
 
 void LoudnessEBUR128Filter::reset() {
   AlgorithmComposite::reset();
-  _network->reset();
-
 }
 
 } // namespace streaming

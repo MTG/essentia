@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -110,6 +110,16 @@ class TestRhythmExtractor(TestCase):
                         self.assertAlmostEqual(found[i], expected[j-1], precision)
                     else:
                         self.assertAlmostEqual(found[i], expected[j], precision)
+
+    def assertVectorWithinVectorFixedPrecision(self, found, expected, precision=2):
+        for i in xrange(len(found)):
+            for j in xrange(1,len(expected)):
+                if found[i] <= expected[j] and found[i] >= expected[j-1]:
+                    if fabs(found[i] - expected[j-1]) < fabs(expected[j] - found[i]):
+                        self.assertAlmostEqualFixedPrecision(found[i], expected[j-1], precision)
+                    else:
+                        self.assertAlmostEqualFixedPrecision(found[i], expected[j], precision)
+
 
     def _assertEqualResults(self, result, expected):
         self.assertEqual(result[0], expected[0]) #bpm
@@ -267,13 +277,15 @@ class TestRhythmExtractor(TestCase):
         expectedTicks = [i/44100. for i in xrange(len(impulseTrain)) if impulseTrain[i]!= 0]
         
         result = self.runInstance(impulseTrain, expectedTicks)
+        print "DEBUG", expectedTicks
+        print "result:", result[1]
 
         # bpm
         expectedBpm = 200
         self.assertAlmostEqual(result[0], expectedBpm, .5)
 
         # ticks
-        self.assertVectorWithinVector(result[1], expectedTicks, .1)
+        self.assertVectorWithinVectorFixedPrecision(result[1], expectedTicks, 1)
 
         # bpm estimates
         for i in xrange(len(result[2])):

@@ -10,8 +10,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* ERBBands::name = "ERBBands";
-const char* ERBBands::version = "1.0";
-const char* ERBBands::description = DOC("This algorithm computes energies/magnitudes in bands spaced on an Equivalent Rectangular Bandwidth (ERB) scale, given a spectrum. It applies a frequency domain filterbank using gammatone filters. Adapted from matlab code in:  D. P. W. Ellis (2009). 'Gammatone-like spectrograms', web resource [1].\n"
+const char* ERBBands::category = "Spectral";
+const char* ERBBands::description = DOC("This algorithm computes energies/magnitudes in ERB bands of a spectrum. The Equivalent Rectangular Bandwidth (ERB) scale is used. The algorithm applies a frequency domain filterbank using gammatone filters. Adapted from matlab code in:  D. P. W. Ellis (2009). 'Gammatone-like spectrograms', web resource [1].\n"
 "\n"
 "References:\n"
 "  [1] http://www.ee.columbia.edu/~dpwe/resources/matlab/gammatonegram/\n\n"
@@ -136,7 +136,7 @@ void ERBBands::compute() {
 
   if (_filterCoefficients.empty() ||
       int(_filterCoefficients[0].size()) != spectrumSize) {
-    cout << "ERBBands: input spectrum size does not correspond to the \"inputSize\" parameter. Recomputing the filter bank." << endl;
+    E_INFO("ERBBands: input spectrum size (" << spectrumSize << ") does not correspond to the \"inputSize\" parameter (" << _filterCoefficients[0].size() << "). Recomputing the filter bank.");
     createFilters(spectrumSize);
   }
 
@@ -148,8 +148,6 @@ void ERBBands::compute() {
   // working with sound effects.  Band magnitudes option is required for 
   // OnsetDetectionGlobal algorithm.
 
-  // TODO: probably all *Bands algorithms should have an option {magnitude,energy} 
-
   if (_type=="magnitude") {
     for (int i=0; i<filterSize; ++i) {
       bands[i] = 0;
@@ -158,7 +156,7 @@ void ERBBands::compute() {
       }
     }
   }
-  else if (_type=="energy") {
+  else if (_type=="power") {
     for (int i=0; i<filterSize; ++i) {
       bands[i] = 0;
       for (int j=0; j<spectrumSize; ++j) {

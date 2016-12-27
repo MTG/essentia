@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -31,6 +31,7 @@
 #include "essentia/streaming/algorithms/poolstorage.h"
 #include "essentia/streaming/algorithms/vectorinput.h"
 
+
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
@@ -38,9 +39,11 @@ using namespace essentia::streaming;
  class FreesoundDescriptorSet{ 
 
  public:
- 	static const string nameSpace;  
+ 	static const string nameSpace;
+    //static const Real sampleRate=44100;
 
  	void createNetwork(SourceBase& source, Pool& pool);
  };
+
 
  #endif

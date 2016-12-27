@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ namespace essentia {
 namespace streaming {
 
 const char* RealAccumulator::name = "RealAccumulator";
+const char* RealAccumulator::category = "Standard";
 const char* RealAccumulator::description = DOC("This algorithm takes a stream of Real values "
 "and outputs them as a single vector when the end of the stream is reached.");
 

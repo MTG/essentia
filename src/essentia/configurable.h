@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -179,7 +179,7 @@ class ESSENTIA_API Configurable {
 };
 
 // macro which is little useful, but allows to write configure() in a very clean
-// and understandable way for StreamingAlgorithmComposite
+// and understandable way for AlgorithmComposite
 #define INHERIT(x) x, parameter(x)
 
 template <typename T> bool compareByName(const T* a, const T* b) {

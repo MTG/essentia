@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -40,19 +40,17 @@ class LoudnessEBUR128 : public AlgorithmComposite {
   Algorithm* _meanIntegrated;
   Algorithm* _computeMomentary;
   Algorithm* _computeShortTerm;
-  Algorithm* _computeIntegrated;
 
   SinkProxy<StereoSample> _signal;
   SourceProxy<Real> _momentaryLoudness;
   SourceProxy<Real> _shortTermLoudness;
   Source<Real> _integratedLoudness;
   Source<Real> _loudnessRange;
-  SourceProxy<Real> _momentaryLoudnessMax;
-  SourceProxy<Real> _shortTermLoudnessMax;
+  //SourceProxy<Real> _momentaryLoudnessMax;
+  //SourceProxy<Real> _shortTermLoudnessMax;
 
   Pool _pool;
-
-  scheduler::Network* _network;
+  Real _absoluteThreshold;
 
   int _hopSize;
 
@@ -66,9 +64,8 @@ class LoudnessEBUR128 : public AlgorithmComposite {
   }
 
   void declareParameters() {
-    // pre-processing
+    // EBU R128 specs: the update rate for short-term loudness ‘live meters’ shall be at least 10 Hz
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    // specs: the update rate for short-term loudness ‘live meters’ shall be at least 10 Hz
     declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,0.1]", 0.1);  
   };
 
@@ -77,10 +74,56 @@ class LoudnessEBUR128 : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
 } // namespace streaming
+} // namespace essentia
+
+
+#include "vectorinput.h"
+
+namespace essentia {
+namespace standard {
+
+class LoudnessEBUR128 : public Algorithm {
+ protected:
+  Input<std::vector<StereoSample> > _signal;
+  Output<std::vector<Real> > _momentaryLoudness;
+  Output<std::vector<Real> > _shortTermLoudness;
+  Output<Real> _integratedLoudness;
+  Output<Real> _loudnessRange;
+  //Output<std::vector<Real> > _momentaryLoudnessMax;
+  //Output<std::vector<Real> > _shortTermLoudnessMax;
+
+  streaming::Algorithm* _loudnessEBUR128;
+  streaming::VectorInput<StereoSample>* _vectorInput;
+  scheduler::Network* _network;
+  Pool _pool;
+
+ public:
+
+  LoudnessEBUR128();
+  ~LoudnessEBUR128();
+
+  void declareParameters() {
+    // EBU R128 specs: the update rate for short-term loudness ‘live meters’ shall be at least 10 Hz
+    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
+    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,0.1]", 0.1);  
+  };
+
+  void configure();
+  void compute();
+  void createInnerNetwork();
+  void reset();
+
+  static const char* name;
+  static const char* category;
+  static const char* description;
+};
+
+} // namespace standard
 } // namespace essentia
 
 #endif // ESSENTIA_LOUDNESSEBUR128_H

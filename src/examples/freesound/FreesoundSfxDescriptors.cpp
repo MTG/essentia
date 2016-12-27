@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -75,6 +75,8 @@ void  FreesoundSfxDescriptors::createNetwork(SourceBase& source, Pool& pool){
   Algorithm* log = factory.create("LogAttackTime");
   accu->output("array") >> log->input("signal");
   log->output("logAttackTime") >> PC(pool, nameSpace + "logattacktime");
+  log->output("attackStart") >> NOWHERE;
+  log->output("attackStop") >> NOWHERE;
 
   // Strong Decay
   Algorithm* decay = factory.create("StrongDecay");

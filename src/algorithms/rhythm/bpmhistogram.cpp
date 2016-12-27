@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -34,22 +34,22 @@ namespace essentia {
 namespace streaming {
 
 const char* BpmHistogram::name = "BpmHistogram";
-const char* BpmHistogram::description = DOC("Given the novelty curve (see NoveltyCurve algorithm), this algorithm outputs a histogram of the most probable bpms and their magnitudes as a measure of strength. It also outputs the mean of the strongest bpm present in the signal. In addition it outputs the bpm at each frame which is most similar to the mean bpm, a half-wave rectified sinusoid whose peaks represent the ticks of the audio signal and their amplitude.\n"
-"The sampleRate parameter refers to the framerate at which the novelty curve has been computed, thus the audio sampling rate divided by the hopsize at which the audio signal was processed.\n"
-"The outputs of the algorithm are the following: \n"
-" - bpm: is the mean of the most salient bpm.\n"
-" - bpmCandidates: list of the strongest bpms present in the signal.\n"
-" - bpmMagnitudes: list containing the normalized strength of each of the bpms from the previous output. These two outputs can be used to construct a histogram and take your own decision when mean bpm is wrong\n."
-" - tempogram: kind of a spectrogram indexed by bpm where the value at each index is the magnitude of the bpm. Very useful for detecting tempo variations and for plotting the evolution of tempi.\n"
-" - frameBpms: list containing the candidate bpms at each frame that are most similar to the meanBpm. If no candidates are found to be similar to the mean bpm, the meanBpm will be kept unless \"tempoChange\" seconds have triggered a variation in the tempo.\n"
-" - ticks: outputs the ticks' positions in seconds.\n"
-" - ticksMagnitude: returns the magnitude of each tick. The higher value the higher probabylity to be correct.\n"
-" - sinusoid: outputs a sinusoidal model of the tick's positions. The previous outputs are based on detecting the peaks of this half-wave rectified sinusoid. If needed, one should be able to drive its own peak detection algorithm on this sinusoid in order to obtain its own ticks. Beware that due to overlap factors the last few ticks may exceed the length of the audio signal. Therfore, this output should always be checked against the length of the audio signal.\n"
-
-"Although the algorithm tries to find the beats that best fit to the mean bpm, the tempo is not assumed to be constant unless specified in the corresponding parameter.  For this reason and if the tempo differs too much from frame to frame, there may be phase discontinuities when constructing the sinusoid which can yield to too many ticks. When this occurs, one can use the sinusoid output to recursively run this algorithm until the ticks stabilize. At this point it may be useful to induce/infer a specific bpm and set the constant tempo parameter to true.\n"
-"Another useful trick, is to run the algorithm one time to get an estimation of the bpm and rerun it with a frameSize parameter which is a multiple of the mean bpm.\n"
+const char* BpmHistogram::category = "Rhythm";
+const char* BpmHistogram::description = DOC("This algorithm analyzes predominant periodicities in a signal given its novelty curve [1] (see NoveltyCurve algorithm) or another onset detection function (see OnsetDetection and OnsetDetectionGlobal). It estimates pulse BPM values and time positions together with a half-wave rectified sinusoid whose peaks represent the pulses present in the audio signal and their magnitudes. The analysis is based on the FFT of the input novelty curve from which salient periodicities are detected by thresholding. Temporal evolution of these periodicities is output in the \"tempogram\". Candidate BPMs are then detected based on a histogram of the observed periodicities weighted by their energy in the tempogram. The sinusoidal model is constructed based on the observed periodicities and their magnitudes with the estimated overall BPM as a reference.\n\n"
+"The algorithm outputs: \n"
+" - bpm: the mean of the most salient BPM values representing periodicities in the signal (the mean BPM).\n"
+" - bpmCandidates and bpmMagnitudes: list of the most salient BPM values and their magnitudes (intensity). These two outputs can be helpful for taking an alternative decision on estimation of the overall BPM.\n"
+" - tempogram: spectrogram-like representation of the estimated salient periodicities and their intensities over time (per-frame BPM magnitudes). It is useful for detecting tempo variations and visualization of tempo evolution.\n"
+" - frameBpms: list of candidate BPM values at each frame. The candidate values are similar to the mean BPM. If no candidates are found to be similar, the mean value itself is used unless \"tempoChange\" seconds have triggered a variation in tempo.\n"
+" - ticks: time positions of ticks in seconds.\n"
+" - ticksMagnitude: magnitude of each tick. Higher values correspond to higher probability of correctly identified ticks.\n"
+" - sinusoid: a sinusoidal model of the ticks' positions. The previous outputs are based on detecting peaks of this half-wave rectified sinusoid. This model can be used to obtain ticks using alternative peak detection algorithms if necessary. Beware that the last few ticks may exceed the length of the audio signal due to overlap factors. Therefore, this output should be always checked against the length of audio signal.\n"
 "\n"
-"NOTE that using RhythmExtractor2013 is recommended in order to extract beats, as it was found to perform better in evaluations.\n"
+"Note:\n"
+" - This algorithm is outdated. For beat tracking it is recommended to use RhythmExtractor2013 algorithm found to perform better than NoveltyCurve with BpmHistogram in evaluations.\n"
+" - The \"frameRate\" parameter refers to the frame rate at which the novelty curve has been computed. It is equal to the audio sampling rate divided by the hop size at which the signal was processed.\n"
+" - Although the algorithm tries to find beats that fit the mean BPM the best, the tempo is not assumed to be constant unless specified in the corresponding parameter. For this reason and if tempo differs too much from frame to frame, there may be phase discontinuities when constructing the sinusoid which can yield to too many ticks. One can recursively run this algorithm on the sinusoid output until the ticks stabilize. At this point it may be useful to infer a specific BPM and set the constant tempo parameter to true.\n"
+" - Another useful trick is to run the algorithm one time to get an estimation of the mean BPM and re-run it again with a \"frameSize\" parameter set to a multiple of the mean BPM.\n"
 "\n"
 "Quality: outdated (use RhythmExtractor2013 instead, still this algorithm might be useful when working with other onset detection functions apart from NoveltyCurve)\n"
 "\n"
@@ -64,14 +64,14 @@ BpmHistogram::BpmHistogram() : _normalize(false), _weightByMagnitude(false) {
 
   declareInput(_signal, "novelty", "the novelty curve");
 
-  declareOutput(_bpm, 0, "bpm", "the mean of the most salient tempo");
-  declareOutput(_bpmCandidates, 0, "bpmCandidates", "the list of bpm candidates");
-  declareOutput(_bpmMagnitudes, 0, "bpmMagnitudes", "the strength of bpm candidates");
-  declareOutput(_tempogram, 0, "tempogram", "the bpm spectrogram");
-  declareOutput(_frameBpms, 0, "frameBpms", "the bpm at each frame that is most related to the mean bpm");
-  declareOutput(_ticks, 0, "ticks", "the list of ticks' positions [s]");
-  declareOutput(_ticksMagnitude, 0, "ticksMagnitude", "the strength of the ticks");
-  declareOutput(_sinusoid, 0, "sinusoid", "the sinusoid whose peaks indicate the ticks' positions");
+  declareOutput(_bpm, 0, "bpm", "mean BPM of the most salient tempo");
+  declareOutput(_bpmCandidates, 0, "bpmCandidates", "list of the most salient BPM values");
+  declareOutput(_bpmMagnitudes, 0, "bpmMagnitudes", "magnitudes of the most salient BPM values");
+  declareOutput(_tempogram, 0, "tempogram", "spectrogram-like representation of tempo over time (frames of BPM magnitudes)");
+  declareOutput(_frameBpms, 0, "frameBpms", "BPM values at each frame");
+  declareOutput(_ticks, 0, "ticks", "time positions of ticks [s]");
+  declareOutput(_ticksMagnitude, 0, "ticksMagnitude", "ticks' strength (magnitude)");
+  declareOutput(_sinusoid, 0, "sinusoid", "sinusoid whose peaks indicate tick positions");
 
 
   // streaming algos:
@@ -154,36 +154,44 @@ void BpmHistogram::computeBpm() {
   const vector<vector<Real> >& magnitudes = _pool.value<vector<vector<Real> > >("magnitudes");
   const vector<vector<Real> >& peaks = _pool.value<vector<vector<Real> > >("peaks_positions");
   const vector<vector<Real> >& peaksValue = _pool.value<vector<vector<Real> > >("peaks_value");
+  
   Real bpmRatio = _binWidth*60.0;
-  Real threshold = 0;
-  //TODO: scheduling problem!! seems that there are more vectors in magnitudes than peaks
-  //for (int i=0; i<(int)magnitudes.size();i++) {
+  Real threshold = 0.;
+  
   for (int i=0; i<(int)peaks.size();i++) {
-    vector<Real> tempogram(int(_maxBpm+1), Real(0));
+    vector<Real> tempogram(int(_maxBpm+1), 0.);
     try {
-      //threshold = max(Real(1e-4), max(median(peaksValue), mean(peaksValue))); // only use peaks that are VERY prominent
-      threshold = min(Real(1e-6), min(median(magnitudes[i]), mean(magnitudes[i]))); // be permissive
+      // only use peaks that are VERY prominent
+      //threshold = max(Real(1e-4), max(median(peaksValue), mean(peaksValue)));
+
+      // be permissive
+      threshold = min(Real(1e-6), min(median(magnitudes[i]), mean(magnitudes[i]))); 
+
       //threshold = max(Real(1e-4), min(median(peaksValue), mean(peaksValue)));
     }
     catch(const EssentiaException& ) { // no peaks found
       threshold = numeric_limits<int>::max();
     }
+
     vector<Real> mainPeaks, mainBpms;
     mainPeaks.reserve(peaks[i].size());
     mainBpms.reserve(peaks[i].size());
+
     for (int j=0; j<(int)peaks[i].size(); j++) {
       if (peaksValue[i][j] < threshold) continue;
+
       Real bpm = round(peaks[i][j]*bpmRatio);
-      // as peakdetection minPosition is rounded by bins we must double check
-      // that we don't get a bpm outside the parameter ranges
+      // double check that we do not get a BPM value outside of the configured range
       if (bpm > _maxBpm || bpm < _minBpm) continue;
+
       mainPeaks.push_back(peaks[i][j]);
       mainBpms.push_back(bpm);
       _pool.add("bpmCandidates", bpm);
       _pool.add("bpmAmplitudes", peaksValue[i][j]);
       tempogram[int(bpm)] = peaksValue[i][j];
     }
-    // check for silent frame or dc offset or possible constant input. Normally more than one peak should be found
+
+    // Check for silent frame or DC offset or possible constant input. Normally more than one peak should be found
     if (mainPeaks.size() < 1) {
       mainPeaks.clear();
       mainBpms.clear();
@@ -191,6 +199,7 @@ void BpmHistogram::computeBpm() {
       _pool.add("bpmCandidates", 0);
       _pool.add("bpmAmplitudes", 0);
     }
+
     _pool.add("tempogram", tempogram);
   }
 
@@ -582,7 +591,96 @@ AlgorithmStatus BpmHistogram::process() {
   return FINISHED;
 }
 
-
-
 } // namespace streaming
+} // namespace essentia
+
+
+namespace essentia {
+namespace standard {
+
+const char* BpmHistogram::name = essentia::streaming::BpmHistogram::name;
+const char* BpmHistogram::category = essentia::streaming::BpmHistogram::category;
+const char* BpmHistogram::description = essentia::streaming::BpmHistogram::description;
+
+BpmHistogram::BpmHistogram() {
+  declareInput(_signal, "novelty", "the novelty curve");
+  declareOutput(_bpm, "bpm", "mean BPM of the most salient tempo");
+  declareOutput(_bpmCandidates, "bpmCandidates", "list of the most salient BPM values");
+  declareOutput(_bpmMagnitudes, "bpmMagnitudes", "magnitudes of the most salient BPM values");
+  declareOutput(_tempogram, "tempogram", "spectrogram-like representation of tempo over time (frames of BPM magnitudes)");
+  declareOutput(_frameBpms, "frameBpms", "BPM values at each frame");
+  declareOutput(_ticks, "ticks", "time positions of ticks [s]");
+  declareOutput(_ticksMagnitude, "ticksMagnitude", "ticks' strength (magnitude)");
+  declareOutput(_sinusoid, "sinusoid", "sinusoid whose peaks indicate tick positions");
+  createInnerNetwork();
+}
+
+BpmHistogram::~BpmHistogram() {
+  delete _network;
+}
+
+void BpmHistogram::configure() {
+  _bpmHistogram->configure(INHERIT("frameRate"), INHERIT("frameSize"),
+                              INHERIT("zeroPadding"), INHERIT("overlap"),
+                              INHERIT("windowType"), INHERIT("maxPeaks"),
+                              INHERIT("minBpm"), INHERIT("maxBpm"),
+                              INHERIT("weightByMagnitude"), INHERIT("constantTempo"),
+                              INHERIT("tempoChange"), INHERIT("bpm"));
+}
+
+void BpmHistogram::createInnerNetwork() {
+  _bpmHistogram = streaming::AlgorithmFactory::create("BpmHistogram");
+  _vectorInput = new streaming::VectorInput<Real>();
+
+  *_vectorInput  >>  _bpmHistogram->input("novelty");
+  _bpmHistogram->output("bpm") >> PC(_pool, "internal.bpm");
+  _bpmHistogram->output("bpmCandidates") >> PC(_pool, "internal.bpmCandidates");
+  _bpmHistogram->output("bpmMagnitudes") >> PC(_pool, "internal.bpmMagnitudes");
+  _bpmHistogram->output("tempogram") >> PC(_pool, "internal.tempogram");
+  _bpmHistogram->output("frameBpms") >> PC(_pool, "internal.frameBpms");
+  _bpmHistogram->output("ticks") >> PC(_pool, "internal.ticks");
+  _bpmHistogram->output("ticksMagnitude") >> PC(_pool, "internal.ticksMagnitude");
+  _bpmHistogram->output("sinusoid") >> PC(_pool, "internal.sinusoid");
+
+  _network = new scheduler::Network(_vectorInput);
+}
+
+void BpmHistogram::compute() {
+  const vector<Real>& signal = _signal.get();
+  _vectorInput->setVector(&signal);
+
+  _network->run();
+
+  Real& bpm = _bpm.get();
+  vector<Real>& bpmCandidates = _bpmCandidates.get();
+  vector<Real>& bpmMagnitudes = _bpmMagnitudes.get();
+  TNT::Array2D<Real>& tempogram = _tempogram.get();
+  vector<Real>& frameBpms = _frameBpms.get();
+  vector<Real>& ticks = _ticks.get();
+  vector<Real>& ticksMagnitude = _ticksMagnitude.get();
+  vector<Real>& sinusoid = _sinusoid.get();
+
+  bpm = _pool.value<Real>("internal.bpm");
+  bpmCandidates = _pool.value<vector<Real> >("internal.bpmCandidates");
+  bpmMagnitudes = _pool.value<vector<Real> >("internal.bpmMagnitudes");
+  tempogram = _pool.value<vector<TNT::Array2D<Real> > >("internal.tempogram")[0];
+  frameBpms = _pool.value<vector<Real> >("internal.frameBpms");
+  ticks = _pool.value<vector<Real> >("internal.ticks");
+  ticksMagnitude = _pool.value<vector<Real> >("internal.ticksMagnitude");
+  sinusoid = _pool.value<vector<Real> >("internal.sinusoid");
+}
+
+void BpmHistogram::reset() {
+  _network->reset();
+  _pool.remove("internal.bpm");
+  _pool.remove("internal.bpmCandidates");
+  _pool.remove("internal.bpmMagnitudes");
+  _pool.remove("internal.tempogram");
+  _pool.remove("internal.frameBpms");
+  _pool.remove("internal.ticks");
+  _pool.remove("internal.ticksMagnitude");
+  _pool.remove("internal.sinusoid");  
+}
+
+} // namespace standard
 } // namespace essentia

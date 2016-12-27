@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -61,6 +61,8 @@ class TestAudioWriter_Streaming(TestCase):
         loader.numberChannels >> None
         loader.sampleRate >> None
         loader.md5 >> None
+        loader.bit_rate >> None
+        loader.codec >> None
         run(loader)
         os.remove(filename)
 
@@ -76,6 +78,8 @@ class TestAudioWriter_Streaming(TestCase):
         loader.numberChannels >> None
         loader.sampleRate >> None
         loader.md5 >> None
+        loader.bit_rate >> None
+        loader.codec >> None
         run(loader)
 
         loader = AudioLoader(filename=outputFilename)
@@ -83,6 +87,8 @@ class TestAudioWriter_Streaming(TestCase):
         loader.numberChannels >> None
         loader.sampleRate >> None
         loader.md5 >> None
+        loader.bit_rate >> None
+        loader.codec >> None
         run(loader)
         os.remove(outputFilename)
 
@@ -127,6 +133,8 @@ class TestAudioWriter_Streaming(TestCase):
         loader.numberChannels >> None
         loader.sampleRate >> None
         loader.md5 >> None
+        loader.bit_rate >> None
+        loader.codec >> None
         run(loader)
         os.remove(filename)
         self.compare(pool['audio'], expected)
@@ -149,6 +157,8 @@ class TestAudioWriter_Streaming(TestCase):
         loader.numberChannels >> None
         loader.sampleRate >> None
         loader.md5 >> None
+        loader.bit_rate >> None
+        loader.codec >> None
         run(loader)
         os.remove(filename)
         self.compare(pool['audio'], signal)
@@ -181,6 +191,8 @@ class TestAudioWriter_Streaming(TestCase):
         loader.numberChannels >> mixer.numberChannels
         loader.sampleRate >> None
         loader.md5 >> None
+        loader.bit_rate >> None
+        loader.codec >> None
         run(loader)
         self.assertAlmostEqual(max(pool['audio']), max(sine), precision)
         from essentia.standard import ZeroCrossingRate

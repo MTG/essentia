@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -116,6 +116,8 @@
 #else
 #  if defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
 #    define OS_MAC
+#  elif defined(__FreeBSD__)
+#    define OS_FREEBSD
 #  else
 #    define OS_LINUX
 #  endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* FFTW::name = "FFT";
-const char* FFTW::description = DOC("This algorithm computes the positive complex STFT (Short-term Fourier transform) of an array of Reals using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
+const char* FFTW::category = "Standard";
+const char* FFTW::description = DOC("This algorithm computes the positive complex short-term Fourier transform (STFT) of an array using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
 "At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
 "\n"
 "References:\n"

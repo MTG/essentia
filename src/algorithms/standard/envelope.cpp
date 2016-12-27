@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Envelope::name = "Envelope";
+const char* Envelope::category = "Envelope/SFX";
 const char* Envelope::description = DOC("This algorithm computes the envelope of a signal by applying a non-symmetric lowpass filter on a signal. By default it rectifies the signal, but that is optional.\n"
 "\n"
 "References:\n"
@@ -62,6 +63,7 @@ void Envelope::compute() {
   vector<Real>& envelope = _envelope.get();
 
   envelope.resize(signal.size());
+  reset();
 
   for (int i=0; i<int(signal.size()); ++i) {
 

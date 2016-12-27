@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -88,6 +88,10 @@ def _create_essentia_class(name, moduleName = __name__):
             # to wrap the Pool that it outputs w/ our python Pool from common.py
             if name in ('YamlInput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'Extractor'):
                 return _c.Pool(results)
+
+            # In the case of MetadataReader, the 7th output is also a Pool
+            if name in ('MetadataReader'):
+                return results[:7] + (_c.Pool(results[7]),) + results[8:]
 
             else:
                 return results

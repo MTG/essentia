@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ namespace essentia {
 namespace standard {
 
 const char* Resample::name = "Resample";
+const char* Resample::category = "Standard";
 const char* Resample::description = DOC("This algorithm resamples the input signal to the desired sampling rate.\n\n"
 
 "This algorithm is only supported if essentia has been compiled with Real=float, otherwise it will throw an exception. It may also throw an exception if there is an internal error in the SRC library during conversion.\n\n"

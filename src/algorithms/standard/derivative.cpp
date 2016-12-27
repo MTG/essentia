@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,8 @@ namespace essentia {
 namespace standard {
 
 const char* Derivative::name = "Derivative";
-const char* Derivative::description = DOC("This algorithm returns the first-order derivative of the input signal, ie: for each input value, it returns the value minus the previous one.");
+const char* Derivative::category = "Standard";
+const char* Derivative::description = DOC("This algorithm returns the first-order derivative of an input signal. That is, for each input value it returns the value minus the previous one.");
 
 void Derivative::compute() {
   const std::vector<Real>& input = _input.get();

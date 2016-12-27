@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Tristimulus::name = "Tristimulus";
+const char* Tristimulus::category = "Tonal";
 const char* Tristimulus::description = DOC("This algorithm calculates the tristimulus of a signal given its harmonic peaks. The tristimulus has been introduced as a timbre equivalent to the color attributes in the vision. The tristimulus is composed of three different types of energy ratio allowing for a fine-grained description of the first harmonic of the spectrum, which are perceptually more salient.\n\n"
 
 "Tristimulus is intended to be fed by the output of the HarmonicPeaks algorithm. The algorithm throws an exception when the input frequencies are not in ascending order and/or if the input vectors are of different sizes.\n\n"

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -60,7 +60,7 @@ class TestAudioOnsetsMarker_Streaming(TestCase):
           if diff[i] > epsilon:
             found.append(float(i)/float(sr))
             j += 1
-            i += onsetWidth
+            i = int(i + onsetWidth)
           else: i+=1
         self.assertAlmostEqualVector(found, onsets, 1.5e-3)
 

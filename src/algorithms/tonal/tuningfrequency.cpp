@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* TuningFrequency::name = "TuningFrequency";
-const char* TuningFrequency::description = DOC("Given a sequence/set of spectral peaks, this algorithm estimates the tuning frequency of a given song. The result is the tuning frequency in Hz, and its distance from 440Hz in cents. This version is slightly adapted from the original algorithm by Emilia Gomez, but gives the same results.\n"
+const char* TuningFrequency::category = "Tonal";
+const char* TuningFrequency::description = DOC("This algorithm estimates the tuning frequency give a sequence/set of spectral peaks. The result is the tuning frequency in Hz, and its distance from 440Hz in cents. This version is slightly adapted from the original algorithm [1], but gives the same results.\n"
 "\n"
 "Input vectors should have the same size, otherwise an exception is thrown. This algorithm should be given the outputs of the spectral peaks algorithm.\n"
 "\n"

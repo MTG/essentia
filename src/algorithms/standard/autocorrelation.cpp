@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,16 +25,21 @@ using namespace essentia;
 using namespace standard;
 
 const char* AutoCorrelation::name = "AutoCorrelation";
+const char* AutoCorrelation::category = "Standard";
 const char* AutoCorrelation::description = DOC(
-"This algorithm returns the autocorrelation vector of a signal.\n"
+"This algorithm computes the autocorrelation vector of a signal.\n"
 "It uses the version most commonly used in signal processing, which doesn't remove "
 "the mean from the observations.\n"
+"Using the 'generalized' option this algorithm computes autocorrelation as described in [3].\n"
 "\n"
 "References:\n"
 "  [1] Autocorrelation -- from Wolfram MathWorld,\n"
 "  http://mathworld.wolfram.com/Autocorrelation.html\n\n"
 "  [2] Autocorrelation - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Autocorrelation");
+"  http://en.wikipedia.org/wiki/Autocorrelation\n\n"
+"  [3] Tolonen T., and Karjalainen, M. (2000). A computationally efficient multipitch analysis model.\n"
+"  IEEE Transactions on Audio, Speech, and Language Processing, 8(6), 708-716.\n\n"
+);
 
 
 void AutoCorrelation::configure() {
@@ -46,6 +51,9 @@ void AutoCorrelation::configure() {
   else if (ntype == "unbiased") {
     _unbiasedNormalization = true;
   }
+
+  _generalized = parameter("generalized").toBool();
+  _frequencyDomainCompression = parameter("frequencyDomainCompression").toReal();
 
   _fft->output("fft").set(_fftBuffer);
   _ifft->input("fft").set(_fftBuffer);
@@ -83,9 +91,16 @@ void AutoCorrelation::compute() {
   // take squared amplitude of the spectrum
   // (using magnitude would compute sqrt*sqrt)
   for (int i=0; i<int(_fftBuffer.size()); i++) {
-    _fftBuffer[i] = complex<Real>(_fftBuffer[i].real() * _fftBuffer[i].real() +
-                                  _fftBuffer[i].imag() * _fftBuffer[i].imag(),
-                                  0.0); // squared amplitude -> complex part = 0
+    if (!_generalized){
+      _fftBuffer[i] = complex<Real>(_fftBuffer[i].real() * _fftBuffer[i].real() +
+                                    _fftBuffer[i].imag() * _fftBuffer[i].imag(), // Generalized, todo 0.5 -> c
+                                    0.0); // squared amplitude -> complex part = 0
+    } else {
+      // Apply magnitude compression
+      _fftBuffer[i] = complex<Real>(
+        pow(sqrt(pow(_fftBuffer[i].real() / sizeFFT, 2) + pow(_fftBuffer[i].imag() / sizeFFT, 2)), _frequencyDomainCompression),
+        0.0); // squared amplitude -> complex part = 0
+    }
   }
 
   // step 3
@@ -93,7 +108,11 @@ void AutoCorrelation::compute() {
 
   // copy results in output array, scaling on the go (normalizing the output of the IFFT)
   Real scale = 1.0 / sizeFFT;
+  if (_generalized) {
+    scale = sizeFFT * scale;
+  }
   correlation.resize(size);
+
 
   if (_unbiasedNormalization) {
     for (int i=0; i<size; i++) {
@@ -105,5 +124,4 @@ void AutoCorrelation::compute() {
       correlation[i] = _corr[i] * scale;
     }
   }
-
 }

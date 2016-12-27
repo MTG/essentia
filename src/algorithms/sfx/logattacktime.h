@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -29,14 +29,19 @@ class LogAttackTime : public Algorithm {
 
  private:
   Real _startThreshold, _stopThreshold;
+  Real _sampleRate;
 
   Input<std::vector<Real> > _signal;
   Output<Real> _logAttackTime;
+  Output<Real> _attackStart;
+  Output<Real> _attackStop;
 
  public:
   LogAttackTime() {
     declareInput(_signal, "signal", "the input signal envelope (must be non-empty)");
     declareOutput(_logAttackTime, "logAttackTime", "the log (base 10) of the attack time [log10(s)]");
+    declareOutput(_attackStart, "attackStart", "the attack start time [s]");
+    declareOutput(_attackStop, "attackStop", "the attack end time [s]");    
   }
 
   void declareParameters() {
@@ -49,6 +54,7 @@ class LogAttackTime : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -66,14 +72,16 @@ class LogAttackTime : public StreamingAlgorithmWrapper {
  protected:
   Sink<std::vector<Real> > _signal;
   Source<Real> _logAttackTime;
-
-  std::vector<Real> _accu;
+  Source<Real> _attackStart;
+  Source<Real> _attackStop;
 
  public:
   LogAttackTime() {
     declareAlgorithm("LogAttackTime");
     declareInput(_signal, TOKEN, "signal");
     declareOutput(_logAttackTime, TOKEN, "logAttackTime");
+    declareOutput(_attackStart, TOKEN, "attackStart");
+    declareOutput(_attackStop, TOKEN, "attackStop"); 
   }
 
 };

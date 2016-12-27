@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 import distutils.sysconfig
 import os
 import sys
@@ -9,51 +11,48 @@ import sys
 # the source file (less the .cpp extension) and is also used as the
 # binary name. The second element (if it exists) is a list of
 # additional files for the extractor
-example_sources = [
+example_sources_fileio = [
         ('standard_beatsmarker', ),
+        ('standard_fadedetection', ),
         ('standard_mfcc', ),
         ('standard_onsetrate', ),
-        ('standard_pitchyinfft', ),
-        ('standard_fadedetection', ),
-        ('standard_spectralcontrast', ),
+        ('standard_pitchdemo', ),
         ('standard_rhythmtransform', ),
+        ('standard_spectralcontrast', ),
+        ('standard_vibrato', ),
 
-        ('streaming_extractor',
-                 [ 'streaming_extractorutils',
-                   'streaming_extractortonal',
-                   'streaming_extractorlowlevel',
-                   'streaming_extractorbeattrack',
-                   'streaming_extractorsfx',
-                   'streaming_extractorpanning',
-                   'streaming_extractorpostprocess' ]),
+        ('standard_harmonicmodel', ),
+        ('standard_hpsmodel', ),
+        ('standard_hprmodel', ),
+        ('standard_predominantmask', ),
+        ('standard_sinemodel', ),
+        ('standard_sinesubtraction', ),
+        ('standard_sprmodel', ),
+        ('standard_spsmodel', ),
+        ('standard_stft', ),
+        ('standard_stochasticmodel', ),
 
-        ('streaming_extractor_short_sounds',
-                 [ 'streaming_extractorutils',
-                   'streaming_extractormetadata',
-                   'streaming_extractortonal',
-                   'streaming_extractorlowlevel',
-                   'streaming_extractorsfx',
-                   'streaming_extractorpanning',
-                   'streaming_extractorpostprocess' ]),
+        ('streaming_beatsmarker', ),
+        ('streaming_beattracker_multifeature_mirex2013', ),
+        ('streaming_key', ),
+        ('streaming_gfcc', ),
+        ('streaming_md5', ),
+        ('streaming_mfcc', ),
+        ('streaming_rhythmextractor_multifeature', ),
+        ('streaming_onsetrate', ),
+        ('streaming_panning', ),
+        ('streaming_pitchyinfft', ),
+        ('streaming_predominantpitchmelodia', ),
+        ('streaming_stft', ),
+        ('streaming_tuningfrequency', ),
+        ('streaming_vibrato', ),
+
 
         ('streaming_extractor_music',
                  [ 'extractor_music/MusicExtractor',
                    'extractor_music/MusicLowlevelDescriptors',
                    'extractor_music/MusicRhythmDescriptors',
                    'extractor_music/MusicTonalDescriptors' ]),
-        
-        ('streaming_beatsmarker', ),
-        ('streaming_mfcc', ),
-        ('streaming_gfcc', ),
-        ('streaming_rhythmextractor_multifeature', ),
-        ('streaming_beattracker_multifeature_mirex2013', ),
-        ('streaming_onsetrate', ),
-        ('streaming_panning', ),
-        ('streaming_tuningfrequency', ),
-        ('streaming_key', ),
-        ('streaming_pitchyinfft', ),
-        ('streaming_predominantmelody', ),
-        ('streaming_md5', ),
 
         ('streaming_extractor_freesound',
                  [ 'freesound/FreesoundExtractor',
@@ -61,6 +60,7 @@ example_sources = [
                    'freesound/FreesoundRhythmDescriptors',
                    'freesound/FreesoundTonalDescriptors',
                    'freesound/FreesoundSfxDescriptors' ])
+
 ]
 
 example_sources_with_gaia = [
@@ -72,8 +72,13 @@ example_sources_with_gaia = [
 ]
 
 def configure(ctx):
-    example_list = [p[0] for p in example_sources]
+    example_list_fileio = [p[0] for p in example_sources_fileio]
     example_list_gaia = [p[0] for p in example_sources_with_gaia]
+
+    example_list = []
+
+    if "HAVE_AVCODEC" in ctx.env['define_key'] and "HAVE_SAMPLERATE" in ctx.env['define_key']:
+        example_list += example_list_fileio
 
     if "HAVE_GAIA2" in ctx.env['define_key']:
         example_list += example_list_gaia
@@ -81,36 +86,46 @@ def configure(ctx):
     if ctx.env.WITH_EXAMPLES:
         ctx.env.EXAMPLE_LIST = example_list
 
+        if ctx.options.CROSS_COMPILE_MINGW32:
+            print('WARNING: Use --with-static-examples flag instead of --with-examples for cross-compilation with MinGW')
+
+
     if ctx.env.EXAMPLES:
         for e in ctx.env.EXAMPLES.split(","):
             e = e.strip()
             if e not in example_list and e in example_list_gaia:
                 raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because Gaia2 is missing" % e)
+            if e not in example_list and e in example_list_fileio:
+                raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because LibAv/FFMpeg or libresample are missing" % e)
             elif e not in example_list:
                 raise ctx.errors.ConfigurationError("Specified example [%s] does not exist" % e)
             ctx.env.EXAMPLE_LIST.append(e)
 
     if ctx.env.WITH_STATIC_EXAMPLES:
         if sys.platform != 'darwin':
-            # skip -static flag on OSX, otherwise it will complain because 
+            # skip -static flag on OSX, otherwise it will complain because
             # static linking to system libraries is not supported on OSX
             ctx.env.LINKFLAGS = ['-static']
             ctx.env.SHLIB_MARKER = '-Wl,-Bstatic'
 
         ctx.env.LIB = [ 'avformat', 'avcodec', 'avutil', 'tag' ]
-        
+
         if "HAVE_GAIA2" in ctx.env['define_key']:
-            ctx.env.LIB += [ 'gaia2' ]    
+            ctx.env.LIB += [ 'gaia2' ]
             ctx.env['LIB_GAIA2'] += [ 'dl' ] # -ldl is required when building with static QtCore
-       
+
         if ctx.options.CROSS_COMPILE_MINGW32:
-            # otherwise the __imp__ symbols will be expected at link time 
+            # otherwise the __imp__ symbols will be expected at link time
             ctx.env.CXXFLAGS += ['-DYAML_DECLARE_STATIC', '-DTAGLIB_STATIC']
+
+    # add flags for support of Accelerate FFT on OSX
+    if 'ACCELERATE' in ctx.env.FFT:
+        ctx.env.LINKFLAGS += [ '-framework', 'Accelerate']
 
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
-    
+
     if len(ctx.env.EXAMPLE_LIST):
         def build_example(prog_name, other=None):
             files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
@@ -122,12 +137,12 @@ def build(ctx):
                 includes.append("../..")
 
             ctx.program(source  = ctx.path.ant_glob(' '.join(files)),
-                        target  = prog_name,
+                        target  = 'essentia_' + prog_name,
                         includes = includes,
                         use      = 'essentia ' + ctx.env.USES,
-                        install_path = None)
+                        install_path = '${PREFIX}/bin')
 
-        for e in example_sources + example_sources_with_gaia:
+        for e in example_sources_fileio + example_sources_with_gaia:
             if e[0] in ctx.env.EXAMPLE_LIST:
                 if len(e) == 1:
                     build_example(e[0])
@@ -144,6 +159,8 @@ def build(ctx):
 
         if sys.platform == 'darwin':
             install_path = os.environ['HOME'] + '/Library/Audio/Plug-Ins/Vamp'
+        elif sys.platform.startswith('linux'):
+            install_path = '/usr/local/lib/vamp'
         else:
             install_path = None
 

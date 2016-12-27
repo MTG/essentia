@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -74,7 +74,7 @@ class CompositeAlgo : public AlgorithmComposite {
   }
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 
 };
@@ -126,7 +126,7 @@ class DiamondShapeAlgo : public AlgorithmComposite {
   }
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 
 };
@@ -156,7 +156,7 @@ class CopyAlgo : public Algorithm {
   void declareParameters() {}
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 
 };
@@ -190,7 +190,7 @@ public:
   void declareParameters() {}
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 
 };
@@ -226,7 +226,7 @@ class TeeProxyAlgo : public AlgorithmComposite {
   }
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 
 };
@@ -250,13 +250,13 @@ public:                                             \
   void declareParameters() {}                       \
                                                     \
   static const char* name;                          \
-  static const char* version;                       \
+  static const char* category;                      \
   static const char* description;                   \
 }
 
-#define DEFINE_TEST_ALGO(AlgoName)                            \
-const char* essentia::streaming::AlgoName::name = #AlgoName;  \
-const char* essentia::streaming::AlgoName::version = "1.0";   \
+#define DEFINE_TEST_ALGO(AlgoName)                                \
+const char* essentia::streaming::AlgoName::name = #AlgoName;      \
+const char* essentia::streaming::AlgoName::category = "Category"; \
 const char* essentia::streaming::AlgoName::description = "";
 
 #define REGISTER_ALGO(AlgoName) \
@@ -316,7 +316,7 @@ public:
   void declareParameters() {}
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 };
 
@@ -339,7 +339,7 @@ public:
   void declareParameters() {}
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 };
 
@@ -362,7 +362,7 @@ public:
   void declareParameters() {}
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 };
 
@@ -399,7 +399,7 @@ class D1 : public AlgorithmComposite {
   void declareParameters() {}
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 };
 
@@ -440,7 +440,7 @@ class AlgoName : public AlgorithmComposite {       \
   void declareParameters() {}                      \
                                                    \
   static const char* name;                         \
-  static const char* version;                      \
+  static const char* category;                     \
   static const char* description;                  \
 };
 

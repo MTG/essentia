@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -178,7 +178,7 @@ std::vector<Real> postProcessTicks(const std::vector<Real>& origticks) {
   }
 
   if (idx == 0 && maxl == 0) {
-    std::cout << "Internal error while processing the beats, returning the original ones" << std::endl;
+    std::cerr << "Internal error while processing the beats, returning the original ones" << std::endl;
     return origticks;
   }
 

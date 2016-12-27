@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,7 +24,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* RMS::name = "RMS";
-const char* RMS::description = DOC("This algorithm computes the Root Mean Square (quadratic mean) of an array of Reals.\n"
+const char* RMS::category = "Statistics";
+const char* RMS::description = DOC("This algorithm computes the root mean square (quadratic mean) of an array.\n"
 "RMS is not defined for empty arrays. In such case, an exception will be thrown\n."
 "\n"
 "References:\n"

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,7 +27,8 @@ namespace essentia {
 namespace streaming {
 
 const char* KeyExtractor::name = "KeyExtractor";
-const char* KeyExtractor::description = DOC("this algorithm extracts key/scale for an audio stream");
+const char* KeyExtractor::category = "Tonal";
+const char* KeyExtractor::description = DOC("This algorithm extracts key/scale for an audio signal");
 
 KeyExtractor::KeyExtractor(): _frameCutter(0), _windowing(0), _spectrum(0), _spectralPeaks(0),
                               _hpcpKey(0), _key(0) {
@@ -105,8 +106,9 @@ KeyExtractor::~KeyExtractor() {
 namespace essentia {
 namespace standard {
 
-const char* KeyExtractor::name = "KeyExtractor";
-const char* KeyExtractor::description = DOC("this algorithm extracts tonal features");
+const char* KeyExtractor::name = essentia::streaming::KeyExtractor::name;
+const char* KeyExtractor::category = essentia::streaming::KeyExtractor::category;
+const char* KeyExtractor::description = essentia::streaming::KeyExtractor::description;
 
 KeyExtractor::KeyExtractor() {
   declareInput(_audio, "audio", "the audio input signal");

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -17,8 +17,15 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-
+import sys
 import subprocess
+import essentia.standard
+import essentia.streaming
+import yaml
+
+import argparse
+
+
 
 def find_dependencies(mode, algo):
 
@@ -31,48 +38,125 @@ essentia.log.debugLevels += essentia.EFactory
 loader = es.%s()
 """ % (mode, algo)
 
-    proc = subprocess.Popen(["python", "-c", code], stdout=subprocess.PIPE)
-    stdout = proc.communicate()[0].split('\n')
+    proc = subprocess.Popen(["python", "-c", code], stderr=subprocess.PIPE)
+    stderr = proc.communicate()[1].split('\n')
+
+    # function to assign nested dict elements by a list of nested keys
+    def set_val(d, keys, val):
+        reduce(lambda x,y: x[y], keys[:-1], d)[keys[-1]] = val
 
     algos = []
     lines = []
-    for line in stdout:
+    tree = {}
+    previous_key = []
+    previous_indent = -8
 
+    # NOTE: the code relies heavily on indentification of output in Essentia's logger
+    for line in stderr:
         if line.startswith("[Factory   ] "):
         
+            line = line.replace("[Factory   ] ", "")
             if line.count("Streaming: Creating algorithm: "):
-                a = line.split("Streaming: Creating algorithm: ")[-1]
+                tab, a = line.split("Streaming: Creating algorithm: ")
                 m = "streaming"
-                lines.append(line)
-                algos.append((m, a))
-
-            if line.count("Standard : Creating algorithm: "):
-                a = line.split("Standard : Creating algorithm: ")[-1]
+            elif line.count("Standard : Creating algorithm: "):
+                tab, a = line.split("Standard : Creating algorithm: ")
                 m = "standard"
-                lines.append(line)
-                algos.append((m, a))
+            else: 
+                continue
 
+            lines.append(line)
+            algos.append((m, a))
+            
+            indent = len(tab)
 
-    print "---------- %s : %s ----------" % (mode, algo)
-    
+            if indent < previous_indent:
+                previous_key = previous_key[:-2]
+            if indent == previous_indent:
+                previous_key = previous_key[:-1]
+
+            set_val(tree, previous_key + [(m,a)], {})
+            previous_key += [(m, a)]          
+
+            previous_indent = indent
+ 
     algos = sorted(list(set(algos) - set([(mode, algo)])))
+    return algos, tree, lines
+
+
+def print_dependencies(algos, tree=None, lines=None):
     print "Dependencies:"
-    for m,a in algos:
+    for m,a in set(algos):
         print m + '\t' + a
     print
 
+    if tree:
+        print "Dependencies tree (yaml)"
+        print yaml.safe_dump(tree, indent=4)
 
-    print '\n'.join(lines)
-    print 
+
+    if lines:
+        print "Essentia logger output"
+        print '\n'.join(lines)
+        print
+        print
+
+
+
+if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser(description="Analyze Essentia's algorithm dependencies.")
+
+    parser.add_argument("-a", "--algorithm", dest="algo", 
+                                             help="algorithm to inspect",
+                                             action="append",
+                                             choices=set(essentia.standard.algorithmNames() + essentia.streaming.algorithmNames()))
+    parser.add_argument("-m", "--mode", dest="mode", 
+                                        help="mode (streaming, standard)", 
+                                        choices=set(("standard", "streaming")))
+
+    args = vars(parser.parse_args())
+
+    streaming = essentia.streaming.algorithmNames()
+    standard = essentia.standard.algorithmNames()
+
+    print "Found", len(streaming), "streaming algorithms"
+    print "Found", len(standard), "standard algorithms"
+    print len(set(streaming) & set(standard)), "algorithms in total"
     print
 
+    algos = [(a, "standard") for a in standard] + [(a, "streaming") for a in streaming]
 
-import essentia.standard as es
-for algo in es.algorithmNames():
-    find_dependencies('standard', algo)
+    if args['algo']:
+        algos = [(a, m) for a, m in algos if a in args['algo']]
+    else:
+        print "Algorithm was not specified. Analyze dependencies for all algorithms"
+
+    if args['mode']: 
+        algos = [(a, m) for a, m in algos if m==args['mode']]
+    else:
+        print "Mode was not specified. Analyze dependencies for both modes"
+
+    if not algos and args['algo'] and args['mode']:
+        print 'Algorithm "' + args['algo'] + '" not found in essentia.' + args['mode']
+        sys.exit()
+
+    all_dependencies = []
+
+    for algo, mode in algos:
+        print "---------- %s : %s ----------" % (mode, algo)   
+        dependencies, tree, _ = find_dependencies(mode, algo)  
+        #print_dependencies(dependencies, tree)
+        print_dependencies(dependencies)
+        all_dependencies += dependencies
+
+    print "The following algorithms will be required for building Essentia:"
+
+    for a in set([a for m,a in all_dependencies]):
+        print a
 
 
-import essentia.streaming as es
-for algo in es.algorithmNames():
-    find_dependencies('streaming', algo)
+
+
+
 

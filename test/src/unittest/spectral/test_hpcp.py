@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -47,14 +47,15 @@ class TestHPCP(TestCase):
         hpcp = HPCP()(freqs, mags)
         self.assertEqualVector(hpcp, [1.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.])
 
-    def testAllSemitones(self):
+    def testAllSemitonesAllOctaves(self):
         # Tests whether a spectral peak output of 12 consecutive semitones
-        # yields a HPCP of all 1's
-        tonic = 440
-        freqs = [(tonic * 2**(x/12.)) for x in range(12)]
-        mags = [1] * 12
-        hpcp = HPCP()(freqs, mags)
-        self.assertEqualVector(hpcp, [1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.])
+        # yields a HPCP of all 1's for octaves 1 to 8
+        for octave in [1, 2, 3, 4, 5, 6, 7, 8]:
+            tonic = 55 * pow(2, octave-1)
+            freqs = [(tonic * 2**(x/12.)) for x in range(12)]
+            mags = [1] * 12
+            hpcp = HPCP(maxFrequency=14000)(freqs, mags)
+            self.assertEqualVector(hpcp, [1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.])
 
     def testSubmediantPosition(self):
         # Make sure that the submediant of a key based on 440 is in the
@@ -113,10 +114,10 @@ class TestHPCP(TestCase):
         self.assertEqualVector(hpcp, [0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.])
 
     def testSmallMinRange(self):
-        self.assertConfigureFails(HPCP(), {'minFrequency':1, 'splitFrequency':200})
+        self.assertConfigureFails(HPCP(), {'minFrequency':1, 'bandSplitFrequency':200})
 
     def testSmallMaxRange(self):
-        self.assertConfigureFails(HPCP(), {'maxFrequency':1199, 'splitFrequency':1000})
+        self.assertConfigureFails(HPCP(), {'maxFrequency':1199, 'bandSplitFrequency':1000})
 
     def testSmallMinMaxRange(self):
         self.assertConfigureFails(HPCP(), {'bandPreset':False, 'maxFrequency':200, 'minFrequency':1})

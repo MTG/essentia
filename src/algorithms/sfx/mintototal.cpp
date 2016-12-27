@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,6 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* MinToTotal::name = "MinToTotal";
+const char* MinToTotal::category = "Envelope/SFX";
 const char* MinToTotal::description = DOC("This algorithm computes the ratio between the index of the minimum value of the envelope of a signal and the total length of the envelope.\n\n"
 "An exception is thrown if the input envelop is empty.");
 
@@ -49,6 +50,7 @@ namespace essentia {
 namespace streaming {
 
 const char* MinToTotal::name = essentia::standard::MinToTotal::name;
+const char* MinToTotal::category = essentia::standard::MinToTotal::category;
 const char* MinToTotal::description = essentia::standard::MinToTotal::description;
 
 

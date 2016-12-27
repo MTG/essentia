@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* OddToEvenHarmonicEnergyRatio::name = "OddToEvenHarmonicEnergyRatio";
+const char* OddToEvenHarmonicEnergyRatio::category = "Tonal";
 const char* OddToEvenHarmonicEnergyRatio::description = DOC("This algorithm computes the ratio between a signal's odd and even harmonic energy given the signal's harmonic peaks. The odd to even harmonic energy ratio is a measure allowing to distinguish odd-harmonic-energy predominant sounds (such as from a clarinet) from equally important even-harmonic-energy sounds (such as from a trumpet). The required harmonic frequencies and magnitudes can be computed by the HarmonicPeaks algorithm.\n"
 "In the case when the even energy is zero, which may happen when only even harmonics where found or when only one peak was found, the algorithm outputs the maximum real number possible. Therefore, this algorithm should be used in conjunction with the harmonic peaks algorithm.\n"
 "If no peaks are supplied, the algorithm outputs a value of one, assuming either the spectrum was flat or it was silent.\n"
@@ -68,10 +69,18 @@ void OddToEvenHarmonicEnergyRatio::compute() {
     else           odd_energy += magnitudes[i] * magnitudes[i];
   }
 
-  if (even_energy == 0.0) {
-     oddtoevenharmonicenergyratio = numeric_limits<Real>::max();
+  if (even_energy == 0.0 && odd_energy > 0.01) {
+     // oddtoevenharmonicenergyratio = numeric_limits<Real>::max();
+     oddtoevenharmonicenergyratio = 1000.;
+  }
+  else if (even_energy == 0.0 && odd_energy < 0.01 ) {
+     oddtoevenharmonicenergyratio = 1;
   }
   else {
      oddtoevenharmonicenergyratio = odd_energy / even_energy;
+  }
+  if (oddtoevenharmonicenergyratio >= 1000.) {
+    E_WARNING("clipping oddtoevenharmonicenergyratio to maximum allowed value");
+    oddtoevenharmonicenergyratio = 1000.;
   }
 }

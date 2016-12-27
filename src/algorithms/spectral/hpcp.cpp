@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,16 +25,20 @@ using namespace essentia;
 using namespace standard;
 
 const char* HPCP::name = "HPCP";
-const char* HPCP::description = DOC("Computes a Harmonic Pitch Class Profile (HPCP), that is a k*12 dimensional vector which represents the intensities of the twelve (k==1) semitone pitch classes (corresponsing to notes from A to G#), or subdivisions of these (k>1). It does this from the spectral peaks of a signal.\n"
-"Regarding frequency parameters, exceptions are thrown if \"minFrequency\", \"splitFrequency\" and \"maxFrequency\" are not separated by at least 200Hz from each other, requiring that \"maxFrequency\" be greater than \"splitFrequency\" and \"splitFrequency\" be greater than \"minFrequenc\"."
-"Other exceptions are thrown if input vectors have different size, if parameter \"size\" is not a positive non-zero multiple of 12 or if \"windowSize\" is less than one hpcp bin (12/size).\n"
+const char* HPCP::category = "Tonal";
+const char* HPCP::description = DOC("Computes a Harmonic Pitch Class Profile (HPCP) from the spectral peaks of a signal. HPCP is a k*12 dimensional vector which represents the intensities of the twelve (k==1) semitone pitch classes (corresponsing to notes from A to G#), or subdivisions of these (k>1).\n"
+"\n"
+"Exceptions are thrown if \"minFrequency\", \"bandSplitFrequency\" and \"maxFrequency\" are not separated by at least 200Hz from each other, requiring that \"maxFrequency\" be greater than \"bandSplitFrequency\" and \"bandSplitFrequency\" be greater than \"minFrequency\". Other exceptions are thrown if input vectors have different size, if parameter \"size\" is not a positive non-zero multiple of 12 or if \"windowSize\" is less than one hpcp bin (12/size).\n"
+"\n"
 "References:\n"
 "  [1] T. Fujishima, \"Realtime Chord Recognition of Musical Sound: A System\n"
 "  Using Common Lisp Music,\" in International Computer Music Conference\n"
-"  (ICMC'99), pp. 464-467, 1999.\n"
+"  (ICMC'99), pp. 464-467, 1999.\n\n"
 "  [2] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
 "  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"
-"  2006.");
+"  2006.\n\n"
+"  [3] Harmonic pitch class profiles - Wikipedia, the free encyclopedia,\n"
+"  https://en.wikipedia.org/wiki/Harmonic_pitch_class_profiles");
 
 
 const Real HPCP::precision = 0.00001;
@@ -62,7 +66,7 @@ void HPCP::configure() {
     throw EssentiaException("HPCP: Minimum and maximum frequencies are too close");
   }
 
-  _splitFrequency = parameter("splitFrequency").toReal();
+  _splitFrequency = parameter("bandSplitFrequency").toReal();
   _bandPreset = parameter("bandPreset").toBool();
 
   if (_bandPreset) {
@@ -82,10 +86,15 @@ void HPCP::configure() {
 
   _nonLinear = parameter("nonLinear").toBool();
   _maxShifted = parameter("maxShifted").toBool();
-  _normalized = parameter("normalized").toBool();
+  
+  string normalized = toLower(parameter("normalized").toString());
+  if (normalized == "none") _normalized = N_NONE;
+  if (normalized == "unitsum") _normalized = N_UNIT_SUM;
+  if (normalized == "unitmax") _normalized = N_UNIT_MAX;
 
-  if (_nonLinear && !_normalized) {
-    throw EssentiaException("HPCP: Cannot apply non-linear filter when HPCP vector is not normalized");
+
+  if (_nonLinear && _normalized != N_UNIT_MAX) {
+    throw EssentiaException("HPCP: Cannot apply non-linear filter when HPCP vector is not normalized to unit max.");
   }
 
   initHarmonicContributionTable();
@@ -250,24 +259,34 @@ void HPCP::compute() {
   }
 
   // Normalize the HPCP vector
-  if (_normalized) {
-    if (_bandPreset) {
+  
+  if (_bandPreset) {
+    if (_normalized == N_UNIT_MAX) {
       normalize(hpcp_LO);
       normalize(hpcp_HI);
-      for (int i=0; i<(int)hpcp.size(); i++) {
-        hpcp[i] = hpcp_LO[i] + hpcp_HI[i];
-      }
     }
-    normalize(hpcp);
-  } else {
-    if (_bandPreset) {
-      for (int i=0; i<(int)hpcp.size(); i++) {
-        hpcp[i] = hpcp_LO[i] + hpcp_HI[i];
-      }
+    else if (_normalized == N_UNIT_SUM) {
+      // TODO does it makes sense to apply band preset together with unit sum normalization?
+      E_WARNING("HPCP: applying band preset together with unit sum normalization was not tested.");
+      normalizeSum(hpcp_LO);
+      normalizeSum(hpcp_HI);
+    }
+    
+    for (int i=0; i<(int)hpcp.size(); i++) {
+      hpcp[i] = hpcp_LO[i] + hpcp_HI[i];
     }
   }
 
+  if (_normalized == N_UNIT_MAX) {
+    normalize(hpcp);
+  }
+  else if (_normalized == N_UNIT_SUM) {
+    normalizeSum(hpcp);
+  }
+
   // Perform the Jordi non-linear post-processing step
+  // This makes small values (below 0.6) even smaller
+  // while boosting further values close to 1.
   if (_nonLinear) {
     for (int i=0; i<(int)hpcp.size(); i++) {
       hpcp[i] = sin(hpcp[i] * M_PI * 0.5);

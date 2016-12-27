@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,6 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* Leq::name = "Leq";
+const char* Leq::category = "Loudness/dynamics";
 const char* Leq::description = DOC("This algorithm computes the Equivalent sound level (Leq) of an audio signal. The Leq measure can be derived from the Revised Low-frequency B-weighting (RLB) or from the raw signal as described in [1]. If the signal contains no energy, Leq defaults to essentias definition of silence which is -90dB.\n"
 "This algorithm will throw an exception on empty input.\n"
 "\n"

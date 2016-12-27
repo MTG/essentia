@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -54,7 +54,7 @@ class PoolAggregator : public Algorithm {
   }
 
   void declareParameters() {
-    const char* defaultStatsC[] = { "mean", "var", "min", "max", "median" };
+    const char* defaultStatsC[] = { "mean", "stdev", "min", "max", "median" };
     std::vector<std::string> defaultStats = arrayToVector<std::string>(defaultStatsC);
 
     declareParameter("defaultStats", "the default statistics to be computed for each descriptor in the input pool", "", defaultStats);
@@ -65,6 +65,7 @@ class PoolAggregator : public Algorithm {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

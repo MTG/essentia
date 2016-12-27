@@ -1,70 +1,22 @@
 Music extractor
 ===============
 
-Usage
------
-``streaming_extractor_music`` computes a large set of spectral, time-domain, rhythm, tonal and high-level descriptors. The frame-wise descriptors are `summarized <reference/std_PoolAggregator.html>`_ by their statistical distribution. This extractor is suited for batch computations on large music collections and is used within `AcousticBrainz project <http://acousticbrainz.org/>`_. 
+``essentia_streaming_extractor_music`` is a configurable command-line feature extractor that computes a large set of spectral, time-domain, rhythm, tonal and high-level descriptors. Using this extractor is probably the easiest way to get many common music descriptors out of audio files using Essentia without any programming. The extractor is suited for batch computations on large music collections and is used within `AcousticBrainz project <http://acousticbrainz.org/>`_. The prebuilt static binaries of this extractor are available via `Essentia website <http://essentia.upf.edu/documentation/extractors/>`_ and `AcousticBrainz website <http://acousticbrainz.org/download>`_.
 
-It is possible to customize the parameters of audio analysis, frame summarization, high-level classifier models, and output format, using a yaml profile file. For example, in the following profile, the extractor is set to analyze only the first 30 seconds of audio, output frame values as well as their statistical summarization, and apply two high-level models associated with the respective filepaths. ::
+It is possible to customize the parameters of audio analysis, frame summarization, high-level classifier models, and output format, using a yaml profile file (`see below <streaming_extractor_music.html#configuration>`_). Writing your own custom profile file you can specify:
 
-  startTime: 0
-  endTime: 1e6
-  analysisSampleRate: 44100.0
-  outputFrames: 0
-  outputFormat: json
-  requireMbid: false
-  indent: 4
-  
-  lowlevel:
-      frameSize: 2048
-      hopSize: 1024
-      zeroPadding: 0
-      windowType: blackmanharris62
-      silentFrames: noise
-      stats: ["mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2"]
-  
-  average_loudness:
-      frameSize: 88200
-      hopSize: 44100
-      windowType: hann
-      silentFrames: noise
-
-  rhythm:
-      method: degara
-      minTempo: 40
-      maxTempo: 208
-      stats: ["mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2"]
-
-  tonal:	
-      frameSize: 4096
-      hopSize: 2048
-      zeroPadding: 0
-      windowType: blackmanharris62
-      silentFrames: noise
-      stats: ["mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2"]
-
-  highlevel:
-      compute: 1
-      svm_models: ['svm_models/genre_tzanetakis.history', 'svm_models/mood_sad.history' ]
-
-
-High-level descriptors are `computed by classifier models <http://en.wikipedia.org/wiki/Statistical_classification>`_ from a lower-level representation of a music track in terms of summarized spectral, time-domain, rhythm, and tonal descriptors. Each model (a ``*.history`` file) is basically a `transformation history <reference/std_GaiaTransform.html>`_ that maps a pool (a `feature vector <http://en.wikipedia.org/wiki/Feature_vector>`_) of such lower-level descriptors produced by extractor into probability values of classes on which the model was trained. Due to algorithm improvements, different extractor versions may produce different descriptor values, uncompatible between each other. This implies that **the models you specify to use within the extractor have to be trained using the same version of the extractor to ensure consistency**. 
-We provide such models pretrained on our ground truth music collections for each version of the music extractor via a `download page <http://essentia.upf.edu/documentation/svm_models/>`_.
-
-Instead of computing high-level descriptors altogether with lower-level ones, it may be convenient to use ``streaming_extractor_music_svm``, a simplified extractor that computes high-level descriptors given a json/yaml file with spectral, time-domain, rhythm, and tonal descriptors required by classfier models (and produced by ``streaming_extractor_music``). High-level models are to be specified in a similar way via a profile file. ::
-
-  highlevel:
-      compute: 1
-      svm_models: ['svm_models/genre_tzanetakis.history', 'svm_models/mood_sad.history' ]
-
-
-Note, that you need to build Essentia with Gaia2 or use our static builds (soon online) in order to be able to run high-level models. Since Essentia version 2.1 high-level models are distributed apart from Essentia via a `download page <http://essentia.upf.edu/documentation/svm_models/>`_. 
-
+ - output format (json or yaml)
+ - whether to store all frame values
+ - an audio segment to analyze using time positions in seconds ::
+ - analysis sample rate (audio will be converted to it before analysis, recommended and default value is 44100.0)
+ - frame parameters for different groups of descriptors: frame/hop size, zero padding, window type (see `FrameCutter <reference/streaming_FrameCutter.html>`_ algorithm)
+ - statistics to compute over frames: mean, var, median, min, max, dmean, dmean2, dvar, dvar2 (see `PoolAggregator <reference/streaming_PoolAggregator.html>`_ algorithm)
+ - whether you want to compute high-level descriptors based on classifier models (not computed by default)
 
 
 Music descriptors
 -----------------
-See below a detailed description of provided audio descriptors. All descriptors are analyzed on a signal resampled to 44kHz sample rate, summed to mono and normalized using replay gain value. 
+See below a detailed description of audio descriptors computed by the extractor. All descriptors are analyzed on a signal resampled to 44kHz sample rate, summed to mono and normalized using replay gain value. The frame-wise descriptors are `summarized <reference/std_PoolAggregator.html>`_ by their statistical distribution, but it is also possible to get frame values (disabled by default).
 
 
 low-level.*
@@ -173,6 +125,122 @@ For implementation details, see `the code of extractor <https://github.com/MTG/e
 * **tuning_diatonic_strength**: key strength estimated from high-resolution HPCP (120 dimensions) using diatonic profile. Algorithms: `Key <reference/streaming_Key.html>`_
 
 * **tuning_equal_tempered_deviation**, **tuning_nontempered_energy_ratio**: equal-temperament deviation and non-tempered energy ratio estimated from high-resolution HPCP (120 dimensions). Algorithms: `HighResolutionFeatures <reference/streaming_HighResolutionFeatures.html>`_
+
+
+Configuration
+-------------
+
+It is possible to customize the parameters of audio analysis, frame summarization, high-level classifier models, and output format, using a yaml profile file. Writing your own custom profile file you can:
+
+Specify output format (json or yaml) ::
+
+  outputFormat: json
+
+Specify whether to store all frame values (0 or 1) ::
+
+  outputFrames: 1
+
+Specify an audio segment to analyze using time positions in seconds ::
+  
+  startTime: 30
+  endTime: 60
+
+Specify analysis sample rate (audio will be converted to it before analysis, recommended and default value is 44100.0) ::
+
+  analysisSampleRate: 44100.0
+
+Specify frame parameters for different groups of descriptors: frame/hop size, zero padding, window type (see `FrameCutter <reference/streaming_FrameCutter.html>`_ algorithm). Specify statistics to compute over frames: mean, var, median, min, max, dmean, dmean2, dvar, dvar2 (see `PoolAggregator <reference/streaming_PoolAggregator.html>`_ algorithm) ::
+
+  lowlevel:
+      frameSize: 2048
+      hopSize: 1024
+      zeroPadding: 0
+      windowType: blackmanharris62
+      silentFrames: noise
+      stats: ["mean", "var", "median"]
+  
+  average_loudness:
+      frameSize: 88200
+      hopSize: 44100
+      windowType: hann
+      silentFrames: noise
+
+  rhythm:
+      method: degara
+      minTempo: 40
+      maxTempo: 208
+      stats: ["mean", "var", "median", "min", "max"]
+
+  tonal:  
+      frameSize: 4096
+      hopSize: 2048
+      zeroPadding: 0
+      windowType: blackmanharris62
+      silentFrames: noise
+      stats: ["mean", "var", "median", "min", "max"]
+
+Specify whether you want to compute high-level descriptors based on classifier models associated with the respective filepaths ::
+
+  highlevel:
+      compute: 1
+      svm_models: ['svm_models/genre_tzanetakis.history', 'svm_models/mood_sad.history' ]
+
+
+In the profile example below, the extractor is set to analyze only the first 30 seconds of audio and output frame values as well as their statistical summarization. ::
+
+  startTime: 0
+  endTime: 30
+  outputFrames: 0
+  outputFormat: json
+  requireMbid: false
+  indent: 4
+  
+  lowlevel:
+      frameSize: 2048
+      hopSize: 1024
+      zeroPadding: 0
+      windowType: blackmanharris62
+      silentFrames: noise
+      stats: ["mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2"]
+  
+  average_loudness:
+      frameSize: 88200
+      hopSize: 44100
+      windowType: hann
+      silentFrames: noise
+
+  rhythm:
+      method: degara
+      minTempo: 40
+      maxTempo: 208
+      stats: ["mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2"]
+
+  tonal:	
+      frameSize: 4096
+      hopSize: 2048
+      zeroPadding: 0
+      windowType: blackmanharris62
+      silentFrames: noise
+      stats: ["mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2"]
+
+
+High-level classifier models
+----------------------------
+
+High-level descriptors are `computed by classifier models <http://en.wikipedia.org/wiki/Statistical_classification>`_ from a lower-level representation of a music track in terms of summarized spectral, time-domain, rhythm, and tonal descriptors. Each model (a ``*.history`` file) is basically a `transformation history <reference/std_GaiaTransform.html>`_ that maps a pool (a `feature vector <http://en.wikipedia.org/wiki/Feature_vector>`_) of such lower-level descriptors produced by extractor into probability values of classes on which the model was trained. Due to algorithm improvements, different extractor versions may produce different descriptor values, uncompatible between each other. This implies that **the models you specify to use within the extractor have to be trained using the same version of the extractor to ensure consistency**. We provide such models pretrained on our ground truth music collections for each version of the music extractor via a `download page <http://essentia.upf.edu/documentation/svm_models/>`_.
+
+Instead of computing high-level descriptors altogether with lower-level ones, it may be convenient to use ``streaming_extractor_music_svm``, a simplified extractor that computes high-level descriptors given a json/yaml file with spectral, time-domain, rhythm, and tonal descriptors required by classfier models (and produced by ``streaming_extractor_music``). High-level models are to be specified in a similar way via a profile file. ::
+
+  highlevel:
+      compute: 1
+      svm_models: ['svm_models/genre_tzanetakis.history', 'svm_models/mood_sad.history']
+
+
+Note, that you need to build Essentia with Gaia2 or use our static builds (soon online) in order to be able to run high-level models. Since Essentia version 2.1 high-level models are distributed apart from Essentia via a `download page <http://essentia.upf.edu/documentation/svm_models/>`_. 
+
+
+
+
 
 
 .. |here| raw:: html

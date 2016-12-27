@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -51,7 +51,7 @@ class TestAudioOnsetsMarker(TestCase):
         j = 0
         i = 0
         while i < inputSize:
-          if diff[i] > epsilon:
+          if diff[int(i)] > epsilon:
             found[j] = float(i)/float(sr)
             j += 1
             i += onsetWidth

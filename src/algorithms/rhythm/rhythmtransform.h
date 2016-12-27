@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -39,7 +39,7 @@ class RhythmTransform : public Algorithm {
 
  public:
   RhythmTransform() {
-    declareInput(_melBands, "melBands", "the energy in the melbands");
+    declareInput(_melBands, "melBands", "the energies in the mel bands");
     declareOutput(_rhythmTransform, "rhythm", "consecutive frames in the rhythm domain");
 
     AlgorithmFactory& factory = AlgorithmFactory::instance();
@@ -62,6 +62,7 @@ class RhythmTransform : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -105,6 +106,7 @@ class RhythmTransform : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

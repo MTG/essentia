@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -52,7 +52,7 @@ def descriptorPlotHTML(namespace, name, audio, pool, options):
         # plot name
         descName = namespace + '.' + name
         # plot x data
-        scopes = pool.value(namespace + '.' + name + '.' + 'scope']
+        scopes = pool.value(namespace + '.' + name + '.' + 'scope')
         descScopes = []
         for scope in scopes:
             descScopes.append(scope[0])

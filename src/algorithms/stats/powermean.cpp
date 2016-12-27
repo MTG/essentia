@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,13 +24,16 @@ using namespace essentia;
 using namespace standard;
 
 const char* PowerMean::name = "PowerMean";
-const char* PowerMean::description = DOC("This algorithm extracts the Power Mean of an array of Reals. It accepts one parameter, p, which is the power (or order or degree) of the Power Mean. Note that if p=-1, the Power Mean is equal to the Harmonic Mean, if p=0, the Power Mean is equal to the Geometric Mean, if p=1, the Power Mean is equal to the Arithmetic Mean, if p=2, the Power Mean is equal to the Root Mean Square.\n"
+const char* PowerMean::category = "Statistics";
+const char* PowerMean::description = DOC("This algorithm computes the power mean of an array. It accepts one parameter, p, which is the power (or order or degree) of the Power Mean. Note that if p=-1, the Power Mean is equal to the Harmonic Mean, if p=0, the Power Mean is equal to the Geometric Mean, if p=1, the Power Mean is equal to the Arithmetic Mean, if p=2, the Power Mean is equal to the Root Mean Square.\n"
 "\n"
 "Exceptions are thrown if input array either is empty or it contains non positive numbers.\n"
 "\n"
 "References:\n"
 "  [1] Power Mean -- from Wolfram MathWorld,\n"
-"  http://mathworld.wolfram.com/PowerMean.html");
+"  http://mathworld.wolfram.com/PowerMean.html\n"
+"  [2] Generalized mean - Wikipedia, the free encyclopedia,\n"
+"  https://en.wikipedia.org/wiki/Generalized_mean");
 
 void PowerMean::compute() {
 

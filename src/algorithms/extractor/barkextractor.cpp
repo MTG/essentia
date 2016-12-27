@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,6 +28,7 @@ using namespace essentia;
 using namespace essentia::streaming;
 
 const char* BarkExtractor::name = "BarkExtractor";
+const char* BarkExtractor::category = "Extractors";
 const char* BarkExtractor::description = DOC("This algorithm extracts some Bark bands based spectral features from an audio signal");
 
 BarkExtractor::BarkExtractor() : _configured(false) {

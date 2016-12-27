@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,7 +26,8 @@ namespace essentia {
 namespace standard {
 
 const char* StrongDecay::name = "StrongDecay";
-const char* StrongDecay::description = DOC("This algorithm extracts the Strong Decay of an audio signal. The Strong Decay is built from the non-linear combination of the signal energy and the signal temporal centroid, the latter being the balance of the absolute value of the signal. A signal containing a temporal centroid near its start boundary and a strong energy is said to have a strong decay.\n"
+const char* StrongDecay::category = "Envelope/SFX";
+const char* StrongDecay::description = DOC("This algorithm computes the Strong Decay of an audio signal. The Strong Decay is built from the non-linear combination of the signal energy and the signal temporal centroid, the latter being the balance of the absolute value of the signal. A signal containing a temporal centroid near its start boundary and a strong energy is said to have a strong decay.\n"
 "\n"
 "This algorithm is not defined for zero signals (i.e. silence) nor when the signal's size is less than two, as it could not compute its centroid.\n"
 "\n"
@@ -68,6 +69,7 @@ namespace essentia {
 namespace streaming {
 
 const char* StrongDecay::name = standard::StrongDecay::name;
+const char* StrongDecay::category = standard::StrongDecay::category;
 const char* StrongDecay::description = standard::StrongDecay::description;
 
 

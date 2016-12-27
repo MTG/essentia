@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -107,7 +107,8 @@ void setDebugLevelForTimeIndex(int index) {
 
 void Logger::flush() {
   while (!_msgQueue.empty()) {
-    std::cout << _msgQueue.front() << std::flush;
+    std::cerr << _msgQueue.front();
+    //std::cout << _msgQueue.front() << std::flush;
     _msgQueue.pop_front();
   }
 }

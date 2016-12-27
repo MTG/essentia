@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -52,7 +52,7 @@ class EqualLoudness : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "{32000,44100,48000}", 44100.);
+    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "{8000,32000,44100,48000}", 44100.);
   }
 
   void reset();
@@ -60,6 +60,7 @@ class EqualLoudness : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

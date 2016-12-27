@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -98,7 +98,7 @@ def computeResetCompute(algo, *args, **kwargs):
     audioLoaders = [ 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'AudioLoader' ]
     filters = [ 'IIR', 'DCRemoval', 'HighPass', 'LowPass', 'BandPass', 'AllPass',
                 'BandReject', 'EqualLoudness', 'MovingAverage' ]
-    special = [ 'FrameCutter', 'TempoScaleBands', 'TempoTap', 'TempoTapTicks',
+    special = [ 'FrameCutter', 'OverlapAdd', 'TempoScaleBands', 'TempoTap', 'TempoTapTicks',
                 'Panning','OnsetDetection', 'MonoWriter', 'Flux', 'StartStopSilence' ]
 
     if algo.name() in audioLoaders + filters + special:

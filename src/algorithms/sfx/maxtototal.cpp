@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,6 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* MaxToTotal::name = "MaxToTotal";
+const char* MaxToTotal::category = "Envelope/SFX";
 const char* MaxToTotal::description = DOC("This algorithm computes the ratio between the index of the maximum value of the envelope of a signal and the total length of the envelope. This ratio shows how much the maximum amplitude is off-center. Its value is close to 0 if the maximum is close to the beginning (e.g. Decrescendo or Impulsive sounds), close to 0.5 if it is close to the middle (e.g. Delta sounds) and close to 1 if it is close to the end of the sound (e.g. Crescendo sounds). This algorithm is intended to be fed by the output of the Envelope algorithm\n\n"
 "MaxToTotal will throw an exception if the input envelope is empty.");
 
@@ -49,6 +50,7 @@ namespace essentia {
 namespace streaming {
 
 const char* MaxToTotal::name = essentia::standard::MaxToTotal::name;
+const char* MaxToTotal::category = essentia::standard::MaxToTotal::category;
 const char* MaxToTotal::description = essentia::standard::MaxToTotal::description;
 
 

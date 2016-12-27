@@ -3,6 +3,7 @@
 
 {% block extrahead %}
 {{ super() }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" type="text/css" />
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
   (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -12,6 +13,21 @@
 
   ga('create', 'UA-18322085-51', 'upf.edu');
   ga('send', 'pageview');
+</script>
+<script>
+var toggleMobileMenu = (function toggleMobileMenu() {
+  var isToggled = false;
+  var el;
+  return function() {
+    el = el || document.getElementsByClassName('navbar__right')[0];
+    isToggled = !isToggled;
+    if (isToggled) {
+      el.classList.add('active');
+    } else {
+      el.classList.remove('active');
+    }
+  };
+})();
 </script>
 
 {#
@@ -26,29 +42,50 @@
 {% endblock %}
 
 {% block rootrellink %}
-    <li><a href="http://essentia.upf.edu">HOME</a>&nbsp;|&nbsp;</li>
-    <li><a href="{{ pathto('index') }}">DOCUMENTATION</a>&nbsp;|&nbsp;</li>
-    <li><a href="http://essentia.upf.edu/download">DOWNLOAD</a>&nbsp;|&nbsp;</li>
-    <li><a href="http://essentia.upf.edu/applications">APPLICATIONS</a>&nbsp;|&nbsp;</li>
-    <li><a href="http://essentia.upf.edu/news">NEWS</a>&nbsp;|&nbsp;</li>
-    <li><a href="http://essentia.upf.edu/contact">ABOUT</a>&nbsp;|&nbsp;</li>
-    <!-- <li><a href="{{ pathto('contents') }}">Documentation contents</a>&raquo;</li> -->
 {% endblock %}
 
 {% block header %}
-<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
-<img src="{{ pathto("_static/essentia_logo.png", 1) }}" alt="Essentia logo" />
-</div>
+<header class="site-header" role="navigation">
+  <div class="header" role="menubar">
+    <a class="header-logo" href="http://essentia.upf.edu" role="menuitem">
+      <img src="{{ pathto("_static/essentia_logo.svg", 1) }}" alt="Essentia logo" />
+    </a>
+    <button class="toggle-menu__button" onclick="toggleMobileMenu()"></button>
+    <nav class="navbar__right">
+      <ul class="navbar__right__list">
+        <li class="navbar__menu__item" role="presentation">
+          <a role="menuitem" href="{{ pathto('index') }}">Documentation</a>
+        </li>
+        <li class="navbar__menu__item" role="presentation">
+          <a role="menuitem" href="http://essentia.upf.edu/download">Download</a>
+        </li>
+        <li class="navbar__menu__item" role="presentation">
+          <a role="menuitem" href="http://essentia.upf.edu/applications">Applications</a>
+        </li>
+        <li class="navbar__menu__item" role="presentation">
+          <a role="menuitem" href="http://essentia.upf.edu/news">News</a>
+        </li>
+        <li class="navbar__menu__item" role="presentation">
+          <a role="menuitem" href="http://essentia.upf.edu/contact">About</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
 {% endblock %}
 
 
 {% block footer %}
-<div style="background-color: #C81331 !important; text-align: left; padding: 10px 10px 15px 15px">
-<a href="http://mtg.upf.edu" title="Universitat Pompeu Fabra - Music Technology Group"><img alt="Universitat Pompeu Fabra - Music Technology Group" src="{{ pathto("_static/upf_mtg_logo.png", 1) }}" style="width: 276px; height: 53px; vertical-align: top; padding-top: 5px;" /></a>
-<a href="http://www.catalonia.com/en/technology/tecnio.jsp"><img alt="" src="{{ pathto("_static/tecnio_logo.png", 1) }}" style="width: 137px; height: 60px; float:right;" /></a>
-</div>
+<footer>
+  <a href="http://mtg.upf.edu" title="Universitat Pompeu Fabra - Music Technology Group" class="footer__link">
+    <img alt="Universitat Pompeu Fabra - Music Technology Group" src="{{ pathto("_static/upf_mtg_logo.svg", 1) }}" />
+  </a>
+  <a href="http://www.catalonia.com/en/technology/tecnio.jsp" class="footer__link">
+    <img alt="" src="{{ pathto("_static/tecnio_logo.png", 1) }}" />
+  </a>
+</footer>
 {% endblock %}
 
 {# Omit the bottom navigation bar. #}
 {% block relbar2 %}
-{% endblock %} 
+{% endblock %}

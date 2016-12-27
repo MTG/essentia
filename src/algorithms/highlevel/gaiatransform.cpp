@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,6 +27,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* GaiaTransform::name = "GaiaTransform";
+const char* GaiaTransform::category = "Transformations";
 const char* GaiaTransform::description = DOC(
 "Applies a given Gaia2 transformation history to a given pool. It first converts the pool into a gaia2::Point suitable for the history, applies the history, and converts back the resulting point into an essentia Pool. In particular, it allows classification.\n"
 "\n"
@@ -173,7 +174,7 @@ void pointToPool(const gaia2::Point* p, Pool& pool, const Pool& origPool) {
 
       // assert we're not doing something potentially stupid
       if ((rows*cols + 2) != desc.size()) {
-        cout << "Oops, internal error in GaiaTransform::pointToPool, ignoring..." << endl;
+        E_WARNING("Oops, internal error in GaiaTransform::pointToPool, ignoring...");
         continue;
       }
       pool.remove(pooldesc);

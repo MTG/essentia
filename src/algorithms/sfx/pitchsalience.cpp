@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchSalience::name = "PitchSalience";
+const char* PitchSalience::category = "Tonal";
 const char* PitchSalience::description = DOC("This algorithm computes the pitch salience of a spectrum. The pitch salience is given by the ratio of the highest auto correlation value of the spectrum to the non-shifted auto correlation value. Pitch salience was designed as quick measure of tone sensation. Unpitched sounds (non-musical sound effects) and pure tones have an average pitch salience value close to 0 whereas sounds containing several harmonics in the spectrum tend to have a higher value.\n\n"
 "Note that this algorithm may give better results when used with low sampling rates (i.e. 8000) as the information in the bands musically meaningful will have more relevance.\n\n"
 "This algorithm uses AutoCorrelation on the input \"spectrum\" and thus inherits its input requirements and exceptions. An exception is thrown at configuration time if \"lowBoundary\" is larger than \"highBoundary\" and/or if \"highBoundary\" is not smaller than half \"sampleRate\". At computation time, an exception is thrown if the input spectrum is empty. Also note that feeding silence to this algorithm will return zero.\n"

@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -207,6 +207,14 @@ class VectorInput(_essentia.VectorInput):
               '  Description:\n\n'+\
               '    Can be used as the starting point of a streaming network. Its constructor\n'+\
               '    takes in a vector that is to be streamed one token at a time.'
+    __struct__ = {'category': 'Input/output',
+                  'description': 'Can be used as the starting point of a streaming network. Its constructor\ntakes in a vector that is to be streamed one token at a time.',
+                  'inputs': [],
+                  'name': 'VectorInput',
+                  'outputs': [{'description': 'the given data',
+                               'name': 'data',
+                               'type': 'vector_<real>'}],
+                  'parameters': []}
 
 
     def __init__(self, data):

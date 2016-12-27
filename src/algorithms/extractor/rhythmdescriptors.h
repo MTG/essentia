@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -39,6 +39,7 @@ class RhythmDescriptors : public AlgorithmComposite {
 
   Source<Real> _bpm;
   Source<std::vector<Real> > _ticks;
+  Source<Real> _confidence;
   Source<std::vector<Real> > _estimates;
   //Source<std::vector<Real> > _rubatoStart;
   //Source<std::vector<Real> > _rubatoStop;
@@ -52,6 +53,7 @@ class RhythmDescriptors : public AlgorithmComposite {
   SourceProxy<Real> _secondPeakBPM;
   SourceProxy<Real> _secondPeakWeight;
   SourceProxy<Real> _secondPeakSpread;
+  SourceProxy<std::vector<Real> > _histogram;
 
   scheduler::Network* _network;
   Pool _pool;
@@ -75,6 +77,7 @@ class RhythmDescriptors : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -90,6 +93,7 @@ class RhythmDescriptors : public Algorithm {
   Input<std::vector<Real> > _signal;
   Output<Real> _bpm;
   Output<std::vector<Real> > _ticks;
+  Output<Real> _confidence;
   Output<std::vector<Real> > _estimates;
   Output<std::vector<Real> > _bpmIntervals;
   //Output<std::vector<Real> > _rubatoStart;
@@ -102,6 +106,7 @@ class RhythmDescriptors : public Algorithm {
   Output<Real> _secondPeakBPM;
   Output<Real> _secondPeakSpread;
   Output<Real> _secondPeakWeight;
+  Output<std::vector<Real> > _histogram;
 
   bool _configured;
 
@@ -123,6 +128,7 @@ class RhythmDescriptors : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

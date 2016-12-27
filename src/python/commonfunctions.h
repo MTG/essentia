@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -166,7 +166,7 @@ inline PyObject* fromString(const string& str) {
 }
 
 template <typename T>
-PyObject* generateDocStruct(T& algo, const std::string& description) {
+PyObject* generateDocStruct(T& algo, const AlgorithmInfo<T>& inf) {
   PyObject* result = PyDict_New();
   PyDict_SetItemString(result, "name", fromString(algo.name()));
 
@@ -234,8 +234,10 @@ PyObject* generateDocStruct(T& algo, const std::string& description) {
 
   PyDict_SetItemString(result, "parameters", params);
 
-  // description
-  PyDict_SetItemString(result, "description", fromString(description));
+  // description and category
+  PyDict_SetItemString(result, "description", fromString(inf.description));
+  PyDict_SetItemString(result, "category", fromString(inf.category));
+
 
   return result;
 }

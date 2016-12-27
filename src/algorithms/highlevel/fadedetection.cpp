@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,7 +27,8 @@ namespace essentia {
 namespace standard {
 
 const char* FadeDetection::name = "FadeDetection";
-const char* FadeDetection::description = DOC("This algorithm computes two arrays containing the start/stop points of fade-ins and fade-outs detected in an audio file. The main hypothesis for the detection is that an increase or decrease of the RMS over time in an audio file corresponds to a fade-in or fade-out, repectively. Minimum and maximum mean-RMS-thresholds are used to define where fade-in and fade-outs occur.\n"
+const char* FadeDetection::category = "Duration/silence";
+const char* FadeDetection::description = DOC("This algorithm detects fade-in and fade-outs time positions in an audio signal given a sequence of RMS values. It outputs two arrays containing the start/stop points of fade-ins and fade-outs. The main hypothesis for the detection is that an increase or decrease of the RMS over time in an audio file corresponds to a fade-in or fade-out, repectively. Minimum and maximum mean-RMS-thresholds are used to define where fade-in and fade-outs occur.\n"
 "\n"
 "An exception is thrown if the input \"rms\" is empty.\n"
 "\n"

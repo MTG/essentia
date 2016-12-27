@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,7 +27,7 @@ namespace standard {
 
 class BpmHistogramDescriptors : public Algorithm {
 
- private:
+ protected:
   Input<std::vector<Real> > _bpmIntervals;
 
   Output<Real> _firstPeakBPM;
@@ -36,6 +36,7 @@ class BpmHistogramDescriptors : public Algorithm {
   Output<Real> _secondPeakBPM;
   Output<Real> _secondPeakWeight;
   Output<Real> _secondPeakSpread;
+  Output<std::vector<Real> > _histogram;
 
  public:
   BpmHistogramDescriptors() {
@@ -46,6 +47,7 @@ class BpmHistogramDescriptors : public Algorithm {
     declareOutput(_secondPeakBPM, "secondPeakBPM", "value for the second highest peak [bpm]");
     declareOutput(_secondPeakWeight, "secondPeakWeight", "weight of the second highest peak");
     declareOutput(_secondPeakSpread, "secondPeakSpread", "spread of the second highest peak");
+    declareOutput(_histogram, "histogram", "bpm histogram [bpm]");
   }
 
   ~BpmHistogramDescriptors() {};
@@ -55,6 +57,7 @@ class BpmHistogramDescriptors : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
   static const int maxBPM;
@@ -83,6 +86,7 @@ class BpmHistogramDescriptors : public StreamingAlgorithmWrapper {
   Source<Real> _secondPeakBPM;
   Source<Real> _secondPeakWeight;
   Source<Real> _secondPeakSpread;
+  Source<std::vector<Real> > _histogram;
 
  public:
   BpmHistogramDescriptors() {
@@ -94,6 +98,7 @@ class BpmHistogramDescriptors : public StreamingAlgorithmWrapper {
     declareOutput(_secondPeakBPM, TOKEN, 1, "secondPeakBPM");
     declareOutput(_secondPeakWeight, TOKEN, 1, "secondPeakWeight");
     declareOutput(_secondPeakSpread, TOKEN, 1, "secondPeakSpread");
+    declareOutput(_histogram, TOKEN, 1, "histogram");
   }
 };
 

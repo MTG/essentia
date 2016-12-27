@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -32,8 +32,8 @@ void connect(SourceBase& source, SinkBase& sink) {
     // NB: source needs to connect to sink first to have a ReaderID as soon as possible.
     //     this is a requirement for ProxyConnectors
     E_DEBUG(EConnectors, "Connecting " << source.fullName() << " to " << sink.fullName());
-    source.connect(sink);
     sink.connect(source);
+    source.connect(sink);
   }
   catch (EssentiaException& e) {
     std::ostringstream msg;

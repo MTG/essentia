@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -19,7 +19,8 @@
 
 #include "essentia.h"
 #include "algorithmfactory.h"
-#include <fftw3.h>
+// Need to do this to keep essentia FFT "agnostic"
+// #include <fftw3.h>
 
 #ifndef OS_WIN32
 #include <cxxabi.h> // for __cxa_demangle
@@ -56,7 +57,8 @@ void init() {
  * Cleanup all resources allocated by Essentia.
  */
 void shutdown() {
-  fftwf_cleanup();
+  // Need to do this to keep essentia FFT "agnostic", and shouldn't the class destructor do that anyway?
+  // fftwf_cleanup();
   standard::AlgorithmFactory::shutdown();
   streaming::AlgorithmFactory::shutdown();
   TypeMap::shutdown();

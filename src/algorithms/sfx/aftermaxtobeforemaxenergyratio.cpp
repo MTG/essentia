@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,8 @@ namespace essentia {
 namespace standard {
 
 const char* AfterMaxToBeforeMaxEnergyRatio::name = "AfterMaxToBeforeMaxEnergyRatio";
-const char* AfterMaxToBeforeMaxEnergyRatio::description = DOC("This algorithm calculates the ratio between the pitch energy after the pitch maximum and the pitch energy before the pitch maximum. Sounds having an monotonically ascending pitch or one unique pitch will show a value of (0,1], while sounds having a monotonically descending pitch will show a value of [1,inf). In case there is no energy before the max pitch, the algorithm will return the energy after the maximum pitch.\n"
+const char* AfterMaxToBeforeMaxEnergyRatio::category = "Envelope/SFX";
+const char* AfterMaxToBeforeMaxEnergyRatio::description = DOC("This algorithm computes the ratio between the pitch energy after the pitch maximum and the pitch energy before the pitch maximum. Sounds having an monotonically ascending pitch or one unique pitch will show a value of (0,1], while sounds having a monotonically descending pitch will show a value of [1,inf). In case there is no energy before the max pitch, the algorithm will return the energy after the maximum pitch.\n"
 "\n"
 "The algorithm throws exception when input is either empty or contains only zeros.");
 

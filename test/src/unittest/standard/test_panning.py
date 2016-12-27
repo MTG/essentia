@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -47,6 +47,10 @@ class TestPanning(TestCase):
         # 10/07/2013: We switched to different testing audio files and recomputed 
         # the files with essentia assuming that Panning algo works correctly since 
         # it seems no fixes were ever done to it since the original test (11/11/2008)
+
+        # 2015-03-02: Recomputed the values again, as they are a bit different, probably 
+        #             due to changes introduced after switching to newer LibAV
+
         testdir = join(filedir(), 'panning')
         expected = readMatrix(join(testdir, 'essentia', 'musicbox_essentia_panning.txt'))
 
@@ -72,6 +76,7 @@ class TestPanning(TestCase):
         
         for i in range(len(frames_left)):
             output = panning(spec(window(frames_left[i])), spec(window(frames_right[i])))
+            
             # readVector messes up with the last digits, so for small numbers
             # we get errors above 1e-7: Is there a way to set precision in
             # python?

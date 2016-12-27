@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,36 +28,35 @@ using namespace essentia;
 using namespace standard;
 
 const char* PoolAggregator::name = "PoolAggregator";
+const char* PoolAggregator::category = "Statistics";
 const char* PoolAggregator::description = DOC("This algorithm performs statistical aggregation on a Pool and places the results of the aggregation into a new Pool. Supported statistical units are:\n"
-  "\t'min' (minimum),\n"
-  "\t'max' (maximum),\n"
-  "\t'median'\n"
-  "\t'mean'\n"
-  "\t'var' (variance),\n"
-  "\t'skew' (skewness),\n"
-  "\t'kurt' (kurtosis),\n"
-  "\t'dmean' (mean of the derivative),\n"
-  "\t'dvar' (variance of the derivative),\n"
-  "\t'dmean2' (mean of the second derivative),\n"
-  "\t'dvar2' (variance of the second derivative),\n"
-  "\t'cov' (covariance), and\n"
-  "\t'icov' (inverse covariance).\n"
-  "\t'copy' (verbatim copy of descriptor, no aggregation; exclusive: cannot be performed with any other statistical units).\n"
-  "\t'value' (copy of the descriptor, but the value is placed under the name '<descriptor name>.value')\n\n"
+"  - 'min' (minimum),\n"
+"  - 'max' (maximum),\n"
+"  - 'median',\n"
+"  - 'mean',\n"
+"  - 'var' (variance),\n"
+"  - 'stdev' (standard deviation),\n"
+"  - 'skew' (skewness),\n"
+"  - 'kurt' (kurtosis),\n"
+"  - 'dmean' (mean of the derivative),\n"
+"  - 'dvar' (variance of the derivative),\n"
+"  - 'dmean2' (mean of the second derivative),\n"
+"  - 'dvar2' (variance of the second derivative),\n"
+"  - 'cov' (covariance), and\n"
+"  - 'icov' (inverse covariance).\n"
+"  - 'copy' (verbatim copy of descriptor, no aggregation; exclusive: cannot be performed with any other statistical units).\n"
+"  - 'value' (copy of the descriptor, but the value is placed under the name '<descriptor name>.value')\n\n"
 
-  "These statistics can be computed for single dimensional vectors in a Pool, with the exception of 'cov' and 'icov'. All of the above statistics can be\n"
-  "computed for two dimensional vectors in the Pool. With the exception of 'cov' and 'icov', two-dimensional statistics are calculated by aggregating\n"
-  "each column and placing the result into a vector of the same size as the size of each vector in the input Pool. The previous implies that each\n"
-  "vector in the pool (under a particular descriptor of course) must have equal size. This implication also applies for 'cov' and 'icov'.\n\n"
+"These statistics can be computed for single dimensional vectors in a Pool, with the exception of 'cov' and 'icov'. All of the above statistics can be computed for two dimensional vectors in the Pool. With the exception of 'cov' and 'icov', two-dimensional statistics are calculated by aggregating each column and placing the result into a vector of the same size as the size of each vector in the input Pool. The previous implies that each vector in the pool (under a particular descriptor of course) must have equal size. This implication also applies for 'cov' and 'icov'.\n\n"
 
-  "An additional restriction for using the 'icov' statistic is that the covariance matrix for a particular descriptor must be invertible. The 'cov' and 'icov' aggregation statistics each return a square matrix with dimension equal to the length of the vectors under the given descriptor.\n\n"
+"An additional restriction for using the 'icov' statistic is that the covariance matrix for a particular descriptor must be invertible. The 'cov' and 'icov' aggregation statistics each return a square matrix with dimension equal to the length of the vectors under the given descriptor.\n\n"
 
-  "Please also note that only the absolute values of the first and second derivates are considered when calculating the mean ('dmean' and 'dmean2') as well as for the variance ('dvar' and 'dvar2'). This is to avoid a trivial solution for the mean.");
+"Please also note that only the absolute values of the first and second derivates are considered when calculating the mean ('dmean' and 'dmean2') as well as for the variance ('dvar' and 'dvar2'). This is to avoid a trivial solution for the mean.");
 
 
 // initialize supported statistics set
 const char* supportedStats[] =
-  {"min", "max", "median", "mean", "var", "skew", "kurt",
+  {"min", "max", "median", "mean", "var", "stdev", "skew", "kurt",
    "dmean", "dvar", "dmean2", "dvar2",
    "cov", "icov",
    "copy", "value"};
@@ -97,9 +96,10 @@ void PoolAggregator::aggregateRealPool(const Pool& input, Pool& output) {
     vector<Real> data = it->second;
     int dsize = int(data.size());
 
-    // mean and variance
+    // mean, variance, and standard deviation
     Real meanVal = mean(data);
     Real varianceVal = variance(data, meanVal);
+    Real stdevVal = sqrt(varianceVal);
 
     // median
     Real medianVal = median(data);
@@ -146,6 +146,7 @@ void PoolAggregator::aggregateRealPool(const Pool& input, Pool& output) {
       else if (stats[i] == "min")    output.set(key + ".min", minVal);
       else if (stats[i] == "max")    output.set(key + ".max", maxVal);
       else if (stats[i] == "var")    output.set(key + ".var", varianceVal);
+      else if (stats[i] == "stdev")  output.set(key + ".stdev", stdevVal);    
       else if (stats[i] == "skew")   output.set(key + ".skew", skewnessVal);
       else if (stats[i] == "kurt")   output.set(key + ".kurt", kurtosisVal);
       else if (stats[i] == "dmean")  output.set(key + ".dmean", dmeanVal);
@@ -205,7 +206,7 @@ void PoolAggregator::aggregateVectorRealPool(const Pool& input, Pool& output) {
     bool skipDescriptor = false;
     for (int i=1; i<dsize; ++i) {
       if ((int)data[i].size() != vsize) {
-        cout << "WARNING: PoolAggregator: not aggregating \"" << key << "\" because it has frames of different sizes" << endl;
+        E_WARNING("PoolAggregator: not aggregating \"" << key << "\" because it has frames of different sizes");
         skipDescriptor = true;
         break;
       }
@@ -216,6 +217,10 @@ void PoolAggregator::aggregateVectorRealPool(const Pool& input, Pool& output) {
     // mean & var
     vector<Real> meanVals = meanFrames(data);
     vector<Real> varVals = varianceFrames(data);
+
+    // stdev
+    vector<Real> stdevVals(varVals);
+    std::transform(stdevVals.begin(), stdevVals.end(), stdevVals.begin(), static_cast<Real (*)(Real)>(std::sqrt));
 
     // median
     vector<Real> medianVals = medianFrames(data);
@@ -330,6 +335,9 @@ void PoolAggregator::aggregateVectorRealPool(const Pool& input, Pool& output) {
       else if (stats[i] == "var")
         for (int j=0; j<int(varVals.size()); ++j) output.add(subkey, varVals[j]);
 
+      else if (stats[i] == "stdev")
+        for (int j=0; j<int(stdevVals.size()); ++j) output.add(subkey, stdevVals[j]);
+
       else if (stats[i] == "skew")
         for (int j=0; j<int(skewnessVals.size()); ++j) output.add(subkey, skewnessVals[j]);
 
@@ -436,7 +444,7 @@ void PoolAggregator::aggregateArray2DRealPool(const Pool& input, Pool& output) {
     bool skipDescriptor = false;
     for (int i=1; i<dsize; ++i) {
       if (data[i].dim1() != dim1 || data[i].dim2() != dim2) {
-        cout << "WARNING: PoolAggregator: not aggregating \"" << key << "\" because it has frames of different sizes" << endl;
+        E_WARNING("WARNING: PoolAggregator: not aggregating \"" << key << "\" because it has frames of different sizes");
         skipDescriptor = true;
         break;
       }
@@ -507,23 +515,36 @@ void PoolAggregator::aggregateArray2DRealPool(const Pool& input, Pool& output) {
     const vector<string>& stats = getStats(key);
 
     if (contains(stats, string("cov")) || contains(stats, string("icov"))) {
-      cout << "PoolAggregator: Covariance and inverse covariance for vectors of matrices are not yet implemented" << endl;
+      E_WARNING("PoolAggregator: Covariance and inverse covariance for vectors of matrices are not yet implemented");
     }
 
     // Now add all the computed statistics into the output pool
     for (int i=0; i<int(stats.size()); ++i) {
       string subkey = key + "." + stats[i];
       if (stats[i] == "mean") addMatrixAsVectorVector(output, subkey, meanMat);
-      else if (stats[i] == "median") { /* TODO: not implemented */ }
+      else if (stats[i] == "median") { 
+        // TODO not implemented
+        E_WARNING("PoolAggregator: median is not implemented for Array2D");
+      }
       else if (stats[i] == "min") addMatrixAsVectorVector(output, subkey, minMat);
       else if (stats[i] == "max") addMatrixAsVectorVector(output, subkey, maxMat);
       else if (stats[i] == "var") addMatrixAsVectorVector(output, subkey, varMat);
+      else if (stats[i] == "stdev") { 
+        // TODO not implemented
+        E_WARNING("PoolAggregator: stdev is not implemented for Array2D");
+      }
       else if (stats[i] == "dmean") addMatrixAsVectorVector(output, subkey, dmeanMat);
       else if (stats[i] == "dvar") addMatrixAsVectorVector(output, subkey, dvarMat);
       else if (stats[i] == "dmean2") addMatrixAsVectorVector(output, subkey, d2meanMat);
       else if (stats[i] == "dvar2") addMatrixAsVectorVector(output, subkey, d2varMat);
-      else if (stats[i] == "cov") { /* TODO: not implemented */ }
-      else if (stats[i] == "icov") { /* TODO: not implemented */ }
+      else if (stats[i] == "cov") { 
+        // TODO not implemented
+        E_WARNING("PoolAggregator: cov is not implemented for Array2D");
+      }
+      else if (stats[i] == "icov") { 
+        // TODO not implemented
+        E_WARNING("PoolAggregator: cov is not implemented for Array2D");
+      }
       else if (stats[i] == "copy")
         for (int j=0; j<int(data.size()); ++j) output.add(key, data[j]);
       else if (stats[i] == "value")

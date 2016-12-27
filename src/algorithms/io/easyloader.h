@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -56,6 +56,7 @@ class EasyLoader : public AlgorithmComposite {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -108,6 +109,7 @@ class EasyLoader : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

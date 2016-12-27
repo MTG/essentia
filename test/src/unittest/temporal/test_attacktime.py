@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -46,7 +46,7 @@ class TestAttackTime(TestCase):
             if len(frame) == 0:
                 break
 
-            atime = self.attackTime(self.envelope(frame))
+            atime, start, stop = self.attackTime(self.envelope(frame))
 
             self.assert_(not numpy.isinf(atime))
             self.assert_(not numpy.isnan(atime))
@@ -58,7 +58,7 @@ class TestAttackTime(TestCase):
         self.assert_((smoothed == zeros(1024)).all())
 
         atime = self.attackTime(smoothed)
-        self.assertEqual(atime, -5.0)
+        self.assertEqualVector(atime, [-5.0, 0., 0.])
 
 
 suite = allTests(TestAttackTime)

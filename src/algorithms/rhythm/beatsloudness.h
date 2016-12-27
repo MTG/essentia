@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -46,19 +46,11 @@ class BeatsLoudness : public AlgorithmComposite {
     Real defaultBands[] = { 0.0, 200.0, 400.0, 800.0, 1600.0, 3200.0, 22000.0 };
     declareParameter("sampleRate", "the audio sampling rate [Hz]",
                      "(0,inf)", 44100.);
-    declareParameter("beats", "the list of beat positions (each position is in "
-                     "seconds)",
-                     "", std::vector<Real>());
-    declareParameter("beatWindowDuration", "the duration of the window in "
-                     "which to look for the beginning of the beat (centered "
-                     "around the positions in 'beats') [s]",
-                     "(0,inf)", 0.1);
-    // 50ms default value estimation after checking some drums' kicks duration
-    // on Freesound
-    declareParameter("beatDuration", "the duration of the window in which the "
-                     "beat will be restricted [s]",
-                     "(0,inf)", 0.05);
-    declareParameter("frequencyBands", "the list of bands to compute energy ratios [Hz", "", arrayToVector<Real>(defaultBands));
+    declareParameter("beats", "the list of beat positions (each position is in seconds)", "", std::vector<Real>());
+    declareParameter("beatWindowDuration", "window size for the beats' onset detection (the windows are centered around the positions in 'beats') [s]", "(0,inf)", 0.1);
+    // 50ms default value estimation after checking some drums' kicks duration on Freesound
+    declareParameter("beatDuration", "window size for the beats' energy computation (the windows start at the onset)[s]", "(0,inf)", 0.05);
+    declareParameter("frequencyBands", "the list of frequency bands to compute energy ratios [Hz]", "", arrayToVector<Real>(defaultBands));
   }
 
   void declareProcessOrder() {
@@ -68,6 +60,7 @@ class BeatsLoudness : public AlgorithmComposite {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -107,20 +100,12 @@ class BeatsLoudness : public Algorithm {
 
   void declareParameters() {
     Real defaultBands[] = { 20.0, 150.0, 400.0, 3200.0, 7000.0, 22000.0};
-    declareParameter("sampleRate", "the audio sampling rate [Hz]",
-                     "(0,inf)", 44100.);
-    declareParameter("beats", "the list of beat positions (each position is in "
-                     "seconds)",
-                     "", std::vector<Real>());
-    declareParameter("beatWindowDuration", "the duration of the window in "
-                     "which to look for the beginning of the beat (centered "
-                     "around the positions in 'beats') [s]",
-                     "(0,inf)", 0.1);
+    declareParameter("sampleRate", "the audio sampling rate [Hz]", "(0,inf)", 44100.);
+    declareParameter("beats", "the list of beat positions (each position is in seconds)", "", std::vector<Real>());
+    declareParameter("beatWindowDuration", "the duration of the window in which to look for the beginning of the beat (centered around the positions in 'beats') [s]", "(0,inf)", 0.1);
     // 50ms default value estimation after checking some drums' kicks duration
     // on Freesound
-    declareParameter("beatDuration", "the duration of the window in which the "
-                     "beat will be restricted [s]",
-                     "(0,inf)", 0.05);
+    declareParameter("beatDuration", "the duration of the window in which the beat will be restricted [s]", "(0,inf)", 0.05);
     declareParameter("frequencyBands", "the list of bands to compute energy ratios [Hz", "", arrayToVector<Real>(defaultBands));
   }
 
@@ -131,6 +116,7 @@ class BeatsLoudness : public Algorithm {
   void reset() { _network->reset(); }
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

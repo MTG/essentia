@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,7 +24,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* Energy::name = "Energy";
-const char* Energy::description = DOC("This algorithm computes the energy of an array of Reals.\n"
+const char* Energy::category = "Statistics";
+const char* Energy::description = DOC("This algorithm computes the energy of an array.\n"
 "\n"
 "The input array should not be empty or an exception will be thrown.\n"
 "\n"

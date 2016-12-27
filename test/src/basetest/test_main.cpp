@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -99,9 +99,9 @@ DEFINE_TEST_ALGO(A5);
 DEFINE_TEST_ALGO(A6);
 
 const char* essentia::streaming::DevNullSample::name = "DevNull";
-const char* essentia::streaming::DevNullSample::version = "1.0";
+const char* essentia::streaming::DevNullSample::category = "Aux";
 const char* essentia::streaming::DevNullSample::description = "";
 
 const char* essentia::streaming::PoolStorageFrame::name = "PoolStorage";
-const char* essentia::streaming::PoolStorageFrame::version = "1.0";
+const char* essentia::streaming::PoolStorageFrame::category = "Aux";
 const char* essentia::streaming::PoolStorageFrame::description = "";

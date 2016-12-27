@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,6 +27,7 @@
 #include <essentia/essentiautil.h>
 
 #include "extractor_music/MusicExtractor.h"
+#include "credit_libav.h" 
 
 using namespace std;
 using namespace essentia;
@@ -38,6 +39,7 @@ void usage(char *progname) {
     cout << "Usage: " << progname << " input_audiofile output_textfile [profile]" << endl;
     cout << endl << "Music extractor version '" << EXTRACTOR_VERSION << "'" << endl 
          << "built with Essentia version " << essentia::version_git_sha << endl;
+    creditLibAV();
     exit(1);
 }
 
@@ -68,7 +70,7 @@ int essentia_main(string audioFilename, string outputFilename, string profileFil
     essentia::shutdown();
   }
   catch (EssentiaException& e) {
-    cout << e.what() << endl;
+    cerr << e.what() << endl;
     return 1;
   }
   return result;

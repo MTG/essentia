@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -44,7 +44,7 @@ class Onsets : public Algorithm {
   Onsets() {
     declareInput(_detections, "detections", "matrix containing onset detection functions--rows represent the values of different detection functions and columns represent different frames of audio (i.e. detections[i][j] represents the value of the ith detection function for the jth frame of audio)");
     declareInput(_weights, "weights", "the weighting coefficicients for each detection function, must be the same as the first dimension of \"detections\"");
-    declareOutput(_onsets, "onsets", "the onset times [s]");
+    declareOutput(_onsets, "onsets", "the onset positions [s]");
 
     _movingAverage = AlgorithmFactory::create("MovingAverage");
   }
@@ -67,6 +67,7 @@ class Onsets : public Algorithm {
   }
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

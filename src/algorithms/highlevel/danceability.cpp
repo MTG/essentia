@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,14 +24,9 @@ namespace essentia {
 namespace standard {
 
 const char* Danceability::name = "Danceability";
-const char* Danceability::description = DOC(
-"Calculates the danceability vector for a given signal. The algorithm is\n"
-"derived from Detrended Fluctuation Analysis (DFA) described in [1]. The\n"
-"parameters minTau and maxTau are used to define the range of time over\n"
-"which DFA will be performed. The output of this algorithm is the\n"
-"danceability of the audio signal. These values usually range from 0 to 3\n"
-"(higher values meaning more danceable).\n"
-"Exception is thrown when minTau is greater than maxTau.\n"
+const char* Danceability::category = "Rhythm";
+const char* Danceability::description = DOC("This algorithm estimates danceability of a given audio signal. The algorithm is derived from Detrended Fluctuation Analysis (DFA) described in [1]. The parameters minTau and maxTau are used to define the range of time over which DFA will be performed. The output of this algorithm is the danceability of the audio signal. These values usually range from 0 to 3 (higher values meaning more danceable).\n\n"
+"Exception is thrown when minTau is greater than maxTau.\n\n"
 "References:\n"
 "  [1] Streich, S. and Herrera, P., Detrended Fluctuation Analysis of Music\n"
 "  Signals: Danceability Estimation and further Semantic Characterization,\n"
@@ -71,6 +66,7 @@ void Danceability::compute() {
 
   const vector<Real>& signal = _signal.get();
   Real& danceability = _danceability.get();
+  vector<Real>& dfa = _dfa.get();
   Real sampleRate = parameter("sampleRate").toReal();
 
   //---------------------------------------------------------------------
@@ -91,8 +87,9 @@ void Danceability::compute() {
     s[i] = stddev(signal, frameBegin, frameEnd);
   }
 
-  // subtract the mean from the array to make it have 0 DC
-  Real mean_s = mean(s,0,s.size());
+  // subtract the mean from the array to make it have 0 DC 
+  // (this is optional, that is, it does not affect result)
+  Real mean_s = mean(s, 0, s.size());
   for (int i=0; i<numFrames; i++)
     s[i] -= mean_s;
 
@@ -131,8 +128,8 @@ void Danceability::compute() {
         F[i] += residualError(s, frameBegin, frameEnd);
       }
 
-      // the square root of the total residual error, for all the
-      // blocks of size tau
+      // compute detrended fluctuation: the square root of the total residual error 
+      // averaged across all blocks of size tau
       if (numFrames == tau) {
          F[i] = 0.0;
       }
@@ -149,17 +146,28 @@ void Danceability::compute() {
   }
 
   danceability = 0.0;
+  dfa.assign(_tau.size()-1, 0.);
 
   // the original article tells us: for small tau's we need to adjust alpha (danceability)
-  for (int i=0; i<nFValues - 1; i++) {
+  for (int i=0; i<nFValues-1; i++) {
     if (F[i+1] != 0.0) {
-      danceability += log10(F[i+1] / F[i]) / log10( ((Real)_tau[i+1]+3.0) / ((Real)_tau[i]+3.0));
+      dfa[i] = log10(F[i+1] / F[i]) / log10( ((Real)_tau[i+1]+3.0) / ((Real)_tau[i]+3.0));
+      danceability += dfa[i];
     }
     else {
+      // should this ever happen? 
+      // is it better to keep in dfa what was calculated so far?
+      E_WARNING("Danceability: Zero detrended fluctuation value has been found. Setting danceability value to 0.");
       danceability = 0.0;
+      fill(dfa.begin(), dfa.end(), 0.);
       return;
     }
   }
+
+  if (nFValues<=1) { // signal is too short
+    E_WARNING("Danceability: Signal is too short. Setting danceability value to 0.");
+    return;
+  } 
 
   danceability /= (nFValues-1);
 
@@ -167,7 +175,8 @@ void Danceability::compute() {
      danceability = 1.0 / danceability;
   }
   else {
-     danceability = 0.0;
+    danceability = 0.0;
+    E_WARNING("Danceability: Unexpected zero danceability value.");
   }
 }
 
@@ -181,6 +190,7 @@ namespace essentia {
 namespace streaming {
 
 const char* Danceability::name = standard::Danceability::name;
+const char* Danceability::category = standard::Danceability::category;
 const char* Danceability::description = standard::Danceability::description;
 
 
@@ -191,6 +201,7 @@ Danceability::Danceability() : AlgorithmComposite() {
 
   declareInput(_signal, 1, "signal", "the input signal");
   declareOutput(_danceability, 0, "danceability", "the danceability value. Normal values range from 0 to ~3. The higher, the more danceable.");
+  declareOutput(_dfa, 0, "dfa", "the DFA exponent vector for considered segment length (tau) values");
 
   _signal >> _poolStorage->input("data"); // attach input proxy
 }
@@ -211,12 +222,15 @@ AlgorithmStatus Danceability::process() {
   if (!shouldStop()) return PASS;
 
   Real danceability;
+  vector<Real> dfa;
   
   _danceabilityAlgo->input("signal").set(_pool.value<vector<Real> >("internal.signal"));
   _danceabilityAlgo->output("danceability").set(danceability);
+  _danceabilityAlgo->output("dfa").set(dfa);
   _danceabilityAlgo->compute();
   
   _danceability.push(danceability);
+  _dfa.push(dfa);
   return FINISHED;
 }
 

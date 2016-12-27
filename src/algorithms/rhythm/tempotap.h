@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -39,7 +39,7 @@ class TempoTap : public Algorithm {
 
  public:
   TempoTap() {
-    declareInput(_featuresFrame, "featuresFrame", "input temporal features");
+    declareInput(_featuresFrame, "featuresFrame", "input temporal features of a frame");
     declareOutput(_periods, "periods", "list of tempo estimates found for each input feature, in frames");
     declareOutput(_phases, "phases", "list of initial phase candidates found for each input feature, in frames");
 
@@ -70,6 +70,7 @@ class TempoTap : public Algorithm {
   void computePhases(const std::vector<std::vector<Real> >& features);
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 

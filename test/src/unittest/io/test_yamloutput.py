@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -336,15 +336,8 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
 
         YamlOutput(filename='test.json', format='json', indent=4)(p)
         actual = open('test.json').read()
+        expected = '{\n"metadata": {\n    "version": {\n        "essentia": "' + version() + '"\n    }\n},\n"key": ["value"]\n}'
 
-        expected = """{
-"metadata": {
-    "version": {
-        "essentia": "2.1-beta1"
-    }
-},
-"key": ["value"]
-}"""
         self.assertEqual(expected, actual)
         os.unlink('test.json')
 
@@ -357,7 +350,7 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
         YamlOutput(filename='test.json', format='json', indent=0)(p)
         actual = open('test.json').read()
 
-        expected = """{"metadata": {"version": {"essentia": "2.1-beta1"}},"key": ["value"]}"""
+        expected = '{"metadata": {"version": {"essentia": "' + version() + '"}},"key": ["value"]}'
         self.assertEqual(expected, actual)
         os.unlink('test.json')
 

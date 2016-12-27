@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,7 +24,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* SpectralComplexity::name = "SpectralComplexity";
-const char* SpectralComplexity::description = DOC("This algorithm computes the spectral complexity of an spectrum of Reals. The spectral complexity is based on the number of peaks in the input spectrum.\n"
+const char* SpectralComplexity::category = "Spectral";
+const char* SpectralComplexity::description = DOC("This algorithm computes the spectral complexity of a spectrum. The spectral complexity is based on the number of peaks in the input spectrum.\n"
 "\n"
 "It is recommended that the input \"spectrum\" be computed by the Spectrum algorithm. The input \"spectrum\" is passed to the SpectralPeaks algorithm and thus inherits its input requirements and exceptions.\n"
 "References:\n"

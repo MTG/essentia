@@ -36,7 +36,7 @@ http://www.mega-nerd.com/SRC/
 
 TagLib – under the GNU Lesser General Public License version 2.1, project page at http://taglib.github.com/api/index.html
 
-libavcodec/libavformat/libavutil – audiocontext.h, audiocontext.c  (modified by MTG)
+libavcodec/libavformat/libavutil/libavresample/libswresample - under the GNU Lesser General Public License version 2.1, project page at https://www.ffmpeg.org
 
 VAMP SDK under the MIT license, with Project page at http://www.vamp-plugins.org/develop.html
 

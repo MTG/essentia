@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,8 +24,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* Variance::name = "Variance";
-const char* Variance::description = DOC(
-  "This algorithm calculates the variance of an array of Reals.");
+const char* Variance::category = "Statistics";
+const char* Variance::description = DOC("This algorithm computes the variance of an array.");
 
 void Variance::compute() {
   _variance.get() = variance(_array.get(),mean(_array.get()));

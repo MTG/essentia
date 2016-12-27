@@ -1,7 +1,20 @@
 /*
- * Copyright (C) 2006-2012 Music Technology Group (MTG)
- *                         Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
+ * This file is part of Essentia
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
 #include "tempotapmaxagreement.h"
@@ -12,7 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* TempoTapMaxAgreement::name = "TempoTapMaxAgreement";
-const char* TempoTapMaxAgreement::description = DOC("This algorithm estimates beat positions and confidence of their estimation based on the maximum mutual agreement between given beat postion candidates, estimated by different beat trackers (or using different features) [1,2].\n"
+const char* TempoTapMaxAgreement::category = "Rhythm";
+const char* TempoTapMaxAgreement::description = DOC("This algorithm outputs beat positions and confidence of their estimation based on the maximum mutual agreement between beat candidates estimated by different beat trackers (or using different features).\n"
 "\n"
 "Note that the input tick times should be in ascending order and that they cannot contain negative values otherwise an exception will be thrown.\n"
 "\n"
@@ -28,6 +42,10 @@ const char* TempoTapMaxAgreement::description = DOC("This algorithm estimates be
 
 
 void TempoTapMaxAgreement::configure() {
+
+  _phaseThreshold = 0.175;
+  _periodThreshold = 0.175;
+  _minTickTime = 5.;
 
   // assign histogram bin centers
   _histogramBins.reserve(_numberBins+1);

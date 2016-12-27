@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,11 +25,12 @@ using namespace standard;
 using namespace std;
 
 const char* BandReject::name = "BandReject";
+const char* BandReject::category = "Filters";
 const char* BandReject::description = DOC("This algorithm implements a 2nd order IIR band-reject filter. Because of its dependence on IIR, IIR's requirements are inherited.\n"
 "\n"
 "References:\n"
-"  [1] U. Zölzer, DAFX - Digital Audio Effects, p. 43,\n"
-"  John Wiley & Sons, 2002");
+"  [1] U. Zölzer, DAFX - Digital Audio Effects, 2nd edition, p. 55,\n"
+"  John Wiley & Sons, 2011");
 
 
 void BandReject::configure() {
@@ -37,7 +38,7 @@ void BandReject::configure() {
   Real fc = parameter("cutoffFrequency").toReal();
   Real fb = parameter("bandwidth").toReal();
 
-  Real c = (tan(M_PI*fb/fs) - 1) / (tan(M_2PI*fb/fs) + 1);
+  Real c = (tan(M_PI*fb/fs) - 1) / (tan(M_PI*fb/fs) + 1);
   Real d = -cos(2*M_PI*fc/fs);
 
   vector<Real> b(3, 0.0);

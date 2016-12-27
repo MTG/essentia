@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -29,6 +29,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* YamlOutput::name = "YamlOutput";
+const char* YamlOutput::category = "Input/output";
 const char* YamlOutput::description = DOC("This algorithm emits a YAML or JSON representation of a Pool.\n"
   "\n"
   "Each descriptor key in the Pool is decomposed into different nodes of the YAML (JSON) format by "

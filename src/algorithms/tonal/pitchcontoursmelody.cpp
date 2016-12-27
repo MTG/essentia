@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,7 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchContoursMelody::name = "PitchContoursMelody";
-const char* PitchContoursMelody::version = "1.0";
+const char* PitchContoursMelody::category = "Pitch";
 const char* PitchContoursMelody::description = DOC("This algorithm converts a set of pitch contours into a sequence of predominant f0 values in Hz by taking the value of the most predominant contour in each frame.\n"
 "This algorithm is intended to receive its \"contoursBins\", \"contoursSaliences\", and \"contoursStartTimes\" inputs from the PitchContours algorithm. The \"duration\" input corresponds to the time duration of the input signal. The output is a vector of estimated pitch values and a vector of confidence values.\n"
 "\n"

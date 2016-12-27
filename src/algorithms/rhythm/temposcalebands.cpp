@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,7 +26,8 @@ using namespace standard;
 
 
 const char* TempoScaleBands::name = "TempoScaleBands";
-const char* TempoScaleBands::description = DOC("This algorithm computes features for tempo tracking. The output features should be used with the TempoTap algorithm. See standard_tempotapExtractor in examples folder.\n"
+const char* TempoScaleBands::category = "Rhythm";
+const char* TempoScaleBands::description = DOC("This algorithm computes features for tempo tracking to be used with the TempoTap algorithm. See standard_rhythmextractor_tempotap in examples folder.\n"
 "\n"
 "An exception is thrown if less than 1 band is given. An exception is also thrown if the there are not an equal number of bands given as band-gains given.\n"
 "\n"

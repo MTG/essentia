@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -86,10 +86,10 @@ class BpmHistogram : public AlgorithmComposite {
 
   void declareParameters() {
     declareParameter("frameRate", "the sampling rate of the novelty curve [frame/s]", "[1,inf)", 44100./512.);
-    declareParameter("frameSize", "the minimum length to compute the fft [s]", "[1,inf)", 4.0);
-    declareParameter("zeroPadding", "zero padding factor to compute the fft [s]", "[0,inf)", 0);
+    declareParameter("frameSize", "the minimum length to compute the FFT [s]", "[1,inf)", 4.0);
+    declareParameter("zeroPadding", "zero padding factor to compute the FFT [s]", "[0,inf)", 0);
     declareParameter("overlap", "the overlap factor", "(0,inf)", 16);
-    declareParameter("windowType", "the window type to be used when computing the fft", "", "hann");
+    declareParameter("windowType", "the window type to be used when computing the FFT", "", "hann");
     declareParameter("maxPeaks", "the number of peaks to be considered at each spectrum", "(0,inf]", 50);
     declareParameter("minBpm", "the minimum bpm to consider", "[0,inf)", 30.);
     declareParameter("maxBpm", "the maximum bpm to consider", "(0,inf)", 560.);
@@ -108,10 +108,69 @@ class BpmHistogram : public AlgorithmComposite {
   AlgorithmStatus process();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
 } // namespace streaming
 } // namespace essentia
 
+#include "vectorinput.h"
+
+namespace essentia {
+namespace standard {
+
+class BpmHistogram : public Algorithm {
+ protected:
+  Input<std::vector<Real> > _signal;
+  Output<Real> _bpm;
+  Output<std::vector<Real> > _bpmCandidates;
+  Output<std::vector<Real> > _bpmMagnitudes;
+  Output<TNT::Array2D<Real> > _tempogram;
+  Output<std::vector<Real> > _frameBpms;
+  Output<std::vector<Real> > _ticks;
+  Output<std::vector<Real> > _ticksMagnitude;
+  Output<std::vector<Real> > _sinusoid;
+
+  bool _configured;
+
+  streaming::Algorithm* _bpmHistogram;
+  streaming::VectorInput<Real>* _vectorInput;
+  scheduler::Network* _network;
+  Pool _pool;
+
+ public:
+  BpmHistogram();
+  ~BpmHistogram();
+
+  void declareParameters() {
+    declareParameter("frameRate", "the sampling rate of the novelty curve [frame/s]", "[1,inf)", 44100./512.);
+    declareParameter("frameSize", "the minimum length to compute the FFT [s]", "[1,inf)", 4.0);
+    declareParameter("zeroPadding", "zero padding factor to compute the FFT [s]", "[0,inf)", 0);
+    declareParameter("overlap", "the overlap factor", "(0,inf)", 16);
+    declareParameter("windowType", "the window type to be used when computing the FFT", "", "hann");
+    declareParameter("maxPeaks", "the number of peaks to be considered at each spectrum", "(0,inf]", 50);
+    declareParameter("minBpm", "the minimum bpm to consider", "[0,inf)", 30.);
+    declareParameter("maxBpm", "the maximum bpm to consider", "(0,inf)", 560.);
+    declareParameter("weightByMagnitude", "whether to consider peaks' magnitude when building the histogram", "{true,false}", true);
+    declareParameter("constantTempo", "whether to consider constant tempo. Set to true when inducina specific tempo", "{true,false}", false);
+    declareParameter("tempoChange", "the minimum length to consider a change in tempo as stable [s]", "[0,inf)", 5.);
+    declareParameter("bpm", "bpm to induce a certain tempo tracking. Zero if unknown", "[0,inf)", 0.0);
+  }
+
+  void configure();
+  void compute();
+  void createInnerNetwork();
+  void reset();
+
+  static const char* name;
+  static const char* category;
+  static const char* description;
+};
+
+} // namespace standard
+} // namespace essentia
+
 #endif // ESSENTIA_BPMHISTOGRAM_H
+
+

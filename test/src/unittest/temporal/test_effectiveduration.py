@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -45,7 +45,6 @@ class TestEffectiveDuration(TestCase):
 
     def testThresholdRatioZero(self):
         input = [1] * 100
-        print EffectiveDuration(thresholdRatio=0.)(input)
         self.assertAlmostEqual(EffectiveDuration(thresholdRatio=0.)(input), 
                                100/44100.)
 

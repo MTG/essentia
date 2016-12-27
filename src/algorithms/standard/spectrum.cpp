@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,7 +24,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* Spectrum::name = "Spectrum";
-const char* Spectrum::description = DOC("This algorithm calculates the magnitude spectrum of an array of Reals. The resulting magnitude spectrum has a size which is half the size of the input array plus one.\n"
+const char* Spectrum::category = "Spectral";
+const char* Spectrum::description = DOC("This algorithm computes the magnitude spectrum of an array of Reals. The resulting magnitude spectrum has a size which is half the size of the input array plus one.\n"
 "\n"
 "References:\n"
 "  [1] Frequency spectrum - Wikipedia, the free encyclopedia,\n"
