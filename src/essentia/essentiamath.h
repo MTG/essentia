@@ -386,12 +386,12 @@ template <typename T> T instantPower(const std::vector<T>& array) {
 // first. For this reason we set the silence cutoff as what should be silence
 // on a 16bit pcm file, that is (16bit - 1bit)*6.02 which yields -90.3 dB thus
 // aproximately -90
-#define silenceCutoff 1e-9
-#define dbSilenceCutoff -90
+#define SILENCE_CUTOFF 1e-10
+#define DB_SILENCE_CUTOFF -100
 
 // returns true if the signal average energy is below a cutoff value, here -90dB
 template <typename T> bool isSilent(const std::vector<T>& array) {
-  return instantPower(array) < silenceCutoff;
+  return instantPower(array) < SILENCE_CUTOFF;
 }
 
 // returns the variance of an array of TNT::Array2D<T> elements
@@ -501,9 +501,12 @@ template <typename T> T round(const T value) {
 
 
 inline Real lin2db(Real value) {
-  return value < silenceCutoff ? dbSilenceCutoff : (Real)10.0 * log10(value);
+  return value < SILENCE_CUTOFF ? DB_SILENCE_CUTOFF : (Real)10.0 * log10(value);
 }
 
+inline Real lin2db(Real value, Real silenceCutoff, Real dbSilenceCutoff) {
+  return value < silenceCutoff ? dbSilenceCutoff : (Real)10.0 * log10(value);
+}
 
 inline Real db2lin(Real value) {
   return pow((Real)10.0, value/(Real)10.0);
@@ -511,6 +514,10 @@ inline Real db2lin(Real value) {
 
 inline Real pow2db(Real power) {
   return lin2db(power);
+}
+
+inline Real pow2db(Real power, Real silenceCutoff, Real dbSilenceCutoff) {
+  return lin2db(power, silenceCutoff, dbSilenceCutoff);  
 }
 
 inline Real db2pow(Real power) {
@@ -521,6 +528,10 @@ inline Real amp2db(Real amplitude) {
   return Real(2.0)*lin2db(amplitude);
 }
 
+inline Real amp2db(Real amplitude, Real silenceCutoff, Real dbSilenceCutoff) {
+  return Real(2.0)*lin2db(amplitude, silenceCutoff, dbSilenceCutoff);  
+}
+
 inline Real db2amp(Real amplitude) {
   return db2lin(0.5*amplitude);
 }
@@ -528,6 +539,11 @@ inline Real db2amp(Real amplitude) {
 inline Real linear(Real input) {
   return input;
 }
+
+inline Real lin2log(Real input, Real silenceCutoff, Real logSilenceCutoff) {
+  return input < silenceCutoff ? logSilenceCutoff : log(input);
+}
+
 
 #ifdef OS_WIN32
 // The following function hz2bark needs the function asinh,

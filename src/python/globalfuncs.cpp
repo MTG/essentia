@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "essentiamath.h" // for silenceCutoff
+#include "essentiamath.h" // for SILENCE_CUTOFF
 #include "streamingalgorithm.h"
 #include "poolstorage.h" // connecting pools
 #include "../algorithms/io/fileoutputproxy.h" // connecting FileOutput algorithm
@@ -238,8 +238,8 @@ is_silent(PyObject* self, PyObject* arg) {
 
   double p = internal_instant_power(arg);
 
-  if (p < silenceCutoff) Py_RETURN_TRUE;
-  else                   Py_RETURN_FALSE;
+  if (p < SILENCE_CUTOFF) Py_RETURN_TRUE;
+  else                    Py_RETURN_FALSE;
 }
 
 static PyObject*
