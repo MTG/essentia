@@ -28,7 +28,7 @@ const char* MFCC::name = "MFCC";
 const char* MFCC::category = "Spectral";
 const char* MFCC::description = DOC("This algorithm computes the mel-frequency cepstrum coefficients of a spectrum. As there is no standard implementation, the MFCC-FB40 is used by default:\n"
 "  - filterbank of 40 bands from 0 to 11000Hz\n"
-"  - take the log value of the spectrum energy in each mel band\n"
+"  - take the log value of the spectrum energy in each mel band. Bands energy values below silence threshold will be clipped to its value before computing log-energies\n"
 "  - DCT of the 40 bands down to 13 mel coefficients\n"
 "There is a paper describing various MFCC implementations [1].\n"
 "\n"
@@ -93,9 +93,12 @@ void MFCC::configure() {
                   INHERIT("liftering"));
   _logbands.resize(parameter("numberBands").toInt());
 
-  setCompressor(parameter("logType").toString());
-
+  _logType = parameter("logType").toLower();
+  _silenceThreshold = parameter("silenceThreshold").toReal();
+  _dbSilenceThreshold = 10 * log10(_silenceThreshold);
+  _logSilenceThreshold = log(_silenceThreshold);
 }
+
 
 void MFCC::compute() {
 
@@ -111,30 +114,25 @@ void MFCC::compute() {
 
   // take the dB amplitude of the spectrum
   for (int i=0; i<int(bands.size()); ++i) {
-    _logbands[i] = (*_compressor)(bands[i]);
+    if (_logType == "dbpow") {
+      _logbands[i] = pow2db(bands[i], _silenceThreshold, _dbSilenceThreshold);
+    }
+    else if (_logType == "dbamp") {
+      _logbands[i] = amp2db(bands[i], _silenceThreshold, _dbSilenceThreshold);
+    }
+    else if (_logType == "log") {
+      _logbands[i] = lin2log(bands[i], _silenceThreshold, _logSilenceThreshold);
+    }
+    else if (_logType == "natural") {
+      _logbands[i] = bands[i]; 
+    }
+    else {
+      throw EssentiaException("MFCC: Bad 'logType' parameter");
+    }
   }
 
   // compute the DCT of these bands
   _dct->input("array").set(_logbands);
   _dct->output("dct").set(mfcc);
   _dct->compute();
-}
-
-void MFCC::setCompressor(std::string logType){
-  if (logType == "natural"){
-    _compressor = linear;
-  }
-  else if (logType == "dbpow"){
-    _compressor = pow2db;
-  }
-  else if (logType == "dbamp"){
-    _compressor = amp2db;
-  }
-  else if (logType == "log"){
-    _compressor = log;
-  }
-  else{
-    throw EssentiaException("MFCC: Bad 'logType' parameter");
-  }
-
 }
