@@ -31,7 +31,7 @@ namespace standard {
 class SpectrumCQ : public Algorithm {
 
  protected:
-  Input<std::vector<std::complex<Real> > > _signal;
+  Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _spectrumCQ;
 
   Algorithm* _constantq;
@@ -50,7 +50,7 @@ class SpectrumCQ : public Algorithm {
  public:
   SpectrumCQ() {
     declareInput(_signal, "frame", "the input audio frame");
-    declareOutput(_spectrumCQ, "spectrumCQ", "the magnitude constant-Q spectrum of the input audio signal");
+    declareOutput(_spectrumCQ, "spectrumCQ", "the magnitude constant-Q spectrum");
 
     _constantq = AlgorithmFactory::create("ConstantQ");
     _magnitude = AlgorithmFactory::create("Magnitude"); 
@@ -89,7 +89,7 @@ namespace streaming {
 class SpectrumCQ : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<std::complex<Real> > > _signal;
+  Sink<std::vector<Real> > _signal;
   Source<std::vector<Real> > _spectrumCQ;
 
  public:

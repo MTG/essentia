@@ -93,8 +93,8 @@ void ConstantQ::configure() {
   // Work out Q value for Filter bank
   _dQ = 1/(pow(2,(1/(double)_binsPerOctave))-1); 
   // Number of Constant Q bins
-  _uK = (unsigned int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));  
-  
+  _uK = (unsigned int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));
+
   _FFTLength = (int) pow(2, nextpow2(ceil(_dQ *_sampleRate/_minFrequency)));
   _hop = _FFTLength/8; // hop size is window length divided by 32
 

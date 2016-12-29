@@ -52,16 +52,17 @@ void SpectrumCQ::configure() {
 
 void SpectrumCQ::compute() {
 
-  const vector<complex<Real> >& signal = _signal.get();
+  const vector<Real>& signal = _signal.get();
   vector<Real>& spectrumCQ = _spectrumCQ.get();
 
-  // compute FFT first...
-  _constantq->input("frame").set(signal);
-  _magnitude->output("magnitude").set(spectrumCQ);
+  // Convert signal from Real to complex
+  vector<complex<Real> > signalC(signal.begin(), signal.end());
 
+  // Compute ConstantQ
+  _constantq->input("frame").set(signalC);
   _constantq->compute();
   
+  // Compute magnitude spectrum
+  _magnitude->output("magnitude").set(spectrumCQ);
   _magnitude->compute();
-
-
 }
