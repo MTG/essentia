@@ -38,13 +38,6 @@ class SpectrumCQ : public Algorithm {
   Algorithm* _magnitude;
   
   std::vector<std::complex<Real> > _CQBuffer;
-  
-  double _sampleRate;
-  double _minFrequency;
-  double _maxFrequency;
-  unsigned int _binsPerOctave;
-  double _threshold;
-  unsigned _octaves;
 
  
  public:
@@ -62,11 +55,12 @@ class SpectrumCQ : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("minFrequency", "the minimum frequency", "[1,inf)", 55.);
-    declareParameter("maxFrequency", "the maximum frequency", "[1,inf)", 7040.);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    
-    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);  
-    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);       
+    declareParameter("minFrequency", "minimum frequency [Hz]", "[1,inf)", 32.7);
+    declareParameter("numberBins", "number of frequency bins, starting at minFrequency", "[1,inf)", 84);
+    declareParameter("binsPerOctave", "number of bins per octave", "[1,inf)", 12);    
+    declareParameter("sampleRate", "FFT sampling rate [Hz]", "[0,inf)", 44100.);  
+    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);
+    // TODO: explain threshold better      
   }
 
   void configure();

@@ -31,32 +31,31 @@ namespace standard {
 
 class ConstantQ : public Algorithm {
  protected:
-  Input<std::vector<std::complex<Real> > > _signal;
+  Input<std::vector<std::complex<Real> > > _fft;
   Output<std::vector<std::complex<Real> > > _constantQ;
 
-  Algorithm* _fft;
+  Algorithm* _fftc;
 
   std::vector<double> _CQdata;
   
-  double _sampleRate; //unsigned int _FS;
+  double _sampleRate;
   double _minFrequency;
   double _maxFrequency;
-  double _dQ; // Work out Q value for Filter bank
-  double _threshold; // ConstantQ threshold for kernel generation
+  double _Q;            // constant Q factor
+  double _threshold;    // threshold for kernel generation
   unsigned int _numWin;
-  unsigned int _hop;
   unsigned int _binsPerOctave;  
   unsigned int _FFTLength;
-  unsigned int _uK; // Number of constant Q bins
+  unsigned int _numberBins;
 
   struct SparseKernel {
-    std::vector<double> _sparseKernelReal;
-    std::vector<double> _sparseKernelImag;
-    std::vector<unsigned> _sparseKernelIs; 
-    std::vector<unsigned> _sparseKernelJs;
+    std::vector<double> real;
+    std::vector<double> imag;
+    std::vector<unsigned> i; 
+    std::vector<unsigned> j;
   };
 
-  SparseKernel *m_sparseKernel;
+  SparseKernel *_sparseKernel;
 
   double hamming(int len, int n) {
     return 0.54 - 0.46*cos(2 * M_PI * n / len);
@@ -64,25 +63,26 @@ class ConstantQ : public Algorithm {
 
  public:
   ConstantQ() {
-    declareInput(_signal, "frame", "the input frame (complex)");
-    declareOutput(_constantQ, "constantq", "the Constant Q transform of the input frame");
+    declareInput(_fft, "fft", "the input FFT frame (complex, non-negative part)");
+    declareOutput(_constantQ, "constantq", "the Constant Q transform");
 
-    _fft = AlgorithmFactory::create("FFTC"); //FFT with complex input
+    _fftc = AlgorithmFactory::create("FFTC"); //FFT with complex input
   }
 
   ~ConstantQ() {
-    delete _fft;
-    if (m_sparseKernel) delete m_sparseKernel;
+    delete _fftc;
+    if (_sparseKernel) delete _sparseKernel;
   }
 
   int sizeFFT() { return _FFTLength; }
 
   void declareParameters() {
-    declareParameter("minFrequency", "the minimum frequency", "[1,inf)", 55.);
-    declareParameter("maxFrequency", "the maximum frequency", "[1,inf)", 7040.);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    
-    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);  
-    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);       
+    declareParameter("minFrequency", "minimum frequency [Hz]", "[1,inf)", 32.7);
+    declareParameter("numberBins", "number of frequency bins, starting at minFrequency", "[1,inf)", 84);
+    declareParameter("binsPerOctave", "number of bins per octave", "[1,inf)", 12);    
+    declareParameter("sampleRate", "FFT sampling rate [Hz]", "[0,inf)", 44100.);  
+    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);
+    // TODO: explain threshold better 
   }
 
   void compute();
@@ -105,13 +105,13 @@ namespace streaming {
 class ConstantQ : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<std::complex<Real> > > _signal;
+  Sink<std::vector<std::complex<Real> > > _fft;
   Source<std::vector<std::complex<Real> > > _constantQ;
 
  public:
   ConstantQ() {
     declareAlgorithm("ConstantQ");
-    declareInput(_signal, TOKEN, "frame");
+    declareInput(_fft, TOKEN, "fft");
     declareOutput(_constantQ, TOKEN, "constantq");
   }
 };
