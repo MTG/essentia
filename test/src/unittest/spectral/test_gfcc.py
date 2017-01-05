@@ -30,6 +30,7 @@ class TestGFCC(TestCase):
                     sampleRate = 44100,
                     numberBands = 40,
                     numberCoefficients = numCoeffs,
+                    silenceThreshold = 1e-9,
                     lowFrequencyBound = 0,
                     highFrequencyBound = 11000,
                     logType = logType)
@@ -52,7 +53,7 @@ class TestGFCC(TestCase):
     def testZero(self):
         # zero input should return dct(lin2db(0)). Try with different sizes
         size = 1025
-        val = amp2db(0)
+        val = 2 * 10 * np.log10(1e-9)
         expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
         while (size > 256 ):
             bands, gfcc = GFCC(inputSize = size)(zeros(size))
