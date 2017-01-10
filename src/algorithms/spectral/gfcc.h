@@ -65,7 +65,7 @@ class GFCC : public Algorithm {
     declareParameter("lowFrequencyBound", "the lower bound of the frequency range [Hz]", "[0,inf)", 40.);
     declareParameter("highFrequencyBound", "the upper bound of the frequency range [Hz]", "(0,inf)", 22050.);
     declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
-    declareParameter("silenceThreshold", "silence threshold for computing log-energy bands", "(0,inf)", 1e-9);
+    declareParameter("silenceThreshold", "silence threshold for computing log-energy bands", "(0,inf)", 1e-10);
     declareParameter("logType","logarithmic compression type. Use 'dbpow' if working with power and 'dbamp' if working with magnitudes","{natural,dbpow,dbamp,log}","dbamp");
     declareParameter("dctType", "the DCT type", "[2,3]", 2);
   }
