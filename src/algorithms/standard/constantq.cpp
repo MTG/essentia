@@ -34,6 +34,8 @@ const char* ConstantQ::description = DOC("This algorithm implements Constant Q T
 "  [1] Constant Q transform - Wikipedia, the free encyclopedia,\n"
 "  https://en.wikipedia.org/wiki/Constant_Q_transform");
 // TODO: add references
+// Brown, J. C., & Puckette, M. S. (1992). An efficient algorithm for the calculation of a constant Q transform. The Journal of the Acoustical Society of America, 92(5), 2698-2701.
+
 
 static double nextpow2(double x) {
   // returns the smallest integer n such that 2^n >= x.
@@ -55,9 +57,11 @@ void ConstantQ::compute() {
     throw EssentiaException("ERROR: ConstantQ::compute: Sparse kernel has not been initialized");
   }
 
-  if (fft.size() != _FFTLength) {
-    throw EssentiaException("ERROR: ConstantQ::compute: input FFT size must be equal to: ", _FFTLength);
+  const unsigned int _FFTSize = _FFTLength/2+1;
+  if (fft.size() != _FFTSize) {
+    throw EssentiaException("ERROR: ConstantQ::compute: input FFT size must be equal to: ", _FFTSize);
   }
+  // TODO pre-compute the size of expected non-negative part of FFT inside configure() 
 
   SparseKernel *sk = _sparseKernel;
 
@@ -70,10 +74,15 @@ void ConstantQ::compute() {
     const unsigned col = sk->i[i];
     const double & r1  = sk->real[i];
     const double & i1  = sk->imag[i];
+    /*
     const double & r2  = (double) fft[_FFTLength - col - 1].real();
     const double & i2  = (double) fft[_FFTLength - col - 1].imag();
     // add the multiplication
     constantQ[row] += complex <Real>((r1*r2 - i1*i2), (r1*i2 + i1*r2));
+    */
+    const double r2 = (double) fft[col].real();
+    const double i2 = (double) fft[col].imag();
+    constantQ[row] += complex<Real>((r1*r2 - i1*i2), (r1*i2 + i1*r2));
   }    
 }
 
@@ -96,70 +105,93 @@ void ConstantQ::configure() {
 
   SparseKernel *sk = new SparseKernel();
 
-  // Initialize temporal kernel with zeros
-  vector<complex<Real> > hammingWindow(_FFTLength, 0.0 + 0.0j);
-  vector<complex<Real> > transfHammingWindow(_FFTLength, 0.0 + 0.0j);
-
   // Twice length to deal with complex numbers
   sk->i.reserve( _FFTLength*2 );
   sk->j.reserve( _FFTLength*2 );
   sk->real.reserve( _FFTLength*2 );
   sk->imag.reserve( _FFTLength*2 );
   
+  vector<complex<Real> > binKernel;
+  vector<complex<Real> > binKernelFFT;
+
   // For each bin value k, calculate temporal kernel, take its fft to
   // calculate the spectral kernel then threshold it to make it sparse and
   // add it to the sparse kernels matrix
-  double squareThreshold = _threshold * _threshold;
+  
+  //double squareThreshold = _threshold * _threshold;
 
   for (unsigned k=_numberBins; k--; ) {
+    // Compute temporal kernel
 
-    // Compute a hamming window
-    hammingWindow.assign(_FFTLength, 0.0 + 0.0j);
-    const double binFrequency = _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave)
+    const double frequency = _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave);
+    const unsigned length = (int) ceil(_Q * _sampleRate / frequency);
+
     // TODO check that the filter pass-band does not lie beyond Nyquist
     // similar to https://github.com/librosa/librosa/blob/master/librosa/filters.py#L625
 
+    // Compute window
+    // TODO configure windowing: zeroPhase=False; try zeroPadding
+    // TODO make window type configurable
+    vector<Real> window(length, 1.);
 
-    const unsigned hammingLength = (int) ceil(_Q * _sampleRate / binFrequency);
-    unsigned origin = _FFTLength/2 - hammingLength/2;
+    _windowing->input("frame").set(window);
+    _windowing->output("frame").set(window); // would this work? 
+    _windowing->compute();
 
-    for (int i=0; i<hammingLength; i++) {
-      const double angle = 2 * M_PI * _Q * i/hammingLength;
-      const double absol = hamming(hammingLength, i)/hammingLength;
-      hammingWindow[origin + i] = complex <Real>(absol*cos(angle), absol*sin(angle));
+    // Initialize temporal kernel with zeros 
+    binKernel.assign(_FFTLength, 0.0 + 0.0j);
+
+    // Compute temporal kernel
+    unsigned origin = _FFTLength/2 - length/2;
+    for (int i=0; i<length; i++) {
+      const double angle = 2 * M_PI * _Q * i / length;
+      binKernel[origin + i] = complex <Real>(window[i]*cos(angle), window[i]*sin(angle));
     }
 
-    // TODO why?
+    /*
+    // TODO why? commenting this for now...
     for (int i=0; i <_FFTLength/2; ++i) {
       complex<Real> temp = hammingWindow[i];
       hammingWindow[i] = hammingWindow[i + _FFTLength/2];
       hammingWindow[i + _FFTLength/2] = temp;
     }
+    */
 
-    // Compute FFT of the hamming window
-    _fftc->input("frame").set(hammingWindow);
-    _fftc->output("fft").set(transfHammingWindow);
+    // Compute FFT of temporal kernel
+    _fftc->input("frame").set(binKernel);
+    _fftc->output("fft").set(binKernelFFT);
     _fftc->compute();
 
-    // Increase the output size of the FFT to _FFTLength by mirroring the data
-    int ind = transfHammingWindow.size() - 1;
-    transfHammingWindow.resize(_FFTLength);
-    for (int i=0; i <_FFTLength/2; ++i) {
-      transfHammingWindow.push_back(transfHammingWindow[ind--]);
-    }
+    // Work only with a non-negative part of FFT
 
-    for (int j=0; j<_FFTLength; j++) {
-      // Perform thresholding
-      const double squaredBin = squaredModule(transfHammingWindow[j]);
+    /*
+    // Increase the output size of the FFT to _FFTLength by mirroring the data
+    int ind = binKernelFFT.size() - 1;
+    binKernelFFT.resize(_FFTLength);
+    for (int i=0; i <_FFTLength/2; ++i) {
+      binKernelFFT.push_back(binKernelFFT[ind--]);
+    }
+    */
+
+    for (int j=0; j<binKernelFFT.size(); j++) {
+      // Perform thresholding: keep values with absolute value above the threshold
+      if (abs(binKernelFFT[j]) <= _threshold) continue;
+      // TODO: use custom abs value to increase precision?
+      /* TODO: before there was a squared threshold:
+      const double squaredBin = squaredModule(binKernelFFT[j]);
       if (squaredBin <= squareThreshold) continue;
+      */
 
       // Insert non-zero position indexes
       sk->i.push_back(j);
       sk->j.push_back(k);
 
       // Take conjugate, normalize and add to array sparseKernel
-      sk->real.push_back(((complex<double>) transfHammingWindow[j]).real()/_FFTLength);
-      sk->imag.push_back(-((complex<double>) transfHammingWindow[j]).imag()/_FFTLength);
+      // TODO: normalized using binKernelFFT.size instead?
+      // TODO: why taking conjugate? disable for now
+      sk->real.push_back(((complex<double>) binKernelFFT[j]).real()/_FFTLength);
+      sk->imag.push_back(((complex<double>) binKernelFFT[j]).imag()/_FFTLength);
+      //sk->imag.push_back(-((complex<double>) binKernelFFT[j]).imag()/_FFTLength);
     }
   }
   _sparseKernel = sk;

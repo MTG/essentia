@@ -35,6 +35,7 @@ class ConstantQ : public Algorithm {
   Output<std::vector<std::complex<Real> > > _constantQ;
 
   Algorithm* _fftc;
+  Algorithm* _windowing;
 
   std::vector<double> _CQdata;
   
@@ -57,9 +58,6 @@ class ConstantQ : public Algorithm {
 
   SparseKernel *_sparseKernel;
 
-  double hamming(int len, int n) {
-    return 0.54 - 0.46*cos(2 * M_PI * n / len);
-  }
 
  public:
   ConstantQ() {
@@ -67,6 +65,7 @@ class ConstantQ : public Algorithm {
     declareOutput(_constantQ, "constantq", "the Constant Q transform");
 
     _fftc = AlgorithmFactory::create("FFTC"); //FFT with complex input
+    _windowing = AlgorithmFactory::create("Windowing");
   }
 
   ~ConstantQ() {
