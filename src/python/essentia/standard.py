@@ -77,7 +77,7 @@ def _create_essentia_class(name, moduleName = __name__):
                 arg = args[i]
                 
                 if type(args[i]).__module__ == 'numpy':     
-                    if not args[i].flags['OWNDATA']:
+                    if not args[i].flags['C_CONTIGUOUS']:
                         arg = copy(args[i])
                 
                 goalType = _c.Edt(self.inputType(inputNames[i]))
