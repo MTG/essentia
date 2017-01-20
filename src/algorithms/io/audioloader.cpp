@@ -106,8 +106,7 @@ void AudioLoader::openAudioFile(const string& filename) {
 
     if (_selectedStream >= nAudioStreams) {
         throw EssentiaException("AudioLoader ERROR: 'audioStream' parameter set to ", _selectedStream ,". It should be smaller than the audio streams count, ", nAudioStreams);
-        E_INFO(_selectedStream);
-        E_INFO(_streams.size());
+
     }
 
     _streamIdx = _streams[_selectedStream];
