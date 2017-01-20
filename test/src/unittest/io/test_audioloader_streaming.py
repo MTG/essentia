@@ -250,13 +250,12 @@ class TestAudioLoader_Streaming(TestCase):
     
     def testMultiStream(self):
         
-        # A multistream file containing the same audio on streams 0 and 1 
-        filename = 'multistream.mka'
-        
+        #  stream 0 of multistream1.mka is the same as stream 1 of multistream2.mka 
+
         p = Pool()
 
-        stream0 = sAudioLoader(filename=join(testdata.audio_dir, 'generated', 'multistream', filename), audioStream = 0)
-        stream1 = sAudioLoader(filename=join(testdata.audio_dir, 'generated', 'multistream', filename), audioStream = 1)
+        stream0 = sAudioLoader(filename=join(testdata.audio_dir, 'generated', 'multistream', 'multistream1.mka'), audioStream = 0)
+        stream1 = sAudioLoader(filename=join(testdata.audio_dir, 'generated', 'multistream', 'multistream2.mka'), audioStream = 1)
 
         stream0.audio >> (p, 'stream0')
         stream0.numberChannels >> (p, 'nChannels0')
@@ -278,7 +277,7 @@ class TestAudioLoader_Streaming(TestCase):
         self.assertEqualVector(p['stream0'][0],p['stream1'][0])
 
         # An exception should be thrown if the required audioStream is out of bounds
-        self.assertConfigureFails(sAudioLoader(), {'filename' :join(testdata.audio_dir, 'generated', 'multistream', filename), 'audioStream' : 2})
+        self.assertConfigureFails(sAudioLoader(), {'filename' :join(testdata.audio_dir, 'generated', 'multistream', 'multistream1.mka'), 'audioStream' : 2})
 
 
 
