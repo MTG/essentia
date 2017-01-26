@@ -61,7 +61,8 @@ void MonoLoader::configure() {
   if (!filename.isConfigured()) return;
 
   _audioLoader->configure("filename", filename,
-                          "computeMD5", false);
+                          "computeMD5", false,
+                          INHERIT("audioStream"));
 
   int inputSampleRate = (int)lastTokenProduced<Real>(_audioLoader->output("sampleRate"));
 
@@ -105,7 +106,8 @@ void MonoLoader::configure() {
 
   _loader->configure(INHERIT("filename"),
                      INHERIT("sampleRate"),
-                     INHERIT("downmix"));
+                     INHERIT("downmix"),
+                     INHERIT("audioStream"));
 }
 
 void MonoLoader::compute() {

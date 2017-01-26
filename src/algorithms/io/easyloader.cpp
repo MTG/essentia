@@ -66,7 +66,8 @@ void EasyLoader::configure() {
 
   _monoLoader->configure(INHERIT("filename"),
                          INHERIT("sampleRate"),
-                         INHERIT("downmix"));
+                         INHERIT("downmix"),
+                         INHERIT("audioStream"));
 
   _params.add("originalSampleRate", _monoLoader->parameter("originalSampleRate"));
 
@@ -111,7 +112,8 @@ void EasyLoader::configure() {
                      INHERIT("startTime"),
                      INHERIT("endTime"),
                      INHERIT("replayGain"),
-                     INHERIT("downmix"));
+                     INHERIT("downmix"),
+                     INHERIT("audioStream"));
 }
 
 void EasyLoader::compute() {
