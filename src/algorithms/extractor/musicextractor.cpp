@@ -17,16 +17,55 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "MusicExtractor.h"
-#include "tagwhitelist.h"
+#include "musicextractor.h"
+#include "extractor_music/tagwhitelist.h"
+
 using namespace std;
-using namespace essentia;
-using namespace streaming;
-using namespace scheduler;
 
-int MusicExtractor::compute(const string& audioFilename){
+namespace essentia {
+namespace standard {
 
-  AlgorithmFactory& factory = AlgorithmFactory::instance();
+const char* MusicExtractor::name = "MusicExtractor";
+const char* MusicExtractor::category = "Extractors";
+const char* MusicExtractor::description = DOC("This algorithm is a wrapper for Music Extractor");
+
+
+MusicExtractor::MusicExtractor() {
+  declareInput(_audiofile, "filename", "the input audiofile");
+  declareOutput(_resultsStats, "results", "Analysis results pool with across-frames statistics");
+  declareOutput(_resultsFrames, "resultsFrames", "Analysis results pool with computed frame values");
+}
+
+MusicExtractor::~MusicExtractor() {
+    for (int i = 0; i < (int)svms.size(); i++) {
+      if (svms[i]) {
+        delete svms[i];
+      }
+    }
+}
+
+void MusicExtractor::reset() {}
+
+void MusicExtractor::configure() {
+  options.clear();
+  setExtractorDefaultOptions();
+
+  if (parameter("profile").isConfigured()) { 
+    setExtractorOptions(parameter("profile").toString());
+  }
+}
+
+void MusicExtractor::compute() {
+
+  const string& audioFilename = _audiofile.get();
+
+  Pool& resultsStats = _resultsStats.get();
+  Pool& resultsFrames = _resultsFrames.get();
+
+  Pool results;
+  Pool stats;
+
+  streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
   analysisSampleRate = options.value<Real>("analysisSampleRate");
   startTime = options.value<Real>("startTime");
@@ -46,30 +85,29 @@ int MusicExtractor::compute(const string& audioFilename){
   // TODO: remove for consistency? evaluate on classification tasks?
 
   cerr << "Process step: Read metadata" << endl;
-  readMetadata(audioFilename);
+  readMetadata(audioFilename, results);
 
   if (requireMbid
       && !results.contains<vector<string> >("metadata.tags.musicbrainz_trackid")
       && !results.contains<string>("metadata.tags.musicbrainz_trackid")) {
-      cerr << "  Cannot find musicbrainz recording id" << endl;
-      return 2;
+      throw EssentiaException("MusicExtractor: Error processing ", audioFilename, " file: cannot find musicbrainz recording id");
   }
 
   cerr << "Process step: Compute md5 audio hash and codec" << endl;
-  computeMetadata(audioFilename);
+  computeMetadata(audioFilename, results);
 
   cerr << "Process step: Compute EBU R128 loudness" << endl;
-  computeLoudnessEBUR128(audioFilename);
+  computeLoudnessEBUR128(audioFilename, results);
 
   cerr << "Process step: Replay gain" << endl;
-  computeReplayGain(audioFilename); // compute replay gain and the duration of the track
+  computeReplayGain(audioFilename, results); // compute replay gain and the duration of the track
 
   cerr << "Process step: Compute audio features" << endl;
 
   // normalize the audio with replay gain and compute as many lowlevel, rhythm,
   // and tonal descriptors as possible
 
-  Algorithm* loader = factory.create("EasyLoader",
+  streaming::Algorithm* loader = factory.create("EasyLoader",
                                     "filename",   audioFilename,
                                     "sampleRate", analysisSampleRate,
                                     "startTime",  startTime,
@@ -88,14 +126,14 @@ int MusicExtractor::compute(const string& audioFilename){
   rhythm->createNetwork(source, results);
   tonal->createNetworkTuningFrequency(source, results);
 
-  Network network(loader,false);
+  scheduler::Network network(loader, false);
   network.run();
 
 
   // Descriptors that require values from other descriptors in the previous chain
   lowlevel->computeAverageLoudness(results);  // requires 'loudness'
 
-  Algorithm* loader_2 = factory.create("EasyLoader",
+  streaming::Algorithm* loader_2 = factory.create("EasyLoader",
                                        "filename",   audioFilename,
                                        "sampleRate", analysisSampleRate,
                                        "startTime",  startTime,
@@ -107,7 +145,7 @@ int MusicExtractor::compute(const string& audioFilename){
   rhythm->createNetworkBeatsLoudness(source_2, results);  // requires 'beat_positions'
   tonal->createNetwork(source_2, results);                // requires 'tuning frequency'
 
-  Network network_2(loader_2);
+  scheduler::Network network_2(loader_2);
   network_2.run();
 
   // Descriptors that require values from other descriptors in the previous chain
@@ -120,7 +158,7 @@ int MusicExtractor::compute(const string& audioFilename){
 
 
   cerr << "Process step: Compute aggregation"<<endl;
-  this->stats = this->computeAggregation(results);
+  stats = computeAggregation(results);
 
   // pre-trained classifiers are only available in branches devoted for that
   // (eg: 2.0.1)
@@ -130,7 +168,16 @@ int MusicExtractor::compute(const string& audioFilename){
   }
 
   cerr << "All done"<<endl;
-  return 0;
+
+  resultsStats = stats;
+
+  if (options.value<Real>("outputFrames")) {
+    resultsFrames = results;
+  }
+  else { 
+    resultsFrames = Pool(); // return empty Pool otherwise
+  }
+
 }
 
 
@@ -220,10 +267,12 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
 }
 
 
-void MusicExtractor::readMetadata(const string& audioFilename) {
+void MusicExtractor::readMetadata(const string& audioFilename, Pool& results) {
   // Pool Connector in streaming mode currently does not support Pool sources,
   // therefore, using standard mode
 
+  // TODO this should not be hardcoded here, this could be a part of (default) profile file configuration,
+  // or passed as a parameter.
   vector<string> whitelist = arrayToVector<string>(tagWhitelist);
   standard::Algorithm* metadata = standard::AlgorithmFactory::create("MetadataReader",
                                                                      "filename", audioFilename,
@@ -293,9 +342,9 @@ void MusicExtractor::readMetadata(const string& audioFilename) {
   */
 }
 
-void MusicExtractor::computeMetadata(const string& audioFilename) {
-  AlgorithmFactory& factory = AlgorithmFactory::instance();
-  Algorithm* loader = factory.create("AudioLoader",
+void MusicExtractor::computeMetadata(const string& audioFilename, Pool& results) {
+  streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
+  streaming::Algorithm* loader = factory.create("AudioLoader",
                                      "filename",   audioFilename,
                                      "computeMD5", true);
 
@@ -306,7 +355,7 @@ void MusicExtractor::computeMetadata(const string& audioFilename) {
   loader->output("bit_rate")        >> PC(results, "metadata.audio_properties.bit_rate");
   loader->output("codec")           >> PC(results, "metadata.audio_properties.codec");
 
-  Network network(loader);
+  scheduler::Network network(loader);
   network.run();
 
   // This is just our best guess as to if a file is in a lossless or lossy format
@@ -323,19 +372,19 @@ void MusicExtractor::computeMetadata(const string& audioFilename) {
 }
 
 
-void MusicExtractor::computeLoudnessEBUR128(const string& audioFilename) {
+void MusicExtractor::computeLoudnessEBUR128(const string& audioFilename, Pool& results) {
   // Note: we can merge into the network used in computeMetadata to avoid
   //       loading audio another time. Keeping the code separate for now for
   //       the sake of code simplicity.
 
-  AlgorithmFactory& factory = AlgorithmFactory::instance();
-  Algorithm* loader = factory.create("AudioLoader", "filename",   audioFilename);
-  Algorithm* demuxer = factory.create("StereoDemuxer");
-  Algorithm* muxer = factory.create("StereoMuxer");
-  Algorithm* resampleR = factory.create("Resample");
-  Algorithm* resampleL = factory.create("Resample");
-  Algorithm* trimmer = factory.create("StereoTrimmer");
-  Algorithm* loudness = factory.create("LoudnessEBUR128");
+  streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
+  streaming::Algorithm* loader = factory.create("AudioLoader", "filename",   audioFilename);
+  streaming::Algorithm* demuxer = factory.create("StereoDemuxer");
+  streaming::Algorithm* muxer = factory.create("StereoMuxer");
+  streaming::Algorithm* resampleR = factory.create("Resample");
+  streaming::Algorithm* resampleL = factory.create("Resample");
+  streaming::Algorithm* trimmer = factory.create("StereoTrimmer");
+  streaming::Algorithm* loudness = factory.create("LoudnessEBUR128");
 
   int inputSampleRate = (int)lastTokenProduced<Real>(loader->output("sampleRate"));
   resampleR->configure("inputSampleRate", inputSampleRate,
@@ -364,32 +413,32 @@ void MusicExtractor::computeLoudnessEBUR128(const string& audioFilename) {
   loudness->output("shortTermLoudness") >> PC(results, "lowlevel.loudness_ebu128.short_term");;
   loudness->output("loudnessRange") >> PC(results, "lowlevel.loudness_ebu128.loudness_range");
   
-  Network network(loader);
+  scheduler::Network network(loader);
   network.run();
 }
 
 
-void MusicExtractor::computeReplayGain(const string& audioFilename) {
+void MusicExtractor::computeReplayGain(const string& audioFilename, Pool& results) {
 
-  AlgorithmFactory& factory = AlgorithmFactory::instance();
+  streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
   replayGain = 0.0;
   int length = 0;
 
   while (true) {
-    Algorithm* audio = factory.create("EqloudLoader",
+    streaming::Algorithm* audio = factory.create("EqloudLoader",
                                       "filename",   audioFilename,
                                       "sampleRate", analysisSampleRate,
                                       "startTime",  startTime,
                                       "endTime",    endTime,
                                       "downmix",    downmix);
-    Algorithm* rgain = factory.create("ReplayGain", "applyEqloud", false);
+    streaming::Algorithm* rgain = factory.create("ReplayGain", "applyEqloud", false);
 
     audio->output("audio")      >> rgain->input("signal");
     rgain->output("replayGain") >> PC(results, "metadata.audio_properties.replay_gain");
 
     try {
-      Network network(audio);
+      scheduler::Network network(audio);
       network.run();
       length = audio->output("audio").totalProduced();
       replayGain = results.value<Real>("metadata.audio_properties.replay_gain");
@@ -470,17 +519,14 @@ void MusicExtractor::loadSVMModels() {
 void MusicExtractor::computeSVMDescriptors(Pool& pool) {
   cerr << "Process step: SVM models" << endl;
   for (int i = 0; i < (int)svms.size(); i++) {
-
     svms[i]->input("pool").set(pool);
     svms[i]->output("pool").set(pool);
     svms[i]->compute();
-
   }
 }
 
 
 void MusicExtractor::setExtractorOptions(const std::string& filename) {
-  setExtractorDefaultOptions();
 
   if (filename.empty()) return;
 
@@ -613,3 +659,9 @@ void MusicExtractor::mergeValues(Pool &pool) {
     pool.set(keys[i], options.value<string>(mergeKeyPrefix + "." + keys[i]));
   }
 }
+
+
+
+
+} // namespace standard
+} // namespace essentia

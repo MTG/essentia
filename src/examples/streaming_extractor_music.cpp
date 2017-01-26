@@ -23,16 +23,22 @@
 #include <windows.h>
 #endif
 
+#include <essentia/essentia.h>
+#include <essentia/algorithm.h>
+#include <essentia/algorithmfactory.h> 
 #include <essentia/streaming/algorithms/poolstorage.h>
 #include <essentia/essentiautil.h>
+#include <essentia/utils/extractor_music/extractor_version.h>
 
-#include "extractor_music/MusicExtractor.h"
 #include "credit_libav.h" 
+
 
 using namespace std;
 using namespace essentia;
-using namespace essentia::streaming;
-using namespace essentia::scheduler;
+using namespace essentia::standard;
+//using namespace essentia::streaming;
+//using namespace essentia::scheduler;
+
 
 void usage(char *progname) {
     cout << "Error: wrong number of arguments" << endl;
@@ -40,33 +46,90 @@ void usage(char *progname) {
     cout << endl << "Music extractor version '" << EXTRACTOR_VERSION << "'" << endl 
          << "built with Essentia version " << essentia::version_git_sha << endl;
     creditLibAV();
+
     exit(1);
 }
+
+
+void setExtractorDefaultOptions(Pool &options) {
+  options.set("outputFrames", false);
+  options.set("outputFormat", "json");
+  options.set("requireMbid", false);
+  options.set("indent", 4);
+
+  options.set("highlevel.inputFormat", "json");
+}
+
+
+void setExtractorOptions(const std::string& filename, Pool& options) {
+  setExtractorDefaultOptions(options);
+  if (filename.empty()) return;
+
+  Pool opts;
+  Algorithm * yaml = AlgorithmFactory::create("YamlInput", "filename", filename);
+  yaml->output("pool").set(opts);
+  yaml->compute();
+  delete yaml;
+  options.merge(opts, "replace");
+}
+
+
+void outputToFile(Pool& pool, const string& outputFilename, Pool& options) {
+
+  cerr << "Writing results to file " << outputFilename << endl;
+  int indent = (int)options.value<Real>("indent");
+
+  string format = options.value<string>("outputFormat");
+  Algorithm* output = AlgorithmFactory::create("YamlOutput",
+                                               "filename", outputFilename,
+                                               "doubleCheck", true,
+                                               "format", format,
+                                               "writeVersion", false,
+                                               "indent", indent);
+  output->input("pool").set(pool);
+  output->compute();
+  delete output;
+}
+
 
 int essentia_main(string audioFilename, string outputFilename, string profileFilename) {
   // Returns: 1 on essentia error
   //          2 if there are no tags in the file
+  // TODO: is 2 recieved?
+
   int result;
   try {
     essentia::init();
 
     cout.precision(10); // TODO ????
 
+    Pool options;
+    setExtractorOptions(profileFilename, options);
+
+    Algorithm* extractor = AlgorithmFactory::create("MusicExtractor",
+                                                    "profile", profileFilename);
+    /*
     MusicExtractor *extractor = new MusicExtractor();
 
     extractor->setExtractorOptions(profileFilename);
     extractor->mergeValues(extractor->results);
+    */
 
-    result = extractor->compute(audioFilename);
+    Pool results;
+    Pool resultsFrames;
 
-    if (result > 0) {
-        cerr << "Quitting early." << endl;
-    } else {
-        extractor->outputToFile(extractor->stats, outputFilename);
-        if (extractor->options.value<Real>("outputFrames")) {
-          extractor->outputToFile(extractor->results, outputFilename+"_frames");
-        }
+    extractor->input("filename").set(audioFilename);
+    extractor->output("results").set(results);
+    extractor->output("resultsFrames").set(resultsFrames);
+
+    extractor->compute();  
+
+    outputToFile(results, outputFilename, options);
+    
+    if (options.value<Real>("outputFrames")) {
+      outputToFile(resultsFrames, outputFilename+"_frames", options);
     }
+
     essentia::shutdown();
   }
   catch (EssentiaException& e) {
