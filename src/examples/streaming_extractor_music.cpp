@@ -26,18 +26,14 @@
 #include <essentia/essentia.h>
 #include <essentia/algorithm.h>
 #include <essentia/algorithmfactory.h> 
-#include <essentia/streaming/algorithms/poolstorage.h>
-#include <essentia/essentiautil.h>
 #include <essentia/utils/extractor_music/extractor_version.h>
+#include "music_extractor/extractor_utils.h"
 
-#include "credit_libav.h" 
-
+#include "credit_libav.h"
 
 using namespace std;
 using namespace essentia;
 using namespace essentia::standard;
-//using namespace essentia::streaming;
-//using namespace essentia::scheduler;
 
 
 void usage(char *progname) {
@@ -48,47 +44,6 @@ void usage(char *progname) {
     creditLibAV();
 
     exit(1);
-}
-
-
-void setExtractorDefaultOptions(Pool &options) {
-  options.set("outputFrames", false);
-  options.set("outputFormat", "json");
-  options.set("requireMbid", false);
-  options.set("indent", 4);
-
-  options.set("highlevel.inputFormat", "json");
-}
-
-
-void setExtractorOptions(const std::string& filename, Pool& options) {
-  setExtractorDefaultOptions(options);
-  if (filename.empty()) return;
-
-  Pool opts;
-  Algorithm * yaml = AlgorithmFactory::create("YamlInput", "filename", filename);
-  yaml->output("pool").set(opts);
-  yaml->compute();
-  delete yaml;
-  options.merge(opts, "replace");
-}
-
-
-void outputToFile(Pool& pool, const string& outputFilename, Pool& options) {
-
-  cerr << "Writing results to file " << outputFilename << endl;
-  int indent = (int)options.value<Real>("indent");
-
-  string format = options.value<string>("outputFormat");
-  Algorithm* output = AlgorithmFactory::create("YamlOutput",
-                                               "filename", outputFilename,
-                                               "doubleCheck", true,
-                                               "format", format,
-                                               "writeVersion", false,
-                                               "indent", indent);
-  output->input("pool").set(pool);
-  output->compute();
-  delete output;
 }
 
 
@@ -108,12 +63,6 @@ int essentia_main(string audioFilename, string outputFilename, string profileFil
 
     Algorithm* extractor = AlgorithmFactory::create("MusicExtractor",
                                                     "profile", profileFilename);
-    /*
-    MusicExtractor *extractor = new MusicExtractor();
-
-    extractor->setExtractorOptions(profileFilename);
-    extractor->mergeValues(extractor->results);
-    */
 
     Pool results;
     Pool resultsFrames;
@@ -122,14 +71,15 @@ int essentia_main(string audioFilename, string outputFilename, string profileFil
     extractor->output("results").set(results);
     extractor->output("resultsFrames").set(resultsFrames);
 
-    extractor->compute();  
+    extractor->compute();
 
-    outputToFile(results, outputFilename, options);
-    
+    mergeValues(results, options);
+
+    outputToFile(results, outputFilename, options);    
     if (options.value<Real>("outputFrames")) {
       outputToFile(resultsFrames, outputFilename+"_frames", options);
     }
-
+    delete extractor;
     essentia::shutdown();
   }
   catch (EssentiaException& e) {
