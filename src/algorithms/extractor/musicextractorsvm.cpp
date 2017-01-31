@@ -38,11 +38,11 @@ MusicExtractorSVM::MusicExtractorSVM() {
 }
 
 MusicExtractorSVM::~MusicExtractorSVM() {
-    for (int i = 0; i < (int)_svms.size(); i++) {
-      if (_svms[i]) {
-        delete _svms[i];
-      }
+  for (int i = 0; i < (int)_svms.size(); i++) {
+    if (_svms[i]) {
+      delete _svms[i];
     }
+  }
 }
 
 void MusicExtractorSVM::reset() {}
@@ -67,7 +67,7 @@ void MusicExtractorSVM::compute() {
 
   const Pool& inputPool = _inputPool.get();
   Pool& outputPool = _outputPool.get();
-  
+
   for (int i = 0; i < (int)_svms.size(); i++) {
     _svms[i]->input("pool").set(inputPool);
     _svms[i]->output("pool").set(outputPool);
