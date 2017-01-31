@@ -36,13 +36,16 @@ MusicExtractor::MusicExtractor() {
   declareOutput(_resultsFrames, "resultsFrames", "Analysis results pool with computed frame values");
 }
 
+
 MusicExtractor::~MusicExtractor() {
-  if (_svms) {
-    delete _svms;
+  if (options.value<Real>("highlevel.compute")) {
+    if (_svms) delete _svms;
   }
 }
 
+
 void MusicExtractor::reset() {}
+
 
 void MusicExtractor::configure() {
   options.clear();
@@ -58,8 +61,8 @@ void MusicExtractor::configure() {
   }
 }
 
-void MusicExtractor::compute() {
 
+void MusicExtractor::compute() {
   const string& audioFilename = _audiofile.get();
 
   Pool& resultsStats = _resultsStats.get();
@@ -347,6 +350,7 @@ void MusicExtractor::readMetadata(const string& audioFilename, Pool& results) {
   */
 }
 
+
 void MusicExtractor::computeMetadata(const string& audioFilename, Pool& results) {
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
   streaming::Algorithm* loader = factory.create("AudioLoader",
@@ -491,24 +495,6 @@ void MusicExtractor::computeReplayGain(const string& audioFilename, Pool& result
 }
 
 
-void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
-
-  cerr << "Writing results to file " << outputFilename << endl;
-  int indent = (int)options.value<Real>("indent");
-
-  string format = options.value<string>("outputFormat");
-  standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
-                                                                   "filename", outputFilename,
-                                                                   "doubleCheck", true,
-                                                                   "format", format,
-                                                                   "writeVersion", false,
-                                                                   "indent", indent);
-  output->input("pool").set(pool);
-  output->compute();
-  delete output;
-}
-
-
 void MusicExtractor::setExtractorOptions(const std::string& filename) {
 
   if (filename.empty()) return;
@@ -624,23 +610,6 @@ void MusicExtractor::setExtractorDefaultOptions() {
 
   // do not compute by default, whether Gaia is installed or no
   options.set("highlevel.compute", false);
-}
-
-
-void MusicExtractor::mergeValues(Pool &pool) {
-  // NOTE:
-  // - no check for if descriptors with the same names as the ones asked to
-  //   merge exist already
-  // - all descriptors to be merged are expected to be strings
-  // TODO implement a method in Pool to detect the type of a descriptor given its name
-
-  string mergeKeyPrefix = "mergeValues";
-  vector<string> keys = options.descriptorNames(mergeKeyPrefix);
-
-  for (int i=0; i<(int) keys.size(); ++i) {
-    keys[i].replace(0, mergeKeyPrefix.size()+1, "");
-    pool.set(keys[i], options.value<string>(mergeKeyPrefix + "." + keys[i]));
-  }
 }
 
 } // namespace standard

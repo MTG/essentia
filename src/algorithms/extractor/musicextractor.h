@@ -47,8 +47,6 @@ class MusicExtractor : public Algorithm {
   std::string downmix;
   standard::Algorithm* _svms;
 
-  //Pool options;
-
   void setExtractorOptions(const std::string& filename);
   void setExtractorDefaultOptions();
   void mergeValues(Pool &pool);
@@ -56,9 +54,6 @@ class MusicExtractor : public Algorithm {
   void computeMetadata(const std::string& audioFilename, Pool& results);
   void computeLoudnessEBUR128(const std::string& audioFilename, Pool& results);
   void computeReplayGain(const std::string& audioFilename, Pool& results);
-  void computeSVMDescriptors(Pool& pool);
-  void loadSVMModels();
-  void outputToFile(Pool& pool, const std::string& outputFilename);
 
   Pool computeAggregation(Pool& pool);
 
