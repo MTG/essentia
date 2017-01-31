@@ -37,11 +37,9 @@ MusicExtractor::MusicExtractor() {
 }
 
 MusicExtractor::~MusicExtractor() {
-    for (int i = 0; i < (int)svms.size(); i++) {
-      if (svms[i]) {
-        delete svms[i];
-      }
-    }
+  if (_svms) {
+    delete _svms;
+  }
 }
 
 void MusicExtractor::reset() {}
@@ -52,6 +50,11 @@ void MusicExtractor::configure() {
 
   if (parameter("profile").isConfigured()) { 
     setExtractorOptions(parameter("profile").toString());
+  }
+
+  if (options.value<Real>("highlevel.compute")) {
+    vector<string> svmModels = options.value<vector<string> >("highlevel.svm_models");
+    _svms = AlgorithmFactory::create("MusicExtractorSVM", "svms", svmModels);
   }
 }
 
@@ -163,8 +166,10 @@ void MusicExtractor::compute() {
   // pre-trained classifiers are only available in branches devoted for that
   // (eg: 2.0.1)
   if (options.value<Real>("highlevel.compute")) {
-    loadSVMModels();
-    computeSVMDescriptors(stats);
+    cerr << "Process step: SVM models" << endl;
+    _svms->input("pool").set(stats);
+    _svms->output("pool").set(stats);
+    _svms->compute();
   }
 
   cerr << "All done"<<endl;
@@ -503,28 +508,6 @@ void MusicExtractor::outputToFile(Pool& pool, const string& outputFilename){
   delete output;
 }
 
-void MusicExtractor::loadSVMModels() {
-
-  vector<string> svmModels = options.value<vector<string> >("highlevel.svm_models");
-
-  for (int i=0; i<(int)svmModels.size(); i++) {
-    cerr << "adding SVM model: " << svmModels[i] << endl;
-    standard::Algorithm* svm = standard::AlgorithmFactory::create("GaiaTransform",
-                                                                  "history", svmModels[i]);
-    svms.push_back(svm);
-  }
-}
-
-
-void MusicExtractor::computeSVMDescriptors(Pool& pool) {
-  cerr << "Process step: SVM models" << endl;
-  for (int i = 0; i < (int)svms.size(); i++) {
-    svms[i]->input("pool").set(pool);
-    svms[i]->output("pool").set(pool);
-    svms[i]->compute();
-  }
-}
-
 
 void MusicExtractor::setExtractorOptions(const std::string& filename) {
 
@@ -659,9 +642,6 @@ void MusicExtractor::mergeValues(Pool &pool) {
     pool.set(keys[i], options.value<string>(mergeKeyPrefix + "." + keys[i]));
   }
 }
-
-
-
 
 } // namespace standard
 } // namespace essentia

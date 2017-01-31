@@ -45,7 +45,7 @@ class MusicExtractor : public Algorithm {
 
   Real replayGain;
   std::string downmix;
-  std::vector<standard::Algorithm*> svms;
+  standard::Algorithm* _svms;
 
   //Pool options;
 
@@ -81,7 +81,6 @@ class MusicExtractor : public Algorithm {
   static const char* name;
   static const char* category;
   static const char* description;
-  static const char* version;  
 };
 
 } // namespace standard
