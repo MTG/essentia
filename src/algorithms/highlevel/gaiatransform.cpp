@@ -51,7 +51,12 @@ void GaiaTransform::configure() {
     return;
   }
 
+  try {
   _history.load(QString::fromStdString(filename));
+  }
+  catch (gaia2::GaiaException& e) {
+    throw EssentiaException("GaiaTransform: error loading gaia history: ", e.what());
+  }
 
   _configured = true;
 }
