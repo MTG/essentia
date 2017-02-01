@@ -49,16 +49,17 @@ void MusicExtractorSVM::reset() {}
 
 void MusicExtractorSVM::configure() {
 
-  if (!parameter("svms").isConfigured()) { 
-    throw EssentiaException("MusicExtractorSVM: No model files were specified in \"svm\" parameter");
+  if (parameter("svms").isConfigured()) { 
+    vector<string> svmModels = parameter("svms").toVectorString();
+
+    for (int i=0; i<(int) svmModels.size(); i++) {
+      E_INFO("MusicExtractorSVM: adding SVM model " << svmModels[i]);
+      Algorithm* svm = AlgorithmFactory::create("GaiaTransform", "history", svmModels[i]);
+      _svms.push_back(svm);
+    }
   }
-
-  vector<string> svmModels = parameter("svms").toVectorString();
-
-  for (int i=0; i<(int) svmModels.size(); i++) {
-    E_INFO("MusicExtractorSVM: adding SVM model " << svmModels[i]);
-    Algorithm* svm = AlgorithmFactory::create("GaiaTransform", "history", svmModels[i]);
-    _svms.push_back(svm);
+  else {
+    E_INFO("MusicExtractorSVM: no classifier models were configured by default");
   }
 }
 
