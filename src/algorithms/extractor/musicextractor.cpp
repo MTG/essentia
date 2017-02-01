@@ -83,6 +83,12 @@ void MusicExtractor::configure() {
   mfccStats = parameter("mfccStats").toVectorString();
   gfccStats = parameter("gfccStats").toVectorString();
 
+#if HAVE_GAIA2 
+  if (parameter("highlevel").isConfigured()) { 
+    svmModels = parameter("highlevel").toVectorString();
+  }
+#endif
+
   options.clear();
   setExtractorDefaultOptions();
 
@@ -91,7 +97,8 @@ void MusicExtractor::configure() {
   }
 
   if (options.value<Real>("highlevel.compute")) {
-    vector<string> svmModels = options.value<vector<string> >("highlevel.svm_models");
+    cerr << "DEBUG" << svmModels << endl;
+    svmModels = options.value<vector<string> >("highlevel.svm_models");
     _svms = AlgorithmFactory::create("MusicExtractorSVM", "svms", svmModels);
   }
 }
@@ -138,52 +145,14 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("lowlevel.gfccStats", gfccStats);
 
   // high-level
-#if HAVE_GAIA2
-  //options.set("highlevel.compute", true);
-  
-  // This list includes classifier models hosted on Essentia's website
-  const char* svmModelsArray[] = { 
-                                   "danceability",
-                                   "gender",
-                                   "genre_dortmund",
-                                   "genre_electronic",
-                                   "genre_rosamerica",
-                                   "genre_tzanetakis",
-                                   "ismir04_rhythm",
-                                   "mood_acoustic",
-                                   "mood_aggressive",
-                                   "mood_electronic",
-                                   "mood_happy",
-                                   "mood_party",
-                                   "mood_relaxed",
-                                   "mood_sad",
-                                   "moods_mirex",
-                                   "timbre",
-                                   "tonal_atonal",
-                                   "voice_instrumental" 
-                                 };
-  
-  vector<string> svmModels = arrayToVector<string>(svmModelsArray);
-  string pathToSvmModels;
-#ifdef OS_WIN32
-  pathToSvmModels = "svm_models\\";
-#else
-  pathToSvmModels = "svm_models/";
-#endif
-
-  for (int i=0; i<(int)svmModels.size(); i++) {
-    options.add("highlevel.svm_models", pathToSvmModels + svmModels[i] + ".history");
-  }
-#else
-  //options.set("highlevel.compute", false);
-  //cerr << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
-#endif
-  options.set("highlevel.inputFormat", "json");
-
-  // do not compute by default, whether Gaia is installed or no
   options.set("highlevel.compute", false);
+#if HAVE_GAIA2
+  if (!svmModels.empty()) {
+    options.add("highlevel.svm_models", svmModels);
+    options.set("highlevel.compute", true);
+  }
+#endif
 }
-
 
 
 void MusicExtractor::compute() {

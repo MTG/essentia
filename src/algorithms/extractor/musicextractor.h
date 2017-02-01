@@ -69,6 +69,10 @@ class MusicExtractor : public Algorithm {
   std::vector<std::string> mfccStats;
   std::vector<std::string> gfccStats;
 
+#if HAVE_GAIA2 
+  std::vector<std::string> svmModels;
+#endif
+
   Real replayGain;
   std::string downmix;
   standard::Algorithm* _svms;
@@ -131,6 +135,10 @@ class MusicExtractor : public Algorithm {
     
     declareParameter("mfccStats", "the statistics to compute for MFCC features", "", cepstrumStats);
     declareParameter("gfccStats", "the statistics to compute for GFCC features", "", cepstrumStats);
+
+#if HAVE_GAIA2 
+    declareParameter("highlevel", "list of high-level classifier models (gaia2 history filenames) to apply using extracted features. Skip classification if not specified (empty list)", "", Parameter::VECTOR_STRING);
+#endif
   }
 
   Pool options;
