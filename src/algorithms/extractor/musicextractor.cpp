@@ -48,6 +48,35 @@ void MusicExtractor::reset() {}
 
 
 void MusicExtractor::configure() {
+
+  analysisSampleRate = parameter("analysisSampleRate").toReal();
+  startTime = parameter("startTime").toReal();
+  endTime = parameter("endTime").toReal();
+  requireMbid = parameter("requireMbid").toBool();
+
+  lowlevelFrameSize = parameter("lowlevelFrameSize").toInt();
+  lowlevelHopSize = parameter("lowlevelHopSize").toInt();
+  lowlevelZeroPadding = parameter("lowlevelZeroPadding").toInt();
+  lowlevelSilentFrames = parameter("lowlevelSilentFrames").toLower();
+  lowlevelWindowType = parameter("lowlevelWindowType").toLower();
+
+  tonalFrameSize = parameter("tonalFrameSize").toInt();
+  tonalHopSize = parameter("tonalHopSize").toInt();
+  tonalZeroPadding = parameter("tonalZeroPadding").toInt();
+  tonalSilentFrames = parameter("tonalSilentFrames").toLower();
+  tonalWindowType = parameter("tonalWindowType").toLower();
+
+  loudnessFrameSize = parameter("loudnessFrameSize").toInt();
+  loudnessHopSize = parameter("loudnessHopSize").toInt();
+  loudnessSilentFrames = parameter("loudnessSilentFrames").toLower();
+  loudnessWindowType = parameter("loudnessWindowType").toLower();
+
+  rhythmMethod = parameter("rhythmMethod").toLower();
+  rhythmMinTempo = parameter("rhythmMinTempo").toInt();
+  rhythmMaxTempo = parameter("rhythmMaxTempo").toInt();
+
+  downmix = "mix";
+
   options.clear();
   setExtractorDefaultOptions();
 
@@ -62,6 +91,106 @@ void MusicExtractor::configure() {
 }
 
 
+void MusicExtractor::setExtractorDefaultOptions() {
+  // general
+  options.set("startTime", startTime);
+  options.set("endTime", endTime);
+  options.set("analysisSampleRate", analysisSampleRate);
+  options.set("requireMbid", requireMbid);
+
+  // lowlevel
+  options.set("lowlevel.frameSize", lowlevelFrameSize);
+  options.set("lowlevel.hopSize", lowlevelHopSize);
+  options.set("lowlevel.zeroPadding", lowlevelZeroPadding);
+  options.set("lowlevel.windowType", lowlevelWindowType);
+  options.set("lowlevel.silentFrames", lowlevelSilentFrames);
+
+  // tonal
+  options.set("tonal.frameSize", tonalFrameSize);
+  options.set("tonal.hopSize", tonalHopSize);
+  options.set("tonal.zeroPadding", tonalZeroPadding);
+  options.set("tonal.windowType", tonalWindowType);
+  options.set("tonal.silentFrames", tonalSilentFrames);
+
+  // average_loudness
+  options.set("average_loudness.frameSize", loudnessFrameSize);
+  options.set("average_loudness.hopSize", loudnessHopSize);
+  options.set("average_loudness.windowType", loudnessWindowType);
+  options.set("average_loudness.silentFrames", loudnessSilentFrames);
+
+  // rhythm
+  options.set("rhythm.method", rhythmMethod);
+  options.set("rhythm.minTempo", rhythmMinTempo);
+  options.set("rhythm.maxTempo", rhythmMaxTempo);
+
+  // stats
+  const char* statsArray[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
+  const char* mfccStatsArray[] = { "mean", "cov", "icov" };
+  const char* gfccStatsArray[] = { "mean", "cov", "icov" };
+
+  vector<string> stats = arrayToVector<string>(statsArray);
+  vector<string> mfccStats = arrayToVector<string>(mfccStatsArray);
+  vector<string> gfccStats = arrayToVector<string>(gfccStatsArray);
+  for (int i=0; i<(int)stats.size(); i++) {
+    options.add("lowlevel.stats", stats[i]);
+    options.add("tonal.stats", stats[i]);
+    options.add("rhythm.stats", stats[i]);
+    options.add("sfx.stats", stats[i]);
+  }
+  for (int i=0; i<(int)mfccStats.size(); i++)
+    options.add("lowlevel.mfccStats", mfccStats[i]);
+  for (int i=0; i<(int)gfccStats.size(); i++)
+    options.add("lowlevel.gfccStats", gfccStats[i]);
+
+  // high-level
+#if HAVE_GAIA2
+  //options.set("highlevel.compute", true);
+  
+  // This list includes classifier models hosted on Essentia's website
+  const char* svmModelsArray[] = { 
+                                   "danceability",
+                                   "gender",
+                                   "genre_dortmund",
+                                   "genre_electronic",
+                                   "genre_rosamerica",
+                                   "genre_tzanetakis",
+                                   "ismir04_rhythm",
+                                   "mood_acoustic",
+                                   "mood_aggressive",
+                                   "mood_electronic",
+                                   "mood_happy",
+                                   "mood_party",
+                                   "mood_relaxed",
+                                   "mood_sad",
+                                   "moods_mirex",
+                                   "timbre",
+                                   "tonal_atonal",
+                                   "voice_instrumental" 
+                                 };
+  
+  vector<string> svmModels = arrayToVector<string>(svmModelsArray);
+  string pathToSvmModels;
+#ifdef OS_WIN32
+  pathToSvmModels = "svm_models\\";
+#else
+  pathToSvmModels = "svm_models/";
+#endif
+
+  for (int i=0; i<(int)svmModels.size(); i++) {
+    options.add("highlevel.svm_models", pathToSvmModels + svmModels[i] + ".history");
+  }
+#else
+  //options.set("highlevel.compute", false);
+  //cerr << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
+#endif
+  options.set("highlevel.inputFormat", "json");
+
+  // do not compute by default, whether Gaia is installed or no
+  options.set("highlevel.compute", false);
+}
+
+
+
 void MusicExtractor::compute() {
   const string& audioFilename = _audiofile.get();
 
@@ -72,12 +201,6 @@ void MusicExtractor::compute() {
   Pool stats;
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
-
-  analysisSampleRate = options.value<Real>("analysisSampleRate");
-  startTime = options.value<Real>("startTime");
-  endTime = options.value<Real>("endTime");
-  requireMbid = options.value<Real>("requireMbid");
-  downmix = "mix";
 
   results.set("metadata.version.essentia", essentia::version);
   results.set("metadata.version.essentia_git_sha", essentia::version_git_sha);
@@ -178,14 +301,7 @@ void MusicExtractor::compute() {
   cerr << "All done"<<endl;
 
   resultsStats = stats;
-
-  if (options.value<Real>("outputFrames")) {
-    resultsFrames = results;
-  }
-  else { 
-    resultsFrames = Pool(); // return empty Pool otherwise
-  }
-
+  resultsFrames = results;
 }
 
 
@@ -505,111 +621,6 @@ void MusicExtractor::setExtractorOptions(const std::string& filename) {
   yaml->compute();
   delete yaml;
   options.merge(opts, "replace");
-}
-
-
-void MusicExtractor::setExtractorDefaultOptions() {
-  // general
-  options.set("startTime", 0);
-  options.set("endTime", 1e6);
-  options.set("analysisSampleRate", 44100.0);
-  options.set("outputFrames", false);
-  options.set("outputFormat", "json");
-  options.set("requireMbid", false);
-  options.set("indent", 4);
-
-  string silentFrames = "noise";
-  int zeroPadding = 0;
-
-  // lowlevel
-  options.set("lowlevel.frameSize", 2048);
-  options.set("lowlevel.hopSize", 1024);
-  options.set("lowlevel.zeroPadding", zeroPadding);
-  options.set("lowlevel.windowType", "blackmanharris62");
-  options.set("lowlevel.silentFrames", silentFrames);
-
-  // average_loudness
-  options.set("average_loudness.frameSize", 88200);
-  options.set("average_loudness.hopSize", 44100);
-  options.set("average_loudness.windowType", "hann");
-  options.set("average_loudness.silentFrames", silentFrames);
-
-  // rhythm
-  options.set("rhythm.method", "degara");
-  options.set("rhythm.minTempo", 40);
-  options.set("rhythm.maxTempo", 208);
-
-  // tonal
-  options.set("tonal.frameSize", 4096);
-  options.set("tonal.hopSize", 2048);
-  options.set("tonal.zeroPadding", zeroPadding);
-  options.set("tonal.windowType", "blackmanharris62");
-  options.set("tonal.silentFrames", silentFrames);
-
-  // stats
-  const char* statsArray[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
-  const char* mfccStatsArray[] = { "mean", "cov", "icov" };
-  const char* gfccStatsArray[] = { "mean", "cov", "icov" };
-
-  vector<string> stats = arrayToVector<string>(statsArray);
-  vector<string> mfccStats = arrayToVector<string>(mfccStatsArray);
-  vector<string> gfccStats = arrayToVector<string>(gfccStatsArray);
-  for (int i=0; i<(int)stats.size(); i++) {
-    options.add("lowlevel.stats", stats[i]);
-    options.add("tonal.stats", stats[i]);
-    options.add("rhythm.stats", stats[i]);
-    options.add("sfx.stats", stats[i]);
-  }
-  for (int i=0; i<(int)mfccStats.size(); i++)
-    options.add("lowlevel.mfccStats", mfccStats[i]);
-  for (int i=0; i<(int)gfccStats.size(); i++)
-    options.add("lowlevel.gfccStats", gfccStats[i]);
-
-  // high-level
-#if HAVE_GAIA2
-  //options.set("highlevel.compute", true);
-  
-  // This list includes classifier models hosted on Essentia's website
-  const char* svmModelsArray[] = { 
-                                   "danceability",
-                                   "gender",
-                                   "genre_dortmund",
-                                   "genre_electronic",
-                                   "genre_rosamerica",
-                                   "genre_tzanetakis",
-                                   "ismir04_rhythm",
-                                   "mood_acoustic",
-                                   "mood_aggressive",
-                                   "mood_electronic",
-                                   "mood_happy",
-                                   "mood_party",
-                                   "mood_relaxed",
-                                   "mood_sad",
-                                   "moods_mirex",
-                                   "timbre",
-                                   "tonal_atonal",
-                                   "voice_instrumental" 
-                                 };
-  
-  vector<string> svmModels = arrayToVector<string>(svmModelsArray);
-  string pathToSvmModels;
-#ifdef OS_WIN32
-  pathToSvmModels = "svm_models\\";
-#else
-  pathToSvmModels = "svm_models/";
-#endif
-
-  for (int i=0; i<(int)svmModels.size(); i++) {
-    options.add("highlevel.svm_models", pathToSvmModels + svmModels[i] + ".history");
-  }
-#else
-  //options.set("highlevel.compute", false);
-  //cerr << "Warning: Essentia was compiled without Gaia2 library, skipping SVM models" << endl;
-#endif
-  options.set("highlevel.inputFormat", "json");
-
-  // do not compute by default, whether Gaia is installed or no
-  options.set("highlevel.compute", false);
 }
 
 } // namespace standard

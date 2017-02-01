@@ -41,7 +41,27 @@ class MusicExtractor : public Algorithm {
   Real startTime;
   Real endTime;
   bool requireMbid;
-  Real indent;
+
+  int lowlevelFrameSize;
+  int lowlevelHopSize;
+  int lowlevelZeroPadding;
+  std::string lowlevelSilentFrames;
+  std::string lowlevelWindowType;
+
+  int tonalFrameSize;
+  int tonalHopSize;
+  int tonalZeroPadding;
+  std::string tonalSilentFrames;
+  std::string tonalWindowType;
+
+  int loudnessFrameSize;
+  int loudnessHopSize;
+  std::string loudnessSilentFrames;
+  std::string loudnessWindowType;
+
+  std::string rhythmMethod;
+  int rhythmMinTempo;
+  int rhythmMaxTempo;
 
   Real replayGain;
   std::string downmix;
@@ -64,7 +84,35 @@ class MusicExtractor : public Algorithm {
 
   void declareParameters() {
     declareParameter("profile", "profile filename. If specified, default parameter values are overwritten by values in the profile yaml file. If not specified (empty string), use values configured by user like in other normal algorithms", "", Parameter::STRING);
-    // TODO implement parameters directly in addition to profile. If there's no profile then read normal parameter values. 
+    
+    declareParameter("analysisSampleRate", "the analysis sampling rate of the audio signal [Hz]", "(0,inf)", 44100.0);
+    declareParameter("startTime", "the start time of the slice you want to extract [s]", "[0,inf)", 0.0);
+    declareParameter("endTime", "the end time of the slice you want to extract [s]", "[0,inf)", 1.0e6);
+    declareParameter("requireMbid", "ignore audio files without musicbrainz recording id tag (throw exception)", "{true,false}", false);
+    // requireMbid option is very specific for AcousticBrainz extractor
+    // however, we'll keep it here for now...
+  
+    declareParameter("lowlevelFrameSize", "the frame size for computing low-level features", "(0,inf)", 2048);
+    declareParameter("lowlevelHopSize", "the hop size for computing low-level features", "(0,inf)", 1024);
+    declareParameter("lowlevelZeroPadding", "zero padding factor for computing low-level features", "[0,inf)", 0);
+    declareParameter("lowlevelSilentFrames", "whether to [keep/drop/add noise to] silent frames for computing low-level features", "{drop,keep,noise}", "noise");
+    declareParameter("lowlevelWindowType", "the window type for computing low-level features", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "blackmanharris62");
+
+    declareParameter("tonalFrameSize", "the frame size for computing tonal features", "(0,inf)", 4096);
+    declareParameter("tonalHopSize", "the hop size for computing tonal features", "(0,inf)", 2048);
+    declareParameter("tonalZeroPadding", "zero padding factor for computing tonal features", "[0,inf)", 0);
+    declareParameter("tonalSilentFrames", "whether to [keep/drop/add noise to] silent frames for computing tonal features", "{drop,keep,noise}", "noise");
+    declareParameter("tonalWindowType", "the window type for computing tonal features", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "blackmanharris62");
+
+    // TODO average_loudness is redundant? we compare with replaygain and ebu r128
+    declareParameter("loudnessFrameSize", "the frame size for computing average loudness", "(0,inf)", 88200);
+    declareParameter("loudnessHopSize", "the hop size for computing average loudness", "(0,inf)", 44100);
+    declareParameter("loudnessWindowType", "the window type for computing average loudness", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    declareParameter("loudnessSilentFrames", "whether to [keep/drop/add noise to] silent frames for computing average loudness", "{drop,keep,noise}", "noise");
+
+    declareParameter("rhythmMethod", "the method used for beat tracking", "{multifeature,degara}", "degara");
+    declareParameter("rhythmMinTempo", "the slowest tempo to detect [bpm]", "[40,180]", 40);
+    declareParameter("rhythmMaxTempo", "the fastest tempo to detect [bpm]", "[60,250]", 208);
   }
 
   Pool options;
