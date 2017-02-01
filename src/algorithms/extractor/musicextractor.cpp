@@ -49,6 +49,8 @@ void MusicExtractor::reset() {}
 
 void MusicExtractor::configure() {
 
+  downmix = "mix";
+
   analysisSampleRate = parameter("analysisSampleRate").toReal();
   startTime = parameter("startTime").toReal();
   endTime = parameter("endTime").toReal();
@@ -75,7 +77,11 @@ void MusicExtractor::configure() {
   rhythmMinTempo = parameter("rhythmMinTempo").toInt();
   rhythmMaxTempo = parameter("rhythmMaxTempo").toInt();
 
-  downmix = "mix";
+  lowlevelStats = parameter("lowlevelStats").toVectorString();
+  tonalStats = parameter("tonalStats").toVectorString();
+  rhythmStats = parameter("rhythmStats").toVectorString();
+  mfccStats = parameter("mfccStats").toVectorString();
+  gfccStats = parameter("gfccStats").toVectorString();
 
   options.clear();
   setExtractorDefaultOptions();
@@ -123,24 +129,13 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("rhythm.minTempo", rhythmMinTempo);
   options.set("rhythm.maxTempo", rhythmMaxTempo);
 
-  // stats
-  const char* statsArray[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
-  const char* mfccStatsArray[] = { "mean", "cov", "icov" };
-  const char* gfccStatsArray[] = { "mean", "cov", "icov" };
+  // statistics
+  options.set("lowlevel.stats", lowlevelStats); 
+  options.set("tonal.stats", tonalStats);
+  options.set("rhythm.stats", rhythmStats);
 
-  vector<string> stats = arrayToVector<string>(statsArray);
-  vector<string> mfccStats = arrayToVector<string>(mfccStatsArray);
-  vector<string> gfccStats = arrayToVector<string>(gfccStatsArray);
-  for (int i=0; i<(int)stats.size(); i++) {
-    options.add("lowlevel.stats", stats[i]);
-    options.add("tonal.stats", stats[i]);
-    options.add("rhythm.stats", stats[i]);
-    options.add("sfx.stats", stats[i]);
-  }
-  for (int i=0; i<(int)mfccStats.size(); i++)
-    options.add("lowlevel.mfccStats", mfccStats[i]);
-  for (int i=0; i<(int)gfccStats.size(); i++)
-    options.add("lowlevel.gfccStats", gfccStats[i]);
+  options.set("lowlevel.mfccStats", mfccStats);
+  options.set("lowlevel.gfccStats", gfccStats);
 
   // high-level
 #if HAVE_GAIA2
@@ -331,10 +326,6 @@ Pool MusicExtractor::computeAggregation(Pool& pool){
     }
     if (descNames[i].find("tonal.") != string::npos) {
       exceptions[descNames[i]] = options.value<vector<string> >("tonal.stats");
-      continue;
-    }
-    if (descNames[i].find("sfx.") != string::npos) {  // TODO sfx not computed for music?
-      exceptions[descNames[i]] = options.value<vector<string> >("sfx.stats");
       continue;
     }
   }

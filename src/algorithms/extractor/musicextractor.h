@@ -63,6 +63,12 @@ class MusicExtractor : public Algorithm {
   int rhythmMinTempo;
   int rhythmMaxTempo;
 
+  std::vector<std::string> lowlevelStats;
+  std::vector<std::string> tonalStats;
+  std::vector<std::string> rhythmStats;
+  std::vector<std::string> mfccStats;
+  std::vector<std::string> gfccStats;
+
   Real replayGain;
   std::string downmix;
   standard::Algorithm* _svms;
@@ -113,6 +119,18 @@ class MusicExtractor : public Algorithm {
     declareParameter("rhythmMethod", "the method used for beat tracking", "{multifeature,degara}", "degara");
     declareParameter("rhythmMinTempo", "the slowest tempo to detect [bpm]", "[40,180]", 40);
     declareParameter("rhythmMaxTempo", "the fastest tempo to detect [bpm]", "[60,250]", 208);
+  
+    const char* statsArray[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
+    const char* cepstrumStatsArray[] = { "mean", "cov", "icov" };
+    vector<string> stats = arrayToVector<string>(statsArray);
+    vector<string> cepstrumStats = arrayToVector<string>(cepstrumStatsArray);
+
+    declareParameter("lowlevelStats", "the statistics to compute for low-level features", "", stats);
+    declareParameter("tonalStats", "the statistics to compute for tonal features", "", stats);
+    declareParameter("rhythmStats", "the statistics to compute for rhythm features", "", stats);
+    
+    declareParameter("mfccStats", "the statistics to compute for MFCC features", "", cepstrumStats);
+    declareParameter("gfccStats", "the statistics to compute for GFCC features", "", cepstrumStats);
   }
 
   Pool options;
