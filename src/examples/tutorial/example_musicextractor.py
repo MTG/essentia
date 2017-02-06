@@ -24,13 +24,12 @@ def add_to_dict(dict, keys, value):
 
 def pool_to_dict(pool, include_descs=None, ignore_descs=None):
     # a workaround to convert Pool to dict
-    
+
     descs = pool.descriptorNames()
     if include_descs:
         descs = [d for d in descs if isMatch(d, include_descs)]
     if ignore_descs:
         descs = [d for d in descs if not isMatch(d, ignore_descs)]
-    print descs
 
     result = {}
     pool = Pool(pool)
@@ -73,17 +72,24 @@ def analyze_dir(audio_dir, result_file, audio_types=None, profile=None, store_fr
                 audio_files.append(os.path.join(root, filename))
 
     # analyze
+    errors = 0
     results = {}
     for audio_file in audio_files:
         print "Analyzing", audio_file
-        poolStats, poolFrames = extractor(audio_file)
-        results[audio_file] = {}
-        results[audio_file]['stats'] = pool_to_dict(poolStats, include_descs, ignore_descs)
-        if store_frames:
-            results[audio_file]['frames'] = pool_to_dict(poolFrames, include_descs, ignore_descs)
+        try:
+            poolStats, poolFrames = extractor(audio_file)
+            results[audio_file] = {}
+            results[audio_file]['stats'] = pool_to_dict(poolStats, include_descs, ignore_descs)
+            if store_frames:
+                results[audio_file]['frames'] = pool_to_dict(poolFrames, include_descs, ignore_descs)
+        except Exception, e:
+            print "Error processing", audio_file, ":", str(e)
+            errors += 1
+            continue
 
     # save to json
     print
+    print "Analysis done.", errors, "files have been skipped due to errors"
     print "Saving results to", result_file
     with open(result_file, 'w') as f:
         json.dump(results, f)
@@ -98,7 +104,7 @@ Analyzes all audio files found (recursively) in a folder using MusicExtractor.
     parser.add_argument('-o', '--output', help='output json file with audio analysis results', required=True)
     parser.add_argument('-t', '--type', nargs='+', help='type of audio files to include (can use wildcards)', required=False)
     parser.add_argument('--profile', help='MusicExtractor profile', required=False)
-    parser.add_argument('--frames', help='store frames data', action='store_false', required=False)
+    parser.add_argument('--frames', help='store frames data', action='store_true', required=False)
     parser.add_argument('--include', nargs='+', help='descriptors to include (can use wildcards)', required=False)
     parser.add_argument('--ignore', nargs='+', help='descriptors to ignore (can use wildcards)', required=False)
 
