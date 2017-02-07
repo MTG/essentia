@@ -78,14 +78,16 @@ def analyze_dir(audio_dir, result_file, audio_types=None, profile=None, store_fr
         print "Analyzing", audio_file
         try:
             poolStats, poolFrames = extractor(audio_file)
-            results[audio_file] = {}
-            results[audio_file]['stats'] = pool_to_dict(poolStats, include_descs, ignore_descs)
-            if store_frames:
-                results[audio_file]['frames'] = pool_to_dict(poolFrames, include_descs, ignore_descs)
+
         except Exception, e:
             print "Error processing", audio_file, ":", str(e)
             errors += 1
             continue
+
+        results[audio_file] = {}
+        results[audio_file]['stats'] = pool_to_dict(poolStats, include_descs, ignore_descs)
+        if store_frames:
+            results[audio_file]['frames'] = pool_to_dict(poolFrames, include_descs, ignore_descs)
 
     # save to json
     print
