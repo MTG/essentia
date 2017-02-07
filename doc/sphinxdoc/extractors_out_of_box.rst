@@ -24,7 +24,7 @@ with the type of descriptors Essentia is able to compute or use them as a refere
 
 * ``essentia_streaming_extractor_freesound``: similar extractor recommended for sound analysis. This extractor is used by `Freesound <http://freesound.org>`_ in order to provide sound analysis API and search by similar sounds functionality.
 
-* ``essentia_standard_pitchyinfft``: extracts pitch for a monophonic signal using `YinFFT <reference/std_PitchYinFFT.html>`_ algorithm.
+* ``essentia_standard_pitchdemo``: extracts pitch for a monophonic/polyphonic signal using various pitch estimation algorithms.
 
 * ``essentia_streaming_predominantpitchmelodia``: extracts pitch of a predominant melody using `MELODIA <reference/std_PredominantMelody.html>`_ algorithm. 
 

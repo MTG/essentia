@@ -8,7 +8,11 @@ Mac OSX
 The easiest way to install Essentia on OSX is by using `our Homebrew formula <https://github.com/MTG/homebrew-essentia>`_. You will need to install `Homebrew package manager <http://brew.sh>`_ first (and there are other good reasons to do so apart from Essentia).
 
 
-Note that packages location for Python installed via Homebrew is different from the system Python. If you plan to use Essentia with Python, `make sure the Homebrew directory is at the top of your PATH environment variable <http://docs.python-guide.org/en/latest/starting/install/osx/>`_. More information about using Python and Homebrew is `here <https://github.com/Homebrew/brew/blob/master/share/doc/homebrew/Homebrew-and-Python.md>`_.
+Note that packages location for Python installed via Homebrew is different from the system Python. If you plan to use Essentia with Python, make sure the Homebrew directory is at the top of your PATH environment variable. To this end, add the line::
+
+  export PATH=/usr/local/bin:/usr/local/sbin:$PATH
+
+at the bottom of your ``~/.bash_profile`` file. More information about using Python and Homebrew is `here <https://github.com/Homebrew/brew/blob/master/docs/Homebrew-and-Python.md>`_.
 
 
 Linux
@@ -43,7 +47,6 @@ Essentia depends on (at least) the following libraries:
  - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
  - `Gaia <https://github.com/MTG/gaia>`_: for using SVM classifier models *(optional)*
 All dependencies are optional, and some functionality will be excluded when a dependency is not found.
-
 
 Installing dependencies on Linux
 --------------------------------
@@ -164,6 +167,15 @@ Building Essentia on Windows
 
 Essentia C++ library and extractors based on it can be compiled and run correctly on Windows, but python bindings are not supported yet. The easiest way to build Essentia is by `cross-compilation on Linux using MinGW <FAQ.html#cross-compiling-for-windows-on-linux>`_. However the resulting library binaries are only compatible within C++ projects using MinGW compilers, and therefore they are not compatible with Visual Studio. If you want to use Visual Studio, there is no project readily available, so you will have to setup one yourself and compile the dependencies too.
 
+Building Essentia on Windows 10 via Bash on Ubuntu
+--------------------------------------------------
+It is possible to install Essentia easily via *bash on Ubuntu* on Windows 10. Bash on Ubuntu allows to run the same command-line utilities that could be run within a native Ubuntu 14.04 environment. Note that Bash on Ubuntu is still a beta product, hence there are some missing features and several issues. In addition, you cannot call Windows applications from bash.
+
+To install bash on Ubuntu, follow the `official guide <https://msdn.microsoft.com/commandline/wsl/install_guide>`_ in the Microsoft Developer Network.
+
+After bash on Ubuntu is successfully installed, you should open a bash terminal and install the dependencies (see: `Installing dependencies on Linux`_). Remember that bash on Windows runs on an Ubuntu 14.04 environment. Therefore, you may need to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
+
+Finally, you can compile Essentia (see: `Compiling Essentia from source`_).
 
 Building Essentia on Android
 ----------------------------
@@ -188,4 +200,3 @@ Essentia includes a number of `pre-trained classifier models for genres, moods a
 * Use ``essentia_streaming_extractor_music`` (see `detailed documentation <streaming_extractor_music.html>`_)
 
 You can `train your own classifier models <FAQ.html#training-and-running-classifier-models-in-gaia>`_.
-

@@ -158,6 +158,11 @@ class TestAudioLoader_Streaming(TestCase):
             filename = join(testdata.audio_dir, 'generated', 'multichannel', '4channels.'+ext)
             self.assertRaises(RuntimeError, lambda: sAudioLoader(filename=filename))
 
+
+
+
+
+
     def testResetStandard(self):
         from essentia.standard import AudioLoader as stdAudioLoader
         audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
@@ -173,6 +178,8 @@ class TestAudioLoader_Streaming(TestCase):
         self.assertEqualMatrix(audio2, audio1)
         self.assertEqual(bitrate3, bitrate1)
         self.assertEqual(codec3, codec1)        
+
+
 
     def testLoadMultiple(self):
         from essentia.standard import AudioLoader as stdAudioLoader
@@ -240,6 +247,39 @@ class TestAudioLoader_Streaming(TestCase):
         self.assertEqual(md5_mp3, "1e5a598218e9b19cfe04d6c2f61f84a6")
         self.assertEqual(md5_ogg, "a87dad40fea0966cc5b967d5412e8868")
         self.assertEqual(md5_aac, "9a4c7f0da68d4b58767f219c48014f9c")
+    
+    def testMultiStream(self):
+        
+        #  stream 0 of multistream1.mka is the same as stream 1 of multistream2.mka 
+
+        p = Pool()
+
+        stream0 = sAudioLoader(filename=join(testdata.audio_dir, 'generated', 'multistream', 'multistream1.mka'), audioStream = 0)
+        stream1 = sAudioLoader(filename=join(testdata.audio_dir, 'generated', 'multistream', 'multistream2.mka'), audioStream = 1)
+
+        stream0.audio >> (p, 'stream0')
+        stream0.numberChannels >> (p, 'nChannels0')
+        stream0.sampleRate >> (p, 'sampleRate0')
+        stream0.md5 >> (p, 'md50')
+        stream0.bit_rate >> (p, 'bit_rate0')
+        stream0.codec >> (p, 'codec0')
+
+        stream1.audio >> (p, 'stream1')
+        stream1.numberChannels >> (p, 'nChannels1')
+        stream1.sampleRate >> (p, 'sampleRate1')
+        stream1.md5 >> (p, 'md51')
+        stream1.bit_rate >> (p, 'bit_rate1')
+        stream1.codec >> (p, 'codec1')
+
+        run(stream0)
+        run(stream1)
+
+        self.assertEqualVector(p['stream0'][0],p['stream1'][0])
+
+        # An exception should be thrown if the required audioStream is out of bounds
+        self.assertConfigureFails(sAudioLoader(), {'filename' :join(testdata.audio_dir, 'generated', 'multistream', 'multistream1.mka'), 'audioStream' : 2})
+
+
 
 
 suite = allTests(TestAudioLoader_Streaming)

@@ -20,7 +20,7 @@
 
 
 from essentia_test import *
-
+import numpy as np
 
 class TestMelBands(TestCase):
 
@@ -43,6 +43,44 @@ class TestMelBands(TestCase):
         self.assert_(not any(numpy.isnan(mbands)))
         self.assert_(not any(numpy.isinf(mbands)))
         self.assertAlmostEqualVector(mbands, [1]*128, 1e-5)
+
+    def testRegressionHtkMode(self):
+        audio = essentia.standard.MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'), 
+                                            sampleRate = 44100)()*2**15
+        expected = [ 10.35452019,  12.97260263,  13.87114479,  12.92819811,  13.53927989,
+                     13.65001411,  13.7067006,   12.72165126,  12.16052112,  12.29371287,
+                     12.49577573,  12.68672873,  13.08112941,  12.59404232,  11.71325616,
+                     11.48389955,  12.27751253,  12.07873884,  12.02260756,  12.42848721,
+                     11.13694966,  10.49976274,  11.3370437,   12.06821492,  12.1631667,
+                     11.84755549]
+
+        frameSize = 1102
+        hopSize = 441
+        fftsize = 2048
+        paddingSize = fftsize - frameSize
+        spectrumSize = fftsize/2 + 1
+        w = Windowing(type = 'hamming', 
+                      size = frameSize, 
+                      zeroPadding = paddingSize,
+                      normalized = False,
+                      zeroPhase = False)
+
+        spectrum = Spectrum(size = fftsize)
+
+        mbands = MelBands(inputSize= spectrumSize,
+                          type = 'magnitude',
+                          highFrequencyBound = 8000,
+                          lowFrequencyBound = 0,
+                          numberBands = 26,
+                          warpingFormula = 'htkMel',
+                          weighting = 'linear', 
+                          normalize = 'unit_max')
+
+        pool = Pool()
+        for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize, startFromZero = True, validFrameThresholdRatio = 1):
+            pool.add('melBands', mbands(spectrum(w(frame))))
+
+        self.assertAlmostEqualVector( np.mean(np.log(pool['melBands']),0), expected,1e-2)    
 
 
     def testZero(self):

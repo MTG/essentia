@@ -34,7 +34,7 @@ class Leq : public Algorithm {
  public:
   Leq() {
     declareInput(_signal, "signal", "the input signal (must be non-empty)");
-    declareOutput(_leq, "leq", "the equivalent sound level estimate");
+    declareOutput(_leq, "leq", "the equivalent sound level estimate [dB]");
   }
 
   void declareParameters() {}
@@ -67,7 +67,7 @@ class Leq : public AccumulatorAlgorithm {
  public:
   Leq() {
     declareInputStream(_signal, "signal", "the input signal (must be non-empty)");
-    declareOutputResult(_leq, "leq", "the equivalent sound level estimate");
+    declareOutputResult(_leq, "leq", "the equivalent sound level estimate [dB]");
     reset();
   }
 

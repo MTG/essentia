@@ -148,6 +148,7 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                          "weightType", "cosine",
                                          "nonLinear", true,
                                          "windowSize", 0.5);
+
   Algorithm* schord = factory.create("ChordsDetection");
   Algorithm* schords_desc = factory.create("ChordsDescriptors");
 
@@ -214,6 +215,7 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                           "weightType", "cosine",
                                           "nonLinear", true,
                                           "windowSize", 0.5);
+
   peaks->output("frequencies")  >> hpcp_tuning->input("frequencies");
   peaks->output("magnitudes")   >> hpcp_tuning->input("magnitudes");
   hpcp_tuning->output("hpcp")   >> PC(pool, nameSpace + "hpcp_highres");

@@ -47,14 +47,15 @@ class TestHPCP(TestCase):
         hpcp = HPCP()(freqs, mags)
         self.assertEqualVector(hpcp, [1.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.])
 
-    def testAllSemitones(self):
+    def testAllSemitonesAllOctaves(self):
         # Tests whether a spectral peak output of 12 consecutive semitones
-        # yields a HPCP of all 1's
-        tonic = 440
-        freqs = [(tonic * 2**(x/12.)) for x in range(12)]
-        mags = [1] * 12
-        hpcp = HPCP()(freqs, mags)
-        self.assertEqualVector(hpcp, [1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.])
+        # yields a HPCP of all 1's for octaves 1 to 8
+        for octave in [1, 2, 3, 4, 5, 6, 7, 8]:
+            tonic = 55 * pow(2, octave-1)
+            freqs = [(tonic * 2**(x/12.)) for x in range(12)]
+            mags = [1] * 12
+            hpcp = HPCP(maxFrequency=14000)(freqs, mags)
+            self.assertEqualVector(hpcp, [1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.])
 
     def testSubmediantPosition(self):
         # Make sure that the submediant of a key based on 440 is in the
@@ -113,10 +114,10 @@ class TestHPCP(TestCase):
         self.assertEqualVector(hpcp, [0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.])
 
     def testSmallMinRange(self):
-        self.assertConfigureFails(HPCP(), {'minFrequency':1, 'splitFrequency':200})
+        self.assertConfigureFails(HPCP(), {'minFrequency':1, 'bandSplitFrequency':200})
 
     def testSmallMaxRange(self):
-        self.assertConfigureFails(HPCP(), {'maxFrequency':1199, 'splitFrequency':1000})
+        self.assertConfigureFails(HPCP(), {'maxFrequency':1199, 'bandSplitFrequency':1000})
 
     def testSmallMinMaxRange(self):
         self.assertConfigureFails(HPCP(), {'bandPreset':False, 'maxFrequency':200, 'minFrequency':1})
@@ -134,6 +135,25 @@ class TestHPCP(TestCase):
         hpcp = hpcpAlg(freqs, mags)
         expected = [0., 0., 0., 0.1340538263, 0., 0.2476127148, 0., 0., 0., 0., 1., 0.]
         self.assertAlmostEqualVector(hpcp, expected, 1e-4)
+
+    def testWhiteNoise(self):
+        # ideal white noise spectrum would be a plain line
+        spectrum_size = 1024 * 4 * 4 * 4 * 4
+        bin_resolution = 20050. / spectrum_size
+
+        freqs = [i * bin_resolution for i in range(1, spectrum_size+1)]
+        mags = [1.] * len(freqs)
+
+        hpcp = HPCP(minFrequency=440, maxFrequency=440 * 2, bandPreset=False, weightType="none", normalized="none")(freqs, mags)
+
+        # There are more bins in each consequent semitone, therefore we need 
+        # to normalize HPCP numbers by the number of corresponding frequency bins
+        # to get a straight line.
+        weights = [pow(2, i/12.) for i in range(0, 13)]
+        weights[0] = weights[0]/2 + weights[12]/2 # same semitone, different octaves
+        weights = weights[:12]
+        hpcp = normalize([h/w for h, w in zip(hpcp, weights)])
+        self.assertAlmostEqualVector(hpcp, [1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.], precision=1e-2)
 
     def testRegression(self):
         # Just makes sure algorithm does not crash on a real data source. This

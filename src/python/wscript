@@ -12,9 +12,13 @@ def options(ctx):
 
 
 def configure(ctx):
-    ctx.load('python')
-    ctx.check_python_version((2,6,0))
+    ctx.load('compiler_c python')
+    ctx.check_python_version((2,7,0))
+    if int(ctx.env.PYTHON_VERSION[0]) > 2:
+        ctx.fatal('Sorry, essentia does not support python3 yet\nhttps://github.com/MTG/essentia/issues/138')
+
     ctx.check_python_headers()
+    ctx.check_python_module('numpy')
 
 def adjust(objs, path):
     return [ '%s/%s' % (path, obj) for obj in objs ]

@@ -48,6 +48,22 @@ class TestTriangularBands(TestCase):
         expected = [1, 1, 1, 1]
         output = TriangularBands(frequencyBands=fbands, log=False)(input)
         self.assertEqualVector(output, expected)
+        # expected output using unit spectrum is that power bands matches magnitude bands.
+        output = TriangularBands(frequencyBands=fbands, log=False, type = 'power')(input)
+        self.assertEqualVector(output, expected)
+
+    def testInsufficientResolution(self):
+        self.assertRaises(EssentiaException, lambda: TriangularBands(sampleRate = 44100)([0] * 513))
+
+    def testInvalidParam(self):
+        # Test that we must give valid frequency ranges or order
+        self.assertConfigureFails(TriangularBands(), { 'frequencyBands':[] })
+        self.assertConfigureFails(TriangularBands(), { 'frequencyBands': [-1] })
+        self.assertConfigureFails(TriangularBands(), { 'frequencyBands': [100] })
+        self.assertConfigureFails(TriangularBands(), { 'weighting': 'htk' })
+        self.assertConfigureFails(TriangularBands(), { 'normalize': 'norm' })
+        self.assertConfigureFails(TriangularBands(), { 'type': 'mag' })
+
 
     """
     def testSingleBand(self):
@@ -65,14 +81,7 @@ class TestTriangularBands(TestCase):
         self.assertEqualVector(fband(zeros(1024)), zeros(len(nbands)-2))
         self.assertEqualVector(fband(zeros(10)), zeros(len(nbands)-2))
 
-    def testInvalidParam(self):
-        # Test that we must give valid frequency ranges or order
-        self.assertConfigureFails(TriangularBands(), { 'frequencyBands':[] })
-        self.assertConfigureFails(TriangularBands(), { 'frequencyBands': [-1] })
-        self.assertConfigureFails(TriangularBands(), { 'frequencyBands': [100] })
-        self.assertConfigureFails(TriangularBands(), { 'frequencyBands': [100, 200] })
-        self.assertConfigureFails(TriangularBands(), { 'frequencyBands': [0, 200, 100] })
-        self.assertConfigureFails(TriangularBands(), { 'frequencyBands': [0, 200, 200, 400] })
+
 
     def testEmpty(self):
         # Test that FrequencyBands on an empty vector should return null band energies
