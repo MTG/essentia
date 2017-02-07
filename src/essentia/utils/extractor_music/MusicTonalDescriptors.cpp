@@ -42,6 +42,7 @@ void MusicTonalDescriptors::createNetworkTuningFrequency(SourceBase& source, Poo
                                      "type", windowType,
                                      "zeroPadding", zeroPadding);
   Algorithm* spec   = factory.create("Spectrum");
+  // TODO: which parameters to select for min/maxFrequency? [20, 3500] for consistency?
   Algorithm* peaks  = factory.create("SpectralPeaks",
                                      "maxPeaks", 10000,
                                      "magnitudeThreshold", 0.00001,
@@ -101,7 +102,7 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                        "referenceFrequency", tuningFreq,
                                        "bandPreset", false,
                                        "minFrequency", 20.0,
-                                       //"splitFrequency", 250.0,
+                                       //"bandSplitFrequency", 250.0, // TODO ???
                                        "maxFrequency", 3500.0,
                                        "weightType", "cosine",
                                        "nonLinear", false,
@@ -111,7 +112,6 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
   // - weightType = squaredCosine
   // - windowSize = 4.0/3.0
   // - bandPreset = true
-
 
   Algorithm* skey_temperley = factory.create("Key",
                                    "numHarmonics", 4,
@@ -144,7 +144,7 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                          "bandPreset", true,
                                          "minFrequency", 20.0,
                                          "maxFrequency", 3500.0,
-                                         "splitFrequency", 500.0,
+                                         "bandSplitFrequency", 500.0,
                                          "weightType", "cosine",
                                          "nonLinear", true,
                                          "windowSize", 0.5);
@@ -211,7 +211,7 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                           "bandPreset", true,
                                           "minFrequency", 20.0,
                                           "maxFrequency", 3500.0,
-                                          "splitFrequency", 500.0,
+                                          "bandSplitFrequency", 500.0,
                                           "weightType", "cosine",
                                           "nonLinear", true,
                                           "windowSize", 0.5);
