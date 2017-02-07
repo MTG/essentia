@@ -181,7 +181,7 @@ void MusicExtractor::compute() {
   // TODO: we still compute some low-level descriptors with equal loudness filter...
   // TODO: remove for consistency? evaluate on classification tasks?
 
-  E_INFO("Process step: Read metadata");
+  E_INFO("MusicExtractor: Read metadata");
   readMetadata(audioFilename, results);
 
   if (requireMbid
@@ -190,16 +190,16 @@ void MusicExtractor::compute() {
       throw EssentiaException("MusicExtractor: Error processing ", audioFilename, " file: cannot find musicbrainz recording id");
   }
 
-  E_INFO("Process step: Compute md5 audio hash and codec");
+  E_INFO("MusicExtractor: Compute md5 audio hash and codec");
   computeMetadata(audioFilename, results);
 
-  E_INFO("Process step: Compute EBU R128 loudness");
+  E_INFO("MusicExtractor: Compute EBU R128 loudness");
   computeLoudnessEBUR128(audioFilename, results);
 
-  E_INFO("Process step: Replay gain");
+  E_INFO("MusicExtractor: Replay gain");
   computeReplayGain(audioFilename, results); // compute replay gain and the duration of the track
 
-  E_INFO("Process step: Compute audio features");
+  E_INFO("MusicExtractor: Compute audio features");
 
   // normalize the audio with replay gain and compute as many lowlevel, rhythm,
   // and tonal descriptors as possible
@@ -253,13 +253,13 @@ void MusicExtractor::compute() {
   results.set(tonal->nameSpace + "tuning_frequency", tuningFreq);
 
 
-  E_INFO("Process step: Compute aggregation");
+  E_INFO("MusicExtractor: Compute aggregation");
   stats = computeAggregation(results);
 
   // pre-trained classifiers are only available in branches devoted for that
   // (eg: 2.0.1)
   if (options.value<Real>("highlevel.compute")) {
-    E_INFO("Process step: SVM models");
+    E_INFO("MusicExtractor: SVM models");
     _svms->input("pool").set(stats);
     _svms->output("pool").set(stats);
     _svms->compute();
