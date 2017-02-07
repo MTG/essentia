@@ -177,6 +177,7 @@ void MusicExtractor::compute() {
 
   results.set("metadata.audio_properties.equal_loudness", false);
   results.set("metadata.audio_properties.analysis_sample_rate", analysisSampleRate);
+  results.set("metadata.audio_properties.downmix", downmix);
 
   // TODO: we still compute some low-level descriptors with equal loudness filter...
   // TODO: remove for consistency? evaluate on classification tasks?
@@ -190,7 +191,7 @@ void MusicExtractor::compute() {
       throw EssentiaException("MusicExtractor: Error processing ", audioFilename, " file: cannot find musicbrainz recording id");
   }
 
-  E_INFO("MusicExtractor: Compute md5 audio hash and codec");
+  E_INFO("MusicExtractor: Compute md5 audio hash, codec, and length");
   computeMetadata(audioFilename, results);
 
   E_INFO("MusicExtractor: Compute EBU R128 loudness");
@@ -457,6 +458,10 @@ void MusicExtractor::computeMetadata(const string& audioFilename, Pool& results)
       isLossless = true;
   }
   results.set("metadata.audio_properties.lossless", isLossless);
+
+  // set length (actually duration) of the file
+  int length = loader->output("audio").totalProduced();
+  results.set("metadata.audio_properties.length", length/analysisSampleRate);
 }
 
 
@@ -566,11 +571,6 @@ void MusicExtractor::computeReplayGain(const string& audioFilename, Pool& result
       //exit(5);
     }
   }
-
-  results.set("metadata.audio_properties.downmix", downmix);
-
-  // set length (actually duration) of the file
-  results.set("metadata.audio_properties.length", length/analysisSampleRate);
 }
 
 
