@@ -372,8 +372,8 @@ void MusicLowlevelDescriptors::computeAverageLoudness(Pool& pool){ // after comp
     pool.value<vector<Real> >(nameSpace + "loudness")[0];
   }
   catch (EssentiaException&) {
-    cerr << "ERROR: File is too short for loudness estimation... Aborting..." << endl;
-    exit(6);
+    throw EssentiaException("File is too short for loudness estimation... Aborting...");
+    //exit(6);
   }
 
   vector<Real> levelArray = pool.value<vector<Real> >(nameSpace + "loudness");

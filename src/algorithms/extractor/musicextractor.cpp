@@ -102,7 +102,6 @@ void MusicExtractor::configure() {
   }
 
   if (options.value<Real>("highlevel.compute")) {
-    cerr << "DEBUG" << svmModels << endl;
     svmModels = options.value<vector<string> >("highlevel.svm_models");
     _svms = AlgorithmFactory::create("MusicExtractorSVM", "svms", svmModels);
   }
@@ -182,7 +181,7 @@ void MusicExtractor::compute() {
   // TODO: we still compute some low-level descriptors with equal loudness filter...
   // TODO: remove for consistency? evaluate on classification tasks?
 
-  cerr << "Process step: Read metadata" << endl;
+  E_INFO("Process step: Read metadata");
   readMetadata(audioFilename, results);
 
   if (requireMbid
@@ -191,16 +190,16 @@ void MusicExtractor::compute() {
       throw EssentiaException("MusicExtractor: Error processing ", audioFilename, " file: cannot find musicbrainz recording id");
   }
 
-  cerr << "Process step: Compute md5 audio hash and codec" << endl;
+  E_INFO("Process step: Compute md5 audio hash and codec");
   computeMetadata(audioFilename, results);
 
-  cerr << "Process step: Compute EBU R128 loudness" << endl;
+  E_INFO("Process step: Compute EBU R128 loudness");
   computeLoudnessEBUR128(audioFilename, results);
 
-  cerr << "Process step: Replay gain" << endl;
+  E_INFO("Process step: Replay gain");
   computeReplayGain(audioFilename, results); // compute replay gain and the duration of the track
 
-  cerr << "Process step: Compute audio features" << endl;
+  E_INFO("Process step: Compute audio features");
 
   // normalize the audio with replay gain and compute as many lowlevel, rhythm,
   // and tonal descriptors as possible
@@ -226,8 +225,6 @@ void MusicExtractor::compute() {
 
   scheduler::Network network(loader, false);
   network.run();
-  cerr << "DEBUG: " << loader->output("audio").totalProduced() << endl;
-
 
   // Descriptors that require values from other descriptors in the previous chain
   lowlevel->computeAverageLoudness(results);  // requires 'loudness'
@@ -256,19 +253,19 @@ void MusicExtractor::compute() {
   results.set(tonal->nameSpace + "tuning_frequency", tuningFreq);
 
 
-  cerr << "Process step: Compute aggregation"<<endl;
+  E_INFO("Process step: Compute aggregation");
   stats = computeAggregation(results);
 
   // pre-trained classifiers are only available in branches devoted for that
   // (eg: 2.0.1)
   if (options.value<Real>("highlevel.compute")) {
-    cerr << "Process step: SVM models" << endl;
+    E_INFO("Process step: SVM models");
     _svms->input("pool").set(stats);
     _svms->output("pool").set(stats);
     _svms->compute();
   }
 
-  cerr << "All done"<<endl;
+  E_INFO("All done");
 
   resultsStats = stats;
   resultsFrames = results;
@@ -540,8 +537,8 @@ void MusicExtractor::computeReplayGain(const string& audioFilename, Pool& result
         downmix = "left";
       }
       else {
-        cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
-        exit(4);
+        throw EssentiaException("File looks like a completely silent file");
+        //exit(4);
       }
 
       try {
@@ -565,8 +562,8 @@ void MusicExtractor::computeReplayGain(const string& audioFilename, Pool& result
       results.remove("metadata.audio_properties.replay_gain");
     }
     else {
-      cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
-      exit(5);
+      throw EssentiaException("File looks like a completely silent file... Aborting...");
+      //exit(5);
     }
   }
 
