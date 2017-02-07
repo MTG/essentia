@@ -37,6 +37,7 @@ void Trimmer::configure() {
   if (_startIndex > _endIndex) {
     throw EssentiaException("Trimmer: startTime cannot be larger than endTime.");
   }
+  _checkRange = parameter("checkRange").toBool();
 }
 
 void Trimmer::compute() {
@@ -44,9 +45,12 @@ void Trimmer::compute() {
   vector<Real>& output = _output.get();
   int size = input.size();
 
-  if (_startIndex < 0) _startIndex = 0;
+  if (_startIndex < 0) _startIndex = 0; // should never happen
   if (_startIndex > size) {
-    //throw EssentiaException("Trimmer: cannot trim beyond the size of the input signal");
+    if (_checkRange) {
+      throw EssentiaException("Trimmer: cannot trim beyond the size of the input signal");
+    }
+    E_WARNING("Trimmer: empty output due to insufficient input signal size");
     _startIndex = size;
   }
   if (_endIndex > size) _endIndex = size;

@@ -37,6 +37,7 @@ void StereoTrimmer::configure() {
   if (_startIndex > _endIndex) {
     throw EssentiaException("StereoTrimmer: startTime cannot be larger than endTime.");
   }
+  _checkRange = parameter("checkRange").toBool();
 }
 
 void StereoTrimmer::compute() {
@@ -46,8 +47,11 @@ void StereoTrimmer::compute() {
 
   if (_startIndex < 0) _startIndex = 0;
   if (_startIndex > size) {
-    //throw EssentiaException("StereoTrimmer: cannot trim beyond the size of the input signal");
+    if (_checkRange) {
+      throw EssentiaException("StereoTrimmer: cannot trim beyond the size of the input signal");
+    }
     _startIndex = size;
+    E_WARNING("StereoTrimmer: empty output due to insufficient input signal size");
   }
   if (_endIndex > size) _endIndex = size;
 
