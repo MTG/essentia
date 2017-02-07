@@ -22,6 +22,7 @@
 from essentia_test import *
 
 class TestLoudnessEBUR128(TestCase):
+    
     def testRegression(self):
         # The test audio files for loudness are provided in EBU Tech 3341 
         # https://tech.ebu.ch/docs/tech/tech3341.pdf
@@ -120,9 +121,10 @@ class TestLoudnessEBUR128(TestCase):
     
     def testEmpty(self):
         # empty (0,2) array
-        audio = essentia.array([[1.,1.]])[:-1] 
+        audio = essentia.array([[1., 1.]])[:-1]
+        LoudnessEBUR128()(audio)
         self.assertComputeFails(LoudnessEBUR128(), audio)
-
+    
     def testSilence(self):
         audio = essentia.array([[0, 0]] * 44100)
         m, s, i, r = LoudnessEBUR128()(audio)
@@ -134,7 +136,7 @@ class TestLoudnessEBUR128(TestCase):
             self.assert_(x <= -70.)
         self.assertEqual(i, -70.)
         self.assertEqual(r, 0.)
-
+    
 suite = allTests(TestLoudnessEBUR128)
 
 if __name__ == '__main__':
