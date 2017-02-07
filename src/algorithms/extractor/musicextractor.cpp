@@ -94,6 +94,11 @@ void MusicExtractor::configure() {
 
   if (parameter("profile").isConfigured()) { 
     setExtractorOptions(parameter("profile").toString());
+
+    analysisSampleRate = options.value<Real>("analysisSampleRate");
+    startTime = options.value<Real>("startTime");
+    endTime = options.value<Real>("endTime");
+    requireMbid = options.value<Real>("requireMbid");
   }
 
   if (options.value<Real>("highlevel.compute")) {
@@ -221,6 +226,7 @@ void MusicExtractor::compute() {
 
   scheduler::Network network(loader, false);
   network.run();
+  cerr << "DEBUG: " << loader->output("audio").totalProduced() << endl;
 
 
   // Descriptors that require values from other descriptors in the previous chain
@@ -463,7 +469,7 @@ void MusicExtractor::computeLoudnessEBUR128(const string& audioFilename, Pool& r
   //       the sake of code simplicity.
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
-  streaming::Algorithm* loader = factory.create("AudioLoader", "filename",   audioFilename);
+  streaming::Algorithm* loader = factory.create("AudioLoader", "filename", audioFilename);
   streaming::Algorithm* demuxer = factory.create("StereoDemuxer");
   streaming::Algorithm* muxer = factory.create("StereoMuxer");
   streaming::Algorithm* resampleR = factory.create("Resample");
