@@ -458,11 +458,13 @@ void MusicExtractor::computeMetadata(const string& audioFilename, Pool& results)
                      "startTime", startTime,
                      "endTime", endTime);
 
+  // TODO implement StereoLoader algorithm instead of hardcoding this chain
   loader->output("audio")      >> demuxer->input("audio");
   demuxer->output("left")      >> resampleL->input("signal");
   demuxer->output("right")     >> resampleR->input("signal");
   resampleR->output("signal")  >> muxer->input("right");
   resampleL->output("signal")  >> muxer->input("left");
+
   muxer->output("audio")       >> trimmer->input("signal");
   trimmer->output("signal")    >> loudness->input("signal");
   loudness->output("integratedLoudness") >> PC(results, "lowlevel.loudness_ebu128.integrated");
