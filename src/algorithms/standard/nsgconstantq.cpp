@@ -247,7 +247,7 @@ void NSGConstantQ::createCoefficients(){
 void NSGConstantQ::compute(){
 
   const std::vector<Real>& signal = _signal.get();
-  std::vector<Real>& windowedSignal = _constantQ.get();
+  std::vector< std::vector<Real> >& constantQ = _constantQ.get();
 
   std::vector<complex<Real> > fft;
   std::vector<int> posit;
@@ -311,12 +311,16 @@ void NSGConstantQ::compute(){
   //E_INFO("Lg: " <<posit);
   //E_INFO("N: " <<N);
 
+  // Prepare indexing vectors and compute the coefficients.
   std::vector<int> idx;
   std::vector<int> win_range;
   std::vector<int> product_idx;
   std::vector<complex <Real> > product;
 
+  constantQ.resize(N);
+
   for (int j=0; j< N; j++){
+
     for (int i = ceil( (float) Lg[j]/2.0); i < Lg[j]; i++) idx.push_back(i);
     for (int i = 0; i < ceil( (float) Lg[j]/2); i++) idx.push_back(i);
 
@@ -358,6 +362,10 @@ void NSGConstantQ::compute(){
           product[idx[i]] = fft[win_range[i]] * _freqFilters[j][idx[i]];
 
           //todo ifft
+          _ifft->configure("size",_filtersLength[j]);
+          _ifft->input("fft").set(product);
+          _ifft->output("frame").set(constantQ[j]);
+          _ifft->compute();
 
       }
 

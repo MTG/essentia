@@ -29,7 +29,7 @@ namespace standard {
 class NSGConstantQ : public Algorithm {
  protected:
   Input<std::vector<Real> > _signal;
-  Output<std::vector<Real> >_constantQ;
+  Output<std::vector< std::vector<Real> > >_constantQ ;
 
  public:
   NSGConstantQ() {
@@ -37,6 +37,7 @@ class NSGConstantQ : public Algorithm {
     declareOutput(_constantQ, "constantq", "the Non Stationary Gabor transform bAsed constant Q transform of the input frame");
 
     _fft = AlgorithmFactory::create("FFT"); //FFT with complex input
+    _ifft = AlgorithmFactory::create("IFFT");
     _windowing = AlgorithmFactory::create("Windowing");
   }
 
@@ -70,7 +71,7 @@ class NSGConstantQ : public Algorithm {
 
  protected:
 
-
+  Algorithm* _ifft;
   Algorithm* _fft;
   Algorithm* _windowing;
 
