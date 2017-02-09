@@ -475,6 +475,20 @@ void MusicExtractor::computeMetadata(const string& audioFilename, Pool& results)
   scheduler::Network network(loader);
   network.run();
 
+ // set length (actually duration) of the file and length of analyzed segment
+  Real length = loader->output("audio").totalProduced() / inputSampleRate;
+  Real analysis_length = trimmer->output("signal").totalProduced() / analysisSampleRate;
+
+  if (!analysis_length) {
+    ostringstream msg;
+    msg << "MusicExtractor: empty input signal (analysis startTime: " << startTime
+        << ", endTime: " <<  endTime << ", input audio length: " << length << ")";
+    throw EssentiaException(msg);
+  }
+
+  results.set("metadata.audio_properties.length", length);
+  results.set("metadata.audio_properties.analysis.length", analysis_length);
+
   // This is just our best guess as to if a file is in a lossless or lossy format
   // It won't protect us against people converting from (e.g.) mp3 -> flac
   // before submitting
@@ -486,12 +500,6 @@ void MusicExtractor::computeMetadata(const string& audioFilename, Pool& results)
       isLossless = true;
   }
   results.set("metadata.audio_properties.lossless", isLossless);
-
-  // set length (actually duration) of the file
-  int length = loader->output("audio").totalProduced();
-  int analysis_length = trimmer->output("signal").totalProduced();
-  results.set("metadata.audio_properties.length", length/inputSampleRate);
-  results.set("metadata.audio_properties.analysis.length", analysis_length/analysisSampleRate);  
 }
 
 
