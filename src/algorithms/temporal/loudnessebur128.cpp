@@ -183,15 +183,13 @@ AlgorithmStatus LoudnessEBUR128::process() {
   // of values, as it is implemented now. However, this would lead to a 
   // necessity to compute log value for each value of the vector.
 
-  if (!_pool.contains<string>("integrated_power") && !_pool.contains<string>("shortterm_power")) {
+  if (!_pool.contains<vector<Real> >("integrated_power") || !_pool.contains<vector<Real> >("shortterm_power")) {
     // do not push anything in the case of empty signal
     E_WARNING("LoudnessEBUR128: empty input signal");
     return FINISHED;
   }
 
-  cerr << "DEBUG: access integrated_power in pool" << endl;
   const vector<Real>& powerI = _pool.value<vector<Real> >("integrated_power");
-  cerr << "DEBUG: OK" << endl;
   
   // compute gated loudness with absolute threshold: 
   // ignore values below -70 LKFS and computed mean of the rest
