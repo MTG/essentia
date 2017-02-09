@@ -193,11 +193,8 @@ void MusicExtractor::compute() {
       throw EssentiaException("MusicExtractor: Error processing ", audioFilename, " file: cannot find musicbrainz recording id");
   }
 
-  E_INFO("MusicExtractor: Compute md5 audio hash, codec, and length");
+  E_INFO("MusicExtractor: Compute md5 audio hash, codec, length, and EBU 128 loudness");
   computeMetadata(audioFilename, results);
-
-  E_INFO("MusicExtractor: Compute EBU R128 loudness");
-  computeLoudnessEBUR128(audioFilename, results);
 
   E_INFO("MusicExtractor: Replay gain");
   computeReplayGain(audioFilename, results); // compute replay gain and the duration of the track
@@ -436,15 +433,42 @@ void MusicExtractor::readMetadata(const string& audioFilename, Pool& results) {
 void MusicExtractor::computeMetadata(const string& audioFilename, Pool& results) {
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
   streaming::Algorithm* loader = factory.create("AudioLoader",
-                                     "filename",   audioFilename,
-                                     "computeMD5", true);
+                                                "filename",   audioFilename,
+                                                "computeMD5", true);
 
-  loader->output("audio")           >> NOWHERE;
   loader->output("md5")             >> PC(results, "metadata.audio_properties.md5_encoded");
   loader->output("sampleRate")      >> PC(results, "metadata.audio_properties.sample_rate");
   loader->output("numberChannels")  >> NOWHERE;
   loader->output("bit_rate")        >> PC(results, "metadata.audio_properties.bit_rate");
   loader->output("codec")           >> PC(results, "metadata.audio_properties.codec");
+
+  streaming::Algorithm* demuxer = factory.create("StereoDemuxer");
+  streaming::Algorithm* muxer = factory.create("StereoMuxer");
+  streaming::Algorithm* resampleR = factory.create("Resample");
+  streaming::Algorithm* resampleL = factory.create("Resample");
+  streaming::Algorithm* trimmer = factory.create("StereoTrimmer");
+  streaming::Algorithm* loudness = factory.create("LoudnessEBUR128");
+
+  Real inputSampleRate = lastTokenProduced<Real>(loader->output("sampleRate"));
+  resampleR->configure("inputSampleRate", inputSampleRate,
+                       "outputSampleRate", analysisSampleRate);
+  resampleL->configure("inputSampleRate", inputSampleRate,
+                       "outputSampleRate", analysisSampleRate);
+  trimmer->configure("sampleRate", analysisSampleRate,
+                     "startTime", startTime,
+                     "endTime", endTime);
+
+  loader->output("audio")      >> demuxer->input("audio");
+  demuxer->output("left")      >> resampleL->input("signal");
+  demuxer->output("right")     >> resampleR->input("signal");
+  resampleR->output("signal")  >> muxer->input("right");
+  resampleL->output("signal")  >> muxer->input("left");
+  muxer->output("audio")       >> trimmer->input("signal");
+  trimmer->output("signal")    >> loudness->input("signal");
+  loudness->output("integratedLoudness") >> PC(results, "lowlevel.loudness_ebu128.integrated");
+  loudness->output("momentaryLoudness") >> PC(results, "lowlevel.loudness_ebu128.momentary");;
+  loudness->output("shortTermLoudness") >> PC(results, "lowlevel.loudness_ebu128.short_term");;
+  loudness->output("loudnessRange") >> PC(results, "lowlevel.loudness_ebu128.loudness_range");
 
   scheduler::Network network(loader);
   network.run();
@@ -463,53 +487,9 @@ void MusicExtractor::computeMetadata(const string& audioFilename, Pool& results)
 
   // set length (actually duration) of the file
   int length = loader->output("audio").totalProduced();
-  results.set("metadata.audio_properties.length", length/analysisSampleRate);
-}
-
-
-void MusicExtractor::computeLoudnessEBUR128(const string& audioFilename, Pool& results) {
-  // Note: we can merge into the network used in computeMetadata to avoid
-  //       loading audio another time. Keeping the code separate for now for
-  //       the sake of code simplicity.
-
-  streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
-  streaming::Algorithm* loader = factory.create("AudioLoader", "filename", audioFilename);
-  streaming::Algorithm* demuxer = factory.create("StereoDemuxer");
-  streaming::Algorithm* muxer = factory.create("StereoMuxer");
-  streaming::Algorithm* resampleR = factory.create("Resample");
-  streaming::Algorithm* resampleL = factory.create("Resample");
-  streaming::Algorithm* trimmer = factory.create("StereoTrimmer");
-  streaming::Algorithm* loudness = factory.create("LoudnessEBUR128");
-
-  int inputSampleRate = (int)lastTokenProduced<Real>(loader->output("sampleRate"));
-  resampleR->configure("inputSampleRate", inputSampleRate,
-                       "outputSampleRate", analysisSampleRate);
-  resampleL->configure("inputSampleRate", inputSampleRate,
-                       "outputSampleRate", analysisSampleRate);
-  trimmer->configure("sampleRate", analysisSampleRate,
-                     "startTime", startTime,
-                     "endTime", endTime);
-
-  loader->output("audio")           >> demuxer->input("audio");
-  loader->output("md5")             >> NOWHERE;
-  loader->output("sampleRate")      >> NOWHERE;
-  loader->output("numberChannels")  >> NOWHERE;
-  loader->output("bit_rate")        >> NOWHERE;
-  loader->output("codec")           >> NOWHERE;
-
-  demuxer->output("left")      >> resampleL->input("signal");
-  demuxer->output("right")     >> resampleR->input("signal");
-  resampleR->output("signal")  >> muxer->input("right");
-  resampleL->output("signal")  >> muxer->input("left");
-  muxer->output("audio")       >> trimmer->input("signal");
-  trimmer->output("signal")    >> loudness->input("signal");
-  loudness->output("integratedLoudness") >> PC(results, "lowlevel.loudness_ebu128.integrated");
-  loudness->output("momentaryLoudness") >> PC(results, "lowlevel.loudness_ebu128.momentary");;
-  loudness->output("shortTermLoudness") >> PC(results, "lowlevel.loudness_ebu128.short_term");;
-  loudness->output("loudnessRange") >> PC(results, "lowlevel.loudness_ebu128.loudness_range");
-  
-  scheduler::Network network(loader);
-  network.run();
+  int analysis_length = trimmer->output("signal").totalProduced();
+  results.set("metadata.audio_properties.length", length/inputSampleRate);
+  results.set("metadata.audio_properties.analysis.length", analysis_length/analysisSampleRate);  
 }
 
 
