@@ -225,7 +225,7 @@ void NSGConstantQ::createCoefficients(){
       _filtersLength[j] = _filtersLength[_binsNum];
       _filtersLength[rasterizeIdx] = _filtersLength[_binsNum];
     }
-    // E_INFO("rasterize: full. New idx:" << _filtersLength);
+    E_INFO("rasterize: full. New idx:" << _filtersLength);
   }
 
 
@@ -256,6 +256,7 @@ void NSGConstantQ::compute(){
     throw EssentiaException("NSGConstantQ: the size of the input signal is not greater than one");
   }
 
+  // Check input. If different shape reconfigure the algorithm
   if (signal.size() !=  _inputSize) {
     E_INFO("NSGConstantQ: The input spectrum size (" << signal.size() << ") does not correspond to the \"inputSize\" parameter (" << _inputSize << "). Recomputing the filter bank.");
     _inputSize = signal.size();
@@ -270,11 +271,11 @@ void NSGConstantQ::compute(){
 
   int N = _shifts.size();
 
+
+
   _fft->input("frame").set(signal);
   _fft->output("fft").set(fft);
   _fft->compute();
-
-
 
 
   int fill = _shifts[0]  - _inputSize ;
@@ -291,16 +292,14 @@ void NSGConstantQ::compute(){
 
 
 
-
-
-  //add some zero padding
+  //add some zero padding if needed
   //E_INFO("FFT: " <<fft.size());
   std::vector<Real> padding(fill,0.0);
   fft.insert(fft.end(), padding.begin(), padding.end());
   //E_INFO("FFT: " <<fft.size());
 
 
-  //calculate filter lenghts
+  // extract filter lengths
   std::vector<int> Lg(_freqFilters.size(),0);
 
   for (int j = 0;  j < (int)_freqFilters.size(); ++j){
@@ -311,6 +310,7 @@ void NSGConstantQ::compute(){
   //E_INFO("Lg: " <<posit);
   //E_INFO("N: " <<N);
 
+
   // Prepare indexing vectors and compute the coefficients.
   std::vector<int> idx;
   std::vector<int> win_range;
@@ -319,6 +319,7 @@ void NSGConstantQ::compute(){
 
   constantQ.resize(N);
 
+  // The Gabor transform
   for (int j=0; j< N; j++){
 
     for (int i = ceil( (float) Lg[j]/2.0); i < Lg[j]; i++) idx.push_back(i);
@@ -359,15 +360,14 @@ void NSGConstantQ::compute(){
       //E_INFO("fft: " << fft[win_range[i]]);
       */
       for (int i = 0 ; i < idx.size() ; i++){
-          product[idx[i]] = fft[win_range[i]] * _freqFilters[j][idx[i]];
-
-          //todo ifft
-          _ifft->configure("size",_filtersLength[j]);
-          _ifft->input("fft").set(product);
-          _ifft->output("frame").set(constantQ[j]);
-          _ifft->compute();
-
+        product[idx[i]] = fft[win_range[i]] * _freqFilters[j][idx[i]];
       }
+      std::vector<complex <Real> > halfproduct;
+      halfproduct.insert(halfproduct.begin(),product.begin(),product.begin() + _filtersLength[j]/2+1);
+      _ifft->configure("size",_filtersLength[j]/2+1);
+      _ifft->input("fft").set(halfproduct);
+      _ifft->output("frame").set(constantQ[j]);
+      _ifft->compute();
 
     }
 
@@ -375,8 +375,10 @@ void NSGConstantQ::compute(){
     win_range.clear();
     product_idx.clear();
     product.clear();
-
   }
+
+  //post processing
+
 
 
   //E_INFO("win_range: " <<win_range);
