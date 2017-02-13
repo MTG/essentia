@@ -76,6 +76,8 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   // Connect input proxy
   _signal >> _loudnessEBUR128Filter->input("signal");
 
+  _loudnessEBUR128Filter->output("signal").setBufferType(BufferUsage::forLargeAudioStream);
+  
   _loudnessEBUR128Filter->output("signal") >> _frameCutterMomentary->input("signal");
   _loudnessEBUR128Filter->output("signal") >> _frameCutterShortTerm->input("signal");
 
@@ -84,6 +86,9 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   // therefore, signal power is mean of squared signal
   _frameCutterMomentary->output("frame") >> _meanMomentary->input("array");
   _frameCutterShortTerm->output("frame") >> _meanShortTerm->input("array");
+
+  _meanMomentary->output("mean").setBufferType(BufferUsage::forAudioStream);  
+  _meanShortTerm->output("mean").setBufferType(BufferUsage::forAudioStream);
 
   _meanMomentary->output("mean") >> _computeMomentary->input("array");
   _meanShortTerm->output("mean") >> _computeShortTerm->input("array");
