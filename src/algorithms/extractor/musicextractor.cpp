@@ -39,7 +39,9 @@ MusicExtractor::MusicExtractor() {
 
 MusicExtractor::~MusicExtractor() {
   if (options.value<Real>("highlevel.compute")) {
+#if HAVE_GAIA2
     if (_svms) delete _svms;
+#endif  
   }
 }
 
@@ -102,8 +104,12 @@ void MusicExtractor::configure() {
   }
 
   if (options.value<Real>("highlevel.compute")) {
+#if HAVE_GAIA2 
     svmModels = options.value<vector<string> >("highlevel.svm_models");
     _svms = AlgorithmFactory::create("MusicExtractorSVM", "svms", svmModels);
+#else
+    E_WARNING("MusicExtractor: Gaia library is missing. Skipping configuration of SVM models.");
+#endif
   }
 }
 
@@ -259,12 +265,15 @@ void MusicExtractor::compute() {
   // pre-trained classifiers are only available in branches devoted for that
   // (eg: 2.0.1)
   if (options.value<Real>("highlevel.compute")) {
+#if HAVE_GAIA2    
     E_INFO("MusicExtractor: SVM models");
     _svms->input("pool").set(stats);
     _svms->output("pool").set(stats);
     _svms->compute();
+#else
+    E_WARNING("MusicExtractor: Gaia library is missing. Skipping computation of SVM models.");
+#endif
   }
-
   E_INFO("All done");
 
   resultsStats = stats;
