@@ -142,7 +142,7 @@ void Logger::info(const string& msg) {
 #ifndef _WIN32
   if(!isatty(2)) { // no colors if stderr is not a terminal
     GREEN_FONT.clear();
-    RESET_FONT .clear();
+    RESET_FONT.clear();
   }
 #endif
 
