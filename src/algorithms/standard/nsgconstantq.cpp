@@ -225,11 +225,12 @@ void NSGConstantQ::createCoefficients(){
       _filtersLength[j] = _filtersLength[_binsNum];
       _filtersLength[rasterizeIdx] = _filtersLength[_binsNum];
     }
+
     E_INFO("rasterize: full. New idx:" << _filtersLength);
   }
 
 
-  if (_rasterize == "piecewise"){
+  if (_rasterize == "piecewise" || _rasterize == "full" ){
 
     int octs = ceil(log2(_maxFrequency/ _minFrequency));
 
@@ -369,6 +370,8 @@ void NSGConstantQ::compute(){
       _ifft->output("frame").set(constantQ[j]);
       _ifft->compute();
 
+      std::transform(constantQ[j].begin(), constantQ[j].end(), constantQ[j].begin(),
+                      std::bind2nd(std::divides<Real>(), constantQ[j].size()));
     }
 
     idx.clear();
