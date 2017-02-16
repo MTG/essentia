@@ -226,7 +226,7 @@ void NSGConstantQ::createCoefficients(){
       _filtersLength[rasterizeIdx] = _filtersLength[_binsNum];
     }
 
-    E_INFO("rasterize: full. New idx:" << _filtersLength);
+    //E_INFO("rasterize: full. New idx:" << _filtersLength);
   }
 
 
@@ -329,8 +329,8 @@ void NSGConstantQ::compute(){
     float winComp;
     for (int i = -Lg[j]/2 ; i < ceil( (float) Lg[j]/2); i++){
       winComp = (posit[j] + i) % (_inputSize + fill);
-      if (winComp < 0) winComp += _inputSize + fill;
-      win_range.push_back( winComp);
+      //if (winComp < 0) winComp += _inputSize + fill ;
+      win_range.push_back( abs(winComp));
     }
 
 
@@ -342,27 +342,33 @@ void NSGConstantQ::compute(){
       //todo implement non-painles case
     }
     else{
-      for (int i = _filtersLength[j] - (Lg[j] )/2 ; i < _filtersLength[j] + Lg[j]/2; i++) product_idx.push_back( fmod(i, _filtersLength[j]));
+      for (int i = _filtersLength[j] - (Lg[j] )/2 ; i < _filtersLength[j] + int( Real(Lg[j])/2 + .5); i++) product_idx.push_back( fmod(i, _filtersLength[j]));
+
       product.resize(_filtersLength[j]);
       std::fill(product.begin(), product.end(), 0);
-      if  (j == 0){
-        E_INFO("Lg[j]: " <<Lg[j]);
-        E_INFO("_filtersLength[j]: " <<_filtersLength[j]);
-        E_INFO("idx: " <<idx);
-        E_INFO("win_range: " <<win_range);
-        E_INFO("product:idx: " <<product_idx);
-        for (int i = _filtersLength[j] - (Lg[j])/2 ; i < _filtersLength[j] + Lg[j]/2; i++) E_INFO("idx: " <<i);
-      }
-      /*
-      E_INFO("_freqFilters: " );
-      for (int i = 0 ; i < idx.size() ; i++) E_INFO( _freqFilters[j][idx[i]]);
-      E_INFO("fft: " );
-      for (int i = 0 ; i < idx.size() ; i++) E_INFO( fft[win_range[i]]);
-      //E_INFO("fft: " << fft[win_range[i]]);
-      */
+
+      E_INFO(j);
+
+
       for (int i = 0 ; i < idx.size() ; i++){
-        product[idx[i]] = fft[win_range[i]] * _freqFilters[j][idx[i]];
+        product[product_idx[i]] = fft[win_range[i]] * _freqFilters[j][idx[i]];
       }
+
+      if  (j == 168){
+        E_INFO("Lg[j]: " <<Lg[j]);
+         E_INFO("_filtersLength[j]: " <<_filtersLength[j]);
+         E_INFO("idx: " <<idx);
+         E_INFO("win_range: " <<win_range);
+         E_INFO("product idx: " <<product_idx);
+         E_INFO("Filters:");
+         for (int i = 0; i < idx.size() ; i++) E_INFO("idx: " << _freqFilters[j][idx[i]]);
+         E_INFO("FFT:");
+         for (int i = 0 ; i < idx.size() ; i++) E_INFO( fft[win_range[i]]);
+         E_INFO("Product :" << product);
+         E_INFO("Transform:");
+         for (int i = 0 ; i < constantQ[j].size() ; i++) E_INFO( constantQ[j][i]);
+      }
+
       std::vector<complex <Real> > halfproduct;
       halfproduct.insert(halfproduct.begin(),product.begin(),product.begin() + _filtersLength[j]/2+1);
       _ifft->configure("size",_filtersLength[j]/2+1);
