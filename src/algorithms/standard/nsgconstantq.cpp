@@ -282,12 +282,14 @@ void NSGConstantQ::compute(){
   int fill = _shifts[0]  - _inputSize ;
 
   posit.resize(N);
-  posit[0] = 0;
+  posit[0] = _shifts[0];
 
   for (int j = 1; j< N; j++){
-    posit[j] = posit[j-1] + _shifts[j] - _shifts[0];
+    posit[j] = posit[j-1] + _shifts[j];
     fill += _shifts[j];
   }
+  std::transform(posit.begin(), posit.end(), posit.begin(),
+                  std::bind2nd(std::minus<int>(), _shifts[0]));
   //E_INFO("posits: " << posit);
   //E_INFO("shifts: " << _shifts);
 
@@ -343,31 +345,17 @@ void NSGConstantQ::compute(){
     }
     else{
       for (int i = _filtersLength[j] - (Lg[j] )/2 ; i < _filtersLength[j] + int( Real(Lg[j])/2 + .5); i++) product_idx.push_back( fmod(i, _filtersLength[j]));
-
+      //todo product is smaller
       product.resize(_filtersLength[j]);
       std::fill(product.begin(), product.end(), 0);
 
-      E_INFO(j);
+
 
 
       for (int i = 0 ; i < idx.size() ; i++){
         product[product_idx[i]] = fft[win_range[i]] * _freqFilters[j][idx[i]];
       }
 
-      if  (j == 168){
-        E_INFO("Lg[j]: " <<Lg[j]);
-         E_INFO("_filtersLength[j]: " <<_filtersLength[j]);
-         E_INFO("idx: " <<idx);
-         E_INFO("win_range: " <<win_range);
-         E_INFO("product idx: " <<product_idx);
-         E_INFO("Filters:");
-         for (int i = 0; i < idx.size() ; i++) E_INFO("idx: " << _freqFilters[j][idx[i]]);
-         E_INFO("FFT:");
-         for (int i = 0 ; i < idx.size() ; i++) E_INFO( fft[win_range[i]]);
-         E_INFO("Product :" << product);
-         E_INFO("Transform:");
-         for (int i = 0 ; i < constantQ[j].size() ; i++) E_INFO( constantQ[j][i]);
-      }
 
       std::vector<complex <Real> > halfproduct;
       halfproduct.insert(halfproduct.begin(),product.begin(),product.begin() + _filtersLength[j]/2+1);
@@ -380,12 +368,28 @@ void NSGConstantQ::compute(){
                       std::bind2nd(std::divides<Real>(), constantQ[j].size()));
     }
 
+    //if  (j == 0){
+      //E_INFO("Lg[j]: " <<Lg[j]);
+       //E_INFO("_filtersLength[j]: " <<_filtersLength[j]);
+       //E_INFO("idx: " <<idx);
+       E_INFO("win_range: " <<win_range);
+
+       //E_INFO("product idx: " <<product_idx);
+       //E_INFO("Filters:");
+       //for (int i = 0; i < idx.size() ; i++) E_INFO("idx: " << _freqFilters[j][idx[i]]);
+       //E_INFO("FFT:");
+       //for (int i = 0 ; i < idx.size() ; i++) E_INFO( fft[win_range[i]]);
+       //E_INFO("Product :" << product);
+       //E_INFO("Transform:");
+       //for (int i = 0 ; i < constantQ[j].size() ; i++) E_INFO( constantQ[j][i]);
+    //}
+
     idx.clear();
     win_range.clear();
     product_idx.clear();
     product.clear();
   }
-
+  E_INFO("shifts: " << _shifts);
   //post processing
 
 
