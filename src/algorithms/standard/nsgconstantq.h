@@ -56,7 +56,7 @@ class NSGConstantQ : public Algorithm {
     declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a mapping function [2]", "{local,global}", "global");
     declareParameter("gamma", "The bandwidth of each filter is given by Bk = 1/Q * fk + gamma", "[0,inf)", 0);
     declareParameter("normalize", "coefficient normalization", "{sinusoid,impulse,none}", "sinusoid");
-    declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hann");
+    declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hann");
   }
 
   void compute();

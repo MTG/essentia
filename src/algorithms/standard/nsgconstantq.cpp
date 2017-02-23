@@ -51,9 +51,6 @@ void NSGConstantQ::configure() {
 
   _fft->configure("size", _inputSize);
 
-  //E_INFO("M:" << _filtersLength);
-  //E_INFO("shifts:" << _shifts);
-  //E_INFO("g15:" << _freqFilters[14]);
 }
 
 void NSGConstantQ::designWindow(){
@@ -167,7 +164,8 @@ void NSGConstantQ::designWindow(){
 
     _windowing->configure("type", parameter("window").toLower(),
                           "size", _filtersLength[j],
-                          "normalized", false);
+                          "normalized", false,
+                          "zeroPhase", false);
     _windowing->input("frame").set(inputWindow);
     _windowing->output("frame").set(outputWindow);
     _windowing->compute();
@@ -190,22 +188,22 @@ void NSGConstantQ::designWindow(){
   std::transform(_filtersLength.begin(), _filtersLength.end(), _filtersLength.begin(),
                   std::bind2nd(std::plus<int>(), + 1));
 
+
   // Setup Tukey window for 0- and Nyquist-frequency
-
-  // Todo normalize filter
-
-  //E_INFO("filter number: " << _filtersLength);
-
   for (int j = 0; j <= _binsNum +1; j += _binsNum +1 ){
     if ( _filtersLength[j] > _filtersLength[j+1] ){
 
       std::vector<Real> inputWindow(_filtersLength[j], 1);
+
       copy(_freqFilters[j+1].begin(),_freqFilters[j+1].end(), inputWindow.begin() + _filtersLength[j] /2 );
+
       std::transform(inputWindow.begin(), inputWindow.end(), inputWindow.begin(),
                       std::bind2nd(std::divides<Real>(), 1));
+
       copy(inputWindow.begin(),inputWindow.end(), _freqFilters[j].begin());
-      // E_INFO("new window:");
-      // for (int k = 0; k < (int) _filtersLength[j]; ++k) E_INFO(inputWindow[k]);
+
+      std::transform( _freqFilters[j].begin(),  _freqFilters[j].end(),  _freqFilters[j].begin(),
+                      std::bind2nd(std::divides<Real>(), sqrt(_filtersLength[j] )));
     }
   }
 
@@ -222,8 +220,11 @@ void NSGConstantQ::createCoefficients(){
 
     for (int j = 1; j <= _binsNum; ++j){
       --rasterizeIdx;
+
       _filtersLength[j] = _filtersLength[_binsNum];
+
       _filtersLength[rasterizeIdx] = _filtersLength[_binsNum];
+
     }
 
     //E_INFO("rasterize: full. New idx:" << _filtersLength);
@@ -231,7 +232,6 @@ void NSGConstantQ::createCoefficients(){
 
 
   if (_rasterize == "piecewise" || _rasterize == "full" ){
-
     int octs = ceil(log2(_maxFrequency/ _minFrequency));
 
     Real temp = ceil(_filtersLength[_binsNum] / pow(2, octs)) * pow(2, octs);
@@ -272,8 +272,6 @@ void NSGConstantQ::compute(){
 
   int N = _shifts.size();
 
-
-
   _fft->input("frame").set(signal);
   _fft->output("fft").set(fft);
   _fft->compute();
@@ -288,6 +286,7 @@ void NSGConstantQ::compute(){
     posit[j] = posit[j-1] + _shifts[j];
     fill += _shifts[j];
   }
+
   std::transform(posit.begin(), posit.end(), posit.begin(),
                   std::bind2nd(std::minus<int>(), _shifts[0]));
   //E_INFO("posits: " << posit);
@@ -319,7 +318,7 @@ void NSGConstantQ::compute(){
   std::vector<int> win_range;
   std::vector<int> product_idx;
   std::vector<complex <Real> > product;
-
+  std::vector<complex <Real> > halfproduct;
   constantQ.resize(N);
 
   // The Gabor transform
@@ -331,7 +330,7 @@ void NSGConstantQ::compute(){
     float winComp;
     for (int i = -Lg[j]/2 ; i < ceil( (float) Lg[j]/2); i++){
       winComp = (posit[j] + i) % (_inputSize + fill);
-      //if (winComp < 0) winComp += _inputSize + fill ;
+
       win_range.push_back( abs(winComp));
     }
 
@@ -349,16 +348,24 @@ void NSGConstantQ::compute(){
       product.resize(_filtersLength[j]);
       std::fill(product.begin(), product.end(), 0);
 
-
-
-
       for (int i = 0 ; i < idx.size() ; i++){
         product[product_idx[i]] = fft[win_range[i]] * _freqFilters[j][idx[i]];
+      //product[product_idx[i]] = fft[win_range[i]] * _freqFilters[j][i];
       }
 
-
-      std::vector<complex <Real> > halfproduct;
       halfproduct.insert(halfproduct.begin(),product.begin(),product.begin() + _filtersLength[j]/2+1);
+
+      if (_phaseMode == "global"){
+        E_INFO("halfproduct size" << halfproduct.size());
+        int displace = (posit[j] - ((posit[j] / _filtersLength[j]) * _filtersLength[j])) % halfproduct.size();
+        E_INFO("displace" << displace);
+        std::rotate(halfproduct.begin(),
+                    halfproduct.end() - displace, // this will be the new first element
+                    halfproduct.end());
+
+
+      }
+
       _ifft->configure("size",_filtersLength[j]/2+1);
       _ifft->input("fft").set(halfproduct);
       _ifft->output("frame").set(constantQ[j]);
@@ -368,28 +375,29 @@ void NSGConstantQ::compute(){
                       std::bind2nd(std::divides<Real>(), constantQ[j].size()));
     }
 
-    //if  (j == 0){
-      //E_INFO("Lg[j]: " <<Lg[j]);
-       //E_INFO("_filtersLength[j]: " <<_filtersLength[j]);
-       //E_INFO("idx: " <<idx);
-       E_INFO("win_range: " <<win_range);
-
-       //E_INFO("product idx: " <<product_idx);
+    if  (j == 155){
+      E_INFO("Lg[j]: " <<Lg[j]);
+      E_INFO("_filtersLength[j]: " <<_filtersLength[j]);
+      E_INFO("idx: " <<idx);
+      E_INFO("win_range: " <<win_range);
+      E_INFO("Product :" << product);
+      E_INFO("IFFT :" << constantQ[j]);
        //E_INFO("Filters:");
        //for (int i = 0; i < idx.size() ; i++) E_INFO("idx: " << _freqFilters[j][idx[i]]);
        //E_INFO("FFT:");
        //for (int i = 0 ; i < idx.size() ; i++) E_INFO( fft[win_range[i]]);
-       //E_INFO("Product :" << product);
+
        //E_INFO("Transform:");
        //for (int i = 0 ; i < constantQ[j].size() ; i++) E_INFO( constantQ[j][i]);
-    //}
+    }
 
     idx.clear();
     win_range.clear();
     product_idx.clear();
     product.clear();
+    halfproduct.clear();
   }
-  E_INFO("shifts: " << _shifts);
+  //E_INFO("shifts: " << _shifts);
   //post processing
 
 
