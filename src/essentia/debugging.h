@@ -27,6 +27,10 @@
 #include "streamutil.h"
 #include "stringutil.h"
 
+#ifndef _WIN32
+#include <unistd.h>
+#endif
+
 namespace essentia {
 
 // IMPORTANT:
@@ -109,8 +113,22 @@ class Logger {
 
   void flush();
 
+  std::string GREEN_FONT;
+  std::string YELLOW_FONT;
+  std::string RED_FONT;
+  std::string RESET_FONT;
+
  public:
-  Logger() : _addHeader(true) {}
+  Logger() : _addHeader(true) {
+    #ifndef _WIN32
+    if(isatty(2)) { // no colors if stderr is not a terminal
+      GREEN_FONT = "\x1B[0;32m";
+      YELLOW_FONT = "\x1B[0;33m";
+      RED_FONT = "\x1B[0;31m";
+      RESET_FONT = "\x1B[0m";
+    }
+    #endif
+  }
 
   void debug(DebuggingModule module, const std::string& msg, bool resetHeader = false);
   void info(const std::string& msg);
