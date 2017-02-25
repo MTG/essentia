@@ -23,21 +23,32 @@
 #include "algorithm.h"
 #include "algorithmfactory.h"
 
+
 namespace essentia {
 namespace standard {
 
 class NSGConstantQ : public Algorithm {
  protected:
   Input<std::vector<Real> > _signal;
-  Output<std::vector< std::vector<Real> > >_constantQ ;
+  Output<std::vector< std::vector<std::complex<Real> > > >_constantQ ;
+  Output<std::vector<std::complex<Real> > > _constantQDC;
+  Output<std::vector<std::complex<Real> > > _constantQNF;
+  Output<std::vector<Real> > _shiftsOut;
+  Output<std::vector<Real> > _winsLenOut;
 
  public:
   NSGConstantQ() {
     declareInput(_signal, "frame", "the input frame (vector)");
-    declareOutput(_constantQ, "constantq", "the Non Stationary Gabor transform bAsed constant Q transform of the input frame");
+    declareOutput(_constantQ, "constantq", "the Non Stationary Gabor transform based constant Q transform of the input frame");
+    declareOutput(_constantQDC, "constantqdc", "the DC component of the constant Q transform. Needed for the time reconstruction");
+    declareOutput(_constantQNF, "constantqnf", "the Nyquist Frequency component of the constant Q transform. Needed for the time reconstruction");
+    declareOutput(_shiftsOut, "windowShifts", "Amount of bins from the center of each frequency window to the base band. Needed for the time reconstruction");
+    declareOutput(_winsLenOut, "windowLenghts", "Longitudes of the frequency windows used in the transform. Needed for the time reconstruction");
+
+
 
     _fft = AlgorithmFactory::create("FFT"); //FFT with complex input
-    _ifft = AlgorithmFactory::create("IFFT");
+    _ifft = AlgorithmFactory::create("IFFTC");
     _windowing = AlgorithmFactory::create("Windowing");
   }
 
@@ -51,11 +62,10 @@ class NSGConstantQ : public Algorithm {
     declareParameter("maxFrequency", "the maximum frequency", "(0,inf)", 55);
     declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 12);
     declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);
-    // declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);
     declareParameter("rasterize", "hop sizes for each frequency channel. With 'none' each frequency channel is distinct. 'full' sets the hop sizes of all the channels to the smallest. 'piecewise' rounds down the hop size to a power of two", "{none,full,piecewise}", "full");
     declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a mapping function [2]", "{local,global}", "global");
     declareParameter("gamma", "The bandwidth of each filter is given by Bk = 1/Q * fk + gamma", "[0,inf)", 0);
-    declareParameter("normalize", "coefficient normalization", "{sinusoid,impulse,none}", "sinusoid");
+    declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "sine");
     declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hann");
   }
 
@@ -88,10 +98,12 @@ class NSGConstantQ : public Algorithm {
 
 
   //windowing vectors
-  std::vector< std::vector<Real> > _freqFilters;
-  std::vector<int > _shifts;
+  std::vector< std::vector<Real> > _freqWins;
+  std::vector<int> _shifts;
+  std::vector<Real> _shiftsReal;
   std::vector<Real> _shiftsFreq;
-  std::vector<int> _filtersLength;
+  std::vector<int> _winsLen;
+  std::vector<Real> _winsLenReal;
   std::vector<Real> _baseFreqs;
 
   int _binsNum;
