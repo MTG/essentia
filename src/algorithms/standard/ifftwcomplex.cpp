@@ -17,16 +17,16 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "complexifftw.h"
+#include "ifftwcomplex.h"
 #include "fftw.h"
 
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* COMPLEXIFFTW::name = "COMPLEXCOMPLEXIFFT";
-const char* COMPLEXIFFTW::category = "Standard";
-const char* COMPLEXIFFTW::description = DOC("This algorithm calculates the inverse short-term Fourier transform (STFT) of an array of complex values using the FFT algorithm. The resulting frame has a size of (s-1)*2, where s is the size of the input fft frame. The inverse Fourier transform is not defined for frames which size is less than 2 samples. Otherwise an exception is thrown.\n"
+const char* IFFTWComplex::name = "IFFTC";
+const char* IFFTWComplex::category = "Standard";
+const char* IFFTWComplex::description = DOC("This algorithm calculates the inverse short-term Fourier transform (STFT) of an array of complex values using the FFT algorithm. The resulting frame has a size equal to the input fft frame size. The inverse Fourier transform is not defined for frames which size is less than 2 samples. Otherwise an exception is thrown.\n"
 "\n"
 "An exception is thrown if the input's size is not larger than 1.\n"
 "\n"
@@ -37,7 +37,7 @@ const char* COMPLEXIFFTW::description = DOC("This algorithm calculates the inver
 "  http://mathworld.wolfram.com/FastFourierTransform.html");
 
 
-COMPLEXIFFTW::~COMPLEXIFFTW() {
+IFFTWComplex::~IFFTWComplex() {
   ForcedMutexLocker lock(FFTW::globalFFTWMutex);
 
   fftwf_destroy_plan(_fftPlan);
@@ -45,15 +45,15 @@ COMPLEXIFFTW::~COMPLEXIFFTW() {
   fftwf_free(_output);
 }
 
-void COMPLEXIFFTW::compute() {
+void IFFTWComplex::compute() {
 
   const std::vector<std::complex<Real> >& fft = _fft.get();
   std::vector<std::complex<Real> >& signal = _signal.get();
 
   // check if input is OK
-  int size = ((int)fft.size()-1)*2;
+  int size = (int)fft.size();
   if (size <= 0) {
-    throw EssentiaException("COMPLEXIFFT: Input size cannot be 0 or 1");
+    throw EssentiaException("IFFTComplex: Input size cannot be 0 or 1");
   }
   if ((_fftPlan == 0) ||
       ((_fftPlan != 0) && _fftPlanSize != size)) {
@@ -61,7 +61,7 @@ void COMPLEXIFFTW::compute() {
   }
 
   // copy input into plan
-  memcpy(_input, &fft[0], (size/2+1)*sizeof(complex<Real>));
+  memcpy(_input, &fft[0], size*sizeof(complex<Real>));
 
   // calculate the fft
   fftwf_execute(_fftPlan);
@@ -72,25 +72,26 @@ void COMPLEXIFFTW::compute() {
 
 }
 
-void COMPLEXIFFTW::configure() {
+void IFFTWComplex::configure() {
   createFFTObject(parameter("size").toInt());
 }
 
-void COMPLEXIFFTW::createFFTObject(int size) {
+void IFFTWComplex::createFFTObject(int size) {
   ForcedMutexLocker lock(FFTW::globalFFTWMutex);
 
   // create the temporary storage array
   fftwf_free(_input);
   fftwf_free(_output);
   _input = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
-  _output = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>*)*size);
+  _output = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
 
   if (_fftPlan != 0) {
     fftwf_destroy_plan(_fftPlan);
   }
 
   //_fftPlan = fftwf_plan_dft_c2r_1d(size, (fftwf_complex*)_input, _output, FFTW_MEASURE);
-  _fftPlan = fftwf_plan_dft_c2r_1d(size, (fftwf_complex*)_input, (fftwf_complex*)_output, FFTW_ESTIMATE);
+  _fftPlan = fftwf_plan_dft_1d(size, (fftwf_complex*)_input, (fftwf_complex*)_output, FFTW_FORWARD, FFTW_ESTIMATE);
   _fftPlanSize = size;
 
 }
+

@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_COMPLEXIFFTW_H
-#define ESSENTIA_COMPLEXIFFTW_H
+#ifndef ESSENTIA_IFFTWCOMPLEX_H
+#define ESSENTIA_IFFTWCOMPLEX_H
 
 #include "algorithm.h"
 #include "threading.h"
@@ -28,19 +28,20 @@
 namespace essentia {
 namespace standard {
 
-class COMPLEXIFFTW : public Algorithm {
+class IFFTWComplex : public Algorithm {
 
  protected:
   Input<std::vector<std::complex<Real> > > _fft;
   Output<std::vector<std::complex<Real> > > _signal;
 
  public:
-  COMPLEXIFFTW() : _fftPlan(0), _input(0), _output(0) {
+
+  IFFTWComplex() : _fftPlan(0), _input(0), _output(0) {
     declareInput(_fft, "fft", "the input frame");
     declareOutput(_signal, "frame", "the complex IFFT of the input frame");
   }
 
-  ~COMPLEXIFFTW();
+  ~IFFTWComplex();
 
   void declareParameters() {
     declareParameter("size", "the expected size of the input frame. This is purely optional and only targeted at optimizing the creation time of the FFT object", "[1,inf)", 1024);
@@ -71,15 +72,15 @@ class COMPLEXIFFTW : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class COMPLEXIFFTW : public StreamingAlgorithmWrapper {
+class IFFTWComplex : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<std::complex<Real> > > _fft;
   Source<std::vector<std::complex<Real> > > _signal;
 
  public:
-  COMPLEXIFFTW() {
-    declareAlgorithm("COMPLEXIFFT");
+  IFFTWComplex() {
+    declareAlgorithm("IFFTC");
     declareInput(_fft, TOKEN, "fft");
     declareOutput(_signal, TOKEN, "frame");
   }
@@ -88,4 +89,5 @@ class COMPLEXIFFTW : public StreamingAlgorithmWrapper {
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_COMPLEXIFFTW_H
+#endif // ESSENTIA_IFFTWCOMPLEX_H
+
