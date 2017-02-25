@@ -306,6 +306,7 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
       case VECTOR_STRING: SET_PORT(vector<string>);
       case VECTOR_STEREOSAMPLE: SET_PORT(vector<StereoSample>);
       case VECTOR_VECTOR_REAL: SET_PORT(vector<vector<Real> >);
+      case VECTOR_VECTOR_COMPLEX: SET_PORT(vector<vector<complex<Real> > >);
       case VECTOR_VECTOR_STRING: SET_PORT(vector<vector<string> >);
       case MATRIX_REAL: SET_PORT(TNT::Array2D<Real>);
       case POOL: SET_PORT(Pool);
