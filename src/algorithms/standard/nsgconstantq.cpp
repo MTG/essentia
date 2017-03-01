@@ -41,8 +41,8 @@ void NSGConstantQ::configure() {
   _rasterize = parameter("rasterize").toLower();
   _phaseMode = parameter("phaseMode").toLower();
   _normalize = parameter("normalize").toLower();
-
-
+  _minimumWindow = parameter("minimumWindow").toInt();
+  _windowSizeFactor = parameter("windowSizeFactor").toInt();
   designWindow();
   createCoefficients();
   normalize();
@@ -53,10 +53,6 @@ void NSGConstantQ::configure() {
 
 
 void NSGConstantQ::designWindow() {
-  //shoud this be external parameters?
-  Real bwfac = 1;
-  int minWin = 4;
-
   std::vector<Real> cqtbw; //Bandwidths
   std::vector<Real> bw;
   std::vector<Real> posit;
@@ -144,7 +140,7 @@ void NSGConstantQ::designWindow() {
   copy(bw.begin(),bw.end(), _winsLen.begin());
 
   for (int j = 0; j< baseFreqsSize; ++j){
-    if (_winsLen[j] < minWin ) _winsLen[j] = minWin;
+    if (_winsLen[j] < _minimumWindow ) _winsLen[j] = _minimumWindow;
   }
 
   _freqWins.resize(baseFreqsSize);
@@ -174,7 +170,7 @@ void NSGConstantQ::designWindow() {
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
                   std::bind2nd(std::plus<int>(), - 1));
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
-                  std::bind2nd(std::divides<Real>(), bwfac));
+                  std::bind2nd(std::divides<Real>(), _windowSizeFactor));
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
                   std::bind2nd(std::plus<int>(), + 1));
 
