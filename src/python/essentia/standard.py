@@ -20,7 +20,7 @@ import essentia
 import common as _c
 import sys as _sys
 from _essentia import keys as algorithmNames, info as algorithmInfo
-
+from copy import copy
 
 # given an essentia algorithm name, create the corresponding class
 def _create_essentia_class(name, moduleName = __name__):
@@ -46,6 +46,11 @@ def _create_essentia_class(name, moduleName = __name__):
             # verify that all types match and do any necessary conversions
             for name, val in kwargs.iteritems():
                 goalType = self.paramType(name)
+                
+                if type(val).__module__ == 'numpy':
+                    if not val.flags['C_CONTIGUOUS']:
+                        val = copy(val)
+
                 try:
                     convertedVal = _c.convertData(val, goalType)
                 except TypeError: # as e: # catching exception as sth is only
@@ -72,13 +77,21 @@ def _create_essentia_class(name, moduleName = __name__):
             result = []
 
             convertedArgs = []
+
             for i in range(len(inputNames)):
+                arg = args[i]
+
+                if type(args[i]).__module__ == 'numpy':
+                    if not args[i].flags['C_CONTIGUOUS']:
+                        arg = copy(args[i])
+
                 goalType = _c.Edt(self.inputType(inputNames[i]))
+
                 try:
-                    convertedData = _c.convertData(args[i], goalType)
+                    convertedData = _c.convertData(arg, goalType)
                 except TypeError:
                     raise TypeError('Error cannot convert argument %s to %s' \
-                          %(str(_c.determineEdt(args[i])), str(goalType)))
+                          %(str(_c.determineEdt(arg)), str(goalType)))
 
                 convertedArgs.append(convertedData)
 

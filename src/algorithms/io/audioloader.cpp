@@ -60,6 +60,7 @@ void AudioLoader::configure() {
     av_log_set_level(AV_LOG_QUIET);
     //av_log_set_level(AV_LOG_VERBOSE);
     _computeMD5 = parameter("computeMD5").toBool();
+    _selectedStream = parameter("audioStream").toInt();
     reset();
 }
 
@@ -90,16 +91,25 @@ void AudioLoader::openAudioFile(const string& filename) {
     //dump_format(_demuxCtx, 0, filename.c_str(), 0);
 
     // Check that we have only 1 audio stream in the file
+    _streams.clear();
     int nAudioStreams = 0;
     for (int i=0; i<(int)_demuxCtx->nb_streams; i++) {
         if (_demuxCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
-            _streamIdx = i;
+            _streams.push_back(i);
             nAudioStreams++;
         }
     }
-    if (nAudioStreams != 1) {
-        throw EssentiaException("AudioLoader ERROR: found ", nAudioStreams, " streams in the file, expecting only one audio stream");
+
+    if (nAudioStreams == 0) {
+        throw EssentiaException("AudioLoader ERROR: found 0 streams in the file, expecting one or more audio streams");
     }
+
+    if (_selectedStream >= nAudioStreams) {
+        throw EssentiaException("AudioLoader ERROR: 'audioStream' parameter set to ", _selectedStream ,". It should be smaller than the audio streams count, ", nAudioStreams);
+
+    }
+
+    _streamIdx = _streams[_selectedStream];
 
     // Load corresponding audio codec
     _audioCtx = _demuxCtx->streams[_streamIdx]->codec;
@@ -168,6 +178,7 @@ void AudioLoader::closeAudioFile() {
 
     _demuxCtx = 0;
     _audioCtx = 0;
+    _streams.clear();
 }
 
 
@@ -510,7 +521,8 @@ void AudioLoader::createInnerNetwork() {
 
 void AudioLoader::configure() {
     _loader->configure(INHERIT("filename"),
-                       INHERIT("computeMD5"));
+                       INHERIT("computeMD5"),
+                       INHERIT("audioStream"));
 }
 
 void AudioLoader::compute() {

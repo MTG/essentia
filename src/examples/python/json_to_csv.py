@@ -75,6 +75,7 @@ def convert_all(json_files, csv_file, include=None, ignore=None, add_filename=Tr
                 raw = [d[h] for h in header]
             except Exception:
                 print "Error: Incompatible descriptor layouts"
+                print "Layout difference:", list(set(header).symmetric_difference(set(d.keys())))
                 sys.exit()
             
             writer.writerow(raw)
