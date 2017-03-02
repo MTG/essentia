@@ -69,6 +69,7 @@ class NSGConstantQ : public Algorithm {
     declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hann");
     declareParameter("minimumWindow", "Minimum size allowed for the windows", "[2,inf)", 4);
     declareParameter("windowSizeFactor", "Window sizes are rounded to multiples of this", "[1,inf)", 1);
+    declareParameter("INSQConstantQdata", "Flag to output the data needed for the reconstruction", "{true,false}", true);
   }
 
   void compute();
@@ -99,6 +100,8 @@ class NSGConstantQ : public Algorithm {
   std::string _normalize;
   int _minimumWindow;
   int _windowSizeFactor;
+  bool _INSQConstantQdata;
+
   //windowing vectors
   std::vector< std::vector<Real> > _freqWins;
   std::vector<int> _shifts;
@@ -108,6 +111,8 @@ class NSGConstantQ : public Algorithm {
   std::vector<Real> _winsLenReal;
   std::vector<Real> _baseFreqs;
   int _binsNum;
+
+
 };
 
 }

@@ -43,6 +43,9 @@ void NSGConstantQ::configure() {
   _normalize = parameter("normalize").toLower();
   _minimumWindow = parameter("minimumWindow").toInt();
   _windowSizeFactor = parameter("windowSizeFactor").toInt();
+
+  _INSQConstantQdata = parameter("INSQConstantQdata").toBool();
+
   designWindow();
   createCoefficients();
   normalize();
@@ -379,15 +382,19 @@ void NSGConstantQ::compute() {
     product.clear();
   }
 
+
+  if (_INSQConstantQdata){
+    constantQDC.resize(constantQ[0].size());
+    copy(constantQ[0].begin(),constantQ[0].end(),constantQDC.begin());
+
+    constantQNF.resize(constantQ[N-1].size());
+    copy(constantQ[N-1].begin(),constantQ[N-1].end(),constantQNF.begin());
+
+    shiftsOut = _shiftsReal;
+    winsLenOut = _winsLenReal;
+  }
+
   // boundary bins are removed from the main output
-  constantQDC.resize(constantQ[0].size());
-  copy(constantQ[0].begin(),constantQ[0].end(),constantQDC.begin());
-
-  constantQNF.resize(constantQ[N-1].size());
-  copy(constantQ[N-1].begin(),constantQ[N-1].end(),constantQNF.begin());
-  shiftsOut = _shiftsReal;
-  winsLenOut = _winsLenReal;
-
   constantQ.pop_back();
   constantQ.erase(constantQ.begin());
 }
