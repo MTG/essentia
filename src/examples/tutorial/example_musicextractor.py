@@ -32,7 +32,6 @@ def pool_to_dict(pool, include_descs=None, ignore_descs=None):
         descs = [d for d in descs if not isMatch(d, ignore_descs)]
 
     result = {}
-    pool = Pool(pool)
 
     for d in descs:
         keys = d.split('.')
