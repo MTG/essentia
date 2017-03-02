@@ -72,16 +72,16 @@ def _create_essentia_class(name, moduleName = __name__):
             result = []
 
             convertedArgs = []
-            
+
             for i in range(len(inputNames)):
                 arg = args[i]
-                
+
                 if type(args[i]).__module__ == 'numpy':     
                     if not args[i].flags['C_CONTIGUOUS']:
                         arg = copy(args[i])
-                
+
                 goalType = _c.Edt(self.inputType(inputNames[i]))
-                
+
                 try:
                     convertedData = _c.convertData(arg, goalType)
                 except TypeError:
@@ -96,6 +96,10 @@ def _create_essentia_class(name, moduleName = __name__):
             # to wrap the Pool that it outputs w/ our python Pool from common.py
             if name in ('YamlInput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'Extractor'):
                 return _c.Pool(results)
+
+            # MusicExtractor outputs two pools
+            if name in ('MusicExtractor'):
+                return (_c.Pool(results[0]), _c.Pool(results[1]))
 
             # In the case of MetadataReader, the 7th output is also a Pool
             if name in ('MetadataReader'):
