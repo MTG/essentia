@@ -53,7 +53,9 @@ class NSGConstantQ : public Algorithm {
   }
 
   ~NSGConstantQ() {
-    delete _fft;
+    if (_fft) delete _fft;
+    if (_ifft) delete _ifft;
+    if (_windowing) delete _windowing;
   }
 
   void declareParameters() {

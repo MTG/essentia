@@ -34,6 +34,8 @@ void NSGConstantQ::configure() {
   _sr = parameter("sampleRate").toReal();
   _minFrequency = parameter("minFrequency").toReal();
   _maxFrequency = parameter("maxFrequency").toReal();
+
+
   _binsPerOctave = parameter("binsPerOctave").toReal();
   _gamma = parameter("gamma").toReal();
   _inputSize = parameter("inputSize").toInt();
@@ -50,10 +52,9 @@ void NSGConstantQ::configure() {
   createCoefficients();
   normalize();
 
-
   _fft->configure("size", _inputSize);
-}
 
+}
 
 void NSGConstantQ::designWindow() {
   std::vector<Real> cqtbw; //Bandwidths
@@ -69,6 +70,9 @@ void NSGConstantQ::designWindow() {
   }
   if (_maxFrequency > nf) {
     throw EssentiaException("NSGConstantQ: 'maximunFrequency' parameter is out of the range (0 - fs/2)");
+  }
+  if (_minFrequency >= _maxFrequency) {
+    throw EssentiaException("NSGConstantQ: 'minimumFrequency' has to be lower than 'maximunFrequency'");
   }
 
 
@@ -202,7 +206,7 @@ void NSGConstantQ::designWindow() {
   for (int j=0; j<_shifts.size(); j++) _shiftsReal[j] = Real(_shifts[j]);
 
   _winsLenReal.resize(_winsLen.size());
-    for (int j=0; j<_winsLen.size(); j++) _winsLenReal[j] = Real(_winsLen[j]);
+  for (int j=0; j<_winsLen.size(); j++) _winsLenReal[j] = Real(_winsLen[j]);
 
 }
 
@@ -218,13 +222,15 @@ void NSGConstantQ::createCoefficients() {
       _winsLen[rasterizeIdx] = _winsLen[_binsNum];
     }
   }
-
-  if (_rasterize == "piecewise" || _rasterize == "full" ){
+  // if (_rasterize == "piecewise" || _rasterize == "full" )
+  if (_rasterize == "piecewise"){
     int octs = ceil(log2(_maxFrequency/ _minFrequency));
     Real temp = ceil(_winsLen[_binsNum] / pow(2, octs)) * pow(2, octs);
 
-    for (int j = 1; j <= (int)_winsLen.size() ; ++j){
-      if (j != _binsNum +1) _winsLen[j] = temp / ( pow(2, ceil(log2(temp /_winsLen[j])) -1 ));
+    E_INFO("winsLen: " << _winsLen.size());
+    E_INFO("bins: " << _binsNum +1);
+    for (int j = 1; j < (int)_winsLen.size() ; ++j){
+      if (j != _binsNum +1) _winsLen[j] = temp / (pow(2, ceil(log2(temp / _winsLen[j])) -1 ));
     }
   }
 }
