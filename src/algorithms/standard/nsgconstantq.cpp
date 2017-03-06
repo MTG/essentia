@@ -338,8 +338,8 @@ void NSGConstantQ::compute() {
     float winComp;
     for (int i = -Lg[j]/2; i < ceil((float) Lg[j] / 2); i++){
       winComp = (posit[j] + i) % (_inputSize + fill);
-      if (winComp > (_inputSize + fill) / 2 +1){
-        winComp = ((_inputSize + fill) / 2 +1) * 2 - winComp;
+      if (winComp >= fft.size()){
+        winComp = (_inputSize + fill) - winComp;
       }
 
       win_range.push_back( abs(winComp));
@@ -358,15 +358,6 @@ void NSGConstantQ::compute() {
 
       for (int i = 0; i < idx.size(); i++) {
         product[product_idx[i]] = fft[win_range[i]] * _freqWins[j][idx[i]];
-      }
-
-      if (j == N-1){
-          //E_INFO("idx size: " <<idx.size());
-          //E_INFO("product size: " <<product.size());
-          //E_INFO("product_idx size: " <<product_idx.size());
-          //E_INFO("win_range size: " <<win_range);
-          //E_INFO("_freqWins size: " <<_freqWins[j].size());
-          //E_INFO(win_range);
       }
 
       // Circular shift in order to get the global phase representation
