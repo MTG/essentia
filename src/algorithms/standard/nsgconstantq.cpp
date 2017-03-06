@@ -167,8 +167,6 @@ void NSGConstantQ::designWindow() {
     _windowing->compute();
 
 
-    _freqWins[j].resize(_winsLen[j]);
-
     inputWindow.clear();
   }
 
@@ -185,7 +183,6 @@ void NSGConstantQ::designWindow() {
   // Setup Tukey window for 0- and Nyquist-frequency
   for (int j = 0; j <= _binsNum +1; j += _binsNum +1) {
     if ( _winsLen[j] > _winsLen[j+1] ) {
-
       std::vector<Real> inputWindow(_winsLen[j], 1);
 
       copy(_freqWins[j+1].begin(),_freqWins[j+1].end(), inputWindow.begin() + _winsLen[j] /2 );
@@ -197,6 +194,7 @@ void NSGConstantQ::designWindow() {
 
       std::transform( _freqWins[j].begin(),  _freqWins[j].end(),  _freqWins[j].begin(),
                       std::bind2nd(std::divides<Real>(), sqrt(_winsLen[j] )));
+
     }
   }
 
@@ -204,10 +202,6 @@ void NSGConstantQ::designWindow() {
 
   _shiftsReal.resize(_shifts.size());
   for (int j=0; j<_shifts.size(); j++) _shiftsReal[j] = Real(_shifts[j]);
-
-  _winsLenReal.resize(_winsLen.size());
-  for (int j=0; j<_winsLen.size(); j++) _winsLenReal[j] = Real(_winsLen[j]);
-
 }
 
 
@@ -222,17 +216,18 @@ void NSGConstantQ::createCoefficients() {
       _winsLen[rasterizeIdx] = _winsLen[_binsNum];
     }
   }
-  // if (_rasterize == "piecewise" || _rasterize == "full" )
+
   if (_rasterize == "piecewise"){
     int octs = ceil(log2(_maxFrequency/ _minFrequency));
     Real temp = ceil(_winsLen[_binsNum] / pow(2, octs)) * pow(2, octs);
 
-    E_INFO("winsLen: " << _winsLen.size());
-    E_INFO("bins: " << _binsNum +1);
     for (int j = 1; j < (int)_winsLen.size() ; ++j){
       if (j != _binsNum +1) _winsLen[j] = temp / (pow(2, ceil(log2(temp / _winsLen[j])) -1 ));
     }
   }
+
+  _winsLenReal.resize(_winsLen.size());
+  for (int j=0; j<_winsLen.size(); j++) _winsLenReal[j] = Real(_winsLen[j]);
 }
 
 
@@ -343,6 +338,9 @@ void NSGConstantQ::compute() {
     float winComp;
     for (int i = -Lg[j]/2; i < ceil((float) Lg[j] / 2); i++){
       winComp = (posit[j] + i) % (_inputSize + fill);
+      if (winComp > (_inputSize + fill) / 2 +1){
+        winComp = ((_inputSize + fill) / 2 +1) * 2 - winComp;
+      }
 
       win_range.push_back( abs(winComp));
     }
@@ -355,16 +353,23 @@ void NSGConstantQ::compute() {
     else {
       for (int i = _winsLen[j] - (Lg[j] )/2 ; i < _winsLen[j] + int( Real(Lg[j])/2 + .5); i++) product_idx.push_back( fmod(i, _winsLen[j]));
 
-
       product.resize(_winsLen[j]);
       std::fill(product.begin(), product.end(), 0);
 
-      for (int i = 0 ; i < idx.size() ; i++) {
+      for (int i = 0; i < idx.size(); i++) {
         product[product_idx[i]] = fft[win_range[i]] * _freqWins[j][idx[i]];
       }
 
+      if (j == N-1){
+          //E_INFO("idx size: " <<idx.size());
+          //E_INFO("product size: " <<product.size());
+          //E_INFO("product_idx size: " <<product_idx.size());
+          //E_INFO("win_range size: " <<win_range);
+          //E_INFO("_freqWins size: " <<_freqWins[j].size());
+          //E_INFO(win_range);
+      }
 
-      // Circular shift in order to improve the phase representation
+      // Circular shift in order to get the global phase representation
       if (_phaseMode == "global") {
         int displace = (posit[j] - ((posit[j] / _winsLen[j]) * _winsLen[j])) % product.size();
 
