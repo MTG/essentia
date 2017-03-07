@@ -98,7 +98,8 @@ void* VectorVectorComplex::fromPythonCopy(PyObject* obj) {
         delete v;
         throw EssentiaException("VectorVectorComplex::fromPythonCopy: input is not a list of lists of floats");
       }
-      (*v)[i][j] = PyFloat_AsDouble(item);
+      (*v)[i][j] = complex<Real>(PyComplex_RealAsDouble(item), PyComplex_ImagAsDouble(item));
+
     }
   }
 

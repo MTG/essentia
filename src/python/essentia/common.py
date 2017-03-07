@@ -144,6 +144,9 @@ def determineEdt(obj):
         if obj.dtype == numpy.dtype('single'):
             return Edt(Edt.MATRIX_REAL)
 
+        if obj.dtype == numpy.dtype('complex64'):
+            return Edt(Edt.VECTOR_VECTOR_COMPLEX)
+
         raise TypeError('essentia can currently only accept two-dimensional numpy arrays of dtype '\
                         '"single"')
 
