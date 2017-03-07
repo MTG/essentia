@@ -54,6 +54,9 @@ class LoudnessEBUR128 : public AlgorithmComposite {
 
   int _hopSize;
 
+  scheduler::Network* _network;
+
+
  public:
   LoudnessEBUR128();
    ~LoudnessEBUR128();

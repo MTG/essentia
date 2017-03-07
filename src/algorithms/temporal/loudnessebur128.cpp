@@ -53,7 +53,6 @@ const char* LoudnessEBUR128::description = DOC("This algorithm computes the EBU 
 
 
 LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
-
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   _frameCutterMomentary       = factory.create("FrameCutter");
   _frameCutterShortTerm       = factory.create("FrameCutter");
@@ -130,10 +129,13 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   // measurement was started, by recalculating the threshold, then applying
   // it to the stored values, every time the meter reading is updated. 
   // The update rate for "live meters" shall be at least 1 Hz. 
+
+  _network = new scheduler::Network(_loudnessEBUR128Filter);
 }
 
-LoudnessEBUR128::~LoudnessEBUR128() {}
-
+LoudnessEBUR128::~LoudnessEBUR128() {
+  delete _network;
+}
 
 // According to ITU-R BS.1770-2 paper:  loudness = –0.691 + 10 log_10 (power)
 inline Real power2loudness(Real power) {
