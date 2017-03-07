@@ -37,8 +37,8 @@ class TestNSGConstantQ(TestCase):
                     phaseMode='global',
                     gamma=0,
                     normalize=normalize,
-                    window = 'hannnsgcq',
-                    INSQConstantQdata = True
+                    window='hannnsgcq',
+                    INSQConstantQdata=True
                     )
 
     def testRegression(self):
@@ -73,12 +73,15 @@ class TestNSGConstantQ(TestCase):
         self.assertEqual(inputEnergy , DCenergy)
 
     def testNyquist(self):
-        inputSize = 512
+        inputSize = 2**11
         signalNyquist = [-1,  1] * (inputSize / 2)
-        expectedNyquist = [0] * int(inputSize / 2 + 1)
-        expectedNyquist[-1] = inputSize
-        outputNyquist = Spectrum()(signalNyquist)
-        self.assertEqualVector(outputNyquist,  expectedNyquist)
+
+        CQ, DC, Nyquist, _, _ = self.initNsgconstantq()(signalNyquist)
+
+        # Checks that all the energy is contained in the Nyquist band
+        self.assertEqual(np.sum(np.abs(CQ)), 0)
+        self.assertEqual(np.sum(np.abs(DC)), 0)
+        self.assertGreater(np.sum(np.abs(Nyquist)), 0)
 
     def testZero(self):
         inputSize = 2**11
