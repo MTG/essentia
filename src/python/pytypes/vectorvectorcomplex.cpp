@@ -76,7 +76,7 @@ PyObject* VectorVectorComplex::toPythonCopy(const vector<vector<complex<Real> > 
 
 void* VectorVectorComplex::fromPythonCopy(PyObject* obj) {
   if (!PyList_Check(obj)) {
-    throw EssentiaException("VectorVectorComplex::fromPythonCopy: input is not a list");
+    throw EssentiaException("VectorVectorComplex::fromPythonCopy: input is not a list. Numpy vectors are not supported as input yet. Please cast it to Python list");
   }
 
   int size = PyList_Size(obj);
@@ -86,7 +86,7 @@ void* VectorVectorComplex::fromPythonCopy(PyObject* obj) {
     PyObject* row = PyList_GetItem(obj, i);
     if (!PyList_Check(obj)) {
       delete v;
-      throw EssentiaException("VectorVectorComplex::fromPythonCopy: input is not a list of lists");
+      throw EssentiaException("VectorVectorComplex::fromPythonCopy: input is not a list of lists. Lists of Numpy vectors are not supported as input yet. Please cast it to Python list of lists");
     }
 
     int rowsize = PyList_Size(row);
@@ -94,12 +94,23 @@ void* VectorVectorComplex::fromPythonCopy(PyObject* obj) {
 
     for (int j=0; j<rowsize; j++) {
       PyObject* item = PyList_GetItem(row, j);
-      if (!PyFloat_Check(item)) {
-        delete v;
-        throw EssentiaException("VectorVectorComplex::fromPythonCopy: input is not a list of lists of floats");
+      try{
+        Py_complex a =  PyComplex_AsCComplex(item);
+        (*v)[i][j] = complex<Real>((Real) a.real, (Real) a.imag);
       }
-      (*v)[i][j] = complex<Real>(PyComplex_RealAsDouble(item), PyComplex_ImagAsDouble(item));
+      catch(const EssentiaException& e){
+        ostringstream msg;
+        msg << "VectorVectorComplex::fromPythonCopy: input is not a list of lists of complex" << e.what();
+        delete v;
+      }
 
+      /*
+      if (!PyComplex_Check(item)) {
+        delete v;
+        throw EssentiaException("VectorVectorComplex::fromPythonCopy: input is not a list of lists of complex");
+      }
+      (*v)[i][j] = complex<Real>(a.real, a.imag);
+      */
     }
   }
 
