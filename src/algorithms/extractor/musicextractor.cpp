@@ -189,7 +189,7 @@ void MusicExtractor::compute() {
 
   // TODO: we still compute some low-level descriptors with equal loudness filter...
   // TODO: remove for consistency? evaluate on classification tasks?
-
+  
   E_INFO("MusicExtractor: Read metadata");
   readMetadata(audioFilename, results);
 
@@ -198,18 +198,18 @@ void MusicExtractor::compute() {
       && !results.contains<string>("metadata.tags.musicbrainz_trackid")) {
       throw EssentiaException("MusicExtractor: Error processing ", audioFilename, " file: cannot find musicbrainz recording id");
   }
-
+  
   E_INFO("MusicExtractor: Compute md5 audio hash, codec, length, and EBU 128 loudness");
   computeMetadata(audioFilename, results);
-
+  
   E_INFO("MusicExtractor: Replay gain");
   computeReplayGain(audioFilename, results); // compute replay gain and the duration of the track
-
+  
   E_INFO("MusicExtractor: Compute audio features");
 
   // normalize the audio with replay gain and compute as many lowlevel, rhythm,
   // and tonal descriptors as possible
-
+  
   streaming::Algorithm* loader = factory.create("EasyLoader",
                                     "filename",   audioFilename,
                                     "sampleRate", analysisSampleRate,
@@ -217,11 +217,10 @@ void MusicExtractor::compute() {
                                     "endTime",    endTime,
                                     "replayGain", replayGain,
                                     "downmix",    downmix);
-
   MusicLowlevelDescriptors *lowlevel = new MusicLowlevelDescriptors(options);
   MusicRhythmDescriptors *rhythm = new MusicRhythmDescriptors(options);
   MusicTonalDescriptors *tonal = new MusicTonalDescriptors(options);
-
+  
   SourceBase& source = loader->output("audio");
   lowlevel->createNetworkNeqLoud(source, results);
   lowlevel->createNetworkEqLoud(source, results);
@@ -229,9 +228,9 @@ void MusicExtractor::compute() {
   rhythm->createNetwork(source, results);
   tonal->createNetworkTuningFrequency(source, results);
 
-  scheduler::Network network(loader, false);
+  scheduler::Network network(loader);
   network.run();
-
+  
   // Descriptors that require values from other descriptors in the previous chain
   lowlevel->computeAverageLoudness(results);  // requires 'loudness'
 
@@ -257,7 +256,7 @@ void MusicExtractor::compute() {
   Real tuningFreq = results.value<vector<Real> >(tonal->nameSpace + "tuning_frequency").back();
   results.remove(tonal->nameSpace + "tuning_frequency");
   results.set(tonal->nameSpace + "tuning_frequency", tuningFreq);
-
+  
 
   E_INFO("MusicExtractor: Compute aggregation");
   stats = computeAggregation(results);
@@ -275,7 +274,7 @@ void MusicExtractor::compute() {
 #endif
   }
   E_INFO("All done");
-
+  
   resultsStats = stats;
   resultsFrames = results;
 }
@@ -473,18 +472,17 @@ void MusicExtractor::computeMetadata(const string& audioFilename, Pool& results)
   demuxer->output("right")     >> resampleR->input("signal");
   resampleR->output("signal")  >> muxer->input("right");
   resampleL->output("signal")  >> muxer->input("left");
-
   muxer->output("audio")       >> trimmer->input("signal");
   trimmer->output("signal")    >> loudness->input("signal");
   loudness->output("integratedLoudness") >> PC(results, "lowlevel.loudness_ebu128.integrated");
-  loudness->output("momentaryLoudness") >> PC(results, "lowlevel.loudness_ebu128.momentary");;
-  loudness->output("shortTermLoudness") >> PC(results, "lowlevel.loudness_ebu128.short_term");;
+  loudness->output("momentaryLoudness") >> PC(results, "lowlevel.loudness_ebu128.momentary");
+  loudness->output("shortTermLoudness") >> PC(results, "lowlevel.loudness_ebu128.short_term");
   loudness->output("loudnessRange") >> PC(results, "lowlevel.loudness_ebu128.loudness_range");
 
   scheduler::Network network(loader);
   network.run();
-
- // set length (actually duration) of the file and length of analyzed segment
+  
+  // set length (actually duration) of the file and length of analyzed segment
   Real length = loader->output("audio").totalProduced() / inputSampleRate;
   Real analysis_length = trimmer->output("signal").totalProduced() / analysisSampleRate;
 
