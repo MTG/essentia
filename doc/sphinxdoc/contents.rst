@@ -26,6 +26,7 @@ Essentia documentation contents
    composite_api
    execution_network_algorithm
    coding_guidelines
+   contribute
 
    licensing_information
    FAQ
