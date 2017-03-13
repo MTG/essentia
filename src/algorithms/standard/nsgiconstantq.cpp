@@ -50,24 +50,30 @@ void NSGIConstantQ::compute() {
   const std::vector<Real>& winsLen = _winsLenOut.get();
   std::vector<Real>& signal = _signal.get();
 
-  std::vector<std::vector<complex<Real> > > CQ = constantQ;
+
+  //add NF and DC components
+  std::vector<std::vector<complex<Real> > > CQ;
+  CQ = constantQ;
   CQ.push_back(constantQNF);
   CQ.insert(CQ.begin(), constantQDC);
 
   int N = CQ.size();
+  int CH = CQ[1].size();
+
 
 
   _posit.resize(N);
-  _posit[0] = _shifts[0];
+  _posit[0] = shifts[0];
 
-  for (int j=1; j<N; j++) _posit[j] = _posit[j-1] + _shifts[j];
+  for (int j=1; j<N; j++) _posit[j] = _posit[j-1] + shifts[j];
 
+  int NN = _posit[N-1];
   std::transform(_posit.begin(), _posit.end(), _posit.begin(),
-                  std::bind2nd(std::minus<int>(), _shifts[0]));
+                  std::bind2nd(std::minus<int>(), shifts[0]));
 
-  std::vector< std::vector<std::complex<Real> > > _fr;
+  std::vector< std::vector<std::complex<Real> > > _fr(CH,std::vector<std::complex<Real> > (NN,0));
 
-  _fft->configure("size", _inputSize);
+  //_fft->configure("size", _inputSize);
 
   E_INFO(shifts);
 
