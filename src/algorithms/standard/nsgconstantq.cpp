@@ -269,7 +269,7 @@ void NSGConstantQ::compute() {
   std::vector<complex<Real> >& constantQNF = _constantQNF.get();
   std::vector<Real>& shiftsOut = _shiftsOut.get();
   std::vector<Real>& winsLenOut = _winsLenOut.get();
-
+  std::vector< std::vector<Real> >&  freqWinsOut = _freqWinsOut.get();
 
   std::vector<complex<Real> > fft;
   std::vector<int> posit;
@@ -394,6 +394,7 @@ void NSGConstantQ::compute() {
 
     shiftsOut = _shiftsReal;
     winsLenOut = _winsLenReal;
+    freqWinsOut = _freqWins;
   }
 
   // boundary bins are removed from the main output

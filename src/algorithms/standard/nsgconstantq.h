@@ -35,6 +35,7 @@ class NSGConstantQ : public Algorithm {
   Output<std::vector<std::complex<Real> > > _constantQNF;
   Output<std::vector<Real> > _shiftsOut;
   Output<std::vector<Real> > _winsLenOut;
+  Output<std::vector< std::vector<Real> > > _freqWinsOut;
 
  public:
   NSGConstantQ() {
@@ -44,6 +45,7 @@ class NSGConstantQ : public Algorithm {
     declareOutput(_constantQNF, "constantqnf", "the Nyquist Frequency component of the constant Q transform. Needed for the time reconstruction");
     declareOutput(_shiftsOut, "windowShifts", "Amount of bins from the center of each frequency window to the base band. Needed for the time reconstruction");
     declareOutput(_winsLenOut, "windowLenghts", "Longitudes of the frequency windows used in the transform. Needed for the time reconstruction");
+    declareOutput(_freqWinsOut, "frequencyFilters", "Frequency windows used in the transform. Needed for the time reconstruction");
 
 
 

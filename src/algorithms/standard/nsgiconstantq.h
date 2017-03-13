@@ -30,11 +30,12 @@ namespace standard {
 class NSGIConstantQ : public Algorithm {
  protected:
   Output<std::vector<Real> > _signal;
-  Input<std::vector< std::vector<std::complex<Real> > > >_constantQ ;
+  Input<std::vector<std::vector<std::complex<Real> > > >_constantQ ;
   Input<std::vector<std::complex<Real> > > _constantQDC;
   Input<std::vector<std::complex<Real> > > _constantQNF;
   Input<std::vector<Real> > _shiftsOut;
   Input<std::vector<Real> > _winsLenOut;
+  Input<std::vector<std::vector<Real> > > _freqWins;
 
  public:
   NSGIConstantQ() {
@@ -44,7 +45,7 @@ class NSGIConstantQ : public Algorithm {
     declareInput(_constantQNF, "constantqnf", "the Nyquist Frequency component of the constant Q transform. Needed for the time reconstruction");
     declareInput(_shiftsOut, "windowShifts", "Amount of bins from the center of each frequency window to the base band. Needed for the time reconstruction");
     declareInput(_winsLenOut, "windowLenghts", "Longitudes of the frequency windows used in the transform. Needed for the time reconstruction");
-
+    declareInput(_freqWins, "frequencyWindows", "Frequency windows used in the transform. Needed for the time reconstruction");
 
 
     _fft = AlgorithmFactory::create("FFTC");
@@ -99,7 +100,7 @@ class NSGIConstantQ : public Algorithm {
   bool _INSQConstantQdata;
 
   //windowing vectors
-  std::vector< std::vector<Real> > _freqWins;
+  //std::vector< std::vector<Real> > _freqWins;
   std::vector<int> _shifts;
   std::vector<Real> _shiftsReal;
   std::vector<Real> _shiftsFreq;
