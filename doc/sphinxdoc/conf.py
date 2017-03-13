@@ -162,7 +162,8 @@ html_static_path = ['_static']
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
 html_additional_pages = { 'index': 'index.html',
-                          'algorithms_reference': 'algorithms_reference.html' }
+                          'algorithms_reference': 'algorithms_reference.html',
+                          'applications': 'applications.html' }
 
 execfile('essentia_reference.py')
 html_additional_pages.update(essentia_algorithms)
