@@ -255,7 +255,7 @@ void NSGConstantQ::normalize() {
   }
 
 
-  for (int j = 0; j < _binsNum +2; j++){
+  for (int j = 0; j < (int)_freqWins.size(); j++){
     std::transform(_freqWins[j].begin(), _freqWins[j].end(), _freqWins[j].begin(),
                     std::bind2nd(std::multiplies<Real>(), normalizeWeights[j]));
   }

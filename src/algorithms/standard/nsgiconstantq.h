@@ -111,7 +111,11 @@ class NSGIConstantQ : public Algorithm {
 
   std::vector<int> _posit;
   std::vector< std::vector<std::complex<Real> > > _fr;
+  std::vector<std::vector<Real> > _dualFreqWins;
 
+  void designDualFrame(const std::vector<Real>& shifts,
+                       const std::vector<std::vector<Real> >& freqWins,
+                       const std::vector<Real>& winsLen);
 
 };
 

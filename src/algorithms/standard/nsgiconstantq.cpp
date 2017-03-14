@@ -51,6 +51,10 @@ void NSGIConstantQ::compute() {
   const std::vector<std::vector<Real> >& freqWins = _freqWins.get();
   std::vector<Real>& signal = _signal.get();
 
+
+  designDualFrame(shifts, freqWins, winsLen);
+
+
   //add NF and DC components
   std::vector<std::vector<complex<Real> > > CQ;
   CQ = constantQ;
@@ -107,7 +111,7 @@ void NSGIConstantQ::compute() {
     // E_INFO(temp);
     // E_INFO(freqWins[j]);
     for (int i=0; i<(int)win_range.size(); i++){
-      fr[win_range[i]] += temp[idx[i]] * freqWins[j][idx[i]];
+      fr[win_range[i]] += temp[idx[i]] * _dualFreqWins[j][idx[i]];
     }
 
 
@@ -130,6 +134,71 @@ void NSGIConstantQ::compute() {
   signal.resize(NN);
   for (int i=0; i<NN; i++){
     signal[i] = std::real(output[i]);
+  }
+
+}
+
+
+void NSGIConstantQ::designDualFrame(const std::vector<Real>& shifts,
+                                    const std::vector<std::vector<Real> >& freqWins,
+                                    const std::vector<Real>& winsLen){
+
+  int N = shifts.size();
+
+  _posit.resize(N);
+  _posit[0] = shifts[0];
+  //E_INFO(N);
+  for (int j=1; j<N; j++) _posit[j] = _posit[j-1] + shifts[j];
+
+  int Ls = _posit[N-1];
+
+  std::transform(_posit.begin(), _posit.end(), _posit.begin(),
+                  std::bind2nd(std::minus<int>(), shifts[0]));
+
+  std::vector<Real> diagonal(Ls, 0.0);
+
+
+  std::vector<std::vector<int> > win_range;
+  std::vector<std::vector<int> > idx;
+  win_range.resize(N);
+  idx.resize(N);
+  for (int j = 0; j<N; j++){
+    int Lg = freqWins[j].size();
+
+    for (int i = ceil( (float) Lg/2.0); i < Lg; i++) idx[j].push_back(i);
+    for (int i = 0; i < ceil( (float) Lg/2); i++) idx[j].push_back(i);
+
+    float winComp;
+    for (int i = -Lg/2; i < ceil((float) Lg / 2); i++){
+      winComp = (_posit[j] + i) % Ls;
+      if (winComp < 0){
+        winComp = (Ls) + winComp;
+      }
+      win_range[j].push_back( abs(winComp));
+    }
+
+    for (int i=0; i<(int)win_range[j].size(); i++){
+      diagonal[win_range[j][i]] += pow(freqWins[j][idx[j][i]], 2) * winsLen[j];
+    }
+
+    if (j == 205){
+      //E_INFO("win_range: " << freqWins[j]);
+    }
+    if (j == 207){
+      //E_INFO("win_range: " << freqWins[j]);
+    }
+  }
+  E_INFO("win_range: " << diagonal);
+  _dualFreqWins = freqWins;
+
+  for (int j = 0; j<N; j++){
+    for (int i=0; i<(int)win_range[j].size(); i++){
+      _dualFreqWins[j][idx[j][i]] = _dualFreqWins[j][idx[j][i]] / diagonal[win_range[j][i]];
+    }
+    if (j == 0){
+      //E_INFO("diag now: " << diagonal);
+      //E_INFO("frame: " << _dualFreqWins[j]);
+    }
   }
 
 }
