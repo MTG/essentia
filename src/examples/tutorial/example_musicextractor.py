@@ -42,7 +42,7 @@ def pool_to_dict(pool, include_descs=None, ignore_descs=None):
     return result
 
 
-def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, profile=None, store_frames=False, include_descs=None, ignore_descs=None):
+def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, profile=None, store_frames=False, include_descs=None, ignore_descs=None, skip_analyzed=False):
 
     """
     if args.include and args.ignore and not set(args.include).isdisjoint(args.ignore):
@@ -51,6 +51,14 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
     """
     if not output_json and not output_dir:
         print "Error: Neither output json file nor output directory were specified."
+        return
+
+    if skip_analyzed and not output_dir:
+        print "--skip-analyzed can be only used together with --output-dir flag"
+        return
+
+    if skip_analyzed and output_json:
+        print "--skip-analyzed cannot be used together with --output_json flag"
         return
 
     if output_dir:
@@ -81,6 +89,14 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
     results = {}
     for audio_file in audio_files:
         print "Analyzing", audio_file
+
+        if output_dir:
+            sig_file = os.path.join(output_dir, audio_file)
+            if skip_analyzed:
+                if os.path.isfile(sig_file + ".sig"):
+                    print "Found descriptor file for " + audio_file + ", skipping..."
+                    continue
+
         try:
             poolStats, poolFrames = extractor(audio_file)
 
@@ -96,8 +112,7 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
                 results[audio_file]['frames'] = pool_to_dict(poolFrames, include_descs, ignore_descs)
 
         if output_dir:
-            audio_file = os.path.join(output_dir, audio_file)
-            folder = os.path.dirname(audio_file)
+            folder = os.path.dirname(sig_file)
 
             if not os.path.exists(folder):
                 os.makedirs(folder)
@@ -106,10 +121,10 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
                 print "There exist a file with the same name. Aborting analysis."
                 sys.exit()
 
-            output = YamlOutput(filename=audio_file+'.sig')
+            output = YamlOutput(filename=sig_file+'.sig')
             output(poolStats)
             if store_frames:
-                YamlOutput(filename=audio_file + '.frames.sig')(poolFrames)
+                YamlOutput(filename=sig_file + '.frames.sig')(poolFrames)
 
     print
     print "Analysis done.", errors, "files have been skipped due to errors"
@@ -134,7 +149,7 @@ Analyzes all audio files found (recursively) in a folder using MusicExtractor.
     parser.add_argument('--frames', help='store frames data', action='store_true', required=False)
     parser.add_argument('--include', nargs='+', help='descriptors to include (can use wildcards)', required=False)
     parser.add_argument('--ignore', nargs='+', help='descriptors to ignore (can use wildcards)', required=False)
-
+    parser.add_argument('--skip-analyzed', help='skip audio files for which descriptor files were found in the output directory', action='store_true')
     args = parser.parse_args()
 
-    analyze_dir(args.dir, args.output_json, args.output_dir, args.type, args.profile, args.frames, args.include, args.ignore)
+    analyze_dir(args.dir, args.output_json, args.output_dir, args.type, args.profile, args.frames, args.include, args.ignore, args.skip_analyzed)
