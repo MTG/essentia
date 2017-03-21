@@ -226,6 +226,9 @@ void NSGConstantQ::createCoefficients() {
     }
   }
 
+  // filters have to be even as Essentia odd size FFT is not implemented.
+  for (int j=0; j<_winsLen.size(); j++) _winsLen[j] += (_winsLen[j] % 2);
+
   _winsLenReal.resize(_winsLen.size());
   for (int j=0; j<_winsLen.size(); j++) _winsLenReal[j] = Real(_winsLen[j]);
 }
@@ -356,7 +359,7 @@ void NSGConstantQ::compute() {
       product.resize(_winsLen[j]);
       std::fill(product.begin(), product.end(), 0);
 
-      for (int i = 0; i < idx.size(); i++) {
+      for (int i = 0; i < (int) idx.size(); i++) {
         product[product_idx[i]] = fft[win_range[i]] * _freqWins[j][idx[i]];
       }
 
@@ -369,14 +372,37 @@ void NSGConstantQ::compute() {
                     product.end());
       }
 
+
+
+
       _ifft->configure("size",_winsLen[j]);
       _ifft->input("fft").set(product);
       _ifft->output("frame").set(constantQ[j]);
       _ifft->compute();
 
+      std::reverse(constantQ[j].begin(), constantQ[j].end());
+
+      //todo clean this
+
+      /*
+      std::rotate(constantQ[j].begin(),
+                  constantQ[j].end(), // this will be the new first element
+                  constantQ[j].end());
+      */
+
+      constantQ[j].insert(constantQ[j].begin(), constantQ[j][constantQ[j].size()-1]);
+
+      constantQ[j].pop_back();
+
       std::transform(constantQ[j].begin(), constantQ[j].end(), constantQ[j].begin(),
                       std::bind2nd(std::divides<complex<Real> >(), constantQ[j].size()));
     }
+
+/*
+    if (j == 125){
+      E_INFO("temp: " << constantQ[j]);
+    }
+*/
 
     idx.clear();
     win_range.clear();
