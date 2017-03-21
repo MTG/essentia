@@ -74,13 +74,19 @@ void FFTWComplex::compute() {
   fftwf_execute(_fftPlan);
 
   // copy result from plan to output vector
-  fft.resize(size/2+1);
-  memcpy(&fft[0], _output, (size/2+1)*sizeof(complex<Real>));
-
+  if (_negativeFrequencies){
+    fft.resize(size);
+    memcpy(&fft[0], _output, (size)*sizeof(complex<Real>));
+  }
+  else{
+    fft.resize(size/2+1);
+    memcpy(&fft[0], _output, (size/2+1)*sizeof(complex<Real>));
+  }
 }
 
 void FFTWComplex::configure() {
   createFFTObject(parameter("size").toInt());
+  _negativeFrequencies = parameter("negativeFrequencies").toBool();
 }
 
 void FFTWComplex::createFFTObject(int size) {

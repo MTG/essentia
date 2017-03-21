@@ -44,6 +44,8 @@ class FFTWComplex : public Algorithm {
 
   void declareParameters() {
     declareParameter("size", "the expected size of the input frame. This is purely optional and only targeted at optimizing the creation time of the FFT object", "[1,inf)", 1024);
+    declareParameter("negativeFrequencies", "returns the full spectrum or just the positive frequencies", "{true,false}", false);
+
   }
 
   void compute();
@@ -61,6 +63,8 @@ class FFTWComplex : public Algorithm {
   int _fftPlanSize;
   std::complex<Real>* _input;
   std::complex<Real>* _output;
+
+  bool _negativeFrequencies;
 
   void createFFTObject(int size);
 };
