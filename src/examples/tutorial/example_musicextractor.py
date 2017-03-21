@@ -142,7 +142,7 @@ Analyzes all audio files found (recursively) in a folder using MusicExtractor.
 """)
 
     parser.add_argument('-d', '--dir', help='input directory', required=True)
-    parser.add_argument('--output-json', help='output json file with audio analysis results or output directory to store separate analysis files for each track', required=False)
+    parser.add_argument('--output-json', help='output json file with audio analysis results', required=False)
     parser.add_argument('--output-dir', help='output directory to store descriptor files (maintains input directory structure)', required=False)
     parser.add_argument('-t', '--type', nargs='+', help='type of audio files to include (can use wildcards)', required=False)
     parser.add_argument('--profile', help='MusicExtractor profile', required=False)
