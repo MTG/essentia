@@ -184,13 +184,12 @@ void NSGConstantQ::designWindow() {
   for (int j = 0; j <= _binsNum +1; j += _binsNum +1) {
     if ( _winsLen[j] > _winsLen[j+1] ) {
       std::vector<Real> inputWindow(_winsLen[j], 1);
+      _freqWins[j] = std::vector<Real>(_winsLen[j], 1);
 
-      copy(_freqWins[j+1].begin(),_freqWins[j+1].end(), inputWindow.begin() + _winsLen[j] /2 );
+      copy(_freqWins[j+1].begin(),_freqWins[j+1].end(), _freqWins[j].begin() + _winsLen[j]/2 - _winsLen[j+1]/2 );
 
-      std::transform(inputWindow.begin(), inputWindow.end(), inputWindow.begin(),
-                      std::bind2nd(std::divides<Real>(), 1));
 
-      copy(inputWindow.begin(),inputWindow.end(), _freqWins[j].begin());
+      //copy(inputWindow.begin(),inputWindow.end(), _freqWins[j].begin());
 
       std::transform( _freqWins[j].begin(),  _freqWins[j].end(),  _freqWins[j].begin(),
                       std::bind2nd(std::divides<Real>(), sqrt(_winsLen[j] )));
@@ -227,10 +226,10 @@ void NSGConstantQ::createCoefficients() {
   }
 
   // filters have to be even as Essentia odd size FFT is not implemented.
-  for (int j=0; j<_winsLen.size(); j++) _winsLen[j] += (_winsLen[j] % 2);
+  for (int j=0; j<(int)_winsLen.size(); j++) _winsLen[j] += (_winsLen[j] % 2);
 
   _winsLenReal.resize(_winsLen.size());
-  for (int j=0; j<_winsLen.size(); j++) _winsLenReal[j] = Real(_winsLen[j]);
+  for (int j=0; j<(int) _winsLen.size(); j++) _winsLenReal[j] = Real(_winsLen[j]);
 }
 
 
@@ -299,7 +298,9 @@ void NSGConstantQ::compute() {
   _fft->output("fft").set(fft);
   _fft->compute();
 
-  int fill = _shifts[0]  - _inputSize ;
+  for (int i=_inputSize/2-1; i >0; i--) fft.push_back(std::conj(fft[i]));
+
+  int fill = _shifts[0] - _inputSize ;
 
   posit.resize(N);
   posit[0] = _shifts[0];
@@ -373,36 +374,35 @@ void NSGConstantQ::compute() {
       }
 
 
-
-
       _ifft->configure("size",_winsLen[j]);
       _ifft->input("fft").set(product);
       _ifft->output("frame").set(constantQ[j]);
       _ifft->compute();
 
-      std::reverse(constantQ[j].begin(), constantQ[j].end());
+      std::reverse(constantQ[j].begin()+1, constantQ[j].end());
 
       //todo clean this
-
-      /*
+/*
       std::rotate(constantQ[j].begin(),
                   constantQ[j].end(), // this will be the new first element
                   constantQ[j].end());
-      */
-
       constantQ[j].insert(constantQ[j].begin(), constantQ[j][constantQ[j].size()-1]);
-
       constantQ[j].pop_back();
+*/
 
       std::transform(constantQ[j].begin(), constantQ[j].end(), constantQ[j].begin(),
                       std::bind2nd(std::divides<complex<Real> >(), constantQ[j].size()));
     }
 
-/*
-    if (j == 125){
-      E_INFO("temp: " << constantQ[j]);
-    }
-*/
+
+/*    if (j == 206){
+      //E_INFO("idx: " << idx);
+      //E_INFO("w ramge: " << win_range);
+      //E_INFO("p idx: " << product_idx);
+       E_INFO("product: " << product);
+      //E_INFO("win: " << _freqWins[j]);
+    }*/
+
 
     idx.clear();
     win_range.clear();
