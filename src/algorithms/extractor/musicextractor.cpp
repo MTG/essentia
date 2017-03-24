@@ -178,7 +178,7 @@ void MusicExtractor::compute() {
 
   results.set("metadata.version.essentia", essentia::version);
   results.set("metadata.version.essentia_git_sha", essentia::version_git_sha);
-  results.set("metadata.version.extractor", EXTRACTOR_VERSION);
+  results.set("metadata.version.extractor", MUSIC_EXTRACTOR_VERSION);
   // TODO: extractor_build_id
 
   results.set("metadata.audio_properties.analysis.equal_loudness", false);
@@ -203,7 +203,7 @@ void MusicExtractor::compute() {
   computeAudioMetadata(audioFilename, results);
   
   E_INFO("MusicExtractor: Replay gain");
-  computeReplayGain(audioFilename, results); // compute replay gain and the duration of the track
+  computeReplayGain(audioFilename, results);
   
   E_INFO("MusicExtractor: Compute audio features");
 
