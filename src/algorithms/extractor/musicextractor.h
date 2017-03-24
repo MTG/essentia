@@ -81,7 +81,7 @@ class MusicExtractor : public Algorithm {
   void setExtractorDefaultOptions();
   void mergeValues(Pool &pool);
   void readMetadata(const std::string& audioFilename, Pool& results);
-  void computeMetadata(const std::string& audioFilename, Pool& results);
+  void computeAudioMetadata(const std::string& audioFilename, Pool& results);
   void computeReplayGain(const std::string& audioFilename, Pool& results);
 
   Pool computeAggregation(Pool& pool);

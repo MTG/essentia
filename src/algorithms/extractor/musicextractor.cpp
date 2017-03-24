@@ -200,7 +200,7 @@ void MusicExtractor::compute() {
   }
   
   E_INFO("MusicExtractor: Compute md5 audio hash, codec, length, and EBU 128 loudness");
-  computeMetadata(audioFilename, results);
+  computeAudioMetadata(audioFilename, results);
   
   E_INFO("MusicExtractor: Replay gain");
   computeReplayGain(audioFilename, results); // compute replay gain and the duration of the track
@@ -438,7 +438,7 @@ void MusicExtractor::readMetadata(const string& audioFilename, Pool& results) {
 }
 
 
-void MusicExtractor::computeMetadata(const string& audioFilename, Pool& results) {
+void MusicExtractor::computeAudioMetadata(const string& audioFilename, Pool& results) {
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
   streaming::Algorithm* loader = factory.create("AudioLoader",
                                                 "filename",   audioFilename,
