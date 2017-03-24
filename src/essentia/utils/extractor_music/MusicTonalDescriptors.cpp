@@ -61,7 +61,7 @@ void MusicTonalDescriptors::createNetworkTuningFrequency(SourceBase& source, Poo
   tuning->output("tuningCents")     >> NOWHERE;
 }
 
-void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
+void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool) {
 
   // Using the 20-3500 Hz frequency ranges as suggested by Angel Faraldo
   // This range improves key estimation significantly for electronic music 
@@ -137,6 +137,7 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool){
                                    "usePolyphony", true,
                                    "useThreeChords", true);
 
+  // TODO review this parameters to improve our chords detection
   Algorithm* hpcp_chord = factory.create("HPCP",
                                          "size", 36,
                                          "referenceFrequency", tuningFreq,

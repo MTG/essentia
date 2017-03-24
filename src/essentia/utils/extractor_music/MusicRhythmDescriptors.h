@@ -26,7 +26,7 @@ using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
 
- class MusicRhythmDescriptors : public MusicDescriptorSet{
+class MusicRhythmDescriptors : public MusicDescriptorSet {
 
  public:
 
@@ -39,6 +39,6 @@ using namespace essentia::streaming;
 
  	void createNetwork(SourceBase& source, Pool& pool);
 	void createNetworkBeatsLoudness(SourceBase& source, Pool& pool);
- };
+};
 
  #endif

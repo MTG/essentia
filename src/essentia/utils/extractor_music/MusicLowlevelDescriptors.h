@@ -25,7 +25,7 @@
 
 using namespace std;
 
- class MusicLowlevelDescriptors : public MusicDescriptorSet{
+class MusicLowlevelDescriptors : public MusicDescriptorSet {
 
  public:
  	static const string nameSpace;  
@@ -39,6 +39,6 @@ using namespace std;
   void createNetworkEqLoud(SourceBase& source, Pool& pool);
   void createNetworkLoudness(SourceBase& source, Pool& pool);
 	void computeAverageLoudness(Pool& pool);
- };
+};
 
- #endif
+#endif

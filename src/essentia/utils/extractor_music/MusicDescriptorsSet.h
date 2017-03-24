@@ -36,7 +36,7 @@ using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
 
- class MusicDescriptorSet{ 
+class MusicDescriptorSet { 
 
  public:
  	static const string nameSpace;  
@@ -44,6 +44,6 @@ using namespace essentia::streaming;
  protected:
   Pool options;
 
- };
+};
 
- #endif
+#endif

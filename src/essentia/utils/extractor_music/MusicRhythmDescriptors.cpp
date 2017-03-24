@@ -49,7 +49,7 @@ void  MusicRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
   rhythmExtractor->output("bpmIntervals") >> bpmhist->input("bpmIntervals");
 
-  // connect as single value otherwise PoolAggregator with compute statistics
+  // connect as single value otherwise PoolAggregator will compute statistics
   connectSingleValue(bpmhist->output("firstPeakBPM"), pool, nameSpace + "bpm_histogram_first_peak_bpm");
   connectSingleValue(bpmhist->output("firstPeakWeight"), pool, nameSpace + "bpm_histogram_first_peak_weight");
   connectSingleValue(bpmhist->output("firstPeakSpread"), pool, nameSpace + "bpm_histogram_first_peak_weight");

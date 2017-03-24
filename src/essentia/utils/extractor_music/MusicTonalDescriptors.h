@@ -23,7 +23,7 @@
 #include "MusicDescriptorsSet.h"
 
 
- class MusicTonalDescriptors : public MusicDescriptorSet{
+class MusicTonalDescriptors : public MusicDescriptorSet {
 
  public:
  	static const string nameSpace;
@@ -36,6 +36,6 @@
   void createNetworkTuningFrequency(SourceBase& source, Pool& pool);
  	void createNetwork(SourceBase& source, Pool& pool);
   void computeTuningSystemFeatures(Pool& pool);
- };
+};
 
- #endif
+#endif

@@ -140,7 +140,8 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
 
   // Spectral Decrease
   Algorithm* square = factory.create("UnaryOperator", "type", "square");
-  Algorithm* decrease = factory.create("Decrease", "range", sampleRate * 0.5);
+  Algorithm* decrease = factory.create("Decrease", 
+                                       "range", sampleRate * 0.5);
   spec->output("spectrum")      >> square->input("array");
   square->output("array")       >> decrease->input("array");
   decrease->output("decrease")  >> PC(pool, nameSpace + "spectral_decrease");
@@ -357,9 +358,7 @@ void MusicLowlevelDescriptors::createNetworkLoudness(SourceBase& source, Pool& p
 }
 
 
-Real squeezeRange(Real& x, Real& x1, Real& x2);
-
-Real squeezeRange(Real& x, Real& x1, Real& x2) {
+inline Real squeezeRange(Real& x, Real& x1, Real& x2) {
   return (0.5 + 0.5 * tanh(-1.0 + 2.0 * (x - x1) / (x2 - x1)));
 }
 
