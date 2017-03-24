@@ -17,8 +17,6 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-// Streaming extractor designed for analysis of music collections
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -39,7 +37,7 @@ using namespace essentia::standard;
 void usage(char *progname) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << progname << " input_audiofile output_textfile [profile]" << endl;
-    cout << endl << "Music extractor version '" << EXTRACTOR_VERSION << "'" << endl 
+    cout << endl << "Music extractor version '" << MUSIC_EXTRACTOR_VERSION << "'" << endl 
          << "built with Essentia version " << essentia::version_git_sha << endl;
     creditLibAV();
 
