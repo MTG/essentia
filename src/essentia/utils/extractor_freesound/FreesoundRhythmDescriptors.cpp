@@ -33,7 +33,10 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
 
   // Rhythm extractor
   Algorithm* rhythmExtractor = factory.create("RhythmExtractor2013");
-  rhythmExtractor->configure("method","degara");
+  rhythmExtractor->configure("method", options.value<string>("rhythm.method"),
+                             "maxTempo", (int) options.value<Real>("rhythm.maxTempo"),
+                             "minTempo", (int) options.value<Real>("rhythm.minTempo"));
+
   
   
   source >> rhythmExtractor->input("signal");
@@ -41,40 +44,48 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   rhythmExtractor->output("bpm") >>          PC(pool, nameSpace + "bpm");
   rhythmExtractor->output("estimates") >>    NOWHERE;
   rhythmExtractor->output("bpmIntervals") >> PC(pool, nameSpace + "bpm_intervals");
+  // TODO: confidence value will be always zero for degar
   rhythmExtractor->output("confidence") >>   PC(pool, nameSpace + "bpm_confidence");
 
   // BPM Histogram descriptors
   Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
   rhythmExtractor->output("bpmIntervals") >> bpmhist->input("bpmIntervals");
-  bpmhist->output("firstPeakBPM") >>     PC(pool, nameSpace + "first_peak_bpm");
-  bpmhist->output("firstPeakWeight") >>  PC(pool, nameSpace + "first_peak_weight");
-  bpmhist->output("firstPeakSpread") >>  PC(pool, nameSpace + "first_peak_spread");
-  bpmhist->output("secondPeakBPM") >>    PC(pool, nameSpace + "second_peak_bpm");
-  bpmhist->output("secondPeakWeight") >> PC(pool, nameSpace + "second_peak_weight");
-  bpmhist->output("secondPeakSpread") >> PC(pool, nameSpace + "second_peak_spread");
-  bpmhist->output("histogram") >> NOWHERE;
+  
+  // connect as single value otherwise PoolAggregator will compute statistics
+  connectSingleValue(bpmhist->output("firstPeakBPM"), pool, nameSpace + "bpm_histogram_first_peak_bpm");
+  connectSingleValue(bpmhist->output("firstPeakWeight"), pool, nameSpace + "bpm_histogram_first_peak_weight");
+  connectSingleValue(bpmhist->output("firstPeakSpread"), pool, nameSpace + "bpm_histogram_first_peak_weight");
+  connectSingleValue(bpmhist->output("secondPeakBPM"), pool, nameSpace + "bpm_histogram_second_peak_bpm");
+  connectSingleValue(bpmhist->output("secondPeakWeight"), pool, nameSpace + "bpm_histogram_second_peak_weight");
+  connectSingleValue(bpmhist->output("secondPeakSpread"), pool, nameSpace + "bpm_histogram_second_peak_spread");
+  connectSingleValue(bpmhist->output("histogram"), pool, nameSpace + "bpm_histogram");
+  // TODO: we did not output bpm_histogram before
 
   // Onset Detection
+  // TODO: use SuperFlux onset rate algorithm instead!
+  //       the algorithm that is used is possibly outdated, onset times can be 
+  //       inaccurate, however, onset_rate is still very informative for many 
+  //       tasks 
   Algorithm* onset = factory.create("OnsetRate");
   source >> onset->input("signal");
   onset->output("onsetTimes") >> PC(pool, nameSpace + "onset_times");
   onset->output("onsetRate") >> PC(pool, nameSpace + "onset_rate"); 
 
+  // TODO add danceability? although we have seems some QA problems related to it...
 }
 
-void FreesoundRhythmDescriptors::createBeatsLoudnessNetwork(SourceBase& source, Pool& pool){
-  string nameSpace = "rhythm.";
-  streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
-  Real analysisSampleRate = 44100; // TODO: unify analysisSampleRate
+void FreesoundRhythmDescriptors::createNetworkBeatsLoudness(SourceBase& source, Pool& pool){
+  Real sampleRate = options.value<Real>("analysisSampleRate");
+
+  AlgorithmFactory& factory = AlgorithmFactory::instance();
   vector<Real> ticks = pool.value<vector<Real> >(nameSpace + "beats_position");
-    if (ticks.size()==0){
-        cout<<"adding 0 to ticks"<<endl;
-        ticks.push_back(0);
-    }
+  if (ticks.size()==0){ // TODO why? we dont do that in MusicExtractor
+    cout<<"adding 0 to ticks"<<endl;
+    ticks.push_back(0);
+  }
   Algorithm* beatsLoudness = factory.create("BeatsLoudness",
-    "sampleRate", analysisSampleRate,
-    "beats", ticks
-  );
+                                            "sampleRate", sampleRate,
+                                            "beats", ticks);
   source >> beatsLoudness->input("signal");
   beatsLoudness->output("loudness") >> PC(pool, nameSpace + "beats_loudness");
   beatsLoudness->output("loudnessBandRatio") >> PC(pool, nameSpace + "beats_loudness_band_ratio");

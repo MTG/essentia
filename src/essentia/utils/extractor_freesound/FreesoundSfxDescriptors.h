@@ -17,22 +17,27 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef FREESOUND_LOWLEVEL_DESCRIPTORS_H
-#define FREESOUND_LOWLEVEL_DESCRIPTORS_H
+#ifndef FREESOUND_SFX_DESCRIPTORS_H
+#define FREESOUND_SFX_DESCRIPTORS_H
 
 #include "FreesoundDescriptorsSet.h"
-#include "essentia/essentiamath.h"
 
-using namespace std;
 
- class FreesoundLowlevelDescriptors : public FreesoundDescriptorSet{
+class FreesoundSfxDescriptors : public FreesoundDescriptorSet {
 
  public:
+
  	static const string nameSpace;  
 
+  FreesoundSfxDescriptors(Pool& options) {
+    this->options = options;
+  }
+  ~FreesoundSfxDescriptors();
+
  	void createNetwork(SourceBase& source, Pool& pool);
-	void computeAverageLoudness(Pool& pool);
+ 	void createPitchNetwork(VectorInput<Real>& pitch, Pool& pool);
+ 	void createHarmonicityNetwork(SourceBase& source, Pool& pool);
 
- };
+};
 
- #endif
+#endif

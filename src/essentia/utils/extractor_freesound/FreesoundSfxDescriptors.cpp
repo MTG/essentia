@@ -32,7 +32,7 @@ const string FreesoundSfxDescriptors::nameSpace="sfx.";
   // not directly available in streaming mode.
   // Can be done at the client for the moment
 
-void  FreesoundSfxDescriptors::createNetwork(SourceBase& source, Pool& pool){
+void FreesoundSfxDescriptors::createNetwork(SourceBase& source, Pool& pool) {
   
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
@@ -104,9 +104,7 @@ void  FreesoundSfxDescriptors::createNetwork(SourceBase& source, Pool& pool){
 }
 
 
-
-
-void  FreesoundSfxDescriptors::createPitchNetwork(VectorInput<Real>& pitch, Pool& pool){
+void FreesoundSfxDescriptors::createPitchNetwork(VectorInput<Real>& pitch, Pool& pool) {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
@@ -130,7 +128,6 @@ void  FreesoundSfxDescriptors::createPitchNetwork(VectorInput<Real>& pitch, Pool
   Algorithm* amt = factory.create("AfterMaxToBeforeMaxEnergyRatio");
   pitch >> amt->input("pitch"); 
   amt->output("afterMaxToBeforeMaxEnergyRatio") >>  PC(pool, nameSpace + "pitch_after_max_to_before_max_energy_ratio");
-  
 }
 
 
@@ -139,13 +136,13 @@ void  FreesoundSfxDescriptors::createHarmonicityNetwork(SourceBase& source, Pool
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
-  //Real sampleRate = 44100;
-  int frameSize =   2048;
-  int hopSize =     1024;
-  int zeroPadding = 0;
-  string silentFrames ="noise";
-  string windowType = "blackmanharris62";
-
+  // using the same parameters as for other low-level descriptors
+  Real sampleRate = options.value<Real>("analysisSampleRate");
+  int frameSize =   int(options.value<Real>("lowlevel.frameSize"));
+  int hopSize =     int(options.value<Real>("lowlevel.hopSize"));
+  int zeroPadding = int(options.value<Real>("lowlevel.zeroPadding"));
+  string silentFrames = options.value<string>("lowlevel.silentFrames");
+  string windowType = options.value<string>("lowlevel.windowType");
 
   // FrameCutter
   Algorithm* fc = factory.create("FrameCutter",

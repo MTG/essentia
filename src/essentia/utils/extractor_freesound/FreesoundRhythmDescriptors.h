@@ -26,14 +26,19 @@ using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
 
- class FreesoundRhythmDescriptors : public FreesoundDescriptorSet{
+ class FreesoundRhythmDescriptors : public FreesoundDescriptorSet {
 
  public:
 
  	static const string nameSpace;  
 
+  FreesoundRhythmDescriptors(Pool& options) {
+    this->options = options;
+  }
+  ~FreesoundRhythmDescriptors();
+
  	void createNetwork(SourceBase& source, Pool& pool);
-	void createBeatsLoudnessNetwork(SourceBase& source, Pool& pool);
+	void createNetworkBeatsLoudness(SourceBase& source, Pool& pool);
  };
 
  #endif

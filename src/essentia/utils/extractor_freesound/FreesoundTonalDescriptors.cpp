@@ -24,69 +24,53 @@ using namespace essentia::streaming;
 
 const string FreesoundTonalDescriptors::nameSpace="tonal.";
 
+void FreesoundTonalDescriptors ::createNetworkTuningFrequency(SourceBase& source, Pool& pool){
 
-const int frameSize = 4096;
-const int hopSize =   2048;
-const string silentFrames = "noise";
-const string windowType = "blackmanharris92";
-const int zeroPadding = 0;
+  int frameSize = int(options.value<Real>("tonal.frameSize"));
+  int hopSize =   int(options.value<Real>("tonal.hopSize"));
+  string silentFrames = options.value<string>("tonal.silentFrames");
+  string windowType = options.value<string>("tonal.windowType");
+  int zeroPadding = int(options.value<Real>("tonal.zeroPadding"));
 
-
-
-void FreesoundTonalDescriptors ::createTuningFrequencyNetwork(SourceBase& source, Pool& pool){
-
-    streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
+  AlgorithmFactory& factory = AlgorithmFactory::instance();
     
-    // FrameCutter
-    Algorithm* fc = factory.create("FrameCutter",
-                                   "frameSize", frameSize,
-                                   "hopSize", hopSize,
-                                   "silentFrames", silentFrames);
+  Algorithm* fc = factory.create("FrameCutter",
+                                 "frameSize", frameSize,
+                                 "hopSize", hopSize,
+                                "silentFrames", silentFrames);
+  Algorithm* w = factory.create("Windowing",
+                                "type", windowType,
+                                "zeroPadding", zeroPadding);
+  Algorithm* spec = factory.create("Spectrum");
+  Algorithm* peaks = factory.create("SpectralPeaks",
+                                    "maxPeaks", 10000,
+                                    "magnitudeThreshold", 0.00001,
+                                    "minFrequency", 40,
+                                    "maxFrequency", 5000,
+                                    "orderBy", "frequency");
+  Algorithm* tuning = factory.create("TuningFrequency");
 
-    source >> fc->input("signal");
-    
-    // Windowing
-    Algorithm* w = factory.create("Windowing",
-                                  "type", windowType,
-                                  "zeroPadding", zeroPadding);
-
-    fc->output("frame") >> w->input("frame");
-    
-    // Spectrum
-    Algorithm* spec = factory.create("Spectrum");
-
-    w->output("frame") >> spec->input("frame");
-    
-    // Spectral Peaks
-    Algorithm* peaks = factory.create("SpectralPeaks",
-                                      "maxPeaks", 10000,
-                                      "magnitudeThreshold", 0.00001,
-                                      "minFrequency", 40,
-                                      "maxFrequency", 5000,
-                                      "orderBy", "frequency");
-
-    spec->output("spectrum") >> peaks->input("spectrum");
-    
-    // Tuning Frequency
-    Algorithm* tuning = factory.create("TuningFrequency");
-    
-    peaks->output("magnitudes") >>  tuning->input("magnitudes");
-    peaks->output("frequencies") >>  tuning->input("frequencies");
-    tuning->output("tuningFrequency") >>  PC(pool, nameSpace + "tuning_frequency");
-    tuning->output("tuningCents") >> NOWHERE;
-    
+  source >> fc->input("signal");
+  fc->output("frame") >> w->input("frame");
+  w->output("frame") >> spec->input("frame");
+  spec->output("spectrum") >> peaks->input("spectrum");
+  peaks->output("magnitudes") >>  tuning->input("magnitudes");
+  peaks->output("frequencies") >>  tuning->input("frequencies");
+  tuning->output("tuningFrequency") >>  PC(pool, nameSpace + "tuning_frequency");
+  tuning->output("tuningCents") >> NOWHERE;
 }
 
- void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool){
+void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
+  // TODO: update to 20-3500 Hz range similarly to MusicExtractor? 
+  // (as suggested by Angel Faraldo) 
 
-     int frameSize = 4096;
-     int hopSize =   2048;
-     string silentFrames = "noise";
-     string windowType = "blackmanharris92";
-     int zeroPadding = 0;
+  int frameSize = int(options.value<Real>("tonal.frameSize"));
+  int hopSize =   int(options.value<Real>("tonal.hopSize"));
+  string silentFrames = options.value<string>("tonal.silentFrames");
+  string windowType = options.value<string>("tonal.windowType");
+  int zeroPadding = int(options.value<Real>("tonal.zeroPadding"));
 
-
-  streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
+  AlgorithmFactory& factory = AlgorithmFactory::instance();
 
 
   // FrameCutter
@@ -123,7 +107,8 @@ void FreesoundTonalDescriptors ::createTuningFrequencyNetwork(SourceBase& source
   tuning->output("tuningFrequency") >> PC(pool, nameSpace + "tuning_frequency");
   tuning->output("tuningCents") >> NOWHERE;
 
-  // Tuning frequency is currently provided but not used for HPCP computation, not clear if it would make an improvement for freesound sounds
+  // TODO: Tuning frequency is currently provided but not used for HPCP 
+  // computation, not clear if it would make an improvement for freesound sounds
   Real tuningFreq = 440;
       
   //Real tuningFreq = pool.value<vector<Real> >(nameSpace + "tuning_frequency").back();
@@ -143,6 +128,7 @@ void FreesoundTonalDescriptors ::createTuningFrequencyNetwork(SourceBase& source
   hpcp_key->output("hpcp") >> PC(pool, nameSpace + "hpcp");
 
   
+  // TODO: use four different key profiles similar to MusicExtractor? 
   Algorithm* skey = factory.create("Key");
   hpcp_key->output("hpcp") >> skey->input("pcp");
   skey->output("key") >> PC(pool, nameSpace + "key_key");
@@ -183,14 +169,9 @@ void FreesoundTonalDescriptors ::createTuningFrequencyNetwork(SourceBase& source
   Algorithm* entropy = factory.create("Entropy");
   hpcp_chord->output("hpcp") >> entropy->input("array");
   entropy->output("entropy") >> PC(pool, nameSpace + "hpcp_entropy");
-     
+
+  // TODO: what is the sense of HPCP crest and why we do not have it in MusicExtractor?
   Algorithm* crest = factory.create("Crest");
   hpcp_chord->output("hpcp") >> crest->input("array");
   crest->output("crest") >> PC(pool, nameSpace + "hpcp_crest");
-    
-    
-
-     
-     
-  
- }
+}
