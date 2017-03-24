@@ -33,9 +33,9 @@ class NSGIConstantQ : public Algorithm {
   Input<std::vector<std::vector<std::complex<Real> > > >_constantQ ;
   Input<std::vector<std::complex<Real> > > _constantQDC;
   Input<std::vector<std::complex<Real> > > _constantQNF;
-  Input<std::vector<Real> > _shiftsOut;
-  Input<std::vector<Real> > _winsLenOut;
-  Input<std::vector<std::vector<Real> > > _freqWins;
+  Input<std::vector<Real> > _shiftsIn;
+  Input<std::vector<Real> > _winsLenIn;
+  Input<std::vector<std::vector<Real> > > _freqWinsIn;
 
  public:
   NSGIConstantQ() {
@@ -43,9 +43,9 @@ class NSGIConstantQ : public Algorithm {
     declareInput(_constantQ, "constantq", "the Non Stationary Gabor transform based constant Q transform of the input frame");
     declareInput(_constantQDC, "constantqdc", "the DC component of the constant Q transform. Needed for the time reconstruction");
     declareInput(_constantQNF, "constantqnf", "the Nyquist Frequency component of the constant Q transform. Needed for the time reconstruction");
-    declareInput(_shiftsOut, "windowShifts", "Amount of bins from the center of each frequency window to the base band. Needed for the time reconstruction");
-    declareInput(_winsLenOut, "windowLenghts", "Longitudes of the frequency windows used in the transform. Needed for the time reconstruction");
-    declareInput(_freqWins, "frequencyWindows", "Frequency windows used in the transform. Needed for the time reconstruction");
+    declareInput(_shiftsIn, "windowShifts", "Amount of bins from the center of each frequency window to the base band. Needed for the time reconstruction");
+    declareInput(_winsLenIn, "windowLenghts", "Longitudes of the frequency windows used in the transform. Needed for the time reconstruction");
+    declareInput(_freqWinsIn, "frequencyWindows", "Frequency windows used in the transform. Needed for the time reconstruction");
 
 
     _fft = AlgorithmFactory::create("FFTC");
@@ -58,19 +58,7 @@ class NSGIConstantQ : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("inputSize", "the size of the input", "(0,inf)", 1024);
-    declareParameter("minFrequency", "the minimum frequency", "(0,inf)", 27.5);
-    declareParameter("maxFrequency", "the maximum frequency", "(0,inf)", 55);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 12);
-    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);
-    declareParameter("rasterize", "hop sizes for each frequency channel. With 'none' each frequency channel is distinct. 'full' sets the hop sizes of all the channels to the smallest. 'piecewise' rounds down the hop size to a power of two", "{none,full,piecewise}", "full");
     declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a mapping function [2]", "{local,global}", "global");
-    declareParameter("gamma", "The bandwidth of each filter is given by Bk = 1/Q * fk + gamma", "[0,inf)", 0);
-    declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "sine");
-    declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hann");
-    declareParameter("minimumWindow", "Minimum size allowed for the windows", "[2,inf)", 4);
-    declareParameter("windowSizeFactor", "Window sizes are rounded to multiples of this", "[1,inf)", 1);
-    declareParameter("INSQConstantQdata", "Flag to output the data needed for the reconstruction", "{true,false}", true);
   }
 
   void compute();
@@ -86,32 +74,25 @@ class NSGIConstantQ : public Algorithm {
   Algorithm* _fft;
 
   //Variables for the input parameters
-  Real _minFrequency;
-  Real _maxFrequency;
-  Real _sr;
-  Real _binsPerOctave;
-  int _inputSize;
-  Real _gamma;
-  std::string _rasterize;
   std::string _phaseMode;
-  std::string _normalize;
-  int _minimumWindow;
-  int _windowSizeFactor;
-  bool _INSQConstantQdata;
+
 
   //windowing vectors
-  //std::vector< std::vector<Real> > _freqWins;
-  std::vector<int> _shifts;
-  std::vector<Real> _shiftsReal;
-  std::vector<Real> _shiftsFreq;
-  std::vector<int> _winsLen;
-  std::vector<Real> _winsLenReal;
-  std::vector<Real> _baseFreqs;
+  std::vector<std::vector<Real> > _freqWins;
+  std::vector<Real> _shifts;
+  std::vector<Real> _winsLen;
+
+
   int _binsNum;
+  int _NN;
+  int _N;
 
   std::vector<int> _posit;
-  std::vector< std::vector<std::complex<Real> > > _fr;
   std::vector<std::vector<Real> > _dualFreqWins;
+
+  std::vector<std::vector<int> > _win_range;
+  std::vector<std::vector<int> > _idx;
+
 
   void designDualFrame(const std::vector<Real>& shifts,
                        const std::vector<std::vector<Real> >& freqWins,

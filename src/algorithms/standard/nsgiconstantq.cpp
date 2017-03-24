@@ -32,11 +32,7 @@ const char* NSGIConstantQ::description = DOC("TODO.\n");
 
 void NSGIConstantQ::configure() {
 
-  _rasterize = parameter("rasterize").toLower();
   _phaseMode = parameter("phaseMode").toLower();
-  _normalize = parameter("normalize").toLower();
-
-
 
 }
 
@@ -46,58 +42,52 @@ void NSGIConstantQ::compute() {
   const std::vector< std::vector<std::complex<Real> > > & constantQ = _constantQ.get();
   const std::vector<std::complex<Real> >& constantQDC = _constantQDC.get();
   const std::vector<std::complex<Real> >& constantQNF = _constantQNF.get();
-  const std::vector<Real>& shifts = _shiftsOut.get();
-  const std::vector<Real>& winsLen = _winsLenOut.get();
-  const std::vector<std::vector<Real> >& freqWins = _freqWins.get();
+  const std::vector<Real>& shifts = _shiftsIn.get();
+  const std::vector<Real>& winsLen = _winsLenIn.get();
+  const std::vector<std::vector<Real> >& freqWins = _freqWinsIn.get();
   std::vector<Real>& signal = _signal.get();
-
-
-  designDualFrame(shifts, freqWins, winsLen);
-
 
   //add NF and DC components
   std::vector<std::vector<complex<Real> > > CQ;
   CQ = constantQ;
   CQ.push_back(constantQNF);
   CQ.insert(CQ.begin(), constantQDC);
+  E_INFO("starting");
 
-  int N = CQ.size();
-  int shiftsSize = shifts.size();
+  // Dual frames only have to be computed the first time.
+  if (_shifts != shifts || _winsLen != winsLen || _freqWins != freqWins ){
 
-  _posit.resize(shiftsSize);
-  _posit[0] = shifts[0];
+    designDualFrame(shifts, freqWins, winsLen);
+    E_INFO("designed dual frames ");
 
-  for (int j=1; j<shiftsSize; j++) _posit[j] = _posit[j-1] + shifts[j];
+    _N = CQ.size();
+    int shiftsSize = shifts.size();
 
-  int NN = _posit[shiftsSize-1];
+    _posit.resize(shiftsSize);
+    _posit[0] = shifts[0];
 
-  std::transform(_posit.begin(), _posit.end(), _posit.begin(),
-                  std::bind2nd(std::minus<int>(), shifts[0]));
+    for (int j=1; j<shiftsSize; j++) _posit[j] = _posit[j-1] + shifts[j];
 
-  std::vector<std::complex<Real> >  fr(NN, (complex<Real>)0);
+    _NN = _posit[shiftsSize-1];
 
-  std::vector<int> win_range;
-  std::vector<int> idx;
+    std::transform(_posit.begin(), _posit.end(), _posit.begin(),
+                     std::bind2nd(std::minus<int>(), shifts[0]));
+
+    _shifts = shifts;
+    _winsLen = winsLen;
+    _freqWins = freqWins;
+  }
+
+
+  std::vector<std::complex<Real> >  fr(_NN, (complex<Real>)0);
   std::vector<int> temp_idx;
   std::vector<std::complex<Real> > temp;
 
-  for (int j=0; j<N; j++){
+  for (int j=0; j<_N; j++){
     int Lg = freqWins[j].size();
 
-    for (int i = ceil( (float) Lg/2.0); i < Lg; i++) idx.push_back(i);
-    for (int i = 0; i < ceil( (float) Lg/2); i++) idx.push_back(i);
-
-    float winComp;
-    for (int i = -Lg/2; i < ceil((float) Lg / 2); i++){
-      winComp = (_posit[j] + i) % NN;
-      if (winComp < 0){
-        winComp = (NN) + winComp;
-      }
-
-      win_range.push_back( abs(winComp));
-    }
-
     for (int i=(int)winsLen[j]-(Lg )/2; i<(int)winsLen[j]+int(Real(Lg)/2 + .5); i++) temp_idx.push_back( fmod(i, (int)winsLen[j]));
+
 
     _fft->configure("size", (int)winsLen[j],
                     "negativeFrequencies", true);
@@ -105,57 +95,50 @@ void NSGIConstantQ::compute() {
     _fft->output("fft").set(temp);
     _fft->compute();
 
-    //for (int i=temp.size()-2; i>0; i--) temp.push_back(temp[i]);
-
     std::transform(temp.begin(), temp.end(), temp.begin(),
                     std::bind2nd(std::multiplies<complex<Real> >(), winsLen[j]));
 
-     //E_INFO(win_range);
-     //E_INFO(j);
-    // E_INFO(temp);
-    // E_INFO(freqWins[j]);
+    // Phase shift
+    if (_phaseMode == "global") {
+      int displace = (_posit[j] - (_posit[j] / (int)winsLen[j] * (int)winsLen[j])) % temp.size();
 
-/*    if (j == 125){
-      E_INFO("temp: " << temp);
-      E_INFO("coeff: " << CQ[j]);
-    }*/
+      std::rotate(temp.begin(),
+                  temp.begin() + displace, // this will be the new first element
+                  temp.end());
+    }
 
-    for (int i=0; i<(int)win_range.size(); i++){
-      fr[win_range[i]] += temp[temp_idx[i]] * _dualFreqWins[j][idx[i]] ;
+    for (int i=0; i<(int)_win_range[j].size(); i++){
+      fr[_win_range[j][i]] += temp[temp_idx[i]] * _dualFreqWins[j][_idx[j][i]] ;
     }
 
     temp.clear();
-    idx.clear();
-    win_range.clear();
     temp_idx.clear();
   }
 
-
-  // E_INFO(fr[467]);
-  int NyquistBin = NN/2;
+  int NyquistBin = _NN/2;
   int count = 1;
   for (int i= NyquistBin -1; i>0; i--){
     fr[NyquistBin + count] = std::conj(fr[i]);
     count++;
   }
 
-  E_INFO(fr);
+
   std::vector<std::complex<Real> > output;
-  _ifft->configure("size", NN);
+  _ifft->configure("size", _NN);
   _ifft->input("fft").set(fr);
   _ifft->output("frame").set(output);
   _ifft->compute();
 
+
   std::reverse(output.begin()+1, output.end());
 
   std::transform(output.begin(), output.end(), output.begin(),
-                  std::bind2nd(std::divides<complex<Real> >(), NN));
+                  std::bind2nd(std::divides<complex<Real> >(), _NN));
 
-  signal.resize(NN);
-  for (int i=0; i<NN; i++){
+  signal.resize(_NN);
+  for (int i=0; i<_NN; i++){
     signal[i] = std::real(output[i]);
   }
-
 }
 
 
@@ -163,12 +146,18 @@ void NSGIConstantQ::designDualFrame(const std::vector<Real>& shifts,
                                     const std::vector<std::vector<Real> >& freqWins,
                                     const std::vector<Real>& winsLen){
 
+  _posit.clear();
+  _win_range.clear();
+  _idx.clear();
+
+
   Real eps = std::numeric_limits<Real>::epsilon();
   int N = shifts.size();
 
+
   _posit.resize(N);
   _posit[0] = shifts[0];
-  //E_INFO(N);
+
   for (int j=1; j<N; j++) _posit[j] = _posit[j-1] + shifts[j];
 
   int Ls = _posit[N-1];
@@ -179,49 +168,34 @@ void NSGIConstantQ::designDualFrame(const std::vector<Real>& shifts,
   std::vector<Real> diagonal(Ls, 0.0);
 
 
-  std::vector<std::vector<int> > win_range;
-  std::vector<std::vector<int> > idx;
-  win_range.resize(N);
-  idx.resize(N);
+  _win_range.resize(N);
+  _idx.resize(N);
   for (int j = 0; j<N; j++){
     int Lg = freqWins[j].size();
 
-    for (int i = ceil( (float) Lg/2.0); i < Lg; i++) idx[j].push_back(i);
-    for (int i = 0; i < ceil( (float) Lg/2); i++) idx[j].push_back(i);
+    for (int i = ceil( (float) Lg/2.0); i < Lg; i++) _idx[j].push_back(i);
+    for (int i = 0; i < ceil( (float) Lg/2); i++) _idx[j].push_back(i);
 
     float winComp;
     for (int i = -Lg/2; i < ceil((float) Lg / 2); i++){
       winComp = (_posit[j] + i) % Ls;
       if (winComp < 0){
-        winComp = (Ls) + winComp;
+        winComp = Ls + winComp;
       }
-      win_range[j].push_back( abs(winComp));
+      _win_range[j].push_back( abs(winComp));
     }
 
-    for (int i=0; i<(int)win_range[j].size(); i++){
-      diagonal[win_range[j][i]] += pow(freqWins[j][idx[j][i]], 2) * winsLen[j] + eps;
+    for (int i=0; i<(int)_win_range[j].size(); i++){
+      diagonal[_win_range[j][i]] += pow(freqWins[j][_idx[j][i]], 2) * winsLen[j] + eps;
     }
-
-/*    if (j == 206){
-      E_INFO("win range: " << win_range[j]);
-      E_INFO("idx: " << idx[j]);
-      E_INFO("freqWins: " << freqWins[j]);
-      E_INFO("factor: " << winsLen[j]);
-      E_INFO("diagonal: " << diagonal);
-    }*/
-
   }
-
-  // E_INFO("diagonal: " << diagonal);
 
   _dualFreqWins = freqWins;
 
   for (int j = 0; j<N; j++){
 
-    for (int i=0; i<(int)win_range[j].size(); i++){
-      _dualFreqWins[j][idx[j][i]] = _dualFreqWins[j][idx[j][i]] / diagonal[win_range[j][i]];
+    for (int i=0; i<(int)_win_range[j].size(); i++){
+      _dualFreqWins[j][_idx[j][i]] = _dualFreqWins[j][_idx[j][i]] / diagonal[_win_range[j][i]];
     }
-
   }
-
 }

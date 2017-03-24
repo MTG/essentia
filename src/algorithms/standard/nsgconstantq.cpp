@@ -381,28 +381,9 @@ void NSGConstantQ::compute() {
 
       std::reverse(constantQ[j].begin()+1, constantQ[j].end());
 
-      //todo clean this
-/*
-      std::rotate(constantQ[j].begin(),
-                  constantQ[j].end(), // this will be the new first element
-                  constantQ[j].end());
-      constantQ[j].insert(constantQ[j].begin(), constantQ[j][constantQ[j].size()-1]);
-      constantQ[j].pop_back();
-*/
-
       std::transform(constantQ[j].begin(), constantQ[j].end(), constantQ[j].begin(),
                       std::bind2nd(std::divides<complex<Real> >(), constantQ[j].size()));
     }
-
-
-/*    if (j == 206){
-      //E_INFO("idx: " << idx);
-      //E_INFO("w ramge: " << win_range);
-      //E_INFO("p idx: " << product_idx);
-       E_INFO("product: " << product);
-      //E_INFO("win: " << _freqWins[j]);
-    }*/
-
 
     idx.clear();
     win_range.clear();
