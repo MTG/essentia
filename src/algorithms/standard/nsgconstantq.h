@@ -45,7 +45,7 @@ class NSGConstantQ : public Algorithm {
     declareOutput(_constantQNF, "constantqnf", "the Nyquist Frequency component of the constant Q transform. Needed for the time reconstruction");
     declareOutput(_shiftsOut, "windowShifts", "Amount of bins from the center of each frequency window to the base band. Needed for the time reconstruction");
     declareOutput(_winsLenOut, "windowLenghts", "Longitudes of the frequency windows used in the transform. Needed for the time reconstruction");
-    declareOutput(_freqWinsOut, "frequencyFilters", "Frequency windows used in the transform. Needed for the time reconstruction");
+    declareOutput(_freqWinsOut, "frequencyWindows", "Frequency windows used in the transform. Needed for the time reconstruction");
 
 
 
@@ -121,5 +121,40 @@ class NSGConstantQ : public Algorithm {
 
 }
 }
+
+#include "streamingalgorithmwrapper.h"
+
+namespace essentia {
+namespace streaming {
+
+class NSGConstantQ : public StreamingAlgorithmWrapper {
+
+ protected:
+  Sink<std::vector<Real> > _signal;
+  Source<std::vector<std::vector<std::complex<Real> > > >_constantQ ;
+  Source<std::vector<std::complex<Real> > > _constantQDC;
+  Source<std::vector<std::complex<Real> > > _constantQNF;
+  Source<std::vector<Real> > _shiftsOut;
+  Source<std::vector<Real> > _winsLenOut;
+  Source<std::vector<std::vector<Real> > > _freqWinsOut;
+
+
+
+ public:
+  NSGConstantQ() {
+    declareAlgorithm("NSGConstantQ");
+    declareInput(_signal, TOKEN, "frame");
+    declareOutput(_constantQ, TOKEN, "constantq");
+    declareOutput(_constantQDC, TOKEN, "constantqdc");
+    declareOutput(_constantQNF, TOKEN, "constantqnf");
+    declareOutput(_shiftsOut, TOKEN, "windowShifts");
+    declareOutput(_winsLenOut, TOKEN, "windowLenghts");
+    declareOutput(_freqWinsOut, TOKEN, "frequencyWindows");
+
+  }
+};
+
+} // namespace streaming
+} // namespace essentia
 
 #endif // ESSENTIA_NSGCONSTANTQ_H

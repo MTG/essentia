@@ -103,4 +103,37 @@ class NSGIConstantQ : public Algorithm {
 }
 }
 
+#include "streamingalgorithmwrapper.h"
+
+namespace essentia {
+namespace streaming {
+
+class NSGIConstantQ : public StreamingAlgorithmWrapper {
+
+ protected:
+  Sink<std::vector<std::vector<std::complex<Real> > > >_constantQ ;
+  Sink<std::vector<std::complex<Real> > > _constantQDC;
+  Sink<std::vector<std::complex<Real> > > _constantQNF;
+  Sink<std::vector<Real> > _shiftsIn;
+  Sink<std::vector<Real> > _winsLenIn;
+  Sink<std::vector<std::vector<Real> > > _freqWinsIn;
+  Source<std::vector<Real> > _signal;
+
+
+ public:
+  NSGIConstantQ() {
+    declareAlgorithm("NSGIConstantQ");
+    declareInput(_constantQ, TOKEN, "constantq");
+    declareInput(_constantQDC, TOKEN, "constantqdc");
+    declareInput(_constantQNF, TOKEN, "constantqnf");
+    declareInput(_shiftsIn, TOKEN, "windowShifts");
+    declareInput(_winsLenIn, TOKEN, "windowLenghts");
+    declareInput(_freqWinsIn, TOKEN, "frequencyWindows");
+    declareOutput(_signal, TOKEN, "frame");
+  }
+};
+
+} // namespace streaming
+} // namespace essentia
+
 #endif // ESSENTIA_NSGICONSTANTQ_H
