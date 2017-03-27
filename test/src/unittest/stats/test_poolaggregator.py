@@ -186,7 +186,7 @@ class TestPoolAggregator(TestCase):
         self.assertConfigureFails(PoolAggregator(), {'exceptions': exceptions})
 
 
-    def atestCopyStatistic(self):
+    def testCopyStatistic(self):
         p = Pool({ 'foo': [3,6,3,2,39],
                    'bar.ff.wfew.f.gr.g.re.gr.e.gregreg.re.gr.eg.re': [[324, 5, 54], [543, 234, 57]]
                  })
@@ -214,6 +214,19 @@ class TestPoolAggregator(TestCase):
         self.assertTrue(results.containsKey('foo.value'))
         self.assertAlmostEqual(results['foo.max'], 5)
         self.assertAlmostEqualVector(results['foo.value'], [1,2,3,4,5])
+
+
+    def testLastStatistic(self):
+        p = Pool({'foo': [1,2,3,4,5], 'foo_vector': [[1,2,3], [4,5,6], [7,8,9]]})
+
+        results = PoolAggregator(defaultStats=['last'])(p)
+
+        self.assertTrue(results.containsKey('foo'))
+        self.assertTrue(results.containsKey('foo_vector'))
+
+        self.assertAlmostEqual(results['foo'], 5)
+        self.assertAlmostEqualVector(results['foo_vector'], [7,8,9])
+
 
     def testArray2DAggregation(self):
         p = Pool()
