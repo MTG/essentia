@@ -279,17 +279,17 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
 
   map<string, vector<string> > exceptions;
 
-  // TODO why all that is ignored?
+  // do not aggregate values for features characterizing the whole audio  
+  const char* noStats[] = { "last" };
   const char *noStatsSfxArray[] = {
     "der_av_after_max", "effective_duration","flatness", "logattacktime",
-    "max_der_before_max", "oddtoevenharmonicenergyratio", "pitch_centroid",
+    "max_der_before_max", "pitch_centroid",
     "temporal_centroid","temporal_decrease" ,"temporal_kurtosis",
     "temporal_skewness","temporal_spread"};
-
   vector<string> noStatsSfx = arrayToVector<string>(noStatsSfxArray);
 
   for (int i=0; i<(int)noStatsSfx.size(); i++) {
-    exceptions["sfx."+noStatsSfx[i]] = arrayToVector<string>(defaultStats);
+    exceptions["sfx."+noStatsSfx[i]] = arrayToVector<string>(noStats);
   }
 
   // keeping this from MusicExtractor
