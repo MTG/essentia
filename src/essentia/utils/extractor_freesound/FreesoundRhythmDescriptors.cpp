@@ -79,7 +79,9 @@ void FreesoundRhythmDescriptors::createNetworkBeatsLoudness(SourceBase& source, 
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   vector<Real> ticks = pool.value<vector<Real> >(nameSpace + "beats_position");
-  if (ticks.size()==0){ // TODO why? we dont do that in MusicExtractor
+  
+  // assume there is only one beat centered at zero if there were not beats detected
+  if (ticks.size()==0) {
     cout<<"adding 0 to ticks"<<endl;
     ticks.push_back(0);
   }

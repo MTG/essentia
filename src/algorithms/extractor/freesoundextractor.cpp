@@ -68,11 +68,13 @@ void FreesoundExtractor::configure() {
   tonalSilentFrames = parameter("tonalSilentFrames").toLower();
   tonalWindowType = parameter("tonalWindowType").toLower();
 
+  /*
   loudnessFrameSize = parameter("loudnessFrameSize").toInt();
   loudnessHopSize = parameter("loudnessHopSize").toInt();
   loudnessSilentFrames = parameter("loudnessSilentFrames").toLower();
   loudnessWindowType = parameter("loudnessWindowType").toLower();
-
+  */
+  
   rhythmMethod = parameter("rhythmMethod").toLower();
   rhythmMinTempo = parameter("rhythmMinTempo").toInt();
   rhythmMaxTempo = parameter("rhythmMaxTempo").toInt();
@@ -131,11 +133,13 @@ void FreesoundExtractor::setExtractorDefaultOptions() {
   options.set("tonal.windowType", tonalWindowType);
   options.set("tonal.silentFrames", tonalSilentFrames);
 
-  // average_loudness // TODO review; do we really use that for loudness?
-  options.set("average_loudness.frameSize", loudnessFrameSize);
-  options.set("average_loudness.hopSize", loudnessHopSize);
-  options.set("average_loudness.windowType", loudnessWindowType);
-  options.set("average_loudness.silentFrames", loudnessSilentFrames);
+  // average_loudness 
+  // Note: below are parameters used in MusicExtractor, but 
+  // in FreesoundExtractor we use the same parameters as for low-level.
+  //options.set("average_loudness.frameSize", loudnessFrameSize);
+  //options.set("average_loudness.hopSize", loudnessHopSize);
+  //options.set("average_loudness.windowType", loudnessWindowType);
+  //options.set("average_loudness.silentFrames", loudnessSilentFrames);
 
   // rhythm
   options.set("rhythm.method", rhythmMethod);
@@ -183,10 +187,7 @@ void FreesoundExtractor::compute() {
   results.set("metadata.audio_properties.analysis.start_time", startTime);
   results.set("metadata.audio_properties.analysis.end_time", endTime);
 
-  // TODO: we still compute some low-level descriptors with equal loudness filter...
-  // TODO: remove for consistency? evaluate on classification tasks?
-
-  // TODO: reading metadata for Freesound too. This could be useful.  
+  // Reading metadata for Freesound too. This could be useful.  
   E_INFO("FreesoundExtractor: Read metadata");
   readMetadata(audioFilename, results);
  
@@ -214,11 +215,10 @@ void FreesoundExtractor::compute() {
  
   SourceBase& source = loader->output("audio");
   lowlevel->createNetwork(loader->output("audio"),results);
-  // TODO: do we need loudness? disabled for now 
-  //lowlevel->createNetworkLoudness(source, results);
   rhythm->createNetwork(source, results);
-  tonal->createNetworkTuningFrequency(source, results);
+  tonal->createNetwork(source, results);
   sfx->createNetwork(loader->output("audio"),results);
+  sfx->createHarmonicityNetwork(loader->output("audio"), results);            
 
   scheduler::Network network(loader);
   network.run();
@@ -226,7 +226,7 @@ void FreesoundExtractor::compute() {
   // Descriptors that require values from other descriptors in the previous chain
   
   // requires 'loudness'
-  lowlevel->computeAverageLoudness(results);  
+  lowlevel->computeAverageLoudness(results);
 
   streaming::Algorithm* loader_2 = factory.create("EasyLoader",
                                        "filename",   audioFilename,
@@ -235,10 +235,9 @@ void FreesoundExtractor::compute() {
                                        "endTime",    endTime,
                                        //"replayGain", replayGain,
                                        "downmix",    downmix);
+
   // requires 'beat_positions'
   rhythm->createNetworkBeatsLoudness(loader_2->output("audio"), results);  
-  // TODO: requires pitch?
-  sfx->createHarmonicityNetwork(loader->output("audio"), results);            
 
   scheduler::Network network_2(loader_2);
   network_2.run();
@@ -276,8 +275,7 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
   // choose which descriptors stats to output
   const char* defaultStats[] = { 
     "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
-    // TODO: replace var with stdev, or add both?
-
+  // TODO: replace var with stdev, or add both?
 
   map<string, vector<string> > exceptions;
 
@@ -294,7 +292,7 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
     exceptions["sfx."+noStatsSfx[i]] = arrayToVector<string>(defaultStats);
   }
 
-  // TODO keeping this from MusicExtractor. Correct?
+  // keeping this from MusicExtractor
   const vector<string>& descNames = pool.descriptorNames();
   for (int i=0; i<(int)descNames.size(); i++) {
     if (descNames[i].find("lowlevel.mfcc") != string::npos) {
@@ -349,7 +347,8 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
 
   poolStats.set(string("tonal.hpcp_peak_count"), hpcp_peak_amps.size());
 
-  // TODO: keeping that from MusicExtractor
+  // MusicExtractor post-processes beats loudness in different way
+  /*
   // add descriptors that may be missing due to content
   const Real emptyVector[] = { 0, 0, 0, 0, 0, 0};
 
@@ -364,8 +363,8 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
     for (int i=0; i<statsSize; i++)
       poolStats.set(string("rhythm.beats_loudness_band_ratio.")+defaultStats[i], arrayToVector<Real>(emptyVector));
   }
+  */
 
-  // TODO: necessary to delete?? 
   delete aggregator;
   delete hpcp_peaks;
   
@@ -526,7 +525,6 @@ void FreesoundExtractor::computeReplayGain(const string& audioFilename, Pool& re
       }
       else {
         throw EssentiaException("File looks like a completely silent file");
-        //exit(4);
       }
 
       try {

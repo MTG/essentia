@@ -33,11 +33,12 @@ using namespace std;
 using namespace essentia;
 using namespace essentia::standard;
 
-// FIXME this could pretty much doubles streaming_extractor_music
+// this code pretty much doubles streaming_extractor_music
 
 void usage(char *progname) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << progname << " input_audiofile output_textfile [profile]" << endl;
+    cout << "See http://essentia.upf.edu/documentation/streaming_extractor_music.html" << endl;
     cout << endl << "Freesound extractor version '" << FREESOUND_EXTRACTOR_VERSION << "'" << endl 
          << "built with Essentia version " << essentia::version_git_sha << endl;
     creditLibAV();
@@ -48,10 +49,7 @@ void usage(char *progname) {
 
 int essentia_main(string audioFilename, string outputFilename, string profileFilename) {
   // Returns: 1 on essentia error
-  //          2 if there are no tags in the file // FIXME
-  // TODO: is 2 recieved?
 
-  int result;
   try {
     essentia::init();
 
@@ -85,7 +83,7 @@ int essentia_main(string audioFilename, string outputFilename, string profileFil
     cerr << e.what() << endl;
     return 1;
   }
-  return result;
+  return 0;
 
 }
 

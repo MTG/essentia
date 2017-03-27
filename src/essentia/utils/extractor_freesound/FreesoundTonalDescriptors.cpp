@@ -24,42 +24,6 @@ using namespace essentia::streaming;
 
 const string FreesoundTonalDescriptors::nameSpace="tonal.";
 
-void FreesoundTonalDescriptors ::createNetworkTuningFrequency(SourceBase& source, Pool& pool){
-
-  int frameSize = int(options.value<Real>("tonal.frameSize"));
-  int hopSize =   int(options.value<Real>("tonal.hopSize"));
-  string silentFrames = options.value<string>("tonal.silentFrames");
-  string windowType = options.value<string>("tonal.windowType");
-  int zeroPadding = int(options.value<Real>("tonal.zeroPadding"));
-
-  AlgorithmFactory& factory = AlgorithmFactory::instance();
-    
-  Algorithm* fc = factory.create("FrameCutter",
-                                 "frameSize", frameSize,
-                                 "hopSize", hopSize,
-                                "silentFrames", silentFrames);
-  Algorithm* w = factory.create("Windowing",
-                                "type", windowType,
-                                "zeroPadding", zeroPadding);
-  Algorithm* spec = factory.create("Spectrum");
-  Algorithm* peaks = factory.create("SpectralPeaks",
-                                    "maxPeaks", 10000,
-                                    "magnitudeThreshold", 0.00001,
-                                    "minFrequency", 40,
-                                    "maxFrequency", 5000,
-                                    "orderBy", "frequency");
-  Algorithm* tuning = factory.create("TuningFrequency");
-
-  source >> fc->input("signal");
-  fc->output("frame") >> w->input("frame");
-  w->output("frame") >> spec->input("frame");
-  spec->output("spectrum") >> peaks->input("spectrum");
-  peaks->output("magnitudes") >>  tuning->input("magnitudes");
-  peaks->output("frequencies") >>  tuning->input("frequencies");
-  tuning->output("tuningFrequency") >>  PC(pool, nameSpace + "tuning_frequency");
-  tuning->output("tuningCents") >> NOWHERE;
-}
-
 void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
   // TODO: update to 20-3500 Hz range similarly to MusicExtractor? 
   // (as suggested by Angel Faraldo) 

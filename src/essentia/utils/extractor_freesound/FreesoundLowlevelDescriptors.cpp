@@ -289,8 +289,7 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   pitch->output("pitch") >> PC(pool, nameSpace + "pitch");
   pitch->output("pitchConfidence") >> PC(pool, nameSpace + "pitch_instantaneous_confidence");
 
-  // TODO: this differs from Loudness in MusicExtractor which is estimated on 
-  // longer frames. Review again.
+  // Note: loudness is computed on shorter frames compared to MusicExtractor
   Algorithm* ln = factory.create("Loudness");
   fc->output("frame") >> ln->input("signal");
   ln->output("loudness") >> PC(pool, nameSpace + "loudness");
@@ -308,7 +307,7 @@ inline Real squeezeRange(Real& x, Real& x1, Real& x2) {
   return (0.5 + 0.5 * tanh(-1.0 + 2.0 * (x - x1) / (x2 - x1)));
 }
 
-void FreesoundLowlevelDescriptors::computeAverageLoudness(Pool& pool){ // after computing network
+void FreesoundLowlevelDescriptors::computeAverageLoudness(Pool& pool) { // after computing network
 
   // TODO: would this fail on empty signal?
   vector<Real> levelArray = pool.value<vector<Real> >(nameSpace + "loudness");

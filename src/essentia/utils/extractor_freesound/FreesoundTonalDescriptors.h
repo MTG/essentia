@@ -33,7 +33,6 @@ class FreesoundTonalDescriptors : public FreesoundDescriptorSet {
   }
   ~FreesoundTonalDescriptors();
 
-  void createNetworkTuningFrequency(SourceBase& source, Pool& pool);
  	void createNetwork(SourceBase& source, Pool& pool);
 };
 
