@@ -274,8 +274,7 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
 
   // choose which descriptors stats to output
   const char* defaultStats[] = { 
-    "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
-  // TODO: replace var with stdev, or add both?
+    "mean", "var", "stdev", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
 
   map<string, vector<string> > exceptions;
 
