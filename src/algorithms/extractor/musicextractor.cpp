@@ -185,7 +185,7 @@ void MusicExtractor::compute() {
   results.set("metadata.audio_properties.analysis.sample_rate", analysisSampleRate);
   results.set("metadata.audio_properties.analysis.downmix", downmix);
   results.set("metadata.audio_properties.analysis.start_time", startTime);
-  results.set("metadata.audio_properties.analysis.end_time", endTime);
+  //results.set("metadata.audio_properties.analysis.end_time", endTime);
 
   // TODO: we still compute some low-level descriptors with equal loudness filter...
   // TODO: remove for consistency? evaluate on classification tasks?

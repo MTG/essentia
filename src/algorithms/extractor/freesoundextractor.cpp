@@ -185,7 +185,7 @@ void FreesoundExtractor::compute() {
   results.set("metadata.audio_properties.analysis.sample_rate", analysisSampleRate);
   results.set("metadata.audio_properties.analysis.downmix", downmix);
   results.set("metadata.audio_properties.analysis.start_time", startTime);
-  results.set("metadata.audio_properties.analysis.end_time", endTime);
+  //results.set("metadata.audio_properties.analysis.end_time", endTime);
 
   // Reading metadata for Freesound too. This could be useful.  
   E_INFO("FreesoundExtractor: Read metadata");
