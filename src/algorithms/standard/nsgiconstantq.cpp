@@ -52,13 +52,13 @@ void NSGIConstantQ::compute() {
   CQ = constantQ;
   CQ.push_back(constantQNF);
   CQ.insert(CQ.begin(), constantQDC);
-  E_INFO("starting");
+
 
   // Dual frames only have to be computed the first time.
   if (_shifts != shifts || _winsLen != winsLen || _freqWins != freqWins ){
 
     designDualFrame(shifts, freqWins, winsLen);
-    E_INFO("designed dual frames ");
+
 
     _N = CQ.size();
     int shiftsSize = shifts.size();
