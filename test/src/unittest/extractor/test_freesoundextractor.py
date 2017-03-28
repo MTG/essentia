@@ -49,6 +49,12 @@ class TestFreesoundExtractor(TestCase):
         # TODO test that computed descriptors are similar across formats
         return
 
+    def testLengthMetadata(self):
+        inputFilename = join(testdata.audio_dir, 'recorded', 'musicbox.wav')
+        pool, _ = FreesoundExtractor(startTime=10, endTime=40)(inputFilename)
+        self.assertAlmostEqualFixedPrecision(pool['metadata.audio_properties.length'], 45.43, 2)
+        self.assertAlmostEqualFixedPrecision(pool['metadata.audio_properties.analysis.length'], 30., 2)
+
 
 suite = allTests(TestFreesoundExtractor)
 
