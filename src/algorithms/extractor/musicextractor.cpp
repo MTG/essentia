@@ -283,7 +283,7 @@ void MusicExtractor::compute() {
 Pool MusicExtractor::computeAggregation(Pool& pool){
 
   // choose which descriptors stats to output
-  const char* defaultStats[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
+  const char* defaultStats[] = { "mean", "var", "stdev", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
 
   map<string, vector<string> > exceptions;
   const vector<string>& descNames = pool.descriptorNames();

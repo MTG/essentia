@@ -123,7 +123,7 @@ class MusicExtractor : public Algorithm {
     declareParameter("rhythmMinTempo", "the slowest tempo to detect [bpm]", "[40,180]", 40);
     declareParameter("rhythmMaxTempo", "the fastest tempo to detect [bpm]", "[60,250]", 208);
   
-    const char* statsArray[] = { "mean", "var", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
+    const char* statsArray[] = { "mean", "var", "stdev", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
     const char* cepstrumStatsArray[] = { "mean", "cov", "icov" };
     vector<string> stats = arrayToVector<string>(statsArray);
     vector<string> cepstrumStats = arrayToVector<string>(cepstrumStatsArray);
