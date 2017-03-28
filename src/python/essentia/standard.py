@@ -97,8 +97,8 @@ def _create_essentia_class(name, moduleName = __name__):
             if name in ('YamlInput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'Extractor'):
                 return _c.Pool(results)
 
-            # MusicExtractor outputs two pools
-            if name in ('MusicExtractor'):
+            # MusicExtractor and FreesoundExtractor output two pools
+            if name in ('MusicExtractor', 'FreesoundExtractor'):
                 return (_c.Pool(results[0]), _c.Pool(results[1]))
 
             # In the case of MetadataReader, the 7th output is also a Pool
