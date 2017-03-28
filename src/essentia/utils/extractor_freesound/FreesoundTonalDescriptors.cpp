@@ -25,8 +25,6 @@ using namespace essentia::streaming;
 const string FreesoundTonalDescriptors::nameSpace="tonal.";
 
 void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
-  // TODO: update to 20-3500 Hz range similarly to MusicExtractor? 
-  // (as suggested by Angel Faraldo) 
 
   int frameSize = int(options.value<Real>("tonal.frameSize"));
   int hopSize =   int(options.value<Real>("tonal.hopSize"));
@@ -36,70 +34,115 @@ void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
-
-  // FrameCutter
   Algorithm* fc = factory.create("FrameCutter",
                                  "frameSize", frameSize,
                                  "hopSize", hopSize,
                                  "silentFrames", silentFrames);
-  source >> fc->input("signal");
-
-  // Windowing
   Algorithm* w = factory.create("Windowing",
                                 "type", windowType,
                                 "zeroPadding", zeroPadding);
-  fc->output("frame") >> w->input("frame");
-
-  // Spectrum
   Algorithm* spec = factory.create("Spectrum");
-  w->output("frame") >> spec->input("frame");
 
-  // Spectral Peaks
+  // Compute tuning frequency
   Algorithm* peaks = factory.create("SpectralPeaks",
                                     "maxPeaks", 10000,
                                     "magnitudeThreshold", 0.00001,
                                     "minFrequency", 40,
                                     "maxFrequency", 5000,
                                     "orderBy", "magnitude");
-  spec->output("spectrum") >> peaks->input("spectrum");
-
-  // Tuning Frequency
-     
   Algorithm* tuning = factory.create("TuningFrequency");
+
+  source >> fc->input("signal");
+  fc->output("frame") >> w->input("frame");
+  w->output("frame") >> spec->input("frame");
+  spec->output("spectrum") >> peaks->input("spectrum");
   peaks->output("magnitudes") >> tuning->input("magnitudes");
   peaks->output("frequencies") >> tuning->input("frequencies");
   tuning->output("tuningFrequency") >> PC(pool, nameSpace + "tuning_frequency");
   tuning->output("tuningCents") >> NOWHERE;
 
+  // Compute HPCP and key
+
   // TODO: Tuning frequency is currently provided but not used for HPCP 
   // computation, not clear if it would make an improvement for freesound sounds
   Real tuningFreq = 440;
-      
   //Real tuningFreq = pool.value<vector<Real> >(nameSpace + "tuning_frequency").back();
 
-  
+  Algorithm* hpcp_peaks = factory.create("SpectralPeaks",
+                                         "maxPeaks", 60,
+                                         "magnitudeThreshold", 0.00001,
+                                         "minFrequency", 20.0,
+                                         "maxFrequency", 3500.0,
+                                         "orderBy", "magnitude");
+  // This is taken from MusicExtractor: Detecting 60 peaks instead of all of 
+  // all peaks may be better, especially for electronic music that has lots of 
+  // high-frequency content
+
   Algorithm* hpcp_key = factory.create("HPCP",
                                        "size", 36,
                                        "referenceFrequency", tuningFreq,
                                        "bandPreset", false,
-                                       "minFrequency", 40.0,
-                                       "maxFrequency", 5000.0,
-                                       "weightType", "squaredCosine",
+                                       "minFrequency", 20.0,
+                                       "maxFrequency", 3500.0,
+                                       "weightType", "cosine",
                                        "nonLinear", false,
-                                       "windowSize", 4.0/3.0);
-  peaks->output("frequencies") >> hpcp_key->input("frequencies");
-  peaks->output("magnitudes") >> hpcp_key->input("magnitudes");
-  hpcp_key->output("hpcp") >> PC(pool, nameSpace + "hpcp");
+                                       "windowSize", 1.);
+  // Previously used parameter values: 
+  // - nonLinear = false
+  // - weightType = squaredCosine
+  // - windowSize = 4.0/3.0
+  // - bandPreset = false
+  // - minFrequency = 40
+  // - maxFrequency = 5000
 
-  
-  // TODO: use four different key profiles similar to MusicExtractor? 
-  Algorithm* skey = factory.create("Key");
-  hpcp_key->output("hpcp") >> skey->input("pcp");
-  skey->output("key") >> PC(pool, nameSpace + "key_key");
-  skey->output("scale") >> PC(pool, nameSpace + "key_scale");
-  skey->output("strength") >> PC(pool, nameSpace + "key_strength");
+  Algorithm* skey_temperley = factory.create("Key",
+                                   "numHarmonics", 4,
+                                   "pcpSize", 36,
+                                   "profileType", "temperley",
+                                   "slope", 0.6,
+                                   "usePolyphony", true,
+                                   "useThreeChords", true);
 
+  Algorithm* skey_krumhansl = factory.create("Key",
+                                   "numHarmonics", 4,
+                                   "pcpSize", 36,
+                                   "profileType", "krumhansl",
+                                   "slope", 0.6,
+                                   "usePolyphony", true,
+                                   "useThreeChords", true);
+
+  Algorithm* skey_edma = factory.create("Key",
+                                   "numHarmonics", 4,
+                                   "pcpSize", 36,
+                                   "profileType", "edma",
+                                   "slope", 0.6,
+                                   "usePolyphony", true,
+                                   "useThreeChords", true);
+
+  spec->output("spectrum") >> hpcp_peaks->input("spectrum");
+  hpcp_peaks->output("frequencies") >> hpcp_key->input("frequencies");
+  hpcp_peaks->output("magnitudes")  >> hpcp_key->input("magnitudes");
+
+  hpcp_key->output("hpcp")     >> PC(pool, nameSpace + "hpcp");
   
+  hpcp_key->output("hpcp")     >> skey_temperley->input("pcp");
+  hpcp_key->output("hpcp")     >> skey_krumhansl->input("pcp");
+  hpcp_key->output("hpcp")     >> skey_edma->input("pcp");
+
+  skey_temperley->output("key")          >> PC(pool, nameSpace + "key_temperley.key");
+  skey_temperley->output("scale")        >> PC(pool, nameSpace + "key_temperley.scale");
+  skey_temperley->output("strength")     >> PC(pool, nameSpace + "key_temperley.strength");
+
+  skey_krumhansl->output("key")          >> PC(pool, nameSpace + "key_krumhansl.key");
+  skey_krumhansl->output("scale")        >> PC(pool, nameSpace + "key_krumhansl.scale");
+  skey_krumhansl->output("strength")     >> PC(pool, nameSpace + "key_krumhansl.strength");
+
+  skey_edma->output("key")          >> PC(pool, nameSpace + "key_edma.key");
+  skey_edma->output("scale")        >> PC(pool, nameSpace + "key_edma.scale");
+  skey_edma->output("strength")     >> PC(pool, nameSpace + "key_edma.strength");
+
+  // Compute chords
+  // TODO review these parameters to improve chords detection. Keeping old code for now
   Algorithm* hpcp_chord = factory.create("HPCP",
                                          "size", 36,
                                          "referenceFrequency", tuningFreq,
@@ -121,8 +164,8 @@ void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
   
   Algorithm* schords_desc = factory.create("ChordsDescriptors");
   schord->output("chords") >> schords_desc->input("chords");
-  skey->output("key") >> schords_desc->input("key");
-  skey->output("scale") >> schords_desc->input("scale");
+  skey_temperley->output("key") >> schords_desc->input("key");
+  skey_temperley->output("scale") >> schords_desc->input("scale");
 
   schords_desc->output("chordsHistogram") >> PC(pool, nameSpace + "chords_histogram");
   schords_desc->output("chordsNumberRate") >> PC(pool, nameSpace + "chords_number_rate");
@@ -134,7 +177,6 @@ void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
   hpcp_chord->output("hpcp") >> entropy->input("array");
   entropy->output("entropy") >> PC(pool, nameSpace + "hpcp_entropy");
 
-  // TODO: what is the sense of HPCP crest and why we do not have it in MusicExtractor?
   Algorithm* crest = factory.create("Crest");
   hpcp_chord->output("hpcp") >> crest->input("array");
   crest->output("crest") >> PC(pool, nameSpace + "hpcp_crest");

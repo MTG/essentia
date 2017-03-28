@@ -44,7 +44,7 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   rhythmExtractor->output("bpm") >>          PC(pool, nameSpace + "bpm");
   rhythmExtractor->output("estimates") >>    NOWHERE;
   rhythmExtractor->output("bpmIntervals") >> PC(pool, nameSpace + "bpm_intervals");
-  // TODO: confidence value will be always zero for degar
+  // TODO: confidence value will be always zero for degara
   rhythmExtractor->output("confidence") >>   PC(pool, nameSpace + "bpm_confidence");
 
   // BPM Histogram descriptors
@@ -59,7 +59,6 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   connectSingleValue(bpmhist->output("secondPeakWeight"), pool, nameSpace + "bpm_histogram_second_peak_weight");
   connectSingleValue(bpmhist->output("secondPeakSpread"), pool, nameSpace + "bpm_histogram_second_peak_spread");
   connectSingleValue(bpmhist->output("histogram"), pool, nameSpace + "bpm_histogram");
-  // TODO: we did not output bpm_histogram before
 
   // Onset Detection
   // TODO: use SuperFlux onset rate algorithm instead!
@@ -70,8 +69,6 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   source >> onset->input("signal");
   onset->output("onsetTimes") >> PC(pool, nameSpace + "onset_times");
   onset->output("onsetRate") >> PC(pool, nameSpace + "onset_rate"); 
-
-  // TODO add danceability? although we have seems some QA problems related to it...
 }
 
 void FreesoundRhythmDescriptors::createNetworkBeatsLoudness(SourceBase& source, Pool& pool){

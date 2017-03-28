@@ -26,8 +26,6 @@ const string FreesoundLowlevelDescriptors::nameSpace="lowlevel.";
 
 void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool){
 
-  //Real analysisSampleRate =  44100;// TODO: unify
-
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   Real sampleRate = options.value<Real>("analysisSampleRate");
@@ -72,13 +70,11 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   zcr->output("zeroCrossingRate") >> PC(pool, nameSpace + "zerocrossingrate");
 
   // MFCC
-  // TODO: lower MFCC band silence threshold? 
   Algorithm* mfcc = factory.create("MFCC");
   spec->output("spectrum") >> mfcc->input("spectrum");
-  mfcc->output("bands") >> NOWHERE; // TODO why no melbands?
+  mfcc->output("bands") >> PC(pool, nameSpace + "melbands");
   mfcc->output("mfcc") >> PC(pool, nameSpace + "mfcc");
 
-  // TODO: taken from MusicExtractor
   // Spectral MelBands Central Moments Statistics, Flatness and Crest
   Algorithm* mels_cm = factory.create("CentralMoments", "range", 40-1);
   Algorithm* mels_ds = factory.create("DistributionShape");
@@ -95,7 +91,7 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   mels_fl->output("flatnessDB")  >> PC(pool, nameSpace + "melbands_flatness_db");
   mels_cr->output("crest")       >> PC(pool, nameSpace + "melbands_crest");
 
-  // TODO: taken from MusicExtractor. MelBands 128 
+  // taken from MusicExtractor. MelBands 128 
   Algorithm* melbands128 = factory.create("MelBands", "numberBands", 128);
   spec->output("spectrum")     >> melbands128->input("spectrum");
   melbands128->output("bands") >> PC(pool, nameSpace + "melbands128");
@@ -106,10 +102,9 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
                                    "lowFrequencyBound", 26,
                                    "numberBands", 18);
   spec->output("spectrum") >> gfcc->input("spectrum");
-  gfcc->output("bands") >>PC(pool, nameSpace + "erb_bands");
+  gfcc->output("bands") >>PC(pool, nameSpace + "erbbands");
   gfcc->output("gfcc") >> PC(pool, nameSpace + "gfcc");
 
-  // TODO: taken from MusicExtractor
   // Spectral ERBBands Central Moments Statistics, Flatness and Crest
   Algorithm* erbs_cm = factory.create("CentralMoments", "range", 18-1);
   Algorithm* erbs_ds = factory.create("DistributionShape");
@@ -220,11 +215,13 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   spec->output("spectrum") >> ps->input("spectrum");
   ps->output("pitchSalience") >> PC(pool, nameSpace + "pitch_salience");
 
-  // Spectral Frequency Bands // TODO: remove?
+  /*
+  // Spectral Frequency Bands
   Algorithm* fb = factory.create("FrequencyBands",
                                  "sampleRate", sampleRate);
   spec->output("spectrum") >> fb->input("spectrum");
   fb->output("bands") >> PC(pool, nameSpace + "frequency_bands");
+  */
 
   // Spectral Crest
   Algorithm* crest = factory.create("Crest");
@@ -300,7 +297,11 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   ss->output("startFrame") >> PC(pool, nameSpace + "startFrame");
   ss->output("stopFrame") >> PC(pool, nameSpace + "stopFrame");
 
-  // TODO: missing DynamicComplexity? (see MusicExtractor)
+  // Dynamic complexity
+  Algorithm* dc = factory.create("DynamicComplexity", "sampleRate", sampleRate);
+  source                          >> dc->input("signal");
+  dc->output("dynamicComplexity") >> PC(pool, nameSpace + "dynamic_complexity");
+  dc->output("loudness")          >> NOWHERE; // TODO ??? --> should correspond to average_loudness value, if so --> simplify
 } 
 
 inline Real squeezeRange(Real& x, Real& x1, Real& x2) {
