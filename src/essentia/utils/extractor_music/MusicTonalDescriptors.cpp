@@ -199,10 +199,14 @@ void MusicTonalDescriptors::createNetwork(SourceBase& source, Pool& pool) {
   schords_desc->output("chordsKey")         >> PC(pool, nameSpace + "chords_key");
   schords_desc->output("chordsScale")       >> PC(pool, nameSpace + "chords_scale");
 
-  // HPCP Entropy
+  // HPCP Entropy and Crest
   Algorithm* ent = factory.create("Entropy");
   hpcp_chord->output("hpcp")  >> ent->input("array");
   ent->output("entropy")      >> PC(pool, nameSpace + "hpcp_entropy");
+  
+  Algorithm* crest = factory.create("Crest");
+  hpcp_chord->output("hpcp") >> crest->input("array");
+  crest->output("crest") >> PC(pool, nameSpace + "hpcp_crest");
 
   // HPCP Tuning
   Algorithm* hpcp_tuning = factory.create("HPCP",
