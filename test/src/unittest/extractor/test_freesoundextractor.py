@@ -40,9 +40,10 @@ class TestFreesoundExtractor(TestCase):
     def testComputeValid(self):
         # Simply checks if computation succeeded. Ideally, we would need
         # a regression test for each descriptor in the pool.
-
-        # TODO: test that every numerical descriptor is not NaN nor Inf
-        return
+        inputFilename = join(testdata.audio_dir, 'recorded', 'cat_purrrr.wav')
+        pool, poolFrames = FreesoundExtractor()(inputFilename)
+        self.assertValidPool(pool)
+        self.assertValidPool(poolFrames)
 
     def testRobustness(self):
         # TODO test that computed descriptors are similar across formats
