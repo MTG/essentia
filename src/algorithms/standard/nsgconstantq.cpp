@@ -27,7 +27,11 @@ using namespace standard;
 
 const char* NSGConstantQ::name = "NSGConstantQ";
 const char* NSGConstantQ::category = "Standard";
-const char* NSGConstantQ::description = DOC("TODO.\n");
+const char* NSGConstantQ::description = DOC("This algorithm computes a constant Q transform using non stationary Gabor frames and returns a complex time-frequency representation of the input vector.\n"
+"The implementation is inspired by the toolbox described in [1]."
+"\n"
+"References:\n"
+    "[1] Schörkhuber, C., Klapuri, A., Holighaus, N., \& Dörfler, M. (n.d.). A Matlab Toolbox for Efficient Perfect Reconstruction Time-Frequency Transforms with Log-Frequency Resolution.");
 
 
 void NSGConstantQ::configure() {

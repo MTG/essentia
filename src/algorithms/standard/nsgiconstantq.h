@@ -40,12 +40,12 @@ class NSGIConstantQ : public Algorithm {
  public:
   NSGIConstantQ() {
     declareOutput(_signal, "frame", "the input frame (vector)");
-    declareInput(_constantQ, "constantq", "the Non Stationary Gabor transform based constant Q transform of the input frame");
-    declareInput(_constantQDC, "constantqdc", "the DC component of the constant Q transform. Needed for the time reconstruction");
-    declareInput(_constantQNF, "constantqnf", "the Nyquist Frequency component of the constant Q transform. Needed for the time reconstruction");
-    declareInput(_shiftsIn, "windowShifts", "Amount of bins from the center of each frequency window to the base band. Needed for the time reconstruction");
-    declareInput(_winsLenIn, "windowLenghts", "Longitudes of the frequency windows used in the transform. Needed for the time reconstruction");
-    declareInput(_freqWinsIn, "frequencyWindows", "Frequency windows used in the transform. Needed for the time reconstruction");
+    declareInput(_constantQ, "constantq", "the constant Q transform of the input frame");
+    declareInput(_constantQDC, "constantqdc", "the DC band transform of the input frame");
+    declareInput(_constantQNF, "constantqnf", "the Nyquist band transform of the input frame");
+    declareInput(_shiftsIn, "windowShifts", "distance from each frequency window to the base band");
+    declareInput(_winsLenIn, "windowLenghts", "number of elements used in each Gabor window");
+    declareInput(_freqWinsIn, "frequencyWindows", "the Gabor frames in the frequency domain");
 
 
     _fft = AlgorithmFactory::create("FFTC");
@@ -58,7 +58,7 @@ class NSGIConstantQ : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a mapping function [2]", "{local,global}", "global");
+    declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a phase mapping function as described in [1]", "{local,global}", "global");
   }
 
   void compute();

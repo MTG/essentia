@@ -40,13 +40,12 @@ class NSGConstantQ : public Algorithm {
  public:
   NSGConstantQ() {
     declareInput(_signal, "frame", "the input frame (vector)");
-    declareOutput(_constantQ, "constantq", "the Non Stationary Gabor transform based constant Q transform of the input frame");
-    declareOutput(_constantQDC, "constantqdc", "the DC component of the constant Q transform. Needed for the time reconstruction");
-    declareOutput(_constantQNF, "constantqnf", "the Nyquist Frequency component of the constant Q transform. Needed for the time reconstruction");
-    declareOutput(_shiftsOut, "windowShifts", "Amount of bins from the center of each frequency window to the base band. Needed for the time reconstruction");
-    declareOutput(_winsLenOut, "windowLenghts", "Longitudes of the frequency windows used in the transform. Needed for the time reconstruction");
-    declareOutput(_freqWinsOut, "frequencyWindows", "Frequency windows used in the transform. Needed for the time reconstruction");
-
+    declareOutput(_constantQ, "constantq", "the constant Q transform of the input frame");
+    declareOutput(_constantQDC, "constantqdc", "the DC band transform of the input frame. Only needed for the inverse transform");
+    declareOutput(_constantQNF, "constantqnf", "the Nyquist band transform of the input frame. Only needed for the inverse transform");
+    declareOutput(_shiftsOut, "windowShifts", "distance from each frequency window to the base band. Only needed for the inverse transform");
+    declareOutput(_winsLenOut, "windowLenghts", "number of elements used in each Gabor window. Only needed for the inverse transform");
+    declareOutput(_freqWinsOut, "frequencyWindows", " the Gabor frames in the frequency domain. Only needed for the inverse transform");
 
 
     _fft = AlgorithmFactory::create("FFT"); //FFT with complex input
@@ -67,13 +66,13 @@ class NSGConstantQ : public Algorithm {
     declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 12);
     declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);
     declareParameter("rasterize", "hop sizes for each frequency channel. With 'none' each frequency channel is distinct. 'full' sets the hop sizes of all the channels to the smallest. 'piecewise' rounds down the hop size to a power of two", "{none,full,piecewise}", "full");
-    declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a mapping function [2]", "{local,global}", "global");
+    declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a phase mapping function as described in [1]", "{local,global}", "global");
     declareParameter("gamma", "The bandwidth of each filter is given by Bk = 1/Q * fk + gamma", "[0,inf)", 0);
     declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "sine");
-    declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hann");
-    declareParameter("minimumWindow", "Minimum size allowed for the windows", "[2,inf)", 4);
-    declareParameter("windowSizeFactor", "Window sizes are rounded to multiples of this", "[1,inf)", 1);
-    declareParameter("INSQConstantQdata", "Flag to output the data needed for the reconstruction", "{true,false}", true);
+    declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hannnsgcq");
+    declareParameter("minimumWindow", "minimum size allowed for the windows", "[2,inf)", 4);
+    declareParameter("windowSizeFactor", "window sizes are rounded to multiples of this", "[1,inf)", 1);
+    declareParameter("INSQConstantQdata", "flag to output the data needed for the inverse transform", "{true,false}", true);
   }
 
   void compute();

@@ -27,7 +27,11 @@ using namespace standard;
 
 const char* NSGIConstantQ::name = "NSGIConstantQ";
 const char* NSGIConstantQ::category = "Standard";
-const char* NSGIConstantQ::description = DOC("TODO.\n");
+const char* NSGIConstantQ::description = DOC("This algorithm computes an inverse constant Q transform using non stationary Gabor frames and returns a complex time-frequency representation of the input vector.\n"
+"The implementation is inspired by the toolbox described in [1]."
+"\n"
+"References:\n"
+    "[1] Schörkhuber, C., Klapuri, A., Holighaus, N., \& Dörfler, M. (n.d.). A Matlab Toolbox for Efficient Perfect Reconstruction Time-Frequency Transforms with Log-Frequency Resolution.");
 
 
 void NSGIConstantQ::configure() {
