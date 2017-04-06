@@ -428,7 +428,7 @@ void FreesoundExtractor::computeAudioMetadata(const string& audioFilename, Pool&
 
   loader->output("md5")             >> PC(results, "metadata.audio_properties.md5_encoded");
   loader->output("sampleRate")      >> PC(results, "metadata.audio_properties.sample_rate");
-  loader->output("numberChannels")  >> NOWHERE;
+  loader->output("numberChannels")  >> PC(results, "metadata.audio_properties.number_channels");
   loader->output("bit_rate")        >> PC(results, "metadata.audio_properties.bit_rate");
   loader->output("codec")           >> PC(results, "metadata.audio_properties.codec");
 
