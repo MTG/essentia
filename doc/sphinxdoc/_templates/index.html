@@ -8,9 +8,9 @@
   <div class="section" id="what-is-essentia">
     <h2>What is Essentia?<a class="headerlink" href="#what-is-essentia" title="Permalink to this headline">¶</a></h2>
 
-    <p>Essentia is an open-source C++ library for <strong>audio analysis and audio-based music information retrieval</strong> released
+    <p>Essentia is an open-source C++ library with Python bindings for <strong>audio analysis and audio-based music information retrieval</strong>. It is released
     under the <strong><a href="http://tldrlegal.com/license/gnu-affero-general-public-license-v3-%28agpl-3.0%29#summary">Affero GPLv3
-    license</a></strong> (also available under proprietary license upon request). It contains an <strong><a href="{{ pathto("algorithms_overview") }}">
+    license</a></strong> and is also available under proprietary license upon request. The library contains an <strong><a href="{{ pathto("algorithms_overview") }}">
     extensive collection of reusable algorithms</a></strong> which implement audio input/output functionality, standard digital signal processing
     blocks, statistical characterization of data, and a large set of spectral, temporal, tonal and high-level music descriptors.
     In addition, Essentia can be <strongs>complemented</strong> with <strong><a href="https://github.com/MTG/gaia">Gaia</a></strong>, a
@@ -18,27 +18,28 @@
     <strong><a href="{{ pathto("installing") }}#using-pre-trained-high-level-models-in-essentia">classification
     models</a></strong> that Essentia can use to compute high-level description of music (same license terms apply).</p>
 
-    <p>Essentia is not a framework, but rather a collection of algorithms (plus some infrastructure) wrapped in a library.
-    It does not provide common high-level logic for descriptor computation (so you aren’t locked into a certain way of doing things). It
-    rather focuses on the <strong>robustness</strong>, <strong>performance </strong>and <strong>optimality </strong>of the <strong>provided
-    algorithms</strong>, as well as ease of use. The flow of the analysis is decided and implemented by the user, while Essentia is taking
+    <p>Essentia is not a framework, but rather a collection of algorithms (plus some infrastructure) wrapped in a library. It is designed with a focus on the <strong>robustness</strong>, <strong>performance</strong> and <strong>optimality</strong> of the <strong>provided
+    algorithms</strong>, including computational speed and memory usage, as well as ease of use. The flow of the analysis is decided and implemented by the user, while Essentia is taking
     care of the implementation details of the algorithms being used. There is a special <strong>streaming mode</strong> in which it is possible to connect
     algorithms and run them automatically (similarly to PureData or Max/MSP) instead of specifying explicitly the order of execution with an
-    advantage of less boilerplate code and less memory consumption. A number of predefined executable extractors are provided with the library
-    as examples, however they should not be considered as the only correct way of doing things.</p>
+    advantage of less boilerplate code and less memory consumption. A number of examples are provided with the library, however they should 
+    not be considered as the only correct way of doing things. A large part of Essentia's algorithms is well-suited for
+    <a href="FAQ.html#using-essentia-real-time"><strong>real-time</strong></a> applications.</p>
 
-    <p>Currently the following algorithms are included (among others):</p>
+    <p>The provided functionality is <strong>easily expandable</strong> and allows for both research experiments and development of large-scale <strong>industrial applications</strong>. Essentia has served in a large number of research activities conducted at <a href="http://mtg.upf.edu/">Music Technology Group</a> since 2006. It has been used for music classification, semantic autotagging, music similarity and recommendation, visualization and interaction with music, sound indexing, musical instruments detection, cover detection, beat detection, and acoustic analysis of stimuli for neuroimaging studies. A list of highlighted academic publications can be found <a href="{{ pathto("research_papers") }}">here</a>. Essentia and Gaia have been used extensively in a number of <a href="applications.html">research projects and industrial applications</a>.</p>
+
+    <p>Currently the following algorithms are included (<a href="{{ pathto("algorithms_reference") }}">among others</a>):</p>
 
     <ul class="simple">
-      <li><strong>Audio file input/output:</strong> ability to read and write nearly all audio file formats (wav, mp3, ogg, flac, etc.)</li>
-      <li><strong>Standard signal processing blocks:</strong> FFT, DCT, frame cutter, windowing, envelope, smoothing</li>
-      <li><strong>Filters (FIR &amp; IIR):</strong> low/high/band pass, band reject, DC removal, equal loudness</li>
-      <li><strong>Statistical descriptors:</strong> median, mean, variance, power means, raw and central moments, spread, kurtosis, skewness, flatness</li>
-      <li><strong>Time-domain descriptors:</strong> duration, loudness, LARM, Leq, Vickers' loudness, zero-crossing-rate, log attack time and other signal envelope descriptors</li>
-      <li><strong>Spectral descriptors:</strong> Bark/Mel/ERB bands, MFCC, GFCC, LPC, spectral peaks, complexity, rolloff, contrast, HFC, inharmonicity and dissonance</li>
-      <li><strong>Tonal descriptors</strong> Pitch salience function, predominant melody and pitch, HPCP (chroma) related features, chords, key and scale, tuning frequency</li>
-      <li><strong>Rhythm descriptors</strong> beat detection, BPM, onset detection, rhythm transform, beat loudness</li>
-      <li><strong>Other high-level descriptors:</strong> danceability, dynamic complexity, audio segmentation, SVM classifier</li>
+      <li><strong>Audio file input/output</strong>: ability to read and write nearly all audio file formats (wav, mp3, ogg, flac, etc.)</li>
+      <li><strong>Standard signal processing blocks</strong>: FFT, DCT, frame cutter, windowing, envelope, smoothing</li>
+      <li><strong>Filters (FIR &amp; IIR)</strong>: low/high/band pass, band reject, DC removal, equal loudness</li>
+      <li><strong>Statistical descriptors</strong>: median, mean, variance, power means, raw and central moments, spread, kurtosis, skewness, flatness</li>
+      <li><strong>Time-domain descriptors</strong>: duration, loudness, LARM, Leq, Vickers' loudness, zero-crossing-rate, log attack time and other signal envelope descriptors</li>
+      <li><strong>Spectral descriptors</strong>: Bark/Mel/ERB bands, MFCC, GFCC, LPC, spectral peaks, complexity, rolloff, contrast, HFC, inharmonicity and dissonance</li>
+      <li><strong>Tonal descriptors</strong>: Pitch salience function, predominant melody and pitch, HPCP (chroma) related features, chords, key and scale, tuning frequency</li>
+      <li><strong>Rhythm descriptors</strong>: beat detection, BPM, onset detection, rhythm transform, beat loudness</li>
+      <li><strong>Other high-level descriptors</strong>: danceability, dynamic complexity, audio segmentation, SVM classifier</li>
     </ul>
 
     <p>The library is<strong> cross-platform</strong> and currently supports <a href="{{ pathto("installing") }}"><strong>Linux</strong>, <strong>Mac OS X</strong>, and partially <strong>Windows</strong>,
@@ -51,15 +52,6 @@
     that allow its use within the frameworks of <a href="http://mtg.upf.edu/technologies/EssentiaRT~"><strong>PureData</strong> and
     <strong>Max/MSP</strong></a>, <a href="https://github.com/leozimmerman/ofxAudioAnalyzer"><strong>openFrameworks</strong></a>, and
     <a href="https://github.com/MTG/matlab-c-tools"><strong>Matlab</strong></a>.</p>
-
-    <p>Essentia is designed with a focus on the robustness of the provided music descriptors and is optimized in terms of the computational
-    cost of the algorithms and low memory usage. The provided functionality, specifically the music descriptors included in-the-box and signal
-    processing algorithms, is <strong>easily expandable</strong> and allows for both research experiments and development of large-scale
-    industrial applications. Large part of Essentia's algorithms is well-suited for
-    <a href="FAQ.html#using-essentia-real-time"><strong>real-time</strong></a> applications.</p>
-
-    <p>Essentia has served in a large number of research activities conducted at Music Technology Group since 2006. It has been used for music classification, semantic autotagging, music similarity and recommendation, visualization and interaction with music, sound indexing, musical instruments detection, cover detection, beat detection, and acoustic analysis of stimuli for neuroimaging studies. A list of highlighted academic publications can be found <a href="{{ pathto("research_papers") }}">here</a>. Essentia and Gaia have been used extensively in a number of <a href="http://essentia.upf.edu/applications">research projects and industrial applications</a>.</p>
-
 
     <h2>Crediting Essentia<a class="headerlink" href="#crediting-essentia" title="Permalink to this headline">¶</a></h2>
     <p>Please credit properly your use of Essentia! If you use the Essentia library in your software please
@@ -152,15 +144,11 @@
 <div class="section" id="examples">
 <h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
 </div>
-
-<div class="section" id="get-essentia">
-<h2>Get Essentia<a class="headerlink" href="#get-essentia" title="Permalink to this headline">¶</a></h2>
-<p>You can download precompiled packages for Essentia from the
-<a class="reference external" href="http://static.mtg.upf.edu/mir-dev-download/essentia/">TODO download page</a></p>
-<p>The code can be found in a Github repository, at <tt class="docutils literal"><span class="pre">https://github.com/MTG/essentia.git</span></tt>.</p>
-<p>(Please refer to <a class="reference external" href="https://help.github.com/articles/set-up-git">this page</a>
-for instructions on how to setup Git)</p>
-</div>
 -->
+<div class="section" id="download">
+<h2>Download<a class="headerlink" href="#download" title="Permalink to this headline">¶</a></h2>
+
+<p><a href="https://github.com/MTG/essentia/releases">Essentia releases</a> | <a href="https://github.com/MTG/gaia/releases">Gaia releases</a> | Precompiled <a href="http://essentia.upf.edu/documentation/extractors">extractor binaries</a> (Linux, OSX, Win)</p>
+</div>
 
 {% endblock %}
