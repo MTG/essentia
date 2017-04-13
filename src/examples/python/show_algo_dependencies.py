@@ -122,7 +122,8 @@ if __name__ == "__main__":
 
     print "Found", len(streaming), "streaming algorithms"
     print "Found", len(standard), "standard algorithms"
-    print len(set(streaming) & set(standard)), "algorithms in total"
+    print len(set(streaming) & set(standard)), "algorithms in with both modes"
+    print len(set(streaming) | set(standard)), "algorithms in total"
     print
 
     algos = [(a, "standard") for a in standard] + [(a, "streaming") for a in streaming]
