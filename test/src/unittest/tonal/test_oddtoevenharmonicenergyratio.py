@@ -18,10 +18,11 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-
 from essentia_test import *
 
-maxfloat = 3.4028234663852886e+38
+maxratio = 1000.  # Maximum ratio value hardcoded in the algorithm code
+#maxratio = 3.4028234663852886e+38
+
 
 class TestOddToEvenHarmonicEnergyRatio(TestCase):
     def testEmpty(self):
@@ -31,8 +32,8 @@ class TestOddToEvenHarmonicEnergyRatio(TestCase):
         self.assertAlmostEqual(OddToEvenHarmonicEnergyRatio()([1], [1]), 0)
 
     def testZero(self):
-        self.assertAlmostEqual(OddToEvenHarmonicEnergyRatio()([0], [0]), maxfloat )
-        self.assertAlmostEqual(OddToEvenHarmonicEnergyRatio()([1], [0]), maxfloat )
+        self.assertAlmostEqual(OddToEvenHarmonicEnergyRatio()([0], [0]), 1)
+        self.assertAlmostEqual(OddToEvenHarmonicEnergyRatio()([1], [0]), 1)
 
     def testTwo(self):
         self.assertEqual(OddToEvenHarmonicEnergyRatio()([1,1], [1,1]), 1)
@@ -46,7 +47,7 @@ class TestOddToEvenHarmonicEnergyRatio(TestCase):
                 [1, 3, 2], [1, 1, 1])
 
     def testZeroEvenEnergy(self):
-        self.assertEqual(OddToEvenHarmonicEnergyRatio()([1,2,3,4], [0,1,0,1]), maxfloat)
+        self.assertEqual(OddToEvenHarmonicEnergyRatio()([1,2,3,4], [0,1,0,1]), maxratio)
 
     def testZeroOddEnergy(self):
         self.assertEqual(OddToEvenHarmonicEnergyRatio()([1,2,3,4], [1,0,1,0]), 0)
