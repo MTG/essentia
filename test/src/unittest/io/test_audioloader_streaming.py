@@ -97,7 +97,6 @@ class TestAudioLoader_Streaming(TestCase):
         if stereo: self.assertEqual(sum, 18)
         else:      self.assertEqual(sum, 9)
 
-
     def testPcm(self):
         # .wav
         wavpath = join('generated','synthesised','impulse','wav')
@@ -117,7 +116,6 @@ class TestAudioLoader_Streaming(TestCase):
         self.pcm(22050, join(aiffpath,'impulses_1second_22050.aiff'))
         self.pcm(22050, join(aiffpath,'impulses_1second_22050_st.aiff'), True)
 
-
     def testOgg(self):
         oggpath = join('generated','synthesised','impulse','ogg')
         self.compressed(44100, join(oggpath, 'impulses_1second_44100.ogg'))
@@ -126,7 +124,6 @@ class TestAudioLoader_Streaming(TestCase):
         self.compressed(48000, join(oggpath, 'impulses_1second_48000_st.ogg'), True)
         self.compressed(22050, join(oggpath, 'impulses_1second_22050.ogg'))
         self.compressed(22050, join(oggpath, 'impulses_1second_22050_st.ogg'), True)
-
 
     def testFlac(self):
         flacpath = join('generated','synthesised','impulse','flac')
@@ -137,7 +134,6 @@ class TestAudioLoader_Streaming(TestCase):
         self.pcm(22050, join(flacpath, 'impulses_1second_22050.flac'))
         self.pcm(22050, join(flacpath, 'impulses_1second_22050_st.flac'), True)
 
-
     def testMp3(self):
         mp3path = join('generated','synthesised','impulse','mp3')
         self.compressed(44100, join(mp3path, 'impulses_1second_44100.mp3'))
@@ -147,21 +143,14 @@ class TestAudioLoader_Streaming(TestCase):
         self.compressed(22050, join(mp3path, 'impulses_1second_22050.mp3'))
         self.compressed(22050, join(mp3path, 'impulses_1second_22050_st.mp3'), True)
 
-
     def testInvalidFile(self):
         for ext in ['wav', 'aiff', 'flac', 'mp3', 'ogg']:
             self.assertRaises(RuntimeError, lambda: sAudioLoader(filename='unknown.'+ext))
-
 
     def testMultiChannel(self):
         for ext in ['wav', 'aiff', 'flac']:
             filename = join(testdata.audio_dir, 'generated', 'multichannel', '4channels.'+ext)
             self.assertRaises(RuntimeError, lambda: sAudioLoader(filename=filename))
-
-
-
-
-
 
     def testResetStandard(self):
         from essentia.standard import AudioLoader as stdAudioLoader
@@ -178,8 +167,6 @@ class TestAudioLoader_Streaming(TestCase):
         self.assertEqualMatrix(audio2, audio1)
         self.assertEqual(bitrate3, bitrate1)
         self.assertEqual(codec3, codec1)        
-
-
 
     def testLoadMultiple(self):
         from essentia.standard import AudioLoader as stdAudioLoader

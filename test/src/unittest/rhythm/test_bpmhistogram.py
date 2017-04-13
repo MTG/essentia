@@ -18,12 +18,11 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-
 from essentia_test import *
 import essentia
 from essentia import Pool
-import essentia.standard as std
-from essentia.streaming import *
+from essentia.standard import *
+import essentia.streaming as ess
 
 from math import ceil, fabs
 from numpy import argmax
@@ -35,17 +34,18 @@ class TestBpmHistogram(TestCase):
                             weightCurveType='hybrid', sampleRate=44100.0,
                             startTime=0, endTime=2000):
 
-        loader = EasyLoader(filename=filename, startTime=startTime,
-                            endTime=endTime, sampleRate=sampleRate,
-                            downmix='left')
-        fc     = FrameCutter(frameSize=frameSize, hopSize=hopSize,
-                             silentFrames="keep",
-                             startFromZero=False, lastFrameToEndOfFile=True)
-        window = Windowing(type=windowType, zeroPhase=True,
-                           zeroPadding=1024-frameSize)
-        freqBands = FrequencyBands(sampleRate=sampleRate) # using barkbands by default
+        loader = ess.EasyLoader(filename=filename, startTime=startTime,
+                                endTime=endTime, sampleRate=sampleRate,
+                                downmix='left')
+        fc     = ess.FrameCutter(frameSize=frameSize, hopSize=hopSize,
+                                 silentFrames="keep",
+                                 startFromZero=False, lastFrameToEndOfFile=True)
+        window = ess.Windowing(type=windowType, zeroPhase=True,
+                               zeroPadding=1024-frameSize)
+        freqBands = ess.FrequencyBands(sampleRate=sampleRate) # using barkbands by default
+        spec = ess.Spectrum()
+
         pool = Pool()
-        spec = Spectrum()
         loader.audio >> fc.signal
         fc.frame >> window.frame >> spec.frame
         spec.spectrum >> freqBands.spectrum
@@ -53,8 +53,8 @@ class TestBpmHistogram(TestCase):
         essentia.run(loader)
 
 
-        noveltyCurve = std.NoveltyCurve(frameRate=sampleRate/float(hopSize),
-                                        weightCurveType=weightCurveType)(pool['frequency_bands'])
+        noveltyCurve = NoveltyCurve(frameRate=sampleRate/float(hopSize),
+                                    weightCurveType=weightCurveType)(pool['frequency_bands'])
 
         return noveltyCurve
 
@@ -65,15 +65,15 @@ class TestBpmHistogram(TestCase):
                             minBpm=30):
 
         pool=Pool()
-        bpmHist = BpmHistogram(frameRate=frameRate,
-                               frameSize=frameSize,
-                               overlap=overlap,
-                               zeroPadding=zeroPadding,
-                               constantTempo=constantTempo,
-                               windowType='hann',
-                               minBpm=minBpm)
+        bpmHist = ess.BpmHistogram(frameRate=frameRate,
+                                   frameSize=frameSize,
+                                   overlap=overlap,
+                                   zeroPadding=zeroPadding,
+                                   constantTempo=constantTempo,
+                                   windowType='hann',
+                                   minBpm=minBpm)
 
-        gen    = VectorInput(noveltyCurve)
+        gen    = ess.VectorInput(noveltyCurve)
         gen.data >> bpmHist.novelty
         bpmHist.bpm >> (pool, 'bpm')
         bpmHist.bpmCandidates >> (pool, 'bpmCandidates')
@@ -108,13 +108,13 @@ class TestBpmHistogram(TestCase):
         #plot(pool['sinusoid'],'r')
         #show()
 
-        noveltyPeaks = std.PeakDetection(interpolate=False)(noveltyCurve)[0]
-        sinusoidPeaks = std.PeakDetection(interpolate=False)(pool['sinusoid'])[0]
+        noveltyPeaks = PeakDetection(interpolate=False)(noveltyCurve)[0]
+        sinusoidPeaks = PeakDetection(interpolate=False)(pool['sinusoid'])[0]
 
         # depending on the framesize, hopsize, etc. the sinusoid is usually
         # larger than the novelty curve, so we need to trim the sinusoid's
         # peaks
-        sinusoidPeaks = std.PeakDetection()(pool['sinusoid'])[0][:len(noveltyPeaks)]
+        sinusoidPeaks = PeakDetection()(pool['sinusoid'])[0][:len(noveltyPeaks)]
         for p1, p2 in zip(noveltyPeaks, sinusoidPeaks):
             self.assertAlmostEqual(fabs(p1-p2), 0, 5e-2)
         self.assertAlmostEqual(pool['bpm'], expectedBpm, 1e-3)
