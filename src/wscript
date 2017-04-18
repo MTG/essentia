@@ -236,7 +236,7 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
-    algos = [ 'GaiaTransform' ]
+    algos = [ 'GaiaTransform', 'MusicExtractorSVM' ]
     if ctx.env.WITH_GAIA:
         if has('gaia2'):
             print('- Gaia2 detected!')

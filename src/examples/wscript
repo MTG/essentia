@@ -11,65 +11,55 @@ import sys
 # the source file (less the .cpp extension) and is also used as the
 # binary name. The second element (if it exists) is a list of
 # additional files for the extractor
+
 example_sources_fileio = [
-        ('standard_beatsmarker', ),
-        ('standard_fadedetection', ),
-        ('standard_mfcc', ),
-        ('standard_onsetrate', ),
-        ('standard_pitchdemo', ),
-        ('standard_rhythmtransform', ),
-        ('standard_spectralcontrast', ),
-        ('standard_vibrato', ),
+    ('standard_beatsmarker', ),
+    ('standard_fadedetection', ),
+    ('standard_mfcc', ),
+    ('standard_onsetrate', ),
+    ('standard_pitchdemo', ),
+    ('standard_rhythmtransform', ),
+    ('standard_spectralcontrast', ),
+    ('standard_vibrato', ),
 
-        ('standard_harmonicmodel', ),
-        ('standard_hpsmodel', ),
-        ('standard_hprmodel', ),
-        ('standard_predominantmask', ),
-        ('standard_sinemodel', ),
-        ('standard_sinesubtraction', ),
-        ('standard_sprmodel', ),
-        ('standard_spsmodel', ),
-        ('standard_stft', ),
-        ('standard_stochasticmodel', ),
+    ('standard_harmonicmodel', ),
+    ('standard_hpsmodel', ),
+    ('standard_hprmodel', ),
+    ('standard_predominantmask', ),
+    ('standard_sinemodel', ),
+    ('standard_sinesubtraction', ),
+    ('standard_sprmodel', ),
+    ('standard_spsmodel', ),
+    ('standard_stft', ),
+    ('standard_stochasticmodel', ),
 
-        ('streaming_beatsmarker', ),
-        ('streaming_beattracker_multifeature_mirex2013', ),
-        ('streaming_key', ),
-        ('streaming_gfcc', ),
-        ('streaming_md5', ),
-        ('streaming_mfcc', ),
-        ('streaming_rhythmextractor_multifeature', ),
-        ('streaming_onsetrate', ),
-        ('streaming_panning', ),
-        ('streaming_pitchyinfft', ),
-        ('streaming_predominantpitchmelodia', ),
-        ('streaming_stft', ),
-        ('streaming_tuningfrequency', ),
-        ('streaming_vibrato', ),
+    ('streaming_beatsmarker', ),
+    ('streaming_beattracker_multifeature_mirex2013', ),
+    ('streaming_key', ),
+    ('streaming_gfcc', ),
+    ('streaming_md5', ),
+    ('streaming_mfcc', ),
+    ('streaming_rhythmextractor_multifeature', ),
+    ('streaming_onsetrate', ),
+    ('streaming_panning', ),
+    ('streaming_pitchyinfft', ),
+    ('streaming_predominantpitchmelodia', ),
+    ('streaming_stft', ),
+    ('streaming_tuningfrequency', ),
+    ('streaming_vibrato', ),
 
+    ('streaming_extractor_music',
+        ['music_extractor/extractor_utils']),
 
-        ('streaming_extractor_music',
-                 [ 'extractor_music/MusicExtractor',
-                   'extractor_music/MusicLowlevelDescriptors',
-                   'extractor_music/MusicRhythmDescriptors',
-                   'extractor_music/MusicTonalDescriptors' ]),
-
-        ('streaming_extractor_freesound',
-                 [ 'freesound/FreesoundExtractor',
-                   'freesound/FreesoundLowlevelDescriptors',
-                   'freesound/FreesoundRhythmDescriptors',
-                   'freesound/FreesoundTonalDescriptors',
-                   'freesound/FreesoundSfxDescriptors' ])
-
+    ('streaming_extractor_freesound',
+        ['music_extractor/extractor_utils'])    
 ]
 
 example_sources_with_gaia = [
-        ('streaming_extractor_music_svm',
-                 [ 'extractor_music/MusicExtractor',
-                   'extractor_music/MusicLowlevelDescriptors',
-                   'extractor_music/MusicRhythmDescriptors',
-                   'extractor_music/MusicTonalDescriptors' ])
+    ('streaming_extractor_music_svm',
+        ['music_extractor/extractor_utils'])
 ]
+
 
 def configure(ctx):
     example_list_fileio = [p[0] for p in example_sources_fileio]
@@ -89,7 +79,6 @@ def configure(ctx):
         if ctx.options.CROSS_COMPILE_MINGW32:
             print('WARNING: Use --with-static-examples flag instead of --with-examples for cross-compilation with MinGW')
 
-
     if ctx.env.EXAMPLES:
         for e in ctx.env.EXAMPLES.split(","):
             e = e.strip()
@@ -108,11 +97,11 @@ def configure(ctx):
             ctx.env.LINKFLAGS = ['-static']
             ctx.env.SHLIB_MARKER = '-Wl,-Bstatic'
 
-        ctx.env.LIB = [ 'avformat', 'avcodec', 'avutil', 'tag' ]
+        ctx.env.LIB = ['avformat', 'avcodec', 'avutil', 'tag']
 
         if "HAVE_GAIA2" in ctx.env['define_key']:
-            ctx.env.LIB += [ 'gaia2' ]
-            ctx.env['LIB_GAIA2'] += [ 'dl' ] # -ldl is required when building with static QtCore
+            ctx.env.LIB += ['gaia2']
+            ctx.env['LIB_GAIA2'] += ['dl'] # -ldl is required when building with static QtCore
 
         if ctx.options.CROSS_COMPILE_MINGW32:
             # otherwise the __imp__ symbols will be expected at link time
@@ -120,7 +109,7 @@ def configure(ctx):
 
     # add flags for support of Accelerate FFT on OSX
     if 'ACCELERATE' in ctx.env.FFT:
-        ctx.env.LINKFLAGS += [ '-framework', 'Accelerate']
+        ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
 
 
 def build(ctx):
@@ -132,7 +121,7 @@ def build(ctx):
 
             # If an `other` program has files in a directory we need
             # to add an aditional includes
-            includes = [ '.', '..' ]
+            includes = ['.', '..']
             if any((len(x.split("/")) > 1 for x in other or [])):
                 includes.append("../..")
 

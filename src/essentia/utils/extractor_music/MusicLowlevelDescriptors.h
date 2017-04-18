@@ -17,23 +17,28 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef FREESOUND_RHYTHM_DESCRIPTORS_H
-#define FREESOUND_RHYTHM_DESCRIPTORS_H
+#ifndef MUSIC_LOWLEVEL_DESCRIPTORS_H
+#define MUSIC_LOWLEVEL_DESCRIPTORS_H
 
-#include "FreesoundDescriptorsSet.h"
+#include "MusicDescriptorsSet.h"
+#include "essentia/essentiamath.h"
 
 using namespace std;
-using namespace essentia;
-using namespace essentia::streaming;
 
- class FreesoundRhythmDescriptors : public FreesoundDescriptorSet{
+class MusicLowlevelDescriptors : public MusicDescriptorSet {
 
  public:
-
  	static const string nameSpace;  
 
- 	void createNetwork(SourceBase& source, Pool& pool);
-	void createBeatsLoudnessNetwork(SourceBase& source, Pool& pool);
- };
+  MusicLowlevelDescriptors(Pool& options) {
+    this->options = options;
+  }
+  ~MusicLowlevelDescriptors();
 
- #endif
+ 	void createNetworkNeqLoud(SourceBase& source, Pool& pool);
+  void createNetworkEqLoud(SourceBase& source, Pool& pool);
+  void createNetworkLoudness(SourceBase& source, Pool& pool);
+	void computeAverageLoudness(Pool& pool);
+};
+
+#endif

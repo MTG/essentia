@@ -48,13 +48,15 @@ void  MusicRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   // BPM Histogram descriptors
   Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");
   rhythmExtractor->output("bpmIntervals") >> bpmhist->input("bpmIntervals");
-  bpmhist->output("firstPeakBPM")     >> PC(pool, nameSpace + "bpm_histogram_first_peak_bpm");
-  bpmhist->output("firstPeakWeight")  >> PC(pool, nameSpace + "bpm_histogram_first_peak_weight");
-  bpmhist->output("firstPeakSpread")  >> PC(pool, nameSpace + "bpm_histogram_first_peak_spread");
-  bpmhist->output("secondPeakBPM")    >> PC(pool, nameSpace + "bpm_histogram_second_peak_bpm");
-  bpmhist->output("secondPeakWeight") >> PC(pool, nameSpace + "bpm_histogram_second_peak_weight");
-  bpmhist->output("secondPeakSpread") >> PC(pool, nameSpace + "bpm_histogram_second_peak_spread");
-  bpmhist->output("histogram") >> NOWHERE;
+
+  // connect as single value otherwise PoolAggregator will compute statistics
+  connectSingleValue(bpmhist->output("firstPeakBPM"), pool, nameSpace + "bpm_histogram_first_peak_bpm");
+  connectSingleValue(bpmhist->output("firstPeakWeight"), pool, nameSpace + "bpm_histogram_first_peak_weight");
+  connectSingleValue(bpmhist->output("firstPeakSpread"), pool, nameSpace + "bpm_histogram_first_peak_weight");
+  connectSingleValue(bpmhist->output("secondPeakBPM"), pool, nameSpace + "bpm_histogram_second_peak_bpm");
+  connectSingleValue(bpmhist->output("secondPeakWeight"), pool, nameSpace + "bpm_histogram_second_peak_weight");
+  connectSingleValue(bpmhist->output("secondPeakSpread"), pool, nameSpace + "bpm_histogram_second_peak_spread");
+  connectSingleValue(bpmhist->output("histogram"), pool, nameSpace + "bpm_histogram");
 
   // Onset Detection
   // TODO: use SuperFlux onset rate algorithm instead!

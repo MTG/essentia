@@ -60,21 +60,20 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
   sr->output("threshold_0") >> PC(pool, nameSpace + "silence_rate_20dB");
   sr->output("threshold_1") >> PC(pool, nameSpace + "silence_rate_30dB");
   sr->output("threshold_2") >> PC(pool, nameSpace + "silence_rate_60dB");
-
+  
   // Zero crossing rate
   Algorithm* zcr = factory.create("ZeroCrossingRate");
   fc->output("frame")             >> zcr->input("signal");
   zcr->output("zeroCrossingRate") >> PC(pool, nameSpace + "zerocrossingrate");
 
   // MelBands and MFCC
-  int nMelBands = 40;
-  Algorithm* mfcc = factory.create("MFCC", "numberBands", nMelBands);
+  Algorithm* mfcc = factory.create("MFCC", "numberBands", 40);
   spec->output("spectrum")  >> mfcc->input("spectrum");
   mfcc->output("bands")     >> PC(pool, nameSpace + "melbands");
   mfcc->output("mfcc")      >> PC(pool, nameSpace + "mfcc");
-
+  
   // Spectral MelBands Central Moments Statistics, Flatness and Crest
-  Algorithm* mels_cm = factory.create("CentralMoments", "range", nMelBands-1);
+  Algorithm* mels_cm = factory.create("CentralMoments", "range", 40-1);
   Algorithm* mels_ds = factory.create("DistributionShape");
   mfcc->output("bands")             >> mels_cm->input("array");
   mels_cm->output("centralMoments") >> mels_ds->input("centralMoments");
@@ -88,7 +87,11 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
   mfcc->output("bands")      >> mels_cr->input("array");
   mels_fl->output("flatnessDB")  >> PC(pool, nameSpace + "melbands_flatness_db");
   mels_cr->output("crest")       >> PC(pool, nameSpace + "melbands_crest");
-
+  
+  // MelBands 128 
+  Algorithm* melbands128 = factory.create("MelBands", "numberBands", 128);
+  spec->output("spectrum")     >> melbands128->input("spectrum");
+  melbands128->output("bands") >> PC(pool, nameSpace + "melbands128");
 
   // ERBBands and GFCC
   uint nERBBands = 40;
@@ -137,7 +140,8 @@ void MusicLowlevelDescriptors::createNetworkNeqLoud(SourceBase& source, Pool& po
 
   // Spectral Decrease
   Algorithm* square = factory.create("UnaryOperator", "type", "square");
-  Algorithm* decrease = factory.create("Decrease", "range", sampleRate * 0.5);
+  Algorithm* decrease = factory.create("Decrease", 
+                                       "range", sampleRate * 0.5);
   spec->output("spectrum")      >> square->input("array");
   square->output("array")       >> decrease->input("array");
   decrease->output("decrease")  >> PC(pool, nameSpace + "spectral_decrease");
@@ -354,9 +358,7 @@ void MusicLowlevelDescriptors::createNetworkLoudness(SourceBase& source, Pool& p
 }
 
 
-Real squeezeRange(Real& x, Real& x1, Real& x2);
-
-Real squeezeRange(Real& x, Real& x1, Real& x2) {
+inline Real squeezeRange(Real& x, Real& x1, Real& x2) {
   return (0.5 + 0.5 * tanh(-1.0 + 2.0 * (x - x1) / (x2 - x1)));
 }
 
@@ -369,8 +371,8 @@ void MusicLowlevelDescriptors::computeAverageLoudness(Pool& pool){ // after comp
     pool.value<vector<Real> >(nameSpace + "loudness")[0];
   }
   catch (EssentiaException&) {
-    cerr << "ERROR: File is too short for loudness estimation... Aborting..." << endl;
-    exit(6);
+    throw EssentiaException("File is too short for loudness estimation... Aborting...");
+    //exit(6);
   }
 
   vector<Real> levelArray = pool.value<vector<Real> >(nameSpace + "loudness");

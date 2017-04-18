@@ -17,25 +17,26 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef MUSIC_TONAL_DESCRIPTORS_H
-#define MUSIC_TONAL_DESCRIPTORS_H
+#ifndef FREESOUND_LOWLEVEL_DESCRIPTORS_H
+#define FREESOUND_LOWLEVEL_DESCRIPTORS_H
 
-#include "MusicDescriptorsSet.h"
+#include "FreesoundDescriptorsSet.h"
+#include "essentia/essentiamath.h"
 
+using namespace std;
 
- class MusicTonalDescriptors : public MusicDescriptorSet{
+class FreesoundLowlevelDescriptors : public FreesoundDescriptorSet {
 
  public:
- 	static const string nameSpace;
+ 	static const string nameSpace;  
 
-  MusicTonalDescriptors(Pool& options) {
+  FreesoundLowlevelDescriptors(Pool& options) {
     this->options = options;
   }
-  ~MusicTonalDescriptors();
+  ~FreesoundLowlevelDescriptors();
 
-  void createNetworkTuningFrequency(SourceBase& source, Pool& pool);
  	void createNetwork(SourceBase& source, Pool& pool);
-  void computeTuningSystemFeatures(Pool& pool);
- };
+	void computeAverageLoudness(Pool& pool);
+};
 
- #endif
+#endif

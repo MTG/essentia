@@ -146,11 +146,11 @@ void connect(SourceBase& source, Pool& pool,
              const std::string& descriptorName);
 
 class PoolConnector {
-protected:
+ protected:
   Pool& pool;
   std::string name;
 
-public:
+ public:
   PoolConnector(Pool& p, const std::string& descName) : pool(p), name(descName) {}
 
   friend void operator>>(SourceBase& source, const PoolConnector& pc);

@@ -17,56 +17,67 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-// Streaming extractor designed for analysis of music collections
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
-#include <essentia/streaming/algorithms/poolstorage.h>
-#include <essentia/essentiautil.h>
+#include <essentia/essentia.h>
+#include <essentia/algorithm.h>
+#include <essentia/algorithmfactory.h> 
+#include <essentia/utils/extractor_music/extractor_version.h>
+#include "music_extractor/extractor_utils.h"
 
-#include "extractor_music/MusicExtractor.h"
-#include "credit_libav.h" 
+#include "credit_libav.h"
 
 using namespace std;
 using namespace essentia;
-using namespace essentia::streaming;
-using namespace essentia::scheduler;
+using namespace essentia::standard;
+
 
 void usage(char *progname) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << progname << " input_audiofile output_textfile [profile]" << endl;
-    cout << endl << "Music extractor version '" << EXTRACTOR_VERSION << "'" << endl 
+    cout << endl << "Music extractor version '" << MUSIC_EXTRACTOR_VERSION << "'" << endl 
          << "built with Essentia version " << essentia::version_git_sha << endl;
     creditLibAV();
+
     exit(1);
 }
+
 
 int essentia_main(string audioFilename, string outputFilename, string profileFilename) {
   // Returns: 1 on essentia error
   //          2 if there are no tags in the file
+  // TODO: is 2 recieved?
+
   int result;
   try {
     essentia::init();
 
     cout.precision(10); // TODO ????
 
-    MusicExtractor *extractor = new MusicExtractor();
+    Pool options;
+    setExtractorOptions(profileFilename, options);
 
-    extractor->setExtractorOptions(profileFilename);
-    extractor->mergeValues(extractor->results);
+    Algorithm* extractor = AlgorithmFactory::create("MusicExtractor",
+                                                    "profile", profileFilename);
 
-    result = extractor->compute(audioFilename);
+    Pool results;
+    Pool resultsFrames;
 
-    if (result > 0) {
-        cerr << "Quitting early." << endl;
-    } else {
-        extractor->outputToFile(extractor->stats, outputFilename);
-        if (extractor->options.value<Real>("outputFrames")) {
-          extractor->outputToFile(extractor->results, outputFilename+"_frames");
-        }
+    extractor->input("filename").set(audioFilename);
+    extractor->output("results").set(results);
+    extractor->output("resultsFrames").set(resultsFrames);
+
+    extractor->compute();
+
+    mergeValues(results, options);
+
+    outputToFile(results, outputFilename, options);    
+    if (options.value<Real>("outputFrames")) {
+      outputToFile(resultsFrames, outputFilename+"_frames", options);
     }
+    delete extractor;
     essentia::shutdown();
   }
   catch (EssentiaException& e) {

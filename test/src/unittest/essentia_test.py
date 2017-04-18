@@ -77,18 +77,26 @@ def allTests(testClass):
     return TestLoader().loadTestsFromTestCase(testClass)
 
 
-
 class TestCase(BaseTestCase):
 
     def assertValidNumber(self, x):
         self.assert_(not numpy.isnan(x))
         self.assert_(not numpy.isinf(x))
 
+    def assertValidPool(self, pool):
+        for key in pool.descriptorNames():
+            x = pool[key]
+            if type(x) is float:
+                self.assertValidNumber(x)
+            elif type(x) is numpy.ndarray:
+                self.assert_(not numpy.isnan(x).any())
+                self.assert_(not numpy.isinf(x).any())
+
     def assertEqualVector(self, found, expected):
         self.assertEqual(len(found), len(expected))
         for val1, val2 in zip(found, expected):
             self.assertEqual(val1, val2)
-    
+
     def assertEqualMatrix(self, found, expected):
         self.assertEqual(len(found), len(expected))
         for v1, v2 in zip(found, expected):
@@ -96,7 +104,8 @@ class TestCase(BaseTestCase):
             for val1, val2 in zip(v1, v2):
                 if (isinstance(val1, numpy.ndarray)):
                     self.assertEqual(val1.all(), val2.all())
-                else : self.assertEqual(val1, val2)
+                else:
+                    self.assertEqual(val1, val2)
 
     def assertAlmostEqualFixedPrecision(self, found, expected, digits = 0):
         BaseTestCase.assertAlmostEqual(self, found, expected, digits)

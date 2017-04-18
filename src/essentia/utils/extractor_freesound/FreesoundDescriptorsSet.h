@@ -17,22 +17,33 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef FREESOUND_LOWLEVEL_DESCRIPTORS_H
-#define FREESOUND_LOWLEVEL_DESCRIPTORS_H
+#ifndef FREESOUND_DESCRIPTOR_SET_H
+#define FREESOUND_DESCRIPTOR_SET_H
 
-#include "FreesoundDescriptorsSet.h"
-#include "essentia/essentiamath.h"
+
+#include "essentia/streaming/sourcebase.h"
+#include "essentia/pool.h"
+#include "essentia/types.h"
+#include "essentia/algorithm.h"
+#include "essentia/scheduler/network.h"
+#include "essentia/streaming/streamingalgorithm.h"
+#include "essentia/algorithmfactory.h"
+#include "essentia/streaming/algorithms/poolstorage.h"
+#include "essentia/streaming/algorithms/vectorinput.h"
+
 
 using namespace std;
+using namespace essentia;
+using namespace essentia::streaming;
 
- class FreesoundLowlevelDescriptors : public FreesoundDescriptorSet{
+class FreesoundDescriptorSet { 
 
  public:
- 	static const string nameSpace;  
+ 	static const string nameSpace;
 
- 	void createNetwork(SourceBase& source, Pool& pool);
-	void computeAverageLoudness(Pool& pool);
+ protected:
+  Pool options;
 
- };
+};
 
- #endif
+#endif

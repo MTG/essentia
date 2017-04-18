@@ -91,14 +91,14 @@ class BpmHistogramDescriptors : public StreamingAlgorithmWrapper {
  public:
   BpmHistogramDescriptors() {
     declareAlgorithm("BpmHistogramDescriptors");
-    declareInput(_bpmIntervals, TOKEN, 1, "bpmIntervals");
-    declareOutput(_firstPeakBPM, TOKEN, 1, "firstPeakBPM");
-    declareOutput(_firstPeakWeight, TOKEN, 1, "firstPeakWeight");
-    declareOutput(_firstPeakSpread, TOKEN, 1, "firstPeakSpread");
-    declareOutput(_secondPeakBPM, TOKEN, 1, "secondPeakBPM");
-    declareOutput(_secondPeakWeight, TOKEN, 1, "secondPeakWeight");
-    declareOutput(_secondPeakSpread, TOKEN, 1, "secondPeakSpread");
-    declareOutput(_histogram, TOKEN, 1, "histogram");
+    declareInput(_bpmIntervals, TOKEN, "bpmIntervals");
+    declareOutput(_firstPeakBPM, TOKEN, "firstPeakBPM");
+    declareOutput(_firstPeakWeight, TOKEN, "firstPeakWeight");
+    declareOutput(_firstPeakSpread, TOKEN, "firstPeakSpread");
+    declareOutput(_secondPeakBPM, TOKEN, "secondPeakBPM");
+    declareOutput(_secondPeakWeight, TOKEN, "secondPeakWeight");
+    declareOutput(_secondPeakSpread, TOKEN, "secondPeakSpread");
+    declareOutput(_histogram, TOKEN, "histogram");
   }
 };
 

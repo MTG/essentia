@@ -53,7 +53,6 @@ const char* LoudnessEBUR128::description = DOC("This algorithm computes the EBU 
 
 
 LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
-
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   _frameCutterMomentary       = factory.create("FrameCutter");
   _frameCutterShortTerm       = factory.create("FrameCutter");
@@ -76,6 +75,8 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   // Connect input proxy
   _signal >> _loudnessEBUR128Filter->input("signal");
 
+  _loudnessEBUR128Filter->output("signal").setBufferType(BufferUsage::forLargeAudioStream);
+  
   _loudnessEBUR128Filter->output("signal") >> _frameCutterMomentary->input("signal");
   _loudnessEBUR128Filter->output("signal") >> _frameCutterShortTerm->input("signal");
 
@@ -84,6 +85,9 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   // therefore, signal power is mean of squared signal
   _frameCutterMomentary->output("frame") >> _meanMomentary->input("array");
   _frameCutterShortTerm->output("frame") >> _meanShortTerm->input("array");
+
+  _meanMomentary->output("mean").setBufferType(BufferUsage::forAudioStream);  
+  _meanShortTerm->output("mean").setBufferType(BufferUsage::forAudioStream);
 
   _meanMomentary->output("mean") >> _computeMomentary->input("array");
   _meanShortTerm->output("mean") >> _computeShortTerm->input("array");
@@ -125,10 +129,13 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   // measurement was started, by recalculating the threshold, then applying
   // it to the stored values, every time the meter reading is updated. 
   // The update rate for "live meters" shall be at least 1 Hz. 
+
+  _network = new scheduler::Network(_loudnessEBUR128Filter);
 }
 
-LoudnessEBUR128::~LoudnessEBUR128() {}
-
+LoudnessEBUR128::~LoudnessEBUR128() {
+  delete _network;
+}
 
 // According to ITU-R BS.1770-2 paper:  loudness = –0.691 + 10 log_10 (power)
 inline Real power2loudness(Real power) {
@@ -183,7 +190,7 @@ AlgorithmStatus LoudnessEBUR128::process() {
   // of values, as it is implemented now. However, this would lead to a 
   // necessity to compute log value for each value of the vector.
 
-  if (!_pool.contains<vector<Real> >("integrated_power") && !_pool.contains<vector<Real> >("shortterm_power")) {
+  if (!_pool.contains<vector<Real> >("integrated_power") || !_pool.contains<vector<Real> >("shortterm_power")) {
     // do not push anything in the case of empty signal
     E_WARNING("LoudnessEBUR128: empty input signal");
     return FINISHED;

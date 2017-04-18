@@ -17,33 +17,25 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef MUSIC_DESCRIPTOR_SET_H
-#define MUSIC_DESCRIPTOR_SET_H
+#ifndef MUSIC_TONAL_DESCRIPTORS_H
+#define MUSIC_TONAL_DESCRIPTORS_H
+
+#include "MusicDescriptorsSet.h"
 
 
-#include "essentia/streaming/sourcebase.h"
-#include "essentia/pool.h"
-#include "essentia/types.h"
-#include "essentia/essentiamath.h"
-#include "essentia/algorithm.h"
-#include "essentia/scheduler/network.h"
-#include "essentia/streaming/streamingalgorithm.h"
-#include "essentia/algorithmfactory.h"
-#include "essentia/streaming/algorithms/poolstorage.h"
-#include "essentia/streaming/algorithms/vectorinput.h"
-
-using namespace std;
-using namespace essentia;
-using namespace essentia::streaming;
-
- class MusicDescriptorSet{ 
+class MusicTonalDescriptors : public MusicDescriptorSet {
 
  public:
- 	static const string nameSpace;  
+ 	static const string nameSpace;
 
- protected:
-  Pool options;
+  MusicTonalDescriptors(Pool& options) {
+    this->options = options;
+  }
+  ~MusicTonalDescriptors();
 
- };
+  void createNetworkTuningFrequency(SourceBase& source, Pool& pool);
+ 	void createNetwork(SourceBase& source, Pool& pool);
+  void computeTuningSystemFeatures(Pool& pool);
+};
 
- #endif
+#endif

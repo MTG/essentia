@@ -23,12 +23,17 @@
 #include "FreesoundDescriptorsSet.h"
 
 
- class FreesoundTonalDescriptors : public FreesoundDescriptorSet{
+class FreesoundTonalDescriptors : public FreesoundDescriptorSet {
 
  public:     
  	static const string nameSpace;
-    void createTuningFrequencyNetwork(SourceBase& source, Pool& pool);
- 	void createNetwork(SourceBase& source, Pool& pool);
- };
 
- #endif
+  FreesoundTonalDescriptors(Pool& options) {
+    this->options = options;
+  }
+  ~FreesoundTonalDescriptors();
+
+ 	void createNetwork(SourceBase& source, Pool& pool);
+};
+
+#endif

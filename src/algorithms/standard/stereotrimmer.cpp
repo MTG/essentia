@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "trimmer.h"
+#include "stereotrimmer.h"
 #include "essentiamath.h"
 
 using namespace std;
@@ -25,39 +25,39 @@ using namespace std;
 namespace essentia {
 namespace standard {
 
-const char* Trimmer::name = "Trimmer";
-const char* Trimmer::category = "Standard";
-const char* Trimmer::description = DOC("This algorithm extracts a segment of an audio signal given its start and end times.\n"
+const char* StereoTrimmer::name = "StereoTrimmer";
+const char* StereoTrimmer::category = "Standard";
+const char* StereoTrimmer::description = DOC("This algorithm extracts a segment of a stereo audio signal given its start and end times.\n"
 "Giving \"startTime\" greater than \"endTime\" will raise an exception.");
 
-void Trimmer::configure() {
+void StereoTrimmer::configure() {
   Real sampleRate = parameter("sampleRate").toReal();
   _startIndex = (long long)(parameter("startTime").toReal() * sampleRate);
   _endIndex = (long long)(parameter("endTime").toReal() * sampleRate);
   if (_startIndex > _endIndex) {
-    throw EssentiaException("Trimmer: startTime cannot be larger than endTime.");
+    throw EssentiaException("StereoTrimmer: startTime cannot be larger than endTime.");
   }
   _checkRange = parameter("checkRange").toBool();
 }
 
-void Trimmer::compute() {
-  const vector<Real>& input = _input.get();
-  vector<Real>& output = _output.get();
+void StereoTrimmer::compute() {
+  const vector<StereoSample>& input = _input.get();
+  vector<StereoSample>& output = _output.get();
   int size = input.size();
 
-  if (_startIndex < 0) _startIndex = 0; // should never happen
+  if (_startIndex < 0) _startIndex = 0;
   if (_startIndex > size) {
     if (_checkRange) {
-      throw EssentiaException("Trimmer: cannot trim beyond the size of the input signal");
+      throw EssentiaException("StereoTrimmer: cannot trim beyond the size of the input signal");
     }
-    E_WARNING("Trimmer: empty output due to insufficient input signal size");
     _startIndex = size;
+    E_WARNING("StereoTrimmer: empty output due to insufficient input signal size");
   }
   if (_endIndex > size) _endIndex = size;
 
   size = _endIndex-_startIndex;
   output.resize(size);
-  memcpy(&output[0], &input[0]+_startIndex, size*sizeof(Real));
+  memcpy(&output[0], &input[0]+_startIndex, size*sizeof(StereoSample));
 }
 
 } // namespace essentia
@@ -67,22 +67,22 @@ void Trimmer::compute() {
 namespace essentia {
 namespace streaming {
 
-const char* Trimmer::name = essentia::standard::Trimmer::name;
-const char* Trimmer::category = essentia::standard::Trimmer::category;
-const char* Trimmer::description = essentia::standard::Trimmer::description;
+const char* StereoTrimmer::name = essentia::standard::StereoTrimmer::name;
+const char* StereoTrimmer::category = essentia::standard::StereoTrimmer::category;
+const char* StereoTrimmer::description = essentia::standard::StereoTrimmer::description;
 
-void Trimmer::configure() {
+void StereoTrimmer::configure() {
   Real sampleRate = parameter("sampleRate").toReal();
   _startIndex = (long long)(parameter("startTime").toReal() * sampleRate);
   _endIndex = (long long)(parameter("endTime").toReal() * sampleRate);
   if (_startIndex > _endIndex) {
-    throw EssentiaException("Trimmer: startTime cannot be larger than endTime.");
+    throw EssentiaException("StereoTrimmer: startTime cannot be larger than endTime.");
   }
   _consumed = 0;
   _preferredSize = defaultPreferredSize;
 }
 
-AlgorithmStatus Trimmer::process() {
+AlgorithmStatus StereoTrimmer::process() {
   EXEC_DEBUG("process()");
 
   if ((_consumed < _startIndex) && (_consumed + _preferredSize > _startIndex)) {
@@ -131,8 +131,8 @@ AlgorithmStatus Trimmer::process() {
 
 
   // get the audio input and copy it to the output
-  const vector<Real>& input = _input.tokens();
-  vector<Real>& output = _output.tokens();
+  const vector<StereoSample>& input = _input.tokens();
+  vector<StereoSample>& output = _output.tokens();
 
 
   if (_consumed >= _startIndex && _consumed < _endIndex) {
@@ -168,7 +168,7 @@ AlgorithmStatus Trimmer::process() {
 }
 
 
-void Trimmer::reset() {
+void StereoTrimmer::reset() {
   Algorithm::reset();
   _consumed = 0;
   _preferredSize = defaultPreferredSize;

@@ -17,22 +17,44 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef FREESOUND_SFX_DESCRIPTORS_H
-#define FREESOUND_SFX_DESCRIPTORS_H
+#ifndef MUSIC_EXTRACTOR_SVM_H
+#define MUSIC_EXTRACTOR_SVM_H
 
-#include "FreesoundDescriptorsSet.h"
+#include "pool.h"
+#include "algorithm.h"
+#include "extractor_music/extractor_version.h"
 
+namespace essentia {
+namespace standard {
 
- class FreesoundSfxDescriptors : public FreesoundDescriptorSet{
+class MusicExtractorSVM : public Algorithm {
+ protected:
+  Input<Pool> _inputPool;
+  Output<Pool> _outputPool;
+
+  std::vector<standard::Algorithm*> _svms;
+
+  void computeSVMDescriptors(Pool& pool);
 
  public:
 
- 	static const string nameSpace;  
+  MusicExtractorSVM();
+  ~MusicExtractorSVM();
 
- 	void createNetwork(SourceBase& source, Pool& pool);
- 	void createPitchNetwork(VectorInput<Real>& pitch, Pool& pool);
- 	void createHarmonicityNetwork(SourceBase& source, Pool& pool);
+  void declareParameters() {
+    declareParameter("svms", "list of svm models (gaia2 history) filenames.", "", Parameter::VECTOR_STRING);
+  }
 
- };
+  void configure();
+  void compute();
+  void reset();
 
- #endif
+  static const char* name;
+  static const char* category;
+  static const char* description;
+};
+
+} // namespace standard
+} // namespace essentia
+
+#endif

@@ -17,28 +17,29 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_TRIMMER_H
-#define ESSENTIA_TRIMMER_H
+#ifndef ESSENTIA_STEREOTRIMMER_H
+#define ESSENTIA_STEREOTRIMMER_H
 
 #include "algorithm.h"
 
 namespace essentia {
 namespace standard {
 
-class Trimmer : public Algorithm {
+class StereoTrimmer : public Algorithm {
 
  private:
-  Input<std::vector<Real> > _input;
-  Output<std::vector<Real> > _output;
+  Input<std::vector<StereoSample> > _input;
+  Output<std::vector<StereoSample> > _output;
 
   long long _startIndex;
   long long _endIndex;
   bool _checkRange;
 
+
  public:
-  Trimmer() {
-    declareInput(_input, "signal", "the input signal");
-    declareOutput(_output, "signal", "the trimmed signal");
+  StereoTrimmer() {
+    declareInput(_input, "signal", "the input stereo signal");
+    declareOutput(_output, "signal", "the trimmed stereo signal");
   }
 
   void declareParameters() {
@@ -67,10 +68,10 @@ class Trimmer : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class Trimmer : public Algorithm {
+class StereoTrimmer : public Algorithm {
  protected:
-  Sink<Real> _input;
-  Source<Real> _output;
+  Sink<StereoSample> _input;
+  Source<StereoSample> _output;
 
   int _preferredSize;
   long long _startIndex;
@@ -80,9 +81,9 @@ class Trimmer : public Algorithm {
   static const int defaultPreferredSize = 4096;
 
  public:
-  Trimmer() : Algorithm(), _preferredSize(defaultPreferredSize) {
-    declareInput(_input, _preferredSize, "signal", "the input signal");
-    declareOutput(_output, _preferredSize, "signal", "the trimmed signal");
+  StereoTrimmer() : Algorithm(), _preferredSize(defaultPreferredSize) {
+    declareInput(_input, _preferredSize, "signal", "the input stereo signal");
+    declareOutput(_output, _preferredSize, "signal", "the trimmed stereo signal");
 
     _output.setBufferType(BufferUsage::forAudioStream);
   }
@@ -107,4 +108,4 @@ class Trimmer : public Algorithm {
 } // namespace essentia
 
 
-#endif // ESSENTIA_TRIMMER_H
+#endif // ESSENTIA_STEREOTRIMMER_H
