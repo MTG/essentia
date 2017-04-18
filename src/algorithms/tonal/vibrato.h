@@ -40,8 +40,8 @@ class Vibrato : public Algorithm {
  public:
   Vibrato() {
     declareInput(_pitch, "pitch", "the pitch trajectory [Hz].");
-    declareOutput(_vibratoFrequency, "vibratoFrequency", "estimated vibrato frquency [Hz]; zero if no vibrato was detected.");
-    declareOutput(_vibratoExtend, "vibratoExtend","estimated vibrato frquency [Hz]; zero if no vibrato was detected.") ;
+    declareOutput(_vibratoFrequency, "vibratoFrequency", "estimated vibrato frequency (or speed) [Hz]; zero if no vibrato was detected.");
+    declareOutput(_vibratoExtend, "vibratoExtend","estimated vibrato extend (or depth) [cents]; zero if no vibrato was detected.") ;
       
     frameCutter = AlgorithmFactory::create("FrameCutter");
     window = AlgorithmFactory::create("Windowing");
