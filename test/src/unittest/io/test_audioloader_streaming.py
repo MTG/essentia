@@ -18,11 +18,11 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-
 from essentia_test import *
 import essentia
 from essentia.streaming import AudioLoader as sAudioLoader
 import sys
+
 
 class TestAudioLoader_Streaming(TestCase):
 
@@ -154,19 +154,19 @@ class TestAudioLoader_Streaming(TestCase):
 
     def testResetStandard(self):
         from essentia.standard import AudioLoader as stdAudioLoader
-        audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
+        audiofile = join(testdata.audio_dir, 'recorded', 'musicbox.wav')
         loader = stdAudioLoader(filename=audiofile, computeMD5=True)
-        audio1, sr1, nChannels1, md51, bitrate1, codec1 = loader();
-        audio2, sr2, nchannels2, md52, bitrate2, codec2 = loader();
-        loader.reset();
-        audio3, sr3, nChannels3, md53, bitrate3, codec3 = loader();
+        audio1, sr1, nChannels1, md51, bitrate1, codec1 = loader()
+        audio2, sr2, nchannels2, md52, bitrate2, codec2 = loader()
+        loader.reset()
+        audio3, sr3, nChannels3, md53, bitrate3, codec3 = loader()
         self.assertAlmostEqualMatrix(audio3, audio1)
         self.assertEqual(sr3, sr1)
         self.assertEqual(nChannels3, nChannels1)
         self.assertEqual(md53, md51)
         self.assertEqualMatrix(audio2, audio1)
         self.assertEqual(bitrate3, bitrate1)
-        self.assertEqual(codec3, codec1)        
+        self.assertEqual(codec3, codec1)
 
     def testLoadMultiple(self):
         from essentia.standard import AudioLoader as stdAudioLoader
@@ -208,7 +208,7 @@ class TestAudioLoader_Streaming(TestCase):
         centroid16 = centroid(audio16L)
         centroid24 = centroid(audio24L)
         centroid32 = centroid(audio32L)
-        
+
         self.assertEqual(len(audio16), len(audio24))
         self.assertEqual(len(audio16), len(audio32))
         self.assertAlmostEqual(error24, 0)
@@ -226,23 +226,23 @@ class TestAudioLoader_Streaming(TestCase):
         _, _, _, md5_mp3, _, _ = AudioLoader(filename=join(dir,"dubstep.mp3"), computeMD5=True)()
         _, _, _, md5_ogg, _, _ = AudioLoader(filename=join(dir,"dubstep.ogg"), computeMD5=True)()
         _, _, _, md5_aac, _, _ = AudioLoader(filename=join(dir,"dubstep.aac"), computeMD5=True)()
-        
-        # results should correspond to ffmpeg output (computed on debian wheezy) 
+
+        # results should correspond to ffmpeg output (computed on debian wheezy)
         #   ffmpeg -i dubstep.wav -acodec copy -f md5 -
         self.assertEqual(md5_wav, "bf0f4d0613fab0fa5268ece9b043c441")
         self.assertEqual(md5_flac, "93ee45bc8776eed656a554b32d0d9616")
         self.assertEqual(md5_mp3, "1e5a598218e9b19cfe04d6c2f61f84a6")
         self.assertEqual(md5_ogg, "a87dad40fea0966cc5b967d5412e8868")
         self.assertEqual(md5_aac, "9a4c7f0da68d4b58767f219c48014f9c")
-    
+
     def testMultiStream(self):
-        
-        #  stream 0 of multistream1.mka is the same as stream 1 of multistream2.mka 
+
+        #  stream 0 of multistream1.mka is the same as stream 1 of multistream2.mka
 
         p = Pool()
 
-        stream0 = sAudioLoader(filename=join(testdata.audio_dir, 'generated', 'multistream', 'multistream1.mka'), audioStream = 0)
-        stream1 = sAudioLoader(filename=join(testdata.audio_dir, 'generated', 'multistream', 'multistream2.mka'), audioStream = 1)
+        stream0 = sAudioLoader(filename=join(testdata.audio_dir, 'generated', 'multistream', 'multistream1.mka'), audioStream=0)
+        stream1 = sAudioLoader(filename=join(testdata.audio_dir, 'generated', 'multistream', 'multistream2.mka'), audioStream=1)
 
         stream0.audio >> (p, 'stream0')
         stream0.numberChannels >> (p, 'nChannels0')
@@ -261,12 +261,10 @@ class TestAudioLoader_Streaming(TestCase):
         run(stream0)
         run(stream1)
 
-        self.assertEqualVector(p['stream0'][0],p['stream1'][0])
+        self.assertEqualVector(p['stream0'][0], p['stream1'][0])
 
         # An exception should be thrown if the required audioStream is out of bounds
-        self.assertConfigureFails(sAudioLoader(), {'filename' :join(testdata.audio_dir, 'generated', 'multistream', 'multistream1.mka'), 'audioStream' : 2})
-
-
+        self.assertConfigureFails(sAudioLoader(), {'filename': join(testdata.audio_dir, 'generated', 'multistream', 'multistream1.mka'), 'audioStream': 2})
 
 
 suite = allTests(TestAudioLoader_Streaming)
