@@ -25,29 +25,29 @@ from numpy import sin, float32, pi, arange, mean, log2, floor, ceil
 class TestVibrato(TestCase):
 
     def testEmpty(self):
-        vibrato, extend = Vibrato()([])
+        vibrato, extent = Vibrato()([])
         self.assertEqual(vibrato.size, 0)
-        self.assertEqual(extend.size, 0)
+        self.assertEqual(extent.size, 0)
 
     def testZero(self):
-        vibrato, extend = Vibrato()([0])
+        vibrato, extent = Vibrato()([0])
 
         self.assertEqualVector(vibrato, [0.])
-        self.assertEqualVector(extend, [0.])
+        self.assertEqualVector(extent, [0.])
 
     def testOnes(self):
-        vibrato, extend = Vibrato()([1]*1024)
+        vibrato, extent = Vibrato()([1]*1024)
 
         self.assertEqualVector(vibrato, [0.]*1024)
-        self.assertEqualVector(extend, [0.]*1024)
+        self.assertEqualVector(extent, [0.]*1024)
 
 
     def testNegativeInput(self):
         # Negative vlues should be set to 0
-        vibrato, extend = Vibrato()([-1]*1024)
+        vibrato, extent = Vibrato()([-1]*1024)
 
         self.assertEqualVector(vibrato, [0.]*1024)
-        self.assertEqualVector(extend, [0.]*1024)    
+        self.assertEqualVector(extent, [0.]*1024)    
 
     def testInvalidParam(self):
         self.assertConfigureFails(Vibrato(), { 'maxExtend':    -1 })
@@ -59,17 +59,17 @@ class TestVibrato(TestCase):
     def testSyntheticVibrato(self):
         fs = 100  #Hz
         f0 = 100  #Hz
-        extend = 5  #Hz
+        extent = 5  #Hz
         vibrato = 5 #Hz
 
-        x = [f0] * 1024 + extend * sin(2 * pi * vibrato * arange(1024) / fs)
+        x = [f0] * 1024 + extent * sin(2 * pi * vibrato * arange(1024) / fs)
 
-        vibratoEst, extendEst = Vibrato(sampleRate=fs)(x.astype(float32))
+        vibratoEst, extentEst = Vibrato(sampleRate=fs)(x.astype(float32))
 
         self.assertAlmostEqual(vibrato,mean(vibratoEst[3:-3]), 1)
 
-        extendCents = 1200*log2((f0+extend)/float(f0-extend))
-        self.assertAlmostEqual(extendCents, mean(extendEst[3:-3]), 1e-1)
+        extentCents = 1200*log2((f0+extent)/float(f0-extent))
+        self.assertAlmostEqual(extentCents, mean(extentEst[3:-3]), 1e-1)
 
     def testFrequencyDetenctionThreshold(self):
         #  Vibrato Min and Max default values are 3 and 8Hz so
@@ -77,16 +77,16 @@ class TestVibrato(TestCase):
 
         fs = 100  #Hz
         f0 = 100  #Hz
-        extend = 5  #Hz
+        extent = 5  #Hz
         vibrato = 3 #Hz
-        x = [f0] * 1024 + extend * sin(2 * pi * vibrato * arange(1024) / fs)
+        x = [f0] * 1024 + extent * sin(2 * pi * vibrato * arange(1024) / fs)
 
-        vibratoEst, extendEst = Vibrato(sampleRate=fs)(x.astype(float32))
+        vibratoEst, extentEst = Vibrato(sampleRate=fs)(x.astype(float32))
         self.assertEqual(0, vibratoEst.all())
 
         vibrato = 9 #Hz
-        x = [f0] * 1024 + extend * sin(2 * pi * vibrato * arange(1024) / fs)
-        vibratoEst, extendEst = Vibrato(sampleRate=fs)(x.astype(float32))
+        x = [f0] * 1024 + extent * sin(2 * pi * vibrato * arange(1024) / fs)
+        vibratoEst, extentEst = Vibrato(sampleRate=fs)(x.astype(float32))
         self.assertEqual(0, vibratoEst.all())
 
 
@@ -95,15 +95,15 @@ class TestVibrato(TestCase):
         #  this values  shouldn't be detected.
         fs = 100  #Hz
         f0 = 100  #Hz
-        extend = ceil(f0 * (2**(250/1200.) -1) / (2**(250/1200.) + 1))
+        extent = ceil(f0 * (2**(250/1200.) -1) / (2**(250/1200.) + 1))
         vibrato = 5 #Hz
-        x = [f0] * 1024 + extend * sin(2 * pi * vibrato * arange(1024) / fs)
-        vibratoEst, extendEst = Vibrato(sampleRate=fs)(x.astype(float32))
+        x = [f0] * 1024 + extent * sin(2 * pi * vibrato * arange(1024) / fs)
+        vibratoEst, extentEst = Vibrato(sampleRate=fs)(x.astype(float32))
         self.assertEqual(0, vibratoEst.all())
 
-        extend = floor(f0 * (2**(50/1200.) -1) / (2**(50/1200.) + 1))
-        x = [f0] * 1024 + extend * sin(2 * pi * vibrato * arange(1024) / fs)
-        vibratoEst, extendEst = Vibrato(sampleRate=fs)(x.astype(float32))
+        extent = floor(f0 * (2**(50/1200.) -1) / (2**(50/1200.) + 1))
+        x = [f0] * 1024 + extent * sin(2 * pi * vibrato * arange(1024) / fs)
+        vibratoEst, extentEst = Vibrato(sampleRate=fs)(x.astype(float32))
         self.assertEqual(0, vibratoEst.all())
 
 
