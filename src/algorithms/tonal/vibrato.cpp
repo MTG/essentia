@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* Vibrato::name = "Vibrato";
 const char* Vibrato::category = "Pitch";
-const char* Vibrato::description = DOC("This algorithm detects the presence of vibrato and estimates its parameters given a pitch contour [Hz]. The result is the vibrato frequency in Hz and the extend (peak to peak) in cents. If no vibrato is detected in a frame, the output of both values is zero.\n"
+const char* Vibrato::description = DOC("This algorithm detects the presence of vibrato and estimates its parameters given a pitch contour [Hz]. The result is the vibrato frequency in Hz and the extent (peak to peak) in cents. If no vibrato is detected in a frame, the output of both values is zero.\n"
 "\n"
 "This algorithm should be given the outputs of a pitch estimator, i.e. PredominantMelody, PitchYinFFT or PitchMelodia and the corresponding sample rate with which it was computed.\n"
 "\n"
@@ -91,7 +91,7 @@ void Vibrato::compute() {
     startC.push_back(0);
   }
   for (int i=0; i<(int)pitchP.size()-1; i++) {
-    if (pitchP[i+1]>0 && pitchP[i]==0){
+    if (pitchP[i+1]>0 && pitchP[i]==0) {
       startC.push_back(i+1);
     }
     if (pitchP[i+1]==0 && pitchP[i]>0) {
@@ -138,7 +138,7 @@ void Vibrato::compute() {
       if(!frame.size()) {
         break;
       }
-          
+
       // subtract mean pitch from frame
       Real m = mean(frame, 0, frame.size()-1);
       for (int ii=0; ii<(int)frame.size(); ii++) {
@@ -181,11 +181,17 @@ void Vibrato::compute() {
       if (ext<_minExtend || ext>_maxExtend){
         continue;
       }
-    
-      for (int ii=startC[i]+frameNumber-1; ii<startC[i]+frameNumber+frameSize-1; ii++) {
+
+      int ii = startC[i]+frameNumber-1;
+      vibratoFrequency[ii] = peakFrequencies[0];
+      vibratoExtend[ii] = ext;
+      // NOTE: no need to loop over the frame, as the hopSize is 1
+      /*
+      for (int ii=startC[i]+frameNumber-1; ii<startC[i]+frameNumber-1+frameSize; ii++) {  
         vibratoFrequency[ii]=peakFrequencies[0];
         vibratoExtend[ii]=ext;
       }
+      */
     }
   }
 }

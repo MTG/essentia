@@ -113,7 +113,21 @@ int PyStreamingAlgorithm::tp_init(PyStreamingAlgorithm *self, PyObject *args, Py
 void PyStreamingAlgorithm::tp_dealloc (PyObject* obj) {
   PyStreamingAlgorithm* self = reinterpret_cast<PyStreamingAlgorithm*>(obj);
   // FIXME: need to deallocate something here I guess...
-  //if (self->isGenerator) streaming::deleteNetwork(self->algo);
+  
+  if (self->isGenerator) {
+    scheduler::deleteNetwork(self->algo);
+    
+    // Another way to do that is by creating a network and running its clear() method
+    /*    
+    try {
+      scheduler::Network(self->algo).clear();
+    }
+    catch (const exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, e.what());
+      return;
+    }
+    */
+  }
 
   self->ob_type->tp_free(obj);
 }

@@ -92,21 +92,23 @@ void AudioLoader::openAudioFile(const string& filename) {
 
     // Check that we have only 1 audio stream in the file
     _streams.clear();
-    int nAudioStreams = 0;
     for (int i=0; i<(int)_demuxCtx->nb_streams; i++) {
         if (_demuxCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
             _streams.push_back(i);
-            nAudioStreams++;
         }
     }
-
+    int nAudioStreams = _streams.size();
+    
     if (nAudioStreams == 0) {
+        avformat_close_input(&_demuxCtx);
+        _demuxCtx = 0;
         throw EssentiaException("AudioLoader ERROR: found 0 streams in the file, expecting one or more audio streams");
     }
 
     if (_selectedStream >= nAudioStreams) {
+        avformat_close_input(&_demuxCtx);
+        _demuxCtx = 0;
         throw EssentiaException("AudioLoader ERROR: 'audioStream' parameter set to ", _selectedStream ,". It should be smaller than the audio streams count, ", nAudioStreams);
-
     }
 
     _streamIdx = _streams[_selectedStream];
@@ -168,14 +170,13 @@ void AudioLoader::closeAudioFile() {
     }
 
     // Close the codec
-    avcodec_close(_audioCtx);
-
+    if (!_audioCtx) avcodec_close(_audioCtx);
     // Close the audio file
-    avformat_close_input(&_demuxCtx);
+    if (!_demuxCtx) avformat_close_input(&_demuxCtx);
 
     // free AVPacket
+    // TODO: use a variable for whether _packet is initialized or not
     av_free_packet(&_packet);
-
     _demuxCtx = 0;
     _audioCtx = 0;
     _streams.clear();

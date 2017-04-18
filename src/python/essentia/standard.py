@@ -46,6 +46,11 @@ def _create_essentia_class(name, moduleName = __name__):
             # verify that all types match and do any necessary conversions
             for name, val in kwargs.iteritems():
                 goalType = self.paramType(name)
+                
+                if type(val).__module__ == 'numpy':
+                    if not val.flags['C_CONTIGUOUS']:
+                        val = copy(val)
+
                 try:
                     convertedVal = _c.convertData(val, goalType)
                 except TypeError: # as e: # catching exception as sth is only
@@ -76,7 +81,7 @@ def _create_essentia_class(name, moduleName = __name__):
             for i in range(len(inputNames)):
                 arg = args[i]
 
-                if type(args[i]).__module__ == 'numpy':     
+                if type(args[i]).__module__ == 'numpy':
                     if not args[i].flags['C_CONTIGUOUS']:
                         arg = copy(args[i])
 

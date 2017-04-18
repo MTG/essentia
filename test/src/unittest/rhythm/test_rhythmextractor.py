@@ -277,8 +277,6 @@ class TestRhythmExtractor(TestCase):
         expectedTicks = [i/44100. for i in xrange(len(impulseTrain)) if impulseTrain[i]!= 0]
         
         result = self.runInstance(impulseTrain, expectedTicks)
-        print "DEBUG", expectedTicks
-        print "result:", result[1]
 
         # bpm
         expectedBpm = 200

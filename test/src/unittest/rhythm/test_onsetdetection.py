@@ -52,7 +52,7 @@ class TestOnsetDetection(TestCase):
         audio[int(floor(pos*(hopsize)))] = 1.
         frames = FrameGenerator(audio, frameSize=framesize, hopSize=hopsize,
                 startFromZero=True)
-        win = Windowing(type='hamming')
+        win = Windowing(type='hamming', zeroPadding=framesize)
         fft = FFT()
         onset_hfc = OnsetDetection(method='hfc')
         onset_complex_phase = OnsetDetection(method='complex_phase')
@@ -64,26 +64,26 @@ class TestOnsetDetection(TestCase):
         nframe = 0
         for frame in frames:
             mag, ph = CartesianToPolar()(fft(win(frame)))
-            
-            # 'rms' (energy flux) and 'melflux' method will result in a non-zero value on frames 4 and 5, 
+
+            # 'rms' (energy flux) and 'melflux' method will result in a non-zero value on frames 4 and 5,
             # energy flux for frame 6 is zero due to half-rectification
             # 'flux' on contrary will results in non-zero value for frame 6, as it does not half-rectify
-            
-            if nframe == floor(pos)-1: # 4th frame
+
+            if nframe == floor(pos)-1:  # 4th frame
                 self.assertNotEqual(onset_complex_phase(mag,ph), 0)
                 self.assertNotEqual(onset_hfc(mag,ph), 0)
                 self.assertNotEqual(onset_rms(mag,ph), 0)
                 self.assertNotEqual(onset_flux(mag,ph), 0)
                 self.assertNotEqual(onset_melflux(mag,ph), 0)
                 self.assertNotEqual(onset_complex(mag,ph), 0)
-            elif nframe == ceil(pos)-1: #5th frame
+            elif nframe == ceil(pos)-1:  # 5th frame
                 self.assertNotEqual(onset_complex_phase(mag,ph), 0)
                 self.assertNotEqual(onset_hfc(mag,ph), 0)
                 self.assertNotEqual(onset_rms(mag,ph), 0)
                 self.assertNotEqual(onset_flux(mag,ph), 0)
                 self.assertNotEqual(onset_melflux(mag,ph), 0)
                 self.assertNotEqual(onset_complex(mag,ph), 0)
-            elif nframe == ceil(pos): #6th frame
+            elif nframe == ceil(pos):  # 6th frame
                 self.assertEqual(onset_complex_phase(mag,ph), 0)
                 self.assertEqual(onset_hfc(mag,ph), 0)
                 self.assertEqual(onset_rms(mag,ph), 0)

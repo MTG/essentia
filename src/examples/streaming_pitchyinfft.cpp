@@ -117,7 +117,6 @@ int main(int argc, char* argv[]) {
   }
 
   // clean up:
-  //deleteNetwork(audioload);
   delete output;
   delete aggregator;
   essentia::shutdown();

@@ -7,6 +7,7 @@ import os
 import sys
 import platform
 
+
 def get_git_version():
     """ try grab the current version number from git"""
     version = "Undefined"
@@ -20,7 +21,7 @@ def get_git_version():
 
 APPNAME = 'essentia'
 VERSION = open('VERSION', 'r').read().strip('\n')
-GIT_SHA = get_git_version();
+GIT_SHA = get_git_version()
 
 top = '.'
 out = 'build'
@@ -72,24 +73,24 @@ def configure(ctx):
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
 
     # compiler flags
-    ctx.env.CXXFLAGS = [ '-pipe', '-Wall' ]
+    ctx.env.CXXFLAGS = ['-pipe', '-Wall']
 
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
     if not ctx.options.EMSCRIPTEN and not ctx.options.CROSS_COMPILE_ANDROID and not ctx.options.CROSS_COMPILE_IOS:
-        ctx.env.CXXFLAGS += [ '-msse', '-msse2', '-mfpmath=sse' ]
+        ctx.env.CXXFLAGS += ['-msse', '-msse2', '-mfpmath=sse']
 
     # define this to be stricter, but sometimes some libraries can give problems...
     #ctx.env.CXXFLAGS += [ '-Werror' ]
 
     if ctx.options.MODE == 'debug':
         print ('→ Building in debug mode')
-        ctx.env.CXXFLAGS += [ '-g' ]
+        ctx.env.CXXFLAGS += ['-g']
 
     elif ctx.options.MODE == 'release':
         print ('→ Building in release mode')
-        ctx.env.CXXFLAGS += [ '-O2' ] # '-march=native' ] # '-msse3', '-mfpmath=sse' ]
+        ctx.env.CXXFLAGS += ['-O2']  # '-march=native' ] # '-msse3', '-mfpmath=sse' ]
 
     else:
         raise ValueError('mode should be either "debug" or "release"')
@@ -97,9 +98,8 @@ def configure(ctx):
     if not ctx.options.CROSS_COMPILE_MINGW32 and sys.platform != 'win32':
         # required if we want to use libessentia.a to be linked in the python bindings
         # (dynamic library, needs -fPIC)
-        ctx.env.CXXFLAGS += [ '-fPIC' ]
-        ctx.env.CPPFLAGS += [ '-fPIC' ] # need that for KissFFT
-
+        ctx.env.CXXFLAGS += ['-fPIC']
+        ctx.env.CPPFLAGS += ['-fPIC']  # need that for KissFFT
 
     ctx.env.CROSS_COMPILE_MINGW32 = ctx.options.CROSS_COMPILE_MINGW32
 
@@ -107,7 +107,7 @@ def configure(ctx):
     ctx.env.DEFINES = []
 
     if ctx.options.EMSCRIPTEN:
-        ctx.env.CXXFLAGS += [ '-I' + os.path.join(os.environ['EMSCRIPTEN'], 'system', 'lib', 'libcxxabi', 'include') ]
+        ctx.env.CXXFLAGS += ['-I' + os.path.join(os.environ['EMSCRIPTEN'], 'system', 'lib', 'libcxxabi', 'include')]
         ctx.env.CXXFLAGS += ['-Oz']
     elif sys.platform == 'darwin':
         # clang fails on 10.7 using <atomic>, because libc++ is not new enough
@@ -116,7 +116,7 @@ def configure(ctx):
         #ctx.env.CXXFLAGS = [ '-stdlib=libc++', '-std=c++11', '-Wno-gnu' ]
         #ctx.env.LINKFLAGS = [ '-stdlib=libc++' ]
 
-        ctx.env.DEFINES   += [ 'GTEST_HAS_TR1_TUPLE=0' ]
+        ctx.env.DEFINES += ['GTEST_HAS_TR1_TUPLE=0']
         # for defining static const variables in header
         # ctx.env.CXXFLAGS += [ '-Wno-static-float-init' ]
         # add /usr/local/include as the brew formula for yaml doesn't have
@@ -124,22 +124,21 @@ def configure(ctx):
         #ctx.env.CXXFLAGS += [ '-I/usr/local/include' ]
 
         if ctx.options.ARCH == 'i386':
-            ctx.env.CXXFLAGS += [ '-arch' , 'i386']
-            ctx.env.LINKFLAGS += [ '-arch', 'i386']
+            ctx.env.CXXFLAGS += ['-arch', 'i386']
+            ctx.env.LINKFLAGS += ['-arch', 'i386']
             ctx.env.LDFLAGS = ['-arch', 'i386']
         if ctx.options.ARCH == 'FAT':
-            ctx.env.CXXFLAGS += [ '-arch' , 'i386', '-arch', 'x86_64']
-            ctx.env.LINKFLAGS += [ '-arch' , 'i386', '-arch', 'x86_64']
-            ctx.env.LDFLAGS = [ '-arch' , 'i386', '-arch', 'x86_64']
+            ctx.env.CXXFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
+            ctx.env.LINKFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
+            ctx.env.LDFLAGS = ['-arch', 'i386', '-arch', 'x86_64']
 
     elif sys.platform.startswith('linux'):
         # include -pthread flag because not all versions of gcc provide it automatically
-        ctx.env.CXXFLAGS += [ '-pthread' ]
-
+        ctx.env.CXXFLAGS += ['-pthread']
 
     elif sys.platform == 'win32':
         # compile libgcc and libstd statically when using MinGW
-        ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
+        ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
         win_path = "packaging/win32_3rdparty"
 
@@ -181,30 +180,30 @@ def configure(ctx):
 
     if ctx.options.CROSS_COMPILE_IOS:
         print ("→ Cross-compiling for iOS (ARMv7 and ARM64)")
-        ctx.env.CXXFLAGS += [ '-arch' , 'armv7']
-        ctx.env.LINKFLAGS += [ '-arch', 'armv7']
+        ctx.env.CXXFLAGS += ['-arch', 'armv7']
+        ctx.env.LINKFLAGS += ['-arch', 'armv7']
         ctx.env.LDFLAGS += ['-arch', 'armv7']
-        ctx.env.CXXFLAGS += [ '-arch' , 'arm64']
-        ctx.env.LINKFLAGS += [ '-arch', 'arm64']
+        ctx.env.CXXFLAGS += ['-arch', 'arm64']
+        ctx.env.LINKFLAGS += ['-arch', 'arm64']
         ctx.env.LDFLAGS += ['-arch', 'armv64']
 
         ctx.env.CXXFLAGS += ['-stdlib=libc++']
         ctx.env.CXXFLAGS += ['-miphoneos-version-min=5.0']
-        ctx.env.CXXFLAGS += [ '-isysroot' , '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk']
-        ctx.env.CXXFLAGS += [ '-fembed-bitcode']
+        ctx.env.CXXFLAGS += ['-isysroot', '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk']
+        ctx.env.CXXFLAGS += ['-fembed-bitcode']
 
     if ctx.options.CROSS_COMPILE_IOS_SIM:
         print ("→ Cross-compiling for iOS Simulator (i386)")
-        ctx.env.CXXFLAGS += [ '-arch' , 'i386']
-        ctx.env.LINKFLAGS += [ '-arch', 'i386']
+        ctx.env.CXXFLAGS += ['-arch', 'i386']
+        ctx.env.LINKFLAGS += ['-arch', 'i386']
         ctx.env.LDFLAGS += ['-arch', 'i386']
-        ctx.env.CXXFLAGS += [ '-arch' , 'x86_64']
-        ctx.env.LINKFLAGS += [ '-arch', 'x86_64']
+        ctx.env.CXXFLAGS += ['-arch', 'x86_64']
+        ctx.env.LINKFLAGS += ['-arch', 'x86_64']
         ctx.env.LDFLAGS += ['-arch', 'x86_64']
 
         ctx.env.CXXFLAGS += ['-stdlib=libc++']
         ctx.env.CXXFLAGS += ['-miphoneos-version-min=5.0']
-        ctx.env.CXXFLAGS += [ '-isysroot' , '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk']
+        ctx.env.CXXFLAGS += ['-isysroot', '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk']
 
     # use manually prebuilt dependencies in the case of static examples or mingw cross-build
     if ctx.options.CROSS_COMPILE_MINGW32:
@@ -218,7 +217,7 @@ def configure(ctx):
         ctx.find_program('i686-w64-mingw32-ar', var='AR')
 
         # compile libgcc and libstd statically when using MinGW
-        ctx.env.CXXFLAGS = [ '-static-libgcc', '-static-libstdc++' ]
+        ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
     elif ctx.options.WITH_STATIC_EXAMPLES and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
         print ("→ Compiling with static examples on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
@@ -229,9 +228,9 @@ def configure(ctx):
 
     # write pkg-config file
     prefix = os.path.normpath(ctx.options.prefix)
-    opts = { 'prefix': prefix,
-             'version': ctx.env.VERSION,
-             }
+    opts = {'prefix': prefix,
+            'version': ctx.env.VERSION,
+            }
 
     pcfile = '''prefix=%(prefix)s
     libdir=${prefix}/lib
@@ -244,7 +243,7 @@ def configure(ctx):
     Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/utils
     ''' % opts
 
-    pcfile = '\n'.join([ l.strip() for l in pcfile.split('\n') ])
+    pcfile = '\n'.join([l.strip() for l in pcfile.split('\n')])
     ctx.env.pcfile = pcfile
     #open('build/essentia.pc', 'w').write(pcfile) # we'll do it later on the build stage
 
@@ -252,7 +251,8 @@ def configure(ctx):
 
 
 def adjust(objs, path):
-    return [ '%s/%s' % (path, obj) for obj in objs ]
+    return ['%s/%s' % (path, obj) for obj in objs]
+
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
@@ -266,18 +266,20 @@ def build(ctx):
             ctx.env.USES += ' pthread'
 
         ctx.program(
-            source   = ctx.path.ant_glob('test/src/basetest/*.cpp test/3rdparty/gtest-1.6.0/src/gtest-all.cc '),
-            target   = 'basetest',
-            includes = [ 'test/3rdparty/gtest-1.6.0/include',
-                         'test/3rdparty/gtest-1.6.0' ] + adjust(ctx.env.INCLUDES, 'src'),
-            install_path = None,
-            use      = 'essentia ' + ctx.env.USES
+            source=ctx.path.ant_glob('test/src/basetest/*.cpp test/3rdparty/gtest-1.6.0/src/gtest-all.cc '),
+            target='basetest',
+            includes=['test/3rdparty/gtest-1.6.0/include',
+                      'test/3rdparty/gtest-1.6.0'] + adjust(ctx.env.INCLUDES, 'src'),
+            install_path=None,
+            use='essentia ' + ctx.env.USES
             )
+
 
 def run_tests(ctx):
     ret = os.system(out + '/basetest')
     if ret:
         ctx.fatal('failed to run tests. Check test output')
+
 
 def run_python_tests(ctx):
     # create a local python package folder
@@ -289,8 +291,10 @@ def run_python_tests(ctx):
     if ret:
         ctx.fatal('failed to run python tests. Check test output')
 
+
 def ipython(ctx):
     os.system('ipython --pylab')
+
 
 def doc(ctx):
     # create a local python package folder

@@ -45,7 +45,7 @@ class TestMelBands(TestCase):
         self.assertAlmostEqualVector(mbands, [1]*128, 1e-5)
 
     def testRegressionHtkMode(self):
-        audio = essentia.standard.MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'), 
+        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'),
                                             sampleRate = 44100)()*2**15
         expected = [ 10.35452019,  12.97260263,  13.87114479,  12.92819811,  13.53927989,
                      13.65001411,  13.7067006,   12.72165126,  12.16052112,  12.29371287,

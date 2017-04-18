@@ -18,13 +18,13 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-
 from essentia_test import *
 
+
 class TestLoudnessEBUR128(TestCase):
-    
+
     def testRegression(self):
-        # The test audio files for loudness are provided in EBU Tech 3341 
+        # The test audio files for loudness are provided in EBU Tech 3341
         # https://tech.ebu.ch/docs/tech/tech3341.pdf
 
         # M, S, I = -20 +- 0.1 LUFS
@@ -34,7 +34,7 @@ class TestLoudnessEBUR128(TestCase):
         self.assertAlmostEqualVector(m, essentia.array([-20.] * len(m)), 0.1)
         self.assertAlmostEqualVector(s, essentia.array([-20.] * len(s)), 0.1)
         self.assertAlmostEqual(i, -20., 0.1)
-       
+
         # M, S, I = -26 +- 0.1 LUFS
         filename = join(testdata.audio_dir, 'generated', 'ebur128', '1kHz_sine_-26LUFS-16bit.flac')
         audio, samplerate, _, _, _, _ = AudioLoader(filename=filename)()
@@ -72,7 +72,7 @@ class TestLoudnessEBUR128(TestCase):
         audio, samplerate, _, _, _, _ = AudioLoader(filename=filename)()
         _, _, i, _ = LoudnessEBUR128(sampleRate=samplerate)(audio)
         self.assertAlmostEqual(i, -23., 0.1)
-        
+
         # I = -23 +- 0.1 LUFS
         filename = join(testdata.audio_dir, 'generated', 'ebur128', 'seq-3341-4-16bit-v02.flac')
         audio, samplerate, _, _, _, _ = AudioLoader(filename=filename)()
@@ -118,13 +118,12 @@ class TestLoudnessEBUR128(TestCase):
         audio, samplerate, _, _, _, _ = AudioLoader(filename=filename)()
         _, _, _, r = LoudnessEBUR128(sampleRate=samplerate)(audio)
         self.assertAlmostEqual(r, 15., 1.)
-    
+
     def testEmpty(self):
         # empty (0,2) array
         audio = essentia.array([[1., 1.]])[:-1]
-        LoudnessEBUR128()(audio)
         self.assertComputeFails(LoudnessEBUR128(), audio)
-    
+
     def testSilence(self):
         audio = essentia.array([[0, 0]] * 44100)
         m, s, i, r = LoudnessEBUR128()(audio)
@@ -136,7 +135,7 @@ class TestLoudnessEBUR128(TestCase):
             self.assert_(x <= -70.)
         self.assertEqual(i, -70.)
         self.assertEqual(r, 0.)
-    
+
 suite = allTests(TestLoudnessEBUR128)
 
 if __name__ == '__main__':

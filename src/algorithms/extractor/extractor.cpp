@@ -75,7 +75,6 @@ void Extractor::compute() {
   scheduler::Network network(gen);
   network.run();
   if (_rhythm) postProcessOnsetRate(gen, pool);
-  //deleteNetwork(gen); // done automatically when network goes out of scope
   if (_midLevel) computeMidLevel(signal, pool);
   if (_highLevel) computeHighLevel(pool);
   if (_relativeIoi) computeRelativeIoi(pool);

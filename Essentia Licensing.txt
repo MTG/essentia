@@ -1,7 +1,7 @@
 A) Affero General Public License
 This licensing file applies to the Essentia software library ("Essentia"), except as described in B) below.
 
-Essentia is © Universitat Pompeu Fabra 2009-2013
+Essentia is © Universitat Pompeu Fabra 2009-2017
 Original Developers: See AUTHORS file
 
 Essentia is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public
