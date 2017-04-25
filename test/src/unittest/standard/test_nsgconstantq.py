@@ -38,12 +38,11 @@ class TestNSGConstantQ(TestCase):
                     gamma=0,
                     normalize=normalize,
                     window='hannnsgcq',
-                    INSQConstantQdata=True
                     )
 
     def testRegression(self):
         input = essentia.array(np.sin(2 * np.pi * 1000 * np.arange(2048) / 44100))
-
+        # Compared against the implementation of the MATLAB CQT_toolbox_2013 
         expected = np.array([ 0.01764389 +8.19244758e-06j, -0.00327444 +1.78957267e-03j,
                              -0.00379942 +1.00535053e-02j,  0.00479218 +8.65996905e-03j,
                               0.00636455 -1.14715385e-03j, -0.00165716 -6.73704576e-03j,
@@ -59,8 +58,8 @@ class TestNSGConstantQ(TestCase):
                              -0.00574295 -7.79506339e-03j, -0.00166257 +5.33548630e-04j])
         
         output = np.mean(self.initNsgconstantq(normalize='sine')(input)[0],axis=0)
-        # High tolerance allowed here as far as the results look consistant with the CQT_toolbox_2013.
-        self.assertAlmostEqualVector(np.abs(expected), np.abs(output), 1e1)
+
+        self.assertAlmostEqualVector(np.abs(expected), np.abs(output), 1e-6)
 
     def testDC(self):
         # Checks the DC component of the transform
@@ -76,7 +75,7 @@ class TestNSGConstantQ(TestCase):
         inputSize = 2**11
         signalNyquist = [-1,  1] * (inputSize / 2)
 
-        CQ, DC, Nyquist, _, _ = self.initNsgconstantq()(signalNyquist)
+        CQ, DC, Nyquist = self.initNsgconstantq()(signalNyquist)
 
         # Checks that all the energy is contained in the Nyquist band
         self.assertEqual(np.sum(np.abs(CQ)), 0)

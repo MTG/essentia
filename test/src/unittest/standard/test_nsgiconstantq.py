@@ -31,14 +31,14 @@ class TestNSGIConstantQ(TestCase):
     def testSynthetiseSine(self):
         x = essentia.array(np.sin(2 * np.pi * 1000 * np.arange(2**12) / 44100))
 
-        CQ, CQDC, DCNF, shifts, lengths, filters = NSGConstantQ(inputSize=2**12)(x)
+        CQ, CQDC, DCNF = NSGConstantQ(inputSize=2**12)(x)
 
         # At the moment data needs to be transformed into a list of lists 
         CQList= list(CQ)
         for i in range(len(CQList)):
             CQList[i] = list(CQList[i]) 
 
-        y = NSGIConstantQ()(CQList, CQDC, DCNF, shifts, lengths, filters)
+        y = NSGIConstantQ(inputSize=2**12)(CQList, CQDC, DCNF)
 
 
         self.assertAlmostEqualVectorFixedPrecision(x, y, 3)
@@ -46,7 +46,7 @@ class TestNSGIConstantQ(TestCase):
     def testSynthetiseSineLocalPhase(self):
         x = essentia.array(np.sin(2 * np.pi * 1000 * np.arange(2**12) / 44100))
 
-        CQ, CQDC, DCNF, shifts, lengths, filters = NSGConstantQ(inputSize=2**12,
+        CQ, CQDC, DCNF= NSGConstantQ(inputSize=2**12,
                                                                 phaseMode='local')(x)
 
         # At the moment data needs to be transformed into a list of lists 
@@ -54,7 +54,7 @@ class TestNSGIConstantQ(TestCase):
         for i in range(len(CQList)):
             CQList[i] = list(CQList[i]) 
 
-        y = NSGIConstantQ(phaseMode='local')(CQList, CQDC, DCNF, shifts, lengths, filters)
+        y = NSGIConstantQ(inputSize=2**12, phaseMode='local')(CQList, CQDC, DCNF)
 
 
         self.assertAlmostEqualVectorFixedPrecision(x, y, 3)
@@ -62,43 +62,55 @@ class TestNSGIConstantQ(TestCase):
     def testSynthetiseDC(self):
         x = essentia.array(np.ones(2**12))
 
-        CQ, CQDC, DCNF, shifts, lengths, filters = NSGConstantQ(inputSize=2**12)(x)
+        CQ, CQDC, DCNF = NSGConstantQ(inputSize=2**12)(x)
         CQList= list(CQ)
         for i in range(len(CQList)):
             CQList[i] = list(CQList[i]) 
 
 
-        y = NSGIConstantQ()(CQList, CQDC, DCNF, shifts, lengths, filters)
+        y = NSGIConstantQ(inputSize=2**12)(CQList, CQDC, DCNF)
 
         self.assertAlmostEqualVectorFixedPrecision(x, y, 1)
 
     def testInvalidParam(self):
         self.assertConfigureFails(NSGIConstantQ(), {'phaseMode': 'none'})
+        self.assertConfigureFails(NSGIConstantQ(), {'inputSize': -1})
+        self.assertConfigureFails(NSGIConstantQ(), {'inputSize': 0})
+        self.assertConfigureFails(NSGIConstantQ(), {'minFrequency': 30000})
+        self.assertConfigureFails(NSGIConstantQ(), {'minFrequency': 1000,
+                                                            'maxFrequency': 500})
+        self.assertConfigureFails(NSGIConstantQ(), {'maxFrequency': 0})
+        self.assertConfigureFails(NSGIConstantQ(), {'binsPerOctave': 0})
+        self.assertConfigureFails(NSGIConstantQ(), {'sampleRate': 0})  
+        self.assertConfigureFails(NSGIConstantQ(), {'gamma': -1})  
+        self.assertConfigureFails(NSGIConstantQ(), {'minimumWindow': 1})
+        self.assertConfigureFails(NSGIConstantQ(), {'windowSizeFactor': 0})
+        self.assertConfigureFails(NSGIConstantQ(), {'minimumWindow': 1})
     
     def testReconfigure(self):
         # The configuration of this algorithm is done the first time it is computed and 
         #  it will automatically change each time the input vectors modify their length. 
 
         x = essentia.array(np.sin(2 * np.pi * 1000 * np.arange(2**12) / 44100))
-        CQ, CQDC, DCNF, shifts, lengths, filters = NSGConstantQ(inputSize=2**12)(x)
+        CQ, CQDC, DCNF = NSGConstantQ(inputSize=2**12)(x)
         CQList= list(CQ)
         for i in range(len(CQList)):
             CQList[i] = list(CQList[i]) 
 
         nsgiconstantq = NSGIConstantQ()
 
-        nsgiconstantq(CQList, CQDC, DCNF, shifts, lengths, filters)
+        nsgiconstantq(CQList, CQDC, DCNF)
 
         # Reuse the algorith with different input shapes
         x = essentia.array(np.sin(2 * np.pi * 1000 * np.arange(2**13) / 44100))
-        CQ, CQDC, DCNF, shifts, lengths, filters = NSGConstantQ(inputSize=2**13)(x)
+        CQ, CQDC, DCNF = NSGConstantQ(inputSize=2**13)(x)
         CQList= list(CQ)
         for i in range(len(CQList)):
             CQList[i] = list(CQList[i]) 
 
         nsgiconstantq = NSGIConstantQ()
         
-        nsgiconstantq(CQList, CQDC, DCNF, shifts, lengths, filters)
+        nsgiconstantq(CQList, CQDC, DCNF)
 
 
 
