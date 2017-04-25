@@ -33,36 +33,46 @@ class NSGIConstantQ : public Algorithm {
   Input<std::vector<std::vector<std::complex<Real> > > >_constantQ ;
   Input<std::vector<std::complex<Real> > > _constantQDC;
   Input<std::vector<std::complex<Real> > > _constantQNF;
-  Input<std::vector<Real> > _shiftsIn;
-  Input<std::vector<Real> > _winsLenIn;
-  Input<std::vector<std::vector<Real> > > _freqWinsIn;
 
  public:
   NSGIConstantQ() {
-    declareOutput(_signal, "frame", "the input frame (vector)");
     declareInput(_constantQ, "constantq", "the constant Q transform of the input frame");
     declareInput(_constantQDC, "constantqdc", "the DC band transform of the input frame");
     declareInput(_constantQNF, "constantqnf", "the Nyquist band transform of the input frame");
-    declareInput(_shiftsIn, "windowShifts", "distance from each frequency window to the base band");
-    declareInput(_winsLenIn, "windowLenghts", "number of elements used in each Gabor window");
-    declareInput(_freqWinsIn, "frequencyWindows", "the Gabor frames in the frequency domain");
-
+    declareOutput(_signal, "frame", "the input frame (vector)");
 
     _fft = AlgorithmFactory::create("FFTC");
     _ifft = AlgorithmFactory::create("IFFTC");
+    _windowing = AlgorithmFactory::create("Windowing");
   }
 
   ~NSGIConstantQ() {
     if (_fft) delete _fft;
     if (_ifft) delete _ifft;
+    if (_windowing) delete _windowing;
   }
 
   void declareParameters() {
+    declareParameter("inputSize", "the size of the input", "(0,inf)", 1024);
+    declareParameter("minFrequency", "the minimum frequency", "(0,inf)", 27.5);
+    declareParameter("maxFrequency", "the maximum frequency", "(0,inf)", 55);
+    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 12);
+    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);
+    declareParameter("rasterize", "hop sizes for each frequency channel. With 'none' each frequency channel is distinct. 'full' sets the hop sizes of all the channels to the smallest. 'piecewise' rounds down the hop size to a power of two", "{none,full,piecewise}", "full");
     declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a phase mapping function as described in [1]", "{local,global}", "global");
-  }
+    declareParameter("gamma", "The bandwidth of each filter is given by Bk = 1/Q * fk + gamma", "[0,inf)", 0);
+    declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "sine");
+    declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hannnsgcq");
+    declareParameter("minimumWindow", "minimum size allowed for the windows", "[2,inf)", 4);
+    declareParameter("windowSizeFactor", "window sizes are rounded to multiples of this", "[1,inf)", 1);
+    }
+
 
   void compute();
   void configure();
+  void designWindow();
+  void createCoefficients();
+  void normalize();
 
   static const char* name;
   static const char* category;
@@ -72,16 +82,27 @@ class NSGIConstantQ : public Algorithm {
 
   Algorithm* _ifft;
   Algorithm* _fft;
+  Algorithm* _windowing;
 
   //Variables for the input parameters
+  Real _minFrequency;
+  Real _maxFrequency;
+  Real _sr;
+  Real _binsPerOctave;
+  int _inputSize;
+  Real _gamma;
+  std::string _rasterize;
   std::string _phaseMode;
-
+  std::string _normalize;
+  int _minimumWindow;
+  int _windowSizeFactor;
+  bool _INSQConstantQdata;
 
   //windowing vectors
-  std::vector<std::vector<Real> > _freqWins;
-  std::vector<Real> _shifts;
-  std::vector<Real> _winsLen;
-
+  std::vector< std::vector<Real> > _freqWins;
+  std::vector<int> _shifts;
+  std::vector<int> _winsLen;
+  std::vector<Real> _baseFreqs;
 
   int _binsNum;
   int _NN;
@@ -94,9 +115,7 @@ class NSGIConstantQ : public Algorithm {
   std::vector<std::vector<int> > _idx;
 
 
-  void designDualFrame(const std::vector<Real>& shifts,
-                       const std::vector<std::vector<Real> >& freqWins,
-                       const std::vector<Real>& winsLen);
+  void designDualFrame();
 
 };
 
@@ -109,16 +128,12 @@ namespace essentia {
 namespace streaming {
 
 class NSGIConstantQ : public StreamingAlgorithmWrapper {
-
  protected:
   Sink<std::vector<std::vector<std::complex<Real> > > >_constantQ ;
   Sink<std::vector<std::complex<Real> > > _constantQDC;
   Sink<std::vector<std::complex<Real> > > _constantQNF;
-  Sink<std::vector<Real> > _shiftsIn;
-  Sink<std::vector<Real> > _winsLenIn;
-  Sink<std::vector<std::vector<Real> > > _freqWinsIn;
-  Source<std::vector<Real> > _signal;
 
+  Source<std::vector<Real> > _signal;
 
  public:
   NSGIConstantQ() {
@@ -126,12 +141,77 @@ class NSGIConstantQ : public StreamingAlgorithmWrapper {
     declareInput(_constantQ, TOKEN, "constantq");
     declareInput(_constantQDC, TOKEN, "constantqdc");
     declareInput(_constantQNF, TOKEN, "constantqnf");
-    declareInput(_shiftsIn, TOKEN, "windowShifts");
-    declareInput(_winsLenIn, TOKEN, "windowLenghts");
-    declareInput(_freqWinsIn, TOKEN, "frequencyWindows");
     declareOutput(_signal, TOKEN, "frame");
   }
 };
+
+/*
+class NSGIConstantQ : public Algorithm {
+ protected:
+  Sink<std::vector<std::vector<std::complex<Real> > > >_constantQ ;
+  Sink<std::vector<std::complex<Real> > > _constantQDC;
+  Sink<std::vector<std::complex<Real> > > _constantQNF;
+
+  Source<std::vector<Real> > _signal;
+
+  class NSGIConstantQWrapper : public StreamingAlgorithmWrapper {
+   protected:
+    Sink<std::vector<std::vector<std::complex<Real> > > >_constantQ ;
+    Sink<std::vector<std::complex<Real> > > _constantQDC;
+    Sink<std::vector<std::complex<Real> > > _constantQNF;
+
+    Source<std::vector<Real> > _signal;
+
+   public:
+    NSGIConstantQWrapper() {
+      declareAlgorithm("NSGIConstantQ");
+      declareInput(_constantQ, TOKEN, "constantq");
+      declareInput(_constantQDC, TOKEN, "constantqdc");
+      declareInput(_constantQNF, TOKEN, "constantqnf");
+      declareOutput(_signal, TOKEN, "frame");
+    }
+  };
+
+  Algorithm* _wrapper;
+
+ public:
+  NSGIConstantQ(): Algorithm() {
+    declareInput(_constantQ, "constantq", "the constant Q transform of the input frame");
+    declareInput(_constantQDC, "constantqdc", "the DC band transform of the input frame");
+    declareInput(_constantQNF, "constantqnf", "the Nyquist band transform of the input frame");
+    declareOutput(_signal, "frame", "the input frame (vector)");
+
+    _wrapper = AlgorithmFactory::create("NSGIConstantQWrapper");
+  }
+
+
+
+  ~NSGIConstantQ() {};
+
+  AlgorithmStatus process();
+
+  void declareParameters() {
+    declareParameter("inputSize", "the size of the input", "(0,inf)", 1024);
+    declareParameter("minFrequency", "the minimum frequency", "(0,inf)", 27.5);
+    declareParameter("maxFrequency", "the maximum frequency", "(0,inf)", 55);
+    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 12);
+    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);
+    declareParameter("rasterize", "hop sizes for each frequency channel. With 'none' each frequency channel is distinct. 'full' sets the hop sizes of all the channels to the smallest. 'piecewise' rounds down the hop size to a power of two", "{none,full,piecewise}", "full");
+    declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a phase mapping function as described in [1]", "{local,global}", "global");
+    declareParameter("gamma", "The bandwidth of each filter is given by Bk = 1/Q * fk + gamma", "[0,inf)", 0);
+    declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "sine");
+    declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hannnsgcq");
+    declareParameter("minimumWindow", "minimum size allowed for the windows", "[2,inf)", 4);
+    declareParameter("windowSizeFactor", "window sizes are rounded to multiples of this", "[1,inf)", 1);
+    }
+
+  void configure();
+
+  static const char* name;
+  static const char* category;
+  static const char* description;
+};
+*/
 
 } // namespace streaming
 } // namespace essentia

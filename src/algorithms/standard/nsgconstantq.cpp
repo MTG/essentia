@@ -22,8 +22,8 @@
 #include "essentiamath.h"
 
 using namespace std;
-using namespace essentia;
-using namespace standard;
+namespace essentia {
+namespace standard {
 
 const char* NSGConstantQ::name = "NSGConstantQ";
 const char* NSGConstantQ::category = "Standard";
@@ -38,19 +38,14 @@ void NSGConstantQ::configure() {
   _sr = parameter("sampleRate").toReal();
   _minFrequency = parameter("minFrequency").toReal();
   _maxFrequency = parameter("maxFrequency").toReal();
-
-
   _binsPerOctave = parameter("binsPerOctave").toReal();
   _gamma = parameter("gamma").toReal();
   _inputSize = parameter("inputSize").toInt();
-
   _rasterize = parameter("rasterize").toLower();
   _phaseMode = parameter("phaseMode").toLower();
   _normalize = parameter("normalize").toLower();
   _minimumWindow = parameter("minimumWindow").toInt();
   _windowSizeFactor = parameter("windowSizeFactor").toInt();
-
-  _INSQConstantQdata = parameter("INSQConstantQdata").toBool();
 
   designWindow();
   createCoefficients();
@@ -202,9 +197,6 @@ void NSGConstantQ::designWindow() {
   }
 
   _binsNum = baseFreqsSize / 2 - 1;
-
-  _shiftsReal.resize(_shifts.size());
-  for (int j=0; j<_shifts.size(); j++) _shiftsReal[j] = Real(_shifts[j]);
 }
 
 
@@ -231,9 +223,6 @@ void NSGConstantQ::createCoefficients() {
 
   // filters have to be even as Essentia odd size FFT is not implemented.
   for (int j=0; j<(int)_winsLen.size(); j++) _winsLen[j] += (_winsLen[j] % 2);
-
-  _winsLenReal.resize(_winsLen.size());
-  for (int j=0; j<(int) _winsLen.size(); j++) _winsLenReal[j] = Real(_winsLen[j]);
 }
 
 
@@ -273,9 +262,6 @@ void NSGConstantQ::compute() {
   std::vector<std::vector<complex<Real> > >& constantQ = _constantQ.get();
   std::vector<complex<Real> >& constantQDC = _constantQDC.get();
   std::vector<complex<Real> >& constantQNF = _constantQNF.get();
-  std::vector<Real>& shiftsOut = _shiftsOut.get();
-  std::vector<Real>& winsLenOut = _winsLenOut.get();
-  std::vector< std::vector<Real> >&  freqWinsOut = _freqWinsOut.get();
 
   std::vector<complex<Real> > fft;
   std::vector<int> posit;
@@ -285,7 +271,7 @@ void NSGConstantQ::compute() {
   }
 
   // Check input. If different shape reconfigure the algorithm
-  if (signal.size() !=  _inputSize) {
+  if (signal.size() != _inputSize) {
     E_INFO("NSGConstantQ: The input spectrum size (" << signal.size() << ") does not correspond to the \"inputSize\" parameter (" << _inputSize << "). Recomputing the filter bank.");
     _inputSize = signal.size();
 
@@ -395,24 +381,86 @@ void NSGConstantQ::compute() {
     product.clear();
   }
 
+  constantQDC.resize(constantQ[0].size());
+  copy(constantQ[0].begin(),constantQ[0].end(),constantQDC.begin());
 
-  if (_INSQConstantQdata){
-    constantQDC.resize(constantQ[0].size());
-    copy(constantQ[0].begin(),constantQ[0].end(),constantQDC.begin());
-
-    constantQNF.resize(constantQ[N-1].size());
-    copy(constantQ[N-1].begin(),constantQ[N-1].end(),constantQNF.begin());
-
-    shiftsOut = _shiftsReal;
-    winsLenOut = _winsLenReal;
-    freqWinsOut = _freqWins;
-  }
+  constantQNF.resize(constantQ[N-1].size());
+  copy(constantQ[N-1].begin(),constantQ[N-1].end(),constantQNF.begin());
 
   // boundary bins are removed from the main output
   constantQ.pop_back();
   constantQ.erase(constantQ.begin());
 }
 
+}
+}
+
+/*
 
 
+namespace essentia {
+namespace streaming {
 
+const char* NSGConstantQ::name = "NSGConstantQ";
+const char* NSGConstantQ::category = "Streaming";
+const char* NSGConstantQ::description = DOC("This algorithm computes a constant Q transform using non stationary Gabor frames and returns a complex time-frequency representation of the input vector.\n"
+"The implementation is inspired by the toolbox described in [1]."
+"\n"
+"References:\n"
+    "[1] Schörkhuber, C., Klapuri, A., Holighaus, N., \& Dörfler, M. (n.d.). A Matlab Toolbox for Efficient Perfect Reconstruction Time-Frequency Transforms with Log-Frequency Resolution.");
+
+NSGConstantQ::NSGConstantQ() {
+  declareInput(_signal, "frame", "the input frame (vector)");
+  declareOutput(_constantQ, "constantq", "the constant Q transform of the input frame");
+  declareOutput(_constantQDC, "constantqdc", "the DC band transform of the input frame. Only needed for the inverse transform");
+  declareOutput(_constantQNF, "constantqnf", "the Nyquist band transform of the input frame. Only needed for the inverse transform");
+  _wrapper =  new NSGConstantQWrapper();
+
+  _signal                         >> _wrapper->input("frame");
+  //_wrapper->output("constantq")   >> _constantQ;
+  _wrapper->output("constantqdc") >> _constantQDC;
+  _wrapper->output("constantqnf") >> _constantQNF;
+
+}
+
+void NSGConstantQ::configure() {
+  _wrapper->configure();
+
+  _wrapper->configure(INHERIT("sampleRate"),
+                      INHERIT("minFrequency"),
+                      INHERIT("maxFrequency"),
+                      INHERIT("binsPerOctave"),
+                      INHERIT("gamma"),
+                      INHERIT("inputSize"),
+                      INHERIT("rasterize"),
+                      INHERIT("phaseMode"),
+                      INHERIT("normalize"),
+                      INHERIT("minimumWindow"),
+                      INHERIT("windowSizeFactor"));
+
+}
+
+AlgorithmStatus NSGConstantQ::process() {
+  EXEC_DEBUG("process()");
+  AlgorithmStatus status = acquireData();
+  EXEC_DEBUG("data acquired");
+
+  EXEC_DEBUG("releasing");
+  releaseData();
+  EXEC_DEBUG("released");
+
+  // OK part
+
+  if (!shouldStop()) return PASS;
+  //_signal.acquire();
+  //_wrapper->input("frame").acquire();
+  _wrapper->process();
+
+  return OK;
+}
+
+
+}
+}
+
+*/
