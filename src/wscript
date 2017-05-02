@@ -146,7 +146,7 @@ def configure(ctx):
 
     if 'libchromaprint' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libchromaprint', uselib_store='LIBCHROMAPRINT',
-                      args=['--cflags', '--libs'], mandatory=True)
+                      args=['--cflags', '--libs'], mandatory=False)
 
 
     if ctx.env.WITH_GAIA:
@@ -253,7 +253,15 @@ def configure(ctx):
         print('  Examples requiring Gaia2 will be ignored\n')
         ctx.env.ALGOIGNORE += algos
 
-        ctx.env.USES += ' LIBCHROMAPRINT'    
+    algos = [ 'Chromaprinter' ]
+    if has('libchromaprint'):
+        print('- Chromaprint detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
+        ctx.env.USES += ' LIBCHROMAPRINT'
+    else:
+        print('- Essentia is configured without Chromaprint.')
+        print('  The following algorithms will be ignored: %s' % algos)
+        ctx.env.ALGOIGNORE += algos 
 
     lel = len(ctx.env.EXAMPLE_LIST)
     if lel:
