@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_CHROMAPRINTGENERATOR_H
-#define ESSENTIA_CHROMAPRINTGENERATOR_H
+#ifndef ESSENTIA_CHROMAPRINTER_H
+#define ESSENTIA_CHROMAPRINTER_H
 
 #include "algorithmfactory.h"
 #include <chromaprint.h>
@@ -27,7 +27,7 @@
 namespace essentia {
 namespace standard {
 
-class ChromaprintGenerator : public Algorithm {
+class Chromaprinter : public Algorithm {
 
  protected:
   Input<std::vector<Real> >  _signal;
@@ -38,12 +38,12 @@ class ChromaprintGenerator : public Algorithm {
   ChromaprintContext *_ctx;
 
  public:
-  ChromaprintGenerator() {
+  Chromaprinter() {
     declareInput(_signal, "signal", "the input audio signal");
     declareOutput(_fingerprint, "fingerprint", "the chromaprint value");
   }
 
-  ~ChromaprintGenerator() {}
+  ~Chromaprinter() {}
 
   void declareParameters() {
     declareParameter("sampleRate", "the input audio sampling rate [Hz]", "(0,inf)", 44100.);
@@ -69,14 +69,14 @@ class ChromaprintGenerator : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class ChromaprintGenerator : public StreamingAlgorithmWrapper {
+class Chromaprinter : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<Real> _signal;
   Source<Real> _fingerprint;
 
  public:
-  ChromaprintGenerator() {
+  Chromaprinter() {
     declareAlgorithm("ChromaprintGenerator");
     declareInput(_signal, TOKEN, "signal");
     declareOutput(_fingerprint, TOKEN, "fingerprint");
@@ -87,5 +87,5 @@ class ChromaprintGenerator : public StreamingAlgorithmWrapper {
 } // namespace essentia
 
 
-#endif // ESSENTIA_CHROMAPRINTGENERATOR_H
+#endif // ESSENTIA_CHROMAPRINTER_H
 

@@ -17,23 +17,23 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "chromaprintgenerator.h"
+#include "chromaprinter.h"
 
 using namespace std;
 
 namespace essentia {
 namespace standard {
 
-const char* ChromaprintGenerator::name = "Chromaprint";
-const char* ChromaprintGenerator::category = "Fingerprinting";
-const char* ChromaprintGenerator::description = DOC("");
+const char* Chromaprinter::name = "Chromaprinter";
+const char* Chromaprinter::category = "Fingerprinting";
+const char* Chromaprinter::description = DOC("");
 
-void ChromaprintGenerator::configure() {
+void Chromaprinter::configure() {
   _sampleRate = parameter("sampleRate").toReal();
   _maxLength = parameter("maxLength").toReal();
 }
 
-void ChromaprintGenerator::compute() {
+void Chromaprinter::compute() {
   const std::vector<Real>& signal = _signal.get();
   std::string& fingerprint = _fingerprint.get();
   char *fp;
@@ -56,13 +56,27 @@ void ChromaprintGenerator::compute() {
 
   _ctx = chromaprint_new(CHROMAPRINT_ALGORITHM_DEFAULT);
 
-  chromaprint_start(_ctx, (int)_sampleRate, num_channels);
+  int ok;
 
-  chromaprint_feed(_ctx, &signalCast[0], inputSize);
+  ok = chromaprint_start(_ctx, (int)_sampleRate, num_channels);
+  if (!ok) {
+    throw EssentiaException("Chromaprinter: chromaprint_start returned error");
+  }
 
-  chromaprint_finish(_ctx);
+  ok = chromaprint_feed(_ctx, &signalCast[0], inputSize);
+  if (!ok) {
+    throw EssentiaException("Chromaprinter: chromaprint_feed returned error");
+  }
 
-  chromaprint_get_fingerprint(_ctx, &fp);
+  ok = chromaprint_finish(_ctx);
+  if (!ok) {
+    throw EssentiaException("Chromaprinter: chromaprint_finish returned error");
+  }
+
+  ok = chromaprint_get_fingerprint(_ctx, &fp);
+  if (!ok) {
+    throw EssentiaException("Chromaprinter: chromaprint_get_fingerprint returned error");
+  }
 
   fingerprint = const_cast<char*>(fp);
 
@@ -70,11 +84,7 @@ void ChromaprintGenerator::compute() {
 
   chromaprint_free(_ctx);
 
-/*  @endcode
 
-  Note that there is no error handling in the code above. Almost any of the called functions can fail.
-  You should check the return values in an actual code.
- */
 }
 
 } // namespace standard
