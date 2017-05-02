@@ -64,12 +64,12 @@ class Chromaprinter : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
-#include "streamingalgorithmwrapper.h"
+//#include "streamingalgorithmwrapper.h"
 
 namespace essentia {
 namespace streaming {
 
-class Chromaprinter : public StreamingAlgorithmWrapper {
+/*class Chromaprinter : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<Real> _signal;
@@ -81,6 +81,53 @@ class Chromaprinter : public StreamingAlgorithmWrapper {
     declareInput(_signal, TOKEN, "signal");
     declareOutput(_fingerprint, TOKEN, "fingerprint");
   }
+};*/
+
+class Chromaprinter : public Algorithm {
+ protected:
+  Sink<Real> _signal;
+  Source<std::string> _fingerprint;
+
+  Real _sampleRate;
+  Real _analysisTime;
+
+  int _inputSize;
+
+  ChromaprintContext *_ctx;
+
+ public:
+  Chromaprinter() : Algorithm() {
+    declareInput(_signal, "signal", "the input audio signal");
+    declareOutput(_fingerprint, "fingerprint", "the chromaprint value");
+
+    _fingerprint.setBufferType(BufferUsage::forMultipleFrames);
+  }
+
+  ~Chromaprinter() {}
+
+  AlgorithmStatus process();
+
+  void declareParameters() {
+    declareParameter("sampleRate", "the input audio sampling rate [Hz]", "(0,inf)", 44100.);
+    declareParameter("analysisTime", "A chromaprint is retrieved each analysisTime seconds. 0 to use the full audio length [s]", "(0,inf)", 5.);
+  }
+
+  void configure() {
+    _sampleRate = parameter("sampleRate").toReal();
+    _analysisTime = parameter("analysisTime").toReal();
+    _inputSize = _sampleRate * _analysisTime;
+
+    _signal.setAcquireSize(_inputSize);
+    _signal.setReleaseSize(_inputSize);
+
+    _fingerprint.setAcquireSize(1);
+    _fingerprint.setReleaseSize(1);
+  }
+
+  static const char* name;
+  static const char* category;
+  static const char* description;
+
 };
 
 } // namespace streaming
