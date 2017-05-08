@@ -91,9 +91,22 @@ class Chromaprinter : public Algorithm {
   Real _sampleRate;
   Real _analysisTime;
 
-  int _inputSize;
+  std::vector<int16_t> _buffer;
+
+  unsigned  _chromaprintSize;
+  unsigned _count;
+
 
   ChromaprintContext *_ctx;
+
+  bool _ok;
+  bool _returnChromaprint;
+  bool _concatenate;
+
+  std::string getChromaprint();
+  void initChromaprint();
+
+  std::string fingerprintConcatenated;
 
  public:
   Chromaprinter() : Algorithm() {
@@ -109,20 +122,13 @@ class Chromaprinter : public Algorithm {
 
   void declareParameters() {
     declareParameter("sampleRate", "the input audio sampling rate [Hz]", "(0,inf)", 44100.);
-    declareParameter("analysisTime", "A chromaprint is retrieved each analysisTime seconds. 0 to use the full audio length [s]", "(0,inf)", 5.);
+    declareParameter("analysisTime", "A chromaprint is computed each analysisTime seconds. 0 to use the full audio length [s]", "(0,inf)", 5.);
+    declareParameter("concatenate", "If true, chromaprints are concatenated and returned when all the data is processed. Otherwise a chromaprint is returned each analysis time seconds.", "{true,false}", true);
   }
 
-  void configure() {
-    _sampleRate = parameter("sampleRate").toReal();
-    _analysisTime = parameter("analysisTime").toReal();
-    _inputSize = _sampleRate * _analysisTime;
+  void configure();
 
-    _signal.setAcquireSize(_inputSize);
-    _signal.setReleaseSize(_inputSize);
 
-    _fingerprint.setAcquireSize(1);
-    _fingerprint.setReleaseSize(1);
-  }
 
   static const char* name;
   static const char* category;

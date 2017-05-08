@@ -97,83 +97,131 @@ namespace streaming {
 const char* Chromaprinter::name = standard::Chromaprinter::name;
 const char* Chromaprinter::description = standard::Chromaprinter::description;
 
+void Chromaprinter::configure() {
+  _sampleRate = parameter("sampleRate").toReal();
+  _analysisTime = parameter("analysisTime").toReal();
+  _concatenate = parameter("concatenate").toBool();
+
+  _chromaprintSize = _sampleRate * _analysisTime;
+
+  _signal.setAcquireSize(4096);
+  _signal.setReleaseSize(4096);
+
+  _fingerprint.setAcquireSize(1);
+  _fingerprint.setReleaseSize(1);
+
+  _returnChromaprint = !_concatenate;
+
+  _count = 0;
+}
+
 AlgorithmStatus Chromaprinter::process() {
+  while (true) {
+    EXEC_DEBUG("process()");
 
-  EXEC_DEBUG("process()");
-  AlgorithmStatus status = acquireData();
-/*
-  EXEC_DEBUG("data acquired (in: " << _signal.acquireSize()
-             << " - out: " << _outputAudio.acquireSize() << ")");
-*/
+    AlgorithmStatus status = acquireData();
 
-  if (status != OK) {
-    if (!shouldStop()) return status;
+  /*
+    EXEC_DEBUG("data acquired (in: " << _signal.acquireSize()
+               << " - out: " << _outputAudio.acquireSize() << ")");
+  */
 
-    // if shouldStop is true, that means there is no more audio coming, so we need
-    // to take what's left to fill in half-frames, instead of waiting for more
-    // data to come in (which would have done by returning from this function)
+    if (status != OK) {
+      if (!shouldStop()) return status;
 
-    int available = input("signal").available();
-    if (available == 0) return NO_INPUT;
+      // if shouldStop is true, that means there is no more audio coming, so we need
+      // to take what's left to fill in half-frames, instead of waiting for more
+      // data to come in (which would have done by returning from this function)
 
-    input("signal").setAcquireSize(available);
-    input("signal").setReleaseSize(available);
+      int available = _signal.available();
+      if (available == 0) return NO_INPUT;
 
-    _inputSize = available;
+      _signal.setAcquireSize(available);
+      _signal.setReleaseSize(available);
 
-    return process();
+      _chromaprintSize = _count + available;
+
+      _returnChromaprint = true;
+
+      return process();
+    }
+
+    const vector<Real>& signal = _signal.tokens();
+
+    // Copy the signal to new vector to expand it to the int16_t dynamic range before the cast.
+    std::vector<Real> signalScaled = signal;
+    std::transform(signalScaled.begin(), signalScaled.end(), signalScaled.begin(),
+                   std::bind1st(std::multiplies<Real>(), pow(2,15)));
+
+    std::vector<int16_t> signalCast(signalScaled.begin(), signalScaled.end());
+
+    if (_count == 0) initChromaprint();
+
+    _buffer.insert(_buffer.end(), signalCast.begin(), signalCast.end());
+
+    _count += signalCast.size();
+
+    if (_count >= _chromaprintSize) {
+      fingerprintConcatenated.append(getChromaprint());
+
+      if (_returnChromaprint) {
+        // Only acquires tokens when we want to output the chromaprint.
+        _fingerprint.acquire(1);
+        std::vector<std::string>& fingerprint = _fingerprint.tokens();
+        fingerprint[0] = fingerprintConcatenated;
+        _fingerprint.release();
+        fingerprintConcatenated.erase();
+      }
+
+      _count = 0;
+      _buffer.clear();
+    }
+
+
+    EXEC_DEBUG("releasing");
+    _signal.release();
+    EXEC_DEBUG("released");
+
+    return OK;
   }
+}
 
-  const vector<Real>& signal = _signal.tokens();
-  std::vector<std::string>& fingerprint = _fingerprint.tokens();
 
-  // Copy the signal to new vector to expand it to the int16_t dynamic range before the cast.
-  std::vector<Real> signalScaled = signal;
-  std::transform(signalScaled.begin(), signalScaled.end(), signalScaled.begin(),
-                 std::bind1st(std::multiplies<Real>(), pow(2,15)));
-
-  std::vector<int16_t> signalCast(signalScaled.begin(), signalScaled.end());
-
+void Chromaprinter::initChromaprint(){
   const int num_channels = 1;
-
   _ctx = chromaprint_new(CHROMAPRINT_ALGORITHM_DEFAULT);
 
-  int ok;
+  _ok = chromaprint_start(_ctx, (int)_sampleRate, num_channels);
+    if (!_ok) {
+      throw EssentiaException("Chromaprinter: chromaprint_start returned error");
+    }
+}
 
-  ok = chromaprint_start(_ctx, (int)_sampleRate, num_channels);
-  if (!ok) {
-    throw EssentiaException("Chromaprinter: chromaprint_start returned error");
-  }
+std::string Chromaprinter::getChromaprint(){
 
-  ok = chromaprint_feed(_ctx, &signalCast[0], _inputSize);
-  if (!ok) {
+  _ok = chromaprint_feed(_ctx, &_buffer[0], _chromaprintSize);
+  if (!_ok) {
     throw EssentiaException("Chromaprinter: chromaprint_feed returned error");
   }
 
-  ok = chromaprint_finish(_ctx);
-  if (!ok) {
+  _ok = chromaprint_finish(_ctx);
+  if (!_ok) {
     throw EssentiaException("Chromaprinter: chromaprint_finish returned error");
   }
 
   char *fp;
-  ok = chromaprint_get_fingerprint(_ctx, &fp);
-  if (!ok) {
+  _ok = chromaprint_get_fingerprint(_ctx, &fp);
+  if (!_ok) {
     throw EssentiaException("Chromaprinter: chromaprint_get_fingerprint returned error");
   }
-  E_INFO(fp);
 
-  fingerprint[0] = const_cast<char*>(fp);
+  std::string chromaprint = const_cast<char*>(fp);
 
   chromaprint_dealloc(fp);
 
   chromaprint_free(_ctx);
 
-
-  EXEC_DEBUG("releasing");
-  releaseData();
-  EXEC_DEBUG("released");
-
-  return OK;
+  return chromaprint;
 }
 
 } // namespace streaming
