@@ -26,7 +26,11 @@ namespace standard {
 
 const char* Chromaprinter::name = "Chromaprinter";
 const char* Chromaprinter::category = "Fingerprinting";
-const char* Chromaprinter::description = DOC("");
+const char* Chromaprinter::description = DOC("This algorithm computes the fingerprint of the input signal by means of the Chromaprint API [1]. The Chromaprints are returned as base64-encoded strings. \n"
+    "\n"
+    "References: \n"
+    "[1] Chromaprint -- from the Acousticid project,\n"
+    "https://acoustid.org/chromaprint");
 
 void Chromaprinter::configure() {
   _sampleRate = parameter("sampleRate").toReal();
@@ -36,9 +40,11 @@ void Chromaprinter::configure() {
 void Chromaprinter::compute() {
   const std::vector<Real>& signal = _signal.get();
   std::string& fingerprint = _fingerprint.get();
-  int inputSize;
+  unsigned inputSize;
 
   _maxLength == 0. ? inputSize = signal.size() : inputSize = _sampleRate * _maxLength;
+
+  if (inputSize > signal.size()) inputSize = signal.size();
 
   if (inputSize <= 0) {
     throw EssentiaException("Chromaprinter: the number of samples to compute Chromaprint should be grater than 0 but it is ", inputSize);
