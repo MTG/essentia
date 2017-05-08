@@ -50,8 +50,8 @@ class TestChromaprinter(TestCase):
         self.assertEqualVector(result1, result2)
 
     def testRegressionStreaming(self):
-        #  In Streaming mode the duration of the file is not known by the algorithm so it works by concatenating fragment.
-        #  About 30 seconds of processing are required to show results consistant with the standard mode.
+        #  In Streaming mode the duration of the file is not known by the algorithm so it works by concatenating fragments.
+        #  About 30 seconds of processing are required to show results consistant with the Standard mode.
 
         loader = es.MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'mozart_c_major_30sec.wav'))
         cp = es.Chromaprinter(analysisTime=30, concatenate=True)

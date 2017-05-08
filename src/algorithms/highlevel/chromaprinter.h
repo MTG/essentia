@@ -122,7 +122,7 @@ class Chromaprinter : public Algorithm {
 
   void declareParameters() {
     declareParameter("sampleRate", "the input audio sampling rate [Hz]", "(0,inf)", 44100.);
-    declareParameter("analysisTime", "a Chromaprint is computed each 'analysisTime' seconds", "(0,inf)", 30.);
+    declareParameter("analysisTime", "a Chromaprint is computed each 'analysisTime' seconds. It is not recommended use a value lower than 30.", "(0,inf)", 30.);
     declareParameter("concatenate", "if true, Chromaprints are concatenated and returned as a single string. Otherwise a Chromaprint is returned each 'analysisTim'e seconds.", "{true,false}", true);
   }
 
