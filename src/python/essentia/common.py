@@ -50,6 +50,7 @@ class Edt: # Essentia Data Type
     VECTOR_VECTOR_COMPLEX = 'VECTOR_VECTOR_COMPLEX'
     VECTOR_STEREOSAMPLE = 'VECTOR_STEREOSAMPLE'
     MATRIX_REAL = 'MATRIX_REAL'
+    MATRIX_COMPLEX = 'MATRIX_COMPLEX'
     VECTOR_MATRIX_REAL = 'VECTOR_MATRIX_REAL'
     POOL = 'POOL'
 
@@ -154,7 +155,7 @@ def determineEdt(obj):
             return Edt(Edt.MATRIX_REAL)
 
         if obj.dtype == numpy.dtype('complex64'):
-            return Edt(Edt.VECTOR_VECTOR_COMPLEX)
+            return Edt(Edt.MATRIX_COMPLEX)
 
         raise TypeError('essentia can currently only accept two-dimensional numpy arrays of dtype '\
                         '"single"')
@@ -187,6 +188,8 @@ def determineEdt(obj):
     if isinstance(obj, numpy.float32): return Edt(Edt.NUMPY_FLOAT)
 
     if isinstance(obj, numpy.complex64): return Edt(Edt.COMPLEX)
+
+    if isinstance(obj, complex): return Edt(Edt.COMPLEX)
 
 
     if isinstance(obj, dict):
@@ -302,6 +305,9 @@ def convertData(data, goalType):
     if goalType == Edt.VECTOR_VECTOR_COMPLEX:
         if origType  == Edt.LIST_LIST_COMPLEX:
             return data
+
+        if origType  == Edt.MATRIX_COMPLEX:
+            return [[col for col in row] for row in data]
 
     raise TypeError('Cannot convert data from type '+str(origType)+' to type '+str(goalType))
 
