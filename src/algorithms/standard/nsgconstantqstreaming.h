@@ -9,17 +9,26 @@
 namespace essentia {
 namespace streaming {
 
-class NSGConstantQStreaming : public AlgorithmComposite {
+class NSGConstantQStreaming : public Algorithm{
  protected:
-  SinkProxy<std::vector<Real> > _signal;
+  SinkProxy<std::vector<Real> >_frame;
 
-  Source<std::vector<std::vector<std::complex<Real> > > >_constantQ;
-  SourceProxy<std::vector<std::complex<Real> > > _constantQDC;
-  SourceProxy<std::vector<std::complex<Real> > > _constantQNF;
+  Sink<std::vector<std::vector<std::complex<Real> > > >_constantQinner;
+  Sink<std::vector<std::complex<Real> > > _constantQDCinner;
+  Sink<std::vector<std::complex<Real> > > _constantQNFinner;
+
+  Source<std::vector<std::complex<Real> > > _constantQ;
+  Source<std::vector<std::complex<Real> > > _constantQDC;
+  Source<std::vector<std::complex<Real> > > _constantQNF;
+
+  Source<int> _frameStamps;
+
+  int _frameStampsCount;
 
   Algorithm* _wrapper;
 
-  scheduler::Network* _network;
+  //std::vector<std::vector<std::complex<Real> > > _constantQAUX;
+  //scheduler::Network* _network;
 
  public:
   NSGConstantQStreaming();
@@ -28,10 +37,10 @@ class NSGConstantQStreaming : public AlgorithmComposite {
 
   AlgorithmStatus process();
 
-  void declareProcessOrder() {
-    declareProcessStep(ChainFrom(_wrapper));
-    declareProcessStep(SingleShot(this));
-  }
+ // void declareProcessOrder() {
+ //   declareProcessStep(ChainFrom(_wrapper));
+  //  declareProcessStep(SingleShot(this));
+ // }
 
   void declareParameters() {
     declareParameter("inputSize", "the size of the input", "(0,inf)", 1024);
