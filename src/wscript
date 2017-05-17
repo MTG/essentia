@@ -200,7 +200,7 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
-    algos = [ 'Resample', 'MonoLoader', 'EqloudLoader', 'EasyLoader']
+    algos = ['Resample', 'MonoLoader', 'EqloudLoader', 'EasyLoader']
     if has('samplerate'):
         print('- libsamplerate (SRC) detected!')
         ctx.env.USES += ' SAMPLERATE'
@@ -209,14 +209,14 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
-    algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter', 'Resample' ]
+    algos = ['AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter', 'Resample']
     algos_include = list(set(algos) - set(ctx.env.ALGOIGNORE))
     if algos_include:
         print('  The following algorithms will be included: %s\n' % algos_include)
     else:
         print('  Examples requiring FFmpeg / libav and libsamplerate will be ignored\n')
 
-    algos = [ 'MetadataReader' ]
+    algos = ['MetadataReader', 'MusicExtractor', 'FreesoundExtractor']
     if has('taglib'):
         print('- TagLib detected!')
         print('  The following algorithms will be included: %s\n' % algos)
@@ -236,7 +236,7 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
-    algos = [ 'GaiaTransform', 'MusicExtractorSVM' ]
+    algos = ['GaiaTransform', 'MusicExtractorSVM']
     if ctx.env.WITH_GAIA:
         if has('gaia2'):
             print('- Gaia2 detected!')
