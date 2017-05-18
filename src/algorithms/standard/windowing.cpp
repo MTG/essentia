@@ -48,6 +48,7 @@ void Windowing::configure() {
 void Windowing::createWindow(const std::string& windowtype) {
   if (windowtype == "hamming") hamming();
   else if (windowtype == "hann") hann();
+  else if (windowtype == "hannnsgcq") hannNSGCQ();
   else if (windowtype == "triangular") triangular();
   else if (windowtype == "square") square();
   else if (windowtype == "blackmanharris62") blackmanHarris62();
@@ -127,6 +128,16 @@ void Windowing::hann() {
 
   for (int i=0; i<size; i++) {
     _window[i] = 0.5 - 0.5 * cos((2.0*M_PI*i) / (size - 1.0));
+  }
+}
+
+void Windowing::hannNSGCQ() {
+  const int size = _window.size();
+  for (int i=0; i<=size/2 ; i++) {
+    _window[i] = 0.5 + 0.5 * cos(2.0*M_PI*i / size);
+  }
+  for (int i=size/2+1; i<size ; i++) {
+    _window[i] = 0.5 + 0.5 * cos(-2.0*M_PI*i / size);
   }
 }
 

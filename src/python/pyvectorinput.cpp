@@ -58,13 +58,14 @@ static int vectorinput_init(PyStreamingAlgorithm* self, PyObject *args, PyObject
   try {
     switch (tp) {
 
-    case VECTOR_REAL:    INIT_TYPE(Real, VectorReal::fromPythonRef);
-    case VECTOR_INTEGER: INIT_TYPE(int, VectorInteger::fromPythonRef);
+    case VECTOR_REAL:           INIT_TYPE(Real,                            VectorReal::fromPythonRef);
+    case VECTOR_INTEGER:        INIT_TYPE(int,                             VectorInteger::fromPythonRef);
 
-    case VECTOR_STRING:       INIT_TYPE_OWNDATA(string,             VectorString::fromPythonCopy);
-    case VECTOR_STEREOSAMPLE: INIT_TYPE_OWNDATA(StereoSample,       VectorStereoSample::fromPythonCopy);
-    case VECTOR_MATRIX_REAL:  INIT_TYPE_OWNDATA(TNT::Array2D<Real>, VectorMatrixReal::fromPythonCopy);
-    case VECTOR_VECTOR_REAL:  INIT_TYPE_OWNDATA(vector<Real>,       VectorVectorReal::fromPythonCopy);
+    case VECTOR_STRING:         INIT_TYPE_OWNDATA(string,                  VectorString::fromPythonCopy);
+    case VECTOR_STEREOSAMPLE:   INIT_TYPE_OWNDATA(StereoSample,            VectorStereoSample::fromPythonCopy);
+    case VECTOR_MATRIX_REAL:    INIT_TYPE_OWNDATA(TNT::Array2D<Real>,      VectorMatrixReal::fromPythonCopy);
+    case VECTOR_VECTOR_REAL:    INIT_TYPE_OWNDATA(vector<Real>,            VectorVectorReal::fromPythonCopy);
+    case VECTOR_VECTOR_COMPLEX: INIT_TYPE_OWNDATA(vector<complex< Real> >, VectorVectorComplex::fromPythonCopy);
 
     case MATRIX_REAL: {
         TNT::Array2D<Real>* data = reinterpret_cast<TNT::Array2D<Real>*>(MatrixReal::fromPythonCopy(input));

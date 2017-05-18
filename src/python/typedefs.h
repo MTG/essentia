@@ -45,6 +45,7 @@ enum Edt {
   VECTOR_STEREOSAMPLE,
   VECTOR_BOOL,
   VECTOR_VECTOR_REAL,
+  VECTOR_VECTOR_COMPLEX,
   VECTOR_VECTOR_STRING,
   VECTOR_VECTOR_STEREOSAMPLE,
   MATRIX_REAL,
@@ -67,6 +68,7 @@ inline Edt typeInfoToEdt(const std::type_info& tp) {
   if (essentia::sameType(tp, typeid(std::vector<int>))) return VECTOR_INTEGER;
   if (essentia::sameType(tp, typeid(std::vector<essentia::StereoSample>))) return VECTOR_STEREOSAMPLE;
   if (essentia::sameType(tp, typeid(std::vector<std::vector<essentia::Real> >))) return VECTOR_VECTOR_REAL;
+  if (essentia::sameType(tp, typeid(std::vector<std::vector<std::complex<essentia::Real> > >))) return VECTOR_VECTOR_COMPLEX;
   if (essentia::sameType(tp, typeid(std::vector<std::vector<std::string> >))) return VECTOR_VECTOR_STRING;
   if (essentia::sameType(tp, typeid(std::vector<std::vector<essentia::StereoSample> >))) return VECTOR_VECTOR_STEREOSAMPLE;
   if (essentia::sameType(tp, typeid(TNT::Array2D<essentia::Real>))) return MATRIX_REAL;
@@ -88,6 +90,7 @@ inline std::string edtToString(Edt tp) {
     case VECTOR_INTEGER: return "VECTOR_INTEGER";
     case VECTOR_STEREOSAMPLE: return "VECTOR_STEREOSAMPLE";
     case VECTOR_VECTOR_REAL: return "VECTOR_VECTOR_REAL";
+    case VECTOR_VECTOR_COMPLEX: return "VECTOR_VECTOR_COMPLEX";
     case VECTOR_VECTOR_STRING: return "VECTOR_VECTOR_STRING";
     case VECTOR_VECTOR_STEREOSAMPLE: return "VECTOR_VECTOR_STEREOSAMPLE";
     case MATRIX_REAL: return "MATRIX_REAL";
@@ -110,6 +113,7 @@ inline Edt stringToEdt(const std::string& tpName) {
   if (tpName == "VECTOR_INTEGER") return VECTOR_INTEGER;
   if (tpName == "VECTOR_STEREOSAMPLE") return VECTOR_STEREOSAMPLE;
   if (tpName == "VECTOR_VECTOR_REAL") return VECTOR_VECTOR_REAL;
+  if (tpName == "VECTOR_VECTOR_COMPLEX") return VECTOR_VECTOR_COMPLEX;
   if (tpName == "VECTOR_VECTOR_STRING") return VECTOR_VECTOR_STRING;
   if (tpName == "VECTOR_VECTOR_STEREOSAMPLE") return VECTOR_VECTOR_STEREOSAMPLE;
   if (tpName == "MATRIX_REAL") return MATRIX_REAL;
@@ -155,6 +159,7 @@ inline void* allocate(Edt tp) {
     case VECTOR_COMPLEX: return new essentia::RogueVector<std::complex<essentia::Real> >;
     case VECTOR_STEREOSAMPLE: return new std::vector<essentia::StereoSample>;
     case VECTOR_VECTOR_REAL: return new std::vector<std::vector<essentia::Real> >;
+    case VECTOR_VECTOR_COMPLEX: return new std::vector<std::vector<std::complex<essentia::Real> > >;
     case VECTOR_VECTOR_STRING: return new std::vector<std::vector<std::string> >;
     case VECTOR_VECTOR_STEREOSAMPLE: return new std::vector<std::vector<essentia::StereoSample> >;
     case MATRIX_REAL: return new TNT::Array2D<essentia::Real>;
@@ -178,6 +183,7 @@ inline void dealloc(void* ptr, Edt tp) {
     case VECTOR_STRING: delete (std::vector<std::string>*)ptr; break;
     case VECTOR_STEREOSAMPLE: delete (std::vector<essentia::StereoSample>*)ptr; break;
     case VECTOR_VECTOR_REAL: delete (std::vector<std::vector<essentia::Real> >*)ptr; break;
+    case VECTOR_VECTOR_COMPLEX: delete (std::vector<std::vector<std::complex<essentia::Real> > >*)ptr; break;
     case VECTOR_VECTOR_STRING: delete (std::vector<std::vector<std::string> >*)ptr; break;
     case VECTOR_VECTOR_STEREOSAMPLE: delete (std::vector<std::vector<essentia::StereoSample> >*)ptr; break;
     case MATRIX_REAL: delete (TNT::Array2D<essentia::Real>*)ptr; break;
@@ -224,6 +230,9 @@ DECLARE_PYTHON_TYPE(VectorStereoSample);
 
 DECLARE_PROXY_TYPE(VectorVectorReal, std::vector<std::vector<essentia::Real> >);
 DECLARE_PYTHON_TYPE(VectorVectorReal);
+
+DECLARE_PROXY_TYPE(VectorVectorComplex, std::vector<std::vector<std::complex<essentia::Real> > >);
+DECLARE_PYTHON_TYPE(VectorVectorComplex);
 
 DECLARE_PROXY_TYPE(VectorVectorString, std::vector<std::vector<std::string> >);
 DECLARE_PYTHON_TYPE(VectorVectorString);
