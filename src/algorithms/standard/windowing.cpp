@@ -130,8 +130,11 @@ void Windowing::hann() {
     _window[i] = 0.5 - 0.5 * cos((2.0*M_PI*i) / (size - 1.0));
   }
 }
-
+// note: Zero-centered windows are very important for the NSQConstantQ algorithm.
+// As the algorithm sometimes uses very short windows, this can have a big impact on the transform.
+// Thus, this window was created to return a zero-centered window also with even sizes.
 void Windowing::hannNSGCQ() {
+
   const int size = _window.size();
   for (int i=0; i<=size/2 ; i++) {
     _window[i] = 0.5 + 0.5 * cos(2.0*M_PI*i / size);

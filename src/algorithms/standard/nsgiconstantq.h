@@ -62,7 +62,7 @@ class NSGIConstantQ : public Algorithm {
     declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a phase mapping function as described in [1]", "{local,global}", "global");
     declareParameter("gamma", "The bandwidth of each filter is given by Bk = 1/Q * fk + gamma", "[0,inf)", 0);
     declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "sine");
-    declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hannnsgcq");
+    declareParameter("window","the type of window for the frequency filter. It is not recommended to change the default window.","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hannnsgcq");
     declareParameter("minimumWindow", "minimum size allowed for the windows", "[2,inf)", 4);
     declareParameter("windowSizeFactor", "window sizes are rounded to multiples of this", "[1,inf)", 1);
     }
