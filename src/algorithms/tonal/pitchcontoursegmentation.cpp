@@ -1,5 +1,8 @@
 /*
+
+
  * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+
  *
  * This file is part of Essentia
  *
@@ -25,8 +28,10 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchContourSegmentation::name = "PitchContourSegmentation";
+
 const char* PitchContourSegmentation::category = "Pitch";
 const char* PitchContourSegmentation::description = DOC("This algorithm converts a pitch sequence estimated from an audio signal into a set of discrete note events. Each note is defined by its onset time, duration and MIDI pitch value, quantized to the equal tempered scale.\n"
+
 "\n"
 "Note segmentation is performed based on pitch contour characteristics (island building) and signal RMS. Notes below an adjustable minimum duration are rejected.\n"
 "\n"
@@ -36,6 +41,8 @@ const char* PitchContourSegmentation::description = DOC("This algorithm converts
 
 
 void PitchContourSegmentation::configure() {
+
+
   _minDur = parameter("minDuration").toReal();
   _tuningFreq = parameter("tuningFrequency").toReal();
   _hopSize = parameter("hopSize").toReal();
