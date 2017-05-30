@@ -185,7 +185,7 @@ def configure(ctx):
         else:
             print(' - fftw seems to be missing.')
             print('   The following algorithms will be ignored: %s\n' % algos)
-            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW']
+            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex']
             print('   IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
             print('                   To avoid these errors, use alternative FFT libraries (see the --fft flag).\n')
 
