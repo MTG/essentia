@@ -61,7 +61,7 @@ master_doc = 'contents'
 
 # General information about the project.
 project = u'Essentia'
-copyright = u'2006-2016, Universitat Pompeu Fabra'
+copyright = u'2006-2017, Universitat Pompeu Fabra'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
