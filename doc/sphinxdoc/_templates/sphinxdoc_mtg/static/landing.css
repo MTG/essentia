@@ -1,0 +1,225 @@
+html, body {
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Navbar */
+.navbar-default {
+  background-color: #0B3954;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  border: 0;
+  border-radius: 0;
+  margin-bottom: 0;
+}
+
+.navbar-default .navbar-nav>li>a {
+  color: white;
+  position: relative;
+}
+
+.navbar-default .navbar-nav>li>a:hover {
+  color: white;
+}
+
+.navbar-default .navbar-nav>li>a:hover::after {
+  content: '';
+  position: absolute;
+  background-color: white;
+  width: 100%;
+  height: 2px;
+  top: calc(100% - 10px);
+  left: 0;
+}
+
+.navbar-brand {
+  padding: 0;
+}
+
+.navbar-brand__logo {
+  height: 100%;
+}
+
+.navbar-default .navbar-nav>li>a.essnt-navbar-link {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.navbar-default .navbar-nav>li>a.essnt-navbar-link:hover {
+  color: white;
+}
+
+.navbar-default .navbar-nav>li>a.essnt-navbar-link::after {
+  height: 0;
+}
+
+/* HERO */
+.essnt-hero {
+  background-image: linear-gradient(206deg, #13B5BF 0%, #087E8B 100%);
+  padding-top: 50px;
+  padding-bottom: 50px;
+  color: white;
+}
+
+.essnt-hero__title {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 60px;
+}
+
+.essnt-hero__subtitle {
+  font-size: 24px;
+}
+
+.essnt-hero__btn-group {
+  letter-spacing: -1px;
+  font-size: 24px;
+  margin-top: 30px;
+}
+
+.essnt-hero__btn {
+  color: white;
+  font-size: inherit;
+  border-radius: 0;
+  position: relative;
+  padding: 10px 35px;
+}
+
+.essnt-hero__btn::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.2);
+  transition: opacity 0.2s ease-in;
+  opacity: 0;
+  content: '';
+}
+
+.essnt-hero__btn:hover::before {
+  opacity: 1;
+}
+
+.essnt-hero__btn-primary {
+  background-color: #FF5A5F;
+  text-transform: uppercase;
+  border: none;
+  margin-right: 15px;
+}
+
+.essnt-hero__btn-secondary {
+  background-color: transparent;
+  text-transform: uppercase;
+  border: none;
+}
+
+
+/* CORE */
+.essnt-core {
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+.essnt-core-feature {
+  min-height: 180px;
+}
+
+.essnt-core-feature__title {
+  min-height: 40px;
+}
+
+/* ABOUT */
+.essnt-about {
+  background-color: #AC4142;
+  background-image: linear-gradient(206deg, #FF5A5F 0%, #AC4142 100%);
+  padding: 60px 0;
+  color: white;
+}
+
+.essnt-about__title {
+  margin-top: 0;
+}
+
+.essnt-about__text {
+  font-size: 16px;
+}
+
+.essnt-about__media-container {
+  text-align: center;
+}
+
+.essnt-about__media {
+  height: 266px;
+  opacity: 0.6;
+}
+
+/* APPLICATIONS */
+.essnt-applications {
+  /*background-color: #0B3954;*/
+  background-image: linear-gradient(206deg, #13B5BF 0%, #087E8B 100%);
+  color: white;
+  padding-top: 80px;
+  padding-bottom: 80px;
+}
+
+/* COMPANIES */
+.essnt-apps {
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+.essnt-apps__app-container {
+  padding: 30px 70px;
+}
+
+.essnt-apps__app-logo-container {
+  position: relative;
+}
+
+.essnt-apps__app-logo-container::before {
+  content: '';
+  display: block;
+  padding-top: 100%;
+}
+
+.essnt-apps__app-logo {
+  position: absolute;
+  width: 100%;
+  top: 50%;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.essnt-apps__app-description {
+  text-align: center;
+}
+
+/* FOOTER */
+.essnt-footer {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  background-color: #0B3954;
+  color: white;
+}
+
+.essnt-footer-link {
+  display: block;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.essnt-footer-link:hover {
+  color: white;
+  text-decoration: none;
+}
+
+.essnt-footer__mtg-logo-container {
+  margin-top: 40px;
+  width: 60%;
+  max-width: 300px;
+}
+
+.essnt-footer__mtg-logo {
+  max-width: 100%;
+  margin-left: -20px;
+}

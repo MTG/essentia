@@ -48,14 +48,14 @@ var toggleMobileMenu = (function toggleMobileMenu() {
 {% block header %}
 <header class="site-header" role="navigation">
   <div class="header" role="menubar">
-    <a class="header-logo" href="http://essentia.upf.edu" role="menuitem">
+    <a class="header-logo" href="{{ pathto('index') }}" role="menuitem">
       <img src="{{ pathto("_static/essentia_logo.svg", 1) }}" alt="Essentia logo" />
     </a>
     <button class="toggle-menu__button" onclick="toggleMobileMenu()"></button>
     <nav class="navbar__right">
       <ul class="navbar__right__list">
         <li class="navbar__menu__item" role="presentation">
-          <a role="menuitem" href="http://essentia.upf.edu/documentation">Documentation</a>
+          <a role="menuitem" href="{{ pathto('documentation') }}">Documentation</a>
         </li>
         <li class="navbar__menu__item" role="presentation">
           <a role="menuitem" href="{{ pathto('applications') }}">Applications</a>
