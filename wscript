@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
@@ -145,8 +145,8 @@ def configure(ctx):
 
     elif sys.platform == 'win32':
         print ("Building on win32")
-	
-	"""
+
+        """
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
