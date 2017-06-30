@@ -28,7 +28,10 @@ out = 'build'
 
 
 def options(ctx):
-    ctx.load('compiler_cxx compiler_c python msvc')
+    ctx.load('compiler_cxx compiler_c python')
+    if sys.platform == 'win32':
+        ctx.load('msvc')
+
     ctx.recurse('src')
 
     ctx.add_option('--with-cpptests', action='store_true',
@@ -235,7 +238,10 @@ def configure(ctx):
         os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
-    ctx.load('compiler_cxx compiler_c msvc')
+    ctx.load('compiler_cxx compiler_c')
+
+    if sys.platform == 'win32':
+        ctx.load('msvc')
 
     # write pkg-config file
     prefix = os.path.normpath(ctx.options.prefix)
