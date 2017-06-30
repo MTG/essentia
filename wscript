@@ -260,7 +260,7 @@ def build(ctx):
 
     if ctx.env.WITH_CPPTESTS:
         # missing -lpthread flag on Ubuntu and LinuxMint
-        if platform.dist()[0] in ['Ubuntu', 'LinuxMint'] and not ctx.env.CROSS_COMPILE_MINGW32 and not ctx.env.WITH_STATIC_EXAMPLES:
+        if platform.dist()[0].lower() in {'debian', 'ubuntu', 'linuxmint'} and not ctx.env.CROSS_COMPILE_MINGW32 and not ctx.env.WITH_STATIC_EXAMPLES:
             ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
             ctx.read_shlib('pthread', paths=ext_paths)
             ctx.env.USES += ' pthread'
