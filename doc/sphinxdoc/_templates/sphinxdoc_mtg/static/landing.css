@@ -51,6 +51,11 @@ html, body {
   height: 0;
 }
 
+.navbar-docs > .container {
+  width: 100%;
+  max-width: 960px;
+}
+
 /* HERO */
 .essnt-hero {
   background-image: linear-gradient(206deg, #13B5BF 0%, #087E8B 100%);
@@ -167,12 +172,9 @@ html, body {
   padding-bottom: 50px;
 }
 
-.essnt-apps__app-container {
-  padding: 30px 70px;
-}
-
 .essnt-apps__app-logo-container {
   position: relative;
+  padding: 20px;
 }
 
 .essnt-apps__app-logo-container::before {
@@ -183,12 +185,17 @@ html, body {
 
 .essnt-apps__app-logo {
   position: absolute;
+  padding: 20px;
   width: 100%;
   top: 50%;
-  right: 0;
+  right: auto;
   bottom: 0;
-  left: 0;
-  transform: translateY(-50%);
+  left: 50%;
+  transform: translate3d(-50%, -50%, 0);
+}
+
+@media screen and (min-width: 990px) {
+  max-width: 200px;
 }
 
 .essnt-apps__app-description {
