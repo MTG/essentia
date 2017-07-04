@@ -23,6 +23,7 @@
 #include "essentiamath.h"
 #include "algorithm.h"
 #include "algorithmfactory.h"
+#include <cmath>
 
 
 namespace essentia {
@@ -40,6 +41,8 @@ class TriangularBarkBands : public Algorithm {
   Output<std::vector<Real> > _bandsOutput;
 
   Algorithm* _triangularBands;
+    
+    bool _isLog;
 
  public:
   TriangularBarkBands() {
@@ -81,6 +84,7 @@ class TriangularBarkBands : public Algorithm {
   void setWarpingFunctions(std::string warping, std::string weighting);
 
   std::vector<std::vector<Real> > _filterCoefficients;
+    std::vector<std::vector<Real> > doubleCoefficients;
   std::vector<Real> _filterFrequencies;
   int _numBands;
   Real _sampleRate;

@@ -110,8 +110,10 @@ void TriangularBarkBands::calculateFilterCoefficients() {
     for(int i=0; i<nfft/2+1; i++)
         binbarks.push_back(_hz2bark((float)i*srOverNFFT));
     
-    std::vector<float> lof(nfft/2+1, 0.0);
-    std::vector<float> hif(nfft/2+1, 0.0);
+    doubleCoefficients.resize(nfilts);
+    
+    for(int i=0; i<nfilts; i++)
+        doubleCoefficients[i].resize(binbarks.size());
     
     for(int i = 0; i < nfilts; i++)
     {
@@ -122,11 +124,13 @@ void TriangularBarkBands::calculateFilterCoefficients() {
             float lof = binbarks[j] - f_bark_mid - 0.5;
             float hif = binbarks[j] - f_bark_mid + 0.5;
             
-            float coeff = std::min((float)0, min((float)hif, (float)-2.5*lof)/width);
+            double coeff = std::min((float)0, min((float)hif, (float)-2.5*lof)/width);
             
-            _filterCoefficients[i].push_back(pow(10, coeff));
+            doubleCoefficients[i][j] = pow(10, coeff);
         }
     }
+    
+    int z = 1;
 }
 
 
@@ -156,18 +160,19 @@ void TriangularBarkBands::compute() {
         for (int j=0; j<spectrum.size(); ++j) {
             
             if (_type == "power"){
-                bands[i] += (spectrum[j] * spectrum[j]) * _filterCoefficients[i][j];
+                bands[i] += (spectrum[j] * spectrum[j]) * doubleCoefficients[i][j];
             }
             
             if (_type == "magnitude"){
-                bands[i] += (spectrum[j]) * _filterCoefficients[i][j];
+                bands[i] += (spectrum[j]) * doubleCoefficients[i][j];
             }
             
+//            if (_isLog) bands[i] = log2(1 + bands[i]);            
         }
-//        if (_isLog) bands[i] = log2(1 + bands[i]);
+        
     }
     
-    int x = 5;
+    int z = 5;
 }
 
 
