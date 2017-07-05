@@ -31,6 +31,7 @@ namespace standard {
 
 class TriangularBarkBands : public Algorithm {
     
+    //HTK implementation of hz2bark
     inline float _hz2bark(float f)
     {
         return 6.0 * asinh(f/600.0);
@@ -39,8 +40,6 @@ class TriangularBarkBands : public Algorithm {
  protected:
   Input<std::vector<Real> > _spectrumInput;
   Output<std::vector<Real> > _bandsOutput;
-
-  Algorithm* _triangularBands;
     
     bool _isLog;
 
@@ -48,12 +47,9 @@ class TriangularBarkBands : public Algorithm {
   TriangularBarkBands() {
     declareInput(_spectrumInput, "spectrum", "the audio spectrum");
     declareOutput(_bandsOutput, "bands", "the energy in mel bands");
-
-    _triangularBands = AlgorithmFactory::create("TriangularBands");
   }
 
-  ~TriangularBarkBands() {
-    if (_triangularBands) delete _triangularBands;
+  ~TriangularBarkBands() {    
   }
 
   void declareParameters() {
@@ -62,7 +58,6 @@ class TriangularBarkBands : public Algorithm {
     declareParameter("sampleRate", "the sample rate", "(0,inf)", 44100.);
     declareParameter("lowFrequencyBound", "a lower-bound limit for the frequencies to be included in the bands", "[0,inf)", 0.0);
     declareParameter("highFrequencyBound", "an upper-bound limit for the frequencies to be included in the bands", "[0,inf)", 22050.0);
-    declareParameter("warpingFormula", "The scale implementation type. use 'htkMel' to emulate its behaviour. Default slaneyMel.","{slaneyMel,htkMel}","slaneyMel");
     declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
     declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
     declareParameter("type", "'power' to output squared units, 'magnitude' to keep it as the input","{magnitude,power}", "power");
@@ -78,14 +73,11 @@ class TriangularBarkBands : public Algorithm {
   static const char* description;
 
  protected:
-
-  void calculateFilterFrequencies();
-    void calculateFilterCoefficients();
+  
+  void calculateFilterCoefficients();
   void setWarpingFunctions(std::string warping, std::string weighting);
 
   std::vector<std::vector<Real> > _filterCoefficients;
-    std::vector<std::vector<Real> > doubleCoefficients;
-  std::vector<Real> _filterFrequencies;
   int _numBands;
   Real _sampleRate;
 
@@ -93,9 +85,6 @@ class TriangularBarkBands : public Algorithm {
   std::string _type;
   std::string _weighting;
   typedef Real (*funcPointer)(Real);
-
-  funcPointer _inverseWarper;
-  funcPointer _warper;
 };
 
 } // namespace standard

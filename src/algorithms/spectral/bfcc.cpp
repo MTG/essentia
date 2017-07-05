@@ -81,8 +81,7 @@ void BFCC::configure() {
                         INHERIT("sampleRate"),
                         INHERIT("numberBands"),
                         INHERIT("lowFrequencyBound"),
-                        INHERIT("highFrequencyBound"),
-                        INHERIT("warpingFormula"),
+                        INHERIT("highFrequencyBound"),                        
                         INHERIT("weighting"),
                         INHERIT("normalize"),
                         INHERIT("type"));

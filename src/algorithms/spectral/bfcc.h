@@ -63,8 +63,7 @@ class BFCC : public Algorithm {
     declareParameter("numberBands", "the number of bark-bands in the filter", "[1,inf)", 40);
     declareParameter("numberCoefficients", "the number of output mel coefficients", "[1,inf)", 13);
     declareParameter("lowFrequencyBound", "the lower bound of the frequency range [Hz]", "[0,inf)", 0.);
-    declareParameter("highFrequencyBound", "the upper bound of the frequency range [Hz]", "(0,inf)", 11000.);
-    declareParameter("warpingFormula", "The scale implementation type. use 'htkMel' to emulate its behaviour. Default slaneyMel.","{slaneyMel,htkMel}","slaneyMel");
+    declareParameter("highFrequencyBound", "the upper bound of the frequency range [Hz]", "(0,inf)", 11000.);    
     declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
     declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
     declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");

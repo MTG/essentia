@@ -50,38 +50,9 @@ void TriangularBarkBands::configure() {
   _sampleRate = parameter("sampleRate").toReal();
   _normalization = parameter("normalize").toString();
   _type = parameter("type").toString();
-
-  setWarpingFunctions(parameter("warpingFormula").toString(),
-                      parameter("weighting").toString());
-
-  calculateFilterFrequencies();
     
+    _isLog = parameter("log").toBool();
     calculateFilterCoefficients();
-
-  _triangularBands->configure(INHERIT("inputSize"),
-                              INHERIT("sampleRate"),
-                              INHERIT("log"),
-                              INHERIT("normalize"),
-                              INHERIT("type"),
-                              "frequencyBands", _filterFrequencies,
-                              "weighting",_weighting);
-}
-
-void TriangularBarkBands::calculateFilterFrequencies() {
-  int filterSize = _numBands;
-
-  _filterFrequencies.resize(filterSize + 2);
-
-  // get the low and high frequency bounds in mel frequency
-  Real lowMelFrequencyBound = (*_warper)(parameter("lowFrequencyBound").toReal());
-  Real highMelFrequencyBound = (*_warper)(parameter("highFrequencyBound").toReal());
-  Real melFrequencyIncrement = (highMelFrequencyBound - lowMelFrequencyBound)/(filterSize + 1);
-
-  Real melFreq = lowMelFrequencyBound;
-  for (int i=0; i<filterSize + 2; ++i) {
-    _filterFrequencies[i] = (*_inverseWarper)(melFreq);
-    melFreq += melFrequencyIncrement; // increment linearly in mel-scale
-  }
 }
 
 void TriangularBarkBands::calculateFilterCoefficients() {
@@ -110,10 +81,8 @@ void TriangularBarkBands::calculateFilterCoefficients() {
     for(int i=0; i<nfft/2+1; i++)
         binbarks.push_back(_hz2bark((float)i*srOverNFFT));
     
-    doubleCoefficients.resize(nfilts);
-    
     for(int i=0; i<nfilts; i++)
-        doubleCoefficients[i].resize(binbarks.size());
+        _filterCoefficients[i].resize(binbarks.size());
     
     for(int i = 0; i < nfilts; i++)
     {
@@ -126,21 +95,32 @@ void TriangularBarkBands::calculateFilterCoefficients() {
             
             double coeff = std::min((float)0, min((float)hif, (float)-2.5*lof)/width);
             
-            doubleCoefficients[i][j] = pow(10, coeff);
+            _filterCoefficients[i][j] = pow(10, coeff);
         }
     }
     
-    int z = 1;
+    // normalize the filter weights
+    if ( _normalization.compare("unit_sum") == 0 ){
+        for (int i=0; i<nfilts; ++i) {
+            Real weight = 0.0;
+            
+            for (int j=0; j<binbarks.size(); ++j) {
+                weight += _filterCoefficients[i][j];
+            }
+            
+            if (weight == 0) continue;
+            
+            for (int j=0; j<binbarks.size(); ++j) {
+                _filterCoefficients[i][j] = _filterCoefficients[i][j] / weight;
+            }
+        }
+    }    
 }
 
 
 void TriangularBarkBands::compute() {
   const std::vector<Real>& spectrum = _spectrumInput.get();
   std::vector<Real>& bands = _bandsOutput.get();
-    
-//  _triangularBands->input("spectrum").set(spectrum);
-//  _triangularBands->output("bands").set(bands);
-//  _triangularBands->compute();
     
     if (spectrum.size() <= 1) {
         throw EssentiaException("TriangularBands: the size of the input spectrum is not greater than one");
@@ -153,53 +133,18 @@ void TriangularBarkBands::compute() {
     fill(bands.begin(), bands.end(), (Real) 0.0);
     
     for (int i=0; i<filterSize; ++i) {
-        
-//        int jbegin = int(_bandFrequencies[i] / frequencyScale + 0.5);
-//        int jend = int(_bandFrequencies[i+2] / frequencyScale + 0.5);
-        
         for (int j=0; j<spectrum.size(); ++j) {
-            
             if (_type == "power"){
-                bands[i] += (spectrum[j] * spectrum[j]) * doubleCoefficients[i][j];
+                bands[i] += (spectrum[j] * spectrum[j]) * _filterCoefficients[i][j];
             }
             
             if (_type == "magnitude"){
-                bands[i] += (spectrum[j]) * doubleCoefficients[i][j];
+                bands[i] += (spectrum[j]) * _filterCoefficients[i][j];
             }
             
-//            if (_isLog) bands[i] = log2(1 + bands[i]);            
+            if (_isLog)
+                bands[i] = log2(1 + bands[i]);
         }
-        
     }
-    
-    int z = 5;
-}
-
-
-void TriangularBarkBands::setWarpingFunctions(std::string warping, std::string weighting){
-
-  if ( warping == "htkMel" ){
-    _warper = hz2mel10;
-    _inverseWarper = mel102hz;
-  }
-  else if ( warping == "slaneyMel" ){
-    _warper = hz2mel;
-    _inverseWarper = mel2hz;
-  }
-  else{
-    E_INFO("TriangularBarkBands: 'warpingFormula' = "<<warping);
-    throw EssentiaException(" TriangularBarkBands: Bad 'warpingFormula' parameter");
-  }
-
-  if (weighting == "warping"){
-    _weighting = warping;
-  }
-  else if (weighting == "linear"){
-    _weighting = "linear";
-  }
-  else{
-    throw EssentiaException("TriangularBarkBands: Bad 'weighting' parameter");
-  }
-
 }
 
