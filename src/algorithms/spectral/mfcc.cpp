@@ -63,6 +63,7 @@ const char* MFCC::description = DOC("This algorithm computes the mel-frequency c
 "IDCT can be used to compute smoothed Mel Bands. In order to do this: \n "
 "- compute MFCC\n"
 "- smoothedMelBands = 10^(IDCT(MFCC)/20) \n"
+"\n"                                
 "Note: The second step assumes that 'logType' = 'dbamp' was used to compute MFCCs, otherwise that formula should be changed in order to be consistent.\n"
 "\n"
 "References:\n"
