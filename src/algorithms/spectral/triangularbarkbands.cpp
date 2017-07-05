@@ -25,19 +25,11 @@ using namespace standard;
 
 const char* TriangularBarkBands::name = "TriangularBarkBands";
 const char* TriangularBarkBands::category = "Spectral";
-const char* TriangularBarkBands::description = DOC("This algorithm computes energy in mel bands of a spectrum. It applies a frequency-domain filterbank (MFCC FB-40, [1]), which consists of equal area triangular filters spaced according to the mel scale. The filterbank is normalized in such a way that the sum of coefficients for every filter equals one. It is recommended that the input \"spectrum\" be calculated by the Spectrum algorithm.\n"
+const char* TriangularBarkBands::description = DOC("This algorithm computes energy in the bark bands of a spectrum. It is different to the regular BarkBands algorithm in that is more configurable so that it can be used in the BFCC algorithm to produce output similar to Rastamat (http://www.ee.columbia.edu/ln/rosa/matlab/rastamat/)\n"
+"See the BFCC algorithm documentation for more information as to why you might want to choose this over Mel frequency analysis\n"
+"It is recommended that the input \"spectrum\" be calculated by the Spectrum algorithm.\n"
 "\n"
-"It is required that parameter \"highMelFrequencyBound\" not be larger than the Nyquist frequency, but must be larger than the parameter, \"lowMelFrequencyBound\". Also, The input spectrum must contain at least two elements. If any of these requirements are violated, an exception is thrown.\n"
-"\n"
-"Note: an exception will be thrown in the case when the number of spectrum bins (FFT size) is insufficient to compute the specified number of mel bands: in such cases the start and end bin of a band can be the same bin or adjacent bins, which will result in zero energy when summing bins for that band. Use zero padding to increase the number of spectrum bins in these cases.\n"
-"\n"
-"References:\n"
-"  [1] T. Ganchev, N. Fakotakis, and G. Kokkinakis, \"Comparative evaluation\n"
-"  of various MFCC implementations on the speaker verification task,\" in\n"
-"  International Conference on Speach and Computer (SPECOM’05), 2005,\n"
-"  vol. 1, pp. 191–194.\n\n"
-"  [2] Mel-frequency cepstrum - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient");
+);
 
 void TriangularBarkBands::configure() {
   if (parameter("highFrequencyBound").toReal() > parameter("sampleRate").toReal()*0.5 ) {
@@ -129,6 +121,11 @@ void TriangularBarkBands::compute() {
     int filterSize = _numBands;
     int spectrumSize = spectrum.size();
     
+    if (_filterCoefficients.empty() || int(_filterCoefficients[0].size()) != spectrumSize) {
+        E_INFO("TriangularBarkBands: input spectrum size (" << spectrumSize << ") does not correspond to the \"inputSize\" parameter (" << _filterCoefficients[0].size() << "). Recomputing the filter bank.");
+        calculateFilterCoefficients();
+    }
+
     bands.resize(_numBands);
     fill(bands.begin(), bands.end(), (Real) 0.0);
     

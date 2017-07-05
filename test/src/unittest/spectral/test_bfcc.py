@@ -55,6 +55,7 @@ class TestBFCC(TestCase):
         zeroPadding = fftSize - frameSize
         spectrumSize = fftSize/2 + 1
 
+        #Expected values generated in Rastamat/MATLAB
         expected = array([ 174.2926614, 17.63766925, -12.01485808, -13.28523247,
                           -21.98320439, -27.65860448, -20.36286442, -11.31062965,
                           -3.406240974, -27.84575779, -27.37699052, -6.010315266, 
