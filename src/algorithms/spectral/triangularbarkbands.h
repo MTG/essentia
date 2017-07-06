@@ -46,7 +46,7 @@ class TriangularBarkBands : public Algorithm {
  public:
   TriangularBarkBands() {
     declareInput(_spectrumInput, "spectrum", "the audio spectrum");
-    declareOutput(_bandsOutput, "bands", "the energy in mel bands");
+    declareOutput(_bandsOutput, "bands", "the energy in bark bands");
   }
 
   ~TriangularBarkBands() {    

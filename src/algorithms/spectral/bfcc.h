@@ -45,7 +45,7 @@ class BFCC : public Algorithm {
  public:
   BFCC() {
     declareInput(_spectrum, "spectrum", "the audio spectrum");
-    declareOutput(_bands, "bands" , "the energies in mel bands");
+    declareOutput(_bands, "bands" , "the energies in bark bands");
     declareOutput(_bfcc, "bfcc", "the bark frequency cepstrum coefficients");
 
     _triangularBarkFilter = AlgorithmFactory::create("TriangularBarkBands");
@@ -60,8 +60,8 @@ class BFCC : public Algorithm {
   void declareParameters() {
     declareParameter("inputSize", "the size of input spectrum", "(1,inf)", 1025);
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("numberBands", "the number of bark-bands in the filter", "[1,inf)", 40);
-    declareParameter("numberCoefficients", "the number of output mel coefficients", "[1,inf)", 13);
+    declareParameter("numberBands", "the number of bark bands in the filter", "[1,inf)", 40);
+    declareParameter("numberCoefficients", "the number of output cepstrum coefficients", "[1,inf)", 13);
     declareParameter("lowFrequencyBound", "the lower bound of the frequency range [Hz]", "[0,inf)", 0.);
     declareParameter("highFrequencyBound", "the upper bound of the frequency range [Hz]", "(0,inf)", 11000.);    
     declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
