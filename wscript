@@ -26,6 +26,10 @@ GIT_SHA = get_git_version()
 top = '.'
 out = 'build'
 
+# make default --prefix=$VIRTUAL_ENV inside virtualenv
+if 'VIRTUAL_ENV' in os.environ:
+    default_prefix = os.environ['VIRTUAL_ENV']
+
 
 def options(ctx):
     ctx.load('compiler_cxx compiler_c python')
