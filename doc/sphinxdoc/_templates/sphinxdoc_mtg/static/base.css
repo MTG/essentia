@@ -4,6 +4,13 @@ html, body {
 }
 
 /* Navbar */
+@media (min-width: 768px) and (max-width: 991px) {
+  .navbar-default .navbar-nav>li>a.essnt-navbar-link {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
 .navbar-default {
   background-color: #0B3954;
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
@@ -51,11 +58,36 @@ html, body {
   height: 0;
 }
 
-.navbar-docs > .container {
-  width: 100%;
-  max-width: 960px;
+/* FOOTER */
+.essnt-footer {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  background-color: #0B3954;
+  color: white;
 }
 
+.essnt-footer-link {
+  display: block;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.essnt-footer-link:hover {
+  color: white;
+  text-decoration: none;
+}
+
+.essnt-footer__mtg-logo-container {
+  margin-top: 40px;
+  width: 60%;
+  max-width: 300px;
+}
+
+.essnt-footer__mtg-logo {
+  max-width: 100%;
+  margin-left: -20px;
+}
+
+/* HOMEPAGE RELATED */
 /* HERO */
 .essnt-hero {
   background-image: linear-gradient(206deg, #13B5BF 0%, #087E8B 100%);
@@ -68,10 +100,12 @@ html, body {
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 60px;
+  font-weight: 300;
 }
 
 .essnt-hero__subtitle {
   font-size: 24px;
+  opacity: 0.8;
 }
 
 .essnt-hero__btn-group {
@@ -159,7 +193,6 @@ html, body {
 
 /* APPLICATIONS */
 .essnt-applications {
-  /*background-color: #0B3954;*/
   background-image: linear-gradient(206deg, #13B5BF 0%, #087E8B 100%);
   color: white;
   padding-top: 80px;
@@ -194,39 +227,6 @@ html, body {
   transform: translate3d(-50%, -50%, 0);
 }
 
-@media screen and (min-width: 990px) {
-  max-width: 200px;
-}
-
 .essnt-apps__app-description {
   text-align: center;
-}
-
-/* FOOTER */
-.essnt-footer {
-  padding-top: 50px;
-  padding-bottom: 50px;
-  background-color: #0B3954;
-  color: white;
-}
-
-.essnt-footer-link {
-  display: block;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.essnt-footer-link:hover {
-  color: white;
-  text-decoration: none;
-}
-
-.essnt-footer__mtg-logo-container {
-  margin-top: 40px;
-  width: 60%;
-  max-width: 300px;
-}
-
-.essnt-footer__mtg-logo {
-  max-width: 100%;
-  margin-left: -20px;
 }

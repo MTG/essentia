@@ -80,7 +80,7 @@ def doc2rst(algo_doc):
                    ]
 
         for inp in algo_doc['inputs']:
-            lines.append(' - **%s** (*%s*) - %s' % (inp['name'], inp['type'], TR(inp['description'])))
+            lines.append(' - ``%s`` (*%s*) - %s' % (inp['name'], inp['type'], TR(inp['description'])))
 
         lines.append('')
 
@@ -91,7 +91,7 @@ def doc2rst(algo_doc):
                    ]
 
         for out in algo_doc['outputs']:
-            lines.append(' - **%s** (*%s*) - %s' % (out['name'], out['type'], TR(out['description'])))
+            lines.append(' - ``%s`` (*%s*) - %s' % (out['name'], out['type'], TR(out['description'])))
 
         lines.append('')
 
@@ -108,7 +108,7 @@ def doc2rst(algo_doc):
             if param['default'] is not None:
                 range_str += ', default = ' + TR(param['default'])
 
-            lines.append(' - **%s** (*%s*) :' % (param['name'], range_str))
+            lines.append(' - ``%s`` (*%s*) :' % (param['name'], range_str))
             lines.append('     ' + TR(param['description']))
 
         lines.append('')
@@ -179,13 +179,15 @@ def write_algorithms_reference():
     # write the algorithms reference organized by categories
     std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
     streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase'] ]
+    std_algo_list = std_algo_list[:5]
+    streaming_algo_list = streaming_algo_list[:5]
 
     # generate html documentation for each algorithm and create an overall list of algorithms
     algos = {}
     for algoname in std_algo_list:
         algos.setdefault(algoname, {})
         algos[algoname]['standard'] = getattr(essentia.standard, algoname).__struct__
-        # __struct__ does not contain mode (perhaps it should), 
+        # __struct__ does not contain mode (perhaps it should),
         # therefore, doing a workaround so that doc2rst can know the mode
         algos[algoname]['standard']['mode'] = 'standard mode'
 
@@ -341,8 +343,7 @@ and hence are not available in python.</p>
 '''
     for category in algo_categories_html:
         category_id = re.sub('[^0-9a-zA-Z]+', '', category.lower())
-        html += '<section><h2 id=' + category_id + '>' + category + \
-            '<a class="headerlink" href="#' + category_id + '" title="Permalink to this headline">¶</a>' + '</h2>'
+        html += '<section><h2 id=' + category_id + '>' + category + '</h2>'
         html += '\n'.join(sorted(algo_categories_html[category]))
         html += '</section>'
     html += '''
@@ -359,7 +360,7 @@ and hence are not available in python.</p>
     # Copy convert FAQ.md to rst and copy to documenation folder
     subprocess.call(['pandoc', '../../FAQ.md', '-o', 'FAQ.rst'])
 
-    # Convert research_papers.md to rst 
+    # Convert research_papers.md to rst
     subprocess.call(['pandoc', 'research_papers.md', '-o', 'research_papers.rst'])
 
 
