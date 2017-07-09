@@ -1,34 +1,36 @@
-html, body {
+html,
+body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
 
 /* Navbar */
 @media (min-width: 768px) and (max-width: 991px) {
-  .navbar-default .navbar-nav>li>a.essnt-navbar-link {
+  .navbar-default .navbar-nav > li > a.essnt-navbar-link {
     padding-left: 10px;
     padding-right: 10px;
   }
 }
 
 .navbar-default {
-  background-color: #0B3954;
+  background-color: #0b3954;
+  -webkit-box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   border: 0;
   border-radius: 0;
   margin-bottom: 0;
 }
 
-.navbar-default .navbar-nav>li>a {
+.navbar-default .navbar-nav > li > a {
   color: white;
   position: relative;
 }
 
-.navbar-default .navbar-nav>li>a:hover {
+.navbar-default .navbar-nav > li > a:hover {
   color: white;
 }
 
-.navbar-default .navbar-nav>li>a:hover::after {
+.navbar-default .navbar-nav > li > a:hover::after {
   content: '';
   position: absolute;
   background-color: white;
@@ -46,15 +48,15 @@ html, body {
   height: 100%;
 }
 
-.navbar-default .navbar-nav>li>a.essnt-navbar-link {
+.navbar-default .navbar-nav > li > a.essnt-navbar-link {
   color: rgba(255, 255, 255, 0.7);
 }
 
-.navbar-default .navbar-nav>li>a.essnt-navbar-link:hover {
+.navbar-default .navbar-nav > li > a.essnt-navbar-link:hover {
   color: white;
 }
 
-.navbar-default .navbar-nav>li>a.essnt-navbar-link::after {
+.navbar-default .navbar-nav > li > a.essnt-navbar-link::after {
   height: 0;
 }
 
@@ -62,7 +64,7 @@ html, body {
 .essnt-footer {
   padding-top: 50px;
   padding-bottom: 50px;
-  background-color: #0B3954;
+  background-color: #0b3954;
   color: white;
 }
 
@@ -90,7 +92,9 @@ html, body {
 /* HOMEPAGE RELATED */
 /* HERO */
 .essnt-hero {
-  background-image: linear-gradient(206deg, #13B5BF 0%, #087E8B 100%);
+  background-image: -webkit-linear-gradient(244deg, #13b5bf 0%, #087e8b 100%);
+  background-image: -o-linear-gradient(244deg, #13b5bf 0%, #087e8b 100%);
+  background-image: linear-gradient(206deg, #13b5bf 0%, #087e8b 100%);
   padding-top: 50px;
   padding-bottom: 50px;
   color: white;
@@ -129,6 +133,8 @@ html, body {
   bottom: 0;
   left: 0;
   background-color: rgba(0, 0, 0, 0.2);
+  -webkit-transition: opacity 0.2s ease-in;
+  -o-transition: opacity 0.2s ease-in;
   transition: opacity 0.2s ease-in;
   opacity: 0;
   content: '';
@@ -139,7 +145,7 @@ html, body {
 }
 
 .essnt-hero__btn-primary {
-  background-color: #FF5A5F;
+  background-color: #ff5a5f;
   text-transform: uppercase;
   border: none;
   margin-right: 15px;
@@ -150,7 +156,6 @@ html, body {
   text-transform: uppercase;
   border: none;
 }
-
 
 /* CORE */
 .essnt-core {
@@ -173,8 +178,10 @@ html, body {
 
 /* ABOUT */
 .essnt-about {
-  background-color: #AC4142;
-  background-image: linear-gradient(206deg, #FF5A5F 0%, #AC4142 100%);
+  background-color: #ac4142;
+  background-image: -webkit-linear-gradient(244deg, #ff5a5f 0%, #ac4142 100%);
+  background-image: -o-linear-gradient(244deg, #ff5a5f 0%, #ac4142 100%);
+  background-image: linear-gradient(206deg, #ff5a5f 0%, #ac4142 100%);
   padding: 60px 0;
   color: white;
 }
@@ -198,7 +205,9 @@ html, body {
 
 /* APPLICATIONS */
 .essnt-applications {
-  background-image: linear-gradient(206deg, #13B5BF 0%, #087E8B 100%);
+  background-image: -webkit-linear-gradient(244deg, #13b5bf 0%, #087e8b 100%);
+  background-image: -o-linear-gradient(244deg, #13b5bf 0%, #087e8b 100%);
+  background-image: linear-gradient(206deg, #13b5bf 0%, #087e8b 100%);
   color: white;
   padding-top: 80px;
   padding-bottom: 80px;
@@ -229,6 +238,7 @@ html, body {
   right: auto;
   bottom: 0;
   left: 50%;
+  -webkit-transform: translate3d(-50%, -50%, 0);
   transform: translate3d(-50%, -50%, 0);
 }
 
