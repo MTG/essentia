@@ -179,8 +179,6 @@ def write_algorithms_reference():
     # write the algorithms reference organized by categories
     std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
     streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase'] ]
-    std_algo_list = std_algo_list[:5]
-    streaming_algo_list = streaming_algo_list[:5]
 
     # generate html documentation for each algorithm and create an overall list of algorithms
     algos = {}
