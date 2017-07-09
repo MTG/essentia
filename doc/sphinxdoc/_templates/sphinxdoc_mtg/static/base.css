@@ -158,12 +158,17 @@ html, body {
   padding-bottom: 80px;
 }
 
-.essnt-core-feature {
-  min-height: 180px;
+@media (min-width: 768px) {
+  .essnt-core-feature__title {
+    min-height: 40px;
+  }
+  .essnt-core-feature {
+    min-height: 180px;
+  }
 }
 
-.essnt-core-feature__title {
-  min-height: 40px;
+.essnt-core-feature {
+  margin-bottom: 20px;
 }
 
 /* ABOUT */

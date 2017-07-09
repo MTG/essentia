@@ -30,13 +30,19 @@
 
 .essnt-apps-page__logo-img {
   position: absolute;
-  padding: 20px;
+  padding-left: 20px;
   top: 50%;
   right: 0;
   bottom: 0;
   left: 0;
   transform: translateY(-50%);
   width: 100%;
+}
+
+@media (min-width: 768px) {
+  .essnt-apps-page__logo-img {
+    padding: 20px;
+  }
 }
 
 .essnt-apps-page__logo-text {
