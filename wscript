@@ -77,7 +77,7 @@ def configure(ctx):
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
 
     # compiler flags
-    ctx.env.CXXFLAGS = ['-pipe', '-Wall']
+    ctx.env.CXXFLAGS = ['-pipe', '-Wall', '-std=c++03']
 
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
