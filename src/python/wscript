@@ -48,6 +48,5 @@ def build(ctx):
         use      = 'essentia ' + ctx.env.USES
     )
 
-    # FIXME: this doesn't install in the active virtualenv but in the system python...
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
                       relative_trick=True)
