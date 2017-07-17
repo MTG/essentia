@@ -1,10 +1,10 @@
 #!/bin/sh
 BASEDIR=$(dirname $0)
 cd $BASEDIR/debian_3rdparty
-./build_fftw3.sh  
-./build_libav_nomuxers.sh  
-./build_libsamplerate.sh  
-./build_taglib.sh  
+./build_fftw3.sh
+./build_ffmpeg_nomuxers.sh
+./build_libsamplerate.sh
+./build_taglib.sh
 ./build_yaml.sh
 
 if [ "$1" = --with-gaia ];

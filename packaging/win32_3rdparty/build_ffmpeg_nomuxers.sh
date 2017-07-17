@@ -5,12 +5,12 @@ rm -rf tmp
 mkdir tmp
 cd tmp
 
-wget https://libav.org/releases/$LIBAV_VERSION.tar.gz
-tar xf $LIBAV_VERSION.tar.gz
-cd $LIBAV_VERSION
+wget https://ffmpeg.org/releases/$FFMPEG_VERSION.tar.gz
+tar xf $FFMPEG_VERSION.tar.gz
+cd $FFMPEG_VERSION
 
 ./configure \
-    $LIBAV_AUDIO_FLAGS \
+    $FFMPEG_AUDIO_FLAGS \
     --prefix=$PREFIX \
     --enable-cross-compile \
     --cross-prefix=$HOST- \
