@@ -243,7 +243,7 @@ def configure(ctx):
     Name: libessentia
     Description: audio analysis library -- development files
     Version: %(version)s
-    Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f
+    Libs: -L${libdir} -lessentia
     Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/utils
     ''' % opts
 
