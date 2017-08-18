@@ -45,7 +45,7 @@ def build(ctx):
         includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
         cxxflags = [ '-w' ],
         install_path = '${PYTHONDIR}/essentia',
-        use      = 'essentia ' + ctx.env.USES
+        use      = 'essentia ' #+ ctx.env.USES
     )
 
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
