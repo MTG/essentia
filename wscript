@@ -223,10 +223,14 @@ def configure(ctx):
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
-    elif ctx.options.WITH_STATIC_EXAMPLES and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
-        print ("→ Compiling with static examples on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
+    elif ctx.options.BUILD_STATIC and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
+        print ("→ Building static library on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+        
+        # flags required for linking to static ffmpeg libs
+        ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
+        ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 
     ctx.load('compiler_cxx compiler_c')
 
