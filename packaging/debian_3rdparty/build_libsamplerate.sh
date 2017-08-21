@@ -9,7 +9,7 @@ wget http://www.mega-nerd.com/SRC/$LIBSAMPLERATE_VERSION.tar.gz
 tar -xf $LIBSAMPLERATE_VERSION.tar.gz
 cd $LIBSAMPLERATE_VERSION
 
-./configure \
+CPPFLAGS=-fPIC ./configure \
     --prefix=$PREFIX \
     $LIBSAMPLERATE_FLAGS \
     $SHARED_OR_STATIC

@@ -10,6 +10,7 @@ tar xf $FFMPEG_VERSION.tar.gz
 cd $FFMPEG_VERSION
 
 ./configure \
+    --enable-pic \
     $FFMPEG_AUDIO_FLAGS \
     --prefix=$PREFIX \
     $SHARED_OR_STATIC

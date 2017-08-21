@@ -10,6 +10,7 @@ tar -xf $TAGLIB_VERSION.tar.gz
 cd $TAGLIB_VERSION/
 
 cmake \
+    -D CMAKE_CXX_FLAGS="-fPIC" \
     -DCMAKE_INSTALL_PREFIX=$PREFIX \
     -DCMAKE_BUILD_TYPE=Release \
     -DENABLE_STATIC=ON \
