@@ -5,6 +5,8 @@ The list below highlights some of the academic studies using Essentia organized 
 
 - Porter, A., Bogdanov D., Kaye R., Tsukanov R., & Serra X. (2015).  AcousticBrainz: a community platform for gathering music information obtained from audio. 16th International Society for Music Information Retrieval Conference (ISMIR 2015). 786-792.
 
+- Bayle, Y., Hanna, P., & Robine, M. (2017). SATIN: A Persistent Musical Database for Music Information Retrieval. In 15th International Workshop on Content-Based Multimedia Indexing (CBMI'17).
+
 
 ## Music classification
 
