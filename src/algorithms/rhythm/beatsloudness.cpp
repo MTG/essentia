@@ -22,15 +22,12 @@
 
 using namespace std;
 
-
 namespace essentia {
 namespace streaming {
 
-const char* BeatsLoudness::name = "BeatsLoudness";
-const char* BeatsLoudness::category = "Rhythm";
-const char* BeatsLoudness::description = DOC("This algorithm computes the spectrum energy of beats in an audio signal given their positions. The energy is computed both on the whole frequency range and for each of the specified frequency bands. See the SingleBeatLoudness algorithm for a more detailed explanation.\n"
-"\n"
-"Note that the algorithm will output empty results in the case if no beats are specified in the \"beats\" parameter.");
+const char* BeatsLoudness::name = essentia::standard::BeatsLoudness::name;
+const char* BeatsLoudness::category = essentia::standard::BeatsLoudness::category;
+const char* BeatsLoudness::description = essentia::standard::BeatsLoudness::description;
 
 
 BeatsLoudness::BeatsLoudness() {
@@ -98,9 +95,12 @@ void BeatsLoudness::configure() {
 namespace essentia {
 namespace standard {
 
-const char* BeatsLoudness::name = essentia::streaming::BeatsLoudness::name;
-const char* BeatsLoudness::category = essentia::streaming::BeatsLoudness::category;
-const char* BeatsLoudness::description = essentia::streaming::BeatsLoudness::description;
+const char* BeatsLoudness::name = "BeatsLoudness";
+const char* BeatsLoudness::category = "Rhythm";
+const char* BeatsLoudness::description = DOC("This algorithm computes the spectrum energy of beats in an audio signal given their positions. The energy is computed both on the whole frequency range and for each of the specified frequency bands. See the SingleBeatLoudness algorithm for a more detailed explanation.\n"
+"\n"
+"Note that the algorithm will output empty results in the case if no beats are specified in the \"beats\" parameter.");
+
 
 void BeatsLoudness::createInnerNetwork() {
   _beatLoud = streaming::AlgorithmFactory::create("BeatsLoudness");

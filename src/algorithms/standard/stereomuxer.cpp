@@ -26,9 +26,10 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* StereoMuxer::name = "StereoMuxer";
-const char* StereoMuxer::category = "Standard";
-const char* StereoMuxer::description = DOC("This algorithm outputs a stereo signal given left and right channel separately.");
+const char* StereoMuxer::name = essentia::standard::StereoMuxer::name;
+const char* StereoMuxer::category = essentia::standard::StereoMuxer::category;
+const char* StereoMuxer::description = essentia::standard::StereoMuxer::description;
+
 
 AlgorithmStatus StereoMuxer::process() {
   EXEC_DEBUG("process()");
@@ -81,9 +82,10 @@ AlgorithmStatus StereoMuxer::process() {
 namespace essentia {
 namespace standard {
 
-const char* StereoMuxer::name = essentia::streaming::StereoMuxer::name;
-const char* StereoMuxer::category = essentia::streaming::StereoMuxer::category;
-const char* StereoMuxer::description = essentia::streaming::StereoMuxer::description;
+const char* StereoMuxer::name = "StereoMuxer";
+const char* StereoMuxer::category = "Standard";
+const char* StereoMuxer::description = DOC("This algorithm outputs a stereo signal given left and right channel separately.");
+
 
 void StereoMuxer::createInnerNetwork() {
   _muxer = streaming::AlgorithmFactory::create("StereoMuxer");
