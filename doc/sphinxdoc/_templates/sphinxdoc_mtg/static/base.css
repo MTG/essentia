@@ -1,27 +1,36 @@
-html, body {
+html,
+body {
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
 }
 
 /* Navbar */
+@media (min-width: 768px) and (max-width: 991px) {
+  .navbar-default .navbar-nav > li > a.essnt-navbar-link {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
 .navbar-default {
-  background-color: #0B3954;
+  background-color: #0b3954;
+  -webkit-box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
   border: 0;
   border-radius: 0;
   margin-bottom: 0;
 }
 
-.navbar-default .navbar-nav>li>a {
+.navbar-default .navbar-nav > li > a {
   color: white;
   position: relative;
 }
 
-.navbar-default .navbar-nav>li>a:hover {
+.navbar-default .navbar-nav > li > a:hover {
   color: white;
 }
 
-.navbar-default .navbar-nav>li>a:hover::after {
+.navbar-default .navbar-nav > li > a:hover::after {
   content: '';
   position: absolute;
   background-color: white;
@@ -39,21 +48,53 @@ html, body {
   height: 100%;
 }
 
-.navbar-default .navbar-nav>li>a.essnt-navbar-link {
+.navbar-default .navbar-nav > li > a.essnt-navbar-link {
   color: rgba(255, 255, 255, 0.7);
 }
 
-.navbar-default .navbar-nav>li>a.essnt-navbar-link:hover {
+.navbar-default .navbar-nav > li > a.essnt-navbar-link:hover {
   color: white;
 }
 
-.navbar-default .navbar-nav>li>a.essnt-navbar-link::after {
+.navbar-default .navbar-nav > li > a.essnt-navbar-link::after {
   height: 0;
 }
 
+/* FOOTER */
+.essnt-footer {
+  padding-top: 50px;
+  padding-bottom: 50px;
+  background-color: #0b3954;
+  color: white;
+}
+
+.essnt-footer-link {
+  display: block;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.essnt-footer-link:hover {
+  color: white;
+  text-decoration: none;
+}
+
+.essnt-footer__mtg-logo-container {
+  margin-top: 40px;
+  width: 60%;
+  max-width: 300px;
+}
+
+.essnt-footer__mtg-logo {
+  max-width: 100%;
+  margin-left: -20px;
+}
+
+/* HOMEPAGE RELATED */
 /* HERO */
 .essnt-hero {
-  background-image: linear-gradient(206deg, #13B5BF 0%, #087E8B 100%);
+  background-image: -webkit-linear-gradient(244deg, #13b5bf 0%, #087e8b 100%);
+  background-image: -o-linear-gradient(244deg, #13b5bf 0%, #087e8b 100%);
+  background-image: linear-gradient(206deg, #13b5bf 0%, #087e8b 100%);
   padding-top: 50px;
   padding-bottom: 50px;
   color: white;
@@ -63,10 +104,12 @@ html, body {
   margin-top: 0;
   margin-bottom: 10px;
   font-size: 60px;
+  font-weight: 300;
 }
 
 .essnt-hero__subtitle {
   font-size: 24px;
+  opacity: 0.8;
 }
 
 .essnt-hero__btn-group {
@@ -90,6 +133,8 @@ html, body {
   bottom: 0;
   left: 0;
   background-color: rgba(0, 0, 0, 0.2);
+  -webkit-transition: opacity 0.2s ease-in;
+  -o-transition: opacity 0.2s ease-in;
   transition: opacity 0.2s ease-in;
   opacity: 0;
   content: '';
@@ -100,7 +145,7 @@ html, body {
 }
 
 .essnt-hero__btn-primary {
-  background-color: #FF5A5F;
+  background-color: #ff5a5f;
   text-transform: uppercase;
   border: none;
   margin-right: 15px;
@@ -112,25 +157,31 @@ html, body {
   border: none;
 }
 
-
 /* CORE */
 .essnt-core {
   padding-top: 80px;
   padding-bottom: 80px;
 }
 
-.essnt-core-feature {
-  min-height: 180px;
+@media (min-width: 768px) {
+  .essnt-core-feature__title {
+    min-height: 40px;
+  }
+  .essnt-core-feature {
+    min-height: 180px;
+  }
 }
 
-.essnt-core-feature__title {
-  min-height: 40px;
+.essnt-core-feature {
+  margin-bottom: 20px;
 }
 
 /* ABOUT */
 .essnt-about {
-  background-color: #AC4142;
-  background-image: linear-gradient(206deg, #FF5A5F 0%, #AC4142 100%);
+  background-color: #ac4142;
+  background-image: -webkit-linear-gradient(244deg, #ff5a5f 0%, #ac4142 100%);
+  background-image: -o-linear-gradient(244deg, #ff5a5f 0%, #ac4142 100%);
+  background-image: linear-gradient(206deg, #ff5a5f 0%, #ac4142 100%);
   padding: 60px 0;
   color: white;
 }
@@ -154,8 +205,9 @@ html, body {
 
 /* APPLICATIONS */
 .essnt-applications {
-  /*background-color: #0B3954;*/
-  background-image: linear-gradient(206deg, #13B5BF 0%, #087E8B 100%);
+  background-image: -webkit-linear-gradient(244deg, #13b5bf 0%, #087e8b 100%);
+  background-image: -o-linear-gradient(244deg, #13b5bf 0%, #087e8b 100%);
+  background-image: linear-gradient(206deg, #13b5bf 0%, #087e8b 100%);
   color: white;
   padding-top: 80px;
   padding-bottom: 80px;
@@ -167,12 +219,9 @@ html, body {
   padding-bottom: 50px;
 }
 
-.essnt-apps__app-container {
-  padding: 30px 70px;
-}
-
 .essnt-apps__app-logo-container {
   position: relative;
+  padding: 20px;
 }
 
 .essnt-apps__app-logo-container::before {
@@ -183,43 +232,16 @@ html, body {
 
 .essnt-apps__app-logo {
   position: absolute;
+  padding: 20px;
   width: 100%;
   top: 50%;
-  right: 0;
+  right: auto;
   bottom: 0;
-  left: 0;
-  transform: translateY(-50%);
+  left: 50%;
+  -webkit-transform: translate3d(-50%, -50%, 0);
+  transform: translate3d(-50%, -50%, 0);
 }
 
 .essnt-apps__app-description {
   text-align: center;
-}
-
-/* FOOTER */
-.essnt-footer {
-  padding-top: 50px;
-  padding-bottom: 50px;
-  background-color: #0B3954;
-  color: white;
-}
-
-.essnt-footer-link {
-  display: block;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.essnt-footer-link:hover {
-  color: white;
-  text-decoration: none;
-}
-
-.essnt-footer__mtg-logo-container {
-  margin-top: 40px;
-  width: 60%;
-  max-width: 300px;
-}
-
-.essnt-footer__mtg-logo {
-  max-width: 100%;
-  margin-left: -20px;
 }
