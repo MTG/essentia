@@ -278,8 +278,8 @@ How to compute music descriptors using Essentia?
 
 Because Essentia is a library you are very fexible in the ways you can compute descriptors out of audio:
 
-- using [premade extractors out-of-box](doc/sphinxdoc/extractors_out_of_box.rst) (the easiest way without programming)
-- using python (see [python tutorial](doc/sphinxdoc/python_tutorial.rst))
+- using [premade extractors out-of-box](extractors_out_of_box.html) (the easiest way without programming)
+- using python (see [python tutorial](python_tutorial.html))
 - writing your own C++ extractor (see the premade extractors as examples)
 
 
