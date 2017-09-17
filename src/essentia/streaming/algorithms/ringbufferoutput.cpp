@@ -26,6 +26,7 @@ namespace essentia {
 namespace streaming {
 
 const char* RingBufferOutput::name = "RingBufferOutput";
+const char* RingBufferOutput::category = "Input/Output";
 const char* RingBufferOutput::description = DOC("This algorithm fills an output ringbuffer of type Real that can be read from a different thread then.");
 
 RingBufferOutput::RingBufferOutput() : _impl(0)
