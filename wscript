@@ -96,6 +96,8 @@ def configure(ctx):
 
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
 
+    ctx.load('compiler_cxx compiler_c')
+
     # compiler flags
     ctx.env.CXXFLAGS = ['-pipe', '-Wall', '-std=c++03']
 
@@ -249,10 +251,10 @@ def configure(ctx):
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
         
         # flags required for linking to static ffmpeg libs
-        ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
-        ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
-
-    ctx.load('compiler_cxx compiler_c')
+        # -Bsymbolic flag is not available on clang
+        if ctx.env.CXX_NAME is not "clang":
+            ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
+            ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 
     # write pkg-config file
     prefix = os.path.normpath(ctx.options.prefix)
