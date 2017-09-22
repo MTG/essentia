@@ -87,6 +87,12 @@ def configure(ctx):
     ctx.env.INCLUDE_ALGOS        = ctx.options.INCLUDE_ALGOS
     ctx.env.FFT                  = ctx.options.FFT
 
+
+    if ctx.options.CROSS_COMPILE_MINGW32:
+        if ctx.env.WITH_EXAMPLES:
+            ctx.env.WITH_STATIC_EXAMPLES = True
+            print('WARNING: Using --with-static-examples flag instead of --with-examples for cross-compilation with MinGW')
+
     if ctx.env.WITH_STATIC_EXAMPLES:
         ctx.env.BUILD_STATIC = True
         ctx.env.STATIC_DEPENDENCIES = True
@@ -95,8 +101,6 @@ def configure(ctx):
     ctx.env.GIT_SHA = GIT_SHA
 
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
-
-    ctx.load('compiler_cxx compiler_c')
 
     # compiler flags
     ctx.env.CXXFLAGS = ['-pipe', '-Wall', '-std=c++03']
@@ -245,7 +249,13 @@ def configure(ctx):
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
-    elif ctx.env.STATIC_DEPENDENCIES and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
+
+    ctx.load('compiler_cxx compiler_c')
+
+    if ctx.env.STATIC_DEPENDENCIES \
+        and (sys.platform.startswith('linux') or sys.platform == 'darwin') \
+        and not ctx.options.CROSS_COMPILE_MINGW32:
+        
         print ("→ Building with static dependencies on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]

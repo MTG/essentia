@@ -76,9 +76,6 @@ def configure(ctx):
     if ctx.env.WITH_EXAMPLES:
         ctx.env.EXAMPLE_LIST = example_list
 
-        if ctx.options.CROSS_COMPILE_MINGW32:
-            print('WARNING: Use --with-static-examples flag instead of --with-examples for cross-compilation with MinGW')
-
     if ctx.env.EXAMPLES:
         for e in ctx.env.EXAMPLES.split(","):
             e = e.strip()
