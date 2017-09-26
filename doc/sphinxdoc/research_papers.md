@@ -60,6 +60,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 ## Emotion detection
 
+-  J. Grekow. Comparative Analysis of Musical Performances by Using Emotion Tracking. In book: Foundations of Intelligent Systems, pages 175-184, 2017.
+
 - J. Grekow. Audio features dedicated to the detection of arousal and valence in music recordings. In IEEE International Conference on INnovations in Intelligent SysTems and Applications (INISTA), pages 40-44, 2017.
 
 - J. Grekow. Music Emotion Maps in Arousal-Valence Space. In IFIP International Conference on Computer Information Systems and Industrial Management, pages 697-706, 2016.
