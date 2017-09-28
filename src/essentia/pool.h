@@ -190,6 +190,8 @@ class Pool {
    *         function. An EssentiaException will be thrown if the given
    *         descriptor name already exists in the pool and was put there via a
    *         call to an add function.
+   * @param validityCheck indicates whether @e value should be checked for NaN or Inf values. If
+   *                      true, an exception is thrown if @e value is (or contains) a NaN or Inf.
    */
   void set(const std::string& name, const Real& value, bool validityCheck=false);
 
@@ -264,9 +266,9 @@ class Pool {
 
   /**
    * Removes the entire namespace given by @e ns from the Pool along with the
-   * data itpoints to. This function does nothing if @e name does not exist in
+   * data it points to. This function does nothing if @e ns does not exist in
    * the Pool.
-   * @param name the descriptor name to remove
+   * @param ns the descriptor namespace to remove
    */
   void removeNamespace(const std::string& ns);
 
@@ -280,7 +282,7 @@ class Pool {
 
   /**
    * @returns whether the given descriptor name exists in the pool
-   * @param the name of the descriptor you wish to check for
+   * @param name is the name of the descriptor you wish to check for
    * @tparam T is the type of data that @e name refers to
    */
   template <typename T>

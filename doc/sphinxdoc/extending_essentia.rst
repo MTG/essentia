@@ -103,7 +103,7 @@ can do it using its native type (i.e., int, float, string, ...) as the conversio
 
 
 The ``configure()`` method
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This method (with no parameters) will be called each time the object is configured.
 This is intended if you have some setup actions to do before starting to process that you

@@ -46,6 +46,7 @@ Essentia depends on (at least) the following libraries:
  - `TagLib <http://developer.kde.org/~wheeler/taglib.html>`_: for reading audio metadata tags *(optional)*
  - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
  - `Gaia <https://github.com/MTG/gaia>`_: for using SVM classifier models *(optional)*
+
 All dependencies are optional, and some functionality will be excluded when a dependency is not found.
 
 Installing dependencies on Linux
