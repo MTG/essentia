@@ -28,15 +28,17 @@
 
 {% block extrafooter %}
 <script>
-jQuery = $;
-$('#fallback').hide();
-var DOCUMENTATION_OPTIONS = {
-  URL_ROOT: './',
-  VERSION: '{{version}}',
-  COLLAPSE_INDEX: false,
-  FILE_SUFFIX: '.html',
-  HAS_SOURCE: true
-};
+  jQuery = $;
+  $('#fallback').hide();
+  var DOCUMENTATION_OPTIONS = {
+    URL_ROOT: './',
+    VERSION: '{{version}}',
+    COLLAPSE_INDEX: false,
+    SOURCELINK_SUFFIX: '.txt',
+    FILE_SUFFIX: '.html',
+    HAS_SOURCE: true
+  };
+
 </script>
 <script src="{{ pathto("_static/underscore.js", 1) }}"></script>
 <script src="{{ pathto("_static/doctools.js", 1) }}"></script>
