@@ -66,12 +66,18 @@ def TR_DESC(s):
 
     return s
 
-def doc2rst(algo_doc):
-    lines = [ algo_doc['name'],
-              '=' * len(algo_doc['name']),
-              ''
-              ]
-    lines += [algo_doc['mode'] + ' | ' + algo_doc['category'] + ' category', '']
+def doc2rst(algo_doc, sphinxsearch=False):
+    if sphinxsearch:
+        # dummy rst files used to append algorithms to the sphinx HTML search
+        lines = [':orphan:',
+                 ''
+                 ]
+        header = 'Algorithm reference - ' + algo_doc['name'] + ' (' + algo_doc['mode'] + ')'
+        lines += [header, '=' * len(header), '']
+    else:
+        # actual rst files used to render HTMLs
+        lines = [ algo_doc['name'], '=' * len(algo_doc['name']), '']
+        lines += [algo_doc['mode'] + ' | ' + algo_doc['category'] + ' category', '']
 
     if algo_doc['inputs']:
         lines += [ 'Inputs',
@@ -123,8 +129,7 @@ def doc2rst(algo_doc):
 
 
 def write_doc(filename, algo_doc):
-    open(filename, 'w').write(doc2rst(algo_doc))
-
+    open(filename, 'w').write(doc2rst(algo_doc, sphinxsearch=True))
 
 
 def rst2html(rst, layout_type):
@@ -173,8 +178,14 @@ def write_algorithms_reference():
      - write the templates for both std & streaming algos to have the full list of algos as a sidebar
     '''
 
+    # folder for storing HTMLs
     try: os.mkdir('_templates/reference')
     except: pass
+
+    # folder for storing RSTs for sphinx search index
+    try: os.mkdir('reference')
+    except: pass
+
 
     # write the algorithms reference organized by categories
     std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
@@ -190,6 +201,7 @@ def write_algorithms_reference():
         algos[algoname]['standard']['mode'] = 'standard mode'
 
         print 'generating doc for standard algorithm:', algoname, '...'
+        write_doc('reference/std_' + algoname + '.rst', algos[algoname]['standard'])
         write_html_doc('_templates/reference/std_' + algoname + '.html',
                        algos[algoname]['standard'],
                        layout_type = 'std')
@@ -200,6 +212,7 @@ def write_algorithms_reference():
         algos[algoname]['streaming']['mode'] = 'streaming mode'
 
         print 'generating doc for streaming algorithm:', algoname, '...'
+        write_doc('reference/streaming_' + algoname + '.rst', algos[algoname]['streaming'])
         write_html_doc('_templates/reference/streaming_' + algoname + '.html',
                        algos[algoname]['streaming'],
                        layout_type = 'streaming')
