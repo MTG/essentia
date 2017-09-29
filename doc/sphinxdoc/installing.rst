@@ -153,7 +153,7 @@ Install doxigen and pip, if you are on Linux::
 
 Install additional dependencies (you might need to run this command with sudo)::
 
-  sudo pip install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter
+  sudo pip install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults
   sudo apt-get install pandoc
 
 Make sure to install Essentia with python bindings and run::
