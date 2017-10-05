@@ -16,7 +16,8 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 import numpy
-import _essentia
+from six import iteritems
+from . import _essentia
 
 # force the array objects to be of type float32
 def array(object, **kwargs):
@@ -83,7 +84,7 @@ class Edt: # Essentia Data Type
         return Edt(self._tp[len('VECTOR_'):])
 
     def __eq__(self, other):
-        if isinstance(other, basestring):
+        if isinstance(other, str):
             return self._tp == other
         elif isinstance(other, Edt):
             return self._tp == other._tp
@@ -169,7 +170,7 @@ def determineEdt(obj):
     if isinstance(obj, float): return Edt(Edt.REAL)
 
     # strings
-    if isinstance(obj, basestring): return Edt(Edt.STRING)
+    if isinstance(obj, str): return Edt(Edt.STRING)
 
     if isinstance(obj, numpy.float32): return Edt(Edt.NUMPY_FLOAT)
 
@@ -180,8 +181,8 @@ def determineEdt(obj):
             firstType = None
             allKeysAreStrings = True
             allTypesEqual = True
-            for key, val in obj.iteritems():
-                if not isinstance(key, basestring):
+            for key, val in iteritems(obj):
+                if not isinstance(key, str):
                     allKeysAreStrings = False
                     break
 
@@ -296,7 +297,7 @@ class Pool:
 
         elif isinstance(poolRep, dict):
             self.cppPool = _essentia.Pool()
-            for key, val in poolRep.iteritems():
+            for key, val in iteritems(poolRep):
                 for v in val:
                     self.add(key, v)
 
@@ -331,7 +332,7 @@ class Pool:
         # try to convert the type
         try:
             convertedVal = convertData(value, goalType)
-        except TypeError, e:
+        except TypeError:
             raise KeyError('Pool.add could not convert given data to the type already in the Pool under the key \''+key+'\'')
 
         self.cppPool.__add__(key, str(goalType), convertedVal, validityCheck)
@@ -360,7 +361,7 @@ class Pool:
         # try to convert the type
         try:
             convertedVal = convertData(value, goalType)
-        except TypeError, e:
+        except TypeError:
             raise KeyError('Pool.set could not convert given data to the type already in the Pool under the key \''+key+'\'')
 
         return self.cppPool.__set__(key, str(goalType), convertedVal, validityCheck)
@@ -407,7 +408,7 @@ class Pool:
         # try to convert the type
         try:
             convertedVal = convertData(value, goalType)
-        except TypeError, e:
+        except TypeError:
             raise KeyError('Pool.merge could not convert given data to the type already in the Pool under the key\''+key+'\'')
 
         return self.cppPool.__merge__(key, str(goalType), convertedVal, mergeType)
@@ -434,7 +435,7 @@ class Pool:
         # try to convert the type
         try:
             convertedVal = convertData(value, goalType)
-        except TypeError, e:
+        except TypeError:
             raise KeyError('Pool.mergeSingle could not convert given data to the type already in the Pool under the key \''+key+'\'')
 
         return self.cppPool.__mergeSingle__(key, str(goalType), convertedVal, mergeType)

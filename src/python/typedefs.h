@@ -21,6 +21,7 @@
 #define ESSENTIA_PYTHON_TYPEDEFS_H
 
 #include <Python.h>
+#include "python3.h"
 #include <complex>
 #define NO_IMPORT_ARRAY
 #include "numpy/ndarrayobject.h"

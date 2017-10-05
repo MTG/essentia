@@ -1,9 +1,9 @@
-import _essentia
+from . import _essentia
 import sys as _sys
-from _essentia import reset
-from common import Pool, array, ones, zeros
-from progress import Progress
-from utils import *
+from ._essentia import reset
+from .common import Pool, array, ones, zeros
+from .progress import Progress
+from .utils import *
 
 
 __version__ = _essentia.version()

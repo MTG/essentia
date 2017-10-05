@@ -129,7 +129,7 @@ void PyStreamingAlgorithm::tp_dealloc (PyObject* obj) {
     */
   }
 
-  self->ob_type->tp_free(obj);
+  Py_TYPE(self)->tp_free(obj);
 }
 
 PyObject* PyStreamingAlgorithm::configure (PyStreamingAlgorithm* self, PyObject* args, PyObject* keywds) {
@@ -398,8 +398,12 @@ static PyMethodDef PyStreamingAlgorithm_methods[] = {
 };
 
 static PyTypeObject PyStreamingAlgorithmType = {
+#if PY_MAJOR_VERSION >= 3
+  PyVarObject_HEAD_INIT(NULL, 0)
+#else
   PyObject_HEAD_INIT(NULL)
   0,                                                      // ob_size
+#endif
   "essentia.streaming.Algorithm",                          // tp_name
   sizeof(PyStreamingAlgorithm),                           // tp_basicsize
   0,                                                      // tp_itemsize

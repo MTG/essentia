@@ -90,8 +90,12 @@ static int vectorinput_init(PyStreamingAlgorithm* self, PyObject *args, PyObject
 }
 
 static PyTypeObject PyVectorInputType = {
+#if PY_MAJOR_VERSION >= 3
+  PyVarObject_HEAD_INIT(NULL, 0)
+#else
   PyObject_HEAD_INIT(NULL)
   0,                                                      // ob_size
+#endif
   "essentia.streaming.VectorInput",                       // tp_name
   sizeof(PyStreamingAlgorithm),                           // tp_basicsize
   0,                                                      // tp_itemsize
