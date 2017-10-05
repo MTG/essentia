@@ -104,7 +104,9 @@ def configure(ctx):
             a = a.strip()
             ctx.env.ALGOINCLUDE.append(a)
 
-
+    # Make check_cfg find PKG_CONFIG_PATH
+    ctx.env.env = dict(os.environ) 
+    
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
                       args=['libavcodec >= 55.34.1', '--cflags', '--libs'],

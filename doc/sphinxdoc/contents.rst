@@ -11,6 +11,7 @@ Essentia documentation contents
 
    introduction
    installing
+   download
    algorithms_overview
    essentia_python_tutorial
    extractors_out_of_box
