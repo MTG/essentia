@@ -1,19 +1,27 @@
 Licensing Essentia
 ==================
 
-Essentia is released under the `Affero GPLv3 license <http://www.gnu.org/licenses/agpl.html>`_, 
-but it is also available under proprietary license upon request. Contact `Music Technology Group (UPF) 
-<http://mtg.upf.edu/about/contact>`_ for more information.
+Essentia is the result of more than 10 years of research and development at Music Technology Group and it 
+incorporates the work done by many researchers during all this time. The library has been designed to support 
+large-scale industrial applications. It is being used to support applications such as music and sound classification, 
+semantic auto-tagging, music similarity and recommendation, visualization and interaction with music, sound 
+indexing, musical instruments detection, cover detection, and beat detection among many others.
+
+Essentia is available under an open licence, `Affero GPLv3 <http://www.gnu.org/licenses/agpl.html>`_, 
+for non-commercial applications, thus it is possible to test the library before deciding to licence 
+it under a comercial licence.
+
+Contact `Music Technology Group (UPF) <https://www.upf.edu/web/mtg/technologies-licensing>`_ for 
+more information about licensing conditions and for consulting how Essentia can suit your application.
 
 
-
-3rd Parties Licensing Information
-=================================
+Licensing dependencies
+======================
 
 Some Essentia library algorithms use third-party libraries with licenses such as `GPL`_, `LGPL`_,
 and others for which UPF is not able to provide full sublicensing rights to third parties.
 If a third party plans to release a product based on Essentia, it needs to make sure to have
-cleared the rights over the needed libraries for itself.
+cleared the rights over the required libraries for itself.
 
 Essentia can interoperate with these libraries but it does not force any third-party
 application to use them. It is possible to `compile Essentia with reduced dependencies <http://essentia.upf.edu/documentation/FAQ.html#building-lightweight-essentia-with-reduced-dependencies>`_ ignoring undesired 3rd-party libraries and algorithms. 

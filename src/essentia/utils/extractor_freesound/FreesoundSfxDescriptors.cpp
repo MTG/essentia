@@ -137,7 +137,7 @@ void  FreesoundSfxDescriptors::createHarmonicityNetwork(SourceBase& source, Pool
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   // using the same parameters as for other low-level descriptors
-  Real sampleRate = options.value<Real>("analysisSampleRate");
+  //Real sampleRate = options.value<Real>("analysisSampleRate");
   int frameSize =   int(options.value<Real>("lowlevel.frameSize"));
   int hopSize =     int(options.value<Real>("lowlevel.hopSize"));
   int zeroPadding = int(options.value<Real>("lowlevel.zeroPadding"));

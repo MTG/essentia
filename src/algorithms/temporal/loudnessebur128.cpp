@@ -43,11 +43,11 @@ const char* LoudnessEBUR128::description = DOC("This algorithm computes the EBU 
 "\n"
 "References:\n"
 "  [1] EBU Tech 3341-2011. \"Loudness Metering: 'EBU Mode' metering to supplement\n"
-"  loudness normalisation in accordance with EBU R 128\"\n"
-"  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\n"
+"  loudness normalisation in accordance with EBU R 128\"\n\n"
+"  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\"\n\n"
 "  [3] EBU Tech Doc 3342-2011. \"Loudness Range: A measure to supplement loudness\n"
-"  normalisation in accordance with EBU R 128\"\n"
-"  [4] http://tech.ebu.ch/loudness\n"
+"  normalisation in accordance with EBU R 128\"\n\n"
+"  [4] http://tech.ebu.ch/loudness\n\n"
 "  [5] http://en.wikipedia.org/wiki/LKFS\n"
 );
 

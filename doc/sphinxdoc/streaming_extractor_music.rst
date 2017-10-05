@@ -7,7 +7,7 @@ It is possible to customize the parameters of audio analysis, frame summarizatio
 
  - output format (json or yaml)
  - whether to store all frame values
- - an audio segment to analyze using time positions in seconds ::
+ - an audio segment to analyze using time positions in seconds
  - analysis sample rate (audio will be converted to it before analysis, recommended and default value is 44100.0)
  - frame parameters for different groups of descriptors: frame/hop size, zero padding, window type (see `FrameCutter <reference/streaming_FrameCutter.html>`_ algorithm)
  - statistics to compute over frames: mean, var, median, min, max, dmean, dmean2, dvar, dvar2 (see `PoolAggregator <reference/streaming_PoolAggregator.html>`_ algorithm)
@@ -90,7 +90,7 @@ The *spectral_centroid*, *spectral_kurtosis*, *spectral_spread*, *spectral_skewn
 rhythm.*
 -----------
 
-For implementation details, see `the code of extractor <https://github.com/MTG/essentia/blob/master/src/examples/extractor_music/MusicRhythmDescriptors.cpp>`_.
+For implementation details, see `the code of extractor <https://github.com/MTG/essentia/blob/master/src/examples/extractor_music/MusicRhythmDescriptors.cpp>`__.
 
 * **beats_position**: time positions [sec] of detected beats using beat tracking algorithm by Degara et al., 2012. Algorithms: `RhythmExtractor2013 <reference/streaming_RhythmExtractor2013.html>`_, `BeatTrackerDegara <reference/streaming_BeatTrackerDegara.html>`_
 
@@ -110,7 +110,7 @@ For implementation details, see `the code of extractor <https://github.com/MTG/e
 tonal.*
 -------
 
-For implementation details, see `the code of extractor <https://github.com/MTG/essentia/blob/master/src/examples/extractor_music/MusicTonalDescriptors.cpp>`_. All features are computed with frame/hop sizes equal to 4096/2048 samples. 
+For implementation details, see `the code of extractor <https://github.com/MTG/essentia/blob/master/src/examples/extractor_music/MusicTonalDescriptors.cpp>`__. All features are computed with frame/hop sizes equal to 4096/2048 samples. 
 
 * **tuning_frequency**: estimated tuning frequency [Hz]. Algorithms: `TuningFrequency <reference/streaming_TuningFrequency.html>`_
 

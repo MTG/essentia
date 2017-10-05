@@ -21,7 +21,7 @@
 #define ESSENTIA_DISKWRITER_H
 
 #include <fstream>
-#include "streamingalgorithm.h"
+#include "../streamingalgorithm.h"
 
 namespace essentia {
 namespace streaming {

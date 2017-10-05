@@ -497,7 +497,7 @@ void FreesoundExtractor::computeReplayGain(const string& audioFilename, Pool& re
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
   replayGain = 0.0;
-  int length = 0;
+  //int length = 0;
 
   while (true) {
     streaming::Algorithm* audio = factory.create("EqloudLoader",
@@ -514,7 +514,7 @@ void FreesoundExtractor::computeReplayGain(const string& audioFilename, Pool& re
     try {
       scheduler::Network network(audio);
       network.run();
-      length = audio->output("audio").totalProduced();
+      //length = audio->output("audio").totalProduced();
       replayGain = results.value<Real>("metadata.audio_properties.replay_gain");
     }
 
