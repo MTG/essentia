@@ -80,7 +80,7 @@ void TriangularBarkBands::calculateFilterCoefficients() {
     {
         float f_bark_mid = min_bark + i * step_barks;
         
-        for(int j=0; j<binbarks.size(); j++)
+        for(int j=0; j<(int)binbarks.size(); j++)
         {
             float lof = binbarks[j] - f_bark_mid - 0.5;
             float hif = binbarks[j] - f_bark_mid + 0.5;
@@ -96,13 +96,13 @@ void TriangularBarkBands::calculateFilterCoefficients() {
         for (int i=0; i<nfilts; ++i) {
             Real weight = 0.0;
             
-            for (int j=0; j<binbarks.size(); ++j) {
+            for (int j=0; j<(int)binbarks.size(); ++j) {
                 weight += _filterCoefficients[i][j];
             }
             
             if (weight == 0) continue;
             
-            for (int j=0; j<binbarks.size(); ++j) {
+            for (int j=0; j<(int)binbarks.size(); ++j) {
                 _filterCoefficients[i][j] = _filterCoefficients[i][j] / weight;
             }
         }
@@ -130,7 +130,7 @@ void TriangularBarkBands::compute() {
     fill(bands.begin(), bands.end(), (Real) 0.0);
     
     for (int i=0; i<filterSize; ++i) {
-        for (int j=0; j<spectrum.size(); ++j) {
+        for (int j=0; j<(int)spectrum.size(); ++j) {
             if (_type == "power"){
                 bands[i] += (spectrum[j] * spectrum[j]) * _filterCoefficients[i][j];
             }

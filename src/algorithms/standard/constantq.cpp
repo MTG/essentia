@@ -121,7 +121,7 @@ void ConstantQ::configure() {
     const unsigned hammingLength = (int) ceil( _dQ * _sampleRate / ( _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave)));
     unsigned origin = _FFTLength/2 - hammingLength/2;
 
-    for (int i=0; i<hammingLength; i++) {
+    for (int i=0; i<(int)hammingLength; i++) {
       const double angle = 2 * M_PI * _dQ * i/hammingLength;
       const double real = cos(angle);
       const double imag = sin(angle);
@@ -129,7 +129,7 @@ void ConstantQ::configure() {
       hammingWindow[origin + i] = complex <double>(absol*real, absol*imag);
     }
 
-    for (int i=0; i <_FFTLength/2; ++i) {
+    for (unsigned int i=0; i <_FFTLength/2; ++i) {
       complex<double> temp = hammingWindow[i];
       hammingWindow[i] = hammingWindow[i + _FFTLength/2];
       hammingWindow[i + _FFTLength/2] = temp;
@@ -147,11 +147,11 @@ void ConstantQ::configure() {
     // Increase the output size of the FFT to _FFTLength by mirroring the data
     int ind = transfHammingWindow.size() - 1;
     transfHammingWindow.resize(_FFTLength);
-    for (int i=0; i <_FFTLength/2; ++i) {
+    for (unsigned int i=0; i <_FFTLength/2; ++i) {
       transfHammingWindow.push_back(transfHammingWindow[ind--]);
     }
 
-    for (int j=0; j<_FFTLength; j++) {
+    for (unsigned int j=0; j<_FFTLength; j++) {
       // Perform thresholding
       const double squaredBin = squaredModule( transfHammingWindow[j]);
       if (squaredBin <= squareThreshold) continue;
