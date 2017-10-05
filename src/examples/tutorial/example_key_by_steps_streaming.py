@@ -7,7 +7,7 @@ try:
     infile = sys.argv[1]
     outfile = sys.argv[2]
 except:
-    print "usage:", sys.argv[0], "<input audio file> <output json file>"
+    print("usage: %s <input audio file> <output json file>" % sys.argv[0])
     sys.exit()
 
 # initialize algorithms we will use
@@ -40,7 +40,7 @@ key.strength >> (pool, 'tonal.key_strength')
 # network is ready, run it
 essentia.run(loader)
 
-print pool['tonal.key_key'] + " " + pool['tonal.key_scale']
+print(pool['tonal.key_key'] + " " + pool['tonal.key_scale'])
 
 # write to json file
 YamlOutput(filename=outfile, format="json")(pool)
