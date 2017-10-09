@@ -16,9 +16,10 @@ audioout = np.array(0)
 counter = 0
 
 # input and output files
-inputFilename = 'singing-female.wav'
-outputFilename = 'singing-female-out-sprmodel.wav'
-
+import os.path
+tutorial_dir = os.path.dirname(os.path.realpath(__file__))
+inputFilename = os.path.join(tutorial_dir, 'singing-female.wav')
+outputFilename = os.path.join(tutorial_dir, 'singing-female-out-sprmodel.wav')
 
 out = np.array(0)
 loader = es.MonoLoader(filename = inputFilename, sampleRate =  params['sampleRate'])
@@ -27,7 +28,7 @@ fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize
 w = es.Windowing(type = "blackmanharris92");
 fft = es.FFT(size = params['frameSize']);
 smanal = es.SprModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
-synFFTSize = min(params['frameSize']/4, 4*params['hopSize']);  # make sure the FFT size is appropriate
+synFFTSize = min(int(params['frameSize']/4), 4*params['hopSize']);  # make sure the FFT size is appropriate
 smsyn = es.SprModelSynth(sampleRate = params['sampleRate'], fftSize = synFFTSize, hopSize = params['hopSize'])    
 
 
