@@ -91,7 +91,7 @@ class TestAudioLoader_Streaming(TestCase):
 
         # TODO: ffmpeg seems to decode ogg files in opposite phase, thus:
         if sum < 0:
-            print 'WARNING: Essentia uses a version of FFMpeg that does reverse decoding of Ogg files...'
+            print('WARNING: Essentia uses a version of FFMpeg that does reverse decoding of Ogg files...')
             sum = abs(sum)
 
         if stereo: self.assertEqual(sum, 18)

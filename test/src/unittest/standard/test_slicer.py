@@ -28,7 +28,7 @@ class TestSlicer(TestCase):
     def slice(self, startTimes, endTimes):
         nSlices = len(startTimes)
         if nSlices != len(endTimes):
-            print "Test cannot be computed"
+            print("Test cannot be computed")
             exit(1)
         input = range(max(endTimes))
 

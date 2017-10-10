@@ -324,7 +324,7 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
         try:
             result = json.load(open('test.json', 'r'))
         except:
-            print open('test.json').read()
+            print(open('test.json').read())
             raised = True
 
         self.assertEqual(raised, False)

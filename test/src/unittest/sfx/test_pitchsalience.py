@@ -64,11 +64,11 @@ class TestPitchSalience(TestCase):
             sig += [step]*stepSize
         varSqrSalience = mean(self.computePitchSalience(sig,sr))
 
-        #print "noise: ", noiseSalience
-        #print "sine:", sineSalience
-        #print "sweep:", sweepSalience
-        #print "square:", sqrSalience
-        #print "var square:", varSqrSalience
+        #print("noise: %f" % noiseSalience)
+        #print("sine: %f" % sineSalience)
+        #print("sweep: %f" % sweepSalience)
+        #print("square: %f" % sqrSalience)
+        #print("var square %f:" % varSqrSalience)
         self.assertTrue(sineSalience  < sweepSalience)
         self.assertTrue(sweepSalience < noiseSalience)
         self.assertTrue(noiseSalience < varSqrSalience)
