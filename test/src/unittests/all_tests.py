@@ -17,9 +17,9 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
+from __future__ import absolute_import # For Python 2 compatibility
 
-
-from os.path import join,  sep
+from os.path import join, sep
 import os
 import sys
 import unittest
@@ -27,15 +27,25 @@ import glob
 import essentia
 import essentia.streaming
 
+try:
+    from importlib import reload # Python3
+except:
+    pass
+
 # we don't want to get too chatty when running all the tests
 essentia.log.info = False
 #essentia.log.debug += essentia.EAll
 #essentia.log.debug -= essentia.EConnectors
 
-# chdir into the dir of this file so paths work out right
 tests_dir = os.path.dirname(__file__)
 if tests_dir:
+    # Add sys path to make python recognize tests/src/unittests as a module
+    parent_dir = os.path.abspath(os.path.dirname(tests_dir))
+    sys.path.insert(0, parent_dir)
+    
+    # Chdir into the tests dir so that the paths work out right
     os.chdir(tests_dir)
+
 
 # import the test from the subdirectories which filename match the pattern 'test_*.py'
 listAllTests = [ filename.split(sep+'test_') for filename in glob.glob(join('*', 'test_*.py')) ]
@@ -48,17 +58,15 @@ def importTest(fullname, strategy = 'import'):
     '''Imports or reloads test given its fullname.'''
     folder, name = fullname
     if strategy == 'import':
-        cmd = 'import %s.test_%s; setattr(sys.modules[__name__], \'%s\', %s.test_%s.suite)' % (folder, name, name, folder, name)
+        cmd = 'import unittests.%s.test_%s; setattr(sys.modules[__name__], \'%s\', unittests.%s.test_%s.suite)' % (folder, name, name, folder, name)
     elif strategy == 'reload':
-        cmd1 = 'reload(sys.modules[\'%s.test_%s\']); ' % (folder, name)
-        cmd2 = 'setattr(sys.modules[__name__], \'%s\', sys.modules[\'%s.test_%s\'].suite)' % (name, folder, name)
-
+        cmd1 = 'reload(sys.modules[\'unittests.%s.test_%s\']); ' % (folder, name)
+        cmd2 = 'setattr(sys.modules[__name__], \'%s\', sys.modules[\'unittests.%s.test_%s\'].suite)' % (name, folder, name)
         cmd = cmd1 + cmd2
     else:
-        raise ValueError('When importing a test, only strategies allowed are \'import\' and \'reload\'')
+        raise ValueError('When importing a test, the only strategies allowed are \'import\' and \'reload\'')
 
     exec(cmd)
-
 
 
 def getTests(names=None, exclude=None, strategy='import'):
@@ -69,12 +77,13 @@ def getTests(names=None, exclude=None, strategy='import'):
 
     for name in names:
         if name not in allNames:
-            print 'WARNING: did not find test', name
+            print('WARNING: did not find test %s' % name)
     for name in (exclude or []):
         if name not in allNames:
-            print 'WARNING: did not find test to exclude', name
+            print('WARNING: did not find test to exclude %s' % name)
 
-    print 'Running tests:', sorted(name for _, name in tests)
+    print('Running tests:')
+    print(sorted(name for _, name in tests))
 
     if not tests:
         raise RuntimeError('No test to execute!')
@@ -89,7 +98,7 @@ def getTests(names=None, exclude=None, strategy='import'):
 
 
 def traceCompute(algo, *args, **kwargs):
-    print 'computing algo', algo.name()
+    print('computing algo %s' % algo.name())
     return algo.normalCompute(*args, **kwargs)
 
 
@@ -162,7 +171,7 @@ def runResetRun(gen, *args, **kwargs):
         return True
 
     if not isValid(gen):
-        print 'Network is not capable of doing the run/reset/run trick, doing it the normal way...'
+        print('Network is not capable of doing the run/reset/run trick, doing it the normal way...')
         essentia.run(gen)
         return
 
@@ -228,15 +237,12 @@ if __name__ == '__main__':
     testList = [ t for t in sys.argv[1:] if t[0] != '-' ]
     testExclude = [ t[1:] for t in sys.argv[1:] if t[0] == '-' ]
 
-    print 'TEST LIST', testList
-    print 'TEST EXCLUDE', testExclude
-
-    print 'Running tests normally'
-    print '-'*70
+    print('Running tests normally')
+    print('-'*70)
     result1 = runTests(getTests(testList, exclude=testExclude))
 
-    print '\n\nRunning tests with compute/reset/compute'
-    print '-'*70
+    print('\n\nRunning tests with compute/reset/compute')
+    print('-'*70)
 
     setattr(sys.modules['essentia.common'], 'algoDecorator', computeDecorator(computeResetCompute))
     essentia.standard._reloadAlgorithms()
