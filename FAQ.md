@@ -223,20 +223,20 @@ Run all python tests:
     
 Run all tests except specific ones:
 ```
-python test/src/unittest/all_tests.py -audioloader_streaming
+python test/src/unittests/all_tests.py -audioloader_streaming
 ```
 
 Run a specific test
 ```
-python test/src/unittest/all_tests.py audioloader_streaming
+python test/src/unittests/all_tests.py audioloader_streaming
 ```
 
 
 Writing tests
 -------------
-It is manadatory to write python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittest).
+It is manadatory to write python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittests).
 
-All unit tests for algorithms are located in ```test/src/unittest``` folder. They are organized by sub-folders similarly to the code for the algorithms. 
+All unit tests for algorithms are located in ```test/src/unittests``` folder. They are organized by sub-folders similarly to the code for the algorithms. 
 
 Typically tests include:
 
