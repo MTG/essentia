@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import distutils.sysconfig
 import os
+import sys
 
 
 def options(ctx):
@@ -39,16 +40,28 @@ def build(ctx):
                       os.path.join(PYLIB, 'numpy', 'core', 'include'),
                       # system python path
                       os.path.join(ctx.env.PYTHONDIR, 'numpy', 'core', 'include') ]
-
-    pybindings = ctx.shlib(
-        source   = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp'),
-        target   = '_essentia',
-        features = 'pyext',
-        includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
-        cxxflags = [ '-w' ],
-        install_path = '${PYTHONDIR}/essentia',
-        use      = 'essentia ' #+ ctx.env.USES
-    )
+    if sys.platform == 'win32':
+        print("Sources:", ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp') + ctx.env.ESSENTIA_SOURCES)
+        print("Includes:", ctx.env.INCLUDES)
+        pybindings = ctx.shlib(
+            source   = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp') + ctx.env.ESSENTIA_SOURCES,
+            target   = '_essentia',
+            features = 'pyext',
+            includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
+            cxxflags = [ '-w' ],
+            install_path = '${PYTHONDIR}/essentia',
+            use      = ctx.env.USES
+        )
+    else:
+        pybindings = ctx.shlib(
+            source   = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp'),
+            target   = '_essentia',
+            features = 'pyext',
+            includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
+            cxxflags = [ '-w' ],
+            install_path = '${PYTHONDIR}/essentia',
+            use      = 'essentia ' #+ ctx.env.USES
+        )
 
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
                       relative_trick=True)

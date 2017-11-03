@@ -363,6 +363,8 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/kiss_fft.c') ]
         sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/tools/kiss_fftr.c') ]
 
+    # Keep track of all source files just in case we want to compile python extension on Windows
+    ctx.env.ESSENTIA_SOURCES = sources
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
@@ -381,7 +383,6 @@ def build(ctx):
             cxxflags = [ '-w' ],
             install_path = '${PREFIX}/lib'
         )
-
 
     def write_pcfile(task):
         open('build/essentia.pc', 'w').write(ctx.env.pcfile)
