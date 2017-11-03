@@ -19,7 +19,8 @@
 
 #include "typedefs.h"
 using namespace std;
-using namespace essentia;
+
+namespace essentia {
 
 DEFINE_PYTHON_TYPE(VectorStereoSample);
 
@@ -71,4 +72,6 @@ void* VectorStereoSample::fromPythonCopy(PyObject* obj) {
   }
 
   return result;
+}
+
 }

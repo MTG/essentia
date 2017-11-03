@@ -19,7 +19,8 @@
 
 #include "typedefs.h"
 using namespace std;
-using namespace essentia;
+
+namespace essentia {
 
 DEFINE_PYTHON_TYPE(VectorVectorReal);
 
@@ -110,4 +111,6 @@ Parameter* VectorVectorReal::toParameter(PyObject* obj) {
   Parameter* result = new Parameter(*value);
   delete value;
   return result;
+}
+
 }

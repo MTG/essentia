@@ -19,7 +19,8 @@
 
 #include "typedefs.h"
 using namespace std;
-using namespace essentia;
+
+namespace essentia {
 
 DEFINE_PYTHON_TYPE(VectorComplex);
 
@@ -58,4 +59,6 @@ void* VectorComplex::fromPythonRef(PyObject* obj) {
   }
 
   return new RogueVector<complex<Real> >((complex<Real>*)PyArray_DATA(obj), PyArray_SIZE(obj));
+}
+
 }

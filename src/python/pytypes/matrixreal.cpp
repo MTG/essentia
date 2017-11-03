@@ -19,7 +19,8 @@
 
 #include "typedefs.h"
 using namespace std;
-using namespace essentia;
+
+namespace essentia {
 
 
 DEFINE_PYTHON_TYPE(MatrixReal);
@@ -81,4 +82,6 @@ void* MatrixReal::fromPythonCopy(PyObject* obj) {
   }
 
   return tntmat;
+}
+
 }

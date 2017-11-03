@@ -19,7 +19,8 @@
 
 #include "typedefs.h"
 using namespace std;
-using namespace essentia;
+
+namespace essentia {
 
 DEFINE_PYTHON_TYPE(VectorMatrixReal);
 
@@ -77,4 +78,6 @@ void* VectorMatrixReal::fromPythonCopy(PyObject* obj) {
   }
 
   return v;
+}
+
 }

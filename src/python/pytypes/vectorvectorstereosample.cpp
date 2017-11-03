@@ -19,7 +19,8 @@
 
 #include "typedefs.h"
 using namespace std;
-using namespace essentia;
+
+namespace essentia {
 
 DEFINE_PYTHON_TYPE(VectorVectorStereoSample);
 
@@ -109,4 +110,6 @@ void* VectorVectorStereoSample::fromPythonRef(PyObject* obj) {
 
   cout << "VectorVectorStereoSample::fromPython: not a vector<StereoSample>: " << strtype(obj) << endl;
   return NULL;
+}
+
 }

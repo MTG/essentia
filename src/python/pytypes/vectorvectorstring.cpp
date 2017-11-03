@@ -19,7 +19,8 @@
 
 #include "typedefs.h"
 using namespace std;
-using namespace essentia;
+
+namespace essentia {
 
 DEFINE_PYTHON_TYPE(VectorVectorString);
 
@@ -76,4 +77,6 @@ Parameter* VectorVectorString::toParameter(PyObject* obj) {
   Parameter* result = new Parameter(*value);
   delete value;
   return result;
+}
+
 }

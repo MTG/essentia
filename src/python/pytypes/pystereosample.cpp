@@ -20,7 +20,8 @@
 #include "typedefs.h"
 #include "parsing.h"
 using namespace std;
-using namespace essentia;
+
+namespace essentia {
 
 DEFINE_PYTHON_TYPE(PyStereoSample);
 
@@ -57,4 +58,6 @@ void* PyStereoSample::fromPythonCopy(PyObject* obj) {
   delete right;
 
   return ss;
+}
+
 }
