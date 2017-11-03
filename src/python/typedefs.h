@@ -32,6 +32,8 @@
 #include "typewrapper.h"
 #include "tnt/tnt.h"
 
+namespace essentia {
+
 // Essentia Data Type
 enum Edt {
   REAL,
@@ -244,5 +246,6 @@ typedef std::map<std::string, std::vector<std::string> > mapvectorstring;
 DECLARE_PROXY_TYPE(MapVectorString, mapvectorstring);
 DECLARE_PYTHON_TYPE(MapVectorString);
 
+} // namespace essentia
 
 #endif // ESSENTIA_PYTHON_TYPEDEFS_H
