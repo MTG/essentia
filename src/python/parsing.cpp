@@ -70,7 +70,7 @@ void parseParameters(ParameterMap* pm, PyObject* args, PyObject* keywds) {
     Edt tp = paramTypeToEdt((*pm)[name].type());
 
     switch (tp) {
-      case BOOL:              pm->add(name, Boolean::toParameter(obj)); break;
+      case essentia::BOOL:    pm->add(name, Boolean::toParameter(obj)); break;
       case INTEGER:           pm->add(name, Integer::toParameter(obj)); break;
       case REAL:              pm->add(name, PyReal::toParameter(obj)); break;
       case STRING:            pm->add(name, String::toParameter(obj)); break;
@@ -145,7 +145,7 @@ PyObject* toPython(void* obj, Edt tp) {
     case REAL: return PyReal::toPythonCopy((Real*)obj);
     case STRING: return String::toPythonCopy((string*)obj);
     case INTEGER: return Integer::toPythonCopy((int*)obj);
-    case BOOL: return Boolean::toPythonCopy((bool*)obj);
+    case essentia::BOOL: return Boolean::toPythonCopy((bool*)obj);
     case STEREOSAMPLE: return PyStereoSample::toPythonCopy((StereoSample*)obj);
     case VECTOR_REAL: return VectorReal::toPythonRef((RogueVector<Real>*)obj);
     case VECTOR_STRING: return VectorString::toPythonCopy((vector<string>*)obj);

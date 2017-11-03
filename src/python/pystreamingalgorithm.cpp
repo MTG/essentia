@@ -173,7 +173,7 @@ PyObject* PyStreamingAlgorithm::hasSink(PyStreamingAlgorithm* self, PyObject* ob
   }
 
   bool result = contains(self->algo->inputs(), name);
-  return toPython((void*)&result, BOOL);
+  return toPython((void*)&result, essentia::BOOL);
 }
 
 PyObject* PyStreamingAlgorithm::hasSource(PyStreamingAlgorithm* self, PyObject* obj) {
@@ -184,7 +184,7 @@ PyObject* PyStreamingAlgorithm::hasSource(PyStreamingAlgorithm* self, PyObject* 
   }
 
   bool result = contains(self->algo->outputs(), name);
-  return toPython((void*)&result, BOOL);
+  return toPython((void*)&result, essentia::BOOL);
 }
 
 

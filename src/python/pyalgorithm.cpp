@@ -24,6 +24,7 @@
 #include "roguevector.h"
 #include "commonfunctions.h"
 #include "parsing.h"
+
 using namespace std;
 using namespace essentia;
 using namespace standard;
@@ -228,7 +229,7 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
         case REAL:                 SET_PORT_COPY(PyReal, Real);
         case VECTOR_STRING:        SET_PORT_COPY(VectorString, vector<string>);
         case STRING:               SET_PORT_COPY(String, string);
-        case BOOL:                 SET_PORT_COPY(Boolean, bool);
+        case essentia::BOOL:       SET_PORT_COPY(Boolean, bool);
         case INTEGER:              SET_PORT_COPY(Integer, int);
         case VECTOR_VECTOR_REAL:   SET_PORT_COPY(VectorVectorReal, vector<vector<Real> >);
         case VECTOR_VECTOR_STRING: SET_PORT_COPY(VectorVectorString, vector<vector<string> >);
@@ -282,7 +283,7 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
     switch (outputTypes[i]) {
       case REAL: SET_PORT(Real);
       case STRING: SET_PORT(string);
-      case BOOL: SET_PORT(bool);
+      case essentia::BOOL: SET_PORT(bool);
       case INTEGER: SET_PORT(int);
       case STEREOSAMPLE: SET_PORT(StereoSample);
       case VECTOR_REAL:
