@@ -28,6 +28,7 @@
 #define PARSE_OK 1
 #define PARSE_FAILED 0
 
+using namespace essentia;
 
 /**
   @param params represents the default parameters for an algorithm and will have
