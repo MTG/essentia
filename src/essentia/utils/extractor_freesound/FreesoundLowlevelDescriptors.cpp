@@ -276,8 +276,8 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
                                  "staticDistribution", 0.15);
 
   spec->output("spectrum") >> sc->input("spectrum");
-  sc->output("spectralContrast") >> PC(pool, nameSpace + "spectral_contrast");
-  sc->output("spectralValley") >> PC(pool, nameSpace + "scvalleys");
+  sc->output("spectralContrast") >> PC(pool, nameSpace + "spectral_contrast_coeffs");
+  sc->output("spectralValley") >> PC(pool, nameSpace + "spectral_contrast_valleys");
 
   // Pitch Detection
   Algorithm* pitch = factory.create("PitchYinFFT",
