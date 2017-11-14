@@ -294,8 +294,8 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   // StartStopSilence
   Algorithm* ss = factory.create("StartStopSilence","threshold",-60);
   fc->output("frame") >> ss->input("frame");
-  ss->output("startFrame") >> PC(pool, nameSpace + "startFrame");
-  ss->output("stopFrame") >> PC(pool, nameSpace + "stopFrame");
+  ss->output("startFrame") >> PC(pool, nameSpace + "sound_start_frame");
+  ss->output("stopFrame") >> PC(pool, nameSpace + "sound_stop_frame");
 
   // Dynamic complexity
   Algorithm* dc = factory.create("DynamicComplexity", "sampleRate", sampleRate);
