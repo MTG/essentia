@@ -104,6 +104,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 ## Sound indexing, music production, and intelligent audio processing
 
+- H. Ordiales, M. L. Bruno. Sound recycling from public databases. In 12th International Audio Mostly Conference on Augmented and Participatory Sound and Music Experiences (AM’17), 2017.
+
 - S. Parekh, F. Font, and X. Serra. Improving Audio Retrieval through Loudness Profile Categorization. In IEEE International Symposium on Multimedia (ISM), pages 565-568, 2016.
 
 - D. Moffat, D. Ronan, and J. D. Reiss. Unsupervised taxonomy of sound effects. In 20th International Conference on Digital Audio Effects (DAFx-17), 2017.
