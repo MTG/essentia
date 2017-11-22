@@ -7,9 +7,9 @@ cd tmp
 
 echo $PREFIX
 
-git clone https://github.com/MTG/gaia.git
-cd gaia
-git checkout $GAIA_VERSION
+wget https://github.com/MTG/gaia/archive/v$GAIA_VERSION.tar.gz -O gaia-$GAIA_VERSION.tar.gz
+tar -xf gaia-$GAIA_VERSION.tar.gz
+cd gaia-$GAIA_VERSION
 
 ./waf configure --prefix=$PREFIX
 ./waf
