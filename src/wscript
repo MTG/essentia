@@ -90,11 +90,14 @@ def configure(ctx):
             ctx.env.ALGOINCLUDE.append(a)
 
     # Make check_cfg find PKG_CONFIG_PATH
-    ctx.env.env = dict(os.environ) 
-    
+    ctx.env.env = dict(os.environ)
+
     check_cfg_args = ['--cflags', '--libs']
     #if ctx.env.STATIC_DEPENDENCIES:
     #    check_cfg_args += ['--static']
+
+    if "PKG_CONFIG_PATH" in os.environ:
+        print("...Checking for dependencies in %s" % os.environ["PKG_CONFIG_PATH"])
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
