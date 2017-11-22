@@ -56,7 +56,8 @@ void Meter::compute() {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   Algorithm* acorr=factory.create("AutoCorrelation");
   vector<vector<Real> > bandCorr(nbands);
-  Real maxBand=0, maxBandValue=0;
+  //Real maxBand=0;
+  Real maxBandValue=0;
   vector<Real> maxCorr(nbands);
   vector<int> maxCorrIdx(nbands);
   for (int iBand=0; iBand<nbands; iBand++) {
@@ -69,7 +70,7 @@ void Meter::compute() {
      maxCorr[iBand]=corr[maxCorrIdx[iBand]];
      if (maxCorr[iBand] > maxBandValue) {
        maxBandValue = maxCorr[iBand];
-       maxBand = iBand;
+       //maxBand = iBand;
      }
   }
   delete acorr;

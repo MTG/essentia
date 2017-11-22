@@ -50,15 +50,8 @@ void FrameToReal::compute() {
 
   audio.resize(_hopSize);
 
- ////////////////////////////////////
-
-  int i = 0;
-
-    // output
-    for (int i=0; i< _hopSize; i++) {
-        audio[i] = frames[i];
-    }
-
-
+  // output
+  for (int i=0; i< _hopSize; i++) {
+    audio[i] = frames[i];
+  }
 }
-

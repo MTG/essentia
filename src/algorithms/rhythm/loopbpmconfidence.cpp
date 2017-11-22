@@ -68,7 +68,7 @@ void LoopBpmConfidence::compute() {
 
     // Find start position
     int start_position = 0;
-    for (int i=0; i<envelope.size(); i++){
+    for (int i=0; i<(int)envelope.size(); i++){
       if (envelope[i] >= threshold){
         start_position = i;
         break;
@@ -97,7 +97,7 @@ void LoopBpmConfidence::compute() {
     confidences.resize(4);
     Real beatDuration = (60.0 * parameter("sampleRate").toReal()) / bpmEstimate;
     Real lambdaThreshold = beatDuration * 0.5;
-    for (int i=0; i<durations_to_check.size(); i++){
+    for (int i=0; i<(int)durations_to_check.size(); i++){
       int duration = durations_to_check[i];
       int minDistance = duration_samples; // Set maximum duration
       for (int j=1; j<128; j++) { // Iterate over possible beat lengths (1-127)

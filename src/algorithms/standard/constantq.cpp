@@ -56,7 +56,7 @@ void ConstantQ::compute() {
     throw EssentiaException("ERROR: ConstantQ::compute: Sparse kernel has not been initialised");
   }
 
-  if (signal.size() != _FFTLength) {
+  if ((int)signal.size() != _FFTLength) {
     throw EssentiaException("ERROR: ConstantQ::compute: The ConstantQ input size must be equal to the FFTLength : ", _FFTLength);
   }
 
@@ -64,15 +64,15 @@ void ConstantQ::compute() {
 
   constantQ.assign(_uK, 0.0 + 0.0j); // initialize output
 
-  const unsigned *fftbin = &(sk->_sparseKernelIs[0]);
-  const unsigned *cqbin  = &(sk->_sparseKernelJs[0]);
+  const int *fftbin = &(sk->_sparseKernelIs[0]);
+  const int *cqbin  = &(sk->_sparseKernelJs[0]);
   const double   *real   = &(sk->_sparseKernelReal[0]);
   const double   *imag   = &(sk->_sparseKernelImag[0]);
-  const unsigned int sparseCells = sk->_sparseKernelReal.size();
+  const int sparseCells = sk->_sparseKernelReal.size();
 
-  for (unsigned i = 0; i<sparseCells; i++) {
-    const unsigned row = cqbin[i];
-    const unsigned col = fftbin[i];
+  for (int i = 0; i<sparseCells; i++) {
+    const int row = cqbin[i];
+    const int col = fftbin[i];
     const double & r1  = real[i];
     const double & i1  = imag[i];
     const double & r2  = (double) signal.at( _FFTLength - col - 1 ).real();
@@ -93,7 +93,7 @@ void ConstantQ::configure() {
   // Work out Q value for Filter bank
   _dQ = 1/(pow(2,(1/(double)_binsPerOctave))-1); 
   // Number of Constant Q bins
-  _uK = (unsigned int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));
+  _uK = (int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));
 
   _FFTLength = (int) pow(2, nextpow2(ceil(_dQ *_sampleRate/_minFrequency)));
   _hop = _FFTLength/8; // hop size is window length divided by 32
@@ -114,12 +114,12 @@ void ConstantQ::configure() {
   // add it to the sparse kernels matrix
   double squareThreshold = _threshold * _threshold;
 
-  for (unsigned k=_uK; k--; ) {
+  for (int k=_uK; k--; ) {
 
     // Compute a hamming window
     hammingWindow.assign(_FFTLength, 0.0 + 0.0j);
-    const unsigned hammingLength = (int) ceil( _dQ * _sampleRate / ( _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave)));
-    unsigned origin = _FFTLength/2 - hammingLength/2;
+    const int hammingLength = (int) ceil( _dQ * _sampleRate / ( _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave)));
+    int origin = _FFTLength/2 - hammingLength/2;
 
     for (int i=0; i<hammingLength; i++) {
       const double angle = 2 * M_PI * _dQ * i/hammingLength;
