@@ -2,7 +2,7 @@
 
 libessentia.so is not found after installing from source
 --------------------------------------------------------
-The library is installed into /usr/local and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
+The library is installed into `/usr/local` and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
 
 
 Build Essentia on Ubuntu 14.04 or earlier

@@ -104,9 +104,9 @@ void YamlInput::compute() {
       // Load to string
       size_t result = fread(jsonChar, sizeof(char), filesize, file);
       if (result != filesize) {
-        throw EssentiaException("YamlInput: error reading json file");
+        throw EssentiaException("YamlInput: error reading the json file");
       }
-
+      
       string yamlString = JsonConvert(string(jsonChar, filesize)).parseDict();
       yamlString = unescapeJsonString(yamlString);
       delete[] jsonChar;

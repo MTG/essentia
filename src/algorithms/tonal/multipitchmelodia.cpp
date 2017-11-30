@@ -102,11 +102,15 @@ void MultiPitchMelodia::configure() {
                                          "minFrequency", 1,
                                          "maxFrequency", 20000);
 
+  // NOTE: previously used hardcoded values 
+  // - peakFrameThreshold = 0.5
+  // - peakDistributionThreshold = 2.0 
+  // Are those good to use as default values? 
   _pitchContours->configure("sampleRate", sampleRate,
                                             "hopSize", hopSize,
                                             "binResolution", binResolution,
-                                            "peakFrameThreshold", 0.5,
-                                            "peakDistributionThreshold", 2.0,
+                                            "peakFrameThreshold", peakFrameThreshold,
+                                            "peakDistributionThreshold", peakDistributionThreshold,
                                             "pitchContinuity", pitchContinuity,
                                             "timeContinuity", timeContinuity,
                                             "minDuration", minDuration);

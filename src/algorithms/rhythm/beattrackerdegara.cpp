@@ -26,27 +26,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* BeatTrackerDegara::name = "BeatTrackerDegara";
-const char* BeatTrackerDegara::category = "Rhythm";
-const char* BeatTrackerDegara::description = DOC("This algorithm estimates the beat positions given an input signal. It computes 'complex spectral difference' onset detection function and utilizes the beat tracking algorithm (TempoTapDegara) to extract beats [1]. The algorithm works with the optimized settings of 2048/1024 frame/hop size for the computation of the detection function, with its posterior x2 resampling.) While it has a lower accuracy than BeatTrackerMultifeature (see the evaluation results in [2]), its computational speed is significantly higher, which makes reasonable to apply this algorithm for batch processings of large amounts of audio signals.\n"
-"\n"
-"Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
-"\n"
-"References:\n"
-"  [1] N. Degara, E. A. Rua, A. Pena, S. Torres-Guijarro, M. E. Davies, and\n"
-"  M. D. Plumbley, \"Reliability-informed beat tracking of musical signals,\"\n"
-"  IEEE Transactions on Audio, Speech, and Language Processing, vol. 20,\n" 
-"  no. 1, pp. 290–301, 2012.\n\n"
-"  [2] J.R. Zapata, M.E.P. Davies and E. Gómez, \"Multi-feature beat tracking,\"\n"
-"  IEEE Transactions on Audio, Speech, and Language Processing, vol. 22,\n"
-"  no. 4, pp. 816-825, 2014.");
-
-// TODO updated ref [2] when the article gets published
-
-// evaluation results on a large collection of tracks [2] for essentia implementations (DBogdanov):
-// *Degara:         65.4407   55.3735   45.6554   66.5149   45.6192   49.9258   69.5233   77.7232    2.2475   68.0827  -- fast
-// *MultiFeature:   65.8871   53.9884   47.2754   66.4396   46.3123   50.8143   72.0530   80.5138    2.3865   67.5627  -- very slow
-// RhythmExtractor: 49.6150   40.3908   21.4286   55.7790   29.8988   37.5160   41.1232   51.7029    1.5479   48.3133  -- slow
+const char* BeatTrackerDegara::name = essentia::standard::BeatTrackerDegara::name;
+const char* BeatTrackerDegara::category = essentia::standard::BeatTrackerDegara::category;
+const char* BeatTrackerDegara::description = essentia::standard::BeatTrackerDegara::description;
 
 
 BeatTrackerDegara::BeatTrackerDegara() : AlgorithmComposite(),
@@ -140,9 +122,27 @@ void BeatTrackerDegara::reset() {
 namespace essentia {
 namespace standard {
 
-const char* BeatTrackerDegara::name = essentia::streaming::BeatTrackerDegara::name;
-const char* BeatTrackerDegara::category = essentia::streaming::BeatTrackerDegara::category;
-const char* BeatTrackerDegara::description = essentia::streaming::BeatTrackerDegara::description;
+const char* BeatTrackerDegara::name = "BeatTrackerDegara";
+const char* BeatTrackerDegara::category = "Rhythm";
+const char* BeatTrackerDegara::description = DOC("This algorithm estimates the beat positions given an input signal. It computes 'complex spectral difference' onset detection function and utilizes the beat tracking algorithm (TempoTapDegara) to extract beats [1]. The algorithm works with the optimized settings of 2048/1024 frame/hop size for the computation of the detection function, with its posterior x2 resampling.) While it has a lower accuracy than BeatTrackerMultifeature (see the evaluation results in [2]), its computational speed is significantly higher, which makes reasonable to apply this algorithm for batch processings of large amounts of audio signals.\n"
+"\n"
+"Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
+"\n"
+"References:\n"
+"  [1] N. Degara, E. A. Rua, A. Pena, S. Torres-Guijarro, M. E. Davies, and\n"
+"  M. D. Plumbley, \"Reliability-informed beat tracking of musical signals,\"\n"
+"  IEEE Transactions on Audio, Speech, and Language Processing, vol. 20,\n" 
+"  no. 1, pp. 290–301, 2012.\n\n"
+"  [2] J.R. Zapata, M.E.P. Davies and E. Gómez, \"Multi-feature beat tracking,\"\n"
+"  IEEE Transactions on Audio, Speech, and Language Processing, vol. 22,\n"
+"  no. 4, pp. 816-825, 2014.");
+
+// TODO updated ref [2] when the article gets published
+
+// evaluation results on a large collection of tracks [2] for essentia implementations (DBogdanov):
+// *Degara:         65.4407   55.3735   45.6554   66.5149   45.6192   49.9258   69.5233   77.7232    2.2475   68.0827  -- fast
+// *MultiFeature:   65.8871   53.9884   47.2754   66.4396   46.3123   50.8143   72.0530   80.5138    2.3865   67.5627  -- very slow
+// RhythmExtractor: 49.6150   40.3908   21.4286   55.7790   29.8988   37.5160   41.1232   51.7029    1.5479   48.3133  -- slow
 
 
 BeatTrackerDegara::BeatTrackerDegara() {

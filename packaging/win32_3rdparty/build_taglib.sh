@@ -24,7 +24,7 @@ cmake \
     -DCMAKE_INSTALL_PREFIX=$PREFIX \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=$TAGLIB_VERSION_toolchain.cmake \
-    -DENABLE_STATIC=ON \
+    -DBUILD_SHARED_LIBS=OFF \
 	. 
 make
 make install
