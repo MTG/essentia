@@ -22,6 +22,7 @@
 
 #include <deque>
 #include <string>
+#include <algorithm> // for std::max
 #include <climits> // for INT_MAX
 #include "config.h"
 #include "streamutil.h"
@@ -156,7 +157,7 @@ extern Logger loggerInstance;
 #  define E_DEBUG(module, msg) if (E_ACTIVE(module)) loggerInstance.debug(module, E_STRINGIFY(msg << '\n'), true)
 
 // NB: the following #define macros only work when used inside one of streaming::Algorithm's methods
-#  define ALGONAME _name << std::string(std::max(15-(int)_name.size(), 0), ' ') << ": "
+#  define ALGONAME _name << std::string((std::max)(15-(int)_name.size(), 0), ' ') << ": "
 #  define EXEC_DEBUG(msg) E_DEBUG(EExecution, ALGONAME << nProcess << " - " << msg)
 
 #  define E_INFO(msg) loggerInstance.info(E_STRINGIFY(msg))

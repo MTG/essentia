@@ -33,6 +33,9 @@ if 'VIRTUAL_ENV' in os.environ:
 
 def options(ctx):
     ctx.load('compiler_cxx compiler_c python')
+    if sys.platform == 'win32':
+        ctx.load('msvc')
+
     ctx.recurse('src')
 
     ctx.add_option('--with-cpptests', action='store_true',
@@ -103,12 +106,19 @@ def configure(ctx):
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
 
     # compiler flags
-    ctx.env.CXXFLAGS = ['-pipe', '-Wall', '-std=c++03']
+    if sys.platform != 'win32':
+        # msvc does not support -pipe
+        ctx.env.CXXFLAGS = ['-pipe', '-Wall']
+    else:
+        ctx.env.CXXFLAGS = ['-W2', '-EHsc']
 
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
-    if not ctx.options.EMSCRIPTEN and not ctx.options.CROSS_COMPILE_ANDROID and not ctx.options.CROSS_COMPILE_IOS:
+    if (not ctx.options.EMSCRIPTEN and 
+        not ctx.options.CROSS_COMPILE_ANDROID and 
+        not ctx.options.CROSS_COMPILE_IOS and
+        sys.platform != 'win32'):
         ctx.env.CXXFLAGS += ['-msse', '-msse2', '-mfpmath=sse']
 
     # define this to be stricter, but sometimes some libraries can give problems...
@@ -167,6 +177,9 @@ def configure(ctx):
         ctx.env.CXXFLAGS += ['-pthread']
 
     elif sys.platform == 'win32':
+        print ("Building on win32")
+
+        """
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
@@ -189,7 +202,7 @@ def configure(ctx):
         # force the use of mingw gcc compiler instead of msvc
         #ctx.env.CC = 'gcc'
         #ctx.env.CXX = 'g++'
-
+        
         import distutils.dir_util
 
         print("copying pkgconfig ...")
@@ -200,6 +213,7 @@ def configure(ctx):
             print("copying " + lib + "...")
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/include", tdm_include)
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/lib", tdm_lib)
+        """
 
     if ctx.options.CROSS_COMPILE_ANDROID:
         print ("→ Cross-compiling for Android ARM")

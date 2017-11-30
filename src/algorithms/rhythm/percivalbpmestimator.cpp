@@ -192,7 +192,7 @@ Real PercivalBpmEstimator::energyInRange(const std::vector<Real>& array,
     if (indexHigh > (int)array.size() - 1) {
       indexHigh = array.size() - 1;
     }
-    if (indexLow < 0){
+    if (indexLow < 0) {
       indexLow = 0;
     }
     return scale * (Real)sum(array, indexLow, indexHigh + 1);

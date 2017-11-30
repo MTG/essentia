@@ -500,10 +500,15 @@ static PyMethodDef PyAlgorithm_methods[] = {
   { NULL }  /* Sentinel */
 };
 
+
 static PyTypeObject PyAlgorithmType = {
+#if PY_MAJOR_VERSION >= 3
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
     PyObject_HEAD_INIT(NULL)
     0,                                                    // ob_size
-    "essentia.standard.Algorithm",                                 // tp_name
+#endif
+    "essentia.standard.Algorithm",                        // tp_name
     sizeof(PyAlgorithm),                                  // tp_basicsize
     0,                                                    // tp_itemsize
     PyAlgorithm::dealloc,                                 // tp_dealloc
@@ -522,7 +527,7 @@ static PyTypeObject PyAlgorithmType = {
     0,                                                    // tp_setattro
     0,                                                    // tp_as_buffer
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,             // tp_flags
-    "essentia::standard::Algorithm wrapper objects",                // tp_doc
+    "essentia::standard::Algorithm wrapper objects",      // tp_doc
     0,                                                    // tp_traverse
     0,                                                    // tp_clear
     0,                                                    // tp_richcompare

@@ -92,9 +92,9 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   mels_cr->output("crest")       >> PC(pool, nameSpace + "melbands_crest");
 
   // taken from MusicExtractor. MelBands 128 
-  Algorithm* melbands128 = factory.create("MelBands", "numberBands", 128);
-  spec->output("spectrum")     >> melbands128->input("spectrum");
-  melbands128->output("bands") >> PC(pool, nameSpace + "melbands128");
+  Algorithm* melbands96 = factory.create("MelBands", "numberBands", 96);
+  spec->output("spectrum")     >> melbands96->input("spectrum");
+  melbands96->output("bands") >> PC(pool, nameSpace + "melbands96");
 
   // ERB Bands and GFCC
   Algorithm* gfcc = factory.create("GFCC",
@@ -276,8 +276,8 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
                                  "staticDistribution", 0.15);
 
   spec->output("spectrum") >> sc->input("spectrum");
-  sc->output("spectralContrast") >> PC(pool, nameSpace + "spectral_contrast");
-  sc->output("spectralValley") >> PC(pool, nameSpace + "scvalleys");
+  sc->output("spectralContrast") >> PC(pool, nameSpace + "spectral_contrast_coeffs");
+  sc->output("spectralValley") >> PC(pool, nameSpace + "spectral_contrast_valleys");
 
   // Pitch Detection
   Algorithm* pitch = factory.create("PitchYinFFT",
@@ -294,8 +294,8 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   // StartStopSilence
   Algorithm* ss = factory.create("StartStopSilence","threshold",-60);
   fc->output("frame") >> ss->input("frame");
-  ss->output("startFrame") >> PC(pool, nameSpace + "startFrame");
-  ss->output("stopFrame") >> PC(pool, nameSpace + "stopFrame");
+  ss->output("startFrame") >> PC(pool, nameSpace + "sound_start_frame");
+  ss->output("stopFrame") >> PC(pool, nameSpace + "sound_stop_frame");
 
   // Dynamic complexity
   Algorithm* dc = factory.create("DynamicComplexity", "sampleRate", sampleRate);

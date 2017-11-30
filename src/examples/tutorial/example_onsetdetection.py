@@ -39,19 +39,19 @@ from essentia.standard import *
 try:
     filename = sys.argv[1]
 except:
-    print "usage:", sys.argv[0], "<audiofile>"
+    print("usage: %s <audiofile>" % sys.argv[0])
     sys.exit()
 
 # don't forget, we can actually instantiate and call an algorithm on the same line!
-print 'Loading audio file...'
-audio = MonoLoader(filename = filename)()
+print('Loading audio file...')
+audio = MonoLoader(filename=filename)()
 
 # Phase 1: compute the onset detection function
 # The OnsetDetection algorithm tells us that there are several methods available in Essentia,
 # let's do two of them
 
-od1 = OnsetDetection(method = 'hfc')
-od2 = OnsetDetection(method = 'complex')
+od1 = OnsetDetection(method='hfc')
+od2 = OnsetDetection(method='complex')
 
 # let's also get the other algorithms we will need, and a pool to store the results
 
@@ -62,7 +62,7 @@ c2p = CartesianToPolar() # and this turns it into a pair (magnitude, phase)
 pool = Pool()
 
 # let's get down to business
-print 'Computing onset detection functions...'
+print('Computing onset detection functions...')
 for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512):
     mag, phase, = c2p(fft(w(frame)))
     pool.add('features.hfc', od1(mag, phase))
@@ -72,7 +72,7 @@ for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512):
 # Phase 2: compute the actual onsets locations
 onsets = Onsets()
 
-print 'Computing onset times...'
+print('Computing onset times...')
 onsets_hfc = onsets(# this algo expects a matrix, not a vector
                     array([ pool['features.hfc'] ]),
 
@@ -85,20 +85,20 @@ onsets_complex = onsets(array([ pool['features.complex'] ]), [ 1 ])
 
 # and mark them on the audio, which we'll write back to disk
 # we use beeps instead of white noise to mark them, as it's more distinctive
-print 'Writing audio files to disk with onsets marked...'
+print('Writing audio files to disk with onsets marked...')
 
 # mark the 'hfc' onsets:
-marker = AudioOnsetsMarker(onsets = onsets_hfc, type = 'beep')
+marker = AudioOnsetsMarker(onsets=onsets_hfc, type='beep')
 marked_audio = marker(audio)
-MonoWriter(filename = 'onsets_hfc.wav')(marked_audio)
+MonoWriter(filename='onsets_hfc.wav')(marked_audio)
 
 # mark the 'complex' onsets:
-marker = AudioOnsetsMarker(onsets = onsets_complex, type = 'beep')
+marker = AudioOnsetsMarker(onsets=onsets_complex, type='beep')
 # mark the audio and make it an mp3 file, all in 1 line, just because we can!
-MonoWriter(filename = 'onsets_complex.mp3', format = 'mp3')(marker(audio))
+MonoWriter(filename='onsets_complex.mp3', format='mp3')(marker(audio))
 
 
 # and now go listen to your nice audio files to see which onset detection function
 # works better!
-print 'All done!'
-print 'Results are written to the files \'onsets_hfc.wav\' and \'onsets_complex.mp3\''
+print('All done!')
+print('Results are written to the files \'onsets_hfc.wav\' and \'onsets_complex.mp3\'')
