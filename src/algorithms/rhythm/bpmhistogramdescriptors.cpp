@@ -96,9 +96,9 @@ void BpmHistogramDescriptors::compute() {
     int minIndex = max(idx - ((spreadWidth-1) / 2), 0);
     int maxIndex = min(idx + ((spreadWidth-1) / 2), int(weights.size())-1);
 
-    for (int i=minIndex; i<=maxIndex; ++i) {
-      peakSpread += weights[i];
-      weights[i] = 0.0;
+    for (int j=minIndex; j<=maxIndex; ++j) {
+      peakSpread += weights[j];
+      weights[j] = 0.0;
     }
   
     if (peakSpread > 0) {

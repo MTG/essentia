@@ -15,12 +15,12 @@ SHARED_OR_STATIC="
 "
 
 FFMPEG_VERSION=ffmpeg-2.8.12
-TAGLIB_VERSION=taglib-1.10
+TAGLIB_VERSION=taglib-1.11.1
 FFTW_VERSION=fftw-3.3.2
 LIBSAMPLERATE_VERSION=libsamplerate-0.1.8
 LIBYAML_VERSION=yaml-0.1.5
 QT_SOURCE_URL=http://download.qt-project.org/official_releases/qt/4.8/4.8.6/qt-everywhere-opensource-src-4.8.6.tar.gz
-GAIA_VERSION=v2.4.4
+GAIA_VERSION=2.4.4
 
 FFMPEG_AUDIO_FLAGS="
     --enable-avresample

@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
   int framesize = 1024;
   int hopsize = 256;
   int sr = 44100;
-  Real tol = 0.1;
+  //Real tol = 0.1;
 
 
   // instanciate facgory and create algorithms:

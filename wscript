@@ -74,6 +74,32 @@ def options(ctx):
 def configure(ctx):
     print('→ configuring the project in ' + ctx.path.abspath())
 
+    ctx.env.WITH_EXAMPLES        = ctx.options.WITH_EXAMPLES
+    ctx.env.WITH_PYTHON          = ctx.options.WITH_PYTHON
+    ctx.env.WITH_VAMP            = ctx.options.WITH_VAMP
+    ctx.env.BUILD_STATIC         = ctx.options.BUILD_STATIC
+    ctx.env.STATIC_DEPENDENCIES  = ctx.options.STATIC_DEPENDENCIES
+    ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
+    ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
+    ctx.env.WITH_LIBS            = ctx.options.WITH_LIBS
+    ctx.env.EXAMPLES             = ctx.options.EXAMPLES
+    ctx.env.EXAMPLE_LIST         = []
+    ctx.env.ALGOIGNORE           = []
+    ctx.env.IGNORE_ALGOS         = ctx.options.IGNORE_ALGOS
+    ctx.env.ALGOINCLUDE          = []
+    ctx.env.INCLUDE_ALGOS        = ctx.options.INCLUDE_ALGOS
+    ctx.env.FFT                  = ctx.options.FFT
+
+
+    if ctx.options.CROSS_COMPILE_MINGW32:
+        if ctx.env.WITH_EXAMPLES:
+            ctx.env.WITH_STATIC_EXAMPLES = True
+            print('WARNING: Using --with-static-examples flag instead of --with-examples for cross-compilation with MinGW')
+
+    if ctx.env.WITH_STATIC_EXAMPLES:
+        ctx.env.BUILD_STATIC = True
+        ctx.env.STATIC_DEPENDENCIES = True
+
     ctx.env.VERSION = VERSION
     ctx.env.GIT_SHA = GIT_SHA
 
@@ -237,15 +263,22 @@ def configure(ctx):
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
-    elif ctx.options.WITH_STATIC_EXAMPLES and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
-        print ("→ Compiling with static examples on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
-        os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
     ctx.load('compiler_cxx compiler_c')
 
-    if sys.platform == 'win32':
-        ctx.load('msvc')
+    if ctx.env.STATIC_DEPENDENCIES \
+        and (sys.platform.startswith('linux') or sys.platform == 'darwin') \
+        and not ctx.options.CROSS_COMPILE_MINGW32:
+        
+        print ("→ Building with static dependencies on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
+        os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+        
+        # flags required for linking to static ffmpeg libs
+        # -Bsymbolic flag is not available on clang
+        if ctx.env.CXX_NAME is not "clang":
+            ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
+            ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 
     # write pkg-config file
     prefix = os.path.normpath(ctx.options.prefix)

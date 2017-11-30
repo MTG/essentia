@@ -29,11 +29,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* AudioWriter::name = "AudioWriter";
-const char* AudioWriter::category = "Input/output";
-const char* AudioWriter::description = DOC("This algorithm encodes an input signal into a stereo audio file.\n\n"
-"Supported formats are wav, aiff, mp3, flac and ogg.\n\n"
-"An exception is thrown when other extensions are given. Note that to encode in mp3 format it is mandatory that ffmpeg was configured with mp3 enabled.");
+const char* AudioWriter::name = essentia::standard::AudioWriter::name;
+const char* AudioWriter::category = essentia::standard::AudioWriter::category;
+const char* AudioWriter::description = essentia::standard::AudioWriter::description;
 
 
 void AudioWriter::configure() {
@@ -119,9 +117,12 @@ void AudioWriter::reset() {
 namespace essentia {
 namespace standard {
 
-const char* AudioWriter::name = essentia::streaming::AudioWriter::name;
-const char* AudioWriter::category = essentia::streaming::AudioWriter::category;
-const char* AudioWriter::description = essentia::streaming::AudioWriter::description;
+const char* AudioWriter::name = "AudioWriter";
+const char* AudioWriter::category = "Input/output";
+const char* AudioWriter::description = DOC("This algorithm encodes an input signal into a stereo audio file.\n\n"
+"Supported formats are wav, aiff, mp3, flac and ogg.\n\n"
+"An exception is thrown when other extensions are given. Note that to encode in mp3 format it is mandatory that ffmpeg was configured with mp3 enabled.");
+
 
 void AudioWriter::createInnerNetwork() {
   _writer = streaming::AlgorithmFactory::create("AudioWriter");

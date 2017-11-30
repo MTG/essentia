@@ -26,9 +26,10 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* KeyExtractor::name = "KeyExtractor";
-const char* KeyExtractor::category = "Tonal";
-const char* KeyExtractor::description = DOC("This algorithm extracts key/scale for an audio signal");
+const char* KeyExtractor::name = essentia::standard::KeyExtractor::name;
+const char* KeyExtractor::category = essentia::standard::KeyExtractor::category;
+const char* KeyExtractor::description = essentia::standard::KeyExtractor::description;
+
 
 KeyExtractor::KeyExtractor(): _frameCutter(0), _windowing(0), _spectrum(0), _spectralPeaks(0),
                               _hpcpKey(0), _key(0) {
@@ -106,9 +107,10 @@ KeyExtractor::~KeyExtractor() {
 namespace essentia {
 namespace standard {
 
-const char* KeyExtractor::name = essentia::streaming::KeyExtractor::name;
-const char* KeyExtractor::category = essentia::streaming::KeyExtractor::category;
-const char* KeyExtractor::description = essentia::streaming::KeyExtractor::description;
+const char* KeyExtractor::name = "KeyExtractor";
+const char* KeyExtractor::category = "Tonal";
+const char* KeyExtractor::description = DOC("This algorithm extracts key/scale for an audio signal");
+
 
 KeyExtractor::KeyExtractor() {
   declareInput(_audio, "audio", "the audio input signal");
