@@ -339,9 +339,9 @@ def run_python_tests(ctx):
     # create a local python package folder
     os.system('mkdir -p build/python')
     os.system('cp -r src/python/essentia build/python/')
-    os.system('cp build/src/python/_essentia.so build/python/essentia')
+    os.system('cp build/src/python/_essentia*.so build/python/essentia')
 
-    ret = os.system('PYTHONPATH=build/python python test/src/unittest/all_tests.py')
+    ret = os.system('PYTHONPATH=build/python %s test/src/unittests/all_tests.py' % sys.executable)
     if ret:
         ctx.fatal('failed to run python tests. Check test output')
 
@@ -355,6 +355,6 @@ def doc(ctx):
     os.system('mkdir -p build/python')
     os.system('cp -r src/python/essentia build/python/essentia')
     os.system('cp build/src/python/_essentia.so build/python')
+    
     pythonpath = os.path.abspath('build/python')
-
     os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh' % pythonpath)

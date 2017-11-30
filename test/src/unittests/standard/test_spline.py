@@ -189,15 +189,15 @@ class TestSpline(TestCase):
         beta2=0.0
         expected = readVector(join(filedir(), 'spline/betaSpline_1_0.txt'))
         self.evaluateBetaSpline(beta1, beta2, expected)
-        print "\n\tbeta1=1.0, beta2=0.0 \tok"
+        print("\n\tbeta1=1.0, beta2=0.0 \tok")
 
-        print "\tbeta1=1.0, beta2=100.0\tok"
+        print("\tbeta1=1.0, beta2=100.0\tok")
         beta1=1.0
         beta2=100.0
         expected = readVector(join(filedir(), 'spline/betaSpline_1_100.txt'))
         self.evaluateBetaSpline(beta1, beta2, expected)
 
-        print "\tbeta1=100.0, beta2=0.0\tok"
+        print("\tbeta1=100.0, beta2=0.0\tok")
         beta1=100.0
         beta2=0.0
         expected = readVector(join(filedir(), 'spline/betaSpline_100_0.txt'))

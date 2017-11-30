@@ -71,10 +71,12 @@ def EqualList( a, b ):
 
 def Equal( a, b ):
     if type(a) != type(b):
-        if isinstance(a, (int,float)) and  isinstance(b, (int,float)):
+        if isinstance(a, (int,float)) and isinstance(b, (int,float)):
             pass # in case of comparing 1 with 1.0 we want to get ok, and not failed
         else:
-            print "ERROR: comparing", a, b, "which are of different type"
+            print("ERROR: comparing values of different type:")
+            print(a)
+            print(b)
             return -2
     if isinstance(a, (str,int)):
        if a == b : return 1
@@ -83,7 +85,7 @@ def Equal( a, b ):
     elif type(a) == list:
       return EqualList( a, b )
     else:
-      print "ERROR: Type not supported for comparison"
+      print("ERROR: Type not supported for comparison")
       return -3
 
 def EqualDict( d1, d2 ):
@@ -115,18 +117,18 @@ def run_python_extractor( py_extractor ):
         sys.exit(1)
     try:
       os.system(py_extractor)
-    except( essentia.EssentiaError, RuntimeError ):
-      print 'ERROR:', sys.exc_type, sys.exc_value
+    except(essentia.EssentiaError, RuntimeError):
+      print('ERROR:', exc_info)
     return
 
 def run_cpp_extractor( cpp_extractor ):
     if( cpp_extractor == ''):
-        print "Error running cpp_extractor\n"
+        print("Error running cpp_extractor\n")
         sys.exit(1)
     try:
       os.system(cpp_extractor)
     except( essentia.EssentiaError, RuntimeError ):
-      print 'ERROR:', sys.exc_type, sys.exc_value
+      print('ERROR:', exc_info)
     return
 
 ###########################################################################################
@@ -152,7 +154,7 @@ def compare_namespaces( c_data ={}, py_data={}, c_file='', py_file='' ):
 
 def delete_from_list( l, val ):
     if not l:
-      print "Error, trying to delete from an empty list"
+      print("Error, trying to delete from an empty list")
       return
     while val in l:l.remove(val)
     return
@@ -233,13 +235,13 @@ def compare( c_file='', py_file='', log_file='' ) :
     try:
       c_data = yaml.safe_load(open(c_file).read())
     except yaml.YAMLError, exception:
-      print "Error in " + c_file + " : " + exception
+      print("Error in %s : %s" % (c_file, str(exception)))
     try:
       py_data = yaml.safe_load(open(py_file).read())
     except yaml.YAMLError, exception:
-      print "Error in " + py_file + " : " + exception
+      print("Error in %s : %s" % (py_file, exception))
     if c_data =={} or py_data == {}:
-      print "\tERROR: passing empty files for comparison"
+      print("\tERROR: passing empty files for comparison")
       sys.exit(1)
     desc_result, desc_not_in_c, desc_not_in_py = compare_descriptors( c_data, py_data )
     positive_test = []
@@ -249,28 +251,32 @@ def compare( c_file='', py_file='', log_file='' ) :
         else: negative_test.append( k )
     n_positive = len(positive_test)
     n_negative = len(negative_test)
-    print "\n*******************************************************************"
-    print "TOTAL TESTS: " , n_positive+n_negative
-    print_green( "\tPOSITIVE_TESTS: " + str(n_positive) + "\n\t\t" + str(positive_test) )
-    print_red( "\tNEGATIVE_TESTS: " + str(n_negative) + "\n\t\t" + str(negative_test) )
-    print_yellow( "\tUNABLE TO TEST: " + str(len(desc_not_in_c) + len(desc_not_in_py)))
+    print("\n*******************************************************************")
+    print("TOTAL TESTS: " + str(n_positive+n_negative))
+    print_green("\tPOSITIVE_TESTS: " + str(n_positive) + "\n\t\t" + str(positive_test))
+    print_red("\tNEGATIVE_TESTS: " + str(n_negative) + "\n\t\t" + str(negative_test))
+    print_yellow("\tUNABLE TO TEST: " + str(len(desc_not_in_c) + len(desc_not_in_py)))
     FILE = open( log_file, 'w' )
+    
     if n_negative:
       FILE.write("\n#*******************************************************************")
       FILE.write("\n#TOTAL TESTS: " + str(n_positive + n_negative) )
       FILE.write("\n#\tPOSITIVE_TESTS: " + str(n_positive) + "\n#\t\t" + str(positive_test) )
       FILE.write("\n#\tNEGATIVE_TESTS: " + str(n_negative) + "\n#\t\t" + str(negative_test) )
       FILE.write("\n#\tUNABLE TO TEST: " + str( len(desc_not_in_c) + len(desc_not_in_py) ) )
-    if len( desc_not_in_c):
-        print_yellow( "\n\treason: not found in the C++ file:")
+    
+    if len(desc_not_in_c):
+        print_yellow("\n\treason: not found in the C++ file:")
         print_yellow( desc_not_in_c )
         FILE.write("\n#\treason: not found in the C++ file:")
         FILE.write( str(desc_not_in_c ) )
-    if len( desc_not_in_py):
-        print_yellow( "\n\treason: not found in the Python file:")
-        print_yellow( desc_not_in_py )
+    
+    if len(desc_not_in_py):
+        print_yellow("\n\treason: not found in the Python file:")
+        print_yellow(desc_not_in_py)
         FILE.write("\n#\treason: not found in the Python file:")
         FILE.write( str(desc_not_in_py) )
+    
     FILE.write("\n#*******************************************************************")
     FILE.write("\n#The following tests did not met the requirements for equality with epsilon " + str(EPSILON))
     FILE.write("\n#Errors are presented as descriptor_name: c_value, python_value\n")
@@ -289,45 +295,45 @@ def compare( c_file='', py_file='', log_file='' ) :
     ns_not_in_c, ns_not_in_py = compare_namespaces( c_data, py_data, c_file, py_file )
     if len(ns_not_in_c) or len(ns_not_in_py):
         if not FILE : FILE = open( log_file, 'w' )
-        print "\n#*******************************************************************"
+        print("\n#*******************************************************************")
         FILE.write("\n#*******************************************************************")
-        print '''WARNING: Some namespaces could not be compared as they could
-not be found in either ''' + c_file + " or " + py_file
+        print ('''WARNING: Some namespaces could not be compared as they could
+not be found in either ''' + c_file + " or " + py_file)
         FILE.write('''\n# WARNING: Some namespaces could not be compared as they could
 # not be found in either ''' + c_file + " or " + py_file )
         if ns_not_in_py:
-            print "\tnot found in " + py_file + " : "
-            FILE.write( "\n#\tnot found in " + py_file + " : " )
+            print("\tnot found in " + py_file + " : ")
+            FILE.write("\n#\tnot found in " + py_file + " : ")
             for i in range(len(ns_not_in_py)):
-                print_red( "\t* " + str(ns_not_in_py[i]) )
-                File.write( "\n#\t* " + str(ns_not_in_py[i]) )
+                print_red("\t* " + str(ns_not_in_py[i]))
+                File.write("\n#\t* " + str(ns_not_in_py[i]))
         if ns_not_in_c:
-            print "\tnot found in " + c_file + " : "
-            FILE.write("\n#\tnot found in " + c_file + " : " )
+            print("\tnot found in " + c_file + " : ")
+            FILE.write("\n#\tnot found in " + c_file + " : ")
             for i in range(len(ns_not_in_c)):
-                print_red( "\t* " + str(ns_not_in_c[i]))
-                FILE.write( "\n#\t* " + str(ns_not_in_c[i]))
-        print "*******************************************************************\n"
+                print_red("\t* " + str(ns_not_in_c[i]))
+                FILE.write("\n#\t* " + str(ns_not_in_c[i]))
+        print("*******************************************************************\n")
         FILE.write("\n#*******************************************************************")
-    print "\nsee file", log_file, "for more detais\n"
+    print("\nsee file " + log_file + " for more detais\n")
 
 ###########################################################################################
-def print_green( s = ''):
-    print "\033[32;1m", s, "\033[0m"
+def print_green(s=''):
+    print("\033[32;1m " + s + " \033[0m")
     return
 
-def print_red( s = ''):
-    print "\033[31;1m", s, "\033[0m"
+def print_red(s=''):
+    print("\033[31;1m " + s + "\ 033[0m")
     return
 
-def print_yellow( s =''):
-    print "\033[93;1m", s, "\033[0m"
+def print_yellow(s=''):
+    print("\033[93;1m " + s + " \033[0m")
     return
 ###########################################################################################
 
-def get_log_filename( s ):
+def get_log_filename(s):
     if s == '':
-      print "Error: passing an empty filename"
+      print("Error: passing an empty filename")
       sys.exit(1)
     filename = s.split('.')[-2]
     if "/" in filename:
@@ -340,17 +346,17 @@ def get_log_filename( s ):
 
 def run( audio_filename ):
     # Python extractor
-    print '\nPython Extractor'
+    print('\nPython Extractor')
     py_file = 'python.yaml'
     run_python_extractor(PY_EXTRACTOR + " " + PROFILE_DIR + "/" + PROFILE + " " + audio_filename + " " + py_file )
 
 
     # C++ extractor
-    print '\nC++ Extractor'
+    print('\nC++ Extractor')
     c_file = 'c.yaml'
     run_cpp_extractor( C_EXTRACTOR + " " + audio_filename + " " + c_file )
 
-    print
+    print("")
     # Comparison
     compare( c_file, py_file, get_log_filename( audio_filename ) )
 
@@ -359,6 +365,6 @@ if __name__ == '__main__':
   parser = OptionParser()
   opt, args = parser.parse_args()
   if( len(args) < 1 ) :
-    print "usage: ./streaming_versus_python.py audio_filename"
+    print("usage: ./streaming_versus_python.py audio_filename")
     sys.exit(1)
   run( args[0] )

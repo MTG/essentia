@@ -27,7 +27,7 @@ class TestStereoMuxer(TestCase):
     def testRegression(self):
         size = 10
         result = StereoMuxer()([size-i for i in range(size)], [i for i in range(size)])
-        print result
+        print(result)
         expected = array([[size-i, i] for i in range(size)])
         self.assertEqualVector(result, expected)
 

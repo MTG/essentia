@@ -37,7 +37,7 @@ class TestRhythmExtractor(TestCase):
 
 
     def runInstance(self, input, tempoHints=None, useOnset=True, useBands=True, poolInit=False):
-        print 'TestRhythmExtractor: Warning - these tests are evaluated with high tolerances for error, please review these tests'
+        print('TestRhythmExtractor: Warning - these tests are evaluated with high tolerances for error, please review these tests')
 
         gen = VectorInput(input)
         if not tempoHints:

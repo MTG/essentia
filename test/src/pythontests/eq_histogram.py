@@ -62,8 +62,8 @@ for root, dirs, files in tree:
 
           results_file = os.path.join(root, filename)
 
-          print 'Processing file:'
-          print results_file
+          print('Processing file:')
+          print(results_file)
 
           y = yaml.load( open(results_file).read(), yaml.CLoader )
 
@@ -82,14 +82,14 @@ for root, dirs, files in tree:
           if not genre in number_genres:
              number_genres[genre] = 0
           number_genres[genre] += 1
-          print
+          print('')
 
 # normalization
 for genre in eq_genres.keys():
     for band in eq_genres[genre].keys():
         eq_genres[genre][band] /= number_genres[genre]
 
-print eq_genres
+print(eq_genres)
 
 
 

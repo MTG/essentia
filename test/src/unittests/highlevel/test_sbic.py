@@ -88,7 +88,7 @@ class TestSBic(TestCase):
                             downmix='left', sampleRate=441000)
 
         if sys.platform == 'win32' and getattr(loader, 'hasDoubleCompute', False):
-            print 'WARNING: skipping this test as Windows seems to do weird things with memory...'
+            print('WARNING: skipping this test as Windows seems to do weird things with memory...')
             return
 
         audio = loader()

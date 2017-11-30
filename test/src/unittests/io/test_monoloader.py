@@ -176,7 +176,7 @@ class TestMonoLoader(TestCase):
         self.assertEqual(abs(self.sum(mix)),   9)
 
         if self.sum(left) < 0:
-            print 'WARNING: Essentia uses a version of FFMpeg that does reverse decoding of Ogg files...'
+            print('WARNING: Essentia uses a version of FFMpeg that does reverse decoding of Ogg files...')
 
     def testOgg22050(self):
         # files with 9 impulses in each channel
@@ -189,7 +189,7 @@ class TestMonoLoader(TestCase):
         self.assertEqual(abs(self.sum(mix)),   9)
 
         if self.sum(left) < 0:
-            print 'WARNING: Essentia uses a version of FFMpeg that does reverse decoding of Ogg files...'
+            print('WARNING: Essentia uses a version of FFMpeg that does reverse decoding of Ogg files...')
 
     def testOgg48000(self):
         # files with 9 impulses in each channel
@@ -202,7 +202,7 @@ class TestMonoLoader(TestCase):
         self.assertEqual(abs(self.sum(mix)),   9)
 
         if self.sum(left) < 0:
-            print 'WARNING: Essentia uses a version of FFMpeg that does reverse decoding of Ogg files...'
+            print('WARNING: Essentia uses a version of FFMpeg that does reverse decoding of Ogg files...')
 
     def testDownSampling(self):
         # files of 30s with impulses at every sample
