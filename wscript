@@ -336,6 +336,8 @@ def run_tests(ctx):
 
 
 def run_python_tests(ctx):
+    print("Running python unit tests using %s" % sys.executable)
+
     # create a local python package folder
     os.system('mkdir -p build/python')
     os.system('cp -r src/python/essentia build/python/')
