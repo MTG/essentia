@@ -2,7 +2,7 @@
 
 libessentia.so is not found after installing from source
 --------------------------------------------------------
-The library is installed into /usr/local and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
+The library is installed into `/usr/local` and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
 
 
 Build Essentia on Ubuntu 14.04 or earlier
@@ -234,7 +234,7 @@ python test/src/unittest/all_tests.py audioloader_streaming
 
 Writing tests
 -------------
-It is manadatory to write python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittest).
+It is mandatory to write python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittest).
 
 All unit tests for algorithms are located in ```test/src/unittest``` folder. They are organized by sub-folders similarly to the code for the algorithms. 
 
