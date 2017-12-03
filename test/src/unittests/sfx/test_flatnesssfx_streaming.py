@@ -27,9 +27,9 @@ class TestFlatnessSfx_Streaming(TestCase):
         # this algorithm has a standard mode implementation which has been
         # tested thru the unitests in python. Therefore it's only tested that
         # for a certain input standard == streaming
-        envelope = range(22050)
+        envelope = list(range(22050))
         envelope.reverse()
-        envelope = range(22050) + envelope
+        envelope = list(range(22050)) + envelope
 
         # Calculate standard result
         stdResult = FlatnessSFX()(envelope)

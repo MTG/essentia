@@ -86,15 +86,15 @@ class TestRhythmExtractor(TestCase):
             phase = 0
 
         impulse = [0.0]*size
-        for i in xrange(size):
+        for i in range(size):
             if i%period == phase:
                 impulse[i] = 1.0
         return impulse
 
 
     def assertVectorWithinVectorDifference(self, found, expected, precision=1e-7):
-        for i in xrange(len(found)):
-            for j in xrange(1,len(expected)):
+        for i in range(len(found)):
+            for j in range(1,len(expected)):
                 if found[i] <= expected[j] and found[i] >= expected[j-1]:
                     if fabs(found[i] - expected[j-1]) < fabs(expected[j] - found[i]):
                         self.assertAlmostEqual(found[i]-expected[j-1], 0, precision)
@@ -103,8 +103,8 @@ class TestRhythmExtractor(TestCase):
 
 
     def assertVectorWithinVector(self, found, expected, precision=1e-7):
-        for i in xrange(len(found)):
-            for j in xrange(1,len(expected)):
+        for i in range(len(found)):
+            for j in range(1,len(expected)):
                 if found[i] <= expected[j] and found[i] >= expected[j-1]:
                     if fabs(found[i] - expected[j-1]) < fabs(expected[j] - found[i]):
                         self.assertAlmostEqual(found[i], expected[j-1], precision)
@@ -112,8 +112,8 @@ class TestRhythmExtractor(TestCase):
                         self.assertAlmostEqual(found[i], expected[j], precision)
 
     def assertVectorWithinVectorFixedPrecision(self, found, expected, precision=2):
-        for i in xrange(len(found)):
-            for j in xrange(1,len(expected)):
+        for i in range(len(found)):
+            for j in range(1,len(expected)):
                 if found[i] <= expected[j] and found[i] >= expected[j-1]:
                     if fabs(found[i] - expected[j-1]) < fabs(expected[j] - found[i]):
                         self.assertAlmostEqualFixedPrecision(found[i], expected[j-1], precision)
@@ -170,7 +170,7 @@ class TestRhythmExtractor(TestCase):
         impulseTrain140 = self.pulseTrain(bpm=140, sr=44100., offset=.1, dur=10)
 
         # expected values
-        expectedTicks = [i/44100. for i in xrange(len(impulseTrain140)) if impulseTrain140[i]!= 0]
+        expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
         expectedBpm = 140.
         expectedRubatoStart = []
         expectedRubatoStop = []
@@ -183,11 +183,11 @@ class TestRhythmExtractor(TestCase):
         self.assertVectorWithinVector(result[1], expectedTicks, .1)
 
         # estimated bpm
-        for i in xrange(len(result[2])):
+        for i in range(len(result[2])):
             self.assertAlmostEqual(result[2][i], expectedBpm, 1.)
 
         # bpm intervals
-        for i in xrange(len(result[3])):
+        for i in range(len(result[3])):
             self.assertAlmostEqual(result[3][i], 60./expectedBpm, 0.2)
 
         ## rubato start/stop
@@ -200,7 +200,7 @@ class TestRhythmExtractor(TestCase):
 
         #show(plot(impulseTrain140))
         # expected values
-        expectedTicks = [i/44100. for i in xrange(len(impulseTrain140)) if impulseTrain140[i]!= 0]
+        expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
         expectedBpm = 140.
         expectedRubatoStart = []
         expectedRubatoStop = []
@@ -213,11 +213,11 @@ class TestRhythmExtractor(TestCase):
         self.assertVectorWithinVector(result[1], expectedTicks, .1)
 
         # estimated bpm
-        for i in xrange(len(result[2])):
+        for i in range(len(result[2])):
             self.assertAlmostEqual(result[2][i], expectedBpm, 1.)
 
         # bpm intervals
-        for i in xrange(len(result[3])):
+        for i in range(len(result[3])):
             self.assertAlmostEqual(result[3][i], 60./expectedBpm, 0.2)
 
         ## rubato start/stop
@@ -230,7 +230,7 @@ class TestRhythmExtractor(TestCase):
         impulseTrain140 = self.pulseTrain(bpm=140, sr=44100., offset=.1, dur=10)
         
         # expected values
-        expectedTicks = [i/44100. for i in xrange(len(impulseTrain140)) if impulseTrain140[i]!= 0]
+        expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
 
         expectedBpm = 140.
         ## Rubato should be empty in this case, however due to the nature of the
@@ -247,11 +247,11 @@ class TestRhythmExtractor(TestCase):
         self.assertVectorWithinVector(result[1], expectedTicks, .1)
 
         # estimated bpm
-        for i in xrange(len(result[2])):
+        for i in range(len(result[2])):
             self.assertAlmostEqual(result[2][i], expectedBpm, 1.)
 
         # bpm intervals
-        for i in xrange(len(result[3])):
+        for i in range(len(result[3])):
             self.assertAlmostEqual(result[3][i], 60./expectedBpm, 0.2)
 
         ## rubato start/stop
@@ -274,7 +274,7 @@ class TestRhythmExtractor(TestCase):
         # expected values
 
         # ticks
-        expectedTicks = [i/44100. for i in xrange(len(impulseTrain)) if impulseTrain[i]!= 0]
+        expectedTicks = [i/44100. for i in range(len(impulseTrain)) if impulseTrain[i]!= 0]
         
         result = self.runInstance(impulseTrain, expectedTicks)
 
@@ -286,7 +286,7 @@ class TestRhythmExtractor(TestCase):
         self.assertVectorWithinVectorFixedPrecision(result[1], expectedTicks, 1)
 
         # bpm estimates
-        for i in xrange(len(result[2])):
+        for i in range(len(result[2])):
             self.assertAlmostEqual(result[2][i], expectedBpm, 0.5)
 
         # bpm intervals: we may need to take into account also multiples of 90,

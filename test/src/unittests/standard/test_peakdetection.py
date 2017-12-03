@@ -175,7 +175,7 @@ class TestPeakDetection(TestCase):
 
     def testPlateau(self):
         inputSize = 1024
-        pos = range(3, 7)
+        pos = list(range(3, 7))
         val = 1.0
         input = [0] * inputSize
         for i in range(len(pos)):
@@ -199,7 +199,7 @@ class TestPeakDetection(TestCase):
     def testStairCase(self):
         # should find the first postition of the last step
         inputSize = 1024
-        pos = [range(3, 7), range(7,14), range(14,20)]
+        pos = [list(range(3, 7)), list(range(7,14)), list(range(14,20))]
         val = [1.0, 2.0, 3.0]
         input = [0] * inputSize
         for i in range(len(pos)):
@@ -219,8 +219,8 @@ class TestPeakDetection(TestCase):
         input = [0] * inputSize
         pdetect = PeakDetection()
         (posis, vals) = pdetect(input)
-        self.assert_(len(posis) == 0)
-        self.assert_(len(vals) == 0)
+        self.assertTrue(len(posis) == 0)
+        self.assertTrue(len(vals) == 0)
 
     def testEmpty(self):
         # Feeding an empty array shouldn't crash and throw an exception

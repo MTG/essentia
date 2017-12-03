@@ -148,7 +148,7 @@ if __name__ == '__main__':
     opt, args = parse_args()
 
     if len(args) != 2: #3:
-        print "Incorrect number of arguments\n", essentia_usage
+        print("Incorrect number of arguments\n", essentia_usage)
         sys.exit(1)
 
 
@@ -172,7 +172,7 @@ if __name__ == '__main__':
         computeLowLevel(input_file, pool, startTime, endTime)
         segmentation.compute(input_file, pool, startTime, endTime)
         segments = pool['segmentation.timestamps']
-        for i in xrange(len(segments)-1):
+        for i in range(len(segments)-1):
             startTime = segments[i]
             endTime = segments[i+1]
 

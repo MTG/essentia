@@ -79,7 +79,7 @@ if __name__ == '__main__':
     try:
         infile = sys.argv[1]
     except:
-        print('usage: %s <input audio file>' % sys.argv[0])
+        print(('usage: %s <input audio file>' % sys.argv[0]))
         sys.exit()
 
     extractor(sys.argv[1])

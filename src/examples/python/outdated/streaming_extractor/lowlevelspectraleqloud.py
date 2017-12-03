@@ -127,7 +127,7 @@ if __name__ == '__main__':
 
     loader.audio >> lowlevelExtractor.signal
 
-    for desc, output in lowlevelExtractor.outputs.items():
+    for desc, output in list(lowlevelExtractor.outputs.items()):
         output >> (pool, namespace + '.' + desc)
 
     essentia.run(loader)

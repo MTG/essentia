@@ -30,7 +30,7 @@ tbb_src = essentia_third_party + 'tbb20_020oss_src/'
 
 def link(source, target):
     cmd = 'sudo ln -s' + ' ' + source + ' ' + target
-    print cmd
+    print(cmd)
     return os.system(cmd);
 
 def link_tbb_files() :
@@ -55,5 +55,5 @@ def link_tbb_files() :
 
 if __name__ == '__main__':
     ret = link_tbb_files();
-    print "returning ", ret
+    print("returning ", ret)
     exit(ret)

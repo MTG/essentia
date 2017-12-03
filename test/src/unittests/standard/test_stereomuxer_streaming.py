@@ -45,8 +45,8 @@ class TestStereoMuxer_Streaming(TestCase):
 
         run(loader)
 
-        original_l, original_r = zip(*p['original'])
-        result_l, result_r = zip(*p['result'])
+        original_l, original_r = list(zip(*p['original']))
+        result_l, result_r = list(zip(*p['result']))
 
         self.assertEqualVector(original_l, result_l)
         self.assertEqualVector(original_r, result_r)

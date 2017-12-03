@@ -76,7 +76,7 @@ class ExtractorMfcc(essentia.streaming.CompositeBase):
 if __name__ == '__main__':
     # Make sure the command was well-formed.
     if len(sys.argv) < 3:
-        print 'Usage: extractor_mfcc.py <input audio filename> <output yaml filename>'
+        print('Usage: extractor_mfcc.py <input audio filename> <output yaml filename>')
         sys.exit(1)
 
     # Loaders must be specified outside your composite algorithm.

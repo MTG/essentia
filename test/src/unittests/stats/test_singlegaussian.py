@@ -31,7 +31,7 @@ class TestSingleGaussian(TestCase):
         (rows,cols) = cov.shape
         self.assertEqual(rows, cols)
         I = zeros([rows,cols]) # identity matrix
-        for i in xrange(rows): I[i][i] = 1.0
+        for i in range(rows): I[i][i] = 1.0
         # assert that covariance*inverse_covariance = identity matrix
         self.assertAlmostEqualMatrix(dot(cov,icov), I, 1e-6)
 

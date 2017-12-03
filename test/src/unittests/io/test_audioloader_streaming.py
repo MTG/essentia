@@ -176,9 +176,9 @@ class TestAudioLoader_Streaming(TestCase):
         audio1, _, _, _, _, _ = algo()
         audio2, _, _, _, _, _ = algo()
         audio3, _, _, _, _, _ = algo()
-        self.assertEquals(len(audio1), 441000);
-        self.assertEquals(len(audio2), 441000);
-        self.assertEquals(len(audio3), 441000);
+        self.assertEqual(len(audio1), 441000);
+        self.assertEqual(len(audio2), 441000);
+        self.assertEqual(len(audio3), 441000);
         self.assertEqualMatrix(audio2, audio1)
         self.assertEqualMatrix(audio2, audio3)
 

@@ -30,7 +30,7 @@ class TestSlicer_Streaming(TestCase):
         if nSlices != len(endTimes):
             print("Test cannot be computed")
             exit(1)
-        input = range(max(endTimes))
+        input = list(range(max(endTimes)))
 
         # expected values:
         expected = []

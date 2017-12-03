@@ -130,9 +130,9 @@ class TestLoudnessEBUR128(TestCase):
 
         # Momentary and short-term loudness can have values below absolute threshold of -70. LUFS
         for x in m:
-            self.assert_(x <= -70.)
+            self.assertTrue(x <= -70.)
         for x in s:
-            self.assert_(x <= -70.)
+            self.assertTrue(x <= -70.)
         self.assertEqual(i, -70.)
         self.assertEqual(r, 0.)
 

@@ -42,8 +42,8 @@ class TestBFCC(TestCase):
             bands, bfcc = self.InitBFCC(size)(ones(1025))
             self.assertEqual(len(bfcc), size )
             self.assertEqual(len(bands), 40 )
-            self.assert_(not any(numpy.isnan(bfcc)))
-            self.assert_(not any(numpy.isinf(bfcc)))
+            self.assertTrue(not any(numpy.isnan(bfcc)))
+            self.assertTrue(not any(numpy.isinf(bfcc)))
             size -= 1
 
     def testRegressionRastaMode(self):

@@ -55,9 +55,9 @@ class TestSingleBeatLoudness(TestCase):
     def testRegression(self):
         # test that it yields valid output (which doesn't mean correct output ;)
         loudness = SingleBeatLoudness(frequencyBands = [20,150])(array(random.rand(8192)))
-        self.assert_(not any(numpy.isnan(loudness)))
-        self.assert_(not any(numpy.isinf(loudness)))
-        self.assert_(all(array(loudness) >= 0.0))
+        self.assertTrue(not any(numpy.isnan(loudness)))
+        self.assertTrue(not any(numpy.isinf(loudness)))
+        self.assertTrue(all(array(loudness) >= 0.0))
 
 
 suite = allTests(TestSingleBeatLoudness)

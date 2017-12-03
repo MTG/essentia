@@ -52,8 +52,8 @@ if __name__ == '__main__':
     try:
         input_file = sys.argv[1]
     except:
-        print("usage: %s <input_file>" % sys.argv[0])
+        print(("usage: %s <input_file>" % sys.argv[0]))
         sys.exit()
 
     extractor(sys.argv[1])
-    print('Results written to %s' % input_file+'.features.yaml')
+    print(('Results written to %s' % input_file+'.features.yaml'))

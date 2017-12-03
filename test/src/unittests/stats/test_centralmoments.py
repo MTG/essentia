@@ -26,7 +26,7 @@ class TestCentralMoments(TestCase):
     def testZero(self):
         n = 1000
         cm = CentralMoments(mode = 'pdf', range = n-1)
-        self.assert_(all(cm(zeros(n)) == 0))
+        self.assertTrue(all(cm(zeros(n)) == 0))
 
     def testEmptyOrOne(self):
         self.assertComputeFails(CentralMoments(), [])

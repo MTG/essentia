@@ -66,9 +66,9 @@ def real_fft( f,inv ):
     ims = f[1::2]
 
     fp = [ complex(r,i) for r,i in zip(res,ims) ]
-    print 'fft input ', fp
+    print('fft input ', fp)
     Fp = fft( fp ,0 )
-    print 'fft output ', Fp
+    print('fft output ', Fp)
 
     F = [ complex(0,0) ] * ( N+1 )
     
@@ -102,10 +102,10 @@ def main():
     nerrs= 0
     for i in range(len(Ftvec)/2 + 1):
         if abs( F[i] - Ftvec[i] )> 1e-5:
-            print 'F[%d]: %s != %s' % (i,F[i],Ftvec[i])
+            print('F[%d]: %s != %s' % (i,F[i],Ftvec[i]))
             nerrs += 1
 
-    print '%d errors in forward fft' % nerrs
+    print('%d errors in forward fft' % nerrs)
     if nerrs:
         return
 
@@ -116,10 +116,10 @@ def main():
 
     for i in range(len(tvec) ):
         if abs( trec[i] - tvec[i] )> 1e-5:
-            print 't[%d]: %s != %s' % (i,tvec[i],trec[i])
+            print('t[%d]: %s != %s' % (i,tvec[i],trec[i]))
             nerrs += 1
 
-    print '%d errors in reverse fft' % nerrs
+    print('%d errors in reverse fft' % nerrs)
 
 
 def make_random(dims=[1]):
@@ -151,7 +151,7 @@ def test_fftnd(ndims=3):
     import Numeric
 
     x=randmat( ndims )
-    print 'dimensions=%s' % str( Numeric.shape(x) )
+    print('dimensions=%s' % str( Numeric.shape(x) ))
     #print 'x=%s' %str(x)
     xver = FFT.fftnd(x)
     x2=myfftnd(x)
@@ -162,9 +162,9 @@ def test_fftnd(ndims=3):
     sigpow = Numeric.vdot(xverf,xverf)+1e-10
     snr = 10*math.log10(abs(sigpow/errpow) )
     if snr<80:
-        print xver
-        print x2
-    print 'SNR=%sdB' % str( snr )
+        print(xver)
+        print(x2)
+    print('SNR=%sdB' % str( snr ))
  
 def myfftnd(x):
     import Numeric

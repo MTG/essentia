@@ -49,7 +49,7 @@ for root, dirs, files in tree:
 
         y = yaml.load( open(results_file).read(), yaml.CLoader )
 
-        print(y['chords']['values'])
+        print((y['chords']['values']))
 
         key = y['key_key']['value']
         scale = y['key_scale']['value']
@@ -63,7 +63,7 @@ for root, dirs, files in tree:
                 continue
             key_hist[chords[c.strip('m')]] += 1
             mod = chords[c] % chords[key]
-            print mod, ' ',
+            print(mod, ' ', end=' ')
             if not genre in distances:
                 distances[genre] = [0]*25
             #distances[genre].append( mod )
@@ -82,9 +82,9 @@ for root, dirs, files in tree:
 
 i=1
 html = '<html>'
-for genre, distance in distances.items():
+for genre, distance in list(distances.items()):
     figure(i)
-    bar( range(25), distance )
+    bar( list(range(25)), distance )
     #n, bins, patches = hist( distance, 24 )
     #xlabel('values')
     #ylabel('files')

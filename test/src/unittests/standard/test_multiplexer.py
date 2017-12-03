@@ -55,7 +55,7 @@ class TestMultiplexer(TestCase):
         inputReals = [[float(i) for i in range(n*N,(n+1)*N)] for n in range(M)]
 
         for m in range(M):
-            expectedReals.append(range(m, N*M, M))
+            expectedReals.append(list(range(m, N*M, M)))
 
 
         #### Vectors ###

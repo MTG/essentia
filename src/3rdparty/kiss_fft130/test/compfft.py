@@ -66,10 +66,10 @@ def main():
 
     snr = 10 * math.log10(abs( sigpow / noisepow ) )
     if snr<100:
-        print xout
-        print xoutcomp
+        print(xout)
+        print(xoutcomp)
         exitcode=1
-    print 'NFFT=%s,SNR = %f dB' % (str(dims),snr)
+    print('NFFT=%s,SNR = %f dB' % (str(dims),snr))
     sys.exit(exitcode)
 
 def dopack(x,fmt,cpx):

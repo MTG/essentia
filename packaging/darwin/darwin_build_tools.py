@@ -38,7 +38,7 @@ def copy_examples(essentia_root_dir, build_dir, target_dir):
     allfiles = headers + sources + programs + python_examples + libvamp
     ret = 0
     for file in allfiles:
-        print 'copying:', file, 'to', target_dir
+        print('copying:', file, 'to', target_dir)
         ret += subprocess.call(['cp', '-rf', file, target_dir])
 
     return ret
@@ -68,7 +68,7 @@ def removeDSSTORE(dir):
     for file in files:
         if os.path.isdir(file): removeDSSTORE(file)
         else:
-            if file == ds_file: print "removing", file
+            if file == ds_file: print("removing", file)
     ret = 0
     #print 'files:', files
     #ret = 0
@@ -92,7 +92,7 @@ def timeToString():
 def buildPackage(pkg_dir, essentia_root):
     packageMaker = '/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker'
     if not os.path.exists(packageMaker):
-        print "Error building package. Could not find PackageMaker application"
+        print("Error building package. Could not find PackageMaker application")
         return 1
 
     root_dir = pkg_dir # path to where the distribution has been created
@@ -130,52 +130,52 @@ if __name__ == '__main__':
     from optparse import OptionParser
     opt,args = OptionParser().parse_args()
     if (len(args) < 2):
-        print 'error while finalising osx package: wrong number of arguments'
-        print '\tusage: ./osx_finalise.py essentia_source_directory essentia_target_directory'
+        print('error while finalising osx package: wrong number of arguments')
+        print('\tusage: ./osx_finalise.py essentia_source_directory essentia_target_directory')
         sys.exit(1)
 
     build_dir = args[0]
     essentia_root_dir = "/".join(build_dir.split('/')[:-1])
     target_dir = args[1]
-    print '*'*70
-    print 'build_dir:', build_dir
-    print 'essentia_dir:', essentia_root_dir
-    print 'target_dir:', target_dir
-    print '*'*70
+    print('*'*70)
+    print('build_dir:', build_dir)
+    print('essentia_dir:', essentia_root_dir)
+    print('target_dir:', target_dir)
+    print('*'*70)
 
-    print '\n'
-    print '*'*70
-    print '* copying examples to', target_dir
+    print('\n')
+    print('*'*70)
+    print('* copying examples to', target_dir)
     if copy_examples(essentia_root_dir,             # where essentia src lives
                      join(build_dir,'examples'),    # where examples are built
                      join(target_dir, 'examples')): # where we want to copy examples
-        print "An error occurred while finalising osx package: error while\
-        copying examples"
+        print("An error occurred while finalising osx package: error while\
+        copying examples")
         sys.exit(1)
 
-    print '* copying documentation to', target_dir
+    print('* copying documentation to', target_dir)
     if copy_documentation(essentia_root_dir, target_dir):
-        print "An error occurred while finalising osx package: error while\
-        copying documentation"
+        print("An error occurred while finalising osx package: error while\
+        copying documentation")
         sys.exit(2)
 
-    print '* removing \".DS_Store\" files from', target_dir
+    print('* removing \".DS_Store\" files from', target_dir)
     if removeDSSTORE(target_dir):
-        print "An error occurred while finalising osx package: "\
-              " could not delete all \".DS_Store\" files."
+        print("An error occurred while finalising osx package: "\
+              " could not delete all \".DS_Store\" files.")
         sys.exit(3)
 
-    print '* copying tests from', essentia_root_dir, 'to', target_dir
+    print('* copying tests from', essentia_root_dir, 'to', target_dir)
     if copy_python_tests(essentia_root_dir, target_dir):
-        print "An error occurred while finalising osx package: "\
-              " could not copy unittest files."
+        print("An error occurred while finalising osx package: "\
+              " could not copy unittest files.")
         sys.exit(3)
 
     pkg_dir = PKG_DIR
-    print '* creating distribution pkg in', pkg_dir
+    print('* creating distribution pkg in', pkg_dir)
     if subprocess.call(['mkdir', pkg_dir]):
-        print "An error occurred while finalising osx package: could not "\
-              "create", pkg_dir
+        print("An error occurred while finalising osx package: could not "\
+              "create", pkg_dir)
         sys.exit(4)
 
     # store where usr and Library are before moving them:
@@ -183,60 +183,60 @@ if __name__ == '__main__':
     library_dir = join(build_dir, 'Library')
 
     if subprocess.call(['mkdir', join(pkg_dir,'usr')]):
-        print "An error occurred while finalising osx package: could not "\
-              "create directory:", join(pkg_dir,'usr')
+        print("An error occurred while finalising osx package: could not "\
+              "create directory:", join(pkg_dir,'usr'))
 
     if subprocess.call(['cp', '-r', usr_dir, join(pkg_dir,'usr', 'local')]):
-        print "An error occurred while finalising osx package: could not "\
-              "move", usr_dir, "to", pkg_dir
+        print("An error occurred while finalising osx package: could not "\
+              "move", usr_dir, "to", pkg_dir)
         sys.exit(5)
 
     if subprocess.call(['mv', library_dir, pkg_dir]):
-        print "An error occurred while finalising osx package: could not "\
-              "move", library_dir, "to", pkg_dir
+        print("An error occurred while finalising osx package: could not "\
+              "move", library_dir, "to", pkg_dir)
         sys.exit(6)
 
     if subprocess.call(['mv', target_dir, pkg_dir]):
-        print "An error occurred while finalising osx package: could not "\
-              "copy ", target_dir, "to", pkg_dir
+        print("An error occurred while finalising osx package: could not "\
+              "copy ", target_dir, "to", pkg_dir)
         sys.exit(7)
 
 
     # change ownership of usr folder to root:wheel:
     usr_dir = join(pkg_dir, 'usr')
-    print '* changing ownership of ', usr_dir, 'to root:wheel'
+    print('* changing ownership of ', usr_dir, 'to root:wheel')
     if chown(usr_dir, 'root', 'wheel', True):
-        print "An error occurred while finalising osx package: "\
-              "could not change ownership of \"usr\" folder"
+        print("An error occurred while finalising osx package: "\
+              "could not change ownership of \"usr\" folder")
         sys.exit(8)
 
     # change ownership of Library folder to root:admin:
     library_dir = join(pkg_dir, 'Library')
-    print '* changing ownership of ', library_dir, 'to root:admin'
+    print('* changing ownership of ', library_dir, 'to root:admin')
     if chown(library_dir, 'root', 'admin', True):
-        print "An error occurred while finalising osx package: error while "\
-              "changing ownership of \"Library\" folder"
+        print("An error occurred while finalising osx package: error while "\
+              "changing ownership of \"Library\" folder")
         sys.exit(9)
 
-    print "* Building Package..."
+    print("* Building Package...")
     if buildPackage(PKG_DIR, essentia_root_dir):
-        print "An error occurred while finalising osx package: error while "\
-              "creating the package"
+        print("An error occurred while finalising osx package: error while "\
+              "creating the package")
         # osx packageMaker failed, but distribuiton package was done succesfully:
-        print '\n'
-        print "*"*70
-        print "* osx distribution build successful. You may find it in", pkg_dir
-        print "* in order to build the package you must use PackageMaker found in "\
-              "* /Developer"
-        print "*"*70
-        print '\n'
+        print('\n')
+        print("*"*70)
+        print("* osx distribution build successful. You may find it in", pkg_dir)
+        print("* in order to build the package you must use PackageMaker found in "\
+              "* /Developer")
+        print("*"*70)
+        print('\n')
         sys.exit(0)
     else:
-        print '\n'
-        print "*"*70
-        print "* osx package build successful. You may find it in your root "\
-              "directory"
-        print "*"*70
-        print '\n'
+        print('\n')
+        print("*"*70)
+        print("* osx package build successful. You may find it in your root "\
+              "directory")
+        print("*"*70)
+        print('\n')
         sys.exit(0)
 

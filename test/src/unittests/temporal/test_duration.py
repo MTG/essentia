@@ -42,7 +42,7 @@ class TestDuration(TestCase):
         self.assertAlmostEqual(Duration()(input), 2.26757365454e-5)
 
     def test30Sec(self):
-        input = [randint(0, 100) for x in xrange(44100*30)]
+        input = [randint(0, 100) for x in range(44100*30)]
         self.assertAlmostEqual(Duration()(input), 30.0)
 
     def testSampleRates(self):
@@ -75,7 +75,7 @@ class TestDuration(TestCase):
         self.assertAlmostEqual(pool['duration'], 2.26757365454e-5)
 
     def test30SecStreaming(self):
-        gen = VectorInput([ randint(0, 100) for x in xrange(44100*30) ])
+        gen = VectorInput([ randint(0, 100) for x in range(44100*30) ])
         dur = es.Duration()
         pool = Pool()
 

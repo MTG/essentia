@@ -44,8 +44,8 @@ class TestGFCC(TestCase):
             bands, gfcc = self.InitGFCC(size, logType)(ones(1025))
             self.assertEqual(len(gfcc), size )
             self.assertEqual(len(bands), 40 )
-            self.assert_(not any(numpy.isnan(gfcc)))
-            self.assert_(not any(numpy.isinf(gfcc)))
+            self.assertTrue(not any(numpy.isnan(gfcc)))
+            self.assertTrue(not any(numpy.isinf(gfcc)))
             size -= 1
 
 

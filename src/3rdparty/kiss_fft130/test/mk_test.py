@@ -96,22 +96,22 @@ def main():
     from getopt import getopt
     opts,args = getopt(sys.argv[1:],'s')
     opts = dict(opts)
-    short = int( opts.has_key('-s') )
+    short = int( '-s' in opts )
 
     fftsizes = args
     if not fftsizes:
         fftsizes = [ 1800 ]
-    print '#include "kiss_fft.h"'
-    print compare_func()
-    print "int main() { int exit_code=0;\n"
+    print('#include "kiss_fft.h"')
+    print(compare_func())
+    print("int main() { int exit_code=0;\n")
     for n in fftsizes:
         n = int(n)
-        print test_cpx(n,0,short)
-        print test_cpx(n,1,short)
-    print """
+        print(test_cpx(n,0,short))
+        print(test_cpx(n,1,short))
+    print("""
     return exit_code;
 }
-"""
+""")
 
 if __name__ == "__main__":
     main()

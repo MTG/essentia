@@ -32,7 +32,7 @@ def print_onset(onset):
     else:
        minutes = int(floor(onset / 60.0))
        seconds = int(floor(onset % 60))
-    print minutes, "mn", seconds, "s",
+    print(minutes, "mn", seconds, "s", end=' ')
 
 
 def compute(megalopool, verbose = True):
@@ -40,7 +40,7 @@ def compute(megalopool, verbose = True):
     cvar.verbose = False
 
     if verbose:
-       print "\nDoing thumbnailing..."
+       print("\nDoing thumbnailing...")
 
     # From megalopool to Gaia point
     p = megalopool.to_point()
@@ -98,14 +98,14 @@ def compute(megalopool, verbose = True):
 
     if verbose:
        if len(thumbnail) > 0:
-          print 'Thumbnail : ',
-          print '[',
+          print('Thumbnail : ', end=' ')
+          print('[', end=' ')
           print_onset(thumbnail[0])
-          print ",",
+          print(",", end=' ')
           print_onset(thumbnail[1])
-          print '] ',
+          print('] ', end=' ')
        else:
-          print 'No thumbnail found!'
-       print
+          print('No thumbnail found!')
+       print()
 
     return thumbnail

@@ -55,7 +55,7 @@ def compute(eqloudSource, neqloudSource, pool, startTime=0, endTime=1e6, namespa
     lowLevelSpectral = LowLevelSpectralExtractor(halfSampleRate=sampleRate*0.5)
     neqloudSource >> lowLevelSpectral.signal
     sfx_descriptors = ["inharmonicity", "oddtoevenharmonicenergyratio", "tristimulus"]
-    for desc, output in lowLevelSpectral.outputs.items():
+    for desc, output in list(lowLevelSpectral.outputs.items()):
         if desc in sfx_descriptors:
             output >> (pool, sfxspace + desc)
         else: output >> (pool, llspace + desc)
@@ -63,7 +63,7 @@ def compute(eqloudSource, neqloudSource, pool, startTime=0, endTime=1e6, namespa
     # Low-Level Spectral Equal Loudness Descriptors
     lowLevelSpectralEqloud = LowLevelSpectralEqloudExtractor(sampleRate=sampleRate)
     eqloudSource >> lowLevelSpectralEqloud.signal
-    for desc, output in lowLevelSpectralEqloud.outputs.items():
+    for desc, output in list(lowLevelSpectralEqloud.outputs.items()):
         output >> (pool, llspace + desc)
 
     # Level Descriptor
@@ -79,7 +79,7 @@ def compute(eqloudSource, neqloudSource, pool, startTime=0, endTime=1e6, namespa
     # Rhythm descriptors
     rhythm = RhythmDescriptorsExtractor()
     neqloudSource >> rhythm.signal
-    for desc, output in rhythm.outputs.items():
+    for desc, output in list(rhythm.outputs.items()):
         output >> (pool, rhythmspace + desc)
 
     # onset detection:

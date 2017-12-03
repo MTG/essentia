@@ -85,11 +85,11 @@ def plot_bpm_file(pool):
     ticks  = pool.descriptors['tempotap_ticks']['values'][0]
     rubato_start = pool.descriptors['tempotap_rubato_start']['values'][0]
     rubato_stop = pool.descriptors['tempotap_rubato_stop']['values'][0]
-    print('bpm', bpm)
-    print('ticks', ticks)
-    print('rubato_start', rubato_start)
-    print('rubato_stop', rubato_stop)
-    print('intervals', intervals)
+    print(('bpm', bpm))
+    print(('ticks', ticks))
+    print(('rubato_start', rubato_start))
+    print(('rubato_stop', rubato_stop))
+    print(('intervals', intervals))
     import pylab
     pylab.plot(ticks,[bpm_periods[0]] + bpm_periods,'r+-')
     pylab.hold(True)
@@ -97,7 +97,7 @@ def plot_bpm_file(pool):
     pylab.plot(rubato_start,[bpm]*len(rubato_start),'b+')
     pylab.plot(rubato_stop,[bpm]*len(rubato_stop),'b|')
     # ground truth
-    if 'gt_ticks' in pool.descriptors.keys():
+    if 'gt_ticks' in list(pool.descriptors.keys()):
         gt_ticks  = pool.descriptors['gt_ticks']['values'][0]
         if len(gt_ticks) > 1:
             gt_bpm_periods = [60./(gt_ticks[i] - gt_ticks[i-1]) for i in range(1,len(gt_ticks))]
@@ -164,12 +164,12 @@ if __name__ == '__main__':
           dump = yaml.dump
       metadata = load(open(options.ground_truth_file))
       # add ground truth to pool
-      if 'bpm' in metadata.keys():
+      if 'bpm' in list(metadata.keys()):
           true_bpm = metadata['bpm']
           pool.add('gt_bpm', true_bpm, 0)
       #else:
       #    print 'no bpm found in ground truth file'
-      if 'ticks' in metadata.keys():
+      if 'ticks' in list(metadata.keys()):
           true_ticks = metadata['ticks']
           pool.add('gt_ticks', true_ticks, 0)
       #else:
@@ -183,7 +183,7 @@ if __name__ == '__main__':
     if options.do_final_plots: 
         plot_bpm_file(pool)
     if options.ground_truth_file is not None: 
-        print('ground truth bpm', true_bpm)
+        print(('ground truth bpm', true_bpm))
     if options.verbose:
       bpm    = pool.descriptors['tempotap_bpm']['values'][0]
       intervals = pool.descriptors['tempotap_intervals']['values'][0]
@@ -191,9 +191,9 @@ if __name__ == '__main__':
       ticks  = pool.descriptors['tempotap_ticks']['values'][0]
       rubato_start = pool.descriptors['tempotap_rubato_start']['values'][0]
       rubato_stop = pool.descriptors['tempotap_rubato_stop']['values'][0]
-      print('bpm', bpm)
-      print('ticks', ticks)
-      print('rubato_start', rubato_start)
-      print('rubato_stop', rubato_stop)
-      print('intervals', intervals)
+      print(('bpm', bpm))
+      print(('ticks', ticks))
+      print(('rubato_start', rubato_start))
+      print(('rubato_stop', rubato_stop))
+      print(('intervals', intervals))
 

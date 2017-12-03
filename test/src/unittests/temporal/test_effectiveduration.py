@@ -54,24 +54,24 @@ class TestEffectiveDuration(TestCase):
                                100/44100.0)
 
     def test30Sec(self):
-        input = [randint(41, 100) for x in xrange(44100*30)]
+        input = [randint(41, 100) for x in range(44100*30)]
         self.assertAlmostEqual(EffectiveDuration()(input), 30)
 
     def test15SecOf30Sec(self):
-        input1 = [randint(41, 100) for x in xrange(44100*15)]
+        input1 = [randint(41, 100) for x in range(44100*15)]
         input1[0] = 100 # to ensure that at least one element is 100
-        input2 = [randint(0, 39) for x in xrange(44100*15)]
+        input2 = [randint(0, 39) for x in range(44100*15)]
         input = input1 + input2
 
         self.assertAlmostEqual(EffectiveDuration()(input), 15)
 
     def testNegative20SecOf40Sec(self):
         # Note: this test assumes the thresholdRatio is 40%
-        input1 = [randint(-100, -41) for x in xrange(44100*10)]
-        input2 = [randint(0, 39) for x in xrange(44100*10)]
-        input3 = [randint(41, 100) for x in xrange(44100*10)]
+        input1 = [randint(-100, -41) for x in range(44100*10)]
+        input2 = [randint(0, 39) for x in range(44100*10)]
+        input3 = [randint(41, 100) for x in range(44100*10)]
         input3[0] = 100 # to ensure that at least one element is 100
-        input4 = [randint(-39, 0) for x in xrange(44100*10)]
+        input4 = [randint(-39, 0) for x in range(44100*10)]
 
         input = input1 + input2 + input3 + input4
 

@@ -66,9 +66,9 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
 
     if not audio_types:
         audio_types = ['*.wav', '*.aiff', '*.flac', '*.mp3', '*.ogg']
-        print("Audio files extensions considered by default: " + ' '.join(audio_types))
+        print(("Audio files extensions considered by default: " + ' '.join(audio_types)))
     else:
-        print("Searching for audio files extensions: " + ' '.join(audio_types))
+        print(("Searching for audio files extensions: " + ' '.join(audio_types)))
     print("")
 
     if profile:
@@ -88,20 +88,20 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
     errors = 0
     results = {}
     for audio_file in audio_files:
-        print("Analyzing %s" % audio_file)
+        print(("Analyzing %s" % audio_file))
 
         if output_dir:
             sig_file = os.path.join(output_dir, audio_file)
             if skip_analyzed:
                 if os.path.isfile(sig_file + ".sig"):
-                    print("Found descriptor file for " + audio_file + ", skipping...")
+                    print(("Found descriptor file for " + audio_file + ", skipping..."))
                     continue
 
         try:
             poolStats, poolFrames = extractor(audio_file)
 
-        except Exception, e:
-            print("Error processing", audio_file, ":", str(e))
+        except Exception as e:
+            print(("Error processing", audio_file, ":", str(e)))
             errors += 1
             continue
 
@@ -117,7 +117,7 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
             if not os.path.exists(folder):
                 os.makedirs(folder)
             elif os.path.isfile(folder):
-                print("Cannot create directory %s" % folder)
+                print(("Cannot create directory %s" % folder))
                 print("There exist a file with the same name. Aborting analysis.")
                 sys.exit()
 
@@ -126,12 +126,12 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
             if store_frames:
                 YamlOutput(filename=sig_file + '.frames.sig')(poolFrames)
 
-    print
-    print "Analysis done.", errors, "files have been skipped due to errors"
+    print()
+    print("Analysis done.", errors, "files have been skipped due to errors")
 
     # save to json
     if output_json:
-        print("Saving results to %s" % output_json)
+        print(("Saving results to %s" % output_json))
         with open(output_json, 'w') as f:
             json.dump(results, f)
 

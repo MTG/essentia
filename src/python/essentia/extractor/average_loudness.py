@@ -20,7 +20,7 @@ import numpy
 import sys
 from math import *
 from essentia import INFO
-from squeezeInto import squeezeInto
+from .squeezeInto import squeezeInto
 from essentia.essentia_extractor import descriptorNames
 from essentia.progress import Progress
 

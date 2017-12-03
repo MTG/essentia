@@ -38,7 +38,7 @@ class TestDissonance(TestCase):
         self.assertComputeFails(Dissonance(), [1,3,2], [1,2,3])
 
     def testZeros(self):
-        self.assertAlmostEqual(Dissonance()( range(44100), [0]*44100 ), 0)
+        self.assertAlmostEqual(Dissonance()( list(range(44100)), [0]*44100 ), 0)
 
     def testBadFreqs(self):
         self.assertAlmostEqual(Dissonance()( [0]*100, [1]*100 ), 0)
@@ -60,7 +60,7 @@ class TestDissonance(TestCase):
         mags[3] = 0.555555
         mags[7] = 0.211
         mags[15] = 0.05
-        self.assertNotEquals(Dissonance()(harms, mags), 0)
+        self.assertNotEqual(Dissonance()(harms, mags), 0)
 
     def testHarmonic(self):
         size = 32

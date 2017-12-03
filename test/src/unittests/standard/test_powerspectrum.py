@@ -51,7 +51,7 @@ class TestPowerSpectrum(TestCase):
             1e-6)
 
     def testSize(self):
-        signal = range(100)
+        signal = list(range(100))
         self.assertAlmostEqualVector(
             PowerSpectrum(size=54)(signal),
             [x**2 for x in Spectrum()(signal)],
@@ -62,7 +62,7 @@ class TestPowerSpectrum(TestCase):
         specSize = size/2+1
         signal = zeros(size);
         signal[0] = 1
-        self.assertEquals(sum(PowerSpectrum()(signal)), specSize)
+        self.assertEqual(sum(PowerSpectrum()(signal)), specSize)
 
     def testZero(self):
         input = [0]*1024

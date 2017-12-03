@@ -88,17 +88,17 @@ loader = es.%s()
 def print_dependencies(algos, tree=None, lines=None):
     print("Dependencies:")
     for m,a in set(algos):
-        print(m + '\t' + a)
+        print((m + '\t' + a))
     print('')
 
     if tree:
         print("Dependencies tree (yaml)")
-        print(yaml.safe_dump(tree, indent=4))
+        print((yaml.safe_dump(tree, indent=4)))
 
 
     if lines:
         print("Essentia logger output")
-        print('\n'.join(lines))
+        print(('\n'.join(lines)))
         print('')
         print('')
 
@@ -121,10 +121,10 @@ if __name__ == "__main__":
     streaming = essentia.streaming.algorithmNames()
     standard = essentia.standard.algorithmNames()
 
-    print("Found %d streaming algorithms" % len(streaming))
-    print("Found %d standard algorithms" % len(standard))
-    print("%d algorithms in with both modes" % len(set(streaming) & set(standard)))
-    print("%d algorithms in total" % len(set(streaming) | set(standard)))
+    print(("Found %d streaming algorithms" % len(streaming)))
+    print(("Found %d standard algorithms" % len(standard)))
+    print(("%d algorithms in with both modes" % len(set(streaming) & set(standard))))
+    print(("%d algorithms in total" % len(set(streaming) | set(standard))))
     print('')
 
     algos = [(a, "standard") for a in standard] + [(a, "streaming") for a in streaming]
@@ -140,13 +140,13 @@ if __name__ == "__main__":
         print("Mode was not specified. Analyze dependencies for both modes")
 
     if not algos and args['algo'] and args['mode']:
-        print('Algorithm "' + args['algo'] + '" not found in essentia.' + args['mode'])
+        print(('Algorithm "' + args['algo'] + '" not found in essentia.' + args['mode']))
         sys.exit()
 
     all_dependencies = []
 
     for algo, mode in algos:
-        print("---------- %s : %s ----------" % (mode, algo))
+        print(("---------- %s : %s ----------" % (mode, algo)))
         dependencies, tree, _ = find_dependencies(mode, algo)  
         #print_dependencies(dependencies, tree)
         print_dependencies(dependencies)

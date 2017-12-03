@@ -67,7 +67,7 @@ def levelAverage(pool, namespace=''):
         if x <= threshold : return threshold
         return x
 
-    loudness = map(f, loudness)
+    loudness = list(map(f, loudness))
 
     # average level:
     levelAverage = 10.0*log10(mean(loudness))

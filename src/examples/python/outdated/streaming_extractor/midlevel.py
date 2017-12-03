@@ -47,7 +47,7 @@ def compute(source, pool, startTime=0, endTime=1e6, namespace='',
         tuning_frequency = pool[tonalspace + 'tuning_frequency'][-1]
     tonalDescriptors = TonalDescriptorsExtractor(tuningFrequency=tuning_frequency)
     source >> tonalDescriptors.signal
-    for desc, output in tonalDescriptors.outputs.items():
+    for desc, output in list(tonalDescriptors.outputs.items()):
         output >> (pool, tonalspace + desc)
 
     ticks = pool[rhythmspace + 'beats_position']

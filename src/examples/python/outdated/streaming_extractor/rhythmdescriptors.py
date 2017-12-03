@@ -90,7 +90,7 @@ if __name__ == '__main__':
     loader = essentia.streaming.MonoLoader(filename=args[0])
     rhythm = RhythmDescriptorsExtractor()
     loader.audio >> rhythm.signal
-    for desc, output in rhythm.outputs.items():
+    for desc, output in list(rhythm.outputs.items()):
         output >> (pool, desc)
     essentia.run(loader)
 
