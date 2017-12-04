@@ -38,7 +38,7 @@ class TestRollOff(TestCase):
         self.assertAlmostEqual(result, 44100/2 * .85)
 
     def testPinkNoise(self):
-        input = [1./x for x in xrange(1,44101)]
+        input = [1./x for x in range(1,44101)]
         result = RollOff( cutoff=.85 )( input )
         self.assertAlmostEqual(result, 1.50003397465)
 

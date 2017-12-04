@@ -55,14 +55,11 @@ class TestMultiplexer(TestCase):
         inputReals = [[float(i) for i in range(n*N,(n+1)*N)] for n in range(M)]
 
         for m in range(M):
-            expectedReals.append(range(m, N*M, M))
-
+            expectedReals.append(list(range(m, N*M, M)))
 
         #### Vectors ###
 
         inputVectors = [[[float(m + n*M + i*N*M) for m in range(M)] for n in range(N)] for i in range(nVectors)]
-
-
 
         expectedVectors = zeros([N,  M*nVectors])
         for n in range(N):
@@ -72,7 +69,8 @@ class TestMultiplexer(TestCase):
 
         ### expected result ###
         expected = [[]]*(len(expectedReals) + len(expectedVectors))
-        for i in range(len(expectedReals)): expected[i] = expectedReals[i] #exp in expectedReals: expected.append(exp)
+        for i in range(len(expectedReals)):
+            expected[i] = expectedReals[i]  # exp in expectedReals: expected.append(exp)
         for i in range(len(expectedVectors)):
             for exp in expectedVectors[i]:
                 expected[i].append(exp)

@@ -53,7 +53,7 @@ class TestBFCC(TestCase):
         hopSize = 441
         fftSize= 2048
         zeroPadding = fftSize - frameSize
-        spectrumSize = fftSize/2 + 1
+        spectrumSize = int(fftSize/2) + 1
 
         #Expected values generated in Rastamat/MATLAB
         expected = array([ 174.2926614, 17.63766925, -12.01485808, -13.28523247,

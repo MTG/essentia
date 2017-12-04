@@ -33,7 +33,7 @@ class TestDecrease(TestCase):
         self.assertComputeFails(Decrease(), [666])
 
     def testRegression(self):
-        self.assertEqual(Decrease(range=4)(range(1, 6)), 1)
+        self.assertEqual(Decrease(range=4)(list(range(1, 6))), 1)
 
 
 suite = allTests(TestDecrease)

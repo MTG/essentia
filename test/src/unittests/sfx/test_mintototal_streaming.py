@@ -26,9 +26,9 @@ class TestMinToTotal_Streaming(TestCase):
 
     def testRegression(self):
         # V-shaped input
-        envelope = range(22050)
+        envelope = list(range(22050))
         envelope.reverse()
-        envelope += range(22050)
+        envelope += list(range(22050))
 
         gen = VectorInput(envelope)
         minToTotal = sMinToTotal()

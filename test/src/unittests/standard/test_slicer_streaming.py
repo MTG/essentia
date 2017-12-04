@@ -30,7 +30,7 @@ class TestSlicer_Streaming(TestCase):
         if nSlices != len(endTimes):
             print("Test cannot be computed")
             exit(1)
-        input = range(max(endTimes))
+        input = list(range(max(endTimes)))
 
         # expected values:
         expected = []
@@ -38,14 +38,14 @@ class TestSlicer_Streaming(TestCase):
         for i in range(nSlices):
             time = (startTimes[i], endTimes[i])
             orderedTimes.append(time)
-        orderedTimes = sorted(orderedTimes, lambda x,y:x[0]-y[0])
+        orderedTimes = sorted(orderedTimes, key=lambda x: x[0])
 
         for i in range(nSlices):
             expected.append(input[orderedTimes[i][0]:orderedTimes[i][1]])
 
         gen = VectorInput(input)
-        slicer = Slicer(startTimes = startTimes,
-                        endTimes = endTimes,
+        slicer = Slicer(startTimes=startTimes,
+                        endTimes=endTimes,
                         timeUnits="samples")
         pool = Pool()
         gen.data >> slicer.audio

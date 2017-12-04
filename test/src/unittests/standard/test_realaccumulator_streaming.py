@@ -48,7 +48,7 @@ class TestRealAccumulator_Streaming(TestCase):
 
     def testPreferredSize(self):
         # NB: this is not as useful as before when we had a preferredSize parameter
-        input = [ float(i) for i in xrange(44100)]
+        input = [float(i) for i in range(44100)]
         result = self.accumulate(input, size=1024)
         self.assertEqualVector(result, input)
 

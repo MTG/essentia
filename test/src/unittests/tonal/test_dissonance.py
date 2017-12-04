@@ -38,13 +38,13 @@ class TestDissonance(TestCase):
         self.assertComputeFails(Dissonance(), [1,3,2], [1,2,3])
 
     def testZeros(self):
-        self.assertAlmostEqual(Dissonance()( range(44100), [0]*44100 ), 0)
+        self.assertAlmostEqual(Dissonance()(list(range(44100)), [0]*44100 ), 0)
 
     def testBadFreqs(self):
-        self.assertAlmostEqual(Dissonance()( [0]*100, [1]*100 ), 0)
+        self.assertAlmostEqual(Dissonance()([0]*100, [1]*100 ), 0)
 
     def testNoRelevantFreqs(self):
-        self.assertAlmostEqual(Dissonance()( [1,2,3, 10001, 10002], [.1]*5), 0)
+        self.assertAlmostEqual(Dissonance()([1,2,3, 10001, 10002], [.1]*5), 0)
 
 
     def testEnharmonic(self):

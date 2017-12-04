@@ -49,9 +49,9 @@ class TestTCToTotal(TestCase):
 
 
     def testRegression(self):
-        envelope = range(22050)
+        envelope = list(range(22050))
         envelope.reverse()
-        envelope = range(22050) + envelope
+        envelope = list(range(22050)) + envelope
 
         gen = VectorInput(envelope)
         tcToTotal = sTCToTotal()

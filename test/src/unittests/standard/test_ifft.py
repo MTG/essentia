@@ -30,7 +30,7 @@ class TestIFFT(TestCase):
     def testDC(self):
         # input is [1, 0, 0, ...] which corresponds to an IFFT of constant magnitude 1
         signalSize = 512
-        fftSize = signalSize/2 + 1
+        fftSize = int(signalSize/2) + 1
 
         signalDC = zeros(signalSize)
         signalDC[0] = 1.0
@@ -43,7 +43,7 @@ class TestIFFT(TestCase):
     def testNyquist(self):
         # input is [1, -1, 1, -1, ...] which corresponds to a sine of frequency Fs/2
         signalSize = 1024
-        fftSize = signalSize/2 + 1
+        fftSize = int(signalSize/2) + 1
 
         signalNyquist = ones(signalSize)
         for i in range(signalSize):

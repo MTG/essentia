@@ -91,7 +91,7 @@ class TestMultiplexer_Streaming(TestCase):
             inputReals.append([float(i) for i in range(n*M, (n+1)*M)])
 
         for m in range(M):
-            expectedReals.append(range(m, N*M, M))
+            expectedReals.append(list(range(m, N*M, M)))
 
         genReals = [VectorInput(input) for input in inputReals]
 
@@ -113,7 +113,8 @@ class TestMultiplexer_Streaming(TestCase):
 
         ### expected result ###
         expected = []
-        for exp in expectedReals: expected.append(exp)
+        for exp in expectedReals:
+            expected.append(exp)
         for i in range(len(expectedVectors)):
             for exp in expectedVectors[i]:
                 expected[i].append(exp)

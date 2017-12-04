@@ -70,7 +70,7 @@ class TestSpectralContrast(TestCase):
         spec1 = [1]*1015 + [0]*10
         spec2 = [1]*10 + [0]*1015
         sr = 44100
-        SC = SpectralContrast(sampleRate = sr, highFrequencyBound = sr/2)
+        SC = SpectralContrast(sampleRate=sr, highFrequencyBound=sr/2)
 
         sc0 = SC(spec0)
         sc1 = SC(spec1)

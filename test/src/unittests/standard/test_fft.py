@@ -28,7 +28,7 @@ class TestFFT(TestCase):
     def testDC(self):
         # input is [1, 0, 0, ...] which corresponds to an FFT of constant magnitude 1
         signalSize = 512
-        fftSize = signalSize/2 + 1
+        fftSize = int(signalSize/2) + 1
 
         signalDC = zeros(signalSize)
         signalDC[0] = 1.0
@@ -40,7 +40,7 @@ class TestFFT(TestCase):
     def testNyquist(self):
         # input is [1, -1, 1, -1, ...] which corresponds to a sine of frequency Fs/2
         signalSize = 1024
-        fftSize = signalSize/2 + 1
+        fftSize = int(signalSize/2) + 1
 
         inputNyquist = ones(signalSize)
         for i in range(signalSize):
@@ -79,7 +79,7 @@ class TestFFT(TestCase):
     def testRegression(self):
         inputSignal = numpy.sin(numpy.arange(1024, dtype='f4')/1024. * 441 * 2*math.pi)
         expected = readComplexVector(join(filedir(), 'fft', 'fft_output.txt'))
-        expected = expected[:len(inputSignal)/2+1]
+        expected = expected[:int(len(inputSignal)/2)+1]
 
         # readjust to our precision, otherwise 0.001 compared to 1e-12 would
         # give a 1e9 difference...

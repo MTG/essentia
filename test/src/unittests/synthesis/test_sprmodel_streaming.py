@@ -122,46 +122,45 @@ def analSprModelStreaming(params, signal):
 
 
 def analsynthSprModelStreaming(params, signal):
-  
+
     out = array([0.])
-  
+
     pool = essentia.Pool()
     # windowing and FFT
-    fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
-    w = es.Windowing(type = "blackmanharris92");    
-    spec = es.Spectrum(size = params['frameSize']);
-    
-        
+    fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False)
+    w = es.Windowing(type = "blackmanharris92") 
+    spec = es.Spectrum(size = params['frameSize'])
+
+
     smanal = es.SprModelAnal(sampleRate = params['sampleRate'], hopSize = params['hopSize'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'])
-    synFFTSize = min(params['frameSize']/4, 4*params['hopSize']);  # make sure the FFT size is appropriate
-    smsyn = es.SprModelSynth(sampleRate = params['sampleRate'], fftSize = synFFTSize, hopSize = params['hopSize'])    
-    
+    synFFTSize = min(int(params['frameSize']/4), 4*params['hopSize'])  # make sure the FFT size is appropriate
+    smsyn = es.SprModelSynth(sampleRate=params['sampleRate'],
+                             fftSize=synFFTSize,
+                             hopSize=params['hopSize'])
+
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
-    insignal = VectorInput (signal)
-        
-      
+    signal = numpy.append(signal, zeros(params['frameSize']/2))
+    insignal = VectorInput(signal)
+
+
     # analysis
-    insignal.data >> fcut.signal    
+    insignal.data >> fcut.signal
     fcut.frame >> smanal.frame
 
-    
     # synthesis
     smanal.magnitudes >> smsyn.magnitudes
     smanal.frequencies >> smsyn.frequencies
-    smanal.phases >> smsyn.phases    
+    smanal.phases >> smsyn.phases
     smanal.res >> smsyn.res
-  
-    
+
     smsyn.frame >> (pool, 'frames')
     smsyn.sineframe >> (pool, 'sineframes')
     smsyn.resframe >> (pool, 'resframes')
-    
+
     essentia.run(insignal)
-       
+
     outaudio = framesToAudio(pool['frames'])
-    outaudio = outaudio [2*params['hopSize']:]
-    
+    outaudio = outaudio[2*params['hopSize']:]
 
     return outaudio, pool
 

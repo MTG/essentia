@@ -32,7 +32,7 @@ class TestMonoMixer_Streaming(TestCase):
         offset = 10
         self.left = [0]*size
         self.right = [0]*size
-        for i in range(offset/2, size, offset):
+        for i in range(int(offset/2), size, offset):
             self.left[i] = 1.0
         for i in range(offset, size, offset):
             self.right[i] = 1

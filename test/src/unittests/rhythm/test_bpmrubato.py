@@ -149,7 +149,7 @@ class TestBpmRubato(TestCase):
         self.assertConfigureFails(BpmRubato(), { 'shortRegionsMergingTime': -1 })
 
     def testDescendingBeats(self):
-        beats = range(10)
+        beats = list(range(10))
         beats.reverse()
         self.assertComputeFails(BpmRubato(), beats)
 

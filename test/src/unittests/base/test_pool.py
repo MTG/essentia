@@ -455,7 +455,7 @@ class TestPool(TestCase):
     def testMergeVectorStringRealInt(self):
         def addToPool(name, offset, r, fun):
             p = Pool()
-            vec = [[fun(offset+i*r), fun(offset+i*r+1), fun(offset+i*r+2)] for i in xrange(r)]
+            vec = [[fun(offset+i*r), fun(offset+i*r+1), fun(offset+i*r+2)] for i in range(r)]
             for x in vec: p.add(name, x)
             return p
 

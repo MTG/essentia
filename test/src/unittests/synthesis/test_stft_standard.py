@@ -88,7 +88,7 @@ class TestSTFT(TestCase):
 #        numpy.savetxt('zeros_out.txt',outsignal)
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = int(self.params['frameSize']/2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
 
@@ -100,27 +100,27 @@ class TestSTFT(TestCase):
 
         outsignal = analysisSynthesisStandard(self.params, signal)
         outsignal = outsignal[:signalSize] # cut to duration of input signal
-        
+
 #        numpy.savetxt('noise.txt',signal)
 #        numpy.savetxt('noise_out.txt',outsignal)
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = int(self.params['frameSize']/2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
     def testRamp(self):
         # generate test signal
         signalSize = 10 * self.params['frameSize']
         signal = 0.5 * array([float(2*i%signalSize)/signalSize for i in range(signalSize)])
-        
+
         outsignal = analysisSynthesisStandard(self.params, signal)
-        outsignal = outsignal[:signalSize] # cut to duration of input signal
-        
+        outsignal = outsignal[:signalSize]  # cut to duration of input signal
+
 #        numpy.savetxt('ramp.txt',signal)
 #        numpy.savetxt('ramp_out.txt',outsignal)
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = int(self.params['frameSize']/2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
     def testRegression(self):
@@ -136,7 +136,7 @@ class TestSTFT(TestCase):
 #        numpy.savetxt('sine_out.txt',outsignal)
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = int(self.params['frameSize']/2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
 

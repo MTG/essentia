@@ -25,7 +25,7 @@ class TestScale(TestCase):
 
     def testRegression(self):
         inputSize = 1024
-        input = range(inputSize)
+        input = list(range(inputSize))
         factor = 0.5
         expected = [factor * n for n in input]
         output = Scale(factor=factor, clipping=False)(input)

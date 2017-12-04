@@ -90,9 +90,9 @@ def analsynthSineSubtractionStreaming(params, signal):
     w = es.Windowing(type = "blackmanharris92");
     fft = es.FFT(size = params['frameSize']);
     smanal = es.SineModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
-    
-    subtrFFTSize = min(params['frameSize']/4, 4* params['hopSize'])
-    smsub = es.SineSubtraction(sampleRate = params['sampleRate'], fftSize = subtrFFTSize, hopSize = params['hopSize'])
+
+    subtrFFTSize = min(int(params['frameSize']/4), 4 * params['hopSize'])
+    smsub = es.SineSubtraction(sampleRate=params['sampleRate'], fftSize=subtrFFTSize, hopSize=params['hopSize'])
 
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))

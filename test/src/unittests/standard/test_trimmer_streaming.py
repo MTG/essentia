@@ -26,7 +26,7 @@ class TestTrimmer_Streaming(TestCase):
 
     def slice(self, start, end, sr):
         size = 100*sr
-        input = range(size)
+        input = list(range(size))
         startIdx = int(start*sr);
         stopIdx = int(end*sr)
         if stopIdx > size: stopIdx = size

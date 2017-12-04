@@ -61,7 +61,7 @@ class TestTriangularBarkBands(TestCase):
         hopSize = 441
         fftsize = 2048
         paddingSize = fftsize - frameSize
-        spectrumSize = fftsize/2 + 1
+        spectrumSize = int(fftsize/2) + 1
         w = Windowing(type = 'hann', 
                       size = frameSize, 
                       zeroPadding = paddingSize,

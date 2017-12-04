@@ -53,7 +53,7 @@ class TestAutoCorrelation(TestCase):
 
         self.assertEqual(len(expected)/2, len(output))
 
-        self.assertAlmostEqualVector(expected[:len(expected)/2], output, 1e-4)
+        self.assertAlmostEqualVector(expected[:int(len(expected)/2)], output, 1e-4)
 
 
     def testZero(self):
@@ -66,7 +66,7 @@ class TestAutoCorrelation(TestCase):
         self.assertAlmostEqualVector(AutoCorrelation()([0.2]), [0.04])
 
     def testInvalidParam(self):
-        self.assertConfigureFails(AutoCorrelation(), { 'normalization': 'unknown' })
+        self.assertConfigureFails(AutoCorrelation(), {'normalization': 'unknown'})
 
 
 suite = allTests(TestAutoCorrelation)

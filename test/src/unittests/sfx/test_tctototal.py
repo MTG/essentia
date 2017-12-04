@@ -40,9 +40,9 @@ class TestTCToTotal(TestCase):
         size = 100
         envelope = zeros(size)
 
-        for i in range(size/2):
+        for i in range(int(size/2)):
             envelope[i] = i
-        for i in range(size/2, size):
+        for i in range(int(size/2), size):
             envelope[i] = size - i
         TCToTotal()(envelope)
         self.assertAlmostEqual(TCToTotal()(envelope), 0.5*size/float(size-1))
@@ -57,7 +57,7 @@ class TestTCToTotal(TestCase):
         self.assertComputeFails(TCToTotal(), [0]*100)
 
     def testGaussian(self):
-        data = [x/100. for x in xrange(-50, 50)]
+        data = [x/100. for x in range(-50, 50)]
         envelope = [exp(-(x**2)/2) for x in data]
         self.assertAlmostEqual(TCToTotal()(envelope), 0.5, 1e-3)
 

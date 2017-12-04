@@ -35,15 +35,15 @@ class TestSpectrum(TestCase):
     def testDC(self):
         inputSize = 512
         signalDC = [1] * inputSize
-        expectedDC = [0] * int(inputSize / 2 + 1)
+        expectedDC = [0] * int(inputSize/2 + 1)
         expectedDC[0] = inputSize
         outputDC = Spectrum()(signalDC)
         self.assertEqualVector(outputDC,  expectedDC)
 
     def testNyquist(self):
         inputSize = 512
-        signalNyquist = [-1,  1] * (inputSize / 2)
-        expectedNyquist = [0] * int(inputSize / 2 + 1)
+        signalNyquist = [-1,  1] * int(inputSize/2)
+        expectedNyquist = [0] * int(inputSize/2 + 1)
         expectedNyquist[-1] = inputSize
         outputNyquist = Spectrum()(signalNyquist)
         self.assertEqualVector(outputNyquist,  expectedNyquist)
@@ -51,14 +51,14 @@ class TestSpectrum(TestCase):
     def testZero(self):
         inputSize = 512
         signalZero = [0] * inputSize
-        expectedZero = [0] * int(inputSize / 2 + 1)
+        expectedZero = [0] * int(inputSize/2 + 1)
         outputZero = Spectrum()(signalZero)
         self.assertEqualVector(outputZero,  expectedZero)
 
     def testSize(self):
         inputSize = 512
         fakeSize = 514
-        expectedSize = int(inputSize / 2 + 1)
+        expectedSize = int(inputSize/2 + 1)
         input = [1] * inputSize
         output = Spectrum(size=fakeSize)(input)
         self.assertEqual(len(output), expectedSize)

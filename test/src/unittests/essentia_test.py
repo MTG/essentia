@@ -70,7 +70,7 @@ def readComplexVector(filename):
 
 
 def readMatrix(filename):
-    return array([[float(value) for value in line.strip().split()] for line in open(filename).xreadlines()])
+    return array([[float(value) for value in line.strip().split()] for line in open(filename).readlines()])
 
 
 def allTests(testClass):

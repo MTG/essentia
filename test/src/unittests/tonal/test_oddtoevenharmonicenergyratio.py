@@ -57,7 +57,7 @@ class TestOddToEvenHarmonicEnergyRatio(TestCase):
         evenEnergy = mags[0]**2 + mags[2]**2
         oddEnergy = mags[1]**2 + mags[3]**2
         self.assertAlmostEqual(
-                OddToEvenHarmonicEnergyRatio()(range(len(mags)), mags),
+                OddToEvenHarmonicEnergyRatio()(list(range(len(mags))), mags),
                 oddEnergy / evenEnergy,
                 1e-6)
 

@@ -25,7 +25,7 @@ class TestRawMoments(TestCase):
 
     def testZero(self):
         n = 1000
-        rawMoments = RawMoments(range = n-1)
+        rawMoments = RawMoments(range=n-1)
         self.assert_(all(rawMoments(zeros(n)) == 0))
 
     def testEmptyOrOne(self):
@@ -34,19 +34,18 @@ class TestRawMoments(TestCase):
 
     def testRegression(self):
         input = readVector(join(filedir(), 'stats/input.txt'))
-        range = len(input)-1
         total = sum(input)
 
         expectedMoments = [0]*5
 
         expectedMoments[0] = 1
-        expectedMoments[1] = sum( [pow(freq,1)*input[freq] for freq in xrange(len(input))] ) / total
-        expectedMoments[2] = sum( [pow(freq,2)*input[freq] for freq in xrange(len(input))] ) / total
-        expectedMoments[3] = sum( [pow(freq,3)*input[freq] for freq in xrange(len(input))] ) / total
-        expectedMoments[4] = sum( [pow(freq,4)*input[freq] for freq in xrange(len(input))] ) / total
+        expectedMoments[1] = sum([pow(freq, 1)*input[freq] for freq in range(len(input))]) / total
+        expectedMoments[2] = sum([pow(freq, 2)*input[freq] for freq in range(len(input))]) / total
+        expectedMoments[3] = sum([pow(freq, 3)*input[freq] for freq in range(len(input))]) / total
+        expectedMoments[4] = sum([pow(freq, 4)*input[freq] for freq in range(len(input))]) / total
 
 
-        moments = RawMoments(range = range)(input)
+        moments = RawMoments(range=len(input)-1)(input)
 
         self.assertAlmostEqual(moments[0], expectedMoments[0])
         self.assertAlmostEqual(moments[1], expectedMoments[1], 1e-6)

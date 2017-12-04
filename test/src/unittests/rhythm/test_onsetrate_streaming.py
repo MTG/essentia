@@ -59,14 +59,14 @@ class TestStreamingOnsetRate(TestCase):
 
         # after the first frame,every factor frames there will be an impulse of
         # type 1, 0.8, 0.6, 0.4, 0.2
-        for i in xrange(len(inputData)):
+        for i in range(len(inputData)):
             mod = i%pos
             if i > frameSize and mod < 5:
                 inputData[i] = 0.5*(5-mod)/2.5 # impulse: 1, 0.8, 0.6, 0.4, 0.2
 
         size = int(nFrames/factor);
         expected = [0]*size
-        for i in xrange(size):
+        for i in range(size):
           expected[i] = factor*(i+1)*frameSize/44100
 
         gen = VectorInput(inputData)

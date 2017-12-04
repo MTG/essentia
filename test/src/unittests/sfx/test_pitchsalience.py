@@ -60,7 +60,7 @@ class TestPitchSalience(TestCase):
         sig = []
         for i in range(0, sr, int(stepSize)):
             step*=-1;
-            stepSize = 10 + 100*i/sr
+            stepSize = 10 + int(100*i/sr)
             sig += [step]*stepSize
         varSqrSalience = mean(self.computePitchSalience(sig,sr))
 

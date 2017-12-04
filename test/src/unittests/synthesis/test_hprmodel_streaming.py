@@ -146,45 +146,46 @@ def analsynthHprModelStreaming(params, signal):
     fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
     w = es.Windowing(type = "blackmanharris92");    
     spec = es.Spectrum(size = params['frameSize']);
-    
+
     # pitch detection
     pitchDetect = es.PitchYinFFT(frameSize=params['frameSize'], sampleRate =  params['sampleRate'])    
-    
+
     smanal = es.HprModelAnal(sampleRate = params['sampleRate'], hopSize = params['hopSize'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'])
-    synFFTSize = min(params['frameSize']/4, 4*params['hopSize']);  # make sure the FFT size is appropriate
-    smsyn = es.SprModelSynth(sampleRate = params['sampleRate'], fftSize = synFFTSize, hopSize = params['hopSize'])    
-    
+    synFFTSize = min(int(params['frameSize']/4), 4*params['hopSize'])  # make sure the FFT size is appropriate
+    smsyn = es.SprModelSynth(sampleRate=params['sampleRate'],
+                             fftSize=synFFTSize,
+                             hopSize=params['hopSize'])
+
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize']/2))
     insignal = VectorInput (signal)
-        
-      
+
+
     # analysis
     insignal.data >> fcut.signal
     fcut.frame >> w.frame
-    w.frame >> spec.frame   
+    w.frame >> spec.frame
     spec.spectrum >> pitchDetect.spectrum
-    
+
     fcut.frame >> smanal.frame
-    pitchDetect.pitch >> smanal.pitch  
-    pitchDetect.pitchConfidence >> (pool, 'pitchConfidence')  
-    pitchDetect.pitch >> (pool, 'pitch')  
-    
+    pitchDetect.pitch >> smanal.pitch
+    pitchDetect.pitchConfidence >> (pool, 'pitchConfidence')
+    pitchDetect.pitch >> (pool, 'pitch')
+
     # synthesis
     smanal.magnitudes >> smsyn.magnitudes
     smanal.frequencies >> smsyn.frequencies
     smanal.phases >> smsyn.phases
     smanal.res >> smsyn.res
-    
+
     smsyn.frame >> (pool, 'frames')
     smsyn.sineframe >> (pool, 'sineframes')
     smsyn.resframe >> (pool, 'resframes')
-    
+
     essentia.run(insignal)
-       
-    outaudio = framesToAudio(pool['frames'])        
-    outaudio = outaudio [2*params['hopSize']:]
-    
+
+    outaudio = framesToAudio(pool['frames'])   
+    outaudio = outaudio[2*params['hopSize']:]
 
     return outaudio, pool
 

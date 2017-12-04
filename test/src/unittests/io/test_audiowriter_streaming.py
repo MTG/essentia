@@ -172,7 +172,7 @@ class TestAudioWriter_Streaming(TestCase):
         from math import sin, pi
         format = os.path.splitext(filename)[1].split('.')[1]
         sr = 44100
-        sine = [i/44100.*sin(2.0*pi*10.0*i/sr) for i in xrange(sr)]
+        sine = [i/44100.*sin(2.0*pi*10.0*i/sr) for i in range(sr)]
         #sine = [0.5*sin(2.0*pi*10.0*i/sr) for i in xrange(sr)]
         signal = array([[val,val] for val in sine])
 

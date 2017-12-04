@@ -134,7 +134,7 @@ def mapPools(algo, func):
     # loops
     connections = dict(algo.connections)
 
-    for output, inputs in connections.iteritems():
+    for output, inputs in connections.items():
         ins = list(inputs)
         for input in ins:
             # TODO: assuming input is a tuple of pool and descriptor name
@@ -159,12 +159,12 @@ def runResetRun(gen, *args, **kwargs):
     #    little trick. In particular, we have a test for multiplexer that runs
     #    multiple generators...
     def isValid(algo):
-        if isinstance(algo, essentia.streaming.VectorInput) and not algo.connections.values()[0]:
+        if isinstance(algo, essentia.streaming.VectorInput) and not list(algo.connections.values())[0]:
             # non-connected VectorInput, we don't want to get too fancy here...
             return False
         if algo.name() == 'Multiplexer':
             return False
-        for output, inputs in algo.connections.iteritems():
+        for output, inputs in algo.connections.items():
             for inp in inputs:
                 if isinstance(inp, essentia.streaming._StreamConnector) and not isValid(inp.input_algo):
                     return False

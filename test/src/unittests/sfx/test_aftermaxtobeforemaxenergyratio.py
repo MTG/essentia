@@ -33,10 +33,10 @@ class TestAfterMaxToBeforeMaxEnergyRatio(TestCase):
         self.assertEqual(AfterMaxToBeforeMaxEnergyRatio()([1234]), 1)
 
     def testAscending(self):
-        self.assertEqual(AfterMaxToBeforeMaxEnergyRatio()(range(10)) < 1, True)
+        self.assertEqual(AfterMaxToBeforeMaxEnergyRatio()(list(range(10))) < 1, True)
 
     def testDescending(self):
-        self.assertEqual(AfterMaxToBeforeMaxEnergyRatio()(range(9, -1, -1)) > 1, True)
+        self.assertEqual(AfterMaxToBeforeMaxEnergyRatio()(list(range(9, -1, -1))) > 1, True)
 
     def testMaxInclusion(self):
         self.assertEqual(AfterMaxToBeforeMaxEnergyRatio()([100, 1000, 100]), 1)

@@ -93,7 +93,7 @@ class TestChordsDetection_Streaming(TestCase):
             from essentia.standard import ChordsDetection as stdChordsDetection
             chordsDetection = stdChordsDetection(windowSize=2.0, hopSize = hopSize)
             chords, strength = chordsDetection(pcp)
-            for i in xrange(len(chords)):
+            for i in range(len(chords)):
                 pool.add('chords.progression', chords[i])
                 pool.add('chords.strength', float(strength[i]))
 

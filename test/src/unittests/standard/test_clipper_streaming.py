@@ -30,7 +30,7 @@ class TestClipper_Streaming(TestCase):
         max = 0.5
         min = -1
 
-        input = [2*sin(2*pi*i*5/sr) for i in xrange(sr)]
+        input = [2*sin(2*pi*i*5/sr) for i in range(sr)]
         gen = VectorInput(input)
         clip = Clipper(min=min, max=max)
         p = Pool()
@@ -80,7 +80,7 @@ class TestClipper_Streaming(TestCase):
         max = 0.5
         min = -1.0
         sr = 44100
-        input = [2*sin(2*pi*i*5/sr) for i in xrange(sr)]
+        input = [2*sin(2*pi*i*5/sr) for i in range(sr)]
         output = stdClipper(max=max, min=min)(input)
         for val in output:
             self.assertTrue(val <= max)

@@ -29,7 +29,7 @@ class TestUtils(TestCase):
         self.assertEqual(True, isSilent([0]*100))
 
     def testInstantPower(self):
-        sample = range(1,11)
+        sample = list(range(1, 11))
         p = 0
         for s in sample:
             p += s**2
