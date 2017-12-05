@@ -40,8 +40,8 @@ class TestERBBands(TestCase):
                       1.15976588e+06,   6.31381562e+05,   1.99480609e+05,   1.94543945e+04]
         mbands = self.InitERBBands(24)(spectrum)
         self.assertEqual(len(mbands), 24 )
-        self.assert_(not any(numpy.isnan(mbands)))
-        self.assert_(not any(numpy.isinf(mbands)))
+        self.assertTrue(not any(numpy.isnan(mbands)))
+        self.assertTrue(not any(numpy.isinf(mbands)))
         self.assertAlmostEqualVector(mbands, expected, 1e-5)
 
     def testZero(self):

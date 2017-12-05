@@ -54,11 +54,11 @@ class TestTempoTapTicks(TestCase):
             ticks +=list(tmp[0])
             matching_periods += list(tmp[1])
 
-        self.assertEquals( True, len(ticks) > 0)
+        self.assertEqual( True, len(ticks) > 0)
         # make sure that time is not negative
-        self.assert_(all(array(ticks)) >= 0 )
+        self.assertTrue(all(array(ticks)) >= 0 )
         # make sure there is at least one matching period
-        self.assertEquals( True, len(matching_periods) > 0)
+        self.assertEqual( True, len(matching_periods) > 0)
 
 
     def testResetMethod(self):
@@ -141,8 +141,8 @@ class TestTempoTapTicks(TestCase):
             ticks += list(tmp[0])
             matching_periods += list(tmp[1])
 
-        self.assert_(all(array(ticks) == 0))
-        self.assert_(all(array(matching_periods) == 0))
+        self.assertTrue(all(array(ticks) == 0))
+        self.assertTrue(all(array(matching_periods) == 0))
 
     def testEmpty(self):
         tempotapticks = TempoTapTicks()

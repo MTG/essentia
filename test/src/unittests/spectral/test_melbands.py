@@ -34,14 +34,14 @@ class TestMelBands(TestCase):
         spectrum = [1]*1024
         mbands = self.InitMelBands(24)(spectrum)
         self.assertEqual(len(mbands), 24 )
-        self.assert_(not any(numpy.isnan(mbands)))
-        self.assert_(not any(numpy.isinf(mbands)))
+        self.assertTrue(not any(numpy.isnan(mbands)))
+        self.assertTrue(not any(numpy.isinf(mbands)))
         self.assertAlmostEqualVector(mbands, [1]*24, 1e-5)
 
         mbands = self.InitMelBands(128)(spectrum)
         self.assertEqual(len(mbands), 128 )
-        self.assert_(not any(numpy.isnan(mbands)))
-        self.assert_(not any(numpy.isinf(mbands)))
+        self.assertTrue(not any(numpy.isnan(mbands)))
+        self.assertTrue(not any(numpy.isinf(mbands)))
         self.assertAlmostEqualVector(mbands, [1]*128, 1e-5)
 
     def testRegressionHtkMode(self):

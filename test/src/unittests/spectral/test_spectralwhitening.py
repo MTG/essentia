@@ -116,8 +116,8 @@ class TestSpectralWhitening(TestCase):
         freqs = [bound, bound+1]
         mags = [1, 1]
         whitener = SpectralWhitening(maxFrequency=maxFrequency)
-        expected = [0.9885531068, 1.]  # Only the first mag is whitened
-        actual = whitener(list(range(0, 100)), freqs, mags)
+        expected = [0.9885531068, 1.] # Only the first mag is whitened
+        actual = whitener(list(range(0,100)), freqs, mags)
         self.assertAlmostEqualVector(actual, expected)
 
 

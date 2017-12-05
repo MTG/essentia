@@ -40,13 +40,13 @@ class TestTempoScaleBands(TestCase):
         for frame in FrameGenerator(audio, frameSize = 2048, hopSize = 512):
             scaledbands, cumul = tempobands(fbands(fft(window(frame))))
 
-            self.assert_(not any(numpy.isnan(scaledbands)))
-            self.assert_(not any(numpy.isinf(scaledbands)))
-            self.assert_(all(scaledbands >= 0.0))
+            self.assertTrue(not any(numpy.isnan(scaledbands)))
+            self.assertTrue(not any(numpy.isinf(scaledbands)))
+            self.assertTrue(all(scaledbands >= 0.0))
 
-            self.assert_(not numpy.isnan(cumul))
-            self.assert_(not numpy.isinf(cumul))
-            self.assert_(cumul >= 0.0)
+            self.assertTrue(not numpy.isnan(cumul))
+            self.assertTrue(not numpy.isinf(cumul))
+            self.assertTrue(cumul >= 0.0)
 
     def testConstantInput(self):
        # When input is constant should yiled zero

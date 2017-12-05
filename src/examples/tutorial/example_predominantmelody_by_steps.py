@@ -24,7 +24,7 @@ from numpy import *
 try:
     filename = sys.argv[1]
 except:
-    print("usage: %s <input-audiofile>" % sys.argv[0])
+    print(("usage: %s <input-audiofile>" % sys.argv[0]))
     sys.exit()
 
 
@@ -88,11 +88,11 @@ pitch, confidence = run_pitch_contours_melody(contours_bins,
 #      if you want to get access to pitch salience function and pitch contours.
 
 n_frames = len(pitch)
-print("number of frames: %d" % n_frames)
+print(("number of frames: %d" % n_frames))
 
 # visualize output pitch
 fig = plt.figure()
-plot(range(n_frames), pitch, 'b')
+plot(list(range(n_frames)), pitch, 'b')
 n_ticks = 10
 xtick_locs = [i * (n_frames / 10.0) for i in range(n_ticks)]
 xtick_lbls = [i * (n_frames / 10.0) * hopSize / sampleRate for i in range(n_ticks)]
@@ -105,7 +105,7 @@ suptitle("Predominant melody pitch")
 
 # visualize output pitch confidence
 fig = plt.figure()
-plot(range(n_frames), confidence, 'b')
+plot(list(range(n_frames)), confidence, 'b')
 n_ticks = 10
 xtick_locs = [i * (n_frames / 10.0) for i in range(n_ticks)]
 xtick_lbls = [i * (n_frames / 10.0) * hopSize / sampleRate for i in range(n_ticks)]

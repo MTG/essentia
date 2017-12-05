@@ -54,9 +54,9 @@ class TestSpectrumToCent(TestCase):
         for frame in FrameGenerator(audioSlice, frameSize = frameSize_default, hopSize = hopSize_default):
             truthBands = truthTriangles(fft(window(frame)))
             centBands, centFreqs = centTriangles(fft(window(frame)))
-            self.assert_(not any(numpy.isnan(centBands)))
-            self.assert_(not any(numpy.isinf(centBands)))
-            self.assert_(all(centBands >= 0.0))
+            self.assertTrue(not any(numpy.isnan(centBands)))
+            self.assertTrue(not any(numpy.isinf(centBands)))
+            self.assertTrue(all(centBands >= 0.0))
             self.assertAlmostEqualVector(centBands, truthBands, 1.0e-4)
 
 
@@ -64,8 +64,8 @@ class TestSpectrumToCent(TestCase):
     def testZero(self):
         speaks = SpectralPeaks()
         (freqs, mags) = speaks(numpy.zeros(1024, dtype='f4'))
-        self.assert_(len(freqs) == 0)
-        self.assert_(len(mags) == 0)
+        self.assertTrue(len(freqs) == 0)
+        self.assertTrue(len(mags) == 0)
 
 
 

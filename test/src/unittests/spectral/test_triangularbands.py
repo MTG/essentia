@@ -35,9 +35,9 @@ class TestTriangularBands(TestCase):
         for frame in FrameGenerator(audio, frameSize = 2048, hopSize = 512):
             bands = fbands(fft(window(frame)))
 
-            self.assert_(not any(numpy.isnan(bands)))
-            self.assert_(not any(numpy.isinf(bands)))
-            self.assert_(all(bands >= 0.0))
+            self.assertTrue(not any(numpy.isnan(bands)))
+            self.assertTrue(not any(numpy.isinf(bands)))
+            self.assertTrue(all(bands >= 0.0))
 
         # input is a flat spectrum:
         input = [1]*1024

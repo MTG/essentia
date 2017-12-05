@@ -150,7 +150,7 @@ if __name__ == '__main__':
     loader = essentia.streaming.MonoLoader(filename=args[0])
     tonalExtractor = TonalDescriptorsExtractor()
     loader.audio >> tonalExtractor.signal
-    for desc, output in tonalExtractor.outputs.items():
+    for desc, output in list(tonalExtractor.outputs.items()):
         output >> (pool, desc)
     essentia.run(loader)
 

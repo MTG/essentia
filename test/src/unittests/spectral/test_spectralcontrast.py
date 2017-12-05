@@ -39,8 +39,8 @@ class TestSpectralContrast(TestCase):
         valleys = []
         for frame in FrameGenerator(audio, frameSize = 2048, hopSize = 512):
             result = SC(fft(window(frame)))
-            self.assert_(not any(numpy.isnan(result[0])))
-            self.assert_(not any(numpy.isinf(result[1])))
+            self.assertTrue(not any(numpy.isnan(result[0])))
+            self.assertTrue(not any(numpy.isinf(result[1])))
             sc += [result[0]]
             valleys += [result[1]]
         self.assertAlmostEqual(numpy.mean(sc), -0.604606057431, 1e-5)
@@ -105,8 +105,8 @@ class TestSpectralContrast(TestCase):
     def testSpectrumSizeSmallerThanNumberOfBands(self):
         SC = SpectralContrast(sampleRate = 44100, frameSize = 4)
         sc = SC([1,1,1])
-        self.assertAlmostEquals(numpy.mean(sc[0]), -2.7182817459)
-        self.assertAlmostEquals(numpy.mean(sc[1]), 0)
+        self.assertAlmostEqual(numpy.mean(sc[0]), -2.7182817459)
+        self.assertAlmostEqual(numpy.mean(sc[1]), 0)
 
 
 suite = allTests(TestSpectralContrast)

@@ -48,14 +48,14 @@ class TestAttackTime(TestCase):
 
             atime, start, stop = self.attackTime(self.envelope(frame))
 
-            self.assert_(not numpy.isinf(atime))
-            self.assert_(not numpy.isnan(atime))
+            self.assertTrue(not numpy.isinf(atime))
+            self.assertTrue(not numpy.isnan(atime))
 
 
 
     def testZero(self):
         smoothed = self.envelope(zeros(1024))
-        self.assert_((smoothed == zeros(1024)).all())
+        self.assertTrue((smoothed == zeros(1024)).all())
 
         atime = self.attackTime(smoothed)
         self.assertEqualVector(atime, [-5.0, 0., 0.])

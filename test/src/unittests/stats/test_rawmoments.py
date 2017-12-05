@@ -25,8 +25,8 @@ class TestRawMoments(TestCase):
 
     def testZero(self):
         n = 1000
-        rawMoments = RawMoments(range=n-1)
-        self.assert_(all(rawMoments(zeros(n)) == 0))
+        rawMoments = RawMoments(range = n-1)
+        self.assertTrue(all(rawMoments(zeros(n)) == 0))
 
     def testEmptyOrOne(self):
         self.assertComputeFails(RawMoments(), [])
@@ -43,7 +43,6 @@ class TestRawMoments(TestCase):
         expectedMoments[2] = sum([pow(freq, 2)*input[freq] for freq in range(len(input))]) / total
         expectedMoments[3] = sum([pow(freq, 3)*input[freq] for freq in range(len(input))]) / total
         expectedMoments[4] = sum([pow(freq, 4)*input[freq] for freq in range(len(input))]) / total
-
 
         moments = RawMoments(range=len(input)-1)(input)
 

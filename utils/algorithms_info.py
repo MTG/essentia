@@ -17,7 +17,7 @@
 
 #!/usr/bin/python
 
-from __future__ import print_function
+
 
 import os
 import sys
@@ -241,13 +241,13 @@ def get_all_algorithms(algo_dir, root_dir=None):
 
                 # 4- if we couldn't determine some attributes of inputs/outputs, put
                 #    placeholders
-                for (input, attr) in inputs.items():
+                for (input, attr) in list(inputs.items()):
                     if 'name' not in attr:
                         attr['name'] = 'Unknown'
                     if 'description' not in attr:
                         attr['description'] = 'TODO'
 
-                for (output, attr) in outputs.items():
+                for (output, attr) in list(outputs.items()):
                     if 'name' not in attr:
                         attr['name'] = 'Unknown'
                     if 'description' not in attr:
@@ -325,7 +325,7 @@ if __name__ == '__main__':
     algo_dir = sys.argv[1]
     algos = get_all_algorithms(algo_dir)
 
-    for name, algo in algos.items():
+    for name, algo in list(algos.items()):
         print('%s:' % name)
         for attr in algo:
             print('  %s: %s' % (attr, algo[attr]))

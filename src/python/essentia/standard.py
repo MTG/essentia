@@ -130,7 +130,7 @@ def _create_essentia_class(name, moduleName = __name__):
 
 # load all classes into python
 def _reloadAlgorithms(moduleName = __name__):
-    for name in _essentia.keys():
+    for name in list(_essentia.keys()):
         _create_essentia_class(name, moduleName)
 
 _reloadAlgorithms()

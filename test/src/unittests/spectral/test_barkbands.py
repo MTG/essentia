@@ -40,9 +40,9 @@ class TestBarkBands(TestCase):
         for frame in FrameGenerator(audio, frameSize = 2048, hopSize = 512):
             bands = bbands(fft(window(frame)))
 
-            self.assert_(not any(numpy.isnan(bands)))
-            self.assert_(not any(numpy.isinf(bands)))
-            self.assert_(all(bands >= 0.0))
+            self.assertTrue(not any(numpy.isnan(bands)))
+            self.assertTrue(not any(numpy.isinf(bands)))
+            self.assertTrue(all(bands >= 0.0))
 
             # this test is commented because although essentia yields exactly
             # the same results as in output.txt when run as cpp, python does
@@ -68,8 +68,8 @@ class TestBarkBands(TestCase):
     def testZero(self):
         # Inputting zeros should return null band energies
         bbands = BarkBands()
-        self.assert_(all(bbands(zeros(1024)) == 0))
-        self.assert_(all(bbands(zeros(10)) == 0))
+        self.assertTrue(all(bbands(zeros(1024)) == 0))
+        self.assertTrue(all(bbands(zeros(10)) == 0))
 
     def testInvalidParam(self):
         # Test that we can only have up to 28 bands

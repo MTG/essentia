@@ -40,7 +40,7 @@ def descriptorPlot(name, xData, yData, pool, options):
     if not os.path.exists('plots'):
         os.mkdir('plots')
     figureName = 'plots/' + name + '.png'
-    print 'Plotting ' + name + '...'
+    print('Plotting ' + name + '...')
     pylab.savefig(figureName)
 
     return figureName
@@ -75,7 +75,7 @@ def descriptorPlotHTML(namespace, name, audio, pool, options):
 
     except KeyError:
         htmlCode = ''
-        print "WARNING: the descriptor", descName, "doesn't exist"
+        print("WARNING: the descriptor", descName, "doesn't exist")
 
     return htmlCode
 

@@ -27,7 +27,7 @@ import essentia.streaming as es
 import essentia.standard as std
 
 
-def cutFrames(params, input = range(100)):
+def cutFrames(params, input = list(range(100))):
 
     if not 'validFrameThresholdRatio' in params:
       params['validFrameThresholdRatio'] = 0
@@ -125,7 +125,7 @@ class TestHarmonicMask(TestCase):
 
         # generate test signal: sine 20Hz @44100kHz
         signalSize = 10 * self.params['frameSize']
-        signal = .5 * numpy.sin( (array(range(signalSize))/self.params['sampleRate']) * 220 * 2*math.pi)        
+        signal = .5 * numpy.sin( (array(list(range(signalSize)))/self.params['sampleRate']) * 220 * 2*math.pi)        
         
         outsignal,pool = analsynthHarmonicMaskStreaming(self.params, signal)
 

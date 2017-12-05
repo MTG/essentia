@@ -90,7 +90,7 @@ def Equal( a, b ):
 
 def EqualDict( d1, d2 ):
     failed ={}
-    for k, v in d1.items():
+    for k, v in list(d1.items()):
       if Equal(d1[k], d2[k]) != 1:
         failed[k]=(d1[k], d2[k])
     return failed
@@ -98,13 +98,13 @@ def EqualDict( d1, d2 ):
 
 def compare_dict_different_lengths( d1, d2 ):
     failed ={}
-    for stat in d1.keys():
+    for stat in list(d1.keys()):
       if stat in d2:
           if Equal( d1[stat], d2[stat] ) != 1:
               failed[stat] = (d1[stat], d2[stat])
       else:
           failed[stat] = (d1[stat], "None")
-    for stat in d2.keys():
+    for stat in list(d2.keys()):
         if stat not in d1:
           failed[stat] = ("None", d2[stat])
     return failed
@@ -118,7 +118,7 @@ def run_python_extractor( py_extractor ):
     try:
       os.system(py_extractor)
     except(essentia.EssentiaError, RuntimeError):
-      print('ERROR:', exc_info)
+      print(('ERROR:', exc_info))
     return
 
 def run_cpp_extractor( cpp_extractor ):
@@ -128,14 +128,14 @@ def run_cpp_extractor( cpp_extractor ):
     try:
       os.system(cpp_extractor)
     except( essentia.EssentiaError, RuntimeError ):
-      print('ERROR:', exc_info)
+      print(('ERROR:', exc_info))
     return
 
 ###########################################################################################
 
 def compare_namespaces( c_data ={}, py_data={}, c_file='', py_file='' ):
-    c_ns = c_data.keys() #namespaces computed by cpp
-    py_ns = py_data.keys() #namespaces computed by python
+    c_ns = list(c_data.keys()) #namespaces computed by cpp
+    py_ns = list(py_data.keys()) #namespaces computed by python
     c_ns.sort()
     py_ns.sort()
 
@@ -171,30 +171,30 @@ def compare_descriptors( c_data ={}, py_data={} ):
     result={}
     not_in_py=[] # descriptors found in c++ file but not in python file
     not_in_c=[] # descriptors found in python file but not in c++ file
-    for ns in c_data.keys():
-      if ns != "metadata" and ns in py_data.keys():
-        for desc, c_values in c_data[ns].items():
-            if py_data[ns].has_key(desc):
-              c_len = len(c_data[ns][desc].values())
+    for ns in list(c_data.keys()):
+      if ns != "metadata" and ns in list(py_data.keys()):
+        for desc, c_values in list(c_data[ns].items()):
+            if desc in py_data[ns]:
+              c_len = len(list(c_data[ns][desc].values()))
               if py_data[ns][desc] is None:
                 py_len = 0
               else:
-                py_len = len(py_data[ns][desc].values())
+                py_len = len(list(py_data[ns][desc].values()))
               if c_len != py_len:
                 if py_len and c_len:
                   #result[desc]=(c_data[ns][desc].values(), py_data[ns][desc].values())
                   result[desc]=compare_dict_different_lengths( c_data[ns][desc], py_data[ns][desc])
                 elif py_len:
-                  result[desc]=( 'None', py_data[ns][desc].values())
-                else:result[desc]=( c_data[ns][desc].values(), 'None')
+                  result[desc]=( 'None', list(py_data[ns][desc].values()))
+                else:result[desc]=( list(c_data[ns][desc].values()), 'None')
               else:
                 py_values = py_data[ns][desc]
                 result[desc] = EqualDict(c_values, py_values)
             else:
              # print "ERROR: " + desc + " not found in python file"
               not_in_py.append(desc)
-        for desc in py_data[ns].keys():
-           if desc not in c_data[ns].keys():
+        for desc in list(py_data[ns].keys()):
+           if desc not in list(c_data[ns].keys()):
              # print "ERROR: " + ns + "::" + desc + " not found in C++ file"
               not_in_c.append( desc )
 
@@ -234,25 +234,25 @@ def compare_descriptors( c_data ={}, py_data={} ):
 def compare( c_file='', py_file='', log_file='' ) :
     try:
       c_data = yaml.safe_load(open(c_file).read())
-    except yaml.YAMLError, exception:
-      print("Error in %s : %s" % (c_file, str(exception)))
+    except yaml.YAMLError as exception:
+      print(("Error in %s : %s" % (c_file, str(exception))))
     try:
       py_data = yaml.safe_load(open(py_file).read())
-    except yaml.YAMLError, exception:
-      print("Error in %s : %s" % (py_file, exception))
+    except yaml.YAMLError as exception:
+      print(("Error in %s : %s" % (py_file, exception)))
     if c_data =={} or py_data == {}:
       print("\tERROR: passing empty files for comparison")
       sys.exit(1)
     desc_result, desc_not_in_c, desc_not_in_py = compare_descriptors( c_data, py_data )
     positive_test = []
     negative_test = []
-    for k,v in desc_result.items():
+    for k,v in list(desc_result.items()):
         if v == {}:positive_test.append( k )
         else: negative_test.append( k )
     n_positive = len(positive_test)
     n_negative = len(negative_test)
     print("\n*******************************************************************")
-    print("TOTAL TESTS: " + str(n_positive+n_negative))
+    print(("TOTAL TESTS: " + str(n_positive+n_negative)))
     print_green("\tPOSITIVE_TESTS: " + str(n_positive) + "\n\t\t" + str(positive_test))
     print_red("\tNEGATIVE_TESTS: " + str(n_negative) + "\n\t\t" + str(negative_test))
     print_yellow("\tUNABLE TO TEST: " + str(len(desc_not_in_c) + len(desc_not_in_py)))
@@ -280,13 +280,13 @@ def compare( c_file='', py_file='', log_file='' ) :
     FILE.write("\n#*******************************************************************")
     FILE.write("\n#The following tests did not met the requirements for equality with epsilon " + str(EPSILON))
     FILE.write("\n#Errors are presented as descriptor_name: c_value, python_value\n")
-    for k, v in desc_result.items():
+    for k, v in list(desc_result.items()):
       if not v:
         FILE.write("\n" + str(k) + ":\n")
         if not isinstance( v, dict ) :
           FILE.write("\t\t" + str(v) + "\n" )
         else:
-            for k1, v1 in v.items():
+            for k1, v1 in list(v.items()):
               val = str(v1).split('(')[1]
               val = val.split(')')[0]
               FILE.write("    " + str(k1) + ":    " + val + "\n" )
@@ -297,37 +297,37 @@ def compare( c_file='', py_file='', log_file='' ) :
         if not FILE : FILE = open( log_file, 'w' )
         print("\n#*******************************************************************")
         FILE.write("\n#*******************************************************************")
-        print ('''WARNING: Some namespaces could not be compared as they could
-not be found in either ''' + c_file + " or " + py_file)
+        print(('''WARNING: Some namespaces could not be compared as they could
+not be found in either ''' + c_file + " or " + py_file))
         FILE.write('''\n# WARNING: Some namespaces could not be compared as they could
 # not be found in either ''' + c_file + " or " + py_file )
         if ns_not_in_py:
-            print("\tnot found in " + py_file + " : ")
+            print(("\tnot found in " + py_file + " : "))
             FILE.write("\n#\tnot found in " + py_file + " : ")
             for i in range(len(ns_not_in_py)):
                 print_red("\t* " + str(ns_not_in_py[i]))
                 File.write("\n#\t* " + str(ns_not_in_py[i]))
         if ns_not_in_c:
-            print("\tnot found in " + c_file + " : ")
+            print(("\tnot found in " + c_file + " : "))
             FILE.write("\n#\tnot found in " + c_file + " : ")
             for i in range(len(ns_not_in_c)):
                 print_red("\t* " + str(ns_not_in_c[i]))
                 FILE.write("\n#\t* " + str(ns_not_in_c[i]))
         print("*******************************************************************\n")
         FILE.write("\n#*******************************************************************")
-    print("\nsee file " + log_file + " for more detais\n")
+    print(("\nsee file " + log_file + " for more detais\n"))
 
 ###########################################################################################
 def print_green(s=''):
-    print("\033[32;1m " + s + " \033[0m")
+    print(("\033[32;1m " + s + " \033[0m"))
     return
 
 def print_red(s=''):
-    print("\033[31;1m " + s + "\ 033[0m")
+    print(("\033[31;1m " + s + "\ 033[0m"))
     return
 
 def print_yellow(s=''):
-    print("\033[93;1m " + s + " \033[0m")
+    print(("\033[93;1m " + s + " \033[0m"))
     return
 ###########################################################################################
 

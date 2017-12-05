@@ -31,7 +31,7 @@ class TestMultiplexer_Streaming(TestCase):
             inputs.append([float(i) for i in range(n*M, (n+1)*M)])
 
         for m in range(M):
-            expected.append(range(m, N*M, M))
+            expected.append(list(range(m, N*M, M)))
 
         gens = [VectorInput(input) for input in inputs]
         mux = Multiplexer(numberRealInputs=N)

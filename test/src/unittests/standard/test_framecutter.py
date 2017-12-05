@@ -429,4 +429,4 @@ class TestFrameCutter(TestCase):
 suite = allTests(TestFrameCutter)
 
 if __name__ == '__main__':
-    TextTestRunner(verbosity=2).run(suite)
+TextTestRunner(verbosity=2).run(suite)

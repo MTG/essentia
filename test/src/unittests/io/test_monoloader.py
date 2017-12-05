@@ -251,9 +251,9 @@ class TestMonoLoader(TestCase):
         audio1 = algo()
         audio2 = algo()
         audio3 = algo()
-        self.assertEquals(len(audio1), 441000);
-        self.assertEquals(len(audio2), 441000);
-        self.assertEquals(len(audio3), 441000);
+        self.assertEqual(len(audio1), 441000);
+        self.assertEqual(len(audio2), 441000);
+        self.assertEqual(len(audio3), 441000);
         self.assertEqualVector(audio2, audio1)
         self.assertEqualVector(audio2, audio3)
 

@@ -48,7 +48,7 @@ class TestEasyLoader_Streaming(TestCase):
         # it is kinda weird, some archs (64bit) produce 1 sample more when resampling
         # than what is expected. It is not that much of a problem, though, so we accept
         # it as a correct result
-        self.assert_(len(pool['audio']) == length or
+        self.assertTrue(len(pool['audio']) == length or
                      len(pool['audio']) == length + 1)
         self.assertAlmostEqual(sum(pool['audio']), length*scale, 1e-3)
 
@@ -95,9 +95,9 @@ class TestEasyLoader_Streaming(TestCase):
         audio1 = algo()
         audio2 = algo()
         audio3 = algo()
-        self.assertEquals(len(audio1), 441000);
-        self.assertEquals(len(audio2), 441000);
-        self.assertEquals(len(audio3), 441000);
+        self.assertEqual(len(audio1), 441000);
+        self.assertEqual(len(audio2), 441000);
+        self.assertEqual(len(audio3), 441000);
         self.assertEqualVector(audio2, audio1)
         self.assertEqualVector(audio2, audio3)
 

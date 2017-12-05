@@ -15,7 +15,7 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-from wekafile import WekaFile
+from .wekafile import WekaFile
 import yaml
 
 # all the labels you will use
@@ -79,7 +79,7 @@ def ns_to_single_name(descriptors):
 
 def convert(inputFilenames, outputFilename):
     for (inputFilename, inClass) in inputFilenames:
-        print "processing", inputFilename
+        print("processing", inputFilename)
 
         descriptors = yaml.load(open(inputFilename, 'r').read())
 

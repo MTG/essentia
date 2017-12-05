@@ -16,10 +16,10 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 import inspect, types
-import streaming
+from . import streaming
 import _essentia
-import common
-from streaming import _reloadStreamingAlgorithms
+from . import common
+from .streaming import _reloadStreamingAlgorithms
 
 # genetic marker used to track which composite parameters configure which inner algorithms
 class MarkerObject(object):
@@ -65,8 +65,8 @@ edt_dot_code = { common.Edt.STRING:             'string',
 # to configure that parameter, and the configure_log
 def find_edt(composite_param_name, marker_obj, configure_log):
     # find inner algorithm and inner parameter name that this composite_param will configure
-    for inner_algo_name, properties in configure_log.iteritems():
-        for inner_param_name, value in properties['parameters'].iteritems():
+    for inner_algo_name, properties in configure_log.items():
+        for inner_param_name, value in properties['parameters'].items():
             if marker_obj == value:
                 return properties['instance'].paramType(inner_param_name)
 
@@ -76,7 +76,7 @@ def find_edt(composite_param_name, marker_obj, configure_log):
 # given a reference to an inner algorithm and the configure_log, returns the name of the algo (use
 # lower() if referring to the member var name)
 def inner_algo_name(instance, configure_log):
-    for algo_name, properties in configure_log.iteritems():
+    for algo_name, properties in configure_log.items():
         if instance == properties['instance']:
             return algo_name
 
@@ -145,25 +145,25 @@ def generate_dot_algo_label(algo_inst, indent=''):
 def generate_dot_network(configure_log, composite_algo_inst):
     # make connections
     dot_code ='\n// connecting the network\n'
-    for algo_name, properties in configure_log.iteritems():
-        for left_connector, right_connectors in properties['instance'].connections.iteritems():
+    for algo_name, properties in configure_log.items():
+        for left_connector, right_connectors in properties['instance'].connections.items():
             for right_connector in right_connectors:
                 if isinstance(right_connector, streaming._StreamConnector):
                     dot_code += '        _'+inner_algo_name(left_connector.output_algo, configure_log).lower()+':'+left_connector.name+'_o:e'+' -> '+\
                                 '_'+inner_algo_name(right_connector.input_algo, configure_log).lower()+':'+right_connector.name + '_i:w;\n'
-                if isinstance(right_connector, types.NoneType):
+                if isinstance(right_connector, type(None)):
                     inneralgoname = inner_algo_name(left_connector.output_algo, configure_log).lower()
                     dot_code += '        nowhere_'+inneralgoname+' [shape="box", style="rounded,filled", fillcolor="grey50", color="transparent" label="Nowhere" fontcolor="white" fontsize="18"];\n'+\
                                 '        _'+inneralgoname+':'+left_connector.name+'_o:e'+' -> nowhere_'+inneralgoname+';\n'
 
     # make connections from floating inputs
-    for name, connector in composite_algo_inst.inputs.iteritems():
+    for name, connector in composite_algo_inst.inputs.items():
         innerinputname = connector.name
         inneralgoname = inner_algo_name(connector.input_algo, configure_log).lower()
         dot_code += '        '+name+':e -> _'+inneralgoname+':'+innerinputname+'_i:w;\n'
 
     # make connections from floating outputs
-    for name, connector in composite_algo_inst.outputs.iteritems():
+    for name, connector in composite_algo_inst.outputs.items():
         inneroutputname = connector.name
         inneralgoname = inner_algo_name(connector.output_algo, configure_log).lower()
         dot_code += '        _'+inneralgoname+':'+inneroutputname+'_o:e -> '+name+':w;\n'
@@ -180,7 +180,7 @@ def generate_dot_cluster(configure_log, clustername, composite_algo_inst):
                 '        label='+clustername+';\n\n'
 
     # for each algo in the cluster, declare it in dot:
-    for algo_name, properties in configure_log.iteritems():
+    for algo_name, properties in configure_log.items():
         dot_code += generate_dot_algo(algo_name, properties['instance'])
 
     # create the connections
@@ -223,7 +223,7 @@ def translate(composite_algo, output_filename, dot_graph=False):
         algo_name = self.name()+'_'+str(lbl)
 
         # increment lbl to generate a unique name for inner algo
-        lowered_algo_names = [name.lower() for name in configure_log.keys()]
+        lowered_algo_names = [name.lower() for name in list(configure_log.keys())]
         while algo_name.lower() in lowered_algo_names:
             algo_name = algo_name[:algo_name.index('_')+1] + str(lbl)
             lbl +=1
@@ -241,8 +241,8 @@ def translate(composite_algo, output_filename, dot_graph=False):
         # itself
         kwargs_no_markers = dict(kwargs)
 
-        for key, value in kwargs.iteritems():
-            if value in marker_objs.values():
+        for key, value in kwargs.items():
+            if value in list(marker_objs.values()):
                 if value.default_value == None:
                     del kwargs_no_markers[key]
                 else:
@@ -270,7 +270,7 @@ def translate(composite_algo, output_filename, dot_graph=False):
         algo.configure = algo.real_configure
 
     ### Do some checking on their network ###
-    for algo in [ logitem['instance'] for logitem in configure_log.values() ]:
+    for algo in [ logitem['instance'] for logitem in list(configure_log.values()) ]:
         if isinstance(algo, streaming.VectorInput):
             raise TypeError('essentia.streaming.VectorInput algorithms are not allowed for translatable composite algorithms')
 
@@ -290,7 +290,7 @@ def translate(composite_algo, output_filename, dot_graph=False):
 
     def sort_by_key(configure_log):
         # sort algorithms and conf values:
-        sitems = configure_log.items()
+        sitems = list(configure_log.items())
         sitems.sort()
         sorted_algos = []
         sorted_params= []
@@ -334,7 +334,7 @@ class '''+composite_algo.__name__+''' : public essentia::streaming::AlgorithmCom
         for param_name, default_value in zip(param_names, default_values):
             h_code += '    declareParameter("'+param_name+'", "", "", '
 
-            if isinstance(default_value, basestring): h_code += '"'+default_value+'"'
+            if isinstance(default_value, str): h_code += '"'+default_value+'"'
             else:                                     h_code += str(default_value)
 
             h_code += ');\n'
@@ -396,7 +396,7 @@ const char* '''+composite_algo.__name__+'''::description = DOC("");\n\n'''
     cpp_code += 'void ' + composite_algo.__name__ + '::createInnerNetwork() {\n'
 
     # declare inputs
-    for input_alias, connector in algo_inst.inputs.iteritems():
+    for input_alias, connector in algo_inst.inputs.items():
         input_owner_name = None
         input_name = None
 
@@ -434,7 +434,7 @@ const char* '''+composite_algo.__name__+'''::description = DOC("");\n\n'''
 
     # make connections
     for algo_name, properties in zip(sorted_algos, sorted_params): #configure_log.iteritems():
-        for left_connector, right_connectors in properties['instance'].connections.iteritems():
+        for left_connector, right_connectors in properties['instance'].connections.items():
             for right_connector in right_connectors:
                 if isinstance(right_connector, streaming._StreamConnector):
                     cpp_code += '  connect( _'+\
@@ -443,7 +443,7 @@ const char* '''+composite_algo.__name__+'''::description = DOC("");\n\n'''
                                 inner_algo_name(right_connector.input_algo, configure_log).lower() + \
                                 '->input("'+right_connector.name+'") );\n'
 
-                elif isinstance(right_connector, types.NoneType):
+                elif isinstance(right_connector, type(None)):
                     cpp_code += '  connect( _'+\
                                 inner_algo_name(left_connector.output_algo, configure_log).lower() + \
                                 '->output("'+left_connector.name+'"), NOWHERE );\n'
@@ -475,7 +475,7 @@ const char* '''+composite_algo.__name__+'''::description = DOC("");\n\n'''
         # skip if inner algorithm wasn't configured explicitly
         if not properties['parameters']: continue
 
-        for param_name, value in properties['parameters'].iteritems():
+        for param_name, value in properties['parameters'].items():
             type = common.determineEdt(value)
             if 'LIST' in str(type) or 'VECTOR' in str(type):
                 if type in [common.Edt.VECTOR_STRING]:
@@ -491,11 +491,11 @@ const char* '''+composite_algo.__name__+'''::description = DOC("");\n\n'''
 
         cpp_code += '  _'+algo_name.lower()+'->configure('
 
-        for param_name, value in properties['parameters'].iteritems():
+        for param_name, value in properties['parameters'].items():
             if isinstance(value, MarkerObject):
                 # figure out which composite param it is
                 composite_param_name = None
-                for marker_name, marker_obj in marker_objs.iteritems():
+                for marker_name, marker_obj in marker_objs.items():
                     if marker_obj == value:
                         composite_param_name = marker_name
                         break
@@ -514,7 +514,7 @@ const char* '''+composite_algo.__name__+'''::description = DOC("");\n\n'''
                         cpp_code += '"'+param_name+'", '+'arrayToVector<Real>(' + param_name + ')  '
                     elif type in [common.Edt.VECTOR_INT, common.Edt.LIST_INT]:
                         cpp_code += '"'+param_name+'", '+'arrayToVector<int>(' + param_name + ')  '
-                elif isinstance(value, basestring):
+                elif isinstance(value, str):
                     cpp_code += '"'+param_name+'", "'+value+'", '
                 elif isinstance(value, bool):
                     if value: cpp_code += '"'+param_name+'", true, '
@@ -557,13 +557,13 @@ const char* '''+composite_algo.__name__+'''::description = DOC("");\n\n'''
         dot_code += '    edge [color=black, style=solid, weight=1, arrowhead="dotnormal", arrowtail="dot", arrowsize=1, fontsize=6]\n'
 
         # for each input generate nodes
-        for name in algo_inst.inputs.keys():
+        for name in list(algo_inst.inputs.keys()):
             dot_code += '    '+name+' [label="'+name+'"];\n'
 
         dot_code += generate_dot_cluster(configure_log, composite_algo.__name__, algo_inst)
 
         # for each output generate nodes
-        for name in algo_inst.outputs.keys():
+        for name in list(algo_inst.outputs.keys()):
             dot_code += '    '+name+' [label="'+name+'"];\n'
 
         dot_code += '}'

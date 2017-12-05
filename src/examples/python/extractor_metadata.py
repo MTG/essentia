@@ -16,19 +16,19 @@ try:
     indir = sys.argv[1]
     result_file = sys.argv[2]
 except:
-    print("usage: %s <input-directory> <result.json>" % sys.argv[0])
+    print(("usage: %s <input-directory> <result.json>" % sys.argv[0]))
     sys.exit()
 
 
 result = Pool()
 files = [f for f in find_files(indir, FILE_EXT)]
 
-print('Found %d audio files (%s)' % (len(files), '/'.join(FILE_EXT)))
+print(('Found %d audio files (%s)' % (len(files), '/'.join(FILE_EXT))))
 
 i = 0
 for filename in files:
     i += 1
-    print('Extracting metadata: %s' % filename)
+    print(('Extracting metadata: %s' % filename))
     namespace = 'track_' + str(i)
     try:
         meta = MetadataReader(filename=filename, failOnError=True, tagPoolName=namespace + '.metadata')()
@@ -40,7 +40,7 @@ for filename in files:
         pool_meta.set(namespace + ".channels", channels)
         result.merge(pool_meta)
     except Exception as e:
-        print(str(e))
+        print((str(e)))
 
-print("Saving results to %s" % result_file)
+print(("Saving results to %s" % result_file))
 YamlOutput(filename=result_file, format='json', doubleCheck=True, writeVersion=False)(result)

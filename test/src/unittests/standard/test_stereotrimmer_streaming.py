@@ -30,7 +30,7 @@ class TestStereoTrimmer_Streaming(TestCase):
         startIdx = int(start*sr);
         stopIdx = int(end*sr)
         if stopIdx > size: stopIdx = size
-        expected = range(startIdx,stopIdx)
+        expected = list(range(startIdx,stopIdx))
         expected = list(zip(expected, expected))
         gen = VectorInput(input)
         pool = Pool()

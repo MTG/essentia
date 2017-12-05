@@ -28,7 +28,7 @@ from essentia import INFO
 def mergeRecursiveDict(d1, d2):
     '''This function merges the values contained in d2 into d1.
     If a value was already in d1, it overwrites that value.'''
-    for (key, value) in d2.items():
+    for (key, value) in list(d2.items()):
         if key in d1 and isinstance(value, dict):
             mergeRecursiveDict(d1[key], value)
         else:
@@ -191,7 +191,7 @@ def computeAllExtractors(extractors, audio, pool, options):
         try:
             computeExtractor(name, audio, pool, options)
         except Exception:
-            print 'ERROR: when trying to compute', name, 'features'
+            print('ERROR: when trying to compute', name, 'features')
             raise
 
 def percentile(values, p):
@@ -232,7 +232,7 @@ def cleanStats(pool, options):
                     except KeyError:
                         wantedStats[namespace] = {}
                         wantedStats[namespace + '.' + descriptor] = options['specific'][extractor]['output'][descriptor]
-            for (k,v) in wantedStats.items():
+            for (k,v) in list(wantedStats.items()):
                 if not isinstance(v, list):
                     wantedStats[k] = [v]
                 stats = wantedStats[k]
@@ -240,7 +240,7 @@ def cleanStats(pool, options):
                 for stat in stats:
                     if stat not in supportedStats:
                         unwantedStats += [stat]
-                        print 'Ignoring', stat, 'for', k, '. It is not supported.'
+                        print('Ignoring', stat, 'for', k, '. It is not supported.')
                     if stat == 'single_gaussian':
                         unwantedStats += [stat]
                         wantedStats[k] += ['mean', 'cov', 'icov']
@@ -264,7 +264,7 @@ def computeSegments(audio, segments, extractors, megalopool, options):
         segmentName = 'segment_' + str("%02d" % segments.index(segment))
 
         if options['verbose']:
-            print 'Processing', segmentName, 'from second', segment[0], 'to second', segment[1]
+            print('Processing', segmentName, 'from second', segment[0], 'to second', segment[1])
 
         # creating pool...
         poolSegment = essentia.Pool()
@@ -377,7 +377,7 @@ def compute(profile, inputFilename, outputFilename, userOptions = {}):
     # plotting descriptors evolution
     try:
         if options['plots']:
-            import plotting
+            from . import plotting
             plotting.compute(inputFilename, audio, pool, options)
     except KeyError: pass
 

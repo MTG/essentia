@@ -6,7 +6,7 @@ from essentia.streaming import *
 try:
 	audiofile = sys.argv[1]
 except:
-	print ("usage: %s <audiofile>" % sys.argv[0])
+	print(("usage: %s <audiofile>" % sys.argv[0]))
 	sys.exit()
 
 pool = essentia.Pool()
@@ -33,14 +33,14 @@ bpm_histogram.histogram >> centroid.array
 centroid.centroid >> (pool, 'bpm_centroid')
 
 essentia.run(loader)
-print("BPM: %0.1f" % pool['bpm'])
-print("Most prominent peak: %0.1f BPM" % pool['bpm_first_peak'][0])
-print("Centroid: %0.1f" % pool['bpm_centroid'][0]) 
+print(("BPM: %0.1f" % pool['bpm']))
+print(("Most prominent peak: %0.1f BPM" % pool['bpm_first_peak'][0]))
+print(("Centroid: %0.1f" % pool['bpm_centroid'][0])) 
 
 histogram = pool['bpm_histogram'][0]
 
 fig, ax = plt.subplots()
-ax.bar(range(len(histogram)), histogram, width=1)
+ax.bar(list(range(len(histogram))), histogram, width=1)
 ax.set_xlabel('BPM')
 ax.set_ylabel('Frequency')
 ax.set_xticks([20 * x + 0.5 for x in range(int(len(histogram) / 20))])

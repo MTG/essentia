@@ -44,7 +44,7 @@ if sys.platform =='linux2':
     import wave, alsaaudio
 
 import time
-import thread
+import _thread
 
 barkBands = [0.0, 50.0, 100.0, 150.0, 200.0, 300.0, 400.0, 510.0, 630.0, 770.0,
               920.0, 1080.0, 1270.0, 1480.0, 1720.0, 2000.0, 2320.0, 2700.0,
@@ -268,7 +268,7 @@ def computeBeats(filename, pool):
         ticksAmp = []
         frameRate = pool['framerate']
         bpms = pool['harmonicBpm']
-        print 'estimated bpm:', bpms
+        print('estimated bpm:', bpms)
         tatum = 60./bpms[0]
         diffTick = 2*tatum
         prevTick = -1
@@ -311,7 +311,7 @@ def computeBeats(filename, pool):
             if count >= 5:
                 bpmTolerance += 1
                 count = 0
-            print "recomputing!!!!"
+            print("recomputing!!!!")
             novelty = copy.deepcopy(pool['sinusoid'])
             pool.remove('sinusoid')
             pool.remove('novelty_curve')
@@ -325,8 +325,8 @@ def computeBeats(filename, pool):
     #pyplot.plot(prodPulse, 'g')
     #pyplot.show()
 
-    print 'estimated bpm:', bpms
-    print 'bpms:', pool['peaksBpm']
+    print('estimated bpm:', bpms)
+    print('bpms:', pool['peaksBpm'])
     #ticks = postProcessTicks(filename, pool)
     #print 'bpm mags:', pool['peaksMagnitude']
     bpmRatios = []
@@ -336,8 +336,7 @@ def computeBeats(filename, pool):
     #print 'original nticks:', len(ticks)
     #print 'step:', step
     if step>1:
-        ticks = essentia.array(map(lambda i: ticks[i],
-                               filter(lambda i: i%step == 0,range(len(ticks)))))
+        ticks = essentia.array([ticks[i] for i in [i for i in range(len(ticks)) if i%step == 0]])
 
     #print 'nticks:', len(ticks)
     pool.remove('ticks')
@@ -360,8 +359,8 @@ def getMostStableTickLength(ticks):
     hist, distx = np.histogram(dticks, bins=50*(1+(max(dticks)-min(dticks))))
     bestPeriod = distx[argmax(hist)] # there may be more than one candidate!!
     bestBpm = 60./bestPeriod
-    print 'best period', bestPeriod
-    print 'best bpm:', bestBpm
+    print('best period', bestPeriod)
+    print('best bpm:', bestBpm)
 
     #print 'hist:', hist, distx
     maxLength = 0
@@ -372,7 +371,7 @@ def getMostStableTickLength(ticks):
             maxLength = l;
             idx = startpos;
 
-    print 'max stable length:', idx, maxLength
+    print('max stable length:', idx, maxLength)
     return idx, maxLength, bestBpm
 
 
@@ -464,7 +463,7 @@ def computeSpectrum(signal):
     corr = std.AutoCorrelation()(signal)
     pyplot.plot(corr)
     pyplot.show()
-    print argmax(corr[2:])+2
+    print(argmax(corr[2:])+2)
 
 def isPowerTwo(n):
     return (n&(n-1))==0
@@ -562,7 +561,7 @@ def plot(pool, title, outputfile='out.svg', subplot=111):
 
     pyplot.subplot(511)
     pyplot.imshow(bandCorr, cmap=pyplot.cm.hot, aspect='auto', origin='lower', interpolation='nearest')
-    print 'max correlation', maxCorr
+    print('max correlation', maxCorr)
 
     sumCorr = []
     for tick in range(nticks):
@@ -581,11 +580,11 @@ def plot(pool, title, outputfile='out.svg', subplot=111):
                    bottom=0,alpha=alpha,
                    color='r', edgecolor='w', linewidth=.3)
 
-    print 'max sum correlation', argmax(sumCorr[2:])+2
+    print('max sum correlation', argmax(sumCorr[2:])+2)
 
     hist = getHarmonics(sumCorr)
     maxHist = argmax(hist)
-    print 'max histogram', maxHist
+    print('max histogram', maxHist)
     #for idx,val in enumerate(hist):
     #    if val < maxHist: hist[idx] = 0
 
@@ -602,7 +601,7 @@ def plot(pool, title, outputfile='out.svg', subplot=111):
                                    range=len(sumCorr)-1)
     peaks = peakDetect(sumCorr)[0]
     peaks = [round(x+1e-15) for x in peaks]
-    print 'Peaks:',peaks
+    print('Peaks:',peaks)
 
     pyplot.subplot(514)
     maxAlpha = max(sumCorr)
@@ -615,7 +614,7 @@ def plot(pool, title, outputfile='out.svg', subplot=111):
     # multiply both histogram and sum corr to have a weighted histogram:
     wHist = essentia.array(hist)*sumCorr*acorr(loudness)
     maxHist = argmax(wHist)
-    print 'max weighted histogram', maxHist
+    print('max weighted histogram', maxHist)
     pyplot.subplot(515)
 
     maxAlpha = max(wHist)
@@ -716,13 +715,13 @@ if __name__ == '__main__':
     else: files = [inputfilename]
 
     for audiofile in files:
-        print "*"*70
-        print "Processing ", audiofile
-        print "*"*70
+        print("*"*70)
+        print("Processing ", audiofile)
+        print("*"*70)
         try:
-            print 'realBpm', open(audiofile.replace('wav', 'bpm')).read()
+            print('realBpm', open(audiofile.replace('wav', 'bpm')).read())
         except:
-            print 'realBpm not found'
+            print('realBpm not found')
 
         pool = essentia.Pool()
         pool.set('downmix',    DOWNMIX)
@@ -755,13 +754,13 @@ if __name__ == '__main__':
            #                                            f.getframerate())
             device = alsaaudio.PCM(card=card)
 
-            lock = thread.allocate_lock()
-            thread.start_new_thread(getkey, (beatFilename, device, f, card, lock))
+            lock = _thread.allocate_lock()
+            _thread.start_new_thread(getkey, (beatFilename, device, f, card, lock))
 
 
             plot(pool,'beats loudness ' + audiofile, imgfilename);
             f.close()
-            thread.exit()
+            _thread.exit()
 
         #print 'deleting beatfile:', beatFilename
         #subprocess.call(['rm', beatFilename])

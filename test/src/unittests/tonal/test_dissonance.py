@@ -60,7 +60,7 @@ class TestDissonance(TestCase):
         mags[3] = 0.555555
         mags[7] = 0.211
         mags[15] = 0.05
-        self.assertNotEquals(Dissonance()(harms, mags), 0)
+        self.assertNotEqual(Dissonance()(harms, mags), 0)
 
     def testHarmonic(self):
         size = 32

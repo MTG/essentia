@@ -15,7 +15,7 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-from itertools import izip
+
 import numpy
 import essentia
 from essentia import EssentiaError
@@ -82,7 +82,7 @@ class Pool:
     def mean_scope(self, scopeFrom, scopeTo):
         descriptors_mean = {}
 
-        for key in self.descriptors.keys():
+        for key in list(self.descriptors.keys()):
             descriptor = self.descriptors[self.__currentNamespace][key]
             values_in_scope = []
 
@@ -106,7 +106,7 @@ class Pool:
     def var_scope(self, scopeFrom, scopeTo):
         descriptors_var = {}
 
-        for key in self.descriptors.keys():
+        for key in list(self.descriptors.keys()):
             descriptor = self.descriptors[self.__currentNamespace][key]
             values_in_scope = []
 
@@ -131,7 +131,7 @@ class Pool:
         aggregated = {}
         for namespace in self.descriptors:
             aggregated[namespace] = {}
-            descs = self.descriptors[namespace].keys()
+            descs = list(self.descriptors[namespace].keys())
             descs.sort()
 
             stats_default = [ 'mean' ,'var', 'min', 'max' ]
@@ -183,24 +183,24 @@ class Pool:
                     derived2 = None
 
                     if 'dmean' in stats:
-                        if not derived: derived = [a - b for a,b in izip(values[1:], values[:-1])]
+                        if not derived: derived = [a - b for a,b in zip(values[1:], values[:-1])]
                         aggrDesc['dmean'] = essentia.array(numpy.mean(numpy.abs(derived), axis=0))
 
                     if 'dvar' in stats:
-                        if not derived: derived = [a - b for a,b in izip(values[1:], values[:-1])]
+                        if not derived: derived = [a - b for a,b in zip(values[1:], values[:-1])]
                         aggrDesc['dvar'] = essentia.array(numpy.var(derived, axis=0))
 
                     if 'dmean2' in stats:
-                        if not derived: derived = [a - b for a,b in izip(values[1:], values[:-1])]
-                        if not derived2: derived2 = [a - b for a,b in izip(derived[1:], derived[:-1])]
+                        if not derived: derived = [a - b for a,b in zip(values[1:], values[:-1])]
+                        if not derived2: derived2 = [a - b for a,b in zip(derived[1:], derived[:-1])]
                         if derived2:
                             aggrDesc['dmean2'] = essentia.array(numpy.mean(numpy.abs(derived2), axis=0))
                         else:
                             aggrDesc['dmean2'] = 'undefined'
 
                     if 'dvar2' in stats:
-                        if not derived: derived = [a - b for a,b in izip(values[1:], values[:-1])]
-                        if not derived2: derived2 = [a - b for a,b in izip(derived[1:], derived[:-1])]
+                        if not derived: derived = [a - b for a,b in zip(values[1:], values[:-1])]
+                        if not derived2: derived2 = [a - b for a,b in zip(derived[1:], derived[:-1])]
                         if derived2:
                             aggrDesc['dvar2'] = essentia.array(numpy.var(derived2, axis=0))
                         else:

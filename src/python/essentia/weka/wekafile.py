@@ -97,10 +97,10 @@ if __name__ == "__main__":
 	output = "".join(file("weka_test.arff").readlines())
 	
 	if output == expected_output:
-		print "test succeeded"
+		print("test succeeded")
 	else:
-		print "test failed"
-		print "---------output-------------------------"
-		print output
-		print "---------expected output----------------"
-		print expected_output
+		print("test failed")
+		print("---------output-------------------------")
+		print(output)
+		print("---------expected output----------------")
+		print(expected_output)

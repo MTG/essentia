@@ -42,8 +42,8 @@ class TestMFCC(TestCase):
             bands, mfcc = self.InitMFCC(size)(ones(1025))
             self.assertEqual(len(mfcc), size )
             self.assertEqual(len(bands), 40 )
-            self.assert_(not any(numpy.isnan(mfcc)))
-            self.assert_(not any(numpy.isinf(mfcc)))
+            self.assertTrue(not any(numpy.isnan(mfcc)))
+            self.assertTrue(not any(numpy.isinf(mfcc)))
             size -= 1
 
     def testRegressionHtkMode(self):

@@ -99,12 +99,12 @@ def test_fft(ndims):
     errpow = numpy.vdot(errf,errf)+1e-10
     sigpow = numpy.vdot(xverf,xverf)+1e-10
     snr = 10*math.log10(abs(sigpow/errpow) )
-    print 'SNR (compared to NumPy) : %.1fdB' % float(snr)
+    print('SNR (compared to NumPy) : %.1fdB' % float(snr))
 
     if snr<minsnr:
-        print 'xver=',xver
-        print 'x2=',x2
-        print 'err',err
+        print('xver=',xver)
+        print('x2=',x2)
+        print('err',err)
         sys.exit(1)
  
 def dofft(x,isreal):
@@ -124,7 +124,7 @@ def dofft(x,isreal):
     if doreal:
         cmd += ' -R '
 
-    print cmd
+    print(cmd)
     p = popen2.Popen3(cmd )
 
     open('/tmp/fftin.dat','w').write(dopack( x , isreal==False ) )
@@ -147,12 +147,12 @@ def main():
     opts=dict(opts)
 
     global doreal
-    doreal = opts.has_key('-r')
+    doreal = '-r' in opts
 
     if doreal:
-        print 'Testing multi-dimensional real FFTs'
+        print('Testing multi-dimensional real FFTs')
     else:
-        print 'Testing multi-dimensional FFTs'
+        print('Testing multi-dimensional FFTs')
 
     for dim in range(1,4):
         test_fft( dim )

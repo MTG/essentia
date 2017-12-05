@@ -139,9 +139,9 @@ class TestTempoTap(TestCase):
             periodEstimates += list(periods)
             phaseEstimates += list(phases)
 
-        self.assert_(all(array(periodEstimates) == 0))
+        self.assertTrue(all(array(periodEstimates) == 0))
         # WTF?? that should probably raise an exception or sth...
-        self.assert_(all(array(phaseEstimates) == -1))
+        self.assertTrue(all(array(phaseEstimates) == -1))
 
 
 

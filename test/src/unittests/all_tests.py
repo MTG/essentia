@@ -17,7 +17,7 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-from __future__ import absolute_import # For Python 2 compatibility
+ # For Python 2 compatibility
 
 from os.path import join, sep
 import os
@@ -77,13 +77,13 @@ def getTests(names=None, exclude=None, strategy='import'):
 
     for name in names:
         if name not in allNames:
-            print('WARNING: did not find test %s' % name)
+            print(('WARNING: did not find test %s' % name))
     for name in (exclude or []):
         if name not in allNames:
-            print('WARNING: did not find test to exclude %s' % name)
+            print(('WARNING: did not find test to exclude %s' % name))
 
     print('Running tests:')
-    print(sorted(name for _, name in tests))
+    print((sorted(name for _, name in tests)))
 
     if not tests:
         raise RuntimeError('No test to execute!')
@@ -98,7 +98,7 @@ def getTests(names=None, exclude=None, strategy='import'):
 
 
 def traceCompute(algo, *args, **kwargs):
-    print('computing algo %s' % algo.name())
+    print(('computing algo %s' % algo.name()))
     return algo.normalCompute(*args, **kwargs)
 
 
@@ -238,11 +238,11 @@ if __name__ == '__main__':
     testExclude = [ t[1:] for t in sys.argv[1:] if t[0] == '-' ]
 
     print('Running tests normally')
-    print('-'*70)
+    print(('-'*70))
     result1 = runTests(getTests(testList, exclude=testExclude))
 
     print('\n\nRunning tests with compute/reset/compute')
-    print('-'*70)
+    print(('-'*70))
 
     setattr(sys.modules['essentia.common'], 'algoDecorator', computeDecorator(computeResetCompute))
     essentia.standard._reloadAlgorithms()

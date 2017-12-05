@@ -85,8 +85,8 @@ for root, dirs, files in tree:
           print('')
 
 # normalization
-for genre in eq_genres.keys():
-    for band in eq_genres[genre].keys():
+for genre in list(eq_genres.keys()):
+    for band in list(eq_genres[genre].keys()):
         eq_genres[genre][band] /= number_genres[genre]
 
 print(eq_genres)
@@ -95,7 +95,7 @@ print(eq_genres)
 
 i=1
 html = '<html>'
-for genre in eq_genres.keys():
+for genre in list(eq_genres.keys()):
    if genre != 'Sample':
       figure(i)
       eq_genre = []
@@ -103,7 +103,7 @@ for genre in eq_genres.keys():
       eq_genre.append(eq_genres[genre]['middle_low'])
       eq_genre.append(eq_genres[genre]['middle_high'])
       eq_genre.append(eq_genres[genre]['high'])
-      bar(range(4), eq_genre)
+      bar(list(range(4)), eq_genre)
       axis([0, 4, 0, 0.7])
       figfile = genre + '.png'
       savefig( figfile, dpi=60, format='png')

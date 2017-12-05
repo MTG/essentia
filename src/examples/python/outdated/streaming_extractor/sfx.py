@@ -118,7 +118,7 @@ if __name__ == '__main__':
     sfx = SfxExtractor()
 
     loader.audio >> sfx.signal
-    for desc, output in sfx.outputs.items():
+    for desc, output in list(sfx.outputs.items()):
         output >> (pool, namespace + '.' + desc)
     essentia.run(loader)
 

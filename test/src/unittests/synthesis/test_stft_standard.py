@@ -28,7 +28,7 @@ import essentia.standard as std
 
 counterrunner = 0
 
-def cutFrames(params, input = range(100)):
+def cutFrames(params, input = list(range(100))):
 
     if not 'validFrameThresholdRatio' in params:
       params['validFrameThresholdRatio'] = 0
@@ -127,7 +127,7 @@ class TestSTFT(TestCase):
 
         # generate test signal: sine 110Hz @44100kHz
         signalSize = 10 * self.params['frameSize']
-        signal = 0.5 * numpy.sin( (array(range(signalSize))/44100.) * 110 * 2*math.pi)
+        signal = 0.5 * numpy.sin( (array(list(range(signalSize)))/44100.) * 110 * 2*math.pi)
         
         outsignal = analysisSynthesisStandard(self.params, signal)
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal

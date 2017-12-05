@@ -36,7 +36,7 @@ def compute(pool, options):
 
 
     if namespace not in namespaces:
-        print 'ERROR when trying to compute BIC segmentation: you must compute lowlevel descriptors first!'
+        print('ERROR when trying to compute BIC segmentation: you must compute lowlevel descriptors first!')
 
     # options
     minimumSegmentsLength = options['segmentation']['minimumSegmentsLength']

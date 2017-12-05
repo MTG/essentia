@@ -51,7 +51,7 @@ def compute(audio, pool, options):
     for i in range(3,len(onsets)): riois += [ round( (onsets[i] - onsets[i-3]) / interval ) ]
     for i in range(4,len(onsets)): riois += [ round( (onsets[i] - onsets[i-4]) / interval ) ]
     ioidist = essentia.array(bincount(riois))
-    fullioidist = essentia.array(zip( [p/interp for p in range(len(ioidist))], [ioi/sum(ioidist) for ioi in ioidist]))
+    fullioidist = essentia.array(list(zip( [p/interp for p in range(len(ioidist))], [ioi/sum(ioidist) for ioi in ioidist])))
     fullioidist = fullioidist[0:interp*5]
     peak_detection = essentia.PeakDetection(minPosition = 0., maxPosition = len(ioidist),
                                             maxPeaks = 5, range = len(ioidist) - 1.,
@@ -65,7 +65,7 @@ def compute(audio, pool, options):
     mags = [ mag/sum(ioidist) for mag in mags ]
 
     # add to pool
-    pool.add(namespace + '.' + 'relative_ioi_peaks', essentia.array(zip(pos,mags)))#, pool.GlobalScope)
+    pool.add(namespace + '.' + 'relative_ioi_peaks', essentia.array(list(zip(pos,mags))))#, pool.GlobalScope)
     pool.add(namespace + '.' + 'relative_ioi', fullioidist)#, pool.GlobalScope)
 
     # debug plot

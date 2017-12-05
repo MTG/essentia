@@ -61,8 +61,8 @@ source_suffix = '.rst'
 master_doc = 'contents'
 
 # General information about the project.
-project = u'Essentia'
-copyright = u'2006-2017, Universitat Pompeu Fabra'
+project = 'Essentia'
+copyright = '2006-2017, Universitat Pompeu Fabra'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -165,7 +165,7 @@ html_additional_pages = {'index': 'index.html',
                          'applications': 'applications.html',
                          'documentation': 'documentation.html'}
 
-execfile('essentia_reference.py')
+exec(compile(open('essentia_reference.py').read(), 'essentia_reference.py', 'exec'))
 html_additional_pages.update(essentia_algorithms)
 
 # If false, no module index is generated.
@@ -209,8 +209,8 @@ htmlhelp_basename = 'Essentiadoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Essentia.tex', u'Essentia Documentation',
-   u'Nicolas Wack', 'manual'),
+  ('index', 'Essentia.tex', 'Essentia Documentation',
+   'Nicolas Wack', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -242,8 +242,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'essentia', u'Essentia Documentation',
-     [u'Nicolas Wack'], 1)
+    ('index', 'essentia', 'Essentia Documentation',
+     ['Nicolas Wack'], 1)
 ]
 
 

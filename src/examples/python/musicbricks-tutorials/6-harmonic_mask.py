@@ -24,7 +24,7 @@ maskbinwidth = 2
 loader = essentia.standard.MonoLoader(filename=inputFilename, sampleRate=samplerate )
 audio = loader()
 print("Duration of the audio sample [sec]:")
-print(len(audio)/ samplerate )
+print((len(audio)/ samplerate ))
 
 
 #extract predominant pitch

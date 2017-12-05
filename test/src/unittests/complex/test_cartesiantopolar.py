@@ -54,13 +54,13 @@ class TestCartesianToPolar(TestCase):
                    (0, -1): (1, -pi/2)
                    }
 
-        for c, p in circle.items():
+        for c, p in list(circle.items()):
             mag, phase = c2p(numpy.array([complex(*c)], dtype='c8'))
 
             self.assertAlmostEqualVector(mag, [ p[0] ])
             self.assertAlmostEqualVector(phase, [ p[1] ])
 
-        circleCart = circle.keys()
+        circleCart = list(circle.keys())
         circlePolar = [ circle[key] for key in circleCart ]
 
         circleCart = numpy.array([ complex(*c) for c in circleCart ], dtype='c8')

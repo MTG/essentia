@@ -506,4 +506,4 @@ class TestFrameCutter_Streaming(TestCase):
 suite = allTests(TestFrameCutter_Streaming)
 
 if __name__ == '__main__':
-    TextTestRunner(verbosity=2).run(suite)
+TextTestRunner(verbosity=2).run(suite)

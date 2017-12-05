@@ -21,8 +21,8 @@
 import sys
 import numpy
 import essentia
-import segmentation_bic
-import segmentation_max_energy
+from . import segmentation_bic
+from . import segmentation_max_energy
 from essentia import EssentiaError, INFO
 from math import *
 
@@ -30,7 +30,7 @@ namespace = 'segmentation'
 
 def print_onset(onset):
     (minutes, seconds) = (int(onset/60.0), int(onset%60))
-    print minutes, 'mn', seconds, 's',
+    print(minutes, 'mn', seconds, 's', end=' ')
 
 
 def doSegmentation(inputFilename, audio, pool, options):
@@ -42,7 +42,7 @@ def doSegmentation(inputFilename, audio, pool, options):
     sampleRate = options['sampleRate']
 
     if segtype == 'fromFile':
-        segments = [ map(float, l.strip().split('\t')) for l in open(options[namespace]['segmentsFile'], 'r').readlines() ]
+        segments = [ list(map(float, l.strip().split('\t'))) for l in open(options[namespace]['segmentsFile'], 'r').readlines() ]
 
     else:
         if segtype == 'maxEnergy':
@@ -57,7 +57,7 @@ def doSegmentation(inputFilename, audio, pool, options):
         # creating segment wave file
         if writeFile:
             outputFilename = inputFilename + '.segments.wav'
-            print 'Creating segments audio file ' + outputFilename + '...'
+            print('Creating segments audio file ' + outputFilename + '...')
             audioOnsetsMarker = essentia.AudioOnsetsMarker(filename = outputFilename, sampleRate = sampleRate)
             audioOnsetsMarker(audio, onsets)
 
@@ -68,16 +68,16 @@ def doSegmentation(inputFilename, audio, pool, options):
 
     if options['verbose']:
         if len(segments) > 0:
-            print 'Segments : ',
+            print('Segments : ', end=' ')
             for segment in segments:
-                print '[',
+                print('[', end=' ')
                 print_onset(segment[0])
-                print ",",
+                print(",", end=' ')
                 print_onset(segment[1])
-                print '] ',
+                print('] ', end=' ')
         else:
-            print 'No segments found!'
-        print
+            print('No segments found!')
+        print()
 
     return segments
 

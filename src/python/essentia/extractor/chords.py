@@ -50,7 +50,7 @@ def get_chords_histogram(chords):
     for chord in chords:
         chords_histogram[chord] += 1.0
 
-    for chord in chords_histogram.keys():
+    for chord in list(chords_histogram.keys()):
         chords_histogram[chord] *= 100.0 / len(chords)
 
     return chords_histogram
@@ -108,7 +108,7 @@ def compute(audio, pool, options):
        # 1st step: find the most frequent chord(s)
        max_value = max(chords_histogram.values())
        chords_max = []
-       for chord in chords_histogram.keys():
+       for chord in list(chords_histogram.keys()):
          if chords_histogram[chord] == max_value:
             chords_max.append(chord)
        # 2nd step: in case of 2 max, let's take the major one

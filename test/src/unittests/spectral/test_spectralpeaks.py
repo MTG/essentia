@@ -62,7 +62,7 @@ class TestSpectralPeaks(TestCase):
                                orderBy = 'frequency')
 
         (freqs, mags) = speaks(spectrum)
-        peaks = zip(freqs, mags)
+        peaks = list(zip(freqs, mags))
 
         expected = [ (0, 0.5),
                      (11, 0.6),
@@ -112,8 +112,8 @@ class TestSpectralPeaks(TestCase):
     def testZero(self):
         speaks = SpectralPeaks()
         (freqs, mags) = speaks(numpy.zeros(1024, dtype='f4'))
-        self.assert_(len(freqs) == 0)
-        self.assert_(len(mags) == 0)
+        self.assertTrue(len(freqs) == 0)
+        self.assertTrue(len(mags) == 0)
 
     def testEmpty(self):
         # Feeding an empty array shouldn't crash and throw an exception

@@ -27,7 +27,7 @@ import essentia.streaming as es
 import essentia.standard as std
 
 
-def cutFrames(params, input = range(100)):
+def cutFrames(params, input = list(range(100))):
 
     if not 'validFrameThresholdRatio' in params:
       params['validFrameThresholdRatio'] = 0

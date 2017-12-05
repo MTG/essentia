@@ -33,9 +33,9 @@ def pca(pool, namespace=''):
     numFrames = len(sccoeffs)
     poolSc = Pool()
     merged = essentia.zeros(2*len(sccoeffs[0]))
-    for frame in xrange(numFrames):
+    for frame in range(numFrames):
         j = 0
-        for i in xrange(len(sccoeffs[frame])):
+        for i in range(len(sccoeffs[frame])):
             merged[j]=sccoeffs[frame][i]
             merged[j+1]=scvalleys[frame][i]
             j+=2

@@ -31,7 +31,7 @@ try:
     input_filename = sys.argv[1]
     output_filename = sys.argv[2]
 except:
-    print('usage: %s <input-audiofile> <output-audiofile>' % sys.argv[0])
+    print(('usage: %s <input-audiofile> <output-audiofile>' % sys.argv[0]))
     sys.exit()
 
 # don't forget, we can actually instantiate and call an algorithm on the same line!
