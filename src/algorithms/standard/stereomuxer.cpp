@@ -87,31 +87,20 @@ const char* StereoMuxer::category = "Standard";
 const char* StereoMuxer::description = DOC("This algorithm outputs a stereo signal given left and right channel separately.");
 
 
-void StereoMuxer::createInnerNetwork() {
-  _muxer = streaming::AlgorithmFactory::create("StereoMuxer");
-
-  _audiogenLeft = new streaming::VectorInput<AudioSample, 4096>();
-  _audiogenRight = new streaming::VectorInput<AudioSample, 4096>();
-  
-  _storage = new streaming::VectorOutput<StereoSample>();
-
-  _audiogenLeft->output("data") >>  _muxer->input("left");
-  _audiogenRight->output("data") >>  _muxer->input("right");
-  _muxer->output("audio")   >>  _storage->input("data");
-
-  _network = new scheduler::Network(_audiogenLeft);
-}
-
 void StereoMuxer::compute() {
   const vector<AudioSample>& left = _left.get();
   const vector<AudioSample>& right = _right.get();
   vector<StereoSample>& audio = _audio.get();
 
-  _audiogenLeft->setVector(&left);
-  _audiogenRight->setVector(&right);
-  _storage->setVector(&audio);
+  if (left.size() != right.size()) {
+    throw EssentiaException("StereoMuxer: \"left\" and \"right\" inputs should contain equal number of audiosamples");
+  }
 
-  _network->run();
+  audio.resize(left.size());
+  for (size_t i=0; i<left.size(); ++i) {
+    audio[i].first = left[i];
+    audio[i].second = right[i];
+  }
 }
 
 } // namespace standard
