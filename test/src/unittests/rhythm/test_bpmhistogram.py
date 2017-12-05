@@ -168,30 +168,40 @@ class TestBpmHistogram(TestCase):
 
 
     def testRegressionReal(self):
-        #print "TODO: this test on a real example is not ready yet. We need to add a song from Public Domain with beat annotation done by expert and compare output against it"
+        # TODO: this test on a real example is not ready yet.
+        # We need to add a song from Public Domain with beat annotation done by
+        # expert and compare output against it"
 
         filename =filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav')
         pool = self.computeBpmHistogram(self.computeNoveltyCurve(filename),
                                         frameSize=4, overlap=2,
                                         frameRate=44100./512.)
-        expectedBpm = 61 # octave error, should actually be a double of it, as well, the exact value should be 61.9
+
+        # Octave error, should actually be a double of it.
+        # Also, the exact value should be 61.9
+        expectedBpm = 61
+
         self.assertEqual(int(pool['bpm']), expectedBpm)
         # the ticks that are being tested with were not manually annotated.
         # It's just the output of the algorithm written to a file
         # Therefore this test is just for checking that everything stays as originally:
-        # the algo outputs more ticks than exactly expectedBpm/2. The exact number can 
+        # the algo outputs more ticks than exactly expectedBpm/2. The exact number can
         # only happen when the algo is run recursively, as is done in src/examples/streaming_beattrack.cpp
-        referenceTicks = [0.49410257, 1.45644403, 2.42204642, 3.38822556, 4.35157299, 
+        referenceTicks = [0.49410257, 1.45644403, 2.42204642, 3.38822556, 4.35157299,
                           5.31459808, 6.28024578, 7.24001789,  8.20012093, 9.16794968,
                           10.12917042, 11.08399296, 12.05328083, 13.01444721, 13.96003532,
-                          14.92348099, 15.88770294, 16.84051323, 17.80594826, 18.77087402, 
+                          14.92348099, 15.88770294, 16.84051323, 17.80594826, 18.77087402,
                           19.7209034, 20.68716812, 21.65229988, 22.60784912, 23.57401085,
-                          24.5430603, 25.48790741, 26.44778061, 27.41486359, 28.36922264, 
-                          29.33124924 ] #, 30.30256462, 31.2541275, 32.20780945]
+                          24.5430603, 25.48790741, 26.44778061, 27.41486359, 28.36922264,
+                          29.33124924]  #, 30.30256462, 31.2541275, 32.20780945]
 
         ticks = list(pool['ticks'])
-        while ticks[-1] > 30: ticks.pop() # audio duration is 30 seconds, we get ticks beyond that
-        self.assertEqual(len(ticks), round(expectedBpm/2.)) 
+        while ticks[-1] > 30: ticks.pop()  # audio duration is 30 seconds, we get ticks beyond that
+
+        self.assertEqual(len(ticks), 31)      
+        # round(expectedBpm/2.) = 30 instead of 31 in python3
+        #self.assertEqual(len(ticks), round(expectedBpm/2.))
+
         self.assertAlmostEqualVector(ticks, referenceTicks, 1e-2)
 
     def testEmpty(self):
