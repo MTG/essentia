@@ -27,9 +27,12 @@ class TestStereoMuxer(TestCase):
     def testRegression(self):
         size = 10
         result = StereoMuxer()([size-i for i in range(size)], [i for i in range(size)])
-        print(result)
         expected = array([[size-i, i] for i in range(size)])
-        self.assertEqualVector(result, expected)
+
+        result_l, result_r = zip(*result)
+        expected_l, expected_r = zip(*expected)
+        self.assertEqualVector(result_l, expected_l)
+        self.assertEqualVector(result_r, expected_r)
 
     def testEmpty(self):
         audio = StereoMuxer()([], [])
