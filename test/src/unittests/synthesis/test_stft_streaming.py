@@ -118,7 +118,7 @@ class TestSTFT(TestCase):
         outsignal = outsignal[:signalSize]
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = int(self.params['frameSize']/2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
     def testWhiteNoise(self):
@@ -131,7 +131,7 @@ class TestSTFT(TestCase):
         outsignal = outsignal[:signalSize] # cut to duration of input signal
         
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = int(self.params['frameSize']/2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
     def testRamp(self):
@@ -143,7 +143,7 @@ class TestSTFT(TestCase):
         outsignal = outsignal[:signalSize] # cut to duration of input signal          
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = int(self.params['frameSize']/2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
     def testRegression(self):
@@ -157,7 +157,7 @@ class TestSTFT(TestCase):
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = int(self.params['frameSize']/2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
 

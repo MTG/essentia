@@ -52,8 +52,8 @@ class TestBPF(TestCase):
         bpf = BPF(xPoints = [0, 10],
                   yPoints = [0, 10])
 
-        self.assertRaises(EssentiaException, bpf, -1)
-        self.assertRaises(EssentiaException, bpf, 11)
+        self.assertComputeFails(bpf, -1)
+        self.assertComputeFails(bpf, 11)
 
     def testDecreasingX(self):
         # Test that bpf checks whether the x points are ordered

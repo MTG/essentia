@@ -26,7 +26,7 @@ import essentia.standard as std
 
 class TestFrameCutter_Streaming(TestCase):
 
-    def cutFrames(self, options, input=list(range(100))):
+    def cutFrames(self, options, input=range(100)):
         input = [float(x) for x in input]
         gen = VectorInput(input)
         pool = Pool()
@@ -90,7 +90,7 @@ class TestFrameCutter_Streaming(TestCase):
                    "startFromZero": True}
 
         found = self.cutFrames(options)
-        expected = [list(range(100))]
+        expected = [range(100)]
         self.assertEqualMatrix(found, expected)
 
     def testLastFrame2(self):
@@ -132,7 +132,7 @@ class TestFrameCutter_Streaming(TestCase):
                    "startFromZero": True}
 
         found = self.cutFrames(options)
-        expected = [list(range(20))]
+        expected = [range(20)]
         self.assertEqualMatrix(found, expected)
 
     def testBigHopSize2(self):
@@ -141,7 +141,7 @@ class TestFrameCutter_Streaming(TestCase):
                    "startFromZero": True}
 
         found = self.cutFrames(options)
-        expected = [ list(range(20)), [99] + [0]*19 ]
+        expected = [list(range(20)), [99] + [0]*19]
         self.assertEqualMatrix(found, expected)
 
 
@@ -151,7 +151,7 @@ class TestFrameCutter_Streaming(TestCase):
                    "startFromZero": False}
 
         found = self.cutFrames(options)
-        expected = [[0]*10 + list(range(10)),list(range(90,100)) + [0]*10]
+        expected = [[0]*10 + list(range(10)), list(range(90,100)) + [0]*10]
         self.assertEqualMatrix(found, expected)
 
 
@@ -160,7 +160,7 @@ class TestFrameCutter_Streaming(TestCase):
                    "hopSize": 2,
                    "startFromZero": True}
 
-        found = self.cutFrames(options, list(range(1, 6)))
+        found = self.cutFrames(options, range(1, 6))
         expected = [[ 1, 2, 3 ],
                     [ 3, 4, 5 ]]
         self.assertEqualMatrix(found, expected)
@@ -171,7 +171,7 @@ class TestFrameCutter_Streaming(TestCase):
                    "hopSize": 1,
                    "startFromZero": True}
 
-        found = self.cutFrames(options, list(range(1, 4)))
+        found = self.cutFrames(options, range(1, 4))
         expected = [[ 1, 2 ],
                     [ 2, 3 ]]
         self.assertEqualMatrix(found, expected)
@@ -182,8 +182,8 @@ class TestFrameCutter_Streaming(TestCase):
                    "hopSize": 2,
                    "startFromZero": False}
 
-        found = self.cutFrames(options, list(range(1, 6)))
-        expected = [[0,0,1], list(range(1,4)), list(range(3,6)),  [5,0,0]]
+        found = self.cutFrames(options, range(1, 6))
+        expected = [[0,0,1], range(1,4), range(3,6),  [5,0,0]]
         self.assertEqualMatrix(found, expected)
 
 
@@ -192,8 +192,8 @@ class TestFrameCutter_Streaming(TestCase):
                    "hopSize": 1,
                    "startFromZero": False}
 
-        found = self.cutFrames(options, list(range(1, 4)))
-        expected = [[0,1], list(range(1,3)), list(range(2,4)), list(range(3,4))+[0]]
+        found = self.cutFrames(options, range(1, 4))
+        expected = [[0,1], range(1,3), range(2,4), list(range(3,4))+[0]]
         self.assertEqualMatrix(found, expected)
 
     def testIncompatibleParams(self):
@@ -201,150 +201,150 @@ class TestFrameCutter_Streaming(TestCase):
                                                      'validFrameThresholdRatio' : .6})
 
     def testDropLastFrame_StartFromZeroEvenFrameSize(self):
-        expected = [list(range(1,  11)),
-                    list(range(11, 21)),
-                    list(range(21, 31)),
-                    list(range(31, 41)),
-                    list(range(41, 51))]
+        expected = [range(1,  11),
+                    range(11, 21),
+                    range(21, 31),
+                    range(31, 41),
+                    range(41, 51)]
 
         # test with ratio = 1
         options = {'frameSize': 10, 'hopSize': 10,
                    'startFromZero': True, 'validFrameThresholdRatio': 1}
-        found = self.cutFrames(options, list(range(1, 60)))
+        found = self.cutFrames(options, range(1, 60))
         self.assertEqualMatrix(found, expected)
 
         # test with ratio = .9
         options = {'frameSize': 10, 'hopSize': 10,
                    'startFromZero': True, 'validFrameThresholdRatio': .9}
-        found = self.cutFrames(options, list(range(1, 59)))
+        found = self.cutFrames(options, range(1, 59))
         self.assertEqualMatrix(found, expected)
 
         # test with ratio = .2
         options = {'frameSize': 10, 'hopSize': 10,
                    'startFromZero': True, 'validFrameThresholdRatio': .2}
-        found = self.cutFrames(options, list(range(1, 52)))
+        found = self.cutFrames(options, range(1, 52))
         self.assertEqualMatrix(found, expected)
 
     def testDontDropLastFrame_StartFromZeroEvenFrameSize(self):
         # test with ratio = 1
         options = {'frameSize': 10, 'hopSize': 10,
                    'startFromZero': True, 'validFrameThresholdRatio': 1}
-        found = self.cutFrames(options, list(range(1, 61)))
-        expected = [list(range(1,  11)),
-                    list(range(11, 21)),
-                    list(range(21, 31)),
-                    list(range(31, 41)),
-                    list(range(41, 51)),
-                    list(range(51, 61))]
+        found = self.cutFrames(options, range(1, 61))
+        expected = [range(1,  11),
+                    range(11, 21),
+                    range(21, 31),
+                    range(31, 41),
+                    range(41, 51),
+                    range(51, 61)]
         self.assertEqualMatrix(found, expected)
 
 
         # test with ratio = .9
         options = {'frameSize': 10, 'hopSize': 10,
                    'startFromZero': True, 'validFrameThresholdRatio': .9}
-        found = self.cutFrames(options, list(range(1, 60)))
-        expected = [list(range(1,  11)),
-                    list(range(11, 21)),
-                    list(range(21, 31)),
-                    list(range(31, 41)),
-                    list(range(41, 51)),
+        found = self.cutFrames(options, range(1, 60))
+        expected = [range(1,  11),
+                    range(11, 21),
+                    range(21, 31),
+                    range(31, 41),
+                    range(41, 51),
                     list(range(51, 60))+[0]]
         self.assertEqualMatrix(found, expected)
 
         # test with ratio = .2
         options = {'frameSize': 10, 'hopSize': 10,
                    'startFromZero': True, 'validFrameThresholdRatio': .2}
-        found = self.cutFrames(options, list(range(1, 53)))
-        expected = [list(range(1,  11)),
-                    list(range(11, 21)),
-                    list(range(21, 31)),
-                    list(range(31, 41)),
-                    list(range(41, 51)),
+        found = self.cutFrames(options, range(1, 53))
+        expected = [range(1,  11),
+                    range(11, 21),
+                    range(21, 31),
+                    range(31, 41),
+                    range(41, 51),
                     list(range(51, 53))+[0]*8]
         self.assertEqualMatrix(found, expected)
 
     def testDropLastFrame_StartFromZeroOddFrameSize(self):
-        expected = [list(range(1,  12)),
-                    list(range(12, 23)),
-                    list(range(23, 34)),
-                    list(range(34, 45)),
-                    list(range(45, 56))]
+        expected = [range(1,  12),
+                    range(12, 23),
+                    range(23, 34),
+                    range(34, 45),
+                    range(45, 56)]
 
         # test with ratio = 1
         options = {'frameSize': 11, 'hopSize': 11,
                    'startFromZero': True, 'validFrameThresholdRatio': 1}
-        found = self.cutFrames(options, list(range(1, 66)))
+        found = self.cutFrames(options, range(1, 66))
         self.assertEqualMatrix(found, expected)
 
         # test with ratio = .9
         options = {'frameSize': 11, 'hopSize': 11,
                    'startFromZero': True, 'validFrameThresholdRatio': .9}
-        found = self.cutFrames(options, list(range(1, 65)))
+        found = self.cutFrames(options, range(1, 65))
         self.assertEqualMatrix(found, expected)
 
         # test with ratio = .2
         options = {'frameSize': 11, 'hopSize': 11,
                    'startFromZero': True, 'validFrameThresholdRatio': .2}
-        found = self.cutFrames(options, list(range(1, 57)))
+        found = self.cutFrames(options, range(1, 57))
         self.assertEqualMatrix(found, expected)
 
     def testDontDropLastFrame_StartFromZeroOddFrameSize(self):
         # test with ratio = 1
         options = {'frameSize': 11, 'hopSize': 11,
                    'startFromZero': True, 'validFrameThresholdRatio': 1}
-        found = self.cutFrames(options, list(range(1, 67)))
-        expected = [list(range(1,  12)),
-                    list(range(12, 23)),
-                    list(range(23, 34)),
-                    list(range(34, 45)),
-                    list(range(45, 56)),
-                    list(range(56, 67))]
+        found = self.cutFrames(options, range(1, 67))
+        expected = [range(1,  12),
+                    range(12, 23),
+                    range(23, 34),
+                    range(34, 45),
+                    range(45, 56),
+                    range(56, 67)]
         self.assertEqualMatrix(found, expected)
 
 
         # test with ratio = .9
         options = {'frameSize': 11, 'hopSize': 11,
                    'startFromZero': True, 'validFrameThresholdRatio': .9}
-        found = self.cutFrames(options, list(range(1, 66)))
-        expected = [list(range(1,  12)),
-                    list(range(12, 23)),
-                    list(range(23, 34)),
-                    list(range(34, 45)),
-                    list(range(45, 56)),
+        found = self.cutFrames(options, range(1, 66))
+        expected = [range(1,  12),
+                    range(12, 23),
+                    range(23, 34),
+                    range(34, 45),
+                    range(45, 56),
                     list(range(56, 66))+[0]]
         self.assertEqualMatrix(found, expected)
 
         # test with ratio = .2
         options = {'frameSize': 11, 'hopSize': 11,
                    'startFromZero': True, 'validFrameThresholdRatio': .2}
-        found = self.cutFrames(options, list(range(1, 59)))
-        expected = [list(range(1,  12)),
-                    list(range(12, 23)),
-                    list(range(23, 34)),
-                    list(range(34, 45)),
-                    list(range(45, 56)),
+        found = self.cutFrames(options, range(1, 59))
+        expected = [range(1,  12),
+                    range(12, 23),
+                    range(23, 34),
+                    range(34, 45),
+                    range(45, 56),
                     list(range(56, 59))+[0]*8]
         self.assertEqualMatrix(found, expected)
 
     def testDropLastFrame_EvenFrameSize(self):
         expected = [[0]*5+list(range(1, 6)),
-                          list(range(6, 16)),
-                          list(range(16, 26)),
-                          list(range(26, 36)),
-                          list(range(36, 46)),
-                          list(range(46, 56))]
+                          range(6, 16),
+                          range(16, 26),
+                          range(26, 36),
+                          range(36, 46),
+                          range(46, 56)]
 
         # test with ratio = .5 (highest threshold possible with
         # startFromZero == false)
         options = {'frameSize': 10, 'hopSize': 10,
                    'startFromZero': False, 'validFrameThresholdRatio': .5}
-        found = self.cutFrames(options, list(range(1, 60)))
+        found = self.cutFrames(options, range(1, 60))
         self.assertEqualMatrix(found, expected)
 
         # test with ratio = .2
         options = {'frameSize': 10, 'hopSize': 10,
                    'startFromZero': False, 'validFrameThresholdRatio': .2}
-        found = self.cutFrames(options, list(range(1, 57)))
+        found = self.cutFrames(options, range(1, 57))
         self.assertEqualMatrix(found, expected)
 
     def testDontDropLastFrame_EvenFrameSize(self):
@@ -352,7 +352,7 @@ class TestFrameCutter_Streaming(TestCase):
         # startFromZero == false)
         options = {'frameSize': 10, 'hopSize': 10,
                    'startFromZero': False, 'validFrameThresholdRatio': .5}
-        found = self.cutFrames(options, list(range(1, 61)))
+        found = self.cutFrames(options, range(1, 61))
         expected = [[0]*5+list(range(1, 6)),
                           list(range(6, 16)),
                           list(range(16, 26)),
@@ -365,7 +365,7 @@ class TestFrameCutter_Streaming(TestCase):
         # test with ratio = .2
         options = {'frameSize': 10, 'hopSize': 10,
                    'startFromZero': False, 'validFrameThresholdRatio': .2}
-        found = self.cutFrames(options, list(range(1, 58)))
+        found = self.cutFrames(options, range(1, 58))
         expected = [[0]*5+list(range(1, 6)),
                           list(range(6, 16)),
                           list(range(16, 26)),
@@ -386,13 +386,13 @@ class TestFrameCutter_Streaming(TestCase):
         # startFromZero == false)
         options = {'frameSize': 11, 'hopSize': 11,
                    'startFromZero': False, 'validFrameThresholdRatio': .5}
-        found = self.cutFrames(options, list(range(1, 55)))
+        found = self.cutFrames(options, range(1, 55))
         self.assertEqualMatrix(found, expected)
 
         # test with ratio = .2
         options = {'frameSize': 11, 'hopSize': 11,
                    'startFromZero': False, 'validFrameThresholdRatio': .2}
-        found = self.cutFrames(options, list(range(1, 51)))
+        found = self.cutFrames(options, range(1, 51))
         self.assertEqualMatrix(found, expected)
 
     def testDontDropLastFrame_OddFrameSize(self):
@@ -400,7 +400,7 @@ class TestFrameCutter_Streaming(TestCase):
         # startFromZero == false)
         options = {'frameSize': 11, 'hopSize': 11,
                    'startFromZero': False, 'validFrameThresholdRatio': .5}
-        found = self.cutFrames(options, list(range(1, 56)))
+        found = self.cutFrames(options, range(1, 56))
         expected = [[0]*6+list(range( 1,  6)),
                           list(range( 6, 17)),
                           list(range(17, 28)),
@@ -412,7 +412,7 @@ class TestFrameCutter_Streaming(TestCase):
         # test with ratio = .2
         options = {'frameSize': 11, 'hopSize': 11,
                    'startFromZero': False, 'validFrameThresholdRatio': .2}
-        found = self.cutFrames(options, list(range(1, 53)))
+        found = self.cutFrames(options, range(1, 53))
         expected = [[0]*6+list(range( 1,  6)),
                           list(range( 6, 17)),
                           list(range(17, 28)),
@@ -506,4 +506,4 @@ class TestFrameCutter_Streaming(TestCase):
 suite = allTests(TestFrameCutter_Streaming)
 
 if __name__ == '__main__':
-    TextTestRunner(verbosity=2).run(suite)
+TextTestRunner(verbosity=2).run(suite)

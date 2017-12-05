@@ -55,9 +55,9 @@ class TestGFCC(TestCase):
         val = amp2db(0)
         expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
         while (size > 256 ):
-            bands, gfcc = GFCC(inputSize = size)(zeros(size))
+            bands, gfcc = GFCC(inputSize=size)(zeros(size))
             self.assertEqualVector(gfcc, expected)
-            size /= 2
+            size = int(size/2)
 
 
     def testInvalidInput(self):

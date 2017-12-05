@@ -52,7 +52,7 @@ class TestMFCC(TestCase):
         hopSize = 441
         fftSize= 2048
         zeroPadding = fftSize - frameSize
-        spectrumSize = fftSize/2 + 1
+        spectrumSize = int(fftSize/2) + 1
         expected = array([ 88.78342438, 6.36632776,  -1.62886882,  -5.30124903,
                           -3.92886806, -13.52705765, -7.62559938,  -18.51092339,
                            2.24103594,  3.10329103,  -16.25634193, -5.46565485, 
@@ -94,10 +94,10 @@ class TestMFCC(TestCase):
         size = 1025
         val = amp2db(0)
         expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
-        while (size > 256 ):
+        while (size > 256):
             bands, mfcc = MFCC()(zeros(size))
             self.assertEqualVector(mfcc, expected)
-            size /= 2
+            size = int(size/2)
 
 
     def testInvalidInput(self):

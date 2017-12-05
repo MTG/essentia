@@ -70,15 +70,14 @@ class TestChordsDescriptors(TestCase):
                           0, 0, 0, 0, 0, 0, 0]
 
           self.assertEqualVector(result[0], [hist*100 for hist in expectedHist])
-          self.assertAlmostEqual(result[1], 2.0/6.0) #chord rate
-          self.assertAlmostEqual(result[2], 5.0/6.0) #change rate
-          self.assertEqual(result[3], 'C')     #key
-          self.assertEqual(result[4], 'major') #scale
+          self.assertAlmostEqual(result[1], 2.0/6.0)  #chord rate
+          self.assertAlmostEqual(result[2], 5.0/6.0)  #change rate
+          self.assertEqual(result[3], 'C')      #key
+          self.assertEqual(result[4], 'major')  #scale
 
       def testUnknownChord(self):
-          chords = [ 'Cb', 'G', 'C', 'G', 'C', 'G' ] # Cb will raise exception
-          chordsAlgo = ChordsDescriptors()
-          self.assertRaises(EssentiaException, chordsAlgo, chords, 'C', 'major')
+          chords = ['Cb', 'G', 'C', 'G', 'C', 'G']  # Cb will raise exception
+          self.assertComputeFails(ChordsDescriptors(), chords, 'C', 'major')
 
       def testUnknownKey(self):
           self.assertComputeFails(ChordsDescriptors(), ['C', 'C'], 'Cb', 'major')

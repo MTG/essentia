@@ -20,7 +20,7 @@
 
 
 from essentia_test import *
-from numpy import dot # dot product
+from numpy import dot  # dot product
 
 testdir = join(filedir(), 'singlegaussian')
 
@@ -28,12 +28,13 @@ testdir = join(filedir(), 'singlegaussian')
 class TestSingleGaussian(TestCase):
 
     def assertInverse(self, cov, icov):
-        (rows,cols) = cov.shape
+        (rows, cols) = cov.shape
         self.assertEqual(rows, cols)
-        I = zeros([rows,cols]) # identity matrix
-        for i in range(rows): I[i][i] = 1.0
+        I = zeros([rows, cols])  # identity matrix
+        for i in range(rows):
+            I[i][i] = 1.0
         # assert that covariance*inverse_covariance = identity matrix
-        self.assertAlmostEqualMatrix(dot(cov,icov), I, 1e-6)
+        self.assertAlmostEqualMatrix(dot(cov, icov), I, 1e-6)
 
     def testRegression(self):
         input = readMatrix(join(testdir, 'matrix.txt'))
@@ -75,17 +76,17 @@ class TestSingleGaussian(TestCase):
         self.assertComputeFails(SingleGaussian(), array([[0]]))
 
     def testEmpty(self):
-        self.assertComputeFails(SingleGaussian(),array([[]]))
+        self.assertComputeFails(SingleGaussian(), array([[]]))
 
     def testOneRow(self):
-        mat = array([[1,2,3,4,5]])
+        mat = array([[1, 2, 3, 4, 5]])
         self.assertComputeFails(SingleGaussian(), mat)
 
     def testOneCol(self):
-        mat = array([[1],[2],[3],[4],[5]])
+        mat = array([[1], [2], [3], [4], [5]])
         mean = array(3)
-        cov =  array([[ 2.5]])
-        icov = array([[ 0.4]])
+        cov = array([[2.5]])
+        icov = array([[0.4]])
         outputMean, outputCov, outputInv = SingleGaussian()(mat)
         self.assertEqual(outputMean, mean)
         self.assertAlmostEqualMatrix(outputCov, cov)

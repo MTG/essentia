@@ -113,7 +113,8 @@ class TestMultiplexer_Streaming(TestCase):
 
         ### expected result ###
         expected = []
-        for exp in expectedReals: expected.append(exp)
+        for exp in expectedReals:
+            expected.append(exp)
         for i in range(len(expectedVectors)):
             for exp in expectedVectors[i]:
                 expected[i].append(exp)

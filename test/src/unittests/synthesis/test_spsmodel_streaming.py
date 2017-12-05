@@ -114,54 +114,48 @@ def analSpsModelStreaming(params, signal):
     minFrames = int( params['minSineDur'] * params['sampleRate'] / params['hopSize']);
     freqsClean = cleaningSineTracks(freqs, minFrames)
     pool['frequencies'].data = freqsClean
-    
+
     return mags, freqsClean, phases
 
 
-
-
-
 def analsynthSpsModelStreaming(params, signal):
-  
+
     out = array([0.])
-  
+
     pool = essentia.Pool()
     # windowing and FFT
-    fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False);
-    w = es.Windowing(type = "blackmanharris92");    
-    spec = es.Spectrum(size = params['frameSize']);
-    
-        
-    smanal = es.SpsModelAnal(sampleRate = params['sampleRate'], hopSize = params['hopSize'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'], stocf = params['stocf'])
-    synFFTSize = min(params['frameSize']/4, 4*params['hopSize']);  # make sure the FFT size is appropriate
-    smsyn = es.SpsModelSynth(sampleRate = params['sampleRate'], fftSize = synFFTSize, hopSize = params['hopSize'], stocf = params['stocf'])    
-    
+    fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False)
+    w = es.Windowing(type = "blackmanharris92")
+    spec = es.Spectrum(size = params['frameSize'])
+
+    smanal = es.SpsModelAnal(sampleRate=params['sampleRate'], hopSize=params['hopSize'], maxnSines=params['maxnSines'], magnitudeThreshold=params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'], stocf = params['stocf'])
+    synFFTSize = min(int(params['frameSize']/4), 4*params['hopSize'])  # make sure the FFT size is appropriate
+    smsyn = es.SpsModelSynth(sampleRate=params['sampleRate'], fftSize=synFFTSize, hopSize=params['hopSize'], stocf=params['stocf'])
+
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal = numpy.append(signal, zeros(params['frameSize']/2))
     insignal = VectorInput (signal)
-        
-      
+
     # analysis
-    insignal.data >> fcut.signal    
+    insignal.data >> fcut.signal
     fcut.frame >> smanal.frame
 
-    
     # synthesis
     smanal.magnitudes >> smsyn.magnitudes
     smanal.frequencies >> smsyn.frequencies
-    smanal.phases >> smsyn.phases    
+    smanal.phases >> smsyn.phases
     smanal.stocenv >> smsyn.stocenv
-  
-    
+
+
     smsyn.frame >> (pool, 'frames')
     smsyn.sineframe >> (pool, 'sineframes')
     smsyn.stocframe >> (pool, 'stocframes')
-    
+
     essentia.run(insignal)
-       
+
     outaudio = framesToAudio(pool['frames'])
     outaudio = outaudio [2*params['hopSize']:]
-    
+
 
     return outaudio, pool
 

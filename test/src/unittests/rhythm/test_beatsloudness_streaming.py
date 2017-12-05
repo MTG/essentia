@@ -111,7 +111,7 @@ class TestBeatsLoudness(TestCase):
 
         # create audio signal that represents a click track nClicks seconds
         # long, with .25s clicks starting at every second
-        clickTrack = [1.0]*(sr/2) + [0.0]*(sr/2)
+        clickTrack = [1.0]*int(sr/2) + [0.0]*int(sr/2)
         clickTrack *= nClicks
         clickLocations = [i + 1./4. for i in range(nClicks)]
 

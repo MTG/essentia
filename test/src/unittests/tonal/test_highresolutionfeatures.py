@@ -47,7 +47,7 @@ class TestHighResolutionFeatures(TestCase):
         size = nCents*nSemitones
         hpcp = zeros(size)
         # peaks at semitone position + 0.5:
-        for i in range(0, size, nCents/2):
+        for i in range(0, size, int(nCents/2)):
             hpcp[i] = 1.0
         self.assertEqualVector(HighResolutionFeatures()(hpcp), [0.25, 0.5, 0.5])
 
@@ -60,7 +60,7 @@ class TestHighResolutionFeatures(TestCase):
         size = nCents*nSemitones
         hpcp = [0]*size
         # peaks at semitone position + 0.5:
-        for i in range(0, size, nCents/2):
+        for i in range(0, size, int(nCents/2)):
             hpcp[i] = 1
 
         gen = VectorInput([hpcp])

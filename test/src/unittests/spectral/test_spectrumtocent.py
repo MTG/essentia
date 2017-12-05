@@ -33,7 +33,7 @@ class TestSpectrumToCent(TestCase):
         fft_size = 2**16
         frameSize_default = 2048
         zeroPadding_default = fft_size - frameSize_default
-        spectrum_size = fft_size / 2 + 1
+        spectrum_size = int(fft_size/2) + 1
         hopSize_default = 512
 
         #Analize only a few frames

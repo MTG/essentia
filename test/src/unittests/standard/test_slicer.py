@@ -38,7 +38,7 @@ class TestSlicer(TestCase):
         for i in range(nSlices):
             time = (startTimes[i], endTimes[i])
             orderedTimes.append(time)
-        orderedTimes = sorted(orderedTimes, lambda x,y:x[0]-y[0])
+        orderedTimes = sorted(orderedTimes, key=lambda x: x[0])
 
         for i in range(nSlices):
             expected.append(input[orderedTimes[i][0]:orderedTimes[i][1]])

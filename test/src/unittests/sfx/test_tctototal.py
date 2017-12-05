@@ -40,9 +40,9 @@ class TestTCToTotal(TestCase):
         size = 100
         envelope = zeros(size)
 
-        for i in range(size/2):
+        for i in range(int(size/2)):
             envelope[i] = i
-        for i in range(size/2, size):
+        for i in range(int(size/2), size):
             envelope[i] = size - i
         TCToTotal()(envelope)
         self.assertAlmostEqual(TCToTotal()(envelope), 0.5*size/float(size-1))
