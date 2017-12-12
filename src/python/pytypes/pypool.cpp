@@ -552,9 +552,8 @@ PyObject* PyPool::isSingleValue(PyPool* self, PyObject* obj) {
   }
 
   if (self->pool->isSingleValue(PyString_AS_STRING(obj)))
-    return Py_True;
-  return Py_False;
-
+    Py_RETURN_TRUE;
+  Py_RETURN_FALSE;
 }
 
 PyObject* PyPool::removeNamespace(PyPool* self, PyObject* obj) {
