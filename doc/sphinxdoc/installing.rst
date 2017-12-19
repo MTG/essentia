@@ -146,7 +146,7 @@ The waf build scripts are python scripts themselves. They will configure Essenti
 
 Running tests (optional)
 ------------------------
-If you want to assure that Essentia works correctly, do the tests.
+If you want to assure that Essentia works correctly, do the tests. Some of the tests require additional audio files, which are stored in a separate submodule repository `essentia-audio <https://github.com/MTG/essentia-audio>`_. Make sure to clone Essentia git repository including its submodules in order to be able to run the tests (``git clone --recursive https://github.com/MTG/essentia.git``).
 
 To run the C++ base unit tests (only test basic library behavior)::
 
