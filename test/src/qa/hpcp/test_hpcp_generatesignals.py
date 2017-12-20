@@ -1,6 +1,5 @@
 import random
 import numpy as np
-from collections import defaultdict
 
 from scipy.signal import spectrogram
 import essentia
@@ -14,39 +13,39 @@ def getSignalsList(tests):
     getSignalsList(['testWindowWholeRange', 'testFrameSize']])
     """
     signals = {}
-    signalsKey = []
     
     for test in tests:
         for signalNeeded in test2SignalsMapping[test]:
-            if not signalNeeded in signalsKey:
+            if not signalNeeded in signals.keys():
                 signals[signalNeeded]=getSignal(signalNeeded)
-                signalsKey.append(signalNeeded)
-    
-    return signals, signalsKey
+    return signals
     
 def getSignal(signalNeeded):
     if signalNeeded.startswith('Tones'):
         return (getTone(signalNeeded))
     elif signalNeeded.startswith('White Noise'):
+        # Generate white noise
         return (getWhiteNoise())
     elif signalNeeded.startswith('LPF'):
+        # White noise through a low pass filter with different cutoff frequencies  
         return (getLPF(signalNeeded))
     elif signalNeeded.startswith('BPF'):
+        # White noise through a bandpass filter with different cutoff frequencies
         return (getBPF(signalNeeded))
     else:
-        print ('Error in getSignal')
-        return ([])
+        print ('Unknown signal type in getSignal')
+        return (np.array(zeros(1024)))
     
 
 def getTone(signalNeeded):
-
+    # Generate an ascending sequence of pitches
     # Note scales
-    N_offset0 = float(note_scales[signalNeeded][0])
-    N_offset1 = float(note_scales[signalNeeded][1])
+    N_offset0 = note_scales[signalNeeded][0]
+    N_offset1 = note_scales[signalNeeded][1]
     nnotes = N_offset1 - N_offset0 + 1
 
     samples_per_note = np.rint((float(N) / float(nnotes)) / 2.0)
-	# Divide in half because we are adding up silences between notes
+    # Divide in half because we are adding up silences between notes
 
     scale_midi = np.arange(N_offset0, N_offset1+1)
     scale_frequencies = 440.*np.power(semitone, scale_midi)
@@ -81,9 +80,9 @@ def getWhiteNoise():
 
 def getLPF(signalNeeded):
     
-    midi = int(float(signalNeeded[-2:]))
+    midi_note = int(float(signalNeeded[-2:]))
     
-    fc = 440.*np.power(semitone, midi)
+    fc = 440.*np.power(semitone, midi_note)
     LPF = LowPass(sampleRate=fs, cutoffFrequency=fc)
     signal = essentia.array(LPF(getWhiteNoise()))
     # Normalization
@@ -93,11 +92,11 @@ def getLPF(signalNeeded):
 
 def getBPF(signalNeeded):
     
-    midi = int(float(signalNeeded[-2:]))
+    midi_note = int(float(signalNeeded[-2:]))
     
     
-    fc0 = 440.*np.power(semitone, midi)
-    fc1 = 440.*np.power(semitone, midi + 2*12 + 1) # 2 octaves
+    fc0 = 440.*np.power(semitone, midi_note)
+    fc1 = 440.*np.power(semitone, midi_note + 2*12 + 1) # 2 octaves
     bandwidth = fc1 - fc0
     cutoffFrequency = (fc0 + fc1) / 2.
     BPF = BandPass(bandwidth=bandwidth, cutoffFrequency=cutoffFrequency,sampleRate=fs)

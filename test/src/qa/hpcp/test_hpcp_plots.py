@@ -26,11 +26,9 @@ def plotSpectrumComparison(signals, signalkey, speaks, spectrum):
         signal = signals[skey]
         pfreq, pmagn = speaks(spectrum(signal))
         plot(pfreq*fs/2, pmagn)   
-    
     legend(signalkey)
     title = 'Spectrum BPF of WN'
     fig.suptitle(title)
-    
     figname = title + '.png'
     fig.savefig(figname)
     close('all')
@@ -38,16 +36,11 @@ def plotSpectrumComparison(signals, signalkey, speaks, spectrum):
     return html_
 
 def plotHPCP(signal, signalname, hpcp, w, speaks, frameSize, hopSize, figtitle, show=False):
-    
     hpcp_, _, _, hpcpmean, hpcpmedian = extractHPCP(signal, frameSize, hopSize, w, speaks, hpcp, signal)
-   
     fig = figure(num=None, figsize=(8, 5), dpi=80, facecolor='w', edgecolor='k')         
     gs = GridSpec(4, 4)
     ax1 = subplot(gs[:,:-1])
     ax2 = subplot(gs[:,-1])
-                    
-    
-    #ax1.text(0,2,params,ha="left", va="top",size=18,color='black')
     ax1.imshow(hpcp_[::-1,:], aspect = 'auto') 
     ax1.set_title(figtitle)
     ax2.plot(hpcpmean,xrange(36))
@@ -56,54 +49,38 @@ def plotHPCP(signal, signalname, hpcp, w, speaks, frameSize, hopSize, figtitle, 
     tight_layout()
     if show:
         show()
-
-
-    
     figname = figtitle + '.png'
     fig.savefig(figname, bbox_inches='tight')
-    
     html = "<p><img src=\"" + figname + "\"></p>\n"  
     return html
 
 def plotmeanHPPC_Spectrum(hpcpmeanpool,spectrummean,signalsKey,frameSize,hopSize,wtype,title):
-    
-    
     figtitle = 'Mean HPCP ' + title + ' window type ' + str(wtype[0])
     fig = figure(num=None, figsize=(8, 5), dpi=80, facecolor='w', edgecolor='k')
     fignamehpcp = figtitle
     plt.title(figtitle)
-    
     for skey in signalsKey:
         plot(hpcpmeanpool[str(wtype)][str(skey)])
         tight_layout()
-
     legend(signalsKey)
     # show()
-        
     fignamehpcp = fignamehpcp + '.png'
     fig.savefig(fignamehpcp,bbox_inches='tight')
     close('all')                                            
-    
     figtitle = 'Spectrum ' + title + ' window type ' + str(wtype[0])
     fig = figure(num=None, figsize=(8, 5), dpi=80, facecolor='w', edgecolor='k')
     fignamescptr = figtitle
     plt.title(figtitle)
-    
     for skey in signalsKey:
         plot(spectrummean[str(wtype)][str(skey)])
         tight_layout()
-
     legend(signalsKey)
-    # show()
-        
     fignamescptr = fignamescptr + '.png'
     fig.savefig(fignamescptr,bbox_inches='tight')
     close('all')
-    
     html = "<p>" + title + "</p>\n" 
     html += "<p><img src=\"" + fignamehpcp + "\"></p>\n\n"  
     html += "<p><img src=\"" + fignamescptr + "\"></p>\n\n"      
-
     return html
 
 def parametersText(hpcp, w, frameSize, hopSize):

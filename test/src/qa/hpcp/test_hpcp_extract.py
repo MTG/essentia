@@ -1,6 +1,5 @@
 import numpy as np
 from scipy.signal import spectrogram
-from collections import defaultdict
 
 import essentia
 from essentia.standard import *
