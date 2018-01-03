@@ -175,6 +175,7 @@ def configure(ctx):
     elif sys.platform.startswith('linux'):
         # include -pthread flag because not all versions of gcc provide it automatically
         ctx.env.CXXFLAGS += ['-pthread']
+        ctx.env.LINKFLAGS += ['-pthread']
 
     elif sys.platform == 'win32':
         print ("Building on win32")
@@ -313,12 +314,6 @@ def build(ctx):
     ctx.recurse('src')
 
     if ctx.env.WITH_CPPTESTS:
-        # missing -lpthread flag on Ubuntu and LinuxMint
-        if platform.dist()[0].lower() in ['debian', 'ubuntu', 'linuxmint'] and not ctx.env.CROSS_COMPILE_MINGW32 and not ctx.env.WITH_STATIC_EXAMPLES:
-            ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
-            ctx.read_shlib('pthread', paths=ext_paths)
-            ctx.env.USES += ' pthread'
-
         ctx.program(
             source=ctx.path.ant_glob('test/src/basetest/*.cpp test/3rdparty/gtest-1.6.0/src/gtest-all.cc '),
             target='basetest',
