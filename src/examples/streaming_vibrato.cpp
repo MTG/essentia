@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
                                            "sampleRate", sr,
                                            "downmix", "mix");
 
-  Algorithm* pitchDetect  = factory.create("PredominantMelody");
+  Algorithm* pitchDetect  = factory.create("PitchMelodia");
   Algorithm* vibrato      = factory.create("Vibrato");
   // by default, vibrato is adjusted to the predominant melody default output sample rate (44100.0/128.0)
     
@@ -99,7 +99,6 @@ int main(int argc, char* argv[]) {
   }
   
   // clean up:
-  //deleteNetwork(audioload);
   delete output;
   essentia::shutdown();
 

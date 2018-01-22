@@ -1,161 +1,229 @@
-{% extends "layout.html" %}
-{% set title = 'Overview' %}
-{% block body %}
-  <h1>Essentia {{version}} Documentation</h1>
+{% extends "base.html" %}
+{% set title = "Homepage" %}
 
-
-
-  <div class="section" id="what-is-essentia">
-    <h2>What is Essentia?<a class="headerlink" href="#what-is-essentia" title="Permalink to this headline">¶</a></h2>
-
-    <p>Essentia is an open-source C++ library for <strong>audio analysis and audio-based music information retrieval</strong> released
-    under the <strong><a href="http://tldrlegal.com/license/gnu-affero-general-public-license-v3-%28agpl-3.0%29#summary">Affero GPLv3
-    license</a></strong> (also available under proprietary license upon request). It contains an <strong><a href="{{ pathto("algorithms_overview") }}">
-    extensive collection of reusable algorithms</a></strong> which implement audio input/output functionality, standard digital signal processing
-    blocks, statistical characterization of data, and a large set of spectral, temporal, tonal and high-level music descriptors.
-    In addition, Essentia can be <strongs>complemented</strong> with <strong><a href="https://github.com/MTG/gaia">Gaia</a></strong>, a
-    C++ library with python bindings which implement similarity measures and classification on the results of audio analysis, and generate
-    <strong><a href="{{ pathto("installing") }}#using-pre-trained-high-level-models-in-essentia">classification
-    models</a></strong> that Essentia can use to compute high-level description of music (same license terms apply).</p>
-
-    <p>Essentia is not a framework, but rather a collection of algorithms (plus some infrastructure) wrapped in a library.
-    It does not provide common high-level logic for descriptor computation (so you aren’t locked into a certain way of doing things). It
-    rather focuses on the <strong>robustness</strong>, <strong>performance </strong>and <strong>optimality </strong>of the <strong>provided
-    algorithms</strong>, as well as ease of use. The flow of the analysis is decided and implemented by the user, while Essentia is taking
-    care of the implementation details of the algorithms being used. There is a special <strong>streaming mode</strong> in which it is possible to connect
-    algorithms and run them automatically (similarly to PureData or Max/MSP) instead of specifying explicitly the order of execution with an
-    advantage of less boilerplate code and less memory consumption. A number of predefined executable extractors are provided with the library
-    as examples, however they should not be considered as the only correct way of doing things.</p>
-
-    <p>Currently the following algorithms are included (among others):</p>
-
-    <ul class="simple">
-      <li><strong>Audio file input/output:</strong> ability to read and write nearly all audio file formats (wav, mp3, ogg, flac, etc.)</li>
-      <li><strong>Standard signal processing blocks:</strong> FFT, DCT, frame cutter, windowing, envelope, smoothing</li>
-      <li><strong>Filters (FIR &amp; IIR):</strong> low/high/band pass, band reject, DC removal, equal loudness</li>
-      <li><strong>Statistical descriptors:</strong> median, mean, variance, power means, raw and central moments, spread, kurtosis, skewness, flatness</li>
-      <li><strong>Time-domain descriptors:</strong> duration, loudness, LARM, Leq, Vickers' loudness, zero-crossing-rate, log attack time and other signal envelope descriptors</li>
-      <li><strong>Spectral descriptors:</strong> Bark/Mel/ERB bands, MFCC, GFCC, LPC, spectral peaks, complexity, rolloff, contrast, HFC, inharmonicity and dissonance</li>
-      <li><strong>Tonal descriptors</strong> Pitch salience function, predominant melody and pitch, HPCP (chroma) related features, chords, key and scale, tuning frequency</li>
-      <li><strong>Rhythm descriptors</strong> beat detection, BPM, onset detection, rhythm transform, beat loudness</li>
-      <li><strong>Other high-level descriptors:</strong> danceability, dynamic complexity, audio segmentation, SVM classifier</li>
-    </ul>
-
-    <p>The library is<strong> cross-platform</strong> and currently supports <a href="{{ pathto("installing") }}"><strong>Linux</strong>, <strong>Mac OS X</strong>, and partially <strong>Windows</strong>,
-    <strong>iOS</strong> and <strong>Android</strong></a> systems. It can also be cross-compiled to <strong><a href="FAQ.html#compiling-essentia-to-javascript-with-emscripten">JavaScript</a></strong> to be used on the web.</p>
-
-    <p>The library is wrapped in <strong>Python</strong> (Linux and OSX) and includes a number of predefined <strong><a href="{{ pathto("extractors_out_of_box") }}">
-    command-line extractors for music descriptors</a></strong> (Linux, OSX and Windows), which facilitates its use for fast prototyping and allows setting up
-    research experiments very rapidly. Furthermore, it includes a <a href="http://essentia.upf.edu/documentation/vamp_plugins"><strong>Vamp plugin</strong></a>
-    (Linux and OSX) that can be used with Sonic Visualiser for visualization purposes. There have been developed a number of third-party extensions to Essentia
-    that allow its use within the frameworks of <a href="http://mtg.upf.edu/technologies/EssentiaRT~"><strong>PureData</strong> and
-    <strong>Max/MSP</strong></a>, <a href="https://github.com/leozimmerman/ofxAudioAnalyzer"><strong>openFrameworks</strong></a>, and
-    <a href="https://github.com/MTG/matlab-c-tools"><strong>Matlab</strong></a>.</p>
-
-    <p>Essentia is designed with a focus on the robustness of the provided music descriptors and is optimized in terms of the computational
-    cost of the algorithms and low memory usage. The provided functionality, specifically the music descriptors included in-the-box and signal
-    processing algorithms, is <strong>easily expandable</strong> and allows for both research experiments and development of large-scale
-    industrial applications. Large part of Essentia's algorithms is well-suited for
-    <a href="FAQ.html#using-essentia-real-time"><strong>real-time</strong></a> applications.</p>
-
-
-    <h2>Crediting Essentia<a class="headerlink" href="#crediting-essentia" title="Permalink to this headline">¶</a></h2>
-    <p>Please credit properly your use of Essentia! If you use the Essentia library in your software please
-    acknowledge it and specify its origen as <a>http://essentia.upf.edu</a>. If you do some research and publish an article,
-    cite both the Essentia paper [1] and the specific references mentioned in the documentation of the algorithms used.
-    We would be also very grateful if you let us know how you use Essentia by sending an email to <a
-    href="mailto:mtg@upf.edu">mtg@upf.edu</a>
+{% block content %}
+<section class="essnt-hero">
+  <div class="container">
+    <h1 class="essnt-hero__title">Essentia</h1>
+    <p class="essnt-hero__subtitle">
+      Open-source library and tools for audio and music analysis, description and synthesis
     </p>
-
-    <p>[1] Bogdanov, D., Wack N., Gómez E., Gulati S., Herrera P., Mayor O., et al. (2013).  <a
-    href="http://mtg.upf.edu/node/2793">ESSENTIA: an Audio Analysis
-    Library for Music Information Retrieval.</a> International Society for Music Information Retrieval Conference
-    (ISMIR'13). 493-498.</p>
+    <div class="essnt-hero__btn-group">
+      <a class="btn essnt-hero__btn essnt-hero__btn-primary" href="documentation.html">
+        Get started
+      </a>
+      <a class="btn essnt-hero__btn essnt-hero__btn-secondary" href="download.html">
+        Download
+      </a>
+    </div>
   </div>
-
-  <div class="section" id="contents">
-
-  <h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("contents") }}">Contents and search</a><br/>
-      <span class="linkdescr">For a complete overview of the documentation</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("algorithms_reference") }}">Algorithm reference</a><br/>
-    <span class="linkdescr">The detailed documentation for all the algorithms</span></p>
-
-  <p class="biglink"><a class="biglink" href="doxygen/index.html">Doxygen C++ documentation</a><br/>
-      <span class="linkdescr">The documentation for the base classes used in Essentia</span></p>
-
-  <h2>Getting started</h2>
-      
-  <p class="biglink"><a class="biglink" href="{{ pathto("introduction") }}">Introduction</a><br/>
-      <span class="linkdescr">An introduction to Essentia's main concepts</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("installing") }}">Building and installing Essentia</a><br/>
-      <span class="linkdescr">Instructions to get Essentia running on your computer</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("algorithms_overview") }}">Algorithms overview</a><br/>
-     <span class="linkdescr">A quick description of the main algorithms</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("essentia_python_tutorial") }}">Python tutorial for beginners</a><br/>
-     <span class="linkdescr">A hands-on introduction to Essentia</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("extractors_out_of_box") }}">Using extractors out-of-box</a><br/>
-     <span class="linkdescr">Quick results with no programming required</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("streaming_extractor_music") }}">Music extractor</a><br/>
-     <span class="linkdescr">Command-line feature extractor</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("FAQ") }}">Frequently asked questions</a><br/>
-     <span class="linkdescr">Various tips on how to build and use Essentia</span></p>
-
-
-  <h2>Using Essentia</h2>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("design_overview") }}">Design overview</a><br/>
-      <span class="linkdescr">An explanation of Essentia's basic types and classes</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("howto_standard_extractor") }}">Using standard mode</a><br/>
-      <span class="linkdescr">Learn how to write a "standard" extractor</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("howto_streaming_extractor") }}">Using streaming mode</a><br/>
-      <span class="linkdescr">Learn how to write a "streaming" extractor</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("streaming_architecture") }}">Streaming mode architecture</a><br/>
-      <span class="linkdescr">A description of how the "streaming" mode works</span></p>
-
-
-  <h2>Extending Essentia</h2>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("extending_essentia") }}">Standard algorithms</a><br/>
-      <span class="linkdescr">How to write new "standard" algorithms for Essentia</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("extending_essentia_streaming") }}">Streaming algorithms</a><br/>
-      <span class="linkdescr">How to write new "streaming" algorithms for Essentia</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("composite_api") }}">AlgorithmComposite algorithms</a><br/>
-      <span class="linkdescr">The inner workings of the composite algorithms</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("execution_network_algorithm") }}">Streaming network execution</a><br/>
-      <span class="linkdescr">How Essentia's streaming scheduler works</span></p>
-
-  <p class="biglink"><a class="biglink" href="{{ pathto("coding_guidelines") }}">Coding guidelines</a><br/>
-      <span class="linkdescr">Good practices to follow when developing new algorithms</span></p>
-
+</section>
+<section class="essnt-core container">
+  <div class="row">
+    <div class="col-sm-6 col-md-3 essnt-core-feature">
+      <h4 class="essnt-core-feature__title">Extensive collection of reusable algorithms</h4>
+      <p class="essnt-core-feature__description">
+        Flexible and easily extendable algorithms for common audio analysis processes and audio and music descriptors
+      </p>
+    </div>
+    <div class="col-sm-6 col-md-3 essnt-core-feature">
+      <h4 class="essnt-core-feature__title">Cross-platform</h4>
+      <p class="essnt-core-feature__description">
+        Linux, Mac OS X, Windows, iOS, Android, and JavaScript
+      </p>
+    </div>
+    <div class="col-sm-6 col-md-3 essnt-core-feature">
+      <h4 class="essnt-core-feature__title">Fast prototyping</h4>
+      <p class="essnt-core-feature__description">
+        Python’s scientific environment and command-line audio analysis tools
+      </p>
+    </div>
+    <div class="col-sm-6 col-md-3 essnt-core-feature">
+      <h4 class="essnt-core-feature__title">Optimized for computational speed</h4>
+      <p class="essnt-core-feature__description">
+        Used in industrial real-time applications
+      </p>
+    </div>
   </div>
-<!--
-<div class="section" id="examples">
-<h2>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h2>
-</div>
+</section>
+<section class="essnt-about">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-8">
+        <h3 class="essnt-about__title">
+          About
+        </h3>
+        <p class="essnt-about__text">
+          Essentia is a open-source C++ library for audio analysis and audio-based music information retrieval. It contains an extensive collection of algorithms including audio input/output functionality, standard digital signal processing blocks, statistical characterization of data, and a large set of spectral, temporal, tonal and high-level music descriptors.
 
-<div class="section" id="get-essentia">
-<h2>Get Essentia<a class="headerlink" href="#get-essentia" title="Permalink to this headline">¶</a></h2>
-<p>You can download precompiled packages for Essentia from the
-<a class="reference external" href="http://static.mtg.upf.edu/mir-dev-download/essentia/">TODO download page</a></p>
-<p>The code can be found in a Github repository, at <tt class="docutils literal"><span class="pre">https://github.com/MTG/essentia.git</span></tt>.</p>
-<p>(Please refer to <a class="reference external" href="https://help.github.com/articles/set-up-git">this page</a>
-for instructions on how to setup Git)</p>
-</div>
--->
+Essentia is cross-platform and it is designed with a focus on optimization in terms of robustness,  computational speed and low memory usage, which makes it effective for many industrial applications. The library is also wrapped in Python and includes a number of command-line tools and third-party extensions, which facilitate its use for fast prototyping and allow setting up research experiments very rapidly.
+        </p>
+      </div>
+      <div class="hidden-xs col-sm-4 essnt-about__media-container">
+        <img class="essnt-about__media" src="_static/essentia_white_e.png" />
+      </div>
+    </div>
+  </div>
+</section>
+<section class="essnt-applications">
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Similarity</h4>
+        <p class="essnt-core-feature__description">
+            Analyze audio and compute features to find similar sounds or music tracks.
+        </p>
+      </div>
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Classification</h4>
+        <p class="essnt-core-feature__description">
+          Classify sounds or music based on computed audio features.
+        </p>
+      </div>
 
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Mood detection</h4>
+        <p class="essnt-core-feature__description">
+          Find if a song is happy, sad, aggressive or relaxed.
+        </p>
+      </div>
+
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Key detection</h4>
+        <p class="essnt-core-feature__description">
+          Find a key of a music piece.
+        </p>
+      </div>
+
+
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Onset detection</h4>
+        <p class="essnt-core-feature__description">
+          Detect onsets (and transients) in an audio signal.
+        </p>
+      </div>
+
+     <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Segmentation</h4>
+        <p class="essnt-core-feature__description">
+          Split audio into homogeneous segments that sound alike.
+        </p>
+      </div>
+
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Beat tracking</h4>
+        <p class="essnt-core-feature__description">
+          Estimate beat positions and tempo (BPM) of a song.
+        </p>
+      </div>
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Melody extraction</h4>
+        <p class="essnt-core-feature__description">
+          Estimate pitch in monophonic and polyphonic audio.
+        </p>
+      </div>
+
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Audio fingerprinting</h4>
+        <p class="essnt-core-feature__description">
+        Extract fingerprints from any audio source using the Chromaprint algorithm.
+        </p>
+      </div>
+
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Spectral analysis</h4>
+        <p class="essnt-core-feature__description">
+        Analyze spectral shape of an audio signal.
+        </p>
+      </div>
+
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Loudness metering</h4>
+        <p class="essnt-core-feature__description">
+        Use various loudness meters including algorithms compliant with the EBU R128 broadcasting standard.
+        </p>
+      </div>
+
+
+      <div class="col-sm-6 col-md-3 essnt-core-feature">
+        <h4 class="essnt-core-feature__title">Synthesis</h4>
+        <p class="essnt-core-feature__description">
+        Analyze, transform and synthesize sounds using spectral modeling approaches.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+<section class="essnt-apps container">
+  <h3 class="essnt-apps__title">Companies and projects using Essentia</h3>
+  <div class="row essnt-apps__wrapper">
+    <div class="col-xs-6 col-sm-3 essnt-apps__app-container">
+      <div class="essnt-apps__app-logo-container">
+        <img class="essnt-apps__app-logo" src="{{ pathto("_static/3rdparty/logo_freesound.png", 1) }}" alt="freesound logo"  />
+      </div>
+      <p class="essnt-apps__app-description">
+        Collaborative database of Creative Commons Licensed sounds
+      </p>
+    </div>
+    <div class="col-xs-6 col-sm-3 essnt-apps__app-container">
+      <div class="essnt-apps__app-logo-container">
+        <img class="essnt-apps__app-logo" src="{{ pathto("_static/3rdparty/logo_acousticbrainz2.png", 1) }}" alt="acousticbrainz logo"  />
+      </div>
+      <p class="essnt-apps__app-description">
+        Open platform for gathering music information from audio
+      </p>
+    </div>
+    <div class="visible-xs clearfix"></div>
+    <div class="col-xs-6 col-sm-3 essnt-apps__app-container">
+      <div class="essnt-apps__app-logo-container">
+        <img class="essnt-apps__app-logo" src="{{ pathto("_static/3rdparty/logo_korg.jpg", 1) }}" alt="korg logo"  />
+      </div>
+      <p class="essnt-apps__app-description">
+      Interactive iPhone tuner app for learning to play music instrumens</p>
+    </div>
+    <div class="col-xs-6 col-sm-3 essnt-apps__app-container">
+      <div class="essnt-apps__app-logo-container">
+        <img class="essnt-apps__app-logo" src="{{ pathto("_static/3rdparty/logo_neurodancer.png", 1) }}" alt="crept of the necrodancer logo"  />
+      </div>
+      <p class="essnt-apps__app-description">
+      Award winning independent rhythm game using Essentia's beat detection</p>
+    </div>
+  </div>
+  <div class="row essnt-apps__wrapper">
+    <div class="col-xs-6 col-sm-3 essnt-apps__app-container">
+      <div class="essnt-apps__app-logo-container">
+        <img class="essnt-apps__app-logo" src="{{ pathto("_static/3rdparty/logo_fretello.png", 1) }}" alt="fretello logo"  />
+      </div>
+      <p class="essnt-apps__app-description">
+        An iOS/Android app that helps you learn guitar
+      </p>
+    </div>
+    <div class="col-xs-6 col-sm-3 essnt-apps__app-container">
+      <div class="essnt-apps__app-logo-container">
+        <img class="essnt-apps__app-logo" src="{{ pathto("_static/3rdparty/logo_reactable.jpg", 1) }}" alt="reactable logo"  />
+      </div>
+      <p class="essnt-apps__app-description">
+        Cutting-edge interactive products for musical creation
+      </p>
+    </div>
+    <div class="visible-xs clearfix"></div>
+    <div class="col-xs-6 col-sm-3 essnt-apps__app-container">
+      <div class="essnt-apps__app-logo-container">
+        <img class="essnt-apps__app-logo" src="{{ pathto("_static/3rdparty/logo_bmat.jpg", 1) }}" alt="bmat logo"  />
+      </div>
+      <p class="essnt-apps__app-description">
+        Worldwide music identification and monitoring service, using fingerprinting technology
+      </p>
+    </div>
+    <div class="col-xs-6 col-sm-3 essnt-apps__app-container">
+      <div class="essnt-apps__app-logo-container">
+        <img class="essnt-apps__app-logo" src="{{ pathto("_static/3rdparty/logo_musicmuni.png", 1) }}" alt="musicmuni logo"  />
+      </div>
+      <p class="essnt-apps__app-description">
+        Technologies for music education and infotainment
+      </p>
+    </div>
+  </div>
+</section>
 {% endblock %}

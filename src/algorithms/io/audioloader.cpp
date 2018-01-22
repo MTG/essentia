@@ -26,24 +26,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* AudioLoader::name = "AudioLoader";
-const char* AudioLoader::category = "Input/output";
-const char* AudioLoader::description = DOC("This algorithm loads the single audio stream contained in a given audio or video file. Supported formats are all those supported by the ffmpeg library including wav, aiff, flac, ogg and mp3.\n"
-"\n"
-"This algorithm will throw an exception if it was not properly configured which is normally due to not specifying a valid filename. Invalid names comprise those with extensions different than the supported  formats and non existent files. If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8\n\n"
-"Note: ogg files are decoded in reverse phase, due to be using ffmpeg library.\n"
-"\n"
-"References:\n"
-"  [1] WAV - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Wav\n"
-"  [2] Audio Interchange File Format - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Aiff\n"
-"  [3] Free Lossless Audio Codec - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Flac\n"
-"  [4] Vorbis - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Vorbis\n"
-"  [5] MP3 - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Mp3");
+const char* AudioLoader::name = essentia::standard::AudioLoader::name;
+const char* AudioLoader::category = essentia::standard::AudioLoader::category;
+const char* AudioLoader::description = essentia::standard::AudioLoader::description;
 
 
 AudioLoader::~AudioLoader() {
@@ -60,6 +45,7 @@ void AudioLoader::configure() {
     av_log_set_level(AV_LOG_QUIET);
     //av_log_set_level(AV_LOG_VERBOSE);
     _computeMD5 = parameter("computeMD5").toBool();
+    _selectedStream = parameter("audioStream").toInt();
     reset();
 }
 
@@ -90,16 +76,27 @@ void AudioLoader::openAudioFile(const string& filename) {
     //dump_format(_demuxCtx, 0, filename.c_str(), 0);
 
     // Check that we have only 1 audio stream in the file
-    int nAudioStreams = 0;
+    _streams.clear();
     for (int i=0; i<(int)_demuxCtx->nb_streams; i++) {
         if (_demuxCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
-            _streamIdx = i;
-            nAudioStreams++;
+            _streams.push_back(i);
         }
     }
-    if (nAudioStreams != 1) {
-        throw EssentiaException("AudioLoader ERROR: found ", nAudioStreams, " streams in the file, expecting only one audio stream");
+    int nAudioStreams = _streams.size();
+    
+    if (nAudioStreams == 0) {
+        avformat_close_input(&_demuxCtx);
+        _demuxCtx = 0;
+        throw EssentiaException("AudioLoader ERROR: found 0 streams in the file, expecting one or more audio streams");
     }
+
+    if (_selectedStream >= nAudioStreams) {
+        avformat_close_input(&_demuxCtx);
+        _demuxCtx = 0;
+        throw EssentiaException("AudioLoader ERROR: 'audioStream' parameter set to ", _selectedStream ,". It should be smaller than the audio streams count, ", nAudioStreams);
+    }
+
+    _streamIdx = _streams[_selectedStream];
 
     // Load corresponding audio codec
     _audioCtx = _demuxCtx->streams[_streamIdx]->codec;
@@ -158,16 +155,16 @@ void AudioLoader::closeAudioFile() {
     }
 
     // Close the codec
-    avcodec_close(_audioCtx);
-
+    if (_audioCtx) avcodec_close(_audioCtx);
     // Close the audio file
-    avformat_close_input(&_demuxCtx);
+    if (_demuxCtx) avformat_close_input(&_demuxCtx);
 
     // free AVPacket
+    // TODO: use a variable for whether _packet is initialized or not
     av_free_packet(&_packet);
-
     _demuxCtx = 0;
     _audioCtx = 0;
+    _streams.clear();
 }
 
 
@@ -490,9 +487,24 @@ void AudioLoader::reset() {
 namespace essentia {
 namespace standard {
 
-const char* AudioLoader::name = essentia::streaming::AudioLoader::name;
-const char* AudioLoader::category = essentia::streaming::AudioLoader::category;
-const char* AudioLoader::description = essentia::streaming::AudioLoader::description;
+const char* AudioLoader::name = "AudioLoader";
+const char* AudioLoader::category = "Input/output";
+const char* AudioLoader::description = DOC("This algorithm loads the single audio stream contained in a given audio or video file. Supported formats are all those supported by the ffmpeg library including wav, aiff, flac, ogg and mp3.\n"
+"\n"
+"This algorithm will throw an exception if it was not properly configured which is normally due to not specifying a valid filename. Invalid names comprise those with extensions different than the supported  formats and non existent files. If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8\n\n"
+"Note: ogg files are decoded in reverse phase, due to be using ffmpeg library.\n"
+"\n"
+"References:\n"
+"  [1] WAV - Wikipedia, the free encyclopedia,\n"
+"      http://en.wikipedia.org/wiki/Wav\n"
+"  [2] Audio Interchange File Format - Wikipedia, the free encyclopedia,\n"
+"      http://en.wikipedia.org/wiki/Aiff\n"
+"  [3] Free Lossless Audio Codec - Wikipedia, the free encyclopedia,\n"
+"      http://en.wikipedia.org/wiki/Flac\n"
+"  [4] Vorbis - Wikipedia, the free encyclopedia,\n"
+"      http://en.wikipedia.org/wiki/Vorbis\n"
+"  [5] MP3 - Wikipedia, the free encyclopedia,\n"
+"      http://en.wikipedia.org/wiki/Mp3");
 
 
 void AudioLoader::createInnerNetwork() {
@@ -510,7 +522,8 @@ void AudioLoader::createInnerNetwork() {
 
 void AudioLoader::configure() {
     _loader->configure(INHERIT("filename"),
-                       INHERIT("computeMD5"));
+                       INHERIT("computeMD5"),
+                       INHERIT("audioStream"));
 }
 
 void AudioLoader::compute() {

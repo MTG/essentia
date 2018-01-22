@@ -40,8 +40,8 @@ class Vibrato : public Algorithm {
  public:
   Vibrato() {
     declareInput(_pitch, "pitch", "the pitch trajectory [Hz].");
-    declareOutput(_vibratoFrequency, "vibratoFrequency", "estimated vibrato frquency [Hz]; zero if no vibrato was detected.");
-    declareOutput(_vibratoExtend, "vibratoExtend","estimated vibrato frquency [Hz]; zero if no vibrato was detected.") ;
+    declareOutput(_vibratoFrequency, "vibratoFrequency", "estimated vibrato frequency (or speed) [Hz]; zero if no vibrato was detected.");
+    declareOutput(_vibratoExtend, "vibratoExtend","estimated vibrato extent (or depth) [cents]; zero if no vibrato was detected.") ;
       
     frameCutter = AlgorithmFactory::create("FrameCutter");
     window = AlgorithmFactory::create("Windowing");
@@ -54,8 +54,8 @@ class Vibrato : public Algorithm {
   void declareParameters() {
     declareParameter("minFrequency", "minimum considered vibrato frequency [Hz]", "(0,inf)", 4.0);
     declareParameter("maxFrequency", "maximum considered vibrato frequency [Hz]", "(0,inf)", 8.0);
-    declareParameter("minExtend", "minimum considered vibrato extend [cents]", "(0,inf)", 50.0);
-    declareParameter("maxExtend", "maximum considered vibrato extend [cents]", "(0,inf)", 250.0);
+    declareParameter("minExtend", "minimum considered vibrato extent [cents]", "(0,inf)", 50.0);
+    declareParameter("maxExtend", "maximum considered vibrato extent [cents]", "(0,inf)", 250.0);
     declareParameter("sampleRate", "sample rate of the input pitch contour", "(0,inf)", 44100.0/128.0);
   }
 

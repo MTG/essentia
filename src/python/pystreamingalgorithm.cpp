@@ -113,9 +113,23 @@ int PyStreamingAlgorithm::tp_init(PyStreamingAlgorithm *self, PyObject *args, Py
 void PyStreamingAlgorithm::tp_dealloc (PyObject* obj) {
   PyStreamingAlgorithm* self = reinterpret_cast<PyStreamingAlgorithm*>(obj);
   // FIXME: need to deallocate something here I guess...
-  //if (self->isGenerator) streaming::deleteNetwork(self->algo);
+  
+  if (self->isGenerator) {
+    scheduler::deleteNetwork(self->algo);
+    
+    // Another way to do that is by creating a network and running its clear() method
+    /*    
+    try {
+      scheduler::Network(self->algo).clear();
+    }
+    catch (const exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, e.what());
+      return;
+    }
+    */
+  }
 
-  self->ob_type->tp_free(obj);
+  Py_TYPE(self)->tp_free(obj);
 }
 
 PyObject* PyStreamingAlgorithm::configure (PyStreamingAlgorithm* self, PyObject* args, PyObject* keywds) {
@@ -384,8 +398,12 @@ static PyMethodDef PyStreamingAlgorithm_methods[] = {
 };
 
 static PyTypeObject PyStreamingAlgorithmType = {
+#if PY_MAJOR_VERSION >= 3
+  PyVarObject_HEAD_INIT(NULL, 0)
+#else
   PyObject_HEAD_INIT(NULL)
   0,                                                      // ob_size
+#endif
   "essentia.streaming.Algorithm",                          // tp_name
   sizeof(PyStreamingAlgorithm),                           // tp_basicsize
   0,                                                      // tp_itemsize

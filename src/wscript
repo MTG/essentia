@@ -18,9 +18,15 @@ def options(ctx):
     ctx.add_option('--with-example', action='store',
                    dest='EXAMPLES', default=False,
                    help='example programs to build (comma separated, without .cpp)')
+    ctx.add_option('--build-static', action='store_true',
+                   dest='BUILD_STATIC', default=False,
+                   help='build static library')
+    ctx.add_option('--static-dependencies', action='store_true',
+                   dest='STATIC_DEPENDENCIES', default=False,
+                   help='build with static dependencies from packaging/* folder')
     ctx.add_option('--with-static-examples', action='store_true',
                    dest='WITH_STATIC_EXAMPLES', default=False,
-                   help='build the example programs as static executables')
+                   help='build the example programs as static executables; forces --static-dependencies and --static flags')
     ctx.add_option('--with-vamp', action='store_true',
                    dest='WITH_VAMP', default=False,
                    help='build the vamp plugin wrapper')
@@ -39,9 +45,6 @@ def options(ctx):
     ctx.add_option('--fft', action='store',
                    dest='FFT', default='FFTW',
                    help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
-    ctx.add_option('--build-static', action='store_true',
-                   dest='BUILD_STATIC', default=False,
-                   help='build static library')
 
 
 def debian_version():
@@ -59,26 +62,8 @@ def debian_version():
 
 
 def configure(ctx):
-    ctx.env.WITH_EXAMPLES        = ctx.options.WITH_EXAMPLES
-    ctx.env.WITH_PYTHON          = ctx.options.WITH_PYTHON
-    ctx.env.WITH_VAMP            = ctx.options.WITH_VAMP
-    ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
-    ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
-    ctx.env.WITH_LIBS            = ctx.options.WITH_LIBS
-    ctx.env.EXAMPLES             = ctx.options.EXAMPLES
-    ctx.env.EXAMPLE_LIST         = []
-    ctx.env.ALGOIGNORE           = []
-    ctx.env.IGNORE_ALGOS         = ctx.options.IGNORE_ALGOS
-    ctx.env.ALGOINCLUDE          = []
-    ctx.env.INCLUDE_ALGOS        = ctx.options.INCLUDE_ALGOS
-    ctx.env.FFT                  = ctx.options.FFT
-    ctx.env.BUILD_STATIC         = ctx.options.BUILD_STATIC
-
     if ctx.env.WITH_STATIC_EXAMPLES and not ctx.env.EXAMPLES:
         ctx.env.WITH_EXAMPLES = True
-
-    if ctx.env.WITH_STATIC_EXAMPLES:
-        ctx.env.BUILD_STATIC = True
 
     if ctx.env.WITH_LIBS != False:
         # bool value if --lightweight flag was not specified, string otherwise
@@ -104,35 +89,44 @@ def configure(ctx):
             a = a.strip()
             ctx.env.ALGOINCLUDE.append(a)
 
+    # Make check_cfg find PKG_CONFIG_PATH
+    ctx.env.env = dict(os.environ)
+
+    check_cfg_args = ['--cflags', '--libs']
+    #if ctx.env.STATIC_DEPENDENCIES:
+    #    check_cfg_args += ['--static']
+
+    if "PKG_CONFIG_PATH" in os.environ:
+        print("...Checking for dependencies in %s" % os.environ["PKG_CONFIG_PATH"])
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
-                      args=['libavcodec >= 55.34.1', '--cflags', '--libs'],
+                      args=['libavcodec >= 55.34.1'] + check_cfg_args,
                       msg='Checking for \'libavcodec\' >= 55.34.1',
                       mandatory=False)
 
         ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
-                      args=['--cflags', '--libs'], mandatory=False)
+                      args=check_cfg_args, mandatory=False)
 
         ctx.check_cfg(package='libavutil', uselib_store='AVUTIL',
-                      args=['--cflags', '--libs'], mandatory=False)
+                      args=check_cfg_args, mandatory=False)
 
         ctx.check_cfg(package='libavresample', uselib_store='AVRESAMPLE',
-                      args=['--cflags', '--libs'], mandatory=False)
+                      args=check_cfg_args, mandatory=False)
 
     if 'libsamplerate' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='samplerate', uselib_store='SAMPLERATE',
-                      args=['--cflags', '--libs'], mandatory=False)
+                      args=check_cfg_args, mandatory=False)
 
     if 'taglib' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
-                      args=['taglib >= 1.9', '--cflags', '--libs'],
+                      args=['taglib >= 1.9'] + check_cfg_args,
                       msg='Checking for \'taglib\' >= 1.9',
                       mandatory=False)
 
     if 'yaml' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
-                      args=['--cflags', '--libs'], mandatory=False)
+                      args=check_cfg_args, mandatory=False)
         if not ctx.env.INCLUDES_YAML and sys.platform == 'darwin':
             # an ugly hack for osx, because pkg-config file for yaml-0.1.6 installed by brew
             # is missing include path
@@ -142,7 +136,7 @@ def configure(ctx):
 
     if 'fftw' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
-                      args=['--cflags', '--libs'], mandatory=False)
+                      args=check_cfg_args, mandatory=False)
 
     if 'libchromaprint' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libchromaprint', uselib_store='LIBCHROMAPRINT',
@@ -151,7 +145,7 @@ def configure(ctx):
 
     if ctx.env.WITH_GAIA:
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
-                      args=['--cflags', '--libs'], mandatory=True)
+                      args=check_cfg_args, mandatory=True)
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += [ '__STDC_CONSTANT_MACROS' ]
@@ -190,7 +184,7 @@ def configure(ctx):
         else:
             print(' - fftw seems to be missing.')
             print('   The following algorithms will be ignored: %s\n' % algos)
-            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW']
+            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex']
             print('   IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
             print('                   To avoid these errors, use alternative FFT libraries (see the --fft flag).\n')
 
@@ -205,7 +199,7 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
-    algos = [ 'Resample', 'MonoLoader', 'EqloudLoader', 'EasyLoader']
+    algos = ['Resample', 'MonoLoader', 'EqloudLoader', 'EasyLoader']
     if has('samplerate'):
         print('- libsamplerate (SRC) detected!')
         ctx.env.USES += ' SAMPLERATE'
@@ -214,14 +208,14 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
-    algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter', 'Resample' ]
+    algos = ['AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter', 'Resample']
     algos_include = list(set(algos) - set(ctx.env.ALGOIGNORE))
     if algos_include:
         print('  The following algorithms will be included: %s\n' % algos_include)
     else:
         print('  Examples requiring FFmpeg / libav and libsamplerate will be ignored\n')
 
-    algos = [ 'MetadataReader' ]
+    algos = ['MetadataReader', 'MusicExtractor', 'FreesoundExtractor']
     if has('taglib'):
         print('- TagLib detected!')
         print('  The following algorithms will be included: %s\n' % algos)
@@ -241,7 +235,7 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s\n' % algos)
         ctx.env.ALGOIGNORE += algos
 
-    algos = [ 'GaiaTransform' ]
+    algos = ['GaiaTransform', 'MusicExtractorSVM']
     if ctx.env.WITH_GAIA:
         if has('gaia2'):
             print('- Gaia2 detected!')
@@ -270,6 +264,22 @@ def configure(ctx):
 
     buildRegFile(ctx);
 
+    print('\n' + '-' * 87)
+
+    if ctx.env.BUILD_STATIC:
+        print('- Building static library')
+    else:
+        print('- Building shared library')
+    if ctx.env.STATIC_DEPENDENCIES:
+        print('Static dependencies found in ' + os.environ["PKG_CONFIG_PATH"] + ' will be used for:')
+    if ctx.env.WITH_PYTHON:
+        print('- Building Python extension')
+    if ctx.env.WITH_STATIC_EXAMPLES:
+        print('- Building static examples')
+    elif ctx.env.WITH_EXAMPLES:
+        print('- Building examples')
+    if ctx.env.WITH_VAMP:
+        print('- Building Vamp plugin')
 
     print('=======================================================================================')
 

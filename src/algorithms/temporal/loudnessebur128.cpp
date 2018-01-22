@@ -28,32 +28,12 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* LoudnessEBUR128::name = "LoudnessEBUR128";
-const char* LoudnessEBUR128::category = "Loudness/dynamics";
-const char* LoudnessEBUR128::description = DOC("This algorithm computes the EBU R128 loudness descriptors of an audio signal.\n"
-"- The input stereo signal is preprocessed with a K-weighting filter [2] (see LoudnessEBUR128Filter algorithm), composed of two stages: a shelving filter and a high-pass filter (RLB-weighting curve).\n"
-"- Momentary loudness is computed by integrating the sum of powers over a sliding rectangular window of 400 ms. The measurement is not gated.\n"
-"- Short-term loudness is computed by integrating the sum of powers over a sliding rectangular window of 3 seconds. The measurement is not gated.\n"
-"- Integrated loudness is a loudness value averaged over an arbitrary long time interval with gating of 400 ms blocks with two thresholds [2].\n"
-"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
-"  - Relative gating threshold, 10 LU below the absolute-gated loudness level.\n"
-"- Loudness range is computed from short-term loudness values. It is defined as the difference between the estimates of the 10th and 95th percentiles of the distribution of the loudness values with applied gating [3].\n"
-"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
-"  - Relative gating threshold, -20 LU below the absolute-gated loudness level.\n"
-"\n"
-"References:\n"
-"  [1] EBU Tech 3341-2011. \"Loudness Metering: 'EBU Mode' metering to supplement\n"
-"  loudness normalisation in accordance with EBU R 128\"\n"
-"  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\n"
-"  [3] EBU Tech Doc 3342-2011. \"Loudness Range: A measure to supplement loudness\n"
-"  normalisation in accordance with EBU R 128\"\n"
-"  [4] http://tech.ebu.ch/loudness\n"
-"  [5] http://en.wikipedia.org/wiki/LKFS\n"
-);
+const char* LoudnessEBUR128::name = essentia::standard::LoudnessEBUR128::name;
+const char* LoudnessEBUR128::category = essentia::standard::LoudnessEBUR128::category;
+const char* LoudnessEBUR128::description = essentia::standard::LoudnessEBUR128::description;
 
 
 LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
-
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   _frameCutterMomentary       = factory.create("FrameCutter");
   _frameCutterShortTerm       = factory.create("FrameCutter");
@@ -76,6 +56,8 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   // Connect input proxy
   _signal >> _loudnessEBUR128Filter->input("signal");
 
+  _loudnessEBUR128Filter->output("signal").setBufferType(BufferUsage::forLargeAudioStream);
+  
   _loudnessEBUR128Filter->output("signal") >> _frameCutterMomentary->input("signal");
   _loudnessEBUR128Filter->output("signal") >> _frameCutterShortTerm->input("signal");
 
@@ -84,6 +66,9 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   // therefore, signal power is mean of squared signal
   _frameCutterMomentary->output("frame") >> _meanMomentary->input("array");
   _frameCutterShortTerm->output("frame") >> _meanShortTerm->input("array");
+
+  _meanMomentary->output("mean").setBufferType(BufferUsage::forAudioStream);  
+  _meanShortTerm->output("mean").setBufferType(BufferUsage::forAudioStream);
 
   _meanMomentary->output("mean") >> _computeMomentary->input("array");
   _meanShortTerm->output("mean") >> _computeShortTerm->input("array");
@@ -125,10 +110,13 @@ LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
   // measurement was started, by recalculating the threshold, then applying
   // it to the stored values, every time the meter reading is updated. 
   // The update rate for "live meters" shall be at least 1 Hz. 
+
+  _network = new scheduler::Network(_loudnessEBUR128Filter);
 }
 
-LoudnessEBUR128::~LoudnessEBUR128() {}
-
+LoudnessEBUR128::~LoudnessEBUR128() {
+  delete _network;
+}
 
 // According to ITU-R BS.1770-2 paper:  loudness = –0.691 + 10 log_10 (power)
 inline Real power2loudness(Real power) {
@@ -182,6 +170,12 @@ AlgorithmStatus LoudnessEBUR128::process() {
   // size (0.1 dB bins are suggested) instead of storing potentially long vector 
   // of values, as it is implemented now. However, this would lead to a 
   // necessity to compute log value for each value of the vector.
+
+  if (!_pool.contains<vector<Real> >("integrated_power") || !_pool.contains<vector<Real> >("shortterm_power")) {
+    // do not push anything in the case of empty signal
+    E_WARNING("LoudnessEBUR128: empty input signal");
+    return FINISHED;
+  }
 
   const vector<Real>& powerI = _pool.value<vector<Real> >("integrated_power");
   
@@ -272,9 +266,28 @@ void LoudnessEBUR128::reset() {
 namespace essentia {
 namespace standard {
 
-const char* LoudnessEBUR128::name = essentia::streaming::LoudnessEBUR128::name;
-const char* LoudnessEBUR128::category = essentia::streaming::LoudnessEBUR128::category;
-const char* LoudnessEBUR128::description = essentia::streaming::LoudnessEBUR128::description;
+const char* LoudnessEBUR128::name = "LoudnessEBUR128";
+const char* LoudnessEBUR128::category = "Loudness/dynamics";
+const char* LoudnessEBUR128::description = DOC("This algorithm computes the EBU R128 loudness descriptors of an audio signal.\n"
+"- The input stereo signal is preprocessed with a K-weighting filter [2] (see LoudnessEBUR128Filter algorithm), composed of two stages: a shelving filter and a high-pass filter (RLB-weighting curve).\n"
+"- Momentary loudness is computed by integrating the sum of powers over a sliding rectangular window of 400 ms. The measurement is not gated.\n"
+"- Short-term loudness is computed by integrating the sum of powers over a sliding rectangular window of 3 seconds. The measurement is not gated.\n"
+"- Integrated loudness is a loudness value averaged over an arbitrary long time interval with gating of 400 ms blocks with two thresholds [2].\n"
+"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
+"  - Relative gating threshold, 10 LU below the absolute-gated loudness level.\n"
+"- Loudness range is computed from short-term loudness values. It is defined as the difference between the estimates of the 10th and 95th percentiles of the distribution of the loudness values with applied gating [3].\n"
+"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
+"  - Relative gating threshold, -20 LU below the absolute-gated loudness level.\n"
+"\n"
+"References:\n"
+"  [1] EBU Tech 3341-2011. \"Loudness Metering: 'EBU Mode' metering to supplement\n"
+"  loudness normalisation in accordance with EBU R 128\"\n\n"
+"  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\"\n\n"
+"  [3] EBU Tech Doc 3342-2011. \"Loudness Range: A measure to supplement loudness\n"
+"  normalisation in accordance with EBU R 128\"\n\n"
+"  [4] http://tech.ebu.ch/loudness\n\n"
+"  [5] http://en.wikipedia.org/wiki/LKFS\n"
+);
 
 
 LoudnessEBUR128::LoudnessEBUR128() {
@@ -315,8 +328,11 @@ void LoudnessEBUR128::createInnerNetwork() {
 
 void LoudnessEBUR128::compute() {
   const vector<StereoSample>& signal = _signal.get();
-  _vectorInput->setVector(&signal);
+  if (!signal.size()) {
+    throw EssentiaException("LoudnessEBUR128: empty input signal");
+  }
 
+  _vectorInput->setVector(&signal);
   _network->run();
 
   vector<Real>& momentaryLoudness = _momentaryLoudness.get();

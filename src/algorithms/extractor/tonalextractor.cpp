@@ -26,9 +26,10 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* TonalExtractor::name = "TonalExtractor";
-const char* TonalExtractor::category = "Tonal";
-const char* TonalExtractor::description = DOC("This algorithm computes tonal features for an audio signal");
+const char* TonalExtractor::name = essentia::standard::TonalExtractor::name;
+const char* TonalExtractor::category = essentia::standard::TonalExtractor::category;
+const char* TonalExtractor::description = essentia::standard::TonalExtractor::description;
+
 
 TonalExtractor::TonalExtractor(): _frameCutter(0), _windowing(0), _spectrum(0), _spectralPeaks(0),
                                   _hpcpKey(0), _hpcpChord(0), _hpcpTuning(0), _key(0),
@@ -128,7 +129,7 @@ void TonalExtractor::configure() {
   _hpcpChord->configure("referenceFrequency", tuningFrequency,
                         "minFrequency", 40.0,
                         "nonLinear", true,
-                        "splitFrequency", 500.0,
+                        "bandSplitFrequency", 500.0,
                         "maxFrequency", 5000.0,
                         "bandPreset", true,
                         "windowSize", 0.5,
@@ -139,7 +140,7 @@ void TonalExtractor::configure() {
   _hpcpTuning->configure("referenceFrequency", tuningFrequency,
                          "minFrequency", 40.0,
                          "nonLinear", true,
-                         "splitFrequency", 500.0,
+                         "bandSplitFrequency", 500.0,
                          "maxFrequency", 5000.0,
                          "bandPreset", true,
                          "windowSize", 0.5,
@@ -160,9 +161,10 @@ TonalExtractor::~TonalExtractor() {
 namespace essentia {
 namespace standard {
 
-const char* TonalExtractor::name = essentia::streaming::TonalExtractor::name;
-const char* TonalExtractor::category = essentia::streaming::TonalExtractor::category;
-const char* TonalExtractor::description = essentia::streaming::TonalExtractor::description;
+const char* TonalExtractor::name = "TonalExtractor";
+const char* TonalExtractor::category = "Tonal";
+const char* TonalExtractor::description = DOC("This algorithm computes tonal features for an audio signal");
+
 
 TonalExtractor::TonalExtractor() {
   declareInput(_signal, "signal", "the audio input signal");

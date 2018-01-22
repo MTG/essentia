@@ -266,6 +266,13 @@ class Network {
   void clearExecutionNetwork();
 };
 
+
+/**
+* Delete the algorithm together with its all visible dependencies without 
+* creating a network object.
+*/
+void deleteNetwork(const streaming::Algorithm* algo);
+
 /**
  * Prints the fill state of all the buffers in the last created network.
  */
@@ -282,7 +289,6 @@ AlgoVector computeCompositeDependencies(const streaming::Algorithm* algo);
  * and also avoid doing any allocation while running the network.
  */
 void cacheDependencies(streaming::Algorithm* algo);
-
 
 /**
  * Returns the list of all algorithms which live inside of the given composite

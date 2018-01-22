@@ -11,6 +11,7 @@ Essentia documentation contents
 
    introduction
    installing
+   download
    algorithms_overview
    essentia_python_tutorial
    extractors_out_of_box
@@ -26,6 +27,7 @@ Essentia documentation contents
    composite_api
    execution_network_algorithm
    coding_guidelines
+   contribute
 
    licensing_information
    FAQ

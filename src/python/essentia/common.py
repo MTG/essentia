@@ -16,24 +16,30 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 import numpy
-import _essentia
+from six import iteritems
+from . import _essentia
+
 
 # force the array objects to be of type float32
 def array(object, **kwargs):
-    return numpy.array(object, dtype ='f4', **kwargs)
+    return numpy.array(object, dtype='f4', **kwargs)
+
 
 def zeros(object, **kwargs):
-    return numpy.zeros(object, dtype ='f4', **kwargs)
+    return numpy.zeros(object, dtype='f4', **kwargs)
+
 
 def ones(object, **kwargs):
-    return numpy.ones(object, dtype ='f4', **kwargs)
+    return numpy.ones(object, dtype='f4', **kwargs)
+
 
 algoDecorator = lambda x: x
 
+
 # An object representing an enum which contains int representations for
 # essentia types. The purpose of this int representation is to have a common
-# space for which to compare python and c++ types that are relevant to essentia.
-class Edt: # Essentia Data Type
+# space for which to compare python and c++ types that are relevant to Essentia
+class Edt:  # Essentia Data Type
     # c++ types
     BOOL = 'BOOL'
     INTEGER = 'INTEGER'
@@ -68,9 +74,9 @@ class Edt: # Essentia Data Type
         self._tp = tp
 
     def isIntermediate(self):
-        return self._tp in (Edt.LIST_EMPTY, Edt.LIST_MIXED, Edt.LIST_INTEGER, \
-                            Edt.LIST_REAL, Edt.LIST_LIST_REAL, \
-                            Edt.LIST_LIST_INTEGER, Edt.LIST_ARRAY,\
+        return self._tp in (Edt.LIST_EMPTY, Edt.LIST_MIXED, Edt.LIST_INTEGER,
+                            Edt.LIST_REAL, Edt.LIST_LIST_REAL,
+                            Edt.LIST_LIST_INTEGER, Edt.LIST_ARRAY,
                             Edt.UNDEFINED, Edt.NUMPY_FLOAT, Edt.LIST_LIST_EMPTY)
 
     def vectorize(self):
@@ -83,7 +89,7 @@ class Edt: # Essentia Data Type
         return Edt(self._tp[len('VECTOR_'):])
 
     def __eq__(self, other):
-        if isinstance(other, basestring):
+        if isinstance(other, str):
             return self._tp == other
         elif isinstance(other, Edt):
             return self._tp == other._tp
@@ -96,11 +102,13 @@ class Edt: # Essentia Data Type
     def __str__(self):
         return self._tp
 
+
 # Determines the essentia data type of a given python object
 def determineEdt(obj):
     # lists
     if isinstance(obj, list):
-        if len(obj) == 0: return Edt(Edt.LIST_EMPTY)
+        if len(obj) == 0:
+            return Edt(Edt.LIST_EMPTY)
 
         firstElmtType = determineEdt(obj[0])
 
@@ -143,8 +151,7 @@ def determineEdt(obj):
         if obj.dtype == numpy.dtype('single'):
             return Edt(Edt.MATRIX_REAL)
 
-        raise TypeError('essentia can currently only accept two-dimensional numpy arrays of dtype '\
-                        '"single"')
+        raise TypeError('essentia can currently only accept two-dimensional numpy arrays of dtype "single"')
 
     # numpy arrays
     if isinstance(obj, numpy.ndarray) and obj.ndim == 1:
@@ -160,19 +167,23 @@ def determineEdt(obj):
                         'create your arrays')
 
     # bool (must go before ints! because True and False can be ints)
-    if isinstance(obj, bool): return Edt(Edt.BOOL)
+    if isinstance(obj, bool):
+        return Edt(Edt.BOOL)
 
     # ints
-    if isinstance(obj, int): return Edt(Edt.INTEGER)
+    if isinstance(obj, int):
+        return Edt(Edt.INTEGER)
 
     # reals
-    if isinstance(obj, float): return Edt(Edt.REAL)
+    if isinstance(obj, float):
+        return Edt(Edt.REAL)
 
     # strings
-    if isinstance(obj, basestring): return Edt(Edt.STRING)
+    if isinstance(obj, str):
+        return Edt(Edt.STRING)
 
-    if isinstance(obj, numpy.float32): return Edt(Edt.NUMPY_FLOAT)
-
+    if isinstance(obj, numpy.float32):
+        return Edt(Edt.NUMPY_FLOAT)
 
     if isinstance(obj, dict):
         # map parameters
@@ -180,12 +191,12 @@ def determineEdt(obj):
             firstType = None
             allKeysAreStrings = True
             allTypesEqual = True
-            for key, val in obj.iteritems():
-                if not isinstance(key, basestring):
+            for key, val in iteritems(obj):
+                if not isinstance(key, str):
                     allKeysAreStrings = False
                     break
 
-                if firstType == None:
+                if firstType is None:
                     firstType = determineEdt(val)
 
                 elif firstType != determineEdt(val):
@@ -194,7 +205,6 @@ def determineEdt(obj):
 
             if allKeysAreStrings and allTypesEqual:
                 return Edt('MAP_'+str(firstType))
-
 
     # pools
     if isinstance(obj, Pool) or isinstance(obj, _essentia.Pool):
@@ -208,6 +218,7 @@ def determineEdt(obj):
 
     # everything else
     return Edt(Edt.UNDEFINED)
+
 
 # Converts 'data' to 'goalType'. 'goalType' must be a non-intermediate EDT. If
 # a conversion cannot be made, a TypeError will be raised.
@@ -225,8 +236,8 @@ def convertData(data, goalType):
             for item in data:
                 itemType = determineEdt(item)
                 if not (itemType == Edt.REAL or itemType == Edt.INTEGER):
-                    raise TypeError('Cannot convert data from type LIST_MIXED to type VECTOR_REAL '+\
-                                    'because LIST_MIXED contains items not of type REAL or INTEGER (e.g. '+\
+                    raise TypeError('Cannot convert data from type LIST_MIXED to type VECTOR_REAL ' +
+                                    'because LIST_MIXED contains items not of type REAL or INTEGER (e.g. ' +
                                     str(itemType)+')')
             return array(data)
 
@@ -240,10 +251,14 @@ def convertData(data, goalType):
             return numpy.array(data, numpy.float32)
 
     if origType == Edt.LIST_EMPTY:
-        if goalType == Edt.VECTOR_REAL: return array(data)
-        if goalType == Edt.VECTOR_STRING: return data
-        if goalType == Edt.VECTOR_INTEGER: return numpy.array(data, numpy.dtype('int'))
-        if goalType == Edt.VECTOR_STEREOSAMPLE: return data
+        if goalType == Edt.VECTOR_REAL:
+            return array(data)
+        if goalType == Edt.VECTOR_STRING:
+            return data
+        if goalType == Edt.VECTOR_INTEGER:
+            return numpy.array(data, numpy.dtype('int'))
+        if goalType == Edt.VECTOR_STEREOSAMPLE:
+            return data
 
     if goalType == Edt.MATRIX_REAL and \
        (origType == Edt.LIST_LIST_REAL or origType == Edt.LIST_LIST_INTEGER or origType == Edt.LIST_ARRAY):
@@ -278,17 +293,19 @@ def convertData(data, goalType):
                 if len(row) != 2:
                     ValueError('Cannot convert a LIST_MIXED to a VECTOR_STEREOSAMPLE if the sub-lists are not of length 2')
                 try:
-                    convertData(row, VECTOR_REAL)
+                    convertData(row, Edt.VECTOR_REAL)
                 except:
                     TypeError('Cannot convert a LIST_MIXED to a VECTOR_STEREOSAMPLE if the sub-lists are not convertible to VECTOR_REAL')
 
             return array(data)
 
-    raise TypeError('Cannot convert data from type '+str(origType)+' to type '+str(goalType))
+    raise TypeError('Cannot convert data from type %s (%s) to type %s' %
+                    (str(origType), str(type(data)), str(goalType)))
+
 
 class Pool:
     def __init__(self, poolRep=None):
-        if poolRep == None:
+        if poolRep is None:
             self.cppPool = _essentia.Pool()
 
         elif isinstance(poolRep, _essentia.Pool):
@@ -296,13 +313,12 @@ class Pool:
 
         elif isinstance(poolRep, dict):
             self.cppPool = _essentia.Pool()
-            for key, val in poolRep.iteritems():
+            for key, val in iteritems(poolRep):
                 for v in val:
                     self.add(key, v)
 
         else:
             raise TypeError('poolRep argument must be a Cpp Essentia Pool or python dictionary')
-
 
     def add(self, key, value, validityCheck=False):
         givenType = determineEdt(value)
@@ -313,17 +329,22 @@ class Pool:
 
         # if we haven't seen this type before, we will have to guess its type
         else:
-            if givenType in (Edt.REAL, Edt.STRING, Edt.STEREOSAMPLE, \
-                             Edt.VECTOR_REAL, Edt.VECTOR_STRING, \
+            if givenType in (Edt.REAL, Edt.STRING, Edt.STEREOSAMPLE,
+                             Edt.VECTOR_REAL, Edt.VECTOR_STRING,
                              Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL):
                 goalType = givenType
 
             # some exceptions
-            elif givenType == Edt.INTEGER: goalType = Edt(Edt.REAL)
-            elif givenType == Edt.NUMPY_FLOAT: goalType = Edt(Edt.REAL)
-            elif givenType == Edt.LIST_REAL: goalType = Edt(Edt.VECTOR_REAL)
-            elif givenType == Edt.LIST_INTEGER: goalType = Edt(Edt.VECTOR_REAL)
-            elif givenType == Edt.VECTOR_INTEGER: goalType = Edt(Edt.VECTOR_REAL)
+            elif givenType == Edt.INTEGER:
+                goalType = Edt(Edt.REAL)
+            elif givenType == Edt.NUMPY_FLOAT:
+                goalType = Edt(Edt.REAL)
+            elif givenType == Edt.LIST_REAL:
+                goalType = Edt(Edt.VECTOR_REAL)
+            elif givenType == Edt.LIST_INTEGER:
+                goalType = Edt(Edt.VECTOR_REAL)
+            elif givenType == Edt.VECTOR_INTEGER:
+                goalType = Edt(Edt.VECTOR_REAL)
 
             else:
                 raise TypeError('Pool.add does not support the type: '+str(givenType))
@@ -331,7 +352,7 @@ class Pool:
         # try to convert the type
         try:
             convertedVal = convertData(value, goalType)
-        except TypeError, e:
+        except TypeError:
             raise KeyError('Pool.add could not convert given data to the type already in the Pool under the key \''+key+'\'')
 
         self.cppPool.__add__(key, str(goalType), convertedVal, validityCheck)
@@ -345,14 +366,20 @@ class Pool:
 
         # if we haven't seen this type before, we will have to guess its type
         else:
-            if givenType in (Edt.REAL, Edt.STRING, Edt.VECTOR_REAL): goalType = givenType
+            if givenType in (Edt.REAL, Edt.STRING, Edt.VECTOR_REAL):
+                goalType = givenType
 
             # some exceptions
-            elif givenType == Edt.INTEGER: goalType = Edt(Edt.REAL)
-            elif givenType == Edt.NUMPY_FLOAT: goalType = Edt(Edt.REAL)
-            elif givenType == Edt.VECTOR_INTEGER: goalType = Edt(Edt.VECTOR_REAL)
-            elif givenType == Edt.LIST_INTEGER: goalType = Edt(Edt.VECTOR_REAL)
-            elif givenType == Edt.LIST_REAL: goalType = Edt(Edt.VECTOR_REAL)
+            elif givenType == Edt.INTEGER:
+                goalType = Edt(Edt.REAL)
+            elif givenType == Edt.NUMPY_FLOAT:
+                goalType = Edt(Edt.REAL)
+            elif givenType == Edt.VECTOR_INTEGER:
+                goalType = Edt(Edt.VECTOR_REAL)
+            elif givenType == Edt.LIST_INTEGER:
+                goalType = Edt(Edt.VECTOR_REAL)
+            elif givenType == Edt.LIST_REAL:
+                goalType = Edt(Edt.VECTOR_REAL)
 
             else:
                 raise TypeError('Pool.set does not support the type: '+str(givenType))
@@ -360,46 +387,52 @@ class Pool:
         # try to convert the type
         try:
             convertedVal = convertData(value, goalType)
-        except TypeError, e:
+        except TypeError:
             raise KeyError('Pool.set could not convert given data to the type already in the Pool under the key \''+key+'\'')
 
         return self.cppPool.__set__(key, str(goalType), convertedVal, validityCheck)
-
 
     def merge(self, arg1, arg2=None, arg3=None):
         # this function is used to merge both descriptors and pools
         if determineEdt(arg1) == Edt.POOL:
             if arg3:
-                raise TypeError('Pool.merge requires only 3 arguments when '+
+                raise TypeError('Pool.merge requires only 3 arguments when ' +
                                 'merging entire pools: self, pool, string')
-            if not arg2: mergeType =''
-            else: mergeType = arg2
+            if not arg2:
+                mergeType = ''
+            else:
+                mergeType = arg2
             return self.cppPool.__merge__(str(Edt(Edt.POOL)), arg1.cppPool, mergeType)
 
         key = arg1
         value = arg2
         mergeType = arg3
-        if not mergeType: mergeType = ''
+        if not mergeType:
+            mergeType = ''
 
         givenType = determineEdt(value)
 
         # if we've seen this key before, determine the type
         if self.containsKey(key):
-            goalType = Edt(self.cppPool.__keyType__(key))#.devectorize()
+            goalType = Edt(self.cppPool.__keyType__(key))  #.devectorize()
 
         # if we haven't seen this type before, we will have to guess its type
         else:
-            if givenType in (Edt.REAL, Edt.STRING, Edt.STEREOSAMPLE, \
-                             Edt.VECTOR_REAL, Edt.VECTOR_STRING, \
-                             Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL,\
+            if givenType in (Edt.REAL, Edt.STRING, Edt.STEREOSAMPLE,
+                             Edt.VECTOR_REAL, Edt.VECTOR_STRING,
+                             Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL,
                              Edt.VECTOR_VECTOR_REAL, Edt.VECTOR_MATRIX_REAL):
                 goalType = givenType
 
             # some exceptions
-            elif givenType == Edt.INTEGER: goalType = Edt(Edt.REAL)
-            elif givenType == Edt.LIST_REAL: goalType = Edt(Edt.VECTOR_REAL)
-            elif givenType == Edt.LIST_INTEGER: goalType = Edt(Edt.VECTOR_REAL)
-            elif givenType == Edt.VECTOR_INTEGER: goalType = Edt(Edt.VECTOR_REAL)
+            elif givenType == Edt.INTEGER:
+                goalType = Edt(Edt.REAL)
+            elif givenType == Edt.LIST_REAL:
+                goalType = Edt(Edt.VECTOR_REAL)
+            elif givenType == Edt.LIST_INTEGER:
+                goalType = Edt(Edt.VECTOR_REAL)
+            elif givenType == Edt.VECTOR_INTEGER:
+                goalType = Edt(Edt.VECTOR_REAL)
 
             else:
                 raise TypeError('Pool.merge does not support the type: '+str(givenType))
@@ -407,7 +440,7 @@ class Pool:
         # try to convert the type
         try:
             convertedVal = convertData(value, goalType)
-        except TypeError, e:
+        except TypeError:
             raise KeyError('Pool.merge could not convert given data to the type already in the Pool under the key\''+key+'\'')
 
         return self.cppPool.__merge__(key, str(goalType), convertedVal, mergeType)
@@ -421,12 +454,16 @@ class Pool:
 
         # if we haven't seen this type before, we will have to guess its type
         else:
-            if givenType in (Edt.REAL, Edt.STRING, Edt.VECTOR_REAL): goalType = givenType
+            if givenType in (Edt.REAL, Edt.STRING, Edt.VECTOR_REAL):
+                goalType = givenType
 
             # some exceptions
-            elif givenType == Edt.INTEGER: goalType = Edt(Edt.REAL)
-            elif givenType == Edt.VECTOR_INTEGER: goalType = Edt(Edt.VECTOR_REAL)
-            elif givenType == Edt.NUMPY_FLOAT: goalType = Edt(Edt.REAL)
+            elif givenType == Edt.INTEGER:
+                goalType = Edt(Edt.REAL)
+            elif givenType == Edt.VECTOR_INTEGER:
+                goalType = Edt(Edt.VECTOR_REAL)
+            elif givenType == Edt.NUMPY_FLOAT:
+                goalType = Edt(Edt.REAL)
 
             else:
                 raise TypeError('Pool.mergeSingle does not support the type: '+str(givenType))
@@ -434,11 +471,10 @@ class Pool:
         # try to convert the type
         try:
             convertedVal = convertData(value, goalType)
-        except TypeError, e:
+        except TypeError:
             raise KeyError('Pool.mergeSingle could not convert given data to the type already in the Pool under the key \''+key+'\'')
 
         return self.cppPool.__mergeSingle__(key, str(goalType), convertedVal, mergeType)
-
 
     def __getitem__(self, key):
         if not self.containsKey(key):
@@ -450,7 +486,8 @@ class Pool:
         return key in self.descriptorNames()
 
     def descriptorNames(self, key=None):
-        if not key: return self.cppPool.descriptorNames()
+        if not key:
+            return self.cppPool.descriptorNames()
         return self.cppPool.descriptorNames(key)
 
     def remove(self, key):
@@ -464,4 +501,3 @@ class Pool:
 
     def clear(self):
         return self.cppPool.clear()
-

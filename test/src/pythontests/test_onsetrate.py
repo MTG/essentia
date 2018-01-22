@@ -60,4 +60,4 @@ for input_file in glob.glob('../../../../audio/recorded/*.wav'):
                                     essentia.array([complex]) ])
     time_onsets = onsets(detections, essentia.array([1, 1]))
 
-    print len(time_onsets) / ( len(samples) / sample_rate ), os.path.basename(input_file)
+    print(len(time_onsets) / ( len(samples) / sample_rate ), os.path.basename(input_file))

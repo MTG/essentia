@@ -66,12 +66,18 @@ def TR_DESC(s):
 
     return s
 
-def doc2rst(algo_doc):
-    lines = [ algo_doc['name'],
-              '=' * len(algo_doc['name']),
-              ''
-              ]
-    lines += [algo_doc['mode'] + ' | ' + algo_doc['category'] + ' category', '']
+def doc2rst(algo_doc, sphinxsearch=False):
+    if sphinxsearch:
+        # dummy rst files used to append algorithms to the sphinx HTML search
+        lines = [':orphan:',
+                 ''
+                 ]
+        header = 'Algorithm reference - ' + algo_doc['name'] + ' (' + algo_doc['mode'] + ')'
+        lines += [header, '=' * len(header), '']
+    else:
+        # actual rst files used to render HTMLs
+        lines = [ algo_doc['name'], '=' * len(algo_doc['name']), '']
+        lines += [algo_doc['mode'] + ' | ' + algo_doc['category'] + ' category', '']
 
     if algo_doc['inputs']:
         lines += [ 'Inputs',
@@ -80,7 +86,7 @@ def doc2rst(algo_doc):
                    ]
 
         for inp in algo_doc['inputs']:
-            lines.append(' - **%s** (*%s*) - %s' % (inp['name'], inp['type'], TR(inp['description'])))
+            lines.append(' - ``%s`` (*%s*) - %s' % (inp['name'], inp['type'], TR(inp['description'])))
 
         lines.append('')
 
@@ -91,7 +97,7 @@ def doc2rst(algo_doc):
                    ]
 
         for out in algo_doc['outputs']:
-            lines.append(' - **%s** (*%s*) - %s' % (out['name'], out['type'], TR(out['description'])))
+            lines.append(' - ``%s`` (*%s*) - %s' % (out['name'], out['type'], TR(out['description'])))
 
         lines.append('')
 
@@ -108,7 +114,7 @@ def doc2rst(algo_doc):
             if param['default'] is not None:
                 range_str += ', default = ' + TR(param['default'])
 
-            lines.append(' - **%s** (*%s*) :' % (param['name'], range_str))
+            lines.append(' - ``%s`` (*%s*) :' % (param['name'], range_str))
             lines.append('     ' + TR(param['description']))
 
         lines.append('')
@@ -123,8 +129,7 @@ def doc2rst(algo_doc):
 
 
 def write_doc(filename, algo_doc):
-    open(filename, 'w').write(doc2rst(algo_doc))
-
+    open(filename, 'w').write(doc2rst(algo_doc, sphinxsearch=True))
 
 
 def rst2html(rst, layout_type):
@@ -173,8 +178,14 @@ def write_algorithms_reference():
      - write the templates for both std & streaming algos to have the full list of algos as a sidebar
     '''
 
+    # folder for storing HTMLs
     try: os.mkdir('_templates/reference')
     except: pass
+
+    # folder for storing RSTs for sphinx search index
+    try: os.mkdir('reference')
+    except: pass
+
 
     # write the algorithms reference organized by categories
     std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
@@ -185,11 +196,12 @@ def write_algorithms_reference():
     for algoname in std_algo_list:
         algos.setdefault(algoname, {})
         algos[algoname]['standard'] = getattr(essentia.standard, algoname).__struct__
-        # __struct__ does not contain mode (perhaps it should), 
+        # __struct__ does not contain mode (perhaps it should),
         # therefore, doing a workaround so that doc2rst can know the mode
         algos[algoname]['standard']['mode'] = 'standard mode'
 
         print 'generating doc for standard algorithm:', algoname, '...'
+        write_doc('reference/std_' + algoname + '.rst', algos[algoname]['standard'])
         write_html_doc('_templates/reference/std_' + algoname + '.html',
                        algos[algoname]['standard'],
                        layout_type = 'std')
@@ -200,6 +212,7 @@ def write_algorithms_reference():
         algos[algoname]['streaming']['mode'] = 'streaming mode'
 
         print 'generating doc for streaming algorithm:', algoname, '...'
+        write_doc('reference/streaming_' + algoname + '.rst', algos[algoname]['streaming'])
         write_html_doc('_templates/reference/streaming_' + algoname + '.html',
                        algos[algoname]['streaming'],
                        layout_type = 'streaming')
@@ -341,8 +354,7 @@ and hence are not available in python.</p>
 '''
     for category in algo_categories_html:
         category_id = re.sub('[^0-9a-zA-Z]+', '', category.lower())
-        html += '<section><h2 id=' + category_id + '>' + category + \
-            '<a class="headerlink" href="#' + category_id + '" title="Permalink to this headline">¶</a>' + '</h2>'
+        html += '<section><h2 id=' + category_id + '>' + category + '</h2>'
         html += '\n'.join(sorted(algo_categories_html[category]))
         html += '</section>'
     html += '''
@@ -359,12 +371,12 @@ and hence are not available in python.</p>
     # Copy convert FAQ.md to rst and copy to documenation folder
     subprocess.call(['pandoc', '../../FAQ.md', '-o', 'FAQ.rst'])
 
-    # Convert research_papers.md to rst 
+    # Convert research_papers.md to rst
     subprocess.call(['pandoc', 'research_papers.md', '-o', 'research_papers.rst'])
 
 
     # Convert python notebook tutorials to rst
-    subprocess.call(['jupyter', 'nbconvert', '../../src/examples/tutorial/*.ipynb', '--to', 'rst'])
+    subprocess.call(['jupyter', 'nbconvert', '../../src/examples/tutorial/*.ipynb', '--to', 'rst', '--output-dir', '.'])
 
 if __name__ == '__main__':
     write_algorithms_reference()

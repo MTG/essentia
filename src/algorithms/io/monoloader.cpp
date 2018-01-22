@@ -25,11 +25,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* MonoLoader::name = "MonoLoader";
-const char* MonoLoader::category = "Input/output";
-const char* MonoLoader::description = DOC("This algorithm loads the raw audio data from an audio file and downmixes it to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal.\n"
-"\n"
-"This algorithm uses AudioLoader and thus inherits all of its input requirements and exceptions.");
+const char* MonoLoader::name = essentia::standard::MonoLoader::name;
+const char* MonoLoader::category = essentia::standard::MonoLoader::category;
+const char* MonoLoader::description = essentia::standard::MonoLoader::description;
 
 
 MonoLoader::MonoLoader() : AlgorithmComposite(),
@@ -61,7 +59,8 @@ void MonoLoader::configure() {
   if (!filename.isConfigured()) return;
 
   _audioLoader->configure("filename", filename,
-                          "computeMD5", false);
+                          "computeMD5", false,
+                          INHERIT("audioStream"));
 
   int inputSampleRate = (int)lastTokenProduced<Real>(_audioLoader->output("sampleRate"));
 
@@ -85,9 +84,11 @@ void MonoLoader::configure() {
 namespace essentia {
 namespace standard {
 
-const char* MonoLoader::name = essentia::streaming::MonoLoader::name;
-const char* MonoLoader::category = essentia::streaming::MonoLoader::category;
-const char* MonoLoader::description = essentia::streaming::MonoLoader::description;
+const char* MonoLoader::name = "MonoLoader";
+const char* MonoLoader::category = "Input/output";
+const char* MonoLoader::description = DOC("This algorithm loads the raw audio data from an audio file and downmixes it to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal.\n"
+"\n"
+"This algorithm uses AudioLoader and thus inherits all of its input requirements and exceptions.");
 
 
 void MonoLoader::createInnerNetwork() {
@@ -105,7 +106,8 @@ void MonoLoader::configure() {
 
   _loader->configure(INHERIT("filename"),
                      INHERIT("sampleRate"),
-                     INHERIT("downmix"));
+                     INHERIT("downmix"),
+                     INHERIT("audioStream"));
 }
 
 void MonoLoader::compute() {

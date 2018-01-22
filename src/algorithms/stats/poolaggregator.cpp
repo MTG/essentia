@@ -44,14 +44,20 @@ const char* PoolAggregator::description = DOC("This algorithm performs statistic
 "  - 'dvar2' (variance of the second derivative),\n"
 "  - 'cov' (covariance), and\n"
 "  - 'icov' (inverse covariance).\n"
+"  - 'value' (copy of descriptor, but the value is placed under the name '<descriptor name>.value')\n"
 "  - 'copy' (verbatim copy of descriptor, no aggregation; exclusive: cannot be performed with any other statistical units).\n"
-"  - 'value' (copy of the descriptor, but the value is placed under the name '<descriptor name>.value')\n\n"
+"  - 'last' (last value of descriptor placed under the name '<descriptor name>'; exclusive: cannot be performed with any other statistical units\n\n"
 
-"These statistics can be computed for single dimensional vectors in a Pool, with the exception of 'cov' and 'icov'. All of the above statistics can be computed for two dimensional vectors in the Pool. With the exception of 'cov' and 'icov', two-dimensional statistics are calculated by aggregating each column and placing the result into a vector of the same size as the size of each vector in the input Pool. The previous implies that each vector in the pool (under a particular descriptor of course) must have equal size. This implication also applies for 'cov' and 'icov'.\n\n"
+"These statistics can be computed for single-dimensional vectors (vectors of Reals) and two-dimensional vectors (vectors of vectors of Reals) in the Pool. Statistics for two-dimensional vectors are computed by aggregating each column placing the result into a vector of the same size as the size of each vector in the input Pool under the given descriptor (which implies their equal size).\n\n"
 
-"An additional restriction for using the 'icov' statistic is that the covariance matrix for a particular descriptor must be invertible. The 'cov' and 'icov' aggregation statistics each return a square matrix with dimension equal to the length of the vectors under the given descriptor.\n\n"
+"In the case of 'cov' and 'icov', two-dimensional vectors are required, and each statistic returns a square matrix with the dimensions equal to the length of the vectors under the given descriptor. Computing 'icov' requires the corresponding covariance matrix to be invertible.\n\n"
 
-"Please also note that only the absolute values of the first and second derivates are considered when calculating the mean ('dmean' and 'dmean2') as well as for the variance ('dvar' and 'dvar2'). This is to avoid a trivial solution for the mean.");
+"Note that only the absolute values of the first and second derivatives are considered when computing their mean ('dmean' and 'dmean2') and variance ('dvar' and 'dvar2'). This is to avoid a trivial solution for the mean.\n\n"
+
+"For vectors, if the input pool value consists of only one vector, its aggregation will be skipped, and the vector itself will be added to the output.\n\n"
+
+"The 'value' and 'copy' are auxiliary aggregation methods that can be used to copy values in the input Pool to the output Pool without aggregation. In the case of 'last', the last value in the input vector of Reals (or input vector of vectors of Reals) will be taken and saved as a single Real (or single vector of Reals) in the output Pool."
+);
 
 
 // initialize supported statistics set
@@ -59,7 +65,7 @@ const char* supportedStats[] =
   {"min", "max", "median", "mean", "var", "stdev", "skew", "kurt",
    "dmean", "dvar", "dmean2", "dvar2",
    "cov", "icov",
-   "copy", "value"};
+   "copy", "value", "last"};
 vector<string> tmp = arrayToVector<string>(supportedStats);
 const set<string> PoolAggregator::_supportedStats(tmp.begin(), tmp.end());
 
@@ -164,6 +170,9 @@ void PoolAggregator::aggregateRealPool(const Pool& input, Pool& output) {
           output.add(subkey, data[i]);
         }
       }
+      else if (stats[i] == "last") {
+        output.set(key, data.back());
+      }
     }
   }
 }
@@ -195,10 +204,10 @@ void PoolAggregator::aggregateVectorRealPool(const Pool& input, Pool& output) {
 
     // if pool value consists of only one vector, don't perform aggregation,
     // just add it to the output
-    if (dsize == 1) {
-      output.add(key, data[0]);
-      continue;
-    }
+    //if (dsize == 1) {
+    //  output.add(key, data[0]);
+    //  continue;
+    //}
 
     int vsize = data[0].size();
 
@@ -368,6 +377,10 @@ void PoolAggregator::aggregateVectorRealPool(const Pool& input, Pool& output) {
 
       else if (stats[i] == "value")
         for (int j=0; j<int(data.size()); ++j) output.add(subkey, data[j]);
+      
+      else if (stats[i] == "last") {
+        output.set(key, data.back());
+      }
     }
   }
 }
@@ -432,6 +445,7 @@ void PoolAggregator::aggregateArray2DRealPool(const Pool& input, Pool& output) {
     // if pool value consists of only one vector, don't perform aggregation,
     // just add it to the output
     if (dsize == 1) {
+      E_WARNING("WARNING: PoolAggregator: not aggregating \"" << key << "\" because it contains a single Array2D value");
       output.add(key, data[0]);
       continue;
     }
@@ -566,6 +580,13 @@ void PoolAggregator::configure() {
                             "statistics for the same descriptor");
   }
 
+  if (indexOf<string>(_defaultStats, "last") != -1 &&
+      int(_defaultStats.size()) != 1) {
+    throw EssentiaException("PoolAggregator: the 'last' aggregation statistic "
+                            "is exclusive, it cannot be used with other "
+                            "statistics for the same descriptor");
+  }
+
   // make sure there are no unsupported statistics in 'defaultStats'
   for (int i=0; i<(int)_defaultStats.size(); ++i) {
     if (_supportedStats.find(_defaultStats[i]) == _supportedStats.end()) {
@@ -584,6 +605,13 @@ void PoolAggregator::configure() {
     if (indexOf<string>(exceptionStats, "copy") != -1 &&
         int(exceptionStats.size()) != 1) {
       throw EssentiaException("PoolAggregator: the 'copy' aggregation statistic "
+                              "is exclusive, it cannot be used with other "
+                              "statistics for the same descriptor");
+    }
+
+    if (indexOf<string>(exceptionStats, "last") != -1 &&
+        int(exceptionStats.size()) != 1) {
+      throw EssentiaException("PoolAggregator: the 'last' aggregation statistic "
                               "is exclusive, it cannot be used with other "
                               "statistics for the same descriptor");
     }

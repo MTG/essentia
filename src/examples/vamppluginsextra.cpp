@@ -1825,8 +1825,8 @@ public:
     connect(bpmHist->output("ticksMagnitude"), _pool, "ticksMagnitude");
     connect(bpmHist->output("sinusoid"),    _pool, "sinusoid");
     Network network(gen);
-    network.run();    // runGenerator(gen);
-    network.clear();  // deleteNetwork(gen);
+    network.run();
+    network.clear();
 
     _pool.remove("bpm");
     _pool.remove("bpmCandidates");

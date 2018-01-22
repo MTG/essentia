@@ -27,9 +27,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* RhythmDescriptors::name = "RhythmDescriptors";
-const char* RhythmDescriptors::category = "Rhythm";
-const char* RhythmDescriptors::description = DOC("This algorithm computes rhythm features (bpm, beat positions, beat histogram peaks) for an audio signal. It combines RhythmExtractor2013 for beat tracking and BPM estimation with BpmHistogramDescriptors algorithms.");
+const char* RhythmDescriptors::name = essentia::standard::RhythmDescriptors::name;
+const char* RhythmDescriptors::category = essentia::standard::RhythmDescriptors::category;
+const char* RhythmDescriptors::description = essentia::standard::RhythmDescriptors::description;
 
 
 RhythmDescriptors::RhythmDescriptors() {
@@ -137,9 +137,10 @@ void RhythmDescriptors::reset() {
 namespace essentia {
 namespace standard {
 
-const char* RhythmDescriptors::name = essentia::streaming::RhythmDescriptors::name;
-const char* RhythmDescriptors::category = essentia::streaming::RhythmDescriptors::category;
-const char* RhythmDescriptors::description = essentia::streaming::RhythmDescriptors::description;
+const char* RhythmDescriptors::name = "RhythmDescriptors";
+const char* RhythmDescriptors::category = "Rhythm";
+const char* RhythmDescriptors::description = DOC("This algorithm computes rhythm features (bpm, beat positions, beat histogram peaks) for an audio signal. It combines RhythmExtractor2013 for beat tracking and BPM estimation with BpmHistogramDescriptors algorithms.");
+
 
 RhythmDescriptors::RhythmDescriptors() {
   declareInput(_signal, "signal", "the audio input signal");

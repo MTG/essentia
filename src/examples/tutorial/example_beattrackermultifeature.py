@@ -31,25 +31,25 @@ try:
     input_filename = sys.argv[1]
     output_filename = sys.argv[2]
 except:
-    print "usage:", sys.argv[0], "<input-audiofile> <output-audiofile>"
+    print('usage: %s <input-audiofile> <output-audiofile>' % sys.argv[0])
     sys.exit()
 
 # don't forget, we can actually instantiate and call an algorithm on the same line!
-print 'Loading audio file...'
+print('Loading audio file...')
 audio = MonoLoader(filename = input_filename)()
 
 # compute beat positions
-print 'Computing beat positions...'
+print('Computing beat positions...')
 bt = BeatTrackerMultiFeature()
 beats, _ = bt(audio)
-print beats
+print(beats)
 
 # mark them on the audio, which we'll write back to disk
 # we use beeps instead of white noise to mark them, as it's more distinctive
-print 'Writing audio files to disk with beats marked...'
+print('Writing audio files to disk with beats marked...')
 
 marker = AudioOnsetsMarker(onsets = beats, type = 'beep')
 marked_audio = marker(audio)
 MonoWriter(filename = output_filename)(marked_audio)
 
-print 'All done!'
+print('All done!')

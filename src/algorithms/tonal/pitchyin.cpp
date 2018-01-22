@@ -47,7 +47,7 @@ void PitchYin::configure() {
   _tolerance = parameter("tolerance").toReal();
   _interpolate = parameter("interpolate").toBool();
 
-  _yin.resize(_frameSize/2+1);
+  _yin.resize(_frameSize/2 + 1);
 
   _tauMax = min(int(ceil(_sampleRate / parameter("minFrequency").toReal())), _frameSize/2);
   _tauMin = min(int(floor(_sampleRate / parameter("maxFrequency").toReal())), _frameSize/2);
@@ -90,7 +90,7 @@ void PitchYin::compute() {
   // Compute difference function
   for (int tau=1; tau < (int) _yin.size(); ++tau) {
     _yin[tau] = 0.;
-    for (int j=0; j < (int) _yin.size(); ++j) {
+    for (int j=0; j < (int) _yin.size()-1; ++j) {
       _yin[tau] += pow(signal[j] - signal[j+tau], 2);
     }
   }

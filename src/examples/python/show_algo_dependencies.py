@@ -39,10 +39,11 @@ loader = es.%s()
 """ % (mode, algo)
 
     proc = subprocess.Popen(["python", "-c", code], stderr=subprocess.PIPE)
-    stderr = proc.communicate()[1].split('\n')
+    stderr = proc.communicate()[1].decode('utf8').split('\n')
 
     # function to assign nested dict elements by a list of nested keys
     def set_val(d, keys, val):
+        from functools import reduce # Python 3 compatibility
         reduce(lambda x,y: x[y], keys[:-1], d)[keys[-1]] = val
 
     algos = []
@@ -85,21 +86,21 @@ loader = es.%s()
 
 
 def print_dependencies(algos, tree=None, lines=None):
-    print "Dependencies:"
+    print("Dependencies:")
     for m,a in set(algos):
-        print m + '\t' + a
-    print
+        print(m + '\t' + a)
+    print('')
 
     if tree:
-        print "Dependencies tree (yaml)"
-        print yaml.safe_dump(tree, indent=4)
+        print("Dependencies tree (yaml)")
+        print(yaml.safe_dump(tree, indent=4))
 
 
     if lines:
-        print "Essentia logger output"
-        print '\n'.join(lines)
-        print
-        print
+        print("Essentia logger output")
+        print('\n'.join(lines))
+        print('')
+        print('')
 
 
 
@@ -120,40 +121,41 @@ if __name__ == "__main__":
     streaming = essentia.streaming.algorithmNames()
     standard = essentia.standard.algorithmNames()
 
-    print "Found", len(streaming), "streaming algorithms"
-    print "Found", len(standard), "standard algorithms"
-    print len(set(streaming) & set(standard)), "algorithms in total"
-    print
+    print("Found %d streaming algorithms" % len(streaming))
+    print("Found %d standard algorithms" % len(standard))
+    print("%d algorithms in with both modes" % len(set(streaming) & set(standard)))
+    print("%d algorithms in total" % len(set(streaming) | set(standard)))
+    print('')
 
     algos = [(a, "standard") for a in standard] + [(a, "streaming") for a in streaming]
 
     if args['algo']:
         algos = [(a, m) for a, m in algos if a in args['algo']]
     else:
-        print "Algorithm was not specified. Analyze dependencies for all algorithms"
+        print("Algorithm was not specified. Analyze dependencies for all algorithms")
 
     if args['mode']: 
         algos = [(a, m) for a, m in algos if m==args['mode']]
     else:
-        print "Mode was not specified. Analyze dependencies for both modes"
+        print("Mode was not specified. Analyze dependencies for both modes")
 
     if not algos and args['algo'] and args['mode']:
-        print 'Algorithm "' + args['algo'] + '" not found in essentia.' + args['mode']
+        print('Algorithm "' + args['algo'] + '" not found in essentia.' + args['mode'])
         sys.exit()
 
     all_dependencies = []
 
     for algo, mode in algos:
-        print "---------- %s : %s ----------" % (mode, algo)   
+        print("---------- %s : %s ----------" % (mode, algo))
         dependencies, tree, _ = find_dependencies(mode, algo)  
         #print_dependencies(dependencies, tree)
         print_dependencies(dependencies)
         all_dependencies += dependencies
 
-    print "The following algorithms will be required for building Essentia:"
+    print("The following algorithms will be required for building Essentia:")
 
     for a in set([a for m,a in all_dependencies]):
-        print a
+        print(a)
 
 
 

@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% set title = 'Overview' %}
+
+{% block body %}
+<h1 id="search-documentation">Search</h1>
+<div id="fallback" class="admonition warning">
+<p>
+  Please activate JavaScript to enable the search
+  functionality.
+</p>
+</div>
+<p>
+  From here you can search these documents. Enter your search
+  words into the box below and click "search". Note that the search
+  function will automatically search for all of the words. Pages
+  containing fewer words won't appear in the result list.
+</p>
+<form action="" method="get">
+  <input type="text" name="q" value="" />
+  <input type="submit" value="search" />
+  <span id="search-progress" style="padding-left: 10px"></span>
+</form>
+
+<div id="search-results">
+
+</div>
+{% endblock %}
+
+{% block extrafooter %}
+<script>
+  jQuery = $;
+  $('#fallback').hide();
+  var DOCUMENTATION_OPTIONS = {
+    URL_ROOT: './',
+    VERSION: '{{version}}',
+    COLLAPSE_INDEX: false,
+    SOURCELINK_SUFFIX: '.txt',
+    FILE_SUFFIX: '.html',
+    HAS_SOURCE: true
+  };
+
+</script>
+<script src="{{ pathto("_static/underscore.js", 1) }}"></script>
+<script src="{{ pathto("_static/doctools.js", 1) }}"></script>
+<script src="{{ pathto("_static/searchtools.js", 1) }}"></script>
+<script>
+jQuery(function() {
+  Search.loadIndex('searchindex.js');
+});
+</script>
+<script id="searchindexloader"></script>
+{% endblock %}

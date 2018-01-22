@@ -23,15 +23,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* Multiplexer::name = "Multiplexer";
-const char* Multiplexer::category = "Standard";
-const char* Multiplexer::description = DOC("This algorithm returns a single vector from a given number of real values and/or frames. Frames from different inputs are multiplexed onto a single stream in an alternating fashion.\n"
-"\n"
-"This algorithm throws an exception if the number of input reals (or vector<real>) is less than the number specified in configuration parameters or if the user tries to acces an input which has not been specified.\n"
-"\n"
-"References:\n"
-"  [1] Multiplexer - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Multiplexer\n");
+const char* Multiplexer::name = essentia::standard::Multiplexer::name;
+const char* Multiplexer::category = essentia::standard::Multiplexer::category;
+const char* Multiplexer::description = essentia::standard::Multiplexer::description;
 
 
 void Multiplexer::clearInputs() {
@@ -126,9 +120,16 @@ AlgorithmStatus Multiplexer::process() {
 namespace essentia {
 namespace standard {
 
-const char* Multiplexer::name = essentia::streaming::Multiplexer::name;
-const char* Multiplexer::category = essentia::streaming::Multiplexer::category;
-const char* Multiplexer::description = essentia::streaming::Multiplexer::description;
+const char* Multiplexer::name = "Multiplexer";
+const char* Multiplexer::category = "Standard";
+const char* Multiplexer::description = DOC("This algorithm returns a single vector from a given number of real values and/or frames. Frames from different inputs are multiplexed onto a single stream in an alternating fashion.\n"
+"\n"
+"This algorithm throws an exception if the number of input reals (or vector<real>) is less than the number specified in configuration parameters or if the user tries to acces an input which has not been specified.\n"
+"\n"
+"References:\n"
+"  [1] Multiplexer - Wikipedia, the free encyclopedia,\n"
+"  http://en.wikipedia.org/wiki/Multiplexer\n");
+
 
 void Multiplexer::clearInputs() {
   for (int i=0; i<int(_realInputs.size()); i++) delete _realInputs[i];

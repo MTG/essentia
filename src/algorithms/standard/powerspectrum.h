@@ -38,7 +38,7 @@ class PowerSpectrum : public Algorithm {
  public:
   PowerSpectrum() {
     declareInput(_signal, "signal", "the input signal");
-    declareOutput(_powerSpectrum, "powerSpectrum", "the power spectrum of the input signal");
+    declareOutput(_powerSpectrum, "powerSpectrum", "power spectrum of the input signal");
 
     // creation of the FFT algorithm
     _fft = AlgorithmFactory::create("FFT");

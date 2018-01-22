@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* Tristimulus::name = "Tristimulus";
 const char* Tristimulus::category = "Tonal";
-const char* Tristimulus::description = DOC("This algorithm calculates the tristimulus of a signal given its harmonic peaks. The tristimulus has been introduced as a timbre equivalent to the color attributes in the vision. The tristimulus is composed of three different types of energy ratio allowing for a fine-grained description of the first harmonic of the spectrum, which are perceptually more salient.\n\n"
+const char* Tristimulus::description = DOC("This algorithm calculates the tristimulus of a signal given its harmonic peaks. The tristimulus has been introduced as a timbre equivalent to the color attributes in the vision. Tristimulus measures the mixture of harmonics in a given sound, grouped into three sections. The first tristimulus measures the relative weight of the first harmonic; the second tristimulus measures the relative weight of the second, third, and fourth harmonics taken together; and the third tristimulus measures the relative weight of all the remaining harmonics.\n\n"
 
 "Tristimulus is intended to be fed by the output of the HarmonicPeaks algorithm. The algorithm throws an exception when the input frequencies are not in ascending order and/or if the input vectors are of different sizes.\n\n"
 

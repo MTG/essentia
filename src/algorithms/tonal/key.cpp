@@ -41,7 +41,9 @@ const char* Key::description = DOC("This algorithm computes key estimate given a
 "  - 'edma' - automatic profiles extracted from corpus analysis of electronic dance music [3]. They normally perform better that Shaath's\n"
 "  - 'edmm' - automatic profiles extracted from corpus analysis of electronic dance music and manually tweaked according to heuristic observation. It will report major modes (which are poorly represented in EDM) as minor, but improve performance otherwise [3].\n"
 "  - Other key profiles ('Faraldo', 'Pentatonic') are experimental and will be removed on due time.\n"
-
+"\n"
+"The standard mode of the algorithm estimates key/scale for a given HPCP vector. The streaming mode first accumulates a stream of HPCP vectors and computes its mean to provide the estimation.\n"
+"\n"
 "References:\n"
 "  [1] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
 "  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"

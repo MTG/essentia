@@ -53,8 +53,12 @@ PyMethodDef PyPool_methods[] = {
 
 
 PyTypeObject PyPoolType = {
+#if PY_MAJOR_VERSION >= 3
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
     PyObject_HEAD_INIT(NULL)
     0,                         // ob_size
+#endif
     "essentia.Pool",           // tp_name
     sizeof(PyPool),            // tp_basicsize
     0,                         // tp_itemsize
@@ -548,9 +552,8 @@ PyObject* PyPool::isSingleValue(PyPool* self, PyObject* obj) {
   }
 
   if (self->pool->isSingleValue(PyString_AS_STRING(obj)))
-    return Py_True;
-  return Py_False;
-
+    Py_RETURN_TRUE;
+  Py_RETURN_FALSE;
 }
 
 PyObject* PyPool::removeNamespace(PyPool* self, PyObject* obj) {

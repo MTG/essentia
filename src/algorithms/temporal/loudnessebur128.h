@@ -54,6 +54,9 @@ class LoudnessEBUR128 : public AlgorithmComposite {
 
   int _hopSize;
 
+  scheduler::Network* _network;
+
+
  public:
   LoudnessEBUR128();
    ~LoudnessEBUR128();
@@ -64,7 +67,7 @@ class LoudnessEBUR128 : public AlgorithmComposite {
   }
 
   void declareParameters() {
-    // EBU R128 specs: the update rate for short-term loudness ‘live meters’ shall be at least 10 Hz
+    // EBU R128 specs: the update rate for short-term loudness "live meters" shall be at least 10 Hz
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,0.1]", 0.1);  
   };
@@ -108,7 +111,7 @@ class LoudnessEBUR128 : public Algorithm {
   ~LoudnessEBUR128();
 
   void declareParameters() {
-    // EBU R128 specs: the update rate for short-term loudness ‘live meters’ shall be at least 10 Hz
+    // EBU R128 specs: the update rate for short-term loudness 'live meters' shall be at least 10 Hz
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,0.1]", 0.1);  
   };

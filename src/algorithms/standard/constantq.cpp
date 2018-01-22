@@ -19,7 +19,6 @@
 
 #include "constantq.h"
 #include "essentia.h"
-#include "essentiamath.h"
 #include <iostream>
 
 using namespace std;
@@ -56,23 +55,23 @@ void ConstantQ::compute() {
     throw EssentiaException("ERROR: ConstantQ::compute: Sparse kernel has not been initialised");
   }
 
-  if (signal.size() != _FFTLength) {
+  if ((int)signal.size() != _FFTLength) {
     throw EssentiaException("ERROR: ConstantQ::compute: The ConstantQ input size must be equal to the FFTLength : ", _FFTLength);
   }
 
   SparseKernel *sk = m_sparseKernel;
 
-  constantQ.assign(_uK, 0.0 + 0.0j); // initialize output
+  constantQ.assign(_uK, 0.0 + 0.0i); // initialize output
 
-  const unsigned *fftbin = &(sk->_sparseKernelIs[0]);
-  const unsigned *cqbin  = &(sk->_sparseKernelJs[0]);
+  const int *fftbin = &(sk->_sparseKernelIs[0]);
+  const int *cqbin  = &(sk->_sparseKernelJs[0]);
   const double   *real   = &(sk->_sparseKernelReal[0]);
   const double   *imag   = &(sk->_sparseKernelImag[0]);
-  const unsigned int sparseCells = sk->_sparseKernelReal.size();
+  const int sparseCells = sk->_sparseKernelReal.size();
 
-  for (unsigned i = 0; i<sparseCells; i++) {
-    const unsigned row = cqbin[i];
-    const unsigned col = fftbin[i];
+  for (int i = 0; i<sparseCells; i++) {
+    const int row = cqbin[i];
+    const int col = fftbin[i];
     const double & r1  = real[i];
     const double & i1  = imag[i];
     const double & r2  = (double) signal.at( _FFTLength - col - 1 ).real();
@@ -93,16 +92,16 @@ void ConstantQ::configure() {
   // Work out Q value for Filter bank
   _dQ = 1/(pow(2,(1/(double)_binsPerOctave))-1); 
   // Number of Constant Q bins
-  _uK = (unsigned int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));  
-  
+  _uK = (int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));
+
   _FFTLength = (int) pow(2, nextpow2(ceil(_dQ *_sampleRate/_minFrequency)));
   _hop = _FFTLength/8; // hop size is window length divided by 32
 
   SparseKernel *sk = new SparseKernel();
 
   // Initialise temporal kernel with zeros, twice length to deal with complex numbers
-  vector<complex<double> > hammingWindow(_FFTLength, 0.0 + 0.0j);
-  vector<complex<Real> > transfHammingWindowR(_FFTLength, 0.0 + 0.0j);
+  vector<complex<double> > hammingWindow(_FFTLength, 0.0 + 0.0i);
+  vector<complex<Real> > transfHammingWindowR(_FFTLength, 0.0 + 0.0i);
 
   sk->_sparseKernelIs.reserve( _FFTLength*2 );
   sk->_sparseKernelJs.reserve( _FFTLength*2 );
@@ -114,14 +113,14 @@ void ConstantQ::configure() {
   // add it to the sparse kernels matrix
   double squareThreshold = _threshold * _threshold;
 
-  for (unsigned k=_uK; k--; ) {
+  for (int k=_uK; k--; ) {
 
     // Compute a hamming window
     hammingWindow.assign(_FFTLength, 0.0 + 0.0j);
-    const unsigned hammingLength = (int) ceil( _dQ * _sampleRate / ( _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave)));
-    unsigned origin = _FFTLength/2 - hammingLength/2;
+    const int hammingLength = (int) ceil( _dQ * _sampleRate / ( _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave)));
+    int origin = _FFTLength/2 - hammingLength/2;
 
-    for (int i=0; i<hammingLength; i++) {
+    for (int i=0; i<(int)hammingLength; i++) {
       const double angle = 2 * M_PI * _dQ * i/hammingLength;
       const double real = cos(angle);
       const double imag = sin(angle);
@@ -129,7 +128,7 @@ void ConstantQ::configure() {
       hammingWindow[origin + i] = complex <double>(absol*real, absol*imag);
     }
 
-    for (int i=0; i <_FFTLength/2; ++i) {
+    for (unsigned int i=0; i <_FFTLength/2; ++i) {
       complex<double> temp = hammingWindow[i];
       hammingWindow[i] = hammingWindow[i + _FFTLength/2];
       hammingWindow[i + _FFTLength/2] = temp;
@@ -147,11 +146,11 @@ void ConstantQ::configure() {
     // Increase the output size of the FFT to _FFTLength by mirroring the data
     int ind = transfHammingWindow.size() - 1;
     transfHammingWindow.resize(_FFTLength);
-    for (int i=0; i <_FFTLength/2; ++i) {
+    for (unsigned int i=0; i <_FFTLength/2; ++i) {
       transfHammingWindow.push_back(transfHammingWindow[ind--]);
     }
 
-    for (int j=0; j<_FFTLength; j++) {
+    for (unsigned int j=0; j<_FFTLength; j++) {
       // Perform thresholding
       const double squaredBin = squaredModule( transfHammingWindow[j]);
       if (squaredBin <= squareThreshold) continue;

@@ -15,12 +15,13 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-import _essentia
+from six import iteritems
+from . import _essentia
 import essentia
-import common as _c
+from . import common as _c
 import sys as _sys
-from _essentia import keys as algorithmNames, info as algorithmInfo
-
+from ._essentia import keys as algorithmNames, info as algorithmInfo
+from copy import copy
 
 # given an essentia algorithm name, create the corresponding class
 def _create_essentia_class(name, moduleName = __name__):
@@ -44,8 +45,13 @@ def _create_essentia_class(name, moduleName = __name__):
 
         def configure(self, **kwargs):
             # verify that all types match and do any necessary conversions
-            for name, val in kwargs.iteritems():
+            for name, val in iteritems(kwargs):
                 goalType = self.paramType(name)
+                
+                if type(val).__module__ == 'numpy':
+                    if not val.flags['C_CONTIGUOUS']:
+                        val = copy(val)
+
                 try:
                     convertedVal = _c.convertData(val, goalType)
                 except TypeError: # as e: # catching exception as sth is only
@@ -72,13 +78,21 @@ def _create_essentia_class(name, moduleName = __name__):
             result = []
 
             convertedArgs = []
+
             for i in range(len(inputNames)):
+                arg = args[i]
+
+                if type(args[i]).__module__ == 'numpy':
+                    if not args[i].flags['C_CONTIGUOUS']:
+                        arg = copy(args[i])
+
                 goalType = _c.Edt(self.inputType(inputNames[i]))
+
                 try:
-                    convertedData = _c.convertData(args[i], goalType)
+                    convertedData = _c.convertData(arg, goalType)
                 except TypeError:
                     raise TypeError('Error cannot convert argument %s to %s' \
-                          %(str(_c.determineEdt(args[i])), str(goalType)))
+                          %(str(_c.determineEdt(arg)), str(goalType)))
 
                 convertedArgs.append(convertedData)
 
@@ -88,6 +102,10 @@ def _create_essentia_class(name, moduleName = __name__):
             # to wrap the Pool that it outputs w/ our python Pool from common.py
             if name in ('YamlInput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'Extractor'):
                 return _c.Pool(results)
+
+            # MusicExtractor and FreesoundExtractor output two pools
+            if name in ('MusicExtractor', 'FreesoundExtractor'):
+                return (_c.Pool(results[0]), _c.Pool(results[1]))
 
             # In the case of MetadataReader, the 7th output is also a Pool
             if name in ('MetadataReader'):
@@ -119,5 +137,5 @@ _reloadAlgorithms()
 
 
 # load derived descriptors and other ones written in python
-from algorithms import create_python_algorithms as _create_python_algorithms
+from .algorithms import create_python_algorithms as _create_python_algorithms
 _create_python_algorithms(_sys.modules[__name__])

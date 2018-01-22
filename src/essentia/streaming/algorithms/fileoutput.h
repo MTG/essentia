@@ -48,7 +48,7 @@ class FileOutput : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("filename", "the name of the output file", "", "out.txt");
+    declareParameter("filename", "the name of the output file (use '-' for stdout)", "", "out.txt");
     declareParameter("mode", "output mode", "{text,binary}", "text");
   }
 

@@ -31,7 +31,7 @@ namespace scheduler {
 
 // helper function, was inside Algorithm before but it makes more sense to have
 // it only here, statically defined (ie: not part of Algorithm API)
-set<Algorithm*> visibleDependencies(const Algorithm* algo) {
+set<Algorithm*> visibleDependencies(const Algorithm* algo, bool logWarnings=true) {
   set<Algorithm*> dependencies;
 
   // for each source of this algorithm...
@@ -45,7 +45,7 @@ set<Algorithm*> visibleDependencies(const Algorithm* algo) {
 
     vector<SinkBase*>& sinks = output->second->sinks();
 
-    if (!sinks.size()) {
+    if (!sinks.size() && logWarnings) {
       E_WARNING("Unconnected source (" << output->first << ") in " << algo->name());
     }
 
@@ -57,6 +57,15 @@ set<Algorithm*> visibleDependencies(const Algorithm* algo) {
   }
 
   return dependencies;
+}
+
+void deleteNetwork(const streaming::Algorithm* algo) {
+  set<Algorithm*> dependencies = visibleDependencies(algo, false);
+
+  for (set<Algorithm*>::iterator it = dependencies.begin(); it != dependencies.end(); ++it) {
+    delete *it;
+  }
+  delete algo;
 }
 
 /**

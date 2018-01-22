@@ -46,6 +46,7 @@ Essentia depends on (at least) the following libraries:
  - `TagLib <http://developer.kde.org/~wheeler/taglib.html>`_: for reading audio metadata tags *(optional)*
  - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
  - `Gaia <https://github.com/MTG/gaia>`_: for using SVM classifier models *(optional)*
+
 All dependencies are optional, and some functionality will be excluded when a dependency is not found.
 
 Installing dependencies on Linux
@@ -53,11 +54,15 @@ Installing dependencies on Linux
 
 You can install those dependencies on a Debian/Ubuntu system from official repositories using the command below::
 
-  sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev
+  sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev python-six
 
-In order to use python bindings for the library, you might also need to install python-numpy-dev (or python-numpy on Ubuntu) and python-yaml for YAML support in python::
+In order to use python bindings for the library, you might also need to install python-dev, python-numpy-dev (or python-numpy on Ubuntu) and python-yaml for YAML support in python::
 
-  sudo apt-get install python-numpy-dev python-numpy python-yaml
+  sudo apt-get install python-dev python-numpy-dev python-numpy python-yaml
+
+Similarly, in the case of Python3 install::
+
+  sudo apt-get install python3-dev python3-numpy-dev python3-numpy python3-yaml
 
 
 Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_. 
@@ -103,17 +108,19 @@ Once your dependencies are installed, you can proceed to compiling Essentia. Dow
 
 Go into its source code directory and start by configuring it::
 
-  ./waf configure --mode=release --build-static --with-python --with-cpptests --with-examples --with-vamp
+  ./waf configure --build-static --with-python --with-cpptests --with-examples --with-vamp
 
-Use the keys:
+Use these (optional) flags:
  - ``--with-python`` to enable python bindings,
- - ``--with-examples`` to build `executable extractors <extractors_out_of_box.html>`_ based on the library,
+ - ``--with-examples`` to build `command line extractors <extractors_out_of_box.html>`_ based on the library,
  - ``--with-vamp`` to build Vamp plugin wrapper,
- - ``--with-gaia`` to build with Gaia library support.
+ - ``--with-gaia`` to build with Gaia library support
+ - ``--mode=debug`` to build in debug mode
+ - ``--with-cpptests`` to build cpptests
 
 NOTE: you must *always* configure at least once before building!
 
-The following will give you a full list of options::
+The following will give you the full list of options::
 
   ./waf --help
 
@@ -128,9 +135,18 @@ To install the C++ library, python bindings, extractors and Vamp plugin (if conf
   ./waf install
 
 
+Compiling for Python3
+---------------------
+The waf build scripts are python scripts themselves. They will configure Essentia to be used with the same Python that was used to execute them. In the case if your default python is not Python3, you will need to run all waf commands with python3::
+
+  python3 ./waf configure --build-static --with-python --with-cpptests --with-examples --with-vamp
+  python3 ./waf
+  python3 ./waf install
+
+
 Running tests (optional)
 ------------------------
-If you want to assure that Essentia works correctly, do the tests.
+If you want to assure that Essentia works correctly, do the tests. Some of the tests require additional audio files, which are stored in a separate submodule repository `essentia-audio <https://github.com/MTG/essentia-audio>`_. Make sure to clone Essentia git repository including its submodules in order to be able to run the tests (``git clone --recursive https://github.com/MTG/essentia.git``).
 
 To run the C++ base unit tests (only test basic library behavior)::
 
@@ -139,6 +155,10 @@ To run the C++ base unit tests (only test basic library behavior)::
 To run the python unit tests (include all unittests on algorithms, need python bindings installed first)::
 
   ./waf run_python_tests
+
+or, in the case if your default python is not Python3::
+
+  python3 ./waf run_python_tests
 
 
 Building documentation (optional)
@@ -152,7 +172,7 @@ Install doxigen and pip, if you are on Linux::
 
 Install additional dependencies (you might need to run this command with sudo)::
 
-  sudo pip install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter
+  sudo pip install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults
   sudo apt-get install pandoc
 
 Make sure to install Essentia with python bindings and run::
@@ -175,7 +195,7 @@ To install bash on Ubuntu, follow the `official guide <https://msdn.microsoft.co
 
 After bash on Ubuntu is successfully installed, you should open a bash terminal and install the dependencies (see: `Installing dependencies on Linux`_). Remember that bash on Windows runs on an Ubuntu 14.04 environment. Therefore, you may need to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
 
-Finally, you can compile the Essentia (see: `Compiling Essentia from source`_).
+Finally, you can compile Essentia (see: `Compiling Essentia from source`_).
 
 Building Essentia on Android
 ----------------------------
