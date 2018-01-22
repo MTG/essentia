@@ -50,7 +50,7 @@ def options(ctx):
 def debian_version():
     try:
         v = open('/etc/debian_version').read().strip()
-        return [ int(n) for n in v.split('.') ]
+        return [int(n) for n in v.split('.')]
     except IOError:
         return []
     except ValueError:
@@ -143,7 +143,7 @@ def configure(ctx):
                       args=check_cfg_args, mandatory=True)
 
     # needed by ffmpeg for the INT64_C macros
-    ctx.env.DEFINES += [ '__STDC_CONSTANT_MACROS' ]
+    ctx.env.DEFINES += ['__STDC_CONSTANT_MACROS']
 
     if ctx.env.WITH_EXAMPLES or ctx.env.EXAMPLES or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
@@ -165,7 +165,7 @@ def configure(ctx):
     algos = ['FFT']
     if 'ACCELERATE' in ctx.env.FFT:
         print('- using Accelerate Framework for FFT\n')
-        ctx.env.LINKFLAGS += [ '-framework', 'Accelerate']
+        ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
         ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
     elif 'KISS' in ctx.env.FFT:
         print('- using KISS for FFT\n')
@@ -247,7 +247,11 @@ def configure(ctx):
         print('- Compiling %s example%s' % (lel, "" if lel == 1 else "s"))
         print('  %s' % ", ".join(ctx.env.EXAMPLE_LIST))
 
-    buildRegFile(ctx);
+    buildRegFile(ctx)
+
+    if ctx.env.WITH_PYTHON:
+        if 'FileOutputProxy' not in algos:
+            raise ctx.errors.ConfigurationError("FileOutputProxy algorithm is necessary for python bindings, however it was excluded. Please, reconfigure including this algorithm.")
 
     print('\n' + '-' * 87)
 
@@ -301,7 +305,7 @@ def buildRegFile(ctx):
             algos_included[alg] = algos[alg]
         algos = algos_included
         if algos_not_found:
-            print ('Warning: the following algorithms could not be found: %s' % ', '.join(algos_not_found))
+            print('Warning: the following algorithms could not be found: %s' % ', '.join(algos_not_found))
         print('Building the following algorithms: %s' % ', '.join(algos.keys()))
     else:
         print('Building all the algorithms')
@@ -335,7 +339,7 @@ def build(ctx):
     # add essentia root folder to path to be able to import utils.algorithms_info
     sys.path = [ctx.path.find_dir('..')] + sys.path
 
-    algos = buildRegFile(ctx);
+    algos = buildRegFile(ctx)
 
     sources = ctx.path.ant_glob('essentia/**/*.cpp')
 
