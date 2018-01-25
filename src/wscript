@@ -262,7 +262,7 @@ def configure(ctx):
         print('- Compiling %s example%s' % (lel, "" if lel == 1 else "s"))
         print('  %s' % ", ".join(ctx.env.EXAMPLE_LIST))
 
-    buildRegFile(ctx)
+    algos = buildRegFile(ctx)
 
     if ctx.env.WITH_PYTHON:
         if 'FileOutputProxy' not in algos:
