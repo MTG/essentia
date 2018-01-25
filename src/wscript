@@ -6,7 +6,7 @@ from __future__ import print_function
 import sys
 import os.path
 
-dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw']
+dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
 
 def options(ctx):
     ctx.add_option('--with-python', action='store_true',
@@ -138,6 +138,11 @@ def configure(ctx):
         ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
                       args=check_cfg_args, mandatory=False)
 
+    if 'libchromaprint' in ctx.env.WITH_LIBS_LIST:
+        ctx.check_cfg(package='libchromaprint', uselib_store='LIBCHROMAPRINT',
+                      args=['--cflags', '--libs'], mandatory=False)
+
+
     if ctx.env.WITH_GAIA:
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
                       args=check_cfg_args, mandatory=True)
@@ -241,6 +246,16 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s' % algos)
         print('  Examples requiring Gaia2 will be ignored\n')
         ctx.env.ALGOIGNORE += algos
+
+    algos = [ 'Chromaprinter' ]
+    if has('libchromaprint'):
+        print('- Chromaprint detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
+        ctx.env.USES += ' LIBCHROMAPRINT'
+    else:
+        print('- Essentia is configured without Chromaprint.')
+        print('  The following algorithms will be ignored: %s' % algos)
+        ctx.env.ALGOIGNORE += algos 
 
     lel = len(ctx.env.EXAMPLE_LIST)
     if lel:
@@ -375,6 +390,19 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/kiss_fft.c') ]
         sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/tools/kiss_fftr.c') ]
 
+    # Add Chromaprint Dependancy stuff 
+    """
+    if 'CHROMAPRINT' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/chromaprint-1.4.2/src' ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/chromaprint.cpp') ]
+
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprint_compressor.cpp') ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprint_decompressor.cpp') ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprint_matcher.cpp') ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
+	"""
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
