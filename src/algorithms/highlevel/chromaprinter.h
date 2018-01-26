@@ -47,7 +47,7 @@ class Chromaprinter : public Algorithm {
 
   void declareParameters() {
     declareParameter("sampleRate", "the input audio sampling rate [Hz]", "(0,inf)", 44100.);
-    declareParameter("maxLength", "use the first 'maxLength' seconds to compute the Chromaprint. 0 to use the full audio length [s]", "[0,inf)", 0.);
+    declareParameter("maxLength", "use the first 'maxLength' seconds to compute the chromaprint. 0 to use the full audio length [s]", "[0,inf)", 0.);
   }
 
   void reset() {}
@@ -111,7 +111,7 @@ class Chromaprinter : public Algorithm {
  public:
   Chromaprinter() : Algorithm() {
     declareInput(_signal, "signal", "the input audio signal");
-    declareOutput(_fingerprint, "fingerprint", "the Chromaprint as a base64-encoded string");
+    declareOutput(_fingerprint, "fingerprint", "the chromaprint as a base64-encoded string");
 
     _fingerprint.setBufferType(BufferUsage::forMultipleFrames);
   }
@@ -122,8 +122,8 @@ class Chromaprinter : public Algorithm {
 
   void declareParameters() {
     declareParameter("sampleRate", "the input audio sampling rate [Hz]", "(0,inf)", 44100.);
-    declareParameter("analysisTime", "a Chromaprint is computed each 'analysisTime' seconds. It is not recommended use a value lower than 30.", "(0,inf)", 30.);
-    declareParameter("concatenate", "if true, Chromaprints are concatenated and returned as a single string. Otherwise a Chromaprint is returned each 'analysisTim'e seconds.", "{true,false}", true);
+    declareParameter("analysisTime", "a chromaprint is computed each 'analysisTime' seconds. It is not recommended use a value lower than 30.", "(0,inf)", 30.);
+    declareParameter("concatenate", "if true, chromaprints are concatenated and returned as a single string. Otherwise a chromaprint is returned each 'analysisTime' seconds.", "{true,false}", true);
   }
 
   void configure();

@@ -26,11 +26,12 @@ namespace standard {
 
 const char* Chromaprinter::name = "Chromaprinter";
 const char* Chromaprinter::category = "Fingerprinting";
-const char* Chromaprinter::description = DOC("This algorithm computes the fingerprint of the input signal by means of the Chromaprint API [1]. The Chromaprints are returned as base64-encoded strings. \n"
-    "\n"
-    "References: \n"
-    "[1] Chromaprint -- from the Acousticid project,\n"
-    "https://acoustid.org/chromaprint");
+const char* Chromaprinter::description = DOC("This algorithm computes the fingerprint of the input signal using Chromaprint algorithm. It is a wrapper of the Chromaprint library [1,2]. The chromaprints are returned as base64-encoded strings.\n"
+"\n"
+"References:\n"
+"  [1] Chromaprint -- from the Acousticid project,\n"
+"  https://acoustid.org/chromaprint\n\n"
+"  [2] https://github.com/acoustid/chromaprint");
 
 void Chromaprinter::configure() {
   _sampleRate = parameter("sampleRate").toReal();
@@ -102,6 +103,8 @@ namespace streaming {
 
 const char* Chromaprinter::name = standard::Chromaprinter::name;
 const char* Chromaprinter::description = standard::Chromaprinter::description;
+const char* Chromaprinter::category = standard::Chromaprinter::category;
+
 
 void Chromaprinter::configure() {
   _sampleRate = parameter("sampleRate").toReal();
