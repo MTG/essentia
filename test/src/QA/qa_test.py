@@ -18,7 +18,6 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-
 from essentia import *
 from essentia.utils import *
 from essentia.standard import *
@@ -37,11 +36,10 @@ def find_files(directory, pattern):
 
 
 test_types = [
-    'values',    # several float values. (e,g. MFCC)
-    'value',     # only one value. (e.g, average loudness)
-    'events',    # detecting events (e.g, onsets)
-    'hybrid',    # events with a value (e.g, peaks with amplitude)
-    'bool',      # True/False test (e.g, presence of voice)
+    'numeric',  # n-dimensional values. (e,g. MFCC)
+    'events',  # detecting events (e.g, onsets)
+    'hybrid',  # events with a value (e.g, peaks with amplitude)
+    'bool',  # True/False test (e.g, presence of voice)
     'semantic',  # high level descriptor (e.g, key)
 ]
 
@@ -52,14 +50,16 @@ class QaTest:
     metrics = dict()
 
     solutions = dict()
+    ground_true = dict()
     times = dict()
     scores = dict()
 
+    fs = 44100  # global fs for the test
     test_type = ''  # todo: restrict the possible values
     time_wrappers = True
     verbose = True
 
-    def __init__(self, test_type='values', wrappers=[], metrics=[], time_wrappers=True, verbose=True):
+    def __init__(self, test_type='numeric', wrappers=[], metrics=[], time_wrappers=True, verbose=True):
         """
 
         :param test_type: {value, values, events, hybrid, bool}
@@ -85,12 +85,11 @@ class QaTest:
             self.wrappers[wrapper.__class__.__name__] = wrapper
         print 'Wrappers seem ok'
 
-    def set_data(self, filename, sample_rate=44100, pattern='.wav'):
+    def set_data(self, filename, pattern='.wav'):
         """
         Uses Essentia MonoLoader to load the audio data. If filename is a folder it will look for all the `.extension` \
         files in the folder.
         :param filename:
-        :param sample_rate:
         :param pattern:
         :return:
         """
@@ -101,10 +100,11 @@ class QaTest:
 
         try:
             for f in files:
-                self.data[os.path.basename(f)] = MonoLoader(filename=f, sampleRate=sample_rate)()
+                name = ''.join(os.path.basename(f).split('.')[:-1])
+                self.data[name] = MonoLoader(filename=f, sampleRate=self.fs)()
         except IOError:
             print 'cannot open {}'.format(f)  # todo improve exception handling
-        #else:
+        # else:
         #    raise EssentiaException
 
     def set_metrics(self, metrics):
@@ -121,6 +121,48 @@ class QaTest:
         self.assert_metrics(metrics)
         self.metrics.add(metrics)
         print 'metrics seem ok'
+
+    def load(self, filename, name='', ground_true=False):
+        if not os.path.isfile(filename):
+            files = [x for x in find_files(filename, '')]
+        else:
+            files = [filename]
+
+        for f in files:
+            try:
+                instance = ''.join(os.path.basename(f).split('.')[:-1])
+                ext = (f.split('.')[-1])
+                parsers = {
+                    'svl': lambda x: self.load_svl(x),
+                    'csv': lambda x: self.load_csv(x),
+                    'lab': lambda x: self.load_lab(x)
+                    }
+
+                try:
+                    points = parsers[ext](f)
+                except KeyError:
+                    print ("ERROR: {} not loaded. \n"
+                           "'{}' extension is not supported yet. Try with one of the supperted formats {}"
+                           .format(f, ext, parsers.keys()))
+                    continue
+
+                if ground_true:
+                    self.ground_true[instance] = np.array(points)
+                else:
+                    if name == '':
+                        raise EssentiaException('If this solution is not the ground true it should be given a name')
+                    self.solutions[name, instance] = points
+            except EssentiaException:
+                continue
+
+    def load_svl(self):
+        print 'This menthod is not implemeted in this class. Override it'
+        return  # How should a general implementation be?
+
+    def load_lab(self):
+        print 'This menthod is not implemeted in this class. Override it'
+        return  # How should a general implementation be?
+
 
     def compute(self, key_wrap, wrapper, key_inst, instance):
         print "Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap)
@@ -140,7 +182,7 @@ class QaTest:
                 else:
                     self.compute(key_wrap, wrapper, key_inst, instance)
 
-    def compare_elapsed_times(self):
+    def compare_elapsed_times(self, output_file='stats.log'):
         w_names = self.wrappers.keys()
         i_names = self.data.keys()
 
@@ -148,41 +190,75 @@ class QaTest:
         means = np.mean(arrs, 1)
 
         fastest_idx = np.argmin(means)
-        print ''
-        print '*' * 70
-        print '{} is the fastest method. Lasted {:.3f}s on average'\
-            .format(w_names[fastest_idx], means[fastest_idx])
+        text = []
+        text.append('')
+        text.append('*' * 70)
+        text.append('{} is the fastest method. Lasted {:.3f}s on average'
+                    .format(w_names[fastest_idx], means[fastest_idx]))
 
         for i in range(len(w_names)):
             if i != fastest_idx:
-                print '{} lasted {:.3f}s. {:.2f}x slower'\
-                    .format(w_names[i], means[i], means[i] / means[fastest_idx])
-        print '*' * 70
-        print ''
+                text.append('{} lasted {:.3f}s. {:.2f}x slower'
+                            .format(w_names[i], means[i], means[i] / means[fastest_idx]))
+        text.append('*' * 70)
+        text.append('')
+
+        print '\n'.join(text)
+
+        with open(output_file, 'a') as o_file:
+            o_file.write('\n'.join(text))
 
     def score(self, key_wrap, key_inst, solution, key_metric, metric, gt):
-        print "Scoring file '{}' computed with the wrapper '{}' using metric '{}'..."\
+        print "Scoring file '{}' computed with the wrapper '{}' using metric '{}'..." \
             .format(key_inst, key_wrap, key_metric)
         self.scores[key_wrap, key_inst, key_metric] = metric.score(gt, solution)
 
     def score_all(self):
         gt_flags = []
+        gt_name = ''
         for key_wrap, wrapper in self.wrappers.iteritems():
             gt_flags.append(wrapper.ground_true)
             if wrapper.ground_true:
                 gt_name = wrapper.name
-        #  assert only one GT
-        if sum(gt_flags) > 1:
-            raise EssentiaException("Only one wrapper can be set as ground true")
-        if sum(gt_flags) == 0:
-            raise EssentiaException("No wrapper is set as ground true")
+
+        if not bool(self.ground_true):
+
+            #  assert only one GT
+            if sum(gt_flags) > 1:
+                raise EssentiaException("Only one wrapper can be set as ground true")
+            if sum(gt_flags) == 0:
+                raise EssentiaException("No wrapper is set as ground true")
+        else:
+            if sum(gt_flags) != 0:
+                print("warning: When ground truth is set externally the ground truth wrapper would be ignored")
 
         for key_sol, solution in self.solutions.iteritems():
             key_wrap, key_inst = key_sol
-            gt = self.solutions[gt_name, key_inst]
-            if key_wrap != gt_name:
+            gt = self.ground_true.get(key_inst, None)
+            if gt is not None:
                 for key_metric, metric in self.metrics.iteritems():
                     self.score(key_wrap, key_inst, solution, key_metric, metric, gt)
+                continue
+
+            gt = self.solutions.get((gt_name, key_inst), None)
+            if gt is not None:
+                if key_wrap != gt_name:
+                    for key_metric, metric in self.metrics.iteritems():
+                        self.score(key_wrap, key_inst, solution, key_metric, metric, gt)
+                    continue
+
+            print "{} was not scored because there is not ground truth available".format(key_inst)
+
+    def save_test(self, output_file):
+        import pickle
+        with open('{}.pkl'.format(output_file), 'wb') as f:
+            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
+
+    @staticmethod
+    def load_test(input_file):
+        import pickle
+        with open('{}.pkl'.format(input_file), 'rb') as f:
+            return pickle.load(f)
 
     @staticmethod
     def assert_wrappers(wrappers):
@@ -205,9 +281,6 @@ class QaTest:
         for metric in metrics:
             if not isinstance(metric, QaMetric):
                 raise EssentiaException('Metrics should be wrapped in a QaMetric object')
-
-    def run(self):
-        pass
 
 
 class QaWrapper:
@@ -239,6 +312,7 @@ class QaWrapper:
         secs = (end - start)
 
         return solution, secs
+
 
 class QaMetric:
     def __init__(self):
