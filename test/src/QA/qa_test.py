@@ -43,6 +43,8 @@ test_types = [
     'semantic',  # high level descriptor (e.g, key)
 ]
 
+default_audio_types = ('wav', 'mp3', 'flac', 'ogg')  # To be extended
+
 
 class QaTest:
     wrappers = dict()
@@ -59,7 +61,7 @@ class QaTest:
     time_wrappers = True
     verbose = True
 
-    def __init__(self, test_type='numeric', wrappers=[], metrics=[], time_wrappers=True, verbose=True):
+    def __init__(self, test_type='numeric', wrappers=[], metrics=[], time_wrappers=True, verbose=False):
         """
 
         :param test_type: {value, values, events, hybrid, bool}
@@ -68,24 +70,26 @@ class QaTest:
         :param time_wrappers: If true the Wrappers are timed.
         """
 
+        self.verbose = verbose
         self.set_test_type(test_type)
         self.set_wrappers(wrappers)
         self.set_metrics(metrics)
         self.time_wrappers = time_wrappers
-        self.verbose = verbose
 
     def set_test_type(self, test_type):
         self.assert_test_type(test_type)
         self.test_type = test_type
-        print 'test_type is ok'
+        if self.verbose:
+            print 'test_type is ok'
 
     def set_wrappers(self, wrappers):
         self.assert_wrappers(wrappers)
         for wrapper in wrappers:
             self.wrappers[wrapper.__class__.__name__] = wrapper
-        print 'Wrappers seem ok'
+        if self.verbose:
+            print 'Wrappers seem ok'
 
-    def set_data(self, filename, pattern='.wav'):
+    def load_audio(self, filename, pattern=default_audio_types):
         """
         Uses Essentia MonoLoader to load the audio data. If filename is a folder it will look for all the `.extension` \
         files in the folder.
@@ -97,13 +101,15 @@ class QaTest:
             files = [x for x in find_files(filename, pattern)]
         else:
             files = [filename]
-
+        if len(files) == 0:
+            raise EssentiaException("The file does not exist or the folder doesn't contain any '{}' file".format(pattern))
         try:
             for f in files:
                 name = ''.join(os.path.basename(f).split('.')[:-1])
                 self.data[name] = MonoLoader(filename=f, sampleRate=self.fs)()
         except IOError:
-            print 'cannot open {}'.format(f)  # todo improve exception handling
+            if self.verbose:
+                print 'cannot open {}'.format(f)  # todo improve exception handling
         # else:
         #    raise EssentiaException
 
@@ -113,16 +119,18 @@ class QaTest:
         self.assert_metrics(metrics)
         for metric in metrics:
             self.metrics[metric.__class__.__name__] = metric
-        print 'metrics seem ok'
+        if self.verbose:
+            print 'metrics seem ok'
 
     def add_metrics(self, metrics):
         if not type(metrics) == list:
             metrics = [metrics]
         self.assert_metrics(metrics)
         self.metrics.add(metrics)
-        print 'metrics seem ok'
+        if self.verbose:
+            print 'metrics seem ok'
 
-    def load(self, filename, name='', ground_true=False):
+    def load_solution(self, filename, name='', ground_true=False):
         if not os.path.isfile(filename):
             files = [x for x in find_files(filename, '')]
         else:
@@ -132,6 +140,11 @@ class QaTest:
             try:
                 instance = ''.join(os.path.basename(f).split('.')[:-1])
                 ext = (f.split('.')[-1])
+
+                # Exclude known audio types so audio everything can be in the same folder
+                if ext in default_audio_types:
+                    continue
+
                 parsers = {
                     'svl': lambda x: self.load_svl(x),
                     'csv': lambda x: self.load_csv(x),
@@ -141,9 +154,10 @@ class QaTest:
                 try:
                     points = parsers[ext](f)
                 except KeyError:
-                    print ("ERROR: {} not loaded. \n"
-                           "'{}' extension is not supported yet. Try with one of the supperted formats {}"
-                           .format(f, ext, parsers.keys()))
+                    if self.verbose:
+                        print ("ERROR: {} not loaded. \n"
+                               "'{}' extension is not supported yet. Try with one of the supperted formats {}"
+                               .format(f, ext, parsers.keys()))
                     continue
 
                 if ground_true:
@@ -163,13 +177,14 @@ class QaTest:
         print 'This menthod is not implemeted in this class. Override it'
         return  # How should a general implementation be?
 
-
     def compute(self, key_wrap, wrapper, key_inst, instance):
-        print "Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap)
+        if self.verbose:
+            print "Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap)
         self.solutions[key_wrap, key_inst] = wrapper.compute(instance)
 
     def compute_and_time(self, key_wrap, wrapper, key_inst, instance):
-        print "Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap)
+        if self.verbose:
+            print "Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap)
         solution, time = wrapper.compute_and_time(instance)
         self.solutions[key_wrap, key_inst] = solution
         self.times[key_wrap, key_inst] = time
@@ -203,14 +218,16 @@ class QaTest:
         text.append('*' * 70)
         text.append('')
 
-        print '\n'.join(text)
+        if self.verbose:
+            print '\n'.join(text)
 
         with open(output_file, 'a') as o_file:
             o_file.write('\n'.join(text))
 
     def score(self, key_wrap, key_inst, solution, key_metric, metric, gt):
-        print "Scoring file '{}' computed with the wrapper '{}' using metric '{}'..." \
-            .format(key_inst, key_wrap, key_metric)
+        if self.verbose:
+            print "Scoring file '{}' computed with the wrapper '{}' using metric '{}'..." \
+                .format(key_inst, key_wrap, key_metric)
         self.scores[key_wrap, key_inst, key_metric] = metric.score(gt, solution)
 
     def score_all(self):
@@ -230,7 +247,8 @@ class QaTest:
                 raise EssentiaException("No wrapper is set as ground true")
         else:
             if sum(gt_flags) != 0:
-                print("warning: When ground truth is set externally the ground truth wrapper would be ignored")
+                if self.verbose:
+                    print("warning: When ground truth is set externally the ground truth wrapper would be ignored")
 
         for key_sol, solution in self.solutions.iteritems():
             key_wrap, key_inst = key_sol
@@ -246,8 +264,8 @@ class QaTest:
                     for key_metric, metric in self.metrics.iteritems():
                         self.score(key_wrap, key_inst, solution, key_metric, metric, gt)
                     continue
-
-            print "{} was not scored because there is not ground truth available".format(key_inst)
+            if self.verbose:
+                print "{} was not scored because there is not ground truth available".format(key_inst)
 
     def save_test(self, output_file):
         import pickle
