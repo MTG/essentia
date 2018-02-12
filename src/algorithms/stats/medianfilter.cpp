@@ -51,7 +51,7 @@ void MedianFilter::compute() {
     throw(EssentiaException("kernelSize has to be smaller than the input size"));
   output.resize(inputSize);
 
-  // Padding beginning and end values so the ouput fits inputs size.
+  // add padding at the beginning and end so the ouput fits the input size.
   std::vector<Real> paddedArray = input;
   paddedArray.insert(paddedArray.begin(), paddingSize, input[0]);
   paddedArray.insert(paddedArray.end(), paddingSize, input.back());
