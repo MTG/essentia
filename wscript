@@ -193,7 +193,7 @@ def configure(ctx):
         tdm_lib = tdm_root + "/lib"
 
         # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
-        # libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8']
+        # libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'chromaprint-1.4.2']
         # libs_paths = [';packaging\win32_3rdparty\\' + lib + '\lib\pkgconfig' for lib in libs_3rdparty]
         # os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
 
@@ -209,7 +209,7 @@ def configure(ctx):
         print("copying pkgconfig ...")
         distutils.dir_util.copy_tree(win_path + "/pkgconfig/bin", tdm_bin)
 
-        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'taglib-1.9.1']
+        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'taglib-1.9.1', 'chromaprint-1.4.2']
         for lib in libs_3rdparty:
             print("copying " + lib + "...")
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/include", tdm_include)
@@ -294,7 +294,7 @@ def configure(ctx):
     Name: libessentia
     Description: audio analysis library -- development files
     Version: %(version)s
-    Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f
+    Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f -lchromaprint
     Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/utils
     ''' % opts
 
