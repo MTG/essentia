@@ -75,7 +75,7 @@ class MedianFilter : public StreamingAlgorithmWrapper
     MedianFilter() {
         declareAlgorithm("MedianFilter");
         declareInput(_array, TOKEN, "array");
-        declareOutput(_filteredArray, TOKEN, "median");
+        declareOutput(_filteredArray, TOKEN, "filteredArray");
     }
 };
 

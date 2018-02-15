@@ -24,7 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char *MedianFilter::name = "MedianFilter";
-const char *MedianFilter::category = "Statistics";
+const char *MedianFilter::category = "Filters";
 const char *MedianFilter::description = DOC("This algorithm computes the median filtered version of the input signal giving the kernel size as detailed in [1].\n"
 "\n"
 "References:\n"
