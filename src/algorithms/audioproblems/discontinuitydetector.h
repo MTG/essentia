@@ -107,12 +107,12 @@ class DiscontinuityDetector : public StreamingAlgorithmWrapper {
 
   protected:
     Sink<std::vector<Real>> _frame;
-    Source<std::vector<int>> _discontinuityLocations;
+    Source<std::vector<Real>> _discontinuityLocations;
     Source<std::vector<Real>> _discontinuityAmplitues;
 
   public:
     DiscontinuityDetector() {
-        declareAlgorithm("MedianFilter");
+        declareAlgorithm("DiscontinuityDetector");
         declareInput(_frame, TOKEN, "frame");
         declareOutput(_discontinuityLocations, TOKEN, "discontinuityLocations");
         declareOutput(_discontinuityAmplitues, TOKEN, "discontinuityAmplitudes");
