@@ -51,11 +51,11 @@ void DiscontinuityDetector::configure() {
                           "the number of LPC coefficientes"));
 
   if (_frameSize < _hopSize)
-    throw(EssentiaException("hopSize has to be smaller than the input size"));
+    throw(EssentiaException("hopSize has to be smaller or equal than the input size"));
 
   if (_frameSize < _kernelSize)
     throw(
-        EssentiaException("kernelSize has to be smaller than the input size"));
+        EssentiaException("kernelSize has to be smaller or equal than the input size"));
 
   if (_frameSize < _subFrameSize)
     throw(EssentiaException(

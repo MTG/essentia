@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 
+
 # Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
@@ -29,16 +30,17 @@ class TestDiscontinuityDetector(TestCase):
         return DiscontinuityDetector(**kwargs)
 
     def testZero(self):
-        # Inputting zeros should return zero.
+        # inputting zeros should return an empty list.
         size = 1024
         self.assertEqualVector(
             self.InitDiscontinuityDetector(frameSize=size)(
                 esarr(numpy.zeros(size)))[0], esarr([]))
 
-    # The algorithm should be robust to squarewaves if there are at least a few
-    # periods on the frame. ( ~200Hz for 512 samples @ 44.1kHz) Try different
-    # frequencies.
     def testSquareWave(self):
+        # the algorithm should be robust to squarewaves if there are at least
+        # a few periods on the frame:
+        #   f > ~200Hz for a window size of 512 @ 44.1kHz
+        # try different frequencies.
         fs = 44100
         minFreq = 200  # Hz
         maxFreq = 20000  # Hz
