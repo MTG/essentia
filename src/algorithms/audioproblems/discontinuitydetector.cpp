@@ -51,11 +51,12 @@ void DiscontinuityDetector::configure() {
                           "the number of LPC coefficientes"));
 
   if (_frameSize < _hopSize)
-    throw(EssentiaException("hopSize has to be smaller or equal than the input size"));
+    throw(EssentiaException(
+        "hopSize has to be smaller or equal than the input size"));
 
   if (_frameSize < _kernelSize)
-    throw(
-        EssentiaException("kernelSize has to be smaller or equal than the input size"));
+    throw(EssentiaException(
+        "kernelSize has to be smaller or equal than the input size"));
 
   if (_frameSize < _subFrameSize)
     throw(EssentiaException(
@@ -98,10 +99,9 @@ void DiscontinuityDetector::compute() {
   // contiguous frames
   int start = inputSize / 2 - _hopSize / 2;
   int end = inputSize / 2 + _hopSize / 2;
-  
-  if (inputSize == _hopSize)
-    start = _order;
-  
+
+  if (inputSize == _hopSize) start = _order;
+
   int analysisSize = end - start;
 
   std::vector<Real> frameProc(_frameSize);

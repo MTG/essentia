@@ -22,64 +22,61 @@
 
 #include "algorithm.h"
 
-namespace essentia
-{
-namespace standard
-{
+namespace essentia {
+namespace standard {
 
-class MedianFilter : public Algorithm
-{
+class MedianFilter : public Algorithm {
+  
+ private:
+  Input<std::vector<Real>> _array;
+  Output<std::vector<Real>> _filteredArray;
 
-  private:
-    Input<std::vector<Real>> _array;
-    Output<std::vector<Real>> _filteredArray;
+  int _kernelSize;
 
-    int _kernelSize;
+ public:
+  MedianFilter() {
+    declareInput(_array, "array", "the input array (must be non-empty)");
+    declareOutput(_filteredArray, "filteredArray",
+                  "the median-filtered input array");
+  }
 
-  public:
-    MedianFilter() {
-        declareInput(_array, "array", "the input array (must be non-empty)");
-        declareOutput(_filteredArray, "filteredArray", "the median-filtered input array");
-    }
+  void declareParameters() {
+    declareParameter(
+        "kernelSize",
+        "scalar giving the size of the median filter window. Must be odd",
+        "[1,inf)", 11);
+  }
 
-    void declareParameters() {
-        declareParameter("kernelSize", "scalar giving the size of the median filter window. Must be odd", "[1,inf)", 11);
-    }
+  void configure();
+  void compute();
 
-    void configure();
-    void compute();
-
-    static const char *name;
-    static const char *category;
-    static const char *description;
+  static const char *name;
+  static const char *category;
+  static const char *description;
 };
 
-} // namespace standard
-} // namespace essentia
+}  // namespace standard
+}  // namespace essentia
 
 #include "streamingalgorithmwrapper.h"
 
-namespace essentia
-{
-namespace streaming
-{
+namespace essentia {
+namespace streaming {
 
-class MedianFilter : public StreamingAlgorithmWrapper
-{
+class MedianFilter : public StreamingAlgorithmWrapper {
+ protected:
+  Sink<std::vector<Real>> _array;
+  Source<std::vector<Real>> _filteredArray;
 
-  protected:
-    Sink<std::vector<Real>> _array;
-    Source<std::vector<Real>> _filteredArray;
-
-  public:
-    MedianFilter() {
-        declareAlgorithm("MedianFilter");
-        declareInput(_array, TOKEN, "array");
-        declareOutput(_filteredArray, TOKEN, "filteredArray");
-    }
+ public:
+  MedianFilter() {
+    declareAlgorithm("MedianFilter");
+    declareInput(_array, TOKEN, "array");
+    declareOutput(_filteredArray, TOKEN, "filteredArray");
+  }
 };
 
-} // namespace streaming
-} // namespace essentia
+}  // namespace streaming
+}  // namespace essentia
 
-#endif // ESSENTIA_MEDIANFILTER_H
+#endif  // ESSENTIA_MEDIANFILTER_H
