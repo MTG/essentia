@@ -58,7 +58,45 @@ class TestDiscontinuityDetector(TestCase):
             input = waveTable * repetitions
             self.assertEqualVector(
                 self.InitDiscontinuityDetector()(esarr(input))[0], esarr([]))
-                
+
+    def testRegression(self, frameSize=512, hopSize=256):
+        fs = 44100
+
+        audio = MonoLoader(filename=join(testdata.audio_dir,
+                           'recorded/cat_purrrr.wav'),
+                           sampleRate=fs)()
+
+        originalLen = len(audio)
+        startJump = originalLen / 4
+        groundTruth = [startJump / float(fs)]
+
+        # make sure that the artificial jump produces a prominent discontinuity
+        if audio[startJump] > 0:
+            end = next(idx for idx, i in enumerate(audio[startJump:]) if i < -.3)
+        else:
+            end = next(idx for idx, i in enumerate(audio[startJump:]) if i > .3)
+
+        endJump = startJump + end
+        audio = esarr(numpy.hstack([audio[:startJump], audio[endJSump:]]))
+
+        frameList = []
+        discontinuityDetector = self.InitDiscontinuityDetector(
+                                    frameSize=frameSize, hopSize=hopSize,
+                                    detectionThreshold=10)
+
+        for idx, frame in enumerate(FrameGenerator(
+                                    audio, frameSize=frameSize,
+                                    hopSize=hopSize, startFromZero=True)):
+            locs, _ = discontinuityDetector(frame)
+            if not len(locs) == 0:
+                for loc in locs:
+                    frameList.append((idx * hopSize + loc) / float(fs))
+
+        self.assertAlmostEqualVector(frameList, groundTruth, 1e-7)
+
+    def testNoOverlap(self):
+        # the algorithm should also work without overlapping
+        self.testRegresion(frameSize=512, hopSize=512)
 
     def testInvalidParam(self):
         self.assertConfigureFails(DiscontinuityDetector(), {'order': 0})
