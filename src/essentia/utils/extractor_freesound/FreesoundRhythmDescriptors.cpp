@@ -75,6 +75,11 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   source >> onset->input("signal");
   onset->output("onsetTimes") >> PC(pool, nameSpace + "onset_times");
   onset->output("onsetRate") >> PC(pool, nameSpace + "onset_rate"); 
+
+  // Loop BPM estimation
+  Algorithm* percivalBPM = factory.create("PercivalBpmEstimator");
+  source >> percivalBPM->input("signal");
+  percivalBPM->output("bpm") >> PC(pool, nameSpace + "bpm_loop");
 }
 
 void FreesoundRhythmDescriptors::createNetworkBeatsLoudness(SourceBase& source, Pool& pool){
