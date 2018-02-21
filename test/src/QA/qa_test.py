@@ -60,8 +60,9 @@ class QaTest:
     test_type = ''  # todo: restrict the possible values
     time_wrappers = True
     verbose = True
+    log = True
 
-    def __init__(self, test_type='numeric', wrappers=[], metrics=[], time_wrappers=True, verbose=False):
+    def __init__(self, test_type='numeric', wrappers=[], metrics=[], time_wrappers=True, verbose=False, log=True):
         """
 
         :param test_type: {value, values, events, hybrid, bool}
@@ -75,6 +76,7 @@ class QaTest:
         self.set_wrappers(wrappers)
         self.set_metrics(metrics)
         self.time_wrappers = time_wrappers
+        self.log = log
 
     def set_test_type(self, test_type):
         self.assert_test_type(test_type)
@@ -189,7 +191,7 @@ class QaTest:
         self.solutions[key_wrap, key_inst] = solution
         self.times[key_wrap, key_inst] = time
 
-    def compute_all(self):
+    def compute_all(self, output_file='compute.log'):
         for key_wrap, wrapper in self.wrappers.iteritems():
             for key_inst, instance in self.data.iteritems():
                 if self.time_wrappers:
@@ -197,7 +199,26 @@ class QaTest:
                 else:
                     self.compute(key_wrap, wrapper, key_inst, instance)
 
-    def compare_elapsed_times(self, output_file='stats.log'):
+        if self.log:
+            np.set_printoptions(precision=3)
+            final_text = []
+            for data_key in self.data.keys():
+                text = ['Results for: {}\n'.format(data_key)]
+                found_something = False
+                for wrapper_key in self.wrappers.keys():
+                    if self.solutions[(wrapper_key, data_key)].any():
+                        found_something = True
+                        text.append('Using {}:'.format(wrapper_key))
+                        text.append(str(self.solutions[(wrapper_key, data_key)]))
+                        text.append('\n')
+                if found_something:
+                    final_text.append(''.join(text))
+            with open(output_file, 'w') as o_file:
+                o_file.write(''.join(final_text))
+            if self.time_wrappers:
+                self.compare_elapsed_times(output_file=output_file, mode='a')
+
+    def compare_elapsed_times(self, output_file='stats.log', mode='a'):
         w_names = self.wrappers.keys()
         i_names = self.data.keys()
 
@@ -221,7 +242,7 @@ class QaTest:
         if self.verbose:
             print '\n'.join(text)
 
-        with open(output_file, 'a') as o_file:
+        with open(output_file, mode) as o_file:
             o_file.write('\n'.join(text))
 
     def score(self, key_wrap, key_inst, solution, key_metric, metric, gt):
@@ -272,6 +293,52 @@ class QaTest:
         with open('{}.pkl'.format(output_file), 'wb') as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
 
+    def remove_wrapper(self, name):
+        if name in self.wrappers:
+            del self.wrappers[name]
+        else:
+            print 'No wrapper named {} found'.format(name)
+
+    def clear_wrappers(self):
+        self.wrappers.clear()
+
+    def remove_solution(self, name):
+        if name in self.solutions:
+            del self.solutions[name]
+        else:
+            print 'No solution named {} found'.format(name)
+
+    def clear_solutions(self, wrapper=''):
+        if wrapper is '':
+            self.solutions.clear()
+        else:
+            if wrapper in self.wrappers:
+                names = self.filter(self.solutions.keys(), 0, wrapper)
+                for name in names:
+                    self.remove_solution(name)
+            else:
+                print 'No wrapper named {} found'.format(wrapper)
+
+    def remove_scores(self, name):
+        if name in self.scores:
+            del self.solutions[name]
+        else:
+            print 'No score named {} found'.format(name)
+
+    def clear_scores(self, wrapper='', metric=''):
+        if wrapper is '' and metric is '':
+            self.solutions.clear()
+        else:
+            names = self.solutions.keys()
+            if wrapper in self.wrappers:
+                names = self.filter(names, 0, wrapper)
+
+            if metric in self.metrics:
+                names = self.filter(names, 2, metric)
+
+            for name in names:
+                self.remove_solution(name)
+
     @staticmethod
     def load_test(input_file):
         import pickle
@@ -299,6 +366,15 @@ class QaTest:
         for metric in metrics:
             if not isinstance(metric, QaMetric):
                 raise EssentiaException('Metrics should be wrapped in a QaMetric object')
+
+    @staticmethod
+    def filter(tuples, pos, patt):
+        aux = [idx for idx, x in enumerate(tuples) if x[pos] == patt]
+        filtered = []
+
+        for idx in aux:
+            filtered.append(tuples[idx])
+        return filtered
 
 
 class QaWrapper:
