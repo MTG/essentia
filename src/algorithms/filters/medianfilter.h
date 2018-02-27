@@ -41,10 +41,7 @@ class MedianFilter : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter(
-        "kernelSize",
-        "scalar giving the size of the median filter window. Must be odd",
-        "[1,inf)", 11);
+    declareParameter("kernelSize", "scalar giving the size of the median filter window. Must be odd", "[1,inf)", 11);
   }
 
   void configure();
@@ -79,4 +76,4 @@ class MedianFilter : public StreamingAlgorithmWrapper {
 }  // namespace streaming
 }  // namespace essentia
 
-#endif  // ESSENTIA_MEDIANFILTER_H
+#endif // ESSENTIA_MEDIANFILTER_H
