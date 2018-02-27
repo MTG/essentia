@@ -46,6 +46,7 @@ void GapsDetector::configure() {
   _prepowerThreshold =
       pow(db2amp(parameter("prepowerThreshold").toReal()), 2.f);
   _prepowerTime = parameter("prepowerTime").toFloat() / 1000.f;
+  _postpowerTime = parameter("postpowerTime").toFloat() / 1000.f;
   _minimumTime = parameter("minimumTime").toFloat() / 1000.f;
   _maximumTime = parameter("maximumTime").toFloat() / 1000.f;
 
@@ -53,6 +54,7 @@ void GapsDetector::configure() {
   _envelope->configure(INHERIT("attackTime"), INHERIT("releaseTime"));
 
   _prepowerSamples = _prepowerTime * _sampleRate;
+  _postpowerSamples = _postpowerTime * _sampleRate;
 
   _updateSize = std::min(_hopSize, _prepowerSamples);
 
@@ -170,7 +172,7 @@ void GapsDetector::compute() {
       Real prepower = instantPower(lBuffer);
       if (prepower > _prepowerThreshold) {
         _gaps.push_back(gap{
-            _prepowerSamples,
+            _postpowerSamples,
             (Real)((offset + dFlanks[i]) / _sampleRate),
             0,
             true,
@@ -186,13 +188,13 @@ void GapsDetector::compute() {
     int offset = _frameCount * _hopSize;
     for (uint i = 0; i < uFlanks.size(); i++) {
       uint remaining =
-          std::max((int)(_prepowerSamples + uFlanks[i] - _frameSize), 0);
+          std::max((int)(_postpowerSamples + uFlanks[i] - _frameSize), 0);
       for (uint j = 0; j < _gaps.size(); j++) {
         if (_gaps[j].active) {
           _gaps[j].active = false;
           _gaps[j].end = (Real)((offset + uFlanks[i]) / _sampleRate);
           _gaps[j].remaining = remaining;
-          uint last = std::min(_frameSize, uFlanks[i] + _prepowerSamples);
+          uint last = std::min(_frameSize, uFlanks[i] + _postpowerSamples);
           std::vector<Real> rBuffer(last - uFlanks[i], 0.f);
           uint l = 0;
           _gaps[j].rBuffer.resize(_frameSize - uFlanks[i]);

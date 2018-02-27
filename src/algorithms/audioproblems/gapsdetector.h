@@ -40,13 +40,13 @@ class GapsDetector : public Algorithm {
   };
 
   uint _frameSize, _hopSize;
-  uint _prepowerSamples;
+  uint _prepowerSamples, _postpowerSamples;
   uint _updateSize;
   long _frameCount;
   Real _sampleRate;
   Real _silenceThreshold;
   Real _prepowerThreshold;
-  Real _prepowerTime, _minimumTime, _maximumTime;
+  Real _prepowerTime, _postpowerTime, _minimumTime, _maximumTime;
   std::vector<Real> _lBuffer;
   std::vector<gap> _gaps;
 
@@ -74,6 +74,7 @@ class GapsDetector : public Algorithm {
         declareParameter("silenceThreshold", "silence threshold [dB]", "(-inf,inf)", -50.f);
         declareParameter("prepowerThreshold", "prepower threshold [dB]. ", "(-inf,inf)", -30.f);
         declareParameter("prepowerTime", "time for the prepower calculation [ms]", "(0,inf)", 40.f);
+        declareParameter("postpowerTime", "time for the postpower calculation [ms]", "(0,inf)", 40.f);
         declareParameter("minimumTime", "time of the minimum gap duration [ms]", "(0,inf)", 10.f);
         declareParameter("maximumTime", "time of the maximum gap duration [ms]", "(0,inf)", 3500.f);
         declareParameter("kernelSize", "scalar giving the size of the median filter window. Must be odd", "[1,inf)", 11);
