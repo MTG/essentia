@@ -27,12 +27,15 @@ namespace standard {
 
 const char* StartStopCut::name = "StartStopCut";
 const char* StartStopCut::category = "Audio Probelms";
-const char* StartStopCut::description =
-    DOC("This algorithm outputs if there is a cut on the beginning or in "
-        "the end of the audio by measuring the first and last non silent " 
-        "frames and comparing them to the actual beginning and end of the "
-        "audio. There are thresholds to set the number of allowed beginning "
-        "and end  silent frames.\n");
+const char* StartStopCut::description = DOC(
+    "This algorithm outputs if there is a cut at the beginning or at the end "
+    "of the audio by measuring the first and last non-silent frames and "
+    "comparing them to the actual beginning and end of the audio. If the first "
+    "non-silent frame occurs before a time threshold the beginning cut flag is "
+    "activated. The same applies to the stop cut flag.\n"
+    "\n"
+    "Note: This algorithm is designed to operate song-wise. Use it in "
+    "combination of RealAccumulator for the streaming mode.\n");
 
 void StartStopCut::configure() {
   _sampleRate = parameter("sampleRate").toReal();
@@ -51,15 +54,35 @@ void StartStopCut::compute() {
   int& startCut = _startCut.get();
   int& stopCut = _stopCut.get();
 
-  bool silentFrame;
-  uint sFrame, eFrame, nFrame;
   Real start, stop;
+  uint sFrame, eFrame;
+
+  // looks for the first non-silent frame
+  findNonSilentFrame(audio, sFrame);
+
+  
+  std::vector<Real> reversedAudio = audio;
+  std::reverse(reversedAudio.begin(), reversedAudio.end());
+
+  // looks for the last non-silent frame
+  findNonSilentFrame(reversedAudio, eFrame);
+
+  // sets the start/stop flags according to the thresholds
+  start = (Real)(_hopSize * sFrame) / _sampleRate;
+  stop = (Real)(_hopSize * eFrame) / _sampleRate;
+
+  (start < _maximumStartTime) ? startCut = true : startCut = false;
+  (stop < _maximumStopTime) ? stopCut = true : stopCut = false;
+}
+
+void StartStopCut::findNonSilentFrame(std::vector<Real> audio, uint &nonSilentFrame) {
   std::vector<Real> frame;
+  bool silentFrame;
+  uint nFrame = 0;
 
   _frameCutter->input("signal").set(audio);
   _frameCutter->output("frame").set(frame);
 
-  nFrame = 0;
   while (true) {
     _frameCutter->compute();
 
@@ -70,7 +93,7 @@ void StartStopCut::compute() {
 
     silentFrame = instantPower(frame) < _threshold;
     if (!silentFrame) {
-      sFrame = nFrame;
+      nonSilentFrame = nFrame;
       break;
     }
 
@@ -78,35 +101,6 @@ void StartStopCut::compute() {
   }
 
   _frameCutter->reset();
-  std::vector<Real> reversedAudio = audio;
-  std::reverse(reversedAudio.begin(), reversedAudio.end());
-
-  _frameCutter->input("signal").set(reversedAudio);
-  _frameCutter->output("frame").set(frame);
-
-  nFrame = 0;
-  while (true) {
-    _frameCutter->compute();
-
-    // if it was the last one (ie: it was empty), then we're done.
-    if (!frame.size()) {
-      break;
-    }
-
-    silentFrame = instantPower(frame) < _threshold;
-    if (!silentFrame) {
-      eFrame = nFrame;
-      break;
-    }
-
-    nFrame++;
-  }
-
-  start = (Real)(_hopSize * sFrame) / _sampleRate;
-  stop = (Real)(_hopSize * eFrame) / _sampleRate;
-
-  (start < _maximumStartTime) ? startCut = true : startCut = false;
-  (stop < _maximumStopTime) ? stopCut = true : stopCut = false;
 }
 
 }  // namespace standard

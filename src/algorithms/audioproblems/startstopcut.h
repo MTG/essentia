@@ -45,8 +45,8 @@ class StartStopCut : public Algorithm {
  public:
   StartStopCut() {
     declareInput(_audio, "audio", "the input audio ");
-    declareOutput(_startCut, "startCut", "true if there is a cut at the begining of the audio");
-    declareOutput(_stopCut, "stopCut", "true if there is a cut at the end of the audio");
+    declareOutput(_startCut, "startCut", "1 if there is a cut at the begining of the audio");
+    declareOutput(_stopCut, "stopCut", "1 if there is a cut at the end of the audio");
     
     _frameCutter = AlgorithmFactory::create("FrameCutter");
   }
@@ -57,15 +57,16 @@ class StartStopCut : public Algorithm {
 
   void declareParameters() {
     declareParameter("sampleRate", "the sample rate", "(0,inf)", 44100.);
-    declareParameter("frameSize", "the output frame size", "[1,inf)", 256);
-    declareParameter("hopSize", "the hop size between frames", "[1,inf)", 256);
+    declareParameter("frameSize", "the frame size for the internal power analysis", "[1,inf)", 256);
+    declareParameter("hopSize", "the hop size for the internal power analysis", "[1,inf)", 256);
     declareParameter("threshold", "the threshold below which average energy is defined as silence [dB]", "(-inf,0])", -60);
-    declareParameter("maximumStartTime", "the maximum time from the begining to the start to be considered a cut [ms]", "[0,inf])", 10.0f);
-    declareParameter("maximumStopTime", "the maximum time from the stop to the end to be considered a cut [ms]", "[0,inf])", 10.0f);
+    declareParameter("maximumStartTime", "if the first non-silent frame occurs before maximumStartTime startCut is activated [ms]", "[0,inf])", 10.0f);
+    declareParameter("maximumStopTime", "if the last non-silent frame occurs after maximumStopTime to the end stopCut is activated [ms]", "[0,inf])", 10.0f);
   }
 
   void configure();
   void compute();
+  void findNonSilentFrame(std::vector<Real> audio, uint &nonSilentFrame); 
 
   static const char* name;
   static const char* category;
