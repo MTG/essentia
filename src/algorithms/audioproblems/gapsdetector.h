@@ -69,7 +69,7 @@ class GapsDetector : public Algorithm {
   }
     void declareParameters() {
         declareParameter("sampleRate", "sample rate used for the analysis", "(0,inf)", 44100.f);
-        declareParameter("frameSize", "frame size used for the analysis", "[0,inf)", 2048);
+        declareParameter("frameSize", "frame size used for the analysis. Should match the input frame size. Otherwise, an exception will be thrown", "[0,inf)", 2048);
         declareParameter("hopSize", "hop size used for the analysis", "[0,inf)", 1024);
         declareParameter("silenceThreshold", "silence threshold [dB]", "(-inf,inf)", -50.f);
         declareParameter("prepowerThreshold", "prepower threshold [dB]. ", "(-inf,inf)", -30.f);

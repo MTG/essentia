@@ -24,7 +24,7 @@ using namespace essentia;
 using namespace standard;
 
 const char *GapsDetector::name = "GapsDetector";
-const char *GapsDetector::category = "AudioProblems";
+const char *GapsDetector::category = "Audio Problems";
 const char *GapsDetector::description = DOC("This algorithm uses energy "
     "and time thresholds to detect gaps in the waveform. A median filter "
     "is used to remove spurious silent samples. The power of a small "
@@ -60,7 +60,8 @@ void GapsDetector::configure() {
 
   if (_frameSize < _hopSize)
     throw(EssentiaException(
-        "hopSize has to be smaller or equal than the input size"));
+        "sampleRate: hopSize has to be smaller or equal than the input "
+        "frame size"));
 
   _frameCount = 0;
   _lBuffer.assign(_prepowerSamples, 0.f);
@@ -76,9 +77,10 @@ void GapsDetector::compute() {
   // resizing as probably the hop size is mismatching too.
   if (_frameSize != frame.size())
     throw(
-        EssentiaException("frameSize is not matching the actual input size. "
-                          "Please make sure frameSize, hopSize and sampleRate "
-                          "are properly set so the output units make sense."));
+        EssentiaException("GapsDetector: frameSize is not matching the actual "
+                          "input size. Please make sure frameSize, hopSize and "
+                          "sampleRate are properly set so the output units "
+                          "make sense."));
 
   // fill the right buffer for each gap candidate
   for (uint i = 0; i < _gaps.size(); i++) {
