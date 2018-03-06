@@ -77,7 +77,7 @@ class TestDiscontinuityDetector(TestCase):
             end = next(idx for idx, i in enumerate(audio[startJump:]) if i > .3)
 
         endJump = startJump + end
-        audio = esarr(numpy.hstack([audio[:startJump], audio[endJSump:]]))
+        audio = esarr(numpy.hstack([audio[:startJump], audio[endJump:]]))
 
         frameList = []
         discontinuityDetector = self.InitDiscontinuityDetector(
@@ -96,7 +96,7 @@ class TestDiscontinuityDetector(TestCase):
 
     def testNoOverlap(self):
         # the algorithm should also work without overlapping
-        self.testRegresion(frameSize=512, hopSize=512)
+        self.testRegression(frameSize=512, hopSize=512)
 
     def testInvalidParam(self):
         self.assertConfigureFails(DiscontinuityDetector(), {'order': 0})
