@@ -23,7 +23,7 @@ using namespace essentia;
 using namespace standard;
 
 const char *DiscontinuityDetector::name = "DiscontinuityDetector";
-const char *DiscontinuityDetector::category = "AudioProblems";
+const char *DiscontinuityDetector::category = "Audio Problems";
 const char *DiscontinuityDetector::description =
     DOC("This algorithm uses LPC and some heuristics to detect discontinuities "
         "in an audio signal. [1].\n"
@@ -47,20 +47,20 @@ void DiscontinuityDetector::configure() {
 
   if (_frameSize <= _order)
     throw(
-        EssentiaException("the size of the input array has to be smaller than "
-                          "the number of LPC coefficientes"));
+        EssentiaException("DiscontinuityDetector: the number of LPC coefficientes has to be smaller "
+                          "than the size of the input frame"));
 
   if (_frameSize < _hopSize)
     throw(EssentiaException(
-        "hopSize has to be smaller or equal than the input size"));
+        "DiscontinuityDetector: hopSize has to be smaller or equal than the input frame size"));
 
   if (_frameSize < _kernelSize)
     throw(EssentiaException(
-        "kernelSize has to be smaller or equal than the input size"));
+        "DiscontinuityDetector: kernelSize has to be smaller or equal than the input frame size"));
 
   if (_frameSize < _subFrameSize)
     throw(EssentiaException(
-        "subFrameSize has to be smaller than the input size"));
+        "DiscontinuityDetector: subFrameSize has to be smaller than the input frame size"));
 }
 
 void DiscontinuityDetector::compute() {
@@ -75,19 +75,19 @@ void DiscontinuityDetector::compute() {
 
   if (inputSize <= _order)
     throw(
-        EssentiaException("the size of the input array has to be smaller than "
-                          "the number of LPC coefficientes"));
+        EssentiaException("DiscontinuityDetector: the number of LPC coefficientes has to be smaller "
+                          "than the size of the input frame"));
 
   if (inputSize < _hopSize)
-    throw(EssentiaException("hopSize has to be smaller than the input size"));
+    throw(EssentiaException("DiscontinuityDetector: hopSize has to be smaller than the input frame size"));
 
   if (inputSize < _kernelSize)
     throw(
-        EssentiaException("kernelSize has to be smaller than the input size"));
+        EssentiaException("DiscontinuityDetector: kernelSize has to be smaller than the input frame size"));
 
   if (inputSize < _subFrameSize)
     throw(EssentiaException(
-        "subFrameSize has to be smaller than the input size"));
+        "DiscontinuityDetector: subFrameSize has to be smaller than the input frame size"));
 
   if (inputSize != _frameSize) {
     _frameSize = inputSize;
@@ -109,7 +109,7 @@ void DiscontinuityDetector::compute() {
   _windowing->output("frame").set(frameProc);
   _windowing->compute();
 
-  absNormalize(frameProc);
+  normalizeAbs(frameProc);
 
   std::vector<Real> lpc_coeff;
   std::vector<Real> reflection_coeff;

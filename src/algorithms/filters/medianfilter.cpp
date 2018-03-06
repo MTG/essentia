@@ -37,7 +37,7 @@ void MedianFilter::configure() {
   _kernelSize = parameter("kernelSize").toInt();
 
   if (_kernelSize % 2 != 1)
-    throw(EssentiaException("kernelSize has to be odd"));
+    throw(EssentiaException("MedianFilter: kernelSize has to be odd"));
 }
 
 void MedianFilter::compute() {

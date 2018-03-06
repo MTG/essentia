@@ -65,8 +65,8 @@ class DiscontinuityDetector : public Algorithm {
 
     void declareParameters() {
         declareParameter("order", "scalar giving the number of LPCs to use", "[1,inf)", 3);
-        declareParameter("frameSize", "frame size used for the analysis. Only discontinuities outside the overlapped areas are returned", "[0,inf)", 512);
-        declareParameter("hopSize", "hop size used for the analysis. Only discontinuities outside the overlapped areas are returned", "[0,inf)", 256);
+        declareParameter("frameSize", "the expected size of the input audio signal (this is an optional parameter to optimize memory allocation)", "(0,inf)", 512);
+        declareParameter("hopSize", "hop size used for the analysis. This parameter must be set correctly as it cannot be obtained from the input data", "[0,inf)", 256);
         declareParameter("kernelSize", "scalar giving the size of the median filter window. Must be odd", "[1,inf)", 7);
         declareParameter("detectionThreshold", "'detectionThreshold' times the standard deviation plus the median of the frame is used as detection threshold", "[1,inf)", 8.f);
         declareParameter("energyThreshold", "threshold in dB to detect silent subframes", "(-inf,inf)", -60.f);
