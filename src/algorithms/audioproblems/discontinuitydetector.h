@@ -46,20 +46,6 @@ class DiscontinuityDetector : public Algorithm {
     Algorithm* _LPC;
     Algorithm* _windowing;
 
-    // normalize to the max(abs(array))
-    template <typename T> void absNormalize(std::vector<T>& array) {
-      if (array.empty()) return;
-      std::vector<T> absArray = array;
-      rectify(absArray);
-      T maxElement = *std::max_element(absArray.begin(), absArray.end());
-
-      if (maxElement != (T) 0.0) {
-        for (uint i=0; i<array.size(); i++) {
-          array[i] /= maxElement;
-        }
-      }
-    }
-
   public:
     DiscontinuityDetector() {
         declareInput(_frame, "frame", "the input frame (must be non-empty)");

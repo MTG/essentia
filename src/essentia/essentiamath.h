@@ -667,6 +667,20 @@ template <typename T> void normalize(std::vector<T>& array) {
   }
 }
 
+// normalize to the max(abs(array))
+template <typename T> void normalizeAbs(std::vector<T>& array) {
+  if (array.empty()) return;
+  std::vector<T> absArray = array;
+  rectify(absArray);
+  T maxElement = *std::max_element(absArray.begin(), absArray.end());
+
+  if (maxElement != (T) 0.0) {
+    for (uint i=0; i<array.size(); i++) {
+      array[i] /= maxElement;
+    }
+  }
+}
+
 // normalize a vector so it's sum is equal to 1. the vector is not touched if
 // it contains negative elements or the sum is zero
 template <typename T> void normalizeSum(std::vector<T>& array) {
