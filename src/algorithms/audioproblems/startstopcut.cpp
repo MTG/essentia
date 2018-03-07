@@ -26,7 +26,7 @@ namespace essentia {
 namespace standard {
 
 const char* StartStopCut::name = "StartStopCut";
-const char* StartStopCut::category = "Audio Probelms";
+const char* StartStopCut::category = "Audio Problems";
 const char* StartStopCut::description = DOC(
     "This algorithm outputs if there is a cut at the beginning or at the end "
     "of the audio by measuring the first and last non-silent frames and "
