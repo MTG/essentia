@@ -60,7 +60,7 @@ void GapsDetector::configure() {
 
   if (_frameSize < _hopSize)
     throw(EssentiaException(
-        "sampleRate: hopSize has to be smaller or equal than the input "
+        "GapsDetector: hopSize has to be smaller or equal than the input "
         "frame size"));
 
   _frameCount = 0;
