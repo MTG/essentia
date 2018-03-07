@@ -51,6 +51,11 @@ void StartStopCut::configure() {
   _maximumStopTime = parameter("maximumStopTime").toReal() / 1000.f;
   _threshold = db2pow(parameter("threshold").toReal());
 
+  if (_frameSize < _hopSize)
+    throw(EssentiaException(
+        "StartStopCut: hopSize has to be smaller or equal than the input "
+        "frame size"));
+
   _frameCutter->configure(INHERIT("frameSize"), INHERIT("hopSize"),
                           INHERIT("frameSize"), "startFromZero", true);
 };
