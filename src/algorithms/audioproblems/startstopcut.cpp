@@ -34,8 +34,14 @@ const char* StartStopCut::description = DOC(
     "non-silent frame occurs before a time threshold the beginning cut flag is "
     "activated. The same applies to the stop cut flag.\n"
     "\n"
-    "Note: This algorithm is designed to operate song-wise. Use it in "
-    "combination of RealAccumulator for the streaming mode.\n");
+    "Notes: This algorithm is designed to operate file-wise. Use it in "
+    "combination of RealAccumulator on the streaming mode.\n"
+    "The encoding/decoding process of lossy formats can introduce some padding "
+    "at the beginning/end of the file. E.g. an MP3 file encoded and decoded "
+    "with LAME using the default parameters will introduce a delay of 1104 "
+    "samples [http://lame.sourceforge.net/tech-FAQ.txt]. In this case, the "
+    "maximumStartTime can be increased by 1104 ÷ 44100 × 1000 = 25 ms to "
+    "prevent misdetections.\n");
 
 void StartStopCut::configure() {
   _sampleRate = parameter("sampleRate").toReal();
