@@ -155,9 +155,9 @@ void AudioLoader::closeAudioFile() {
     }
 
     // Close the codec
-    if (!_audioCtx) avcodec_close(_audioCtx);
+    if (_audioCtx) avcodec_close(_audioCtx);
     // Close the audio file
-    if (!_demuxCtx) avformat_close_input(&_demuxCtx);
+    if (_demuxCtx) avformat_close_input(&_demuxCtx);
 
     // free AVPacket
     // TODO: use a variable for whether _packet is initialized or not

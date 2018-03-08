@@ -44,6 +44,7 @@ NumPy: Copyright © 2005-2012, NumPy Developers, Project page at http://www.nump
 
 LibYAML under the MIT license, with Project page at http://pyyaml.org/wiki/LibYAML
 
+libchromaprint under the GNU Lesser General Public License 2.1
 
 WRITTEN OFFER
 If you would like a copy of the GPL or LGPL source code contained in this product, please contact mtg@upf.edu. If you have

@@ -47,10 +47,7 @@ void usage(char *progname) {
 
 int essentia_main(string audioFilename, string outputFilename, string profileFilename) {
   // Returns: 1 on essentia error
-  //          2 if there are no tags in the file
-  // TODO: is 2 recieved?
 
-  int result;
   try {
     essentia::init();
 
@@ -84,8 +81,7 @@ int essentia_main(string audioFilename, string outputFilename, string profileFil
     cerr << e.what() << endl;
     return 1;
   }
-  return result;
-
+  return 0;
 }
 
 #ifdef _WIN32

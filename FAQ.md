@@ -270,6 +270,8 @@ g++ -pipe -Wall -O2 -fPIC -I/usr/local/include/essentia/ -I/usr/local/include/es
 
 Alternatively, if you want to create and build your own examples, the easiest way is to add them to ```src/examples``` folder, modify ```src/examples/wscript``` file accordingly and use ```./waf configure --with-examples; ./waf``` to build them.
 
+If you would also like to use [waf](https://waf.io/) in your application as we do, we provide an [example waf template using Essentia](https://github.com/MTG/essentia-project-template/).
+
 You can build your application using XCode (OSX) following [these steps](https://github.com/MTG/essentia/issues/58#issuecomment-38530548).
 
 

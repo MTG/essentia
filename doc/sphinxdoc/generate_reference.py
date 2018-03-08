@@ -376,7 +376,7 @@ and hence are not available in python.</p>
 
 
     # Convert python notebook tutorials to rst
-    subprocess.call(['jupyter', 'nbconvert', '../../src/examples/tutorial/*.ipynb', '--to', 'rst'])
+    subprocess.call(['jupyter', 'nbconvert', '../../src/examples/tutorial/*.ipynb', '--to', 'rst', '--output-dir', '.'])
 
 if __name__ == '__main__':
     write_algorithms_reference()

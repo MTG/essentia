@@ -102,6 +102,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 - J. Buhmann, B. Moens, V. Lorenzoni, and M. Leman. Shifting the Musical Beat to Influence Running Cadence. In European Society for Cognitive Sciences Of Music (ESCOM'17), 2017.
 
+- J. Buhmann. Effects of music-based biofeedback on walking and running. PhD Thesis, Ghent University, Belgium, 2017.
+
 ## Sound indexing, music production, and intelligent audio processing
 
 - H. Ordiales, M. L. Bruno. Sound recycling from public databases. In 12th International Audio Mostly Conference on Augmented and Participatory Sound and Music Experiences (AM’17), 2017.

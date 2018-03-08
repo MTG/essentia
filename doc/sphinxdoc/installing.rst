@@ -46,6 +46,7 @@ Essentia depends on (at least) the following libraries:
  - `TagLib <http://developer.kde.org/~wheeler/taglib.html>`_: for reading audio metadata tags *(optional)*
  - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
  - `Gaia <https://github.com/MTG/gaia>`_: for using SVM classifier models *(optional)*
+ - `Chromaprint <https://github.com/acoustid/chromaprint>`_: for audio fingerprinting *(optional)*
 
 All dependencies are optional, and some functionality will be excluded when a dependency is not found.
 
@@ -54,7 +55,7 @@ Installing dependencies on Linux
 
 You can install those dependencies on a Debian/Ubuntu system from official repositories using the command below::
 
-  sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev python-six
+  sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six
 
 In order to use python bindings for the library, you might also need to install python-dev, python-numpy-dev (or python-numpy on Ubuntu) and python-yaml for YAML support in python::
 
@@ -146,7 +147,7 @@ The waf build scripts are python scripts themselves. They will configure Essenti
 
 Running tests (optional)
 ------------------------
-If you want to assure that Essentia works correctly, do the tests.
+If you want to assure that Essentia works correctly, do the tests. Some of the tests require additional audio files, which are stored in a separate submodule repository `essentia-audio <https://github.com/MTG/essentia-audio>`_. Make sure to clone Essentia git repository including its submodules in order to be able to run the tests (``git clone --recursive https://github.com/MTG/essentia.git``).
 
 To run the C++ base unit tests (only test basic library behavior)::
 

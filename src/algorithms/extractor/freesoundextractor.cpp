@@ -26,7 +26,7 @@ namespace standard {
 
 const char* FreesoundExtractor::name = "FreesoundExtractor";
 const char* FreesoundExtractor::category = "Extractors";
-const char* FreesoundExtractor::description = DOC("This algorithm is a wrapper for Music Extractor");
+const char* FreesoundExtractor::description = DOC("This algorithm is a wrapper for FreesoundExtractor");
 
 
 FreesoundExtractor::FreesoundExtractor() {

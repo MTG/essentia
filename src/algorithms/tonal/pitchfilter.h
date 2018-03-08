@@ -89,7 +89,7 @@ class PitchFilter : public StreamingAlgorithmWrapper {
  protected:
   Sink<std::vector<Real> > _pitchConfidence;
   Sink<std::vector<Real> > _pitch;
-  Source<Real> _pitchFiltered;
+  Source<std::vector<Real> > _pitchFiltered;
 
  public:
   PitchFilter() {

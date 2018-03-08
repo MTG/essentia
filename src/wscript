@@ -6,7 +6,7 @@ from __future__ import print_function
 import sys
 import os.path
 
-dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw']
+dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
 
 def options(ctx):
     ctx.add_option('--with-python', action='store_true',
@@ -50,7 +50,7 @@ def options(ctx):
 def debian_version():
     try:
         v = open('/etc/debian_version').read().strip()
-        return [ int(n) for n in v.split('.') ]
+        return [int(n) for n in v.split('.')]
     except IOError:
         return []
     except ValueError:
@@ -138,12 +138,17 @@ def configure(ctx):
         ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
                       args=check_cfg_args, mandatory=False)
 
+    if 'libchromaprint' in ctx.env.WITH_LIBS_LIST:
+        ctx.check_cfg(package='libchromaprint', uselib_store='LIBCHROMAPRINT',
+                      args=['--cflags', '--libs'], mandatory=False)
+
+
     if ctx.env.WITH_GAIA:
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
                       args=check_cfg_args, mandatory=True)
 
     # needed by ffmpeg for the INT64_C macros
-    ctx.env.DEFINES += [ '__STDC_CONSTANT_MACROS' ]
+    ctx.env.DEFINES += ['__STDC_CONSTANT_MACROS']
 
     if ctx.env.WITH_EXAMPLES or ctx.env.EXAMPLES or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
@@ -165,7 +170,7 @@ def configure(ctx):
     algos = ['FFT']
     if 'ACCELERATE' in ctx.env.FFT:
         print('- using Accelerate Framework for FFT\n')
-        ctx.env.LINKFLAGS += [ '-framework', 'Accelerate']
+        ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
         ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
     elif 'KISS' in ctx.env.FFT:
         print('- using KISS for FFT\n')
@@ -242,12 +247,26 @@ def configure(ctx):
         print('  Examples requiring Gaia2 will be ignored\n')
         ctx.env.ALGOIGNORE += algos
 
+    algos = [ 'Chromaprinter' ]
+    if has('libchromaprint'):
+        print('- Chromaprint detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
+        ctx.env.USES += ' LIBCHROMAPRINT'
+    else:
+        print('- Essentia is configured without Chromaprint.')
+        print('  The following algorithms will be ignored: %s' % algos)
+        ctx.env.ALGOIGNORE += algos 
+
     lel = len(ctx.env.EXAMPLE_LIST)
     if lel:
         print('- Compiling %s example%s' % (lel, "" if lel == 1 else "s"))
         print('  %s' % ", ".join(ctx.env.EXAMPLE_LIST))
 
-    buildRegFile(ctx);
+    algos = buildRegFile(ctx)
+
+    if ctx.env.WITH_PYTHON:
+        if 'FileOutputProxy' not in algos:
+            raise ctx.errors.ConfigurationError("FileOutputProxy algorithm is necessary for python bindings, however it was excluded. Please, reconfigure including this algorithm.")
 
     print('\n' + '-' * 87)
 
@@ -301,7 +320,7 @@ def buildRegFile(ctx):
             algos_included[alg] = algos[alg]
         algos = algos_included
         if algos_not_found:
-            print ('Warning: the following algorithms could not be found: %s' % ', '.join(algos_not_found))
+            print('Warning: the following algorithms could not be found: %s' % ', '.join(algos_not_found))
         print('Building the following algorithms: %s' % ', '.join(algos.keys()))
     else:
         print('Building all the algorithms')
@@ -335,7 +354,7 @@ def build(ctx):
     # add essentia root folder to path to be able to import utils.algorithms_info
     sys.path = [ctx.path.find_dir('..')] + sys.path
 
-    algos = buildRegFile(ctx);
+    algos = buildRegFile(ctx)
 
     sources = ctx.path.ant_glob('essentia/**/*.cpp')
 
@@ -371,6 +390,19 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/kiss_fft.c') ]
         sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/tools/kiss_fftr.c') ]
 
+    # Add Chromaprint Dependancy stuff 
+    """
+    if 'CHROMAPRINT' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/chromaprint-1.4.2/src' ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/chromaprint.cpp') ]
+
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprint_compressor.cpp') ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprint_decompressor.cpp') ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprint_matcher.cpp') ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
+        sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
+	"""
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
