@@ -134,15 +134,15 @@ def testMaxFreq(signals):
     Html_file.close()
     os.chdir('..')
     
-def testJordiNL(signals):
-    # 'test3': 'Jordi non-linear filtering',
+def testNonLinearPostProcessing(signals):
+    # 'test3': 'non-linear post-processing (nonLinear parameter)',
     testKey = 'testJordiNL'
     testTitle = testTitles[testKey]
     directory = testKey
     if not os.path.exists(directory):
         os.mkdir(directory)        
     os.chdir(directory)
-    # Comparison of Jordi non linear 
+    # Comparison of non-linear post-processing parameter
     NLList = [True, False]
     # Comparison of signals:
     signalkey = test2SignalsMapping[testKey]
