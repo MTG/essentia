@@ -29,17 +29,29 @@ class TestStartStopCut(TestCase):
     def InitStartStopCut(self, **kwargs):
         return StartStopCut(**kwargs)
 
+    # test different input sizes
     def testZero(self):
-        size = 1024
-        self.assertEqualVector(
-            self.InitStartStopCut(frameSize=size)(
-                esarr(numpy.zeros(size))), (0, 0))
+        size = 200000  # apx. 4.5s @ 44.1kHz
+        while size > 1000:
+            self.assertEqualVector(
+                self.InitStartStopCut()(
+                    esarr(numpy.zeros(size))), (0, 0))
+            size /= 2
 
     def testOnes(self):
+        size = 200000  # apx. 4.5s @ 44.1kHz
+        while size > 1000:
+            self.assertEqualVector(
+                self.InitStartStopCut()(
+                    esarr(numpy.ones(size))), (1, 1))
+            size /= 2
+
+    # if th input size is smaller that the detection thresholds plus a the
+    # size of a frame it should throw an Exception
+    def testInputTooShort(self):
         size = 1024
-        self.assertEqualVector(
-            self.InitStartStopCut(frameSize=size)(
-                esarr(numpy.ones(size))), (1, 1))
+        self.assertComputeFails(
+            StartStopCut(frameSize=size), esarr(numpy.ones(size)))
 
     def testRegression(self, frameSize=512, hopSize=256):
         fs = 44100.
