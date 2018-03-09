@@ -37,6 +37,7 @@ class StartStopCut : public Algorithm {
   Real _sampleRate;
   uint _hopSize, _frameSize;
   Real _maximumStartTime, _maximumStopTime;
+  uint _maximumStartSamples, _maximumStopSamples;
 
   Real _threshold;
 
@@ -66,7 +67,7 @@ class StartStopCut : public Algorithm {
 
   void configure();
   void compute();
-  void findNonSilentFrame(std::vector<Real> audio, uint &nonSilentFrame); 
+  void findNonSilentFrame(std::vector<Real> audio, int &nonSilentFrame, uint lastFrame);
 
   static const char* name;
   static const char* category;

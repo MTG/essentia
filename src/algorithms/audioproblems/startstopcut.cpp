@@ -29,13 +29,14 @@ const char* StartStopCut::name = "StartStopCut";
 const char* StartStopCut::category = "Audio Problems";
 const char* StartStopCut::description = DOC(
     "This algorithm outputs if there is a cut at the beginning or at the end "
-    "of the audio by measuring the first and last non-silent frames and "
-    "comparing them to the actual beginning and end of the audio. If the first "
-    "non-silent frame occurs before a time threshold the beginning cut flag is "
-    "activated. The same applies to the stop cut flag.\n"
+    "of the audio by locating the first and last non-silent frames and "
+    "comparing their positions to the actual beginning and end of the audio. "
+    "The input audio is considered to be cut at the beginning (or the end) and "
+    "the corresponding flag is activated if the first (last) non-silent frame "
+    "occurs before (after) the configurable time threshold.\n"
     "\n"
-    "Notes: This algorithm is designed to operate file-wise. Use it in "
-    "combination of RealAccumulator on the streaming mode.\n"
+    "Notes: This algorithm is designed to operate on the entire (file) audio. "
+    "In the streaming mode, use it in combination with RealAccumulator.\n"
     "The encoding/decoding process of lossy formats can introduce some padding "
     "at the beginning/end of the file. E.g. an MP3 file encoded and decoded "
     "with LAME using the default parameters will introduce a delay of 1104 "
@@ -56,6 +57,9 @@ void StartStopCut::configure() {
         "StartStopCut: hopSize has to be smaller or equal than the input "
         "frame size"));
 
+  _maximumStartSamples = (uint)(_maximumStartTime * _sampleRate) + _frameSize;  
+  _maximumStopSamples = (uint)(_maximumStopTime * _sampleRate) + _frameSize;  
+
   _frameCutter->configure(INHERIT("frameSize"), INHERIT("hopSize"),
                           INHERIT("frameSize"), "startFromZero", true);
 };
@@ -65,48 +69,48 @@ void StartStopCut::compute() {
   int& startCut = _startCut.get();
   int& stopCut = _stopCut.get();
 
-  Real start, stop;
-  uint sFrame, eFrame;
+  if (audio.size() < _maximumStartSamples)
+    throw(EssentiaException(
+        "StartStopCut: current maximumStartTime value requires at least ",
+        _maximumStartSamples, " samples, but the input file size is just ",
+        audio.size()));
+
+  if (audio.size() < _maximumStartSamples)
+    throw(EssentiaException(
+        "StartStopCut: current maximumStopTime value requires at least ",
+        _maximumStopSamples, " samples, but the input file size is just ",
+        audio.size()));
 
   // looks for the first non-silent frame
-  findNonSilentFrame(audio, sFrame);
+  findNonSilentFrame(audio, startCut, _maximumStartSamples / _hopSize);
 
   
-  std::vector<Real> reversedAudio = audio;
+  // gets a reversed version of the last _maximumStopTime ms of audio
+  std::vector<Real> reversedAudio(audio.end() - _maximumStopSamples, audio.end());
   std::reverse(reversedAudio.begin(), reversedAudio.end());
 
   // looks for the last non-silent frame
-  findNonSilentFrame(reversedAudio, eFrame);
-
-  // sets the start/stop flags according to the thresholds
-  start = (Real)(_hopSize * sFrame) / _sampleRate;
-  stop = (Real)(_hopSize * eFrame) / _sampleRate;
-
-  (start < _maximumStartTime) ? startCut = true : startCut = false;
-  (stop < _maximumStopTime) ? stopCut = true : stopCut = false;
+  findNonSilentFrame(reversedAudio, stopCut, _maximumStopSamples / _hopSize);
 }
 
-void StartStopCut::findNonSilentFrame(std::vector<Real> audio, uint &nonSilentFrame) {
+void StartStopCut::findNonSilentFrame(std::vector<Real> audio,
+                                      int& nonSilentFrame, uint lastFrame) {
   std::vector<Real> frame;
-  bool silentFrame;
   uint nFrame = 0;
 
   _frameCutter->input("signal").set(audio);
   _frameCutter->output("frame").set(frame);
 
-  while (true) {
+  while (nFrame < lastFrame) {
     _frameCutter->compute();
 
     // if it was the last one (ie: it was empty), then we're done.
-    if (!frame.size()) {
+    if (!frame.size())
       break;
-    }
 
-    silentFrame = instantPower(frame) < _threshold;
-    if (!silentFrame) {
-      nonSilentFrame = nFrame;
+    nonSilentFrame = instantPower(frame) > _threshold;
+    if (nonSilentFrame)
       break;
-    }
 
     nFrame++;
   }
