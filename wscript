@@ -81,6 +81,7 @@ def configure(ctx):
     ctx.env.STATIC_DEPENDENCIES  = ctx.options.STATIC_DEPENDENCIES
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
     ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
+    ctx.env.WITH_GAIA_QT5    = ctx.options.WITH_GAIA_QT5
     ctx.env.WITH_LIBS            = ctx.options.WITH_LIBS
     ctx.env.EXAMPLES             = ctx.options.EXAMPLES
     ctx.env.EXAMPLE_LIST         = []

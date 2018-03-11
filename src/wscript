@@ -33,6 +33,9 @@ def options(ctx):
     ctx.add_option('--with-gaia', action='store_true',
                    dest='WITH_GAIA', default=False,
                    help='build with Gaia support')
+    ctx.add_option('--with-gaia-qt5', action='store_true',
+                   dest='WITH_GAIA_QT5', default=False,
+                   help='build with Gaia Qt5 support')
     ctx.add_option('--lightweight', action='store',
                    dest='WITH_LIBS', default=False,
                    help='build lightweight version with specified dependencies (comma separated: =' + ','.join(dependencies_list) + ')')
@@ -236,7 +239,12 @@ def configure(ctx):
         ctx.env.ALGOIGNORE += algos
 
     algos = ['GaiaTransform', 'MusicExtractorSVM']
-    if ctx.env.WITH_GAIA:
+    if ctx.env.WITH_GAIA_QT5:
+        if has('gaia2'):
+            print('- Gaia2 detected!')
+            print('  The following algorithms will be included: %s\n' % algos)
+            ctx.env.USES += ' GAIA2'
+    elif ctx.env.WITH_GAIA:
         if has('gaia2'):
             print('- Gaia2 detected!')
             print('  The following algorithms will be included: %s\n' % algos)
@@ -402,7 +410,7 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
-	"""
+        """
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
@@ -423,8 +431,8 @@ def build(ctx):
         )
 
 
-    def write_pcfile(task):
-        open('build/essentia.pc', 'w').write(ctx.env.pcfile)
+def write_pcfile(task):
+    open('build/essentia.pc', 'w').write(ctx.env.pcfile)
 
     ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
     ctx.add_group()

@@ -6,9 +6,16 @@ build
 .sconsign.dblite
 *.idb
 *~
+.pro
+.pro.*
 .waf-*
 .lock-waf*
 buildw/
+
+# hide Qt Creator stuff
+*.pro
+*.pro.*
+build-*
 
 # hide the debian stuff
 build-arch-stamp

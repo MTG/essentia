@@ -20,7 +20,7 @@
 #ifndef ESSENTIA_CONFIG_H
 #define ESSENTIA_CONFIG_H
 
-#include "version.h"
+#include "../version.h"
 
 /**
  * Essentia version number.
