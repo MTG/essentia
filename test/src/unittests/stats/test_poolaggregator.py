@@ -26,10 +26,9 @@ class TestPoolAggregator(TestCase):
 
     def testAggregateReal(self):
         p = Pool({ 'foo': [ 1, 1, 2, 3, 5, 8, 13, 21, 34 ] })
-
-        pAgg = PoolAggregator(defaultStats=['mean', 'min', 'max', 'median', 'var', 'stdev', 'dmean', 'dvar', 'dmean2', 'dvar2'])
-
-        results = pAgg(p)
+        defaultStats=['mean', 'min', 'max', 'median', 'var', 'stdev', 'dmean', 'dvar', 'dmean2', 'dvar2', 'skew', 'kurt']
+        
+        results = PoolAggregator(defaultStats=defaultStats)(p)
 
         self.assertAlmostEqual(results['foo.mean'], 9.77777777778)
         self.assertAlmostEqual(results['foo.median'], 5)
@@ -41,6 +40,8 @@ class TestPoolAggregator(TestCase):
         self.assertAlmostEqual(results['foo.dvar'], 17.109375)
         self.assertAlmostEqual(results['foo.dmean2'], 1.85714285714)
         self.assertAlmostEqual(results['foo.dvar2'], 2.40816326531, 1e-6)
+        self.assertAlmostEqual(results['foo.skew'], 1.2540842294692993)
+        self.assertAlmostEqual(results['foo.kurt'], 0.34124279022216797)
 
 
     def testAggregateExceptions(self):
@@ -88,7 +89,7 @@ class TestPoolAggregator(TestCase):
         p.add('foo', [4.4, 5.5, 6.6])
         p.add('foo', [7.7, 8.8, 9.9])
 
-        defaultStats = ['mean', 'min', 'max', 'median', 'var', 'stdev', 'dmean', 'dvar', 'dmean2', 'dvar2']
+        defaultStats = ['mean', 'min', 'max', 'median', 'var', 'stdev', 'dmean', 'dvar', 'dmean2', 'dvar2', 'skew', 'kurt']
         results = PoolAggregator(defaultStats=defaultStats)(p)
 
         self.assertAlmostEqualVector(results['foo.mean'], [4.4, 5.5, 6.6])
@@ -101,7 +102,9 @@ class TestPoolAggregator(TestCase):
         self.assertAlmostEqualVector(results['foo.dvar'], [0]*3)
         self.assertAlmostEqualVector(results['foo.dmean2'], [0]*3, precision=1e-6)
         self.assertAlmostEqualVector(results['foo.dvar2'], [0]*3, precision=1e-6)
-  
+        self.assertAlmostEqualVector(results['foo.kurt'], [-1.5, -1.5, -1.5], precision=1e-6)
+        self.assertAlmostEqualVector(results['foo.skew'], [0., 0., 0.], precision=1e-6)
+
         # test median for even number of frames
         p.add('foo', [10.0, 10.0, 10.0])
         results = PoolAggregator(defaultStats=defaultStats)(p)
@@ -249,6 +252,17 @@ class TestPoolAggregator(TestCase):
         self.assertEqualMatrix(results['foo.bar.dvar'],[[0,0], [0,0]])
         self.assertEqualMatrix(results['foo.bar.dmean2'],[[0,0], [0,0]])
         self.assertEqualMatrix(results['foo.bar.dvar2'], [[0,0],[0,0]])
+
+
+    def testSkewKurtNanValue(self):
+        p = Pool( {'foo': [[0, 1, 2, 3, 4]]} )
+        
+        defaultStats = ['kurt', 'skew']
+        results = PoolAggregator(defaultStats=defaultStats)(p)
+        YamlOutput(filename = "/tmp/foo_pool.json", format = 'json')(results)
+
+        self.assertEqualVector(results['foo.skew'], [0, 0, 0, 0, 0])
+        self.assertEqualVector(results['foo.kurt'], [-3, -3, -3, -3, -3])
 
 
 suite = allTests(TestPoolAggregator)
