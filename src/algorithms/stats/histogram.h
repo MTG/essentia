@@ -39,7 +39,7 @@ class Histogram : public Algorithm {
 
 
  public:
-  Spectrum() {
+  Histogram() {
     declareInput(_array, "inputArray", "the input array (cannot contain negative values, and must be non-empty)");
     declareOutput(_histogramArray, "histogramArray", "Array formatted for histogrsam plots (bins and their respective frequencies)");
 
@@ -70,14 +70,14 @@ class Histogram : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class Spectrum : public StreamingAlgorithmWrapper {
+class Histogram : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<Real> > _inputArray;
   Source<std::vector<Real> > _histogramArray;
 
  public:
-  Spectrum() {
+  Histogram() {
     declareAlgorithm("Histogram");
     declareInput(_inputArray, TOKEN, "inputArray");
     declareOutput(_spectrum, TOKEN, "histogramArray");
