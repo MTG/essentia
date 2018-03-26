@@ -46,10 +46,10 @@ void Histogram::compute() {
 
   // normalze the array with the chosen mode
   if (normMode == "unit_sum"){
-    unitSumNorm(&inputArray);
+    Histogram::unitSumNorm(&inputArray);
   }
   else if (normMode == "unit_max") {
-    unitMaxNorm(&inputArray, maxRange);
+    Histogram::unitMaxNorm(&inputArray, maxRange);
   }
   else if (normMode == "None") {
   }
