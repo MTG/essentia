@@ -172,6 +172,8 @@ void connect(VectorInput<T>& v, SinkBase& sink) {
     visource.setReleaseSize(size);
   }
   connect(v.output("data"), sink);
+
+  v.setAcqireSize(size);
 }
 
 template <typename T>
