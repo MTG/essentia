@@ -80,7 +80,7 @@ class Histogram : public StreamingAlgorithmWrapper {
   Histogram() {
     declareAlgorithm("Histogram");
     declareInput(_inputArray, TOKEN, "inputArray");
-    declareOutput(_spectrum, TOKEN, "histogramArray");
+    declareOutput(_histogramArray, TOKEN, "histogramArray");
   }
 };
 
