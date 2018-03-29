@@ -105,6 +105,9 @@ class VectorInput : public Algorithm {
 
   void setAcqireSize(const int size) {
     _acquireSize = size;
+    
+    _output.setAcquireSize(_acquireSize);
+    _output.setReleaseSize(_acquireSize);
   }
 
   void reset() {
