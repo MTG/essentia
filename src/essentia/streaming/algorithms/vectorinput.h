@@ -171,12 +171,11 @@ void connect(VectorInput<T>& v, SinkBase& sink) {
   int size = sink.acquireSize();
   SourceBase& visource = v.output("data");
   if (visource.acquireSize() < size) {
-    visource.setAcquireSize(size);
-    visource.setReleaseSize(size);
+    v.setAcqireSize(size);
   }
   connect(v.output("data"), sink);
 
-  v.setAcqireSize(size);
+  
 }
 
 template <typename T>
