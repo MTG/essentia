@@ -21,6 +21,7 @@
 from essentia import *
 from essentia.utils import *
 from essentia.standard import *
+from essentia import array as esarr
 import numpy as np
 import os
 
@@ -36,7 +37,7 @@ def find_files(directory, pattern):
 
 
 test_types = [
-    'numeric',  # n-dimensional values. (e,g. MFCC)
+    'values',  # n-dimensional values. (e,g. MFCC)
     'events',  # detecting events (e.g, onsets)
     'hybrid',  # events with a value (e.g, peaks with amplitude)
     'bool',  # True/False test (e.g, presence of voice)
@@ -49,6 +50,7 @@ default_audio_types = ('wav', 'mp3', 'flac', 'ogg')  # To be extended
 class QaTest:
     wrappers = dict()
     data = dict()
+    routes = dict()
     metrics = dict()
 
     solutions = dict()
@@ -56,13 +58,13 @@ class QaTest:
     times = dict()
     scores = dict()
 
-    fs = 44100  # global fs for the test
+    fs = 44100.  # global fs for the test
     test_type = ''  # todo: restrict the possible values
     time_wrappers = True
     verbose = True
     log = True
 
-    def __init__(self, test_type='numeric', wrappers=[], metrics=[], time_wrappers=True, verbose=False, log=True):
+    def __init__(self, test_type='values', wrappers=[], metrics=[], time_wrappers=True, verbose=False, log=True):
         """
 
         :param test_type: {value, values, events, hybrid, bool}
@@ -91,7 +93,7 @@ class QaTest:
         if self.verbose:
             print 'Wrappers seem ok'
 
-    def load_audio(self, filename, pattern=default_audio_types):
+    def load_audio(self, filename, pattern=default_audio_types, stereo=False):
         """
         Uses Essentia MonoLoader to load the audio data. If filename is a folder it will look for all the `.extension` \
         files in the folder.
@@ -108,7 +110,14 @@ class QaTest:
         try:
             for f in files:
                 name = ''.join(os.path.basename(f).split('.')[:-1])
-                self.data[name] = MonoLoader(filename=f, sampleRate=self.fs)()
+                if stereo:
+                    audio, fs, _, _, _, _ = AudioLoader(filename=f)()
+                    if np.abs(fs - self.fs) > 1e-3:
+                        audio = Resample(inputSampleRate=fs, outputSampleRate=self.fs)(audio)
+                    self.data[name] = audio
+                else:
+                    self.data[name] = MonoLoader(filename=f, sampleRate=self.fs)()
+                self.routes[name] = f
         except IOError:
             if self.verbose:
                 print 'cannot open {}'.format(f)  # todo improve exception handling
@@ -182,12 +191,12 @@ class QaTest:
     def compute(self, key_wrap, wrapper, key_inst, instance):
         if self.verbose:
             print "Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap)
-        self.solutions[key_wrap, key_inst] = wrapper.compute(instance)
+        self.solutions[key_wrap, key_inst] = wrapper.compute(self, instance, key_inst, key_wrap)
 
     def compute_and_time(self, key_wrap, wrapper, key_inst, instance):
         if self.verbose:
             print "Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap)
-        solution, time = wrapper.compute_and_time(instance)
+        solution, time = wrapper.compute_and_time(self, instance, key_inst, key_wrap)
         self.solutions[key_wrap, key_inst] = solution
         self.times[key_wrap, key_inst] = time
 
