@@ -159,6 +159,18 @@ def configure(ctx):
     if ctx.env.WITH_PYTHON:
         ctx.recurse('python')
 
+    # Prebuilt dependencies on Windows contain pkg-config files with relative 
+    # include paths which won't work correctly in waf (TODO: why?). Convert to 
+    # absolute paths.
+    if sys.platform == 'win32':
+        includes = [key for key in ctx.env.keys() if key.startswith('INCLUDES_')]
+        for key in includes:
+            ctx.env[key] = [path if os.path.isabs(path) else os.path.abspath(path) for path in ctx.env[key]]
+
+        libs = [key for key in ctx.env.keys() if key.startswith('LIBPATH_') and key is not 'LIBPATH_ST']
+        for key in libs:
+            ctx.env[key] = [os.path.abspath(path) if path.startswith('packaging') else path for path in ctx.env[key]]
+
 
     # prepare the compilation environment using the detected libraries
     print()
@@ -172,12 +184,16 @@ def configure(ctx):
     # Select FFT algorithms
     algos = ['FFT']
     if 'ACCELERATE' in ctx.env.FFT:
-        print('- using Accelerate Framework for FFT\n')
+        print('- using Accelerate Framework for FFT')
         ctx.env.LINKFLAGS += [ '-framework', 'Accelerate']
-        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
+        ignore_fft_algos = ['ConstantQ',  'SpectrumCQ', 'Chromagram']
+        print('  The following algorithms will be ignored (fftw required): %s\n' % ignore_fft_algos)
+        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex'] + ignore_fft_algos
     elif 'KISS' in ctx.env.FFT:
-        print('- using KISS for FFT\n')
-        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
+        print('- using KISS for FFTW')
+        ignore_fft_algos = ['ConstantQ',  'SpectrumCQ', 'Chromagram']
+        print('  The following algorithms will be ignored (fftw required): %s\n' % ignore_fft_algos)
+        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex'] + ignore_fft_algos
     else:
         print('- using FFTW for FFT\n')
         if has('fftw'):
@@ -363,7 +379,8 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/kiss_fft.c') ]
         sources += [ ctx.path.find_resource('3rdparty/kiss_fft130/tools/kiss_fftr.c') ]
 
-    # Keep track of all source files just in case we want to compile python extension on Windows
+    # Keep track of all source files just in case we want to compile python 
+    # extension on Windows as we'll need them.
     ctx.env.ESSENTIA_SOURCES = sources
 
     if ctx.env.BUILD_STATIC:
@@ -390,7 +407,6 @@ def build(ctx):
     ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
     ctx.add_group()
 
-
     # install headers if asked to
     headers = ctx.path.ant_glob('essentia/**/*.h')
     for h in headers:
@@ -400,10 +416,7 @@ def build(ctx):
     ctx.install_files('${PREFIX}/include/essentia', 'version.h')
 
     # install pkgconfig file
-    #pc = ctx.path.ant_glob('essentia/build/essentia.pc') #TODO remove
-    #ctx.install_files('${PREFIX}/lib/pkgconfig', pc)     #TODO remove
     ctx.install_files('${PREFIX}/lib/pkgconfig', '../build/essentia.pc')
-
 
     if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
         ctx.recurse('examples')

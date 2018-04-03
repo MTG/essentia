@@ -41,17 +41,26 @@ def build(ctx):
                       # system python path
                       os.path.join(ctx.env.PYTHONDIR, 'numpy', 'core', 'include') ]
     if sys.platform == 'win32':
-        print("Sources:", ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp') + ctx.env.ESSENTIA_SOURCES)
-        print("Includes:", ctx.env.INCLUDES)
         pybindings = ctx.shlib(
-            source   = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp') + ctx.env.ESSENTIA_SOURCES,
-            target   = '_essentia',
+            source = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp') + ctx.env.ESSENTIA_SOURCES,
+            target = '_essentia',
             features = 'pyext',
             includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
             cxxflags = [ '-w' ],
             install_path = '${PYTHONDIR}/essentia',
-            use      = ctx.env.USES
+            use = ctx.env.USES
         )
+
+        # Install all required prebuilt dll dependencies
+        lib_paths = [path for key in ctx.env.keys() if key.startswith('LIBPATH_') 
+                          for path in ctx.env[key] if path.count('packaging\\win32_3rdparty')]
+
+        for path in lib_paths:
+            print(path)
+            ctx.install_files('${PYTHONDIR}/essentia',
+                              ctx.root.find_dir(path).ant_glob('*.dll'),
+                              relative_trick=False)
+
     else:
         pybindings = ctx.shlib(
             source   = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp'),

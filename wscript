@@ -84,7 +84,7 @@ def configure(ctx):
         # msvc does not support -pipe
         ctx.env.CXXFLAGS = ['-pipe', '-Wall']
     else:
-        ctx.env.CXXFLAGS = ['-W2', '-EHsc']
+        ctx.env.CXXFLAGS = ['-w', '-EHsc']
 
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
@@ -151,7 +151,15 @@ def configure(ctx):
         ctx.env.CXXFLAGS += ['-pthread']
 
     elif sys.platform == 'win32':
-        print ("Building on win32")
+        print ("→ Building on win32: search for pre-built dependencies in 'packaging/win32_3rdparty'")
+
+        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libsamplerate-0.1.8', 'taglib-1.11.1']  # 'libav-0.8.9'
+        libs_paths = ['packaging/win32_3rdparty/builds/' + lib + '/lib/pkgconfig' for lib in libs_3rdparty] 
+        os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
+
+        # ffmpeg
+        os.environ["PKG_CONFIG_PATH"] += ';packaging/win32_3rdparty/lib/pkgconfig'
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
         """
         # compile libgcc and libstd statically when using MinGW
@@ -164,11 +172,6 @@ def configure(ctx):
         tdm_bin = tdm_root + "/bin"
         tdm_include = tdm_root + "/include"
         tdm_lib = tdm_root + "/lib"
-
-        # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
-        # libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8']
-        # libs_paths = [';packaging\win32_3rdparty\\' + lib + '\lib\pkgconfig' for lib in libs_3rdparty]
-        # os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
 
         os.environ["PKG_CONFIG_PATH"] = tdm_root + '\lib\pkgconfig'
 
@@ -238,7 +241,7 @@ def configure(ctx):
         ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
     elif ctx.options.WITH_STATIC_EXAMPLES and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
-        print ("→ Compiling with static examples on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
+        print ("→ Compiling with static examples on Linux/OSX: search for pre-built dependencies in 'packaging/debian_3rdparty'")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
@@ -303,12 +306,19 @@ def run_tests(ctx):
 
 
 def run_python_tests(ctx):
-    # create a local python package folder
-    os.system('mkdir -p build/python')
-    os.system('cp -r src/python/essentia build/python/')
-    os.system('cp build/src/python/_essentia.so build/python/essentia')
+    print("Make sure to install Essentia library and python extension before running python tests")
+    ret = os.system('python test/src/unittest/all_tests.py')
 
-    ret = os.system('PYTHONPATH=build/python python test/src/unittest/all_tests.py')
+    # Some old code below attempts to create a local python package folder to run
+    # python tests without a need to run waf install first. It won't necessarily
+    # work if the extension in turn depends on the shared libessentia, unless
+    # Essentia library was build with --build-static flag, therefore commented.
+
+    #os.system('mkdir -p build/python')
+    #os.system('cp -r src/python/essentia build/python/')
+    #os.system('cp build/src/python/_essentia.so build/python/essentia')
+    #ret = os.system('PYTHONPATH=build/python python test/src/unittest/all_tests.py')
+
     if ret:
         ctx.fatal('failed to run python tests. Check test output')
 
