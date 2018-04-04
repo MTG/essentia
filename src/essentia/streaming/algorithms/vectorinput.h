@@ -103,7 +103,7 @@ class VectorInput : public Algorithm {
     _ownVector = own;
   }
 
-  void setAcqireSize(const int size) {
+  void setAcquireSize(const int size) {
     _acquireSize = size;
     
     _output.setAcquireSize(_acquireSize);
@@ -171,7 +171,7 @@ void connect(VectorInput<T>& v, SinkBase& sink) {
   int size = sink.acquireSize();
   SourceBase& visource = v.output("data");
   if (visource.acquireSize() < size) {
-    v.setAcqireSize(size);
+    v.setAcquireSize(size);
   }
   connect(v.output("data"), sink);
 
