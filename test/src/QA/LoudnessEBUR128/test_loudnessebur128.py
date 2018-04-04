@@ -29,10 +29,10 @@ class EssentiaWrap(QaWrapper):
     """
     Essentia Solution.
     """
-    def compute(self, *args):
+    algo = es.LoudnessEBUR128()
 
-        # stereo = es.StereoMuxer()(args[1], args[1])
-        outs = es.LoudnessEBUR128()(args[1])
+    def compute(self, *args):
+        outs = self.algo(args[1])
 
         integratedLoudness = outs[2]
         loudnessRange = outs[3]
