@@ -139,14 +139,16 @@ void AudioWriter::configure() {
   try {
     _writer->configure(INHERIT("filename"),
                        INHERIT("format"),
-                       INHERIT("sampleRate"));
+                       INHERIT("sampleRate"),
+                       INHERIT("bitrate"));
   }
-  catch (EssentiaException&) {
+  catch (EssentiaException& e) {
     // no file has been specified, do not do anything
     // we let the inner loader take care of correctness and sending a nice
     // error message if necessary
-    _configured = false;
-    return;
+    //_configured = false;
+    //return;
+    throw EssentiaException(e.what());
   }
 
   _configured = true;
