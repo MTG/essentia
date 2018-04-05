@@ -116,7 +116,7 @@ void ConstantQ::configure() {
   for (int k=_uK; k--; ) {
 
     // Compute a hamming window
-    hammingWindow.assign(_FFTLength, 0.0 + 0.0j);
+    hammingWindow.assign(_FFTLength, 0.0 + 0.0i);
     const int hammingLength = (int) ceil( _dQ * _sampleRate / ( _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave)));
     int origin = _FFTLength/2 - hammingLength/2;
 
