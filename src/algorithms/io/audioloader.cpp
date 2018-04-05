@@ -26,24 +26,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* AudioLoader::name = "AudioLoader";
-const char* AudioLoader::category = "Input/output";
-const char* AudioLoader::description = DOC("This algorithm loads the single audio stream contained in a given audio or video file. Supported formats are all those supported by the ffmpeg library including wav, aiff, flac, ogg and mp3.\n"
-"\n"
-"This algorithm will throw an exception if it was not properly configured which is normally due to not specifying a valid filename. Invalid names comprise those with extensions different than the supported  formats and non existent files. If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8\n\n"
-"Note: ogg files are decoded in reverse phase, due to be using ffmpeg library.\n"
-"\n"
-"References:\n"
-"  [1] WAV - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Wav\n"
-"  [2] Audio Interchange File Format - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Aiff\n"
-"  [3] Free Lossless Audio Codec - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Flac\n"
-"  [4] Vorbis - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Vorbis\n"
-"  [5] MP3 - Wikipedia, the free encyclopedia,\n"
-"      http://en.wikipedia.org/wiki/Mp3");
+const char* AudioLoader::name = essentia::standard::AudioLoader::name;
+const char* AudioLoader::category = essentia::standard::AudioLoader::category;
+const char* AudioLoader::description = essentia::standard::AudioLoader::description;
 
 
 AudioLoader::~AudioLoader() {
@@ -170,9 +155,9 @@ void AudioLoader::closeAudioFile() {
     }
 
     // Close the codec
-    if (!_audioCtx) avcodec_close(_audioCtx);
+    if (_audioCtx) avcodec_close(_audioCtx);
     // Close the audio file
-    if (!_demuxCtx) avformat_close_input(&_demuxCtx);
+    if (_demuxCtx) avformat_close_input(&_demuxCtx);
 
     // free AVPacket
     // TODO: use a variable for whether _packet is initialized or not
@@ -502,9 +487,24 @@ void AudioLoader::reset() {
 namespace essentia {
 namespace standard {
 
-const char* AudioLoader::name = essentia::streaming::AudioLoader::name;
-const char* AudioLoader::category = essentia::streaming::AudioLoader::category;
-const char* AudioLoader::description = essentia::streaming::AudioLoader::description;
+const char* AudioLoader::name = "AudioLoader";
+const char* AudioLoader::category = "Input/output";
+const char* AudioLoader::description = DOC("This algorithm loads the single audio stream contained in a given audio or video file. Supported formats are all those supported by the ffmpeg library including wav, aiff, flac, ogg and mp3.\n"
+"\n"
+"This algorithm will throw an exception if it was not properly configured which is normally due to not specifying a valid filename. Invalid names comprise those with extensions different than the supported  formats and non existent files. If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8\n\n"
+"Note: ogg files are decoded in reverse phase, due to be using ffmpeg library.\n"
+"\n"
+"References:\n"
+"  [1] WAV - Wikipedia, the free encyclopedia,\n"
+"      http://en.wikipedia.org/wiki/Wav\n"
+"  [2] Audio Interchange File Format - Wikipedia, the free encyclopedia,\n"
+"      http://en.wikipedia.org/wiki/Aiff\n"
+"  [3] Free Lossless Audio Codec - Wikipedia, the free encyclopedia,\n"
+"      http://en.wikipedia.org/wiki/Flac\n"
+"  [4] Vorbis - Wikipedia, the free encyclopedia,\n"
+"      http://en.wikipedia.org/wiki/Vorbis\n"
+"  [5] MP3 - Wikipedia, the free encyclopedia,\n"
+"      http://en.wikipedia.org/wiki/Mp3");
 
 
 void AudioLoader::createInnerNetwork() {

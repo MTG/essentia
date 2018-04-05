@@ -81,7 +81,7 @@ void BpmHistogramDescriptors::compute() {
 
   _histogram.get() = weights;
 
-  for (int i=0; i<numPeaks; ++i) {
+  for (int ip=0; ip<numPeaks; ++ip) {
   
     int idx = argmax(weights);
     Real peakBPM = idx;
@@ -96,21 +96,21 @@ void BpmHistogramDescriptors::compute() {
     int minIndex = max(idx - ((spreadWidth-1) / 2), 0);
     int maxIndex = min(idx + ((spreadWidth-1) / 2), int(weights.size())-1);
 
-    for (int i=minIndex; i<=maxIndex; ++i) {
-      peakSpread += weights[i];
-      weights[i] = 0.0;
+    for (int j=minIndex; j<=maxIndex; ++j) {
+      peakSpread += weights[j];
+      weights[j] = 0.0;
     }
   
     if (peakSpread > 0) {
       peakSpread = 1 - peakWeight / peakSpread;
     }
     
-    if (i==0) {
+    if (ip==0) {
       _firstPeakBPM.get() = peakBPM;
       _firstPeakWeight.get() = peakWeight;
       _firstPeakSpread.get() = peakSpread;
     }
-    else if (i==1) {
+    else if (ip==1) {
       _secondPeakBPM.get() = peakBPM;
       _secondPeakWeight.get() = peakWeight;
       _secondPeakSpread.get() = peakSpread;

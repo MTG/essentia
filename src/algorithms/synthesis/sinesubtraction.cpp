@@ -204,7 +204,7 @@ void SineSubtraction::createSynthesisWindow(std::vector<Real> &synwindow, int ho
 	synwindow.resize(winSize);
 	std::fill(synwindow.begin(), synwindow.end(), 0.);
 
-	int hN = winSize / 2;
+	//int hN = winSize / 2;
 
 	// first half of the windowed signal is the
 	// second half of the signal with windowing!

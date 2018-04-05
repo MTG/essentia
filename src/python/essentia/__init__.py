@@ -143,7 +143,7 @@ def run(gen):
     from essentia.streaming import VectorInput
     # catch this here as the actual type has not been determined yet so trying
     # run it here and now would result in an invalid pointer dereference...
-    if isinstance(gen, VectorInput) and not gen.connections.values()[0]:
+    if isinstance(gen, VectorInput) and not list(gen.connections.values())[0]:
         raise EssentiaError('VectorInput is not connected to anything...')
     return _essentia.run(gen)
 

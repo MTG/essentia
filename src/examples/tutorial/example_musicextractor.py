@@ -46,19 +46,19 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
 
     """
     if args.include and args.ignore and not set(args.include).isdisjoint(args.ignore):
-        print 'You cannot specify the same descriptor patterns in both 'include_descs' and --ignore flags'
+        print('You cannot specify the same descriptor patterns in both 'include_descs' and --ignore flags')
         sys.exit() # TODO return None instead in this function
     """
     if not output_json and not output_dir:
-        print "Error: Neither output json file nor output directory were specified."
+        print("Error: Neither output json file nor output directory were specified.")
         return
 
     if skip_analyzed and not output_dir:
-        print "--skip-analyzed can be only used together with --output-dir flag"
+        print("--skip-analyzed can be only used together with --output-dir flag")
         return
 
     if skip_analyzed and output_json:
-        print "--skip-analyzed cannot be used together with --output_json flag"
+        print("--skip-analyzed cannot be used together with --output_json flag")
         return
 
     if output_dir:
@@ -66,10 +66,10 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
 
     if not audio_types:
         audio_types = ['*.wav', '*.aiff', '*.flac', '*.mp3', '*.ogg']
-        print "Audio files extensions considered by default: " + ' '.join(audio_types)
+        print("Audio files extensions considered by default: " + ' '.join(audio_types))
     else:
-        print "Searching for audio files extensions: " + ' '.join(audio_types)
-    print
+        print("Searching for audio files extensions: " + ' '.join(audio_types))
+    print("")
 
     if profile:
         extractor = MusicExtractor(profile=profile)
@@ -88,20 +88,20 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
     errors = 0
     results = {}
     for audio_file in audio_files:
-        print "Analyzing", audio_file
+        print("Analyzing %s" % audio_file)
 
         if output_dir:
             sig_file = os.path.join(output_dir, audio_file)
             if skip_analyzed:
                 if os.path.isfile(sig_file + ".sig"):
-                    print "Found descriptor file for " + audio_file + ", skipping..."
+                    print("Found descriptor file for " + audio_file + ", skipping...")
                     continue
 
         try:
             poolStats, poolFrames = extractor(audio_file)
 
         except Exception, e:
-            print "Error processing", audio_file, ":", str(e)
+            print("Error processing", audio_file, ":", str(e))
             errors += 1
             continue
 
@@ -117,8 +117,8 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
             if not os.path.exists(folder):
                 os.makedirs(folder)
             elif os.path.isfile(folder):
-                print "Cannot create directory", folder
-                print "There exist a file with the same name. Aborting analysis."
+                print("Cannot create directory %s" % folder)
+                print("There exist a file with the same name. Aborting analysis.")
                 sys.exit()
 
             output = YamlOutput(filename=sig_file+'.sig')
@@ -131,7 +131,7 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
 
     # save to json
     if output_json:
-        print "Saving results to", output_json
+        print("Saving results to %s" % output_json)
         with open(output_json, 'w') as f:
             json.dump(results, f)
 

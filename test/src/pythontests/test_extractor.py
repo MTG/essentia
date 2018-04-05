@@ -61,7 +61,7 @@ input_file = '../../../../audio/recorded/britney.wav'
 output_file = input_file.replace(".wav",".sig")
 
 # Python extractor
-#print "Python extractor"
+#print("Python extractor")
 
 try:
   #possible also but i gave up :-)
@@ -74,15 +74,15 @@ try:
   os.system(python_bin + ' ../../../src/python/essentia/extractor/essentia_music.py ' + input_file + ' ' + output_file)
   desc_python = yaml.load(open(output_file).read())
 except (essentia.EssentiaError, RuntimeError):
-  print 'ERROR:', sys.exc_type, sys.exc_value
+  print('ERROR:', exc_info)
   sys.exit(1)
 
 clean_key(desc_python)
 del desc_python['version']
 
 # C++ extractor
-#print
-#print "C++ extractor"
+#print('')
+#print("C++ extractor")
 
 try:
   audio_file = essentia.AudioFileInput(filename = input_file)
@@ -91,20 +91,20 @@ try:
   essentia_music(audio)
   desc_c = yaml.load(open(output_file).read())
 except (essentia.EssentiaError, RuntimeError):
-  print 'ERROR:', sys.exc_type, sys.exc_value
+  print('ERROR:', sys.exc_info)
   sys.exit(1)
 
 os.remove(output_file)
 
 # Comparation
-#print
+#print('')
 for desc in desc_c:
     if desc not in desc_python:
-        print "ERROR: the descriptor " + desc + " is not included in the python version"
+        print("ERROR: the descriptor " + desc + " is not included in the python version")
         sys.exit(1)
 for desc in desc_python:
     if desc not in desc_c:
-        print "ERROR: the descriptor " + desc + " is not included in the C++ version"
+        print("ERROR: the descriptor " + desc + " is not included in the C++ version")
         sys.exit(1)
 
     if 'mean' in desc_python[desc] and type(desc_python[desc]['mean']) != list:
@@ -119,7 +119,7 @@ for desc in desc_python:
     i = 0
     for (i,(value_python, value_c)) in enumerate(zip(desc_python[desc]['mean'], desc_c[desc]['mean'])):
         if not isAlmostEqual(value_python, value_c, 10e-4):
-            print "ERROR: In descriptor ",desc,", value # ",i
-            print "Python value =", value_python, "while C++ value =", value_c
+            print("ERROR: In descriptor ",desc,", value # ", i)
+            print("Python value =", value_python, "while C++ value =", value_c)
             sys.exit(1)
         i+=1

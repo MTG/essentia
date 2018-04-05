@@ -8,7 +8,9 @@ Releases
 
 `Gaia releases <https://github.com/MTG/gaia/releases>`_
 
-Precompiled `extractor binaries <http://essentia.upf.edu/documentation/extractors>`_ (Linux, OSX, Win)
+`Essentia docker images <https://mtg.github.io/essentia-labs//news/2018/01/16/essentia-docker-images/>`_
+
+Precompiled `extractor binaries <https://mtg.github.io/essentia-labs//news/2015/12/22/static-binaries-for-extractors/>`_ (Linux, OSX, Win)
 
 AcousticBrainz `Music Extractor binaries <http://acousticbrainz.org/download>`_ (Linux, OSX, Win)
 

@@ -425,6 +425,7 @@ AlgorithmStatus PitchMelodia::process() {
   _pitchContoursMelody->compute();
 
   _pitch.push(pitch);
+  _pitchConfidence.push(pitchConfidence);
 
   return FINISHED;
 }

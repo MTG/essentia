@@ -24,13 +24,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* MonoWriter::name = "MonoWriter";
-const char* MonoWriter::category = "Input/output";
-const char* MonoWriter::description = DOC("This algorithm writes a mono audio stream to a file.\n\n"
-
-"Supported formats are wav, aiff, mp3, flac and ogg. An exception is thrown when other extensions are given. Note that to encode in mp3 format it is mandatory that ffmpeg was configured with mp3 enabled.\n\n"
-
-"If the file specified by filename could not be opened or the header of the file omits channel's information, an exception is thrown.");
+const char* MonoWriter::name = essentia::standard::MonoWriter::name;
+const char* MonoWriter::category = essentia::standard::MonoWriter::category;
+const char* MonoWriter::description = essentia::standard::MonoWriter::description;
 
 
 void MonoWriter::reset() {
@@ -118,9 +114,14 @@ AlgorithmStatus MonoWriter::process() {
 namespace essentia {
 namespace standard {
 
-const char* MonoWriter::name = essentia::streaming::MonoWriter::name;
-const char* MonoWriter::category = essentia::streaming::MonoWriter::category;
-const char* MonoWriter::description = essentia::streaming::MonoWriter::description;
+const char* MonoWriter::name = "MonoWriter";
+const char* MonoWriter::category = "Input/output";
+const char* MonoWriter::description = DOC("This algorithm writes a mono audio stream to a file.\n\n"
+
+"Supported formats are wav, aiff, mp3, flac and ogg. An exception is thrown when other extensions are given. Note that to encode in mp3 format it is mandatory that ffmpeg was configured with mp3 enabled.\n\n"
+
+"If the file specified by filename could not be opened or the header of the file omits channel's information, an exception is thrown.");
+
 
 void MonoWriter::createInnerNetwork() {
   _writer = streaming::AlgorithmFactory::create("MonoWriter");

@@ -74,6 +74,32 @@ def options(ctx):
 def configure(ctx):
     print('→ configuring the project in ' + ctx.path.abspath())
 
+    ctx.env.WITH_EXAMPLES        = ctx.options.WITH_EXAMPLES
+    ctx.env.WITH_PYTHON          = ctx.options.WITH_PYTHON
+    ctx.env.WITH_VAMP            = ctx.options.WITH_VAMP
+    ctx.env.BUILD_STATIC         = ctx.options.BUILD_STATIC
+    ctx.env.STATIC_DEPENDENCIES  = ctx.options.STATIC_DEPENDENCIES
+    ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
+    ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
+    ctx.env.WITH_LIBS            = ctx.options.WITH_LIBS
+    ctx.env.EXAMPLES             = ctx.options.EXAMPLES
+    ctx.env.EXAMPLE_LIST         = []
+    ctx.env.ALGOIGNORE           = []
+    ctx.env.IGNORE_ALGOS         = ctx.options.IGNORE_ALGOS
+    ctx.env.ALGOINCLUDE          = []
+    ctx.env.INCLUDE_ALGOS        = ctx.options.INCLUDE_ALGOS
+    ctx.env.FFT                  = ctx.options.FFT
+
+
+    if ctx.options.CROSS_COMPILE_MINGW32:
+        if ctx.env.WITH_EXAMPLES:
+            ctx.env.WITH_STATIC_EXAMPLES = True
+            print('WARNING: Using --with-static-examples flag instead of --with-examples for cross-compilation with MinGW')
+
+    if ctx.env.WITH_STATIC_EXAMPLES:
+        ctx.env.BUILD_STATIC = True
+        ctx.env.STATIC_DEPENDENCIES = True
+
     ctx.env.VERSION = VERSION
     ctx.env.GIT_SHA = GIT_SHA
 
@@ -149,6 +175,7 @@ def configure(ctx):
     elif sys.platform.startswith('linux'):
         # include -pthread flag because not all versions of gcc provide it automatically
         ctx.env.CXXFLAGS += ['-pthread']
+        ctx.env.LINKFLAGS += ['-pthread']
 
     elif sys.platform == 'win32':
         print ("→ Building on win32: search for pre-built dependencies in 'packaging/win32_3rdparty'")
@@ -185,7 +212,7 @@ def configure(ctx):
         print("copying pkgconfig ...")
         distutils.dir_util.copy_tree(win_path + "/pkgconfig/bin", tdm_bin)
 
-        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'taglib-1.9.1']
+        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'taglib-1.9.1', 'chromaprint-1.4.2']
         for lib in libs_3rdparty:
             print("copying " + lib + "...")
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/include", tdm_include)
@@ -247,8 +274,19 @@ def configure(ctx):
 
     ctx.load('compiler_cxx compiler_c')
 
-    if sys.platform == 'win32':
-        ctx.load('msvc')
+    if ctx.env.STATIC_DEPENDENCIES \
+        and (sys.platform.startswith('linux') or sys.platform == 'darwin') \
+        and not ctx.options.CROSS_COMPILE_MINGW32:
+        
+        print ("→ Building with static dependencies on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
+        os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+        
+        # flags required for linking to static ffmpeg libs
+        # -Bsymbolic flag is not available on clang
+        if ctx.env.CXX_NAME is not "clang":
+            ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
+            ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 
     # write pkg-config file
     prefix = os.path.normpath(ctx.options.prefix)
@@ -263,7 +301,7 @@ def configure(ctx):
     Name: libessentia
     Description: audio analysis library -- development files
     Version: %(version)s
-    Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f
+    Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f -lchromaprint
     Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/utils
     ''' % opts
 
@@ -283,12 +321,6 @@ def build(ctx):
     ctx.recurse('src')
 
     if ctx.env.WITH_CPPTESTS:
-        # missing -lpthread flag on Ubuntu and LinuxMint
-        if platform.dist()[0].lower() in ['debian', 'ubuntu', 'linuxmint'] and not ctx.env.CROSS_COMPILE_MINGW32 and not ctx.env.WITH_STATIC_EXAMPLES:
-            ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
-            ctx.read_shlib('pthread', paths=ext_paths)
-            ctx.env.USES += ' pthread'
-
         ctx.program(
             source=ctx.path.ant_glob('test/src/basetest/*.cpp test/3rdparty/gtest-1.6.0/src/gtest-all.cc '),
             target='basetest',
@@ -306,8 +338,10 @@ def run_tests(ctx):
 
 
 def run_python_tests(ctx):
+    print("Running python unit tests using %s" % sys.executable)
+
     print("Make sure to install Essentia library and python extension before running python tests")
-    ret = os.system('python test/src/unittest/all_tests.py')
+    ret = os.system('%s test/src/unittest/all_tests.py' % sys.executable)
 
     # Some old code below attempts to create a local python package folder to run
     # python tests without a need to run waf install first. It won't necessarily
@@ -317,7 +351,7 @@ def run_python_tests(ctx):
     #os.system('mkdir -p build/python')
     #os.system('cp -r src/python/essentia build/python/')
     #os.system('cp build/src/python/_essentia.so build/python/essentia')
-    #ret = os.system('PYTHONPATH=build/python python test/src/unittest/all_tests.py')
+    #ret = os.system('PYTHONPATH=build/python %s test/src/unittests/all_tests.py' % sys.executable)
 
     if ret:
         ctx.fatal('failed to run python tests. Check test output')
@@ -330,8 +364,8 @@ def ipython(ctx):
 def doc(ctx):
     # create a local python package folder
     os.system('mkdir -p build/python')
-    os.system('cp -r src/python/essentia build/python/essentia')
-    os.system('cp build/src/python/_essentia.so build/python')
+    os.system('cp -r src/python/essentia build/python/')
+    os.system('cp build/src/python/_essentia*.so build/python/essentia')
+    
     pythonpath = os.path.abspath('build/python')
-
     os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh' % pythonpath)
