@@ -2,7 +2,7 @@
 BASEDIR=$(dirname $0)
 cd $BASEDIR/debian_3rdparty
 ./build_fftw3.sh
-./build_ffmpeg_nomuxers.sh
+./build_ffmpeg.sh --no-muxers
 ./build_libsamplerate.sh
 ./build_taglib.sh
 ./build_yaml.sh
