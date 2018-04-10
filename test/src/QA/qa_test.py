@@ -406,13 +406,13 @@ class QaWrapper:
         pass
 
     def compute_and_time(self, *args):
-        from time import clock
+        import timeit
+        import functools
 
-        start = clock()
+        t = timeit.Timer(functools.partial(self.compute, *args))
+        secs = t.timeit(1)
+
         solution = self.compute(*args)
-        end = clock()
-
-        secs = (end - start)
 
         return solution, secs
 
