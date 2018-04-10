@@ -43,8 +43,8 @@ class EssentiaWrap(QaWrapper):
 class PyloudnessWrap(QaWrapper):
     """
     Pyloudness Solution. Found on this repo https://github.com/jrigden/pyloudness
-    I didn't find any feedback about the lib and the developer doesen't seem to have
-    a huge background in audio processing.
+    Just a wrapper for the FFMPEG pure c implementation
+    https://github.com/FFmpeg/FFmpeg/blob/ed93ed5ee320db299dc8c65d59c4f25e2eb0acdc/libavfilter/ebur128.h
     """
     def compute(self, *args):
         key = args[2]
