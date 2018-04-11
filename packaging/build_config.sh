@@ -175,6 +175,19 @@ FFMPEG_AUDIO_FLAGS="
     --enable-parser=vp8
 "
 
+FFMPEG_AUDIO_FLAGS_MUXERS="
+    --enable-muxer=wav
+    --enable-muxer=aiff
+    --enable-muxer=mp3
+    --enable-muxer=ogg
+    --enable-muxer=flac
+    --enable-encoder=pcm_s16le
+    --enable-encoder=pcm_s16be
+    --enable-encoder=mp3
+    --enable-encoder=vorbis
+    --enable-encoder=flac
+"
+
 # see http://www.fftw.org/install/windows.html
 FFTW_FLAGS="
     --enable-float \
