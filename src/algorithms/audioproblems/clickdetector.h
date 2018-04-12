@@ -58,8 +58,8 @@ class ClickDetector : public Algorithm {
   public:
     ClickDetector() {
         declareInput(_frame, "frame", "the input frame (must be non-empty)");
-        declareOutput(_clickStarts, "clickStarts", "starting indexes of the clicks");
-        declareOutput(_clickEnds, "clickEnds", "ending indexes of the clicks");
+        declareOutput(_clickStarts, "starts", "starting indexes of the clicks");
+        declareOutput(_clickEnds, "ends", "ending indexes of the clicks");
     
       _LPC = AlgorithmFactory::create("LPC");
       _InverseFilter = AlgorithmFactory::create("IIR");
@@ -113,8 +113,8 @@ class ClickDetector : public StreamingAlgorithmWrapper {
     ClickDetector() {
         declareAlgorithm("ClickDetector");
         declareInput(_frame, TOKEN, "frame");
-        declareOutput(_clickStarts, TOKEN, "clickStarts");
-        declareOutput(_clickEnds, TOKEN, "clickEnds");
+        declareOutput(_clickStarts, TOKEN, "starts");
+        declareOutput(_clickEnds, TOKEN, "ends");
     }
 };
 
