@@ -68,9 +68,11 @@ void ChordsDetectionBeats::compute() {
     int numFramesTick = int((diffTicks * _sampleRate) / _hopSize);
     int frameStart = int((ticks[i] * _sampleRate) / _hopSize);
     int frameEnd = frameStart + numFramesTick-1;
+    // Could happen if beats are unrealistically close.
+    if (frameStart >= frameEnd)
+      frameEnd = frameStart + 1;
 
     if (frameEnd > (int)hpcp.size()-1) break;
-
     vector<Real> hpcpMedian = medianFrames(hpcp, frameStart, frameEnd);
     normalize(hpcpMedian);
 
