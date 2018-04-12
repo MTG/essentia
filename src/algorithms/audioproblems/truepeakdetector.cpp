@@ -112,7 +112,7 @@ void TruePeakDetector::compute() {
 
   for (uint i = 0; i < processed->size(); i++)
     if ((*processed)[i] >= _threshold)
-      peakLocations.push_back(i);
+      peakLocations.push_back((int) (i / _oversamplingFactor));
 
   output = *processed;
 }
