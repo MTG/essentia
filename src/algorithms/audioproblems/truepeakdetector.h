@@ -68,7 +68,7 @@ class TruePeakDetector : public Algorithm {
     declareParameter("quality", "type of interpolation applied (see libresmple)", "[0,4]", 1);
     declareParameter("blockDC", "flag to activate the optional DC blocker", "{true,false}", false);
     declareParameter("emphatise", "flag to activate the optional emphasis filter", "{true,false}", false);
-    declareParameter("threshold", "threshold to detect peaks [dB]", "(-inf,0]", -0.0002);
+    declareParameter("threshold", "threshold to detect peaks [dB]", "(-inf,inf)", -0.0002);
   }
 
   void reset() {
@@ -94,9 +94,9 @@ namespace streaming {
 class TruePeakDetector : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<Real> _signal;
-  Source<Real> _output;
-  Source<Real> _peakLocations;
+  Sink<std::vector<Real> > _signal;
+  Source<std::vector<Real> > _output;
+  Source<std::vector<Real> > _peakLocations;
 
  public:
   TruePeakDetector() {
