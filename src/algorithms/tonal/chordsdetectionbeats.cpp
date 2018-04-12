@@ -42,6 +42,9 @@ const char* ChordsDetectionBeats::description = DOC("This algorithm estimates ch
 void ChordsDetectionBeats::configure() {
   _sampleRate = parameter("sampleRate").toReal();
   _hopSize = parameter("hopSize").toInt();
+  _chromaPick = parameter("chromaPick").toLower();
+  if (!(_chromaPick == "interbeat_median" || _chromaPick == "first_beat"))
+    throw EssentiaException("Bad DCT type.");
 }
 
 void ChordsDetectionBeats::compute() {
@@ -73,8 +76,14 @@ void ChordsDetectionBeats::compute() {
       frameEnd = frameStart + 1;
 
     if (frameEnd > (int)hpcp.size()-1) break;
-    vector<Real> hpcpMedian = medianFrames(hpcp, frameStart, frameEnd);
-    normalize(hpcpMedian);
+    vector<Real> hpcpMedian;
+    if (_chromaPick == "interbeat_median")
+    {
+      hpcpMedian = medianFrames(hpcp, frameStart, frameEnd);
+      normalize(hpcpMedian);
+    }
+    else
+        hpcpMedian = hpcp[frameStart];
 
     _chordsAlgo->input("pcp").set(hpcpMedian);
     _chordsAlgo->output("key").set(key);
