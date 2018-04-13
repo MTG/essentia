@@ -183,7 +183,6 @@ FFMPEG_AUDIO_FLAGS_MUXERS="
     --enable-muxer=flac
     --enable-encoder=pcm_s16le
     --enable-encoder=pcm_s16be
-    --enable-encoder=mp3
     --enable-encoder=vorbis
     --enable-encoder=flac
 "
