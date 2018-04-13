@@ -46,10 +46,14 @@ int essentia_main(string audioFilename, string outputFilename) {
 
     Pool pool;
 
-    Algorithm* audioload = factory.create("MonoLoader",
-                                          "filename", audioFilename,
-                                          "sampleRate", sr,
-                                          "downmix", "mix");
+    Algorithm* audioStereo = factory.create("AudioLoader",
+                                    "filename", audioFilename);
+
+    Algorithm* monoMixer = factory.create("MonoMixer");
+    // Algorithm* audioload = factory.create("MonoLoader",
+    //                                       "filename", audioFilename,
+    //                                       "sampleRate", sr,
+    //                                       "downmix", "mix");
 
     Algorithm* frameCutter = factory.create("FrameCutter",
                                             "frameSize", framesize,
@@ -58,15 +62,20 @@ int essentia_main(string audioFilename, string outputFilename) {
 
 
     Algorithm* discontinuityDetector    = factory.create("DiscontinuityDetector",
-                                                         "detectionThreshold", 10,
+                                                         "detectionThreshold", 15,
                                                          "frameSize", framesize, 
-                                                         "hopSize", hopsize);
+                                                         "hopSize", hopsize,
+                                                         "silenceThreshold", -25);
 
     Algorithm* gapsDetector             = factory.create("GapsDetector",
                                                          "frameSize", framesize, 
-                                                         "hopSize", hopsize); 
+                                                         "hopSize", hopsize,
+                                                         "silenceThreshold", -70); // in the first itteration of the assessment it was found
+                                                                                   // that low level noise was sometimes considered noise 
                                                          
-    Algorithm* startStopCut             = factory.create("StartStopCut");
+    Algorithm* startStopCut             = factory.create("StartStopCut",
+                                                         "maximumStartTime", 1, // Found song with only this margin (to double-check)
+                                                         "maximumStopTime", 1);
 
     // Algorithm* realAccumulator          = factory.create("RealAccumulator");
 
@@ -74,17 +83,21 @@ int essentia_main(string audioFilename, string outputFilename) {
                                                          "frameSize", framesize, 
                                                          "hopSize", hopsize,
                                                          "differentialThreshold", 0.0001,
-                                                         "minimumDuration", 1.0f);
+                                                         "minimumDuration", 2.0f); // An experiment on rock songs showed that distortion is evident when 
+                                                                                   // the median duration of the saturated regions is around 2ms
 
     Algorithm* truePeakDetector         = factory.create("TruePeakDetector",
-                                                         "threshold", 0.1); 
+                                                         "threshold", 0.0f); 
 
+    // The algorithm should skip  beginings
     Algorithm* clickDetector            = factory.create("ClickDetector",
                                                          "frameSize", framesize, 
                                                          "hopSize", hopsize,
-                                                         "detectionThreshold", 38);
+                                                         "silenceThreshold", -25, // This is to high. Just a work around to the problem on initial and final non-silent parts
+                                                         "detectionThreshold", 38); // Experiments showed that a higher threshold is not eenough to detect audible clicks.
 
 
+    Algorithm* le                       = factory.create("LoudnessEBUR128");  
 
     // Algorithm* window = factory.create("Windowing",
     //                                   "type", "hann",
@@ -92,9 +105,36 @@ int essentia_main(string audioFilename, string outputFilename) {
 
     
     cout << "-------- connecting algos ---------" << endl;
+    Real fs;
+    int ch, br;
+    std::string md5, cod;
+    // Audio -> FrameCutter
+
+    vector<StereoSample> audioBuffer;
+    audioStereo->output("audio").set(audioBuffer);
+    audioStereo->output("sampleRate").set(fs);
+    audioStereo->output("numberChannels").set(ch);
+    audioStereo->output("md5").set(md5);
+    audioStereo->output("bit_rate").set(br);
+    audioStereo->output("codec").set(cod);
+
+    le->input("signal").set(audioBuffer);
+
+    // FrameCutter -> GapsDetector
+    vector<Real> momentaryLoudness, shortTermLoudness;
+    Real integratedLoudness, loudnessRange;
+
+    le->output("momentaryLoudness").set(momentaryLoudness);
+    le->output("shortTermLoudness").set(shortTermLoudness);
+    le->output("integratedLoudness").set(integratedLoudness);
+    le->output("loudnessRange").set(loudnessRange);
+
 
     vector<Real> audio;
-    audioload->output("audio").set(audio);
+    // audioload->output("audio").set(audio);
+    monoMixer->input("audio").set(audioBuffer);
+    monoMixer->input("numberChannels").set(2);
+    monoMixer->output("audio").set(audio);
 
     int startStopCutStart, startStopCutEnd; 
     startStopCut->input("audio").set(audio);
@@ -133,8 +173,15 @@ int essentia_main(string audioFilename, string outputFilename) {
 
 
     cout << "-------- running algos ---------" << endl;
+    
+    audioStereo->compute();
+    le->compute();
+    // audioload->compute();
 
-    audioload->compute();
+    pool.add("EBUR128.integratedLoudness", integratedLoudness);
+    pool.add("EBUR128.range", loudnessRange);
+
+    monoMixer->compute();
 
     pool.add("duration", audio.size() / sr);
 
