@@ -27,7 +27,12 @@ namespace standard {
 
 const char* ChordsDetectionBeats::name = "ChordsDetectionBeats";
 const char* ChordsDetectionBeats::category = "Tonal";
-const char* ChordsDetectionBeats::description = DOC("This algorithm estimates chords using pitch profile classes on segments between beats. It is similar to ChordsDetection algorithm, but the chords are estimated on audio segments between each pair of consecutive beats.\n"
+const char* ChordsDetectionBeats::description = DOC(
+"This algorithm estimates chords using pitch profile classes on segments between beats. "
+"It is similar to ChordsDetection algorithm, but the chords are estimated on audio segments between each pair "
+"of consecutive beats. Chroma vector from each segment could be obtained as:\n"
+"  - 'interbeat_median', each resulting chroma vector component is a median of all the component values in the segment\n"
+"  - 'starting_beat', chroma vector is sampled from the start of each segment (that is, its starting beat position) using the first frame in each segment. It makes sense if chroma is preliminary smoothed.\n"
 "\n"
 "Quality: experimental (algorithm needs evaluation)\n"
 "\n"
@@ -42,6 +47,9 @@ const char* ChordsDetectionBeats::description = DOC("This algorithm estimates ch
 void ChordsDetectionBeats::configure() {
   _sampleRate = parameter("sampleRate").toReal();
   _hopSize = parameter("hopSize").toInt();
+  _chromaPick = parameter("chromaPick").toLower();
+  if (!(_chromaPick == "interbeat_median" || _chromaPick == "starting_beat"))
+    throw EssentiaException("Bad chromaPick type.");
 }
 
 void ChordsDetectionBeats::compute() {
@@ -68,11 +76,19 @@ void ChordsDetectionBeats::compute() {
     int numFramesTick = int((diffTicks * _sampleRate) / _hopSize);
     int frameStart = int((ticks[i] * _sampleRate) / _hopSize);
     int frameEnd = frameStart + numFramesTick-1;
+    // Could happen if beats are unrealistically close.
+    if (frameStart >= frameEnd)
+      frameEnd = frameStart + 1;
 
     if (frameEnd > (int)hpcp.size()-1) break;
-
-    vector<Real> hpcpMedian = medianFrames(hpcp, frameStart, frameEnd);
-    normalize(hpcpMedian);
+    vector<Real> hpcpMedian;
+    if (_chromaPick == "interbeat_median")
+    {
+      hpcpMedian = medianFrames(hpcp, frameStart, frameEnd);
+      normalize(hpcpMedian);
+    }
+    else
+        hpcpMedian = hpcp[frameStart];
 
     _chordsAlgo->input("pcp").set(hpcpMedian);
     _chordsAlgo->output("key").set(key);
