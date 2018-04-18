@@ -30,9 +30,9 @@ const char* ChordsDetectionBeats::category = "Tonal";
 const char* ChordsDetectionBeats::description = DOC(
 "This algorithm estimates chords using pitch profile classes on segments between beats. "
 "It is similar to ChordsDetection algorithm, but the chords are estimated on audio segments between each pair "
-"of consecutive beats. Chroma vector from the segment could be obtained as:\n"
+"of consecutive beats. Chroma vector from each segment could be obtained as:\n"
 "  - 'interbeat_median', each resulting chroma vector component is a median of all the component values in the segment\n"
-"  - 'first_beat', chroma vector is sampled from the segment's first beat (makes sense if chroma is preliminary smoothed)\n"
+"  - 'starting_beat', chroma vector is sampled from the start of each segment (that is, its starting beat position) using the first frame in each segment. It makes sense if chroma is preliminary smoothed.\n"
 "\n"
 "Quality: experimental (algorithm needs evaluation)\n"
 "\n"
@@ -48,7 +48,7 @@ void ChordsDetectionBeats::configure() {
   _sampleRate = parameter("sampleRate").toReal();
   _hopSize = parameter("hopSize").toInt();
   _chromaPick = parameter("chromaPick").toLower();
-  if (!(_chromaPick == "interbeat_median" || _chromaPick == "first_beat"))
+  if (!(_chromaPick == "interbeat_median" || _chromaPick == "starting_beat"))
     throw EssentiaException("Bad chromaPick type.");
 }
 
