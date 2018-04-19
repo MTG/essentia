@@ -33,18 +33,19 @@ This is the set of libraries which can be used within Essentia:
 1. `GPL`_ (with dual license option to allow Commercial license. Commercial license has to
    be obtained from the software author)
 
-   * FFTW - http://www.fftw.org/ -- used by FFT and IFFT algorithms, it can be replaced for Kiss FFT or Accelerate
-   * Libsamplerate - http://www.mega-nerd.com/SRC/ - used by Resample algorithm, and MonoLoader, EasyLoader and EqloudLoader
+   * FFTW - http://www.fftw.org/ -- used by FFT and IFFT algorithms, it can be replaced by more permissive `Kiss FFT or Accelerate <http://essentia.upf.edu/documentation/FAQ.html#building-lightweight-essentia-with-reduced-dependencies>`_
 
 2. `LGPL`_ (the original copyright notice as well as a copy of the LGPL has to be supplied
    This can be achieved through dynamic linking)
    
-   * libavcodec/libavformat/libavutil/libavresample - https://www.ffmpeg.org - used by AudioLoader, MonoLoader, EasyLoader and EqloudLoader algorithms
-   * Taglib - http://developer.kde.org/~wheeler/taglib.html - used by MetadataReader algorithm
-   * splineutil.hpp and splineutil.cpp - http://people.sc.fsu.edu/~jburkardt/cpp_src/spline/spline.html - used by Spline and CubicSpline algorithms
+   * libavcodec/libavformat/libavutil/libavresample - https://www.ffmpeg.org - used by the AudioLoader, MonoLoader, EasyLoader and EqloudLoader algorithms
+   * Taglib - http://developer.kde.org/~wheeler/taglib.html - used by the MetadataReader algorithm
+   * Chromaprint - https://github.com/acoustid/chromaprint - used by the Chromaprinter algorithm
+   * splineutil.hpp and splineutil.cpp - http://people.sc.fsu.edu/~jburkardt/cpp_src/spline/spline.html - used by the Spline and CubicSpline algorithms
 
 3. Others (the original copyright notice must be retained. They can be linked dynamically or statically)
 
+   * Libsamplerate - http://www.mega-nerd.com/SRC/ - used by the Resample algorithm, and MonoLoader, EasyLoader and EqloudLoader. Originally released under GPL, it is licensed under `BSD-2-Clause`_ since 2016
    * MersenneTwister - http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html (`BSD-style license`_)
    * TNT - http://math.nist.gov/tnt/ (`Public domain`_)
    * VAMP SDK - http://www.vamp-plugins.org/develop.html (`MIT license`_) (for building vamp plugins)
@@ -62,3 +63,5 @@ This is the set of libraries which can be used within Essentia:
 .. _runtime exception: http://gcc.gnu.org/onlinedocs/libstdc++/manual/bk01pt01ch01s02.html
 .. _MIT license: http://www.opensource.org/licenses/mit-license.php
 .. _Public domain: http://en.wikipedia.org/wiki/Public_domain
+.. _BSD-2-Clause: https://opensource.org/licenses/BSD-2-Clause
+
