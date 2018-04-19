@@ -68,7 +68,7 @@ namespace streaming {
 class LoopBpmConfidence : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<Real> _signal;
+  Sink<std::vector<Real> > _signal;
   Sink<Real> _bpmEstimate;
   Source<Real> _confidence;
 
