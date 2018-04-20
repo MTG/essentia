@@ -26,9 +26,12 @@ import essentia.standard as es
 import matplotlib.pyplot as plt
 from essentia import instantPower
 from essentia import db2pow
-
+from scipy.special import iv
+from scipy.constants import pi
+from math import isnan
+from math import isinf
 frameSize = 512
-hopSize = 256
+hopSize = frameSize / 2
 
 
 class EssentiaWrap(QaWrapper):
@@ -55,60 +58,120 @@ class Dev(QaWrapper):
     """
 
     def compute(self, *args):
+        eps = (np.finfo(np.float32).eps)
+        def SNR_prior_est(alpha, mmse, noise_pow, snr_inst):
+            return alpha * (np.abs(mmse) ** 2) / noise_pow + (1 - alpha) *\
+                   np.clip(snr_inst, a_min=0, a_max=None)
 
-        def SNR(alpha, MMSE, noiseVar, lamb):
+        def update_noise_psd(noise_spectrum, noise, alpha=.98):
+            return alpha * noise_spectrum + (1 - alpha) * np.abs(noise) ** 2
 
-            lamb = lamb - 1
-            lamb[lamb < 0] = 0
-            return alpha * (MMSE ** 2) / noiseVar + (1 - alpha) * np.abs(lamb)
+        def update_noise_pow(noise_std, noise, alpha=.98):
+            return alpha * noise_std + (1 - alpha) * noise
 
-        def updateNoiseVar(pastNoiseVar, noise, alpha=.5):
-            return alpha * pastNoiseVar + (1 - alpha) * np.abs(noise) ** 2
+        def update_y(mean_y, y, alpha=.98):
+            return alpha * mean_y + (1 - alpha) * y
 
-        def MMSE(v, gamma, Y):
-            return G(1.5) * ( np.sqrt(v) / gamma ) * np.exp(- v / 2) * ((1 + vk) * I0(v / 2) + vk * I1(v / 2)) * Y
+        def MMSE(v, snr_post, Y):
+            g = 0.8862269254527579 # gamma(1.5)
+
+            output = np.zeros(len(v))
+
+            for idx in range(len(Y)):
+                if v[idx] > 10:
+                    output[idx] = v[idx] * Y[idx] / snr_post[idx]
+                else:
+                    output[idx] = g * ( np.sqrt(v[idx]) / snr_post[idx]) * np.exp(-v[idx] / 2.)\
+                                    * ((1 + v[idx]) * iv(0., v[idx] / 2.) + v[idx] * iv(1., v[idx] / 2.)) * Y[idx]
+            return output
+
+        def SNR_post_est(Y, noise_pow):
+            return np.abs(Y) ** 2 / noise_pow
+
+        def SNR_inst_est(snr_post_est):
+            return snr_post_est - 1.
+
+        def V(snr_prior, snr_post):
+            return (snr_prior / (1. + snr_prior)) * snr_post
+
 
         x = args[1]
+        asume_gauss_psd = args[2]
         idx_ = 0
-        silenceThreshold = db2pow(-50)
 
-        start_proc = int(frameSize / 2 - hopSize / 2)
-        end_proc = int(frameSize / 2 + hopSize / 2)
+        silenceThreshold = db2pow(-30)
 
-        alpha = .5
+        MMSE_alpha = .98
+        noise_alpha = args[3]
+        snr_alpha = .98
 
         y = []
 
-        pastNoiseVar = np.random.randn(frameSize / 2 + 1) * silenceThreshold
-        pastNoiseVar /= np.std(pastNoiseVar)  # whiten the initial SNR value
+        noise_psd = np.zeros(frameSize / 2 + 1)
+
+        previous_snr_prior = np.zeros(frameSize / 2 + 1)
+        previous_snr_inst = np.zeros(frameSize / 2 + 1)
+        previous_snr_post = np.zeros(frameSize / 2 + 1)
+        previous_Y = np.zeros(frameSize / 2 + 1)
+        previous_noise_psd = np.zeros(frameSize / 2 + 1)
+
+        noise_std = 0
+        ma_snr_average = 0
 
         spectrum = es.Spectrum(size=frameSize)
-
-
+        window = es.Windowing(size=frameSize, type='hann', normalized=False)
 
         for frame in es.FrameGenerator(x, frameSize=frameSize, hopSize=hopSize, startFromZero=True):
-
-            fft = spectrum(frame)
+            Y = spectrum(window(frame))
 
             if instantPower(frame) < silenceThreshold:
-                idx_ += 1
-                pastNoiseVar = updateNoiseVar(pastNoiseVar, fft, alpha=alpha)
+                # Fixed threshold
+                # noise_std = 1e-5
+
+                # Estimated threshold
+                # noise_std = update_noise_pow(noise_std, instantPower(frame), alpha=alpha)
+                # noise_spectrum = np.ones(frameSize / 2 + 1) * noise_std
+
+                noise_psd = update_noise_psd(noise_psd, Y, alpha=noise_alpha)
+
+                noise_std = np.mean(noise_psd)
+
+                snr_post = SNR_post_est(Y, noise_psd)
+                snr_inst = SNR_inst_est(snr_post)
+
             else:
-                print a
+                if np.sum(previous_snr_prior) == 0:
+                    previous_snr_prior =  MMSE_alpha + (1 - MMSE_alpha) * np.clip(previous_snr_inst, a_min=0., a_max=None)
 
-            Yvar =  fft **2
+                    if asume_gauss_psd:
+                        noise_psd = np.ones(frameSize / 2 + 1) *np.mean(noise_psd)
 
-            SNRprior = Yvar / pastNoiseVar
+                snr_post = SNR_post_est(Y, noise_psd)
+                snr_inst = SNR_inst_est(snr_post)
 
-            # plt.plot(pastNoiseVar)
-            # plt.plot(Yvar)
-            # plt.show()
+                v = V(previous_snr_prior, previous_snr_post)
 
-            plt.close()
+                previous_mmse = MMSE(v, previous_snr_post, previous_Y)
+
+                snr_prior = SNR_prior_est(MMSE_alpha, previous_mmse, previous_noise_psd, snr_inst)
+
+                X_psd_est = noise_psd * snr_prior
+
+                snr_average = np.mean(X_psd_est) / np.mean(noise_psd)
+
+
+                ma_snr_average = update_y(ma_snr_average, snr_average, alpha=snr_alpha)
+
+                previous_snr_prior = snr_prior
+
+            previous_noise_psd = noise_psd
+            previous_snr_post = snr_post
+            previous_snr_inst = snr_inst
+            previous_Y = Y
 
             idx_ += 1
 
-        return esarr(y)
+        return ma_snr_average
 
 
 if __name__ == '__main__':
@@ -133,11 +196,64 @@ if __name__ == '__main__':
     # data_dir = '../../QA-audio/Discontinuities/prominent_jumps/vignesh_prominent_jump.wav'
     # data_dir = '../../../../../../pablo/Music/Desakato-La_Teoria_del_Fuego/'
 
-    qa.load_audio(filename=data_dir, stereo=False)  # Works for a single
+    # qa.load_audio(filename=data_dir, stereo=False)  # Works for a single
     # qa.load_solution(data_dir, ground_true=True)
 
+    fs = 44100.
+    time = 5 #s
+
+
+
+    noise_durations = [.05, 0.1, 0.5, 1, 2] #s
+    time_axis = np.arange(0, time, 1 / fs)
+
+    nsamples = len(time_axis)
+    for noise_alpha in [.8, .9, .95, .98, 99]:
+        for asume_gauss_psd in [0, 1]:
+            for noise_only in noise_durations:
+
+                results = []
+                gt = []
+                for i in range(1000):
+                    noise = np.random.randn(nsamples)
+                    noise /= np.std(noise)
+
+
+                    signal = np.sin(2 * pi * 5000 * time_axis)
+
+                    signal_db = -.5
+                    noise_db  = -50.
+
+                    noise_var = instantPower(esarr(db2amp(noise_db) * noise))
+                    signal[:int(noise_only * fs)] = np.zeros(int(noise_only * fs))
+                    real_snr_prior = 10. * np.log10(
+                        (instantPower(esarr(db2amp(signal_db) * signal[int(noise_only * fs):]))) /
+                        (instantPower(esarr(db2amp(noise_db)  * noise[int(noise_only * fs):]))))
+
+                    real_snr_prior_esp_corrected = real_snr_prior - 10. * np.log10(fs / 2.)
+                    gt.append(real_snr_prior_esp_corrected)
+
+                    signal_and_noise = esarr(db2amp(signal_db) * signal + db2amp(noise_db) * noise)
+                    ma_snr_average = qa.wrappers['Dev'].compute(None, signal_and_noise, asume_gauss_psd, noise_alpha)
+
+                    mean_snr_estimation = 10 * np.log10(ma_snr_average)
+                    mean_snr_estimation_corrected = mean_snr_estimation - 10. * np.log10(fs / 2.)
+
+                    results.append(mean_snr_estimation_corrected)
+                print '*' * 30
+                print 'Noise duration is {:.3f}.'.format(noise_only)
+                print 'Noise alpha is {:.2f}.'.format(noise_alpha)
+                print 'SNR estimation mean is {:.4f} with a std of {:.3f}.'.format(np.mean(results), np.std(results))
+                print 'SNR groud true mean is {:.4f} with a std of {:.3f}.'.format(np.mean(gt), np.std(gt))
+                if asume_gauss_psd:
+                    print 'assuming gaussin psd for noise (flat psd)'
+                else:
+                    print 'estimating noise psd shape from data'
+                print '*' * 30
+
+
     # Compute and the results, the scores and and compare the computation times
-    qa.compute_all(output_file='{}/compute.log'.format(folder))
+    # qa.compute_all(output_file='{}/compute.log'.format(folder))
 
     # qa.score_all()
     # qa.scores
