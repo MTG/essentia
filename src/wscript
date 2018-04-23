@@ -406,13 +406,9 @@ def build(ctx):
 
     if 'BesselFunction' not in ctx.env.ALGOIGNORE:
         ctx.env.INCLUDES += ['3rdparty/cephes/bessel/' ]
-        # ctx.env.INCLUDES += ['3rdparty/cephes/eval/' ]
-        sources += [ ctx.path.find_resource('3rdparty/cephes/bessel/iv.c') ]
-        sources += [ ctx.path.find_resource('3rdparty/cephes/bessel/hyperg.c') ]
-        sources += [ ctx.path.find_resource('3rdparty/cephes/bessel/gamma.c') ]
-        sources += [ ctx.path.find_resource('3rdparty/cephes/eval/polevl.c') ]
+        sources += ctx.path.ant_glob('3rdparty/cephes/bessel/*.cpp') 
     else:
-        print ('Building without 3rdparty Scipy library code because BesselFunction algorithm is ignored')
+        print ('Building without 3rdparty Cephes library code because BesselFunction algorithm is ignored')
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
