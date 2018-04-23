@@ -22,7 +22,7 @@ double k0e(double x);
 double k1(double x);
 double k1e(double x);
 
-double iv(double nu, double x);
+double cephes_iv(double nu, double x);
 double jv(double nu, double x);
 double yv(double nu, double x);
 double kn(int n, double x);

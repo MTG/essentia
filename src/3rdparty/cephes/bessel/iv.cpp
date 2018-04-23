@@ -67,7 +67,7 @@ Copyright 1984, 1987, 1988, 2000 by Stephen L. Moshier
 
 #define MAXNUM 1.79769313486231570815E308    /* 2**1024*(1-MACHEP) */
 
-double iv(double v, double x)
+double cephes_iv(double v, double x)
 {
 int sign;
 double t, ax;

@@ -64,7 +64,7 @@ Cephes Math Library Release 2.8:  June, 2000
 Copyright 1984, 1987, 1988, 2000 by Stephen L. Moshier
 */
 
-#include "../bessel/bessel.h"
+#include "bessel.h"
 
 // #ifdef ANSIPROT
 // extern double exp ( double );

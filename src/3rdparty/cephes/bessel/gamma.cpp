@@ -586,3 +586,84 @@ else
 	q += polevl( p, A, 4 ) / x;
 return( q );
 }
+
+double gam(double x)
+{
+  double p, q, z;
+  int i;
+
+  sgngam = 1;
+  if (std::isnan(x))
+    return(x);
+
+  if (std::isinf(x) == 1)
+    return(x);
+  if (std::isinf(x) == -1)
+    return(NAN);
+
+  q = fabs(x);
+
+  if (q > 33.0) {
+    if (x < 0.0) {
+      p = floor(q);
+      if (p == q) {
+      gamnan:
+        // it_warning("gam(): argument domain error");
+        return (NAN);
+      }
+      i = int(p);
+      if ((i & 1) == 0)
+        sgngam = -1;
+      z = q - p;
+      if (z > 0.5) {
+        p += 1.0;
+        z = q - p;
+      }
+      z = q * sin(PI * z);
+      if (z == 0.0) {
+        return(sgngam * INFINITY);
+      }
+      z = fabs(z);
+      z = PI / (z * stirf(q));
+    }
+    else {
+      z = stirf(x);
+    }
+    return(sgngam * z);
+  }
+
+  z = 1.0;
+  while (x >= 3.0) {
+    x -= 1.0;
+    z *= x;
+  }
+
+  while (x < 0.0) {
+    if (x > -1.E-9)
+      goto small;
+    z /= x;
+    x += 1.0;
+  }
+
+  while (x < 2.0) {
+    if (x < 1.e-9)
+      goto small;
+    z /= x;
+    x += 1.0;
+  }
+
+  if (x == 2.0)
+    return(z);
+
+  x -= 2.0;
+  p = polevl(x, P, 6);
+  q = polevl(x, Q, 7);
+  return(z * p / q);
+
+small:
+  if (x == 0.0) {
+    goto gamnan;
+  }
+  else
+    return(z / ((1.0 + 0.5772156649015329 * x) * x));
+}

@@ -37,6 +37,7 @@
 #include "types.h"
 #include "utils/tnt/tnt.h"
 #include "utils/tnt/tnt2essentiautils.h"
+#include "../3rdparty/cephes/bessel/bessel.h"
 
 #define M_2PI (2 * M_PI)
 
@@ -887,6 +888,12 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
   }
 
   return result;
+}
+
+template <typename T>
+T iv(T v, T z) {
+    //  y[i] = std::tr1::cyl_bessel_i(_v, x[i]);
+    return (T)cephes_iv((double)v, (double)z);
 }
 
 } // namespace essentia
