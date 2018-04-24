@@ -64,6 +64,8 @@ class SNR : public Algorithm {
 
   void UpdateEMA(Real alpha, Real &ema, Real y);
 
+  void resizeBuffers();
+
   Real _sampleRate;
   Real _noiseThreshold;
   Real _alphaMmse;
@@ -72,6 +74,7 @@ class SNR : public Algorithm {
   bool _useBroadbadNoiseCorrection;
   uint _frameSize;
   uint _specSize;
+  uint _counter;
 
   std::vector<Real> _Y;
   std::vector<Real> _noisePsd;
@@ -93,6 +96,8 @@ class SNR : public Algorithm {
 
   Algorithm* _windowing;
   Algorithm* _spectrum;
+
+  Real _eps = std::numeric_limits<Real>::epsilon();
 
  public:
   SNR() {
