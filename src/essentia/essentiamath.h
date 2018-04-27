@@ -892,7 +892,6 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
 
 template <typename T>
 T iv(T v, T z) {
-    //  y[i] = std::tr1::cyl_bessel_i(_v, x[i]);
     return (T)cephes_iv((double)v, (double)z);
 }
 
