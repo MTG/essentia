@@ -52,7 +52,7 @@ class Welch : public Algorithm {
  public:
   Welch() {
     declareInput(_frame, "frame", "the input stereo audio signal");
-    declareOutput(_psd, "PSD", "Power Spectral Density [dB] or [dB/Hz]");
+    declareOutput(_psd, "psd", "Power Spectral Density [dB] or [dB/Hz]");
 
     _window = AlgorithmFactory::create("Windowing");
     _powerSpectrum  = AlgorithmFactory::create("PowerSpectrum");
@@ -101,7 +101,7 @@ class Welch : public StreamingAlgorithmWrapper {
   Welch() {
     declareAlgorithm("Welch");
     declareInput(_frame, TOKEN, "frame");
-    declareOutput(_psd, TOKEN, "PSD");
+    declareOutput(_psd, TOKEN, "psd");
   }
 };
 
