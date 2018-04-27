@@ -6,6 +6,15 @@
 
 #include <cmath>
 
+#define MAXITER        500
+
+#define EDOM		33
+#define ERANGE	34
+#define MAXNUM 1.79769313486231570815E308    /* 2**1024*(1-MACHEP) */
+#define EULER 0.577215664901532860606512090082402431 /* Euler constant */
+
+#define MACHEP 1.11022302462515654042E-16
+
 double chbevl(double x, double array[], int n);
 double hyperg(double a, double b, double x);
 int airy(double x, double *ai, double *aip, double *bi, double *bip);
@@ -30,6 +39,7 @@ double kn(int n, double x);
 double gam(double x);
 double lgam(double x);
 extern int sgngam;
+
 
 //! \endcond
 
