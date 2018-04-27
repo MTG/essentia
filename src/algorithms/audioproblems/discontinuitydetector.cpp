@@ -39,6 +39,7 @@ void DiscontinuityDetector::configure() {
   _detectionThld = parameter("detectionThreshold").toReal();
   _energyThld = parameter("energyThreshold").toReal();
   _subFrameSize = parameter("subFrameSize").toInt();
+  _silenceThld = db2pow(parameter("silenceThreshold").toReal());
 
   _medianFilter->configure(INHERIT("kernelSize"));
   _LPC->configure(INHERIT("order"));
@@ -69,7 +70,7 @@ void DiscontinuityDetector::compute() {
   std::vector<Real> &discontinuityAmplitues = _discontinuityAmplitues.get();
   std::vector<Real> frameAux = frame;
 
-  if (isSilent(frameAux)) return;
+  if (instantPower(frameAux) < _silenceThld) return;
 
   int inputSize = frameAux.size();
 

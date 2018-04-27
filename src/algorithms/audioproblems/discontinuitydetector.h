@@ -41,6 +41,7 @@ class DiscontinuityDetector : public Algorithm {
     float _energyThld;
     int _subFrameSize;
     int _frameSize;
+    float _silenceThld;
 
     Algorithm* _medianFilter;
     Algorithm* _LPC;
@@ -71,6 +72,7 @@ class DiscontinuityDetector : public Algorithm {
         declareParameter("detectionThreshold", "'detectionThreshold' times the standard deviation plus the median of the frame is used as detection threshold", "[1,inf)", 8.f);
         declareParameter("energyThreshold", "threshold in dB to detect silent subframes", "(-inf,inf)", -60.f);
         declareParameter("subFrameSize", "size of the window used to compute silent subframes", "[1,inf)", 32);
+        declareParameter("silenceThreshold", "threshold to skip silent frames", "(-inf,0)", -50);
     }
 
     void configure();
