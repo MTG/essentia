@@ -64,7 +64,7 @@ class SNR : public Algorithm {
 
   void UpdateEMA(Real alpha, Real &ema, Real y);
 
-  void resizeBuffers();
+  void reset();
 
   Real _sampleRate;
   Real _noiseThreshold;
@@ -72,6 +72,7 @@ class SNR : public Algorithm {
   Real _alphaEma;
   Real _alphaNoise;
   bool _useBroadbadNoiseCorrection;
+  bool _warned;
   uint _frameSize;
   uint _specSize;
   uint _counter;
@@ -102,9 +103,9 @@ class SNR : public Algorithm {
  public:
   SNR() {
     declareInput(_frame, "frame", "the input audio frame");
-    declareOutput(_SNRprior, "aPrioriSNR", "A priori SNR of the input frame for each frequency bin");
-    declareOutput(_SNRAverage, "AverageSNR", "Global SNR of the input frame computed from the a priori contribution of each frequency bin");
-    declareOutput(_SNRAverageEMA, "AverageSNRMA", "Moving average version of the AverageSNR");
+    declareOutput(_SNRAverage, "instantSNR", "SNR value for the the current frame");
+    declareOutput(_SNRAverageEMA, "averagedSNR", "averaged SNR through an Exponential Moving Average filter");
+    declareOutput(_SNRprior, "spectralSNR", "instant SNR for each frequency bin");
  
    _windowing = AlgorithmFactory::create("Windowing");
    _spectrum  = AlgorithmFactory::create("Spectrum");
@@ -154,9 +155,9 @@ class SNR : public StreamingAlgorithmWrapper {
   SNR() {
     declareAlgorithm("SNR");
     declareInput(_frame, TOKEN, "frame");
-    declareOutput(_SNRprior, TOKEN, "aPrioriSNR");
-    declareOutput(_SNRAverage, TOKEN, "averageSNR");
-    declareOutput(_SNRAverageEMA, TOKEN, "averageSNRMA");
+    declareOutput(_SNRAverage, TOKEN, "instantSNR");
+    declareOutput(_SNRAverageEMA, TOKEN, "averagedSNR");
+    declareOutput(_SNRprior, TOKEN, "spectralSNR");
 
   }
 };
