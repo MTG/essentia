@@ -49,7 +49,9 @@ class HumDetector : public AlgorithmComposite {
   uint _hopSize;
   uint _frameSize;
   uint _spectSize;
+  uint _timeStamps;
   Real _sampleRate;
+  Real _outSampleRate;
   Real _timeWindow;
   Real _Q0;
   Real _Q1;
@@ -57,6 +59,10 @@ class HumDetector : public AlgorithmComposite {
   uint _Q1sample;
 
   scheduler::Network* _network;
+
+template< typename T >
+typename std::vector<T>::iterator 
+  insertSorted( std::vector<T> & vec, T const& item );
 
 
  public:
@@ -70,8 +76,8 @@ class HumDetector : public AlgorithmComposite {
 
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,0.1]", 0.1);  
-    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,0.1]", 0.1);  
+    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.1);  
+    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.1);  
     declareParameter("timeWindow", "time to use for the hum estimation [s]", "(0,inf)",15);  
     declareParameter("Q0", "time to use for the hum estimation [s]", "(0,1)",0.1);  
     declareParameter("Q1", "time to use for the hum estimation [s]", "(0,1)",0.55);  
@@ -114,10 +120,12 @@ class HumDetector : public Algorithm {
   ~HumDetector();
 
   void declareParameters() {
-    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,0.1]", 0.1);  
-    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,0.1]", 0.1);  
-    declareParameter("timeWindow", "time to use for the hum estimation [s]", "(0,0.1]",15);  
+       declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
+    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.1);  
+    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.1);  
+    declareParameter("timeWindow", "time to use for the hum estimation [s]", "(0,inf)",15);  
+    declareParameter("Q0", "time to use for the hum estimation [s]", "(0,1)",0.1);  
+    declareParameter("Q1", "time to use for the hum estimation [s]", "(0,1)",0.55);  
   };
 
   void configure();
