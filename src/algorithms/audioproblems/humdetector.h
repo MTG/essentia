@@ -35,6 +35,9 @@ class HumDetector : public AlgorithmComposite {
   Algorithm* _frameCutter;
   Algorithm* _lowPass;
   Algorithm* _welch;
+  standard::Algorithm* _Smoothing;
+  standard::Algorithm* _spectralPeaks;
+  // Algorithm* _timeSmoothing;
 
   SinkProxy<Real> _signal;
 
@@ -57,6 +60,7 @@ class HumDetector : public AlgorithmComposite {
   Real _Q1;
   uint _Q0sample;
   uint _Q1sample;
+  uint _iterations;
 
   scheduler::Network* _network;
 
