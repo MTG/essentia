@@ -44,6 +44,20 @@ typename std::vector<T>::iterator
         );
 }
 
+template <typename T>
+vector<size_t> HumDetector::sort_indexes(const vector<T> &v) {
+
+  // initialize original index locations
+  vector<size_t> idx(v.size());
+  iota(idx.begin(), idx.end(), 0);
+
+  // sort indexes based on comparing values in v
+  sort(idx.begin(), idx.end(),
+       [&v](size_t i1, size_t i2) {return v[i1] < v[i2];});
+
+  return idx;
+}
+
 HumDetector::HumDetector() : AlgorithmComposite() {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   _decimator                = factory.create("Resample");
@@ -55,6 +69,7 @@ HumDetector::HumDetector() : AlgorithmComposite() {
   // _timeSmoothing            = factory.create("MedianFilter");
 
   declareInput(_signal, "signal", "the input audio signal");
+  declareOutput(_rMatrix, "r", "r");
   declareOutput(_frequencies, "frequencies", "humming tones frequencies");
   declareOutput(_amplitudes, "amplitudes", "humming tones amplitudes");
   declareOutput(_starts, "starts", "humming tones starts");
@@ -89,7 +104,7 @@ void HumDetector::configure() {
   _outSampleRate = 2000.f;
   _sampleRate = parameter("sampleRate").toReal();
   _hopSize = int(round(parameter("hopSize").toReal() * _outSampleRate));
-  _frameSize = int(round(parameter("frameSize").toReal() * _outSampleRate));
+  _frameSize = nextPowerTwo(int(round(parameter("frameSize").toReal() * _outSampleRate)));
   _timeWindow = int(round(parameter("timeWindow").toReal() * _outSampleRate / _hopSize));
   _Q0 = parameter("Q0").toReal();
   _Q1 = parameter("Q1").toReal();
@@ -97,6 +112,8 @@ void HumDetector::configure() {
   _Q0sample = (uint)(_Q0 * _timeWindow + 0.5);
   _Q1sample = (uint)(_Q1 * _timeWindow + 0.5);
 
+  _medianFilterSize = _frameSize * 60 / _outSampleRate;
+  _medianFilterSize += (_medianFilterSize + 1) % 2;
 
   _decimator->configure("inputSampleRate", _sampleRate,
                         "outputSampleRate", _outSampleRate);
@@ -110,10 +127,8 @@ void HumDetector::configure() {
 
   _welch->configure("size",_frameSize);
 
-  _Smoothing->configure("kernelSize", 29);
-
   _spectralPeaks->configure("sampleRate", _outSampleRate,
-                            "magnitudeThreshold", 0.f);
+                            "magnitudeThreshold", 10.f);
   // _timeSmoothing->configure();
 
 }
@@ -132,35 +147,39 @@ AlgorithmStatus HumDetector::process() {
 
   _spectSize = psd[0].size();
   _timeStamps = psd.size();
-  _iterations = _timeStamps - _timeWindow + 1; 
+  _iterations = _timeStamps - _timeWindow + 1;
   std::vector<vector<Real> >psdWindow(_spectSize, vector<Real>(_timeWindow, 0.f));
   std::vector<vector<size_t> >psdIdxs(_spectSize, vector<size_t>(_timeWindow, 0));
 
 
   std::vector<vector<Real> >r(_spectSize, vector<Real>(_iterations, 0.0));
 
-  Real R0, R1;
+  Real Q0, Q1;
   for (uint i = 0; i < _spectSize; i++) {
     for (uint j = 0; j < _timeWindow; j++)
       psdWindow[i][j] = psd[j][i];
 
-    sort(psdWindow[i].begin(), psdWindow[i].end());
-    R0 = psdWindow[i][_Q0sample];
-    R1 = psdWindow[i][_Q1sample];
+    psdIdxs[i] = sort_indexes(psdWindow[i]);
+    // sort(psdWindow[i].begin(), psdWindow[i].end());
+    Q0 = psdWindow[i][psdIdxs[i][_Q0sample]];
+    Q1 = psdWindow[i][psdIdxs[i][_Q1sample]];
     
-    r[i][0] = (R1 - R0);
+    r[i][0] = Q0 / Q1;
   }
 
+  // std::vector<Real>::iterator idxIt;
   for (uint i = 0; i < _spectSize; i++) {
     for (uint j = _timeWindow; j < _timeStamps; j++) {
-      rotate(psdWindow.begin(), psdWindow.begin() + 1, psdWindow.end());
-      insertSorted(psdWindow[i], psd[j][i]);
-      psdWindow[i].pop_back();
+      rotate(psdWindow[i].begin(), psdWindow[i].begin() + 1, psdWindow[i].end());
+      // idxIt = insertSorted(psdWindow[i], psd[j][i]);
+      // uint pos = std::distance(psdWindow[0].begin(),idxIt);
+      psdWindow[i][_timeWindow - 1] = psd[j][i];
+      psdIdxs[i] = sort_indexes(psdWindow[i]);
 
-      Real R0 = psdWindow[i][_Q0sample];
-      Real R1 = psdWindow[i][_Q1sample];
+      Q0 = psdWindow[i][psdIdxs[i][_Q0sample]];
+      Q1 = psdWindow[i][psdIdxs[i][_Q1sample]];
 
-      r[i][j - _timeWindow + 1] = (R1 - R0);
+      r[i][j - _timeWindow + 1] = Q0 / Q1;
       }
   }
   vector<Real> rSpec = vector<Real>(_spectSize, 0.f);
@@ -169,23 +188,34 @@ AlgorithmStatus HumDetector::process() {
     for (uint i = 0; i < _spectSize; i++)
       rSpec[i] = r[i][j];
 
-    _Smoothing->input("signal").set(rSpec);
-    _Smoothing->output("signal").set(filtered);
+    _Smoothing->configure("kernelSize", _medianFilterSize);
+    _Smoothing->input("array").set(rSpec);
+    _Smoothing->output("filteredArray").set(filtered);
     _Smoothing->compute();
     
     for (uint i = 0; i < _spectSize; i++)
       r[i][j] -= filtered[i];
   }
 
+  uint kernerSize = (uint)_timeWindow + (((uint)_timeWindow + 1) % 2);
   for (uint i = 0; i < _spectSize; i++) {
-    _Smoothing->input("signal").set(r[i]);
-    _Smoothing->output("signal").set(filtered);
+    _Smoothing->configure("kernelSize", kernerSize);
+    _Smoothing->input("array").set(r[i]);
+    _Smoothing->output("filteredArray").set(filtered);
     _Smoothing->compute();
 
     for (uint j = 0; j < _iterations; j++)
-      r[i][j] -= filtered[j];
-
+        r[i][j] = filtered[j];
   }
+
+  _rMatrix.push(vecvecToArray2D(r));
+
+  vector<Real> aux(1, 1.0);
+
+  _amplitudes.push(aux);
+  _frequencies.push(aux);
+  _starts.push(aux);
+  _ends.push(aux);
 
   
   vector<Real> frequencies, magnitudes;
@@ -195,14 +225,18 @@ AlgorithmStatus HumDetector::process() {
 
     _spectralPeaks->input("spectrum").set(rSpec);
     _spectralPeaks->output("frequencies").set(frequencies);
-    _spectralPeaks->output("magnidues").set(magnitudes);
+    _spectralPeaks->output("magnitudes").set(magnitudes);
     _spectralPeaks->compute();
 
-    for (uint k = 0; k < frequencies.size(); k++) {
-      _frequencies.push(frequencies[k]);
-      _amplitudes.push(magnitudes[k]);
-    }
+    
+
+    // for (uint k = 0; k < frequencies.size(); k++) {
+    // _frequencies.push(frequencies);
+    // _amplitudes.push(magnitudes);
+    // }
   }
+
+  return FINISHED;
 }
 
 void HumDetector::reset() {
@@ -224,6 +258,7 @@ const char* HumDetector::description = DOC("");
 
 HumDetector::HumDetector() {
   declareInput(_signal, "signal", "the input audio signal");
+  declareOutput(_rMatrix, "r", "r");
   declareOutput(_frequencies, "frequencies", "humming tones frequencies");
   declareOutput(_amplitudes, "amplitudes", "humming tones amplitudes");
   declareOutput(_starts, "starts", "humming tones starts");
@@ -247,6 +282,7 @@ void HumDetector::createInnerNetwork() {
   _vectorInput = new streaming::VectorInput<Real>();
 
   *_vectorInput  >>  _humDetector->input("signal");
+  _humDetector->output("r")    >> PC(_pool, "r");
   _humDetector->output("frequencies")    >> PC(_pool, "frequencies");
   _humDetector->output("amplitudes")    >> PC(_pool, "amplitudes");
   _humDetector->output("starts")   >> PC(_pool, "starts");
@@ -264,10 +300,14 @@ void HumDetector::compute() {
   _vectorInput->setVector(&signal);
   _network->run();
 
+  TNT::Array2D<Real>& rMatrix = _rMatrix.get();
   vector<Real>& frequencies = _frequencies.get();
   vector<Real>& amplitudes = _amplitudes.get();
   vector<Real>& starts = _starts.get();
   vector<Real>& ends = _ends.get();
+
+
+  rMatrix = _pool.value<vector<TNT::Array2D<Real> > >("r")[0];
 
 
   frequencies = _pool.value<vector<Real> >("frequencies");
@@ -275,16 +315,17 @@ void HumDetector::compute() {
   starts = _pool.value<vector<Real> >("starts");
   ends = _pool.value<vector<Real> >("ends");
 
-  reset();
+  // reset();
 }
 
 void HumDetector::reset() {
   _network->reset();
-  _pool.remove("momentaryLoudness");
-  _pool.remove("shortTermLoudness");
-  _pool.remove("integratedLoudness");
-  _pool.remove("loudnessRange");
-  //_pool.remove("momentaryLoudnessMax");
+  _pool.remove("r");
+  _pool.remove("frequencies");
+  _pool.remove("amplitudes");
+  _pool.remove("starts");
+  _pool.remove("ends");
+  //_pool.remove("ends");
   //_pool.remove("shortTermLoudnessMax");
 }
 

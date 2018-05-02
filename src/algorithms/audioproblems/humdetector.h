@@ -24,6 +24,7 @@
 #include "network.h"
 #include "pool.h"
 #include "streamingalgorithmcomposite.h"
+#include <essentia/utils/tnt/tnt2vector.h>
 
 namespace essentia {
 namespace streaming {
@@ -37,10 +38,13 @@ class HumDetector : public AlgorithmComposite {
   Algorithm* _welch;
   standard::Algorithm* _Smoothing;
   standard::Algorithm* _spectralPeaks;
+  standard::Algorithm* _pitchSalienceFunction;
+  standard::Algorithm* _pitchContours;
   // Algorithm* _timeSmoothing;
 
   SinkProxy<Real> _signal;
 
+  Source<TNT::Array2D<Real> > _rMatrix;
   Source<std::vector<Real> > _frequencies;
   Source<std::vector<Real> > _amplitudes;
   Source<std::vector<Real> > _starts;
@@ -61,6 +65,7 @@ class HumDetector : public AlgorithmComposite {
   uint _Q0sample;
   uint _Q1sample;
   uint _iterations;
+  uint _medianFilterSize;
 
   scheduler::Network* _network;
 
@@ -68,6 +73,8 @@ template< typename T >
 typename std::vector<T>::iterator 
   insertSorted( std::vector<T> & vec, T const& item );
 
+template <typename T>
+std::vector<size_t> sort_indexes(const std::vector<T> &v);
 
  public:
   HumDetector();
@@ -108,6 +115,7 @@ namespace standard {
 class HumDetector : public Algorithm {
  protected:
   Input<std::vector<Real> > _signal;
+  Output<TNT::Array2D<Real> > _rMatrix;
   Output<std::vector<Real> > _frequencies;
   Output<std::vector<Real> > _amplitudes;
   Output<std::vector<Real> > _starts;
@@ -124,7 +132,7 @@ class HumDetector : public Algorithm {
   ~HumDetector();
 
   void declareParameters() {
-       declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
+    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.1);  
     declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.1);  
     declareParameter("timeWindow", "time to use for the hum estimation [s]", "(0,inf)",15);  
