@@ -58,24 +58,32 @@ vector<size_t> HumDetector::sort_indexes(const vector<T> &v) {
   return idx;
 }
 
+
+Real HumDetector::centBinToFrequency(Real cent, Real reff, Real binsInOctave) {
+  return pow(2.f, (cent - reff) / binsInOctave);
+}
+
+
 HumDetector::HumDetector() : AlgorithmComposite() {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   _decimator                = factory.create("Resample");
   _lowPass                  = factory.create("LowPass");
   _frameCutter              = factory.create("FrameCutter");
-  _welch                    = factory.create("PowerSpectrum");
+  _welch                    = factory.create("Welch");
   _Smoothing                = standard::AlgorithmFactory::create("MedianFilter");
   _spectralPeaks            = standard::AlgorithmFactory::create("SpectralPeaks");
-  // _timeSmoothing            = factory.create("MedianFilter");
+  _pitchSalienceFunction    = standard::AlgorithmFactory::create("PitchSalienceFunction");
+  _pitchSalienceFunctionPeaks = standard::AlgorithmFactory::create("PitchSalienceFunctionPeaks");
+  _pitchContours            = standard::AlgorithmFactory::create("PitchContours");
 
   declareInput(_signal, "signal", "the input audio signal");
-  declareOutput(_rMatrix, "r", "r");
+  declareOutput(_rMatrix, "r", "the quantile ratios matrix");
   declareOutput(_frequencies, "frequencies", "humming tones frequencies");
-  declareOutput(_amplitudes, "amplitudes", "humming tones amplitudes");
+  declareOutput(_saliences, "saliences", "humming tones saliences");
   declareOutput(_starts, "starts", "humming tones starts");
-  declareOutput(_ends, "ends", "humming tones ends");
 
-  // Connect input proxy
+
+  // connect input proxy
   _signal >> _decimator->input("signal");
 
   _decimator->output("signal").setBufferType(BufferUsage::forLargeAudioStream);
@@ -86,10 +94,10 @@ HumDetector::HumDetector() : AlgorithmComposite() {
 
   _lowPass->output("signal") >> _frameCutter->input("signal");
 
-  _frameCutter->output("frame") >> _welch->input("signal");
+  _frameCutter->output("frame") >> _welch->input("frame");
 
 
-  _welch->output("powerSpectrum") >> PC(_pool, "psd");
+  _welch->output("psd") >> PC(_pool, "psd");
 
   _network = new scheduler::Network(_decimator);
 }
@@ -104,15 +112,15 @@ void HumDetector::configure() {
   _outSampleRate = 2000.f;
   _sampleRate = parameter("sampleRate").toReal();
   _hopSize = int(round(parameter("hopSize").toReal() * _outSampleRate));
-  _frameSize = nextPowerTwo(int(round(parameter("frameSize").toReal() * _outSampleRate)));
+  uint frameSize = int(round(parameter("frameSize").toReal() * _outSampleRate));
+  _frameSize = nextPowerTwo(frameSize);
   _timeWindow = int(round(parameter("timeWindow").toReal() * _outSampleRate / _hopSize));
   _Q0 = parameter("Q0").toReal();
   _Q1 = parameter("Q1").toReal();
 
-  _Q0sample = (uint)(_Q0 * _timeWindow + 0.5);
-  _Q1sample = (uint)(_Q1 * _timeWindow + 0.5);
+  _minimumFrequency = parameter("minimumFrequency").toReal();
 
-  _medianFilterSize = _frameSize * 60 / _outSampleRate;
+  _medianFilterSize = _frameSize * 60 / (_outSampleRate);
   _medianFilterSize += (_medianFilterSize + 1) % 2;
 
   _decimator->configure("inputSampleRate", _sampleRate,
@@ -121,16 +129,41 @@ void HumDetector::configure() {
   _lowPass->configure("sampleRate",_outSampleRate,
                       "cutoffFrequency", 900.f);
 
-  _frameCutter->configure("frameSize",_frameSize,
+  _frameCutter->configure("frameSize",frameSize,
                           "hopSize", _hopSize,
                           "silentFrames", "keep");
 
-  _welch->configure("size",_frameSize);
+  _welch->configure("fftSize",_frameSize,
+                    "frameSize", frameSize,
+                    "averagingFrames", 2,
+                    "windowType", "blackmanharris92");
 
   _spectralPeaks->configure("sampleRate", _outSampleRate,
-                            "magnitudeThreshold", 10.f);
-  // _timeSmoothing->configure();
+                            "minFrequency", _minimumFrequency,
+                            "maxFrequency", 900.f,
+                            "magnitudeThreshold", 0.5f);
 
+  Real binResolution = 5;
+  _binsInOctave = 1200.0 / binResolution;
+  _pitchSalienceFunction->configure("binResolution", binResolution, 
+                                    "referenceFrequency", _minimumFrequency,
+                                    "numberHarmonics", 1);
+
+  _pitchSalienceFunctionPeaks->configure("binResolution", binResolution,
+                                         "maxFrequency", 900.f,
+                                         "minFrequency", _minimumFrequency,
+                                         "referenceFrequency",  _minimumFrequency);
+
+  uint pitchContinuity = 10 / (1000 * _hopSize);
+  _pitchContours->configure("binResolution", binResolution, 
+                            "hopSize", _hopSize,
+                            "sampleRate", _outSampleRate,
+                            "minDuration", 2000,
+                            "pitchContinuity", pitchContinuity,
+                            "timeContinuity", 5000);
+
+
+  _referenceTerm = 0.5 - _binsInOctave * log2(_minimumFrequency);
 }
 
 
@@ -145,80 +178,94 @@ AlgorithmStatus HumDetector::process() {
 
   const vector<vector<Real> >& psd = _pool.value<vector<vector<Real> > >("psd");
 
-  _spectSize = psd[0].size();
+  // this algorithm relies in long audio streams (10s by default). In order to prevent it to break,
+  // the analysis window duration shrinks down when the input audio stream is shorter. 
   _timeStamps = psd.size();
+  _spectSize = psd[0].size();
+  if (_timeWindow > _timeStamps) {
+    E_INFO("HumDetector: the selected time window needs " << _timeWindow * _hopSize / _outSampleRate << 
+    "s of audio while the input stream lasts " << _timeStamps * _hopSize / _outSampleRate << 
+    "s.  Resizing the analysis time window to " << _timeStamps * _hopSize / (2 * _outSampleRate) << "s");
+    _timeWindow = _timeStamps/2;
+  }
+
+  // the algorithms works by sorting (energy-wise) the PSD of the analysis window and computing the 
+  // ratio between the Q0 and Q1 quantiles (0.1 and 0.55 by default).
+  _Q0sample = (uint)(_Q0 * _timeWindow + 0.5);
+  _Q1sample = (uint)(_Q1 * _timeWindow + 0.5);
+
   _iterations = _timeStamps - _timeWindow + 1;
-  std::vector<vector<Real> >psdWindow(_spectSize, vector<Real>(_timeWindow, 0.f));
-  std::vector<vector<size_t> >psdIdxs(_spectSize, vector<size_t>(_timeWindow, 0));
-
-
-  std::vector<vector<Real> >r(_spectSize, vector<Real>(_iterations, 0.0));
-
+  vector<vector<Real> > psdWindow(_spectSize, vector<Real>(_timeWindow, 0.f));
+  vector<vector<Real> > r(_spectSize, vector<Real>(_iterations, 0.f));
+  vector<size_t> psdIdxs(_timeWindow, 0);
   Real Q0, Q1;
+
+  // initialize the PSD and r(quantile ratios) matrices.
   for (uint i = 0; i < _spectSize; i++) {
     for (uint j = 0; j < _timeWindow; j++)
       psdWindow[i][j] = psd[j][i];
 
-    psdIdxs[i] = sort_indexes(psdWindow[i]);
-    // sort(psdWindow[i].begin(), psdWindow[i].end());
-    Q0 = psdWindow[i][psdIdxs[i][_Q0sample]];
-    Q1 = psdWindow[i][psdIdxs[i][_Q1sample]];
+    psdIdxs = sort_indexes(psdWindow[i]);
+    Q0 = psdWindow[i][psdIdxs[_Q0sample]];
+    Q1 = psdWindow[i][psdIdxs[_Q1sample]];
     
     r[i][0] = Q0 / Q1;
   }
 
-  // std::vector<Real>::iterator idxIt;
+  // iterate during the rest of timestamps.
   for (uint i = 0; i < _spectSize; i++) {
     for (uint j = _timeWindow; j < _timeStamps; j++) {
       rotate(psdWindow[i].begin(), psdWindow[i].begin() + 1, psdWindow[i].end());
-      // idxIt = insertSorted(psdWindow[i], psd[j][i]);
-      // uint pos = std::distance(psdWindow[0].begin(),idxIt);
-      psdWindow[i][_timeWindow - 1] = psd[j][i];
-      psdIdxs[i] = sort_indexes(psdWindow[i]);
+      psdWindow[i][_timeWindow - 1] =psd[j][i];
+      psdIdxs = sort_indexes(psdWindow[i]);
 
-      Q0 = psdWindow[i][psdIdxs[i][_Q0sample]];
-      Q1 = psdWindow[i][psdIdxs[i][_Q1sample]];
+      Q0 = psdWindow[i][psdIdxs[_Q0sample]];
+      Q1 = psdWindow[i][psdIdxs[_Q1sample]];
 
       r[i][j - _timeWindow + 1] = Q0 / Q1;
       }
   }
+
+  // apply the median filter frequency-wise
   vector<Real> rSpec = vector<Real>(_spectSize, 0.f);
   vector<Real> filtered = vector<Real>(_spectSize, 0.f);
+  _Smoothing->configure("kernelSize", _medianFilterSize); 
+  _Smoothing->output("filteredArray").set(filtered);
+  _Smoothing->input("array").set(rSpec);
   for (uint j = 0; j < _iterations; j++) {
     for (uint i = 0; i < _spectSize; i++)
       rSpec[i] = r[i][j];
-
-    _Smoothing->configure("kernelSize", _medianFilterSize);
-    _Smoothing->input("array").set(rSpec);
-    _Smoothing->output("filteredArray").set(filtered);
     _Smoothing->compute();
     
     for (uint i = 0; i < _spectSize; i++)
       r[i][j] -= filtered[i];
   }
 
-  uint kernerSize = (uint)_timeWindow + (((uint)_timeWindow + 1) % 2);
+  // apply the median filter time-wise
+  uint kernerSize = (uint)(_timeWindow / 2);
+  kernerSize += (kernerSize + 1) % 2;
+  _Smoothing->configure("kernelSize", kernerSize);
+  _Smoothing->output("filteredArray").set(filtered);
+
   for (uint i = 0; i < _spectSize; i++) {
-    _Smoothing->configure("kernelSize", kernerSize);
     _Smoothing->input("array").set(r[i]);
-    _Smoothing->output("filteredArray").set(filtered);
     _Smoothing->compute();
 
     for (uint j = 0; j < _iterations; j++)
-        r[i][j] = filtered[j];
+      r[i][j] = filtered[j];
   }
 
   _rMatrix.push(vecvecToArray2D(r));
 
-  vector<Real> aux(1, 1.0);
-
-  _amplitudes.push(aux);
-  _frequencies.push(aux);
-  _starts.push(aux);
-  _ends.push(aux);
-
   
   vector<Real> frequencies, magnitudes;
+  vector<Real> salienceFunction;
+  vector<Real> salienceBins, salienceValues;
+  vector<vector<Real> >peakBins(_iterations);
+  vector<vector<Real> >peakSaliences(_iterations);
+  bool peakBinsNotEmpty = false;
+  
+  // finally the r matrix is feed into the pitch contours recommended signal chain
   for (uint j = 0; j < _iterations; j++) {
     for (uint i = 0; i < _spectSize; i++) 
       rSpec[i] = r[i][j];
@@ -228,13 +275,47 @@ AlgorithmStatus HumDetector::process() {
     _spectralPeaks->output("magnitudes").set(magnitudes);
     _spectralPeaks->compute();
 
-    
+    _pitchSalienceFunction->input("frequencies").set(frequencies);
+    _pitchSalienceFunction->input("magnitudes").set(magnitudes);
+    _pitchSalienceFunction->output("salienceFunction").set(salienceFunction);
+    _pitchSalienceFunction->compute();
 
-    // for (uint k = 0; k < frequencies.size(); k++) {
-    // _frequencies.push(frequencies);
-    // _amplitudes.push(magnitudes);
-    // }
+    _pitchSalienceFunctionPeaks->input("salienceFunction").set(salienceFunction);
+    _pitchSalienceFunctionPeaks->output("salienceBins").set(salienceBins);
+    _pitchSalienceFunctionPeaks->output("salienceValues").set(salienceValues);
+    _pitchSalienceFunctionPeaks->compute();
+
+    peakBins[j] = salienceBins;
+    peakSaliences[j] = salienceValues;
+
+    if (not salienceBins.empty())
+      peakBinsNotEmpty = true;
   }
+    std::vector<std::vector<Real> > contoursBins;
+    std::vector<std::vector<Real> > contoursSaliences;
+    std::vector<Real> contoursStartTimes, contoursFreqsMean, contoursSaliencesMean;
+    Real duration;
+
+    if (peakBinsNotEmpty) {
+      _pitchContours->input("peakBins").set(peakBins);
+      _pitchContours->input("peakSaliences").set(peakSaliences);
+      _pitchContours->output("contoursBins").set(contoursBins);
+      _pitchContours->output("contoursSaliences").set(contoursSaliences);
+      _pitchContours->output("contoursStartTimes").set(contoursStartTimes);
+      _pitchContours->output("duration").set(duration);
+      _pitchContours->compute();
+
+      contoursFreqsMean.assign(contoursBins.size(), 0.f);
+      contoursSaliencesMean.assign(contoursBins.size(), 0.f);
+
+      for (uint i = 0; i < contoursBins.size(); i++) {
+        contoursFreqsMean[i] = centBinToFrequency(mean(contoursBins[i]), _referenceTerm, _binsInOctave);
+        contoursSaliencesMean[i] = mean(contoursSaliences[i]);
+      }
+    }
+    _frequencies.push(contoursFreqsMean);
+    _saliences.push(contoursSaliencesMean);
+    _starts.push(contoursStartTimes);
 
   return FINISHED;
 }
@@ -253,16 +334,25 @@ namespace standard {
 
 const char* HumDetector::name = "HumDetector";
 const char* HumDetector::category = "Audio Problems";
-const char* HumDetector::description = DOC("");
+const char* HumDetector::description = DOC("This algorithm detects low frequency tonal noises in the audio signal. "
+"First, the steadiness of the Power Spectral Density (PSD) of the signal is computed by measuring the quantile ratios "
+"as discribed in [1]. After this, the PitchContours algorithm is used to keep track of the humming tones[2][3].\n"
+"\n"
+"References:\n"
+"  [1] Brandt, M., & Bitzer, J. (2014). Automatic Detection of Hum in Audio Signals. Journal of the Audio Engineering Society, 62(9), 584-595.\n"
+"  [2] J. Salamon and E. Gómez, Melody extraction from polyphonic music signals using pitch contour characteristics, IEEE Transactions on Audio, Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n"
+"  [3] The Essentia library,\n"
+"    http://essentia.upf.edu/documentation/reference/streaming_PitchContours.html"
+"\n"
+);
 
 
 HumDetector::HumDetector() {
   declareInput(_signal, "signal", "the input audio signal");
-  declareOutput(_rMatrix, "r", "r");
+  declareOutput(_rMatrix, "r", "the quantile ratios matrix");
   declareOutput(_frequencies, "frequencies", "humming tones frequencies");
-  declareOutput(_amplitudes, "amplitudes", "humming tones amplitudes");
+  declareOutput(_saliences, "saliences", "humming tones saliences");
   declareOutput(_starts, "starts", "humming tones starts");
-  declareOutput(_ends, "ends", "humming tones ends");
 
   createInnerNetwork();
 }
@@ -284,9 +374,8 @@ void HumDetector::createInnerNetwork() {
   *_vectorInput  >>  _humDetector->input("signal");
   _humDetector->output("r")    >> PC(_pool, "r");
   _humDetector->output("frequencies")    >> PC(_pool, "frequencies");
-  _humDetector->output("amplitudes")    >> PC(_pool, "amplitudes");
+  _humDetector->output("saliences")    >> PC(_pool, "saliences");
   _humDetector->output("starts")   >> PC(_pool, "starts");
-  _humDetector->output("ends")        >> PC(_pool, "ends");
 
   _network = new scheduler::Network(_vectorInput);
 }
@@ -302,31 +391,25 @@ void HumDetector::compute() {
 
   TNT::Array2D<Real>& rMatrix = _rMatrix.get();
   vector<Real>& frequencies = _frequencies.get();
-  vector<Real>& amplitudes = _amplitudes.get();
+  vector<Real>& amplitudes = _saliences.get();
   vector<Real>& starts = _starts.get();
-  vector<Real>& ends = _ends.get();
 
 
   rMatrix = _pool.value<vector<TNT::Array2D<Real> > >("r")[0];
-
-
   frequencies = _pool.value<vector<Real> >("frequencies");
-  amplitudes = _pool.value<vector<Real> >("amplitudes");
+  amplitudes = _pool.value<vector<Real> >("saliences");
   starts = _pool.value<vector<Real> >("starts");
-  ends = _pool.value<vector<Real> >("ends");
 
-  // reset();
+
+  reset();
 }
 
 void HumDetector::reset() {
   _network->reset();
   _pool.remove("r");
   _pool.remove("frequencies");
-  _pool.remove("amplitudes");
+  _pool.remove("saliences");
   _pool.remove("starts");
-  _pool.remove("ends");
-  //_pool.remove("ends");
-  //_pool.remove("shortTermLoudnessMax");
 }
 
 } // namespace standard

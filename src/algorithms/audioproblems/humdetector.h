@@ -39,6 +39,7 @@ class HumDetector : public AlgorithmComposite {
   standard::Algorithm* _Smoothing;
   standard::Algorithm* _spectralPeaks;
   standard::Algorithm* _pitchSalienceFunction;
+  standard::Algorithm* _pitchSalienceFunctionPeaks;
   standard::Algorithm* _pitchContours;
   // Algorithm* _timeSmoothing;
 
@@ -46,9 +47,9 @@ class HumDetector : public AlgorithmComposite {
 
   Source<TNT::Array2D<Real> > _rMatrix;
   Source<std::vector<Real> > _frequencies;
-  Source<std::vector<Real> > _amplitudes;
+  Source<std::vector<Real> > _saliences;
   Source<std::vector<Real> > _starts;
-  Source<std::vector<Real> > _ends;
+  // Source<std::vector<Real> > _ends;
 
   Pool _pool;
   Real _absoluteThreshold;
@@ -66,6 +67,9 @@ class HumDetector : public AlgorithmComposite {
   uint _Q1sample;
   uint _iterations;
   uint _medianFilterSize;
+  Real _referenceTerm;
+  Real _binsInOctave;
+  Real _minimumFrequency;
 
   scheduler::Network* _network;
 
@@ -75,6 +79,8 @@ typename std::vector<T>::iterator
 
 template <typename T>
 std::vector<size_t> sort_indexes(const std::vector<T> &v);
+
+Real centBinToFrequency(Real cent, Real reff, Real binsInOctave);
 
  public:
   HumDetector();
@@ -87,11 +93,14 @@ std::vector<size_t> sort_indexes(const std::vector<T> &v);
 
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.1);  
-    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.1);  
-    declareParameter("timeWindow", "time to use for the hum estimation [s]", "(0,inf)",15);  
-    declareParameter("Q0", "time to use for the hum estimation [s]", "(0,1)",0.1);  
-    declareParameter("Q1", "time to use for the hum estimation [s]", "(0,1)",0.55);  
+    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.2);
+    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.4);
+    declareParameter("timeWindow", "analysis time to use for the hum estimation [s]", "(0,inf)", 10);
+    declareParameter("minimumFrequency", "minimum frequency to consider [Hz]", "(0,inf)", 22.5);
+    declareParameter("Q0", "low quantile", "(0,1)", 0.1);
+    declareParameter("Q1", "high quatile", "(0,1)", 0.55);
+    declareParameter("minDuration", "minimun duration of the humming tones [s]", "(0,inf)", 2);
+    declareParameter("timeContinuity", "time continuity cue (the maximum allowed gap duration for a pitch contour) [s]", "(0,inf)",5);
   };
 
   void configure();
@@ -117,9 +126,9 @@ class HumDetector : public Algorithm {
   Input<std::vector<Real> > _signal;
   Output<TNT::Array2D<Real> > _rMatrix;
   Output<std::vector<Real> > _frequencies;
-  Output<std::vector<Real> > _amplitudes;
+  Output<std::vector<Real> > _saliences;
   Output<std::vector<Real> > _starts;
-  Output<std::vector<Real> > _ends;
+  // Output<std::vector<Real> > _ends;
 
   streaming::Algorithm* _humDetector;
   streaming::VectorInput<Real>* _vectorInput;
@@ -133,11 +142,12 @@ class HumDetector : public Algorithm {
 
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.1);  
-    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.1);  
-    declareParameter("timeWindow", "time to use for the hum estimation [s]", "(0,inf)",15);  
-    declareParameter("Q0", "time to use for the hum estimation [s]", "(0,1)",0.1);  
-    declareParameter("Q1", "time to use for the hum estimation [s]", "(0,1)",0.55);  
+    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.2);
+    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.4);
+    declareParameter("timeWindow", "analysis time to use for the hum estimation [s]", "(0,inf)",10);
+    declareParameter("minimumFrequency", "minimum frequency to consider [Hz]", "(0,inf)",22.5);
+    declareParameter("Q0", "low quantile", "(0,1)",0.1);
+    declareParameter("Q1", "high quatile", "(0,1)",0.55);
   };
 
   void configure();
