@@ -94,8 +94,8 @@ namespace streaming {
 class Welch : public StreamingAlgorithmWrapper {
 
  protected:
-   Sink<std::vector<Real> > _frame;
-   Source<std::vector<Real> > _psd;
+  Sink<std::vector<Real> > _frame;
+  Source<std::vector<Real> > _psd;
 
  public:
   Welch() {

@@ -58,17 +58,17 @@ void Welch::initBuffers() {
 
   _spectSize = _fftSize / 2 + 1;
 
-  _window->configure("size", _fftSize,
+  _window->configure("size", _frameSize,
                     "zeroPadding", _padding,
                     "type", _windowType,
                     "normalized", false);
   _window->output("frame").set(_windowed);
 
   _powerSpectrum->configure("size", _fftSize);
-  _powerSpectrum->input("signal").set(_windowed);
+  
   _powerSpectrum->output("powerSpectrum").set(_powerSpectrumFrame);
 
-  _psdBuffer.resize(_averagingFrames, vector<Real>(_spectSize, 0.f));
+  _psdBuffer.assign(_averagingFrames, vector<Real>(_spectSize, 0.f));
 
   vector<Real> ones( _fftSize, 1.f);
   _window->input("frame").set(ones);
@@ -84,7 +84,7 @@ void Welch::initBuffers() {
 void Welch::compute() {
   const vector<Real>& frame = _frame.get();
   std::vector<Real>& psd = _psd.get();
-  psd = vector<Real>(_spectSize, 0.f);
+  psd.assign(_spectSize, 0.f);
 
   if (frame.size() != _frameSize) {
     E_INFO("Welch: frameSize was configured to " << _frameSize << " but encountered " <<
@@ -95,6 +95,7 @@ void Welch::compute() {
   _window->input("frame").set(frame);
   _window->compute();
 
+  _powerSpectrum->input("signal").set(_windowed);
   _powerSpectrum->compute();
   
   for (uint j = 0; j < _spectSize; j++) {
