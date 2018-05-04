@@ -34,7 +34,7 @@ class EssentiaWrap(QaWrapper):
     """
     Essentia Solution.
     """
-    algo = es.ClickDetector(frameSize=frameSize, hopSize=hopSize)
+    algo = es.ClickDetector(frameSize=frameSize, hopSize=hopSize, detectionThreshold=30)
 
     def compute(self, *args):
         y = []
@@ -162,19 +162,21 @@ if __name__ == '__main__':
     qa.set_wrappers(wrappers)
 
     # data_dir = '../../QA-audio/Discontinuities/prominent_jumps/Vivaldi_Sonata_5_II_Allegro_prominent_jump.wav'
-    data_dir = '../../QA-audio/Discontinuities/prominent_jumps/'
+    # data_dir = '../../QA-audio/Clicks'
+    # data_dir = '/home/pablo/reps/essentia/test/audio/recorded/vignesh.wav'
+    # data_dir = '../../QA-audio/Discontinuities/prominent_jumps/'
     # data_dir = '../../QA-audio/Discontinuities/prominent_jumps/vignesh_prominent_jump.wav'
-    #  data_dir = '../../../../../../pablo/Music/Desakato-La_Teoria_del_Fuego/'
+    data_dir = '../../../../../../pablo/Music/Desakato-La_Teoria_del_Fuego/'
 
     qa.load_audio(filename=data_dir, stereo=False)  # Works for a single
-    qa.load_solution(data_dir, ground_true=True)
+    # qa.load_solution(data_dir, ground_true=True)
 
     # Compute and the results, the scores and and compare the computation times
-    qa.compute_all(output_file='{}/compute.log'.format(folder))
+    # qa.compute_all(output_file='{}/compute.log'.format(folder))
 
-    qa.score_all()
+    # qa.score_all()
     # qa.scores
     # qa.save_test('{}/test'.format(folder))
 
-    x = qa.data['vignesh_prominent_jump'][33863:33863+512]
+    # x = qa.data['vignesh_prominent_jump'][33863:33863+512]
     # Add the testing files
