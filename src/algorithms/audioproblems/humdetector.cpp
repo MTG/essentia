@@ -117,8 +117,12 @@ void HumDetector::configure() {
   _timeWindow = int(round(parameter("timeWindow").toReal() * _outSampleRate / _hopSize));
   _Q0 = parameter("Q0").toReal();
   _Q1 = parameter("Q1").toReal();
-
+  _maximumFrequency = parameter("maximumFrequency").toReal();
+  _minDuration = parameter("minimumDuration").toReal() * 1000.f;
+  _timeContinuity = parameter("timeContinuity").toReal() * 1000.f;
   _minimumFrequency = parameter("minimumFrequency").toReal();
+  _numberHarmonics = parameter("numberHarmonics").toInt();
+  _detectionThreshold = parameter("detectionThreshold").toReal();
 
   _medianFilterSize = _frameSize * 60 / (_outSampleRate);
   _medianFilterSize += (_medianFilterSize + 1) % 2;
@@ -127,7 +131,7 @@ void HumDetector::configure() {
                         "outputSampleRate", _outSampleRate);
   
   _lowPass->configure("sampleRate",_outSampleRate,
-                      "cutoffFrequency", 900.f);
+                      "cutoffFrequency", _maximumFrequency);
 
   _frameCutter->configure("frameSize",frameSize,
                           "hopSize", _hopSize,
@@ -140,27 +144,30 @@ void HumDetector::configure() {
 
   _spectralPeaks->configure("sampleRate", _outSampleRate,
                             "minFrequency", _minimumFrequency,
-                            "maxFrequency", 900.f,
-                            "magnitudeThreshold", 0.5f);
+                            "maxFrequency", _maximumFrequency,
+                            "magnitudeThreshold", _detectionThreshold);
 
-  Real binResolution = 5;
+  Real binResolution = 20;
   _binsInOctave = 1200.0 / binResolution;
-  _pitchSalienceFunction->configure("binResolution", binResolution, 
+  _pitchSalienceFunction->configure("binResolution", binResolution,
+                                    "harmonicWeight", 0.1,
                                     "referenceFrequency", _minimumFrequency,
-                                    "numberHarmonics", 1);
+                                    "numberHarmonics", _numberHarmonics);
 
   _pitchSalienceFunctionPeaks->configure("binResolution", binResolution,
-                                         "maxFrequency", 900.f,
+                                         "maxFrequency", _maximumFrequency,
                                          "minFrequency", _minimumFrequency,
                                          "referenceFrequency",  _minimumFrequency);
 
-  uint pitchContinuity = 10 / (1000 * _hopSize);
+  Real binsToSkip = 6;
+  //Real pitchContinuity = 400.f / (1000.f * _hopSize);
+  Real pitchContinuity = (binsToSkip / _binsInOctave) * 1200. / (1000.f * _hopSize / _outSampleRate); 
   _pitchContours->configure("binResolution", binResolution, 
                             "hopSize", _hopSize,
                             "sampleRate", _outSampleRate,
-                            "minDuration", 2000,
+                            "minDuration", _minDuration,
                             "pitchContinuity", pitchContinuity,
-                            "timeContinuity", 5000);
+                            "timeContinuity", _timeContinuity);
 
 
   _referenceTerm = 0.5 - _binsInOctave * log2(_minimumFrequency);
@@ -242,8 +249,8 @@ AlgorithmStatus HumDetector::process() {
   }
 
   // apply the median filter time-wise
-  uint kernerSize = (uint)(_timeWindow / 2);
-  kernerSize += (kernerSize + 1) % 2;
+  uint kernerSize = min((uint)(_timeWindow / 2), _iterations);
+  kernerSize -= (kernerSize + 1) % 2;
   _Smoothing->configure("kernelSize", kernerSize);
   _Smoothing->output("filteredArray").set(filtered);
 
@@ -363,7 +370,11 @@ HumDetector::~HumDetector() {
 
 void HumDetector::configure() {
   _humDetector->configure(INHERIT("sampleRate"), INHERIT("hopSize"),
-                          INHERIT("frameSize"), INHERIT("timeWindow"));
+                          INHERIT("frameSize"), INHERIT("timeWindow"),
+                          INHERIT("minimumFrequency"), INHERIT("maximumFrequency"),
+                          INHERIT("Q0"), INHERIT("Q1"),
+                          INHERIT("minimumDuration"), INHERIT("timeContinuity"),
+                          INHERIT("numberHarmonics"));
 }
 
 

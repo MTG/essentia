@@ -67,9 +67,14 @@ class HumDetector : public AlgorithmComposite {
   uint _Q1sample;
   uint _iterations;
   uint _medianFilterSize;
+  uint _numberHarmonics;
   Real _referenceTerm;
   Real _binsInOctave;
   Real _minimumFrequency;
+  Real _maximumFrequency;
+  Real _minDuration;
+  Real _timeContinuity;
+  Real _detectionThreshold;
 
   scheduler::Network* _network;
 
@@ -91,16 +96,19 @@ Real centBinToFrequency(Real cent, Real reff, Real binsInOctave);
     declareProcessStep(SingleShot(this));
   }
 
-  void declareParameters() {
-    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.2);
-    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.4);
-    declareParameter("timeWindow", "analysis time to use for the hum estimation [s]", "(0,inf)", 10);
-    declareParameter("minimumFrequency", "minimum frequency to consider [Hz]", "(0,inf)", 22.5);
-    declareParameter("Q0", "low quantile", "(0,1)", 0.1);
-    declareParameter("Q1", "high quatile", "(0,1)", 0.55);
-    declareParameter("minDuration", "minimun duration of the humming tones [s]", "(0,inf)", 2);
-    declareParameter("timeContinuity", "time continuity cue (the maximum allowed gap duration for a pitch contour) [s]", "(0,inf)",5);
+void declareParameters() {
+    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.f);
+    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.2f);
+    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.4f);
+    declareParameter("timeWindow", "analysis time to use for the hum estimation [s]", "(0,inf)", 9.f);
+    declareParameter("minimumFrequency", "minimum frequency to consider [Hz]", "(0,inf)", 27.5f);
+    declareParameter("maximumFrequency", "maximum frequency to consider [Hz]", "(0,inf)", 400.f);
+    declareParameter("Q0", "low quantile", "(0,1)", 0.1f);
+    declareParameter("Q1", "high quatile", "(0,1)", 0.55f);
+    declareParameter("minimumDuration", "minimun duration of the humming tones [s]", "(0,inf)", 0.5f);
+    declareParameter("timeContinuity", "time continuity cue (the maximum allowed gap duration for a pitch contour) [s]", "(0,inf)", 10.f);
+    declareParameter("numberHarmonics", "number of considered harmonics", "(0,inf)", 1);
+    declareParameter("detectionThreshold", "the detection threshold for the peaks of the r matrix", "(0,inf)", 0.2f);
   };
 
   void configure();
@@ -140,14 +148,19 @@ class HumDetector : public Algorithm {
   HumDetector();
   ~HumDetector();
 
-  void declareParameters() {
-    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.2);
-    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.4);
-    declareParameter("timeWindow", "analysis time to use for the hum estimation [s]", "(0,inf)",10);
-    declareParameter("minimumFrequency", "minimum frequency to consider [Hz]", "(0,inf)",22.5);
-    declareParameter("Q0", "low quantile", "(0,1)",0.1);
-    declareParameter("Q1", "high quatile", "(0,1)",0.55);
+void declareParameters() {
+    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.f);
+    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.2f);
+    declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.4f);
+    declareParameter("timeWindow", "analysis time to use for the hum estimation [s]", "(0,inf)", 10.f);
+    declareParameter("minimumFrequency", "minimum frequency to consider [Hz]", "(0,inf)", 22.5f);
+    declareParameter("maximumFrequency", "maximum frequency to consider [Hz]", "(0,inf)", 400.f);
+    declareParameter("Q0", "low quantile", "(0,1)", 0.1f);
+    declareParameter("Q1", "high quatile", "(0,1)", 0.55f);
+    declareParameter("minimumDuration", "minimun duration of the humming tones [s]", "(0,inf)", 2.f);
+    declareParameter("timeContinuity", "time continuity cue (the maximum allowed gap duration for a pitch contour) [s]", "(0,inf)", 10.f);
+    declareParameter("numberHarmonics", "number of considered harmonics", "(0,inf)", 1);
+    declareParameter("detectionThreshold", "the detection threshold for the peaks of the r matrix", "(0,inf)", 0.2f);
   };
 
   void configure();
