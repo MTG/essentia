@@ -39,7 +39,9 @@ int main (int argc,char* argv[]) {
                                     "sampleRate", sampleRate);
 
 
-  Algorithm* hd    = factory.create("HumDetector");                                                               
+  Algorithm* hd    = factory.create("HumDetector",
+                                    "timeWindow", 10.f,
+                                    "minimumDuration", 0.1f);                                                               
 
   cout << "-------- connecting algos ---------" << endl;
 
@@ -53,7 +55,7 @@ int main (int argc,char* argv[]) {
   vector<Real> a, f, s, e;
   TNT::Array2D<Real> r;
 
-  hd->output("amplitudes").set(a);
+  hd->output("saliences").set(a);
   hd->output("frequencies").set(f);
   hd->output("starts").set(s);
   // hd->output("ends").set(e);
