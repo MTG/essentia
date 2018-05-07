@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
   if (argc < 2) {
     cout << "Error: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " audio_input output_file chromaprint_duration" << endl;
+    cout << "Usage: " << argv[0] << " audio_input chromaprint_duration" << endl;
     creditLibAV();
     exit(1);
   }
