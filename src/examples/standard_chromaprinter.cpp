@@ -28,7 +28,7 @@ using namespace standard;
 
 int main(int argc, char* argv[]) {
 
-  if (argc != 4) {
+  if (argc < 2) {
     cout << "Error: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input output_file chromaprint_duration" << endl;
     creditLibAV();
@@ -36,8 +36,10 @@ int main(int argc, char* argv[]) {
   }
 
   string audioFilename = argv[1];
-  string outputFilename = argv[2];
-  Real chromaprintDuration = stof(argv[3]);
+  Real chromaprintDuration = 0.f;
+  
+  if (argc == 3)
+    chromaprintDuration = stof(argv[3]);
 
   // register the algorithms in the factory(ies)
   essentia::init();
@@ -53,11 +55,12 @@ int main(int argc, char* argv[]) {
                                           "filename", audioFilename,
                                           "sampleRate", sampleRate);
 
-  Algorithm* chromaPrinter = factory.create("Chromaprinter");
+  Algorithm* chromaPrinter = factory.create("Chromaprinter",
+                                            "maxLength", chromaprintDuration,
+                                            "sampleRate", sampleRate);
 
   vector<Real> audio;
   string chromaprint;
-  Real confidence;
 
   audioLoader->output("audio").set(audio);
   audioLoader->compute();
@@ -66,20 +69,10 @@ int main(int argc, char* argv[]) {
   chromaPrinter->output("fingerprint").set(chromaprint);
   chromaPrinter->compute();
 
+  int duration = audio.size() / sampleRate;
 
-  // output to file:
-  Algorithm* yamlOutput = factory.create("YamlOutput",
-                                         "filename", outputFilename);
-
-  pool.add("pool.chromaprint", chromaprint);
-
-  yamlOutput->input("pool").set(pool);
-
-  // run algorithms
-  yamlOutput->compute();
-
-  delete audioLoader;
-  delete chromaPrinter;
+  std::cout << "DURATION=" << duration << std::endl;
+  std::cout << "FINGERPRINT=" << chromaprint << std::endl;
 
   essentia::shutdown();
 
