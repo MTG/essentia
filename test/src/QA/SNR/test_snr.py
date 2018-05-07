@@ -39,13 +39,13 @@ class EssentiaWrap(QaWrapper):
     """
     Essentia Solution.
     """
-    algo = es.SNR(frameSize=frameSize, noiseThreshold=noiseThreshold)
 
+    algo = es.SNR(frameSize=frameSize, noiseThreshold=noiseThreshold)
     def compute(self, *args):
         self.algo.reset()
         for frame in es.FrameGenerator(args[1], frameSize=frameSize, hopSize=hopSize,
                                        startFromZero=True):
-            _, _, snr = self.algo(frame)
+            snr, _, _  = self.algo(frame)
 
         return esarr([snr])
 
@@ -179,8 +179,8 @@ if __name__ == '__main__':
 
     # Instantiating wrappers
     wrappers = [
-        EssentiaWrap('events')
-        # Dev('events')
+        EssentiaWrap('events'),
+        Dev('events')
     ]
 
     # Instantiating the test
@@ -189,80 +189,55 @@ if __name__ == '__main__':
     # Add the wrappers to the test the wrappers
     qa.set_wrappers(wrappers)
 
-    # data_dir = '../../QA-audio/Discontinuities/prominent_jumps/Vivaldi_Sonata_5_II_Allegro_prominent_jump.wav'
-    # data_dir = '../../QA-audio/Clicks'
-    # data_dir = '/home/pablo/reps/essentia/test/audio/recorded/vignesh.wav'
     data_dir = '/home/pablo/reps/essentia/test/audio/recorded/'
-    # data_dir = '../../QA-audio/Discontinuities/prominent_jumps/'
-    # data_dir = '../../QA-audio/Discontinuities/prominent_jumps/vignesh_prominent_jump.wav'
-    # data_dir = '../../../../../../pablo/Music/Desakato-La_Teoria_del_Fuego/'
 
     qa.load_audio(filename=data_dir, stereo=False)  # Works for a single
-    # qa.load_solution(data_dir, ground_true=True)
 
+
+    # As there is no known SNR annotated real data, this algorithm is assessed with
+    # synthetic signals only. Adding noise to the Essentia audio folder was discharted
+    # because the original noise level should be known a priori.
     fs = 44100.
     time = 5 #s
 
+    noise_durations = [1.] #s
+    time_axis = np.arange(0, time, 1 / fs)
+
+    nsamples = len(time_axis)
+    for noise_alpha in [.9]:
+        for asume_gauss_psd in [0]:
+            for noise_only in noise_durations:
+
+                results = []
+                gt = []
+                for i in range(1):
+                    noise = np.random.randn(nsamples)
+                    noise /= np.std(noise)
 
 
-    # noise_durations = [1.] #s
-    # time_axis = np.arange(0, time, 1 / fs)
-    #
-    # nsamples = len(time_axis)
-    # for noise_alpha in [.9]:
-    #     for asume_gauss_psd in [0]:
-    #         for noise_only in noise_durations:
-    #
-    #             results = []
-    #             gt = []
-    #             for i in range(1):
-    #                 noise = np.random.randn(nsamples)
-    #                 noise /= np.std(noise)
-    #
-    #
-    #                 signal = np.sin(2 * pi * 5000 * time_axis)
-    #
-    #                 signal_db = -22.
-    #                 noise_db  = -50.
-    #
-    #                 noise_var = instantPower(esarr(db2amp(noise_db) * noise))
-    #                 signal[:int(noise_only * fs)] = np.zeros(int(noise_only * fs))
-    #                 real_snr_prior = 10. * np.log10(
-    #                     (instantPower(esarr(db2amp(signal_db) * signal[int(noise_only * fs):]))) /
-    #                     (instantPower(esarr(db2amp(noise_db)  * noise[int(noise_only * fs):]))))
-    #
-    #                 real_snr_prior_esp_corrected = real_snr_prior - 10. * np.log10(fs / 2.)
-    #                 gt.append(real_snr_prior_esp_corrected)
-    #
-    #                 signal_and_noise = esarr(db2amp(signal_db) * signal + db2amp(noise_db) * noise)
-    #
-    #                 ma_snr_average = qa.wrappers['Dev'].compute(None, signal_and_noise, asume_gauss_psd, noise_alpha)
-    #                 mean_snr_estimation = 10 * np.log10(ma_snr_average)
-    #                 mean_snr_estimation_corrected = mean_snr_estimation - 10. * np.log10(fs / 2.)
-    #                 print 'with dev, error: {:.3f}dB'.format(np.abs(mean_snr_estimation_corrected[0] - real_snr_prior_esp_corrected))
-    #
-    #                 ma_snr_average = qa.wrappers['EssentiaWrap'].compute(None, signal_and_noise, asume_gauss_psd, noise_alpha)
-    #                 mean_snr_estimation = 10 * np.log10(ma_snr_average)
-    #                 mean_snr_estimation_corrected = mean_snr_estimation - 10. * np.log10(fs / 2.)
-    #                 print 'with Esssentia, error: {:.3f}dB'.format(np.abs(mean_snr_estimation_corrected[0] - real_snr_prior_esp_corrected))
-    #
-    #
-    #                 results.append(mean_snr_estimation_corrected)
-                # print '*' * 30
-                # print 'Noise duration is {:.3f}.'.format(noise_only)
-                # print 'Noise alpha is {:.2f}.'.format(noise_alpha)
-                # print 'SNR estimation mean is {:.4f} with a std of {:.3f}.'.format(np.mean(results), np.std(results))
-                # print 'SNR groud true mean is {:.4f} with a std of {:.3f}.'.format(np.mean(gt), np.std(gt))
-                # if asume_gauss_psd:
-                #     print 'assuming gaussin psd for noise (flat psd)'
-                # else:
-                #     print 'estimating noise psd shape from data'
-                # print '*' * 30
+                    signal = np.sin(2 * pi * 5000 * time_axis)
 
+                    signal_db = -22.
+                    noise_db  = -50.
 
-    # Compute and the results, the scores and and compare the computation times
-    qa.compute_all(output_file='{}/compute.log'.format(folder))
+                    noise_var = instantPower(esarr(db2amp(noise_db) * noise))
+                    signal[:int(noise_only * fs)] = np.zeros(int(noise_only * fs))
+                    real_snr_prior = 10. * np.log10(
+                        (instantPower(esarr(db2amp(signal_db) * signal[int(noise_only * fs):]))) /
+                        (instantPower(esarr(db2amp(noise_db)  * noise[int(noise_only * fs):]))))
 
-    # qa.score_all()
-    # qa.scores
-    # qa.save_test('{}/test'.format(folder))
+                    real_snr_prior_esp_corrected = real_snr_prior - 10. * np.log10(fs / 2.)
+                    gt.append(real_snr_prior_esp_corrected)
+
+                    signal_and_noise = esarr(db2amp(signal_db) * signal + db2amp(noise_db) * noise)
+
+                    ma_snr_average = qa.wrappers['Dev'].compute(None, signal_and_noise, asume_gauss_psd, noise_alpha)
+                    mean_snr_estimation = 10 * np.log10(ma_snr_average)
+                    mean_snr_estimation_corrected = mean_snr_estimation - 10. * np.log10(fs / 2.)
+                    print 'with dev, error: {:.3f}dB'.format(np.abs(mean_snr_estimation_corrected[0] - real_snr_prior_esp_corrected))
+
+                    ma_snr_average = qa.wrappers['EssentiaWrap'].compute(None, signal_and_noise, asume_gauss_psd, noise_alpha)
+                    print 'with Esssentia, error: {:.3f}dB'.format(np.abs(ma_snr_average[0] - real_snr_prior_esp_corrected))
+
+                    results.append(mean_snr_estimation_corrected)
+
