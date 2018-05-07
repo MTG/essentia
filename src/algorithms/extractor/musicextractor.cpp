@@ -84,6 +84,11 @@ void MusicExtractor::configure() {
   rhythmStats = parameter("rhythmStats").toVectorString();
   mfccStats = parameter("mfccStats").toVectorString();
   gfccStats = parameter("gfccStats").toVectorString();
+  
+#if HAVE_LIBCHROMAPRINT
+  chromaprintCompute = parameter("chromaprintCompute").toBool();
+  chromaprintDuration = parameter("chromaprintDuration").toReal();
+#endif
 
 #if HAVE_GAIA2 
   if (parameter("highlevel").isConfigured()) { 
@@ -111,6 +116,11 @@ void MusicExtractor::configure() {
     E_WARNING("MusicExtractor: Gaia library is missing. Skipping configuration of SVM models.");
 #endif
   }
+
+#if HAVE_LIBCHROMAPRINT
+    chromaprintCompute = options.value<Real>("chromaprint.compute");
+    chromaprintDuration = options.value<Real>("chromaprint.duration");
+#endif
 }
 
 
@@ -162,6 +172,12 @@ void MusicExtractor::setExtractorDefaultOptions() {
     options.set("highlevel.compute", true);
   }
 #endif
+
+#if HAVE_LIBCHROMAPRINT
+    options.set("chromaprint.compute", chromaprintCompute);
+    options.set("chromaprint.duration", chromaprintDuration);
+#endif
+  
 }
 
 
@@ -204,7 +220,16 @@ void MusicExtractor::compute() {
   
   E_INFO("MusicExtractor: Replay gain");
   computeReplayGain(audioFilename, results);
-  
+
+  #if HAVE_LIBCHROMAPRINT
+    if (chromaprintCompute) {
+      E_INFO("MusicExtractor: Chromaprint");
+      computeChromaPrint(audioFilename, results);
+    }
+  #else
+    E_WARNING("MusicExtractor: Chromaprint library is missing. Skipping computation of the Chromaprint.");
+  #endif
+    
   E_INFO("MusicExtractor: Compute audio features");
 
   // normalize the audio with replay gain and compute as many lowlevel, rhythm,
@@ -584,6 +609,43 @@ void MusicExtractor::setExtractorOptions(const std::string& filename) {
   delete yaml;
   options.merge(opts, "replace");
 }
+
+#if HAVE_LIBCHROMAPRINT
+void MusicExtractor::computeChromaPrint(const string& audioFilename, Pool& results) {
+  AlgorithmFactory& factory = standard::AlgorithmFactory::instance();
+
+  Algorithm* audio = factory.create("MonoLoader",
+                                    "filename", audioFilename,
+                                    "sampleRate", analysisSampleRate,
+                                    "downmix", downmix);
+  Algorithm* chromaprinter = factory.create("Chromaprinter",
+                                            "sampleRate", analysisSampleRate,
+                                            "maxLength", chromaprintDuration);
+
+  vector<Real> siganl;
+  string chromaprint;
+
+  audio->output("audio").set(siganl);
+  chromaprinter->input("signal").set(siganl);
+
+  chromaprinter->output("fingerprint").set(chromaprint);
+
+  try {
+    audio->compute();
+    chromaprinter->compute();
+
+    results.add("chromaprint.string", chromaprint);
+    if (chromaprintDuration == 0.f)
+      results.add("chromaprint.duration", results.value<Real>("metadata.audio_properties.length"));
+    else
+    results.add("chromaprint.duration", chromaprintDuration);
+  }
+  catch (const EssentiaException&) {
+    throw EssentiaException("File looks like a completely silent file");
+    //exit(4);
+  }
+}
+#endif
 
 } // namespace standard
 } // namespace essentia

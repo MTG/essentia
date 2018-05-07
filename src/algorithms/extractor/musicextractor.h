@@ -69,6 +69,11 @@ class MusicExtractor : public Algorithm {
   std::vector<std::string> mfccStats;
   std::vector<std::string> gfccStats;
 
+#if HAVE_LIBCHROMAPRINT
+  bool chromaprintCompute;
+  Real chromaprintDuration;
+#endif
+
 #if HAVE_GAIA2 
   std::vector<std::string> svmModels;
 #endif
@@ -83,6 +88,10 @@ class MusicExtractor : public Algorithm {
   void readMetadata(const std::string& audioFilename, Pool& results);
   void computeAudioMetadata(const std::string& audioFilename, Pool& results);
   void computeReplayGain(const std::string& audioFilename, Pool& results);
+
+#if HAVE_LIBCHROMAPRINT
+  void computeChromaPrint(const std::string& audioFilename, Pool& results);
+#endif
 
   Pool computeAggregation(Pool& pool);
 
@@ -134,6 +143,11 @@ class MusicExtractor : public Algorithm {
     
     declareParameter("mfccStats", "the statistics to compute for MFCC features", "", cepstrumStats);
     declareParameter("gfccStats", "the statistics to compute for GFCC features", "", cepstrumStats);
+
+#if HAVE_LIBCHROMAPRINT
+    declareParameter("chromaprintCompute", "compute the Chromaprint", "{true,false}", false);
+    declareParameter("chromaprintDuration", "the amount of time from the beginning used to compute the Chromaprint. 0 to use the full audio length [s]", "[0,inf)", 0.);
+#endif
 
 #if HAVE_GAIA2 
     declareParameter("highlevel", "list of high-level classifier models (gaia2 history filenames) to apply using extracted features. Skip classification if not specified (empty list)", "", Parameter::VECTOR_STRING);
