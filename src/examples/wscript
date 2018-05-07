@@ -32,7 +32,13 @@ example_sources_fileio = [
     ('standard_spsmodel', ),
     ('standard_stft', ),
     ('standard_stochasticmodel', ),
+    ('standard_extractor_la-cupula', ),
+    ('standard_snr', ),
+    ('standard_welch', ),
+    ('standard_humdetector', ),
 
+    # ('streaming_extractor_la-cupula', ),
+    ('streaming_humdetector', ),
     ('streaming_beatsmarker', ),
     ('streaming_beattracker_multifeature_mirex2013', ),
     ('streaming_key', ),
