@@ -13,7 +13,7 @@ cmake \
     -D CMAKE_CXX_FLAGS="-fPIC" \
     -DCMAKE_INSTALL_PREFIX=$PREFIX \
     -DCMAKE_BUILD_TYPE=Release \
-    -DENABLE_STATIC=ON \
+    -DBUILD_SHARED_LIBS=OFF \
 	. 
 make
 make install
