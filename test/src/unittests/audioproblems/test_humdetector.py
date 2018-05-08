@@ -58,9 +58,38 @@ class TestHumDetector(TestCase):
 
         hum *= db2amp(-54.) # empirically found to be the audible limit
 
-        rHum, f, a, s = HumDetector()(np.array(audio + hum , dtype=np.float32))
+        _, f, _, _, _ = HumDetector()(np.array(audio + hum , dtype=np.float32))
 
         self.assertAlmostEqualVector(f, [freq], 1e1)
+
+    def testARProcess(self):
+        # This test assess the capability of the algorithm to
+        # detect a low frequency humming modeled as an autoregresive
+        # process. The idea is that this kind of signal is probably
+        # closer to hummings found on real scenarios.
+        PI = np.pi
+        time = 30. # s
+        fs = 44100. # fs
+        freq = 100 # Hz
+        nSamples = int(time * fs)
+
+        noise = np.array(np.random.randn(nSamples), dtype=np.float32)
+
+        v1 = [1, -1 * np.exp(1j * 2 * PI * freq / fs)]
+        v2 = [1, -1 * np.exp(-1j * 2 * PI * freq / fs)]
+
+        a = np.array(np.convolve(np.real(v1), np.real(v2)), dtype=np.float32)
+        b = 1 - np.sum(abs(a))
+
+        hum = IIR(denominator=a,numerator=[1.])(noise)
+        hum /= np.max(hum)
+
+        signal = hum + noise 
+        signal /= np.max(signal)
+
+        _, estimated_freqs, _, _, _, = HumDetector()(signal)
+
+        self.assertAlmostEqualVector([estimated_freqs[0]], [freq], 1e2)
 
 suite = allTests(TestHumDetector)
 
