@@ -22,6 +22,16 @@ def configure(ctx):
     ctx.check_python_headers()
     ctx.check_python_module('numpy')
 
+    # A monkey patch to remove the -lpythonX.Ym flag. PEP 513 recommends to
+    # avoid explicit linking to libpythonX.Y.so.1, however python-config still
+    # outputs this flag.
+    # https://www.python.org/dev/peps/pep-0513
+    # https://github.com/pypa/manylinux/issues/85
+    ctx.env.LIB_PYEMBED = [f for f in ctx.env.LIB_PYEMBED
+                                   if not f.startswith('python')]
+    ctx.env.LIB_PYEXT = [f for f in ctx.env.LIB_PYEMBED
+                                   if not f.startswith('python')]
+
 def adjust(objs, path):
     return [ '%s/%s' % (path, obj) for obj in objs ]
 
