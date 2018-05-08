@@ -49,7 +49,7 @@ class HumDetector : public AlgorithmComposite {
   Source<std::vector<Real> > _frequencies;
   Source<std::vector<Real> > _saliences;
   Source<std::vector<Real> > _starts;
-  // Source<std::vector<Real> > _ends;
+  Source<std::vector<Real> > _ends;
 
   Pool _pool;
   Real _absoluteThreshold;
@@ -136,7 +136,7 @@ class HumDetector : public Algorithm {
   Output<std::vector<Real> > _frequencies;
   Output<std::vector<Real> > _saliences;
   Output<std::vector<Real> > _starts;
-  // Output<std::vector<Real> > _ends;
+  Output<std::vector<Real> > _ends;
 
   streaming::Algorithm* _humDetector;
   streaming::VectorInput<Real>* _vectorInput;

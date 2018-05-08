@@ -81,6 +81,7 @@ HumDetector::HumDetector() : AlgorithmComposite() {
   declareOutput(_frequencies, "frequencies", "humming tones frequencies");
   declareOutput(_saliences, "saliences", "humming tones saliences");
   declareOutput(_starts, "starts", "humming tones starts");
+  declareOutput(_ends, "ends", "humming tones ends");
 
 
   // connect input proxy
@@ -300,7 +301,7 @@ AlgorithmStatus HumDetector::process() {
   }
     std::vector<std::vector<Real> > contoursBins;
     std::vector<std::vector<Real> > contoursSaliences;
-    std::vector<Real> contoursStartTimes, contoursFreqsMean, contoursSaliencesMean;
+    std::vector<Real> contoursStartTimes, contoursEndsTimes, contoursFreqsMean, contoursSaliencesMean;
     Real duration;
 
     if (peakBinsNotEmpty) {
@@ -314,15 +315,24 @@ AlgorithmStatus HumDetector::process() {
 
       contoursFreqsMean.assign(contoursBins.size(), 0.f);
       contoursSaliencesMean.assign(contoursBins.size(), 0.f);
+      contoursEndsTimes.assign(contoursBins.size(), 0.f);
 
+      Real timeWindowSecs = _timeWindow * _hopSize / _outSampleRate;
       for (uint i = 0; i < contoursBins.size(); i++) {
-        contoursFreqsMean[i] = centBinToFrequency(mean(contoursBins[i]), _referenceTerm, _binsInOctave);
+        // we add the offset due to the initial frames needed to fill the buffers
+        // to the starts and ends
+        contoursStartTimes[i] += timeWindowSecs;
+        contoursFreqsMean[i] = centBinToFrequency(mean(contoursBins[i]), 
+                                                  _referenceTerm, _binsInOctave);
         contoursSaliencesMean[i] = mean(contoursSaliences[i]);
+        contoursEndsTimes[i] = contoursStartTimes[i] + 
+                               contoursSaliences[i].size() * _hopSize / _outSampleRate;
       }
     }
     _frequencies.push(contoursFreqsMean);
     _saliences.push(contoursSaliencesMean);
     _starts.push(contoursStartTimes);
+    _ends.push(contoursEndsTimes);
 
   return FINISHED;
 }
@@ -360,6 +370,7 @@ HumDetector::HumDetector() {
   declareOutput(_frequencies, "frequencies", "humming tones frequencies");
   declareOutput(_saliences, "saliences", "humming tones saliences");
   declareOutput(_starts, "starts", "humming tones starts");
+  declareOutput(_ends, "ends", "humming tones ends");
 
   createInnerNetwork();
 }
@@ -387,6 +398,7 @@ void HumDetector::createInnerNetwork() {
   _humDetector->output("frequencies")    >> PC(_pool, "frequencies");
   _humDetector->output("saliences")    >> PC(_pool, "saliences");
   _humDetector->output("starts")   >> PC(_pool, "starts");
+  _humDetector->output("ends")   >> PC(_pool, "ends");
 
   _network = new scheduler::Network(_vectorInput);
 }
@@ -404,12 +416,14 @@ void HumDetector::compute() {
   vector<Real>& frequencies = _frequencies.get();
   vector<Real>& amplitudes = _saliences.get();
   vector<Real>& starts = _starts.get();
+  vector<Real>& ends = _ends.get();
 
 
   rMatrix = _pool.value<vector<TNT::Array2D<Real> > >("r")[0];
   frequencies = _pool.value<vector<Real> >("frequencies");
   amplitudes = _pool.value<vector<Real> >("saliences");
   starts = _pool.value<vector<Real> >("starts");
+  ends = _pool.value<vector<Real> >("ends");
 
 
   reset();
@@ -421,6 +435,7 @@ void HumDetector::reset() {
   _pool.remove("frequencies");
   _pool.remove("saliences");
   _pool.remove("starts");
+  _pool.remove("ends");
 }
 
 } // namespace standard
