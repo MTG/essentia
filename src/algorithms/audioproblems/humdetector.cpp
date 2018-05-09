@@ -76,7 +76,7 @@ HumDetector::HumDetector() : AlgorithmComposite() {
   _pitchSalienceFunctionPeaks = standard::AlgorithmFactory::create("PitchSalienceFunctionPeaks");
   _pitchContours            = standard::AlgorithmFactory::create("PitchContours");
 
-  declareInput(_signal, "signal", "the input audio signal");
+  declareInput(_signal, 4096, "signal", "the input audio signal");
   declareOutput(_rMatrix, "r", "the quantile ratios matrix");
   declareOutput(_frequencies, "frequencies", "humming tones frequencies");
   declareOutput(_saliences, "saliences", "humming tones saliences");
@@ -88,7 +88,7 @@ HumDetector::HumDetector() : AlgorithmComposite() {
   _signal >> _decimator->input("signal");
 
   _decimator->output("signal").setBufferType(BufferUsage::forLargeAudioStream);
-  
+
   _decimator->output("signal") >> _lowPass->input("signal");
 
   _lowPass->output("signal").setBufferType(BufferUsage::forLargeAudioStream);
@@ -130,7 +130,11 @@ void HumDetector::configure() {
 
   _decimator->configure("inputSampleRate", _sampleRate,
                         "outputSampleRate", _outSampleRate);
-  
+
+  // Resample buffers have to be resized everytime it is configured 
+  // as it resets the sizes to the default each time.
+  _decimator->output("signal").setBufferType(BufferUsage::forLargeAudioStream);
+
   _lowPass->configure("sampleRate",_outSampleRate,
                       "cutoffFrequency", _maximumFrequency);
 
@@ -161,7 +165,7 @@ void HumDetector::configure() {
                                          "referenceFrequency",  _minimumFrequency);
 
   Real binsToSkip = 6;
-  //Real pitchContinuity = 400.f / (1000.f * _hopSize);
+
   Real pitchContinuity = (binsToSkip / _binsInOctave) * 1200. / (1000.f * _hopSize / _outSampleRate); 
   _pitchContours->configure("binResolution", binResolution, 
                             "hopSize", _hopSize,
@@ -186,10 +190,27 @@ AlgorithmStatus HumDetector::process() {
 
   const vector<vector<Real> >& psd = _pool.value<vector<vector<Real> > >("psd");
 
-  // this algorithm relies in long audio streams (10s by default). In order to prevent it to break,
-  // the analysis window duration shrinks down when the input audio stream is shorter. 
+
   _timeStamps = psd.size();
   _spectSize = psd[0].size();
+
+  if (_timeStamps < 10) {
+     E_INFO("HumDetector: With only " << _timeStamps << 
+            " PSD frames it is not posible to estimate humming frequencies."
+            " Try to process a longer audio stream or to reduce the hopSize parameter");
+
+    _rMatrix.push(TNT::Array2D<Real>());
+    _frequencies.push(vector<Real>());
+    _saliences.push(vector<Real>());
+    _starts.push(vector<Real>());
+    _ends.push(vector<Real>());
+
+    return FINISHED;
+  }
+
+
+  // this algorithm relies in a long audio window (10s by default). In order to prevent it to break,
+  // the analysis window duration shrinks down when the input audio stream is shorter.
   if (_timeWindow > _timeStamps) {
     E_INFO("HumDetector: the selected time window needs " << _timeWindow * _hopSize / _outSampleRate << 
     "s of audio while the input stream lasts " << _timeStamps * _hopSize / _outSampleRate << 
@@ -208,7 +229,7 @@ AlgorithmStatus HumDetector::process() {
   vector<size_t> psdIdxs(_timeWindow, 0);
   Real Q0, Q1;
 
-  // initialize the PSD and r(quantile ratios) matrices.
+  // initialize the PSD and r (quantile ratios) matrices.
   for (uint i = 0; i < _spectSize; i++) {
     for (uint j = 0; j < _timeWindow; j++)
       psdWindow[i][j] = psd[j][i];
@@ -339,6 +360,7 @@ AlgorithmStatus HumDetector::process() {
 
 void HumDetector::reset() {
   AlgorithmComposite::reset();
+  _decimator->output("signal").setBufferType(BufferUsage::forLargeAudioStream);
   _pool.remove("psd");
 }
 
