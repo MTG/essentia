@@ -90,10 +90,12 @@ class TestHumDetector(TestCase):
                 signal = hum + noise 
                 signal /= np.max(signal)
 
-                _, estimated_freqs, _, _, _, = HumDetector()(signal)
+                _, estimated_freqs, _, _, _, = HumDetector(detectionThreshold=2.)(signal)
 
                 self.assertAlmostEqualVector([estimated_freqs[0]], [freq], 1e2)
             except IndexError:
+                if i == attempts - 1:
+                    self.assertAlmostEqualVector([estimated_freqs[0]], [freq], 1e2)
                 print 'testARProcess failed. This test is based on random signals so it can fail sometimes. {}Attempt {}/{}'.format('It will be repeated. ' if i < 2 else '', i+1, attempts)
                 continue
             if i > 0:
