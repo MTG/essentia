@@ -150,7 +150,8 @@ void HumDetector::configure() {
   _spectralPeaks->configure("sampleRate", _outSampleRate,
                             "minFrequency", _minimumFrequency,
                             "maxFrequency", _maximumFrequency,
-                            "magnitudeThreshold", _detectionThreshold);
+                            "magnitudeThreshold", _detectionThreshold,
+                            "maxPeaks", 5);
 
   Real binResolution = 20;
   _binsInOctave = 1200.0 / binResolution;
@@ -293,11 +294,20 @@ AlgorithmStatus HumDetector::process() {
   vector<vector<Real> >peakBins(_iterations);
   vector<vector<Real> >peakSaliences(_iterations);
   bool peakBinsNotEmpty = false;
-  
+  Real threshold;
+
   // finally the r matrix is feed into the pitch contours recommended signal chain
   for (uint j = 0; j < _iterations; j++) {
     for (uint i = 0; i < _spectSize; i++) 
       rSpec[i] = r[i][j];
+
+    threshold = _detectionThreshold * stddev(rSpec, mean(rSpec));
+
+    _spectralPeaks->configure("sampleRate", _outSampleRate,
+                              "minFrequency", _minimumFrequency,
+                              "maxFrequency", _maximumFrequency,
+                              "magnitudeThreshold", threshold,
+                              "maxPeaks", 5);
 
     _spectralPeaks->input("spectrum").set(rSpec);
     _spectralPeaks->output("frequencies").set(frequencies);
@@ -407,7 +417,7 @@ void HumDetector::configure() {
                           INHERIT("minimumFrequency"), INHERIT("maximumFrequency"),
                           INHERIT("Q0"), INHERIT("Q1"),
                           INHERIT("minimumDuration"), INHERIT("timeContinuity"),
-                          INHERIT("numberHarmonics"));
+                          INHERIT("numberHarmonics"), INHERIT("detectionThreshold"));
 }
 
 

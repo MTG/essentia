@@ -108,7 +108,7 @@ void declareParameters() {
     declareParameter("minimumDuration", "minimun duration of the humming tones [s]", "(0,inf)", 0.5f);
     declareParameter("timeContinuity", "time continuity cue (the maximum allowed gap duration for a pitch contour) [s]", "(0,inf)", 10.f);
     declareParameter("numberHarmonics", "number of considered harmonics", "(0,inf)", 1);
-    declareParameter("detectionThreshold", "the detection threshold for the peaks of the r matrix", "(0,inf)", 0.2f);
+    declareParameter("detectionThreshold", "the detection threshold for the peaks of the r matrix", "(0,inf)", 5.f);
   };
 
   void configure();
@@ -160,7 +160,7 @@ void declareParameters() {
     declareParameter("minimumDuration", "minimun duration of the humming tones [s]", "(0,inf)", 2.f);
     declareParameter("timeContinuity", "time continuity cue (the maximum allowed gap duration for a pitch contour) [s]", "(0,inf)", 10.f);
     declareParameter("numberHarmonics", "number of considered harmonics", "(0,inf)", 1);
-    declareParameter("detectionThreshold", "the detection threshold for the peaks of the r matrix", "(0,inf)", 0.2f);
+    declareParameter("detectionThreshold", "the detection threshold for the peaks of the r matrix", "(0,inf)", 5.f);
   };
 
   void configure();
