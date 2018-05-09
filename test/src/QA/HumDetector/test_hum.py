@@ -38,9 +38,7 @@ class EssentiaWrap(QaWrapper):
     """
 
     def compute(self, *args):
-        algo = es.HumDetector(timeWindow=9.,
-                                minimumDuration=2,
-                                detectionThreshold=.2)
+        algo = es.HumDetector(minimumDuration=10.)
         
         x = args[1]
 
@@ -49,9 +47,8 @@ class EssentiaWrap(QaWrapper):
         return frequencies
 
 
-
 if __name__ == '__main__':
-    folder = 'Hum'
+    folder = 'HumDetector'
 
     # Instantiating wrappers
     wrappers = [
@@ -65,10 +62,22 @@ if __name__ == '__main__':
     qa.set_wrappers(wrappers)
 
     # Do this with music from LaCupula
-    data_dir = '/home/pablo/reps/LaCupula-MTG/test/QA-audio/Hum/50HzHum'
+    data_dir = '/home/pablo/reps/essentia/test/QA-audio/Hum/Songs50HzHum'
 
-    qa.load_audio(filename=data_dir, stereo=False)  # Works for a single
+    qa.load_audio(filename=data_dir, stereo=False)
 
     qa.compute_all(output_file='{}/compute.log'.format(folder))
 
     print qa.solutions
+
+    GT = 50  # Hz
+    detected = 0
+    error = []
+    for i in qa.solutions.itervalues():
+        if i.any():
+            detected += 1
+            error.append(np.mean(np.abs(i - GT)))
+
+    print 'Mean error: {:.2f}Hz'.format(np.mean(error))
+    print 'Detected on {:.2f}% of the songs'.format(100. * detected / len(qa.solutions.items()))
+

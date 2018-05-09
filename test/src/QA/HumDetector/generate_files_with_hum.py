@@ -23,10 +23,10 @@ def find_files(directory, pattern):
 
 
 if __name__ == '__main__':
-    in_folder = '../../../audio/recorded'
-    out_folder = '../../../QA-audio/Hum/'
+    in_folder = '/home/pablo/data/sns-small/samples'
+    out_folder = '/home/pablo/reps/essentia/test/QA-audio/Hum/Songs50HzHum'
     fs = 44100.
-    files = [x for x in find_files(in_folder, 'wav')]
+    files = [x for x in find_files(in_folder, 'flac')]
     if not files:
         print('no files found!')
 
@@ -38,13 +38,13 @@ if __name__ == '__main__':
             continue
 
         fs = 44100.
-        t = np.linspace(0,len(audio) / fs, len(audio))
+        t = np.linspace(0, len(audio) / fs, len(audio))
 
         freq = 50
 
         sinusoid = np.sin(2 * PI * freq * t)
 
-        signal = np.array(.95 * audio + .002 * sinusoid, dtype=np.float32)
+        signal = np.array(.95 * audio + .005 * sinusoid, dtype=np.float32)
 
         if not os.path.exists(out_folder):
             os.mkdir(out_folder)
