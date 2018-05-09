@@ -45,6 +45,9 @@ FFMPEG_AUDIO_FLAGS="
     --enable-protocol=file
     --enable-protocol=pipe
 
+    --disable-zlib
+    --disable-bzlib
+
     --enable-demuxer=image2
     --enable-demuxer=aac
     --enable-demuxer=ac3
