@@ -27,6 +27,9 @@ from essentia import array as esarray
 from essentia import instantPower
 from essentia import array as esarr
 
+# parameters
+frame_size = 2048
+hop_size = 1024
 
 class DevWrap(QaWrapper):
     """
@@ -34,8 +37,8 @@ class DevWrap(QaWrapper):
     """
 
     # parameters
-    frame_size = 2048
-    hop_size = 1024
+    frame_size = frame_size
+    hop_size = hop_size
     fs = 44100.
 
     threshold = -50
@@ -59,8 +62,9 @@ class DevWrap(QaWrapper):
     envelope = es.Envelope(releaseTime=releaseTime, attackTime=attackTime)
     medianFilter = es.MedianFilter()
 
-    def compute(self, x):
+    def compute(self, *args):
         y = []
+        x = args[1]
         for frame_idx, frame in enumerate(es.FrameGenerator(x, frameSize=self.frame_size,
                                           hopSize=self.hop_size, startFromZero=True)):
             # frame = es.essentia.normalize(frame)
@@ -144,11 +148,29 @@ class DevWrap(QaWrapper):
         return esarr(y)
 
 
+class EssentiaWrap(QaWrapper):
+    """
+    Implemented Solution.
+    """
+    def compute(self, *args):
+        y = []
+        x = args[1]
+        gapDetector = es.GapsDetector()
+
+        for frame in es.FrameGenerator(x, frameSize=frame_size,
+                                       hopSize=hop_size, startFromZero=True):
+            starts, _ = gapDetector(frame)
+            for s in starts:
+                y.append(s)
+        return esarr(y)
+
+
 if __name__ == '__main__':
 
     # Instantiating wrappers
     wrappers = [
         DevWrap('events', ground_true=True),
+        EssentiaWrap('events', ground_true=True),
     ]
 
     # Instantiating the test
@@ -158,10 +180,7 @@ if __name__ == '__main__':
     qa.set_wrappers(wrappers)
 
     # Add the testing files
-    # data_dir = '../../QA-audio/Gaps/forced/'
-    # data_dir = '/home/pablo/data/fma_small/012/012521.mp3'
-    data_dir = '/home/pablo/data/fma_small/011/011916.mp3'
-    # data_dir = '/home/pablo/data/fma_small/fast/'
+    data_dir = '../../QA-audio/Gaps/forced/'
 
     qa.load_audio(filename=data_dir)  # Works for a single
     qa.load_solution(data_dir, ground_true=True)
