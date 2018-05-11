@@ -44,6 +44,7 @@ class TruePeakDetector : public Algorithm {
   bool _blockDC;
   bool _emphatise;
   Real _threshold;
+  uint _version;
 
  public:
   TruePeakDetector() {
@@ -69,6 +70,7 @@ class TruePeakDetector : public Algorithm {
     declareParameter("blockDC", "flag to activate the optional DC blocker", "{true,false}", false);
     declareParameter("emphatise", "flag to activate the optional emphasis filter", "{true,false}", false);
     declareParameter("threshold", "threshold to detect peaks [dB]", "(-inf,inf)", -0.0002);
+    declareParameter("version", "algorithm version", "{2,4}",4);
   }
 
   void reset() {
