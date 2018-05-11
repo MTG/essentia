@@ -41,7 +41,6 @@ class TestClickDetector(TestCase):
         self.assertConfigureFails(ClickDetector(), {'hopSize': 0})
         self.assertConfigureFails(ClickDetector(), {'order': 0})
         self.assertConfigureFails(ClickDetector(), {'order': 5, 'frameSize': 4})
-        self.assertConfigureFails(ClickDetector(), {'detectionThreshold': 0})
         self.assertConfigureFails(ClickDetector(), {'powerEstimationThreshold': 0})
         self.assertConfigureFails(ClickDetector(), {'silenceThreshold': 1})
 
