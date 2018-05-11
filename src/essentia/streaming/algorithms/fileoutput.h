@@ -28,12 +28,12 @@ namespace essentia {
 namespace streaming {
 
 
-template <typename TokenType> void write_binary(std::ostream* _stream,
+template <typename TokenType> inline void write_binary(std::ostream* _stream,
                                                 const TokenType& value) {
   _stream->write((const char*) &value, sizeof(TokenType));
 }
 
-template <> void write_binary<std::vector<Real> >(std::ostream* _stream,
+template <> void inline write_binary<std::vector<Real> >(std::ostream* _stream,
                                                   const std::vector<Real>& value) {
   _stream->write((const char*) &value[0], value.size() * sizeof(Real));
 }
