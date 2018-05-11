@@ -27,14 +27,14 @@ from essentia import instantPower
 from essentia import db2pow
 
 frameSize = 512
-hopSize = 450
+hopSize = 256
 
 
 class EssentiaWrap(QaWrapper):
     """
     Essentia Solution.
     """
-    algo = es.ClickDetector(frameSize=frameSize, hopSize=hopSize, detectionThreshold=30)
+    algo = es.ClickDetector(frameSize=frameSize, hopSize=hopSize)
 
     def compute(self, *args):
         y = []
@@ -80,22 +80,12 @@ class Dev(QaWrapper):
 
             e_mf = es.IIR(numerator=-lpc)(e[::-1])[::-1]
 
-            # e[:order] = np.zeros(order)
-            # e_mf[:order] = np.zeros(order)
-
             # Thresholding
-            th_p = np.max([self.robustPower(e, powerEstimationThreshold) * detectionThreshold, silenceThreshold])
+            th_p = np.max([self.robustPower(e, powerEstimationThreshold) *\
+                           detectionThreshold, silenceThreshold])
 
-            # plt.plot(frame)
-            # plt.plot(e[order:] ** 2, label='e')
-            # plt.plot(e_mf[order:] ** 2, label='mf')
-            # #
-            # plt.axhline(th_p, color='r', label='th power')
-            # plt.legend()
-            # plt.show()
-            # plt.close()
-
-            detections = [i + start_proc for i, v in enumerate(e_mf[start_proc:end_proc]**2) if v >= th_p]
+            detections = [i + start_proc for i, v in\
+                          enumerate(e_mf[start_proc:end_proc]**2) if v >= th_p]
             if detections:
                 starts = [detections[0]]
                 ends = []
@@ -147,9 +137,6 @@ class Dev(QaWrapper):
 if __name__ == '__main__':
     folder = 'ClickDetector'
 
-    # We are using 1 digit only to fit the format of PyloudnessWrap
-    # np.set_printoptions(precision=1)
-
     # Instantiating wrappers
     wrappers = [
         EssentiaWrap('events'),
@@ -161,22 +148,31 @@ if __name__ == '__main__':
     # Add the wrappers to the test the wrappers
     qa.set_wrappers(wrappers)
 
-    # data_dir = '../../QA-audio/Discontinuities/prominent_jumps/Vivaldi_Sonata_5_II_Allegro_prominent_jump.wav'
-    # data_dir = '../../QA-audio/Clicks'
-    # data_dir = '/home/pablo/reps/essentia/test/audio/recorded/vignesh.wav'
-    # data_dir = '../../QA-audio/Discontinuities/prominent_jumps/'
-    # data_dir = '../../QA-audio/Discontinuities/prominent_jumps/vignesh_prominent_jump.wav'
-    data_dir = '../../../../../../pablo/Music/Desakato-La_Teoria_del_Fuego/'
+    data_dir = '../../QA-audio/Clicks'
 
     qa.load_audio(filename=data_dir, stereo=False)  # Works for a single
-    # qa.load_solution(data_dir, ground_true=True)
 
-    # Compute and the results, the scores and and compare the computation times
-    # qa.compute_all(output_file='{}/compute.log'.format(folder))
+    qa.compute_all(output_file='{}/compute.log'.format(folder))
 
-    # qa.score_all()
-    # qa.scores
-    # qa.save_test('{}/test'.format(folder))
+    # The tested signals are different version of the same file with different
+    # click amplification. It was found that only clips above 9dB amplification
+    # are able to be heard. This test checks that the algorithm is configured in
+    # that way.
+    lim = 9.  # dB
+    location = 1.  # s
 
-    # x = qa.data['vignesh_prominent_jump'][33863:33863+512]
-    # Add the testing files
+    def getdB(filename):
+        return float(filename.split('_')[-1][:-2])
+
+    for sol, val in qa.solutions.iteritems():
+        amplification = getdB(sol[1])
+        if amplification > lim:
+            if np.abs(val[0] - location) < .1:
+                print '{}: {}'.format(sol, 'ok!')
+            else:
+                print '{}: {}'.format(sol, 'failed')
+        else:
+            if len(val) == 0:
+                print '{}: {}'.format(sol, 'ok!')
+            else:
+                print '{}: {}'.format(sol, 'failed')
