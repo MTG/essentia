@@ -20,6 +20,7 @@
 #include <iostream>
 #include <essentia/algorithmfactory.h>
 #include <essentia/streaming/algorithms/poolstorage.h>
+#include <essentia/streaming/algorithms/fileoutput.h>
 #include <essentia/scheduler/network.h>
 #include "credit_libav.h"
 
@@ -38,8 +39,9 @@ int main(int argc, char* argv[]) {
     exit(1);
   }
 
-  string audioFilename = argv[1];
-  string outputFilename = argv[2];
+  string audioFile = argv[1];
+  string outputFile = argv[2];
+  string outputSpecFile = outputFile + ".spec";
 
   essentia::init();
 
@@ -54,7 +56,7 @@ int main(int argc, char* argv[]) {
   AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
   Algorithm* audio = factory.create("MonoLoader",
-                                    "filename", audioFilename,
+                                    "filename", audioFile,
                                     "sampleRate", sampleRate);
 
   Algorithm* fc    = factory.create("FrameCutter",
@@ -72,6 +74,9 @@ int main(int argc, char* argv[]) {
                                          "numberBands", 96,
                                          "log", true);
 
+  Algorithm* file = new FileOutput<vector<Real> >();
+  file->configure("filename", outputSpecFile, "mode", "binary");
+
   // Audio -> FrameCutter -> Windowing -> Spectrum
   audio->output("audio") >> fc->input("signal");
   fc->output("frame") >> w->input("frame");
@@ -80,23 +85,25 @@ int main(int argc, char* argv[]) {
   // Spectrum -> MFCC -> Pool
   spec->output("spectrum") >> mfcc->input("spectrum");
   spec->output("spectrum") >> melbands96->input("spectrum");
+  spec->output("spectrum") >> file->input("data");
 
   mfcc->output("bands") >> NOWHERE; // only store high-res mel bands
   mfcc->output("mfcc") >> PC(pool, "lowlevel.mfcc");
   melbands96->output("bands") >> PC(pool, "lowlevel.melbands96");
 
-
-  cout << "Analyzing " << audioFilename << endl;;
+  cout << "Analyzing " << audioFile << endl;;
 
   Network n(audio);
   n.run();
 
   // write results to file
-  cout << "Writing results to file " << outputFilename << endl;
+  cout << "Writing results to json file " << outputFile << endl;
+  cout << "Writing spectrogram to binary file " << outputSpecFile << endl;
 
   standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
-                                                                   "filename", outputFilename,
+                                                                   "filename", outputFile,
                                                                    "format", format);
+
   output->input("pool").set(pool);
   output->compute();
 
