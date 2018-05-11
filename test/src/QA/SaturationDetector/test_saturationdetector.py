@@ -26,41 +26,53 @@ import essentia.standard as es
 from essentia import array as esarr
 from scipy.signal import medfilt
 
-order = 3
-frame_size = 512
-hop_size = 256
-kernel_size = 7
-times_thld = 8
-energy_thld = 0.001
-sub_frame = 32
+# parameters
+sampleRate = 44100.
+frameSize = 512
+hopSize = 256
+minimumDuration = 0.005  # ms
+
+# inner variables
+idx = 0
+previousRegion = None
+
+
+class EssentiaWrap(QaWrapper):
+    """
+    Essentia Solution.
+    """
+    algo = es.SaturationDetector(frameSize=frameSize, hopSize=hopSize)
+
+    def compute(self, *args):
+        x = args[1]
+        y = []
+        self.algo.reset()
+        for frame in es.FrameGenerator(x, frameSize=frameSize, hopSize=hopSize,
+                                       startFromZero=True):
+            starts, ends = self.algo(frame)
+            if len(starts) > 0:
+                for start in starts:
+                    y.append(start)
+        return esarr(y)
+
 
 class DevWrap(QaWrapper):
     """
     Development Solution.
     """
-
-    # parameters
-    _sampleRate = 44100.
-    _frameSize = 512
-    _hopSize = 256
-    _minimumDuration = 0  # ms
-
-    _minimumDuration /= 1000.
-
-    # inner variables
-    _idx = 0
-    _previousRegion = None
-
-    def compute(self, x):
+    previousRegion = None
+    
+    def compute(self, *args):
+        x = args[1]
         y = []
-        self._idx = 0
-        for frame in es.FrameGenerator(x, frameSize=frame_size, hopSize=hop_size, startFromZero=True):
+        idx = 0
+        for frame in es.FrameGenerator(x, frameSize=frameSize, hopSize=hopSize, startFromZero=True):
             frame = np.abs(frame)
             starts = []
             ends = []
 
-            s = int(self._frameSize / 2 - self._hopSize / 2) - 1  # consider non overlapping case
-            e = int(self._frameSize / 2 + self._hopSize / 2)
+            s = int(frameSize / 2 - hopSize / 2) - 1  # consider non overlapping case
+            e = int(frameSize / 2 + hopSize / 2)
 
             delta = np.diff(frame)
             delta = np.insert(delta, 0, 0)
@@ -70,25 +82,24 @@ class DevWrap(QaWrapper):
             combinedMask = energyMask * deltaMask
 
             flanks = np.diff(combinedMask)
-            #np.insert(delta, 0, 0)
 
             uFlanks = [idx for idx, x in enumerate(flanks) if x == 1]
             dFlanks = [idx for idx, x in enumerate(flanks) if x == -1]
 
-            if self._previousRegion and dFlanks:
-                start = self._previousRegion
-                end = (self._idx * hop_size + dFlanks[0] + s) / self._sampleRate
+            if self.previousRegion and dFlanks:
+                start = self.previousRegion
+                end = (idx * hopSize + dFlanks[0] + s) / sampleRate
                 duration = start - end
 
-                if duration > self._minimumDuration:
+                if duration > minimumDuration:
                     starts.append(start)
                     ends.append(end)
 
-                self._previousRegion = None
+                self.previousRegion = None
                 del dFlanks[0]
 
             if len(dFlanks) is not len(uFlanks):
-                self._previousRegion = (self._idx * hop_size + uFlanks[-1] + s) / self._sampleRate
+                self.previousRegion = (idx * hopSize + uFlanks[-1] + s) / sampleRate
                 del uFlanks[-1]
 
             if len(dFlanks) is not len(uFlanks):
@@ -97,25 +108,27 @@ class DevWrap(QaWrapper):
                                                                                                             len(uFlanks)))
 
             for idx in range(len(uFlanks)):
-                start = float(self._idx * hop_size + uFlanks[idx] + s) / self._sampleRate
-                end = float(self._idx * hop_size + dFlanks[idx] + s) / self._sampleRate
+                start = float(idx * hopSize + uFlanks[idx] + s) / sampleRate
+                end = float(idx * hopSize + dFlanks[idx] + s) / sampleRate
                 duration = end - start
-                if duration > self._minimumDuration:
+                if duration > minimumDuration:
                     starts.append(start)
                     ends.append(end)
 
             for start in starts:
                 y.append(start)
-            self._idx += 1
+            idx += 1
 
         return esarr(y)
 
 
 if __name__ == '__main__':
+    folder = 'SaturationDetector'
 
     # Instantiating wrappers
     wrappers = [
-        DevWrap('events'),
+        # DevWrap('events'),
+        EssentiaWrap('events'),
     ]
 
     # Instantiating the test
@@ -127,11 +140,17 @@ if __name__ == '__main__':
     data_dir = '../../audio/recorded/distorted.wav'
 
     qa.load_audio(filename=data_dir)  # Works for a single
+
     qa.load_solution(data_dir, ground_true=True)
 
     # Compute and the results, the scores and and compare the computation times
 
-    qa.compute_all()
+    qa.compute_all(output_file='{}/compute.log'.format(folder))
 
-    # qa.score_all()
+    # todo Generate Ground truth to test this
 
+    for sol, val in qa.solutions.iteritems():
+        print '{}'.format(sol)
+
+        for v in val:
+            print '{:.3f}'.format(v)
