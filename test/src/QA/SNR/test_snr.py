@@ -64,9 +64,6 @@ class Dev(QaWrapper):
         def update_noise_psd(noise_spectrum, noise, alpha=.98):
             return alpha * noise_spectrum + (1 - alpha) * np.abs(noise) ** 2
 
-        def update_noise_pow(noise_std, noise, alpha=.98):
-            return alpha * noise_std + (1 - alpha) * noise
-
         def update_y(mean_y, y, alpha=.98):
             return alpha * mean_y + (1 - alpha) * y
 
@@ -134,17 +131,15 @@ class Dev(QaWrapper):
 
                 noise_psd = update_noise_psd(noise_psd, Y, alpha=noise_alpha)
 
-                noise_std = np.mean(noise_psd)
-
                 snr_post = SNR_post_est(Y, noise_psd)
                 snr_inst = SNR_inst_est(snr_post)
 
             else:
                 if np.sum(previous_snr_prior) == 0:
-                    previous_snr_prior =  MMSE_alpha + (1 - MMSE_alpha) * np.clip(previous_snr_inst, a_min=0., a_max=None)
+                    previous_snr_prior = MMSE_alpha + (1 - MMSE_alpha) * np.clip(previous_snr_inst, a_min=0., a_max=None)
 
                     if 0:
-                        noise_psd = np.ones(frameSize / 2 + 1) *np.mean(noise_psd)
+                        noise_psd = np.ones(frameSize / 2 + 1) * np.mean(noise_psd)
 
                 snr_post = SNR_post_est(Y, noise_psd)
                 snr_inst = SNR_inst_est(snr_post)
@@ -158,7 +153,6 @@ class Dev(QaWrapper):
                 X_psd_est = noise_psd * snr_prior
 
                 snr_average = np.mean(X_psd_est) / np.mean(noise_psd)
-
 
                 ma_snr_average = update_y(ma_snr_average, snr_average, alpha=snr_alpha)
 
@@ -240,4 +234,3 @@ if __name__ == '__main__':
                     print 'with Esssentia, error: {:.3f}dB'.format(np.abs(ma_snr_average[0] - real_snr_prior_esp_corrected))
 
                     results.append(mean_snr_estimation_corrected)
-
