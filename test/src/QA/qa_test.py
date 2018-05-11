@@ -109,7 +109,7 @@ class QaTest:
             raise EssentiaException("The file does not exist or the folder doesn't contain any '{}' file".format(pattern))
         try:
             for f in files:
-                name = ''.join(os.path.basename(f).split('.')[:-1])
+                name = '.'.join(os.path.basename(f).split('.')[:-1])
                 if stereo:
                     audio, fs, _, _, _, _ = AudioLoader(filename=f)()
                     if np.abs(fs - self.fs) > 1e-3:
@@ -149,7 +149,7 @@ class QaTest:
 
         for f in files:
             try:
-                instance = ''.join(os.path.basename(f).split('.')[:-1])
+                instance = '.'.join(os.path.basename(f).split('.')[:-1])
                 ext = (f.split('.')[-1])
 
                 # Exclude known audio types so audio everything can be in the same folder
