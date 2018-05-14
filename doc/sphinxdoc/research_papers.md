@@ -10,6 +10,8 @@ The list below highlights some of the academic studies using Essentia organized 
 
 ## Music classification
 
+- J. Kim, M. Won, X. Serra, and C. C. S. Liem, Transfer Learning of Artist Group Factors to Musical Genre Classification. In WWW '18 Companion Proceedings of the The Web Conference 2018, 2018.
+
 - D. Bogdanov, A. Porter, J. Urbano, and H. Schreiber. The MediaEval 2017 AcousticBrainz Genre Task: Content-based Music Genre Recognition from Multiple Sources. In MediaEval 2017 Multimedia Benchmark Workshop (MediaEval'17), 2017.
 
 - K. Koutini, A. Imenina, M. Dorfer,  A. R. Gruber, and M. Schedl.  MediaEval 2017 AcousticBrainz Genre Task: Multilayer Perceptron Approach. In MediaEval 2017 Multimedia Benchmark Workshop (MediaEval'17), 2017.
