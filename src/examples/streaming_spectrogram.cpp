@@ -23,49 +23,81 @@
 #include <essentia/streaming/algorithms/fileoutput.h>
 #include <essentia/scheduler/network.h>
 #include "credit_libav.h"
+#include "music_extractor/extractor_utils.h"
+
 
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
 using namespace essentia::scheduler;
 
+
+void usage(char *progname) {
+    cout << "Error: wrong number of arguments" << endl;
+    cout << "Usage: " << progname << " input_audiofile output_file [profile]" << endl;
+    cout << endl << "This extractor computes magnitude spectrogram, mel-band log-energies spectrogram, and mfcc frames for the input audiofile." << endl;
+    cout << "The results are stored in either binary files (default) or a yaml/json file. Use the yaml profile file to specify the output:" << endl;
+    cout << "- 'outputFormat: binary' for binary output." << endl;
+    cout << "- 'outputFormat: json' for json output" << endl;
+    cout << "- 'outputFormat: yaml' for yaml output" << endl;
+
+    creditLibAV();
+
+    exit(1);
+}
+
+
+void setDefaultOptions(Pool &options) {
+  options.set("sampleRate", 44100.0);
+  options.set("outputFormat", "binary");
+  options.set("frameSize", 2048);
+  options.set("hopSize", 1024);
+}
+
+
 int main(int argc, char* argv[]) {
 
-  if (argc != 3) {
-    cout << "Error: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " audio_input json_output" << endl;
-    cout << "Computes spectrogram and mel-band log-energies spectrogram for the input audiofile." << endl;
-    creditLibAV();
-    exit(1);
-  }
+  string audioFilename, outputFilename, profileFilename;
 
-  string audioFile = argv[1];
-  string outputFile = argv[2];
-  string outputSpecFile = outputFile + ".spec";
+  switch (argc) {
+    case 3:
+      audioFilename =  argv[1];
+      outputFilename = argv[2];
+      break;
+    case 4: // profile supplied
+      audioFilename =  argv[1];
+      outputFilename = argv[2];
+      profileFilename = argv[3];
+      break;
+    default:
+      usage(argv[0]);
+  }
 
   essentia::init();
 
+  Pool options;
   Pool pool;
+  setDefaultOptions(options);
+  setExtractorOptions(profileFilename, options);
 
-  // TODO this should be configurable
-  Real sampleRate = 44100.0;
-  int frameSize = 2048;
-  int hopSize = 1024;
-  std::string format ("json");
+  Real sampleRate = options.value<Real>("sampleRate");
+  int frameSize = options.value<Real>("frameSize");
+  int hopSize = options.value<Real>("hopSize");
+  std::string format = options.value<string>("outputFormat");
 
   AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
   Algorithm* audio = factory.create("MonoLoader",
-                                    "filename", audioFile,
+                                    "filename", audioFilename,
                                     "sampleRate", sampleRate);
 
-  Algorithm* fc    = factory.create("FrameCutter",
-                                    "frameSize", frameSize,
-                                    "hopSize", hopSize,
-                                    "silentFrames", "noise");
+  Algorithm* fc = factory.create("FrameCutter",
+                                 "frameSize", frameSize,
+                                 "hopSize", hopSize,
+                                 "silentFrames", "noise");
 
-  Algorithm* w     = factory.create("Windowing",
-                                    "type", "blackmanharris62");
+  Algorithm* w = factory.create("Windowing",
+                                "type", "blackmanharris62");
 
   Algorithm* spec  = factory.create("Spectrum");
   Algorithm* mfcc  = factory.create("MFCC", "numberBands", 40,
@@ -74,42 +106,50 @@ int main(int argc, char* argv[]) {
                                          "numberBands", 96,
                                          "log", true);
 
-  Algorithm* file = new FileOutput<vector<Real> >();
-  file->configure("filename", outputSpecFile, "mode", "binary");
-
-  // Audio -> FrameCutter -> Windowing -> Spectrum
+  // Audio -> FrameCutter -> Windowing -> Spectrum -> MelBands & MFCC 
   audio->output("audio") >> fc->input("signal");
   fc->output("frame") >> w->input("frame");
   w->output("frame") >> spec->input("frame");
-
-  // Spectrum -> MFCC -> Pool
   spec->output("spectrum") >> mfcc->input("spectrum");
   spec->output("spectrum") >> melbands96->input("spectrum");
-  spec->output("spectrum") >> file->input("data");
+  mfcc->output("bands") >> NOWHERE; // we'll only store high-res mel96 bands
 
-  mfcc->output("bands") >> NOWHERE; // only store high-res mel bands
-  mfcc->output("mfcc") >> PC(pool, "lowlevel.mfcc");
-  melbands96->output("bands") >> PC(pool, "lowlevel.melbands96");
+  // Prepare binary file outputs or pool/yaml outputs 
+  if (format=="binary") {
+    Algorithm* fileSpec = new FileOutput<vector<Real> >();
+    Algorithm* fileMelBands = new FileOutput<vector<Real> >();
+    Algorithm* fileMFCC = new FileOutput<vector<Real> >();
 
-  cout << "Analyzing " << audioFile << endl;;
+    fileSpec->configure("filename", outputFilename + ".spec", "mode", "binary");
+    fileMelBands->configure("filename", outputFilename + ".mel96", "mode", "binary");
+    fileMFCC->configure("filename", outputFilename + ".mfcc", "mode", "binary");
+ 
+    melbands96->output("bands") >> fileMelBands->input("data");
+    mfcc->output("mfcc") >> fileMFCC->input("data");
+    spec->output("spectrum") >> fileSpec->input("data"); 
+  }
+  else {
+    mfcc->output("mfcc") >> PC(pool, "lowlevel.mfcc");
+    melbands96->output("bands") >> PC(pool, "lowlevel.melbands96");   
+    spec-> output("spectrum") >> PC(pool, "lowlevel.spectrum");
+  }
+
+  cout << "Analyzing " << audioFilename << endl;;
 
   Network n(audio);
   n.run();
 
-  // write results to file
-  cout << "Writing results to json file " << outputFile << endl;
-  cout << "Writing spectrogram to binary file " << outputSpecFile << endl;
-
-  standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
-                                                                   "filename", outputFile,
-                                                                   "format", format);
-
-  output->input("pool").set(pool);
-  output->compute();
-
+  // Write results to file
+  if (format!="binary") {
+    standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
+                                                                     "filename", outputFilename,
+                                                                     "format", format);
+    output->input("pool").set(pool);
+    output->compute();
+    delete output;
+  }
+    
   n.clear();
-
-  delete output;
   essentia::shutdown();
 
   return 0;
