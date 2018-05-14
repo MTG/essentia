@@ -34,9 +34,10 @@ times_thld = 8
 energy_thld = 0.001
 sub_frame = 32
 
+
 class DevWrap(QaWrapper):
     """
-    Essentia Solution.
+    Development Solution.
     """
     errors = []
     errors_filt = []
@@ -45,8 +46,9 @@ class DevWrap(QaWrapper):
     frames = []
     power = []
 
-    def compute(self, x):
+    def compute(self, *args):
 
+        x = args[1]
         LPC = es.LPC(order=order, type='regular')
         W = es.Windowing(size=frame_size, zeroPhase=False, type='triangular')
         predicted = np.zeros(hop_size)
@@ -58,11 +60,6 @@ class DevWrap(QaWrapper):
         self.frame_idx = []
         self.power = []
         frame_counter = 0
-        from time import clock
-        lpc_timer = 0
-        pre_timer = 0
-        med_timer = 0
-        mas_timer = 0
 
         for frame in es.FrameGenerator(x, frameSize=frame_size, hopSize=hop_size, startFromZero=True):
             self.power.append(es.essentia.instantPower(frame))
@@ -74,38 +71,26 @@ class DevWrap(QaWrapper):
                 continue
             frame /= norm
 
-            c1 = clock()
             lpc_f, _ = LPC(esarray(frame))
 
-            lpc_timer += (clock() - c1)
-
-            c1 = clock()
             lpc_f1 = lpc_f[1:][::-1]
 
             for idx, i in enumerate(range(hop_size / 2, hop_size * 3 / 2)):
                 predicted[idx] = - np.sum(np.multiply(frame[i - order:i], lpc_f1))
-            pre_timer += (clock() - c1)
 
             error = np.abs(frame[hop_size/2: hop_size * 3 / 2] - predicted)
 
             threshold1 = times_thld * np.std(error)
 
-            c1 = clock()
             med_filter = medfilt(error, kernel_size=kernel_size)
             filtered = np.abs(med_filter - error)
-            med_timer += (clock() - c1)
 
-            c1 = clock()
             mask = []
             for i in range(0, len(error), sub_frame):
-                # r = np.sum(error[i:i + sub_frame]) / float(sub_frame) > (np.median(error))
-                # r = np.sum(filtered[i:i + sub_frame]) / float(sub_frame) > error_thld
-                # r = np.sum(filtered[i:i + sub_frame]) / float(sub_frame) > (np.median(filtered) )
                 r = es.essentia.instantPower(frame_un[i:i + sub_frame]) > energy_thld
                 mask += [r] * sub_frame
             mask = mask[:len(error)]
             mask = np.array([mask]).astype(float)[0]
-            mas_timer += (clock() - c1)
 
             if sum(mask) == 0:
                 threshold2 = 1000  # just skip silent frames
@@ -127,17 +112,11 @@ class DevWrap(QaWrapper):
 
             frame_counter += 1
 
-        """
-        print 'computing lpcs: {:.2f}s'.format(lpc_timer)
-        print 'making predictions: {:.2f}s'.format(pre_timer)
-        print 'computing median filter: {:.2f}s'.format(med_timer)
-        print 'computing mask: {:.2f}s'.format(mas_timer)
-        print '*' * 20
-        """
         return np.array(y)
 
 
 if __name__ == '__main__':
+    folder = 'DiscontinuityDetector'
 
     # Instantiating wrappers
     wrappers = [
@@ -150,20 +129,14 @@ if __name__ == '__main__':
     # Add the wrappers to the test the wrappers
     qa.set_wrappers(wrappers)
 
-    data_dir = '../../QA-audio/Jumps/random_jumps'
+    data_dir = '../../QA-audio/Jumps/prominent_jumps'
 
     # Add the testing files
-    # qa.set_data(filename='../../QA-audio/Jumps/prominent_jumps')  # Works for a single
-    # qa.set_data(filename='../../../../../data/Dead_Combo_-_01_-_Povo_Que_Cas_Descalo_silence.wav')  # Works for a single
-    # qa.set_data(filename='../../../../../../pablo/Music/Desakato-La_Teoria_del_Fuego/03. Desakato - Estigma.mp3')  # Works for a single
-    #  qa.load_audio(filename='../../QA-audio/Jumps/loud_songs/')  # Works for a single
-
     qa.load_audio(filename=data_dir)  # Works for a single
     qa.load_solution(data_dir, ground_true=True)
 
     # Compute and the results, the scores and and compare the computation times
-
-    qa.compute_all()
+    qa.compute_all(output_file='{}/compute.log'.format(folder))
 
     qa.score_all()
 
@@ -178,21 +151,3 @@ if __name__ == '__main__':
     print 'Mean Precision: {}'.format(np.mean(precision))
     print 'Mean Recall: {}'.format(np.mean(recall))
     print 'Mean F-measure: {}'.format(np.mean(f_measure))
-
-    """
-    # Add extra metrics
-    qa.set_metrics(Distance())
-
-    # Add ground true
-    qa.load('../../QA-audio/StartStopSilence/', ground_true=True)
-
-    qa.plot_all(force=True, plots_dir='StartStopSilence/plots')
-
-    qa.score_all()
-
-    qa.generate_stats(output_file='StartStopSilence/stats.log')
-
-    qa.compare_elapsed_times(output_file='StartStopSilence/stats.log')
-
-    qa.save_test('StartStopSilence/test')
-    """

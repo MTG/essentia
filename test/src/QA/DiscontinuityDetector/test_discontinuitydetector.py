@@ -28,6 +28,7 @@ from scipy.signal import medfilt
 
 order = 3
 frame_size = 512
+sample_rate = 44100.
 hop_size = 256
 kernel_size = 7
 times_thld = 8
@@ -115,12 +116,30 @@ class DevWrap(QaWrapper):
         return np.array(y)
 
 
+class EssentiaWrap(QaWrapper):
+    """
+    Essentia Solution.
+    """
+    algo = es.DiscontinuityDetector(frameSize=frame_size, hopSize=hop_size)
+
+    def compute(self, *args):
+        y = []
+        self.algo.reset()
+        for idx, frame in enumerate(es.FrameGenerator(args[1], frameSize=frame_size, hopSize=hop_size,
+                                    startFromZero=True)):
+            locs, amps = self.algo(frame)
+            for l in locs:
+                y.append((l + hop_size * idx) / sample_rate)
+        return esarr(y)
+
+
 if __name__ == '__main__':
     folder = 'DiscontinuityDetector'
 
     # Instantiating wrappers
     wrappers = [
         DevWrap('events'),
+        EssentiaWrap('events'),
     ]
 
     # Instantiating the test
@@ -129,7 +148,7 @@ if __name__ == '__main__':
     # Add the wrappers to the test the wrappers
     qa.set_wrappers(wrappers)
 
-    data_dir = '../../QA-audio/Jumps/prominent_jumps'
+    data_dir = '../../QA-audio/Discontinuities/prominent_jumps'
 
     # Add the testing files
     qa.load_audio(filename=data_dir)  # Works for a single
