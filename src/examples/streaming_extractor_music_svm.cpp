@@ -123,6 +123,7 @@ int main(int argc, char* argv[]) {
     essentia::init();
     cout.precision(10); // TODO ????
 
+    setExtractorDefaultOptions(options);
     setExtractorOptions(profileFilename, options);  
     vector<string> svmModels = options.value<vector<string> >("highlevel.svm_models");
     
