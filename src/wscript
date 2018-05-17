@@ -265,8 +265,11 @@ def configure(ctx):
     algos = buildRegFile(ctx)
 
     if ctx.env.WITH_PYTHON:
-        if 'FileOutputProxy' not in algos:
-            raise ctx.errors.ConfigurationError("FileOutputProxy algorithm is necessary for python bindings, however it was excluded. Please, reconfigure including this algorithm.")
+        for a in ['FileOutputProxy', 'FrameCutter']:
+            if a not in algos:
+                raise ctx.errors.ConfigurationError(
+                    "%s algorithm is necessary for python bindings, however it was excluded. "
+                    "Please, reconfigure including this algorithm." % a)
 
     print('\n' + '-' * 87)
 
