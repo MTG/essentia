@@ -146,9 +146,9 @@ def configure(ctx):
                       args=['--cflags', '--libs'], mandatory=False)
 
 
-    #if ctx.env.WITH_GAIA:
-    #    ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
-    #                  args=check_cfg_args, mandatory=False)
+    if ctx.env.WITH_GAIA:
+        ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
+                      args=check_cfg_args, mandatory=False)
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += ['__STDC_CONSTANT_MACROS']
