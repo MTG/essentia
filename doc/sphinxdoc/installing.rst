@@ -12,7 +12,7 @@ Note that packages location for Python installed via Homebrew is different from 
 
   export PATH=/usr/local/bin:/usr/local/sbin:$PATH
 
-at the bottom of your ``~/.bash_profile`` file. More information about using Python and Homebrew is `here <https://github.com/Homebrew/brew/blob/master/docs/Homebrew-and-Python.md>`_.
+at the bottom of your ``~/.bash_profile`` file. More information about using Python and Homebrew is `here <https://docs.brew.sh/Homebrew-and-Python>`_.
 
 
 Linux
@@ -57,14 +57,15 @@ You can install those dependencies on a Debian/Ubuntu system from official repos
 
   sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six
 
-In order to use python bindings for the library, you might also need to install python-dev, python-numpy-dev (or python-numpy on Ubuntu) and python-yaml for YAML support in python::
+In order to use Python 2 bindings for the library, you might also need to install python-dev, python-numpy-dev (or python-numpy on Ubuntu) and python-yaml for YAML support in python::
 
   sudo apt-get install python-dev python-numpy-dev python-numpy python-yaml
 
-Similarly, in the case of Python3 install::
+Similarly, in the case of Python 3 install::
 
   sudo apt-get install python3-dev python3-numpy-dev python3-numpy python3-yaml
 
+On Ubuntu/Debian, make sure that ``/usr/local/lib/python3/dist-packages/`` path is included in the list of Python 3 `module search paths <https://docs.python.org/3/tutorial/modules.html#the-module-search-path>`_. If it is not included by default, you can configure it in the PYTHONPATH variable.
 
 Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_. 
 
@@ -138,11 +139,19 @@ To install the C++ library, python bindings, extractors and Vamp plugin (if conf
 
 Compiling for Python3
 ---------------------
-The waf build scripts are python scripts themselves. They will configure Essentia to be used with the same Python that was used to execute them. In the case if your default python is not Python3, you will need to run all waf commands with python3::
+The waf build script is a python script itself. By default it will configure Essentia to be built for the same Python that was used to execute this script. Alternatively, you can specify a specific Python binary to build for using the ``--python=PYTHON`` configuration option.
+
+Therefore, to build for Python3, you can either run all waf commands with your python3::
 
   python3 ./waf configure --build-static --with-python --with-cpptests --with-examples --with-vamp
   python3 ./waf
   python3 ./waf install
+
+or specify the ``--python`` option, for example:
+
+  ./waf configure --build-static --with-python --python=/usr/bin/python3 --with-cpptests --with-examples --with-vamp
+  ./waf
+  ./waf install
 
 
 Running tests (optional)
