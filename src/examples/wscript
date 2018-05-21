@@ -102,43 +102,43 @@ def configure(ctx):
     if 'ACCELERATE' in ctx.env.FFT:
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
 
+def build_example(ctx, prog_name, other=None):
+    files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
+
+    # If an `other` program has files in a directory we need
+    # to add an aditional includes
+    includes = ['.', '..']
+    if any((len(x.split("/")) > 1 for x in other or [])):
+        includes.append("../..")
+
+    ctx(features='c cxx cxxprogram check_static',
+        source = ctx.path.ant_glob(' '.join(files)),
+        target = 'essentia_' + prog_name,
+        includes = includes,
+        use = 'essentia', # + ctx.env.USES,
+        install_path = '${PREFIX}/bin')
+
+@feature('check_static')
+@before_method('apply_link')
+def check_static(ctx):
+    if ctx.env.WITH_STATIC_EXAMPLES:
+        if sys.platform != 'darwin':
+            # skip -static flag on OSX, otherwise it will complain because
+            # static linking to system libraries is not supported on OSX
+            ctx.env.LINKFLAGS = ['-static']
+            ctx.env.SHLIB_MARKER = ctx.env.STLIB_MARKER
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
 
     if len(ctx.env.EXAMPLE_LIST):
-        def build_example(prog_name, other=None):
-            files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
-
-            # If an `other` program has files in a directory we need
-            # to add an aditional includes
-            includes = ['.', '..']
-            if any((len(x.split("/")) > 1 for x in other or [])):
-                includes.append("../..")
-
-            ctx(features='c cxx cxxprogram check_static',
-                source = ctx.path.ant_glob(' '.join(files)),
-                target = 'essentia_' + prog_name,
-                includes = includes,
-                use = 'essentia ', # + ctx.env.USES,
-                install_path = '${PREFIX}/bin')
-            @feature('check_static')
-            @before_method('apply_link')
-            def check_static(self):
-                if ctx.env.WITH_STATIC_EXAMPLES:
-                    if sys.platform != 'darwin':
-                        # skip -static flag on OSX, otherwise it will complain because
-                        # static linking to system libraries is not supported on OSX
-                        self.env.LINKFLAGS = ['-static']
-                        self.env.SHLIB_MARKER = self.env.STLIB_MARKER
-
+        print('→ building examples')
         for e in example_sources_fileio + example_sources_with_gaia:
             if e[0] in ctx.env.EXAMPLE_LIST:
                 if len(e) == 1:
-                    build_example(e[0])
+                    build_example(ctx, e[0])
                 elif len(e) == 2:
-                    build_example(e[0], e[1])
-
+                    build_example(ctx, e[0], e[1])
 
     if ctx.env.WITH_VAMP:
         ctx.env.INCLUDES += [ '3rdparty/vamp-plugin-sdk-2.4' ]

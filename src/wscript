@@ -431,6 +431,12 @@ def build(ctx):
         )
 
 
+    if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
+        ctx.recurse('examples')
+
+    if ctx.env.WITH_PYTHON:
+        ctx.recurse('python')
+
 def write_pcfile(task):
     open('build/essentia.pc', 'w').write(ctx.env.pcfile)
 
@@ -452,8 +458,3 @@ def write_pcfile(task):
     ctx.install_files('${PREFIX}/lib/pkgconfig', '../build/essentia.pc')
 
 
-    if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
-        ctx.recurse('examples')
-
-    if ctx.env.WITH_PYTHON:
-        ctx.recurse('python')
