@@ -6,6 +6,7 @@ cd $BASEDIR/debian_3rdparty
 ./build_libsamplerate.sh
 ./build_taglib.sh
 ./build_yaml.sh
+./build_chromaprint.sh
 
 if [ "$1" = --with-gaia ];
     then
