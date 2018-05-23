@@ -412,7 +412,9 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
         """
     if ctx.env.WITH_GAIA_QT5:
-        ctx.env.INCLUDES +=  ['.','..','/usr/local/include', '/usr/include/x86_64-linux-gnu/qt5']
+        ctx.env.INCLUDES += ['.','..','/usr/local/include'] 
+        ctx.env.INCLUDES += ['/usr/include/x86_64-linux-gnu/qt5']
+        ctx.env.INCLUDES += ['/usr/include/x86_64-linux-gnu/qt5/QtCore']
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
