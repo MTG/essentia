@@ -411,6 +411,8 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
         """
+    if ctx.env.WITH_GAIA_QT5:
+        ctx.env.INCLUDES +=  ['.','..','/usr/local/include', '/usr/include/x86_64-linux-gnu/qt5']
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
@@ -424,7 +426,10 @@ def build(ctx):
         ctx.shlib(
             source   = sources,
             target   = 'essentia',
-            #stlib = 'gaia2', 
+            lib=['Qt5Core', 'Qt5Concurrent', 'yaml'], 
+            libpath=['/usr/lib/x86_64-linux-gnu', '..'],  # shared libraries
+            stlib='gaia2', 
+            stlibpath='/usr/local/lib', 
             use      = ctx.env.USES,
             includes = ctx.env.INCLUDES,
             cxxflags = [ '-w' ],

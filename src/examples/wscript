@@ -136,7 +136,8 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             use = 'essentia', # + ctx.env.USES,
             install_path = '${PREFIX}/bin')
     else:
-        includes_path = ['.', '..', '/usr/include/x86_64-linux-gnu/qt5']
+        includes_path = ['.','..', '/usr/include/x86_64-linux-gnu/qt5/QtCore']
+        
         ctx(features='c cxx cxxprogram qt5 check_static',
             source = ctx.path.ant_glob(' '.join(files)),
             target = 'essentia_' + prog_name,
@@ -148,7 +149,7 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             '-fno-strict-aliasing',\
             '-fPIC', '-fvisibility=hidden'], 
             #uselib = qt_uselib,
-            lib=['Qt5Core','essentia'], 
+            lib=['Qt5Core','Qt5Concurrent','essentia', 'yaml'], 
             libpath=['/usr/lib/x86_64-linux-gnu', '..'],  # shared libraries
             stlib='gaia2', 
             stlibpath='/usr/local/lib', 
