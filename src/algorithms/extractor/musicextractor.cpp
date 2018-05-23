@@ -566,8 +566,8 @@ void MusicExtractor::computeReplayGain(const string& audioFilename, Pool& result
       results.remove("metadata.audio_properties.replay_gain");
     }
     else {
-      throw EssentiaException("File looks like a completely silent file... Aborting...");
       //exit(5);
+      break;
     }
   }
 }
