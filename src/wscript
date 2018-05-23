@@ -243,12 +243,12 @@ def configure(ctx):
         if has('gaia2'):
             print('- Gaia2 detected!')
             print('  The following algorithms will be included: %s\n' % algos)
-            ctx.env.USES += ' GAIA2'
+            #ctx.env.USES += ' GAIA2'
     elif ctx.env.WITH_GAIA:
         if has('gaia2'):
             print('- Gaia2 detected!')
             print('  The following algorithms will be included: %s\n' % algos)
-            ctx.env.USES += ' GAIA2'
+            #ctx.env.USES += ' GAIA2'
     else:
         print('- Essentia is configured without Gaia2.')
         print('  The following algorithms will be ignored: %s' % algos)
@@ -424,6 +424,7 @@ def build(ctx):
         ctx.shlib(
             source   = sources,
             target   = 'essentia',
+            #stlib = 'gaia2', 
             use      = ctx.env.USES,
             includes = ctx.env.INCLUDES,
             cxxflags = [ '-w' ],
@@ -437,13 +438,8 @@ def build(ctx):
     if ctx.env.WITH_PYTHON:
         ctx.recurse('python')
 
-def write_pcfile(task):
-    open('build/essentia.pc', 'w').write(ctx.env.pcfile)
-
     ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
-    ctx.add_group()
-
-
+    
     # install headers if asked to
     headers = ctx.path.ant_glob('essentia/**/*.h')
     for h in headers:
@@ -457,4 +453,5 @@ def write_pcfile(task):
     #ctx.install_files('${PREFIX}/lib/pkgconfig', pc)     #TODO remove
     ctx.install_files('${PREFIX}/lib/pkgconfig', '../build/essentia.pc')
 
-
+def write_pcfile(ctx):
+    open('build/essentia.pc', 'w').write(ctx.env.pcfile)

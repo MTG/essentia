@@ -32,7 +32,7 @@ if 'VIRTUAL_ENV' in os.environ:
 
 
 def options(ctx):
-    ctx.load('compiler_cxx compiler_c python')
+    ctx.load('compiler_cxx compiler_c python qt5')
     if sys.platform == 'win32':
         ctx.load('msvc')
 
@@ -266,7 +266,7 @@ def configure(ctx):
         ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
 
-    ctx.load('compiler_cxx compiler_c')
+    ctx.load('compiler_cxx compiler_c qt5')
 
     if ctx.env.STATIC_DEPENDENCIES \
         and (sys.platform.startswith('linux') or sys.platform == 'darwin') \

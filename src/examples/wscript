@@ -32,6 +32,7 @@ example_sources_fileio = [
     ('standard_spsmodel', ),
     ('standard_stft', ),
     ('standard_stochasticmodel', ),
+    # ('standard_chromaprinter', ),
 
     ('streaming_beatsmarker', ),
     ('streaming_beattracker_multifeature_mirex2013', ),
@@ -62,6 +63,9 @@ example_sources_with_gaia = [
 
 
 def configure(ctx):
+    global gaia_qt5
+    gaia_qt5 = ctx.env['WITH_GAIA_QT5']
+    #print ('gaia_qt5 = ', gaia_qt5)
     example_list_fileio = [p[0] for p in example_sources_fileio]
     example_list_gaia = [p[0] for p in example_sources_with_gaia]
 
@@ -72,10 +76,15 @@ def configure(ctx):
 
     if "HAVE_GAIA2" in ctx.env['define_key']:
         example_list += example_list_gaia
+        if gaia_qt5:
+            ctx.load('qt5')
+            #ctx.env.CXXFLAGS += ['-Wno-parentheses', '-Wno-uninitialized' ]  
+        else:
+            ctx.load('qt4')
 
     if ctx.env.WITH_EXAMPLES:
         ctx.env.EXAMPLE_LIST = example_list
-
+ 
     if ctx.env.EXAMPLES:
         for e in ctx.env.EXAMPLES.split(","):
             e = e.strip()
@@ -102,21 +111,51 @@ def configure(ctx):
     if 'ACCELERATE' in ctx.env.FFT:
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
 
-def build_example(ctx, prog_name, other=None):
+def build_example(ctx, prog_name, other=None,  gaia=False):
     files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
-
+    #print ('gaia = ', gaia) 
     # If an `other` program has files in a directory we need
     # to add an aditional includes
-    includes = ['.', '..']
-    if any((len(x.split("/")) > 1 for x in other or [])):
-        includes.append("../..")
-
-    ctx(features='c cxx cxxprogram check_static',
-        source = ctx.path.ant_glob(' '.join(files)),
-        target = 'essentia_' + prog_name,
-        includes = includes,
-        use = 'essentia', # + ctx.env.USES,
-        install_path = '${PREFIX}/bin')
+    if ctx.env.WITH_GAIA_QT5:
+        qt_uselib = 'QT5CORE'
+    else:
+        qt_uselib = 'QTCORE'
+    if gaia==False:
+        includes_path = ['.', '..']
+        if any((len(x.split("/")) > 1 for x in other or [])):
+            includes_path.append("../..")
+        ctx(features='c cxx cxxprogram check_static',
+            source = ctx.path.ant_glob(' '.join(files)),
+            target = 'essentia_' + prog_name,
+            includes = includes_path,
+            cxxflags= [ '-std=c++11', '-msse2','-Wall', \
+            '-Wno-misleading-indentation', \
+            '-Wno-unused-result',\
+            '-fno-strict-aliasing',\
+            '-fPIC', '-fvisibility=hidden'], 
+            use = 'essentia', # + ctx.env.USES,
+            install_path = '${PREFIX}/bin')
+    else:
+        includes_path = ['.', '..', '/usr/include/x86_64-linux-gnu/qt5']
+        ctx(features='c cxx cxxprogram qt5 check_static',
+            source = ctx.path.ant_glob(' '.join(files)),
+            target = 'essentia_' + prog_name,
+            includes = includes_path,
+            cxxflags= [ '-std=c++11', '-msse2','-Wall', \
+            '-DGAIA_QT5', \
+            '-Wno-misleading-indentation', \
+            '-Wno-unused-result',\
+            '-fno-strict-aliasing',\
+            '-fPIC', '-fvisibility=hidden'], 
+            #uselib = qt_uselib,
+            lib=['Qt5Core','essentia'], 
+            libpath=['/usr/lib/x86_64-linux-gnu', '..'],  # shared libraries
+            stlib='gaia2', 
+            stlibpath='/usr/local/lib', 
+            #stlib     = 'gaia2',
+            #shlib    = 'QTCORE QTCONCURRENT', 
+            #use = 'essentia', # + ctx.env.USES,
+            install_path = '${PREFIX}/bin')
 
 @feature('check_static')
 @before_method('apply_link')
@@ -133,12 +172,20 @@ def build(ctx):
 
     if len(ctx.env.EXAMPLE_LIST):
         print('→ building examples')
-        for e in example_sources_fileio + example_sources_with_gaia:
+        for e in example_sources_fileio:
             if e[0] in ctx.env.EXAMPLE_LIST:
                 if len(e) == 1:
                     build_example(ctx, e[0])
                 elif len(e) == 2:
                     build_example(ctx, e[0], e[1])
+        
+        for e in example_sources_with_gaia:
+            if e[0] in ctx.env.EXAMPLE_LIST:
+                if len(e) == 1:
+                    build_example(ctx, e[0], gaia=True)
+                elif len(e) == 2:
+                    build_example(ctx, e[0], e[1], gaia=True)
+
 
     if ctx.env.WITH_VAMP:
         ctx.env.INCLUDES += [ '3rdparty/vamp-plugin-sdk-2.4' ]

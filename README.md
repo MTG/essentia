@@ -18,7 +18,7 @@ If using on Ubuntu (Linux) with Gaia there is an option `--with-gaia-qt5` this r
 
 `export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/config` 
 
-You can download and use prebuilt static binaries for a number of Essentia's command-line music extractors instead of installing the complete library
+Still working on resolving linker issues involving `Gaia2` for `example` `streaming_extractor_music_svm` extractor.  You can download and use prebuilt static binaries for a number of Essentia's command-line music extractors instead of installing the complete library
 
 - [doc/sphinxdoc/extractors_out_of_box.rst](doc/sphinxdoc/extractors_out_of_box.rst)
 
