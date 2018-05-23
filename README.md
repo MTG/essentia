@@ -16,7 +16,7 @@ The library is cross-platform and currently supports Linux, Mac OS X, Windows, i
 
 If using on Ubuntu (Linux) with Gaia there is an option `--with-gaia-qt5` this requires:
 
-`export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/config` 
+`export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig` 
 
 Still working cleaning up linker references issues involving `Gaia2` for `example` `streaming_extractor_music_svm` extractor to make build more generic, less specific to Ubuntu.
 
