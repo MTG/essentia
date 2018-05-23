@@ -65,7 +65,7 @@ example_sources_with_gaia = [
 def configure(ctx):
     global gaia_qt5
     gaia_qt5 = ctx.env['WITH_GAIA_QT5']
-    #print ('gaia_qt5 = ', gaia_qt5)
+    
     example_list_fileio = [p[0] for p in example_sources_fileio]
     example_list_gaia = [p[0] for p in example_sources_with_gaia]
 
