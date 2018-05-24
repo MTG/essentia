@@ -31,8 +31,8 @@ class EssentiaBuildExtension(build_ext):
         else:
             os.system('./packaging/build_3rdparty_static_debian.sh')
 
-        os.system('%s waf configure --build-static --static-dependencies \
-                   --with-python --prefix=tmp' % PYTHON)
+        os.system('%s waf configure --build-static --static-dependencies '
+                  '--with-python --prefix=tmp' % PYTHON)
         os.system('%s waf' % PYTHON)
         os.system('%s waf install' % PYTHON)
 
@@ -51,14 +51,15 @@ def get_git_version():
 
 
 def get_version():
-    git_version = get_git_version()
     version = open('VERSION', 'r').read().strip('\n')
-
-    if git_version:
-        version = git_version
-    else:
-        version = open('VERSION', 'r').read().strip('\n')
-
+    if version.count('-dev'):
+        # Development version. Get the number of commits after the last release
+        git_version = get_git_version()
+        dev_commits = git_version.split('-')[-2] if git_version else ''
+        if not dev_commits.isdigit():
+            print('Error parsing the number of dev commits: %s', dev_commits)
+            dev_commits = '0'
+        version += dev_commits
     return version
 
 
