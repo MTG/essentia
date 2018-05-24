@@ -415,6 +415,19 @@ def build(ctx):
         ctx.env.INCLUDES += ['.','..','/usr/local/include'] 
         ctx.env.INCLUDES += ['/usr/include/x86_64-linux-gnu/qt5']
         ctx.env.INCLUDES += ['/usr/include/x86_64-linux-gnu/qt5/QtCore']
+        bld_libs = ['Qt5Core', 'Qt5Concurrent', 'yaml'] 
+    elif ctx.env.WITH_GAIA:
+        ctx.env.INCLUDES += ['.','..','/usr/local/include'] 
+        ctx.env.INCLUDES += ['/usr/include/qt4']
+        ctx.env.INCLUDES += ['/usr/include/qt4/QtCore']
+        bld_libs = ['QtCore',  'yaml'] 
+        
+
+    from waflib.Task import Task
+    class task_build_essentia(Task):
+        before = ['task_build_samples']
+    class task_build_samples(Task):
+        after  = ['task_build_essentia']
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
@@ -428,7 +441,7 @@ def build(ctx):
         ctx.shlib(
             source   = sources,
             target   = 'essentia',
-            lib=['Qt5Core', 'Qt5Concurrent', 'yaml'], 
+            lib=bld_libs, 
             libpath=['/usr/lib/x86_64-linux-gnu', '..'],  # shared libraries
             stlib='gaia2', 
             stlibpath='/usr/local/lib', 

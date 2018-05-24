@@ -6,7 +6,7 @@ from waflib.TaskGen import feature, before_method
 import distutils.sysconfig
 import os
 import sys
-
+gaia_qt5 = False
 # This is a list of 1- or 2-tuples. The first element is the name of
 # the source file (less the .cpp extension) and is also used as the
 # binary name. The second element (if it exists) is a list of
@@ -112,14 +112,17 @@ def configure(ctx):
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
 
 def build_example(ctx, prog_name, other=None,  gaia=False):
+    global gaia_qt5
     files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
     #print ('gaia = ', gaia) 
     # If an `other` program has files in a directory we need
     # to add an aditional includes
     if ctx.env.WITH_GAIA_QT5:
         qt_uselib = 'QT5CORE'
-    else:
+        gaia_qt5 = ctx.env['WITH_GAIA_QT5']
+    elif ctx.env.WITH_GAIA:
         qt_uselib = 'QTCORE'
+        
     if gaia==False:
         includes_path = ['.', '..']
         if any((len(x.split("/")) > 1 for x in other or [])):
@@ -136,20 +139,30 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             use = 'essentia', # + ctx.env.USES,
             install_path = '${PREFIX}/bin')
     else:
-        includes_path = ['.','..', '/usr/include/x86_64-linux-gnu/qt5/QtCore']
-        
-        ctx(features='c cxx cxxprogram qt5 check_static',
+        if gaia_qt5:
+            includes_path = ['.','..', '/usr/include/x86_64-linux-gnu/qt5/QtCore']
+            bld_features = 'c cxx cxxprogram qt5 check_static'
+            bld_cxxflag = '-DGAIA_QT5=True'
+            bld_libs = ['Qt5Core','Qt5Concurrent','essentia', 'yaml'] 
+        elif ctx.env['WITH_GAIA']:
+            includes_path = ['.','..', '/usr/include/qt4/QtCore']
+            bld_features = 'c cxx cxxprogram qt4 check_static'
+            bld_cxxflag = '-DGAIA_QT5=False'
+            bld_libs = ['QtCore','essentia', 'yaml'] 
+        #
+        # this must run after essentia.so is built, and for Docker apps this isn't guarenteed
+        ctx(features=bld_features,
             source = ctx.path.ant_glob(' '.join(files)),
             target = 'essentia_' + prog_name,
             includes = includes_path,
             cxxflags= [ '-std=c++11', '-msse2','-Wall', \
-            '-DGAIA_QT5', \
+            bld_cxxflag, \
             '-Wno-misleading-indentation', \
             '-Wno-unused-result',\
             '-fno-strict-aliasing',\
             '-fPIC', '-fvisibility=hidden'], 
             #uselib = qt_uselib,
-            lib=['Qt5Core','Qt5Concurrent','essentia', 'yaml'], 
+            lib=bld_libs, 
             libpath=['/usr/lib/x86_64-linux-gnu', '..', '/usr/local/lib'],  # shared libraries
             stlib='gaia2', 
             stlibpath='/usr/local/lib', 
