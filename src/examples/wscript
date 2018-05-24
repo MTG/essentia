@@ -150,7 +150,7 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             '-fPIC', '-fvisibility=hidden'], 
             #uselib = qt_uselib,
             lib=['Qt5Core','Qt5Concurrent','essentia', 'yaml'], 
-            libpath=['/usr/lib/x86_64-linux-gnu', '..'],  # shared libraries
+            libpath=['/usr/lib/x86_64-linux-gnu', '..', '/usr/local/lib'],  # shared libraries
             stlib='gaia2', 
             stlibpath='/usr/local/lib', 
             #stlib     = 'gaia2',
