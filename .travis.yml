@@ -1,3 +1,6 @@
+git:
+  depth: 500
+
 notifications:
   email: false
 
