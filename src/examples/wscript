@@ -101,7 +101,7 @@ def configure(ctx):
 
         if "HAVE_GAIA2" in ctx.env['define_key']:
             ctx.env.LIB += ['gaia2']
-            ctx.env['LIB_GAIA2'] += ['dl'] # -ldl is required when building with static QtCore
+            #ctx.env['LIB_GAIA2'] += ['dl'] # -ldl is required when building with static QtCore
 
         if ctx.options.CROSS_COMPILE_MINGW32:
             # otherwise the __imp__ symbols will be expected at link time
