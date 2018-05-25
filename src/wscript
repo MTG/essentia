@@ -6,6 +6,8 @@ from __future__ import print_function
 import sys
 import os.path
 
+bld_libs = []
+sources = []
 dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
 
 def options(ctx):
@@ -354,6 +356,35 @@ def buildRegFile(ctx):
     print('Created algorithms registration file')
     return algos
 
+def task_build_essentia (ctx, sources, bld_libs):
+    if ctx.env.BUILD_STATIC:
+        ctx.stlib(
+            source   = sources,
+            target   = 'essentia',
+            use      = ctx.env.USES,
+            install_path = '${PREFIX}/lib',
+            #includes = ctx.env.includes
+        )
+    else:
+        ctx.shlib(
+            source   = sources,
+            target   = 'essentia',
+            lib=bld_libs, 
+            libpath=['/usr/lib/x86_64-linux-gnu', '..'],  # shared libraries
+            stlib='gaia2', 
+            stlibpath='/usr/local/lib', 
+            use      = ctx.env.USES,
+            includes = ctx.env.INCLUDES,
+            cxxflags = [ '-w' ],
+            install_path = '${PREFIX}/lib'
+        )
+
+def task_build_examples (ctx):
+    if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
+        ctx.recurse('examples')
+
+    if ctx.env.WITH_PYTHON:
+        ctx.recurse('python')
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
@@ -420,15 +451,30 @@ def build(ctx):
         ctx.env.INCLUDES += ['.','..','/usr/local/include'] 
         ctx.env.INCLUDES += ['/usr/include/qt4']
         ctx.env.INCLUDES += ['/usr/include/qt4/QtCore']
-        bld_libs = ['QtCore',  'yaml'] 
-        
+        bld_libs = ['QtCore',  'yaml']
 
-    from waflib.Task import Task
-    class task_build_essentia(Task):
-        before = ['task_build_samples']
-    class task_build_samples(Task):
-        after  = ['task_build_essentia']
+   
+    task_build_essentia(ctx, sources, bld_libs)
+    ctx.add_group()
+    task_build_examples(ctx)
 
+    ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
+    
+    # install headers if asked to
+    headers = ctx.path.ant_glob('essentia/**/*.h')
+    for h in headers:
+        install_dir = os.path.split(h.srcpath())[0][4:]
+        ctx.install_files('${PREFIX}/include/' + install_dir, h)
+    # version.h
+    ctx.install_files('${PREFIX}/include/essentia', 'version.h')
+
+    # install pkgconfig file
+    #pc = ctx.path.ant_glob('essentia/build/essentia.pc') #TODO remove
+    #ctx.install_files('${PREFIX}/lib/pkgconfig', pc)     #TODO remove
+    ctx.install_files('${PREFIX}/lib/pkgconfig', '../build/essentia.pc')
+
+'''
+def task_build_essentia (ctx, sources, bld_libs):
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
             source   = sources,
@@ -451,27 +497,13 @@ def build(ctx):
             install_path = '${PREFIX}/lib'
         )
 
-
+def task_build_samples (ctx):
     if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
 
     if ctx.env.WITH_PYTHON:
         ctx.recurse('python')
-
-    ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
-    
-    # install headers if asked to
-    headers = ctx.path.ant_glob('essentia/**/*.h')
-    for h in headers:
-        install_dir = os.path.split(h.srcpath())[0][4:]
-        ctx.install_files('${PREFIX}/include/' + install_dir, h)
-    # version.h
-    ctx.install_files('${PREFIX}/include/essentia', 'version.h')
-
-    # install pkgconfig file
-    #pc = ctx.path.ant_glob('essentia/build/essentia.pc') #TODO remove
-    #ctx.install_files('${PREFIX}/lib/pkgconfig', pc)     #TODO remove
-    ctx.install_files('${PREFIX}/lib/pkgconfig', '../build/essentia.pc')
-
+'''
+   
 def write_pcfile(ctx):
     open('build/essentia.pc', 'w').write(ctx.env.pcfile)
