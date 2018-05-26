@@ -4,7 +4,7 @@
 from __future__ import print_function
 
 import distutils.sysconfig
-import os
+import os,  sys
 
 
 def options(ctx):
@@ -18,7 +18,7 @@ def configure(ctx):
         print ('→ Configuring for python2')
     else:
         print ('→ Configuring for python3')
-
+    
     ctx.check_python_headers()
     ctx.check_python_module('numpy')
 
@@ -27,7 +27,12 @@ def adjust(objs, path):
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
-
+    if sys.platform.startswith('linux'):
+        ctx.env['pyext_PATTERN'] = "%s.so"
+        python_dir = str(ctx.env['PYTHONDIR'])
+        python_dir = python_dir.replace ('3/', str(ctx.env['PYTHON_VERSION'])+'/', 1)
+        ctx.env['PYTHONDIR'] = python_dir
+    print(ctx.env['pyext_PATTERN'])
     # gets the path from the active virtualenv
     PYLIB = distutils.sysconfig.get_python_lib()
     #print('-'*100)
@@ -45,10 +50,17 @@ def build(ctx):
         target   = '_essentia',
         features = 'pyext',
         includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
-        cxxflags = [ '-w' ],
-        install_path = '${PYTHONDIR}/essentia',
-        use      = 'essentia ' #+ ctx.env.USES
+        cxxflags= [ '-w','-std=c++11', '-msse2','-Wall', \
+            '-Wno-misleading-indentation', \
+            '-Wno-unused-result',\
+            '-fno-strict-aliasing',\
+            '-fPIC', '-fvisibility=hidden'],
+        lib = 'essentia', 
+        libpath = ['..'], 
+        install_path = '${PYTHONDIR}/essentia'
+        #use      = 'essentia ' #+ ctx.env.USES
     )
+
 
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
                       relative_trick=True)
