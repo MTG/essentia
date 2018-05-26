@@ -136,7 +136,9 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             '-Wno-unused-result',\
             '-fno-strict-aliasing',\
             '-fPIC', '-fvisibility=hidden'], 
-            use = 'essentia', # + ctx.env.USES,
+            bld_libs = ['essentia', 'yaml'],  
+            ibpath=[ '..', '/usr/local/lib'],  # shared libraries
+            #use = 'essentia', # + ctx.env.USES,
             install_path = '${PREFIX}/bin')
     else:
         if gaia_qt5:
