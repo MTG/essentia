@@ -32,7 +32,7 @@ def build(ctx):
         python_dir = str(ctx.env['PYTHONDIR'])
         python_dir = python_dir.replace ('3/', str(ctx.env['PYTHON_VERSION'])+'/', 1)
         ctx.env['PYTHONDIR'] = python_dir
-    print(ctx.env['pyext_PATTERN'])
+    #print(ctx.env['pyext_PATTERN'])
     # gets the path from the active virtualenv
     PYLIB = distutils.sysconfig.get_python_lib()
     #print('-'*100)

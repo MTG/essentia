@@ -63,6 +63,7 @@ example_sources_with_gaia = [
 
 
 def configure(ctx):
+    #print (ctx.path.abspath())
     global gaia_qt5
     gaia_qt5 = ctx.env['WITH_GAIA_QT5']
     
@@ -112,6 +113,7 @@ def configure(ctx):
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
 
 def build_example(ctx, prog_name, other=None,  gaia=False):
+    #print(ctx.path.abspath())
     global gaia_qt5
     files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
     #print ('gaia = ', gaia) 
@@ -165,7 +167,7 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             '-fPIC', '-fvisibility=hidden'], 
             #uselib = qt_uselib,
             lib=bld_libs, 
-            libpath=['..','/usr/lib/x86_64-linux-gnu', '/usr/local/lib'],  # shared libraries
+            libpath=['..','ctx.path.abspath()/../../build/src','/usr/lib/x86_64-linux-gnu', '/usr/local/lib'],  # shared libraries
             stlib='gaia2', 
             stlibpath='/usr/local/lib', 
             #shlib    = 'QTCORE QTCONCURRENT', 
