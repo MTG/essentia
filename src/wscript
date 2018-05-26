@@ -420,6 +420,12 @@ def build(ctx):
     ctx.env.INCLUDES = [ '.', 'essentia', 'essentia/scheduler', 'essentia/streaming',
                          'essentia/streaming/algorithms', 'essentia/utils',
                          '3rdparty']
+    ctx.env.CXXFLAGS= [ '-w','-std=c++11', '-msse2','-Wall', \
+            '-Wno-misleading-indentation', \
+            '-Wno-unused-result',\
+            '-fext-numeric-literals', \
+            '-fno-strict-aliasing',\
+            '-fPIC', '-fvisibility=hidden']
 
     # do not compile splineutil.cpp if we are not compiling Spline and CubicSpline
     if 'Spline' not in ctx.env.ALGOIGNORE or 'CubicSpline' not in ctx.env.ALGOIGNORE:

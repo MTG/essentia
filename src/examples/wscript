@@ -155,6 +155,7 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             bld_libs = ['essentia','QtCore', 'yaml'] 
         #
         # this must run after essentia.so is built, and for Docker apps this isn't guarenteed
+        print ('ctx.path.abspath() = ', ctx.path.abspath())
         ctx(features=bld_features,
             source = ctx.path.ant_glob(' '.join(files)),
             target = 'essentia_' + prog_name,
@@ -167,7 +168,7 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             '-fPIC', '-fvisibility=hidden'], 
             #uselib = qt_uselib,
             lib=bld_libs, 
-            libpath=['..','ctx.path.abspath()/../../build/src','/usr/lib/x86_64-linux-gnu', '/usr/local/lib'],  # shared libraries
+            libpath=['..','ctx.path.abspath()/../../build/src','../..','.','/usr/lib/x86_64-linux-gnu', '/usr/local/lib'],  # shared libraries
             stlib='gaia2', 
             stlibpath='/usr/local/lib', 
             #shlib    = 'QTCORE QTCONCURRENT', 
