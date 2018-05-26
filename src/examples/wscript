@@ -136,14 +136,14 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             '-Wno-unused-result',\
             '-fno-strict-aliasing',\
             '-fPIC', '-fvisibility=hidden'], 
-            bld_libs = ['essentia', 'yaml'],  
-            ibpath=[ '..', '/usr/local/lib'],  # shared libraries
+            lib = ['essentia', 'yaml'],  
+            libpath=[ '..', '/usr/local/lib'],  # shared libraries
             #use = 'essentia', # + ctx.env.USES,
             install_path = '${PREFIX}/bin')
     else:
         if gaia_qt5:
             includes_path = ['.','..', '/usr/include/x86_64-linux-gnu/qt5/QtCore']
-            bld_features = 'c cxx cxxprogram qt5'
+            bld_features = 'c cxx cxxprogram qt5 check_static'
             bld_cxxflag = '-DGAIA_QT5=True'
             bld_libs = ['essentia','Qt5Core','Qt5Concurrent', 'yaml'] 
         elif ctx.env['WITH_GAIA']:
@@ -168,7 +168,6 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             libpath=['..','/usr/lib/x86_64-linux-gnu', '/usr/local/lib'],  # shared libraries
             stlib='gaia2', 
             stlibpath='/usr/local/lib', 
-            #stlib     = 'gaia2',
             #shlib    = 'QTCORE QTCONCURRENT', 
             #use = 'essentia', # + ctx.env.USES,
             install_path = '${PREFIX}/bin')
