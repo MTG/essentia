@@ -143,14 +143,14 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
     else:
         if gaia_qt5:
             includes_path = ['.','..', '/usr/include/x86_64-linux-gnu/qt5/QtCore']
-            bld_features = 'c cxx cxxprogram qt5 check_static'
+            bld_features = 'c cxx cxxprogram qt5'
             bld_cxxflag = '-DGAIA_QT5=True'
-            bld_libs = ['Qt5Core','Qt5Concurrent','essentia', 'yaml'] 
+            bld_libs = ['essentia','Qt5Core','Qt5Concurrent', 'yaml'] 
         elif ctx.env['WITH_GAIA']:
             includes_path = ['.','..', '/usr/include/qt4/QtCore']
             bld_features = 'c cxx cxxprogram qt4 check_static'
             bld_cxxflag = '-DGAIA_QT5=False'
-            bld_libs = ['QtCore','essentia', 'yaml'] 
+            bld_libs = ['essentia','QtCore', 'yaml'] 
         #
         # this must run after essentia.so is built, and for Docker apps this isn't guarenteed
         ctx(features=bld_features,
@@ -165,7 +165,7 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             '-fPIC', '-fvisibility=hidden'], 
             #uselib = qt_uselib,
             lib=bld_libs, 
-            libpath=['/usr/lib/x86_64-linux-gnu', '..', '/usr/local/lib'],  # shared libraries
+            libpath=['..','/usr/lib/x86_64-linux-gnu', '/usr/local/lib'],  # shared libraries
             stlib='gaia2', 
             stlibpath='/usr/local/lib', 
             #stlib     = 'gaia2',
