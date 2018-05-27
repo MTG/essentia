@@ -157,10 +157,9 @@ def configure(ctx):
 
     if ctx.env.WITH_EXAMPLES or ctx.env.EXAMPLES or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
-
+        
     if ctx.env.WITH_PYTHON:
         ctx.recurse('python')
-
 
     # prepare the compilation environment using the detected libraries
     print()
@@ -383,6 +382,7 @@ def task_build_essentia (ctx, sources, bld_libs):
                 '-fPIC', '-fvisibility=hidden'],
             install_path = '${PREFIX}/lib'
         )
+    ctx.add_group()
 
 def task_build_examples (ctx):
     if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
@@ -466,7 +466,7 @@ def build(ctx):
 
    
     task_build_essentia(ctx, sources, bld_libs)
-    ctx.add_group()
+    
     task_build_examples(ctx)
 
     ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
