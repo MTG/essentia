@@ -116,7 +116,7 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
     #print(ctx.path.abspath())
     global gaia_qt5
     files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
-    print ('gaia = ', gaia) 
+    #print ('gaia = ', gaia) 
     # If an `other` program has files in a directory we need
     # to add an aditional includes
     if ctx.env.WITH_GAIA_QT5:
