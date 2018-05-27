@@ -19,7 +19,7 @@ def configure(ctx):
     else:
         print ('→ Configuring for python3')
     
-    ctx.check_python_headers()
+    ctx.check_python_headers(features='pyext')
     ctx.check_python_module('numpy')
 
 def adjust(objs, path):
