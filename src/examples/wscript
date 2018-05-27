@@ -116,7 +116,7 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
     #print(ctx.path.abspath())
     global gaia_qt5
     files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
-    #print ('gaia = ', gaia) 
+    print ('gaia = ', gaia) 
     # If an `other` program has files in a directory we need
     # to add an aditional includes
     if ctx.env.WITH_GAIA_QT5:
@@ -155,17 +155,17 @@ def build_example(ctx, prog_name, other=None,  gaia=False):
             bld_libs = ['essentia','QtCore', 'yaml'] 
         #
         # this must run after essentia.so is built, and for Docker apps this isn't guarenteed
-        print ('ctx.path.abspath() = ', ctx.path.abspath())
+        #print ('ctx.path.abspath() = ', ctx.path.abspath())
         ctx(features=bld_features,
             source = ctx.path.ant_glob(' '.join(files)),
             target = 'essentia_' + prog_name,
             includes = includes_path,
             cxxflags= [ '-std=c++11', '-msse2','-Wall', \
-            bld_cxxflag, \
-            '-Wno-misleading-indentation', \
-            '-Wno-unused-result',\
-            '-fno-strict-aliasing',\
-            '-fPIC', '-fvisibility=hidden'], 
+                bld_cxxflag, \
+                '-Wno-misleading-indentation', \
+                '-Wno-unused-result',\
+                '-fno-strict-aliasing',\
+                '-fPIC', '-fvisibility=hidden'], 
             #uselib = qt_uselib,
             lib=bld_libs, 
             libpath=['..','ctx.path.abspath()/../../build/src','../..','.','/usr/lib/x86_64-linux-gnu', '/usr/local/lib'],  # shared libraries
@@ -203,7 +203,7 @@ def build(ctx):
                     build_example(ctx, e[0], gaia=True)
                 elif len(e) == 2:
                     build_example(ctx, e[0], e[1], gaia=True)
-
+        ctx.add_group()
 
     if ctx.env.WITH_VAMP:
         ctx.env.INCLUDES += [ '3rdparty/vamp-plugin-sdk-2.4' ]
@@ -225,3 +225,4 @@ def build(ctx):
             use      = 'essentia ', #+ ctx.env.USES,
             install_path = install_path)
 
+        ctx.add_group()

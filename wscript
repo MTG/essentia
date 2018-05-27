@@ -323,7 +323,7 @@ def build(ctx):
             install_path=None,
             use='essentia ' + ctx.env.USES
             )
-
+        ctx.add_group()
 
 def run_tests(ctx):
     ret = os.system(out + '/basetest')

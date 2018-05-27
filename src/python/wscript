@@ -60,7 +60,7 @@ def build(ctx):
         install_path = '${PYTHONDIR}/essentia'
         #use      = 'essentia ' #+ ctx.env.USES
     )
-
+    ctx.add_group()
 
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
                       relative_trick=True)

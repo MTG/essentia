@@ -376,11 +376,11 @@ def task_build_essentia (ctx, sources, bld_libs):
             use      = ctx.env.USES,
             includes = ctx.env.INCLUDES,
             cxxflags= [ '-w','-std=c++11', '-msse2','-Wall', \
-            '-Wno-misleading-indentation', \
-            '-Wno-unused-result',\
-            '-fext-numeric-literals', \
-            '-fno-strict-aliasing',\
-            '-fPIC', '-fvisibility=hidden'],
+                '-Wno-misleading-indentation', \
+                '-Wno-unused-result',\
+                '-fext-numeric-literals', \
+                '-fno-strict-aliasing',\
+                '-fPIC', '-fvisibility=hidden'],
             install_path = '${PREFIX}/lib'
         )
 
