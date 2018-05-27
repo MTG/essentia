@@ -321,7 +321,9 @@ def build(ctx):
             includes=['test/3rdparty/gtest-1.6.0/include',
                       'test/3rdparty/gtest-1.6.0'] + adjust(ctx.env.INCLUDES, 'src'),
             install_path=None,
-            use='essentia ' + ctx.env.USES
+            lib='essentia', 
+            libpath=['..'] 
+            #use='essentia ' + ctx.env.USES
             )
         ctx.add_group()
 
