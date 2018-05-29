@@ -23,7 +23,10 @@ def options(ctx):
                    help='build static library')
     ctx.add_option('--static-dependencies', action='store_true',
                    dest='STATIC_DEPENDENCIES', default=False,
-                   help='build with static dependencies from packaging/* folder')
+                   help='build with static dependencies from packaging/* dir')
+    ctx.add_option('--pkg-config-path', action='store',
+                   dest='PKG_CONFIG_PATH', default=False,
+                   help='pkg-config path to search for dependencies')
     ctx.add_option('--with-static-examples', action='store_true',
                    dest='WITH_STATIC_EXAMPLES', default=False,
                    help='build the example programs as static executables; forces --static-dependencies and --static flags')
@@ -89,15 +92,19 @@ def configure(ctx):
             a = a.strip()
             ctx.env.ALGOINCLUDE.append(a)
 
+    # overwrite PKG_CONFIG_PATH if it is explicitly specified
+    if ctx.env.PKG_CONFIG_PATH:
+        os.environ["PKG_CONFIG_PATH"] = ctx.env.PKG_CONFIG_PATH
+
+    if "PKG_CONFIG_PATH" in os.environ:
+        print("→ Searching *.pc pkg-config files for dependencies in %s" % os.environ["PKG_CONFIG_PATH"])
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+
     # Make check_cfg find PKG_CONFIG_PATH
     ctx.env.env = dict(os.environ)
-
     check_cfg_args = ['--cflags', '--libs']
     #if ctx.env.STATIC_DEPENDENCIES:
     #    check_cfg_args += ['--static']
-
-    if "PKG_CONFIG_PATH" in os.environ:
-        print("...Checking for dependencies in %s" % os.environ["PKG_CONFIG_PATH"])
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
