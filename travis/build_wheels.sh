@@ -70,6 +70,8 @@ for whl in wheelhouse/*.whl; do
     if [[ "$whl" != wheelhouse/six* ]];
     then
         auditwheel repair "$whl" -w /io/wheelhouse/
+    else
+        cp "$whl" /io/wheelhouse/
     fi
 done
 
