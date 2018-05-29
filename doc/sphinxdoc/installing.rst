@@ -176,18 +176,20 @@ Building documentation (optional)
 
 All documentation is provided on the official website of Essentia library. Follow the steps below to generate it by yourself.
 
-Install doxigen and pip, if you are on Linux::
+Note that you should use Python3 for building documentation. We rely on sphinxcontrib-doxylink which has already dropped support for Python2.
 
-  sudo apt-get install doxygen python-pip
+Install doxigen and pip3. If you are on Linux::
+
+  sudo apt-get install doxygen python3-pip
 
 Install additional dependencies (you might need to run this command with sudo)::
 
-  sudo pip install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults
+  sudo pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults
   sudo apt-get install pandoc
 
-Make sure to install Essentia with python bindings and run::
+Make sure to build Essentia with Python3 bindings and run::
 
-  ./waf doc
+  python3 ./waf doc
 
 Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
 
