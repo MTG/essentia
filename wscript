@@ -354,4 +354,4 @@ def doc(ctx):
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
     
     pythonpath = os.path.abspath('build/python')
-    os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh' % pythonpath)
+    os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, sys.executable))
