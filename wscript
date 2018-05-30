@@ -76,6 +76,7 @@ def configure(ctx):
 
     ctx.env.WITH_EXAMPLES        = ctx.options.WITH_EXAMPLES
     ctx.env.WITH_PYTHON          = ctx.options.WITH_PYTHON
+    ctx.env.ONLY_PYTHON          = ctx.options.ONLY_PYTHON
     ctx.env.WITH_VAMP            = ctx.options.WITH_VAMP
     ctx.env.BUILD_STATIC         = ctx.options.BUILD_STATIC
     ctx.env.STATIC_DEPENDENCIES  = ctx.options.STATIC_DEPENDENCIES
@@ -294,7 +295,7 @@ def configure(ctx):
     Description: audio analysis library -- development files
     Version: %(version)s
     Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f -lchromaprint
-    Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/utils
+    Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/streaming/algorithms -I${includedir}/essentia/utils
     ''' % opts
 
     pcfile = '\n'.join([l.strip() for l in pcfile.split('\n')])

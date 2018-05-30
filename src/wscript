@@ -48,6 +48,9 @@ def options(ctx):
     ctx.add_option('--fft', action='store',
                    dest='FFT', default='FFTW',
                    help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
+    ctx.add_option('--only-python', action='store_true',
+                   dest='ONLY_PYTHON', default=False,
+                   help='build only the python bindings (use a pre-built libessentia)')
 
 
 def debian_version():
@@ -105,6 +108,15 @@ def configure(ctx):
     check_cfg_args = ['--cflags', '--libs']
     #if ctx.env.STATIC_DEPENDENCIES:
     #    check_cfg_args += ['--static']
+
+    if ctx.env.ONLY_PYTHON:
+       print("→ Building only Essentia's python bindings (libessentia should be pre-installed)")
+       ctx.check_cfg(package='essentia', uselib_store='ESSENTIA',
+                      args=check_cfg_args, mandatory=True)
+       ctx.env.USES = 'ESSENTIA'
+       ctx.recurse('python')
+       return
+
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
@@ -359,6 +371,11 @@ def buildRegFile(ctx):
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
+
+    if ctx.env.ONLY_PYTHON:
+        ctx.recurse('python')
+        return
+
     #print('  BUILD ENV:\n%s' % ctx.env)
 
     # add essentia root folder to path to be able to import utils.algorithms_info
