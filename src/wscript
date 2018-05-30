@@ -311,15 +311,21 @@ def configure(ctx):
 
 
     # Prepare pkg-config file
-    # Find all -l flags we'll need according to the detected dependencies
-    lib_vars = ["LIB_" + use for use in ctx.env.USES.strip().split(' ')]
-    libs = [l for lib in lib_vars for l in ctx.env[lib]]
-    lflags = ' '.join(['-l%s' % lib for lib in libs])
+    if ctx.env.BUILD_STATIC:
+        # For the static library, find all -l flags we'll need
+        libs = ctx.env.USES.strip().split(' ')
+        lflags = [l for lib in libs for l in ctx.env["LIB_" + lib]]
+        lflags = ' '.join(['-l%s' % lib for lib in lflags])
+        lpaths = [l for lib in libs for l in ctx.env["LIBPATH_" + lib]]
+        lpaths = ' '.join(['-L%s' % lib for lib in set(lpaths)])
+    else:
+        lflags = lpaths = ''
 
     prefix = os.path.normpath(ctx.options.prefix)
     opts = {'prefix': prefix,
             'version': ctx.env.VERSION,
-            'lflags': lflags
+            'lflags': lflags,
+            'lpaths': lpaths
             }
 
     pcfile = '''prefix=%(prefix)s
@@ -329,10 +335,12 @@ def configure(ctx):
     Name: libessentia
     Description: audio analysis library -- development files
     Version: %(version)s
-    Libs: -L${libdir} -lessentia %(lflags)s
+    Libs: -L${libdir} -lessentia %(lpaths)s %(lflags)s
     Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/streaming/algorithms -I${includedir}/essentia/utils
     ''' % opts
-    #Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f -lchromaprint
+
+    # TODO Ideally we should use Requires.private field in .pc file instead.
+    # Requires.private: gaia2 fftw3f yaml-0.1 libavcodec libavformat libavutil libavresample samplerate taglib libchromaprint
 
     pcfile = '\n'.join([l.strip() for l in pcfile.split('\n')])
     ctx.env.pcfile = pcfile

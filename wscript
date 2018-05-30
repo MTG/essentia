@@ -272,8 +272,9 @@ def configure(ctx):
         and (sys.platform.startswith('linux') or sys.platform == 'darwin') \
         and not ctx.options.CROSS_COMPILE_MINGW32:
         
-        print ("→ Building with static dependencies on Linux/OSX")
-        os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
+        if not ctx.env.ONLY_PYTHON:
+            print ("→ Building with static dependencies on Linux/OSX")
+            os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         
         # flags required for linking to static ffmpeg libs
         # -Bsymbolic flag is not available on clang
