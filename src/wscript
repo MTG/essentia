@@ -310,6 +310,35 @@ def configure(ctx):
     print('=======================================================================================')
 
 
+    # Prepare pkg-config file
+    # Find all -l flags we'll need according to the detected dependencies
+    lib_vars = ["LIB_" + use for use in ctx.env.USES.strip().split(' ')]
+    libs = [l for lib in lib_vars for l in ctx.env[lib]]
+    lflags = ' '.join(['-l%s' % lib for lib in libs])
+
+    prefix = os.path.normpath(ctx.options.prefix)
+    opts = {'prefix': prefix,
+            'version': ctx.env.VERSION,
+            'lflags': lflags
+            }
+
+    pcfile = '''prefix=%(prefix)s
+    libdir=${prefix}/lib
+    includedir=${prefix}/include
+
+    Name: libessentia
+    Description: audio analysis library -- development files
+    Version: %(version)s
+    Libs: -L${libdir} -lessentia %(lflags)s
+    Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/streaming/algorithms -I${includedir}/essentia/utils
+    ''' % opts
+    #Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f -lchromaprint
+
+    pcfile = '\n'.join([l.strip() for l in pcfile.split('\n')])
+    ctx.env.pcfile = pcfile
+    #open('build/essentia.pc', 'w').write(pcfile) # we'll do it later on the build stage
+
+
 from waflib.Task import Task
 class BuildAlgoReg(Task):
     def run(self):

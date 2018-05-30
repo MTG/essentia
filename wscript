@@ -281,27 +281,6 @@ def configure(ctx):
             ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
             ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 
-    # write pkg-config file
-    prefix = os.path.normpath(ctx.options.prefix)
-    opts = {'prefix': prefix,
-            'version': ctx.env.VERSION,
-            }
-
-    pcfile = '''prefix=%(prefix)s
-    libdir=${prefix}/lib
-    includedir=${prefix}/include
-
-    Name: libessentia
-    Description: audio analysis library -- development files
-    Version: %(version)s
-    Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f -lchromaprint
-    Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/streaming/algorithms -I${includedir}/essentia/utils
-    ''' % opts
-
-    pcfile = '\n'.join([l.strip() for l in pcfile.split('\n')])
-    ctx.env.pcfile = pcfile
-    #open('build/essentia.pc', 'w').write(pcfile) # we'll do it later on the build stage
-
     ctx.recurse('src')
 
 
