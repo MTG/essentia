@@ -25,14 +25,21 @@ class EssentiaBuildExtension(build_ext):
 
         # Ugly hack using an enviroment variable... There's no way to pass a
         # custom flag to python setup.py bdist_wheel
-        varname = 'ESSENTIA_WHEEL_SKIP_3RDPARTY'
-        if varname in os.environ and os.environ[varname]=='1':
-            print('Skipping building static 3rdparty dependencies (%s=1)' % varname)
+        var_skip_3rdparty = 'ESSENTIA_WHEEL_SKIP_3RDPARTY'
+        var_only_python = 'ESSENTIA_WHEEL_ONLY_PYTHON'
+
+        if var_skip_3rdparty in os.environ and os.environ[var_skip_3rdparty]=='1':
+            print('Skipping building static 3rdparty dependencies (%s=1)' %  var_skip_3rdparty)
         else:
             os.system('./packaging/build_3rdparty_static_debian.sh')
 
-        os.system('%s waf configure --build-static --static-dependencies '
-                  '--with-python --prefix=tmp' % PYTHON)
+        if var_only_python in os.environ and os.environ[var_only_python]=='1':
+            print('Skipping building the core libessentia library (%s=1)' %  var_only_python)
+            os.system('%s waf configure --only-python --static-dependencies '
+                      '--prefix=tmp' % PYTHON)
+        else:
+            os.system('%s waf configure --build-static --static-dependencies '
+                      '--with-python --prefix=tmp' % PYTHON)
         os.system('%s waf' % PYTHON)
         os.system('%s waf install' % PYTHON)
 
