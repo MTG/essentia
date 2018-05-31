@@ -2,8 +2,9 @@
 
 set -e -x
 
-# Build tools
-/io/travis/build_tools.sh
+# Build tools if using original quay.io/pypa/manylinux1_* docker images
+# (already built in mtgupf/essentia-builds images)
+#/io/travis/build_tools.sh
 
 # Build static 3rdparty dependencies
 /io/packaging/build_3rdparty_static_debian.sh
