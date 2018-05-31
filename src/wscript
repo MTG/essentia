@@ -321,31 +321,13 @@ def configure(ctx):
     else:
         lflags = lpaths = ''
 
+    # Prepare pkg-config .pc file variables
     prefix = os.path.normpath(ctx.options.prefix)
-    opts = {'prefix': prefix,
-            'version': ctx.env.VERSION,
-            'lflags': lflags,
-            'lpaths': lpaths
-            }
-
-    pcfile = '''prefix=%(prefix)s
-    libdir=${prefix}/lib
-    includedir=${prefix}/include
-
-    Name: libessentia
-    Description: audio analysis library -- development files
-    Version: %(version)s
-    Libs: -L${libdir} -lessentia %(lpaths)s %(lflags)s
-    Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/streaming/algorithms -I${includedir}/essentia/utils
-    ''' % opts
-
-    # TODO Ideally we should use Requires.private field in .pc file instead.
-    # Requires.private: gaia2 fftw3f yaml-0.1 libavcodec libavformat libavutil libavresample samplerate taglib libchromaprint
-
-    pcfile = '\n'.join([l.strip() for l in pcfile.split('\n')])
-    ctx.env.pcfile = pcfile
-    #open('build/essentia.pc', 'w').write(pcfile) # we'll do it later on the build stage
-
+    ctx.env.pcfile_opts = {'PREFIX': prefix,
+                           'VERSION': ctx.env.VERSION,
+                           'LFLAGS': lflags,
+                           'LPATHS': lpaths
+                           }
 
 from waflib.Task import Task
 class BuildAlgoReg(Task):
@@ -486,11 +468,10 @@ def build(ctx):
             install_path = '${PREFIX}/lib'
         )
 
+    ctx(source='../essentia.pc.in', **ctx.env.pcfile_opts)
+    # TODO Ideally we should use the Requires.private field in the .pc file
+    # Requires.private: gaia2 fftw3f yaml-0.1 libavcodec libavformat libavutil libavresample samplerate taglib libchromaprint
 
-    def write_pcfile(task):
-        open('build/essentia.pc', 'w').write(ctx.env.pcfile)
-
-    ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
     ctx.add_group()
 
 
