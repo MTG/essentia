@@ -98,7 +98,6 @@ void FreesoundRhythmDescriptors::createNetworkBeatsLoudness(SourceBase& source, 
   
   // assume there is only one beat centered at zero if there were not beats detected
   if (ticks.size()==0) {
-    cout<<"adding 0 to ticks"<<endl;
     ticks.push_back(0);
   }
   Algorithm* beatsLoudness = factory.create("BeatsLoudness",
