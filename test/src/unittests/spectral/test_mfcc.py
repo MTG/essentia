@@ -89,16 +89,58 @@ class TestMFCC(TestCase):
         self.assertAlmostEqualVector( mean(pool['mfcc'], 0), expected ,1e0)    
 
 
-    def testZero(self):
+    def testZerodBamp(self):
         # zero input should return dct(lin2db(0)). Try with different sizes
         size = 1025
         val = amp2db(0)
         expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
         while (size > 256):
-            bands, mfcc = MFCC()(zeros(size))
+            bands, mfcc = MFCC(inputSize=size)(zeros(size))
             self.assertEqualVector(mfcc, expected)
+
+            # also assess that the thresholding is working
+            self.assertTrue(not np.isnan(mfcc).any() and not np.isinf(mfcc).any())    
             size = int(size/2)
 
+    def testZerodbPow(self):
+        # zero input should return dct(lin2db(0)). Try with different sizes
+        size = 1025
+        val = pow2db(0)
+        expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
+        while (size > 256):
+            bands, mfcc = MFCC(inputSize=size, logType='dbpow')(zeros(size))
+            self.assertEqualVector(mfcc, expected)
+
+            # also assess that the thresholding is working
+            self.assertTrue(not np.isnan(mfcc).any() and not np.isinf(mfcc).any())    
+            size = int(size/2)
+
+    def testZeroLog(self):
+        # zero input should return dct(lin2db(0)). Try with different sizes
+        size = 1025
+        val = -np.inf # this one has to be replaced with lin2log(0) when 
+                      # the branch mfcc_thresholding is merged. 
+        expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
+        while (size > 256):
+            bands, mfcc = MFCC(inputSize=size, logType='log')(zeros(size))
+            self.assertEqualVector(mfcc, expected)
+
+            # also assess that the thresholding is working
+            self.assertTrue(not np.isnan(mfcc).any() and not np.isinf(mfcc).any())    
+            size = int(size/2)
+
+    def testZeroNatural(self):
+        # zero input should return dct(lin2db(0)). Try with different sizes
+        size = 1025
+        val = 0.
+        expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
+        while (size > 256):
+            bands, mfcc = MFCC(inputSize=size, logType='natural')(zeros(size))
+            self.assertEqualVector(mfcc, expected)
+            
+            # also assess that the thresholding is working
+            self.assertTrue(not np.isnan(mfcc).any() and not np.isinf(mfcc).any())    
+            size = int(size/2)
 
     def testInvalidInput(self):
         # mel bands should fail for a spectrum with less than 2 bins
