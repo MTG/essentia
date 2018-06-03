@@ -25,8 +25,8 @@ RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommend
                        pkg-config \
                    && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install wheel auditwheel
-RUN pip install wheel auditwheel
+RUN pip3 install pip setuptools wheel auditwheel --upgrade
+RUN pip install pip setuptools wheel auditwheel --upgrade
 
 #RUN mkdir -p /tmp/yaml \
 #    && cd /tmp/yaml \

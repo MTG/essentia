@@ -8,23 +8,23 @@ PIPBIN_PYTHON_MASK="$5"
 
 if -z ${PYBIN};
 then
-   local PYBIN=/opt/python/cp36-cp36m/bin/
+   PYBIN=/opt/python/cp36-cp36m/bin/
 fi
 if -z ${WRKDIR};
 then
-   local WRKDIR=/io
+   WRKDIR=/io
 fi
 if -z ${PYBIN_PYTHON_MASK};
 then
-   local PYBIN_PYTHON_MASK=/opt/python/*/bin
+   PYBIN_PYTHON_MASK=/opt/python/*/bin
 fi
 if -z ${PIPBIN};
 then
-   local PIPBIN=${PYBIN}
+   PIPBIN=${PYBIN}
 fi
 if -z ${PIPBIN_PYTHON_MASK};
 then
-   local PIPBIN_PYTHON_MASK=${PYBIN_PYTHON_MASK}
+   PIPBIN_PYTHON_MASK=${PYBIN_PYTHON_MASK}
 fi
 
 set -e -x
@@ -50,8 +50,7 @@ done
 #cd -
 
 # Compile wheels
-for PIP_VER in PIP PIP3; do
-#for PIP_VER in PIP; do
+for PIP_VER in pip pip3; do
 # use older version of numpy for backwards compatibility of its C API
     "${PIPBIN}"/${PIP_VER} install numpy==1.8.2
     ESSENTIA_WHEEL_SKIP_3RDPARTY=1 ESSENTIA_WHEEL_ONLY_PYTHON=1 "${PIPBIN}"/${PIP_VER} wheel ${WRKDIR}/ -w wheelhouse/ -v
@@ -70,7 +69,7 @@ for whl in wheelhouse/*.whl; do
 done
 
 # Install packages and test
-for PIP_VER in PIP PIP3; do
+for PIP_VER in pip pip3; do
     "${PIPBIN}"/${PIP_VER} install essentia --no-index -f ${WRKDIR}/wheelhouse
     for PY_VER in python python3; do
         (cd "$WRKDIR"; ${PYBIN}/${PY_VER} -c 'import essentia; import essentia.standard; import essentia.streaming')
