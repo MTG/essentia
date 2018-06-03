@@ -13,7 +13,7 @@ RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommend
 #                       qt5-default qtbase5-dev qtchooser qt5-qmake \  
                        build-essential apt-utils \
                        autotools-dev automake autoconf libtool-bin cmake \
-#                       python3-dev python3.6-dev python3-setuptools python3-pip \
+                       python3-dev python3.6-dev python3-setuptools python3-pip \
                        python-dev python2.7-dev python-setuptools python-pip \
                        wget \
                        git swig doxygen \
@@ -25,6 +25,8 @@ RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommend
                        pkg-config \
                    && rm -rf /var/lib/apt/lists/*
 
+RUN pip3 install auditwheel
+RUN pip install auditwheel
 
 #RUN mkdir -p /tmp/yaml \
 #    && cd /tmp/yaml \
