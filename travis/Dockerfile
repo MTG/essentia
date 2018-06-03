@@ -70,4 +70,4 @@ RUN git clone https://github.com/sildeag/essentia /tmp/essentia \
 
     && cd /tmp/essentia/travis \
     && ls -l *.sh \
-    && ./build_wheels_test.sh /usr/bin /tmp/essentia
+    && ./build_wheels_test.sh /tmp/essentia /usr/bin /usr/bin/python* /usr/local/bin /usr/local/bin/pip*

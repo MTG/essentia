@@ -1,16 +1,30 @@
 #!/bin/bash
 
-PYBIN="$1"
-WRKDIR="$2"
+WRKDIR="$1"
+PYBIN="$2"
+PYBIN_PYTHON_MASK="$3"
+PIPBIN="$4"
+PIPBIN_PYTHON_MASK="$5"
 
 if -z ${PYBIN};
 then
    local PYBIN=/opt/python/cp36-cp36m/bin/
-   local PYBIN_PYTHON=/opt/python/*/bin
 fi
 if -z ${WRKDIR};
 then
    local WRKDIR=/io
+fi
+if -z ${PYBIN_PYTHON_MASK};
+then
+   local PYBIN_PYTHON_MASK=/opt/python/*/bin
+fi
+if -z ${PIPBIN};
+then
+   local PIPBIN=${PYBIN}
+fi
+if -z ${PIPBIN_PYTHON_MASK};
+then
+   local PIPBIN_PYTHON_MASK=${PYBIN_PYTHON_MASK}
 fi
 
 set -e -x
@@ -29,13 +43,14 @@ cd ${WRKDIR}
 "${PYBIN}/python" waf configure --build-static --static-dependencies
 "${PYBIN}/python" waf
 "${PYBIN}/python" waf install
-cd -
+# cd - needs OLDPWD set
+#cd -
 
 # Compile wheels
-for ${PYBIN} in ${PYBIN_PYTHON}; do
+for ${PIPBIN} in ${PIPBIN_PYTHON_MASK}; do
 # use older version of numpy for backwards compatibility of its C API
-    "${PYBIN}/pip" install numpy==1.8.2
-    ESSENTIA_WHEEL_SKIP_3RDPARTY=1 ESSENTIA_WHEEL_ONLY_PYTHON=1 "${PYBIN}/pip" wheel ${WRKDIR}/ -w wheelhouse/ -v
+    "${PIPBIN}/pip" install numpy==1.8.2
+    ESSENTIA_WHEEL_SKIP_3RDPARTY=1 ESSENTIA_WHEEL_ONLY_PYTHON=1 "${PIPBIN}/pip" wheel ${WRKDIR}/ -w wheelhouse/ -v
 done
 
 # Bundle external shared libraries into the wheels
@@ -51,7 +66,7 @@ for whl in wheelhouse/*.whl; do
 done
 
 # Install packages and test
-for ${PYBIN} in ${PYBIN_PYTHON}; do
-    "${PYBIN}/pip" install essentia --no-index -f ${WRKDIR}/wheelhouse
+for ${PIPBIN} in ${PIPBIN_PYTHON_MASK}; do
+    "${PIPBIN}/pip" install essentia --no-index -f ${WRKDIR}/wheelhouse
     (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')
 done
