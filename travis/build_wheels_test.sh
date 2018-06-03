@@ -51,6 +51,7 @@ done
 
 # Compile wheels
 for PIP_VER in PIP PIP3; do
+#for PIP_VER in PIP; do
 # use older version of numpy for backwards compatibility of its C API
     "${PIPBIN}"/${PIP_VER} install numpy==1.8.2
     ESSENTIA_WHEEL_SKIP_3RDPARTY=1 ESSENTIA_WHEEL_ONLY_PYTHON=1 "${PIPBIN}"/${PIP_VER} wheel ${WRKDIR}/ -w wheelhouse/ -v
