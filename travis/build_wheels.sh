@@ -1,21 +1,17 @@
 #!/bin/bash
 
-if $1;
-then
-   # usually /usr/bin
-   PYBIN = $1
-   PYBIN_PYTHON = $1
-else
-   PYBIN=/opt/python/cp36-cp36m/bin/
-   PYBIN_PYTHON = /opt/python/*/bin
-fi
-if $2
-then
-   WRKDIR = $2
-else
-   WRKDIR = /io
-fi
+PYBIN = "$1"
+WRKDIR = "$2"
 
+if -z ${PYBIN};
+then
+   local PYBIN=/opt/python/cp36-cp36m/bin/
+   local PYBIN_PYTHON=/opt/python/*/bin
+fi
+if -z ${WRKDIR};
+then
+   local WRKDIR = /io
+fi
 
 set -e -x
 
