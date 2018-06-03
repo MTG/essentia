@@ -66,10 +66,9 @@ RUN git clone https://github.com/sildeag/essentia /tmp/essentia \
     && python waf configure --build-static --static-dependencies \
     && python waf \
     && python waf install \
-#    && cp /tmp/essentia/build/src/examples/essentia_streaming_extractor_music_svm /code/hl_extractor/streaming_extractor_music_svm \
+#    && cp /tmp/essentia/build/src/examples/essentia_streaming_extractor_music_svm /code/hl_extractor/#streaming_extractor_music_svm \
     && cd / \
 #    && rm -r /tmp/essentia
-
     && cd /tmp/essentia/travis \
     && ls -l *.sh \
     && ./build_wheels_test.sh /tmp/essentia /usr/bin /usr/bin/python* /usr/local/bin /usr/local/bin/pip*
