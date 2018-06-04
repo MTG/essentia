@@ -50,7 +50,9 @@ def options(ctx):
     ctx.add_option('--fft', action='store',
                    dest='FFT', default='FFTW',
                    help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
-
+    ctx.add_option('--only-python', action='store_true',
+                    dest='ONLY_PYTHON', default=False,
+                    help='build only the python bindings (use a pre-built libessentia)')
 
 def debian_version():
     try:

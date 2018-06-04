@@ -57,8 +57,8 @@ def build(ctx):
             '-fPIC', '-fvisibility=hidden'],
         lib = 'essentia', 
         libpath = ['..'], 
-        install_path = '${PYTHONDIR}/essentia'
-        #use      = 'essentia ' #+ ctx.env.USES
+        install_path = '${PYTHONDIR}/essentia', 
+        use = ctx.env.USES if ctx.env.ONLY_PYTHON else 'essentia'
     )
 
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),

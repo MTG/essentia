@@ -76,6 +76,7 @@ def configure(ctx):
 
     ctx.env.WITH_EXAMPLES        = ctx.options.WITH_EXAMPLES
     ctx.env.WITH_PYTHON          = ctx.options.WITH_PYTHON
+    ctx.env.ONLY_PYTHON = ctx.options.ONLY_PYTHON
     ctx.env.WITH_VAMP            = ctx.options.WITH_VAMP
     ctx.env.BUILD_STATIC         = ctx.options.BUILD_STATIC
     ctx.env.STATIC_DEPENDENCIES  = ctx.options.STATIC_DEPENDENCIES
@@ -272,9 +273,9 @@ def configure(ctx):
         and (sys.platform.startswith('linux') or sys.platform == 'darwin') \
         and not ctx.options.CROSS_COMPILE_MINGW32:
         
-        print ("→ Building with static dependencies on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
-        os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+        if not ctx.env.ONLY_PYTHON:
+            print ("→ Building with static dependencies on Linux/OSX")
+            os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         
         # flags required for linking to static ffmpeg libs
         # -Bsymbolic flag is not available on clang
@@ -357,4 +358,4 @@ def doc(ctx):
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
     
     pythonpath = os.path.abspath('build/python')
-    os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh' % pythonpath)
+    os.system('PYTHONPATH={} doc/build_sphinx_doc.sh {}'.format(pythonpath, sys.executable))
