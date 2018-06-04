@@ -7,8 +7,8 @@ cd tmp
 
 echo "Building gaia $GAIA_VERSION"
 
-curl -SLO https://github.com/MTG/gaia/archive/v$GAIA_VERSION.tar.gz -O gaia-$GAIA_VERSION.tar.gz
-tar -xf gaia-$GAIA_VERSION.tar.gz
+curl -SLO https://github.com/MTG/gaia/archive/v$GAIA_VERSION.tar.gz
+tar -xf v$GAIA_VERSION.tar.gz
 cd gaia-$GAIA_VERSION
 
 ./waf configure --prefix=$PREFIX
