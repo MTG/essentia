@@ -45,21 +45,22 @@ def build(ctx):
                       # system python path
                       os.path.join(ctx.env.PYTHONDIR, 'numpy', 'core', 'include') ]
 
-    pybindings = ctx.shlib(
-        source   = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp'),
-        target   = '_essentia',
-        features = 'pyext',
-        includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
-        cxxflags= [ '-w','-std=c++11', '-msse2','-Wall', \
-            '-Wno-misleading-indentation', \
-            '-Wno-unused-result',\
-            '-fno-strict-aliasing',\
-            '-fPIC', '-fvisibility=hidden'],
-        lib = 'essentia', 
-        libpath = ['..'], 
-        install_path = '${PYTHONDIR}/essentia', 
-        use = ctx.env.USES if ctx.env.ONLY_PYTHON else 'essentia'
-    )
+    if ctx.env.ONLY_PYTHON == False:
+        pybindings = ctx.shlib(
+            source   = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp'),
+            target   = '_essentia',
+            features = 'pyext',
+            includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
+            cxxflags= [ '-w','-std=c++11', '-msse2','-Wall', \
+                '-Wno-misleading-indentation', \
+                '-Wno-unused-result',\
+                '-fno-strict-aliasing',\
+                '-fPIC', '-fvisibility=hidden'],
+            lib = 'essentia', 
+            libpath = ['..'], 
+            install_path = '${PYTHONDIR}/essentia' 
+            #use = ctx.env.USES if ctx.env.ONLY_PYTHON else 'essentia'
+        )
 
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
                       relative_trick=True)
