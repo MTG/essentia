@@ -238,6 +238,31 @@ class TestPeakDetection(TestCase):
         PeakDetection(threshold=0)
         self.assertConfigureFails(PeakDetection(), {'minPosition': 1.01,  'maxPosition': 1})
 
+    def testMinPeakDistance(self):
+        peakPos = 2
+        smallerPeakPos = 4
+        input=[0,0,0,0,0]
+        input[peakPos] = 2.0
+        input[smallerPeakPos] = 1.0
+        inputSize = len(input)
+        
+        # default behaviour: 2 peaks expected.
+        config = { 'range': inputSize-1,  'maxPosition': inputSize-1, 'orderBy': 'amplitude',
+                   'interpolate': False }
+        pdetect = PeakDetection(**config)
+        (posis, vals) = pdetect(input)
+
+        self.assertEqualVector(posis, [peakPos, smallerPeakPos])
+        self.assertEqualVector(vals, [2.0, 1.0])
+
+        # with 'minPeakDistance': 1 peak expected
+        config = { 'range': inputSize-1,  'maxPosition': inputSize-1, 'orderBy': 'amplitude',
+                   'minPeakDistance': 3.0, 'interpolate': False }
+        pdetect = PeakDetection(**config)
+        (posis, vals) = pdetect(input)
+        self.assertEqualVector(posis, [peakPos])
+        self.assertEqualVector(vals, [2.0])
+
 suite = allTests(TestPeakDetection)
 
 if __name__ == '__main__':

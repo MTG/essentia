@@ -44,6 +44,7 @@ void PeakDetection::configure() {
   _range = parameter("range").toReal();
   _interpolate = parameter("interpolate").toBool();
   _orderBy = parameter("orderBy").toLower();
+  _minPeakDistance = parameter("minPeakDistance").toReal();
 
   if (_minPos >= _maxPos) {
     throw EssentiaException("PeakDetection: The minimum position has to be less than the maximum position");
@@ -163,6 +164,43 @@ void PeakDetection::compute() {
     if (array[size-1] > _threshold) {
       peaks.push_back(Peak((size-1)*scale, array[size-1]));
     }
+  }
+
+  // remove peaks that are closer than 'minPeakDistance'
+  if (_minPeakDistance > 0 && peaks.size() > 1) {
+    
+    std::vector<int> deletedPeaks;
+    deletedPeaks.reserve(peaks.size());
+    Real minPos;
+    Real maxPos;
+    
+    // iterate following an amplitide hierarchy
+    std::sort(peaks.begin(), peaks.end(),
+          ComparePeakMagnitude<std::greater<Real>, std::less<Real> >());
+
+    int k = 0;
+    while (k < peaks.size() - 1) {
+      minPos = peaks[k].position - _minPeakDistance;
+      maxPos = peaks[k].position + _minPeakDistance;
+
+      for (int l = k+1; l < peaks.size(); l++) {
+        if (peaks[l].position > minPos && peaks[l].position < maxPos) 
+          deletedPeaks.push_back(l);
+      }
+
+      // delete peaks starting from the end so the indexes are not altered
+      std::sort(deletedPeaks.begin(), deletedPeaks.end(), std::greater<int>());
+      
+      for (int l = 0; l < deletedPeaks.size(); l++)
+        peaks.erase(peaks.begin() + deletedPeaks[l]);
+        
+      deletedPeaks.clear();
+      deletedPeaks.reserve(peaks.size());
+      k++;
+    }
+
+    std::sort(peaks.begin(), peaks.end(),
+              ComparePeakPosition<std::less<Real>, std::greater<Real> >());    
   }
 
   // we only want this many peaks
