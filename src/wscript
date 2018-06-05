@@ -8,6 +8,7 @@ import os.path
 
 bld_libs = []
 sources = []
+
 dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
 
 def options(ctx):
@@ -26,6 +27,9 @@ def options(ctx):
     ctx.add_option('--static-dependencies', action='store_true',
                    dest='STATIC_DEPENDENCIES', default=False,
                    help='build with static dependencies from packaging/* folder')
+    ctx.add_option('--pkg-config-path', action='store',
+                   dest='PKG_CONFIG_PATH', default=False,
+                   help='pkg-config path to search for dependencies')
     ctx.add_option('--with-static-examples', action='store_true',
                    dest='WITH_STATIC_EXAMPLES', default=False,
                    help='build the example programs as static executables; forces --static-dependencies and --static flags')
@@ -99,12 +103,28 @@ def configure(ctx):
     # Make check_cfg find PKG_CONFIG_PATH
     ctx.env.env = dict(os.environ)
 
+    # overwrite PKG_CONFIG_PATH if it is explicitly specified
+    if ctx.env.PKG_CONFIG_PATH:
+        os.environ["PKG_CONFIG_PATH"] = ctx.env.PKG_CONFIG_PATH
+
+    if "PKG_CONFIG_PATH" in os.environ:
+        print("→ Searching *.pc pkg-config files for dependencies in %s" % os.environ["PKG_CONFIG_PATH"])
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+
+    # Make check_cfg find PKG_CONFIG_PATH
+    ctx.env.env = dict(os.environ)
     check_cfg_args = ['--cflags', '--libs']
     #if ctx.env.STATIC_DEPENDENCIES:
     #    check_cfg_args += ['--static']
 
-    if "PKG_CONFIG_PATH" in os.environ:
-        print("...Checking for dependencies in %s" % os.environ["PKG_CONFIG_PATH"])
+    if ctx.env.ONLY_PYTHON:
+       print("→ Building only Essentia's python bindings (libessentia should be pre-installed)")
+       ctx.check_cfg(package='essentia', uselib_store='ESSENTIA',
+                      args=check_cfg_args, mandatory=True)
+       ctx.env.USES = 'ESSENTIA'
+       ctx.env.ALGOIGNORE += ['FFT','KISS','FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
+       ctx.recurse('python')
+       return
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
@@ -297,6 +317,26 @@ def configure(ctx):
         print('- Building Vamp plugin')
 
     print('=======================================================================================')
+
+
+    # Prepare pkg-config file
+    if ctx.env.BUILD_STATIC:
+        # For the static library, find all -l flags we'll need
+        libs = ctx.env.USES.strip().split(' ')
+        lflags = [l for lib in libs for l in ctx.env["LIB_" + lib]]
+        lflags = ' '.join(['-l%s' % lib for lib in lflags])
+        lpaths = [l for lib in libs for l in ctx.env["LIBPATH_" + lib]]
+        lpaths = ' '.join(['-L%s' % lib for lib in set(lpaths)])
+    else:
+        lflags = lpaths = ''
+
+    # Prepare pkg-config .pc file variables
+    prefix = os.path.normpath(ctx.options.prefix)
+    ctx.env.pcfile_opts = {'PREFIX': prefix,
+                           'VERSION': ctx.env.VERSION,
+                           'LFLAGS': lflags,
+                           'LPATHS': lpaths
+                           }
 
 
 from waflib.Task import Task
