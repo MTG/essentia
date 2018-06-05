@@ -246,7 +246,7 @@ class TestPeakDetection(TestCase):
         input[smallerPeakPos] = 1.0
         inputSize = len(input)
         
-        # default behaviour: 2 peaks expected.
+        # default behaviour: 2 peaks expected
         config = { 'range': inputSize-1,  'maxPosition': inputSize-1, 'orderBy': 'amplitude',
                    'interpolate': False }
         pdetect = PeakDetection(**config)

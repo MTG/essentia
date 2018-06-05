@@ -174,7 +174,7 @@ void PeakDetection::compute() {
     Real minPos;
     Real maxPos;
     
-    // iterate following an amplitide hierarchy
+    // iterate following an amplitude hierarchy
     std::sort(peaks.begin(), peaks.end(),
           ComparePeakMagnitude<std::greater<Real>, std::less<Real> >());
 
