@@ -76,7 +76,7 @@ def configure(ctx):
 
     ctx.env.WITH_EXAMPLES        = ctx.options.WITH_EXAMPLES
     ctx.env.WITH_PYTHON          = ctx.options.WITH_PYTHON
-    ctx.env.ONLY_PYTHON = ctx.options.ONLY_PYTHON
+    ctx.env.ONLY_PYTHON         = ctx.options.ONLY_PYTHON
     ctx.env.WITH_VAMP            = ctx.options.WITH_VAMP
     ctx.env.BUILD_STATIC         = ctx.options.BUILD_STATIC
     ctx.env.STATIC_DEPENDENCIES  = ctx.options.STATIC_DEPENDENCIES
@@ -358,4 +358,5 @@ def doc(ctx):
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
     
     pythonpath = os.path.abspath('build/python')
+    # python 2/3 version of same thing as in MTG wscript
     os.system('PYTHONPATH={} doc/build_sphinx_doc.sh {}'.format(pythonpath, sys.executable))

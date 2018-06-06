@@ -13,47 +13,47 @@ dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchr
 
 def options(ctx):
     ctx.add_option('--with-python', action='store_true',
-                   dest='WITH_PYTHON', default=False,
-                   help='build the python bindings')
+                    dest='WITH_PYTHON', default=False,
+                    help='build the python bindings')
     ctx.add_option('--with-examples', action='store_true',
-                   dest='WITH_EXAMPLES', default=False,
-                   help='build the example programs')
+                    dest='WITH_EXAMPLES', default=False,
+                    help='build the example programs')
     ctx.add_option('--with-example', action='store',
-                   dest='EXAMPLES', default=False,
-                   help='example programs to build (comma separated, without .cpp)')
+                    dest='EXAMPLES', default=False,
+                    help='example programs to build (comma separated, without .cpp)')
     ctx.add_option('--build-static', action='store_true',
-                   dest='BUILD_STATIC', default=False,
-                   help='build static library')
+                    dest='BUILD_STATIC', default=False,
+                    help='build static library')
     ctx.add_option('--static-dependencies', action='store_true',
-                   dest='STATIC_DEPENDENCIES', default=False,
-                   help='build with static dependencies from packaging/* folder')
+                    dest='STATIC_DEPENDENCIES', default=False,
+                    help='build with static dependencies from packaging/* dir')
     ctx.add_option('--pkg-config-path', action='store',
-                   dest='PKG_CONFIG_PATH', default=False,
-                   help='pkg-config path to search for dependencies')
+                    dest='PKG_CONFIG_PATH', default=False,
+                    help='pkg-config path to search for dependencies')
     ctx.add_option('--with-static-examples', action='store_true',
-                   dest='WITH_STATIC_EXAMPLES', default=False,
-                   help='build the example programs as static executables; forces --static-dependencies and --static flags')
+                    dest='WITH_STATIC_EXAMPLES', default=False,
+                    help='build the example programs as static executables; forces --static-dependencies and --static flags')
     ctx.add_option('--with-vamp', action='store_true',
-                   dest='WITH_VAMP', default=False,
-                   help='build the vamp plugin wrapper')
+                    dest='WITH_VAMP', default=False,
+                    help='build the vamp plugin wrapper')
     ctx.add_option('--with-gaia', action='store_true',
-                   dest='WITH_GAIA', default=False,
-                   help='build with Gaia support')
+                    dest='WITH_GAIA', default=False,
+                    help='build with Gaia support')
     ctx.add_option('--with-gaia-qt5', action='store_true',
-                   dest='WITH_GAIA_QT5', default=False,
-                   help='build with Gaia Qt5 support')
+                    dest='WITH_GAIA_QT5', default=False,
+                    help='build with Gaia Qt5 support')
     ctx.add_option('--lightweight', action='store',
-                   dest='WITH_LIBS', default=False,
-                   help='build lightweight version with specified dependencies (comma separated: =' + ','.join(dependencies_list) + ')')
+                    dest='WITH_LIBS', default=False,
+                    help='build lightweight version with specified dependencies (comma separated: =' + ','.join(dependencies_list) + ')')
     ctx.add_option('--ignore-algos', action='store',
-                   dest='IGNORE_ALGOS', default=False,
-                   help='algorithms to ignore (comma separated)')
+                    dest='IGNORE_ALGOS', default=False,
+                    help='algorithms to ignore (comma separated)')
     ctx.add_option('--include-algos', action='store',
-                   dest='INCLUDE_ALGOS', default=False,
-                   help='algorithms to install (comma separated)')
+                    dest='INCLUDE_ALGOS', default=False,
+                    help='algorithms to install (comma separated)')
     ctx.add_option('--fft', action='store',
-                   dest='FFT', default='FFTW',
-                   help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
+                    dest='FFT', default='FFTW',
+                    help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
     ctx.add_option('--only-python', action='store_true',
                     dest='ONLY_PYTHON', default=False,
                     help='build only the python bindings (use a pre-built libessentia)')
@@ -122,7 +122,7 @@ def configure(ctx):
        ctx.check_cfg(package='essentia', uselib_store='ESSENTIA',
                       args=check_cfg_args, mandatory=True)
        ctx.env.USES = 'ESSENTIA'
-       ctx.env.ALGOIGNORE += ['FFT','KISS','FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
+       ctx.env.ALGOIGNORE += ['FFT','FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
        ctx.recurse('python')
        return
 
