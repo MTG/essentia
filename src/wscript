@@ -6,57 +6,52 @@ from __future__ import print_function
 import sys
 import os.path
 
-bld_libs = []
-sources = []
-
 dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
 
 def options(ctx):
     ctx.add_option('--with-python', action='store_true',
-                    dest='WITH_PYTHON', default=False,
-                    help='build the python bindings')
+                   dest='WITH_PYTHON', default=False,
+                   help='build the python bindings')
     ctx.add_option('--with-examples', action='store_true',
-                    dest='WITH_EXAMPLES', default=False,
-                    help='build the example programs')
+                   dest='WITH_EXAMPLES', default=False,
+                   help='build the example programs')
     ctx.add_option('--with-example', action='store',
-                    dest='EXAMPLES', default=False,
-                    help='example programs to build (comma separated, without .cpp)')
+                   dest='EXAMPLES', default=False,
+                   help='example programs to build (comma separated, without .cpp)')
     ctx.add_option('--build-static', action='store_true',
-                    dest='BUILD_STATIC', default=False,
-                    help='build static library')
+                   dest='BUILD_STATIC', default=False,
+                   help='build static library')
     ctx.add_option('--static-dependencies', action='store_true',
-                    dest='STATIC_DEPENDENCIES', default=False,
-                    help='build with static dependencies from packaging/* dir')
+                   dest='STATIC_DEPENDENCIES', default=False,
+                   help='build with static dependencies from packaging/* dir')
     ctx.add_option('--pkg-config-path', action='store',
-                    dest='PKG_CONFIG_PATH', default=False,
-                    help='pkg-config path to search for dependencies')
+                   dest='PKG_CONFIG_PATH', default=False,
+                   help='pkg-config path to search for dependencies')
     ctx.add_option('--with-static-examples', action='store_true',
-                    dest='WITH_STATIC_EXAMPLES', default=False,
-                    help='build the example programs as static executables; forces --static-dependencies and --static flags')
+                   dest='WITH_STATIC_EXAMPLES', default=False,
+                   help='build the example programs as static executables; forces --static-dependencies and --static flags')
     ctx.add_option('--with-vamp', action='store_true',
-                    dest='WITH_VAMP', default=False,
-                    help='build the vamp plugin wrapper')
+                   dest='WITH_VAMP', default=False,
+                   help='build the vamp plugin wrapper')
     ctx.add_option('--with-gaia', action='store_true',
-                    dest='WITH_GAIA', default=False,
-                    help='build with Gaia support')
-    ctx.add_option('--with-gaia-qt5', action='store_true',
-                    dest='WITH_GAIA_QT5', default=False,
-                    help='build with Gaia Qt5 support')
+                   dest='WITH_GAIA', default=False,
+                   help='build with Gaia support')
     ctx.add_option('--lightweight', action='store',
-                    dest='WITH_LIBS', default=False,
-                    help='build lightweight version with specified dependencies (comma separated: =' + ','.join(dependencies_list) + ')')
+                   dest='WITH_LIBS', default=False,
+                   help='build lightweight version with specified dependencies (comma separated: =' + ','.join(dependencies_list) + ')')
     ctx.add_option('--ignore-algos', action='store',
-                    dest='IGNORE_ALGOS', default=False,
-                    help='algorithms to ignore (comma separated)')
+                   dest='IGNORE_ALGOS', default=False,
+                   help='algorithms to ignore (comma separated)')
     ctx.add_option('--include-algos', action='store',
-                    dest='INCLUDE_ALGOS', default=False,
-                    help='algorithms to install (comma separated)')
+                   dest='INCLUDE_ALGOS', default=False,
+                   help='algorithms to install (comma separated)')
     ctx.add_option('--fft', action='store',
-                    dest='FFT', default='FFTW',
-                    help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
+                   dest='FFT', default='FFTW',
+                   help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
     ctx.add_option('--only-python', action='store_true',
-                    dest='ONLY_PYTHON', default=False,
-                    help='build only the python bindings (use a pre-built libessentia)')
+                   dest='ONLY_PYTHON', default=False,
+                   help='build only the python bindings (use a pre-built libessentia)')
+
 
 def debian_version():
     try:
@@ -100,9 +95,6 @@ def configure(ctx):
             a = a.strip()
             ctx.env.ALGOINCLUDE.append(a)
 
-    # Make check_cfg find PKG_CONFIG_PATH
-    ctx.env.env = dict(os.environ)
-
     # overwrite PKG_CONFIG_PATH if it is explicitly specified
     if ctx.env.PKG_CONFIG_PATH:
         os.environ["PKG_CONFIG_PATH"] = ctx.env.PKG_CONFIG_PATH
@@ -122,9 +114,9 @@ def configure(ctx):
        ctx.check_cfg(package='essentia', uselib_store='ESSENTIA',
                       args=check_cfg_args, mandatory=True)
        ctx.env.USES = 'ESSENTIA'
-       ctx.env.ALGOIGNORE += ['FFT','FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
        ctx.recurse('python')
        return
+
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
@@ -172,16 +164,17 @@ def configure(ctx):
 
     if ctx.env.WITH_GAIA:
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
-                      args=check_cfg_args, mandatory=False)
+                      args=check_cfg_args, mandatory=True)
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += ['__STDC_CONSTANT_MACROS']
 
     if ctx.env.WITH_EXAMPLES or ctx.env.EXAMPLES or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
-        
+
     if ctx.env.WITH_PYTHON:
         ctx.recurse('python')
+
 
     # prepare the compilation environment using the detected libraries
     print()
@@ -262,16 +255,11 @@ def configure(ctx):
         ctx.env.ALGOIGNORE += algos
 
     algos = ['GaiaTransform', 'MusicExtractorSVM']
-    if ctx.env.WITH_GAIA_QT5:
+    if ctx.env.WITH_GAIA:
         if has('gaia2'):
             print('- Gaia2 detected!')
             print('  The following algorithms will be included: %s\n' % algos)
-            #ctx.env.USES += ' GAIA2'
-    elif ctx.env.WITH_GAIA:
-        if has('gaia2'):
-            print('- Gaia2 detected!')
-            print('  The following algorithms will be included: %s\n' % algos)
-            #ctx.env.USES += ' GAIA2'
+            ctx.env.USES += ' GAIA2'
     else:
         print('- Essentia is configured without Gaia2.')
         print('  The following algorithms will be ignored: %s' % algos)
@@ -296,8 +284,11 @@ def configure(ctx):
     algos = buildRegFile(ctx)
 
     if ctx.env.WITH_PYTHON:
-        if 'FileOutputProxy' not in algos:
-            raise ctx.errors.ConfigurationError("FileOutputProxy algorithm is necessary for python bindings, however it was excluded. Please, reconfigure including this algorithm.")
+        for a in ['FileOutputProxy', 'FrameCutter']:
+            if a not in algos:
+                raise ctx.errors.ConfigurationError(
+                    "%s algorithm is necessary for python bindings, however it was excluded. "
+                    "Please, reconfigure including this algorithm." % a)
 
     print('\n' + '-' * 87)
 
@@ -337,7 +328,6 @@ def configure(ctx):
                            'LFLAGS': lflags,
                            'LPATHS': lpaths
                            }
-
 
 from waflib.Task import Task
 class BuildAlgoReg(Task):
@@ -397,44 +387,14 @@ def buildRegFile(ctx):
     print('Created algorithms registration file')
     return algos
 
-def task_build_essentia (ctx, sources, bld_libs):
-    if ctx.env.BUILD_STATIC:
-        ctx.stlib(
-            source   = sources,
-            target   = 'essentia',
-            use      = ctx.env.USES,
-            install_path = '${PREFIX}/lib',
-            #includes = ctx.env.includes
-        )
-    else:
-        ctx.shlib(
-            source   = sources,
-            target   = 'essentia',
-            lib=bld_libs, 
-            libpath=['/usr/lib/x86_64-linux-gnu', '..'],  # shared libraries
-            stlib='gaia2', 
-            stlibpath='/usr/local/lib', 
-            use      = ctx.env.USES,
-            includes = ctx.env.INCLUDES,
-            cxxflags= [ '-w','-std=c++11', '-msse2','-Wall', \
-                '-Wno-misleading-indentation', \
-                '-Wno-unused-result',\
-                '-fext-numeric-literals', \
-                '-fno-strict-aliasing',\
-                '-fPIC', '-fvisibility=hidden'],
-            install_path = '${PREFIX}/lib'
-        )
-    ctx.add_group()
-
-def task_build_examples (ctx):
-    if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
-        ctx.recurse('examples')
-
-    if ctx.env.WITH_PYTHON:
-        ctx.recurse('python')
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
+
+    if ctx.env.ONLY_PYTHON:
+        ctx.recurse('python')
+        return
+
     #print('  BUILD ENV:\n%s' % ctx.env)
 
     # add essentia root folder to path to be able to import utils.algorithms_info
@@ -462,12 +422,6 @@ def build(ctx):
     ctx.env.INCLUDES = [ '.', 'essentia', 'essentia/scheduler', 'essentia/streaming',
                          'essentia/streaming/algorithms', 'essentia/utils',
                          '3rdparty']
-    ctx.env.CXXFLAGS= [ '-w','-std=c++11', '-msse2','-Wall', \
-            '-Wno-misleading-indentation', \
-            '-Wno-unused-result',\
-            '-fext-numeric-literals', \
-            '-fno-strict-aliasing',\
-            '-fPIC', '-fvisibility=hidden']
 
     # do not compile splineutil.cpp if we are not compiling Spline and CubicSpline
     if 'Spline' not in ctx.env.ALGOIGNORE or 'CubicSpline' not in ctx.env.ALGOIGNORE:
@@ -494,26 +448,33 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
-        """
-    if ctx.env.WITH_GAIA_QT5:
-        ctx.env.INCLUDES += ['.','..','/usr/local/include'] 
-        ctx.env.INCLUDES += ['/usr/include/x86_64-linux-gnu/qt5']
-        ctx.env.INCLUDES += ['/usr/include/x86_64-linux-gnu/qt5/QtCore']
-        bld_libs = ['Qt5Core', 'Qt5Concurrent', 'yaml'] 
-    elif ctx.env.WITH_GAIA:
-        ctx.env.INCLUDES += ['.','..','/usr/local/include'] 
-        ctx.env.INCLUDES += ['/usr/include/qt4']
-        ctx.env.INCLUDES += ['/usr/include/qt4/QtCore']
-        bld_libs = ['QtCore',  'yaml']
-    else:
-        bld_libs = ['yaml']
-   
-    task_build_essentia(ctx, sources, bld_libs)
-    
-    task_build_examples(ctx)
+	"""
 
-    ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
-    
+    if ctx.env.BUILD_STATIC:
+        ctx.stlib(
+            source   = sources,
+            target   = 'essentia',
+            use      = ctx.env.USES,
+            install_path = '${PREFIX}/lib',
+            #includes = ctx.env.includes
+        )
+    else:
+        ctx.shlib(
+            source   = sources,
+            target   = 'essentia',
+            use      = ctx.env.USES,
+            includes = ctx.env.INCLUDES,
+            cxxflags = [ '-w' ],
+            install_path = '${PREFIX}/lib'
+        )
+
+    ctx(source='../essentia.pc.in', **ctx.env.pcfile_opts)
+    # TODO Ideally we should use the Requires.private field in the .pc file
+    # Requires.private: gaia2 fftw3f yaml-0.1 libavcodec libavformat libavutil libavresample samplerate taglib libchromaprint
+
+    ctx.add_group()
+
+
     # install headers if asked to
     headers = ctx.path.ant_glob('essentia/**/*.h')
     for h in headers:
@@ -527,37 +488,9 @@ def build(ctx):
     #ctx.install_files('${PREFIX}/lib/pkgconfig', pc)     #TODO remove
     ctx.install_files('${PREFIX}/lib/pkgconfig', '../build/essentia.pc')
 
-'''
-def task_build_essentia (ctx, sources, bld_libs):
-    if ctx.env.BUILD_STATIC:
-        ctx.stlib(
-            source   = sources,
-            target   = 'essentia',
-            use      = ctx.env.USES,
-            install_path = '${PREFIX}/lib',
-            #includes = ctx.env.includes
-        )
-    else:
-        ctx.shlib(
-            source   = sources,
-            target   = 'essentia',
-            lib=bld_libs, 
-            libpath=['/usr/lib/x86_64-linux-gnu', '..'],  # shared libraries
-            stlib='gaia2', 
-            stlibpath='/usr/local/lib', 
-            use      = ctx.env.USES,
-            includes = ctx.env.INCLUDES,
-            cxxflags = [ '-w' ],
-            install_path = '${PREFIX}/lib'
-        )
 
-def task_build_samples (ctx):
     if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
 
     if ctx.env.WITH_PYTHON:
         ctx.recurse('python')
-'''
-   
-def write_pcfile(ctx):
-    open('build/essentia.pc', 'w').write(ctx.env.pcfile)
