@@ -4,7 +4,7 @@
 from __future__ import print_function
 
 import distutils.sysconfig
-import os, sys
+import os
 
 
 def options(ctx):
@@ -38,11 +38,6 @@ def adjust(objs, path):
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
 
-    if sys.platform.startswith('linux'):
-        ctx.env['pyext_PATTERN'] = "%s.so"
-        python_dir = str(ctx.env['PYTHONDIR'])
-        python_dir = python_dir.replace ('3/', str(ctx.env['PYTHON_VERSION'])+'/', 1)
-        ctx.env['PYTHONDIR'] = python_dir
     # gets the path from the active virtualenv
     PYLIB = distutils.sysconfig.get_python_lib()
 
@@ -59,9 +54,9 @@ def build(ctx):
         features = 'pyext',
         includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
         cxxflags = [ '-w' ],
-        install_path = '${PYTHONDIR}/essentia', 
-        use      = ctx.env.USES if ctx.env.ONLY_PYTHON else 'essentia ' #+ ctx.env.USES 
+        install_path = '${PYTHONDIR}/essentia',
+        use      = ctx.env.USES if ctx.env.ONLY_PYTHON else 'essentia ' #+ ctx.env.USES
     )
-    
+
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
                       relative_trick=True)
