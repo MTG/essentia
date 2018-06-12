@@ -106,6 +106,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 - J. Buhmann. Effects of music-based biofeedback on walking and running. PhD Thesis, Ghent University, Belgium, 2017.
 
+-  A. Xambó, G. Roma, A. Lerch, M. Barthet, G. Fazekas. Live Repurposing of Sounds: MIR Explorations with Personal and Crowdsourced Databases. In New Interfaces for Musical Expression (NIME'18), 2018.
+
 ## Sound indexing, music production, and intelligent audio processing
 
 - H. Ordiales, M. L. Bruno. Sound recycling from public databases. In 12th International Audio Mostly Conference on Augmented and Participatory Sound and Music Experiences (AM’17), 2017.
