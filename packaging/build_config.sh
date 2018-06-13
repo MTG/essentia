@@ -1,7 +1,9 @@
 #!/bin/sh
 
 HOST=i686-w64-mingw32
-PREFIX=`pwd`
+if [ -z "${PREFIX}" ]; then
+    PREFIX=`pwd`
+fi
 echo Installing to: $PREFIX
 
 #SHARED_OR_STATIC="
