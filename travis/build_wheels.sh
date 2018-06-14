@@ -1,5 +1,4 @@
 #!/bin/bash
-
 set -e -x
 
 # Build tools if using original quay.io/pypa/manylinux1_* docker images
@@ -7,13 +6,20 @@ set -e -x
 #/io/travis/build_tools.sh
 
 # Build static 3rdparty dependencies
-/io/packaging/build_3rdparty_static_debian.sh
+# (already built in mtgupf/essentia-builds images)
+#/io/packaging/build_3rdparty_static_debian.sh --with-gaia
+
+# Location of the dependencies in essentia-builds docker images
+# ...is already set in the docker images
+#PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+#PKG_CONFIG_PATH=/io/packaging/debian_3rdparty/lib/pkgconfig
 
 # Build static libessentia.a library
 # Use Python3.6. CentOS 5's native python is too old...
 PYBIN=/opt/python/cp36-cp36m/bin/
+
 cd /io
-"${PYBIN}/python" waf configure --build-static --static-dependencies
+"${PYBIN}/python" waf configure --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
 "${PYBIN}/python" waf
 "${PYBIN}/python" waf install
 cd -
