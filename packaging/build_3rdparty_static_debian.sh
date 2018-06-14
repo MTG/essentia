@@ -12,7 +12,7 @@ if [ "$1" = --with-gaia ];
     then
         ./build_qt.sh
         ./build_gaia.sh
-        rm -r mkspecs plugins translations
+        rm -rf mkspecs plugins translations
 fi
 
-rm -r bin share
+rm -rf bin share
