@@ -17,9 +17,9 @@ cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=OFF \
     -DBUILD_TOOLS=OFF \
-    -DFFMPEG_ROOT=../../ \
+    -DFFMPEG_ROOT=$PREFIX \
     -DFFT_LIB=fftw3f \
-    -DFFTW3_DIR=../../ \
+    -DFFTW3_DIR=$PREFIX \
     -DCMAKE_VERBOSE_MAKEFILE=ON \
     .
 
@@ -30,4 +30,4 @@ cd ../..
 rm -r tmp
 
 # patch libchromaprint.pc to add a missing link flag for fftw3f
-sed -i -e 's/-lchromaprint/-lchromaprint -lfftw3f/g' lib/pkgconfig/libchromaprint.pc
+sed -i -e 's/-lchromaprint/-lchromaprint -lfftw3f/g' "${PREFIX}"/lib/pkgconfig/libchromaprint.pc
