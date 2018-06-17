@@ -16,7 +16,6 @@ void setExtractorDefaultOptions(Pool &options) {
 
 
 void setExtractorOptions(const std::string& filename, Pool& options) {
-  setExtractorDefaultOptions(options);
   if (filename.empty()) return;
 
   Pool opts;

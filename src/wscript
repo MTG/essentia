@@ -6,9 +6,6 @@ from __future__ import print_function
 import sys
 import os.path
 
-bld_libs = []
-sources = []
-
 dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
 
 def options(ctx):
@@ -40,8 +37,8 @@ def options(ctx):
                    dest='WITH_GAIA', default=False,
                    help='build with Gaia support')
     ctx.add_option('--with-gaia-qt5', action='store_true',
-                    dest='WITH_GAIA_QT5', default=False,
-                    help='build with Gaia Qt5 support')
+                   dest='WITH_GAIA_QT5', default=False,
+                   help='build with Gaia Qt5 support')
     ctx.add_option('--lightweight', action='store',
                    dest='WITH_LIBS', default=False,
                    help='build lightweight version with specified dependencies (comma separated: =' + ','.join(dependencies_list) + ')')
@@ -170,7 +167,8 @@ def configure(ctx):
 
     if ctx.env.WITH_GAIA:
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
-                      args=check_cfg_args, mandatory=True)
+                      args=check_cfg_args, mandatory=False)
+
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += ['__STDC_CONSTANT_MACROS']
@@ -261,12 +259,7 @@ def configure(ctx):
         ctx.env.ALGOIGNORE += algos
 
     algos = ['GaiaTransform', 'MusicExtractorSVM']
-    if ctx.env.WITH_GAIA_QT5:
-        if has('gaia2'):
-            print('- Gaia2 detected!')
-            print('  The following algorithms will be included: %s\n' % algos)
-            ctx.env.USES += ' GAIA2'
-    elif ctx.env.WITH_GAIA:
+    if ctx.env.WITH_GAIA:
         if has('gaia2'):
             print('- Gaia2 detected!')
             print('  The following algorithms will be included: %s\n' % algos)
@@ -276,7 +269,7 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s' % algos)
         print('  Examples requiring Gaia2 will be ignored\n')
         ctx.env.ALGOIGNORE += algos
-    
+
     algos = [ 'Chromaprinter' ]
     if has('libchromaprint'):
         print('- Chromaprint detected!')
@@ -433,12 +426,6 @@ def build(ctx):
     ctx.env.INCLUDES = [ '.', 'essentia', 'essentia/scheduler', 'essentia/streaming',
                          'essentia/streaming/algorithms', 'essentia/utils',
                          '3rdparty']
-    ctx.env.CXXFLAGS= [ '-w','-std=c++11', '-msse2','-Wall', \
-            '-Wno-misleading-indentation', \
-            '-Wno-unused-result',\
-            '-fext-numeric-literals', \
-            '-fno-strict-aliasing',\
-            '-fPIC', '-fvisibility=hidden']
 
     # do not compile splineutil.cpp if we are not compiling Spline and CubicSpline
     if 'Spline' not in ctx.env.ALGOIGNORE or 'CubicSpline' not in ctx.env.ALGOIGNORE:
@@ -466,33 +453,29 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
     """
-
+    if ctx.env.WITH_GAIA: 
+        ctx.env.INCLUDE += '[/usr/local/include]'
+    
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
             source   = sources,
             target   = 'essentia',
+            stlib = 'gaia2' if ctx.env.WITH_GAIA else None, 
+            stlibpath = '/usr/local/lib' if ctx.env.WITH_GAIA else None, 
             use      = ctx.env.USES,
-            cxxflags= [ '-w','-std=c++11', '-msse2','-Wall', \
-                '-Wno-misleading-indentation', \
-                '-Wno-unused-result',\
-                '-fext-numeric-literals', \
-                '-fno-strict-aliasing',\
-                '-fPIC', '-fvisibility=hidden'],
             install_path = '${PREFIX}/lib',
             #includes = ctx.env.includes
         )
     else:
+        print (ctx.env.INCLUDES,'\n',  ctx.env.USES)
         ctx.shlib(
             source   = sources,
             target   = 'essentia',
+            stlib = 'gaia2' if ctx.env.WITH_GAIA else None, 
+            stlibpath = '/usr/local/lib' if ctx.env.WITH_GAIA else None, 
             use      = ctx.env.USES,
-            includes = ctx.env.INCLUDES,
-            cxxflags= [ '-w','-std=c++11', '-msse2','-Wall', \
-                '-Wno-misleading-indentation', \
-                '-Wno-unused-result',\
-                '-fext-numeric-literals', \
-                '-fno-strict-aliasing',\
-                '-fPIC', '-fvisibility=hidden'],
+            includes = ctx.env.INCLUDES ,
+            cxxflags = [ '-w' ],
             install_path = '${PREFIX}/lib'
         )
 
