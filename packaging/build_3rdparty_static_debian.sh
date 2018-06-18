@@ -4,6 +4,7 @@ cd $BASEDIR/debian_3rdparty
 ./build_fftw3.sh
 ./build_ffmpeg.sh
 ./build_libsamplerate.sh
+./build_zlib.sh
 ./build_taglib.sh
 ./build_yaml.sh
 ./build_chromaprint.sh
