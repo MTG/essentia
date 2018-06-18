@@ -12,7 +12,7 @@ tar -xf $ZLIB_VERSION.tar.gz
 cd $ZLIB_VERSION/
 
 
-CPPFLAGS=-fPIC ./configure \
+CFLAGS=-fPIC ./configure \
     --prefix=$PREFIX \
     --static
 make
