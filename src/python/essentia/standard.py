@@ -15,11 +15,12 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-import _essentia
+from six import iteritems
+from . import _essentia
 import essentia
-import common as _c
+from . import common as _c
 import sys as _sys
-from _essentia import keys as algorithmNames, info as algorithmInfo
+from ._essentia import keys as algorithmNames, info as algorithmInfo
 from copy import copy
 
 # given an essentia algorithm name, create the corresponding class
@@ -44,7 +45,7 @@ def _create_essentia_class(name, moduleName = __name__):
 
         def configure(self, **kwargs):
             # verify that all types match and do any necessary conversions
-            for name, val in kwargs.iteritems():
+            for name, val in iteritems(kwargs):
                 goalType = self.paramType(name)
                 
                 if type(val).__module__ == 'numpy':
@@ -136,5 +137,5 @@ _reloadAlgorithms()
 
 
 # load derived descriptors and other ones written in python
-from algorithms import create_python_algorithms as _create_python_algorithms
+from .algorithms import create_python_algorithms as _create_python_algorithms
 _create_python_algorithms(_sys.modules[__name__])

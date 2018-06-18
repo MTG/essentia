@@ -28,28 +28,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* LoudnessEBUR128::name = "LoudnessEBUR128";
-const char* LoudnessEBUR128::category = "Loudness/dynamics";
-const char* LoudnessEBUR128::description = DOC("This algorithm computes the EBU R128 loudness descriptors of an audio signal.\n"
-"- The input stereo signal is preprocessed with a K-weighting filter [2] (see LoudnessEBUR128Filter algorithm), composed of two stages: a shelving filter and a high-pass filter (RLB-weighting curve).\n"
-"- Momentary loudness is computed by integrating the sum of powers over a sliding rectangular window of 400 ms. The measurement is not gated.\n"
-"- Short-term loudness is computed by integrating the sum of powers over a sliding rectangular window of 3 seconds. The measurement is not gated.\n"
-"- Integrated loudness is a loudness value averaged over an arbitrary long time interval with gating of 400 ms blocks with two thresholds [2].\n"
-"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
-"  - Relative gating threshold, 10 LU below the absolute-gated loudness level.\n"
-"- Loudness range is computed from short-term loudness values. It is defined as the difference between the estimates of the 10th and 95th percentiles of the distribution of the loudness values with applied gating [3].\n"
-"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
-"  - Relative gating threshold, -20 LU below the absolute-gated loudness level.\n"
-"\n"
-"References:\n"
-"  [1] EBU Tech 3341-2011. \"Loudness Metering: 'EBU Mode' metering to supplement\n"
-"  loudness normalisation in accordance with EBU R 128\"\n"
-"  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\n"
-"  [3] EBU Tech Doc 3342-2011. \"Loudness Range: A measure to supplement loudness\n"
-"  normalisation in accordance with EBU R 128\"\n"
-"  [4] http://tech.ebu.ch/loudness\n"
-"  [5] http://en.wikipedia.org/wiki/LKFS\n"
-);
+const char* LoudnessEBUR128::name = essentia::standard::LoudnessEBUR128::name;
+const char* LoudnessEBUR128::category = essentia::standard::LoudnessEBUR128::category;
+const char* LoudnessEBUR128::description = essentia::standard::LoudnessEBUR128::description;
 
 
 LoudnessEBUR128::LoudnessEBUR128() : AlgorithmComposite() {
@@ -285,9 +266,28 @@ void LoudnessEBUR128::reset() {
 namespace essentia {
 namespace standard {
 
-const char* LoudnessEBUR128::name = essentia::streaming::LoudnessEBUR128::name;
-const char* LoudnessEBUR128::category = essentia::streaming::LoudnessEBUR128::category;
-const char* LoudnessEBUR128::description = essentia::streaming::LoudnessEBUR128::description;
+const char* LoudnessEBUR128::name = "LoudnessEBUR128";
+const char* LoudnessEBUR128::category = "Loudness/dynamics";
+const char* LoudnessEBUR128::description = DOC("This algorithm computes the EBU R128 loudness descriptors of an audio signal.\n"
+"- The input stereo signal is preprocessed with a K-weighting filter [2] (see LoudnessEBUR128Filter algorithm), composed of two stages: a shelving filter and a high-pass filter (RLB-weighting curve).\n"
+"- Momentary loudness is computed by integrating the sum of powers over a sliding rectangular window of 400 ms. The measurement is not gated.\n"
+"- Short-term loudness is computed by integrating the sum of powers over a sliding rectangular window of 3 seconds. The measurement is not gated.\n"
+"- Integrated loudness is a loudness value averaged over an arbitrary long time interval with gating of 400 ms blocks with two thresholds [2].\n"
+"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
+"  - Relative gating threshold, 10 LU below the absolute-gated loudness level.\n"
+"- Loudness range is computed from short-term loudness values. It is defined as the difference between the estimates of the 10th and 95th percentiles of the distribution of the loudness values with applied gating [3].\n"
+"  - Absolute 'silence' gating threshold at -70 LUFS for the computation of the absolute-gated loudness level.\n"
+"  - Relative gating threshold, -20 LU below the absolute-gated loudness level.\n"
+"\n"
+"References:\n"
+"  [1] EBU Tech 3341-2011. \"Loudness Metering: 'EBU Mode' metering to supplement\n"
+"  loudness normalisation in accordance with EBU R 128\"\n\n"
+"  [2] ITU-R BS.1770-2. \"Algorithms to measure audio programme loudness and true-peak audio level\"\n\n"
+"  [3] EBU Tech Doc 3342-2011. \"Loudness Range: A measure to supplement loudness\n"
+"  normalisation in accordance with EBU R 128\"\n\n"
+"  [4] http://tech.ebu.ch/loudness\n\n"
+"  [5] http://en.wikipedia.org/wiki/LKFS\n"
+);
 
 
 LoudnessEBUR128::LoudnessEBUR128() {

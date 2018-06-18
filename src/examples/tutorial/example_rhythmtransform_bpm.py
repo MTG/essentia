@@ -6,8 +6,8 @@ import numpy
 try:
     input_file = sys.argv[1]
 except:
-    print "Estimates BPM using RhythmTransform"
-    print "usage:", sys.argv[0], "<input_file>"
+    print("Estimates BPM using RhythmTransform")
+    print("usage: %s <input_file>" % sys.argv[0])
     sys.exit()
 
 
@@ -42,19 +42,9 @@ for frame in FrameGenerator(audio=loader(), frameSize=frameSize, hopSize=hopSize
     bands = melbands(spectrum(w(frame)))
     pool.add('melbands', bands)
 
-
 rhythmtransform = RhythmTransform(frameSize=rmsFrameSize, hopSize=rmsHopSize)
 rt = rhythmtransform(pool['melbands'])
 rt_mean = numpy.mean(rt, axis=0)
 bin_resoluion = 5.007721656976744
 
-
-print numpy.argmax(rt_mean) * bin_resoluion
-
-
-
-
-
-
-
-
+print("Estimated BPM: %0.1f" % float(numpy.argmax(rt_mean) * bin_resoluion))

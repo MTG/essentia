@@ -26,9 +26,10 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* StereoDemuxer::name = "StereoDemuxer";
-const char* StereoDemuxer::category = "Standard";
-const char* StereoDemuxer::description = DOC("This algorithm outputs left and right channel separately given a stereo signal. If the signal is monophonic, it outputs a zero signal on the right channel.");
+const char* StereoDemuxer::name = essentia::standard::StereoDemuxer::name;
+const char* StereoDemuxer::category = essentia::standard::StereoDemuxer::category;
+const char* StereoDemuxer::description = essentia::standard::StereoDemuxer::description;
+
 
 AlgorithmStatus StereoDemuxer::process() {
   EXEC_DEBUG("process()");
@@ -79,9 +80,10 @@ AlgorithmStatus StereoDemuxer::process() {
 namespace essentia {
 namespace standard {
 
-const char* StereoDemuxer::name = essentia::streaming::StereoDemuxer::name;
-const char* StereoDemuxer::category = essentia::streaming::StereoDemuxer::category;
-const char* StereoDemuxer::description = essentia::streaming::StereoDemuxer::description;
+const char* StereoDemuxer::name = "StereoDemuxer";
+const char* StereoDemuxer::category = "Standard";
+const char* StereoDemuxer::description = DOC("This algorithm outputs left and right channel separately given a stereo signal. If the signal is monophonic, it outputs a zero signal on the right channel.");
+
 
 void StereoDemuxer::createInnerNetwork() {
   _demuxer = streaming::AlgorithmFactory::create("StereoDemuxer");

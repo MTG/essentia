@@ -22,6 +22,7 @@
 
 #include "algorithm.h"
 #include "algorithmfactory.h"
+#include "essentiamath.h"
 #include <complex>
 #include <vector>
 
@@ -43,17 +44,17 @@ class ConstantQ : public Algorithm {
   double _maxFrequency;
   double _dQ; // Work out Q value for Filter bank
   double _threshold; // ConstantQ threshold for kernel generation
-  unsigned int _numWin;
-  unsigned int _hop;
-  unsigned int _binsPerOctave;  
-  unsigned int _FFTLength;
-  unsigned int _uK; // Number of constant Q bins
+  int _numWin;
+  int _hop;
+  int _binsPerOctave;  
+  int _FFTLength;
+  int _uK; // Number of constant Q bins
 
   struct SparseKernel {
     std::vector<double> _sparseKernelReal;
     std::vector<double> _sparseKernelImag;
-    std::vector<unsigned> _sparseKernelIs; 
-    std::vector<unsigned> _sparseKernelJs;
+    std::vector<int> _sparseKernelIs; 
+    std::vector<int> _sparseKernelJs;
   };
 
   SparseKernel *m_sparseKernel;

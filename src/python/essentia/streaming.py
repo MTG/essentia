@@ -15,11 +15,12 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-import _essentia
+from six import iteritems
+from . import _essentia
 import essentia
 import sys as _sys
-import common as _c
-from _essentia import skeys as algorithmNames, sinfo as algorithmInfo
+from . import common as _c
+from ._essentia import skeys as algorithmNames, sinfo as algorithmInfo
 
 # Used as a place-holder for sources and sinks, implements the right shift
 # operator
@@ -173,11 +174,11 @@ def _create_streaming_algo(givenname):
 
         def configure(self, **kwargs):
             # verify that all types match and do any necessary conversions
-            for name, val in kwargs.iteritems():
+            for name, val in iteritems(kwargs):
                 goalType = self.paramType(name)
                 try:
                     convertedVal = _c.convertData(val, goalType)
-                except TypeError, e:
+                except TypeError as e:
                     raise TypeError('Error verifying \''+name+'\' parameter: '+str(e))
 
                 kwargs[name] = convertedVal

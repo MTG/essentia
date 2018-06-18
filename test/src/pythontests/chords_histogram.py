@@ -44,12 +44,12 @@ for root, dirs, files in tree:
         genre = root.split('/')[-1]
         results_file = os.path.join(root, filename)
 
-        print 'Processing file:'
-        print results_file
+        print('Processing file:')
+        print(results_file)
 
         y = yaml.load( open(results_file).read(), yaml.CLoader )
 
-        print y['chords']['values']
+        print(y['chords']['values'])
 
         key = y['key_key']['value']
         scale = y['key_scale']['value']
@@ -76,9 +76,9 @@ for root, dirs, files in tree:
         else:
             false_key += 1
 
-        print
+        print('')
 
-#print histo
+#print(histo)
 
 i=1
 html = '<html>'

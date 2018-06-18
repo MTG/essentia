@@ -30,7 +30,7 @@ PyObject* VectorVectorReal::toPythonCopy(const vector<vector<Real> >* v) {
 
   bool isRectangular = true;
 
-  // check all rows have the same size
+  // check if all rows have the same size and convert to numpy array
   for (int i=1; i<dims[0]; i++) {
     if ((int)(*v)[i].size() != dims[1]) {
       isRectangular = false;
@@ -56,18 +56,32 @@ PyObject* VectorVectorReal::toPythonCopy(const vector<vector<Real> >* v) {
     return (PyObject*)result;
   }
 
-  // added this to vectorvectorreal could be made from unequal sizes
+  // convert to list of numpy arrays otherwise
   PyObject* result = PyList_New(v->size());
 
   for (int i=0; i<(int)v->size(); ++i) {
+    npy_intp itemDims[1] = {(int)(*v)[i].size()};
+    PyArrayObject* item = (PyArrayObject*)PyArray_SimpleNew(1, itemDims, PyArray_FLOAT);
+    assert(item->strides[0] == sizeof(Real));
+    if (item == NULL) {
+      throw EssentiaException("VectorVectorReal: dang null object (list of numpy arrays)");
+    }
+
+    Real* dest = (Real*)(item->data);
+    const Real* src = &((*v)[i][0]);
+    fastcopy(dest, src, itemDims[0]);
+
+    // old code to convert to list of lists
+    /*
     PyObject* item = PyList_New((*v)[i].size());
 
     for (int j=0; j<(int)(*v)[i].size(); ++j) {
       double val = double((*v)[i][j]);
       PyList_SET_ITEM(item, j, PyFloat_FromDouble(val));
     }
+    */
 
-    PyList_SET_ITEM(result, i, item);
+    PyList_SET_ITEM(result, i, (PyObject*) item);
   }
 
   return result;

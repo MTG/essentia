@@ -36,9 +36,9 @@ for test in tests:
      passed += 1
      print '.'
 
-print "Summary:"
-print "        \033[1mExecuted Tests:         ", len(tests)
-print "        \033[32;1mPassed Tests:           ", passed,
-print "\033[0m"
+print("Summary:")
+print("        \033[1mExecuted Tests:         ", len(tests))
+print("        \033[32;1mPassed Tests:           ", passed)
+print("\033[0m")
 
 if passed != len(tests): sys.exit(1)

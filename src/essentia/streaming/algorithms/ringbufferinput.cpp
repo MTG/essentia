@@ -28,6 +28,7 @@ namespace essentia {
 namespace streaming {
 
 const char* RingBufferInput::name = "RingBufferInput";
+const char* RingBufferInput::category = "Input/Output";
 const char* RingBufferInput::description = DOC(
 "This algorithm gets data from an input ringbuffer of type Real that is fed into the essentia streaming mode."
 );

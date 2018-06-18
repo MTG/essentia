@@ -62,49 +62,24 @@ class StereoMuxer : public Algorithm {
 } // namespace essentia
 
 #include "algorithm.h"
-#include "network.h"
-#include "vectoroutput.h"
-#include "vectorinput.h"
 
 namespace essentia {
 namespace standard {
 
-// Standard non-streaming algorithm comes after the streaming one as it
-// depends on it
 class StereoMuxer : public Algorithm {
  protected:
   Input<std::vector<AudioSample> > _left;
   Input<std::vector<AudioSample> > _right;
   Output<std::vector<StereoSample> > _audio;
 
-  streaming::Algorithm* _muxer;
-  streaming::VectorInput<AudioSample, 4096>* _audiogenLeft;
-  streaming::VectorInput<AudioSample, 4096>* _audiogenRight;
-  streaming::VectorOutput<StereoSample>* _storage;
-  scheduler::Network* _network;
-
-  void createInnerNetwork();
-
  public:
   StereoMuxer() {
     declareInput(_left, "left", "the left channel of the audio signal");
     declareInput(_right, "right", "the right channel of the audio signal");
     declareOutput(_audio, "audio", "the audio signal");
-
-    createInnerNetwork();
-  }
-
-  ~StereoMuxer() {
-    delete _network;
   }
 
   void declareParameters() {}
-
-  void configure(){};
-  void reset() {
-    _network->reset();
-  }
-
   void compute();
 
   static const char* name;

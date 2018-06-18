@@ -44,8 +44,14 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   rhythmExtractor->output("bpm") >>          PC(pool, nameSpace + "bpm");
   rhythmExtractor->output("estimates") >>    NOWHERE;
   rhythmExtractor->output("bpmIntervals") >> PC(pool, nameSpace + "bpm_intervals");
-  // TODO: confidence value will be always zero for degara
-  rhythmExtractor->output("confidence") >>   PC(pool, nameSpace + "bpm_confidence");
+  
+  // Do not output confidence value for degara as it will be always zero
+  if (options.value<string>("rhythm.method") == "degara") {
+    rhythmExtractor->output("confidence") >> NOWHERE;
+  }
+  else {
+    rhythmExtractor->output("confidence") >> PC(pool, nameSpace + "bpm_confidence");
+  }
 
   // BPM Histogram descriptors
   Algorithm* bpmhist = factory.create("BpmHistogramDescriptors");

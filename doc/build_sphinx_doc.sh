@@ -22,9 +22,17 @@ doxygen doc/Doxyfile
 
 
 # now build Sphinx doc
-echo "******** BUILDING SPHINX DOCUMENTATION ********"
 cd doc/sphinxdoc
-python generate_reference.py
+echo "******** GENERATE ALGORITHMS REFERENCE AND TUTORIALS ********"
+
+# force using default python3 if the the argument is not supplied
+if [ -z "$1" ]
+    then
+        python3 generate_reference.py
+    else
+        "$1" generate_reference.py
+fi
+echo "******** BUILDING SPHINX DOCUMENTATION ********"
 make html
 
 # and copy doxygen into sphinx resulting dir

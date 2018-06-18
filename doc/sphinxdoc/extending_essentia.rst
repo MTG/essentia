@@ -3,7 +3,7 @@
 Writing a new Algorithm
 =======================
 
-Although Essentia comes pre-loaded with a considerable list of algorithms, we imagine 
+Although Essentia comes pre-loaded with a considerable list of algorithms, we imagine
 that you will want to write your own algorithms at some point. By following the next steps,
 you should be able to roll up your own algorithm in very little time.
 
@@ -102,8 +102,8 @@ can do it using its native type (i.e., int, float, string, ...) as the conversio
 ``Parameter`` type is done automatically.
 
 
-The configure() method
-^^^^^^^^^^^^^^^^^^^^^^
+The ``configure()`` method
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This method (with no parameters) will be called each time the object is configured.
 This is intended if you have some setup actions to do before starting to process that you
@@ -112,7 +112,7 @@ computation, etc...). As a rule of thumb, you can (and should) initialize everyt
 can in the constructor (i.e., when not knowing any parameters) and initializes the rest of
 it (that is dependent on parameters) in the configure method.
 
-You will be given as input a ``ParameterMap`` containing all of the parameters that you 
+You will be given as input a ``ParameterMap`` containing all of the parameters that you
 declared using the ``declareParameters`` statements.
 
 

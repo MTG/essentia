@@ -31,5 +31,5 @@ def test():
     return 0
   except:
     raise
-    print "Failed to run essentia_music"
+    print("Failed to run essentia_music")
     return 1

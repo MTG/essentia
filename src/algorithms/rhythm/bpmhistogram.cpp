@@ -33,31 +33,9 @@ using namespace essentia;
 namespace essentia {
 namespace streaming {
 
-const char* BpmHistogram::name = "BpmHistogram";
-const char* BpmHistogram::category = "Rhythm";
-const char* BpmHistogram::description = DOC("This algorithm analyzes predominant periodicities in a signal given its novelty curve [1] (see NoveltyCurve algorithm) or another onset detection function (see OnsetDetection and OnsetDetectionGlobal). It estimates pulse BPM values and time positions together with a half-wave rectified sinusoid whose peaks represent the pulses present in the audio signal and their magnitudes. The analysis is based on the FFT of the input novelty curve from which salient periodicities are detected by thresholding. Temporal evolution of these periodicities is output in the \"tempogram\". Candidate BPMs are then detected based on a histogram of the observed periodicities weighted by their energy in the tempogram. The sinusoidal model is constructed based on the observed periodicities and their magnitudes with the estimated overall BPM as a reference.\n\n"
-"The algorithm outputs: \n"
-" - bpm: the mean of the most salient BPM values representing periodicities in the signal (the mean BPM).\n"
-" - bpmCandidates and bpmMagnitudes: list of the most salient BPM values and their magnitudes (intensity). These two outputs can be helpful for taking an alternative decision on estimation of the overall BPM.\n"
-" - tempogram: spectrogram-like representation of the estimated salient periodicities and their intensities over time (per-frame BPM magnitudes). It is useful for detecting tempo variations and visualization of tempo evolution.\n"
-" - frameBpms: list of candidate BPM values at each frame. The candidate values are similar to the mean BPM. If no candidates are found to be similar, the mean value itself is used unless \"tempoChange\" seconds have triggered a variation in tempo.\n"
-" - ticks: time positions of ticks in seconds.\n"
-" - ticksMagnitude: magnitude of each tick. Higher values correspond to higher probability of correctly identified ticks.\n"
-" - sinusoid: a sinusoidal model of the ticks' positions. The previous outputs are based on detecting peaks of this half-wave rectified sinusoid. This model can be used to obtain ticks using alternative peak detection algorithms if necessary. Beware that the last few ticks may exceed the length of the audio signal due to overlap factors. Therefore, this output should be always checked against the length of audio signal.\n"
-"\n"
-"Note:\n"
-" - This algorithm is outdated. For beat tracking it is recommended to use RhythmExtractor2013 algorithm found to perform better than NoveltyCurve with BpmHistogram in evaluations.\n"
-" - The \"frameRate\" parameter refers to the frame rate at which the novelty curve has been computed. It is equal to the audio sampling rate divided by the hop size at which the signal was processed.\n"
-" - Although the algorithm tries to find beats that fit the mean BPM the best, the tempo is not assumed to be constant unless specified in the corresponding parameter. For this reason and if tempo differs too much from frame to frame, there may be phase discontinuities when constructing the sinusoid which can yield to too many ticks. One can recursively run this algorithm on the sinusoid output until the ticks stabilize. At this point it may be useful to infer a specific BPM and set the constant tempo parameter to true.\n"
-" - Another useful trick is to run the algorithm one time to get an estimation of the mean BPM and re-run it again with a \"frameSize\" parameter set to a multiple of the mean BPM.\n"
-"\n"
-"Quality: outdated (use RhythmExtractor2013 instead, still this algorithm might be useful when working with other onset detection functions apart from NoveltyCurve)\n"
-"\n"
-"References:\n"
-"  [1] P. Grosche and M. Müller, \"A mid-level representation for capturing\n"
-"  dominant tempo and pulse information in music recordings,\" in\n"
-"  International Society for Music Information Retrieval Conference\n"
-"  (ISMIR’09), 2009, pp. 189–194.");
+const char* BpmHistogram::name = essentia::standard::BpmHistogram::name;
+const char* BpmHistogram::category = essentia::standard::BpmHistogram::category;
+const char* BpmHistogram::description = essentia::standard::BpmHistogram::description;
 
 
 BpmHistogram::BpmHistogram() : _normalize(false), _weightByMagnitude(false) {
@@ -598,9 +576,32 @@ AlgorithmStatus BpmHistogram::process() {
 namespace essentia {
 namespace standard {
 
-const char* BpmHistogram::name = essentia::streaming::BpmHistogram::name;
-const char* BpmHistogram::category = essentia::streaming::BpmHistogram::category;
-const char* BpmHistogram::description = essentia::streaming::BpmHistogram::description;
+const char* BpmHistogram::name = "BpmHistogram";
+const char* BpmHistogram::category = "Rhythm";
+const char* BpmHistogram::description = DOC("This algorithm analyzes predominant periodicities in a signal given its novelty curve [1] (see NoveltyCurve algorithm) or another onset detection function (see OnsetDetection and OnsetDetectionGlobal). It estimates pulse BPM values and time positions together with a half-wave rectified sinusoid whose peaks represent the pulses present in the audio signal and their magnitudes. The analysis is based on the FFT of the input novelty curve from which salient periodicities are detected by thresholding. Temporal evolution of these periodicities is output in the \"tempogram\". Candidate BPMs are then detected based on a histogram of the observed periodicities weighted by their energy in the tempogram. The sinusoidal model is constructed based on the observed periodicities and their magnitudes with the estimated overall BPM as a reference.\n\n"
+"The algorithm outputs: \n"
+" - bpm: the mean of the most salient BPM values representing periodicities in the signal (the mean BPM).\n"
+" - bpmCandidates and bpmMagnitudes: list of the most salient BPM values and their magnitudes (intensity). These two outputs can be helpful for taking an alternative decision on estimation of the overall BPM.\n"
+" - tempogram: spectrogram-like representation of the estimated salient periodicities and their intensities over time (per-frame BPM magnitudes). It is useful for detecting tempo variations and visualization of tempo evolution.\n"
+" - frameBpms: list of candidate BPM values at each frame. The candidate values are similar to the mean BPM. If no candidates are found to be similar, the mean value itself is used unless \"tempoChange\" seconds have triggered a variation in tempo.\n"
+" - ticks: time positions of ticks in seconds.\n"
+" - ticksMagnitude: magnitude of each tick. Higher values correspond to higher probability of correctly identified ticks.\n"
+" - sinusoid: a sinusoidal model of the ticks' positions. The previous outputs are based on detecting peaks of this half-wave rectified sinusoid. This model can be used to obtain ticks using alternative peak detection algorithms if necessary. Beware that the last few ticks may exceed the length of the audio signal due to overlap factors. Therefore, this output should be always checked against the length of audio signal.\n"
+"\n"
+"Note:\n"
+" - This algorithm is outdated. For beat tracking it is recommended to use RhythmExtractor2013 algorithm found to perform better than NoveltyCurve with BpmHistogram in evaluations.\n"
+" - The \"frameRate\" parameter refers to the frame rate at which the novelty curve has been computed. It is equal to the audio sampling rate divided by the hop size at which the signal was processed.\n"
+" - Although the algorithm tries to find beats that fit the mean BPM the best, the tempo is not assumed to be constant unless specified in the corresponding parameter. For this reason and if tempo differs too much from frame to frame, there may be phase discontinuities when constructing the sinusoid which can yield to too many ticks. One can recursively run this algorithm on the sinusoid output until the ticks stabilize. At this point it may be useful to infer a specific BPM and set the constant tempo parameter to true.\n"
+" - Another useful trick is to run the algorithm one time to get an estimation of the mean BPM and re-run it again with a \"frameSize\" parameter set to a multiple of the mean BPM.\n"
+"\n"
+"Quality: outdated (use RhythmExtractor2013 instead, still this algorithm might be useful when working with other onset detection functions apart from NoveltyCurve)\n"
+"\n"
+"References:\n"
+"  [1] P. Grosche and M. Müller, \"A mid-level representation for capturing\n"
+"  dominant tempo and pulse information in music recordings,\" in\n"
+"  International Society for Music Information Retrieval Conference\n"
+"  (ISMIR’09), 2009, pp. 189–194.");
+
 
 BpmHistogram::BpmHistogram() {
   declareInput(_signal, "novelty", "the novelty curve");

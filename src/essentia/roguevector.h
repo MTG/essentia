@@ -72,22 +72,19 @@ void RogueVector<T>::setSize(size_t size) {
     *(start+2) = *start + size;
 }
 
-
 // Windows implementation
 #elif defined(OS_WIN32)
 
-// TODO probably outdated, as we want to use MINGW
-/*
 template <typename T>
-void RogueVector<T>::setData(T* data) { this->_Myfirst = data; }
+void RogueVector<T>::setData(T* data) { this->_Myfirst() = data; }
 
 template <typename T>
 void RogueVector<T>::setSize(size_t size) {
-  this->_Mylast = this->_Myfirst + size;
-  this->_Myend = this->_Myfirst + size;
+  this->_Mylast() = this->_Myfirst() + size;
+  this->_Myend() = this->_Myfirst() + size;
 }
-*/
 
+/*
 // TODO just a copy-paste from OS_LINUX version
 template <typename T>
 void RogueVector<T>::setData(T* data) { this->_M_impl._M_start = data; }
@@ -97,7 +94,7 @@ void RogueVector<T>::setSize(size_t size) {
   this->_M_impl._M_finish = this->_M_impl._M_start + size;
   this->_M_impl._M_end_of_storage = this->_M_impl._M_start + size;
 }
-
+*/
 
 // Linux implementation
 #elif defined(OS_LINUX)

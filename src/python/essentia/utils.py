@@ -15,8 +15,8 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-import common as _c
-import _essentia
+from . import common as _c
+from . import _essentia
 
 def isSilent(arg):
     return _essentia.isSilent( _c.convertData(arg, _c.Edt.VECTOR_REAL) )

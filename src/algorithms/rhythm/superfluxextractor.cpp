@@ -27,15 +27,10 @@ using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
 
-const char* SuperFluxExtractor::name = "SuperFluxExtractor";
-const char* SuperFluxExtractor::category = "Rhythm";
-const char* SuperFluxExtractor::description = DOC("This algorithm detects onsets given an audio signal using SuperFlux algorithm. This implementation is based on the available reference implementation in python [2]. The algorithm computes spectrum of the input signal, summarizes it into triangular band energies, and computes a onset detection function based on spectral flux tracking spectral trajectories with a maximum filter (SuperFluxNovelty). The peaks of the function are then detected (SuperFluxPeaks).\n"
-"\n"
-"References:\n"
-"  [1] Böck, S. and Widmer, G., Maximum Filter Vibrato Suppression for Onset\n"
-"  Detection, Proceedings of the 16th International Conference on Digital\n"
-"  Audio Effects (DAFx-13), 2013\n"
-"  [2] https://github.com/CPJKU/SuperFlux");
+const char* SuperFluxExtractor::name = standard::SuperFluxExtractor::name;
+const char* SuperFluxExtractor::category = standard::SuperFluxExtractor::category;
+const char* SuperFluxExtractor::description = standard::SuperFluxExtractor::description;
+
 
 SuperFluxExtractor::SuperFluxExtractor() : _configured(false) {
 
@@ -108,9 +103,16 @@ void SuperFluxExtractor::clearAlgos() {
 namespace essentia {
 namespace standard {
 
-const char* SuperFluxExtractor::name = streaming::SuperFluxExtractor::name;
-const char* SuperFluxExtractor::category = streaming::SuperFluxExtractor::category;
-const char* SuperFluxExtractor::description = streaming::SuperFluxExtractor::description;
+const char* SuperFluxExtractor::name = "SuperFluxExtractor";
+const char* SuperFluxExtractor::category = "Rhythm";
+const char* SuperFluxExtractor::description = DOC("This algorithm detects onsets given an audio signal using SuperFlux algorithm. This implementation is based on the available reference implementation in python [2]. The algorithm computes spectrum of the input signal, summarizes it into triangular band energies, and computes a onset detection function based on spectral flux tracking spectral trajectories with a maximum filter (SuperFluxNovelty). The peaks of the function are then detected (SuperFluxPeaks).\n"
+"\n"
+"References:\n"
+"  [1] Böck, S. and Widmer, G., Maximum Filter Vibrato Suppression for Onset\n"
+"  Detection, Proceedings of the 16th International Conference on Digital\n"
+"  Audio Effects (DAFx-13), 2013\n"
+"  [2] https://github.com/CPJKU/SuperFlux");
+
 
 SuperFluxExtractor::SuperFluxExtractor() {
   declareInput(_signal, "signal", "the audio input signal");

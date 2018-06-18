@@ -7,7 +7,7 @@ It is possible to customize the parameters of audio analysis, frame summarizatio
 
  - output format (json or yaml)
  - whether to store all frame values
- - an audio segment to analyze using time positions in seconds ::
+ - an audio segment to analyze using time positions in seconds
  - analysis sample rate (audio will be converted to it before analysis, recommended and default value is 44100.0)
  - frame parameters for different groups of descriptors: frame/hop size, zero padding, window type (see `FrameCutter <reference/streaming_FrameCutter.html>`_ algorithm)
  - statistics to compute over frames: mean, var, median, min, max, dmean, dmean2, dvar, dvar2 (see `PoolAggregator <reference/streaming_PoolAggregator.html>`_ algorithm)
@@ -22,11 +22,12 @@ See below a detailed description of audio descriptors computed by the extractor.
 low-level.*
 -----------
 
-For implementation details, see `the code of extractor <https://github.com/MTG/essentia/blob/master/src/examples/extractor_music/MusicLowlevelDescriptors.cpp>`_.
+For implementation details, see `the code of extractor <https://github.com/MTG/essentia/blob/master/src/essentia/utils/extractor_music/MusicLowlevelDescriptors.cpp>`__.
 
 
-The *spectral_centroid*, *spectral_kurtosis*, *spectral_spread*, *spectral_skewness*, *dissonance*, *spectral_entropy*, *spectral_contrast_coeffs*, and *spectral_contrast_valleys* are computed with an `equal-loudness filter <reference/streaming_EqualLoudness.html>`_ applied to the signal. All frame-based features are computed with frame/hop sizes equal to 2048/1024 samples unless stated otherwise.
+The *spectral_centroid*, *spectral_kurtosis*, *spectral_spread*, *spectral_skewness*, *dissonance*, *spectral_entropy*, *spectral_contrast_coeffs*, and *spectral_contrast_valleys* are computed with an `equal-loudness filter <reference/streaming_EqualLoudness.html>`_ applied to the signal. By default all frame-based features are computed with frame/hop sizes equal to 2048/1024 samples unless stated otherwise.
 
+* **loudness_ebu128**: EBU R128 loudness descriptors. Algorithms: `LoudnessEBUR128 <reference/streaming_LoudnessEBUR128.html>`_
 
 * **average_loudness**: dynamic range descriptor. It rescales average loudness, computed on 2sec windows with 1 sec overlap, into the [0,1] interval. The value of 0 corresponds to signals with large dynamic range, 1 corresponds to signal with little dynamic range. Algorithms: `Loudness <reference/streaming_Loudness.html>`_
 
@@ -38,7 +39,7 @@ The *spectral_centroid*, *spectral_kurtosis*, *spectral_spread*, *spectral_skewn
 
 * **spectral_flux**: spectral flux of a signal computed using L2-norm. Algorithms: `Flux <reference/streaming_Flux.html>`_
 
-* **spectral_centroid**, spectral_kurtosis, spectral_spread, spectral_skewness: centroid and central moments statistics describing the spectral shape. Algorithms: `Centroid <reference/streaming_Centroid.html>`_, `CentralMoments <reference/streaming_CentralMoments.html>`_
+* **spectral_centroid**, **spectral_kurtosis**, **pectral_spread**, **spectral_skewness**: centroid and central moments statistics describing the spectral shape. Algorithms: `Centroid <reference/streaming_Centroid.html>`_, `CentralMoments <reference/streaming_CentralMoments.html>`_
 
 * **spectral_rolloff**: the roll-off frequency of a spectrum. Algorithms: `RollOff <reference/streaming_RollOff.html>`_
 
@@ -57,6 +58,8 @@ The *spectral_centroid*, *spectral_kurtosis*, *spectral_spread*, *spectral_skewn
 * **barkbands**: spectral energy in 27 Bark bands. Algorithms: `BarkBands <reference/streaming_BarkBands.html>`_
 
 * **melbands**: spectral energy in 40 mel bands. Algorithms: `MFCC <reference/streaming_MFCC.html>`_
+
+* **melbands128**: spectral energy in 128 mel bands. Algorithms: `MelBands <reference/streaming_MelBands.html>`_
 
 * **erbbands**: spectral energy in 40 ERB bands. Algorithms: `ERBBands <reference/streaming_ERBBands.html>`_
 
@@ -90,7 +93,7 @@ The *spectral_centroid*, *spectral_kurtosis*, *spectral_spread*, *spectral_skewn
 rhythm.*
 -----------
 
-For implementation details, see `the code of extractor <https://github.com/MTG/essentia/blob/master/src/examples/extractor_music/MusicRhythmDescriptors.cpp>`_.
+For implementation details, see `the code of extractor <https://github.com/MTG/essentia/blob/master/src/essentia/utils/extractor_music/MusicRhythmDescriptors.cpp>`__.
 
 * **beats_position**: time positions [sec] of detected beats using beat tracking algorithm by Degara et al., 2012. Algorithms: `RhythmExtractor2013 <reference/streaming_RhythmExtractor2013.html>`_, `BeatTrackerDegara <reference/streaming_BeatTrackerDegara.html>`_
 
@@ -98,7 +101,9 @@ For implementation details, see `the code of extractor <https://github.com/MTG/e
 
 * **bpm**: BPM value according to detected beats
 
-* **bpm_histogram_first_peak_bpm**, **bpm_histogram_first_peak_spread**, **bpm_histogram_first_peak_weight**, **bpm_histogram_second_peak_bpm**, **bpm_histogram_second_peak_spread**, **bpm_histogram_second_peak_weight**: descriptors characterizing highest and second highest peak of the BPM probability histogram. Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
+* **bpm_histogram**: BPM histogram. Algorithms: Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
+
+* **bpm_histogram_first_peak_bpm**, **bpm_histogram_first_peak_spread**, **bpm_histogram_first_peak_weight**, **bpm_histogram_second_peak_bpm**, **bpm_histogram_second_peak_spread**, **bpm_histogram_second_peak_weight**: descriptors characterizing highest and second highest peak of the BPM histogram. Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
 
 * **beats_loudness**, **beats_loudness_band_ratio**: spectral energy computed on beats segments of audio across the whole spectrum, and ratios of energy in 6 frequency bands. Algorithms: `BeatsLoudness <reference/streaming_BeatsLoudness.html>`_, `SingleBeatLoudness <reference/streaming_SingleBeatLoudness.html>`_
 
@@ -110,7 +115,7 @@ For implementation details, see `the code of extractor <https://github.com/MTG/e
 tonal.*
 -------
 
-For implementation details, see `the code of extractor <https://github.com/MTG/essentia/blob/master/src/examples/extractor_music/MusicTonalDescriptors.cpp>`_. All features are computed with frame/hop sizes equal to 4096/2048 samples. 
+For implementation details, see `the code of extractor <https://github.com/MTG/essentia/blob/master/src/essentia/utils/extractor_music/MusicTonalDescriptors.cpp>`__. By default all features are computed with frame/hop sizes equal to 4096/2048 samples. 
 
 * **tuning_frequency**: estimated tuning frequency [Hz]. Algorithms: `TuningFrequency <reference/streaming_TuningFrequency.html>`_
 
@@ -118,7 +123,9 @@ For implementation details, see `the code of extractor <https://github.com/MTG/e
 
 * **hpcp_entropy**: Shannon entropy of a HPCP vector. Algorithms: `Entropy <reference/streaming_Entropy.html>`_
 
-* **key_key**, **key_scale**, **key_strength**: estimated key using Temperley’s profile, its scale and strength. Algorithms: `Key <reference/streaming_Key.html>`_
+* **hpcp_crest**: crest of the HPCP vector. Algorithms: `Crest <reference/streaming_Crest.html>`_
+
+* **key_temperley**, **key_krumhansl**, **key_edma**; key estimation, its scale and strength using three different HPCP key profiles. Algorithms: `Key <reference/streaming_Key.html>`_
 
 * **chords_strength**, **chords_histogram**, **chords_changes_rate**, **chords_number_rate**, **chords_key**, **chords_scale**: strength of estimated chords and normalized histogram of their progression; chords change rate in the progression;  ratio of different chords from the total number of chords in the progression; key of the progression, taken as the most frequent chord, and scale of the progression, whether major or minor. Algorithms: `ChordsDetection <reference/streaming_ChordsDetection.html>`_, `ChordsDescriptors <reference/streaming_ChordsDescriptors.html>`_
 

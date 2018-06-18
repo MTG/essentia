@@ -24,7 +24,7 @@ from numpy import *
 try:
     filename = sys.argv[1]
 except:
-    print "usage:", sys.argv[0], "<input-audiofile>"
+    print("usage: %s <input-audiofile>" % sys.argv[0])
     sys.exit()
 
 
@@ -57,7 +57,7 @@ pool = Pool();
 
 # Now we are ready to start processing.
 # 1. Load audio and pass it through the equal-loudness filter
-audio = MonoLoader(filename = filename)()
+audio = MonoLoader(filename=filename)()
 audio = EqualLoudness()(audio)
 
 # 2. Cut audio into frames and compute for each frame:
@@ -88,7 +88,7 @@ pitch, confidence = run_pitch_contours_melody(contours_bins,
 #      if you want to get access to pitch salience function and pitch contours.
 
 n_frames = len(pitch)
-print "number of frames:", n_frames
+print("number of frames: %d" % n_frames)
 
 # visualize output pitch
 fig = plt.figure()

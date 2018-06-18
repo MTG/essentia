@@ -56,6 +56,7 @@ int essentia_main(string audioFilename, string outputFilename, string profileFil
     cout.precision(10); // TODO ????
 
     Pool options;
+    setExtractorDefaultOptions(options);
     setExtractorOptions(profileFilename, options);
 
     Algorithm* extractor = AlgorithmFactory::create("FreesoundExtractor",

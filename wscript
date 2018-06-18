@@ -26,9 +26,16 @@ GIT_SHA = get_git_version()
 top = '.'
 out = 'build'
 
+# make default --prefix=$VIRTUAL_ENV inside virtualenv
+if 'VIRTUAL_ENV' in os.environ:
+    default_prefix = os.environ['VIRTUAL_ENV']
+
 
 def options(ctx):
     ctx.load('compiler_cxx compiler_c python')
+    if sys.platform == 'win32':
+        ctx.load('msvc')
+
     ctx.recurse('src')
 
     ctx.add_option('--with-cpptests', action='store_true',
@@ -67,18 +74,53 @@ def options(ctx):
 def configure(ctx):
     print('→ configuring the project in ' + ctx.path.abspath())
 
+    ctx.env.WITH_EXAMPLES        = ctx.options.WITH_EXAMPLES
+    ctx.env.WITH_PYTHON          = ctx.options.WITH_PYTHON
+    ctx.env.ONLY_PYTHON          = ctx.options.ONLY_PYTHON
+    ctx.env.WITH_VAMP            = ctx.options.WITH_VAMP
+    ctx.env.BUILD_STATIC         = ctx.options.BUILD_STATIC
+    ctx.env.STATIC_DEPENDENCIES  = ctx.options.STATIC_DEPENDENCIES
+    ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
+    ctx.env.PKG_CONFIG_PATH      = ctx.options.PKG_CONFIG_PATH
+    ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
+    ctx.env.WITH_LIBS            = ctx.options.WITH_LIBS
+    ctx.env.EXAMPLES             = ctx.options.EXAMPLES
+    ctx.env.EXAMPLE_LIST         = []
+    ctx.env.ALGOIGNORE           = []
+    ctx.env.IGNORE_ALGOS         = ctx.options.IGNORE_ALGOS
+    ctx.env.ALGOINCLUDE          = []
+    ctx.env.INCLUDE_ALGOS        = ctx.options.INCLUDE_ALGOS
+    ctx.env.FFT                  = ctx.options.FFT
+
+
+    if ctx.options.CROSS_COMPILE_MINGW32:
+        if ctx.env.WITH_EXAMPLES:
+            ctx.env.WITH_STATIC_EXAMPLES = True
+            print('WARNING: Using --with-static-examples flag instead of --with-examples for cross-compilation with MinGW')
+
+    if ctx.env.WITH_STATIC_EXAMPLES:
+        ctx.env.BUILD_STATIC = True
+        ctx.env.STATIC_DEPENDENCIES = True
+
     ctx.env.VERSION = VERSION
     ctx.env.GIT_SHA = GIT_SHA
 
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
 
     # compiler flags
-    ctx.env.CXXFLAGS = ['-pipe', '-Wall']
+    if sys.platform != 'win32':
+        # msvc does not support -pipe
+        ctx.env.CXXFLAGS = ['-pipe', '-Wall']
+    else:
+        ctx.env.CXXFLAGS = ['-W2', '-EHsc']
 
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
-    if not ctx.options.EMSCRIPTEN and not ctx.options.CROSS_COMPILE_ANDROID and not ctx.options.CROSS_COMPILE_IOS:
+    if (not ctx.options.EMSCRIPTEN and 
+        not ctx.options.CROSS_COMPILE_ANDROID and 
+        not ctx.options.CROSS_COMPILE_IOS and
+        sys.platform != 'win32'):
         ctx.env.CXXFLAGS += ['-msse', '-msse2', '-mfpmath=sse']
 
     # define this to be stricter, but sometimes some libraries can give problems...
@@ -135,8 +177,12 @@ def configure(ctx):
     elif sys.platform.startswith('linux'):
         # include -pthread flag because not all versions of gcc provide it automatically
         ctx.env.CXXFLAGS += ['-pthread']
+        ctx.env.LINKFLAGS += ['-pthread']
 
     elif sys.platform == 'win32':
+        print ("Building on win32")
+
+        """
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
@@ -149,7 +195,7 @@ def configure(ctx):
         tdm_lib = tdm_root + "/lib"
 
         # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
-        # libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8']
+        # libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'chromaprint-1.4.2']
         # libs_paths = [';packaging\win32_3rdparty\\' + lib + '\lib\pkgconfig' for lib in libs_3rdparty]
         # os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
 
@@ -159,17 +205,18 @@ def configure(ctx):
         # force the use of mingw gcc compiler instead of msvc
         #ctx.env.CC = 'gcc'
         #ctx.env.CXX = 'g++'
-
+        
         import distutils.dir_util
 
         print("copying pkgconfig ...")
         distutils.dir_util.copy_tree(win_path + "/pkgconfig/bin", tdm_bin)
 
-        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'taglib-1.9.1']
+        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'taglib-1.9.1', 'chromaprint-1.4.2']
         for lib in libs_3rdparty:
             print("copying " + lib + "...")
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/include", tdm_include)
             distutils.dir_util.copy_tree(win_path + "/" + lib + "/lib", tdm_lib)
+        """
 
     if ctx.options.CROSS_COMPILE_ANDROID:
         print ("→ Cross-compiling for Android ARM")
@@ -207,9 +254,8 @@ def configure(ctx):
 
     # use manually prebuilt dependencies in the case of static examples or mingw cross-build
     if ctx.options.CROSS_COMPILE_MINGW32:
-        print ("→ Cross-compiling for Windows with MinGW: search for pre-built dependencies in 'packaging/win32_3rdparty'")
+        print ("→ Cross-compiling for Windows with MinGW")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
         # locate MinGW compilers and use them
         ctx.find_program('i686-w64-mingw32-gcc', var='CC')
@@ -219,33 +265,22 @@ def configure(ctx):
         # compile libgcc and libstd statically when using MinGW
         ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
-    elif ctx.options.WITH_STATIC_EXAMPLES and (sys.platform.startswith('linux') or sys.platform == 'darwin'):
-        print ("→ Compiling with static examples on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
-        os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
     ctx.load('compiler_cxx compiler_c')
 
-    # write pkg-config file
-    prefix = os.path.normpath(ctx.options.prefix)
-    opts = {'prefix': prefix,
-            'version': ctx.env.VERSION,
-            }
-
-    pcfile = '''prefix=%(prefix)s
-    libdir=${prefix}/lib
-    includedir=${prefix}/include
-
-    Name: libessentia
-    Description: audio analysis library -- development files
-    Version: %(version)s
-    Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f
-    Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/utils
-    ''' % opts
-
-    pcfile = '\n'.join([l.strip() for l in pcfile.split('\n')])
-    ctx.env.pcfile = pcfile
-    #open('build/essentia.pc', 'w').write(pcfile) # we'll do it later on the build stage
+    if ctx.env.STATIC_DEPENDENCIES \
+        and (sys.platform.startswith('linux') or sys.platform == 'darwin') \
+        and not ctx.options.CROSS_COMPILE_MINGW32:
+        
+        if not ctx.env.ONLY_PYTHON:
+            print ("→ Building with static dependencies on Linux/OSX")
+            os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
+        
+        # flags required for linking to static ffmpeg libs
+        # -Bsymbolic flag is not available on clang
+        if ctx.env.CXX_NAME is not "clang":
+            ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
+            ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 
     ctx.recurse('src')
 
@@ -259,12 +294,6 @@ def build(ctx):
     ctx.recurse('src')
 
     if ctx.env.WITH_CPPTESTS:
-        # missing -lpthread flag on Ubuntu and LinuxMint
-        if platform.dist()[0] in ['Ubuntu', 'LinuxMint'] and not ctx.env.CROSS_COMPILE_MINGW32 and not ctx.env.WITH_STATIC_EXAMPLES:
-            ext_paths = ['/usr/lib/i386-linux-gnu', '/usr/lib/x86_64-linux-gnu']
-            ctx.read_shlib('pthread', paths=ext_paths)
-            ctx.env.USES += ' pthread'
-
         ctx.program(
             source=ctx.path.ant_glob('test/src/basetest/*.cpp test/3rdparty/gtest-1.6.0/src/gtest-all.cc '),
             target='basetest',
@@ -282,12 +311,14 @@ def run_tests(ctx):
 
 
 def run_python_tests(ctx):
+    print("Running python unit tests using %s" % sys.executable)
+
     # create a local python package folder
     os.system('mkdir -p build/python')
     os.system('cp -r src/python/essentia build/python/')
-    os.system('cp build/src/python/_essentia.so build/python/essentia')
+    os.system('cp build/src/python/_essentia*.so build/python/essentia')
 
-    ret = os.system('PYTHONPATH=build/python python test/src/unittest/all_tests.py')
+    ret = os.system('PYTHONPATH=build/python %s test/src/unittests/all_tests.py' % sys.executable)
     if ret:
         ctx.fatal('failed to run python tests. Check test output')
 
@@ -299,8 +330,8 @@ def ipython(ctx):
 def doc(ctx):
     # create a local python package folder
     os.system('mkdir -p build/python')
-    os.system('cp -r src/python/essentia build/python/essentia')
-    os.system('cp build/src/python/_essentia.so build/python')
+    os.system('cp -r src/python/essentia build/python/')
+    os.system('cp build/src/python/_essentia*.so build/python/essentia')
+    
     pythonpath = os.path.abspath('build/python')
-
-    os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh' % pythonpath)
+    os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, sys.executable))

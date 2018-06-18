@@ -17,8 +17,11 @@ counter = 0
 
 import matplotlib.pylab as plt
 
-inputFilename = './src/examples/python/musicbricks-tutorials/singing-female.wav'
-outputFilename = './src/examples/python/musicbricks-tutorials/singing-female-out-stft.wav'
+# input and output files
+import os.path
+tutorial_dir = os.path.dirname(os.path.realpath(__file__))
+inputFilename = os.path.join(tutorial_dir, 'singing-female.wav')
+outputFilename = os.path.join(tutorial_dir, 'singing-female-out-stft.wav')
 
 out = np.array(0)
 loader = es.MonoLoader(filename = inputFilename, sampleRate = 44100)

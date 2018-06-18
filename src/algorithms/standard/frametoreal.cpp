@@ -48,17 +48,9 @@ void FrameToReal::compute() {
 
   if (frames.empty()) throw EssentiaException("FrameToReal: the input signal is empty");
 
+  // output
   audio.resize(_hopSize);
-
- ////////////////////////////////////
-
-  int i = 0;
-
-    // output
-    for (int i=0; i< _hopSize; i++) {
-        audio[i] = frames[i];
-    }
-
-
+  for (int i=0; i< _hopSize; i++) {
+    audio[i] = frames[i];
+  }
 }
-
