@@ -19,7 +19,7 @@ set -e -x
 PYBIN=/opt/python/cp36-cp36m/bin/
 
 cd /io
-"${PYBIN}/python" waf configure --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
+"${PYBIN}/python" waf configure --with-gaia --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
 "${PYBIN}/python" waf
 "${PYBIN}/python" waf install
 cd -
