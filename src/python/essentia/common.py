@@ -53,8 +53,10 @@ class Edt:  # Essentia Data Type
     VECTOR_COMPLEX = 'VECTOR_COMPLEX'
     VECTOR_VECTOR_STRING = 'VECTOR_VECTOR_STRING'
     VECTOR_VECTOR_REAL = 'VECTOR_VECTOR_REAL'
+    VECTOR_VECTOR_COMPLEX = 'VECTOR_VECTOR_COMPLEX'
     VECTOR_STEREOSAMPLE = 'VECTOR_STEREOSAMPLE'
     MATRIX_REAL = 'MATRIX_REAL'
+    MATRIX_COMPLEX = 'MATRIX_COMPLEX'
     VECTOR_MATRIX_REAL = 'VECTOR_MATRIX_REAL'
     POOL = 'POOL'
 
@@ -66,6 +68,8 @@ class Edt:  # Essentia Data Type
     LIST_LIST_REAL = 'LIST_LIST_REAL'
     LIST_LIST_INTEGER = 'LIST_LIST_INTEGER'
     LIST_LIST_EMPTY = 'LIST_LIST_EMPTY'
+    LIST_COMPLEX = 'LIST_COMPLEX'
+    LIST_LIST_COMPLEX = 'LIST_LIST_COMPLEX'
     LIST_ARRAY = 'LIST_ARRAY'
     NUMPY_FLOAT = 'NUMPY_FLOAT'
     UNDEFINED = 'UNDEFINED'
@@ -77,7 +81,8 @@ class Edt:  # Essentia Data Type
         return self._tp in (Edt.LIST_EMPTY, Edt.LIST_MIXED, Edt.LIST_INTEGER,
                             Edt.LIST_REAL, Edt.LIST_LIST_REAL,
                             Edt.LIST_LIST_INTEGER, Edt.LIST_ARRAY,
-                            Edt.UNDEFINED, Edt.NUMPY_FLOAT, Edt.LIST_LIST_EMPTY)
+                            Edt.UNDEFINED, Edt.NUMPY_FLOAT, Edt.LIST_LIST_EMPTY,
+                            Edt.LIST_LIST_COMPLEX)
 
     def vectorize(self):
         return Edt('VECTOR_'+self._tp)
@@ -125,6 +130,9 @@ def determineEdt(obj):
         if firstElmtType == Edt.STRING:
             return Edt(Edt.VECTOR_STRING)
 
+        if firstElmtType == Edt.COMPLEX:
+            return Edt(Edt.LIST_COMPLEX)
+
         if firstElmtType == Edt.VECTOR_STRING:
             return Edt(Edt.VECTOR_VECTOR_STRING)
 
@@ -136,6 +144,9 @@ def determineEdt(obj):
 
         if firstElmtType == Edt.LIST_REAL:
             return Edt(Edt.LIST_LIST_REAL)
+
+        if firstElmtType == Edt.LIST_COMPLEX:
+            return Edt(Edt.LIST_LIST_COMPLEX)
 
         if firstElmtType == Edt.LIST_INTEGER:
             return Edt(Edt.LIST_LIST_INTEGER)
@@ -151,7 +162,11 @@ def determineEdt(obj):
         if obj.dtype == numpy.dtype('single'):
             return Edt(Edt.MATRIX_REAL)
 
-        raise TypeError('essentia can currently only accept two-dimensional numpy arrays of dtype "single"')
+        if obj.dtype == numpy.dtype('complex64'):
+            return Edt(Edt.MATRIX_COMPLEX)
+
+        raise TypeError('essentia can currently only accept two-dimensional numpy arrays of dtype '\
+                        '"single"')
 
     # numpy arrays
     if isinstance(obj, numpy.ndarray) and obj.ndim == 1:
@@ -181,6 +196,12 @@ def determineEdt(obj):
     # strings
     if isinstance(obj, str):
         return Edt(Edt.STRING)
+
+    if isinstance(obj, numpy.complex64):
+        return Edt(Edt.COMPLEX)
+
+    if isinstance(obj, complex):
+        return Edt(Edt.COMPLEX)
 
     if isinstance(obj, numpy.float32):
         return Edt(Edt.NUMPY_FLOAT)
@@ -298,6 +319,13 @@ def convertData(data, goalType):
                     TypeError('Cannot convert a LIST_MIXED to a VECTOR_STEREOSAMPLE if the sub-lists are not convertible to VECTOR_REAL')
 
             return array(data)
+
+    if goalType == Edt.VECTOR_VECTOR_COMPLEX:
+        if origType  == Edt.LIST_LIST_COMPLEX:
+            return data
+
+        if origType  == Edt.MATRIX_COMPLEX:
+            return [[col for col in row] for row in data]
 
     raise TypeError('Cannot convert data from type %s (%s) to type %s' %
                     (str(origType), str(type(data)), str(goalType)))

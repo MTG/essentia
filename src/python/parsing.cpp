@@ -153,6 +153,7 @@ PyObject* toPython(void* obj, Edt tp) {
     case VECTOR_INTEGER: return VectorInteger::toPythonRef((RogueVector<int>*)obj);
     case VECTOR_STEREOSAMPLE: return VectorStereoSample::toPythonCopy((vector<StereoSample>*)obj);
     case VECTOR_VECTOR_REAL: return VectorVectorReal::toPythonCopy((vector<vector<Real> >*)obj);
+    case VECTOR_VECTOR_COMPLEX: return VectorVectorComplex::toPythonCopy((vector<vector<complex<Real> > >*)obj);
     case VECTOR_VECTOR_STRING: return VectorVectorString::toPythonCopy((vector<vector<string> >*)obj);
     case VECTOR_VECTOR_STEREOSAMPLE: return VectorVectorStereoSample::toPythonCopy((vector<vector<StereoSample> >*)obj);
     case MATRIX_REAL: return MatrixReal::toPythonRef((TNT::Array2D<Real>*)obj);
