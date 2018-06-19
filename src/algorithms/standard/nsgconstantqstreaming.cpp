@@ -27,7 +27,7 @@ namespace essentia {
 namespace streaming {
 
 const char* NSGConstantQStreaming::name = "NSGConstantQStreaming";
-const char* NSGConstantQStreaming::category = "Streaming";
+const char* NSGConstantQStreaming::category = "Standard";
 const char* NSGConstantQStreaming::description = DOC("This algorithm computes a constant Q transform using non stationary Gabor frames and returns a complex time-frequency representation of the input vector.\n"
 "The implementation is inspired by the toolbox described in [1]."
 "\n"
