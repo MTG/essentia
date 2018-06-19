@@ -31,7 +31,7 @@ const char* NSGIConstantQ::description = DOC("This algorithm computes an inverse
 "The implementation is inspired by the toolbox described in [1]."
 "\n"
 "References:\n"
-    "[1] Schörkhuber, C., Klapuri, A., Holighaus, N., \& Dörfler, M. (n.d.). A Matlab Toolbox for Efficient Perfect Reconstruction Time-Frequency Transforms with Log-Frequency Resolution.");
+"  [1] Schörkhuber, C., Klapuri, A., Holighaus, N., \& Dörfler, M. (n.d.). A Matlab Toolbox for Efficient Perfect Reconstruction Time-Frequency Transforms with Log-Frequency Resolution.");
 
 
 void NSGIConstantQ::configure() {

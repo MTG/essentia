@@ -31,7 +31,7 @@ const char* NSGConstantQ::description = DOC("This algorithm computes a constant 
 "The implementation is inspired by the toolbox described in [1]."
 "\n"
 "References:\n"
-    "[1] Schörkhuber, C., Klapuri, A., Holighaus, N., & Dörfler, M. (n.d.). A Matlab Toolbox for Efficient Perfect Reconstruction Time-Frequency Transforms with Log-Frequency Resolution.");
+"  [1] Schörkhuber, C., Klapuri, A., Holighaus, N., & Dörfler, M. (n.d.). A Matlab Toolbox for Efficient Perfect Reconstruction Time-Frequency Transforms with Log-Frequency Resolution.");
 
 
 void NSGConstantQ::configure() {
@@ -329,8 +329,8 @@ void NSGConstantQ::compute() {
     for (int i = ceil( (float) Lg[j]/2.0); i < Lg[j]; i++) idx.push_back(i);
     for (int i = 0; i < ceil( (float) Lg[j]/2); i++) idx.push_back(i);
 
-    float winComp;
     for (int i = -Lg[j]/2; i < ceil((float) Lg[j] / 2); i++){
+      float winComp;
       winComp = (posit[j] + i) % (_inputSize + fill);
       if (winComp >= fft.size()){
         winComp = (_inputSize + fill) - winComp;
@@ -396,8 +396,6 @@ void NSGConstantQ::compute() {
 }
 
 /*
-
-
 namespace essentia {
 namespace streaming {
 
