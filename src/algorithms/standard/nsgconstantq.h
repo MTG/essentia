@@ -41,7 +41,7 @@ class NSGConstantQ : public Algorithm {
     declareOutput(_constantQDC, "constantqdc", "the DC band transform of the input frame. Only needed for the inverse transform");
     declareOutput(_constantQNF, "constantqnf", "the Nyquist band transform of the input frame. Only needed for the inverse transform");
 
-    _fft = AlgorithmFactory::create("FFT"); //FFT with complex input
+    _fft = AlgorithmFactory::create("FFT");
     _ifft = AlgorithmFactory::create("IFFTC");
     _windowing = AlgorithmFactory::create("Windowing");
   }
