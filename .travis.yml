@@ -4,8 +4,13 @@ git:
 notifications:
   email: false
 
+sudo: false
+language: python
+cache: pip
+
 matrix:
   include:
+    - os: osx
     - sudo: required
       services:
         - docker
@@ -25,7 +30,7 @@ script:
 
 deploy:
   - provider: pypi
-    server: https://testpypi.python.org/pypi
+    server: https://test.pypi.org/legacy/
     distributions: sdist bdist_wheel
     user: dbogdanov
     password:
