@@ -73,9 +73,9 @@ class TestNSGConstantQ(TestCase):
 
     def testNyquist(self):
         inputSize = 2**11
-        signalNyquist = [-1,  1] * (inputSize / 2)
+        signalNyquist = [-1,  1] * int(inputSize / 2)
 
-        CQ, DC, Nyquist = self.initNsgconstantq()(signalNyquist)
+        CQ, DC, Nyquist = self.initNsgconstantq(inputSize=inputSize)(signalNyquist)
 
         # Checks that all the energy is contained in the Nyquist band
         self.assertEqual(np.sum(np.abs(CQ)), 0)
