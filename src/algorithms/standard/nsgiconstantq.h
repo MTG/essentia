@@ -84,7 +84,7 @@ class NSGIConstantQ : public Algorithm {
   Algorithm* _fft;
   Algorithm* _windowing;
 
-  //Variables for the input parameters
+  // variables for the input parameters
   Real _minFrequency;
   Real _maxFrequency;
   Real _sr;
@@ -98,7 +98,7 @@ class NSGIConstantQ : public Algorithm {
   int _windowSizeFactor;
   bool _INSQConstantQdata;
 
-  //windowing vectors
+  // windowing vectors
   std::vector< std::vector<Real> > _freqWins;
   std::vector<int> _shifts;
   std::vector<int> _winsLen;

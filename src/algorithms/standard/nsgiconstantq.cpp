@@ -67,14 +67,14 @@ void NSGIConstantQ::configure() {
 }
 
 void NSGIConstantQ::designWindow() {
-  std::vector<Real> cqtbw; //Bandwidths
+  std::vector<Real> cqtbw; // bandwidths
   std::vector<Real> bw;
   std::vector<Real> posit;
 
   Real nf = _sr / 2;
 
 
-  // Some exceptions after computing Nyquist frequency.
+  // some exceptions after computing Nyquist frequency
   if (_minFrequency < 0) {
     throw EssentiaException("NSGIConstantQ: 'minimumFrequency' parameter is out of the range (0 - fs/2)");
   }
@@ -101,7 +101,7 @@ void NSGIConstantQ::designWindow() {
   }
 
 
-  // check if the first and last bins are within the bounds.
+  // check if the first and last bins are within the bounds
   if ( _baseFreqs[0] - cqtbw[0] / 2 < 0 ) {
     E_INFO("NSGConstantQ: Attempted to create a band with a low bound of " << _baseFreqs[0] - cqtbw[0] << "Hz");
     throw EssentiaException("NSGConstantQ: Attempted to create a filter below frequency 0");
@@ -117,7 +117,7 @@ void NSGIConstantQ::designWindow() {
   _baseFreqs.push_back(nf);
 
 
-  // Add negative frequencies
+  // add negative frequencies
   for (int j = _binsNum ; j > 0; --j) _baseFreqs.push_back(_sr -_baseFreqs[j]);
 
   int baseFreqsSize = (int) _baseFreqs.size();
@@ -128,7 +128,7 @@ void NSGIConstantQ::designWindow() {
   for (int j = cqtbw.size() -1; j >= 0; --j) bw.push_back(cqtbw[j]);
 
 
-  //bins to Hz
+  // bins to Hz
   std::transform(_baseFreqs.begin(), _baseFreqs.end(), _baseFreqs.begin(),
                   std::bind2nd(std::divides<Real>(), fftres));
 
@@ -146,7 +146,7 @@ void NSGIConstantQ::designWindow() {
   for (int j = 1; j< baseFreqsSize; ++j) _shifts[j] = posit[j] - posit[j-1];
 
 
-  // Fractional mode not implemented (probably not needed)
+  // fractional mode not implemented (probably not needed)
 
 
 
@@ -163,7 +163,7 @@ void NSGIConstantQ::designWindow() {
   _freqWins.resize(baseFreqsSize);
 
 
-  //Use Windowing to create the requited window filter-bank
+  // use Windowing to create the requited window filter-bank
   for (int j = 0; j< baseFreqsSize; ++j){
 
     std::vector<Real> inputWindow(_winsLen[j], 1);
@@ -181,7 +181,7 @@ void NSGIConstantQ::designWindow() {
   }
 
 
-  // Ceil integer division. Maybe there are matrix operations implemented in essentia?
+  // ceil integer division
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
                   std::bind2nd(std::plus<int>(), - 1));
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
@@ -190,7 +190,7 @@ void NSGIConstantQ::designWindow() {
                   std::bind2nd(std::plus<int>(), + 1));
 
 
-  // Setup Tukey window for 0- and Nyquist-frequency
+  // setup Tukey window for the DC and Nyquist frequencies
   for (int j = 0; j <= _binsNum +1; j += _binsNum +1) {
     if ( _winsLen[j] > _winsLen[j+1] ) {
       std::vector<Real> inputWindow(_winsLen[j], 1);
@@ -198,8 +198,6 @@ void NSGIConstantQ::designWindow() {
 
       copy(_freqWins[j+1].begin(),_freqWins[j+1].end(), _freqWins[j].begin() + _winsLen[j]/2 - _winsLen[j+1]/2 );
 
-
-      //copy(inputWindow.begin(),inputWindow.end(), _freqWins[j].begin());
 
       std::transform( _freqWins[j].begin(),  _freqWins[j].end(),  _freqWins[j].begin(),
                       std::bind2nd(std::divides<Real>(), sqrt(_winsLen[j] )));
@@ -232,7 +230,7 @@ void NSGIConstantQ::createCoefficients() {
     }
   }
 
-  // filters have to be even as Essentia odd size FFT is not implemented.
+  // filters have to be even as Essentia odd size FFT is not implemented
   for (int j=0; j<(int)_winsLen.size(); j++) _winsLen[j] += (_winsLen[j] % 2);
 }
 
@@ -276,7 +274,7 @@ void NSGIConstantQ::compute() {
   const std::vector< std::vector<Real> >& freqWins = _freqWins;
   std::vector<Real>& signal = _signal.get();
 
-  //add NF and DC components
+  // add NF and DC components
   std::vector<std::vector<complex<Real> > > CQ;
   CQ = constantQ;
   CQ.push_back(constantQNF);
@@ -333,7 +331,7 @@ void NSGIConstantQ::compute() {
     std::transform(temp.begin(), temp.end(), temp.begin(),
                     std::bind2nd(std::multiplies<complex<Real> >(), winsLen[j]));
 
-    // Phase shift
+    // phase shift
     if (_phaseMode == "global") {
       int displace = (_posit[j] - (_posit[j] / (int)winsLen[j] * (int)winsLen[j])) % temp.size();
 
@@ -431,4 +429,3 @@ void NSGIConstantQ::designDualFrame(){
     }
   }
 }
-

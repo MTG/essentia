@@ -56,14 +56,14 @@ void NSGConstantQ::configure() {
 }
 
 void NSGConstantQ::designWindow() {
-  std::vector<Real> cqtbw; //Bandwidths
+  std::vector<Real> cqtbw; // bandwidths
   std::vector<Real> bw;
   std::vector<Real> posit;
 
   Real nf = _sr / 2;
 
 
-  // Some exceptions after computing Nyquist frequency.
+  // some exceptions after computing Nyquist frequency
   if (_minFrequency < 0) {
     throw EssentiaException("NSGConstantQ: 'minimumFrequency' parameter is out of the range (0 - fs/2)");
   }
@@ -90,7 +90,7 @@ void NSGConstantQ::designWindow() {
   }
 
 
-  // check if the first and last bins are within the bounds.
+  // check if the first and last bins are within the bounds
   if ( _baseFreqs[0] - cqtbw[0] / 2 < 0 ) {
     E_INFO("NSGConstantQ: Attempted to create a band with a low bound of " << _baseFreqs[0] - cqtbw[0] << "Hz");
     throw EssentiaException("NSGConstantQ: Attempted to create a filter below frequency 0");
@@ -106,7 +106,7 @@ void NSGConstantQ::designWindow() {
   _baseFreqs.push_back(nf);
 
 
-  // Add negative frequencies
+  // add negative frequencies
   for (int j = _binsNum ; j > 0; --j) _baseFreqs.push_back(_sr -_baseFreqs[j]);
 
   int baseFreqsSize = (int) _baseFreqs.size();
@@ -117,7 +117,7 @@ void NSGConstantQ::designWindow() {
   for (int j = cqtbw.size() -1; j >= 0; --j) bw.push_back(cqtbw[j]);
 
 
-  //bins to Hz
+  // bins to Hz
   std::transform(_baseFreqs.begin(), _baseFreqs.end(), _baseFreqs.begin(),
                   std::bind2nd(std::divides<Real>(), fftres));
 
@@ -135,7 +135,7 @@ void NSGConstantQ::designWindow() {
   for (int j = 1; j< baseFreqsSize; ++j) _shifts[j] = posit[j] - posit[j-1];
 
 
-  // Fractional mode not implemented (probably not needed)
+  // fractional mode not implemented (probably not needed)
 
 
 
@@ -152,7 +152,7 @@ void NSGConstantQ::designWindow() {
   _freqWins.resize(baseFreqsSize);
 
 
-  //Use Windowing to create the requited window filter-bank
+  // use Windowing to create the required window filter-bank
   for (int j = 0; j< baseFreqsSize; ++j){
 
     std::vector<Real> inputWindow(_winsLen[j], 1);
@@ -170,7 +170,7 @@ void NSGConstantQ::designWindow() {
   }
 
 
-  // Ceil integer division. Maybe there are matrix operations implemented in essentia?
+  // ceil integer division
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
                   std::bind2nd(std::plus<int>(), - 1));
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
@@ -179,7 +179,7 @@ void NSGConstantQ::designWindow() {
                   std::bind2nd(std::plus<int>(), + 1));
 
 
-  // Setup Tukey window for 0- and Nyquist-frequency
+  // setup Tukey window for the DC and Nyquist frequencies
   for (int j = 0; j <= _binsNum +1; j += _binsNum +1) {
     if ( _winsLen[j] > _winsLen[j+1] ) {
       std::vector<Real> inputWindow(_winsLen[j], 1);
@@ -187,8 +187,6 @@ void NSGConstantQ::designWindow() {
 
       copy(_freqWins[j+1].begin(),_freqWins[j+1].end(), _freqWins[j].begin() + _winsLen[j]/2 - _winsLen[j+1]/2 );
 
-
-      //copy(inputWindow.begin(),inputWindow.end(), _freqWins[j].begin());
 
       std::transform( _freqWins[j].begin(),  _freqWins[j].end(),  _freqWins[j].begin(),
                       std::bind2nd(std::divides<Real>(), sqrt(_winsLen[j] )));
@@ -221,7 +219,7 @@ void NSGConstantQ::createCoefficients() {
     }
   }
 
-  // filters have to be even as Essentia odd size FFT is not implemented.
+  // filters have to be even as Essentia odd size FFT is not implemented
   for (int j=0; j<(int)_winsLen.size(); j++) _winsLen[j] += (_winsLen[j] % 2);
 }
 
@@ -270,7 +268,7 @@ void NSGConstantQ::compute() {
     throw EssentiaException("NSGConstantQ: the size of the input signal is not greater than one");
   }
 
-  // Check input. If different shape reconfigure the algorithm
+  // check the input. If different shape, reconfigure the algorithm
   if (signal.size() != _inputSize) {
     E_INFO("NSGConstantQ: The input spectrum size (" << signal.size() << ") does not correspond to the \"inputSize\" parameter (" << _inputSize << "). Recomputing the filter bank.");
     _inputSize = signal.size();
@@ -303,7 +301,7 @@ void NSGConstantQ::compute() {
   std::transform(posit.begin(), posit.end(), posit.begin(),
                   std::bind2nd(std::minus<int>(), _shifts[0]));
 
-  //add some zero padding if needed
+  // add some zero padding if needed
   std::vector<Real> padding(fill,0.0);
   fft.insert(fft.end(), padding.begin(), padding.end());
 
@@ -316,14 +314,14 @@ void NSGConstantQ::compute() {
     if ((posit[j] - Lg[j]/2) <= float(_inputSize + fill)/2) N = j+1;
   }
 
-  // Prepare indexing vectors and compute the coefficients.
+  // prepare index vectors and compute the coefficients
   std::vector<int> idx;
   std::vector<int> win_range;
   std::vector<int> product_idx;
   std::vector<complex <Real> > product;
   constantQ.resize(N);
 
-  // The actual Gabor transform
+  // the actual Gabor transform
   for (int j=0; j<N; j++){
 
     for (int i = ceil( (float) Lg[j]/2.0); i < Lg[j]; i++) idx.push_back(i);
@@ -342,7 +340,7 @@ void NSGConstantQ::compute() {
 
     if (_winsLen[j] < Lg[j]) {
       throw EssentiaException("NSGConstantQ: non painless frame found. This case is currently not supported.");
-      // TODO implement non-painless case
+      // @todo implement non-painless case
     }
     else {
       for (int i = _winsLen[j] - (Lg[j] )/2 ; i < _winsLen[j] + int( Real(Lg[j])/2 + .5); i++) product_idx.push_back( fmod(i, _winsLen[j]));
@@ -354,7 +352,7 @@ void NSGConstantQ::compute() {
         product[product_idx[i]] = fft[win_range[i]] * _freqWins[j][idx[i]];
       }
 
-      // Circular shift in order to get the global phase representation
+      // circular shift in order to get the global phase representation
       if (_phaseMode == "global") {
         int displace = (posit[j] - ((posit[j] / _winsLen[j]) * _winsLen[j])) % product.size();
 
