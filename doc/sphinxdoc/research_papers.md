@@ -8,7 +8,7 @@ The list below highlights some of the academic studies using Essentia organized 
 - Y. Bayle, P. Hanna, and M. Robine. SATIN: A Persistent Musical Database for Music Information Retrieval. In 15th International Workshop on Content-Based Multimedia Indexing (CBMI'17), 2017.
 
 
-## Music classification
+## Music and sound classification
 
 - J. Kim, M. Won, X. Serra, and C. C. S. Liem, Transfer Learning of Artist Group Factors to Musical Genre Classification. In WWW '18 Companion Proceedings of the The Web Conference 2018, 2018.
 
@@ -30,6 +30,9 @@ Based Analysis. PhD thesis, UPF, Barcelona, Spain, 2011.
 Indexing music by mood: design and integration of an automatic content-based annotator. Multimedia Tools and Applications, 48(1):161–184, 2009.
 
 - C. Johnson-Roberson. Content-Based Genre Classification and Sample Recognition Using Topic Models. Master Thesis, Brown University, Providence, USA, 2017.
+
+- E. Fonseca, R. Gong, and X. Serra. A Simple Fusion Of Deep And Shallow Learning For Acoustic Scene Classification. In Sound and Music Computing Conference (SMC’18), 2018.
+
 
 ### Semantic autotagging
 
