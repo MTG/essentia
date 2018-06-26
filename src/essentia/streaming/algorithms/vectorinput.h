@@ -34,13 +34,14 @@ class VectorInput : public Algorithm {
   const std::vector<TokenType>* _inputVector;
   bool _ownVector;
   int _idx;
-  int _acquireSize = acquireSize;
+  int _acquireSize;
 
  public:
 
   VectorInput(const std::vector<TokenType>* input=0, bool own = false)
     : _inputVector(input), _ownVector(own) {
     setName("VectorInput");
+    setAcquireSize(acquireSize);
     declareOutput(_output, _acquireSize, "data", "the values read from the vector");
     reset();
   }
@@ -48,6 +49,7 @@ class VectorInput : public Algorithm {
   VectorInput(std::vector<TokenType>* input, bool own = false)
     : _inputVector(input), _ownVector(own) {
     setName("VectorInput");
+    setAcquireSize(acquireSize);
     declareOutput(_output, _acquireSize, "data", "the values read from the vector");
     reset();
   }
@@ -57,6 +59,7 @@ class VectorInput : public Algorithm {
     setName("VectorInput");
     _inputVector = new std::vector<TokenType>(arrayToVector<TokenType>(inputArray));
     _ownVector = true;
+    setAcquireSize(acquireSize);
     declareOutput(_output, _acquireSize, "data", "the values read from the vector");
     reset();
   }
@@ -81,7 +84,8 @@ class VectorInput : public Algorithm {
 
     _inputVector = inputVector;
     _ownVector = true;
-    declareOutput(_output, acquireSize, "data", "the values read from the vector");
+    setAcquireSize(acquireSize);
+    declareOutput(_output, _acquireSize, "data", "the values read from the vector");
     reset();
   }
 
