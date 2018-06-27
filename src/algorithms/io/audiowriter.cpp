@@ -119,9 +119,9 @@ namespace standard {
 
 const char* AudioWriter::name = "AudioWriter";
 const char* AudioWriter::category = "Input/output";
-const char* AudioWriter::description = DOC("This algorithm encodes an input signal into a stereo audio file.\n\n"
-"Supported formats are wav, aiff, mp3, flac and ogg.\n\n"
-"An exception is thrown when other extensions are given. Note that to encode in mp3 format it is mandatory that ffmpeg was configured with mp3 enabled.");
+const char* AudioWriter::description = DOC("This algorithm encodes an input stereo signal into a stereo audio file.\n\n"
+"The algorithm uses the FFmpeg library. Supported formats are wav, aiff, mp3, flac and ogg. The default FFmpeg encoders are used for each format.\n\n"
+"An exception is thrown when other extensions are given. Note that to encode in mp3 format it is mandatory that FFmpeg was configured with mp3 enabled.");
 
 
 void AudioWriter::createInnerNetwork() {

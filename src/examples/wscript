@@ -39,6 +39,8 @@ example_sources_fileio = [
     ('streaming_gfcc', ),
     ('streaming_md5', ),
     ('streaming_mfcc', ),
+    ('streaming_spectrogram',
+        ['music_extractor/extractor_utils']),
     ('streaming_rhythmextractor_multifeature', ),
     ('streaming_onsetrate', ),
     ('streaming_panning', ),

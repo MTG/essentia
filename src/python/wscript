@@ -19,8 +19,18 @@ def configure(ctx):
     else:
         print ('→ Configuring for python3')
 
-    ctx.check_python_headers()
+    ctx.check_python_headers(features='pyext')
     ctx.check_python_module('numpy')
+
+    # A monkey patch to remove the -lpythonX.Ym flag. PEP 513 recommends to
+    # avoid explicit linking to libpythonX.Y.so.1, however python-config still
+    # outputs this flag.
+    # https://www.python.org/dev/peps/pep-0513
+    # https://github.com/pypa/manylinux/issues/85
+    ctx.env.LIB_PYEMBED = [f for f in ctx.env.LIB_PYEMBED
+                                   if not f.startswith('python')]
+    ctx.env.LIB_PYEXT = [f for f in ctx.env.LIB_PYEMBED
+                                   if not f.startswith('python')]
 
 def adjust(objs, path):
     return [ '%s/%s' % (path, obj) for obj in objs ]
@@ -30,9 +40,7 @@ def build(ctx):
 
     # gets the path from the active virtualenv
     PYLIB = distutils.sysconfig.get_python_lib()
-    #print('-'*100)
-    #print('ctx.env', ctx.env)
-    #print('-'*100)
+
     NUMPY_INCPATH = [ # importable numpy path
                       __import__('numpy').get_include(),
                       # virtualenv path
@@ -47,7 +55,7 @@ def build(ctx):
         includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
         cxxflags = [ '-w' ],
         install_path = '${PYTHONDIR}/essentia',
-        use      = 'essentia ' #+ ctx.env.USES
+        use      = ctx.env.USES if ctx.env.ONLY_PYTHON else 'essentia ' #+ ctx.env.USES
     )
 
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),

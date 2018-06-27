@@ -61,7 +61,7 @@ void ConstantQ::compute() {
 
   SparseKernel *sk = m_sparseKernel;
 
-  constantQ.assign(_uK, 0.0 + 0.0i); // initialize output
+  constantQ.assign(_uK, complex<Real>(0, 0)); // initialize output
 
   const int *fftbin = &(sk->_sparseKernelIs[0]);
   const int *cqbin  = &(sk->_sparseKernelJs[0]);
@@ -101,7 +101,7 @@ void ConstantQ::configure() {
 
   // Initialise temporal kernel with zeros, twice length to deal with complex numbers
   vector<complex<double> > hammingWindow(_FFTLength, 0.0 + 0.0i);
-  vector<complex<Real> > transfHammingWindowR(_FFTLength, 0.0 + 0.0i);
+  vector<complex<Real> > transfHammingWindowR(_FFTLength, complex<Real>(0, 0));
 
   sk->_sparseKernelIs.reserve( _FFTLength*2 );
   sk->_sparseKernelJs.reserve( _FFTLength*2 );
@@ -128,7 +128,7 @@ void ConstantQ::configure() {
       hammingWindow[origin + i] = complex <double>(absol*real, absol*imag);
     }
 
-    for (unsigned int i=0; i <_FFTLength/2; ++i) {
+    for (int i=0; i <(int)_FFTLength/2; ++i) {
       complex<double> temp = hammingWindow[i];
       hammingWindow[i] = hammingWindow[i + _FFTLength/2];
       hammingWindow[i + _FFTLength/2] = temp;
@@ -146,11 +146,11 @@ void ConstantQ::configure() {
     // Increase the output size of the FFT to _FFTLength by mirroring the data
     int ind = transfHammingWindow.size() - 1;
     transfHammingWindow.resize(_FFTLength);
-    for (unsigned int i=0; i <_FFTLength/2; ++i) {
+    for (int i=0; i <(int)_FFTLength/2; ++i) {
       transfHammingWindow.push_back(transfHammingWindow[ind--]);
     }
 
-    for (unsigned int j=0; j<_FFTLength; j++) {
+    for (int j=0; j<(int)_FFTLength; j++) {
       // Perform thresholding
       const double squaredBin = squaredModule( transfHammingWindow[j]);
       if (squaredBin <= squareThreshold) continue;

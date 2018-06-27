@@ -1,6 +1,12 @@
 #!/bin/sh
 . ../build_config.sh
 
+mux=$1
+if test "$1" = "--no-muxers"; then
+    echo Building FFmpeg without muxers
+    FFMPEG_AUDIO_FLAGS_MUXERS=""
+fi
+
 rm -rf tmp
 mkdir tmp
 cd tmp
@@ -11,6 +17,7 @@ cd $FFMPEG_VERSION
 
 ./configure \
     $FFMPEG_AUDIO_FLAGS \
+    $FFMPEG_AUDIO_FLAGS_MUXERS \
     --prefix=$PREFIX \
     --enable-cross-compile \
     --cross-prefix=$HOST- \

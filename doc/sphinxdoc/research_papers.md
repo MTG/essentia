@@ -8,7 +8,9 @@ The list below highlights some of the academic studies using Essentia organized 
 - Y. Bayle, P. Hanna, and M. Robine. SATIN: A Persistent Musical Database for Music Information Retrieval. In 15th International Workshop on Content-Based Multimedia Indexing (CBMI'17), 2017.
 
 
-## Music classification
+## Music and sound classification
+
+- J. Kim, M. Won, X. Serra, and C. C. S. Liem, Transfer Learning of Artist Group Factors to Musical Genre Classification. In WWW '18 Companion Proceedings of the The Web Conference 2018, 2018.
 
 - D. Bogdanov, A. Porter, J. Urbano, and H. Schreiber. The MediaEval 2017 AcousticBrainz Genre Task: Content-based Music Genre Recognition from Multiple Sources. In MediaEval 2017 Multimedia Benchmark Workshop (MediaEval'17), 2017.
 
@@ -29,6 +31,9 @@ Indexing music by mood: design and integration of an automatic content-based ann
 
 - C. Johnson-Roberson. Content-Based Genre Classification and Sample Recognition Using Topic Models. Master Thesis, Brown University, Providence, USA, 2017.
 
+- E. Fonseca, R. Gong, and X. Serra. A Simple Fusion Of Deep And Shallow Learning For Acoustic Scene Classification. In Sound and Music Computing Conference (SMC’18), 2018.
+
+
 ### Semantic autotagging
 
 - M. Sordo. Semantic Annotation of Music Collections: A Computational Approach. PhD thesis, UPF, Barcelona, Spain, 2012.
@@ -36,7 +41,7 @@ Indexing music by mood: design and integration of an automatic content-based ann
 - Y. Yang, D. Bogdanov, P. Herrera, and M. Sordo. Music Retagging Using Label Propagation and Robust Principal Component Analysis. In International World Wide Web Conference (WWW’12), International Workshop on Advances in Music Information Research (AdMIRe’12), 2012.
 
 
-## Music similarity and recommendation
+## Music preferences, similarity and recommendation
 
 - D. Bogdanov. From music similarity to music recommendation: Com-
 putational approaches based on audio and metadata analysis. PhD
@@ -58,9 +63,14 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 - K. Yadati, C. Liem, M. Larson, and A. Hanjalic. On the Automatic Identification of Music for Common Activities. In 2017 ACM on International Conference on Multimedia Retrieval, pages 192-200, 2017.
 
+- K.R. Fricke, D.M. Greenberg, P.J. Rentfrow, and P.Y. Herzberg. Computer-based music feature analysis mirrors human perception and can be used to measure individual music preference. Journal of Research in Personality, 75:94-102, 2018.
+
+
 ## Emotion detection
 
--  J. Grekow. Comparative Analysis of Musical Performances by Using Emotion Tracking. In book: Foundations of Intelligent Systems, pages 175-184, 2017.
+- J. Grekow. Musical performance analysis in terms of emotions it evokes. Journal of Intelligent Information Systems, 2018.
+
+- J. Grekow. Comparative Analysis of Musical Performances by Using Emotion Tracking. In book: Foundations of Intelligent Systems, pages 175-184, 2017.
 
 - J. Grekow. Audio features dedicated to the detection of arousal and valence in music recordings. In IEEE International Conference on INnovations in Intelligent SysTems and Applications (INISTA), pages 40-44, 2017.
 
@@ -103,6 +113,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 - J. Buhmann, B. Moens, V. Lorenzoni, and M. Leman. Shifting the Musical Beat to Influence Running Cadence. In European Society for Cognitive Sciences Of Music (ESCOM'17), 2017.
 
 - J. Buhmann. Effects of music-based biofeedback on walking and running. PhD Thesis, Ghent University, Belgium, 2017.
+
+-  A. Xambó, G. Roma, A. Lerch, M. Barthet, G. Fazekas. Live Repurposing of Sounds: MIR Explorations with Personal and Crowdsourced Databases. In New Interfaces for Musical Expression (NIME'18), 2018.
 
 ## Sound indexing, music production, and intelligent audio processing
 
@@ -252,7 +264,6 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 - F. A. Araújo, F. L. Brasil, A. C. L. Santos, L. D. S. B. Junior, S. P. F. Dutra, and C. E. C. F. Batista. Auris System: Providing vibrotactile feedback for hearing impaired population. BioMed Research International, 2017, 2017. 
 
 - M. A. Casey. Music of the 7Ts: Predicting and Decoding Multivoxel fMRI Responses with Acoustic, Schematic, and Categorical Music Features. Frontiers in psychology, 8, 2017.
-
 
 
 

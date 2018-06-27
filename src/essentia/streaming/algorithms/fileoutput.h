@@ -27,6 +27,18 @@
 namespace essentia {
 namespace streaming {
 
+
+template <typename TokenType> inline void write_binary(std::ostream* _stream,
+                                                const TokenType& value) {
+  _stream->write((const char*) &value, sizeof(TokenType));
+}
+
+template <> void inline write_binary<std::vector<Real> >(std::ostream* _stream,
+                                                  const std::vector<Real>& value) {
+  _stream->write((const char*) &value[0], value.size() * sizeof(Real));
+}
+
+
 template <typename TokenType, typename StorageType = TokenType>
 class FileOutput : public Algorithm {
  protected:
@@ -99,7 +111,7 @@ class FileOutput : public Algorithm {
   void write(const TokenType& value) {
     if (!_stream) throw EssentiaException("FileOutput: not configured properly");
     if (_binary) {
-      _stream->write((const char*) &value, sizeof(TokenType));
+      write_binary(_stream, value);
     }
     else {
       *_stream << value << "\n";

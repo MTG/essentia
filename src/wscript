@@ -23,7 +23,10 @@ def options(ctx):
                    help='build static library')
     ctx.add_option('--static-dependencies', action='store_true',
                    dest='STATIC_DEPENDENCIES', default=False,
-                   help='build with static dependencies from packaging/* folder')
+                   help='build with static dependencies from packaging/* dir')
+    ctx.add_option('--pkg-config-path', action='store',
+                   dest='PKG_CONFIG_PATH', default=False,
+                   help='pkg-config path to search for dependencies')
     ctx.add_option('--with-static-examples', action='store_true',
                    dest='WITH_STATIC_EXAMPLES', default=False,
                    help='build the example programs as static executables; forces --static-dependencies and --static flags')
@@ -45,6 +48,9 @@ def options(ctx):
     ctx.add_option('--fft', action='store',
                    dest='FFT', default='FFTW',
                    help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
+    ctx.add_option('--only-python', action='store_true',
+                   dest='ONLY_PYTHON', default=False,
+                   help='build only the python bindings (use a pre-built libessentia)')
 
 
 def debian_version():
@@ -89,15 +95,28 @@ def configure(ctx):
             a = a.strip()
             ctx.env.ALGOINCLUDE.append(a)
 
+    # overwrite PKG_CONFIG_PATH if it is explicitly specified
+    if ctx.env.PKG_CONFIG_PATH:
+        os.environ["PKG_CONFIG_PATH"] = ctx.env.PKG_CONFIG_PATH
+
+    if "PKG_CONFIG_PATH" in os.environ:
+        print("→ Searching *.pc pkg-config files for dependencies in %s" % os.environ["PKG_CONFIG_PATH"])
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+
     # Make check_cfg find PKG_CONFIG_PATH
     ctx.env.env = dict(os.environ)
-
     check_cfg_args = ['--cflags', '--libs']
     #if ctx.env.STATIC_DEPENDENCIES:
     #    check_cfg_args += ['--static']
 
-    if "PKG_CONFIG_PATH" in os.environ:
-        print("...Checking for dependencies in %s" % os.environ["PKG_CONFIG_PATH"])
+    if ctx.env.ONLY_PYTHON:
+       print("→ Building only Essentia's python bindings (libessentia should be pre-installed)")
+       ctx.check_cfg(package='essentia', uselib_store='ESSENTIA',
+                      args=check_cfg_args, mandatory=True)
+       ctx.env.USES = 'ESSENTIA'
+       ctx.recurse('python')
+       return
+
 
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
@@ -265,8 +284,11 @@ def configure(ctx):
     algos = buildRegFile(ctx)
 
     if ctx.env.WITH_PYTHON:
-        if 'FileOutputProxy' not in algos:
-            raise ctx.errors.ConfigurationError("FileOutputProxy algorithm is necessary for python bindings, however it was excluded. Please, reconfigure including this algorithm.")
+        for a in ['FileOutputProxy', 'FrameCutter']:
+            if a not in algos:
+                raise ctx.errors.ConfigurationError(
+                    "%s algorithm is necessary for python bindings, however it was excluded. "
+                    "Please, reconfigure including this algorithm." % a)
 
     print('\n' + '-' * 87)
 
@@ -287,6 +309,25 @@ def configure(ctx):
 
     print('=======================================================================================')
 
+
+    # Prepare pkg-config file
+    if ctx.env.BUILD_STATIC:
+        # For the static library, find all -l flags we'll need
+        libs = ctx.env.USES.strip().split(' ')
+        lflags = [l for lib in libs for l in ctx.env["LIB_" + lib]]
+        lflags = ' '.join(['-l%s' % lib for lib in lflags])
+        lpaths = [l for lib in libs for l in ctx.env["LIBPATH_" + lib]]
+        lpaths = ' '.join(['-L%s' % lib for lib in set(lpaths)])
+    else:
+        lflags = lpaths = ''
+
+    # Prepare pkg-config .pc file variables
+    prefix = os.path.normpath(ctx.options.prefix)
+    ctx.env.pcfile_opts = {'PREFIX': prefix,
+                           'VERSION': ctx.env.VERSION,
+                           'LFLAGS': lflags,
+                           'LPATHS': lpaths
+                           }
 
 from waflib.Task import Task
 class BuildAlgoReg(Task):
@@ -349,6 +390,11 @@ def buildRegFile(ctx):
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
+
+    if ctx.env.ONLY_PYTHON:
+        ctx.recurse('python')
+        return
+
     #print('  BUILD ENV:\n%s' % ctx.env)
 
     # add essentia root folder to path to be able to import utils.algorithms_info
@@ -422,11 +468,10 @@ def build(ctx):
             install_path = '${PREFIX}/lib'
         )
 
+    ctx(source='../essentia.pc.in', **ctx.env.pcfile_opts)
+    # TODO Ideally we should use the Requires.private field in the .pc file
+    # Requires.private: gaia2 fftw3f yaml-0.1 libavcodec libavformat libavutil libavresample samplerate taglib libchromaprint
 
-    def write_pcfile(task):
-        open('build/essentia.pc', 'w').write(ctx.env.pcfile)
-
-    ctx(rule=write_pcfile,  name='write_pcfile', target='../essentia.pc')
     ctx.add_group()
 
 

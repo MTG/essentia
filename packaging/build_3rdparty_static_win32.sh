@@ -4,7 +4,7 @@ cd $BASEDIR/win32_3rdparty
 rm -rf bin dynamic include lib share
 
 ./build_fftw3.sh
-./build_ffmpeg_nomuxers.sh
+./build_ffmpeg.sh
 ./build_libsamplerate.sh
 ./build_taglib.sh
 ./build_yaml.sh

@@ -76,10 +76,12 @@ def configure(ctx):
 
     ctx.env.WITH_EXAMPLES        = ctx.options.WITH_EXAMPLES
     ctx.env.WITH_PYTHON          = ctx.options.WITH_PYTHON
+    ctx.env.ONLY_PYTHON          = ctx.options.ONLY_PYTHON
     ctx.env.WITH_VAMP            = ctx.options.WITH_VAMP
     ctx.env.BUILD_STATIC         = ctx.options.BUILD_STATIC
     ctx.env.STATIC_DEPENDENCIES  = ctx.options.STATIC_DEPENDENCIES
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
+    ctx.env.PKG_CONFIG_PATH      = ctx.options.PKG_CONFIG_PATH
     ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
     ctx.env.WITH_LIBS            = ctx.options.WITH_LIBS
     ctx.env.EXAMPLES             = ctx.options.EXAMPLES
@@ -252,9 +254,8 @@ def configure(ctx):
 
     # use manually prebuilt dependencies in the case of static examples or mingw cross-build
     if ctx.options.CROSS_COMPILE_MINGW32:
-        print ("→ Cross-compiling for Windows with MinGW: search for pre-built dependencies in 'packaging/win32_3rdparty'")
+        print ("→ Cross-compiling for Windows with MinGW")
         os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
         # locate MinGW compilers and use them
         ctx.find_program('i686-w64-mingw32-gcc', var='CC')
@@ -271,36 +272,15 @@ def configure(ctx):
         and (sys.platform.startswith('linux') or sys.platform == 'darwin') \
         and not ctx.options.CROSS_COMPILE_MINGW32:
         
-        print ("→ Building with static dependencies on Linux/OSX: search for pre-built dependencies in 'packaging/debian'")
-        os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+        if not ctx.env.ONLY_PYTHON:
+            print ("→ Building with static dependencies on Linux/OSX")
+            os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
         
         # flags required for linking to static ffmpeg libs
         # -Bsymbolic flag is not available on clang
         if ctx.env.CXX_NAME is not "clang":
             ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
             ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
-
-    # write pkg-config file
-    prefix = os.path.normpath(ctx.options.prefix)
-    opts = {'prefix': prefix,
-            'version': ctx.env.VERSION,
-            }
-
-    pcfile = '''prefix=%(prefix)s
-    libdir=${prefix}/lib
-    includedir=${prefix}/include
-
-    Name: libessentia
-    Description: audio analysis library -- development files
-    Version: %(version)s
-    Libs: -L${libdir} -lessentia -lgaia2 -lfftw3 -lyaml -lavcodec -lavformat -lavutil -lavresample -lsamplerate -ltag -lfftw3f -lchromaprint
-    Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/utils
-    ''' % opts
-
-    pcfile = '\n'.join([l.strip() for l in pcfile.split('\n')])
-    ctx.env.pcfile = pcfile
-    #open('build/essentia.pc', 'w').write(pcfile) # we'll do it later on the build stage
 
     ctx.recurse('src')
 
@@ -354,4 +334,4 @@ def doc(ctx):
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
     
     pythonpath = os.path.abspath('build/python')
-    os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh' % pythonpath)
+    os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, sys.executable))

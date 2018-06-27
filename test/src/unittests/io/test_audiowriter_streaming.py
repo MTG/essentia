@@ -18,12 +18,11 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-
 from essentia_test import *
 from essentia.streaming import AudioWriter, AudioLoader
 from essentia.streaming import MonoMixer
 import os
-from math import fabs
+
 
 class TestAudioWriter_Streaming(TestCase):
 
@@ -45,7 +44,7 @@ class TestAudioWriter_Streaming(TestCase):
         for pos in impulsePos:
             signal[pos][0] = impulse[i]
             signal[pos][1] = -impulse[i]
-            i+=1
+            i += 1
 
         # write the audio file:
         gen = VectorInput(signal)
@@ -115,9 +114,9 @@ class TestAudioWriter_Streaming(TestCase):
                 expected[pos][0] = 1
                 expected[pos][1] = -1-1.0/32767.0
             else:
-                expected[pos][0] =  -1-1.0/32767.0
+                expected[pos][0] = -1-1.0/32767.0
                 expected[pos][1] = 1
-            i+=1
+            i += 1
 
         # write the audio file:
         gen = VectorInput(signal)
@@ -200,7 +199,7 @@ class TestAudioWriter_Streaming(TestCase):
         expected = int(ZeroCrossingRate(threshold=0.0)(sine)*len(sine)+0.5)
         # for debugging:
         #from pylab import show, plot, figure
-        from essentia.standard import MonoLoader
+        #from essentia.standard import MonoLoader
         #plot(sine)
         #plot(MonoLoader(filename=filename)())
         #show(figure)
@@ -214,13 +213,13 @@ class TestAudioWriter_Streaming(TestCase):
         self.encoderTest('audiowritertest.wav', precision=5e-6)
 
     def testAiff(self):
-        self.encoderTest('audiowritertest.aiff', precision=5e-6);
+        self.encoderTest('audiowritertest.aiff', precision=5e-6)
 
     def testflac(self):
-        self.encoderTest('audiowritertest.flac', precision=5e-6);
+        self.encoderTest('audiowritertest.flac', precision=5e-6)
 
     def testOgg(self):
-        self.encoderTest('audiowritertest.ogg', precision=5e-6);
+        self.encoderTest('audiowritertest.ogg', precision=5e-6)
 
 
 suite = allTests(TestAudioWriter_Streaming)
