@@ -74,7 +74,7 @@ classifiers = [
     'License :: OSI Approved :: GNU Affero General Public License v3',
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
-    'Intended Audience :: Science/Research'
+    'Intended Audience :: Science/Research',
     'Topic :: Software Development :: Libraries',
     'Topic :: Multimedia :: Sound/Audio :: Analysis',
     'Topic :: Multimedia :: Sound/Audio :: Sound Synthesis',
