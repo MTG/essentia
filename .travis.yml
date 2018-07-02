@@ -28,6 +28,7 @@ script:
   - ls wheelhouse/
 
 deploy:
+  skip_cleanup: true
   provider: script
   script:
     - python setup.py sdist
