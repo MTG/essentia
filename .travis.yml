@@ -10,7 +10,6 @@ cache: pip
 
 matrix:
   include:
-#    - os: osx
     - sudo: required
       services:
         - docker
@@ -29,13 +28,7 @@ script:
   - ls wheelhouse/
 
 deploy:
-   provider: script
-   script: travis/deploy_transfer.sh
-    on:
-      branch: master
-#  - provider: pypi
-#    server: https://test.pypi.org/legacy/
-#    distributions: sdist bdist_wheel
-#    user: dbogdanov
-#    password:
-#      secure: 4M7A1uxjdAmkyR6LrLsJcQIxN5xQiLK33hiTQO9jU3sUIO0aqxVK7OWSMuepG0TW+D1tV+8nMWPCFsXrW/ibrFBzhbRKOOW7FK8YreaA/Iat494qW4EtPWk2eXgCSMoioSzi4K3EPvYNfaIjkzqAlxUfJsACrBI70YdL7VRjfyo=
+  provider: script
+  script: travis/deploy_transfer.sh
+  on:
+    branch: master
