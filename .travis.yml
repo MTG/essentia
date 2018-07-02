@@ -29,6 +29,8 @@ script:
 
 deploy:
   provider: script
-  script: travis/deploy_transfer.sh
+  script:
+    - python setup.py sdist
+    - travis/deploy_transfer.sh
   on:
     branch: master
