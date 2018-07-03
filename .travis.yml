@@ -31,7 +31,7 @@ deploy:
   skip_cleanup: true
   provider: script
   script:
-    - python setup.py sdist
-    - travis/deploy_transfer.sh
+    python setup.py sdist;
+    travis/deploy_transfer.sh
   on:
     branch: master
