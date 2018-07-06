@@ -41,7 +41,7 @@ Indexing music by mood: design and integration of an automatic content-based ann
 - Y. Yang, D. Bogdanov, P. Herrera, and M. Sordo. Music Retagging Using Label Propagation and Robust Principal Component Analysis. In International World Wide Web Conference (WWW’12), International Workshop on Advances in Music Information Research (AdMIRe’12), 2012.
 
 
-## Music similarity and recommendation
+## Music preferences, similarity and recommendation
 
 - D. Bogdanov. From music similarity to music recommendation: Com-
 putational approaches based on audio and metadata analysis. PhD
@@ -62,6 +62,9 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 - J. Kaitila. A content-based music recommender system. Master Thesis, University of Tampere, Finland, 2017.
 
 - K. Yadati, C. Liem, M. Larson, and A. Hanjalic. On the Automatic Identification of Music for Common Activities. In 2017 ACM on International Conference on Multimedia Retrieval, pages 192-200, 2017.
+
+- K.R. Fricke, D.M. Greenberg, P.J. Rentfrow, and P.Y. Herzberg. Computer-based music feature analysis mirrors human perception and can be used to measure individual music preference. Journal of Research in Personality, 75:94-102, 2018.
+
 
 ## Emotion detection
 
@@ -261,7 +264,6 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 - F. A. Araújo, F. L. Brasil, A. C. L. Santos, L. D. S. B. Junior, S. P. F. Dutra, and C. E. C. F. Batista. Auris System: Providing vibrotactile feedback for hearing impaired population. BioMed Research International, 2017, 2017. 
 
 - M. A. Casey. Music of the 7Ts: Predicting and Decoding Multivoxel fMRI Responses with Acoustic, Schematic, and Categorical Music Features. Frontiers in psychology, 8, 2017.
-
 
 
 
