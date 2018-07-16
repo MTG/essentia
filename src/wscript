@@ -190,10 +190,14 @@ def configure(ctx):
     if 'ACCELERATE' in ctx.env.FFT:
         print('- using Accelerate Framework for FFT\n')
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
-        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
+        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex',
+                               'IFFTWComplex', 'ConstantQ', 'Chromagram',
+                               'NSGConstantQ', 'NSGIConstantQ']
     elif 'KISS' in ctx.env.FFT:
         print('- using KISS for FFT\n')
-        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
+        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex',
+                               'IFFTWComplex', 'ConstantQ', 'Chromagram',
+                               'NSGConstantQ', 'NSGIConstantQ']
     else:
         print('- using FFTW for FFT\n')
         if has('fftw'):
