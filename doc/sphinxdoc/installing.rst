@@ -17,7 +17,11 @@ at the bottom of your ``~/.bash_profile`` file. More information about using Pyt
 
 Linux
 -----
-We are currently preparing deb packages for Ubuntu and Debian. Meanwhile, you need to compile Essentia from source (see below).
+You can install Essentia python extension from PyPi::
+
+  pip install essentia
+
+For other needs, you need to compile Essentia from source (see below).
 
 
 Windows, Android, iOS
@@ -147,7 +151,7 @@ Therefore, to build for Python3, you can either run all waf commands with your p
   python3 ./waf
   python3 ./waf install
 
-or specify the ``--python`` option, for example:
+or specify the ``--python`` option, for example: ::
 
   ./waf configure --build-static --with-python --python=/usr/bin/python3 --with-cpptests --with-examples --with-vamp
   ./waf
