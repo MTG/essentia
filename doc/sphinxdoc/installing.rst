@@ -229,7 +229,7 @@ Using pre-trained high-level models in Essentia
 -----------------------------------------------
 
 Essentia includes a number of `pre-trained classifier models for genres, moods and instrumentation
-<algorithms_overview.html#other-high-level-descriptors>`_. In order to use them you need to:
+<algorithms_overview.html#classifier-models>`_. In order to use them you need to:
 
 * Install `Gaia2 library <https://github.com/MTG/gaia/blob/master/README.md>`_ (supported on Linux/OSX)
 * Build Essentia with examples and Gaia (``--with-examples --with-gaia``)
