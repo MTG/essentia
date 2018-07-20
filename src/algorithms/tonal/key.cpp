@@ -61,7 +61,7 @@ void Key::configure() {
   _numHarmonics = parameter("numHarmonics").toInt();
   _profileType = parameter("profileType").toString();
 
-  const char* keyNames[] = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+  const char* keyNames[] = { "A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab" };
   _keys = arrayToVector<string>(keyNames);
 
   Real profileTypes[][12] = {
@@ -118,12 +118,32 @@ void Key::configure() {
     { 0.17235348, 0.04, 0.0761009,  0.12, 0.05621498, 0.08527853, 0.0497915,  0.13451001, 0.07458916, 0.05003023, 0.09187879, 0.05545106 },
 
     // edma
-    { 0.16519551, 0.04749026, 0.08293076, 0.06687112, 0.09994645, 0.09274123, 0.05294487, 0.13159476, 0.05218986, 0.07443653, 0.06940723, 0.0642515  },
-    { 0.17235348, 0.05336489, 0.0761009,  0.10043649, 0.05621498, 0.08527853, 0.0497915,  0.13451001, 0.07458916, 0.05003023, 0.09187879, 0.05545106 }
+    // { 0.16519551, 0.04749026, 0.08293076, 0.06687112, 0.09994645, 0.09274123, 0.05294487, 0.13159476, 0.05218986, 0.07443653, 0.06940723, 0.0642515  },
+    // { 0.17235348, 0.05336489, 0.0761009,  0.10043649, 0.05621498, 0.08527853, 0.0497915,  0.13451001, 0.07458916, 0.05003023, 0.09187879, 0.05545106 },
+};
+
+Real profileTypesWithOther[][12] = {
+    // bgate
+    { 1.00  , 0.00  , 0.42  , 0.00  , 0.53  , 0.37  , 0.00  , 0.77  , 0.00  , 0.38,   0.21  , 0.30   },
+    { 1.00  , 0.00  , 0.36  , 0.39  , 0.00  , 0.38  , 0.00  , 0.74  , 0.27  , 0.00  , 0.42  , 0.23   },
+    { 1.00  , 0.26  , 0.35  , 0.29  , 0.44  , 0.36  , 0.21  , 0.78  , 0.26  , 0.25  , 0.32  , 0.26   },
+
+    // braw
+    { 1.0000, 0.1573, 0.4200, 0.1570, 0.5296, 0.3669, 0.1632, 0.7711, 0.1676, 0.3827, 0.2113, 0.2965 },
+    { 1.0000, 0.2330, 0.3615, 0.3905, 0.2925, 0.3777, 0.1961, 0.7425, 0.2701, 0.2161, 0.4228, 0.2272 },
+    { 1.0000, 0.2608, 0.3528, 0.2935, 0.4393, 0.3580, 0.2137, 0.7809, 0.2578, 0.2539, 0.3233, 0.2615 },
+
+    // edma
+    { 1.00  , 0.29  , 0.50  , 0.40  , 0.60  , 0.56  , 0.32  , 0.80  , 0.31  , 0.45  , 0.42  , 0.39   },
+    { 1.00  , 0.31  , 0.44  , 0.58  , 0.33  , 0.49  , 0.29  , 0.78  , 0.43  , 0.29  , 0.53  , 0.32   },
+	  { 1.00  , 0.26  , 0.35  , 0.29  , 0.44  , 0.36  , 0.21  , 0.78  , 0.26  , 0.25  , 0.32  , 0.26   }
 };
 
 
 #define SET_PROFILE(i) _M = arrayToVector<Real>(profileTypes[2*i]); _m = arrayToVector<Real>(profileTypes[2*i+1])
+#define SET_PROFILE_OTHER(i) _M = arrayToVector<Real>(profileTypesWithOther[3*i]); _m = arrayToVector<Real>(profileTypesWithOther[3*i+1]); _O = arrayToVector<Real>(profileTypesWithOther[3*i+2])
+
+  _O.assign(12, 0.);
 
   if      (_profileType == "diatonic")      { SET_PROFILE(0);  }
   else if (_profileType == "krumhansl")     { SET_PROFILE(1);  }
@@ -138,7 +158,10 @@ void Key::configure() {
   else if (_profileType == "faraldo")       { SET_PROFILE(10); }
   else if (_profileType == "pentatonic")    { SET_PROFILE(11); }
   else if (_profileType == "edmm")          { SET_PROFILE(12); }
-  else if (_profileType == "edma")          { SET_PROFILE(13); }
+  // else if (_profileType == "edma")          { SET_PROFILE(13); }
+  else if (_profileType == "bgate")         { SET_PROFILE_OTHER(0); }
+  else if (_profileType == "braw")          { SET_PROFILE_OTHER(1); }
+  else if (_profileType == "edma")          { SET_PROFILE_OTHER(2); }
   else {
     throw EssentiaException("Key: Unsupported profile type: ", _profileType);
   }
@@ -279,18 +302,22 @@ void Key::compute() {
 
   // Compute correlation matrix
   int keyIndex = -1; // index of the first maximum
-  Real max = -1;     // first maximum
-  Real max2 = -1;    // second maximum
-  int scale = MAJOR;  // scale
+  Real max     = -1;     // first maximum
+  Real max2    = -1;    // second maximum
+  int scale    = MAJOR;  // scale
 
-  // Compute maximum for both major and minor
-  Real maxMaj = -1;
-  Real max2Maj = -1;
-  int keyIndexMaj = -1;
+  // Compute maximum for major, minor and other.
+  Real maxMajor     = -1;
+  Real max2Major    = -1;
+  int keyIndexMajor = -1;
 
-  Real maxMin = -1;
-  Real max2Min = -1;
-  int keyIndexMin = -1;
+  Real maxMinor     = -1;
+  Real max2Minor    = -1;
+  int keyIndexMinor = -1;
+
+  Real maxOther     = -1;
+  Real max2Other    = -1;
+  int keyIndexOther = -1;
 
   // calculate the correlation between the profiles and the PCP...
   // we shift the profile around to find the best match
@@ -306,33 +333,50 @@ void Key::compute() {
     */
     Real corrMajor = correlation(pcp, mean_pcp, std_pcp, _profile_doM, _mean_profile_M, _std_profile_M, shift);
     // Compute maximum value for major keys
-    if (corrMajor > maxMaj) {
-      max2Maj = maxMaj;
-      maxMaj = corrMajor;
-      keyIndexMaj = shift;
+    if (corrMajor > maxMajor) {
+      max2Major = maxMajor;
+      maxMajor = corrMajor;
+      keyIndexMajor = shift;
     }
 
     Real corrMinor = correlation(pcp, mean_pcp, std_pcp, _profile_dom, _mean_profile_m, _std_profile_m, shift);
     // Compute maximum value for minor keys
-    if (corrMinor > maxMin) {
-      max2Min = maxMin;
-      maxMin = corrMinor;
-      keyIndexMin = shift;
+    if (corrMinor > maxMinor) {
+      max2Minor = maxMinor;
+      maxMinor = corrMinor;
+      keyIndexMinor = shift;
+    }
+
+    Real corrOther = correlation(pcp, mean_pcp, std_pcp, _profile_doO, _mean_profile_O, _std_profile_O, shift);
+    // Compute maximum value for other keys
+    if (corrOther > maxOther) {
+      max2Other = maxOther;
+      maxOther = corrOther;
+      keyIndexOther = shift;
     }
   }
 
-  if (maxMaj >= maxMin) {
-    keyIndex = (int) (keyIndexMaj *  12 / pcpsize + .5);
+
+  if (maxMajor > maxMinor && maxMajor > maxOther) {
+    keyIndex = (int) (keyIndexMajor *  12 / pcpsize + 0.5);
     scale = MAJOR;
-    max = maxMaj;
-    max2 = max2Maj;
+    max = maxMajor;
+    max2 = max2Major;
   }
-  else {
-    keyIndex = (int) (keyIndexMin * 12 / pcpsize + .5);
+
+  else if (maxMinor >= maxMajor && maxMinor >= maxOther) {
+    keyIndex = (int) (keyIndexMinor * 12 / pcpsize + 0.5);
     scale = MINOR;
-    max = maxMin;
-    max2 = max2Min;
-  }
+    max = maxMinor;
+    max2 = max2Minor;
+    }
+
+	else if (maxOther > maxMajor && maxOther > maxMinor) {
+    keyIndex = (int) (keyIndexOther * 12 / pcpsize + 0.5);
+    scale = OTHER;
+    max = maxOther;
+    max2 = max2Other;
+    }
 
   // In the case of Wei Chai algorithm, the scale is detected in a second step
   // In this point, always the major relative is detected, as it is the first
@@ -366,7 +410,19 @@ void Key::compute() {
 
   // first three outputs are key, scale and strength
   _key.get() = _keys[keyIndex];
-  _scale.get() = scale == MAJOR ? "major" : "minor";
+
+  if (scale == MAJOR) {
+    _scale.get() = "major";
+  }
+
+  else if (scale == MINOR) {
+    _scale.get() = "minor";
+  }
+
+  else if (scale == OTHER) {
+    _scale.get() = "minor";
+  }
+
   _strength.get() = max;
 
   // this one outputs the relative difference between the maximum and the
@@ -384,41 +440,52 @@ void Key::resize(int pcpsize) {
 
   _profile_doM.resize(pcpsize);
   _profile_dom.resize(pcpsize);
+  _profile_doO.resize(pcpsize);
 
   for (int i=0; i<12; i++) {
-
     _profile_doM[i*n] = _M[i];
     _profile_dom[i*n] = _m[i];
+    _profile_doO[i*n] = _O[i];
 
     // Two interpolated values
-    Real incr_M, incr_m;
+    Real incr_M, incr_m, incr_O;
     if (i == 11) {
       incr_M = (_M[11] - _M[0]) / n;
       incr_m = (_m[11] - _m[0]) / n;
+      incr_O = (_O[11] - _O[0]) / n;
     }
+    
     else {
       incr_M = (_M[i] - _M[i+1]) / n;
       incr_m = (_m[i] - _m[i+1]) / n;
+      incr_O = (_O[i] - _O[i+1]) / n;
     }
 
     for (int j=1; j<=(n-1); j++) {
       _profile_doM[i*n+j] = _M[i] - j * incr_M;
       _profile_dom[i*n+j] = _m[i] - j * incr_m;
+      _profile_doO[i*n+j] = _O[i] - j * incr_O;	
     }
   }
 
   _mean_profile_M = mean(_profile_doM);
   _mean_profile_m = mean(_profile_dom);
+  _mean_profile_O = mean(_profile_doO);
+
   _std_profile_M = 0;
   _std_profile_m = 0;
+  _std_profile_O = 0;
 
   // Compute Standard Deviations
   for (int i=0; i<pcpsize; i++) {
     _std_profile_M += (_profile_doM[i] - _mean_profile_M) * (_profile_doM[i] - _mean_profile_M);
     _std_profile_m += (_profile_dom[i] - _mean_profile_m) * (_profile_dom[i] - _mean_profile_m);
+    _std_profile_O += (_profile_doO[i] - _mean_profile_O) * (_profile_doO[i] - _mean_profile_O);
   }
+
   _std_profile_M = sqrt(_std_profile_M);
   _std_profile_m = sqrt(_std_profile_m);
+  _std_profile_O = sqrt(_std_profile_O);
 }
 
 

@@ -31,7 +31,7 @@ namespace streaming {
 
 class KeyExtractor : public AlgorithmComposite {
  protected:
-  Algorithm *_frameCutter, *_windowing, *_spectrum, *_spectralPeaks, *_hpcpKey, *_key;
+  Algorithm *_frameCutter, *_windowing, *_spectrum, *_spectralPeaks, *_spectralWhitening, *_hpcpKey, *_key;
   scheduler::Network* _network;
   bool _configured;
 

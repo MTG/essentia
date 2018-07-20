@@ -50,7 +50,7 @@ class Key : public Algorithm {
     declareParameter("useThreeChords", "consider only the 3 main triad chords of the key (T, D, SD) to build the polyphonic profiles", "{true,false}", true);
     declareParameter("numHarmonics", "number of harmonics that should contribute to the polyphonic profile (1 only considers the fundamental harmonic)", "[1,inf)", 4);
     declareParameter("slope", "value of the slope of the exponential harmonic contribution to the polyphonic profile", "[0,inf)", 0.6);
-    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,faraldo,pentatonic,edmm,edma}", "temperley");
+    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,faraldo,pentatonic,edmm,edma,bgate,braw}", "temperley");
     declareParameter("pcpSize", "number of array elements used to represent a semitone times 12 (this parameter is only a hint, during computation, the size of the input PCP is used instead)", "[12,inf)", 36);
   }
 
@@ -64,18 +64,25 @@ class Key : public Algorithm {
 protected:
   enum Scales {
     MAJOR = 0,
-    MINOR = 1
+    MINOR = 1,
+    OTHER   = 2
   };
 
   std::vector<Real> _m;
   std::vector<Real> _M;
+  std::vector<Real> _O;
+
   std::vector<Real> _profile_doM;
   std::vector<Real> _profile_dom;
+  std::vector<Real> _profile_doO;
 
   Real _mean_profile_M;
   Real _mean_profile_m;
+  Real _mean_profile_O;
+
   Real _std_profile_M;
   Real _std_profile_m;
+  Real _std_profile_O;
 
   Real _slope;
   int _numHarmonics;
@@ -120,7 +127,7 @@ class Key : public AlgorithmComposite {
     declareParameter("useThreeChords", "consider only the 3 main triad chords of the key (T, D, SD) to build the polyphonic profiles", "{true,false}", true);
     declareParameter("numHarmonics", "number of harmonics that should contribute to the polyphonic profile (1 only considers the fundamental harmonic)", "[1,inf)", 4);
     declareParameter("slope", "value of the slope of the exponential harmonic contribution to the polyphonic profile", "[0,inf)", 0.6);
-    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,faraldo,pentatonic,edmm,edma}", "temperley");
+    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,faraldo,pentatonic,edmm,edma,bgate,braw}", "temperley");
     declareParameter("pcpSize", "number of array elements used to represent a semitone times 12 (this parameter is only a hint, during computation, the size of the input PCP is used instead)", "[12,inf)", 36);
   }
 

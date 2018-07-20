@@ -52,6 +52,7 @@ void KeyExtractor::createInnerNetwork() {
   _spectralPeaks = factory.create("SpectralPeaks",
                                   "orderBy", "magnitude", "magnitudeThreshold", 1e-05,
                                   "minFrequency", 40, "maxFrequency", 5000, "maxPeaks", 10000);
+  _spectralWhitening = factory.create("SpectralWhitening", "maxFrequency", _maxFrequency, "sampleRate", _sampleRate);
   _hpcpKey       = factory.create("HPCP");
   _key           = factory.create("Key");
 
@@ -62,8 +63,10 @@ void KeyExtractor::createInnerNetwork() {
   _frameCutter->output("frame")          >>  _windowing->input("frame");
   _windowing->output("frame")            >>  _spectrum->input("frame");
   _spectrum->output("spectrum")          >>  _spectralPeaks->input("spectrum");
-  _spectralPeaks->output("magnitudes")   >>  _hpcpKey->input("magnitudes");
-  _spectralPeaks->output("frequencies")  >>  _hpcpKey->input("frequencies");
+  _spectralPeaks->output("spectrum")     >>  _spectralWhitening->input("spectrum");
+  _spectralPeaks->output("magnitudes")   >>  _spectralWhitening->input("magnitudes");
+  _spectralPeaks->output("frequencies")  >>  _spectralWhitening->input("frequencies");
+  _spectralWhitening->output("magnitudes")  >>  _magnitudes->input("frequencies");
   _hpcpKey->output("hpcp")               >>  _key->input("pcp");
 
   // attach output proxy(ies)
