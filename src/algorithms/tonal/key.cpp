@@ -629,12 +629,33 @@ Key::~Key() {
   delete _poolStorage;
 }
 
+void Key::configure() {
+  _keyAlgo->configure(INHERIT("usePolyphony"),
+                      INHERIT("useThreeChords"),
+                      INHERIT("numHarmonics"),
+                      INHERIT("slope"),
+                      INHERIT("profileType"),
+                      INHERIT("pcpSize"));
+
+  _averageDetuningCorrection = parameter("averageDetuningCorrection").toBool();
+  _pcpThreshold = parameter("pcpThreshold").toReal();
+}
 
 AlgorithmStatus Key::process() {
   if (!shouldStop()) return PASS;
 
   const vector<vector<Real> >& hpcpKey = _pool.value<vector<vector<Real> > >("internal.hpcp");
   vector<Real> hpcpAverage = meanFrames(hpcpKey);
+
+  if (_pcpThreshold > 0.f) {
+    normalizePcpPeak(hpcpAverage);
+    pcpGate(hpcpAverage, _pcpThreshold);
+  }
+
+  if (_averageDetuningCorrection == true) {
+    shiftPcp(hpcpAverage);
+  }
+
   string key;
   string scale;
   Real strength;
@@ -658,6 +679,35 @@ void Key::reset() {
   AlgorithmComposite::reset();
   _keyAlgo->reset();
 }
+
+
+void Key::normalizePcpPeak(vector<Real>& pcp) {
+  normalize(pcp);
+};
+
+void Key::pcpGate(vector<Real>& pcp, Real threshold) {
+  for (int i = 0; i < (int)pcp.size(); i++)
+    if (pcp[i] < threshold) pcp[i] = 0.f;
+};
+
+void Key::shiftPcp(vector<Real>& pcp) {
+  int tuningResolution = pcp.size() / 12;
+
+  normalize(pcp);
+
+  int maxValIndex = argmax(pcp);
+  maxValIndex %= tuningResolution;
+
+  vector<Real>::iterator newBegin;
+  if (maxValIndex > (tuningResolution / 2)) {
+    newBegin = pcp.end() + maxValIndex - tuningResolution;
+  }
+  else {
+    newBegin = pcp.begin() + maxValIndex;
+  }
+  
+  rotate(pcp.begin(), newBegin, pcp.end());
+};
 
 
 } // namespace streaming

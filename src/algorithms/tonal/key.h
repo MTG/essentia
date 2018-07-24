@@ -21,6 +21,7 @@
 #define ESSENTIA_KEY_H
 
 #include "algorithm.h"
+#include "essentiamath.h"
 
 namespace essentia {
 namespace standard {
@@ -50,7 +51,7 @@ class Key : public Algorithm {
     declareParameter("useThreeChords", "consider only the 3 main triad chords of the key (T, D, SD) to build the polyphonic profiles", "{true,false}", true);
     declareParameter("numHarmonics", "number of harmonics that should contribute to the polyphonic profile (1 only considers the fundamental harmonic)", "[1,inf)", 4);
     declareParameter("slope", "value of the slope of the exponential harmonic contribution to the polyphonic profile", "[0,inf)", 0.6);
-    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,faraldo,pentatonic,edmm,edma,bgate,braw}", "temperley");
+    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,faraldo,pentatonic,edmm,edma,bgate,braw}", "bgate");
     declareParameter("pcpSize", "number of array elements used to represent a semitone times 12 (this parameter is only a hint, during computation, the size of the input PCP is used instead)", "[12,inf)", 36);
   }
 
@@ -118,6 +119,14 @@ class Key : public AlgorithmComposite {
   Algorithm* _poolStorage;
   standard::Algorithm* _keyAlgo;
 
+  bool _averageDetuningCorrection;
+  Real _pcpThreshold;
+
+  void normalizePcpPeak(std::vector<Real>& pcp);
+  void pcpGate(std::vector<Real>& pcp, Real threshold);
+  void shiftPcp(std::vector<Real>& pcp);
+
+
  public:
   Key();
   ~Key();
@@ -127,18 +136,13 @@ class Key : public AlgorithmComposite {
     declareParameter("useThreeChords", "consider only the 3 main triad chords of the key (T, D, SD) to build the polyphonic profiles", "{true,false}", true);
     declareParameter("numHarmonics", "number of harmonics that should contribute to the polyphonic profile (1 only considers the fundamental harmonic)", "[1,inf)", 4);
     declareParameter("slope", "value of the slope of the exponential harmonic contribution to the polyphonic profile", "[0,inf)", 0.6);
-    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,faraldo,pentatonic,edmm,edma,bgate,braw}", "temperley");
+    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,faraldo,pentatonic,edmm,edma,bgate,braw}", "bgate");
     declareParameter("pcpSize", "number of array elements used to represent a semitone times 12 (this parameter is only a hint, during computation, the size of the input PCP is used instead)", "[12,inf)", 36);
+    declareParameter("pcpThreshold", "pcp bins below this value are set to 0", "[0,1]", 0.2);
+    declareParameter("averageDetuningCorrection", "shifts a pcp to the nearest tempered bin", "{true,false}", true);
   }
 
-  void configure() {
-    _keyAlgo->configure(INHERIT("usePolyphony"),
-                        INHERIT("useThreeChords"),
-                        INHERIT("numHarmonics"),
-                        INHERIT("slope"),
-                        INHERIT("profileType"),
-                        INHERIT("pcpSize"));
-  }
+  void configure();
 
   void declareProcessOrder() {
     declareProcessStep(SingleShot(_poolStorage));
