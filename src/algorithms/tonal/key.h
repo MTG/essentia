@@ -66,7 +66,7 @@ protected:
   enum Scales {
     MAJOR = 0,
     MINOR = 1,
-    OTHER   = 2
+    OTHER = 2
   };
 
   std::vector<Real> _m;

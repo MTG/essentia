@@ -40,6 +40,8 @@ const char* Key::description = DOC("This algorithm computes key estimate given a
 "  - 'Noland' - profiles from Bach's 'Well Tempered Klavier'.\n" 
 "  - 'edma' - automatic profiles extracted from corpus analysis of electronic dance music [3]. They normally perform better that Shaath's\n"
 "  - 'edmm' - automatic profiles extracted from corpus analysis of electronic dance music and manually tweaked according to heuristic observation. It will report major modes (which are poorly represented in EDM) as minor, but improve performance otherwise [3].\n"
+"  - 'braw' - profiles obtained by calculating the median profile for each mode from a subset of BeatPort dataset. There is an extra profile obtained from ambiguous tracks that are reported as minor[4]\n"
+"  - 'bgate' - same as braw but zeroing the 4 less relevant elements of each profile[4]\n"
 "  - Other key profiles ('Faraldo', 'Pentatonic') are experimental and will be removed on due time.\n"
 "\n"
 "The standard mode of the algorithm estimates key/scale for a given HPCP vector. The streaming mode first accumulates a stream of HPCP vectors and computes its mean to provide the estimation.\n"
@@ -53,7 +55,10 @@ const char* Key::description = DOC("This algorithm computes key estimate given a
 "  pp. 65-100, 1999."
 "  [3] Á. Faraldo, E. Gómez, S. Jordà, P.Herrera, \"Key Estimation in Electronic\n"
 "  Dance Music. Proceedings of the 38th International Conference on information\n"
-"  Retrieval, Padova, 2016. (In Press.)");
+"  Retrieval, Padova, 2016. (In Press.)\n"
+"  [4] Faraldo, Á., Jordà, S., & Herrera, P. (2017, June). A multi-profile method\n"
+"  for key estimation in edm. In Audio Engineering Society Conference: 2017 AES\n"
+"  International Conference on Semantic Audio. Audio Engineering Society.");
 
 
 void Key::configure() {

@@ -17,15 +17,16 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_NNLS_H
-#define ESSENTIA_NNLS_H
+#ifndef ESSENTIA_NNLSCHROMA_H
+#define ESSENTIA_NNLSCHROMA_H
 
 #include "algorithm.h"
+#include "nnls.h"
 
 namespace essentia {
 namespace standard {
 
-class NNLS : public Algorithm {
+class NNLSChroma : public Algorithm {
  public:
 
  protected:
@@ -38,7 +39,7 @@ class NNLS : public Algorithm {
   Output<std::vector<std::vector<Real> > > _chromagram;
 
  public:
-  NNLS() {
+  NNLSChroma() {
     declareInput(_logSpectrum, "logSpectrogram", "log spectrum frames");
     declareInput(_meanTuning, "meanTuning", "mean tuning frames");
     declareInput(_localTuning, "localTuning", "local tuning frames");
@@ -90,14 +91,6 @@ class NNLS : public Algorithm {
   Real cospuls(Real x, Real centre, Real width);
   Real pitchCospuls(Real x, Real centre, int binsperoctave);
   std::vector<Real> SpecialConvolution(std::vector<Real> convolvee, std::vector<Real> kernel);
-  int nnls(Real* a,  int mda,  int m,  int n, Real* b,
-           Real* x, Real* rnorm, Real* w, Real* zz, int* index,
-           int* mode);
-  Real d_sign(Real a, Real b);
-  int g1(Real* a, Real* b, Real* cterm, Real* sterm, Real* sig);
-  int h12(int mode, int* lpivot, int* l1,
-      int m, Real* u, int* iue, Real* up, Real* c__,
-        int* ice, int* icv, int* ncv);
   void dictionaryMatrix(Real* dm, Real s_param);
 
 };
@@ -110,7 +103,7 @@ class NNLS : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class NNLS : public StreamingAlgorithmWrapper {
+class NNLSChroma : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<std::vector<Real> > > _logSpectrum;
@@ -122,8 +115,8 @@ class NNLS : public StreamingAlgorithmWrapper {
   Source<std::vector<std::vector<Real> > > _chromagram;
 
  public:
-  NNLS() {
-    declareAlgorithm("NNLS");
+  NNLSChroma() {
+    declareAlgorithm("NNLSChroma");
     declareInput(_logSpectrum, TOKEN, "logSpectrogram");
     declareInput(_meanTuning, TOKEN, "meanTuning");
     declareInput(_localTuning, TOKEN, "localTuning");
@@ -139,4 +132,4 @@ class NNLS : public StreamingAlgorithmWrapper {
 } // namespace essentia
 
 
-#endif // ESSENTIA_NNLS_H
+#endif // ESSENTIA_NNLSCHROMA_H
