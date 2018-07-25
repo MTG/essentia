@@ -50,6 +50,7 @@ class LogSpectrum : public Algorithm {
 
   void configure();
   void compute();
+  void initialize();
 
   static const char* name;
   static const char* category;

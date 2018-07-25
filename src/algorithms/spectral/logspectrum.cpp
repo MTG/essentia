@@ -26,7 +26,12 @@ using namespace standard;
 
 const char* LogSpectrum::name = "LogSpectrum";
 const char* LogSpectrum::category = "Spectral";
-const char* LogSpectrum::description = DOC("Computes spectrum with logarithmically distributed frequency bins.");
+const char* LogSpectrum::description = DOC("Computes spectrum with logarithmically distributed frequency bins. "
+"This code is a reimplementation of the well known NNLS Chroma based in[1].\n"
+"\n"
+"References:\n"
+"  [1] Mauch, M., & Dixon, S. (2010, August). Approximate Note Transcription\n"
+"  for the Improved Identification of Difficult Chords. In ISMIR (pp. 135-140).");
 
 
 const int nBPS = 3; // bins per semitone
@@ -44,47 +49,8 @@ void LogSpectrum::configure() {
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toFloat();
   _rollon = parameter("rollOn").toFloat();
-	
-	// make things for tuning estimation
-  _sinvalues.clear();
-  _cosvalues.clear();
-	for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
-    _sinvalues.push_back(sin(2 * M_PI * (iBPS * 1.0 / nBPS)));
-    _cosvalues.push_back(cos(2 * M_PI * (iBPS * 1.0 / nBPS)));
-  }
-
-  _localTunings.clear();
-  _meanTunings.clear();
-  for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
-    _meanTunings.push_back(0);
-    _localTunings.push_back(0);
-  }
-
-  _frameCount = 0;
-
-  int tempn = nNote * _frameSize;
-
-  Real *tempkernel;
-  tempkernel = new Real[tempn];
-
-  logFreqMatrix(_sampleRate, _frameSize, tempkernel);
-  _kernelValue.clear();
-  _kernelFftIndex.clear();
-  _kernelNoteIndex.clear();
-  int countNonzero = 0;
-  for (int iNote = 0; iNote < nNote; ++iNote) {
-    for (int iFFT = 0; iFFT <static_cast<int>(_frameSize); ++iFFT) {
-      if (tempkernel[iFFT + _frameSize * iNote] > 0) {
-        _kernelValue.push_back(tempkernel[iFFT + _frameSize * iNote]);
-        if (tempkernel[iFFT + _frameSize * iNote] > 0) {
-            countNonzero++;
-        }
-        _kernelFftIndex.push_back(iFFT);
-        _kernelNoteIndex.push_back(iNote);				
-      }
-    }
-  }
-  delete [] tempkernel;
+	E_INFO("LogSpectrum: input spectrum size does not match _frameSize parameter. Reconfiguring the algorithm");
+  initialize();
 }
 
 
@@ -94,6 +60,11 @@ void LogSpectrum::compute() {
   vector<Real>& logFreqSpectrum = _logFreqSpectrum.get();
   Real& localTuning = _localTuning.get();
   vector<Real>& meanTuning = _meanTuning.get();
+
+  if (spectrum.size() != _frameSize) {
+    _frameSize = spectrum.size();
+    initialize();
+  }
 
   _frameCount++;   
 
@@ -253,4 +224,47 @@ Real LogSpectrum::pitchCospuls(Real x, Real centre, int binsperoctave) {
   }
 
   return out;
+}
+
+void LogSpectrum::initialize() {
+	// make things for tuning estimation
+  _sinvalues.clear();
+  _cosvalues.clear();
+	for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
+    _sinvalues.push_back(sin(2 * M_PI * (iBPS * 1.0 / nBPS)));
+    _cosvalues.push_back(cos(2 * M_PI * (iBPS * 1.0 / nBPS)));
+  }
+
+  _localTunings.clear();
+  _meanTunings.clear();
+  for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
+    _meanTunings.push_back(0);
+    _localTunings.push_back(0);
+  }
+
+  _frameCount = 0;
+
+  int tempn = nNote * _frameSize;
+
+  Real *tempkernel;
+  tempkernel = new Real[tempn];
+
+  logFreqMatrix(_sampleRate, _frameSize, tempkernel);
+  _kernelValue.clear();
+  _kernelFftIndex.clear();
+  _kernelNoteIndex.clear();
+  int countNonzero = 0;
+  for (int iNote = 0; iNote < nNote; ++iNote) {
+    for (int iFFT = 0; iFFT <static_cast<int>(_frameSize); ++iFFT) {
+      if (tempkernel[iFFT + _frameSize * iNote] > 0) {
+        _kernelValue.push_back(tempkernel[iFFT + _frameSize * iNote]);
+        if (tempkernel[iFFT + _frameSize * iNote] > 0) {
+            countNonzero++;
+        }
+        _kernelFftIndex.push_back(iFFT);
+        _kernelNoteIndex.push_back(iNote);				
+      }
+    }
+  }
+  delete [] tempkernel;
 }
