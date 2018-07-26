@@ -118,6 +118,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 ## Sound indexing, music production, and intelligent audio processing
 
+- M. Grachten, E. Deruty, A. Tanguy. Auto-adaptive Resonance Equalization using Dilated Residual Networks. arXiv preprint arXiv:1807.08636, 2018. 
+
 - H. Ordiales, M. L. Bruno. Sound recycling from public databases. In 12th International Audio Mostly Conference on Augmented and Participatory Sound and Music Experiences (AM’17), 2017.
 
 - S. Parekh, F. Font, and X. Serra. Improving Audio Retrieval through Loudness Profile Categorization. In IEEE International Symposium on Multimedia (ISM), pages 565-568, 2016.
