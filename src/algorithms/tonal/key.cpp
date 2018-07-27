@@ -42,7 +42,6 @@ const char* Key::description = DOC("This algorithm computes key estimate given a
 "  - 'edmm' - automatic profiles extracted from corpus analysis of electronic dance music and manually tweaked according to heuristic observation. It will report major modes (which are poorly represented in EDM) as minor, but improve performance otherwise [3].\n"
 "  - 'braw' - profiles obtained by calculating the median profile for each mode from a subset of BeatPort dataset. There is an extra profile obtained from ambiguous tracks that are reported as minor[4]\n"
 "  - 'bgate' - same as braw but zeroing the 4 less relevant elements of each profile[4]\n"
-"  - Other key profiles ('Faraldo', 'Pentatonic') are experimental and will be removed on due time.\n"
 "\n"
 "The standard mode of the algorithm estimates key/scale for a given HPCP vector. The streaming mode first accumulates a stream of HPCP vectors and computes its mean to provide the estimation.\n"
 "\n"
@@ -65,7 +64,17 @@ void Key::configure() {
   _slope = parameter("slope").toReal();
   _numHarmonics = parameter("numHarmonics").toInt();
   _profileType = parameter("profileType").toString();
+  _useMajMin = parameter("useMajMin").toBool();
 
+  if (_useMajMin) {
+    if (_profileType == "diatonic" || _profileType == "krumhansl"  || _profileType == "temperley" ||
+        _profileType == "weichai"  || _profileType == "tonictriad" || _profileType == "temperley2005" ||
+        _profileType == "thpcp"    || _profileType == "shaath"     || _profileType == "gomez" ||
+        _profileType == "noland"   || _profileType == "edmm") {
+      E_INFO("Key: the profile '" << _profileType << "' does not support the use of 'majmin' mode.");
+      _useMajMin = false;
+    }
+  }
   const char* keyNames[] = { "A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab" };
   _keys = arrayToVector<string>(keyNames);
 
@@ -110,14 +119,6 @@ void Key::configure() {
     { 0.0629, 0.0146, 0.061, 0.0121, 0.0623, 0.0414, 0.0248, 0.0631, 0.015, 0.0521, 0.0142, 0.0478 },
     { 0.0682, 0.0138, 0.0543, 0.0519, 0.0234, 0.0544, 0.0176, 0.067, 0.0349, 0.0297, 0.0401, 0.027 },
 
-    // Faraldo
-    { 7.0, 2.0, 3.8, 2.3, 4.7, 4.1, 2.5, 5.2, 2.0, 3.7, 3.0, 3.4 },
-    { 7.0, 3.0, 3.8, 4.5, 2.6, 3.5, 2.5, 5.2, 4.0, 2.5, 4.5, 3.0 },
-
-    // Pentatonic
-    { 1.0, 0.1, 0.25, 0.1, 0.5, 0.7, 0.1, 0.8, 0.1, 0.25, 0.1, 0.5 },
-    { 1.0, 0.2, 0.25, 0.5, 0.1, 0.7, 0.1, 0.8, 0.3, 0.2, 0.6, 0.2  },
-
     // edmm
     { 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083 },
     { 0.17235348, 0.04, 0.0761009,  0.12, 0.05621498, 0.08527853, 0.0497915,  0.13451001, 0.07458916, 0.05003023, 0.09187879, 0.05545106 },
@@ -125,9 +126,9 @@ void Key::configure() {
     // edma
     // { 0.16519551, 0.04749026, 0.08293076, 0.06687112, 0.09994645, 0.09274123, 0.05294487, 0.13159476, 0.05218986, 0.07443653, 0.06940723, 0.0642515  },
     // { 0.17235348, 0.05336489, 0.0761009,  0.10043649, 0.05621498, 0.08527853, 0.0497915,  0.13451001, 0.07458916, 0.05003023, 0.09187879, 0.05545106 },
-};
+  };
 
-Real profileTypesWithOther[][12] = {
+  Real profileTypesWithOther[][12] = {
     // bgate
     { 1.00  , 0.00  , 0.42  , 0.00  , 0.53  , 0.37  , 0.00  , 0.77  , 0.00  , 0.38,   0.21  , 0.30   },
     { 1.00  , 0.00  , 0.36  , 0.39  , 0.00  , 0.38  , 0.00  , 0.74  , 0.27  , 0.00  , 0.42  , 0.23   },
@@ -142,7 +143,7 @@ Real profileTypesWithOther[][12] = {
     { 1.00  , 0.29  , 0.50  , 0.40  , 0.60  , 0.56  , 0.32  , 0.80  , 0.31  , 0.45  , 0.42  , 0.39   },
     { 1.00  , 0.31  , 0.44  , 0.58  , 0.33  , 0.49  , 0.29  , 0.78  , 0.43  , 0.29  , 0.53  , 0.32   },
 	  { 1.00  , 0.26  , 0.35  , 0.29  , 0.44  , 0.36  , 0.21  , 0.78  , 0.26  , 0.25  , 0.32  , 0.26   }
-};
+  };
 
 
 #define SET_PROFILE(i) _M = arrayToVector<Real>(profileTypes[2*i]); _m = arrayToVector<Real>(profileTypes[2*i+1])
@@ -160,9 +161,7 @@ Real profileTypesWithOther[][12] = {
   else if (_profileType == "shaath")        { SET_PROFILE(7);  }
   else if (_profileType == "gomez")         { SET_PROFILE(8);  }
   else if (_profileType == "noland")        { SET_PROFILE(9);  }
-  else if (_profileType == "faraldo")       { SET_PROFILE(10); }
-  else if (_profileType == "pentatonic")    { SET_PROFILE(11); }
-  else if (_profileType == "edmm")          { SET_PROFILE(12); }
+  else if (_profileType == "edmm")          { SET_PROFILE(10); }
   // else if (_profileType == "edma")          { SET_PROFILE(13); }
   else if (_profileType == "bgate")         { SET_PROFILE_OTHER(0); }
   else if (_profileType == "braw")          { SET_PROFILE_OTHER(1); }
@@ -352,12 +351,15 @@ void Key::compute() {
       keyIndexMinor = shift;
     }
 
-    Real corrOther = correlation(pcp, mean_pcp, std_pcp, _profile_doO, _mean_profile_O, _std_profile_O, shift);
-    // Compute maximum value for other keys
-    if (corrOther > maxOther) {
-      max2Other = maxOther;
-      maxOther = corrOther;
-      keyIndexOther = shift;
+    Real corrOther = 0;
+    if (_useMajMin) {
+      corrOther = correlation(pcp, mean_pcp, std_pcp, _profile_doO, _mean_profile_O, _std_profile_O, shift);
+      // Compute maximum value for other keys
+      if (corrOther > maxOther) {
+        max2Other = maxOther;
+        maxOther = corrOther;
+        keyIndexOther = shift;
+      }
     }
   }
 
@@ -378,7 +380,7 @@ void Key::compute() {
 
 	else if (maxOther > maxMajor && maxOther > maxMinor) {
     keyIndex = (int) (keyIndexOther * 12 / pcpsize + 0.5);
-    scale = OTHER;
+    scale = MAJMIN;
     max = maxOther;
     max2 = max2Other;
     }
@@ -424,8 +426,8 @@ void Key::compute() {
     _scale.get() = "minor";
   }
 
-  else if (scale == OTHER) {
-    _scale.get() = "minor";
+  else if (scale == MAJMIN) {
+    _scale.get() = "majmin";
   }
 
   _strength.get() = max;
@@ -640,7 +642,8 @@ void Key::configure() {
                       INHERIT("numHarmonics"),
                       INHERIT("slope"),
                       INHERIT("profileType"),
-                      INHERIT("pcpSize"));
+                      INHERIT("pcpSize"),
+                      INHERIT("useMajMin"));
 
   _averageDetuningCorrection = parameter("averageDetuningCorrection").toBool();
   _pcpThreshold = parameter("pcpThreshold").toReal();

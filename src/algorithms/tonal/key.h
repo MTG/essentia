@@ -51,8 +51,9 @@ class Key : public Algorithm {
     declareParameter("useThreeChords", "consider only the 3 main triad chords of the key (T, D, SD) to build the polyphonic profiles", "{true,false}", true);
     declareParameter("numHarmonics", "number of harmonics that should contribute to the polyphonic profile (1 only considers the fundamental harmonic)", "[1,inf)", 4);
     declareParameter("slope", "value of the slope of the exponential harmonic contribution to the polyphonic profile", "[0,inf)", 0.6);
-    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,faraldo,pentatonic,edmm,edma,bgate,braw}", "bgate");
+    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,edmm,edma,bgate,braw}", "bgate");
     declareParameter("pcpSize", "number of array elements used to represent a semitone times 12 (this parameter is only a hint, during computation, the size of the input PCP is used instead)", "[12,inf)", 36);
+    declareParameter("useMajMin", "use a third profile called 'majmin' for ambiguous tracks [4]. Only avalable for the edma, bgate and braw profiles", "{true,false}", false);
   }
 
   void compute();
@@ -64,9 +65,9 @@ class Key : public Algorithm {
 
 protected:
   enum Scales {
-    MAJOR = 0,
-    MINOR = 1,
-    OTHER = 2
+    MAJOR  = 0,
+    MINOR  = 1,
+    MAJMIN = 2
   };
 
   std::vector<Real> _m;
@@ -90,6 +91,7 @@ protected:
   std::string _profileType;
 
   std::vector<std::string> _keys;
+  bool _useMajMin;
 
   Real correlation(const std::vector<Real>& v1, const Real mean1, const Real std1, const std::vector<Real>& v2, const Real mean2, const Real std2, const int shift) const;
   void addContributionHarmonics(const int pitchclass, const Real contribution, std::vector<Real>& M_chords) const;
@@ -136,10 +138,11 @@ class Key : public AlgorithmComposite {
     declareParameter("useThreeChords", "consider only the 3 main triad chords of the key (T, D, SD) to build the polyphonic profiles", "{true,false}", true);
     declareParameter("numHarmonics", "number of harmonics that should contribute to the polyphonic profile (1 only considers the fundamental harmonic)", "[1,inf)", 4);
     declareParameter("slope", "value of the slope of the exponential harmonic contribution to the polyphonic profile", "[0,inf)", 0.6);
-    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,faraldo,pentatonic,edmm,edma,bgate,braw}", "bgate");
+    declareParameter("profileType", "the type of polyphic profile to use for correlation calculation", "{diatonic,krumhansl,temperley,weichai,tonictriad,temperley2005,thpcp,shaath,gomez,noland,edmm,edma,bgate,braw}", "bgate");
     declareParameter("pcpSize", "number of array elements used to represent a semitone times 12 (this parameter is only a hint, during computation, the size of the input PCP is used instead)", "[12,inf)", 36);
     declareParameter("pcpThreshold", "pcp bins below this value are set to 0", "[0,1]", 0.2);
     declareParameter("averageDetuningCorrection", "shifts a pcp to the nearest tempered bin", "{true,false}", true);
+    declareParameter("useMajMin", "songs can also be clasified as MajMin [4]. Only avalable for the edma, bgate and braw profiles", "{true,false}", false);
   }
 
   void configure();
