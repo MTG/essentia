@@ -29,6 +29,9 @@ const char* LogSpectrum::category = "Spectral";
 const char* LogSpectrum::description = DOC("Computes spectrum with logarithmically distributed frequency bins. "
 "This code is a reimplementation of the well known NNLS Chroma based in[1].\n"
 "\n"
+"note: The algorithm uses moving averages to compute the tuning frequencies so it should be reset before starting "
+"to process the frames of a new audio file by calling reset() (or configure())\n"
+"\n"
 "References:\n"
 "  [1] Mauch, M., & Dixon, S. (2010, August). Approximate Note Transcription\n"
 "  for the Improved Identification of Difficult Chords. In ISMIR (pp. 135-140).");
@@ -49,7 +52,6 @@ void LogSpectrum::configure() {
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toFloat();
   _rollon = parameter("rollOn").toFloat();
-	E_INFO("LogSpectrum: input spectrum size does not match _frameSize parameter. Reconfiguring the algorithm");
   initialize();
 }
 
@@ -61,7 +63,11 @@ void LogSpectrum::compute() {
   Real& localTuning = _localTuning.get();
   vector<Real>& meanTuning = _meanTuning.get();
 
+  if (spectrum.size() <= 1)
+    throw EssentiaException("LogSpectrum: input vector is empty");
+
   if (spectrum.size() != _frameSize) {
+    E_INFO("LogSpectrum: input spectrum size does not match '_frameSize' parameter. Reconfiguring the algorithm.");
     _frameSize = spectrum.size();
     initialize();
   }
@@ -267,4 +273,8 @@ void LogSpectrum::initialize() {
     }
   }
   delete [] tempkernel;
+}
+
+void LogSpectrum::reset() {
+  initialize();
 }

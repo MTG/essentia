@@ -43,14 +43,14 @@ class LogSpectrum : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("frameSize", "the input frame size of the spectrum vector", "[0,inf)", 1025);
-    declareParameter("sampleRate", "the input sample rate", "[0,inf)", 44100.);
+    declareParameter("frameSize", "the input frame size of the spectrum vector", "(1,inf)", 1025);
+    declareParameter("sampleRate", "the input sample rate", "(0,inf)", 44100.);
     declareParameter("rollOn", "this removes low-frequency noise - useful in quiet recordings", "[0,5]", 0.f);
   }
 
   void configure();
   void compute();
-  void initialize();
+  void reset();
 
   static const char* name;
   static const char* category;
@@ -73,6 +73,7 @@ class LogSpectrum : public Algorithm {
   bool logFreqMatrix(Real fs, int frameSize, Real *outmatrix);
   Real cospuls(Real x, Real centre, Real width);
   Real pitchCospuls(Real x, Real centre, int binsperoctave);
+  void initialize();
 };
 
 } // namespace standard
@@ -93,7 +94,7 @@ class LogSpectrum : public StreamingAlgorithmWrapper {
 
  public:
   LogSpectrum() {
-    declareAlgorithm("NNLSBase");
+    declareAlgorithm("LogSpectrum");
     declareInput(_spectrum, TOKEN, "spectrum");
     declareOutput(_logFreqSpectrum, TOKEN, "logFreqSpectrum");
     declareOutput(_meanTuning, TOKEN, "meanTuning");
