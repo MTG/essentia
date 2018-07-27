@@ -50,8 +50,8 @@ class NNLSChroma : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("frameSize", "the input frame size of the spectrum vector", "[0,inf)", 1025);
-    declareParameter("sampleRate", "the input sample rate", "[0,inf)", 44100.);
+    declareParameter("frameSize", "the input frame size of the spectrum vector", "(1,inf)", 1025);
+    declareParameter("sampleRate", "the input sample rate", "(0,inf)", 44100.);
     declareParameter("useNNLS", "toggle between NNLS approximate transcription and linear spectral mapping", "{true,false}", true);
     declareParameter("tuningMode", "local uses a local average for tuning, global uses all audio frames. Local tuning is only advisable when the tuning is likely to change over the audio", "{global,local}", "global");
     declareParameter("spectralWhitening", "determines how much the log-frequency spectrum is whitened", "[0,1.0]", 1.0);
@@ -61,6 +61,7 @@ class NNLSChroma : public Algorithm {
 
   void configure();
   void compute();
+  void reset();
 
   static const char* name;
   static const char* category;
@@ -69,10 +70,7 @@ class NNLSChroma : public Algorithm {
 
  protected:
   Real _sampleRate;
-  int _frameCount;
   size_t _frameSize;
-  std::vector<Real> _meanTunings;
-  std::vector<Real> _localTunings;
   Real _whitening;
   Real _spectralShape;
   bool _useNNLS;
@@ -80,7 +78,6 @@ class NNLSChroma : public Algorithm {
   std::vector<int> _kernelFftIndex;
   std::vector<int> _kernelNoteIndex;
   int _doNormalizeChroma;
-  Real _rollon;
   std::vector<Real> _hw;
   std::vector<Real> _sinvalues;
   std::vector<Real> _cosvalues;

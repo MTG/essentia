@@ -121,6 +121,11 @@ void NNLSChroma::configure() {
   dictionaryMatrix(_dict, _spectralShape);
 }
 
+void NNLSChroma::reset() {
+  delete [] _dict;
+
+  configure();
+}
 
 void NNLSChroma::compute() {
   const vector<vector<Real> >& logSpectrum = _logSpectrum.get();
@@ -131,6 +136,13 @@ void NNLSChroma::compute() {
   vector<vector<Real> >& bassChromagram = _bassChromagram.get();
   vector<vector<Real> >& chromagram = _chromagram.get();
 
+  if (logSpectrum.size() <= 1)
+    throw EssentiaException("NNLSChroma: input vector is empty");
+
+  if (logSpectrum[0].size() != 256) {
+    throw EssentiaException("NNLSChroma: log spectrum size should be 256 but it is ", 
+                            logSpectrum[0].size(), ".");
+  }
 
   /**  Calculate Tuning
        calculate tuning from (using the angle of the complex number defined by the 
