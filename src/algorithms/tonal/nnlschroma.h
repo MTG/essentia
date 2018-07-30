@@ -69,26 +69,26 @@ class NNLSChroma : public Algorithm {
   static const Real precision;
 
  protected:
-  Real _sampleRate;
+  bool _useNNLS;
+  bool _tuningMode;
+  int _doNormalizeChroma;
   size_t _frameSize;
+  Real _sampleRate;
   Real _whitening;
   Real _spectralShape;
-  bool _useNNLS;
-  std::vector<Real> _kernelValue;
   std::vector<int> _kernelFftIndex;
   std::vector<int> _kernelNoteIndex;
-  int _doNormalizeChroma;
+  std::vector<Real> _kernelValue;
   std::vector<Real> _hw;
   std::vector<Real> _sinvalues;
   std::vector<Real> _cosvalues;
-  bool _tuningMode;
-  Real *_dict;
+  std::vector<Real> _dict;
 
-  bool logFreqMatrix(Real fs, int frameSize, Real *outmatrix);
+  bool logFreqMatrix(Real fs, int frameSize, std::vector<Real> outmatrix);
   Real cospuls(Real x, Real centre, Real width);
   Real pitchCospuls(Real x, Real centre, int binsperoctave);
   std::vector<Real> SpecialConvolution(std::vector<Real> convolvee, std::vector<Real> kernel);
-  void dictionaryMatrix(Real* dm, Real s_param);
+  void dictionaryMatrix(std::vector<Real> dm, Real s_param);
 
 };
 

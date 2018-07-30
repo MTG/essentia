@@ -30,7 +30,8 @@ const char* NNLSChroma::description = DOC("This algorithm extracts treble and ba
 "On this representation, two processing steps are performed:\n"
 "  -tuning, after which each centre bin (i.e. bin 2, 5, 8, ...) corresponds to a semitone, even if the tuning of the piece deviates from 440 Hz standard pitch.\n"
 "  -running standardisation: subtraction of the running mean, division by the running standard deviation. This has a spectral whitening effect.\n"
-"This code is a reimplementation of the well known NNLS Chroma based in [1].\n"
+"This code is a reimplementation of the well known NNLS Chroma presented in [1]. To achieve similar results follow this processing chain:\n"
+"frame slicing with sample rate = 44100, frame size = 16384, hop size = 2048 -> Windowing with Hann and no normalization -> Spectrum -> LogSpectrum.\n"
 "\n"
 "References:\n"
 "  [1] Mauch, M., & Dixon, S. (2010, August). Approximate Note Transcription\n"
@@ -41,9 +42,32 @@ const int nOctave = 7;
 const int nNote = nOctave * 12 * nBPS + 2 * (nBPS/2+1); // a core over all octaves, plus some overlap at top and bottom
 const int MIDI_basenote = 45;
 
-static const Real basswindow[] = {0.001769, 0.015848, 0.043608, 0.084265, 0.136670, 0.199341, 0.270509, 0.348162, 0.430105, 0.514023, 0.597545, 0.678311, 0.754038, 0.822586, 0.882019, 0.930656, 0.967124, 0.990393, 0.999803, 0.995091, 0.976388, 0.944223, 0.899505, 0.843498, 0.777785, 0.704222, 0.624888, 0.542025, 0.457975, 0.375112, 0.295778, 0.222215, 0.156502, 0.100495, 0.055777, 0.023612, 0.004909, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000};
-static const Real treblewindow[] = {0.000350, 0.003144, 0.008717, 0.017037, 0.028058, 0.041719, 0.057942, 0.076638, 0.097701, 0.121014, 0.146447, 0.173856, 0.203090, 0.233984, 0.266366, 0.300054, 0.334860, 0.370590, 0.407044, 0.444018, 0.481304, 0.518696, 0.555982, 0.592956, 0.629410, 0.665140, 0.699946, 0.733634, 0.766016, 0.796910, 0.826144, 0.853553, 0.878986, 0.902299, 0.923362, 0.942058, 0.958281, 0.971942, 0.982963, 0.991283, 0.996856, 0.999650, 0.999650, 0.996856, 0.991283, 0.982963, 0.971942, 0.958281, 0.942058, 0.923362, 0.902299, 0.878986, 0.853553, 0.826144, 0.796910, 0.766016, 0.733634, 0.699946, 0.665140, 0.629410, 0.592956, 0.555982, 0.518696, 0.481304, 0.444018, 0.407044, 0.370590, 0.334860, 0.300054, 0.266366, 0.233984, 0.203090, 0.173856, 0.146447, 0.121014, 0.097701, 0.076638, 0.057942, 0.041719, 0.028058, 0.017037, 0.008717, 0.003144, 0.000350};
-
+static const vector<Real> basswindow = {
+    0.001769, 0.015848, 0.043608, 0.084265, 0.136670, 0.199341, 0.270509,
+    0.348162, 0.430105, 0.514023, 0.597545, 0.678311, 0.754038, 0.822586,
+    0.882019, 0.930656, 0.967124, 0.990393, 0.999803, 0.995091, 0.976388,
+    0.944223, 0.899505, 0.843498, 0.777785, 0.704222, 0.624888, 0.542025,
+    0.457975, 0.375112, 0.295778, 0.222215, 0.156502, 0.100495, 0.055777,
+    0.023612, 0.004909, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000};
+static const vector<Real> treblewindow = {
+    0.000350, 0.003144, 0.008717, 0.017037, 0.028058, 0.041719, 0.057942,
+    0.076638, 0.097701, 0.121014, 0.146447, 0.173856, 0.203090, 0.233984,
+    0.266366, 0.300054, 0.334860, 0.370590, 0.407044, 0.444018, 0.481304,
+    0.518696, 0.555982, 0.592956, 0.629410, 0.665140, 0.699946, 0.733634,
+    0.766016, 0.796910, 0.826144, 0.853553, 0.878986, 0.902299, 0.923362,
+    0.942058, 0.958281, 0.971942, 0.982963, 0.991283, 0.996856, 0.999650,
+    0.999650, 0.996856, 0.991283, 0.982963, 0.971942, 0.958281, 0.942058,
+    0.923362, 0.902299, 0.878986, 0.853553, 0.826144, 0.796910, 0.766016,
+    0.733634, 0.699946, 0.665140, 0.629410, 0.592956, 0.555982, 0.518696,
+    0.481304, 0.444018, 0.407044, 0.370590, 0.334860, 0.300054, 0.266366,
+    0.233984, 0.203090, 0.173856, 0.146447, 0.121014, 0.097701, 0.076638,
+    0.057942, 0.041719, 0.028058, 0.017037, 0.008717, 0.003144, 0.000350};
 
 void NNLSChroma::configure() {
   _frameSize = parameter("frameSize").toInt();
@@ -69,7 +93,7 @@ void NNLSChroma::configure() {
     _doNormalizeChroma = 3;
 
 
-  // make things for tuning estimation
+  // Make things for tuning estimation.
   _sinvalues.clear();
   _cosvalues.clear();
 	for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
@@ -77,7 +101,7 @@ void NNLSChroma::configure() {
     _cosvalues.push_back(cos(2 * M_PI * (iBPS * 1.0 / nBPS)));
   }
 
-	// make hamming window of length 1/2 octave
+	// Make hamming window of length 1/2 octave.
 	int hamwinlength = nBPS * 6 + 1;
 
   Real hamwinsum = 0;
@@ -91,16 +115,14 @@ void NNLSChroma::configure() {
 
   int tempn = nNote * _frameSize;
 
-  Real *tempkernel;
-
-  tempkernel = new Real[tempn];
+  vector<Real> tempkernel(tempn);
 
   logFreqMatrix(_sampleRate, _frameSize, tempkernel);
   _kernelValue.clear();
   _kernelFftIndex.clear();
   _kernelNoteIndex.clear();
   int countNonzero = 0;
-  for (int iNote = 0; iNote < nNote; ++iNote) { // I don't know if this is wise: manually making a sparse matrix
+  for (int iNote = 0; iNote < nNote; ++iNote) {
     for (int iFFT = 0; iFFT <static_cast<int>(_frameSize); ++iFFT) {
       if (tempkernel[iFFT + _frameSize * iNote] > 0) {
         _kernelValue.push_back(tempkernel[iFFT + _frameSize * iNote]);
@@ -113,17 +135,13 @@ void NNLSChroma::configure() {
     }
   }
 
-  delete [] tempkernel;
-
-  _dict = new Real[nNote * 84];
+  _dict.assign(nNote * 84, 0.f);
   for (int i = 0; i < nNote * 84; ++i) _dict[i] = 0.0;
 
   dictionaryMatrix(_dict, _spectralShape);
 }
 
 void NNLSChroma::reset() {
-  delete [] _dict;
-
   configure();
 }
 
@@ -146,7 +164,7 @@ void NNLSChroma::compute() {
 
   /**  Calculate Tuning
        calculate tuning from (using the angle of the complex number defined by the 
-        cumulative mean real and imag values)
+       cumulative mean real and imag values)
   **/
   Real meanTuningImag = 0;
   Real meanTuningReal = 0;
@@ -174,23 +192,27 @@ void NNLSChroma::compute() {
         RealShift = localTuning[i] * 3.f - intShift; // RealShift is a really bad name for this
     }
         
-    // interpolate all inner bins
+    // Interpolate all inner bins.
     for (int k = 2; k < (int)logSpectrum[i].size() - 3; ++k) {
-        tempValue = logSpectrum[i][k + intShift] * (1-RealShift) + logSpectrum[i][k+intShift+1] * RealShift;
-        tunedLogfreqSpectrum[i].push_back(tempValue);
+      tempValue = logSpectrum[i][k + intShift] * (1 - RealShift) +
+                  logSpectrum[i][k + intShift + 1] * RealShift;
+      tunedLogfreqSpectrum[i].push_back(tempValue);
     }
-        
-    tunedLogfreqSpectrum[i].push_back(0.0); tunedLogfreqSpectrum[i].push_back(0.0); tunedLogfreqSpectrum[i].push_back(0.0); // upper edge
+
+    tunedLogfreqSpectrum[i].push_back(0.0);
+    tunedLogfreqSpectrum[i].push_back(0.0);
+    tunedLogfreqSpectrum[i].push_back(0.0);  // upper edge
 
     vector<Real> runningmean = SpecialConvolution(tunedLogfreqSpectrum[i], _hw);
     vector<Real> runningstd;
 
-    // first step: squared values into vector (variance)
+    // First step: squared values into vector (variance).
     for (int j = 0; j < nNote; j++) {
-      runningstd.push_back((tunedLogfreqSpectrum[i][j] - runningmean[j]) * (tunedLogfreqSpectrum[i][j] - runningmean[j]));
+      runningstd.push_back((tunedLogfreqSpectrum[i][j] - runningmean[j]) *
+                           (tunedLogfreqSpectrum[i][j] - runningmean[j]));
     }
 
-    // second step convolve
+    // Second step convolve.
     runningstd = SpecialConvolution(runningstd, _hw);
 
     for (int j = 0; j < nNote; j++) {  
@@ -207,18 +229,16 @@ void NNLSChroma::compute() {
 
 
   /** Semitone spectrum and chromagrams
-      Semitone-spaced log-frequency spectrum derived from the tuned log-freq spectrum above. the spectrum
-      is inferred using a non-negative least squares algorithm.
-      Three different kinds of chromagram are calculated, "treble", "bass", and "both" (which means 
-      bass and treble stacked onto each other).
+      Semitone-spaced log-frequency spectrum derived from the tuned log-freq spectrum above. 
+      The spectrum is inferred using a non-negative least squares algorithm.
+      Three different kinds of chromagram are calculated, "treble", "bass", and "both" (which 
+      means bass and treble stacked onto each other).
   **/
-
   semitoneSpectrum.assign(logSpectrum.size(), vector<Real>());
   chromagram.assign(logSpectrum.size(), vector<Real>());
   bassChromagram.assign(logSpectrum.size(), vector<Real>());
 
   for (int i = 0; i < (int)logSpectrum.size(); i++) {
-    // vector<Real> b(nNote, 0.f);
     Real b[nNote];
 
     bool some_b_greater_zero = false;
@@ -232,7 +252,8 @@ void NNLSChroma::compute() {
       }
     }
 
-    // here's where the non-negative least squares algorithm calculates the note activation x
+    // Here's where the non-negative least squares algorithm calculates the note
+    // activation x.
     vector<Real> chroma = vector<Real>(12, 0);
     vector<Real> basschroma = vector<Real>(12, 0);
     Real currval;
@@ -240,60 +261,66 @@ void NNLSChroma::compute() {
 
     if (some_b_greater_zero) {
       if (!_useNNLS) {
-        for (int iNote = nBPS/2 + 2; iNote < nNote - nBPS/2; iNote += nBPS) {
+        for (int iNote = nBPS / 2 + 2; iNote < nNote - nBPS / 2;
+             iNote += nBPS) {
           currval = 0;
-          for (int iBPS = -nBPS/2; iBPS < nBPS/2+1; ++iBPS) {
-            currval += b[iNote + iBPS] * (1-abs(iBPS*1.0/(nBPS/2+1)));						
+          for (int iBPS = -nBPS / 2; iBPS < nBPS / 2 + 1; ++iBPS) {
+            currval += b[iNote + iBPS] * (1 - abs(iBPS * 1.0 / (nBPS / 2 + 1)));
           }
 
           semitoneSpectrum[i].push_back(currval);
           chroma[iSemitone % 12] += currval * treblewindow[iSemitone];
           basschroma[iSemitone % 12] += currval * basswindow[iSemitone];
           iSemitone++;
-        } 
+        }
       }
 
       else {
-        Real x[84+1000];
+        Real x[84 + 1000];
         for (int j = 1; j < 1084; ++j) x[j] = 1.0;
 
         vector<int> signifIndex;
         int index = 0;
         sumb /= 84.0;
 
-        for (int iNote = nBPS/2 + 2; iNote < nNote - nBPS/2; iNote += nBPS) {
+        for (int iNote = nBPS / 2 + 2; iNote < nNote - nBPS / 2;
+             iNote += nBPS) {
           Real currval = 0.f;
-          for (int iBPS = -nBPS/2; iBPS < nBPS/2+1; ++iBPS) {
-            currval += b[iNote + iBPS]; 
+          for (int iBPS = -nBPS / 2; iBPS < nBPS / 2 + 1; ++iBPS) {
+            currval += b[iNote + iBPS];
           }
           if (currval > 0.f) signifIndex.push_back(index);
-          semitoneSpectrum[i].push_back(0.f); // fill the values, change later
+          semitoneSpectrum[i].push_back(0.f);  // fill the values, change later
           index++;
         }
         Real rnorm;
-        Real w[84+1000];
-        Real zz[84+1000];
-        int indx[84+1000];
+        Real w[84 + 1000];
+        Real zz[84 + 1000];
+        int indx[84 + 1000];
         int mode;
         int dictsize = nNote * signifIndex.size();
-        Real *curr_dict = new Real[dictsize];
+        Real* curr_dict = new Real[dictsize];
         for (int iNote = 0; iNote < (int)signifIndex.size(); ++iNote) {
           for (int iBin = 0; iBin < nNote; iBin++) {
-            curr_dict[iNote * nNote + iBin] = 1.0 * _dict[signifIndex[iNote] * nNote + iBin];
+            curr_dict[iNote * nNote + iBin] =
+                1.0 * _dict[signifIndex[iNote] * nNote + iBin];
           }
         }
 
-        nnls(curr_dict, nNote, nNote, signifIndex.size(), b, x, &rnorm, w, zz, indx, &mode);
-        delete [] curr_dict;
+        nnls(curr_dict, nNote, nNote, signifIndex.size(), b, x, &rnorm, w, zz,
+             indx, &mode);
+        delete[] curr_dict;
 
         for (int iNote = 0; iNote < (int)signifIndex.size(); ++iNote) {
           semitoneSpectrum[i][signifIndex[iNote]] = x[iNote];
-          chroma[signifIndex[iNote] % 12] += x[iNote] * treblewindow[signifIndex[iNote]];
-          basschroma[signifIndex[iNote] % 12] += x[iNote] * basswindow[signifIndex[iNote]];
+          chroma[signifIndex[iNote] % 12] +=
+              x[iNote] * treblewindow[signifIndex[iNote]];
+          basschroma[signifIndex[iNote] % 12] +=
+              x[iNote] * basswindow[signifIndex[iNote]];
         }
       }
-    } 
-    
+    }
+
     else {
       for (int j = 0; j < 84; ++j) semitoneSpectrum[i].push_back(0);
     }
@@ -302,35 +329,41 @@ void NNLSChroma::compute() {
     bassChromagram[i] = basschroma;
 
     if (_doNormalizeChroma > 0) {
-      vector<Real> chromanorm = vector<Real>(3,0);			
-      
+      vector<Real> chromanorm = vector<Real>(3, 0);
+
       switch (_doNormalizeChroma) {
-      case 0: // should never end up here
-        break;
-      case 1:
-        chromanorm[0] = *max_element(chromagram[i].begin(), chromagram[i].end());
-        chromanorm[1] = *max_element(bassChromagram[i].begin(), bassChromagram[i].end());
-        chromanorm[2] = max(chromanorm[0], chromanorm[1]);
-        break;
-      case 2:
-        for (vector<Real>::iterator it = chromagram[i].begin(); it != chromagram[i].end(); ++it) {
-          chromanorm[0] += *it; 						
-        }
-        for (vector<Real>::iterator it = bassChromagram[i].begin(); it != bassChromagram[i].end(); ++it) {
-          chromanorm[1] += *it; 						
-        }
-        break;
-      case 3:
-        for (vector<Real>::iterator it = chromagram[i].begin(); it != chromagram[i].end(); ++it) {
-          chromanorm[0] += pow(*it,2); 						
-        }
-        chromanorm[0] = sqrt(chromanorm[0]);
-        for (vector<Real>::iterator it = bassChromagram[i].begin(); it != bassChromagram[i].end(); ++it) {
-          chromanorm[1] += pow(*it,2); 						
-        }
-        chromanorm[1] = sqrt(chromanorm[1]);
-        chromanorm[2] = sqrt(chromanorm[2]);
-        break;
+        case 0:  // should never end up here
+          break;
+        case 1:
+          chromanorm[0] =
+              *max_element(chromagram[i].begin(), chromagram[i].end());
+          chromanorm[1] =
+              *max_element(bassChromagram[i].begin(), bassChromagram[i].end());
+          chromanorm[2] = max(chromanorm[0], chromanorm[1]);
+          break;
+        case 2:
+          for (vector<Real>::iterator it = chromagram[i].begin();
+               it != chromagram[i].end(); ++it) {
+            chromanorm[0] += *it;
+          }
+          for (vector<Real>::iterator it = bassChromagram[i].begin();
+               it != bassChromagram[i].end(); ++it) {
+            chromanorm[1] += *it;
+          }
+          break;
+        case 3:
+          for (vector<Real>::iterator it = chromagram[i].begin();
+               it != chromagram[i].end(); ++it) {
+            chromanorm[0] += pow(*it, 2);
+          }
+          chromanorm[0] = sqrt(chromanorm[0]);
+          for (vector<Real>::iterator it = bassChromagram[i].begin();
+               it != bassChromagram[i].end(); ++it) {
+            chromanorm[1] += pow(*it, 2);
+          }
+          chromanorm[1] = sqrt(chromanorm[1]);
+          chromanorm[2] = sqrt(chromanorm[2]);
+          break;
       }
       if (chromanorm[0] > 0) {
         for (int j = 0; j < (int)chromagram[i].size(); j++) {
@@ -349,84 +382,84 @@ void NNLSChroma::compute() {
 
 /** Special Convolution
     Special convolution is as long as the convolvee, i.e. the first argument. 
-	In the "valid" core part of the convolution it contains the usual convolution 
-	values, but the parts at the beginning (ending) that would normally be 
-	calculated using zero padding simply have the same values as the first 
-	(last) valid convolution bin.
+	  In the "valid" core part of the convolution it contains the usual convolution 
+  	values, but the parts at the beginning (ending) that would normally be 
+  	calculated using zero padding simply have the same values as the first 
+  	(last) valid convolution bin.
 **/
-
 vector<Real> NNLSChroma::SpecialConvolution(vector<Real> convolvee, vector<Real> kernel) {
-    Real s;
-    int m, n;
-    int lenConvolvee = convolvee.size();
-    int lenKernel = kernel.size();
+  Real s;
+  int m, n;
+  int lenConvolvee = convolvee.size();
+  int lenKernel = kernel.size();
 
-    vector<Real> Z(nNote,0);
-    assert(lenKernel % 2 != 0); // no exception handling !!!
-    
-    for (n = lenKernel - 1; n < lenConvolvee; n++) {
-    	s=0.0;
-    	for (m = 0; m < lenKernel; m++) {
-            s += convolvee[n-m] * kernel[m];
-    	}
-        Z[n -lenKernel/2] = s;
+  vector<Real> Z(nNote, 0);
+  assert(lenKernel % 2 != 0);  // no exception handling !!!
+
+  for (n = lenKernel - 1; n < lenConvolvee; n++) {
+    s = 0.0;
+    for (m = 0; m < lenKernel; m++) {
+      s += convolvee[n - m] * kernel[m];
     }
-    
-    // fill upper and lower pads
-    for (n = 0; n < lenKernel/2; n++) Z[n] = Z[lenKernel/2];    
-    for (n = lenConvolvee; n < lenConvolvee +lenKernel/2; n++) Z[n - lenKernel/2] = 
-                                                                   Z[lenConvolvee - lenKernel/2 -  1];
-    return Z;
+    Z[n - lenKernel / 2] = s;
+  }
+
+  // Fill upper and lower pads.
+  for (n = 0; n < lenKernel / 2; n++) Z[n] = Z[lenKernel / 2];
+  for (n = lenConvolvee; n < lenConvolvee + lenKernel / 2; n++)
+    Z[n - lenKernel / 2] = Z[lenConvolvee - lenKernel / 2 - 1];
+  return Z;
 }
 
 
 /**
- * Calculates a matrix that can be used to linearly map from the magnitude spectrum to a pitch-scale spectrum.
- * @return this always returns true, which is a bit stupid, really. The main purpose of the function is to change the values in the "matrix" pointed to by *outmatrix
- */
-bool NNLSChroma::logFreqMatrix(Real fs, int frameSize, Real *outmatrix) {
-	// TODO: rewrite so that everyone understands what is done here.
-	// TODO: make this more general, such that it works with all minoctave, maxoctave and whatever nBPS (or check if it already does)
+  Calculates a matrix that can be used to linearly map from the magnitude spectrum to a pitch-scale spectrum.
+  return this always returns true, which is a bit stupid, really. The main purpose of the function is to change the values in the "matrix" pointed to by *outmatrix
+*/
+bool NNLSChroma::logFreqMatrix(Real fs, int frameSize, vector<Real> outmatrix) {
+  // todo: rewrite so that everyone understands what is done here.
+  // todo: make this more general, such that it works with all minoctave,
+  // maxoctave and whatever nBPS (or check if it already does)
 
-  int binspersemitone = nBPS; 
-  int minoctave = 0; // this must be 0
-  int maxoctave = 7; // this must be 7
+  int binspersemitone = nBPS;
+  int minoctave = 0;  // this must be 0
+  int maxoctave = 7;  // this must be 7
   int oversampling = 80;
 
-  // linear frequency vector
+  // Linear frequency vector.
   vector<Real> fft_f;
   for (int i = 0; i < frameSize; ++i) {
-    fft_f.push_back(i * (fs * 1.0 / ((frameSize - 1.f ) * 2.f)));
+    fft_f.push_back(i * (fs * 1.0 / ((frameSize - 1.f) * 2.f)));
   }
 
   Real fft_width = fs / (frameSize - 1.f);
 
-  // linear oversampled frequency vector
+  // Linear oversampled frequency vector.
   vector<Real> oversampled_f;
   for (int i = 0; i < oversampling * frameSize; ++i) {
-    oversampled_f.push_back(i * ((fs * 1.0 / ((frameSize - 1.f ) * 2.f)) / oversampling));
+    oversampled_f.push_back(
+        i * ((fs * 1.0 / ((frameSize - 1.f) * 2.f)) / oversampling));
   }
 
-  // pitch-spaced frequency vector
-  int minMIDI = 21 + minoctave * 12 - 1; // this includes one additional semitone!
-  int maxMIDI = 21 + maxoctave * 12; // this includes one additional semitone!
+  // Pitch-spaced frequency vector.
+  int minMIDI =
+      21 + minoctave * 12 - 1;        // this includes one additional semitone!
+  int maxMIDI = 21 + maxoctave * 12;  // this includes one additional semitone!
   vector<Real> cq_f;
-  Real oob = 1.0/binspersemitone; // one over binspersemitone
+  Real oob = 1.0 / binspersemitone;  // one over binspersemitone
   for (int i = minMIDI; i < maxMIDI; ++i) {
-    for (int k = 0; k < binspersemitone; ++k)	 {
-      cq_f.push_back(440 * pow(2.0,0.083333333333 * (i+oob*k-69)));
+    for (int k = 0; k < binspersemitone; ++k) {
+      cq_f.push_back(440 * pow(2.0, 0.083333333333 * (i + oob * k - 69)));
     }
   }
-  // cq_f.push_back(440 * pow(2.0,0.083333 * (minMIDI-oob-69)));
-  cq_f.push_back(440 * pow(2.0,0.083333 * (maxMIDI-69)));
+  cq_f.push_back(440 * pow(2.0, 0.083333 * (maxMIDI - 69)));
 
   int nFFT = fft_f.size();
 
   vector<Real> fft_activation;
   for (int iOS = 0; iOS < 2 * oversampling; ++iOS) {
-    Real cosp = cospuls(oversampled_f[iOS],fft_f[1],fft_width);
+    Real cosp = cospuls(oversampled_f[iOS], fft_f[1], fft_width);
     fft_activation.push_back(cosp);
-    // cerr << cosp << endl;
   }
 
   for (int i = 0; i < nFFT * (int)cq_f.size(); ++i) {
@@ -435,21 +468,26 @@ bool NNLSChroma::logFreqMatrix(Real fs, int frameSize, Real *outmatrix) {
 
   Real cq_activation;
   for (int iFFT = 1; iFFT < nFFT; ++iFFT) {
-    // find frequency stretch where the oversampled vector can be non-zero (i.e. in a window of width fft_width around the current frequency)
+    // Find frequency stretch where the oversampled vector can be non-zero
+    // (i.e. in a window of width fft_width around the current frequency)
     int curr_start = oversampling * iFFT - oversampling;
-    int curr_end = oversampling * iFFT + oversampling; // don't know if I should add "+1" here
-    // cerr << oversampled_f[curr_start] << " " << fft_f[iFFT] << " " << oversampled_f[curr_end] << endl;
+    int curr_end = oversampling * iFFT +
+                   oversampling;  // don't know if I should add "+1" here
+    // oversampled_f[curr_end] << endl;
     for (int iCQ = 0; iCQ < (int)cq_f.size(); ++iCQ) {
-      if (cq_f[iCQ] * pow(2.0, 0.084) + fft_width > fft_f[iFFT] && cq_f[iCQ] * pow(2.0, -0.084 * 2) - fft_width < fft_f[iFFT]) { // within a generous neighbourhood
+      if (cq_f[iCQ] * pow(2.0, 0.084) + fft_width > fft_f[iFFT] &&
+          cq_f[iCQ] * pow(2.0, -0.084 * 2) - fft_width < fft_f[iFFT]) {
+        // within a generous neighbourhood
         for (int iOS = curr_start; iOS < curr_end; ++iOS) {
-          cq_activation = pitchCospuls(oversampled_f[iOS],cq_f[iCQ],binspersemitone*12);
-          // cerr << oversampled_f[iOS] << " " << cq_f[iCQ] << " " << cq_activation << endl;
-          outmatrix[iFFT + nFFT * iCQ] += cq_activation * fft_activation[iOS-curr_start];
+          cq_activation =
+              pitchCospuls(oversampled_f[iOS], cq_f[iCQ], binspersemitone * 12);
+          outmatrix[iFFT + nFFT * iCQ] +=
+              cq_activation * fft_activation[iOS - curr_start];
         }
       }
     }
   }
-  return true;	
+  return true;
 }
 
 
@@ -465,7 +503,7 @@ Real NNLSChroma::pitchCospuls(Real x, Real centre, int binsperoctave) {
   Real warpedf = -binsperoctave * (log2(centre) - log2(x));
   Real out = cospuls(warpedf, 0.0, 2.0);
 
-  // now scale to correct for note density
+  // Now scale to correct for note density.
   Real c = log(2.0)/binsperoctave;
   if (x > 0) {
     out = out / (c * x);
@@ -477,43 +515,40 @@ Real NNLSChroma::pitchCospuls(Real x, Real centre, int binsperoctave) {
   return out;
 }
 
-void NNLSChroma::dictionaryMatrix(Real* dm, Real s_param) {
-	// TODO: make this more general, such that it works with all minoctave, maxoctave and even more than one note per semitone
-    int binspersemitone = nBPS;
-    int minoctave = 0; // this must be 0
-    int maxoctave = 7; // this must be 7
-	
-    // pitch-spaced frequency vector
-    int minMIDI = 21 + minoctave * 12 - 1; // this includes one additional semitone!
-    int maxMIDI = 21 + maxoctave * 12; // this includes one additional semitone!
-    vector<Real> cq_f;
-    Real oob = 1.0/binspersemitone; // one over binspersemitone
-    for (int i = minMIDI; i < maxMIDI; ++i) {
-        for (int k = 0; k < binspersemitone; ++k)	 {
-            cq_f.push_back(440 * pow(2.0,0.083333333333 * (i+oob*k-69)));
-        }
-    }
-    cq_f.push_back(440 * pow(2.0,0.083333 * (maxMIDI-69)));
+void NNLSChroma::dictionaryMatrix(vector<Real> dm, Real s_param) {
+  // todo: make this more general, such that it works with all minoctave,
+  // maxoctave and even more than one note per semitone
+  int binspersemitone = nBPS;
+  int minoctave = 0;  // this must be 0
+  int maxoctave = 7;  // this must be 7
 
-//    Real curr_f;
-    Real Realbin;
-    Real curr_amp;
-    // now for every combination calculate the matrix element
-    for (int iOut = 0; iOut < 12 * (maxoctave - minoctave); ++iOut) {
-        // cerr << iOut << endl;
-        for (int iHarm = 1; iHarm <= 20; ++iHarm) {
-//            curr_f = 440 * pow(2,(minMIDI-69+iOut)*1.0/12) * iHarm;
-            // if (curr_f > cq_f[nNote-1])  break;
-            Realbin = ((iOut + 1) * binspersemitone + 1) + binspersemitone * 12 * log2(iHarm);
-            // cerr << Realbin << endl;
-            curr_amp = pow(s_param,Real(iHarm-1));
-            // cerr << "curramp" << curr_amp << endl;
-            for (int iNote = 0; iNote < nNote; ++iNote) {
-                if (abs(iNote+1.0-Realbin)<2) {
-                    dm[iNote  + nNote * iOut] += cospuls(iNote+1.0, Realbin, binspersemitone + 0.0) * curr_amp;
-                    // dm[iNote + nNote * iOut] += 1 * curr_amp;
-                }
-            }
-        }
+  // Pitch-spaced frequency vector.
+  int minMIDI =
+      21 + minoctave * 12 - 1;        // this includes one additional semitone!
+  int maxMIDI = 21 + maxoctave * 12;  // this includes one additional semitone!
+  vector<Real> cq_f;
+  Real oob = 1.0 / binspersemitone;  // one over binspersemitone
+  for (int i = minMIDI; i < maxMIDI; ++i) {
+    for (int k = 0; k < binspersemitone; ++k) {
+      cq_f.push_back(440 * pow(2.0, 0.083333333333 * (i + oob * k - 69)));
     }
+  }
+  cq_f.push_back(440 * pow(2.0, 0.083333 * (maxMIDI - 69)));
+
+  Real Realbin;
+  Real curr_amp;
+  // Now for every combination calculate the matrix element.
+  for (int iOut = 0; iOut < 12 * (maxoctave - minoctave); ++iOut) {
+    for (int iHarm = 1; iHarm <= 20; ++iHarm) {
+      Realbin = ((iOut + 1) * binspersemitone + 1) +
+                binspersemitone * 12 * log2(iHarm);
+      curr_amp = pow(s_param, Real(iHarm - 1));
+      for (int iNote = 0; iNote < nNote; ++iNote) {
+        if (abs(iNote + 1.0 - Realbin) < 2) {
+          dm[iNote + nNote * iOut] +=
+              cospuls(iNote + 1.0, Realbin, binspersemitone + 0.0) * curr_amp;
+        }
+      }
+    }
+  }
 }

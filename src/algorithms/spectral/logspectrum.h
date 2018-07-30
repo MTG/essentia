@@ -58,19 +58,19 @@ class LogSpectrum : public Algorithm {
   static const Real precision;
 
  protected:
-  Real _sampleRate;
   int _frameCount;
   size_t _frameSize;
+  Real _sampleRate;
+  Real _rollon;
+  std::vector<int> _kernelFftIndex;
+  std::vector<int> _kernelNoteIndex;
   std::vector<Real> _meanTunings;
   std::vector<Real> _localTunings;
   std::vector<Real> _kernelValue;
-  std::vector<int> _kernelFftIndex;
-  std::vector<int> _kernelNoteIndex;
-  Real _rollon;
   std::vector<Real> _sinvalues;
   std::vector<Real> _cosvalues;
 
-  bool logFreqMatrix(Real fs, int frameSize, Real *outmatrix);
+  bool logFreqMatrix(Real fs, int frameSize, std::vector<Real> &outmatrix);
   Real cospuls(Real x, Real centre, Real width);
   Real pitchCospuls(Real x, Real centre, int binsperoctave);
   void initialize();

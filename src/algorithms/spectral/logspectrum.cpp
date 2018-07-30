@@ -26,11 +26,12 @@ using namespace standard;
 
 const char* LogSpectrum::name = "LogSpectrum";
 const char* LogSpectrum::category = "Spectral";
-const char* LogSpectrum::description = DOC("Computes spectrum with logarithmically distributed frequency bins. "
-"This code is a reimplementation of the well known NNLS Chroma based in[1].\n"
+const char* LogSpectrum::description = DOC("This algorithm computes spectrum with logarithmically distributed frequency bins. "
+"This code is a reimplementation of the well known NNLS Chroma described in [1]."
+"This algorithm also returns a local tuning that is retrieved for input frame and a global tuning that is updated with a moving average.\n"
 "\n"
-"note: The algorithm uses moving averages to compute the tuning frequencies so it should be reset before starting "
-"to process the frames of a new audio file by calling reset() (or configure())\n"
+"note: As the algorithm uses moving averages that are updated every frame it should be reset before  "
+"processing a new audio file. To do this call reset() (or configure())\n"
 "\n"
 "References:\n"
 "  [1] Mauch, M., & Dixon, S. (2010, August). Approximate Note Transcription\n"
@@ -42,13 +43,36 @@ const int nOctave = 7;
 const int nNote = nOctave * 12 * nBPS + 2 * (nBPS/2+1); // a core over all octaves, plus some overlap at top and bottom
 const int MIDI_basenote = 45;
 
-static const Real basswindow[] = {0.001769, 0.015848, 0.043608, 0.084265, 0.136670, 0.199341, 0.270509, 0.348162, 0.430105, 0.514023, 0.597545, 0.678311, 0.754038, 0.822586, 0.882019, 0.930656, 0.967124, 0.990393, 0.999803, 0.995091, 0.976388, 0.944223, 0.899505, 0.843498, 0.777785, 0.704222, 0.624888, 0.542025, 0.457975, 0.375112, 0.295778, 0.222215, 0.156502, 0.100495, 0.055777, 0.023612, 0.004909, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000};
-static const Real treblewindow[] = {0.000350, 0.003144, 0.008717, 0.017037, 0.028058, 0.041719, 0.057942, 0.076638, 0.097701, 0.121014, 0.146447, 0.173856, 0.203090, 0.233984, 0.266366, 0.300054, 0.334860, 0.370590, 0.407044, 0.444018, 0.481304, 0.518696, 0.555982, 0.592956, 0.629410, 0.665140, 0.699946, 0.733634, 0.766016, 0.796910, 0.826144, 0.853553, 0.878986, 0.902299, 0.923362, 0.942058, 0.958281, 0.971942, 0.982963, 0.991283, 0.996856, 0.999650, 0.999650, 0.996856, 0.991283, 0.982963, 0.971942, 0.958281, 0.942058, 0.923362, 0.902299, 0.878986, 0.853553, 0.826144, 0.796910, 0.766016, 0.733634, 0.699946, 0.665140, 0.629410, 0.592956, 0.555982, 0.518696, 0.481304, 0.444018, 0.407044, 0.370590, 0.334860, 0.300054, 0.266366, 0.233984, 0.203090, 0.173856, 0.146447, 0.121014, 0.097701, 0.076638, 0.057942, 0.041719, 0.028058, 0.017037, 0.008717, 0.003144, 0.000350};
-
+static const vector<Real> basswindow = {
+    0.001769, 0.015848, 0.043608, 0.084265, 0.136670, 0.199341, 0.270509,
+    0.348162, 0.430105, 0.514023, 0.597545, 0.678311, 0.754038, 0.822586,
+    0.882019, 0.930656, 0.967124, 0.990393, 0.999803, 0.995091, 0.976388,
+    0.944223, 0.899505, 0.843498, 0.777785, 0.704222, 0.624888, 0.542025,
+    0.457975, 0.375112, 0.295778, 0.222215, 0.156502, 0.100495, 0.055777,
+    0.023612, 0.004909, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
+    0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000};
+static const vector<Real> treblewindow = {
+    0.000350, 0.003144, 0.008717, 0.017037, 0.028058, 0.041719, 0.057942,
+    0.076638, 0.097701, 0.121014, 0.146447, 0.173856, 0.203090, 0.233984,
+    0.266366, 0.300054, 0.334860, 0.370590, 0.407044, 0.444018, 0.481304,
+    0.518696, 0.555982, 0.592956, 0.629410, 0.665140, 0.699946, 0.733634,
+    0.766016, 0.796910, 0.826144, 0.853553, 0.878986, 0.902299, 0.923362,
+    0.942058, 0.958281, 0.971942, 0.982963, 0.991283, 0.996856, 0.999650,
+    0.999650, 0.996856, 0.991283, 0.982963, 0.971942, 0.958281, 0.942058,
+    0.923362, 0.902299, 0.878986, 0.853553, 0.826144, 0.796910, 0.766016,
+    0.733634, 0.699946, 0.665140, 0.629410, 0.592956, 0.555982, 0.518696,
+    0.481304, 0.444018, 0.407044, 0.370590, 0.334860, 0.300054, 0.266366,
+    0.233984, 0.203090, 0.173856, 0.146447, 0.121014, 0.097701, 0.076638,
+    0.057942, 0.041719, 0.028058, 0.017037, 0.008717, 0.003144, 0.000350};
 
 
 void LogSpectrum::configure() {
-  // get parameters
+  // Get parameters.
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toFloat();
   _rollon = parameter("rollOn").toFloat();
@@ -67,7 +91,8 @@ void LogSpectrum::compute() {
     throw EssentiaException("LogSpectrum: input vector is empty");
 
   if (spectrum.size() != _frameSize) {
-    E_INFO("LogSpectrum: input spectrum size does not match '_frameSize' parameter. Reconfiguring the algorithm.");
+    E_INFO("LogSpectrum: input spectrum size does not match '_frameSize' "
+           "parameter. Reconfiguring the algorithm.");
     _frameSize = spectrum.size();
     initialize();
   }
@@ -76,10 +101,10 @@ void LogSpectrum::compute() {
 
   Real energysum = 0;
 
-  // make spectrum
+  // Get spectrum parameters.
   Real maxmag = -10000;
   for (int iBin = 0; iBin < static_cast<int>(_frameSize); iBin++) {
-    if (spectrum[iBin]>_frameSize*1.0) spectrum[iBin] = _frameSize;
+    if (spectrum[iBin] > _frameSize * 1.0) spectrum[iBin] = _frameSize;
     if (maxmag < spectrum[iBin]) maxmag = spectrum[iBin];
 
     if (_rollon > 0) {
@@ -90,13 +115,15 @@ void LogSpectrum::compute() {
   Real cumenergy = 0;
   if (_rollon > 0) {
     for (int iBin = 2; iBin < static_cast<int>(_frameSize); iBin++) {
-      cumenergy +=  pow(spectrum[iBin], 2);
-      if (cumenergy < energysum * _rollon / 100) spectrum[iBin-2] = 0;
-      else break;
+      cumenergy += pow(spectrum[iBin], 2);
+      if (cumenergy < energysum * _rollon / 100)
+        spectrum[iBin - 2] = 0;
+      else
+        break;
     }
   }
 
-  // in the original implementation, "maxmag < 2". In the typical essentia pipe the Window is 
+  // In the original implementation, "maxmag < 2". In the typical essentia pipe the Window is 
   // normalized to area == 1 making maxmag < 1 most of the time. Thus, this threshold is comented.   
   // if (maxmag < 1.f) {
   //   for (int iBin = 0; iBin < static_cast<int>(_frameSize); iBin++) {
@@ -104,22 +131,27 @@ void LogSpectrum::compute() {
   //   }
   // }
 
-  // note spectrum mapping using pre-calculated matrix
+  // Spectrum mapping using pre-calculated matrix.
   logFreqSpectrum.assign(nNote, 0.f);
 
   int binCount = 0;
-  for (vector<Real>::iterator it = _kernelValue.begin(); it != _kernelValue.end(); ++it) {
-    logFreqSpectrum[_kernelNoteIndex[binCount]] += spectrum[_kernelFftIndex[binCount]] * _kernelValue[binCount];
+  for (vector<Real>::iterator it = _kernelValue.begin();
+       it != _kernelValue.end(); ++it) {
+    logFreqSpectrum[_kernelNoteIndex[binCount]] +=
+        spectrum[_kernelFftIndex[binCount]] * _kernelValue[binCount];
     binCount++;	
   }
 
   Real one_over_N = 1.0 / _frameCount;
 
-  // update means of complex tuning variables
-  for (int iBPS = 0; iBPS < nBPS; ++iBPS) _meanTunings[iBPS] *= float(_frameCount - 1) * one_over_N;
+  // Update means of complex tuning variables.
+  for (int iBPS = 0; iBPS < nBPS; ++iBPS)
+    _meanTunings[iBPS] *= float(_frameCount - 1) * one_over_N;
 
-  for (int iTone = 0; iTone < round(nNote*0.62/nBPS)*nBPS+1; iTone = iTone + nBPS) {
-    for (int iBPS = 0; iBPS < nBPS; ++iBPS) _meanTunings[iBPS] += logFreqSpectrum[iTone + iBPS] * one_over_N;
+  for (int iTone = 0; iTone < round(nNote * 0.62 / nBPS) * nBPS + 1;
+       iTone = iTone + nBPS) {
+    for (int iBPS = 0; iBPS < nBPS; ++iBPS)
+      _meanTunings[iBPS] += logFreqSpectrum[iTone + iBPS] * one_over_N;
     Real ratioOld = 0.997;
     for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
       _localTunings[iBPS] *= ratioOld; 
@@ -138,52 +170,55 @@ void LogSpectrum::compute() {
   meanTuning = _meanTunings;
 }
 
-
 /**
- * Calculates a matrix that can be used to linearly map from the magnitude spectrum to a pitch-scale spectrum.
- * @return this always returns true, which is a bit stupid, really. The main purpose of the function is to change the values in the "matrix" pointed to by *outmatrix
+  Calculates a matrix that can be used to linearly map from the magnitude
+  spectrum to a pitch-scale spectrum. this always returns true, which is a bit
+  stupid, really. The main purpose of the function is to change the values in
+  the "matrix" pointed to by outmatrix.
  */
-bool LogSpectrum::logFreqMatrix(Real fs, int frameSize, Real *outmatrix) {
-	// TODO: rewrite so that everyone understands what is done here.
-	// TODO: make this more general, such that it works with all minoctave, maxoctave and whatever nBPS (or check if it already does)
+bool LogSpectrum::logFreqMatrix(Real fs, int frameSize, vector<Real> &outmatrix) {
+  // todo: rewrite so that everyone understands what is done here.
+  // todo: make this more general, such that it works with all minoctave,
+  // maxoctave and whatever nBPS (or check if it already does)
 
   int binspersemitone = nBPS; 
-  int minoctave = 0; // this must be 0
-  int maxoctave = 7; // this must be 7
+  int minoctave = 0;  // this must be 0
+  int maxoctave = 7;  // this must be 7
   int oversampling = 80;
 
-  // linear frequency vector
+  // Linear frequency vector.
   vector<Real> fft_f;
   for (int i = 0; i < frameSize; ++i) {
-    fft_f.push_back(i * (fs * 1.0 / ((frameSize - 1.f ) * 2.f)));
+    fft_f.push_back(i * (fs * 1.0 / ((frameSize - 1.f) * 2.f)));
   }
 
   Real fft_width = fs / (frameSize - 1.f);
 
-  // linear oversampled frequency vector
+  // Linear oversampled frequency vector.
   vector<Real> oversampled_f;
   for (int i = 0; i < oversampling * frameSize; ++i) {
-    oversampled_f.push_back(i * ((fs * 1.0 / ((frameSize - 1.f ) * 2.f)) / oversampling));
+    oversampled_f.push_back(
+        i * ((fs * 1.0 / ((frameSize - 1.f) * 2.f)) / oversampling));
   }
 
-  // pitch-spaced frequency vector
-  int minMIDI = 21 + minoctave * 12 - 1; // this includes one additional semitone!
-  int maxMIDI = 21 + maxoctave * 12; // this includes one additional semitone!
+  // Pitch-spaced frequency vector.
+  int minMIDI =
+      21 + minoctave * 12 - 1;        // this includes one additional semitone!
+  int maxMIDI = 21 + maxoctave * 12;  // this includes one additional semitone!
   vector<Real> cq_f;
-  Real oob = 1.0/binspersemitone; // one over binspersemitone
+  Real oob = 1.0 / binspersemitone;  // one over binspersemitone
   for (int i = minMIDI; i < maxMIDI; ++i) {
-    for (int k = 0; k < binspersemitone; ++k)	 {
-      cq_f.push_back(440 * pow(2.0,0.083333333333 * (i+oob*k-69)));
+    for (int k = 0; k < binspersemitone; ++k) {
+      cq_f.push_back(440 * pow(2.0, 0.083333333333 * (i + oob * k - 69)));
     }
   }
-  // cq_f.push_back(440 * pow(2.0,0.083333 * (minMIDI-oob-69)));
-  cq_f.push_back(440 * pow(2.0,0.083333 * (maxMIDI-69)));
+  cq_f.push_back(440 * pow(2.0, 0.083333 * (maxMIDI - 69)));
 
   int nFFT = fft_f.size();
 
   vector<Real> fft_activation;
   for (int iOS = 0; iOS < 2 * oversampling; ++iOS) {
-    Real cosp = cospuls(oversampled_f[iOS],fft_f[1],fft_width);
+    Real cosp = cospuls(oversampled_f[iOS], fft_f[1], fft_width);
     fft_activation.push_back(cosp);
   }
 
@@ -193,14 +228,21 @@ bool LogSpectrum::logFreqMatrix(Real fs, int frameSize, Real *outmatrix) {
 
   Real cq_activation;
   for (int iFFT = 1; iFFT < nFFT; ++iFFT) {
-    // find frequency stretch where the oversampled vector can be non-zero (i.e. in a window of width fft_width around the current frequency)
+    // Find frequency stretch where the oversampled vector can be non-zero (i.e.
+    // in a window of width fft_width around the current frequency).
     int curr_start = oversampling * iFFT - oversampling;
-    int curr_end = oversampling * iFFT + oversampling; // don't know if I should add "+1" here
+    int curr_end = oversampling * iFFT +
+                   oversampling;  // don't know if I should add "+1" here
     for (int iCQ = 0; iCQ < (int)cq_f.size(); ++iCQ) {
-      if (cq_f[iCQ] * pow(2.0, 0.084) + fft_width > fft_f[iFFT] && cq_f[iCQ] * pow(2.0, -0.084 * 2) - fft_width < fft_f[iFFT]) { // within a generous neighbourhood
+      if (cq_f[iCQ] * pow(2.0, 0.084) + fft_width > fft_f[iFFT] &&
+          cq_f[iCQ] * pow(2.0, -0.084 * 2) - fft_width <
+              fft_f[iFFT]) {  
+        // Within a generous neighbourhood.
         for (int iOS = curr_start; iOS < curr_end; ++iOS) {
-          cq_activation = pitchCospuls(oversampled_f[iOS],cq_f[iCQ],binspersemitone*12);
-          outmatrix[iFFT + nFFT * iCQ] += cq_activation * fft_activation[iOS-curr_start];
+          cq_activation =
+              pitchCospuls(oversampled_f[iOS], cq_f[iCQ], binspersemitone * 12);
+          outmatrix[iFFT + nFFT * iCQ] +=
+              cq_activation * fft_activation[iOS - curr_start];
         }
       }
     }
@@ -220,7 +262,7 @@ Real LogSpectrum::pitchCospuls(Real x, Real centre, int binsperoctave) {
   Real warpedf = -binsperoctave * (log2(centre) - log2(x));
   Real out = cospuls(warpedf, 0.0, 2.0);
 
-  // now scale to correct for note density
+  // Now scale to correct for note density.
   Real c = log(2.0)/binsperoctave;
   if (x > 0) {
     out = out / (c * x);
@@ -233,7 +275,7 @@ Real LogSpectrum::pitchCospuls(Real x, Real centre, int binsperoctave) {
 }
 
 void LogSpectrum::initialize() {
-	// make things for tuning estimation
+	// Make things for tuning estimation.
   _sinvalues.clear();
   _cosvalues.clear();
 	for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
@@ -252,8 +294,8 @@ void LogSpectrum::initialize() {
 
   int tempn = nNote * _frameSize;
 
-  Real *tempkernel;
-  tempkernel = new Real[tempn];
+  // Real *tempkernel;
+  vector<Real> tempkernel(tempn);
 
   logFreqMatrix(_sampleRate, _frameSize, tempkernel);
   _kernelValue.clear();
@@ -272,7 +314,7 @@ void LogSpectrum::initialize() {
       }
     }
   }
-  delete [] tempkernel;
+  // delete [] tempkernel;
 }
 
 void LogSpectrum::reset() {

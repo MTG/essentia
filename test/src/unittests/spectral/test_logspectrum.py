@@ -127,8 +127,9 @@ class TestLogSpectrum(TestCase):
         # This test makes sure that even though the frameSize given at
         # configure time does not match the input spectrum, the algorithm does
         # not crash and correctly resizes internal structures to avoid errors.
+        print('\n')
         self.testRegression(frameSize=1000)
-
+        print('...')
 
 
 suite = allTests(TestLogSpectrum)
