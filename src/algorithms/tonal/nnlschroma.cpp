@@ -40,9 +40,8 @@ const char* NNLSChroma::description = DOC("This algorithm extracts treble and ba
 const int nBPS = 3; // bins per semitone
 const int nOctave = 7;
 const int nNote = nOctave * 12 * nBPS + 2 * (nBPS/2+1); // a core over all octaves, plus some overlap at top and bottom
-const int MIDI_basenote = 45;
 
-static const vector<Real> basswindow = {
+static const Real basswindow[] = {
     0.001769, 0.015848, 0.043608, 0.084265, 0.136670, 0.199341, 0.270509,
     0.348162, 0.430105, 0.514023, 0.597545, 0.678311, 0.754038, 0.822586,
     0.882019, 0.930656, 0.967124, 0.990393, 0.999803, 0.995091, 0.976388,
@@ -55,7 +54,7 @@ static const vector<Real> basswindow = {
     0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
     0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000,
     0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000};
-static const vector<Real> treblewindow = {
+static const Real treblewindow[] = {
     0.000350, 0.003144, 0.008717, 0.017037, 0.028058, 0.041719, 0.057942,
     0.076638, 0.097701, 0.121014, 0.146447, 0.173856, 0.203090, 0.233984,
     0.266366, 0.300054, 0.334860, 0.370590, 0.407044, 0.444018, 0.481304,
