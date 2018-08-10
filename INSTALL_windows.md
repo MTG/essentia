@@ -109,7 +109,8 @@ Build from source:
 Steps:
 
 - Install cmake: https://cmake.org/
-- ``cmake  -DCMAKE_INSTALL_PREFIX=C:\users\User\Dev\lib``
+- For x86: ``cmake  -DCMAKE_INSTALL_PREFIX=C:\users\User\Dev\lib -DBUILD_SHARED_LIBS=ON``
+- For x64: ``cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX=C:\users\User\Dev\lib -DBUILD_SHARED_LIBS=ON``
 - ``msbuild all_build.vcxproj /p:Configuration=Release``
 - ``msbuild install.vcxproj``
 
