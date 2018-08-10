@@ -54,7 +54,7 @@ def build(ctx):
         # Install all required prebuilt dll dependencies
         lib_paths = [path for key in ctx.env.keys() if key.startswith('LIBPATH_') 
                           for path in ctx.env[key] if path.count('packaging\\win32_3rdparty')]
-
+        lib_paths = list(set(lib_paths))
         for path in lib_paths:
             print(path)
             ctx.install_files('${PYTHONDIR}/essentia',
