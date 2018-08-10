@@ -185,8 +185,8 @@ def configure(ctx):
         os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
 
         # ffmpeg
-        os.environ["PKG_CONFIG_PATH"] += ';packaging/win32_3rdparty/lib/pkgconfig'
-        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+        #os.environ["PKG_CONFIG_PATH"] += ';packaging/win32_3rdparty/lib/pkgconfig'
+        #os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
         """
         # compile libgcc and libstd statically when using MinGW
