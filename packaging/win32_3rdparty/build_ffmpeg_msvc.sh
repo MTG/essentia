@@ -12,17 +12,15 @@ mkdir tmp
 cd tmp
 
 wget https://ffmpeg.org/releases/$FFMPEG_VERSION.tar.gz
-echo DEBUG - Unpacking
 tar xf $FFMPEG_VERSION.tar.gz
 cd $FFMPEG_VERSION
 
-echo DEBUG - configuring
 ./configure \
     --toolchain=msvc \
     $FFMPEG_AUDIO_FLAGS \
     $FFMPEG_AUDIO_FLAGS_MUXERS \
     --prefix=$PREFIX \
-    --arch=x86_32 \
+    --arch=x86_64 \
     --enable-memalign-hack \
     --enable-shared \
     --disable-static
@@ -33,7 +31,6 @@ echo DEBUG - configuring
     #--enable-w32threads \
     #$SHARED_OR_STATIC
 
-echo DEBUG - making
 make
 make install
 
