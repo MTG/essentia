@@ -46,14 +46,11 @@ int essentia_main(string audioFilename, string outputFilename) {
 
     Pool pool;
 
+    // Algorithm instantiations
     Algorithm* audioStereo = factory.create("AudioLoader",
                                     "filename", audioFilename);
 
     Algorithm* monoMixer = factory.create("MonoMixer");
-    // Algorithm* audioload = factory.create("MonoLoader",
-    //                                       "filename", audioFilename,
-    //                                       "sampleRate", sr,
-    //                                       "downmix", "mix");
 
     Algorithm* frameCutter = factory.create("FrameCutter",
                                             "frameSize", framesize,
@@ -77,7 +74,6 @@ int essentia_main(string audioFilename, string outputFilename) {
                                                          "maximumStartTime", 1, // Found song with only this margin (to double-check)
                                                          "maximumStopTime", 1);
 
-    // Algorithm* realAccumulator          = factory.create("RealAccumulator");
 
     Algorithm* saturationDetector       = factory.create("SaturationDetector",
                                                          "frameSize", framesize, 
@@ -89,26 +85,37 @@ int essentia_main(string audioFilename, string outputFilename) {
     Algorithm* truePeakDetector         = factory.create("TruePeakDetector",
                                                          "threshold", 0.0f); 
 
-    // The algorithm should skip  beginings
+    // The algorithm should skip beginings.
     Algorithm* clickDetector            = factory.create("ClickDetector",
                                                          "frameSize", framesize, 
                                                          "hopSize", hopsize,
                                                          "silenceThreshold", -25, // This is to high. Just a work around to the problem on initial and final non-silent parts
                                                          "detectionThreshold", 38); // Experiments showed that a higher threshold is not eenough to detect audible clicks.
 
+    Algorithm* loudnessEBUR128          = factory.create("LoudnessEBUR128");
 
-    Algorithm* le                       = factory.create("LoudnessEBUR128");  
+    Algorithm* humDetector              = factory.create("HumDetector",
+                                                         "sampleRate", sr,
+                                                         "frameSize", framesize,
+                                                         "hopSize", hopsize); 
 
-    // Algorithm* window = factory.create("Windowing",
-    //                                   "type", "hann",
-    //                                   "zeroPadding", zeropadding);
+    Algorithm* snr                      = factory.create("SNR",
+                                                         "frameSize", framesize,
+                                                         "sampleRate", sr); 
 
-    
+    Algorithm* startStopSilence         = factory.create("StartStopSilence"); 
+
+    Algorithm* windowing                = factory.create("Windowing",
+                                                         "size", framesize,
+                                                         "zeroPadding", 0,
+                                                         "type", "hann",
+                                                         "normalized", false);
+
+
     cout << "-------- connecting algos ---------" << endl;
     Real fs;
     int ch, br;
     std::string md5, cod;
-    // Audio -> FrameCutter
 
     vector<StereoSample> audioBuffer;
     audioStereo->output("audio").set(audioBuffer);
@@ -118,28 +125,37 @@ int essentia_main(string audioFilename, string outputFilename) {
     audioStereo->output("bit_rate").set(br);
     audioStereo->output("codec").set(cod);
 
-    le->input("signal").set(audioBuffer);
 
-    // FrameCutter -> GapsDetector
     vector<Real> momentaryLoudness, shortTermLoudness;
     Real integratedLoudness, loudnessRange;
-
-    le->output("momentaryLoudness").set(momentaryLoudness);
-    le->output("shortTermLoudness").set(shortTermLoudness);
-    le->output("integratedLoudness").set(integratedLoudness);
-    le->output("loudnessRange").set(loudnessRange);
+    loudnessEBUR128->input("signal").set(audioBuffer);
+    loudnessEBUR128->output("momentaryLoudness").set(momentaryLoudness);
+    loudnessEBUR128->output("shortTermLoudness").set(shortTermLoudness);
+    loudnessEBUR128->output("integratedLoudness").set(integratedLoudness);
+    loudnessEBUR128->output("loudnessRange").set(loudnessRange);
 
 
     vector<Real> audio;
-    // audioload->output("audio").set(audio);
     monoMixer->input("audio").set(audioBuffer);
     monoMixer->input("numberChannels").set(2);
     monoMixer->output("audio").set(audio);
+
 
     int startStopCutStart, startStopCutEnd; 
     startStopCut->input("audio").set(audio);
     startStopCut->output("startCut").set(startStopCutStart);
     startStopCut->output("stopCut").set(startStopCutEnd);
+
+
+    TNT::Array2D<Real> r;
+    vector<Real> frequencies, saliences, starts, ends;
+    humDetector->input("signal").set(audio);
+    humDetector->output("r").set(r);
+    humDetector->output("frequencies").set(frequencies);
+    humDetector->output("saliences").set(saliences);
+    humDetector->output("starts").set(starts);
+    humDetector->output("ends").set(ends);
+
 
     std::vector<Real> peakLocations, truePeakDetectorOutput;
     truePeakDetector->input("signal").set(audio);
@@ -151,20 +167,25 @@ int essentia_main(string audioFilename, string outputFilename) {
     frameCutter->input("signal").set(audio);
     frameCutter->output("frame").set(frame);
 
+
+    // Time domain algorithms do not require Windowing.
     std::vector<Real> discontinuityLocations, discontinuityAmplitudes;
     discontinuityDetector->input("frame").set(frame);
     discontinuityDetector->output("discontinuityLocations").set(discontinuityLocations);
     discontinuityDetector->output("discontinuityAmplitudes").set(discontinuityAmplitudes);
+
 
     std::vector<Real> gapsDetectorStarts, gapsDetectorEnds;
     gapsDetector->input("frame").set(frame);
     gapsDetector->output("starts").set(gapsDetectorStarts);
     gapsDetector->output("ends").set(gapsDetectorEnds);
 
+
     std::vector<Real> saturationDetectorStarts, saturationDetectorEnds;
     saturationDetector->input("frame").set(frame);
     saturationDetector->output("starts").set(saturationDetectorStarts);
     saturationDetector->output("ends").set(saturationDetectorEnds);
+
 
     std::vector<Real> clickDetectorStarts, clickDetectorEnds;
     clickDetector->input("frame").set(frame);
@@ -172,25 +193,48 @@ int essentia_main(string audioFilename, string outputFilename) {
     clickDetector->output("ends").set(clickDetectorEnds);
 
 
-    cout << "-------- running algos ---------" << endl;
-    
-    audioStereo->compute();
-    le->compute();
-    // audioload->compute();
+    int startFrame, stopFrame;
+    startStopSilence->input("frame").set(frame);
+    startStopSilence->output("startFrame").set(startFrame);
+    startStopSilence->output("stopFrame").set(stopFrame);
 
+
+    std::vector<Real> windowedFrame;
+    windowing->input("frame").set(frame);
+    windowing->output("frame").set(windowedFrame);
+
+
+    Real averagedSNR, instantSNR;
+    std::vector<Real> spectralSNR;
+    snr->input("frame").set(windowedFrame);
+    snr->output("instantSNR").set(instantSNR);
+    snr->output("averagedSNR").set(averagedSNR);
+    snr->output("spectralSNR").set(spectralSNR);
+
+
+    cout << "-------- running algos ---------" << endl;
+    audioStereo->compute();
+
+    loudnessEBUR128->compute();
     pool.add("EBUR128.integratedLoudness", integratedLoudness);
     pool.add("EBUR128.range", loudnessRange);
 
     monoMixer->compute();
-
     pool.add("duration", audio.size() / sr);
 
     startStopCut->compute();
     pool.add("startStopCut.start", startStopCutStart);
     pool.add("startStopCut.end", startStopCutEnd);
 
-    truePeakDetector->compute();
+    humDetector->compute();
+    if (frequencies.size() > 0) {
+      pool.add("humDetector.frequencies", frequencies);
+      pool.add("humDetector.saliences", saliences);
+      pool.add("humDetector.starts", ends);
+      pool.add("humDetector.ends", ends);
+    }
 
+    truePeakDetector->compute();
     for (uint i = 0; i < peakLocations.size(); i++) 
       peakLocations[i] /= sr;
 
@@ -217,6 +261,13 @@ int essentia_main(string audioFilename, string outputFilename) {
       saturationDetector->compute();
 
       clickDetector->compute();
+
+      windowing->compute();
+
+      snr->compute();
+
+      startStopSilence->compute();
+      
       }
 
       pool.add("filename", audioFilename);
@@ -229,41 +280,29 @@ int essentia_main(string audioFilename, string outputFilename) {
       }
 
       if (gapsDetectorStarts.size() > 0) {
-        pool.add("gaps.starts", gapsDetectorStarts);
-        pool.add("gaps.ends", gapsDetectorEnds);
+        pool.add("gaps.averagedSNR", averagedSNR);
+        pool.add("gaps.spectralSNR", spectralSNR);
       }
+
       if (saturationDetectorStarts.size() > 0) {      
         pool.add("saturationDetector.starts", saturationDetectorStarts);
         pool.add("saturationDetector.ends", saturationDetectorEnds);
       }
+      
       if (clickDetectorStarts.size() > 0) { 
         pool.add("clickDetector.starts", clickDetectorStarts);
         pool.add("clickDetector.ends", clickDetectorEnds);
-  }
+      }
 
-    // startStopCut->output("startCut")            >>  PC(pool, "startStopCut.start");
-    // startStopCut->output("stopCut")            >>  PC(pool, "startStopCut.cut");
+      pool.add("snr.spectralSNR", spectralSNR);
+      pool.add("snr.averagedSNR", averagedSNR);
 
-    // truePeakDetector->output("peakLocations")            >>  PC(pool, "truePeakDetector.peakLocations");
-    // truePeakDetector->output("output")            >>  NOWHERE;
 
-    // discontinuityDetector->output("discontinuityLocations")  >>  PC(pool, "discontinuities.locations");
-    // discontinuityDetector->output("discontinuityAmplitudes")      >>  PC(pool, "discontinuities.durations");
-
-    // gapsDetector->output("starts")  >>  PC(pool, "gaps.starts");
-    // gapsDetector->output("ends")      >>  PC(pool, "gaps.ends");
-
-    // saturationDetector->output("starts")  >>  PC(pool, "saturationDetector.starts");
-    // saturationDetector->output("ends")      >>  PC(pool, "saturationDetector.ends");
-
-    // clickDetector->output("starts")  >>  PC(pool, "clickDetector.starts");
-    // clickDetector->output("ends")      >>  PC(pool, "clickDetector.ends");
-
-    // Network(audioload).run();
+      pool.add("startStopSilince.start", startFrame * hopsize / fs);
+      pool.add("startStopSilince.end", stopFrame * hopsize / fs);
 
     cout << "-------- writting Yalm ---------" << endl;
-
-    // Write to yaml file
+    // Write to yaml file.
     Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
                                                           "filename", outputFilename);
     output->input("pool").set(pool);
@@ -277,6 +316,11 @@ int essentia_main(string audioFilename, string outputFilename) {
     delete saturationDetector;
     delete truePeakDetector;
     delete clickDetector;
+    delete windowing;
+    delete humDetector;
+    delete snr;
+    delete loudnessEBUR128;
+    delete startStopSilence;
     
     essentia::shutdown();
     cout << "-------- Done! ---------" << endl;

@@ -37,7 +37,7 @@ example_sources_fileio = [
     ('standard_welch', ),
     ('standard_humdetector', ),
 
-    # ('streaming_extractor_la-cupula', ),
+    ('streaming_extractor_la-cupula', ),
     ('streaming_humdetector', ),
     ('streaming_beatsmarker', ),
     ('streaming_beattracker_multifeature_mirex2013', ),

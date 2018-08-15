@@ -47,15 +47,15 @@ int essentia_main(string audioFilename, string outputFilename) {
 
     Pool pool;
 
-    Algorithm* audioload = factory.create("MonoLoader",
-                                          "filename", audioFilename,
-                                          "sampleRate", sr,
-                                          "downmix", "mix");
+    Algorithm* audioload                = factory.create("AudioLoader",
+                                                         "filename", audioFilename);
 
-    Algorithm* frameCutter = factory.create("FrameCutter",
-                                            "frameSize", framesize,
-                                            "hopSize", hopsize,
-                                            "startFromZero", true);
+    Algorithm* monoMixer                = factory.create("MonoMixer");
+
+    Algorithm* frameCutter              = factory.create("FrameCutter",
+                                                         "frameSize", framesize,
+                                                         "hopSize", hopsize,
+                                                         "startFromZero", true);
 
 
     Algorithm* discontinuityDetector    = factory.create("DiscontinuityDetector",
@@ -78,45 +78,85 @@ int essentia_main(string audioFilename, string outputFilename) {
 
     Algorithm* clickDetector            = factory.create("ClickDetector",
                                                          "frameSize", framesize, 
-                                                         "hopSize", hopsize); 
+                                                         "hopSize", hopsize);
+
+    Algorithm* humDetector              = factory.create("HumDetector"); 
+    Algorithm* loudnessEBUR128          = factory.create("LoudnessEBUR128"); 
+    Algorithm* snr                      = factory.create("SNR"); 
+    Algorithm* startStopSilence         = factory.create("StartStopSilence"); 
 
 
 
-    // Algorithm* window = factory.create("Windowing",
-    //                                   "type", "hann",
-    //                                   "zeroPadding", zeropadding);
+     Algorithm* windowing               = factory.create("Windowing",
+                                                         "type", "hann",
+                                                         "zeroPadding", 0);
 
     
     cout << "-------- connecting algos ---------" << endl;
-    audioload->output("audio")             >>  frameCutter->input("signal");
-    audioload->output("audio")             >>  realAccumulator->input("data");
 
-    realAccumulator->output("array")             >>  startStopCut->input("audio");
-    realAccumulator->output("array")             >>  truePeakDetector->input("signal");
 
-    startStopCut->output("startCut")            >>  PC(pool, "startStopCut.start");
-    startStopCut->output("stopCut")            >>  PC(pool, "startStopCut.cut");
+    audioload->output("audio")                    >>  monoMixer->input("audio");
+    audioload->output("audio")                    >>  loudnessEBUR128->input("signal");
+    audioload->output("sampleRate")               >>  NOWHERE;
+    audioload->output("numberChannels")           >>  monoMixer->input("numberChannels");
+    audioload->output("md5")                      >>  NOWHERE;
+    audioload->output("bit_rate")                 >>  NOWHERE;
+    audioload->output("codec")                    >>  NOWHERE;
 
-    truePeakDetector->output("peakLocations")            >>  PC(pool, "truePeakDetector.peakLocations");
+    monoMixer->output("audio")                    >>  frameCutter->input("signal");
+    monoMixer->output("audio")                    >>  realAccumulator->input("data");
+    monoMixer->output("audio")                    >>  humDetector->input("signal");
+
+    realAccumulator->output("array")              >>  startStopCut->input("audio");
+    realAccumulator->output("array")              >>  truePeakDetector->input("signal");
+
+    startStopCut->output("startCut")              >>  PC(pool, "startStopCut.start");
+    startStopCut->output("stopCut")               >>  PC(pool, "startStopCut.cut");
+
+    truePeakDetector->output("peakLocations")     >>  PC(pool, "truePeakDetector.peakLocations");
     truePeakDetector->output("output")            >>  NOWHERE;
 
-    frameCutter->output("frame")           >>  discontinuityDetector->input("frame");
-    frameCutter->output("frame")           >>  gapsDetector->input("frame");
-    frameCutter->output("frame")           >>  saturationDetector->input("frame");
-    frameCutter->output("frame")           >>  clickDetector->input("frame");
+    // Time domain algorithms do not require Windowing.
+    frameCutter->output("frame")                  >>  discontinuityDetector->input("frame");
+    frameCutter->output("frame")                  >>  gapsDetector->input("frame");
+    frameCutter->output("frame")                  >>  saturationDetector->input("frame");
+    frameCutter->output("frame")                  >>  clickDetector->input("frame");
+    frameCutter->output("frame")                  >>  startStopSilence->input("frame");
+    
+    frameCutter->output("frame")                  >>  windowing->input("frame");
+    windowing->output("frame")                    >>  snr->input("frame");
 
 
-    discontinuityDetector->output("discontinuityLocations")  >>  PC(pool, "discontinuities.locations");
+    // Store the outputs in the Pool.
+    discontinuityDetector->output("discontinuityLocations")       >>  PC(pool, "discontinuities.locations");
     discontinuityDetector->output("discontinuityAmplitudes")      >>  PC(pool, "discontinuities.durations");
 
-    gapsDetector->output("starts")  >>  PC(pool, "gaps.starts");
-    gapsDetector->output("ends")      >>  PC(pool, "gaps.ends");
+    gapsDetector->output("starts")                                >>  PC(pool, "gaps.starts");
+    gapsDetector->output("ends")                                  >>  PC(pool, "gaps.ends");
 
-    saturationDetector->output("starts")  >>  PC(pool, "saturationDetector.starts");
-    saturationDetector->output("ends")      >>  PC(pool, "saturationDetector.ends");
+    saturationDetector->output("starts")                          >>  PC(pool, "saturationDetector.starts");
+    saturationDetector->output("ends")                            >>  PC(pool, "saturationDetector.ends");
 
-    clickDetector->output("starts")  >>  PC(pool, "clickDetector.starts");
-    clickDetector->output("ends")      >>  PC(pool, "clickDetector.ends");
+    clickDetector->output("starts")                               >>  PC(pool, "clickDetector.starts");
+    clickDetector->output("ends")                                 >>  PC(pool, "clickDetector.ends");
+
+    loudnessEBUR128->output("momentaryLoudness")                  >>  NOWHERE;
+    loudnessEBUR128->output("shortTermLoudness")                  >>  NOWHERE;
+    loudnessEBUR128->output("integratedLoudness")                 >>  PC(pool, "loudnessEBUR128.integratedLoudness");
+    loudnessEBUR128->output("loudnessRange")                      >>  PC(pool, "loudnessEBUR128.loudnessRange");
+
+    humDetector->output("r")                                      >>  NOWHERE;
+    humDetector->output("frequencies")                            >>  PC(pool, "humDetector.frequencies");
+    humDetector->output("saliences")                              >>  PC(pool, "humDetector.saliences");
+    humDetector->output("starts")                                 >>  PC(pool, "humDetector.starts");
+    humDetector->output("ends")                                   >>  PC(pool, "humDetector.ends");
+
+    snr->output("instantSNR")                                     >>  NOWHERE;
+    snr->output("averagedSNR")                                    >>  PC(pool, "snr.averagedSNR");
+    snr->output("spectralSNR")                                    >>  PC(pool, "snr.spectralSNR");
+
+    startStopSilence->output("startFrame")                        >>  PC(pool, "startStopSilence.startFrame");
+    startStopSilence->output("stopFrame")                         >>  PC(pool, "startStopSilence.stopFrame");
 
 
 
