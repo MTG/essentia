@@ -267,6 +267,11 @@ def configure(ctx):
 
 
     ctx.load('compiler_cxx compiler_c')
+    if ctx.options.WITH_GAIA:
+        if sys.platform.startswith('linux') and ctx.options.WITH_GAIA_QT5:
+            ctx.load('qt5')
+        else:
+            ctx.load('qt4')                   
 
     if ctx.env.STATIC_DEPENDENCIES \
         and (sys.platform.startswith('linux') or sys.platform == 'darwin') \
@@ -292,6 +297,8 @@ def adjust(objs, path):
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
     ctx.recurse('src')
+
+    print ('USES =', ctx.env.USES)
 
     if ctx.env.WITH_CPPTESTS:
         ctx.program(

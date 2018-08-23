@@ -166,7 +166,7 @@ PyObject* PyStreamingAlgorithm::configure (PyStreamingAlgorithm* self, PyObject*
 }
 
 PyObject* PyStreamingAlgorithm::hasSink(PyStreamingAlgorithm* self, PyObject* obj) {
-  char* name = PyString_AsString(obj);
+  const char* name = PyString_AsString(obj);
   if (name == NULL) {
     PyErr_SetString(PyExc_ValueError, "Algorithm.hasSink requires 1 string argument");
     return NULL;
@@ -177,7 +177,7 @@ PyObject* PyStreamingAlgorithm::hasSink(PyStreamingAlgorithm* self, PyObject* ob
 }
 
 PyObject* PyStreamingAlgorithm::hasSource(PyStreamingAlgorithm* self, PyObject* obj) {
-  char* name = PyString_AsString(obj);
+  const char* name = PyString_AsString(obj);
   if (name == NULL) {
     PyErr_SetString(PyExc_ValueError, "Algorithm.hasSource requires 1 string argument");
     return NULL;
@@ -250,7 +250,7 @@ PyObject* PyStreamingAlgorithm::push(PyStreamingAlgorithm* self, PyObject* args)
 }
 
 PyObject* PyStreamingAlgorithm::getInputType(PyStreamingAlgorithm* self, PyObject* obj) {
-  char* name = PyString_AsString(obj);
+  const char* name = PyString_AsString(obj);
   if (name == NULL) {
     PyErr_SetString(PyExc_TypeError, "Algorithm.getInputType requires 1 string argument");
     return NULL;
@@ -270,7 +270,7 @@ PyObject* PyStreamingAlgorithm::getInputType(PyStreamingAlgorithm* self, PyObjec
 }
 
 PyObject* PyStreamingAlgorithm::getOutputType(PyStreamingAlgorithm* self, PyObject* obj) {
-  char* name = PyString_AsString(obj);
+  const char* name = PyString_AsString(obj);
   if (name == NULL) {
     PyErr_SetString(PyExc_TypeError, "Algorithm.getOutputType requires 1 string argument");
     return NULL;

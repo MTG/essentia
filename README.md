@@ -15,6 +15,14 @@ The library is cross-platform and currently supports Linux, Mac OS X, Windows, i
 -  http://essentia.upf.edu/documentation/installing.html 
 -  [doc/sphinxdoc/installing.rst](doc/sphinxdoc/installing.rst)
 
+If using on Ubuntu (Linux) with Gaia there is an option `--with-gaia-qt5` this requires:
+
+`export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig` 
+
+Still working cleaning up linker references issues involving `Gaia2` for `example` `streaming_extractor_music_svm` extractor to make build more generic, less specific to Ubuntu.
+
+Examples are now built for `essentia` using `--with-gaia-qt5`.  Will make changes to allow `Qt4` to work.
+
 You can download and use prebuilt static binaries for a number of Essentia's command-line music extractors instead of installing the complete library
 
 - [doc/sphinxdoc/extractors_out_of_box.rst](doc/sphinxdoc/extractors_out_of_box.rst)
