@@ -180,13 +180,12 @@ def configure(ctx):
     elif sys.platform == 'win32':
         print ("→ Building on win32: search for pre-built dependencies in 'packaging/win32_3rdparty'")
 
-        libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libsamplerate-0.1.8', 'taglib-1.11.1', 'ffmpeg-2.8.12']
-        libs_paths = ['packaging/win32_3rdparty/builds/' + lib + '/lib/pkgconfig' for lib in libs_3rdparty] 
-        os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
+        #libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libsamplerate-0.1.8', 'taglib-1.11.1', 'ffmpeg-2.8.12']
+        #libs_paths = ['packaging/win32_3rdparty/builds/' + lib + '/lib/pkgconfig' for lib in libs_3rdparty]
+        #os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
 
-        # ffmpeg
-        #os.environ["PKG_CONFIG_PATH"] += ';packaging/win32_3rdparty/lib/pkgconfig'
-        #os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+        os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
         """
         # compile libgcc and libstd statically when using MinGW
