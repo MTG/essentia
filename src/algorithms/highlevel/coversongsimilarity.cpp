@@ -109,10 +109,10 @@ void CoverSongSimilarity::compute() {
 
                 // measure the diagonal when a similarity is found in the input matrix as mentioned by Chen et. al 2016
                 if (simMatrix[i][j] == 1.){
-                    c2 = cumMatrix[i-2][j-1] + scoreMatrix[i-1][j];
-                    c3 = cumMatrix[i-1][j-2] + scoreMatrix[i][j-1];
-                    c4 = cumMatrix[i-3][j-1] + scoreMatrix[i-2][j] + scoreMatrix[i-1][j];
-                    c5 = cumMatrix[i-1][j-3] + scoreMatrix[i][j-2] + scoreMatrix[i][j-1];
+                    c2 = cumMatrix[i-2][j-1] + simMatrix[i-1][j];
+                    c3 = cumMatrix[i-1][j-2] + simMatrix[i][j-1];
+                    c4 = cumMatrix[i-3][j-1] + simMatrix[i-2][j] + scoreMatrix[i-1][j];
+                    c5 = cumMatrix[i-1][j-3] + simMatrix[i][j-2] + scoreMatrix[i][j-1];
                     float row[5] = {cumMatrix[i-1][j-1], c2, c3, c4, c5};
                     //float rowMax = arrayMax(row, 5);
                     cumMatrix[i][j] =  arrayMax(row, 5) + 1;
@@ -123,10 +123,10 @@ void CoverSongSimilarity::compute() {
                 {
                     // apply gap penalty onset for disurption and extension when similarity is not found in the input matrix 
                     c1 = cumMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1]);
-                    c2 = (cumMatrix[i-2][j-1] + scoreMatrix[i-1][j]) - gammaState(simMatrix[i-2][j-1], _gammaO, _gammaE);
-                    c3 = (cumMatrix[i-1][j-2] + scoreMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-2], _gammaO, _gammaE);
-                    c4 = (cumMatrix[i-3][j-1] + scoreMatrix[i-2][j] + scoreMatrix[i-1][j]) - gammaState(simMatrix[i-3][j-1], _gammaO, _gammaE);
-                    c5 = (cumMatrix[i-1][j-3] + scoreMatrix[i][j-2] + scoreMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-3], _gammaO, _gammaE);
+                    c2 = (cumMatrix[i-2][j-1] + simMatrix[i-1][j]) - gammaState(simMatrix[i-2][j-1], _gammaO, _gammaE);
+                    c3 = (cumMatrix[i-1][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-2], _gammaO, _gammaE);
+                    c4 = (cumMatrix[i-3][j-1] + simMatrix[i-2][j] + simMatrix[i-1][j]) - gammaState(simMatrix[i-3][j-1], _gammaO, _gammaE);
+                    c5 = (cumMatrix[i-1][j-3] + simMatrix[i][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-3], _gammaO, _gammaE);
                     float row2[6] = {0, c1, c2, c3, c4, c5};
                     cumMatrix[i][j] = arrayMax(row2, 6);
                     //cumMatrix[i][j] = *std::max_element(row2, row2+6);
