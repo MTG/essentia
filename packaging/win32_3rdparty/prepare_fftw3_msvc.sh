@@ -11,17 +11,27 @@ lib /def:libfftw3-3.def
 lib /def:libfftw3f-3.def
 lib /def:libfftw3l-3.def
 
-mkdir include; mkdir lib
-mv fftw3.h include/
-mv libfftw3f-3.def lib/fftw3f.def
-mv libfftw3f-3.exp lib/fftwf3.exp
-mv libfftw3f-3.lib lib/fftw3f.lib
-mv libfftw3f-3.dll lib/
+mkdir -p $PREFIX/include; mkdir -p $PREFIX/lib
+mv fftw3.h $PREFIX/include/
+mv libfftw3f-3.def $PREFIX/lib/fftw3f.def
+mv libfftw3f-3.exp $PREFIX/lib/fftwf3.exp
+mv libfftw3f-3.lib $PREFIX/lib/fftw3f.lib
+mv libfftw3f-3.dll $PREFIX/lib/
+
+# Create a *.pc file
+VERSION=`echo $FFTW_VERSION | awk -F "-"  '{ print $2 }'`
+echo "
+prefix=../packaging/win32_3rdparty
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: FFTW
+Description: fast Fourier transform library
+Version: $VERSION
+Libs: -L\${libdir} -lfftw3f
+Cflags: -I\${includedir}
+" > $PREFIX/lib/pkgconfig/fftw3f.pc
 
 cd ..
-mkdir -p builds/$FFTW_VERSION
-mv tmp/include builds/$FFTW_VERSION
-mv tmp/lib builds/$FFTW_VERSION
 rm -r tmp
-
-# TODO: create pc file

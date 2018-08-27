@@ -30,7 +30,8 @@ export PATH=${PATH/\/bin:/}
 export PATH=/usr/bin:/bin:$PATH
 
 cp src/samplerate.h $PREFIX/include
-cp libsamplerate-0.dll libsamplerate-0.lib $PREFIX/lib
+cp libsamplerate-0.dll $PREFIX/lib
+cp libsamplerate-0.lib $PREFIX/lib/samplerate.lib
 
 # Create a *.pc file
 VERSION=`echo $LIBSAMPLERATE_VERSION | awk -F "-"  '{ print $2 }'`
