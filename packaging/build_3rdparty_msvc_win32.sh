@@ -8,4 +8,4 @@ rm -rf bin dynamic include lib share
 ./build_libsamplerate_msvc.sh
 ./build_zlib_msvc.sh
 ./build_taglib_msvc.sh
-./build_yaml.sh
+./build_yaml_msvc.sh
