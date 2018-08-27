@@ -9,3 +9,4 @@ rm -rf bin dynamic include lib share
 ./build_zlib_msvc.sh
 ./build_taglib_msvc.sh
 ./build_yaml_msvc.sh
+./build_chromaprint_msvc.sh
