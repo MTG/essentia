@@ -9,6 +9,7 @@ wget http://taglib.github.io/releases/$TAGLIB_VERSION.tar.gz
 tar -xf $TAGLIB_VERSION.tar.gz
 cd $TAGLIB_VERSION/
 
+# For an x86 build, remove -G flag that is specifying the x64 generator
 cmake -G "Visual Studio 15 2017 Win64" -DCMAKE_INSTALL_PREFIX=$PREFIX -DBUILD_SHARED_LIBS=ON -DZLIB_ROOT=$PREFIX
 msbuild.exe all_build.vcxproj -p:Configuration=Release
 msbuild.exe install.vcxproj

@@ -20,7 +20,6 @@ cp $LIBSNDFILE_VERSION/sndfile.h Win32/
 sed -i 's/I386/x64/g' Win32/Makefile.msvc
 sed -i 's/i386/x64/g' Win32/Makefile.msvc
 
-#"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" x64
 # Get rid of /usr/bin and /bin paths that were added by MSYS2 and force using MSVC's link.exe
 export PATH=${PATH/\/usr\/bin:/}
 export PATH=${PATH/\/bin:/}

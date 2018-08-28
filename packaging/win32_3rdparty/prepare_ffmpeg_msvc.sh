@@ -1,9 +1,12 @@
 #!/bin/sh
+. ../build_config.sh
 
-pacman -S tar make gcc diffutils --noconfirm
+# There are FFmpeg builds available online (http://ffmpeg.zeranoe.com/builds/),
+# but unfortunately those do not include libavresample. Therefore, we have to
+# build FFmpeg from scratch.
 ./build_ffmpeg_msvc.sh
 
-cd lib/
+cd $PREFIX/lib
 lib /def:avcodec-56.def /out:avcodec-56.lib
 lib /def:avformat-56.def /out:avformat-56.lib
 lib /def:avutil-54.def /out:avutil-54.lib
@@ -16,12 +19,4 @@ mv avutil-54.lib avutil.lib
 mv avresample-2.lib avresample.lib
 mv swresample-1.lib swresample.lib
 
-# TODO patch .pc file here
-
-cd ..
-
-# TODO avoid writing to include/ lib/. Use prefix instead
-# TODO use FFmpeg version variable
-mkdir -p builds/ffmpeg-2.8.12
-mv include builds/ffmpeg-2.8.12
-mv lib builds/ffmpeg-2.8.12
+sed -i 's/^prefix=.*/prefix=\.\.\/packaging\/win32_3rdparty/' pkgconfig/libav*.pc
