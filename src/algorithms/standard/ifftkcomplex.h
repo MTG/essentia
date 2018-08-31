@@ -44,6 +44,7 @@ class IFFTKComplex : public Algorithm {
 
   void declareParameters() {
     declareParameter("size", "the expected size of the input frame. This is purely optional and only targeted at optimizing the creation time of the FFT object", "[1,inf)", 1024);
+    declareParameter("normalize", "wheter to normalize the output by the FFT length.", "{true,false}", true);
   }
 
 
@@ -55,11 +56,11 @@ class IFFTKComplex : public Algorithm {
   static const char* description;
 
  protected:
-    kiss_fft_cfg _fftCfg;
-    int _fftPlanSize;
-    std::complex<Real>* _input;
-    std::complex<Real>* _output;
-    
+  kiss_fft_cfg _fftCfg;
+  int _fftPlanSize;
+  std::complex<Real>* _input;
+  std::complex<Real>* _output;
+  bool _normalize;
     
   void createFFTObject(int size);
 };

@@ -70,10 +70,18 @@ void IFFTWComplex::compute() {
   signal.resize(size);
   memcpy(&signal[0], _output, size*sizeof(complex<Real>));
 
+  if (_normalize) {
+    Real norm = (Real)size;
+    
+    for (int i = 0; i < size; i++) {
+      signal[i] /= norm;
+    }
+  }
 }
 
 void IFFTWComplex::configure() {
   createFFTObject(parameter("size").toInt());
+  _normalize = parameter("normalize").toBool();
 }
 
 void IFFTWComplex::createFFTObject(int size) {
@@ -90,7 +98,7 @@ void IFFTWComplex::createFFTObject(int size) {
   }
 
   //_fftPlan = fftwf_plan_dft_c2r_1d(size, (fftwf_complex*)_input, _output, FFTW_MEASURE);
-  _fftPlan = fftwf_plan_dft_1d(size, (fftwf_complex*)_input, (fftwf_complex*)_output, FFTW_FORWARD, FFTW_ESTIMATE);
+  _fftPlan = fftwf_plan_dft_1d(size, (fftwf_complex*)_input, (fftwf_complex*)_output, FFTW_BACKWARD, FFTW_ESTIMATE);
   _fftPlanSize = size;
 
 }
