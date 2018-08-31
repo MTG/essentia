@@ -49,6 +49,7 @@ class IFFTA : public Algorithm {
 
   void declareParameters() {
     declareParameter("size", "the expected size of the input frame. This is purely optional and only targeted at optimizing the creation time of the FFT object", "[1,inf)", 1024);
+    declareParameter("normalize", "wheter to normalize the output by the FFT length.", "{true,false}", true);
   }
 
 
@@ -64,13 +65,15 @@ class IFFTA : public Algorithm {
 //  std::complex<Real>* _input;
 //  Real* _output;
 
-    FFTSetup fftSetup;
-    
-    int logSize;
-    
-    int _fftPlanSize;
-    
-    DSPSplitComplex accelBuffer;    
+  FFTSetup fftSetup;
+  
+  int logSize;
+  
+  int _fftPlanSize;
+  
+  DSPSplitComplex accelBuffer;
+
+  bool _normalize;
 
   void createFFTObject(int size);
 };
