@@ -37,7 +37,7 @@ class TestIFFT(TestCase):
 
         fftInput = [ 1+0j ] * fftSize
 
-        self.assertAlmostEqualVector(signalDC*signalSize, IFFT()(cvec(fftInput)))
+        self.assertAlmostEqualVector(signalDC*signalSize, IFFT(normalize=False)(cvec(fftInput)))
 
 
     def testNyquist(self):
@@ -53,19 +53,19 @@ class TestIFFT(TestCase):
         fftInput = [ 0+0j ] * fftSize
         fftInput[-1] = (1+0j) * signalSize
 
-        self.assertAlmostEqualVector(IFFT()(cvec(fftInput)), signalNyquist*signalSize)
+        self.assertAlmostEqualVector(IFFT(normalize=False)(cvec(fftInput)), signalNyquist*signalSize)
 
     def testZero(self):
-        self.assertAlmostEqualVector(zeros(2048), IFFT()(numpy.zeros(1025, dtype='c8')))
+        self.assertAlmostEqualVector(zeros(2048), IFFT(normalize=False)(numpy.zeros(1025, dtype='c8')))
 
 
     def testEmpty(self):
-        self.assertComputeFails(IFFT(), cvec([]))
+        self.assertComputeFails(IFFT(normalize=False), cvec([]))
 
 
     def testRegression(self):
         signal = numpy.sin(numpy.arange(1024, dtype='f4')/1024. * 441 * 2*math.pi)
-        self.assertAlmostEqualVector(signal*len(signal), IFFT()(FFT()(signal)), 1e-2)
+        self.assertAlmostEqualVector(signal*len(signal), IFFT(normalize=False)(FFT()(signal)), 1e-2)
 
 
 
