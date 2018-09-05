@@ -45,6 +45,8 @@ const char* Key::description = DOC("This algorithm computes key estimate given a
 "\n"
 "The standard mode of the algorithm estimates key/scale for a given HPCP vector. The streaming mode first accumulates a stream of HPCP vectors and computes its mean to provide the estimation.\n"
 "\n"
+"This algorithm combines 2 complementary tuning strategies. If the exact tuning frequency of the input signal is known, `referenceFrequency` can be set in order to modify the semitone crossover frequencies. "
+"Alternatively, the tuning frequency agnostic approach described in [3] is able to correct tuning errors when pcpSize > 12."
 "References:\n"
 "  [1] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
 "  Processing,\" INFORMS Journal on Computing, vol. 18, no. 3, pp. 294–304,\n"
