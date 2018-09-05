@@ -46,6 +46,7 @@ class LogSpectrum : public Algorithm {
     declareParameter("frameSize", "the input frame size of the spectrum vector", "(1,inf)", 1025);
     declareParameter("sampleRate", "the input sample rate", "(0,inf)", 44100.);
     declareParameter("rollOn", "this removes low-frequency noise - useful in quiet recordings", "[0,5]", 0.f);
+    declareParameter("binsPerSemitone", " bins per semitone", "(0,inf)", 3.0);
   }
 
   void configure();
@@ -59,6 +60,9 @@ class LogSpectrum : public Algorithm {
 
  protected:
   int _frameCount;
+  int _nBPS;
+  int _nOctave;
+  int _nNote;
   size_t _frameSize;
   Real _sampleRate;
   Real _rollon;
