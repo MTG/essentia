@@ -276,7 +276,9 @@ void NNLSChroma::compute() {
 
       else {
         Real x[84 + 1000];
-        for (int j = 1; j < 1084; ++j) x[j] = 1.0;
+        for (int j = 1; j < 1084; ++j){
+          x[j] = 1.0;
+        } 
 
         vector<int> signifIndex;
         int index = 0;
@@ -404,9 +406,12 @@ vector<Real> NNLSChroma::SpecialConvolution(vector<Real> convolvee, vector<Real>
   }
 
   // Fill upper and lower pads.
-  for (n = 0; n < lenKernel / 2; n++) Z[n] = Z[lenKernel / 2];
-  for (n = lenConvolvee; n < lenConvolvee + lenKernel / 2; n++)
+  for (n = 0; n < lenKernel / 2; n++) {
+    Z[n] = Z[lenKernel / 2];
+  }
+  for (n = lenConvolvee; n < lenConvolvee + lenKernel / 2; n++) {
     Z[n - lenKernel / 2] = Z[lenConvolvee - lenKernel / 2 - 1];
+  }  
   return Z;
 }
 
