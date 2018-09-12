@@ -23,7 +23,6 @@
 #include <string>
 #include <algorithm>
 
-//using namespace std;
 
 double gammaState(double value, float gammaO=0.5, float gammaE=0.5);
 double arrayMax(const float* arr, size_t length);
@@ -80,22 +79,16 @@ void CoverSongSimilarity::compute() {
                     c2 = cumMatrix[i-2][j-1];
                     c3 = cumMatrix[i-1][j-2];
                     float row[3] = {c1, c2 , c3};
-                    //float rowMax = arrayMax(row, 3);
                     cumMatrix[i][j] =  arrayMax(row, 3) + 1;
-                    //cumMatrix[i][j] = *std::max_element(row, row+3);
-                    //std::cout << "Cummatrix value first: " << cumMatrix[i][j] << std::endl;
                 }
                 else
                 {
-                    // apply gap penalty onset for disurption and extension when similarity is not dound in the input matrix 
+                    // apply gap penalty onset for disurption and extension when similarity is not found in the input matrix 
                     c1 = cumMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1], _gammaO, _gammaE);
                     c2 = cumMatrix[i-2][j-1] - gammaState(simMatrix[i-2][j-1], _gammaO, _gammaE);
                     c3 = cumMatrix[i-1][j-2] - gammaState(simMatrix[i-1][j-2], _gammaO, _gammaE);
                     float row2[4] = {0, c1, c2, c3};
-                    //float rowMax2 = arrayMax(row2, 4);
                     cumMatrix[i][j] = arrayMax(row2, 4);
-                    //cumMatrix[i][j] = *std::max_element(row2, row2+4);
-                    //std::cout << "Cummatrix value second: " << cumMatrix[i][j] << std::endl;
                 }
             }
         }
@@ -114,10 +107,7 @@ void CoverSongSimilarity::compute() {
                     c4 = cumMatrix[i-3][j-1] + simMatrix[i-2][j] + scoreMatrix[i-1][j];
                     c5 = cumMatrix[i-1][j-3] + simMatrix[i][j-2] + scoreMatrix[i][j-1];
                     float row[5] = {cumMatrix[i-1][j-1], c2, c3, c4, c5};
-                    //float rowMax = arrayMax(row, 5);
                     cumMatrix[i][j] =  arrayMax(row, 5) + 1;
-                    //cumMatrix[i][j] = *std::max_element(row, row+5);
-                    //std::cout << "Cummatrix value first: " << cumMatrix[i][j] << std::endl;
                 }
                 else
                 {
@@ -129,14 +119,11 @@ void CoverSongSimilarity::compute() {
                     c5 = (cumMatrix[i-1][j-3] + simMatrix[i][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-3], _gammaO, _gammaE);
                     float row2[6] = {0, c1, c2, c3, c4, c5};
                     cumMatrix[i][j] = arrayMax(row2, 6);
-                    //cumMatrix[i][j] = *std::max_element(row2, row2+6);
-                    //std::cout << "Cummatrix value second: " << cumMatrix[i][j] << std::endl;
                 }
             }    
         }
         scoreMatrix = cumMatrix;
-    } 
-    //similarityMeasure = 0;   
+    }    
 }
 
 

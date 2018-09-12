@@ -76,4 +76,4 @@ namespace streaming {
 };
  } // namespace streaming
 } // namespace essentia
- #endif // ESSENTIA_HISTOGRAM_H
+ #endif // ESSENTIA_COVERSONGSIMILARITY_H
