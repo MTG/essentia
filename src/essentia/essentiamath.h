@@ -908,6 +908,23 @@ void rotateByIndex(const std::vector<T>& inputArray, const int indx) {
 }
 
 
+// returns the n-th percentile of an input array
+template <typename T> T percentile(const std::vector<T>& array, int npercentile) {
+  if (array.empty())
+    throw EssentiaException("trying to calculate percentile of empty array");
+
+  // median has sense only on sorted array
+  std::vector<T> sorted_array = array;
+  std::sort(sorted_array.begin(), sorted_array.end());
+
+  uint size = sorted_array.size()+1;
+  float nth = npercentile/100.;
+  float idx = size*nth;
+  return sorted_array[round(idx)];
+}
+
+
+
 /**
  * Apply heaviside step function to an input m X n dimentional vector.
  * f(x) = if x<0: x=0; if x>=0: x=1
@@ -951,14 +968,16 @@ std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >
   double item = 0;
   std::vector<std::vector<T> > result(yNcols, std::vector<T>(xNcols, 0));
 
+  /*
   for (size_t i=1; i<xNcols; i++) {
-    if ((int)m[i].size() != nrows) {  
+    if ((size_t)m[i].size() != nrows) {  
       std::ostringstream ss;
       ss <<"Expecting dim2 = " << xNcols
          << " but got " << m[i].size();
       throw EssentiaException(ss.str());
     }
   }
+  */
 
   for (size_t i=0; i<xNcols; i++) {
       for (size_t j=0; j<yNcols; j++) {
@@ -973,3 +992,4 @@ std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >
 } // namespace essentia
 
 #endif // ESSENTIA_MATH_H
+

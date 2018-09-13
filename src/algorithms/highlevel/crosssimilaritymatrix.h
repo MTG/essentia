@@ -45,7 +45,7 @@ namespace standard {
     declareParameter("m", "embedding dimension for the time series embedding", "[0,inf)", 9);
     declareParameter("kappa", "fraction of mutual nearest neighbours to consider", "[0,1]", 0.095);
     declareParameter("oti", "whether to transpose the key of the reference song to the query song by (OTI)", "{true,false}", true);
-    declareParameter("toBlocked", "whether to use blocked chroma vector for computing similarity", "{true,false}", true);
+    declareParameter("toBlocked", "whether to use blocked chroma vector for computing similarity", "{true,false}", false);
     declareParameter("noti", "Number of circular shifts to be checked for optimal transposition index", "[0, inf)", 12);
   }
 
@@ -62,7 +62,7 @@ namespace standard {
   bool _oti;
   bool _toBlocked;
 
-  protected:
+  //protected:
    std::vector<Real> globalAverageChroma(std::vector<std::vector<Real> >& inputFeature) const;
    std::vector<std::vector<Real> > toTimeEmbedding(std::vector<std::vector<Real> >& inputArray, int m, int tau) const;
    int optimalTranspositionIndex(std::vector<std::vector<Real> >& featureA, std::vector<std::vector<Real> >& featureB, int nshifts) const;

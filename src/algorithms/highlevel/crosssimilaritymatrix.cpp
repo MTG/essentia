@@ -22,6 +22,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <functional>
 
 
 namespace essentia {
@@ -56,11 +57,13 @@ void CrossSimilarityMatrix::compute() {
     // check whether to transpose by oti
     if (_oti == true) {
         int otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
-        rotateByIndex(referenceFeature, otiIdx);
+        std::rotate(referenceFeature.begin(), referenceFeature.end() - otiIdx, referenceFeature.end());
+        //rotateByIndex(referenceFeature, otiIdx);
     }
     
     // check if delay embedding needed
     if (_toBlocked == true) {
+        // construct time embedding from input chroma features
         std::vector<std::vector<Real> >  timeEmbedA = toTimeEmbedding(queryFeature, _m, _tau);
         std::vector<std::vector<Real> >  timeEmbedB = toTimeEmbedding(referenceFeature, _m, _tau);
         // pairwise euclidean distance
@@ -76,10 +79,42 @@ void CrossSimilarityMatrix::compute() {
 
     // transposing the array of pairwsie distance
     std::vector<std::vector<Real> > tDistances = transpose(pdistances);
-    std::vector<std::vector<Real> > ephX;
-    std::vector<std::vector<Real> > ephY;
-    // TODO: implement numpy percentile function in essentiamath
 
+    // ephisilon
+    std::vector<std::vector<Real> > ephX(pdistances.size());
+    std::vector<std::vector<Real> > ephY(tDistances.size());
+
+    std::vector<Real> tempXrow;
+    for (size_t i=0; i<pdistances.size(); i++) {
+        tempXrow.push_back(percentile(pdistances[i], _kappa));
+        ephX[i] = tempXrow;
+        tempXrow.clear();
+    }
+
+    std::vector<Real> tempYrow;
+    for (size_t j=0; j<tDistances.size(); j++) {
+        tempYrow.push_back(percentile(tDistances[j], _kappa));
+        ephY[j] = tempYrow;
+        tempYrow.clear();
+    }
+
+    std::vector<std::vector<Real> > similarityX(pdistances.size());
+    std::vector<std::vector<Real> > similarityY(tDistances.size());
+
+    for (size_t k=0; k<pdistances.size(); k++) {
+        std::transform(ephX[k].begin(),ephX[k].end(),pdistances[k].begin(),std::back_inserter(similarityX[k]),std::minus<Real>());
+    }
+
+    for (size_t l=0; l<tDistances.size(); l++) {
+        std::transform(ephX[l].begin(),ephX[l].end(),tDistances[l].begin(),std::back_inserter(similarityY[l]),std::minus<Real>());
+    }
+
+    // Finally we construct out cross similarity matrix by doing dot product of the similarity matrices
+    for (size_t x=0; x<similarityX.size(); x++) {
+        for (size_t y=0; y<similarityY.size(); y++) {
+            csm[x][y] = dotProduct(similarityX[x], similarityY[y]);
+        }
+    }
 }
 
 
@@ -141,7 +176,8 @@ int CrossSimilarityMatrix::optimalTranspositionIndex(std::vector<std::vector<Rea
 
     for(int i=1; i<=nshifts; i++) {
         // circular rotate the input globalchroma by an index 'i'
-        rotateByIndex(globalChromaB, i);
+        std::rotate(globalChromaB.begin(), globalChromaB.end() - i, globalChromaB.end());
+        //rotateByIndex(globalChromaB, i);
         // compute the dot product of the query global chroma and the shifted global chroma of reference song and append to an array
         valueAtShifts.push_back(dotProduct(globalChromaA, globalChromaB));
         globalChromaB = chromaBcopy;
@@ -152,5 +188,9 @@ int CrossSimilarityMatrix::optimalTranspositionIndex(std::vector<std::vector<Rea
 }
 
 
+
+
+
 } // namespace standard
 } // namespace essentia
+
