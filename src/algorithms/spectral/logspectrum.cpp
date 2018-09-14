@@ -27,7 +27,7 @@ using namespace standard;
 const char* LogSpectrum::name = "LogSpectrum";
 const char* LogSpectrum::category = "Spectral";
 const char* LogSpectrum::description = DOC("This algorithm computes spectrum with logarithmically distributed frequency bins. "
-"This code is a reimplementation of the well known NNLS Chroma described in [1]."
+"This code is ported from NNLS Chroma [1, 2]."
 "This algorithm also returns a local tuning that is retrieved for input frame and a global tuning that is updated with a moving average.\n"
 "\n"
 "Note: As the algorithm uses moving averages that are updated every frame it should be reset before  "
@@ -35,8 +35,9 @@ const char* LogSpectrum::description = DOC("This algorithm computes spectrum wit
 "\n"
 "References:\n"
 "  [1] Mauch, M., & Dixon, S. (2010, August). Approximate Note Transcription\n"
-"  for the Improved Identification of Difficult Chords. In ISMIR (pp. 135-140).");
-
+"  for the Improved Identification of Difficult Chords. In ISMIR (pp. 135-140).\n"
+"  [2] Chordino and NNLS Chroma,\n"
+"  http://www.isophonics.net/nnls-chroma");
 
 void LogSpectrum::configure() {
   // Get parameters.
@@ -147,8 +148,8 @@ void LogSpectrum::compute() {
   the "matrix" pointed to by outmatrix.
  */
 bool LogSpectrum::logFreqMatrix(Real fs, int frameSize, vector<Real> &outmatrix) {
-  // todo: rewrite so that everyone understands what is done here.
-  // todo: make this more general, such that it works with all minoctave,
+  // TODO: rewrite so that everyone understands what is done here.
+  // TODO: make this more general, such that it works with all minoctave,
   // maxoctave and whatever _nBPS (or check if it already does)
 
   int binspersemitone = _nBPS; 
