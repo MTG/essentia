@@ -70,6 +70,7 @@ class Edt:  # Essentia Data Type
     LIST_LIST_EMPTY = 'LIST_LIST_EMPTY'
     LIST_COMPLEX = 'LIST_COMPLEX'
     LIST_LIST_COMPLEX = 'LIST_LIST_COMPLEX'
+    LIST_ARRAY_REAL = 'LIST_ARRAY_REAL'
     LIST_ARRAY = 'LIST_ARRAY'
     NUMPY_FLOAT = 'NUMPY_FLOAT'
     UNDEFINED = 'UNDEFINED'
@@ -81,8 +82,8 @@ class Edt:  # Essentia Data Type
         return self._tp in (Edt.LIST_EMPTY, Edt.LIST_MIXED, Edt.LIST_INTEGER,
                             Edt.LIST_REAL, Edt.LIST_LIST_REAL,
                             Edt.LIST_LIST_INTEGER, Edt.LIST_ARRAY,
-                            Edt.UNDEFINED, Edt.NUMPY_FLOAT, Edt.LIST_LIST_EMPTY,
-                            Edt.LIST_LIST_COMPLEX)
+                            Edt.LIST_ARRAY_REAL, Edt.UNDEFINED, Edt.NUMPY_FLOAT,
+                            Edt.LIST_LIST_EMPTY, Edt.LIST_LIST_COMPLEX)
 
     def vectorize(self):
         return Edt('VECTOR_'+self._tp)
@@ -155,7 +156,10 @@ def determineEdt(obj):
             return Edt(Edt.LIST_LIST_EMPTY)
 
         if isinstance(obj[0], numpy.ndarray) and obj[0].ndim == 1:
-            return Edt(Edt.LIST_ARRAY)
+            if obj[0].dtype == numpy.dtype('single'):
+                return Edt(Edt.LIST_ARRAY_REAL)
+            else:
+                return Edt(Edt.LIST_ARRAY)
 
     # numpy array matrices
     if isinstance(obj, numpy.ndarray) and obj.ndim == 2:
@@ -282,14 +286,14 @@ def convertData(data, goalType):
             return data
 
     if goalType == Edt.MATRIX_REAL and \
-       (origType == Edt.LIST_LIST_REAL or origType == Edt.LIST_LIST_INTEGER or origType == Edt.LIST_ARRAY):
+       (origType == Edt.LIST_LIST_REAL or origType == Edt.LIST_LIST_INTEGER or origType == Edt.LIST_ARRAY_REAL):
         return array(data)
 
     if goalType == Edt.VECTOR_VECTOR_REAL:
         if origType == Edt.MATRIX_REAL or origType == Edt.LIST_LIST_INTEGER:
             return [[float(col) for col in row] for row in data]
 
-        if origType == Edt.LIST_LIST_REAL or origType == Edt.LIST_LIST_EMPTY:
+        if origType == Edt.LIST_LIST_REAL or origType == Edt.LIST_LIST_EMPTY or Edt.LIST_ARRAY_REAL:
             return data
 
     if goalType == Edt.REAL:
