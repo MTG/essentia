@@ -882,6 +882,111 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
   return result;
 }
 
+
+/**
+ * returns the dot product of two 1-D vectors.
+ */
+template <typename T>
+T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
+  if (xArray.empty())
+    throw EssentiaException("trying to calculate dot product of an empty array");
+  if (yArray.empty())
+    throw EssentiaException("trying to calculate dot product of an empty array");
+  return std::inner_product(std::begin(xArray), std::end(xArray), std::begin(yArray), 0.0);
+}
+
+
+/**
+ * rotate the input 1-D vector by an index value.
+ */
+template <typename T>
+void rotateByIndex(const std::vector<T>& inputArray, const int indx) {
+  if (inputArray.empty())
+    throw EssentiaException("trying to rotate an empty array");
+  std::rotate(inputArray.begin(), inputArray.end() - indx, inputArray.end());
+}
+
+
+// returns the n-th percentile of an input array
+template <typename T> T percentile(const std::vector<T>& array, int npercentile) {
+  if (array.empty())
+    throw EssentiaException("trying to calculate percentile of empty array");
+
+  // median has sense only on sorted array
+  std::vector<T> sorted_array = array;
+  std::sort(sorted_array.begin(), sorted_array.end());
+
+  uint size = sorted_array.size()+1;
+  float nth = npercentile/100.;
+  int idx = size*nth;
+  return sorted_array[idx];
+}
+
+
+/**
+ * Apply heaviside step function to an input m X n dimentional vector.
+ * f(x) = if x<0: x=0; if x>=0: x=1
+ * returns a 2d binary vector of m X n shape
+ */
+template <typename T>
+void heavisideStepFunction(std::vector<std::vector<T> >& inputArray) {
+  if (inputArray.empty())
+    throw EssentiaException("empty array as input");
+
+  //std::vector<std::vector<T> > result(inputArray.size(), std::vector<T>(inputArray[0].size(), 0));
+
+  for (size_t i=0; i<inputArray.size(); i++) {
+    for (size_t j=0; j<inputArray[i].size(); j++) {
+
+      // initialize all non negative elements as zero
+      if (inputArray[i][j] < 0) {
+        inputArray[i][j] = 0;
+        //result[i][j] = 0;
+      }
+      else if (inputArray[i][j] >= 0) {
+        inputArray[i][j] = 1;
+        //result[i][j] = 1;
+      }
+    }
+  }
+  //return result;
+}
+
+
+/*
+ * Pairwise euclidean distances between two set of observations in n-dimensional space.
+ * The inputs are two m X n and k X l dimentional vectors
+ * Returns a m X k dimentional vector
+ * TODO: [add other distance metrics beside euclidean such as cosine, mahanalobis etc]
+ */
+template <typename T>
+std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >& m, const std::vector<std::vector<T> >& n) {
+
+  //size_t nrows = m.size();
+  size_t xNcols = m.size();
+  size_t yNcols = n.size();
+  double item = 0;
+  std::vector<std::vector<T> > result(yNcols, std::vector<T>(xNcols, 0));
+
+  /*
+  for (size_t i=1; i<xNcols; i++) {
+    if ((size_t)m[i].size() != nrows) {
+      std::ostringstream ss;
+      ss <<"Expecting dim2 = " << xNcols
+         << " but got " << m[i].size();
+      throw EssentiaException(ss.str());
+    }
+  }
+  */
+  for (size_t i=0; i<xNcols; i++) {
+      for (size_t j=0; j<yNcols; j++) {
+          item = dotProduct(m[i], m[i]) - 2*dotProduct(m[i], n[j]) + dotProduct(n[j], n[j]);
+          result[i][j] = sqrt(item);
+      }
+  }
+  return result;
+}
+
 } // namespace essentia
 
 #endif // ESSENTIA_MATH_H
