@@ -30,15 +30,16 @@ namespace standard {
 
 const char* CrossSimilarityMatrix::name = "CrossSimilarityMatrix";
 const char* CrossSimilarityMatrix::category = "Music similarity";
-const char* CrossSimilarityMatrix::description = DOC("This algorithm compute a cross similarity matrix from two audio feature vectors of a  \
+const char* CrossSimilarityMatrix::description = DOC("This algorithm computes a cross similarity matrix from two audio feature vectors of a  \
 query and reference song.\n" "\n"
-" ------------------ \n\n"
+"\n\n"
 "References \n"
 "----------"
-"\n"
+"\n\n"
 "[1]. Serra, J., Gómez, E., & Herrera, P. (2008). Transposing chroma representations to a common key, IEEE Conference on The Use of Symbols to Represent Music and Multimedia Objects. \n"
-"[2]. Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n"
-"[3]. Serra, Joan, et al. Chroma binary similarity and local alignment applied to cover song identification. IEEE Transactions on Audio, Speech, and Language Processing 16.6 (2008).\n"
+"[2]. Tralie, C.J., 2017. Geometric Multimedia Time Series (Doctoral dissertation, Duke University)\n"
+"[3]. Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n"
+"[4]. Serra, Joan, et al. Chroma binary similarity and local alignment applied to cover song identification. IEEE Transactions on Audio, Speech, and Language Processing 16.6 (2008).\n"
 "\n");
 
 
@@ -56,8 +57,6 @@ void CrossSimilarityMatrix::compute() {
     std::vector<std::vector<Real> > queryFeature = _queryFeature.get();
     std::vector<std::vector<Real> > referenceFeature = _referenceFeature.get();
     std::vector<std::vector<Real> >& csm = _csm.get();
-
-    TNT::Array2D<Real> csmArray;
     //std::vector<std::vector<Real> > pdistances(queryFeature.size(), vector<Real>(referenceFeature.size(), 0));
     std::vector<std::vector<Real> > pdistances;
 
@@ -74,7 +73,7 @@ void CrossSimilarityMatrix::compute() {
         std::vector<std::vector<Real> >  timeEmbedA = toTimeEmbedding(queryFeature, _m, _tau);
         std::vector<std::vector<Real> >  timeEmbedB = toTimeEmbedding(referenceFeature, _m, _tau);
         // pairwise euclidean distance
-        std::vector<std::vector<Real> > pdistances = pairwiseDistance(timeEmbedA, timeEmbedB);
+        pdistances = pairwiseDistance(timeEmbedA, timeEmbedB);
 
         // free memorry of input feature arrays
         std::vector<std::vector<Real> >().swap(timeEmbedA);
@@ -82,8 +81,7 @@ void CrossSimilarityMatrix::compute() {
     }
     else {
         // pairwise euclidean distance
-        std::cout << "Query Input sizes " << queryFeature.size() << "\t" << referenceFeature.size() << std::endl;
-        std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeature, referenceFeature);
+        pdistances = pairwiseDistance(queryFeature, referenceFeature);
 
         // free memorry of input feature arrays
         std::vector<std::vector<Real> >().swap(queryFeature);
@@ -117,24 +115,25 @@ void CrossSimilarityMatrix::compute() {
         //ephY[j] = percentile(tDistances[j], _kappa);
     }
 
-    std::vector<std::vector<Real> > similarityX(pdistances.size());
-    std::vector<std::vector<Real> > similarityY(tpDistances.size());
+    std::vector<std::vector<Real> > similarityX(pdistances.size(), std::vector<Real>(pdistances[0].size(), 0));
+    std::vector<std::vector<Real> > similarityY(tpDistances.size(), std::vector<Real>(tpDistances[0].size(), 0));
 
 
     // Construct thresholded similarity matrix on axis X
     for (size_t k=0; k<pdistances.size(); k++) {
         for (size_t l=0; l<pdistances[k].size(); l++) {
-            similarityX[k] = ephX[k][0] - pdistances[k][l];
+            similarityX[k][l] = ephX[k][0] - pdistances[k][l];
         }
     }
 
     // Construct thresholded similarity matrix on axis Y
     for (size_t u=0; u<tpDistances.size(); u++) {
         for (size_t v=0; v<tpDistances[u].size(); v++) {
-            similarityY[u] = ephY[v][0] - tpDistances[u][v];
+            similarityY[u][v] = ephY[v][0] - tpDistances[u][v];
         }
     }
 
+    /*
     if (similarityX.empty() == 0) {
       throw EssentiaException("Sim X is empty");
     }
@@ -142,7 +141,7 @@ void CrossSimilarityMatrix::compute() {
     if (similarityY.empty() == 0) {
       throw EssentiaException("Sim Y is empty");
     }
-
+    */
     // Clear memory
     std::vector<std::vector<Real>>().swap(ephX);
     std::vector<std::vector<Real>>().swap(ephY);
@@ -151,13 +150,18 @@ void CrossSimilarityMatrix::compute() {
     heavisideStepFunction(similarityX);
     heavisideStepFunction(similarityY);
 
+    csm.assign(similarityX.size(), std::vector<Real>(similarityY.size(), 0));
+    // tranpose similarityY vector for dot product
+    std::vector<std::vector<Real> > tSimilarityY = transpose(similarityY);
+    // clear memory
+    std::vector<std::vector<Real>>().swap(similarityY);
+
     // Finally we construct out cross similarity matrix by doing dot product
     for (size_t x=0; x<similarityX.size(); x++) {
-        for (size_t y=0; y<similarityY.size(); y++) {
-            csm[x][y] = dotProduct(similarityX[x], similarityY[y]);
+        for (size_t y=0; y<tSimilarityY.size(); y++) {
+            csm[x][y] = dotProduct(similarityX[x], tSimilarityY[y]);
         }
     }
-    std::cout << "Final sizes " << csm.size() << std::endl;
 }
 
 

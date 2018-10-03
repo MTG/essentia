@@ -19,8 +19,6 @@
 #ifndef ESSENTIA_CROSSSIMILARITYMATRIX_H
 #define ESSENTIA_CROSSSIMILARITYMATRIX_H
 #include "algorithmfactory.h"
-#include "utils/tnt/tnt.h"
-#include "utils/tnt/tnt2essentiautils.h"
 #include <complex>
 namespace essentia {
 namespace standard {
@@ -81,8 +79,8 @@ namespace essentia {
 namespace streaming {
  class CrossSimilarityMatrix : public StreamingAlgorithmWrapper {
   protected:
-  Sink<std::vector<Real> > _queryFeature;
-  Sink<std::vector<Real> > _referenceFeature;
+  Sink<std::vector<std::vector<Real>> > _queryFeature;
+  Sink<std::vector<std::vector<Real>> > _referenceFeature;
   Source<std::vector<std::vector<Real>> > _csm;
   public:
   CrossSimilarityMatrix() {
