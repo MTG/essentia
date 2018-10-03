@@ -966,7 +966,7 @@ std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >
   size_t xNcols = m.size();
   size_t yNcols = n.size();
   double item = 0;
-  std::vector<std::vector<T> > result(yNcols, std::vector<T>(xNcols, 0));
+  std::vector<std::vector<T> > result(xNcols, std::vector<T>(yNcols, 0));
 
   /*
   for (size_t i=1; i<xNcols; i++) {
