@@ -62,7 +62,6 @@ void CoverSongSimilarity::compute() {
 
     size_t Nx = simMatrix[0].size();
     size_t Ny = simMatrix.size();
-    //scoreMatrix.assign(Ny, vector<Real>(Nx, 0));
     std::vector<std::vector<Real> > cumMatrix(Ny, std::vector<Real>(Nx, 0));
 
     float c1 = 0;
