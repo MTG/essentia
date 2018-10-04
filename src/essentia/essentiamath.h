@@ -892,7 +892,7 @@ T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
     throw EssentiaException("trying to calculate dot product of an empty array");
   if (yArray.empty())
     throw EssentiaException("trying to calculate dot product of an empty array");
-  return std::inner_product(std::begin(xArray), std::end(xArray), std::begin(yArray), 0.0);
+  return std::inner_product(xArray::begin(), xArray::end(), yArray::begin(), 0.0);
 }
 
 
