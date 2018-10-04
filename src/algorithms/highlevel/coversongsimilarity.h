@@ -24,9 +24,9 @@ namespace essentia {
 namespace standard {
  class CoverSongSimilarity : public Algorithm {
   protected:
-  Input<std::vector<std::vector<Real>> > _inputArray;
+  Input<std::vector<std::vector<Real> > > _inputArray;
   //Output<Real> _similarityMeasure;
-  Output<std::vector<std::vector<Real>> > _scoreMatrix;
+  Output<std::vector<std::vector<Real> > > _scoreMatrix;
   double gammaO;
   double gammaE;
   public:
@@ -63,9 +63,9 @@ namespace standard {
 namespace streaming {
  class CoverSongSimilarity : public StreamingAlgorithmWrapper {
   protected:
-  Sink<std::vector<std::vector<Real>> > _inputArray;
+  Sink<std::vector<std::vector<Real> > > _inputArray;
   //Source<Real> _similarityMeasure;
-  Source<std::vector<std::vector<Real>> > _scoreMatrix;
+  Source<std::vector<std::vector<Real> > > _scoreMatrix;
   public:
   CoverSongSimilarity() {
     declareAlgorithm("CoverSongSimilarity");

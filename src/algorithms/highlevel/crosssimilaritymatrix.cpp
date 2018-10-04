@@ -57,14 +57,12 @@ void CrossSimilarityMatrix::compute() {
     std::vector<std::vector<Real> > queryFeature = _queryFeature.get();
     std::vector<std::vector<Real> > referenceFeature = _referenceFeature.get();
     std::vector<std::vector<Real> >& csm = _csm.get();
-    //std::vector<std::vector<Real> > pdistances(queryFeature.size(), vector<Real>(referenceFeature.size(), 0));
     std::vector<std::vector<Real> > pdistances;
 
     // check whether to transpose by oti
     if (_oti == true) {
         int otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
         std::rotate(referenceFeature.begin(), referenceFeature.end() - otiIdx, referenceFeature.end());
-        //rotateByIndex(referenceFeature, otiIdx);
     }
 
     // check if delay embedding needed
@@ -94,16 +92,13 @@ void CrossSimilarityMatrix::compute() {
     // transposing the array of pairwsie distance
     std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
 
-    // ephisilon
     std::vector<std::vector<Real> > ephX(pdistances.size());
     std::vector<std::vector<Real> > ephY(tpDistances.size());
-
 
     std::vector<Real> tempXrow;
     for (size_t i=0; i<pdistances.size(); i++) {
         tempXrow.push_back(percentile(pdistances[i], _kappa));
         ephX[i] = tempXrow;
-        //ephX[i] = percentile(pdistances[i], _kappa);
         tempXrow.clear();
     }
 
@@ -112,7 +107,6 @@ void CrossSimilarityMatrix::compute() {
         tempYrow.push_back(percentile(tpDistances[j], _kappa));
         ephY[j] = tempYrow;
         tempYrow.clear();
-        //ephY[j] = percentile(tDistances[j], _kappa);
     }
 
     std::vector<std::vector<Real> > similarityX(pdistances.size(), std::vector<Real>(pdistances[0].size(), 0));
@@ -143,8 +137,8 @@ void CrossSimilarityMatrix::compute() {
     }
     */
     // Clear memory
-    std::vector<std::vector<Real>>().swap(ephX);
-    std::vector<std::vector<Real>>().swap(ephY);
+    std::vector<std::vector<Real> >().swap(ephX);
+    std::vector<std::vector<Real> >().swap(ephY);
 
     // Binarise the array with heavisideStepFunction
     heavisideStepFunction(similarityX);
@@ -154,7 +148,7 @@ void CrossSimilarityMatrix::compute() {
     // tranpose similarityY vector for dot product
     std::vector<std::vector<Real> > tSimilarityY = transpose(similarityY);
     // clear memory
-    std::vector<std::vector<Real>>().swap(similarityY);
+    std::vector<std::vector<Real> >().swap(similarityY);
 
     // Finally we construct out cross similarity matrix by doing dot product
     for (size_t x=0; x<similarityX.size(); x++) {

@@ -24,9 +24,9 @@ namespace essentia {
 namespace standard {
  class CrossSimilarityMatrix : public Algorithm {
   protected:
-  Input<std::vector<std::vector<Real>> > _queryFeature;
-  Input<std::vector<std::vector<Real>> > _referenceFeature;
-  Output<std::vector<std::vector<Real>> > _csm;
+  Input<std::vector<std::vector<Real> > > _queryFeature;
+  Input<std::vector<std::vector<Real> > > _referenceFeature;
+  Output<std::vector<std::vector<Real> > > _csm;
   int tau;
   int m;
   double kappa;
@@ -79,9 +79,9 @@ namespace essentia {
 namespace streaming {
  class CrossSimilarityMatrix : public StreamingAlgorithmWrapper {
   protected:
-  Sink<std::vector<std::vector<Real>> > _queryFeature;
-  Sink<std::vector<std::vector<Real>> > _referenceFeature;
-  Source<std::vector<std::vector<Real>> > _csm;
+  Sink<std::vector<std::vector<Real> > > _queryFeature;
+  Sink<std::vector<std::vector<Real> > > _referenceFeature;
+  Source<std::vector<std::vector<Real> > > _csm;
   public:
   CrossSimilarityMatrix() {
     declareAlgorithm("CrossSimilarityMatrix");
