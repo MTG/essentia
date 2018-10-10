@@ -6,7 +6,7 @@ from __future__ import print_function
 import sys
 import os.path
 
-dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
+dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint', 'boost']
 
 def options(ctx):
     ctx.add_option('--with-python', action='store_true',
@@ -36,6 +36,9 @@ def options(ctx):
     ctx.add_option('--with-gaia', action='store_true',
                    dest='WITH_GAIA', default=False,
                    help='build with Gaia support')
+    ctx.add_option('--with-tensorflow', action='store_true',
+                   dest='WITH_TENSORFLOW', default=False,
+                   help='build with Tensorflow support')
     ctx.add_option('--lightweight', action='store',
                    dest='WITH_LIBS', default=False,
                    help='build lightweight version with specified dependencies (comma separated: =' + ','.join(dependencies_list) + ')')
@@ -161,6 +164,9 @@ def configure(ctx):
         ctx.check_cfg(package='libchromaprint', uselib_store='LIBCHROMAPRINT',
                       args=['--cflags', '--libs'], mandatory=False)
 
+    if ctx.env.WITH_TENSORFLOW:
+        ctx.check_cfg(package='tensorflow', uselib_store='TENSORFLOW',
+                      args=['--cflags', '--libs'], mandatory=False)
 
     if ctx.env.WITH_GAIA:
         ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
@@ -279,6 +285,16 @@ def configure(ctx):
         ctx.env.USES += ' LIBCHROMAPRINT'
     else:
         print('- Essentia is configured without Chromaprint.')
+        print('  The following algorithms will be ignored: %s' % algos)
+        ctx.env.ALGOIGNORE += algos 
+
+    algos = [ 'TensorflowPredict' ]
+    if has('tensorflow'):
+        print('- Tensorflow detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
+        ctx.env.USES += ' TENSORFLOW'
+    else:
+        print('- Essentia is configured without Tensorflow.')
         print('  The following algorithms will be ignored: %s' % algos)
         ctx.env.ALGOIGNORE += algos 
 
@@ -454,7 +470,11 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
-	"""
+    """
+
+    # Add Tensorflow Dependancy stuff 
+    if 'TensorflowPredict' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['/usr/local/include' ]
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(

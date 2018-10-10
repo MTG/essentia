@@ -58,6 +58,8 @@ class Edt:  # Essentia Data Type
     MATRIX_REAL = 'MATRIX_REAL'
     MATRIX_COMPLEX = 'MATRIX_COMPLEX'
     VECTOR_MATRIX_REAL = 'VECTOR_MATRIX_REAL'
+    ARRAYND_REAL = 'ARRAYND_REAL'
+    ARRAYND_COMPLEX = 'ARRAYND_COMPLEX'
     POOL = 'POOL'
 
     # intermediate types
@@ -156,6 +158,16 @@ def determineEdt(obj):
 
         if isinstance(obj[0], numpy.ndarray) and obj[0].ndim == 1:
             return Edt(Edt.LIST_ARRAY)
+
+    if isinstance(obj, numpy.ndarray) and obj.ndim > 2: # temporal solusion. ArrayND should be generalized to <= 2 case too
+        if obj.dtype == numpy.dtype('single'):
+            return Edt(Edt.ARRAYND_REAL)
+
+        if obj.dtype == numpy.dtype('complex64'):
+            return Edt(Edt.ARRAYND_COMPLEX)
+
+        raise TypeError('essentia can currently only accept two-dimensional numpy arrays of dtype '\
+                        '"single"')
 
     # numpy array matrices
     if isinstance(obj, numpy.ndarray) and obj.ndim == 2:

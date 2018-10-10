@@ -47,7 +47,7 @@ def _create_essentia_class(name, moduleName = __name__):
             # verify that all types match and do any necessary conversions
             for name, val in iteritems(kwargs):
                 goalType = self.paramType(name)
-                
+
                 if type(val).__module__ == 'numpy':
                     if not val.flags['C_CONTIGUOUS']:
                         val = copy(val)
@@ -83,9 +83,14 @@ def _create_essentia_class(name, moduleName = __name__):
                 arg = args[i]
 
                 if type(args[i]).__module__ == 'numpy':
+                    if arg.dtype == 'float64':
+                        arg = arg.astype('float32')
+                        essentia.INFO('Warning: essentia can currently only accept numpy arrays of dtype '
+                                      '"single". "%s" dtype is double. Precision will be automatically '
+                                      'truncated into "single".' %(inputNames[i]))
                     if not args[i].flags['C_CONTIGUOUS']:
                         arg = copy(args[i])
-
+                print(inputNames)
                 goalType = _c.Edt(self.inputType(inputNames[i]))
 
                 try:

@@ -30,6 +30,7 @@
 #include "config.h"
 #include "debugging.h"
 #include "streamutil.h"
+#include "3rdparty/boost_1_68_0/boost/multi_array.hpp"
 
 
 // fixed-size int types
@@ -369,6 +370,12 @@ class Tuple2 {
  */
 typedef Tuple2<Real> StereoSample;
 
+
+/**
+ * Aliad for boost::multi_array.
+ */
+template<typename T, int NumDims>
+using ArrayND = boost::multi_array<T, NumDims>;
 
 
 namespace streaming {

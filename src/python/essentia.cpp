@@ -67,6 +67,7 @@ init_essentia() {
       PyType_Ready(&VectorIntegerType)        < 0 ||
       PyType_Ready(&VectorVectorRealType)     < 0 ||
       PyType_Ready(&VectorVectorStringType)   < 0 ||
+      PyType_Ready(&ArrayNDRealType)          < 0 ||
       PyType_Ready(&MatrixRealType)           < 0 ||
       PyType_Ready(&PyPoolType)               < 0 ||
       PyType_Ready(&PyStereoSampleType)       < 0 ||
