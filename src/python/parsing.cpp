@@ -157,7 +157,7 @@ PyObject* toPython(void* obj, Edt tp) {
     case VECTOR_VECTOR_COMPLEX: return VectorVectorComplex::toPythonCopy((vector<vector<complex<Real> > >*)obj);
     case VECTOR_VECTOR_STRING: return VectorVectorString::toPythonCopy((vector<vector<string> >*)obj);
     case VECTOR_VECTOR_STEREOSAMPLE: return VectorVectorStereoSample::toPythonCopy((vector<vector<StereoSample> >*)obj);
-    case ARRAYND_REAL: ArrayNDReal::toPythonCopy((ArrayND<Real, 3>*)obj);
+    case ARRAYND_REAL: return ArrayNDReal::toPythonRef((ArrayND<Real, 3>*)obj);
     case MATRIX_REAL: return MatrixReal::toPythonRef((TNT::Array2D<Real>*)obj);
     case VECTOR_MATRIX_REAL: return VectorMatrixReal::toPythonCopy((vector<TNT::Array2D<Real> >*)obj);
     case POOL: return PyPool::toPythonRef((Pool*)obj);
@@ -211,8 +211,8 @@ PyObject* paramToPython(const Parameter& p) {
     PARAM_CASE(VECTOR_VECTOR_REAL, vector<vector<Real> >, VectorVectorReal);
     PARAM_CASE(VECTOR_VECTOR_STRING, vector<vector<string> >, VectorVectorString);
     PARAM_CASE(VECTOR_VECTOR_STEREOSAMPLE, vector<vector<StereoSample> >, VectorVectorStereoSample);
-    typedef ArrayND<Real, 3> arraynd;
-    PARAM_CASE(ARRAYND_REAL, arraynd, ArrayNDReal);
+    // typedef ArrayND<Real, 3> arraynd;
+    // PARAM_CASE(ARRAYND_REAL, arraynd, ArrayNDReal);
     PARAM_CASE(MATRIX_REAL, TNT::Array2D<Real>, MatrixReal);
     PARAM_CASE(VECTOR_MATRIX_REAL, vector<TNT::Array2D<Real> >, VectorMatrixReal);
     PARAM_CASE(MAP_VECTOR_REAL, mapvectorreal, MapVectorReal);

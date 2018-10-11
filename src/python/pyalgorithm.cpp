@@ -234,7 +234,7 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
         case VECTOR_VECTOR_COMPLEX:SET_PORT_COPY(VectorVectorComplex, vector<vector<complex<Real> > >);
         case VECTOR_VECTOR_STRING: SET_PORT_COPY(VectorVectorString, vector<vector<string> >);
         typedef ArrayND<Real, 3> arrayndreal;
-        case ARRAYND_REAL:         SET_PORT_COPY(ArrayNDReal, arrayndreal);
+        case ARRAYND_REAL:         SET_PORT_REF(ArrayNDReal, arrayndreal);
         case VECTOR_STEREOSAMPLE:  SET_PORT_COPY(VectorStereoSample, vector<StereoSample>);
         case MATRIX_REAL:          SET_PORT_COPY(MatrixReal, TNT::Array2D<Real>);
 
@@ -311,6 +311,8 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
       case VECTOR_VECTOR_REAL: SET_PORT(vector<vector<Real> >);
       case VECTOR_VECTOR_COMPLEX: SET_PORT(vector<vector<complex<Real> > >);
       case VECTOR_VECTOR_STRING: SET_PORT(vector<vector<string> >);
+      typedef ArrayND<Real, 3> arrayndreal;
+      case ARRAYND_REAL: SET_PORT(arrayndreal);
       case MATRIX_REAL: SET_PORT(TNT::Array2D<Real>);
       case POOL: SET_PORT(Pool);
 
