@@ -904,21 +904,14 @@ void rotateByIndex(const std::vector<T>& inputArray, const int indx) {
 
 
 // returns the n-th percentile of an input array
-template <typename T> T percentile(const std::vector<T>& array, int npercentile, std::string interpolation='higher') {
+template <typename T> T percentile(const std::vector<T>& array, int npercentile) {
   if (array.empty())
     throw EssentiaException("percentile: trying to calculate percentile of empty array");
   std::vector<T> sorted_array = array;
+  // sort the array
   std::sort(sorted_array.begin(), sorted_array.end());
   uint size = sorted_array.size()+1;
-  if (interpolation == 'higher') {
-    int idx = std::ceil(size * (npercentile/100.));
-  }
-  else if (interpolation == 'lower') {
-    int idx = std::floor(size * (npercentile/100.));
-  }
-  else {
-    throw EssentiaException("percentile: wrong interpolation method for percentile calculation. Should be in ['higher', 'lower']")
-  }
+  int idx = std::ceil(size * (npercentile/100.));
   return sorted_array[idx];
 }
 

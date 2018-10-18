@@ -155,7 +155,7 @@ std::vector<std::vector<Real> > CrossSimilarityMatrix::toTimeEmbedding(std::vect
 // computes global averaged chroma hpcp as described in [1]
 std::vector<Real> CrossSimilarityMatrix::globalAverageChroma(std::vector<std::vector<Real> >& inputFeature) const {
 
-  int numbins = inputFeature[0].size();
+  size_t numbins = inputFeature[0].size();
   std::vector<Real> globalChroma(numbins);
 
   Real tSum;

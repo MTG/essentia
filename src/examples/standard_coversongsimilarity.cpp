@@ -95,12 +95,11 @@ int main(int argc, char* argv[]) {
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos for hpcp extraction ---------" << endl;
 
-  // queryAudio -> FrameCutter
-  vector<Real> audioBufferQuery;
+  vector<Real> audioBuffer;
 
-  audio->output("audio").set(audioBufferQuery);
-
-  fc->input("signal").set(audioBufferQuery);
+  // audio -> FrameCutter
+  audio->output("audio").set(audioBuffer);
+  fc->input("signal").set(audioBuffer);
 
   // FrameCutter -> Windowing -> Spectrum
   vector<Real> frame, windowedFrame;
@@ -127,7 +126,7 @@ int main(int argc, char* argv[]) {
   white->output("magnitudes").set(wPeakMagnitudes);
 
   // SpectralWhitening > HPCP
-  vector<vector<Real> > hpcpOut;
+  vector<Real> hpcpOut;
   hpcp->input("frequencies").set(peakFrequencies);
   hpcp->input("magnitudes").set(wPeakMagnitudes);
   hpcp->output("hpcp").set(hpcpOut);
@@ -192,15 +191,15 @@ int main(int argc, char* argv[]) {
   /////////// CONNECTING THE ALGORITHMS FOR COVER SONG SIMILARITY ////////////////
   cout << "-------- computing cover song similarity ---------" << endl;
 
-  const vector<vector<Real> >& queryHpcp = pool.value<vector<vector<Real> >("query.hpcp");
-  const vector<vector<Real> >& referenceHpcp = pool.value<vector<vector<Real> >("reference.hpcp");
+  const vector<vector<Real> > queryHpcp = pool.value<vector<vector<Real> > >("query.hpcp");
+  const vector<vector<Real> > referenceHpcp = pool.value<vector<vector<Real> > >("reference.hpcp");
 
   vector<vector<Real> > simMatrix;
   csm->input("queryFeature").set(queryHpcp);
   csm->input("referenceFeature").set(referenceHpcp);
   csm->output("csm").set(simMatrix);
 
-  vector<vector<Real> > scoreMatrix;
+  vector<Real> scoreMatrix;
   coversim->input("inputArray").set(csm);
   coversim->output("scoreMatrix").set(scoreMatrix);
 
