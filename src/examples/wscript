@@ -32,7 +32,7 @@ example_sources_fileio = [
     ('standard_spsmodel', ),
     ('standard_stft', ),
     ('standard_stochasticmodel', ),
-    ('standard_crosssimilaritymatrix', ),
+    ('standard_coversongsimilarity', ),
 
     ('streaming_beatsmarker', ),
     ('streaming_beattracker_multifeature_mirex2013', ),
