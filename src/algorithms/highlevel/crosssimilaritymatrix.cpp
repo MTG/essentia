@@ -24,142 +24,109 @@
 #include <algorithm>
 #include <functional>
 
-
 namespace essentia {
 namespace standard {
 
 const char* CrossSimilarityMatrix::name = "CrossSimilarityMatrix";
-const char* CrossSimilarityMatrix::category = "Music similarity";
-const char* CrossSimilarityMatrix::description = DOC("This algorithm computes a cross similarity matrix from two audio feature vectors of a  \
-query and reference song.\n" "\n"
-"\n\n"
-"References \n"
-"----------"
-"\n\n"
-"[1]. Serra, J., Gómez, E., & Herrera, P. (2008). Transposing chroma representations to a common key, IEEE Conference on The Use of Symbols to Represent Music and Multimedia Objects. \n"
-"[2]. Tralie, C.J., 2017. Geometric Multimedia Time Series (Doctoral dissertation, Duke University)\n"
-"[3]. Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n"
-"[4]. Serra, Joan, et al. Chroma binary similarity and local alignment applied to cover song identification. IEEE Transactions on Audio, Speech, and Language Processing 16.6 (2008).\n"
-"\n");
+const char* CrossSimilarityMatrix::category = "Music Similarity";
+const char* CrossSimilarityMatrix::description = DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
+"Use HPCP algorithm for computing the chromagram for best results.\n\n"
+"The input chromagram should be in the shape (x, numbins), where 'x' is number of frames and 'numbins' stands for number of bins in the chromagram. An exception isthrown otherwise.\n\n"
+"An exception is also thrown if either one of the input audio feature arrays are empty or if the cross similarity matrix is empty.\n\n"
+"References:\n"
+"[1] Serra, J., Gómez, E., & Herrera, P. (2008). Transposing chroma representations to a common key, IEEE Conference on The Use of Symbols to Represent Music and Multimedia Objects.\n\n"
+"[2] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n"
+"[3] Serra, Joan, et al. Chroma binary similarity and local alignment applied to cover song identification. IEEE Transactions on Audio, Speech, and Language Processing 16.6 (2008).\n");
 
 
 void CrossSimilarityMatrix::configure() {
   _tau = parameter("tau").toInt();
   _m = parameter("m").toInt();
-  _kappa = parameter("kappa").toDouble();
+  _kappa = parameter("kappa").toReal();
   _noti = parameter("noti").toInt();
   _oti = parameter("oti").toBool();
   _toBlocked = parameter("toBlocked").toBool();
 }
 
 void CrossSimilarityMatrix::compute() {
-    // get inputs and output
-    std::vector<std::vector<Real> > queryFeature = _queryFeature.get();
-    std::vector<std::vector<Real> > referenceFeature = _referenceFeature.get();
-    std::vector<std::vector<Real> >& csm = _csm.get();
-    std::vector<std::vector<Real> > pdistances;
+  // get inputs and output
+  std::vector<std::vector<Real> > queryFeature = _queryFeature.get();
+  std::vector<std::vector<Real> > referenceFeature = _referenceFeature.get();
+  std::vector<std::vector<Real> >& csm = _csm.get();
+  std::vector<std::vector<Real> > pdistances;
 
-    // check whether to transpose by oti
-    if (_oti == true) {
-        int otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
-        std::rotate(referenceFeature.begin(), referenceFeature.end() - otiIdx, referenceFeature.end());
-    }
+  if (queryFeature.empty())
+      throw EssentiaException("CrossSimilarityMatrix: input queryFeature array is empty.");
 
-    // check if delay embedding needed
-    if (_toBlocked == true) {
-        // construct time embedding from input chroma features
-        std::vector<std::vector<Real> >  timeEmbedA = toTimeEmbedding(queryFeature, _m, _tau);
-        std::vector<std::vector<Real> >  timeEmbedB = toTimeEmbedding(referenceFeature, _m, _tau);
-        // pairwise euclidean distance
-        pdistances = pairwiseDistance(timeEmbedA, timeEmbedB);
+  if (referenceFeature.empty())
+      throw EssentiaException("CrossSimilarityMatrix: input referenceFeature array is empty.");
 
-        // free memorry of input feature arrays
-        std::vector<std::vector<Real> >().swap(timeEmbedA);
-        std::vector<std::vector<Real> >().swap(timeEmbedB);
-    }
-    else {
-        // pairwise euclidean distance
-        pdistances = pairwiseDistance(queryFeature, referenceFeature);
+  // check whether to transpose by oti
+  if (_oti == true) {
+      int otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
+      std::rotate(referenceFeature.begin(), referenceFeature.end() - otiIdx, referenceFeature.end());
+  }
 
-        // free memorry of input feature arrays
-        std::vector<std::vector<Real> >().swap(queryFeature);
-        std::vector<std::vector<Real> >().swap(referenceFeature);
-    }
+  // check if delay embedding needed
+  if (_toBlocked == true) {
+      // construct time embedding from input chroma features
+      std::vector<std::vector<Real> >  timeEmbedA = toTimeEmbedding(queryFeature, _m, _tau);
+      std::vector<std::vector<Real> >  timeEmbedB = toTimeEmbedding(referenceFeature, _m, _tau);
+      // pairwise euclidean distance
+      pdistances = pairwiseDistance(timeEmbedA, timeEmbedB);
+  }
+  else {
+      // pairwise euclidean distance
+      pdistances = pairwiseDistance(queryFeature, referenceFeature);
+  }
+  if (pdistances.empty())
+      throw EssentiaException("CrossSimilarityMatrix: Empty array found on the euclidean cross similarity matrix.");
 
-    if (pdistances.empty())
-       throw EssentiaException("empty array found while calculating euclidian similarity");
+  // transposing the array of pairwsie distance
+  std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
 
-    // transposing the array of pairwsie distance
-    std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
+  std::vector<std::vector<Real> > ephX(pdistances.size(), std::vector<Real>(1, 0));
+  std::vector<std::vector<Real> > ephY(tpDistances.size(), std::vector<Real>(1, 0));
+  for (size_t i=0; i<pdistances.size(); i++) {
+      ephX[i][0] = percentile(pdistances[i], _kappa*100);
+  }
+  for (size_t j=0; j<tpDistances.size(); j++) {
+      ephY[j][0] = percentile(tpDistances[j], _kappa*100);
+  }
 
-    std::vector<std::vector<Real> > ephX(pdistances.size());
-    std::vector<std::vector<Real> > ephY(tpDistances.size());
+  std::vector<std::vector<Real> > similarityX(pdistances.size(), std::vector<Real>(pdistances[0].size(), 0));
+  std::vector<std::vector<Real> > similarityY(tpDistances.size(), std::vector<Real>(tpDistances[0].size(), 0));
+  // Construct thresholded similarity matrix on axis X
+  for (size_t k=0; k<pdistances.size(); k++) {
+      for (size_t l=0; l<pdistances[k].size(); l++) {
+          similarityX[k][l] = ephX[k][0] - pdistances[k][l];
+      }
+  }
+  // Construct thresholded similarity matrix on axis Y
+  for (size_t u=0; u<tpDistances.size(); u++) {
+      for (size_t v=0; v<tpDistances[u].size(); v++) {
+          similarityY[u][v] = ephY[v][0] - tpDistances[u][v];
+      }
+  }
 
-    std::vector<Real> tempXrow;
-    for (size_t i=0; i<pdistances.size(); i++) {
-        tempXrow.push_back(percentile(pdistances[i], _kappa));
-        ephX[i] = tempXrow;
-        tempXrow.clear();
-    }
+  // Binarise the array with heavisideStepFunction
+  heavisideStepFunction(similarityX);
+  heavisideStepFunction(similarityY);
 
-    std::vector<Real> tempYrow;
-    for (size_t j=0; j<tpDistances.size(); j++) {
-        tempYrow.push_back(percentile(tpDistances[j], _kappa));
-        ephY[j] = tempYrow;
-        tempYrow.clear();
-    }
+  csm.assign(similarityX.size(), std::vector<Real>(similarityY.size(), 0));
+  // tranpose similarityY vector for dot product
+  similarityY = transpose(similarityY);
 
-    std::vector<std::vector<Real> > similarityX(pdistances.size(), std::vector<Real>(pdistances[0].size(), 0));
-    std::vector<std::vector<Real> > similarityY(tpDistances.size(), std::vector<Real>(tpDistances[0].size(), 0));
-
-
-    // Construct thresholded similarity matrix on axis X
-    for (size_t k=0; k<pdistances.size(); k++) {
-        for (size_t l=0; l<pdistances[k].size(); l++) {
-            similarityX[k][l] = ephX[k][0] - pdistances[k][l];
-        }
-    }
-
-    // Construct thresholded similarity matrix on axis Y
-    for (size_t u=0; u<tpDistances.size(); u++) {
-        for (size_t v=0; v<tpDistances[u].size(); v++) {
-            similarityY[u][v] = ephY[v][0] - tpDistances[u][v];
-        }
-    }
-
-    /*
-    if (similarityX.empty() == 0) {
-      throw EssentiaException("Sim X is empty");
-    }
-
-    if (similarityY.empty() == 0) {
-      throw EssentiaException("Sim Y is empty");
-    }
-    */
-    // Clear memory
-    std::vector<std::vector<Real> >().swap(ephX);
-    std::vector<std::vector<Real> >().swap(ephY);
-
-    // Binarise the array with heavisideStepFunction
-    heavisideStepFunction(similarityX);
-    heavisideStepFunction(similarityY);
-
-    csm.assign(similarityX.size(), std::vector<Real>(similarityY.size(), 0));
-    // tranpose similarityY vector for dot product
-    std::vector<std::vector<Real> > tSimilarityY = transpose(similarityY);
-    // clear memory
-    std::vector<std::vector<Real> >().swap(similarityY);
-
-    // Finally we construct out cross similarity matrix by doing dot product
-    for (size_t x=0; x<similarityX.size(); x++) {
-        for (size_t y=0; y<tSimilarityY.size(); y++) {
-            csm[x][y] = dotProduct(similarityX[x], tSimilarityY[y]);
-        }
-    }
+  // Finally we construct out cross similarity matrix by doing dot product
+  for (size_t x=0; x<similarityX.size(); x++) {
+      for (size_t y=0; y<similarityY.size(); y++) {
+          csm[x][y] = dotProduct(similarityX[x], similarityY[y]);
+      }
+  }
 }
 
-
-// Construct a stacked chroma embedding from an input chroma audio feature vector [TODO] future use beat-synchronised stacked embeddings
+// Construct a stacked chroma embedding from an input chroma audio feature vector 
+// [TODO] In future use beat-synchronised stacked embeddings
 std::vector<std::vector<Real> > CrossSimilarityMatrix::toTimeEmbedding(std::vector<std::vector<Real> >& inputArray, int m, int tau) const {
 
     int stopIdx;
@@ -185,48 +152,41 @@ std::vector<std::vector<Real> > CrossSimilarityMatrix::toTimeEmbedding(std::vect
     return timeEmbedding;
 }
 
-
 // computes global averaged chroma hpcp as described in [1]
 std::vector<Real> CrossSimilarityMatrix::globalAverageChroma(std::vector<std::vector<Real> >& inputFeature) const {
 
-    std::vector<Real> globalChroma;
-    std::vector<std::vector<Real> > featureCopy;
-    // tranpose the array from (time_axis, chroma_bin) to (chroma_bin, time-axis)for easy calculation
-    featureCopy = transpose(inputFeature);
+  int numbins = inputFeature[0].size();
+  std::vector<Real> globalChroma(numbins);
 
-    // sum all the value along the time axis of chroma hpcp feature
-    for (size_t i=0; i<featureCopy.size(); i++) {
-        globalChroma.push_back(std::accumulate(featureCopy[i].begin(), featureCopy[i].end(), 0));
-    }
-
-    double maxItem = *std::max_element(globalChroma.begin(), globalChroma.end());
-    // divide the sum array by the max element to normalise it to 0-1 range
-    for (size_t j=0; j<globalChroma.size(); j++) {
-        globalChroma[j] = globalChroma[j] / maxItem;
-    }
-    return globalChroma;
+  Real tSum;
+  for (size_t j=0; j<numbins; j++) {
+      tSum = 0;
+      for (size_t i=0; i<inputFeature.size(); i++) {
+          tSum += inputFeature[i][j];
+      }
+      globalChroma[j] = tSum;
+  }
+  // divide the sum array by the max element to normalise it to 0-1 range
+  normalize(globalChroma);
+  return globalChroma;
 }
 
-
 // Compute the optimal transposition index for transposing reference song feature to the musical key of query song feature as described in [1].
-int CrossSimilarityMatrix::optimalTranspositionIndex(std::vector<std::vector<Real> >& featureA, std::vector<std::vector<Real> >& featureB, int nshifts) const {
-
-    std::vector<Real> globalChromaA = globalAverageChroma(featureA);
-    std::vector<Real> globalChromaB = globalAverageChroma(featureB);
-    std::vector<Real> chromaBcopy = globalChromaB;
+int CrossSimilarityMatrix::optimalTranspositionIndex(std::vector<std::vector<Real> >& chromaA, std::vector<std::vector<Real> >& chromaB, int nshifts) const {
+    
+    std::vector<Real> globalChromaA = globalAverageChroma(chromaA);
+    std::vector<Real> globalChromaB = globalAverageChroma(chromaB);
     std::vector<Real> valueAtShifts;
-
+    int prevIdx = 0;
     for(int i=1; i<=nshifts; i++) {
         // circular rotate the input globalchroma by an index 'i'
-        std::rotate(globalChromaB.begin(), globalChromaB.end() - i, globalChromaB.end());
-        //rotateByIndex(globalChromaB, i);
+        std::rotate(globalChromaB.begin(), globalChromaB.end() - (i - prevIdx), globalChromaB.end());
         // compute the dot product of the query global chroma and the shifted global chroma of reference song and append to an array
         valueAtShifts.push_back(dotProduct(globalChromaA, globalChromaB));
-        globalChromaB = chromaBcopy;
+        prevIdx++;
     }
     // compute the optimal index by finding the index of maximum element in the array of value at various shifts
-    int maxValue = argmax(valueAtShifts);
-    return maxValue;
+    return argmax(valueAtShifts);
 }
 
 } // namespace standard

@@ -884,14 +884,10 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
 
 
 /**
- * returns the dot product of two 1-D vectors.
+ * returns the dot product of two 1D vectors.
  */
 template <typename T>
 T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
-  if (xArray.empty())
-    throw EssentiaException("trying to calculate dot product of an empty array");
-  if (yArray.empty())
-    throw EssentiaException("trying to calculate dot product of an empty array");
   return std::inner_product(xArray.begin(), xArray.end(), yArray.begin(), 0.0);
 }
 
@@ -902,23 +898,27 @@ T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
 template <typename T>
 void rotateByIndex(const std::vector<T>& inputArray, const int indx) {
   if (inputArray.empty())
-    throw EssentiaException("trying to rotate an empty array");
+    throw EssentiaException("rotateByIndex: trying to rotate an empty array");
   std::rotate(inputArray.begin(), inputArray.end() - indx, inputArray.end());
 }
 
 
 // returns the n-th percentile of an input array
-template <typename T> T percentile(const std::vector<T>& array, int npercentile) {
+template <typename T> T percentile(const std::vector<T>& array, int npercentile, std::string interpolation='higher') {
   if (array.empty())
-    throw EssentiaException("trying to calculate percentile of empty array");
-
-  // median has sense only on sorted array
+    throw EssentiaException("percentile: trying to calculate percentile of empty array");
   std::vector<T> sorted_array = array;
   std::sort(sorted_array.begin(), sorted_array.end());
-
   uint size = sorted_array.size()+1;
-  float nth = npercentile/100.;
-  int idx = size*nth;
+  if (interpolation == 'higher') {
+    int idx = std::ceil(size * (npercentile/100.));
+  }
+  else if (interpolation == 'lower') {
+    int idx = std::floor(size * (npercentile/100.));
+  }
+  else {
+    throw EssentiaException("percentile: wrong interpolation method for percentile calculation. Should be in ['higher', 'lower']")
+  }
   return sorted_array[idx];
 }
 
@@ -926,30 +926,25 @@ template <typename T> T percentile(const std::vector<T>& array, int npercentile)
 /**
  * Apply heaviside step function to an input m X n dimentional vector.
  * f(x) = if x<0: x=0; if x>=0: x=1
- * returns a 2d binary vector of m X n shape
+ * returns a 2D binary vector of m X n shape
  */
 template <typename T>
 void heavisideStepFunction(std::vector<std::vector<T> >& inputArray) {
   if (inputArray.empty())
-    throw EssentiaException("empty array as input");
-
-  //std::vector<std::vector<T> > result(inputArray.size(), std::vector<T>(inputArray[0].size(), 0));
+    throw EssentiaException("heavisideStepFunction: found empty array as input");
 
   for (size_t i=0; i<inputArray.size(); i++) {
     for (size_t j=0; j<inputArray[i].size(); j++) {
 
       // initialize all non negative elements as zero
       if (inputArray[i][j] < 0) {
-        inputArray[i][j] = 0;
-        //result[i][j] = 0;
+        inputArray[i][j] = 0.;
       }
       else if (inputArray[i][j] >= 0) {
-        inputArray[i][j] = 1;
-        //result[i][j] = 1;
+        inputArray[i][j] = 1.;
       }
     }
   }
-  //return result;
 }
 
 
@@ -962,22 +957,14 @@ void heavisideStepFunction(std::vector<std::vector<T> >& inputArray) {
 template <typename T>
 std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >& m, const std::vector<std::vector<T> >& n) {
 
-  //size_t nrows = m.size();
+  if (m.empty() || n.empty())
+    throw EssentiaException("pairwiseDistance: found empty array as input");
+
   size_t xNcols = m.size();
   size_t yNcols = n.size();
-  double item = 0;
+  Real item = 0;
   std::vector<std::vector<T> > result(xNcols, std::vector<T>(yNcols, 0));
 
-  /*
-  for (size_t i=1; i<xNcols; i++) {
-    if ((size_t)m[i].size() != nrows) {
-      std::ostringstream ss;
-      ss <<"Expecting dim2 = " << xNcols
-         << " but got " << m[i].size();
-      throw EssentiaException(ss.str());
-    }
-  }
-  */
   for (size_t i=0; i<xNcols; i++) {
       for (size_t j=0; j<yNcols; j++) {
           item = dotProduct(m[i], m[i]) - 2*dotProduct(m[i], n[j]) + dotProduct(n[j], n[j]);

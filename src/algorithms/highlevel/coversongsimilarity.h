@@ -20,60 +20,65 @@
 #define ESSENTIA_COVERSONGSIMILARITY_H
 #include "algorithmfactory.h"
 #include <complex>
+
 namespace essentia {
 namespace standard {
+
  class CoverSongSimilarity : public Algorithm {
   protected:
-  Input<std::vector<std::vector<Real> > > _inputArray;
-  //Output<Real> _similarityMeasure;
-  Output<std::vector<std::vector<Real> > > _scoreMatrix;
-  double gammaO;
-  double gammaE;
+   Input<std::vector<std::vector<Real> > > _inputArray;
+   //Output<Real> _similarityMeasure;
+   Output<std::vector<std::vector<Real> > > _scoreMatrix;
+   Real gammaO;
+   Real gammaE;
   public:
-  CoverSongSimilarity() {
-    declareInput(_inputArray, "inputArray", " a 2d binary cross similarity matrix of two audio chroma vectors (refer 'essentia.standard.CrossSimilarityMatrix').");
-    //declareOutput(_similarityMeasure, "similarityMeasure", "Qmax cover song similarity measure (distance) from the input cross recurrent plot");
-    declareOutput(_scoreMatrix, "scoreMatrix", "2D cover song similarity scoring matrix from the input cross similarity matrix");
-   }
+   CoverSongSimilarity() {
+     declareInput(_inputArray, "inputArray", " a 2D binary cross similarity matrix of two audio chroma vectors (refer CrossSimilarityMatrix algorithm').");
+     //declareOutput(_similarityMeasure, "similarityMeasure", "Cover song similarity measure (distance) from the input cross recurrent plot");
+     declareOutput(_scoreMatrix, "scoreMatrix", "2D cover song similarity score matrix from the input binary cross similarity matrix");
+    }
 
    void declareParameters() {
-    declareParameter("gammaO", "penalty for disurption onset", "[0,inf)", 0.5);
-    declareParameter("gammaE", "penalty for disurption extension", "[0,inf)", 0.5);
-    declareParameter("simType", "type of cover song similarity measure", "{qmax, dmax}", "qmax");
-  }
+     declareParameter("gammaO", "penalty for disruption onset", "[0,inf)", 0.5);
+     declareParameter("gammaE", "penalty for disruption extension", "[0,inf)", 0.5);
+     declareParameter("simType", "type of cover song similarity measure", "{qmax, dmax}", "qmax");
+   }
 
-  void configure();
-  void compute();
-  static const char* name;
-  static const char* category;
-  static const char* description;
+   void configure();
+   void compute();
+   static const char* name;
+   static const char* category;
+   static const char* description;
+   Real gammaState(Real value, const Real gammaO, const Real gammaE) const;
 
-  float _gammaO;
-  float _gammaE;
-  enum SimType {
-    QMAX, DMAX
-  };
-  SimType _simType;
-
- };
- } // namespace standard
+  protected:
+   Real _gammaO;
+   Real _gammaE;
+   enum SimType {
+     QMAX, DMAX
+   };
+   SimType _simType;
+};
+} // namespace standard
 } // namespace essentia
- #include "streamingalgorithmwrapper.h"
- namespace essentia {
+
+#include "streamingalgorithmwrapper.h"
+
+namespace essentia {
 namespace streaming {
+
  class CoverSongSimilarity : public StreamingAlgorithmWrapper {
   protected:
-  Sink<std::vector<std::vector<Real> > > _inputArray;
-  //Source<Real> _similarityMeasure;
-  Source<std::vector<std::vector<Real> > > _scoreMatrix;
+   Sink<std::vector<std::vector<Real> > > _inputArray;
+   Source<std::vector<std::vector<Real> > > _scoreMatrix;
   public:
-  CoverSongSimilarity() {
-    declareAlgorithm("CoverSongSimilarity");
-    declareInput(_inputArray, TOKEN, "inputArray");
-    //declareOutput(_similarityMeasure, TOKEN, "similarityMeasure");
-    declareOutput(_scoreMatrix, TOKEN, "scoreMatrix");
+   CoverSongSimilarity() {
+     declareAlgorithm("CoverSongSimilarity");
+     declareInput(_inputArray, TOKEN, "inputArray");
+     declareOutput(_scoreMatrix, TOKEN, "scoreMatrix");
   }
 };
- } // namespace streaming
+
+} // namespace streaming
 } // namespace essentia
- #endif // ESSENTIA_COVERSONGSIMILARITY_H
+#endif // ESSENTIA_COVERSONGSIMILARITY_H

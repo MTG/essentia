@@ -20,24 +20,20 @@
 #define ESSENTIA_CROSSSIMILARITYMATRIX_H
 #include "algorithmfactory.h"
 #include <complex>
+
 namespace essentia {
 namespace standard {
+
  class CrossSimilarityMatrix : public Algorithm {
   protected:
-  Input<std::vector<std::vector<Real> > > _queryFeature;
-  Input<std::vector<std::vector<Real> > > _referenceFeature;
-  Output<std::vector<std::vector<Real> > > _csm;
-  int tau;
-  int m;
-  double kappa;
-  int noti;
-  bool oti;
-  bool toBlocked;
+   Input<std::vector<std::vector<Real> > > _queryFeature;
+   Input<std::vector<std::vector<Real> > > _referenceFeature;
+   Output<std::vector<std::vector<Real> > > _csm;
   public:
   CrossSimilarityMatrix() {
-    declareInput(_queryFeature, "queryFeature", " audio chromafeature vector of the query song as input");
-    declareInput(_referenceFeature, "referenceFeature", "audio chroma feature vector of the reference song as input");
-    declareOutput(_csm, "csm", "2d cross similarity matrix of the query and reference song audio features");
+    declareInput(_queryFeature, "queryFeature", "input chromagram of the query song");
+    declareInput(_referenceFeature, "referenceFeature", "input chromagram of the reference song");
+    declareOutput(_csm, "csm", "2D binary cross-similarity matrix of the query and reference features");
    }
 
    void declareParameters() {
@@ -53,14 +49,15 @@ namespace standard {
   void compute();
   std::vector<Real> globalAverageChroma(std::vector<std::vector<Real> >& inputFeature) const;
   std::vector<std::vector<Real> > toTimeEmbedding(std::vector<std::vector<Real> >& inputArray, int m, int tau) const;
-  int optimalTranspositionIndex(std::vector<std::vector<Real> >& featureA, std::vector<std::vector<Real> >& featureB, int nshifts) const;
+  int optimalTranspositionIndex(std::vector<std::vector<Real> >& chromaA, std::vector<std::vector<Real> >& chromaB, int nshifts) const;
+
   static const char* name;
   static const char* category;
   static const char* description;
 
   int _tau;
   int _m;
-  double _kappa;
+  Real _kappa;
   int _noti;
   bool _oti;
   bool _toBlocked;
@@ -70,8 +67,8 @@ namespace standard {
    std::vector<std::vector<Real> > toTimeEmbedding(std::vector<std::vector<Real> >& inputArray, int m, int tau) const;
    int optimalTranspositionIndex(std::vector<std::vector<Real> >& featureA, std::vector<std::vector<Real> >& featureB, int nshifts) const;
   */
- };
- } // namespace standard
+};
+} // namespace standard
 } // namespace essentia
 
 #include "streamingalgorithmwrapper.h"
@@ -90,6 +87,7 @@ namespace streaming {
     declareOutput(_csm, TOKEN, "csm");
   }
 };
+
 } // namespace streaming
 } // namespace essentia
- #endif // ESSENTIA_CrossSimilarityMatrix_H
+ #endif // ESSENTIA_CROSSSIMILARITYMATRIX_H
