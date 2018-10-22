@@ -29,8 +29,8 @@ class Histogram : public Algorithm {
 
  protected:
   Input<std::vector<Real> > _array;
-  Output<std::vector<Real> > _binCounts;
-  Output<std::vector<Real> > _binRanges;
+  Output<std::vector<Real> > _histogram;
+  Output<std::vector<Real> > _binCenters;
 
   std::string  _normalize;
   Real _minValue;
@@ -40,15 +40,15 @@ class Histogram : public Algorithm {
  public:
   Histogram() {
     declareInput(_array, "array", "the input array");
-    declareOutput(_binCounts, "binCounts", "the values in the equally-spaced bins");
-    declareOutput(_binRanges, "binRanges", "the ranges of the equally-spaced bins");
+    declareOutput(_histogram, "histogram", "the values in the equally-spaced bins");
+    declareOutput(_binCenters, "binCenters", "the ranges of the equally-spaced bins");
   }
 
   void declareParameters(){
     declareParameter("normalize", "the normalization setting.", "{none, unit_sum, unit_max}",  std::string("none"));
     declareParameter("minValue", "the min value of the histogram", "[0, Inf)", 0.0);
     declareParameter("maxValue", "the max value of the histogram", "[0, Inf)", 1.0);
-    declareParameter("numberBins", "the number of bins", "(0, Inf)", 1);
+    declareParameter("numberBins", "the number of bins", "(0, Inf)", 10);
   }
 
   void configure();
@@ -72,15 +72,15 @@ class Histogram : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<Real> > _array;
-  Source<std::vector<Real> > _binCounts;
-  Source<std::vector<Real> > _binRanges;
+  Source<std::vector<Real> > _histogram;
+  Source<std::vector<Real> > _binCenters;
 
  public:
   Histogram() {
    declareAlgorithm("Histogram");
    declareInput(_array, TOKEN, "array");
-   declareOutput(_binCounts, TOKEN, "binCounts");
-   declareOutput(_binRanges, TOKEN, "binRanges");
+   declareOutput(_histogram, TOKEN, "histogram");
+   declareOutput(_binCenters, TOKEN, "binCenters");
   }
 };
 

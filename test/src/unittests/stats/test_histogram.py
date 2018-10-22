@@ -25,7 +25,9 @@ testdir = join(filedir(), 'histogram')
 class TestHistogram(TestCase):
 
   def testZero(self):
-    self.assertEqualVector(Histogram()(zeros(1000)), [[1000], [0.5]])
+    histogram, binCenters = Histogram()(zeros(1000))
+    self.assertEqualVector(histogram, [1000., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
+    self.assertAlmostEqualVector(binCenters, [0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95], 0.0001) 
 
   def testOutOfRangeConfiguration(self):
     self.assertConfigureFails(Histogram(), {'normalize' : 'y'})
@@ -39,13 +41,13 @@ class TestHistogram(TestCase):
 
   def testRegression(self):
    inputArray = readVector(join(filedir(), 'stats/input.txt'))
-   expectedRangesNone = readVector(join(testdir, 'ranges.txt'))
-   expectedCountsNone = readVector(join(testdir, 'counts.txt'))
+   expectedCentersNone = readVector(join(testdir, 'ranges.txt'))
+   expectedHistogramNone = readVector(join(testdir, 'counts.txt'))
 
-   (outputCountsNone, outputRangesNone) = Histogram(numberBins = 10, minValue = 0.000039890, maxValue = 0.99970)(inputArray)
+   (outputHistogramNone, outputCentersNone) = Histogram(numberBins = 10, minValue = 0.000039890, maxValue = 0.99970)(inputArray)
 
-   self.assertAlmostEqualVector(outputRangesNone, expectedRangesNone, 0.01)
-   self.assertAlmostEqualVector(outputCountsNone, expectedCountsNone, 0.01)
+   self.assertAlmostEqualVector(outputCentersNone, expectedCentersNone, 0.01)
+   self.assertAlmostEqualVector(outputHistogramNone, expectedHistogramNone, 0.01)
 
 suite = allTests(TestHistogram)
 

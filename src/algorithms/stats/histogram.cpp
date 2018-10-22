@@ -24,38 +24,38 @@ using namespace standard;
 
 const char* Histogram::name = "Histogram";
 const char* Histogram::category = "Statistics";
-const char* Histogram::description = DOC("This algorithm computes a histogram given the following preconfigured parameters: a normalization setting, a minimum value, a maximum value, and the number of equal sized bins for the histogram. ");
+const char* Histogram::description = DOC("This algorithm computes a histogram. All values outside histogram range are ignored");
 
 void Histogram::configure() {
-    _normalize = parameter("normalize").toString(); 
-    _minValue = parameter("minValue").toReal();
-    _maxValue = parameter("maxValue").toReal();
-    _numberBins = parameter("numberBins").toInt();
+  _normalize = parameter("normalize").toString(); 
+  _minValue = parameter("minValue").toReal();
+  _maxValue = parameter("maxValue").toReal();
+  _numberBins = parameter("numberBins").toInt();
 }
 
 void Histogram::compute() {
   
   const std::vector<Real>& array = _array.get();
-  std::vector<Real>& binCounts = _binCounts.get();
-  std::vector<Real>& binRanges = _binRanges.get();
+  std::vector<Real>& histogram = _histogram.get();
+  std::vector<Real>& binCenters = _binCenters.get();
   
-  binCounts.resize(_numberBins);
-  binRanges.resize(_numberBins);
+  histogram.resize(_numberBins);
+  binCenters.resize(_numberBins);
 
   if(_maxValue < _minValue)
     throw EssentiaException("Histogram: maxValue must be > minValue");
 
   Real bin_width = (_maxValue - _minValue)/(Real)_numberBins;
 
-  binRanges[0] = _minValue + (Real)(bin_width/2.0);
+  binCenters[0] = _minValue + (Real)(bin_width/2.0);
   for(int i = 1; i < _numberBins; i++) {
-    binRanges[i] = binRanges[i-1] + bin_width;
+    binCenters[i] = binCenters[i-1] + bin_width;
   }
 
   for(int i = 0; i < array.size(); i++){
     if(array[i] < _maxValue && array[i] >= _minValue)
-      binCounts[floor(array[i]/(Real)bin_width)]++;
+      histogram[floor(array[i]/(Real)bin_width)]++;
     else if(array[i] == _maxValue)
-      binCounts[_numberBins-1]++;
+      histogram[_numberBins-1]++;
   }
 }
