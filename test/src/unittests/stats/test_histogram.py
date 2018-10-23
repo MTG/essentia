@@ -40,14 +40,14 @@ class TestHistogram(TestCase):
     self.assertConfigureFails(Histogram(), {'minValue' : 1, 'maxValue' : 0})
 
   def testRegression(self):
-   inputArray = readVector(join(filedir(), 'stats/input.txt'))
-   expectedCentersNone = readVector(join(testdir, 'ranges.txt'))
-   expectedHistogramNone = readVector(join(testdir, 'counts.txt'))
+    inputArray = readVector(join(filedir(), 'stats/input.txt'))
+    expectedCentersNone = readVector(join(testdir, 'ranges.txt'))
+    expectedHistogramNone = readVector(join(testdir, 'counts.txt'))
 
-   (outputHistogramNone, outputCentersNone) = Histogram(numberBins = 10, minValue = 0.000039890, maxValue = 0.99970)(inputArray)
+    (outputHistogramNone, outputCentersNone) = Histogram(numberBins = 10, minValue = 0.000039890, maxValue = 0.99970)(inputArray)
 
-   self.assertAlmostEqualVector(outputCentersNone, expectedCentersNone, 0.01)
-   self.assertAlmostEqualVector(outputHistogramNone, expectedHistogramNone, 0.01)
+    self.assertAlmostEqualVector(outputCentersNone, expectedCentersNone, 0.01)
+    self.assertAlmostEqualVector(outputHistogramNone, expectedHistogramNone, 0.01)
 
 suite = allTests(TestHistogram)
 

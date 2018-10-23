@@ -36,7 +36,10 @@ class Histogram : public Algorithm {
   Real _minValue;
   Real _maxValue;
   int  _numberBins;
-  Real _binWidth;
+
+ private:
+  Real binWidth;
+  std::vector<Real> tempBinCenters;  
 
  public:
   Histogram() {

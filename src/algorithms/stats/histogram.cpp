@@ -35,7 +35,15 @@ void Histogram::configure() {
   if(_maxValue < _minValue)
     throw EssentiaException("Histogram: maxValue must be > minValue");
 
-  _binWidth =  (_maxValue - _minValue)/(Real)_numberBins;
+  binWidth =  (_maxValue - _minValue)/(Real)_numberBins;
+
+  tempBinCenters.resize(_numberBins);
+
+  tempBinCenters[0] = _minValue + (Real)(binWidth/2.0);
+  for(int i = 1; i < _numberBins; i++) {
+    tempBinCenters[i] = tempBinCenters[i-1] + binWidth;
+  }
+
 }
 
 void Histogram::compute() {
@@ -45,17 +53,13 @@ void Histogram::compute() {
   std::vector<Real>& binCenters = _binCenters.get();
   
   histogram.resize(_numberBins);
-  binCenters.resize(_numberBins);
-
-  binCenters[0] = _minValue + (Real)(_binWidth/2.0);
-  for(int i = 1; i < _numberBins; i++) {
-    binCenters[i] = binCenters[i-1] + _binWidth;
-  }
+  binCenters.assign(tempBinCenters.begin(), tempBinCenters.end());
 
   for(int i = 0; i < array.size(); i++){
     if(array[i] < _maxValue && array[i] >= _minValue)
-      histogram[floor(array[i]/(Real)_binWidth)]++;
+      histogram[floor(array[i]/(Real)binWidth)]++;
     else if(array[i] == _maxValue)
       histogram[_numberBins-1]++;
   }
+
 }
