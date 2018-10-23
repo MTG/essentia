@@ -36,6 +36,7 @@ class Histogram : public Algorithm {
   Real _minValue;
   Real _maxValue;
   int  _numberBins;
+  Real _binWidth;
 
  public:
   Histogram() {

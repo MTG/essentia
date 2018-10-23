@@ -37,7 +37,7 @@ class TestHistogram(TestCase):
     self.assertConfigureFails(Histogram(), {'numberBins' : -1})
 
   def testInvalidConfigurationCombination(self):
-    self.assertRaises(EssentiaException, Histogram(maxValue = 0, minValue = 1), (zeros(1000)))
+    self.assertConfigureFails(Histogram(), {'minValue' : 1, 'maxValue' : 0})
 
   def testRegression(self):
    inputArray = readVector(join(filedir(), 'stats/input.txt'))

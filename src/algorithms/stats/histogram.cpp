@@ -31,6 +31,11 @@ void Histogram::configure() {
   _minValue = parameter("minValue").toReal();
   _maxValue = parameter("maxValue").toReal();
   _numberBins = parameter("numberBins").toInt();
+
+  if(_maxValue < _minValue)
+    throw EssentiaException("Histogram: maxValue must be > minValue");
+
+  _binWidth =  (_maxValue - _minValue)/(Real)_numberBins;
 }
 
 void Histogram::compute() {
@@ -42,19 +47,14 @@ void Histogram::compute() {
   histogram.resize(_numberBins);
   binCenters.resize(_numberBins);
 
-  if(_maxValue < _minValue)
-    throw EssentiaException("Histogram: maxValue must be > minValue");
-
-  Real bin_width = (_maxValue - _minValue)/(Real)_numberBins;
-
-  binCenters[0] = _minValue + (Real)(bin_width/2.0);
+  binCenters[0] = _minValue + (Real)(_binWidth/2.0);
   for(int i = 1; i < _numberBins; i++) {
-    binCenters[i] = binCenters[i-1] + bin_width;
+    binCenters[i] = binCenters[i-1] + _binWidth;
   }
 
   for(int i = 0; i < array.size(); i++){
     if(array[i] < _maxValue && array[i] >= _minValue)
-      histogram[floor(array[i]/(Real)bin_width)]++;
+      histogram[floor(array[i]/(Real)_binWidth)]++;
     else if(array[i] == _maxValue)
       histogram[_numberBins-1]++;
   }
