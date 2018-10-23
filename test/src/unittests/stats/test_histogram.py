@@ -20,8 +20,6 @@
 
 from essentia_test import *
 
-testdir = join(filedir(), 'histogram')
-
 class TestHistogram(TestCase):
 
   def testZero(self):
