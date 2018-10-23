@@ -24,7 +24,7 @@ using namespace standard;
 
 const char* Histogram::name = "Histogram";
 const char* Histogram::category = "Statistics";
-const char* Histogram::description = DOC("This algorithm computes a histogram. All values outside histogram range are ignored");
+const char* Histogram::description = DOC("This algorithm computes a histogram. Values outside the range are ignored");
 
 void Histogram::configure() {
   _normalize = parameter("normalize").toString(); 
@@ -35,13 +35,18 @@ void Histogram::configure() {
   if(_maxValue < _minValue)
     throw EssentiaException("Histogram: maxValue must be > minValue");
 
+  if(_maxValue == _minValue) {
+    if(_numberBins > 1)
+       throw EssentiaException("Histogram: numberBins must = 1 when maxValue = minValue");
+  }
+
   binWidth =  (_maxValue - _minValue)/(Real)_numberBins;
 
-  tempBinCenters.resize(_numberBins);
+  tempBinEdges.resize(_numberBins+1);
 
-  tempBinCenters[0] = _minValue + (Real)(binWidth/2.0);
-  for(int i = 1; i < _numberBins; i++) {
-    tempBinCenters[i] = tempBinCenters[i-1] + binWidth;
+  tempBinEdges[0] = _minValue;
+  for(std::vector<Real>::iterator it = tempBinEdges.begin()+1; it != tempBinEdges.end(); it++) {
+    *it = *(it-1) + binWidth;
   }
 
 }
@@ -50,10 +55,10 @@ void Histogram::compute() {
   
   const std::vector<Real>& array = _array.get();
   std::vector<Real>& histogram = _histogram.get();
-  std::vector<Real>& binCenters = _binCenters.get();
+  std::vector<Real>& binEdges = _binEdges.get();
   
   histogram.resize(_numberBins);
-  binCenters.assign(tempBinCenters.begin(), tempBinCenters.end());
+  binEdges.assign(tempBinEdges.begin(), tempBinEdges.end());
 
   for(int i = 0; i < array.size(); i++){
     if(array[i] < _maxValue && array[i] >= _minValue)

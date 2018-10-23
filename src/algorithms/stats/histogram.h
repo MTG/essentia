@@ -30,7 +30,7 @@ class Histogram : public Algorithm {
  protected:
   Input<std::vector<Real> > _array;
   Output<std::vector<Real> > _histogram;
-  Output<std::vector<Real> > _binCenters;
+  Output<std::vector<Real> > _binEdges;
 
   std::string  _normalize;
   Real _minValue;
@@ -39,13 +39,13 @@ class Histogram : public Algorithm {
 
  private:
   Real binWidth;
-  std::vector<Real> tempBinCenters;  
+  std::vector<Real> tempBinEdges;  
 
  public:
   Histogram() {
     declareInput(_array, "array", "the input array");
     declareOutput(_histogram, "histogram", "the values in the equally-spaced bins");
-    declareOutput(_binCenters, "binCenters", "the ranges of the equally-spaced bins");
+    declareOutput(_binEdges, "binEdges", "the edges of the equally-spaced bins. Size is _histogram.size() + 1");
   }
 
   void declareParameters(){
@@ -77,14 +77,14 @@ class Histogram : public StreamingAlgorithmWrapper {
  protected:
   Sink<std::vector<Real> > _array;
   Source<std::vector<Real> > _histogram;
-  Source<std::vector<Real> > _binCenters;
+  Source<std::vector<Real> > _binEdges;
 
  public:
   Histogram() {
    declareAlgorithm("Histogram");
    declareInput(_array, TOKEN, "array");
    declareOutput(_histogram, TOKEN, "histogram");
-   declareOutput(_binCenters, TOKEN, "binCenters");
+   declareOutput(_binEdges, TOKEN, "binEdges");
   }
 };
 
