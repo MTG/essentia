@@ -36,6 +36,7 @@ class TestHistogram(TestCase):
 
   def testInvalidConfigurationCombination(self):
     self.assertConfigureFails(Histogram(), {'minValue' : 1, 'maxValue' : 0})
+    self.assertConfigureFails(Histogram(), {'minValue' : 1, 'maxValue' : 1, 'numberBins' : 2})
 
   def testRegression(self):
     inputArray = readVector(join(filedir(), 'stats/input.txt'))
