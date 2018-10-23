@@ -34,7 +34,7 @@ class TruePeakDetector : public Algorithm {
   Output<std::vector<Real> > _peakLocations;
 
   Algorithm* _resampler;
-  Algorithm* _emphatiser;
+  Algorithm* _emphasiser;
   Algorithm* _dcBlocker;
 
   Real _inputSampleRate;
@@ -42,7 +42,7 @@ class TruePeakDetector : public Algorithm {
   Real _oversamplingFactor;
   int _quality;
   bool _blockDC;
-  bool _emphatise;
+  bool _emphasise;
   Real _threshold;
   uint _version;
 
@@ -53,13 +53,13 @@ class TruePeakDetector : public Algorithm {
     declareOutput(_output, "output", "the processed signal");
 
     _resampler = AlgorithmFactory::create("Resample");
-    _emphatiser = AlgorithmFactory::create("IIR");
+    _emphasiser = AlgorithmFactory::create("IIR");
     _dcBlocker = AlgorithmFactory::create("DCRemoval");
   }
 
   ~TruePeakDetector() {
     if (_resampler) delete _resampler;
-    if (_emphatiser) delete _emphatiser;
+    if (_emphasiser) delete _emphasiser;
     if (_dcBlocker) delete _dcBlocker;
   }
 
@@ -68,14 +68,14 @@ class TruePeakDetector : public Algorithm {
     declareParameter("oversamplingFactor", "times the signal is oversapled", "[1,inf)", 4);
     declareParameter("quality", "type of interpolation applied (see libresmple)", "[0,4]", 1);
     declareParameter("blockDC", "flag to activate the optional DC blocker", "{true,false}", false);
-    declareParameter("emphatise", "flag to activate the optional emphasis filter", "{true,false}", false);
+    declareParameter("emphasise", "flag to activate the optional emphasis filter", "{true,false}", false);
     declareParameter("threshold", "threshold to detect peaks [dB]", "(-inf,inf)", -0.0002);
     declareParameter("version", "algorithm version", "{2,4}",4);
   }
 
   void reset() {
     _resampler->reset();
-    _emphatiser->reset();
+    _emphasiser->reset();
     _dcBlocker->reset();
   }
 

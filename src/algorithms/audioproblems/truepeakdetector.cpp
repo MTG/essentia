@@ -27,22 +27,26 @@ using namespace std;
 const char* TruePeakDetector::name = "TruePeakDetector";
 const char* TruePeakDetector::category = "Audio Problems";
 const char* TruePeakDetector::description =
-    DOC("This algorithm implements the “true-peak” level meter as descripted "
-        "in the second annex of the ITU-R BS.1770-2[1] or the ITU-R BS.1770-4[2] (default)\n"
+    DOC("This algorithm implements a “true-peak” level meter for clipping detection. "
+        "According to the ITU-R recommendations, “true-peak” values overcoming the full-scale range are "
+        "potential sources of “clipping in subsequent processes, such as within particular "
+        "D/A converters or during sample-rate conversion”.\n"
+        "The ITU-R BS.1770-4[1] (by default) and the ITU-R BS.1770-2[2] signal-flows can be used. "
+        "Go to the references for information about the differences.\n"
+        "Only the peaks (if any) exceeding the configurable amplitude threshold are returned."
         "\n"
-        "Note: the parameters 'blockDC' and 'emphatise' work only when 'version' is set to 2."
+        "Note: the parameters 'blockDC' and 'emphasise' work only when 'version' is set to 2."
         "\n"
         "References:\n"
-        "  [1] Series, B. S. (2011). Recommendation  ITU-R  BS.1770-2. Algorithms to measure audio programme "
+        "  [1] Series, B. S. (2011). Recommendation  ITU-R  BS.1770-4. Algorithms to measure audio programme "
         "loudness and true-peak audio level,\n"
         "  "
-        "https://www.itu.int/dms_pubrec/itu-r/rec/bs/"
-        "R-REC-BS.1770-2-201103-S!!PDF-E.pdfe\n"
+        "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf\n"
+        "  [2] Series, B. S. (2011). Recommendation  ITU-R  BS.1770-2. Algorithms to measure audio programme "
+        "loudness and true-peak audio level,\n"
+        "  "
+        "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-2-201103-S!!PDF-E.pdf\n");
         
-        "  [2] Series, B. S. (2011). Recommendation  ITU-R  BS.1770-4. Algorithms to measure audio programme "
-        "loudness and true-peak audio level,\n"
-        "  "
-        "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf\n");
 
 void TruePeakDetector::configure() {
   _inputSampleRate = parameter("sampleRate").toReal();
@@ -50,7 +54,7 @@ void TruePeakDetector::configure() {
   _outputSampleRate = _inputSampleRate * _oversamplingFactor;
   _quality = parameter("quality").toInt();
   _blockDC = parameter("blockDC").toBool();
-  _emphatise = parameter("emphatise").toBool();
+  _emphasise = parameter("emphasise").toBool();
   _threshold = db2amp(parameter("threshold").toFloat());
   _version = parameter("version").toInt();
 
@@ -58,7 +62,7 @@ void TruePeakDetector::configure() {
                        "outputSampleRate", _outputSampleRate,
                        "quality", _quality);
 
-  if (_emphatise) {
+  if (_emphasise) {
     // the parameters of the filter are extracted in the recommendation
     Real poleFrequency = 20e3;  // Hz
     Real zeroFrequncy = 14.1e3; // Hz
@@ -74,7 +78,7 @@ void TruePeakDetector::configure() {
     a[0] = 1.0;
     a[1] = rPole;
 
-    _emphatiser->configure( "numerator", b, "denominator", a);
+    _emphasiser->configure( "numerator", b, "denominator", a);
   }
 
   if (_blockDC) {
@@ -97,12 +101,12 @@ void TruePeakDetector::compute() {
   processed = &resampled;
 
   if (_version == 2) {
-    if (_emphatise) {
-      std::vector<Real> emphatised;
-      _emphatiser->input("signal").set(*processed);
-      _emphatiser->output("signal").set(emphatised);
-      _emphatiser->compute();
-      processed = &emphatised;
+    if (_emphasise) {
+      std::vector<Real> emphasised;
+      _emphasiser->input("signal").set(*processed);
+      _emphasiser->output("signal").set(emphasised);
+      _emphasiser->compute();
+      processed = &emphasised;
     }
 
 
@@ -126,4 +130,3 @@ void TruePeakDetector::compute() {
 
     output = *processed;
   }
-
