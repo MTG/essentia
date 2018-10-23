@@ -49,7 +49,7 @@ class Histogram : public Algorithm {
   }
 
   void declareParameters(){
-    declareParameter("normalize", "the normalization setting.", "{none, unit_sum, unit_max}",  std::string("none"));
+    declareParameter("normalize", "the normalization setting.", "{none,unit_sum,unit_max}",  std::string("none"));
     declareParameter("minValue", "the min value of the histogram", "[0, Inf)", 0.0);
     declareParameter("maxValue", "the max value of the histogram", "[0, Inf)", 1.0);
     declareParameter("numberBins", "the number of bins", "(0, Inf)", 10);

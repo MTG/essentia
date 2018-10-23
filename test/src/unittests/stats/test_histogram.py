@@ -41,13 +41,21 @@ class TestHistogram(TestCase):
 
   def testRegression(self):
     inputArray = readVector(join(filedir(), 'stats/input.txt'))
-    expectedEdgesNone = [ 0. ,  0.1,  0.2,  0.3,  0.4,  0.5,  0.6,  0.7,  0.8,  0.9,  1. ]
+    expectedEdges = [ 0. ,  0.1,  0.2,  0.3,  0.4,  0.5,  0.6,  0.7,  0.8,  0.9,  1. ]
     expectedHistogramNone = [113,  87,  98, 104, 114,  86,  99,  88, 102, 109]
+    expectedHistogramUnitSum = [ 0.113,  0.087,  0.098,  0.104,  0.114,  0.086,  0.099,  0.088,  0.102,  0.109]  
+    expectedHistogramUnitMax = [ 0.99122807,  0.76315789,  0.85964912,  0.9122807 ,  1., 0.75438596,  0.86842105,  0.77192982,  0.89473684,  0.95614035] 
 
-    (outputHistogramNone, outputEdgesNone) = Histogram(numberBins = 10, minValue = 0., maxValue = 1.)(inputArray)
+    (outputHistogramNone, outputEdgesNone) = Histogram(normalize = "none", numberBins = 10, minValue = 0., maxValue = 1.)(inputArray)
+    (outputHistogramUnitSum, outputEdgesUnitSum) = Histogram(normalize = "unit_sum", numberBins = 10, minValue = 0., maxValue = 1.)(inputArray)
+    (outputHistogramUnitMax, outputEdgesUnitMax) = Histogram(normalize = "unit_max", numberBins = 10, minValue = 0., maxValue = 1.)(inputArray)
 
-    self.assertAlmostEqualVector(outputEdgesNone, expectedEdgesNone, 0.001)
+    self.assertAlmostEqualVector(outputEdgesNone, expectedEdges, 0.001)
     self.assertAlmostEqualVector(outputHistogramNone, expectedHistogramNone, 0.001)
+    self.assertAlmostEqualVector(outputEdgesUnitSum, expectedEdges, 0.001)
+    self.assertAlmostEqualVector(outputHistogramUnitSum, expectedHistogramUnitSum, 0.001)
+    self.assertAlmostEqualVector(outputEdgesUnitMax, expectedEdges, 0.001)
+    self.assertAlmostEqualVector(outputHistogramUnitMax, expectedHistogramUnitMax, 0.001)
 
 suite = allTests(TestHistogram)
 
