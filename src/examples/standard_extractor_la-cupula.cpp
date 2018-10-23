@@ -298,8 +298,8 @@ int essentia_main(string audioFilename, string outputFilename) {
       pool.add("snr.averagedSNR", averagedSNR);
 
 
-      pool.add("startStopSilince.start", startFrame * hopsize / fs);
-      pool.add("startStopSilince.end", stopFrame * hopsize / fs);
+      pool.add("startStopSilence.start", startFrame * hopsize / fs);
+      pool.add("startStopSilence.end", stopFrame * hopsize / fs);
 
     cout << "-------- writting Yalm ---------" << endl;
     // Write to yaml file.
