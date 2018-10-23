@@ -89,15 +89,16 @@ int essentia_main(string audioFilename, string outputFilename) {
     Algorithm* clickDetector            = factory.create("ClickDetector",
                                                          "frameSize", framesize, 
                                                          "hopSize", hopsize,
-                                                         "silenceThreshold", -25, // This is to high. Just a work around to the problem on initial and final non-silent parts
+                                                         "silenceThreshold", -25, // This is too high. Just a work around to the problem on initial and final non-silent parts
                                                          "detectionThreshold", 38); // Experiments showed that a higher threshold is not eenough to detect audible clicks.
 
     Algorithm* loudnessEBUR128          = factory.create("LoudnessEBUR128");
 
     Algorithm* humDetector              = factory.create("HumDetector",
                                                          "sampleRate", sr,
-                                                         "frameSize", framesize,
-                                                         "hopSize", hopsize); 
+                                                         "minimumDuration", 20.f,  // [seconds] We are only interested in humming tones if they are present over very long segments 
+                                                         "frameSize", .4,  // For this algorithm, `frameSize` `hopSoze` are expresed in seconds.
+                                                         "hopSize", .2); 
 
     Algorithm* snr                      = factory.create("SNR",
                                                          "frameSize", framesize,
@@ -148,13 +149,13 @@ int essentia_main(string audioFilename, string outputFilename) {
 
 
     TNT::Array2D<Real> r;
-    vector<Real> frequencies, saliences, starts, ends;
+    vector<Real> humFrequencies, humSaliences, humStarts, humEnds;
     humDetector->input("signal").set(audio);
     humDetector->output("r").set(r);
-    humDetector->output("frequencies").set(frequencies);
-    humDetector->output("saliences").set(saliences);
-    humDetector->output("starts").set(starts);
-    humDetector->output("ends").set(ends);
+    humDetector->output("frequencies").set(humFrequencies);
+    humDetector->output("saliences").set(humSaliences);
+    humDetector->output("starts").set(humStarts);
+    humDetector->output("ends").set(humEnds);
 
 
     std::vector<Real> peakLocations, truePeakDetectorOutput;
@@ -227,11 +228,11 @@ int essentia_main(string audioFilename, string outputFilename) {
     pool.add("startStopCut.end", startStopCutEnd);
 
     humDetector->compute();
-    if (frequencies.size() > 0) {
-      pool.add("humDetector.frequencies", frequencies);
-      pool.add("humDetector.saliences", saliences);
-      pool.add("humDetector.starts", ends);
-      pool.add("humDetector.ends", ends);
+    if (humFrequencies.size() > 0) {
+      pool.add("humDetector.frequencies", humFrequencies);
+      pool.add("humDetector.saliences", humSaliences);
+      pool.add("humDetector.starts", humStarts);
+      pool.add("humDetector.ends", humEnds);
     }
 
     truePeakDetector->compute();
@@ -301,7 +302,7 @@ int essentia_main(string audioFilename, string outputFilename) {
       pool.add("startStopSilence.start", startFrame * hopsize / fs);
       pool.add("startStopSilence.end", stopFrame * hopsize / fs);
 
-    cout << "-------- writting Yalm ---------" << endl;
+    cout << "-------- writting Yaml ---------" << endl;
     // Write to yaml file.
     Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
                                                           "filename", outputFilename);
