@@ -280,8 +280,8 @@ int essentia_main(string audioFilename, string outputFilename) {
       }
 
       if (gapsDetectorStarts.size() > 0) {
-        pool.add("gaps.averagedSNR", averagedSNR);
-        pool.add("gaps.spectralSNR", spectralSNR);
+        pool.add("gaps.starts", gapsDetectorStarts);
+        pool.add("gaps.ends", gapsDetectorEnds);
       }
 
       if (saturationDetectorStarts.size() > 0) {      
