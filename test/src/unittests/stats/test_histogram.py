@@ -25,7 +25,7 @@ testdir = join(filedir(), 'histogram')
 class TestHistogram(TestCase):
 
   def testZero(self):
-    histogram, binCenters = Histogram()(zeros(1000))
+    histogram, binCenters = Histogram(normalize = "none", maxValue = 1., minValue = 0., numberBins = 10)(zeros(1000))
     self.assertEqualVector(histogram, [1000., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
     self.assertAlmostEqualVector(binCenters, [0.05, 0.15, 0.25, 0.35, 0.45, 0.55, 0.65, 0.75, 0.85, 0.95], 0.0001) 
 
