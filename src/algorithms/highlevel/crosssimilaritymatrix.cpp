@@ -31,7 +31,6 @@ namespace standard {
 const char* CrossSimilarityMatrix::name = "CrossSimilarityMatrix";
 const char* CrossSimilarityMatrix::category = "Music Similarity";
 const char* CrossSimilarityMatrix::description = DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
-"An optinal parameter 'downSample' can be used to down sample the input chroma features by a specified step size.\n"
 "Use HPCP algorithm for computing the chromagram and the default parameter for best results.\n\n"
 "The input chromagram should be in the shape (x, numbins), where 'x' is number of frames and 'numbins' stands for number of bins in the chromagram. An exception isthrown otherwise.\n\n"
 "An exception is also thrown if either one of the input audio feature arrays are empty or if the cross similarity matrix is empty.\n\n"
