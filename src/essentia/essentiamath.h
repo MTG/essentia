@@ -885,15 +885,22 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
 
 /**
  * returns the dot product of two 1D vectors.
+ * Throws an exception either one of the input arrays is empty.
  */
 template <typename T>
 T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
+  if (xArray.empty())
+    throw EssentiaException("dotProduct: input xArray is empty!");
+  if (yArray.empty())
+    throw EssentiaException("dotProduct: input yArray is empty!");
+
   return std::inner_product(xArray.begin(), xArray.end(), yArray.begin(), 0.0);
 }
 
 
 /**
  * rotate the input 1-D vector by an index value.
+ * Throws an exception if the input array is empty.
  */
 template <typename T>
 void rotateByIndex(const std::vector<T>& inputArray, const int indx) {
@@ -903,22 +910,35 @@ void rotateByIndex(const std::vector<T>& inputArray, const int indx) {
 }
 
 
-// returns the n-th percentile of an input array
-template <typename T> T percentile(const std::vector<T>& array, int npercentile) {
+/**
+ * returns the q-th percentile of an 1D input array (same as numpy percentile implementation).
+ * Throws an exception if the input array is empty.
+ */ 
+template <typename T> T percentile(const std::vector<T>& array, Real qpercentile) {
   if (array.empty())
     throw EssentiaException("percentile: trying to calculate percentile of empty array");
+
   std::vector<T> sorted_array = array;
   // sort the array
   std::sort(sorted_array.begin(), sorted_array.end());
-  uint size = sorted_array.size()+1;
-  int idx = std::ceil(size * (npercentile/100.));
-  return sorted_array[idx];
+
+  qpercentile /= 100.;
+  Real k = (sorted_array.size() - 1) * qpercentile;
+
+  Real idxFloor = std::floor(k);
+  Real idxCeil = std::ceil(k);
+  
+  // apply interpolation
+  Real d0 = sorted_array[int(idxFloor)] * (idxCeil - k);
+  Real d1 = sorted_array[int(idxCeil)] * (k - idxFloor);
+  return d0 + d1;
 }
 
 
 /**
  * Apply heaviside step function to an input m X n dimentional vector.
  * f(x) = if x<0: x=0; if x>=0: x=1
+ * Throws an exception if the input array is empty.
  * returns a 2D binary vector of m X n shape
  */
 template <typename T>
@@ -943,7 +963,8 @@ void heavisideStepFunction(std::vector<std::vector<T> >& inputArray) {
 
 /*
  * Pairwise euclidean distances between two set of observations in n-dimensional space.
- * The inputs are two m X n and k X l dimentional vectors
+ * The inputs are two m X n and k X l dimentional vectors.
+ * Throws an exception if the input array is empty.
  * Returns a m X k dimentional vector
  * TODO: [add other distance metrics beside euclidean such as cosine, mahanalobis etc]
  */
