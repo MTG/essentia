@@ -67,55 +67,55 @@ void CoverSongSimilarity::compute() {
   Real c5 = 0;
   
   if (_simType == QMAX) {
-      // iterate through the similarity matrix to recursively construct the qmax scoring cumilative matrix
-      for(size_t i = 2; i < simMatrix.size(); i++) {
-          for(size_t j = 2; j < simMatrix[i].size(); j++) {
-              // measure the diagonal when a similarity is found in the input matrix
-              if (simMatrix[i][j] == 1) {
-                  c1 = cumMatrix[i-1][j-1];
-                  c2 = cumMatrix[i-2][j-1];
-                  c3 = cumMatrix[i-1][j-2];
-                  Real row[3] = {c1, c2 , c3};
-                  cumMatrix[i][j] = *std::max_element(row, row+3) + 1;
-              }
-              else {
-                  // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
-                  c1 = cumMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1], _gammaO, _gammaE);
-                  c2 = cumMatrix[i-2][j-1] - gammaState(simMatrix[i-2][j-1], _gammaO, _gammaE);
-                  c3 = cumMatrix[i-1][j-2] - gammaState(simMatrix[i-1][j-2], _gammaO, _gammaE);
-                  Real row2[4] = {0, c1, c2, c3};
-                  cumMatrix[i][j] = *std::max_element(row2, row2+4);
-              }
+    // iterate through the similarity matrix to recursively construct the qmax scoring cumilative matrix
+    for(size_t i = 2; i < simMatrix.size(); i++) {
+      for(size_t j = 2; j < simMatrix[i].size(); j++) {
+        // measure the diagonal when a similarity is found in the input matrix
+        if (simMatrix[i][j] == 1) {
+          c1 = cumMatrix[i-1][j-1];
+          c2 = cumMatrix[i-2][j-1];
+          c3 = cumMatrix[i-1][j-2];
+          Real row[3] = {c1, c2 , c3};
+          cumMatrix[i][j] = *std::max_element(row, row+3) + 1;
+          }
+        else {
+        // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
+          c1 = cumMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1], _gammaO, _gammaE);
+          c2 = cumMatrix[i-2][j-1] - gammaState(simMatrix[i-2][j-1], _gammaO, _gammaE);
+          c3 = cumMatrix[i-1][j-2] - gammaState(simMatrix[i-1][j-2], _gammaO, _gammaE);
+          Real row2[4] = {0, c1, c2, c3};
+          cumMatrix[i][j] = *std::max_element(row2, row2+4);
           }
       }
-      scoreMatrix = cumMatrix;
+    }
+    scoreMatrix = cumMatrix;
   }
   else if (_simType == DMAX) {
-      // iterate through the similarity matrix to recursively construct the dmax scoring cumilative matrix
-      for(size_t i = 2; i < simMatrix.size(); ++i) {
-          for(size_t j = 2; i < simMatrix[i].size(); ++j) {
-              // measure the diagonal when a similarity is found in the input matrix
-              if (simMatrix[i][j] == 1.) {
-                  c2 = cumMatrix[i-2][j-1] + simMatrix[i-1][j];
-                  c3 = cumMatrix[i-1][j-2] + simMatrix[i][j-1];
-                  c4 = cumMatrix[i-3][j-1] + simMatrix[i-2][j] + scoreMatrix[i-1][j];
-                  c5 = cumMatrix[i-1][j-3] + simMatrix[i][j-2] + scoreMatrix[i][j-1];
-                  Real row[5] = {cumMatrix[i-1][j-1], c2, c3, c4, c5};
-                  cumMatrix[i][j] = *std::max_element(row, row+5) + 1;
-              }
-              else {
-                  // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
-                  c1 = cumMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1], _gammaO, _gammaE);
-                  c2 = (cumMatrix[i-2][j-1] + simMatrix[i-1][j]) - gammaState(simMatrix[i-2][j-1], _gammaO, _gammaE);
-                  c3 = (cumMatrix[i-1][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-2], _gammaO, _gammaE);
-                  c4 = (cumMatrix[i-3][j-1] + simMatrix[i-2][j] + simMatrix[i-1][j]) - gammaState(simMatrix[i-3][j-1], _gammaO, _gammaE);
-                  c5 = (cumMatrix[i-1][j-3] + simMatrix[i][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-3], _gammaO, _gammaE);
-                  Real row2[6] = {0, c1, c2, c3, c4, c5};
-                  cumMatrix[i][j] = *std::max_element(row2, row2+6);
-              }
-          }
+    // iterate through the similarity matrix to recursively construct the dmax scoring cumilative matrix
+    for(size_t i = 2; i < simMatrix.size(); ++i) {
+      for(size_t j = 2; i < simMatrix[i].size(); ++j) {
+        // measure the diagonal when a similarity is found in the input matrix
+        if (simMatrix[i][j] == 1.) {
+          c2 = cumMatrix[i-2][j-1] + simMatrix[i-1][j];
+          c3 = cumMatrix[i-1][j-2] + simMatrix[i][j-1];
+          c4 = cumMatrix[i-3][j-1] + simMatrix[i-2][j] + scoreMatrix[i-1][j];
+          c5 = cumMatrix[i-1][j-3] + simMatrix[i][j-2] + scoreMatrix[i][j-1];
+          Real row[5] = {cumMatrix[i-1][j-1], c2, c3, c4, c5};
+          cumMatrix[i][j] = *std::max_element(row, row+5) + 1;
+        }
+        else {
+          // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
+          c1 = cumMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1], _gammaO, _gammaE);
+          c2 = (cumMatrix[i-2][j-1] + simMatrix[i-1][j]) - gammaState(simMatrix[i-2][j-1], _gammaO, _gammaE);
+          c3 = (cumMatrix[i-1][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-2], _gammaO, _gammaE);
+          c4 = (cumMatrix[i-3][j-1] + simMatrix[i-2][j] + simMatrix[i-1][j]) - gammaState(simMatrix[i-3][j-1], _gammaO, _gammaE);
+          c5 = (cumMatrix[i-1][j-3] + simMatrix[i][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-3], _gammaO, _gammaE);
+          Real row2[6] = {0, c1, c2, c3, c4, c5};
+          cumMatrix[i][j] = *std::max_element(row2, row2+6);
+        }
       }
-      scoreMatrix = cumMatrix;
+    }
+    scoreMatrix = cumMatrix;
   }
 }
 

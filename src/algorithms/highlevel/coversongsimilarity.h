@@ -27,16 +27,14 @@ namespace standard {
  class CoverSongSimilarity : public Algorithm {
   protected:
    Input<std::vector<std::vector<Real> > > _inputArray;
-   //Output<Real> _similarityMeasure;
    Output<std::vector<std::vector<Real> > > _scoreMatrix;
    Real gammaO;
    Real gammaE;
   public:
    CoverSongSimilarity() {
      declareInput(_inputArray, "inputArray", " a 2D binary cross similarity matrix of two audio chroma vectors (refer CrossSimilarityMatrix algorithm').");
-     //declareOutput(_similarityMeasure, "similarityMeasure", "Cover song similarity measure (distance) from the input cross recurrent plot");
      declareOutput(_scoreMatrix, "scoreMatrix", "2D cover song similarity score matrix from the input binary cross similarity matrix");
-    }
+   }
 
    void declareParameters() {
      declareParameter("gammaO", "penalty for disruption onset", "[0,inf)", 0.5);
@@ -49,7 +47,6 @@ namespace standard {
    static const char* name;
    static const char* category;
    static const char* description;
-   Real gammaState(Real value, const Real gammaO, const Real gammaE) const;
 
   protected:
    Real _gammaO;
@@ -58,7 +55,9 @@ namespace standard {
      QMAX, DMAX
    };
    SimType _simType;
+   Real gammaState(Real value, const Real gammaO, const Real gammaE) const;
 };
+
 } // namespace standard
 } // namespace essentia
 
@@ -67,16 +66,16 @@ namespace standard {
 namespace essentia {
 namespace streaming {
 
- class CoverSongSimilarity : public StreamingAlgorithmWrapper {
+class CoverSongSimilarity : public StreamingAlgorithmWrapper {
   protected:
    Sink<std::vector<std::vector<Real> > > _inputArray;
    Source<std::vector<std::vector<Real> > > _scoreMatrix;
   public:
    CoverSongSimilarity() {
-     declareAlgorithm("CoverSongSimilarity");
-     declareInput(_inputArray, TOKEN, "inputArray");
-     declareOutput(_scoreMatrix, TOKEN, "scoreMatrix");
-  }
+    declareAlgorithm("CoverSongSimilarity");
+    declareInput(_inputArray, TOKEN, "inputArray");
+    declareOutput(_scoreMatrix, TOKEN, "scoreMatrix");
+}
 };
 
 } // namespace streaming
