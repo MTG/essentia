@@ -23,6 +23,7 @@
 #include <essentia/essentiamath.h>
 #include <essentia/pool.h>
 #include "credit_libav.h"
+#include "essentia/utils/tnt/tnt2vector.h"
 
 using namespace std;
 using namespace essentia;
@@ -126,10 +127,13 @@ int main(int argc, char* argv[]) {
   white->output("magnitudes").set(wPeakMagnitudes);
 
   // SpectralWhitening > HPCP
-  vector<Real> hpcpOut;
+  vector<vector<Real> > hpcpOut;
   hpcp->input("frequencies").set(peakFrequencies);
   hpcp->input("magnitudes").set(wPeakMagnitudes);
   hpcp->output("hpcp").set(hpcpOut);
+
+  // TODO: replace with std::vector<vector<Real> > when essentia pool has 2D vector support
+  TNT::Array2D<Real> hpcpOutPool;
 
   /////////// STARTING THE ALGORITHMS //////////////////
 
@@ -155,7 +159,9 @@ int main(int argc, char* argv[]) {
     white->compute();
     hpcp->compute();
 
-    pool.add("query.hpcp", hpcpOut);
+    hpcpOutPool = vecvecToArray2D(hpcpOut);
+
+    pool.add("query.hpcp", hpcpOutPool);
   }
 
   // Now we reset the audio loader and compute HPCP feature for the reference song
@@ -184,7 +190,10 @@ int main(int argc, char* argv[]) {
     peak->compute();
     white->compute();
     hpcp->compute();
-    pool.add("reference.hpcp", hpcpOut);
+
+    hpcpOutPool = vecvecToArray2D(hpcpOut);
+
+    pool.add("reference.hpcp", hpcpOutPool);
 
   }
 
@@ -194,7 +203,8 @@ int main(int argc, char* argv[]) {
   const vector<vector<Real> > queryHpcp = pool.value<vector<vector<Real> > >("query.hpcp");
   const vector<vector<Real> > referenceHpcp = pool.value<vector<vector<Real> > >("reference.hpcp");
 
-  vector<vector<Real> > simMatrix;
+  // TODO: replace with std::vector<vector<Real> > when essentia pool has 2D vector support
+  TNT::Array2D<Real> simMatrix;
   csm->input("queryFeature").set(queryHpcp);
   csm->input("referenceFeature").set(referenceHpcp);
   csm->output("csm").set(simMatrix);
@@ -208,6 +218,7 @@ int main(int argc, char* argv[]) {
   coversim->compute();
   pool.add("score_matrix", scoreMatrix);
 
+  scoreMatrix.size();
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
 
