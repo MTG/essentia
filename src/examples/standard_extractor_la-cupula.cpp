@@ -112,6 +112,8 @@ int essentia_main(string audioFilename, string outputFilename) {
                                                          "type", "hann",
                                                          "normalized", false);
 
+    Algorithm* noiseBurstDetector       = factory.create("NoiseBurstDetector");
+
 
     cout << "-------- connecting algos ---------" << endl;
     Real fs;
@@ -199,6 +201,9 @@ int essentia_main(string audioFilename, string outputFilename) {
     startStopSilence->output("startFrame").set(startFrame);
     startStopSilence->output("stopFrame").set(stopFrame);
 
+    vector<Real> noiseBurstIndexes;
+    noiseBurstDetector->input("frame").set(frame);
+    noiseBurstDetector->output("indexes").set(noiseBurstIndexes);
 
     std::vector<Real> windowedFrame;
     windowing->input("frame").set(frame);
@@ -242,6 +247,7 @@ int essentia_main(string audioFilename, string outputFilename) {
     if (peakLocations.size() > 0)
       pool.add("truePeakDetector.locations", peakLocations);
 
+    size_t idx = 0;
     while (true) {
 
       // compute a frame
@@ -252,7 +258,7 @@ int essentia_main(string audioFilename, string outputFilename) {
         break;
       }
 
-      // if the frame is silent, just drop it and go on processing
+      // skippint silent frames should be internally done by each algorithm
       // if (isSilent(frame)) continue;
 
       discontinuityDetector->compute();
@@ -263,44 +269,53 @@ int essentia_main(string audioFilename, string outputFilename) {
 
       clickDetector->compute();
 
+      noiseBurstDetector->compute();
+
       windowing->compute();
 
       snr->compute();
 
       startStopSilence->compute();
-      
+
+      if (noiseBurstIndexes.size() > 3) {
+        pool.add("noiseBursts.locations", idx * hopsize / (Real)fs);
       }
 
-      pool.add("filename", audioFilename);
+      noiseBurstIndexes.clear();
 
-      if (discontinuityLocations.size() > 0) {
-        for (uint i = 0; i < discontinuityLocations.size(); i++) 
-          discontinuityLocations[i] /= sr;
-        pool.add("discontinuities.locations", discontinuityLocations);
-        pool.add("discontinuities.amplitudes", discontinuityAmplitudes);
-      }
+      idx++;
+    }
 
-      if (gapsDetectorStarts.size() > 0) {
-        pool.add("gaps.starts", gapsDetectorStarts);
-        pool.add("gaps.ends", gapsDetectorEnds);
-      }
+    pool.add("filename", audioFilename);
 
-      if (saturationDetectorStarts.size() > 0) {      
-        pool.add("saturationDetector.starts", saturationDetectorStarts);
-        pool.add("saturationDetector.ends", saturationDetectorEnds);
-      }
-      
-      if (clickDetectorStarts.size() > 0) { 
-        pool.add("clickDetector.starts", clickDetectorStarts);
-        pool.add("clickDetector.ends", clickDetectorEnds);
-      }
+    if (discontinuityLocations.size() > 0) {
+      for (uint i = 0; i < discontinuityLocations.size(); i++) 
+        discontinuityLocations[i] /= sr;
+      pool.add("discontinuities.locations", discontinuityLocations);
+      pool.add("discontinuities.amplitudes", discontinuityAmplitudes);
+    }
 
-      pool.add("snr.spectralSNR", spectralSNR);
-      pool.add("snr.averagedSNR", averagedSNR);
+    if (gapsDetectorStarts.size() > 0) {
+      pool.add("gaps.starts", gapsDetectorStarts);
+      pool.add("gaps.ends", gapsDetectorEnds);
+    }
 
+    if (saturationDetectorStarts.size() > 0) {      
+      pool.add("saturationDetector.starts", saturationDetectorStarts);
+      pool.add("saturationDetector.ends", saturationDetectorEnds);
+    }
 
-      pool.add("startStopSilence.start", startFrame * hopsize / fs);
-      pool.add("startStopSilence.end", stopFrame * hopsize / fs);
+    if (clickDetectorStarts.size() > 0) { 
+      pool.add("clickDetector.starts", clickDetectorStarts);
+      pool.add("clickDetector.ends", clickDetectorEnds);
+    }
+
+    pool.add("snr.spectralSNR", spectralSNR);
+    pool.add("snr.averagedSNR", averagedSNR);
+
+    pool.add("startStopSilence.start", startFrame * hopsize / fs);
+    pool.add("startStopSilence.end", stopFrame * hopsize / fs);
+
 
     cout << "-------- writting Yaml ---------" << endl;
     // Write to yaml file.
