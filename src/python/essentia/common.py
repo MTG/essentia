@@ -58,6 +58,7 @@ class Edt:  # Essentia Data Type
     MATRIX_REAL = 'MATRIX_REAL'
     MATRIX_COMPLEX = 'MATRIX_COMPLEX'
     VECTOR_MATRIX_REAL = 'VECTOR_MATRIX_REAL'
+    VECTOR_ARRAYND_REAL = 'VECTOR_ARRAYND_REAL'
     ARRAYND_REAL = 'ARRAYND_REAL'
     # ARRAYND_COMPLEX = 'ARRAYND_COMPLEX'
     POOL = 'POOL'
@@ -143,6 +144,9 @@ def determineEdt(obj):
 
         if firstElmtType == Edt.MATRIX_REAL:
             return Edt(Edt.VECTOR_MATRIX_REAL)
+
+        if firstElmtType == Edt.ARRAYND_REAL:
+            return Edt(Edt.VECTOR_ARRAYND_REAL)
 
         if firstElmtType == Edt.LIST_REAL:
             return Edt(Edt.LIST_LIST_REAL)
@@ -371,7 +375,8 @@ class Pool:
         else:
             if givenType in (Edt.REAL, Edt.STRING, Edt.STEREOSAMPLE,
                              Edt.VECTOR_REAL, Edt.VECTOR_STRING,
-                             Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL):
+                             Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL,
+                             Edt.ARRAYND_REAL):
                 goalType = givenType
 
             # some exceptions
@@ -461,7 +466,8 @@ class Pool:
             if givenType in (Edt.REAL, Edt.STRING, Edt.STEREOSAMPLE,
                              Edt.VECTOR_REAL, Edt.VECTOR_STRING,
                              Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL,
-                             Edt.VECTOR_VECTOR_REAL, Edt.VECTOR_MATRIX_REAL):
+                             Edt.VECTOR_VECTOR_REAL, Edt.VECTOR_MATRIX_REAL,
+                             Edt.VECTOR_ARRAYND_REAL, Edt.ARRAYND_REAL):
                 goalType = givenType
 
             # some exceptions

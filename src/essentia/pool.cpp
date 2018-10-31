@@ -35,6 +35,7 @@ void Pool::clear() {
   _poolString.clear();
   _poolVectorString.clear();
   _poolArray2DReal.clear();
+  _poolArrayNDReal.clear();
   _poolStereoSample.clear();
   _poolSingleReal.clear();
   _poolSingleString.clear();
@@ -85,6 +86,7 @@ void Pool::remove(const string& name) {
   SEARCH_AND_DESTROY(vector<vector<string> >, VectorString);
 
   SEARCH_AND_DESTROY(vector<TNT::Array2D<Real> >, Array2DReal);
+  SEARCH_AND_DESTROY(vector<arrayndreal>, ArrayNDReal);
   SEARCH_AND_DESTROY(vector<StereoSample>, StereoSample);
 
   #undef SEARCH_AND_DESTROY
@@ -125,6 +127,7 @@ void Pool::removeNamespace(const string& ns) {
   SEARCH_AND_DESTROY(vector<string>, SingleVectorString);  
   SEARCH_AND_DESTROY(vector<vector<string> >, VectorString);
 
+  SEARCH_AND_DESTROY(vector<arrayndreal>, ArrayNDReal);
   SEARCH_AND_DESTROY(vector<TNT::Array2D<Real> >, Array2DReal);
   SEARCH_AND_DESTROY(vector<StereoSample>, StereoSample);
 
@@ -156,6 +159,7 @@ vector<string> Pool::descriptorNames() const {
   ADD_DESC_NAMES(vector<string>, SingleVectorString);  
   ADD_DESC_NAMES(vector<vector<string> >, VectorString);
   ADD_DESC_NAMES(vector<TNT::Array2D<Real> >, Array2DReal);
+  ADD_DESC_NAMES(vector<arrayndreal>, ArrayNDReal);
   ADD_DESC_NAMES(vector<StereoSample>, StereoSample);
 
   #undef ADD_DESC_NAMES
@@ -185,6 +189,7 @@ vector<string> Pool::descriptorNames(const std::string& ns) const {
   ADD_DESC_NAMES(vector<string>, SingleVectorString);
   ADD_DESC_NAMES(vector<vector<string> >, VectorString);
   ADD_DESC_NAMES(vector<TNT::Array2D<Real> >, Array2DReal);
+  ADD_DESC_NAMES(vector<arrayndreal>, ArrayNDReal);
   ADD_DESC_NAMES(vector<StereoSample>, StereoSample);
 
   #undef ADD_DESC_NAMES
@@ -200,6 +205,7 @@ vector<string> Pool::descriptorNamesNoLocking() const {
                            _poolString.size()       +
                            _poolVectorString.size() +
                            _poolArray2DReal.size()  +
+                           _poolArrayNDReal.size()  +
                            _poolStereoSample.size() +
                            _poolSingleReal.size()   +
                            _poolSingleString.size() +
@@ -223,6 +229,7 @@ vector<string> Pool::descriptorNamesNoLocking() const {
   ADD_DESC_NAMES(vector<string>, SingleVectorString);
   ADD_DESC_NAMES(vector<vector<string> >, VectorString);
   ADD_DESC_NAMES(vector<TNT::Array2D<Real> >, Array2DReal);
+  ADD_DESC_NAMES(vector<arrayndreal>, ArrayNDReal);
   ADD_DESC_NAMES(vector<StereoSample>, StereoSample);
 
 
@@ -284,6 +291,27 @@ SPECIALIZE_ADD_IMPL(vector<Real>, VectorReal);
 SPECIALIZE_ADD_IMPL(string, String);
 SPECIALIZE_ADD_IMPL(vector<string>, VectorString);
 SPECIALIZE_ADD_IMPL(StereoSample, StereoSample);
+// SPECIALIZE_ADD_IMPL(arrayndreal, ArrayNDReal);
+
+// special add for ArrayND<3, Real>
+// todo
+void Pool::add(const string& name, const ArrayND<Real, 3>& value, bool validityCheck) {
+  /* first check if the pool has ever seen this key before, if it has, we can
+   * just add it, if not, we need to run some validation tests */
+  {
+    MutexLocker lock(mutexArrayNDReal);
+    if (validityCheck && !isValid(value)) {
+      throw EssentiaException("Pool::add array contains invalid numbers (NaN or inf)");
+    }
+    if (_poolArrayNDReal.find(name) != _poolArrayNDReal.end()) {
+      _poolArrayNDReal[name].push_back(ArrayND<Real, 3>(value));
+      return;
+    }
+  }
+  GLOBAL_LOCK
+  validateKey(name);
+  _poolArrayNDReal[name].push_back(ArrayND<Real, 3>(value));
+}
 
 // special add for Array2d<Real>
 // Array2D needs a special add that cannot be implemented in the macro because
@@ -330,6 +358,7 @@ SPECIALIZE_SET_IMPL(Real, Real)
 SPECIALIZE_SET_IMPL(string, String)
 SPECIALIZE_SET_IMPL(vector<Real>, VectorReal)
 SPECIALIZE_SET_IMPL(vector<string>, VectorString)
+// SPECIALIZE_SET_IMPL(arrayndreal, ArrayNDReal)
 
 
 void Pool::merge(Pool& p, const string& mergeType) {
@@ -379,6 +408,7 @@ void Pool::merge(Pool& p, const string& mergeType) {
   MERGE_POOL(vector<string>, VectorString);
   MERGE_POOL(StereoSample, StereoSample);
   MERGE_POOL(TNT::Array2D<Real>, Array2DReal);
+  MERGE_POOL(arrayndreal, ArrayNDReal);
 
   #undef MERGE_SINGLE_POOL
   #undef MERGE_POOL
@@ -444,6 +474,7 @@ SPECIALIZE_MERGE_IMPL(vector<Real>, VectorReal);
 SPECIALIZE_MERGE_IMPL(string, String);
 SPECIALIZE_MERGE_IMPL(vector<string>, VectorString);
 SPECIALIZE_MERGE_IMPL(StereoSample, StereoSample);
+SPECIALIZE_MERGE_IMPL(arrayndreal, ArrayNDReal);
 
 #define SPECIALIZE_MERGE_SINGLE_IMPL(type, tname)                                                      \
 void Pool::mergeSingle(const string& name, const type& value, const string& mergeType) {               \

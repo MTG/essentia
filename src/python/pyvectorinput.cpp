@@ -64,6 +64,8 @@ static int vectorinput_init(PyStreamingAlgorithm* self, PyObject *args, PyObject
     case VECTOR_STRING:         INIT_TYPE_OWNDATA(string,                  VectorString::fromPythonCopy);
     case VECTOR_STEREOSAMPLE:   INIT_TYPE_OWNDATA(StereoSample,            VectorStereoSample::fromPythonCopy);
     case VECTOR_MATRIX_REAL:    INIT_TYPE_OWNDATA(TNT::Array2D<Real>,      VectorMatrixReal::fromPythonCopy);
+    typedef boost::multi_array<essentia::Real, 3> arrayndreal;
+    case VECTOR_ARRAYND_REAL:   INIT_TYPE_OWNDATA(arrayndreal,             VectorArrayNDReal::fromPythonCopy);
     case VECTOR_VECTOR_REAL:    INIT_TYPE_OWNDATA(vector<Real>,            VectorVectorReal::fromPythonCopy);
     case VECTOR_VECTOR_COMPLEX: INIT_TYPE_OWNDATA(vector<complex< Real> >, VectorVectorComplex::fromPythonCopy);
 

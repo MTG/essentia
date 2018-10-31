@@ -157,6 +157,14 @@ inline bool isValid(const TNT::Array2D<T> & mat) {
   return true;
 }
 
+template <typename T, size_t nDim>
+inline bool isValid(const boost::multi_array<T, nDim>& mat) {
+  for (const T* i = mat.origin(); i < (mat.origin() + mat.num_elements()); ++i){
+    if (!isValid(*i)) return false;
+  }
+  return true;
+}
+
 #ifdef OS_WIN32
 int mkstemp(char *tmpl);
 #endif // OS_WIN32

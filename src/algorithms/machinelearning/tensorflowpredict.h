@@ -34,10 +34,18 @@ class TensorflowPredict : public Algorithm {
   Input<Pool> _poolIn;
   Output<Pool> _poolOut;
 
-  std::string _nameIn;
-  std::string _nameOut;
-  std::vector<std::string> _fetchOutputs;
-  int _nOutputs;
+  // const char* are required for the tensorflow c API  
+  std::vector<std::string> _inputNames;
+  std::vector<std::string> _outputNames;
+
+  std::vector<TF_Tensor*> _inputTensors;
+  std::vector<TF_Tensor*> _outputTensors;
+
+  std::vector<TF_Output> _inputNodes;
+  std::vector<TF_Output> _outputNodes;
+
+  size_t _nInputs;
+  size_t _nOutputs;
 
   TF_Graph* _graph;
   TF_Status* _status;
@@ -49,10 +57,13 @@ class TensorflowPredict : public Algorithm {
  public:
   TensorflowPredict() {
     declareInput(_poolIn, "poolIn", "the pool where to get the feature tensors");
-    declareOutput(_poolOut, "poolOut", "the pool where to store the predicted tensors");
+    declareOutput(_poolOut, "poolOut", "the pool where to store the output tensors");
   }
 
   ~TensorflowPredict(){
+    TF_CloseSession(_session, _status);
+    TF_DeleteSessionOptions(_sessionOptions);
+    TF_DeleteSession(_session, _status);
     TF_DeleteImportGraphDefOptions(_options);
     TF_DeleteStatus(_status);
     TF_DeleteGraph(_graph);
@@ -60,13 +71,22 @@ class TensorflowPredict : public Algorithm {
 
   void declareParameters() {
     declareParameter("garphFilename", "the name of the file from which to read the Tensorflow graph", "", "/home/pablo/base_model.pb");
-    declareParameter("fetchOutputs", "will save the output tensors of the graph nodes named after each element of this vector of strings","", Parameter::VECTOR_STRING);
-    declareParameter("namespaceIn", "will look for this namespace in poolIn", "", "X");
-    declareParameter("namespaceOut", "will save to this namespace in poolOut", "", "Y");
+    
+    const char* inputNames[] = {"input_1"};
+    const char* outputNames[] = {"output_node0"};
+
+    std::vector<std::string> inputNamesVector = arrayToVector<std::string>(inputNames);
+    std::vector<std::string> outputNamesVector = arrayToVector<std::string>(outputNames);
+
+    declareParameter("inputs", "will look for this namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", inputNamesVector);
+    declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool", "", outputNamesVector);
   }
 
   void configure();
   void compute();
+  TF_Tensor* arrayNDToTensor(const boost::const_multi_array_ref<Real, 3>& arrayND);
+  boost::const_multi_array_ref<Real, 3> tensorToArrayND(const TF_Tensor* tensor, TF_Output node);
+  TF_Output graphOperationByName(const char* nodeName, int index=0);
 
   static const char* name;
   static const char* category;

@@ -30,14 +30,30 @@ const char* SDA::category = "Machine Learning";
 const char* SDA::description = DOC("dfsdfdsfsdaf");
 
 
-void SDA::configure() {};
+void SDA::configure() {
+};
 
 
 void SDA::compute() {
+  // const Real& input = _input.get();
+  const_multi_array_ref<Real, 3> input(_input.get());
+  multi_array<Real, 3>& output = _output.get();
+  // Real& output = _output.get();
+  auto& input_shape = reinterpret_cast<boost::array<size_t, const_multi_array_ref<Real, 3>::dimensionality> const&>(*input.shape());
 
-  const const_multi_array_ref<Real, 3>& input = _input.get();
-  multi_array_ref<Real, 3>& output = _output.get();
 
+
+  // output.resize(input_shape);
+  // output.reshape(input_shape);
+  // output = input;
+
+  multi_array<Real, 3> intermediate(boost::extents[3][3][3]);
+  // auto& input_shape = reinterpret_cast<boost::array<size_t, const_multi_array_ref<Real, 3>::dimensionality> const&>(*intermediate.shape());
+
+  output.resize(input_shape);
+  output.reshape(input_shape);
   output = input;
+
+  output[0][0][2] = 5.f;
 }
 

@@ -20,7 +20,7 @@
 #include <Python.h>
 #include "parsing.h"
 #include "typedefs.h"
-#include "3rdparty/boost_1_68_0/boost/multi_array.hpp"
+// #include "3rdparty/boost_1_68_0/boost/multi_array.hpp"
 using namespace std;
 using namespace essentia;
 
@@ -157,7 +157,8 @@ PyObject* toPython(void* obj, Edt tp) {
     case VECTOR_VECTOR_COMPLEX: return VectorVectorComplex::toPythonCopy((vector<vector<complex<Real> > >*)obj);
     case VECTOR_VECTOR_STRING: return VectorVectorString::toPythonCopy((vector<vector<string> >*)obj);
     case VECTOR_VECTOR_STEREOSAMPLE: return VectorVectorStereoSample::toPythonCopy((vector<vector<StereoSample> >*)obj);
-    case ARRAYND_REAL: return ArrayNDReal::toPythonRef((ArrayND<Real, 3>*)obj);
+    case ARRAYND_REAL: return ArrayNDReal::toPythonRef((boost::multi_array<Real, 3>*)obj);
+    case VECTOR_ARRAYND_REAL: return VectorArrayNDReal::toPythonCopy((vector<boost::multi_array<Real, 3> >*)obj);
     case MATRIX_REAL: return MatrixReal::toPythonRef((TNT::Array2D<Real>*)obj);
     case VECTOR_MATRIX_REAL: return VectorMatrixReal::toPythonCopy((vector<TNT::Array2D<Real> >*)obj);
     case POOL: return PyPool::toPythonRef((Pool*)obj);

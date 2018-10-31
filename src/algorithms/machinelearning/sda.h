@@ -24,6 +24,7 @@
 #include "pool.h"
 #include <tensorflow/c/c_api.h>
 #include <3rdparty/boost_1_68_0/boost/multi_array.hpp>
+#include "boost/array.hpp"
 
 
 namespace essentia {
@@ -32,17 +33,19 @@ namespace standard {
 class SDA : public Algorithm {
 
  protected:
+  // Input<Real> _input;
   Input<boost::multi_array<Real, 3> > _input;
   Output<boost::multi_array<Real, 3> > _output;
+  // Output<Real> _output;
 
 
 
  public:
   SDA() {
-    declareInput(_input, "poolIn", "the pool where to get the feature tensors");
-    declareOutput(_output, "poolOut", "the pool where to store the predicted tensors");
+    declareInput(_input, "array3dIn", "array3dIn");
+    declareOutput(_output, "array3dOut", "array3dOut");
   }
-
+  
   void declareParameters() {};
 
   void configure();

@@ -17,16 +17,14 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-// #include <numpy/arrayobject.h>
 #include "typedefs.h"
 #include "3rdparty/boost_1_68_0/boost/multi_array.hpp"
 #include "3rdparty/boost_1_68_0/boost/python/detail/wrap_python.hpp"
-// #include "3rdparty/boost_1_68_0/boost/cstdint.hpp"
 
 using namespace std;
 using namespace essentia;
 
-DEFINE_PYTHON_TYPE(ArrayNDReal);
+DEFINE_PYTHON_TYPE(VectorArrayNDReal);
 
 namespace detail {
   template<typename T>
@@ -38,7 +36,6 @@ namespace detail {
   // specialized function templates.
   // template<> inline int numpy_type_map<Real>()                      { return NPY_FLOAT; }
 }
-
 
 template<class T, int NDims>
 class numpy_boost : public boost::multi_array_ref<T, NDims>
@@ -167,54 +164,61 @@ public:
   }
 };
 
-
-// template <size_t n>
-PyObject* ArrayNDReal::toPythonRef(boost::multi_array<essentia::Real, 3>* a) {
+PyObject* VectorArrayNDReal::toPythonCopy(const vector<boost::multi_array<Real, 3> >* aVec) {
+  int size = aVec->size();
+  PyObject* result = PyList_New(size);
   
-  PyArrayObject* result;
 
-  // boost::multi_array<essentia::Real, 3> *ad = (boost::multi_array<essentia::Real, 3> *)a;
-  E_INFO("finally:");
-  E_INFO((*a)[0][0][0]);
+  for (int i=0; i<size; ++i) {
+    const boost::multi_array_ref<Real, 3> *a = &((*aVec)[i]);
+    int dims = a->num_dimensions();
+      npy_intp shape[dims];
+      for (int j = 0; j< dims; j++)
+          shape[j] = (long int)a->shape()[j];
 
-  int dims = a->num_dimensions();
-  
-  npy_intp shape[dims];
-  for (int i = 0; i< dims; i++)
-      shape[i] = (long int)a->shape()[i];
-
-
-  // TODO: this should be possible to di it in this way
-  // if (dims > 0) result = PyArray_SimpleNewFromData(dims, shape, PyArray_FLOAT, a->origin());
-  // else          result = PyArray_SimpleNew(1, shape, PyArray_FLOAT);
-
-  result = (PyArrayObject*)PyArray_SimpleNew(dims, shape, PyArray_FLOAT);
-  assert(result->strides[2] == sizeof(Real));
-  for (int i=0; i<(int)shape[0]; i++) {
-    for (int j=0; j<(int)shape[1]; j++) {
-      Real* dest = (Real*)(result->data + i*result->strides[0] + j*result->strides[1]);
-      const Real* src = &((*a)[i][j][0]);
-      fastcopy(dest, src, shape[2]);
+    PyArrayObject* mat = (PyArrayObject*)PyArray_SimpleNew(dims, shape, PyArray_FLOAT);
+    if (mat == NULL) {
+      throw EssentiaException("VectorArrayNDReal::toPythonCopy: dang null object");
     }
+    // assert(result->strides[2] == sizeof(Real));
+
+    // w/o the following check, will crash
+    if (shape[1] != 0) {
+      for (int j=0; j<(int)shape[0]; j++) {
+        for (int k=0; k<(int)shape[1]; k++) {
+          Real* dest = (Real*)(mat->data + j*mat->strides[0] + k*mat->strides[1]);
+          const Real* src = &((*a)[j][k][0]);
+          fastcopy(dest, src, shape[2]);
+        }
+      }
+    }
+
+    PyList_SET_ITEM(result, i, (PyObject*)mat);
   }
 
-  if (result == NULL) {
-    throw EssentiaException("ArrayNDReal: dang null object");
-  }
-
-  return (PyObject*) result;
+  return result;
 }
 
-void* ArrayNDReal::fromPythonRef(PyObject* obj) {
-  if (!PyArray_Check(obj)) {
-    throw EssentiaException("ArrayNDReal::fromPythonRef: expected PyArray, received: ", strtype(obj));
+
+void* VectorArrayNDReal::fromPythonCopy(PyObject* obj) {
+  if (!PyList_Check(obj)) {
+    throw EssentiaException("VectorArrayNDReal::fromPythonCopy: input is not a list");
   }
 
-  PyArrayObject* array = (PyArrayObject*)obj;
+  int size = PyList_Size(obj);
+  vector<boost::multi_array<Real, 3> >* v = new vector<boost::multi_array<Real, 3> >(size);
 
-  if (array->descr->type_num != PyArray_FLOAT) {
-    throw EssentiaException("ArrayNDReal::fromPythonRef: this NumPy array doesn't contain Reals (maybe you forgot dtype='f4')");
+  for (int i=0; i<size; ++i) {
+    try {
+      (*v)[i] = *(boost::multi_array<Real, 3> *)ArrayNDReal::fromPythonRef(PyList_GET_ITEM(obj, i));
+    }
+
+    catch (const exception&) {
+      delete v;
+      throw;
+    }
+
   }
 
-  return new boost::multi_array<Real, 3>((boost::multi_array_ref<Real, 3>)numpy_boost<Real, 3>(array));
+  return v;
 }

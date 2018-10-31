@@ -23,6 +23,7 @@
 using namespace std;
 using namespace essentia;
 
+typedef boost::multi_array<essentia::Real, 3> arrayndreal;
 
 PyMethodDef PyPool_methods[] = {
   { "__add__",        (PyCFunction)PyPool::add, METH_VARARGS,
@@ -150,6 +151,11 @@ PyObject* PyPool::keyType(PyPool* self, PyObject* obj) {
     return PyString_FromString( edtToString(VECTOR_MATRIX_REAL).c_str() );
   }
 
+  // search arraynd sub-pool
+  if (p.getArrayNDRealPool().find(key) != p.getArrayNDRealPool().end()) {
+    return PyString_FromString( edtToString(VECTOR_ARRAYND_REAL).c_str() );
+  }
+
   // search single real pool
   if (p.getSingleRealPool().find(key) != p.getSingleRealPool().end()) {
     return PyString_FromString( edtToString(REAL).c_str() );
@@ -233,6 +239,7 @@ PyObject* PyPool::add(PyPool* self, PyObject* pyArgs) {
       case VECTOR_STRING: ADD_COPY(VectorString, vector<string>);
       case MATRIX_REAL:   ADD_COPY(MatrixReal, TNT::Array2D<Real>);
 
+      case ARRAYND_REAL:  ADD_REF(ArrayNDReal, arrayndreal);
       case VECTOR_REAL:   ADD_REF(VectorReal, RogueVector<Real>);
 
       default:
@@ -397,6 +404,7 @@ PyObject* PyPool::merge(PyPool* self, PyObject* pyArgs) {
       case VECTOR_VECTOR_REAL: MERGE_COPY(VectorVectorReal, vector<vector<Real> >);
       case VECTOR_VECTOR_STRING: MERGE_COPY(VectorVectorString, vector<vector<string> >);
       case VECTOR_MATRIX_REAL:   MERGE_COPY(VectorMatrixReal, vector<TNT::Array2D<Real> >);
+      case VECTOR_ARRAYND_REAL:   MERGE_COPY(VectorArrayNDReal,  vector<arrayndreal>);
       //case POOL: p.merge(args[1].cppPool, mergeType)
 
 
@@ -517,6 +525,7 @@ PyObject* PyPool::value(PyPool* self, PyObject* pyArgs) {
       case VECTOR_VECTOR_REAL: return VectorVectorReal::toPythonCopy(&p.value<vector<vector<Real> > >(key));
       case VECTOR_VECTOR_STRING: return VectorVectorString::toPythonCopy(&p.value<vector<vector<string> > >(key));
       case VECTOR_MATRIX_REAL: return VectorMatrixReal::toPythonCopy(&p.value<vector<TNT::Array2D<Real> > >(key));
+      case VECTOR_ARRAYND_REAL: return VectorArrayNDReal::toPythonCopy(&p.value<vector<arrayndreal> >(key));
       default:
         ostringstream msg;
         msg << "Pool.value does not support the type: " << edtToString(tp);
