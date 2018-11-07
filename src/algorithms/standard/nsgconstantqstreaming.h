@@ -39,7 +39,7 @@ class NSGConstantQStreaming : public Algorithm{
 
  // void declareProcessOrder() {
  //   declareProcessStep(ChainFrom(_wrapper));
-  //  declareProcessStep(SingleShot(this));
+ //  declareProcessStep(SingleShot(this));
  // }
 
   void declareParameters() {
