@@ -18,6 +18,7 @@
  */
 
 #include "devnull.h"
+#include "pool.h"
 #include "../../utils/tnt/tnt.h"
 using namespace std;
 
@@ -26,6 +27,7 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
+typedef boost::multi_array<Real, 3> arrayndreal;
 
 void connect(SourceBase& source, DevNullConnector dummy) {
   const type_info& sourceType = source.typeInfo();
@@ -37,7 +39,9 @@ void connect(SourceBase& source, DevNullConnector dummy) {
   CREATE_DEVNULL(string);
   CREATE_DEVNULL(vector<string>);
   CREATE_DEVNULL(TNT::Array2D<Real>);
+  CREATE_DEVNULL(arrayndreal);
   CREATE_DEVNULL(StereoSample);
+  CREATE_DEVNULL(Pool);
 
   if (!devnull) throw EssentiaException("DevNull class doesn't work for type: ", nameOfType(sourceType));
 
