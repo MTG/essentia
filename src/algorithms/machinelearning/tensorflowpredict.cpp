@@ -49,7 +49,7 @@ static void DeallocateBuffer(void* data, size_t) {
 }
 
 void TensorflowPredict::configure() {
-  string garphFilename = parameter("garphFilename").toString();
+  string garphFilename = parameter("graphFilename").toString();
   _inputNames = parameter("inputs").toVectorString();
   _outputNames = parameter("outputs").toVectorString();
 

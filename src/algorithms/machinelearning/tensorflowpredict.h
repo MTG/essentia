@@ -70,7 +70,7 @@ class TensorflowPredict : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("garphFilename", "the name of the file from which to read the Tensorflow graph", "", "/home/pablo/base_model.pb");
+    declareParameter("graphFilename", "the name of the file from which to read the Tensorflow graph", "", "/home/pablo/base_model.pb");
     
     const char* inputNames[] = {"input_1"};
     const char* outputNames[] = {"output_node0"};
@@ -92,6 +92,30 @@ class TensorflowPredict : public Algorithm {
   static const char* category;
   static const char* description;
 
+};
+
+} //namespace standard
+} //namespace essentia
+
+
+#include "streamingalgorithmwrapper.h"
+
+namespace essentia {
+namespace streaming {
+
+class TensorflowPredict : public StreamingAlgorithmWrapper {
+
+ protected:
+  Sink<Pool> _poolIn;
+  Source<Pool> _poolOut;
+
+
+ public:
+  TensorflowPredict() {
+    declareAlgorithm("TensorflowPredict");
+    declareInput(_poolIn, TOKEN, "poolIn");
+    declareOutput(_poolOut, TOKEN, "poolOut");
+  }
 };
 
 } //namespace standard
