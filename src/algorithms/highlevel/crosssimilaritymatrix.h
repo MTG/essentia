@@ -43,6 +43,7 @@ class CrossSimilarityMatrix : public Algorithm {
     declareParameter("oti", "whether to transpose the key of the reference song to the query song by (OTI)", "{true,false}", true);
     declareParameter("toBlocked", "whether to use stacked chroma vector embedding for computing similarity", "{true,false}", true);
     declareParameter("noti", "Number of circular shifts to be checked for optimal transposition index", "[0, inf)", 12);
+    declareParameter("otiBinary", "whether to use the chroma binary similarity matrix method using oti", "{true,false}", false);
   }
 
    void configure();
@@ -57,6 +58,7 @@ class CrossSimilarityMatrix : public Algorithm {
    std::vector<Real> globalAverageChroma(std::vector<std::vector<Real> >& inputFeature) const;
    std::vector<std::vector<Real> > toTimeEmbedding(std::vector<std::vector<Real> >& inputArray, int m, int tau) const;
    int optimalTranspositionIndex(std::vector<std::vector<Real> >& chromaA, std::vector<std::vector<Real> >& chromaB, int nshifts) const;
+   std::vector<std::vector<Real> > chromaBinarySimMatrix(std::vector<std::vector<Real> >& chromaA, std::vector<std::vector<Real> >& chromaB, int nshifts, Real matchCoef, Real mismatchCoef) const;
 
    int _tau;
    int _m;
@@ -64,6 +66,7 @@ class CrossSimilarityMatrix : public Algorithm {
    int _noti;
    bool _oti;
    bool _toBlocked;
+   bool _otiBinary;
 };
 
 } // namespace standard

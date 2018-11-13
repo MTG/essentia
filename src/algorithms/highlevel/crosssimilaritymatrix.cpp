@@ -24,6 +24,10 @@
 #include <string>
 #include <algorithm>
 #include <functional>
+#include <boost/numeric/ublas/vector.hpp>
+
+
+using namespace boost::numeric;
 
 namespace essentia {
 namespace standard {
@@ -47,6 +51,7 @@ void CrossSimilarityMatrix::configure() {
   _noti = parameter("noti").toInt();
   _oti = parameter("oti").toBool();
   _toBlocked = parameter("toBlocked").toBool();
+  _otiBinary = parameter("otiBinary").toBool();
 }
 
 void CrossSimilarityMatrix::compute() {
@@ -62,84 +67,90 @@ void CrossSimilarityMatrix::compute() {
   if (referenceFeature.empty())
     throw EssentiaException("CrossSimilarityMatrix: input referenceFeature array is empty.");
 
-  // check whether to transpose by oti
-  if (_oti == true) {
-    int otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
-    std::rotate(referenceFeature.begin(), referenceFeature.end() - otiIdx, referenceFeature.end());
+
+  if (_otiBinary == true) {
+    csm = chromaBinarySimMatrix(queryFeature, referenceFeature, _noti, 1, 0);
   }
 
-  // check if delay embedding needed
-  if (_toBlocked == true) {
-    // construct time embedding from input chroma features
-    std::vector<std::vector<Real> >  timeEmbedA = toTimeEmbedding(queryFeature, _m, _tau);
-    std::vector<std::vector<Real> >  timeEmbedB = toTimeEmbedding(referenceFeature, _m, _tau);
-    // pairwise euclidean distance
-    pdistances = pairwiseDistance(timeEmbedA, timeEmbedB);
-  }
   else {
-    // pairwise euclidean distance
-    pdistances = pairwiseDistance(queryFeature, referenceFeature);
-  }
-  if (pdistances.empty())
-    throw EssentiaException("CrossSimilarityMatrix: empty array found on the euclidean cross similarity matrix.");
 
-  // transposing the array of pairwsie distance
-  std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
-
-  size_t xRows = pdistances.size();
-  size_t xCols = pdistances[0].size();
-  size_t yRows = tpDistances.size();
-  size_t yCols = tpDistances[0].size();
-
-  std::vector<std::vector<Real> > ephX(xRows, std::vector<Real>(1, 0));
-  std::vector<std::vector<Real> > ephY(yRows, std::vector<Real>(1, 0));
-
-  for (size_t i=0; i<xRows; i++) {
-    ephX[i][0] = percentile(pdistances[i], _kappa*100);
-  }
-
-  for (size_t j=0; j<yRows; j++) {
-    ephY[j][0] = percentile(tpDistances[j], _kappa*100);
-  }
-
-  std::vector<std::vector<Real> > similarityX(xRows, std::vector<Real>(xCols, 0));
-  std::vector<std::vector<Real> > similarityY(yRows, std::vector<Real>(yCols, 0));
-
-  // construct thresholded similarity matrix on axis X
-  for (size_t k=0; k<xRows; k++) {
-    for (size_t l=0; l<xCols; l++) {
-      similarityX[k][l] = ephX[k][0] - pdistances[k][l];
+    // check whether to transpose by oti
+    if (_oti == true) {
+      int otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
+      std::rotate(referenceFeature.begin(), referenceFeature.end() - otiIdx, referenceFeature.end());
     }
-  }
 
-  // construct thresholded similarity matrix on axis Y
-  for (size_t u=0; u<yRows; u++) {
-    for (size_t v=0; v<yCols; v++) {
-      similarityY[u][v] = ephY[u][0] - tpDistances[u][v];
+    // check if delay embedding needed
+    if (_toBlocked == true) {
+      // construct time embedding from input chroma features
+      std::vector<std::vector<Real> >  timeEmbedA = toTimeEmbedding(queryFeature, _m, _tau);
+      std::vector<std::vector<Real> >  timeEmbedB = toTimeEmbedding(referenceFeature, _m, _tau);
+      // pairwise euclidean distance
+      pdistances = pairwiseDistance(timeEmbedA, timeEmbedB);
     }
-  }
+    else {
+      // pairwise euclidean distance
+      pdistances = pairwiseDistance(queryFeature, referenceFeature);
+    }
+    if (pdistances.empty())
+      throw EssentiaException("CrossSimilarityMatrix: empty array found on the euclidean cross similarity matrix.");
 
-  // binarise the array with heavisideStepFunction
-  heavisideStepFunction(similarityX);
+    // transposing the array of pairwsie distance
+    std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
 
-  // here we binarise and transpose the similarityY array same time in order to avoid redundant looping needed for matmult operation at the end
-  std::vector<std::vector<Real> > tSimilarityY(yCols, std::vector<Real>(yRows));
-  for (size_t i=0; i<yRows; i++) {
-    for (size_t j=0; j<yCols; j++) {
-      if (similarityY[i][j] < 0) {
-        tSimilarityY[j][i] = 0.;
-      }
-      else if (similarityY[i][j] >= 0) {
-        tSimilarityY[j][i] = 1.;
+    size_t xRows = pdistances.size();
+    size_t xCols = pdistances[0].size();
+    size_t yRows = tpDistances.size();
+    size_t yCols = tpDistances[0].size();
+
+    std::vector<std::vector<Real> > similarityX(xRows, std::vector<Real>(xCols, 0));
+    std::vector<std::vector<Real> > similarityY(yRows, std::vector<Real>(yCols, 0));
+
+    // construct thresholded similarity matrix on axis X
+    for (size_t k=0; k<xRows; k++) {
+      for (size_t l=0; l<xCols; l++) {
+        similarityX[k][l] = percentile(pdistances[k], _kappa*100) - pdistances[k][l];
       }
     }
+
+    // construct thresholded similarity matrix on axis Y
+    for (size_t u=0; u<yRows; u++) {
+      for (size_t v=0; v<yCols; v++) {
+        similarityY[u][v] = percentile(tpDistances[u], _kappa*100) - tpDistances[u][v];
+      }
+    }
+
+    // binarise the array with heavisideStepFunction
+    heavisideStepFunction(similarityX);
+
+    // here we binarise and transpose the similarityY array same time in order to avoid redundant looping needed for matmult operation at the end
+    std::vector<std::vector<Real> > tSimilarityY(yCols, std::vector<Real>(yRows));
+    for (size_t i=0; i<yRows; i++) {
+      for (size_t j=0; j<yCols; j++) {
+        if (similarityY[i][j] < 0) {
+          tSimilarityY[j][i] = 0;
+        }
+        else if (similarityY[i][j] >= 0) {
+          tSimilarityY[j][i] = 1;
+        }
+      }
+    }
+    // finally we construct out cross similarity matrix by multiplying similarityX and similarityY
+    // [TODO]: replace TNT array matmult with Boost matrix in future for faster computation.
+    TNT::Array2D<Real> simX = vecvecToArray2D(similarityX);
+    TNT::Array2D<Real> simY = vecvecToArray2D(tSimilarityY);
+    TNT::Array2D<Real> csmOut = TNT::operator*(simX, simY);
+    csm = array2DToVecvec(csmOut);
+    /*
+    for (size_t x=0; x<xRows; x++) {
+      for (size_t y=0; y<yRows; y++) {
+        for (size_t z=0; z<yCols; z++) {
+          csm[x][y] = similarityX[x][y] * similarityY[y][z];
+        }
+      }
+    }
+    */
   }
-  // finally we construct out cross similarity matrix by multiplying similarityX and similarityY
-  // [TODO]: replace TNT array matmult with Boost matrix in future for faster computation.
-  TNT::Array2D<Real> simX = vecvecToArray2D(similarityX);
-  TNT::Array2D<Real> simY = vecvecToArray2D(tSimilarityY);
-  TNT::Array2D<Real> csmOut = TNT::operator*(simX, simY);
-  csm = array2DToVecvec(csmOut);
 }
 
 // Construct a stacked chroma embedding from an input chroma audio feature vector 
@@ -193,16 +204,46 @@ int CrossSimilarityMatrix::optimalTranspositionIndex(std::vector<std::vector<Rea
   std::vector<Real> globalChromaA = globalAverageChroma(chromaA);
   std::vector<Real> globalChromaB = globalAverageChroma(chromaB);
   std::vector<Real> valueAtShifts;
-  int prevIdx = 0;
+  std::vector<Real> chromaBcopy = globalChromaB;
   for(int i=0; i<=nshifts; i++) {
     // circular rotate the input globalchroma by an index 'i'
-    std::rotate(globalChromaB.begin(), globalChromaB.end() - (i - prevIdx), globalChromaB.end());
+    std::rotate(chromaBcopy.begin(), chromaBcopy.end() - i, chromaBcopy.end());
     // compute the dot product of the query global chroma and the shifted global chroma of reference song and append to an array
-    valueAtShifts.push_back(dotProduct(globalChromaA, globalChromaB));
-    prevIdx++;
+    valueAtShifts.push_back(dotProduct(globalChromaA, chromaBcopy));
+    chromaBcopy = globalChromaB;
   }
   // compute the optimal index by finding the index of maximum element in the array of value at various shifts
   return argmax(valueAtShifts);
+}
+
+
+std::vector<std::vector<Real> > CrossSimilarityMatrix::chromaBinarySimMatrix(std::vector<std::vector<Real> >& chromaA, std::vector<std::vector<Real> >& chromaB, int nshifts, Real matchCoef, Real mismatchCoef) const {
+
+  int otiIndex;
+  std::vector<Real> valueAtShifts;
+  std::vector<Real> chromaBcopy;
+
+  std::vector<std::vector<Real> > simMatrix(chromaA.size(), std::vector<Real>(chromaB.size(), 0));
+
+  for (size_t i=0; i<chromaA.size(); i++) {
+    for (size_t j=0; j<chromaB.size(); j++) {
+      for(int k=0; k<=nshifts; k++) {
+        chromaBcopy = chromaB[j];
+        std::rotate(chromaBcopy.begin(), chromaBcopy.end() - k, chromaBcopy.end());
+        valueAtShifts.push_back(dotProduct(chromaA[i], chromaBcopy));
+        chromaBcopy = chromaB[j];
+      }
+      otiIndex = std::max_element(valueAtShifts.begin(), valueAtShifts.end()) - valueAtShifts.begin();
+      valueAtShifts.clear();
+      if (otiIndex == 0 || otiIndex == 1) {
+        simMatrix[i][j] = matchCoef;
+      }
+      else {
+        simMatrix[i][j] = mismatchCoef;
+      } 
+    }
+  }
+  return simMatrix;
 }
 
 } // namespace standard
