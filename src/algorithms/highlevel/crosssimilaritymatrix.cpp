@@ -24,10 +24,6 @@
 #include <string>
 #include <algorithm>
 #include <functional>
-#include <boost/numeric/ublas/vector.hpp>
-
-
-using namespace boost::numeric;
 
 namespace essentia {
 namespace standard {
