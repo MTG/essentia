@@ -10,7 +10,13 @@ The list below highlights some of the academic studies using Essentia organized 
 
 ## Music and sound classification
 
+- S. Oramas, D. Bogdanov and A. Porter. MediaEval 2018 AcousticBrainz Genre Task: A baseline combining deep feature embeddings across datasets. In MediaEval 2018 Workshop, 2018.
+
+- H. Schreiber. MediaEval 2018 AcousticBrainz Genre Task: A CNN Baseline Relying on Mel-Features. In MediaEval 2018 Workshop, 2018.
+
 - J. Kim, M. Won, X. Serra, and C. C. S. Liem, Transfer Learning of Artist Group Factors to Musical Genre Classification. In WWW '18 Companion Proceedings of the The Web Conference 2018, 2018.
+
+- N. Karunakaran and A. Arya, A Scalable Hybrid Classifier for Music Genre Classification using Machine Learning Concepts and Spark. In International Conference on Intelligent Autonomous Systems (ICoIAS), 2018.
 
 - D. Bogdanov, A. Porter, J. Urbano, and H. Schreiber. The MediaEval 2017 AcousticBrainz Genre Task: Content-based Music Genre Recognition from Multiple Sources. In MediaEval 2017 Multimedia Benchmark Workshop (MediaEval'17), 2017.
 
