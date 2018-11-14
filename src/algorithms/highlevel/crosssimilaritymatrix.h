@@ -43,7 +43,7 @@ class CrossSimilarityMatrix : public Algorithm {
     declareParameter("oti", "whether to transpose the key of the reference song to the query song by (OTI)", "{true,false}", true);
     declareParameter("toBlocked", "whether to use stacked chroma vector embedding for computing similarity", "{true,false}", true);
     declareParameter("noti", "Number of circular shifts to be checked for optimal transposition index", "[0, inf)", 12);
-    declareParameter("otiBinary", "whether to use the chroma binary similarity matrix method using oti", "{true,false}", false);
+    declareParameter("otiBinary", "whether to use the OTI-based chroma binary similarity method", "{true,false}", false);
   }
 
    void configure();

@@ -32,6 +32,8 @@ const char* CrossSimilarityMatrix::name = "CrossSimilarityMatrix";
 const char* CrossSimilarityMatrix::category = "Music Similarity";
 const char* CrossSimilarityMatrix::description = DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
 "Use HPCP algorithm for computing the chromagram and the default parameter for best results.\n\n"
+"In addition, the algorithm also provides an option to use another binary similarity computation method using optimal transposition index (OTI) of chroma features as mentioned in [3].\n\n"
+"Use default parameter values for best results.\n\n"
 "The input chromagram should be in the shape (x, numbins), where 'x' is number of frames and 'numbins' stands for number of bins in the chromagram. An exception isthrown otherwise.\n\n"
 "An exception is also thrown if either one of the input audio feature arrays are empty or if the cross similarity matrix is empty.\n\n"
 "References:\n"
@@ -41,6 +43,7 @@ const char* CrossSimilarityMatrix::description = DOC("This algorithm computes a 
 
 
 void CrossSimilarityMatrix::configure() {
+  // configure parameters
   _tau = parameter("tau").toInt();
   _m = parameter("m").toInt();
   _kappa = parameter("kappa").toReal();
@@ -55,7 +58,6 @@ void CrossSimilarityMatrix::compute() {
   std::vector<std::vector<Real> > queryFeature = _queryFeature.get();
   std::vector<std::vector<Real> > referenceFeature = _referenceFeature.get();
   std::vector<std::vector<Real> >& csm = _csm.get();
-  std::vector<std::vector<Real> > pdistances;
 
   if (queryFeature.empty())
     throw EssentiaException("CrossSimilarityMatrix: input queryFeature array is empty.");
@@ -63,13 +65,22 @@ void CrossSimilarityMatrix::compute() {
   if (referenceFeature.empty())
     throw EssentiaException("CrossSimilarityMatrix: input referenceFeature array is empty.");
 
-
+  // check whether to use oti-based binary similarity 
   if (_otiBinary == true) {
-    csm = chromaBinarySimMatrix(queryFeature, referenceFeature, _noti, 1, 0);
+    // check whether to stack the chroma features
+    if (_toBlocked == true) {
+      std::vector<std::vector<Real> >  timeEmbedA = toTimeEmbedding(queryFeature, _m, _tau);
+      std::vector<std::vector<Real> >  timeEmbedB = toTimeEmbedding(referenceFeature, _m, _tau);
+      csm = chromaBinarySimMatrix(queryFeature, referenceFeature, _noti, 1, 0);;
+    }
+    else {
+      csm = chromaBinarySimMatrix(queryFeature, referenceFeature, _noti, 1, 0);
+    }
   }
-
+  // Use default cross similarity computation method based on euclidean distances
   else {
 
+    std::vector<std::vector<Real> > pdistances;
     // check whether to transpose by oti
     if (_oti == true) {
       int otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
@@ -108,18 +119,15 @@ void CrossSimilarityMatrix::compute() {
         similarityX[k][l] = percentile(pdistances[k], _kappa*100) - pdistances[k][l];
       }
     }
-
     // construct thresholded similarity matrix on axis Y
     for (size_t u=0; u<yRows; u++) {
       for (size_t v=0; v<yCols; v++) {
         similarityY[u][v] = percentile(tpDistances[u], _kappa*100) - tpDistances[u][v];
       }
     }
-
     // binarise the array with heavisideStepFunction
     heavisideStepFunction(similarityX);
-
-    // here we binarise and transpose the similarityY array same time in order to avoid redundant looping needed for matmult operation at the end
+    // here we binarise and transpose the similarityY array same time in order to avoid redundant looping
     std::vector<std::vector<Real> > tSimilarityY(yCols, std::vector<Real>(yRows));
     for (size_t i=0; i<yRows; i++) {
       for (size_t j=0; j<yCols; j++) {
@@ -213,6 +221,7 @@ int CrossSimilarityMatrix::optimalTranspositionIndex(std::vector<std::vector<Rea
 }
 
 
+// Computes a binary similarity matrix from two chroma vector inputs using OTI as mentioned in [3]
 std::vector<std::vector<Real> > CrossSimilarityMatrix::chromaBinarySimMatrix(std::vector<std::vector<Real> >& chromaA, std::vector<std::vector<Real> >& chromaB, int nshifts, Real matchCoef, Real mismatchCoef) const {
 
   int otiIndex;
@@ -223,14 +232,16 @@ std::vector<std::vector<Real> > CrossSimilarityMatrix::chromaBinarySimMatrix(std
 
   for (size_t i=0; i<chromaA.size(); i++) {
     for (size_t j=0; j<chromaB.size(); j++) {
+      // compute OTI-based similarity for each frame of chromaA and chromaB
       for(int k=0; k<=nshifts; k++) {
         chromaBcopy = chromaB[j];
         std::rotate(chromaBcopy.begin(), chromaBcopy.end() - k, chromaBcopy.end());
         valueAtShifts.push_back(dotProduct(chromaA[i], chromaBcopy));
         chromaBcopy = chromaB[j];
       }
-      otiIndex = std::max_element(valueAtShifts.begin(), valueAtShifts.end()) - valueAtShifts.begin();
+      otiIndex = argmax(valueAtShifts);
       valueAtShifts.clear();
+      // assign matchCoef to similarity matrix if the OTI is 0 or 1 semitone
       if (otiIndex == 0 || otiIndex == 1) {
         simMatrix[i][j] = matchCoef;
       }
