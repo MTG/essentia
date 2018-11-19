@@ -19,9 +19,9 @@
 
 // #include <numpy/arrayobject.h>
 #include "typedefs.h"
-#include "3rdparty/boost_1_68_0/boost/multi_array.hpp"
-#include "3rdparty/boost_1_68_0/boost/python/detail/wrap_python.hpp"
-// #include "3rdparty/boost_1_68_0/boost/cstdint.hpp"
+#include <boost/multi_array.hpp>
+#include <boost/python/detail/wrap_python.hpp>
+
 
 using namespace std;
 using namespace essentia;

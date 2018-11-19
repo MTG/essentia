@@ -30,7 +30,7 @@
 #include "config.h"
 #include "debugging.h"
 #include "streamutil.h"
-#include "3rdparty/boost_1_68_0/boost/multi_array.hpp"
+#include <boost/multi_array.hpp>
 
 
 // fixed-size int types

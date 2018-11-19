@@ -23,7 +23,7 @@
 #include "algorithm.h"
 #include "pool.h"
 #include <tensorflow/c/c_api.h>
-#include <3rdparty/boost_1_68_0/boost/multi_array.hpp>
+#include <boost/multi_array.hpp>
 #include "boost/array.hpp"
 
 

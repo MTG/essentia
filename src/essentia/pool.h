@@ -24,7 +24,7 @@
 #include "threading.h"
 #include "utils/tnt/tnt.h"
 #include "essentiautil.h"
-#include "3rdparty/boost_1_68_0/boost/multi_array.hpp"
+#include <boost/multi_array.hpp>
 
 namespace essentia {
 
