@@ -53,6 +53,9 @@ class TensorflowPredict : public Algorithm {
   TF_SessionOptions* _sessionOptions;
   TF_Session* _session;
 
+  bool _isTraining;
+  bool _isTrainingSet;
+  std::string _isTrainingName;
 
  public:
   TensorflowPredict() {
@@ -71,7 +74,7 @@ class TensorflowPredict : public Algorithm {
 
   void declareParameters() {
     declareParameter("graphFilename", "the name of the file from which to read the Tensorflow graph", "", "/home/pablo/base_model.pb");
-    
+
     const char* inputNames[] = {"input_1"};
     const char* outputNames[] = {"output_node0"};
 
@@ -80,6 +83,8 @@ class TensorflowPredict : public Algorithm {
 
     declareParameter("inputs", "will look for this namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", inputNamesVector);
     declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool", "", outputNamesVector);
+    declareParameter("isTraining", "Whether to return the output in training mode (normalized with statistics of the current batch) or in inference mode (normalized with moving statistics)", "{true,false}", false);
+    declareParameter("isTrainingName", "The name if the input reciving isTraining. If empty, it wont be feed ro the network", "", "");
   }
 
   void configure();

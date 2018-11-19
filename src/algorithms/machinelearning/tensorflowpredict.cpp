@@ -52,6 +52,10 @@ void TensorflowPredict::configure() {
   string garphFilename = parameter("graphFilename").toString();
   _inputNames = parameter("inputs").toVectorString();
   _outputNames = parameter("outputs").toVectorString();
+  _isTraining = parameter("isTraining").toBool();
+  _isTrainingName = parameter("isTrainingName").toString();
+
+  (_isTrainingName == "") ? _isTrainingSet = false : _isTrainingSet = true;
 
   _nInputs = _inputNames.size();
   _nOutputs = _outputNames.size();
@@ -92,14 +96,14 @@ void TensorflowPredict::configure() {
   TF_DeleteBuffer(buffer);
 
   if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Graph status is ", _status);
+    throw EssentiaException("TensorflowPredict: Error importing graph. ", TF_Message(_status));
   }
 
   _sessionOptions = TF_NewSessionOptions();
   _session = TF_NewSession(_graph, _sessionOptions, _status);
 
   if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Session status is ", _status);
+    throw EssentiaException("TensorflowPredict: Error creating new session. ", TF_Message(_status));
   }
 }
 
@@ -123,6 +127,23 @@ void TensorflowPredict::compute() {
     _inputNodes[i] = graphOperationByName(_inputNames[i].c_str(), 0);
   }
 
+  // Add isTraining flag if needed
+  if (_isTrainingSet) {
+    const int64_t dims[1] = {};
+    TF_Tensor *isTraining = TF_AllocateTensor(TF_BOOL, dims, 0, 1);
+    void* isTrainingValue = TF_TensorData(isTraining);
+
+    if (isTrainingValue == nullptr) {
+      TF_DeleteTensor(isTraining);
+      throw EssentiaException("Error generating traning phase flag");
+    }
+
+    memcpy(isTrainingValue, &_isTraining, sizeof(bool));
+
+    _inputTensors.push_back(isTraining);
+    _inputNodes.push_back(graphOperationByName(_isTrainingName.c_str(), 0));
+  }
+
   // Initialize output tensors.
   for (size_t i = 0; i < _nOutputs; i++) {
     _outputTensors[i] = nullptr;
@@ -131,21 +152,20 @@ void TensorflowPredict::compute() {
 
   // Run the Tensorflow session.
   TF_SessionRun(_session,
-                nullptr,             // Run options.
-                &_inputNodes[0],     // Input node names.
-                &_inputTensors[0],   // input tensor values.
-                _nInputs,            // Number of inputs.
-                &_outputNodes[0],    // Output node names.
-                &_outputTensors[0],  // Output tensor values.
-                _nOutputs,           // Number of outputs.
-                nullptr, 0,          // Target operations, number of targets.
-                nullptr,             // Run metadata.
-                _status              // Output status. 
+                nullptr,                         // Run options.
+                &_inputNodes[0],                 // Input node names.
+                &_inputTensors[0],               // input tensor values.
+                _nInputs + (int)_isTrainingSet,  // Number of inputs.
+                &_outputNodes[0],                // Output node names.
+                &_outputTensors[0],              // Output tensor values.
+                _nOutputs,                       // Number of outputs.
+                nullptr, 0,                      // Target operations, number of targets.
+                nullptr,                         // Run metadata.
+                _status                          // Output status. 
                );
 
   if (TF_GetCode(_status) != TF_OK) {
-    TF_DeleteStatus(_status);
-    throw EssentiaException("Error running the Tensorflow session");
+    throw EssentiaException("TensorflowPredict: Error running the Tensorflow session. ", TF_Message(_status));
   }
 
   // Copy the desired tensors into the output pool.
@@ -155,7 +175,7 @@ void TensorflowPredict::compute() {
   }
 
   // Deallocate tensors.
-  for (size_t i = 0; i < _nInputs; i++) {
+  for (size_t i = 0; i < _nInputs + (int)_isTrainingSet; i++) {
     TF_DeleteTensor(_inputTensors[i]);
   }
 
@@ -172,7 +192,7 @@ TF_Tensor* TensorflowPredict::arrayNDToTensor(
       arrayND.num_elements() * sizeof(Real));
 
   if (tensor == nullptr) {
-    throw EssentiaException("Error generating input tensor.");
+    throw EssentiaException("TensorflowPredict: Error generating input tensor.");
   }
 
   // Get a pointer to the data and fill the tensor.
@@ -180,7 +200,7 @@ TF_Tensor* TensorflowPredict::arrayNDToTensor(
 
   if (tensorData == nullptr) {
     TF_DeleteTensor(tensor);
-    throw EssentiaException("Error generating input tensors data");
+    throw EssentiaException("TensorflowPredict: Error generating input tensors data.");
   }
 
   // Why min?
@@ -200,14 +220,16 @@ const_multi_array_ref<Real, 3> TensorflowPredict::tensorToArrayND(
   size_t outNDims = TF_GraphGetTensorNumDims(_graph, node, _status);
 
   if (TF_GetCode(_status) != TF_OK) {
-    TF_DeleteStatus(_status);
-    throw EssentiaException("Error geting the output tensor's shape.");
+    throw EssentiaException("TensorflowPredict: Error getting the output tensor's shape. ", TF_Message(_status));
   }
 
   // Create a boost array to store the shape of the tensor.
-  boost::array<multi_array<int, 3>::index, 3> shape;
+  boost::array<multi_array<int, 3>::index, 3> shape = {1, 1, 1};
+  
+  size_t increment;
+  (outNDims == 2) ? increment = 2 : increment = 1;
   for (size_t i = 0; i < outNDims; i++) {
-    shape[i] = (int)TF_Dim(tensor, i);
+    shape[i * increment] = (int)TF_Dim(tensor, i);
   }
 
   // Return a const reference to the data in the Boost format.
@@ -221,7 +243,7 @@ TF_Output TensorflowPredict::graphOperationByName(const char* nodeName,
   TF_Output output = {TF_GraphOperationByName(_graph, nodeName), index};
 
   if (output.oper == nullptr) {
-    throw EssentiaException("Can't init node names");
+    throw EssentiaException("TensorflowPredict: Can't init node names.");
   }
 
   return output;
