@@ -108,6 +108,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 - M. Sordo, G. K. Koduri, S. Şentürk, S. Gulati, and X. Serra. A musically aware system for browsing and interacting with audio music collections. In The 2nd CompMusic Workshop, 2012.
 
+- A. Augello, I. Infantino, U. Maniscalco, G. Pilato, R. Rizzo, and F. Vella. Robotic Intelligence and Computational Creativity. Encyclopedia with Semantic Computing and Robotic Intelligence, 2018.
+
 - A. Augello, E. Cipolla, I. Infantino, A. Manfre, G. Pilato, and F. Vella. Creative Robot Dance with Variational Encoder. In International Conference on Computational Creativity, 2017.
 
 - A. Augello, I. Infantino, A. Manfrè, G. Pilato, F. Vella, and A. Chella. Creation and cognition for humanoid live dancing. Robotics and Autonomous Systems, 86:128-137, 2016
