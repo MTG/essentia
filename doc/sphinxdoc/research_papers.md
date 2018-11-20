@@ -263,6 +263,8 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - J. Salamon, J. P. Bello, A. Farnsworth, M. Robbins, S. Keen, H. Klinck, and S. Kelling. Towards the automatic classification of avian flight calls for bioacoustic monitoring. PloS one, 11(11), e0166866, 2016.
 
+- C. Lopez-Tello and V. Muthukumar. Classifying Acoustic Signals for Wildlife Monitoring and Poacher Detection on UAVs. In 2018 21st Euromicro Conference on Digital System Design (DSD), pp. 685-690. IEEE, 2018.
+
 - C. Lopez-Tello. Acoustic Detection, Source Separation, and Classification Algorithms for Unmanned Aerial Vehicles in Wildlife Monitoring and Poaching. Master Thesis, University of Nevada, Las Vegas, USA, 2016
 
 ## Acoustic analysis for medical and neuroimaging studies
