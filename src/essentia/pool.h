@@ -103,7 +103,7 @@ class Pool {
   std::map<std::string, std::string> _poolSingleString;
   std::map<std::string, std::vector<Real> > _poolSingleVectorReal;  
   std::map<std::string, std::vector<std::string> > _poolSingleVectorString;
-  std::map<std::string, std::vector<std::string> > _poolSingleArrayNDReal;
+  std::map<std::string, arrayndreal> _poolSingleArrayNDReal;
 
   // maps for vectors of values:
   PoolOf(Real) _poolReal;
@@ -128,7 +128,8 @@ class Pool {
 
   mutable Mutex mutexReal, mutexVectorReal, mutexString, mutexVectorString,
                 mutexArray2DReal, mutexStereoSample,
-                mutexSingleReal, mutexSingleString, mutexSingleVectorReal, mutexSingleVectorString, mutexArrayNDReal;
+                mutexSingleReal, mutexSingleString, mutexSingleVectorReal,
+                mutexSingleVectorString, mutexArrayNDReal, mutexSingleArrayNDReal;
 
   /**
    * Adds @e value to the Pool under @e name
@@ -211,6 +212,9 @@ class Pool {
   /** @copydoc set(const std::string&,const Real&i, bool) */
   void set(const std::string& name, const std::vector<std::string>& value, bool validityCheck=false);
 
+  /** @copydoc set(const std::string&,const boost::multi_array<Real, 3>, bool) */
+  void set(const std::string& name, const boost::multi_array<Real, 3>& value, bool validityCheck=false);
+
   /**
    * \brief Merges the current pool with the given one @e p.
    *
@@ -266,6 +270,8 @@ class Pool {
   void mergeSingle(const std::string& name, const std::string& value, const std::string& type="");
   /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
   void mergeSingle(const std::string& name, const std::vector<std::string>& value, const std::string& type="");
+  /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
+  void mergeSingle(const std::string& name, const arrayndreal& value, const std::string& type="");
   /**
    * Removes the descriptor name @e name from the Pool along with the data it
    * points to. This function does nothing if @e name does not exist in the
@@ -376,6 +382,12 @@ class Pool {
   const std::map<std::string, std::vector<std::string> >& getSingleVectorStringPool() const { return _poolSingleVectorString; }
 
   /**
+   * @returns a std::map where the key is a descriptor name and the value is
+   *          of type vector<string>
+   */
+  const std::map<std::string, arrayndreal>& getSingleArrayNDRealPool() const { return _poolSingleArrayNDReal; }
+
+  /**
    * Checks that no descriptor name is in two different inner pool types at
    * the same time, and throws an EssentiaException if there is
    */
@@ -420,6 +432,7 @@ SPECIALIZE_VALUE(std::vector<std::vector<std::string> >, VectorString);
 SPECIALIZE_VALUE(std::vector<TNT::Array2D<Real> >, Array2DReal);
 typedef boost::multi_array<Real, 3> arrayndreal;
 SPECIALIZE_VALUE(std::vector<arrayndreal>, ArrayNDReal);
+SPECIALIZE_VALUE(arrayndreal, SingleArrayNDReal);
 SPECIALIZE_VALUE(std::vector<StereoSample>, StereoSample);
 
 // This value function is not under the macro above because it needs to check
@@ -496,6 +509,7 @@ SPECIALIZE_CONTAINS(std::vector<std::vector<std::string> >, VectorString);
 SPECIALIZE_CONTAINS(std::vector<TNT::Array2D<Real> >, Array2DReal);
 typedef boost::multi_array<Real, 3> arrayndreal;
 SPECIALIZE_CONTAINS(std::vector<arrayndreal>, ArrayNDReal);
+SPECIALIZE_CONTAINS(arrayndreal, SingleArrayNDReal);
 SPECIALIZE_CONTAINS(std::vector<StereoSample>, StereoSample);
 
 // This value function is not under the macro above because it needs to check
@@ -560,7 +574,8 @@ MutexLocker lockStereoSample(mutexStereoSample);            \
 MutexLocker lockSingleReal(mutexSingleReal);                \
 MutexLocker lockSingleString(mutexSingleString);            \
 MutexLocker lockSingleVectorReal(mutexSingleVectorReal);    \
-MutexLocker lockSingleVectorString(mutexSingleVectorString);
+MutexLocker lockSingleVectorString(mutexSingleVectorString);\
+MutexLocker lockSingleArrayNDReal(mutexSingleArrayNDReal);
 
 
 

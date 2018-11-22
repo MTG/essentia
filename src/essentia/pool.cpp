@@ -40,7 +40,8 @@ void Pool::clear() {
   _poolSingleReal.clear();
   _poolSingleString.clear();
   _poolSingleVectorReal.clear();
-  _poolSingleVectorString.clear();  
+  _poolSingleVectorString.clear();
+  _poolSingleArrayNDReal.clear();  
 }
 
 void Pool::checkIntegrity() const {
@@ -160,6 +161,7 @@ vector<string> Pool::descriptorNames() const {
   ADD_DESC_NAMES(vector<vector<string> >, VectorString);
   ADD_DESC_NAMES(vector<TNT::Array2D<Real> >, Array2DReal);
   ADD_DESC_NAMES(vector<arrayndreal>, ArrayNDReal);
+  ADD_DESC_NAMES(arrayndreal, SingleArrayNDReal);
   ADD_DESC_NAMES(vector<StereoSample>, StereoSample);
 
   #undef ADD_DESC_NAMES
@@ -190,6 +192,7 @@ vector<string> Pool::descriptorNames(const std::string& ns) const {
   ADD_DESC_NAMES(vector<vector<string> >, VectorString);
   ADD_DESC_NAMES(vector<TNT::Array2D<Real> >, Array2DReal);
   ADD_DESC_NAMES(vector<arrayndreal>, ArrayNDReal);
+  ADD_DESC_NAMES(arrayndreal, SingleArrayNDReal);
   ADD_DESC_NAMES(vector<StereoSample>, StereoSample);
 
   #undef ADD_DESC_NAMES
@@ -210,7 +213,8 @@ vector<string> Pool::descriptorNamesNoLocking() const {
                            _poolSingleReal.size()   +
                            _poolSingleString.size() +
                            _poolSingleVectorReal.size() + 
-                           _poolSingleVectorString.size());
+                           _poolSingleVectorString.size() +
+                           _poolSingleArrayNDReal.size());
   int i=0;
 
   #define ADD_DESC_NAMES(type, tname)                                          \
@@ -360,6 +364,30 @@ SPECIALIZE_SET_IMPL(vector<Real>, VectorReal)
 SPECIALIZE_SET_IMPL(vector<string>, VectorString)
 // SPECIALIZE_SET_IMPL(arrayndreal, ArrayNDReal)
 
+// special add for ArrayND<3, Real>
+void Pool::set(const string& name, const ArrayND<Real, 3>& value, bool validityCheck) {
+  /* first check if the pool has ever seen this key before, if it has, we can
+   * just add it, if not, we need to run some validation tests */
+  {
+    MutexLocker lock(mutexSingleArrayNDReal);
+    if (validityCheck && !isValid(value)) {
+      throw EssentiaException("Pool::set array contains invalid numbers (NaN or inf)");
+    }
+    if (_poolSingleArrayNDReal.find(name) != _poolSingleArrayNDReal.end()) {
+      _poolSingleArrayNDReal[name] = ArrayND<Real, 3>(value);
+      return;
+    }
+  }
+  GLOBAL_LOCK
+  validateKey(name);
+
+  auto& input_shape = reinterpret_cast<boost::array<size_t, boost::const_multi_array_ref<Real, 3>::dimensionality> const&>(*value.shape());
+  _poolSingleArrayNDReal[name].resize(input_shape);
+  _poolSingleArrayNDReal[name].reshape(input_shape);
+
+  _poolSingleArrayNDReal[name] = value;
+}
+
 
 void Pool::merge(Pool& p, const string& mergeType) {
 
@@ -400,6 +428,7 @@ void Pool::merge(Pool& p, const string& mergeType) {
   MERGE_SINGLE_POOL(string, SingleString);
   MERGE_SINGLE_POOL(vector<Real>, SingleVectorReal);
   MERGE_SINGLE_POOL(vector<string>, SingleVectorString);
+  MERGE_SINGLE_POOL(arrayndreal, SingleArrayNDReal);
 
   // multiple value:
   MERGE_POOL(Real, Real);
@@ -506,6 +535,7 @@ SPECIALIZE_MERGE_SINGLE_IMPL(Real, Real)
 SPECIALIZE_MERGE_SINGLE_IMPL(string, String)
 SPECIALIZE_MERGE_SINGLE_IMPL(vector<Real>, VectorReal)
 SPECIALIZE_MERGE_SINGLE_IMPL(vector<string>, VectorString)
+SPECIALIZE_MERGE_SINGLE_IMPL(arrayndreal, ArrayNDReal)
 
 
 void Pool::merge(const string& name, const vector<Array2D<Real> >& value, const string& mergeType) {
@@ -576,6 +606,7 @@ bool Pool::isSingleValue(const string& name) {
   SEARCH_SINGLE(vector<Real>, SingleVectorReal);
   SEARCH_SINGLE(string, SingleString);
   SEARCH_SINGLE(vector<string>, SingleVectorString);
+  SEARCH_SINGLE(arrayndreal, SingleArrayNDReal);
 
   #undef SEARCH_SINGLE
   return false;

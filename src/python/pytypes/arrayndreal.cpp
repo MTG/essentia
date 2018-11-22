@@ -173,10 +173,6 @@ PyObject* ArrayNDReal::toPythonRef(boost::multi_array<essentia::Real, 3>* a) {
   
   PyArrayObject* result;
 
-  // boost::multi_array<essentia::Real, 3> *ad = (boost::multi_array<essentia::Real, 3> *)a;
-  E_INFO("finally:");
-  E_INFO((*a)[0][0][0]);
-
   int dims = a->num_dimensions();
   
   npy_intp shape[dims];

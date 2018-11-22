@@ -60,7 +60,6 @@ class Edt:  # Essentia Data Type
     VECTOR_MATRIX_REAL = 'VECTOR_MATRIX_REAL'
     VECTOR_ARRAYND_REAL = 'VECTOR_ARRAYND_REAL'
     ARRAYND_REAL = 'ARRAYND_REAL'
-    # ARRAYND_COMPLEX = 'ARRAYND_COMPLEX'
     POOL = 'POOL'
 
     # intermediate types
@@ -411,7 +410,7 @@ class Pool:
 
         # if we haven't seen this type before, we will have to guess its type
         else:
-            if givenType in (Edt.REAL, Edt.STRING, Edt.VECTOR_REAL):
+            if givenType in (Edt.REAL, Edt.STRING, Edt.VECTOR_REAL, Edt.ARRAYND_REAL):
                 goalType = givenType
 
             # some exceptions

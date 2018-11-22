@@ -107,6 +107,20 @@ void TensorflowPredict::configure() {
   }
 }
 
+
+void TensorflowPredict::reset() {
+  TF_CloseSession(_session, _status);
+  if (TF_GetCode(_status) != TF_OK) {
+    throw EssentiaException("TensorflowPredict: Error reseting session. ", TF_Message(_status));
+  }
+  
+  _session = TF_NewSession(_graph, _sessionOptions, _status);
+  if (TF_GetCode(_status) != TF_OK) {
+    throw EssentiaException("TensorflowPredict: Error reseting session. ", TF_Message(_status));
+  }
+}
+
+
 void TensorflowPredict::compute() {
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
@@ -121,7 +135,7 @@ void TensorflowPredict::compute() {
   // Parse the input tensors from the pool into Tensorflow tensors.
   for (size_t i = 0; i < _nInputs; i++) {
     const_multi_array_ref<Real, 3> inputData(
-        poolIn.value<vector<multi_array<Real, 3> > >(_inputNames[i])[0]);
+        poolIn.value<multi_array<Real, 3> >(_inputNames[i]));
 
     _inputTensors[i] = arrayNDToTensor(inputData);
     _inputNodes[i] = graphOperationByName(_inputNames[i].c_str(), 0);
@@ -170,7 +184,7 @@ void TensorflowPredict::compute() {
 
   // Copy the desired tensors into the output pool.
   for (size_t i = 0; i < _nOutputs; i++) {
-    poolOut.add(_outputNames[i], multi_array<Real, 3>(tensorToArrayND(
+    poolOut.set(_outputNames[i], multi_array<Real, 3>(tensorToArrayND(
                                      _outputTensors[i], _outputNodes[i])));
   }
 

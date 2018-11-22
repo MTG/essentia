@@ -171,6 +171,11 @@ PyObject* PyPool::keyType(PyPool* self, PyObject* obj) {
     return PyString_FromString( edtToString(STRING).c_str() );
   }
 
+  // search single arraynd pool
+  if (p.getSingleArrayNDRealPool().find(key) != p.getSingleArrayNDRealPool().end()) {
+    return PyString_FromString( edtToString(ARRAYND_REAL).c_str() );
+  }
+
   // couldn't find the key
   ostringstream msg;
   msg << "'" << key << "' is not a key in the pool" << endl;
@@ -306,6 +311,7 @@ PyObject* PyPool::set(PyPool* self, PyObject* pyArgs) {
       case REAL: SET_COPY(PyReal, Real);
       case STRING: SET_COPY(String, string);
       case VECTOR_REAL: SET_REF(VectorReal, RogueVector<Real>);
+      case ARRAYND_REAL: SET_REF(ArrayNDReal, arrayndreal);
       default:
         ostringstream msg;
         msg << "Pool.set does not support the type: " << edtToString(tp);
@@ -526,6 +532,13 @@ PyObject* PyPool::value(PyPool* self, PyObject* pyArgs) {
       case VECTOR_VECTOR_STRING: return VectorVectorString::toPythonCopy(&p.value<vector<vector<string> > >(key));
       case VECTOR_MATRIX_REAL: return VectorMatrixReal::toPythonCopy(&p.value<vector<TNT::Array2D<Real> > >(key));
       case VECTOR_ARRAYND_REAL: return VectorArrayNDReal::toPythonCopy(&p.value<vector<arrayndreal> >(key));
+      case ARRAYND_REAL: {
+        // toPythonRef should be replaced by toOythonCopy
+        // and accept const value so we don't have to copy
+        // here.
+        arrayndreal a = p.value<arrayndreal>(key);
+        return ArrayNDReal::toPythonRef(&a);
+      }
       default:
         ostringstream msg;
         msg << "Pool.value does not support the type: " << edtToString(tp);

@@ -27,16 +27,23 @@ namespace streaming {
 
 const char* TensorToVectorReal::name = "TensorToVectorReal";
 const char* TensorToVectorReal::category = "Standard";
-const char* TensorToVectorReal::description = DOC("This algorithm takes a stream of tensors "
-"and outputs them as a stream of frames");
+const char* TensorToVectorReal::description = DOC("This algorithm streams the frames "
+"of the input tensor along a given namespace ");
+
 
 void TensorToVectorReal::configure() {
-  vector<int> shape = parameter("shape").toVectorInt();
   _timeAxis = parameter("timeAxis").toInt();
 
-  _timeStamps = shape[_timeAxis];
-  _frame.setAcquireSize(_timeStamps);
-  _frame.setReleaseSize(_timeStamps);
+  _batchSize = 0;
+  _timeStamps = 0;
+  _featsSize = 0;
+} 
+
+
+void TensorToVectorReal::reset() {
+  _batchSize = 0;
+  _timeStamps = 0;
+  _featsSize = 0;
 } 
 
 
@@ -50,22 +57,30 @@ AlgorithmStatus TensorToVectorReal::process() {
       return status;
   };
   
-  const vector<multi_array<Real, 3> >& tensor = _tensor.tokens();
+  const_multi_array_ref<Real, 3> tensor = *(multi_array<Real, 3> *)_tensor.getFirstToken();
+
+  if ((_batchSize != tensor.size()) || (_timeStamps != tensor.shape()[_timeAxis])) {
+    EXEC_DEBUG("resizing frame acquire size");
+    _batchSize = tensor.size();
+    _timeStamps = tensor.shape()[_timeAxis];
+    _featsSize = tensor.shape()[2];
+
+    _frame.setAcquireSize(_timeStamps * _batchSize);
+    _frame.setReleaseSize(_timeStamps * _batchSize);
+
+    return process();
+  }
 
   vector<vector<Real> >& frame = _frame.tokens();
-
   // TODO: This block could be cleaned up by taking adventage
   // of the boost view interfaces. Plus it allows to use and 
   // artbitrary time axis instead of a harcored one (without
-  // using the [] operator)  
-  size_t frameIdx;  
-  for (size_t i = 0; i < tensor.size(); i++) {
-    for (size_t j = 0; j < _timeStamps; j++) {
-      frameIdx = i * _timeStamps + j;
-      frame[frameIdx].resize((int)tensor[i][0][j].size());
-      fastcopy(&frame[frameIdx][0],
-               tensor[i][0][j].origin(), 
-               (int)tensor[i][0][j].size());
+  // using the [] operator)
+  size_t i = 0;
+  for (size_t j = 0; j < _batchSize; j++) {
+    for (size_t k = 0; k < _timeStamps; k++, i++) {
+      frame[i].resize(_featsSize);
+      fastcopy(&frame[i][0], tensor[j][k].origin(), _featsSize);
     }
   }
 

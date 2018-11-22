@@ -32,24 +32,24 @@ class TensorToVectorReal : public Algorithm {
   Sink<boost::multi_array<Real, 3> > _tensor;
   Source<std::vector<Real> > _frame;
 
-  int _timeAxis;
+  size_t _timeAxis;
   size_t _timeStamps;
-
-  std::vector<int> _shape;
+  size_t _batchSize;
+  size_t _featsSize;
 
  public:
   TensorToVectorReal(){
     declareInput(_tensor, 1, "tensor", "the input tensor");
-    declareOutput(_frame, 1, "frame", "the frames to be retrieved from the tensor");
+    declareOutput(_frame, 128, "frame", "the frames to be retrieved from the tensor");
+    _frame.setBufferType(BufferUsage::forMultipleFrames);
   }
   
   void declareParameters() {
-    std::vector<int> inputShape = {1, 5000, 1};
-    declareParameter("shape", "the size of input tensor", "", inputShape);
     declareParameter("timeAxis", "frames are retrieves along this axis", "(0,inf)", 1);
   }
 
   void configure();
+  void reset();
   AlgorithmStatus process();
 
   static const char* name;

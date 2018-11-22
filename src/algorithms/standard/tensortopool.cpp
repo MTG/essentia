@@ -27,8 +27,8 @@ namespace streaming {
 
 const char* TensorToPool::name = "TensorToPool";
 const char* TensorToPool::category = "Standard";
-const char* TensorToPool::description = DOC("This algorithm inserts tensors into "
-"a pool under a given namespace. Suppors adding (accumulation) or overwritting");
+const char* TensorToPool::description = DOC("This algorithm inserts a tensor into "
+"a pool under a given namespace. Suppors adding (accumulation) or (setting) overwritting");
 
 void TensorToPool::configure() {
   _mode = parameter("mode").toString();
@@ -42,23 +42,23 @@ AlgorithmStatus TensorToPool::process() {
              << " - out: " << _pool.acquireSize() << ")");
 
   if (status != OK) {
-      return status;
+    return status;
   };
 
-  const vector<multi_array<Real, 3> >& tensors = _tensor.tokens();
-  vector<Pool >& pool = _pool.tokens();
+  const vector<multi_array<Real, 3> >& tensor = _tensor.tokens();
+  vector<Pool>& pool = _pool.tokens();
 
   if (_mode == "add") {
-    for (size_t i = 0; i < tensors.size(); i++) {
-      pool[0].add(_namespace, tensors[i]);
+    for (size_t i = 0; i < tensor.size(); i++) {
+      pool[i].add(_namespace, tensor[i]);
     }
   }
 
   else if (_mode == "overwrite") {
-    for (size_t i = 0; i < tensors.size(); i++) {
-      // TODO: Implement Pool::set for ArrayNDReal
-      pool[0].removeNamespace(_namespace);
-      pool[0].add(_namespace, tensors[i]);
+    for (size_t i = 0; i < tensor.size(); i++) {
+      pool[i].set(_namespace, tensor[i]);
+      const_multi_array_ref<Real, 3> inputData(
+        pool[i].value<multi_array<Real, 3> >(_namespace));
     }
   }
 

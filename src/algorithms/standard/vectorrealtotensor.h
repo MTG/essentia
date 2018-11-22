@@ -31,24 +31,37 @@ class VectorRealToTensor : public Algorithm {
   Sink<std::vector<Real> > _frame;
   Source<boost::multi_array<Real, 3> > _tensor;
 
-  boost::array<size_t, 3> _shape;
+  boost::array<uint, 3> _shape;
   int _timeAxis;
   size_t _timeStamps;
+  size_t _batchHopSize;
+  size_t _patchHopSize;
+  bool _push;
+  bool _accumulate;
+  bool _pushedEverything;
+  std::string _lastPatchMode;
+
+  std::vector<std::vector<std::vector<Real> > > _acc;
 
  public:
   VectorRealToTensor(){
-    declareInput(_frame, 1, "frame", "the input frames");
+    declareInput(_frame, 128,"frame", "the input frames");
     declareOutput(_tensor, 1, "tensor", "the accumulated frame in one single tensor");
+
   }
 
   void declareParameters() {
     // TODO: set a better default shape
-    std::vector<int> outputShape = {1, 5000, 1};
-    declareParameter("shape", "the size of output tensor", "", outputShape);
-    declareParameter("timeAxis", "the where the frames will be stacked", "[0,inf)]", 1);
+    std::vector<int> outputShape = {-1, 128, 128};
+    declareParameter("shape", "the size of output tensor. If batch dimension (the first one) is -1 it will accumulate as many batches as available in the input track", "", outputShape);
+    declareParameter("timeAxis", "the axis where the frames will be stacked", "(0,inf)", 1);
+    declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 0);
+    declareParameter("batchHopSize", "number of patches between the beginnings of adjacent batches. 0 to avoid overlap", "[0,inf)", 0);
+    declareParameter("lastPatchMode", "what to do with the last incomplete patch", "{discard,repeat}", "repeat");
   }
 
   void configure();
+  void reset();
   AlgorithmStatus process();
 
   static const char* name;

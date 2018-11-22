@@ -27,8 +27,8 @@ namespace streaming {
 
 const char* PoolToTensor::name = "PoolToTensor";
 const char* PoolToTensor::category = "Standard";
-const char* PoolToTensor::description = DOC("This algorithm retrieve tensors from "
-"pools under a given namespace");
+const char* PoolToTensor::description = DOC("This algorithm retrieve a tensor from "
+"a pool under a given namespace");
 
 void PoolToTensor::configure() {
   _namespace = parameter("namespace").toString();
@@ -49,7 +49,7 @@ AlgorithmStatus PoolToTensor::process() {
 
   for (size_t i = 0; i < tensor.size(); i++) {
     const_multi_array_ref<Real, 3> data(
-      pool[i].value<vector<multi_array<Real, 3> > >(_namespace)[0]);
+      pool[i].value<multi_array<Real, 3> >(_namespace));
 
     // TODO: is there a more beatiful way to get the multi_array shape?
     // Otherwise a method getArrayShape() could be added to an 
