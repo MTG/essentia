@@ -277,11 +277,4 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - M. A. Casey. Music of the 7Ts: Predicting and Decoding Multivoxel fMRI Responses with Acoustic, Schematic, and Categorical Music Features. Frontiers in psychology, 8, 2017.
 
-
-
-
-
-
-
-
-
+- G. Chambres, P. Hanna, and M. Desainte-Catherine. Automatic Detection of Patient with Respiratory Diseases Using Lung Sound Analysis. In 2018 International Conference on Content-Based Multimedia Indexing (CBMI) (pp. 1-6). IEEE, 2018.
