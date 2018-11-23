@@ -18,9 +18,6 @@
  */
 
 #include "tensorflowpredict.h"
-#include "algorithmfactory.h"
-#include "tnt/tnt2vector.h"
-#include "boost/multi_array.hpp"
 
 using namespace std;
 using namespace essentia;
@@ -31,7 +28,7 @@ const char* TensorflowPredict::name = "TensorflowPredict";
 const char* TensorflowPredict::category = "Machine Learning";
 const char* TensorflowPredict::description = DOC("This algorithm runs a Tensorflow graph and stores the desired tensors in a pool.\n"
 "The Tensorflow graph should be stored in Protocol Buffer [1] (.pb) binary format, and should contain both the architecture and the weights of the model.\n"
-"The parameter `inputs` should contain a list with the names of the input nodes that feed the model. The input Pool should contain the tensors corresponding to each input node stored using EssetiaArrayND. "
+"The parameter `inputs` should contain a list with the names of the input nodes that feed the model. The input Pool should contain the tensors corresponding to each input node stored using Essetia tensors."
 "The pool namespace for each input tensor has to match the input node's name.\n"
 "In the same way, the `outputs` parameter should contain the names of the nodes whose tensors are desired to save. These tensors will be stored inside the output pool under a namespace that matches the name of the node.\n"
 "\n"
@@ -134,10 +131,10 @@ void TensorflowPredict::compute() {
 
   // Parse the input tensors from the pool into Tensorflow tensors.
   for (size_t i = 0; i < _nInputs; i++) {
-    const_multi_array_ref<Real, 3> inputData(
-        poolIn.value<multi_array<Real, 3> >(_inputNames[i]));
+    ConstTensorRef<Real> inputData(
+        poolIn.value<Tensor<Real> >(_inputNames[i]));
 
-    _inputTensors[i] = arrayNDToTensor(inputData);
+    _inputTensors[i] = TensorToTF(inputData);
     _inputNodes[i] = graphOperationByName(_inputNames[i].c_str(), 0);
   }
 
@@ -184,7 +181,7 @@ void TensorflowPredict::compute() {
 
   // Copy the desired tensors into the output pool.
   for (size_t i = 0; i < _nOutputs; i++) {
-    poolOut.set(_outputNames[i], multi_array<Real, 3>(tensorToArrayND(
+    poolOut.set(_outputNames[i], Tensor<Real>(TFToTensor(
                                      _outputTensors[i], _outputNodes[i])));
   }
 
@@ -199,34 +196,34 @@ void TensorflowPredict::compute() {
 }
 
 
-TF_Tensor* TensorflowPredict::arrayNDToTensor(
-    const const_multi_array_ref<Real, 3>& arrayND) {
-  TF_Tensor* tensor = TF_AllocateTensor(
-      TF_FLOAT, (const int64_t*)arrayND.shape(), arrayND.num_dimensions(),
-      arrayND.num_elements() * sizeof(Real));
+TF_Tensor* TensorflowPredict::TensorToTF(
+    const ConstTensorRef<Real>& tensorIn) {
+  TF_Tensor* tensorOut = TF_AllocateTensor(
+      TF_FLOAT, (const int64_t*)tensorIn.shape(), tensorIn.num_dimensions(),
+      tensorIn.num_elements() * sizeof(Real)); 
 
-  if (tensor == nullptr) {
+  if (tensorOut == nullptr) {
     throw EssentiaException("TensorflowPredict: Error generating input tensor.");
   }
 
   // Get a pointer to the data and fill the tensor.
-  void* tensorData = TF_TensorData(tensor);
+  void* tensorData = TF_TensorData(tensorOut);
 
   if (tensorData == nullptr) {
-    TF_DeleteTensor(tensor);
+    TF_DeleteTensor(tensorOut);
     throw EssentiaException("TensorflowPredict: Error generating input tensors data.");
   }
 
   // Why min?
-  memcpy(tensorData, arrayND.origin(),
-         std::min(arrayND.num_elements() * sizeof(Real),
-                  TF_TensorByteSize(tensor)));
+  memcpy(tensorData, tensorIn.origin(),
+         std::min(tensorIn.num_elements() * sizeof(Real),
+                  TF_TensorByteSize(tensorOut)));
 
-  return tensor;
+  return tensorOut;
 }
 
 
-const_multi_array_ref<Real, 3> TensorflowPredict::tensorToArrayND(
+ConstTensorRef<Real> TensorflowPredict::TFToTensor(
     const TF_Tensor* tensor, TF_Output node) {
   const Real* outputData = static_cast<Real*>(TF_TensorData(tensor));
 
@@ -238,7 +235,7 @@ const_multi_array_ref<Real, 3> TensorflowPredict::tensorToArrayND(
   }
 
   // Create a boost array to store the shape of the tensor.
-  boost::array<multi_array<int, 3>::index, 3> shape = {1, 1, 1};
+  boost::array<Tensor<int>::index, 3> shape = {1, 1, 1};
   
   size_t increment;
   (outNDims == 2) ? increment = 2 : increment = 1;
@@ -247,7 +244,7 @@ const_multi_array_ref<Real, 3> TensorflowPredict::tensorToArrayND(
   }
 
   // Return a const reference to the data in the Boost format.
-  return const_multi_array_ref<Real, 3>(outputData, shape);
+  return ConstTensorRef<Real>(outputData, shape);
 }
 
 

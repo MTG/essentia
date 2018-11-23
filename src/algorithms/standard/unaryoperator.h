@@ -95,6 +95,7 @@ class UnaryOperator : public StreamingAlgorithmWrapper {
     declareAlgorithm("UnaryOperator");
     declareInput(_input, TOKEN, "array");
     declareOutput(_output, TOKEN, "array");
+    _output.setBufferType(BufferUsage::forMultipleFrames);
   }
 };
 

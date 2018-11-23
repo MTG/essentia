@@ -29,7 +29,7 @@ namespace streaming {
 class VectorRealToTensor : public Algorithm {
  protected:
   Sink<std::vector<Real> > _frame;
-  Source<boost::multi_array<Real, 3> > _tensor;
+  Source<Tensor<Real> > _tensor;
 
   boost::array<uint, 3> _shape;
   int _timeAxis;

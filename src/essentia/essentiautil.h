@@ -157,8 +157,8 @@ inline bool isValid(const TNT::Array2D<T> & mat) {
   return true;
 }
 
-template <typename T, size_t nDim>
-inline bool isValid(const boost::multi_array<T, nDim>& mat) {
+template <typename T>
+inline bool isValid(const Tensor<T>& mat) {
   for (const T* i = mat.origin(); i < (mat.origin() + mat.num_elements()); ++i){
     if (!isValid(*i)) return false;
   }

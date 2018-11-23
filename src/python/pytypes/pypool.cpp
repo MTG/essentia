@@ -23,7 +23,6 @@
 using namespace std;
 using namespace essentia;
 
-typedef boost::multi_array<essentia::Real, 3> arrayndreal;
 
 PyMethodDef PyPool_methods[] = {
   { "__add__",        (PyCFunction)PyPool::add, METH_VARARGS,
@@ -151,9 +150,9 @@ PyObject* PyPool::keyType(PyPool* self, PyObject* obj) {
     return PyString_FromString( edtToString(VECTOR_MATRIX_REAL).c_str() );
   }
 
-  // search arraynd sub-pool
-  if (p.getArrayNDRealPool().find(key) != p.getArrayNDRealPool().end()) {
-    return PyString_FromString( edtToString(VECTOR_ARRAYND_REAL).c_str() );
+  // search tensor sub-pool
+  if (p.getTensorRealPool().find(key) != p.getTensorRealPool().end()) {
+    return PyString_FromString( edtToString(VECTOR_TENSOR_REAL).c_str() );
   }
 
   // search single real pool
@@ -171,9 +170,9 @@ PyObject* PyPool::keyType(PyPool* self, PyObject* obj) {
     return PyString_FromString( edtToString(STRING).c_str() );
   }
 
-  // search single arraynd pool
-  if (p.getSingleArrayNDRealPool().find(key) != p.getSingleArrayNDRealPool().end()) {
-    return PyString_FromString( edtToString(ARRAYND_REAL).c_str() );
+  // search single tensor pool
+  if (p.getSingleTensorRealPool().find(key) != p.getSingleTensorRealPool().end()) {
+    return PyString_FromString( edtToString(TENSOR_REAL).c_str() );
   }
 
   // couldn't find the key
@@ -243,8 +242,7 @@ PyObject* PyPool::add(PyPool* self, PyObject* pyArgs) {
       case STEREOSAMPLE:  ADD_COPY(PyStereoSample, StereoSample);
       case VECTOR_STRING: ADD_COPY(VectorString, vector<string>);
       case MATRIX_REAL:   ADD_COPY(MatrixReal, TNT::Array2D<Real>);
-
-      case ARRAYND_REAL:  ADD_REF(ArrayNDReal, arrayndreal);
+      case TENSOR_REAL:   ADD_COPY(TensorReal, Tensor<Real>);
       case VECTOR_REAL:   ADD_REF(VectorReal, RogueVector<Real>);
 
       default:
@@ -311,7 +309,7 @@ PyObject* PyPool::set(PyPool* self, PyObject* pyArgs) {
       case REAL: SET_COPY(PyReal, Real);
       case STRING: SET_COPY(String, string);
       case VECTOR_REAL: SET_REF(VectorReal, RogueVector<Real>);
-      case ARRAYND_REAL: SET_REF(ArrayNDReal, arrayndreal);
+      case TENSOR_REAL: SET_COPY(TensorReal, Tensor<Real>);
       default:
         ostringstream msg;
         msg << "Pool.set does not support the type: " << edtToString(tp);
@@ -410,7 +408,7 @@ PyObject* PyPool::merge(PyPool* self, PyObject* pyArgs) {
       case VECTOR_VECTOR_REAL: MERGE_COPY(VectorVectorReal, vector<vector<Real> >);
       case VECTOR_VECTOR_STRING: MERGE_COPY(VectorVectorString, vector<vector<string> >);
       case VECTOR_MATRIX_REAL:   MERGE_COPY(VectorMatrixReal, vector<TNT::Array2D<Real> >);
-      case VECTOR_ARRAYND_REAL:   MERGE_COPY(VectorArrayNDReal,  vector<arrayndreal>);
+      case VECTOR_TENSOR_REAL:   MERGE_COPY(VectorTensorReal,  vector<Tensor<Real> >);
       //case POOL: p.merge(args[1].cppPool, mergeType)
 
 
@@ -531,13 +529,13 @@ PyObject* PyPool::value(PyPool* self, PyObject* pyArgs) {
       case VECTOR_VECTOR_REAL: return VectorVectorReal::toPythonCopy(&p.value<vector<vector<Real> > >(key));
       case VECTOR_VECTOR_STRING: return VectorVectorString::toPythonCopy(&p.value<vector<vector<string> > >(key));
       case VECTOR_MATRIX_REAL: return VectorMatrixReal::toPythonCopy(&p.value<vector<TNT::Array2D<Real> > >(key));
-      case VECTOR_ARRAYND_REAL: return VectorArrayNDReal::toPythonCopy(&p.value<vector<arrayndreal> >(key));
-      case ARRAYND_REAL: {
+      case VECTOR_TENSOR_REAL: return VectorTensorReal::toPythonCopy(&p.value<vector<Tensor<Real> > >(key));
+      case TENSOR_REAL: {
         // toPythonRef should be replaced by toOythonCopy
         // and accept const value so we don't have to copy
         // here.
-        arrayndreal a = p.value<arrayndreal>(key);
-        return ArrayNDReal::toPythonRef(&a);
+        Tensor<Real> a = p.value<Tensor<Real> >(key);
+        return TensorReal::toPythonCopy(&a);
       }
       default:
         ostringstream msg;

@@ -29,7 +29,7 @@ namespace streaming {
 class PoolToTensor : public Algorithm {
  protected:
   Sink<Pool> _pool;
-  Source<boost::multi_array<Real, 3> > _tensor;
+  Source<Tensor<Real> > _tensor;
 
   std::string _namespace;
 

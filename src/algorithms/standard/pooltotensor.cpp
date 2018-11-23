@@ -45,16 +45,16 @@ AlgorithmStatus PoolToTensor::process() {
   };
 
   const vector<Pool>& pool = _pool.tokens();
-  vector<multi_array<Real, 3> >& tensor = _tensor.tokens();
+  vector<Tensor<Real> >& tensor = _tensor.tokens();
 
   for (size_t i = 0; i < tensor.size(); i++) {
-    const_multi_array_ref<Real, 3> data(
-      pool[i].value<multi_array<Real, 3> >(_namespace));
+    ConstTensorRef<Real> data(
+      pool[i].value<Tensor<Real> >(_namespace));
 
-    // TODO: is there a more beatiful way to get the multi_array shape?
+    // TODO: is there a more beatiful way to get the tensor shape?
     // Otherwise a method getArrayShape() could be added to an 
     // Essentia child class.  
-    auto& shape = reinterpret_cast<boost::array<size_t, const_multi_array_ref<Real, 3>::dimensionality> const&>(*data.shape());
+    auto& shape = reinterpret_cast<boost::array<size_t, ConstTensorRef<Real>::dimensionality> const&>(*data.shape());
     
     tensor[i].resize(shape);
     tensor[i].reshape(shape);

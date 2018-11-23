@@ -24,7 +24,7 @@
 #include "threading.h"
 #include "utils/tnt/tnt.h"
 #include "essentiautil.h"
-#include <boost/multi_array.hpp>
+
 
 namespace essentia {
 
@@ -97,13 +97,12 @@ typedef std::string DescriptorName;
 class Pool {
 
  protected:
-  typedef boost::multi_array<Real, 3> arrayndreal;
   // maps for single values:
   std::map<std::string, Real> _poolSingleReal;
   std::map<std::string, std::string> _poolSingleString;
   std::map<std::string, std::vector<Real> > _poolSingleVectorReal;  
   std::map<std::string, std::vector<std::string> > _poolSingleVectorString;
-  std::map<std::string, arrayndreal> _poolSingleArrayNDReal;
+  std::map<std::string, Tensor<Real> > _poolSingleTensorReal;
 
   // maps for vectors of values:
   PoolOf(Real) _poolReal;
@@ -111,7 +110,7 @@ class Pool {
   PoolOf(std::string) _poolString;
   PoolOf(std::vector<std::string>) _poolVectorString;
   PoolOf(TNT::Array2D<Real>) _poolArray2DReal;
-  PoolOf(arrayndreal) _poolArrayNDReal;
+  PoolOf(Tensor<Real>) _poolTensorReal;
   PoolOf(StereoSample) _poolStereoSample;
 
   // WARNING: this function assumes that all sub-pools are locked
@@ -129,7 +128,7 @@ class Pool {
   mutable Mutex mutexReal, mutexVectorReal, mutexString, mutexVectorString,
                 mutexArray2DReal, mutexStereoSample,
                 mutexSingleReal, mutexSingleString, mutexSingleVectorReal,
-                mutexSingleVectorString, mutexArrayNDReal, mutexSingleArrayNDReal;
+                mutexSingleVectorString, mutexTensorReal, mutexSingleTensorReal;
 
   /**
    * Adds @e value to the Pool under @e name
@@ -167,8 +166,8 @@ class Pool {
   /** @copydoc add(const std::string&,const Real&,bool) */
   void add(const std::string& name, const TNT::Array2D<Real>& value, bool validityCheck = false);
 
-  /** @copydoc add(const std::string&,const Real&,bool) */
-  void add(const std::string& name, const boost::multi_array<Real, 3>& value, bool validityCheck = false);
+  /** @copydoc add(const std::string&,const Tensor<Real>& value,bool) */
+  void add(const std::string& name, const Tensor<Real>& value, bool validityCheck = false);
 
   /** @copydoc add(const std::string&,const Real&,bool) */
   void add(const std::string& name, const StereoSample& value, bool validityCheck = false);
@@ -212,8 +211,8 @@ class Pool {
   /** @copydoc set(const std::string&,const Real&i, bool) */
   void set(const std::string& name, const std::vector<std::string>& value, bool validityCheck=false);
 
-  /** @copydoc set(const std::string&,const boost::multi_array<Real, 3>, bool) */
-  void set(const std::string& name, const boost::multi_array<Real, 3>& value, bool validityCheck=false);
+  /** @copydoc set(const std::string&, const Tensor<Real>& value, bool) */
+  void set(const std::string& name, const Tensor<Real>& value, bool validityCheck=false);
 
   /**
    * \brief Merges the current pool with the given one @e p.
@@ -257,7 +256,7 @@ class Pool {
   void merge(const std::string& name, const std::vector<TNT::Array2D<Real> >& value, const std::string& type="");
 
   /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
-  void merge(const std::string& name, const std::vector<arrayndreal>& value, const std::string& type="");
+  void merge(const std::string& name, const std::vector<Tensor<Real> >& value, const std::string& type="");
 
   /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
   void merge(const std::string& name, const std::vector<StereoSample>& value, const std::string& type="");
@@ -271,7 +270,7 @@ class Pool {
   /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
   void mergeSingle(const std::string& name, const std::vector<std::string>& value, const std::string& type="");
   /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
-  void mergeSingle(const std::string& name, const arrayndreal& value, const std::string& type="");
+  void mergeSingle(const std::string& name, const Tensor<Real> & value, const std::string& type="");
   /**
    * Removes the descriptor name @e name from the Pool along with the data it
    * points to. This function does nothing if @e name does not exist in the
@@ -347,9 +346,9 @@ class Pool {
 
   /**
    * @returns a std::map where the key is a descriptor name and the values are
-   *          of type ArrayND<Real>
+   *          of type Tensor<Real>
    */
-  const PoolOf(arrayndreal)& getArrayNDRealPool() const { return _poolArrayNDReal; }
+  const PoolOf(Tensor<Real>)& getTensorRealPool() const { return _poolTensorReal; }
 
   /**
    * @returns a std::map where the key is a descriptor name and the values are
@@ -385,7 +384,7 @@ class Pool {
    * @returns a std::map where the key is a descriptor name and the value is
    *          of type vector<string>
    */
-  const std::map<std::string, arrayndreal>& getSingleArrayNDRealPool() const { return _poolSingleArrayNDReal; }
+  const std::map<std::string, Tensor<Real> >& getSingleTensorRealPool() const { return _poolSingleTensorReal; }
 
   /**
    * Checks that no descriptor name is in two different inner pool types at
@@ -430,9 +429,8 @@ SPECIALIZE_VALUE(std::string, SingleString);
 SPECIALIZE_VALUE(std::vector<std::vector<Real> >, VectorReal);
 SPECIALIZE_VALUE(std::vector<std::vector<std::string> >, VectorString);
 SPECIALIZE_VALUE(std::vector<TNT::Array2D<Real> >, Array2DReal);
-typedef boost::multi_array<Real, 3> arrayndreal;
-SPECIALIZE_VALUE(std::vector<arrayndreal>, ArrayNDReal);
-SPECIALIZE_VALUE(arrayndreal, SingleArrayNDReal);
+SPECIALIZE_VALUE(std::vector<Tensor<Real> >, TensorReal);
+SPECIALIZE_VALUE(Tensor<Real>, SingleTensorReal);
 SPECIALIZE_VALUE(std::vector<StereoSample>, StereoSample);
 
 // This value function is not under the macro above because it needs to check
@@ -507,9 +505,8 @@ SPECIALIZE_CONTAINS(std::string, SingleString);
 SPECIALIZE_CONTAINS(std::vector<std::vector<Real> >, VectorReal);
 SPECIALIZE_CONTAINS(std::vector<std::vector<std::string> >, VectorString);
 SPECIALIZE_CONTAINS(std::vector<TNT::Array2D<Real> >, Array2DReal);
-typedef boost::multi_array<Real, 3> arrayndreal;
-SPECIALIZE_CONTAINS(std::vector<arrayndreal>, ArrayNDReal);
-SPECIALIZE_CONTAINS(arrayndreal, SingleArrayNDReal);
+SPECIALIZE_CONTAINS(std::vector<Tensor<Real> >, TensorReal);
+SPECIALIZE_CONTAINS(Tensor<Real> , SingleTensorReal);
 SPECIALIZE_CONTAINS(std::vector<StereoSample>, StereoSample);
 
 // This value function is not under the macro above because it needs to check
@@ -569,13 +566,13 @@ MutexLocker lockVectorReal(mutexVectorReal);                \
 MutexLocker lockString(mutexString);                        \
 MutexLocker lockVectorString(mutexVectorString);            \
 MutexLocker lockArray2DReal(mutexArray2DReal);              \
-MutexLocker lockArrayNDReal(mutexArrayNDReal);              \
+MutexLocker lockTensorReal(mutexTensorReal);              \
 MutexLocker lockStereoSample(mutexStereoSample);            \
 MutexLocker lockSingleReal(mutexSingleReal);                \
 MutexLocker lockSingleString(mutexSingleString);            \
 MutexLocker lockSingleVectorReal(mutexSingleVectorReal);    \
 MutexLocker lockSingleVectorString(mutexSingleVectorString);\
-MutexLocker lockSingleArrayNDReal(mutexSingleArrayNDReal);
+MutexLocker lockSingleTensorReal(mutexSingleTensorReal);
 
 
 

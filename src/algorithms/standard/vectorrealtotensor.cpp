@@ -177,7 +177,7 @@ AlgorithmStatus VectorRealToTensor::process() {
       _pushedEverything = true;
     }
 
-    multi_array<Real, 3>* tensor = (multi_array<Real, 3> *)_tensor.getFirstToken();
+    Tensor<Real>* tensor = (Tensor<Real> *)_tensor.getFirstToken();
     tensor->resize(shape);
     tensor->reshape(shape);
 

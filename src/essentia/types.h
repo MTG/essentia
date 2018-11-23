@@ -372,10 +372,54 @@ typedef Tuple2<Real> StereoSample;
 
 
 /**
- * Aliad for boost::multi_array.
+ * Alias for boost::multi_array.
  */
-template<typename T, int NumDims>
-using ArrayND = boost::multi_array<T, NumDims>;
+
+// template<typename T>
+// class Tensor : public boost::multi_array<T, 3> {
+//  public:
+//   typedef Tensor<T>                   self_type;
+//   typedef boost::multi_array<T, 3>    super;
+//   typedef typename super::size_type   size_type;
+
+//   /* Copy constructor */
+//   Tensor(const self_type &other) throw() : 
+//     super(NULL, std::vector<typename super::index>(3, 0)) {
+//       super::base_ = (other);
+//     }
+
+//   /* Copy constructor */
+//   Tensor(const super &other) throw() : 
+//     super(NULL, std::vector<typename super::index>(3, 0)) {
+//       super::base_ = super(other);
+//     }
+
+//   /* Copy constructor */
+//   Tensor(const boost::multi_array_ref<T, 3> &other) throw() : 
+//     super(NULL, std::vector<typename super::index>(3, 0)) {
+//       super::base_ = super(other);
+//     }
+
+// };
+
+
+/**
+ * Alias for boost::multi_array.
+ */
+template<typename T>
+using Tensor = boost::multi_array<T, 3>;
+
+/**
+ * Alias for boost::multi_array_ref.
+ */
+template<typename T>
+using TensorRef = boost::multi_array_ref<T, 3>;
+
+/**
+ * Alias for boost::const_multi_array_ref.
+ */
+template<typename T>
+using ConstTensorRef = boost::const_multi_array_ref<T, 3>;
 
 
 namespace streaming {

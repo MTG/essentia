@@ -90,8 +90,8 @@ class TensorflowPredict : public Algorithm {
   void configure();
   void compute();
   void reset();
-  TF_Tensor* arrayNDToTensor(const boost::const_multi_array_ref<Real, 3>& arrayND);
-  boost::const_multi_array_ref<Real, 3> tensorToArrayND(const TF_Tensor* tensor, TF_Output node);
+  TF_Tensor* TensorToTF(const ConstTensorRef<Real>& tensorIn);
+  ConstTensorRef<Real> TFToTensor(const TF_Tensor* tensor, TF_Output node);
   TF_Output graphOperationByName(const char* nodeName, int index=0);
 
   static const char* name;

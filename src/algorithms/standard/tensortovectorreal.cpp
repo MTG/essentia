@@ -57,7 +57,7 @@ AlgorithmStatus TensorToVectorReal::process() {
       return status;
   };
   
-  const_multi_array_ref<Real, 3> tensor = *(multi_array<Real, 3> *)_tensor.getFirstToken();
+  ConstTensorRef<Real> tensor = *(Tensor<Real> *)_tensor.getFirstToken();
 
   if ((_batchSize != tensor.size()) || (_timeStamps != tensor.shape()[_timeAxis])) {
     EXEC_DEBUG("resizing frame acquire size");

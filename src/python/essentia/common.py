@@ -58,8 +58,8 @@ class Edt:  # Essentia Data Type
     MATRIX_REAL = 'MATRIX_REAL'
     MATRIX_COMPLEX = 'MATRIX_COMPLEX'
     VECTOR_MATRIX_REAL = 'VECTOR_MATRIX_REAL'
-    VECTOR_ARRAYND_REAL = 'VECTOR_ARRAYND_REAL'
-    ARRAYND_REAL = 'ARRAYND_REAL'
+    VECTOR_TENSOR_REAL = 'VECTOR_TENSOR_REAL'
+    TENSOR_REAL = 'TENSOR_REAL'
     POOL = 'POOL'
 
     # intermediate types
@@ -144,8 +144,8 @@ def determineEdt(obj):
         if firstElmtType == Edt.MATRIX_REAL:
             return Edt(Edt.VECTOR_MATRIX_REAL)
 
-        if firstElmtType == Edt.ARRAYND_REAL:
-            return Edt(Edt.VECTOR_ARRAYND_REAL)
+        if firstElmtType == Edt.TENSOR_REAL:
+            return Edt(Edt.VECTOR_TENSOR_REAL)
 
         if firstElmtType == Edt.LIST_REAL:
             return Edt(Edt.LIST_LIST_REAL)
@@ -162,12 +162,12 @@ def determineEdt(obj):
         if isinstance(obj[0], numpy.ndarray) and obj[0].ndim == 1:
             return Edt(Edt.LIST_ARRAY)
 
-    if isinstance(obj, numpy.ndarray) and obj.ndim > 2: # temporal solusion. ArrayND should be generalized to <= 2 case too
+    if isinstance(obj, numpy.ndarray) and obj.ndim > 2: # temporal solusion. Tensor should be generalized to <= 2 case too
         if obj.dtype == numpy.dtype('single'):
-            return Edt(Edt.ARRAYND_REAL)
+            return Edt(Edt.TENSOR_REAL)
 
         if obj.dtype == numpy.dtype('complex64'):
-            return Edt(Edt.ARRAYND_COMPLEX)
+            return Edt(Edt.TENSOR_COMPLEX)
 
         raise TypeError('essentia can currently only accept two-dimensional numpy arrays of dtype '\
                         '"single"')
@@ -375,7 +375,7 @@ class Pool:
             if givenType in (Edt.REAL, Edt.STRING, Edt.STEREOSAMPLE,
                              Edt.VECTOR_REAL, Edt.VECTOR_STRING,
                              Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL,
-                             Edt.ARRAYND_REAL):
+                             Edt.TENSOR_REAL):
                 goalType = givenType
 
             # some exceptions
@@ -410,7 +410,7 @@ class Pool:
 
         # if we haven't seen this type before, we will have to guess its type
         else:
-            if givenType in (Edt.REAL, Edt.STRING, Edt.VECTOR_REAL, Edt.ARRAYND_REAL):
+            if givenType in (Edt.REAL, Edt.STRING, Edt.VECTOR_REAL, Edt.TENSOR_REAL):
                 goalType = givenType
 
             # some exceptions
@@ -466,7 +466,7 @@ class Pool:
                              Edt.VECTOR_REAL, Edt.VECTOR_STRING,
                              Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL,
                              Edt.VECTOR_VECTOR_REAL, Edt.VECTOR_MATRIX_REAL,
-                             Edt.VECTOR_ARRAYND_REAL, Edt.ARRAYND_REAL):
+                             Edt.VECTOR_TENSOR_REAL, Edt.TENSOR_REAL):
                 goalType = givenType
 
             # some exceptions

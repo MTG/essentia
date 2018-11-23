@@ -126,7 +126,7 @@ class PoolStorage : public PoolStorageBase {
   }
 
   template <typename T>
-  void addToPool(const boost::multi_array<T, 3>& value) {
+  void addToPool(const Tensor<T>& value) {
     _pool->add(_descriptorName, value);
   }
 

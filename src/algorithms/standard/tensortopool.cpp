@@ -45,7 +45,7 @@ AlgorithmStatus TensorToPool::process() {
     return status;
   };
 
-  const vector<multi_array<Real, 3> >& tensor = _tensor.tokens();
+  const vector<Tensor<Real> >& tensor = _tensor.tokens();
   vector<Pool>& pool = _pool.tokens();
 
   if (_mode == "add") {
@@ -57,8 +57,8 @@ AlgorithmStatus TensorToPool::process() {
   else if (_mode == "overwrite") {
     for (size_t i = 0; i < tensor.size(); i++) {
       pool[i].set(_namespace, tensor[i]);
-      const_multi_array_ref<Real, 3> inputData(
-        pool[i].value<multi_array<Real, 3> >(_namespace));
+      ConstTensorRef<Real> inputData(
+        pool[i].value<Tensor<Real> >(_namespace));
     }
   }
 

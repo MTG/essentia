@@ -23,7 +23,6 @@
 #include <Python.h>
 #include "pool.h"
 #include "typewrapper.h"
-#include <boost/multi_array.hpp>
 
 extern PyTypeObject PyPoolType;
 
