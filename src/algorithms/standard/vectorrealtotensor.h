@@ -31,7 +31,7 @@ class VectorRealToTensor : public Algorithm {
   Sink<std::vector<Real> > _frame;
   Source<Tensor<Real> > _tensor;
 
-  boost::array<uint, 3> _shape;
+  boost::array<uint, 4> _shape;
   int _timeAxis;
   size_t _timeStamps;
   size_t _batchHopSize;
@@ -52,9 +52,9 @@ class VectorRealToTensor : public Algorithm {
 
   void declareParameters() {
     // TODO: set a better default shape
-    std::vector<int> outputShape = {-1, 128, 128};
+    std::vector<int> outputShape = {-1, 1, 128, 128};
     declareParameter("shape", "the size of output tensor. If batch dimension (the first one) is -1 it will accumulate as many batches as available in the input track", "", outputShape);
-    declareParameter("timeAxis", "the axis where the frames will be stacked", "(0,inf)", 1);
+    declareParameter("timeAxis", "the axis where the frames will be stacked", "(0,inf)", 2);
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 0);
     declareParameter("batchHopSize", "number of patches between the beginnings of adjacent batches. 0 to avoid overlap", "[0,inf)", 0);
     declareParameter("lastPatchMode", "what to do with the last incomplete patch", "{discard,repeat}", "repeat");

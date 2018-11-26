@@ -158,7 +158,7 @@ AlgorithmStatus VectorRealToTensor::process() {
   // or if we have reached the end of the stream in
   // accumulate mode.
   if (_push) {
-    boost::array<uint, 3> shape = _shape;
+    boost::array<uint, 4> shape = _shape;
     size_t batchHopSize = _batchHopSize;
 
     // If we have been accumulating we have to get the
@@ -181,10 +181,10 @@ AlgorithmStatus VectorRealToTensor::process() {
     tensor->resize(shape);
     tensor->reshape(shape);
 
-    // TODO: clean this taking adventage of subarray references
+    // TODO: Add flag to swap frequency axis from 4 to 2.
     for (size_t i = 0; i < shape[0]; i++) {      // Batch axis
       for (size_t j = 0; j < shape[1]; j++) {    // Time axis
-        fastcopy(&(*tensor)[i][j][0], &_acc[i][j][0], _acc[i][j].size());
+        fastcopy(&(*tensor)[i][0][j][0], &_acc[i][j][0], _acc[i][j].size());
       }
     }
 

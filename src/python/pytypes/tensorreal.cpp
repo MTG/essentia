@@ -42,12 +42,14 @@ PyObject* TensorReal::toPythonCopy(const essentia::Tensor<essentia::Real>* a) {
   // else          result = PyArray_SimpleNew(1, shape, PyArray_FLOAT);
 
   result = (PyArrayObject*)PyArray_SimpleNew(dims, shape, PyArray_FLOAT);
-  assert(result->strides[2] == sizeof(Real));
+  assert(result->strides[3] == sizeof(Real));
   for (int i=0; i<(int)shape[0]; i++) {
     for (int j=0; j<(int)shape[1]; j++) {
-      Real* dest = (Real*)(result->data + i*result->strides[0] + j*result->strides[1]);
-      const Real* src = &((*a)[i][j][0]);
-      fastcopy(dest, src, shape[2]);
+      for (int k=0; k<(int)shape[2]; k++) {
+        Real* dest = (Real*)(result->data + i*result->strides[0] + j*result->strides[1] + k*result->strides[2]);
+        const Real* src = &((*a)[i][j][k][0]);
+        fastcopy(dest, src, shape[3]);
+      }
     }
   }
 
@@ -69,5 +71,5 @@ void* TensorReal::fromPythonCopy(PyObject* obj) {
     throw EssentiaException("TensorReal::fromPythonCopy: this NumPy array doesn't contain Reals (maybe you forgot dtype='f4')");
   }
 
-  return new Tensor<Real>((TensorRef<Real>)NumpyBoost<Real, 3>(array));
+  return new Tensor<Real>((TensorRef<Real>)NumpyBoost<Real, 4>(array));
 }

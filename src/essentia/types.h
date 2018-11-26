@@ -407,19 +407,19 @@ typedef Tuple2<Real> StereoSample;
  * Alias for boost::multi_array.
  */
 template<typename T>
-using Tensor = boost::multi_array<T, 3>;
+using Tensor = boost::multi_array<T, 4>;
 
 /**
  * Alias for boost::multi_array_ref.
  */
 template<typename T>
-using TensorRef = boost::multi_array_ref<T, 3>;
+using TensorRef = boost::multi_array_ref<T, 4>;
 
 /**
  * Alias for boost::const_multi_array_ref.
  */
 template<typename T>
-using ConstTensorRef = boost::const_multi_array_ref<T, 3>;
+using ConstTensorRef = boost::const_multi_array_ref<T, 4>;
 
 
 namespace streaming {

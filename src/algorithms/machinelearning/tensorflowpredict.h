@@ -57,6 +57,8 @@ class TensorflowPredict : public Algorithm {
   bool _isTrainingSet;
   std::string _isTrainingName;
 
+  bool _squeeze;
+
  public:
   TensorflowPredict() {
     declareInput(_poolIn, "poolIn", "the pool where to get the feature tensors");
@@ -85,6 +87,7 @@ class TensorflowPredict : public Algorithm {
     declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool", "", outputNamesVector);
     declareParameter("isTraining", "Whether to return the output in training mode (normalized with statistics of the current batch) or in inference mode (normalized with moving statistics)", "{true,false}", false);
     declareParameter("isTrainingName", "The name if the input reciving isTraining. If empty, it wont be feed ro the network", "", "");
+    declareParameter("squeeze", "Remove singleton dimensions of the inputs tensors. Does not apply to the batch dimension.", "{true,false}", true);
   }
 
   void configure();

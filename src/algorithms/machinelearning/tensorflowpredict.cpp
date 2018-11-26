@@ -51,6 +51,7 @@ void TensorflowPredict::configure() {
   _outputNames = parameter("outputs").toVectorString();
   _isTraining = parameter("isTraining").toBool();
   _isTrainingName = parameter("isTrainingName").toString();
+  _squeeze = parameter("squeeze").toBool();
 
   (_isTrainingName == "") ? _isTrainingSet = false : _isTrainingSet = true;
 
@@ -198,8 +199,27 @@ void TensorflowPredict::compute() {
 
 TF_Tensor* TensorflowPredict::TensorToTF(
     const ConstTensorRef<Real>& tensorIn) {
+  int dims = 1;
+  vector<int64_t> shape;
+
+  // Batch dimensions is the only one allowed to be singleton
+  shape.push_back(tensorIn.shape()[0]);
+
+  if (_squeeze) {
+    for(size_t i = 1; i < tensorIn.num_dimensions(); i++) {  
+      if (tensorIn.shape()[i] > 1) {
+        shape.push_back(tensorIn.shape()[i]);
+        dims++;
+      }   
+    }
+  } else {
+    dims = tensorIn.num_dimensions();
+    for(size_t i = 1; i < dims; i++) {  
+        shape.push_back(tensorIn.shape()[i]);
+      }
+  }
   TF_Tensor* tensorOut = TF_AllocateTensor(
-      TF_FLOAT, (const int64_t*)tensorIn.shape(), tensorIn.num_dimensions(),
+      TF_FLOAT,  &shape[0], dims,
       tensorIn.num_elements() * sizeof(Real)); 
 
   if (tensorOut == nullptr) {
@@ -235,7 +255,7 @@ ConstTensorRef<Real> TensorflowPredict::TFToTensor(
   }
 
   // Create a boost array to store the shape of the tensor.
-  boost::array<Tensor<int>::index, 3> shape = {1, 1, 1};
+  boost::array<Tensor<int>::index, 4> shape = {1, 1, 1, 1};
   
   size_t increment;
   (outNDims == 2) ? increment = 2 : increment = 1;

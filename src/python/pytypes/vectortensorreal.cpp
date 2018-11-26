@@ -48,9 +48,11 @@ PyObject* VectorTensorReal::toPythonCopy(const vector<Tensor<Real> >* aVec) {
     if (shape[1] != 0) {
       for (int j=0; j<(int)shape[0]; j++) {
         for (int k=0; k<(int)shape[1]; k++) {
-          Real* dest = (Real*)(mat->data + j*mat->strides[0] + k*mat->strides[1]);
-          const Real* src = &((*a)[j][k][0]);
-          fastcopy(dest, src, shape[2]);
+          for (int l=0; k<(int)shape[2]; l++) {
+            Real* dest = (Real*)(mat->data + j*mat->strides[0] + k*mat->strides[1] + l*mat->strides[2]);
+            const Real* src = &((*a)[j][k][l][0]);
+            fastcopy(dest, src, shape[3]);
+          }
         }
       }
     }

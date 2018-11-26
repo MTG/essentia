@@ -33,8 +33,9 @@ class TensorToVectorReal : public Algorithm {
   Source<std::vector<Real> > _frame;
 
   size_t _timeAxis;
-  size_t _timeStamps;
   size_t _batchSize;
+  size_t _channels;
+  size_t _timeStamps;
   size_t _featsSize;
 
  public:

@@ -373,6 +373,10 @@ void Pool::set(const string& name, const Tensor<Real>& value, bool validityCheck
       throw EssentiaException("Pool::set array contains invalid numbers (NaN or inf)");
     }
     if (_poolSingleTensorReal.find(name) != _poolSingleTensorReal.end()) {
+      auto& input_shape = reinterpret_cast<boost::array<size_t, ConstTensorRef<Real>::dimensionality> const&>(*value.shape());
+      _poolSingleTensorReal[name].resize(input_shape);
+      _poolSingleTensorReal[name].reshape(input_shape);
+
       _poolSingleTensorReal[name] = Tensor<Real>(value);
       return;
     }

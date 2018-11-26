@@ -35,6 +35,7 @@ void TensorToVectorReal::configure() {
   _timeAxis = parameter("timeAxis").toInt();
 
   _batchSize = 0;
+  _channels = 0;
   _timeStamps = 0;
   _featsSize = 0;
 } 
@@ -42,6 +43,7 @@ void TensorToVectorReal::configure() {
 
 void TensorToVectorReal::reset() {
   _batchSize = 0;
+  _channels = 0;
   _timeStamps = 0;
   _featsSize = 0;
 } 
@@ -62,11 +64,12 @@ AlgorithmStatus TensorToVectorReal::process() {
   if ((_batchSize != tensor.size()) || (_timeStamps != tensor.shape()[_timeAxis])) {
     EXEC_DEBUG("resizing frame acquire size");
     _batchSize = tensor.size();
+    _channels = tensor.shape()[1];
     _timeStamps = tensor.shape()[_timeAxis];
-    _featsSize = tensor.shape()[2];
+    _featsSize = tensor.shape()[3];
 
-    _frame.setAcquireSize(_timeStamps * _batchSize);
-    _frame.setReleaseSize(_timeStamps * _batchSize);
+    _frame.setAcquireSize(_timeStamps * _channels * _batchSize);
+    _frame.setReleaseSize(_timeStamps * _channels *_batchSize);
 
     return process();
   }
@@ -78,9 +81,11 @@ AlgorithmStatus TensorToVectorReal::process() {
   // using the [] operator)
   size_t i = 0;
   for (size_t j = 0; j < _batchSize; j++) {
-    for (size_t k = 0; k < _timeStamps; k++, i++) {
-      frame[i].resize(_featsSize);
-      fastcopy(&frame[i][0], tensor[j][k].origin(), _featsSize);
+    for (size_t k = 0; k < _channels; k++) {
+      for (size_t l = 0; l < _timeStamps; l++, i++) {
+        frame[i].resize(_featsSize);
+        fastcopy(&frame[i][0], tensor[j][k][l].origin(), _featsSize);
+      }
     }
   }
 
