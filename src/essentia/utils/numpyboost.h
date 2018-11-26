@@ -73,14 +73,29 @@ private:
        about storage order is recorded in the strides. */
     super::storage_ = boost::c_storage_order();
 
-    /* Copy the dimensions from the Numpy array to the boost::array. */
-    boost::detail::multi_array::copy_n(PyArray_DIMS(a), NDims, super::extent_list_.begin());
+    /* Copy the dimensions and strides from the Numpy array to the 
+       boost::array. Numpy strides are in bytes. 
+       This method accepts Numpy arrays of smaller dimension than the 
+       final 4D tensor, {Batch, Channels, Timestamps, Feats}.
+       The considered dimenension priority is, 
+          - NDims = 2 -> Batch + Feats 
+          - NDims = 3 -> Batch + Timestamps + Feats
+          - NDims = 4 -> Batch + Channels + Timestamps + Feats */
 
-    /* Copy the strides from the Numpy array to the boost::array.
-       Numpy strides are in bytes.  boost::array strides are in
-       elements, so we need to divide. */
-    for (size_t i = 0; i < NDims; ++i) {
-      super::stride_list_[i] = PyArray_STRIDE(a, i) / sizeof(T);
+    super::extent_list_[0] = PyArray_DIMS(a)[0];
+    super::stride_list_[0] = PyArray_STRIDE(a, 0) / sizeof(T);
+
+    /* Set singletion elements */
+    for (size_t i = 1; i < NDims - PyArray_NDIM(a) + 1; i++) {
+      super::extent_list_[i] = 1;
+      super::stride_list_[i] = PyArray_STRIDE(a, 0) / sizeof(T);
+    }
+
+    /* Set elements from python */
+    size_t idx = 1;
+    for (size_t i = NDims - PyArray_NDIM(a) + 1; i < NDims; i++, idx++) {
+      super::extent_list_[i] = PyArray_DIMS(a)[idx];
+      super::stride_list_[i] = PyArray_STRIDE(a, idx) / sizeof(T);
     }
 
     /* index_base_list_ stores the bases of the indices in each
