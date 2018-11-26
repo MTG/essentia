@@ -134,7 +134,6 @@ void TensorflowPredict::compute() {
   for (size_t i = 0; i < _nInputs; i++) {
     ConstTensorRef<Real> inputData(
         poolIn.value<Tensor<Real> >(_inputNames[i]));
-
     _inputTensors[i] = TensorToTF(inputData);
     _inputNodes[i] = graphOperationByName(_inputNames[i].c_str(), 0);
   }
@@ -214,12 +213,12 @@ TF_Tensor* TensorflowPredict::TensorToTF(
     }
   } else {
     dims = tensorIn.num_dimensions();
-    for(size_t i = 1; i < dims; i++) {  
+    for(int i = 1; i < dims; i++) {  
         shape.push_back(tensorIn.shape()[i]);
       }
   }
   TF_Tensor* tensorOut = TF_AllocateTensor(
-      TF_FLOAT,  &shape[0], dims,
+      TF_FLOAT, &shape[0], dims,
       tensorIn.num_elements() * sizeof(Real)); 
 
   if (tensorOut == nullptr) {
@@ -256,11 +255,15 @@ ConstTensorRef<Real> TensorflowPredict::TFToTensor(
 
   // Create a boost array to store the shape of the tensor.
   boost::array<Tensor<int>::index, 4> shape = {1, 1, 1, 1};
-  
-  size_t increment;
-  (outNDims == 2) ? increment = 2 : increment = 1;
-  for (size_t i = 0; i < outNDims; i++) {
-    shape[i * increment] = (int)TF_Dim(tensor, i);
+  shape[0] = (int)TF_Dim(tensor, 0);
+
+  // TODO: We are assuming one of the following cases:
+  //       1 - outNDims = 2 -> Batch + Feats 
+  //       2 - outNDims = 3 -> Batch + Timestamps + Feats
+  //       3 - outNDims = 4 -> Batch + Channels + Timestamps + Feats
+  size_t idx = 1;
+  for (size_t i = shape.size() - outNDims + 1; i < shape.size(); i++, idx++) {
+    shape[i] = (int)TF_Dim(tensor, idx);
   }
 
   // Return a const reference to the data in the Boost format.

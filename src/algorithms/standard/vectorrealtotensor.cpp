@@ -35,7 +35,6 @@ const char* VectorRealToTensor::description = DOC("This algorithm takes a stream
 
 void VectorRealToTensor::configure() {
   vector<int> shape = parameter("shape").toVectorInt();
-  _timeAxis = parameter("timeAxis").toInt();
   _patchHopSize = parameter("patchHopSize").toInt();
   _batchHopSize = parameter("batchHopSize").toInt();
   _lastPatchMode = parameter("lastPatchMode").toString();
@@ -44,7 +43,7 @@ void VectorRealToTensor::configure() {
     _shape[i] = shape[i];
   }
   
-  _timeStamps = shape[_timeAxis];
+  _timeStamps = shape[2];
 
   if (shape[0] == -1) {
     _accumulate = true;
@@ -58,9 +57,20 @@ void VectorRealToTensor::configure() {
     _patchHopSize = _timeStamps;
   }
 
-  _acc.assign(0, vector<vector<Real> >(_shape[1], vector<Real>(_shape[2], 0.0)));
+  _acc.assign(0, vector<vector<Real> >(_shape[2], vector<Real>(_shape[3], 0.0)));
   _push = false;
   _pushedEverything = false;
+
+  if (_patchHopSize > _timeStamps) {
+    throw EssentiaException("VectorRealToTensor: `patchHopSize` has to be smaller that the number of timestamps");
+  }
+
+
+  if (shape[0] > 0) {
+    if (_batchHopSize > _timeStamps) {
+      throw EssentiaException("VectorRealToTensor: `batchHopSize` has to be smaller that the number batch size (shape[0])");
+    }
+  }
 
 }
 
@@ -183,7 +193,7 @@ AlgorithmStatus VectorRealToTensor::process() {
 
     // TODO: Add flag to swap frequency axis from 4 to 2.
     for (size_t i = 0; i < shape[0]; i++) {      // Batch axis
-      for (size_t j = 0; j < shape[1]; j++) {    // Time axis
+      for (size_t j = 0; j < shape[2]; j++) {    // Time axis
         fastcopy(&(*tensor)[i][0][j][0], &_acc[i][j][0], _acc[i][j].size());
       }
     }

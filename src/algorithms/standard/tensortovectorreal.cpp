@@ -32,7 +32,6 @@ const char* TensorToVectorReal::description = DOC("This algorithm streams the fr
 
 
 void TensorToVectorReal::configure() {
-  _timeAxis = parameter("timeAxis").toInt();
 
   _batchSize = 0;
   _channels = 0;
@@ -61,11 +60,11 @@ AlgorithmStatus TensorToVectorReal::process() {
   
   ConstTensorRef<Real> tensor = *(Tensor<Real> *)_tensor.getFirstToken();
 
-  if ((_batchSize != tensor.size()) || (_timeStamps != tensor.shape()[_timeAxis])) {
+  if ((_batchSize != tensor.size()) || (_timeStamps != tensor.shape()[2])) {
     EXEC_DEBUG("resizing frame acquire size");
     _batchSize = tensor.size();
     _channels = tensor.shape()[1];
-    _timeStamps = tensor.shape()[_timeAxis];
+    _timeStamps = tensor.shape()[2];
     _featsSize = tensor.shape()[3];
 
     _frame.setAcquireSize(_timeStamps * _channels * _batchSize);
@@ -75,10 +74,7 @@ AlgorithmStatus TensorToVectorReal::process() {
   }
 
   vector<vector<Real> >& frame = _frame.tokens();
-  // TODO: This block could be cleaned up by taking adventage
-  // of the boost view interfaces. Plus it allows to use and 
-  // artbitrary time axis instead of a harcored one (without
-  // using the [] operator)
+
   size_t i = 0;
   for (size_t j = 0; j < _batchSize; j++) {
     for (size_t k = 0; k < _channels; k++) {

@@ -32,7 +32,6 @@ class VectorRealToTensor : public Algorithm {
   Source<Tensor<Real> > _tensor;
 
   boost::array<uint, 4> _shape;
-  int _timeAxis;
   size_t _timeStamps;
   size_t _batchHopSize;
   size_t _patchHopSize;
@@ -54,7 +53,6 @@ class VectorRealToTensor : public Algorithm {
     // TODO: set a better default shape
     std::vector<int> outputShape = {-1, 1, 128, 128};
     declareParameter("shape", "the size of output tensor. If batch dimension (the first one) is -1 it will accumulate as many batches as available in the input track", "", outputShape);
-    declareParameter("timeAxis", "the axis where the frames will be stacked", "(0,inf)", 2);
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 0);
     declareParameter("batchHopSize", "number of patches between the beginnings of adjacent batches. 0 to avoid overlap", "[0,inf)", 0);
     declareParameter("lastPatchMode", "what to do with the last incomplete patch", "{discard,repeat}", "repeat");

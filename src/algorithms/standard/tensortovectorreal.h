@@ -45,9 +45,7 @@ class TensorToVectorReal : public Algorithm {
     _frame.setBufferType(BufferUsage::forMultipleFrames);
   }
   
-  void declareParameters() {
-    declareParameter("timeAxis", "frames are retrieves along this axis", "(0,inf)", 1);
-  }
+  void declareParameters() {};
 
   void configure();
   void reset();
