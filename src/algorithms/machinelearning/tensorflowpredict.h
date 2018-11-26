@@ -34,7 +34,7 @@ class TensorflowPredict : public Algorithm {
   Input<Pool> _poolIn;
   Output<Pool> _poolOut;
 
-  // const char* are required for the tensorflow c API  
+  std::string _graphFilename;
   std::vector<std::string> _inputNames;
   std::vector<std::string> _outputNames;
 
@@ -93,6 +93,7 @@ class TensorflowPredict : public Algorithm {
   void configure();
   void compute();
   void reset();
+  void openGraph();
   TF_Tensor* TensorToTF(const ConstTensorRef<Real>& tensorIn);
   ConstTensorRef<Real> TFToTensor(const TF_Tensor* tensor, TF_Output node);
   TF_Output graphOperationByName(const char* nodeName, int index=0);
@@ -100,7 +101,6 @@ class TensorflowPredict : public Algorithm {
   static const char* name;
   static const char* category;
   static const char* description;
-
 };
 
 } //namespace standard

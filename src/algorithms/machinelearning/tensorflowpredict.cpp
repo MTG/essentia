@@ -45,8 +45,9 @@ static void DeallocateBuffer(void* data, size_t) {
   free(data);
 }
 
+
 void TensorflowPredict::configure() {
-  string garphFilename = parameter("graphFilename").toString();
+  _graphFilename = parameter("graphFilename").toString();
   _inputNames = parameter("inputs").toVectorString();
   _outputNames = parameter("outputs").toVectorString();
   _isTraining = parameter("isTraining").toBool();
@@ -58,8 +59,26 @@ void TensorflowPredict::configure() {
   _nInputs = _inputNames.size();
   _nOutputs = _outputNames.size();
 
+  _status = TF_NewStatus();
+  _graph = TF_NewGraph();
+  _options = TF_NewImportGraphDefOptions();
+  _sessionOptions = TF_NewSessionOptions();
+  _session = TF_NewSession(_graph, _sessionOptions, _status);
+
+  // Initialize the status to `unavaulable` so compute
+  // knows that the graph is still not open.
+  TF_SetStatus(_status, TF_UNAVAILABLE, "");
+}
+
+
+void TensorflowPredict::openGraph() {
+  if (!parameter("graphFilename").isConfigured()) {
+    throw EssentiaException("TensorflowPredict: `graphFilename` parameter should be configured.");
+  }
+
+
   // First we load and initialize the model.
-  const auto f = fopen(garphFilename.c_str(), "rb");
+  const auto f = fopen(_graphFilename.c_str(), "rb");
   if (f == nullptr) {
     throw EssentiaException(
         "TensorflowPredict: could not open the tensorflow graph file.");
@@ -85,10 +104,6 @@ void TensorflowPredict::configure() {
   buffer->length = fsize;
   buffer->data_deallocator = DeallocateBuffer;
 
-  _graph = TF_NewGraph();
-  _status = TF_NewStatus();
-  _options = TF_NewImportGraphDefOptions();
-
   TF_GraphImportGraphDef(_graph, buffer, _options, _status);
 
   TF_DeleteBuffer(buffer);
@@ -97,7 +112,6 @@ void TensorflowPredict::configure() {
     throw EssentiaException("TensorflowPredict: Error importing graph. ", TF_Message(_status));
   }
 
-  _sessionOptions = TF_NewSessionOptions();
   _session = TF_NewSession(_graph, _sessionOptions, _status);
 
   if (TF_GetCode(_status) != TF_OK) {
@@ -105,8 +119,9 @@ void TensorflowPredict::configure() {
   }
 }
 
-
 void TensorflowPredict::reset() {
+  if (!parameter("graphFilename").isConfigured()) return;
+
   TF_CloseSession(_session, _status);
   if (TF_GetCode(_status) != TF_OK) {
     throw EssentiaException("TensorflowPredict: Error reseting session. ", TF_Message(_status));
@@ -120,6 +135,10 @@ void TensorflowPredict::reset() {
 
 
 void TensorflowPredict::compute() {
+  if (TF_GetCode(_status) == TF_UNAVAILABLE) {
+    openGraph();
+  }
+  
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
 
