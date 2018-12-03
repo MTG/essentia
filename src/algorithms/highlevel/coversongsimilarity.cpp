@@ -39,8 +39,8 @@ const char* CoverSongSimilarity::description = DOC("This algorithm computes a co
 
 
 void CoverSongSimilarity::configure() {
-  _gammaO = parameter("gammaO").toReal();
-  _gammaE = parameter("gammaE").toReal();
+  _disOnset = parameter("disOnset").toReal();
+  _disExtension = parameter("disExtension").toReal();
 
   std::string simType = toLower(parameter("simType").toString());
   if      (simType == "qmax") _simType = QMAX;
@@ -80,9 +80,9 @@ void CoverSongSimilarity::compute() {
           }
         else {
         // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
-          c1 = cumMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1], _gammaO, _gammaE);
-          c2 = cumMatrix[i-2][j-1] - gammaState(simMatrix[i-2][j-1], _gammaO, _gammaE);
-          c3 = cumMatrix[i-1][j-2] - gammaState(simMatrix[i-1][j-2], _gammaO, _gammaE);
+          c1 = cumMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1], _disOnset, _disExtension);
+          c2 = cumMatrix[i-2][j-1] - gammaState(simMatrix[i-2][j-1], _disOnset, _disExtension);
+          c3 = cumMatrix[i-1][j-2] - gammaState(simMatrix[i-1][j-2], _disOnset, _disExtension);
           Real row2[4] = {0, c1, c2, c3};
           cumMatrix[i][j] = *std::max_element(row2, row2+4);
           }
@@ -105,11 +105,11 @@ void CoverSongSimilarity::compute() {
         }
         else {
           // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
-          c1 = cumMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1], _gammaO, _gammaE);
-          c2 = (cumMatrix[i-2][j-1] + simMatrix[i-1][j]) - gammaState(simMatrix[i-2][j-1], _gammaO, _gammaE);
-          c3 = (cumMatrix[i-1][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-2], _gammaO, _gammaE);
-          c4 = (cumMatrix[i-3][j-1] + simMatrix[i-2][j] + simMatrix[i-1][j]) - gammaState(simMatrix[i-3][j-1], _gammaO, _gammaE);
-          c5 = (cumMatrix[i-1][j-3] + simMatrix[i][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-3], _gammaO, _gammaE);
+          c1 = cumMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1], _disOnset, _disExtension);
+          c2 = (cumMatrix[i-2][j-1] + simMatrix[i-1][j]) - gammaState(simMatrix[i-2][j-1], _disOnset, _disExtension);
+          c3 = (cumMatrix[i-1][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-2], _disOnset, _disExtension);
+          c4 = (cumMatrix[i-3][j-1] + simMatrix[i-2][j] + simMatrix[i-1][j]) - gammaState(simMatrix[i-3][j-1], _disOnset, _disExtension);
+          c5 = (cumMatrix[i-1][j-3] + simMatrix[i][j-2] + simMatrix[i][j-1]) - gammaState(simMatrix[i-1][j-3], _disOnset, _disExtension);
           Real row2[6] = {0, c1, c2, c3, c4, c5};
           cumMatrix[i][j] = *std::max_element(row2, row2+6);
         }
@@ -120,9 +120,9 @@ void CoverSongSimilarity::compute() {
 }
 
 // apply gap penalty for disruption and extension
-Real CoverSongSimilarity::gammaState(Real value, const Real gammaO, const Real gammaE) const {
-  if      (value == 1.) return gammaO;
-  else if (value == 0.) return gammaE;
+Real CoverSongSimilarity::gammaState(Real value, const Real disOnset, const Real disExtension) const {
+  if      (value == 1.) return disOnset;
+  else if (value == 0.) return disExtension;
   else throw EssentiaException("CoverSongSimilarity:Non-binary elements found in the inputsimilarity matrix. Expected a binary similarity matrix!");
 }
 

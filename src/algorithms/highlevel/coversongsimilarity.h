@@ -28,8 +28,8 @@ namespace standard {
   protected:
    Input<std::vector<std::vector<Real> > > _inputArray;
    Output<std::vector<std::vector<Real> > > _scoreMatrix;
-   Real gammaO;
-   Real gammaE;
+   Real disOnset;
+   Real disExtension;
   public:
    CoverSongSimilarity() {
      declareInput(_inputArray, "inputArray", " a 2D binary cross similarity matrix of two audio chroma vectors (refer CrossSimilarityMatrix algorithm').");
@@ -37,8 +37,8 @@ namespace standard {
    }
 
    void declareParameters() {
-     declareParameter("gammaO", "penalty for disruption onset", "[0,inf)", 0.5);
-     declareParameter("gammaE", "penalty for disruption extension", "[0,inf)", 0.5);
+     declareParameter("disOnset", "penalty for disruption onset", "[0,inf)", 0.5);
+     declareParameter("disExtension", "penalty for disruption extension", "[0,inf)", 0.5);
      declareParameter("simType", "type of cover song similarity measure", "{qmax, dmax}", "qmax");
    }
 
@@ -49,13 +49,13 @@ namespace standard {
    static const char* description;
 
   protected:
-   Real _gammaO;
-   Real _gammaE;
+   Real _disOnset;
+   Real _disExtension;
    enum SimType {
      QMAX, DMAX
    };
    SimType _simType;
-   Real gammaState(Real value, const Real gammaO, const Real gammaE) const;
+   Real gammaState(Real value, const Real disOnset, const Real disExtension) const;
 };
 
 } // namespace standard

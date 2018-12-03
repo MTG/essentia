@@ -31,7 +31,7 @@ namespace standard {
 const char* CrossSimilarityMatrix::name = "CrossSimilarityMatrix";
 const char* CrossSimilarityMatrix::category = "Music Similarity";
 const char* CrossSimilarityMatrix::description = DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
-"Use HPCP algorithm for computing the chromagram and the default parameter for best results.\n\n"
+"Use HPCP algorithm for computing the chromagram and the default parameters of this algorithm for best results.\n\n"
 "In addition, the algorithm also provides an option to use another binary similarity computation method using optimal transposition index (OTI) of chroma features as mentioned in [3].\n\n"
 "Use default parameter values for best results.\n\n"
 "The input chromagram should be in the shape (x, numbins), where 'x' is number of frames and 'numbins' stands for number of bins in the chromagram. An exception isthrown otherwise.\n\n"
@@ -100,7 +100,7 @@ void CrossSimilarityMatrix::compute() {
       pdistances = pairwiseDistance(queryFeature, referenceFeature);
     }
     if (pdistances.empty())
-      throw EssentiaException("CrossSimilarityMatrix: empty array found on the euclidean cross similarity matrix.");
+      throw EssentiaException("CrossSimilarityMatrix: empty array found inside euclidean cross similarity matrix.");
 
     // transposing the array of pairwsie distance
     std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
@@ -145,15 +145,6 @@ void CrossSimilarityMatrix::compute() {
     TNT::Array2D<Real> simY = vecvecToArray2D(tSimilarityY);
     TNT::Array2D<Real> csmOut = TNT::operator*(simX, simY);
     csm = array2DToVecvec(csmOut);
-    /*
-    for (size_t x=0; x<xRows; x++) {
-      for (size_t y=0; y<yRows; y++) {
-        for (size_t z=0; z<yCols; z++) {
-          csm[x][y] = similarityX[x][y] * similarityY[y][z];
-        }
-      }
-    }
-    */
   }
 }
 
