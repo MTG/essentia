@@ -27,18 +27,18 @@ sed -i 's/#ifndef __ANDROID__/#define __ANDROID__ 1\n&/' tensorflow/c/c_api.cc
 
 tensorflow/contrib/makefile/build_all_linux.sh
 
-PREXIX_LIB = ${PREFIX}/lib/tensorflow
-PREXIX_INCLUDE = ${PREFIX}/include
+PREFIX_LIB = ${PREFIX}/lib/tensorflow
+PREFIX_INCLUDE = ${PREFIX}/include
 
-mkdir ${PREDIX_LIB}
+mkdir ${PREFIX_LIB}
 
-cp tensorflow/contrib/makefile/gen/lib/libtensorflow-core.a ${PREXIX_LIB}
-cp tensorflow/contrib/makefile/gen/protobuf/lib/libprotobuf.a ${PREXIX_LIB}
-cp tensorflow/contrib/makefile/downloads/nsync/builds/default.linux.c++11/libnsync.a ${PREXIX_LIB}
+cp tensorflow/contrib/makefile/gen/lib/libtensorflow-core.a ${PREFIX_LIB}
+cp tensorflow/contrib/makefile/gen/protobuf/lib/libprotobuf.a ${PREFIX_LIB}
+cp tensorflow/contrib/makefile/downloads/nsync/builds/default.linux.c++11/libnsync.a ${PREFIX_LIB}
 
-cp tensorflow/c/c_api.h ${PREXIX_INCLUDE}
+cp tensorflow/c/c_api.h ${PREFIX_INCLUDE}
 
-./tensorflow/c/generate-pc.sh -p ${PREFIX} -l ${PREXIX_LIB} -v $TENSORFLOW_VERSION
+./tensorflow/c/generate-pc.sh -p ${PREFIX} -l ${PREFIX_LIB} -v $TENSORFLOW_VERSION
 
 
 
