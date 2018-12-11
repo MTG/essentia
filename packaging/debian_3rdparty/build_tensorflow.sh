@@ -16,7 +16,7 @@ cd tensorflow-$TENSORFLOW_VERSION
 
 
 # Force using curl for the dependencies download
-sed -i 's/\[ \"\$OSTYPE\" == \"darwin\"\* \]/1/g' tensorflow/contrib/makefile/download_dependencies.sh
+sed -i 's/\[\[ \"\$OSTYPE\" == \"darwin\"\* \]\]/true/g' tensorflow/contrib/makefile/download_dependencies.sh
 
 tensorflow/contrib/makefile/download_dependencies.sh
 
