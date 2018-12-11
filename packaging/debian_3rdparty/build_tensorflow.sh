@@ -14,6 +14,10 @@ curl -SLO https://github.com/tensorflow/tensorflow/archive/v$TENSORFLOW_VERSION.
 tar -xf v$TENSORFLOW_VERSION.tar.gz
 cd tensorflow-$TENSORFLOW_VERSION
 
+
+# Force using curl for the dependencies download
+sed -i 's/\[ \"\$OSTYPE\" == \"darwin\"\* \]/1/g' tensorflow/contrib/makefile/download_dependencies.sh
+
 tensorflow/contrib/makefile/download_dependencies.sh
 
 # Add fPIC Otherwise it won't compile
