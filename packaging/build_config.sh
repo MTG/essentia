@@ -27,12 +27,17 @@ QT_SOURCE_URL=http://download.qt-project.org/archive/qt/4.8/4.8.6/qt-everywhere-
 GAIA_VERSION=2.4.5
 
 FFMPEG_AUDIO_FLAGS="
-    --enable-avresample
+    --disable-programs
     --disable-doc
     --disable-debug
+
     --disable-avdevice
+    --disable-swresample
     --disable-swscale
+    --disable-postproc
     --disable-avfilter
+    --enable-avresample
+
     --disable-network
     --disable-indevs
     --disable-outdevs
@@ -49,8 +54,12 @@ FFMPEG_AUDIO_FLAGS="
     --enable-protocol=file
     --enable-protocol=pipe
 
+    --disable-sdl
+    --disable-lzma
     --disable-zlib
+    --disable-xlib
     --disable-bzlib
+    --disable-libxcb
 
     --enable-demuxer=image2
     --enable-demuxer=aac
