@@ -8,6 +8,7 @@ cd $BASEDIR/debian_3rdparty
 ./build_taglib.sh
 ./build_yaml.sh
 ./build_chromaprint.sh
+./build_tensorflow.sh
 
 if [ "$1" = --with-gaia ];
     then
