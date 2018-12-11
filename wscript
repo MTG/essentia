@@ -273,6 +273,9 @@ def configure(ctx):
         ctx.env.CXXFLAGS = ['-static-libgcc', '-static-libstdc++']
 
 
+    if ctx.options.WITH_TENSORFLOW:
+        ctx.env.LDFLAGS += ['-Wl,--no-whole-archive']
+
     ctx.load('compiler_cxx compiler_c')
 
     if ctx.env.STATIC_DEPENDENCIES \
