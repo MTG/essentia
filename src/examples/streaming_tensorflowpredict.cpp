@@ -20,7 +20,6 @@
 #include <iostream>
 #include <essentia/algorithmfactory.h>
 #include <essentia/streaming/algorithms/poolstorage.h>
-#include <essentia/streaming/algorithms/fileoutput.h>
 #include <essentia/scheduler/network.h>
 #include "credit_libav.h"
 
@@ -29,20 +28,18 @@ using namespace essentia;
 using namespace essentia::streaming;
 using namespace essentia::scheduler;
 
-// This example shows how to use the Tensorflow wrapper of Essentia
-// in real time. Here we are running a tensorflow clasiffication model
-// build on top of Mel bands. 
 int main(int argc, char* argv[]) {
 
-  if (argc != 3) {
+  if (argc != 4) {
     cout << "Error: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " audio_input yaml_output" << endl;
+    cout << "Usage: " << argv[0] << " audio_input model output" << endl;
     creditLibAV();
     exit(1);
   }
 
   string audioFilename = argv[1];
-  string outputFilename = argv[2];
+  string modelName = argv[2];
+  string outputFilename = argv[3];
 
   // register the algorithms in the factory(ies)
   essentia::init();
@@ -51,8 +48,16 @@ int main(int argc, char* argv[]) {
 
   /////// PARAMS //////////////
   Real sampleRate = 44100.0;
-  int frameSize = 2048;
+  int frameSize = 1024;
   int hopSize = 1024;
+  vector<int> inputShape({-1, 1, 128, 128});
+  vector<string> inputs({"model/Placeholder"});
+  vector<string> outputs({"model/Softmax"});
+
+  // we want to compute the MFCC of a file: we need the create the following:
+  // audioloader -> framecutter -> windowing -> FFT -> MFCC -> PoolStorage
+  // we also need a DevNull which is able to gobble data without doing anything
+  // with it (required otherwise a buffer would be filled and blocking)
 
   AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
@@ -63,76 +68,59 @@ int main(int argc, char* argv[]) {
   Algorithm* fc    = factory.create("FrameCutter",
                                     "frameSize", frameSize,
                                     "hopSize", hopSize,
-                                    "silentFrames", "noise");
+                                    "startFromZero", true);
 
   Algorithm* w     = factory.create("Windowing",
-                                    "type", "blackmanharris62");
+                                    "type", "hann",
+                                    "zeroPadding", frameSize);
 
-  Algorithm* spec  = factory.create("Spectrum");
+  Algorithm* spec  = factory.create("Spectrum",
+                                    "size", frameSize);
 
-  Algorithm* mel   = factory.create("MelBands", 
-                                    "numberBands", 90);
-  
-  // VectorRealToTensor creates tensor by accumulating frames
-  // and the input shape required by our model is reached. 
-  // We can choose the axis to store our features with the 
-  // parameter 'timeAxis'
-  vector<int> outputShape = {1, 3000, 90};
-  Algorithm* vtt   = factory.create("VectorRealToTensor",
-                                   "shape", outputShape);
+  Algorithm* mel  = factory.create("MelBands",
+                                   "numberBands", 128,
+                                   "type", "magnitude");
 
-  // The input tensors have to be stores inside an Essentia pool
-  // under a namespace that matches the Tensorflow model input 
-  // layer name.
-  Algorithm* ttp   = factory.create("TensorToPool",
-                                   "mode", "overwrite",
-                                   "namespace", "bidirectional_1_input_1");
+  Algorithm* logNorm  = factory.create("UnaryOperator",
+                                       "type", "log");
+                                   
+  Algorithm* vtt      = factory.create("VectorRealToTensor",
+                                       "shape", inputShape,
+                                       "lastPatchMode", "repeat",
+                                       "patchHopSize", 1);
 
-  vector<string> inputs = {"bidirectional_1_input_1"};
-  vector<string> outputs = {"output_node0", "time_distributed_1_1/Reshape_1"};
+  Algorithm* ttp      = factory.create("TensorToPool",
+                                       "mode", "overwrite",
+                                       "namespace", "model/Placeholder");
 
-  //  Here is where the Deep Learning magic happens!  
-  Algorithm* tfp  = factory.create("TensorflowPredict",
-                                   "inputs", inputs,
-                                   "outputs", outputs);
+  Algorithm* tfp      = factory.create("TensorflowPredict",
+                                       "graphFilename", modelName,
+                                       "inputs", inputs,
+                                       "outputs", outputs,
+                                       "isTraining", false,
+                                       "isTrainingName", "model/Placeholder_1");
+                                   
+  Algorithm* ptt      = factory.create("PoolToTensor",
+                                       "namespace", "model/Softmax");
+                                   
+  Algorithm* ttv      = factory.create("TensorToVectorReal");
+                                   
 
-  // Here we retrieve the tensors of interest from the output stream of
-  // pools.
-  Algorithm* ptt   = factory.create("PoolToTensor",
-                                    "namespace", "output_node0");
-
-  // In the same manner, the output frame are extracted from the tensors
-  // so they can be stored to a file or saved in an storage pool. 
-  Algorithm* ttv   = factory.create("TensorToVectorReal",
-                                    "shape", outputShape);
-
-  Algorithm* file = new FileOutput<vector<Real> >();
-  file->configure("filename", "predictionframes.txt",
-                  "mode", "text");
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos --------" << endl;
 
   audio->output("audio")    >>  fc->input("signal");
-
   fc->output("frame")       >>  w->input("frame");
-
   w->output("frame")        >>  spec->input("frame");
-
   spec->output("spectrum")  >>  mel->input("spectrum");
-
-  mel->output("bands")      >>  vtt->input("frame");
-
+  mel->output("bands")      >>  logNorm->input("array");
+  logNorm->output("array")  >>  vtt->input("frame");
   vtt->output("tensor")     >>  ttp->input("tensor");
-
   ttp->output("pool")       >>  tfp->input("poolIn");
-
   tfp->output("poolOut")    >>  ptt->input("pool");
-
   ptt->output("tensor")     >>  ttv->input("tensor");
-
-  ttv->output("frame")      >>  file->input("data");
-
+  ttv->output("frame")      >>  PC(pool, "vgg_probs"); // store only the mfcc coeffs
 
 
   /////////// STARTING THE ALGORITHMS //////////////////
@@ -143,14 +131,35 @@ int main(int argc, char* argv[]) {
   // ...and run it, easy as that!
   n.run();
 
+  // aggregate the results
+  Pool aggrPool; // the pool with the aggregated MFCC values
+  const char* stats[] = {"mean"};
 
+  standard::Algorithm* aggr = standard::AlgorithmFactory::create("PoolAggregator",
+                                                                 "defaultStats", arrayToVector<string>(stats));
 
+  aggr->input("input").set(pool);
+  aggr->output("output").set(aggrPool);
+  aggr->compute();
+
+  // write results to file
+  cout << "-------- writing results to standard output " << outputFilename << " --------" << endl;
+
+  cout << aggrPool.value<vector<Real> >("vgg_probs.mean");
+
+  standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
+                                                                   "format", "json",
+                                                                   "filename", outputFilename);
+  output->input("pool").set(aggrPool);
+  output->compute();
 
   // NB: we could just wait for the network to go out of scope, but then this would happen
   //     after the call to essentia::shutdown() where the FFTW structs would already have
   //     been freed, so let's just delete everything explicitly now
   n.clear();
 
+  delete aggr;
+  delete output;
   essentia::shutdown();
 
   return 0;
