@@ -31,8 +31,8 @@ sed -i 's/#ifndef __ANDROID__/#define __ANDROID__ 1\n&/' tensorflow/c/c_api.cc
 
 tensorflow/contrib/makefile/build_all_linux.sh
 
-PREFIX_LIB = ${PREFIX}/lib/tensorflow
-PREFIX_INCLUDE = ${PREFIX}/include
+PREFIX_LIB=${PREFIX}/lib/tensorflow
+PREFIX_INCLUDE=${PREFIX}/include
 
 mkdir ${PREFIX_LIB}
 
