@@ -46,6 +46,10 @@ def options(ctx):
                    dest='MODE', default="release",
                    help='debug or release')
 
+    ctx.add_option('--std', action='store',
+                   dest='STD', default='c++11',
+                   help='C++ standard to compile for [c++11 c++14 c++17 ...]')
+
     ctx.add_option('--arch', action='store',
                    dest='ARCH', default="x64",
                    help='Target architecture when compiling on OSX: i386, x64 or FAT')
@@ -108,11 +112,13 @@ def configure(ctx):
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
 
     # compiler flags
+    ctx.env.CXXFLAGS = ['-std=' + ctx.options.STD]  # c++11 by default
+
     if sys.platform != 'win32':
         # msvc does not support -pipe
-        ctx.env.CXXFLAGS = ['-pipe', '-Wall']
+        ctx.env.CXXFLAGS += ['-pipe', '-Wall']
     else:
-        ctx.env.CXXFLAGS = ['-W2', '-EHsc']
+        ctx.env.CXXFLAGS += ['-W2', '-EHsc']
 
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences

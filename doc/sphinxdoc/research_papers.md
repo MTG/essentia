@@ -10,7 +10,13 @@ The list below highlights some of the academic studies using Essentia organized 
 
 ## Music and sound classification
 
+- S. Oramas, D. Bogdanov and A. Porter. MediaEval 2018 AcousticBrainz Genre Task: A baseline combining deep feature embeddings across datasets. In MediaEval 2018 Workshop, 2018.
+
+- H. Schreiber. MediaEval 2018 AcousticBrainz Genre Task: A CNN Baseline Relying on Mel-Features. In MediaEval 2018 Workshop, 2018.
+
 - J. Kim, M. Won, X. Serra, and C. C. S. Liem, Transfer Learning of Artist Group Factors to Musical Genre Classification. In WWW '18 Companion Proceedings of the The Web Conference 2018, 2018.
+
+- N. Karunakaran and A. Arya, A Scalable Hybrid Classifier for Music Genre Classification using Machine Learning Concepts and Spark. In International Conference on Intelligent Autonomous Systems (ICoIAS), 2018.
 
 - D. Bogdanov, A. Porter, J. Urbano, and H. Schreiber. The MediaEval 2017 AcousticBrainz Genre Task: Content-based Music Genre Recognition from Multiple Sources. In MediaEval 2017 Multimedia Benchmark Workshop (MediaEval'17), 2017.
 
@@ -101,6 +107,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 - O. Mayor, J. Llop, and E. Maestre. RepoVizz: A multimodal on-line database and browsing tool for music performance research. In International Society for Music Information Retrieval Conference (ISMIR’11), 2011.
 
 - M. Sordo, G. K. Koduri, S. Şentürk, S. Gulati, and X. Serra. A musically aware system for browsing and interacting with audio music collections. In The 2nd CompMusic Workshop, 2012.
+
+- A. Augello, I. Infantino, U. Maniscalco, G. Pilato, R. Rizzo, and F. Vella. Robotic Intelligence and Computational Creativity. Encyclopedia with Semantic Computing and Robotic Intelligence, 2018.
 
 - A. Augello, E. Cipolla, I. Infantino, A. Manfre, G. Pilato, and F. Vella. Creative Robot Dance with Variational Encoder. In International Conference on Computational Creativity, 2017.
 
@@ -255,6 +263,8 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - J. Salamon, J. P. Bello, A. Farnsworth, M. Robbins, S. Keen, H. Klinck, and S. Kelling. Towards the automatic classification of avian flight calls for bioacoustic monitoring. PloS one, 11(11), e0166866, 2016.
 
+- C. Lopez-Tello and V. Muthukumar. Classifying Acoustic Signals for Wildlife Monitoring and Poacher Detection on UAVs. In 2018 21st Euromicro Conference on Digital System Design (DSD), pp. 685-690. IEEE, 2018.
+
 - C. Lopez-Tello. Acoustic Detection, Source Separation, and Classification Algorithms for Unmanned Aerial Vehicles in Wildlife Monitoring and Poaching. Master Thesis, University of Nevada, Las Vegas, USA, 2016
 
 ## Acoustic analysis for medical and neuroimaging studies
@@ -267,11 +277,4 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - M. A. Casey. Music of the 7Ts: Predicting and Decoding Multivoxel fMRI Responses with Acoustic, Schematic, and Categorical Music Features. Frontiers in psychology, 8, 2017.
 
-
-
-
-
-
-
-
-
+- G. Chambres, P. Hanna, and M. Desainte-Catherine. Automatic Detection of Patient with Respiratory Diseases Using Lung Sound Analysis. In 2018 International Conference on Content-Based Multimedia Indexing (CBMI) (pp. 1-6). IEEE, 2018.
