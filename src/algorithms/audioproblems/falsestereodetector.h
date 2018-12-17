@@ -48,8 +48,8 @@ class FalseStereoDetector : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("silenceThreshold", "correation computation can be skipped if not required.", "(-inf,0)", -70);
-    declareParameter("correlationThreshold", "silence threshold. Silent frames will be skkiped.", "[-1,1]", 0.9995);
+    declareParameter("silenceThreshold", "Silent frames will be skkiped.", "(-inf,0)", -70);
+    declareParameter("correlationThreshold", "threshold to activate the isFalseStereo flag", "[-1,1]", 0.9995);
   }
 
   void configure();
