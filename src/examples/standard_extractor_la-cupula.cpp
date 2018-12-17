@@ -112,7 +112,10 @@ int essentia_main(string audioFilename, string outputFilename) {
                                                          "type", "hann",
                                                          "normalized", false);
 
-    Algorithm* noiseBurstDetector       = factory.create("NoiseBurstDetector");
+    Algorithm* noiseBurstDetector       = factory.create("NoiseBurstDetector", 
+                                                         "threshold", 200);
+
+    Algorithm* falseStereoDetector      = factory.create("FalseStereoDetector");
 
 
     cout << "-------- connecting algos ---------" << endl;
@@ -136,6 +139,13 @@ int essentia_main(string audioFilename, string outputFilename) {
     loudnessEBUR128->output("shortTermLoudness").set(shortTermLoudness);
     loudnessEBUR128->output("integratedLoudness").set(integratedLoudness);
     loudnessEBUR128->output("loudnessRange").set(loudnessRange);
+
+
+    Real correlation;
+    int isFalseStereo;
+    falseStereoDetector->input("frame").set(audioBuffer);
+    falseStereoDetector->output("isFalseStereo").set(isFalseStereo);
+    falseStereoDetector->output("correlation").set(correlation);   
 
 
     vector<Real> audio;
@@ -221,31 +231,49 @@ int essentia_main(string audioFilename, string outputFilename) {
     cout << "-------- running algos ---------" << endl;
     audioStereo->compute();
 
+    pool.set("filename", audioFilename);
+
+    pool.set("duration", audio.size() / sr);
+
+    pool.set("filename", audioFilename);
+
     loudnessEBUR128->compute();
-    pool.add("EBUR128.integratedLoudness", integratedLoudness);
-    pool.add("EBUR128.range", loudnessRange);
+    pool.set("EBUR128.integratedLoudness", integratedLoudness);
+    pool.set("EBUR128.range", loudnessRange);
+
+    falseStereoDetector->compute();
+    pool.set("channelsCorrelation", correlation);
 
     monoMixer->compute();
-    pool.add("duration", audio.size() / sr);
+    
 
     startStopCut->compute();
-    pool.add("startStopCut.start", startStopCutStart);
-    pool.add("startStopCut.end", startStopCutEnd);
+    pool.set("startStopCut.start", startStopCutStart);
+    pool.set("startStopCut.end", startStopCutEnd);
 
     humDetector->compute();
     if (humFrequencies.size() > 0) {
-      pool.add("humDetector.frequencies", humFrequencies);
-      pool.add("humDetector.saliences", humSaliences);
-      pool.add("humDetector.starts", humStarts);
-      pool.add("humDetector.ends", humEnds);
+      pool.set("humDetector.present", true);
+      pool.set("humDetector.frequencies", humFrequencies);
+      pool.set("humDetector.saliences", humSaliences);
+      pool.set("humDetector.starts", humStarts);
+      pool.set("humDetector.ends", humEnds);
+    } else {
+      pool.set("humDetector.present", false);
     }
 
     truePeakDetector->compute();
     for (uint i = 0; i < peakLocations.size(); i++) 
       peakLocations[i] /= sr;
 
-    if (peakLocations.size() > 0)
-      pool.add("truePeakDetector.locations", peakLocations);
+    if (peakLocations.size() > 0) {
+      pool.set("truePeakDetector.present", true);
+      pool.set("truePeakDetector.locations", peakLocations);
+    } else {
+      pool.set("truePeakDetector.present", false);
+    }
+
+    vector<Real> noiseBursts;
 
     size_t idx = 0;
     while (true) {
@@ -278,7 +306,7 @@ int essentia_main(string audioFilename, string outputFilename) {
       startStopSilence->compute();
 
       if (noiseBurstIndexes.size() > 3) {
-        pool.add("noiseBursts.locations", idx * hopsize / (Real)fs);
+        noiseBursts.push_back(idx * hopsize / (Real)fs);
       }
 
       noiseBurstIndexes.clear();
@@ -286,35 +314,53 @@ int essentia_main(string audioFilename, string outputFilename) {
       idx++;
     }
 
-    pool.add("filename", audioFilename);
+    if (noiseBursts.size() > 0) {
+      pool.set("noiseBursts.present", true);
+      pool.set("noiseBursts.locations", noiseBursts);
+    } else {
+    pool.set("noiseBursts.present", false);
+    }
 
     if (discontinuityLocations.size() > 0) {
+      pool.set("discontinuities.present", true);
       for (uint i = 0; i < discontinuityLocations.size(); i++) 
         discontinuityLocations[i] /= sr;
-      pool.add("discontinuities.locations", discontinuityLocations);
-      pool.add("discontinuities.amplitudes", discontinuityAmplitudes);
+      pool.set("discontinuities.locations", discontinuityLocations);
+      pool.set("discontinuities.amplitudes", discontinuityAmplitudes);
+    } else {
+      pool.set("discontinuities.present", false);
     }
 
     if (gapsDetectorStarts.size() > 0) {
-      pool.add("gaps.starts", gapsDetectorStarts);
-      pool.add("gaps.ends", gapsDetectorEnds);
+      pool.set("gaps.present", true);
+      pool.set("gaps.starts", gapsDetectorStarts);
+      pool.set("gaps.ends", gapsDetectorEnds);
+    } else {
+      pool.set("gaps.present", false);
     }
 
-    if (saturationDetectorStarts.size() > 0) {      
-      pool.add("saturationDetector.starts", saturationDetectorStarts);
-      pool.add("saturationDetector.ends", saturationDetectorEnds);
+    if (saturationDetectorStarts.size() > 0) {
+      pool.set("saturationDetector.present", true);    
+      pool.set("saturationDetector.starts", saturationDetectorStarts);
+      pool.set("saturationDetector.ends", saturationDetectorEnds);
+    } else {
+      pool.set("saturationDetector.present", false); 
     }
 
-    if (clickDetectorStarts.size() > 0) { 
-      pool.add("clickDetector.starts", clickDetectorStarts);
-      pool.add("clickDetector.ends", clickDetectorEnds);
+    if (clickDetectorStarts.size() > 0) {
+      pool.set("clickDetector.present", true); 
+      pool.set("clickDetector.starts", clickDetectorStarts);
+      pool.set("clickDetector.ends", clickDetectorEnds);
+    } else {
+      pool.set("clickDetector.present", false); 
     }
 
-    pool.add("snr.spectralSNR", spectralSNR);
-    pool.add("snr.averagedSNR", averagedSNR);
+    // Spectral SNR is not very relevant. 
+    // pool.set("snr.spectralSNR", spectralSNR);
+    pool.set("snr.averagedSNR", averagedSNR);
 
-    pool.add("startStopSilence.start", startFrame * hopsize / fs);
-    pool.add("startStopSilence.end", stopFrame * hopsize / fs);
+    pool.set("startStopSilence.start", startFrame * hopsize / fs);
+    pool.set("startStopSilence.end", stopFrame * hopsize / fs);
 
 
     cout << "-------- writting Yaml ---------" << endl;
