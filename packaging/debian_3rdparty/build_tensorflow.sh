@@ -42,9 +42,10 @@ sed -i 's/all: \$(LIB_PATH) \$(BENCHMARK_NAME)/all: \$(LIB_PATH)/' tensorflow/co
 tensorflow/contrib/makefile/build_all_linux.sh
 
 PREFIX_LIB=${PREFIX}/lib/tensorflow
-PREFIX_INCLUDE=${PREFIX}/include
+PREFIX_INCLUDE=${PREFIX}/include/tensorflow/c
 
 mkdir ${PREFIX_LIB}
+mkdir -p ${PREFIX_INCLUDE}
 
 cp tensorflow/contrib/makefile/gen/lib/libtensorflow-core.a ${PREFIX_LIB}
 cp tensorflow/contrib/makefile/gen/protobuf/lib/libprotobuf.a ${PREFIX_LIB}
@@ -54,6 +55,21 @@ cp tensorflow/c/c_api.h ${PREFIX_INCLUDE}
 
 ./tensorflow/c/generate-pc.sh -p ${PREFIX} -l ${PREFIX_LIB} -v $TENSORFLOW_VERSION
 
+echo "Generating pkgconfig file for TensorFlow $TENSORFLOW_VERSION in ${PREFIX}"
+
+cat << EOF > ${PREFIX}/lib/pkgconfig/tensorflow.pc
+prefix=${PREFIX}
+exec_prefix=\${prefix}
+libdir=\${prefix}/lib/tensorflow
+includedir=\${prefix}/include/tensorflow/c
+Name: TensorFlow
+Version: ${TENSORFLOW_VERSION}
+Description: Library for computation using data flow graphs for scalable machine learning
+Requires:
+Libs: -L\${libdir} -Wl,--allow-multiple-definition -Wl,--whole-archive -ltensorflow-core -lprotobuf -lnsync
+Libs.private: -lz -lm -ldl -lpthread
+Cflags: -I\${includedir}
+EOF
 
 
 cd ../..
