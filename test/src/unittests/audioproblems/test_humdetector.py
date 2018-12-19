@@ -96,10 +96,10 @@ class TestHumDetector(TestCase):
             except IndexError:
                 if i == attempts - 1:
                     self.assertAlmostEqualVector([estimated_freqs[0]], [freq], 1e2)
-                print 'testARProcess failed. This test is based on random signals so it can fail sometimes. {}Attempt {}/{}'.format('It will be repeated. ' if i < 2 else '', i+1, attempts)
+                print('testARProcess failed. This test is based on random signals so it can fail sometimes. {}Attempt {}/{}'.format('It will be repeated. ' if i < 2 else '', i+1, attempts))
                 continue
             if i > 0:
-                print 'testARProcess passed on the attempt {}'.format(i+1)
+                print('testARProcess passed on the attempt {}'.format(i+1))
             break
 
 suite = allTests(TestHumDetector)
