@@ -54,6 +54,10 @@ def options(ctx):
                    dest='ARCH', default="x64",
                    help='Target architecture when compiling on OSX: i386, x64 or FAT')
 
+    ctx.add_option('--no-msse', action='store_true',
+                   dest='NO_MSSE', default=False,
+                   help='never add compiler flags for msse')
+
     ctx.add_option('--cross-compile-mingw32', action='store_true',
                    dest='CROSS_COMPILE_MINGW32', default=False,
                    help='cross-compile for windows using mingw32 on linux')
@@ -95,6 +99,7 @@ def configure(ctx):
     ctx.env.ALGOINCLUDE          = []
     ctx.env.INCLUDE_ALGOS        = ctx.options.INCLUDE_ALGOS
     ctx.env.FFT                  = ctx.options.FFT
+    ctx.env.NO_MSSE              = ctx.options.NO_MSSE
 
 
     if ctx.options.CROSS_COMPILE_MINGW32:
@@ -126,6 +131,7 @@ def configure(ctx):
     if (not ctx.options.EMSCRIPTEN and 
         not ctx.options.CROSS_COMPILE_ANDROID and 
         not ctx.options.CROSS_COMPILE_IOS and
+        not ctx.options.NO_MSSE and
         sys.platform != 'win32'):
         ctx.env.CXXFLAGS += ['-msse', '-msse2', '-mfpmath=sse']
 
