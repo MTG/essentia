@@ -129,7 +129,8 @@ void HumDetector::configure() {
   _medianFilterSize += (_medianFilterSize + 1) % 2;
 
   _decimator->configure("inputSampleRate", _sampleRate,
-                        "outputSampleRate", _outSampleRate);
+                        "outputSampleRate", _outSampleRate,
+                        "quality", 2);
 
   // Resample buffers have to be resized everytime it is configured 
   // as it resets the sizes to the default each time.
