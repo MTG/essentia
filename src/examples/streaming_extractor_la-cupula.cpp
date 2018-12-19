@@ -47,121 +47,156 @@ int essentia_main(string audioFilename, string outputFilename) {
 
     Pool pool;
 
-    Algorithm* audioload                = factory.create("AudioLoader",
-                                                         "filename", audioFilename);
+    Algorithm* audioStereo = factory.create("AudioLoader",
+                                    "filename", audioFilename);
 
-    Algorithm* monoMixer                = factory.create("MonoMixer");
+    Algorithm* monoMixer = factory.create("MonoMixer");
 
-    Algorithm* frameCutter              = factory.create("FrameCutter",
-                                                         "frameSize", framesize,
-                                                         "hopSize", hopsize,
-                                                         "startFromZero", true);
+    Algorithm* realAccumulator = factory.create("RealAccumulator");
+
+    Algorithm* frameCutter = factory.create("FrameCutter",
+                                            "frameSize", framesize,
+                                            "hopSize", hopsize,
+                                            "startFromZero", true);
 
 
     Algorithm* discontinuityDetector    = factory.create("DiscontinuityDetector",
+                                                         "detectionThreshold", 15,
                                                          "frameSize", framesize, 
-                                                         "hopSize", hopsize);
+                                                         "hopSize", hopsize,
+                                                         "silenceThreshold", -25);
 
     Algorithm* gapsDetector             = factory.create("GapsDetector",
                                                          "frameSize", framesize, 
-                                                         "hopSize", hopsize); 
+                                                         "hopSize", hopsize,
+                                                         "silenceThreshold", -70); // in the first itteration of the assessment it was found
+                                                                                   // that low level noise was sometimes considered noise 
                                                          
-    Algorithm* startStopCut             = factory.create("StartStopCut");
+    Algorithm* startStopCut             = factory.create("StartStopCut",
+                                                         "maximumStartTime", 1, // Found song with only this margin (to double-check)
+                                                         "maximumStopTime", 1);
 
-    Algorithm* realAccumulator          = factory.create("RealAccumulator");
 
     Algorithm* saturationDetector       = factory.create("SaturationDetector",
                                                          "frameSize", framesize, 
-                                                         "hopSize", hopsize);
+                                                         "hopSize", hopsize,
+                                                         "differentialThreshold", 0.0001,
+                                                         "minimumDuration", 2.0f); // An experiment on rock songs showed that distortion is evident when 
+                                                                                   // the median duration of the saturated regions is around 2ms
 
-    Algorithm* truePeakDetector         = factory.create("TruePeakDetector"); 
+    Algorithm* truePeakDetector         = factory.create("TruePeakDetector",
+                                                         "threshold", 0.0f); 
 
+    // The algorithm should skip beginings.
     Algorithm* clickDetector            = factory.create("ClickDetector",
                                                          "frameSize", framesize, 
-                                                         "hopSize", hopsize);
+                                                         "hopSize", hopsize,
+                                                         "silenceThreshold", -25, // This is too high. Just a work around to the problem on initial and final non-silent parts
+                                                         "detectionThreshold", 38); // Experiments showed that a higher threshold is not eenough to detect audible clicks.
 
-    Algorithm* humDetector              = factory.create("HumDetector"); 
-    Algorithm* loudnessEBUR128          = factory.create("LoudnessEBUR128"); 
-    Algorithm* snr                      = factory.create("SNR"); 
+    Algorithm* loudnessEBUR128          = factory.create("LoudnessEBUR128");
+
+    Algorithm* humDetector              = factory.create("HumDetector",
+                                                         "sampleRate", sr,
+                                                         "minimumDuration", 20.f,  // [seconds] We are only interested in humming tones if they are present over very long segments 
+                                                         "frameSize", .4,  // For this algorithm, `frameSize` `hopSoze` are expresed in seconds.
+                                                         "hopSize", .2); 
+
+    Algorithm* snr                      = factory.create("SNR",
+                                                         "frameSize", framesize,
+                                                         "sampleRate", sr); 
+
     Algorithm* startStopSilence         = factory.create("StartStopSilence"); 
 
-
-
-     Algorithm* windowing               = factory.create("Windowing",
+    Algorithm* windowing                = factory.create("Windowing",
+                                                         "size", framesize,
+                                                         "zeroPadding", 0,
                                                          "type", "hann",
-                                                         "zeroPadding", 0);
+                                                         "normalized", false);
+
+    Algorithm* noiseBurstDetector       = factory.create("NoiseBurstDetector", 
+                                                         "threshold", 200);
+
+    Algorithm* falseStereoDetector      = factory.create("FalseStereoDetector");
 
     
     cout << "-------- connecting algos ---------" << endl;
 
 
-    audioload->output("audio")                    >>  monoMixer->input("audio");
-    audioload->output("audio")                    >>  loudnessEBUR128->input("signal");
-    audioload->output("sampleRate")               >>  NOWHERE;
-    audioload->output("numberChannels")           >>  monoMixer->input("numberChannels");
-    audioload->output("md5")                      >>  NOWHERE;
-    audioload->output("bit_rate")                 >>  NOWHERE;
-    audioload->output("codec")                    >>  NOWHERE;
+    audioStereo->output("audio")                   >>  monoMixer->input("audio");
+    audioStereo->output("audio")                   >>  loudnessEBUR128->input("signal");
+    audioStereo->output("audio")                   >>  falseStereoDetector->input("audio");
+    audioStereo->output("numberChannels")          >>  monoMixer->input("numberChannels");
+    audioStereo->output("sampleRate")              >>  NOWHERE;
+    audioStereo->output("md5")                     >>  NOWHERE;
+    audioStereo->output("bit_rate")                >>  NOWHERE;
+    audioStereo->output("codec")                   >>  NOWHERE;
 
-    monoMixer->output("audio")                    >>  frameCutter->input("signal");
-    monoMixer->output("audio")                    >>  realAccumulator->input("data");
-    monoMixer->output("audio")                    >>  humDetector->input("signal");
+    monoMixer->output("audio")                     >>  frameCutter->input("signal");
+    monoMixer->output("audio")                     >>  realAccumulator->input("data");
+    monoMixer->output("audio")                     >>  humDetector->input("signal");
 
-    realAccumulator->output("array")              >>  startStopCut->input("audio");
-    realAccumulator->output("array")              >>  truePeakDetector->input("signal");
+    realAccumulator->output("array")               >>  startStopCut->input("audio");
+    realAccumulator->output("array")               >>  truePeakDetector->input("signal");
 
-    startStopCut->output("startCut")              >>  PC(pool, "startStopCut.start");
-    startStopCut->output("stopCut")               >>  PC(pool, "startStopCut.cut");
+    startStopCut->output("startCut")               >>  PC(pool, "startStopCut.start");
+    startStopCut->output("stopCut")                >>  PC(pool, "startStopCut.cut");
 
-    truePeakDetector->output("peakLocations")     >>  PC(pool, "truePeakDetector.peakLocations");
-    truePeakDetector->output("output")            >>  NOWHERE;
+    truePeakDetector->output("peakLocations")      >>  PC(pool, "truePeakDetector.peakLocations");
+    truePeakDetector->output("output")             >>  NOWHERE;
 
     // Time domain algorithms do not require Windowing.
-    frameCutter->output("frame")                  >>  discontinuityDetector->input("frame");
-    frameCutter->output("frame")                  >>  gapsDetector->input("frame");
-    frameCutter->output("frame")                  >>  saturationDetector->input("frame");
-    frameCutter->output("frame")                  >>  clickDetector->input("frame");
-    frameCutter->output("frame")                  >>  startStopSilence->input("frame");
+    frameCutter->output("frame")                   >>  discontinuityDetector->input("frame");
+    frameCutter->output("frame")                   >>  gapsDetector->input("frame");
+    frameCutter->output("frame")                   >>  saturationDetector->input("frame");
+    frameCutter->output("frame")                   >>  clickDetector->input("frame");
+    frameCutter->output("frame")                   >>  startStopSilence->input("frame");
+    frameCutter->output("frame")                   >>  noiseBurstDetector->input("frame");
     
-    frameCutter->output("frame")                  >>  windowing->input("frame");
-    windowing->output("frame")                    >>  snr->input("frame");
+    frameCutter->output("frame")                   >>  windowing->input("frame");
+    windowing->output("frame")                     >>  snr->input("frame");
 
 
     // Store the outputs in the Pool.
-    discontinuityDetector->output("discontinuityLocations")       >>  PC(pool, "discontinuities.locations");
-    discontinuityDetector->output("discontinuityAmplitudes")      >>  PC(pool, "discontinuities.durations");
+    loudnessEBUR128->output("momentaryLoudness")   >>  NOWHERE;
+    loudnessEBUR128->output("shortTermLoudness")   >>  NOWHERE;
+    loudnessEBUR128->output("integratedLoudness")  >>  PC(pool, "loudnessEBUR128.integratedLoudness");
+    loudnessEBUR128->output("loudnessRange")       >>  PC(pool, "loudnessEBUR128.loudnessRange");
 
-    gapsDetector->output("starts")                                >>  PC(pool, "gaps.starts");
-    gapsDetector->output("ends")                                  >>  PC(pool, "gaps.ends");
+    humDetector->output("r")                       >>  NOWHERE;
+    humDetector->output("frequencies")             >>  PC(pool, "humDetector.frequencies");
+    humDetector->output("saliences")               >>  PC(pool, "humDetector.saliences");
+    humDetector->output("starts")                  >>  PC(pool, "humDetector.starts");
+    humDetector->output("ends")                    >>  PC(pool, "humDetector.ends");
 
-    saturationDetector->output("starts")                          >>  PC(pool, "saturationDetector.starts");
-    saturationDetector->output("ends")                            >>  PC(pool, "saturationDetector.ends");
+    falseStereoDetector->output("correlation")     >>  PC(pool, "falseStereoDetector.correlation");
+    falseStereoDetector->output("isFalseStereo")   >>  NOWHERE;
 
-    clickDetector->output("starts")                               >>  PC(pool, "clickDetector.starts");
-    clickDetector->output("ends")                                 >>  PC(pool, "clickDetector.ends");
+    connectSingleValue(discontinuityDetector->output("discontinuityLocations"), pool, "discontinuities.locations");
+    connectSingleValue(discontinuityDetector->output("discontinuityAmplitudes"), pool,  "discontinuities.amplitudes");
 
-    loudnessEBUR128->output("momentaryLoudness")                  >>  NOWHERE;
-    loudnessEBUR128->output("shortTermLoudness")                  >>  NOWHERE;
-    loudnessEBUR128->output("integratedLoudness")                 >>  PC(pool, "loudnessEBUR128.integratedLoudness");
-    loudnessEBUR128->output("loudnessRange")                      >>  PC(pool, "loudnessEBUR128.loudnessRange");
+    connectSingleValue(gapsDetector->output("starts"), pool, "gaps.starts");
+    connectSingleValue(gapsDetector->output("ends"), pool, "gaps.ends");
 
-    humDetector->output("r")                                      >>  NOWHERE;
-    humDetector->output("frequencies")                            >>  PC(pool, "humDetector.frequencies");
-    humDetector->output("saliences")                              >>  PC(pool, "humDetector.saliences");
-    humDetector->output("starts")                                 >>  PC(pool, "humDetector.starts");
-    humDetector->output("ends")                                   >>  PC(pool, "humDetector.ends");
+    connectSingleValue(saturationDetector->output("starts"), pool, "saturationDetector.starts");
+    connectSingleValue(saturationDetector->output("ends"), pool, "saturationDetector.ends");
 
-    snr->output("instantSNR")                                     >>  NOWHERE;
-    snr->output("averagedSNR")                                    >>  PC(pool, "snr.averagedSNR");
-    snr->output("spectralSNR")                                    >>  PC(pool, "snr.spectralSNR");
+    connectSingleValue(clickDetector->output("starts"), pool, "clickDetector.starts");
+    connectSingleValue(clickDetector->output("ends"), pool, "clickDetector.ends");
 
-    startStopSilence->output("startFrame")                        >>  PC(pool, "startStopSilence.startFrame");
-    startStopSilence->output("stopFrame")                         >>  PC(pool, "startStopSilence.stopFrame");
+    snr->output("instantSNR")                     >>  NOWHERE;
+    snr->output("spectralSNR")                    >>  NOWHERE;
+    connectSingleValue(snr->output("averagedSNR"), pool, "snr.averagedSNR");
 
+
+    connectSingleValue(startStopSilence->output("startFrame"), pool, "startStopSilence.startFrame");
+    connectSingleValue(startStopSilence->output("stopFrame"), pool, "startStopSilence.stopFrame");
+    
+    connectSingleValue(noiseBurstDetector->output("indexes"), pool, "noiseBurstDetector.indexes");
 
 
     cout << "-------- running algos ---------" << endl;
-    Network(audioload).run();
+    Network(audioStereo).run();
 
     cout << "-------- writting Yalm ---------" << endl;
 
