@@ -43,6 +43,7 @@ int essentia_main(string audioFilename, string outputFilename) {
     Real sr = 44100.f;
     int framesize = 512;
     int hopsize = 256;
+    Real silenceThreshold = -25;
 
     Pool pool;
 
@@ -62,7 +63,7 @@ int essentia_main(string audioFilename, string outputFilename) {
                                                          "detectionThreshold", 15,
                                                          "frameSize", framesize, 
                                                          "hopSize", hopsize,
-                                                         "silenceThreshold", -25);
+                                                         "silenceThreshold", silenceThreshold);
 
     Algorithm* gapsDetector             = factory.create("GapsDetector",
                                                          "frameSize", framesize, 
@@ -83,13 +84,14 @@ int essentia_main(string audioFilename, string outputFilename) {
                                                                                    // the median duration of the saturated regions is around 2ms
 
     Algorithm* truePeakDetector         = factory.create("TruePeakDetector",
-                                                         "threshold", 0.0f); 
+                                                         "threshold", 0.0f,
+                                                         "quality", 2); // Reducing the quality of the conversion doubles the conversion speed.   
 
     // The algorithm should skip beginings.
     Algorithm* clickDetector            = factory.create("ClickDetector",
                                                          "frameSize", framesize, 
                                                          "hopSize", hopsize,
-                                                         "silenceThreshold", -25, // This is too high. Just a work around to the problem on initial and final non-silent parts
+                                                         "silenceThreshold", silenceThreshold, // This is too high. Just a work around to the problem on initial and final non-silent parts
                                                          "detectionThreshold", 38); // Experiments showed that a higher threshold is not eenough to detect audible clicks.
 
     Algorithm* loudnessEBUR128          = factory.create("LoudnessEBUR128");
@@ -113,7 +115,8 @@ int essentia_main(string audioFilename, string outputFilename) {
                                                          "normalized", false);
 
     Algorithm* noiseBurstDetector       = factory.create("NoiseBurstDetector", 
-                                                         "threshold", 200);
+                                                         "threshold", 200,
+                                                         "silenceThreshold", silenceThreshold);
 
     Algorithm* falseStereoDetector      = factory.create("FalseStereoDetector");
 
@@ -245,7 +248,7 @@ int essentia_main(string audioFilename, string outputFilename) {
     pool.set("channelsCorrelation", correlation);
 
     monoMixer->compute();
-    
+
 
     startStopCut->compute();
     pool.set("startStopCut.start", startStopCutStart);
