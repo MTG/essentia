@@ -43,7 +43,7 @@ int essentia_main(string audioFilename, string outputFilename) {
     Real sr = 44100.f;
     int framesize = 512;
     int hopsize = 256;
-    Real silenceThreshold = -25;
+    int silenceThreshold = -25;
 
     Pool pool;
 
@@ -236,9 +236,7 @@ int essentia_main(string audioFilename, string outputFilename) {
 
     pool.set("filename", audioFilename);
 
-    pool.set("duration", audio.size() / sr);
-
-    pool.set("filename", audioFilename);
+    pool.set("duration", audioBuffer.size() / sr);
 
     loudnessEBUR128->compute();
     pool.set("EBUR128.integratedLoudness", integratedLoudness);
@@ -248,7 +246,6 @@ int essentia_main(string audioFilename, string outputFilename) {
     pool.set("channelsCorrelation", correlation);
 
     monoMixer->compute();
-
 
     startStopCut->compute();
     pool.set("startStopCut.start", startStopCutStart);
