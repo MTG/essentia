@@ -89,7 +89,7 @@ void SNR::compute() {
     }
 
     if ((_counter < 15) && (!_warned)) {
-      E_WARNING("SNR: Noise PSD was smtimated on just " << _counter << 
+      E_WARNING("SNR: Noise PSD was stimated on just " << _counter << 
       " frames. Maybe the audio stream does not have enoguh noise or the"
       " threshold parameter 'noiseThreshold' is not properly set.");
 
