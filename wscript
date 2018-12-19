@@ -44,7 +44,7 @@ def options(ctx):
 
     ctx.add_option('--mode', action='store',
                    dest='MODE', default="release",
-                   help='debug or release')
+                   help='debug, release or default')
 
     ctx.add_option('--std', action='store',
                    dest='STD', default='c++11',
@@ -140,8 +140,11 @@ def configure(ctx):
         print ('→ Building in release mode')
         ctx.env.CXXFLAGS += ['-O2']  # '-march=native' ] # '-msse3', '-mfpmath=sse' ]
 
+    elif ctx.options.MODE == 'default':
+        pass
+
     else:
-        raise ValueError('mode should be either "debug" or "release"')
+        raise ValueError('mode should be either "debug" or "release" or "default"')
 
     if not ctx.options.CROSS_COMPILE_MINGW32 and sys.platform != 'win32':
         # required if we want to use libessentia.a to be linked in the python bindings
