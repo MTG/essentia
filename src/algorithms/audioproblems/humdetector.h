@@ -75,6 +75,7 @@ class HumDetector : public AlgorithmComposite {
   Real _minDuration;
   Real _timeContinuity;
   Real _detectionThreshold;
+  Real  _EPS;
 
   scheduler::Network* _network;
 

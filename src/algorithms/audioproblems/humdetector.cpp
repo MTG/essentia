@@ -178,6 +178,8 @@ void HumDetector::configure() {
 
 
   _referenceTerm = 0.5 - _binsInOctave * log2(_minimumFrequency);
+
+  _EPS = numeric_limits<Real>::epsilon();
 }
 
 
@@ -240,7 +242,7 @@ AlgorithmStatus HumDetector::process() {
     Q0 = psdWindow[i][psdIdxs[_Q0sample]];
     Q1 = psdWindow[i][psdIdxs[_Q1sample]];
     
-    r[i][0] = Q0 / Q1;
+    r[i][0] = Q0 / (Q1 + _EPS);
   }
 
   // iterate during the rest of timestamps.
@@ -253,7 +255,7 @@ AlgorithmStatus HumDetector::process() {
       Q0 = psdWindow[i][psdIdxs[_Q0sample]];
       Q1 = psdWindow[i][psdIdxs[_Q1sample]];
 
-      r[i][j - _timeWindow + 1] = Q0 / Q1;
+      r[i][j - _timeWindow + 1] = Q0 / (Q1 + _EPS);
       }
   }
 
