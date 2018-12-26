@@ -36,11 +36,11 @@ FFMPEG_AUDIO_FLAGS="
     --disable-debug
 
     --disable-avdevice
-    --disable-swresample
+    --disable-avresample
     --disable-swscale
     --disable-postproc
     --disable-avfilter
-    --enable-avresample
+    --enable-swresample
 
     --disable-network
     --disable-indevs

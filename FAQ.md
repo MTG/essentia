@@ -16,7 +16,7 @@ To install LibAv from source:
 
 - If you have installed LibAv before, remove it so that it does not mess up Essentia installation 
     ```
-    sudo apt-get remove libavcodec-dev libavformat-dev libavutil-dev libavresample-dev
+    sudo apt-get remove libavcodec-dev libavformat-dev libavutil-dev libswresample-dev
     ```
 - Download and unpack [LibAv source code](https://libav.org/download/)
 - Configure and build LibAv. The library will be installed to ```/usr/local```.

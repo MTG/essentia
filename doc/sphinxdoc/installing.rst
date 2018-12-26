@@ -47,7 +47,7 @@ Essentia depends on (at least) the following libraries:
 
 - `Eigen <http://eigen.tuxfamily.org/>`_: for linear algebra
 - `FFTW <http://www.fftw.org>`_: for the FFT implementation *(optional)*
-- `libavcodec/libavformat/libavutil/libavresample <http://ffmpeg.org/>`_ (from the FFmpeg/LibAv project): for loading/saving any type of audio files *(optional)*
+- `libavcodec/libavformat/libavutil/libswresample <http://ffmpeg.org/>`_ (from the FFmpeg/LibAv project): for loading/saving any type of audio files *(optional)*
 - `libsamplerate <http://www.mega-nerd.com/SRC/>`_: for resampling audio *(optional)*
 - `TagLib <http://developer.kde.org/~wheeler/taglib.html>`_: for reading audio metadata tags *(optional)*
 - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
@@ -62,7 +62,7 @@ Installing dependencies on Linux
 
 You can install those dependencies on a Debian/Ubuntu system from official repositories using the command below::
 
-  sudo apt-get install build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev libsamplerate0-dev libtag1-dev libchromaprint-dev
+  sudo apt-get install build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libsamplerate0-dev libtag1-dev libchromaprint-dev
 
 In order to use Python 3 bindings for the library, you might also need to install python3-dev, python3-numpy-dev (or python3-numpy on Ubuntu) and python3-yaml for YAML support in python::
 
@@ -75,7 +75,7 @@ Similarly, in the case of Python 2 install::
 
 Note that, depending on the version of Essentia, different versions of ``libav*`` and ``libtag1-dev`` packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_.
 
-Since the 2.1-beta3 release of Essentia, the required version of TagLib (``libtag1-dev``) is greater or equal to ``1.9``. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu 14.10 or later, and in Debian wheezy-backports. If you want to install Essentia on older versions of Ubuntu/Debian, you will have to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
+Since the 2.1-beta3 release of Essentia, the required version of TagLib (``libtag1-dev``) is greater or equal to ``1.9``. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libswresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu 14.10 or later, and in Debian wheezy-backports. If you want to install Essentia on older versions of Ubuntu/Debian, you will have to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
 
 If you are willing to use Essentia with a TensorFlow wrapper in C++, install the TensorFlow shared library using a helper script inside our source code::
 
