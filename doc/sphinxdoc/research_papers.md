@@ -216,7 +216,7 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - A. Haron. A step towards automatic identification of influene: Lick detection in a musical passage. In 15th International Society for Music Information Retrieval Conference (ISMIR'14) Late-Breaking/Demo Session.
 
-### Melodic analysis
+### Melodic analysis
 
 - Y. P. Chen, L. Su, and Y. H. Yang. Electric Guitar Playing Technique Detection in Real-World Recording Based on F0 Sequence Pattern Recognition. In 16th International Society for Music Information Retrieval Conference (ISMIR'15), pages 708-714, 2015.
 
