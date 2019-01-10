@@ -32,6 +32,11 @@ deploy:
   provider: script
   script:
     python setup.py sdist;
-    travis/deploy_transfer.sh
+    travis/deploy_owncloud.sh
   on:
     branch: master
+
+env:
+  global:
+  - secure: "MCX3GqjhLwLLkhm3OTPKUy7BbNEPrO0YxfXA+kHihimADG23nkbESq54e3/RKc/+M8yCiOLjfUP8hNp+YdgzxQKcxotcuNQ4K/24TVrckPejJL6XZCtTkvmN6KsjvdKM8xwR5LiHjrHStC3yvlyZ87PUjfpv7y6lyQiXfVP2xBM="
+  - secure: "tnJPOcBtnYQiY+HRu7hX6iP7/JWYufHGenRROyTiqxylaEB9df/9aqeBrqNtH13eCW6eY4uoXXFdatmfU0S+QWR0TPOfUhPCYMSyX3cNQ7HMbialdRKwNGrwbWUv9bru1hqKoLRFeFlWHouoJHiuyFymWnGT5seIjKfbwfLRkXs="

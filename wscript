@@ -44,11 +44,19 @@ def options(ctx):
 
     ctx.add_option('--mode', action='store',
                    dest='MODE', default="release",
-                   help='debug or release')
+                   help='debug, release or default')
+
+    ctx.add_option('--std', action='store',
+                   dest='STD', default='c++11',
+                   help='C++ standard to compile for [c++11 c++14 c++17 ...]')
 
     ctx.add_option('--arch', action='store',
                    dest='ARCH', default="x64",
                    help='Target architecture when compiling on OSX: i386, x64 or FAT')
+
+    ctx.add_option('--no-msse', action='store_true',
+                   dest='NO_MSSE', default=False,
+                   help='never add compiler flags for msse')
 
     ctx.add_option('--cross-compile-mingw32', action='store_true',
                    dest='CROSS_COMPILE_MINGW32', default=False,
@@ -91,6 +99,7 @@ def configure(ctx):
     ctx.env.ALGOINCLUDE          = []
     ctx.env.INCLUDE_ALGOS        = ctx.options.INCLUDE_ALGOS
     ctx.env.FFT                  = ctx.options.FFT
+    ctx.env.NO_MSSE              = ctx.options.NO_MSSE
 
 
     if ctx.options.CROSS_COMPILE_MINGW32:
@@ -108,11 +117,13 @@ def configure(ctx):
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
 
     # compiler flags
+    ctx.env.CXXFLAGS = ['-std=' + ctx.options.STD]  # c++11 by default
+
     if sys.platform != 'win32':
         # msvc does not support -pipe
-        ctx.env.CXXFLAGS = ['-pipe', '-Wall']
+        ctx.env.CXXFLAGS += ['-pipe', '-Wall']
     else:
-        ctx.env.CXXFLAGS = ['-W2', '-EHsc']
+        ctx.env.CXXFLAGS += ['-W2', '-EHsc']
 
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
@@ -120,6 +131,7 @@ def configure(ctx):
     if (not ctx.options.EMSCRIPTEN and 
         not ctx.options.CROSS_COMPILE_ANDROID and 
         not ctx.options.CROSS_COMPILE_IOS and
+        not ctx.options.NO_MSSE and
         sys.platform != 'win32'):
         ctx.env.CXXFLAGS += ['-msse', '-msse2', '-mfpmath=sse']
 
@@ -134,8 +146,11 @@ def configure(ctx):
         print ('→ Building in release mode')
         ctx.env.CXXFLAGS += ['-O2']  # '-march=native' ] # '-msse3', '-mfpmath=sse' ]
 
+    elif ctx.options.MODE == 'default':
+        pass
+
     else:
-        raise ValueError('mode should be either "debug" or "release"')
+        raise ValueError('mode should be either "debug" or "release" or "default"')
 
     if not ctx.options.CROSS_COMPILE_MINGW32 and sys.platform != 'win32':
         # required if we want to use libessentia.a to be linked in the python bindings

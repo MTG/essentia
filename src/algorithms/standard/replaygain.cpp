@@ -28,9 +28,11 @@ namespace standard {
 
 const char* ReplayGain::name = "ReplayGain";
 const char* ReplayGain::category = "Loudness/dynamics";
-const char* ReplayGain::description = DOC("This algorithm computes the Replay Gain loudness value of an audio signal. The algorithm is described in detail at [1]. The value returned is the 'standard' ReplayGain value, not the value with 6dB preamplification as it is computed by lame, mp3gain, vorbisgain, and all widely used ReplayGain programs.\n"
+const char* ReplayGain::description = DOC("This algorithm computes the Replay Gain loudness value of an audio signal. The algorithm is described in detail in [1]. The value returned is the 'standard' ReplayGain value, not the value with 6dB preamplification as computed by lame, mp3gain, vorbisgain, and all widely used ReplayGain programs.\n"
 "\n"
 "This algorithm is only defined for input signals which size is larger than 0.05ms, otherwise an exception will be thrown.\n"
+"\n"
+"As a pre-processing step, the algorithm applies equal-loudness filtering to the input signal. This is always done in the standard mode, but it can be turned off in the streaming mode, which is useful in the case one already has an equal-loudness filtered signal.\n"
 "\n"
 "References:\n"
 "  [1] ReplayGain 1.0 specification, https://wiki.hydrogenaud.io/index.php?title=ReplayGain_1.0_specification\n");
@@ -102,6 +104,9 @@ void ReplayGain::compute() {
 namespace essentia {
 namespace streaming {
 
+const char* ReplayGain::name = essentia::standard::ReplayGain::name;
+const char* ReplayGain::category = essentia::standard::ReplayGain::category;
+const char* ReplayGain::description = essentia::standard::ReplayGain::description;
 
 ReplayGain::ReplayGain() : _applyEqloud(false) {
   declareInput(_signal, "signal", "the input signal");
