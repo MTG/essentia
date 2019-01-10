@@ -75,7 +75,9 @@ void Key::configure() {
       _useMajMin = false;
     }
   }
-  const char* keyNames[] = { "A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab" };
+  // TODO: choose which set of key names we want to use
+  //const char* keyNames[] = { "A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab" };
+  const char* keyNames[] = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
   _keys = arrayToVector<string>(keyNames);
 
   Real profileTypes[][12] = {
