@@ -215,7 +215,7 @@ AlgorithmStatus PercivalBpmEstimator::process() {
 
   // If there are no valid lag estimates, return bpm 0
   if (lags.size() == 0) {
-    _bpm.push(0.0);
+    _bpm.push((Real)0.0);
     return FINISHED;
   }
 
