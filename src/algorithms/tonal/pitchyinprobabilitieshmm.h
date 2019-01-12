@@ -34,9 +34,9 @@ class PitchYinProbabilitiesHMM : public Algorithm {
 
   Algorithm* _viterbi;
 
-  Real _minFreq;
-  size_t _nBPS;
-  Real _selfTrans;
+  Real _minFrequency;
+  size_t _numberBinsPerSemitone;
+  Real _selfTransition;
   Real _yinTrust;
   size_t _nPitch;
   size_t _transitionWidth;
@@ -59,11 +59,10 @@ class PitchYinProbabilitiesHMM : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("minFreq", "minimum detected frequency", "(0,inf)", 61.735);
-    declareParameter("nBPS", "number of bins per semitone", "(1,inf)", 5);
-    declareParameter("selfTrans", "the self transition probabilities", "(0,1)", 0.99);  
+    declareParameter("minFrequency", "minimum detected frequency", "(0,inf)", 61.735);
+    declareParameter("numberBinsPerSemitone", "number of bins per semitone", "(1,inf)", 5);
+    declareParameter("selfTransition", "the self transition probabilities", "(0,1)", 0.99);  
     declareParameter("yinTrust", "the yin trust parameter", "(0, 1)", 0.5);
-    // https://github.com/piem/aubio/blob/master/src/pitch/pitchyin.c
   }
 
   void configure();

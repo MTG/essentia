@@ -28,22 +28,22 @@ namespace standard {
 class Viterbi : public Algorithm {
 
  protected:
-  Input<std::vector<std::vector<Real> > > _obs;
-  Input<std::vector<Real> > _init;
-  Input<std::vector<size_t> > _from;
-  Input<std::vector<size_t> > _to;
-  Input<std::vector<Real> > _transProb;
+  Input<std::vector<std::vector<Real> > > _observationProbabilities;
+  Input<std::vector<Real> > _initialization;
+  Input<std::vector<size_t> > _fromIndex;
+  Input<std::vector<size_t> > _toIndex;
+  Input<std::vector<Real> > _transitionProbabilities;
   Output<std::vector<int> > _path;
 
   std::vector<int> _tempPath; 
 
  public:
   Viterbi() {
-    declareInput(_obs, "obs", "the observation probabilities");
-    declareInput(_init, "init", "the initialization");
-    declareInput(_from, "from", "the transition matrix from index");
-    declareInput(_to, "to", "the transition matrix to index");
-    declareInput(_transProb, "transProb", "the transition probablities matrix");
+    declareInput(_observationProbabilities, "observationProbabilities", "the observation probabilities");
+    declareInput(_initialization, "initialization", "the initialization");
+    declareInput(_fromIndex, "fromIndex", "the transition matrix from index");
+    declareInput(_toIndex, "toIndex", "the transition matrix to index");
+    declareInput(_transitionProbabilities, "transitionProbabilities", "the transition probabilities matrix");
     declareOutput(_path, "path", "the decoded path");
   }
 
@@ -71,21 +71,21 @@ namespace streaming {
 class Viterbi : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<std::vector<Real> > > _obs;
-  Sink<std::vector<Real> > _init;
-  Sink<std::vector<size_t> > _from;
-  Sink<std::vector<size_t> > _to;
-  Sink<std::vector<Real> > _transProb;
+  Sink<std::vector<std::vector<Real> > > _observationProbabilities;
+  Sink<std::vector<Real> > _initialization;
+  Sink<std::vector<size_t> > _fromIndex;
+  Sink<std::vector<size_t> > _toIndex;
+  Sink<std::vector<Real> > _transitionProbabilities;
   Source<std::vector<int> > _path;
 
  public:
   Viterbi() {
     declareAlgorithm("Viterbi");
-    declareInput(_obs, TOKEN, "obs");
-    declareInput(_init, TOKEN, "init");
-    declareInput(_from , TOKEN, "from");
-    declareInput(_to, TOKEN, "to");
-    declareInput(_transProb, TOKEN, "transProb");
+    declareInput(_observationProbabilities, TOKEN, "observationProbabilities");
+    declareInput(_initialization, TOKEN, "initialization");
+    declareInput(_fromIndex , TOKEN, "fromIndex");
+    declareInput(_toIndex, TOKEN, "toIndex");
+    declareInput(_transitionProbabilities, TOKEN, "transitionProbabilities");
     declareOutput(_path, TOKEN, "path");
   }
 };

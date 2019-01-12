@@ -42,7 +42,7 @@ void PitchYinProbabilities::configure() {
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toReal();
   _lowAmp = parameter("lowAmp").toReal();
-  _precisetime = parameter("precisetime").toBool();
+  _preciseTime = parameter("preciseTime").toBool();
 
   _yin.resize(_frameSize/2 + 1);
   _peakProb.resize(_yin.size());
@@ -199,7 +199,7 @@ void PitchYinProbabilities::fastDifference(const std::vector<Real> in, std::vect
 void PitchYinProbabilities::compute() {
   const vector<Real>& signal = _signal.get();
   if (signal.empty()) {
-    throw EssentiaException("PitchYin: Cannot compute pitch detection on empty signal frame.");
+    throw EssentiaException("PitchYinProbabilities: Cannot compute pitch detection on empty signal frame.");
   }
   if ((int) signal.size() != _frameSize) {
     Algorithm::configure( "frameSize", int(signal.size()) );
@@ -209,7 +209,7 @@ void PitchYinProbabilities::compute() {
   vector<Real>& probabilities = _probabilities.get();
   Real& RMS = _RMS.get();
   
-  if (_precisetime) {
+  if (_preciseTime) {
     slowDifference(signal, _yin);
   } else {
     fastDifference(signal, _yin, size_t(_yin.size()));
@@ -236,6 +236,7 @@ void PitchYinProbabilities::compute() {
   // this tau is the same as the mean across all df values from 1 to tau   
 
   // Calculate YIN probabilities
+  // beta distribution used as parameter priors
   static float betaDist2[100] = {0.012614,0.022715,0.030646,0.036712,0.041184,0.044301,0.046277,0.047298,0.047528,0.047110,0.046171,0.044817,0.043144,0.041231,0.039147,0.036950,0.034690,0.032406,0.030133,0.027898,0.025722,0.023624,0.021614,0.019704,0.017900,0.016205,0.014621,0.013148,0.011785,0.010530,0.009377,0.008324,0.007366,0.006497,0.005712,0.005005,0.004372,0.003806,0.003302,0.002855,0.002460,0.002112,0.001806,0.001539,0.001307,0.001105,0.000931,0.000781,0.000652,0.000542,0.000449,0.000370,0.000303,0.000247,0.000201,0.000162,0.000130,0.000104,0.000082,0.000065,0.000051,0.000039,0.000030,0.000023,0.000018,0.000013,0.000010,0.000007,0.000005,0.000004,0.000003,0.000002,0.000001,0.000001,0.000001,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000,0.000000};
 
   size_t minTau = 2;

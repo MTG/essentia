@@ -41,8 +41,8 @@ PitchYinProbabilistic::PitchYinProbabilistic() : AlgorithmComposite() {
   _yinProbabilitiesHMM = standard::AlgorithmFactory::create("PitchYinProbabilitiesHMM");
 
   declareInput(_signal, "signal", "the input mono audio signal");
-  declareOutput(_pitch, "pitch", "the output pitch track");
-  declareOutput(_voicedProbs, "voicedProbs", "the voiced probabilities");
+  declareOutput(_pitch, "pitch", "the output pitch estimations");
+  declareOutput(_voicedProbabilities, "voicedProbabilities", "the voiced probabilities");
  
   // Connect input proxy
   _signal >> _frameCutter->input("signal");
@@ -64,9 +64,9 @@ void PitchYinProbabilistic::configure() {
   Real sampleRate = parameter("sampleRate").toReal();
   _frameSize = parameter("frameSize").toInt();
   _hopSize = parameter("hopSize").toInt();
-  _lowAmp = parameter("lowAmp").toReal();
+  _lowRMSThreshold = parameter("lowRMSThreshold").toReal();
   _outputUnvoiced = parameter("outputUnvoiced").toInt();
-  _precisetime = parameter("precisetime").toBool();
+  _preciseTime = parameter("preciseTime").toBool();
   
   _frameCutter->configure("frameSize", _frameSize,
                           "hopSize", _hopSize,
@@ -75,8 +75,8 @@ void PitchYinProbabilistic::configure() {
 
   _yinProbabilities->configure("frameSize", _frameSize,
                                "sampleRate", sampleRate,
-                               "lowAmp", _lowAmp,
-                               "precisetime", _precisetime);
+                               "lowAmp", _lowRMSThreshold,
+                               "preciseTime", _preciseTime);
 }
 
 
@@ -108,7 +108,7 @@ AlgorithmStatus PitchYinProbabilistic::process() {
     }
     oF0Probs[j] = voicedProb;
   }
-  _voicedProbs.push(oF0Probs);
+  _voicedProbabilities.push(oF0Probs);
 
 
   vector<Real> _tempPitchVoicing(tempPitch.size());
@@ -157,8 +157,8 @@ const char* PitchYinProbabilistic::description = DOC("This algorithm computes th
 
 PitchYinProbabilistic::PitchYinProbabilistic() {
   declareInput(_signal, "signal", "the input mono audio signal");
-  declareOutput(_pitch, "pitch", "the output pitch track");
-  declareOutput(_voicedProbs, "voicedProbs", "the voiced probabilities");
+  declareOutput(_pitch, "pitch", "the output pitch estimations");
+  declareOutput(_voicedProbabilities, "voicedProbabilities", "the voiced probabilities");
 
   createInnerNetwork();
 }
@@ -172,9 +172,9 @@ void PitchYinProbabilistic::configure() {
   _PitchYinProbabilistic->configure(INHERIT("sampleRate"), 
                                     INHERIT("frameSize"),
                                     INHERIT("hopSize"),
-                                    INHERIT("lowAmp"),
+                                    INHERIT("lowRMSThreshold"),
                                     INHERIT("outputUnvoiced"),
-                                    INHERIT("precisetime"));
+                                    INHERIT("preciseTime"));
 }
 
 
@@ -184,7 +184,7 @@ void PitchYinProbabilistic::createInnerNetwork() {
 
   *_vectorInput  >>  _PitchYinProbabilistic->input("signal");
   _PitchYinProbabilistic->output("pitch") >> PC(_pool, "pitch");
-  _PitchYinProbabilistic->output("voicedProbs") >> PC(_pool, "voicedProbs");
+  _PitchYinProbabilistic->output("voicedProbabilities") >> PC(_pool, "voicedProbabilities");
   
   _network = new scheduler::Network(_vectorInput);
 }
@@ -199,10 +199,10 @@ void PitchYinProbabilistic::compute() {
   _network->run();
 
   vector<Real>& pitch = _pitch.get();
-  vector<Real>& voicedProbas = _voicedProbs.get();
+  vector<Real>& voicedProbas = _voicedProbabilities.get();
 
   pitch = _pool.value<vector<Real> >("pitch");
-  voicedProbas = _pool.value<vector<Real> >("voicedProbs");
+  voicedProbas = _pool.value<vector<Real> >("voicedProbabilities");
 
   reset();
 }

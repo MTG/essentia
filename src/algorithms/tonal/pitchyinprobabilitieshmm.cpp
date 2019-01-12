@@ -41,16 +41,16 @@ const char* PitchYinProbabilitiesHMM::description = DOC("This algorithm estimate
 void PitchYinProbabilitiesHMM::configure() {
   _viterbi->configure();
 
-  _minFreq = parameter("minFreq").toReal();
-  _nBPS = parameter("nBPS").toInt();
-  _selfTrans = parameter("selfTrans").toReal();
+  _minFrequency = parameter("minFrequency").toReal();
+  _numberBinsPerSemitone = parameter("numberBinsPerSemitone").toInt();
+  _selfTransition = parameter("selfTransition").toReal();
   _yinTrust = parameter("yinTrust").toReal();
 
-  _transitionWidth = 5 * (_nBPS / 2) + 1;
-  _nPitch = 69 * _nBPS;
+  _transitionWidth = 5 * (_numberBinsPerSemitone / 2) + 1;
+  _nPitch = 69 * _numberBinsPerSemitone;
   _freqs = vector<Real>( 2 * _nPitch);
   for (size_t iPitch = 0; iPitch < _nPitch; ++iPitch) {
-      _freqs[iPitch] = _minFreq * pow(2, iPitch * 1.0 / (12 * _nBPS));
+      _freqs[iPitch] = _minFrequency * pow(2, iPitch * 1.0 / (12 * _numberBinsPerSemitone));
       _freqs[iPitch + _nPitch] = -_freqs[iPitch];
   }
 
@@ -88,19 +88,19 @@ void PitchYinProbabilitiesHMM::configure() {
     {
       _from.push_back(iPitch);
       _to.push_back(i);
-      _transProb.push_back(weights[i - minNextPitch] / weightSum * _selfTrans);
+      _transProb.push_back(weights[i - minNextPitch] / weightSum * _selfTransition);
 
       _from.push_back(iPitch);
       _to.push_back(i + _nPitch);
-      _transProb.push_back(weights[i - minNextPitch] / weightSum * (1 - _selfTrans));
+      _transProb.push_back(weights[i - minNextPitch] / weightSum * (1 - _selfTransition));
 
       _from.push_back(iPitch + _nPitch);
       _to.push_back(i + _nPitch);
-      _transProb.push_back(weights[i - minNextPitch] / weightSum * _selfTrans);
+      _transProb.push_back(weights[i - minNextPitch] / weightSum * _selfTransition);
       
       _from.push_back(iPitch + _nPitch);
       _to.push_back(i);
-      _transProb.push_back(weights[i - minNextPitch] / weightSum * (1 - _selfTrans));
+      _transProb.push_back(weights[i - minNextPitch] / weightSum * (1 - _selfTransition));
     }
   }
 }
@@ -112,7 +112,7 @@ const vector<Real> PitchYinProbabilitiesHMM::calculateObsProb(const vector<Real>
   // BIN THE PITCHES
   for (size_t iPair = 0; iPair < pitchCandidates.size(); ++iPair) {
     Real freq = 440. * pow(2, (pitchCandidates[iPair] - 69)/12);
-    if (freq <= _minFreq) continue;
+    if (freq <= _minFrequency) continue;
     Real d = 0;
     Real oldd = 1000;
     for (size_t iPitch = 0; iPitch < _nPitch; ++iPitch) {
@@ -153,11 +153,11 @@ void PitchYinProbabilitiesHMM::compute() {
   }
 
   vector<int> path;
-  _viterbi->input("obs").set(obsProb);
-  _viterbi->input("init").set(_init);
-  _viterbi->input("from").set(_from);
-  _viterbi->input("to").set(_to);
-  _viterbi->input("transProb").set(_transProb);
+  _viterbi->input("observationProbabilities").set(obsProb);
+  _viterbi->input("initialization").set(_init);
+  _viterbi->input("fromIndex").set(_from);
+  _viterbi->input("toIndex").set(_to);
+  _viterbi->input("transitionProbabilities").set(_transProb);
   _viterbi->output("path").set(path);
   _viterbi->compute();
 

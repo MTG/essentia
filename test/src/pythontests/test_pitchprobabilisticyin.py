@@ -25,28 +25,13 @@ import time
 import os
 
 filename = os.path.join(os.path.dirname(__file__) ,'../../audio/recorded', 'long_voice.wav')
-
-loader = ess.MonoLoader(filename=filename,
-					    sampleRate=48000)
-
-PYIN = ess.PitchYinProbabilistic(sampleRate=48000,
-								 frameSize=2048,
-								 hopSize=256, 
-								 lowAmp=0.1,
-								 outputUnvoiced=2)
-
+loader = ess.MonoLoader(filename=filename, sampleRate=48000)
+PYIN = ess.PitchYinProbabilistic(sampleRate=48000, frameSize=2048, hopSize=256, lowRMSThreshold=0.1, outputUnvoiced=2)
 start_time = time.time()
-
 loader.audio >> PYIN.signal
-
 pool = essentia.Pool()
-
 PYIN.pitch >> (pool, 'pitch')
-
-PYIN.voicedProbs >> (pool, 'voicedProbs')
-
+PYIN.voicedProbabilities >> (pool, 'voicedProbabilities')
 essentia.run(loader)
-
 end_time = time.time()
-
 print("Execution time {} s".format(end_time-start_time))

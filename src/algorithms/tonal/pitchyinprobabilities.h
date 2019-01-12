@@ -44,7 +44,7 @@ class PitchYinProbabilities : public Algorithm {
   int _frameSize;
   Real _sampleRate;
   Real _lowAmp;
-  bool _precisetime;
+  bool _preciseTime;
 
  public:
   PitchYinProbabilities() {
@@ -62,7 +62,7 @@ class PitchYinProbabilities : public Algorithm {
     declareParameter("frameSize", "number of samples in the input frame", "[2,inf)", 2048);
     declareParameter("sampleRate", "sampling rate of the input audio [Hz]", "(0,inf)", 44100.);
     declareParameter("lowAmp", "the low RMS amplitude threshold", "(0,1]", 0.1);  
-    declareParameter("precisetime", "use non-standard precise YIN timing (slow).", "{true,false}", false);
+    declareParameter("preciseTime", "use non-standard precise YIN timing (slow).", "{true,false}", false);
   }
 
   void configure();

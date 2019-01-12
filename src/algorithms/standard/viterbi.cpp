@@ -26,9 +26,9 @@ using namespace standard;
 
 const char* Viterbi::name = "Viterbi";
 const char* Viterbi::category = "Statistics";
-const char* Viterbi::description = DOC("This is the Viterbi algorithm used in PitchYinProbabilistiesHMM algorithm.\n"
+const char* Viterbi::description = DOC("This algorithm estimates the most-likely path by Viterbi algorithm. It is used in PitchYinProbabilistiesHMM algorithm.\n"
 "\n"
-"This Viterbi algorithm returns the most likely path.\n"
+"This Viterbi algorithm returns the most likely path. The internal variable calculation uses double for a better precision.\n"
 "\n"
 "References:\n"
 "  [1] M. Mauch and S. Dixon, \"pYIN: A Fundamental Frequency Estimator\n"
@@ -38,11 +38,11 @@ const char* Viterbi::description = DOC("This is the Viterbi algorithm used in Pi
 
 void Viterbi::compute() {
 
-  const vector<vector<Real> >& obs = _obs.get();
-  const vector<Real>& init = _init.get();
-  const vector<size_t>& from = _from.get();
-  const vector<size_t>& to = _to.get();
-  const vector<Real>&transProb = _transProb.get();
+  const vector<vector<Real> >& obs = _observationProbabilities.get();
+  const vector<Real>& init = _initialization.get();
+  const vector<size_t>& from = _fromIndex.get();
+  const vector<size_t>& to = _toIndex.get();
+  const vector<Real>&transProb = _transitionProbabilities.get();
 
   if (obs.size() == 0 || init.size() == 0 || from.size() == 0 || to.size() == 0 || transProb.size() == 0) {
     throw EssentiaException("Viterbi: one of the inputs has size zero");
@@ -56,7 +56,7 @@ void Viterbi::compute() {
   // check for consistency    
   size_t nTrans = transProb.size();
   
-  // declaring variables
+  // declaring variables, use double for a better precision
   vector<double> delta = vector<double>(nState);
   vector<double> oldDelta = vector<double>(nState);
   vector<vector<int> > psi; //  "matrix" of remembered indices of the best transitions
@@ -121,7 +121,7 @@ void Viterbi::compute() {
           }
       } else
       {
-          std::cerr << "WARNING: Viterbi has been fed some zero probabilities, at least they become zero at frame " <<  iFrame << " in combination with the model." << std::endl;
+          E_WARNING("WARNING: Viterbi has been fed some zero probabilities, at least they become zero at frame " <<  iFrame << " in combination with the model.");
           for (size_t iState = 0; iState < nState; ++iState)
           {
               oldDelta[iState] = 1.0/nState;
@@ -130,7 +130,7 @@ void Viterbi::compute() {
       }
   }
 
-  // initialise backward step
+  // initialise backward step, use double for a better precision
   double bestValue = 0;
   for (size_t iState = 0; iState < nState; ++iState)
   {

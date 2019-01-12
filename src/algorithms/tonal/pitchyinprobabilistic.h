@@ -31,22 +31,21 @@ namespace streaming {
 class PitchYinProbabilistic : public AlgorithmComposite {
 
  protected:
-  // Algorithm* _loudnessEBUR128Filter;
   Algorithm* _frameCutter;
   Algorithm* _yinProbabilities;
   standard::Algorithm* _yinProbabilitiesHMM;
 
   SinkProxy<Real> _signal;
   Source<std::vector<Real> > _pitch;
-  Source<std::vector<Real> > _voicedProbs;
+  Source<std::vector<Real> > _voicedProbabilities;
 
   Pool _pool;
 
   int _frameSize;
   int _hopSize;
-  Real _lowAmp;
+  Real _lowRMSThreshold;
   int _outputUnvoiced;
-  bool _precisetime;
+  bool _preciseTime;
 
   scheduler::Network* _network;
 
@@ -64,9 +63,9 @@ class PitchYinProbabilistic : public AlgorithmComposite {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("frameSize", "the frame size of FFT", "(0, inf)", 2048);
     declareParameter("hopSize", "the hop size with which the pitch is computed", "[1,inf)", 256); 
-    declareParameter("lowAmp", "the low RMS amplitude threshold", "(0,1]", 0.1);  
+    declareParameter("lowRMSThreshold", "the low RMS amplitude threshold", "(0,1]", 0.1);  
     declareParameter("outputUnvoiced", "whether output unvoiced frame. 0: output non-voiced pitch as 0.; 1: output non-voiced pitch as absolute values; 2: output non-voiced pitch as negative values", "{0,1,2}", 2);
-    declareParameter("precisetime", "use non-standard precise YIN timing (slow).", "{true,false}", false);
+    declareParameter("preciseTime", "use non-standard precise YIN timing (slow).", "{true,false}", false);
   };
 
   void configure();
@@ -91,7 +90,7 @@ class PitchYinProbabilistic : public Algorithm {
  protected:
   Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _pitch;
-  Output<std::vector<Real> > _voicedProbs;
+  Output<std::vector<Real> > _voicedProbabilities;
 
   streaming::Algorithm* _PitchYinProbabilistic;
   streaming::VectorInput<Real>* _vectorInput;
@@ -100,7 +99,7 @@ class PitchYinProbabilistic : public Algorithm {
 
   int _frameSize;
   int _hopSize;
-  Real _lowAmp;
+  Real _lowRMSThreshold;
   int _outputUnvoiced;
 
  public:
@@ -112,9 +111,9 @@ class PitchYinProbabilistic : public Algorithm {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("frameSize", "the frame size of FFT", "(0, inf)", 2048);
     declareParameter("hopSize", "the hop size with which the loudness is computed", "[1,inf)", 256);
-    declareParameter("lowAmp", "the low RMS amplitude threshold", "(0,1]", 0.1);  
+    declareParameter("lowRMSThreshold", "the low RMS amplitude threshold", "(0,1]", 0.1);  
     declareParameter("outputUnvoiced", "whether output unvoiced frame, 0: output non-voiced pitch as 0.; 1: output non-voiced pitch as absolute values; 2: output non-voiced pitch as negative values", "{0,1,2}", 2);
-    declareParameter("precisetime", "use non-standard precise YIN timing (slow).", "{true,false}", false);
+    declareParameter("preciseTime", "use non-standard precise YIN timing (slow).", "{true,false}", false);
   };
 
   void configure();
