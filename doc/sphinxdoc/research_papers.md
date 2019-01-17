@@ -72,7 +72,7 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 - K.R. Fricke, D.M. Greenberg, P.J. Rentfrow, and P.Y. Herzberg. Computer-based music feature analysis mirrors human perception and can be used to measure individual music preference. Journal of Research in Personality, 75:94-102, 2018.
 
 
-## Emotion detection
+## Emotion detection
 
 - J. Grekow. Musical performance analysis in terms of emotions it evokes. Journal of Intelligent Information Systems, 2018.
 
