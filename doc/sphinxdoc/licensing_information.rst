@@ -34,6 +34,7 @@ This is the set of libraries which can be used within Essentia:
    be obtained from the software author)
 
    * FFTW - http://www.fftw.org/ -- used by FFT and IFFT algorithms, it can be replaced by more permissive `Kiss FFT or Accelerate <http://essentia.upf.edu/documentation/FAQ.html#building-lightweight-essentia-with-reduced-dependencies>`_
+   * NNLS Chroma - http://www.isophonics.net/nnls-chroma -- used by LogSpectrum and NNLSChroma algorithms. Alternatively, Essentia's ConstantQ and HPCP native algorithms should provide equilavent results.
 
 2. `LGPL`_ (the original copyright notice as well as a copy of the LGPL has to be supplied
    This can be achieved through dynamic linking)

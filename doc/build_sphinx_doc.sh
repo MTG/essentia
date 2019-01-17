@@ -35,6 +35,11 @@ fi
 echo "******** BUILDING SPHINX DOCUMENTATION ********"
 make html
 
+# remove rst files generated from markdown
+rm FAQ.rst
+rm research_papers.rst
+
+
 # and copy doxygen into sphinx resulting dir
 echo "******** MERGING DOCUMENTATION ********"
 rm -fr _build/html/doxygen
