@@ -882,6 +882,61 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
   return result;
 }
 
+inline std::string equivalentKey(const std::string key) {
+  if (key == "C")
+    return "C";
+
+  if (key == "C#")
+    return "Db";
+
+  if (key == "Db")
+    return "C#";
+
+  if (key == "D")
+    return "D";
+
+  if (key == "D#")
+    return "Eb";
+
+  if (key == "Eb")
+    return "D#";
+
+  if (key == "E")
+    return "E";
+
+  if (key == "F")
+    return "F";
+
+  if (key == "F#")
+    return "Gb";
+
+  if (key == "Gb")
+    return "F#";
+
+  if (key == "G")
+    return "G";
+
+  if (key == "G#")
+    return "Ab";
+
+  if (key == "Ab")
+    return "G#";
+
+  if (key == "A")
+    return "A";
+
+  if (key == "A#")
+    return "Bb";
+
+  if (key == "Bb")
+    return "A#";
+
+  if (key == "B")
+    return "B";
+
+  return "";
+}
+
 } // namespace essentia
 
 #endif // ESSENTIA_MATH_H
