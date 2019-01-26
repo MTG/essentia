@@ -126,7 +126,7 @@ def configure(ctx):
 
     if ctx.options.MODE == 'debug':
         print ('→ Building in debug mode')
-        ctx.env.CXXFLAGS += ['-g']
+        ctx.env.CXXFLAGS += ['-Od', '-MDd', '-Gd'] # ctx.env.CXXFLAGS += ['-g']
 
     elif ctx.options.MODE == 'release':
         print ('→ Building in release mode')
