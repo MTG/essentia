@@ -35,6 +35,7 @@ class PitchYinProbabilities : public Algorithm {
 
   Algorithm* _FFT;
   Algorithm* _IFFT;
+  Algorithm* _RMSALGO;
 
   std::vector<Real> _yin;
   std::vector<Real> _peakProb;
@@ -55,6 +56,7 @@ class PitchYinProbabilities : public Algorithm {
 
     _FFT = AlgorithmFactory::create("FFTC");
     _IFFT = AlgorithmFactory::create("IFFTC");
+    _RMSALGO = AlgorithmFactory::create("RMS");
   }
 
 
@@ -74,10 +76,9 @@ class PitchYinProbabilities : public Algorithm {
 
  protected:
   Real parabolicInterpolation(const std::vector<Real> yinBuffer, const size_t tau, const size_t yinBufferSize);
-  Real sumSquare(const std::vector<Real> signal, const size_t start, const size_t end);
   void slowDifference(const std::vector<Real> sig, std::vector<Real> &yinBuffer);
   void fastDifference(const std::vector<Real> in, std::vector<Real> &yinBuffer, const size_t yinBufferSize);
-}; // class PitchYin
+};
 
 } // namespace standard
 } // namespace essentia
@@ -98,6 +99,7 @@ class PitchYinProbabilities : public StreamingAlgorithmWrapper {
 
   Algorithm* _FFT;
   Algorithm* _IFFT;
+  Algorithm* _RMSALGO;
 
  public:
   PitchYinProbabilities() {

@@ -44,7 +44,7 @@ class PitchYinProbabilistic : public AlgorithmComposite {
   int _frameSize;
   int _hopSize;
   Real _lowRMSThreshold;
-  int _outputUnvoiced;
+  std::string _outputUnvoiced;
   bool _preciseTime;
 
   scheduler::Network* _network;
@@ -64,7 +64,7 @@ class PitchYinProbabilistic : public AlgorithmComposite {
     declareParameter("frameSize", "the frame size of FFT", "(0, inf)", 2048);
     declareParameter("hopSize", "the hop size with which the pitch is computed", "[1,inf)", 256); 
     declareParameter("lowRMSThreshold", "the low RMS amplitude threshold", "(0,1]", 0.1);  
-    declareParameter("outputUnvoiced", "whether output unvoiced frame. 0: output non-voiced pitch as 0.; 1: output non-voiced pitch as absolute values; 2: output non-voiced pitch as negative values", "{0,1,2}", 2);
+    declareParameter("outputUnvoiced", "whether output unvoiced frame. zero: output non-voiced pitch as 0.; abs: output non-voiced pitch as absolute values; negative: output non-voiced pitch as negative values", "{zero,abs,negative}", "negative");
     declareParameter("preciseTime", "use non-standard precise YIN timing (slow).", "{true,false}", false);
   };
 
@@ -100,7 +100,7 @@ class PitchYinProbabilistic : public Algorithm {
   int _frameSize;
   int _hopSize;
   Real _lowRMSThreshold;
-  int _outputUnvoiced;
+  std::string _outputUnvoiced;
 
  public:
 
@@ -112,7 +112,7 @@ class PitchYinProbabilistic : public Algorithm {
     declareParameter("frameSize", "the frame size of FFT", "(0, inf)", 2048);
     declareParameter("hopSize", "the hop size with which the loudness is computed", "[1,inf)", 256);
     declareParameter("lowRMSThreshold", "the low RMS amplitude threshold", "(0,1]", 0.1);  
-    declareParameter("outputUnvoiced", "whether output unvoiced frame, 0: output non-voiced pitch as 0.; 1: output non-voiced pitch as absolute values; 2: output non-voiced pitch as negative values", "{0,1,2}", 2);
+    declareParameter("outputUnvoiced", "whether output unvoiced frame, zero: output non-voiced pitch as 0.; abs: output non-voiced pitch as absolute values; negative: output non-voiced pitch as negative values", "{zero,abs,negative}", "negative");
     declareParameter("preciseTime", "use non-standard precise YIN timing (slow).", "{true,false}", false);
   };
 

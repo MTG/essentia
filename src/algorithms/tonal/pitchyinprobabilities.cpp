@@ -51,6 +51,7 @@ void PitchYinProbabilities::configure() {
   _FFT->configure("negativeFrequencies", true,
                   "size", _frameSize);
   _IFFT->configure("size", _frameSize);
+  _RMSALGO->configure();
 }
 
 Real PitchYinProbabilities::parabolicInterpolation(const std::vector<Real> yinBuffer, const size_t tau, const size_t yinBufferSize) {
@@ -76,14 +77,6 @@ Real PitchYinProbabilities::parabolicInterpolation(const std::vector<Real> yinBu
     betterTau = tau;
   }
   return betterTau;
-}
-
-Real PitchYinProbabilities::sumSquare(const std::vector<Real> signal, const size_t start, const size_t end) {
-  Real out = 0;
-  for (size_t i = start; i < end; ++i) {
-    out += signal[i] * signal[i];
-  }
-  return out;
 }
 
 void PitchYinProbabilities::slowDifference(const std::vector<Real> sig, std::vector<Real> &yinBuffer) 
@@ -302,7 +295,13 @@ void PitchYinProbabilities::compute() {
     _peakProb[minInd] += nonPeakProb * minWeight;
   }
 
-  RMS = sqrt(sumSquare(signal, 0, _yin.size()) / _yin.size());
+  // calculate RMS of the signal, use only size of _yin
+  vector<Real>::const_iterator beginYin = signal.begin();
+  vector<Real>::const_iterator endYin = signal.begin() + _yin.size();
+  vector<Real> signalYinSize(beginYin, endYin);
+  _RMSALGO->input("array").set(signalYinSize);
+  _RMSALGO->output("rms").set(RMS);
+  _RMSALGO->compute();
 
   // reuse the vector
   _freq.resize(0);
@@ -321,9 +320,11 @@ void PitchYinProbabilities::compute() {
   bool isLowAmplitude = (RMS < _lowAmp);
 
   for (size_t iCandidate = 0; iCandidate < _freq.size(); ++iCandidate) {
-    Real pitchCents = 12 * log(_freq[iCandidate]/440)/log(2.) + 69;
+    Real pitchCents = hz2cents(_freq[iCandidate]);
     _freq[iCandidate] = pitchCents;
     if (isLowAmplitude) {
+      // lower the probabilities of the frequencies by calculating the weighted sum
+      // if the current frame is the low amplitude
       Real factor = ((RMS+0.01 * _lowAmp) / (1.01 * _lowAmp));
       _peakProb_freq[iCandidate] = _peakProb_freq[iCandidate]*factor;
     }

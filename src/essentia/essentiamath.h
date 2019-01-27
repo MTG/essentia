@@ -652,6 +652,10 @@ inline Real hz2hz(Real hz){
   return hz;
 }
 
+inline Real hz2cents(Real hz) {
+  return 12 * std::log(hz/440)/std::log(2.) + 69;
+}
+
 inline int argmin(const std::vector<Real>& input) {
   return std::min_element(input.begin(), input.end()) - input.begin();
 }
@@ -880,6 +884,18 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
   }
 
   return result;
+}
+
+/**
+ * Calculate square summation of a vector
+ */
+
+template <typename T> T sumSquare(const std::vector<T> signal, const size_t start, const size_t end) {
+  T out = 0;
+  for (size_t i = start; i < end; ++i) {
+    out += signal[i] * signal[i];
+  }
+  return out;
 }
 
 } // namespace essentia

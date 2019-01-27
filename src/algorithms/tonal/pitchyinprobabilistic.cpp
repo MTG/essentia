@@ -65,7 +65,7 @@ void PitchYinProbabilistic::configure() {
   _frameSize = parameter("frameSize").toInt();
   _hopSize = parameter("hopSize").toInt();
   _lowRMSThreshold = parameter("lowRMSThreshold").toReal();
-  _outputUnvoiced = parameter("outputUnvoiced").toInt();
+  _outputUnvoiced = parameter("outputUnvoiced").toString();
   _preciseTime = parameter("preciseTime").toBool();
   
   _frameCutter->configure("frameSize", _frameSize,
@@ -113,8 +113,8 @@ AlgorithmStatus PitchYinProbabilistic::process() {
 
   vector<Real> _tempPitchVoicing(tempPitch.size());
   for (size_t iFrame = 0; iFrame < tempPitch.size(); ++iFrame) {
-    if (tempPitch[iFrame] < 0 && (_outputUnvoiced==0)) continue;
-    if (_outputUnvoiced == 1) {
+    if (tempPitch[iFrame] < 0 && (_outputUnvoiced=="zero")) continue;
+    if (_outputUnvoiced == "abs") {
       _tempPitchVoicing[iFrame] = fabs(tempPitch[iFrame]);
     } else {
       _tempPitchVoicing[iFrame] = tempPitch[iFrame];

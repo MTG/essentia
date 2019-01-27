@@ -108,28 +108,17 @@ class TestPitchYinProbabilistic(TestCase):
         self.assertConfigureFails(PitchYinProbabilistic(), {'frameSize' : 1})
         self.assertConfigureFails(PitchYinProbabilistic(), {'sampleRate' : 0})
 
-    # TODO: generate pitchyin/pitch_mozart_c_major_30sec.txt 
-    #       check if estimations actually have some sense
-    #       it is better to have real case using a monophonic audio 
-
-    # def testARealCase(self):
-    #     frameSize = 2048
-    #     sr = 48000
-    #     hopSize = 256
-    #     print(testdata.audio_dir)
-    #     filename = join(os.path.dirname(__file__), '..', testdata.audio_dir, 'recorded','long_voice.wav')
-    #     audio = MonoLoader(filename=filename, sampleRate=sr)()
-    #     frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
-    #     pitchDetect = PitchYinProbabilistic(frameSize=frameSize, sampleRate = sr, hopSize=hopSize, outputUnvoiced=0)
-    #     pitch, _ = pitchDetect(audio)
-
-    #     expected_pitch = readVectorTwoColumns(join(filedir(), 'pitchyin/long_voice.txt'))
-    #     print(expected_pitch)
-    #     print(pitch)
-    #     # expected_conf = readVector(join(filedir(), 'pitchyin/pitchconfidence_mozart_c_major_30sec.txt'))
-
-    #     self.assertAlmostEqualVector(pitch, expected_pitch)
-    #     # self.assertAlmostEqualVector(confidence, expected_conf, 5e-5)
+    def testARealCase(self):
+        frameSize = 2048
+        sr = 48000
+        hopSize = 256
+        filename = os.path.join(os.path.dirname(__file__), '..', testdata.audio_dir, 'recorded','long_voice.wav')
+        audio = MonoLoader(filename=filename, sampleRate=sr)()
+        frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
+        pitchDetect = PitchYinProbabilistic(frameSize=frameSize, sampleRate = sr, hopSize=hopSize, outputUnvoiced="zero")
+        pitch, _ = pitchDetect(audio)
+        expected_pitch = readVector(os.path.join(filedir(), 'pitchyin/long_voice.txt'))
+        self.assertAlmostEqualVector(pitch, expected_pitch)
 
 suite = allTests(TestPitchYinProbabilistic)
 

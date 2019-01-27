@@ -26,7 +26,7 @@ import os
 
 filename = os.path.join(os.path.dirname(__file__) ,'../../audio/recorded', 'long_voice.wav')
 loader = ess.MonoLoader(filename=filename, sampleRate=48000)
-PYIN = ess.PitchYinProbabilistic(sampleRate=48000, frameSize=2048, hopSize=256, lowRMSThreshold=0.1, outputUnvoiced=2)
+PYIN = ess.PitchYinProbabilistic(sampleRate=48000, frameSize=2048, hopSize=256, lowRMSThreshold=0.1, outputUnvoiced="negative")
 start_time = time.time()
 loader.audio >> PYIN.signal
 pool = essentia.Pool()
