@@ -22,7 +22,6 @@ from subprocess import Popen, PIPE
 import numpy as np
 import os
 import sys
-import fnmatch
 
 
 def __subprocess__(cmd):
@@ -38,23 +37,26 @@ def __subprocess__(cmd):
     stdout = stdout.decode("utf-8")
     stderr = stderr.decode("utf-8")
 
-    stderr = 'cmd: "{}"\nstderr:"{}"'.format(cmd_str, stderr)
-    stdout = 'cmd: "{}"\nstderr:"{}"'.format(cmd_str, stdout)
+    stderr = 'cmd: "{}"\nstderr: "{}"'.format(cmd_str, stderr)
+    stdout = 'cmd: "{}"\nstderr: "{}"'.format(cmd_str, stdout)
     return stdout, stderr
 
 
-def recursive_music_extractor(audio_dir, output_dir, generate_log=True,
-                              audio_types=None, profile=None, 
-                              store_frames=False, skip_analyzed=False, jobs=4):
+def batch_music_extractor(audio_dir, output_dir, generate_log=True,
+                          audio_types=None, profile=None,
+                          store_frames=False, skip_analyzed=False, jobs=4):
     """
-        print('You cannot specify the same descriptor patterns in both 'include_descs' and --ignore flags')
+        Processes every audio file matching `audio_types` in `audio_dir` with MusicExtractor. The generated
+        .sig yaml files are stored in `output_dir` matching the folder structure found in `audio_dir`.
         sys.exit() # TODO return None instead in this function
     """
 
     if not audio_types:
-        audio_types = ['*.wav', '*.aiff', '*.flac', '*.mp3', '*.ogg']
-        print("Audio files extensions considered by default: " + ' '.join(audio_types))
+        audio_types = ('.WAV', '.AIFF', '.FLAC', '.MP3', '.OGG')
+        print("Audio files extensions considered by default: " +
+              ' '.join(audio_types))
     else:
+        audio_types = tuple(audio_types)
         print("Searching for audio files extensions: " + ' '.join(audio_types))
     print("")
 
@@ -70,15 +72,16 @@ def recursive_music_extractor(audio_dir, output_dir, generate_log=True,
     skipped_files = []
     cmd_lines = []
     for root, dirnames, filenames in os.walk("."):
-        for match in audio_types:
-            for filename in fnmatch.filter(filenames, match):
+        for filename in filenames:
+            if filename.upper().endswith(audio_types):
                 audio_file = os.path.relpath(os.path.join(root, filename))
                 audio_file_abs = os.path.join(audio_dir, audio_file)
                 sig_file = os.path.join(output_dir, audio_file + ".sig")
 
                 if skip_analyzed:
                     if os.path.isfile(sig_file):
-                        print("Found descriptor file for " + audio_file + ", skipping...")
+                        print("Found descriptor file for " +
+                              audio_file + ", skipping...")
                         skipped_files.append(audio_file)
                         skipped_count += 1
                         continue
@@ -94,7 +97,7 @@ def recursive_music_extractor(audio_dir, output_dir, generate_log=True,
 
                 # TODO: music_extractor.py path could be obtained in a better way
                 cmd_lines.append([sys.executable, os.path.join(os.path.dirname(__file__),
-                                  'extractors/music_extractor.py')] + [audio_file_abs, sig_file])
+                                                               'extractors/music_extractor.py')] + [audio_file_abs, sig_file])
 
     # analyze
     errors, oks = 0, 0
@@ -112,7 +115,8 @@ def recursive_music_extractor(audio_dir, output_dir, generate_log=True,
         errors = np.count_nonzero(status == False)
         oks = np.count_nonzero(status == True)
 
-    summary = "Analysis done. {} files have been skipped due to errors, {} were processed and {} already existed.".format(errors, oks, skipped_count)
+    summary = "Analysis done. {} files have been skipped due to errors, {} were processed and {} already existed.".format(
+        errors, oks, skipped_count)
     print(summary)
 
     # generate log
@@ -120,10 +124,12 @@ def recursive_music_extractor(audio_dir, output_dir, generate_log=True,
         log = [summary]
 
         if errors > 0:
-            log += ['Errors:'] + [stderr[idx] for idx, i in enumerate(status) if not i]
+            log += ['Errors:'] + [stderr[idx]
+                                  for idx, i in enumerate(status) if not i]
 
         if oks > 0:
-            log += ['Oks:'] + [stderr[idx] for idx, i in enumerate(status) if i]
+            log += ['Oks:'] + [stderr[idx]
+                               for idx, i in enumerate(status) if i]
 
         if skipped_count > 0:
             log += ['Skipped files:'] + skipped_files
