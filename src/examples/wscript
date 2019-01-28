@@ -49,6 +49,7 @@ example_sources_fileio = [
     ('streaming_stft', ),
     ('streaming_tuningfrequency', ),
     ('streaming_vibrato', ),
+    ('streaming_yinprobabilistic', ),
 
     ('streaming_extractor_music',
         ['music_extractor/extractor_utils']),

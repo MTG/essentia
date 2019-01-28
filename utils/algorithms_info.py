@@ -217,6 +217,7 @@ def get_all_algorithms(algo_dir, root_dir=None):
                             # big hack to correctly parser stuff like declareInput(_algo->input("a"))
                             if var_name.find('-') >= 0:
                                 inputs[var_name] = {'type': 'unknown'}
+                        
                         outputs[var_name]['name'] = input_name
                         outputs[var_name]['description'] = input_desc
                         continue

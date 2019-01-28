@@ -60,6 +60,13 @@ def readValue(filename):
 def readVector(filename):
     return [ float(x) for x in open(filename).read().strip().split() ]
 
+def readVectorTwoColumns(filename):
+    vector = []
+    for ii, x in enumerate(open(filename).read().strip().split()):
+        if ii % 2 == 1:
+            vector.append(float(x))
+    return vector
+
 def readComplexVector(filename):
     values = open(filename).read().strip().split()
     values = [ v.replace('(', '') for v in values ]

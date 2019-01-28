@@ -82,7 +82,9 @@ template <> inline long long int nextPowerTwo(long long int n) {
   return ++n;
 }
 
-// returns the L2-norm of an array
+/**
+ * Returns the L2-norm of an array
+ */
 template <typename T> T norm(const std::vector<T>& array) {
   if (array.empty()) {
     throw EssentiaException("trying to calculate norm of empty array");
@@ -95,6 +97,17 @@ template <typename T> T norm(const std::vector<T>& array) {
   }
 
   return sqrt(sum);
+}
+
+/**
+ * Returns the sum of squared values of an array
+ */
+template <typename T> T sumSquare(const std::vector<T> array, const size_t start, const size_t end) {
+  T sum = 0.0;
+  for (size_t i = array; i < end; ++i) {
+    sum += array[i] * array[i];
+  }
+  return sum;
 }
 
 /**
@@ -650,6 +663,10 @@ inline Real hz2mel10(Real hz) {
 
 inline Real hz2hz(Real hz){
   return hz;
+}
+
+inline Real hz2cents(Real hz) {
+  return 12 * std::log(hz/440)/std::log(2.) + 69;
 }
 
 inline int argmin(const std::vector<Real>& input) {
