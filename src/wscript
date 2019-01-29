@@ -187,7 +187,7 @@ def configure(ctx):
 
     # Select FFT algorithms
     algos = ['FFT']
-    if 'ACCELERATE' in ctx.env.FFT:
+    if 'ACCELERATE' in ctx.env.FFT or sys.platform == 'darwin':
         print('- using Accelerate Framework for FFT\n')
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
         ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex',
