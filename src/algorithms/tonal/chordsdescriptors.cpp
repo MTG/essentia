@@ -102,7 +102,8 @@ void ChordsDescriptors::compute() {
     throw EssentiaException("ChordsDescriptors: Chords input empty");
   }
 
-  string key = toUpper(_key.get());
+  string key = _key.get();
+  key[0] = toUpper(string(1, key[0]))[0];
   string scale = toLower(_scale.get());
 
   if (_scale.get() == "minor") {
