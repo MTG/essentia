@@ -19,7 +19,7 @@ import numpy as np
 import essentia.standard as es
 
 
-def nsgcqgram(audio, frameSize=4096, transitionSize=1024, minFrequency=65.41,
+def nsgcqgram(audio, frameSize=8192, transitionSize=1024, minFrequency=65.41,
               maxFrequency=6000, binsPerOctave=48,
               sampleRate=44100, rasterize='full',
               phaseMode='global', gamma=0,
@@ -37,9 +37,9 @@ def nsgcqgram(audio, frameSize=4096, transitionSize=1024, minFrequency=65.41,
     Args:
         audio (vector): If it is empty, an exception is raised.
     Returns:
-        (list of 2D complex arrays): Time / frequency complex matrices representing the NSGCQ `constantq` coefficients for each frameSize // 2 samples jump.
-        (list of complex vectors): Complex vectors representing the NSGCQ `constantqdc` coefficients for each frameSize // 2 samples jump.
-        (list of complex vectors): Complex vectors representing the NSGCQ `constantqnf` coefficients for each frameSize // 2 samples jump.
+        (list of 2D complex arrays): Time/frequency complex matrices representing the NSGCQ `constantq` coefficients for each `frameSize // 2` samples jump.
+        (list of complex vectors): Complex vectors representing the NSGCQ `constantqdc` coefficients for each `frameSize // 2` samples jump.
+        (list of complex vectors): Complex vectors representing the NSGCQ `constantqnf` coefficients for each `frameSize // 2` samples jump.
     """
 
     hopSize = frameSize // 2
@@ -49,7 +49,8 @@ def nsgcqgram(audio, frameSize=4096, transitionSize=1024, minFrequency=65.41,
                             maxFrequency=maxFrequency, binsPerOctave=binsPerOctave,
                             sampleRate=sampleRate, rasterize=rasterize,
                             phaseMode=phaseMode, gamma=gamma,
-                            normalize=normalize, window=window)
+                            normalize=normalize, window=window,
+                            minimumWindow=8)
 
     w = es.Windowing(type='hannnsgcq', normalized=False, zeroPhase=False)(
         np.ones(transitionSize * 2).astype('float32'))
@@ -94,7 +95,7 @@ def nsgcqgram(audio, frameSize=4096, transitionSize=1024, minFrequency=65.41,
     dcSize = dcFrame.size
     nfSize = nfFrame.size
 
-    # Center the the frames for a better display.
+    # Center the frames for a better display.
     cqShiftEven = np.hstack(
         [np.arange(cqSize // 4, cqSize), np.arange(0, cqSize // 4)])
     dcShiftEven = np.hstack(
@@ -119,11 +120,11 @@ def nsgcqgram(audio, frameSize=4096, transitionSize=1024, minFrequency=65.41,
     return cq, dc, nf
 
 
-def __dualTukeyFrame__(x):
+def __inverseTukeyWindow__(x):
     return (1 + np.cos(np.pi * x)) / (1 + np.cos(np.pi * x) ** 2)
 
 
-def nsgicqgram(cq, dc, nf, frameSize=4096, transitionSize=1024, minFrequency=65.41,
+def nsgicqgram(cq, dc, nf, frameSize=8192, transitionSize=1024, minFrequency=65.41,
                maxFrequency=6000, binsPerOctave=48,
                sampleRate=44100, rasterize='full',
                phaseMode='global', gamma=0,
@@ -139,9 +140,9 @@ def nsgicqgram(cq, dc, nf, frameSize=4096, transitionSize=1024, minFrequency=65.
         Gabor frames". Proceedings of DAFX11, Paris, 93-99.
 
     Args:
-        (list of 2D complex arrays): Time / frequency complex matrices representing the NSGCQ `constantq` coefficients for each frameSize // 2 samples jump.
-        (list of complex vectors): Complex vectors representing the NSGCQ `constantqdc` coefficients for each frameSize // 2 samples jump.
-        (list of complex vectors): Complex vectors representing the NSGCQ `constantqnf` coefficients for each frameSize // 2 samples jump.
+        (list of 2D complex arrays): Time / frequency complex matrices representing the NSGCQ `constantq` coefficients for each `frameSize // 2` samples jump.
+        (list of complex vectors): Complex vectors representing the NSGCQ `constantqdc` coefficients for each `frameSize // 2` samples jump.
+        (list of complex vectors): Complex vectors representing the NSGCQ `constantqnf` coefficients for each `frameSize // 2` samples jump.
     Returns:
         audio (vector): The synthetized audio.
     """
@@ -157,14 +158,15 @@ def nsgicqgram(cq, dc, nf, frameSize=4096, transitionSize=1024, minFrequency=65.
                                maxFrequency=maxFrequency, binsPerOctave=binsPerOctave,
                                sampleRate=sampleRate, rasterize=rasterize,
                                phaseMode=phaseMode, gamma=gamma,
-                               normalize=normalize, window=window)
+                               normalize=normalize, window=window,
+                               minimumWindow=8)
 
-    # Tukey dual window.
+    # Tukey inverse window.
     window = np.zeros(frameSize)
     window[np.arange((hopSize + transitionSize) // 2, (3 * hopSize -
                                                        transitionSize) // 2)] = np.ones(hopSize - transitionSize)
     window[np.hstack([np.arange((hopSize - transitionSize) // 2, (hopSize + transitionSize) // 2), np.arange((3 * hopSize - transitionSize) //
-                                                                                                             2, (3 * hopSize + transitionSize) // 2)])] = __dualTukeyFrame__(np.arange(-transitionSize, transitionSize) / transitionSize)
+                                                                                                             2, (3 * hopSize + transitionSize) // 2)])] = __inverseTukeyWindow__(np.arange(-transitionSize, transitionSize) / transitionSize)
 
 
     # Undo the frame centering.
@@ -212,7 +214,7 @@ def nsgcq_overlap_add(cq):
     Note: It is not possible to perform a perfect reconstruction from the overlapped version of the CQ data. 
 
     Args:
-        (list of 2D complex arrays): Time / frequency complex matrices representing the NSGCQ `constantq` coefficients for each frameSize // 2 samples jump.
+        (list of 2D complex arrays): Time / frequency complex matrices representing the NSGCQ `constantq` coefficients for each `frameSize // 2` samples jump.
     Returns:
         (2D complex array): The overlapped version of the Constant-Q. 
     """
@@ -234,4 +236,4 @@ def nsgcq_overlap_add(cq):
     for jj in range(frameNum):
         cqOverlap[:, jj * hopSize + index] += cq[jj]
 
-    return cqOverlap
+    return cqOverlap[:, hopSize:]
