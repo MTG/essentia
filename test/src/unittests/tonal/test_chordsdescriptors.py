@@ -149,11 +149,11 @@ class TestChordsDescriptors(TestCase):
         # Equivalent notes (eg. Eb <-> D#) should produce the same result.
 
         scale = 'minor'
-        key='A'
+        key = 'A'
 
         a = ["A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab"]
         b = ["A", "A#", "B", "C", "Db", "D", "D#", "E", "F", "Gb", "G", "G#"]
-        
+
         # Assert that if the notes are not equivalet the output is actually different
         # to probe the validity of the test 
         c = ["A", "D#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
@@ -170,6 +170,16 @@ class TestChordsDescriptors(TestCase):
         self.assertNotEquals(sum(abs(chordsHistogramA - chordsHistogramC)), 0)
         self.assertNotEqual(chordsNumberRateA, chordsNumberRateC)
         self.assertNotEqual(chordsKeyA, chordsKeyC)
+
+    # Checks whether an empty input yields an exception
+    def testEmptyChords(self):
+        self.assertComputeFails(ChordsDescriptors(),  [], 'A', 'minor')
+
+    def testEmptyKey(self):
+        self.assertComputeFails(ChordsDescriptors(),  ['A'], '', 'minor')
+
+    def testEmptyScale(self):
+        self.assertComputeFails(ChordsDescriptors(),  ['A'], 'A', '')
 
 
 suite = allTests(TestChordsDescriptors)
