@@ -16,39 +16,33 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 from essentia.standard import MusicExtractor, YamlOutput
+from essentia import EssentiaError
 from argparse import ArgumentParser
 import os
 import sys
 
 
-def music_extractor(audio_file, sig_file, profile=None, store_frames=False):
+def music_extractor(audio_file, sig_file, profile=None, store_frames=False, format='yaml'):
     if profile:
         extractor = MusicExtractor(profile=profile)
     else:
         extractor = MusicExtractor()
 
-    try:
-        poolStats, poolFrames = extractor(audio_file)
-
-    except Exception:
-        print("Error processing", audio_file, ":", sys.exc_info()[0])   
-        raise
+    poolStats, poolFrames = extractor(audio_file)
 
     folder = os.path.dirname(sig_file)
 
     if not os.path.exists(folder):
         os.makedirs(folder)
     elif os.path.isfile(folder):
-        print("Cannot create directory %s" % folder)
-        print("There exist a file with the same name. Aborting analysis.")
-        sys.exit()
+        raise EssentiaError('Cannot create directory {} .There exist a file with the same name. Aborting analysis.'.format(folder))
 
-    output = YamlOutput(filename=sig_file+'.sig')
+    output = YamlOutput(filename=sig_file+'.sig', format=format)
     output(poolStats)
     if store_frames:
-        YamlOutput(filename=sig_file + '.frames.sig')(poolFrames)
+        YamlOutput(filename=sig_file + '.frames.sig', format=format)(poolFrames)
 
-    print('ok!')
+    return 0
 
 
 if __name__ == '__main__':
@@ -60,6 +54,7 @@ Analyzes an audio file using MusicExtractor.
     parser.add_argument('sig_file', help='sig file name')
     parser.add_argument('--profile', help='MusicExtractor profile', required=False)
     parser.add_argument('--store_frames', help='store frames data', action='store_true', required=False)
+    parser.add_argument('--format', help='yaml or json', default='yaml', choices=['yaml', 'json'])
     args = parser.parse_args()
 
-    music_extractor(args.audio_file, args.sig_file, profile=args.profile, store_frames=args.store_frames)
+    music_extractor(args.audio_file, args.sig_file, profile=args.profile, store_frames=args.store_frames, format=args.format)

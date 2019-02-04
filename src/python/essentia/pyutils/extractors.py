@@ -17,8 +17,9 @@
 
 from argparse import ArgumentParser
 from multiprocessing import Pool
+from multiprocessing import cpu_count
 from subprocess import Popen, PIPE
-
+from essentia import EssentiaError
 import numpy as np
 import os
 import sys
@@ -32,23 +33,20 @@ def __subprocess__(cmd):
     cmd_str = ' '.join(cmd)
     print('Running "{}"...'.format(cmd_str))
 
-    stdout, stderr = Popen(cmd, stdout=PIPE, stderr=PIPE).communicate()
+    child = Popen(cmd, stdout=None, stderr=PIPE)
+    _, stderr = child.communicate()
+    rc = child.returncode
 
-    stdout = stdout.decode("utf-8")
-    stderr = stderr.decode("utf-8")
-
-    stderr = 'cmd: "{}"\nstderr: "{}"'.format(cmd_str, stderr)
-    stdout = 'cmd: "{}"\nstderr: "{}"'.format(cmd_str, stdout)
-    return stdout, stderr
+    return rc, cmd_str, stderr.decode("utf-8")
 
 
 def batch_music_extractor(audio_dir, output_dir, generate_log=True,
                           audio_types=None, profile=None,
-                          store_frames=False, skip_analyzed=False, jobs=4):
+                          store_frames=False, skip_analyzed=False,
+                          format='yaml', jobs=0):
     """
         Processes every audio file matching `audio_types` in `audio_dir` with MusicExtractor. The generated
-        .sig yaml files are stored in `output_dir` matching the folder structure found in `audio_dir`.
-        sys.exit() # TODO return None instead in this function
+        .sig yaml/json files are stored in `output_dir` matching the folder structure found in `audio_dir`.
     """
 
     if not audio_types:
@@ -65,6 +63,13 @@ def batch_music_extractor(audio_dir, output_dir, generate_log=True,
     if profile:
         assert os.path.isfile(profile)
 
+    if jobs == 0:
+        try:
+            jobs = cpu_count()
+        except NotImplementedError:
+            print("Failed to automatically detect the cpu count, the analysis will try to continue with 4 jobs. For a different behavior change the `job` parameter.")
+            jobs = 4
+
     # find all audio files and prepare folder structure in the output folder
     os.chdir(audio_dir)
 
@@ -76,28 +81,37 @@ def batch_music_extractor(audio_dir, output_dir, generate_log=True,
             if filename.upper().endswith(audio_types):
                 audio_file = os.path.relpath(os.path.join(root, filename))
                 audio_file_abs = os.path.join(audio_dir, audio_file)
-                sig_file = os.path.join(output_dir, audio_file + ".sig")
+                sig_file = os.path.join(output_dir, audio_file)
 
                 if skip_analyzed:
-                    if os.path.isfile(sig_file):
+                    if os.path.isfile(sig_file + '.sig'):
                         print("Found descriptor file for " +
                               audio_file + ", skipping...")
                         skipped_files.append(audio_file)
                         skipped_count += 1
                         continue
-
                 folder = os.path.dirname(sig_file)
                 if not os.path.exists(folder):
                     os.makedirs(folder)
 
                 elif os.path.isfile(folder):
-                    print("Cannot create directory %s" % folder)
-                    print("There exist a file with the same name. Aborting analysis.")
-                    sys.exit()
+                    raise EssentiaError('Cannot create directory {} .There exist a file with the same name. Aborting analysis.'.format(folder))
 
-                # TODO: music_extractor.py path could be obtained in a better way
-                cmd_lines.append([sys.executable, os.path.join(os.path.dirname(__file__),
-                                                               'extractors/music_extractor.py')] + [audio_file_abs, sig_file])
+                cmd_line = [
+                            sys.executable,
+                            os.path.join(os.path.dirname(__file__), 'extractors/music_extractor.py'), 
+                            audio_file_abs, sig_file,
+                            '--format', format
+                            ]
+
+                if store_frames:
+                    cmd_line += ['--store_frames']
+
+                if profile:
+                    cmd_line += ['--profile', profile]
+
+                cmd_lines.append(cmd_line)
+
 
     # analyze
     errors, oks = 0, 0
@@ -105,15 +119,13 @@ def batch_music_extractor(audio_dir, output_dir, generate_log=True,
         p = Pool(jobs)
         outs = p.map(__subprocess__, cmd_lines)
 
-        stdout, stderr = zip(*outs)
+        status, cmd, stderr = zip(*outs)
 
         stderr = list(stderr)
-        stdout = list(stdout)
 
-        status = np.array(["ok!" in it for it in stderr])
-
-        errors = np.count_nonzero(status == False)
-        oks = np.count_nonzero(status == True)
+        status = np.array(status)
+        errors = np.count_nonzero(status != 0)
+        oks = np.count_nonzero(status == 0)
 
     summary = "Analysis done. {} files have been skipped due to errors, {} were processed and {} already existed.".format(
         errors, oks, skipped_count)
@@ -124,12 +136,12 @@ def batch_music_extractor(audio_dir, output_dir, generate_log=True,
         log = [summary]
 
         if errors > 0:
-            log += ['Errors:'] + [stderr[idx]
-                                  for idx, i in enumerate(status) if not i]
+            log += ['Errors:'] + ['"{}"\n{}\n\n'.format(cmd[idx], stderr[idx])
+                                  for idx, i in enumerate(status) if i != 0]
 
         if oks > 0:
-            log += ['Oks:'] + [stderr[idx]
-                               for idx, i in enumerate(status) if i]
+            log += ['Oks:'] + [cmd[idx]
+                               for idx, i in enumerate(status) if i == 0]
 
         if skipped_count > 0:
             log += ['Skipped files:'] + skipped_files
