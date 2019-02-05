@@ -75,9 +75,29 @@ class TestChordsDescriptors(TestCase):
         self.assertEqual(result[3], 'C')      #key
         self.assertEqual(result[4], 'major')  #scale
 
+    def testCaseSensitivityFlatKey(self):
+        # Checks that key is case-insensitive in presence of the flat sign.
+        upperCase = 'Db'
+        lowerCase = 'db'
+        chords = ['Db', 'Ab', 'Db', 'Ab', 'Db', 'Ab']
+
+        resultUpper = ChordsDescriptors()(chords, upperCase, 'MaJoR')
+        resultLower = ChordsDescriptors()(chords, lowerCase, 'MaJoR')
+
+        self.assertEqualVector(resultUpper[0], resultLower[0])
+        self.assertAlmostEqual(resultUpper[1], resultLower[1])  #chord rate
+        self.assertAlmostEqual(resultUpper[2], resultLower[2])  #change rate
+        self.assertEqual(resultUpper[3], resultLower[3])      #key
+        self.assertEqual(resultUpper[4], resultLower[4])  #scale
+
+
     def testUnknownChord(self):
         chords = ['Cb', 'G', 'C', 'G', 'C', 'G']  # Cb will raise exception
         self.assertComputeFails(ChordsDescriptors(), chords, 'C', 'major')
+
+    def testIncorrectFlatSign(self):
+        chords = ['DB', 'AB', 'DB', 'AB', 'DB', 'AB']  # "B" is not accepted for flat.
+        self.assertComputeFails(ChordsDescriptors(), chords, 'DB', 'major')
 
     def testUnknownKey(self):
         self.assertComputeFails(ChordsDescriptors(), ['C', 'C'], 'Cb', 'major')
@@ -129,11 +149,11 @@ class TestChordsDescriptors(TestCase):
         # Equivalent notes (eg. Eb <-> D#) should produce the same result.
 
         scale = 'minor'
-        key='A'
+        key = 'A'
 
         a = ["A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab"]
         b = ["A", "A#", "B", "C", "Db", "D", "D#", "E", "F", "Gb", "G", "G#"]
-        
+
         # Assert that if the notes are not equivalet the output is actually different
         # to probe the validity of the test 
         c = ["A", "D#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
@@ -150,6 +170,16 @@ class TestChordsDescriptors(TestCase):
         self.assertNotEquals(sum(abs(chordsHistogramA - chordsHistogramC)), 0)
         self.assertNotEqual(chordsNumberRateA, chordsNumberRateC)
         self.assertNotEqual(chordsKeyA, chordsKeyC)
+
+    # Checks whether an empty input yields an exception
+    def testEmptyChords(self):
+        self.assertComputeFails(ChordsDescriptors(),  [], 'A', 'minor')
+
+    def testEmptyKey(self):
+        self.assertComputeFails(ChordsDescriptors(),  ['A'], '', 'minor')
+
+    def testEmptyScale(self):
+        self.assertComputeFails(ChordsDescriptors(),  ['A'], 'A', '')
 
 
 suite = allTests(TestChordsDescriptors)
