@@ -258,17 +258,33 @@ void NSGConstantQ::normalize() {
 
 
 void NSGConstantQ::compute() {
-  const std::vector<Real>& signal = _signal.get();
+  const std::vector<Real>& originalSignal = _signal.get();
   std::vector<std::vector<complex<Real> > >& constantQ = _constantQ.get();
   std::vector<complex<Real> >& constantQDC = _constantQDC.get();
   std::vector<complex<Real> >& constantQNF = _constantQNF.get();
 
   std::vector<complex<Real> > fft;
   std::vector<int> posit;
+  std::vector<Real> paddedSignal;
 
-  if (signal.size() <= 1) {
+  if (originalSignal.size() <= 1) {
     throw EssentiaException("NSGConstantQ: the size of the input signal is not greater than one");
   }
+
+  // FFT requires an even input, but in order to push back
+  // we needed to copy the data first. When it is alredy
+  // even we can just use a reference to the input buffer
+  // to avoid the copy.
+  if(originalSignal.size() % 2) {
+    E_INFO("Odd input. Repeating the last Sample.");
+
+    paddedSignal = originalSignal;
+    
+    // Repeat the last sample if the signal is odd.
+    paddedSignal.push_back(originalSignal.back());
+  }
+
+  const vector<Real>& signal = (originalSignal.size() % 2) ? paddedSignal : originalSignal;
 
   // Check input. If different shape reconfigure the algorithm
   if (signal.size() != _inputSize) {

@@ -109,6 +109,12 @@ class TestNSGConstantQ(TestCase):
         self.assertConfigureFails(self.initNsgconstantq(), {'minimumWindow': 1})
         self.assertConfigureFails(self.initNsgconstantq(), {'windowSizeFactor': 0})
         self.assertConfigureFails(self.initNsgconstantq(), {'minimumWindow': 1})
+
+    def testOddInput(self):
+        # Checks that compute does not fail for even input (former behavior).
+        a = np.ones(4099, dtype='float32')
+        NSGConstantQ()(a)
+
     
 suite = allTests(TestNSGConstantQ)
 
