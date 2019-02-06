@@ -30,7 +30,7 @@ def nsgcqgram(audio, frameSize=8192, transitionSize=1024, minFrequency=65.41,
     frame-wise analysis with the `NSGConstantQ` algorithm.
 
     References:
-      [1] Velasco, G. A., Holighaus, N., Dörfler, M., & Grill, T. (2011). 
+      [1] Velasco, G. A., Holighaus, N., Dörfler, M., & Grill, T. (2011).
         "Constructing an invertible constant-Q transform with non-stationary
         Gabor frames". Proceedings of DAFX11, Paris, 93-99.
 
@@ -131,7 +131,7 @@ def nsgicqgram(cq, dc, nf, frameSize=8192, transitionSize=1024, minFrequency=65.
                normalize='none', window='hannnsgcq'):
     """Frame-wise invertible Constant-Q synthesis.
     This code replicates the Sli-CQ algorithm from [1]. An inverse Tukey window
-    is used to resynthetise the original audio signal from the `nsgcqgram` 
+    is used to resynthetise the original audio signal from the `nsgcqgram`
     representation using the `NSGIConstantQ` algorithm.
 
     References:
@@ -163,11 +163,16 @@ def nsgicqgram(cq, dc, nf, frameSize=8192, transitionSize=1024, minFrequency=65.
 
     # Tukey inverse window.
     window = np.zeros(frameSize)
-    window[np.arange((hopSize + transitionSize) // 2, (3 * hopSize -
-                                                       transitionSize) // 2)] = np.ones(hopSize - transitionSize)
-    window[np.hstack([np.arange((hopSize - transitionSize) // 2, (hopSize + transitionSize) // 2), np.arange((3 * hopSize - transitionSize) //
-                                                                                                             2, (3 * hopSize + transitionSize) // 2)])] = __inverseTukeyWindow__(np.arange(-transitionSize, transitionSize) / transitionSize)
+    window[np.arange((hopSize + transitionSize) // 2,
+                     (3 * hopSize - transitionSize) // 2)
+           ] = np.ones(hopSize - transitionSize)
 
+    window[np.hstack([np.arange((hopSize - transitionSize) // 2,
+                                (hopSize + transitionSize) // 2),
+                      np.arange((3 * hopSize - transitionSize) // 2,
+                                (3 * hopSize + transitionSize) // 2)])
+           ] = __inverseTukeyWindow__(np.arange(-transitionSize,
+                                                transitionSize) / transitionSize)
 
     # Undo the frame centering.
     cqShiftEven = np.hstack(
@@ -201,7 +206,8 @@ def nsgicqgram(cq, dc, nf, frameSize=8192, transitionSize=1024, minFrequency=65.
     audio = np.zeros((len(frames) + 1) * hopSize)
 
     for kk in range(len(frames)):
-        audio[np.arange(int(np.ceil((kk - .5) * hopSize)), int(np.ceil((kk + 1.5) * hopSize)))
+        audio[np.arange(int(np.ceil((kk - .5) * hopSize)),
+                        int(np.ceil((kk + 1.5) * hopSize)))
               ] += np.roll(frames[kk], int(np.floor(((-1) ** kk) * hopSize / 2))) * window
 
     return audio[hopSize:]
