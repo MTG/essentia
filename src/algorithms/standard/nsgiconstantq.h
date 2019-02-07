@@ -114,6 +114,7 @@ class NSGIConstantQ : public Algorithm {
   std::vector<std::vector<int> > _win_range;
   std::vector<std::vector<int> > _idx;
 
+  bool _oddInput;
 
   void designDualFrame();
 

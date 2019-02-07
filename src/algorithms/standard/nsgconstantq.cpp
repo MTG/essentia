@@ -47,6 +47,13 @@ void NSGConstantQ::configure() {
   _minimumWindow = parameter("minimumWindow").toInt();
   _windowSizeFactor = parameter("windowSizeFactor").toInt();
 
+  // Force an even inputSize so FFT doesn't throw
+  // an exception. If the input signal is odd it 
+  // will be padded on runtime.
+  if (_inputSize % 2) {
+    _inputSize++;
+  }
+
   designWindow();
   createCoefficients();
   normalize();
