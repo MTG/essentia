@@ -279,11 +279,11 @@ void NSGConstantQ::compute() {
   }
 
   // FFT requires an even input, but in order to push back
-  // we needed to copy the data first. When it is alredy
+  // we needed to copy the data first. When it is already
   // even we can just use a reference to the input buffer
   // to avoid the copy.
-  if(originalSignal.size() % 2) {
-    E_INFO("Odd input. Repeating the last Sample.");
+  if (originalSignal.size() % 2) {
+    E_INFO("NSGConstantQ: Odd input. Duplicating the last sample to get even size.");
 
     paddedSignal = originalSignal;
     
