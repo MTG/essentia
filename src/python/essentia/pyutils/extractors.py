@@ -20,7 +20,6 @@ from multiprocessing import Pool
 from multiprocessing import cpu_count
 from subprocess import Popen, PIPE
 from essentia import EssentiaError
-import numpy as np
 import os
 import sys
 
@@ -121,11 +120,12 @@ def batch_music_extractor(audio_dir, output_dir, generate_log=True,
 
         status, cmd, stderr = zip(*outs)
 
-        stderr = list(stderr)
-
-        status = np.array(status)
-        errors = np.count_nonzero(status != 0)
-        oks = np.count_nonzero(status == 0)
+        oks, errors = 0, 0
+        for i in status:
+            if i == 0:
+                oks += 1
+            else:
+                errors += 1
 
     summary = "Analysis done. {} files have been skipped due to errors, {} were processed and {} already existed.".format(
         errors, oks, skipped_count)

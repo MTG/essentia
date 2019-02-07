@@ -42,8 +42,6 @@ def music_extractor(audio_file, sig_file, profile=None, store_frames=False, form
     if store_frames:
         YamlOutput(filename=sig_file + '.frames.sig', format=format)(poolFrames)
 
-    return 0
-
 
 if __name__ == '__main__':
     parser = ArgumentParser(description = """
