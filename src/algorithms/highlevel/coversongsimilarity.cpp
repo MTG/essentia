@@ -29,9 +29,9 @@ namespace standard {
 const char* CoverSongSimilarity::name = "CoverSongSimilarity";
 const char* CoverSongSimilarity::category = "Music similarity";
 const char* CoverSongSimilarity::description = DOC("This algorithm computes a cover song similiarity measure from an input cross similarity matrix of two chroma vectors of a query and reference song using various alignment constraints of smith-waterman local-alignment algorithm.\n\n"
-"This algorithm expects to recieve the input matrix from CrossSimilarityMatrix algorithm\n\n"
+"This algorithm expects to recieve the input matrix from essentia 'CrossSimilarityMatrix' algorithm\n\n"
 "The algorithm provides two different allignment contraints for computing the smith-waterman score matrix (check references).\n\n"
-"Exceptions are thrown if the input similarity is not binary or empty.\n\n"
+"Exceptions are thrown if the input similarity matrix is not binary or empty.\n\n"
 "References:\n"
 "[1] Smith-Waterman algorithm Wikipedia (https://en.wikipedia.org/wiki/Smith%E2%80%93Waterman_algorithm).\n\n"
 "[2] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n"

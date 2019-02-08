@@ -32,6 +32,7 @@ example_sources_fileio = [
     ('standard_spsmodel', ),
     ('standard_stft', ),
     ('standard_stochasticmodel', ),
+    ('standard_crosssimilarity', ),
     ('standard_coversongsimilarity', ),
 
     ('streaming_beatsmarker', ),
@@ -47,6 +48,7 @@ example_sources_fileio = [
     ('streaming_panning', ),
     ('streaming_pitchyinfft', ),
     ('streaming_predominantpitchmelodia', ),
+    ('streaming_crosssimilaritymatrix', ),
     ('streaming_stft', ),
     ('streaming_tuningfrequency', ),
     ('streaming_vibrato', ),

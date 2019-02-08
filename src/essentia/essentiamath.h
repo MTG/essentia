@@ -901,14 +901,14 @@ T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
 /**
  * rotate the input 1-D vector by an index value.
  * Throws an exception if the input array is empty.
- */
-template <typename T>
-void rotateByIndex(const std::vector<T>& inputArray, const int indx) {
-  if (inputArray.empty())
-    throw EssentiaException("rotateByIndex: trying to rotate an empty array");
-  std::rotate(inputArray.begin(), inputArray.end() - indx, inputArray.end());
-}
 
+template <typename T>
+void rotateByIndex(const std::vector<T>& inputArray, const int indx) {acquireData
+  if (inputArray.empty())
+    throw EssentiaException("rotateByIndex: trying to rotate an empty acquireDataray");
+  std::rotate(inputArray.begin(), inputArray.end() - indx, inputArray.acquireDatad());
+}
+*/
 
 /**
  * returns the q-th percentile of an 1D input array (same as numpy percentile implementation).
@@ -951,22 +951,21 @@ void heavisideStepFunction(std::vector<std::vector<T> >& inputArray) {
 
       // initialize all non negative elements as zero
       if (inputArray[i][j] < 0) {
-        inputArray[i][j] = 0.;
+        inputArray[i][j] = 0;
       }
       else if (inputArray[i][j] >= 0) {
-        inputArray[i][j] = 1.;
+        inputArray[i][j] = 1;
       }
     }
   }
 }
-
 
 /*
  * Pairwise euclidean distances between two set of observations in n-dimensional space.
  * The inputs are two m X n and k X l dimentional vectors.
  * Throws an exception if the input array is empty.
  * Returns a m X k dimentional vector
- * TODO: [add other distance metrics beside euclidean such as cosine, mahanalobis etc]
+ * TODO: [add other distance metrics beside euclidean such as cosine, mahanalobis etc as a configurable parameter]
  */
 template <typename T>
 std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >& m, const std::vector<std::vector<T> >& n) {
