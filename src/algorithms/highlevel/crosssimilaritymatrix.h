@@ -44,7 +44,7 @@ class CrossSimilarityMatrix : public Algorithm {
     declareParameter("toBlocked", "whether to use stacked chroma vector embedding for computing similarity", "{true,false}", true);
     declareParameter("noti", "Number of circular shifts to be checked for optimal transposition index", "[0, inf)", 12);
     declareParameter("otiBinary", "whether to use the OTI-based chroma binary similarity method", "{true,false}", false);
-    declareParameter("optimiseThreshold", "whether to use the optimised threhold method in hte similarity computation ", "{true,false}", false);
+    declareParameter("optimiseThreshold", "whether to use the optimised threhold method in the similarity computation", "{true,false}", false);
   }
 
    void configure();

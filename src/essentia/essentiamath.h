@@ -898,22 +898,7 @@ T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
 }
 
 
-/**
- * rotate the input 1-D vector by an index value.
- * Throws an exception if the input array is empty.
-
-template <typename T>
-void rotateByIndex(const std::vector<T>& inputArray, const int indx) {acquireData
-  if (inputArray.empty())
-    throw EssentiaException("rotateByIndex: trying to rotate an empty acquireDataray");
-  std::rotate(inputArray.begin(), inputArray.end() - indx, inputArray.acquireDatad());
-}
-*/
-
-/**
- * returns the q-th percentile of an 1D input array (same as numpy percentile implementation).
- * Throws an exception if the input array is empty.
- */ 
+// returns the q-th percentile of an input array. Same as numpy.percentile implementation
 template <typename T> T percentile(const std::vector<T>& array, Real qpercentile) {
   if (array.empty())
     throw EssentiaException("percentile: trying to calculate percentile of empty array");
@@ -923,7 +908,16 @@ template <typename T> T percentile(const std::vector<T>& array, Real qpercentile
   std::sort(sorted_array.begin(), sorted_array.end());
 
   qpercentile /= 100.;
-  Real k = (sorted_array.size() - 1) * qpercentile;
+
+  Real k;
+  int sortArraySize = sorted_array.size();
+  if (sortArraySize > 1) {
+    k = (sortArraySize - 1) * qpercentile;
+  }
+  else {
+    // to avoid zero value in arrays with single element
+    k = sortArraySize * qpercentile;
+  }
 
   Real idxFloor = std::floor(k);
   Real idxCeil = std::ceil(k);

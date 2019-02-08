@@ -191,8 +191,8 @@ void CrossSimilarityMatrix::configure() {
   input("queryFeature").setAcquireSize(_minFramesSize);
   input("queryFeature").setReleaseSize(_tau);
 
-  output("csm").setAcquireSize(_minFramesSize);
-  output("csm").setReleaseSize(0);
+  output("csm").setAcquireSize(1);
+  output("csm").setReleaseSize(1);
 }
 
 AlgorithmStatus CrossSimilarityMatrix::process() {
@@ -212,14 +212,8 @@ AlgorithmStatus CrossSimilarityMatrix::process() {
     int available = input("queryFeature").available();
     if (available == 0) return NO_INPUT;
 
-    /*
     input("queryFeature").setAcquireSize(available);
     input("queryFeature").setReleaseSize(available);
-
-    output("csm").setAcquireSize(available);
-    output("csm").setReleaseSize(available);
-    */
-
 
     return process();
   }
@@ -227,7 +221,7 @@ AlgorithmStatus CrossSimilarityMatrix::process() {
   const std::vector<std::vector<Real> >& inputQueryFrames = _queryFeature.tokens();
   std::vector<std::vector<Real> > inputFramesCopy = inputQueryFrames; 
   // std::vector<std::vector<std::vector<Real> > >& csmOutput = _csm.tokens();
-  // std::vector<TNT::Array2D<Real> >& csmOutput = _csm.tokens();
+  std::vector<TNT::Array2D<Real> >& csmOutput = _csm.tokens();
   std::vector<std::vector<Real> > outputSimMatrix;
 
   if (input("queryFeature").acquireSize() < _minFramesSize) {
@@ -248,21 +242,15 @@ AlgorithmStatus CrossSimilarityMatrix::process() {
   // check whether to use oti-based binary similarity as mentioned in [3]
   if (_otiBinary == true) {
     outputSimMatrix = chromaBinarySimMatrix(queryTimeEmbed, referenceTimeEmbed, _noti, _mathcCoef, _mismatchCoef);
-    _csm.push(vecvecToArray2D(outputSimMatrix));
+    csmOutput[0] = vecvecToArray2D(outputSimMatrix);
+    releaseData();
   }
+
   // otherwise we compute similarity matrix as mentioned in [2]
   else if (_otiBinary == false) {
     // here we compute the pairwsie euclidean distances between query and reference song time embedding and finally tranpose the resulting matrix.
-    if (queryTimeEmbed.empty() || referenceTimeEmbed.empty())
-      EXEC_DEBUG("CrossSimilarityMatrix: Found empty array as input while calculating pairwise distances");
-    std::vector<std::vector<Real> > tpDistances(referenceTimeEmbed.size(), std::vector<Real>(queryTimeEmbed.size(), 0));
-    Real item = 0;
-    for (size_t i=0; i<queryTimeEmbed.size(); i++) {
-        for (size_t j=0; j<referenceTimeEmbed.size(); j++) {
-            item = dotProduct(queryTimeEmbed[i], queryTimeEmbed[i]) - 2*dotProduct(queryTimeEmbed[i], referenceTimeEmbed[j]) + dotProduct(referenceTimeEmbed[j], referenceTimeEmbed[j]);
-            tpDistances[j][i] = sqrt(item);
-        }
-    }
+    std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryTimeEmbed, referenceTimeEmbed);
+    std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
 
     size_t yRows = tpDistances.size();
     size_t yCols = tpDistances[0].size();
@@ -272,21 +260,16 @@ AlgorithmStatus CrossSimilarityMatrix::process() {
     std::vector<std::vector<Real> > similarityY(yRows, std::vector<Real>(yCols, 0));
 
     // construct thresholded similarity matrix on axis Y
+    std::vector<std::vector<Real> > tSimilarityY(yCols, std::vector<Real>(yRows));
     for (size_t u=0; u<yRows; u++) {
       for (size_t v=0; v<yCols; v++) {
         similarityY[u][v] = percentile(tpDistances[u], _kappa*100) - tpDistances[u][v];
-      }
-    }
-
-    // here we binarise and transpose the similarityY array same time in order to avoid redundant looping
-    std::vector<std::vector<Real> > tSimilarityY(yCols, std::vector<Real>(yRows));
-    for (size_t i=0; i<yRows; i++) {
-      for (size_t j=0; j<yCols; j++) {
-        if (similarityY[i][j] < 0) {
-          tSimilarityY[j][i] = 0;
+        // here we binarise and transpose the similarityY array same time in order to avoid redundant looping
+        if (similarityY[u][v] < 0) {
+          tSimilarityY[v][u] = 0.;
         }
-        else if (similarityY[i][j] >= 0) {
-          tSimilarityY[j][i] = 1;
+        else if (similarityY[u][v] >= 0) {
+          tSimilarityY[v][u] = 1.;
         }
       }
     }
@@ -294,7 +277,7 @@ AlgorithmStatus CrossSimilarityMatrix::process() {
     TNT::Array2D<Real> simX = vecvecToArray2D(similarityX);
     TNT::Array2D<Real> simY = vecvecToArray2D(tSimilarityY);
     TNT::Array2D<Real> csmOut = TNT::operator*(simX, simY);
-    _csm.push(csmOut);
+    csmOutput[0] = csmOut;
     releaseData();
   }
   // should not arrive here
@@ -302,6 +285,7 @@ AlgorithmStatus CrossSimilarityMatrix::process() {
   
   return OK;
 }
+
 
 /*
 // construct time delayed embedding from streaming input
@@ -332,6 +316,7 @@ std::vector<std::vector<Real> > CrossSimilarityMatrix::streamingFrames2TimeEmbed
   return outputVec;
 }
 */
+
 
 } // namespace streaming
 } // namespace essentia

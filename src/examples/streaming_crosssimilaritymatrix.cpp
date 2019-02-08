@@ -43,17 +43,34 @@ int main(int argc, char* argv[]) {
   string referenceFilename = argv[2];
   string outputFilename = argv[3];
 
-  vector<vector<Real> > referenceFeature(500, vector<Real>(12, 0.5));
+  vector<vector<Real> > referenceFeature;
+  // read the 2d array text file and store it to a 2D vector 
+  ifstream myReadFile;
+  myReadFile.open(referenceFilename);
+  string line;
+  int i = 0;
 
-  // register the algorithms in the factory(ies)
+  while (getline(myReadFile, line)) {
+    Real value;
+    stringstream ss(line);
+    referenceFeature.push_back(vector<Real> ());
+    while (ss >> value) {
+      referenceFeature[i].push_back(value);
+    }
+    ++i;
+  }
+
+  cout << "\nReference song input matrix size: " << referenceFeature.size() << ", " << referenceFeature[0].size() << "\n" << endl;
+
+  // register the algorithms in the factory
   essentia::init();
 
   Pool pool;
 
   /////// PARAMS //////////////
   Real sampleRate = 44100.0;
-  int frameSize = 1024;
-  int hopSize = 512;
+  int frameSize = 4096;
+  int hopSize = 2048;
   int numBins = 12;
   Real minFrequency = 100;
   Real maxFrequency = 3500;
@@ -135,10 +152,11 @@ int main(int argc, char* argv[]) {
   Network network(audio);
   network.run();
 
-
   ///////// Writing results to a json file //////////////
+  cout << "-------- writing results to " << outputFilename << " ---------" << endl;
   standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
-                                                                   "filename", outputFilename);
+                                                                   "filename", outputFilename,
+                                                                   "format", "json");
   output->input("pool").set(pool);
   output->compute();
 
