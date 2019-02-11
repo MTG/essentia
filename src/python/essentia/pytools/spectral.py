@@ -291,21 +291,21 @@ def hpcp(audio, sampleRate=44100, frameSize=4096, hopSize=2048, windowType='blac
 
     """
     audio = array(audio)
-    frameGenerator = estd.FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
-    window = estd.Windowing(type=windowType)
-    spectrum = estd.Spectrum()
+    frameGenerator = es.FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
+    window = es.Windowing(type=windowType)
+    spectrum = es.Spectrum()
     # Refer http://essentia.upf.edu/documentation/reference/std_SpectralPeaks.html
-    spectralPeaks = estd.SpectralPeaks(magnitudeThreshold=magnitudeThreshold,
+    spectralPeaks = es.SpectralPeaks(magnitudeThreshold=magnitudeThreshold,
                                         maxFrequency=maxFrequency,
                                         minFrequency=minFrequency,
                                         maxPeaks=maxPeaks,
                                         orderBy="frequency",
                                         sampleRate=sampleRate)
     # http://essentia.upf.edu/documentation/reference/std_SpectralWhitening.html
-    spectralWhitening = estd.SpectralWhitening(maxFrequency= maxFrequency,
+    spectralWhitening = es.SpectralWhitening(maxFrequency= maxFrequency,
                                                     sampleRate=sampleRate)
     # http://essentia.upf.edu/documentation/reference/std_HPCP.html
-    hpcp = estd.HPCP(sampleRate=sampleRate,
+    hpcp = es.HPCP(sampleRate=sampleRate,
                     maxFrequency=maxFrequency,
                     minFrequency=minFrequency,
                     referenceFrequency=referenceFrequency,
