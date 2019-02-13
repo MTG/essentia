@@ -29,6 +29,7 @@ const char* PeakDetection::name = "PeakDetection";
 const char* PeakDetection::category = "Standard";
 const char* PeakDetection::description = DOC("This algorithm detects local maxima (peaks) in an array. The algorithm finds positive slopes and detects a peak when the slope changes sign and the peak is above the threshold.\n"
 "It optionally interpolates using parabolic curve fitting.\n"
+"When two consecutive peaks are closer than the `minPeakDistance` parameter, the smallest one is discarded. A value of 0 bypasses this feature.\n"
 "\n"
 "Exceptions are thrown if parameter \"minPosition\" is greater than parameter \"maxPosition\", also if the size of the input array is less than 2 elements.\n"
 "\n"
@@ -199,25 +200,39 @@ void PeakDetection::compute() {
       k++;
     }
 
-    std::sort(peaks.begin(), peaks.end(),
-              ComparePeakPosition<std::less<Real>, std::greater<Real> >());    
+    if (_orderBy == "position") {
+      // if required,sort peaks by 
+      // position again
+      std::sort(peaks.begin(), peaks.end(),
+                ComparePeakPosition<std::less<Real>, std::greater<Real> >());
+    }
+    else if (_orderBy == "amplitude") {
+      // already sorted by amplitude
+    }
+    else {
+      throw EssentiaException("PeakDetection: Unsupported ordering type: '" + _orderBy + "'");
+    }
+
+  } else {
+    // if haven't passed through the minPeakDistance part
+    // apply the inverse logic for sorting
+    if (_orderBy == "amplitude") {
+      // sort peaks by amplitude, in case of equality,
+      // return the one having smaller position
+      std::sort(peaks.begin(), peaks.end(),
+                ComparePeakMagnitude<std::greater<Real>, std::less<Real> >());
+    }
+    else if (_orderBy == "position") {
+      // already sorted by position
+    }
+    else {
+      throw EssentiaException("PeakDetection: Unsupported ordering type: '" + _orderBy + "'");
+    }
   }
+
 
   // we only want this many peaks
   int nWantedPeaks = std::min((int)_maxPeaks, (int)peaks.size());
-
-  if (_orderBy == "amplitude") {
-    // sort peaks by magnitude, in case of equality,
-    // return the one having smaller position
-    std::sort(peaks.begin(), peaks.end(),
-              ComparePeakMagnitude<std::greater<Real>, std::less<Real> >());
-  }
-  else if (_orderBy == "position") {
-    // they're already sorted by position
-  }
-  else {
-    throw EssentiaException("PeakDetection: Unsupported ordering type: '" + _orderBy + "'");
-  }
 
   peakPosition.resize(nWantedPeaks);
   peakValue.resize(nWantedPeaks);
