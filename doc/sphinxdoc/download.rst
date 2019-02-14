@@ -14,12 +14,15 @@ Precompiled `extractor binaries <https://mtg.github.io/essentia-labs//news/2015/
 
 AcousticBrainz `Music Extractor binaries <http://acousticbrainz.org/download>`_ (Linux, OSX, Win)
 
+`Manylinux1 Python wheels <https://pypi.org/project/essentia/>`_ (Linux)
+
 
 Development branch
 ------------------
 
 The latest updates are always available in the `master branch <https://github.com/MTG/essentia/tree/master/>`_.
 
+The latest development builds of Python wheels are available `here <https://owncloud.rp.upf.edu/index.php/s/TpwgF4XrZEpBTOI>`_ (Linux).
 
 
 Classifier models
