@@ -49,7 +49,7 @@ class TestIFFT(TestCase):
                 timeSignal[i] = -1.0
 
         freqSignal = [ 0+0j ] * signalSize
-        freqSignal[signalSize / 2] = (1+0j) * signalSize
+        freqSignal[signalSize // 2] = (1+0j) * signalSize
 
         self.assertAlmostEqualVector(IFFTC()(cvec(freqSignal)), timeSignal)
 
