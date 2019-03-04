@@ -435,6 +435,13 @@ def build(ctx):
     else:
         print ('Building without 3rdparty spline library code because Spline and CubicSpline algorithms are ignored')
 
+    # do not compile nnls.h if we are not compiling NNLSChroma
+    if 'NNLSChroma' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/nnls' ]
+        sources += [ ctx.path.find_resource('3rdparty/nnls/nnls.c') ]
+    else:
+        print ('Building without 3rdparty nnls library code because NNLSChroma algorithms are ignored')
+
     # Add Kiss Dependancy stuff
     if 'KISS' in ctx.env.FFT:
         ctx.env.INCLUDES += ['3rdparty/kiss_fft130' ]

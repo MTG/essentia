@@ -26,8 +26,25 @@ cd -
 
 # Compile wheels
 for PYBIN in /opt/python/*/bin; do
-# use older version of numpy for backwards compatibility of its C API
-    "${PYBIN}/pip" install numpy==1.8.2
+# Use the oldest version of numpy for each Python version
+# for backwards compatibility of its C API
+# https://github.com/numpy/numpy/issues/5888
+# Build numpy versions used by scikit-learn:
+# https://github.com/MacPython/scikit-learn-wheels/blob/master/.travis.yml
+
+# Python 2.7
+    NUMPY_VERSION=1.8.2
+
+# Python 3.x
+    if [[ $PYBIN == *"cp37"* ]]; then
+        NUMPY_VERSION=1.14.5
+    elif [[ $PYBIN == *"cp36"* ]]; then
+        NUMPY_VERSION=1.11.3
+    elif [[ $PYBIN == *"cp34"* ]] || [[ $PYBIN == *"cp35"* ]]; then
+        NUMPY_VERSION=1.9.3
+    fi
+
+    "${PYBIN}/pip" install numpy==$NUMPY_VERSION
     ESSENTIA_WHEEL_SKIP_3RDPARTY=1 ESSENTIA_WHEEL_ONLY_PYTHON=1 "${PYBIN}/pip" wheel /io/ -w wheelhouse/ -v
 done
 
