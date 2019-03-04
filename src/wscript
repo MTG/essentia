@@ -197,8 +197,7 @@ def configure(ctx):
     elif 'KISS' in ctx.env.FFT:
         print('- using KISS for FFT\n')
         ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTAComplex', 'IFFTAComplex',
-                               'FFTW', 'IFFTW', 'FFTWComplex', 'IFFTWComplex',
-                               'ConstantQ', 'Chromagram']
+                               'FFTW', 'IFFTW', 'FFTWComplex', 'IFFTWComplex']
     else:
         print('- using FFTW for FFT\n')
         if has('fftw'):
