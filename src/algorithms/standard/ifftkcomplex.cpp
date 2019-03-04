@@ -74,13 +74,18 @@ void IFFTKComplex::compute() {
   signal.resize(size);
   memcpy(&signal[0], _output, size * sizeof(complex<Real>));
   
-  for (int i = 0; i < size; i++) {
-    signal[i] /= (Real)size;
+  if (_normalize) {
+    Real norm = (Real)size;
+    
+    for (int i = 0; i < size; i++) {
+      signal[i] /= norm;
+    }
   }
 }
 
 void IFFTKComplex::configure() {
   createFFTObject(parameter("size").toInt());
+  _normalize = parameter("normalize").toBool();
 }
 
 void IFFTKComplex::createFFTObject(int size) {

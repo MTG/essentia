@@ -65,25 +65,34 @@ void IFFTAComplex::compute() {
     createFFTObject(size);
   }
 
-    //Pack
-    // accelBuffer.realp[0] = fft[0].real();
-    // accelBuffer.imagp[0] = fft[fft.size()-1].real();
+  //Pack
+  // accelBuffer.realp[0] = fft[0].real();
+  // accelBuffer.imagp[0] = fft[fft.size()-1].real();
     
-    for(int i = 0; i < fft.size(); i++) {
-        accelBuffer.realp[i] = fft[i].real();
-        accelBuffer.imagp[i] = fft[i].imag();
+  for(int i = 0; i < fft.size(); i++) {
+      accelBuffer.realp[i] = fft[i].real();
+      accelBuffer.imagp[i] = fft[i].imag();
+  }
+    
+  vDSP_fft_zip(fftSetup, &accelBuffer, 1, logSize, FFT_INVERSE);
+  
+  // copy result from plan to output vector
+  signal.resize(size);
+  
+  vDSP_ztoc(&accelBuffer, 1, (COMPLEX*)&signal[0], 2, size);
+
+  if (_normalize) {
+    Real norm = (Real)size;
+    
+    for (int i = 0; i < size; i++) {
+      signal[i] /= norm;
     }
-    
-    vDSP_fft_zip(fftSetup, &accelBuffer, 1, logSize, FFT_INVERSE);
-    
-    // copy result from plan to output vector
-    signal.resize(size);
-    
-    vDSP_ztoc(&accelBuffer, 1, (COMPLEX*)&signal[0], 2, size);
+  }
 }
 
 void IFFTAComplex::configure() {
   createFFTObject(parameter("size").toInt());
+  _normalize = parameter("normalize").toBool();
 }
 
 void IFFTAComplex::createFFTObject(int size) {

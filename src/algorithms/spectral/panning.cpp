@@ -99,7 +99,7 @@ void Panning::configure() {
   _warpedPanorama = parameter("warpedPanorama").toBool();
   _sampleRate = parameter("sampleRate").toReal();
   _histogramAccumulated.resize(_panningBins);
-  _ifft->configure("size", _panningBins * 2);
+  _ifft->configure("size", _panningBins * 2, "normalize", false);
   _nFrames = 0;
 }
 
