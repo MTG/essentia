@@ -214,14 +214,13 @@ AlgorithmStatus CoverSongSimilarity::process() {
   for(size_t i = _x; i < _accumXFrameSize; i++) {
     for(size_t j = 2; j < yFrames; j++) {
       // measure the diagonal when a similarity is found in the input matrix
-      std::cout << "Val: " << _previnputMatrixFrames[i][j] << std::endl;
+      //std::cout << "Val: " << _previnputMatrixFrames[i][j] << std::endl;
       if (inputFrames[_xIter][j] == 1.0) {
         _c1 = _prevCumMatrixFrames[i-1][j-1];
         _c2 = _prevCumMatrixFrames[i-2][j-1];
         _c3 = _prevCumMatrixFrames[i-1][j-2];
         Real row[3] = {_c1, _c2 , _c3};
         incrementMatrix[_xIter][j] = *std::max_element(row, row+3) + 1;
-        std::cout << "Hola1: " << incrementMatrix[_xIter][j] << " Idx: " << _xIter << ", " << j << std::endl;
         }
       // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
       else {
@@ -230,7 +229,6 @@ AlgorithmStatus CoverSongSimilarity::process() {
         _c3 = _prevCumMatrixFrames[i-1][j-2] - gammaState(_previnputMatrixFrames[i-1][j-2], _disOnset, _disExtension);
         Real row2[4] = {0, _c1, _c2, _c3};
         incrementMatrix[_xIter][j] = *std::max_element(row2, row2+4);
-        // std::cout << "Hola2: " << incrementMatrix[_xIter][_yIter] << " Idx: " << _xIter << ", " << _yIter << std::endl;
       }
     }
     if (_xIter < xFrames) _xIter++;
