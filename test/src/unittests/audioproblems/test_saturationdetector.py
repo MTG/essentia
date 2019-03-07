@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -18,11 +18,11 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
+import numpy as np
+from math import *
 
 from essentia_test import *
-from math import *
 from essentia import array as esarr
-import numpy as np
 
 
 class TestSaturationDetector(TestCase):
@@ -59,8 +59,8 @@ class TestSaturationDetector(TestCase):
         self.testLongSaturation(frameSize=512, hopSize=512)
 
     def testSquareWaves(self):
-        # the algorithm should be able to detect the positive part of square
-        # waves at different frequencies.
+        # The algorithm should be able to detect the positive part
+        # of square waves at different frequencies.
 
         fs = 44100
         minFreq = 100  # Hz
@@ -106,6 +106,7 @@ class TestSaturationDetector(TestCase):
         self.assertConfigureFails(SaturationDetector(), {'minimumDuration': -1})
 
 suite = allTests(TestSaturationDetector)
+
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

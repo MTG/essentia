@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-
-
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -25,12 +23,11 @@ from essentia import array as esarr
 
 
 class TestStartStopCut(TestCase):
-
     def InitStartStopCut(self, **kwargs):
         return StartStopCut(**kwargs)
 
-    # test different input sizes
     def testZero(self):
+        # Test different input sizes.
         size = 200000  # apx. 4.5s @ 44.1kHz
         while size > 1000:
             self.assertEqualVector(
@@ -46,9 +43,9 @@ class TestStartStopCut(TestCase):
                     esarr(numpy.ones(size))), (1, 1))
             size /= 2
 
-    # if th input size is smaller that the detection thresholds plus a the
-    # size of a frame it should throw an Exception
     def testInputTooShort(self):
+        # If the input size is smaller that the detection thresholds plus
+        # the size of a frame it should throw an Exception.
         size = 1024
         self.assertComputeFails(
             StartStopCut(frameSize=size), esarr(numpy.ones(size)))
@@ -79,9 +76,9 @@ class TestStartStopCut(TestCase):
         self.assertConfigureFails(StartStopCut(), {'frameSize': 64,
                                                    'hopSize': 65})
 
-    # Streaming mode should also be tested to ensure it works well with the
-    # real accumulator
     def testStreamingRegression(self):
+        # Streaming mode should also be tested to ensure it works well
+        # with the real accumulator.
         import essentia.streaming as estr
         loader = estr.MonoLoader(filename=join(testdata.audio_dir,
                                  'recorded/mozart_c_major_30sec.wav'))
@@ -102,6 +99,7 @@ class TestStartStopCut(TestCase):
         self.assertEqual(pool['stop'], 1)
 
 suite = allTests(TestStartStopCut)
+
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

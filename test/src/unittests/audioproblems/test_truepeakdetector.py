@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -18,15 +18,14 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
+import numpy as np
+from math import *
 
 from essentia_test import *
-from math import *
 from essentia import array as esarr
-import numpy as np
 
 
 class TestTruePeakDetector(TestCase):
-
     def testZero(self):
         self.assertEqualVector(TruePeakDetector()(esarr(np.zeros(512)))[0],
                                esarr([]))
@@ -35,7 +34,6 @@ class TestTruePeakDetector(TestCase):
         # This test asserts that the estimated peak position is better than
         # the sampled one. This test is performed over a sinc wave sampled
         # with different offsets.
-
         duration = 10  # s
         fs = 1  # hz
         k = 1.5  # amplitude
@@ -94,13 +92,13 @@ class TestTruePeakDetector(TestCase):
         peakDetector = TruePeakDetector()
         results = [peakDetector(x)[0] for x in data]
 
-        # the algorithm should detect the same frames regardless the bit size.
+        # The algorithm should detect the same frames regardless the bit size.
         for version in results[:-1]:
             self.assertEqualVector(results[-1], version)
 
     def testDCblock(self):
-        # this negative peak is hidden by a huge amount of positive dc offset.
-        # it should be detected when the optional dc blocker is on.
+        # This negative peak is hidden by a huge amount of positive dc offset.
+        # It should be detected when the optional dc blocker is on.
         oversamplingFactor = 4
         signal = np.zeros(512)
         peakLoc = 256
@@ -110,9 +108,9 @@ class TestTruePeakDetector(TestCase):
         withoutDC = TruePeakDetector(blockDC=True,
                                      oversamplingFactor=oversamplingFactor,
                                      version=2)(signalWithDC.astype(np.float32))[0]
-        withDC    = TruePeakDetector(blockDC=False,
-                                     oversamplingFactor=oversamplingFactor,
-                                     version=2)(signalWithDC.astype(np.float32))[0]
+        withDC = TruePeakDetector(blockDC=False,
+                                  oversamplingFactor=oversamplingFactor,
+                                  version=2)(signalWithDC.astype(np.float32))[0]
 
         assert(withDC.size == 0)
         assert(peakLoc in withoutDC)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -18,15 +18,14 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
+import numpy as np
+from math import *
 
 from essentia_test import *
-from math import *
 from essentia import array as esarr
-import numpy as np
 
 
 class TestClickDetector(TestCase):
-
     def testZero(self):
         self.assertEqual(SNR()(esarr(np.zeros(512)))[1], -np.inf)
 
@@ -90,7 +89,7 @@ class TestClickDetector(TestCase):
         signal = np.sin(2 * pi * 5000 * time_axis)
 
         signal_db = -22.
-        noise_db  = -50.
+        noise_db = -50.
 
         signal[:int(noise_only * fs)] = np.zeros(int(noise_only * fs))
 
@@ -108,6 +107,7 @@ class TestClickDetector(TestCase):
         self.assertAlmostEqual(snrCorrected, snrNotCorrected - 10. * np.log10(fs / 2), 1e-4)
 
 suite = allTests(TestClickDetector)
+
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

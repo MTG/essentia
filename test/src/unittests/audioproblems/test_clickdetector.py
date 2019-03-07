@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -18,15 +18,14 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
+import numpy as np
+from math import *
 
 from essentia_test import *
-from math import *
 from essentia import array as esarr
-import numpy as np
 
 
 class TestClickDetector(TestCase):
-
     def testZero(self):
         self.assertEqualVector(ClickDetector()(esarr(np.zeros(512)))[0],
                                esarr([]))

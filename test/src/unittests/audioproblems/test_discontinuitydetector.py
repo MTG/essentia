@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 
-
-
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -25,22 +23,21 @@ from essentia import array as esarr
 
 
 class TestDiscontinuityDetector(TestCase):
-
     def InitDiscontinuityDetector(self, **kwargs):
         return DiscontinuityDetector(**kwargs)
 
     def testZero(self):
-        # inputting zeros should return an empty list.
+        # An array of zeros should return an empty list.
         size = 1024
         self.assertEqualVector(
             self.InitDiscontinuityDetector(frameSize=size)(
                 esarr(numpy.zeros(size)))[0], esarr([]))
 
     def testSquareWave(self):
-        # the algorithm should be robust to squarewaves if there are at least
-        # a few periods on the frame:
+        # The algorithm should be robust to squarewaves if
+        # there are at least a few periods on the frame:
         #   f > ~200Hz for a window size of 512 @ 44.1kHz
-        # try different frequencies.
+        # Try different frequencies.
         fs = 44100
         minFreq = 200  # Hz
         maxFreq = 20000  # Hz
@@ -70,7 +67,7 @@ class TestDiscontinuityDetector(TestCase):
         startJump = originalLen / 4
         groundTruth = [startJump / float(fs)]
 
-        # make sure that the artificial jump produces a prominent discontinuity
+        # Make sure that the artificial jump produces a prominent discontinuity.
         if audio[startJump] > 0:
             end = next(idx for idx, i in enumerate(audio[startJump:]) if i < -.3)
         else:
@@ -95,7 +92,7 @@ class TestDiscontinuityDetector(TestCase):
         self.assertAlmostEqualVector(frameList, groundTruth, 1e-7)
 
     def testNoOverlap(self):
-        # the algorithm should also work without overlapping
+        # The algorithm should also work without overlapping.
         self.testRegression(frameSize=512, hopSize=512)
 
     def testInvalidParam(self):
@@ -110,8 +107,8 @@ class TestDiscontinuityDetector(TestCase):
                                                             'hopSize': 32,
                                                             'order': 64})
 
-
 suite = allTests(TestDiscontinuityDetector)
+
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

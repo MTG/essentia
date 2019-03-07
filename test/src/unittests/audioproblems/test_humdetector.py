@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -18,15 +18,14 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
+import numpy as np
+from math import *
 
 from essentia_test import *
-from math import *
 from essentia import array as esarr
-import numpy as np
 
 
 class TestHumDetector(TestCase):
-
     def testZero(self):
         self.assertEqualVector(HumDetector()(esarr(np.zeros(512)))[1], esarr([]))
 
@@ -56,7 +55,7 @@ class TestHumDetector(TestCase):
 
         hum = np.sin(2 * np.pi * freq * time )
 
-        hum *= db2amp(-54.) # empirically found to be the audible limit
+        hum *= db2amp(-54.)  # empirically found to be the audible limit
 
         _, f, _, _, _ = HumDetector()(np.array(audio + hum , dtype=np.float32))
 
@@ -68,12 +67,12 @@ class TestHumDetector(TestCase):
         # process. The idea is that this kind of signal is probably
         # closer to hummings found on real scenarios.
         PI = np.pi
-        time = 30. # s
-        fs = 44100. # fs
-        freq = 100 # Hz
+        time = 30.  # s
+        fs = 44100.  # fs
+        freq = 100  # Hz
         nSamples = int(time * fs)
 
-        attempts = 3 
+        attempts = 3
         for i in range(attempts):
             try:
                 noise = np.array(np.random.randn(nSamples), dtype=np.float32)
@@ -96,13 +95,16 @@ class TestHumDetector(TestCase):
             except IndexError:
                 if i == attempts - 1:
                     self.assertAlmostEqualVector([estimated_freqs[0]], [freq], 1e2)
-                print('testARProcess failed. This test is based on random signals so it can fail sometimes. {}Attempt {}/{}'.format('It will be repeated. ' if i < 2 else '', i+1, attempts))
+                print('testARProcess failed. This test is based on random '
+                      'signals so it can fail sometimes. {}Attempt {}/{}'
+                      .format('It will be repeated. ' if i < 2 else '', i+1, attempts))
                 continue
             if i > 0:
                 print('testARProcess passed on the attempt {}'.format(i+1))
             break
 
 suite = allTests(TestHumDetector)
+
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

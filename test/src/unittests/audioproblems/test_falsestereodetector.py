@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -18,14 +18,13 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
+import numpy as np
+from math import *
 
 from essentia_test import *
-from math import *
-import numpy as np
 
 
 class TestFalseStereoDetector(TestCase):
-
     def testZero(self):
         size = 512
         zeros = array([(0., 0.)] * size)
@@ -48,8 +47,8 @@ class TestFalseStereoDetector(TestCase):
 
         stereoAudio = StereoMuxer()(monoAudio, monoAudio)
 
-        # If both channels are equal the flag 'isFalseStereo' should be activated 
-        # and the value of the correlation should be 1.
+        # If both channels are equal the flag 'isFalseStereo' should be
+        # activated and the value of the correlation should be 1.
         self.assertEqual(FalseStereoDetector()(stereoAudio),
                          (1, 1.))
 
@@ -59,15 +58,14 @@ class TestFalseStereoDetector(TestCase):
 
         stereoAudio = StereoMuxer()(monoAudio, -monoAudio)
 
-        # If the signals are the same but out of phase, the correlation should be
-        # -1, but we are not activating the flag in this case.
+        # If the signals are the same but out of phase, the correlation should
+        # be -1, but we are not activating the flag in this case.
         self.assertEqual(FalseStereoDetector()(stereoAudio),
                          (0, -1.))
 
     def testRegression(self,):
         stereoAudio = AudioLoader(filename=join(testdata.audio_dir,
                                                 'recorded/dubstep.wav'))()[0]
-        
         # We are not interested in the value of the correlation here.
         # We are happy if the flag 'isfalseStereo' is not triggered.
         self.assertEqual(FalseStereoDetector()(stereoAudio)[0], 0)
@@ -101,6 +99,7 @@ class TestFalseStereoDetector(TestCase):
                          (0, 0.))
 
 suite = allTests(TestFalseStereoDetector)
+
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
