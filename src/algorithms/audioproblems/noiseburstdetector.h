@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,49 +28,49 @@ namespace essentia {
 namespace standard {
 
 class NoiseBurstDetector : public Algorithm {
+ private:
+  Input<std::vector<Real>> _frame;
+  Output<std::vector<Real>> _indexes;
 
-  private:
-    Input<std::vector<Real>> _frame;
-    Output<std::vector<Real>> _indexes;
+  Real _threshold;
+  Real _thresholdCoeff;
+  Real _silenceThreshold;
+  Real _alpha;
 
-    Real _threshold;
-    Real _thresholdCoeff;
-    Real _silenceThreshold;
-    Real _alpha;
+  Algorithm* _Clipper;
 
-    Algorithm* _Clipper;
+  Real robustRMS(std::vector<Real> x, Real k);
+  void updateEMA(Real x);
 
-    Real robustRMS(std::vector<Real> x, Real k);
-    void updateEMA(Real x);
+ public:
+  NoiseBurstDetector() {
+    declareInput(_frame, "frame", "the input frame (must be non-empty)");
+    declareOutput(_indexes, "indexes", "indexes of the noisy samples");
 
-  public:
-    NoiseBurstDetector() {
-        declareInput(_frame, "frame", "the input frame (must be non-empty)");
-        declareOutput(_indexes, "indexes", "indexes of the noisy samples");
+    _Clipper = AlgorithmFactory::create("Clipper");
+  }
 
-      _Clipper = AlgorithmFactory::create("Clipper");
-    }
+  ~NoiseBurstDetector() {
+    if (_Clipper) delete _Clipper;
+  }
 
-    ~NoiseBurstDetector() {
-      if (_Clipper) delete _Clipper;
-    }
+  void declareParameters() {
+    declareParameter("threshold", "factor to control the dynamic theshold", "(-inf,inf)", 8);
+    declareParameter("silenceThreshold", "threshold to skip silent frames", "(-inf,0)", -50);
+    declareParameter("alpha", "alpha coefficient for the Exponential Moving Average threshold estimation.", "(0,1)", .9);
+  }
 
-    void declareParameters() {
-        declareParameter("threshold", "factor to control the dynamic theshold", "(-inf,inf)", 8);
-        declareParameter("silenceThreshold", "threshold to skip silent frames", "(-inf,0)", -50);
-        declareParameter("alpha", "alpha coefficient for the Exponential Moving Average threshold estimation.", "(0,1)", .9);
-    }
-
-    void configure();
-    void compute();
-    
-    static const char *name;
-    static const char *category;
-    static const char *description;
+  void configure();
+  void compute();
+  
+  static const char *name;
+  static const char *category;
+  static const char *description;
 };
 
 } // namespace standard
 } // namespace essentia
+
 
 #include "streamingalgorithmwrapper.h"
 
@@ -78,17 +78,16 @@ namespace essentia {
 namespace streaming {
 
 class NoiseBurstDetector : public StreamingAlgorithmWrapper {
+ protected:
+  Sink<std::vector<Real>> _frame;
+  Source<std::vector<Real>> _indexes;
 
-  protected:
-    Sink<std::vector<Real>> _frame;
-    Source<std::vector<Real>> _indexes;
-
-  public:
-    NoiseBurstDetector() {
-        declareAlgorithm("NoiseBurstDetector");
-        declareInput(_frame, TOKEN, "frame");
-        declareOutput(_indexes, TOKEN, "indexes");
-    }
+ public:
+  NoiseBurstDetector() {
+    declareAlgorithm("NoiseBurstDetector");
+    declareInput(_frame, TOKEN, "frame");
+    declareOutput(_indexes, TOKEN, "indexes");
+  }
 };
 
 } // namespace streaming

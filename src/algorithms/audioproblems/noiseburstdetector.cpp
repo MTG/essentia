@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,10 +27,11 @@ using namespace std;
 const char *NoiseBurstDetector::name = "NoiseBurstDetector";
 const char *NoiseBurstDetector::category = "Audio Problems";
 const char *NoiseBurstDetector::description = DOC(
-    "This algorithm detects noise bursts in the waveform by thresholding  the "
-    "peaks of the second derivative. The threshold is computed using an "
-    "Exponential Moving Average filter over the RMS of the second derivative "
-    "of the input frame.");
+  "This algorithm detects noise bursts in the waveform by thresholding  the "
+  "peaks of the second derivative. The threshold is computed using an "
+  "Exponential Moving Average filter over the RMS of the second derivative "
+  "of the input frame.");
+
 
 void NoiseBurstDetector::configure() {
   _thresholdCoeff = parameter("threshold").toReal();
@@ -61,7 +62,6 @@ void NoiseBurstDetector::compute() {
       indexes.push_back(i);
     }
   }
-
 }
 
 
@@ -69,7 +69,6 @@ void NoiseBurstDetector::compute() {
 // the median in order to reduce the weight of outliers
 // samples in the RMS estimation.
 Real NoiseBurstDetector::robustRMS(std::vector<Real> x, Real k) {
-    // Square.
     for (size_t i = 0; i < x.size(); i++) {
       x[i] *= x[i];
     }

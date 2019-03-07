@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -29,58 +29,58 @@ namespace standard {
 
 class DiscontinuityDetector : public Algorithm {
 
-  private:
-    Input<std::vector<Real>> _frame;
-    Output<std::vector<Real>> _discontinuityLocations;
-    Output<std::vector<Real>> _discontinuityAmplitues;
+ private:
+  Input<std::vector<Real>> _frame;
+  Output<std::vector<Real>> _discontinuityLocations;
+  Output<std::vector<Real>> _discontinuityAmplitues;
 
-    int _order;
-    int _hopSize;
-    int _kernelSize;
-    float _detectionThld;
-    float _energyThld;
-    int _subFrameSize;
-    int _frameSize;
-    float _silenceThld;
+  int _order;
+  int _hopSize;
+  int _kernelSize;
+  float _detectionThld;
+  float _energyThld;
+  int _subFrameSize;
+  int _frameSize;
+  float _silenceThld;
 
-    Algorithm* _medianFilter;
-    Algorithm* _LPC;
-    Algorithm* _windowing;
+  Algorithm* _medianFilter;
+  Algorithm* _LPC;
+  Algorithm* _windowing;
 
-  public:
-    DiscontinuityDetector() {
-        declareInput(_frame, "frame", "the input frame (must be non-empty)");
-        declareOutput(_discontinuityLocations, "discontinuityLocations", "the index of the detected discontinuities (if any)");
-        declareOutput(_discontinuityAmplitues, "discontinuityAmplitudes", "the peak values of the prediction error for the discontinuities (if any)");
-    
-      _medianFilter = AlgorithmFactory::create("MedianFilter");
-      _LPC = AlgorithmFactory::create("LPC");
-      _windowing = AlgorithmFactory::create("Windowing");
-    }
+ public:
+  DiscontinuityDetector() {
+    declareInput(_frame, "frame", "the input frame (must be non-empty)");
+    declareOutput(_discontinuityLocations, "discontinuityLocations", "the index of the detected discontinuities (if any)");
+    declareOutput(_discontinuityAmplitues, "discontinuityAmplitudes", "the peak values of the prediction error for the discontinuities (if any)");
 
-    ~DiscontinuityDetector() {
-      if (_medianFilter) delete _medianFilter;
-      if (_LPC) delete _LPC;
-      if (_windowing) delete _windowing;
-    }
+    _medianFilter = AlgorithmFactory::create("MedianFilter");
+    _LPC = AlgorithmFactory::create("LPC");
+    _windowing = AlgorithmFactory::create("Windowing");
+  }
 
-    void declareParameters() {
-        declareParameter("order", "scalar giving the number of LPCs to use", "[1,inf)", 3);
-        declareParameter("frameSize", "the expected size of the input audio signal (this is an optional parameter to optimize memory allocation)", "(0,inf)", 512);
-        declareParameter("hopSize", "hop size used for the analysis. This parameter must be set correctly as it cannot be obtained from the input data", "[0,inf)", 256);
-        declareParameter("kernelSize", "scalar giving the size of the median filter window. Must be odd", "[1,inf)", 7);
-        declareParameter("detectionThreshold", "'detectionThreshold' times the standard deviation plus the median of the frame is used as detection threshold", "[1,inf)", 8.f);
-        declareParameter("energyThreshold", "threshold in dB to detect silent subframes", "(-inf,inf)", -60.f);
-        declareParameter("subFrameSize", "size of the window used to compute silent subframes", "[1,inf)", 32);
-        declareParameter("silenceThreshold", "threshold to skip silent frames", "(-inf,0)", -50);
-    }
+  ~DiscontinuityDetector() {
+    if (_medianFilter) delete _medianFilter;
+    if (_LPC) delete _LPC;
+    if (_windowing) delete _windowing;
+  }
 
-    void configure();
-    void compute();
+  void declareParameters() {
+    declareParameter("order", "scalar giving the number of LPCs to use", "[1,inf)", 3);
+    declareParameter("frameSize", "the expected size of the input audio signal (this is an optional parameter to optimize memory allocation)", "(0,inf)", 512);
+    declareParameter("hopSize", "hop size used for the analysis. This parameter must be set correctly as it cannot be obtained from the input data", "[0,inf)", 256);
+    declareParameter("kernelSize", "scalar giving the size of the median filter window. Must be odd", "[1,inf)", 7);
+    declareParameter("detectionThreshold", "'detectionThreshold' times the standard deviation plus the median of the frame is used as detection threshold", "[1,inf)", 8.f);
+    declareParameter("energyThreshold", "threshold in dB to detect silent subframes", "(-inf,inf)", -60.f);
+    declareParameter("subFrameSize", "size of the window used to compute silent subframes", "[1,inf)", 32);
+    declareParameter("silenceThreshold", "threshold to skip silent frames", "(-inf,0)", -50);
+  }
 
-    static const char *name;
-    static const char *category;
-    static const char *description;
+  void configure();
+  void compute();
+
+  static const char *name;
+  static const char *category;
+  static const char *description;
 };
 
 } // namespace standard
@@ -93,18 +93,18 @@ namespace streaming {
 
 class DiscontinuityDetector : public StreamingAlgorithmWrapper {
 
-  protected:
-    Sink<std::vector<Real>> _frame;
-    Source<std::vector<Real>> _discontinuityLocations;
-    Source<std::vector<Real>> _discontinuityAmplitues;
+ protected:
+  Sink<std::vector<Real>> _frame;
+  Source<std::vector<Real>> _discontinuityLocations;
+  Source<std::vector<Real>> _discontinuityAmplitues;
 
-  public:
-    DiscontinuityDetector() {
-        declareAlgorithm("DiscontinuityDetector");
-        declareInput(_frame, TOKEN, "frame");
-        declareOutput(_discontinuityLocations, TOKEN, "discontinuityLocations");
-        declareOutput(_discontinuityAmplitues, TOKEN, "discontinuityAmplitudes");
-    }
+ public:
+  DiscontinuityDetector() {
+    declareAlgorithm("DiscontinuityDetector");
+    declareInput(_frame, TOKEN, "frame");
+    declareOutput(_discontinuityLocations, TOKEN, "discontinuityLocations");
+    declareOutput(_discontinuityAmplitues, TOKEN, "discontinuityAmplitudes");
+  }
 };
 
 } // namespace streaming

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -67,20 +67,21 @@ class GapsDetector : public Algorithm {
     if (_medianFilter) delete _medianFilter;
     if (_envelope) delete _envelope;
   }
-    void declareParameters() {
-        declareParameter("sampleRate", "sample rate used for the analysis", "(0,inf)", 44100.f);
-        declareParameter("frameSize", "frame size used for the analysis. Should match the input frame size. Otherwise, an exception will be thrown", "[0,inf)", 2048);
-        declareParameter("hopSize", "hop size used for the analysis", "[0,inf)", 1024);
-        declareParameter("silenceThreshold", "silence threshold [dB]", "(-inf,inf)", -50.f);
-        declareParameter("prepowerThreshold", "prepower threshold [dB]. ", "(-inf,inf)", -30.f);
-        declareParameter("prepowerTime", "time for the prepower calculation [ms]", "(0,inf)", 40.f);
-        declareParameter("postpowerTime", "time for the postpower calculation [ms]", "(0,inf)", 40.f);
-        declareParameter("minimumTime", "time of the minimum gap duration [ms]", "(0,inf)", 10.f);
-        declareParameter("maximumTime", "time of the maximum gap duration [ms]", "(0,inf)", 3500.f);
-        declareParameter("kernelSize", "scalar giving the size of the median filter window. Must be odd", "[1,inf)", 11);
-        declareParameter("attackTime", "the attack time of the first order lowpass in the attack phase [ms]", "[0,inf)", 0.05);
-        declareParameter("releaseTime", "the release time of the first order lowpass in the release phase [ms]", "[0,inf)", 0.05);
-    }
+
+  void declareParameters() {
+    declareParameter("sampleRate", "sample rate used for the analysis", "(0,inf)", 44100.f);
+    declareParameter("frameSize", "frame size used for the analysis. Should match the input frame size. Otherwise, an exception will be thrown", "[0,inf)", 2048);
+    declareParameter("hopSize", "hop size used for the analysis", "[0,inf)", 1024);
+    declareParameter("silenceThreshold", "silence threshold [dB]", "(-inf,inf)", -50.f);
+    declareParameter("prepowerThreshold", "prepower threshold [dB]. ", "(-inf,inf)", -30.f);
+    declareParameter("prepowerTime", "time for the prepower calculation [ms]", "(0,inf)", 40.f);
+    declareParameter("postpowerTime", "time for the postpower calculation [ms]", "(0,inf)", 40.f);
+    declareParameter("minimumTime", "time of the minimum gap duration [ms]", "(0,inf)", 10.f);
+    declareParameter("maximumTime", "time of the maximum gap duration [ms]", "(0,inf)", 3500.f);
+    declareParameter("kernelSize", "scalar giving the size of the median filter window. Must be odd", "[1,inf)", 11);
+    declareParameter("attackTime", "the attack time of the first order lowpass in the attack phase [ms]", "[0,inf)", 0.05);
+    declareParameter("releaseTime", "the release time of the first order lowpass in the release phase [ms]", "[0,inf)", 0.05);
+  }
 
     void configure();
     void compute();
@@ -94,25 +95,25 @@ class GapsDetector : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
+
 #include "streamingalgorithmwrapper.h"
 
 namespace essentia {
 namespace streaming {
 
 class GapsDetector : public StreamingAlgorithmWrapper {
+ protected:
+  Sink<std::vector<Real>> _frame;
+  Source<std::vector<Real>> _gapsStarts;
+  Source<std::vector<Real>> _gapsEnds;
 
-  protected:
-    Sink<std::vector<Real>> _frame;
-    Source<std::vector<Real>> _gapsStarts;
-    Source<std::vector<Real>> _gapsEnds;
-
-  public:
-    GapsDetector() {
-        declareAlgorithm("GapsDetector");
-        declareInput(_frame, TOKEN, "frame");
-        declareOutput(_gapsStarts, TOKEN, "starts");
-        declareOutput(_gapsEnds, TOKEN, "ends");
-    }
+ public:
+  GapsDetector() {
+    declareAlgorithm("GapsDetector");
+    declareInput(_frame, TOKEN, "frame");
+    declareOutput(_gapsStarts, TOKEN, "starts");
+    declareOutput(_gapsEnds, TOKEN, "ends");
+  }
 };
 
 } // namespace streaming

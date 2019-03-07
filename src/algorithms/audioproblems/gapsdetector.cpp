@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,17 +26,18 @@ using namespace standard;
 const char *GapsDetector::name = "GapsDetector";
 const char *GapsDetector::category = "Audio Problems";
 const char *GapsDetector::description = DOC("This algorithm uses energy "
-    "and time thresholds to detect gaps in the waveform. A median filter "
-    "is used to remove spurious silent samples. The power of a small "
-    "audio region before the detected gaps (prepower) is thresholded to "
-    "detect intentional pauses as described in [1]. This technique is"
-    "extended to the region after the gap.\n"
-    "The algorithm was designed for a framewise use and returns the start "
-    "and end timestamps related to the first frame processed. Call "
-    "configure() or reset() in order to restart the count.\n"
-    "\n"
-    "References:\n"
-    "  [1] Mühlbauer, R. (2010). Automatic Audio Defect Detection.\n");
+  "and time thresholds to detect gaps in the waveform. A median filter "
+  "is used to remove spurious silent samples. The power of a small "
+  "audio region before the detected gaps (prepower) is thresholded to "
+  "detect intentional pauses as described in [1]. This technique is"
+  "extended to the region after the gap.\n"
+  "The algorithm was designed for a framewise use and returns the start "
+  "and end timestamps related to the first frame processed. Call "
+  "configure() or reset() in order to restart the count.\n"
+  "\n"
+  "References:\n"
+  "  [1] Mühlbauer, R. (2010). Automatic Audio Defect Detection.\n");
+
 
 void GapsDetector::configure() {
   _sampleRate = parameter("sampleRate").toFloat();
@@ -60,20 +61,21 @@ void GapsDetector::configure() {
 
   if (_frameSize < _hopSize)
     throw(EssentiaException(
-        "GapsDetector: hopSize has to be smaller or equal than the input "
-        "frame size"));
+      "GapsDetector: hopSize has to be smaller or equal than the input "
+      "frame size"));
 
   _frameCount = 0;
   _lBuffer.assign(_prepowerSamples, 0.f);
   _gaps.clear();
 }
 
+
 void GapsDetector::compute() {
   const std::vector<Real> frame = _frame.get();
   std::vector<Real> &gapsStarts = _gapsStarts.get();
   std::vector<Real> &gapsEnds = _gapsEnds.get();
 
-  // if the frameSize is not properly set we throw an exception instead of  
+  // If the frameSize is not properly set we throw an exception instead of  
   // resizing as probably the hop size is mismatching too.
   if (_frameSize != frame.size())
     throw(
@@ -82,7 +84,7 @@ void GapsDetector::compute() {
                           "sampleRate are properly set so the output units "
                           "make sense."));
 
-  // fill the right buffer for each gap candidate
+  // Fill the right buffer for each gap candidate.
   for (uint i = 0; i < _gaps.size(); i++) {
     if (!_gaps[i].finished && !_gaps[i].active) {
       uint last = std::min(_frameSize, _gaps[i].remaining);
@@ -96,7 +98,7 @@ void GapsDetector::compute() {
     }
   }
 
-  // finish the gaps when the right buffer is filled
+  // Finish the gaps when the right buffer is filled.
   std::vector<uint> removeIndexes;
   for (uint i = 0; i < _gaps.size(); i++) {
     if (_gaps[i].finished) {
@@ -116,7 +118,7 @@ void GapsDetector::compute() {
   for (uint i = 0; i < removeIndexes.size(); i++)
     _gaps.erase(_gaps.begin() + removeIndexes[i]);
 
-  // here the current frame processing starts
+  // Here the current frame processing starts.
   std::vector<Real> x1, x3;
 
   _envelope->input("signal").set(frame);
@@ -131,20 +133,20 @@ void GapsDetector::compute() {
   _medianFilter->output("filteredArray").set(x3);
   _medianFilter->compute();
 
-  // round back to binary values 
+  // Round back to binary values.
   for (uint i = 0; i < _frameSize; i++) 
     x3[i] = (int)(x3[i] + 0.5f);
 
-  // we are only processing the non-overlapping part of the frame
+  // We are only processing the non-overlapping part of the frame.
   uint startProc = (int)((_frameSize / 2) - (_hopSize / 2));
   uint endProc = (int)((_frameSize / 2) + (_hopSize / 2));
 
-  // if there is no overlap we skip only the first sample
+  // If there is no overlap we skip only the first sample.
   if (startProc == 0)
     startProc = 1;
 
-  // the gaps limits are detected as rising (u) and falling (d)
-  // flanks over the energy mask
+  // The gaps limits are detected as rising (u) and falling (d)
+  // flanks over the energy mask.
   int diff;
   std::vector<uint> uFlanks, dFlanks;
   for (uint i = startProc; i < endProc; i++) {
@@ -153,7 +155,7 @@ void GapsDetector::compute() {
     if (diff == -1) dFlanks.push_back(i);
   }
 
-  // initialize gap candidates for all the falling flanks 
+  // Initialize gap candidates for all the falling flanks.
   if (dFlanks.size() > 0) {
     std::vector<Real> lBuffer(_prepowerSamples, 0.f);
     Real offset = _frameCount * _hopSize;
@@ -185,7 +187,7 @@ void GapsDetector::compute() {
     }
   }
 
-  // set the gap candidates ends for every rising flank
+  // Set the gap candidates ends for every rising flank.
   if (uFlanks.size() > 0) {
     int offset = _frameCount * _hopSize;
     for (uint i = 0; i < uFlanks.size(); i++) {
@@ -208,7 +210,7 @@ void GapsDetector::compute() {
     }
   }
 
-  // update the left buffer (past values)
+  // Update the left buffer (past values).
   std::rotate(_lBuffer.begin(), _lBuffer.begin() + _updateSize, _lBuffer.end());
   for (uint i = 0; i < _updateSize; i++)
     _lBuffer[_prepowerSamples - _updateSize + i] =

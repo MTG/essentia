@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,13 +24,10 @@
 #include "algorithm.h"
 #include "algorithmfactory.h"
 
-
 namespace essentia {
 namespace standard {
 
 class SNR : public Algorithm {
-
-
  protected:
   Input<std::vector<Real> > _frame;
   Output<std::vector<Real> > _SNRprior;
@@ -138,18 +135,18 @@ class SNR : public Algorithm {
 } // namespace essentia
 } // namespace standard
 
+
 #include "streamingalgorithmwrapper.h"
 
 namespace essentia {
 namespace streaming {
 
 class SNR : public StreamingAlgorithmWrapper {
-
  protected:
-   Sink<std::vector<Real> > _frame;
-   Source<std::vector<Real> > _SNRprior;
-   Source<Real> _SNRAverage;
-   Source<Real> _SNRAverageEMA;
+  Sink<std::vector<Real> > _frame;
+  Source<std::vector<Real> > _SNRprior;
+  Source<Real> _SNRAverage;
+  Source<Real> _SNRAverageEMA;
 
  public:
   SNR() {
@@ -158,7 +155,6 @@ class SNR : public StreamingAlgorithmWrapper {
     declareOutput(_SNRAverage, TOKEN, "instantSNR");
     declareOutput(_SNRAverageEMA, TOKEN, "averagedSNR");
     declareOutput(_SNRprior, TOKEN, "spectralSNR");
-
   }
 };
 

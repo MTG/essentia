@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -23,12 +23,10 @@
 #include "algorithm.h"
 #include "algorithmfactory.h"
 
-
 namespace essentia {
 namespace standard {
 
 class SaturationDetector : public Algorithm {
-
  private:
   Input<std::vector<Real> > _frame;
   Output<std::vector<Real>> _starts;
@@ -65,11 +63,11 @@ class SaturationDetector : public Algorithm {
   static const char* name;
   static const char* category;
   static const char* description;
-
 };
 
 } // namespace standard
 } // namespace essentia
+
 
 #include "streamingalgorithmwrapper.h"
 
@@ -77,7 +75,6 @@ namespace essentia {
 namespace streaming {
 
 class SaturationDetector : public StreamingAlgorithmWrapper {
-
  protected:
   Sink<std::vector<Real> > _frame;
   Source<std::vector<Real> > _starts;
@@ -94,6 +91,5 @@ class SaturationDetector : public StreamingAlgorithmWrapper {
 
 } // namespace streaming
 } // namespace essentia
-
 
 #endif // SATURATIONDETECTEOR_H

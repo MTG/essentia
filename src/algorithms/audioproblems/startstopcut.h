@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -23,12 +23,10 @@
 #include "algorithm.h"
 #include "algorithmfactory.h"
 
-
 namespace essentia {
 namespace standard {
 
 class StartStopCut : public Algorithm {
-
  private:
   Input<std::vector<Real> > _audio;
   Output<int> _startCut;
@@ -78,13 +76,13 @@ class StartStopCut : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
+
 #include "streamingalgorithmwrapper.h"
 
 namespace essentia {
 namespace streaming {
 
 class StartStopCut : public StreamingAlgorithmWrapper {
-
  protected:
   Sink<std::vector<Real> > _audio;
   Source<int> _startCut;

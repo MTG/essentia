@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -30,7 +30,6 @@ namespace essentia {
 namespace streaming {
 
 class HumDetector : public AlgorithmComposite {
-
  protected:
   Algorithm* _decimator;
   Algorithm* _frameCutter;
@@ -41,7 +40,6 @@ class HumDetector : public AlgorithmComposite {
   standard::Algorithm* _pitchSalienceFunction;
   standard::Algorithm* _pitchSalienceFunctionPeaks;
   standard::Algorithm* _pitchContours;
-  // Algorithm* _timeSmoothing;
 
   SinkProxy<Real> _signal;
 
@@ -79,25 +77,25 @@ class HumDetector : public AlgorithmComposite {
 
   scheduler::Network* _network;
 
-template< typename T >
-typename std::vector<T>::iterator 
-  insertSorted( std::vector<T> & vec, T const& item );
+  template< typename T >
+  typename std::vector<T>::iterator 
+    insertSorted( std::vector<T> & vec, T const& item );
 
-template <typename T>
-std::vector<size_t> sort_indexes(const std::vector<T> &v);
+  template <typename T>
+  std::vector<size_t> sort_indexes(const std::vector<T> &v);
 
-Real centBinToFrequency(Real cent, Real reff, Real binsInOctave);
+  Real centBinToFrequency(Real cent, Real reff, Real binsInOctave);
 
  public:
   HumDetector();
-   ~HumDetector();
+  ~HumDetector();
 
   void declareProcessOrder() {
     declareProcessStep(ChainFrom(_decimator));
     declareProcessStep(SingleShot(this));
   }
 
-void declareParameters() {
+  void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.f);
     declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.2f);
     declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.4f);
@@ -145,11 +143,10 @@ class HumDetector : public Algorithm {
   Pool _pool;
 
  public:
-
   HumDetector();
   ~HumDetector();
 
-void declareParameters() {
+  void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.f);
     declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,inf)", 0.2f);
     declareParameter("frameSize", "the frame size with which the loudness is computed [s]", "(0,inf)", 0.4f);

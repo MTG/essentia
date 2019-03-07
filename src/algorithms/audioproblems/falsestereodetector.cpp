@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,9 +27,10 @@ namespace standard{
 const char *FalseStereoDetector::name = "FalseStereoDetector";
 const char *FalseStereoDetector::category = "Audio Problems";
 const char *FalseStereoDetector::description = DOC(
-    "This algorithm detects if a stereo track has duplicated channels (false stereo)."
-    "It is based on the Pearson linear correlation coefficient and thus it is robust "
-    "scaling and shifting between channels.");
+  "This algorithm detects if a stereo track has duplicated channels (false stereo)."
+  "It is based on the Pearson linear correlation coefficient and thus it is robust "
+  "scaling and shifting between channels.");
+
 
 void FalseStereoDetector::configure() {
   _silenceThreshold = db2pow(parameter("silenceThreshold").toReal());
@@ -84,6 +85,7 @@ const char* FalseStereoDetector::name = standard::FalseStereoDetector::name;
 const char* FalseStereoDetector::category = standard::FalseStereoDetector::category;
 const char* FalseStereoDetector::description = standard::FalseStereoDetector::description;
 
+
 FalseStereoDetector::FalseStereoDetector() : Algorithm() {
 
   _FalseStereoDetectorAlgo = standard::AlgorithmFactory::create("FalseStereoDetector");
@@ -92,6 +94,7 @@ FalseStereoDetector::FalseStereoDetector() : Algorithm() {
   declareOutput(_isFalseStereo, "isFalseStereo", "a flag indicating if the frame channes are simmilar");
   declareOutput(_correlation, "correlation", "correlation betweeen the input channels");
 }
+
 
 FalseStereoDetector::~FalseStereoDetector() {
   delete _FalseStereoDetectorAlgo;
@@ -104,13 +107,12 @@ AlgorithmStatus FalseStereoDetector::process() {
   EXEC_DEBUG("data acquired (in: " << _audio.acquireSize()
              << " - out: " << _audio.acquireSize() << ")");
 
-  
   if (status != OK) {
     if (!shouldStop()) return status;
 
-    // if shouldStop is true, that means there is no more audio coming, so we need
+    // If shouldStop is true, that means there is no more audio coming, so we need
     // to take what's left to fill in half-frames, instead of waiting for more
-    // data to come in (which would have done by returning from this function)
+    // data to come in (which would have done by returning from this function).
     int available = input("audio").available();
     if (available == 0) return NO_INPUT;
 
@@ -136,12 +138,12 @@ AlgorithmStatus FalseStereoDetector::process() {
   return OK;
 }
 
+
 void FalseStereoDetector::configure() {
   _frameSize = parameter("frameSize").toInt();
 
   _FalseStereoDetectorAlgo->configure(INHERIT("silenceThreshold"),
                                       INHERIT("correlationThreshold"));
-
 
   _audio.setAcquireSize(_frameSize);
   _audio.setReleaseSize(_frameSize);

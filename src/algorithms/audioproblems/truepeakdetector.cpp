@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,27 +26,27 @@ using namespace std;
 
 const char* TruePeakDetector::name = "TruePeakDetector";
 const char* TruePeakDetector::category = "Audio Problems";
-const char* TruePeakDetector::description =
-    DOC("This algorithm implements a “true-peak” level meter for clipping detection. "
-        "According to the ITU-R recommendations, “true-peak” values overcoming the full-scale range are "
-        "potential sources of “clipping in subsequent processes, such as within particular "
-        "D/A converters or during sample-rate conversion”.\n"
-        "The ITU-R BS.1770-4[1] (by default) and the ITU-R BS.1770-2[2] signal-flows can be used. "
-        "Go to the references for information about the differences.\n"
-        "Only the peaks (if any) exceeding the configurable amplitude threshold are returned."
-        "\n"
-        "Note: the parameters 'blockDC' and 'emphasise' work only when 'version' is set to 2."
-        "\n"
-        "References:\n"
-        "  [1] Series, B. S. (2011). Recommendation  ITU-R  BS.1770-4. Algorithms to measure audio programme "
-        "loudness and true-peak audio level,\n"
-        "  "
-        "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf\n"
-        "  [2] Series, B. S. (2011). Recommendation  ITU-R  BS.1770-2. Algorithms to measure audio programme "
-        "loudness and true-peak audio level,\n"
-        "  "
-        "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-2-201103-S!!PDF-E.pdf\n");
-        
+const char* TruePeakDetector::description = DOC(
+  "This algorithm implements a “true-peak” level meter for clipping detection. "
+  "According to the ITU-R recommendations, “true-peak” values overcoming the full-scale range are "
+  "potential sources of “clipping in subsequent processes, such as within particular "
+  "D/A converters or during sample-rate conversion”.\n"
+  "The ITU-R BS.1770-4[1] (by default) and the ITU-R BS.1770-2[2] signal-flows can be used. "
+  "Go to the references for information about the differences.\n"
+  "Only the peaks (if any) exceeding the configurable amplitude threshold are returned."
+  "\n"
+  "Note: the parameters 'blockDC' and 'emphasise' work only when 'version' is set to 2."
+  "\n"
+  "References:\n"
+  "  [1] Series, B. S. (2011). Recommendation  ITU-R  BS.1770-4. Algorithms to measure audio programme "
+  "loudness and true-peak audio level,\n"
+  "  "
+  "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-4-201510-I!!PDF-E.pdf\n"
+  "  [2] Series, B. S. (2011). Recommendation  ITU-R  BS.1770-2. Algorithms to measure audio programme "
+  "loudness and true-peak audio level,\n"
+  "  "
+  "https://www.itu.int/dms_pubrec/itu-r/rec/bs/R-REC-BS.1770-2-201103-S!!PDF-E.pdf\n");
+
 
 void TruePeakDetector::configure() {
   _inputSampleRate = parameter("sampleRate").toReal();
@@ -63,7 +63,7 @@ void TruePeakDetector::configure() {
                        "quality", _quality);
 
   if (_emphasise) {
-    // the parameters of the filter are extracted in the recommendation
+    // The parameters of the filter are extracted from the recommendation.
     Real poleFrequency = 20e3;  // Hz
     Real zeroFrequncy = 14.1e3; // Hz
 
@@ -84,9 +84,8 @@ void TruePeakDetector::configure() {
   if (_blockDC) {
     _dcBlocker->configure("sampleRate", _outputSampleRate);
   }
-  
-
 }
+
 
 void TruePeakDetector::compute() {
   vector<Real>& output = _output.get();
@@ -109,7 +108,6 @@ void TruePeakDetector::compute() {
       processed = &emphasised;
     }
 
-
     if (_blockDC) {
       std::vector<Real> dcBlocked;
       _dcBlocker->input("signal").set(*processed);
@@ -122,7 +120,6 @@ void TruePeakDetector::compute() {
 
   if ((_version == 4) || (!_blockDC))
       rectify((*processed));
-
 
     for (uint i = 0; i < processed->size(); i++)
       if ((*processed)[i] >= _threshold)

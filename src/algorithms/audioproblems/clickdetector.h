@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,74 +28,71 @@ namespace essentia {
 namespace standard {
 
 class ClickDetector : public Algorithm {
+ private:
+  Input<std::vector<Real>> _frame;
+  Output<std::vector<Real>> _clickStarts;
+  Output<std::vector<Real>> _clickEnds;
 
-  private:
-    Input<std::vector<Real>> _frame;
-    Output<std::vector<Real>> _clickStarts;
-    Output<std::vector<Real>> _clickEnds;
+  int _order;
+  int _frameSize;
+  int _hopSize;
+  Real _detectionThld;
+  Real _powerEstimationThld;
+  Real _silenceThld;
+  Real _sampleRate;
 
+  uint _startProc;
+  uint _endProc;
+  uint _idx;
 
-    int _order;
-    int _frameSize;
-    int _hopSize;
-    Real _detectionThld;
-    Real _powerEstimationThld;
-    Real _silenceThld;
-    Real _sampleRate;
+  Algorithm* _LPC;
+  Algorithm* _InverseFilter;
+  Algorithm* _MatchedFilter;
+  Algorithm* _Clipper;
 
-    uint _startProc;
-    uint _endProc;
-    uint _idx;
+  Real robustPower(std::vector<Real> x, Real k);
 
+ public:
+  ClickDetector() {
+      declareInput(_frame, "frame", "the input frame (must be non-empty)");
+      declareOutput(_clickStarts, "starts", "starting indexes of the clicks");
+      declareOutput(_clickEnds, "ends", "ending indexes of the clicks");
+  
+    _LPC = AlgorithmFactory::create("LPC");
+    _InverseFilter = AlgorithmFactory::create("IIR");
+    _MatchedFilter = AlgorithmFactory::create("IIR");
+    _Clipper = AlgorithmFactory::create("Clipper");
+  }
 
-    Algorithm* _LPC;
-    Algorithm* _InverseFilter;
-    Algorithm* _MatchedFilter;
-    Algorithm* _Clipper;
+  ~ClickDetector() {
+    if (_LPC) delete _LPC;
+    if (_InverseFilter) delete _InverseFilter;
+    if (_MatchedFilter) delete _MatchedFilter;
+    if (_Clipper) delete _Clipper;
+  }
 
-    Real robustPower(std::vector<Real> x, Real k);
+  void declareParameters() {
+      declareParameter("sampleRate", "sample rate used for the analysis", "(0,inf)", 44100.);
+      declareParameter("frameSize", "the expected size of the input audio signal (this is an optional parameter to optimize memory allocation)", "(0,inf)", 512);
+      declareParameter("hopSize", "hop size used for the analysis. This parameter must be set correctly as it cannot be obtained from the input data", "(0,inf)", 256);
+      declareParameter("order", "scalar giving the number of LPCs to use", "[1,inf)", 12);
+      declareParameter("detectionThreshold", "'detectionThreshold' the threshold is based on the instant power of the noisy excitation signal plus detectionThreshold dBs", "(-inf,inf)", 30.f);
+      declareParameter("powerEstimationThreshold", "the noisy excitation is clipped to 'powerEstimationThreshold' times its median.", "(0,inf)", 10);
+      declareParameter("silenceThreshold", "threshold to skip silent frames", "(-inf,0)", -50);
+  }
 
-  public:
-    ClickDetector() {
-        declareInput(_frame, "frame", "the input frame (must be non-empty)");
-        declareOutput(_clickStarts, "starts", "starting indexes of the clicks");
-        declareOutput(_clickEnds, "ends", "ending indexes of the clicks");
-    
-      _LPC = AlgorithmFactory::create("LPC");
-      _InverseFilter = AlgorithmFactory::create("IIR");
-      _MatchedFilter = AlgorithmFactory::create("IIR");
-      _Clipper = AlgorithmFactory::create("Clipper");
-    }
-
-    ~ClickDetector() {
-      if (_LPC) delete _LPC;
-      if (_InverseFilter) delete _InverseFilter;
-      if (_MatchedFilter) delete _MatchedFilter;
-      if (_Clipper) delete _Clipper;
-    }
-
-    void declareParameters() {
-        declareParameter("sampleRate", "sample rate used for the analysis", "(0,inf)", 44100.);
-        declareParameter("frameSize", "the expected size of the input audio signal (this is an optional parameter to optimize memory allocation)", "(0,inf)", 512);
-        declareParameter("hopSize", "hop size used for the analysis. This parameter must be set correctly as it cannot be obtained from the input data", "(0,inf)", 256);
-        declareParameter("order", "scalar giving the number of LPCs to use", "[1,inf)", 12);
-        declareParameter("detectionThreshold", "'detectionThreshold' the threshold is based on the instant power of the noisy excitation signal plus detectionThreshold dBs", "(-inf,inf)", 30.f);
-        declareParameter("powerEstimationThreshold", "the noisy excitation is clipped to 'powerEstimationThreshold' times its median.", "(0,inf)", 10);
-        declareParameter("silenceThreshold", "threshold to skip silent frames", "(-inf,0)", -50);
-
-    }
-
-    void configure();
-    void compute();
-    void reset();
-    
-    static const char *name;
-    static const char *category;
-    static const char *description;
+  void configure();
+  void compute();
+  void reset();
+  
+  static const char *name;
+  static const char *category;
+  static const char *description;
 };
 
 } // namespace standard
 } // namespace essentia
+
 
 #include "streamingalgorithmwrapper.h"
 
@@ -104,18 +101,18 @@ namespace streaming {
 
 class ClickDetector : public StreamingAlgorithmWrapper {
 
-  protected:
-    Sink<std::vector<Real>> _frame;
-    Source<std::vector<Real>> _clickStarts;
-    Source<std::vector<Real>> _clickEnds;
+ protected:
+  Sink<std::vector<Real>> _frame;
+  Source<std::vector<Real>> _clickStarts;
+  Source<std::vector<Real>> _clickEnds;
 
-  public:
-    ClickDetector() {
-        declareAlgorithm("ClickDetector");
-        declareInput(_frame, TOKEN, "frame");
-        declareOutput(_clickStarts, TOKEN, "starts");
-        declareOutput(_clickEnds, TOKEN, "ends");
-    }
+ public:
+  ClickDetector() {
+    declareAlgorithm("ClickDetector");
+    declareInput(_frame, TOKEN, "frame");
+    declareOutput(_clickStarts, TOKEN, "starts");
+    declareOutput(_clickEnds, TOKEN, "ends");
+  }
 };
 
 } // namespace streaming

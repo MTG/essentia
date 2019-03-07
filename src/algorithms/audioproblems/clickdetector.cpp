@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -48,15 +48,14 @@ void ClickDetector::configure() {
 
   _LPC->configure(INHERIT("order"));
 
-
   if (_frameSize <= _order)
     throw(
-        EssentiaException("ClickDetector: the number of LPC coefficientes has to be smaller "
-                          "than the size of the input frame"));
+      EssentiaException("ClickDetector: the number of LPC coefficientes has to be smaller "
+                        "than the size of the input frame"));
 
   if (_frameSize < _hopSize)
     throw(EssentiaException(
-        "ClickDetector: hopSize has to be smaller or equal than the input frame size"));
+      "ClickDetector: hopSize has to be smaller or equal than the input frame size"));
 
   _startProc = int(_frameSize / 2 - _hopSize / 2);
   _endProc = int(_frameSize / 2 + _hopSize / 2);
@@ -155,19 +154,19 @@ void ClickDetector::reset() {
 
 
 Real ClickDetector::robustPower(std::vector<Real> x, Real k ) {
-    for (uint i = 0; i < x.size(); i ++)
-      x[i] *= x[i];
+  for (uint i = 0; i < x.size(); i ++)
+    x[i] *= x[i];
 
-    Real medianValue = median(x);
+  Real medianValue = median(x);
 
-    _Clipper->configure("max", medianValue * k);
-    
-    std::vector<Real> robustPowerX;
-    _Clipper->input("signal").set(x);
-    _Clipper->output("signal").set(robustPowerX);
-    _Clipper->compute();
+  _Clipper->configure("max", medianValue * k);
+  
+  std::vector<Real> robustPowerX;
+  _Clipper->input("signal").set(x);
+  _Clipper->output("signal").set(robustPowerX);
+  _Clipper->compute();
 
-    Real robustPower = mean(robustPowerX);
+  Real robustPower = mean(robustPowerX);
 
-    return robustPower;
+  return robustPower;
 }

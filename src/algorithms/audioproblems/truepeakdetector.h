@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,7 +27,6 @@ namespace essentia {
 namespace standard {
 
 class TruePeakDetector : public Algorithm {
-
  protected:
   Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _output;
@@ -85,16 +84,14 @@ class TruePeakDetector : public Algorithm {
   static const char* name;
   static const char* category;
   static const char* description;
-
 };
 
-
 } // namespace standard
+
+
 namespace streaming {
 
-
 class TruePeakDetector : public StreamingAlgorithmWrapper {
-
  protected:
   Sink<std::vector<Real> > _signal;
   Source<std::vector<Real> > _output;
@@ -111,6 +108,5 @@ class TruePeakDetector : public StreamingAlgorithmWrapper {
 
 } // namespace streaming
 } // namespace essentia
-
 
 #endif // ESSENTIA_TRUEPEAKDETECTOR_H

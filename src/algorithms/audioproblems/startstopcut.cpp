@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,21 +28,22 @@ namespace standard {
 const char* StartStopCut::name = "StartStopCut";
 const char* StartStopCut::category = "Audio Problems";
 const char* StartStopCut::description = DOC(
-    "This algorithm outputs if there is a cut at the beginning or at the end "
-    "of the audio by locating the first and last non-silent frames and "
-    "comparing their positions to the actual beginning and end of the audio. "
-    "The input audio is considered to be cut at the beginning (or the end) and "
-    "the corresponding flag is activated if the first (last) non-silent frame "
-    "occurs before (after) the configurable time threshold.\n"
-    "\n"
-    "Notes: This algorithm is designed to operate on the entire (file) audio. "
-    "In the streaming mode, use it in combination with RealAccumulator.\n"
-    "The encoding/decoding process of lossy formats can introduce some padding "
-    "at the beginning/end of the file. E.g. an MP3 file encoded and decoded "
-    "with LAME using the default parameters will introduce a delay of 1104 "
-    "samples [http://lame.sourceforge.net/tech-FAQ.txt]. In this case, the "
-    "maximumStartTime can be increased by 1104 ÷ 44100 × 1000 = 25 ms to "
-    "prevent misdetections.\n");
+  "This algorithm outputs if there is a cut at the beginning or at the end "
+  "of the audio by locating the first and last non-silent frames and "
+  "comparing their positions to the actual beginning and end of the audio. "
+  "The input audio is considered to be cut at the beginning (or the end) and "
+  "the corresponding flag is activated if the first (last) non-silent frame "
+  "occurs before (after) the configurable time threshold.\n"
+  "\n"
+  "Notes: This algorithm is designed to operate on the entire (file) audio. "
+  "In the streaming mode, use it in combination with RealAccumulator.\n"
+  "The encoding/decoding process of lossy formats can introduce some padding "
+  "at the beginning/end of the file. E.g. an MP3 file encoded and decoded "
+  "with LAME using the default parameters will introduce a delay of 1104 "
+  "samples [http://lame.sourceforge.net/tech-FAQ.txt]. In this case, the "
+  "maximumStartTime can be increased by 1104 ÷ 44100 × 1000 = 25 ms to "
+  "prevent misdetections.\n");
+
 
 void StartStopCut::configure() {
   _sampleRate = parameter("sampleRate").toReal();
@@ -64,6 +65,7 @@ void StartStopCut::configure() {
                           INHERIT("frameSize"), "startFromZero", true);
 };
 
+
 void StartStopCut::compute() {
   const vector<Real>& audio = _audio.get();
   int& startCut = _startCut.get();
@@ -81,17 +83,17 @@ void StartStopCut::compute() {
         _maximumStopSamples, " samples, but the input file size is just ",
         audio.size()));
 
-  // looks for the first non-silent frame
+  // Looks for the first non-silent frame.
   findNonSilentFrame(audio, startCut, _maximumStartSamples / _hopSize);
-
   
-  // gets a reversed version of the last _maximumStopTime ms of audio
+  // Gets a reversed version of the last _maximumStopTime ms of audio.
   std::vector<Real> reversedAudio(audio.end() - _maximumStopSamples, audio.end());
   std::reverse(reversedAudio.begin(), reversedAudio.end());
 
-  // looks for the last non-silent frame
+  // Looks for the last non-silent frame.
   findNonSilentFrame(reversedAudio, stopCut, _maximumStopSamples / _hopSize);
 }
+
 
 void StartStopCut::findNonSilentFrame(std::vector<Real> audio,
                                       int& nonSilentFrame, uint lastFrame) {
@@ -104,7 +106,7 @@ void StartStopCut::findNonSilentFrame(std::vector<Real> audio,
   while (nFrame < lastFrame) {
     _frameCutter->compute();
 
-    // if it was the last one (ie: it was empty), then we're done.
+    // If it was the last one (ie: it was empty), then we're done.
     if (!frame.size())
       break;
 

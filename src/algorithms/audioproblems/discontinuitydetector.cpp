@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -30,6 +30,7 @@ const char *DiscontinuityDetector::description =
         "\n"
         "References:\n"
         "  [1] Mühlbauer, R. (2010). Automatic Audio Defect Detection.\n");
+
 
 void DiscontinuityDetector::configure() {
   _order = parameter("order").toInt();
@@ -63,6 +64,7 @@ void DiscontinuityDetector::configure() {
     throw(EssentiaException(
         "DiscontinuityDetector: subFrameSize has to be smaller than the input frame size"));
 }
+
 
 void DiscontinuityDetector::compute() {
   const std::vector<Real> frame = _frame.get();
@@ -135,7 +137,7 @@ void DiscontinuityDetector::compute() {
     error[idx] = abs(prediction - frameProc[i]);
   }
 
-  // a median filter cleans up the error signal to focus on the narrow peaks
+  // A median filter cleans up the error signal to focus on the narrow peaks.
   std::vector<Real> medianFilter;
 
   _medianFilter->input("array").set(error);
@@ -147,8 +149,8 @@ void DiscontinuityDetector::compute() {
   for (int i = 0; i < analysisSize; i++)
     filteredError[i] = abs(error[i] - medianFilter[i]);
 
-  // use only the non-silent subframes for the threshold computation.
-  // Otherwise they can lower it too much
+  // Use only the non-silent subframes for the threshold computation.
+  // Otherwise they can lower it too much.
   std::vector<Real> subFrame(_subFrameSize, 0.f);
   std::vector<Real> masked;
   std::vector<Real>::const_iterator inputIt = frame.begin() + start;
@@ -162,8 +164,8 @@ void DiscontinuityDetector::compute() {
 
   if (masked.size() == 0) return;
 
-  // the threshold goes up if rather the std or the median of the error signal
-  // are high
+  // The threshold goes up if rather the std or the median of the error signal
+  // are high.
   float threshold =
       _detectionThld * (stddev(masked, mean(masked)) + median(masked));
 
