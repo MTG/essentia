@@ -42,8 +42,7 @@ class TestHumDetector(TestCase):
         self.assertConfigureFails(HumDetector(), {'timeWindow': 0})
 
     def testSyntheticHum(self):
-        #  this test adds an artificial humming tone of 50 Hz
-        import numpy as np
+        # This test adds an artificial humming tone of 50 Hz.
         filename = join(testdata.audio_dir, 'recorded/Vivaldi_Sonata_5_II_Allegro.wav')
         audio = MonoLoader(filename=filename)()
 
@@ -53,11 +52,11 @@ class TestHumDetector(TestCase):
 
         freq = 50.
 
-        hum = np.sin(2 * np.pi * freq * time )
+        hum = np.sin(2 * np.pi * freq * time)
 
-        hum *= db2amp(-54.)  # empirically found to be the audible limit
+        hum *= db2amp(-40.)
 
-        _, f, _, _, _ = HumDetector()(np.array(audio + hum , dtype=np.float32))
+        _, f, _, _, _ = HumDetector()(np.array(audio + hum, dtype=np.float32))
 
         self.assertAlmostEqualVector(f, [freq], 1e1)
 
