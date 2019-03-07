@@ -33,7 +33,7 @@ class TestStartStopCut(TestCase):
             self.assertEqualVector(
                 self.InitStartStopCut()(
                     esarr(numpy.zeros(size))), (0, 0))
-            size /= 2
+            size //= 2
 
     def testOnes(self):
         size = 200000  # apx. 4.5s @ 44.1kHz
@@ -41,7 +41,7 @@ class TestStartStopCut(TestCase):
             self.assertEqualVector(
                 self.InitStartStopCut()(
                     esarr(numpy.ones(size))), (1, 1))
-            size /= 2
+            size //= 2
 
     def testInputTooShort(self):
         # If the input size is smaller that the detection thresholds plus

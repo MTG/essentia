@@ -73,7 +73,7 @@ class TestSaturationDetector(TestCase):
             sampleNum -= sampleNum % 2
 
             waveTable = [0] * sampleNum
-            waveTable[:sampleNum / 2] = [1] * (sampleNum / 2)
+            waveTable[:sampleNum // 2] = [1] * (sampleNum // 2)
 
             waveDur = len(waveTable) / 44100.
             repetitions = int(time / waveDur)

@@ -48,7 +48,7 @@ class TestDiscontinuityDetector(TestCase):
             samplenum -= samplenum % 2
 
             waveTable = [0] * samplenum
-            waveTable[:samplenum / 2] = [1] * (samplenum / 2)
+            waveTable[:samplenum // 2] = [1] * (samplenum // 2)
 
             waveDur = len(waveTable) / 44100.
             repetitions = int(time / waveDur)
@@ -64,7 +64,7 @@ class TestDiscontinuityDetector(TestCase):
                            sampleRate=fs)()
 
         originalLen = len(audio)
-        startJump = originalLen / 4
+        startJump = originalLen // 4
         groundTruth = [startJump / float(fs)]
 
         # Make sure that the artificial jump produces a prominent discontinuity.

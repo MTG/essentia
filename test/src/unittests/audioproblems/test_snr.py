@@ -44,7 +44,7 @@ class TestClickDetector(TestCase):
         from essentia import instantPower
         from essentia import db2amp
         frameSize = 512
-        hopSize = frameSize / 2
+        hopSize = frameSize // 2
         fs = 44100.
         time = 5.  # s
         time_axis = np.arange(0, time, 1 / fs)
@@ -77,7 +77,7 @@ class TestClickDetector(TestCase):
         from essentia import instantPower
         from essentia import db2amp
         frameSize = 512
-        hopSize = frameSize / 2
+        hopSize = frameSize // 2
         fs = 44100.
         time = 1.  # s
         time_axis = np.arange(0, time, 1 / fs)
