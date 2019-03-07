@@ -7,7 +7,9 @@ build
 *.idb
 *~
 .waf-*
+.waf3-*
 .lock-waf*
+.vscode
 buildw/
 
 # hide the debian stuff
@@ -82,23 +84,3 @@ packaging/win32_3rdparty/bin
 packaging/win32_3rdparty/share
 packaging/win32_3rdparty/lib
 packaging/win32_3rdparty/include
-
-# prvisional Pablo stuff
-*.json
-*.xml
-*.yaml
-*.pkl
-
-*.wav
-*.mp3
-*.png
-
-*.lab
-*.svl
-
-*.log
-
-*.vscode
-*.idea
-
-*.pch
