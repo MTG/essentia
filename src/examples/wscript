@@ -49,6 +49,7 @@ example_sources_fileio = [
     ('streaming_pitchyinfft', ),
     ('streaming_predominantpitchmelodia', ),
     ('streaming_crosssimilaritymatrix', ),
+    ('streaming_coversongsimilarity', ),
     ('streaming_stft', ),
     ('streaming_tuningfrequency', ),
     ('streaming_vibrato', ),

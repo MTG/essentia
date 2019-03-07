@@ -898,7 +898,10 @@ T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
 }
 
 
-// returns the q-th percentile of an input array. Same as numpy.percentile implementation
+/**	
+ * returns the q-th percentile of an 1D input array (same as numpy percentile implementation).	
+ * Throws an exception if the input array is empty.	
+ */ 
 template <typename T> T percentile(const std::vector<T>& array, Real qpercentile) {
   if (array.empty())
     throw EssentiaException("percentile: trying to calculate percentile of empty array");
@@ -918,13 +921,10 @@ template <typename T> T percentile(const std::vector<T>& array, Real qpercentile
     // to avoid zero value in arrays with single element
     k = sortArraySize * qpercentile;
   }
-
-  Real idxFloor = std::floor(k);
-  Real idxCeil = std::ceil(k);
   
   // apply interpolation
-  Real d0 = sorted_array[int(idxFloor)] * (idxCeil - k);
-  Real d1 = sorted_array[int(idxCeil)] * (k - idxFloor);
+  Real d0 = sorted_array[int(std::floor(k))] * (std::ceil(k) - k);
+  Real d1 = sorted_array[int(std::ceil(k))] * (k - std::floor(k));
   return d0 + d1;
 }
 

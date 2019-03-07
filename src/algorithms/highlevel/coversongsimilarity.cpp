@@ -18,10 +18,15 @@
  */
 #include "coversongsimilarity.h"
 #include "essentiamath.h"
+#include "essentia/utils/tnt/tnt2vector.h"
 #include <vector>
 #include <iostream>
 #include <string>
 #include <algorithm>
+
+using namespace essentia;
+
+Real gammaState(Real value, const Real disOnset, const Real disExtension);
 
 namespace essentia {
 namespace standard {
@@ -119,12 +124,130 @@ void CoverSongSimilarity::compute() {
   }
 }
 
+} // namespace standard
+} // namespace essentia
+
+
+#include "algorithmfactory.h"
+
+namespace essentia {
+namespace streaming {
+
+const char* CoverSongSimilarity::name = standard::CoverSongSimilarity::name;
+const char* CoverSongSimilarity::description = standard::CoverSongSimilarity::description;
+
+void CoverSongSimilarity::configure() {
+  _disOnset = parameter("disOnset").toReal();
+  _disExtension = parameter("disExtension").toReal();
+
+  _c1 = 0;
+  _c2 = 0;
+  _c3 = 0;
+  _c4 = 0;
+  _c5 = 0;
+  _minFramesSize = 2*2;
+  _accumXFrameSize = 2;
+  _accumYFrameSize = 2;
+
+  input("inputArray").setAcquireSize(_minFramesSize);
+  input("inputArray").setReleaseSize(1);
+
+  output("scoreMatrix").setAcquireSize(1);
+  output("scoreMatrix").setReleaseSize(1);
+
+}
+
+AlgorithmStatus CoverSongSimilarity::process() {
+
+  const std::vector<std::vector<Real> >& inputFrames = _inputArray.tokens();
+  std::vector<TNT::Array2D<Real> >& scoreMatrix = _scoreMatrix.tokens();
+
+  //std::vector<std::vector<Real> >& inputFrames = array2DToVecvec(inputArray);
+  EXEC_DEBUG("process()");
+  AlgorithmStatus status = acquireData();
+  EXEC_DEBUG("data acquired (in: " << _inputArray.acquireSize()
+             << " - out: " << _scoreMatrix.acquireSize() << ")");
+
+  if (status != OK) {
+    if (!shouldStop()) return status;
+
+    // if shouldStop is true, that means there is no more audio coming, so we need
+    // to take what's left to fill in half-frames, instead of waiting for more
+    // data to come in (which would have done by returning from this function)
+    int available = input("queryFeature").available();
+    if (available == 0) return NO_INPUT;
+
+    input("inputArray").setAcquireSize(available);
+    input("inputArray").setReleaseSize(available);
+
+    return process();
+  }
+
+  xFrames = inputFrames.size();
+  yFrames = inputFrames[0].size();
+  std::vector<std::vector<Real> > incrementMatrix(xFrames, std::vector<Real>(yFrames, 0));
+
+  if (_iterIdx > 0) {
+    _accumXFrameSize = xFrames * (_iterIdx +  1);
+    _accumYFrameSize = yFrames;
+    for (size_t i=0; i<incrementMatrix.size(); i++) {
+      _prevCumMatrixFrames.push_back(incrementMatrix[i]);
+      _previnputMatrixFrames.push_back(incrementMatrix[i]);
+    }
+    _x = xFrames * _iterIdx;
+    _y = yFrames;
+    _xIter = 0;
+  }
+  else {
+    _prevCumMatrixFrames.assign(xFrames, std::vector<Real>(yFrames, 0));
+    for (size_t i=0; i<incrementMatrix.size(); i++) {
+      _previnputMatrixFrames.push_back(incrementMatrix[i]);
+    }
+    _accumXFrameSize = xFrames;
+    _accumYFrameSize = yFrames;
+    _x = 2;
+    _y = 2;
+    _xIter = 2;
+  }
+  
+  // iterate through the similarity matrix to recursively construct the qmax scoring cumilative matrix
+  for(size_t i = _x; i < _accumXFrameSize; i++) {
+    for(size_t j = 2; j < yFrames; j++) {
+      // measure the diagonal when a similarity is found in the input matrix
+      std::cout << "Val: " << _previnputMatrixFrames[i][j] << std::endl;
+      if (inputFrames[_xIter][j] == 1.0) {
+        _c1 = _prevCumMatrixFrames[i-1][j-1];
+        _c2 = _prevCumMatrixFrames[i-2][j-1];
+        _c3 = _prevCumMatrixFrames[i-1][j-2];
+        Real row[3] = {_c1, _c2 , _c3};
+        incrementMatrix[_xIter][j] = *std::max_element(row, row+3) + 1;
+        std::cout << "Hola1: " << incrementMatrix[_xIter][j] << " Idx: " << _xIter << ", " << j << std::endl;
+        }
+      // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
+      else {
+        _c1 = _prevCumMatrixFrames[i-1][j-1] - gammaState(_previnputMatrixFrames[i-1][j-1], _disOnset, _disExtension);
+        _c2 = _prevCumMatrixFrames[i-2][j-1] - gammaState(_previnputMatrixFrames[i-2][j-1], _disOnset, _disExtension);
+        _c3 = _prevCumMatrixFrames[i-1][j-2] - gammaState(_previnputMatrixFrames[i-1][j-2], _disOnset, _disExtension);
+        Real row2[4] = {0, _c1, _c2, _c3};
+        incrementMatrix[_xIter][j] = *std::max_element(row2, row2+4);
+        // std::cout << "Hola2: " << incrementMatrix[_xIter][_yIter] << " Idx: " << _xIter << ", " << _yIter << std::endl;
+      }
+    }
+    if (_xIter < xFrames) _xIter++;
+  }
+  _iterIdx++;
+  scoreMatrix[0] = vecvecToArray2D(incrementMatrix);
+  releaseData();
+}
+
+} // namespace streaming
+} // namespace essentia
+
+
 // apply gap penalty for disruption and extension
-Real CoverSongSimilarity::gammaState(Real value, const Real disOnset, const Real disExtension) const {
-  if      (value == 1.) return disOnset;
-  else if (value == 0.) return disExtension;
+Real gammaState(Real value, const Real disOnset, const Real disExtension) {
+  if      (value == 1.0) return disOnset;
+  else if (value == 0.0) return disExtension;
   else throw EssentiaException("CoverSongSimilarity:Non-binary elements found in the inputsimilarity matrix. Expected a binary similarity matrix!");
 }
 
-} // namespace standard
-} // namespace essentia

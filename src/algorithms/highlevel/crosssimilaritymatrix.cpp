@@ -186,8 +186,9 @@ void CrossSimilarityMatrix::configure() {
   _otiBinary = parameter("otiBinary").toBool();
   _mathcCoef = 1; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
   _mismatchCoef = 0; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
-  _minFramesSize = _embedDimension + 1;
+  _minFramesSize = _embedDimension * 2;
 
+  // input("queryFeature").setAcquireSize(_minFramesSize);
   input("queryFeature").setAcquireSize(_minFramesSize);
   input("queryFeature").setReleaseSize(_tau);
 
@@ -232,7 +233,9 @@ AlgorithmStatus CrossSimilarityMatrix::process() {
 
   // check whether to transpose by oti
   if (_oti == true) {
+    // int otiIdx = 8;
     int otiIdx = optimalTranspositionIndex(inputFramesCopy, _referenceFeature, _noti);
+    std::cout << "OTI: " << otiIdx << std::endl;
     std::rotate(_referenceFeature.begin(), _referenceFeature.end() - otiIdx, _referenceFeature.end());
   }
   
@@ -264,6 +267,7 @@ AlgorithmStatus CrossSimilarityMatrix::process() {
     for (size_t u=0; u<yRows; u++) {
       for (size_t v=0; v<yCols; v++) {
         similarityY[u][v] = percentile(tpDistances[u], _kappa*100) - tpDistances[u][v];
+        // std::cout << "Percentile: " << percentile(tpDistances[u], _kappa*100) << ", distValue: " << tpDistances[u][v] << ", SimValue: " << similarityY[u][v] << std::endl;
         // here we binarise and transpose the similarityY array same time in order to avoid redundant looping
         if (similarityY[u][v] < 0) {
           tSimilarityY[v][u] = 0.;
@@ -337,7 +341,7 @@ std::vector<Real> globalAverageChroma(std::vector<std::vector<Real> >& inputFeat
     globalChroma[j] = tSum;
   }
   // divide the sum array by the max element to normalise it to 0-1 range
-  essentia::normalize(globalChroma);
+  normalize(globalChroma);
   return globalChroma;
 }
 
@@ -352,11 +356,11 @@ int optimalTranspositionIndex(std::vector<std::vector<Real> >& chromaA, std::vec
     // circular rotate the input globalchroma by an index 'i'
     std::rotate(chromaBcopy.begin(), chromaBcopy.end() - i, chromaBcopy.end());
     // compute the dot product of the query global chroma and the shifted global chroma of reference song and append to an array
-    valueAtShifts.push_back(essentia::dotProduct(globalChromaA, chromaBcopy));
+    valueAtShifts.push_back(dotProduct(globalChromaA, chromaBcopy));
     chromaBcopy = globalChromaB;
   }
   // compute the optimal index by finding the index of maximum element in the array of value at various shifts
-  return essentia::argmax(valueAtShifts);
+  return argmax(valueAtShifts);
 }
 
 
@@ -406,10 +410,10 @@ std::vector<std::vector<Real> > chromaBinarySimMatrix(std::vector<std::vector<Re
       for(int k=0; k<=nshifts; k++) {
         chromaBcopy = chromaB[j];
         std::rotate(chromaBcopy.begin(), chromaBcopy.end() - k, chromaBcopy.end());
-        valueAtShifts.push_back(essentia::dotProduct(chromaA[i], chromaBcopy));
+        valueAtShifts.push_back(dotProduct(chromaA[i], chromaBcopy));
         chromaBcopy = chromaB[j];
       }
-      otiIndex = essentia::argmax(valueAtShifts);
+      otiIndex = argmax(valueAtShifts);
       valueAtShifts.clear();
       // assign matchCoef to similarity matrix if the OTI is 0 or 1 semitone
       if (otiIndex == 0 || otiIndex == 1) {

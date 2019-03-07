@@ -71,7 +71,6 @@ class CrossSimilarityMatrix : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
-#include "pool.h"
 #include "streamingalgorithm.h"
 
 namespace essentia {
@@ -92,10 +91,10 @@ class CrossSimilarityMatrix : public Algorithm {
   Real _mathcCoef;
   Real _mismatchCoef;
   Real _minFramesSize;
-  std::vector<std::vector<Real> > _prevQueryFrame;
+  // std::vector<std::vector<Real> > _prevQueryFrame;
   std::vector<std::vector<Real> > _referenceFeature;
 
-  std::vector<std::vector<Real> > streamingFrames2TimeEmbedding(std::vector<std::vector<Real> > inputFrames, int m, int tau);
+  // std::vector<std::vector<Real> > streamingFrames2TimeEmbedding(std::vector<std::vector<Real> > inputFrames, int m, int tau);
 
  public:
   CrossSimilarityMatrix() : Algorithm() {
