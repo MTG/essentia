@@ -12,14 +12,14 @@ using namespace essentia::standard;
 using namespace std;
 int main (int argc,char* argv[]) {
 
-    if (argc != 2) {
+  if (argc != 3) {
     cout << "ERROR: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input yaml_output" << endl;
     exit(1);
   }
 
   string audioFilename = argv[1];
-  // string outputFilename = argv[2];
+  string outputFilename = argv[2];
 
   // register the algorithms in the factory(ies)
   essentia::init();
@@ -49,13 +49,11 @@ int main (int argc,char* argv[]) {
 
   cout << "-------- connecting algos ---------" << endl;
 
-  // Audio -> FrameCutter
   vector<Real> audioBuffer;
 
   audio->output("audio").set(audioBuffer);
   fc->input("signal").set(audioBuffer);
 
-  // FrameCutter -> GapsDetector
   vector<Real> frame, starts, ends;
 
   fc->output("frame").set(frame);
@@ -87,14 +85,13 @@ int main (int argc,char* argv[]) {
 
     pool.add("starts", starts);
     pool.add("ends", ends);
-
   }
 
   // write results to file
-  cout << "-------- writing results to file " << "results.yaml" << " ---------" << endl;
+  cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
 
   Algorithm* output = AlgorithmFactory::create("YamlOutput",
-                                               "filename", "results.yaml");
+                                               "filename", outputFilename);
 
   output->input("pool").set(pool);
   output->compute();                     
@@ -106,5 +103,4 @@ int main (int argc,char* argv[]) {
   essentia::shutdown();
 
   return 0;
-
 }

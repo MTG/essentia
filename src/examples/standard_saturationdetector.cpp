@@ -12,16 +12,16 @@ using namespace essentia::standard;
 using namespace std;
 int main (int argc,char* argv[]) {
 
-    if (argc != 2) {
+  if (argc != 3) {
     cout << "ERROR: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input yaml_output" << endl;
     exit(1);
   }
 
   string audioFilename = argv[1];
-  // string outputFilename = argv[2];
+  string outputFilename = argv[2];
 
-  // register the algorithms in the factory(ies)
+  // Register the algorithms in the factory(ies).
   essentia::init();
 
   Pool pool;
@@ -54,7 +54,7 @@ int main (int argc,char* argv[]) {
   audio->output("audio").set(audioBuffer);
   fc->input("signal").set(audioBuffer);
 
-  // FrameCutter -> Windowing -> Spectrum
+  // FrameCutter -> SaturationDetector
   vector<Real> frame, starts, ends;
 
   fc->output("frame").set(frame);
@@ -71,29 +71,25 @@ int main (int argc,char* argv[]) {
 
   while (true) {
 
-    // compute a frame
+    // Compute a frame.
     fc->compute();
 
-    // if it was the last one (ie: it was empty), then we're done.
+    // If it was the last one (ie: it was empty), then we're done.
     if (!frame.size()) {
       break;
     }
-
-    // if the frame is silent, just drop it and go on processing
-    // if (isSilent(frame)) continue;
 
     dd->compute();
 
     pool.add("starts", starts);
     pool.add("ends", ends);
-
   }
 
   // write results to file
-  cout << "-------- writing results to file " << "results.yaml" << " ---------" << endl;
+  cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
 
   Algorithm* output = AlgorithmFactory::create("YamlOutput",
-                                               "filename", "results.yaml");
+                                               "filename", outputFilename);
 
   output->input("pool").set(pool);
   output->compute();                     
@@ -105,5 +101,4 @@ int main (int argc,char* argv[]) {
   essentia::shutdown();
 
   return 0;
-
 }

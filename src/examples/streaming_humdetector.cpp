@@ -29,26 +29,21 @@ using namespace scheduler;
 
 
 int main(int argc, char* argv[]) {
-
-  if (argc < 2 ) {
+  if (argc < 3 ) {
     cout << "Error: wrong number of arguments" << endl;
     cout << "Usage: " << argv[0] << " input_audiofile output_yamlfile [1/0 print to stdout]" << endl;
     exit(1);
   }
 
-  // register the algorithms in the factory(ies)
+  // Register the algorithms in the factory(ies).
   essentia::init();
 
-  // setDebugLevel(EAll);
   /////// PARAMS //////////////
-  // don't change these default values as they guarantee that pitch extractor output
-  // is correct, no tests were done on other values
-  int framesize = 2048;
-  int hopsize = 128;
+  // Don't change these default values as they guarantee that pitch extractor output
+  // is correct, no tests were done on other values.
   int sr = 44100;
 
-
-  // instantiate factory and create algorithms:
+  // Instantiate factory and create algorithms:
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
   Algorithm* audioload = factory.create("MonoLoader",
@@ -57,11 +52,7 @@ int main(int argc, char* argv[]) {
                                         "downmix", "mix");
 
   Algorithm* humDetector = factory.create("HumDetector");
-  // Algorithm* predominantMelody = factory.create("PredominantPitchMelodia",
-  //                                               "frameSize", framesize,
-  //                                               "hopSize", hopsize,
-  //                                               "sampleRate", sr);
-  // data storage
+
   Pool pool;
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
@@ -70,11 +61,10 @@ int main(int argc, char* argv[]) {
   // audio -> equal loudness -> predominant melody
   audioload->output("audio")                   >> humDetector->input("signal");
   humDetector->output("frequencies")           >> PC(pool, "frequencies");
-  humDetector->output("amplitudes")            >> PC(pool, "amplitudes");
+  humDetector->output("saliences")             >> PC(pool, "saliences");
   humDetector->output("starts")                >> PC(pool, "starts");
+  humDetector->output("ends")                  >> PC(pool, "ends");
   humDetector->output("r")                     >> PC(pool, "r");
-
-
 
   /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << argv[1]<< " --------" << endl;
@@ -82,15 +72,14 @@ int main(int argc, char* argv[]) {
   Network network(audioload);
   network.run();
 
-  // write results to yamlfile
+  // Write results to yamlfile.
   cout << "-------- writing results to file " << argv[2] << " --------" << endl;
 
   standard::Algorithm* output = standard::AlgorithmFactory::create("YamlOutput",
-                                                                   "filename", "dummy_out.yaml");
+                                                                   "filename", argv[2]);
   output->input("pool").set(pool);
   output->compute();
 
-  // clean up:
   delete output;
   essentia::shutdown();
 

@@ -12,14 +12,14 @@ using namespace essentia::standard;
 using namespace std;
 int main (int argc,char* argv[]) {
 
-    if (argc != 2) {
+  if (argc != 3) {
     cout << "ERROR: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " audio_input yaml_output" << endl;
     exit(1);
   }
 
   string audioFilename = argv[1];
-  // string outputFilename = argv[2];
+  string outputFilename = argv[2];
 
   // register the algorithms in the factory(ies)
   essentia::init();
@@ -43,7 +43,7 @@ int main (int argc,char* argv[]) {
                                     "hopSize", hopSize,
                                     "startFromZero", true);
 
-  Algorithm* snr    = factory.create("Welch",
+  Algorithm* w     = factory.create("Welch",
                                     "fftSize", hopSize,
                                     "frameSize", frameSize,
                                     "sampleRate", 1.0,
@@ -57,14 +57,11 @@ int main (int argc,char* argv[]) {
   audio->output("audio").set(audioBuffer);
   fc->input("signal").set(audioBuffer);
 
-  // FrameCutter -> Windowing -> Spectrum
+  // FrameCutter -> Welch
   vector<Real> frame, psd;
-  Real AverageSNR, AverageSNRMA;
   fc->output("frame").set(frame);
-  snr->input("frame").set(frame);
-
-  snr->output("PSD").set(psd);
-
+  w->input("frame").set(frame);
+  w->output("psd").set(psd);
 
 
   /////////// STARTING THE ALGORITHMS //////////////////
@@ -84,29 +81,24 @@ int main (int argc,char* argv[]) {
 
     // if the frame is silent, just drop it and go on processing
     // if (isSilent(frame)) continue;
+    w->compute();
 
-    snr->compute();
-
-    pool.add("AverageSNR", AverageSNR);
-    pool.add("AverageSNRMA", AverageSNRMA);
-
+    pool.add("AverageSNR", psd);
   }
 
-  // write results to file
-  cout << "-------- writing results to file " << "results.yaml" << " ---------" << endl;
+  cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
 
   Algorithm* output = AlgorithmFactory::create("YamlOutput",
-                                               "filename", "results.yaml");
+                                               "filename", outputFilename);
 
   output->input("pool").set(pool);
   output->compute();                     
 
   delete audio;
   delete fc;
-  delete snr;
+  delete w;
 
   essentia::shutdown();
 
   return 0;
-
 }
