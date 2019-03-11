@@ -91,11 +91,10 @@ class CrossSimilarityMatrix : public Algorithm {
   Real _mathcCoef;
   Real _mismatchCoef;
   Real _minFramesSize;
-  // std::vector<std::vector<Real> > _prevQueryFrame;
   std::vector<std::vector<Real> > _referenceFeature;
-
+  std::vector<std::vector<Real> > _referenceTimeEmbed;
   // std::vector<std::vector<Real> > streamingFrames2TimeEmbedding(std::vector<std::vector<Real> > inputFrames, int m, int tau);
-
+  
  public:
   CrossSimilarityMatrix() : Algorithm() {
     declareInput(_queryFeature, 10, "queryFeature", "input chromagram of the query song");
@@ -111,7 +110,7 @@ class CrossSimilarityMatrix : public Algorithm {
     declareParameter("tau", "time delay for embedding in units of number of windows", "[1,inf)", 1);
     declareParameter("embedDimension", "embedding dimension for the stacked feature embedding. Choose embedDimension=1 to use raw input feature vector for the similarity calculation.", "[0,inf)", 9);
     declareParameter("kappa", "fraction of mutual nearest neighbours to consider while computing euclidean distances", "[0,1]", 0.095);
-    declareParameter("oti", "whether to transpose the key of the reference song to the query song by (OTI)", "{true,false}", true);
+    declareParameter("oti", "optimal transposition index of the query and reference song", "[0, inf]", 0);
     declareParameter("noti", "Number of circular shifts to be checked for optimal transposition index", "[0, inf)", 12);
     declareParameter("otiBinary", "whether to use the OTI-based chroma binary similarity method", "{true,false}", false);
   }

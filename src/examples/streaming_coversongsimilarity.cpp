@@ -42,11 +42,6 @@ int main(int argc, char* argv[]) {
   string inputSimFile = argv[1];
   string outputFilename = argv[2];
 
-  /*
-  string inputSimFile = "/home/albin/Documents/brahm_coldplay_sim_matrix.txt";
-  string outputFilename = "/home/albin/Documents/qmax_brahm_coldplay_stream.json";
-  */
- 
   vector<vector<Real> > inputSimMatrix;
   // read the 2d array text file and store it to a 2D vector 
   ifstream myReadFile;
@@ -69,6 +64,8 @@ int main(int argc, char* argv[]) {
   // register the algorithms in the factory
   essentia::init();
 
+  Pool pool;
+  
   Real disExtension = 0.5;
   Real disOnset = 0.5;
 

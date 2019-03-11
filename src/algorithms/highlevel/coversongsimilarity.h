@@ -105,7 +105,6 @@ class CoverSongSimilarity : public Algorithm {
   void declareParameters() {
     declareParameter("disOnset", "penalty for disruption onset", "[0,inf)", 0.5);
     declareParameter("disExtension", "penalty for disruption extension", "[0,inf)", 0.5);
-    declareParameter("simType", "type of cover song similarity measure", "{qmax, dmax}", "qmax");
   }
 
   void configure();

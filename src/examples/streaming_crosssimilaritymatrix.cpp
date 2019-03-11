@@ -72,10 +72,10 @@ int main(int argc, char* argv[]) {
   int frameSize = 4096;
   int hopSize = 2048;
   int numBins = 12;
+  int oti = 0; // hardcoded, should be replaced by oti algo
   Real minFrequency = 100;
   Real maxFrequency = 3500;
   bool otiBinary = false;
-  bool oti = true;
   Real kappa = 0.095;
   int tau = 1;
   int embedDimension = 9;

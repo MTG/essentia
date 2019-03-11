@@ -214,7 +214,6 @@ AlgorithmStatus CoverSongSimilarity::process() {
   for(size_t i = _x; i < _accumXFrameSize; i++) {
     for(size_t j = 2; j < yFrames; j++) {
       // measure the diagonal when a similarity is found in the input matrix
-      //std::cout << "Val: " << _previnputMatrixFrames[i][j] << std::endl;
       if (inputFrames[_xIter][j] == 1.0) {
         _c1 = _prevCumMatrixFrames[i-1][j-1];
         _c2 = _prevCumMatrixFrames[i-2][j-1];

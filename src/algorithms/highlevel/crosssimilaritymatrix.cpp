@@ -32,7 +32,6 @@ int optimalTranspositionIndex(std::vector<std::vector<Real> >& chromaA, std::vec
 std::vector<std::vector<Real> > toTimeEmbedding(std::vector<std::vector<Real> >& inputArray, int m, int tau);
 std::vector<std::vector<Real> > chromaBinarySimMatrix(std::vector<std::vector<Real> >& chromaA, std::vector<std::vector<Real> >& chromaB, int nshifts, Real matchCoef, Real mismatchCoef);
 
-
 namespace essentia {
 namespace standard {
 
@@ -182,13 +181,12 @@ void CrossSimilarityMatrix::configure() {
   _embedDimension = parameter("embedDimension").toInt();
   _kappa = parameter("kappa").toReal();
   _noti = parameter("noti").toInt();
-  _oti = parameter("oti").toBool();
+  _oti = parameter("oti").toInt();
   _otiBinary = parameter("otiBinary").toBool();
   _mathcCoef = 1; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
   _mismatchCoef = 0; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
-  _minFramesSize = _embedDimension * 2;
-
-  // input("queryFeature").setAcquireSize(_minFramesSize);
+  _minFramesSize = _embedDimension + 1;
+  
   input("queryFeature").setAcquireSize(_minFramesSize);
   input("queryFeature").setReleaseSize(_tau);
 
@@ -231,39 +229,36 @@ AlgorithmStatus CrossSimilarityMatrix::process() {
     }
   }
 
-  // check whether to transpose by oti
-  if (_oti == true) {
-    // int otiIdx = 8;
-    int otiIdx = optimalTranspositionIndex(inputFramesCopy, _referenceFeature, _noti);
-    std::cout << "OTI: " << otiIdx << std::endl;
-    std::rotate(_referenceFeature.begin(), _referenceFeature.end() - otiIdx, _referenceFeature.end());
-  }
-  
+  // transpose the reference song feature matrix by the given optimal transposition index
+  std::rotate(_referenceFeature.begin(), _referenceFeature.end() - _oti, _referenceFeature.end());
+
   std::vector<std::vector<Real> > queryTimeEmbed = toTimeEmbedding(inputFramesCopy, _embedDimension, _tau);
-  std::vector<std::vector<Real> > referenceTimeEmbed = toTimeEmbedding(_referenceFeature, _embedDimension, _tau);
+  _referenceTimeEmbed = toTimeEmbedding(_referenceFeature, _embedDimension, _tau);
 
   // check whether to use oti-based binary similarity as mentioned in [3]
   if (_otiBinary == true) {
-    outputSimMatrix = chromaBinarySimMatrix(queryTimeEmbed, referenceTimeEmbed, _noti, _mathcCoef, _mismatchCoef);
+    outputSimMatrix = chromaBinarySimMatrix(queryTimeEmbed, _referenceTimeEmbed, _noti, _mathcCoef, _mismatchCoef);
+    // std::cout << "Size: " << outputSimMatrix.size() << ", " << outputSimMatrix[0].size() << std::endl;
     csmOutput[0] = vecvecToArray2D(outputSimMatrix);
     releaseData();
   }
-
   // otherwise we compute similarity matrix as mentioned in [2]
   else if (_otiBinary == false) {
     // here we compute the pairwsie euclidean distances between query and reference song time embedding and finally tranpose the resulting matrix.
-    std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryTimeEmbed, referenceTimeEmbed);
+    std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryTimeEmbed, _referenceTimeEmbed);
     std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
 
     size_t yRows = tpDistances.size();
     size_t yCols = tpDistances[0].size();
 
     // optimise the threshold computation on axis X by iniatilizing it to a matrix of ones
-    std::vector<std::vector<Real> > similarityX(yCols, std::vector<Real>(yRows, 1));
-    std::vector<std::vector<Real> > similarityY(yRows, std::vector<Real>(yCols, 0));
+    std::vector<std::vector<Real> > similarityX(yCols, std::vector<Real>(yRows, 0));
+    // std::vector<std::vector<Real> > similarityY(yRows, std::vector<Real>(yCols, 0));
 
     // construct thresholded similarity matrix on axis Y
-    std::vector<std::vector<Real> > tSimilarityY(yCols, std::vector<Real>(yRows));
+    std::vector<std::vector<Real> > tSimilarityY(yCols, std::vector<Real>(yRows, 1));
+
+    /*
     for (size_t u=0; u<yRows; u++) {
       for (size_t v=0; v<yCols; v++) {
         similarityY[u][v] = percentile(tpDistances[u], _kappa*100) - tpDistances[u][v];
@@ -274,6 +269,21 @@ AlgorithmStatus CrossSimilarityMatrix::process() {
         }
         else if (similarityY[u][v] >= 0) {
           tSimilarityY[v][u] = 1.;
+        }
+      }
+    }
+    */
+
+    for (size_t u=0; u<pdistances.size(); u++) {
+      for (size_t v=0; v<pdistances[u].size(); v++) {
+        similarityX[u][v] = percentile(pdistances[u], _kappa*100) - pdistances[u][v];
+        // std::cout << "Percentile: " << percentile(tpDistances[u], _kappa*100) << ", distValue: " << tpDistances[u][v] << ", SimValue: " << similarityY[u][v] << std::endl;
+        // here we binarise and transpose the similarityY array same time in order to avoid redundant looping
+        if (similarityX[u][v] < 0) {
+          similarityX[u][v] = 0.;
+        }
+        else if (similarityX[u][v] >= 0) {
+          similarityX[u][v] = 1.;
         }
       }
     }
