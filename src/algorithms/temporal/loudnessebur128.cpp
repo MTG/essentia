@@ -131,24 +131,27 @@ inline Real loudness2power(Real loudness) {
 void LoudnessEBUR128::configure() {
 
   Real sampleRate = parameter("sampleRate").toReal();
+  bool startFromZero = !parameter("startAtZero").toBool();
+
+
   _hopSize = int(round(parameter("hopSize").toReal() * sampleRate));
 
   _loudnessEBUR128Filter->configure("sampleRate", sampleRate);
   
   _frameCutterMomentary->configure("frameSize", int(round(0.4 * sampleRate)), // 400ms
                                    "hopSize", _hopSize,
-                                   "startFromZero", true,
+                                   "startFromZero", startFromZero,
                                    "silentFrames", "keep");
   _frameCutterShortTerm->configure("frameSize", int(3 * sampleRate), // 3 seconds
                                    "hopSize", _hopSize,
-                                   "startFromZero", true,
+                                   "startFromZero", startFromZero,
                                    "silentFrames", "keep");
 
   // The measurement input to which the gating threshold is applied is the loudness of the
   // 400 ms blocks with a constant overlap between consecutive gating blocks of 75%. 
   _frameCutterIntegrated->configure("frameSize", int(round(0.4 * sampleRate)),
                                     "hopSize", int(round(0.1 * sampleRate)), 
-                                    "startFromZero", true,
+                                    "startFromZero", startFromZero,
                                     "silentFrames", "keep");
 
   _computeMomentary->configure("type", "log10",
@@ -308,7 +311,7 @@ LoudnessEBUR128::~LoudnessEBUR128() {
 }
 
 void LoudnessEBUR128::configure() {
-  _loudnessEBUR128->configure(INHERIT("sampleRate"), INHERIT("hopSize"));
+  _loudnessEBUR128->configure(INHERIT("sampleRate"), INHERIT("hopSize"), INHERIT("startAtZero"));
 }
 
 
