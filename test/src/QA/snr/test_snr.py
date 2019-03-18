@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -18,22 +18,29 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
+import sys
+
+from math import isnan
+from math import isinf
+
+from scipy.special import iv
+from scipy.constants import pi
+
+import essentia.standard as es
+from essentia import instantPower
+from essentia import db2pow
+
+sys.path.insert(0, './')
 from qa_test import *
 from qa_testevents import QaTestEvents
 from qa_testvalues import QaTestValues
-import essentia.standard as es
 
-import matplotlib.pyplot as plt
-from essentia import instantPower
-from essentia import db2pow
-from scipy.special import iv
-from scipy.constants import pi
-from math import isnan
-from math import isinf
+
 frameSize = 512
-hopSize = frameSize / 2
+hopSize = frameSize // 2
 noiseThreshold = -40
 eps = (np.finfo(np.float32).eps)
+
 
 class EssentiaWrap(QaWrapper):
     """
@@ -43,7 +50,8 @@ class EssentiaWrap(QaWrapper):
     algo = es.SNR(frameSize=frameSize, noiseThreshold=noiseThreshold)
     def compute(self, *args):
         self.algo.reset()
-        for frame in es.FrameGenerator(args[1], frameSize=frameSize, hopSize=hopSize,
+        for frame in es.FrameGenerator(args[1], frameSize=frameSize,
+                                       hopSize=hopSize,
                                        startFromZero=True):
             snr, _, _  = self.algo(frame)
 
@@ -104,13 +112,13 @@ class Dev(QaWrapper):
 
         y = []
 
-        noise_psd = np.zeros(frameSize / 2 + 1, dtype=np.float32)
+        noise_psd = np.zeros(frameSize // 2 + 1, dtype=np.float32)
 
-        previous_snr_prior = np.zeros(frameSize / 2 + 1, dtype=np.float32)
-        previous_snr_inst = np.zeros(frameSize / 2 + 1, dtype=np.float32)
-        previous_snr_post = np.zeros(frameSize / 2 + 1, dtype=np.float32)
-        previous_Y = np.zeros(frameSize / 2 + 1, dtype=np.float32)
-        previous_noise_psd = np.zeros(frameSize / 2 + 1, dtype=np.float32)
+        previous_snr_prior = np.zeros(frameSize // 2 + 1, dtype=np.float32)
+        previous_snr_inst = np.zeros(frameSize // 2 + 1, dtype=np.float32)
+        previous_snr_post = np.zeros(frameSize // 2 + 1, dtype=np.float32)
+        previous_Y = np.zeros(frameSize // 2 + 1, dtype=np.float32)
+        previous_noise_psd = np.zeros(frameSize // 2 + 1, dtype=np.float32)
 
         noise_std = 0
         ma_snr_average = 0
@@ -118,17 +126,11 @@ class Dev(QaWrapper):
         spectrum = es.Spectrum(size=frameSize)
         window = es.Windowing(size=frameSize, type='hann', normalized=False)
 
-        for frame in es.FrameGenerator(x, frameSize=frameSize, hopSize=hopSize, startFromZero=True):
+        for frame in es.FrameGenerator(x, frameSize=frameSize,
+                                       hopSize=hopSize, startFromZero=True):
             Y = spectrum(window(frame))
 
             if instantPower(frame) < silenceThreshold:
-                # Fixed threshold
-                # noise_std = 1e-5
-
-                # Estimated threshold
-                # noise_std = update_noise_pow(noise_std, instantPower(frame), alpha=alpha)
-                # noise_spectrum = np.ones(frameSize / 2 + 1) * noise_std
-
                 noise_psd = update_noise_psd(noise_psd, Y, alpha=noise_alpha)
 
                 snr_post = SNR_post_est(Y, noise_psd)
@@ -148,13 +150,15 @@ class Dev(QaWrapper):
 
                 previous_mmse = MMSE(v, previous_snr_post, previous_Y)
 
-                snr_prior = SNR_prior_est(MMSE_alpha, previous_mmse, previous_noise_psd, snr_inst)
+                snr_prior = SNR_prior_est(MMSE_alpha, previous_mmse, 
+                                          previous_noise_psd, snr_inst)
 
                 X_psd_est = noise_psd * snr_prior
 
                 snr_average = np.mean(X_psd_est) / np.mean(noise_psd)
 
-                ma_snr_average = update_y(ma_snr_average, snr_average, alpha=snr_alpha)
+                ma_snr_average = update_y(ma_snr_average, snr_average,
+                                          alpha=snr_alpha)
 
                 previous_snr_prior = snr_prior
 
@@ -228,9 +232,9 @@ if __name__ == '__main__':
                     ma_snr_average = qa.wrappers['Dev'].compute(None, signal_and_noise, asume_gauss_psd, noise_alpha)
                     mean_snr_estimation = 10 * np.log10(ma_snr_average)
                     mean_snr_estimation_corrected = mean_snr_estimation - 10. * np.log10(fs / 2.)
-                    print 'with dev, error: {:.3f}dB'.format(np.abs(mean_snr_estimation_corrected[0] - real_snr_prior_esp_corrected))
+                    print('with dev, error: {:.3f}dB'.format(np.abs(mean_snr_estimation_corrected[0] - real_snr_prior_esp_corrected)))
 
                     ma_snr_average = qa.wrappers['EssentiaWrap'].compute(None, signal_and_noise, asume_gauss_psd, noise_alpha)
-                    print 'with Esssentia, error: {:.3f}dB'.format(np.abs(ma_snr_average[0] - real_snr_prior_esp_corrected))
+                    print('with Esssentia, error: {:.3f}dB'.format(np.abs(ma_snr_average[0] - real_snr_prior_esp_corrected)))
 
                     results.append(mean_snr_estimation_corrected)

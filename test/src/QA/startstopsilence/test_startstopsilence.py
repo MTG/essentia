@@ -18,12 +18,16 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-from qa_test import *
-from qa_testevents import QaTestEvents
+import sys
 import numpy as np
-from librosa.effects import trim
+# from librosa.effects import trim
+
 import essentia.standard as es
 from essentia import array as esarray
+
+sys.path.insert(0, './')
+from qa_test import *
+from qa_testevents import QaTestEvents
 
 
 class EssentiaWrap60(QaWrapper):
@@ -33,7 +37,8 @@ class EssentiaWrap60(QaWrapper):
 
     def compute(self, x):
         startstopsilence = es.StartStopSilence(threshold=-60)
-        for frame in es.FrameGenerator(x, frameSize=2048, hopSize=512, startFromZero=True):
+        for frame in es.FrameGenerator(x, frameSize=2048, hopSize=512, 
+                                       startFromZero=True):
             result = startstopsilence(esarray(frame))
         solution = np.array([result[0], result[1]])
         return solution * 512 / 44100.
@@ -46,7 +51,8 @@ class EssentiaWrap50(QaWrapper):
 
     def compute(self, x):
         startstopsilence = es.StartStopSilence(threshold=-50)
-        for frame in es.FrameGenerator(x, frameSize=2048, hopSize=512, startFromZero=True):
+        for frame in es.FrameGenerator(x, frameSize=2048, hopSize=512,
+                                       startFromZero=True):
             result = startstopsilence(esarray(frame))
         solution = np.array([result[0], result[1]])
         return solution * 512 / 44100.
@@ -59,10 +65,12 @@ class EssentiaWrap70(QaWrapper):
 
     def compute(self, x):
         startstopsilence = es.StartStopSilence(threshold=-70)
-        for frame in es.FrameGenerator(x, frameSize=2048, hopSize=512, startFromZero=True):
+        for frame in es.FrameGenerator(x, frameSize=2048, hopSize=512, 
+                                       startFromZero=True):
             result = startstopsilence(esarray(frame))
         solution = np.array([result[0], result[1]])
         return solution * 512 / 44100.
+
 
 class LibrosaWrap(QaWrapper):
     """
@@ -83,10 +91,11 @@ class Distance(QaMetric):
 if __name__ == '__main__':
     # Instantiating wrappers
     wrappers = [
-        EssentiaWrap60('events'),
         EssentiaWrap70('events'),
+        EssentiaWrap60('events', ground_true=True),
         EssentiaWrap50('events'),
-        LibrosaWrap('events', ground_true=True)  # May act as GT when annotations are not available
+        # May act as GT when annotations are not available
+        # LibrosaWrap('events', ground_true=True)
     ]
 
     # Instantiating the test
@@ -96,18 +105,18 @@ if __name__ == '__main__':
     qa.set_wrappers(wrappers)
 
     # Add the testing files
-    qa.set_data(filename='../../QA-audio/StartStopSilence/')  # Works for a single
+    # qa.load_audio(filename='../../QA-audio/StartStopSilence/')
 
     # Add extra metrics
     qa.set_metrics(Distance())
 
     # Add ground true
-    qa.load('../../QA-audio/StartStopSilence/', ground_true=True)
+    qa.load_audio('../../QA-audio/StartStopSilence/')
 
     # Compute and the results, the scores and and compare the computation times
     qa.compute_all()
 
-    qa.plot_all(force=True, plots_dir='StartStopSilence/plots')
+    # qa.plot_all(force=True, plots_dir='StartStopSilence/plots')
 
     qa.score_all()
 

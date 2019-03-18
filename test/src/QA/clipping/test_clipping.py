@@ -18,13 +18,17 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-from qa_test import *
-from qa_testevents import QaTestEvents
+import sys
+
 import numpy as np
-from librosa.effects import trim
+from scipy.signal import medfilt
+
 import essentia.standard as es
 from essentia import array as esarr
-from scipy.signal import medfilt
+
+sys.path.insert(0, './')
+from qa_test import *
+from qa_testevents import QaTestEvents
 
 
 class DevWrap(QaWrapper):
@@ -45,10 +49,13 @@ class DevWrap(QaWrapper):
     _idx = 0
     _previousRegion = None
 
-    def compute(self, x):
+    def compute(self, *args):
+        x = args[1]
         y = []
         self._idx = 0
-        for frame in es.FrameGenerator(x, frameSize=self._frameSize, hopSize=self._hopSize, startFromZero=True):
+        for frame in es.FrameGenerator(x, frameSize=self._frameSize,
+                                       hopSize=self._hopSize,
+                                       startFromZero=True):
             frame = np.abs(frame)
             starts = []
             ends = []
@@ -64,7 +71,6 @@ class DevWrap(QaWrapper):
             combinedMask = energyMask * deltaMask
 
             flanks = np.diff(combinedMask)
-            #np.insert(delta, 0, 0)
 
             uFlanks = [idx for idx, x in enumerate(flanks) if x == 1]
             dFlanks = [idx for idx, x in enumerate(flanks) if x == -1]
@@ -135,11 +141,6 @@ class DevWrap(QaWrapper):
                         xs = s + dFlanks[idx]
                         plt.axvline(xs, color='g', alpha=.2)
 
-                        # xs = s + uFlanks[1]
-                        # plt.axvline(xs, color = 'g', alpha=.2)
-                        # xs = s + dFlanks[1]
-                        # plt.axvline(xs, color = 'g', alpha=.2)
-
                         xs = [uFlanks[idx] - 1, uFlanks[0], dFlanks[0], dFlanks[0] + 1]
                         xs2 = np.array(xs) + s
 
@@ -191,10 +192,13 @@ class DevWrap2(QaWrapper):
     _idx = 0
     _previousRegion = None
 
-    def compute(self, x):
+    def compute(self, *args):
+        x = args[1]
         y = []
         self._idx = 0
-        for frame in es.FrameGenerator(x, frameSize=self._frameSize, hopSize=self._hopSize, startFromZero=True):
+        for frame in es.FrameGenerator(x, frameSize=self._frameSize, 
+                                       hopSize=self._hopSize,
+                                       startFromZero=True):
             frame = np.abs(frame)
             starts = []
             ends = []
@@ -202,8 +206,6 @@ class DevWrap2(QaWrapper):
             s = int(self._frameSize / 2 - self._hopSize / 2) - 1  # consider non overlapping case
             e = int(self._frameSize / 2 + self._hopSize / 2)
 
-            # energyMask = np.array([x > self._energyThreshold for x in frame])[s:e].astype(int)
-            # deltaMask = np.array([np.abs(x) <= self._differentialThreshold for x in delta])[s:e].astype(int)
             for idx in range(s, e):
                 if frame[idx] >= self._energyThreshold:
                     continue
@@ -213,8 +215,6 @@ class DevWrap2(QaWrapper):
 
 class TruePeakDetector(QaWrapper):
     # Frame-wise implementation following ITU-R BS.1770-2
-
-
 
     # parameters
     _sampleRate = 44100.
@@ -229,8 +229,11 @@ class TruePeakDetector(QaWrapper):
     # inner variables
     _idx = 0
     _clippingThreshold = 0.9999695
-    def compute(self, x):
+
+    def compute(self, *args):
         from math import pi
+
+        x = args[1]
         for frame in es.FrameGenerator(x, frameSize=self._frameSize,
                                        hopSize=self._hopSize, startFromZero=True):
             y = []
@@ -238,7 +241,6 @@ class TruePeakDetector(QaWrapper):
             e = int(self._frameSize / 2 + self._hopSize / 2)
 
             # Stage 1: Attenuation. Is not required because we are using float point.
-
 
             # Stage 2: Resample
             yResample = es.Resample(inputSampleRate=self._sampleRate,
@@ -268,11 +270,6 @@ class TruePeakDetector(QaWrapper):
 
                 yAbsoluteDCBlocked = np.abs(yDCBlocked)
 
-                # for i in range(len(yAbsolute)):
-                #     yMax = np.max([yAbsolute[i], yAbsoluteDCBlocked[i]])
-                #     if yMax > 1.0:
-                #         y.append((i + self._idx * self._hopSize) / float(self._sampleRateOver), yMax)
-
                 yMaxArray = np.maximum(yMaxArray, yAbsoluteDCBlocked)
 
             y = [((i + self._idx * self._hopSize) / float(self._sampleRateOver), yMax)
@@ -280,10 +277,11 @@ class TruePeakDetector(QaWrapper):
 
             self._idx += 1
 
-        return y
+        return esarr(y)
 
 
 if __name__ == '__main__':
+    folder = 'clipping'
 
     # Instantiating wrappers
     wrappers = [
@@ -296,18 +294,13 @@ if __name__ == '__main__':
     # Add the wrappers to the test the wrappers
     qa.set_wrappers(wrappers)
 
-    # data_dir = '../../audio/recorded/distorted.wav'
-    # data_dir = '/home/pablo/Music/Metallica - Death Magnetic [Unloaded] (2017) MP3/01 That Was Just Your Life.mp3'
-    # data_dir = '/home/pablo/Music/Desakato-La_Teoria_del_Fuego/03. Desakato - Estigma.mp3'
-    data_dir = '../../QA-audio/Clipping/desakato_clipped_short.wav'
+    data_dir = '../../audio/recorded/distorted.wav'
 
     qa.load_audio(filename=data_dir)  # Works for a single
-    qa.load_solution(data_dir, ground_true=True)
+    # qa.load_solution(data_dir, ground_true=True)
 
-    # Compute and the results, the scores and and compare the computation times
+    # Compute all the estimations, get the scores and compare the computation times
+    qa.compute_all(output_file='{}/compute.log'.format(folder))
 
-    qa.compute_all()
-    qa.plot_all('clipping_plots/')
-
-    # qa.score_all()
-
+    # Optional plotting
+    # qa.plot_all('clipping_plots/')

@@ -1,18 +1,32 @@
-#!/usr/local/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 
-# Created by pablo on 2/02/18
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
+#
+# This file is part of Essentia
+#
+# Essentia is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Affero General Public License as published by the Free
+# Software Foundation (FSF), either version 3 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the Affero GNU General Public License
+# version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-"""
-This script find all the files in a folder, tries to open them as audio files,
-reduces a bit the audio level to prevent clipping and ads a humming tone at 50 Hz
-"""
+
+import os
 
 import numpy as np
-import os
+
 import essentia.standard as es
 from essentia import array as esarr
+
 PI = np.pi
+
 
 def find_files(directory, pattern):
     for root, dirs, files in os.walk(directory):
@@ -23,6 +37,11 @@ def find_files(directory, pattern):
 
 
 if __name__ == '__main__':
+    """
+    This script find all the files in a folder, tries to open them as audio files,
+    reduces a bit the audio level to prevent clipping and ads a humming tone at 50 Hz
+    """
+
     in_folder = '/home/pablo/data/sns-small/samples'
     out_folder = '/home/pablo/reps/essentia/test/QA-audio/Hum/Songs50HzHum'
     fs = 44100.
@@ -34,7 +53,7 @@ if __name__ == '__main__':
         try:
             audio = es.MonoLoader(filename=f, sampleRate=fs)()
         except Exception:
-            print '{} was not loaded'.format(f)
+            print('{} was not loaded'.format(f))
             continue
 
         fs = 44100.

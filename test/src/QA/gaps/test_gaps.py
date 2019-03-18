@@ -17,15 +17,19 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
+import sys
 
-from qa_test import *
-from qa_testevents import QaTestEvents
 import numpy as np
-from librosa.effects import trim
+
 import essentia.standard as es
 from essentia import array as esarray
 from essentia import instantPower
 from essentia import array as esarr
+
+sys.path.insert(0, './')
+from qa_test import *
+from qa_testevents import QaTestEvents
+
 
 # parameters
 frame_size = 2048
@@ -193,11 +197,11 @@ if __name__ == '__main__':
     precision = []
     recall = []
     f_measure = []
-    for i in qa.scores.itervalues():
+    for i in qa.scores.values():
         precision.append(i['Precision'])
         recall.append(i['Recall'])
         f_measure.append(i['F-measure'])
 
-    print 'Mean Precision: {}'.format(np.mean(precision))
-    print 'Mean Recall: {}'.format(np.mean(recall))
-    print 'Mean F-measure: {}'.format(np.mean(f_measure))
+    print('Mean Precision: {}'.format(np.mean(precision)))
+    print('Mean Recall: {}'.format(np.mean(recall)))
+    print('Mean F-measure: {}'.format(np.mean(f_measure)))

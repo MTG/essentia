@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -18,13 +18,17 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-from qa_test import *
-from qa_testevents import QaTestEvents
+import sys
+
 import numpy as np
-from librosa.effects import trim
+
 import essentia.standard as es
 from essentia import array as esarr
-from scipy.signal import medfilt
+
+sys.path.insert(0, './')
+from qa_test import *
+from qa_testevents import QaTestEvents
+
 
 # parameters
 sampleRate = 44100.
@@ -61,18 +65,20 @@ class DevWrap(QaWrapper):
     Development Solution.
     """
     previousRegion = None
-    
+
     def compute(self, *args):
         x = args[1]
         y = []
         idx = 0
-        for frame in es.FrameGenerator(x, frameSize=frameSize, hopSize=hopSize, startFromZero=True):
+        for frame in es.FrameGenerator(x, frameSize=frameSize,
+                                       hopSize=hopSize, 
+                                       startFromZero=True):
             frame = np.abs(frame)
             starts = []
             ends = []
 
-            s = int(frameSize / 2 - hopSize / 2) - 1  # consider non overlapping case
-            e = int(frameSize / 2 + hopSize / 2)
+            s = int(frameSize // 2 - hopSize // 2) - 1  # consider non overlapping case
+            e = int(frameSize // 2 + hopSize // 2)
 
             delta = np.diff(frame)
             delta = np.insert(delta, 0, 0)
@@ -104,8 +110,9 @@ class DevWrap(QaWrapper):
 
             if len(dFlanks) is not len(uFlanks):
                 raise EssentiaException(
-                    "Ath this point uFlanks ({}) and dFlanks ({}) are expected to have the same length!".format(len(dFlanks),
-                                                                                                            len(uFlanks)))
+                    "Ath this point uFlanks ({}) and dFlanks ({}) "
+                    "are expected to have the same length!".format(len(dFlanks),
+                                                                   len(uFlanks)))
 
             for idx in range(len(uFlanks)):
                 start = float(idx * hopSize + uFlanks[idx] + s) / sampleRate
@@ -123,11 +130,11 @@ class DevWrap(QaWrapper):
 
 
 if __name__ == '__main__':
-    folder = 'SaturationDetector'
+    folder = 'saturationdetector'
 
     # Instantiating wrappers
     wrappers = [
-        # DevWrap('events'),
+        DevWrap('events'),
         EssentiaWrap('events'),
     ]
 
@@ -139,18 +146,17 @@ if __name__ == '__main__':
 
     data_dir = '../../audio/recorded/distorted.wav'
 
-    qa.load_audio(filename=data_dir)  # Works for a single
+    qa.load_audio(filename=data_dir)  # works for a single
 
     qa.load_solution(data_dir, ground_true=True)
 
-    # Compute and the results, the scores and and compare the computation times
+    # Compute and the results, the scores and and compare the computation times.
 
     qa.compute_all(output_file='{}/compute.log'.format(folder))
 
-    # todo Generate Ground truth to test this
+    # TODO Generate Ground truth to test this.
 
-    for sol, val in qa.solutions.iteritems():
-        print '{}'.format(sol)
-
+    for sol, val in qa.solutions.items():
+        print('{}'.format(sol))
         for v in val:
-            print '{:.3f}'.format(v)
+            print('{:.3f}'.format(v))

@@ -18,22 +18,15 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
+import os
+import numpy as np
+
 from essentia import *
 from essentia.utils import *
 from essentia.standard import *
 from essentia import array as esarr
-import numpy as np
-import os
 
 EssentiaException = RuntimeError
-
-
-def find_files(directory, pattern):
-    for root, dirs, files in os.walk(directory):
-        for basename in files:
-            if basename.lower().endswith(pattern):
-                filename = os.path.join(root, basename)
-                yield filename
 
 
 test_types = [
@@ -44,7 +37,15 @@ test_types = [
     'semantic',  # high level descriptor (e.g, key)
 ]
 
-default_audio_types = ('wav', 'mp3', 'flac', 'ogg')  # To be extended
+default_audio_types = ('wav', 'mp3', 'flac', 'ogg')  # To be extended.
+
+
+def find_files(directory, pattern):
+    for root, dirs, files in os.walk(directory):
+        for basename in files:
+            if basename.lower().endswith(pattern):
+                filename = os.path.join(root, basename)
+                yield filename
 
 
 class QaTest:
@@ -58,15 +59,14 @@ class QaTest:
     times = dict()
     scores = dict()
 
-    fs = 44100.  # global fs for the test
-    test_type = ''  # todo: restrict the possible values
+    fs = 44100.  # Global fs for the test.
+    test_type = ''  # TODO: Restrict the possible values.
     time_wrappers = True
     verbose = True
     log = True
 
     def __init__(self, test_type='values', wrappers=[], metrics=[], time_wrappers=True, verbose=False, log=True):
         """
-
         :param test_type: {value, values, events, hybrid, bool}
         :param wrappers: list of QaWrapper objects to provide solutions
         :param metrics: list of QaMetric objects to assess the solutions
@@ -84,22 +84,19 @@ class QaTest:
         self.assert_test_type(test_type)
         self.test_type = test_type
         if self.verbose:
-            print 'test_type is ok'
+            print('test_type is ok')
 
     def set_wrappers(self, wrappers):
         self.assert_wrappers(wrappers)
         for wrapper in wrappers:
             self.wrappers[wrapper.__class__.__name__] = wrapper
         if self.verbose:
-            print 'Wrappers seem ok'
+            print('Wrappers seem ok')
 
     def load_audio(self, filename, pattern=default_audio_types, stereo=False):
         """
         Uses Essentia MonoLoader to load the audio data. If filename is a folder it will look for all the `.extension` \
         files in the folder.
-        :param filename:
-        :param pattern:
-        :return:
         """
         if not os.path.isfile(filename):
             files = [x for x in find_files(filename, pattern)]
@@ -113,14 +110,17 @@ class QaTest:
                 if stereo:
                     audio, fs, _, _, _, _ = AudioLoader(filename=f)()
                     if np.abs(fs - self.fs) > 1e-3:
-                        audio = Resample(inputSampleRate=fs, outputSampleRate=self.fs)(audio)
+                        resampler = Resample(inputSampleRate=fs, outputSampleRate=self.fs)
+                        l = resampler(audio[:,0])
+                        r = resampler(audio[:,1])
+                        audio = np.vstack([l, r])
                     self.data[name] = audio
                 else:
                     self.data[name] = MonoLoader(filename=f, sampleRate=self.fs)()
                 self.routes[name] = f
         except IOError:
             if self.verbose:
-                print 'cannot open {}'.format(f)  # todo improve exception handling
+                print('cannot open {}'.format(f))  # TODO improve exception handling.
         # else:
         #    raise EssentiaException
 
@@ -131,7 +131,7 @@ class QaTest:
         for metric in metrics:
             self.metrics[metric.__class__.__name__] = metric
         if self.verbose:
-            print 'metrics seem ok'
+            print('Metrics seem ok.')
 
     def add_metrics(self, metrics):
         if not type(metrics) == list:
@@ -139,7 +139,7 @@ class QaTest:
         self.assert_metrics(metrics)
         self.metrics.add(metrics)
         if self.verbose:
-            print 'metrics seem ok'
+            print('Metrics seem ok.')
 
     def load_solution(self, filename, name='', ground_true=False):
         if not os.path.isfile(filename):
@@ -166,7 +166,7 @@ class QaTest:
                     points = parsers[ext](f)
                 except KeyError:
                     if self.verbose:
-                        print ("ERROR: {} not loaded. \n"
+                        print("ERROR: {} not loaded. \n"
                                "'{}' extension is not supported yet. Try with one of the supperted formats {}"
                                .format(f, ext, parsers.keys()))
                     continue
@@ -181,28 +181,28 @@ class QaTest:
                 continue
 
     def load_svl(self):
-        print 'This menthod is not implemeted in this class. Override it'
+        print('This menthod is not implemeted in this class. Override it')
         return  # How should a general implementation be?
 
     def load_lab(self):
-        print 'This menthod is not implemeted in this class. Override it'
+        print('This menthod is not implemeted in this class. Override it')
         return  # How should a general implementation be?
 
     def compute(self, key_wrap, wrapper, key_inst, instance):
         if self.verbose:
-            print "Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap)
+            print("Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap))
         self.solutions[key_wrap, key_inst] = wrapper.compute(self, instance, key_inst, key_wrap)
 
     def compute_and_time(self, key_wrap, wrapper, key_inst, instance):
         if self.verbose:
-            print "Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap)
+            print("Computing file '{}' with the wrapper '{}'...".format(key_inst, key_wrap))
         solution, time = wrapper.compute_and_time(self, instance, key_inst, key_wrap)
         self.solutions[key_wrap, key_inst] = solution
         self.times[key_wrap, key_inst] = time
 
     def compute_all(self, output_file='compute.log'):
-        for key_wrap, wrapper in self.wrappers.iteritems():
-            for key_inst, instance in self.data.iteritems():
+        for key_wrap, wrapper in self.wrappers.items():
+            for key_inst, instance in self.data.items():
                 if self.time_wrappers:
                     self.compute_and_time(key_wrap, wrapper, key_inst, instance)
                 else:
@@ -228,8 +228,8 @@ class QaTest:
                 self.compare_elapsed_times(output_file=output_file, mode='a')
 
     def compare_elapsed_times(self, output_file='stats.log', mode='a'):
-        w_names = self.wrappers.keys()
-        i_names = self.data.keys()
+        w_names = list(self.wrappers.keys())
+        i_names = list(self.data.keys())
 
         arrs = np.array([np.array([self.times[w, i] for i in i_names]) for w in w_names])
         means = np.mean(arrs, 1)
@@ -249,42 +249,42 @@ class QaTest:
         text.append('')
 
         if self.verbose:
-            print '\n'.join(text)
+            print('\n'.join(text))
 
         with open(output_file, mode) as o_file:
             o_file.write('\n'.join(text))
 
     def score(self, key_wrap, key_inst, solution, key_metric, metric, gt):
         if self.verbose:
-            print "Scoring file '{}' computed with the wrapper '{}' using metric '{}'..." \
-                .format(key_inst, key_wrap, key_metric)
+            print("Scoring file '{}' computed with the wrapper '{}' using metric '{}'..."
+                  .format(key_inst, key_wrap, key_metric))
         self.scores[key_wrap, key_inst, key_metric] = metric.score(gt, solution)
 
     def score_all(self):
         gt_flags = []
         gt_name = ''
-        for key_wrap, wrapper in self.wrappers.iteritems():
+        for key_wrap, wrapper in self.wrappers.items():
             gt_flags.append(wrapper.ground_true)
             if wrapper.ground_true:
                 gt_name = wrapper.name
 
         if not bool(self.ground_true):
 
-            #  assert only one GT
+            #  Assert only one GT.
             if sum(gt_flags) > 1:
-                raise EssentiaException("Only one wrapper can be set as ground true")
+                raise EssentiaException("Only one wrapper can be set as ground true.")
             if sum(gt_flags) == 0:
-                raise EssentiaException("No wrapper is set as ground true")
+                raise EssentiaException("No wrapper is set as ground true.")
         else:
             if sum(gt_flags) != 0:
                 if self.verbose:
-                    print("warning: When ground truth is set externally the ground truth wrapper would be ignored")
+                    print("warning: When ground truth is set externally the ground truth wrapper would be ignored.")
 
-        for key_sol, solution in self.solutions.iteritems():
+        for key_sol, solution in self.solutions.items():
             key_wrap, key_inst = key_sol
             gt = self.ground_true.get(key_inst, None)
             if gt is not None:
-                for key_metric, metric in self.metrics.iteritems():
+                for key_metric, metric in self.metrics.items():
                     self.score(key_wrap, key_inst, solution, key_metric, metric, gt)
                 continue
 
@@ -295,7 +295,7 @@ class QaTest:
                         self.score(key_wrap, key_inst, solution, key_metric, metric, gt)
                     continue
             if self.verbose:
-                print "{} was not scored because there is not ground truth available".format(key_inst)
+                print("{} was not scored because there is not ground truth available.".format(key_inst))
 
     def save_test(self, output_file):
         import pickle
@@ -306,7 +306,7 @@ class QaTest:
         if name in self.wrappers:
             del self.wrappers[name]
         else:
-            print 'No wrapper named {} found'.format(name)
+            print('No wrapper named {} found.'.format(name))
 
     def clear_wrappers(self):
         self.wrappers.clear()
@@ -315,7 +315,7 @@ class QaTest:
         if name in self.solutions:
             del self.solutions[name]
         else:
-            print 'No solution named {} found'.format(name)
+            print('No solution named {} found.'.format(name))
 
     def clear_solutions(self, wrapper=''):
         if wrapper is '':
@@ -326,13 +326,13 @@ class QaTest:
                 for name in names:
                     self.remove_solution(name)
             else:
-                print 'No wrapper named {} found'.format(wrapper)
+                print('No wrapper named {} found.'.format(wrapper))
 
     def remove_scores(self, name):
         if name in self.scores:
             del self.solutions[name]
         else:
-            print 'No score named {} found'.format(name)
+            print('No score named {} found.'.format(name))
 
     def clear_scores(self, wrapper='', metric=''):
         if wrapper is '' and metric is '':
@@ -359,22 +359,22 @@ class QaTest:
         types = set()
         for wrapper in wrappers:
             if not isinstance(wrapper, QaWrapper):
-                raise EssentiaException('Input should be wrappers')
+                raise EssentiaException('Input should be wrappers.')
             types.add(wrapper.test_type)
         if len(types) > 1:
-            raise EssentiaException("Wrappers type don't match")
+            raise EssentiaException("Wrappers type don't match.")
 
     @staticmethod
     def assert_test_type(test_type):
         if test_type.lower() not in test_types:
-            raise EssentiaException("'{}' is not supported among the test types ({})"
+            raise EssentiaException("'{}' is not supported among the test types ({})."
                                     .format(test_type, test_types))
 
     @staticmethod
     def assert_metrics(metrics):
         for metric in metrics:
             if not isinstance(metric, QaMetric):
-                raise EssentiaException('Metrics should be wrapped in a QaMetric object')
+                raise EssentiaException('Metrics should be wrapped in a QaMetric object.')
 
     @staticmethod
     def filter(tuples, pos, patt):

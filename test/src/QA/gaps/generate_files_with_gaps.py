@@ -1,16 +1,28 @@
-#!/usr/local/bin/python
-# -*- coding: utf-8 -*-
+#!/usr/bin/env python
 
-# Created by pablo on 2/02/18
+# Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
+#
+# This file is part of Essentia
+#
+# Essentia is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Affero General Public License as published by the Free
+# Software Foundation (FSF), either version 3 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the Affero GNU General Public License
+# version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-"""
-This script find all the files in a folder, tries to open them as audio files,
-set some samples to 0 in order to generate a gap and ens and saves them in a desired folder
-"""
+import sys
+import os
 
 import numpy as np
-import os
 import essentia.standard as es
+
 from essentia import array as esarr
 
 
@@ -34,18 +46,18 @@ if __name__ == '__main__':
         try:
             audio = es.MonoLoader(filename=f, sampleRate=fs)()
         except Exception:
-            print '{} was not loaded'.format(f)
+            print('{} was not loaded'.format(f))
             continue
 
         original_len = len(audio)
 
-        start_jump = original_len/4
+        start_jump = original_len // 4
 
         end_jump = start_jump + int(np.abs(np.random.randn()) * fs)
 
         audio[start_jump:end_jump] = np.zeros(end_jump - start_jump)
 
-        text = ['{}\t{}\tevent\n'.format(start_jump/float(fs), end_jump/float(fs))]
+        text = ['{}\t{}\tevent\n'.format(start_jump / float(fs), end_jump / float(fs))]
 
         if not os.path.exists(out_folder):
             os.mkdir(out_folder)

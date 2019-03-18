@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -18,11 +18,15 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-from qa_test import *
-from qa_testvalues import QaTestValues
+import sys
+
 import essentia.standard as es
 
 import pyloudness
+
+sys.path.insert(0, './')
+from qa_test import *
+from qa_testvalues import QaTestValues
 
 
 class EssentiaWrap(QaWrapper):
@@ -73,15 +77,8 @@ if __name__ == '__main__':
     qa.set_wrappers(wrappers)
 
     # Add the testing files
-    data_dir = '../../../../../../pablo/Music/Desakato-La_Teoria_del_Fuego/'
-    # data_dir = '../../audio/recorded'
-    # qa.load_audio(filename='../../QA-audio/Jumps/prominent_jumps')  # Works for a single
-    # qa.load_audio(filename='../../../../../data/Dead_Combo_-_01_-_Povo_Que_Cas_Descalo_silence.wav')  # Works for a single
-    #  qa.load_audio(filename='../../QA-audio/Jumps/loud_songs/')  # Works for a single
-
-    qa.load_audio(filename=data_dir, stereo=True)  # Works for a single
-
-    # qa.load_solution(data_dir, ground_true=True)
+    qa.load_audio(filename='../../audio/recorded/',
+                  stereo=True)  # Works for a single
 
     # Compute and the results, the scores and and compare the computation times
 

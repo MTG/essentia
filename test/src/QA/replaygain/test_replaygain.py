@@ -18,11 +18,14 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-from qa_test import *
-from qa_testvalues import QaTestValues
+import sys
+import subprocess
+
 import essentia.standard as es
 
-import subprocess
+sys.path.insert(0, './')
+from qa_test import *
+from qa_testvalues import QaTestValues
 
 
 class EssentiaWrap(QaWrapper):
@@ -50,7 +53,10 @@ class RGain(QaWrapper):
         command = ['replaygain', '-f', '-d', '-r 83', args[0].routes[key]]
         output = subprocess.check_output(command, stderr=subprocess.STDOUT,
                                          universal_newlines=True)
-        y = float(output.split('\n')[1].split(' ')[-2])
+        if output.endswith('Nothing to do.'):
+            y = float(output.split('\n')[1].split(' ')[-2])
+        else:
+            return esarr(np.nan)
 
         return esarr(y)
 
@@ -71,7 +77,7 @@ class bs1770gain(QaWrapper):
 
 
 if __name__ == '__main__':
-    folder = 'ReplayGain'
+    folder = 'replaygain'
 
     # We are using 1 digit only to fit the format of PyloudnessWrap
     np.set_printoptions(precision=1)
@@ -90,13 +96,9 @@ if __name__ == '__main__':
     qa.set_wrappers(wrappers)
 
     # Add the testing files
-    data_dir = '../../../../../../pablo/Music/Desakato-La_Teoria_del_Fuego/'
+    data_dir = '../../audio/recorded'
 
     qa.load_audio(filename=data_dir, stereo=False)  # Works for a single
 
     # Compute and the results, the scores and and compare the computation times
     qa.compute_all(output_file='{}/compute.log'.format(folder))
-
-    qa.score_all()
-
-    qa.save_test('{}/test'.format(folder))

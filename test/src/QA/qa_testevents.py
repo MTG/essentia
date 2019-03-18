@@ -1,7 +1,23 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-# Created by pablo on 31/01/18
+# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
+#
+# This file is part of Essentia
+#
+# Essentia is free software: you can redistribute it and/or modify it under
+# the terms of the GNU Affero General Public License as published by the Free
+# Software Foundation (FSF), either version 3 of the License, or (at your
+# option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but WITHOUT
+# ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+# details.
+#
+# You should have received a copy of the Affero GNU General Public License
+# version 3 along with this program. If not, see http://www.gnu.org/licenses/
+
 
 """
 Class for event tests. Here the methods can be overrided to fit the event case demands
@@ -13,14 +29,14 @@ from qa_test import *
 
 class QaTestEvents(QaTest):
     def __init__(self, *args, **kwargs):
-        # use QaTest constructor with hardcoded `test_type`
+        # Use QaTest constructor with hardcoded `test_type`.
         if len(args) > 1:
             args = args[1:]
         kwargs.pop('test_type', None)
 
         QaTest.__init__(self, 'events', *args, **kwargs)
 
-        # add mir_eval metrics by default when available
+        # Add mir_eval metrics by default when available.
         self.add_mir_eval()
 
     def load_svl(self, filename):
@@ -47,7 +63,8 @@ class QaTestEvents(QaTest):
 
             class MirEval(QaMetric):
                 """
-                mir_eval metrics wrapper. More information in https://craffel.github.io/mir_eval/#module-mir_eval.onset
+                mir_eval metrics wrapper. More information in
+                https://craffel.github.io/mir_eval/#module-mir_eval.onset
                 """
                 def score(self, reference, estimated):
                     scores = me.onset.evaluate(reference, estimated)
@@ -55,8 +72,8 @@ class QaTestEvents(QaTest):
 
             self.set_metrics(MirEval())
         except ImportError:
-            print 'Not using mir_eval metrics because the package was not found'
-            pass  # module doesn't exist, deal with it.
+            print('Not using mir_eval metrics because the package was not found')
+            pass  # Module doesn't exist, deal with it.
         pass
 
     def plot(self, name, plots_dir='plots', force=False):
@@ -73,7 +90,7 @@ class QaTestEvents(QaTest):
             import matplotlib.pyplot as plt
 
         except ImportError:
-            print 'Not plotting because matplotlib was not found'
+            print('Not plotting because matplotlib was not found')
             return
 
         def r():
@@ -90,7 +107,7 @@ class QaTestEvents(QaTest):
             for x in self.ground_true[name][1:]:
                 plt.axvline(x=x, color='green', alpha=0.7)
 
-        for key_sol, solution in self.solutions.iteritems():
+        for key_sol, solution in self.solutions.items():
             if not key_sol[1] == name:
                 continue
 
@@ -99,7 +116,6 @@ class QaTestEvents(QaTest):
             for x in solution[1:]:
                 plt.axvline(x=x, color=color, alpha=0.7)
 
-        #  plt.autoscale(enable=True, axis='x', tight=True)
         plt.legend()
 
         plt.savefig(plot_name)
@@ -109,7 +125,6 @@ class QaTestEvents(QaTest):
             self.plot(name, *args, **kwargs)
 
     def generate_stats(self, output_file='stats.log'):
-
         text = []
 
         wrappers = self.wrappers.keys()

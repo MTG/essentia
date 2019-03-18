@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2018  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -18,13 +18,16 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
+import sys
+
+import essentia.standard as es
+from essentia import db2pow
+from essentia import instantPower
+
+sys.path.insert(0, './')
 from qa_test import *
 from qa_testevents import QaTestEvents
-import essentia.standard as es
 
-import matplotlib.pyplot as plt
-from essentia import instantPower
-from essentia import db2pow
 
 frameSize = 512
 hopSize = 256
@@ -39,7 +42,8 @@ class EssentiaWrap(QaWrapper):
     def compute(self, *args):
         y = []
         self.algo.reset()
-        for frame in es.FrameGenerator(args[1], frameSize=frameSize, hopSize=hopSize,
+        for frame in es.FrameGenerator(args[1], frameSize=frameSize,
+                                       hopSize=hopSize,
                                        startFromZero=True):
             starts, ends = self.algo(frame)
             if len(starts) > 0:
@@ -67,7 +71,9 @@ class Dev(QaWrapper):
         end_proc = int(frameSize / 2 + hopSize / 2)
 
         y = []
-        for frame in es.FrameGenerator(x, frameSize=frameSize, hopSize=hopSize, startFromZero=True):
+        for frame in es.FrameGenerator(x, frameSize=frameSize, 
+                                       hopSize=hopSize,
+                                       startFromZero=True):
             if instantPower(frame) < silenceThreshold:
                 idx_ += 1
                 continue
@@ -135,7 +141,7 @@ class Dev(QaWrapper):
 
 
 if __name__ == '__main__':
-    folder = 'ClickDetector'
+    folder = 'clickdetector'
 
     # Instantiating wrappers
     wrappers = [
@@ -164,15 +170,15 @@ if __name__ == '__main__':
     def getdB(filename):
         return float(filename.split('_')[-1][:-2])
 
-    for sol, val in qa.solutions.iteritems():
+    for sol, val in qa.solutions.items():
         amplification = getdB(sol[1])
         if amplification > lim:
             if np.abs(val[0] - location) < .1:
-                print '{}: {}'.format(sol, 'ok!')
+                print('{}: {}'.format(sol, 'ok!'))
             else:
-                print '{}: {}'.format(sol, 'failed')
+                print('{}: {}'.format(sol, 'failed'))
         else:
             if len(val) == 0:
-                print '{}: {}'.format(sol, 'ok!')
+                print('{}: {}'.format(sol, 'ok!'))
             else:
-                print '{}: {}'.format(sol, 'failed')
+                print('{}: {}'.format(sol, 'failed'))
