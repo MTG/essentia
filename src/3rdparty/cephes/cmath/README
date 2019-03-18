@@ -1,9 +1,0 @@
-
-This suite of C language elementary functions offers support for
-not-a-number (NaN) and infinity rules, subnormal numbers, and minus
-zero as described by IEEE standard 754 and the Numerical C Extensions
-Group (NCEG).  For a variety of reasons, many computers cannot take
-advantage of these features.  You can disable any or all of them by
-removing the corresponding preprocessor macros.  Check the files
-mconf.h and const.c carefully to be sure they are appropriate for your
-system.
