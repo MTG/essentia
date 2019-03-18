@@ -37,6 +37,7 @@
 #include "types.h"
 #include "utils/tnt/tnt.h"
 #include "utils/tnt/tnt2essentiautils.h"
+#include "../3rdparty/cephes/bessel/bessel.h"
 
 #define M_2PI (2 * M_PI)
 
@@ -691,6 +692,20 @@ template <typename T> void normalize(std::vector<T>& array) {
   }
 }
 
+// normalize to the max(abs(array))
+template <typename T> void normalizeAbs(std::vector<T>& array) {
+  if (array.empty()) return;
+  std::vector<T> absArray = array;
+  rectify(absArray);
+  T maxElement = *std::max_element(absArray.begin(), absArray.end());
+
+  if (maxElement != (T) 0.0) {
+    for (uint i=0; i<array.size(); i++) {
+      array[i] /= maxElement;
+    }
+  }
+}
+
 // normalize a vector so it's sum is equal to 1. the vector is not touched if
 // it contains negative elements or the sum is zero
 template <typename T> void normalizeSum(std::vector<T>& array) {
@@ -952,6 +967,61 @@ inline std::string equivalentKey(const std::string key) {
     return "B";
 
   return "";
+
+template <typename T>
+T iv(T v, T z) {
+    return (T)cephes_iv((double)v, (double)z);
+}
+
+/**
+ * Sample covariance
+ */
+template <typename T> T covariance(const std::vector<T>& x, const T xMean, const std::vector<T>& y, const T yMean) {
+  if (x.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (y.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (x.size() != y.size())
+    throw EssentiaException("x and y should have the same size");
+
+  T cov = (T) 0.0;
+
+  for (uint i=0; i<x.size(); i++) {
+    cov += (x[i] - xMean) * (y[i] - yMean);
+  }
+
+  return (T)(cov / (Real)x.size());
+}
+
+/**
+ * Returns the sample Pearson correlation coefficient of a pair of vectors as described in,
+ * https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
+ */
+template <typename T> T pearsonCorrelationCoefficient(const std::vector<T>& x, const std::vector<T>& y) {
+  if (x.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (y.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (x.size() != y.size())
+    throw EssentiaException("x and y should have the same size");
+
+  T xMean = mean(x);
+  T yMean = mean(y);
+  
+  T cov = covariance(x, xMean, y, yMean);
+
+  T xStddev = stddev(x, xMean);
+  T yStddev = stddev(y, yMean);
+
+  // When dealing with constants corraltion is 0 by convention. 
+  if ((xStddev == (T)0.0) || (xStddev == (T)0.0) || (xStddev == (T)0.0)) return (T) 0.0;
+  
+  T corr = cov / (xStddev * yStddev);
+
+  // Numerical error can yield results slightly outside the analytical range [-1, 1].
+  // Clipping the output is a cheap way to mantain this contrain.
+  // Seen in https://github.com/numpy/numpy/blob/v1.15.0/numpy/lib/function_base.py#L2403-L2406
+  return std::max(std::min(corr, (T)1.0), (T)-1.0);
 }
 
 } // namespace essentia
