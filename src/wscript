@@ -463,6 +463,12 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
 	"""
 
+    if 'BesselFunction' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/cephes/bessel/' ]
+        sources += ctx.path.ant_glob('3rdparty/cephes/bessel/*.cpp') 
+    else:
+        print ('Building without 3rdparty Cephes library code because BesselFunction algorithm is ignored')
+
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
             source   = sources,
