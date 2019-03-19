@@ -31,20 +31,16 @@ class CrossSimilarityMatrix : public Algorithm {
    Output<std::vector<std::vector<Real> > > _csm;
   public:
    CrossSimilarityMatrix() {
-    declareInput(_queryFeature, "queryFeature", "input chromagram of the query song");
-    declareInput(_referenceFeature, "referenceFeature", "input chromagram of the reference song");
-    declareOutput(_csm, "csm", "2D binary cross-similarity matrix of the query and reference features");
+    declareInput(_queryFeature, "queryFeature", "input frame features of the query song (e.g., a chromagram)");
+    declareInput(_referenceFeature, "referenceFeature", "input frame features of the reference song (e.g., a chromagram)");
+    declareOutput(_csm, "csm", "2D euclidean cross-similarity matrix of two input audio feature arrays");
    }
 
    void declareParameters() {
-    declareParameter("tau", "time delay for embedding in units of number of windows", "[1,inf)", 1);
-    declareParameter("embedDimension", "embedding dimension for the stacked feature embedding. Choose 'embedDimension=1' to use raw input feature vector for the similarity calculation.", "[0,inf)", 9);
-    declareParameter("kappa", "fraction of mutual nearest neighbours to consider while computing euclidean distances", "[0,1]", 0.095);
-    declareParameter("oti", "whether to transpose the key of the reference song to the query song by (OTI)", "{true,false}", true);
-    declareParameter("toBlocked", "whether to use stacked chroma vector embedding for computing similarity", "{true,false}", true);
-    declareParameter("noti", "Number of circular shifts to be checked for optimal transposition index", "[0, inf)", 12);
-    declareParameter("otiBinary", "whether to use the OTI-based chroma binary similarity method", "{true,false}", false);
-    declareParameter("optimiseThreshold", "whether to use the optimised threhold method in the similarity computation", "{true,false}", false);
+    declareParameter("frameStackStride", "stride size to form a stack of frames (e.g., 'frameStackStride'=1 to use consecutive frames; 'frameStackStride'=2 for using every second frame)", "[1,inf)", 1);
+    declareParameter("frameStackSize", "number of input frames to stack together and treat as a feature vector for similarity computation. Choose 'frameStackSize=1' to use the original input frames without stacking", "[0,inf)", 1);
+    declareParameter("kappa", "fraction of mutual nearest neighbours to consider while computing binary similary matrix from euclidean distances", "[0,1]", 0.095);
+    declareParameter("toBinary", "whether to binarize the euclidean similarity matrix", "{true,false}", true);
   }
 
    void configure();
@@ -55,74 +51,13 @@ class CrossSimilarityMatrix : public Algorithm {
    static const char* description;
 
   protected:
-   int _tau;
-   int _embedDimension;
+   int _frameStackStride;
+   int _frameStackSize;
    Real _kappa;
-   int _noti;
-   bool _oti;
-   bool _toBlocked;
-   bool _otiBinary;
-   bool _optimiseThreshold;
-   Real _mathcCoef;
-   Real _mismatchCoef;
-
+   bool _toBinary;
+   std::vector<std::vector<Real> > stackFrames(std::vector<std::vector<Real> >& frames, int frameStackSize, int frameStackStride) const;
 };
 
 } // namespace standard
-} // namespace essentia
-
-#include "streamingalgorithm.h"
-
-namespace essentia {
-namespace streaming {
-
-class CrossSimilarityMatrix : public Algorithm {
- protected:
-  Sink<std::vector<Real> > _queryFeature;
-  Source<TNT::Array2D<Real> > _csm;
-
-  // params variables
-  int _tau;
-  int _embedDimension;
-  Real _kappa;
-  int _noti;
-  bool _oti;
-  bool _otiBinary;
-  Real _mathcCoef;
-  Real _mismatchCoef;
-  Real _minFramesSize;
-  std::vector<std::vector<Real> > _referenceFeature;
-  std::vector<std::vector<Real> > _referenceTimeEmbed;
-  // std::vector<std::vector<Real> > streamingFrames2TimeEmbedding(std::vector<std::vector<Real> > inputFrames, int m, int tau);
-  
- public:
-  CrossSimilarityMatrix() : Algorithm() {
-    declareInput(_queryFeature, 10, "queryFeature", "input chromagram of the query song");
-    declareOutput(_csm, 1, "csm", "2D binary cross-similarity matrix of the query and reference features");
-  }
-
-  ~CrossSimilarityMatrix() {}
-
-  AlgorithmStatus process();
-
-  void declareParameters() {
-    declareParameter("referenceFeature", "input chromagram of the reference song", "", std::vector<std::vector<Real> >());
-    declareParameter("tau", "time delay for embedding in units of number of windows", "[1,inf)", 1);
-    declareParameter("embedDimension", "embedding dimension for the stacked feature embedding. Choose embedDimension=1 to use raw input feature vector for the similarity calculation.", "[0,inf)", 9);
-    declareParameter("kappa", "fraction of mutual nearest neighbours to consider while computing euclidean distances", "[0,1]", 0.095);
-    declareParameter("oti", "optimal transposition index of the query and reference song", "[0, inf]", 0);
-    declareParameter("noti", "Number of circular shifts to be checked for optimal transposition index", "[0, inf)", 12);
-    declareParameter("otiBinary", "whether to use the OTI-based chroma binary similarity method", "{true,false}", false);
-  }
-
-  void configure();
-
-  static const char* name;
-  static const char* category;
-  static const char* description;
-
-};
-
-} // namespace streaming
 } // namespace essentia
  #endif // ESSENTIA_CROSSSIMILARITYMATRIX_H
