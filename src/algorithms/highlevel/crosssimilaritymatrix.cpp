@@ -94,32 +94,32 @@ void CrossSimilarityMatrix::compute() {
   // check whether to binarize the euclidean cross-similarity matrix using the given thresholds 
   if (_toBinary == true) {
     std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
-    size_t xRows = pdistances.size();
-    size_t xCols = pdistances[0].size();
-    size_t yRows = tpDistances.size();
-    size_t yCols = tpDistances[0].size();
+    size_t queryRows = pdistances.size();
+    size_t queryCols = pdistances[0].size();
+    size_t referenceRows = tpDistances.size();
+    size_t referenceCols = tpDistances[0].size();
 
     std::vector<std::vector<Real> > similarityX;
-    similarityX.assign(xRows, std::vector<Real>(xCols));
+    similarityX.assign(queryRows, std::vector<Real>(queryCols));
     // construct thresholded similarity matrix on axis X
-    for (size_t k=0; k<xRows; k++) {
-      for (size_t l=0; l<xCols; l++) {
+    for (size_t k=0; k<queryRows; k++) {
+      for (size_t l=0; l<queryCols; l++) {
         similarityX[k][l] = percentile(pdistances[k], _kappa*100) - pdistances[k][l];
       }
     }
     // binarise the array with heavisideStepFunction
     heavisideStepFunction(similarityX);
-    std::vector<std::vector<Real> > similarityY(yRows, std::vector<Real>(yCols));
+    std::vector<std::vector<Real> > similarityY(referenceRows, std::vector<Real>(referenceCols));
     // construct thresholded similarity matrix on axis Y
-    for (size_t u=0; u<yRows; u++) {
-      for (size_t v=0; v<yCols; v++) {
+    for (size_t u=0; u<referenceRows; u++) {
+      for (size_t v=0; v<referenceCols; v++) {
         similarityY[u][v] = percentile(tpDistances[u], _kappa*100) - tpDistances[u][v];
       }
     }
     // here we binarise and transpose the similarityY array same time in order to avoid redundant looping
-    std::vector<std::vector<Real> > tSimilarityY(yCols, std::vector<Real>(yRows));
-    for (size_t i=0; i<yRows; i++) {
-      for (size_t j=0; j<yCols; j++) {
+    std::vector<std::vector<Real> > tSimilarityY(referenceCols, std::vector<Real>(referenceRows));
+    for (size_t i=0; i<referenceRows; i++) {
+      for (size_t j=0; j<referenceCols; j++) {
         if (similarityY[i][j] < 0) {
           tSimilarityY[j][i] = 0;
         }
