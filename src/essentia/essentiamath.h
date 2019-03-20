@@ -272,6 +272,24 @@ std::vector<T> varianceFrames(const std::vector<std::vector<T> >& frames) {
 }
 
 
+// returns the sum of frames 
+template <typename T>
+std::vector<T> sumFrames(const std::vector<std::vector<T> >& frames) {
+  if (frames.empty()) {
+    throw EssentiaException("sumFrames: trying to calculate sum of empty input frames");
+  }
+  size_t nframes = frames.size();
+  size_t vsize = frames[0].size();
+  std::vector<T> result(vsize, (T)0);
+  for (size_t j=0; j<vsize; j++) {
+    for (size_t i=0; i<nframes; i++) {
+      result[j] += frames[i][j];
+    }
+  }
+  return result;
+}
+
+
 template <typename T>
 std::vector<T> skewnessFrames(const std::vector<std::vector<T> >& frames) {
   if (frames.empty()) {
@@ -883,17 +901,28 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
 }
 
 
+/** Circularly rotate an input chromagram by an specified optimal transposition index (oti).
+ * Expects input chromagram to be in the shape (frames , n_bins) where frames is no of frames and n_bins is no of chroma bins.
+ * Throws an exception if the input chromagram is empty.
+ */
+template <typename T>
+void rotateChroma(std::vector<std::vector<T> >& inputMatrix, int oti) {
+  if (inputMatrix.empty())
+    throw EssentiaException("rotateChroma: trying to rotate an empty matrix");
+  for (size_t i=0; i<inputMatrix.size(); i++) {
+    std::rotate(inputMatrix[i].begin(), inputMatrix[i].end() - oti, inputMatrix[i].end());
+  }
+}
+
+
 /**
  * returns the dot product of two 1D vectors.
- * Throws an exception either one of the input arrays is empty.
+ * Throws an exception either one of the input arrays are empty.
  */
 template <typename T>
 T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
-  if (xArray.empty())
-    throw EssentiaException("dotProduct: input xArray is empty!");
-  if (yArray.empty())
-    throw EssentiaException("dotProduct: input yArray is empty!");
-
+  if (xArray.empty() || yArray.empty())
+    throw EssentiaException("dotProduct: trying to calculate the dotProduct of empty arrays!");
   return std::inner_product(xArray.begin(), xArray.end(), yArray.begin(), 0.0);
 }
 
@@ -909,7 +938,6 @@ template <typename T> T percentile(const std::vector<T>& array, Real qpercentile
   std::vector<T> sorted_array = array;
   // sort the array
   std::sort(sorted_array.begin(), sorted_array.end());
-
   qpercentile /= 100.;
 
   Real k;
@@ -921,7 +949,6 @@ template <typename T> T percentile(const std::vector<T>& array, Real qpercentile
     // to avoid zero value in arrays with single element
     k = sortArraySize * qpercentile;
   }
-  
   // apply interpolation
   Real d0 = sorted_array[int(std::floor(k))] * (std::ceil(k) - k);
   Real d1 = sorted_array[int(std::ceil(k))] * (k - std::floor(k));
@@ -938,11 +965,10 @@ template <typename T> T percentile(const std::vector<T>& array, Real qpercentile
 template <typename T>
 void heavisideStepFunction(std::vector<std::vector<T> >& inputArray) {
   if (inputArray.empty())
-    throw EssentiaException("heavisideStepFunction: found empty array as input");
+    throw EssentiaException("heavisideStepFunction: found empty array as input!");
 
   for (size_t i=0; i<inputArray.size(); i++) {
     for (size_t j=0; j<inputArray[i].size(); j++) {
-
       // initialize all non negative elements as zero
       if (inputArray[i][j] < 0) {
         inputArray[i][j] = 0;
@@ -954,31 +980,31 @@ void heavisideStepFunction(std::vector<std::vector<T> >& inputArray) {
   }
 }
 
-/*
- * Pairwise euclidean distances between two set of observations in n-dimensional space.
- * The inputs are two m X n and k X l dimentional vectors.
+
+/**
+ * Pairwise euclidean distances between two 2D vectors.
  * Throws an exception if the input array is empty.
- * Returns a m X k dimentional vector
+ * Returns a (m.shape[0], n.shape[0]) dimentional vector where m and n are the two input arrays
  * TODO: [add other distance metrics beside euclidean such as cosine, mahanalobis etc as a configurable parameter]
  */
 template <typename T>
 std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >& m, const std::vector<std::vector<T> >& n) {
 
   if (m.empty() || n.empty())
-    throw EssentiaException("pairwiseDistance: found empty array as input");
+    throw EssentiaException("pairwiseDistance: found empty array as input!");
 
-  size_t xNcols = m.size();
-  size_t yNcols = n.size();
-  Real item = 0;
-  std::vector<std::vector<T> > result(xNcols, std::vector<T>(yNcols, 0));
-
-  for (size_t i=0; i<xNcols; i++) {
-      for (size_t j=0; j<yNcols; j++) {
-          item = dotProduct(m[i], m[i]) - 2*dotProduct(m[i], n[j]) + dotProduct(n[j], n[j]);
-          result[i][j] = sqrt(item);
+  size_t mSize = m.size();
+  size_t nSize = n.size();
+  std::vector<std::vector<T> > pdist(mSize, std::vector<T>(nSize));
+  for (size_t i=0; i<mSize; i++) {
+      for (size_t j=0; j<nSize; j++) {
+          Real item = dotProduct(m[i], m[i]) - 2*dotProduct(m[i], n[j]) + dotProduct(n[j], n[j]);
+          pdist[i][j] = sqrt(item);
       }
   }
-  return result;
+  if (pdist.empty())
+      throw EssentiaException("pairwiseDistance: outputs an empty similarity matrix!");
+  return pdist;
 }
 
 } // namespace essentia

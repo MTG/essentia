@@ -17,7 +17,6 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 #include "crosssimilaritymatrix.h"
-#include "essentia/utils/tnt/tnt2vector.h"
 #include "essentiamath.h"
 #include <vector>
 #include <iostream>
@@ -30,8 +29,7 @@ namespace standard {
 
 const char* CrossSimilarityMatrix::name = "CrossSimilarityMatrix";
 const char* CrossSimilarityMatrix::category = "Music Similarity";
-const char* CrossSimilarityMatrix::description = DOC("This algorithm computes an euclidean cross-similarity matrix from two 2D input feature vectors.\n\n"
-"In addition, the algorithm also provides an option to binarize the euclidean cross-similarity matrix using given threshold 'kappa'.\n\n"
+const char* CrossSimilarityMatrix::description = DOC("This algorithm computes a euclidean cross-similarity matrix of two sequences of frame features. Similarity values can be optionally binarized\n\n"
 "Use default parameter values for best results while computing cross-similarity using the binarize method.\n\n"
 "The input feature arrays should be in the shape (x, y), where 'x' is the number of frames.\n\n"
 "An exception is also thrown if either one of the input audio feature arrays are empty or if the output similarity matrix is empty.\n\n"
@@ -81,59 +79,51 @@ void CrossSimilarityMatrix::compute() {
   if (referenceFeature.empty())
     throw EssentiaException("CrossSimilarityMatrix: input referenceFeature array is empty.");
 
-  // construct time embedding from input chroma features
+  // construct a new vector by stacking the input features by an specified 'frameStackStride' and 'frameStackSize'
   std::vector<std::vector<Real> >  queryFeatureStack = stackFrames(queryFeature, _frameStackSize, _frameStackStride);
   std::vector<std::vector<Real> >  referenceFeatureStack = stackFrames(referenceFeature, _frameStackSize, _frameStackStride);
 
   std::vector<std::vector<Real> > pdistances;
   // pairwise euclidean distance
   pdistances = pairwiseDistance(queryFeatureStack, referenceFeatureStack);
-  if (pdistances.empty())
-    throw EssentiaException("CrossSimilarityMatrix: empty array found inside euclidean cross similarity matrix.");
 
-  // check whether to binarize the euclidean cross-similarity matrix using the given thresholds 
+  // check whether to binarize the euclidean cross-similarity matrix using the given threshold kappa
   if (_toBinary == true) {
     std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
     size_t queryRows = pdistances.size();
-    size_t queryCols = pdistances[0].size();
-    size_t referenceRows = tpDistances.size();
-    size_t referenceCols = tpDistances[0].size();
+    size_t referenceRows = pdistances[0].size();
 
-    std::vector<std::vector<Real> > similarityX;
-    similarityX.assign(queryRows, std::vector<Real>(queryCols));
-    // construct thresholded similarity matrix on axis X
+    std::vector<Real> thresholdX(queryRows);
+    std::vector<Real> thresholdY(referenceRows);
+
+    std::vector<std::vector<Real> > outputSimMatrix;
+    outputSimMatrix.assign(queryRows, std::vector<Real>(referenceRows));
+    // construct the binary output similarity matrix using the thresholds computed along the queryFeature axis
     for (size_t k=0; k<queryRows; k++) {
-      for (size_t l=0; l<queryCols; l++) {
-        similarityX[k][l] = percentile(pdistances[k], _kappa*100) - pdistances[k][l];
-      }
-    }
-    // binarise the array with heavisideStepFunction
-    heavisideStepFunction(similarityX);
-    std::vector<std::vector<Real> > similarityY(referenceRows, std::vector<Real>(referenceCols));
-    // construct thresholded similarity matrix on axis Y
-    for (size_t u=0; u<referenceRows; u++) {
-      for (size_t v=0; v<referenceCols; v++) {
-        similarityY[u][v] = percentile(tpDistances[u], _kappa*100) - tpDistances[u][v];
-      }
-    }
-    // here we binarise and transpose the similarityY array same time in order to avoid redundant looping
-    std::vector<std::vector<Real> > tSimilarityY(referenceCols, std::vector<Real>(referenceRows));
-    for (size_t i=0; i<referenceRows; i++) {
-      for (size_t j=0; j<referenceCols; j++) {
-        if (similarityY[i][j] < 0) {
-          tSimilarityY[j][i] = 0;
+      thresholdX[k] = percentile(pdistances[k], _kappa*100);
+      for (size_t l=0; l<referenceRows; l++) {
+        if ((thresholdX[k] - pdistances[k][l]) > 0) {
+          outputSimMatrix[k][l] = 1;
         }
-        else if (similarityY[i][j] >= 0) {
-          tSimilarityY[j][i] = 1;
+        else if ((thresholdX[k] - pdistances[k][l]) <= 0) {
+          outputSimMatrix[k][l] = 0.;
+        }
+      }
+
+    }
+    // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
+    for (size_t j=0; j<referenceRows; j++) {
+      thresholdY[j] = percentile(tpDistances[j], _kappa*100);
+      for (size_t i=0; i<queryRows; i++) {
+        if ((thresholdY[j] - pdistances[i][j]) > 0) {
+          outputSimMatrix[i][j] *= 1; 
+        }
+        else if ((thresholdY[j] - pdistances[i][j]) <= 0) {
+          outputSimMatrix[i][j] *= 0;
         }
       }
     }
-    // finally we construct out cross similarity matrix by multiplying similarityX and similarityY
-    // [TODO]: replace TNT array matmult with Boost matrix in future for faster computation.
-    TNT::Array2D<Real> simX = vecvecToArray2D(similarityX);
-    TNT::Array2D<Real> simY = vecvecToArray2D(tSimilarityY);
-    TNT::Array2D<Real> csmOut = TNT::operator*(simX, simY);
-    csm = array2DToVecvec(csmOut);
+    csm = outputSimMatrix;
   }
   // Use default cross-similarity computation method based on euclidean distances
   else {
