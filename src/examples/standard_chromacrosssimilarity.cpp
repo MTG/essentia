@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
   cout << "Reference shape: " << referenceFeature.size() << ", " << referenceFeature[0].size() << endl;
 
   /////// PARAMS //////////////
-  Real kappa = 0.095;
+  Real binarizePercentile = 0.095;
   int frameStackStride = 1;
   int frameStackSize = 9;
   bool otiBinary = false;
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
   Algorithm* csm = factory.create("ChromaCrossSimilarity",
                                   "otiBinary", otiBinary,
                                   "optimizeThreshold", optimizeThreshold,
-                                  "kappa", kappa,
+                                  "binarizePercentile", binarizePercentile,
                                   "frameStackSize", frameStackSize,
                                   "frameStackStride", frameStackStride);
 

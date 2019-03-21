@@ -54,7 +54,7 @@ void ChromaCrossSimilarity::configure() {
   // configure parameters
   _frameStackStride = parameter("frameStackStride").toInt();
   _frameStackSize = parameter("frameStackSize").toInt();
-  _kappa = parameter("kappa").toReal();
+  _binarizePercentile = parameter("binarizePercentile").toReal();
   _noti = parameter("noti").toInt();
   _oti = parameter("oti").toBool();
   _otiBinary = parameter("otiBinary").toBool();
@@ -108,7 +108,7 @@ void ChromaCrossSimilarity::compute() {
       csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize));
       // construct the binary output similarity matrix using the thresholds computed along the queryFeature axis
       for (size_t k=0; k<queryFeatureSize; k++) {
-        thresholdQuery[k] = percentile(pdistances[k], _kappa*100);
+        thresholdQuery[k] = percentile(pdistances[k], _binarizePercentile*100);
         for (size_t l=0; l<referenceFeatureSize; l++) {
           if (thresholdQuery[k] >= pdistances[k][l]) {
             csm[k][l] = 1;
@@ -121,7 +121,7 @@ void ChromaCrossSimilarity::compute() {
     }
     // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
     for (size_t j=0; j<referenceFeatureSize; j++) {
-      thresholdReference[j] = percentile(tpDistances[j], _kappa*100);
+      thresholdReference[j] = percentile(tpDistances[j], _binarizePercentile*100);
       for (size_t i=0; i<queryFeatureSize; i++) {
         if (thresholdReference[j] < pdistances[i][j]) {
           csm[i][j] = 0;
@@ -148,7 +148,7 @@ void ChromaCrossSimilarity::configure() {
   _referenceFeature = parameter("referenceFeature").toVectorVectorReal();
   _frameStackStride = parameter("frameStackStride").toInt();
   _frameStackSize = parameter("frameStackSize").toInt();
-  _kappa = parameter("kappa").toReal();
+  _binarizePercentile = parameter("binarizePercentile").toReal();
   _oti = parameter("oti").toInt();
   _otiBinary = parameter("otiBinary").toBool();
   _mathcCoef = 1; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
@@ -219,7 +219,7 @@ AlgorithmStatus ChromaCrossSimilarity::process() {
     std::vector<Real> thresholdReference(referenceFeatureSize);
     // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
     for (size_t j=0; j<referenceFeatureSize; j++) {
-      thresholdReference[j] = percentile(tpDistances[j], _kappa*100);
+      thresholdReference[j] = percentile(tpDistances[j], _binarizePercentile*100);
       for (size_t i=0; i<queryFeatureSize; i++) {
         if (thresholdReference[j] <= tpDistances[j][i]) {
           _outputSimMatrix[i][j] = 0;
