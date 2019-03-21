@@ -31,17 +31,17 @@ using namespace essentia::standard;
 vector<vector<Real> > readMatrixFile(string inputFileName);
 
 int main(int argc, char* argv[]) {
-  
+
   if (argc != 4) {
     cout << "Error: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " <query_feature_file> <reference_feature_file> <json_output_path>" << endl;
+    cout << "Usage: " << argv[0] << " <query_song_feature_file> <reference_song_feature_file> <json_output_path>" << endl;
     creditLibAV();
     exit(1);
   }
-
+  
   // register the algorithms in the factory(ies)
   essentia::init();
-  // input feature matrix as text file
+
   string queryFilename = argv[1];
   string referenceFilename = argv[2];
   string outputFilename = argv[3];
@@ -54,16 +54,18 @@ int main(int argc, char* argv[]) {
   cout << "Reference shape: " << referenceFeature.size() << ", " << referenceFeature[0].size() << endl;
 
   /////// PARAMS //////////////
-  Real binarizePercentile = 0.095;
+  Real kappa = 0.095;
   int frameStackStride = 1;
   int frameStackSize = 9;
-  bool binarize = false;
+  bool otiBinary = false;
+  bool optimizeThreshold = false;
 
   Pool pool;
   AlgorithmFactory& factory = standard::AlgorithmFactory::instance();
-  Algorithm* csm = factory.create("CrossSimilarityMatrix",
-                                  "binarize", binarize,
-                                  "binarizePercentile", binarizePercentile,
+  Algorithm* csm = factory.create("ChromaCrossSimilarity",
+                                  "otiBinary", otiBinary,
+                                  "optimizeThreshold", optimizeThreshold,
+                                  "kappa", kappa,
                                   "frameStackSize", frameStackSize,
                                   "frameStackStride", frameStackStride);
 
@@ -75,9 +77,9 @@ int main(int argc, char* argv[]) {
   csm->output("csm").set(csmout);
   
   /////////// STARTING THE ALGORITHMS //////////////////
-  cout << "-----Cross-similarity matrix calculation --------" << endl;
+  cout << "-----ChromaCrossSimilarity matrix calculation --------" << endl;
   csm->compute();
-  // since pool only supports TNT::Array2D
+  // since pool only supports TNT::Array2D for storing 2D matrices
   TNT::Array2D<Real> outArray = vecvecToArray2D(csmout);
   // add to pool
   pool.add("csm", outArray);
@@ -98,6 +100,7 @@ int main(int argc, char* argv[]) {
 
 }
 
+
 // read the 2d array text file and store it to a 2D vector 
 vector<vector<Real> > readMatrixFile(string inputFileName) {
   ifstream myReadFile;
@@ -117,3 +120,4 @@ vector<vector<Real> > readMatrixFile(string inputFileName) {
   }
   return outputArray;
 }
+

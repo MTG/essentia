@@ -75,10 +75,10 @@ int main(int argc, char* argv[]) {
   int oti = 0; // hardcoded, should be replaced by oti algo
   Real minFrequency = 100;
   Real maxFrequency = 3500;
-  bool otiBinary = false;
+  bool otiBinary = true;
   Real kappa = 0.095;
-  int tau = 1;
-  int embedDimension = 9;
+  int frameStackStride = 1;
+  int frameStackSize = 9;
 
   streaming::AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
@@ -114,13 +114,13 @@ int main(int argc, char* argv[]) {
                                    "maxFrequency", maxFrequency,
                                    "size", numBins);
 
-  Algorithm* csm = factory.create("CrossSimilarityMatrix",
+  Algorithm* csm = factory.create("ChromaCrossSimilarity",
                                   "referenceFeature", referenceFeature,
                                   "otiBinary", otiBinary,
                                   "oti", oti,
                                   "kappa", kappa,
-                                  "embedDimension", embedDimension,
-                                  "tau", tau);
+                                  "frameStackSize", frameStackSize,
+                                  "frameStackStride", frameStackStride);
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos for hpcp extraction ---------" << endl;
@@ -174,3 +174,4 @@ int main(int argc, char* argv[]) {
 
   return 0;
 }
+
