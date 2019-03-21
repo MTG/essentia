@@ -110,7 +110,6 @@ class ChromaCrossSimilarity : public Algorithm {
     declareParameter("frameStackSize", "embedding dimension for the stacked feature embedding. Choose embedDimension=1 to use raw input feature vector for the similarity calculation.", "[0,inf)", 9);
     declareParameter("kappa", "fraction of mutual nearest neighbours to consider while computing euclidean distances", "[0,1]", 0.095);
     declareParameter("oti", "optimal transposition index of the query and reference song", "[0, inf]", 0);
-    declareParameter("noti", "Number of circular shifts to be checked for optimal transposition index", "[0, inf)", 12);
     declareParameter("otiBinary", "whether to use the OTI-based chroma binary similarity method", "{true,false}", false);
   }
 

@@ -33,14 +33,14 @@ class CrossSimilarityMatrix : public Algorithm {
    CrossSimilarityMatrix() {
     declareInput(_queryFeature, "queryFeature", "input frame features of the query song (e.g., a chromagram)");
     declareInput(_referenceFeature, "referenceFeature", "input frame features of the reference song (e.g., a chromagram)");
-    declareOutput(_csm, "csm", "2D euclidean cross-similarity matrix of two input audio feature arrays");
+    declareOutput(_csm, "csm", "2D cross-similarity matrix of two input frame sequences (query vs reference)");
    }
 
    void declareParameters() {
     declareParameter("frameStackStride", "stride size to form a stack of frames (e.g., 'frameStackStride'=1 to use consecutive frames; 'frameStackStride'=2 for using every second frame)", "[1,inf)", 1);
     declareParameter("frameStackSize", "number of input frames to stack together and treat as a feature vector for similarity computation. Choose 'frameStackSize=1' to use the original input frames without stacking", "[0,inf)", 1);
-    declareParameter("kappa", "fraction of mutual nearest neighbours to consider while computing binary similary matrix from euclidean distances", "[0,1]", 0.095);
-    declareParameter("toBinary", "whether to binarize the euclidean similarity matrix", "{true,false}", true);
+    declareParameter("binarizePercentile", "maximum percent of distance values to consider as similar in each row and each column", "[0,1]", 0.095);
+    declareParameter("binarize", "whether to binarize the euclidean cross-similarity matrix", "{true,false}", false);
   }
 
    void configure();
@@ -53,8 +53,8 @@ class CrossSimilarityMatrix : public Algorithm {
   protected:
    int _frameStackStride;
    int _frameStackSize;
-   Real _kappa;
-   bool _toBinary;
+   Real _binarizePercentile;
+   bool _binarize;
    std::vector<std::vector<Real> > stackFrames(std::vector<std::vector<Real> >& frames, int frameStackSize, int frameStackStride) const;
 };
 

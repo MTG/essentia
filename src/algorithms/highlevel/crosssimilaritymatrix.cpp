@@ -30,19 +30,19 @@ namespace standard {
 const char* CrossSimilarityMatrix::name = "CrossSimilarityMatrix";
 const char* CrossSimilarityMatrix::category = "Music Similarity";
 const char* CrossSimilarityMatrix::description = DOC("This algorithm computes a euclidean cross-similarity matrix of two sequences of frame features. Similarity values can be optionally binarized\n\n"
-"Use default parameter values for best results while computing cross-similarity using the binarize method.\n\n"
-"The input feature arrays should be in the shape (x, y), where 'x' is the number of frames.\n\n"
-"An exception is also thrown if either one of the input audio feature arrays are empty or if the output similarity matrix is empty.\n\n"
+"The default parameters for binarizing are optimized according to [1] for cover song identification using chroma features. \n\n"
+"The input feature arrays are vectors of frames of features in the shape (n_frames, n_features), where 'n_frames' is the number frames, 'n_features' is the number of frame features.\n\n"
+"An exception is also thrown if either one of the input feature arrays are empty or if the output similarity matrix is empty.\n\n"
 "References:\n"
-"[1] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n");
+"[1] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification. New Journal of Physics.\n\n");
 
 
 void CrossSimilarityMatrix::configure() {
   // configure parameters
   _frameStackStride = parameter("frameStackStride").toInt();
   _frameStackSize = parameter("frameStackSize").toInt();
-  _kappa = parameter("kappa").toReal();
-  _toBinary = parameter("toBinary").toBool();
+  _binarizePercentile = parameter("binarizePercentile").toReal();
+  _binarize = parameter("binarize").toBool();
 }
 
 // Construct a 'stacked-frames' feature vector from an input audio feature vector by given 'frameStackSize' and 'frameStackStride'
@@ -56,6 +56,7 @@ std::vector<std::vector<Real> > CrossSimilarityMatrix::stackFrames(std::vector<s
   std::vector<std::vector<Real> > stackedFrames;
   stackedFrames.reserve(frames.size() - increment);
   std::vector<Real> stack;
+  stack.reserve(frames[0].size() * frameStackSize);
   for (size_t i=0; i<(frames.size() - increment); i+=frameStackStride) {
     stopIdx = i + increment;
     for (size_t startTime=i; startTime<stopIdx; startTime+=frameStackStride) {
@@ -83,52 +84,47 @@ void CrossSimilarityMatrix::compute() {
   std::vector<std::vector<Real> >  queryFeatureStack = stackFrames(queryFeature, _frameStackSize, _frameStackStride);
   std::vector<std::vector<Real> >  referenceFeatureStack = stackFrames(referenceFeature, _frameStackSize, _frameStackStride);
 
-  std::vector<std::vector<Real> > pdistances;
-  // pairwise euclidean distance
-  pdistances = pairwiseDistance(queryFeatureStack, referenceFeatureStack);
-
   // check whether to binarize the euclidean cross-similarity matrix using the given threshold kappa
-  if (_toBinary == true) {
+  if (_binarize == true) {
+    // pairwise euclidean distance
+    std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeatureStack, referenceFeatureStack);
     std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
-    size_t queryRows = pdistances.size();
-    size_t referenceRows = pdistances[0].size();
+    size_t queryFeatureSize = pdistances.size();
+    size_t referenceFeatureSize = pdistances[0].size();
 
-    std::vector<Real> thresholdX(queryRows);
-    std::vector<Real> thresholdY(referenceRows);
+    std::vector<Real> thresholdQuery(queryFeatureSize);
+    std::vector<Real> thresholdReference(referenceFeatureSize);
 
-    std::vector<std::vector<Real> > outputSimMatrix;
-    outputSimMatrix.assign(queryRows, std::vector<Real>(referenceRows));
+    csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize));
     // construct the binary output similarity matrix using the thresholds computed along the queryFeature axis
-    for (size_t k=0; k<queryRows; k++) {
-      thresholdX[k] = percentile(pdistances[k], _kappa*100);
-      for (size_t l=0; l<referenceRows; l++) {
-        if ((thresholdX[k] - pdistances[k][l]) > 0) {
-          outputSimMatrix[k][l] = 1;
+    for (size_t k=0; k<queryFeatureSize; k++) {
+      thresholdQuery[k] = percentile(pdistances[k], _binarizePercentile*100);
+      for (size_t l=0; l<referenceFeatureSize; l++) {
+        if (thresholdQuery[k] >= pdistances[k][l]) {
+          csm[k][l] = 1;
         }
-        else if ((thresholdX[k] - pdistances[k][l]) <= 0) {
-          outputSimMatrix[k][l] = 0.;
+        else if (thresholdQuery[k] < pdistances[k][l]) {
+          csm[k][l] = 0;
         }
       }
-
     }
     // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
-    for (size_t j=0; j<referenceRows; j++) {
-      thresholdY[j] = percentile(tpDistances[j], _kappa*100);
-      for (size_t i=0; i<queryRows; i++) {
-        if ((thresholdY[j] - pdistances[i][j]) > 0) {
-          outputSimMatrix[i][j] *= 1; 
+    for (size_t j=0; j<referenceFeatureSize; j++) {
+      thresholdReference[j] = percentile(tpDistances[j], _binarizePercentile*100);
+      for (size_t i=0; i<queryFeatureSize; i++) {
+        if (thresholdReference[j] >= pdistances[i][j]) {
+          csm[i][j] *= 1; 
         }
-        else if ((thresholdY[j] - pdistances[i][j]) <= 0) {
-          outputSimMatrix[i][j] *= 0;
+        else if (thresholdReference[j] < pdistances[i][j]) {
+          csm[i][j] *= 0;
         }
       }
     }
-    csm = outputSimMatrix;
   }
   // Use default cross-similarity computation method based on euclidean distances
   else {
     // returns pairwise euclidean distance
-    csm = pdistances;
+    csm = pairwiseDistance(queryFeatureStack, referenceFeatureStack);
   }
 }
 

@@ -39,10 +39,10 @@ const char* ChromaCrossSimilarity::name = "ChromaCrossSimilarity";
 const char* ChromaCrossSimilarity::category = "Music Similarity";
 const char* ChromaCrossSimilarity::description = DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
 "Use HPCP algorithm for computing the chromagram and the default parameters of this algorithm for the best results.\n\n"
-"In addition, the algorithm also provides an option to use another binary cross-similarity computation method using optimal transposition index (OTI) of chroma features as mentioned in [3].\n\n"
-"Use default parameter values for best results.\n\n"
-"The input chromagram should be in the shape (x, numbins), where 'x' is number of frames and 'numbins' for the number of bins in the chromagram. An exception is thrown otherwise.\n\n"
-"An exception is also thrown if either one of the input chromagrams are empty or if the cross-similarity matrix is empty.\n\n"
+"If parameter 'oti=True', the algorithm transpose the reference song chromagram by optimal transposition index as described in [1].\n\n"
+"If parameter 'otiBinary=True', the algorithm computes the binary cross-similarity matrix based on optimal transposition index instead of euclidean distance as described in [3].\n\n"
+"The input chromagram should be in the shape (n_frames, numbins), where 'n_frames' is number of frames and 'numbins' for the number of bins in the chromagram. An exception is thrown otherwise.\n\n"
+"An exception is also thrown if either one of the input chromagrams are empty.\n\n"
 "NOTE: Streaming mode of this algorithm outputs the same as the output of standard mode 'ChromaCrossSimilarity' with parameter 'optimizeThreshold=True'\n\n"
 "References:\n"
 "[1] Serra, J., Gómez, E., & Herrera, P. (2008). Transposing chroma representations to a common key, IEEE Conference on The Use of Symbols to Represent Music and Multimedia Objects.\n\n"
@@ -71,7 +71,6 @@ void ChromaCrossSimilarity::compute() {
 
   if (queryFeature.empty())
     throw EssentiaException("CrossSimilarityMatrix: input queryFeature is empty.");
-
   if (referenceFeature.empty())
     throw EssentiaException("CrossSimilarityMatrix: input referenceFeature is empty.");
 
@@ -87,7 +86,6 @@ void ChromaCrossSimilarity::compute() {
     if (_oti == true) {
       int otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
       rotateChroma(referenceFeature, otiIdx);
-      std::cout << "OTI: " << otiIdx << std::endl;
     }
     // construct stacked chroma feature matrices from specified 'frameStackSize' and 'frameStackStride'
     std::vector<std::vector<Real> >  queryFeatureStack = stackChromaFrames(queryFeature, _frameStackSize, _frameStackStride);
@@ -96,45 +94,40 @@ void ChromaCrossSimilarity::compute() {
     std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeatureStack, referenceFeatureStack);
     // transposing the array of pairwise distance
     std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
-    size_t queryRows = pdistances.size();
-    size_t referenceRows = pdistances[0].size();
- 
-    std::vector<std::vector<Real> > outputSimMatrix;
-    std::vector<Real> thresholdX(queryRows);
-    std::vector<Real> thresholdY(referenceRows);
+    size_t queryFeatureSize = pdistances.size();
+    size_t referenceFeatureSize = pdistances[0].size();
+
+    std::vector<Real> thresholdQuery(queryFeatureSize);
+    std::vector<Real> thresholdReference(referenceFeatureSize);
 
     if (_optimizeThreshold == true) {
       // optimise the threshold computation by iniatilizing it to a matrix of ones
-      outputSimMatrix.assign(queryRows, std::vector<Real>(referenceRows, 1));
+      csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 1));
     }
     else if (_optimizeThreshold == false) {
-      outputSimMatrix.assign(queryRows, std::vector<Real>(referenceRows));
+      csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize));
       // construct the binary output similarity matrix using the thresholds computed along the queryFeature axis
-      for (size_t k=0; k<queryRows; k++) {
-        thresholdX[k] = percentile(pdistances[k], _kappa*100);
-        for (size_t l=0; l<referenceRows; l++) {
-          if ((thresholdX[k] - pdistances[k][l]) > 0) {
-            outputSimMatrix[k][l] = 1;
+      for (size_t k=0; k<queryFeatureSize; k++) {
+        thresholdQuery[k] = percentile(pdistances[k], _kappa*100);
+        for (size_t l=0; l<referenceFeatureSize; l++) {
+          if (thresholdQuery[k] >= pdistances[k][l]) {
+            csm[k][l] = 1;
           }
-          else if ((thresholdX[k] - pdistances[k][l]) <= 0) {
-            outputSimMatrix[k][l] = 0.;
+          else if (thresholdQuery[k] < pdistances[k][l]) {
+            csm[k][l] = 0;
           }
         }
       }
     }
     // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
-    for (size_t j=0; j<referenceRows; j++) {
-      thresholdY[j] = percentile(tpDistances[j], _kappa*100);
-      for (size_t i=0; i<queryRows; i++) {
-        if ((thresholdY[j] - pdistances[i][j]) > 0) {
-          outputSimMatrix[i][j] *= 1; 
-        }
-        else if ((thresholdY[j] - pdistances[i][j]) <= 0) {
-          outputSimMatrix[i][j] *= 0;
+    for (size_t j=0; j<referenceFeatureSize; j++) {
+      thresholdReference[j] = percentile(tpDistances[j], _kappa*100);
+      for (size_t i=0; i<queryFeatureSize; i++) {
+        if (thresholdReference[j] < pdistances[i][j]) {
+          csm[i][j] = 0;
         }
       }
     }
-    csm = outputSimMatrix;
   }
 }
 
@@ -156,13 +149,14 @@ void ChromaCrossSimilarity::configure() {
   _frameStackStride = parameter("frameStackStride").toInt();
   _frameStackSize = parameter("frameStackSize").toInt();
   _kappa = parameter("kappa").toReal();
-  _noti = parameter("noti").toInt();
   _oti = parameter("oti").toInt();
   _otiBinary = parameter("otiBinary").toBool();
   _mathcCoef = 1; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
   _mismatchCoef = 0; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
+  rotateChroma(_referenceFeature, _oti); // transpose the chroma of reference song by an specified 'oti' parameter.
   _referenceFeatureStack = stackChromaFrames(_referenceFeature, _frameStackSize, _frameStackStride);
-  _minFramesSize = _frameStackSize + 1; // min amount of frames needed to construct an frame of stacked vector
+  if (_otiBinary == true) _minFramesSize = 1;
+  else _minFramesSize = _frameStackSize + 1; // min amount of frames needed to construct an frame of stacked vector
   
   input("queryFeature").setAcquireSize(_minFramesSize);
   input("queryFeature").setReleaseSize(1);
@@ -204,34 +198,31 @@ AlgorithmStatus ChromaCrossSimilarity::process() {
       inputFramesCopy.push_back(inputQueryFrames[i]);
     }
   }
-  std::vector<std::vector<Real> > queryFeatureStack = stackChromaFrames(inputFramesCopy, _frameStackSize, _frameStackStride);
   // check whether to use oti-based binary similarity as mentioned in [3]
   if (_otiBinary == true) {
-    _outputSimMatrix = chromaBinarySimMatrix(queryFeatureStack, _referenceFeatureStack, _noti, _mathcCoef, _mismatchCoef);
+    _outputSimMatrix = chromaBinarySimMatrix(inputFramesCopy, _referenceFeature, _noti, _mathcCoef, _mismatchCoef);
     csmOutput[0] = _outputSimMatrix[0];
     releaseData();
   }
   // otherwise we compute similarity matrix as mentioned in [2]
   else if (_otiBinary == false) {
+    std::vector<std::vector<Real> > queryFeatureStack = stackChromaFrames(inputFramesCopy, _frameStackSize, _frameStackStride);
     // here we compute the pairwsie euclidean distances between query and reference song time embedding and finally tranpose the resulting matrix.
     std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeatureStack, _referenceFeatureStack);
     std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
-    size_t queryRows = pdistances.size();
-    size_t referenceRows = pdistances[0].size();
+    size_t queryFeatureSize = pdistances.size();
+    size_t referenceFeatureSize = pdistances[0].size();
 
     // optimise the threshold computation by iniatilizing it to a matrix of ones
-    _outputSimMatrix.assign(queryRows, std::vector<Real>(referenceRows, 1));
+    _outputSimMatrix.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 1));
     
-    std::vector<Real> thresholdY(referenceRows);
+    std::vector<Real> thresholdReference(referenceFeatureSize);
     // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
-    for (size_t j=0; j<referenceRows; j++) {
-      thresholdY[j] = percentile(tpDistances[j], _kappa*100);
-      for (size_t i=0; i<queryRows; i++) {
-        if (pdistances[i][j] > thresholdY[j]) {
-          _outputSimMatrix[i][j] *= 1; 
-        }
-        else if (thresholdY[j] >= pdistances[i][j]) {
-          _outputSimMatrix[i][j] *= 0;
+    for (size_t j=0; j<referenceFeatureSize; j++) {
+      thresholdReference[j] = percentile(tpDistances[j], _kappa*100);
+      for (size_t i=0; i<queryFeatureSize; i++) {
+        if (thresholdReference[j] <= tpDistances[j][i]) {
+          _outputSimMatrix[i][j] = 0;
         }
       }
     }
@@ -285,6 +276,7 @@ std::vector<std::vector<Real> > stackChromaFrames(std::vector<std::vector<Real> 
   std::vector<std::vector<Real> > stackedFrames;
   stackedFrames.reserve(frames.size() - increment);
   std::vector<Real> stack;
+  stack.reserve(frames[0].size() * frameStackSize);
   for (size_t i=0; i<(frames.size() - increment); i+=frameStackStride) {
     stopIdx = i + increment;
     for (size_t startTime=i; startTime<stopIdx; startTime+=frameStackStride) {
