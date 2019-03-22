@@ -967,6 +967,7 @@ inline std::string equivalentKey(const std::string key) {
     return "B";
 
   return "";
+}
 
 template <typename T>
 T iv(T v, T z) {
