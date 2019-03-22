@@ -43,7 +43,7 @@ class ChromaCrossSimilarity : public Algorithm {
     declareParameter("oti", "whether to transpose the key of the reference song to the query song by (OTI)", "{true,false}", true);
     declareParameter("noti", "Number of circular shifts to be checked for optimal transposition index", "[0, inf)", 12);
     declareParameter("otiBinary", "whether to use the OTI-based chroma binary similarity method", "{true,false}", false);
-    declareParameter("optimizeThreshold", "whether to use the optimised threhold method in the similarity computation (While enalbled it outputs same as in essentia streaming mode 'ChromaCrossSimilarity' algorithm)", "{true,false}", false);
+    declareParameter("streamingMode", "whether to use the optimised threhold method in the similarity computation (While enalbled it outputs same as in essentia streaming mode 'ChromaCrossSimilarity' algorithm)", "{true,false}", false);
   }
 
    void configure();
@@ -61,7 +61,7 @@ class ChromaCrossSimilarity : public Algorithm {
    int _noti;
    bool _oti;
    bool _otiBinary;
-   bool _optimizeThreshold;
+   bool _streamingMode;
    Real _mathcCoef;
    Real _mismatchCoef;
 
