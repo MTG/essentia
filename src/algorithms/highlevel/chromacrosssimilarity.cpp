@@ -17,7 +17,6 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 #include "chromacrosssimilarity.h"
-#include "essentia/utils/tnt/tnt2vector.h"
 #include "essentiamath.h"
 #include <vector>
 #include <iostream>
@@ -40,7 +39,7 @@ const char* ChromaCrossSimilarity::category = "Music Similarity";
 const char* ChromaCrossSimilarity::description = DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
 "Use HPCP algorithm for computing the chromagram and the default parameters of this algorithm for the best results.\n\n"
 "If parameter 'oti=True', the algorithm transpose the reference song chromagram by optimal transposition index as described in [1].\n\n"
-"If parameter 'otiBinary=True', the algorithm computes the binary cross-similarity matrix based on optimal transposition index instead of euclidean distance as described in [3].\n\n"
+"If parameter 'otiBinary=True', the algorithm computes the binary cross-similarity matrix based on optimal transposition index between each feature pairs instead of euclidean distance as described in [3].\n\n"
 "The input chromagram should be in the shape (n_frames, numbins), where 'n_frames' is number of frames and 'numbins' for the number of bins in the chromagram. An exception is thrown otherwise.\n\n"
 "An exception is also thrown if either one of the input chromagrams are empty.\n\n"
 "NOTE: Streaming mode of this algorithm outputs the same as the output of standard mode 'ChromaCrossSimilarity' with parameter 'streamingMode=True'\n\n"
@@ -92,8 +91,6 @@ void ChromaCrossSimilarity::compute() {
     std::vector<std::vector<Real> >  referenceFeatureStack= stackChromaFrames(referenceFeature, _frameStackSize, _frameStackStride);
     // pairwise euclidean distance
     std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeatureStack, referenceFeatureStack);
-    // transposing the array of pairwise distance
-    std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
     size_t queryFeatureSize = pdistances.size();
     size_t referenceFeatureSize = pdistances[0].size();
 
@@ -106,16 +103,19 @@ void ChromaCrossSimilarity::compute() {
     }
     else if (_streamingMode == false) {
       csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize));
-      // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
+      // compute the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
       for (size_t j=0; j<referenceFeatureSize; j++) {
-        thresholdReference[j] = percentile(tpDistances[j], _binarizePercentile*100);
+        _status = true;
         for (size_t i=0; i<queryFeatureSize; i++) {
+          // here we only compute the thresholdReference at index j once 
+          if (_status == true) thresholdReference[j] = percentile(getColsAtVecIndex(pdistances, j), _binarizePercentile*100);
           if (pdistances[i][j] <= thresholdReference[j]) {
             csm[i][j] = 1;
           }
           if (pdistances[i][j] > thresholdReference[j]) {
             csm[i][j] = 0;
           }
+          _status = false;
         }
       }
     }
@@ -131,6 +131,19 @@ void ChromaCrossSimilarity::compute() {
   }
 }
 
+
+// returns a column corresponding to a specified index in the given 2D input matrix
+std::vector<Real> ChromaCrossSimilarity::getColsAtVecIndex(std::vector<std::vector<Real> >& inputMatrix, int index) const {
+  
+  std::vector<Real> cols;
+  cols.reserve(inputMatrix.size());
+  for (size_t i=0; i<inputMatrix.size(); i++) {
+    cols.push_back(inputMatrix[i][index]);
+  }
+  return cols;
+}
+
+
 } // namespace standard
 } // namespace essentia
 
@@ -141,7 +154,19 @@ namespace essentia {
 namespace streaming {
 
 const char* ChromaCrossSimilarity::name = standard::ChromaCrossSimilarity::name;
-const char* ChromaCrossSimilarity::description = standard::ChromaCrossSimilarity::description;
+const char* ChromaCrossSimilarity::description =  DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
+"Use HPCP algorithm for computing the chromagram and the default parameters of this algorithm for the best results.\n\n"
+"Note that the parameters and output of this algorithm differs as compared to it's standard mode version.\n\n"
+"The output of this algorithm is only same as the output of standard mode 'ChromaCrossSimilarity' when parameter 'streamingMode=True'.\n\n"
+"Key invariance can be obtained by manually specifing the parameter 'oti' (eg. 'oti=2' to transpose the reference song chromagram by an optimal transposition index '2'.  [1]. \n\n"
+"If parameter 'otiBinary=True', the algorithm computes the binary cross-similarity matrix based on optimal transposition index of each feature paris instead of euclidean distance as described in [3].\n\n"
+"The input chromagram should be in the shape (n_frames, numbins), where 'n_frames' is number of frames and 'numbins' for the number of bins in the chromagram. An exception is thrown otherwise.\n\n"
+"An exception is also thrown if either one of the input chromagrams are empty.\n\n"
+"References:\n"
+"[1] Serra, J., Gómez, E., & Herrera, P. (2008). Transposing chroma representations to a common key, IEEE Conference on The Use of Symbols to Represent Music and Multimedia Objects.\n\n"
+"[2] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n"
+"[3] Serra, Joan, et al. Chroma binary similarity and local alignment applied to cover song identification. IEEE Transactions on Audio, Speech, and Language Processing 16.6 (2008).\n");
+0
 
 void ChromaCrossSimilarity::configure() {
   // configure parameters
@@ -209,14 +234,12 @@ AlgorithmStatus ChromaCrossSimilarity::process() {
     std::vector<std::vector<Real> > queryFeatureStack = stackChromaFrames(inputFramesCopy, _frameStackSize, _frameStackStride);
     // here we compute the pairwsie euclidean distances between query and reference song time embedding and finally tranpose the resulting matrix.
     std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeatureStack, _referenceFeatureStack);
-    std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
     size_t queryFeatureSize = pdistances.size();
     size_t referenceFeatureSize = pdistances[0].size();
 
     // optimise the threshold computation by iniatilizing it to a matrix of ones
     _outputSimMatrix.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 1));
-    
-    // std::vector<Real> thresholdReference(referenceFeatureSize);
+
     std::vector<Real> thresholdQuery(queryFeatureSize);
     // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
     for (size_t i=0; i<queryFeatureSize; i++) {

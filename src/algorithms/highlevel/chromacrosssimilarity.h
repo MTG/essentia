@@ -54,7 +54,6 @@ class ChromaCrossSimilarity : public Algorithm {
    static const char* description;
 
   protected:
-
    int _frameStackStride;
    int _frameStackSize;
    Real _binarizePercentile;
@@ -64,7 +63,8 @@ class ChromaCrossSimilarity : public Algorithm {
    bool _streamingMode;
    Real _mathcCoef;
    Real _mismatchCoef;
-
+   bool _status;
+   std::vector<Real> getColsAtVecIndex(std::vector<std::vector<Real> >& inputMatrix, int index) const; 
 };
 
 } // namespace standard
