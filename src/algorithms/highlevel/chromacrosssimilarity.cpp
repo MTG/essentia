@@ -43,7 +43,7 @@ const char* ChromaCrossSimilarity::description = DOC("This algorithm computes a 
 "If parameter 'otiBinary=True', the algorithm computes the binary cross-similarity matrix based on optimal transposition index instead of euclidean distance as described in [3].\n\n"
 "The input chromagram should be in the shape (n_frames, numbins), where 'n_frames' is number of frames and 'numbins' for the number of bins in the chromagram. An exception is thrown otherwise.\n\n"
 "An exception is also thrown if either one of the input chromagrams are empty.\n\n"
-"NOTE: Streaming mode of this algorithm outputs the same as the output of standard mode 'ChromaCrossSimilarity' with parameter 'optimizeThreshold=True'\n\n"
+"NOTE: Streaming mode of this algorithm outputs the same as the output of standard mode 'ChromaCrossSimilarity' with parameter 'streamingMode=True'\n\n"
 "References:\n"
 "[1] Serra, J., Gómez, E., & Herrera, P. (2008). Transposing chroma representations to a common key, IEEE Conference on The Use of Symbols to Represent Music and Multimedia Objects.\n\n"
 "[2] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n"
@@ -58,7 +58,7 @@ void ChromaCrossSimilarity::configure() {
   _noti = parameter("noti").toInt();
   _oti = parameter("oti").toBool();
   _otiBinary = parameter("otiBinary").toBool();
-  _optimizeThreshold = parameter("optimizeThreshold").toBool();
+  _streamingMode = parameter("streamingMode").toBool();
   _mathcCoef = 1; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
   _mismatchCoef = 0; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
 }
@@ -100,31 +100,31 @@ void ChromaCrossSimilarity::compute() {
     std::vector<Real> thresholdQuery(queryFeatureSize);
     std::vector<Real> thresholdReference(referenceFeatureSize);
 
-    if (_optimizeThreshold == true) {
+    if (_streamingMode == true) {
       // optimise the threshold computation by iniatilizing it to a matrix of ones
       csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 1));
     }
-    else if (_optimizeThreshold == false) {
+    else if (_streamingMode == false) {
       csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize));
-      // construct the binary output similarity matrix using the thresholds computed along the queryFeature axis
-      for (size_t k=0; k<queryFeatureSize; k++) {
-        thresholdQuery[k] = percentile(pdistances[k], _binarizePercentile*100);
-        for (size_t l=0; l<referenceFeatureSize; l++) {
-          if (thresholdQuery[k] >= pdistances[k][l]) {
-            csm[k][l] = 1;
+      // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
+      for (size_t j=0; j<referenceFeatureSize; j++) {
+        thresholdReference[j] = percentile(tpDistances[j], _binarizePercentile*100);
+        for (size_t i=0; i<queryFeatureSize; i++) {
+          if (pdistances[i][j] <= thresholdReference[j]) {
+            csm[i][j] = 1;
           }
-          else if (thresholdQuery[k] < pdistances[k][l]) {
-            csm[k][l] = 0;
+          if (pdistances[i][j] > thresholdReference[j]) {
+            csm[i][j] = 0;
           }
         }
       }
     }
-    // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
-    for (size_t j=0; j<referenceFeatureSize; j++) {
-      thresholdReference[j] = percentile(tpDistances[j], _binarizePercentile*100);
-      for (size_t i=0; i<queryFeatureSize; i++) {
-        if (thresholdReference[j] < pdistances[i][j]) {
-          csm[i][j] = 0;
+    // update the binary output similarity matrix using the thresholds computed along the queryFeature axis
+    for (size_t k=0; k<queryFeatureSize; k++) {
+      thresholdQuery[k] = percentile(pdistances[k], _binarizePercentile*100);
+      for (size_t l=0; l<referenceFeatureSize; l++) {
+        if (pdistances[k][l] > thresholdQuery[k]) {
+          csm[k][l] = 0;
         }
       }
     }
@@ -216,12 +216,13 @@ AlgorithmStatus ChromaCrossSimilarity::process() {
     // optimise the threshold computation by iniatilizing it to a matrix of ones
     _outputSimMatrix.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 1));
     
-    std::vector<Real> thresholdReference(referenceFeatureSize);
+    // std::vector<Real> thresholdReference(referenceFeatureSize);
+    std::vector<Real> thresholdQuery(queryFeatureSize);
     // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
-    for (size_t j=0; j<referenceFeatureSize; j++) {
-      thresholdReference[j] = percentile(tpDistances[j], _binarizePercentile*100);
-      for (size_t i=0; i<queryFeatureSize; i++) {
-        if (thresholdReference[j] <= tpDistances[j][i]) {
+    for (size_t i=0; i<queryFeatureSize; i++) {
+      thresholdQuery[i] = percentile(pdistances[i], _binarizePercentile*100);
+      for (size_t j=0; j<referenceFeatureSize; j++) {
+        if (pdistances[i][j] > thresholdQuery[i]) {
           _outputSimMatrix[i][j] = 0;
         }
       }
