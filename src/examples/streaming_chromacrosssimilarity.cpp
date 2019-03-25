@@ -29,12 +29,13 @@ using namespace essentia;
 using namespace essentia::streaming;
 using namespace essentia::scheduler;
 
+vector<vector<Real> > readMatrixFile(string inputFileName);
 
 int main(int argc, char* argv[]) {
   
   if (argc != 4) {
     cout << "Error: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " <query_song_path> <reference_song_path> <json_output_path>" << endl;
+    cout << "Usage: " << argv[0] << " <query_song_path> <reference_feature_file_path> <json_output_path>" << endl;
     creditLibAV();
     exit(1);
   }
@@ -42,29 +43,13 @@ int main(int argc, char* argv[]) {
   string queryFilename = argv[1];
   string referenceFilename = argv[2];
   string outputFilename = argv[3];
+  vector<vector<Real> > referenceFeature = readMatrixFile(referenceFilename);
 
-  vector<vector<Real> > referenceFeature;
-  // read the 2d array text file and store it to a 2D vector 
-  ifstream myReadFile;
-  myReadFile.open(referenceFilename);
-  string line;
-  int i = 0;
-
-  while (getline(myReadFile, line)) {
-    Real value;
-    stringstream ss(line);
-    referenceFeature.push_back(vector<Real> ());
-    while (ss >> value) {
-      referenceFeature[i].push_back(value);
-    }
-    ++i;
-  }
-
-  cout << "\nReference song input matrix size: " << referenceFeature.size() << ", " << referenceFeature[0].size() << "\n" << endl;
+  cout << "----------- Inputs -----------" << endl;
+  cout << "Reference song input shape: " << referenceFeature.size() << ", " << referenceFeature[0].size() << endl;
 
   // register the algorithms in the factory
   essentia::init();
-
   Pool pool;
 
   /////// PARAMS //////////////
@@ -72,11 +57,11 @@ int main(int argc, char* argv[]) {
   int frameSize = 4096;
   int hopSize = 2048;
   int numBins = 12;
-  int oti = 0; // hardcoded, should be replaced by oti algo
   Real minFrequency = 100;
   Real maxFrequency = 3500;
-  bool otiBinary = true;
-  Real kappa = 0.095;
+  int oti = 3; // hardcoded, should be replaced by oti algo
+  bool otiBinary = false;
+  Real binarizePercentile = 0.095;
   int frameStackStride = 1;
   int frameStackSize = 9;
 
@@ -118,12 +103,12 @@ int main(int argc, char* argv[]) {
                                   "referenceFeature", referenceFeature,
                                   "otiBinary", otiBinary,
                                   "oti", oti,
-                                  "kappa", kappa,
+                                  "binarizePercentile", binarizePercentile,
                                   "frameStackSize", frameStackSize,
                                   "frameStackStride", frameStackStride);
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
-  cout << "-------- connecting algos for hpcp extraction ---------" << endl;
+  cout << "-------- connecting algos for hpcp and csm extraction ---------" << endl;
 
   // Audio -> FrameCutter
   audio->output("audio")    >>  fc->input("signal");
@@ -145,7 +130,7 @@ int main(int argc, char* argv[]) {
   // HPCP -> CSM -> pool
   hpcp->output("hpcp") >> csm->input("queryFeature");
   csm->output("csm") >> PC(pool, "csm");
-
+  
   /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-------- start processing " << queryFilename << " --------" << endl;
 
@@ -159,7 +144,8 @@ int main(int argc, char* argv[]) {
                                                                    "format", "json");
   output->input("pool").set(pool);
   output->compute();
-
+  cout << "...Done..." << endl;
+  
   delete audio;
   delete fc;
   delete w;
@@ -171,7 +157,28 @@ int main(int argc, char* argv[]) {
   delete output;
 
   essentia::shutdown();
-
   return 0;
 }
+
+
+// read the 2d array text file and store it to a 2D vector 
+vector<vector<Real> > readMatrixFile(string inputFileName) {
+  ifstream myReadFile;
+  myReadFile.open(inputFileName);
+  std::string line;
+  int i = 0;
+  vector<vector<Real> > outputArray;
+
+  while (getline(myReadFile, line)) {
+    Real value;
+    stringstream ss(line);
+    outputArray.push_back(vector<Real> ());
+    while (ss >> value) {
+      outputArray[i].push_back(value);
+    }
+    ++i;
+  }
+  return outputArray;
+}
+
 

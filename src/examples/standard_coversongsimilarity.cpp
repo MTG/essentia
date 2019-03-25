@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <cmath>
 #include <essentia/algorithmfactory.h>
 #include <essentia/essentiamath.h>
 #include <essentia/pool.h>
@@ -29,9 +30,11 @@ using namespace std;
 using namespace essentia;
 using namespace essentia::standard;
 
+Real findMaxElem(vector<vector<Real> >& inputMatrix) ;
+
 int main(int argc, char* argv[]) {
 
-  if (argc != 3) {
+  if (argc != 4) {
     cout << "Error: incorrect number of arguments." << endl;
     cout << "Usage: " << argv[0] << " <query_song_path> <reference_song_path> <json_output_path>" << endl;
     creditLibAV();
@@ -49,8 +52,8 @@ int main(int argc, char* argv[]) {
 
   /////// PARAMS //////////////
   Real sampleRate = 44100.0;
-  int frameSize = 1024;
-  int hopSize = 512;
+  int frameSize = 4096;
+  int hopSize = 2048;
   int numBins = 12;
   Real minFrequency = 100;
   Real maxFrequency = 3500;
@@ -89,12 +92,13 @@ int main(int argc, char* argv[]) {
                                    "maxFrequency", maxFrequency,
                                    "size", numBins);
 
-  Algorithm* csm = factory.create("CrossSimilarityMatrix");
+  // with default params
+  Algorithm* csm = factory.create("ChromaCrossSimilarity");
 
   Algorithm* coversim = factory.create("CoverSongSimilarity"); 
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
-  cout << "-------- connecting algos for hpcp extraction ---------" << endl;
+  cout << "-------- connecting algos for hpcp, csm and local-alignment extraction ---------" << endl;
 
   vector<Real> audioBuffer;
 
@@ -127,18 +131,18 @@ int main(int argc, char* argv[]) {
   white->output("magnitudes").set(wPeakMagnitudes);
 
   // SpectralWhitening > HPCP
-  vector<vector<Real> > hpcpOut;
+  vector<Real> hpcpOut;
   hpcp->input("frequencies").set(peakFrequencies);
   hpcp->input("magnitudes").set(wPeakMagnitudes);
   hpcp->output("hpcp").set(hpcpOut);
 
   // TODO: replace with std::vector<vector<Real> > when essentia pool has 2D vector support
-  TNT::Array2D<Real> hpcpOutPool;
+  // TNT::Array2D<Real> hpcpOutPool;
 
   /////////// STARTING THE ALGORITHMS //////////////////
 
   // compute HPCP feature of the query song
-  cout << "-------- start processing " << queryFilename << " --------" << endl;
+  cout << "-------- start processing hpcp for " << queryFilename << " --------" << endl;
 
   audio->compute();
 
@@ -158,19 +162,18 @@ int main(int argc, char* argv[]) {
     peak->compute();
     white->compute();
     hpcp->compute();
-
-    hpcpOutPool = vecvecToArray2D(hpcpOut);
-
-    pool.add("query.hpcp", hpcpOutPool);
+    pool.add("queryHPCP", hpcpOut);
   }
 
   // Now we reset the audio loader and compute HPCP feature for the reference song
-  cout << "-------- start processing " << referenceFilename << " --------" << endl;
-
+  cout << "-------- start processing hpcp for " << referenceFilename << " --------" << endl;
+  audioBuffer.clear();
+  hpcpOut.clear();
   audio->reset();
-
   audio->configure("filename", referenceFilename,
                    "sampleRate", sampleRate);
+  fc->configure("frameSize", frameSize,
+                "hopSize", hopSize);
 
   audio->compute();
 
@@ -190,42 +193,44 @@ int main(int argc, char* argv[]) {
     peak->compute();
     white->compute();
     hpcp->compute();
-
-    hpcpOutPool = vecvecToArray2D(hpcpOut);
-
-    pool.add("reference.hpcp", hpcpOutPool);
+    pool.add("referenceHPCP", hpcpOut);
 
   }
 
+  const vector<vector<Real> > queryHpcp = pool.value<vector<vector<Real> > >("queryHPCP");
+  const vector<vector<Real> > referenceHpcp = pool.value<vector<vector<Real> > >("referenceHPCP");
+  cout << "Query HPCP frames: " << queryHpcp.size() << "\nReference HPCP frames: " << referenceHpcp.size() << endl; 
+
   /////////// CONNECTING THE ALGORITHMS FOR COVER SONG SIMILARITY ////////////////
-  cout << "-------- computing cover song similarity ---------" << endl;
+  cout << "\n-------- computing cover song similarity ---------" << endl;
 
-  const vector<vector<Real> > queryHpcp = pool.value<vector<vector<Real> > >("query.hpcp");
-  const vector<vector<Real> > referenceHpcp = pool.value<vector<vector<Real> > >("reference.hpcp");
-
-  // TODO: replace with std::vector<vector<Real> > when essentia pool has 2D vector support
-  TNT::Array2D<Real> simMatrix;
+  vector<vector<Real> > simMatrix;
   csm->input("queryFeature").set(queryHpcp);
   csm->input("referenceFeature").set(referenceHpcp);
   csm->output("csm").set(simMatrix);
 
-  vector<Real> scoreMatrix;
-  coversim->input("inputArray").set(csm);
+  vector<vector<Real> > scoreMatrix;
+  coversim->input("inputArray").set(simMatrix);
   coversim->output("scoreMatrix").set(scoreMatrix);
 
   // Now we compute the cover song similarity
   csm->compute();
+  cout << " .... computing smith-waterman local alignment" << endl;
   coversim->compute();
-  pool.add("score_matrix", scoreMatrix);
+  // TODO: replace with std::vector<vector<Real> > when essentia pool has 2D vector support
+  pool.add("simMatrix", vecvecToArray2D(simMatrix));
+  pool.add("scoreMatrix", vecvecToArray2D(scoreMatrix));
 
-  scoreMatrix.size();
+  // Normalised using the length of the query song. (Asymetric cover song similarity distance) 
+  Real distance = sqrt(queryHpcp.size()) / findMaxElem(scoreMatrix);
+  cout << "Cover song similarity distance: " << distance << endl;
+  pool.add("distance", distance);
+  
   // write results to file
-  cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
-
-  string outFormat = "json";
+  cout << "\n-------- writing results to file " << outputFilename << " ---------" << endl;
   Algorithm* output = AlgorithmFactory::create("YamlOutput",
                                                "filename", outputFilename,
-                                               "format", outFormat);
+                                               "format", "json");
   output->input("pool").set(pool);
   output->compute();
 
@@ -243,4 +248,16 @@ int main(int argc, char* argv[]) {
   essentia::shutdown();
 
   return 0;
+}
+
+
+Real findMaxElem(vector<vector<Real> >& inputMatrix) {
+
+  Real maxElement = INT_MIN;
+  for (size_t i=0; i<inputMatrix.size(); i++) {
+    for (size_t j=0; j<inputMatrix[i].size(); j++) {
+      if (inputMatrix[i][j] > maxElement) maxElement = inputMatrix[i][j];
+    }
+  }
+  return maxElement;
 }
