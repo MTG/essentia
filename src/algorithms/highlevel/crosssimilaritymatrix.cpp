@@ -88,36 +88,31 @@ void CrossSimilarityMatrix::compute() {
   if (_binarize == true) {
     // pairwise euclidean distance
     std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeatureStack, referenceFeatureStack);
-    std::vector<std::vector<Real> > tpDistances = transpose(pdistances);
     size_t queryFeatureSize = pdistances.size();
     size_t referenceFeatureSize = pdistances[0].size();
 
     std::vector<Real> thresholdQuery(queryFeatureSize);
     std::vector<Real> thresholdReference(referenceFeatureSize);
 
-    csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize));
+    csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 1));
     // construct the binary output similarity matrix using the thresholds computed along the queryFeature axis
     for (size_t k=0; k<queryFeatureSize; k++) {
       thresholdQuery[k] = percentile(pdistances[k], _binarizePercentile*100);
       for (size_t l=0; l<referenceFeatureSize; l++) {
-        if (thresholdQuery[k] >= pdistances[k][l]) {
-          csm[k][l] = 1;
-        }
-        else if (thresholdQuery[k] < pdistances[k][l]) {
+        if (pdistances[k][l] > thresholdQuery[k]) {
           csm[k][l] = 0;
         }
       }
     }
     // update the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
     for (size_t j=0; j<referenceFeatureSize; j++) {
-      thresholdReference[j] = percentile(tpDistances[j], _binarizePercentile*100);
+      _status = true;
       for (size_t i=0; i<queryFeatureSize; i++) {
-        if (thresholdReference[j] >= pdistances[i][j]) {
-          csm[i][j] *= 1; 
+        if (_status == true) thresholdReference[j] = percentile(getColsAtVecIndex(pdistances, j), _binarizePercentile * 100);
+        if (pdistances[i][j] > thresholdReference[j]) {
+          csm[i][j] = 0;
         }
-        else if (thresholdReference[j] < pdistances[i][j]) {
-          csm[i][j] *= 0;
-        }
+        _status = false;
       }
     }
   }
@@ -126,6 +121,17 @@ void CrossSimilarityMatrix::compute() {
     // returns pairwise euclidean distance
     csm = pairwiseDistance(queryFeatureStack, referenceFeatureStack);
   }
+}
+
+// returns a column corresponding to a specified index in the given 2D input matrix
+std::vector<Real> CrossSimilarityMatrix::getColsAtVecIndex(std::vector<std::vector<Real> >& inputMatrix, int index) const {
+  
+  std::vector<Real> cols;
+  cols.reserve(inputMatrix.size());
+  for (size_t i=0; i<inputMatrix.size(); i++) {
+    cols.push_back(inputMatrix[i][index]);
+  }
+  return cols;
 }
 
 } // namespace standard

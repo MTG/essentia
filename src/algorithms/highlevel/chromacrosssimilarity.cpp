@@ -166,7 +166,7 @@ const char* ChromaCrossSimilarity::description =  DOC("This algorithm computes a
 "[1] Serra, J., Gómez, E., & Herrera, P. (2008). Transposing chroma representations to a common key, IEEE Conference on The Use of Symbols to Represent Music and Multimedia Objects.\n\n"
 "[2] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n"
 "[3] Serra, Joan, et al. Chroma binary similarity and local alignment applied to cover song identification. IEEE Transactions on Audio, Speech, and Language Processing 16.6 (2008).\n");
-0
+
 
 void ChromaCrossSimilarity::configure() {
   // configure parameters
@@ -340,5 +340,5 @@ std::vector<std::vector<Real> > chromaBinarySimMatrix(std::vector<std::vector<Re
     }
   }
   return simMatrix;
-};
+}
 

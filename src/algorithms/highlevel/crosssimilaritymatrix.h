@@ -55,7 +55,9 @@ class CrossSimilarityMatrix : public Algorithm {
    int _frameStackSize;
    Real _binarizePercentile;
    bool _binarize;
+   bool _status;
    std::vector<std::vector<Real> > stackFrames(std::vector<std::vector<Real> >& frames, int frameStackSize, int frameStackStride) const;
+   std::vector<Real> getColsAtVecIndex(std::vector<std::vector<Real> >& inputMatrix, int index) const;
 };
 
 } // namespace standard
