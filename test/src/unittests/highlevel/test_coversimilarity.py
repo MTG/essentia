@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
-
+from essentia.streaming import CoverSongSimilarity, VectorInput
 from essentia.standard import CoverSongSimilarity
 from essentia import array, run, Pool
 from essentia_test import *
@@ -25,39 +25,37 @@ import numpy as np
 
 class TestCoverSimilarity(TestCase):
 
-    # computed using the python implementation from https://github.com/albincorreya/ChromaCoverId/blob/master/cover_similarity_measures.py
-    input_matrix = np.load('highlevel/simMatrix_mozart30sec_vivaldi.npy')
-    expected_distance = 0.701402
+    sim_matrix = np.array([[1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1],
+                           [0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
+                           [1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1],
+                           [1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+                           [0, 0, 0, 0, 0, 0, 0 ,0, 0, 0, 0, 0],
+                           [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]])
+    expected_distance = 1.732
 
     def testEmpty(self):
         self.assertComputeFails(CoverSongSimilarity(), [])
 
-    def testRegression(self):
+    def testRegressionStandard(self):
         sim = CoverSongSimilarity()
-        score_matrix = sim.compute(array(self.input_matrix))
-        distance = np.sqrt(self.input_matrix.shape[1]) / np.max(score_matrix)
-
+        score_matrix = sim.compute(array(self.sim_matrix))
+        distance = np.sqrt(self.sim_matrix.shape[1]) / np.max(score_matrix)
         self.assertAlmostEqual(self.expected_distance, distance)
 
     def testInvalidParam(self):
         self.assertConfigureFails(CoverSongSimilarity(), { 'simType': 1 })
         self.assertConfigureFails(CoverSongSimilarity(), { 'simType': 'dmax' })
 
-    """
-    def testStreamingRegression(self):
-        from essentia.streaming import CoverSongSimilarity as CoverSim
-
-        sim = CoverSim()
+    def testRegressionStreaming(self):
+        sim = CoverSongSimilarity()
         pool = Pool()
-        
-        array(self.input_matrix) >> sim.inputArray
+        inputVec = VectorInput(array(self.sim_matrix))
+        inputVec.data >> sim.inputArray
         sim.inputArray >> (pool, 'score_matrix')
         run(sim)
-
-        distance = np.sqrt(pool['score_matrix'].shape[1]) / np.max(pool['score_matrix'])
-
+        distance = np.sqrt(self.sim_matrix.shape[1]) / np.max(pool['score_matrix'])
         self.assertAlmostEqual(self.expected_distance, distance)
-    """
+
 
 suite = allTests(TestCoverSimilarity)
 
