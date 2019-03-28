@@ -654,12 +654,46 @@ inline Real mel102hz(Real mel) {
   return 700.0 * (pow(10.0, mel/2595.0) - 1.0);
 }
 
+// Convert Mel to Hz based on Slaney's formula in MATLAB Auditory Toolbox
+inline Real mel2hzSlaney(Real mel) {
+  const Real minLogHz = 1000.0;
+  const Real linSlope = 3 / 200.;
+  const Real minLogMel = minLogHz * linSlope;
+
+  if (mel < minLogMel) {
+    // Linear part: 0 - 1000 Hz.
+    return mel / linSlope;
+  }
+  else {
+    // Log-scale part: >= 1000 Hz.
+    const Real logStep = log(6.4) / 27.0;
+    return minLogHz * exp((mel - minLogMel) * logStep);
+  }
+}
+
 inline Real hz2mel(Real hz) {
   return 1127.01048 * log(hz/700.0 + 1.0);
 }
 
 inline Real hz2mel10(Real hz) {
   return 2595.0 * log10(hz/700.0 + 1.0);
+}
+
+// Convert Hz to Mel based on Slaney's formula in MATLAB Auditory Toolbox
+inline Real hz2melSlaney(Real hz) {
+  const Real minLogHz = 1000.0;
+  const Real linSlope = 3 / 200.;
+
+  if (hz < minLogHz) {
+    // Linear part: 0 - 1000 Hz.
+    return hz * linSlope;
+  }
+  else {
+    // Log-scale part: >= 1000 Hz.
+    const Real minLogMel = minLogHz * linSlope;
+    const Real logStep = log(6.4) / 27.0;
+    return minLogMel + log(hz/minLogHz) / logStep;
+  }
 }
 
 inline Real hz2hz(Real hz){
