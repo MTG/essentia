@@ -30,7 +30,7 @@ class TestMelBands(TestCase):
                         lowFrequencyBound=0,
                         highFrequencyBound=44100*.5)
 
-    def testRegression(self):
+    def testFlatSpectrum(self):
         spectrum = [1]*1024
         mbands = self.InitMelBands(24)(spectrum)
         self.assertEqual(len(mbands), 24 )
@@ -88,7 +88,7 @@ class TestMelBands(TestCase):
         size = 1024
         while (size >= 256 ):
             self.assertEqualVector(MelBands()(zeros(size)), zeros(24))
-            size /= 2
+            size = size // 2
 
     def testInvalidInput(self):
         # mel bands should fail for a spectrum with less than 2 bins
