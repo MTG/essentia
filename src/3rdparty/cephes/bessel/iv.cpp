@@ -54,6 +54,8 @@ Copyright 1984, 1987, 1988, 2000 by Stephen L. Moshier
 #include <cstddef>
 #include "bessel.h"
 
+using namespace cephes;
+
 // #ifdef ANSIPROT
 // extern double hyperg ( double, double, double );
 // extern double exp ( double );
@@ -67,13 +69,7 @@ Copyright 1984, 1987, 1988, 2000 by Stephen L. Moshier
 // extern double MACHEP, MAXNUM;
 
 
-
-static double iv_asymptotic(double v, double x);
-static void ikv_asymptotic_uniform(double v, double x, double *Iv, double *Kv);
-static void ikv_temme(double v, double x, double *Iv, double *Kv);
-
-
-double cephes_iv(double v, double x)
+double cephes::cephes_iv(double v, double x)
 {
 int sign;
 double t, ax, res;
@@ -143,7 +139,7 @@ return res;
  * Compute Iv from (AMS5 9.7.1), asymptotic expansion for large |z|
  * Iv ~ exp(x)/sqrt(2 pi x) ( 1 + (4*v*v-1)/8x + (4*v*v-1)(4*v*v-9)/8x/2! + ...)
  */
-static double iv_asymptotic(double v, double x)
+double cephes::iv_asymptotic(double v, double x)
 {
     double mu;
     double sum, term, prefactor, factor;
@@ -247,7 +243,7 @@ static const double asymptotic_ufactors[N_UFACTORS][N_UFACTOR_TERMS] = {
 /*
  * Compute Iv, Kv from (AMS5 9.7.7 + 9.7.8), asymptotic expansion for large v
  */
-static void ikv_asymptotic_uniform(double v, double x,
+void cephes::ikv_asymptotic_uniform(double v, double x,
 			    double *i_value, double *k_value)
 {
     double i_prefactor, k_prefactor;
@@ -350,7 +346,7 @@ static void ikv_asymptotic_uniform(double v, double x,
  * Calculate K(v, x) and K(v+1, x) by method analogous to
  * Temme, Journal of Computational Physics, vol 21, 343 (1976)
  */
-static int temme_ik_series(double v, double x, double *K, double *K1)
+int cephes::temme_ik_series(double v, double x, double *K, double *K1)
 {
     double f, h, p, q, coef, sum, sum1, tolerance;
     double a, b, c, d, sigma, gamma1, gamma2;
@@ -412,7 +408,7 @@ static int temme_ik_series(double v, double x, double *K, double *K1)
 
 /* Evaluate continued fraction fv = I_(v+1) / I_v, derived from
  * Abramowitz and Stegun, Handbook of Mathematical Functions, 1972, 9.1.73 */
-static int CF1_ik(double v, double x, double *fv)
+int cephes::CF1_ik(double v, double x, double *fv)
 {
     double C, D, f, a, b, delta, tiny, tolerance;
     unsigned long k;
@@ -463,7 +459,7 @@ static int CF1_ik(double v, double x, double *fv)
  * z1 / z0 = U(v+1.5, 2v+1, 2x) / U(v+0.5, 2v+1, 2x), see
  * Thompson and Barnett, Computer Physics Communications, vol 47, 245 (1987)
  */
-static int CF2_ik(double v, double x, double *Kv, double *Kv1)
+int cephes::CF2_ik(double v, double x, double *Kv, double *Kv1)
 {
 
     double S, C, Q, D, f, a, b, q, delta, tolerance, current, prev;
@@ -530,7 +526,7 @@ enum {
  * Compute I(v, x) and K(v, x) simultaneously by Temme's method, see
  * Temme, Journal of Computational Physics, vol 19, 324 (1975)
  */
-static void ikv_temme(double v, double x, double *Iv_p, double *Kv_p)
+void cephes::ikv_temme(double v, double x, double *Iv_p, double *Kv_p)
 {
     /* Kv1 = K_(v+1), fv = I_(v+1) / I_v */
     /* Ku1 = K_(u+1), fu = I_(u+1) / I_u */

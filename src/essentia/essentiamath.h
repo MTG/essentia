@@ -971,7 +971,7 @@ inline std::string equivalentKey(const std::string key) {
 
 template <typename T>
 T iv(T v, T z) {
-    return (T)cephes_iv((double)v, (double)z);
+    return (T)cephes::cephes_iv((double)v, (double)z);
 }
 
 /**

@@ -108,6 +108,8 @@ Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
 
 #define MAXNUM 1.79769313486231570815E308
 
+using namespace cephes;
+
 static double P[] = {
   1.60119522476751861407E-4,
   1.19135147006586384913E-3,
@@ -160,8 +162,8 @@ double lgam ( double );
 #else
 double pow(), log(), exp(), sin(), polevl(), p1evl(), floor(), fabs();
 int isnan(), isfinite();
-static double stirf();
-double lgam();
+// static double stirf();
+// double lgam();
 #endif
 #ifdef INFINITIES
 extern double INFINITY;
@@ -174,7 +176,7 @@ extern double NAN;
 /* Gamma function computed by Stirling's formula.
  * The polynomial STIR is valid for 33 <= x <= 172.
  */
-static double stirf(double x)
+double cephes::stirf(double x)
 {
 double y, w, v;
 
@@ -196,7 +198,7 @@ return( y );
 
 
 
-double gamma(double x)
+/* double gamma(double x)
 {
 double p, q, z;
 int i;
@@ -312,7 +314,7 @@ if( x == 0.0 )
 else
 	return( z/((1.0 + 0.5772156649015329 * x) * x) );
 }
-
+*/
 
 
 /* A[]: Stirling's formula expansion of log gamma
@@ -478,7 +480,7 @@ static double LS2PI  =  0.91893853320467274178;
 /* Logarithm of gamma function */
 
 
-double lgam(double x)
+double cephes::lgam(double x)
 {
 double p, q, u, w, z;
 int i;
@@ -587,7 +589,7 @@ else
 return( q );
 }
 
-double gam(double x)
+double cephes::gam(double x)
 {
   double p, q, z;
   int i;
@@ -598,8 +600,11 @@ double gam(double x)
 
   if (std::isinf(x) == 1)
     return(x);
-  if (std::isinf(x) == -1)
-    return(NAN);
+	// These lines do not make sense
+	// therefore we comment them to 
+	// prevent a compilation warning (Pablo A.)
+  // if (std::isinf(x) == -1)
+    // return(NAN);
 
   q = fabs(x);
 
