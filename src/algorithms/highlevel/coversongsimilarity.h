@@ -28,18 +28,20 @@ namespace standard {
   protected:
    Input<std::vector<std::vector<Real> > > _inputArray;
    Output<std::vector<std::vector<Real> > > _scoreMatrix;
+   Output<Real> _distance;
    Real disOnset;
    Real disExtension;
   public:
    CoverSongSimilarity() {
-     declareInput(_inputArray, "inputArray", " a 2D binary cross similarity matrix of two audio chroma vectors (refer CrossSimilarityMatrix algorithm').");
-     declareOutput(_scoreMatrix, "scoreMatrix", "2D cover song similarity score matrix from the input binary cross similarity matrix");
+     declareInput(_inputArray, "inputArray", " a 2D binary cross-similarity matrix of two audio chroma vectors (query vs reference song) (refer 'ChromaCrossSimilarity' algorithm').");
+     declareOutput(_scoreMatrix, "scoreMatrix", "a 2D smith-waterman alignment score matrix from the input binary cross-similarity matrix");
+     declareOutput(_distance, "distance", "asymmetric cover song similarity distance between the query and reference song from the input similarity matrix as described in [2].");
    }
 
    void declareParameters() {
      declareParameter("disOnset", "penalty for disruption onset", "[0,inf)", 0.5);
      declareParameter("disExtension", "penalty for disruption extension", "[0,inf)", 0.5);
-     declareParameter("simType", "type of cover song similarity measure", "{qmax, dmax}", "qmax");
+     declareParameter("alignmentType", "choose either one of the given local-alignment constraints for smith-waterman algorithm as described in [2] and [3] respectively.", "{serra09, chen17}", "serra09");
    }
 
    void configure();
@@ -52,7 +54,7 @@ namespace standard {
    Real _disOnset;
    Real _disExtension;
    enum SimType {
-     QMAX, DMAX
+     SERRA09, CHEN17
    };
    SimType _simType;
 };
@@ -68,34 +70,33 @@ namespace streaming {
 class CoverSongSimilarity : public Algorithm {
   protected:
    Sink<std::vector<Real> > _inputArray;
-   // Sink<TNT::Array2D<Real> > _inputArray;
-   // Source<std::vector<std::vector<Real> > > _scoreMatrix;
    Source<TNT::Array2D<Real> > _scoreMatrix;
-   // params
+   Source<Real> _distance;
+   
+   // params and global protected variables
    int _minFramesSize = 2;
    int _iterIdx = 0;
    Real _disOnset;
    Real _disExtension;
-   // global protected variables
-   std::vector<std::vector<Real> > _prevCumMatrixFrames;
-   std::vector<std::vector<Real> > _previnputMatrixFrames;
    Real _c1;
    Real _c2;
    Real _c3;
    Real _c4;
    Real _c5;
-   size_t xFrames;
-   size_t yFrames;
+   size_t _xFrames;
+   size_t _yFrames;
    size_t _xIter;
    size_t _accumXFrameSize;
-   size_t _accumYFrameSize;
    size_t _x;
-   size_t _y;
+   std::vector<std::vector<Real> > _prevCumMatrixFrames;
+   std::vector<std::vector<Real> > _previnputMatrixFrames;
+   std::vector<std::vector<Real> > _bufferScoreMatrix;
 
   public:
    CoverSongSimilarity() : Algorithm() {
     declareInput(_inputArray, _minFramesSize, "inputArray", "a 2D binary cross similarity matrix of two audio chroma vectors (refer CrossSimilarityMatrix algorithm').");
-    declareOutput(_scoreMatrix, 1, "scoreMatrix", "2D cover song similarity score matrix from the input binary cross similarity matrix");
+    declareOutput(_scoreMatrix, 1, "scoreMatrix", "a 2D smith-waterman alignment score matrix from the input binary cross-similarity matrix as described in [2].");
+    declareOutput(_distance, 1, "distance", "asymmetric cover song similarity distance between the query and reference song from the input similarity matrix as described in [2].");
   }
 
   ~CoverSongSimilarity() {}
@@ -118,3 +119,4 @@ class CoverSongSimilarity : public Algorithm {
 } // namespace streaming
 } // namespace essentia
 #endif // ESSENTIA_COVERSONGSIMILARITY_H
+
