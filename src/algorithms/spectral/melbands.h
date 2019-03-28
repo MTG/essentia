@@ -54,7 +54,7 @@ class MelBands : public Algorithm {
     declareParameter("sampleRate", "the sample rate", "(0,inf)", 44100.);
     declareParameter("lowFrequencyBound", "a lower-bound limit for the frequencies to be included in the bands", "[0,inf)", 0.0);
     declareParameter("highFrequencyBound", "an upper-bound limit for the frequencies to be included in the bands", "[0,inf)", 22050.0);
-    declareParameter("warpingFormula", "The scale implementation type. use 'htkMel' to emulate its behaviour. Default slaneyMel.","{slaneyMel,htkMel}","slaneyMel");
+    declareParameter("warpingFormula", "The scale implementation type: 'htkMel' scale from the HTK toolkit [2, 3] (default) or 'slaneyMel' scale from the Auditory toolbox [4]","{slaneyMel,htkMel}","htkMel");
     declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
     declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
     declareParameter("type", "'power' to output squared units, 'magnitude' to keep it as the input","{magnitude,power}", "power");
