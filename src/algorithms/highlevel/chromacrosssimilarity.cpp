@@ -74,7 +74,7 @@ void ChromaCrossSimilarity::compute() {
     throw EssentiaException("CrossSimilarityMatrix: input referenceFeature is empty.");
 
   // check whether to use oti-based binary similarity 
-  if (_otiBinary == true) {
+  if (_otiBinary) {
     std::vector<std::vector<Real> >  stackFramesA = stackChromaFrames(queryFeature, _frameStackSize, _frameStackStride);
     std::vector<std::vector<Real> >  stackFramesB = stackChromaFrames(referenceFeature, _frameStackSize, _frameStackStride);
     csm = chromaBinarySimMatrix(stackFramesA, stackFramesB, _noti, _mathcCoef, _mismatchCoef);;
@@ -82,7 +82,7 @@ void ChromaCrossSimilarity::compute() {
   // Otherwise use default cross-similarity computation method based on euclidean distances
   else {
     // check whether to transpose by oti
-    if (_oti == true) {
+    if (_oti) {
       int otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
       rotateChroma(referenceFeature, otiIdx);
     }
@@ -97,18 +97,18 @@ void ChromaCrossSimilarity::compute() {
     std::vector<Real> thresholdQuery(queryFeatureSize);
     std::vector<Real> thresholdReference(referenceFeatureSize);
 
-    if (_streamingMode == true) {
+    if (_streamingMode) {
       // optimise the threshold computation by iniatilizing it to a matrix of ones
       csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 1));
     }
-    else if (_streamingMode == false) {
+    else if (!_streamingMode) {
       csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize));
       // compute the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
       for (size_t j=0; j<referenceFeatureSize; j++) {
         _status = true;
         for (size_t i=0; i<queryFeatureSize; i++) {
           // here we only compute the thresholdReference at index j once 
-          if (_status == true) thresholdReference[j] = percentile(getColsAtVecIndex(pdistances, j), _binarizePercentile*100);
+          if (_status) thresholdReference[j] = percentile(getColsAtVecIndex(pdistances, j), _binarizePercentile*100);
           if (pdistances[i][j] <= thresholdReference[j]) {
             csm[i][j] = 1;
           }
@@ -178,10 +178,13 @@ void ChromaCrossSimilarity::configure() {
   _otiBinary = parameter("otiBinary").toBool();
   _mathcCoef = 1; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
   _mismatchCoef = 0; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
-  rotateChroma(_referenceFeature, _oti); // transpose the chroma of reference song by an specified 'oti' parameter.
-  _referenceFeatureStack = stackChromaFrames(_referenceFeature, _frameStackSize, _frameStackStride);
-  if (_otiBinary == true) _minFramesSize = 1;
-  else _minFramesSize = _frameStackSize + 1; // min amount of frames needed to construct an frame of stacked vector
+  
+  if (!_referenceFeature.empty()) {
+    if (_oti != 0) rotateChroma(_referenceFeature, _oti); // transpose the chroma of reference song by an specified 'oti' parameter.
+    _referenceFeatureStack = stackChromaFrames(_referenceFeature, _frameStackSize, _frameStackStride);
+  }
+  if (_otiBinary) _minFramesSize = 1;
+  else _minFramesSize = _frameStackSize + 1; // min amount of frames needed to construct a frame of stacked-feature vector
   
   input("queryFeature").setAcquireSize(_minFramesSize);
   input("queryFeature").setReleaseSize(1);
@@ -224,13 +227,13 @@ AlgorithmStatus ChromaCrossSimilarity::process() {
     }
   }
   // check whether to use oti-based binary similarity as mentioned in [3]
-  if (_otiBinary == true) {
+  if (_otiBinary) {
     _outputSimMatrix = chromaBinarySimMatrix(inputFramesCopy, _referenceFeature, _noti, _mathcCoef, _mismatchCoef);
     csmOutput[0] = _outputSimMatrix[0];
     releaseData();
   }
   // otherwise we compute similarity matrix as mentioned in [2]
-  else if (_otiBinary == false) {
+  else if (!_otiBinary) {
     std::vector<std::vector<Real> > queryFeatureStack = stackChromaFrames(inputFramesCopy, _frameStackSize, _frameStackStride);
     // here we compute the pairwsie euclidean distances between query and reference song time embedding and finally tranpose the resulting matrix.
     std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeatureStack, _referenceFeatureStack);
@@ -341,4 +344,5 @@ std::vector<std::vector<Real> > chromaBinarySimMatrix(std::vector<std::vector<Re
   }
   return simMatrix;
 }
+
 

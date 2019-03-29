@@ -6,10 +6,10 @@
  * Essentia is free software: you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License as published by the Free
  * Software Foundation (FSF), either version 3 of the License, or (at your
- * option) ayFrames later version.
+ * option) any later version.
  *
  * This program is distributed in the hope that it will be useful, but WITHOUT
- * AyFrames WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
  * details.
  *
@@ -36,7 +36,7 @@ namespace standard {
 const char* CoverSongSimilarity::name = "CoverSongSimilarity";
 const char* CoverSongSimilarity::category = "Music similarity";
 const char* CoverSongSimilarity::description = DOC("This algorithm computes a cover song similiarity measure from an input cross similarity matrix of two chroma vectors of a query and reference song using various alignment constraints of smith-waterman local-alignment algorithm.\n\n"
-"This algorithm expects to recieve the input matrix from essentia 'ChromaCrossSimilarity' algorithm\n\n"
+"This algorithm expects to recieve the input matrix from essentia 'ChromaCrossSimilarity' algorithm or essentia 'CrossSimilarityMatrix' with parameter 'binarize=True'.\n\n"
 "The algorithm provides two different allignment contraints for computing the smith-waterman score matrix (check references).\n\n"
 "Exceptions are thrown if the input similarity matrix is not binary or empty.\n\n"
 "References:\n"
@@ -48,7 +48,7 @@ const char* CoverSongSimilarity::description = DOC("This algorithm computes a co
 void CoverSongSimilarity::configure() {
   _disOnset = parameter("disOnset").toReal();
   _disExtension = parameter("disExtension").toReal();
-  std::string simType = toLower(parameter("simType").toString());
+  std::string simType = toLower(parameter("alignmentType").toString());
   if      (simType == "serra09") _simType = SERRA09;
   else if (simType == "chen17") _simType = CHEN17;
   else throw EssentiaException("CoverSongSimilarity: Invalid cover similarity type: ", simType);
@@ -198,8 +198,8 @@ AlgorithmStatus CoverSongSimilarity::process() {
   // if it's the very first stream of feature array, we initialize the state varibales and indexes
   if (_iterIdx == 0) {
     _prevCumMatrixFrames.assign(_xFrames, std::vector<Real>(_yFrames, 0));
-    for (size_t i=0; i<incrementMatrix.size(); i++) {
-      _previnputMatrixFrames.push_back(incrementMatrix[i]);
+    for (size_t i=0; i<_xFrames; i++) {
+      _previnputMatrixFrames.push_back(inputFramesCopy[i]);
     }
     _accumXFrameSize = _xFrames;
     _x = 2;
@@ -207,11 +207,10 @@ AlgorithmStatus CoverSongSimilarity::process() {
   }
   // otherwise we update the indexes with respected to the previously stored prevcumMatrixFrames
   else {
-    _accumXFrameSize = _xFrames * (_iterIdx +  1);
-    for (size_t i=0; i<incrementMatrix.size(); i++) {
-      _prevCumMatrixFrames.push_back(incrementMatrix[i]);
-      _previnputMatrixFrames.push_back(incrementMatrix[i]);
+    for (size_t i=0; i<_xFrames; i++) {
+      _previnputMatrixFrames.push_back(inputFramesCopy[i]);
     }
+    _accumXFrameSize = _xFrames * (_iterIdx +  1);
     _x = _xFrames * _iterIdx;
     _xIter = 0;
   }
@@ -239,9 +238,10 @@ AlgorithmStatus CoverSongSimilarity::process() {
     if (_xIter < _xFrames) _xIter++;
   }
   _iterIdx++;
-  // add the resulted score matrix to the buffer
-  for (size_t i=0; i<incrementMatrix.size(); i++) {
+  // add the resulted score matrix to the buffer variables
+  for (size_t i=0; i<_xFrames; i++) {
     _bufferScoreMatrix.push_back(incrementMatrix[i]);
+    _prevCumMatrixFrames.push_back(incrementMatrix[i]);
   }
   // compute asymetric cover similarity distance
   distance[0] = sqrt(_yFrames) / maxElementArray(_bufferScoreMatrix);

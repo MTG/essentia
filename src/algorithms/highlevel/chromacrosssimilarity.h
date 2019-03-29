@@ -105,7 +105,7 @@ class ChromaCrossSimilarity : public Algorithm {
   AlgorithmStatus process();
 
   void declareParameters() {
-    declareParameter("referenceFeature", "input chromagram of the reference song. (eg. a HPCP)", "", std::vector<std::vector<Real> >());
+    declareParameter("referenceFeature", "2D matrix corresponds to the input chromagram of the reference song. (eg. a HPCP)", "", std::vector<std::vector<Real> >());
     declareParameter("frameStackStride", "stride size to form a stack of frames (e.g., 'frameStackStride'=1 to use consecutive frames; 'frameStackStride'=2 for using every second frame)", "[1,inf)", 1);
     declareParameter("frameStackSize", "number of input frames to stack together and treat as a feature vector for similarity computation. Choose 'frameStackSize=1' to use the original input frames without stacking", "[0,inf)", 9);
     declareParameter("binarizePercentile", "maximum percent of distance values to consider as similar in each row and each column", "[0,1]", 0.095);

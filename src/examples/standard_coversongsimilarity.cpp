@@ -19,7 +19,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <cmath>
 #include <essentia/algorithmfactory.h>
 #include <essentia/essentiamath.h>
 #include <essentia/pool.h>
@@ -30,7 +29,6 @@ using namespace std;
 using namespace essentia;
 using namespace essentia::standard;
 
-Real findMaxElem(vector<vector<Real> >& inputMatrix) ;
 
 int main(int argc, char* argv[]) {
 
@@ -205,6 +203,7 @@ int main(int argc, char* argv[]) {
   cout << "\n-------- computing cover song similarity ---------" << endl;
 
   vector<vector<Real> > simMatrix;
+  Real distance;
   csm->input("queryFeature").set(queryHpcp);
   csm->input("referenceFeature").set(referenceHpcp);
   csm->output("csm").set(simMatrix);
@@ -212,19 +211,18 @@ int main(int argc, char* argv[]) {
   vector<vector<Real> > scoreMatrix;
   coversim->input("inputArray").set(simMatrix);
   coversim->output("scoreMatrix").set(scoreMatrix);
+  coversim->output("distance").set(distance);
 
   // Now we compute the cover song similarity
   csm->compute();
   cout << " .... computing smith-waterman local alignment" << endl;
   coversim->compute();
   // TODO: replace with std::vector<vector<Real> > when essentia pool has 2D vector support
-  pool.add("simMatrix", vecvecToArray2D(simMatrix));
   pool.add("scoreMatrix", vecvecToArray2D(scoreMatrix));
-
-  // Normalised using the length of the query song. (Asymetric cover song similarity distance) 
-  Real distance = sqrt(queryHpcp.size()) / findMaxElem(scoreMatrix);
   cout << "Cover song similarity distance: " << distance << endl;
   pool.add("distance", distance);
+  pool.remove("queryHPCP");
+  pool.remove("referenceHPCP");
   
   // write results to file
   cout << "\n-------- writing results to file " << outputFilename << " ---------" << endl;
@@ -250,14 +248,3 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-
-Real findMaxElem(vector<vector<Real> >& inputMatrix) {
-
-  Real maxElement = INT_MIN;
-  for (size_t i=0; i<inputMatrix.size(); i++) {
-    for (size_t j=0; j<inputMatrix[i].size(); j++) {
-      if (inputMatrix[i][j] > maxElement) maxElement = inputMatrix[i][j];
-    }
-  }
-  return maxElement;
-}
