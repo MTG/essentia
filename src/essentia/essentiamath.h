@@ -37,7 +37,6 @@
 #include "types.h"
 #include "utils/tnt/tnt.h"
 #include "utils/tnt/tnt2essentiautils.h"
-#include "../3rdparty/cephes/bessel/bessel.h"
 
 #define M_2PI (2 * M_PI)
 
@@ -969,10 +968,6 @@ inline std::string equivalentKey(const std::string key) {
   return "";
 }
 
-template <typename T>
-T iv(T v, T z) {
-    return (T)cephes::cephes_iv((double)v, (double)z);
-}
 
 /**
  * Sample covariance

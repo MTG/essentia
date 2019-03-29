@@ -23,6 +23,7 @@
 #include "essentiamath.h"
 #include "algorithm.h"
 #include "algorithmfactory.h"
+#include "3rdparty/cephes/bessel/bessel.h"
 
 namespace essentia {
 namespace standard {
