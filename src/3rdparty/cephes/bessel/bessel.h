@@ -33,7 +33,7 @@ double p1evl(double x, double coef[], int N);
 // double k1(double x);
 // double k1e(double x);
 
-double cephes_iv(double nu, double x);
+double iv(double nu, double x);
 // double jv(double nu, double x);
 // double yv(double nu, double x);
 // double kn(int n, double x);
