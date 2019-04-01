@@ -69,7 +69,7 @@ using namespace cephes;
 // extern double MACHEP, MAXNUM;
 
 
-double cephes::cephes_iv(double v, double x)
+double cephes::iv(double v, double x)
 {
 int sign;
 double t, ax, res;
