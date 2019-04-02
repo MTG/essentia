@@ -75,7 +75,11 @@ const char* MFCC::description = DOC("This algorithm computes the mel-frequency c
 "  http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient\n\n"
 "  [3] Young, S. J., Evermann, G., Gales, M. J. F., Hain, T., Kershaw, D.,\n"
 "  Liu, X., … Woodland, P. C. (2009). The HTK Book (for HTK Version 3.4).\n"
-"  Construction, (July 2000), 384, https://doi.org/http://htk.eng.cam.ac.uk");
+"  Construction, (July 2000), 384, https://doi.org/http://htk.eng.cam.ac.uk\n\n"
+"  [4] Slaney, M. Auditory Toolbox: A MATLAB Toolbox for Auditory Modeling Work.\n"
+"  Technical Report, version 2, Interval Research Corporation, 1998.");
+
+
 
 void MFCC::configure() {
   _melFilter->configure(INHERIT("inputSize"),

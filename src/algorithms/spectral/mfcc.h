@@ -64,8 +64,7 @@ class MFCC : public Algorithm {
     declareParameter("numberCoefficients", "the number of output mel coefficients", "[1,inf)", 13);
     declareParameter("lowFrequencyBound", "the lower bound of the frequency range [Hz]", "[0,inf)", 0.);
     declareParameter("highFrequencyBound", "the upper bound of the frequency range [Hz]", "(0,inf)", 11000.);
-    declareParameter("warpingFormula", "The scale implementation type. use 'htkMel' to emulate its behaviour. Default slaneyMel.","{slaneyMel,htkMel}","slaneyMel");
-    declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
+    declareParameter("warpingFormula", "The scale implementation type: 'htkMel' scale from the HTK toolkit [2, 3] (default) or 'slaneyMel' scale from the Auditory toolbox [4]","{slaneyMel,htkMel}","htkMel");    declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
     declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
     declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
     declareParameter("dctType", "the DCT type", "[2,3]", 2);
