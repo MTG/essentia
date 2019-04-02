@@ -216,8 +216,8 @@ void SNR::MMSE(std::vector<Real> &mmse,
     else {
       mmse[i] = g * (sqrt(v[i]) / snrPost[i]) * 
                 exp(-v[i] / 2.f) * 
-                ((1 + v[i]) * iv(0.f, v[i] / 2.f) +
-                v[i] * iv(1.f, v[i] / 2.f)) * Y[i];
+                ((1 + v[i]) * cephes::iv(0.f, v[i] / 2.f) +
+                v[i] * cephes::iv(1.f, v[i] / 2.f)) * Y[i];
     }
   }
 };
