@@ -181,7 +181,6 @@ std::vector<Real> ChromaCrossSimilarity::getColsAtVecIndex(std::vector<std::vect
 void ChromaCrossSimilarity::reset() {
   // clear the accumulated euclidean similarit matrix in the streaming mode
   _accumEucDistances.clear();
-  _accumEucDistances.shrink_to_fit();
 }
 
 
