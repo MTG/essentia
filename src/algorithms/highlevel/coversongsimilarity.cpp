@@ -98,14 +98,14 @@ void CoverSongSimilarity::compute() {
   }
   else if (_simType == CHEN17) {
     // iterate through the similarity matrix to recursively construct the dmax scoring cumilative matrix
-    for(size_t i = 2; i < xFrames; ++i) {
-      for(size_t j = 2; i < yFrames; ++j) {
+    for(size_t i = 3; i < xFrames; i++) {
+      for(size_t j = 3; j < yFrames; j++) {
         // measure the diagonal when a similarity is found in the input matrix
         if (simMatrix[i][j] == 1.) {
           c2 = scoreMatrix[i-2][j-1] + simMatrix[i-1][j];
           c3 = scoreMatrix[i-1][j-2] + simMatrix[i][j-1];
-          c4 = scoreMatrix[i-3][j-1] + simMatrix[i-2][j] + scoreMatrix[i-1][j];
-          c5 = scoreMatrix[i-1][j-3] + simMatrix[i][j-2] + scoreMatrix[i][j-1];
+          c4 = scoreMatrix[i-3][j-1] + simMatrix[i-2][j] + simMatrix[i-1][j];
+          c5 = scoreMatrix[i-1][j-3] + simMatrix[i][j-2] + simMatrix[i][j-1];
           Real row[5] = {scoreMatrix[i-1][j-1], c2, c3, c4, c5};
           scoreMatrix[i][j] = *std::max_element(row, row+5) + 1;
         }
@@ -215,7 +215,7 @@ AlgorithmStatus CoverSongSimilarity::process() {
     _xIter = 0;
   }
   
-  // iterate through the similarity matrix to recursively construct the qmax scoring cumilative matrix
+  // iterate through the similarity matrix to recursively construct the smith-waterman scoring cumilative matrix
   for(size_t i = _x; i < _accumXFrameSize; i++) {
     for(size_t j = 2; j < _yFrames; j++) {
       // measure the diagonal when a similarity is found in the input matrix
@@ -245,6 +245,7 @@ AlgorithmStatus CoverSongSimilarity::process() {
   }
   // compute asymetric cover similarity distance
   distance[0] = sqrt(_yFrames) / maxElementArray(_bufferScoreMatrix);
+  std::cout << distance[0] << std::endl;
   scoreMatrix[0] = vecvecToArray2D(incrementMatrix);
   releaseData();
   return OK;

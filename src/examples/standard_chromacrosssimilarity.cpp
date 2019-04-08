@@ -79,6 +79,15 @@ int main(int argc, char* argv[]) {
   /////////// STARTING THE ALGORITHMS //////////////////
   cout << "-----ChromaCrossSimilarity matrix calculation --------" << endl;
   csm->compute();
+  
+  cout << "--- computing for the second iteration ---" << endl;
+  vector<vector<Real> > csmout2;
+  csm->input("queryFeature").set(queryFeature);
+  csm->input("referenceFeature").set(referenceFeature);
+  csm->output("csm").set(csmout2);
+
+  csm->compute();
+
   // since pool only supports TNT::Array2D for storing 2D matrices
   TNT::Array2D<Real> outArray = vecvecToArray2D(csmout);
   // add to pool

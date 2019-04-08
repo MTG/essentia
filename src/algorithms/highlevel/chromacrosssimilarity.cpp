@@ -42,7 +42,7 @@ const char* ChromaCrossSimilarity::description = DOC("This algorithm computes a 
 "If parameter 'otiBinary=True', the algorithm computes the binary cross-similarity matrix based on optimal transposition index between each feature pairs instead of euclidean distance as described in [3].\n\n"
 "The input chromagram should be in the shape (n_frames, numbins), where 'n_frames' is number of frames and 'numbins' for the number of bins in the chromagram. An exception is thrown otherwise.\n\n"
 "An exception is also thrown if either one of the input chromagrams are empty.\n\n"
-"NOTE: Streaming mode of this algorithm outputs the same as the output of standard mode 'ChromaCrossSimilarity' with parameter 'streamingMode=True'\n\n"
+"While param 'streaming=True', the algorithm accumulates the input 'queryFeature' in the pairwise similarity matrix calculation on each call of compute() method. You can reset it using the reset() method.\n\n"
 "References:\n"
 "[1] Serra, J., Gómez, E., & Herrera, P. (2008). Transposing chroma representations to a common key, IEEE Conference on The Use of Symbols to Represent Music and Multimedia Objects.\n\n"
 "[2] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n"
@@ -57,15 +57,17 @@ void ChromaCrossSimilarity::configure() {
   _noti = parameter("noti").toInt();
   _oti = parameter("oti").toBool();
   _otiBinary = parameter("otiBinary").toBool();
-  _streamingMode = parameter("streamingMode").toBool();
+  _streaming = parameter("streaming").toBool();
+  _iterIdx = 0;
   _mathcCoef = 1; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
   _mismatchCoef = 0; // for chroma binary sim-matrix based on OTI similarity as in [3]. 
 }
 
 void ChromaCrossSimilarity::compute() {
+  
   // get inputs and output
-  std::vector<std::vector<Real> > queryFeature = _queryFeature.get();
-  std::vector<std::vector<Real> > referenceFeature = _referenceFeature.get();
+  queryFeature = _queryFeature.get();
+  if (_iterIdx == 0) referenceFeature = _referenceFeature.get();
   std::vector<std::vector<Real> >& csm = _csm.get();
 
   if (queryFeature.empty())
@@ -83,48 +85,80 @@ void ChromaCrossSimilarity::compute() {
   else {
     // check whether to transpose by oti
     if (_oti) {
-      int otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
-      rotateChroma(referenceFeature, otiIdx);
+      _otiIdx = optimalTranspositionIndex(queryFeature, referenceFeature, _noti);
+      rotateChroma(referenceFeature, _otiIdx);
     }
     // construct stacked chroma feature matrices from specified 'frameStackSize' and 'frameStackStride'
-    std::vector<std::vector<Real> >  queryFeatureStack = stackChromaFrames(queryFeature, _frameStackSize, _frameStackStride);
-    std::vector<std::vector<Real> >  referenceFeatureStack= stackChromaFrames(referenceFeature, _frameStackSize, _frameStackStride);
+    _queryFeatureStack = stackChromaFrames(queryFeature, _frameStackSize, _frameStackStride);
+    _referenceFeatureStack = stackChromaFrames(referenceFeature, _frameStackSize, _frameStackStride);
     // pairwise euclidean distance
-    std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeatureStack, referenceFeatureStack);
-    size_t queryFeatureSize = pdistances.size();
-    size_t referenceFeatureSize = pdistances[0].size();
+    _pdistances = pairwiseDistance(_queryFeatureStack, _referenceFeatureStack);
+    queryFeatureSize = _pdistances.size();
+    referenceFeatureSize = _pdistances[0].size();
 
-    std::vector<Real> thresholdQuery(queryFeatureSize);
-    std::vector<Real> thresholdReference(referenceFeatureSize);
-
-    if (_streamingMode) {
-      // optimise the threshold computation by iniatilizing it to a matrix of ones
-      csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 1));
-    }
-    else if (!_streamingMode) {
-      csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize));
+    // if streaming=True, accumulate the pdistances matrix for each compute method call.
+    if (_streaming) {
+      // accumulate the similarity matrix in every compute method call
+      for (size_t i=0; i<queryFeatureSize; i++) {
+        _accumEucDistances.push_back(_pdistances[i]);
+      }
+      queryFeatureSize = _accumEucDistances.size();
+      referenceFeatureSize = _accumEucDistances[0].size();
+      csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 0));
+      _thresholdQuery.assign(queryFeatureSize, 0);
+      _thresholdReference.assign(referenceFeatureSize, 0);
       // compute the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
       for (size_t j=0; j<referenceFeatureSize; j++) {
         _status = true;
         for (size_t i=0; i<queryFeatureSize; i++) {
           // here we only compute the thresholdReference at index j once 
-          if (_status) thresholdReference[j] = percentile(getColsAtVecIndex(pdistances, j), _binarizePercentile*100);
-          if (pdistances[i][j] <= thresholdReference[j]) {
+          if (_status) _thresholdReference[j] = percentile(getColsAtVecIndex(_accumEucDistances, j), _binarizePercentile*100);
+          if (_accumEucDistances[i][j] <= _thresholdReference[j]) {
             csm[i][j] = 1;
-          }
-          if (pdistances[i][j] > thresholdReference[j]) {
-            csm[i][j] = 0;
           }
           _status = false;
         }
       }
+      // update the binary output similarity matrix using the thresholds computed along the queryFeature axis
+      for (size_t k=0; k<queryFeatureSize; k++) {
+        _thresholdQuery[k] = percentile(_accumEucDistances[k], _binarizePercentile*100);
+        for (size_t l=0; l<referenceFeatureSize; l++) {
+          if (_accumEucDistances[k][l] > _thresholdQuery[k]) {
+            csm[k][l] = 0;
+          }
+        }
+      }
+      _iterIdx++;
+      // clear the internal states after each compute() method call
+      _queryFeatureStack.clear();
+      _referenceFeatureStack.clear();
+      _pdistances.clear();
+      _thresholdQuery.clear();
+      _thresholdReference.clear();
     }
-    // update the binary output similarity matrix using the thresholds computed along the queryFeature axis
-    for (size_t k=0; k<queryFeatureSize; k++) {
-      thresholdQuery[k] = percentile(pdistances[k], _binarizePercentile*100);
-      for (size_t l=0; l<referenceFeatureSize; l++) {
-        if (pdistances[k][l] > thresholdQuery[k]) {
-          csm[k][l] = 0;
+    else if (!_streaming) {
+      _thresholdQuery.assign(queryFeatureSize, 0);
+      _thresholdReference.assign(referenceFeatureSize, 0);
+      csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 0));
+      // compute the binary output similarity matrix by multiplying with the thresholds computed along the referenceFeature axis
+      for (size_t j=0; j<referenceFeatureSize; j++) {
+        _status = true;
+        for (size_t i=0; i<queryFeatureSize; i++) {
+          // here we only compute the thresholdReference at index j once 
+          if (_status) _thresholdReference[j] = percentile(getColsAtVecIndex(_pdistances, j), _binarizePercentile*100);
+          if (_pdistances[i][j] <= _thresholdReference[j]) {
+            csm[i][j] = 1;
+          }
+          _status = false;
+        }
+      }
+      // update the binary output similarity matrix using the thresholds computed along the queryFeature axis
+      for (size_t k=0; k<queryFeatureSize; k++) {
+        _thresholdQuery[k] = percentile(_pdistances[k], _binarizePercentile*100);
+        for (size_t l=0; l<referenceFeatureSize; l++) {
+          if (_pdistances[k][l] > _thresholdQuery[k]) {
+            csm[k][l] = 0;
+          }
         }
       }
     }
@@ -141,6 +175,13 @@ std::vector<Real> ChromaCrossSimilarity::getColsAtVecIndex(std::vector<std::vect
     cols.push_back(inputMatrix[i][index]);
   }
   return cols;
+}
+
+
+void ChromaCrossSimilarity::reset() {
+  // clear the accumulated euclidean similarit matrix in the streaming mode
+  _accumEucDistances.clear();
+  _accumEucDistances.shrink_to_fit();
 }
 
 
@@ -184,7 +225,7 @@ void ChromaCrossSimilarity::configure() {
     _referenceFeatureStack = stackChromaFrames(_referenceFeature, _frameStackSize, _frameStackStride);
   }
   if (_otiBinary) _minFramesSize = 1;
-  else _minFramesSize = _frameStackSize + 1; // min amount of frames needed to construct a frame of stacked-feature vector
+  else _minFramesSize = _frameStackSize + 1; // min amount of frames needed to construct a single frame of stacked-feature vector
   
   input("queryFeature").setAcquireSize(_minFramesSize);
   input("queryFeature").setReleaseSize(1);
@@ -257,6 +298,10 @@ AlgorithmStatus ChromaCrossSimilarity::process() {
     releaseData();
   }
   return OK;
+}
+
+void ChromaCrossSimilarity::reset () {
+  Algorithm::reset();
 }
 
 } // namespace streaming

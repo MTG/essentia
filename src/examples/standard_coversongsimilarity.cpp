@@ -34,7 +34,7 @@ int main(int argc, char* argv[]) {
 
   if (argc != 4) {
     cout << "Error: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " <query_song_path> <reference_song_path> <json_output_path>" << endl;
+    cout << "Usage: " << argv[0] << " <query_audio_file> <reference_audio_file> <json_output_path>" << endl;
     creditLibAV();
     exit(1);
   }
@@ -62,6 +62,7 @@ int main(int argc, char* argv[]) {
   // HPCP -> CrossSimilarityMatrix -> CoverSongSimilarity
 
   AlgorithmFactory& factory = standard::AlgorithmFactory::instance();
+
 
   Algorithm* audio = factory.create("MonoLoader",
                                     "filename", queryFilename,
@@ -93,7 +94,8 @@ int main(int argc, char* argv[]) {
   // with default params
   Algorithm* csm = factory.create("ChromaCrossSimilarity");
 
-  Algorithm* coversim = factory.create("CoverSongSimilarity"); 
+  Algorithm* coversim = factory.create("CoverSongSimilarity",
+                                      "alignmentType", "chen17"); 
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos for hpcp, csm and local-alignment extraction ---------" << endl;
@@ -215,10 +217,11 @@ int main(int argc, char* argv[]) {
 
   // Now we compute the cover song similarity
   csm->compute();
+
   cout << " .... computing smith-waterman local alignment" << endl;
   coversim->compute();
   // TODO: replace with std::vector<vector<Real> > when essentia pool has 2D vector support
-  pool.add("scoreMatrix", vecvecToArray2D(scoreMatrix));
+  // pool.add("scoreMatrix", vecvecToArray2D(scoreMatrix));
   cout << "Cover song similarity distance: " << distance << endl;
   pool.add("distance", distance);
   pool.remove("queryHPCP");

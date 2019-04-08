@@ -24,6 +24,7 @@
 #include <essentia/streaming/algorithms/vectorinput.h>
 #include <essentia/scheduler/network.h>
 #include "credit_libav.h" 
+
 using namespace std;
 using namespace essentia;
 using namespace essentia::streaming;
@@ -40,7 +41,7 @@ int main(int argc, char* argv[]) {
   }
   string queryAudioFile = argv[1]; 
   string referenceFile = argv[2];
-  string outputFilename = argv[2];
+  string outputFilename = argv[3];
   vector<vector<Real> > referenceFeature;
 
   // read the 2d array text file and store it to a 2D vector 
@@ -132,8 +133,8 @@ int main(int argc, char* argv[]) {
                                                                    "format", "json");
   output->input("pool").set(pool);
   output->compute();
+  cout << "---- Done ----" << endl;
 
-  delete alignment;
   delete output;
 
   essentia::shutdown();

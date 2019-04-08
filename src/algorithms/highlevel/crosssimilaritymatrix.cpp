@@ -85,7 +85,7 @@ void CrossSimilarityMatrix::compute() {
   std::vector<std::vector<Real> >  referenceFeatureStack = stackFrames(referenceFeature, _frameStackSize, _frameStackStride);
 
   // check whether to binarize the euclidean cross-similarity matrix using the given threshold kappa
-  if (_binarize == true) {
+  if (_binarize) {
     // pairwise euclidean distance
     std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeatureStack, referenceFeatureStack);
     size_t queryFeatureSize = pdistances.size();
@@ -108,7 +108,7 @@ void CrossSimilarityMatrix::compute() {
     for (size_t j=0; j<referenceFeatureSize; j++) {
       _status = true;
       for (size_t i=0; i<queryFeatureSize; i++) {
-        if (_status == true) thresholdReference[j] = percentile(getColsAtVecIndex(pdistances, j), _binarizePercentile * 100);
+        if (_status) thresholdReference[j] = percentile(getColsAtVecIndex(pdistances, j), _binarizePercentile * 100);
         if (pdistances[i][j] > thresholdReference[j]) {
           csm[i][j] = 0;
         }

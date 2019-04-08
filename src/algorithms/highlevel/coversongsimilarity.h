@@ -41,7 +41,7 @@ namespace standard {
    void declareParameters() {
      declareParameter("disOnset", "penalty for disruption onset", "[0,inf)", 0.5);
      declareParameter("disExtension", "penalty for disruption extension", "[0,inf)", 0.5);
-     declareParameter("alignmentType", "choose either one of the given local-alignment constraints for smith-waterman algorithm as described in [2] and [3] respectively.", "{serra09, chen17}", "serra09");
+     declareParameter("alignmentType", "choose either one of the given local-alignment constraints for smith-waterman algorithm as described in [2] and [3] respectively.", "{serra09,chen17}", "serra09");
    }
 
    void configure();
