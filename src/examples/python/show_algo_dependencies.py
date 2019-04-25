@@ -168,13 +168,8 @@ if __name__ == "__main__":
         print_dependencies(dependencies)
         all_dependencies += dependencies
 
-    print("The following algorithms will be required for building Essentia:")
+    algos = set([a for m,a in all_dependencies])
+    print("The following %d algorithms will be required for building Essentia:" % len(algos))
 
-    for a in set([a for m,a in all_dependencies]):
+    for a in algos:
         print(a)
-
-
-
-
-
-
