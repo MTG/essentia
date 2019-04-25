@@ -17,6 +17,7 @@
 
 import essentia.standard
 import tempfile
+import numpy as np
 
 def test_audiofile(filename=None, type='sin440', duration=1):
 
