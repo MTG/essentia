@@ -96,7 +96,7 @@ void BeatTrackerDegara::configure() {
 
   _frameCutter->configure("frameSize", frameSize,
                           "hopSize", hopSize,
-                          "silentFrames", "noise",
+                          "silentFrames", "keep",
                           "startFromZero", true);
 
   _windowing->configure("size", frameSize, "type", "hann");
