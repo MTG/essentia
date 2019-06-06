@@ -600,11 +600,6 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
                      * eqloudPool.value<Real>("metadata.audio_properties.analysis_sample_rate"));
     }
   }
-
-
-  // delete network only now, because we needed audio_2->output("audio") to
-  // compute the onset rate on the previous line.
-  //deleteNetwork(audio_2);
 }
 
 // outdated beat tracker

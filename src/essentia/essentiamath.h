@@ -24,6 +24,7 @@
 #define _USE_MATH_DEFINES
 #endif
 
+#include <math.h>
 #include <cmath>
 #include <vector>
 #include <numeric>
@@ -81,7 +82,9 @@ template <> inline long long int nextPowerTwo(long long int n) {
   return ++n;
 }
 
-// returns the L2-norm of an array
+/**
+ * Returns the L2-norm of an array
+ */
 template <typename T> T norm(const std::vector<T>& array) {
   if (array.empty()) {
     throw EssentiaException("trying to calculate norm of empty array");
@@ -94,6 +97,17 @@ template <typename T> T norm(const std::vector<T>& array) {
   }
 
   return sqrt(sum);
+}
+
+/**
+ * Returns the sum of squared values of an array
+ */
+template <typename T> T sumSquare(const std::vector<T> array, const size_t start, const size_t end) {
+  T sum = 0.0;
+  for (size_t i = array; i < end; ++i) {
+    sum += array[i] * array[i];
+  }
+  return sum;
 }
 
 /**
@@ -296,7 +310,8 @@ std::vector<T> skewnessFrames(const std::vector<std::vector<T> >& frames) {
   for (uint j=0; j<vsize; j++) {
     m2[j] /= nframes;
     m3[j] /= nframes;
-    result[j] = m3[j] / pow(m2[j], (T)1.5);
+    if (m2[j] == (T)0.) result[j] = (T)0.;
+    else result[j] = m3[j] / pow(m2[j], (T)1.5);
   }
 
   return result;
@@ -327,7 +342,8 @@ std::vector<T> kurtosisFrames(const std::vector<std::vector<T> >& frames) {
   for (uint j=0; j<vsize; j++) {
     m2[j] /= nframes;
     m4[j] /= nframes;
-    result[j] = m4[j] / (m2[j]*m2[j]) - 3;
+    if (m2[j] == (T)0.) result[j] = (T)(-3.);
+    else result[j] = m4[j] / (m2[j]*m2[j]) - 3;
   }
 
   return result;
@@ -458,8 +474,11 @@ template <typename T> T skewness(const std::vector<T>& array, const T mean) {
 
   m2 /= n; m3 /= n;
 
-  T result = m3 / pow(m2, (T)1.5);
-  if (std::isnan(result) || std::isinf(result)) return 0;
+  T result;
+  //if (std::isnan(result) || std::isinf(result)) return 0;
+  if (m2 == (T)0.) result = (T)0.;
+  else result = m3 / pow(m2, (T)1.5);
+
   return result;
 }
 
@@ -479,11 +498,13 @@ template <typename T> T kurtosis(const std::vector<T>& array, const T mean) {
 
   m2 /= n; m4 /= n;
 
-  T result = m4 / (m2*m2) - 3;
-  if (std::isnan(result) || std::isinf(result)) return 0;
+  T result;
+  //if (std::isnan(result) || std::isinf(result)) return 0;
+  if (m2 == (T)0.) result = (T)(-3.);
+  else result = m4 / (m2*m2) - 3;
+
   return result;
 }
-
 
 
 // returns the standard deviation of an array
@@ -648,6 +669,23 @@ inline Real mel102hz(Real mel) {
   return 700.0 * (pow(10.0, mel/2595.0) - 1.0);
 }
 
+// Convert Mel to Hz based on Slaney's formula in MATLAB Auditory Toolbox
+inline Real mel2hzSlaney(Real mel) {
+  const Real minLogHz = 1000.0;
+  const Real linSlope = 3 / 200.;
+  const Real minLogMel = minLogHz * linSlope;
+
+  if (mel < minLogMel) {
+    // Linear part: 0 - 1000 Hz.
+    return mel / linSlope;
+  }
+  else {
+    // Log-scale part: >= 1000 Hz.
+    const Real logStep = log(6.4) / 27.0;
+    return minLogHz * exp((mel - minLogMel) * logStep);
+  }
+}
+
 inline Real hz2mel(Real hz) {
   return 1127.01048 * log(hz/700.0 + 1.0);
 }
@@ -656,8 +694,29 @@ inline Real hz2mel10(Real hz) {
   return 2595.0 * log10(hz/700.0 + 1.0);
 }
 
+// Convert Hz to Mel based on Slaney's formula in MATLAB Auditory Toolbox
+inline Real hz2melSlaney(Real hz) {
+  const Real minLogHz = 1000.0;
+  const Real linSlope = 3 / 200.;
+
+  if (hz < minLogHz) {
+    // Linear part: 0 - 1000 Hz.
+    return hz * linSlope;
+  }
+  else {
+    // Log-scale part: >= 1000 Hz.
+    const Real minLogMel = minLogHz * linSlope;
+    const Real logStep = log(6.4) / 27.0;
+    return minLogMel + log(hz/minLogHz) / logStep;
+  }
+}
+
 inline Real hz2hz(Real hz){
   return hz;
+}
+
+inline Real hz2cents(Real hz) {
+  return 12 * std::log(hz/440)/std::log(2.) + 69;
 }
 
 inline int argmin(const std::vector<Real>& input) {
@@ -674,6 +733,20 @@ template <typename T> void normalize(std::vector<T>& array) {
   if (array.empty()) return;
 
   T maxElement = *std::max_element(array.begin(), array.end());
+
+  if (maxElement != (T) 0.0) {
+    for (uint i=0; i<array.size(); i++) {
+      array[i] /= maxElement;
+    }
+  }
+}
+
+// normalize to the max(abs(array))
+template <typename T> void normalizeAbs(std::vector<T>& array) {
+  if (array.empty()) return;
+  std::vector<T> absArray = array;
+  rectify(absArray);
+  T maxElement = *std::max_element(absArray.begin(), absArray.end());
 
   if (maxElement != (T) 0.0) {
     for (uint i=0; i<array.size(); i++) {
@@ -888,6 +961,113 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
   }
 
   return result;
+}
+
+inline std::string equivalentKey(const std::string key) {
+  if (key == "C")
+    return "C";
+
+  if (key == "C#")
+    return "Db";
+
+  if (key == "Db")
+    return "C#";
+
+  if (key == "D")
+    return "D";
+
+  if (key == "D#")
+    return "Eb";
+
+  if (key == "Eb")
+    return "D#";
+
+  if (key == "E")
+    return "E";
+
+  if (key == "F")
+    return "F";
+
+  if (key == "F#")
+    return "Gb";
+
+  if (key == "Gb")
+    return "F#";
+
+  if (key == "G")
+    return "G";
+
+  if (key == "G#")
+    return "Ab";
+
+  if (key == "Ab")
+    return "G#";
+
+  if (key == "A")
+    return "A";
+
+  if (key == "A#")
+    return "Bb";
+
+  if (key == "Bb")
+    return "A#";
+
+  if (key == "B")
+    return "B";
+
+  return "";
+}
+
+
+/**
+ * Sample covariance
+ */
+template <typename T> T covariance(const std::vector<T>& x, const T xMean, const std::vector<T>& y, const T yMean) {
+  if (x.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (y.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (x.size() != y.size())
+    throw EssentiaException("x and y should have the same size");
+
+  T cov = (T) 0.0;
+
+  for (uint i=0; i<x.size(); i++) {
+    cov += (x[i] - xMean) * (y[i] - yMean);
+  }
+
+  return (T)(cov / (Real)x.size());
+}
+
+/**
+ * Returns the sample Pearson correlation coefficient of a pair of vectors as described in,
+ * https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
+ */
+template <typename T> T pearsonCorrelationCoefficient(const std::vector<T>& x, const std::vector<T>& y) {
+  if (x.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (y.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (x.size() != y.size())
+    throw EssentiaException("x and y should have the same size");
+
+  T xMean = mean(x);
+  T yMean = mean(y);
+  
+  T cov = covariance(x, xMean, y, yMean);
+
+  T xStddev = stddev(x, xMean);
+  T yStddev = stddev(y, yMean);
+
+  // When dealing with constants corraltion is 0 by convention. 
+  if ((xStddev == (T)0.0) || (xStddev == (T)0.0) || (xStddev == (T)0.0)) return (T) 0.0;
+  
+  T corr = cov / (xStddev * yStddev);
+
+  // Numerical error can yield results slightly outside the analytical range [-1, 1].
+  // Clipping the output is a cheap way to mantain this contrain.
+  // Seen in https://github.com/numpy/numpy/blob/v1.15.0/numpy/lib/function_base.py#L2403-L2406
+  return std::max(std::min(corr, (T)1.0), (T)-1.0);
 }
 
 } // namespace essentia

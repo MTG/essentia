@@ -85,11 +85,11 @@ def plot_bpm_file(pool):
     ticks  = pool.descriptors['tempotap_ticks']['values'][0]
     rubato_start = pool.descriptors['tempotap_rubato_start']['values'][0]
     rubato_stop = pool.descriptors['tempotap_rubato_stop']['values'][0]
-    print 'bpm', bpm
-    print 'ticks', ticks
-    print 'rubato_start', rubato_start
-    print 'rubato_stop', rubato_stop
-    print 'intervals', intervals
+    print('bpm', bpm)
+    print('ticks', ticks)
+    print('rubato_start', rubato_start)
+    print('rubato_stop', rubato_stop)
+    print('intervals', intervals)
     import pylab
     pylab.plot(ticks,[bpm_periods[0]] + bpm_periods,'r+-')
     pylab.hold(True)
@@ -135,7 +135,7 @@ def parse_args():
         help='ground truth file')
     (options, args) = parser.parse_args()
     if options.input_file is None:
-      print usage
+      print(usage)
       sys.exit(1)
     return options, args
 
@@ -179,8 +179,11 @@ if __name__ == '__main__':
       use_onset = options.use_onset,
       use_bands = options.use_bands,
       doplots = options.do_plots)
-    if options.do_final_plots: plot_bpm_file(pool)
-    if options.ground_truth_file is not None: print 'ground truth bpm', true_bpm
+    
+    if options.do_final_plots: 
+        plot_bpm_file(pool)
+    if options.ground_truth_file is not None: 
+        print('ground truth bpm', true_bpm)
     if options.verbose:
       bpm    = pool.descriptors['tempotap_bpm']['values'][0]
       intervals = pool.descriptors['tempotap_intervals']['values'][0]
@@ -188,9 +191,9 @@ if __name__ == '__main__':
       ticks  = pool.descriptors['tempotap_ticks']['values'][0]
       rubato_start = pool.descriptors['tempotap_rubato_start']['values'][0]
       rubato_stop = pool.descriptors['tempotap_rubato_stop']['values'][0]
-      print 'bpm', bpm
-      print 'ticks', ticks
-      print 'rubato_start', rubato_start
-      print 'rubato_stop', rubato_stop
-      print 'intervals', intervals
+      print('bpm', bpm)
+      print('ticks', ticks)
+      print('rubato_start', rubato_start)
+      print('rubato_stop', rubato_stop)
+      print('intervals', intervals)
 

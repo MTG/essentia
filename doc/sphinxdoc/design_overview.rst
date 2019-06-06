@@ -228,6 +228,12 @@ To activate/deactivate the debugging modules at runtime, use the functions::
     setDebugLevel(EAll);                     // EAll is a special value that contains all modules
     unsetDebugLevel(EMemory | EConnectors);  // modules are bitmasks
 
+To change the logging levels at runtime (all levels are activated by default), use::
+
+    essentia::warningLevelActive = false; // deactivate warnings
+    essentia::infoLevelActive = false;    // deactivate info
+    essentia::errorLevelActive = true;    // activate error level
+
 Note that when a logging module is deactivated, the cost on runtime is minimal
 (i.e., you only really pay for logging when you use it). If you wish to completely
 turn off logging, this can be done at compile time by setting the ``DEBUGGING_ENABLED``
@@ -272,3 +278,5 @@ the output is not mangled between the 2 logging frameworks:
     essentia.log.infoActive = True                   # activate the info level
     essentia.log.debugLevels += essentia.EAll        # activate all debug modules
     essentia.log.debugLevels -= essentia.EExecution  # deactivate the ``Execution`` one
+
+    essentia.log.warningActive = False               # deactivate the warning level

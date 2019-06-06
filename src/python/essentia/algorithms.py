@@ -108,6 +108,15 @@ FrameGenerator inherits all the parameters of the FrameCutter. The way to use it
         def __iter__(self):
             return self
 
+        def __next__(self):
+            frame = self.frame_creator.compute(self.audio)
+            if frame.size == 0:
+                raise StopIteration
+            else:
+                return frame
+
+        next = __next__  # Python 2
+
         def num_frames(self):
             if self.startFromZero:
                 if not self.lastFrameToEndOfFile:
@@ -129,12 +138,5 @@ FrameGenerator inherits all the parameters of the FrameCutter. The way to use it
                 times.append((start + self.hopSize * i) / sampleRate)
             return times
 
-
-        def next(self):
-            frame = self.frame_creator.compute(self.audio)
-            if frame.size == 0:
-                raise StopIteration
-            else:
-                return frame
 
     setattr(essentia, 'FrameGenerator', FrameGenerator)

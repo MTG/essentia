@@ -18,6 +18,7 @@
  */
 
 #include "loudnessebur128filter.h"
+#include "essentiamath.h"
 #include "algorithmfactory.h"
 
 using namespace std;
@@ -65,9 +66,12 @@ LoudnessEBUR128Filter::LoudnessEBUR128Filter() : AlgorithmComposite() {
 
   // Connect output proxy
   _sum->output("array")             >> _signalFiltered;
+
+  _network = new scheduler::Network(_stereoDemuxer);
 }
 
 LoudnessEBUR128Filter::~LoudnessEBUR128Filter() {
+  delete _network;
 }
 
 void LoudnessEBUR128Filter::configure() {

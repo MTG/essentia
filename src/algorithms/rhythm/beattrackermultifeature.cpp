@@ -26,31 +26,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* BeatTrackerMultiFeature::name = "BeatTrackerMultiFeature";
-const char* BeatTrackerMultiFeature::category = "Rhythm";
-const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates the beat positions given an input signal. It computes a number of onset detection functions and estimates beat location candidates from them using TempoTapDegara algorithm. Thereafter the best candidates are selected using TempoTapMaxAgreement. The employed detection functions, and the optimal frame/hop sizes used for their computation are:\n"
-"  - complex spectral difference (see 'complex' method in OnsetDetection algorithm, 2048/1024 with posterior x2 upsample or the detection function)\n"
-"  - energy flux (see 'rms' method in OnsetDetection algorithm, the same settings)\n"
-"  - spectral flux in Mel-frequency bands (see 'melflux' method in OnsetDetection algorithm, the same settings)\n"
-"  - beat emphasis function (see 'beat_emphasis' method in OnsetDetectionGlobal algorithm, 2048/512)\n"
-"  - spectral flux between histogrammed spectrum frames, measured by the modified information gain (see 'infogain' method in OnsetDetectionGlobal algorithm, 2048/512)\n"
-"\n"
-"You can follow these guidelines [2] to assess the quality of beats estimation based on the computed confidence value:\n"
-"  - [0, 1)      very low confidence, the input signal is hard for the employed candidate beat trackers\n"
-"  - [1, 1.5]    low confidence\n"
-"  - (1.5, 3.5]  good confidence, accuracy around 80% in AMLt measure\n"
-"  - (3.5, 5.32] excellent confidence\n"
-"\n"
-"Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
-"\n"
-"References:\n"
-"  [1] J. Zapata, M. Davies and E. Gómez, \"Multi-feature beat tracker,\"\n"
-"  IEEE/ACM Transactions on Audio, Speech and Language Processing. 22(4),\n"
-"  816-825, 2014\n\n"
-"  [2] J.R. Zapata, A. Holzapfel, M.E.P. Davies, J.L. Oliveira, F. Gouyon,\n"
-"  \"Assigning a confidence threshold on automatic beat annotation in large\n"
-"  datasets\", International Society for Music Information Retrieval Conference\n"
-"  (ISMIR'12), pp. 157-162, 2012\n");
+const char* BeatTrackerMultiFeature::name = essentia::standard::BeatTrackerMultiFeature::name;
+const char* BeatTrackerMultiFeature::category = essentia::standard::BeatTrackerMultiFeature::category;
+const char* BeatTrackerMultiFeature::description = essentia::standard::BeatTrackerMultiFeature::description;
 
 
 BeatTrackerMultiFeature::BeatTrackerMultiFeature() : AlgorithmComposite(),
@@ -276,9 +254,31 @@ void BeatTrackerMultiFeature::reset() {
 namespace essentia {
 namespace standard {
 
-const char* BeatTrackerMultiFeature::name = essentia::streaming::BeatTrackerMultiFeature::name;
-const char* BeatTrackerMultiFeature::category = essentia::streaming::BeatTrackerMultiFeature::category;
-const char* BeatTrackerMultiFeature::description = essentia::streaming::BeatTrackerMultiFeature::description;
+const char* BeatTrackerMultiFeature::name = "BeatTrackerMultiFeature";
+const char* BeatTrackerMultiFeature::category = "Rhythm";
+const char* BeatTrackerMultiFeature::description = DOC("This algorithm estimates the beat positions given an input signal. It computes a number of onset detection functions and estimates beat location candidates from them using TempoTapDegara algorithm. Thereafter the best candidates are selected using TempoTapMaxAgreement. The employed detection functions, and the optimal frame/hop sizes used for their computation are:\n"
+"  - complex spectral difference (see 'complex' method in OnsetDetection algorithm, 2048/1024 with posterior x2 upsample or the detection function)\n"
+"  - energy flux (see 'rms' method in OnsetDetection algorithm, the same settings)\n"
+"  - spectral flux in Mel-frequency bands (see 'melflux' method in OnsetDetection algorithm, the same settings)\n"
+"  - beat emphasis function (see 'beat_emphasis' method in OnsetDetectionGlobal algorithm, 2048/512)\n"
+"  - spectral flux between histogrammed spectrum frames, measured by the modified information gain (see 'infogain' method in OnsetDetectionGlobal algorithm, 2048/512)\n"
+"\n"
+"You can follow these guidelines [2] to assess the quality of beats estimation based on the computed confidence value:\n"
+"  - [0, 1)      very low confidence, the input signal is hard for the employed candidate beat trackers\n"
+"  - [1, 1.5]    low confidence\n"
+"  - (1.5, 3.5]  good confidence, accuracy around 80% in AMLt measure\n"
+"  - (3.5, 5.32] excellent confidence\n"
+"\n"
+"Note that the algorithm requires the audio input with the 44100 Hz sampling rate in order to function correctly.\n"
+"\n"
+"References:\n"
+"  [1] J. Zapata, M. Davies and E. Gómez, \"Multi-feature beat tracker,\"\n"
+"  IEEE/ACM Transactions on Audio, Speech and Language Processing. 22(4),\n"
+"  816-825, 2014\n\n"
+"  [2] J.R. Zapata, A. Holzapfel, M.E.P. Davies, J.L. Oliveira, F. Gouyon,\n"
+"  \"Assigning a confidence threshold on automatic beat annotation in large\n"
+"  datasets\", International Society for Music Information Retrieval Conference\n"
+"  (ISMIR'12), pp. 157-162, 2012\n");
 
 
 BeatTrackerMultiFeature::BeatTrackerMultiFeature() {

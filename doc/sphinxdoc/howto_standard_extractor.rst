@@ -260,16 +260,22 @@ Compiling extractors
 
 The simplest way to compile your own extractor is to place its code in ``src/examples`` folder and update 
 the build script located in the same folder (``src/examples/wscript``). Add a new command similar to 
-the ones already present in the script: ::
+the ones already present in the script:
+
+.. code-block:: python
 
     build_example('standard', 'myextractorname')
 
-Configure the build system to include compilation of examples if you have not done it before.::
-    
+Configure the build system to include compilation of examples if you have not done it before.
+
+.. code-block:: console
+
     ./waf configure --mode=release --with-examples
 
-Compile your examples by running::
-    
+Compile your examples by running:
+
+.. code-block:: console
+
     ./waf
 
 See :doc:`installing` for compilation details.

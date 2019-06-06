@@ -63,6 +63,8 @@ class AudioLoader : public Algorithm {
   struct AVAudioResampleContext* _convertCtxAv;
 
   int _streamIdx; // index of the audio stream among all the streams contained in the file
+  std::vector<int> _streams;
+  int _selectedStream;
   bool _configured;
 
 
@@ -112,6 +114,7 @@ class AudioLoader : public Algorithm {
   void declareParameters() {
     declareParameter("filename", "the name of the file from which to read", "", Parameter::STRING);
     declareParameter("computeMD5", "compute the MD5 checksum", "{true,false}", false);
+    declareParameter("audioStream", "audio stream index to be loaded. Other streams are not taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
   }
 
   void configure();
@@ -172,6 +175,7 @@ class AudioLoader : public Algorithm {
   void declareParameters() {
     declareParameter("filename", "the name of the file from which to read", "", Parameter::STRING);
     declareParameter("computeMD5", "compute the MD5 checksum", "{true,false}", false);
+    declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
   }
 
   void configure();

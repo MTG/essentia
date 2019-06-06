@@ -63,22 +63,22 @@ void SpectralContrast::configure() {
 
   _numberOfBinsInBands.clear();
   _numberOfBinsInBands.resize(numberBands);
-  lastBins = int(lowerBound / binWidth);
+  lastBins = round(lowerBound / binWidth);
   _startAtBin = lastBins;
 
   // Determine how many bins are in each band to start with.
   // The rest of the bands will be distributed logarithmically.
-  int  totalNumberOfBins = int(upperBound / binWidth);
-       upperBound        = int(partToScale*totalNumberOfBins) * binWidth;
-  int  staticBinsPerBand = int((1-partToScale)*totalNumberOfBins) / numberBands;
+  int  totalNumberOfBins = round(upperBound / binWidth);
+       upperBound        = round(partToScale*totalNumberOfBins) * binWidth;
+  int  staticBinsPerBand = round((1-partToScale)*totalNumberOfBins / numberBands);
   Real ratio             = upperBound / lowerBound;
   Real ratioPerBand      = pow(ratio, Real(1.0/numberBands));
   Real currFreq          = lowerBound;
 
   for (int i=0; i<numberBands; ++i) {
     currFreq = currFreq*ratioPerBand;
-    _numberOfBinsInBands[i] = int(currFreq / binWidth - lastBins+staticBinsPerBand);
-    lastBins = int(currFreq / binWidth);
+    _numberOfBinsInBands[i] = round(currFreq / binWidth - lastBins+staticBinsPerBand);
+    lastBins = round(currFreq / binWidth);
   }
 }
 
@@ -111,6 +111,7 @@ void SpectralContrast::compute() {
          ++i) {
       bandMean += spectrum[specIdx+i];
     }
+
     if (_numberOfBinsInBands[bandIdx] != 0) bandMean /= _numberOfBinsInBands[bandIdx];
     bandMean += minReal;
 
@@ -119,7 +120,9 @@ void SpectralContrast::compute() {
          spectrum.begin()+std::min(specIdx+_numberOfBinsInBands[bandIdx], int(spectrum.size())));
 
     // number of bins to take the mean of
-    int neighbourBins = int(_neighbourRatio * _numberOfBinsInBands[bandIdx]);
+    // TODO: changed from int() to round() as it seems to be more correct. 
+    // Does this affect values a lot?
+    int neighbourBins = round(_neighbourRatio * _numberOfBinsInBands[bandIdx]);
     if (neighbourBins < 1) neighbourBins = 1;
 
     // valley (FLT_MIN prevents log(0))

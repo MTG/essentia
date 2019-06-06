@@ -41,12 +41,12 @@ for input_file in input_files:
        else:
           mel = 3
 
-    print
-    print "Melodicness Python = ", ton
+    print()
+    print("Melodicness Python = ", ton)
 
     exabre = essentia.Exabre()
     ton_c = exabre(float(key_strength))
-    print "Melodicness C = ", ton
-    print
+    print("Melodicness C = ", ton)
+    print('')
 
 output.close()

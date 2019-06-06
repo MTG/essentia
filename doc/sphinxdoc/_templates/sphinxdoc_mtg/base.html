@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="Open-source library and tools for audio and music analysis, description and synthesis">
+    <meta name="keywords" content="C++,Python,MIR,Audio,Music,Analysis,Research,Information,Retrieval">
+    <link rel="stylesheet" href="{{ pathto("_static/vendors.min.css", 1) }}" />
+    <link rel="stylesheet" href="{{ pathto("_static/base.css", 1) }}" />
+    <title>{{ title }} &#8212; {{ docstitle }}</title>
+    {% block extrahead %}
+    {% endblock %}
+  </head>
+  <body>
+    <div id="app">
+      <header>
+        <nav class="navbar navbar-default">
+          <div class="container navbar-container">
+            <div class="navbar-header">
+              <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+              </button>
+              <a class="navbar-brand" href="{{ pathto('index') }}">
+                <img class="navbar-brand__logo" src="{{ pathto("_static/essentia_logo.svg", 1) }}" alt="essentia-logo" />
+              </a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+              <ul class="nav navbar-nav navbar-right">
+                <li><a class="essnt-navbar-link" href="{{ pathto('documentation') }}">Documentation</a></li>
+                <li><a class="essnt-navbar-link" href="{{ pathto('algorithms_reference') }}">Algorithms reference</a></li>
+                <li><a class="essnt-navbar-link" href="{{ pathto('applications') }}">Applications</a></li>
+                <li><a class="essnt-navbar-link" href="https://mtg.github.io/essentia-labs">News</a></li>
+                <li><a class="essnt-navbar-link" href="{{ pathto('licensing_information') }}">License</a></li>
+                <li><a class="essnt-navbar-link" href="{{ pathto('download') }}">Download</a></li>
+                <li><a class="essnt-navbar-link" href="https://github.com/MTG/essentia">Github</a></li>
+                <li><a class="essnt-navbar-link" href="{{ pathto('search') }}">Search</a></li>
+              </ul>
+            </div><!-- /.navbar-collapse -->
+          </div><!-- /.container-fluid -->
+        </nav>
+      </header>
+      <!--[if lte IE 9]>
+        <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+      <![endif]-->
+      <main>
+        {% block content %}
+        {% endblock %}
+      </main>
+      <footer>
+        <section class="essnt-footer">
+          <div class="container">
+            <div class="row">
+              <div class="col-xs-6 col-sm-4 essnt-footer-container">
+                <h4 class="essnt-footer-title">Contact</h4>
+                <a class="essnt-footer-link" href="http://www.mtg.upf.edu/about/contact">Contact MTG</a>
+                <a class="essnt-footer-link" href="mailto:mtg-info@upf.edu">Licensing</a>
+                <a class="essnt-footer-link" href="https://twitter.com/essentia_mtg">Twitter</a>
+              </div>
+              <div class="col-xs-6 col-sm-4 essnt-footer-container">
+                <h4 class="essnt-footer-title">Support</h4>
+                <a class="essnt-footer-link" href="https://github.com/MTG/essentia/issues">Github issues</a>
+                <a class="essnt-footer-link" href="http://essentia.upf.edu/documentation/FAQ.html">FAQ</a>
+                <a class="essnt-footer-link" href="https://groups.google.com/a/llista.upf.edu/forum/#!forum/essentia-users">Mailing list</a>
+                <a class="essnt-footer-link" href="mailto:mtg@upf.edu?subject=Request to join essentia-users">Join mailing list</a>
+              </div>
+            </div>
+            <div class="essnt-footer__mtg-logo-container">
+              <img class="essnt-footer__mtg-logo" src="https://mtg.github.io/assets/img/upflogo.png" alt="mtg logo" />
+            </div>
+          </div>
+        </section>
+      </footer>
+    </div>
+    <script src="{{ pathto("_static/vendors.min.js", 1) }}"></script>
+    <script src="{{ pathto("_static/main.js", 1) }}"></script>
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+
+      ga('create', 'UA-18322085-51', 'upf.edu');
+      ga('send', 'pageview');
+    </script>
+    {% block extrafooter %}
+    {% endblock %}
+  </body>
+</html>

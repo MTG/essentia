@@ -39,7 +39,7 @@ class Spectrum : public Algorithm {
  public:
   Spectrum() {
     declareInput(_signal, "frame", "the input audio frame");
-    declareOutput(_spectrum, "spectrum", "the magnitude spectrum of the input audio signal");
+    declareOutput(_spectrum, "spectrum", "magnitude spectrum of the input audio signal");
 
     _fft = AlgorithmFactory::create("FFT");
     _magnitude = AlgorithmFactory::create("Magnitude");

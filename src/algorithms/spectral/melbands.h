@@ -44,6 +44,10 @@ class MelBands : public Algorithm {
     _triangularBands = AlgorithmFactory::create("TriangularBands");
   }
 
+  ~MelBands() {
+    if (_triangularBands) delete _triangularBands;
+  }
+
   void declareParameters() {
     declareParameter("inputSize", "the size of the spectrum", "(1,inf)", 1025);
     declareParameter("numberBands", "the number of output bands", "(1,inf)", 24);

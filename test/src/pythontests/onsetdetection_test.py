@@ -37,7 +37,7 @@ def parse_args():
         help="wave output filename")
     (options, args) = parser.parse_args()
     if options.input_file is None:
-      print usage
+      print(usage)
       sys.exit(1)
     return options, args
 
@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     compute(audio, pool, sampleRate = sampleRate, verbose = options.verbose)
     onsets = list(pool.descriptors['rhythm_onsets']['values'][0])
-    if (options.verbose): print onsets
+    if (options.verbose): print(onsets)
     while ((onsets[-1] + 0.020) * sampleRate) > len(audio):
       onsets.pop(len(onsets)-1)
     if len(onsets) > 0 and options.wave_output != None:

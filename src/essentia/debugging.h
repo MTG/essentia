@@ -22,10 +22,15 @@
 
 #include <deque>
 #include <string>
+#include <algorithm> // for std::max
 #include <climits> // for INT_MAX
 #include "config.h"
 #include "streamutil.h"
 #include "stringutil.h"
+
+#ifndef _WIN32
+#include <unistd.h>
+#endif
 
 namespace essentia {
 
@@ -109,8 +114,22 @@ class Logger {
 
   void flush();
 
+  std::string GREEN_FONT;
+  std::string YELLOW_FONT;
+  std::string RED_FONT;
+  std::string RESET_FONT;
+
  public:
-  Logger() : _addHeader(true) {}
+  Logger() : _addHeader(true) {
+    #ifndef _WIN32
+    if(isatty(2)) { // no colors if stderr is not a terminal
+      GREEN_FONT = "\x1B[0;32m";
+      YELLOW_FONT = "\x1B[0;33m";
+      RED_FONT = "\x1B[0;31m";
+      RESET_FONT = "\x1B[0m";
+    }
+    #endif
+  }
 
   void debug(DebuggingModule module, const std::string& msg, bool resetHeader = false);
   void info(const std::string& msg);
@@ -138,7 +157,7 @@ extern Logger loggerInstance;
 #  define E_DEBUG(module, msg) if (E_ACTIVE(module)) loggerInstance.debug(module, E_STRINGIFY(msg << '\n'), true)
 
 // NB: the following #define macros only work when used inside one of streaming::Algorithm's methods
-#  define ALGONAME _name << std::string(std::max(15-(int)_name.size(), 0), ' ') << ": "
+#  define ALGONAME _name << std::string((std::max)(15-(int)_name.size(), 0), ' ') << ": "
 #  define EXEC_DEBUG(msg) E_DEBUG(EExecution, ALGONAME << nProcess << " - " << msg)
 
 #  define E_INFO(msg) loggerInstance.info(E_STRINGIFY(msg))

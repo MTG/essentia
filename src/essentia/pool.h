@@ -77,7 +77,7 @@ typedef std::string DescriptorName;
  * into a Pool using the YamlInput algorithm.
  *
  * For each type, the pool has its own public mutex (i.e. mutexReal, mutexVectorReal, etc.)
- * If locking the pool gobally or partially, lock should be acquired in the following order:
+ * If locking the pool globally or partially, lock should be acquired in the following order:
  *
  *         MutexLocker lockReal(mutexReal)
  *         MutexLocker lockVectorReal(mutexVectorReal)
@@ -88,6 +88,7 @@ typedef std::string DescriptorName;
  *         MutexLocker lockSingleReal(mutexSingleReal)
  *         MutexLocker lockSingleString(mutexSingleString)
  *         MutexLocker lockSingleVectorReal(mutexSingleVectorReal)
+ *         MutexLocker lockSingleVectorString(mutexSingleVectorString)
  *
  * To release the locks, the order should be reversed!
  *
@@ -98,7 +99,8 @@ class Pool {
   // maps for single values:
   std::map<std::string, Real> _poolSingleReal;
   std::map<std::string, std::string> _poolSingleString;
-  std::map<std::string, std::vector<Real> > _poolSingleVectorReal;
+  std::map<std::string, std::vector<Real> > _poolSingleVectorReal;  
+  std::map<std::string, std::vector<std::string> > _poolSingleVectorString;
 
   // maps for vectors of values:
   PoolOf(Real) _poolReal;
@@ -122,7 +124,7 @@ class Pool {
 
   mutable Mutex mutexReal, mutexVectorReal, mutexString, mutexVectorString,
                 mutexArray2DReal, mutexStereoSample,
-                mutexSingleReal, mutexSingleString, mutexSingleVectorReal;
+                mutexSingleReal, mutexSingleString, mutexSingleVectorReal, mutexSingleVectorString;
 
   /**
    * Adds @e value to the Pool under @e name
@@ -188,6 +190,8 @@ class Pool {
    *         function. An EssentiaException will be thrown if the given
    *         descriptor name already exists in the pool and was put there via a
    *         call to an add function.
+   * @param validityCheck indicates whether @e value should be checked for NaN or Inf values. If
+   *                      true, an exception is thrown if @e value is (or contains) a NaN or Inf.
    */
   void set(const std::string& name, const Real& value, bool validityCheck=false);
 
@@ -196,6 +200,9 @@ class Pool {
 
   /** @copydoc set(const std::string&,const Real&i, bool) */
   void set(const std::string& name, const std::string& value, bool validityCheck=false);
+
+  /** @copydoc set(const std::string&,const Real&i, bool) */
+  void set(const std::string& name, const std::vector<std::string>& value, bool validityCheck=false);
 
   /**
    * \brief Merges the current pool with the given one @e p.
@@ -247,7 +254,8 @@ class Pool {
   void mergeSingle(const std::string& name, const std::vector<Real>& value, const std::string& type="");
   /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
   void mergeSingle(const std::string& name, const std::string& value, const std::string& type="");
-
+  /** @copydoc merge(const std::string&, const std::vector<Real>&, const std::string&)*/
+  void mergeSingle(const std::string& name, const std::vector<std::string>& value, const std::string& type="");
   /**
    * Removes the descriptor name @e name from the Pool along with the data it
    * points to. This function does nothing if @e name does not exist in the
@@ -258,9 +266,9 @@ class Pool {
 
   /**
    * Removes the entire namespace given by @e ns from the Pool along with the
-   * data itpoints to. This function does nothing if @e name does not exist in
+   * data it points to. This function does nothing if @e ns does not exist in
    * the Pool.
-   * @param name the descriptor name to remove
+   * @param ns the descriptor namespace to remove
    */
   void removeNamespace(const std::string& ns);
 
@@ -274,7 +282,7 @@ class Pool {
 
   /**
    * @returns whether the given descriptor name exists in the pool
-   * @param the name of the descriptor you wish to check for
+   * @param name is the name of the descriptor you wish to check for
    * @tparam T is the type of data that @e name refers to
    */
   template <typename T>
@@ -346,6 +354,12 @@ class Pool {
   const std::map<std::string, std::vector<Real> >& getSingleVectorRealPool() const { return _poolSingleVectorReal; }
 
   /**
+   * @returns a std::map where the key is a descriptor name and the value is
+   *          of type vector<string>
+   */
+  const std::map<std::string, std::vector<std::string> >& getSingleVectorStringPool() const { return _poolSingleVectorString; }
+
+  /**
    * Checks that no descriptor name is in two different inner pool types at
    * the same time, and throws an EssentiaException if there is
    */
@@ -384,7 +398,7 @@ inline const type& Pool::value(const std::string& name) const {                \
 
 SPECIALIZE_VALUE(Real, SingleReal);
 SPECIALIZE_VALUE(std::string, SingleString);
-SPECIALIZE_VALUE(std::vector<std::string>, String);
+//SPECIALIZE_VALUE(std::vector<std::string>, String);
 SPECIALIZE_VALUE(std::vector<std::vector<Real> >, VectorReal);
 SPECIALIZE_VALUE(std::vector<std::vector<std::string> >, VectorString);
 SPECIALIZE_VALUE(std::vector<TNT::Array2D<Real> >, Array2DReal);
@@ -417,6 +431,32 @@ inline const std::vector<Real>& Pool::value(const std::string& name) const {
   throw EssentiaException(msg);
 }
 
+// This value function is not under the macro above because it needs to check
+// in two separate sub-pools (poolString and poolSingleVectorString)
+template<>
+inline const std::vector<std::string>& Pool::value(const std::string& name) const {
+  std::map<std::string, std::vector<std::string> >::const_iterator result;
+  {
+    MutexLocker lock(mutexString);
+    result = _poolString.find(name);
+    if (result != _poolString.end()) {
+      return result->second;
+    }
+  }
+
+  {
+    MutexLocker lock(mutexSingleVectorString);
+    result = _poolSingleVectorString.find(name);
+    if (result != _poolSingleVectorString.end()) {
+      return result->second;
+    }
+  }
+
+  std::ostringstream msg;
+  msg << "Descriptor name '" << name << "' of type "
+      << nameOfType(typeid(std::vector<std::string>)) << " not found";
+  throw EssentiaException(msg);
+}
 
 // bool Pool::contains(const DescriptorName& name)
 #define SPECIALIZE_CONTAINS(type, tname)                                       \
@@ -432,7 +472,7 @@ inline bool Pool::contains<type>(const std::string& name) const {              \
 
 SPECIALIZE_CONTAINS(Real, SingleReal);
 SPECIALIZE_CONTAINS(std::string, SingleString);
-SPECIALIZE_CONTAINS(std::vector<std::string>, String);
+//SPECIALIZE_CONTAINS(std::vector<std::string>, String);
 SPECIALIZE_CONTAINS(std::vector<std::vector<Real> >, VectorReal);
 SPECIALIZE_CONTAINS(std::vector<std::vector<std::string> >, VectorString);
 SPECIALIZE_CONTAINS(std::vector<TNT::Array2D<Real> >, Array2DReal);
@@ -463,6 +503,30 @@ inline bool Pool::contains<std::vector<Real> >(const std::string& name) const {
 }
 
 
+// This value function is not under the macro above because it needs to check
+// in two separate sub-pools (poolString and poolSingleVectorString)
+template<>
+inline bool Pool::contains<std::vector<std::string> >(const std::string& name) const {
+  std::map<std::string, std::vector<std::string> >::const_iterator result;
+  {
+    MutexLocker lock(mutexString);
+    result = _poolString.find(name);
+    if (result != _poolString.end()) {
+      return true;
+    }
+  }
+
+  {
+    MutexLocker lock(mutexSingleVectorString);
+    result = _poolSingleVectorString.find(name);
+    if (result != _poolSingleVectorString.end()) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // Used to get a lock over all sub-pools, make sure to update this when adding
 // a new sub-pool
 #define GLOBAL_LOCK                                         \
@@ -474,8 +538,8 @@ MutexLocker lockArray2DReal(mutexArray2DReal);              \
 MutexLocker lockStereoSample(mutexStereoSample);            \
 MutexLocker lockSingleReal(mutexSingleReal);                \
 MutexLocker lockSingleString(mutexSingleString);            \
-MutexLocker lockSingleVectorReal(mutexSingleVectorReal);
-
+MutexLocker lockSingleVectorReal(mutexSingleVectorReal);    \
+MutexLocker lockSingleVectorString(mutexSingleVectorString);
 
 
 

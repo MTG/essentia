@@ -64,7 +64,7 @@ class PitchYin : public Algorithm {
 
   void declareParameters() {
     declareParameter("frameSize", "number of samples in the input frame (this is an optional parameter to optimize memory allocation)", "[2,inf)", 2048);
-    declareParameter("sampleRate", "sampling rate of the input spectrum [Hz]", "(0,inf)", 44100.);
+    declareParameter("sampleRate", "sampling rate of the input audio [Hz]", "(0,inf)", 44100.);
     declareParameter("minFrequency", "the minimum allowed frequency [Hz]", "(0,inf)", 20.0);
     declareParameter("maxFrequency", "the maximum allowed frequency [Hz]", "(0,inf)", 22050.0);
     declareParameter("interpolate", "enable interpolation", "{true,false}", true);

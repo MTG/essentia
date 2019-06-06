@@ -1,0 +1,260 @@
+{% extends "layout.html" %}
+{% set title = 'Overview' %}
+{% block body %}
+  <h1>Essentia {{version}} Documentation</h1>
+
+  <section id="what-is-essentia">
+    <h2>What is Essentia?</h2>
+
+    <p>Essentia is an open-source C++ library with Python bindings for <strong>audio analysis and audio-based music information retrieval</strong>. It is released
+    under the <strong><a href="http://tldrlegal.com/license/gnu-affero-general-public-license-v3-%28agpl-3.0%29#summary">Affero GPLv3
+    license</a></strong> and is also available under proprietary license upon request. The library contains an <strong><a href="{{ pathto("algorithms_overview") }}">
+    extensive collection of reusable algorithms</a></strong> which implement audio input/output functionality, standard digital signal processing
+    blocks, statistical characterization of data, and a large set of spectral, temporal, tonal and high-level music descriptors.
+    In addition, Essentia can be <strongs>complemented</strong> with <strong><a href="https://github.com/MTG/gaia">Gaia</a></strong>, a
+    C++ library with python bindings which implement similarity measures and classification on the results of audio analysis, and generate
+    <strong><a href="{{ pathto("installing") }}#using-pre-trained-high-level-models-in-essentia">classification
+    models</a></strong> that Essentia can use to compute high-level description of music (same license terms apply).</p>
+
+    <p>Essentia is not a framework, but rather a collection of algorithms (plus some infrastructure) wrapped in a library. It is designed with a focus on the <strong>robustness</strong>, <strong>performance</strong> and <strong>optimality</strong> of the <strong>provided
+    algorithms</strong>, including computational speed and memory usage, as well as ease of use. The flow of the analysis is decided and implemented by the user, while Essentia is taking
+    care of the implementation details of the algorithms being used. There is a special <strong>streaming mode</strong> in which it is possible to connect
+    algorithms and run them automatically (similarly to PureData or Max/MSP) instead of specifying explicitly the order of execution with an
+    advantage of less boilerplate code and less memory consumption. A number of examples are provided with the library, however they should
+    not be considered as the only correct way of doing things. A large part of Essentia's algorithms is well-suited for
+    <a href="FAQ.html#using-essentia-real-time"><strong>real-time</strong></a> applications.</p>
+
+    <p>The provided functionality is <strong>easily expandable</strong> and allows for both research experiments and development of large-scale <strong>industrial applications</strong>. Essentia has served in a large number of research activities conducted at <a href="http://mtg.upf.edu/">Music Technology Group</a> since 2006. It has been used for music classification, semantic autotagging, music similarity and recommendation, visualization and interaction with music, sound indexing, musical instruments detection, cover detection, beat detection, and acoustic analysis of stimuli for neuroimaging studies. A list of highlighted academic publications can be found <a href="{{ pathto("research_papers") }}">here</a>. Essentia and Gaia have been used extensively in a number of <a href="applications.html">research projects and industrial applications</a>.</p>
+
+    <p>Currently the following algorithms are included (<a href="{{ pathto("algorithms_reference") }}">among others</a>):</p>
+
+    <ul class="simple">
+      <li><strong>Audio file input/output</strong>: ability to read and write nearly all audio file formats (wav, mp3, ogg, flac, etc.)</li>
+      <li><strong>Standard signal processing blocks</strong>: FFT, DCT, frame cutter, windowing, envelope, smoothing</li>
+      <li><strong>Filters (FIR &amp; IIR)</strong>: low/high/band pass, band reject, DC removal, equal loudness</li>
+      <li><strong>Statistical descriptors</strong>: median, mean, variance, power means, raw and central moments, spread, kurtosis, skewness, flatness</li>
+      <li><strong>Time-domain descriptors</strong>: duration, loudness, LARM, Leq, Vickers' loudness, zero-crossing-rate, log attack time and other signal envelope descriptors</li>
+      <li><strong>Spectral descriptors</strong>: Bark/Mel/ERB bands, MFCC, GFCC, LPC, spectral peaks, complexity, rolloff, contrast, HFC, inharmonicity and dissonance</li>
+      <li><strong>Tonal descriptors</strong>: Pitch salience function, predominant melody and pitch, HPCP (chroma) related features, chords, key and scale, tuning frequency</li>
+      <li><strong>Rhythm descriptors</strong>: beat detection, BPM, onset detection, rhythm transform, beat loudness</li>
+      <li><strong>Other high-level descriptors</strong>: danceability, dynamic complexity, audio segmentation, SVM classifier</li>
+    </ul>
+
+    <p>The library is<strong> cross-platform</strong> and currently supports <a href="{{ pathto("installing") }}"><strong>Linux</strong>, <strong>Mac OS X</strong>, and partially <strong>Windows</strong>,
+    <strong>iOS</strong> and <strong>Android</strong></a> systems. It can also be cross-compiled to <strong><a href="FAQ.html#compiling-essentia-to-javascript-with-emscripten">JavaScript</a></strong> to be used on the web.</p>
+
+    <p>The library is wrapped in <strong>Python</strong> (Linux and OSX) and includes a number of predefined <strong><a href="{{ pathto("extractors_out_of_box") }}">
+    command-line extractors for music descriptors</a></strong> (Linux, OSX and Windows), which facilitates its use for fast prototyping and allows setting up
+    research experiments very rapidly. Furthermore, it includes a <a href="http://essentia.upf.edu/documentation/vamp_plugins"><strong>Vamp plugin</strong></a>
+    (Linux and OSX) that can be used with Sonic Visualiser for visualization purposes. There have been developed a number of third-party extensions to Essentia
+    that allow its use within the frameworks of <a href="http://mtg.upf.edu/technologies/EssentiaRT~"><strong>PureData</strong> and
+    <strong>Max/MSP</strong></a>, <a href="https://github.com/leozimmerman/ofxAudioAnalyzer"><strong>openFrameworks</strong></a>, and
+    <a href="https://github.com/MTG/matlab-c-tools"><strong>Matlab</strong></a>.</p>
+  </section>
+  <section id="crediting-essentia">
+    <h2>Crediting Essentia</h2>
+    <p>Please credit properly your use of Essentia! If you use the Essentia library in your software please
+    acknowledge it and specify its origen as <a>http://essentia.upf.edu</a>. If you do some research and publish an article,
+    cite both the Essentia paper [1] and the specific references mentioned in the documentation of the algorithms used.
+    We would be also very grateful if you let us know how you use Essentia by sending an email to <a
+    href="mailto:mtg@upf.edu">mtg@upf.edu</a>
+    </p>
+
+    <p>[1] Bogdanov, D., Wack N., Gómez E., Gulati S., Herrera P., Mayor O., et al. (2013).  <a
+    href="http://mtg.upf.edu/node/2793">ESSENTIA: an Audio Analysis
+    Library for Music Information Retrieval.</a> International Society for Music Information Retrieval Conference
+    (ISMIR'13). 493-498.</p>
+  </section>
+
+  <section id="contents">
+    <h2>Contents</h2>
+    <dl>
+      <dt>
+        <a href="{{ pathto("contents") }}">Contents and search</a>
+      </dt>
+      <dd>
+        For a complete overview of the documentation
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("algorithms_reference") }}">Algorithm reference</a>
+      </dt>
+      <dd>
+        The detailed documentation for all the algorithms
+      </dd>
+
+      <dt>
+        <a href="doxygen/index.html">Doxygen C++ documentation</a>
+      </dt>
+      <dd>
+        The documentation for the base classes used in Essentia
+      </dd>
+    </dl>
+  </section>
+
+  <section id="getting-started">
+    <h2>Getting started</h2>
+    <dl>
+      <dt>
+        <a href="{{ pathto("introduction") }}">Introduction</a>
+      </dt>
+      <dd>
+        An introduction to Essentia's main concepts
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("installing") }}">Building and installing Essentia</a>
+      </dt>
+      <dd>
+        Instructions to get Essentia running on your computer
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("algorithms_overview") }}">Algorithms overview</a>
+      </dt>
+      <dd>
+        A quick description of the main algorithms
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("essentia_python_tutorial") }}">Python tutorial for beginners</a>
+      </dt>
+      <dd>
+        A hands-on introduction to Essentia
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("essentia_python_examples") }}">Python examples</a>
+      </dt>
+      <dd>
+        Examples of using Essentia in Python
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("extractors_out_of_box") }}">Using extractors out-of-box</a>
+      </dt>
+      <dd>
+        Quick results with no programming required
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("streaming_extractor_music") }}">Music extractor</a>
+      </dt>
+      <dd>
+        Command-line feature extractor
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("FAQ") }}">Frequently asked questions</a>
+      </dt>
+      <dd>
+        Various tips on how to build and use Essentia
+      </dd>
+    </dl>
+  </section>
+
+  <section id="using-essentia">
+    <h2>Using Essentia</h2>
+    <dl>
+      <dt>
+        <a href="{{ pathto("design_overview") }}">Design overview</a>
+      </dt>
+      <dd>
+        An explanation of Essentia's basic types and classes
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("howto_standard_extractor") }}">Using standard mode</a>
+      </dt>
+      <dd>
+        Learn how to write a "standard" extractor
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("howto_streaming_extractor") }}">Using streaming mode</a>
+      </dt>
+      <dd>
+        Learn how to write a "streaming" extractor
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("streaming_architecture") }}">Streaming mode architecture</a>
+      </dt>
+      <dd>
+        A description of how the "streaming" mode works
+      </dd>
+    </dl>
+  </section>
+  <section id="extending-essentia">
+    <h2>Extending Essentia</h2>
+    <dl>
+      <dt>
+        <a href="{{ pathto("extending_essentia") }}">Standard algorithms</a>
+      </dt>
+      <dd>
+          How to write new "standard" algorithms for Essentia
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("extending_essentia_streaming") }}">Streaming algorithms</a>
+      </dt>
+      <dd>
+        How to write new "streaming" algorithms for Essentia
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("composite_api") }}">AlgorithmComposite algorithms</a>
+      </dt>
+      <dd>
+        The inner workings of the composite algorithms
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("execution_network_algorithm") }}">Streaming network execution</a>
+      </dt>
+      <dd>
+        How Essentia's streaming scheduler works
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("coding_guidelines") }}">Coding guidelines</a>
+      </dt>
+      <dd>
+        Good practices to follow when developing new algorithms
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("contribute") }}">Contribute</a>
+      </dt>
+      <dd>
+        How to help us in development of Essentia
+      </dd>
+    </dl>
+  </section>
+  <section id="licensing">
+    <h2>Applications and licensing</h2>
+    <dl>
+      <dt>
+        <a href="{{ pathto("research_papers") }}">Academic research using Essentia</a>
+      </dt>
+      <dd>
+        Some of the academic studies using Essentia organized by research topics
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("applications") }}">Industrial applications</a>
+      </dt>
+      <dd>
+        Companies and projects using Essentia
+      </dd>
+
+      <dt>
+        <a href="{{ pathto("licensing_information") }}">Licensing Essentia</a>
+      </dt>
+      <dd>
+        Using Essentia in commercial applications
+      </dd>
+    </dl>
+  </section>
+
+{% endblock %}

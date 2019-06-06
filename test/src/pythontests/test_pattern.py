@@ -68,4 +68,4 @@ for input_file in all_files:
 
     (r, rSegments, patternOnsets, patternRate) = patterndetection(chroma);
 
-    print patternRate , os.path.basename(input_file)
+    print(patternRate , os.path.basename(input_file))

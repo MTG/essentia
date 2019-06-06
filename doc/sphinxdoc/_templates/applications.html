@@ -1,0 +1,203 @@
+{% extends "!layout.html" %}
+{% set title = 'Applications' %}
+
+{% block extrahead %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ pathto("_static/apps.css", 1) }}" />
+{% endblock %}
+
+{% block body %}
+  <h1>Applications</h1>
+
+  <p>
+    Essentia has served in a large number of research activities conducted at<a href="http://mtg.upf.edu"> Music Technology Group</a> since 2006.
+    It has been used for music classification, semantic auto-tagging, music similarity and recommendation, visualization and interaction with music,
+    sound indexing, musical instruments detection, cover detection, beat detection, and acoustic analysis of stimuli for neuroimaging studies.
+  </p>
+  <p>
+    A list of highlighted academic publications using Essentia can be found <a href="research_papers.html">here</a>.
+  </p>
+  <p>
+    Essentia and Gaia have been used extensively in a number of research projects, software and industrial applications. We highlight some of them below.
+  </p>
+
+  <dl class="essnt-app-page">
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="http://www.freesound.org/docs/api/" title="Go to freesound">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_freesound.png", 1) }}" alt="freesound logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        Both Essentia and Gaia libraries are employed for large-scale indexing and content-based search of sound recordings within&nbsp;<a href="http://freesound.org">Freesound.org</a>, a popular repository of Creative Commons licensed audio samples. In particular, Freesound uses audio based similarity to recommend sounds similar to user queries.&nbsp;The Essentia extractor used for this functionality is in&nbsp;<a href="https://github.com/MTG/essentia/tree/master/src/examples/freesound">here</a>. Also through the&nbsp;<a href="http://www.freesound.org/docs/api/">Freesound API</a>&nbsp;the individual analysis descriptors of a sound can be accessed.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="http://dunya.compmusic.upf.edu/" title="Go to Dunya">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_dunya.svg", 1) }}" alt="dunya logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="http://dunya.compmusic.upf.edu/">Dunya</a> is a web-based software application using Essentia that lets users interact with an audio music collection through the use of musical concepts that are derived from a specific musical culture, in this case, Carnatic music.</td>
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="http://acousticbrainz.org" title="Go to Acousticbrainz">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_acousticbrainz2.png", 1) }}" alt="acousticbrainz logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="http://acousticbrainz.org">AcousticBrainz</a> aims to crowdsource acoustic information for all music in the world and to make it available to the public, providing a massive database of information about music for music technology researchers and open-source hackers. The project relies on Essentia for extracting acoustic characteristics of music, including low-level spectral information, rhythm, keys, scales, and much more, and automatic annotation by genres, moods, and instrumentation.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="https://good-sounds.org" title="Go to good-sounds.org">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_goodsounds.png", 1) }}" alt="good-sounds logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="https://good-sounds.org">Good-sounds</a> is a community-based online platform that allows musicians to automatically evaluate their playing exercises in terms of sound quality of instrumental sounds, their “sound goodness”. The evaluation is done by means of audio analysis technology Artistry developed by Korg and the Music Technology Group and is based on Essentia. The system measures how close the sounds performed by training musicians are to the ones that the community has identified as reference sounds.</td>
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="http://www.korg.com/us/products/software/cortosia/" title="Go to good-sounds.org">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_korg.jpg", 1) }}" alt="korg logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="http://www.korg.com/us/products/software/cortosia">Cortosia</a> is an interactive tuner iPhone app using Essentia for automated evaluation of playing exercises by training musicians, developed by Korg and linked to the Good-Sounds platform.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="http://bmat.com/" title="Go to bmat.com">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_bmat.jpg", 1) }}" alt="BMAT logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="http://bmat.com/">BMAT</a> started in 2005 when a group of engineers crazy about music decided to spin-off from University Pompeu Fabra and create a company that made music a better and fairer place. Nowadays, BMAT monitors more than 5,000 tvs, radios, clubs and digital services, identifies when and where any song is played and provides more than 90 CMOs worldwide with the metadata that describes who owns the rights over each track. Essentia is the main library used by BMAT for audio analysis.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="https://github.com/urinieto/msaf" title="Go to MSAF">
+          <span class="essnt-apps-page__logo-text">
+            MSAF
+          </span>
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="https://github.com/urinieto/msaf">Music Structure Analysis Framework</a> is a framework for music audio segmentation using Essentia to extract the necessary features.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="http://mtg.upf.edu/technologies/EssentiaRT~" title="Go to EssentiaRT~">
+          <span class="essnt-apps-page__logo-text">
+            EssentiaRT~
+          </span>
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="http://mtg.upf.edu/technologies/EssentiaRT~">EssentiaRT~</a> is a real-time subset of Essentia implemented as an external for Pd and Max/MSP.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="https://github.com/leozimmerman/ofxAudioAnalyzer" title="Go to ofxAudioAnalyzer">
+          <span class="essnt-apps-page__logo-text">
+            ofxAudioAnalyzer
+          </span>
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="https://github.com/leozimmerman/ofxAudioAnalyzer">ofxAudioAnalyzer</a> is an openFrameworks wrapper for Essentia. It provides audio analysis algorithms modified to process signals in real-time.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="http://necrodancer.com/" title="Go to necrodancer.com">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_neurodancer.png", 1) }}" alt="necrodancer logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="http://necrodancer.com/">Crypt of the NecroDancer</a> is an award winning independent game. Players move on the beat of the music to navigate a dungeon and fight enemies. The game uses Essentia's beat detection capabilities to allow users to play the game with songs from their own music library.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="http://www.fretello.com/" title="Go to Fretello homepage">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_fretello.png", 1) }}" alt="Fretello logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="http://www.fretello.com">Fretello</a> is an app for iOS and Android that helps you learn guitar faster, more effectively, and permanently. It creates individual exercise regimens that are tailored to your specific needs, detects how you play, selects your optimal practicing tempo and adapts dynamically to your progress.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="http://reactable.com/" title="Go to Reactable homepage">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_reactable.jpg", 1) }}" alt="Reactable logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="http://reactable.com/">Reactable</a> provides cutting-edge interactive products for musical creation.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="https://musicmuni.com/" title="Go to MusicMuni Labs homepage">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_musicmuni.png", 1) }}" alt="MusicMuni Labs logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="https://musicmuni.com/">MusicMuni Labs</a> offers technologies for music education and infotainment.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="http://www.tele-music.com/" title="Go to Tele Music homepage">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_telemusic.jpg", 1) }}" alt="Tele Music logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="http://www.tele-music.com/">Tele Music</a> is a 50 years old music label in France with an extensive catalog of library music for movies, adverts, TV, and radio.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="https://www.lacupulamusic.com/" title="Go to La Cupula Music homepage">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_lacupula.png", 1) }}" alt="La Cupula Music logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="https://www.lacupulamusic.com/">La Cupula Music</a> offers tech solutions for digital music distribution, catalogue management and royalties collection.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="https://www.waves.com/" title="Go to Waves homepage">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_waves.jpg", 1) }}" alt="Waves logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="https://www.waves.com/">Waves</a> is the leading developer of audio plugins for mixing, mastering, post production and live sound.
+      </dd>
+    </div>
+    <div class="row essnt-apps-page__container">
+      <dt class="col-xs-2 col-sm-3 col-md-2 essnt-apps-page__logo">
+        <a href="https://tunebat.com/" title="Go to Tunebat homepage">
+          <img class="essnt-apps-page__logo-img" src="{{ pathto("_static/3rdparty/logo_tunebat.png", 1) }}" alt="Tunebat logo"  />
+        </a>
+      </dt>
+      <dd class="col-xs-10 col-sm-9 col-md-10 essnt-apps-page__description">
+        <a href="https://tunebat.com/">Tunebat</a> is a key & BPM database prividing a way to browse and analyze millions of songs for DJs, producers, musicians, and music enthusiasts.
+      </dd>
+    </div>
+  </dl>
+
+{% endblock %}

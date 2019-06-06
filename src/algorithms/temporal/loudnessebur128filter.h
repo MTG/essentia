@@ -40,6 +40,8 @@ class LoudnessEBUR128Filter : public AlgorithmComposite {
   SinkProxy<StereoSample> _signal;
   SourceProxy<Real> _signalFiltered;
 
+  scheduler::Network* _network;
+
  public:
   LoudnessEBUR128Filter();
   ~LoudnessEBUR128Filter();

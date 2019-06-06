@@ -202,8 +202,8 @@ void PitchContours::removePeak(vector<vector<Real> >& peaksBins, vector<vector<R
 
 void PitchContours::trackPitchContour(size_t& index, vector<Real>& contourBins, vector<Real>& contourSaliences) {
   // find the highest salient peak through all frames
-  size_t max_i;
-  int max_j;
+  size_t max_i = 0;
+  int max_j = 0;
   Real maxSalience = 0;
 
   for (size_t i=0; i<_numberFrames; i++) {

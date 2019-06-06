@@ -5,7 +5,7 @@ from essentia import Pool
 try:
     input_file = sys.argv[1]
 except:
-    print "usage:", sys.argv[0], "<input_file>"
+    print("usage: %s <input_file>" % sys.argv[0])
     sys.exit()
 
 
@@ -40,11 +40,8 @@ for frame in FrameGenerator(audio=loader(), frameSize=frameSize, hopSize=hopSize
     bands = melbands(spectrum(w(frame)))
     pool.add('melbands', bands)
 
-
-
-print len(pool['melbands']), "Mel band frames"
-print len(pool['melbands']) / 32, "Rhythm transform frames"
-
+print("Mel band frames: %d" % len(pool['melbands']))
+print("Rhythm transform frames: %d" % int(len(pool['melbands']) / 32))
 
 rhythmtransform = RhythmTransform(frameSize=rmsFrameSize, hopSize=rmsHopSize)
 rt = rhythmtransform(pool['melbands'])

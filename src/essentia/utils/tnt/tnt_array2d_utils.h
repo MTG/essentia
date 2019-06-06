@@ -65,7 +65,7 @@ std::istream& operator>>(std::istream &s, Array2D<T> &A)
             s >>  B[i][j];
         }
 
-	A = B;
+    A = B;
     return s;
 }
 

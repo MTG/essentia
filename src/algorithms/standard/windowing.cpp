@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* Windowing::name = "Windowing";
 const char* Windowing::category = "Standard";
-const char* Windowing::description = DOC("This algorithm applies windowing to an audio signal. It optionally applies zero-phase windowing and optionally adds zero-padding. The resulting windowed frame size is equal to the incoming frame size plus the number of padded zeros. The available windows are normalized (to have an area of 1) and then scaled by a factor of 2.\n"
+const char* Windowing::description = DOC("This algorithm applies windowing to an audio signal. It optionally applies zero-phase windowing and optionally adds zero-padding. The resulting windowed frame size is equal to the incoming frame size plus the number of padded zeros. By default, the available windows are normalized (to have an area of 1) and then scaled by a factor of 2.\n"
 "\n"
 "An exception is thrown if the size of the frame is less than 2.\n"
 "\n"
@@ -48,6 +48,7 @@ void Windowing::configure() {
 void Windowing::createWindow(const std::string& windowtype) {
   if (windowtype == "hamming") hamming();
   else if (windowtype == "hann") hann();
+  else if (windowtype == "hannnsgcq") hannNSGCQ();
   else if (windowtype == "triangular") triangular();
   else if (windowtype == "square") square();
   else if (windowtype == "blackmanharris62") blackmanHarris62();
@@ -127,6 +128,19 @@ void Windowing::hann() {
 
   for (int i=0; i<size; i++) {
     _window[i] = 0.5 - 0.5 * cos((2.0*M_PI*i) / (size - 1.0));
+  }
+}
+// note: Zero-centered windows are very important for the NSQConstantQ algorithm.
+// As the algorithm sometimes uses very short windows, this can have a big impact on the transform.
+// Thus, this window was created to return a zero-centered window also with even sizes.
+void Windowing::hannNSGCQ() {
+
+  const int size = _window.size();
+  for (int i=0; i<=size/2 ; i++) {
+    _window[i] = 0.5 + 0.5 * cos(2.0*M_PI*i / size);
+  }
+  for (int i=size/2+1; i<size ; i++) {
+    _window[i] = 0.5 + 0.5 * cos(-2.0*M_PI*i / size);
   }
 }
 
