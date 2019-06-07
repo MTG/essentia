@@ -324,6 +324,23 @@ In the preprocessing stage, training script loads all descriptor files according
 
 Note that cross-validation script splits the ground-truth dataset into train and test sets randomly. In the case of music classification tasks one may want to assure artist/album filtering (that is, no artist/album occures in the test set if it occures in train set). Current way to achieve it is to ensure that the whole input dataset contains only one item per artist/album. Alternatively, you can adapt the scripts to suit your needs.
 
+### How to train an SVM model with a different set of parameters 
+Our training script generates a single model retrained on the whole dataset with the best parameters combination from the grid search. However, you may want to generate new models with custom parametrizations. Imagine, for instance, that you need a model that runs on a lighter set of features despite the accuracy drop, or that you believe that a different parameters set can improve results for your particular scenario.
+
+In order to generate a model given the `<project_file>` and your chosen `<param_file>` from the results folder, execute the following python lines,
+
+```
+from gaia2.scripts.classification.retrain_model import retrainModel
+retrainModel(project_file, param_file, output_file)
+
+```
+This creates a Gaia model and saves it into `<output_file>`. 
+
+*Also, note that the `retrain_model` can be called as a command line program.*
+
+### How to choose a parameter configuration
+At the end of the training process, a file called `<project_name>.report.csv` is created. It provides a ranking in terms of accuracy and normalized accuracy as well as the standard deviation between folds for every set of parameters. By having a look at this file you can get some insights about which parameters to try. You can, for instance, estimate the expected accuracy drop if you decide to go for a configuration with a smaller set of descriptors.
+
 
 How to know which other Algorithms an Algorithm uses?
 -----------------------------------------------------
