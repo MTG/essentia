@@ -41,7 +41,7 @@ class TriangularBands : public Algorithm {
   bool _isLog;
   std::vector<std::vector<Real> > _filterCoefficients;
   Real _inputSize;
-  std::string _normalization;
+  bool _normalizeUnitSum;
   std::string _type;
   void createFilters(int spectrumSize);
   void setWeightingFunctions(std::string weighting);

@@ -69,7 +69,9 @@ class LoudnessEBUR128 : public AlgorithmComposite {
   void declareParameters() {
     // EBU R128 specs: the update rate for short-term loudness "live meters" shall be at least 10 Hz
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,0.1]", 0.1);  
+    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,0.1]", 0.1);
+    declareParameter("startAtZero", "start momentary/short-term loudness estimation at time 0 (zero-centered loudness estimation windows) if true; otherwise start both windows at time 0 (time positions for momentary and short-term values will not be syncronized)",
+                     "{true,false}", false);
   };
 
   void configure();
@@ -113,7 +115,9 @@ class LoudnessEBUR128 : public Algorithm {
   void declareParameters() {
     // EBU R128 specs: the update rate for short-term loudness 'live meters' shall be at least 10 Hz
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,0.1]", 0.1);  
+    declareParameter("hopSize", "the hop size with which the loudness is computed [s]", "(0,0.1]", 0.1);
+    declareParameter("startAtZero", "start momentary/short-term loudness estimation at time 0 (zero-centered loudness estimation windows) if true; otherwise start both windows at time 0 (time positions for momentary and short-term values will not be syncronized)",
+                     "{true,false}", false);
   };
 
   void configure();

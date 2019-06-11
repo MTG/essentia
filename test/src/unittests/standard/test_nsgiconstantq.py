@@ -59,6 +59,16 @@ class TestNSGIConstantQ(TestCase):
 
         self.assertAlmostEqualVectorFixedPrecision(x, y, 3)
 
+    def testSynthetiseSineOddSize(self):
+        # Test the reconstruction capabilities for signals with an odd length.
+        inputSize = 2 ** 12 + 1
+        x = essentia.array(np.sin(2 * np.pi * 1000 * np.arange(inputSize) / 44100))
+
+        CQ, CQDC, DCNF= NSGConstantQ(inputSize=inputSize)(x)
+        y = NSGIConstantQ(inputSize=inputSize)(CQ, CQDC, DCNF)
+
+        self.assertAlmostEqualVectorFixedPrecision(x, y, 5)
+
     def testSynthetiseDC(self):
         x = essentia.array(np.ones(2**12))
 

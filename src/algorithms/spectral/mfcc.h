@@ -36,11 +36,10 @@ class MFCC : public Algorithm {
   Algorithm* _dct;
 
   std::vector<Real> _logbands;
-
-  typedef  Real (*funcPointer)(Real);
-  funcPointer _compressor;
-
-  void setCompressor(std::string logType);
+  std::string _logType;
+  Real _silenceThreshold;
+  Real _dbSilenceThreshold;
+  Real _logSilenceThreshold;
 
  public:
   MFCC() {
@@ -68,6 +67,7 @@ class MFCC : public Algorithm {
     declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
     declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
     declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
+    declareParameter("silenceThreshold", "silence threshold for computing log-energy bands", "(0,inf)", 1e-10);
     declareParameter("dctType", "the DCT type", "[2,3]", 2);
     declareParameter("liftering", "the liftering coefficient. Use '0' to bypass it", "[0,inf)", 0);
     declareParameter("logType","logarithmic compression type. Use 'dbpow' if working with power and 'dbamp' if working with magnitudes","{natural,dbpow,dbamp,log}","dbamp");
