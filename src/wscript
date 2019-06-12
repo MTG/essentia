@@ -9,6 +9,12 @@ import os.path
 dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
 
 def options(ctx):
+    if sys.platform == 'darwin':
+        defaultFFT = 'ACCELERATE'
+    else:
+        defaultFFT = 'FFTW'
+
+
     ctx.add_option('--with-python', action='store_true',
                    dest='WITH_PYTHON', default=False,
                    help='build the python bindings')
@@ -46,7 +52,7 @@ def options(ctx):
                    dest='INCLUDE_ALGOS', default=False,
                    help='algorithms to install (comma separated)')
     ctx.add_option('--fft', action='store',
-                   dest='FFT', default='FFTW',
+                   dest='FFT', default=defaultFFT,
                    help='FFT to use - options are \'FFTW\'(default), \'KISS\', and \'ACCELERATE\' framework (Mac Only)')
     ctx.add_option('--only-python', action='store_true',
                    dest='ONLY_PYTHON', default=False,
@@ -187,7 +193,7 @@ def configure(ctx):
 
     # Select FFT algorithms
     algos = ['FFT']
-    if 'ACCELERATE' in ctx.env.FFT or sys.platform == 'darwin':
+    if 'ACCELERATE' in ctx.env.FFT:
         print('- using Accelerate Framework for FFT\n')
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
         ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex',
