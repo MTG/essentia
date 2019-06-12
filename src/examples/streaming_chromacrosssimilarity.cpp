@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
   int numBins = 12;
   Real minFrequency = 100;
   Real maxFrequency = 3500;
-  int oti = 3; // hardcoded, should be replaced by oti algo
+  int oti = 3; // hardcoded, should be obtained from the oti algo
   bool otiBinary = false;
   Real binarizePercentile = 0.095;
   int frameStackStride = 1;
@@ -110,7 +110,7 @@ int main(int argc, char* argv[]) {
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos for hpcp and csm extraction ---------" << endl;
 
-  // Audio -> FrameCutter
+ // Audio -> FrameCutter
   audio->output("audio")    >>  fc->input("signal");
 
   // FrameCutter -> Windowing -> Spectrum

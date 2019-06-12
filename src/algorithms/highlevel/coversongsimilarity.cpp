@@ -48,10 +48,14 @@ const char* CoverSongSimilarity::description = DOC("This algorithm computes a co
 void CoverSongSimilarity::configure() {
   _disOnset = parameter("disOnset").toReal();
   _disExtension = parameter("disExtension").toReal();
+  std::string distanceType = toLower(parameter("distanceType").toString());
   std::string simType = toLower(parameter("alignmentType").toString());
   if      (simType == "serra09") _simType = SERRA09;
   else if (simType == "chen17") _simType = CHEN17;
   else throw EssentiaException("CoverSongSimilarity: Invalid cover similarity type: ", simType);
+  if      (distanceType == "symmetric") _distanceType = SYMMETRIC;
+  else if (distanceType == "asymmetric") _distanceType = ASYMMETRIC;
+  else throw EssentiaException("CoverSongSimilarity: Invalid distance type: ", simType);
 }
 
 void CoverSongSimilarity::compute() {
@@ -122,8 +126,13 @@ void CoverSongSimilarity::compute() {
       }
     }
   }
-  // compute cover song similarity distance by normalising it with the length of reference song as described in [2].
-  distance = sqrt(yFrames) / maxElementArray(scoreMatrix);
+  if (_distanceType == SYMMETRIC) {
+    distance = maxElementArray(scoreMatrix);
+  }
+  else if (_distanceType == ASYMMETRIC) {
+    // compute cover song similarity distance by normalising it with the length of reference song as described in [2].
+    distance = sqrt(yFrames) / maxElementArray(scoreMatrix);
+  }
 }
 
 } // namespace standard
@@ -141,6 +150,10 @@ const char* CoverSongSimilarity::description = standard::CoverSongSimilarity::de
 void CoverSongSimilarity::configure() {
   _disOnset = parameter("disOnset").toReal();
   _disExtension = parameter("disExtension").toReal();
+  std::string distanceType = toLower(parameter("distanceType").toString());
+  if      (distanceType == "symetric") _distanceType = SYMMETRIC;
+  else if (distanceType == "asymetric") _distanceType = ASYMMETRIC;
+  else throw EssentiaException("CoverSongSimilarity: Invalid distance type: ", distanceType);
   _c1 = 0;
   _c2 = 0;
   _c3 = 0;
@@ -243,9 +256,15 @@ AlgorithmStatus CoverSongSimilarity::process() {
     _bufferScoreMatrix.push_back(incrementMatrix[i]);
     _prevCumMatrixFrames.push_back(incrementMatrix[i]);
   }
-  // compute asymetric cover similarity distance
-  distance[0] = sqrt(_yFrames) / maxElementArray(_bufferScoreMatrix);
-  std::cout << distance[0] << std::endl;
+  if (_distanceType == SYMMETRIC) {
+    distance[0] = maxElementArray(_bufferScoreMatrix);
+  }
+  else if (_distanceType == ASYMMETRIC) {
+    // compute cover song similarity distance by normalising it with the length of reference song as described in [2].
+    distance[0] = sqrt(_yFrames) / maxElementArray(_bufferScoreMatrix);
+  }
+  // std::cout << distance[0] << std::endl;
+  E_INFO(distance[0]);
   scoreMatrix[0] = vecvecToArray2D(incrementMatrix);
   releaseData();
   return OK;

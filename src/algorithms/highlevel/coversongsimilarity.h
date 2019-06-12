@@ -35,13 +35,14 @@ namespace standard {
    CoverSongSimilarity() {
      declareInput(_inputArray, "inputArray", " a 2D binary cross-similarity matrix of two audio chroma vectors (query vs reference song) (refer 'ChromaCrossSimilarity' algorithm').");
      declareOutput(_scoreMatrix, "scoreMatrix", "a 2D smith-waterman alignment score matrix from the input binary cross-similarity matrix");
-     declareOutput(_distance, "distance", "asymmetric cover song similarity distance between the query and reference song from the input similarity matrix as described in [2].");
+     declareOutput(_distance, "distance", "cover song similarity distance between the query and reference song from the input similarity matrix. Either 'asymmetric' (as described in [2]) or 'symmetric' (maximum score in the alignment score matrix).");
    }
 
    void declareParameters() {
      declareParameter("disOnset", "penalty for disruption onset", "[0,inf)", 0.5);
      declareParameter("disExtension", "penalty for disruption extension", "[0,inf)", 0.5);
-     declareParameter("alignmentType", "choose either one of the given local-alignment constraints for smith-waterman algorithm as described in [2] and [3] respectively.", "{serra09,chen17}", "serra09");
+     declareParameter("alignmentType", "choose either one of the given local-alignment constraints for smith-waterman algorithm as described in [2] or [3] respectively.", "{serra09,chen17}", "serra09");
+     declareParameter("distanceType", "choose the type of distance. By default the algorithm outputs a asymmetric disctance which is obtained by normalising the maximum score in the alignment score matrix with length of reference song", "{symmetric,asymmetric}", "asymmetric");
    }
 
    void configure();
@@ -53,6 +54,10 @@ namespace standard {
   protected:
    Real _disOnset;
    Real _disExtension;
+   enum DistanceType {
+     SYMMETRIC, ASYMMETRIC
+   };
+   DistanceType _distanceType;
    enum SimType {
      SERRA09, CHEN17
    };
@@ -78,6 +83,10 @@ class CoverSongSimilarity : public Algorithm {
    int _iterIdx = 0;
    Real _disOnset;
    Real _disExtension;
+   enum DistanceType {
+     SYMMETRIC, ASYMMETRIC
+   };
+   DistanceType _distanceType;
    Real _c1;
    Real _c2;
    Real _c3;
@@ -96,7 +105,7 @@ class CoverSongSimilarity : public Algorithm {
    CoverSongSimilarity() : Algorithm() {
     declareInput(_inputArray, _minFramesSize, "inputArray", "a 2D binary cross similarity matrix of two audio chroma vectors (refer CrossSimilarityMatrix algorithm').");
     declareOutput(_scoreMatrix, 1, "scoreMatrix", "a 2D smith-waterman alignment score matrix from the input binary cross-similarity matrix as described in [2].");
-    declareOutput(_distance, 1, "distance", "asymmetric cover song similarity distance between the query and reference song from the input similarity matrix as described in [2].");
+    declareOutput(_distance, 1, "distance", "cover song similarity distance between the query and reference song from the input similarity. Either 'asymmetric' (as described in [2]) or 'symmetric' (maximum score in the alignment score matrix).");
   }
 
   ~CoverSongSimilarity() {}
@@ -106,6 +115,7 @@ class CoverSongSimilarity : public Algorithm {
   void declareParameters() {
     declareParameter("disOnset", "penalty for disruption onset", "[0,inf)", 0.5);
     declareParameter("disExtension", "penalty for disruption extension", "[0,inf)", 0.5);
+    declareParameter("distanceType", "choose the type of distance. By default the algorithm outputs a asymmetric disctance which is obtained by normalising the maximum score in the alignment score matrix with length of reference song", "{symmetric,asymmetric}", "asymmetric");
   }
 
   void configure();

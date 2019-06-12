@@ -221,12 +221,12 @@ int main(int argc, char* argv[]) {
   cout << " .... computing smith-waterman local alignment" << endl;
   coversim->compute();
   // TODO: replace with std::vector<vector<Real> > when essentia pool has 2D vector support
-  // pool.add("scoreMatrix", vecvecToArray2D(scoreMatrix));
   cout << "Cover song similarity distance: " << distance << endl;
   pool.add("distance", distance);
+  pool.add("scoreMatrix", vecvecToArray2D(scoreMatrix));
   pool.remove("queryHPCP");
   pool.remove("referenceHPCP");
-  
+    
   // write results to file
   cout << "\n-------- writing results to file " << outputFilename << " ---------" << endl;
   Algorithm* output = AlgorithmFactory::create("YamlOutput",

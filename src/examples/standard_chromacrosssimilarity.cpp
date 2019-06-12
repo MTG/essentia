@@ -58,13 +58,13 @@ int main(int argc, char* argv[]) {
   int frameStackStride = 1;
   int frameStackSize = 9;
   bool otiBinary = false;
-  bool streamingMode = false;
+  bool streaming = false;
 
   Pool pool;
   AlgorithmFactory& factory = standard::AlgorithmFactory::instance();
   Algorithm* csm = factory.create("ChromaCrossSimilarity",
                                   "otiBinary", otiBinary,
-                                  "streamingMode", streamingMode,
+                                  "streaming", streaming,
                                   "binarizePercentile", binarizePercentile,
                                   "frameStackSize", frameStackSize,
                                   "frameStackStride", frameStackStride);
