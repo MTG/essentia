@@ -38,10 +38,11 @@ def find_dependencies(mode, algo):
 import essentia.%s as es
 import essentia
 from essentia.pytools.io import test_audiofile
+test_audio = test_audiofile()
 
 essentia.log.infoActive = True
 essentia.log.debugLevels += essentia.EFactory
-es.%s()(test_audiofile())
+es.%s()(test_audio)
 """ % (mode, algo)
     else:
         code = """
