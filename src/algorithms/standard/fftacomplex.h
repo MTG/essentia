@@ -63,7 +63,7 @@ class FFTAComplex : public Algorithm {
 
  protected:
   friend class IFFTAComplex;
-  static ForcedMutex globalFFTAcomplexMutex;
+  static ForcedMutex globalFFTAMutex;
 
     FFTSetup fftSetup;
     

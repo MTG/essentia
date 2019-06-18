@@ -18,7 +18,7 @@
  */
 
 #include "ifftacomplex.h"
-#include "ifftacomplex.h"
+#include "fftacomplex.h"
 
 using namespace std;
 using namespace essentia;
@@ -96,7 +96,7 @@ void IFFTAComplex::configure() {
 }
 
 void IFFTAComplex::createFFTObject(int size) {
-  ForcedMutexLocker lock(FFTA::globalFFTAMutex);
+  ForcedMutexLocker lock(FFTAComplex::globalFFTAMutex);
     
     //Delete stuff before assigning
     free(accelBuffer.realp);
