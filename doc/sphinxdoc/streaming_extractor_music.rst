@@ -213,8 +213,6 @@ In the profile example below, the extractor is set to analyze only the first 30 
   average_loudness:
       frameSize: 88200
       hopSize: 44100
-      windowType: hann
-      silentFrames: noise
 
   rhythm:
       method: degara
