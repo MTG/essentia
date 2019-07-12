@@ -107,7 +107,7 @@ Cross-compiling for Windows on Linux
 
 Install Mingw-w64 GCC:
 ```
-sudo apt-get install  gcc-mingw-w64 
+sudo apt-get install g++-mingw-w64
 ```
 
 Build all dependencies (similarly to Linux static builds, make sure you have required tools installed):
