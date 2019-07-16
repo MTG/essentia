@@ -636,9 +636,9 @@ void MusicExtractor::computeChromaPrint(const string& audioFilename, Pool& resul
 
     results.add("chromaprint.string", chromaprint);
     if (chromaprintDuration == 0.f)
-      results.add("chromaprint.duration", results.value<Real>("metadata.audio_properties.length"));
+      results.set("chromaprint.duration", results.value<Real>("metadata.audio_properties.length"));
     else
-    results.add("chromaprint.duration", chromaprintDuration);
+    results.set("chromaprint.duration", chromaprintDuration);
   }
   catch (const EssentiaException& e) {
     throw EssentiaException("MusicExtractor: exception thrown while computing the Chromaprint. ", e.what());
