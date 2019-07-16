@@ -56,8 +56,8 @@ class FreesoundExtractor : public Algorithm {
 
   int loudnessFrameSize;
   int loudnessHopSize;
-  std::string loudnessSilentFrames;
-  std::string loudnessWindowType;
+  //std::string loudnessSilentFrames;
+  //std::string loudnessWindowType;
 
   std::string rhythmMethod;
   int rhythmMinTempo;

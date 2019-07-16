@@ -72,8 +72,8 @@ void MusicExtractor::configure() {
 
   loudnessFrameSize = parameter("loudnessFrameSize").toInt();
   loudnessHopSize = parameter("loudnessHopSize").toInt();
-  loudnessSilentFrames = parameter("loudnessSilentFrames").toLower();
-  loudnessWindowType = parameter("loudnessWindowType").toLower();
+  //loudnessSilentFrames = parameter("loudnessSilentFrames").toLower();
+  //loudnessWindowType = parameter("loudnessWindowType").toLower();
 
   rhythmMethod = parameter("rhythmMethod").toLower();
   rhythmMinTempo = parameter("rhythmMinTempo").toInt();
@@ -148,8 +148,8 @@ void MusicExtractor::setExtractorDefaultOptions() {
   // average_loudness
   options.set("average_loudness.frameSize", loudnessFrameSize);
   options.set("average_loudness.hopSize", loudnessHopSize);
-  options.set("average_loudness.windowType", loudnessWindowType);
-  options.set("average_loudness.silentFrames", loudnessSilentFrames);
+  //options.set("average_loudness.windowType", loudnessWindowType);
+  //options.set("average_loudness.silentFrames", loudnessSilentFrames);
 
   // rhythm
   options.set("rhythm.method", rhythmMethod);

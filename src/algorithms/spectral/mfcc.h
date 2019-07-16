@@ -36,11 +36,10 @@ class MFCC : public Algorithm {
   Algorithm* _dct;
 
   std::vector<Real> _logbands;
-
-  typedef  Real (*funcPointer)(Real);
-  funcPointer _compressor;
-
-  void setCompressor(std::string logType);
+  std::string _logType;
+  Real _silenceThreshold;
+  Real _dbSilenceThreshold;
+  Real _logSilenceThreshold;
 
  public:
   MFCC() {
@@ -64,10 +63,10 @@ class MFCC : public Algorithm {
     declareParameter("numberCoefficients", "the number of output mel coefficients", "[1,inf)", 13);
     declareParameter("lowFrequencyBound", "the lower bound of the frequency range [Hz]", "[0,inf)", 0.);
     declareParameter("highFrequencyBound", "the upper bound of the frequency range [Hz]", "(0,inf)", 11000.);
-    declareParameter("warpingFormula", "The scale implementation type. use 'htkMel' to emulate its behaviour. Default slaneyMel.","{slaneyMel,htkMel}","slaneyMel");
-    declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
-    declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
+    declareParameter("warpingFormula", "The scale implementation type: 'htkMel' scale from the HTK toolkit [2, 3] (default) or 'slaneyMel' scale from the Auditory toolbox [4]","{slaneyMel,htkMel}","htkMel");    declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
+    declareParameter("normalize", "spectrum bin weights to use for each mel band: 'unit_max' to make each mel band vertex equal to 1, 'unit_sum' to make each mel band area equal to 1 summing the actual weights of spectrum bins, 'unit_area' to make each triangle mel band area equal to 1 normalizing the weights of each triangle by its bandwidth","{unit_sum,unit_tri,unit_max}", "unit_sum");
     declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
+    declareParameter("silenceThreshold", "silence threshold for computing log-energy bands", "(0,inf)", 1e-10);
     declareParameter("dctType", "the DCT type", "[2,3]", 2);
     declareParameter("liftering", "the liftering coefficient. Use '0' to bypass it", "[0,inf)", 0);
     declareParameter("logType","logarithmic compression type. Use 'dbpow' if working with power and 'dbamp' if working with magnitudes","{natural,dbpow,dbamp,log}","dbamp");

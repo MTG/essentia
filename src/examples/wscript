@@ -33,6 +33,7 @@ example_sources_fileio = [
     ('standard_stft', ),
     ('standard_stochasticmodel', ),
     ('standard_chromaprinter', ),
+    ('standard_pca', ),
 
     ('standard_discontinuitydetector', ),
     ('standard_extractor_la-cupula', ),
