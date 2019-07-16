@@ -48,6 +48,9 @@ def amp2db(arg):
 def db2amp(arg):
     return _essentia.db2amp( _c.convertData(arg, _c.Edt.REAL) )
 
+def lin2log(arg):
+    return _essentia.lin2log( _c.convertData(arg, _c.Edt.REAL) )
+
 def bark2hz(arg):
     return _essentia.bark2hz( _c.convertData(arg, _c.Edt.REAL) )
 
@@ -85,4 +88,4 @@ __all__ = [ 'isSilent', 'instantPower',
             'mel2hz', 'hz2mel',
             'postProcessTicks',
             'normalize', 'derivative',
-            'equivalentKey']
+            'equivalentKey', 'lin2log']

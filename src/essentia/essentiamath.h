@@ -404,6 +404,7 @@ template <typename T> T instantPower(const std::vector<T>& array) {
 // aproximately -90
 #define SILENCE_CUTOFF 1e-10
 #define DB_SILENCE_CUTOFF -100
+#define LOG_SILENCE_CUTOFF -23.025850929940457
 
 // returns true if the signal average energy is below a cutoff value, here -90dB
 template <typename T> bool isSilent(const std::vector<T>& array) {
@@ -559,6 +560,10 @@ inline Real db2amp(Real amplitude) {
 
 inline Real linear(Real input) {
   return input;
+}
+
+inline Real lin2log(Real value) {
+  return value < SILENCE_CUTOFF ? LOG_SILENCE_CUTOFF : log(value);
 }
 
 inline Real lin2log(Real input, Real silenceCutoff, Real logSilenceCutoff) {
