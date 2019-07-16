@@ -640,9 +640,8 @@ void MusicExtractor::computeChromaPrint(const string& audioFilename, Pool& resul
     else
     results.add("chromaprint.duration", chromaprintDuration);
   }
-  catch (const EssentiaException&) {
-    throw EssentiaException("File looks like a completely silent file");
-    //exit(4);
+  catch (const EssentiaException& e) {
+    throw EssentiaException("MusicExtractor: exception thrown while computing the Chromaprint. ", e.what());
   }
 }
 #endif
