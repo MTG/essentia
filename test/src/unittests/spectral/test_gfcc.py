@@ -53,7 +53,7 @@ class TestGFCC(TestCase):
     def testZerodbAmp(self):
         # zero input should return dct(lin2db(0)). Try with different sizes
         size = 1025
-        val = 2 * 10 * np.log10(1e-9)
+        val = amp2db(0)
         expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
         while (size > 256 ):
             bands, gfcc = GFCC(inputSize=size)(zeros(size))
@@ -79,15 +79,14 @@ class TestGFCC(TestCase):
     def testZeroLog(self):
         # zero input should return dct(lin2db(0)). Try with different sizes
         size = 1025
-        val = -np.inf # this one has to be replaced with lin2log(0) when 
-                      # the branch mfcc_thresholding is merged. 
+        val = lin2log(0)
         expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
         while (size > 256):
             bands, gfcc = GFCC(inputSize=size, logType='log')(zeros(size))
             self.assertEqualVector(gfcc, expected)
 
             # also assess that the thresholding is working
-            self.assertTrue(not np.isnan(gfcc).any() and not np.isinf(gfcc).any())    
+            self.assertTrue(not np.isnan(gfcc).any() and not np.isinf(gfcc).any())
             size = int(size/2)
 
     def testZeroNatural(self):
