@@ -191,9 +191,7 @@ def configure(ctx):
         print('- using Accelerate Framework for FFT\n')
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
         ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTKComplex', 'IFFTKComplex',
-                               'FFTW', 'IFFTW', 'FFTWComplex', 'IFFTWComplex',
-                               'ConstantQ', 'Chromagram',
-                               ]
+                               'FFTW', 'IFFTW', 'FFTWComplex', 'IFFTWComplex']
     elif 'KISS' in ctx.env.FFT:
         print('- using KISS for FFT\n')
         ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTAComplex', 'IFFTAComplex',
@@ -208,7 +206,12 @@ def configure(ctx):
         else:
             print(' - fftw seems to be missing.')
             print('   The following algorithms will be ignored: %s\n' % algos)
-            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex']
+            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW',
+                                   'FFTWComplex', 'IFFTWComplex',
+                                   'FFTKComplex', 'IFFTKComplex',
+                                   'FFTAComplex', 'IFFTAComplex']
+            # TODO what other algorithms dependent on FFT should be also ignored?
+
             print('   IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
             print('                   To avoid these errors, use alternative FFT libraries (see the --fft flag).\n')
 
