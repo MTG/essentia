@@ -245,10 +245,11 @@ Note, that you need to build Essentia with Gaia2 or use our static builds (soon 
 
 
 Chromaprints
-----------------------------
+------------
 
-If `libchromaprint <https://packages.debian.org/sid/libchromaprint-dev>`_ is available, this extractor can be configured to compute `Chromaprints <https://acoustid.org/chromaprint>`_ and store them in the output pools.
-To generate the chromaprints the parameter `chromaprint.compute` has to be explicitly set to `1` in the profile file (it defaults to `0`). Optionally, The `chromaprint.duration` parameter specifies how many seconds from the beginning of the track are used to compute the chromaprints. If set to 0 (by default) the whole track is used.
+If `libchromaprint <https://packages.debian.org/sid/libchromaprint-dev>`_ is available, this extractor can be configured to compute `Chromaprint fingerprints <https://acoustid.org/chromaprint>`_ and store them in the output pools.
+To generate the fingerprints the parameter `chromaprint.compute` has to be explicitly set to `1` in the profile file (it defaults to `0`). Optionally, The `chromaprint.duration` parameter specifies how many seconds from the beginning of the track are used to compute the fingerprints. If set to 0 (by default), the whole track is used. ::
+
   chromaprint:
     compute: 1
     duration: 10.0
