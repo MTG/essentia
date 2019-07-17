@@ -61,16 +61,9 @@ class IFFTAComplex : public Algorithm {
   static const char* description;
 
  protected:
-//  fftwf_plan _fftPlan;
-//  std::complex<Real>* _input;
-//  Real* _output;
-
   FFTSetup fftSetup;
-  
   int logSize;
-  
   int _fftPlanSize;
-  
   DSPSplitComplex accelBuffer;
 
   bool _normalize;

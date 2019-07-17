@@ -19,6 +19,7 @@
 
 #include "ifftacomplex.h"
 #include "fftacomplex.h"
+#include "ffta.h"
 
 using namespace std;
 using namespace essentia;
@@ -43,11 +44,10 @@ const char* IFFTAComplex::description = DOC("This algorithm calculates the inver
 
 
 IFFTAComplex::~IFFTAComplex() {
-  ForcedMutexLocker lock(FFTAComplex::globalFFTAMutex);
-
-    vDSP_destroy_fftsetup(fftSetup);
-    free(accelBuffer.realp);
-    free(accelBuffer.imagp);
+  ForcedMutexLocker lock(FFTA::globalFFTAMutex);
+  vDSP_destroy_fftsetup(fftSetup);
+  delete[] accelBuffer.realp;
+  delete[] accelBuffer.imagp;
 }
 
 void IFFTAComplex::compute() {
@@ -76,7 +76,7 @@ void IFFTAComplex::compute() {
     
   vDSP_fft_zip(fftSetup, &accelBuffer, 1, logSize, FFT_INVERSE);
   
-  // copy result from plan to output vector
+  // Copy result from plan to output vector.
   signal.resize(size);
   
   vDSP_ztoc(&accelBuffer, 1, (COMPLEX*)&signal[0], 2, size);
@@ -96,23 +96,22 @@ void IFFTAComplex::configure() {
 }
 
 void IFFTAComplex::createFFTObject(int size) {
-  ForcedMutexLocker lock(FFTAComplex::globalFFTAMutex);
+  ForcedMutexLocker lock(FFTA::globalFFTAMutex);
     
-    //Delete stuff before assigning
-    free(accelBuffer.realp);
-    free(accelBuffer.imagp);
+  // Delete stuff before assigning.
+  delete[] accelBuffer.realp;
+  delete[] accelBuffer.imagp;
+
+  accelBuffer.realp = new float[size];
+  accelBuffer.imagp = new float[size];
+
+  logSize = log2(size);
     
-    accelBuffer.realp         = (float *) malloc(sizeof(float) * size);
-    accelBuffer.imagp         = (float *) malloc(sizeof(float) * size);
-    
-    logSize = log2(size);
-    
-    //With vDSP you only need to create a new fft if you've increased the size
-    if(size > _fftPlanSize) {
-        vDSP_destroy_fftsetup(fftSetup);
-        
-        fftSetup = vDSP_create_fftsetup( logSize, 0 );
-    }
-    
-    _fftPlanSize = size;
+  // With vDSP you only need to create a new fft if you've increased the size.
+  if(size > _fftPlanSize) {
+    vDSP_destroy_fftsetup(fftSetup);
+    fftSetup = vDSP_create_fftsetup(logSize, 0);
+  }
+
+  _fftPlanSize = size;
 }

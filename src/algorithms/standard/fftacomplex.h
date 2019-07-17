@@ -37,14 +37,14 @@ class FFTAComplex : public Algorithm {
   int _fftOutSize;
 
  public:
-    FFTAComplex() {
+  FFTAComplex() {
     declareInput(_signal, "frame", "the input audio frame");
     declareOutput(_fft, "fft", "the FFT of the input frame");
         
-        fftSetup = NULL;
-        accelBuffer.realp = NULL;
-        accelBuffer.imagp = NULL;
-        _fftPlanSize = 0;
+    fftSetup = NULL;
+    accelBuffer.realp = NULL;
+    accelBuffer.imagp = NULL;
+    _fftPlanSize = 0;
   }
 
   ~FFTAComplex();
@@ -62,14 +62,11 @@ class FFTAComplex : public Algorithm {
   static const char* description;
 
  protected:
-  friend class IFFTAComplex;
-  static ForcedMutex globalFFTAMutex;
+  FFTSetup fftSetup;
 
-    FFTSetup fftSetup;
-    
-    int logSize;
-    int _fftPlanSize;    
-    DSPSplitComplex accelBuffer;
+  int logSize;
+  int _fftPlanSize;
+  DSPSplitComplex accelBuffer;
 
   void createFFTObject(int size);
 };

@@ -45,9 +45,9 @@ const char* IFFTA::description = DOC("This algorithm calculates the inverse shor
 IFFTA::~IFFTA() {
   ForcedMutexLocker lock(FFTA::globalFFTAMutex);
 
-    vDSP_destroy_fftsetup(fftSetup);
-    free(accelBuffer.realp);
-    free(accelBuffer.imagp);
+  vDSP_destroy_fftsetup(fftSetup);
+  delete[] accelBuffer.realp;
+  delete[] accelBuffer.imagp;
 }
 
 void IFFTA::compute() {
@@ -98,21 +98,18 @@ void IFFTA::configure() {
 void IFFTA::createFFTObject(int size) {
   ForcedMutexLocker lock(FFTA::globalFFTAMutex);
     
-    //Delete stuff before assigning
-    free(accelBuffer.realp);
-    free(accelBuffer.imagp);
+  delete[] accelBuffer.realp;
+  delete[] accelBuffer.imagp;
+  accelBuffer.realp = new float[size/2];
+  accelBuffer.imagp = new float[size/2];
     
-    accelBuffer.realp         = (float *) malloc(sizeof(float) * size/2);
-    accelBuffer.imagp         = (float *) malloc(sizeof(float) * size/2);
+  logSize = log2(size);
     
-    logSize = log2(size);
+  // With vDSP you only need to create a new fft if you've increased the size.
+  if(size > _fftPlanSize) {
+    vDSP_destroy_fftsetup(fftSetup);
+    fftSetup = vDSP_create_fftsetup(logSize, 0);
+  }
     
-    //With vDSP you only need to create a new fft if you've increased the size
-    if(size > _fftPlanSize) {
-        vDSP_destroy_fftsetup(fftSetup);
-        
-        fftSetup = vDSP_create_fftsetup( logSize, 0 );
-    }
-    
-    _fftPlanSize = size;
+  _fftPlanSize = size;
 }
