@@ -190,10 +190,16 @@ def configure(ctx):
     if 'ACCELERATE' in ctx.env.FFT:
         print('- using Accelerate Framework for FFT\n')
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
-        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
+        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex',
+                               'IFFTWComplex', 'ConstantQ', 'Chromagram',
+                               'SpectrumCQ', 'NSGConstantQ', 'NSGIConstantQ',
+                               'NSGConstantQStreaming']
     elif 'KISS' in ctx.env.FFT:
         print('- using KISS for FFT\n')
-        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex', 'ConstantQ', 'Chromagram']
+        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex',
+                               'IFFTWComplex', 'ConstantQ', 'Chromagram',
+                               'SpectrumCQ', 'NSGConstantQ', 'NSGIConstantQ',
+                               'NSGConstantQStreaming']
     else:
         print('- using FFTW for FFT\n')
         if has('fftw'):
@@ -430,6 +436,13 @@ def build(ctx):
     else:
         print ('Building without 3rdparty spline library code because Spline and CubicSpline algorithms are ignored')
 
+    # do not compile nnls.h if we are not compiling NNLSChroma
+    if 'NNLSChroma' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/nnls' ]
+        sources += [ ctx.path.find_resource('3rdparty/nnls/nnls.c') ]
+    else:
+        print ('Building without 3rdparty nnls library code because NNLSChroma algorithms are ignored')
+
     # Add Kiss Dependancy stuff
     if 'KISS' in ctx.env.FFT:
         ctx.env.INCLUDES += ['3rdparty/kiss_fft130' ]
@@ -448,7 +461,14 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
-	"""
+    """
+
+    # do not compile Cephes functions if we are not compiling SNR
+    if 'SNR' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/cephes/bessel/' ]
+        sources += ctx.path.ant_glob('3rdparty/cephes/bessel/*.cpp') 
+    else:
+        print('Building without 3rdparty Cephes library code (Bessel functions) because SNR algorithm is ignored')
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(

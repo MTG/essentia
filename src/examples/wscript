@@ -32,7 +32,18 @@ example_sources_fileio = [
     ('standard_spsmodel', ),
     ('standard_stft', ),
     ('standard_stochasticmodel', ),
+    ('standard_pca', ),
 
+    ('standard_discontinuitydetector', ),
+    ('standard_extractor_la-cupula', ),
+    ('standard_gapsdetector', ),
+    ('standard_humdetector', ),
+    ('standard_loudnessebur128_double_input', ),
+    ('standard_saturationdetector', ),
+    ('standard_snr', ),
+    ('standard_welch', ),
+
+    ('streaming_humdetector', ),
     ('streaming_beatsmarker', ),
     ('streaming_beattracker_multifeature_mirex2013', ),
     ('streaming_key', ),
@@ -49,6 +60,7 @@ example_sources_fileio = [
     ('streaming_stft', ),
     ('streaming_tuningfrequency', ),
     ('streaming_vibrato', ),
+    ('streaming_yinprobabilistic', ),
 
     ('streaming_extractor_music',
         ['music_extractor/extractor_utils']),

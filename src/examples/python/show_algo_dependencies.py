@@ -28,8 +28,24 @@ import argparse
 
 
 def find_dependencies(mode, algo):
+    if algo in ['MusicExtractor', 'FreesoundExtractor']:
+        # FIXME These are special algorithms that instantiate all dependencies
+        # inside compute(). Ideally, they should be rewritten to do that in
+        # configure() methods. Feeding a test audiofile as an input.
+        print("Running compute() for", algo)
 
-    code = """
+        code = """
+import essentia.%s as es
+import essentia
+from essentia.pytools.io import test_audiofile
+test_audio = test_audiofile()
+
+essentia.log.infoActive = True
+essentia.log.debugLevels += essentia.EFactory
+es.%s()(test_audio)
+""" % (mode, algo)
+    else:
+        code = """
 import essentia.%s as es
 import essentia
 
@@ -38,7 +54,7 @@ essentia.log.debugLevels += essentia.EFactory
 loader = es.%s()
 """ % (mode, algo)
 
-    proc = subprocess.Popen(["python", "-c", code], stderr=subprocess.PIPE)
+    proc = subprocess.Popen([sys.executable, "-c", code], stderr=subprocess.PIPE)
     stderr = proc.communicate()[1].decode('utf8').split('\n')
 
     # function to assign nested dict elements by a list of nested keys
@@ -81,7 +97,8 @@ loader = es.%s()
 
             previous_indent = indent
  
-    algos = sorted(list(set(algos) - set([(mode, algo)])))
+    algos = sorted(list(set(algos)))
+    #algos = sorted(list(set(algos) - set([(mode, algo)])))
     return algos, tree, lines
 
 
@@ -152,13 +169,8 @@ if __name__ == "__main__":
         print_dependencies(dependencies)
         all_dependencies += dependencies
 
-    print("The following algorithms will be required for building Essentia:")
+    algos = sorted(list(set([a for m,a in all_dependencies])))
+    print("The following %d algorithms will be required for building Essentia:" % len(algos))
 
-    for a in set([a for m,a in all_dependencies]):
+    for a in algos:
         print(a)
-
-
-
-
-
-

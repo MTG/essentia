@@ -56,8 +56,8 @@ class MusicExtractor : public Algorithm {
 
   int loudnessFrameSize;
   int loudnessHopSize;
-  std::string loudnessSilentFrames;
-  std::string loudnessWindowType;
+  //std::string loudnessSilentFrames;
+  //std::string loudnessWindowType;
 
   std::string rhythmMethod;
   int rhythmMinTempo;
@@ -116,8 +116,8 @@ class MusicExtractor : public Algorithm {
     // TODO average_loudness is redundant? we compare with replaygain and ebu r128
     declareParameter("loudnessFrameSize", "the frame size for computing average loudness", "(0,inf)", 88200);
     declareParameter("loudnessHopSize", "the hop size for computing average loudness", "(0,inf)", 44100);
-    declareParameter("loudnessWindowType", "the window type for computing average loudness", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
-    declareParameter("loudnessSilentFrames", "whether to [keep/drop/add noise to] silent frames for computing average loudness", "{drop,keep,noise}", "noise");
+    //declareParameter("loudnessWindowType", "the window type for computing average loudness", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    //declareParameter("loudnessSilentFrames", "whether to [keep/drop/add noise to] silent frames for computing average loudness", "{drop,keep,noise}", "noise");
 
     declareParameter("rhythmMethod", "the method used for beat tracking", "{multifeature,degara}", "degara");
     declareParameter("rhythmMinTempo", "the slowest tempo to detect [bpm]", "[40,180]", 40);

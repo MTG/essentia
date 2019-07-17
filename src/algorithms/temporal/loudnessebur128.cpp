@@ -131,24 +131,27 @@ inline Real loudness2power(Real loudness) {
 void LoudnessEBUR128::configure() {
 
   Real sampleRate = parameter("sampleRate").toReal();
+  bool startFromZero = !parameter("startAtZero").toBool();
+
+
   _hopSize = int(round(parameter("hopSize").toReal() * sampleRate));
 
   _loudnessEBUR128Filter->configure("sampleRate", sampleRate);
   
   _frameCutterMomentary->configure("frameSize", int(round(0.4 * sampleRate)), // 400ms
                                    "hopSize", _hopSize,
-                                   "startFromZero", true,
+                                   "startFromZero", startFromZero,
                                    "silentFrames", "keep");
   _frameCutterShortTerm->configure("frameSize", int(3 * sampleRate), // 3 seconds
                                    "hopSize", _hopSize,
-                                   "startFromZero", true,
+                                   "startFromZero", startFromZero,
                                    "silentFrames", "keep");
 
   // The measurement input to which the gating threshold is applied is the loudness of the
   // 400 ms blocks with a constant overlap between consecutive gating blocks of 75%. 
   _frameCutterIntegrated->configure("frameSize", int(round(0.4 * sampleRate)),
                                     "hopSize", int(round(0.1 * sampleRate)), 
-                                    "startFromZero", true,
+                                    "startFromZero", startFromZero,
                                     "silentFrames", "keep");
 
   _computeMomentary->configure("type", "log10",
@@ -269,6 +272,7 @@ namespace standard {
 const char* LoudnessEBUR128::name = "LoudnessEBUR128";
 const char* LoudnessEBUR128::category = "Loudness/dynamics";
 const char* LoudnessEBUR128::description = DOC("This algorithm computes the EBU R128 loudness descriptors of an audio signal.\n"
+"\n"
 "- The input stereo signal is preprocessed with a K-weighting filter [2] (see LoudnessEBUR128Filter algorithm), composed of two stages: a shelving filter and a high-pass filter (RLB-weighting curve).\n"
 "- Momentary loudness is computed by integrating the sum of powers over a sliding rectangular window of 400 ms. The measurement is not gated.\n"
 "- Short-term loudness is computed by integrating the sum of powers over a sliding rectangular window of 3 seconds. The measurement is not gated.\n"
@@ -307,7 +311,7 @@ LoudnessEBUR128::~LoudnessEBUR128() {
 }
 
 void LoudnessEBUR128::configure() {
-  _loudnessEBUR128->configure(INHERIT("sampleRate"), INHERIT("hopSize"));
+  _loudnessEBUR128->configure(INHERIT("sampleRate"), INHERIT("hopSize"), INHERIT("startAtZero"));
 }
 
 

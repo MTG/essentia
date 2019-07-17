@@ -104,6 +104,9 @@ class ReplayGain : public AlgorithmComposite {
   AlgorithmStatus process();
   void reset();
 
+  static const char* name;
+  static const char* category;
+  static const char* description;
 };
 
 } // namespace streaming

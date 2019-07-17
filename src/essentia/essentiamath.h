@@ -82,7 +82,9 @@ template <> inline long long int nextPowerTwo(long long int n) {
   return ++n;
 }
 
-// returns the L2-norm of an array
+/**
+ * Returns the L2-norm of an array
+ */
 template <typename T> T norm(const std::vector<T>& array) {
   if (array.empty()) {
     throw EssentiaException("trying to calculate norm of empty array");
@@ -95,6 +97,17 @@ template <typename T> T norm(const std::vector<T>& array) {
   }
 
   return sqrt(sum);
+}
+
+/**
+ * Returns the sum of squared values of an array
+ */
+template <typename T> T sumSquare(const std::vector<T> array, const size_t start, const size_t end) {
+  T sum = 0.0;
+  for (size_t i = array; i < end; ++i) {
+    sum += array[i] * array[i];
+  }
+  return sum;
 }
 
 /**
@@ -389,12 +402,12 @@ template <typename T> T instantPower(const std::vector<T>& array) {
 // first. For this reason we set the silence cutoff as what should be silence
 // on a 16bit pcm file, that is (16bit - 1bit)*6.02 which yields -90.3 dB thus
 // aproximately -90
-#define silenceCutoff 1e-9
-#define dbSilenceCutoff -90
+#define SILENCE_CUTOFF 1e-10
+#define DB_SILENCE_CUTOFF -100
 
 // returns true if the signal average energy is below a cutoff value, here -90dB
 template <typename T> bool isSilent(const std::vector<T>& array) {
-  return instantPower(array) < silenceCutoff;
+  return instantPower(array) < SILENCE_CUTOFF;
 }
 
 // returns the variance of an array of TNT::Array2D<T> elements
@@ -509,9 +522,12 @@ template <typename T> T round(const T value) {
 
 
 inline Real lin2db(Real value) {
-  return value < silenceCutoff ? dbSilenceCutoff : (Real)10.0 * log10(value);
+  return value < SILENCE_CUTOFF ? DB_SILENCE_CUTOFF : (Real)10.0 * log10(value);
 }
 
+inline Real lin2db(Real value, Real silenceCutoff, Real dbSilenceCutoff) {
+  return value < silenceCutoff ? dbSilenceCutoff : (Real)10.0 * log10(value);
+}
 
 inline Real db2lin(Real value) {
   return pow((Real)10.0, value/(Real)10.0);
@@ -519,6 +535,10 @@ inline Real db2lin(Real value) {
 
 inline Real pow2db(Real power) {
   return lin2db(power);
+}
+
+inline Real pow2db(Real power, Real silenceCutoff, Real dbSilenceCutoff) {
+  return lin2db(power, silenceCutoff, dbSilenceCutoff);  
 }
 
 inline Real db2pow(Real power) {
@@ -529,6 +549,10 @@ inline Real amp2db(Real amplitude) {
   return Real(2.0)*lin2db(amplitude);
 }
 
+inline Real amp2db(Real amplitude, Real silenceCutoff, Real dbSilenceCutoff) {
+  return Real(2.0)*lin2db(amplitude, silenceCutoff, dbSilenceCutoff);  
+}
+
 inline Real db2amp(Real amplitude) {
   return db2lin(0.5*amplitude);
 }
@@ -536,6 +560,11 @@ inline Real db2amp(Real amplitude) {
 inline Real linear(Real input) {
   return input;
 }
+
+inline Real lin2log(Real input, Real silenceCutoff, Real logSilenceCutoff) {
+  return input < silenceCutoff ? logSilenceCutoff : log(input);
+}
+
 
 #ifdef OS_WIN32
 // The following function hz2bark needs the function asinh,
@@ -640,6 +669,23 @@ inline Real mel102hz(Real mel) {
   return 700.0 * (pow(10.0, mel/2595.0) - 1.0);
 }
 
+// Convert Mel to Hz based on Slaney's formula in MATLAB Auditory Toolbox
+inline Real mel2hzSlaney(Real mel) {
+  const Real minLogHz = 1000.0;
+  const Real linSlope = 3 / 200.;
+  const Real minLogMel = minLogHz * linSlope;
+
+  if (mel < minLogMel) {
+    // Linear part: 0 - 1000 Hz.
+    return mel / linSlope;
+  }
+  else {
+    // Log-scale part: >= 1000 Hz.
+    const Real logStep = log(6.4) / 27.0;
+    return minLogHz * exp((mel - minLogMel) * logStep);
+  }
+}
+
 inline Real hz2mel(Real hz) {
   return 1127.01048 * log(hz/700.0 + 1.0);
 }
@@ -648,8 +694,29 @@ inline Real hz2mel10(Real hz) {
   return 2595.0 * log10(hz/700.0 + 1.0);
 }
 
+// Convert Hz to Mel based on Slaney's formula in MATLAB Auditory Toolbox
+inline Real hz2melSlaney(Real hz) {
+  const Real minLogHz = 1000.0;
+  const Real linSlope = 3 / 200.;
+
+  if (hz < minLogHz) {
+    // Linear part: 0 - 1000 Hz.
+    return hz * linSlope;
+  }
+  else {
+    // Log-scale part: >= 1000 Hz.
+    const Real minLogMel = minLogHz * linSlope;
+    const Real logStep = log(6.4) / 27.0;
+    return minLogMel + log(hz/minLogHz) / logStep;
+  }
+}
+
 inline Real hz2hz(Real hz){
   return hz;
+}
+
+inline Real hz2cents(Real hz) {
+  return 12 * std::log(hz/440)/std::log(2.) + 69;
 }
 
 inline int argmin(const std::vector<Real>& input) {
@@ -666,6 +733,20 @@ template <typename T> void normalize(std::vector<T>& array) {
   if (array.empty()) return;
 
   T maxElement = *std::max_element(array.begin(), array.end());
+
+  if (maxElement != (T) 0.0) {
+    for (uint i=0; i<array.size(); i++) {
+      array[i] /= maxElement;
+    }
+  }
+}
+
+// normalize to the max(abs(array))
+template <typename T> void normalizeAbs(std::vector<T>& array) {
+  if (array.empty()) return;
+  std::vector<T> absArray = array;
+  rectify(absArray);
+  T maxElement = *std::max_element(absArray.begin(), absArray.end());
 
   if (maxElement != (T) 0.0) {
     for (uint i=0; i<array.size(); i++) {
@@ -880,6 +961,113 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
   }
 
   return result;
+}
+
+inline std::string equivalentKey(const std::string key) {
+  if (key == "C")
+    return "C";
+
+  if (key == "C#")
+    return "Db";
+
+  if (key == "Db")
+    return "C#";
+
+  if (key == "D")
+    return "D";
+
+  if (key == "D#")
+    return "Eb";
+
+  if (key == "Eb")
+    return "D#";
+
+  if (key == "E")
+    return "E";
+
+  if (key == "F")
+    return "F";
+
+  if (key == "F#")
+    return "Gb";
+
+  if (key == "Gb")
+    return "F#";
+
+  if (key == "G")
+    return "G";
+
+  if (key == "G#")
+    return "Ab";
+
+  if (key == "Ab")
+    return "G#";
+
+  if (key == "A")
+    return "A";
+
+  if (key == "A#")
+    return "Bb";
+
+  if (key == "Bb")
+    return "A#";
+
+  if (key == "B")
+    return "B";
+
+  return "";
+}
+
+
+/**
+ * Sample covariance
+ */
+template <typename T> T covariance(const std::vector<T>& x, const T xMean, const std::vector<T>& y, const T yMean) {
+  if (x.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (y.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (x.size() != y.size())
+    throw EssentiaException("x and y should have the same size");
+
+  T cov = (T) 0.0;
+
+  for (uint i=0; i<x.size(); i++) {
+    cov += (x[i] - xMean) * (y[i] - yMean);
+  }
+
+  return (T)(cov / (Real)x.size());
+}
+
+/**
+ * Returns the sample Pearson correlation coefficient of a pair of vectors as described in,
+ * https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
+ */
+template <typename T> T pearsonCorrelationCoefficient(const std::vector<T>& x, const std::vector<T>& y) {
+  if (x.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (y.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (x.size() != y.size())
+    throw EssentiaException("x and y should have the same size");
+
+  T xMean = mean(x);
+  T yMean = mean(y);
+  
+  T cov = covariance(x, xMean, y, yMean);
+
+  T xStddev = stddev(x, xMean);
+  T yStddev = stddev(y, yMean);
+
+  // When dealing with constants corraltion is 0 by convention. 
+  if ((xStddev == (T)0.0) || (xStddev == (T)0.0) || (xStddev == (T)0.0)) return (T) 0.0;
+  
+  T corr = cov / (xStddev * yStddev);
+
+  // Numerical error can yield results slightly outside the analytical range [-1, 1].
+  // Clipping the output is a cheap way to mantain this contrain.
+  // Seen in https://github.com/numpy/numpy/blob/v1.15.0/numpy/lib/function_base.py#L2403-L2406
+  return std::max(std::min(corr, (T)1.0), (T)-1.0);
 }
 
 } // namespace essentia

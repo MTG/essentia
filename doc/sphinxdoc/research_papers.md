@@ -8,9 +8,15 @@ The list below highlights some of the academic studies using Essentia organized 
 - Y. Bayle, P. Hanna, and M. Robine. SATIN: A Persistent Musical Database for Music Information Retrieval. In 15th International Workshop on Content-Based Multimedia Indexing (CBMI'17), 2017.
 
 
-## Music classification
+## Music and sound classification
+
+- S. Oramas, D. Bogdanov and A. Porter. MediaEval 2018 AcousticBrainz Genre Task: A baseline combining deep feature embeddings across datasets. In MediaEval 2018 Workshop, 2018.
+
+- H. Schreiber. MediaEval 2018 AcousticBrainz Genre Task: A CNN Baseline Relying on Mel-Features. In MediaEval 2018 Workshop, 2018.
 
 - J. Kim, M. Won, X. Serra, and C. C. S. Liem, Transfer Learning of Artist Group Factors to Musical Genre Classification. In WWW '18 Companion Proceedings of the The Web Conference 2018, 2018.
+
+- N. Karunakaran and A. Arya, A Scalable Hybrid Classifier for Music Genre Classification using Machine Learning Concepts and Spark. In International Conference on Intelligent Autonomous Systems (ICoIAS), 2018.
 
 - D. Bogdanov, A. Porter, J. Urbano, and H. Schreiber. The MediaEval 2017 AcousticBrainz Genre Task: Content-based Music Genre Recognition from Multiple Sources. In MediaEval 2017 Multimedia Benchmark Workshop (MediaEval'17), 2017.
 
@@ -31,6 +37,9 @@ Indexing music by mood: design and integration of an automatic content-based ann
 
 - C. Johnson-Roberson. Content-Based Genre Classification and Sample Recognition Using Topic Models. Master Thesis, Brown University, Providence, USA, 2017.
 
+- E. Fonseca, R. Gong, and X. Serra. A Simple Fusion Of Deep And Shallow Learning For Acoustic Scene Classification. In Sound and Music Computing Conference (SMC’18), 2018.
+
+
 ### Semantic autotagging
 
 - M. Sordo. Semantic Annotation of Music Collections: A Computational Approach. PhD thesis, UPF, Barcelona, Spain, 2012.
@@ -38,7 +47,7 @@ Indexing music by mood: design and integration of an automatic content-based ann
 - Y. Yang, D. Bogdanov, P. Herrera, and M. Sordo. Music Retagging Using Label Propagation and Robust Principal Component Analysis. In International World Wide Web Conference (WWW’12), International Workshop on Advances in Music Information Research (AdMIRe’12), 2012.
 
 
-## Music similarity and recommendation
+## Music preferences, similarity and recommendation
 
 - D. Bogdanov. From music similarity to music recommendation: Com-
 putational approaches based on audio and metadata analysis. PhD
@@ -60,7 +69,10 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 - K. Yadati, C. Liem, M. Larson, and A. Hanjalic. On the Automatic Identification of Music for Common Activities. In 2017 ACM on International Conference on Multimedia Retrieval, pages 192-200, 2017.
 
-## Emotion detection
+- K.R. Fricke, D.M. Greenberg, P.J. Rentfrow, and P.Y. Herzberg. Computer-based music feature analysis mirrors human perception and can be used to measure individual music preference. Journal of Research in Personality, 75:94-102, 2018.
+
+
+## Emotion detection
 
 - J. Grekow. Musical performance analysis in terms of emotions it evokes. Journal of Intelligent Information Systems, 2018.
 
@@ -96,6 +108,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 - M. Sordo, G. K. Koduri, S. Şentürk, S. Gulati, and X. Serra. A musically aware system for browsing and interacting with audio music collections. In The 2nd CompMusic Workshop, 2012.
 
+- A. Augello, I. Infantino, U. Maniscalco, G. Pilato, R. Rizzo, and F. Vella. Robotic Intelligence and Computational Creativity. Encyclopedia with Semantic Computing and Robotic Intelligence, 2018.
+
 - A. Augello, E. Cipolla, I. Infantino, A. Manfre, G. Pilato, and F. Vella. Creative Robot Dance with Variational Encoder. In International Conference on Computational Creativity, 2017.
 
 - A. Augello, I. Infantino, A. Manfrè, G. Pilato, F. Vella, and A. Chella. Creation and cognition for humanoid live dancing. Robotics and Autonomous Systems, 86:128-137, 2016
@@ -111,6 +125,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 -  A. Xambó, G. Roma, A. Lerch, M. Barthet, G. Fazekas. Live Repurposing of Sounds: MIR Explorations with Personal and Crowdsourced Databases. In New Interfaces for Musical Expression (NIME'18), 2018.
 
 ## Sound indexing, music production, and intelligent audio processing
+
+- M. Grachten, E. Deruty, A. Tanguy. Auto-adaptive Resonance Equalization using Dilated Residual Networks. arXiv preprint arXiv:1807.08636, 2018. 
 
 - H. Ordiales, M. L. Bruno. Sound recycling from public databases. In 12th International Audio Mostly Conference on Augmented and Participatory Sound and Music Experiences (AM’17), 2017.
 
@@ -200,7 +216,7 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - A. Haron. A step towards automatic identification of influene: Lick detection in a musical passage. In 15th International Society for Music Information Retrieval Conference (ISMIR'14) Late-Breaking/Demo Session.
 
-### Melodic analysis
+### Melodic analysis
 
 - Y. P. Chen, L. Su, and Y. H. Yang. Electric Guitar Playing Technique Detection in Real-World Recording Based on F0 Sequence Pattern Recognition. In 16th International Society for Music Information Retrieval Conference (ISMIR'15), pages 708-714, 2015.
 
@@ -247,6 +263,8 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - J. Salamon, J. P. Bello, A. Farnsworth, M. Robbins, S. Keen, H. Klinck, and S. Kelling. Towards the automatic classification of avian flight calls for bioacoustic monitoring. PloS one, 11(11), e0166866, 2016.
 
+- C. Lopez-Tello and V. Muthukumar. Classifying Acoustic Signals for Wildlife Monitoring and Poacher Detection on UAVs. In 2018 21st Euromicro Conference on Digital System Design (DSD), pp. 685-690. IEEE, 2018.
+
 - C. Lopez-Tello. Acoustic Detection, Source Separation, and Classification Algorithms for Unmanned Aerial Vehicles in Wildlife Monitoring and Poaching. Master Thesis, University of Nevada, Las Vegas, USA, 2016
 
 ## Acoustic analysis for medical and neuroimaging studies
@@ -259,12 +277,4 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - M. A. Casey. Music of the 7Ts: Predicting and Decoding Multivoxel fMRI Responses with Acoustic, Schematic, and Categorical Music Features. Frontiers in psychology, 8, 2017.
 
-
-
-
-
-
-
-
-
-
+- G. Chambres, P. Hanna, and M. Desainte-Catherine. Automatic Detection of Patient with Respiratory Diseases Using Lung Sound Analysis. In 2018 International Conference on Content-Based Multimedia Indexing (CBMI) (pp. 1-6). IEEE, 2018.

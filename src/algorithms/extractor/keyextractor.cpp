@@ -46,25 +46,27 @@ void KeyExtractor::createInnerNetwork() {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   // instantiate all required algorithms
-  _frameCutter   = factory.create("FrameCutter");
-  _windowing     = factory.create("Windowing", "type", "blackmanharris62");
-  _spectrum      = factory.create("Spectrum");
-  _spectralPeaks = factory.create("SpectralPeaks",
-                                  "orderBy", "magnitude", "magnitudeThreshold", 1e-05,
-                                  "minFrequency", 40, "maxFrequency", 5000, "maxPeaks", 10000);
-  _hpcpKey       = factory.create("HPCP");
-  _key           = factory.create("Key");
+  _frameCutter       = factory.create("FrameCutter");
+  _windowing         = factory.create("Windowing");
+  _spectrum          = factory.create("Spectrum");
+  _spectralPeaks     = factory.create("SpectralPeaks");
+  _spectralWhitening = factory.create("SpectralWhitening");
+  _hpcpKey           = factory.create("HPCP");
+  _key               = factory.create("Key");
 
   // attach input proxy(ies)
   _audio  >>  _frameCutter->input("signal");
 
   // connect inner algorithms
-  _frameCutter->output("frame")          >>  _windowing->input("frame");
-  _windowing->output("frame")            >>  _spectrum->input("frame");
-  _spectrum->output("spectrum")          >>  _spectralPeaks->input("spectrum");
-  _spectralPeaks->output("magnitudes")   >>  _hpcpKey->input("magnitudes");
-  _spectralPeaks->output("frequencies")  >>  _hpcpKey->input("frequencies");
-  _hpcpKey->output("hpcp")               >>  _key->input("pcp");
+  _frameCutter->output("frame")              >>  _windowing->input("frame");
+  _windowing->output("frame")                >>  _spectrum->input("frame");
+  _spectrum->output("spectrum")              >>  _spectralPeaks->input("spectrum");
+  _spectrum->output("spectrum")              >>  _spectralWhitening->input("spectrum");
+  _spectralPeaks->output("magnitudes")       >>  _spectralWhitening->input("magnitudes");
+  _spectralPeaks->output("frequencies")      >>  _spectralWhitening->input("frequencies");
+  _spectralWhitening->output("magnitudes")   >>  _hpcpKey->input("magnitudes");
+  _spectralPeaks->output("frequencies")      >>  _hpcpKey->input("frequencies");
+  _hpcpKey->output("hpcp")                   >>  _key->input("pcp");
 
   // attach output proxy(ies)
   _key->output("key")       >>  _keyKey;
@@ -75,22 +77,59 @@ void KeyExtractor::createInnerNetwork() {
 }
 
 void KeyExtractor::configure() {
-  int frameSize = parameter("frameSize").toInt();
-  int hopSize = parameter("hopSize").toInt();
-  Real tuningFrequency = parameter("tuningFrequency").toReal();
+  _sampleRate = parameter("sampleRate").toReal();
+  _frameSize = parameter("frameSize").toInt();
+  _hopSize = parameter("hopSize").toInt();
+  _windowType = parameter("windowType").toString();
+  _minFrequency = parameter("minFrequency").toReal();
+  _maxFrequency = parameter("maxFrequency").toReal();
+  _spectralPeaksThreshold = parameter("spectralPeaksThreshold").toReal();
+  _maxPeaks = parameter("maximumSpectralPeaks").toReal();
+  _hpcpSize = parameter("hpcpSize").toInt();
+  _weightType = parameter("weightType").toString();
+  _tuningFrequency = parameter("tuningFrequency").toReal();
+  _pcpThreshold = parameter("pcpThreshold").toReal();
+  _averageDetuningCorrection = parameter("averageDetuningCorrection").toBool();
+  _profileType = parameter("profileType").toString();
 
-  _frameCutter->configure("frameSize", frameSize,
-                          "hopSize", hopSize,
-                          "silentFrames", "noise");
 
-  _hpcpKey->configure("referenceFrequency", tuningFrequency,
-                      "minFrequency", 40.0,
+  _frameCutter->configure("frameSize", _frameSize,
+                          "hopSize", _hopSize);
+
+  _windowing->configure("size", _frameSize,
+                        "type", _windowType);
+
+  _spectralPeaks->configure("orderBy", "magnitude",
+                            "magnitudeThreshold", _spectralPeaksThreshold,
+                            "minFrequency", _minFrequency,
+                            "maxFrequency", _maxFrequency,
+                            "maxPeaks", _maxPeaks,
+                            "sampleRate", _sampleRate);
+
+  _spectralWhitening->configure("maxFrequency", _maxFrequency,
+                                "sampleRate", _sampleRate);
+
+  _hpcpKey->configure("bandPreset", false,
+                      "harmonics", 4,
+                      "maxFrequency", _maxFrequency,
+                      "minFrequency", _minFrequency, 
                       "nonLinear", false,
-                      "maxFrequency", 5000.0,
-                      "bandPreset", false,
-                      "windowSize", 1.33333333333,
-                      "weightType", "squaredCosine",
-                      "size", 36);
+                      "normalized", "none",
+                      "referenceFrequency", _tuningFrequency,
+                      "sampleRate", _sampleRate,
+                      "size", _hpcpSize, 
+                      "weightType", _weightType,
+                      "windowSize", 1.0,
+                      "maxShifted", false);
+
+  _key->configure("usePolyphony", false,
+                  "useThreeChords", false,
+                  "numHarmonics", 4, 
+                  "slope",  0.6,
+                  "profileType", _profileType,
+                  "pcpSize", _hpcpSize,
+                  "pcpThreshold", _pcpThreshold, 
+                  "averageDetuningCorrection", _averageDetuningCorrection);
 
   _configured = true;
 }
@@ -109,7 +148,13 @@ namespace standard {
 
 const char* KeyExtractor::name = "KeyExtractor";
 const char* KeyExtractor::category = "Tonal";
-const char* KeyExtractor::description = DOC("This algorithm extracts key/scale for an audio signal");
+const char* KeyExtractor::description = DOC("This algorithm extracts key/scale for an audio signal. It computes HPCP frames for the input signal and applies key estimation using the Key algorithm.\n"
+"\n"
+"The algorithm allows tuning correction using two complementary methods:\n"
+"  - Specify the expected `tuningFrequency` for the HPCP computation. The algorithm will adapt the semitone crossover frequencies for computing the HPCPs accordingly. If not specified, the default tuning is used. Tuning frequency can be estimated in advance using TuningFrequency algorithm.\n"
+"  - Apply tuning correction posterior to HPCP computation, based on peaks in the HPCP distribution (`averageDetuningCorrection`). This is possible when hpcpSize > 12.\n"
+"\n"
+"For more information, see the HPCP and Key algorithms.");
 
 
 KeyExtractor::KeyExtractor() {
@@ -131,9 +176,20 @@ void KeyExtractor::reset() {
 }
 
 void KeyExtractor::configure() {
-  _keyExtractor->configure(INHERIT("frameSize"),
+  _keyExtractor->configure(INHERIT("sampleRate"),
+                           INHERIT("frameSize"),
                            INHERIT("hopSize"),
-                           INHERIT("tuningFrequency"));
+                           INHERIT("windowType"),
+                           INHERIT("minFrequency"),
+                           INHERIT("maxFrequency"),
+                           INHERIT("spectralPeaksThreshold"),
+                           INHERIT("maximumSpectralPeaks"),
+                           INHERIT("hpcpSize"),
+                           INHERIT("weightType"),
+                           INHERIT("tuningFrequency"),
+                           INHERIT("pcpThreshold"),
+                           INHERIT("averageDetuningCorrection"),
+                           INHERIT("profileType"));
 }
 
 void KeyExtractor::createInnerNetwork() {

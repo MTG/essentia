@@ -40,9 +40,12 @@ const char* Key::description = DOC("This algorithm computes key estimate given a
 "  - 'Noland' - profiles from Bach's 'Well Tempered Klavier'.\n" 
 "  - 'edma' - automatic profiles extracted from corpus analysis of electronic dance music [3]. They normally perform better that Shaath's\n"
 "  - 'edmm' - automatic profiles extracted from corpus analysis of electronic dance music and manually tweaked according to heuristic observation. It will report major modes (which are poorly represented in EDM) as minor, but improve performance otherwise [3].\n"
-"  - Other key profiles ('Faraldo', 'Pentatonic') are experimental and will be removed on due time.\n"
+"  - 'braw' - profiles obtained by calculating the median profile for each mode from a subset of BeatPort dataset. There is an extra profile obtained from ambiguous tracks that are reported as minor[4]\n"
+"  - 'bgate' - same as braw but zeroing the 4 less relevant elements of each profile[4]\n"
 "\n"
-"The standard mode of the algorithm estimates key/scale for a given HPCP vector. The streaming mode first accumulates a stream of HPCP vectors and computes its mean to provide the estimation.\n"
+"The standard mode of the algorithm estimates key/scale for a given HPCP vector.\n"
+"\n"
+"The streaming mode first accumulates a stream of HPCP vectors and computes its mean to provide the estimation. In this mode, the algorithm can apply a tuning correction, based on peaks in the bins of the accumulated HPCP distribution [3] (the `averageDetuningCorrection` parameter). This detuning approach requires a high resolution of the input HPCP vectors (`pcpSize` larger than 12).\n"
 "\n"
 "References:\n"
 "  [1] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
@@ -53,15 +56,28 @@ const char* Key::description = DOC("This algorithm computes key estimate given a
 "  pp. 65-100, 1999."
 "  [3] Á. Faraldo, E. Gómez, S. Jordà, P.Herrera, \"Key Estimation in Electronic\n"
 "  Dance Music. Proceedings of the 38th International Conference on information\n"
-"  Retrieval, Padova, 2016. (In Press.)");
+"  Retrieval, Padova, 2016. (In Press.)\n"
+"  [4] Faraldo, Á., Jordà, S., & Herrera, P. (2017, June). A multi-profile method\n"
+"  for key estimation in edm. In Audio Engineering Society Conference: 2017 AES\n"
+"  International Conference on Semantic Audio. Audio Engineering Society.");
 
 
 void Key::configure() {
   _slope = parameter("slope").toReal();
   _numHarmonics = parameter("numHarmonics").toInt();
   _profileType = parameter("profileType").toString();
+  _useMajMin = parameter("useMajMin").toBool();
 
-  const char* keyNames[] = { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+  if (_useMajMin) {
+    if (_profileType == "diatonic" || _profileType == "krumhansl"  || _profileType == "temperley" ||
+        _profileType == "weichai"  || _profileType == "tonictriad" || _profileType == "temperley2005" ||
+        _profileType == "thpcp"    || _profileType == "shaath"     || _profileType == "gomez" ||
+        _profileType == "noland"   || _profileType == "edmm") {
+      E_INFO("Key: the profile '" << _profileType << "' does not support the use of 'majmin' mode.");
+      _useMajMin = false;
+    }
+  }
+  const char* keyNames[] = { "A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab" };
   _keys = arrayToVector<string>(keyNames);
 
   Real profileTypes[][12] = {
@@ -105,25 +121,37 @@ void Key::configure() {
     { 0.0629, 0.0146, 0.061, 0.0121, 0.0623, 0.0414, 0.0248, 0.0631, 0.015, 0.0521, 0.0142, 0.0478 },
     { 0.0682, 0.0138, 0.0543, 0.0519, 0.0234, 0.0544, 0.0176, 0.067, 0.0349, 0.0297, 0.0401, 0.027 },
 
-    // Faraldo
-    { 7.0, 2.0, 3.8, 2.3, 4.7, 4.1, 2.5, 5.2, 2.0, 3.7, 3.0, 3.4 },
-    { 7.0, 3.0, 3.8, 4.5, 2.6, 3.5, 2.5, 5.2, 4.0, 2.5, 4.5, 3.0 },
-
-    // Pentatonic
-    { 1.0, 0.1, 0.25, 0.1, 0.5, 0.7, 0.1, 0.8, 0.1, 0.25, 0.1, 0.5 },
-    { 1.0, 0.2, 0.25, 0.5, 0.1, 0.7, 0.1, 0.8, 0.3, 0.2, 0.6, 0.2  },
-
     // edmm
     { 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083, 0.083 },
     { 0.17235348, 0.04, 0.0761009,  0.12, 0.05621498, 0.08527853, 0.0497915,  0.13451001, 0.07458916, 0.05003023, 0.09187879, 0.05545106 },
 
     // edma
-    { 0.16519551, 0.04749026, 0.08293076, 0.06687112, 0.09994645, 0.09274123, 0.05294487, 0.13159476, 0.05218986, 0.07443653, 0.06940723, 0.0642515  },
-    { 0.17235348, 0.05336489, 0.0761009,  0.10043649, 0.05621498, 0.08527853, 0.0497915,  0.13451001, 0.07458916, 0.05003023, 0.09187879, 0.05545106 }
-};
+    // { 0.16519551, 0.04749026, 0.08293076, 0.06687112, 0.09994645, 0.09274123, 0.05294487, 0.13159476, 0.05218986, 0.07443653, 0.06940723, 0.0642515  },
+    // { 0.17235348, 0.05336489, 0.0761009,  0.10043649, 0.05621498, 0.08527853, 0.0497915,  0.13451001, 0.07458916, 0.05003023, 0.09187879, 0.05545106 },
+  };
+
+  Real profileTypesWithOther[][12] = {
+    // bgate
+    { 1.00  , 0.00  , 0.42  , 0.00  , 0.53  , 0.37  , 0.00  , 0.77  , 0.00  , 0.38,   0.21  , 0.30   },
+    { 1.00  , 0.00  , 0.36  , 0.39  , 0.00  , 0.38  , 0.00  , 0.74  , 0.27  , 0.00  , 0.42  , 0.23   },
+    { 1.00  , 0.26  , 0.35  , 0.29  , 0.44  , 0.36  , 0.21  , 0.78  , 0.26  , 0.25  , 0.32  , 0.26   },
+
+    // braw
+    { 1.0000, 0.1573, 0.4200, 0.1570, 0.5296, 0.3669, 0.1632, 0.7711, 0.1676, 0.3827, 0.2113, 0.2965 },
+    { 1.0000, 0.2330, 0.3615, 0.3905, 0.2925, 0.3777, 0.1961, 0.7425, 0.2701, 0.2161, 0.4228, 0.2272 },
+    { 1.0000, 0.2608, 0.3528, 0.2935, 0.4393, 0.3580, 0.2137, 0.7809, 0.2578, 0.2539, 0.3233, 0.2615 },
+
+    // edma
+    { 1.00  , 0.29  , 0.50  , 0.40  , 0.60  , 0.56  , 0.32  , 0.80  , 0.31  , 0.45  , 0.42  , 0.39   },
+    { 1.00  , 0.31  , 0.44  , 0.58  , 0.33  , 0.49  , 0.29  , 0.78  , 0.43  , 0.29  , 0.53  , 0.32   },
+	  { 1.00  , 0.26  , 0.35  , 0.29  , 0.44  , 0.36  , 0.21  , 0.78  , 0.26  , 0.25  , 0.32  , 0.26   }
+  };
 
 
 #define SET_PROFILE(i) _M = arrayToVector<Real>(profileTypes[2*i]); _m = arrayToVector<Real>(profileTypes[2*i+1])
+#define SET_PROFILE_OTHER(i) _M = arrayToVector<Real>(profileTypesWithOther[3*i]); _m = arrayToVector<Real>(profileTypesWithOther[3*i+1]); _O = arrayToVector<Real>(profileTypesWithOther[3*i+2])
+
+  _O.assign(12, 0.);
 
   if      (_profileType == "diatonic")      { SET_PROFILE(0);  }
   else if (_profileType == "krumhansl")     { SET_PROFILE(1);  }
@@ -135,10 +163,11 @@ void Key::configure() {
   else if (_profileType == "shaath")        { SET_PROFILE(7);  }
   else if (_profileType == "gomez")         { SET_PROFILE(8);  }
   else if (_profileType == "noland")        { SET_PROFILE(9);  }
-  else if (_profileType == "faraldo")       { SET_PROFILE(10); }
-  else if (_profileType == "pentatonic")    { SET_PROFILE(11); }
-  else if (_profileType == "edmm")          { SET_PROFILE(12); }
-  else if (_profileType == "edma")          { SET_PROFILE(13); }
+  else if (_profileType == "edmm")          { SET_PROFILE(10); }
+  // else if (_profileType == "edma")          { SET_PROFILE(13); }
+  else if (_profileType == "bgate")         { SET_PROFILE_OTHER(0); }
+  else if (_profileType == "braw")          { SET_PROFILE_OTHER(1); }
+  else if (_profileType == "edma")          { SET_PROFILE_OTHER(2); }
   else {
     throw EssentiaException("Key: Unsupported profile type: ", _profileType);
   }
@@ -279,18 +308,22 @@ void Key::compute() {
 
   // Compute correlation matrix
   int keyIndex = -1; // index of the first maximum
-  Real max = -1;     // first maximum
-  Real max2 = -1;    // second maximum
-  int scale = MAJOR;  // scale
+  Real max     = -1;     // first maximum
+  Real max2    = -1;    // second maximum
+  int scale    = MAJOR;  // scale
 
-  // Compute maximum for both major and minor
-  Real maxMaj = -1;
-  Real max2Maj = -1;
-  int keyIndexMaj = -1;
+  // Compute maximum for major, minor and other.
+  Real maxMajor     = -1;
+  Real max2Major    = -1;
+  int keyIndexMajor = -1;
 
-  Real maxMin = -1;
-  Real max2Min = -1;
-  int keyIndexMin = -1;
+  Real maxMinor     = -1;
+  Real max2Minor    = -1;
+  int keyIndexMinor = -1;
+
+  Real maxOther     = -1;
+  Real max2Other    = -1;
+  int keyIndexOther = -1;
 
   // calculate the correlation between the profiles and the PCP...
   // we shift the profile around to find the best match
@@ -306,33 +339,53 @@ void Key::compute() {
     */
     Real corrMajor = correlation(pcp, mean_pcp, std_pcp, _profile_doM, _mean_profile_M, _std_profile_M, shift);
     // Compute maximum value for major keys
-    if (corrMajor > maxMaj) {
-      max2Maj = maxMaj;
-      maxMaj = corrMajor;
-      keyIndexMaj = shift;
+    if (corrMajor > maxMajor) {
+      max2Major = maxMajor;
+      maxMajor = corrMajor;
+      keyIndexMajor = shift;
     }
 
     Real corrMinor = correlation(pcp, mean_pcp, std_pcp, _profile_dom, _mean_profile_m, _std_profile_m, shift);
     // Compute maximum value for minor keys
-    if (corrMinor > maxMin) {
-      max2Min = maxMin;
-      maxMin = corrMinor;
-      keyIndexMin = shift;
+    if (corrMinor > maxMinor) {
+      max2Minor = maxMinor;
+      maxMinor = corrMinor;
+      keyIndexMinor = shift;
+    }
+
+    Real corrOther = 0;
+    if (_useMajMin) {
+      corrOther = correlation(pcp, mean_pcp, std_pcp, _profile_doO, _mean_profile_O, _std_profile_O, shift);
+      // Compute maximum value for other keys
+      if (corrOther > maxOther) {
+        max2Other = maxOther;
+        maxOther = corrOther;
+        keyIndexOther = shift;
+      }
     }
   }
 
-  if (maxMaj >= maxMin) {
-    keyIndex = (int) (keyIndexMaj *  12 / pcpsize + .5);
+
+  if (maxMajor > maxMinor && maxMajor > maxOther) {
+    keyIndex = (int) (keyIndexMajor *  12 / pcpsize + 0.5);
     scale = MAJOR;
-    max = maxMaj;
-    max2 = max2Maj;
+    max = maxMajor;
+    max2 = max2Major;
   }
-  else {
-    keyIndex = (int) (keyIndexMin * 12 / pcpsize + .5);
+
+  else if (maxMinor >= maxMajor && maxMinor >= maxOther) {
+    keyIndex = (int) (keyIndexMinor * 12 / pcpsize + 0.5);
     scale = MINOR;
-    max = maxMin;
-    max2 = max2Min;
-  }
+    max = maxMinor;
+    max2 = max2Minor;
+    }
+
+	else if (maxOther > maxMajor && maxOther > maxMinor) {
+    keyIndex = (int) (keyIndexOther * 12 / pcpsize + 0.5);
+    scale = MAJMIN;
+    max = maxOther;
+    max2 = max2Other;
+    }
 
   // In the case of Wei Chai algorithm, the scale is detected in a second step
   // In this point, always the major relative is detected, as it is the first
@@ -366,7 +419,19 @@ void Key::compute() {
 
   // first three outputs are key, scale and strength
   _key.get() = _keys[keyIndex];
-  _scale.get() = scale == MAJOR ? "major" : "minor";
+
+  if (scale == MAJOR) {
+    _scale.get() = "major";
+  }
+
+  else if (scale == MINOR) {
+    _scale.get() = "minor";
+  }
+
+  else if (scale == MAJMIN) {
+    _scale.get() = "majmin";
+  }
+
   _strength.get() = max;
 
   // this one outputs the relative difference between the maximum and the
@@ -384,41 +449,52 @@ void Key::resize(int pcpsize) {
 
   _profile_doM.resize(pcpsize);
   _profile_dom.resize(pcpsize);
+  _profile_doO.resize(pcpsize);
 
   for (int i=0; i<12; i++) {
-
     _profile_doM[i*n] = _M[i];
     _profile_dom[i*n] = _m[i];
+    _profile_doO[i*n] = _O[i];
 
     // Two interpolated values
-    Real incr_M, incr_m;
+    Real incr_M, incr_m, incr_O;
     if (i == 11) {
       incr_M = (_M[11] - _M[0]) / n;
       incr_m = (_m[11] - _m[0]) / n;
+      incr_O = (_O[11] - _O[0]) / n;
     }
+    
     else {
       incr_M = (_M[i] - _M[i+1]) / n;
       incr_m = (_m[i] - _m[i+1]) / n;
+      incr_O = (_O[i] - _O[i+1]) / n;
     }
 
     for (int j=1; j<=(n-1); j++) {
       _profile_doM[i*n+j] = _M[i] - j * incr_M;
       _profile_dom[i*n+j] = _m[i] - j * incr_m;
+      _profile_doO[i*n+j] = _O[i] - j * incr_O;	
     }
   }
 
   _mean_profile_M = mean(_profile_doM);
   _mean_profile_m = mean(_profile_dom);
+  _mean_profile_O = mean(_profile_doO);
+
   _std_profile_M = 0;
   _std_profile_m = 0;
+  _std_profile_O = 0;
 
   // Compute Standard Deviations
   for (int i=0; i<pcpsize; i++) {
     _std_profile_M += (_profile_doM[i] - _mean_profile_M) * (_profile_doM[i] - _mean_profile_M);
     _std_profile_m += (_profile_dom[i] - _mean_profile_m) * (_profile_dom[i] - _mean_profile_m);
+    _std_profile_O += (_profile_doO[i] - _mean_profile_O) * (_profile_doO[i] - _mean_profile_O);
   }
+
   _std_profile_M = sqrt(_std_profile_M);
   _std_profile_m = sqrt(_std_profile_m);
+  _std_profile_O = sqrt(_std_profile_O);
 }
 
 
@@ -562,12 +638,34 @@ Key::~Key() {
   delete _poolStorage;
 }
 
+void Key::configure() {
+  _keyAlgo->configure(INHERIT("usePolyphony"),
+                      INHERIT("useThreeChords"),
+                      INHERIT("numHarmonics"),
+                      INHERIT("slope"),
+                      INHERIT("profileType"),
+                      INHERIT("pcpSize"),
+                      INHERIT("useMajMin"));
+
+  _averageDetuningCorrection = parameter("averageDetuningCorrection").toBool();
+  _pcpThreshold = parameter("pcpThreshold").toReal();
+}
 
 AlgorithmStatus Key::process() {
   if (!shouldStop()) return PASS;
 
   const vector<vector<Real> >& hpcpKey = _pool.value<vector<vector<Real> > >("internal.hpcp");
   vector<Real> hpcpAverage = meanFrames(hpcpKey);
+
+  if (_pcpThreshold > 0.f) {
+    normalizePcpPeak(hpcpAverage);
+    pcpGate(hpcpAverage, _pcpThreshold);
+  }
+
+  if (_averageDetuningCorrection == true) {
+    shiftPcp(hpcpAverage);
+  }
+
   string key;
   string scale;
   Real strength;
@@ -591,6 +689,35 @@ void Key::reset() {
   AlgorithmComposite::reset();
   _keyAlgo->reset();
 }
+
+
+void Key::normalizePcpPeak(vector<Real>& pcp) {
+  normalize(pcp);
+};
+
+void Key::pcpGate(vector<Real>& pcp, Real threshold) {
+  for (int i = 0; i < (int)pcp.size(); i++)
+    if (pcp[i] < threshold) pcp[i] = 0.f;
+};
+
+void Key::shiftPcp(vector<Real>& pcp) {
+  int tuningResolution = pcp.size() / 12;
+
+  normalize(pcp);
+
+  int maxValIndex = argmax(pcp);
+  maxValIndex %= tuningResolution;
+
+  vector<Real>::iterator newBegin;
+  if (maxValIndex > (tuningResolution / 2)) {
+    newBegin = pcp.end() + maxValIndex - tuningResolution;
+  }
+  else {
+    newBegin = pcp.begin() + maxValIndex;
+  }
+  
+  rotate(pcp.begin(), newBegin, pcp.end());
+};
 
 
 } // namespace streaming

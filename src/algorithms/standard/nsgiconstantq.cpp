@@ -47,6 +47,13 @@ void NSGIConstantQ::configure() {
   _minimumWindow = parameter("minimumWindow").toInt();
   _windowSizeFactor = parameter("windowSizeFactor").toInt();
 
+  if (_inputSize % 2) {
+    _oddInput = true;
+    _inputSize++;
+  } else {
+    _oddInput = false;
+  }
+
   designWindow();
   createCoefficients();
   normalize();
@@ -370,6 +377,14 @@ void NSGIConstantQ::compute() {
   signal.resize(_NN);
   for (int i=0; i<_NN; i++){
     signal[i] = std::real(output[i]);
+  }
+
+  // If the algorithm was configured with an odd size
+  // it means that the last sample was added on the
+  // forward pass and should be removed in order to
+  // get the original size.
+  if (_oddInput) {
+    signal.pop_back();
   }
 }
 

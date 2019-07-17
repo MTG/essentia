@@ -17,7 +17,11 @@ at the bottom of your ``~/.bash_profile`` file. More information about using Pyt
 
 Linux
 -----
-We are currently preparing deb packages for Ubuntu and Debian. Meanwhile, you need to compile Essentia from source (see below).
+You can install Essentia python extension from PyPi::
+
+  pip install essentia
+
+For other needs, you need to compile Essentia from source (see below).
 
 
 Windows, Android, iOS
@@ -104,7 +108,7 @@ Compiling Essentia
 ------------------
 
 Once your dependencies are installed, you can proceed to compiling Essentia. Download Essentia's source code at `Github <https://github.com/MTG/essentia>`_.  Due to different dependencies requirement (see `release notes for official releases <https://github.com/MTG/essentia/releases>`_), make sure to download the version compatible with your system:
- - **2.1 beta3** is the version currently recommended to install. It is supported on **Ubuntu 14.10 or later**, **Debian Jessie or later** and **OSX**. Build LibAv from source for support on Ubuntu 14.04 LTS or Debian Wheezy. 
+ - **2.1 beta4** is the version currently recommended to install. It is supported on **Ubuntu 14.10 or later**, **Debian Jessie or later** and **OSX**. Build LibAv from source for support on Ubuntu 14.04 LTS or Debian Wheezy.
  - **master** branch is the most updated version of Essentia in development
  
 
@@ -126,6 +130,10 @@ The following will give you the full list of options::
 
   ./waf --help
 
+If you want to build with a custom toolchain, you can pass in the CC and CXX variables for using another compiler. For example, to build the library and examples with clang::
+
+  CC=clang CXX=clang++ ./waf configure
+
 To compile everything you've configured::
 
   ./waf
@@ -135,6 +143,7 @@ All built examples will be located in ``build/src/examples/`` folder, as well as
 To install the C++ library, python bindings, extractors and Vamp plugin (if configured successfully; you might need to run this command with sudo)::
 
   ./waf install
+
 
 
 Compiling for Python3
@@ -147,7 +156,7 @@ Therefore, to build for Python3, you can either run all waf commands with your p
   python3 ./waf
   python3 ./waf install
 
-or specify the ``--python`` option, for example:
+or specify the ``--python`` option, for example: ::
 
   ./waf configure --build-static --with-python --python=/usr/bin/python3 --with-cpptests --with-examples --with-vamp
   ./waf
@@ -225,7 +234,7 @@ Using pre-trained high-level models in Essentia
 -----------------------------------------------
 
 Essentia includes a number of `pre-trained classifier models for genres, moods and instrumentation
-<algorithms_overview.html#other-high-level-descriptors>`_. In order to use them you need to:
+<algorithms_overview.html#classifier-models>`_. In order to use them you need to:
 
 * Install `Gaia2 library <https://github.com/MTG/gaia/blob/master/README.md>`_ (supported on Linux/OSX)
 * Build Essentia with examples and Gaia (``--with-examples --with-gaia``)
