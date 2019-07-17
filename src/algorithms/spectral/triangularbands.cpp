@@ -35,7 +35,7 @@ void TriangularBands::configure() {
   _nBands = int(_bandFrequencies.size() - 2);
   _inputSize = parameter("inputSize").toReal();
   _sampleRate = parameter("sampleRate").toReal();
-  _normalizeUnitSum = (parameter("normalize").toLower() == "unit_sum");
+  _normalize = parameter("normalize").toLower();
   _type = parameter("type").toLower();
   if ( _bandFrequencies.size() < 2 ) {
     throw EssentiaException("TriangularBands: the 'frequencyBands' parameter contains only one element (at least two elements are required)");
@@ -155,8 +155,14 @@ void TriangularBands::createFilters(int spectrumSize) {
       throw EssentiaException("TriangularBands: the number of spectrum bins is insufficient for the specified number of triangular bands. Use zero padding to increase the number of FFT bins.");
     }
 
-    // normalize the filter weights
-    if (_normalizeUnitSum) {
+    // Normalize the filter weights.
+    if (_normalize == "unit_tri") {
+      // Use theoretical triangular area instead of the actual sum of weights.
+      // This is similar to how the normalization is implemnented in Librosa.
+      weight = (fstep1 + fstep2) / 2.;
+    }
+
+    if (_normalize == "unit_sum" || _normalize == "unit_tri") {
       for (int j=jbegin; j<=jend; ++j) {
         _filterCoefficients[i][j] = _filterCoefficients[i][j] / weight;
       }
@@ -166,17 +172,17 @@ void TriangularBands::createFilters(int spectrumSize) {
 
 void TriangularBands::setWeightingFunctions(std::string weighting) {
 
-  if (weighting == "linear"){
+  if (weighting == "linear") {
       _weighter = hz2hz;
   }
-  else if (weighting == "slaneyMel"){
+  else if (weighting == "slaneyMel") {
     _weighter = hz2mel;
   }
-  else if (weighting == "htkMel"){
+  else if (weighting == "htkMel") {
     _weighter = hz2mel10;
   }
   else{
-    throw EssentiaException("Bad 'weighting' parameter");
+    throw EssentiaException("TriangularBands: Bad 'weighting' parameter");
   }
 }
 
