@@ -58,7 +58,7 @@ void IFFTAComplex::compute() {
   // check if input is OK
   int size = (int)fft.size();
   if (size <= 0) {
-    throw EssentiaException("IFFT: Input size cannot be 0 or 1");
+    throw EssentiaException("IFFTC: Input size cannot be 0 or 1");
   }
   if ((fftSetup == 0) ||
       ((fftSetup != 0) && _fftPlanSize != size)) {
