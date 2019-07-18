@@ -197,7 +197,7 @@ class TestAudioWriter_Streaming(TestCase):
         loader.bit_rate >> None
         loader.codec >> None
         run(loader)
-        self.assertAlmostEqual(max(pool['audio']), max(sine), precision)
+
         from essentia.standard import ZeroCrossingRate
         zcr = int(ZeroCrossingRate(threshold=0.001)(pool['audio'])*len(pool['audio'])+0.5)
         expected = int(ZeroCrossingRate(threshold=0.0)(sine)*len(sine)+0.5)
@@ -207,7 +207,10 @@ class TestAudioWriter_Streaming(TestCase):
         #plot(sine)
         #plot(MonoLoader(filename=filename)())
         #show(figure)
+
         os.remove(filename)
+
+        self.assertAlmostEqual(max(pool['audio']), max(sine), precision)
         self.assertEqual(zcr, expected)  # expected should be 20 (double the frequency)
 
     def atestMp3(self):
