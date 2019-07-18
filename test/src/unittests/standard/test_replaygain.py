@@ -29,7 +29,7 @@ class TestReplayGain(TestCase):
         sampleRate = 44100
         input = [0.0] * int(sampleRate * 1)
         replayGainDiff = ReplayGain(sampleRate=sampleRate)(input)
-        dbSilence = -90 # by definition in essentiamath
+        dbSilence = -100 # by definition in essentiamath
         loudness_ref = -31.492595672607422
         self.assertAlmostEqual(replayGainDiff,loudness_ref - dbSilence)
 
