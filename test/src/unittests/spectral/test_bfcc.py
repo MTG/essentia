@@ -102,7 +102,7 @@ class TestBFCC(TestCase):
         while (size > 256 ):
             bands, bfcc = BFCC()(zeros(size))
             self.assertEqualVector(bfcc, expected)
-            size /= 2
+            size //= 2
 
 
     def testInvalidInput(self):

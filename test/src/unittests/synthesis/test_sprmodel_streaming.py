@@ -89,7 +89,7 @@ def analSprModelStreaming(params, signal):
     smanal = es.SprModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'])
     
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
 
 
@@ -139,7 +139,7 @@ def analsynthSprModelStreaming(params, signal):
                              hopSize=params['hopSize'])
 
     # add half window of zeros to input signal to reach same ooutput length
-    signal = numpy.append(signal, zeros(params['frameSize']/2))
+    signal = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput(signal)
 
 
@@ -225,7 +225,7 @@ class TestSprModel(TestCase):
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = (self.params['frameSize'] // 2)
 
         
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)

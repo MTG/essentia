@@ -92,7 +92,7 @@ class TestTriangularBarkBands(TestCase):
         size = 1024
         while (size >= 256 ):
             self.assertEqualVector(TriangularBarkBands()(zeros(size)), zeros(24))
-            size /= 2
+            size //= 2
 
     def testInvalidInput(self):
         # mel bands should fail for a spectrum with less than 2 bins

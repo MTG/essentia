@@ -41,7 +41,7 @@ def cutFrames(params, input = range(100)):
 def analysisSynthesis(params, signal):
 
     outsignal = array(0)
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     
     frames = cutFrames(params, signal)
     
@@ -72,7 +72,7 @@ def analysisSynthesisStreaming(params, signal):
     
     
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
     insignal.data >> fcut.signal
     fcut.frame >> w.frame
@@ -107,7 +107,7 @@ class TestOverlapAdd(TestCase):
         outsignal = outsignal[:signalSize]
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = (self.params['frameSize'] // 2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
     def testWhiteNoise(self):
@@ -121,7 +121,7 @@ class TestOverlapAdd(TestCase):
         
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = (self.params['frameSize'] // 2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
     def testRamp(self):
@@ -134,7 +134,7 @@ class TestOverlapAdd(TestCase):
             
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = (self.params['frameSize'] // 2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
     def testRegression(self):
@@ -151,7 +151,7 @@ class TestOverlapAdd(TestCase):
         numpy.save('sine_out.txt',outsignal)
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = (self.params['frameSize'] // 2)
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
 
