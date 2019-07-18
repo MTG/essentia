@@ -24,30 +24,30 @@ from essentia.streaming import ChordsDetection
 
 chord_dict = {
     'A':  [1, 0, 0, 0, 0.5, 0, 0, 0.3, 0, 0, 0, 0],
-    'A#': [0, 1, 0, 0, 0, 0.5, 0, 0, 0.3, 0, 0, 0],
+    'Bb': [0, 1, 0, 0, 0, 0.5, 0, 0, 0.3, 0, 0, 0],
     'B':  [0, 0, 1, 0, 0, 0, 0.5, 0, 0, 0.3, 0, 0],
     'C':  [0, 0, 0, 1, 0, 0, 0, 0.5, 0, 0, 0.3, 0],
     'C#': [0, 0, 0, 0, 1, 0, 0, 0, 0.5, 0, 0, 0.3],
     'D':  [0.3, 0, 0, 0, 0, 1, 0, 0, 0, 0.5, 0, 0],
-    'D#': [0, 0.3, 0, 0, 0, 0, 1, 0, 0, 0, 0.5, 0],
+    'Eb': [0, 0.3, 0, 0, 0, 0, 1, 0, 0, 0, 0.5, 0],
     'E':  [0, 0, 0.3, 0, 0, 0, 0, 1, 0, 0, 0, 0.5],
     'F':  [0.5, 0, 0, 0.3, 0, 0, 0, 0, 1, 0, 0, 0],
     'F#': [0, 0.5, 0, 0, 0.3, 0, 0, 0, 0, 1, 0, 0],
     'G':  [0, 0, 0.5, 0, 0, 0.3, 0, 0, 0, 0, 1, 0],
-    'G#': [0, 0, 0, 0.5, 0, 0, 0.3, 0, 0, 0, 0, 1],
+    'Ab': [0, 0, 0, 0.5, 0, 0, 0.3, 0, 0, 0, 0, 1],
 
     'Am':  [1, 0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0, 0],
-    'A#m': [0, 1, 0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0],
+    'Bbm': [0, 1, 0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0],
     'Bm':  [0, 0, 1, 0, 0, 0.5, 0, 0, 0, 0.3, 0, 0],
     'Cm':  [0, 0, 0, 1, 0, 0, 0.5, 0, 0, 0, 0.3, 0],
     'C#m': [0, 0, 0, 0, 1, 0, 0, 0.5, 0, 0, 0, 0.3],
     'Dm':  [0.3, 0, 0, 0, 0, 1, 0, 0, 0.5, 0, 0, 0],
-    'D#m': [0, 0.3, 0, 0, 0, 0, 1, 0, 0, 0.5, 0, 0],
+    'Ebm': [0, 0.3, 0, 0, 0, 0, 1, 0, 0, 0.5, 0, 0],
     'Em':  [0, 0, 0.3, 0, 0, 0, 0, 1, 0, 0, 0.5, 0],
     'Fm':  [0, 0, 0, 0.3, 0, 0, 0, 0, 1, 0, 0, 0.5],
     'F#m': [0.5, 0, 0, 0, 0.3, 0, 0, 0, 0, 1, 0, 0],
     'Gm':  [0, 0.5, 0, 0, 0, 0.3, 0, 0, 0, 0, 1, 0],
-    'G#m': [0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0, 0, 1]
+    'Abm': [0, 0, 0.5, 0, 0, 0, 0.3, 0, 0, 0, 0, 1]
 }
 
 
@@ -110,19 +110,19 @@ class TestChordsDetection_Streaming(TestCase):
         self.assertTrue(failure <= nChords)
 
     def testMajor(self):
-        progression = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#' ]
+        progression = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab' ]
         self.runProgression(progression)
 
     def testMinor(self):
-        progression = ['Am', 'A#m', 'Bm', 'Cm', 'C#m', 'Dm', 'D#m', 'Em', 'Fm', 'F#m', 'Gm', 'G#m' ]
+        progression = ['Am', 'Bbm', 'Bm', 'Cm', 'C#m', 'Dm', 'Ebm', 'Em', 'Fm', 'F#m', 'Gm', 'Abm' ]
         self.runProgression(progression)
 
     def testMajorStd(self):
-        progression = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#' ]
+        progression = ['A', 'Bb', 'B', 'C', 'C#', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab' ]
         self.runProgression(progression, False)
 
     def testMinorStd(self):
-        progression = ['Am', 'A#m', 'Bm', 'Cm', 'C#m', 'Dm', 'D#m', 'Em', 'Fm', 'F#m', 'Gm', 'G#m' ]
+        progression = ['Am', 'Bbm', 'Bm', 'Cm', 'C#m', 'Dm', 'Ebm', 'Em', 'Fm', 'F#m', 'Gm', 'Abm' ]
         self.runProgression(progression, False)
 
     #def testMixScale(self):
@@ -156,7 +156,7 @@ class TestChordsDetection_Streaming(TestCase):
         chordsDetection.strength >> (pool, 'chords.strength')
         run(gen)
 
-        self.assertEqualVector(pool['chords.progression'], ['A']*len(pcp))
+        self.assertEqualVector(pool['chords.progression'], ['Am']*len(pcp))
         self.assertEqualVector(pool['chords.strength'], [-1]*len(pcp))
 
     def testNumChordsEqualsHpcpSize(self):
