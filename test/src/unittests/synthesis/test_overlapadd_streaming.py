@@ -147,8 +147,9 @@ class TestOverlapAdd(TestCase):
         outsignal = analysisSynthesisStreaming(self.params, signal)
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
-        numpy.save('sine.txt',signal)
-        numpy.save('sine_out.txt',outsignal)
+        # Save sines in a text file. Use only for debugging purposes.
+        # numpy.save('sine.txt',signal)
+        # numpy.save('sine_out.txt',outsignal)
 
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize'] // 2)

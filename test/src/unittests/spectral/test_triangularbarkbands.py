@@ -82,9 +82,10 @@ class TestTriangularBarkBands(TestCase):
         for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize, startFromZero = True, validFrameThresholdRatio = 1):
             pool.add('TriangularBarkBands', mbands(spectrum(w(frame))))
 
-        np.savetxt("out.csv", np.mean(np.log(pool['TriangularBarkBands']),0), delimiter=',')
+        # Save results in a csv file. Use only for debugging purposes.
+        # np.savetxt("out.csv", np.mean(np.log(pool['TriangularBarkBands']),0), delimiter=',')
 
-        self.assertAlmostEqualVector( np.mean(np.log(pool['TriangularBarkBands']),0), expected,1e-2)    
+        self.assertAlmostEqualVector( np.mean(np.log(pool['TriangularBarkBands']),0), expected,1e-2)
 
 
     def testZero(self):
@@ -115,7 +116,8 @@ class TestTriangularBarkBands(TestCase):
         # not crash and correctly resizes internal structures to avoid errors.
         spec = [.1,.4,.5,.2,.1,.01,.04]*100
 
-        np.savetxt("out.csv", TriangularBarkBands(inputSize=1024, sampleRate=10, highFrequencyBound=4)(spec), delimiter=',')
+        # Save results in a csv file. Use only for debugging purposes.
+        # np.savetxt("out.csv", TriangularBarkBands(inputSize=1024, sampleRate=10, highFrequencyBound=4)(spec), delimiter=',')
 
         self.assertAlmostEqualVector(
                 TriangularBarkBands(inputSize=1024, sampleRate=10, highFrequencyBound=4)(spec),

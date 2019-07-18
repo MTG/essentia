@@ -214,8 +214,9 @@ class TestSineModel(TestCase):
         # compare without half-window bounds to avoid windowing effect
         halfwin = (self.params['frameSize'] // 2)
         
-        numpy.savetxt('sine.txt',signal[halfwin:-halfwin])
-        numpy.savetxt('sine_out.txt',outsignal[halfwin:-halfwin])
+        # Save sines in a text file. Use only for debugging purposes.
+        #numpy.savetxt('sine.txt',signal[halfwin:-halfwin])
+        #numpy.savetxt('sine_out.txt',outsignal[halfwin:-halfwin])
         
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 
