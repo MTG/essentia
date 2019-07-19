@@ -303,14 +303,14 @@ john:
         p = YamlInput(filename='testfile')()
         os.remove('testfile')
 
-        self.assertEqualVector(p['foo'], [[], []])
+        self.assertEqualMatrix(p['foo'], [[], []])
 
         # to make sure that they are vectors of vectors Reals, try adding Reals
         # and strings
         self.assertRaises(KeyError, lambda: p.add('foo', ['foo', 'bar']))
 
         p.add('foo', [4])
-        self.assertEqualVector(p['foo'], [[], [], [4]])
+        self.assertEqualMatrix(p['foo'], [[], [], [4]])
 
         # json 
         testFile = '{ "foo": [[], []] }'
@@ -319,14 +319,14 @@ john:
         p = YamlInput(filename='testfile', format='json')()
         os.remove('testfile')
 
-        self.assertEqualVector(p['foo'], [[], []])
+        self.assertEqualMatrix(p['foo'], [[], []])
 
         # to make sure that they are vectors of vectors Reals, try adding Reals
         # and strings
         self.assertRaises(KeyError, lambda: p.add('foo', ['foo', 'bar']))
 
         p.add('foo', [4])
-        self.assertEqualVector(p['foo'], [[], [], [4]])
+        self.assertEqualMatrix(p['foo'], [[], [], [4]])
 
     def testSequenceWhichContainsEmptySequenceButCanDetermineType(self):
         # yaml
