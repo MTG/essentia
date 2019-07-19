@@ -26,6 +26,12 @@ class TestSpectralContrast(TestCase):
 
     def testRegression(self):
         # Simple regression test, comparing to reference values
+        #
+        # TODO: This test is known to fail after the improvements
+        # described in 16258bf97eedb35299450874675bf2bde6eb5aa8.
+        #
+        # However, as the source of the reference values is not
+        # known it is left as it is for the moment.
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/musicbox.wav'),
                            sampleRate = 44100)()
 
@@ -66,6 +72,15 @@ class TestSpectralContrast(TestCase):
         self.assertAlmostEqual(numpy.mean(valleys),-0.6931471825, 1e-7)
 
     def testCompare(self):
+        # TODO: This test is known to fail after the improvements
+        # described in 16258bf97eedb35299450874675bf2bde6eb5aa8.
+        #
+        # As that change clearly improves the way to compute the
+        # octave bands the fact that it makes this test fail makes
+        # me question the validity of the test. Also the overall
+        # purpose of it is not clear to me. However, the fact that
+        # it makes the algorithm yield -inf values states that the
+        # algorithm needs to be revised.
         spec0 = [1]*1025
         spec1 = [1]*1015 + [0]*10
         spec2 = [1]*10 + [0]*1015
@@ -103,9 +118,23 @@ class TestSpectralContrast(TestCase):
         self.assertComputeFails(SC, [1])
 
     def testSpectrumSizeSmallerThanNumberOfBands(self):
+        # This test creates 6 octave bands centered in
+        # 57.26, 163.98, 469.57, 1344.60, 3850.23 and 11024.99 Hz.
         SC = SpectralContrast(sampleRate = 44100, frameSize = 4)
-        sc = SC([1,1,1])
-        self.assertAlmostEquals(numpy.mean(sc[0]), -2.7182817459)
+
+        # The following spectral bins are centered on
+        # frequencies 0, 11025 and 22050 Hz.
+        spec = [1,1,1]
+
+        sc = SC(spec)
+
+        # First check that the first 5 bands are empty.
+        self.assertAlmostEquals(numpy.mean(sc[0][:5]), -2.7182817459)
+
+        # Then check that the last bands constains one bin.
+        self.assertAlmostEquals(numpy.mean(sc[0][-1]), -1)
+
+        # In any case the valley values should be 0.
         self.assertAlmostEquals(numpy.mean(sc[1]), 0)
 
 
