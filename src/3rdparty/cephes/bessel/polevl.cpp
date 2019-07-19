@@ -51,9 +51,7 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 
 #include "bessel.h"
 
-using namespace cephes;
-
-double cephes::polevl(double x, double coef[], int N )
+double polevl(double x, double coef[], int N )
 {
 double ans;
 int i;
@@ -76,7 +74,7 @@ return( ans );
  * Otherwise same as polevl.
  */
 
-double cephes::p1evl(double x, double coef[], int N )
+double p1evl(double x, double coef[], int N )
 {
 double ans;
 double *p;
