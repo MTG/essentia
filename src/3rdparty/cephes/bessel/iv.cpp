@@ -66,14 +66,14 @@ Copyright 1984, 1987, 1988, 2000 by Stephen L. Moshier
 // #endif
 // extern double MACHEP, MAXNUM;
 
-using namespace cephes;
+namespace cephes {
 
 static double iv_asymptotic(double v, double x);
 static void ikv_asymptotic_uniform(double v, double x, double *Iv, double *Kv);
 static void ikv_temme(double v, double x, double *Iv, double *Kv);
 
 
-double cephes::iv(double v, double x)
+double iv(double v, double x)
 {
 int sign;
 double t, ax, res;
@@ -653,3 +653,5 @@ static void ikv_temme(double v, double x, double *Iv_p, double *Kv_p)
     }
     return;
 }
+
+} // namespace cephes

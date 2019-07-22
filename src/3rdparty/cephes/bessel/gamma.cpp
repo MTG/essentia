@@ -106,7 +106,7 @@ Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
 
 #include "bessel.h"
 
-using namespace cephes;
+namespace cephes{
 
 static double P[] = {
   1.60119522476751861407E-4,
@@ -478,7 +478,7 @@ static double LS2PI  =  0.91893853320467274178;
 /* Logarithm of gamma function */
 
 
-double cephes::lgam(double x)
+double lgam(double x)
 {
 double p, q, u, w, z;
 int i;
@@ -670,3 +670,5 @@ small:
   else
 	return(z / ((1.0 + 0.5772156649015329 * x) * x));
 }
+
+} // namespace cephes

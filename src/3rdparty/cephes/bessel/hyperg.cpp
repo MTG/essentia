@@ -66,7 +66,7 @@ Copyright 1984, 1987, 1988, 2000 by Stephen L. Moshier
 
 #include "bessel.h"
 
-using namespace cephes;
+namespace cephes{
 
 // #ifdef ANSIPROT
 // extern double exp ( double );
@@ -389,3 +389,5 @@ error:
 // mtherr( "hyperg", TLOSS );
 return( sum );
 }
+
+}  // namespace cephes
