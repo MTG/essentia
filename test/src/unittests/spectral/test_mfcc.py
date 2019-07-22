@@ -60,10 +60,10 @@ class TestMFCC(TestCase):
                           -14.56163502])
 
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'),
-                           sampleRate = 44100)()*2**15     
+                           sampleRate = 44100)()*2**15
 
-        w = Windowing(type = 'hamming', 
-                      size = frameSize, 
+        w = Windowing(type = 'hamming',
+                      size = frameSize,
                       zeroPadding = zeroPadding,
                       normalized = False,
                       zeroPhase = False)
@@ -83,7 +83,7 @@ class TestMFCC(TestCase):
                             liftering = 22)
 
         pool = Pool()
-        
+
         for frame in FrameGenerator(audio, frameSize = frameSize, hopSize = hopSize , startFromZero = True, validFrameThresholdRatio = 1):
             pool.add("mfcc",mfccEssentia(spectrum(w(frame)))[1])
 
@@ -165,6 +165,8 @@ class TestMFCC(TestCase):
                                             'sampleRate': 22050} )
 
     def testRealCase(self):
+        # The expected values were recomputed from commit
+        # a97a01a11509802665d8211f679637dd60d85f3e
         from numpy import mean
         filename = join(testdata.audio_dir, 'recorded','musicbox.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
@@ -178,13 +180,12 @@ class TestMFCC(TestCase):
             pool.add("bands", bands)
             pool.add("mfcc", mfcc)
 
-        expected = [ -9.20199646e+02,   5.87043839e+01,  -4.10174484e+01,
-                      2.33621140e+01,  -1.43552504e+01,   8.82298851e+00,
-                     -5.39049816e+00,   3.08949327e+00,  -1.79325986e+00,
-                      1.15834820e+00,  -5.67521632e-01,   3.01115632e-01,
-                      4.70408946e-01]
+        expected = [ -925.62939453,  65.30918121, -47.7603302,  29.60293007, -20.25293922,
+                       14.30178356, -10.4140501,    7.66825676, -5.91072369,   4.87522268,
+                       -3.87032604,   3.17340517,  -2.13934493 ]
 
-        self.assertAlmostEqualVector(mean(pool['mfcc'], 0), expected, 1.0e-5)
+
+        self.assertAlmostEqualVector(mean(pool['mfcc'], 0), expected, 1.e-8)
 
 
 suite = allTests(TestMFCC)
