@@ -18,6 +18,7 @@
  */
 
 #include "fftkcomplex.h"
+#include "fftk.h"
 #include "essentia.h"
 
 using namespace std;
@@ -39,10 +40,9 @@ const char* FFTKComplex::description = DOC("This algorithm computes the complex 
 "  [3] KISS -- Keep It Simple, Stupid.\n"
 "  http://kissfft.sourceforge.net/");
 
-ForcedMutex FFTKComplex::globalFFTKMutex;
 
 FFTKComplex::~FFTKComplex() {
-  ForcedMutexLocker lock(globalFFTKMutex);
+  ForcedMutexLocker lock(FFTK::globalFFTKMutex);
 
   // we might have called essentia::shutdown() before this algorithm goes out
   // of scope, so make sure we're not doing stupid things here
@@ -92,7 +92,7 @@ void FFTKComplex::configure() {
 }
 
 void FFTKComplex::createFFTObject(int size) {
-  ForcedMutexLocker lock(globalFFTKMutex);
+  ForcedMutexLocker lock(FFTK::globalFFTKMutex);
 
   // This is only needed because at the moment we return half of the spectrum,
   // which means that there are 2 different input signals that could yield the

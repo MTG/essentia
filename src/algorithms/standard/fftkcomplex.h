@@ -56,9 +56,6 @@ class FFTKComplex : public Algorithm {
   static const char* description;
 
  protected:
-  friend class IFFTKComplex;
-  static ForcedMutex globalFFTKMutex;
-   
   int _fftPlanSize;
   std::complex<Real>* _input;
   std::complex<Real>* _output;

@@ -18,6 +18,7 @@
  */
 
 #include "fftwcomplex.h"
+#include "fftw.h"
 #include "essentia.h"
 
 using namespace std;
@@ -35,10 +36,9 @@ const char* FFTWComplex::description = DOC("This algorithm computes the complex 
 "  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
 "  http://mathworld.wolfram.com/FastFourierTransform.html");
 
-ForcedMutex FFTWComplex::globalFFTWCOMPLEXMutex;
 
 FFTWComplex::~FFTWComplex() {
-  ForcedMutexLocker lock(globalFFTWCOMPLEXMutex);
+  ForcedMutexLocker lock(FFTW::globalFFTWMutex);
 
   // we might have called essentia::shutdown() before this algorithm goes out
   // of scope, so make sure we're not doing stupid things here
@@ -90,7 +90,7 @@ void FFTWComplex::configure() {
 }
 
 void FFTWComplex::createFFTObject(int size) {
-  ForcedMutexLocker lock(globalFFTWCOMPLEXMutex);
+  ForcedMutexLocker lock(FFTW::globalFFTWMutex);
 
   // This is only needed because at the moment we return half of the spectrum,
   // which means that there are 2 different input signals that could yield the

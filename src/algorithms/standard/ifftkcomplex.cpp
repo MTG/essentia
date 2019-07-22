@@ -1,4 +1,4 @@
-/*
+src/algorithms/standard/fftwcomplex.cpp/*
  * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
@@ -18,7 +18,8 @@
  */
 
 #include "ifftkcomplex.h"
-#include "fftkcomplex.h"
+#include "fftk.h"
+
 
 using namespace std;
 using namespace essentia;
@@ -42,7 +43,7 @@ const char* IFFTKComplex::description = DOC("This algorithm calculates the inver
 
 
 IFFTKComplex::~IFFTKComplex() {
-  ForcedMutexLocker lock(FFTKComplex::globalFFTKMutex);
+  ForcedMutexLocker lock(FFTK::globalFFTKMutex);
 
     free(_fftCfg);
     free(_input);
@@ -89,7 +90,7 @@ void IFFTKComplex::configure() {
 }
 
 void IFFTKComplex::createFFTObject(int size) {
-  ForcedMutexLocker lock(FFTKComplex::globalFFTKMutex);
+  ForcedMutexLocker lock(FFTK::globalFFTKMutex);
     
 //     create the temporary storage array
       free(_input);
