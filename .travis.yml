@@ -26,6 +26,10 @@ install:
 script:
   - docker run --rm -v `pwd`:/io $DOCKER_IMAGE $PRE_CMD /io/travis/build_wheels.sh
   - ls wheelhouse/
+  - if [ ! "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    python setup.py sdist;
+    travis/deploy_transfer.sh;
+    fi
 
 deploy:
   skip_cleanup: true

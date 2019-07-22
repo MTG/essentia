@@ -238,6 +238,67 @@ class TestPeakDetection(TestCase):
         PeakDetection(threshold=0)
         self.assertConfigureFails(PeakDetection(), {'minPosition': 1.01,  'maxPosition': 1})
 
+    def testMinPeakDistance(self):
+        peakPos = 2
+        smallerPeakPos = 4
+        input=[0,0,0,0,0]
+        input[peakPos] = 2.0
+        input[smallerPeakPos] = 1.0
+        inputSize = len(input)
+        
+        # default behaviour: 2 peaks expected
+        config = { 'range': inputSize-1,  'maxPosition': inputSize-1, 'orderBy': 'amplitude',
+                   'interpolate': False }
+        pdetect = PeakDetection(**config)
+        (posis, vals) = pdetect(input)
+
+        self.assertEqualVector(posis, [peakPos, smallerPeakPos])
+        self.assertEqualVector(vals, [2.0, 1.0])
+
+        # with 'minPeakDistance': 1 peak expected
+        config = { 'range': inputSize-1,  'maxPosition': inputSize-1, 'orderBy': 'amplitude',
+                   'minPeakDistance': 3.0, 'interpolate': False }
+        pdetect = PeakDetection(**config)
+        (posis, vals) = pdetect(input)
+        self.assertEqualVector(posis, [peakPos])
+        self.assertEqualVector(vals, [2.0])
+
+    def testMinPeakDistanceSorting(self):
+        # Test the sorting options when appliying
+        # some minimum peak distance
+
+        peak1, peak2, peak3 = 1, 3, 5
+        
+        input=[0] * 6
+        input[peak1] = 4.0
+        input[peak2] = 1.0
+        input[peak3] = 5.0
+        
+        inputSize = len(input)
+
+        peakDetection = PeakDetection()
+        
+        # case 1: ordered by magnitude
+        config = { 'range': inputSize-1,  'maxPosition': inputSize-1, 'orderBy': 'amplitude',
+                   'minPeakDistance': 3.0, 'interpolate': False }
+
+        peakDetection.configure(**config)
+        (posis, vals) = peakDetection(input)
+
+        self.assertEqualVector(posis, [peak3, peak1])
+        self.assertEqualVector(vals, [5.0, 4.0])
+        
+        # case 1: ordered by position
+        config = { 'range': inputSize-1,  'maxPosition': inputSize-1, 'orderBy': 'position',
+                   'minPeakDistance': 3.0, 'interpolate': False }
+
+        peakDetection.configure(**config)
+        (posis, vals) = peakDetection(input)
+
+        self.assertEqualVector(posis, [peak1, peak3])
+        self.assertEqualVector(vals, [4.0, 5.0])
+
+
 suite = allTests(TestPeakDetection)
 
 if __name__ == '__main__':

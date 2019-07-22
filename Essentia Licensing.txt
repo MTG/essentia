@@ -25,6 +25,7 @@ License v3. at http://people.sc.fsu.edu/~jburkardt/txt/gnu_lgpl.txt
 
 TNT, in the public domain (project page at http://math.nist.gov/tnt/download.html)
 
+Cephes Library, used under the BSD license with the explicit consent of the author by email <steve@moshier.net>
 
 C) External Dependant libraries are:
 

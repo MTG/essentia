@@ -34,7 +34,6 @@ class MusicExtractorSVM : public Algorithm {
 
   std::vector<standard::Algorithm*> _svms;
 
-  void computeSVMDescriptors(Pool& pool);
 
  public:
 
