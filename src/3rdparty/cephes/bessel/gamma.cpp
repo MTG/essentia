@@ -106,7 +106,7 @@ Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
 
 #include "bessel.h"
 
-#define MAXNUM 1.79769313486231570815E308
+using namespace cephes;
 
 static double P[] = {
   1.60119522476751861407E-4,
@@ -144,31 +144,31 @@ static double MAXLGM = 2.556348e305;
 
 int sgngam = 0;
 
-#ifdef ANSIPROT
-extern double pow ( double, double );
-extern double log ( double );
-extern double exp ( double );
-extern double sin ( double );
-extern double polevl ( double, void *, int );
-extern double p1evl ( double, void *, int );
-extern double floor ( double );
-extern double fabs ( double );
-extern int isnan ( double );
-extern int isfinite ( double );
-static double stirf ( double );
-double lgam ( double );
-#else
-double pow(), log(), exp(), sin(), polevl(), p1evl(), floor(), fabs();
-int isnan(), isfinite();
-static double stirf();
-double lgam();
-#endif
-#ifdef INFINITIES
-extern double INFINITY;
-#endif
-#ifdef NANS
-extern double NAN;
-#endif
+// #ifdef ANSIPROT
+// extern double pow ( double, double );
+// extern double log ( double );
+// extern double exp ( double );
+// extern double sin ( double );
+// extern double polevl ( double, void *, int );
+// extern double p1evl ( double, void *, int );
+// extern double floor ( double );
+// extern double fabs ( double );
+// extern int isnan ( double );
+// extern int isfinite ( double );
+// static double stirf ( double );
+// double lgam ( double );
+// #else
+// double pow(), log(), exp(), sin(), polevl(), p1evl(), floor(), fabs();
+// int isnan(), isfinite();
+// static double stirf();
+// double lgam();
+// #endif
+// #ifdef INFINITIES
+// extern double INFINITY;
+// #endif
+// #ifdef NANS
+// extern double NAN;
+// #endif
 
 
 /* Gamma function computed by Stirling's formula.
@@ -478,7 +478,7 @@ static double LS2PI  =  0.91893853320467274178;
 /* Logarithm of gamma function */
 
 
-double lgam(double x)
+double cephes::lgam(double x)
 {
 double p, q, u, w, z;
 int i;
@@ -598,8 +598,11 @@ double gam(double x)
 
   if (std::isinf(x) == 1)
     return(x);
-  if (std::isinf(x) == -1)
-    return(NAN);
+	// These lines do not make sense
+	// therefore we comment them to 
+	// prevent a compilation warning (Pablo A.)
+    // if (std::isinf(x) == -1)
+    // return(NAN);
 
   q = fabs(x);
 

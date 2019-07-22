@@ -6,14 +6,13 @@
 
 #include <cmath>
 
-#define MAXITER        500
 
-#define EDOM		33
-#define ERANGE	34
-#define MAXNUM 1.79769313486231570815E308    /* 2**1024*(1-MACHEP) */
-#define EULER 0.577215664901532860606512090082402431 /* Euler constant */
+namespace cephes {
 
-#define MACHEP 1.11022302462515654042E-16
+const static int MAXITER = 500;
+const static double MAXNUM = 1.79769313486231570815E308; /* 2**1024*(1-MACHEP) */
+const static double EULER = 0.577215664901532860606512090082402431; /* Euler constant */
+const static double MACHEP = 1.11022302462515654042E-16;
 
 // double chbevl(double x, double array[], int n);
 // double hyperg(double a, double b, double x);
@@ -38,9 +37,10 @@ double iv(double v, double x);
 
 // double gam(double x);
 double lgam(double x);
-extern int sgngam;
+// extern int sgngam;
 
 
 //! \endcond
+}
 
 #endif // #ifndef BESSEL_H

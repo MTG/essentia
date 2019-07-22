@@ -66,6 +66,8 @@ Copyright 1984, 1987, 1988, 2000 by Stephen L. Moshier
 
 #include "bessel.h"
 
+using namespace cephes;
+
 // #ifdef ANSIPROT
 // extern double exp ( double );
 // extern double log ( double );
@@ -89,12 +91,15 @@ double hyp2f0(double, double, double, int, double *);
 static double hy1f1p(double, double, double, double *);
 static double hy1f1a(double, double, double, double *);
 
-#define MAXNUM 1.79769313486231570815E308    /* 2**1024*(1-MACHEP) */
-#define MACHEP 1.11022302462515654042E-16   /* 2**-53 */
+// #define MAXNUM 1.79769313486231570815E308    /* 2**1024*(1-MACHEP) */
+// #define MACHEP 1.11022302462515654042E-16   /* 2**-53 */
 
 double hyperg( double a, double b, double x)
 {
 double asum, psum, acanc, pcanc, temp;
+
+pcanc = 1.0; // Initialize error to 100% just to prevent a
+			 // compile-time warning. (Pablo A.)
 
 /* See if a Kummer transformation will help */
 temp = b - a;
@@ -121,7 +126,7 @@ if( acanc < pcanc )
 	}
 
 done:
-if( pcanc > 1.0e-12 )
+// if( pcanc > 1.0e-12 )
 	// mtherr( "hyperg", PLOSS );
 
 return( psum );
