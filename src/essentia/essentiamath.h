@@ -82,7 +82,9 @@ template <> inline long long int nextPowerTwo(long long int n) {
   return ++n;
 }
 
-// returns the L2-norm of an array
+/**
+ * Returns the L2-norm of an array
+ */
 template <typename T> T norm(const std::vector<T>& array) {
   if (array.empty()) {
     throw EssentiaException("trying to calculate norm of empty array");
@@ -95,6 +97,17 @@ template <typename T> T norm(const std::vector<T>& array) {
   }
 
   return sqrt(sum);
+}
+
+/**
+ * Returns the sum of squared values of an array
+ */
+template <typename T> T sumSquare(const std::vector<T> array, const size_t start, const size_t end) {
+  T sum = 0.0;
+  for (size_t i = array; i < end; ++i) {
+    sum += array[i] * array[i];
+  }
+  return sum;
 }
 
 /**
@@ -652,6 +665,10 @@ inline Real hz2hz(Real hz){
   return hz;
 }
 
+inline Real hz2cents(Real hz) {
+  return 12 * std::log(hz/440)/std::log(2.) + 69;
+}
+
 inline int argmin(const std::vector<Real>& input) {
   return std::min_element(input.begin(), input.end()) - input.begin();
 }
@@ -880,6 +897,61 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
   }
 
   return result;
+}
+
+inline std::string equivalentKey(const std::string key) {
+  if (key == "C")
+    return "C";
+
+  if (key == "C#")
+    return "Db";
+
+  if (key == "Db")
+    return "C#";
+
+  if (key == "D")
+    return "D";
+
+  if (key == "D#")
+    return "Eb";
+
+  if (key == "Eb")
+    return "D#";
+
+  if (key == "E")
+    return "E";
+
+  if (key == "F")
+    return "F";
+
+  if (key == "F#")
+    return "Gb";
+
+  if (key == "Gb")
+    return "F#";
+
+  if (key == "G")
+    return "G";
+
+  if (key == "G#")
+    return "Ab";
+
+  if (key == "Ab")
+    return "G#";
+
+  if (key == "A")
+    return "A";
+
+  if (key == "A#")
+    return "Bb";
+
+  if (key == "Bb")
+    return "A#";
+
+  if (key == "B")
+    return "B";
+
+  return "";
 }
 
 } // namespace essentia

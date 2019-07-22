@@ -18,6 +18,7 @@
  */
 
 #include "fftwcomplex.h"
+#include "fftw.h"
 #include "essentia.h"
 
 using namespace std;
@@ -26,7 +27,7 @@ using namespace standard;
 
 const char* FFTWComplex::name = "FFTC";
 const char* FFTWComplex::category = "Standard";
-const char* FFTWComplex::description = DOC("This algorithm computes the positive complex short-term Fourier transform (STFT) of a complex array using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
+const char* FFTWComplex::description = DOC("This algorithm computes the complex short-term Fourier transform (STFT) of a complex array using the FFT algorithm. If the `negativeFrequencies` flag is set on, the resulting fft has a size of (s/2)+1, where s is the size of the input frame. Otherwise, output matches the input size.\n"
 "At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
 "\n"
 "References:\n"
@@ -35,10 +36,9 @@ const char* FFTWComplex::description = DOC("This algorithm computes the positive
 "  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
 "  http://mathworld.wolfram.com/FastFourierTransform.html");
 
-ForcedMutex FFTWComplex::globalFFTWCOMPLEXMutex;
 
 FFTWComplex::~FFTWComplex() {
-  ForcedMutexLocker lock(globalFFTWCOMPLEXMutex);
+  ForcedMutexLocker lock(FFTW::globalFFTWMutex);
 
   // we might have called essentia::shutdown() before this algorithm goes out
   // of scope, so make sure we're not doing stupid things here
@@ -90,7 +90,7 @@ void FFTWComplex::configure() {
 }
 
 void FFTWComplex::createFFTObject(int size) {
-  ForcedMutexLocker lock(globalFFTWCOMPLEXMutex);
+  ForcedMutexLocker lock(FFTW::globalFFTWMutex);
 
   // This is only needed because at the moment we return half of the spectrum,
   // which means that there are 2 different input signals that could yield the

@@ -55,6 +55,9 @@ class FFTK : public Algorithm {
 
  protected:
   friend class IFFTK;
+  friend class FFTKComplex;
+  friend class IFFTKComplex;
+
   static ForcedMutex globalFFTKMutex;
    
   int _fftPlanSize;

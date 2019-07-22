@@ -73,10 +73,19 @@ void IFFTK::compute() {
   // copy result from plan to output vector
   signal.resize(size);
   memcpy(&signal[0], _output, size*sizeof(Real));
+
+  if (_normalize) {
+    Real norm = (Real)size;
+    
+    for (int i = 0; i < size; i++) {
+      signal[i] /= norm;
+    }
+  }
 }
 
 void IFFTK::configure() {
   createFFTObject(parameter("size").toInt());
+  _normalize = parameter("normalize").toBool();
 }
 
 void IFFTK::createFFTObject(int size) {

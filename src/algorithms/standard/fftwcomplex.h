@@ -56,9 +56,6 @@ class FFTWComplex : public Algorithm {
   static const char* description;
 
  protected:
-  friend class IFFTW;
-  static ForcedMutex globalFFTWCOMPLEXMutex;
-
   fftwf_plan _fftPlan;
   int _fftPlanSize;
   std::complex<Real>* _input;
