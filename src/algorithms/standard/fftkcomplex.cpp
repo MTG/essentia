@@ -17,44 +17,48 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "fftwcomplex.h"
-#include "fftw.h"
+#include "fftkcomplex.h"
+#include "fftk.h"
 #include "essentia.h"
 
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* FFTWComplex::name = "FFTC";
-const char* FFTWComplex::category = "Standard";
-const char* FFTWComplex::description = DOC("This algorithm computes the complex short-term Fourier transform (STFT) of a complex array using the FFT algorithm. If the `negativeFrequencies` flag is set on, the resulting fft has a size of (s/2)+1, where s is the size of the input frame. Otherwise, output matches the input size.\n"
+const char* FFTKComplex::name = "FFTC";
+const char* FFTKComplex::category = "Standard";
+const char* FFTKComplex::description = DOC("This algorithm computes the complex short-term Fourier transform (STFT) of a complex array using the FFT algorithm. If the `negativeFrequencies` flag is set on, the resulting fft has a size of (s/2)+1, where s is the size of the input frame. Otherwise, output matches the input size.\n"
 "At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
+"\n"
+"FFT computation will be carried out using the KISS library [3]"
 "\n"
 "References:\n"
 "  [1] Fast Fourier transform - Wikipedia, the free encyclopedia,\n"
 "  http://en.wikipedia.org/wiki/Fft\n\n"
 "  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
-"  http://mathworld.wolfram.com/FastFourierTransform.html");
+"  http://mathworld.wolfram.com/FastFourierTransform.html\n"
+"  [3] KISS -- Keep It Simple, Stupid.\n"
+"  http://kissfft.sourceforge.net/");
 
 
-FFTWComplex::~FFTWComplex() {
-  ForcedMutexLocker lock(FFTW::globalFFTWMutex);
+FFTKComplex::~FFTKComplex() {
+  ForcedMutexLocker lock(FFTK::globalFFTKMutex);
 
   // we might have called essentia::shutdown() before this algorithm goes out
   // of scope, so make sure we're not doing stupid things here
   // This will cause a memory leak then, but it is definitely a better choice
   // than a crash (right, right??? :-) )
   if (essentia::isInitialized()) {
-    fftwf_destroy_plan(_fftPlan);
-    fftwf_free(_input);
-    fftwf_free(_output);
+    free(_fftCfg);
+    free(_input);
+    free(_output);
   }
 }
 
-void FFTWComplex::compute() {
+void FFTKComplex::compute() {
 
-  const std::vector<std::complex<Real> >& signal = _signal.get();
-  std::vector<std::complex<Real> >& fft = _fft.get();
+  const vector<complex<Real> >& signal = _signal.get();
+  vector<complex<Real> >& fft = _fft.get();
 
   // check if input is OK
   int size = int(signal.size());
@@ -62,35 +66,33 @@ void FFTWComplex::compute() {
     throw EssentiaException("FFT: Input size cannot be 0");
   }
 
-  if ((_fftPlan == 0) ||
-      ((_fftPlan != 0) && _fftPlanSize != size)) {
+  if (_fftCfg == 0 || (_fftCfg != 0 && _fftPlanSize != size)) {
     createFFTObject(size);
   }
 
   // copy input into plan
   memcpy(_input, &signal[0], size*sizeof(complex<Real>));
-
-  // calculate the fft
-  fftwf_execute(_fftPlan);
+    
+  kiss_fft(_fftCfg, (kiss_fft_cpx *) _input, (kiss_fft_cpx *) _output);
 
   // copy result from plan to output vector
-  if (_negativeFrequencies){
+  if (_negativeFrequencies) {
     fft.resize(size);
     memcpy(&fft[0], _output, (size)*sizeof(complex<Real>));
   }
-  else{
+  else {
     fft.resize(size/2+1);
     memcpy(&fft[0], _output, (size/2+1)*sizeof(complex<Real>));
   }
 }
 
-void FFTWComplex::configure() {
-  createFFTObject(parameter("size").toInt());
+void FFTKComplex::configure() {
   _negativeFrequencies = parameter("negativeFrequencies").toBool();
+  createFFTObject(parameter("size").toInt());
 }
 
-void FFTWComplex::createFFTObject(int size) {
-  ForcedMutexLocker lock(FFTW::globalFFTWMutex);
+void FFTKComplex::createFFTObject(int size) {
+  ForcedMutexLocker lock(FFTK::globalFFTKMutex);
 
   // This is only needed because at the moment we return half of the spectrum,
   // which means that there are 2 different input signals that could yield the
@@ -100,15 +102,16 @@ void FFTWComplex::createFFTObject(int size) {
   }
 
   // create the temporary storage array
-  fftwf_free(_input);
-  fftwf_free(_output);
-  _input = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
-  _output = (complex<Real>*)fftwf_malloc(sizeof(complex<Real>)*size);
+  free(_input);
+  free(_output);
+  _input = (complex<Real>*)malloc(sizeof(complex<Real>) * size);
+  _output = (complex<Real>*)malloc(sizeof(complex<Real>) * size);
 
-  if (_fftPlan != 0) {
-    fftwf_destroy_plan(_fftPlan);
+    
+  if (_fftCfg != 0) {
+    free(_fftCfg);
   }
-
-  _fftPlan = fftwf_plan_dft_1d(size, (fftwf_complex*)_input, (fftwf_complex*)_output, FFTW_FORWARD, FFTW_ESTIMATE);
+    
+  _fftCfg = kiss_fft_alloc(size, 0, NULL, NULL );    
   _fftPlanSize = size;
 }

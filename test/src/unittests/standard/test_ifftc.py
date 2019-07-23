@@ -30,44 +30,40 @@ class TestIFFT(TestCase):
     def testDC(self):
         # input is [1, 0, 0, ...] which corresponds to an IFFT of constant magnitude 1
         signalSize = 512
-        fftSize = int(signalSize/2) + 1
 
-        signalDC = zeros(signalSize)
-        signalDC[0] = 1.0
+        freqSignal = zeros(signalSize).astype(numpy.complex64)
+        freqSignal[0] = (1. + 0j) * signalSize
 
-        fftInput = [ 1+0j ] * fftSize
+        timeSignal = [1.+ 0j] * signalSize
 
-        self.assertAlmostEqualVector(signalDC*signalSize, IFFT(normalize=False)(cvec(fftInput)))
+        self.assertAlmostEqualVector(cvec(timeSignal), IFFTC()(freqSignal))
 
 
     def testNyquist(self):
         # input is [1, -1, 1, -1, ...] which corresponds to a sine of frequency Fs/2
         signalSize = 1024
-        fftSize = int(signalSize/2) + 1
 
-        signalNyquist = ones(signalSize)
+        timeSignal = ones(signalSize).astype(numpy.complex64)
         for i in range(signalSize):
             if i % 2 == 1:
-                signalNyquist[i] = -1.0
+                timeSignal[i] = -1.0
 
-        fftInput = [ 0+0j ] * fftSize
-        fftInput[-1] = (1+0j) * signalSize
+        freqSignal = [ 0+0j ] * signalSize
+        freqSignal[signalSize // 2] = (1+0j) * signalSize
 
-        self.assertAlmostEqualVector(IFFT(normalize=False)(cvec(fftInput)), signalNyquist*signalSize)
+        self.assertAlmostEqualVector(IFFTC()(cvec(freqSignal)), timeSignal)
 
     def testZero(self):
-        self.assertAlmostEqualVector(zeros(2048), IFFT(normalize=False)(numpy.zeros(1025, dtype='c8')))
+        self.assertAlmostEqualVector(zeros(2048), IFFT()(numpy.zeros(1025, dtype='c8')))
 
 
     def testEmpty(self):
-        self.assertComputeFails(IFFT(normalize=False), cvec([]))
-
+        self.assertComputeFails(IFFT(), cvec([]))
 
     def testRegression(self):
-        signal = numpy.sin(numpy.arange(1024, dtype='f4')/1024. * 441 * 2*math.pi)
-        self.assertAlmostEqualVector(signal*len(signal), IFFT(normalize=False)(FFT()(signal)), 1e-2)
-
-
+        signal = (numpy.sin(numpy.arange(1024, dtype='f4')/1024. * 441 * 2 * math.pi) +\
+                 1j * numpy.cos(numpy.arange(1024, dtype='f4')/1024. * 441 * 2 * math.pi)).astype(numpy.complex64)
+        self.assertAlmostEqualVector(signal, IFFTC()(FFTC(negativeFrequencies=True)(signal)), 1e-2)
 
 
 

@@ -17,16 +17,17 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "iffta.h"
+#include "ifftacomplex.h"
+#include "fftacomplex.h"
 #include "ffta.h"
 
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* IFFTA::name = "IFFT";
-const char* IFFTA::category = "Standard";
-const char* IFFTA::description = DOC("This algorithm calculates the inverse short-term Fourier transform (STFT) of an array of complex values using the FFT algorithm. The resulting frame has a size of (s-1)*2, where s is the size of the input fft frame. The inverse Fourier transform is not defined for frames which size is less than 2 samples. Otherwise an exception is thrown.\n"
+const char* IFFTAComplex::name = "IFFTC";
+const char* IFFTAComplex::category = "Standard";
+const char* IFFTAComplex::description = DOC("This algorithm calculates the inverse short-term Fourier transform (STFT) of an array of complex values using the FFT algorithm. The resulting frame has a size equal to the input fft frame size. The inverse Fourier transform is not defined for frames which size is less than 2 samples. Otherwise an exception is thrown.\n"
 "\n"
 "An exception is thrown if the input's size is not larger than 1.\n"
 "\n"
@@ -42,23 +43,22 @@ const char* IFFTA::description = DOC("This algorithm calculates the inverse shor
 );
 
 
-IFFTA::~IFFTA() {
+IFFTAComplex::~IFFTAComplex() {
   ForcedMutexLocker lock(FFTA::globalFFTAMutex);
-
   vDSP_destroy_fftsetup(fftSetup);
   delete[] accelBuffer.realp;
   delete[] accelBuffer.imagp;
 }
 
-void IFFTA::compute() {
+void IFFTAComplex::compute() {
 
   const std::vector<std::complex<Real> >& fft = _fft.get();
-  std::vector<Real>& signal = _signal.get();
+  std::vector<std::complex<Real> >& signal = _signal.get();
 
   // check if input is OK
-  int size = ((int)fft.size()-1)*2;
+  int size = (int)fft.size();
   if (size <= 0) {
-    throw EssentiaException("IFFT: Input size cannot be 0 or 1");
+    throw EssentiaException("IFFTC: Input size cannot be 0 or 1");
   }
   if ((fftSetup == 0) ||
       ((fftSetup != 0) && _fftPlanSize != size)) {
@@ -66,20 +66,20 @@ void IFFTA::compute() {
   }
 
   //Pack
-  accelBuffer.realp[0] = fft[0].real();
-  accelBuffer.imagp[0] = fft[fft.size()-1].real();
-  
-  for(int i=1; i<fft.size()-1; i++) {
+  // accelBuffer.realp[0] = fft[0].real();
+  // accelBuffer.imagp[0] = fft[fft.size()-1].real();
+    
+  for(int i = 0; i < fft.size(); i++) {
       accelBuffer.realp[i] = fft[i].real();
       accelBuffer.imagp[i] = fft[i].imag();
   }
+    
+  vDSP_fft_zip(fftSetup, &accelBuffer, 1, logSize, FFT_INVERSE);
   
-  vDSP_fft_zrip(fftSetup, &accelBuffer, 1, logSize, FFT_INVERSE);
-  
-  // copy result from plan to output vector
+  // Copy result from plan to output vector.
   signal.resize(size);
   
-  vDSP_ztoc(&accelBuffer, 1, (COMPLEX*)&signal[0], 2, size/2);
+  vDSP_ztoc(&accelBuffer, 1, (COMPLEX*)&signal[0], 2, size);
 
   if (_normalize) {
     Real norm = (Real)size;
@@ -90,19 +90,21 @@ void IFFTA::compute() {
   }
 }
 
-void IFFTA::configure() {
+void IFFTAComplex::configure() {
   createFFTObject(parameter("size").toInt());
   _normalize = parameter("normalize").toBool();
 }
 
-void IFFTA::createFFTObject(int size) {
+void IFFTAComplex::createFFTObject(int size) {
   ForcedMutexLocker lock(FFTA::globalFFTAMutex);
     
+  // Delete stuff before assigning.
   delete[] accelBuffer.realp;
   delete[] accelBuffer.imagp;
-  accelBuffer.realp = new float[size/2];
-  accelBuffer.imagp = new float[size/2];
-    
+
+  accelBuffer.realp = new float[size];
+  accelBuffer.imagp = new float[size];
+
   logSize = log2(size);
     
   // With vDSP you only need to create a new fft if you've increased the size.
@@ -110,6 +112,6 @@ void IFFTA::createFFTObject(int size) {
     vDSP_destroy_fftsetup(fftSetup);
     fftSetup = vDSP_create_fftsetup(logSize, 0);
   }
-    
+
   _fftPlanSize = size;
 }

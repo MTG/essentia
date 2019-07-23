@@ -106,9 +106,7 @@ Copyright 1984, 1987, 1989, 1992, 2000 by Stephen L. Moshier
 
 #include "bessel.h"
 
-#define MAXNUM 1.79769313486231570815E308
-
-using namespace cephes;
+namespace cephes{
 
 static double P[] = {
   1.60119522476751861407E-4,
@@ -146,37 +144,37 @@ static double MAXLGM = 2.556348e305;
 
 int sgngam = 0;
 
-#ifdef ANSIPROT
-extern double pow ( double, double );
-extern double log ( double );
-extern double exp ( double );
-extern double sin ( double );
-extern double polevl ( double, void *, int );
-extern double p1evl ( double, void *, int );
-extern double floor ( double );
-extern double fabs ( double );
-extern int isnan ( double );
-extern int isfinite ( double );
-static double stirf ( double );
-double lgam ( double );
-#else
-double pow(), log(), exp(), sin(), polevl(), p1evl(), floor(), fabs();
-int isnan(), isfinite();
+// #ifdef ANSIPROT
+// extern double pow ( double, double );
+// extern double log ( double );
+// extern double exp ( double );
+// extern double sin ( double );
+// extern double polevl ( double, void *, int );
+// extern double p1evl ( double, void *, int );
+// extern double floor ( double );
+// extern double fabs ( double );
+// extern int isnan ( double );
+// extern int isfinite ( double );
+// static double stirf ( double );
+// double lgam ( double );
+// #else
+// double pow(), log(), exp(), sin(), polevl(), p1evl(), floor(), fabs();
+// int isnan(), isfinite();
 // static double stirf();
 // double lgam();
-#endif
-#ifdef INFINITIES
-extern double INFINITY;
-#endif
-#ifdef NANS
-extern double NAN;
-#endif
+// #endif
+// #ifdef INFINITIES
+// extern double INFINITY;
+// #endif
+// #ifdef NANS
+// extern double NAN;
+// #endif
 
 
 /* Gamma function computed by Stirling's formula.
  * The polynomial STIR is valid for 33 <= x <= 172.
  */
-double cephes::stirf(double x)
+static double stirf(double x)
 {
 double y, w, v;
 
@@ -198,7 +196,7 @@ return( y );
 
 
 
-/* double gamma(double x)
+double gamma(double x)
 {
 double p, q, z;
 int i;
@@ -314,7 +312,7 @@ if( x == 0.0 )
 else
 	return( z/((1.0 + 0.5772156649015329 * x) * x) );
 }
-*/
+
 
 
 /* A[]: Stirling's formula expansion of log gamma
@@ -480,7 +478,7 @@ static double LS2PI  =  0.91893853320467274178;
 /* Logarithm of gamma function */
 
 
-double cephes::lgam(double x)
+double lgam(double x)
 {
 double p, q, u, w, z;
 int i;
@@ -589,76 +587,76 @@ else
 return( q );
 }
 
-double cephes::gam(double x)
+double gam(double x)
 {
   double p, q, z;
   int i;
 
   sgngam = 1;
   if (std::isnan(x))
-    return(x);
+	return(x);
 
   if (std::isinf(x) == 1)
-    return(x);
+	return(x);
 	// These lines do not make sense
 	// therefore we comment them to 
 	// prevent a compilation warning (Pablo A.)
-  // if (std::isinf(x) == -1)
-    // return(NAN);
+	// if (std::isinf(x) == -1)
+	// return(NAN);
 
   q = fabs(x);
 
   if (q > 33.0) {
-    if (x < 0.0) {
-      p = floor(q);
-      if (p == q) {
-      gamnan:
-        // it_warning("gam(): argument domain error");
-        return (NAN);
-      }
-      i = int(p);
-      if ((i & 1) == 0)
-        sgngam = -1;
-      z = q - p;
-      if (z > 0.5) {
-        p += 1.0;
-        z = q - p;
-      }
-      z = q * sin(PI * z);
-      if (z == 0.0) {
-        return(sgngam * INFINITY);
-      }
-      z = fabs(z);
-      z = PI / (z * stirf(q));
-    }
-    else {
-      z = stirf(x);
-    }
-    return(sgngam * z);
+	if (x < 0.0) {
+	  p = floor(q);
+	  if (p == q) {
+	  gamnan:
+		// it_warning("gam(): argument domain error");
+		return (NAN);
+	  }
+	  i = int(p);
+	  if ((i & 1) == 0)
+		sgngam = -1;
+	  z = q - p;
+	  if (z > 0.5) {
+		p += 1.0;
+		z = q - p;
+	  }
+	  z = q * sin(PI * z);
+	  if (z == 0.0) {
+		return(sgngam * INFINITY);
+	  }
+	  z = fabs(z);
+	  z = PI / (z * stirf(q));
+	}
+	else {
+	  z = stirf(x);
+	}
+	return(sgngam * z);
   }
 
   z = 1.0;
   while (x >= 3.0) {
-    x -= 1.0;
-    z *= x;
+	x -= 1.0;
+	z *= x;
   }
 
   while (x < 0.0) {
-    if (x > -1.E-9)
-      goto small;
-    z /= x;
-    x += 1.0;
+	if (x > -1.E-9)
+	  goto small;
+	z /= x;
+	x += 1.0;
   }
 
   while (x < 2.0) {
-    if (x < 1.e-9)
-      goto small;
-    z /= x;
-    x += 1.0;
+	if (x < 1.e-9)
+	  goto small;
+	z /= x;
+	x += 1.0;
   }
 
   if (x == 2.0)
-    return(z);
+	return(z);
 
   x -= 2.0;
   p = polevl(x, P, 6);
@@ -667,8 +665,10 @@ double cephes::gam(double x)
 
 small:
   if (x == 0.0) {
-    goto gamnan;
+	goto gamnan;
   }
   else
-    return(z / ((1.0 + 0.5772156649015329 * x) * x));
+	return(z / ((1.0 + 0.5772156649015329 * x) * x));
 }
+
+} // namespace cephes

@@ -17,16 +17,17 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "FFTA.h"
+#include "fftacomplex.h"
+#include "ffta.h"
 #include "essentia.h"
 
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* FFTA::name = "FFT";
-const char* FFTA::category = "Standard";
-const char* FFTA::description = DOC("This algorithm computes the positive complex short-term Fourier transform (STFT) of an array using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
+const char* FFTAComplex::name = "FFTC";
+const char* FFTAComplex::category = "Standard";
+const char* FFTAComplex::description = DOC("This algorithm computes the complex short-term Fourier transform (STFT) of a complex array using the FFT algorithm. If the `negativeFrequencies` flag is set on, the resulting fft has a size of (s/2)+1, where s is the size of the input frame. Otherwise, output matches the input size.\n"
 "At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
 "\n"
 "FFT computation will be carried out using the Accelerate Framework [3]"
@@ -40,10 +41,10 @@ const char* FFTA::description = DOC("This algorithm computes the positive comple
 "  https://developer.apple.com/library/ios/documentation/Performance/Conceptual/vDSP_Programming_Guide/UsingFourierTransforms/UsingFourierTransforms.html"
 );
 
-ForcedMutex FFTA::globalFFTAMutex;
+//ForcedMutex FFTAComplex::globalFFTAComplexMutex;
 
-FFTA::~FFTA() {
-  ForcedMutexLocker lock(globalFFTAMutex);
+FFTAComplex::~FFTAComplex() {
+  ForcedMutexLocker lock(FFTA::globalFFTAMutex);
 
   // we might have called essentia::shutdown() before this algorithm goes out
   // of scope, so make sure we're not doing stupid things here
@@ -56,76 +57,74 @@ FFTA::~FFTA() {
   }
 }
 
-void FFTA::compute() {
-    
-  const std::vector<Real>& signal = _signal.get();
+void FFTAComplex::compute() {
+  const std::vector<std::complex<Real> >& signal = _signal.get();
   std::vector<std::complex<Real> >& fft = _fft.get();
 
   // check if input is OK
   int size = int(signal.size());
   if (size == 0) {
-    throw EssentiaException("FFT: Input size cannot be 0");
+    throw EssentiaException("FFTC: Input size cannot be 0");
   }
  
   if ((fftSetup == 0) ||
       ((fftSetup != 0) && _fftPlanSize != size)) {
     createFFTObject(size);
   }
-    
-    // Scramble-pack the real data into complex buffer in just the way that's
-    // required by the real-to-complex FFT function that follows.
-    vDSP_ctoz((DSPComplex*)&signal[0], 2, &accelBuffer, 1, size/2);
-    
-    // Do real->complex forward FFT
-    vDSP_fft_zrip(fftSetup, &accelBuffer, 1, logSize, FFT_FORWARD);
-    
 
-    fft.resize(size/2+1);
-    
-    //Prob a much better way of doing this but for now this works
-    // In the case of an FFT on a real input, the resulting value of each of
-    // the Fourier coefficients is 2x the actual, mathematical value (see
-    // VDSP fft documentation for scaling factors). We need to scale by /2.0f.
-    //In Accelerate fttOutput[0] contains the real for point 0 and point N/2+1
+  // Copy the interleaved complex vector to a split complex vector.
+  vDSP_ctoz((DSPComplex*)&signal[0], 2, &accelBuffer, 1, _fftPlanSize);
+  // Do complex->complex forward FFT
+  vDSP_fft_zip(fftSetup, &accelBuffer, 1, logSize, FFT_FORWARD);
 
-    //Construct first point
-    fft[0] = std::complex<Real>(accelBuffer.realp[0]/2.0f, 0.0f);
+  fft.resize(_fftOutSize);
+
+  //Construct first point
+  // fft[0] = std::complex<Real>(accelBuffer.realp[0]/2.0f, 0.0f);
     
-    for(int i=1; i<size/2; i++) {
-        std::complex<Real> point(accelBuffer.realp[i]/2.0f, accelBuffer.imagp[i]/2.0f);
-        fft[i] = point;
-    }
+  for(int i=0; i<_fftOutSize; i++) {
+    std::complex<Real> point(accelBuffer.realp[i], accelBuffer.imagp[i]);
+    fft[i] = point;
+  }
     
-    //Construct the last point
-    fft[size/2] = std::complex<Real>(accelBuffer.imagp[0]/2.0f, 0.0f);
+  //Construct the last point
+  // fft[size/2] = std::complex<Real>(accelBuffer.imagp[0]/2.0f, 0.0f);
 }
 
-void FFTA::configure() {
+void FFTAComplex::configure() {
+  _negativeFrequencies = parameter("negativeFrequencies").toBool();
   createFFTObject(parameter("size").toInt());
 }
 
-void FFTA::createFFTObject(int size) {
-  ForcedMutexLocker lock(globalFFTAMutex);
+void FFTAComplex::createFFTObject(int size) {
+  ForcedMutexLocker lock(FFTA::globalFFTAMutex);
 
   // This is only needed because at the moment we return half of the spectrum,
   // which means that there are 2 different input signals that could yield the
   // same FFT...
   if (size % 2 == 1) {
-    throw EssentiaException("FFT: can only compute FFT of arrays which have an even size");
+    throw EssentiaException("FFTC: can only compute FFTC of arrays which have an even size");
   }
+
+  if (_negativeFrequencies) {
+    _fftOutSize = size;
+  }
+  else {
+    _fftOutSize = size / 2 + 1;
+  }
+
+  logSize = log2(size);
 
   delete[] accelBuffer.realp;
   delete[] accelBuffer.imagp;
-  accelBuffer.realp = new float[size/2];
-  accelBuffer.imagp = new float[size/2];
-    
-  logSize = log2(size);
-    
+  accelBuffer.realp = new float[size];
+  accelBuffer.imagp = new float[size];
+
   // With vDSP you only need to create a new fft if you've increased the size
   if(size > _fftPlanSize) {
     vDSP_destroy_fftsetup(fftSetup);
     fftSetup = vDSP_create_fftsetup(logSize, 0);
   }
-    
+
   _fftPlanSize = size;
 }

@@ -17,35 +17,35 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_FFTWCOMPLEX_H
-#define ESSENTIA_FFTWCOMPLEX_H
+#ifndef ESSENTIA_FFTKCOMPLEX_H
+#define ESSENTIA_FFTKCOMPLEX_H
 
 #include "algorithm.h"
 #include "threading.h"
 #include <complex>
-#include <fftw3.h>
+#include "kiss_fft130/kiss_fft.h"
 
 namespace essentia {
 namespace standard {
 
-class FFTWComplex : public Algorithm {
+class FFTKComplex : public Algorithm {
 
  protected:
-  Input<std::vector<std::complex<Real> > >  _signal;
+  Input<std::vector<std::complex<Real> > > _signal;
   Output<std::vector<std::complex<Real> > > _fft;
+  bool _negativeFrequencies;
 
  public:
-  FFTWComplex() : _fftPlan(0), _input(0), _output(0) {
-    declareInput(_signal, "frame", "the input frame (complex)");
+  FFTKComplex() : _input(0), _output(0), _fftCfg(0) {
+    declareInput(_signal, "frame", "the input audio frame");
     declareOutput(_fft, "fft", "the FFT of the input frame");
   }
 
-  ~FFTWComplex();
+  ~FFTKComplex();
 
   void declareParameters() {
     declareParameter("size", "the expected size of the input frame. This is purely optional and only targeted at optimizing the creation time of the FFT object", "[1,inf)", 1024);
     declareParameter("negativeFrequencies", "returns the full spectrum or just the positive frequencies", "{true,false}", false);
-
   }
 
   void compute();
@@ -56,12 +56,11 @@ class FFTWComplex : public Algorithm {
   static const char* description;
 
  protected:
-  fftwf_plan _fftPlan;
   int _fftPlanSize;
   std::complex<Real>* _input;
   std::complex<Real>* _output;
-
-  bool _negativeFrequencies;
+        
+  kiss_fft_cfg _fftCfg;
 
   void createFFTObject(int size);
 };
@@ -74,14 +73,14 @@ class FFTWComplex : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class FFTWComplex : public StreamingAlgorithmWrapper {
+class FFTKComplex : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<std::complex<Real> > > _signal;
   Source<std::vector<std::complex<Real> > > _fft;
 
  public:
-  FFTWComplex() {
+  FFTKComplex() {
     declareAlgorithm("FFTC");
     declareInput(_signal, TOKEN, "frame");
     declareOutput(_fft, TOKEN, "fft");
@@ -91,4 +90,4 @@ class FFTWComplex : public StreamingAlgorithmWrapper {
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_FFTWCOMPLEX_H
+#endif // ESSENTIA_FFTKCOMPLEX_H

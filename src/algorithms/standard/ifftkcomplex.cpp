@@ -1,4 +1,4 @@
-/*
+src/algorithms/standard/fftwcomplex.cpp/*
  * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
@@ -17,16 +17,17 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "ifftk.h"
+#include "ifftkcomplex.h"
 #include "fftk.h"
+
 
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* IFFTK::name = "IFFT";
-const char* IFFTK::category = "Standard";
-const char* IFFTK::description = DOC("This algorithm calculates the inverse short-term Fourier transform (STFT) of an array of complex values using the FFT algorithm. The resulting frame has a size of (s-1)*2, where s is the size of the input fft frame. The inverse Fourier transform is not defined for frames which size is less than 2 samples. Otherwise an exception is thrown.\n"
+const char* IFFTKComplex::name = "IFFTC";
+const char* IFFTKComplex::category = "Standard";
+const char* IFFTKComplex::description = DOC("This algorithm calculates the inverse short-term Fourier transform (STFT) of an array of complex values using the FFT algorithm. The resulting frame has a size equal to the input fft frame size. The inverse Fourier transform is not defined for frames which size is less than 2 samples. Otherwise an exception is thrown.\n"
 "\n"
 "An exception is thrown if the input's size is not larger than 1.\n"
 "\n"
@@ -41,7 +42,7 @@ const char* IFFTK::description = DOC("This algorithm calculates the inverse shor
 "  http://kissfft.sourceforge.net/");
 
 
-IFFTK::~IFFTK() {
+IFFTKComplex::~IFFTKComplex() {
   ForcedMutexLocker lock(FFTK::globalFFTKMutex);
 
     free(_fftCfg);
@@ -49,13 +50,13 @@ IFFTK::~IFFTK() {
     free(_output);
 }
 
-void IFFTK::compute() {
+void IFFTKComplex::compute() {
 
   const std::vector<std::complex<Real> >& fft = _fft.get();
-  std::vector<Real>& signal = _signal.get();
+  std::vector<std::complex<Real> >& signal = _signal.get();
 
   // check if input is OK
-  int size = ((int)fft.size()-1)*2;
+  int size = (int)fft.size();
   if (size <= 0) {
     throw EssentiaException("IFFT: Input size cannot be 0 or 1");
   }
@@ -65,15 +66,15 @@ void IFFTK::compute() {
   }
 
   // copy input into plan
-  memcpy(_input, &fft[0], (size/2+1)*sizeof(complex<Real>));
+  memcpy(_input, &fft[0], size * sizeof(complex<Real>));
 
-    //Perform forward fft
-    kiss_fftri(_fftCfg,(const kiss_fft_cpx *) _input,(kiss_fft_scalar * ) _output);
+  //Perform forward fft
+  kiss_fft(_fftCfg, (const kiss_fft_cpx*) _input,(kiss_fft_cpx*) _output);
 
   // copy result from plan to output vector
   signal.resize(size);
-  memcpy(&signal[0], _output, size*sizeof(Real));
-
+  memcpy(&signal[0], _output, size * sizeof(complex<Real>));
+  
   if (_normalize) {
     Real norm = (Real)size;
     
@@ -83,25 +84,25 @@ void IFFTK::compute() {
   }
 }
 
-void IFFTK::configure() {
+void IFFTKComplex::configure() {
   createFFTObject(parameter("size").toInt());
   _normalize = parameter("normalize").toBool();
 }
 
-void IFFTK::createFFTObject(int size) {
+void IFFTKComplex::createFFTObject(int size) {
   ForcedMutexLocker lock(FFTK::globalFFTKMutex);
     
 //     create the temporary storage array
       free(_input);
       free(_output);
-      _input = (complex<Real>*)malloc(sizeof(complex<Real>)*size);
-      _output = (Real*)malloc(sizeof(Real)*size);
+      _input = (complex<Real>*)malloc(sizeof(complex<Real>) * size);
+      _output = (complex<Real>*)malloc(sizeof(complex<Real>) * size);
 
   if (_fftCfg != 0) {
     free(_fftCfg);
   }
     
-    _fftCfg = kiss_fftr_alloc(size, 1, NULL, NULL );
+    _fftCfg = kiss_fft_alloc(size, 1, NULL, NULL );
   _fftPlanSize = size;
 
 }
