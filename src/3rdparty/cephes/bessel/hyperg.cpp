@@ -66,7 +66,7 @@ Copyright 1984, 1987, 1988, 2000 by Stephen L. Moshier
 
 #include "bessel.h"
 
-using namespace cephes;
+namespace cephes{
 
 // #ifdef ANSIPROT
 // extern double exp ( double );
@@ -87,12 +87,19 @@ using namespace cephes;
 // extern double MAXNUM, MACHEP;
 
 
-#define MAXNUM 1.79769313486231570815E308    /* 2**1024*(1-MACHEP) */
-#define MACHEP 1.11022302462515654042E-16   /* 2**-53 */
+double hyp2f0(double, double, double, int, double *);
+static double hy1f1p(double, double, double, double *);
+static double hy1f1a(double, double, double, double *);
 
-double cephes::hyperg( double a, double b, double x)
+// #define MAXNUM 1.79769313486231570815E308    /* 2**1024*(1-MACHEP) */
+// #define MACHEP 1.11022302462515654042E-16   /* 2**-53 */
+
+double hyperg( double a, double b, double x)
 {
 double asum, psum, acanc, pcanc, temp;
+
+pcanc = 1.0; // Initialize error to 100% just to prevent a
+			 // compile-time warning. (Pablo A.)
 
 /* See if a Kummer transformation will help */
 temp = b - a;
@@ -131,7 +138,7 @@ return( psum );
 /* Power series summation for confluent hypergeometric function		*/
 
 
-double cephes::hy1f1p(double a, double b, double x, double *err)
+static double hy1f1p(double a, double b, double x, double *err)
 {
 double n, a0, sum, t, u, temp;
 double an, bn, maxt, pcanc;
@@ -218,7 +225,7 @@ return( sum );
  *                               |  (a)                        )
  */
 
-double cephes::hy1f1a(double a, double b, double x, double *err)
+static double hy1f1a(double a, double b, double x, double *err)
 {
 double h1, h2, t, u, temp, acanc, asum, err1, err2;
 
@@ -286,7 +293,7 @@ return( asum );
 
 /*							hyp2f0()	*/
 
-double cephes::hyp2f0(double a, double b, double x, int type, double *err)
+double hyp2f0(double a, double b, double x, int type, double *err)
 {
 double a0, alast, t, tlast, maxt;
 double n, an, bn, u, sum, temp;
@@ -382,3 +389,5 @@ error:
 // mtherr( "hyperg", TLOSS );
 return( sum );
 }
+
+}  // namespace cephes
