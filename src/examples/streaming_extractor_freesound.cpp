@@ -84,8 +84,12 @@ int essentia_main(string audioFilename, string outputFilename, string profileFil
     cerr << e.what() << endl;
     return 1;
   }
-  return 0;
+  catch (const std::bad_alloc& e) {
+    cerr << "bad_alloc exception: Out of memory " << e.what() << endl;
+    return 1;
+  }
 
+  return 0;
 }
 
 #ifdef _WIN32
