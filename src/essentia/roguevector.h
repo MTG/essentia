@@ -57,7 +57,7 @@ class RogueVector : public std::vector<T> {
 };
 
 // Clang/LLVM implementation
-#if defined (OS_MAC) || defined(OS_FREEBSD) || defined(__EMSCRIPTEN__)
+#if defined(__clang__) || defined(__EMSCRIPTEN__)
 
 // TODO: this is a big hack that relies on clang/libcpp not changing the memory
 //       layout of the std::vector (very dangerous, but works for now...)

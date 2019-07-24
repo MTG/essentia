@@ -235,10 +235,15 @@ def configure(ctx):
 
     if ctx.options.CROSS_COMPILE_ANDROID:
         print ("→ Cross-compiling for Android ARM")
-        ctx.find_program('arm-linux-androideabi-gcc', var='CC')
-        ctx.find_program('arm-linux-androideabi-g++', var='CXX')
-        ctx.find_program('arm-linux-androideabi-ar', var='AR')
-        ctx.env.LINKFLAGS += ['-Wl,-soname,libessentia.so']
+        # GCC is depricated for Android NDK
+        # Use clang with libc++
+        #ctx.find_program('arm-linux-androideabi-gcc', var='CC')
+        #ctx.find_program('arm-linux-androideabi-g++', var='CXX')
+        #ctx.find_program('arm-linux-androideabi-ar', var='AR')
+        ctx.find_program('clang', var='CC')
+        ctx.find_program('clang++', var='CXX')
+        ctx.env.CXXFLAGS += ['-std=c++11']
+        ctx.env.LINKFLAGS += ['-Wl,-soname,libessentia.so', '-latomic']
 
     if ctx.options.CROSS_COMPILE_IOS:
         print ("→ Cross-compiling for iOS (ARMv7 and ARM64)")
