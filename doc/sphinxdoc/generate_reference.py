@@ -238,6 +238,18 @@ def write_algorithms_reference():
         # therefore, doing a workaround so that doc2rst can know the mode
         algos[algoname]['standard']['mode'] = 'standard mode'
 
+        # Ugly patch for MusicExtractor and FreesoundExtractor to add links to
+        # their detailed documentation.
+        if algoname == 'MusicExtractor':
+            algos[algoname]['standard']['description'] = \
+                algos[algoname]['standard']['description'].replace("essentia_streaming_extractor_music",
+                    "`essentia_streaming_extractor_music <../streaming_extractor_music.html>`__")
+
+        elif algoname == 'FreesoundExtractor':
+            algos[algoname]['standard']['description'] = \
+                algos[algoname]['standard']['description'].replace("essentia_streaming_extractor_freesound",
+                    "`essentia_streaming_extractor_freesound <../freesound_extractor.html>`__")
+
         print('generating doc for standard algorithm: %s ...' % algoname)
         write_doc('reference/std_' + algoname + '.rst', algos[algoname]['standard'])
         write_html_doc('_templates/reference/std_' + algoname + '.html',

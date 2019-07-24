@@ -27,7 +27,7 @@ namespace standard {
 
 const char* MusicExtractor::name = "MusicExtractor";
 const char* MusicExtractor::category = "Extractors";
-const char* MusicExtractor::description = DOC("This algorithm is a wrapper for Music Extractor");
+const char* MusicExtractor::description = DOC("This algorithm is a wrapper for Music Extractor. See documentation for 'essentia_streaming_extractor_music'.");
 
 
 MusicExtractor::MusicExtractor() {
