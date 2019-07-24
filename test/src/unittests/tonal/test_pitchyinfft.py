@@ -111,10 +111,19 @@ class TestPitchYinFFT(TestCase):
         self.assertConfigureFails(PitchYinFFT(), {'sampleRate' : 0})
 
     def testARealCase(self):
+        # The expected values were recomputed from commit
+        # 2d37c0713fb6cc5f637b3d8f5d65aa90b36d4277
+        #
+        # The expeted values were compared with the vamp pYIN
+        # implementation of the YIN algorithm producing very
+        # similar values.
+        #
+        # https://code.soundsoftware.ac.uk/projects/pyin
+
         frameSize = 1024
         sr = 44100
         hopSize = 512
-        filename = join(testdata.audio_dir, 'recorded','mozart_c_major_30sec.wav')
+        filename = join(testdata.audio_dir, 'recorded','vignesh.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
         frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
         win = Windowing(type='hann')
@@ -126,8 +135,8 @@ class TestPitchYinFFT(TestCase):
             f, conf = pitchDetect(spec)
             pitch += [f]
             confidence += [conf]
-        expected_pitch = readVector(join(filedir(), 'pitchyinfft/pitch_mozart_c_major_30sec.txt'))
-        expected_conf = readVector(join(filedir(), 'pitchyinfft/pitchconfidence_mozart_c_major_30sec.txt'))
+        expected_pitch = numpy.load(join(filedir(), 'pitchyinfft/vignesh_pitch.npy'))
+        expected_conf = numpy.load(join(filedir(), 'pitchyinfft/vignesh_confidance.npy'))
         self.assertAlmostEqualVector(pitch, expected_pitch)
         self.assertAlmostEqualVector(confidence, expected_conf, 5e-5)
 
