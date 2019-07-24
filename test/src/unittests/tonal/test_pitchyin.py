@@ -106,15 +106,21 @@ class TestPitchYin(TestCase):
         self.assertConfigureFails(PitchYin(), {'frameSize' : 1})
         self.assertConfigureFails(PitchYin(), {'sampleRate' : 0})
 
-    # TODO: generate pitchyin/pitch_mozart_c_major_30sec.txt 
-    #       check if estimations actually have some sense
-    #       it is better to have real case using a monophonic audio 
 
     def testARealCase(self):
+        # The expected values were recomputed from commit
+        # ded38eaa7e4c081a73c4e16fffec491fe5ac9ab4
+        #
+        # The expeted values were compared with the vamp pYIN
+        # implementation of the YIN algorithm producing very
+        # similar values.
+        #
+        # https://code.soundsoftware.ac.uk/projects/pyin
+
         frameSize = 1024
         sr = 44100
         hopSize = 512
-        filename = join(testdata.audio_dir, 'recorded','mozart_c_major_30sec.wav')
+        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
         frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
         pitchDetect = PitchYin(frameSize=frameSize, sampleRate = sr)
@@ -125,11 +131,11 @@ class TestPitchYin(TestCase):
             pitch += [f]
             confidence += [conf]
 
-        expected_pitch = readVector(join(filedir(), 'pitchyin/pitch_mozart_c_major_30sec.txt'))
-        expected_conf = readVector(join(filedir(), 'pitchyin/pitchconfidence_mozart_c_major_30sec.txt'))
+        expected_pitch = numpy.load(join(filedir(), 'pitchyin/vignesh_pitch.npy'))
+        expected_conf = numpy.load(join(filedir(), 'pitchyin/vignesh_confidance.npy'))
 
         self.assertAlmostEqualVector(pitch, expected_pitch)
-        self.assertAlmostEqualVector(confidence, expected_conf, 5e-5)
+        self.assertAlmostEqualVector(confidence, expected_conf, 5e-6)
 
 suite = allTests(TestPitchYin)
 
