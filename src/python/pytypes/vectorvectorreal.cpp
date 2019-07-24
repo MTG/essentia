@@ -98,21 +98,47 @@ void* VectorVectorReal::fromPythonCopy(PyObject* obj) {
 
   for (int i=0; i<size; i++) {
     PyObject* row = PyList_GetItem(obj, i);
-    if (!PyList_Check(obj)) {
-      delete v;
-      throw EssentiaException("VectorVectorReal::fromPythonCopy: input is not a list of lists");
+
+    // List of floats
+    if (PyList_Check(row)) {
+      int rowsize = PyList_Size(row);
+      (*v)[i].resize(rowsize);
+
+      for (int j=0; j<rowsize; j++) {
+        PyObject* item = PyList_GetItem(row, j);
+        if (!PyFloat_Check(item)) {
+          delete v;
+          throw EssentiaException("VectorVectorReal::fromPythonCopy: input is not a list of lists of floats");
+        }
+        (*v)[i][j] = PyFloat_AsDouble(item);
+      }
     }
 
-    int rowsize = PyList_Size(row);
-    (*v)[i].resize(rowsize);
-
-    for (int j=0; j<rowsize; j++) {
-      PyObject* item = PyList_GetItem(row, j);
-      if (!PyFloat_Check(item)) {
-        delete v;
-        throw EssentiaException("VectorVectorReal::fromPythonCopy: input is not a list of lists of floats");
+    // Numpy array of floats
+    else if (PyArray_Check(row)) {
+      if (PyArray_NDIM(row) != 1) {
+        throw EssentiaException("VectorVectorReal::fromPythonCopy: the element of input list "
+                                "is not a 1-dimensional numpy array: ", PyArray_NDIM(row));
       }
-      (*v)[i][j] = PyFloat_AsDouble(item);
+      PyArrayObject* array = (PyArrayObject*)row;
+      if (array == NULL) {
+        throw EssentiaException("VectorVectorReal::fromPythonCopy: dang null object (list of numpy arrays)");
+      }
+      if (array->descr->type_num != PyArray_FLOAT) {
+        throw EssentiaException("VectorVectorReal::fromPythonCopy: this NumPy array doesn't contain Reals (maybe you forgot dtype='f4')");
+      }
+      assert(array->strides[0] == sizeof(Real));
+      npy_intp rowsize = array->dimensions[0];
+      (*v)[i].resize(rowsize);
+      const Real* src = (Real*)(array->data);
+      Real* dest = &((*v)[i][0]);
+      fastcopy(dest, src, rowsize);
+    }
+
+    // Unsupported
+    else {
+      delete v;
+      throw EssentiaException("VectorVectorReal::fromPythonCopy: input is not a list of lists nor a list of numpy arrays");
     }
   }
 
