@@ -187,7 +187,10 @@ def configure(ctx):
         if ctx.options.ARCH == 'FAT':
             ctx.env.CXXFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
             ctx.env.LINKFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
-            ctx.env.LDFLAGS = ['-arch', 'i386', '-arch', 'x86_64']
+            ctx.env.LDFLAGS = ['-arch', 'i386', '-arch', 'x86_64']        
+            
+        # Need this for clang
+        ctx.env.CXXFLAGS += ['-Wno-undefined-var-template']
 
     elif sys.platform.startswith('linux'):
         # include -pthread flag because not all versions of gcc provide it automatically
