@@ -106,7 +106,6 @@ class TestPitchYin(TestCase):
         self.assertConfigureFails(PitchYin(), {'frameSize' : 1})
         self.assertConfigureFails(PitchYin(), {'sampleRate' : 0})
 
-
     def testARealCase(self):
         # The expected values were recomputed from commit
         # ded38eaa7e4c081a73c4e16fffec491fe5ac9ab4
@@ -136,6 +135,39 @@ class TestPitchYin(TestCase):
 
         self.assertAlmostEqualVector(pitch, expected_pitch)
         self.assertAlmostEqualVector(confidence, expected_conf, 5e-6)
+
+    def testARealCaseVampComparison(self):
+        # Compare with the results obtained with the vamp pYIN
+        # implementation of the YIN algorithm
+        # https://code.soundsoftware.ac.uk/projects/pyin
+
+        frameSize = 2048
+        sr = 44100
+        hopSize = 256
+        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
+        audio = MonoLoader(filename=filename, sampleRate=44100)()
+        frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
+        pitchDetect = PitchYin(frameSize=frameSize, sampleRate=sr,
+                               minFrequency=40, maxFrequency=1600)
+
+        pitch = array([pitchDetect(frame)[0] for frame in frames])
+
+        expected_pitch = numpy.load(join(filedir(), 'pitchyin/vignesh_pitch_vamp.npy'))
+
+        # The VAMP implementation provides voiced/unvoiced information
+        # while our system does not. Thus set to 0 unvoiced frames in
+        # both cases to exclude them from the comparison.
+        unvoiced_idx = numpy.where(expected_pitch <= 0)[0]
+        expected_pitch[unvoiced_idx] = 0
+        pitch[unvoiced_idx] = 0
+
+        # Trim the first and last frames as the
+        # system behavior is unstable.
+        pitch = pitch[8:-5]
+        expected_pitch = expected_pitch[8:-5]
+
+        self.assertAlmostEqualVector(pitch, expected_pitch, 5e-2)
+
 
 suite = allTests(TestPitchYin)
 
