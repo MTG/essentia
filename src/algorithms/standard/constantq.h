@@ -46,7 +46,8 @@ class ConstantQ : public Algorithm {
   double _threshold;    // threshold for kernel generation
   unsigned int _numWin;
   unsigned int _binsPerOctave;  
-  unsigned int _FFTLength;
+  unsigned int _windowSize;
+  unsigned int _inputFFTSize;
   unsigned int _numberBins;
 
   struct SparseKernel {
@@ -56,7 +57,7 @@ class ConstantQ : public Algorithm {
     std::vector<unsigned> j;
   };
 
-  SparseKernel *_sparseKernel;
+  struct SparseKernel _sparseKernel;
 
 
  public:
@@ -70,10 +71,8 @@ class ConstantQ : public Algorithm {
 
   ~ConstantQ() {
     delete _fftc;
-    if (_sparseKernel) delete _sparseKernel;
+    delete _windowing;
   }
-
-  int sizeFFT() { return _FFTLength; }
 
   void declareParameters() {
     declareParameter("minFrequency", "minimum frequency [Hz]", "[1,inf)", 32.7);

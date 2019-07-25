@@ -28,24 +28,17 @@ using namespace standard;
 
 const char* ConstantQ::name = "ConstantQ";
 const char* ConstantQ::category = "Standard";
-const char* ConstantQ::description = DOC("This algorithm implements Constant Q Transform using the FFT for fast calculation.\n"
+const char* ConstantQ::description = DOC("This algorithm computes Constant Q Transform given the FFT for fast calculation. It transforms a standard FFT into the log frequency domain.\n"
 "\n"
 "References:\n"
 "  [1] Constant Q transform - Wikipedia, the free encyclopedia,\n"
-"  https://en.wikipedia.org/wiki/Constant_Q_transform");
-// TODO: add references
-// Brown, J. C., & Puckette, M. S. (1992). An efficient algorithm for the calculation of a constant Q transform. The Journal of the Acoustical Society of America, 92(5), 2698-2701.
-
-
-static double nextpow2(double x) {
-  // returns the smallest integer n such that 2^n >= x.
-  return ceil(log(x)/log(2.0));
-}
-
-static double squaredModule(const complex<Real> xx) {
-  complex<double> multComplex = (complex<double>) xx * (complex<double>) xx;
-  return multComplex.real() + multComplex.imag();
-}
+"  https://en.wikipedia.org/wiki/Constant_Q_transform\n"
+"  [2] Brown, J. C., & Puckette, M. S. (1992). An efficient algorithm for the\n"
+"  calculation of a constant Q transform. The Journal of the Acoustical Society\n"
+"  of America, 92(5), 2698-2701.\n"
+"  [3] Schörkhuber, C., & Klapuri, A. (2010). Constant-Q transform toolbox for\n"
+"  music processing. In 7th Sound and Music Computing Conference, Barcelona,\n"
+"  Spain (pp. 3-64).");
 
 
 void ConstantQ::compute() {
@@ -53,37 +46,22 @@ void ConstantQ::compute() {
   const vector<complex<Real> >& fft = _fft.get();
   vector<complex<Real> >& constantQ = _constantQ.get();
 
-  if (!_sparseKernel) {
-    throw EssentiaException("ERROR: ConstantQ::compute: Sparse kernel has not been initialized");
+  if (fft.size() != _inputFFTSize) {
+    throw EssentiaException("ConstantQ: input FFT size must be equal to: ", _inputFFTSize);
   }
 
-  const unsigned int _FFTSize = _FFTLength/2+1;
-  if (fft.size() != _FFTSize) {
-    throw EssentiaException("ERROR: ConstantQ::compute: input FFT size must be equal to: ", _FFTSize);
-  }
-  // TODO pre-compute the size of expected non-negative part of FFT inside configure() 
+  constantQ.assign(_numberBins, 0.0 + 0.0j); // Initialize output.
 
-  SparseKernel *sk = _sparseKernel;
-
-  constantQ.assign(_numberBins, 0.0 + 0.0j); // initialize output
-
-  const unsigned int sparseCells = sk->real.size();
-
-  for (unsigned i=0; i<sparseCells; i++) {
-    const unsigned row = sk->j[i];
-    const unsigned col = sk->i[i];
-    const double & r1  = sk->real[i];
-    const double & i1  = sk->imag[i];
-    /*
-    const double & r2  = (double) fft[_FFTLength - col - 1].real();
-    const double & i2  = (double) fft[_FFTLength - col - 1].imag();
-    // add the multiplication
-    constantQ[row] += complex <Real>((r1*r2 - i1*i2), (r1*i2 + i1*r2));
-    */
+  const struct SparseKernel &sk = _sparseKernel;
+  for (unsigned i=0; i<sk.real.size(); i++) {
+    const unsigned row = sk.j[i];
+    const unsigned col = sk.i[i];
+    const double & r1  = sk.real[i];
+    const double & i1  = sk.imag[i];
     const double r2 = (double) fft[col].real();
     const double i2 = (double) fft[col].imag();
     constantQ[row] += complex<Real>((r1*r2 - i1*i2), (r1*i2 + i1*r2));
-  }    
+  }
 }
 
 
@@ -94,105 +72,75 @@ void ConstantQ::configure() {
   _binsPerOctave = parameter("binsPerOctave").toInt();
   _threshold = parameter("threshold").toDouble();
 
-  // Constant Q factor
-  // TODO make filterScale configurable (0,+inf) (default = 1)
-  // Resolution of filter windows (larger values correspond to longer windows).
+  // Constant Q factor (resolution of filter windows, larger values correspond
+  // to longer windows.
+  // TODO make filterScale configurable (0,+inf) (default = 1)?
   const Real filterScale = 1.;
   _Q = filterScale / (pow(2, (1/(double)_binsPerOctave))-1);
   
-  // We'll center-pad filters to the next power of two of the maximum filter length
-  _FFTLength = (int) pow(2, nextpow2(ceil(_Q *_sampleRate/_minFrequency)));
+  // The largest window size we'll require. We center-pad filters to the next
+  // power of two of the maximum filter length.
+  _windowSize = nextPowerTwo((int) ceil(_Q *_sampleRate/_minFrequency));
 
-  SparseKernel *sk = new SparseKernel();
+  // Work only with a non-negative part of FFT as an input
+  _inputFFTSize = _windowSize/2+1;
 
-  // Twice length to deal with complex numbers
-  sk->i.reserve( _FFTLength*2 );
-  sk->j.reserve( _FFTLength*2 );
-  sk->real.reserve( _FFTLength*2 );
-  sk->imag.reserve( _FFTLength*2 );
+  struct SparseKernel &sk = _sparseKernel;
+  sk.i.reserve(_windowSize);
+  sk.j.reserve(_windowSize);
+  sk.real.reserve(_windowSize);
+  sk.imag.reserve(_windowSize);
   
   vector<complex<Real> > binKernel;
   vector<complex<Real> > binKernelFFT;
 
-  // For each bin value k, calculate temporal kernel, take its fft to
+  // For each bin value k, calculate temporal kernel, take its FFT to
   // calculate the spectral kernel then threshold it to make it sparse and
-  // add it to the sparse kernels matrix
+  // add it to the sparse kernels matrix.
   
-  //double squareThreshold = _threshold * _threshold;
-
-  for (unsigned k=_numberBins; k--; ) {
-    // Compute temporal kernel
+  for (unsigned k=_numberBins; k>0; k--) {
 
     const double frequency = _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave);
     const unsigned length = (int) ceil(_Q * _sampleRate / frequency);
 
-    // TODO check that the filter pass-band does not lie beyond Nyquist
-    // similar to https://github.com/librosa/librosa/blob/master/librosa/filters.py#L625
+    // TODO throw an exception if the filter pass-band lies beyond Nyquist
+    // similar to https://github.com/librosa/librosa/blob/master/librosa/filters.py
 
-    // Compute window
+    // We can get the window function from the output of Windowing algorithm
+    // with the unity input.
     // TODO configure windowing: zeroPhase=False; try zeroPadding
     // TODO make window type configurable
-    vector<Real> window(length, 1.);
-
-    _windowing->input("frame").set(window);
-    _windowing->output("frame").set(window); // would this work? 
+    vector<Real> unity(length, 1.);
+    vector<Real> window;
+    _windowing->input("frame").set(unity);
+    _windowing->output("frame").set(window);
     _windowing->compute();
 
-    // Initialize temporal kernel with zeros 
-    binKernel.assign(_FFTLength, 0.0 + 0.0j);
-
     // Compute temporal kernel
-    unsigned origin = _FFTLength/2 - length/2;
+    binKernel.assign(_windowSize, 0.0 + 0.0j);
+    unsigned origin = _windowSize/2 - length/2;
     for (int i=0; i<length; i++) {
       const double angle = 2 * M_PI * _Q * i / length;
       binKernel[origin + i] = complex <Real>(window[i]*cos(angle), window[i]*sin(angle));
     }
 
-    /*
-    // TODO why? commenting this for now...
-    for (int i=0; i <_FFTLength/2; ++i) {
-      complex<Real> temp = hammingWindow[i];
-      hammingWindow[i] = hammingWindow[i + _FFTLength/2];
-      hammingWindow[i + _FFTLength/2] = temp;
-    }
-    */
-
-    // Compute FFT of temporal kernel
+    // Compute FFT of temporal kernel.
     _fftc->input("frame").set(binKernel);
     _fftc->output("fft").set(binKernelFFT);
     _fftc->compute();
 
-    // Work only with a non-negative part of FFT
-
-    /*
-    // Increase the output size of the FFT to _FFTLength by mirroring the data
-    int ind = binKernelFFT.size() - 1;
-    binKernelFFT.resize(_FFTLength);
-    for (int i=0; i <_FFTLength/2; ++i) {
-      binKernelFFT.push_back(binKernelFFT[ind--]);
-    }
-    */
-
     for (int j=0; j<binKernelFFT.size(); j++) {
-      // Perform thresholding: keep values with absolute value above the threshold
+      // Perform thresholding to make the kernel sparse: keep values with
+      // absolute value above the threshold.
       if (abs(binKernelFFT[j]) <= _threshold) continue;
-      // TODO: use custom abs value to increase precision?
-      /* TODO: before there was a squared threshold:
-      const double squaredBin = squaredModule(binKernelFFT[j]);
-      if (squaredBin <= squareThreshold) continue;
-      */
 
-      // Insert non-zero position indexes
-      sk->i.push_back(j);
-      sk->j.push_back(k);
+      // Insert non-zero position indexes.
+      sk.i.push_back(j);
+      sk.j.push_back(k);
 
-      // Take conjugate, normalize and add to array sparseKernel
-      // TODO: normalized using binKernelFFT.size instead?
-      // TODO: why taking conjugate? disable for now
-      sk->real.push_back(((complex<double>) binKernelFFT[j]).real()/_FFTLength);
-      sk->imag.push_back(((complex<double>) binKernelFFT[j]).imag()/_FFTLength);
-      //sk->imag.push_back(-((complex<double>) binKernelFFT[j]).imag()/_FFTLength);
+      // Take conjugate, normalize and add to array sparseKernel.
+      sk.real.push_back(((complex<double>) binKernelFFT[j]).real()/_windowSize);
+      sk.imag.push_back(-((complex<double>) binKernelFFT[j]).imag()/_windowSize);
     }
   }
-  _sparseKernel = sk;
 }
