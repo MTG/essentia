@@ -27,21 +27,13 @@ class NSGConstantQStreaming : public Algorithm{
 
   Algorithm* _wrapper;
 
-  //std::vector<std::vector<std::complex<Real> > > _constantQAUX;
-  //scheduler::Network* _network;
-
  public:
   NSGConstantQStreaming();
 
   ~NSGConstantQStreaming() {};
 
   AlgorithmStatus process();
-
- // void declareProcessOrder() {
- //   declareProcessStep(ChainFrom(_wrapper));
- //  declareProcessStep(SingleShot(this));
- // }
-
+ 
   void declareParameters() {
     declareParameter("inputSize", "the size of the input", "(0,inf)", 4096);
     declareParameter("minFrequency", "the minimum frequency", "(0,inf)", 27.5);

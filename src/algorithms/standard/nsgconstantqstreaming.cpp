@@ -79,9 +79,9 @@ void NSGConstantQStreaming::configure() {
   _constantQNFinner.setAcquireSize(1);
   _constantQNFinner.setReleaseSize(1);
 
-  //todo: This is a workarround to inicialize the number of CQ timestamps
+  // @todo this is a workaround to initialize the number of CQ time-stamps
   // to push to a high value. It would be better to compute the actual
-  // number from the input params.
+  // number from the input parameters.
 
   _constantQ.setAcquireSize(200);
   _constantQ.setReleaseSize(200);
@@ -108,8 +108,8 @@ AlgorithmStatus NSGConstantQStreaming::process() {
 
   if ( !ok ) return NO_INPUT;
 
-  //todo: another workaround! This tries to prevent the sinked algorithms to crash.
-  // As we are releasing 'timeStamps' tokens for each input token, there are to many to
+  // @todo another workaround! This tries to prevent the connected algorithms to crash.
+  // As we are releasing 'timeStamps' tokens for each input token, there are too many to
   // process in the input data of the upcoming algorithms once shouldStop() is enabled.
   // Thus, here it just discards the remaining tokens. Tested with CartesianToPoolar().
   if( shouldStop() ) return FINISHED;
