@@ -49,7 +49,7 @@ void ConstantQ::compute() {
     throw EssentiaException("ConstantQ: input FFT size must be equal to: ", _inputFFTSize);
   }
 
-  constantQ.assign(_numberBins, 0.0 + 0.0j); // Initialize output.
+  constantQ.assign(_numberBins, complex<Real>(0, 0)); // Initialize output.
 
   const struct SparseKernel &sk = _sparseKernel;
   for (unsigned i=0; i<sk.real.size(); i++) {
@@ -116,7 +116,7 @@ void ConstantQ::configure() {
     _windowing->compute();
 
     // Compute temporal kernel
-    binKernel.assign(_windowSize, 0.0 + 0.0j);
+    binKernel.assign(_windowSize, complex<Real>(0, 0));
     unsigned origin = _windowSize/2 - length/2;
     for (int i=0; i<length; i++) {
       const double angle = 2 * M_PI * _Q * i / length;
