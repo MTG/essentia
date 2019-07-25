@@ -333,6 +333,17 @@ ampToDb(PyObject* notUsed, PyObject* arg) {
 }
 
 static PyObject*
+linToLog(PyObject* notUsed, PyObject* arg) {
+  if (!PyFloat_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"argument must be a float");
+    return NULL;
+  }
+
+  Real db = lin2log( Real( PyFloat_AS_DOUBLE(arg) ) );
+  return PyFloat_FromDouble( double(db) );
+}
+
+static PyObject*
 barkToHz(PyObject* notUsed, PyObject* arg) {
   if (!PyFloat_Check(arg)) {
     PyErr_SetString(PyExc_TypeError, (char*)"argument must be a float");
@@ -995,6 +1006,7 @@ static PyMethodDef Essentia__Methods[] = {
   { "db2pow",        dbToPow,          METH_O, "Converts a dB measure of power to a linear measure" },
   { "pow2db",        powToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },
   { "db2amp",        dbToAmp,          METH_O, "Converts a dB measure of amplitude to a linear measure" },
+  { "lin2log",       linToLog,         METH_O, "Converts a linear measure to a logarithmic one" },
   { "amp2db",        ampToDb,          METH_O, "Converts a linear measure of amplitude to a measure in dB" },
   { "equivalentKey", getEquivalentKey, METH_O, "Returns an equivalent key name if exist or itself otherwise. An empty string is returned if the input is not a valid string" },
   { "info",          standard_info,  METH_VARARGS, "returns all the information about a given classic algorithm." },
