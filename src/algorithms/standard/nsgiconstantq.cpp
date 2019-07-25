@@ -338,7 +338,7 @@ void NSGIConstantQ::compute() {
     _fft->compute();
 
     std::transform(temp.begin(), temp.end(), temp.begin(),
-                    std::bind2nd(std::multiplies<complex<Real> >(), winsLen[j]));
+                    [&winsLen,j](complex<Real> temp){ return (complex<Real>) winsLen[j] * temp; });
 
     // Phase shift
     if (_phaseMode == "global") {
@@ -374,7 +374,7 @@ void NSGIConstantQ::compute() {
   std::reverse(output.begin()+1, output.end());
 
   std::transform(output.begin(), output.end(), output.begin(),
-                  std::bind2nd(std::divides<complex<Real> >(), _NN));
+                  [&](complex<Real> output){ return output / (complex<Real>)_NN; });
 
   signal.resize(_NN);
   for (int i=0; i<_NN; i++){
