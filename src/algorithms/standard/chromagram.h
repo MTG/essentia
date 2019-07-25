@@ -31,16 +31,13 @@ namespace standard {
 class Chromagram : public Algorithm {
 
  protected:
-  Input<std::vector<std::complex<Real> > > _signal;
+  Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _chromagram;
 
-  Algorithm* _constantq;
-  Algorithm* _magnitude;
+  Algorithm* _spectrumCQ;
   
-  std::vector<std::complex<Real> > _CQBuffer;
-  std::vector<Real> _ChromaBuffer;
+  std::vector<Real> _chromaBuffer;
 
-  std::vector<double> _CQdata;
   unsigned int _binsPerOctave;
   unsigned _octaves;
 
@@ -54,16 +51,14 @@ class Chromagram : public Algorithm {
  
  public:
   Chromagram() {
-    declareInput(_signal, "frame", "the input frame (complex)");
-    declareOutput(_chromagram, "chromagram", "the magnitude chromagram of the input audio signal");
+    declareInput(_signal, "frame", "the input audio frame");
+    declareOutput(_chromagram, "chromagram", "the magnitude constant-Q chromagram");
 
-    _constantq = AlgorithmFactory::create("ConstantQ");
-    _magnitude = AlgorithmFactory::create("Magnitude"); 
+    _spectrumCQ = AlgorithmFactory::create("SpectrumCQ");
   }
 
   ~Chromagram() {
-    delete _constantq;
-    delete _magnitude;
+    delete _spectrumCQ;
   }
 
   void declareParameters() {

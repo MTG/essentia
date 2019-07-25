@@ -34,9 +34,11 @@ class SpectrumCQ : public Algorithm {
   Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _spectrumCQ;
 
+  Algorithm* _fft;
   Algorithm* _constantq;
   Algorithm* _magnitude;
-  
+
+  std::vector<std::complex<Real> > _fftBuffer;
   std::vector<std::complex<Real> > _CQBuffer;
 
  
@@ -45,6 +47,7 @@ class SpectrumCQ : public Algorithm {
     declareInput(_signal, "frame", "the input audio frame");
     declareOutput(_spectrumCQ, "spectrumCQ", "the magnitude constant-Q spectrum");
 
+    _fft = AlgorithmFactory::create("FFT");
     _constantq = AlgorithmFactory::create("ConstantQ");
     _magnitude = AlgorithmFactory::create("Magnitude"); 
   }

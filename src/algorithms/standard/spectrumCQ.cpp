@@ -26,18 +26,17 @@ using namespace standard;
 
 const char* SpectrumCQ::name = "SpectrumCQ";
 const char* SpectrumCQ::category = "Tonal";
-const char* SpectrumCQ::description = DOC("This algorithm computes the Constant Q Spectrogram.\n"
-"\n");
+const char* SpectrumCQ::description = DOC("This algorithm computes the Constant-Q spectrogram using FFT. See ConstantQ algorithm for more details.\n");
 
 
 void SpectrumCQ::configure() {
 
-  // set temp port here as it's not gonna change between consecutive calls
-  // to compute()
   _constantq->configure(INHERIT("minFrequency"), INHERIT("numberBins"),
                         INHERIT("binsPerOctave"), INHERIT("sampleRate"),
                         INHERIT("threshold"));
 
+  _fft->output("fft").set(_fftBuffer);
+  _constantq->input("fft").set(_fftBuffer);
   _constantq->output("constantq").set(_CQBuffer);
   _magnitude->input("complex").set(_CQBuffer);
 }
@@ -47,14 +46,14 @@ void SpectrumCQ::compute() {
   const vector<Real>& signal = _signal.get();
   vector<Real>& spectrumCQ = _spectrumCQ.get();
 
-  // Convert signal from Real to complex
-  vector<complex<Real> > signalC(signal.begin(), signal.end());
+  // Compute FFT of the input signal.
+  _fft->input("frame").set(signal);
+  _fft->compute();
 
-  // Compute ConstantQ
-  _constantq->input("fft").set(signalC);
+  // Compute ConstantQ.
   _constantq->compute();
   
-  // Compute magnitude spectrum
+  // Compute magnitude spectrum.
   _magnitude->output("magnitude").set(spectrumCQ);
   _magnitude->compute();
 }
