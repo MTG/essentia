@@ -55,6 +55,8 @@ class FFTW : public Algorithm {
 
  protected:
   friend class IFFTW;
+  friend class FFTWComplex;
+  friend class IFFTWComplex;
   static ForcedMutex globalFFTWMutex;
 
   fftwf_plan _fftPlan;

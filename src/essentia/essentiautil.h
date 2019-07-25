@@ -180,14 +180,6 @@ inline void fastcopy<Real>(Real* dest, const Real* src, int n) {
   memcpy(dest, src, n*sizeof(Real));
 }
 
-// overload for iterators, which allow us to fastcopy(dest.begin(), src.begin(), 0) and not crash
-inline void fastcopy(std::vector<Real>::iterator dest, std::vector<Real>::const_iterator src, int n) {
-  // need to test this because otherwise it is not legal to dereference the iterator
-  if (n > 0) {
-    fastcopy(&*dest, &*src, n);
-  }
-}
-
 template <>
 inline void fastcopy<StereoSample>(StereoSample* dest, const StereoSample* src, int n) {
   memcpy(dest, src, n*sizeof(StereoSample));
@@ -198,8 +190,19 @@ inline void fastcopy<int>(int* dest, const int* src, int n) {
   memcpy(dest, src, n*sizeof(int));
 }
 
+// overload for iterators, which allow us to fastcopy(dest.begin(), src.begin(), 0) and not crash
+inline void fastcopy(std::vector<Real>::iterator dest, std::vector<Real>::const_iterator src, int n) {
+  // need to test this because otherwise it is not legal to dereference the iterator
+  if (n > 0) {
+    fastcopy(&*dest, &*src, n);
+  }
+}
 
-
+inline void fastcopy(std::vector<StereoSample>::iterator dest, std::vector<StereoSample>::const_iterator src, int n) {
+  if (n > 0) {
+    fastcopy(&*dest, &*src, n);
+  }
+}
 
 } // namespace essentia
 

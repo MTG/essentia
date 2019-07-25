@@ -48,11 +48,11 @@ class Progress:
 
     def updateDisplay(self):
         if self.verbose():
-            print self.format % self.percent(self.current),
-            sys.stdout.flush()
+            print (self.format % self.percent(self.current),
+                   sys.stdout.flush())
 
     def finish(self):
         self.update(self.total)
         # also account for the final end of line
         if self.verbose():
-            print
+            print()

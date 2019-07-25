@@ -1,12 +1,12 @@
 import sys
-
+import pylab as plt
 from essentia.streaming import *
 
 
 try:
 	audiofile = sys.argv[1]
 except:
-	print "usage:", sys.argv[0], "<audiofile>"
+	print ("usage: %s <audiofile>" % sys.argv[0])
 	sys.exit()
 
 pool = essentia.Pool()
@@ -33,8 +33,16 @@ bpm_histogram.histogram >> centroid.array
 centroid.centroid >> (pool, 'bpm_centroid')
 
 essentia.run(loader)
-print "BPM:", pool['bpm']
-print "BPM histogram:"
-print pool['bpm_histogram']
-print "Most prominent peak:", pool['bpm_first_peak'], "BPM"
-print "Centroid:", pool['bpm_centroid']
+print("BPM: %0.1f" % pool['bpm'])
+print("Most prominent peak: %0.1f BPM" % pool['bpm_first_peak'][0])
+print("Centroid: %0.1f" % pool['bpm_centroid'][0]) 
+
+histogram = pool['bpm_histogram'][0]
+
+fig, ax = plt.subplots()
+ax.bar(range(len(histogram)), histogram, width=1)
+ax.set_xlabel('BPM')
+ax.set_ylabel('Frequency')
+ax.set_xticks([20 * x + 0.5 for x in range(int(len(histogram) / 20))])
+ax.set_xticklabels([str(20 * x) for x in range(int(len(histogram) / 20))])
+plt.show()

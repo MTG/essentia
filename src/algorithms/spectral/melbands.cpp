@@ -37,7 +37,13 @@ const char* MelBands::description = DOC("This algorithm computes energy in mel b
 "  International Conference on Speach and Computer (SPECOM’05), 2005,\n"
 "  vol. 1, pp. 191–194.\n\n"
 "  [2] Mel-frequency cepstrum - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient");
+"  http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient\n\n"
+"  [3] Young, S. J., Evermann, G., Gales, M. J. F., Hain, T., Kershaw, D.,\n"
+"  Liu, X., … Woodland, P. C. (2009). The HTK Book (for HTK Version 3.4).\n"
+"  Construction, (July 2000), 384, https://doi.org/http://htk.eng.cam.ac.uk\n\n"
+"  [4] Slaney, M. Auditory Toolbox: A MATLAB Toolbox for Auditory Modeling Work.\n"
+"  Technical Report, version 2, Interval Research Corporation, 1998.");
+
 
 void MelBands::configure() {
   if (parameter("highFrequencyBound").toReal() > parameter("sampleRate").toReal()*0.5 ) {
@@ -95,23 +101,23 @@ void MelBands::compute() {
 
 void MelBands::setWarpingFunctions(std::string warping, std::string weighting){
 
-  if ( warping == "htkMel" ){
+  if (warping == "htkMel"){
     _warper = hz2mel10;
     _inverseWarper = mel102hz;
   }
-  else if ( warping == "slaneyMel" ){
-    _warper = hz2mel;
-    _inverseWarper = mel2hz;
+  else if (warping == "slaneyMel") {
+    _warper = hz2melSlaney;
+    _inverseWarper = mel2hzSlaney;
   }
   else{
     E_INFO("Melbands: 'warpingFormula' = "<<warping);
     throw EssentiaException(" Melbands: Bad 'warpingFormula' parameter");
   }
 
-  if (weighting == "warping"){
+  if (weighting == "warping") {
     _weighting = warping;
   }
-  else if (weighting == "linear"){
+  else if (weighting == "linear") {
     _weighting = "linear";
   }
   else{

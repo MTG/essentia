@@ -231,6 +231,7 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
         case BOOL:                 SET_PORT_COPY(Boolean, bool);
         case INTEGER:              SET_PORT_COPY(Integer, int);
         case VECTOR_VECTOR_REAL:   SET_PORT_COPY(VectorVectorReal, vector<vector<Real> >);
+        case VECTOR_VECTOR_COMPLEX:SET_PORT_COPY(VectorVectorComplex, vector<vector<complex<Real> > >);
         case VECTOR_VECTOR_STRING: SET_PORT_COPY(VectorVectorString, vector<vector<string> >);
         case VECTOR_STEREOSAMPLE:  SET_PORT_COPY(VectorStereoSample, vector<StereoSample>);
         case MATRIX_REAL:          SET_PORT_COPY(MatrixReal, TNT::Array2D<Real>);
@@ -306,6 +307,7 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
       case VECTOR_STRING: SET_PORT(vector<string>);
       case VECTOR_STEREOSAMPLE: SET_PORT(vector<StereoSample>);
       case VECTOR_VECTOR_REAL: SET_PORT(vector<vector<Real> >);
+      case VECTOR_VECTOR_COMPLEX: SET_PORT(vector<vector<complex<Real> > >);
       case VECTOR_VECTOR_STRING: SET_PORT(vector<vector<string> >);
       case MATRIX_REAL: SET_PORT(TNT::Array2D<Real>);
       case POOL: SET_PORT(Pool);
@@ -500,10 +502,15 @@ static PyMethodDef PyAlgorithm_methods[] = {
   { NULL }  /* Sentinel */
 };
 
+
 static PyTypeObject PyAlgorithmType = {
+#if PY_MAJOR_VERSION >= 3
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
     PyObject_HEAD_INIT(NULL)
     0,                                                    // ob_size
-    "essentia.standard.Algorithm",                                 // tp_name
+#endif
+    "essentia.standard.Algorithm",                        // tp_name
     sizeof(PyAlgorithm),                                  // tp_basicsize
     0,                                                    // tp_itemsize
     PyAlgorithm::dealloc,                                 // tp_dealloc
@@ -522,7 +529,7 @@ static PyTypeObject PyAlgorithmType = {
     0,                                                    // tp_setattro
     0,                                                    // tp_as_buffer
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,             // tp_flags
-    "essentia::standard::Algorithm wrapper objects",                // tp_doc
+    "essentia::standard::Algorithm wrapper objects",      // tp_doc
     0,                                                    // tp_traverse
     0,                                                    // tp_clear
     0,                                                    // tp_richcompare

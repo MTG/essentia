@@ -39,10 +39,10 @@ const char* PercivalBpmEstimator::description = DOC("This algorithm estimates th
 
 
 PercivalBpmEstimator::PercivalBpmEstimator()
-  : AlgorithmComposite(), _frameCutter(0), _windowing(0), _spectrum(0), _scaleSpectrum(0),
-  _shiftSpectrum(0), _logSpectrum(0), _normSpectrum(0), _flux(0), _lowPass(0),
-  _frameCutterOSS(0), _autoCorrelation(0), _enhanceHarmonics(0), _peakDetection(0),
-  _evaluatePulseTrains(0), _configured(false) {
+  : AlgorithmComposite(), _frameCutter(0), _windowing(0), _spectrum(0), 
+  _normSpectrum(0), _scaleSpectrum(0), _shiftSpectrum(0), _logSpectrum(0), 
+  _flux(0), _lowPass(0), _frameCutterOSS(0), _autoCorrelation(0), 
+  _enhanceHarmonics(0), _peakDetection(0), _evaluatePulseTrains(0), _configured(false) {
   declareInput(_signal, "signal", "input signal");
   declareOutput(_bpm, "bpm", "the tempo estimation [bpm]");
 }
@@ -189,10 +189,10 @@ Real PercivalBpmEstimator::energyInRange(const std::vector<Real>& array,
                                    const Real scale) {
     int indexLow = round(low);
     int indexHigh = round(high);
-    if (indexHigh > (array.size() - 1)){
+    if (indexHigh > (int)array.size() - 1) {
       indexHigh = array.size() - 1;
     }
-    if (indexLow < 0){
+    if (indexLow < 0) {
       indexLow = 0;
     }
     return scale * (Real)sum(array, indexLow, indexHigh + 1);
@@ -204,7 +204,7 @@ AlgorithmStatus PercivalBpmEstimator::process() {
   // Skip invalid lag candidates (lag=-1)
   std::vector<int> lags;
   lags.reserve(_pool.value<vector<Real> >("lags").size());
-  for (int i=0; i<_pool.value<vector<Real> >("lags").size(); ++i){
+  for (int i=0; i<(int)_pool.value<vector<Real> >("lags").size(); ++i) {
     int lag = (int)_pool.value<vector<Real> >("lags")[i];
     if (lag > -1) {
         lags.push_back(lag);
@@ -234,8 +234,8 @@ AlgorithmStatus PercivalBpmEstimator::process() {
   // Accumulate (sum gaussians for every estimated lag)
   std::vector<Real> accum;
   accum.resize(414);  // 414 "long enough to accommodate all possible tempo lags"
-  for (int i=0; i<lags.size(); ++i){
-    for (int j=0; j<accum.size(); ++j){
+  for (int i=0; i<(int)lags.size(); ++i){
+    for (int j=0; j<(int)accum.size(); ++j){
       accum[j] += gaussian[(int)(gaussianSize/2) - lags[i] + j];
     }
   }
@@ -289,7 +289,7 @@ AlgorithmStatus PercivalBpmEstimator::process() {
   svmWeights12[3] = 1.629700;
 
   // Normalize features
-  for (int i=0; i<features.size(); ++i){
+  for (int i=0; i<(int)features.size(); ++i){
     features[i] = (features[i] - mins[i]) / (maxs[i] - mins[i]);
   }
 

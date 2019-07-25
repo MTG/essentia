@@ -16,8 +16,10 @@ audioout = np.array(0)
 counter = 0
 
 # input and output files
-inputFilename = 'singing-female.wav'
-outputFilename = 'singing-female-out-sinesubtraction.wav'
+import os.path
+tutorial_dir = os.path.dirname(os.path.realpath(__file__))
+inputFilename = os.path.join(tutorial_dir, 'singing-female.wav')
+outputFilename = os.path.join(tutorial_dir, 'singing-female-out-sinesubtraction.wav')
 
 
 out = np.array(0)

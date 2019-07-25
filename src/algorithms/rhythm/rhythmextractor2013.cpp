@@ -29,15 +29,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* RhythmExtractor2013::name = "RhythmExtractor2013";
-const char* RhythmExtractor2013::category = "Rhythm";
-const char* RhythmExtractor2013::description = DOC("This algorithm extracts the beat positions and estimates their confidence as well as tempo in bpm for an audio signal. The beat locations can be computed using:\n"
-"  - 'multifeature', the BeatTrackerMultiFeature algorithm\n"
-"  - 'degara', the BeatTrackerDegara algorithm (note that there is no confidence estimation for this method, the output confidence value is always 0)\n"
-"\n"
-"See BeatTrackerMultiFeature and  BeatTrackerDegara algorithms for more details.\n"
-"\n"
-"Note that the algorithm requires the sample rate of the input signal to be 44100 Hz in order to work correctly.\n");
+const char* RhythmExtractor2013::name = essentia::standard::RhythmExtractor2013::name;
+const char* RhythmExtractor2013::category = essentia::standard::RhythmExtractor2013::category;
+const char* RhythmExtractor2013::description = essentia::standard::RhythmExtractor2013::description;
 
 
 RhythmExtractor2013::RhythmExtractor2013() : AlgorithmComposite() {
@@ -45,15 +39,15 @@ RhythmExtractor2013::RhythmExtractor2013() : AlgorithmComposite() {
 
   declareInput(_signal, "signal", "input signal");
 
-  declareOutput(_ticks, "ticks", " the estimated tick locations [s]");
+  declareOutput(_ticks, "ticks", "the estimated tick locations [s]");
   declareOutput(_confidence, "confidence", "confidence with which the ticks are detected (ignore this value if using 'degara' method)");
-  declareOutput(_bpm, 0, "bpm", "the tempo estimation [bpm]");
-  declareOutput(_estimates, 0, "estimates", "the list of bpm estimates characterizing the bpm distribution for the signal [bpm]");
+  declareOutput(_bpm, "bpm", "the tempo estimation [bpm]");
+  declareOutput(_estimates, "estimates", "the list of bpm estimates characterizing the bpm distribution for the signal [bpm]");
   //TODO we need better rubato estimation algorithm
   //declareOutput(_rubatoStart, 0, "rubatoStart", "list of start times for rubato section [s]");
   //declareOutput(_rubatoStop, 0, "rubatoStop", "list of stop times of rubato section [s]");
   //declareOutput(_rubatoNumber, 0, "rubatoNumber", "number of rubato sections");
-  declareOutput(_bpmIntervals, 0, "bpmIntervals", "list of beats interval [s]");
+  declareOutput(_bpmIntervals, "bpmIntervals", "list of beats interval [s]");
 }
 
 void RhythmExtractor2013::createInnerNetwork() {
@@ -205,9 +199,15 @@ void RhythmExtractor2013::reset() {
 namespace essentia {
 namespace standard {
 
-const char* RhythmExtractor2013::name = essentia::streaming::RhythmExtractor2013::name;
-const char* RhythmExtractor2013::category = essentia::streaming::RhythmExtractor2013::category;
-const char* RhythmExtractor2013::description = essentia::streaming::RhythmExtractor2013::description;
+const char* RhythmExtractor2013::name = "RhythmExtractor2013";
+const char* RhythmExtractor2013::category = "Rhythm";
+const char* RhythmExtractor2013::description = DOC("This algorithm extracts the beat positions and estimates their confidence as well as tempo in bpm for an audio signal. The beat locations can be computed using:\n"
+"  - 'multifeature', the BeatTrackerMultiFeature algorithm\n"
+"  - 'degara', the BeatTrackerDegara algorithm (note that there is no confidence estimation for this method, the output confidence value is always 0)\n"
+"\n"
+"See BeatTrackerMultiFeature and BeatTrackerDegara algorithms for more details.\n"
+"\n"
+"Note that the algorithm requires the sample rate of the input signal to be 44100 Hz in order to work correctly.\n");
 
 
 RhythmExtractor2013::RhythmExtractor2013() {

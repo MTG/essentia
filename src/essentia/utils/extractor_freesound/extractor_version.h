@@ -1,0 +1,6 @@
+#ifndef EXTRACTOR_VERSION_H_
+#define EXTRACTOR_VERSION_H_
+
+#define FREESOUND_EXTRACTOR_VERSION "freesound 0.5"
+
+#endif /* EXTRACTOR_VERSION_H_ */

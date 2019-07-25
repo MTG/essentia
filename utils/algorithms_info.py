@@ -22,6 +22,7 @@ from __future__ import print_function
 import os
 import sys
 import glob
+import io
 
 
 def get_all_algorithms(algo_dir, root_dir=None):
@@ -31,17 +32,17 @@ def get_all_algorithms(algo_dir, root_dir=None):
         for filename in glob.glob(os.path.join(root, '*.h')):
 
             try:
-                lines = [ line.strip() for line in open(filename) ]
+                lines = [line.strip() for line in io.open(filename, encoding='utf8')]
 
                 # get a nicer filename now that it's been read
                 if filename.startswith(root_dir):
                     filename = filename[len(root_dir):]
-                    if filename[0] == '/' or filename[0] == '\\': # both linux and win
+                    if filename[0] == '/' or filename[0] == '\\':  # both linux and win
                         filename = filename[1:]
 
                 algo = ''
-                salgo = '' # name of streaming algo
-                has_standard  = False
+                salgo = ''  # name of streaming algo
+                has_standard = False
                 has_streaming = False
                 parameters = {}
                 inputs = {}
@@ -61,8 +62,7 @@ def get_all_algorithms(algo_dir, root_dir=None):
 
                     if (line.find('public Algorithm') >= 0 or
                         line.find('public AccumulatorAlgorithm') >= 0 or
-                        line.find('public StreamingAlgorithmWrapper') >= 0
-                        ):
+                        line.find('public StreamingAlgorithmWrapper') >= 0):
                         name = line.split(' ')[1]
 
                         if has_standard and not has_streaming: algo = name
@@ -70,78 +70,81 @@ def get_all_algorithms(algo_dir, root_dir=None):
                         if not has_standard and has_streaming: salgo = name
 
                         if has_standard and has_streaming:
-                            if algo == '': algo = name
-                            else: salgo = name
+                            if algo == '':
+                                algo = name
+                            else:
+                                salgo = name
 
                         # if we have both standard and streaming, stop here because we
                         # don't want to override the previous values
-                        if has_standard and has_streaming: break
+                        if has_standard and has_streaming:
+                            break
 
                     if line.find('Input<') >= 0:
                         line = line[line.find('Input<')+6:]
                         var_type = line[:line.rfind('>')].strip()
                         var_name = line[line.rfind('>')+1:].replace(';', '').strip()
-                        inputs[var_name] = { 'type': var_type }
+                        inputs[var_name] = {'type': var_type}
                         continue
 
                     if line.find('Output<') >= 0:
                         line = line[line.find('Output<')+7:]
                         var_type = line[:line.rfind('>')].strip()
-                        var_name = line[line.rfind('>')+1:].replace(";","").strip()
-                        outputs[var_name] = { 'type': var_type }
+                        var_name = line[line.rfind('>')+1:].replace(";", "").strip()
+                        outputs[var_name] = {'type': var_type}
                         continue
 
                     if line.find('Sink<') >= 0:
                         line = line[line.find('Sink<')+5:]
                         var_type = line[:line.rfind('>')].strip()
                         var_name = line[line.rfind('>')+1:].replace(';', '').strip()
-                        inputs[var_name] = { 'type': var_type }
+                        inputs[var_name] = {'type': var_type}
                         continue
 
                     if line.find('SinkProxy<') >= 0:
                         line = line[line.find('SinkProxy<')+10:]
                         var_type = line[:line.rfind('>')].strip()
                         var_name = line[line.rfind('>')+1:].replace(';', '').strip()
-                        inputs[var_name] = { 'type': var_type }
+                        inputs[var_name] = {'type': var_type}
                         continue
 
                     if line.find('Source<') >= 0:
                         line = line[line.find('Source<')+7:]
                         var_type = line[:line.rfind('>')].strip()
-                        var_name = line[line.rfind('>')+1:].replace(";","").strip()
-                        outputs[var_name] = { 'type': var_type }
+                        var_name = line[line.rfind('>')+1:].replace(";", "").strip()
+                        outputs[var_name] = {'type': var_type}
                         continue
 
                     if line.find('SourceProxy<') >= 0:
                         line = line[line.find('SourceProxy<')+12:]
                         var_type = line[:line.rfind('>')].strip()
-                        var_name = line[line.rfind('>')+1:].replace(";","").strip()
-                        outputs[var_name] = { 'type': var_type }
+                        var_name = line[line.rfind('>')+1:].replace(";", "").strip()
+                        outputs[var_name] = {'type': var_type}
                         continue
 
                     if line.find('declareParameter(') >= 0:
                         line = line[line.find("(")+1:]
                         line = line[:line.find(");")]
-                        name = line.split(',',1)[0][1:-1]
-                        line = line.split(',',1)[1].lstrip(" \"")
+                        name = line.split(',', 1)[0][1:-1]
+                        line = line.split(',', 1)[1].lstrip(" \"")
                         description = line[0:line.find("\"")]
                         rest = line[line.find("\""):]
-                        default = rest.replace("\", ","")
+                        default = rest.replace("\", ", "")
                         parameters[name] = (description, default)
                         continue
 
                     if line.find('declareInput') >= 0:
                         line = line[line.find('(')+1:]
                         line = line[0:line.find(');')]
-                        parts = line.strip().split(',',3)
+                        parts = line.strip().split(',', 3)
                         len_parts = len(parts)
                         if len_parts == 2:
                             parts.append("")
 
-                        if len_parts == 4 :
+                        if len_parts == 4:
                             input_name_idx = 3
                             input_desc_idx = -1
-                        elif len_parts < 4 :
+                        elif len_parts < 4:
                             if not has_streaming:
                                 input_name_idx = 1
                                 input_desc_idx = 2
@@ -163,7 +166,7 @@ def get_all_algorithms(algo_dir, root_dir=None):
                             var_name = parts[0]
                             # big hack to correctly parser stuff like declareInput(_algo->input("a"))
                             if var_name.find('-') >= 0:
-                                inputs[var_name] = { 'type': 'unknown' }
+                                inputs[var_name] = {'type': 'unknown'}
                         inputs[var_name]['name'] = input_name
                         inputs[var_name]['description'] = input_desc
                         continue
@@ -183,15 +186,15 @@ def get_all_algorithms(algo_dir, root_dir=None):
 
                         line = line[line.find('(')+1:]
                         line = line[0:line.find(');')]
-                        parts = line.strip().split(',',3)
+                        parts = line.strip().split(',', 3)
                         len_parts = len(parts)
                         if len_parts == 2:
                             parts.append("")
 
-                        if len_parts == 4 :
+                        if len_parts == 4:
                             input_name_idx = 3
                             input_desc_idx = -1
-                        elif len_parts < 4 :
+                        elif len_parts < 4:
                             if not has_streaming:
                                 input_name_idx = 1
                                 input_desc_idx = 2
@@ -213,11 +216,11 @@ def get_all_algorithms(algo_dir, root_dir=None):
                             var_name = parts[0]
                             # big hack to correctly parser stuff like declareInput(_algo->input("a"))
                             if var_name.find('-') >= 0:
-                                inputs[var_name] = { 'type': 'unknown' }
+                                inputs[var_name] = {'type': 'unknown'}
+                        
                         outputs[var_name]['name'] = input_name
                         outputs[var_name]['description'] = input_desc
                         continue
-
 
                 # Sanity checks
 
@@ -253,21 +256,18 @@ def get_all_algorithms(algo_dir, root_dir=None):
                     if 'description' not in attr:
                         attr['description'] = 'TODO'
 
-
-                algorithms[algo] = { 'header' : filename,
-                                     'source' : filename.replace('.h', '.cpp'),
-                                     'has_standard' : has_standard,
-                                     'has_streaming' : has_streaming,
-                                     'inputs': inputs,
-                                     'outputs': outputs,
-                                     'parameters': parameters
-                                     }
+                algorithms[algo] = {'header': filename,
+                                    'source': filename.replace('.h', '.cpp'),
+                                    'has_standard': has_standard,
+                                    'has_streaming': has_streaming,
+                                    'inputs': inputs,
+                                    'outputs': outputs,
+                                    'parameters': parameters}
             except:
                 print('Error while trying to parse file "%s"' % filename)
                 raise
 
     return algorithms
-
 
 
 def create_registration_cpp(all_algos, registration_filename, use_streaming=True):
@@ -277,7 +277,11 @@ def create_registration_cpp(all_algos, registration_filename, use_streaming=True
     # write #include's
     for algo in all_algos:
         if all_algos[algo]['has_standard'] or (use_streaming and all_algos[algo]['has_streaming']):
-            cpp_code += '#include "%s"\n' % all_algos[algo]['header']
+            # Essentia's Duration conflicts with Accelerates, so bump the include to the top
+            if "FFTA" in algo:
+                cpp_code = '#include "%s"\n' % all_algos[algo]['header'] + cpp_code
+            else:
+                cpp_code += '#include "%s"\n' % all_algos[algo]['header']
 
     # register standard algorithms in factory
     cpp_code += "\nnamespace essentia {\nnamespace standard {\n\nESSENTIA_API void registerAlgorithm() {\n"

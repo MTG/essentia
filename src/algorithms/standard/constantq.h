@@ -22,6 +22,7 @@
 
 #include "algorithm.h"
 #include "algorithmfactory.h"
+#include "essentiamath.h"
 #include <complex>
 #include <vector>
 
@@ -44,6 +45,7 @@ class ConstantQ : public Algorithm {
   double _maxFrequency;
   double _Q;            // constant Q factor
   double _threshold;    // threshold for kernel generation
+
   unsigned int _numWin;
   unsigned int _binsPerOctave;  
   unsigned int _windowSize;

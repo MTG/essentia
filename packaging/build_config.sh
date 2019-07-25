@@ -1,7 +1,9 @@
 #!/bin/sh
 
 HOST=i686-w64-mingw32
-PREFIX=`pwd`
+if [ -z "${PREFIX}" ]; then
+    PREFIX=`pwd`
+fi
 echo Installing to: $PREFIX
 
 #SHARED_OR_STATIC="
@@ -14,26 +16,30 @@ SHARED_OR_STATIC="
 --enable-static
 "
 
-LIBAV_VERSION=libav-11.2
-TAGLIB_VERSION=taglib-1.10
+FFMPEG_VERSION=ffmpeg-2.8.12
+TAGLIB_VERSION=taglib-1.11.1
+ZLIB_VERSION=zlib-1.2.11
 FFTW_VERSION=fftw-3.3.2
 LIBSAMPLERATE_VERSION=libsamplerate-0.1.8
 LIBYAML_VERSION=yaml-0.1.5
-QT_SOURCE_URL=http://download.qt-project.org/official_releases/qt/4.8/4.8.6/qt-everywhere-opensource-src-4.8.6.tar.gz
-GAIA_VERSION=v2.4.4
+CHROMAPRINT_VERSION=1.4.3
+QT_SOURCE_URL=http://download.qt-project.org/archive/qt/4.8/4.8.6/qt-everywhere-opensource-src-4.8.6.tar.gz
+GAIA_VERSION=2.4.5
 
-LIBAV_AUDIO_FLAGS="
+FFMPEG_AUDIO_FLAGS="
+    --disable-programs
     --disable-doc
     --disable-debug
-    --disable-avconv
-    --disable-avplay
-    --disable-avprobe 
-    --disable-avserver 
-    --disable-avdevice  
-    --disable-swscale 
-    --disable-avfilter 
-    --disable-network 
-    --disable-indevs 
+
+    --disable-avdevice
+    --disable-swresample
+    --disable-swscale
+    --disable-postproc
+    --disable-avfilter
+    --enable-avresample
+
+    --disable-network
+    --disable-indevs
     --disable-outdevs
     --disable-muxers
     --disable-demuxers
@@ -47,6 +53,13 @@ LIBAV_AUDIO_FLAGS="
 
     --enable-protocol=file
     --enable-protocol=pipe
+
+    --disable-sdl
+    --disable-lzma
+    --disable-zlib
+    --disable-xlib
+    --disable-bzlib
+    --disable-libxcb
 
     --enable-demuxer=image2
     --enable-demuxer=aac
@@ -178,17 +191,29 @@ LIBAV_AUDIO_FLAGS="
     --enable-parser=vp8
 "
 
+FFMPEG_AUDIO_FLAGS_MUXERS="
+    --enable-muxer=wav
+    --enable-muxer=aiff
+    --enable-muxer=mp3
+    --enable-muxer=ogg
+    --enable-muxer=flac
+    --enable-encoder=pcm_s16le
+    --enable-encoder=pcm_s16be
+    --enable-encoder=vorbis
+    --enable-encoder=flac
+"
+
 # see http://www.fftw.org/install/windows.html
 FFTW_FLAGS="
     --enable-float \
     --enable-sse2 \
     --with-incoming-stack-boundary=2 \
-    --with-our-malloc16 
+    --with-our-malloc16
 "
 
 LIBSAMPLERATE_FLAGS="
     --disable-fftw \
-    --disable-sndfile 
+    --disable-sndfile
 "
 
 QT_FLAGS="
@@ -200,9 +225,9 @@ QT_FLAGS="
     -no-fontconfig
     -no-mitshm
     -no-xrender
-    -no-xrandr 
+    -no-xrandr
     -no-xfixes
-    -no-xcursor 
+    -no-xcursor
     -no-xinerama
     -no-xsync
     -no-xvideo

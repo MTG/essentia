@@ -2,7 +2,7 @@
 
 libessentia.so is not found after installing from source
 --------------------------------------------------------
-The library is installed into /usr/local and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
+The library is installed into `/usr/local` and your system does not search for shared libraries there. [Configure your paths properly](http://unix.stackexchange.com/questions/67781/use-shared-libraries-in-usr-local-lib).
 
 
 Build Essentia on Ubuntu 14.04 or earlier
@@ -107,7 +107,7 @@ Cross-compiling for Windows on Linux
 
 Install Mingw-w64 GCC:
 ```
-sudo apt-get install  gcc-mingw-w64 
+sudo apt-get install g++-mingw-w64
 ```
 
 Build all dependencies (similarly to Linux static builds, make sure you have required tools installed):
@@ -223,20 +223,20 @@ Run all python tests:
     
 Run all tests except specific ones:
 ```
-python test/src/unittest/all_tests.py -audioloader_streaming
+python test/src/unittests/all_tests.py -audioloader_streaming
 ```
 
 Run a specific test
 ```
-python test/src/unittest/all_tests.py audioloader_streaming
+python test/src/unittests/all_tests.py audioloader_streaming
 ```
 
 
 Writing tests
 -------------
-It is manadatory to write python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittest).
+It is manadatory to write python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittests).
 
-All unit tests for algorithms are located in ```test/src/unittest``` folder. They are organized by sub-folders similarly to the code for the algorithms. 
+All unit tests for algorithms are located in ```test/src/unittests``` folder. They are organized by sub-folders similarly to the code for the algorithms. 
 
 Typically tests include:
 
@@ -270,6 +270,8 @@ g++ -pipe -Wall -O2 -fPIC -I/usr/local/include/essentia/ -I/usr/local/include/es
 
 Alternatively, if you want to create and build your own examples, the easiest way is to add them to ```src/examples``` folder, modify ```src/examples/wscript``` file accordingly and use ```./waf configure --with-examples; ./waf``` to build them.
 
+If you would also like to use [waf](https://waf.io/) in your application as we do, we provide an [example waf template using Essentia](https://github.com/MTG/essentia-project-template/).
+
 You can build your application using XCode (OSX) following [these steps](https://github.com/MTG/essentia/issues/58#issuecomment-38530548).
 
 
@@ -278,8 +280,8 @@ How to compute music descriptors using Essentia?
 
 Because Essentia is a library you are very fexible in the ways you can compute descriptors out of audio:
 
-- using [premade extractors out-of-box](doc/sphinxdoc/extractors_out_of_box.rst) (the easiest way without programming)
-- using python (see [python tutorial](doc/sphinxdoc/python_tutorial.rst))
+- using [premade extractors out-of-box](extractors_out_of_box.html) (the easiest way without programming)
+- using python (see [python tutorial](python_tutorial.html))
 - writing your own C++ extractor (see the premade extractors as examples)
 
 
@@ -321,6 +323,23 @@ The parameters include:
 In the preprocessing stage, training script loads all descriptor files according to the preprocessing type. Additionally, a number of descriptors are always ignored, including all ```metadata*``` that is the information not directly associated with audio analysis. The ```*.dmean```, ```*.dvar```, ```*.min```, ```*.max```, ```*.cov``` descriptors are also ignored, and therefore, currently only means and variances are used for descriptors summarized across frames. Non-numerical descriptors are enumerated (```tonal.chords_key```, ```tonal.chords_scale```, ```tonal.key_key```, ```tonal.key_scale```).
 
 Note that cross-validation script splits the ground-truth dataset into train and test sets randomly. In the case of music classification tasks one may want to assure artist/album filtering (that is, no artist/album occures in the test set if it occures in train set). Current way to achieve it is to ensure that the whole input dataset contains only one item per artist/album. Alternatively, you can adapt the scripts to suit your needs.
+
+### How to train an SVM model with a different set of parameters 
+Our training script generates a single model retrained on the whole dataset with the best parameters combination from the grid search. However, you may want to generate new models with custom parametrizations. Imagine, for instance, that you need a model that runs on a lighter set of features despite the accuracy drop, or that you believe that a different parameters set can improve results for your particular scenario.
+
+In order to generate a model given the `<project_file>` and your chosen `<param_file>` from the results folder, execute the following python lines,
+
+```
+from gaia2.scripts.classification.retrain_model import retrainModel
+retrainModel(project_file, param_file, output_file)
+
+```
+This creates a Gaia model and saves it into `<output_file>`. 
+
+*Also, note that the `retrain_model` can be called as a command line program.*
+
+### How to choose a parameter configuration
+At the end of the training process, a file called `<project_name>.report.csv` is created. It provides a ranking in terms of accuracy and normalized accuracy as well as the standard deviation between folds for every set of parameters. By having a look at this file you can get some insights about which parameters to try. You can, for instance, estimate the expected accuracy drop if you decide to go for a configuration with a smaller set of descriptors.
 
 
 How to know which other Algorithms an Algorithm uses?

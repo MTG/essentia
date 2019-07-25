@@ -1,7 +1,7 @@
 A) Affero General Public License
 This licensing file applies to the Essentia software library ("Essentia"), except as described in B) below.
 
-Essentia is © Universitat Pompeu Fabra 2009-2013
+Essentia is © Universitat Pompeu Fabra 2009-2017
 Original Developers: See AUTHORS file
 
 Essentia is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public
@@ -25,6 +25,7 @@ License v3. at http://people.sc.fsu.edu/~jburkardt/txt/gnu_lgpl.txt
 
 TNT, in the public domain (project page at http://math.nist.gov/tnt/download.html)
 
+Cephes Library, used under the BSD license with the explicit consent of the author by email <steve@moshier.net>
 
 C) External Dependant libraries are:
 
@@ -44,6 +45,7 @@ NumPy: Copyright © 2005-2012, NumPy Developers, Project page at http://www.nump
 
 LibYAML under the MIT license, with Project page at http://pyyaml.org/wiki/LibYAML
 
+libchromaprint under the GNU Lesser General Public License 2.1
 
 WRITTEN OFFER
 If you would like a copy of the GPL or LGPL source code contained in this product, please contact mtg@upf.edu. If you have

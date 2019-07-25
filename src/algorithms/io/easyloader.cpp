@@ -26,15 +26,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* EasyLoader::name = "EasyLoader";
-const char* EasyLoader::category = "Input/output";
-const char* EasyLoader::description = DOC("This algorithm loads the raw audio data from an audio file, downmixes it to mono and normalizes using replayGain. The audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and is normalized by the given replayGain value.\n"
-"\n"
-"This algorithm uses MonoLoader and therefore inherits all of its input requirements and exceptions.\n"
-"\n"
-"References:\n"
-"  [1] Replay Gain - A Proposed Standard,\n"
-"  http://replaygain.hydrogenaudio.org");
+const char* EasyLoader::name = essentia::standard::EasyLoader::name;
+const char* EasyLoader::category = essentia::standard::EasyLoader::category;
+const char* EasyLoader::description = essentia::standard::EasyLoader::description;
 
 
 EasyLoader::EasyLoader() : AlgorithmComposite(),
@@ -66,7 +60,8 @@ void EasyLoader::configure() {
 
   _monoLoader->configure(INHERIT("filename"),
                          INHERIT("sampleRate"),
-                         INHERIT("downmix"));
+                         INHERIT("downmix"),
+                         INHERIT("audioStream"));
 
   _params.add("originalSampleRate", _monoLoader->parameter("originalSampleRate"));
 
@@ -87,9 +82,16 @@ void EasyLoader::configure() {
 namespace essentia {
 namespace standard {
 
-const char* EasyLoader::name = essentia::streaming::EasyLoader::name;
-const char* EasyLoader::category = essentia::streaming::EasyLoader::category;
-const char* EasyLoader::description = essentia::streaming::EasyLoader::description;
+const char* EasyLoader::name = "EasyLoader";
+const char* EasyLoader::category = "Input/output";
+const char* EasyLoader::description = DOC("This algorithm loads the raw audio data from an audio file, downmixes it to mono and normalizes using replayGain. The audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and is normalized by the given replayGain value.\n"
+"\n"
+"This algorithm uses MonoLoader and therefore inherits all of its input requirements and exceptions.\n"
+"\n"
+"References:\n"
+"  [1] Replay Gain - A Proposed Standard,\n"
+"  http://replaygain.hydrogenaudio.org");
+
 
 void EasyLoader::createInnerNetwork() {
   _loader = streaming::AlgorithmFactory::create("EasyLoader");
@@ -111,7 +113,8 @@ void EasyLoader::configure() {
                      INHERIT("startTime"),
                      INHERIT("endTime"),
                      INHERIT("replayGain"),
-                     INHERIT("downmix"));
+                     INHERIT("downmix"),
+                     INHERIT("audioStream"));
 }
 
 void EasyLoader::compute() {

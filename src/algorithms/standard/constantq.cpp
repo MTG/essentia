@@ -19,7 +19,6 @@
 
 #include "constantq.h"
 #include "essentia.h"
-#include "essentiamath.h"
 #include <iostream>
 
 using namespace std;

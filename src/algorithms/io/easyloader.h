@@ -47,6 +47,8 @@ class EasyLoader : public AlgorithmComposite {
     declareParameter("endTime", "the end time of the slice to be extracted [s]", "[0,inf)", 1e6);
     declareParameter("replayGain", "the value of the replayGain that should be used to normalize the signal [dB]", "(-inf,inf)", -6.0);
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
+    declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
+
   }
 
   void declareProcessOrder() {
@@ -101,6 +103,8 @@ class EasyLoader : public Algorithm {
     declareParameter("endTime", "the end time of the slice to be extracted [s]", "[0,inf)", 1e6);
     declareParameter("replayGain", "the value of the replayGain that should be used to normalize the signal [dB]", "(-inf,inf)", -6.0);
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
+    declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
+
   }
 
   void configure();

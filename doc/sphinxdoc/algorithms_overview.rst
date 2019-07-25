@@ -167,20 +167,28 @@ Essentia also contains the following mid- and high-level descriptors:
 * ``PCA``: does the `Principal Component Analysis <http://en.wikipedia.org/wiki/Principal_component_analysis>`_
   of the given list of arrays.
 * ``GaiaTransform``: applies the given Gaia transformation to a Pool. This is mostly used for
-  classifiers which have been trained with Gaia. At the moment, the following classifiers have
-  trained models available in Essentia:
+  classifiers which have been trained with Gaia. 
 
-  * musical genre (4 different databases)
-  * ballroom music classification
-  * moods: happy, sad, aggressive, relaxed, acoustic, electronic, party
-  * western / non-western music
-  * tonal / atonal
-  * danceability
-  * voice / instrumental
-  * gender (male / female singer)
-  * timbre classification
 
-  Note that you need to `install Essentia version 2.0.1 <installing.html#using-pre-trained-high-level-models-in-essentia>`_, and use or adapt a supplied code example (see :doc:`Using extractors out-of-box <extractors_out_of_box>`) to be able to use these models, as they are trained on particular feature sets.
+Classifier models
+'''''''''''''''''
+
+You can `train your own classifier models <FAQ.html#training-and-running-classifier-models-in-gaia>`_.
+
+In addition, we provide a number of `pre-trained classifier models <http://acousticbrainz.org/datasets/accuracy>`_:
+
+* musical genre (4 different databases)
+* ballroom music classification
+* moods: happy, sad, aggressive, relaxed, acoustic, electronic, party
+* western / non-western music
+* tonal / atonal
+* danceability
+* voice / instrumental
+* gender (male, female singer)
+* timbre (dark, bright)
+
+
+These models were trained on a number of annotated music collections, including various inhouse collections created at Music Technology Group. To run them, use the standalone `Music Extractor <streaming_extractor_music.html#high-level-classifier-models>`_ available in Essentia 2.1_beta2.
 
 
 Extractors

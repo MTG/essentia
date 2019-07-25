@@ -37,15 +37,15 @@ def parse_descriptors(d, include=None, ignore=None):
 
 
 def convert(json_file, include, ignore):
-    print 'Converting', json_file
+    print ('Converting %s' % json_file)
     data = json.load(open(json_file, 'r'))
     
     return parse_descriptors(data, include, ignore)
 
 def convert_all(json_files, csv_file, include=None, ignore=None, add_filename=True):
 
-    with open(csv_file, 'wb') as f_csv:
-        print "Writing to", csv_file
+    with open(csv_file, 'w') as f_csv:
+        print("Writing to %s" % csv_file)
         writer = csv.writer(f_csv, 
                             delimiter=',',
                             quotechar='"', 
@@ -57,7 +57,7 @@ def convert_all(json_files, csv_file, include=None, ignore=None, add_filename=Tr
 
             if add_filename:
                 if JSON_FILENAME in d:
-                    print "Error appending json filename to the CSV: `%s` name is already used." % JSON_FILENAME
+                    print("Error appending json filename to the CSV: `%s` name is already used." % JSON_FILENAME)
                     sys.exit()
                 else:
                     d[JSON_FILENAME] = f_json
@@ -65,7 +65,7 @@ def convert_all(json_files, csv_file, include=None, ignore=None, add_filename=Tr
             if not header:
                 header = sorted(d.keys())
                 if not len(header):
-                    print "Error: no descriptors found to be written."
+                    print("Error: no descriptors found to be written.")
                     sys.exit()
                 writer.writerow(header)
 
@@ -74,7 +74,9 @@ def convert_all(json_files, csv_file, include=None, ignore=None, add_filename=Tr
                     raise Exception()
                 raw = [d[h] for h in header]
             except Exception:
-                print "Error: Incompatible descriptor layouts"
+                print("Error: Incompatible descriptor layouts")
+                print("Layout difference:")
+                print(list(set(header).symmetric_difference(set(d.keys()))))
                 sys.exit()
             
             writer.writerow(raw)
@@ -113,7 +115,7 @@ of descriptor names to be able to merge them into one csv.
     args = parser.parse_args()
 
     if args.include and args.ignore and not set(args.include).isdisjoint(args.ignore):
-        print 'You cannot specify the same descriptor patterns in both --include and --ignore flags'
+        print('You cannot specify the same descriptor patterns in both --include and --ignore flags')
         sys.exit()
 
     convert_all(args.input, args.output, args.include, args.ignore, args.add_filename)

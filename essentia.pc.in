@@ -1,0 +1,9 @@
+prefix=@PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libessentia
+Description: audio analysis library -- development files
+Version: @VERSION@
+Libs: -L${libdir} -lessentia @LPATHS@ @LFLAGS@
+Cflags: -I${includedir}/essentia -I${includedir}/essentia/scheduler -I${includedir}/essentia/streaming -I${includedir}/essentia/streaming/algorithms -I${includedir}/essentia/utils

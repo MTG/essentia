@@ -76,12 +76,12 @@ def extractor(filename):
 # if you do not understand what that means, you don't need to care
 if __name__ == '__main__':
     import sys
-    print 'Script %s called with arguments: %s' % (sys.argv[0], sys.argv[1:])
-
     try:
-        extractor(sys.argv[1])
-        print 'Success!'
+        infile = sys.argv[1]
+    except:
+        print('usage: %s <input audio file>' % sys.argv[0])
+        sys.exit()
 
-    except KeyError:
-        print 'ERROR: You need to call this script with a filename argument...'
+    extractor(sys.argv[1])
+    print('Done')
 
