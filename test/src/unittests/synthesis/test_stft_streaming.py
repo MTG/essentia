@@ -48,7 +48,7 @@ def analysisSynthesis(params, signal):
     w = std.Windowing(type = "hann");
     fft = std.FFT(size = params['frameSize']);
     ifft = std.IFFT(size = params['frameSize']);    
-    overl = std.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'], gain = 1./params['frameSize']);    
+    overl = std.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
     counter = 0
     for f in frames:
       
@@ -79,7 +79,7 @@ def analysisSynthesisStreaming(params, signal):
     w = es.Windowing(type = "hann");
     fft = es.FFT(size = params['frameSize']);
     ifft = es.IFFT(size = params['frameSize']);
-    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'], gain = 1./params['frameSize']);    
+    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
     
     # add half window of zeros to input signal to reach same ooutput length
     signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
