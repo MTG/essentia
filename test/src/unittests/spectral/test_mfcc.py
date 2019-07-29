@@ -30,7 +30,6 @@ class TestMFCC(TestCase):
         return MFCC(inputSize = 1025,
                     sampleRate = 44100,
                     numberBands = 40,
-                    silenceThreshold = 1e-9,
                     numberCoefficients = numCoeffs,
                     lowFrequencyBound = 0,
                     highFrequencyBound = 11000,
