@@ -110,7 +110,7 @@ class PitchYinProbabilistic : public Algorithm {
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("frameSize", "the frame size of FFT", "(0, inf)", 2048);
-    declareParameter("hopSize", "the hop size with which the loudness is computed", "[1,inf)", 256);
+    declareParameter("hopSize", "the hop size with which the pitch is computed", "[1,inf)", 256);
     declareParameter("lowRMSThreshold", "the low RMS amplitude threshold", "(0,1]", 0.1);  
     declareParameter("outputUnvoiced", "whether output unvoiced frame, zero: output non-voiced pitch as 0.; abs: output non-voiced pitch as absolute values; negative: output non-voiced pitch as negative values", "{zero,abs,negative}", "negative");
     declareParameter("preciseTime", "use non-standard precise YIN timing (slow).", "{true,false}", false);
