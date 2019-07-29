@@ -415,12 +415,6 @@ void NSGConstantQ::compute() {
       _ifft->input("fft").set(product);
       _ifft->output("frame").set(constantQ[j]);
       _ifft->compute();
-
-      reverse(constantQ[j].begin() + 1, constantQ[j].end());
-
-      for (int i = 0; i < (int)constantQ[j].size(); ++i) {
-        constantQ[j][i] /= (complex<Real>)constantQ[j].size();
-      }
     }
 
     idx.clear();
