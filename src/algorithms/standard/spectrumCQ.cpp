@@ -26,17 +26,16 @@ using namespace standard;
 
 const char* SpectrumCQ::name = "SpectrumCQ";
 const char* SpectrumCQ::category = "Tonal";
-const char* SpectrumCQ::description = DOC("This algorithm computes the Constant-Q spectrogram using FFT. See ConstantQ algorithm for more details.\n");
+const char* SpectrumCQ::description = DOC("This algorithm computes the magnitude of the Constant-Q spectrum. See ConstantQ algorithm for more details.\n");
 
 
 void SpectrumCQ::configure() {
 
   _constantq->configure(INHERIT("minFrequency"), INHERIT("numberBins"),
                         INHERIT("binsPerOctave"), INHERIT("sampleRate"),
-                        INHERIT("threshold"));
+                        INHERIT("threshold"), INHERIT("scale"),
+                        INHERIT("windowType"));
 
-  _fft->output("fft").set(_fftBuffer);
-  _constantq->input("fft").set(_fftBuffer);
   _constantq->output("constantq").set(_CQBuffer);
   _magnitude->input("complex").set(_CQBuffer);
 }
@@ -46,11 +45,9 @@ void SpectrumCQ::compute() {
   const vector<Real>& signal = _signal.get();
   vector<Real>& spectrumCQ = _spectrumCQ.get();
 
-  // Compute FFT of the input signal.
-  _fft->input("frame").set(signal);
-  _fft->compute();
 
   // Compute ConstantQ.
+  _constantq->input("frame").set(signal);
   _constantq->compute();
   
   // Compute magnitude spectrum.

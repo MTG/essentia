@@ -34,11 +34,9 @@ class SpectrumCQ : public Algorithm {
   Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _spectrumCQ;
 
-  Algorithm* _fft;
   Algorithm* _constantq;
   Algorithm* _magnitude;
 
-  std::vector<std::complex<Real> > _fftBuffer;
   std::vector<std::complex<Real> > _CQBuffer;
 
  
@@ -47,7 +45,6 @@ class SpectrumCQ : public Algorithm {
     declareInput(_signal, "frame", "the input audio frame");
     declareOutput(_spectrumCQ, "spectrumCQ", "the magnitude constant-Q spectrum");
 
-    _fft = AlgorithmFactory::create("FFT");
     _constantq = AlgorithmFactory::create("ConstantQ");
     _magnitude = AlgorithmFactory::create("Magnitude"); 
   }
@@ -60,10 +57,13 @@ class SpectrumCQ : public Algorithm {
   void declareParameters() {
     declareParameter("minFrequency", "minimum frequency [Hz]", "[1,inf)", 32.7);
     declareParameter("numberBins", "number of frequency bins, starting at minFrequency", "[1,inf)", 84);
-    declareParameter("binsPerOctave", "number of bins per octave", "[1,inf)", 12);    
-    declareParameter("sampleRate", "FFT sampling rate [Hz]", "[0,inf)", 44100.);  
+    declareParameter("binsPerOctave", "number of bins per octave", "[1,inf)", 12);
+    declareParameter("sampleRate", "FFT sampling rate [Hz]", "[0,inf)", 44100.);
     declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);
-    // TODO: explain threshold better      
+    declareParameter("scale", "filters scale. Larger values use longer windows", "[0,inf)", 1.0);
+    declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+
+    // TODO: explain threshold better
   }
 
   void configure();

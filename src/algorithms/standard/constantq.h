@@ -32,22 +32,25 @@ namespace standard {
 
 class ConstantQ : public Algorithm {
  protected:
-  Input<std::vector<std::complex<Real> > > _fft;
+  Input<std::vector<Real> > _frame;
   Output<std::vector<std::complex<Real> > > _constantQ;
 
   Algorithm* _fftc;
   Algorithm* _windowing;
+  Algorithm* _fft;
 
   std::vector<double> _CQdata;
+  std::vector<std::complex<Real> > _fftData;
   
   double _sampleRate;
   double _minFrequency;
   double _maxFrequency;
   double _Q;            // constant Q factor
   double _threshold;    // threshold for kernel generation
+  double _scale;
 
   unsigned int _numWin;
-  unsigned int _binsPerOctave;  
+  unsigned int _binsPerOctave;
   unsigned int _windowSize;
   unsigned int _inputFFTSize;
   unsigned int _numberBins;
@@ -59,16 +62,17 @@ class ConstantQ : public Algorithm {
     std::vector<unsigned> j;
   };
 
-  struct SparseKernel _sparseKernel;
+  SparseKernel _sparseKernel;
 
 
  public:
   ConstantQ() {
-    declareInput(_fft, "fft", "the input FFT frame (complex, non-negative part)");
+    declareInput(_frame, "frame", "the windowed input audio frame");
     declareOutput(_constantQ, "constantq", "the Constant Q transform");
 
     _fftc = AlgorithmFactory::create("FFTC"); //FFT with complex input
-    _windowing = AlgorithmFactory::create("Windowing");
+    _windowing = AlgorithmFactory::create("Windowing", "zeroPhase", false);
+    _fft = AlgorithmFactory::create("FFT");
   }
 
   ~ConstantQ() {
@@ -79,10 +83,13 @@ class ConstantQ : public Algorithm {
   void declareParameters() {
     declareParameter("minFrequency", "minimum frequency [Hz]", "[1,inf)", 32.7);
     declareParameter("numberBins", "number of frequency bins, starting at minFrequency", "[1,inf)", 84);
-    declareParameter("binsPerOctave", "number of bins per octave", "[1,inf)", 12);    
-    declareParameter("sampleRate", "FFT sampling rate [Hz]", "[0,inf)", 44100.);  
+    declareParameter("binsPerOctave", "number of bins per octave", "[1,inf)", 12);
+    declareParameter("sampleRate", "FFT sampling rate [Hz]", "[0,inf)", 44100.);
     declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);
     // TODO: explain threshold better 
+    declareParameter("scale", "filters scale. Larger values use longer windows", "[0,inf)", 1.0);
+    declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+
   }
 
   void compute();
@@ -105,13 +112,13 @@ namespace streaming {
 class ConstantQ : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<std::complex<Real> > > _fft;
+  Sink<std::vector<Real> > _frame;
   Source<std::vector<std::complex<Real> > > _constantQ;
 
  public:
   ConstantQ() {
     declareAlgorithm("ConstantQ");
-    declareInput(_fft, TOKEN, "fft");
+    declareInput(_frame, TOKEN, "frame");
     declareOutput(_constantQ, TOKEN, "constantq");
   }
 };
