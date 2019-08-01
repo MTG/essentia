@@ -63,7 +63,7 @@ void Chromagram::compute() {
   _spectrumCQ->input("frame").set(signal);
   _spectrumCQ->compute();
 
-  for (unsigned octave=0; octave <= _octaves; octave++) {
+  for (unsigned octave = 0; octave < _octaves; octave++) {
     unsigned firstBin = octave * _binsPerOctave;
     for (unsigned i = 0; i < _binsPerOctave; i++) {
         chromagram[i] += _chromaBuffer[firstBin+i];

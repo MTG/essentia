@@ -38,7 +38,7 @@ class Chromagram : public Algorithm {
   
   std::vector<Real> _chromaBuffer;
 
-  unsigned int _binsPerOctave;
+  unsigned _binsPerOctave;
   unsigned _octaves;
 
   enum NormalizeType {
@@ -94,7 +94,7 @@ namespace streaming {
 class Chromagram : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<std::complex<Real> > > _signal;
+  Sink<std::vector<Real> > _signal;
   Source<std::vector<Real> > _chromagram;
 
  public:
