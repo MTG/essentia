@@ -74,6 +74,7 @@ void ConstantQ::configure() {
   _threshold = parameter("threshold").toDouble();
   _scale = parameter("scale").toDouble();
   _minimumKernelSize = parameter("minimumKernelSize").toInt();
+  _zeroPhase = parameter("zeroPhase").toBool();
 
   _windowing->configure("type", parameter("windowType").toString());
 
@@ -142,7 +143,7 @@ void ConstantQ::configure() {
     Real threshold = 1;
     Real cumSum = 0;
   
-    // Look for the index of the desired cuantile.
+    // Look for the index of the desired quantile.
     for (size_t i = 0; i <sortedWindow.size(); i++) {
       cumSum += sortedWindow[i-1];
 
@@ -154,12 +155,13 @@ void ConstantQ::configure() {
 
     // Compute temporal kernels
     binKernel.assign(_windowSize, complex<Real>(0, 0));
-    unsigned origin = _windowSize / 2 - (int)ilen / 2;
+    unsigned origin = _zeroPhase ? _windowSize - (int)ilen / 2 : _windowSize / 2 - (int)ilen / 2;
     
     Real a = -(Real)ilen / 2.0;
     for (unsigned i = 0; i < ilen; i++, a++) {
       const double angle = 2.0 * M_PI * a * frequency / _sampleRate;
-      binKernel[origin + i] = window[i] * complex<Real>(cos(angle), sin(angle));
+      const unsigned int idx = _zeroPhase ? (origin + i) % _windowSize : origin + i;
+      binKernel[idx] = window[i] * complex<Real>(cos(angle), sin(angle));
     }
 
     // Compute FFT of temporal kernel.
