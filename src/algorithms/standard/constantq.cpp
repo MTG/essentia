@@ -46,8 +46,9 @@ void ConstantQ::compute() {
   vector<complex<Real> >& constantQ = _constantQ.get();
 
   if (frame.size() != _windowSize) {
-    throw EssentiaException("ConstantQ: input FFT size must be equal to: ", _windowSize);
+    throw EssentiaException("ConstantQ: input frame size must be equal to: ", _windowSize);
   }
+
   _fft->input("frame").set(frame);
   _fft->compute();
 
@@ -89,10 +90,16 @@ void ConstantQ::configure() {
   _fft->configure("size", _windowSize);
   _fft->output("fft").set(_fftData);
 
-  // Work only with a non-negative part of FFT as an input
+  // Work only with a non-negative part of FFT as an input.
   _inputFFTSize = _windowSize / 2 + 1;
 
+  // Get a new sparseKernel and reserve the maximum amount
+  // of memory posible (for the dense kernel case).
   _sparseKernel = {};
+  _sparseKernel.i.reserve(_windowSize / 2 + 1);
+  _sparseKernel.j.reserve(_windowSize / 2 + 1);
+  _sparseKernel.real.reserve(_windowSize / 2 + 1);
+  _sparseKernel.imag.reserve(_windowSize / 2 + 1);
 
   vector<complex<Real> > binKernel;
   vector<complex<Real> > binKernelFFT;
@@ -145,10 +152,10 @@ void ConstantQ::configure() {
   
     // Look for the index of the desired quantile.
     for (size_t i = 0; i <sortedWindow.size(); i++) {
-      cumSum += sortedWindow[i-1];
+      cumSum += sortedWindow[i];
 
       if (cumSum > _threshold) {
-        threshold = sortedWindow[i-1];
+        threshold = sortedWindow[i];
         break;
       }
     }
