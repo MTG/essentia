@@ -128,7 +128,31 @@ void ConstantQ::configure() {
       }
     }
 
-    // Compute temporal kernel
+    // Compute the threshold directly from the window.
+    vector<Real> sortedWindow(window);
+    sort(sortedWindow.begin(), sortedWindow.end());
+    
+    // Notice that Essentia's windows are scaled by 2 so
+    // first we have to renormalize.
+    normalizeSum(sortedWindow);
+    
+    // If we do not manage to compute a threshold the default value
+    // is high so the sparse matrix will be empty to make us notice
+    // that something went wrong.
+    Real threshold = 1;
+    Real cumSum = 0;
+  
+    // Look for the index of the desired cuantile.
+    for (size_t i = 0; i <sortedWindow.size(); i++) {
+      cumSum += sortedWindow[i-1];
+
+      if (cumSum > _threshold) {
+        threshold = sortedWindow[i-1];
+        break;
+      }
+    }
+
+    // Compute temporal kernels
     binKernel.assign(_windowSize, complex<Real>(0, 0));
     unsigned origin = _windowSize / 2 - (int)ilen / 2;
     
@@ -146,7 +170,7 @@ void ConstantQ::configure() {
     for (size_t j=0; j<binKernelFFT.size(); j++) {
       // Perform thresholding to make the kernel sparse: keep values with
       // absolute value above the threshold.
-      if (abs(binKernelFFT[j]) <= _threshold) continue;
+      if (abs(binKernelFFT[j]) / 2 <= threshold) continue;
 
       // Insert non-zero position indexes.
       _sparseKernel.i.push_back(j);

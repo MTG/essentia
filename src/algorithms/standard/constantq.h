@@ -86,8 +86,7 @@ class ConstantQ : public Algorithm {
     declareParameter("numberBins", "number of frequency bins, starting at minFrequency", "[1,inf)", 84);
     declareParameter("binsPerOctave", "number of bins per octave", "[1,inf)", 12);
     declareParameter("sampleRate", "FFT sampling rate [Hz]", "[0,inf)", 44100.);
-    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);
-    // TODO: explain threshold better 
+    declareParameter("threshold", "bins whose magnitude is below this quantile are discarded", "[0,1)", 0.01);
     declareParameter("scale", "filters scale. Larger values use longer windows", "[0,inf)", 1.0);
     declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
     declareParameter("minimumKernelSize", "minimum size allowed for frequency kernels", "[2,inf)", 4);

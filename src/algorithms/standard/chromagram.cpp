@@ -46,7 +46,8 @@ void Chromagram::configure() {
 
   _spectrumCQ->configure(INHERIT("minFrequency"), INHERIT("numberBins"),
                          INHERIT("binsPerOctave"), INHERIT("sampleRate"),
-                         INHERIT("threshold"));
+                         INHERIT("threshold"), INHERIT("scale"),
+                         INHERIT("windowType"), INHERIT("minimumKernelSize"));
   _spectrumCQ->output("spectrumCQ").set(_chromaBuffer);
 }
 
