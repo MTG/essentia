@@ -54,6 +54,7 @@ class ConstantQ : public Algorithm {
   unsigned int _windowSize;
   unsigned int _inputFFTSize;
   unsigned int _numberBins;
+  unsigned int _minimumKernelSize;
 
   struct SparseKernel {
     std::vector<double> real;
@@ -89,6 +90,7 @@ class ConstantQ : public Algorithm {
     // TODO: explain threshold better 
     declareParameter("scale", "filters scale. Larger values use longer windows", "[0,inf)", 1.0);
     declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    declareParameter("minimumKernelSize", "minimum size allowed for frequency kernels", "[2,inf)", 4);
 
   }
 

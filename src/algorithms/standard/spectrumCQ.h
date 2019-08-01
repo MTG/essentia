@@ -62,6 +62,7 @@ class SpectrumCQ : public Algorithm {
     declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);
     declareParameter("scale", "filters scale. Larger values use longer windows", "[0,inf)", 1.0);
     declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    declareParameter("minimumKernelSize", "minimum size allowed for frequency kernels", "[2,inf)", 4);
 
     // TODO: explain threshold better
   }

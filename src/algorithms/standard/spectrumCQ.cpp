@@ -34,7 +34,7 @@ void SpectrumCQ::configure() {
   _constantq->configure(INHERIT("minFrequency"), INHERIT("numberBins"),
                         INHERIT("binsPerOctave"), INHERIT("sampleRate"),
                         INHERIT("threshold"), INHERIT("scale"),
-                        INHERIT("windowType"));
+                        INHERIT("windowType"), INHERIT("minimumKernelSize"));
 
   _constantq->output("constantq").set(_CQBuffer);
   _magnitude->input("complex").set(_CQBuffer);

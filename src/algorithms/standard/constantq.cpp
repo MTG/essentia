@@ -73,6 +73,7 @@ void ConstantQ::configure() {
   _binsPerOctave = parameter("binsPerOctave").toInt();
   _threshold = parameter("threshold").toDouble();
   _scale = parameter("scale").toDouble();
+  _minimumKernelSize = parameter("minimumKernelSize").toInt();
 
   _windowing->configure("type", parameter("windowType").toString());
 
@@ -105,7 +106,7 @@ void ConstantQ::configure() {
 
     // We can get the window function from the output of Windowing algorithm
     // with the unity input.
-    unsigned ilen = 2 * (floor(length) / 2);
+    unsigned int ilen = max((2 * (floor(length) / 2)), (Real)_minimumKernelSize);
 
     vector<Real> unity(ilen, 1.);
     vector<Real> window;
@@ -121,7 +122,8 @@ void ConstantQ::configure() {
       if (passBand > _sampleRate / 2){
         ostringstream msg;
         msg << "ConstantQ: Attempted to create a filter whose pass-band (" << passBand
-            << "Hz) is beyond the Nyquist frequency (" << _sampleRate/2 << " Hz).";
+            << " Hz) is beyond the Nyquist frequency (" << _sampleRate / 2
+            << " Hz). A possible fix is to reduce the 'numberBins' parameter";
         throw EssentiaException(msg.str());
       }
     }
