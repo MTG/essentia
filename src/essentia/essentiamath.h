@@ -102,9 +102,9 @@ template <typename T> T norm(const std::vector<T>& array) {
 /**
  * Returns the sum of squared values of an array
  */
-template <typename T> T sumSquare(const std::vector<T> array, const size_t start, const size_t end) {
+template <typename T> T sumSquare(const std::vector<T> array) {
   T sum = 0.0;
-  for (size_t i = array; i < end; ++i) {
+  for (size_t i = 0; i < array.size(); ++i) {
     sum += array[i] * array[i];
   }
   return sum;
