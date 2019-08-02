@@ -32,58 +32,68 @@ namespace standard {
 
 class ConstantQ : public Algorithm {
  protected:
-  Input<std::vector<std::complex<Real> > > _signal;
+  Input<std::vector<Real> > _frame;
   Output<std::vector<std::complex<Real> > > _constantQ;
 
+  Algorithm* _fftc;
+  Algorithm* _windowing;
   Algorithm* _fft;
 
   std::vector<double> _CQdata;
+  std::vector<std::complex<Real> > _fftData;
   
-  double _sampleRate; //unsigned int _FS;
+  double _sampleRate;
   double _minFrequency;
   double _maxFrequency;
-  double _dQ; // Work out Q value for Filter bank
-  double _threshold; // ConstantQ threshold for kernel generation
-  int _numWin;
-  int _hop;
-  int _binsPerOctave;  
-  int _FFTLength;
-  int _uK; // Number of constant Q bins
+  double _Q;            // constant Q factor
+  double _threshold;    // threshold for kernel generation
+  double _scale;
+
+  unsigned int _numWin;
+  unsigned int _binsPerOctave;
+  unsigned int _windowSize;
+  unsigned int _inputFFTSize;
+  unsigned int _numberBins;
+  unsigned int _minimumKernelSize;
+
+  bool _zeroPhase;
 
   struct SparseKernel {
-    std::vector<double> _sparseKernelReal;
-    std::vector<double> _sparseKernelImag;
-    std::vector<int> _sparseKernelIs; 
-    std::vector<int> _sparseKernelJs;
+    std::vector<double> real;
+    std::vector<double> imag;
+    std::vector<unsigned> i; 
+    std::vector<unsigned> j;
   };
 
-  SparseKernel *m_sparseKernel;
+  SparseKernel _sparseKernel;
 
-  double hamming(int len, int n) {
-    return 0.54 - 0.46*cos(2 * M_PI * n / len);
-  }
 
  public:
   ConstantQ() {
-    declareInput(_signal, "frame", "the input frame (complex)");
-    declareOutput(_constantQ, "constantq", "the Constant Q transform of the input frame");
+    declareInput(_frame, "frame", "the windowed input audio frame");
+    declareOutput(_constantQ, "constantq", "the Constant Q transform");
 
-    _fft = AlgorithmFactory::create("FFTC"); //FFT with complex input
+    _fftc = AlgorithmFactory::create("FFTC"); //FFT with complex input
+    _windowing = AlgorithmFactory::create("Windowing", "zeroPhase", false);
+    _fft = AlgorithmFactory::create("FFT");
   }
 
   ~ConstantQ() {
-    delete _fft;
-    if (m_sparseKernel) delete m_sparseKernel;
+    delete _fftc;
+    delete _windowing;
   }
 
-  int sizeFFT() { return _FFTLength; }
-
   void declareParameters() {
-    declareParameter("minFrequency", "the minimum frequency", "[1,inf)", 55.);
-    declareParameter("maxFrequency", "the maximum frequency", "[1,inf)", 7040.);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    
-    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);  
-    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);       
+    declareParameter("minFrequency", "minimum frequency [Hz]", "[1,inf)", 32.7);
+    declareParameter("numberBins", "number of frequency bins, starting at minFrequency", "[1,inf)", 84);
+    declareParameter("binsPerOctave", "number of bins per octave", "[1,inf)", 12);
+    declareParameter("sampleRate", "FFT sampling rate [Hz]", "[0,inf)", 44100.);
+    declareParameter("threshold", "bins whose magnitude is below this quantile are discarded", "[0,1)", 0.01);
+    declareParameter("scale", "filters scale. Larger values use longer windows", "[0,inf)", 1.0);
+    declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    declareParameter("minimumKernelSize", "minimum size allowed for frequency kernels", "[2,inf)", 4);
+    declareParameter("zeroPhase", "a boolean value that enables zero-phase windowing. Input audio frames should be windowed with the same phase mode", "{true,false}", true);
+
   }
 
   void compute();
@@ -106,13 +116,13 @@ namespace streaming {
 class ConstantQ : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<std::complex<Real> > > _signal;
+  Sink<std::vector<Real> > _frame;
   Source<std::vector<std::complex<Real> > > _constantQ;
 
  public:
   ConstantQ() {
     declareAlgorithm("ConstantQ");
-    declareInput(_signal, TOKEN, "frame");
+    declareInput(_frame, TOKEN, "frame");
     declareOutput(_constantQ, TOKEN, "constantq");
   }
 };

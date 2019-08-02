@@ -24,45 +24,61 @@ import math
 import numpy as np
 import os
 
-script_dir = os.path.dirname(__file__)
-
-
-def cvec(l):
-   	return numpy.array(l, dtype='c8')
-
 class TestChromagram(TestCase):
 
-    
-    def testRandom(self):
-        # input is [1, 0, 0, ...] which corresponds to an ConstantQ of constant magnitude 1
-        with open(os.path.join(script_dir,'constantq/CQinput.txt'), 'r') as f:
-        	#read_data = f.read()
-        	data = np.array([], dtype='complex64')
-        	line = f.readline()
-        	while line != '':
-        		re = float(line.split('\t')[0])
-        		im = float(line.split('\t')[1])
-        		data = np.append(data, re + im * 1j)
-        		line = f.readline()
-				
+    def testRegression(self):
+        expected = numpy.load(join(filedir(), 'constantq/chromagram_values.npy'))
 
-        
-        QMChroma_out = [float(line.rstrip('\n')) for line in open(os.path.join(script_dir,'constantq/QMChroma_out.txt'))]
-            
-       
- 
-        Chroma_data = Chromagram()(cvec(data))
+        frame_size = 32768
+        hop_size = frame_size // 4
 
-        DifferMean = QMChroma_out-Chroma_data  # difference mean
-        DifferMean = sum(abs(DifferMean))/len(DifferMean)# difference mean
-       
-        DiverPer = abs(sum(((QMChroma_out-Chroma_data)/QMChroma_out)*100)/len(QMChroma_out) )#divergence mean percentage 
-        
-        """
-        print('Divergence mean percentage is : '+str(DiverPer)[:5]+'%')
-        print('Difference Mean is : '+str(DifferMean))
-        """
-       
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded/vignesh.wav'))()
+
+        w = Windowing()
+        chroma = Chromagram()
+
+        predicted = numpy.array([chroma(w(frame)) for frame in FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size)])
+
+        self.assertAlmostEqualVector(numpy.mean(predicted, axis=0), expected, 1e-7)
+
+    def testRegressionNoZeroPhase(self):
+        expected = numpy.load(join(filedir(), 'constantq/chromagram_values.npy'))
+
+        frame_size = 32768
+        hop_size = frame_size // 4
+        zeroPhase=False
+
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded/vignesh.wav'))()
+
+        w = Windowing(zeroPhase=zeroPhase)
+        chroma = Chromagram(zeroPhase=zeroPhase)
+
+        predicted = numpy.array([chroma(w(frame)) for frame in FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size)])
+
+        self.assertAlmostEqualVector(numpy.mean(predicted, axis=0), expected, 1e-7)
+
+    def testZero(self):
+        inputSize = 2**15
+        signalZero = [0] * inputSize
+        output = numpy.mean(numpy.abs(Chromagram(normalizeType='none')(signalZero)))
+        self.assertEqual(0, output)
+
+    def testEmpty(self):
+        # Checks whether an empty input vector yields an exception
+        self.assertComputeFails(Chromagram(), [])
+
+    def testOne(self,):
+        # Checks for a single value
+        self.assertComputeFails(Chromagram(), [1])
+
+    def testInvalidParam(self):
+        self.assertConfigureFails(Chromagram(), {'minFrequency': 30000})  # Min bin above Nyquist
+        self.assertConfigureFails(Chromagram(), {'numberBins': 0})  # No CQ bins
+        self.assertConfigureFails(Chromagram(), {'binsPerOctave': 0})  # No CQ bins
+        self.assertConfigureFails(Chromagram(), {'sampleRate': 400}) # With this sample rate the kernels are out of range
+        self.assertConfigureFails(Chromagram(), {'numberBins': 10 * 12})  # Max bin above Nyquist
+        self.assertConfigureFails(Chromagram(), {'minimumKernelSize': 1})  # FFT can not be done
+        self.assertConfigureFails(Chromagram(), {'scale': 0})  # Kernels of size 0
 
 
 suite = allTests(TestChromagram)

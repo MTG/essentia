@@ -31,21 +31,14 @@ namespace standard {
 class Chromagram : public Algorithm {
 
  protected:
-  Input<std::vector<std::complex<Real> > > _signal;
+  Input<std::vector<Real> > _signal;
   Output<std::vector<Real> > _chromagram;
 
-  Algorithm* _constantq;
-  Algorithm* _magnitude;
+  Algorithm* _spectrumCQ;
   
-  std::vector<std::complex<Real> > _CQBuffer;
-  std::vector<Real> _ChromaBuffer;
+  std::vector<Real> _chromaBuffer;
 
-  std::vector<double> _CQdata;
-  double _sampleRate;
-  double _minFrequency;
-  double _maxFrequency;
-  unsigned int _binsPerOctave;
-  double _threshold;
+  unsigned _binsPerOctave;
   unsigned _octaves;
 
   enum NormalizeType {
@@ -58,25 +51,27 @@ class Chromagram : public Algorithm {
  
  public:
   Chromagram() {
-    declareInput(_signal, "frame", "the input frame (complex)");
-    declareOutput(_chromagram, "chromagram", "the magnitude chromagram of the input audio signal");
+    declareInput(_signal, "frame", "the input audio frame");
+    declareOutput(_chromagram, "chromagram", "the magnitude constant-Q chromagram");
 
-    _constantq = AlgorithmFactory::create("ConstantQ");
-    _magnitude = AlgorithmFactory::create("Magnitude"); 
+    _spectrumCQ = AlgorithmFactory::create("SpectrumCQ");
   }
 
   ~Chromagram() {
-    delete _constantq;
-    delete _magnitude;
+    delete _spectrumCQ;
   }
 
   void declareParameters() {
-    declareParameter("minFrequency", "the minimum frequency", "[1,inf)", 55.);
-    declareParameter("maxFrequency", "the maximum frequency", "[1,inf)", 7040.);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    
-    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);  
-    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);       
-    declareParameter("normalizeType", "normalize type", "{none,unit_sum,unit_max}", "unit_max");   
+    declareParameter("minFrequency", "minimum frequency [Hz]", "[1,inf)", 32.7);
+    declareParameter("numberBins", "number of frequency bins, starting at minFrequency", "[1,inf)", 84);
+    declareParameter("binsPerOctave", "number of bins per octave", "[1,inf)", 12);
+    declareParameter("sampleRate", "FFT sampling rate [Hz]", "[0,inf)", 44100.);
+    declareParameter("threshold", "bins whose magnitude is below this quantile are discarded", "[0,1)", 0.01);
+    declareParameter("scale", "filters scale. Larger values use longer windows", "[0,inf)", 1.0);
+    declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    declareParameter("minimumKernelSize", "minimum size allowed for frequency kernels", "[2,inf)", 4);
+    declareParameter("normalizeType", "normalize type", "{none,unit_sum,unit_max}", "unit_max");
+    declareParameter("zeroPhase", "a boolean value that enables zero-phase windowing. Input audio frames should be windowed with the same phase mode", "{true,false}", true);
   }
 
   void configure();
@@ -99,7 +94,7 @@ namespace streaming {
 class Chromagram : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<std::vector<std::complex<Real> > > _signal;
+  Sink<std::vector<Real> > _signal;
   Source<std::vector<Real> > _chromagram;
 
  public:
