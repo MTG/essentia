@@ -57,7 +57,7 @@ class PitchYinFFT : public Algorithm {
   //Real _tolerance;
   int _tauMin;
   int _tauMax;
-
+  Real _tolerance;
 
  public:
   PitchYinFFT() {
@@ -82,7 +82,7 @@ class PitchYinFFT : public Algorithm {
     declareParameter("minFrequency", "the minimum allowed frequency [Hz]", "(0,inf)", 20.0);
     declareParameter("maxFrequency", "the maximum allowed frequency [Hz]", "(0,inf)", 22050.0);
     declareParameter("interpolate", "boolean flag to enable interpolation", "{true,false}", true);
-    //declareParameter("tolerance", "tolerance for peak detection", "[0,1]", 0.75);
+    declareParameter("tolerance", "tolerance for peak detection", "[0,1]", 1.0);
   }
 
   void configure();
