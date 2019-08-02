@@ -27,142 +27,167 @@ using namespace standard;
 
 const char* ConstantQ::name = "ConstantQ";
 const char* ConstantQ::category = "Standard";
-const char* ConstantQ::description = DOC("This algorithm implements Constant Q Transform using the FFT for fast calculation.\n"
+const char* ConstantQ::description = DOC("This algorithm computes Constant Q Transform using the FFT for fast calculation. It transforms a windowed audio frame into the log frequency domain.\n"
 "\n"
 "References:\n"
 "  [1] Constant Q transform - Wikipedia, the free encyclopedia,\n"
-"  https://en.wikipedia.org/wiki/Constant_Q_transform");
-
-
-// nextpow2 returns the smallest integer n such that 2^n >= x.
-static double nextpow2(double x) {
-  double y = ceil(log(x)/log(2.0));
-  return(y);
-}
-
-static double squaredModule(const complex<double> xx) {
-  complex<double> multComplex = xx * xx;
-  return multComplex.real() + multComplex.imag();
-}
+"  https://en.wikipedia.org/wiki/Constant_Q_transform\n"
+"  [2] Brown, J. C., & Puckette, M. S. (1992). An efficient algorithm for the\n"
+"  calculation of a constant Q transform. The Journal of the Acoustical Society\n"
+"  of America, 92(5), 2698-2701.\n"
+"  [3] Schörkhuber, C., & Klapuri, A. (2010). Constant-Q transform toolbox for\n"
+"  music processing. In 7th Sound and Music Computing Conference, Barcelona,\n"
+"  Spain (pp. 3-64).");
 
 
 void ConstantQ::compute() {
 
-  const vector<complex<Real> >& signal = _signal.get();
+  const vector<Real> & frame = _frame.get();
   vector<complex<Real> >& constantQ = _constantQ.get();
 
-  if (!m_sparseKernel) {
-    throw EssentiaException("ERROR: ConstantQ::compute: Sparse kernel has not been initialised");
+  if (frame.size() != _windowSize) {
+    throw EssentiaException("ConstantQ: input frame size must be equal to: ", _windowSize);
   }
 
-  if ((int)signal.size() != _FFTLength) {
-    throw EssentiaException("ERROR: ConstantQ::compute: The ConstantQ input size must be equal to the FFTLength : ", _FFTLength);
+  _fft->input("frame").set(frame);
+  _fft->compute();
+
+  constantQ.assign(_numberBins, complex<Real>(0, 0)); // Initialize output.
+
+  for (unsigned i=0; i<_sparseKernel.real.size(); i++) {
+    const unsigned row = _sparseKernel.j[i];
+    const unsigned col = _sparseKernel.i[i];
+    const double & r1  = _sparseKernel.real[i];
+    const double & i1  = _sparseKernel.imag[i];
+    const double r2 = (double)_fftData[col].real();
+    const double i2 = (double)_fftData[col].imag();
+
+    constantQ[row] += complex<Real>((r1*r2 - i1*i2), (r1*i2 + i1*r2));
   }
-
-  SparseKernel *sk = m_sparseKernel;
-
-  constantQ.assign(_uK, complex<Real>(0, 0)); // initialize output
-
-  const int *fftbin = &(sk->_sparseKernelIs[0]);
-  const int *cqbin  = &(sk->_sparseKernelJs[0]);
-  const double   *real   = &(sk->_sparseKernelReal[0]);
-  const double   *imag   = &(sk->_sparseKernelImag[0]);
-  const int sparseCells = sk->_sparseKernelReal.size();
-
-  for (int i = 0; i<sparseCells; i++) {
-    const int row = cqbin[i];
-    const int col = fftbin[i];
-    const double & r1  = real[i];
-    const double & i1  = imag[i];
-    const double & r2  = (double) signal.at( _FFTLength - col - 1 ).real();
-    const double & i2  = (double) signal.at( _FFTLength - col - 1 ).imag();
-    // add the multiplication
-    constantQ.at(row) += complex <Real>((r1*r2 - i1*i2), (r1*i2 + i1*r2));
-  }    
 }
 
 
 void ConstantQ::configure() {
   _sampleRate = parameter("sampleRate").toDouble();
   _minFrequency = parameter("minFrequency").toDouble();
-  _maxFrequency = parameter("maxFrequency").toDouble();
+  _numberBins = parameter("numberBins").toInt();
   _binsPerOctave = parameter("binsPerOctave").toInt();
   _threshold = parameter("threshold").toDouble();
+  _scale = parameter("scale").toDouble();
+  _minimumKernelSize = parameter("minimumKernelSize").toInt();
+  _zeroPhase = parameter("zeroPhase").toBool();
 
-  // Work out Q value for Filter bank
-  _dQ = 1/(pow(2,(1/(double)_binsPerOctave))-1); 
-  // Number of Constant Q bins
-  _uK = (int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0));
+  _windowing->configure("type", parameter("windowType").toString());
 
-  _FFTLength = (int) pow(2, nextpow2(ceil(_dQ *_sampleRate/_minFrequency)));
-  _hop = _FFTLength/8; // hop size is window length divided by 32
-
-  SparseKernel *sk = new SparseKernel();
-
-  // Initialise temporal kernel with zeros, twice length to deal with complex numbers
-  vector<complex<double> > hammingWindow(_FFTLength, complex<double>(0, 0));
-  vector<complex<Real> > transfHammingWindowR(_FFTLength, complex<Real>(0, 0));
-
-  sk->_sparseKernelIs.reserve( _FFTLength*2 );
-  sk->_sparseKernelJs.reserve( _FFTLength*2 );
-  sk->_sparseKernelReal.reserve( _FFTLength*2 );
-  sk->_sparseKernelImag.reserve( _FFTLength*2 );
+  // Constant Q factor (resolution of filter windows, larger values correspond
+  // to longer windows.
+  _Q = _scale / (pow(2, (1/(double)_binsPerOctave))-1);
   
-  // For each bin value k, calculate temporal kernel, take its fft to
+  // The largest window size we'll require. We center-pad filters to the next
+  // power of two of the maximum filter length.
+  _windowSize = nextPowerTwo((int)ceil(_Q * _sampleRate / _minFrequency));
+
+  _fft->configure("size", _windowSize);
+  _fft->output("fft").set(_fftData);
+
+  // Work only with a non-negative part of FFT as an input.
+  _inputFFTSize = _windowSize / 2 + 1;
+
+  // Get a new sparseKernel and reserve the maximum amount
+  // of memory posible (for the dense kernel case).
+  _sparseKernel = {};
+  _sparseKernel.i.reserve(_windowSize / 2 + 1);
+  _sparseKernel.j.reserve(_windowSize / 2 + 1);
+  _sparseKernel.real.reserve(_windowSize / 2 + 1);
+  _sparseKernel.imag.reserve(_windowSize / 2 + 1);
+
+  vector<complex<Real> > binKernel;
+  vector<complex<Real> > binKernelFFT;
+
+  // For each bin value k, calculate temporal kernel, take its FFT to
   // calculate the spectral kernel then threshold it to make it sparse and
-  // add it to the sparse kernels matrix
-  double squareThreshold = _threshold * _threshold;
+  // add it to the sparse kernels matrix.
+  for (int k = _numberBins - 1; k > -1; k--) {
 
-  for (int k=_uK; k--; ) {
+    const double frequency = _minFrequency * pow(2,((double)(k)) / (double)_binsPerOctave);
+    Real length = _Q * _sampleRate / frequency;
 
-    // Compute a hamming window
-    hammingWindow.assign(_FFTLength, complex<double>(0, 0));
-    const int hammingLength = (int) ceil( _dQ * _sampleRate / ( _minFrequency * pow(2,((double)(k))/(double)_binsPerOctave)));
-    int origin = _FFTLength/2 - hammingLength/2;
+    // We can get the window function from the output of Windowing algorithm
+    // with the unity input.
+    unsigned int ilen = max((2 * (floor(length) / 2)), (Real)_minimumKernelSize);
 
-    for (int i=0; i<(int)hammingLength; i++) {
-      const double angle = 2 * M_PI * _dQ * i/hammingLength;
-      const double real = cos(angle);
-      const double imag = sin(angle);
-      const double absol = hamming(hammingLength, i)/hammingLength;
-      hammingWindow[origin + i] = complex <double>(absol*real, absol*imag);
+    vector<Real> unity(ilen, 1.);
+    vector<Real> window;
+    _windowing->input("frame").set(unity);
+    _windowing->output("frame").set(window);
+    _windowing->compute();
+
+    // Make sure that every filter is below the Nyquist frequency.
+    // It is enough if we check the higher channel.
+    if (k == (int)_numberBins - 1) {
+      Real windowBW = length * sumSquare(window) / pow(sum(window), 2);
+      Real passBand = frequency * (1 + 0.5 * windowBW / _Q);
+      if (passBand > _sampleRate / 2){
+        ostringstream msg;
+        msg << "ConstantQ: Attempted to create a filter whose pass-band (" << passBand
+            << " Hz) is beyond the Nyquist frequency (" << _sampleRate / 2
+            << " Hz). A possible fix is to reduce the 'numberBins' parameter";
+        throw EssentiaException(msg.str());
+      }
     }
 
-    for (int i=0; i <(int)_FFTLength/2; ++i) {
-      complex<double> temp = hammingWindow[i];
-      hammingWindow[i] = hammingWindow[i + _FFTLength/2];
-      hammingWindow[i + _FFTLength/2] = temp;
+    // Compute the threshold directly from the window.
+    vector<Real> sortedWindow(window);
+    sort(sortedWindow.begin(), sortedWindow.end());
+    
+    // Notice that Essentia's windows are scaled by 2 so
+    // first we have to renormalize.
+    normalizeSum(sortedWindow);
+    
+    // If we do not manage to compute a threshold the default value
+    // is high so the sparse matrix will be empty to make us notice
+    // that something went wrong.
+    Real threshold = 1;
+    Real cumSum = 0;
+  
+    // Look for the index of the desired quantile.
+    for (size_t i = 0; i <sortedWindow.size(); i++) {
+      cumSum += sortedWindow[i];
+
+      if (cumSum > _threshold) {
+        threshold = sortedWindow[i];
+        break;
+      }
     }
 
-    // Convert to Real and compute FFT of the hamming window
-    vector<complex<Real> >  hammingWindowR(hammingWindow.begin(), hammingWindow.end());
-    _fft->input("frame").set(hammingWindowR);
-    _fft->output("fft").set(transfHammingWindowR);
-    _fft->compute();
-
-    // Convert to double for better precision
-    vector<complex<double> > transfHammingWindow(transfHammingWindowR.begin(), transfHammingWindowR.end());
-
-    // Increase the output size of the FFT to _FFTLength by mirroring the data
-    int ind = transfHammingWindow.size() - 1;
-    transfHammingWindow.resize(_FFTLength);
-    for (int i=0; i <(int)_FFTLength/2; ++i) {
-      transfHammingWindow.push_back(transfHammingWindow[ind--]);
+    // Compute temporal kernels
+    binKernel.assign(_windowSize, complex<Real>(0, 0));
+    unsigned origin = _zeroPhase ? _windowSize - (int)ilen / 2 : _windowSize / 2 - (int)ilen / 2;
+    
+    Real a = -(Real)ilen / 2.0;
+    for (unsigned i = 0; i < ilen; i++, a++) {
+      const double angle = 2.0 * M_PI * a * frequency / _sampleRate;
+      const unsigned int idx = _zeroPhase ? (origin + i) % _windowSize : origin + i;
+      binKernel[idx] = window[i] * complex<Real>(cos(angle), sin(angle));
     }
 
-    for (int j=0; j<(int)_FFTLength; j++) {
-      // Perform thresholding
-      const double squaredBin = squaredModule( transfHammingWindow[j]);
-      if (squaredBin <= squareThreshold) continue;
+    // Compute FFT of temporal kernel.
+    _fftc->input("frame").set(binKernel);
+    _fftc->output("fft").set(binKernelFFT);
+    _fftc->compute();
 
-      // Insert non-zero position indexes, doubled because they are floats
-      sk->_sparseKernelIs.push_back(j);
-      sk->_sparseKernelJs.push_back(k);
+    for (size_t j=0; j<binKernelFFT.size(); j++) {
+      // Perform thresholding to make the kernel sparse: keep values with
+      // absolute value above the threshold.
+      if (abs(binKernelFFT[j]) / 2 <= threshold) continue;
 
-      // Take conjugate, normalise and add to array sparkernel
-      sk->_sparseKernelReal.push_back(transfHammingWindow[j].real()/_FFTLength);
-      sk->_sparseKernelImag.push_back(-transfHammingWindow[j].imag()/_FFTLength);
+      // Insert non-zero position indexes.
+      _sparseKernel.i.push_back(j);
+      _sparseKernel.j.push_back(k);
+
+      // Take conjugate, normalize and add to array sparseKernel.
+      _sparseKernel.real.push_back(binKernelFFT[j].real() * length / ((Real)_windowSize * 2));
+      _sparseKernel.imag.push_back(-binKernelFFT[j].imag() * length / ((Real)_windowSize * 2));
     }
   }
-  m_sparseKernel = sk;
 }

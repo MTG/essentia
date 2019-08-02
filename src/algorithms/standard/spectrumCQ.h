@@ -36,15 +36,8 @@ class SpectrumCQ : public Algorithm {
 
   Algorithm* _constantq;
   Algorithm* _magnitude;
-  
+
   std::vector<std::complex<Real> > _CQBuffer;
-  
-  double _sampleRate;
-  double _minFrequency;
-  double _maxFrequency;
-  unsigned int _binsPerOctave;
-  double _threshold;
-  unsigned _octaves;
 
  
  public:
@@ -62,11 +55,15 @@ class SpectrumCQ : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("minFrequency", "the minimum frequency", "[1,inf)", 55.);
-    declareParameter("maxFrequency", "the maximum frequency", "[1,inf)", 7040.);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 24);    
-    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);  
-    declareParameter("threshold", "threshold value", "[0,inf)", 0.0005);       
+    declareParameter("minFrequency", "minimum frequency [Hz]", "[1,inf)", 32.7);
+    declareParameter("numberBins", "number of frequency bins, starting at minFrequency", "[1,inf)", 84);
+    declareParameter("binsPerOctave", "number of bins per octave", "[1,inf)", 12);
+    declareParameter("sampleRate", "FFT sampling rate [Hz]", "[0,inf)", 44100.);
+    declareParameter("threshold", "bins whose magnitude is below this quantile are discarded", "[0,1)", 0.01);
+    declareParameter("scale", "filters scale. Larger values use longer windows", "[0,inf)", 1.0);
+    declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    declareParameter("minimumKernelSize", "minimum size allowed for frequency kernels", "[2,inf)", 4);
+    declareParameter("zeroPhase", "a boolean value that enables zero-phase windowing. Input audio frames should be windowed with the same phase mode", "{true,false}", true);
   }
 
   void configure();

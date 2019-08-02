@@ -26,26 +26,17 @@ using namespace standard;
 
 const char* SpectrumCQ::name = "SpectrumCQ";
 const char* SpectrumCQ::category = "Tonal";
-const char* SpectrumCQ::description = DOC("This algorithm computes the Constant Q Spectrogram.\n"
-"\n");
+const char* SpectrumCQ::description = DOC("This algorithm computes the magnitude of the Constant-Q spectrum. See ConstantQ algorithm for more details.\n");
 
 
 void SpectrumCQ::configure() {
-  
-  _sampleRate = parameter("sampleRate").toDouble();
-  _minFrequency = parameter("minFrequency").toDouble();
-  _maxFrequency = parameter("maxFrequency").toDouble();
-  _binsPerOctave = parameter("binsPerOctave").toInt();
-  _threshold = parameter("threshold").toDouble();
 
-  // set temp port here as it's not gonna change between consecutive calls
-  // to compute()
-  _constantq->configure("minFrequency", _minFrequency,
-                        "maxFrequency", _maxFrequency,
-                        "binsPerOctave", _binsPerOctave,
-                        "sampleRate", _sampleRate,
-                        "threshold", _threshold);
-  
+  _constantq->configure(INHERIT("minFrequency"), INHERIT("numberBins"),
+                        INHERIT("binsPerOctave"), INHERIT("sampleRate"),
+                        INHERIT("threshold"), INHERIT("scale"),
+                        INHERIT("windowType"), INHERIT("minimumKernelSize"),
+                        INHERIT("zeroPhase"));
+
   _constantq->output("constantq").set(_CQBuffer);
   _magnitude->input("complex").set(_CQBuffer);
 }
@@ -55,14 +46,12 @@ void SpectrumCQ::compute() {
   const vector<Real>& signal = _signal.get();
   vector<Real>& spectrumCQ = _spectrumCQ.get();
 
-  // Convert signal from Real to complex
-  vector<complex<Real> > signalC(signal.begin(), signal.end());
 
-  // Compute ConstantQ
-  _constantq->input("frame").set(signalC);
+  // Compute ConstantQ.
+  _constantq->input("frame").set(signal);
   _constantq->compute();
   
-  // Compute magnitude spectrum
+  // Compute magnitude spectrum.
   _magnitude->output("magnitude").set(spectrumCQ);
   _magnitude->compute();
 }

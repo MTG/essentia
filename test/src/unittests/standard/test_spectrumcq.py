@@ -21,10 +21,10 @@
 from essentia_test import *
 
 
-class TestConstantQ(TestCase):
+class TestSpectrumCQ(TestCase):
 
     def testRegression(self):
-        expected = numpy.load(join(filedir(), 'constantq/constantq_values.npy'))
+        expected = numpy.load(join(filedir(), 'constantq/spectrumcq_values.npy'))
 
         frame_size = 32768
         hop_size = frame_size // 4
@@ -32,14 +32,14 @@ class TestConstantQ(TestCase):
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded/vignesh.wav'))()
 
         w = Windowing()
-        cqt = ConstantQ()
+        cqt = SpectrumCQ()
 
         predicted = numpy.array([cqt(w(frame)) for frame in FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size)])
 
         self.assertAlmostEqualVector(numpy.mean(predicted, axis=0), expected, 1e-7)
 
     def testRegressionNoZeroPhase(self):
-        expected = numpy.load(join(filedir(), 'constantq/constantq_values.npy'))
+        expected = numpy.load(join(filedir(), 'constantq/spectrumcq_values.npy'))
 
         frame_size = 32768
         hop_size = frame_size // 4
@@ -48,7 +48,7 @@ class TestConstantQ(TestCase):
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded/vignesh.wav'))()
 
         w = Windowing(zeroPhase=zeroPhase)
-        cqt = ConstantQ(zeroPhase=zeroPhase)
+        cqt = SpectrumCQ(zeroPhase=zeroPhase)
 
         predicted = numpy.array([cqt(w(frame)) for frame in FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size)])
 
@@ -57,28 +57,28 @@ class TestConstantQ(TestCase):
     def testZero(self):
         inputSize = 2**15
         signalZero = [0] * inputSize
-        output = numpy.mean(numpy.abs(ConstantQ()(signalZero)))
+        output = numpy.mean(numpy.abs(SpectrumCQ()(signalZero)))
         self.assertEqual(0, output)
 
     def testEmpty(self):
         # Checks whether an empty input vector yields an exception
-        self.assertComputeFails(ConstantQ(), [])
+        self.assertComputeFails(SpectrumCQ(), [])
 
     def testOne(self,):
         # Checks for a single value
-        self.assertComputeFails(ConstantQ(), [1])
+        self.assertComputeFails(SpectrumCQ(), [1])
 
     def testInvalidParam(self):
-        self.assertConfigureFails(ConstantQ(), {'minFrequency': 30000})  # Min bin above Nyquist
-        self.assertConfigureFails(ConstantQ(), {'numberBins': 0})  # No CQ bins
-        self.assertConfigureFails(ConstantQ(), {'binsPerOctave': 0})  # No CQ bins
-        self.assertConfigureFails(ConstantQ(), {'sampleRate': 400}) # With this sample rate the kernels are out of range
-        self.assertConfigureFails(ConstantQ(), {'numberBins': 10 * 12})  # Max bin above Nyquist
-        self.assertConfigureFails(ConstantQ(), {'minimumKernelSize': 1})  # FFT can not be done
-        self.assertConfigureFails(ConstantQ(), {'scale': 0})  # Kernels of size 0
+        self.assertConfigureFails(SpectrumCQ(), {'minFrequency': 30000})  # Min bin above Nyquist
+        self.assertConfigureFails(SpectrumCQ(), {'numberBins': 0})  # No CQ bins
+        self.assertConfigureFails(SpectrumCQ(), {'binsPerOctave': 0})  # No CQ bins
+        self.assertConfigureFails(SpectrumCQ(), {'sampleRate': 400}) # With this sample rate the kernels are out of range
+        self.assertConfigureFails(SpectrumCQ(), {'numberBins': 10 * 12})  # Max bin above Nyquist
+        self.assertConfigureFails(SpectrumCQ(), {'minimumKernelSize': 1})  # FFT can not be done
+        self.assertConfigureFails(SpectrumCQ(), {'scale': 0})  # Kernels of size 0
 
 
-suite = allTests(TestConstantQ)
+suite = allTests(TestSpectrumCQ)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
