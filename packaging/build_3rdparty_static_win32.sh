@@ -8,3 +8,6 @@ rm -rf bin dynamic include lib share
 ./build_libsamplerate.sh
 ./build_taglib.sh
 ./build_yaml.sh
+./build_chromaprint.sh
+
+rm -rf bin dynamic share
