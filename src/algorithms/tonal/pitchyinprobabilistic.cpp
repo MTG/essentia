@@ -91,7 +91,6 @@ AlgorithmStatus PitchYinProbabilistic::process() {
 
   const vector<vector<Real> >& pitchCandidates = _pool.value<vector<vector<Real> > >("frequencies");
   const vector<vector<Real> >& probabilities = _pool.value<vector<vector<Real> > >("probabilities");
-  const vector<Real>& _RMS = _pool.value<vector<Real> >("RMS");
 
   vector<Real> tempPitch;
   _yinProbabilitiesHMM->input("pitchCandidates").set(pitchCandidates);
