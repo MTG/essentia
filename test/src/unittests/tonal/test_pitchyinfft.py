@@ -164,6 +164,29 @@ class TestPitchYinFFT(TestCase):
         pitch = pitch[8:-5]
         expected_pitch = expected_pitch[8:-5]
 
+    def testARealCaseAubioWithToleranceComparison(self):
+        # Check that the tolerance feature works
+        # as in the Aubio implementation.
+
+        frameSize = 4096
+        sr = 44100
+        hopSize = 512
+        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
+        audio = MonoLoader(filename=filename, sampleRate=44100)()
+        frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize, startFromZero=True)
+        win = Windowing(normalized=False, zeroPhase=False)
+        spec = Spectrum()
+        pitchDetect = PitchYinFFT(frameSize=frameSize, sampleRate=sr, tolerance=0.4)
+
+        pitch = array([pitchDetect(spec(win(frame)))[0] for frame in frames])
+
+        expected_pitch = numpy.load(join(filedir(), 'pitchyinfft/vignesh_pitch_aubio_with_tolerance.npy'))
+
+        # Trim the first and last frames as the
+        # system behavior is unestable.
+        pitch = pitch[8:-5]
+        expected_pitch = expected_pitch[8:-5]
+
         self.assertAlmostEqualVector(pitch, expected_pitch, 1e-3)
 
 
