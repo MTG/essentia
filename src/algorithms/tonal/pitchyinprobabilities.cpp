@@ -284,7 +284,7 @@ void PitchYinProbabilities::compute() {
     
   Real nonPeakProb = 1.0;
   if (sumProb > 0) {
-    for (int i = minTau; i < maxTau; ++i)
+    for (size_t i = minTau; i < maxTau; ++i)
     {
         _peakProb[i] = _peakProb[i] / sumProb * _peakProb[minInd];
         nonPeakProb -= _peakProb[i];

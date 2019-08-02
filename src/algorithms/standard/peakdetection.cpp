@@ -179,12 +179,12 @@ void PeakDetection::compute() {
     std::sort(peaks.begin(), peaks.end(),
           ComparePeakMagnitude<std::greater<Real>, std::less<Real> >());
 
-    int k = 0;
+    size_t k = 0;
     while (k < peaks.size() - 1) {
       minPos = peaks[k].position - _minPeakDistance;
       maxPos = peaks[k].position + _minPeakDistance;
 
-      for (int l = k+1; l < peaks.size(); l++) {
+      for (size_t l = k+1; l < peaks.size(); l++) {
         if (peaks[l].position > minPos && peaks[l].position < maxPos) 
           deletedPeaks.push_back(l);
       }
@@ -192,7 +192,7 @@ void PeakDetection::compute() {
       // delete peaks starting from the end so the indexes are not altered
       std::sort(deletedPeaks.begin(), deletedPeaks.end(), std::greater<int>());
       
-      for (int l = 0; l < deletedPeaks.size(); l++)
+      for (size_t l = 0; l < deletedPeaks.size(); l++)
         peaks.erase(peaks.begin() + deletedPeaks[l]);
         
       deletedPeaks.clear();
@@ -232,12 +232,12 @@ void PeakDetection::compute() {
 
 
   // we only want this many peaks
-  int nWantedPeaks = std::min((int)_maxPeaks, (int)peaks.size());
+  size_t nWantedPeaks = std::min((size_t)_maxPeaks, peaks.size());
 
   peakPosition.resize(nWantedPeaks);
   peakValue.resize(nWantedPeaks);
 
-  for (int k=0; k<nWantedPeaks; k++) {
+  for (size_t k=0; k<nWantedPeaks; k++) {
     peakPosition[k] = peaks[k].position;
     peakValue[k] = peaks[k].magnitude;
   }
