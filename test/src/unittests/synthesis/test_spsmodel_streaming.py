@@ -89,7 +89,7 @@ def analSpsModelStreaming(params, signal):
     smanal = es.SpsModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'],  stocf = params['stocf'])
     
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
 
 
@@ -133,7 +133,7 @@ def analsynthSpsModelStreaming(params, signal):
     smsyn = es.SpsModelSynth(sampleRate=params['sampleRate'], fftSize=synFFTSize, hopSize=params['hopSize'], stocf=params['stocf'])
 
     # add half window of zeros to input signal to reach same ooutput length
-    signal = numpy.append(signal, zeros(params['frameSize']/2))
+    signal = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
 
     # analysis
@@ -220,7 +220,7 @@ class TestSpsModel(TestCase):
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = (self.params['frameSize'] // 2)
 
         
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)

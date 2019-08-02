@@ -55,7 +55,7 @@ class PitchYinProbabilities : public Algorithm {
     declareOutput(_RMS, "RMS", "the output RMS value");
 
     _FFT = AlgorithmFactory::create("FFTC");
-    _IFFT = AlgorithmFactory::create("IFFTC");
+    _IFFT = AlgorithmFactory::create("FFTC");
     _RMSALGO = AlgorithmFactory::create("RMS");
   }
 

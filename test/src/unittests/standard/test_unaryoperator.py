@@ -52,7 +52,7 @@ class TestUnaryOperator(TestCase):
     def testLin2Db(self):
         self.assertAlmostEqualVector(
             UnaryOperator(type="lin2db")(self.testInput),
-            [0., 3.01029992, 4.77121258, 6.02059984, 5.3147893, -90., 50.00147629])
+            [0., 3.01029992, 4.77121258, 6.02059984, 5.3147893, -100., 50.00147629])
 
     def testDb2Lin(self):
         # remove the last element because it causes an overflow because it is
