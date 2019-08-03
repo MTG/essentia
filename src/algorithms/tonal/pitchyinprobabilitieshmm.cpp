@@ -66,8 +66,8 @@ void PitchYinProbabilitiesHMM::configure() {
   for (size_t iPitch = 0; iPitch < _nPitch; ++iPitch)
   {
     int theoreticalMinNextPitch = static_cast<int>(iPitch)-static_cast<int>(_transitionWidth / 2);
-    int minNextPitch = iPitch > _transitionWidth/2 ? iPitch - _transitionWidth / 2 : 0;
-    int maxNextPitch = iPitch < _nPitch - _transitionWidth / 2 ? iPitch + _transitionWidth / 2 : _nPitch - 1;
+    size_t minNextPitch = iPitch > _transitionWidth/2 ? iPitch - _transitionWidth / 2 : 0;
+    size_t maxNextPitch = iPitch < _nPitch - _transitionWidth / 2 ? iPitch + _transitionWidth / 2 : _nPitch - 1;
     
     // WEIGHT VECTOR
     Real weightSum = 0;

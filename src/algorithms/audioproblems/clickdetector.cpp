@@ -60,7 +60,7 @@ void ClickDetector::configure() {
   _startProc = int(_frameSize / 2 - _hopSize / 2);
   _endProc = int(_frameSize / 2 + _hopSize / 2);
 
-  if (_startProc < _order) {
+  if (_startProc < (uint)_order) {
     uint unproc = _order - _startProc;
     uint maxHop = _frameSize - 2 * _order;
     E_INFO("ClickDetector: non-optimal 'HopSize' parameter. The " << unproc << " first samples will not be processed."
