@@ -161,11 +161,17 @@ void PitchYinFFT::compute() {
     _yin[tau] *= tau/tmp;
   }
 
-  if (*min_element(_yin.begin(), _yin.end()) >= _tolerance) {
-    pitch = 0.0;
-    pitchConfidence = 0.0;
-    return;
+  // this tolerance threshold only works when it is lower than 1.0.
+  // This way we preserve the legacy behavior by default without any extra
+  // overhead unless it is specified by the user
+  if (_tolerance < 1.0) {
+    if (*min_element(_yin.begin(), _yin.end()) >= _tolerance) {
+      pitch = 0.0;
+      pitchConfidence = 0.0;
+      return;
+    }
   }
+
   // search for argmin within minTau/maxTau range
   if (_interpolate) {
     // yin values are in the range [0,inf], because we want to detect the minima and peak detection detects the maxima,
