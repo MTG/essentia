@@ -35,17 +35,25 @@ class TestSuperFluxExtractor(TestCase):
 
     def testImpulse(self):
         # Given an impulse should return its position
-        signal = zeros(44100*2)
+        sampleRate = 44100
+        frameSize = 2048
+        hopSize = 256
+        signal = zeros(sampleRate * 2)
         # impulses at 0:30 and 1:00
         signal[22050] = 1.
         signal[44100] = 1.
 
         expected = [0.5, 1.]
-        result = SuperFluxExtractor(frameSize=2048, hopSize=256)(signal)
 
-        # TODO: what is the allowed precision? I would expect it to be 256./44100
-        #       in an ideal case, but what about practice?
-        self.assertAlmostEqualVectorAbs(result, expected, 256./44100)
+        result = SuperFluxExtractor(sampleRate=sampleRate, frameSize=frameSize,
+                                    hopSize=hopSize)(signal)
+
+        # SuperfluxPeaks has a parameter 'combine' which is a threshold that
+        # puts together consecutive peaks. This means that a peak will be
+        # detected as soon as it is seen by a frame. Thus, the frame size
+        # also influences the expected precision of the algorithm.
+        precission = (hopSize + frameSize) / sampleRate
+        self.assertAlmostEqualVectorAbs(result, expected, precission)
 
 
 suite = allTests(TestSuperFluxExtractor)

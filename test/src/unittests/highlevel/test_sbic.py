@@ -148,7 +148,9 @@ class TestSBic(TestCase):
 
         features_transpose = array(features_transpose)
         segments = SBic(cpw=1.5, size1=1000, inc1=300, size2=600, inc2=50)(features_transpose)
-        expected = [0., 49., 997., 1296., 1845., 2994., 3943., 4196.]
+        # The expected values were recomputed from commit
+        # 68548001e93c094537b7364c99e63c5402fdf744
+        expected = [0., 49., 997., 1746., 2895., 3344., 3943., 4196.]
         self.assertEqualVector(segments, expected)
 
     def atestMinLengthEqualToAudioFrames(self):

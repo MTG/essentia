@@ -109,7 +109,7 @@ def computeResetCompute(algo, *args, **kwargs):
                 'BandReject', 'EqualLoudness', 'MovingAverage' ]
     special = [ 'FrameCutter', 'OverlapAdd', 'TempoScaleBands', 'TempoTap', 'TempoTapTicks',
                 'Panning','OnsetDetection', 'MonoWriter', 'Flux', 'StartStopSilence',
-                'LogSpectrum', 'ClickDetector', 'SNR', 'SaturationDetector' ]
+                'LogSpectrum', 'ClickDetector', 'SNR', 'SaturationDetector', 'Welch' ]
 
     if algo.name() in audioLoaders + filters + special:
         return algo.normalCompute(*args, **kwargs)

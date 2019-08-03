@@ -53,7 +53,7 @@ class TestOnsets(TestCase):
                 # Onsets() outputs a warning instead of exception from now on
                 # self.assertConfigureFails(Onsets(), { 'frameRate': frameRate })
                 pass
-            size /= 2
+            size //= 2
 
     def testImpulse(self):
         # Given an impulse should return its position

@@ -259,7 +259,7 @@ class TestRhythmExtractor(TestCase):
         #self.assertEqualVector(result[4], expectedRubatoStop)
         
         # impulse train at 90bpm no offset
-        impulseTrain90 = self.pulseTrain(bpm=60., sr=44100., offset=0., dur=20.)
+        impulseTrain90 = self.pulseTrain(bpm=90., sr=44100., offset=0., dur=20.)
         
         # impulse train at 200bpm with offset
         impulseTrain200 = self.pulseTrain(bpm=200., sr=44100., offset=.2, dur=10.)
@@ -283,7 +283,7 @@ class TestRhythmExtractor(TestCase):
         self.assertAlmostEqual(result[0], expectedBpm, .5)
 
         # ticks
-        self.assertVectorWithinVectorFixedPrecision(result[1], expectedTicks, 1)
+        self.assertVectorWithinVector(result[1], expectedTicks, 0.03)
 
         # bpm estimates
         for i in range(len(result[2])):
@@ -314,10 +314,8 @@ class TestRhythmExtractor(TestCase):
         # bpm estimates
         self.assertVectorWithinVector(result[2], expectedBpmVector, 0.5)
         
-        # ticks # TODO ticks results fail test
         self.assertVectorWithinVector(result[1], expectedTicks, 0.03)
 
-        # bpm intervals # TODO ticks results fail test
         self.assertVectorWithinVector(result[3], expectedBpmIntervals, 0.5)
         
         ## rubato start/stop

@@ -106,15 +106,20 @@ class TestPitchYin(TestCase):
         self.assertConfigureFails(PitchYin(), {'frameSize' : 1})
         self.assertConfigureFails(PitchYin(), {'sampleRate' : 0})
 
-    # TODO: generate pitchyin/pitch_mozart_c_major_30sec.txt 
-    #       check if estimations actually have some sense
-    #       it is better to have real case using a monophonic audio 
-
     def testARealCase(self):
+        # The expected values were recomputed from commit
+        # ded38eaa7e4c081a73c4e16fffec491fe5ac9ab4
+        #
+        # The expeted values were compared with the vamp pYIN
+        # implementation of the YIN algorithm producing very
+        # similar values.
+        #
+        # https://code.soundsoftware.ac.uk/projects/pyin
+
         frameSize = 1024
         sr = 44100
         hopSize = 512
-        filename = join(testdata.audio_dir, 'recorded','mozart_c_major_30sec.wav')
+        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
         frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
         pitchDetect = PitchYin(frameSize=frameSize, sampleRate = sr)
@@ -125,11 +130,44 @@ class TestPitchYin(TestCase):
             pitch += [f]
             confidence += [conf]
 
-        expected_pitch = readVector(join(filedir(), 'pitchyin/pitch_mozart_c_major_30sec.txt'))
-        expected_conf = readVector(join(filedir(), 'pitchyin/pitchconfidence_mozart_c_major_30sec.txt'))
+        expected_pitch = numpy.load(join(filedir(), 'pitchyin/vignesh_pitch.npy'))
+        expected_conf = numpy.load(join(filedir(), 'pitchyin/vignesh_confidance.npy'))
 
         self.assertAlmostEqualVector(pitch, expected_pitch)
-        self.assertAlmostEqualVector(confidence, expected_conf, 5e-5)
+        self.assertAlmostEqualVector(confidence, expected_conf, 5e-6)
+
+    def testARealCaseVampComparison(self):
+        # Compare with the results obtained with the vamp pYIN
+        # implementation of the YIN algorithm
+        # https://code.soundsoftware.ac.uk/projects/pyin
+
+        frameSize = 2048
+        sr = 44100
+        hopSize = 256
+        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
+        audio = MonoLoader(filename=filename, sampleRate=44100)()
+        frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
+        pitchDetect = PitchYin(frameSize=frameSize, sampleRate=sr,
+                               minFrequency=40, maxFrequency=1600)
+
+        pitch = array([pitchDetect(frame)[0] for frame in frames])
+
+        expected_pitch = numpy.load(join(filedir(), 'pitchyin/vignesh_pitch_vamp.npy'))
+
+        # The VAMP implementation provides voiced/unvoiced information
+        # while our system does not. Thus set to 0 unvoiced frames in
+        # both cases to exclude them from the comparison.
+        unvoiced_idx = numpy.where(expected_pitch <= 0)[0]
+        expected_pitch[unvoiced_idx] = 0
+        pitch[unvoiced_idx] = 0
+
+        # Trim the first and last frames as the
+        # system behavior is unstable.
+        pitch = pitch[8:-5]
+        expected_pitch = expected_pitch[8:-5]
+
+        self.assertAlmostEqualVector(pitch, expected_pitch, 5e-2)
+
 
 suite = allTests(TestPitchYin)
 

@@ -83,7 +83,7 @@ def analSineModelStreaming(params, signal):
     smanal = es.SineModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
     
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
     insignal.data >> fcut.signal
     fcut.frame >> w.frame
@@ -118,11 +118,11 @@ def analsynthSineModelStreaming(params, signal):
     smanal = es.SineModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
     smsyn = es.SineModelSynth(sampleRate = params['sampleRate'], fftSize = params['frameSize'], hopSize = params['hopSize'])
     ifft = es.IFFT(size = params['frameSize']);
-    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'], gain = 1./params['frameSize']);
+    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
 
 
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
     # analysis
     insignal.data >> fcut.signal
@@ -212,10 +212,11 @@ class TestSineModel(TestCase):
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = (self.params['frameSize'] // 2)
         
-        numpy.savetxt('sine.txt',signal[halfwin:-halfwin])
-        numpy.savetxt('sine_out.txt',outsignal[halfwin:-halfwin])
+        # Save sines in a text file. Use only for debugging purposes.
+        #numpy.savetxt('sine.txt',signal[halfwin:-halfwin])
+        #numpy.savetxt('sine_out.txt',outsignal[halfwin:-halfwin])
         
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 

@@ -358,13 +358,6 @@ void NSGIConstantQ::compute() {
   _ifft->output("frame").set(output);
   _ifft->compute();
 
-
-  reverse(output.begin() + 1, output.end());
-
-  for (int i = 0; i < (int)output.size(); ++i) {
-    output[i] /= (complex<Real>)_NN;
-  }
-
   signal.resize(_NN);
   for (int i = 0; i < _NN; ++i) {
     signal[i] = real(output[i]);
