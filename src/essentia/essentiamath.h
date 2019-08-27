@@ -725,10 +725,14 @@ inline Real hz2cents(Real hz) {
 }
 
 inline int argmin(const std::vector<Real>& input) {
+  if (input.empty())
+    throw EssentiaException("trying to get argmin of empty array");
   return std::min_element(input.begin(), input.end()) - input.begin();
 }
 
 inline int argmax(const std::vector<Real>& input) {
+  if (input.empty())
+    throw EssentiaException("trying to get argmax of empty array");
   return std::max_element(input.begin(), input.end()) - input.begin();
 }
 
