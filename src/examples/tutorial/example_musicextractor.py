@@ -1,3 +1,4 @@
+from __future__ import print_function
 from essentia.standard import MusicExtractor, YamlOutput
 from essentia import Pool
 from argparse import ArgumentParser
