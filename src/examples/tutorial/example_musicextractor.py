@@ -1,3 +1,4 @@
+from __future__ import print_function
 from essentia.standard import MusicExtractor, YamlOutput
 from essentia import Pool
 from argparse import ArgumentParser
@@ -100,7 +101,7 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
         try:
             poolStats, poolFrames = extractor(audio_file)
 
-        except Exception, e:
+        except Exception as e:
             print("Error processing", audio_file, ":", str(e))
             errors += 1
             continue
@@ -126,8 +127,8 @@ def analyze_dir(audio_dir, output_json=None, output_dir=None, audio_types=None, 
             if store_frames:
                 YamlOutput(filename=sig_file + '.frames.sig')(poolFrames)
 
-    print
-    print "Analysis done.", errors, "files have been skipped due to errors"
+    print()
+    print("Analysis done.", errors, "files have been skipped due to errors")
 
     # save to json
     if output_json:
