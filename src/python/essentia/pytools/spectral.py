@@ -17,6 +17,7 @@
 
 import numpy as np
 import essentia.standard as es
+from essentia import Pool, array
 
 
 def nsgcqgram(audio, frameSize=8192, transitionSize=1024, minFrequency=65.41,
@@ -243,3 +244,92 @@ def nsgcq_overlap_add(cq):
         cqOverlap[:, jj * hopSize + index] += cq[jj]
 
     return cqOverlap[:, hopSize:]
+
+
+
+def hpcpgram(audio, sampleRate=44100, frameSize=4096, hopSize=2048, numBins=12,
+            windowType='blackmanharris62', minFrequency=100, maxFrequency=4000, 
+            whitening=False, maxPeaks=100, magnitudeThreshold=1e-05, **kwargs):
+    """
+    Compute Harmonic Pitch Class Profile (HPCP) Grams for overlapped frames of a given input audio signal 
+
+    For additional list of parameters of essentia standard mode HPCP please refer to 
+    http://essentia.upf.edu/documentation/reference/std_HPCP.html
+
+    References:
+    [1]. Gómez, E. (2006). Tonal Description of Polyphonic Audio for Music Content Processing.
+
+    Inputs
+        audio (2d vector): audio signal
+
+    Parameters:
+        sampleRate : (real ∈ (0, ∞), default = 44100) :
+        the sampling rate of the audio signal [Hz]
+
+        frameSize (integer ∈ [1, ∞), default = 1024) :
+        the output frame size
+        
+        hopSize (integer ∈ [1, ∞), default = 512) :
+        the hop size between frames
+
+        numBins : (integer ∈ [12, ∞), default = 12) :
+        the size of the output HPCP (must be a positive nonzero multiple of 12)
+
+        windowType (string ∈ {hamming, hann, hannnsgcq, triangular, square, blackmanharris62, blackmanharris70, blackmanharris74, blackmanharris92}, default = blackmanharris62) :
+        the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'
+
+        maxFrequency : (real ∈ (0, ∞), default = 4000) :
+        the maximum frequency that contributes to the SpectralPeaks and HPCP algorithms computation [Hz] (the difference between the max and split frequencies must not be less than 200.0 Hz)
+
+        minFrequency : (real ∈ (0, ∞), default = 100) :
+        the minimum frequency that contributes to the SpectralPeaks and HPCP algorithm computation [Hz] (the difference between the min and split frequencies must not be less than 200.0 Hz)
+
+        maxPeaks (integer ∈ [1, ∞), default = 100) :
+        the maximum number of returned peaks while calculating SpectralPeaks
+
+        magnitudeThreshold (real ∈ (-∞, ∞), default = 0) :
+        peaks below this given threshold are not outputted while calculating Spectral Peaks
+
+        whitening : (boolean (True, False), default = False)
+        Optional step of computing spectral whitening to the output from speakPeak magnitudes
+
+        kwargs : additional keyword arguments
+        Arguments to parameterize HPCP alogithms.
+        see standard mode HPCP algorithm (http://essentia.upf.edu/documentation/reference/std_HPCP.html).
+
+
+    Returns: hpcpgram of overlapped frames of input audio signal (2D vector) 
+
+    """
+    frameGenerator = es.FrameGenerator(array(audio), frameSize=frameSize, hopSize=hopSize)
+    window = es.Windowing(type=windowType)
+    spectrum = es.Spectrum()
+    # Refer http://essentia.upf.edu/documentation/reference/std_SpectralPeaks.html
+    spectralPeaks = es.SpectralPeaks(magnitudeThreshold=magnitudeThreshold,
+                                     maxFrequency=maxFrequency,
+                                     minFrequency=minFrequency,
+                                     maxPeaks=maxPeaks,
+                                     sampleRate=sampleRate)
+    # http://essentia.upf.edu/documentation/reference/std_SpectralWhitening.html
+    spectralWhitening = es.SpectralWhitening(maxFrequency= maxFrequency,
+                                            sampleRate=sampleRate)
+    # http://essentia.upf.edu/documentation/reference/std_HPCP.html
+    hpcp = es.HPCP(sampleRate=sampleRate,
+                   maxFrequency=maxFrequency,
+                   minFrequency=minFrequency,
+                   size=numBins, **kwargs)
+    pool = Pool()
+    #compute hpcp for each frame and add the results to the pool
+    for frame in frameGenerator:
+        spectrum_mag = spectrum(window(frame))
+        frequencies, magnitudes = spectralPeaks(spectrum_mag)
+        if whitening:
+            w_magnitudes = spectralWhitening(spectrum_mag,
+                                            frequencies,
+                                            magnitudes)
+            hpcp_vector = hpcp(frequencies, w_magnitudes)
+        else:
+            hpcp_vector = hpcp(frequencies, magnitudes)
+        pool.add('tonal.hpcp', hpcp_vector)
+    return pool['tonal.hpcp']
+
