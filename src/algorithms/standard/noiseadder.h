@@ -24,6 +24,7 @@
 
 #ifdef CPP_11
 #  include <random>
+#  include <ctime>
 #else
 // The implementation for non C++11 compilers uses the MersenneTwister.h file
 // downloaded from:

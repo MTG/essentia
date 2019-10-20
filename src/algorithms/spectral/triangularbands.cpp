@@ -35,20 +35,21 @@ void TriangularBands::configure() {
   _nBands = int(_bandFrequencies.size() - 2);
   _inputSize = parameter("inputSize").toReal();
   _sampleRate = parameter("sampleRate").toReal();
-  _normalization = parameter("normalize").toLower();
+  _normalize = parameter("normalize").toLower();
   _type = parameter("type").toLower();
   if ( _bandFrequencies.size() < 2 ) {
     throw EssentiaException("TriangularBands: the 'frequencyBands' parameter contains only one element (at least two elements are required)");
   }
-  
+
+  if (_bandFrequencies.front() < 0) {
+    throw EssentiaException("TriangularBands: the 'frequencyBands' parameter contains a negative value");
+  }
   for (int i=1; i < (int)_bandFrequencies.size(); ++i) {
-    if (_bandFrequencies[i] < 0) {
-      throw EssentiaException("TriangularBands: the 'frequencyBands' parameter contains a negative value");
-    }
     if (_bandFrequencies[i-1] >= _bandFrequencies[i]) {
       throw EssentiaException("TriangularBands: the values in the 'frequencyBands' parameter are not in ascending order or there exists a duplicate value");
     }
   }
+
   _isLog = parameter("log").toBool();
   setWeightingFunctions(parameter("weighting").toString());
   createFilters(_inputSize);
@@ -63,12 +64,9 @@ void TriangularBands::compute() {
     throw EssentiaException("TriangularBands: the size of the input spectrum is not greater than one");
   }
 
-  int filterSize = _nBands;
-  int spectrumSize = spectrum.size();
-
-  if (_filterCoefficients.empty() || int(_filterCoefficients[0].size()) != spectrumSize) {
-      E_INFO("TriangularBands: input spectrum size (" << spectrumSize << ") does not correspond to the \"inputSize\" parameter (" << _filterCoefficients[0].size() << "). Recomputing the filter bank.");
-    createFilters(spectrumSize);
+  if (_filterCoefficients.empty() || _filterCoefficients[0].size() != spectrum.size()) {
+      E_INFO("TriangularBands: input spectrum size (" << spectrum.size() << ") does not correspond to the \"inputSize\" parameter (" << _filterCoefficients[0].size() << "). Recomputing the filter bank.");
+    createFilters(spectrum.size());
   }
 
   Real frequencyScale = (_sampleRate / 2.0) / (spectrum.size() - 1);
@@ -76,18 +74,20 @@ void TriangularBands::compute() {
   bands.resize(_nBands);
   fill(bands.begin(), bands.end(), (Real) 0.0);
 
-  for (int i=0; i<filterSize; ++i) {
+  for (int i=0; i<_nBands; ++i) {
 
-    int jbegin = int(_bandFrequencies[i] / frequencyScale + 0.5);
-    int jend = int(_bandFrequencies[i+2] / frequencyScale + 0.5);
+    // Find margins for FFT bins to iterate through
+    // (all bins fall inside the triangle and therefore have non-zero weights).
+    int jbegin = ceil(_bandFrequencies[i] / frequencyScale);
+    int jend = floor(_bandFrequencies[i+2] / frequencyScale);
 
-    for (int j=jbegin; j<jend; ++j) {
+    for (int j=jbegin; j<=jend; ++j) {
 
-      if (_type == "power"){
+      if (_type == "power") {
         bands[i] += (spectrum[j] * spectrum[j]) * _filterCoefficients[i][j];
       }
 
-      if (_type == "magnitude"){
+      if (_type == "magnitude") {
         bands[i] += (spectrum[j]) * _filterCoefficients[i][j];
       }
 
@@ -120,67 +120,69 @@ void TriangularBands::createFilters(int spectrumSize) {
     throw EssentiaException("TriangularBands: Filter bank cannot be computed from a spectrum with less than 2 bins");
   }
 
-  int filterSize = _nBands;
+  _filterCoefficients = vector<vector<Real> >(_nBands, vector<Real>(spectrumSize, 0.0));
 
-  _filterCoefficients = vector<vector<Real> >(filterSize, vector<Real>(spectrumSize, 0.0));
+  Real frequencyScale = (_sampleRate / 2.0) / (spectrumSize - 1);
 
-  Real frequencyScale = ( _sampleRate / 2.0) / (spectrumSize - 1);
-
-  for (int i=0; i<filterSize; ++i) {
+  for (int i=0; i<_nBands; ++i) {
     Real fstep1 = (*_weighter)(_bandFrequencies[i+1]) - (*_weighter)(_bandFrequencies[i]);
     Real fstep2 = (*_weighter)(_bandFrequencies[i+2]) - (*_weighter)(_bandFrequencies[i+1]);
 
-    int jbegin = int(_bandFrequencies[i] / frequencyScale + 0.5);
-    int jend = int(_bandFrequencies[i+2] / frequencyScale + 0.5);
+    // Find margins for FFT bins to iterate through
+    // (all bins fall inside the triangle).
+    int jbegin = ceil(_bandFrequencies[i] / frequencyScale);
+    int jend = floor(_bandFrequencies[i+2] / frequencyScale);
 
-    if (jend-jbegin <= 1) {
-      throw EssentiaException("TriangularBands: the number of spectrum bins is insufficient for the specified number of triangular bands. Use zero padding to increase the number of FFT bins.");
+    if (jend >= spectrumSize) {
+      throw EssentiaException("TriangularBands: the 'frequencyBands' parameter contains a value above the Nyquist frequency (", _sampleRate/2, " Hz): ", _bandFrequencies.back());
     }
 
-    for (int j=jbegin; j<jend; ++j) {
+    Real weight = 0.;
+    for (int j=jbegin; j<=jend; ++j) {
       Real binfreq = j*frequencyScale;
       // in the ascending part of the triangle...
-      if ((binfreq >= _bandFrequencies[i]) && (binfreq < _bandFrequencies[i+1])) {
+      if (binfreq < _bandFrequencies[i+1]) {
         _filterCoefficients[i][j] = ((*_weighter)(binfreq) - (*_weighter)(_bandFrequencies[i])) / fstep1;
       }
       // in the descending part of the triangle...
-      else if ((binfreq >= _bandFrequencies[i+1]) && (binfreq < _bandFrequencies[i+2])) {
+      else if (binfreq >= _bandFrequencies[i+1]) {
         _filterCoefficients[i][j] = ((*_weighter)(_bandFrequencies[i+2]) - (*_weighter)(binfreq)) / fstep2;
       }
+      weight += _filterCoefficients[i][j];
     }
-  }
 
-  // normalize the filter weights
-  if ( _normalization.compare("unit_sum") == 0 ){
-    for (int i=0; i<filterSize; ++i) {
-      Real weight = 0.0;
+    if (!weight) {
+      throw EssentiaException("TriangularBands: the number of spectrum bins is insufficient for the specified number of triangular bands. Use zero padding to increase the number of FFT bins.");
+    }
 
-      for (int j=0; j<spectrumSize; ++j) {
-        weight += _filterCoefficients[i][j];
-      }
+    // Normalize the filter weights.
+    if (_normalize == "unit_tri") {
+      // Use theoretical triangular area instead of the actual sum of weights.
+      // This is similar to how the normalization is implemnented in Librosa.
+      weight = (fstep1 + fstep2) / 2.;
+    }
 
-      if (weight == 0) continue;
-
-      for (int j=0; j<spectrumSize; ++j) {
+    if (_normalize == "unit_sum" || _normalize == "unit_tri") {
+      for (int j=jbegin; j<=jend; ++j) {
         _filterCoefficients[i][j] = _filterCoefficients[i][j] / weight;
       }
     }
   }
 }
 
-void TriangularBands::setWeightingFunctions(std::string weighting){
+void TriangularBands::setWeightingFunctions(std::string weighting) {
 
-  if (weighting == "linear"){
+  if (weighting == "linear") {
       _weighter = hz2hz;
   }
-  else if (weighting == "slaneyMel"){
+  else if (weighting == "slaneyMel") {
     _weighter = hz2mel;
   }
-  else if (weighting == "htkMel"){
+  else if (weighting == "htkMel") {
     _weighter = hz2mel10;
   }
   else{
-    throw EssentiaException("Bad 'weighting' parameter");
+    throw EssentiaException("TriangularBands: Bad 'weighting' parameter");
   }
 }
 

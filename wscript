@@ -44,7 +44,7 @@ def options(ctx):
 
     ctx.add_option('--mode', action='store',
                    dest='MODE', default="release",
-                   help='debug or release')
+                   help='debug, release or default')
 
     ctx.add_option('--std', action='store',
                    dest='STD', default='c++11',
@@ -53,6 +53,10 @@ def options(ctx):
     ctx.add_option('--arch', action='store',
                    dest='ARCH', default="x64",
                    help='Target architecture when compiling on OSX: i386, x64 or FAT')
+
+    ctx.add_option('--no-msse', action='store_true',
+                   dest='NO_MSSE', default=False,
+                   help='never add compiler flags for msse')
 
     ctx.add_option('--cross-compile-mingw32', action='store_true',
                    dest='CROSS_COMPILE_MINGW32', default=False,
@@ -96,6 +100,7 @@ def configure(ctx):
     ctx.env.ALGOINCLUDE          = []
     ctx.env.INCLUDE_ALGOS        = ctx.options.INCLUDE_ALGOS
     ctx.env.FFT                  = ctx.options.FFT
+    ctx.env.NO_MSSE              = ctx.options.NO_MSSE
 
 
     if ctx.options.CROSS_COMPILE_MINGW32:
@@ -127,6 +132,7 @@ def configure(ctx):
     if (not ctx.options.EMSCRIPTEN and 
         not ctx.options.CROSS_COMPILE_ANDROID and 
         not ctx.options.CROSS_COMPILE_IOS and
+        not ctx.options.NO_MSSE and
         sys.platform != 'win32'):
         ctx.env.CXXFLAGS += ['-msse', '-msse2', '-mfpmath=sse']
 
@@ -141,8 +147,11 @@ def configure(ctx):
         print ('→ Building in release mode')
         ctx.env.CXXFLAGS += ['-O2']  # '-march=native' ] # '-msse3', '-mfpmath=sse' ]
 
+    elif ctx.options.MODE == 'default':
+        pass
+
     else:
-        raise ValueError('mode should be either "debug" or "release"')
+        raise ValueError('mode should be either "debug" or "release" or "default"')
 
     if not ctx.options.CROSS_COMPILE_MINGW32 and sys.platform != 'win32':
         # required if we want to use libessentia.a to be linked in the python bindings
@@ -227,10 +236,15 @@ def configure(ctx):
 
     if ctx.options.CROSS_COMPILE_ANDROID:
         print ("→ Cross-compiling for Android ARM")
-        ctx.find_program('arm-linux-androideabi-gcc', var='CC')
-        ctx.find_program('arm-linux-androideabi-g++', var='CXX')
-        ctx.find_program('arm-linux-androideabi-ar', var='AR')
-        ctx.env.LINKFLAGS += ['-Wl,-soname,libessentia.so']
+        # GCC is depricated for Android NDK
+        # Use clang with libc++
+        #ctx.find_program('arm-linux-androideabi-gcc', var='CC')
+        #ctx.find_program('arm-linux-androideabi-g++', var='CXX')
+        #ctx.find_program('arm-linux-androideabi-ar', var='AR')
+        ctx.find_program('clang', var='CC')
+        ctx.find_program('clang++', var='CXX')
+        ctx.env.CXXFLAGS += ['-std=c++11']
+        ctx.env.LINKFLAGS += ['-Wl,-soname,libessentia.so', '-latomic']
 
     if ctx.options.CROSS_COMPILE_IOS:
         print ("→ Cross-compiling for iOS (ARMv7 and ARM64)")

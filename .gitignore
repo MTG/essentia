@@ -7,7 +7,9 @@ build
 *.idb
 *~
 .waf-*
+.waf3-*
 .lock-waf*
+.vscode
 buildw/
 
 # hide the debian stuff
@@ -82,3 +84,6 @@ packaging/win32_3rdparty/bin
 packaging/win32_3rdparty/share
 packaging/win32_3rdparty/lib
 packaging/win32_3rdparty/include
+dist
+essentia.egg-info
+tmp

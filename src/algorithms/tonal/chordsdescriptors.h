@@ -39,6 +39,7 @@ class ChordsDescriptors : public Algorithm {
   Output<std::string> _chordsScale;
 
   static const char* circleOfFifth[];
+  static const char* circleOfFifthAlternativeNames[];
   int chordIndex(const std::string& chord);
   std::map<int, Real> chordsHistogram(const std::vector<std::string>& chords);
   std::map<int, Real> chordsHistogramNorm(std::map<int, Real>& histogram,

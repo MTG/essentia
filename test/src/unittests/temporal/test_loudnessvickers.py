@@ -24,13 +24,13 @@ from essentia_test import *
 class TestLoudnessVickers(TestCase):
 
     def testEmpty(self):
-        self.assertEqual(LoudnessVickers()([]), -90)
+        self.assertEqual(LoudnessVickers()([]), -100)
 
     def testOne(self):
         self.assertAlmostEqual(LoudnessVickers()([1]),-32.0094032288)
 
     def testSilence(self):
-        self.assertEqual(LoudnessVickers()([0]*2000), -90)
+        self.assertEqual(LoudnessVickers()([0]*2000), -100)
 
     def testInvalidSampleRate(self):
         self.assertConfigureFails(LoudnessVickers(), {'sampleRate': 44101})

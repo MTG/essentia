@@ -27,7 +27,7 @@ namespace standard {
 
 const char* MusicExtractor::name = "MusicExtractor";
 const char* MusicExtractor::category = "Extractors";
-const char* MusicExtractor::description = DOC("This algorithm is a wrapper for Music Extractor");
+const char* MusicExtractor::description = DOC("This algorithm is a wrapper for Music Extractor. See documentation for 'essentia_streaming_extractor_music'.");
 
 
 MusicExtractor::MusicExtractor() {
@@ -72,8 +72,8 @@ void MusicExtractor::configure() {
 
   loudnessFrameSize = parameter("loudnessFrameSize").toInt();
   loudnessHopSize = parameter("loudnessHopSize").toInt();
-  loudnessSilentFrames = parameter("loudnessSilentFrames").toLower();
-  loudnessWindowType = parameter("loudnessWindowType").toLower();
+  //loudnessSilentFrames = parameter("loudnessSilentFrames").toLower();
+  //loudnessWindowType = parameter("loudnessWindowType").toLower();
 
   rhythmMethod = parameter("rhythmMethod").toLower();
   rhythmMinTempo = parameter("rhythmMinTempo").toInt();
@@ -138,8 +138,8 @@ void MusicExtractor::setExtractorDefaultOptions() {
   // average_loudness
   options.set("average_loudness.frameSize", loudnessFrameSize);
   options.set("average_loudness.hopSize", loudnessHopSize);
-  options.set("average_loudness.windowType", loudnessWindowType);
-  options.set("average_loudness.silentFrames", loudnessSilentFrames);
+  //options.set("average_loudness.windowType", loudnessWindowType);
+  //options.set("average_loudness.silentFrames", loudnessSilentFrames);
 
   // rhythm
   options.set("rhythm.method", rhythmMethod);
@@ -399,7 +399,7 @@ void MusicExtractor::readMetadata(const string& audioFilename, Pool& results) {
   results.merge(poolTags);
   delete metadata;
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#if defined(OS_WIN32) && !defined(OS_MINGW)
   string slash = "\\";
 #else
   string slash = "/";

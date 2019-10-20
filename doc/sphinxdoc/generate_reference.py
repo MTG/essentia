@@ -25,6 +25,11 @@ import essentia.streaming
 import os, re, subprocess
 import sys
 
+
+std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
+streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase'] ]
+
+
 def replace_math_symbols(s):
     while True:
         s, replaced = re.subn(r'(\W)pi(\W)', r'\1π\2', s, 1)
@@ -66,6 +71,35 @@ def TR_DESC(s):
     s = s + '\n\n'
 
     return s
+
+def algo_link(algoname, mode):
+    mode_abbr = 'std' if mode == 'standard' else 'streaming'
+    return "%s `(%s) <%s_%s.html>`__" % (algoname, mode, mode_abbr, algoname)
+
+
+def related_algos(algo_doc):
+
+    lines = []
+    if algo_doc['mode'] == 'standard mode' and algo_doc['name'] in streaming_algo_list:
+        lines.append(algo_link(algo_doc['name'], 'streaming'))
+    elif algo_doc['mode'] == 'streaming mode' and algo_doc['name'] in std_algo_list:
+        lines.append(algo_link(algo_doc['name'], 'standard'))
+
+    lines += [algo_link(a, 'standard') for a in std_algo_list
+                                            if a != algo_doc['name'] and
+                                            algo_doc['description'].count(a)]
+
+    lines += [algo_link(a, 'streaming') for a in streaming_algo_list
+                                            if a != algo_doc['name'] and
+                                            algo_doc['description'].count(a)]
+
+    if lines:
+        return ['See also',
+                '--------',
+                '',
+                '\n'.join(sorted(lines))]
+    return []
+
 
 def doc2rst(algo_doc, sphinxsearch=False):
     if sphinxsearch:
@@ -125,6 +159,8 @@ def doc2rst(algo_doc, sphinxsearch=False):
                '',
                TR_DESC(algo_doc['description'])
                ]
+
+    lines += related_algos(algo_doc)
 
     return '\n'.join(lines)
 
@@ -193,9 +229,6 @@ def write_algorithms_reference():
 
 
     # write the algorithms reference organized by categories
-    std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
-    streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase'] ]
-
     # generate html documentation for each algorithm and create an overall list of algorithms
     algos = {}
     for algoname in std_algo_list:
@@ -204,6 +237,18 @@ def write_algorithms_reference():
         # __struct__ does not contain mode (perhaps it should),
         # therefore, doing a workaround so that doc2rst can know the mode
         algos[algoname]['standard']['mode'] = 'standard mode'
+
+        # Ugly patch for MusicExtractor and FreesoundExtractor to add links to
+        # their detailed documentation.
+        if algoname == 'MusicExtractor':
+            algos[algoname]['standard']['description'] = \
+                algos[algoname]['standard']['description'].replace("essentia_streaming_extractor_music",
+                    "`essentia_streaming_extractor_music <../streaming_extractor_music.html>`__")
+
+        elif algoname == 'FreesoundExtractor':
+            algos[algoname]['standard']['description'] = \
+                algos[algoname]['standard']['description'].replace("essentia_streaming_extractor_freesound",
+                    "`essentia_streaming_extractor_freesound <../freesound_extractor.html>`__")
 
         print('generating doc for standard algorithm: %s ...' % algoname)
         write_doc('reference/std_' + algoname + '.rst', algos[algoname]['standard'])

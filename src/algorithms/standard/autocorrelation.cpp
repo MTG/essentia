@@ -55,6 +55,8 @@ void AutoCorrelation::configure() {
   _generalized = parameter("generalized").toBool();
   _frequencyDomainCompression = parameter("frequencyDomainCompression").toReal();
 
+  _ifft->configure("normalize", !_generalized);
+
   _fft->output("fft").set(_fftBuffer);
   _ifft->input("fft").set(_fftBuffer);
 }
@@ -107,21 +109,17 @@ void AutoCorrelation::compute() {
   _ifft->compute();
 
   // copy results in output array, scaling on the go (normalizing the output of the IFFT)
-  Real scale = 1.0 / sizeFFT;
-  if (_generalized) {
-    scale = sizeFFT * scale;
-  }
   correlation.resize(size);
 
 
   if (_unbiasedNormalization) {
     for (int i=0; i<size; i++) {
-      correlation[i] = _corr[i] * scale / (size - i);
+      correlation[i] = _corr[i] / (size - i);
     }
   }
   else {
     for (int i=0; i<size; i++) {
-      correlation[i] = _corr[i] * scale;
+      correlation[i] = _corr[i];
     }
   }
 }

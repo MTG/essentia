@@ -102,7 +102,7 @@ class TestBFCC(TestCase):
         while (size > 256 ):
             bands, bfcc = BFCC()(zeros(size))
             self.assertEqualVector(bfcc, expected)
-            size /= 2
+            size //= 2
 
 
     def testInvalidInput(self):
@@ -127,6 +127,8 @@ class TestBFCC(TestCase):
                                             'sampleRate': 22050} )
 
     def testRealCase(self):
+        # The expected values were recomputed from commit
+        # 4f47eeb35f87fb6cb5ab9f184fbe03ab93cc4cd8
         from numpy import mean
         filename = join(testdata.audio_dir, 'recorded','musicbox.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
@@ -140,13 +142,11 @@ class TestBFCC(TestCase):
             pool.add("bands", bands)
             pool.add("bfcc", bfcc)
 
-        expected = [ -9.02708069e+02,  5.07348213e+01,   -4.36533318e+01,
-                      2.73471756e+01, -1.77998219e+01,    1.11799221e+01,
-                     -7.89495039e+00,  4.71249294e+00,   -3.33718252e+00,
-                      1.84917569e+00, -1.41807127e+00,    6.66075170e-01,
-                     -5.28900564e-01]
+        expected = [-905.33917236,  53.90555191, -47.06598282, 30.50421333, -20.98745728,
+                      14.16875744, -10.8211174,    7.4601965,  -5.96607971,   4.26305676,
+                      -3.73092651,   2.7505765,   -2.49007034]
 
-        self.assertAlmostEqualVector(mean(pool['bfcc'], 0), expected, 1.0e-5)
+        self.assertAlmostEqualVector(mean(pool['bfcc'], 0), expected, 1.0e-6)
 
 
 suite = allTests(TestBFCC)

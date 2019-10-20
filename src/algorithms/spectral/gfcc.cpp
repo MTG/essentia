@@ -45,7 +45,11 @@ void GFCC::configure() {
                   "outputSize", parameter("numberCoefficients"),
                   INHERIT("dctType"));
   _logbands.resize(parameter("numberBands").toInt());
-  setCompressor(parameter("logType").toString());
+
+  _logType = parameter("logType").toLower();
+  _silenceThreshold = parameter("silenceThreshold").toReal();
+  _dbSilenceThreshold = 10 * log10(_silenceThreshold);
+  _logSilenceThreshold = log(_silenceThreshold);
 }
 
 void GFCC::compute() {
@@ -59,11 +63,22 @@ void GFCC::compute() {
   _gtFilter->output("bands").set(bands);
   _gtFilter->compute();
 
-
-
-
   for (int i=0; i<int(bands.size()); ++i) {
-    _logbands[i] = (*_compressor)(bands[i]);
+    if (_logType == "dbpow") {
+       _logbands[i] = pow2db(bands[i], _silenceThreshold, _dbSilenceThreshold);
+     }
+     else if (_logType == "dbamp") {
+       _logbands[i] = amp2db(bands[i], _silenceThreshold, _dbSilenceThreshold);
+     }
+     else if (_logType == "log") {
+      _logbands[i] = lin2log(bands[i], _silenceThreshold, _logSilenceThreshold);
+     }
+     else if (_logType == "natural") {
+       _logbands[i] = bands[i];
+     }
+     else {
+       throw EssentiaException("GFCC: Bad 'logType' parameter");
+     }
   }
 
   // compute the DCT of these bands
@@ -72,21 +87,3 @@ void GFCC::compute() {
   _dct->compute();
 }
 
-void GFCC::setCompressor(std::string logType){
-  if (logType == "natural"){
-    _compressor = linear;
-  }
-  else if (logType == "dbpow"){
-    _compressor = pow2db;
-  }
-  else if (logType == "dbamp"){
-    _compressor = amp2db;
-  }
-  else if (logType == "log"){
-    _compressor = log;
-  }
-  else{
-    throw EssentiaException("GFCC: Bad 'logType' parameter");
-  }
-
-}

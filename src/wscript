@@ -196,26 +196,28 @@ def configure(ctx):
     if 'ACCELERATE' in ctx.env.FFT:
         print('- using Accelerate Framework for FFT\n')
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
-        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex',
-                               'IFFTWComplex', 'ConstantQ', 'Chromagram',
-                               'SpectrumCQ', 'NSGConstantQ', 'NSGIConstantQ',
-                               'NSGConstantQStreaming']
+        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTKComplex', 'IFFTKComplex',
+                               'FFTW', 'IFFTW', 'FFTWComplex', 'IFFTWComplex']
     elif 'KISS' in ctx.env.FFT:
         print('- using KISS for FFT\n')
-        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex',
-                               'IFFTWComplex', 'ConstantQ', 'Chromagram',
-                               'SpectrumCQ', 'NSGConstantQ', 'NSGIConstantQ',
-                               'NSGConstantQStreaming']
+        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTAComplex', 'IFFTAComplex',
+                               'FFTW', 'IFFTW', 'FFTWComplex', 'IFFTWComplex']
     else:
         print('- using FFTW for FFT\n')
         if has('fftw'):
             print('- fftw detected!')
             ctx.env.USES += ' FFTW'
-            ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTK', 'IFFTK']
+            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTKComplex', 'IFFTKComplex',
+                                   'FFTA', 'IFFTA', 'FFTAComplex', 'IFFTAComplex']
         else:
             print(' - fftw seems to be missing.')
             print('   The following algorithms will be ignored: %s\n' % algos)
-            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex']
+            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW',
+                                   'FFTWComplex', 'IFFTWComplex',
+                                   'FFTKComplex', 'IFFTKComplex',
+                                   'FFTAComplex', 'IFFTAComplex']
+            # TODO what other algorithms dependent on FFT should be also ignored?
+
             print('   IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
             print('                   To avoid these errors, use alternative FFT libraries (see the --fft flag).\n')
 
@@ -452,6 +454,13 @@ def build(ctx):
     else:
         print ('Building without 3rdparty spline library code because Spline and CubicSpline algorithms are ignored')
 
+    # do not compile nnls.h if we are not compiling NNLSChroma
+    if 'NNLSChroma' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/nnls' ]
+        sources += [ ctx.path.find_resource('3rdparty/nnls/nnls.c') ]
+    else:
+        print ('Building without 3rdparty nnls library code because NNLSChroma algorithms are ignored')
+
     # Add Kiss Dependancy stuff
     if 'KISS' in ctx.env.FFT:
         ctx.env.INCLUDES += ['3rdparty/kiss_fft130' ]
@@ -472,9 +481,16 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
     """
 
-    # Add Tensorflow Dependancy stuff 
-    if 'TensorflowPredict' not in ctx.env.ALGOIGNORE:
-        ctx.env.INCLUDES += ['/usr/local/include' ]
+    # Add Tensorflow dependancy stuff
+    # if 'TensorflowPredict' not in ctx.env.ALGOIGNORE:
+    #    ctx.env.INCLUDES += ['/usr/local/include' ]
+
+    # do not compile Cephes functions if we are not compiling SNR
+    if 'SNR' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/cephes/bessel/' ]
+        sources += ctx.path.ant_glob('3rdparty/cephes/bessel/*.cpp') 
+    else:
+        print('Building without 3rdparty Cephes library code (Bessel functions) because SNR algorithm is ignored')
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(

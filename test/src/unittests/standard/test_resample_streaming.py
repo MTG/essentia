@@ -47,20 +47,20 @@ class TestResample_Streaming(TestCase):
         self.assertEqualVector(self.resample([], 2), [])
 
     def testSingle(self):
-        self.assertAlmostEqualVector(self.resample([1], 2), [1], 5e-2)
+        self.assertAlmostEqualVector(self.resample([1], 1), [1], 5e-2)
 
     def testDouble(self):
         sr = 44100
         factor = 2
         input = [1]*sr
-        expected = [1]*(sr*factor-1)
+        expected = [1]*(sr*factor)
         self.assertResults(input, expected, factor)
 
     def testOneAndHalf(self):
         sr = 44100
         factor = 1.5
         input = [1]*sr
-        expected = [1]*int(sr*factor-1)
+        expected = [1]*int(sr*factor)
         self.assertResults(input, expected, factor)
 
     def testOne(self):
@@ -74,21 +74,21 @@ class TestResample_Streaming(TestCase):
         sr = 44100
         factor = .5
         input = [1]*sr
-        expected = [1]*int(sr*factor-1)
+        expected = [1]*int(sr*factor)
         self.assertResults(input, expected, factor)
 
     def testThreeQuarters(self):
         sr = 44100
         factor = .75
         input = [1]*sr
-        expected = [1]*int(sr*factor-1)
+        expected = [1]*int(sr*factor)
         self.assertResults(input, expected, factor)
 
     def testOneQuarter(self):
         sr = 44100
         factor = .25
         input = [1]*sr
-        expected = [1]*int(sr*factor-1)
+        expected = [1]*int(sr*factor)
         self.assertResults(input, expected, factor)
 
     #def testLeftLimits(self):

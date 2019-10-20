@@ -33,7 +33,11 @@ class TestAudioWriter_Streaming(TestCase):
             self.assertAlmostEqual(result[i][1] - expected[i][1], 0, 0.5/32767)
 
     def testRegression(self):
-        impulse = [-1, 0.3, 0.9999, 0.5, 0.2, 0.1]
+        # All the values have to be inside the
+        # dynamic range [-1.0, 1.0 - 1 / 32767.0]
+        # For the out of dynamic range case see
+        # testSaturation.
+        impulse = [-.95, 0.3, 0.9999, 0.5, 0.2, 0.1]
         impulsePos = [0, 111, 5013, 20013, 11359, 44099]
         filename = "audiowritertest.wav"
         size = 44100
@@ -105,17 +109,17 @@ class TestAudioWriter_Streaming(TestCase):
             expected.append([0, 0])
 
         i = 0
-        # strangely, negative values saturate at -1.0 - 1.0/32767.0
-        # instead of -1.0 and have the positive saturate at 1.0-1/32767
+        # For 32 bytes floats audio ranges from
+        # -1.0 to 1.0 - 1.0 / 32767.0
         for pos in impulsePos:
             signal[pos][0] = impulse[i]
             signal[pos][1] = -impulse[i]
             if signal[pos][0] > 1:
-                expected[pos][0] = 1
-                expected[pos][1] = -1-1.0/32767.0
+                expected[pos][0] = 1-1.0/32767.0
+                expected[pos][1] = -1
             else:
-                expected[pos][0] = -1-1.0/32767.0
-                expected[pos][1] = 1
+                expected[pos][0] = -1
+                expected[pos][1] = 1-1.0/32767.0
             i += 1
 
         # write the audio file:
@@ -193,7 +197,7 @@ class TestAudioWriter_Streaming(TestCase):
         loader.bit_rate >> None
         loader.codec >> None
         run(loader)
-        self.assertAlmostEqual(max(pool['audio']), max(sine), precision)
+
         from essentia.standard import ZeroCrossingRate
         zcr = int(ZeroCrossingRate(threshold=0.001)(pool['audio'])*len(pool['audio'])+0.5)
         expected = int(ZeroCrossingRate(threshold=0.0)(sine)*len(sine)+0.5)
@@ -203,8 +207,11 @@ class TestAudioWriter_Streaming(TestCase):
         #plot(sine)
         #plot(MonoLoader(filename=filename)())
         #show(figure)
+
         os.remove(filename)
-        self.assertEqual(zcr, expected) # expected should be 20 (double the frequency)
+
+        self.assertAlmostEqual(max(pool['audio']), max(sine), precision)
+        self.assertEqual(zcr, expected)  # expected should be 20 (double the frequency)
 
     def atestMp3(self):
         self.encoderTest('audiowritertest.mp3', bitrate=320, precision=2e-4)
@@ -219,6 +226,20 @@ class TestAudioWriter_Streaming(TestCase):
         self.encoderTest('audiowritertest.flac', precision=5e-6)
 
     def testOgg(self):
+        # FFMPEG supports two codecs for Vorbis:
+        #   - libvorbis
+        #   - an internal (experimental) one
+        # libvorbis is the recommended option in terms of quality
+        # but it is known to make this test fail due to a different
+        # number of samples after decoding.
+        # https://trac.ffmpeg.org/wiki/Encode/HighQualityAudio
+        # libvorbis is the one used when linking Essentia
+        # against libavcodec-dev.
+        # If the dependencies were built statically following
+        # our building scripts (e.g, as for the PyPI packages)
+        # the internal (experimental) codec will be used. This
+        # codec should make this test pass but it is not
+        # recommended in terms of perceived quality.
         self.encoderTest('audiowritertest.ogg', precision=5e-6)
 
 

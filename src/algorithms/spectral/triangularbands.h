@@ -41,7 +41,7 @@ class TriangularBands : public Algorithm {
   bool _isLog;
   std::vector<std::vector<Real> > _filterCoefficients;
   Real _inputSize;
-  std::string _normalization;
+  std::string _normalize;
   std::string _type;
   void createFilters(int spectrumSize);
   void setWeightingFunctions(std::string weighting);
@@ -63,10 +63,9 @@ class TriangularBands : public Algorithm {
     declareParameter("frequencyBands", "list of frequency ranges into which the spectrum is divided (these must be in ascending order and connot contain duplicates),"\
     					"each triangle is build as x(i-1)=0, x(i)=1, x(i+1)=0 over i, the resulting number of bands is size of input array - 2", "", arrayToVector<Real>(freqBands));
     declareParameter("log", "compute log-energies (log10 (1 + energy))","{true,false}", true);
-    declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
-    declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
     declareParameter("weighting", "type of weighting function for determining triangle area","{linear,slaneyMel,htkMel}","linear");
-
+    declareParameter("normalize", "spectrum bin weights to use for each triangular band: 'unit_max' to make each triangle vertex equal to 1, 'unit_sum' to make each triangle area equal to 1 summing the actual weights of spectrum bins, 'unit_area' to make each triangle area equal to 1 normalizing the weights of each triangle by its bandwidth","{unit_sum,unit_tri,unit_max}", "unit_sum");
+    declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
   }
 
   void compute();

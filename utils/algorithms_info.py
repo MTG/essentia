@@ -217,6 +217,7 @@ def get_all_algorithms(algo_dir, root_dir=None):
                             # big hack to correctly parser stuff like declareInput(_algo->input("a"))
                             if var_name.find('-') >= 0:
                                 inputs[var_name] = {'type': 'unknown'}
+                        
                         outputs[var_name]['name'] = input_name
                         outputs[var_name]['description'] = input_desc
                         continue
@@ -276,7 +277,11 @@ def create_registration_cpp(all_algos, registration_filename, use_streaming=True
     # write #include's
     for algo in all_algos:
         if all_algos[algo]['has_standard'] or (use_streaming and all_algos[algo]['has_streaming']):
-            cpp_code += '#include "%s"\n' % all_algos[algo]['header']
+            # Essentia's Duration conflicts with Accelerates, so bump the include to the top
+            if "FFTA" in algo:
+                cpp_code = '#include "%s"\n' % all_algos[algo]['header'] + cpp_code
+            else:
+                cpp_code += '#include "%s"\n' % all_algos[algo]['header']
 
     # register standard algorithms in factory
     cpp_code += "\nnamespace essentia {\nnamespace standard {\n\nESSENTIA_API void registerAlgorithm() {\n"

@@ -53,16 +53,16 @@ class NSGIConstantQ : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("inputSize", "the size of the input", "(0,inf)", 1024);
+    declareParameter("inputSize", "the size of the input", "(0,inf)", 4096);
     declareParameter("minFrequency", "the minimum frequency", "(0,inf)", 27.5);
-    declareParameter("maxFrequency", "the maximum frequency", "(0,inf)", 55);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 12);
+    declareParameter("maxFrequency", "the maximum frequency", "(0,inf)", 7040.);
+    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 48);
     declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);
     declareParameter("rasterize", "hop sizes for each frequency channel. With 'none' each frequency channel is distinct. 'full' sets the hop sizes of all the channels to the smallest. 'piecewise' rounds down the hop size to a power of two", "{none,full,piecewise}", "full");
     declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a phase mapping function as described in [1]", "{local,global}", "global");
     declareParameter("gamma", "The bandwidth of each filter is given by Bk = 1/Q * fk + gamma", "[0,inf)", 0);
-    declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "sine");
-    declareParameter("window","the type of window for the frequency filter. It is not recommended to change the default window.","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hannnsgcq");
+    declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "none");
+    declareParameter("window","the type of window for the frequency filters. It is not recommended to change the default window.","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hannnsgcq");
     declareParameter("minimumWindow", "minimum size allowed for the windows", "[2,inf)", 4);
     declareParameter("windowSizeFactor", "window sizes are rounded to multiples of this", "[1,inf)", 1);
     }
@@ -84,7 +84,7 @@ class NSGIConstantQ : public Algorithm {
   Algorithm* _fft;
   Algorithm* _windowing;
 
-  //Variables for the input parameters
+  // variables for the input parameters
   Real _minFrequency;
   Real _maxFrequency;
   Real _sr;
@@ -98,7 +98,7 @@ class NSGIConstantQ : public Algorithm {
   int _windowSizeFactor;
   bool _INSQConstantQdata;
 
-  //windowing vectors
+  // windowing vectors
   std::vector< std::vector<Real> > _freqWins;
   std::vector<int> _shifts;
   std::vector<int> _winsLen;
@@ -114,6 +114,7 @@ class NSGIConstantQ : public Algorithm {
   std::vector<std::vector<int> > _win_range;
   std::vector<std::vector<int> > _idx;
 
+  bool _oddInput;
 
   void designDualFrame();
 
@@ -144,74 +145,6 @@ class NSGIConstantQ : public StreamingAlgorithmWrapper {
     declareOutput(_signal, TOKEN, "frame");
   }
 };
-
-/*
-class NSGIConstantQ : public Algorithm {
- protected:
-  Sink<std::vector<std::vector<std::complex<Real> > > >_constantQ ;
-  Sink<std::vector<std::complex<Real> > > _constantQDC;
-  Sink<std::vector<std::complex<Real> > > _constantQNF;
-
-  Source<std::vector<Real> > _signal;
-
-  class NSGIConstantQWrapper : public StreamingAlgorithmWrapper {
-   protected:
-    Sink<std::vector<std::vector<std::complex<Real> > > >_constantQ ;
-    Sink<std::vector<std::complex<Real> > > _constantQDC;
-    Sink<std::vector<std::complex<Real> > > _constantQNF;
-
-    Source<std::vector<Real> > _signal;
-
-   public:
-    NSGIConstantQWrapper() {
-      declareAlgorithm("NSGIConstantQ");
-      declareInput(_constantQ, TOKEN, "constantq");
-      declareInput(_constantQDC, TOKEN, "constantqdc");
-      declareInput(_constantQNF, TOKEN, "constantqnf");
-      declareOutput(_signal, TOKEN, "frame");
-    }
-  };
-
-  Algorithm* _wrapper;
-
- public:
-  NSGIConstantQ(): Algorithm() {
-    declareInput(_constantQ, "constantq", "the constant Q transform of the input frame");
-    declareInput(_constantQDC, "constantqdc", "the DC band transform of the input frame");
-    declareInput(_constantQNF, "constantqnf", "the Nyquist band transform of the input frame");
-    declareOutput(_signal, "frame", "the input frame (vector)");
-
-    _wrapper = AlgorithmFactory::create("NSGIConstantQWrapper");
-  }
-
-
-
-  ~NSGIConstantQ() {};
-
-  AlgorithmStatus process();
-
-  void declareParameters() {
-    declareParameter("inputSize", "the size of the input", "(0,inf)", 1024);
-    declareParameter("minFrequency", "the minimum frequency", "(0,inf)", 27.5);
-    declareParameter("maxFrequency", "the maximum frequency", "(0,inf)", 55);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 12);
-    declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);
-    declareParameter("rasterize", "hop sizes for each frequency channel. With 'none' each frequency channel is distinct. 'full' sets the hop sizes of all the channels to the smallest. 'piecewise' rounds down the hop size to a power of two", "{none,full,piecewise}", "full");
-    declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a phase mapping function as described in [1]", "{local,global}", "global");
-    declareParameter("gamma", "The bandwidth of each filter is given by Bk = 1/Q * fk + gamma", "[0,inf)", 0);
-    declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "sine");
-    declareParameter("window","the type of window for the frequency filter. See 'Windowing'","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hannnsgcq");
-    declareParameter("minimumWindow", "minimum size allowed for the windows", "[2,inf)", 4);
-    declareParameter("windowSizeFactor", "window sizes are rounded to multiples of this", "[1,inf)", 1);
-    }
-
-  void configure();
-
-  static const char* name;
-  static const char* category;
-  static const char* description;
-};
-*/
 
 } // namespace streaming
 } // namespace essentia
