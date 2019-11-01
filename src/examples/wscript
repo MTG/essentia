@@ -60,17 +60,15 @@ example_sources_fileio = [
     ('streaming_stft', ),
     ('streaming_tuningfrequency', ),
     ('streaming_vibrato', ),
-<<<<<<< HEAD
     ('streaming_tensorflowpredict', ),
-=======
     ('streaming_yinprobabilistic', ),
->>>>>>> master
+    ('streaming_musicnn_predict', ),
 
     ('streaming_extractor_music',
         ['music_extractor/extractor_utils']),
 
     ('streaming_extractor_freesound',
-        ['music_extractor/extractor_utils'])    
+        ['music_extractor/extractor_utils'])
 ]
 
 example_sources_with_gaia = [
