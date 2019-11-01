@@ -25,7 +25,7 @@ LIBYAML_VERSION=yaml-0.1.5
 CHROMAPRINT_VERSION=1.4.3
 QT_SOURCE_URL=http://download.qt-project.org/archive/qt/4.8/4.8.6/qt-everywhere-opensource-src-4.8.6.tar.gz
 GAIA_VERSION=2.4.5
-TENSORFLOW_VERSION=1.12.0
+TENSORFLOW_VERSION=1.14.0
 
 FFMPEG_AUDIO_FLAGS="
     --disable-programs

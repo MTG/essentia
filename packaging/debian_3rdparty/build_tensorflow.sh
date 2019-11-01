@@ -23,7 +23,7 @@ tensorflow/contrib/makefile/download_dependencies.sh
 # Add fPIC, otherwise nsync won't compile
 sed -i 's/PLATFORM_CFLAGS=-std=c++11 -Werror -Wall -Wextra -pedantic/PLATFORM_CFLAGS=-std=c++11 -Wall -Wextra -pedantic -fPIC/g' tensorflow/contrib/makefile/compile_nsync.sh
 
-# Compile the C API as it's curretly the recomended way to interface Tensorflow.
+# Compile the C API as it's curretly the recomended way to interface Tensorflow
 sed -i 's/CORE_CC_ALL_SRCS := \\/&\n\$(wildcard tensorflow\/c\/c_api.cc) \\/' tensorflow/contrib/makefile/Makefile
 
 # Define andrid to prevent errors in the Andrid API. Why?
