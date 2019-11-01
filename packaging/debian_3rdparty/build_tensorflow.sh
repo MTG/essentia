@@ -21,15 +21,18 @@ sed -i 's/\[\[ \"\$OSTYPE\" == \"darwin\"\* \]\]/true/g' tensorflow/contrib/make
 tensorflow/contrib/makefile/download_dependencies.sh
 
 # Add fPIC, otherwise nsync won't compile
-sed -i 's/PLATFORM_CFLAGS=-std=c++11 -Werror -Wall -Wextra -pedantic/PLATFORM_CFLAGS=-std=c++11 -Werror -Wall -Wextra -pedantic -fPIC/g' tensorflow/contrib/makefile/compile_nsync.sh
+sed -i 's/PLATFORM_CFLAGS=-std=c++11 -Werror -Wall -Wextra -pedantic/PLATFORM_CFLAGS=-std=c++11 -Wall -Wextra -pedantic -fPIC/g' tensorflow/contrib/makefile/compile_nsync.sh
 
-# Compile the C API as it's curretly the recomended way to interface Tensorflow.  
+# Compile the C API as it's curretly the recomended way to interface Tensorflow.
 sed -i 's/CORE_CC_ALL_SRCS := \\/&\n\$(wildcard tensorflow\/c\/c_api.cc) \\/' tensorflow/contrib/makefile/Makefile
 
 # Define andrid to prevent errors in the Andrid API. Why?
 sed -i 's/#ifndef __ANDROID__/#define __ANDROID__ 1\n&/' tensorflow/c/c_api.cc
 
-# We don't want to re download dependencies on the build script as it will undo the previous patches
+# Use relative paths to prevent too long lines.
+sed -i 's/"\$(cd "\$(dirname "\${BASH_SOURCE\[0]}")" \&\& pwd)"/"\$(dirname "\${BASH_SOURCE\[0]}")"/' tensorflow/contrib/makefile/build_all_linux.sh tensorflow/contrib/makefile/build_all_linux.sh
+
+# We don't want to re-download dependencies on the build script as it would undo the previous patches
 sed -i 's/rm -rf tensorflow\/contrib\/makefile\/downloads/# &/' tensorflow/contrib/makefile/build_all_linux.sh
 sed -i 's/tensorflow\/contrib\/makefile\/download_dependencies.sh/# &/' tensorflow/contrib/makefile/build_all_linux.sh
 
@@ -38,6 +41,8 @@ sed -i 's/HOST_CXXFLAGS=\"--std=c++11 -march=native\" \\/HOST_CXXFLAGS=\"--std=c
 
 # Prevent compiling the example.
 sed -i 's/all: \$(LIB_PATH) \$(BENCHMARK_NAME)/all: \$(LIB_PATH)/' tensorflow/contrib/makefile/Makefile
+
+echo 'tensorflow/core/kernels/matmul_op_fused.cc' >> tensorflow/contrib/makefile/tf_op_files.txt
 
 tensorflow/contrib/makefile/build_all_linux.sh
 
@@ -73,4 +78,4 @@ EOF
 
 
 cd ../..
-rm -r tmp
+# rm -r tmp
