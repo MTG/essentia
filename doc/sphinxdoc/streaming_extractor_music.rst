@@ -244,6 +244,18 @@ Instead of computing high-level descriptors altogether with lower-level ones, it
 Note, that you need to build Essentia with Gaia2 or use our static builds (soon online) in order to be able to run high-level models. Since Essentia version 2.1 high-level models are distributed apart from Essentia via a `download page <http://essentia.upf.edu/documentation/svm_models/>`_. 
 
 
+Chromaprints
+------------
+
+If `libchromaprint <https://packages.debian.org/sid/libchromaprint-dev>`_ is available, this extractor can be configured to compute `Chromaprint fingerprints <https://acoustid.org/chromaprint>`_ and store them in the output pools.
+To generate the fingerprints the parameter `chromaprint.compute` has to be explicitly set to `1` in the profile file (it defaults to `0`). Optionally, The `chromaprint.duration` parameter specifies how many seconds from the beginning of the track are used to compute the fingerprints. If set to 0 (by default), the whole track is used. ::
+
+  chromaprint:
+    compute: 1
+    duration: 10.0
+
+
+Note that the `chromaprint` namespace is only meaningful when `libchromaprint` is correctly installed and detected.
 
 
 
