@@ -126,10 +126,13 @@ void NSGConstantQ::designWindow() {
 
   //bins to Hz
   std::transform(_baseFreqs.begin(), _baseFreqs.end(), _baseFreqs.begin(),
-                  std::bind2nd(std::divides<Real>(), fftres));
+                  //TODO std::bind2nd(std::divides<Real>(), fftres));
+                 [&](Real f){ return f / fftres; });
+
 
   std::transform(bw.begin(), bw.end(), bw.begin(),
-                  std::bind2nd(std::divides<Real>(), fftres));
+                  //TODO std::bind2nd(std::divides<Real>(), fftres));
+                 [&](Real bw){ return bw / fftres; });
 
 
   posit.resize(baseFreqsSize);
@@ -147,7 +150,9 @@ void NSGConstantQ::designWindow() {
 
 
   std::transform(bw.begin(), bw.end(), bw.begin(),
-                  std::bind2nd(std::plus<Real>(), .5));
+                 //TODO std::bind2nd(std::plus<Real>(), .5));
+                 [&](Real bw){ return bw + .5; });
+
 
   _winsLen.resize(baseFreqsSize);
   copy(bw.begin(),bw.end(), _winsLen.begin());
@@ -178,12 +183,16 @@ void NSGConstantQ::designWindow() {
 
 
   // Ceil integer division. Maybe there are matrix operations implemented in essentia?
+  /* TODO
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
                   std::bind2nd(std::plus<int>(), - 1));
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
                   std::bind2nd(std::divides<Real>(), _windowSizeFactor));
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
                   std::bind2nd(std::plus<int>(), + 1));
+  */
+  std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
+                 [&](Real w){ return (w - 1) / _windowSizeFactor + 1; });
 
 
   // Setup Tukey window for 0- and Nyquist-frequency
@@ -198,8 +207,8 @@ void NSGConstantQ::designWindow() {
       //copy(inputWindow.begin(),inputWindow.end(), _freqWins[j].begin());
 
       std::transform( _freqWins[j].begin(),  _freqWins[j].end(),  _freqWins[j].begin(),
-                      std::bind2nd(std::divides<Real>(), sqrt(_winsLen[j] )));
-
+                      //TODO std::bind2nd(std::divides<Real>(), sqrt(_winsLen[j] )));
+                      [&](Real f){ return f / sqrt(_winsLen[j] ); });
     }
   }
 
@@ -240,7 +249,9 @@ void NSGConstantQ::normalize() {
     copy(_winsLen.begin(), _winsLen.begin() + _binsNum+2, normalizeWeights.begin());
 
     std::transform(normalizeWeights.begin(), normalizeWeights.end(), normalizeWeights.begin(),
-                    std::bind2nd(std::multiplies<Real>(), 2 / Real(_inputSize)));
+                    //TODO std::bind2nd(std::multiplies<Real>(), 2 / Real(_inputSize)));
+                    [&](Real nw){ return nw * 2 / Real(_inputSize); });
+
 
     for (int j = _binsNum; j > 0; --j) normalizeWeights.push_back(normalizeWeights[j]);
   }
@@ -259,7 +270,8 @@ void NSGConstantQ::normalize() {
 
   for (int j = 0; j < (int)_freqWins.size(); j++){
     std::transform(_freqWins[j].begin(), _freqWins[j].end(), _freqWins[j].begin(),
-                    std::bind2nd(std::multiplies<Real>(), normalizeWeights[j]));
+                    //TODO std::bind2nd(std::multiplies<Real>(), normalizeWeights[j]));
+                    [&](Real fw){ return fw * normalizeWeights[j]; });
   }
 }
 
@@ -324,7 +336,9 @@ void NSGConstantQ::compute() {
   }
 
   std::transform(posit.begin(), posit.end(), posit.begin(),
-                  std::bind2nd(std::minus<int>(), _shifts[0]));
+                  //TODO std::bind2nd(std::minus<int>(), _shifts[0]));
+                  [&](int p){ return p - _shifts[0]; });
+
 
   //add some zero padding if needed
   std::vector<Real> padding(fill,0.0);
@@ -395,7 +409,9 @@ void NSGConstantQ::compute() {
       std::reverse(constantQ[j].begin()+1, constantQ[j].end());
 
       std::transform(constantQ[j].begin(), constantQ[j].end(), constantQ[j].begin(),
-                      std::bind2nd(std::divides<complex<Real> >(), constantQ[j].size()));
+                      // TODO std::bind2nd(std::divides<complex<Real> >(), constantQ[j].size()));
+                      [&](complex<Real> cq){ return cq / (Real) constantQ[j].size(); });
+
     }
 
     idx.clear();

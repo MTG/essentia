@@ -70,7 +70,7 @@ void NSGIConstantQ::configure() {
   _NN = _posit[shiftsSize-1];
 
   std::transform(_posit.begin(), _posit.end(), _posit.begin(),
-                   std::bind2nd(std::minus<int>(), _shifts[0]));
+                 [&](int p){ return p - _shifts[0]; });
 }
 
 void NSGIConstantQ::designWindow() {
@@ -137,10 +137,11 @@ void NSGIConstantQ::designWindow() {
 
   //bins to Hz
   std::transform(_baseFreqs.begin(), _baseFreqs.end(), _baseFreqs.begin(),
-                  std::bind2nd(std::divides<Real>(), fftres));
+                 [&](Real f){ return f / fftres; });
+
 
   std::transform(bw.begin(), bw.end(), bw.begin(),
-                  std::bind2nd(std::divides<Real>(), fftres));
+                 [&](Real bw){ return bw / fftres; });
 
 
   posit.resize(baseFreqsSize);
@@ -158,7 +159,7 @@ void NSGIConstantQ::designWindow() {
 
 
   std::transform(bw.begin(), bw.end(), bw.begin(),
-                  std::bind2nd(std::plus<Real>(), .5));
+                 [&](int bw){ return bw + .5; });
 
   _winsLen.resize(baseFreqsSize);
   copy(bw.begin(),bw.end(), _winsLen.begin());
@@ -190,12 +191,7 @@ void NSGIConstantQ::designWindow() {
 
   // Ceil integer division. Maybe there are matrix operations implemented in essentia?
   std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
-                  std::bind2nd(std::plus<int>(), - 1));
-  std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
-                  std::bind2nd(std::divides<Real>(), _windowSizeFactor));
-  std::transform(_winsLen.begin(), _winsLen.end(), _winsLen.begin(),
-                  std::bind2nd(std::plus<int>(), + 1));
-
+                 [&](int l){ return (l - 1) / _windowSizeFactor + 1; });
 
   // Setup Tukey window for 0- and Nyquist-frequency
   for (int j = 0; j <= _binsNum +1; j += _binsNum +1) {
@@ -208,8 +204,8 @@ void NSGIConstantQ::designWindow() {
 
       //copy(inputWindow.begin(),inputWindow.end(), _freqWins[j].begin());
 
-      std::transform( _freqWins[j].begin(),  _freqWins[j].end(),  _freqWins[j].begin(),
-                      std::bind2nd(std::divides<Real>(), sqrt(_winsLen[j] )));
+      std::transform(_freqWins[j].begin(),  _freqWins[j].end(),  _freqWins[j].begin(),
+                     [&](int freqWin){ return freqWin / sqrt(_winsLen[j]); });
 
     }
   }
@@ -251,7 +247,7 @@ void NSGIConstantQ::normalize() {
     copy(_winsLen.begin(), _winsLen.begin() + _binsNum+2, normalizeWeights.begin());
 
     std::transform(normalizeWeights.begin(), normalizeWeights.end(), normalizeWeights.begin(),
-                    std::bind2nd(std::multiplies<Real>(), 2 / Real(_inputSize)));
+                   [&](int nw){ return nw * 2 / Real(_inputSize); });
 
     for (int j = _binsNum; j > 0; --j) normalizeWeights.push_back(normalizeWeights[j]);
   }
@@ -270,7 +266,7 @@ void NSGIConstantQ::normalize() {
 
   for (int j = 0; j < (int)_freqWins.size(); j++){
     std::transform(_freqWins[j].begin(), _freqWins[j].end(), _freqWins[j].begin(),
-                    std::bind2nd(std::multiplies<Real>(), normalizeWeights[j]));
+                   [&](int fw){ return fw * normalizeWeights[j]; });
   }
 }
 
@@ -410,7 +406,7 @@ void NSGIConstantQ::designDualFrame(){
   int Ls = _posit[N-1];
 
   std::transform(_posit.begin(), _posit.end(), _posit.begin(),
-                  std::bind2nd(std::minus<int>(), _shifts[0]));
+                 [&](int p){ return p - _shifts[0]; });
 
   std::vector<Real> diagonal(Ls, 0.0);
 
