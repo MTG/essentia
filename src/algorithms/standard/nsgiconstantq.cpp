@@ -77,7 +77,6 @@ void NSGIConstantQ::configure() {
   _NN = _posit[shiftsSize-1];
 
   transform(_posit.begin(), _posit.end(), _posit.begin(),
-            //TODO bind2nd(minus<int>(), _shifts[0]));
             [&](int p){ return p - _shifts[0]; });
 }
 
@@ -147,13 +146,10 @@ void NSGIConstantQ::designWindow() {
 
   // Bins to Hz.
   transform(_baseFreqs.begin(), _baseFreqs.end(), _baseFreqs.begin(),
-            //TODO bind2nd(divides<Real>(), fftres));
             [&](Real f){ return f / fftres; });
 
   transform(bw.begin(), bw.end(), bw.begin(),
-            //TODO bind2nd(divides<Real>(), fftres));
             [&](Real bw){ return bw / fftres; });
-
 
   posit.resize(baseFreqsSize);
   for (int j = 0; j <= _binsNum + 1; ++j) {
@@ -172,7 +168,6 @@ void NSGIConstantQ::designWindow() {
   }
 
   transform(bw.begin(), bw.end(), bw.begin(),
-            //TODO bind2nd(plus<Real>(), .5));
             [&](Real bw){ return bw + .5; });
 
   // Compute windows length.
@@ -220,7 +215,6 @@ void NSGIConstantQ::designWindow() {
            _freqWins[j].begin() + _winsLen[j] / 2 - _winsLen[j+1] / 2);
 
       transform(_freqWins[j].begin(), _freqWins[j].end(), _freqWins[j].begin(),
-                //TODO bind2nd(divides<Real>(), sqrt(_winsLen[j])));
                 [&](Real fw){ return fw / sqrt(_winsLen[j]); });
     }
   }
@@ -265,7 +259,6 @@ void NSGIConstantQ::normalize() {
     copy(_winsLen.begin(), _winsLen.begin() + _binsNum + 2, normalizeWeights.begin());
 
     std::transform(normalizeWeights.begin(), normalizeWeights.end(), normalizeWeights.begin(),
-                   //TODO bind2nd(multiplies<Real>(), 2.0 / _inputSize));
                    [&](Real nw){ return nw * 2 / Real(_inputSize); });
 
     for (int j = _binsNum; j > 0; --j) normalizeWeights.push_back(normalizeWeights[j]);
@@ -400,7 +393,6 @@ void NSGIConstantQ::designDualFrame() {
   int Ls = _posit[N-1];
 
   transform(_posit.begin(), _posit.end(), _posit.begin(),
-            //TODO bind2nd(minus<int>(), _shifts[0]));
             [&](int p){ return p - _shifts[0]; });
 
   vector<Real> diagonal(Ls, 0.0);
