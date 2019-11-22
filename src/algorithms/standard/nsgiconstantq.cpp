@@ -279,7 +279,6 @@ void NSGIConstantQ::normalize() {
 
   for (int j = 0; j < (int)_freqWins.size(); ++j) {
     transform(_freqWins[j].begin(), _freqWins[j].end(), _freqWins[j].begin(),
-              //bind2nd(multiplies<Real>(), normalizeWeights[j]));
               [&](Real fw){ return fw * normalizeWeights[j]; });
   }
 }
