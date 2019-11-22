@@ -50,16 +50,57 @@ class TestGFCC(TestCase):
             size -= 1
 
 
-    def testZero(self):
+    def testZerodbAmp(self):
         # zero input should return dct(lin2db(0)). Try with different sizes
         size = 1025
-        val = 2 * 10 * np.log10(1e-9)
+        val = amp2db(0)
         expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
         while (size > 256 ):
             bands, gfcc = GFCC(inputSize=size)(zeros(size))
             self.assertEqualVector(gfcc, expected)
+
+            # also assess that the thresholding is working
+            self.assertTrue(not np.isnan(gfcc).any() and not np.isinf(gfcc).any())    
             size = int(size/2)
 
+    def testZerodbPow(self):
+        # zero input should return dct(lin2db(0)). Try with different sizes
+        size = 1025
+        val = pow2db(0)
+        expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
+        while (size > 256):
+            bands, gfcc = GFCC(inputSize=size, logType='dbpow')(zeros(size))
+            self.assertEqualVector(gfcc, expected)
+
+            # also assess that the thresholding is working
+            self.assertTrue(not np.isnan(gfcc).any() and not np.isinf(gfcc).any())    
+            size = int(size/2)
+
+    def testZeroLog(self):
+        # zero input should return dct(lin2db(0)). Try with different sizes
+        size = 1025
+        val = lin2log(0)
+        expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
+        while (size > 256):
+            bands, gfcc = GFCC(inputSize=size, logType='log')(zeros(size))
+            self.assertEqualVector(gfcc, expected)
+
+            # also assess that the thresholding is working
+            self.assertTrue(not np.isnan(gfcc).any() and not np.isinf(gfcc).any())
+            size = int(size/2)
+
+    def testZeroNatural(self):
+        # zero input should return dct(lin2db(0)). Try with different sizes
+        size = 1025
+        val = 0.
+        expected = DCT(inputSize=40, outputSize=13)([val for x in range(40)])
+        while (size > 256):
+            bands, gfcc = GFCC(inputSize=size, logType='natural')(zeros(size))
+            self.assertEqualVector(gfcc, expected)
+
+            # also assess that the thresholding is working
+            self.assertTrue(not np.isnan(gfcc).any() and not np.isinf(gfcc).any())    
+            size = int(size/2)
 
     def testInvalidInput(self):
         # mel bands should fail for a spectrum with less than 2 bins

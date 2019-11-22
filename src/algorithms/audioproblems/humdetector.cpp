@@ -384,16 +384,14 @@ const char* HumDetector::name = "HumDetector";
 const char* HumDetector::category = "Audio Problems";
 const char* HumDetector::description = DOC("This algorithm detects low frequency tonal noises in the audio signal. "
 "First, the steadiness of the Power Spectral Density (PSD) of the signal is computed by measuring the quantile ratios "
-"as discribed in [1]. After this, the PitchContours algorithm is used to keep track of the humming tones[2][3].\n"
+"as described in [1]. After this, the PitchContours algorithm is used to keep track of the humming tones [2].\n"
 "\n"
 "References:\n"
-"  [1] Brandt, M., & Bitzer, J. (2014). Automatic Detection of Hum in Audio Signals. Journal of the Audio Engineering Society, 62(9), 584-595.\n"
-"  [2] J. Salamon and E. Gómez, Melody extraction from polyphonic music signals using pitch contour characteristics, "
-"IEEE Transactions on Audio, Speech, and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n"
-"  [3] The Essentia library,\n"
-"    http://essentia.upf.edu/documentation/reference/streaming_PitchContours.html"
-"\n"
-);
+"  [1] Brandt, M., & Bitzer, J. (2014). Automatic Detection of Hum in Audio\n"
+"  Signals. Journal of the Audio Engineering Society, 62(9), 584-595.\n"
+"  [2] J. Salamon and E. Gómez, Melody extraction from polyphonic music signals\n"
+"  using pitch contour characteristics, IEEE Transactions on Audio, Speech,\n"
+"  and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n");
 
 
 HumDetector::HumDetector() {

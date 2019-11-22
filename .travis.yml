@@ -39,6 +39,7 @@ deploy:
     travis/deploy_owncloud.sh
   on:
     branch: master
+    condition: $TRAVIS_BRANCH == "master" || -n $TRAVIS_TAG
 
 env:
   global:

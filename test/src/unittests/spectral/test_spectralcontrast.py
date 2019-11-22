@@ -26,6 +26,14 @@ class TestSpectralContrast(TestCase):
 
     def testRegression(self):
         # Simple regression test, comparing to reference values
+        #
+        # This test started to fail after the improvements
+        # described in 16258bf97eedb35299450874675bf2bde6eb5aa8.
+        # However, as the new way to compute the bands makes more
+        # sense, lets asumme that the current behavior is correct.
+        # The expected values were updated after commit
+        # 3e3538080a1d4336c293f822d44cc7619b40660f
+
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/musicbox.wav'),
                            sampleRate = 44100)()
 
@@ -43,8 +51,15 @@ class TestSpectralContrast(TestCase):
             self.assert_(not any(numpy.isinf(result[1])))
             sc += [result[0]]
             valleys += [result[1]]
-        self.assertAlmostEqual(numpy.mean(sc), -0.604606057431, 1e-5)
-        self.assertAlmostEqual(numpy.mean(valleys), -8.55062127501, 1e-5)
+
+        expected_constrast = [-0.39171591, -0.47914168, -0.56516778,
+                              -0.71739447, -0.81886953, -0.85993105]
+        expected_valleys = [-6.09844828,  -6.20369911,  -8.22635174,
+                            -9.10304642,  -9.83238029, -10.69903278]
+
+        self.assertAlmostEqualVector(numpy.mean(sc, 0), expected_constrast, 1e-6)
+        self.assertAlmostEqualVector(numpy.mean(valleys, 0), expected_valleys, 1e-6)
+
 
 
     def testZero(self):
@@ -66,11 +81,26 @@ class TestSpectralContrast(TestCase):
         self.assertAlmostEqual(numpy.mean(valleys),-0.6931471825, 1e-7)
 
     def testCompare(self):
-        spec0 = [1]*1025
-        spec1 = [1]*1015 + [0]*10
-        spec2 = [1]*10 + [0]*1015
+        # This test started to fail after the improvements
+        # described in 16258bf97eedb35299450874675bf2bde6eb5aa8.
+        #
+        # As that change clearly improves the way to compute the
+        # octave bands the it will be considered as correct.
+        # This test was modified after commit
+        # 3e3538080a1d4336c293f822d44cc7619b40660f
+
+        # No contrast in any band
+        spec0 = [1] * 1025
+
+        # Contrast in the fist band only
+        spec1 = [1] * 10 + [0] * 1015
+
+        # Contrast in the fist and second bands
+        spec2 = [1] * 10 + [0] * 1015
+        spec2[20] = 1
+
         sr = 44100
-        SC = SpectralContrast(sampleRate=sr, highFrequencyBound=sr/2)
+        SC = SpectralContrast(sampleRate=sr)
 
         sc0 = SC(spec0)
         sc1 = SC(spec1)
@@ -103,9 +133,23 @@ class TestSpectralContrast(TestCase):
         self.assertComputeFails(SC, [1])
 
     def testSpectrumSizeSmallerThanNumberOfBands(self):
+        # This test creates 6 octave bands centered in
+        # 57.26, 163.98, 469.57, 1344.60, 3850.23 and 11024.99 Hz.
         SC = SpectralContrast(sampleRate = 44100, frameSize = 4)
-        sc = SC([1,1,1])
-        self.assertAlmostEquals(numpy.mean(sc[0]), -2.7182817459)
+
+        # The following spectral bins are centered on
+        # frequencies 0, 11025 and 22050 Hz.
+        spec = [1,1,1]
+
+        sc = SC(spec)
+
+        # First check that the first 5 bands are empty.
+        self.assertAlmostEquals(numpy.mean(sc[0][:5]), -2.7182817459)
+
+        # Then check that the last bands constains one bin.
+        self.assertAlmostEquals(numpy.mean(sc[0][-1]), -1)
+
+        # In any case the valley values should be 0.
         self.assertAlmostEquals(numpy.mean(sc[1]), 0)
 
 

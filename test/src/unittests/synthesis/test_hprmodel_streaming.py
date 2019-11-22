@@ -98,7 +98,7 @@ def analHprModelStreaming(params, signal):
     smanal = es.HprModelAnal(sampleRate = params['sampleRate'], hopSize = params['hopSize'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'])
     
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
 
 
@@ -157,7 +157,7 @@ def analsynthHprModelStreaming(params, signal):
                              hopSize=params['hopSize'])
 
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
 
 
@@ -247,7 +247,7 @@ class TestHprModel(TestCase):
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)
+        halfwin = self.params['frameSize'] // 2
 
                 
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)

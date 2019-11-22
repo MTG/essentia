@@ -64,7 +64,7 @@ void TriangularBands::compute() {
     throw EssentiaException("TriangularBands: the size of the input spectrum is not greater than one");
   }
 
-  if (_filterCoefficients.empty() || int(_filterCoefficients[0].size()) != spectrum.size()) {
+  if (_filterCoefficients.empty() || _filterCoefficients[0].size() != spectrum.size()) {
       E_INFO("TriangularBands: input spectrum size (" << spectrum.size() << ") does not correspond to the \"inputSize\" parameter (" << _filterCoefficients[0].size() << "). Recomputing the filter bank.");
     createFilters(spectrum.size());
   }

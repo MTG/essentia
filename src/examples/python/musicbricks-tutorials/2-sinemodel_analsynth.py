@@ -30,7 +30,7 @@ fft = es.FFT(size = params['frameSize']);
 smanal = es.SineModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
 smsyn = es.SineModelSynth(sampleRate = params['sampleRate'], fftSize = params['frameSize'], hopSize = params['hopSize'])
 ifft = es.IFFT(size = params['frameSize']);
-overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'], gain = 1./params['frameSize'] );
+overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'] );
 awrite = es.MonoWriter (filename = outputFilename, sampleRate =  params['sampleRate']);
 
 

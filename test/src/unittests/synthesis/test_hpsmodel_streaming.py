@@ -110,7 +110,7 @@ def analHpsModelStreaming(params, signal):
                              stocf=params['stocf'])
 
     # add half window of zeros to input signal to reach same ooutput length
-    signal = numpy.append(signal, zeros(params['frameSize']/2))
+    signal = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
 
 
@@ -179,7 +179,7 @@ def analsynthHpsModelStreaming(params, signal):
                              stocf=params['stocf'])
 
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
 
 
@@ -272,7 +272,7 @@ class TestHpsModel(TestCase):
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = int(self.params['frameSize']/2)
+        halfwin = self.params['frameSize'] // 2
 
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 

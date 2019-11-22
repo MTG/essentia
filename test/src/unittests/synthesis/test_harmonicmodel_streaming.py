@@ -95,7 +95,7 @@ def analHarmonicModelStreaming(params, signal):
     smanal = es.HarmonicModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'])
     
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
     insignal.data >> fcut.signal
     
@@ -146,11 +146,11 @@ def analsynthHarmonicModelStreaming(params, signal):
     smanal = es.HarmonicModelAnal(sampleRate = params['sampleRate'], maxnSines = params['maxnSines'], magnitudeThreshold = params['magnitudeThreshold'], freqDevOffset = params['freqDevOffset'], freqDevSlope = params['freqDevSlope'], minFrequency =  params['minFrequency'], maxFrequency =  params['maxFrequency'])
     smsyn = es.SineModelSynth(sampleRate = params['sampleRate'], fftSize = params['frameSize'], hopSize = params['hopSize'])
     ifft = es.IFFT(size = params['frameSize']);
-    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize'], gain = 1./params['frameSize']);
+    overl = es.OverlapAdd (frameSize = params['frameSize'], hopSize = params['hopSize']);
 
     
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize']/2))
+    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
     insignal = VectorInput (signal)
         
       
@@ -253,7 +253,7 @@ class TestHarmonicModel(TestCase):
         outsignal = outsignal[:signalSize] # cut to durations of input and output signal
 
         # compare without half-window bounds to avoid windowing effect
-        halfwin = (self.params['frameSize']/2)              
+        halfwin = (self.params['frameSize'] // 2)
                
         self.assertAlmostEqualVectorFixedPrecision(outsignal[halfwin:-halfwin], signal[halfwin:-halfwin], self.precisionDigits)
 

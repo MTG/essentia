@@ -403,7 +403,7 @@ void FreesoundExtractor::readMetadata(const string& audioFilename, Pool& results
   results.merge(poolTags);
   delete metadata;
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#if defined(OS_WIN32) && !defined(OS_MINGW)
   string slash = "\\";
 #else
   string slash = "/";

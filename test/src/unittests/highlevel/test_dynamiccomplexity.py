@@ -25,13 +25,13 @@ from essentia_test import *
 class TestDynamicComplexity(TestCase):
 
     def testEmpty(self):
-        self.assertEqualVector(DynamicComplexity()([]), (0, -90))
+        self.assertEqualVector(DynamicComplexity()([]), (0, -100))
 
     def testOne(self):
-        self.assertEqualVector(DynamicComplexity()([10]), (0, -90))
+        self.assertEqualVector(DynamicComplexity()([10]), (0, -100))
 
     def testSilence(self):
-        self.assertEqualVector(DynamicComplexity()([0]*44100), (0, -90))
+        self.assertEqualVector(DynamicComplexity()([0]*44100), (0, -100))
 
     def testRegression(self):
         filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav')

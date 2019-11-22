@@ -50,7 +50,8 @@ void PitchYinProbabilities::configure() {
   // Pre-processing
   _FFT->configure("negativeFrequencies", true,
                   "size", _frameSize);
-  _IFFT->configure("size", _frameSize);
+  _IFFT->configure("negativeFrequencies", true,
+                   "size", _frameSize);
   _RMSALGO->configure();
 }
 
@@ -174,8 +175,8 @@ void PitchYinProbabilities::fastDifference(const std::vector<Real> in, std::vect
         yinStyleACF[j] = std::complex<Real>(yinStyleACFReal[j], yinStyleACFImag[j]);
     }
 
-    _IFFT->input("fft").set(yinStyleACF);
-    _IFFT->output("frame").set(audioTransformed);
+    _IFFT->input("frame").set(yinStyleACF);
+    _IFFT->output("fft").set(audioTransformed);
     _IFFT->compute();
     for (size_t j = 0; j < frameSize; ++j) {
       audioTransformedReal[j] = audioTransformed[j].real();
@@ -284,7 +285,7 @@ void PitchYinProbabilities::compute() {
     
   Real nonPeakProb = 1.0;
   if (sumProb > 0) {
-    for (int i = minTau; i < maxTau; ++i)
+    for (size_t i = minTau; i < maxTau; ++i)
     {
         _peakProb[i] = _peakProb[i] / sumProb * _peakProb[minInd];
         nonPeakProb -= _peakProb[i];
