@@ -77,7 +77,7 @@ void NSGIConstantQ::configure() {
   _NN = _posit[shiftsSize-1];
 
   transform(_posit.begin(), _posit.end(), _posit.begin(),
-            bind2nd(minus<int>(), _shifts[0]));
+            [&](int p){ return p - _shifts[0]; });
 }
 
 
@@ -146,11 +146,10 @@ void NSGIConstantQ::designWindow() {
 
   // Bins to Hz.
   transform(_baseFreqs.begin(), _baseFreqs.end(), _baseFreqs.begin(),
-            bind2nd(divides<Real>(), fftres));
+            [&](Real f){ return f / fftres; });
 
   transform(bw.begin(), bw.end(), bw.begin(),
-            bind2nd(divides<Real>(), fftres));
-
+            [&](Real bw){ return bw / fftres; });
 
   posit.resize(baseFreqsSize);
   for (int j = 0; j <= _binsNum + 1; ++j) {
@@ -169,7 +168,7 @@ void NSGIConstantQ::designWindow() {
   }
 
   transform(bw.begin(), bw.end(), bw.begin(),
-            bind2nd(plus<Real>(), .5));
+            [&](Real bw){ return bw + .5; });
 
   // Compute windows length.
   _winsLen.resize(baseFreqsSize);
@@ -216,7 +215,7 @@ void NSGIConstantQ::designWindow() {
            _freqWins[j].begin() + _winsLen[j] / 2 - _winsLen[j+1] / 2);
 
       transform(_freqWins[j].begin(), _freqWins[j].end(), _freqWins[j].begin(),
-                bind2nd(divides<Real>(), sqrt(_winsLen[j])));
+                [&](Real fw){ return fw / sqrt(_winsLen[j]); });
     }
   }
 
@@ -259,8 +258,8 @@ void NSGIConstantQ::normalize() {
   if (_normalize == "sine") {
     copy(_winsLen.begin(), _winsLen.begin() + _binsNum + 2, normalizeWeights.begin());
 
-    transform(normalizeWeights.begin(), normalizeWeights.end(), normalizeWeights.begin(),
-              bind2nd(multiplies<Real>(), 2.0 / _inputSize));
+    std::transform(normalizeWeights.begin(), normalizeWeights.end(), normalizeWeights.begin(),
+                   [&](Real nw){ return nw * 2 / Real(_inputSize); });
 
     for (int j = _binsNum; j > 0; --j) normalizeWeights.push_back(normalizeWeights[j]);
   }
@@ -278,10 +277,9 @@ void NSGIConstantQ::normalize() {
     }
   }
 
-
   for (int j = 0; j < (int)_freqWins.size(); ++j) {
     transform(_freqWins[j].begin(), _freqWins[j].end(), _freqWins[j].begin(),
-              bind2nd(multiplies<Real>(), normalizeWeights[j]));
+              [&](Real fw){ return fw * normalizeWeights[j]; });
   }
 }
 
@@ -394,7 +392,7 @@ void NSGIConstantQ::designDualFrame() {
   int Ls = _posit[N-1];
 
   transform(_posit.begin(), _posit.end(), _posit.begin(),
-            bind2nd(minus<int>(), _shifts[0]));
+            [&](int p){ return p - _shifts[0]; });
 
   vector<Real> diagonal(Ls, 0.0);
 

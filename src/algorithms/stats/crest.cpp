@@ -44,7 +44,7 @@ void Crest::compute() {
     throw EssentiaException("Crest: array does not contain any values");
   }
 
-  if (find_if(array.begin(), array.end(), bind2nd(less<Real>(), 0)) != array.end()) {
+  if (find_if(array.begin(), array.end(), [](Real value){ return value < 0; }) != array.end()) {
     throw EssentiaException("Crest: array must not contain negative values");
   }
 

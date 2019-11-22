@@ -132,12 +132,14 @@ void NSGConstantQ::designWindow() {
     bw.push_back(cqtbw[j]);
   }
 
-  // Bins to Hz.
+  //bins to Hz
   transform(_baseFreqs.begin(), _baseFreqs.end(), _baseFreqs.begin(),
-            bind2nd(divides<Real>(), fftres));
+            [&](Real f){ return f / fftres; });
+
 
   transform(bw.begin(), bw.end(), bw.begin(),
-            bind2nd(divides<Real>(), fftres));
+            [&](Real bw){ return bw / fftres; });
+
 
 
   posit.resize(baseFreqsSize);
@@ -157,11 +159,12 @@ void NSGConstantQ::designWindow() {
   }
 
   transform(bw.begin(), bw.end(), bw.begin(),
-            bind2nd(plus<Real>(), .5));
+            [&](Real bw){ return bw + .5; });
+
 
   // Compute windows length.
   _winsLen.resize(baseFreqsSize);
-  copy(bw.begin(),bw.end(), _winsLen.begin());
+  copy(bw.begin(), bw.end(), _winsLen.begin());
 
   for (int j = 0; j < baseFreqsSize; ++j) {
     if (_winsLen[j] < _minimumWindow ) _winsLen[j] = _minimumWindow;
@@ -204,7 +207,7 @@ void NSGConstantQ::designWindow() {
            _freqWins[j].begin() + _winsLen[j] / 2 - _winsLen[j+1] / 2);
 
       transform(_freqWins[j].begin(), _freqWins[j].end(), _freqWins[j].begin(),
-                bind2nd(divides<Real>(), sqrt(_winsLen[j])));
+                [&](Real f){ return f / sqrt(_winsLen[j] ); });
     }
   }
 
@@ -248,7 +251,7 @@ void NSGConstantQ::normalize() {
     copy(_winsLen.begin(), _winsLen.begin() + _binsNum + 2, normalizeWeights.begin());
 
     transform(normalizeWeights.begin(), normalizeWeights.end(), normalizeWeights.begin(),
-                    bind2nd(multiplies<Real>(), 2 / Real(_inputSize)));
+              [&](Real nw){ return nw * 2 / Real(_inputSize); });
 
     for (int j = _binsNum; j > 0; --j) {
       normalizeWeights.push_back(normalizeWeights[j]);
@@ -267,9 +270,9 @@ void NSGConstantQ::normalize() {
     }
   }
 
-  for (size_t j = 0; j < _freqWins.size(); ++j) {
+  for (size_t j = 0; j < _freqWins.size(); j++) {
     transform(_freqWins[j].begin(), _freqWins[j].end(), _freqWins[j].begin(),
-                   bind2nd(multiplies<Real>(), normalizeWeights[j]));
+              [&](Real fw){ return fw * normalizeWeights[j]; });
   }
 }
 
@@ -340,7 +343,7 @@ void NSGConstantQ::compute() {
   }
 
   transform(posit.begin(), posit.end(), posit.begin(),
-                  bind2nd(minus<int>(), _shifts[0]));
+            [&](int p){ return p - _shifts[0]; });
 
   // Add some zero padding if needed.
   vector<Real> padding(fill,0.0);
