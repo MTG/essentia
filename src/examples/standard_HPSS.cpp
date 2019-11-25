@@ -67,11 +67,7 @@ int main(int argc, char* argv[]) {
                                     "type", "blackmanharris62");
 
   Algorithm* spec  = factory.create("Spectrum");
-  Algorithm* mfcc  = factory.create("MFCC");
-
-  Algorithm* median  = factory.create("Median");
-
-
+  Algorithm* hpss  = factory.create("HPSS");
 
 
 
@@ -95,19 +91,13 @@ int main(int argc, char* argv[]) {
   spec->input("frame").set(windowedFrame);
 
   // Spectrum -> MFCC
-  vector<Real> spectrum, mfccCoeffs, mfccBands;
+  vector<Real> spectrum, percussiveSpectrum, harmonicSpectrum;
 
   spec->output("spectrum").set(spectrum);
-  mfcc->input("spectrum").set(spectrum);
+  hpss->input("spectrum").set(spectrum);
 
-  mfcc->output("bands").set(mfccBands);
-  mfcc->output("mfcc").set(mfccCoeffs);
-
-  // MFCC -> median
-  Real median_mfccCoeffs;
-
-  median->input("array").set(mfccCoeffs);
-  median->output("median").set(median_mfccCoeffs);
+  hpss->output("percussiveSpectrum").set(percussiveSpectrum);
+  hpss->output("harmonicSpectrum").set(harmonicSpectrum);
 
 
 
@@ -131,39 +121,26 @@ int main(int argc, char* argv[]) {
 
     w->compute();
     spec->compute();
-    mfcc->compute();
-    median->compute();
+    hpss->compute();
 
-    pool.add("lowlevel.mfcc", mfccCoeffs);
-    pool.add("lowlevel.median_mfcc", median_mfccCoeffs);
+    pool.add("percussiveSpectrum", percussiveSpectrum);
+    pool.add("harmonicSpectrum", harmonicSpectrum);
 
   }
-
-  // aggregate the results
-  Pool aggrPool; // the pool with the aggregated MFCC values
-  const char* stats[] = { "mean", "var", "min", "max" };
-
-  Algorithm* aggr = AlgorithmFactory::create("PoolAggregator",
-                                             "defaultStats", arrayToVector<string>(stats));
-
-  aggr->input("input").set(pool);
-  aggr->output("output").set(aggrPool);
-  aggr->compute();
 
   // write results to file
   cout << "-------- writing results to file " << outputFilename << " ---------" << endl;
 
   Algorithm* output = AlgorithmFactory::create("YamlOutput",
                                                "filename", outputFilename);
-  output->input("pool").set(aggrPool);
+  output->input("pool").set(pool);
   output->compute();
 
   delete audio;
   delete fc;
   delete w;
   delete spec;
-  delete mfcc;
-  delete aggr;
+  delete hpss;
   delete output;
 
   essentia::shutdown();
