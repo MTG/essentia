@@ -104,7 +104,8 @@ int main(int argc, char* argv[]) {
 
   Algorithm* alignment = factory.create("CoverSongSimilarity",
                                   "disExtension", disExtension,
-                                  "disOnset", disOnset);
+                                  "disOnset", disOnset,
+                                  "distanceType", "asymmetric");
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos ---------" << endl;

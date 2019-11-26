@@ -151,8 +151,8 @@ void CoverSongSimilarity::configure() {
   _disOnset = parameter("disOnset").toReal();
   _disExtension = parameter("disExtension").toReal();
   std::string distanceType = toLower(parameter("distanceType").toString());
-  if      (distanceType == "symetric") _distanceType = SYMMETRIC;
-  else if (distanceType == "asymetric") _distanceType = ASYMMETRIC;
+  if      (distanceType == "symmetric") _distanceType = SYMMETRIC;
+  else if (distanceType == "asymmetric") _distanceType = ASYMMETRIC;
   else throw EssentiaException("CoverSongSimilarity: Invalid distance type: ", distanceType);
   _c1 = 0;
   _c2 = 0;
