@@ -23,77 +23,34 @@ from essentia_test import *
 import numpy as np
 
 
-def hpcp(audio_vector):
-    """
-    Compute Harmonic Pitch Class Profiles (HPCP) for the input audio files using essentia standard mode 
-    For full list of parameters of essentia standard mode HPCP please refer to http://essentia.upf.edu/documentation/reference/std_HPCP.html
-    """
-    audio = array(audio_vector)
-    frameGenerator = estd.FrameGenerator(audio, frameSize=4096, hopSize=2048)
-    window = estd.Windowing(type='blackmanharris62')
-    spectrum = estd.Spectrum()
-    spectralPeaks = estd.SpectralPeaks(magnitudeThreshold=1e-05,
-                                        maxFrequency=3500,
-                                        minFrequency=100,
-                                        maxPeaks=100,
-                                        orderBy="frequency",
-                                        sampleRate=44100)
-    spectralWhitening = estd.SpectralWhitening(maxFrequency= 3500,
-                                                sampleRate=44100)
-    hpcp = estd.HPCP(sampleRate=44100,
-                    maxFrequency=3500,
-                    minFrequency=100,
-                    referenceFrequency=440,
-                    nonLinear=True,
-                    harmonics=8,
-                    size=12)
-    #compute hpcp for each frame and add the results to the pool
-    for frame in frameGenerator:
-        spectrum_mag = spectrum(window(frame))
-        frequencies, magnitudes = spectralPeaks(spectrum_mag)
-        w_magnitudes = spectralWhitening(spectrum_mag,
-                                        frequencies,
-                                        magnitudes)
-        hpcp_vector = hpcp(frequencies, w_magnitudes)
-    return hpcp_vector
-
-
-def cross_recurrent_plot(input_x, input_y, tau=1, m=1, kappa=0.095):
-    """
-    Constructs the Cross Recurrent Plot of two audio feature vector
-    """
-    from sklearn.metrics.pairwise import euclidean_distances
-    pdistances = euclidean_distances(input_x, input_y)
-    #pdistances = resample_simmatrix(pdistances)
-    transposed_pdistances = pdistances.T
-    eph_x = np.percentile(pdistances, kappa*100, axis=1)
-    eph_y = np.percentile(transposed_pdistances, kappa*100, axis=1)
-    x = eph_x[:,None] - pdistances
-    y = eph_y[:,None] - transposed_pdistances
-    #apply heaviside function to the array (Binarize the array)
-    x = np.piecewise(x, [x<0, x>=0], [0,1])
-    y = np.piecewise(y, [y<0, y>=0], [0,1])
-    crp = x*y.T
-    return crp
-
-
 class TestChromaCrossSimilarity(TestCase):
 
-    query = estd.MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'mozart_c_major_30sec.wav'))()
-    reference = estd.MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'Vivaldi_Sonata_5_II_Allegro.wav'))
-    query_hpcp = hpcp(query)
-    reference_hpcp = hpcp(reference)
-    expected = cross_recurrent_plot(query_hpcp, reference_hpcp)
+    # hpcp matrix of a short query song segment (2 frames) computed using essentia hpcp algorithm
+    self.query_hpcp = array([[0.3218126, 0.00541916, 0.26444072, 0.36874822, 1., 0.10472599, 0.05123469, 0.03934194, 0.07354275, 0.646091, 0.55201685, 0.03270169],
+                    [0.07695414, 0.04679213, 0.56867135, 1., 0.10247268, 0.03653419, 0.03635696, 0.2443251, 0.2396715, 0.1190474, 0.8045795, 0.41822678]])
+    
+    # hpcp matrix of a short reference song segment (3 frames) computed using essentia hpcp algorithm
+    self.reference_hpcp = array([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                    [0.36084786, 0.37151814, 0.40913638, 0.15566002, 0.40571737, 1., 0.6263613, 0.65415925, 0.53127843, 0.7900088, 0.50427467, 0.51956046],
+                    [0.42861825, 0.36887613, 0.05665652, 0.20978431, 0.1992704, 0.14884946, 1., 0.24148795, 0.43031794, 0.14265466, 0.17224492, 0.36498153]]) 
+    
+    # expected binary similarity matrix using the cross recurrence quantification method computed using the python implementation from https://github.com/albincorreya/ChromaCoverId
+    self.expected_crp_simmatrix = array([[1., 0., 0.],
+                                         [0., 0., 0.]])
+
+    # expected bianry similarity matrix using oti-based similarity method using the python implementation from https://github.com/albincorreya/ChromaCoverId
+    self.expected_oti_simmatrix = array([[0., 0., 0.], 
+                                         [1., 0., 1.]])
 
     def testEmpty(self):
         self.assertComputeFails(estd.CrossSimilarityMatrix(), [])
 
     def testRegressionStandard(self):
-        """Tests standard ChromaCrossSimilarity algo"""
+        """Test standard ChromaCrossSimilarity algo rqa method"""
         csm = estd.ChromaCrossSimilarity(oti=False, stackFrameSize=1)
         result = csm.compute(self.query_hpcp, self.reference_hpcp)
-        self.assertAlmostEqual(np.mean(self.expected), np.mean(result))
-        self.assertAlmostEqualVector(self.expected, result)
+        self.assertAlmostEqual(np.mean(self.expected_crp_simmatrix), np.mean(result))
+        self.assertAlmostEqualVector(self.expected_crp_simmatrix, result)
 
     def testInvalidParam(self):
         self.assertConfigureFails(estd.ChromaCrossSimilarity(), { 'binarizePercentile': -1 })
@@ -103,6 +60,13 @@ class TestChromaCrossSimilarity(TestCase):
         """Tests standard ChromaCrossSimilarity algo when param 'otiBinary=True'"""
         # test oti-based binary sim matirx method
         self.assertComputeFails(estd.ChromaCrossSimilarity(otiBinary=True), [])
+
+    def testRegressionOTIBinary(self):
+        """Test regression of standard ChromaCrossSimilarity when otiBinary=True"""
+        csm = estd.ChromaCrossSimilarity(otiBinary=True)
+        sim_matrix = csm.compute(self.query_hpcp, self.reference_hpcp)
+        self.assertAlmostEqual(np.mean(self.expected_oti_simmatrix), np.mean(sim_matrix))
+        self.assertAlmostEqualVector(self.expected_oti_simmatrix, sim_matrix)
 
     def testRegressionStreaming(self):
         """Tests streaming ChromaCrossSimilarity algo against the standard mode algorithm with 'streamingMode=True' """

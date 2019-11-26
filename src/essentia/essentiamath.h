@@ -969,13 +969,8 @@ void heavisideStepFunction(std::vector<std::vector<T> >& inputArray) {
 
   for (size_t i=0; i<inputArray.size(); i++) {
     for (size_t j=0; j<inputArray[i].size(); j++) {
-      // initialize all non negative elements as zero
-      if (inputArray[i][j] < 0) {
-        inputArray[i][j] = 0;
-      }
-      else if (inputArray[i][j] >= 0) {
-        inputArray[i][j] = 1;
-      }
+      // initialize all non negative elements as zero otherwise as one
+      inputArray[i][j] = (inputArray[i][j] < 0) ? 0 : 1;
     }
   }
 }

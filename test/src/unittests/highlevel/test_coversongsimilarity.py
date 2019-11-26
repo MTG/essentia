@@ -44,6 +44,7 @@ class TestCoverSongSimilarity(TestCase):
         warn = "Expected shape of output score_matrix is %s, instead of %s" % (self.sim_matrix.shape, score_matrix.shape)
         self.assertEqual(score_matrix.shape[0], self.sim_matrix.shape[0], warn)
         self.assertEqual(score_matrix.shape[1], self.sim_matrix.shape[1], warn)
+        self.assertAlmostEqual(self.expected_distance, distance)
 
     def testInvalidParam(self):
         self.assertConfigureFails(CoverSim(), { 'alignmentType': 1 })

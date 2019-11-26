@@ -136,7 +136,7 @@ void ChromaCrossSimilarity::compute() {
       _thresholdQuery.clear();
       _thresholdReference.clear();
     }
-    else if (!_streaming) {
+    else { // no streaming
       _thresholdQuery.assign(queryFeatureSize, 0);
       _thresholdReference.assign(referenceFeatureSize, 0);
       csm.assign(queryFeatureSize, std::vector<Real>(referenceFeatureSize, 0));
@@ -273,7 +273,7 @@ AlgorithmStatus ChromaCrossSimilarity::process() {
     releaseData();
   }
   // otherwise we compute similarity matrix as mentioned in [2]
-  else if (!_otiBinary) {
+  else { // no otiBinary method
     std::vector<std::vector<Real> > queryFeatureStack = stackChromaFrames(inputFramesCopy, _frameStackSize, _frameStackStride);
     // here we compute the pairwsie euclidean distances between query and reference song time embedding and finally tranpose the resulting matrix.
     std::vector<std::vector<Real> > pdistances = pairwiseDistance(queryFeatureStack, _referenceFeatureStack);

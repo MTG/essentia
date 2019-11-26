@@ -123,7 +123,7 @@ class ChromaCrossSimilarity : public Algorithm {
     declareParameter("frameStackStride", "stride size to form a stack of frames (e.g., 'frameStackStride'=1 to use consecutive frames; 'frameStackStride'=2 for using every second frame)", "[1,inf)", 1);
     declareParameter("frameStackSize", "number of input frames to stack together and treat as a feature vector for similarity computation. Choose 'frameStackSize=1' to use the original input frames without stacking", "[0,inf)", 9);
     declareParameter("binarizePercentile", "maximum percent of distance values to consider as similar in each row and each column", "[0,1]", 0.095);
-    declareParameter("oti", "optimal transposition index of the query and reference song", "[0, inf]", 0);
+    declareParameter("oti", "optimal transposition index of the query and reference song if known", "[0, inf]", 0);
     declareParameter("otiBinary", "whether to use the OTI-based chroma binary similarity method", "{true,false}", false);
   }
 
