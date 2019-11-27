@@ -30,6 +30,7 @@
 #include "config.h"
 #include "debugging.h"
 #include "streamutil.h"
+#include <unsupported/Eigen/CXX11/Tensor>
 
 
 // fixed-size int types
@@ -369,6 +370,18 @@ class Tuple2 {
  */
 typedef Tuple2<Real> StereoSample;
 
+
+/**
+ * Alias for Eigen::Tensor.
+ */
+template<typename T>
+using Tensor = Eigen::Tensor<T, 4, 0>;
+
+/**
+ * Alias for Eigen::TensorMap.
+ */
+template<typename T>
+using TensorMap = Eigen::TensorMap<T, 0>;
 
 
 namespace streaming {

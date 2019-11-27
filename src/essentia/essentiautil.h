@@ -157,6 +157,14 @@ inline bool isValid(const TNT::Array2D<T> & mat) {
   return true;
 }
 
+template <typename T>
+inline bool isValid(const Tensor<T>& tensor) {
+  for (const T* i = tensor.data(); i < (tensor.data() + tensor.size()); ++i){
+    if (!isValid(*i)) return false;
+  }
+  return true;
+}
+
 #ifdef OS_WIN32
 int mkstemp(char *tmpl);
 #endif // OS_WIN32

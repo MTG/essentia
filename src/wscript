@@ -6,7 +6,7 @@ from __future__ import print_function
 import sys
 import os.path
 
-dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
+dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint', 'eigen']
 
 def options(ctx):
     ctx.add_option('--with-python', action='store_true',
@@ -118,6 +118,9 @@ def configure(ctx):
        return
 
 
+    ctx.check_cfg(package='eigen3', uselib_store='EIGEN3',
+                  args=['eigen3 >= 3.3.4'] + check_cfg_args)
+
     if 'libav' in ctx.env.WITH_LIBS_LIST:
         ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
                       args=['libavcodec >= 55.34.1'] + check_cfg_args,
@@ -214,6 +217,15 @@ def configure(ctx):
 
             print('   IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
             print('                   To avoid these errors, use alternative FFT libraries (see the --fft flag).\n')
+
+    # TODO Eigen is set as a mandatory dependecy as the long-term goal is to
+    # use it to replace the outdated TNT code for matrices and liner algebra
+    ctx.env.USES += ' EIGEN3'
+
+    # this flag guarantees that all the Eigen code that we are #including is
+    # licensed under MPL2 or more permissive licenses (like BSD)
+    # http://eigen.tuxfamily.org/index.php?title=Main_Page#License
+    ctx.env.DEFINES += ['EIGEN_MPL2_ONLY']
 
     # MonoLoader, EqloudLoader, and EasyLoader are dependent on Resample
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
@@ -468,7 +480,7 @@ def build(ctx):
     # do not compile Cephes functions if we are not compiling SNR
     if 'SNR' not in ctx.env.ALGOIGNORE:
         ctx.env.INCLUDES += ['3rdparty/cephes/bessel/' ]
-        sources += ctx.path.ant_glob('3rdparty/cephes/bessel/*.cpp') 
+        sources += ctx.path.ant_glob('3rdparty/cephes/bessel/*.cpp')
     else:
         print('Building without 3rdparty Cephes library code (Bessel functions) because SNR algorithm is ignored')
 
