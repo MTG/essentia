@@ -16,7 +16,7 @@ cd build
 
 cmake ../ -DCMAKE_INSTALL_PREFIX=$PREFIX
 make install
+cp "$PREFIX"/share/pkgconfig/eigen3.pc "$PREFIX"/lib/pkgconfig/
 
 cd ../../..
-cp share/pkgconfig/eigen3.pc lib/pkgconfig/
 rm -rf tmp
