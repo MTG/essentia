@@ -218,8 +218,8 @@ def configure(ctx):
             print('   IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
             print('                   To avoid these errors, use alternative FFT libraries (see the --fft flag).\n')
 
-    # TODO Eigen is set as a mandatory dependecy as the long-term goal is to
-    # use it to replace the outdated TNT code for matrices and liner algebra
+    # TODO Eigen is set as a mandatory dependency as the long-term goal is to
+    # use it to replace the outdated TNT code for matrices and linear algebra
     ctx.env.USES += ' EIGEN3'
 
     # this flag guarantees that all the Eigen code that we are #including is
