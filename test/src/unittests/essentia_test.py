@@ -154,16 +154,11 @@ class TestCase(BaseTestCase):
             return self.assertTrue(almostEqualArray(found, expected, precision))
 
         self.assertEqual(len(found), len(expected))
-        count = 0
+
         for v1, v2 in zip(found, expected):
             self.assertEqual(len(v1), len(v2))
-            for val1, val2 in zip(v1, v2):
-                if (isinstance(val1, numpy.ndarray)):
-                    self.assertAlmostEqual(val1.all(), val2.all(), precision)
-                else:
-                    self.assertAlmostEqual(val1, val2, precision)
+            self.assertAlmostEqualVector(array(v1).flatten(), array(v2).flatten(), precision)
 
-            count += 1
 
     def assertAlmostEqualAbs(self, found, expected, precision = 0.1):
         diff = abs(expected - found)
