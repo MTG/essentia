@@ -231,6 +231,12 @@ void fillYamlTree (const Pool& p, YamlNode* root) {
   FILL_YAML_TREE_MACRO(vector<TNT::Array2D<Real> >, Array2DReal);
   FILL_YAML_TREE_MACRO(vector<StereoSample>, StereoSample);
 
+  if (p.getSingleTensorRealPool().begin() != p.getSingleTensorRealPool().end() ||
+      p.getTensorRealPool().begin() != p.getTensorRealPool().end() ) {
+    E_WARNING("YamlOuput: Tensors are not supported by YamlOuput. "
+              "The tensors contained in this pool will be ignored.");
+  }
+
   #undef FILL_YAML_TREE_MACRO
 }
 
