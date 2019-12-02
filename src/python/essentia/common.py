@@ -166,7 +166,7 @@ def determineEdt(obj):
             else:
                 return Edt(Edt.LIST_ARRAY)
 
-    if isinstance(obj, numpy.ndarray) and obj.ndim > 2: # temporal solusion. Tensor should be generalized to <= 2 case too
+    if isinstance(obj, numpy.ndarray) and obj.ndim == 4:
         if obj.dtype == numpy.dtype('single'):
             return Edt(Edt.TENSOR_REAL)
 
