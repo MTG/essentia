@@ -5,7 +5,7 @@ rm -rf tmp
 mkdir tmp
 cd tmp
 
-echo "Building gaia $EIGEN_VERSION"
+echo "Installing headers for Eigen $EIGEN_VERSION"
 
 curl -SLO https://bitbucket.org/eigen/eigen/get/$EIGEN_VERSION.tar.gz
 tar -xf $EIGEN_VERSION.tar.gz

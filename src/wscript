@@ -222,7 +222,7 @@ def configure(ctx):
     # use it to replace the outdated TNT code for matrices and linear algebra
     ctx.env.USES += ' EIGEN3'
 
-    # this flag guarantees that all the Eigen code that we are #including is
+    # this flag guarantees that all the Eigen code that we are including is
     # licensed under MPL2 or more permissive licenses (like BSD)
     # http://eigen.tuxfamily.org/index.php?title=Main_Page#License
     ctx.env.DEFINES += ['EIGEN_MPL2_ONLY']

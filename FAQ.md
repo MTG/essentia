@@ -64,7 +64,7 @@ build_yaml.sh
 ...
 cd ../../
 ```
-Note that the dependency needs may change relying on the set of required algorithms.
+Note that you can selectively build dependencies depending on the required Essentia algorithms."
 
 Build Essentia:
 ```

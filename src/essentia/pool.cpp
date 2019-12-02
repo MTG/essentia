@@ -303,7 +303,7 @@ void Pool::add(const string& name, const Tensor<Real>& value, bool validityCheck
   {
     MutexLocker lock(mutexTensorReal);
     if (validityCheck && !isValid(value)) {
-      throw EssentiaException("Pool::add array contains invalid numbers (NaN or inf)");
+      throw EssentiaException("Pool::add tensor contains invalid numbers (NaN or inf)");
     }
     if (_poolTensorReal.find(name) != _poolTensorReal.end()) {
       _poolTensorReal[name].push_back(Tensor<Real>(value));
@@ -368,7 +368,7 @@ void Pool::set(const string& name, const Tensor<Real>& value, bool validityCheck
   {
     MutexLocker lock(mutexSingleTensorReal);
     if (validityCheck && !isValid(value)) {
-      throw EssentiaException("Pool::set array contains invalid numbers (NaN or inf)");
+      throw EssentiaException("Pool::set tensor contains invalid numbers (NaN or inf)");
     }
     if (_poolSingleTensorReal.find(name) != _poolSingleTensorReal.end()) {
       _poolSingleTensorReal[name].resize(value.dimensions());
