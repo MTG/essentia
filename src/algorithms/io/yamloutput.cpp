@@ -233,7 +233,7 @@ void fillYamlTree (const Pool& p, YamlNode* root) {
 
   if (p.getSingleTensorRealPool().begin() != p.getSingleTensorRealPool().end() ||
       p.getTensorRealPool().begin() != p.getTensorRealPool().end() ) {
-    E_WARNING("YamlOuput: Tensors are not supported by YamlOuput. "
+    E_WARNING("YamlOuput: Tensors are not supported by YamlOutput. "
               "The tensors contained in this pool will be ignored.");
   }
 
