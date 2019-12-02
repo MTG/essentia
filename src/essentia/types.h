@@ -373,9 +373,11 @@ typedef Tuple2<Real> StereoSample;
 
 /**
  * Alias for Eigen::Tensor.
+ * Store data in a rowMajor fashion to fit Tensorflow's behavior.
+ * https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/framework/tensor_types.h
  */
 template<typename T>
-using Tensor = Eigen::Tensor<T, 4, 0>;
+using Tensor = Eigen::Tensor<T, 4, Eigen::RowMajor>;
 
 /**
  * Alias for Eigen::TensorMap.
