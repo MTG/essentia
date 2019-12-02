@@ -44,6 +44,7 @@ Compiling Essentia from source
 ==============================
 
 Essentia depends on (at least) the following libraries:
+ - `Eigen <http://eigen.tuxfamily.org/`_: for linear algebra
  - `FFTW <http://www.fftw.org>`_: for the FFT implementation *(optional)*
  - `libavcodec/libavformat/libavutil/libavresample <http://ffmpeg.org/>`_ (from the FFmpeg/LibAv project): for loading/saving any type of audio files *(optional)*
  - `libsamplerate <http://www.mega-nerd.com/SRC/>`_: for resampling audio *(optional)*
@@ -59,7 +60,7 @@ Installing dependencies on Linux
 
 You can install those dependencies on a Debian/Ubuntu system from official repositories using the command below::
 
-  sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six
+  sudo apt-get install build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six
 
 In order to use Python 2 bindings for the library, you might also need to install python-dev, python-numpy-dev (or python-numpy on Ubuntu) and python-yaml for YAML support in python::
 

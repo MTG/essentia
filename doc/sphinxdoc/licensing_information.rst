@@ -55,6 +55,7 @@ This is the set of libraries which can be used within Essentia:
    * LibYAML - http://pyyaml.org/wiki/LibYAML (`MIT license`_)
    * Kiss FFT - https://sourceforge.net/projects/kissfft/ (`BSD-style license`_)
    * Accelerate - https://developer.apple.com/reference/accelerate
+   * Eigen - http://eigen.tuxfamily.org/ (`MPL2`_)
 
 
 .. _GPL: http://www.gnu.org/licenses/gpl.html
@@ -65,4 +66,5 @@ This is the set of libraries which can be used within Essentia:
 .. _MIT license: http://www.opensource.org/licenses/mit-license.php
 .. _Public domain: http://en.wikipedia.org/wiki/Public_domain
 .. _BSD-2-Clause: https://opensource.org/licenses/BSD-2-Clause
+.. _MPL2: https://www.mozilla.org/en-US/MPL/2.0/
 

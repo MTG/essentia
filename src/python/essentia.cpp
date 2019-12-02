@@ -72,6 +72,8 @@ init_essentia() {
       PyType_Ready(&PyStereoSampleType)       < 0 ||
       PyType_Ready(&VectorStereoSampleType)   < 0 ||
       PyType_Ready(&VectorMatrixRealType)     < 0 ||
+      PyType_Ready(&TensorRealType)           < 0 ||
+      PyType_Ready(&VectorTensorRealType)     < 0 ||
       PyType_Ready(&VectorVectorStereoSampleType) < 0) {
 
     cerr << "Unable to instantiate Essentia's wrapper types." << endl;
