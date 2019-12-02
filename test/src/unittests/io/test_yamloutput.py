@@ -354,6 +354,30 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
         self.assertEqual(expected, actual)
         os.unlink('test.json')
 
+    def testIgnoreTensors(self):
+        import yaml
+
+        tensor = array(numpy.ones([1, 1, 1, 1]))
+        arr = array(numpy.ones([1]))
+        p = Pool()
+
+        # Single tensor
+        p.set('tensor', tensor)
+
+        # Vector of tensors
+        p.add('tensors', tensor)
+        p.add('tensors', tensor)
+
+        p.set('array', arr)
+
+        YamlOutput(filename='test.yaml')(p)
+        actual = yaml.load(getYaml('test.yaml'))
+
+        # Assert that the tensors are not written
+        self.assertEqual(['metadata', 'array'], list(actual.keys()))
+
+        # Also assert that the array was correctly written
+        self.assertEqual([1], actual['array'])
 
 
 suite = allTests(TestYamlOutput)
