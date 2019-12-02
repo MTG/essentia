@@ -62,9 +62,9 @@ void* TensorReal::fromPythonCopy(PyObject* obj) {
      throw EssentiaException("TensorReal::fromPythonRef: this NumPy array doesn't contain Reals (maybe you forgot dtype='f4')");
    }
 
-  return new Tensor<Real>(TensorMap<Tensor<Real> >((Real *)PyArray_DATA(numpyarr),
-                                                    PyArray_DIM(obj, 0),
-                                                    PyArray_DIM(obj, 1),
-                                                    PyArray_DIM(obj, 2),
-                                                    PyArray_DIM(obj, 3)));
+  return new Tensor<Real>(TensorMap<Real>((Real *)PyArray_DATA(numpyarr),
+                                                  PyArray_DIM(obj, 0),
+                                                  PyArray_DIM(obj, 1),
+                                                  PyArray_DIM(obj, 2),
+                                                  PyArray_DIM(obj, 3)));
 }

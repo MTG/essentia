@@ -381,7 +381,7 @@ using Tensor = Eigen::Tensor<T, 4, 0>;
  * Alias for Eigen::TensorMap.
  */
 template<typename T>
-using TensorMap = Eigen::TensorMap<T, 0>;
+using TensorMap = Eigen::TensorMap<Tensor<T>, 0>;
 
 
 namespace streaming {
