@@ -91,7 +91,7 @@ def configure(ctx):
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
     ctx.env.PKG_CONFIG_PATH      = ctx.options.PKG_CONFIG_PATH
     ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
-    ctx.env.WITH_LIBS            = ctx.options.WITH_LIBS
+    ctx.env.LIGHTWEIGHT          = ctx.options.LIGHTWEIGHT
     ctx.env.EXAMPLES             = ctx.options.EXAMPLES
     ctx.env.EXAMPLE_LIST         = []
     ctx.env.ALGOIGNORE           = []
