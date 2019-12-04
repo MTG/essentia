@@ -62,7 +62,7 @@ for whl in wheelhouse/*.whl; do
     fi
 done
 
-# Install packages and test
+# Install and test
 for PYBIN in /opt/python/*/bin/; do
     "${PYBIN}/pip" install essentia --no-index -f /io/wheelhouse
     (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')
