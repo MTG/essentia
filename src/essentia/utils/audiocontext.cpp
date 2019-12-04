@@ -145,8 +145,8 @@ int AudioContext::create(const std::string& filename,
   strncpy(_muxCtx->filename, _filename.c_str(), sizeof(_muxCtx->filename));
 
   // Configure sample format convertion
-  E_DEBUG(EAlgorithm, "AudioContext: using sample format conversion from libavresample");
-  _convertCtxAv = avresample_alloc_context();
+  E_DEBUG(EAlgorithm, "AudioContext: using sample format conversion from libswresample");
+  _convertCtxAv = swr_alloc();
         
   av_opt_set_int(_convertCtxAv, "in_channel_layout", _codecCtx->channel_layout, 0);
   av_opt_set_int(_convertCtxAv, "out_channel_layout", _codecCtx->channel_layout, 0);
@@ -155,8 +155,8 @@ int AudioContext::create(const std::string& filename,
   av_opt_set_int(_convertCtxAv, "in_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
   av_opt_set_int(_convertCtxAv, "out_sample_fmt", _codecCtx->sample_fmt, 0);
 
-  if (avresample_open(_convertCtxAv) < 0) {
-      throw EssentiaException("AudioLoader: Could not initialize avresample context");
+  if (swr_init(_convertCtxAv) < 0) {
+      throw EssentiaException("AudioLoader: Could not initialize swresample context");
   }
 
   return _codecCtx->frame_size;
@@ -206,8 +206,8 @@ void AudioContext::close() {
   _buffer = 0;
 
   if (_convertCtxAv) {
-    avresample_close(_convertCtxAv);
-    avresample_free(&_convertCtxAv);
+    swr_close(_convertCtxAv);
+    swr_free(&_convertCtxAv);
   }
 
   _isOpen = false;
@@ -284,17 +284,15 @@ void AudioContext::encodePacket(int size) {
     throw EssentiaException("Could not allocate output buffer for sample format conversion");
   }
  
-  int written = avresample_convert(_convertCtxAv,
+  int written = swr_convert(_convertCtxAv,
                                    &bufferFmt, 
-                                   outputPlaneSize,
                                    size, 
-                                   (uint8_t**) &_buffer,
-                                   inputPlaneSize, 
+                                   (const uint8_t**) &_buffer,
                                    size);
 
   if (written < size) {
     // The same as in AudioLoader. There may be data remaining in the internal 
-    // FIFO buffer to get this data: call avresample_convert() with NULL input 
+    // FIFO buffer to get this data: call swr_convert() with NULL input
     // But we just throw exception instead.
     ostringstream msg;
     msg << "AudioLoader: Incomplete format conversion (some samples missing)"

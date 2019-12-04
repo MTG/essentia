@@ -133,7 +133,7 @@ def configure(ctx):
         ctx.check_cfg(package='libavutil', uselib_store='AVUTIL',
                       args=check_cfg_args, mandatory=False)
 
-        ctx.check_cfg(package='libavresample', uselib_store='AVRESAMPLE',
+        ctx.check_cfg(package='libswresample', uselib_store='AVRESAMPLE',
                       args=check_cfg_args, mandatory=False)
 
     if 'libsamplerate' in ctx.env.WITH_LIBS_LIST:
@@ -504,7 +504,7 @@ def build(ctx):
 
     ctx(source='../essentia.pc.in', **ctx.env.pcfile_opts)
     # TODO Ideally we should use the Requires.private field in the .pc file
-    # Requires.private: gaia2 fftw3f yaml-0.1 libavcodec libavformat libavutil libavresample samplerate taglib libchromaprint
+    # Requires.private: gaia2 fftw3f yaml-0.1 libavcodec libavformat libavutil libswresample samplerate taglib libchromaprint
 
     ctx.add_group()
 
