@@ -88,7 +88,8 @@ classifiers = [
 ]
 
 
-build_requires = ['numpy>=1.8.2', 'six', 'pyyaml']
+setup_requires = ['numpy>=1.8.2', 'six']
+install_requires = setup_requires + ['pyyaml']
 
 module = Extension('name', sources=[])
 
@@ -108,8 +109,8 @@ setup(
     license='AGPLv3',
     platforms='any',
     classifiers=classifiers,
-    setup_requires=build_requires,
-    install_requires=build_requires,
+    setup_requires=setup_requires,
+    install_requires=install_requires,
     ext_modules=[module],
     cmdclass={
         'build_ext': EssentiaBuildExtension,
