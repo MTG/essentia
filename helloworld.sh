@@ -1,1 +1,0 @@
-/usr/local/bin/ipython3 helloworld.py -i

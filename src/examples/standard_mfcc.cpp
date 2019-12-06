@@ -69,10 +69,6 @@ int main(int argc, char* argv[]) {
   Algorithm* spec  = factory.create("Spectrum");
   Algorithm* mfcc  = factory.create("MFCC");
 
-  Algorithm* median  = factory.create("Median");
-
-
-
 
 
 
@@ -103,12 +99,6 @@ int main(int argc, char* argv[]) {
   mfcc->output("bands").set(mfccBands);
   mfcc->output("mfcc").set(mfccCoeffs);
 
-  // MFCC -> median
-  Real median_mfccCoeffs;
-
-  median->input("array").set(mfccCoeffs);
-  median->output("median").set(median_mfccCoeffs);
-
 
 
   /////////// STARTING THE ALGORITHMS //////////////////
@@ -132,10 +122,8 @@ int main(int argc, char* argv[]) {
     w->compute();
     spec->compute();
     mfcc->compute();
-    median->compute();
 
     pool.add("lowlevel.mfcc", mfccCoeffs);
-    pool.add("lowlevel.median_mfcc", median_mfccCoeffs);
 
   }
 

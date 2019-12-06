@@ -87,10 +87,3 @@ packaging/win32_3rdparty/include
 dist
 essentia.egg-info
 tmp
-
-AudioDSP/
-.idea/
-debug_yaml.py
-debug_yaml.sh
-output_HPSS.yml
-output_mfcc_median.yml
