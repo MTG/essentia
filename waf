@@ -31,6 +31,7 @@ POSSIBILITY OF SUCH DAMAGE.
 """
 
 import os, sys, inspect
+import waftools
 
 VERSION="2.0.10"
 REVISION="cf8ca5fa84387374f6d66295baab59ec"
