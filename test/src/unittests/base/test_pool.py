@@ -67,6 +67,14 @@ class TestPool(TestCase):
         self.assertAlmostEqualVector(p['foo.bar'], [expectedVal1])
         self.assertAlmostEqualVector(p['bar.foo'], [expectedVal2])
 
+    def testRealTensorPoolSimple(self):
+        expectedTen = numpy.ones([1, 2, 3, 4]).astype('float32')
+
+        p = Pool()
+        p.add('foo.bar', expectedTen)
+
+        self.assertAlmostEqualMatrix(p['foo.bar'], [expectedTen])
+
     def testRealVectorPoolSimple(self):
         expectedVec = [1.6, 0.9, 19.85]
 
@@ -84,6 +92,16 @@ class TestPool(TestCase):
         p.add('foo.bar', expectedVec2)
 
         self.assertAlmostEqualMatrix(p['foo.bar'], [expectedVec1, expectedVec2])
+
+    def testRealTensorPoolMultiple(self):
+        expectedTen1 = numpy.ones([1, 2, 3, 4]).astype('float32')
+        expectedTen2 = numpy.ones([4, 3, 2, 1]).astype('float32')
+
+        p = Pool()
+        p.add('foo.bar', expectedTen1)
+        p.add('foo.bar', expectedTen2)
+
+        self.assertAlmostEqualMatrix(p['foo.bar'], [expectedTen1, expectedTen2])
 
     def testRealVectorPoolMultipleLabels(self):
         expectedVec1 = [1.6, 0.9, 19.85]

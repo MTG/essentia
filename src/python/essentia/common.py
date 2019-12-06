@@ -58,6 +58,8 @@ class Edt:  # Essentia Data Type
     MATRIX_REAL = 'MATRIX_REAL'
     MATRIX_COMPLEX = 'MATRIX_COMPLEX'
     VECTOR_MATRIX_REAL = 'VECTOR_MATRIX_REAL'
+    VECTOR_TENSOR_REAL = 'VECTOR_TENSOR_REAL'
+    TENSOR_REAL = 'TENSOR_REAL'
     POOL = 'POOL'
 
     # intermediate types
@@ -143,6 +145,9 @@ def determineEdt(obj):
         if firstElmtType == Edt.MATRIX_REAL:
             return Edt(Edt.VECTOR_MATRIX_REAL)
 
+        if firstElmtType == Edt.TENSOR_REAL:
+            return Edt(Edt.VECTOR_TENSOR_REAL)
+
         if firstElmtType == Edt.LIST_REAL:
             return Edt(Edt.LIST_LIST_REAL)
 
@@ -160,6 +165,16 @@ def determineEdt(obj):
                 return Edt(Edt.LIST_ARRAY_REAL)
             else:
                 return Edt(Edt.LIST_ARRAY)
+
+    if isinstance(obj, numpy.ndarray) and obj.ndim == 4:
+        if obj.dtype == numpy.dtype('single'):
+            return Edt(Edt.TENSOR_REAL)
+
+        if obj.dtype == numpy.dtype('complex64'):
+            return Edt(Edt.TENSOR_COMPLEX)
+
+        raise TypeError('essentia can currently only accept two-dimensional numpy arrays of dtype '\
+                        '"single"')
 
     # numpy array matrices
     if isinstance(obj, numpy.ndarray) and obj.ndim == 2:
@@ -363,7 +378,8 @@ class Pool:
         else:
             if givenType in (Edt.REAL, Edt.STRING, Edt.STEREOSAMPLE,
                              Edt.VECTOR_REAL, Edt.VECTOR_STRING,
-                             Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL):
+                             Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL,
+                             Edt.TENSOR_REAL):
                 goalType = givenType
 
             # some exceptions
@@ -398,7 +414,7 @@ class Pool:
 
         # if we haven't seen this type before, we will have to guess its type
         else:
-            if givenType in (Edt.REAL, Edt.STRING, Edt.VECTOR_REAL):
+            if givenType in (Edt.REAL, Edt.STRING, Edt.VECTOR_REAL, Edt.TENSOR_REAL):
                 goalType = givenType
 
             # some exceptions
@@ -453,7 +469,8 @@ class Pool:
             if givenType in (Edt.REAL, Edt.STRING, Edt.STEREOSAMPLE,
                              Edt.VECTOR_REAL, Edt.VECTOR_STRING,
                              Edt.VECTOR_STEREOSAMPLE, Edt.MATRIX_REAL,
-                             Edt.VECTOR_VECTOR_REAL, Edt.VECTOR_MATRIX_REAL):
+                             Edt.VECTOR_VECTOR_REAL, Edt.VECTOR_MATRIX_REAL,
+                             Edt.VECTOR_TENSOR_REAL, Edt.TENSOR_REAL):
                 goalType = givenType
 
             # some exceptions
