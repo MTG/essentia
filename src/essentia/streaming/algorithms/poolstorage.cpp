@@ -39,6 +39,7 @@ void connect(SourceBase& source, Pool& pool, const string& descriptorName, bool 
   CREATE_POOL_STORAGE(string);
   CREATE_POOL_STORAGE(vector<string>);
   CREATE_POOL_STORAGE(TNT::Array2D<Real>);
+  CREATE_POOL_STORAGE(Tensor<Real>);
   CREATE_POOL_STORAGE(StereoSample);
   CREATE_POOL_STORAGE(vector<Real>);
 
@@ -95,6 +96,7 @@ void disconnect(SourceBase& source, Pool& pool, const string& descriptorName) {
       else GET_POOLSTORAGE_PROPERTIES(vector<string>)
       else GET_POOLSTORAGE_PROPERTIES(vector<Real>)
       else GET_POOLSTORAGE_PROPERTIES(TNT::Array2D<Real>)
+      else GET_POOLSTORAGE_PROPERTIES(Tensor<Real>)
       else GET_POOLSTORAGE_PROPERTIES(StereoSample)
       else if (sameType(sourceType, typeid(int))) {
         p = ((PoolStorage<Real>*)sinkAlg)->pool();

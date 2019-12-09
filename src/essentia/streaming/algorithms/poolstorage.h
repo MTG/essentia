@@ -125,6 +125,11 @@ class PoolStorage : public PoolStorageBase {
     */
   }
 
+  template <typename T>
+  void addToPool(const Tensor<T>& value) {
+    _pool->add(_descriptorName, value);
+  }
+
   void addToPool(const StereoSample& value) {
     if (_setSingle) {
       throw EssentiaException("PoolStorage::addToPool, setting StereoSample as single value"
