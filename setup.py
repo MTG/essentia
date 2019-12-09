@@ -9,6 +9,15 @@ from setuptools.command.install_lib import install_lib
 library = None
 PYTHON = sys.executable
 
+project_name = 'essentia'
+
+if '--project_name' in sys.argv:
+    project_name_idx = sys.argv.index('--project_name')
+    project_name = sys.argv[project_name_idx + 1]
+    sys.argv.remove('--project_name')
+    sys.argv.pop(project_name_idx)
+
+
 class EssentiaInstall(install_lib):
     def install(self):
         global library
@@ -94,7 +103,7 @@ install_requires = setup_requires + ['pyyaml']
 module = Extension('name', sources=[])
 
 setup(
-    name='essentia',
+    name=project_name,
     version=get_version(),
     description='Library for audio and music analysis, description and synthesis',
     long_description='C++ library for audio and music analysis, description and synthesis, including Python bindings',

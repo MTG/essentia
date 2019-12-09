@@ -19,7 +19,20 @@ set -e -x
 PYBIN=/opt/python/cp36-cp36m/bin/
 
 cd /io
-"${PYBIN}/python" waf configure --with-gaia --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
+
+
+if [[ "$DOCKER_IMAGE" == *"manylinux2014_x86_64" ]]; then
+    TENSORFLOW_VERSION=1.14
+    PROJECT_NAME='essentia-tensorflow'
+    WITH_TENSORFLOW='--with-tensorflow'
+    "${PYBIN}/pip" install tensorflow-cpu==$TENSORFLOW_VERSION
+    "${PYBIN}/python" src/3rdparty/tensorflow/setup_python.py -m python -c usr/local/
+else
+    PROJECT_NAME='essentia'
+    WITH_TENSORFLOW=''
+fi
+
+"${PYBIN}/python" waf configure --with-gaia "${WITH_TENSORFLOW}" --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
 "${PYBIN}/python" waf
 "${PYBIN}/python" waf install
 cd -
@@ -47,7 +60,7 @@ for PYBIN in /opt/python/*/bin; do
     fi
 
     "${PYBIN}/pip" install numpy==$NUMPY_VERSION
-    ESSENTIA_WHEEL_SKIP_3RDPARTY=1 ESSENTIA_WHEEL_ONLY_PYTHON=1 "${PYBIN}/pip" wheel /io/ -w wheelhouse/ -v
+    ESSENTIA_WHEEL_SKIP_3RDPARTY=1 ESSENTIA_WHEEL_ONLY_PYTHON=1 WITH_TENSORFLOW=1 "${PYBIN}/pip" wheel /io/ -w wheelhouse/ -v --global-option project_name "${PROJECT_NAME}"
 done
 
 # Bundle external shared libraries into the wheels

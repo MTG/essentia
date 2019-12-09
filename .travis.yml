@@ -20,6 +20,10 @@ matrix:
         - docker
       env: DOCKER_IMAGE=mtgupf/essentia-builds:manylinux1_i686
            PRE_CMD=linux32
+    - sudo: required
+      services:
+        - docker
+      env: DOCKER_IMAGE=mtgupf/essentia-builds:manylinux2014_x86_64
 
 install:
   - docker pull $DOCKER_IMAGE > /dev/null
