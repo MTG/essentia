@@ -61,13 +61,15 @@ example_sources_fileio = [
     ('streaming_stft', ),
     ('streaming_tuningfrequency', ),
     ('streaming_vibrato', ),
+    ('streaming_tensorflowpredict', ),
     ('streaming_yinprobabilistic', ),
+    ('streaming_musicnn_predict', ),
 
     ('streaming_extractor_music',
         ['music_extractor/extractor_utils']),
 
     ('streaming_extractor_freesound',
-        ['music_extractor/extractor_utils'])    
+        ['music_extractor/extractor_utils'])
 ]
 
 example_sources_with_gaia = [
@@ -108,6 +110,9 @@ def configure(ctx):
         if "HAVE_GAIA2" in ctx.env['define_key']:
             ctx.env.LIB += ['gaia2']
             ctx.env['LIB_GAIA2'] += ['dl'] # -ldl is required when building with static QtCore
+
+        if "HAVE_TENSORFLOW":
+            ctx.env.LDFLAGS += ['-ldl', '-lXau', '-lxcb', '-lXdmcp']
 
         if ctx.options.CROSS_COMPILE_MINGW32:
             # otherwise the __imp__ symbols will be expected at link time
