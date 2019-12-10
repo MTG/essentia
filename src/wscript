@@ -142,7 +142,6 @@ def configure(ctx):
        ctx.recurse('python')
        return
 
-    print(ctx.env)
     ctx.check_cfg(package=lib_map['EIGEN3'], uselib_store='EIGEN3',
                   args=['eigen3 >= 3.3.4'] + check_cfg_args)
 
@@ -328,7 +327,7 @@ def configure(ctx):
     if has('tensorflow'):
         print('- Tensorflow detected!')
         print('  The following algorithms will be included: %s\n' % algos)
-        ctx.env.USES += ' TENSORFLOW'
+        ctx.env.USE_LIBS += ' TENSORFLOW'
     else:
         print('- Essentia is configured without Tensorflow.')
         print('  The following algorithms will be ignored: %s' % algos)
