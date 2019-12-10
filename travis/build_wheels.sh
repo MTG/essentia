@@ -40,6 +40,12 @@ cd -
 
 # Compile wheels
 for PYBIN in /opt/python/*/bin; do
+    # Don't build essentia-tensorflow wheels for python 3.8 while Tensorflow
+    # doesn't support it.
+    # https://github.com/tensorflow/addons/issues/744
+    if [[ $PYBIN == *"cp38"* ]] && [[ $AUDITWHEEL_PLAT == 'manylinux2014_x86_64' ]]; then
+        break
+    fi
 # Use the oldest version of numpy for each Python version
 # for backwards compatibility of its C API
 # https://github.com/numpy/numpy/issues/5888
@@ -78,6 +84,6 @@ done
 
 # Install and test
 for PYBIN in /opt/python/*/bin/; do
-    "${PYBIN}/pip" install essentia --no-index -f /io/wheelhouse
+    "${PYBIN}/pip" install "${PROJECT_NAME}" --no-index -f /io/wheelhouse
     (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')
 done
