@@ -36,7 +36,9 @@ for PYBIN in /opt/python/*/bin; do
     NUMPY_VERSION=1.8.2
 
 # Python 3.x
-    if [[ $PYBIN == *"cp37"* ]]; then
+    if [[ $PYBIN == *"cp38"* ]]; then
+        NUMPY_VERSION=1.17.4
+    elif [[ $PYBIN == *"cp37"* ]]; then
         NUMPY_VERSION=1.14.5
     elif [[ $PYBIN == *"cp36"* ]]; then
         NUMPY_VERSION=1.11.3
@@ -60,7 +62,7 @@ for whl in wheelhouse/*.whl; do
     fi
 done
 
-# Install packages and test
+# Install and test
 for PYBIN in /opt/python/*/bin/; do
     "${PYBIN}/pip" install essentia --no-index -f /io/wheelhouse
     (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')

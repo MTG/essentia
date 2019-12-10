@@ -91,7 +91,7 @@ def configure(ctx):
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
     ctx.env.PKG_CONFIG_PATH      = ctx.options.PKG_CONFIG_PATH
     ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
-    ctx.env.WITH_LIBS            = ctx.options.WITH_LIBS
+    ctx.env.LIGHTWEIGHT          = ctx.options.LIGHTWEIGHT
     ctx.env.EXAMPLES             = ctx.options.EXAMPLES
     ctx.env.EXAMPLE_LIST         = []
     ctx.env.ALGOIGNORE           = []
@@ -320,7 +320,7 @@ def build(ctx):
             includes=['test/3rdparty/gtest-1.6.0/include',
                       'test/3rdparty/gtest-1.6.0'] + adjust(ctx.env.INCLUDES, 'src'),
             install_path=None,
-            use='essentia ' + ctx.env.USES
+            use='essentia ' + ctx.env.USE_LIBS
             )
 
 
@@ -352,6 +352,6 @@ def doc(ctx):
     os.system('mkdir -p build/python')
     os.system('cp -r src/python/essentia build/python/')
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
-    
+
     pythonpath = os.path.abspath('build/python')
     os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, sys.executable))

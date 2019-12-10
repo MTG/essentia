@@ -135,7 +135,7 @@ def build(ctx):
                 source = ctx.path.ant_glob(' '.join(files)),
                 target = 'essentia_' + prog_name,
                 includes = includes,
-                use = 'essentia ', # + ctx.env.USES,
+                use = 'essentia ', # + ctx.env.USE_LIBS,
                 install_path = '${PREFIX}/bin')
             @feature('check_static')
             @before_method('apply_link')
@@ -172,6 +172,6 @@ def build(ctx):
             source   = ctx.path.ant_glob('vamp*.cpp') + vamp_sdk_files,
             target   = 'vamp_essentia',
             includes = [ '.', '..', '../3rdparty/vamp-plugin-sdk-2.4' ],
-            use      = 'essentia ', #+ ctx.env.USES,
+            use      = 'essentia ', #+ ctx.env.USE_LIBS,
             install_path = install_path)
 
