@@ -9,13 +9,12 @@ from setuptools.command.install_lib import install_lib
 library = None
 PYTHON = sys.executable
 
+# Default project name
 project_name = 'essentia'
 
-if '--project_name' in sys.argv:
-    project_name_idx = sys.argv.index('--project_name')
-    project_name = sys.argv[project_name_idx + 1]
-    sys.argv.remove('--project_name')
-    sys.argv.pop(project_name_idx)
+var_project_name = 'ESSENTIA_PROJECT_NAME'
+if var_project_name in os.environ:
+    project_name = os.environ[var_project_name]
 
 
 class EssentiaInstall(install_lib):
@@ -99,6 +98,10 @@ classifiers = [
 
 setup_requires = ['numpy>=1.8.2', 'six']
 install_requires = setup_requires + ['pyyaml']
+
+# Require Tensorflow for essentia-tensorflow
+if project_name == 'essentia-tensorflow':
+    install_requires.append('tensorflow')
 
 module = Extension('name', sources=[])
 
