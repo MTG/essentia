@@ -6,7 +6,7 @@ from subprocess import call
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser('Sets up tensorflow for linking agaist it.'
+    parser = argparse.ArgumentParser('Sets up tensorflow for linking against it.'
         'This can be done in two ways:'
         ' - python: By symlinking to an existing tensorflow python package. '
         '     This is the recommended way if tensorflow is already being used from python.'
@@ -37,6 +37,15 @@ if __name__ == "__main__":
         tf_dir = dirname(tensorflow.__file__)
         version = tensorflow.__version__
 
+        version_list = version.split('.')
+        major_version = int(version_list[0])
+        minor_version = int(version_list[1])
+
+        # From Tensorflow 1.15. libraries are stored in `tensorflow_core`
+        if major_version >= 1:
+            if minor_version >= 15:
+                tf_dir = tf_dir + '_core'
+
         print('found tensorflow in "{}"'.format(tf_dir))
         print('tensorflow version: {}'.format(version))
 
@@ -48,10 +57,12 @@ if __name__ == "__main__":
         src = join(tf_dir, 'libtensorflow_framework.so.1')
         tgt = join(context, 'lib', 'libtensorflow_framework.so')
         call(['ln', '-sf', src, tgt])
+        call(['ln', '-sf', 'libtensorflow_framework.so', join(context, 'lib', 'libtensorflow_framework.so.1')])
 
         src = join(tf_dir, 'python', '_pywrap_tensorflow_internal.so')
         tgt = join(context, 'lib', 'libpywrap_tensorflow_internal.so')
         call(['ln', '-sf', src, tgt])
+        call(['ln', '-sf', 'libpywrap_tensorflow_internal.so', join(context, 'lib', '_pywrap_tensorflow_internal.so')])
 
         libs = ('-lpywrap_tensorflow_internal '
                 '-ltensorflow_framework')

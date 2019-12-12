@@ -20,15 +20,18 @@ PYBIN=/opt/python/cp36-cp36m/bin/
 
 cd /io
 
-# Build the wheels with Tensorflow support on manylinux2014_x86_64
-if [[ $AUDITWHEEL_PLAT == 'manylinux2014_x86_64' ]]; then
+if [[ $WITH_TENSORFLOW ]]; then
+# Build essentia with tensorflow support using tensorflow 1.15.0 as it is the
+# newest version supported by the C API. It is backwards compatible for 1.X.X
+# https://www.tensorflow.org/guide/versions
+# Tensroflow >= 2.0 do not support libtensorflow for now
+# https://www.tensorflow.org/install/lang_c
     PROJECT_NAME='essentia-tensorflow'
+    TENSORFLOW_VERSION=1.15.0
 
-    TENSORFLOW_VERSION=1.15
-    "${PYBIN}/pip" install tensorflow-cpu==$TENSORFLOW_VERSION
+    "${PYBIN}/pip" install tensorflow==$TENSORFLOW_VERSION
     "${PYBIN}/python" src/3rdparty/tensorflow/setup_tensorflow.py -m python -c "${PREFIX}"
     "${PYBIN}/python" waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
-
 else
     PROJECT_NAME='essentia'
     "${PYBIN}/python" waf configure --with-gaia --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
@@ -40,41 +43,73 @@ cd -
 
 # Compile wheels
 for PYBIN in /opt/python/*/bin; do
-    # Don't build essentia-tensorflow wheels for python 3.8 while Tensorflow
-    # doesn't support it.
+    # Don't build for python 3.8 while tensorflow doesn't create wheels for it
     # https://github.com/tensorflow/addons/issues/744
-    if [[ $PYBIN == *"cp38"* ]] && [[ $AUDITWHEEL_PLAT == 'manylinux2014_x86_64' ]]; then
-        break
+    if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp38"* ]]; then break; fi
+
+    if [[ $WITH_TENSORFLOW ]]; then
+    # The minimum numpy version required by tensorflow is always greater than
+    # the installed one. Install the oldest numpy supported by each tensorflow
+    # to get the maximum fordwards compatibility
+        NUMPY_VERSION=$( "${PYBIN}/pip" check tensorflow |grep tensorflow |grep numpy |grep ">=" |awk -F"[>=',]+" '//{print $2}' )
+
+        if [[ ${NUMPY_VERSION} ]]; then
+            echo "Got numpy ${NUMPY_VERSION} from the Tensorflow requirements"
+            "${PYBIN}/pip" install numpy==$NUMPY_VERSION
+        fi
+
+        "${PYBIN}/pip" install tensorflow==$TENSORFLOW_VERSION
+
+        # Make the tensorflow symbolic links point to the shared libraries
+        # installed with the tensorflow wheel
+        "${PYBIN}/python" /io/src/3rdparty/tensorflow/setup_tensorflow.py -m python -c "${PREFIX}"
+
+    else
+    # Use the oldest version of numpy for each Python version
+    # for backwards compatibility of its C API
+    # https://github.com/numpy/numpy/issues/5888
+    # Build numpy versions used by scikit-learn:
+    # https://github.com/MacPython/scikit-learn-wheels/blob/master/.travis.yml
+
+        # Python 2.7
+        NUMPY_VERSION=1.8.2
+
+        # Python 3.x
+        if [[ $PYBIN == *"cp38"* ]]; then
+            NUMPY_VERSION=1.17.4
+        elif [[ $PYBIN == *"cp37"* ]]; then
+            NUMPY_VERSION=1.14.5
+        elif [[ $PYBIN == *"cp36"* ]]; then
+            NUMPY_VERSION=1.11.3
+        elif [[ $PYBIN == *"cp34"* ]] || [[ $PYBIN == *"cp35"* ]]; then
+            NUMPY_VERSION=1.9.3
+        fi
+
+        "${PYBIN}/pip" install numpy==$NUMPY_VERSION
     fi
-# Use the oldest version of numpy for each Python version
-# for backwards compatibility of its C API
-# https://github.com/numpy/numpy/issues/5888
-# Build numpy versions used by scikit-learn:
-# https://github.com/MacPython/scikit-learn-wheels/blob/master/.travis.yml
 
-# Python 2.7
-    NUMPY_VERSION=1.8.2
+    ESSENTIA_WHEEL_SKIP_3RDPARTY=1 ESSENTIA_WHEEL_ONLY_PYTHON=1 \
+    ESSENTIA_PROJECT_NAME="${PROJECT_NAME}" ESSENTIA_TENSORFLOW_VERSION="${TENSORFLOW_VERSION}" \
+    "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 
-# Python 3.x
-    if [[ $PYBIN == *"cp38"* ]]; then
-        NUMPY_VERSION=1.17.4
-    elif [[ $PYBIN == *"cp37"* ]]; then
-        NUMPY_VERSION=1.14.5
-    elif [[ $PYBIN == *"cp36"* ]]; then
-        NUMPY_VERSION=1.11.3
-    elif [[ $PYBIN == *"cp34"* ]] || [[ $PYBIN == *"cp35"* ]]; then
-        NUMPY_VERSION=1.9.3
-    fi
+    # Bundle external shared libraries into the essentia wheels
+    # The tensorflow libraries are especific for each package version.
+    for whl in wheelhouse/*.whl; do
+        PYVERSION=$( echo "$PYBIN" |cut -d/ -f4 )
 
-    "${PYBIN}/pip" install numpy==$NUMPY_VERSION
-    ESSENTIA_WHEEL_SKIP_3RDPARTY=1 ESSENTIA_WHEEL_ONLY_PYTHON=1 ESSENTIA_PROJECT_NAME="${PROJECT_NAME}" "${PYBIN}/pip" wheel /io/ -w wheelhouse/
+        if [[ "$whl" == wheelhouse/essentia*"${PYVERSION}"* ]];
+        then
+            auditwheel repair "$whl" -w /io/wheelhouse/
+        fi
+    done
 done
 
-# Bundle external shared libraries into the wheels
+# Bundle external shared libraries into the rest of wheels that were builded
+# The wheels that were downloaded can just be copied
 for whl in wheelhouse/*.whl; do
 # Do not run auditwheel for six package because of a bug
 # https://github.com/pypa/python-manylinux-demo/issues/7
-    if [[ "$whl" != wheelhouse/six* ]];
+    if [[ "$whl" == wheelhouse/PyYAML* ]];
     then
         auditwheel repair "$whl" -w /io/wheelhouse/
     else
@@ -85,5 +120,10 @@ done
 # Install and test
 for PYBIN in /opt/python/*/bin/; do
     "${PYBIN}/pip" install "${PROJECT_NAME}" --no-index -f /io/wheelhouse
-    (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')
+    if [[ $WITH_TENSORFLOW ]]; then
+    # Test that essentia can be imported along with tensorflow
+        (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming; import tensorflow')
+    else
+        (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')
+    fi
 done
