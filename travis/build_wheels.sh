@@ -107,11 +107,11 @@ done
 # Bundle external shared libraries into the rest of wheels that were builded
 # The wheels that were downloaded can just be copied
 for whl in wheelhouse/*.whl; do
-# Do not run auditwheel for six package because of a bug
-# https://github.com/pypa/python-manylinux-demo/issues/7
-    if [[ !"$whl" == wheelhouse/essentia* ]];
+    if [[ "$whl" != wheelhouse/essentia* ]];
     then
-        if [[ "$whl" == wheelhouse/PyYAML* ]];
+    # Do not run auditwheel for six package because of a bug
+    # https://github.com/pypa/python-manylinux-demo/issues/7
+        if [[ "$whl" != wheelhouse/six* ]];
         then
             auditwheel repair "$whl" -w /io/wheelhouse/
         else
