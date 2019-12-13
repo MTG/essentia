@@ -109,16 +109,22 @@ done
 for whl in wheelhouse/*.whl; do
 # Do not run auditwheel for six package because of a bug
 # https://github.com/pypa/python-manylinux-demo/issues/7
-    if [[ "$whl" == wheelhouse/PyYAML* ]];
+    if [[ !"$whl" == wheelhouse/essentia* ]];
     then
-        auditwheel repair "$whl" -w /io/wheelhouse/
-    else
-        cp "$whl" /io/wheelhouse/
+        if [[ "$whl" == wheelhouse/PyYAML* ]];
+        then
+            auditwheel repair "$whl" -w /io/wheelhouse/
+        else
+            cp "$whl" /io/wheelhouse/
+        fi
     fi
 done
 
 # Install and test
 for PYBIN in /opt/python/*/bin/; do
+    # Skip essentia-tensorflow until it is available for Python 3.8
+    if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp38"* ]]; then break; fi
+
     "${PYBIN}/pip" install "${PROJECT_NAME}" --no-index -f /io/wheelhouse
     if [[ $WITH_TENSORFLOW ]]; then
     # Test that essentia can be imported along with tensorflow
