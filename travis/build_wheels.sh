@@ -92,8 +92,8 @@ for PYBIN in /opt/python/*/bin; do
     ESSENTIA_PROJECT_NAME="${PROJECT_NAME}" ESSENTIA_TENSORFLOW_VERSION="${TENSORFLOW_VERSION}" \
     "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 
-    # Bundle external shared libraries into the essentia wheels
-    # The tensorflow libraries are especific for each package version.
+    # Bundle external shared libraries into the essentia wheel now because
+    # the tensorflow libraries are especific for each package version
     for whl in wheelhouse/*.whl; do
         PYVERSION=$( echo "$PYBIN" |cut -d/ -f4 )
 
@@ -104,14 +104,14 @@ for PYBIN in /opt/python/*/bin; do
     done
 done
 
-# Bundle external shared libraries into the rest of wheels that were builded
-# The wheels that were downloaded can just be copied
+# Bundle external shared libraries into the rest of wheels
 for whl in wheelhouse/*.whl; do
-    if [[ "$whl" != wheelhouse/essentia* ]];
-    then
-    # Do not run auditwheel for six package because of a bug
+    if [[ "$whl" != wheelhouse/essentia* ]]; then
+    # The wheels that already have `manylinux*` or `none-any`
+    # (not OS-specific and suitable to any processor architecture) tags do not need
+    # to be repaired with auditwheel. This applies to this known bug for six package
     # https://github.com/pypa/python-manylinux-demo/issues/7
-        if [[ "$whl" != wheelhouse/six* ]];
+        if [[ "$whl" != wheelhouse/*manylinux* && "$whl" != wheelhouse/*-none-any* ]];
         then
             auditwheel repair "$whl" -w /io/wheelhouse/
         else
