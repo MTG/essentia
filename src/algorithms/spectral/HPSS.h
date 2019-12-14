@@ -23,6 +23,7 @@
 #include "algorithm.h"
 #include "essentiamath.h"
 #include <essentia/algorithmfactory.h>
+#include <essentia/pool.h>
 
 namespace essentia {
 namespace standard {
@@ -46,11 +47,14 @@ class HPSS : public Algorithm {
     AlgorithmFactory& factory = AlgorithmFactory::instance();
     _harmonicMedian  = factory.create("Median");
     _percussiveMedianFilter = factory.create("MedianFilter");
+    output = factory.create("YamlOutput", "filename", "HPSS_debugging.yml");
   }
 
-  //  ~HPSS() {
-  //    if (_medianFilter) delete _medianFilter;
-  // }
+  ~HPSS() {
+    output->input("pool").set(pool);
+    output->compute();
+    // if (_medianFilter) delete _medianFilter;
+  }
   
 
   void declareParameters() {
@@ -99,6 +103,10 @@ class HPSS : public Algorithm {
 
   // Percussive Median Filter 
   Algorithm *_percussiveMedianFilter;
+
+  Algorithm *output;
+
+  Pool pool;
 
   void initialize();
 };

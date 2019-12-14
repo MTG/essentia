@@ -60,8 +60,15 @@ void HPSS::compute() {
   computingHarmonicEnhancedSpectrogram(const_spectrum, _enhancedHarmonicSpectrum);
   computingPercussiveEnhancedSpectrogram(const_spectrum, _enhancedPercussiveSpectrum);
 
-  harmonicSpectrum = _enhancedHarmonicSpectrum;
-  percussiveSpectrum = _enhancedPercussiveSpectrum;
+  pool.add("enhancedPercussiveSpectrogram", _enhancedPercussiveSpectrum);
+  pool.add("enhancedHarmonicSpectrogram", _enhancedHarmonicSpectrum);
+
+  hardMasking(_enhancedHarmonicSpectrum, _enhancedPercussiveSpectrum, _harmonicMask);
+  hardMasking(_enhancedPercussiveSpectrum, _enhancedHarmonicSpectrum, _percussiveMask);
+
+  harmonicSpectrum = _harmonicMask;
+  percussiveSpectrum = _percussiveMask;
+
 
 //  hardMasking(_enhancedHarmonicSpectrum, _enhancedPercussiveSpectrum, _harmonicMask);
 //  hardMasking(_enhancedPercussiveSpectrum, _enhancedHarmonicSpectrum, _percussiveMask);
