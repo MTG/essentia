@@ -26,7 +26,7 @@ sed -i 's/PLATFORM_CFLAGS=-std=c++11 -Werror -Wall -Wextra -pedantic/PLATFORM_CF
 # Compile the C API as it's curretly the recomended way to interface Tensorflow
 sed -i 's/CORE_CC_ALL_SRCS := \\/&\n\$(wildcard tensorflow\/c\/c_api.cc) \\/' tensorflow/contrib/makefile/Makefile
 
-# Define andrid to prevent errors in the Andrid API. Why?
+# Define android to prevent errors in the Andrid API. Why?
 sed -i 's/#ifndef __ANDROID__/#define __ANDROID__ 1\n&/' tensorflow/c/c_api.cc
 
 # Use relative paths to prevent too long lines.
