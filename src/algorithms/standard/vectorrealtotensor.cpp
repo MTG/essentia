@@ -26,10 +26,14 @@ namespace streaming {
 
 const char* VectorRealToTensor::name = "VectorRealToTensor";
 const char* VectorRealToTensor::category = "Standard";
-const char* VectorRealToTensor::description = DOC("This algorithm takes a stream of frames "
-"and outputs them as a single tensor everytime the output shape is reached. ")
-"If the batch dimension (0) is set to -1 the data will be accumulated and returned "
-"as a single tensor at the end of the stream.";
+const char* VectorRealToTensor::description = DOC("This algorithm generates tensors "
+"out of a stream of input frames. The 4 dimensions of the tensors stand for (batchSize, channels, patchSize, featureSize):\n"
+"  - batchSize: Number of patches per tensor. If batchSize is set to 0 it will accumulate patches until the end of the stream is reached and then produce a single tensor. "
+"Warning: This option may exhaust memory depending on the size of the stream.\n"
+"  - channels: Number of channels per tensor. Currently, only single-channel tensors are supported. Otherwise, an exception is thrown.\n"
+"  - patchSize: Number of timestamps (i.e., number of frames) per patch.\n"
+"  - featureSize: Expected number of features (e.g., mel bands) of every input frame. This algorithm throws an exception if the size of any frame is different from featureSize.\n"
+"Additionally, the patchHopSize and batchHopSize parameters provide control over the amount of overlap on those dimensions.");
 
 
 void VectorRealToTensor::configure() {
@@ -41,6 +45,10 @@ void VectorRealToTensor::configure() {
   _shape.resize(shape.size());
   for (size_t i = 0; i < shape.size(); i++) {
     _shape[i] = shape[i];
+  }
+
+  if (shape[1] != 1) {
+    throw EssentiaException("VectorRealToTensor: Currently only single-channel tensors are supported.");
   }
 
   _timeStamps = shape[2];
@@ -135,6 +143,13 @@ AlgorithmStatus VectorRealToTensor::process() {
   // Frames accumulation step.
   if (addPatch) {
     const vector<vector<Real> >& frame = _frame.tokens();
+
+    for (size_t i = 0; i < frame.size(); i++) {
+      if (frame[i].size() != _shape[3]) {
+        throw EssentiaException("VectorRealToTensor: Found input frame with size ", frame[i].size(),
+                                " while the algorithm was configured to work with frames with size ", _shape[3]);
+      }
+    }
 
     if (frame.size() == _timeStamps) {
       _acc.push_back(frame);

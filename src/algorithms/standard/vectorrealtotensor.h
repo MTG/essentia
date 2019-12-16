@@ -50,12 +50,14 @@ class VectorRealToTensor : public Algorithm {
   }
 
   void declareParameters() {
-    // TODO: set a better default shape
-    std::vector<int> outputShape = {-1, 1, 128, 128};
-    declareParameter("shape", "the size of output tensor. If batch dimension (the first one) is -1 it will accumulate as many batches as available in the input track", "", outputShape);
+    // Process 187 frames x 96 features by default.
+    // This is a common setup for mel-spectrogram based arquitectures.
+    std::vector<int> outputShape = {1, 1, 187, 96};
+
+    declareParameter("shape", "shape of the output tensor (batchSize, channels, patchSize, featureSize). If batchSize is -1 a single tensor is generated when the end of the stream is reached", "", outputShape);
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 0);
     declareParameter("batchHopSize", "number of patches between the beginnings of adjacent batches. 0 to avoid overlap", "[0,inf)", 0);
-    declareParameter("lastPatchMode", "what to do with the last incomplete patch", "{discard,repeat}", "repeat");
+    declareParameter("lastPatchMode", "what to do with the last frames. Options are to `repeat` them to fill the last patch or to discard them.", "{discard,repeat}", "repeat");
   }
 
   void configure();
