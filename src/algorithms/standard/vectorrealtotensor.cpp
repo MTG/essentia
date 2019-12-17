@@ -44,6 +44,10 @@ void VectorRealToTensor::configure() {
 
   _shape.resize(shape.size());
   for (size_t i = 0; i < shape.size(); i++) {
+    if (shape[i] == 0) {
+    throw EssentiaException("VectorRealToTensor: All dimensions should have a non-zero size.");
+    }
+
     _shape[i] = shape[i];
   }
 
