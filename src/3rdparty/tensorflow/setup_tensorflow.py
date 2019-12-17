@@ -26,12 +26,12 @@ from subprocess import call
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser('Sets up tensorflow for linking against it.'
+    parser = argparse.ArgumentParser('Sets up Tensorflow for linking against it.'
         'This can be done in two ways:'
-        ' - python: By symlinking to an existing tensorflow python package. '
-        '     This is the recommended way if tensorflow is already being used from python.'
-        ' - libtensorflow: By downloading and installng the c API. This mode does not '
-        '     allow simultaneous use of essentia and tensorflow from python.')
+        ' - python: By symlinking to an existing Tensorflow python package. '
+        '     This is the recommended way if Tensorflow is already being used from python.'
+        ' - libtensorflow: By downloading and installng the C API. This mode does not '
+        '     allow simultaneous use of Essentia and Tensorflow from Python due to symbol name conficts.')
 
     parser.add_argument('--mode', '-m', default='python',
                         choices=['python', 'libtensorflow'])
@@ -93,6 +93,17 @@ if __name__ == "__main__":
         copytree(join(dirname(__file__), 'c'), include_dir)
 
     elif args.mode == 'libtensorflow':
+        # WARNING. With `--mode libtensorflow`, the following problem is known
+        # to arise when importing Essentia and Tensorflow in Python at the same time.
+        #   In [1]: import tensorflow
+        #   In [2]: import essentia
+        #
+        #   ImportError: /usr/local/lib/libtensorflow.so.1: undefined symbol:
+        #  _ZN6google8protobuf5Arena18CreateMaybeMessageIN10tensorflow16OptimizerOptionsEIEEEPT_PS1_DpOT0_
+
+        # The recommended solution is to link Essentia against the Tensorflow shared
+        # libraries shipped with the Tensorflow wheel with `--mode python`
+
         print('downloading libtensorflow...')
         with_gpu = args.with_gpu
         platform = args.platform
