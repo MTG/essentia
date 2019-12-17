@@ -179,4 +179,3 @@ def build(ctx):
             includes = [ '.', '..', '../3rdparty/vamp-plugin-sdk-2.4' ],
             use      = 'essentia ', #+ ctx.env.USE_LIBS,
             install_path = install_path)
-
