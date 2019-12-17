@@ -28,10 +28,10 @@ from subprocess import call
 if __name__ == "__main__":
     parser = argparse.ArgumentParser('Sets up Tensorflow for linking against it.'
         'This can be done in two ways:'
-        ' - python: By symlinking to an existing Tensorflow python package. '
-        '     This is the recommended way if Tensorflow is already being used from python.'
-        ' - libtensorflow: By downloading and installng the C API. This mode does not '
-        '     allow simultaneous use of Essentia and Tensorflow from Python due to symbol name conficts.')
+        ' - python: By symlinking to an existing Tensorflow Python package. '
+        '     This is the recommended way if Tensorflow is avaialble from Python.'
+        ' - libtensorflow: By downloading and installing the C API. This mode does not '
+        '     allow simultaneous use of Essentia and Tensorflow from Python due to symbol name conflicts.')
 
     parser.add_argument('--mode', '-m', default='python',
                         choices=['python', 'libtensorflow'])
