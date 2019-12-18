@@ -26,6 +26,42 @@ from essentia.standard import PoolAggregator
 
 class TestTensorflowPredict_Streaming(TestCase):
 
+    def identityModel(self, frameSize=1024, hopSize=512, patchSize=187,
+                      lastPatchMode='discard'):
+        # Identity test to check that the data flows properly.
+        model = join(filedir(), 'tensorflowpredict', 'identity.pb')
+        filename = join(testdata.audio_dir, 'recorded', 'cat_purrrr.wav')
+        input_layer='model/Placeholder'
+        output_layer='model/Identity'
+
+
+
+        ml = MonoLoader(filename=filename)
+        fc = FrameCutter(frameSize=frameSize, hopSize=hopSize)
+        vtt = VectorRealToTensor(shape=[1, 1, patchSize, frameSize],
+                                 lastPatchMode=lastPatchMode)
+        ttp = TensorToPool(namespace=input_layer)
+        tfp = TensorflowPredict(graphFilename=model,
+                                inputs=[input_layer],
+                                outputs=[output_layer])
+        ptt = PoolToTensor(namespace=output_layer)
+        ttv = TensorToVectorReal()
+
+        pool = Pool()
+
+        ml.audio    >> fc.signal
+        fc.frame    >> vtt.frame
+        fc.frame    >> (pool, "framesIn")
+        vtt.tensor  >> ttp.tensor
+        ttp.pool    >> tfp.poolIn
+        tfp.poolOut >> ptt.pool
+        ptt.tensor  >> ttv.tensor
+        ttv.frame   >> (pool, "framesOut")
+
+        run(ml)
+
+        return  pool['framesOut'], pool['framesIn']
+
     def testRegression(self):
         # This test assesses the capability to work in streaming mode
         # and to be reset and process new files.
@@ -90,47 +126,21 @@ class TestTensorflowPredict_Streaming(TestCase):
 
             self.assertAlmostEqualVector(foundValues, expectedValues, 1e-2)
 
-
     def testIdentityModel(self):
-        # Identity test to check that the data flows properly.
-
-        model = join(filedir(), 'tensorflowpredict', 'identity.pb')
-        filename = join(testdata.audio_dir, 'recorded', 'cat_purrrr.wav')
-        input_layer='model/Placeholder'
-        output_layer='model/Identity'
-
-        frameSize = 1024
-        hopSize = 512
-
-        # Make the patch size equal the number of frames to facilitate the
-        # comparison
+        # Patch size equal to number of frames
         numberOfFrames = 43
+        found, expected = self.identityModel(patchSize=numberOfFrames, lastPatchMode='repeat')
+        self.assertAlmostEqualMatrix(found, expected, 1e-8)
 
-        ml = MonoLoader(filename=filename)
-        fc = FrameCutter(frameSize=frameSize, hopSize=hopSize)
-        vtt = VectorRealToTensor(shape=[1, 1, numberOfFrames, frameSize],
-                                 lastPatchMode='discard')
-        ttp = TensorToPool(namespace=input_layer)
-        tfp = TensorflowPredict(graphFilename=model,
-                                inputs=[input_layer],
-                                outputs=[output_layer])
-        ptt = PoolToTensor(namespace=output_layer)
-        ttv = TensorToVectorReal()
+        # Default parameters
+        found, expected = self.identityModel(frameSize=256, hopSize=128,
+                                             lastPatchMode='repeat')
+        self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
 
-        pool = Pool()
-
-        ml.audio    >> fc.signal
-        fc.frame    >> vtt.frame
-        fc.frame    >> (pool, "framesIn")
-        vtt.tensor  >> ttp.tensor
-        ttp.pool    >> tfp.poolIn
-        tfp.poolOut >> ptt.pool
-        ptt.tensor  >> ttv.tensor
-        ttv.frame   >> (pool, "framesOut")
-
-        run(ml)
-
-        self.assertAlmostEqualMatrix(pool['framesIn'], pool['framesOut'], 1e-8)
+        # Increse aquire size
+        found, expected = self.identityModel(frameSize=256, hopSize=128,
+                                             patchSize=300, lastPatchMode='repeat')
+        self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
 
 suite = allTests(TestTensorflowPredict_Streaming)
 

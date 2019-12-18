@@ -32,9 +32,9 @@ class VectorRealToTensor : public Algorithm {
   Source<Tensor<Real> > _tensor;
 
   std::vector<int> _shape;
-  size_t _timeStamps;
-  size_t _batchHopSize;
-  size_t _patchHopSize;
+  int _timeStamps;
+  int _batchHopSize;
+  int _patchHopSize;
   bool _push;
   bool _accumulate;
   bool _pushedEverything;
@@ -44,9 +44,8 @@ class VectorRealToTensor : public Algorithm {
 
  public:
   VectorRealToTensor(){
-    declareInput(_frame, 128,"frame", "the input frames");
+    declareInput(_frame, 187,"frame", "the input frames");
     declareOutput(_tensor, 1, "tensor", "the accumulated frame in one single tensor");
-
   }
 
   void declareParameters() {

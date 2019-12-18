@@ -56,6 +56,7 @@ void VectorRealToTensor::configure() {
   }
 
   _timeStamps = shape[2];
+  _frame.setAcquireSize(_timeStamps);
 
   if (shape[0] == -1) {
     _accumulate = true;
@@ -89,15 +90,15 @@ void VectorRealToTensor::configure() {
 
 AlgorithmStatus VectorRealToTensor::process() {
   EXEC_DEBUG("process()");
-  if ((int)_timeStamps != _frame.acquireSize()) {
+  if (_timeStamps != _frame.acquireSize()) {
     _frame.setAcquireSize(_timeStamps);
   }
-  if ((int)_patchHopSize != _frame.releaseSize()) {
+  if (_patchHopSize != _frame.releaseSize()) {
     _frame.setReleaseSize(_patchHopSize);
   }
 
   // Check if we have enough frames to add a patch.
-  size_t available = _frame.available();
+  int available = _frame.available();
   bool addPatch = (_timeStamps <= available);
 
   // If we should stop just take the remaining frames.
@@ -149,23 +150,23 @@ AlgorithmStatus VectorRealToTensor::process() {
     const vector<vector<Real> >& frame = _frame.tokens();
 
     for (size_t i = 0; i < frame.size(); i++) {
-      if (frame[i].size() != _shape[3]) {
+      if ((int)frame[i].size() != _shape[3]) {
         throw EssentiaException("VectorRealToTensor: Found input frame with size ", frame[i].size(),
                                 " while the algorithm was configured to work with frames with size ", _shape[3]);
       }
     }
 
-    if (frame.size() == _timeStamps) {
+    if ((int)frame.size() == _timeStamps) {
       _acc.push_back(frame);
     } else {
       // Rather repeat frames or discard the last patch.
       if (shouldStop()) {
         if (_lastPatchMode == "repeat") {
-          size_t padAmount = _timeStamps - frame.size();
+          int padAmount = _timeStamps - frame.size();
 
           vector<vector<Real> > frame_padded = frame;
 
-          for (size_t i = 0; i < padAmount; i++) {
+          for (int i = 0; i < padAmount; i++) {
             frame_padded.push_back(frame[i % frame.size()]); 
           }
 
@@ -188,7 +189,7 @@ AlgorithmStatus VectorRealToTensor::process() {
   // accumulate mode.
   if (_push) {
     vector<int> shape = _shape;
-    size_t batchHopSize = _batchHopSize;
+    int batchHopSize = _batchHopSize;
 
     // If we have been accumulating we have to get the
     // tensor's shape from the current status of the
@@ -227,9 +228,9 @@ AlgorithmStatus VectorRealToTensor::process() {
 
   // Check if we should push in the next process().
   if (!_accumulate) {
-    if (_acc.size() >= _shape[0]) _push = true;
+    if ((int)_acc.size() >= _shape[0]) _push = true;
   }
-  
+
   EXEC_DEBUG("releasing");
   releaseData();
   EXEC_DEBUG("released");
