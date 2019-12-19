@@ -1,5 +1,6 @@
 #!/bin/sh
 
+cd $(dirname $0)
 
 PYTHON=python3
 
