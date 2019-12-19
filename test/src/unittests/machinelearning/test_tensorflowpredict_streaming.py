@@ -34,8 +34,6 @@ class TestTensorflowPredict_Streaming(TestCase):
         input_layer='model/Placeholder'
         output_layer='model/Identity'
 
-
-
         ml = MonoLoader(filename=filename)
         fc = FrameCutter(frameSize=frameSize, hopSize=hopSize)
         vtt = VectorRealToTensor(shape=[1, 1, patchSize, frameSize],
@@ -60,7 +58,7 @@ class TestTensorflowPredict_Streaming(TestCase):
 
         run(ml)
 
-        return  pool['framesOut'], pool['framesIn']
+        return pool['framesOut'], pool['framesIn']
 
     def testRegression(self):
         # This test assesses the capability to work in streaming mode
