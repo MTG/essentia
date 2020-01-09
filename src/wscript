@@ -20,7 +20,8 @@ lib_map = {
     'YAML': 'yaml-0.1',
     'FFTW': 'fftw3f',
     'LIBCHROMAPRINT': 'libchromaprint',
-    'GAIA2': 'gaia2'}
+    'GAIA2': 'gaia2',
+    'TENSORFLOW': 'tensorflow'}
 
 
 def options(ctx):
@@ -51,6 +52,9 @@ def options(ctx):
     ctx.add_option('--with-gaia', action='store_true',
                    dest='WITH_GAIA', default=False,
                    help='build with Gaia support')
+    ctx.add_option('--with-tensorflow', action='store_true',
+                   dest='WITH_TENSORFLOW', default=False,
+                   help='build with Tensorflow support')
     ctx.add_option('--lightweight', action='store',
                    dest='LIGHTWEIGHT', default=False,
                    help='build lightweight version with specified dependencies (comma separated: =' + ','.join(default_libs) + ')')
@@ -103,6 +107,9 @@ def configure(ctx):
     if ctx.env.WITH_GAIA:
         ctx.env.CHECK_LIBS.append('gaia2')
 
+    if ctx.env.WITH_TENSORFLOW:
+        ctx.env.CHECK_LIBS.append('tensorflow')
+
     if ctx.env.IGNORE_ALGOS:
         for a in ctx.env.IGNORE_ALGOS.split(","):
             a = a.strip()
@@ -134,7 +141,6 @@ def configure(ctx):
        ctx.env.USE_LIBS = 'ESSENTIA'
        ctx.recurse('python')
        return
-
 
     ctx.check_cfg(package=lib_map['EIGEN3'], uselib_store='EIGEN3',
                   args=['eigen3 >= 3.3.4'] + check_cfg_args)
@@ -184,6 +190,10 @@ def configure(ctx):
 
     if 'gaia2' in ctx.env.CHECK_LIBS:
         ctx.check_cfg(package=lib_map['GAIA2'], uselib_store='GAIA2',
+                      args=check_cfg_args, mandatory=True)
+
+    if 'tensorflow' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['TENSORFLOW'], uselib_store='TENSORFLOW',
                       args=check_cfg_args, mandatory=True)
 
     # needed by ffmpeg for the INT64_C macros
@@ -312,6 +322,16 @@ def configure(ctx):
         print('- Essentia is configured without Chromaprint.')
         print('  The following algorithms will be ignored: %s' % algos)
         ctx.env.ALGOIGNORE += algos 
+
+    algos = [ 'TensorflowPredict' ]
+    if has('tensorflow'):
+        print('- Tensorflow detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
+        ctx.env.USE_LIBS += ' TENSORFLOW'
+    else:
+        print('- Essentia is configured without Tensorflow.')
+        print('  The following algorithms will be ignored: %s' % algos)
+        ctx.env.ALGOIGNORE += algos
 
     lel = len(ctx.env.EXAMPLE_LIST)
     if lel:

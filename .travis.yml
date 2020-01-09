@@ -20,12 +20,17 @@ matrix:
         - docker
       env: DOCKER_IMAGE=mtgupf/essentia-builds:manylinux1_i686
            PRE_CMD=linux32
+    - sudo: required
+      services:
+        - docker
+      env: DOCKER_IMAGE=mtgupf/essentia-builds:manylinux2014_x86_64
+           WITH_TENSORFLOW=1
 
 install:
   - docker pull $DOCKER_IMAGE > /dev/null
 
 script:
-  - docker run --rm -v `pwd`:/io $DOCKER_IMAGE $PRE_CMD /io/travis/build_wheels.sh
+  - docker run --rm -v `pwd`:/io --env WITH_TENSORFLOW=$WITH_TENSORFLOW $DOCKER_IMAGE $PRE_CMD /io/travis/build_wheels.sh
   - ls wheelhouse/
   - if [ ! "$TRAVIS_PULL_REQUEST" = "false" ]; then
     python setup.py sdist;
