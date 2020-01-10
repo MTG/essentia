@@ -52,19 +52,14 @@ packaging/build_3rdparty_static_debian.sh
 
 Use ```--with-gaia``` flag to include Gaia.
 
-Alternatively, you can build each dependency apart running corresponding scripts inside ```packaging/debian_3rdparty``` folder:
+Alternatively, you can build each dependency apart running the corresponding scripts inside ```packaging/debian_3rdparty``` folder:
 ```
 cd packaging/debian_3rdparty
-build_eigen3.sh
-build_ffmpeg.sh
-build_taglib.sh
-build_fftw3.sh
-build_libsamplerate.sh
-build_yaml.sh
+build_<dependency>.sh
 ...
 cd ../../
 ```
-Note that you can selectively build dependencies depending on the required Essentia algorithms."
+Note that you can selectively build dependencies depending on the required Essentia algorithms.
 
 Build Essentia:
 ```
