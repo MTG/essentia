@@ -213,7 +213,7 @@ class TestAudioWriter_Streaming(TestCase):
         self.assertAlmostEqual(max(pool['audio']), max(sine), precision)
         self.assertEqual(zcr, expected)  # expected should be 20 (double the frequency)
 
-    def atestMp3(self):
+    def testMp3(self):
         self.encoderTest('audiowritertest.mp3', bitrate=320, precision=2e-4)
 
     def testWave(self):
