@@ -9,6 +9,14 @@ from setuptools.command.install_lib import install_lib
 library = None
 PYTHON = sys.executable
 
+# Default project name
+project_name = 'essentia'
+
+var_project_name = 'ESSENTIA_PROJECT_NAME'
+if var_project_name in os.environ:
+    project_name = os.environ[var_project_name]
+
+
 class EssentiaInstall(install_lib):
     def install(self):
         global library
@@ -91,10 +99,22 @@ classifiers = [
 setup_requires = ['numpy>=1.8.2', 'six']
 install_requires = setup_requires + ['pyyaml']
 
+# Require tensorflow for the package essentia-tensorflow
+# We are using version 1.15.0 as it is the newest version supported by the C API
+# https://www.tensorflow.org/guide/versions
+if project_name == 'essentia-tensorflow':
+    tensorflow_version = '1.15.0'
+
+    var_tensorflow_version = 'ESSENTIA_TENSORFLOW_VERSION'
+    if var_tensorflow_version in os.environ:
+        tensorflow_version = os.environ[var_tensorflow_version]
+
+    install_requires.append('tensorflow=={}'.format(tensorflow_version))
+
 module = Extension('name', sources=[])
 
 setup(
-    name='essentia',
+    name=project_name,
     version=get_version(),
     description='Library for audio and music analysis, description and synthesis',
     long_description='C++ library for audio and music analysis, description and synthesis, including Python bindings',
