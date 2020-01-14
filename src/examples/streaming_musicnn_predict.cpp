@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -48,24 +48,6 @@ int main(int argc, char* argv[]) {
 
   /////// PARAMS //////////////
   Real sampleRate = 16000.0;
-  int frameSize = 512;
-  int hopSize = 256;
-  int patchSize = 187;
-
-  // mel bands parameters
-  int numberBands=96;
-  string weighting = "linear";
-  string warpingFormula = "slaneyMel";
-  string normalize = "unit_tri";
-
-  vector<int> inputShape({-1, 1, patchSize, numberBands});
-  vector<string> inputs({"model/Placeholder"});
-  vector<string> outputs({"model/Sigmoid"});
-
-  // we want to compute the MFCC of a file: we need the create the following:
-  // audioloader -> framecutter -> windowing -> FFT -> MFCC -> PoolStorage
-  // we also need a DevNull which is able to gobble data without doing anything
-  // with it (required otherwise a buffer would be filled and blocking)
 
   AlgorithmFactory& factory = streaming::AlgorithmFactory::instance();
 
@@ -73,69 +55,16 @@ int main(int argc, char* argv[]) {
                                     "filename", audioFilename,
                                     "sampleRate", sampleRate);
 
-  Algorithm* fc    = factory.create("FrameCutter",
-                                    "frameSize", frameSize,
-                                    "hopSize", hopSize);
+  Algorithm* tfp   = factory.create("TensorflowPredictMusiCNN",
+                                    "graphFilename", modelName);
 
-  Algorithm* w     = factory.create("Windowing",
-                                    "normalized", false);
-
-  Algorithm* spec  = factory.create("Spectrum",
-                                    "size", frameSize);
-
-  Algorithm* mel  = factory.create("MelBands",
-                                   "numberBands", numberBands,
-                                   "sampleRate", sampleRate,
-                                   "highFrequencyBound", sampleRate / 2,
-                                   "inputSize", frameSize / 2 + 1,
-                                   "weighting", weighting,
-                                   "normalize", normalize,
-                                   "warpingFormula", warpingFormula);
-
-  Algorithm* shift  = factory.create("UnaryOperator",
-                                      "shift", 1,
-                                      "scale", 1000);
-
-  Algorithm* comp  = factory.create("UnaryOperator",
-                                       "type", "log10");
-
-  Algorithm* vtt      = factory.create("VectorRealToTensor",
-                                       "shape", inputShape,
-                                       "lastPatchMode", "repeat",
-                                       "patchHopSize", patchSize / 2);
-
-  Algorithm* ttp      = factory.create("TensorToPool",
-                                       "namespace", "model/Placeholder");
-
-  Algorithm* tfp      = factory.create("TensorflowPredict",
-                                       "graphFilename", modelName,
-                                       "inputs", inputs,
-                                       "outputs", outputs,
-                                       "isTraining", false,
-                                       "isTrainingName", "model/Placeholder_1");
-                                   
-  Algorithm* ptt      = factory.create("PoolToTensor",
-                                       "namespace", "model/Sigmoid");
-                                   
-  Algorithm* ttv      = factory.create("TensorToVectorReal");
-                                   
 
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos --------" << endl;
 
-  audio->output("audio")    >>  fc->input("signal");
-  fc->output("frame")       >>  w->input("frame");
-  w->output("frame")        >>  spec->input("frame");
-  spec->output("spectrum")  >>  mel->input("spectrum");
-  mel->output("bands")      >>  shift->input("array");
-  shift->output("array")    >>  comp->input("array");
-  comp->output("array")     >>  vtt->input("frame");
-  vtt->output("tensor")     >>  ttp->input("tensor");
-  ttp->output("pool")       >>  tfp->input("poolIn");
-  tfp->output("poolOut")    >>  ptt->input("pool");
-  ptt->output("tensor")     >>  ttv->input("tensor");
-  ttv->output("frame")      >>  PC(pool, "probs"); // store only the mfcc coeffs
+  audio->output("audio")     >>  tfp->input("signal");
+  tfp->output("predictions") >>  PC(pool, "probs");
 
 
   /////////// STARTING THE ALGORITHMS //////////////////
@@ -168,9 +97,6 @@ int main(int argc, char* argv[]) {
   output->input("pool").set(aggrPool);
   output->compute();
 
-  // NB: we could just wait for the network to go out of scope, but then this would happen
-  //     after the call to essentia::shutdown() where the FFTW structs would already have
-  //     been freed, so let's just delete everything explicitly now
   n.clear();
 
   delete aggr;
