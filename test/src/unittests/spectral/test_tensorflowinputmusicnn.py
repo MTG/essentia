@@ -25,7 +25,7 @@ import numpy as np
 class TestTensorflowInputMusiCNN(TestCase):
 
     def testZeroSpectrum(self):
-        # Inputting zeros should return zero. Try with different sizes.
+        # Inputting zeros should return zero.
         size = 512
         self.assertEqualVector(TensorflowInputMusiCNN()(zeros(size)), zeros(96))
 
