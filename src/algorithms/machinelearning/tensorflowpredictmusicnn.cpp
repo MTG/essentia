@@ -29,7 +29,10 @@ const char* TensorflowPredictMusiCNN::category = essentia::standard::TensorflowP
 const char* TensorflowPredictMusiCNN::description = essentia::standard::TensorflowPredictMusiCNN::description;
 
 
-TensorflowPredictMusiCNN::TensorflowPredictMusiCNN() : AlgorithmComposite() {
+TensorflowPredictMusiCNN::TensorflowPredictMusiCNN() : AlgorithmComposite(),
+    _frameCutter(0), _tensorflowInputMusiCNN(0), _vectorRealToTensor(0), _tensorToPool(0),
+    _tensorflowPredict(0), _poolToTensor(0), _tensorToVectorReal(0), _configured(false) {
+
   declareInput(_signal, 4096, "signal", "the input audio signal");
   declareOutput(_predictions, 0, "predictions", "the model predictions");
 }
@@ -85,38 +88,46 @@ void TensorflowPredictMusiCNN::configure() {
 
   createInnerNetwork();
 
+  int patchHopSize = parameter("patchHopSize").toInt();
+  string lastPatchMode = parameter("lastPatchMode").toString();
+  bool accumulate = parameter("accumulate").toBool();
+
+  int batchSize = accumulate ? -1 : 1;
+
   // Hardcoded parameters matching the training setup:
   // https://github.com/jordipons/musicnn-training/blob/master/src/config_file.py
   int frameSize = 512;
   int hopSize = 256;
   int patchSize = 187;
   int numberBands = 96;
-  vector<int> inputShape({-1, 1, patchSize, numberBands});
+  vector<int> inputShape({batchSize, 1, patchSize, numberBands});
 
   _frameCutter->configure("frameSize", frameSize, "hopSize", hopSize);
 
   _vectorRealToTensor->configure("shape", inputShape,
-                                 "lastPatchMode", "repeat",
-                                 "patchHopSize", patchSize / 2);
-  
+                                 "lastPatchMode", lastPatchMode,
+                                 "patchHopSize", patchHopSize);
+
   _configured = true;
 
-  Parameter graphFilenameParam = parameter("graphFilename");
-  // if no file has been specified, do not do anything
-  if (!graphFilenameParam.isConfigured()) return;
-
-  string graphFilename = parameter("graphFilename").toString();
   string input = parameter("input").toString();
   string output = parameter("output").toString();
+  string isTrainingName = parameter("isTrainingName").toString();
 
   _tensorToPool->configure("namespace", input);
 
-  _tensorflowPredict->configure("graphFilename", graphFilename,
-                                "inputs", vector<string>({input}),
-                                "outputs", vector<string>({output}));
-
   _poolToTensor->configure("namespace", output);
 
+  Parameter graphFilenameParam = parameter("graphFilename");
+  // if no file has been specified, do not do anything else
+  if (!graphFilenameParam.isConfigured()) return;
+
+  string graphFilename = parameter("graphFilename").toString();
+
+  _tensorflowPredict->configure("graphFilename", graphFilename,
+                                "inputs", vector<string>({input}),
+                                "outputs", vector<string>({output}),
+                                "isTrainingName", isTrainingName);
 }
 
 } // namespace streaming
@@ -168,7 +179,11 @@ void TensorflowPredictMusiCNN::configure() {
   if (!parameter("graphFilename").isConfigured()) return;
   _tensorflowPredictMusiCNN->configure(INHERIT("graphFilename"),
                                        INHERIT("input"),
-                                       INHERIT("output"));
+                                       INHERIT("output"),
+                                       INHERIT("isTrainingName"),
+                                       INHERIT("patchHopSize"),
+                                       INHERIT("accumulate"),
+                                       INHERIT("lastPatchMode"));
 }
 
 

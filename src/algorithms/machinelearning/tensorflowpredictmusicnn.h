@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_STREAMING_TENSORFLOWPREDICTMUSICNN_H
-#define ESSENTIA_STREAMING_TENSORFLOWPREDICTMUSICNN_H
+#ifndef ESSENTIA_TENSORFLOWPREDICTMUSICNN_H
+#define ESSENTIA_TENSORFLOWPREDICTMUSICNN_H
 
 
 #include "streamingalgorithmcomposite.h"
@@ -56,6 +56,10 @@ class TensorflowPredictMusiCNN : public AlgorithmComposite {
     declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
     declareParameter("input", "the name of the input nodes in the Tensorflow graph", "", "model/Placeholder");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
+    declareParameter("isTrainingName", "The name if the input reciving isTraining. If empty, it wont be feed ro the network", "", "");
+    declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);
+    declareParameter("lastPatchMode", "what to do with the last frames. Options are to `repeat` them to fill the last patch or to discard them.", "{discard,repeat}", "discard");
+    declareParameter("accumulate", "when true it runs a single Tensorflow session at the end of the stream. Otherwise a session is run for every new patch", "{true,false}", false);
   }
 
   void declareProcessOrder() {
@@ -103,6 +107,10 @@ class TensorflowPredictMusiCNN : public Algorithm {
     declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
     declareParameter("input", "the name of the input nodes in the Tensorflow graph", "", "model/Placeholder");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
+    declareParameter("isTrainingName", "The name if the input reciving isTraining. If empty, it wont be feed ro the network", "", "");
+    declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);
+    declareParameter("lastPatchMode", "what to do with the last frames. Options are to `repeat` them to fill the last patch or to discard them", "{discard,repeat}", "discard");
+    declareParameter("accumulate", "when true it runs a single Tensorflow session at the end of the stream. Otherwise a session is run for every new patch", "{true,false}", false);
   }
 
   void configure();
@@ -117,4 +125,4 @@ class TensorflowPredictMusiCNN : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
-#endif // ESSENTIA_STREAMING_TENSORFLOWPREDICTMUSICNN_H
+#endif // ESSENTIA_TENSORFLOWPREDICTMUSICNN_H
