@@ -83,8 +83,9 @@ void parseParameters(ParameterMap* pm, PyObject* args, PyObject* keywds) {
         delete p;
         break;
       }
-      case VECTOR_REAL:       pm->add(name, VectorReal::toParameter(obj)); break;
-      case VECTOR_INTEGER:    pm->add(name, VectorInteger::toParameter(obj)); break;
+      case VECTOR_REAL:        pm->add(name, VectorReal::toParameter(obj)); break;
+      case VECTOR_INTEGER:     pm->add(name, VectorInteger::toParameter(obj)); break;
+      case VECTOR_VECTOR_REAL: pm->add(name, VectorVectorReal::toParameter(obj)); break;
 
       default:
         ostringstream msg;

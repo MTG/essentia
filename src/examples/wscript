@@ -32,6 +32,9 @@ example_sources_fileio = [
     ('standard_spsmodel', ),
     ('standard_stft', ),
     ('standard_stochasticmodel', ),
+    ('standard_crosssimilaritymatrix', ),
+    ('standard_chromacrosssimilarity', ),
+    ('standard_coversongsimilarity', ),
 
     ('streaming_beatsmarker', ),
     ('streaming_beattracker_multifeature_mirex2013', ),
@@ -46,6 +49,8 @@ example_sources_fileio = [
     ('streaming_panning', ),
     ('streaming_pitchyinfft', ),
     ('streaming_predominantpitchmelodia', ),
+    ('streaming_chromacrosssimilarity', ),
+    ('streaming_coversongsimilarity', ),
     ('streaming_stft', ),
     ('streaming_tuningfrequency', ),
     ('streaming_vibrato', ),
@@ -54,7 +59,7 @@ example_sources_fileio = [
         ['music_extractor/extractor_utils']),
 
     ('streaming_extractor_freesound',
-        ['music_extractor/extractor_utils'])    
+        ['music_extractor/extractor_utils'])
 ]
 
 example_sources_with_gaia = [
@@ -161,4 +166,3 @@ def build(ctx):
             includes = [ '.', '..', '../3rdparty/vamp-plugin-sdk-2.4' ],
             use      = 'essentia ', #+ ctx.env.USES,
             install_path = install_path)
-

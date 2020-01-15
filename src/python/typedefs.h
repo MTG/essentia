@@ -139,6 +139,7 @@ inline Edt paramTypeToEdt(const essentia::Parameter::ParamType& p) {
     case essentia::Parameter::VECTOR_STEREOSAMPLE: return VECTOR_STEREOSAMPLE;
     case essentia::Parameter::MAP_VECTOR_REAL: return MAP_VECTOR_REAL;
     case essentia::Parameter::MAP_VECTOR_STRING: return MAP_VECTOR_STRING;
+    case essentia::Parameter::VECTOR_VECTOR_REAL: return VECTOR_VECTOR_REAL;
 
     default:
       std::ostringstream msg;
