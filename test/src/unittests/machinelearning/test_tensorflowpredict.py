@@ -71,7 +71,7 @@ class TestTensorFlowPredict(TestCase):
         self.assertAlmostEqualVector(foundValues, expectedValues, 1e-6)
 
     def testInvalidFilename(self):
-        self.assertComputeFails(TensorflowPredict(graphFilename=''), (Pool()))
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': ''})
 
     def testIdentityModel(self):
         # Perform the identity operation in Tensorflow to test if the data is

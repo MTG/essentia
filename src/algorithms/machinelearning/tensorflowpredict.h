@@ -75,7 +75,7 @@ class TensorflowPredict : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file from which to read the Tensorflow graph", "", "/home/pablo/base_model.pb");
+    declareParameter("graphFilename", "the name of the file from which to read the Tensorflow graph", "", Parameter::STRING);
 
     const char* inputNames[] = {"input_1"};
     const char* outputNames[] = {"output_node0"};
