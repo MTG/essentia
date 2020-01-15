@@ -36,7 +36,7 @@ class TestTensorFlowPredict(TestCase):
         frameSize = 1024
         hopSize = frameSize
 
-        model = join(filedir(), 'tensorflowpredict', 'vgg4.pb')
+        model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
         filename = join(testdata.audio_dir, 'recorded', 'cat_purrrr.wav')
 
         audio = MonoLoader(filename=filename)()
