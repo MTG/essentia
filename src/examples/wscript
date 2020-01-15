@@ -64,6 +64,7 @@ example_sources_fileio = [
     ('streaming_tensorflowpredict', ),
     ('streaming_yinprobabilistic', ),
     ('streaming_musicnn_predict', ),
+    ('streaming_vggish_predict', ),
 
     ('streaming_extractor_music',
         ['music_extractor/extractor_utils']),
