@@ -32,7 +32,7 @@ TensorflowPredictVGGish::TensorflowPredictVGGish() : AlgorithmComposite(),
     _frameCutter(0), _tensorflowInputVGGish(0), _vectorRealToTensor(0), _tensorToPool(0),
     _tensorflowPredict(0), _poolToTensor(0), _tensorToVectorReal(0), _configured(false) {
 
-  declareInput(_signal, 4096, "signal", "the input audio signal");
+  declareInput(_signal, 4096, "signal", "the input audio signal sampled at 16 kHz");
   declareOutput(_predictions, 0, "predictions", "the model predictions");
 }
 
@@ -142,7 +142,7 @@ const char* TensorflowPredictVGGish::category = "Machine Learning";
 const char* TensorflowPredictVGGish::description = DOC(
   "This algorithm makes predictions using VGGish models [1, 2, 3].\n"
   "It reads seralized models in Protobuf format. The recommended pipeline is as follows:\n"
-  "  monoLoader >> TensorflowInputVGGish >> TensorflowPredictVGGish"
+  "  MonoLoader(sampleRate=16000) >> TensorflowInputVGGish >> TensorflowPredictVGGish"
   "\n"
   "References:\n"
   "  [1] Gemmeke, J. et. al., AudioSet: An ontology and human-labelled dataset for audio events, ICASSP 2017\n"

@@ -33,7 +33,7 @@ TensorflowPredictMusiCNN::TensorflowPredictMusiCNN() : AlgorithmComposite(),
     _frameCutter(0), _tensorflowInputMusiCNN(0), _vectorRealToTensor(0), _tensorToPool(0),
     _tensorflowPredict(0), _poolToTensor(0), _tensorToVectorReal(0), _configured(false) {
 
-  declareInput(_signal, 4096, "signal", "the input audio signal");
+  declareInput(_signal, 4096, "signal", "the input audio signal sampled at 16 kHz");
   declareOutput(_predictions, 0, "predictions", "the model predictions");
 }
 
@@ -143,7 +143,7 @@ const char* TensorflowPredictMusiCNN::category = "Machine Learning";
 const char* TensorflowPredictMusiCNN::description = DOC(
   "This algorithm makes predictions using MusiCNN models [1, 2].\n"
   "It reads seralized models in Protobuf format. The recommended pipeline is as follows:\n"
-  "  monoLoader >> TensorflowInputMusiCNN >> TensorflowPredictMusiCNN"
+  "  MonoLoader(sampleRate=16000) >> TensorflowInputMusiCNN >> TensorflowPredictMusiCNN"
   "\n"
   "References:\n"
   "  [1] Pons, J., & Serra, X. (2019). musicnn: Pre-trained convolutional neural networks for music audio tagging. arXiv preprint arXiv:1909.06654.\n"
