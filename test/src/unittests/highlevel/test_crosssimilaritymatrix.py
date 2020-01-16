@@ -41,12 +41,12 @@ def cross_similarity_matrix(input_x, input_y, binarize=True, tau=1, m=1, kappa=0
         return pdistances
 
 
-class TestChromaCrossSimilarity(TestCase):
+class TestCrossSimilarityMatrix(TestCase):
 
     #query = estd.MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'mozart_c_major_30sec.wav'))()
     #reference = estd.MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'Vivaldi_Sonata_5_II_Allegro.wav'))
     query_feature = array(np.ones((100,200)))
-    reference_feature = array(np.zeros((200,100)))
+    reference_feature = array(np.zeros((200,200)))
     expected = cross_similarity_matrix(query_feature, reference_feature, binarize=False)
     expected_binary = cross_similarity_matrix(query_feature, reference_feature, binarize=True)
 

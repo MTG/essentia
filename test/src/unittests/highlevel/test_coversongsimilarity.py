@@ -17,10 +17,12 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-from essentia.streaming import CoverSongSimilarity, VectorInput
-from essentia.standard import CoverSongSimilarity as CoverSim
-from essentia import array, run, Pool
 from essentia_test import *
+import essentia.streaming as estr
+#from essentia.standard import CoverSongSimilarity as CoverSongSimilarityStd
+#from essentia.streaming import CoverSongSimilarity, VectorInput
+
+#from essentia import array, run, Pool
 import numpy as np
 
 
@@ -35,10 +37,10 @@ class TestCoverSongSimilarity(TestCase):
     expected_distance = 1.732
 
     def testEmpty(self):
-        self.assertComputeFails(CoverSim(), [])
+        self.assertComputeFails(CoverSongSimilarity(), [])
 
     def testRegressionStandard(self):
-        sim = CoverSim()
+        sim = CoverSongSimilarity()
         score_matrix, distance = sim.compute(array(self.sim_matrix))
         self.assertAlmostEqual(self.expected_distance, distance)
         warn = "Expected shape of output score_matrix is %s, instead of %s" % (self.sim_matrix.shape, score_matrix.shape)
@@ -47,13 +49,13 @@ class TestCoverSongSimilarity(TestCase):
         self.assertAlmostEqual(self.expected_distance, distance)
 
     def testInvalidParam(self):
-        self.assertConfigureFails(CoverSim(), { 'alignmentType': 1 })
-        self.assertConfigureFails(CoverSim(), { 'alignmentType': 'dmax' })
+        self.assertConfigureFails(CoverSongSimilarity(), { 'distanceType': 'test' })
+        self.assertConfigureFails(CoverSongSimilarity(), { 'alignmentType': 'test' })
 
     def testRegressionStreaming(self):
-        sim = CoverSongSimilarity()
+        sim = estr.CoverSongSimilarity()
         pool = Pool()
-        inputVec = VectorInput(array(self.sim_matrix))
+        inputVec = estr.VectorInput(array(self.sim_matrix))
         inputVec.data >> sim.inputArray
         sim.scoreMatrix >> (pool, 'score_matrix')
         sim.distance >> (pool, 'distance')
