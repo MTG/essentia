@@ -40,7 +40,7 @@ Range* Range::create(const std::string& s) {
     return new Set(s);
   }
   else {
-    throw EssentiaException("Invalid range");
+  throw EssentiaException("Invalid range '" + s + "' for parameter. Should contain '[]', '()' or '{}' to specify the range of given parameter.");
   }
 }
 
