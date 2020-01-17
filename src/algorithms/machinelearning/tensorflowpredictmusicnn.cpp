@@ -141,9 +141,15 @@ namespace standard {
 const char* TensorflowPredictMusiCNN::name = "TensorflowPredictMusiCNN";
 const char* TensorflowPredictMusiCNN::category = "Machine Learning";
 const char* TensorflowPredictMusiCNN::description = DOC(
-  "This algorithm makes predictions using MusiCNN models [1, 2].\n"
-  "It reads seralized models in Protobuf format. The recommended pipeline is as follows:\n"
-  "  MonoLoader(sampleRate=16000) >> TensorflowInputMusiCNN >> TensorflowPredictMusiCNN"
+  "This algorithm makes predictions using MusiCNN-based models [1, 2].\n"
+  "Internally, it uses TensorflowInputMusiCNN for the input feature extraction (mel bands). "
+  "It feeds the model with patches of 187 mel bands frames and jumps a constant amount of frames determined by patchHopSize.\n"
+  "With the `accumulate` parameter the patches are stored to run a single TensorFlow session at the end of the stream. "
+  "This allows to take advantage of parallelization when GPUs are available, but at the same time it can be memory exhausting for long files.\n"
+  "The recommended pipeline is as follows:\n"
+  "  MonoLoader(sampleRate=16000) >> TensorflowPredictMusiCNN"
+  "\n"
+  "Note: This algorithm does not make any check on the input model so it is the user's responsibility to make sure it is a valid one."
   "\n"
   "References:\n"
   "  [1] Pons, J., & Serra, X. (2019). musicnn: Pre-trained convolutional neural networks for music audio tagging. arXiv preprint arXiv:1909.06654.\n"
@@ -151,7 +157,7 @@ const char* TensorflowPredictMusiCNN::description = DOC(
 
 
 TensorflowPredictMusiCNN::TensorflowPredictMusiCNN() {
-    declareInput(_signal, "signal", "the input audio signal");
+    declareInput(_signal, "signal", "the input audio signal sampled at 16 kHz");
     declareOutput(_predictions, "predictions", "the predictions");
 
     createInnerNetwork();

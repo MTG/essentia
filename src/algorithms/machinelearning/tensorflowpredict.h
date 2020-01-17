@@ -87,7 +87,7 @@ class TensorflowPredict : public Algorithm {
     declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool", "", outputNamesVector);
     declareParameter("isTraining", "run the model in training mode (normalized with statistics of the current batch) or in inference mode (normalized with moving statistics). It only applies to some models", "{true,false}", false);
     declareParameter("isTrainingName", "the name of an additional input node to indicate the model if it is in training mode or not. Leave it empty when the model does not need such input", "", "");
-    declareParameter("squeeze", "remove singleton dimensions of the inputs tensors. Does not apply to the batch dimension.", "{true,false}", true);
+    declareParameter("squeeze", "remove singleton dimensions of the inputs tensors. Does not apply to the batch dimension", "{true,false}", true);
   }
 
   void configure();

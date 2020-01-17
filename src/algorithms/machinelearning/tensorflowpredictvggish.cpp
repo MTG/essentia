@@ -140,9 +140,17 @@ namespace standard {
 const char* TensorflowPredictVGGish::name = "TensorflowPredictVGGish";
 const char* TensorflowPredictVGGish::category = "Machine Learning";
 const char* TensorflowPredictVGGish::description = DOC(
-  "This algorithm makes predictions using VGGish models [1, 2, 3].\n"
-  "It reads seralized models in Protobuf format. The recommended pipeline is as follows:\n"
-  "  MonoLoader(sampleRate=16000) >> TensorflowInputVGGish >> TensorflowPredictVGGish"
+  "This algorithm makes predictions using VGGish-based models [1, 2, 3].\n"
+  "Internally, it uses TensorflowInputVGGish for the input feature extraction (mel bands). "
+  "It feeds the model with patches of 96 mel bands frames and jumps a constant amount of frames determined by patchHopSize.\n"
+  "With the accumulate parameter the patches are stored to run a single TensorFlow session at the end of the stream. "
+  "This allows to take advantage of parallelization when GPUs are available, but at the same time it can be memory exhausting for long files.\n"
+  "The recommended pipeline is as follows:\n"
+  "  MonoLoader(sampleRate=16000) >> TensorflowPredictVGGish"
+  "\n"
+  "\n"
+  "Note: This algorithm does not make any check on the input model so it is the user's responsibility to make sure it is a valid one."
+  "\n"
   "\n"
   "References:\n"
   "  [1] Gemmeke, J. et. al., AudioSet: An ontology and human-labelled dataset for audio events, ICASSP 2017\n"
@@ -151,7 +159,7 @@ const char* TensorflowPredictVGGish::description = DOC(
 
 
 TensorflowPredictVGGish::TensorflowPredictVGGish() {
-    declareInput(_signal, "signal", "the input audio signal");
+    declareInput(_signal, "signal", "the input audio signal sampled at 16 kHz");
     declareOutput(_predictions, "predictions", "the predictions");
 
     createInnerNetwork();
@@ -178,12 +186,12 @@ void TensorflowPredictVGGish::configure() {
   // if no file has been specified, do not do anything
   if (!parameter("graphFilename").isConfigured()) return;
   _tensorflowPredictVGGish->configure(INHERIT("graphFilename"),
-                                       INHERIT("input"),
-                                       INHERIT("output"),
-                                       INHERIT("isTrainingName"),
-                                       INHERIT("patchHopSize"),
-                                       INHERIT("accumulate"),
-                                       INHERIT("lastPatchMode"));
+                                      INHERIT("input"),
+                                      INHERIT("output"),
+                                      INHERIT("isTrainingName"),
+                                      INHERIT("patchHopSize"),
+                                      INHERIT("accumulate"),
+                                      INHERIT("lastPatchMode"));
 }
 
 
