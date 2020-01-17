@@ -16,10 +16,8 @@
 #
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
-from essentia import array, run, Pool
-import essentia.standard as estd
-import essentia.streaming as ess
 from essentia_test import *
+import essentia.streaming as ess
 import numpy as np
 
 
@@ -43,36 +41,32 @@ class TestChromaCrossSimilarity(TestCase):
                                     [1., 0., 1.]])
 
     def testEmpty(self):
-        self.assertComputeFails(estd.CrossSimilarityMatrix(), [])
+        self.assertComputeFails(CrossSimilarityMatrix(), [], [])
 
     def testRegressionStandard(self):
         """Test standard ChromaCrossSimilarity algo rqa method"""
-        csm = estd.ChromaCrossSimilarity(oti=False, stackFrameSize=1)
-        result = csm.compute(self.query_hpcp, self.reference_hpcp)
-        self.assertAlmostEqual(np.mean(self.expected_crp_simmatrix), np.mean(result))
-        self.assertAlmostEqualVector(self.expected_crp_simmatrix, result)
-
-    def testInvalidParam(self):
-        self.assertConfigureFails(estd.ChromaCrossSimilarity(), { 'binarizePercentile': -1 })
-        self.assertConfigureFails(estd.ChromaCrossSimilarity(), { 'otiBinary': -1 })
+        csm = ChromaCrossSimilarity(oti=False)
+        result_simmatrix = csm(self.query_hpcp, self.reference_hpcp)
+        self.assertAlmostEqual(np.mean(self.expected_crp_simmatrix), np.mean(result_simmatrix))
+        self.assertAlmostEqualMatrix(self.expected_crp_simmatrix, result_simmatrix)
 
     def testOTIBinaryCompute(self):
         """Tests standard ChromaCrossSimilarity algo when param 'otiBinary=True'"""
         # test oti-based binary sim matirx method
-        self.assertComputeFails(estd.ChromaCrossSimilarity(otiBinary=True), [])
+        self.assertComputeFails(ChromaCrossSimilarity(otiBinary=True), [], [])
 
     def testRegressionOTIBinary(self):
         """Test regression of standard ChromaCrossSimilarity when otiBinary=True"""
-        csm = estd.ChromaCrossSimilarity(otiBinary=True)
-        sim_matrix = csm.compute(self.query_hpcp, self.reference_hpcp)
+        csm = ChromaCrossSimilarity(otiBinary=True)
+        sim_matrix = csm(self.query_hpcp, self.reference_hpcp)
         self.assertAlmostEqual(np.mean(self.expected_oti_simmatrix), np.mean(sim_matrix))
-        self.assertAlmostEqualVector(self.expected_oti_simmatrix, sim_matrix)
+        self.assertAlmostEqualMatrix(self.expected_oti_simmatrix, sim_matrix)
 
     def testRegressionStreaming(self):
         """Tests streaming ChromaCrossSimilarity algo against the standard mode algorithm with 'streamingMode=True' """
         # compute chromacrosssimilarity matrix using standard mode
-        csm_standard = estd.ChromaCrossSimilarity(streamingMode=True)
-        sim_matrix_std = csm_standard.compute(self.query_hpcp, self.reference_hpcp)
+        csm_standard = ChromaCrossSimilarity(streaming=True)
+        sim_matrix_std = csm_standard(self.query_hpcp, self.reference_hpcp)
         # compute chromacrosssimilarity matrix using streaming mode
         queryVec = ess.VectorInput(self.query_hpcp)
         csm_streaming = ess.ChromaCrossSimilarity(referenceFeature=self.reference_hpcp, oti=0)
@@ -80,12 +74,14 @@ class TestChromaCrossSimilarity(TestCase):
         queryVec.data >> csm_streaming.queryFeature
         csm_streaming.csm >>  (pool, 'csm')
 
-        self.assertAlmostEqualVector(sim_matrix_std, pool['csm'])
+        run(queryVec)
+
+        self.assertAlmostEqualMatrix(sim_matrix_std, pool['csm'])
         self.assertAlmostEqual(np.mean(sim_matrix_std), np.mean(pool['csm']))
     
 
 suite = allTests(TestChromaCrossSimilarity)
 
 if __name__ == '__main__':
-    TextTestRunner(verbosity=2).run(suite)
+    TextTestRunner(verbosity=4).run(suite)
 
