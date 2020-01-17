@@ -37,7 +37,7 @@ namespace standard {
 const char* ChromaCrossSimilarity::name = "ChromaCrossSimilarity";
 const char* ChromaCrossSimilarity::category = "Music Similarity";
 const char* ChromaCrossSimilarity::description = DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
-"Use HPCP algorithm for computing the chromagram and the default parameters of this algorithm for the best results.\n\n"
+"Use HPCP algorithm for computing the chromagram with default parameters of this algorithm for the best results.\n\n"
 "If parameter 'oti=True', the algorithm transpose the reference song chromagram by optimal transposition index as described in [1].\n\n"
 "If parameter 'otiBinary=True', the algorithm computes the binary cross-similarity matrix based on optimal transposition index between each feature pairs instead of euclidean distance as described in [3].\n\n"
 "The input chromagram should be in the shape (n_frames, numbins), where 'n_frames' is number of frames and 'numbins' for the number of bins in the chromagram. An exception is thrown otherwise.\n\n"
@@ -195,7 +195,7 @@ namespace streaming {
 
 const char* ChromaCrossSimilarity::name = standard::ChromaCrossSimilarity::name;
 const char* ChromaCrossSimilarity::description =  DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
-"Use HPCP algorithm for computing the chromagram and the default parameters of this algorithm for the best results.\n\n"
+"Use HPCP algorithm for computing the chromagram with the default parameters of this algorithm for the best results.\n\n"
 "Note that the parameters and output of this algorithm differs as compared to it's standard mode version.\n\n"
 "The output of this algorithm is only same as the output of standard mode 'ChromaCrossSimilarity' when parameter 'streamingMode=True'.\n\n"
 "Key invariance can be obtained by manually specifing the parameter 'oti' (eg. 'oti=2' to transpose the reference song chromagram by an optimal transposition index '2'.  [1]. \n\n"
@@ -344,6 +344,14 @@ std::vector<std::vector<Real> > stackChromaFrames(std::vector<std::vector<Real> 
   }
   size_t stopIdx;
   int increment = frameStackSize * frameStackStride;
+
+  if (frames.size() < increment + 1) {
+    throw EssentiaException("Too short frame size for stacking, no of input feature frames (" + std::to_string(frames.size()) + 
+                      ") should be always greater than '(frameStackSize * frameStackStride) + 1', ie. (" + 
+                      std::to_string(((frameStackSize + frameStackStride) + 1)) +  ")");
+
+  }
+
   std::vector<std::vector<Real> > stackedFrames;
   stackedFrames.reserve(frames.size() - increment);
   std::vector<Real> stack;

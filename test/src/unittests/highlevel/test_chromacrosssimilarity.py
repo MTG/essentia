@@ -17,6 +17,7 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 from essentia_test import *
+from essentia import run as ess_run
 import essentia.streaming as ess
 import numpy as np
 
@@ -32,52 +33,47 @@ class TestChromaCrossSimilarity(TestCase):
                     [0.36084786, 0.37151814, 0.40913638, 0.15566002, 0.40571737, 1., 0.6263613, 0.65415925, 0.53127843, 0.7900088, 0.50427467, 0.51956046],
                     [0.42861825, 0.36887613, 0.05665652, 0.20978431, 0.1992704, 0.14884946, 1., 0.24148795, 0.43031794, 0.14265466, 0.17224492, 0.36498153]]) 
     
-    # expected binary similarity matrix using the cross recurrence quantification method computed using the python implementation from https://github.com/albincorreya/ChromaCoverId
-    expected_crp_simmatrix = array([[1., 0., 0.],
+    # expected binary similarity matrix using the cross recurrence quantification method with oti computed using the python implementation from https://github.com/albincorreya/ChromaCoverId
+    expected_crp_simmatrix = array([[0., 0., 1.],
                                     [0., 0., 0.]])
 
     # expected bianry similarity matrix using oti-based similarity method using the python implementation from https://github.com/albincorreya/ChromaCoverId
-    expected_oti_simmatrix = array([[0., 0., 0.], 
-                                    [1., 0., 1.]])
+    expected_oti_simmatrix = array([[1., 0., 0.], 
+                                    [1., 0., 0.]])
 
     def testEmpty(self):
         self.assertComputeFails(CrossSimilarityMatrix(), [], [])
 
     def testRegressionStandard(self):
-        """Test standard ChromaCrossSimilarity algo rqa method"""
-        csm = ChromaCrossSimilarity(oti=False)
+        """Test standard ChromaCrossSimilarity algo rqa method with 'oti=True'"""
+        csm = ChromaCrossSimilarity(frameStackSize=1)
         result_simmatrix = csm(self.query_hpcp, self.reference_hpcp)
-        self.assertAlmostEqual(np.mean(self.expected_crp_simmatrix), np.mean(result_simmatrix))
         self.assertAlmostEqualMatrix(self.expected_crp_simmatrix, result_simmatrix)
 
     def testOTIBinaryCompute(self):
         """Tests standard ChromaCrossSimilarity algo when param 'otiBinary=True'"""
         # test oti-based binary sim matirx method
-        self.assertComputeFails(ChromaCrossSimilarity(otiBinary=True), [], [])
+        self.assertComputeFails(ChromaCrossSimilarity(otiBinary=True, frameStackSize=1), [], [])
 
     def testRegressionOTIBinary(self):
         """Test regression of standard ChromaCrossSimilarity when otiBinary=True"""
-        csm = ChromaCrossSimilarity(otiBinary=True)
+        csm = ChromaCrossSimilarity(otiBinary=True, frameStackSize=1)
         sim_matrix = csm(self.query_hpcp, self.reference_hpcp)
         self.assertAlmostEqual(np.mean(self.expected_oti_simmatrix), np.mean(sim_matrix))
         self.assertAlmostEqualMatrix(self.expected_oti_simmatrix, sim_matrix)
 
     def testRegressionStreaming(self):
-        """Tests streaming ChromaCrossSimilarity algo against the standard mode algorithm with 'streamingMode=True' """
-        # compute chromacrosssimilarity matrix using standard mode
-        csm_standard = ChromaCrossSimilarity(streaming=True)
-        sim_matrix_std = csm_standard(self.query_hpcp, self.reference_hpcp)
+        """Tests streaming ChromaCrossSimilarity algo with 'otiBinary=True' against the standard mode algorithm with 'otiBinary=True' """
         # compute chromacrosssimilarity matrix using streaming mode
         queryVec = ess.VectorInput(self.query_hpcp)
-        csm_streaming = ess.ChromaCrossSimilarity(referenceFeature=self.reference_hpcp, oti=0)
+        csm_streaming = ess.ChromaCrossSimilarity(referenceFeature=self.reference_hpcp, oti=0, frameStackSize=1)
         pool = Pool()
         queryVec.data >> csm_streaming.queryFeature
         csm_streaming.csm >>  (pool, 'csm')
 
-        run(queryVec)
+        ess_run(queryVec)
 
-        self.assertAlmostEqualMatrix(sim_matrix_std, pool['csm'])
-        self.assertAlmostEqual(np.mean(sim_matrix_std), np.mean(pool['csm']))
+        self.assertAlmostEqualMatrix(self.expected_oti_simmatrix, np.array(pool['csm']))
     
 
 suite = allTests(TestChromaCrossSimilarity)
