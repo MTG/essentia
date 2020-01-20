@@ -23,7 +23,7 @@ import numpy as np
 
 
 class TestChromaCrossSimilarity(TestCase):
-
+    
     # hpcp matrix of a short query song segment (2 frames) computed using essentia hpcp algorithm
     query_hpcp = array([[0.3218126, 0.00541916, 0.26444072, 0.36874822, 1., 0.10472599, 0.05123469, 0.03934194, 0.07354275, 0.646091, 0.55201685, 0.03270169],
                     [0.07695414, 0.04679213, 0.56867135, 1., 0.10247268, 0.03653419, 0.03635696, 0.2443251, 0.2396715, 0.1190474, 0.8045795, 0.41822678]])
@@ -42,18 +42,14 @@ class TestChromaCrossSimilarity(TestCase):
                                     [1., 0., 0.]])
 
     def testEmpty(self):
-        self.assertComputeFails(CrossSimilarityMatrix(), [], [])
+        self.assertComputeFails(ChromaCrossSimilarity(otiBinary=False, frameStackSize=1), [], [])
+        self.assertComputeFails(ChromaCrossSimilarity(otiBinary=True, frameStackSize=1), [], [])
 
     def testRegressionStandard(self):
         """Test standard ChromaCrossSimilarity algo rqa method with 'oti=True'"""
         csm = ChromaCrossSimilarity(frameStackSize=1)
         result_simmatrix = csm(self.query_hpcp, self.reference_hpcp)
         self.assertAlmostEqualMatrix(self.expected_crp_simmatrix, result_simmatrix)
-
-    def testOTIBinaryCompute(self):
-        """Tests standard ChromaCrossSimilarity algo when param 'otiBinary=True'"""
-        # test oti-based binary sim matirx method
-        self.assertComputeFails(ChromaCrossSimilarity(otiBinary=True, frameStackSize=1), [], [])
 
     def testRegressionOTIBinary(self):
         """Test regression of standard ChromaCrossSimilarity when otiBinary=True"""
@@ -79,5 +75,5 @@ class TestChromaCrossSimilarity(TestCase):
 suite = allTests(TestChromaCrossSimilarity)
 
 if __name__ == '__main__':
-    TextTestRunner(verbosity=4).run(suite)
+    TextTestRunner(verbosity=2).run(suite)
 

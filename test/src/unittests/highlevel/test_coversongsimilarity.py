@@ -19,17 +19,16 @@
 
 from essentia_test import *
 import essentia.streaming as estr
-import numpy as np
 
 
 class TestCoverSongSimilarity(TestCase):
 
-    sim_matrix = np.array([[1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1],
-                           [0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
-                           [1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1],
-                           [1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0 ,0, 0, 0, 0, 0],
-                           [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]])
+    sim_matrix = array([[1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1],
+                        [0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
+                        [1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1],
+                        [1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0],
+                        [0, 0, 0, 0, 0, 0, 0 ,0, 0, 0, 0, 0],
+                        [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]])
     expected_distance = 1.732
 
     def testEmpty(self):
@@ -37,8 +36,8 @@ class TestCoverSongSimilarity(TestCase):
 
     def testRegressionStandard(self):
         sim = CoverSongSimilarity()
-        score_matrix, distance = sim.compute(array(self.sim_matrix))
-        self.assertAlmostEqual(self.expected_distance, np.round(distance, 3))
+        score_matrix, distance = sim.compute(self.sim_matrix)
+        self.assertAlmostEqualFixedPrecision(self.expected_distance)
         warn = "Expected shape of output score_matrix is %s, instead of %s" % (self.sim_matrix.shape, score_matrix.shape)
         self.assertEqual(score_matrix.shape[0], self.sim_matrix.shape[0], warn)
         self.assertEqual(score_matrix.shape[1], self.sim_matrix.shape[1], warn)

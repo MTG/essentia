@@ -17,54 +17,40 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-from sklearn.metrics.pairwise import euclidean_distances
 from essentia import array
 from essentia_test import *
-import numpy as np
-
-
-def cross_similarity_matrix(input_x, input_y, binarize=True, tau=1, m=1, kappa=0.095):
-    pdistances = euclidean_distances(input_x, input_y)
-    if binarize:
-        transposed_pdistances = pdistances.T
-        eph_x = np.percentile(pdistances, kappa*100, axis=1)
-        eph_y = np.percentile(transposed_pdistances, kappa*100, axis=1)
-        x = eph_x[:,None] - pdistances
-        y = eph_y[:,None] - transposed_pdistances
-        #apply heaviside function to the array (Binarize the array)
-        x = np.piecewise(x, [x<0, x>=0], [0,1])
-        y = np.piecewise(y, [y<0, y>=0], [0,1])
-        crp = x*y.T
-        return crp
-    else:
-        return pdistances
 
 
 class TestCrossSimilarityMatrix(TestCase):
 
-    #query = estd.MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'mozart_c_major_30sec.wav'))()
-    #reference = estd.MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'Vivaldi_Sonata_5_II_Allegro.wav'))
-    query_feature = array(np.ones((100,200)))
-    reference_feature = array(np.zeros((200,200)))
-    expected = cross_similarity_matrix(query_feature, reference_feature, binarize=False)
-    expected_binary = cross_similarity_matrix(query_feature, reference_feature, binarize=True)
+    # hpcp matrix of a short query song segment (2 frames) computed using essentia hpcp algorithm
+    query_hpcp = array([[0.3218126, 0.00541916, 0.26444072, 0.36874822, 1., 0.10472599, 0.05123469, 0.03934194, 0.07354275, 0.646091, 0.55201685, 0.03270169],
+                    [0.07695414, 0.04679213, 0.56867135, 1., 0.10247268, 0.03653419, 0.03635696, 0.2443251, 0.2396715, 0.1190474, 0.8045795, 0.41822678]])
+    
+    # hpcp matrix of a short reference song segment (3 frames) computed using essentia hpcp algorithm
+    reference_hpcp = array([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                    [0.36084786, 0.37151814, 0.40913638, 0.15566002, 0.40571737, 1., 0.6263613, 0.65415925, 0.53127843, 0.7900088, 0.50427467, 0.51956046],
+                    [0.42861825, 0.36887613, 0.05665652, 0.20978431, 0.1992704, 0.14884946, 1., 0.24148795, 0.43031794, 0.14265466, 0.17224492, 0.36498153]]) 
+    
+    # expected euclidean pairwise similarity matrix without binary thresholding (pre-computed using a python script adopted from https://github.com/albincorreya/ChromaCoverId/blob/master/cover_similarity_measures.py)
+    expected_sim_matrix = [[1.432924 , 1.5921365, 1.5593135],
+                           [1.5159905, 1.7596511, 1.5824637]]
+    # expected euclidean pairwise similarity matrix with binary thresholding where binarizePercentile=0.095, frameStackStride=1 and frameStackSize=1 (pre-computed using a python script adopted from https://github.com/albincorreya/ChromaCoverId/blob/master/cover_similarity_measures.py)
+    expected_sim_matrix_binary = [[1., 0., 0.],
+                                  [0., 0., 0.]]
 
     def testEmpty(self):
         self.assertComputeFails(CrossSimilarityMatrix(), [], [])
 
     def testRegressionStandard(self):
-        csm = CrossSimilarityMatrix(binarize=False)
-        result = csm.compute(self.query_feature, self.reference_feature)
-        self.assertAlmostEqual(np.mean(self.expected), np.mean(result))
-        self.assertAlmostEqualMatrix(self.expected, result)
+        csm = CrossSimilarityMatrix(binarize=False, frameStackStride=1, frameStackSize=1)
+        result = csm(self.query_feature, self.reference_feature)
+        self.assertAlmostEqualMatrix(self.expected_sim_matrix, result)
 
     def testRegressionBinary(self):
-        csm = CrossSimilarityMatrix(binarize=True, binarizePercentile=0.095)
-        result = csm.compute(self.query_feature, self.reference_feature)
-        self.assertAlmostEqualMatrix(self.expected_binary, result)
-
-    def testInvalidParam(self):
-        pass
+        csm = CrossSimilarityMatrix(binarize=True, binarizePercentile=0.095, frameStackStride=1, frameStackSize=1)
+        result = csm(self.query_feature, self.reference_feature)
+        self.assertAlmostEqualMatrix(self.expected_sim_matrix_binary, result)
 
 
 suite = allTests(TestCrossSimilarityMatrix)
