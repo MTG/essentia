@@ -37,7 +37,6 @@ class VectorRealToTensor : public Algorithm {
   int _patchHopSize;
   bool _push;
   bool _accumulate;
-  bool _pushedEverything;
   std::string _lastPatchMode;
 
   std::vector<std::vector<std::vector<Real> > > _acc;
