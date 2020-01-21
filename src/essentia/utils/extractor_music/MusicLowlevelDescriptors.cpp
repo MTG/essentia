@@ -307,7 +307,7 @@ void MusicLowlevelDescriptors::createNetworkEqLoud(SourceBase& source, Pool& poo
 
   // Spectral Contrast
   Algorithm* sc = factory.create("SpectralContrast",
-                                 "frameSize", frameSize,
+                                 "frameSize", frameSize + zeroPadding,
                                  "sampleRate", sampleRate,
                                  "numberBands", 6,
                                  "lowFrequencyBound", 20,
