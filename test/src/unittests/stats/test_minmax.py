@@ -31,8 +31,8 @@ class TestMinMax(TestCase):
 
     def testEmpty(self):
         """An empty input causes an exception"""
-        self.assertComputeFails(MinMax()(), [])
-        self.assertComputeFails(MinMax(type="max")(), [])
+        self.assertComputeFails(MinMax(), [])
+        self.assertComputeFails(MinMax(type="max"), [])
 
     def testAllSame(self):
         value, index = MinMax()([0]*10)
@@ -70,12 +70,6 @@ class TestMinMax(TestCase):
         value, index = MinMax()([4, 5, 3.3])
         self.assertAlmostEqual(value, 3.3)
         self.assertEqual(index, 2)
-
-    def testNonNumeric(self):
-        self.assertComputeFails(MinMax()(['a', 1]))
-
-    def testNonArray(self):
-        self.assertComputeFails(MinMax()('Not an array'))
 
     def testMax(self):
         value, index = MinMax(type="max")([3, 7, -45, 2, -1, 0])
