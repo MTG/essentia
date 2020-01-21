@@ -37,7 +37,7 @@ class TestCoverSongSimilarity(TestCase):
     def testRegressionStandard(self):
         sim = CoverSongSimilarity()
         score_matrix, distance = sim.compute(self.sim_matrix)
-        self.assertAlmostEqualFixedPrecision(self.expected_distance)
+        self.assertAlmostEqualFixedPrecision(self.expected_distance, distance)
         warn = "Expected shape of output score_matrix is %s, instead of %s" % (self.sim_matrix.shape, score_matrix.shape)
         self.assertEqual(score_matrix.shape[0], self.sim_matrix.shape[0], warn)
         self.assertEqual(score_matrix.shape[1], self.sim_matrix.shape[1], warn)
