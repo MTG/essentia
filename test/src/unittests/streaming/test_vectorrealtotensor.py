@@ -25,13 +25,15 @@ from essentia.streaming import *
 class TestVectorRealToTensor(TestCase):
 
     def identityOperation(self, frameSize=1024, hopSize=512, patchSize=187,
-                          lastPatchMode='discard'):
-        # Identity test to check that the data flows properly.
+                          lastPatchMode='discard', accumulate=False):
+
+        batchHopSize = -1 if accumulate else 1
+
         filename = join(testdata.audio_dir, 'recorded', 'cat_purrrr.wav')
 
         ml = MonoLoader(filename=filename)
         fc = FrameCutter(frameSize=frameSize, hopSize=hopSize)
-        vtt = VectorRealToTensor(shape=[1, 1, patchSize, frameSize],
+        vtt = VectorRealToTensor(shape=[batchHopSize, 1, patchSize, frameSize],
                                  lastPatchMode=lastPatchMode)
         ttv = TensorToVectorReal()
 
@@ -47,22 +49,86 @@ class TestVectorRealToTensor(TestCase):
 
         return pool['framesOut'], pool['framesIn']
 
-    def testFramesToTensorAndBackToFrames(self):
-        # Patch size equal to number of frames
+
+    def testFramesToTensorAndBackToFramesDiscard(self):
+        # The test audio file has 430 frames.
+        # Setting the patchSize to produce exactly 10 patches.
+        numberOfFrames = 43
+        found, expected = self.identityOperation(patchSize=numberOfFrames,
+                                                 lastPatchMode='discard')
+        self.assertAlmostEqualMatrix(found, expected, 1e-8)
+
+        # Now the number of frames does not match an exact number of patches.
+        # The expected output is trimmed to the found shape as with
+        # lastPatchMode='discard' the remaining frames not fitting into a
+        # patch are discarded.
+        found, expected = self.identityOperation(frameSize=256, hopSize=128,
+                                                 lastPatchMode='discard')
+        self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
+
+        # Increase the patch size.
+        found, expected = self.identityOperation(frameSize=256, hopSize=128,
+                                                 patchSize=300, lastPatchMode='discard')
+        self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
+
+    def testFramesToTensorAndBackToFramesDiscardAccumulate(self):
+        # Repeat the tests in accumulate mode. Here the patches are stored
+        # internally and pushed at once at the end of the stream.
+        numberOfFrames = 43
+        found, expected = self.identityOperation(patchSize=numberOfFrames,
+                                                 lastPatchMode='discard',
+                                                 accumulate=True)
+        self.assertAlmostEqualMatrix(found, expected, 1e-8)
+
+        found, expected = self.identityOperation(frameSize=256, hopSize=128,
+                                                 lastPatchMode='discard',
+                                                 accumulate=True)
+        self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
+
+        found, expected = self.identityOperation(frameSize=256, hopSize=128,
+                                                 patchSize=300, lastPatchMode='discard',
+                                                 accumulate=True)
+        self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
+
+    def testFramesToTensorAndBackToFramesRepeat(self):
+        # Repeat the experiments with lastPatchMode='repeat'. Now if there
+        # are remaining frames they will be looped into a final patch.
+        # The found shape will be equal or bigger than the expected one.
+        # Found values will be trimmed to fit the expected shape.
+
+        # No remaining frames.
         numberOfFrames = 43
         found, expected = self.identityOperation(patchSize=numberOfFrames,
                                                  lastPatchMode='repeat')
         self.assertAlmostEqualMatrix(found, expected, 1e-8)
 
-        # Default parameters
+        # Some remaining frames.
         found, expected = self.identityOperation(frameSize=256, hopSize=128,
                                                  lastPatchMode='repeat')
-        self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
+        self.assertAlmostEqualMatrix(found[:expected.shape[0], :], expected, 1e-8)
 
-        # Increse aquire size
+        # Increase the patch size.
         found, expected = self.identityOperation(frameSize=256, hopSize=128,
                                                  patchSize=300, lastPatchMode='repeat')
-        self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
+        self.assertAlmostEqualMatrix(found[:expected.shape[0], :], expected, 1e-8)
+
+    def testFramesToTensorAndBackToFramesRepeatAccumulate(self):
+        # The behavior should be the same in accumulate mode.
+        numberOfFrames = 43
+        found, expected = self.identityOperation(patchSize=numberOfFrames,
+                                                 lastPatchMode='repeat',
+                                                 accumulate=True)
+        self.assertAlmostEqualMatrix(found, expected, 1e-8)
+
+        found, expected = self.identityOperation(frameSize=256, hopSize=128,
+                                                 lastPatchMode='repeat',
+                                                 accumulate=True)
+        self.assertAlmostEqualMatrix(found[:expected.shape[0], :], expected, 1e-8)
+
+        found, expected = self.identityOperation(frameSize=256, hopSize=128,
+                                                 patchSize=300, lastPatchMode='repeat',
+                                                 accumulate=True)
+        self.assertAlmostEqualMatrix(found[:expected.shape[0], :], expected, 1e-8)
 
     def testInvalidParam(self):
         # VectorRealToTensor only supports single chanel data
@@ -73,6 +139,23 @@ class TestVectorRealToTensor(TestCase):
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 0, 1, 1]})
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 1, 0, 1]})
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 1, 0, 0]})
+
+    def testRepeatMode(self):
+        # The test audio file has 430 frames. If patchSize is set to 428 with
+        # lastPatchMode='repeat' VectorRealToTensor will produce a second
+        # patch of 428 frames by looping the last two spare samples.
+        numberOfFrames = 428
+        loopFrames = 430 - numberOfFrames
+        
+        found, expected = self.identityOperation(patchSize=numberOfFrames,
+                                                 lastPatchMode='repeat')
+
+        expected = numpy.vstack([expected[:numberOfFrames]] +  #  frames for the first patch
+                                [expected[numberOfFrames:numberOfFrames + loopFrames]] *  # remaining frames for the second patch
+                                (numberOfFrames // loopFrames))  # number of repetitions to fill the second patch
+
+        self.assertAlmostEqualMatrix(found, expected, 1e-8)
+
 
 suite = allTests(TestVectorRealToTensor)
 
