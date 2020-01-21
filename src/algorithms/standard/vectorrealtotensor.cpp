@@ -169,6 +169,9 @@ AlgorithmStatus VectorRealToTensor::process() {
           EXEC_DEBUG("VectorRealToTensor: 0 frames remaining.");
 
         } else {
+          if (frame.size() < 10) {
+            E_WARNING("VectorRealToTensor: Last patch produced by repeating the last " << frame.size() << " frames. May result in unreliable predictions.");
+          }
           vector<vector<Real> > padded_frame = frame;
 
           for (int i = 0; i < _timeStamps; i++) {
@@ -181,6 +184,7 @@ AlgorithmStatus VectorRealToTensor::process() {
 
       } else if (_lastPatchMode == "discard") {
         EXEC_DEBUG("VectorRealToTensor: Discarding last frames");
+
       } else {
         throw EssentiaException("VectorRealToTensor: Incomplete patch found "
                                 "before reaching the end of the stream. This is not supposed to happen");
