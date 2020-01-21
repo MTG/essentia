@@ -55,20 +55,22 @@ class TestTensorToPool(TestCase):
         return pool['framesOut'], pool['framesIn']
 
     def testFramesToTensorAndBackToFramesDiscard(self):
-        # Patch size equal to number of frames
+        # The test audio file has 430 frames.
+        # Setting the patchSize to produce exactly 10 patches.
         numberOfFrames = 43
         found, expected = self.identityOperation(patchSize=numberOfFrames,
                                                  lastPatchMode='discard')
         self.assertAlmostEqualMatrix(found, expected, 1e-8)
 
-        # Default patch size. The expected output is trimmed to the found
-        # shape as with lastPatchMode='discard' the remaining frames not
-        # fitting into a patch are discarded.
+        # Now the number of frames does not match an exact number of patches.
+        # The expected output is trimmed to the found shape as with
+        # lastPatchMode='discard' the remaining frames not fitting into a
+        # patch are discarded.
         found, expected = self.identityOperation(frameSize=256, hopSize=128,
                                                  lastPatchMode='discard')
         self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
 
-        # Increse aquire size
+        # Increase the patch size.
         found, expected = self.identityOperation(frameSize=256, hopSize=128,
                                                  patchSize=300, lastPatchMode='discard')
         self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
@@ -93,24 +95,29 @@ class TestTensorToPool(TestCase):
         self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
 
     def testFramesToTensorAndBackToFramesRepeat(self):
-        # Reapeat the experiments with lastPatchMode='repeat'. Now the found
-        # patches will be equal or bigger then the expected ones. They will
-        # be trimmed to fit the expected output. 
+        # Repeat the experiments with lastPatchMode='repeat'. Now if there
+        # are remaining frames they will be looped into a final patch.
+        # The found shape will be equal or bigger than the expected one.
+        # Found values will be trimmed to fit the expected shape.
+
+        # No remaining frames.
         numberOfFrames = 43
         found, expected = self.identityOperation(patchSize=numberOfFrames,
                                                  lastPatchMode='repeat')
         self.assertAlmostEqualMatrix(found, expected, 1e-8)
 
+        # Some remaining frames.
         found, expected = self.identityOperation(frameSize=256, hopSize=128,
                                                  lastPatchMode='repeat')
         self.assertAlmostEqualMatrix(found[:expected.shape[0], :], expected, 1e-8)
 
+        # Increase the patch size.
         found, expected = self.identityOperation(frameSize=256, hopSize=128,
                                                  patchSize=300, lastPatchMode='repeat')
         self.assertAlmostEqualMatrix(found[:expected.shape[0], :], expected, 1e-8)
 
     def testFramesToTensorAndBackToFramesRepeatAccumulate(self):
-        # Repeat the text with lastPatchMode='repeat' and in accumulate mode.
+        # The behavior should be the same in accumulate mode.
         numberOfFrames = 43
         found, expected = self.identityOperation(patchSize=numberOfFrames,
                                                  lastPatchMode='repeat',
@@ -131,9 +138,9 @@ class TestTensorToPool(TestCase):
         self.assertConfigureFails(TensorToPool(), {'mode': ''})
 
     def testRepeatMode(self):
-        # Our test audio has 430 frames. If patchSize is set to 428 with
+        # The test audio file has 430 frames. If patchSize is set to 428 with
         # lastPatchMode='repeat' VectorRealToTensor will produce a second
-        # patch of 428 frames by looping the last 2 spare samples.
+        # patch of 428 frames by looping the last two spare samples.
         numberOfFrames = 428
         loopFrames = 430 - numberOfFrames
         
