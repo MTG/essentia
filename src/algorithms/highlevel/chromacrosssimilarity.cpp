@@ -345,7 +345,7 @@ std::vector<std::vector<Real> > stackChromaFrames(std::vector<std::vector<Real> 
   size_t stopIdx;
   int increment = frameStackSize * frameStackStride;
 
-  if (frames.size() < increment + 1) {
+  if ((int)frames.size() < (increment + 1)) {
     throw EssentiaException("Too short frame size for stacking, no of input feature frames (" + std::to_string(frames.size()) + 
                       ") should be always greater than '(frameStackSize * frameStackStride) + 1', ie. (" + 
                       std::to_string(((frameStackSize + frameStackStride) + 1)) +  ")");
