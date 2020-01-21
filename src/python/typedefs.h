@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -147,6 +147,7 @@ inline Edt paramTypeToEdt(const essentia::Parameter::ParamType& p) {
     case essentia::Parameter::VECTOR_STEREOSAMPLE: return VECTOR_STEREOSAMPLE;
     case essentia::Parameter::MAP_VECTOR_REAL: return MAP_VECTOR_REAL;
     case essentia::Parameter::MAP_VECTOR_STRING: return MAP_VECTOR_STRING;
+    case essentia::Parameter::VECTOR_VECTOR_REAL: return VECTOR_VECTOR_REAL;
 
     default:
       std::ostringstream msg;

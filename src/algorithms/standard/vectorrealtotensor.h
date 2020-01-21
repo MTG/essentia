@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -37,7 +37,6 @@ class VectorRealToTensor : public Algorithm {
   int _patchHopSize;
   bool _push;
   bool _accumulate;
-  bool _pushedEverything;
   std::string _lastPatchMode;
 
   std::vector<std::vector<std::vector<Real> > > _acc;

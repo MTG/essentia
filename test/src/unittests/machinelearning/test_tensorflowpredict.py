@@ -68,7 +68,7 @@ class TestTensorFlowPredict(TestCase):
 
         foundValues = poolOut['model/Softmax'].mean(axis=0).squeeze()
 
-        self.assertAlmostEqualVector(foundValues, expectedValues, 1e-6)
+        self.assertAlmostEqualVector(foundValues, expectedValues, 1e-5)
 
     def testInvalidFilename(self):
         self.assertConfigureFails(TensorflowPredict(), {'graphFilename': ''})

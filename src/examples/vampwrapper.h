@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -62,7 +62,7 @@ public:
   InputDomain getInputDomain() const { return FrequencyDomain; }
 
   std::string getMaker() const { return "Music Technology Group"; }
-  std::string getCopyright() const { return "(C) 2015 MTG, Universitat Pompeu Fabra"; }
+  std::string getCopyright() const { return "(C) 2020 MTG, Universitat Pompeu Fabra"; }
   int getPluginVersion() const { return 2; }
 
   essentia::AlgorithmInfo<essentia::standard::Algorithm> info() const {

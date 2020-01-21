@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -281,6 +281,24 @@ std::vector<T> varianceFrames(const std::vector<std::vector<T> >& frames) {
   }
   for (uint j=0; j<vsize; j++) result[j] /= nframes;
 
+  return result;
+}
+
+
+// returns the sum of frames 
+template <typename T>
+std::vector<T> sumFrames(const std::vector<std::vector<T> >& frames) {
+  if (frames.empty()) {
+    throw EssentiaException("sumFrames: trying to calculate sum of empty input frames");
+  }
+  size_t nframes = frames.size();
+  size_t vsize = frames[0].size();
+  std::vector<T> result(vsize, (T)0);
+  for (size_t j=0; j<vsize; j++) {
+    for (size_t i=0; i<nframes; i++) {
+      result[j] += frames[i][j];
+    }
+  }
   return result;
 }
 
@@ -914,15 +932,15 @@ void hist(const T* array, uint n, int* n_array, T* x_array, uint n_bins) {
  */
 template <typename T>
 void bincount(const std::vector<T>& input, std::vector<T>& output) {
-   output.clear();
-   output.resize( (int) ( std::max<Real>( input[argmax(input)], 0.) + 0.5 ) + 1);
-   uint index = 0;
-   for (uint i=0; i< input.size(); i++) {
-     index = int(std::max<Real>(input[i],0) + 0.5);
-     if (index < output.size() ) {
-       output[index] += 1.;
-     }
-   }
+  output.clear();
+  output.resize( (int) ( std::max<Real>( input[argmax(input)], 0.) + 0.5 ) + 1);
+  uint index = 0;
+  for (uint i=0; i< input.size(); i++) {
+    index = int(std::max<Real>(input[i],0) + 0.5);
+    if (index < output.size() ) {
+      output[index] += 1.;
+    }
+  }
 }
 
 
@@ -1028,6 +1046,61 @@ inline std::string equivalentKey(const std::string key) {
 }
 
 
+/** Circularly rotate an input chromagram by an specified optimal transposition index (oti).
+ * Expects input chromagram to be in the shape (frames , n_bins) where frames is no of frames and n_bins is no of chroma bins.
+ * Throws an exception if the input chromagram is empty.
+ */
+template <typename T>
+void rotateChroma(std::vector<std::vector<T> >& inputMatrix, int oti) {
+  if (inputMatrix.empty())
+    throw EssentiaException("rotateChroma: trying to rotate an empty matrix");
+  for (size_t i=0; i<inputMatrix.size(); i++) {
+    std::rotate(inputMatrix[i].begin(), inputMatrix[i].end() - oti, inputMatrix[i].end());
+  }
+}
+
+
+/**
+ * returns the dot product of two 1D vectors.
+ * Throws an exception either one of the input arrays are empty.
+ */
+template <typename T>
+T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
+  if (xArray.empty() || yArray.empty())
+    throw EssentiaException("dotProduct: trying to calculate the dotProduct of empty arrays!");
+  return std::inner_product(xArray.begin(), xArray.end(), yArray.begin(), 0.0);
+}
+
+
+/**	
+ * returns the q-th percentile of an 1D input array (same as numpy percentile implementation).	
+ * Throws an exception if the input array is empty.	
+ */ 
+template <typename T> T percentile(const std::vector<T>& array, Real qpercentile) {
+  if (array.empty())
+    throw EssentiaException("percentile: trying to calculate percentile of empty array");
+
+  std::vector<T> sorted_array = array;
+  // sort the array
+  std::sort(sorted_array.begin(), sorted_array.end());
+  qpercentile /= 100.;
+
+  Real k;
+  int sortArraySize = sorted_array.size();
+  if (sortArraySize > 1) {
+    k = (sortArraySize - 1) * qpercentile;
+  }
+  else {
+    // to avoid zero value in arrays with single element
+    k = sortArraySize * qpercentile;
+  }
+  // apply interpolation
+  Real d0 = sorted_array[int(std::floor(k))] * (std::ceil(k) - k);
+  Real d1 = sorted_array[int(std::ceil(k))] * (k - std::floor(k));
+  return d0 + d1;
+}
+
+
 /**
  * Sample covariance
  */
@@ -1047,6 +1120,7 @@ template <typename T> T covariance(const std::vector<T>& x, const T xMean, const
 
   return (T)(cov / (Real)x.size());
 }
+
 
 /**
  * Returns the sample Pearson correlation coefficient of a pair of vectors as described in,
@@ -1077,6 +1151,53 @@ template <typename T> T pearsonCorrelationCoefficient(const std::vector<T>& x, c
   // Clipping the output is a cheap way to mantain this contrain.
   // Seen in https://github.com/numpy/numpy/blob/v1.15.0/numpy/lib/function_base.py#L2403-L2406
   return std::max(std::min(corr, (T)1.0), (T)-1.0);
+}
+
+
+/**
+ * Apply heaviside step function to an input m X n dimentional vector.
+ * f(x) = if x<0: x=0; if x>=0: x=1
+ * Throws an exception if the input array is empty.
+ * returns a 2D binary vector of m X n shape
+ */
+template <typename T>
+void heavisideStepFunction(std::vector<std::vector<T> >& inputArray) {
+  if (inputArray.empty())
+    throw EssentiaException("heavisideStepFunction: found empty array as input!");
+
+  for (size_t i=0; i<inputArray.size(); i++) {
+    for (size_t j=0; j<inputArray[i].size(); j++) {
+      // initialize all non negative elements as zero otherwise as one
+      inputArray[i][j] = (inputArray[i][j] < 0) ? 0 : 1;
+    }
+  }
+}
+
+
+/**
+ * Pairwise euclidean distances between two 2D vectors.
+ * Throws an exception if the input array is empty.
+ * Returns a (m.shape[0], n.shape[0]) dimentional vector where m and n are the two input arrays
+ * TODO: [add other distance metrics beside euclidean such as cosine, mahanalobis etc as a configurable parameter]
+ */
+template <typename T>
+std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >& m, const std::vector<std::vector<T> >& n) {
+
+  if (m.empty() || n.empty())
+    throw EssentiaException("pairwiseDistance: found empty array as input!");
+
+  size_t mSize = m.size();
+  size_t nSize = n.size();
+  std::vector<std::vector<T> > pdist(mSize, std::vector<T>(nSize));
+  for (size_t i=0; i<mSize; i++) {
+      for (size_t j=0; j<nSize; j++) {
+          Real item = dotProduct(m[i], m[i]) - 2*dotProduct(m[i], n[j]) + dotProduct(n[j], n[j]);
+          pdist[i][j] = sqrt(item);
+      }
+  }
+  if (pdist.empty())
+      throw EssentiaException("pairwiseDistance: outputs an empty similarity matrix!");
+  return pdist;
 }
 
 } // namespace essentia

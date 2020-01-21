@@ -43,8 +43,12 @@ example_sources_fileio = [
     ('standard_saturationdetector', ),
     ('standard_snr', ),
     ('standard_welch', ),
-
     ('streaming_humdetector', ),
+
+    ('standard_crosssimilaritymatrix', ),
+    ('standard_chromacrosssimilarity', ),
+    ('standard_coversongsimilarity', ),
+
     ('streaming_beatsmarker', ),
     ('streaming_beattracker_multifeature_mirex2013', ),
     ('streaming_key', ),
@@ -58,6 +62,8 @@ example_sources_fileio = [
     ('streaming_panning', ),
     ('streaming_pitchyinfft', ),
     ('streaming_predominantpitchmelodia', ),
+    ('streaming_chromacrosssimilarity', ),
+    ('streaming_coversongsimilarity', ),
     ('streaming_stft', ),
     ('streaming_tuningfrequency', ),
     ('streaming_vibrato', ),

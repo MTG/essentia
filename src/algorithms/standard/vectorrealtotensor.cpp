@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -72,7 +72,6 @@ void VectorRealToTensor::configure() {
 
   _acc.assign(0, vector<vector<Real> >(_shape[2], vector<Real>(_shape[3], 0.0)));
   _push = false;
-  _pushedEverything = false;
 
   if (_patchHopSize > _timeStamps) {
     throw EssentiaException("VectorRealToTensor: `patchHopSize` has to be smaller that the number of timestamps");
@@ -99,20 +98,22 @@ AlgorithmStatus VectorRealToTensor::process() {
 
   // Check if we have enough frames to add a patch.
   int available = _frame.available();
-  bool addPatch = (_timeStamps <= available);
+  bool addPatch = (available >= _timeStamps);
 
   // If we should stop just take the remaining frames.
   if (shouldStop() && (available < _timeStamps)) {
     _frame.setAcquireSize(available);
     _frame.setReleaseSize(available);
+
+    // Push if there are remaining frames
+    if (_lastPatchMode == "repeat" && available > 0) {
+      addPatch = true;
+      _push = true;
   
-    // If we have been accumulating it is time to push!
-    if (_accumulate) {
-      // This is necesary to prevent and infinite loop.
-      if (!_pushedEverything) {
-        addPatch = true;
-        _push = true;
-      }
+    // or if we have been accumulating.
+    } else if (_accumulate && _acc.size() >= 1) {
+      addPatch = true;
+      _push = true;
     }
   }
 
@@ -149,6 +150,7 @@ AlgorithmStatus VectorRealToTensor::process() {
   if (addPatch) {
     const vector<vector<Real> >& frame = _frame.tokens();
 
+    // Sanity check.
     for (size_t i = 0; i < frame.size(); i++) {
       if ((int)frame[i].size() != _shape[3]) {
         throw EssentiaException("VectorRealToTensor: Found input frame with size ", frame[i].size(),
@@ -156,26 +158,32 @@ AlgorithmStatus VectorRealToTensor::process() {
       }
     }
 
+    // Add a regular patch.
     if ((int)frame.size() == _timeStamps) {
       _acc.push_back(frame);
+
+    // If size does not match rather repeat frames or discard them.
     } else {
-      // Rather repeat frames or discard the last patch.
-      if (shouldStop()) {
-        if (_lastPatchMode == "repeat") {
-          int padAmount = _timeStamps - frame.size();
+      if (_lastPatchMode == "repeat") {
+        if (frame.size() == 0) {
+          EXEC_DEBUG("VectorRealToTensor: 0 frames remaining.");
 
-          vector<vector<Real> > frame_padded = frame;
+        } else {
+          if (frame.size() < 10) {
+            E_WARNING("VectorRealToTensor: Last patch produced by repeating the last " << frame.size() << " frames. May result in unreliable predictions.");
+          }
+          vector<vector<Real> > padded_frame = frame;
 
-          for (int i = 0; i < padAmount; i++) {
-            frame_padded.push_back(frame[i % frame.size()]); 
+          for (int i = 0; i < _timeStamps; i++) {
+            padded_frame.push_back(frame[i % frame.size()]);
           }
 
-          _acc.push_back(frame_padded);
+          EXEC_DEBUG("VectorRealToTensor: Repeating the remaining " << frame.size() << " frames to make one last patch.");
+          _acc.push_back(padded_frame);
         }
 
-        if (_lastPatchMode == "discard") {
-          EXEC_DEBUG("discarding last frames");
-        }
+      } else if (_lastPatchMode == "discard") {
+        EXEC_DEBUG("VectorRealToTensor: Discarding last frames");
 
       } else {
         throw EssentiaException("VectorRealToTensor: Incomplete patch found "
@@ -184,7 +192,7 @@ AlgorithmStatus VectorRealToTensor::process() {
     }
   }
 
-  // We only push if when we have filled the whole batch  
+  // We only push if when we have filled the whole batch
   // or if we have reached the end of the stream in
   // accumulate mode.
   if (_push) {
@@ -203,8 +211,6 @@ AlgorithmStatus VectorRealToTensor::process() {
                                 "produce a patch of the desired size. Consider setting the `lastPatchMode` "
                                 "parameter to `repeat` in order to produce a batch.");
       }
-    
-      _pushedEverything = true;
     }
 
     Tensor<Real>& tensor = *(Tensor<Real> *)_tensor.getFirstToken();
@@ -240,7 +246,6 @@ AlgorithmStatus VectorRealToTensor::process() {
 void VectorRealToTensor::reset() {
   _acc.assign(0, vector<vector<Real> >(_shape[1], vector<Real>(_shape[2], 0.0)));
   _push = false;
-  _pushedEverything = false;
 }
 
 } // namespace streaming

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -83,8 +83,9 @@ void parseParameters(ParameterMap* pm, PyObject* args, PyObject* keywds) {
         delete p;
         break;
       }
-      case VECTOR_REAL:       pm->add(name, VectorReal::toParameter(obj)); break;
-      case VECTOR_INTEGER:    pm->add(name, VectorInteger::toParameter(obj)); break;
+      case VECTOR_REAL:        pm->add(name, VectorReal::toParameter(obj)); break;
+      case VECTOR_INTEGER:     pm->add(name, VectorInteger::toParameter(obj)); break;
+      case VECTOR_VECTOR_REAL: pm->add(name, VectorVectorReal::toParameter(obj)); break;
 
       default:
         ostringstream msg;

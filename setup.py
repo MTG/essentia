@@ -109,7 +109,7 @@ if project_name == 'essentia-tensorflow':
     if var_tensorflow_version in os.environ:
         tensorflow_version = os.environ[var_tensorflow_version]
 
-    install_requires.append('tensorflow=={}'.format(tensorflow_version))
+    setup_requires.append('tensorflow=={}'.format(tensorflow_version))
 
 module = Extension('name', sources=[])
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -40,7 +40,7 @@ Range* Range::create(const std::string& s) {
     return new Set(s);
   }
   else {
-    throw EssentiaException("Invalid range");
+  throw EssentiaException("Invalid range '" + s + "' for parameter. Should contain '[]', '()' or '{}' to specify the range of given parameter.");
   }
 }
 

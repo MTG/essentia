@@ -125,20 +125,26 @@ class TestTensorflowPredict_Streaming(TestCase):
             self.assertAlmostEqualVector(foundValues, expectedValues, 1e-2)
 
     def testIdentityModel(self):
-        # Patch size equal to number of frames
+        # The test audio file has 430 frames.
+        # Setting the patchSize to produce exactly 10 patches.
         numberOfFrames = 43
-        found, expected = self.identityModel(patchSize=numberOfFrames, lastPatchMode='repeat')
+        found, expected = self.identityModel(patchSize=numberOfFrames,
+                                             lastPatchMode='discard')
         self.assertAlmostEqualMatrix(found, expected, 1e-8)
 
-        # Default parameters
+        # Now the number of frames does not match an exact number of patches.
+        # The expected output is trimmed to the found shape as with
+        # lastPatchMode='discard' the remaining frames not fitting into a
+        # patch are discarded.
         found, expected = self.identityModel(frameSize=256, hopSize=128,
-                                             lastPatchMode='repeat')
+                                             lastPatchMode='discard')
         self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
 
-        # Increse aquire size
+        # Increase the patch size.
         found, expected = self.identityModel(frameSize=256, hopSize=128,
-                                             patchSize=300, lastPatchMode='repeat')
+                                             patchSize=300, lastPatchMode='discard')
         self.assertAlmostEqualMatrix(found, expected[:found.shape[0], :], 1e-8)
+
 
 suite = allTests(TestTensorflowPredict_Streaming)
 
