@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -36,7 +36,7 @@ class TestTensorFlowPredict(TestCase):
         frameSize = 1024
         hopSize = frameSize
 
-        model = join(filedir(), 'tensorflowpredict', 'vgg4.pb')
+        model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
         filename = join(testdata.audio_dir, 'recorded', 'cat_purrrr.wav')
 
         audio = MonoLoader(filename=filename)()
@@ -71,7 +71,7 @@ class TestTensorFlowPredict(TestCase):
         self.assertAlmostEqualVector(foundValues, expectedValues, 1e-5)
 
     def testInvalidFilename(self):
-        self.assertComputeFails(TensorflowPredict(graphFilename=''), (Pool()))
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': ''})
 
     def testIdentityModel(self):
         # Perform the identity operation in Tensorflow to test if the data is

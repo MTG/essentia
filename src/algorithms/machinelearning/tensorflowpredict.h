@@ -75,7 +75,7 @@ class TensorflowPredict : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file from which to read the Tensorflow graph", "", "/home/pablo/base_model.pb");
+    declareParameter("graphFilename", "the name of the file from which to read the Tensorflow graph", "", Parameter::STRING);
 
     const char* inputNames[] = {"input_1"};
     const char* outputNames[] = {"output_node0"};
@@ -85,9 +85,9 @@ class TensorflowPredict : public Algorithm {
 
     declareParameter("inputs", "will look for this namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", inputNamesVector);
     declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool", "", outputNamesVector);
-    declareParameter("isTraining", "Whether to return the output in training mode (normalized with statistics of the current batch) or in inference mode (normalized with moving statistics)", "{true,false}", false);
-    declareParameter("isTrainingName", "The name if the input reciving isTraining. If empty, it wont be feed ro the network", "", "");
-    declareParameter("squeeze", "Remove singleton dimensions of the inputs tensors. Does not apply to the batch dimension.", "{true,false}", true);
+    declareParameter("isTraining", "run the model in training mode (normalized with statistics of the current batch) instead of inference mode (normalized with moving statistics). This only applies to some models", "{true,false}", false);
+    declareParameter("isTrainingName", "the name of an additional input node indicating whether the model is to be run in a training mode (for models with a training mode, leave it empty otherwise)", "", "");
+    declareParameter("squeeze", "remove singleton dimensions of the inputs tensors. Does not apply to the batch dimension", "{true,false}", true);
   }
 
   void configure();

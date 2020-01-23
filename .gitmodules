@@ -1,3 +1,6 @@
 [submodule "test/audio"]
 	path = test/audio
 	url = https://github.com/MTG/essentia-audio
+[submodule "test/models"]
+	path = test/models
+	url = https://github.com/MTG/essentia-models

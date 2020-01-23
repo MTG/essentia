@@ -46,7 +46,6 @@ static void DeallocateBuffer(void* data, size_t) {
 
 
 void TensorflowPredict::configure() {
-  _graphFilename = parameter("graphFilename").toString();
   _inputNames = parameter("inputs").toVectorString();
   _outputNames = parameter("outputs").toVectorString();
   _isTraining = parameter("isTraining").toBool();
@@ -64,9 +63,12 @@ void TensorflowPredict::configure() {
   _sessionOptions = TF_NewSessionOptions();
   _session = TF_NewSession(_graph, _sessionOptions, _status);
 
-  // Initialize the status to `unavaulable` so compute
-  // knows that the graph is still not open.
-  TF_SetStatus(_status, TF_UNAVAILABLE, "");
+  //if no file has been specified, do not do anything else
+  if (!parameter("graphFilename").isConfigured()) return;
+
+  _graphFilename = parameter("graphFilename").toString();
+
+  openGraph();
 }
 
 
@@ -134,10 +136,7 @@ void TensorflowPredict::reset() {
 
 
 void TensorflowPredict::compute() {
-  if (TF_GetCode(_status) == TF_UNAVAILABLE) {
-    openGraph();
-  }
-  
+
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
 

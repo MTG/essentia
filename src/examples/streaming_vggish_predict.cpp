@@ -55,10 +55,8 @@ int main(int argc, char* argv[]) {
                                     "filename", audioFilename,
                                     "sampleRate", sampleRate);
 
-  Algorithm* tfp   = factory.create("TensorflowPredictMusiCNN",
+  Algorithm* tfp   = factory.create("TensorflowPredictVGGish",
                                     "graphFilename", modelName);
-
-
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos --------" << endl;

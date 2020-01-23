@@ -22,3 +22,4 @@
 from os.path import join
 
 audio_dir = join('..', '..', 'audio')
+models_dir = join('..', '..', 'models')

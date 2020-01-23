@@ -323,7 +323,7 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s' % algos)
         ctx.env.ALGOIGNORE += algos 
 
-    algos = [ 'TensorflowPredict' ]
+    algos = [ 'TensorflowPredict', 'TensorflowPredictMusiCNN', 'TensorflowPredictVGGish' ]
     if has('tensorflow'):
         print('- Tensorflow detected!')
         print('  The following algorithms will be included: %s\n' % algos)
