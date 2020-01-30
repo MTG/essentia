@@ -24,7 +24,7 @@
 #include "python3.h"
 #include <complex>
 #define NO_IMPORT_ARRAY
-#include "numpy/ndarrayobject.h"
+#include <numpy/ndarrayobject.h>
 #include "types.h"
 #include "parameter.h"
 #include "pytypes/pypool.h"
