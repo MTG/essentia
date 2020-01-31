@@ -140,7 +140,7 @@ namespace standard {
 const char* TensorflowPredictVGGish::name = "TensorflowPredictVGGish";
 const char* TensorflowPredictVGGish::category = "Machine Learning";
 const char* TensorflowPredictVGGish::description = DOC(
-  "This algorithm makes predictions using VGGish-based models [1, 2, 3].\n"
+  "This algorithm makes predictions using VGGish-based models.\n"
   "Internally, it uses TensorflowInputVGGish for the input feature extraction (mel bands). "
   "It feeds the model with patches of 96 mel bands frames and jumps a constant amount of frames determined by patchHopSize.\n"
   "With the accumulate parameter the patches are stored to run a single TensorFlow session at the end of the stream. "
@@ -153,8 +153,8 @@ const char* TensorflowPredictVGGish::description = DOC(
   "\n"
   "\n"
   "References:\n"
-  "  [1] Gemmeke, J. et. al., AudioSet: An ontology and human-labelled dataset for audio events, ICASSP 2017\n"
-  "  [2] Hershey, S. et. al., CNN Architectures for Large-Scale Audio Classification, ICASSP 2017\n"
+  "  [1] Gemmeke, J. et. al., AudioSet: An ontology and human-labelled dataset for audio events, ICASSP 2017\n\n"
+  "  [2] Hershey, S. et. al., CNN Architectures for Large-Scale Audio Classification, ICASSP 2017\n\n"
   "  [3] Supported models at https://essentia.upf.edu/models/");
 
 

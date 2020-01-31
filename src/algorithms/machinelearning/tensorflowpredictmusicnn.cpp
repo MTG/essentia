@@ -141,7 +141,7 @@ namespace standard {
 const char* TensorflowPredictMusiCNN::name = "TensorflowPredictMusiCNN";
 const char* TensorflowPredictMusiCNN::category = "Machine Learning";
 const char* TensorflowPredictMusiCNN::description = DOC(
-  "This algorithm makes predictions using MusiCNN-based models [1, 2].\n"
+  "This algorithm makes predictions using MusiCNN-based models.\n"
   "Internally, it uses TensorflowInputMusiCNN for the input feature extraction (mel bands). "
   "It feeds the model with patches of 187 mel bands frames and jumps a constant amount of frames determined by patchHopSize.\n"
   "With the `accumulate` parameter the patches are stored to run a single TensorFlow session at the end of the stream. "
@@ -152,7 +152,7 @@ const char* TensorflowPredictMusiCNN::description = DOC(
   "Note: This algorithm does not make any check on the input model so it is the user's responsibility to make sure it is a valid one."
   "\n"
   "References:\n"
-  "  [1] Pons, J., & Serra, X. (2019). musicnn: Pre-trained convolutional neural networks for music audio tagging. arXiv preprint arXiv:1909.06654.\n"
+  "  [1] Pons, J., & Serra, X. (2019). musicnn: Pre-trained convolutional neural networks for music audio tagging. arXiv preprint arXiv:1909.06654.\n\n"
   "  [2] Supported models at https://essentia.upf.edu/models/");
 
 

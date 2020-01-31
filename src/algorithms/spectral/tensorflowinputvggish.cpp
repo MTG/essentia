@@ -26,11 +26,11 @@ using namespace standard;
 const char* TensorflowInputVGGish::name = "TensorflowInputVGGish";
 const char* TensorflowInputVGGish::category = "Spectral";
 const char* TensorflowInputVGGish::description = DOC(
-  "This algorithm computes mel-bands with a particular parametrization specific to VGGish based models [1, 2, 3].\n"
+  "This algorithm computes mel-bands with a particular parametrization specific to VGGish based models.\n"
   "\n"
   "References:\n"
-  "  [1] Gemmeke, J. et. al., AudioSet: An ontology and human-labelled dataset for audio events, ICASSP 2017\n"
-  "  [2] Hershey, S. et. al., CNN Architectures for Large-Scale Audio Classification, ICASSP 2017\n"
+  "  [1] Gemmeke, J. et. al., AudioSet: An ontology and human-labelled dataset for audio events, ICASSP 2017\n\n"
+  "  [2] Hershey, S. et. al., CNN Architectures for Large-Scale Audio Classification, ICASSP 2017\n\n"
   "  [3] Supported models at https://essentia.upf.edu/models/");
 
 

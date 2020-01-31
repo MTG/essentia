@@ -26,16 +26,16 @@ using namespace standard;
 const char* TensorflowPredict::name = "TensorflowPredict";
 const char* TensorflowPredict::category = "Machine Learning";
 const char* TensorflowPredict::description = DOC("This algorithm runs a Tensorflow graph and stores the desired tensors in a pool.\n"
-"The Tensorflow graph should be stored in Protocol Buffer [1] (.pb) binary format, and should contain both the architecture and the weights of the model.\n"
+"The Tensorflow graph should be stored in Protocol Buffer (.pb) binary format [1], and should contain both the architecture and the weights of the model.\n"
 "The parameter `inputs` should contain a list with the names of the input nodes that feed the model. The input Pool should contain the tensors corresponding to each input node stored using Essetia tensors."
 "The pool namespace for each input tensor has to match the input node's name.\n"
 "In the same way, the `outputs` parameter should contain the names of the nodes whose tensors are desired to save. These tensors will be stored inside the output pool under a namespace that matches the name of the node.\n"
 "\n"
-"Note: This algorithm is a wrapper for the Tensorflow C API[2]."
+"Note: This algorithm is a wrapper for the Tensorflow C API [2]."
 "\n"
 "References:\n"
 "  [1] TensorFlow - An open source machine learning library for research and production.\n"
-"  https://www.tensorflow.org/extend/tool_developers/#protocol_buffers\n"
+"  https://www.tensorflow.org/extend/tool_developers/#protocol_buffers\n\n"
 "  [2] TensorFlow - An open source machine learning library for research and production.\n"
 "  https://www.tensorflow.org/api_docs/cc/");
 
