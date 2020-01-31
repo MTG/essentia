@@ -63,7 +63,7 @@ class TestTensorflowPredict_Streaming(TestCase):
     def testRegression(self):
         # This test assesses the capability to work in streaming mode
         # and to be reset and process new files.
-        model = join(filedir(), 'tensorflowpredict', 'vgg4.pb')
+        model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
 
         filenames = [join(testdata.audio_dir, 'recorded', 'cat_purrrr.wav'),
                      join(testdata.audio_dir, 'recorded', 'distorted.wav'),
