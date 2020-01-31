@@ -26,14 +26,10 @@ import os
 class TestTensorFlowPredictVGGish(TestCase):
 
     def testRegression(self):
-        # classes: [alternative, blues, electronic, folkcountry, funksoulrnb,
-        # jazz, pop, raphiphop, rock]
-        expected = [3.4114898e-03, 3.1453432e-03, 2.0511408e-01, 6.1876175e-04,
-                    6.5898625e-03, 6.9921114e-02, 9.8948106e-03, 6.7665005e-01,
-                    4.6318569e-03]
+        expected = [0.49044114, 0.50241125]
 
         filename = join(testdata.audio_dir, 'recorded', 'hiphop.mp3')
-        model = join(testdata.models_dir, 'vggish', 'genre_dortmund_vggish_audioset.pb')
+        model = join(testdata.models_dir, 'vggish', 'small_vggish_init.pb')
 
         audio = MonoLoader(filename=filename, sampleRate=16000)()
         found = TensorflowPredictVGGish(graphFilename=model, patchHopSize=0)(audio)
@@ -42,7 +38,7 @@ class TestTensorFlowPredictVGGish(TestCase):
         # Setting a high tolerance value due to the mismatch between the
         # original and replicated features. However, they are close enough to
         # make valid predictions.
-        self.assertAlmostEqualVector(found, expected, 1e1)
+        self.assertAlmostEqualVector(found, expected, 1e-2)
 
 
 suite = allTests(TestTensorFlowPredictVGGish)
