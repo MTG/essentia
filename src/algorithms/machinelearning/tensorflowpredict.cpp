@@ -33,6 +33,8 @@ const char* TensorflowPredict::description = DOC("This algorithm runs a Tensorfl
 "\n"
 "Note: This algorithm is a wrapper for the Tensorflow C API [2]."
 "\n"
+"Note II: On this algorithm, the reset method deletes the current TensorFlow session and creates a new one relaying on the current graph. The configure algorithm reloads the graph file and then calls the reset method.\n"
+"\n"
 "References:\n"
 "  [1] TensorFlow - An open source machine learning library for research and production.\n"
 "  https://www.tensorflow.org/extend/tool_developers/#protocol_buffers\n\n"
@@ -46,6 +48,10 @@ static void DeallocateBuffer(void* data, size_t) {
 
 
 void TensorflowPredict::configure() {
+  // If no file has been specified, do not do anything
+  if (!parameter("graphFilename").isConfigured()) return;
+  _graphFilename = parameter("graphFilename").toString();
+
   _inputNames = parameter("inputs").toVectorString();
   _outputNames = parameter("outputs").toVectorString();
   _isTraining = parameter("isTraining").toBool();
@@ -57,18 +63,12 @@ void TensorflowPredict::configure() {
   _nInputs = _inputNames.size();
   _nOutputs = _outputNames.size();
 
-  _status = TF_NewStatus();
+  TF_DeleteGraph(_graph);
   _graph = TF_NewGraph();
-  _options = TF_NewImportGraphDefOptions();
-  _sessionOptions = TF_NewSessionOptions();
-  _session = TF_NewSession(_graph, _sessionOptions, _status);
-
-  //if no file has been specified, do not do anything else
-  if (!parameter("graphFilename").isConfigured()) return;
-
-  _graphFilename = parameter("graphFilename").toString();
 
   openGraph();
+
+  reset();
 }
 
 
@@ -110,13 +110,7 @@ void TensorflowPredict::openGraph() {
   TF_DeleteBuffer(buffer);
 
   if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error importing graph. ", TF_Message(_status));
-  }
-
-  _session = TF_NewSession(_graph, _sessionOptions, _status);
-
-  if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error creating new session. ", TF_Message(_status));
+    throw EssentiaException("TensorflowPredict: Error importing graph.", TF_Message(_status));
   }
 }
 
@@ -125,12 +119,17 @@ void TensorflowPredict::reset() {
 
   TF_CloseSession(_session, _status);
   if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error reseting session. ", TF_Message(_status));
+    throw EssentiaException("TensorflowPredict: Error closing session.", TF_Message(_status));
   }
-  
+
+  TF_DeleteSession(_session, _status);
+  if (TF_GetCode(_status) != TF_OK) {
+    throw EssentiaException("TensorflowPredict: Error deleting session.", TF_Message(_status));
+  }
+
   _session = TF_NewSession(_graph, _sessionOptions, _status);
   if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error reseting session. ", TF_Message(_status));
+    throw EssentiaException("TensorflowPredict: Error creating new session after reset.", TF_Message(_status));
   }
 }
 
@@ -293,7 +292,15 @@ TF_Output TensorflowPredict::graphOperationByName(const char* nodeName,
   TF_Output output = {TF_GraphOperationByName(_graph, nodeName), index};
 
   if (output.oper == nullptr) {
-    throw EssentiaException("TensorflowPredict: Can't init node names.");
+    size_t pos = 0;
+    TF_Operation *oper;
+    string exceptionText = "TensorflowPredict: " + string(nodeName) + " is not a valid node name of this graph.\n" +
+                           "Available node names are:\n";
+
+    while ((oper = TF_GraphNextOperation(_graph, &pos)) != nullptr) {
+      exceptionText += string(TF_OperationName(oper)) + ", ";
+    }
+    throw EssentiaException(exceptionText);
   }
 
   return output;

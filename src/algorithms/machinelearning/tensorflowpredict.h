@@ -60,7 +60,9 @@ class TensorflowPredict : public Algorithm {
   bool _squeeze;
 
  public:
-  TensorflowPredict() {
+  TensorflowPredict() : _graph(TF_NewGraph()), _status(TF_NewStatus()),
+      _options(TF_NewImportGraphDefOptions()), _sessionOptions(TF_NewSessionOptions()),
+      _session(TF_NewSession(_graph, _sessionOptions, _status)) {
     declareInput(_poolIn, "poolIn", "the pool where to get the feature tensors");
     declareOutput(_poolOut, "poolOut", "the pool where to store the output tensors");
   }
