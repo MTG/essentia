@@ -33,7 +33,7 @@ const char* TensorflowPredict::description = DOC("This algorithm runs a Tensorfl
 "\n"
 "Note: This algorithm is a wrapper for the Tensorflow C API [2]."
 "\n"
-"Note II: On this algorithm, the reset method deletes the current TensorFlow session and creates a new one relaying on the current graph. The configure algorithm reloads the graph file and then calls the reset method.\n"
+"Note II: On this algorithm, the reset method deletes the current TensorFlow session (and the resources attached to it) and creates a new one relying on the current graph. The configure method reloads the graph file and then calls the reset method.\n"
 "\n"
 "References:\n"
 "  [1] TensorFlow - An open source machine learning library for research and production.\n"
