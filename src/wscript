@@ -42,7 +42,7 @@ def options(ctx):
                    help='build with static dependencies from packaging/* dir')
     ctx.add_option('--pkg-config-path', action='store',
                    dest='PKG_CONFIG_PATH', default=False,
-                   help='pkg-config path to search for dependencies')
+                   help='pkg-config path to search for dependencies (default paths will be ignored)')
     ctx.add_option('--with-static-examples', action='store_true',
                    dest='WITH_STATIC_EXAMPLES', default=False,
                    help='build the example programs as static executables; forces --static-dependencies and --static flags')
@@ -123,10 +123,11 @@ def configure(ctx):
     # overwrite PKG_CONFIG_PATH if it is explicitly specified
     if ctx.env.PKG_CONFIG_PATH:
         os.environ["PKG_CONFIG_PATH"] = ctx.env.PKG_CONFIG_PATH
-
-    if "PKG_CONFIG_PATH" in os.environ:
-        print("→ Searching *.pc pkg-config files for dependencies in %s" % os.environ["PKG_CONFIG_PATH"])
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+        print("→ Searching *.pc pkg-config files for dependencies in %s (default paths are ignored)" % os.environ["PKG_CONFIG_PATH"])
+
+    elif "PKG_CONFIG_PATH" in os.environ:
+        print("→ Searching *.pc pkg-config files for dependencies in %s and default paths" % os.environ["PKG_CONFIG_PATH"])
 
     # Make check_cfg find PKG_CONFIG_PATH
     ctx.env.env = dict(os.environ)
