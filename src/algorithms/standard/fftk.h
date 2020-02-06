@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -55,6 +55,9 @@ class FFTK : public Algorithm {
 
  protected:
   friend class IFFTK;
+  friend class FFTKComplex;
+  friend class IFFTKComplex;
+
   static ForcedMutex globalFFTKMutex;
    
   int _fftPlanSize;

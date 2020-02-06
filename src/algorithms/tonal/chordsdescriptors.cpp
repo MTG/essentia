@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -31,7 +31,7 @@ const char* ChordsDescriptors::description = DOC("Given a chord progression this
 "Note:\n"
 "  - chordsHistogram indexes follow the circle of fifths order, while being shifted to the input key and scale\n"
 "  - key and scale are taken from the most frequent chord. In the case where multiple chords are equally frequent, the chord is hierarchically chosen from the circle of fifths.\n"
-"  - valid chords are C, Em, G, Bm, D, F#m, A, C#m, E, G#m, B, D#m, F#, A#m, C#, Fm, G#, Cm, D#, Gm, A#, Dm, F, Am. Chords that not follow this terminology (i.e. Gb) will raise an exception.\n"
+"  - chords should follow this name convention `<A-G>[<#/b><m>]` (i.e. C, C# or C#m are valid chords). Chord names not fitting this convention will throw an exception.\n"
 "\n"
 "Input chords vector may not be empty, otherwise an exception is thrown.\n"
 "\n"
@@ -41,13 +41,14 @@ const char* ChordsDescriptors::description = DOC("Given a chord progression this
 "  [2] Circle of fifths - Wikipedia, the free encyclopedia,\n"
 "  http://en.wikipedia.org/wiki/Circle_of_fifths");
 
-const char* ChordsDescriptors::circleOfFifth[] = { "C", "Em", "G", "Bm", "D", "F#m", "A", "C#m", "E", "G#m", "B", "D#m", "F#", "A#m", "C#", "Fm", "G#", "Cm", "D#", "Gm", "A#", "Dm", "F", "Am"};
+const char* ChordsDescriptors::circleOfFifth[] = { "C", "Em", "G", "Bm", "D", "F#m", "A", "C#m", "E", "Abm", "B", "Ebm", "F#", "Bbm", "C#", "Fm", "Ab", "Cm", "Eb", "Gm", "Bb", "Dm", "F", "Am"};
+const char* ChordsDescriptors::circleOfFifthAlternativeNames[] = { "C", "Em", "G", "Bm", "D", "Gbm", "A", "Dbm", "E", "G#m", "B", "D#m", "Gb", "A#m", "Db", "Fm", "G#", "Cm", "D#", "Gm", "A#", "Dm", "F", "Am"};
 
 
 
 int ChordsDescriptors::chordIndex(const string& chord) {
   for (int i=0; i<int(ARRAY_SIZE(circleOfFifth)); ++i) {
-    if (chord == circleOfFifth[i]) {
+    if (chord == circleOfFifth[i] || chord ==  circleOfFifthAlternativeNames[i]) {
       return i;
     }
   }
@@ -101,8 +102,19 @@ void ChordsDescriptors::compute() {
     throw EssentiaException("ChordsDescriptors: Chords input empty");
   }
 
-  string key = toUpper(_key.get());
+  string key = _key.get();
+  
+  if (key.empty()) {
+    throw EssentiaException("ChordsDescriptors: Key input empty");
+  }
+
+  key[0] = toUpper(string(1, key[0]))[0];
+  
   string scale = toLower(_scale.get());
+
+  if (scale.empty()) {
+    throw EssentiaException("ChordsDescriptors: Scale input empty");
+  }
 
   if (_scale.get() == "minor") {
     key += "m";

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -35,14 +35,14 @@ class FFTA : public Algorithm {
   Output<std::vector<std::complex<Real> > > _fft;
 
  public:
-    FFTA() {
-    declareInput(_signal, "frame", "the input audio frame");
-    declareOutput(_fft, "fft", "the FFT of the input frame");
+  FFTA() {
+      declareInput(_signal, "frame", "the input audio frame");
+      declareOutput(_fft, "fft", "the FFT of the input frame");
         
-        fftSetup = NULL;
-        accelBuffer.realp = NULL;
-        accelBuffer.imagp = NULL;
-        _fftPlanSize = 0;
+      fftSetup = NULL;
+      accelBuffer.realp = NULL;
+      accelBuffer.imagp = NULL;
+      _fftPlanSize = 0;
   }
 
   ~FFTA();
@@ -60,13 +60,15 @@ class FFTA : public Algorithm {
 
  protected:
   friend class IFFTA;
+  friend class FFTAComplex;
+  friend class IFFTAComplex;
   static ForcedMutex globalFFTAMutex;
 
-    FFTSetup fftSetup;
+  FFTSetup fftSetup;
     
-    int logSize;
-    int _fftPlanSize;    
-    DSPSplitComplex accelBuffer;
+  int logSize;
+  int _fftPlanSize;
+  DSPSplitComplex accelBuffer;
 
   void createFFTObject(int size);
 };

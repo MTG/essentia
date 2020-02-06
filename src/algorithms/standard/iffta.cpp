@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -45,9 +45,9 @@ const char* IFFTA::description = DOC("This algorithm calculates the inverse shor
 IFFTA::~IFFTA() {
   ForcedMutexLocker lock(FFTA::globalFFTAMutex);
 
-    vDSP_destroy_fftsetup(fftSetup);
-    free(accelBuffer.realp);
-    free(accelBuffer.imagp);
+  vDSP_destroy_fftsetup(fftSetup);
+  delete[] accelBuffer.realp;
+  delete[] accelBuffer.imagp;
 }
 
 void IFFTA::compute() {
@@ -65,45 +65,51 @@ void IFFTA::compute() {
     createFFTObject(size);
   }
 
-    //Pack
-    accelBuffer.realp[0] = fft[0].real();
-    accelBuffer.imagp[0] = fft[fft.size()-1].real();
+  //Pack
+  accelBuffer.realp[0] = fft[0].real();
+  accelBuffer.imagp[0] = fft[fft.size()-1].real();
+  
+  for(int i=1; i<fft.size()-1; i++) {
+      accelBuffer.realp[i] = fft[i].real();
+      accelBuffer.imagp[i] = fft[i].imag();
+  }
+  
+  vDSP_fft_zrip(fftSetup, &accelBuffer, 1, logSize, FFT_INVERSE);
+  
+  // copy result from plan to output vector
+  signal.resize(size);
+  
+  vDSP_ztoc(&accelBuffer, 1, (COMPLEX*)&signal[0], 2, size/2);
+
+  if (_normalize) {
+    Real norm = (Real)size;
     
-    for(int i=1; i<fft.size()-1; i++) {
-        accelBuffer.realp[i] = fft[i].real();
-        accelBuffer.imagp[i] = fft[i].imag();
+    for (int i = 0; i < size; i++) {
+      signal[i] /= norm;
     }
-    
-    vDSP_fft_zrip(fftSetup, &accelBuffer, 1, logSize, FFT_INVERSE);
-    
-    // copy result from plan to output vector
-    signal.resize(size);
-    
-    vDSP_ztoc(&accelBuffer, 1, (COMPLEX*)&signal[0], 2, size/2);
+  }
 }
 
 void IFFTA::configure() {
   createFFTObject(parameter("size").toInt());
+  _normalize = parameter("normalize").toBool();
 }
 
 void IFFTA::createFFTObject(int size) {
   ForcedMutexLocker lock(FFTA::globalFFTAMutex);
     
-    //Delete stuff before assigning
-    free(accelBuffer.realp);
-    free(accelBuffer.imagp);
+  delete[] accelBuffer.realp;
+  delete[] accelBuffer.imagp;
+  accelBuffer.realp = new float[size/2];
+  accelBuffer.imagp = new float[size/2];
     
-    accelBuffer.realp         = (float *) malloc(sizeof(float) * size/2);
-    accelBuffer.imagp         = (float *) malloc(sizeof(float) * size/2);
+  logSize = log2(size);
     
-    logSize = log2(size);
+  // With vDSP you only need to create a new fft if you've increased the size.
+  if(size > _fftPlanSize) {
+    vDSP_destroy_fftsetup(fftSetup);
+    fftSetup = vDSP_create_fftsetup(logSize, 0);
+  }
     
-    //With vDSP you only need to create a new fft if you've increased the size
-    if(size > _fftPlanSize) {
-        vDSP_destroy_fftsetup(fftSetup);
-        
-        fftSetup = vDSP_create_fftsetup( logSize, 0 );
-    }
-    
-    _fftPlanSize = size;
+  _fftPlanSize = size;
 }

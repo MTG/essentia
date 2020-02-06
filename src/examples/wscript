@@ -32,6 +32,22 @@ example_sources_fileio = [
     ('standard_spsmodel', ),
     ('standard_stft', ),
     ('standard_stochasticmodel', ),
+    ('standard_chromaprinter', ),
+    ('standard_pca', ),
+
+    ('standard_discontinuitydetector', ),
+    ('standard_extractor_la-cupula', ),
+    ('standard_gapsdetector', ),
+    ('standard_humdetector', ),
+    ('standard_loudnessebur128_double_input', ),
+    ('standard_saturationdetector', ),
+    ('standard_snr', ),
+    ('standard_welch', ),
+    ('streaming_humdetector', ),
+
+    ('standard_crosssimilaritymatrix', ),
+    ('standard_chromacrosssimilarity', ),
+    ('standard_coversongsimilarity', ),
 
     ('streaming_beatsmarker', ),
     ('streaming_beattracker_multifeature_mirex2013', ),
@@ -46,15 +62,21 @@ example_sources_fileio = [
     ('streaming_panning', ),
     ('streaming_pitchyinfft', ),
     ('streaming_predominantpitchmelodia', ),
+    ('streaming_chromacrosssimilarity', ),
+    ('streaming_coversongsimilarity', ),
     ('streaming_stft', ),
     ('streaming_tuningfrequency', ),
     ('streaming_vibrato', ),
+    ('streaming_tensorflowpredict', ),
+    ('streaming_yinprobabilistic', ),
+    ('streaming_musicnn_predict', ),
+    ('streaming_vggish_predict', ),
 
     ('streaming_extractor_music',
         ['music_extractor/extractor_utils']),
 
     ('streaming_extractor_freesound',
-        ['music_extractor/extractor_utils'])    
+        ['music_extractor/extractor_utils'])
 ]
 
 example_sources_with_gaia = [
@@ -96,6 +118,9 @@ def configure(ctx):
             ctx.env.LIB += ['gaia2']
             ctx.env['LIB_GAIA2'] += ['dl'] # -ldl is required when building with static QtCore
 
+        if "HAVE_TENSORFLOW":
+            ctx.env.LDFLAGS += ['-ldl', '-lXau', '-lxcb', '-lXdmcp']
+
         if ctx.options.CROSS_COMPILE_MINGW32:
             # otherwise the __imp__ symbols will be expected at link time
             ctx.env.CXXFLAGS += ['-DYAML_DECLARE_STATIC', '-DTAGLIB_STATIC']
@@ -122,7 +147,7 @@ def build(ctx):
                 source = ctx.path.ant_glob(' '.join(files)),
                 target = 'essentia_' + prog_name,
                 includes = includes,
-                use = 'essentia ', # + ctx.env.USES,
+                use = 'essentia ', # + ctx.env.USE_LIBS,
                 install_path = '${PREFIX}/bin')
             @feature('check_static')
             @before_method('apply_link')
@@ -159,6 +184,5 @@ def build(ctx):
             source   = ctx.path.ant_glob('vamp*.cpp') + vamp_sdk_files,
             target   = 'vamp_essentia',
             includes = [ '.', '..', '../3rdparty/vamp-plugin-sdk-2.4' ],
-            use      = 'essentia ', #+ ctx.env.USES,
+            use      = 'essentia ', #+ ctx.env.USE_LIBS,
             install_path = install_path)
-

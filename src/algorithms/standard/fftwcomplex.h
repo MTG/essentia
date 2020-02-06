@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -56,9 +56,6 @@ class FFTWComplex : public Algorithm {
   static const char* description;
 
  protected:
-  friend class IFFTW;
-  static ForcedMutex globalFFTWCOMPLEXMutex;
-
   fftwf_plan _fftPlan;
   int _fftPlanSize;
   std::complex<Real>* _input;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,18 +27,18 @@ using namespace standard;
 const char* FFTA::name = "FFT";
 const char* FFTA::category = "Standard";
 const char* FFTA::description = DOC("This algorithm computes the positive complex short-term Fourier transform (STFT) of an array using the FFT algorithm. The resulting fft has a size of (s/2)+1, where s is the size of the input frame.\n"
-                                    "At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
-                                    "\n"
-                                    "FFT computation will be carried out using the Accelerate Framework [3]"
-                                    "\n"
-                                    "References:\n"
-                                    "  [1] Fast Fourier transform - Wikipedia, the free encyclopedia,\n"
-                                    "  http://en.wikipedia.org/wiki/Fft\n\n"
-                                    "  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
-                                    "  http://mathworld.wolfram.com/FastFourierTransform.html\n"
-                                    "  [3] vDSP Programming Guide -- from Apple\n"
-                                    "  https://developer.apple.com/library/ios/documentation/Performance/Conceptual/vDSP_Programming_Guide/UsingFourierTransforms/UsingFourierTransforms.html"
-                                    );
+"At the moment FFT can only be computed on frames which size is even and non zero, otherwise an exception is thrown.\n"
+"\n"
+"FFT computation will be carried out using the Accelerate Framework [3]"
+"\n"
+"References:\n"
+"  [1] Fast Fourier transform - Wikipedia, the free encyclopedia,\n"
+"  http://en.wikipedia.org/wiki/Fft\n\n"
+"  [2] Fast Fourier Transform -- from Wolfram MathWorld,\n"
+"  http://mathworld.wolfram.com/FastFourierTransform.html\n"
+"  [3] vDSP Programming Guide -- from Apple\n"
+"  https://developer.apple.com/library/ios/documentation/Performance/Conceptual/vDSP_Programming_Guide/UsingFourierTransforms/UsingFourierTransforms.html"
+);
 
 ForcedMutex FFTA::globalFFTAMutex;
 
@@ -50,9 +50,9 @@ FFTA::~FFTA() {
   // This will cause a memory leak then, but it is definitely a better choice
   // than a crash (right, right??? :-) )
   if (essentia::isInitialized()) {
-      vDSP_destroy_fftsetup(fftSetup);
-      free(accelBuffer.realp);
-      free(accelBuffer.imagp);
+    vDSP_destroy_fftsetup(fftSetup);
+    delete[] accelBuffer.realp;
+    delete[] accelBuffer.imagp;
   }
 }
 
@@ -83,7 +83,9 @@ void FFTA::compute() {
     fft.resize(size/2+1);
     
     //Prob a much better way of doing this but for now this works
-    //Things to note: need to scale by /2.0f
+    // In the case of an FFT on a real input, the resulting value of each of
+    // the Fourier coefficients is 2x the actual, mathematical value (see
+    // VDSP fft documentation for scaling factors). We need to scale by /2.0f.
     //In Accelerate fttOutput[0] contains the real for point 0 and point N/2+1
 
     //Construct first point
@@ -111,20 +113,19 @@ void FFTA::createFFTObject(int size) {
   if (size % 2 == 1) {
     throw EssentiaException("FFT: can only compute FFT of arrays which have an even size");
   }
+
+  delete[] accelBuffer.realp;
+  delete[] accelBuffer.imagp;
+  accelBuffer.realp = new float[size/2];
+  accelBuffer.imagp = new float[size/2];
     
-    free(accelBuffer.realp);
-    free(accelBuffer.imagp);
+  logSize = log2(size);
     
-    accelBuffer.realp         = (float *) malloc(sizeof(float) * size/2);
-    accelBuffer.imagp         = (float *) malloc(sizeof(float) * size/2);
+  // With vDSP you only need to create a new fft if you've increased the size
+  if(size > _fftPlanSize) {
+    vDSP_destroy_fftsetup(fftSetup);
+    fftSetup = vDSP_create_fftsetup(logSize, 0);
+  }
     
-    logSize = log2(size);
-    
-    //With vDSP you only need to create a new fft if you've increased the size
-    if(size > _fftPlanSize) {
-        vDSP_destroy_fftsetup(fftSetup);
-        fftSetup = vDSP_create_fftsetup( logSize, 0 );
-    }
-    
-    _fftPlanSize = size;
+  _fftPlanSize = size;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -53,9 +53,8 @@ void StochasticModelSynth::configure() {
   _stocSize += _stocSize % 2;
   _resample->configure("inSize", _stocSize, "outSize", _hN + 1);
 
-  Real gain = 1.f/Real(_fftSize);
-  _overlapadd->configure( "frameSize", _fftSize, // uses synthesis window
-													"hopSize", parameter("hopSize").toInt(),"gain", gain);
+  _overlapadd->configure("frameSize", _fftSize, // uses synthesis window
+                         "hopSize", parameter("hopSize").toInt());
 }
 
 

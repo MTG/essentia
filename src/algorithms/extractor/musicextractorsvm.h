@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -34,7 +34,6 @@ class MusicExtractorSVM : public Algorithm {
 
   std::vector<standard::Algorithm*> _svms;
 
-  void computeSVMDescriptors(Pool& pool);
 
  public:
 

@@ -75,6 +75,24 @@ For Windows users: make sure that you do not use Windows end-of-lines, but Unix 
 Basically, any editor that is not Notepad should be able to deal with that.
 
 
+Code comments
+-------------
+
+We prefer the following style in both C++ and Python code:
+
+* Use "TODO comment." for To-Do comments.
+* Capitalize the first letter of each sentence and use periods.
+::
+
+  // TODO text of your To-Do comment.
+  // Text of your comment.
+
+::
+
+  # TODO text of your To-Do comment.
+  # Text of your comment.
+
+
 General C++ pitfalls
 --------------------
 

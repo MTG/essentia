@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -18,6 +18,7 @@
  */
 
 #include "devnull.h"
+#include "pool.h"
 #include "../../utils/tnt/tnt.h"
 using namespace std;
 
@@ -37,7 +38,9 @@ void connect(SourceBase& source, DevNullConnector dummy) {
   CREATE_DEVNULL(string);
   CREATE_DEVNULL(vector<string>);
   CREATE_DEVNULL(TNT::Array2D<Real>);
+  CREATE_DEVNULL(Tensor<Real>);
   CREATE_DEVNULL(StereoSample);
+  CREATE_DEVNULL(Pool);
 
   if (!devnull) throw EssentiaException("DevNull class doesn't work for type: ", nameOfType(sourceType));
 

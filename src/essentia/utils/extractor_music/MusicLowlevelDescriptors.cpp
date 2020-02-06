@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -307,7 +307,7 @@ void MusicLowlevelDescriptors::createNetworkEqLoud(SourceBase& source, Pool& poo
 
   // Spectral Contrast
   Algorithm* sc = factory.create("SpectralContrast",
-                                 "frameSize", frameSize,
+                                 "frameSize", frameSize + zeroPadding,
                                  "sampleRate", sampleRate,
                                  "numberBands", 6,
                                  "lowFrequencyBound", 20,

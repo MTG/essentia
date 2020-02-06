@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -39,16 +39,17 @@ class IFFTA : public Algorithm {
     declareInput(_fft, "fft", "the input frame");
     declareOutput(_signal, "frame", "the IFFT of the input frame");
       
-      fftSetup = NULL;
-      accelBuffer.realp = NULL;
-      accelBuffer.imagp = NULL;
-      _fftPlanSize = 0;
+    fftSetup = NULL;
+    accelBuffer.realp = NULL;
+    accelBuffer.imagp = NULL;
+    _fftPlanSize = 0;
   }
 
   ~IFFTA();
 
   void declareParameters() {
     declareParameter("size", "the expected size of the input frame. This is purely optional and only targeted at optimizing the creation time of the FFT object", "[1,inf)", 1024);
+    declareParameter("normalize", "wheter to normalize the output by the FFT length.", "{true,false}", true);
   }
 
 
@@ -64,13 +65,15 @@ class IFFTA : public Algorithm {
 //  std::complex<Real>* _input;
 //  Real* _output;
 
-    FFTSetup fftSetup;
-    
-    int logSize;
-    
-    int _fftPlanSize;
-    
-    DSPSplitComplex accelBuffer;    
+  FFTSetup fftSetup;
+  
+  int logSize;
+  
+  int _fftPlanSize;
+  
+  DSPSplitComplex accelBuffer;
+
+  bool _normalize;
 
   void createFFTObject(int size);
 };

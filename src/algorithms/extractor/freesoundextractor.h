@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -56,8 +56,8 @@ class FreesoundExtractor : public Algorithm {
 
   int loudnessFrameSize;
   int loudnessHopSize;
-  std::string loudnessSilentFrames;
-  std::string loudnessWindowType;
+  //std::string loudnessSilentFrames;
+  //std::string loudnessWindowType;
 
   std::string rhythmMethod;
   int rhythmMinTempo;

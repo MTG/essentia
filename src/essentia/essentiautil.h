@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -153,6 +153,14 @@ inline bool isValid(const TNT::Array2D<T> & mat) {
     for (int col=0; col<mat.dim2(); ++col) {
       if (!isValid(mat[row][col])) return false;
     }
+  }
+  return true;
+}
+
+template <typename T>
+inline bool isValid(const Tensor<T>& tensor) {
+  for (const T* i = tensor.data(); i < (tensor.data() + tensor.size()); ++i){
+    if (!isValid(*i)) return false;
   }
   return true;
 }

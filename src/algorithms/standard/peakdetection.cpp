@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -29,6 +29,7 @@ const char* PeakDetection::name = "PeakDetection";
 const char* PeakDetection::category = "Standard";
 const char* PeakDetection::description = DOC("This algorithm detects local maxima (peaks) in an array. The algorithm finds positive slopes and detects a peak when the slope changes sign and the peak is above the threshold.\n"
 "It optionally interpolates using parabolic curve fitting.\n"
+"When two consecutive peaks are closer than the `minPeakDistance` parameter, the smallest one is discarded. A value of 0 bypasses this feature.\n"
 "\n"
 "Exceptions are thrown if parameter \"minPosition\" is greater than parameter \"maxPosition\", also if the size of the input array is less than 2 elements.\n"
 "\n"
@@ -44,6 +45,7 @@ void PeakDetection::configure() {
   _range = parameter("range").toReal();
   _interpolate = parameter("interpolate").toBool();
   _orderBy = parameter("orderBy").toLower();
+  _minPeakDistance = parameter("minPeakDistance").toReal();
 
   if (_minPos >= _maxPos) {
     throw EssentiaException("PeakDetection: The minimum position has to be less than the maximum position");
@@ -165,26 +167,77 @@ void PeakDetection::compute() {
     }
   }
 
-  // we only want this many peaks
-  int nWantedPeaks = std::min((int)_maxPeaks, (int)peaks.size());
-
-  if (_orderBy == "amplitude") {
-    // sort peaks by magnitude, in case of equality,
-    // return the one having smaller position
+  // remove peaks that are closer than 'minPeakDistance'
+  if (_minPeakDistance > 0 && peaks.size() > 1) {
+    
+    std::vector<int> deletedPeaks;
+    deletedPeaks.reserve(peaks.size());
+    Real minPos;
+    Real maxPos;
+    
+    // iterate following an amplitude hierarchy
     std::sort(peaks.begin(), peaks.end(),
-              ComparePeakMagnitude<std::greater<Real>, std::less<Real> >());
+          ComparePeakMagnitude<std::greater<Real>, std::less<Real> >());
+
+    size_t k = 0;
+    while (k < peaks.size() - 1) {
+      minPos = peaks[k].position - _minPeakDistance;
+      maxPos = peaks[k].position + _minPeakDistance;
+
+      for (size_t l = k+1; l < peaks.size(); l++) {
+        if (peaks[l].position > minPos && peaks[l].position < maxPos) 
+          deletedPeaks.push_back(l);
+      }
+
+      // delete peaks starting from the end so the indexes are not altered
+      std::sort(deletedPeaks.begin(), deletedPeaks.end(), std::greater<int>());
+      
+      for (size_t l = 0; l < deletedPeaks.size(); l++)
+        peaks.erase(peaks.begin() + deletedPeaks[l]);
+        
+      deletedPeaks.clear();
+      deletedPeaks.reserve(peaks.size());
+      k++;
+    }
+
+    if (_orderBy == "position") {
+      // if required,sort peaks by 
+      // position again
+      std::sort(peaks.begin(), peaks.end(),
+                ComparePeakPosition<std::less<Real>, std::greater<Real> >());
+    }
+    else if (_orderBy == "amplitude") {
+      // already sorted by amplitude
+    }
+    else {
+      throw EssentiaException("PeakDetection: Unsupported ordering type: '" + _orderBy + "'");
+    }
+
+  } else {
+    // if haven't passed through the minPeakDistance part
+    // apply the inverse logic for sorting
+    if (_orderBy == "amplitude") {
+      // sort peaks by amplitude, in case of equality,
+      // return the one having smaller position
+      std::sort(peaks.begin(), peaks.end(),
+                ComparePeakMagnitude<std::greater<Real>, std::less<Real> >());
+    }
+    else if (_orderBy == "position") {
+      // already sorted by position
+    }
+    else {
+      throw EssentiaException("PeakDetection: Unsupported ordering type: '" + _orderBy + "'");
+    }
   }
-  else if (_orderBy == "position") {
-    // they're already sorted by position
-  }
-  else {
-    throw EssentiaException("PeakDetection: Unsupported ordering type: '" + _orderBy + "'");
-  }
+
+
+  // we only want this many peaks
+  size_t nWantedPeaks = std::min((size_t)_maxPeaks, peaks.size());
 
   peakPosition.resize(nWantedPeaks);
   peakValue.resize(nWantedPeaks);
 
-  for (int k=0; k<nWantedPeaks; k++) {
+  for (size_t k=0; k<nWantedPeaks; k++) {
     peakPosition[k] = peaks[k].position;
     peakValue[k] = peaks[k].magnitude;
   }

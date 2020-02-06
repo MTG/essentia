@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -50,8 +50,8 @@ int main(int argc, char* argv[]) {
   int frameSize = 16384;
   int hopSize = 1024 * 2;
 
-  // we want to compute the MFCC of a file: we need the create the following:
-  // audioloader -> framecutter -> windowing -> FFT -> MFCC
+  // we want to compute the NNLS chroma of a file: we need the create the following:
+  // audioloader -> framecutter -> windowing -> Spectrum -> LogSpectrum -> NNLSChroma
 
   AlgorithmFactory& factory = standard::AlgorithmFactory::instance();
 
@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
   w->output("frame").set(windowedFrame);
   spec->input("frame").set(windowedFrame);
 
-  // Spectrum -> MFCC
+  // Spectrum -> LogSpectrum -> NNLSChroma
   Real tuninig;
   vector<Real> spectrum, logFreqSpectrum, tuningFrames, meanTuning;
   vector<vector<Real> > logSpectrumFrames, tunedLogFreqSpectrum, semitoneSpectrum, bassChromagram, chromagram;
@@ -133,7 +133,7 @@ int main(int argc, char* argv[]) {
     }
 
     // if the frame is silent, just drop it and go on processing
-    // if (isSilent(frame)) continue;
+    if (isSilent(frame)) continue;
 
     w->compute();
     spec->compute();
@@ -141,15 +141,14 @@ int main(int argc, char* argv[]) {
 
     logSpectrumFrames.push_back(logFreqSpectrum);
     tuningFrames.push_back(tuninig);
-
-    // pool.add("lowlevel.nnlsBase", chroma);
-
   }
 
   nnls->compute();
 
+  pool.add("lowlevel.nnlsBase", chromagram);
+
   // aggregate the results
-  Pool aggrPool; // the pool with the aggregated MFCC values
+  Pool aggrPool; // the pool with the aggregated NNLS Chroma values
   const char* stats[] = { "mean", "var", "min", "max" };
 
   Algorithm* aggr = AlgorithmFactory::create("PoolAggregator",

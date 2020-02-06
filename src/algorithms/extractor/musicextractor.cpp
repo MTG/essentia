@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,7 +27,7 @@ namespace standard {
 
 const char* MusicExtractor::name = "MusicExtractor";
 const char* MusicExtractor::category = "Extractors";
-const char* MusicExtractor::description = DOC("This algorithm is a wrapper for Music Extractor");
+const char* MusicExtractor::description = DOC("This algorithm is a wrapper for Music Extractor. See documentation for 'essentia_streaming_extractor_music'.");
 
 
 MusicExtractor::MusicExtractor() {
@@ -72,8 +72,8 @@ void MusicExtractor::configure() {
 
   loudnessFrameSize = parameter("loudnessFrameSize").toInt();
   loudnessHopSize = parameter("loudnessHopSize").toInt();
-  loudnessSilentFrames = parameter("loudnessSilentFrames").toLower();
-  loudnessWindowType = parameter("loudnessWindowType").toLower();
+  //loudnessSilentFrames = parameter("loudnessSilentFrames").toLower();
+  //loudnessWindowType = parameter("loudnessWindowType").toLower();
 
   rhythmMethod = parameter("rhythmMethod").toLower();
   rhythmMinTempo = parameter("rhythmMinTempo").toInt();
@@ -84,6 +84,11 @@ void MusicExtractor::configure() {
   rhythmStats = parameter("rhythmStats").toVectorString();
   mfccStats = parameter("mfccStats").toVectorString();
   gfccStats = parameter("gfccStats").toVectorString();
+  
+#if HAVE_LIBCHROMAPRINT
+  chromaprintCompute = parameter("chromaprintCompute").toBool();
+  chromaprintDuration = parameter("chromaprintDuration").toReal();
+#endif
 
 #if HAVE_GAIA2 
   if (parameter("highlevel").isConfigured()) { 
@@ -111,6 +116,11 @@ void MusicExtractor::configure() {
     E_WARNING("MusicExtractor: Gaia library is missing. Skipping configuration of SVM models.");
 #endif
   }
+
+#if HAVE_LIBCHROMAPRINT
+    chromaprintCompute = options.value<Real>("chromaprint.compute");
+    chromaprintDuration = options.value<Real>("chromaprint.duration");
+#endif
 }
 
 
@@ -138,8 +148,8 @@ void MusicExtractor::setExtractorDefaultOptions() {
   // average_loudness
   options.set("average_loudness.frameSize", loudnessFrameSize);
   options.set("average_loudness.hopSize", loudnessHopSize);
-  options.set("average_loudness.windowType", loudnessWindowType);
-  options.set("average_loudness.silentFrames", loudnessSilentFrames);
+  //options.set("average_loudness.windowType", loudnessWindowType);
+  //options.set("average_loudness.silentFrames", loudnessSilentFrames);
 
   // rhythm
   options.set("rhythm.method", rhythmMethod);
@@ -162,6 +172,12 @@ void MusicExtractor::setExtractorDefaultOptions() {
     options.set("highlevel.compute", true);
   }
 #endif
+
+#if HAVE_LIBCHROMAPRINT
+    options.set("chromaprint.compute", chromaprintCompute);
+    options.set("chromaprint.duration", chromaprintDuration);
+#endif
+  
 }
 
 
@@ -204,7 +220,16 @@ void MusicExtractor::compute() {
   
   E_INFO("MusicExtractor: Replay gain");
   computeReplayGain(audioFilename, results);
-  
+
+  #if HAVE_LIBCHROMAPRINT
+    if (chromaprintCompute) {
+      E_INFO("MusicExtractor: Chromaprint");
+      computeChromaPrint(audioFilename, results);
+    }
+  #else
+    E_WARNING("MusicExtractor: Chromaprint library is missing. Skipping computation of the Chromaprint.");
+  #endif
+    
   E_INFO("MusicExtractor: Compute audio features");
 
   // normalize the audio with replay gain and compute as many lowlevel, rhythm,
@@ -399,7 +424,7 @@ void MusicExtractor::readMetadata(const string& audioFilename, Pool& results) {
   results.merge(poolTags);
   delete metadata;
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#if defined(OS_WIN32) && !defined(OS_MINGW)
   string slash = "\\";
 #else
   string slash = "/";
@@ -584,6 +609,42 @@ void MusicExtractor::setExtractorOptions(const std::string& filename) {
   delete yaml;
   options.merge(opts, "replace");
 }
+
+#if HAVE_LIBCHROMAPRINT
+void MusicExtractor::computeChromaPrint(const string& audioFilename, Pool& results) {
+  AlgorithmFactory& factory = standard::AlgorithmFactory::instance();
+
+  Algorithm* audio = factory.create("MonoLoader",
+                                    "filename", audioFilename,
+                                    "sampleRate", analysisSampleRate,
+                                    "downmix", downmix);
+  Algorithm* chromaprinter = factory.create("Chromaprinter",
+                                            "sampleRate", analysisSampleRate,
+                                            "maxLength", chromaprintDuration);
+
+  vector<Real> siganl;
+  string chromaprint;
+
+  audio->output("audio").set(siganl);
+  chromaprinter->input("signal").set(siganl);
+
+  chromaprinter->output("fingerprint").set(chromaprint);
+
+  try {
+    audio->compute();
+    chromaprinter->compute();
+
+    results.add("chromaprint.string", chromaprint);
+    if (chromaprintDuration == 0.f)
+      results.set("chromaprint.duration", results.value<Real>("metadata.audio_properties.length"));
+    else
+    results.set("chromaprint.duration", chromaprintDuration);
+  }
+  catch (const EssentiaException& e) {
+    throw EssentiaException("MusicExtractor: exception thrown while computing the Chromaprint. ", e.what());
+  }
+}
+#endif
 
 } // namespace standard
 } // namespace essentia

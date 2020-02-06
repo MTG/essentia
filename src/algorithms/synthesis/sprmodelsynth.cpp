@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -38,17 +38,15 @@ void SprModelSynth::configure()
   _fftSize = parameter("fftSize").toInt();
   _hopSize = parameter("hopSize").toInt();
 
-  _sineModelSynth->configure( "sampleRate", _sampleRate,
+  _sineModelSynth->configure("sampleRate", _sampleRate,
                             "fftSize", _fftSize,
-                            "hopSize", _hopSize
-                            );
+                            "hopSize", _hopSize);
 
 
   _ifftSine->configure("size", _fftSize);
 
- Real gain = 1.f/Real(_fftSize);
-  _overlapAdd->configure( "frameSize", _fftSize, // uses synthesis window
-													"hopSize", _hopSize ,"gain", gain);
+  _overlapAdd->configure("frameSize", _fftSize, // uses synthesis window
+                         "hopSize", _hopSize);
 
 }
 

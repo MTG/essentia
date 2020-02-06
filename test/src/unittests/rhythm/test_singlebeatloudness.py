@@ -52,12 +52,39 @@ class TestSingleBeatLoudness(TestCase):
 
         self.assertConfigureFails(SingleBeatLoudness(), {'sampleRate':-441000})
 
-    def testRegression(self):
+    def testValidOutput(self):
         # test that it yields valid output (which doesn't mean correct output ;)
-        loudness = SingleBeatLoudness(frequencyBands = [20,150])(array(random.rand(8192)))
+        loudness, loudness_bands = SingleBeatLoudness(frequencyBands = [20,150])(array(random.rand(8192)))
         self.assert_(not any(numpy.isnan(loudness)))
         self.assert_(not any(numpy.isinf(loudness)))
         self.assert_(all(array(loudness) >= 0.0))
+
+        self.assert_(not any(numpy.isnan(loudness_bands)))
+        self.assert_(not any(numpy.isinf(loudness_bands)))
+        self.assert_(all(array(loudness_bands) >= 0.0))
+
+    def testRegression(self):
+        # These expected values were obtained from the output
+        # of the algorithm SingleBeatLoudness after the commit
+        # 3d8fcf5d54844155a5417b1af2399cf87c5ad761
+        # For now it is enough to get notified if the algorithm
+        # or its dependencies change for any reason, but this
+        # does not mean that values are correct as they have
+        # not been compared with any other source.
+        expected_loudness = 0.2128196358680725
+        expected_bands = [0.69004405, 0.2280884, 0.01353478,
+                          0.07527339, 0.01737026, 0.05698634]
+
+        filename = join(testdata.audio_dir, 'recorded', 'dubstep.wav')
+        fs = 44100.
+        audio = MonoLoader(filename=filename, sampleRate=fs)()
+
+        # Take only the 0.2s as it should be a single beat.
+        audio = audio[: int(0.2 * fs)]
+        loudness, loudness_bands = SingleBeatLoudness()(audio)
+        
+        self.assertAlmostEqual(loudness, expected_loudness, 1e-6)
+        self.assertAlmostEqualVector(loudness_bands, expected_bands, 1e-6)
 
 
 suite = allTests(TestSingleBeatLoudness)

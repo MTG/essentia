@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -96,7 +96,7 @@ void BeatTrackerDegara::configure() {
 
   _frameCutter->configure("frameSize", frameSize,
                           "hopSize", hopSize,
-                          "silentFrames", "noise",
+                          "silentFrames", "keep",
                           "startFromZero", true);
 
   _windowing->configure("size", frameSize, "type", "hann");

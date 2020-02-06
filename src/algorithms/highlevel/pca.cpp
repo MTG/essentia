@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -91,14 +91,15 @@ void PCA::compute() {
 
   // transform all the frames and add to the output
   Array2D<Real> featVector(1,bands, 0.0);
+  Array2D<Real> outFeatVector(1,requiredDimensions, 0.0);
   vector<Real> results = vector<Real>(requiredDimensions, 0.0);
   for (int row=0; row<nFrames; row++) {
     for (int col=0; col<bands; col++) {
       featVector[0][col] = rawFeats[row][col];
     }
-    featVector = matmult(featVector, reducedEig);
+    outFeatVector = matmult(featVector, reducedEig);
     for (int i=0; i<requiredDimensions; i++) {
-      results[i] = featVector[0][i];
+      results[i] = outFeatVector[0][i];
     }
     poolOut.add(nameOut, results);
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -55,6 +55,7 @@ void PitchYinFFT::configure() {
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toReal();
   _interpolate = parameter("interpolate").toBool();
+  _tolerance = parameter("tolerance").toReal();
   _sqrMag.resize(_frameSize);
   _weight.resize(_frameSize/2+1);
   _yin.resize(_frameSize/2+1);
@@ -160,6 +161,17 @@ void PitchYinFFT::compute() {
     _yin[tau] *= tau/tmp;
   }
 
+  // this tolerance threshold only works when it is lower than 1.0.
+  // This way we preserve the legacy behavior by default without any extra
+  // overhead unless it is specified by the user
+  if (_tolerance < 1.0) {
+    if (*min_element(_yin.begin(), _yin.end()) >= _tolerance) {
+      pitch = 0.0;
+      pitchConfidence = 0.0;
+      return;
+    }
+  }
+
   // search for argmin within minTau/maxTau range
   if (_interpolate) {
     // yin values are in the range [0,inf], because we want to detect the minima and peak detection detects the maxima,
@@ -171,7 +183,7 @@ void PitchYinFFT::compute() {
     _peakDetect->input("array").set(_yin);
     _peakDetect->output("positions").set(_positions);
     _peakDetect->output("amplitudes").set(_amplitudes);
-    _peakDetect->compute();    
+    _peakDetect->compute();
     try {
       tau = _positions[0];
       yinMin = -_amplitudes[0];
@@ -201,6 +213,6 @@ void PitchYinFFT::compute() {
   else {
     pitch = 0.0;
     pitchConfidence = 0.0;
-  }      
+  }
 
 }

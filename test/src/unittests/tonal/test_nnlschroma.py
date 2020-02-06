@@ -75,7 +75,7 @@ class TestNNLSChroma(TestCase):
 
 
     def testInvalidParam(self):
-        self.assertConfigureFails(NNLSChroma(), { 'chromaNormalisation': 'cosine' })
+        self.assertConfigureFails(NNLSChroma(), { 'chromaNormalization': 'cosine' })
         self.assertConfigureFails(NNLSChroma(), { 'frameSize': 0 })
         self.assertConfigureFails(NNLSChroma(), { 'sampleRate': 0 })
         self.assertConfigureFails(NNLSChroma(), { 'spectralShape': 0 })

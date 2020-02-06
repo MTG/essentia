@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -123,6 +123,11 @@ class PoolStorage : public PoolStorageBase {
       }
       else _pool->add(_descriptorName, value);
     */
+  }
+
+  template <typename T>
+  void addToPool(const Tensor<T>& value) {
+    _pool->add(_descriptorName, value);
   }
 
   void addToPool(const StereoSample& value) {

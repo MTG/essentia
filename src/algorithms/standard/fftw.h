@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -55,6 +55,7 @@ class FFTW : public Algorithm {
 
  protected:
   friend class IFFTW;
+  friend class FFTWComplex;
   friend class IFFTWComplex;
   static ForcedMutex globalFFTWMutex;
 

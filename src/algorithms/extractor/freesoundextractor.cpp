@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,7 +26,7 @@ namespace standard {
 
 const char* FreesoundExtractor::name = "FreesoundExtractor";
 const char* FreesoundExtractor::category = "Extractors";
-const char* FreesoundExtractor::description = DOC("This algorithm is a wrapper for FreesoundExtractor");
+const char* FreesoundExtractor::description = DOC("This algorithm is a wrapper for Freesound Extractor. See documentation for 'essentia_streaming_extractor_freesound'.");
 
 
 FreesoundExtractor::FreesoundExtractor() {
@@ -403,7 +403,7 @@ void FreesoundExtractor::readMetadata(const string& audioFilename, Pool& results
   results.merge(poolTags);
   delete metadata;
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#if defined(OS_WIN32) && !defined(OS_MINGW)
   string slash = "\\";
 #else
   string slash = "/";

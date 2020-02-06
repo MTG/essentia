@@ -10,6 +10,8 @@ The list below highlights some of the academic studies using Essentia organized 
 
 ## Music and sound classification
 
+- F. Rodríguez-Algarra, B. Sturm, B., and S. Dixon. Characterising Confounding Effects in Music Classification Experiments through Interventions. Transactions of the International Society for Music Information Retrieval, 52-66, 2019.
+
 - S. Oramas, D. Bogdanov and A. Porter. MediaEval 2018 AcousticBrainz Genre Task: A baseline combining deep feature embeddings across datasets. In MediaEval 2018 Workshop, 2018.
 
 - H. Schreiber. MediaEval 2018 AcousticBrainz Genre Task: A CNN Baseline Relying on Mel-Features. In MediaEval 2018 Workshop, 2018.
@@ -40,7 +42,7 @@ Indexing music by mood: design and integration of an automatic content-based ann
 - E. Fonseca, R. Gong, and X. Serra. A Simple Fusion Of Deep And Shallow Learning For Acoustic Scene Classification. In Sound and Music Computing Conference (SMC’18), 2018.
 
 
-### Semantic autotagging
+### Semantic auto-tagging
 
 - M. Sordo. Semantic Annotation of Music Collections: A Computational Approach. PhD thesis, UPF, Barcelona, Spain, 2012.
 
@@ -69,10 +71,20 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 - K. Yadati, C. Liem, M. Larson, and A. Hanjalic. On the Automatic Identification of Music for Common Activities. In 2017 ACM on International Conference on Multimedia Retrieval, pages 192-200, 2017.
 
-- K.R. Fricke, D.M. Greenberg, P.J. Rentfrow, and P.Y. Herzberg. Computer-based music feature analysis mirrors human perception and can be used to measure individual music preference. Journal of Research in Personality, 75:94-102, 2018.
+- K. R. Fricke, D.M. Greenberg, P.J. Rentfrow, and P.Y. Herzberg. Computer-based music feature analysis mirrors human perception and can be used to measure individual music preference. Journal of Research in Personality, 75:94-102, 2018.
+
+- K. R., Fricke, D. M. Greenberg, P. J. Rentfrow, and P. Y. Herzberg. Measuring musical preferences from listening behavior: Data from one million people and 200,000 songs. Psychology of Music, 0305735619868280, 2019.
+
+- K. Fricke, and P. Herzberg. Know your big data: De-biasing subsamples of large datasets for personality research using importance sampling and kNN matching. 10.31234/osf.io/4ftb7, 2019.
 
 
-## Emotion detection
+## Emotion detection
+
+- Y. Hifny, A. Ali. Efficient Arabic Emotion Recognition Using Deep Neural Networks. In ICASSP 2019-2019 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), pages 6710-6714, 2019.
+
+- J. Grekow. Finding Musical Pieces with a Similar Emotional Distribution throughout the Same Composition. In 2019 IEEE International Symposium on INnovations in Intelligent SysTems and Applications (INISTA), pages 1-6, 2019.
+
+- J. Grekow. From Content-based Music Emotion Recognition to Emotion Maps of Musical Pieces. Springer International Publishing, 2018.
 
 - J. Grekow. Musical performance analysis in terms of emotions it evokes. Journal of Intelligent Information Systems, 2018.
 
@@ -92,6 +104,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 ## Visualization and interaction with music
 
+- C. Donahue, Z. C. Lipton, and J. McAuley. Dance dance convolution. In Proceedings of the 34th International Conference on Machine Learning, Volume 70, pages 1039-1048, 2017.
+
 - J. H. P. Ono, F. Sikansi, D. C. Corrêa, F. V. Paulovich, A. Paiva, and L. G. Nonato. Concentric RadViz: visual exploration of multi-task classification. In 28th SIBGRAPI Conference on Graphics, Patterns and Images (SIBGRAPI), pages 165-172, 2015.
 
 - D. Bogdanov. From music similarity to music recommendation: Computational approaches based on audio and metadata analysis. PhD thesis, UPF, Barcelona, Spain, 2013.
@@ -107,6 +121,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 - O. Mayor, J. Llop, and E. Maestre. RepoVizz: A multimodal on-line database and browsing tool for music performance research. In International Society for Music Information Retrieval Conference (ISMIR’11), 2011.
 
 - M. Sordo, G. K. Koduri, S. Şentürk, S. Gulati, and X. Serra. A musically aware system for browsing and interacting with audio music collections. In The 2nd CompMusic Workshop, 2012.
+
+- A. Augello, I. Infantino, U. Maniscalco, G. Pilato, R. Rizzo, and F. Vella. Robotic intelligence and computational creativity. Robotic Intelligence, 2, 161, 2019.
 
 - A. Augello, I. Infantino, U. Maniscalco, G. Pilato, R. Rizzo, and F. Vella. Robotic Intelligence and Computational Creativity. Encyclopedia with Semantic Computing and Robotic Intelligence, 2018.
 
@@ -125,6 +141,14 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 -  A. Xambó, G. Roma, A. Lerch, M. Barthet, G. Fazekas. Live Repurposing of Sounds: MIR Explorations with Personal and Crowdsourced Databases. In New Interfaces for Musical Expression (NIME'18), 2018.
 
 ## Sound indexing, music production, and intelligent audio processing
+
+- K. Subramani, S. Sridhar, M. A. Rohit, and P. Rao. Energy-Weighted Multi-Band Novelty Functions for Onset Detection in Piano Music. In 2018 Twenty Fourth National Conference on Communications (NCC), pages 1-6, 2018.
+
+- S. Trump. Genetische Improvisation. Eine empirische Untersuchung von improvisierter Musik anhand evolutionstheoretischer Prinzipien. PhD Thesis, Hochschule für Musik Nürnberg, 2019.
+
+- S. Giraldo, G. Waddell, I. Nou, A. Ortega, O. Mayor, A. Perez, A. Williamon, and R. Ramirez. Automatic Assessment of Tone Quality in Violin Music Performance. Frontiers in Psychology, 10, 334, 2019.
+
+- M. A. Martinez Ramirez, and J. D. Reiss. Analysis and prediction of the audio feature space when mixing raw recordings into individual stems. In Audio Engineering Society Convention 143, 2017.
 
 - M. Grachten, E. Deruty, A. Tanguy. Auto-adaptive Resonance Equalization using Dilated Residual Networks. arXiv preprint arXiv:1807.08636, 2018. 
 
@@ -165,6 +189,8 @@ Workshop on Intelligent Music Production, 2017.
  
 - Y. J. Luo, L. Su, Y. H. Yang, and T. S. Chi. Detection of Common Mistakes in Novice Violin Playing. In 16th International Society for Music Information Retrieval Conference (ISMIR'15), pages 316-322, 2015.
 
+- J. Sharma, O. C. Granmo, and M. Goodwin. Environment Sound Classification using Multiple Feature Channels and Deep Convolutional Neural Networks. arXiv preprint arXiv:1908.11219, 2019.
+
 - J. Salamon, and J. P. Bello. Deep convolutional neural networks and data augmentation for environmental sound classification. IEEE Signal Processing Letters, 24(3):279-283, 2017.
 
 - J. Salamon, and J. P. Bello. Unsupervised feature learning for urban sound classification. In IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP'15), pages 171-175, 2015.
@@ -179,6 +205,8 @@ Workshop on Intelligent Music Production, 2017.
 Ecological acoustics perspective for content-based retrieval of environmental sounds. EURASIP Journal on Audio, Speech, and Music Processing, 2010.
 
 ## Instrument detection
+
+- O. Slizovskaia, E. Gómez, and G. Haro. A Case Study of Deep-Learned Activations via Hand-Crafted Audio Features. arXiv preprint arXiv:1907.01813, 2019.
 
 - K. A. Pati, and A. Lerch. A Dataset and Method for Guitar Solo Detection in Rock Music. In 2017 AES International Conference on Semantic Audio, 2017.
 
@@ -204,9 +232,20 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 ## Music transcription
 
+- T. W. Su, Y. P. Chen, L. Su, Y. H. Yang. TENT: Technique-embedded note tracking for real-world guitar solo recordings. Transactions of the International Society for Music Information Retrieval, 2(1), 2019.
+
 - K. Ullrich, and E. van der Wel. Music transcription with convolutional sequence-to-sequence models. In International Society for Music Information Retrieval (ISMIR'17), 2017.
 
 ## Computational musicology
+
+E. Zangerle, M. Vötter, R. Huber, and Y. H. Yang. Hit Song Prediction: Leveraging Low- and High-Level Audio Features. In Proceedings of the 20th International Society for Music Information Retrieval Conference 2019 (ISMIR 2019), 2019.
+
+L. Maia, M. Fuentes, L. Biscainho, M. Rocamora, S. Essid. SAMBASET: A Dataset of Historical Samba de Enredo Recordings for Computational Music Analysis. In 20th International Society for Music Information Retrieval Conference (ISMIR'19), 2019.
+
+- I. Czedik-Eysenberg, O. Wieczorek, and C. Reuter. 'Warriors of the Word'-- Deciphering Lyrical Topics in Music and Their Connection to Audio Feature Dimensions Based on a Corpus of Over 100,000 Metal Songs.
+arXiv preprint arXiv:1911.04952, 2019.
+
+- C. Arévalo, M. J. Mora, and C. Arce-Lopera. Towards an efficient algorithm to get the chorus of a salsa song. In 2015 IEEE International Symposium on Multimedia (ISM), pages 258-261, 2015.
 
 - C. C. Liem, and A. Hanjalic. Comparative analysis of orchestral performance recordings: An image-based approach. In 16th International Society for Music Information Retrieval Conference (ISMIR'15), 2015.
 
@@ -238,6 +277,8 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - S. Sentürk, S. Gulati, and X. Serra. Score Informed Tonic Identification for Makam Music of Turkey. In 14th International Society for Music Information Retrieval Conference (ISMIR'13), pages 175-180, 2013.
 
+- H.G. Ranjani & A. Srinivasamurthy, D. Paramashivan and Tv. Sreenivas. A compact pitch and time representation for melodic contours in Indian art music. The Journal of the Acoustical Society of America, 145, pages 597-603, 2019. 
+
 - K. K. Ganguli, S. Gulati, X. Serra, and P. Rao. Data-Driven Exploration of Melodic Structure in Hindustani Music. In 17th International Society for Music Information Retrieval Conference (ISMIR'16), pages 605-611, 2016.
 
 - S. Gulati, J. Serra, and X. Serra. Improving Melodic Similarity in Indian Art Music Using Culture-Specific Melodic Characteristics. In 16th International Society for Music Information Retrieval Conference (ISMIR'15), pages 680-686, 2015.
@@ -252,12 +293,22 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - G. K. Koduri, J. Serrà, and X. Serra. Characterization of intonation in carnatic music by parametrizing pitch histograms. In International Society for Music Information Retrieval Conference (ISMIR’12), pages 199–204, 2012.
 
-## Rhythmic analysis
+- H. G., Ranjani, D. Paramashivan, and T. V. Sreenivas. Discovering structural similarities among rāgas in Indian Art Music: a computational approach. Sādhanā, 44(5), 120, 2019.
+
+## Rhythm and tempo analysis
+
+- B. Jia, J. Lv, and D. Liu. Deep learning-based automatic downbeat tracking: a brief review. Multimedia Systems, 1-22, 2019.
 
 - A. Srinivasamurthy, and X. Serra. A supervised approach to hierarchical metrical cycle tracking from audio music recordings. In IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP'14), pages 5217-5221, 2014.
 
+## Psychoacoustics
+
+R. T. Dean, A. J. Milne, and F. Bailes. Spectral Pitch Similarity is a Predictor of Perceived Change in Sound-as Well as Note-Based Music. Music & Science, 2, 2059204319847351, 2019.
+
 
 ## Bioacoustic analyis
+
+C. Fleitas and A. Moreno, Computational solution for the parametrization of bioacoustic signals. Bachelor Thesis, University of Havana, Cuba, 2018.
 
 - J. Salamon, J. P. Bello, A. Farnsworth, and S. Kelling. Fusing shallow and deep learning for bioacoustic bird species classification. In IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP'17), pages 141-145, 2017.
 
@@ -277,4 +328,8 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - M. A. Casey. Music of the 7Ts: Predicting and Decoding Multivoxel fMRI Responses with Acoustic, Schematic, and Categorical Music Features. Frontiers in psychology, 8, 2017.
 
-- G. Chambres, P. Hanna, and M. Desainte-Catherine. Automatic Detection of Patient with Respiratory Diseases Using Lung Sound Analysis. In 2018 International Conference on Content-Based Multimedia Indexing (CBMI) (pp. 1-6). IEEE, 2018.
+- G. Chambres, P. Hanna, and M. Desainte-Catherine. Automatic Detection of Patient with Respiratory Diseases Using Lung Sound Analysis. In 2018 International Conference on Content-Based Multimedia Indexing (CBMI), pages 1-6, IEEE, 2018.
+
+- A. Rao, E. Huynh, T. J. Royston, A. Kornblith, and S. Roy. Acoustic Methods for Pulmonary Diagnosis. IEEE reviews in biomedical engineering, 12, 221-239, 2018.
+
+- D. Perna, and A. Tagarelli, A. Deep auscultation: Predicting respiratory anomalies and diseases via recurrent neural networks. In 2019 IEEE 32nd International Symposium on Computer-Based Medical Systems (CBMS), pages 50-55, 2019.

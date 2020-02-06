@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -84,8 +84,12 @@ int essentia_main(string audioFilename, string outputFilename, string profileFil
     cerr << e.what() << endl;
     return 1;
   }
-  return 0;
+  catch (const std::bad_alloc& e) {
+    cerr << "bad_alloc exception: Out of memory " << e.what() << endl;
+    return 1;
+  }
 
+  return 0;
 }
 
 #ifdef _WIN32

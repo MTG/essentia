@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -42,7 +42,7 @@ void pcmMetadata(const std::string& filename, int& sr, int& ch, int& bitrate) {
   }
 
   // (trick) create an audioloader to know the original samplerate
-  std::auto_ptr<streaming::Algorithm> audioloader(streaming::AlgorithmFactory::create("AudioLoader",
+  std::unique_ptr<streaming::Algorithm> audioloader(streaming::AlgorithmFactory::create("AudioLoader",
                                                                                       "filename", filename));
 
   sr = (int)streaming::lastTokenProduced<Real>(audioloader->output("sampleRate"));

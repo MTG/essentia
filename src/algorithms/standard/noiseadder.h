@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,6 +24,7 @@
 
 #ifdef CPP_11
 #  include <random>
+#  include <ctime>
 #else
 // The implementation for non C++11 compilers uses the MersenneTwister.h file
 // downloaded from:

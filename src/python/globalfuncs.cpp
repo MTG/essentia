@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "essentiamath.h" // for silenceCutoff
+#include "essentiamath.h" // for SILENCE_CUTOFF
 #include "streamingalgorithm.h"
 #include "poolstorage.h" // connecting pools
 #include "../algorithms/io/fileoutputproxy.h" // connecting FileOutput algorithm
@@ -238,8 +238,8 @@ is_silent(PyObject* self, PyObject* arg) {
 
   double p = internal_instant_power(arg);
 
-  if (p < silenceCutoff) Py_RETURN_TRUE;
-  else                   Py_RETURN_FALSE;
+  if (p < SILENCE_CUTOFF) Py_RETURN_TRUE;
+  else                    Py_RETURN_FALSE;
 }
 
 static PyObject*
@@ -333,6 +333,17 @@ ampToDb(PyObject* notUsed, PyObject* arg) {
 }
 
 static PyObject*
+linToLog(PyObject* notUsed, PyObject* arg) {
+  if (!PyFloat_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"argument must be a float");
+    return NULL;
+  }
+
+  Real db = lin2log( Real( PyFloat_AS_DOUBLE(arg) ) );
+  return PyFloat_FromDouble( double(db) );
+}
+
+static PyObject*
 barkToHz(PyObject* notUsed, PyObject* arg) {
   if (!PyFloat_Check(arg)) {
     PyErr_SetString(PyExc_TypeError, (char*)"argument must be a float");
@@ -376,6 +387,19 @@ hzToMel(PyObject* notUsed, PyObject* arg) {
 
   Real mel = hz2mel( Real( PyFloat_AS_DOUBLE(arg) ) );
   return PyFloat_FromDouble( double(mel) );
+}
+
+
+static PyObject*
+getEquivalentKey(PyObject* notUsed, PyObject* arg) {
+  if (!PyString_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"argument must be an string");
+    return NULL;
+  }
+
+  std::string key = equivalentKey( PyString_AS_STRING(arg) );
+  const char *c_key = key.c_str();
+  return PyString_FromString( c_key );
 }
 
 template <typename T>
@@ -967,24 +991,26 @@ static PyMethodDef Essentia__Methods[] = {
   { "log_warning",     (PyCFunction)log_warning,           METH_O,       "log the string to the warning stream." },
   { "log_error",       (PyCFunction)log_error,             METH_O,       "log the string to the error stream." },
 
-  { "normalize",    normalize,      METH_O,     "returns the normalized array." },
-  { "derivative",   derivative,     METH_O,     "returns the derivative of an array." },
-  { "isSilent",     is_silent,      METH_O, "returns true if the frame is silent." },
-  { "instantPower", instant_power,  METH_O, "returns the instant power of a frame." },
-  { "nextPowerTwo", next_power_two, METH_O, "returns the next power of two." },
-  { "isPowerTwo",   is_power_two,   METH_O, "returns true if argument is a power of two." },
-  { "bark2hz",      barkToHz,       METH_O, "Converts a bark band to frequency in Hz" },
-  { "hz2bark",      hzToBark,       METH_O, "Converts a frequency in Hz to a bark band" },
-  { "mel2hz",       melToHz,        METH_O, "Converts a mel band to frequency in Hz" },
-  { "hz2mel",       hzToMel,        METH_O, "Converts a frequency in Hz to a mel band" },
-  { "lin2db",       linToDb,        METH_O, "Converts a linear measure of power to a measure in dB" },
-  { "db2lin",       dbToLin,        METH_O, "Converts a dB measure of power to a linear measure" },
-  { "db2pow",       dbToPow,        METH_O, "Converts a dB measure of power to a linear measure" },
-  { "pow2db",       powToDb,        METH_O, "Converts a linear measure of power to a measure in dB" },
-  { "db2amp",       dbToAmp,        METH_O, "Converts a dB measure of amplitude to a linear measure" },
-  { "amp2db",       ampToDb,        METH_O, "Converts a linear measure of amplitude to a measure in dB" },
-  { "info",         standard_info,  METH_VARARGS, "returns all the information about a given classic algorithm." },
-  { "sinfo",        streaming_info, METH_VARARGS, "returns all the information about a given streaming algorithm." },
+  { "normalize",     normalize,        METH_O,     "returns the normalized array." },
+  { "derivative",    derivative,       METH_O,     "returns the derivative of an array." },
+  { "isSilent",      is_silent,        METH_O, "returns true if the frame is silent." },
+  { "instantPower",  instant_power,    METH_O, "returns the instant power of a frame." },
+  { "nextPowerTwo",  next_power_two,   METH_O, "returns the next power of two." },
+  { "isPowerTwo",    is_power_two,     METH_O, "returns true if argument is a power of two." },
+  { "bark2hz",       barkToHz,         METH_O, "Converts a bark band to frequency in Hz" },
+  { "hz2bark",       hzToBark,         METH_O, "Converts a frequency in Hz to a bark band" },
+  { "mel2hz",        melToHz,          METH_O, "Converts a mel band to frequency in Hz" },
+  { "hz2mel",        hzToMel,          METH_O, "Converts a frequency in Hz to a mel band" },
+  { "lin2db",        linToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },
+  { "db2lin",        dbToLin,          METH_O, "Converts a dB measure of power to a linear measure" },
+  { "db2pow",        dbToPow,          METH_O, "Converts a dB measure of power to a linear measure" },
+  { "pow2db",        powToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },
+  { "db2amp",        dbToAmp,          METH_O, "Converts a dB measure of amplitude to a linear measure" },
+  { "lin2log",       linToLog,         METH_O, "Converts a linear measure to a logarithmic one" },
+  { "amp2db",        ampToDb,          METH_O, "Converts a linear measure of amplitude to a measure in dB" },
+  { "equivalentKey", getEquivalentKey, METH_O, "Returns an equivalent key name if exist or itself otherwise. An empty string is returned if the input is not a valid string" },
+  { "info",          standard_info,  METH_VARARGS, "returns all the information about a given classic algorithm." },
+  { "sinfo",         streaming_info, METH_VARARGS, "returns all the information about a given streaming algorithm." },
 
   { "totalProduced",   (PyCFunction)totalProduced,       METH_VARARGS, "returns the number of tokens written by algorithm's source." },
   { "connect",         (PyCFunction)connect,             METH_VARARGS, "Connects an algorithm's source to another algorithm's sink." },

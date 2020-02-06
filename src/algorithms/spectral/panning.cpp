@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -99,7 +99,7 @@ void Panning::configure() {
   _warpedPanorama = parameter("warpedPanorama").toBool();
   _sampleRate = parameter("sampleRate").toReal();
   _histogramAccumulated.resize(_panningBins);
-  _ifft->configure("size", _panningBins * 2);
+  _ifft->configure("size", _panningBins * 2, "normalize", false);
   _nFrames = 0;
 }
 

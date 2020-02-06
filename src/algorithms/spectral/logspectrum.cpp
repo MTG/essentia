@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,27 +27,26 @@ using namespace standard;
 const char* LogSpectrum::name = "LogSpectrum";
 const char* LogSpectrum::category = "Spectral";
 const char* LogSpectrum::description = DOC("This algorithm computes spectrum with logarithmically distributed frequency bins. "
-"This code is a reimplementation of the well known NNLS Chroma described in [1]."
+"This code is ported from NNLS Chroma [1, 2]."
 "This algorithm also returns a local tuning that is retrieved for input frame and a global tuning that is updated with a moving average.\n"
 "\n"
-"note: As the algorithm uses moving averages that are updated every frame it should be reset before  "
+"Note: As the algorithm uses moving averages that are updated every frame it should be reset before  "
 "processing a new audio file. To do this call reset() (or configure())\n"
 "\n"
 "References:\n"
 "  [1] Mauch, M., & Dixon, S. (2010, August). Approximate Note Transcription\n"
-"  for the Improved Identification of Difficult Chords. In ISMIR (pp. 135-140).");
-
-
-const int nBPS = 3; // bins per semitone
-const int nOctave = 7;
-const int nNote = nOctave * 12 * nBPS + 2 * (nBPS/2+1); // a core over all octaves, plus some overlap at top and bottom
-
+"  for the Improved Identification of Difficult Chords. In ISMIR (pp. 135-140).\n"
+"  [2] Chordino and NNLS Chroma,\n"
+"  http://www.isophonics.net/nnls-chroma");
 
 void LogSpectrum::configure() {
   // Get parameters.
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toFloat();
   _rollon = parameter("rollOn").toFloat();
+  _nBPS = parameter("binsPerSemitone").toInt();
+  _nOctave = 7;
+  _nNote = _nOctave * 12 * _nBPS + 2 * (_nBPS/2+1); // a core over all octaves, plus some overlap at top and bottom
   initialize();
 }
 
@@ -75,7 +74,7 @@ void LogSpectrum::compute() {
 
   // Get spectrum parameters.
   Real maxmag = -10000;
-  for (int iBin = 0; iBin < static_cast<int>(_frameSize); iBin++) {
+  for (size_t iBin = 0; iBin < _frameSize; iBin++) {
     if (spectrum[iBin] > _frameSize * 1.0) spectrum[iBin] = _frameSize;
     if (maxmag < spectrum[iBin]) maxmag = spectrum[iBin];
 
@@ -86,7 +85,7 @@ void LogSpectrum::compute() {
 
   Real cumenergy = 0;
   if (_rollon > 0) {
-    for (int iBin = 2; iBin < static_cast<int>(_frameSize); iBin++) {
+    for (size_t iBin = 2; iBin < _frameSize; iBin++) {
       cumenergy += pow(spectrum[iBin], 2);
       if (cumenergy < energysum * _rollon / 100)
         spectrum[iBin - 2] = 0;
@@ -95,8 +94,8 @@ void LogSpectrum::compute() {
     }
   }
 
-  // In the original implementation, "maxmag < 2". In the typical essentia pipe the Window is 
-  // normalized to area == 1 making maxmag < 1 most of the time. Thus, this threshold is comented.   
+  // In the original implementation, "maxmag < 2". In the typical essentia processing chain the window is 
+  // normalized to area == 1 making maxmag < 1 most of the time. Thus, this threshold is commented.   
   // if (maxmag < 1.f) {
   //   for (int iBin = 0; iBin < static_cast<int>(_frameSize); iBin++) {
   //     spectrum[iBin] = 0;
@@ -104,7 +103,7 @@ void LogSpectrum::compute() {
   // }
 
   // Spectrum mapping using pre-calculated matrix.
-  logFreqSpectrum.assign(nNote, 0.f);
+  logFreqSpectrum.assign(_nNote, 0.f);
 
   int binCount = 0;
   for (vector<Real>::iterator it = _kernelValue.begin();
@@ -117,15 +116,15 @@ void LogSpectrum::compute() {
   Real one_over_N = 1.0 / _frameCount;
 
   // Update means of complex tuning variables.
-  for (int iBPS = 0; iBPS < nBPS; ++iBPS)
+  for (int iBPS = 0; iBPS < _nBPS; ++iBPS)
     _meanTunings[iBPS] *= float(_frameCount - 1) * one_over_N;
 
-  for (int iTone = 0; iTone < round(nNote * 0.62 / nBPS) * nBPS + 1;
-       iTone = iTone + nBPS) {
-    for (int iBPS = 0; iBPS < nBPS; ++iBPS)
+  for (int iTone = 0; iTone < round(_nNote * 0.62 / _nBPS) * _nBPS + 1;
+       iTone = iTone + _nBPS) {
+    for (int iBPS = 0; iBPS < _nBPS; ++iBPS)
       _meanTunings[iBPS] += logFreqSpectrum[iTone + iBPS] * one_over_N;
     Real ratioOld = 0.997;
-    for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
+    for (int iBPS = 0; iBPS < _nBPS; ++iBPS) {
       _localTunings[iBPS] *= ratioOld; 
       _localTunings[iBPS] += logFreqSpectrum[iTone + iBPS] * (1 - ratioOld);
     }
@@ -133,7 +132,7 @@ void LogSpectrum::compute() {
 
   Real localTuningImag = 0;
   Real localTuningReal = 0;
-  for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
+  for (int iBPS = 0; iBPS < _nBPS; ++iBPS) {
     localTuningReal += _localTunings[iBPS] * _cosvalues[iBPS];
     localTuningImag += _localTunings[iBPS] * _sinvalues[iBPS];
   }
@@ -149,11 +148,11 @@ void LogSpectrum::compute() {
   the "matrix" pointed to by outmatrix.
  */
 bool LogSpectrum::logFreqMatrix(Real fs, int frameSize, vector<Real> &outmatrix) {
-  // todo: rewrite so that everyone understands what is done here.
-  // todo: make this more general, such that it works with all minoctave,
-  // maxoctave and whatever nBPS (or check if it already does)
+  // TODO: rewrite so that everyone understands what is done here.
+  // TODO: make this more general, such that it works with all minoctave,
+  // maxoctave and whatever _nBPS (or check if it already does)
 
-  int binspersemitone = nBPS; 
+  int binspersemitone = _nBPS; 
   int minoctave = 0;  // this must be 0
   int maxoctave = 7;  // this must be 7
   int oversampling = 80;
@@ -250,21 +249,21 @@ void LogSpectrum::initialize() {
 	// Make things for tuning estimation.
   _sinvalues.clear();
   _cosvalues.clear();
-	for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
-    _sinvalues.push_back(sin(2 * M_PI * (iBPS * 1.0 / nBPS)));
-    _cosvalues.push_back(cos(2 * M_PI * (iBPS * 1.0 / nBPS)));
+	for (int iBPS = 0; iBPS < _nBPS; ++iBPS) {
+    _sinvalues.push_back(sin(2 * M_PI * (iBPS * 1.0 / _nBPS)));
+    _cosvalues.push_back(cos(2 * M_PI * (iBPS * 1.0 / _nBPS)));
   }
 
   _localTunings.clear();
   _meanTunings.clear();
-  for (int iBPS = 0; iBPS < nBPS; ++iBPS) {
+  for (int iBPS = 0; iBPS < _nBPS; ++iBPS) {
     _meanTunings.push_back(0);
     _localTunings.push_back(0);
   }
 
   _frameCount = 0;
 
-  int tempn = nNote * _frameSize;
+  int tempn = _nNote * _frameSize;
 
   // Real *tempkernel;
   vector<Real> tempkernel(tempn);
@@ -274,8 +273,8 @@ void LogSpectrum::initialize() {
   _kernelFftIndex.clear();
   _kernelNoteIndex.clear();
   int countNonzero = 0;
-  for (int iNote = 0; iNote < nNote; ++iNote) {
-    for (int iFFT = 0; iFFT <static_cast<int>(_frameSize); ++iFFT) {
+  for (int iNote = 0; iNote < _nNote; ++iNote) {
+    for (size_t iFFT = 0; iFFT < _frameSize; ++iFFT) {
       if (tempkernel[iFFT + _frameSize * iNote] > 0) {
         _kernelValue.push_back(tempkernel[iFFT + _frameSize * iNote]);
         if (tempkernel[iFFT + _frameSize * iNote] > 0) {

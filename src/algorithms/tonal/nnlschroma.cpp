@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -30,12 +30,14 @@ const char* NNLSChroma::description = DOC("This algorithm extracts treble and ba
 "On this representation, two processing steps are performed:\n"
 "  -tuning, after which each centre bin (i.e. bin 2, 5, 8, ...) corresponds to a semitone, even if the tuning of the piece deviates from 440 Hz standard pitch.\n"
 "  -running standardisation: subtraction of the running mean, division by the running standard deviation. This has a spectral whitening effect.\n"
-"This code is a reimplementation of the well known NNLS Chroma presented in [1]. To achieve similar results follow this processing chain:\n"
+"This code is ported from NNLS Chroma [1, 2]. To achieve similar results follow this processing chain:\n"
 "frame slicing with sample rate = 44100, frame size = 16384, hop size = 2048 -> Windowing with Hann and no normalization -> Spectrum -> LogSpectrum.\n"
 "\n"
 "References:\n"
 "  [1] Mauch, M., & Dixon, S. (2010, August). Approximate Note Transcription\n"
-"  for the Improved Identification of Difficult Chords. In ISMIR (pp. 135-140).");
+"  for the Improved Identification of Difficult Chords. In ISMIR (pp. 135-140).\n"
+"  [2] Chordino and NNLS Chroma,\n"
+"  http://www.isophonics.net/nnls-chroma");
 
 const int nBPS = 3; // bins per semitone
 const int nOctave = 7;
@@ -81,7 +83,7 @@ void NNLSChroma::configure() {
   if (tuningString == "global")
     _tuningMode = false;
 
-  string normalizationString = parameter("chromaNormalisation").toString();
+  string normalizationString = parameter("chromaNormalization").toString();
   if (normalizationString == "none")
     _doNormalizeChroma = 0;
   if (normalizationString == "maximum")
@@ -211,7 +213,7 @@ void NNLSChroma::compute() {
                            (tunedLogfreqSpectrum[i][j] - runningmean[j]));
     }
 
-    // Second step convolve.
+    // Second step: convolve.
     runningstd = SpecialConvolution(runningstd, _hw);
 
     for (int j = 0; j < nNote; j++) {  
@@ -221,7 +223,7 @@ void NNLSChroma::compute() {
           (tunedLogfreqSpectrum[i][j] - runningmean[j]) / pow(runningstd[j], _whitening) : 0;
       }
       if (tunedLogfreqSpectrum[i][j] < 0) {
-        E_INFO("ERROR: negative value in logfreq spectrum");
+        throw EssentiaException("ERROR: negative value in log-frequency spectrum");
       }
     }
   }
@@ -276,7 +278,9 @@ void NNLSChroma::compute() {
 
       else {
         Real x[84 + 1000];
-        for (int j = 1; j < 1084; ++j) x[j] = 1.0;
+        for (int j = 1; j < 1084; ++j){
+          x[j] = 1.0;
+        } 
 
         vector<int> signifIndex;
         int index = 0;
@@ -404,9 +408,12 @@ vector<Real> NNLSChroma::SpecialConvolution(vector<Real> convolvee, vector<Real>
   }
 
   // Fill upper and lower pads.
-  for (n = 0; n < lenKernel / 2; n++) Z[n] = Z[lenKernel / 2];
-  for (n = lenConvolvee; n < lenConvolvee + lenKernel / 2; n++)
+  for (n = 0; n < lenKernel / 2; n++) {
+    Z[n] = Z[lenKernel / 2];
+  }
+  for (n = lenConvolvee; n < lenConvolvee + lenKernel / 2; n++) {
     Z[n - lenKernel / 2] = Z[lenConvolvee - lenKernel / 2 - 1];
+  }  
   return Z;
 }
 
@@ -416,8 +423,8 @@ vector<Real> NNLSChroma::SpecialConvolution(vector<Real> convolvee, vector<Real>
   return this always returns true, which is a bit stupid, really. The main purpose of the function is to change the values in the "matrix" pointed to by *outmatrix
 */
 bool NNLSChroma::logFreqMatrix(Real fs, int frameSize, vector<Real> outmatrix) {
-  // todo: rewrite so that everyone understands what is done here.
-  // todo: make this more general, such that it works with all minoctave,
+  // TODO: rewrite so that everyone understands what is done here.
+  // TODO: make this more general, such that it works with all minoctave,
   // maxoctave and whatever nBPS (or check if it already does)
 
   int binspersemitone = nBPS;
@@ -515,7 +522,7 @@ Real NNLSChroma::pitchCospuls(Real x, Real centre, int binsperoctave) {
 }
 
 void NNLSChroma::dictionaryMatrix(vector<Real> dm, Real s_param) {
-  // todo: make this more general, such that it works with all minoctave,
+  // TODO: make this more general, such that it works with all minoctave,
   // maxoctave and even more than one note per semitone
   int binspersemitone = nBPS;
   int minoctave = 0;  // this must be 0

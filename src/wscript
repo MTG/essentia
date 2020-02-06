@@ -6,7 +6,23 @@ from __future__ import print_function
 import sys
 import os.path
 
-dependencies_list = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
+default_libs = ['libav', 'libsamplerate', 'taglib', 'yaml', 'fftw', 'libchromaprint']
+
+# LIB_KEY: package_name
+lib_map = {
+    'EIGEN3': 'eigen3',
+    'AVCODEC': 'libavcodec',
+    'AVFORMAT': 'libavformat',
+    'AVUTIL': 'libavutil',
+    'AVRESAMPLE': 'libavresample',
+    'SAMPLERATE': 'samplerate',
+    'TAGLIB': 'taglib',
+    'YAML': 'yaml-0.1',
+    'FFTW': 'fftw3f',
+    'LIBCHROMAPRINT': 'libchromaprint',
+    'GAIA2': 'gaia2',
+    'TENSORFLOW': 'tensorflow'}
+
 
 def options(ctx):
     ctx.add_option('--with-python', action='store_true',
@@ -26,7 +42,7 @@ def options(ctx):
                    help='build with static dependencies from packaging/* dir')
     ctx.add_option('--pkg-config-path', action='store',
                    dest='PKG_CONFIG_PATH', default=False,
-                   help='pkg-config path to search for dependencies')
+                   help='pkg-config path to search for dependencies (default paths will be ignored)')
     ctx.add_option('--with-static-examples', action='store_true',
                    dest='WITH_STATIC_EXAMPLES', default=False,
                    help='build the example programs as static executables; forces --static-dependencies and --static flags')
@@ -36,9 +52,12 @@ def options(ctx):
     ctx.add_option('--with-gaia', action='store_true',
                    dest='WITH_GAIA', default=False,
                    help='build with Gaia support')
+    ctx.add_option('--with-tensorflow', action='store_true',
+                   dest='WITH_TENSORFLOW', default=False,
+                   help='build with Tensorflow support')
     ctx.add_option('--lightweight', action='store',
-                   dest='WITH_LIBS', default=False,
-                   help='build lightweight version with specified dependencies (comma separated: =' + ','.join(dependencies_list) + ')')
+                   dest='LIGHTWEIGHT', default=False,
+                   help='build lightweight version with specified dependencies (comma separated: =' + ','.join(default_libs) + ')')
     ctx.add_option('--ignore-algos', action='store',
                    dest='IGNORE_ALGOS', default=False,
                    help='algorithms to ignore (comma separated)')
@@ -71,19 +90,25 @@ def configure(ctx):
     if ctx.env.WITH_STATIC_EXAMPLES and not ctx.env.EXAMPLES:
         ctx.env.WITH_EXAMPLES = True
 
-    if ctx.env.WITH_LIBS != False:
+    if ctx.env.LIGHTWEIGHT != False:
         # bool value if --lightweight flag was not specified, string otherwise
-        ctx.env.WITH_LIBS_LIST = ['']
-        if ctx.env.WITH_LIBS:
-            for e in ctx.env.WITH_LIBS.split(","):
+        ctx.env.CHECK_LIBS = ['']
+        if ctx.env.LIGHTWEIGHT:
+            for e in ctx.env.LIGHTWEIGHT.split(","):
                 e = e.strip()
-                if e not in dependencies_list:
+                if e not in default_libs:
                     raise ctx.errors.ConfigurationError("Specified dependency [%s] does not exist" % e)
-                ctx.env.WITH_LIBS_LIST.append(e)
-        ctx.env.WITH_LIBS_LIST = list(set(ctx.env.WITH_LIBS_LIST))
-        print("\n=======================Lightweight Mode : Ignoring ALL libraries except %s =======================\n" % ctx.env.WITH_LIBS_LIST)
+                ctx.env.CHECK_LIBS.append(e)
+        ctx.env.CHECK_LIBS = list(set(ctx.env.CHECK_LIBS))
+        print("\n=======================Lightweight Mode : Ignoring ALL libraries except %s =======================\n" % ctx.env.CHECK_LIBS)
     else:
-        ctx.env.WITH_LIBS_LIST = dependencies_list
+        ctx.env.CHECK_LIBS = default_libs
+
+    if ctx.env.WITH_GAIA:
+        ctx.env.CHECK_LIBS.append('gaia2')
+
+    if ctx.env.WITH_TENSORFLOW:
+        ctx.env.CHECK_LIBS.append('tensorflow')
 
     if ctx.env.IGNORE_ALGOS:
         for a in ctx.env.IGNORE_ALGOS.split(","):
@@ -98,10 +123,11 @@ def configure(ctx):
     # overwrite PKG_CONFIG_PATH if it is explicitly specified
     if ctx.env.PKG_CONFIG_PATH:
         os.environ["PKG_CONFIG_PATH"] = ctx.env.PKG_CONFIG_PATH
-
-    if "PKG_CONFIG_PATH" in os.environ:
-        print("→ Searching *.pc pkg-config files for dependencies in %s" % os.environ["PKG_CONFIG_PATH"])
         os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
+        print("→ Searching *.pc pkg-config files for dependencies in %s (default paths are ignored)" % os.environ["PKG_CONFIG_PATH"])
+
+    elif "PKG_CONFIG_PATH" in os.environ:
+        print("→ Searching *.pc pkg-config files for dependencies in %s and default paths" % os.environ["PKG_CONFIG_PATH"])
 
     # Make check_cfg find PKG_CONFIG_PATH
     ctx.env.env = dict(os.environ)
@@ -113,38 +139,40 @@ def configure(ctx):
        print("→ Building only Essentia's python bindings (libessentia should be pre-installed)")
        ctx.check_cfg(package='essentia', uselib_store='ESSENTIA',
                       args=check_cfg_args, mandatory=True)
-       ctx.env.USES = 'ESSENTIA'
+       ctx.env.USE_LIBS = 'ESSENTIA'
        ctx.recurse('python')
        return
 
+    ctx.check_cfg(package=lib_map['EIGEN3'], uselib_store='EIGEN3',
+                  args=['eigen3 >= 3.3.4'] + check_cfg_args)
 
-    if 'libav' in ctx.env.WITH_LIBS_LIST:
-        ctx.check_cfg(package='libavcodec', uselib_store='AVCODEC',
-                      args=['libavcodec >= 55.34.1'] + check_cfg_args,
-                      msg='Checking for \'libavcodec\' >= 55.34.1',
+    if 'libav' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['AVCODEC'], uselib_store='AVCODEC',
+                      args=['{} >= 55.34.1'.format(lib_map['AVCODEC'])] + check_cfg_args,
+                      msg="Checking for '{}' >= 55.34.1".format(lib_map['AVCODEC']),
                       mandatory=False)
 
-        ctx.check_cfg(package='libavformat', uselib_store='AVFORMAT',
+        ctx.check_cfg(package=lib_map['AVFORMAT'], uselib_store='AVFORMAT',
                       args=check_cfg_args, mandatory=False)
 
-        ctx.check_cfg(package='libavutil', uselib_store='AVUTIL',
+        ctx.check_cfg(package=lib_map['AVUTIL'], uselib_store='AVUTIL',
                       args=check_cfg_args, mandatory=False)
 
-        ctx.check_cfg(package='libavresample', uselib_store='AVRESAMPLE',
+        ctx.check_cfg(package=lib_map['AVRESAMPLE'], uselib_store='AVRESAMPLE',
                       args=check_cfg_args, mandatory=False)
 
-    if 'libsamplerate' in ctx.env.WITH_LIBS_LIST:
-        ctx.check_cfg(package='samplerate', uselib_store='SAMPLERATE',
+    if 'libsamplerate' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['SAMPLERATE'], uselib_store='SAMPLERATE',
                       args=check_cfg_args, mandatory=False)
 
-    if 'taglib' in ctx.env.WITH_LIBS_LIST:
-        ctx.check_cfg(package='taglib', uselib_store='TAGLIB',
-                      args=['taglib >= 1.9'] + check_cfg_args,
-                      msg='Checking for \'taglib\' >= 1.9',
+    if 'taglib' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['TAGLIB'], uselib_store='TAGLIB',
+                      args=['{} >= 1.9'.format(lib_map['TAGLIB'])] + check_cfg_args,
+                      msg="Checking for '{}' >= 1.9".format(lib_map['TAGLIB']),
                       mandatory=False)
 
-    if 'yaml' in ctx.env.WITH_LIBS_LIST:
-        ctx.check_cfg(package='yaml-0.1', uselib_store='YAML',
+    if 'yaml' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['YAML'], uselib_store='YAML',
                       args=check_cfg_args, mandatory=False)
         if not ctx.env.INCLUDES_YAML and sys.platform == 'darwin':
             # an ugly hack for osx, because pkg-config file for yaml-0.1.6 installed by brew
@@ -153,17 +181,20 @@ def configure(ctx):
             ctx.env['INCLUDES_YAML'] = '/'.join(ctx.env['LIBPATH_YAML'][0].split('/')[:-1] + ['include'])
             print(ctx.env['INCLUDES_YAML'])
 
-    if 'fftw' in ctx.env.WITH_LIBS_LIST:
-        ctx.check_cfg(package='fftw3f', uselib_store='FFTW',
+    if 'fftw' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['FFTW'], uselib_store='FFTW',
                       args=check_cfg_args, mandatory=False)
 
-    if 'libchromaprint' in ctx.env.WITH_LIBS_LIST:
-        ctx.check_cfg(package='libchromaprint', uselib_store='LIBCHROMAPRINT',
+    if 'libchromaprint' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['LIBCHROMAPRINT'], uselib_store='LIBCHROMAPRINT',
                       args=['--cflags', '--libs'], mandatory=False)
 
+    if 'gaia2' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['GAIA2'], uselib_store='GAIA2',
+                      args=check_cfg_args, mandatory=True)
 
-    if ctx.env.WITH_GAIA:
-        ctx.check_cfg(package='gaia2', uselib_store='GAIA2',
+    if 'tensorflow' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['TENSORFLOW'], uselib_store='TENSORFLOW',
                       args=check_cfg_args, mandatory=True)
 
     # needed by ffmpeg for the INT64_C macros
@@ -180,7 +211,7 @@ def configure(ctx):
     print()
     print('================================ CONFIGURATION SUMMARY ================================')
 
-    ctx.env.USES = ''
+    ctx.env.USE_LIBS = ''
 
     def has(name):
         return ('HAVE_%s' % name.upper()) in ctx.env['define_key']
@@ -190,34 +221,45 @@ def configure(ctx):
     if 'ACCELERATE' in ctx.env.FFT:
         print('- using Accelerate Framework for FFT\n')
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
-        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTW', 'IFFTW', 'FFTWComplex',
-                               'IFFTWComplex', 'ConstantQ', 'Chromagram',
-                               'SpectrumCQ', 'NSGConstantQ', 'NSGIConstantQ',
-                               'NSGConstantQStreaming']
+        ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTKComplex', 'IFFTKComplex',
+                               'FFTW', 'IFFTW', 'FFTWComplex', 'IFFTWComplex']
     elif 'KISS' in ctx.env.FFT:
         print('- using KISS for FFT\n')
-        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex',
-                               'IFFTWComplex', 'ConstantQ', 'Chromagram',
-                               'SpectrumCQ', 'NSGConstantQ', 'NSGIConstantQ',
-                               'NSGConstantQStreaming']
+        ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTAComplex', 'IFFTAComplex',
+                               'FFTW', 'IFFTW', 'FFTWComplex', 'IFFTWComplex']
     else:
         print('- using FFTW for FFT\n')
         if has('fftw'):
             print('- fftw detected!')
-            ctx.env.USES += ' FFTW'
-            ctx.env.ALGOIGNORE += ['FFTA', 'IFFTA', 'FFTK', 'IFFTK']
+            ctx.env.USE_LIBS += ' FFTW'
+            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTKComplex', 'IFFTKComplex',
+                                   'FFTA', 'IFFTA', 'FFTAComplex', 'IFFTAComplex']
         else:
             print(' - fftw seems to be missing.')
             print('   The following algorithms will be ignored: %s\n' % algos)
-            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW', 'FFTWComplex']
+            ctx.env.ALGOIGNORE += ['FFTK', 'IFFTK', 'FFTA', 'IFFTA', 'FFTW', 'IFFTW',
+                                   'FFTWComplex', 'IFFTWComplex',
+                                   'FFTKComplex', 'IFFTKComplex',
+                                   'FFTAComplex', 'IFFTAComplex']
+            # TODO what other algorithms dependent on FFT should be also ignored?
+
             print('   IMPORTANT NOTE: You will encounter compilation errors, because some other algorithms rely on FFT.')
             print('                   To avoid these errors, use alternative FFT libraries (see the --fft flag).\n')
+
+    # TODO Eigen is set as a mandatory dependency as the long-term goal is to
+    # use it to replace the outdated TNT code for matrices and linear algebra
+    ctx.env.USE_LIBS += ' EIGEN3'
+
+    # this flag guarantees that all the Eigen code that we are including is
+    # licensed under MPL2 or more permissive licenses (like BSD)
+    # http://eigen.tuxfamily.org/index.php?title=Main_Page#License
+    ctx.env.DEFINES += ['EIGEN_MPL2_ONLY']
 
     # MonoLoader, EqloudLoader, and EasyLoader are dependent on Resample
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
     if has('avcodec') and has('avformat') and has('avutil') and has('avresample'):
         print('- FFmpeg / libav detected!')
-        ctx.env.USES += ' AVFORMAT AVCODEC AVUTIL AVRESAMPLE'
+        ctx.env.USE_LIBS += ' AVFORMAT AVCODEC AVUTIL AVRESAMPLE'
 
     else:
         print('- FFmpeg (or LibAv on debian/ubuntu) seems to be missing.')
@@ -227,7 +269,7 @@ def configure(ctx):
     algos = ['Resample', 'MonoLoader', 'EqloudLoader', 'EasyLoader']
     if has('samplerate'):
         print('- libsamplerate (SRC) detected!')
-        ctx.env.USES += ' SAMPLERATE'
+        ctx.env.USE_LIBS += ' SAMPLERATE'
     else:
         print('- libsamplerate seems to be missing.')
         print('  The following algorithms will be ignored: %s\n' % algos)
@@ -244,7 +286,7 @@ def configure(ctx):
     if has('taglib'):
         print('- TagLib detected!')
         print('  The following algorithms will be included: %s\n' % algos)
-        ctx.env.USES += ' TAGLIB'
+        ctx.env.USE_LIBS += ' TAGLIB'
     else:
         print('- TagLib seems to be missing.')
         print('  The following algorithms will be ignored: %s\n' % algos)
@@ -254,7 +296,7 @@ def configure(ctx):
     if has('yaml'):
         print('- libyaml detected!')
         print('  The following algorithms will be included: %s\n' % algos)
-        ctx.env.USES += ' YAML'
+        ctx.env.USE_LIBS += ' YAML'
     else:
         print('- libyaml seems to be missing.')
         print('  The following algorithms will be ignored: %s\n' % algos)
@@ -265,7 +307,7 @@ def configure(ctx):
         if has('gaia2'):
             print('- Gaia2 detected!')
             print('  The following algorithms will be included: %s\n' % algos)
-            ctx.env.USES += ' GAIA2'
+            ctx.env.USE_LIBS += ' GAIA2'
     else:
         print('- Essentia is configured without Gaia2.')
         print('  The following algorithms will be ignored: %s' % algos)
@@ -276,11 +318,21 @@ def configure(ctx):
     if has('libchromaprint'):
         print('- Chromaprint detected!')
         print('  The following algorithms will be included: %s\n' % algos)
-        ctx.env.USES += ' LIBCHROMAPRINT'
+        ctx.env.USE_LIBS += ' LIBCHROMAPRINT'
     else:
         print('- Essentia is configured without Chromaprint.')
         print('  The following algorithms will be ignored: %s' % algos)
         ctx.env.ALGOIGNORE += algos 
+
+    algos = [ 'TensorflowPredict', 'TensorflowPredictMusiCNN', 'TensorflowPredictVGGish' ]
+    if has('tensorflow'):
+        print('- Tensorflow detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
+        ctx.env.USE_LIBS += ' TENSORFLOW'
+    else:
+        print('- Essentia is configured without Tensorflow.')
+        print('  The following algorithms will be ignored: %s' % algos)
+        ctx.env.ALGOIGNORE += algos
 
     lel = len(ctx.env.EXAMPLE_LIST)
     if lel:
@@ -316,10 +368,11 @@ def configure(ctx):
     print('=======================================================================================')
 
 
+    libs = ctx.env.USE_LIBS.strip().split(' ')
+
     # Prepare pkg-config file
     if ctx.env.BUILD_STATIC:
         # For the static library, find all -l flags we'll need
-        libs = ctx.env.USES.strip().split(' ')
         lflags = [l for lib in libs for l in ctx.env["LIB_" + lib]]
         lflags = ' '.join(['-l%s' % lib for lib in lflags])
         lpaths = [l for lib in libs for l in ctx.env["LIBPATH_" + lib]]
@@ -328,9 +381,11 @@ def configure(ctx):
         lflags = lpaths = ''
 
     # Prepare pkg-config .pc file variables
+    requires = ' '.join([lib_map[l] for l in libs])
     prefix = os.path.normpath(ctx.options.prefix)
     ctx.env.pcfile_opts = {'PREFIX': prefix,
                            'VERSION': ctx.env.VERSION,
+                           'REQUIRESPRIVATE': requires,
                            'LFLAGS': lflags,
                            'LPATHS': lpaths
                            }
@@ -411,11 +466,11 @@ def build(ctx):
     sources = ctx.path.ant_glob('essentia/**/*.cpp')
 
     # do not compile audiocontext.cpp if we're compiling without libav
-    if 'AVCODEC' not in ctx.env.USES:
+    if 'AVCODEC' not in ctx.env.USE_LIBS:
         sources = [ s for s in sources if 'audiocontext' not in str(s) ]
 
     # do not compile anything with yaml if we are compiling without libyaml
-    if 'YAML' not in ctx.env.USES:
+    if 'YAML' not in ctx.env.USE_LIBS:
         sources = [ s for s in sources if 'yaml' not in str(s) ]
         sources = [ s for s in sources if 'jsonconvert' not in str(s) ]
 
@@ -461,13 +516,20 @@ def build(ctx):
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/fingerprinter_configuration.cpp') ]
         sources += [ ctx.path.find_resource('3rdparty/chromaprint-1.4.2/src/simhash.cpp') ]
-	"""
+    """
+
+    # do not compile Cephes functions if we are not compiling SNR
+    if 'SNR' not in ctx.env.ALGOIGNORE:
+        ctx.env.INCLUDES += ['3rdparty/cephes/bessel/' ]
+        sources += ctx.path.ant_glob('3rdparty/cephes/bessel/*.cpp')
+    else:
+        print('Building without 3rdparty Cephes library code (Bessel functions) because SNR algorithm is ignored')
 
     if ctx.env.BUILD_STATIC:
         ctx.stlib(
             source   = sources,
             target   = 'essentia',
-            use      = ctx.env.USES,
+            use      = ctx.env.USE_LIBS,
             install_path = '${PREFIX}/lib',
             #includes = ctx.env.includes
         )
@@ -475,15 +537,13 @@ def build(ctx):
         ctx.shlib(
             source   = sources,
             target   = 'essentia',
-            use      = ctx.env.USES,
+            use      = ctx.env.USE_LIBS,
             includes = ctx.env.INCLUDES,
             cxxflags = [ '-w' ],
             install_path = '${PREFIX}/lib'
         )
 
     ctx(source='../essentia.pc.in', **ctx.env.pcfile_opts)
-    # TODO Ideally we should use the Requires.private field in the .pc file
-    # Requires.private: gaia2 fftw3f yaml-0.1 libavcodec libavformat libavutil libavresample samplerate taglib libchromaprint
 
     ctx.add_group()
 

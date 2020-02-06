@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -47,7 +47,7 @@ def _create_essentia_class(name, moduleName = __name__):
             # verify that all types match and do any necessary conversions
             for name, val in iteritems(kwargs):
                 goalType = self.paramType(name)
-                
+
                 if type(val).__module__ == 'numpy':
                     if not val.flags['C_CONTIGUOUS']:
                         val = copy(val)
@@ -71,7 +71,7 @@ def _create_essentia_class(name, moduleName = __name__):
 
             # we have to make some exceptions for YamlOutput and PoolAggregator
             # because they expect cpp Pools
-            if name in ('YamlOutput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform'):
+            if name in ('YamlOutput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'TensorflowPredict'):
                 args = (args[0].cppPool,)
 
             # verify that all types match and do any necessary conversions
@@ -83,6 +83,11 @@ def _create_essentia_class(name, moduleName = __name__):
                 arg = args[i]
 
                 if type(args[i]).__module__ == 'numpy':
+                    if arg.dtype == 'float64':
+                        arg = arg.astype('float32')
+                        essentia.INFO('Warning: essentia can currently only accept numpy arrays of dtype '
+                                      '"single". "%s" dtype is double. Precision will be automatically '
+                                      'truncated into "single".' %(inputNames[i]))
                     if not args[i].flags['C_CONTIGUOUS']:
                         arg = copy(args[i])
 
@@ -100,7 +105,7 @@ def _create_essentia_class(name, moduleName = __name__):
 
             # we have to make an exceptional case for YamlInput, because we need
             # to wrap the Pool that it outputs w/ our python Pool from common.py
-            if name in ('YamlInput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'Extractor'):
+            if name in ('YamlInput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'Extractor', 'TensorflowPredict'):
                 return _c.Pool(results)
 
             # MusicExtractor and FreesoundExtractor output two pools

@@ -52,10 +52,10 @@ def build(ctx):
         source   = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp'),
         target   = '_essentia',
         features = 'pyext',
-        includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
+        includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + (ctx.env.INCLUDES_ESSENTIA if ctx.env.ONLY_PYTHON else adjust(ctx.env.INCLUDES, '..')),
         cxxflags = [ '-w' ],
         install_path = '${PYTHONDIR}/essentia',
-        use      = ctx.env.USES if ctx.env.ONLY_PYTHON else 'essentia ' #+ ctx.env.USES
+        use      = ctx.env.USE_LIBS if ctx.env.ONLY_PYTHON else 'essentia ' #+ ctx.env.USE_LIBS
     )
 
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),

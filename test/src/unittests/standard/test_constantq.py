@@ -19,57 +19,66 @@
 
 
 from essentia_test import *
-import numpy as np
-import os
-
-script_dir = os.path.dirname(__file__)
 
 
-def cvec(l):
-    return numpy.array(l, dtype='c8')
+class TestConstantQ(TestCase):
+
+    def testRegression(self):
+        expected = numpy.load(join(filedir(), 'constantq/constantq_values.npy'))
+
+        frame_size = 32768
+        hop_size = frame_size // 4
+
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded/vignesh.wav'))()
+
+        w = Windowing()
+        cqt = ConstantQ()
+
+        predicted = numpy.array([cqt(w(frame)) for frame in FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size)])
+
+        self.assertAlmostEqualVector(numpy.mean(predicted, axis=0), expected, 1e-7)
+
+    def testRegressionNoZeroPhase(self):
+        expected = numpy.load(join(filedir(), 'constantq/constantq_values.npy'))
+
+        frame_size = 32768
+        hop_size = frame_size // 4
+        zeroPhase=False
+
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded/vignesh.wav'))()
+
+        w = Windowing(zeroPhase=zeroPhase)
+        cqt = ConstantQ(zeroPhase=zeroPhase)
+
+        predicted = numpy.array([cqt(w(frame)) for frame in FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size)])
+
+        self.assertAlmostEqualVector(numpy.mean(predicted, axis=0), expected, 1e-7)
+
+    def testZero(self):
+        inputSize = 2**15
+        signalZero = [0] * inputSize
+        output = numpy.mean(numpy.abs(ConstantQ()(signalZero)))
+        self.assertEqual(0, output)
+
+    def testEmpty(self):
+        # Checks whether an empty input vector yields an exception
+        self.assertComputeFails(ConstantQ(), [])
+
+    def testOne(self,):
+        # Checks for a single value
+        self.assertComputeFails(ConstantQ(), [1])
+
+    def testInvalidParam(self):
+        self.assertConfigureFails(ConstantQ(), {'minFrequency': 30000})  # Min bin above Nyquist
+        self.assertConfigureFails(ConstantQ(), {'numberBins': 0})  # No CQ bins
+        self.assertConfigureFails(ConstantQ(), {'binsPerOctave': 0})  # No CQ bins
+        self.assertConfigureFails(ConstantQ(), {'sampleRate': 400}) # With this sample rate the kernels are out of range
+        self.assertConfigureFails(ConstantQ(), {'numberBins': 10 * 12})  # Max bin above Nyquist
+        self.assertConfigureFails(ConstantQ(), {'minimumKernelSize': 1})  # FFT can not be done
+        self.assertConfigureFails(ConstantQ(), {'scale': 0})  # Kernels of size 0
 
 
-class TestCQ(TestCase):
-
-    def testRandom(self):
-        # input is [1, 0, 0, ...] which corresponds to an ConstantQ of constant magnitude 1
-        with open(os.path.join(script_dir, 'constantq/CQinput.txt'), 'r') as f:
-            #read_data = f.read()
-            data = np.array([], dtype='complex64')
-            line = f.readline()
-            while line != '':
-                re = float(line.split('\t')[0])
-                im = float(line.split('\t')[1])
-                data = np.append(data, re + im * 1j)
-                line = f.readline()
-
-        with open(os.path.join(script_dir, 'constantq/QMoutput.txt'), 'r') as u:
-            QMdata_out = np.array([], dtype='complex64')
-            for line in u:
-                re = line.split('+')[0]
-                re = float(re[1:])
-                im = line.split('+')[1]
-                im = float(im[:-3])
-                QMdata_out = np.append(QMdata_out, re + im * 1j)
-
-        CQdata = ConstantQ()(cvec(data))
-        QMdata_out = np.array(QMdata_out, dtype='complex64')
-
-        # difference mean
-        DifferMean = QMdata_out-CQdata
-        DifferMean = ((sum(abs(DifferMean.real))/len(DifferMean))+(sum(abs(DifferMean.imag))/len(DifferMean)))/2
-        # divergence mean percentage
-        DiverPerReal = (sum(((QMdata_out.real-CQdata.real)/QMdata_out.real)*100))/len(QMdata_out.real)
-        DiverPerImag = (sum(((QMdata_out.imag-CQdata.imag)/QMdata_out.imag)*100))/len(QMdata_out.imag)
-        DiverPer = (DiverPerReal + DiverPerImag) / 2
-
-        """
-        print 'Divergence mean percentage is : '+str(DiverPer)[:5]+'%'
-        print 'Difference Mean is : '+str(DifferMean)[:9]
-        """
-
-
-suite = allTests(TestCQ)
+suite = allTests(TestConstantQ)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

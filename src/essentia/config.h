@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -111,7 +111,11 @@
 /**
  * OS type.
  */
-#if defined(_MSC_VER) || defined(_WIN32)
+#if defined(__MINGW__) || defined(__MINGW32__)
+#  define OS_MINGW
+#endif
+
+#if (defined(_MSC_VER) || defined(_WIN32))
 #  define OS_WIN32
 #else
 #  if defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
@@ -136,7 +140,9 @@
   #pragma warning (disable : 4355) // this used in class initialization, but we do it in a safe way
 
   // tell microsoft we would like to use std::min and std::max
-  #define NOMINMAX
+  #if !defined(OS_WIN32)
+    #define NOMINMAX
+  #endif
 
   typedef unsigned int uint;
 

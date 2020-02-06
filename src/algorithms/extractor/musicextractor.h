@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -56,8 +56,8 @@ class MusicExtractor : public Algorithm {
 
   int loudnessFrameSize;
   int loudnessHopSize;
-  std::string loudnessSilentFrames;
-  std::string loudnessWindowType;
+  //std::string loudnessSilentFrames;
+  //std::string loudnessWindowType;
 
   std::string rhythmMethod;
   int rhythmMinTempo;
@@ -68,6 +68,11 @@ class MusicExtractor : public Algorithm {
   std::vector<std::string> rhythmStats;
   std::vector<std::string> mfccStats;
   std::vector<std::string> gfccStats;
+
+#if HAVE_LIBCHROMAPRINT
+  bool chromaprintCompute;
+  Real chromaprintDuration;
+#endif
 
 #if HAVE_GAIA2 
   std::vector<std::string> svmModels;
@@ -83,6 +88,10 @@ class MusicExtractor : public Algorithm {
   void readMetadata(const std::string& audioFilename, Pool& results);
   void computeAudioMetadata(const std::string& audioFilename, Pool& results);
   void computeReplayGain(const std::string& audioFilename, Pool& results);
+
+#if HAVE_LIBCHROMAPRINT
+  void computeChromaPrint(const std::string& audioFilename, Pool& results);
+#endif
 
   Pool computeAggregation(Pool& pool);
 
@@ -116,8 +125,8 @@ class MusicExtractor : public Algorithm {
     // TODO average_loudness is redundant? we compare with replaygain and ebu r128
     declareParameter("loudnessFrameSize", "the frame size for computing average loudness", "(0,inf)", 88200);
     declareParameter("loudnessHopSize", "the hop size for computing average loudness", "(0,inf)", 44100);
-    declareParameter("loudnessWindowType", "the window type for computing average loudness", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
-    declareParameter("loudnessSilentFrames", "whether to [keep/drop/add noise to] silent frames for computing average loudness", "{drop,keep,noise}", "noise");
+    //declareParameter("loudnessWindowType", "the window type for computing average loudness", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    //declareParameter("loudnessSilentFrames", "whether to [keep/drop/add noise to] silent frames for computing average loudness", "{drop,keep,noise}", "noise");
 
     declareParameter("rhythmMethod", "the method used for beat tracking", "{multifeature,degara}", "degara");
     declareParameter("rhythmMinTempo", "the slowest tempo to detect [bpm]", "[40,180]", 40);
@@ -134,6 +143,11 @@ class MusicExtractor : public Algorithm {
     
     declareParameter("mfccStats", "the statistics to compute for MFCC features", "", cepstrumStats);
     declareParameter("gfccStats", "the statistics to compute for GFCC features", "", cepstrumStats);
+
+#if HAVE_LIBCHROMAPRINT
+    declareParameter("chromaprintCompute", "compute the Chromaprint", "{true,false}", false);
+    declareParameter("chromaprintDuration", "the amount of time from the beginning used to compute the Chromaprint. 0 to use the full audio length [s]", "[0,inf)", 0.);
+#endif
 
 #if HAVE_GAIA2 
     declareParameter("highlevel", "list of high-level classifier models (gaia2 history filenames) to apply using extracted features. Skip classification if not specified (empty list)", "", Parameter::VECTOR_STRING);

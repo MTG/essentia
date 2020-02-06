@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -150,6 +150,11 @@ PyObject* PyPool::keyType(PyPool* self, PyObject* obj) {
     return PyString_FromString( edtToString(VECTOR_MATRIX_REAL).c_str() );
   }
 
+  // search tensor sub-pool
+  if (p.getTensorRealPool().find(key) != p.getTensorRealPool().end()) {
+    return PyString_FromString( edtToString(VECTOR_TENSOR_REAL).c_str() );
+  }
+
   // search single real pool
   if (p.getSingleRealPool().find(key) != p.getSingleRealPool().end()) {
     return PyString_FromString( edtToString(REAL).c_str() );
@@ -163,6 +168,11 @@ PyObject* PyPool::keyType(PyPool* self, PyObject* obj) {
   // search single string pool
   if (p.getSingleStringPool().find(key) != p.getSingleStringPool().end()) {
     return PyString_FromString( edtToString(STRING).c_str() );
+  }
+
+  // search single tensor pool
+  if (p.getSingleTensorRealPool().find(key) != p.getSingleTensorRealPool().end()) {
+    return PyString_FromString( edtToString(TENSOR_REAL).c_str() );
   }
 
   // couldn't find the key
@@ -232,7 +242,7 @@ PyObject* PyPool::add(PyPool* self, PyObject* pyArgs) {
       case STEREOSAMPLE:  ADD_COPY(PyStereoSample, StereoSample);
       case VECTOR_STRING: ADD_COPY(VectorString, vector<string>);
       case MATRIX_REAL:   ADD_COPY(MatrixReal, TNT::Array2D<Real>);
-
+      case TENSOR_REAL:   ADD_COPY(TensorReal, Tensor<Real>);
       case VECTOR_REAL:   ADD_REF(VectorReal, RogueVector<Real>);
 
       default:
@@ -299,6 +309,7 @@ PyObject* PyPool::set(PyPool* self, PyObject* pyArgs) {
       case REAL: SET_COPY(PyReal, Real);
       case STRING: SET_COPY(String, string);
       case VECTOR_REAL: SET_REF(VectorReal, RogueVector<Real>);
+      case TENSOR_REAL: SET_COPY(TensorReal, Tensor<Real>);
       default:
         ostringstream msg;
         msg << "Pool.set does not support the type: " << edtToString(tp);
@@ -397,6 +408,7 @@ PyObject* PyPool::merge(PyPool* self, PyObject* pyArgs) {
       case VECTOR_VECTOR_REAL: MERGE_COPY(VectorVectorReal, vector<vector<Real> >);
       case VECTOR_VECTOR_STRING: MERGE_COPY(VectorVectorString, vector<vector<string> >);
       case VECTOR_MATRIX_REAL:   MERGE_COPY(VectorMatrixReal, vector<TNT::Array2D<Real> >);
+      case VECTOR_TENSOR_REAL:   MERGE_COPY(VectorTensorReal,  vector<Tensor<Real> >);
       //case POOL: p.merge(args[1].cppPool, mergeType)
 
 
@@ -517,6 +529,11 @@ PyObject* PyPool::value(PyPool* self, PyObject* pyArgs) {
       case VECTOR_VECTOR_REAL: return VectorVectorReal::toPythonCopy(&p.value<vector<vector<Real> > >(key));
       case VECTOR_VECTOR_STRING: return VectorVectorString::toPythonCopy(&p.value<vector<vector<string> > >(key));
       case VECTOR_MATRIX_REAL: return VectorMatrixReal::toPythonCopy(&p.value<vector<TNT::Array2D<Real> > >(key));
+      case VECTOR_TENSOR_REAL: return VectorTensorReal::toPythonCopy(&p.value<vector<Tensor<Real> > >(key));
+      case TENSOR_REAL: {
+        Tensor<Real>* t = new Tensor<Real>(p.value<Tensor<Real> >(key));
+        return TensorReal::toPythonRef(t);
+      }
       default:
         ostringstream msg;
         msg << "Pool.value does not support the type: " << edtToString(tp);

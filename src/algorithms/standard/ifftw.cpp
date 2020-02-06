@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -70,10 +70,18 @@ void IFFTW::compute() {
   signal.resize(size);
   memcpy(&signal[0], _output, size*sizeof(Real));
 
+  if (_normalize) {
+    Real norm = (Real)size;
+    
+    for (int i = 0; i < size; i++) {
+      signal[i] /= norm;
+    }
+  }
 }
 
 void IFFTW::configure() {
   createFFTObject(parameter("size").toInt());
+  _normalize = parameter("normalize").toBool();
 }
 
 void IFFTW::createFFTObject(int size) {

@@ -27,32 +27,24 @@ class NSGConstantQStreaming : public Algorithm{
 
   Algorithm* _wrapper;
 
-  //std::vector<std::vector<std::complex<Real> > > _constantQAUX;
-  //scheduler::Network* _network;
-
  public:
   NSGConstantQStreaming();
 
   ~NSGConstantQStreaming() {};
 
   AlgorithmStatus process();
-
- // void declareProcessOrder() {
- //   declareProcessStep(ChainFrom(_wrapper));
- //  declareProcessStep(SingleShot(this));
- // }
-
+ 
   void declareParameters() {
-    declareParameter("inputSize", "the size of the input", "(0,inf)", 1024);
+    declareParameter("inputSize", "the size of the input", "(0,inf)", 4096);
     declareParameter("minFrequency", "the minimum frequency", "(0,inf)", 27.5);
-    declareParameter("maxFrequency", "the maximum frequency", "(0,inf)", 55);
-    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 12);
+    declareParameter("maxFrequency", "the maximum frequency", "(0,inf)", 7040.);
+    declareParameter("binsPerOctave", "the number of bins per octave", "[1,inf)", 48);
     declareParameter("sampleRate", "the desired sampling rate [Hz]", "[0,inf)", 44100.);
     declareParameter("rasterize", "hop sizes for each frequency channel. With 'none' each frequency channel is distinct. 'full' sets the hop sizes of all the channels to the smallest. 'piecewise' rounds down the hop size to a power of two", "{none,full,piecewise}", "full");
     declareParameter("phaseMode", "'local' to use zero-centered filters. 'global' to use a phase mapping function as described in [1]", "{local,global}", "global");
     declareParameter("gamma", "The bandwidth of each filter is given by Bk = 1/Q * fk + gamma", "[0,inf)", 0);
-    declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "sine");
-    declareParameter("window","the type of window for the frequency filter. It is not recommended to change the default window.","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hannnsgcq");
+    declareParameter("normalize", "coefficient normalization", "{sine,impulse,none}", "none");
+    declareParameter("window","the type of window for the frequency filters. It is not recommended to change the default window.","{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}","hannnsgcq");
     declareParameter("minimumWindow", "minimum size allowed for the windows", "[2,inf)", 4);
     declareParameter("windowSizeFactor", "window sizes are rounded to multiples of this", "[1,inf)", 1);
     }

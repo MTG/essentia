@@ -44,13 +44,16 @@ Compiling Essentia from source
 ==============================
 
 Essentia depends on (at least) the following libraries:
- - `FFTW <http://www.fftw.org>`_: for the FFT implementation *(optional)*
- - `libavcodec/libavformat/libavutil/libavresample <http://ffmpeg.org/>`_ (from the FFmpeg/LibAv project): for loading/saving any type of audio files *(optional)*
- - `libsamplerate <http://www.mega-nerd.com/SRC/>`_: for resampling audio *(optional)*
- - `TagLib <http://developer.kde.org/~wheeler/taglib.html>`_: for reading audio metadata tags *(optional)*
- - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
- - `Gaia <https://github.com/MTG/gaia>`_: for using SVM classifier models *(optional)*
- - `Chromaprint <https://github.com/acoustid/chromaprint>`_: for audio fingerprinting *(optional)*
+
+- `Eigen <http://eigen.tuxfamily.org/>`_: for linear algebra
+- `FFTW <http://www.fftw.org>`_: for the FFT implementation *(optional)*
+- `libavcodec/libavformat/libavutil/libavresample <http://ffmpeg.org/>`_ (from the FFmpeg/LibAv project): for loading/saving any type of audio files *(optional)*
+- `libsamplerate <http://www.mega-nerd.com/SRC/>`_: for resampling audio *(optional)*
+- `TagLib <http://developer.kde.org/~wheeler/taglib.html>`_: for reading audio metadata tags *(optional)*
+- `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
+- `Gaia <https://github.com/MTG/gaia>`_: for using SVM classifier models *(optional)*
+- `Chromaprint <https://github.com/acoustid/chromaprint>`_: for audio fingerprinting *(optional)*
+- `TensorFlow <https://tensorflow.org>`_: for inference with TensorFlow deep learning models *(optional)*
 
 All dependencies are optional, and some functionality will be excluded when a dependency is not found.
 
@@ -59,21 +62,28 @@ Installing dependencies on Linux
 
 You can install those dependencies on a Debian/Ubuntu system from official repositories using the command below::
 
-  sudo apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six
+  sudo apt-get install build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six
 
-In order to use Python 2 bindings for the library, you might also need to install python-dev, python-numpy-dev (or python-numpy on Ubuntu) and python-yaml for YAML support in python::
-
-  sudo apt-get install python-dev python-numpy-dev python-numpy python-yaml
-
-Similarly, in the case of Python 3 install::
+In order to use Python 3 bindings for the library, you might also need to install python3-dev, python3-numpy-dev (or python3-numpy on Ubuntu) and python3-yaml for YAML support in python::
 
   sudo apt-get install python3-dev python3-numpy-dev python3-numpy python3-yaml
 
+Similarly, in the case of Python 2 install::
+
+  sudo apt-get install python-dev python-numpy-dev python-numpy python-yaml
+
+
 On Ubuntu/Debian, make sure that ``/usr/local/lib/python3/dist-packages/`` path is included in the list of Python 3 `module search paths <https://docs.python.org/3/tutorial/modules.html#the-module-search-path>`_. If it is not included by default, you can configure it in the PYTHONPATH variable.
 
-Note that, depending on the version of Essentia, different versions of libav* and libtag1-dev packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_. 
+Note that, depending on the version of Essentia, different versions of ``libav*`` and ``libtag1-dev`` packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_.
 
-Since the 2.1-beta3 release of Essentia, the required version of TagLib (libtag1-dev) is greater or equal to ``1.9``. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu 14.10 or later, and in Debian wheezy-backports. If you want to install Essentia on older versions of Ubuntu/Debian, you will have to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
+Since the 2.1-beta3 release of Essentia, the required version of TagLib (``libtag1-dev``) is greater or equal to ``1.9``. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu 14.10 or later, and in Debian wheezy-backports. If you want to install Essentia on older versions of Ubuntu/Debian, you will have to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
+
+If you are willing to use Essentia with a TensorFlow wrapper in C++, install the TensorFlow shared library using a helper script inside our source code::
+
+  src/3rdparty/tensorflow/setup_from_libtesnorflow.sh
+
+
 
 
 Installing dependencies on Mac OS X
@@ -95,7 +105,7 @@ Install prerequisites::
 
 Install Essentia's dependencies::
 
-  brew install libyaml fftw ffmpeg libsamplerate libtag
+  brew install eigen libyaml fftw ffmpeg libsamplerate libtag tensorflow
 
 `Install python environment using Homebrew <http://docs.python-guide.org/en/latest/starting/install/osx>`_ (Note that you are advised to do as described here and there are `good reasons to do so <http://docs.python-guide.org/en/latest/starting/install/osx/>`_. You will most probably encounter installation errors when using python/numpy preinstalled with OSX.)::
 
@@ -108,8 +118,9 @@ Compiling Essentia
 ------------------
 
 Once your dependencies are installed, you can proceed to compiling Essentia. Download Essentia's source code at `Github <https://github.com/MTG/essentia>`_.  Due to different dependencies requirement (see `release notes for official releases <https://github.com/MTG/essentia/releases>`_), make sure to download the version compatible with your system:
- - **2.1 beta4** is the version currently recommended to install. It is supported on **Ubuntu 14.10 or later**, **Debian Jessie or later** and **OSX**. Build LibAv from source for support on Ubuntu 14.04 LTS or Debian Wheezy.
- - **master** branch is the most updated version of Essentia in development
+
+- **master** branch is the most updated version of Essentia in development
+- **2.1 beta5** is the current stable version recommended to install.
  
 
 Go into its source code directory and start by configuring it::
@@ -117,12 +128,14 @@ Go into its source code directory and start by configuring it::
   ./waf configure --build-static --with-python --with-cpptests --with-examples --with-vamp
 
 Use these (optional) flags:
- - ``--with-python`` to enable python bindings,
- - ``--with-examples`` to build `command line extractors <extractors_out_of_box.html>`_ based on the library,
- - ``--with-vamp`` to build Vamp plugin wrapper,
- - ``--with-gaia`` to build with Gaia library support
- - ``--mode=debug`` to build in debug mode
- - ``--with-cpptests`` to build cpptests
+
+- ``--with-python`` to enable python bindings,
+- ``--with-examples`` to build `command line extractors <extractors_out_of_box.html>`_ based on the library,
+- ``--with-vamp`` to build Vamp plugin wrapper,
+- ``--with-gaia`` to build with Gaia library support,
+- ``--with-tensorflow`` to build with TensorFlow support,
+- ``--mode=debug`` to build in debug mode,
+- ``--with-cpptests`` to build cpptests
 
 NOTE: you must *always* configure at least once before building!
 
@@ -180,6 +193,8 @@ or, in the case if your default python is not Python3::
   python3 ./waf run_python_tests
 
 
+More information about running tests is `in our FAQ <FAQ.html#running-tests>`_.
+
 Building documentation (optional)
 ---------------------------------
 
@@ -230,8 +245,8 @@ Building Essentia on iOS
 A lightweight version of Essentia can be `cross-compiled for iOS <FAQ.html#cross-compiling-for-ios>`_ from Mac OSX.
 
 
-Using pre-trained high-level models in Essentia
------------------------------------------------
+Using pre-trained high-level Gaia models in Essentia
+----------------------------------------------------
 
 Essentia includes a number of `pre-trained classifier models for genres, moods and instrumentation
 <algorithms_overview.html#classifier-models>`_. In order to use them you need to:
@@ -241,3 +256,12 @@ Essentia includes a number of `pre-trained classifier models for genres, moods a
 * Use ``essentia_streaming_extractor_music`` (see `detailed documentation <streaming_extractor_music.html>`_)
 
 You can `train your own classifier models <FAQ.html#training-and-running-classifier-models-in-gaia>`_.
+
+
+
+Using pre-trained TensorFlow models in Essentia
+-----------------------------------------------
+
+Most recently, Essentia provides a wrapper for inference with TensorFlow deep learning models. Follow `these instructions <https://mtg.github.io/essentia-labs/news/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with this wrapper.
+
+We provide a number of `pre-trained TensorFlow models <https://mtg.github.io/essentia-labs/news/2020/01/16/tensorflow-models-released/>`_ for auto-tagging and music classification that can be used out of box. 

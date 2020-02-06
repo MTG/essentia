@@ -30,11 +30,11 @@ class TestLeq(TestCase):
 
     def testSilence(self):
         input = [0]*100
-        self.assertEqual(Leq()(input), -90)
+        self.assertEqual(Leq()(input), -100)
 
     def testOne(self):
         input = [0]
-        self.assertEqual(Leq()(input), -90)
+        self.assertEqual(Leq()(input), -100)
 
         input = [100]
         self.assertAlmostEqual(Leq()(input), lin2db(10000.0))

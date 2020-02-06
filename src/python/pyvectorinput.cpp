@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -64,6 +64,7 @@ static int vectorinput_init(PyStreamingAlgorithm* self, PyObject *args, PyObject
     case VECTOR_STRING:         INIT_TYPE_OWNDATA(string,                  VectorString::fromPythonCopy);
     case VECTOR_STEREOSAMPLE:   INIT_TYPE_OWNDATA(StereoSample,            VectorStereoSample::fromPythonCopy);
     case VECTOR_MATRIX_REAL:    INIT_TYPE_OWNDATA(TNT::Array2D<Real>,      VectorMatrixReal::fromPythonCopy);
+    case VECTOR_TENSOR_REAL:    INIT_TYPE_OWNDATA(Tensor<Real>,            VectorTensorReal::fromPythonCopy);
     case VECTOR_VECTOR_REAL:    INIT_TYPE_OWNDATA(vector<Real>,            VectorVectorReal::fromPythonCopy);
     case VECTOR_VECTOR_COMPLEX: INIT_TYPE_OWNDATA(vector<complex< Real> >, VectorVectorComplex::fromPythonCopy);
 

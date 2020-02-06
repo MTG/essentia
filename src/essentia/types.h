@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -30,6 +30,7 @@
 #include "config.h"
 #include "debugging.h"
 #include "streamutil.h"
+#include <unsupported/Eigen/CXX11/Tensor>
 
 
 // fixed-size int types
@@ -369,6 +370,20 @@ class Tuple2 {
  */
 typedef Tuple2<Real> StereoSample;
 
+
+/**
+ * Alias for Eigen::Tensor.
+ * Store data in a rowMajor fashion to fit Tensorflow's behavior.
+ * https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/framework/tensor_types.h
+ */
+template<typename T>
+using Tensor = Eigen::Tensor<T, 4, Eigen::RowMajor>;
+
+/**
+ * Alias for Eigen::TensorMap.
+ */
+template<typename T>
+using TensorMap = Eigen::TensorMap<Tensor<T>, 0>;
 
 
 namespace streaming {

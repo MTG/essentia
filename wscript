@@ -91,7 +91,8 @@ def configure(ctx):
     ctx.env.WITH_STATIC_EXAMPLES = ctx.options.WITH_STATIC_EXAMPLES
     ctx.env.PKG_CONFIG_PATH      = ctx.options.PKG_CONFIG_PATH
     ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
-    ctx.env.WITH_LIBS            = ctx.options.WITH_LIBS
+    ctx.env.WITH_TENSORFLOW      = ctx.options.WITH_TENSORFLOW
+    ctx.env.LIGHTWEIGHT          = ctx.options.LIGHTWEIGHT
     ctx.env.EXAMPLES             = ctx.options.EXAMPLES
     ctx.env.EXAMPLE_LIST         = []
     ctx.env.ALGOIGNORE           = []
@@ -235,10 +236,15 @@ def configure(ctx):
 
     if ctx.options.CROSS_COMPILE_ANDROID:
         print ("→ Cross-compiling for Android ARM")
-        ctx.find_program('arm-linux-androideabi-gcc', var='CC')
-        ctx.find_program('arm-linux-androideabi-g++', var='CXX')
-        ctx.find_program('arm-linux-androideabi-ar', var='AR')
-        ctx.env.LINKFLAGS += ['-Wl,-soname,libessentia.so']
+        # GCC is depricated for Android NDK
+        # Use clang with libc++
+        #ctx.find_program('arm-linux-androideabi-gcc', var='CC')
+        #ctx.find_program('arm-linux-androideabi-g++', var='CXX')
+        #ctx.find_program('arm-linux-androideabi-ar', var='AR')
+        ctx.find_program('clang', var='CC')
+        ctx.find_program('clang++', var='CXX')
+        ctx.env.CXXFLAGS += ['-std=c++11']
+        ctx.env.LINKFLAGS += ['-Wl,-soname,libessentia.so', '-latomic']
 
     if ctx.options.CROSS_COMPILE_IOS:
         print ("→ Cross-compiling for iOS (ARMv7 and ARM64)")
@@ -315,7 +321,7 @@ def build(ctx):
             includes=['test/3rdparty/gtest-1.6.0/include',
                       'test/3rdparty/gtest-1.6.0'] + adjust(ctx.env.INCLUDES, 'src'),
             install_path=None,
-            use='essentia ' + ctx.env.USES
+            use='essentia ' + ctx.env.USE_LIBS
             )
 
 
@@ -347,6 +353,6 @@ def doc(ctx):
     os.system('mkdir -p build/python')
     os.system('cp -r src/python/essentia build/python/')
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
-    
+
     pythonpath = os.path.abspath('build/python')
     os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, sys.executable))

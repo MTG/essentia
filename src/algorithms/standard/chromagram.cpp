@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,17 +26,17 @@ using namespace standard;
 
 const char* Chromagram::name = "Chromagram";
 const char* Chromagram::category = "Tonal";
-const char* Chromagram::description = DOC("This algorithm computes the chromagram of the Constant Q Transform.\n"
-"\n");
+const char* Chromagram::description = DOC("This algorithm computes the Constant-Q chromagram using FFT. See ConstantQ algorithm for more details.\n");
 
 
 void Chromagram::configure() {
   
-  _sampleRate = parameter("sampleRate").toDouble();
-  _minFrequency = parameter("minFrequency").toDouble();
-  _maxFrequency = parameter("maxFrequency").toDouble();
   _binsPerOctave = parameter("binsPerOctave").toInt();
-  _threshold = parameter("threshold").toDouble();
+  int numberBins = parameter("numberBins").toInt();
+
+  _octaves = numberBins /_binsPerOctave;  
+  // TODO check if the configured numberBins matches a complete number of octaves
+  // if not that throw a warning that only X first bins will be used 
 
   string normalizeType = parameter("normalizeType").toString();
   if (normalizeType == "none") _normalizeType = NormalizeNone;
@@ -44,36 +44,29 @@ void Chromagram::configure() {
   else if (normalizeType == "unit_max") _normalizeType = NormalizeUnitMax;
   else throw EssentiaException("Invalid normalize type for chromagram (none/unit_sum/unit_max): ", normalizeType);
 
-  unsigned int uK = (unsigned int) ceil(_binsPerOctave * log(_maxFrequency/_minFrequency)/log(2.0)); 
-  _octaves = (int)floor(double(uK/_binsPerOctave))-1;  
-
-  _constantq->configure("minFrequency", _minFrequency,
-                        "maxFrequency", _maxFrequency,
-                        "binsPerOctave", _binsPerOctave,
-                        "sampleRate", _sampleRate,
-                        "threshold", _threshold);
-
-  _constantq->output("constantq").set(_CQBuffer);
-  _magnitude->input("complex").set(_CQBuffer);
+  _spectrumCQ->configure(INHERIT("minFrequency"), INHERIT("numberBins"),
+                         INHERIT("binsPerOctave"), INHERIT("sampleRate"),
+                         INHERIT("threshold"), INHERIT("scale"),
+                         INHERIT("windowType"), INHERIT("minimumKernelSize"),
+                         INHERIT("zeroPhase"));
+  _spectrumCQ->output("spectrumCQ").set(_chromaBuffer);
 }
 
 void Chromagram::compute() {
 
-  const vector<complex<Real> >& signal = _signal.get();
+  const vector<Real>& signal = _signal.get();
   vector<Real>& chromagram = _chromagram.get();
 
   chromagram.assign(_binsPerOctave, 0.0);
 
-  _constantq->input("frame").set(signal);
-  _constantq->compute();
-  
-  _magnitude->output("magnitude").set(_ChromaBuffer);
-  _magnitude->compute();
+  // Compute Constant-Q spectrogram
+  _spectrumCQ->input("frame").set(signal);
+  _spectrumCQ->compute();
 
-  for (unsigned octave=0; octave <= _octaves; octave++) {
-    unsigned firstBin = octave*_binsPerOctave;
+  for (unsigned octave = 0; octave < _octaves; octave++) {
+    unsigned firstBin = octave * _binsPerOctave;
     for (unsigned i = 0; i < _binsPerOctave; i++) {
-        chromagram[i] += _ChromaBuffer[firstBin+i];
+        chromagram[i] += _chromaBuffer[firstBin+i];
     }
   }
   

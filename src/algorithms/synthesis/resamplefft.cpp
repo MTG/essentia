@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -35,7 +35,7 @@ const char* ResampleFFT::description = DOC("This algorithm resamples a sequence 
 void ResampleFFT::configure()
 {
   _fft->configure("size", parameter("inSize").toInt());
-  _ifft->configure("size", parameter("outSize").toInt());
+  _ifft->configure("size", parameter("outSize").toInt(), "normalize", false);
 
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -235,6 +235,7 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
         case VECTOR_VECTOR_STRING: SET_PORT_COPY(VectorVectorString, vector<vector<string> >);
         case VECTOR_STEREOSAMPLE:  SET_PORT_COPY(VectorStereoSample, vector<StereoSample>);
         case MATRIX_REAL:          SET_PORT_COPY(MatrixReal, TNT::Array2D<Real>);
+        case TENSOR_REAL:          SET_PORT_COPY(TensorReal, Tensor<Real>);
 
         case POOL:                 SET_PORT_REF(PyPool, Pool);
         case VECTOR_REAL:          SET_PORT_REF(VectorReal, vector<Real>);
@@ -309,6 +310,10 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
       case VECTOR_VECTOR_REAL: SET_PORT(vector<vector<Real> >);
       case VECTOR_VECTOR_COMPLEX: SET_PORT(vector<vector<complex<Real> > >);
       case VECTOR_VECTOR_STRING: SET_PORT(vector<vector<string> >);
+      case TENSOR_REAL:
+        outputs[i] = (void*)new Tensor<Real>();
+        port.set(*(Tensor<Real>*)outputs[i]);
+        break;
       case MATRIX_REAL: SET_PORT(TNT::Array2D<Real>);
       case POOL: SET_PORT(Pool);
 

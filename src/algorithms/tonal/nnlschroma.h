@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -56,7 +56,7 @@ class NNLSChroma : public Algorithm {
     declareParameter("tuningMode", "local uses a local average for tuning, global uses all audio frames. Local tuning is only advisable when the tuning is likely to change over the audio", "{global,local}", "global");
     declareParameter("spectralWhitening", "determines how much the log-frequency spectrum is whitened", "[0,1.0]", 1.0);
     declareParameter("spectralShape", " the shape of the notes in the NNLS dictionary", "(0.5,0.9)", 0.7);
-    declareParameter("chromaNormalisation", "determines whether or how the chromagrams are normalised", "{none,maximum,L1,L2}", "none");
+    declareParameter("chromaNormalization", "determines whether or how the chromagrams are normalised", "{none,maximum,L1,L2}", "none");
   }
 
   void configure();

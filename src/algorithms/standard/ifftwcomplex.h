@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -45,6 +45,7 @@ class IFFTWComplex : public Algorithm {
 
   void declareParameters() {
     declareParameter("size", "the expected size of the input frame. This is purely optional and only targeted at optimizing the creation time of the FFT object", "[1,inf)", 1024);
+    declareParameter("normalize", "wheter to normalize the output by the FFT length.", "{true,false}", true);
   }
 
 
@@ -60,6 +61,7 @@ class IFFTWComplex : public Algorithm {
   int _fftPlanSize;
   std::complex<Real>* _input;
   std::complex<Real>* _output;
+  bool _normalize;
 
   void createFFTObject(int size);
 };

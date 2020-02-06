@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -148,7 +148,13 @@ namespace standard {
 
 const char* KeyExtractor::name = "KeyExtractor";
 const char* KeyExtractor::category = "Tonal";
-const char* KeyExtractor::description = DOC("This algorithm extracts key/scale for an audio signal");
+const char* KeyExtractor::description = DOC("This algorithm extracts key/scale for an audio signal. It computes HPCP frames for the input signal and applies key estimation using the Key algorithm.\n"
+"\n"
+"The algorithm allows tuning correction using two complementary methods:\n"
+"  - Specify the expected `tuningFrequency` for the HPCP computation. The algorithm will adapt the semitone crossover frequencies for computing the HPCPs accordingly. If not specified, the default tuning is used. Tuning frequency can be estimated in advance using TuningFrequency algorithm.\n"
+"  - Apply tuning correction posterior to HPCP computation, based on peaks in the HPCP distribution (`averageDetuningCorrection`). This is possible when hpcpSize > 12.\n"
+"\n"
+"For more information, see the HPCP and Key algorithms.");
 
 
 KeyExtractor::KeyExtractor() {

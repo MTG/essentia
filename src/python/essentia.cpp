@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -72,6 +72,8 @@ init_essentia() {
       PyType_Ready(&PyStereoSampleType)       < 0 ||
       PyType_Ready(&VectorStereoSampleType)   < 0 ||
       PyType_Ready(&VectorMatrixRealType)     < 0 ||
+      PyType_Ready(&TensorRealType)           < 0 ||
+      PyType_Ready(&VectorTensorRealType)     < 0 ||
       PyType_Ready(&VectorVectorStereoSampleType) < 0) {
 
     cerr << "Unable to instantiate Essentia's wrapper types." << endl;

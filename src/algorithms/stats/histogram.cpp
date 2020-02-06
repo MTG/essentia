@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -60,7 +60,7 @@ void Histogram::compute() {
   histogram.resize(_numberBins);
   binEdges.assign(tempBinEdges.begin(), tempBinEdges.end());
 
-  for(int i = 0; i < array.size(); i++){
+  for(size_t i = 0; i < array.size(); i++){
     if(array[i] < _maxValue && array[i] >= _minValue)
       histogram[floor(array[i]/(Real)binWidth)]++;
     else if(array[i] == _maxValue) 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -43,7 +43,9 @@ const char* Key::description = DOC("This algorithm computes key estimate given a
 "  - 'braw' - profiles obtained by calculating the median profile for each mode from a subset of BeatPort dataset. There is an extra profile obtained from ambiguous tracks that are reported as minor[4]\n"
 "  - 'bgate' - same as braw but zeroing the 4 less relevant elements of each profile[4]\n"
 "\n"
-"The standard mode of the algorithm estimates key/scale for a given HPCP vector. The streaming mode first accumulates a stream of HPCP vectors and computes its mean to provide the estimation.\n"
+"The standard mode of the algorithm estimates key/scale for a given HPCP vector.\n"
+"\n"
+"The streaming mode first accumulates a stream of HPCP vectors and computes its mean to provide the estimation. In this mode, the algorithm can apply a tuning correction, based on peaks in the bins of the accumulated HPCP distribution [3] (the `averageDetuningCorrection` parameter). This detuning approach requires a high resolution of the input HPCP vectors (`pcpSize` larger than 12).\n"
 "\n"
 "References:\n"
 "  [1] E. Gómez, \"Tonal Description of Polyphonic Audio for Music Content\n"
