@@ -34,7 +34,7 @@ namespace essentia {
 namespace standard {
 
 const char* CoverSongSimilarity::name = "CoverSongSimilarity";
-const char* CoverSongSimilarity::category = "Music similarity";
+const char* CoverSongSimilarity::category = "Music Similarity";
 const char* CoverSongSimilarity::description = DOC("This algorithm computes a cover song similiarity measure from an input cross similarity matrix of two chroma vectors of a query and reference song using various alignment constraints of smith-waterman local-alignment algorithm.\n\n"
 "This algorithm expects to recieve the input matrix from essentia 'ChromaCrossSimilarity' algorithm or essentia 'CrossSimilarityMatrix' with parameter 'binarize=True'.\n\n"
 "The algorithm provides two different allignment contraints for computing the smith-waterman score matrix (check references).\n\n"
