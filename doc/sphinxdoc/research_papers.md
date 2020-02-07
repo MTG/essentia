@@ -333,3 +333,5 @@ C. Fleitas and A. Moreno, Computational solution for the parametrization of bioa
 - A. Rao, E. Huynh, T. J. Royston, A. Kornblith, and S. Roy. Acoustic Methods for Pulmonary Diagnosis. IEEE reviews in biomedical engineering, 12, 221-239, 2018.
 
 - D. Perna, and A. Tagarelli, A. Deep auscultation: Predicting respiratory anomalies and diseases via recurrent neural networks. In 2019 IEEE 32nd International Symposium on Computer-Based Medical Systems (CBMS), pages 50-55, 2019.
+
+- V. K. Cheung, P. M. Harrison, L. Meyer, M. T. Pearce, J. D. Haynes, and S. Koelsch. Uncertainty and surprise jointly predict musical pleasure and amygdala, hippocampus, and auditory cortex activity. Current Biology, 29(23), 4084-4092, 2019.
