@@ -71,11 +71,10 @@ Name: TensorFlow
 Version: ${TENSORFLOW_VERSION}
 Description: Library for computation using data flow graphs for scalable machine learning
 Requires:
-Libs: -L\${libdir} -Wl,--allow-multiple-definition -Wl,--whole-archive -ltensorflow-core -lprotobuf -lnsync
+Libs: -L\${libdir} -Wl,--allow-multiple-definition -Wl,--whole-archive,-ltensorflow-core,--no-whole-archive -lprotobuf -lnsync 
 Libs.private: -lz -lm -ldl -lpthread
 Cflags: -I\${includedir}
 EOF
 
-
 cd ../..
-# rm -r tmp
+rm -r tmp
