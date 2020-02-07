@@ -42,6 +42,9 @@ sed -i 's/HOST_CXXFLAGS=\"--std=c++11 -march=native\" \\/HOST_CXXFLAGS=\"--std=c
 # Prevent compiling the example.
 sed -i 's/all: \$(LIB_PATH) \$(BENCHMARK_NAME)/all: \$(LIB_PATH)/' tensorflow/contrib/makefile/Makefile
 
+# The matmul_op_fused op is required by some of our supported models.
+# We could also create a custom tf_op_files.txt discarding any op that is not
+# relevant to our models to create lightweight extractors.
 echo 'tensorflow/core/kernels/matmul_op_fused.cc' >> tensorflow/contrib/makefile/tf_op_files.txt
 
 tensorflow/contrib/makefile/build_all_linux.sh
@@ -71,7 +74,7 @@ Name: TensorFlow
 Version: ${TENSORFLOW_VERSION}
 Description: Library for computation using data flow graphs for scalable machine learning
 Requires:
-Libs: -L\${libdir} -Wl,--allow-multiple-definition -Wl,--whole-archive,-ltensorflow-core,--no-whole-archive -lprotobuf -lnsync 
+Libs: -L\${libdir} -Wl,--allow-multiple-definition -Wl,--whole-archive,-ltensorflow-core,--no-whole-archive -lprotobuf -lnsync
 Libs.private: -lz -lm -ldl -lpthread
 Cflags: -I\${includedir}
 EOF
