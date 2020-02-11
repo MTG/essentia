@@ -59,6 +59,12 @@ class TensorflowPredict : public Algorithm {
 
   bool _squeeze;
 
+  void openGraph();
+  TF_Tensor* TensorToTF(const Tensor<Real>& tensorIn);
+  const Tensor<Real> TFToTensor(const TF_Tensor* tensor, TF_Output node);
+  TF_Output graphOperationByName(const char* nodeName, int index=0);
+  std::vector<std::string> nodeNames();
+
  public:
   TensorflowPredict() : _graph(TF_NewGraph()), _status(TF_NewStatus()),
       _options(TF_NewImportGraphDefOptions()), _sessionOptions(TF_NewSessionOptions()),
@@ -78,15 +84,8 @@ class TensorflowPredict : public Algorithm {
 
   void declareParameters() {
     declareParameter("graphFilename", "the name of the file from which to read the Tensorflow graph", "", Parameter::STRING);
-
-    const char* inputNames[] = {"input_1"};
-    const char* outputNames[] = {"output_node0"};
-
-    std::vector<std::string> inputNamesVector = arrayToVector<std::string>(inputNames);
-    std::vector<std::string> outputNamesVector = arrayToVector<std::string>(outputNames);
-
-    declareParameter("inputs", "will look for this namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", inputNamesVector);
-    declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool", "", outputNamesVector);
+    declareParameter("inputs", "will look for this namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", Parameter::VECTOR_STRING);
+    declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool. Set the first element of this list as an empty array to print all the available nodes in the graph", "", Parameter::VECTOR_STRING);
     declareParameter("isTraining", "run the model in training mode (normalized with statistics of the current batch) instead of inference mode (normalized with moving statistics). This only applies to some models", "{true,false}", false);
     declareParameter("isTrainingName", "the name of an additional input node indicating whether the model is to be run in a training mode (for models with a training mode, leave it empty otherwise)", "", "");
     declareParameter("squeeze", "remove singleton dimensions of the inputs tensors. Does not apply to the batch dimension", "{true,false}", true);
@@ -95,10 +94,6 @@ class TensorflowPredict : public Algorithm {
   void configure();
   void compute();
   void reset();
-  void openGraph();
-  TF_Tensor* TensorToTF(const Tensor<Real>& tensorIn);
-  const Tensor<Real> TFToTensor(const TF_Tensor* tensor, TF_Output node);
-  TF_Output graphOperationByName(const char* nodeName, int index=0);
 
   static const char* name;
   static const char* category;
@@ -119,7 +114,6 @@ class TensorflowPredict : public StreamingAlgorithmWrapper {
  protected:
   Sink<Pool> _poolIn;
   Source<Pool> _poolOut;
-
 
  public:
   TensorflowPredict() {

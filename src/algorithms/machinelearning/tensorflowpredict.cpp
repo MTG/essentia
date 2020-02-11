@@ -29,9 +29,10 @@ const char* TensorflowPredict::description = DOC("This algorithm runs a Tensorfl
 "The Tensorflow graph should be stored in Protocol Buffer (.pb) binary format [1], and should contain both the architecture and the weights of the model.\n"
 "The parameter `inputs` should contain a list with the names of the input nodes that feed the model. The input Pool should contain the tensors corresponding to each input node stored using Essetia tensors."
 "The pool namespace for each input tensor has to match the input node's name.\n"
-"In the same way, the `outputs` parameter should contain the names of the nodes whose tensors are desired to save. These tensors will be stored inside the output pool under a namespace that matches the name of the node.\n"
+"In the same way, the `outputs` parameter should contain the names of the nodes whose tensors are desired to save. These tensors will be stored inside the output pool under a namespace that matches the name of the node. "
+"To print a list with all the available nodes in the graph set the first element of `outputs` as an empty string.\n"
 "\n"
-"Note: This algorithm is a wrapper for the Tensorflow C API [2]."
+"Note: This algorithm is a wrapper for the Tensorflow C API [2].\n"
 "\n"
 "Note II: On this algorithm, the reset method deletes the current TensorFlow session (and the resources attached to it) and creates a new one relying on the current graph. The configure method reloads the graph file and then calls the reset method.\n"
 "\n"
@@ -63,12 +64,57 @@ void TensorflowPredict::configure() {
   _nInputs = _inputNames.size();
   _nOutputs = _outputNames.size();
 
+  // Allocate input and output tensors.
+  _inputTensors.resize(_nInputs + int(_isTrainingSet));
+  _inputNodes.resize(_nInputs + int(_isTrainingSet));
+
+  _outputTensors.resize(_nOutputs);
+  _outputNodes.resize(_nOutputs);
+
   TF_DeleteGraph(_graph);
   _graph = TF_NewGraph();
 
   openGraph();
 
   reset();
+
+  // If the first output name is empty just print out the list of nodes and return.
+  if (_outputNames[0] == "") {
+    vector<string> nodes = TensorflowPredict::nodeNames();
+
+    string info = "TensorflowPredict: Available node names are:\n";
+    for (vector<string>::const_iterator i = nodes.begin(); i != nodes.end() - 1; ++i) info += *i + ", ";
+    info += nodes.back() + ".\n\nReconfigure this algorithm with valid node names as inputs and outputs before starting the processing.";
+    E_INFO(info);
+
+    return;
+  }
+
+  // Initialize the list of input and output node names.
+  for (size_t i = 0; i < _nInputs; i++) {
+    _inputNodes[i] = graphOperationByName(_inputNames[i].c_str(), 0);
+  }
+
+  for (size_t i = 0; i < _nOutputs; i++) {
+    _outputNodes[i] = graphOperationByName(_outputNames[i].c_str(), 0);
+  }
+
+  // Add isTraining flag if needed.
+  if (_isTrainingSet) {
+    const int64_t dims[1] = {};
+    TF_Tensor *isTraining = TF_AllocateTensor(TF_BOOL, dims, 0, 1);
+    void* isTrainingValue = TF_TensorData(isTraining);
+
+    if (isTrainingValue == nullptr) {
+      TF_DeleteTensor(isTraining);
+      throw EssentiaException("Error generating traning phase flag");
+    }
+
+    memcpy(isTrainingValue, &_isTraining, sizeof(bool));
+
+    _inputTensors[_nInputs] = isTraining;
+    _inputNodes[_nInputs] = graphOperationByName(_isTrainingName.c_str(), 0);
+  }
 }
 
 
@@ -77,12 +123,11 @@ void TensorflowPredict::openGraph() {
     throw EssentiaException("TensorflowPredict: `graphFilename` parameter should be configured.");
   }
 
-
   // First we load and initialize the model.
   const auto f = fopen(_graphFilename.c_str(), "rb");
   if (f == nullptr) {
     throw EssentiaException(
-        "TensorflowPredict: could not open the tensorflow graph file.");
+        "TensorflowPredict: could not open the Tensorflow graph file.");
   }
 
   fseek(f, 0, SEEK_END);
@@ -110,71 +155,45 @@ void TensorflowPredict::openGraph() {
   TF_DeleteBuffer(buffer);
 
   if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error importing graph.", TF_Message(_status));
+    throw EssentiaException("TensorflowPredict: Error importing graph. ", TF_Message(_status));
   }
 }
+
 
 void TensorflowPredict::reset() {
   if (!parameter("graphFilename").isConfigured()) return;
 
   TF_CloseSession(_session, _status);
   if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error closing session.", TF_Message(_status));
+    throw EssentiaException("TensorflowPredict: Error closing session. ", TF_Message(_status));
   }
 
   TF_DeleteSession(_session, _status);
   if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error deleting session.", TF_Message(_status));
+    throw EssentiaException("TensorflowPredict: Error deleting session. ", TF_Message(_status));
   }
 
   _session = TF_NewSession(_graph, _sessionOptions, _status);
   if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error creating new session after reset.", TF_Message(_status));
+    throw EssentiaException("TensorflowPredict: Error creating new session after reset. ", TF_Message(_status));
   }
 }
 
 
 void TensorflowPredict::compute() {
-
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
-
-  // Allocate input and output tensors.
-  _inputTensors.resize(_nInputs);
-  _inputNodes.resize(_nInputs);
-
-  _outputTensors.resize(_nOutputs);
-  _outputNodes.resize(_nOutputs);
 
   // Parse the input tensors from the pool into Tensorflow tensors.
   for (size_t i = 0; i < _nInputs; i++) {
     const Tensor<Real>& inputData =
         poolIn.value<Tensor<Real> >(_inputNames[i]);
     _inputTensors[i] = TensorToTF(inputData);
-    _inputNodes[i] = graphOperationByName(_inputNames[i].c_str(), 0);
-  }
-
-  // Add isTraining flag if needed
-  if (_isTrainingSet) {
-    const int64_t dims[1] = {};
-    TF_Tensor *isTraining = TF_AllocateTensor(TF_BOOL, dims, 0, 1);
-    void* isTrainingValue = TF_TensorData(isTraining);
-
-    if (isTrainingValue == nullptr) {
-      TF_DeleteTensor(isTraining);
-      throw EssentiaException("Error generating traning phase flag");
-    }
-
-    memcpy(isTrainingValue, &_isTraining, sizeof(bool));
-
-    _inputTensors.push_back(isTraining);
-    _inputNodes.push_back(graphOperationByName(_isTrainingName.c_str(), 0));
   }
 
   // Initialize output tensors.
   for (size_t i = 0; i < _nOutputs; i++) {
     _outputTensors[i] = nullptr;
-    _outputNodes[i] = graphOperationByName(_outputNames[i].c_str(), 0);
   }
 
   // Run the Tensorflow session.
@@ -188,7 +207,7 @@ void TensorflowPredict::compute() {
                 _nOutputs,                       // Number of outputs.
                 nullptr, 0,                      // Target operations, number of targets.
                 nullptr,                         // Run metadata.
-                _status                          // Output status. 
+                _status                          // Output status.
                );
 
   if (TF_GetCode(_status) != TF_OK) {
@@ -201,7 +220,7 @@ void TensorflowPredict::compute() {
   }
 
   // Deallocate tensors.
-  for (size_t i = 0; i < _nInputs + (int)_isTrainingSet; i++) {
+  for (size_t i = 0; i < _nInputs; i++) {
     TF_DeleteTensor(_inputTensors[i]);
   }
 
@@ -292,16 +311,28 @@ TF_Output TensorflowPredict::graphOperationByName(const char* nodeName,
   TF_Output output = {TF_GraphOperationByName(_graph, nodeName), index};
 
   if (output.oper == nullptr) {
-    size_t pos = 0;
-    TF_Operation *oper;
-    string exceptionText = "TensorflowPredict: " + string(nodeName) + " is not a valid node name of this graph.\n" +
+    vector<string> nodes = TensorflowPredict::nodeNames();
+
+    string exceptionText = "TensorflowPredict: '" + string(nodeName) + "' is not a valid node name of this graph.\n" +
                            "Available node names are:\n";
 
-    while ((oper = TF_GraphNextOperation(_graph, &pos)) != nullptr) {
-      exceptionText += string(TF_OperationName(oper)) + ", ";
-    }
+    for (vector<string>::const_iterator i = nodes.begin(); i != nodes.end() - 1; ++i) exceptionText +=  *i + ", ";
+    exceptionText += nodes.back() + ".\n";
+
     throw EssentiaException(exceptionText);
   }
 
   return output;
+}
+
+vector<string> TensorflowPredict::nodeNames() {
+  size_t pos = 0;
+  TF_Operation *oper;
+  vector<string> nodeNames;
+
+  while ((oper = TF_GraphNextOperation(_graph, &pos)) != nullptr) {
+    nodeNames.push_back(string(TF_OperationName(oper)));
+  }
+
+  return nodeNames;
 }
