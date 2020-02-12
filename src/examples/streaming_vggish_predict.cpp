@@ -33,7 +33,7 @@ bool hasFlag(char** begin, char** end, const string& option) {
   return find(begin, end, option) != end;
 }
 
-string getArgument(char** begin, char** end, const string & option) {
+string getArgument(char** begin, char** end, const string& option) {
   char** iter = find(begin, end, option);
   if (iter != end && ++iter != end) return *iter;
 
@@ -41,7 +41,7 @@ string getArgument(char** begin, char** end, const string & option) {
 }
 
 void printHelp(string fileName) {
-    cout << "Usage: " << fileName << " pb_graph audio_input output_json [--help | -h] [--list-nodes | -l] [--patchwise | -p] [[-output-node | -o] node_name]" << endl;
+    cout << "Usage: " << fileName << " pb_graph audio_input output_json [--help|-h] [--list-nodes|-l] [--patchwise|-p] [[-output-node|-o] node_name]" << endl;
     cout << "  -h, --help: print this help" << endl;
     cout << "  -l, --list-nodes: list the nodes in the input graph (model)" << endl;
     cout << "  -p, --patchwise: write out patch-wise predctions (one per patch) instead of averaging them" << endl;
@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
   }
 
   if ((argc < 4) || (argc > 8)) {
-    cout << "Error: incorrect number of arguments." << endl;
+    cout << argv[0] <<": incorrect number of arguments." << endl;
     printHelp(argv[0]);
     exit(1);
   }
