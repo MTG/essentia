@@ -49,8 +49,24 @@ void printHelp(string fileName) {
     creditLibAV();
 }
 
+vector<string> flags({"-h", "--help",
+                      "-l", "--list-nodes",
+                      "-p", "--patchwise",
+                      "-o", "--output-node"});
+
 
 int main(int argc, char* argv[]) {
+  // Sanity check for the command line options.
+  for (char** iter = argv; iter < argv + argc; ++iter) {
+    if (**iter == '-') {
+      string flag(*iter);
+      if (find(flags.begin(), flags.end(), flag) == flags.end()){
+        cout << argv[0] << ": invalid option '" << flag << "'" << endl;
+        printHelp(argv[0]);
+        exit(1);
+      }
+    }
+  }
 
   if (hasFlag(argv, argv + argc, "--help") ||
       hasFlag(argv, argv + argc, "-h")) {
