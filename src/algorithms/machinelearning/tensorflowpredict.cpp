@@ -79,12 +79,7 @@ void TensorflowPredict::configure() {
 
   // If the first output name is empty just print out the list of nodes and return.
   if (_outputNames[0] == "") {
-    vector<string> nodes = TensorflowPredict::nodeNames();
-
-    string info = "TensorflowPredict: Available node names are:\n";
-    for (vector<string>::const_iterator i = nodes.begin(); i != nodes.end() - 1; ++i) info += *i + ", ";
-    info += nodes.back() + ".\n\nReconfigure this algorithm with valid node names as inputs and outputs before starting the processing.";
-    E_INFO(info);
+    E_INFO(availableNodesInfo());
 
     return;
   }
@@ -310,15 +305,9 @@ TF_Output TensorflowPredict::graphOperationByName(const char* nodeName,
   TF_Output output = {TF_GraphOperationByName(_graph, nodeName), index};
 
   if (output.oper == nullptr) {
-    vector<string> nodes = TensorflowPredict::nodeNames();
-
-    string exceptionText = "TensorflowPredict: '" + string(nodeName) + "' is not a valid node name of this graph.\n" +
-                           "Available node names are:\n";
-
-    for (vector<string>::const_iterator i = nodes.begin(); i != nodes.end() - 1; ++i) exceptionText +=  *i + ", ";
-    exceptionText += nodes.back() + ".\n";
-
-    throw EssentiaException(exceptionText);
+    throw EssentiaException("TensorflowPredict: '" + string(nodeName) +
+                            "' is not a valid node name of this graph.\n" +
+                            availableNodesInfo());
   }
 
   return output;

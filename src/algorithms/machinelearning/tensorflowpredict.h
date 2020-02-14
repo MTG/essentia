@@ -65,6 +65,13 @@ class TensorflowPredict : public Algorithm {
   TF_Output graphOperationByName(const char* nodeName, int index=0);
   std::vector<std::string> nodeNames();
 
+  inline std::string availableNodesInfo() {
+    std::vector<std::string> nodes = nodeNames();
+    std::string info = "TensorflowPredict: Available node names are:\n";
+    for (std::vector<std::string>::const_iterator i = nodes.begin(); i != nodes.end() - 1; ++i) info += *i + ", ";
+    return info + nodes.back() + ".\n\nReconfigure this algorithm with valid node names as inputs and outputs before starting the processing.";
+  }
+
  public:
   TensorflowPredict() : _graph(TF_NewGraph()), _status(TF_NewStatus()),
       _options(TF_NewImportGraphDefOptions()), _sessionOptions(TF_NewSessionOptions()),
