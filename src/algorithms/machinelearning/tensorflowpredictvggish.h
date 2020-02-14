@@ -105,7 +105,7 @@ class TensorflowPredictVGGish : public Algorithm {
 
   void declareParameters() {
     declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
-    declareParameter("input", "the name of the input nodes in the Tensorflow graph", "", "model/Placeholder");
+    declareParameter("input", "the name of the input node in the Tensorflow graph", "", "model/Placeholder");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
     declareParameter("isTrainingName", "the name of an additional input node indicating whether the model is to be run in a training mode (for models with a training mode, leave it empty otherwise)", "", "");
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);

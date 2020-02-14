@@ -84,7 +84,7 @@ class TensorflowPredict : public Algorithm {
 
   void declareParameters() {
     declareParameter("graphFilename", "the name of the file from which to read the Tensorflow graph", "", Parameter::STRING);
-    declareParameter("inputs", "will look for this namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", Parameter::VECTOR_STRING);
+    declareParameter("inputs", "will look for these namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", Parameter::VECTOR_STRING);
     declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool. Set the first element of this list as an empty array to print all the available nodes in the graph", "", Parameter::VECTOR_STRING);
     declareParameter("isTraining", "run the model in training mode (normalized with statistics of the current batch) instead of inference mode (normalized with moving statistics). This only applies to some models", "{true,false}", false);
     declareParameter("isTrainingName", "the name of an additional input node indicating whether the model is to be run in a training mode (for models with a training mode, leave it empty otherwise)", "", "");
