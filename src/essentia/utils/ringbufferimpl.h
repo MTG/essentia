@@ -190,11 +190,11 @@ class RingBufferImpl {
     if (_writeIndex + size > _bufferSize)
     {
       int n = _bufferSize - _writeIndex;
-      memcpy( &_buffer[_writeIndex], inputData, n * sizeof(AudioSample));
-      memcpy( _buffer, &inputData[n], (size - n)*sizeof(AudioSample));
+      std::copy(inputData, inputData + n, &_buffer[_writeIndex]);
+      std::copy(&inputData[n], &inputData[n] + size - n, _buffer);
       _writeIndex = (size - n);
     } else {
-      memcpy( &_buffer[_writeIndex], inputData, size * sizeof(AudioSample));
+      std::copy(inputData, inputData + size, &_buffer[_writeIndex]);
       _writeIndex += size;
     }
     _space -=  size;
@@ -222,11 +222,11 @@ class RingBufferImpl {
     if (_readIndex + size > _bufferSize)
     {
       int n = _bufferSize - _readIndex;
-      memcpy( outputData, &_buffer[_readIndex], n * sizeof(AudioSample));
-      memcpy( &outputData[n], _buffer, (size - n)*sizeof(AudioSample));
+      std::copy(&_buffer[_readIndex], &_buffer[_readIndex] + n, outputData);
+      std::copy(_buffer, _buffer + size - n, &outputData[n]);
       _readIndex = (size - n);
     } else {
-      memcpy( outputData, &_buffer[_readIndex], size * sizeof(AudioSample));
+      std::copy(&_buffer[_readIndex], &_buffer[_readIndex] + size, &outputData[0]);
       _readIndex += size;
     }
     _available -= size;
