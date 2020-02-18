@@ -191,6 +191,25 @@ class ESSENTIA_API EssentiaFactory {
     CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) CEND
   CREATE P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16)
     CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) AP(16) CEND
+  CREATE P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17)
+    CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) AP(16) AP(17) CEND
+  CREATE P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18)
+    CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) AP(16) AP(17) AP(18) CEND
+  CREATE P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19)
+    CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) AP(16) AP(17) AP(18) AP(19) CEND
+  CREATE P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20)
+    CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) AP(16) AP(17) AP(18) AP(19) AP(20) CEND
+  CREATE P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) P(21)
+    CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) AP(16) AP(17) AP(18) AP(19) AP(20) AP(21) CEND
+  CREATE P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) P(21) P(22)
+    CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) AP(16) AP(17) AP(18) AP(19) AP(20) AP(21) AP(22) CEND
+  CREATE P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) P(21) P(22) P(23)
+    CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) AP(16) AP(17) AP(18) AP(19) AP(20) AP(21) AP(22) AP(23) CEND
+  CREATE P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) P(21) P(22) P(23) P(24)
+    CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) AP(16) AP(17) AP(18) AP(19) AP(20) AP(21) AP(22) AP(23) AP(24) CEND
+  CREATE P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) P(21) P(22) P(23) P(24) P(25)
+    CBEG AP(1) AP(2) AP(3) AP(4) AP(5) AP(6) AP(7) AP(8) AP(9) AP(10) AP(11) AP(12) AP(13) AP(14) AP(15) AP(16) AP(17) AP(18) AP(19) AP(20) AP(21) AP(22) AP(23) AP(24) AP(25) CEND
+  
 
 
 #define CREATEI BaseAlgorithm* create_i(const std::string& id
@@ -214,6 +233,15 @@ class ESSENTIA_API EssentiaFactory {
   CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) CENDI
   CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) CENDI
   CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) CENDI
+  CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) CENDI
+  CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) CENDI
+  CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) CENDI
+  CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) CENDI
+  CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) P(21) CENDI
+  CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) P(21) P(22) CENDI
+  CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) P(21) P(22) P(23) CENDI
+  CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) P(21) P(22) P(23) P(24) CENDI
+  CREATEI P(1) P(2) P(3) P(4) P(5) P(6) P(7) P(8) P(9) P(10) P(11) P(12) P(13) P(14) P(15) P(16) P(17) P(18) P(19) P(20) P(21) P(22) P(23) P(24) P(25) CENDI
 
 #undef CENDI
 #undef CREATEI
