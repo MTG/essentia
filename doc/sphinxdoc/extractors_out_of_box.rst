@@ -20,9 +20,9 @@ These examples include several executable command-line feature extractors that y
 with the type of descriptors Essentia is able to compute or use them as a reference when building your own extractors:
 
 * ``essentia_streaming_extractor_music``: computes a large set of spectral, time-domain, rhythm, tonal and high-level descriptors. 
-  The frame-wise descriptors are summarized by their statistical distribution and can be optionally output per frames. This extractor was designed for batch computations on large music collections and is the easiest way to get the most of music descriptors out of Essentia without programming. See `detailed documentation <streaming_extractor_music.html>`_.
+  The frame-wise descriptors are summarized by their statistical distribution and can be optionally output per frames. This extractor was designed for batch computations on large music collections and is the easiest way to get the most of music descriptors out of Essentia without programming. See `detailed documentation <streaming_extractor_music.rst>`_.
 
-* ``essentia_streaming_extractor_freesound``: similar extractor recommended for sound analysis. This extractor is used by `Freesound <http://freesound.org>`_ in order to provide sound analysis API and search by similar sounds functionality. See `detailed documentation <freesound_extractor.html>`_.
+* ``essentia_streaming_extractor_freesound``: similar extractor recommended for sound analysis. This extractor is used by `Freesound <http://freesound.org>`_ in order to provide sound analysis API and search by similar sounds functionality. See `detailed documentation <freesound_extractor.rst>`_.
 
 * ``essentia_standard_pitchdemo``: extracts pitch for a monophonic/polyphonic signal using various pitch estimation algorithms.
 
