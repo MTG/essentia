@@ -11,11 +11,17 @@ cd $BASEDIR/debian_3rdparty
 ./build_yaml.sh
 ./build_chromaprint.sh
 
-if [ "$1" = --with-gaia ];
+#!/bin/bash
+if [[ "$*" == *--with-gaia* ]]
     then
         ./build_qt.sh
         ./build_gaia.sh
         rm -rf mkspecs plugins translations
+fi
+
+if [[ "$*" == *--with-tensorflow* ]]
+    then
+        ./build_tensorflow.sh
 fi
 
 rm -rf bin share
