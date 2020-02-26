@@ -1,6 +1,8 @@
 #!/bin/sh
 . ../build_config.sh
 
+echo "Building FFmpeg $FFMPEG_VERSION"
+
 mux=$1
 if test "$1" = "--no-muxers"; then
     echo Building FFmpeg without muxers
@@ -11,7 +13,7 @@ rm -rf tmp
 mkdir tmp
 cd tmp
 
-wget https://ffmpeg.org/releases/$FFMPEG_VERSION.tar.gz
+curl -SLO https://ffmpeg.org/releases/$FFMPEG_VERSION.tar.gz
 tar xf $FFMPEG_VERSION.tar.gz
 cd $FFMPEG_VERSION
 
@@ -23,9 +25,12 @@ cd $FFMPEG_VERSION
     --cross-prefix=$HOST- \
     --arch=x86_32 \
     --target-os=mingw32 \
+    --extra-cflags="-I$PREFIX/include" \
+    --extra-ldflags="-L$PREFIX/lib" \
     --enable-memalign-hack \
-    #--enable-w32threads \
     $SHARED_OR_STATIC
+    #--enable-w32threads \
+
 make
 make install
 
