@@ -118,8 +118,8 @@ def configure(ctx):
             ctx.env.LIB += ['gaia2']
             ctx.env['LIB_GAIA2'] += ['dl'] # -ldl is required when building with static QtCore
 
-        if "HAVE_TENSORFLOW":
-            ctx.env.LDFLAGS += ['-ldl', '-lXau', '-lxcb', '-lXdmcp']
+        if "HAVE_TENSORFLOW" in ctx.env['define_key']:
+            ctx.env.LDFLAGS += ['-ldl']
 
         if ctx.options.CROSS_COMPILE_MINGW32:
             # otherwise the __imp__ symbols will be expected at link time
