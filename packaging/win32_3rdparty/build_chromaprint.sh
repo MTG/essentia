@@ -15,7 +15,7 @@ CHROMAPRINT_TOOLCHAIN="
 SET(CMAKE_SYSTEM_NAME Windows)
 SET(CMAKE_C_COMPILER $HOST-gcc)
 SET(CMAKE_CXX_COMPILER $HOST-g++)
-SET(CMAKE_FIND_ROOT_PATH /usr/$HOST;$PREFIX)
+SET(CMAKE_FIND_ROOT_PATH /usr/$HOST $PREFIX)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
@@ -44,3 +44,5 @@ rm -r tmp
 
 # patch libchromaprint.pc to add a missing link flag for fftw3f
 sed -i -e 's/-lchromaprint/-lchromaprint -lfftw3f/g' "${PREFIX}"/lib/pkgconfig/libchromaprint.pc
+# also add a CHROMAPRINT_NODLL flag for mingw cross-compilation
+sed -i -e 's/Cflags: /Cflags: -DCHROMAPRINT_NODLL /g' "${PREFIX}"/lib/pkgconfig/libchromaprint.pc

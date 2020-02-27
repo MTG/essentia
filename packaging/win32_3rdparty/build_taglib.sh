@@ -5,7 +5,9 @@ rm -rf tmp
 mkdir tmp
 cd tmp
 
-wget http://taglib.github.io/releases/$TAGLIB_VERSION.tar.gz
+echo "Building taglib $TAGLIB_VERSION"
+
+curl -SLO http://taglib.github.io/releases/$TAGLIB_VERSION.tar.gz
 tar -xf $TAGLIB_VERSION.tar.gz
 cd $TAGLIB_VERSION/
 
@@ -25,8 +27,11 @@ cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=$TAGLIB_VERSION_toolchain.cmake \
     -DBUILD_SHARED_LIBS=OFF \
+    -DZLIB_ROOT=$PREFIX \
 	. 
 make
+# patch taglib.cp (missing -lz flag)
+sed -i 's/-ltag/-ltag -lz/g' taglib.pc
 make install
 
 cd ../..
