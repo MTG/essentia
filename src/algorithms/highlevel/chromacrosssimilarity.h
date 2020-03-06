@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020 Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -31,8 +31,8 @@ class ChromaCrossSimilarity : public Algorithm {
    Output<std::vector<std::vector<Real> > > _csm;
   public:
    ChromaCrossSimilarity() {
-    declareInput(_queryFeature, "queryFeature", "input chromagram of the query song (e.g., a HPCP)");
-    declareInput(_referenceFeature, "referenceFeature", "input chromagram of the reference song (e.g., a HPCP)");
+    declareInput(_queryFeature, "queryFeature", "frame-wise chromagram of the query song (e.g., a HPCP)");
+    declareInput(_referenceFeature, "referenceFeature", "frame-wise chromagram of the reference song (e.g., a HPCP)");
     declareOutput(_csm, "csm", "2D binary cross-similarity matrix of the query and reference features");
    }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020 Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -33,7 +33,7 @@ namespace standard {
    Real disExtension;
   public:
    CoverSongSimilarity() {
-     declareInput(_inputArray, "inputArray", " a 2D binary cross-similarity matrix of two audio chroma vectors (query vs reference song) (refer 'ChromaCrossSimilarity' algorithm').");
+     declareInput(_inputArray, "inputArray", " a 2D binary cross-similarity matrix between two audio chroma vectors (query vs reference song) (refer 'ChromaCrossSimilarity' algorithm').");
      declareOutput(_scoreMatrix, "scoreMatrix", "a 2D smith-waterman alignment score matrix from the input binary cross-similarity matrix");
      declareOutput(_distance, "distance", "cover song similarity distance between the query and reference song from the input similarity matrix. Either 'asymmetric' (as described in [2]) or 'symmetric' (maximum score in the alignment score matrix).");
    }
