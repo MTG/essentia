@@ -37,6 +37,7 @@ namespace standard {
 const char* ChromaCrossSimilarity::name = "ChromaCrossSimilarity";
 const char* ChromaCrossSimilarity::category = "Music Similarity";
 const char* ChromaCrossSimilarity::description = DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
+"With default parameters, this algorithm computes cross-similarity of two given input chromagrams as described in [2].\n\n"
 "Use HPCP algorithm for computing the chromagram with default parameters of this algorithm for the best results.\n\n"
 "If parameter 'oti=True', the algorithm transpose the reference song chromagram by optimal transposition index as described in [1].\n\n"
 "If parameter 'otiBinary=True', the algorithm computes the binary cross-similarity matrix based on optimal transposition index between each feature pairs instead of euclidean distance as described in [3].\n\n"
