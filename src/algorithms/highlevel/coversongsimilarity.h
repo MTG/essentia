@@ -79,31 +79,28 @@ class CoverSongSimilarity : public Algorithm {
    Source<Real> _distance;
    
    // params and global protected variables
-   int _minFramesSize = 2;
-   int _iterIdx = 0;
    Real _disOnset;
    Real _disExtension;
+   bool _pipeDistance;
    enum DistanceType {
      SYMMETRIC, ASYMMETRIC
    };
    DistanceType _distanceType;
+   int _minFrameAcquireSize = 3;
+   int _minFrameReleaseSize = 2;
+   int _iterIdx = 0;
+   int _iterRow = 2;
    Real _c1;
    Real _c2;
    Real _c3;
-   Real _c4;
-   Real _c5;
    size_t _xFrames;
    size_t _yFrames;
-   size_t _xIter;
-   size_t _accumXFrameSize;
-   size_t _x;
-   std::vector<std::vector<Real> > _prevCumMatrixFrames;
-   std::vector<std::vector<Real> > _previnputMatrixFrames;
-   std::vector<std::vector<Real> > _bufferScoreMatrix;
+   std::vector<std::vector<Real> > _perFrameScoreMatrix;
+   std::vector<std::vector<Real> > _mainScoreMatrix;
 
   public:
    CoverSongSimilarity() : Algorithm() {
-    declareInput(_inputArray, _minFramesSize, "inputArray", "a 2D binary cross similarity matrix of two audio chroma vectors (refer CrossSimilarityMatrix algorithm').");
+    declareInput(_inputArray, _minFrameAcquireSize, "inputArray", "a 2D binary cross similarity matrix of two audio chroma vectors (refer CrossSimilarityMatrix algorithm').");
     declareOutput(_scoreMatrix, 1, "scoreMatrix", "a 2D smith-waterman alignment score matrix from the input binary cross-similarity matrix as described in [2].");
     declareOutput(_distance, 1, "distance", "cover song similarity distance between the query and reference song from the input similarity. Either 'asymmetric' (as described in [2]) or 'symmetric' (maximum score in the alignment score matrix).");
   }
@@ -114,9 +111,12 @@ class CoverSongSimilarity : public Algorithm {
     declareParameter("disOnset", "penalty for disruption onset", "[0,inf)", 0.5);
     declareParameter("disExtension", "penalty for disruption extension", "[0,inf)", 0.5);
     declareParameter("distanceType", "choose the type of distance. By default the algorithm outputs a asymmetric disctance which is obtained by normalising the maximum score in the alignment score matrix with length of reference song", "{asymmetric,symmetric}", "asymmetric");
+    declareParameter("pipeDistance", "whether to pipe-out the computed cover song similarity distance for each stream of input similarity matrix", "{true,false}", false);
   }
 
   void configure();
+
+  void subFrameQmax(std::vector<std::vector<Real> >& inputFrames);
 
   static const char* name;
   static const char* category;

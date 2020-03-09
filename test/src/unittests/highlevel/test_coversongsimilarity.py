@@ -18,23 +18,25 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 from essentia_test import *
-import essentia.streaming as estr
 
 
 class TestCoverSongSimilarity(TestCase):
-
+    '''Unit tests for essentia CoverSongSimilarity algorithm'''    
+    # pre-defined binary similarity matrix for the test
     sim_matrix = array([[1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 1, 1],
                         [0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1],
                         [1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1],
                         [1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 0, 0],
                         [0, 0, 0, 0, 0, 0, 0 ,0, 0, 0, 0, 0],
                         [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1]])
+    # expected cover similarity distance
     expected_distance = 1.732
 
     def testEmpty(self):
         self.assertComputeFails(CoverSongSimilarity(), [])
 
     def testRegressionStandard(self):
+        '''Test regression of CoverSongSimilarity algorithm in standard mode'''
         sim = CoverSongSimilarity()
         score_matrix, distance = sim.compute(self.sim_matrix)
         self.assertAlmostEqualFixedPrecision(self.expected_distance, distance)
@@ -45,6 +47,21 @@ class TestCoverSongSimilarity(TestCase):
     def testInvalidParam(self):
         self.assertConfigureFails(CoverSongSimilarity(), { 'distanceType': 'test' })
         self.assertConfigureFails(CoverSongSimilarity(), { 'alignmentType': 'test' })
+
+    def testRegressionStreaming(self):
+        '''Test regression of CoverSongSimilarity algorithm in streaming mode'''
+        from essentia.streaming import CoverSongSimilarity as CoverSongSimilarityStreaming
+
+        matrix_input = VectorInput(self.sim_matrix)
+        coversim_streaming = CoverSongSimilarityStreaming(pipeDistance=True)
+        pool = Pool()
+        matrix_input.data >> coversim_streaming.inputArray
+        coversim_streaming.scoreMatrix >>  (pool, 'scoreMatrix')
+        coversim_streaming.distance >> (pool, 'distance')
+        # run the algorithm network
+        run(matrix_input)
+
+        self.assertAlmostEqualFixedPrecision(self.expected_distance, pool['distance'][-1])
 
 
 suite = allTests(TestCoverSongSimilarity)
