@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -35,11 +35,11 @@ namespace standard {
 
 const char* CoverSongSimilarity::name = "CoverSongSimilarity";
 const char* CoverSongSimilarity::category = "Music Similarity";
-const char* CoverSongSimilarity::description = DOC("This algorithm computes a cover song similiarity measure from an input cross similarity matrix of two chroma vectors of a query and reference song using various alignment constraints of smith-waterman local-alignment algorithm.\n\n"
-"This algorithm expects to recieve the input matrix from essentia 'ChromaCrossSimilarity' algorithm or essentia 'CrossSimilarityMatrix' with parameter 'binarize=True'.\n\n"
+const char* CoverSongSimilarity::description = DOC("This algorithm computes a cover song similiarity measure from a binary cross similarity matrix input between two chroma vectors of a query and reference song using various alignment constraints of smith-waterman local-alignment algorithm.\n\n"
+"This algorithm expects to recieve the binary similarity matrix input from essentia 'ChromaCrossSimilarity' algorithm or essentia 'CrossSimilarityMatrix' with parameter 'binarize=True'.\n\n"
 "The algorithm provides two different allignment contraints for computing the smith-waterman score matrix (check references).\n\n"
 "Exceptions are thrown if the input similarity matrix is not binary or empty.\n\n"
-"References:\n"
+"References:\n\n"
 "[1] Smith-Waterman algorithm (Wikipedia, https://en.wikipedia.org/wiki/Smith%E2%80%93Waterman_algorithm).\n\n"
 "[2] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n"
 "[3] Chen, N., Li, W., & Xiao, H. (2017). Fusing similarity functions for cover song identification. Multimedia Tools and Applications.\n");
@@ -82,13 +82,13 @@ void CoverSongSimilarity::compute() {
     for(size_t i = 2; i < xFrames; i++) {
       for(size_t j = 2; j < yFrames; j++) {
         // measure the diagonal when a similarity is found in the input matrix
-        if (simMatrix[i][j] == 1) {
+        if (int(simMatrix[i][j]) == 1) {
           c1 = scoreMatrix[i-1][j-1];
           c2 = scoreMatrix[i-2][j-1];
           c3 = scoreMatrix[i-1][j-2];
           Real row[3] = {c1, c2 , c3};
           scoreMatrix[i][j] = *std::max_element(row, row+3) + 1;
-          }
+        }
         else {
         // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
           c1 = scoreMatrix[i-1][j-1] - gammaState(simMatrix[i-1][j-1], _disOnset, _disExtension);
@@ -96,7 +96,7 @@ void CoverSongSimilarity::compute() {
           c3 = scoreMatrix[i-1][j-2] - gammaState(simMatrix[i-1][j-2], _disOnset, _disExtension);
           Real row2[4] = {0, c1, c2, c3};
           scoreMatrix[i][j] = *std::max_element(row2, row2+4);
-          }
+        }
       }
     }
   }
@@ -105,7 +105,7 @@ void CoverSongSimilarity::compute() {
     for(size_t i = 3; i < xFrames; i++) {
       for(size_t j = 3; j < yFrames; j++) {
         // measure the diagonal when a similarity is found in the input matrix
-        if (simMatrix[i][j] == 1.) {
+        if (int(simMatrix[i][j]) == 1) {
           c2 = scoreMatrix[i-2][j-1] + simMatrix[i-1][j];
           c3 = scoreMatrix[i-1][j-2] + simMatrix[i][j-1];
           c4 = scoreMatrix[i-3][j-1] + simMatrix[i-2][j] + simMatrix[i-1][j];
@@ -144,12 +144,19 @@ void CoverSongSimilarity::compute() {
 namespace essentia {
 namespace streaming {
 
+
 const char* CoverSongSimilarity::name = standard::CoverSongSimilarity::name;
-const char* CoverSongSimilarity::description = standard::CoverSongSimilarity::description;
+const char* CoverSongSimilarity::description = DOC("This algorithm computes a cover song similiarity measure from a binary cross similarity matrix input between two chroma vectors of a query and reference song using specific alignment constraint [2] of smith-waterman local-alignment algorithm [1].\n\n"
+"This algorithm expects to recieve the binary similarity matrix input from essentia 'ChromaCrossSimilarity' algorithm or essentia 'CrossSimilarityMatrix' with parameter 'binarize=True'.\n\n"
+"Exceptions are thrown if the input similarity matrix is not binary or empty.\n\n"
+"References:\n\n"
+"[1] Smith-Waterman algorithm (Wikipedia, https://en.wikipedia.org/wiki/Smith%E2%80%93Waterman_algorithm).\n\n"
+"[2] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n");
 
 void CoverSongSimilarity::configure() {
   _disOnset = parameter("disOnset").toReal();
   _disExtension = parameter("disExtension").toReal();
+  _pipeDistance = parameter("pipeDistance").toBool();
   std::string distanceType = toLower(parameter("distanceType").toString());
   if      (distanceType == "symmetric") _distanceType = SYMMETRIC;
   else if (distanceType == "asymmetric") _distanceType = ASYMMETRIC;
@@ -157,16 +164,11 @@ void CoverSongSimilarity::configure() {
   _c1 = 0;
   _c2 = 0;
   _c3 = 0;
-  _c4 = 0;
-  _c5 = 0;
-  _minFramesSize = 2*2;
-
-  input("inputArray").setAcquireSize(_minFramesSize);
-  input("inputArray").setReleaseSize(_minFramesSize);
-
+  // set the acquire and release size for the inputs and outputs for the streaming network
+  input("inputArray").setAcquireSize(_minFrameAcquireSize);
+  input("inputArray").setReleaseSize(_minFrameReleaseSize);
   output("scoreMatrix").setAcquireSize(1);
   output("scoreMatrix").setReleaseSize(1);
-
 }
 
 AlgorithmStatus CoverSongSimilarity::process() {
@@ -179,7 +181,7 @@ AlgorithmStatus CoverSongSimilarity::process() {
   AlgorithmStatus status = acquireData();
   EXEC_DEBUG("data acquired (in: " << _inputArray.acquireSize()
              << " - out: " << _scoreMatrix.acquireSize() << ")");
-
+  
   if (status != OK) {
     if (!shouldStop()) return status;
 
@@ -198,77 +200,68 @@ AlgorithmStatus CoverSongSimilarity::process() {
   std::vector<std::vector<Real> > inputFramesCopy = inputFrames; 
   /* if we have less input frame streams than the required '_minFrameSize' in the last stream, 
    we append the already acquired frames of the current stream until it satisfies the condition */
-  if (input("inputArray").acquireSize() < _minFramesSize) {
-    for (int i=0; i<(_minFramesSize - input("inputArray").acquireSize()); i++) {
+  if (input("inputArray").acquireSize() < _minFrameAcquireSize) {
+    for (int i=0; i<(_minFrameAcquireSize - input("inputArray").acquireSize()); i++) {
       inputFramesCopy.push_back(inputFrames[i]);
     }
   }
 
   _xFrames = inputFramesCopy.size();
   _yFrames = inputFramesCopy[0].size();
-  std::vector<std::vector<Real> > incrementMatrix(_xFrames, std::vector<Real>(_yFrames, 0));
 
-  // if it's the very first stream of feature array, we initialize the state varibales and indexes
   if (_iterIdx == 0) {
-    _prevCumMatrixFrames.assign(_xFrames, std::vector<Real>(_yFrames, 0));
-    for (size_t i=0; i<_xFrames; i++) {
-      _previnputMatrixFrames.push_back(inputFramesCopy[i]);
-    }
-    _accumXFrameSize = _xFrames;
-    _x = 2;
-    _xIter = 2;
+    _mainScoreMatrix.assign(_xFrames, std::vector<Real>(_yFrames, 0));
   }
-  // otherwise we update the indexes with respected to the previously stored prevcumMatrixFrames
   else {
-    for (size_t i=0; i<_xFrames; i++) {
-      _previnputMatrixFrames.push_back(inputFramesCopy[i]);
-    }
-    _accumXFrameSize = _xFrames * (_iterIdx +  1);
-    _x = _xFrames * _iterIdx;
-    _xIter = 0;
+    _mainScoreMatrix.push_back(std::vector<Real>(_yFrames, 0));
   }
-  
-  // iterate through the similarity matrix to recursively construct the smith-waterman scoring cumilative matrix
-  for(size_t i = _x; i < _accumXFrameSize; i++) {
-    for(size_t j = 2; j < _yFrames; j++) {
-      // measure the diagonal when a similarity is found in the input matrix
-      if (inputFramesCopy[_xIter][j] == 1) {
-        _c1 = _prevCumMatrixFrames[i-1][j-1];
-        _c2 = _prevCumMatrixFrames[i-2][j-1];
-        _c3 = _prevCumMatrixFrames[i-1][j-2];
-        Real row[3] = {_c1, _c2 , _c3};
-        incrementMatrix[_xIter][j] = *std::max_element(row, row+3) + 1;
-        }
-      // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
-      else {
-        _c1 = _prevCumMatrixFrames[i-1][j-1] - gammaState(_previnputMatrixFrames[i-1][j-1], _disOnset, _disExtension);
-        _c2 = _prevCumMatrixFrames[i-2][j-1] - gammaState(_previnputMatrixFrames[i-2][j-1], _disOnset, _disExtension);
-        _c3 = _prevCumMatrixFrames[i-1][j-2] - gammaState(_previnputMatrixFrames[i-1][j-2], _disOnset, _disExtension);
-        Real row2[4] = {0, _c1, _c2, _c3};
-        incrementMatrix[_xIter][j] = *std::max_element(row2, row2+4);
-      }
-    }
-    if (_xIter < _xFrames) _xIter++;
-  }
-  _iterIdx++;
-  // add the resulted score matrix to the buffer variables
-  for (size_t i=0; i<_xFrames; i++) {
-    _bufferScoreMatrix.push_back(incrementMatrix[i]);
-    _prevCumMatrixFrames.push_back(incrementMatrix[i]);
-  }
+
+  // compute qmax alignment score matrix for each 3 sub frames of input stream 
+  subFrameQmax(inputFramesCopy);
+
+  // compute distance
   if (_distanceType == SYMMETRIC) {
-    distance[0] = maxElementArray(_bufferScoreMatrix);
+    distance[0] = maxElementArray(_mainScoreMatrix);
   }
   else if (_distanceType == ASYMMETRIC) {
     // compute cover song similarity distance by normalising it with the length of reference song as described in [2].
-    distance[0] = sqrt(_yFrames) / maxElementArray(_bufferScoreMatrix);
+    distance[0] = sqrt(_yFrames) / maxElementArray(_mainScoreMatrix);
   }
-  // std::cout << distance[0] << std::endl;
-  E_INFO(distance[0]);
-  scoreMatrix[0] = vecvecToArray2D(incrementMatrix);
+  if (_pipeDistance) E_INFO(distance[0]);
+  _iterIdx++;
+  scoreMatrix[0] = vecvecToArray2D(_perFrameScoreMatrix);
+  _perFrameScoreMatrix.clear();
   releaseData();
   return OK;
 }
+
+// compute smith-waterman alignment based on [2] for each 3 frames streams of array input
+void CoverSongSimilarity::subFrameQmax(std::vector<std::vector<Real> >& inputFrames) {
+  
+  if (int(_xFrames) != _minFrameAcquireSize) throw EssentiaException("CoverSongSimilarity: Wrong input frame size!");
+  int i = 2;
+  for (size_t j=2; j<_yFrames; j++) {
+    // measure the diagonal when a similarity is found in the input matrix
+    if (int(inputFrames[i][j]) == 1) {
+      _c1 = _mainScoreMatrix[_iterRow-1][j-1];
+      _c2 = _mainScoreMatrix[_iterRow-2][j-1];
+      _c3 = _mainScoreMatrix[_iterRow-1][j-2];
+      Real row[3] = {_c1, _c2 , _c3};
+      _mainScoreMatrix[_iterRow][j] = *std::max_element(row, row+3) + 1;
+    }
+    else {
+    // apply gap penalty onset for disruption and extension when similarity is not found in the input matrix
+    _c1 = _mainScoreMatrix[_iterRow-1][j-1] - gammaState(inputFrames[i-1][j-1], _disOnset, _disExtension);
+    _c2 = _mainScoreMatrix[_iterRow-2][j-1] - gammaState(inputFrames[i-2][j-1], _disOnset, _disExtension);
+    _c3 = _mainScoreMatrix[_iterRow-1][j-2] - gammaState(inputFrames[i-1][j-2], _disOnset, _disExtension);
+    Real row2[4] = {0, _c1, _c2, _c3};
+    _mainScoreMatrix[_iterRow][j] = *std::max_element(row2, row2+4);
+    }
+  }
+  _perFrameScoreMatrix.push_back(_mainScoreMatrix[_iterRow]);
+  _iterRow++;
+};
+
 
 } // namespace streaming
 } // namespace essentia
@@ -276,9 +269,9 @@ AlgorithmStatus CoverSongSimilarity::process() {
 
 // apply gap penalty for disruption  onset and extension
 Real gammaState(Real value, const Real disOnset, const Real disExtension) {
-  if      (value == 1.0) return disOnset;
-  else if (value == 0.0) return disExtension;
-  else throw EssentiaException("CoverSongSimilarity:Non-binary elements found in the inputsimilarity matrix. Expected a binary similarity matrix!");
+  if      (int(value) == 1) return disOnset;
+  else if (int(value) == 0) return disExtension;
+  else throw EssentiaException("CoverSongSimilarity:Non-binary elements found in the input similarity matrix. Expected a binary similarity matrix!");
 }
 
 

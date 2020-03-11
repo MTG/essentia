@@ -37,7 +37,7 @@ class TestChromaCrossSimilarity(TestCase):
     expected_crp_simmatrix = array([[0., 0., 1.],
                                     [0., 0., 0.]])
 
-    # expected bianry similarity matrix using oti-based similarity method using the python implementation from https://github.com/albincorreya/ChromaCoverId
+    # expected binary similarity matrix using oti-based similarity method using the python implementation from https://github.com/albincorreya/ChromaCoverId
     expected_oti_simmatrix = array([[1., 0., 0.], 
                                     [1., 0., 0.]])
 

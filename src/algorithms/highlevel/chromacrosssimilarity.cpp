@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020 Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -37,13 +37,14 @@ namespace standard {
 const char* ChromaCrossSimilarity::name = "ChromaCrossSimilarity";
 const char* ChromaCrossSimilarity::category = "Music Similarity";
 const char* ChromaCrossSimilarity::description = DOC("This algorithm computes a binary cross similarity matrix from two chromagam feature vectors of a query and reference song.\n\n"
+"With default parameters, this algorithm computes cross-similarity of two given input chromagrams as described in [2].\n\n"
 "Use HPCP algorithm for computing the chromagram with default parameters of this algorithm for the best results.\n\n"
 "If parameter 'oti=True', the algorithm transpose the reference song chromagram by optimal transposition index as described in [1].\n\n"
 "If parameter 'otiBinary=True', the algorithm computes the binary cross-similarity matrix based on optimal transposition index between each feature pairs instead of euclidean distance as described in [3].\n\n"
 "The input chromagram should be in the shape (n_frames, numbins), where 'n_frames' is number of frames and 'numbins' for the number of bins in the chromagram. An exception is thrown otherwise.\n\n"
 "An exception is also thrown if either one of the input chromagrams are empty.\n\n"
 "While param 'streaming=True', the algorithm accumulates the input 'queryFeature' in the pairwise similarity matrix calculation on each call of compute() method. You can reset it using the reset() method.\n\n"
-"References:\n"
+"References:\n\n"
 "[1] Serra, J., Gómez, E., & Herrera, P. (2008). Transposing chroma representations to a common key, IEEE Conference on The Use of Symbols to Represent Music and Multimedia Objects.\n\n"
 "[2] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n"
 "[3] Serra, Joan, et al. Chroma binary similarity and local alignment applied to cover song identification. IEEE Transactions on Audio, Speech, and Language Processing 16.6 (2008).\n");

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020 Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -105,7 +105,8 @@ int main(int argc, char* argv[]) {
   Algorithm* alignment = factory.create("CoverSongSimilarity",
                                   "disExtension", disExtension,
                                   "disOnset", disOnset,
-                                  "distanceType", "asymmetric");
+                                  "distanceType", "asymmetric",
+                                  "pipeDistance", true);
 
   /////////// CONNECTING THE ALGORITHMS ////////////////
   cout << "-------- connecting algos ---------" << endl;
