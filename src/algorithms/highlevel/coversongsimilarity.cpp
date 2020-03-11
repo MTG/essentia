@@ -35,7 +35,7 @@ namespace standard {
 
 const char* CoverSongSimilarity::name = "CoverSongSimilarity";
 const char* CoverSongSimilarity::category = "Music Similarity";
-const char* CoverSongSimilarity::description = DOC("This algorithm computes a cover song similiarity measure from an input cross similarity matrix of two chroma vectors of a query and reference song using various alignment constraints of smith-waterman local-alignment algorithm.\n\n"
+const char* CoverSongSimilarity::description = DOC("This algorithm computes a cover song similiarity measure from a binary cross similarity matrix input between two chroma vectors of a query and reference song using various alignment constraints of smith-waterman local-alignment algorithm.\n\n"
 "This algorithm expects to recieve the binary similarity matrix input from essentia 'ChromaCrossSimilarity' algorithm or essentia 'CrossSimilarityMatrix' with parameter 'binarize=True'.\n\n"
 "The algorithm provides two different allignment contraints for computing the smith-waterman score matrix (check references).\n\n"
 "Exceptions are thrown if the input similarity matrix is not binary or empty.\n\n"
@@ -146,7 +146,12 @@ namespace streaming {
 
 
 const char* CoverSongSimilarity::name = standard::CoverSongSimilarity::name;
-const char* CoverSongSimilarity::description = standard::CoverSongSimilarity::description;
+const char* CoverSongSimilarity::description = DOC("This algorithm computes a cover song similiarity measure from a binary cross similarity matrix input between two chroma vectors of a query and reference song using specific alignment constraint [2] of smith-waterman local-alignment algorithm [1].\n\n"
+"This algorithm expects to recieve the binary similarity matrix input from essentia 'ChromaCrossSimilarity' algorithm or essentia 'CrossSimilarityMatrix' with parameter 'binarize=True'.\n\n"
+"Exceptions are thrown if the input similarity matrix is not binary or empty.\n\n"
+"References:\n\n"
+"[1] Smith-Waterman algorithm (Wikipedia, https://en.wikipedia.org/wiki/Smith%E2%80%93Waterman_algorithm).\n\n"
+"[2] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification.New Journal of Physics.\n\n");
 
 void CoverSongSimilarity::configure() {
   _disOnset = parameter("disOnset").toReal();
