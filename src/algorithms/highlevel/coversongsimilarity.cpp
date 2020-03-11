@@ -271,7 +271,7 @@ void CoverSongSimilarity::subFrameQmax(std::vector<std::vector<Real> >& inputFra
 Real gammaState(Real value, const Real disOnset, const Real disExtension) {
   if      (int(value) == 1) return disOnset;
   else if (int(value) == 0) return disExtension;
-  else throw EssentiaException("CoverSongSimilarity:Non-binary elements found in the inputsimilarity matrix. Expected a binary similarity matrix!");
+  else throw EssentiaException("CoverSongSimilarity:Non-binary elements found in the input similarity matrix. Expected a binary similarity matrix!");
 }
 
 
