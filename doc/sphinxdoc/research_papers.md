@@ -305,6 +305,8 @@ arXiv preprint arXiv:1911.04952, 2019.
 
 R. T. Dean, A. J. Milne, and F. Bailes. Spectral Pitch Similarity is a Predictor of Perceived Change in Sound-as Well as Note-Based Music. Music & Science, 2, 2059204319847351, 2019.
 
+P. Harrison and M. T. Pearce. Simultaneous consonance in music perception and composition. Psychological Review, 127(2), 2019.
+
 
 ## Bioacoustic analyis
 
