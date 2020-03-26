@@ -40,7 +40,7 @@ class TestLowPass(TestCase):
 
         for i in range(1000):
             if s[i] > 10:
-                self.assertTrue(sf[i] > 0,5*s[i])
+                self.assertTrue(sf[i] > 0.5*s[i])
 
         for i in range(1001, len(sf)):
             if s[i] > 10:
