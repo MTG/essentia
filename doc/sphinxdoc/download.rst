@@ -25,7 +25,10 @@ The latest updates are always available in the `master branch <https://github.co
 The latest development builds of Python wheels are available `here <https://owncloud.rp.upf.edu/index.php/s/TpwgF4XrZEpBTOI>`_ (Linux).
 
 
-Classifier models
------------------
 
-Pretrained `classifier models <http://essentia.upf.edu/documentation/svm_models/>`_ to be used with Music Extractor. 
+Machine learning models
+-----------------------
+
+Pretrained `TensorFlow models <https://mtg.github.io/essentia-labs//news/2020/01/16/tensorflow-models-released/>`_ for music auto-tagging and classification.
+
+Pretrained `SVM classifier models <http://essentia.upf.edu/documentation/svm_models/>`_ to be used with Music Extractor.
