@@ -214,6 +214,10 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - F. Fuhrmann, P. Herrera, and X. Serra. Detecting solo phrases in music using spectral and pitch-related descriptors. Journal of New Music Research, 38(4):343–356, 2009.
 
+## Audio source separation
+
+F. R. Stöter. Separation and Count Estimation for Audio Sources Overlapping in Time and Frequency. PhD Thesis, Friedrich–Alexander University Erlangen–Nürnberg, Germany, 2020.
+
 ## Music segmentation
 
 - C. Bohak, and M. Marolt. Probabilistic segmentation of folk music recordings. Mathematical Problems in Engineering, 2016.
