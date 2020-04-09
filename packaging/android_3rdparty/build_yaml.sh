@@ -21,3 +21,6 @@ make install
 
 cd ../..
 rm -r tmp
+
+# libyaml.so symlink is missing: https://github.com/yaml/libyaml/issues/141
+ln -s $PREFIX/lib/libyaml-0.so $PREFIX/lib/libyaml.so
