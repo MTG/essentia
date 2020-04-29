@@ -19,7 +19,7 @@
 
 
 import argparse
-from os import symlink, remove
+from os import symlink, remove, makedirs
 from os.path import join, dirname, abspath
 from shutil import copytree, rmtree
 from subprocess import call
@@ -139,7 +139,10 @@ if __name__ == "__main__":
                   'Libs: {} {}\n'
                   'Cflags: {}\n').format(version, lib_dirs, libs, includes)
 
-    with open(join(context, 'lib', 'pkgconfig', 'tensorflow.pc'), 'w') as f:
+    pkgconfig_dir = join(context, 'lib', 'pkgconfig')
+    makedirs(pkgconfig_dir, exist_ok=True)
+
+    with open(join(pkgconfig_dir, 'tensorflow.pc'), 'w') as f:
         f.write(pkg_config)
 
     # sometimes the dynamic linker has to be reconfigured
