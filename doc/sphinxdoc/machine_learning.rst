@@ -15,9 +15,9 @@ We provide various pre-trained models of both types for various music classifica
 Using pre-trained TensorFlow models
 -----------------------------------
 
-Most recently, Essentia provides a wrapper for inference with TensorFlow deep learning models. Follow `these instructions <https://mtg.github.io/essentia-labs/news/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with this wrapper.
+Most recently, Essentia provides a wrapper for inference with TensorFlow deep learning models. Follow `these instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with this wrapper.
 
-We provide many `pre-trained TensorFlow models <https://mtg.github.io/essentia-labs/news/2020/01/16/tensorflow-models-released/>`_ for auto-tagging and music classification that can be used out of the box.
+We provide many `pre-trained TensorFlow models <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for auto-tagging and music classification that can be used out of the box.
 
 See the demos of these models `here <demos.html>`_.
 
