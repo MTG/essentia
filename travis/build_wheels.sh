@@ -47,14 +47,17 @@ cd -
 
 # Compile wheels
 for PYBIN in /opt/python/*/bin; do
-    # Don't build for python 3.8 while tensorflow doesn't create wheels for it
-    # https://github.com/tensorflow/addons/issues/744
-    if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp38"* ]]; then break; fi
 
     if [[ $WITH_TENSORFLOW ]]; then
     # The minimum numpy version required by tensorflow is always greater than
     # the installed one. Install the oldest numpy supported by each tensorflow
     # to get the maximum fordwards compatibility
+        if [[ $PYBIN == *"cp34"* ]] || [[ $PYBIN == *"cp35"* ]] || [[ $PYBIN == *"cp36"* ]] || [[ $PYBIN == *"cp37"* ]]; then
+            TENSORFLOW_VERSION=1.15.0
+        elif [[ $PYBIN == *"cp38"* ]]; then
+            TENSORFLOW_VERSION=2.2.0
+        fi
+
         NUMPY_VERSION=$( "${PYBIN}/pip" check tensorflow |grep tensorflow |grep numpy |grep ">=" |awk -F"[>=',]+" '//{print $2}' )
 
         if [[ ${NUMPY_VERSION} ]]; then
