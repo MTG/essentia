@@ -74,18 +74,27 @@ if __name__ == "__main__":
         # create symbolic links fo the libraries
         print('creating symbolic links...')
 
-        src = join(tf_dir, 'libtensorflow_framework.so.1')
-        tgt = join(context, 'lib', 'libtensorflow_framework.so')
-        call(['ln', '-sf', src, tgt])
-        call(['ln', '-sf', 'libtensorflow_framework.so', join(context, 'lib', 'libtensorflow_framework.so.1')])
+        libtensorflow = 'tensorflow_framework'
+        pywrap_tensorflow_internal = 'pywrap_tensorflow_internal'
 
-        src = join(tf_dir, 'python', '_pywrap_tensorflow_internal.so')
-        tgt = join(context, 'lib', 'libpywrap_tensorflow_internal.so')
+        libtensorflow_name = 'lib{}.so.{}'.format(libtensorflow, major_version)
+        src = join(tf_dir, libtensorflow_name)
+        tgt = join(context, 'lib', libtensorflow_name)
         call(['ln', '-sf', src, tgt])
-        call(['ln', '-sf', 'libpywrap_tensorflow_internal.so', join(context, 'lib', '_pywrap_tensorflow_internal.so')])
 
-        libs = ('-lpywrap_tensorflow_internal '
-                '-ltensorflow_framework')
+        pywrap_tensorflow_name = '_{}.so'.format(pywrap_tensorflow_internal)
+        src = join(tf_dir, 'python', pywrap_tensorflow_name)
+        tgt = join(context, 'lib', pywrap_tensorflow_name)
+        call(['ln', '-sf', src, tgt])
+
+        # add also symbolic links with standarized library names
+        tgt = join(context, 'lib', 'lib{}.so'.format(libtensorflow))
+        call(['ln', '-sf', libtensorflow_name, tgt])
+
+        tgt = join(context, 'lib', 'lib{}.so'.format(pywrap_tensorflow_internal))
+        call(['ln', '-sf', pywrap_tensorflow_name, tgt])
+
+        libs = ('-l{} -l{}'.format(pywrap_tensorflow_internal, libtensorflow))
 
         # copy headers to the context dir
         include_dir = join(context, 'include', 'tensorflow', 'c')
