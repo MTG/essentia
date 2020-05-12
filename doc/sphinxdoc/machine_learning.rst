@@ -15,11 +15,13 @@ We provide various pre-trained models of both types for various music classifica
 Using pre-trained TensorFlow models
 -----------------------------------
 
-Most recently, Essentia provides a wrapper for inference with TensorFlow deep learning models. Follow `these instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with this wrapper.
+Most recently, Essentia provides a wrapper for TensorFlow deep learning models, designed to offer the flexibility of use, easy extensibility, and real-time inference. It allows using virtually any TensorFlow model within our audio analysis framework. Follow `these instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with this wrapper.
 
 We provide many `pre-trained TensorFlow models <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for auto-tagging and music classification that can be used out of the box.
 
 See the demos of these models `here <demos.html>`_.
+
+Some of our models can work in real-time, opening many possibilities for audio developers. For example, `see the demo and code <https://mtg.github.io/essentia-labs/news/tensorflow/2020/04/23/tensorflow-real-time/>`_ for the MusiCNN model performing music auto-tagging on a live audio stream.
 
 TODO text with recommendations how to build your own models.
 
