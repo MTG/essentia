@@ -35,7 +35,6 @@ script:
   - if [ ! "$TRAVIS_PULL_REQUEST" = "false" ]; then
     python setup.py sdist;
     travis/deploy_owncloud.sh python-pip-pr
-    #travis/deploy_transfer.sh;
     fi
 
 deploy:
