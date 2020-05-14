@@ -23,6 +23,16 @@ from os import symlink, remove, makedirs
 from os.path import join, dirname, abspath
 from shutil import copytree, rmtree
 from subprocess import call
+import errno
+
+
+def force_symlink(src, tgt):
+    try:
+        symlink(src, tgt)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            remove(tgt)
+            symlink(src, tgt)
 
 
 if __name__ == "__main__":
@@ -80,21 +90,21 @@ if __name__ == "__main__":
         libtensorflow_name = 'lib{}.so.{}'.format(libtensorflow, major_version)
         src = join(tf_dir, libtensorflow_name)
         tgt = join(context, 'lib', libtensorflow_name)
-        call(['ln', '-sf', src, tgt])
+        force_symlink(src, tgt)
 
         pywrap_tensorflow_name = '_{}.so'.format(pywrap_tensorflow_internal)
         src = join(tf_dir, 'python', pywrap_tensorflow_name)
         tgt = join(context, 'lib', pywrap_tensorflow_name)
-        call(['ln', '-sf', src, tgt])
+        force_symlink(src, tgt)
 
         # add also symbolic links with standarized library names
         tgt = join(context, 'lib', 'lib{}.so'.format(libtensorflow))
-        call(['ln', '-sf', libtensorflow_name, tgt])
+        force_symlink(libtensorflow_name, tgt)
 
         tgt = join(context, 'lib', 'lib{}.so'.format(pywrap_tensorflow_internal))
-        call(['ln', '-sf', pywrap_tensorflow_name, tgt])
+        force_symlink(pywrap_tensorflow_name, tgt)
 
-        libs = ('-l{} -l{}'.format(pywrap_tensorflow_internal, libtensorflow))
+        libs = ('-l{} -l{}'.format(libtensorflow, pywrap_tensorflow_internal))
 
         # copy headers to the context dir
         include_dir = join(context, 'include', 'tensorflow', 'c')
