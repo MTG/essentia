@@ -303,6 +303,8 @@ def configure(ctx):
             ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
             ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 
+        if sys.platform == 'darwin':
+            ctx.env.LDFLAGS += ['-lz']
     ctx.recurse('src')
 
 
