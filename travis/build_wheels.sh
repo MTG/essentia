@@ -33,8 +33,6 @@ if [[ $WITH_TENSORFLOW ]]; then
     PROJECT_NAME='essentia-tensorflow'
     TENSORFLOW_VERSION=1.15.0
 
-    "${PYBIN}/pip" install tensorflow==$TENSORFLOW_VERSION
-    "${PYBIN}/python" src/3rdparty/tensorflow/setup_tensorflow.py -m python -c "${PREFIX}"
     "${PYBIN}/python" waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
 else
     PROJECT_NAME='essentia'
@@ -65,11 +63,9 @@ for PYBIN in /opt/python/*/bin; do
             "${PYBIN}/pip" install numpy==$NUMPY_VERSION
         fi
 
+        # Install tensorflow to check that Python does not crash when
+        # we import it along with essentia
         "${PYBIN}/pip" install tensorflow==$TENSORFLOW_VERSION
-
-        # Make the tensorflow symbolic links point to the shared libraries
-        # installed with the tensorflow wheel
-        "${PYBIN}/python" /io/src/3rdparty/tensorflow/setup_tensorflow.py -m python -c "${PREFIX}"
 
     else
     # Use the oldest version of numpy for each Python version
