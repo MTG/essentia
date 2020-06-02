@@ -156,6 +156,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 - S. Parekh, F. Font, and X. Serra. Improving Audio Retrieval through Loudness Profile Categorization. In IEEE International Symposium on Multimedia (ISM), pages 565-568, 2016.
 
+- D. Moffat and J. D. Reiss. Objective evaluations of synthesised environmental sounds. In International Conference on Digital Audio Effects (DAFx-18), 2018.
+
 - D. Moffat, D. Ronan, and J. D. Reiss. Unsupervised taxonomy of sound effects. In 20th International Conference on Digital Audio Effects (DAFx-17), 2017.
 
 - S. Böck. Event Detection in Musical Audio. PhD Thesis, Johannes Kepler University, Linz, Austria, 2016.
