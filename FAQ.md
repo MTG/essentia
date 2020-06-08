@@ -147,7 +147,7 @@ You can also compile it for iOS simulator (so that you can test on your desktop)
 
 
 Compiling Essentia to ASM.js or WebAssembly using Emscripten
-------------------------------------------------
+------------------------------------------------------------
 Use the instructions below to compile Essentia to intermediate [LLVM](https://llvm.org/) or [ASM.js](http://asmjs.org/) and [WebAssembly]()(WASM) targets using [Emscripten](https://emscripten.org/). You can build Essentia with or without third party dependencies. Among the dependencies, only FFTW3 is currently supported (see instructions to build it below). The rest of dependencies have not been tested, but they should work as well. A lightweight WASM of build Essentia is used in our dedicated JavaScript wrapper [Essentia.js](https://essentia.upf.edu/essentiajs) which only use KISS FFT instead of FFTW3.
 
 - Install the latest stable Emscripten release following the [instructions](https://emscripten.org/docs/getting_started/downloads.html) on their website. If you downloaded the SDK manually, make sure to activate the Emscripten environment by executing `emsdk_env.sh`.
@@ -173,7 +173,7 @@ cd path/to/essentia
 emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=KISS --emscripten'
 # OR
 # for using FFTW
-emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=fftw --emscripten'
+emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=FFTW --emscripten'
 emmake ./waf
 emmake ./waf install
 ```
