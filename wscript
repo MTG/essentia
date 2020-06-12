@@ -299,7 +299,7 @@ def configure(ctx):
         
         # flags required for linking to static ffmpeg libs
         # -Bsymbolic flag is not available on clang
-        if ctx.env.CXX_NAME is not "clang":
+        if ctx.env.CXX_NAME != "clang":
             ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
             ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 
