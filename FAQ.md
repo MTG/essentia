@@ -125,11 +125,11 @@ Build Essentia with static examples:
 Cross-compiling for Android
 ---------------------------
 
-A lightweight version of Essentia can be compiled using the ```--cross-compile-android``` flag. It requires reducing the dependencies to a bare minimum using KissFFT library for FFT. Specify the installation prefix with ```--prefix``` flag. Update the ```PATH``` variable to point to where you have your Android Standalone Toolchain.
+A lightweight version of Essentia can be compiled using the ```--cross-compile-android``` flag. You also need to pass a valid ```--android-target``` ABI. Possible values are ```aarch64```, ```armv7a```, ```i686```, ```x86_64```. It requires reducing the dependencies to a bare minimum using KissFFT library for FFT. Specify the installation prefix with ```--prefix``` flag. Update the ```PATH``` variable to point to where you have your Android NDK installed.
 
 ```
-export PATH=~/Dev/android/toolchain/bin:$PATH;
-./waf configure --cross-compile-android --lightweight= --fft=KISS --prefix=/Users/carthach/Dev/android/modules/essentia
+export PATH=$NDK/toolchains/llvm/prebuilt/$HOST_TAG/bin:$PATH
+./waf configure --cross-compile-android --android-target=armv7a --lightweight= --fft=KISS --ignore-algos=LPC --prefix=/Users/carthach/Dev/android/modules/essentia
 ./waf
 ./waf install
 ```

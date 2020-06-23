@@ -54,6 +54,10 @@ def options(ctx):
                    dest='ARCH', default="x64",
                    help='Target architecture when compiling on OSX: i386, x64 or FAT')
 
+    ctx.add_option('--android-target', action='store',
+                   dest='ANDROID_TARGET', default='arm',
+                   help='Target ABI when cross compiling for Android: aarch64, armv7a, i686, x86_64')
+
     ctx.add_option('--no-msse', action='store_true',
                    dest='NO_MSSE', default=False,
                    help='never add compiler flags for msse')
@@ -235,14 +239,21 @@ def configure(ctx):
         """
 
     if ctx.options.CROSS_COMPILE_ANDROID:
-        print ("→ Cross-compiling for Android ARM")
-        # GCC is depricated for Android NDK
-        # Use clang with libc++
-        #ctx.find_program('arm-linux-androideabi-gcc', var='CC')
-        #ctx.find_program('arm-linux-androideabi-g++', var='CXX')
-        #ctx.find_program('arm-linux-androideabi-ar', var='AR')
-        ctx.find_program('clang', var='CC')
-        ctx.find_program('clang++', var='CXX')
+        print ("→ Cross-compiling for Android")
+        if ctx.options.ANDROID_TARGET == 'aarch64':
+            ctx.find_program('aarch64-linux-android21-clang', var='CC')
+            ctx.find_program('aarch64-linux-android21-clang++', var='CXX')
+        elif ctx.options.ANDROID_TARGET == 'armv7a':
+            ctx.find_program('armv7a-linux-androideabi21-clang', var='CC')
+            ctx.find_program('armv7a-linux-androideabi21-clang++', var='CXX')
+        elif ctx.options.ANDROID_TARGET == 'i686':
+            ctx.find_program('i686-linux-android21-clang', var='CC')
+            ctx.find_program('i686-linux-android21-clang++', var='CXX')
+        elif ctx.options.ANDROID_TARGET == 'x86_64':
+            ctx.find_program('x86_64-linux-android21-clang', var='CC')
+            ctx.find_program('x86_64-linux-android21-clang++', var='CXX')
+        else:
+            raise ValueError('--android-target not set or set to an incorrect option')
         ctx.env.CXXFLAGS += ['-std=c++11']
         ctx.env.LINKFLAGS += ['-Wl,-soname,libessentia.so', '-latomic']
 
