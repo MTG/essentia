@@ -339,7 +339,7 @@ def run_python_tests(ctx):
     os.system('cp -r src/python/essentia build/python/')
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
 
-    ret = os.system('PYTHONPATH=build/python %s test/src/unittests/all_tests.py' % sys.executable)
+    ret = os.system('PYTHONPATH=build/python:$PYTHONPATH %s test/src/unittests/all_tests.py' % sys.executable)
     if ret:
         ctx.fatal('failed to run python tests. Check test output')
 
