@@ -20,6 +20,10 @@
 #include "debugging.h"
 #include <iostream>
 
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
+
 using namespace std;
 
 namespace essentia {
@@ -108,6 +112,9 @@ void setDebugLevelForTimeIndex(int index) {
 
 void Logger::flush() {
   while (!_msgQueue.empty()) {
+	#ifdef  __ANDROID__
+	  __android_log_print(ANDROID_LOG_DEBUG, "Essentia", "%s\n", _msgQueue.front().c_str());
+	#endif
     std::cerr << _msgQueue.front();
     //std::cout << _msgQueue.front() << std::flush;
     _msgQueue.pop_front();
