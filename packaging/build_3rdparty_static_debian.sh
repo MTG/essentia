@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 BASEDIR=$(dirname $0)
 cd $BASEDIR/debian_3rdparty
 ./build_eigen3.sh

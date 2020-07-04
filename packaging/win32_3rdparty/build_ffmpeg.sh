@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 . ../build_config.sh
 
 echo "Building FFmpeg $FFMPEG_VERSION"
