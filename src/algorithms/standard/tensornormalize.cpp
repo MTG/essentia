@@ -54,9 +54,7 @@ void TensorNormalize::compute() {
   Tensor<Real>& output = _output.get();
 
   switch (_scaler) {
-
-  case STANDARD:
-    {
+    case STANDARD: {
       if (_axis == -1) {
         Real means = mean(input);
         Real stds = stddev(input, means);
@@ -72,12 +70,9 @@ void TensorNormalize::compute() {
 
         output = (input - means.broadcast(broadcastShape)) / stds.broadcast(broadcastShape);
       }
-
       break;
     }
-
-  case MINMAX:
-    {
+    case MINMAX: {
       if (_axis == -1) {
         Real minima = tensorMin(input);
         Real maxima = tensorMax(input);
@@ -94,12 +89,11 @@ void TensorNormalize::compute() {
         output = (input - minima.broadcast(broadcastShape)) /
           (maxima - minima).broadcast(broadcastShape);
       }
-
       break;
     }
-
-  default:
-    throw EssentiaException("TensorNormalize: Unknown scaler type.");
+    default: {
+      throw EssentiaException("TensorNormalize: Unknown scaler type.");
+    }
   }
 
 }
