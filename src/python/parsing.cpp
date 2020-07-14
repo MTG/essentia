@@ -157,7 +157,7 @@ PyObject* toPython(void* obj, Edt tp) {
     case VECTOR_VECTOR_COMPLEX: return VectorVectorComplex::toPythonCopy((vector<vector<complex<Real> > >*)obj);
     case VECTOR_VECTOR_STRING: return VectorVectorString::toPythonCopy((vector<vector<string> >*)obj);
     case VECTOR_VECTOR_STEREOSAMPLE: return VectorVectorStereoSample::toPythonCopy((vector<vector<StereoSample> >*)obj);
-    case TENSOR_REAL: return TensorReal::toPythonRef((Tensor<Real>*)obj);
+    case TENSOR_REAL: return TensorReal::toPythonCopy((Tensor<Real>*)obj);
     case VECTOR_TENSOR_REAL: return VectorTensorReal::toPythonCopy((vector<Tensor<Real> >*)obj);
     case MATRIX_REAL: return MatrixReal::toPythonRef((TNT::Array2D<Real>*)obj);
     case VECTOR_MATRIX_REAL: return VectorMatrixReal::toPythonCopy((vector<TNT::Array2D<Real> >*)obj);
