@@ -221,7 +221,6 @@ AlgorithmStatus VectorRealToTensor::process() {
 
     tensor.resize(shapeEigenIndex);
 
-    // TODO: Add flag to swap frequency axis from 4 to 2.
     for (int i = 0; i < shape[0]; i++) {      // Batch axis
       for (int j = 0; j < shape[2]; j++) {    // Time axis
         for (int k = 0; k < shape[3]; k++) {  // Freq axis
