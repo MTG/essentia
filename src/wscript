@@ -146,6 +146,10 @@ def configure(ctx):
     ctx.check_cfg(package=lib_map['EIGEN3'], uselib_store='EIGEN3',
                   args=['eigen3 >= 3.3.4'] + check_cfg_args)
 
+    # Disable Eigen warnings related to meaningless type qualifiers
+    # https://gitlab.com/libeigen/eigen/-/issues/115
+    ctx.env.DEFINES += ['EIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS']
+
     if 'libav' in ctx.env.CHECK_LIBS:
         ctx.check_cfg(package=lib_map['AVCODEC'], uselib_store='AVCODEC',
                       args=['{} >= 55.34.1'.format(lib_map['AVCODEC'])] + check_cfg_args,
