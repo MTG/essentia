@@ -370,6 +370,10 @@ class Tuple2 {
  */
 typedef Tuple2<Real> StereoSample;
 
+/**
+ * Macro used to define the rank (number of dimensions) of Essentia::Tensor.
+ */
+#define TENSORRANK 4
 
 /**
  * Alias for Eigen::Tensor.
@@ -377,7 +381,7 @@ typedef Tuple2<Real> StereoSample;
  * https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/framework/tensor_types.h
  */
 template<typename T>
-using Tensor = Eigen::Tensor<T, 4, Eigen::RowMajor>;
+using Tensor = Eigen::Tensor<T, TENSORRANK, Eigen::RowMajor>;
 
 /**
  * Alias for Eigen::TensorMap.

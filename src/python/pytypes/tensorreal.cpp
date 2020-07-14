@@ -55,7 +55,7 @@ void* TensorReal::fromPythonCopy(PyObject* obj) {
   if (!PyArray_Check(obj)) {
     throw EssentiaException("TensorReal::fromPythonRef: expected PyArray, received: ", strtype(obj));
   }
-  if (PyArray_NDIM(obj) != 4) {
+  if (PyArray_NDIM(obj) != TENSORRANK) {
     throw EssentiaException("TensorReal::fromPythonCopy: argument is not a 4-dimensional PyArray");
   }
 

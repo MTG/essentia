@@ -216,8 +216,8 @@ AlgorithmStatus VectorRealToTensor::process() {
     Tensor<Real>& tensor = *(Tensor<Real> *)_tensor.getFirstToken();
 
     // Explicit convertion of std:vector to std::array<Eigen::Index> for Clang.
-    std::array<Eigen::Index, 4> shapeEigenIndex;
-    std::copy_n(shape.begin(), 4, shapeEigenIndex.begin());
+    std::array<Eigen::Index, TENSORRANK> shapeEigenIndex;
+    std::copy_n(shape.begin(), TENSORRANK, shapeEigenIndex.begin());
 
     tensor.resize(shapeEigenIndex);
 
