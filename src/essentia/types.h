@@ -389,6 +389,26 @@ using Tensor = Eigen::Tensor<T, TENSORRANK, Eigen::RowMajor>;
 template<typename T>
 using TensorMap = Eigen::TensorMap<Tensor<T>, 0>;
 
+/**
+ * Alias for a 0-dimensional Eigen::Tensor.
+ */
+using TensorScalar = Eigen::Tensor<Real, 0, Eigen::RowMajor>;
+
+/**
+ * Alias for a 1-dimensional Eigen::Tensor.
+ */
+using Tensor1D = Eigen::Tensor<Real, 1, Eigen::RowMajor>;
+
+/**
+ * Alias for a 2-dimensional Eigen::Tensor.
+ */
+using Tensor2D = Eigen::Tensor<Real, 2, Eigen::RowMajor>;
+
+/**
+ * Alias for a 3-dimensional Eigen::Tensor.
+ */
+using Tensor3D = Eigen::Tensor<Real, 3, Eigen::RowMajor>;
+
 
 namespace streaming {
 
