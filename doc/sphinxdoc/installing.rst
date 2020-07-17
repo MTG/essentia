@@ -244,6 +244,11 @@ Building Essentia on iOS
 
 A lightweight version of Essentia can be `cross-compiled for iOS <FAQ.html#cross-compiling-for-ios>`_ from Mac OSX.
 
+Building Essentia for Web using asm.js or WebAssembly
+-----------------------------------------------------
+
+A lightweight version of Essentia can be cross-compiled to asm.js or WebAssembly targets using Emscripten for it's usage on the Web. See [FAQ](https://essentia.upf.edu/FAQ.htm) for more details.
+
 
 Using pre-trained high-level Gaia models in Essentia
 ----------------------------------------------------
