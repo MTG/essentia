@@ -44,7 +44,7 @@ class TestTensorNormalize(TestCase):
 
         original = numpy.arange(3, dtype='float32')
 
-        expected =scaler.fit_transform(original.reshape(-1, 1))
+        expected = scaler.fit_transform(original.reshape(-1, 1))
 
         original = numpy.expand_dims(original, axis=[0, 1, 2])
         result = TensorNormalize(scaler=scaler_name, axis=-1)(original)
