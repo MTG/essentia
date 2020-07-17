@@ -1201,13 +1201,13 @@ std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >
 }
 
 /**
- * Sets `squeezeShape`, `summerizerShape`, `broadcastShape` to perform operations 
- * on a Tensor with the shape of `tesor` along the `axis` dimension.
+ * Sets `squeezeShape`, `summarizerShape`, `broadcastShape` to perform operations 
+ * on a Tensor with the shape of `tensor` along the `axis` dimension.
  */
 template <typename T>
 void tensorGeometricalInfo(const Tensor<T>& tensor, int& axis,
                            std::array<Eigen::Index, TENSORRANK - 1>& squeezeShape,
-                           std::array<Eigen::Index, TENSORRANK>& summerizerShape,
+                           std::array<Eigen::Index, TENSORRANK>& summarizerShape,
                            std::array<Eigen::Index, TENSORRANK>& broadcastShape) {
   // To perform tensor operations along an specific axis we need to get
   // some geometrical information before:
@@ -1222,8 +1222,8 @@ void tensorGeometricalInfo(const Tensor<T>& tensor, int& axis,
   }
 
   // An array with all singleton dimension but the axis of interest.
-  summerizerShape = {1, 1, 1, 1};
-  summerizerShape[axis] = tensor.dimension(axis);
+  summarizerShape = {1, 1, 1, 1};
+  summarizerShape[axis] = tensor.dimension(axis);
 
   // An array with the number of times we need to copy the accumulator
   // tensors per dimension in order to match the input tensor shape.
@@ -1245,12 +1245,12 @@ T mean(const Tensor<T>& tensor) {
 template <typename T>
 Tensor<T> mean(const Tensor<T>& tensor, int axis) {
   std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
-  std::array<Eigen::Index, TENSORRANK> summerizerShape, broadcastShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
 
-  tensorGeometricalInfo(tensor, axis, squeezeShape, summerizerShape, broadcastShape);
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
   Tensor1D means = tensor.mean(squeezeShape);
 
-  return TensorMap<Real>(means.data(), summerizerShape);
+  return TensorMap<Real>(means.data(), summarizerShape);
 }
 
 /**
@@ -1272,9 +1272,9 @@ T stddev(const Tensor<T>& tensor, const T mean) {
 template <typename T>
 Tensor<T> stddev(const Tensor<T>& tensor, const Tensor<T> mean, int axis) {
   std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
-  std::array<Eigen::Index, TENSORRANK> summerizerShape, broadcastShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
 
-  tensorGeometricalInfo(tensor, axis, squeezeShape, summerizerShape, broadcastShape);
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
 
   // Get the number of elements on each sub-tensor.
   Real normalization = tensor.size() / tensor.dimension(axis);
@@ -1289,7 +1289,7 @@ Tensor<T> stddev(const Tensor<T>& tensor, const Tensor<T> mean, int axis) {
   // Compute the standard deviations and put them into a Tensor along the axis.
   Tensor1D stds = (sos / normalization).sqrt();
 
-  return TensorMap<Real>(stds.data(), summerizerShape);
+  return TensorMap<Real>(stds.data(), summarizerShape);
 }
 
 /**
@@ -1306,12 +1306,12 @@ T tensorMin(const Tensor<T>& tensor) {
 template <typename T>
 Tensor<T> tensorMin(const Tensor<T>& tensor, int axis) {
   std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
-  std::array<Eigen::Index, TENSORRANK> summerizerShape, broadcastShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
 
-  tensorGeometricalInfo(tensor, axis, squeezeShape, summerizerShape, broadcastShape);
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
   Tensor1D minima = tensor.minimum(squeezeShape);
 
-  return TensorMap<Real>(minima.data(), summerizerShape);
+  return TensorMap<Real>(minima.data(), summarizerShape);
 }
 
 /**
@@ -1328,12 +1328,12 @@ T tensorMax(const Tensor<T>& tensor) {
 template <typename T>
 Tensor<T> tensorMax(const Tensor<T>& tensor, int axis) {
   std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
-  std::array<Eigen::Index, TENSORRANK> summerizerShape, broadcastShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
 
-  tensorGeometricalInfo(tensor, axis, squeezeShape, summerizerShape, broadcastShape);
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
   Tensor1D maxima = tensor.maximum(squeezeShape);
 
-  return TensorMap<Real>(maxima.data(), summerizerShape);
+  return TensorMap<Real>(maxima.data(), summarizerShape);
 }
 
 } // namespace essentia
