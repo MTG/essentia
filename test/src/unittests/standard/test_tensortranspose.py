@@ -53,6 +53,7 @@ class TestTensorTranspose(TestCase):
         self.assertConfigureFails(TensorTranspose(), { 'permutation': [0, -1, 2, 3] })
         self.assertConfigureFails(TensorTranspose(), { 'permutation': [0, 1, 2, 5] })
         self.assertConfigureFails(TensorTranspose(), { 'permutation': [0, 1, 2] })
+        self.assertConfigureFails(TensorTranspose(), { 'permutation': [0, 1, 2, 2] })
 
 
 

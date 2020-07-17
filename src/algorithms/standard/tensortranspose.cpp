@@ -45,6 +45,13 @@ const char* TensorTranspose::description = DOC("This algorithm performs transpos
     int maximum = *max_element(_permutation.begin(), _permutation.end());
     if (maximum > TENSORRANK -1) throw EssentiaException("TensorTranspose: one of the elements of the permutation vector was set to ",
                                                           maximum, ", while the maximum value has to be ", TENSORRANK -1);
+
+    for (int i = 0; i < TENSORRANK; i++) {
+      if (!count(_permutation.begin(), _permutation.end(), i)) {
+        throw EssentiaException("TensorTranspose: Index (", i, ") not found in `permutaiton`.");
+      }
+    }
+    
   }
 
 void TensorTranspose::compute() {
