@@ -56,14 +56,34 @@ void TensorNormalize::compute() {
   switch (_scaler) {
     case STANDARD: {
       if (_axis == -1) {
-        Real means = mean(input);
-        Real stds = stddev(input, means);
+        Real globalMean = mean(input);
+        Real globalStd = stddev(input, globalMean);
 
-        output = (input - input.constant(means)) / input.constant(stds);
+        if (globalStd == 0) {
+          E_INFO("TensorNormalize: Received tensor with constant value.");
+          // Set std to 0 so we return a vector of all 0s.
+          globalStd = 1;
+        }
+
+        output = (input - globalMean) / globalStd;
 
       } else {
         Tensor<Real> means = mean(input, _axis);
         Tensor<Real> stds = stddev(input, means, _axis);
+
+        bool hasConstantSlice = false;
+
+        Real* stds_data = stds.data();
+        for (int i = 0; i < stds.size(); i++) {
+          if (stds_data[i] == 0) {
+            stds_data[i] = 1;
+            hasConstantSlice = true;
+          }
+        }
+
+        if (hasConstantSlice) {
+          E_INFO("TensorNormalize: Received tensor with constant value.");
+        }
 
         array<Eigen::Index, TENSORRANK> broadcastShape = input.dimensions();
         broadcastShape[_axis] = 1;
@@ -74,10 +94,16 @@ void TensorNormalize::compute() {
     }
     case MINMAX: {
       if (_axis == -1) {
-        Real minima = tensorMin(input);
-        Real maxima = tensorMax(input);
+        Real globalMinimum = tensorMin(input);
+        Real globalMaximum = tensorMax(input);
 
-        output = (input - minima) / (maxima - minima);
+        output = input - globalMinimum;
+
+        if (globalMaximum == globalMinimum) {
+          E_INFO("TensorNormalize: Received tensor with constant value.");
+        } else {
+          output /= output.constant(globalMaximum - globalMinimum);
+        }
 
       } else {
         Tensor<Real> minima = tensorMin(input, _axis);
@@ -86,8 +112,23 @@ void TensorNormalize::compute() {
         array<Eigen::Index, TENSORRANK> broadcastShape = input.dimensions();
         broadcastShape[_axis] = 1;
 
-        output = (input - minima.broadcast(broadcastShape)) /
-          (maxima - minima).broadcast(broadcastShape);
+        Tensor<Real> diff = maxima - minima;
+
+        bool hasConstantSlice = false;
+
+        Real* diff_data = diff.data();
+        for (int i = 0; i < diff.size(); i++) {
+          if (diff_data[i] == 0) {
+            diff_data[i] = 1;
+            hasConstantSlice = true;
+          }
+        }
+
+        if (hasConstantSlice) {
+          E_INFO("TensorNormalize: Received tensor with constant value.");
+        }
+
+        output = (input - minima.broadcast(broadcastShape)) / diff.broadcast(broadcastShape);
       }
       break;
     }

@@ -72,6 +72,44 @@ class TestTensorNormalize(TestCase):
         result = TensorNormalize(scaler=scaler_name, axis=axis)(original)
         self.assertAlmostEqualVector(result.flatten(), expected.flatten(), 1e-6)
 
+    def scalerOverallConstantValue(self, scaler_arg=('standard', StandardScaler())):
+        scaler_name, scaler = scaler_arg
+
+        original = numpy.ones([2, 2], dtype='float32')
+
+        # Use Scipy to generate the expected results
+        expected =scaler.fit_transform(original.reshape(-1, 1))
+
+        # Add singleton dimensions to trainsform the input vector into a tensor
+        original = numpy.expand_dims(original, axis=[0, 1])
+        result = TensorNormalize(scaler=scaler_name, axis=-1)(original)
+
+        self.assertAlmostEqualVector(result.flatten(), expected.flatten(), 1e-6)
+
+    def scalerAlongAxisConstantValue(self, axis=0, scaler_arg=('standard', StandardScaler())):
+        scaler_name, scaler = scaler_arg
+
+        dims, length = 4, 2
+        original = numpy.arange(length ** dims, dtype='float32').reshape([length] * dims)
+
+        # Constant along in one of the axes
+        original[0,:,:,:] = numpy.ones(length ** (dims - 1), dtype='float32').reshape([length] * (dims - 1))
+
+        expected = numpy.empty(original.shape)
+
+        for i in range(original.shape[0]):
+            # Swap the axes before and after so we can test all the dimensions
+            # using the same operator ([i, :, :, :]).
+            original = numpy.swapaxes(original, 0, axis)
+            expected = numpy.swapaxes(expected, 0, axis)
+            tmp = scaler.fit_transform(original[i, :, :, :].reshape(-1, 1))
+            expected[i, :, :, :] = tmp.reshape([1] + [length] * (dims - 1))
+            original = numpy.swapaxes(original, 0, axis)
+            expected = numpy.swapaxes(expected, 0, axis)
+
+        result = TensorNormalize(scaler=scaler_name, axis=axis)(original)
+        self.assertAlmostEqualVector(result.flatten(), expected.flatten(), 1e-6)
+
     def testStandardScalerOverall(self):
         self.scalerOverall(scaler_arg=('standard', StandardScaler()))
 
@@ -86,10 +124,25 @@ class TestTensorNormalize(TestCase):
         for i in range(4):
             self.scalerAlongAxis(axis=i, scaler_arg=('minMax', MinMaxScaler()))
 
+    def testStandrdScalerOverallConstantValue(self):
+        self.scalerOverallConstantValue(scaler_arg=('standard', StandardScaler()))
+
+    def testMinMaxScalerOverallConstantValue(self):
+        self.scalerOverallConstantValue(scaler_arg=('minMax', MinMaxScaler()))
+
+    def testStandardScalerAlongAxisConstantValue(self):
+        for i in range(4):
+            self.scalerAlongAxisConstantValue(axis=i, scaler_arg=('standard', StandardScaler()))
+
+    def testMinMaxScalerAlongAxisConstantValue(self):
+        for i in range(4):
+            self.scalerAlongAxisConstantValue(axis=i, scaler_arg=('minMax', MinMaxScaler()))
+
     def testInvalidParam(self):
         self.assertConfigureFails(TensorNormalize(), { 'axis': -2 })
         self.assertConfigureFails(TensorNormalize(), { 'axis': 5 })
         self.assertConfigureFails(TensorNormalize(), { 'scaler': 'MAXMIN' })
+
 
 
 suite = allTests(TestTensorNormalize)
