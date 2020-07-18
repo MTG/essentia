@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 BASEDIR=$(dirname $0)
 cd $BASEDIR/win32_3rdparty
