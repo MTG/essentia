@@ -24,9 +24,8 @@ import os
 import sys
 
 
-def __subprocess__(cmd):
-    """
-    General purpose subprocess.
+def __subprocess(cmd):
+    """General purpose subprocess.
     """
 
     cmd_str = ' '.join([str(x) for x in cmd])
@@ -39,9 +38,9 @@ def __subprocess__(cmd):
     return rc, cmd_str, stderr.decode("utf-8")
 
 
-def __batch_extractor__(audio_dir, output_dir, extractor_cmd, output_extension,
-                        generate_log=True, audio_types=None, skip_analyzed=False,
-                        jobs=0):
+def __batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
+                      generate_log=True, audio_types=None, skip_analyzed=False,
+                      jobs=0):
     if not audio_types:
         audio_types = ('.WAV', '.AIFF', '.FLAC', '.MP3', '.OGG')
         print("Audio files extensions considered by default: " +
@@ -113,8 +112,7 @@ def batch_music_extractor(audio_dir, output_dir, generate_log=True,
                           audio_types=None, profile=None,
                           store_frames=False, skip_analyzed=False,
                           format='yaml', jobs=0):
-    """
-    Processes every audio file matching `audio_types` in `audio_dir` with MusicExtractor.
+    """Processes every audio file matching `audio_types` in `audio_dir` with MusicExtractor.
     The generated .sig yaml/json files are stored in `output_dir` matching the folder
     structure found in `audio_dir`.
     """
@@ -130,9 +128,8 @@ def batch_music_extractor(audio_dir, output_dir, generate_log=True,
     if store_frames:
         extractor_cmd += ['--store_frames']
 
-
-    __batch_extractor__(audio_dir, output_dir, extractor_cmd, 'sig', generate_log=generate_log,
-                        audio_types=audio_types, skip_analyzed=skip_analyzed, jobs=jobs)
+    __batch_extractor(audio_dir, output_dir, extractor_cmd, 'sig', generate_log=generate_log,
+                      audio_types=audio_types, skip_analyzed=skip_analyzed, jobs=jobs)
 
 
 def batch_melbands_extractor(audio_dir, output_dir, generate_log=True,audio_types=None,
@@ -140,10 +137,9 @@ def batch_melbands_extractor(audio_dir, output_dir, generate_log=True,audio_type
                              hop_size=None, number_bands=None, sample_rate=None,
                              max_frequency=None, window_type=None, compression_type=None,
                              normalize=None):
-    """
-        Generates mel bands for every audio file matching `audio_types` in `audio_dir`.
-        The generated .npy files are stored in `output_dir` matching the folder
-        structure found in `audio_dir`.
+    """Generates mel bands for every audio file matching `audio_types` in `audio_dir`.
+    The generated .npy files are stored in `output_dir` matching the folder
+    structure found in `audio_dir`.
     """
 
     extractor_cmd = [sys.executable, os.path.join(os.path.dirname(__file__),
@@ -177,6 +173,6 @@ def batch_melbands_extractor(audio_dir, output_dir, generate_log=True,audio_type
         extractor_cmd += ['--compression_type', compression_type]
 
 
-    __batch_extractor__(audio_dir, output_dir, extractor_cmd, 'npy',
-                        generate_log=generate_log, audio_types=audio_types,
-                        skip_analyzed=skip_analyzed, jobs=jobs)
+    __batch_extractor(audio_dir, output_dir, extractor_cmd, 'npy',
+                      generate_log=generate_log, audio_types=audio_types,
+                      skip_analyzed=skip_analyzed, jobs=jobs)
