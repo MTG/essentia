@@ -216,12 +216,11 @@ AlgorithmStatus VectorRealToTensor::process() {
     Tensor<Real>& tensor = *(Tensor<Real> *)_tensor.getFirstToken();
 
     // Explicit convertion of std:vector to std::array<Eigen::Index> for Clang.
-    std::array<Eigen::Index, 4> shapeEigenIndex;
-    std::copy_n(shape.begin(), 4, shapeEigenIndex.begin());
+    std::array<Eigen::Index, TENSORRANK> shapeEigenIndex;
+    std::copy_n(shape.begin(), TENSORRANK, shapeEigenIndex.begin());
 
     tensor.resize(shapeEigenIndex);
 
-    // TODO: Add flag to swap frequency axis from 4 to 2.
     for (int i = 0; i < shape[0]; i++) {      // Batch axis
       for (int j = 0; j < shape[2]; j++) {    // Time axis
         for (int k = 0; k < shape[3]; k++) {  // Freq axis

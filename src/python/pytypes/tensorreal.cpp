@@ -26,7 +26,7 @@ using namespace essentia;
 DEFINE_PYTHON_TYPE(TensorReal);
 
 
-PyObject* TensorReal::toPythonRef(essentia::Tensor<essentia::Real>* tensor) {
+PyObject* TensorReal::toPythonCopy(const essentia::Tensor<essentia::Real>* tensor) {
   PyObject* result;
 
   int nd = tensor->rank();
@@ -35,7 +35,11 @@ PyObject* TensorReal::toPythonRef(essentia::Tensor<essentia::Real>* tensor) {
   for (int i = 0; i < nd; i++)
     dims[i] = tensor->dimension(i);
 
-  result = PyArray_SimpleNewFromData(nd, dims, PyArray_FLOAT, tensor->data());
+  result = PyArray_SimpleNew(nd, dims, PyArray_FLOAT);
+
+  Real* dest = (Real*)(((PyArrayObject*)result)->data);
+  const Real* src = tensor->data();
+  fastcopy(dest, src, tensor->size());
 
   assert(result->strides[3] == sizeof(Real));
 
@@ -43,7 +47,6 @@ PyObject* TensorReal::toPythonRef(essentia::Tensor<essentia::Real>* tensor) {
     throw EssentiaException("TensorReal: dang null object");
   }
 
-  PyArray_BASE(result) = TO_PYTHON_PROXY(TensorReal, tensor);
   return result;
 }
 
@@ -52,7 +55,7 @@ void* TensorReal::fromPythonCopy(PyObject* obj) {
   if (!PyArray_Check(obj)) {
     throw EssentiaException("TensorReal::fromPythonRef: expected PyArray, received: ", strtype(obj));
   }
-  if (PyArray_NDIM(obj) != 4) {
+  if (PyArray_NDIM(obj) != TENSORRANK) {
     throw EssentiaException("TensorReal::fromPythonCopy: argument is not a 4-dimensional PyArray");
   }
 
