@@ -102,11 +102,10 @@ if __name__ == '__main__':
                         help='whether to print out status to the standard output')
     parser.add_argument('--force', '-f', action='store_true',
                         help='whether to recompute if the output file already exists')
-                        help='Target sample rate')
     parser.add_argument('--frame_size', '-fs', type=int, default=512)
     parser.add_argument('--hop_size', '-hs', type=int, default=256)
     parser.add_argument('--number_bands', '-nb', type=int, default=48)
-    parser.add_argument('--sample_rate', '-sr', type=float, default=1.6e4,
+    parser.add_argument('--sample_rate', '-sr', type=float, default=1.6e4)
     parser.add_argument('--max_frequency', '-hf', type=float, default=8.e3,
                         help='Maximum frequqncy')
     parser.add_argument('--min_frequency', '-lf', type=float, default=0.,
