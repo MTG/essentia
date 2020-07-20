@@ -51,6 +51,7 @@ def __batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
     print("")
 
     output_dir = os.path.abspath(output_dir)
+    audio_dir = os.path.abspath(audio_dir)
 
     if jobs == 0:
         try:
@@ -61,18 +62,14 @@ def __batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
                   'For a different behavior change the `job` parameter.')
             jobs = 4
 
-    # find all audio files and prepare folder structure in the output folder
-    os.chdir(audio_dir)
-
     skipped_count = 0
     skipped_files = []
     cmd_lines = []
-    for root, _, filenames in os.walk("."):
+    for root, _, filenames in os.walk(audio_dir):
         for filename in filenames:
             if filename.upper().endswith(audio_types):
-                audio_file = os.path.relpath(os.path.join(root, filename))
-                audio_file_abs = os.path.join(audio_dir, audio_file)
-                out_file = os.path.join(output_dir, audio_file)
+                audio_file = os.path.join(audio_dir, root, filename)
+                out_file = os.path.join(output_dir, output_dir, filename)
 
                 if skip_analyzed:
                     if os.path.isfile( '{}.{}'.format(out_file, output_extension)):
@@ -90,7 +87,7 @@ def __batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
                                         'There exist a file with the same name. '
                                         'Aborting analysis.'.format(folder))
 
-                cmd_lines.append(extractor_cmd + [audio_file_abs, out_file])
+                cmd_lines.append(extractor_cmd + [audio_file, out_file])
 
     # analyze
     errors, oks = 0, 0
