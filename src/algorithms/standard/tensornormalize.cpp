@@ -61,7 +61,7 @@ void TensorNormalize::compute() {
 
         if (globalStd == 0) {
           E_INFO("TensorNormalize: Received tensor with constant value.");
-          // Set std to 0 so we return a vector of all 0s.
+          // Set std to 1 so we return a vector of all 0s.
           globalStd = 1;
         }
 
