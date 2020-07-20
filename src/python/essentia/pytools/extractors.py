@@ -90,19 +90,34 @@ def __batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
                 cmd_lines.append(extractor_cmd + [audio_file, out_file])
 
     # analyze
+    log_lines = []
     errors, oks = 0, 0
     if len(cmd_lines) > 0:
         p = Pool(jobs)
-        outs = p.map(__subprocess__, cmd_lines)
+        outs = p.map(__subprocess, cmd_lines)
 
         status, cmd, stderr = zip(*outs)
 
         oks, errors = 0, 0
-        for i in status:
+        for i, cmd_idx, err in zip(status, cmd, stderr):
             if i == 0:
                 oks += 1
+                log_lines.append('"{}" ok!'.format(cmd_idx))
             else:
                 errors += 1
+                log_lines.append('"{}" failed'.format(cmd_idx))
+                log_lines.append('  "{}"'.format(err))
+
+    summary = "Analysis done. {} files have been skipped due to errors, {} were successfully processed and {} already existed.\n".format(
+        errors, oks, skipped_count)
+    print(summary)
+
+    # generate log
+    if generate_log:
+        log = [summary] + log_lines
+
+    with open(os.path.join(output_dir, 'log'), 'w') as f:
+        f.write('\n'.join(log))
 
 
 def batch_music_extractor(audio_dir, output_dir, generate_log=True,
