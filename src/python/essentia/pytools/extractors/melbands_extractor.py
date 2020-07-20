@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -92,7 +92,7 @@ def melbands_extractor(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description = 'Computes mel bands and stores them as a numpy binary file.')
+        description='Computes mel bands and stores them as a numpy binary file.')
 
     parser.add_argument('audio_file',
                         help='audio file name')
