@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 BASEDIR=$(dirname $0)
 cd $BASEDIR/debian_3rdparty
 ./build_eigen3.sh
@@ -11,7 +12,7 @@ cd $BASEDIR/debian_3rdparty
 ./build_yaml.sh
 ./build_chromaprint.sh
 
-#!/bin/bash
+#!/usr/bin/env bash
 if [[ "$*" == *--with-gaia* ]]
     then
         ./build_qt.sh
