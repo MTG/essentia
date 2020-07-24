@@ -45,7 +45,7 @@ class TempoCNN : public Algorithm {
     declareInput(_audio, "audio", "the input audio signal sampled at 11025 Hz");
     declareOutput(_globalTempo, "globalTempo" , "the overall tempo estimation in BPM");
     declareOutput(_localTempo, "localTempo", "the patch-wise tempo estimations in BPM");
-    declareOutput(_localTempoProbs, "localTempoProbabilities", "the patch-wise tempo probabilities in BPM");
+    declareOutput(_localTempoProbs, "localTempoProbabilities", "the patch-wise tempo probabilities");
 
     _tensorflowPredictTempoCNN = AlgorithmFactory::create("TensorflowPredictTempoCNN");
   }
