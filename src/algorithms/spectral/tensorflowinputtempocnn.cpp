@@ -38,7 +38,7 @@ const char* TensorflowInputTempoCNN::description = DOC(
 void TensorflowInputTempoCNN::configure() {
 
   // Analysis parameters are hardcoded to make sure they match the values used on training:
-  // https://github.com/jordipons/musicnn-training/blob/master/src/config_file.py
+  // https://github.com/hendriks73/tempo-cnn/blob/master/tempocnn/feature.py
   int frameSize = 1024;
   int numberBands=40;
   Real sampleRate = 11025.0;
