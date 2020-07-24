@@ -142,7 +142,7 @@ const char* TensorflowPredictVGGish::category = "Machine Learning";
 const char* TensorflowPredictVGGish::description = DOC(
   "This algorithm makes predictions using VGGish-based models.\n"
   "Internally, it uses TensorflowInputVGGish for the input feature extraction (mel bands). "
-  "It feeds the model with patches of 96 mel bands frames and jumps a constant amount of frames determined by patchHopSize.\n"
+  "It feeds the model with patches of 96 mel bands frames and jumps a constant amount of frames determined by `patchHopSize`.\n"
   "With the accumulate parameter the patches are stored to run a single TensorFlow session at the end of the stream. "
   "This allows to take advantage of parallelization when GPUs are available, but at the same time it can be memory exhausting for long files.\n"
   "The recommended pipeline is as follows:\n"

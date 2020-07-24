@@ -153,7 +153,7 @@ const char* TensorflowPredictTempoCNN::category = "Machine Learning";
 const char* TensorflowPredictTempoCNN::description = DOC(
   "This algorithm makes predictions using Hendrik Schreiber's TempoCNN-based models.\n"
   "Internally, it uses TensorflowInputTempoCNN for the input feature extraction (mel bands). "
-  "It feeds the model with patches of 256 mel bands frames and jumps a constant amount of frames determined by patchHopSize.\n"
+  "It feeds the model with patches of 256 mel bands frames and jumps a constant amount of frames determined by `patchHopSize`.\n"
   "With the `batchSize` parameter set to -1 the patches are stored to run a single TensorFlow session at the end of the stream. "
   "This allows to take advantage of parallelization when GPUs are available, but at the same time it can be memory exhausting for long files.\n"
   "The recommended pipeline is as follows:\n"
