@@ -97,6 +97,10 @@ void TensorflowPredictTempoCNN::configure() {
   string lastPatchMode = parameter("lastPatchMode").toString();
   int batchSize = parameter("batchSize").toInt();
 
+  if (batchSize == 0) {
+    throw EssentiaException("TensorflowPredictTempoCNN: 0 is not a valid `batchSize` value.");
+  }
+
   // Hardcoded parameters matching the training setup:
   // https://github.com/hendriks73/tempo-cnn/blob/master/tempocnn/feature.py
   int frameSize = 1024;
