@@ -60,8 +60,8 @@ class TempoCNN : public Algorithm {
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "output");
     declareParameter("patchHopSize", "the number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 128);
     declareParameter("lastPatchMode", "what to do with the last frames. Options are to `repeat` them to fill the last patch or to `discard` them", "{discard,repeat}", "discard");
-    declareParameter("batchSize", "Number of patches to process in parallel. Use -1 to accumulate all the patches and run a single TensorFlow session at the end of the stream.", "[-1,inf)", 1);
-    declareParameter("aggregationMethod", "Method used to estimate the global tempo.", "{majority,mean,median}", "majority");
+    declareParameter("batchSize", "number of patches to process in parallel. Use -1 to accumulate all the patches and run a single TensorFlow session at the end of the stream.", "[-1,inf)", 1);
+    declareParameter("aggregationMethod", "method used to estimate the global tempo.", "{majority,mean,median}", "majority");
 
   }
 
