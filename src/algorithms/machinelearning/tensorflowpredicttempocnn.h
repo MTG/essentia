@@ -106,8 +106,8 @@ class TensorflowPredictTempoCNN : public Algorithm {
 
   void declareParameters() {
     declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
-    declareParameter("input", "the name of the input nodes in the Tensorflow graph", "", "Input");
-    declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "Softmax");
+    declareParameter("input", "the name of the input nodes in the Tensorflow graph", "", "input");
+    declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "output");
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 128);
     declareParameter("lastPatchMode", "what to do with the last frames. Options are to `repeat` them to fill the last patch or to discard them", "{discard,repeat}", "discard");
     declareParameter("batchSize", "Number of patches to process in parallel. Use -1 to accumulate all the patches and run a single TensorFlow session at the end of the stream.", "[-1,inf)", 1);
