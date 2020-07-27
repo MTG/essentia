@@ -108,7 +108,9 @@ def melspectrogram(filename, npy_file=None, force=False, verbose=False, sample_r
 
         compression_type:
         string ∈ {dB,shift_scale_log,none} (default = "shift_scale_log")
-        the sample rate
+        the compression type to use.
+        'shift_scale_log' is log10(10000 * x + 1)
+        'dB' is 10 * log10(x)
 
     Returns:
         (2D array): The mel-spectrogram.
