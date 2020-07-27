@@ -34,7 +34,7 @@ TensorflowPredictMusiCNN::TensorflowPredictMusiCNN() : AlgorithmComposite(),
     _tensorflowPredict(0), _poolToTensor(0), _tensorToVectorReal(0), _configured(false) {
 
   declareInput(_signal, 4096, "signal", "the input audio signal sampled at 16 kHz");
-  declareOutput(_predictions, 0, "predictions", "the model predictions");
+  declareOutput(_predictions, 0, "predictions", "the output values from the model node named after `output`");
 }
 
 
@@ -158,7 +158,7 @@ const char* TensorflowPredictMusiCNN::description = DOC(
 
 TensorflowPredictMusiCNN::TensorflowPredictMusiCNN() {
     declareInput(_signal, "signal", "the input audio signal sampled at 16 kHz");
-    declareOutput(_predictions, "predictions", "the predictions");
+    declareOutput(_predictions, "predictions", "the output values from the model node named after `output`");
 
     createInnerNetwork();
   }
