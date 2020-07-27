@@ -26,7 +26,7 @@ using namespace standard;
 const char* TensorflowInputTempoCNN::name = "TensorflowInputTempoCNN";
 const char* TensorflowInputTempoCNN::category = "Spectral";
 const char* TensorflowInputTempoCNN::description = DOC(
-  "This algorithm computes mel-bands with a particular parametrization specific to Hendrik Schreiber's TempoCNN based models.\n"
+  "This algorithm computes mel-bands specific to the input of TempoCNN-based models.\n"
   "\n"
   "References:\n"
   "  [1] Hendrik Schreiber, Meinard Müller, A Single-Step Approach to Musical Tempo Estimation Using a Convolutional Neural Network Proceedings of the 19th International Society for Music Information Retrieval Conference (ISMIR), Paris, France, Sept. 2018.\n"

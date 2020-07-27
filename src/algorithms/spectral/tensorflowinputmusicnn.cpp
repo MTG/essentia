@@ -26,7 +26,7 @@ using namespace standard;
 const char* TensorflowInputMusiCNN::name = "TensorflowInputMusiCNN";
 const char* TensorflowInputMusiCNN::category = "Spectral";
 const char* TensorflowInputMusiCNN::description = DOC(
-  "This algorithm computes mel-bands with a particular parametrization specific to MusiCNN based models.\n"
+  "This algorithm computes mel-bands specific to the input of MusiCNN-based models.\n"
   "\n"
   "References:\n"
   "  [1] Pons, J., & Serra, X. (2019). musicnn: Pre-trained convolutional neural networks for music audio tagging. arXiv preprint arXiv:1909.06654.\n\n"
