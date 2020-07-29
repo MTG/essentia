@@ -89,13 +89,13 @@ def _batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
                         skipped_count += 1
                         continue
                 folder = os.path.dirname(out_file)
-                if not os.path.exists(folder):
-                    os.makedirs(folder)
 
-                elif os.path.isfile(folder):
-                    raise EssentiaError('Cannot create directory {}. '
-                                        'There exist a file with the same name. '
+                if os.path.isfile(folder):
+                    raise EssentiaError('Cannot create directory "{}". '
+                                        'There is a file with the same name. '
                                         'Aborting analysis.'.format(folder))
+                else:
+                    os.makedirs(folder, exist_ok=True)
 
                 cmd_lines.append(extractor_cmd + [audio_file, out_file])
 
