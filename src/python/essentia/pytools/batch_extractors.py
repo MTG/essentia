@@ -18,7 +18,7 @@
 from argparse import ArgumentParser
 from multiprocessing import Pool
 from multiprocessing import cpu_count
-from subprocess import Popen, PIPE
+from subprocess import run, PIPE
 from essentia import EssentiaError
 from functools import partial
 import os
@@ -26,24 +26,22 @@ import sys
 
 
 def _subprocess(cmd, verbose=True):
-    """General purpose subprocess.
-    """
+    """General purpose subprocess."""
+
+    completed_process = run(cmd, stdout=None, stderr=PIPE)
 
     cmd_str = ' '.join([str(x) for x in cmd])
-
-    child = Popen(cmd, stdout=None, stderr=PIPE)
-    _, stderr = child.communicate()
-    rc = child.returncode
+    stderr = completed_process.stderr.decode("utf-8")
+    rc = completed_process.returncode
 
     if verbose:
         if rc == 0:
             print('"{}"... ok!'.format(cmd_str))
         else:
-            print('"{}"... failed!'.format(cmd_str))
+            print('"{}"... failed (returncode {})!'.format(cmd_str, rc))
             print(stderr, '\n')
 
-
-    return rc, cmd_str, stderr.decode("utf-8")
+    return rc, cmd_str, stderr
 
 
 def _batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
