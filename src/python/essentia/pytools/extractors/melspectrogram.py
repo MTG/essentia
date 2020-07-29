@@ -50,7 +50,7 @@ def melspectrogram(filename, npy_file=None, force=False, verbose=False, sample_r
     Use the parameter `force` to overwrite the numpy array in case it already exists.
     The rest of parameters are directly mapped to Essentia algorithms as explained below.
 
-    Note: this functionallity is also avaiable as a command line script.
+    Note: this functionality is also available as a command line script.
 
     Parameters:
         sample_rate:
@@ -121,7 +121,7 @@ def melspectrogram(filename, npy_file=None, force=False, verbose=False, sample_r
 
 
     # In case we want to save the melbands to a file
-    # check if the file already existss
+    # check if the file already exists
     if npy_file:
         if not npy_file.endswith('.npy'):
             npy_file += '.npy'
@@ -188,7 +188,7 @@ def melspectrogram(filename, npy_file=None, force=False, verbose=False, sample_r
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-        description='Computes the mel spectrogram given the audio filename.')
+        description='Computes the mel spectrogram of a given audio file.')
 
     parser.add_argument('filename',
                         help='the name of the file from which to read')

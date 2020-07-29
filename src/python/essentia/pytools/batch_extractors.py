@@ -103,7 +103,7 @@ def __batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
 
     # analyze
     log_lines = []
-    total, errors, oks =0, 0, 0
+    total, errors, oks = 0, 0, 0
     if len(cmd_lines) > 0:
         p = Pool(jobs)
         outs = p.map(partial(__subprocess, verbose=verbose), cmd_lines)
