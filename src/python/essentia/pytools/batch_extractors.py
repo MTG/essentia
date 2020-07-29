@@ -50,7 +50,7 @@ def _batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
     if not audio_types:
         audio_types = ('.wav', '.aiff', '.flac', '.mp3', '.ogg')
         print("Audio files extensions considered by default: " +
-              ' '.join(audio_types))
+              ', '.join(audio_types))
     else:
         if type(audio_types) == str:
             audio_types = [audio_types]
