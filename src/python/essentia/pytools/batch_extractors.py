@@ -25,7 +25,7 @@ import os
 import sys
 
 
-def __subprocess(cmd, verbose=True):
+def _subprocess(cmd, verbose=True):
     """General purpose subprocess.
     """
 
@@ -46,9 +46,9 @@ def __subprocess(cmd, verbose=True):
     return rc, cmd_str, stderr.decode("utf-8")
 
 
-def __batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
-                      generate_log=True, audio_types=None, skip_analyzed=False,
-                      jobs=0, verbose=True):
+def _batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
+                     generate_log=True, audio_types=None, skip_analyzed=False,
+                     jobs=0, verbose=True):
     if not audio_types:
         audio_types = ('.wav', '.aiff', '.flac', '.mp3', '.ogg')
         print("Audio files extensions considered by default: " +
@@ -106,8 +106,8 @@ def __batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
     total, errors, oks = 0, 0, 0
     if cmd_lines:
         p = Pool(jobs)
-        outs = p.map(partial(__subprocess, verbose=verbose), cmd_lines)
-        
+        outs = p.map(partial(_subprocess, verbose=verbose), cmd_lines)
+
         total = len(outs)
         status, cmd, stderr = zip(*outs)
 
@@ -151,8 +151,8 @@ def batch_music_extractor(audio_dir, output_dir, generate_log=True, audio_types=
     if store_frames:
         extractor_cmd += ['--store_frames']
 
-    __batch_extractor(audio_dir, output_dir, extractor_cmd, 'sig', generate_log=generate_log,
-                      audio_types=audio_types, skip_analyzed=skip_analyzed, jobs=jobs)
+    _batch_extractor(audio_dir, output_dir, extractor_cmd, 'sig', generate_log=generate_log,
+                     audio_types=audio_types, skip_analyzed=skip_analyzed, jobs=jobs)
 
 
 def batch_melspectrogram(audio_dir, output_dir, generate_log=True, verbose=True, audio_types=None,
@@ -214,6 +214,6 @@ def batch_melspectrogram(audio_dir, output_dir, generate_log=True, verbose=True,
     if compression_type:
         extractor_cmd += ['--compression-type', str(compression_type)]
 
-    __batch_extractor(audio_dir, output_dir, extractor_cmd, 'npy',
-                      generate_log=generate_log, audio_types=audio_types,
-                      skip_analyzed=skip_analyzed, jobs=jobs, verbose=verbose)
+    _batch_extractor(audio_dir, output_dir, extractor_cmd, 'npy',
+                     generate_log=generate_log, audio_types=audio_types,
+                     skip_analyzed=skip_analyzed, jobs=jobs, verbose=verbose)
