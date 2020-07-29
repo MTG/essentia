@@ -57,7 +57,7 @@ def _batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
 
         audio_types = tuple(audio_types)
         audio_types = tuple([i.lower() for i in audio_types])
-        print("Searching for audio files extensions: " + ' '.join(audio_types))
+        print("Searching for audio files extensions: " + ', '.join(audio_types))
     print("")
 
     output_dir = os.path.abspath(output_dir)
