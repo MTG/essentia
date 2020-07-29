@@ -127,8 +127,8 @@ def _batch_extractor(audio_dir, output_dir, extractor_cmd, output_extension,
     if generate_log:
         log = [summary] + log_lines
 
-    with open(os.path.join(output_dir, 'log'), 'w') as f:
-        f.write('\n'.join(log))
+        with open(os.path.join(output_dir, 'log'), 'w') as f:
+            f.write('\n'.join(log))
 
 
 def batch_music_extractor(audio_dir, output_dir, generate_log=True, audio_types=None, profile=None,
