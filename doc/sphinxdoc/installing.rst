@@ -81,7 +81,7 @@ Since the 2.1-beta3 release of Essentia, the required version of TagLib (``libta
 
 If you are willing to use Essentia with a TensorFlow wrapper in C++, install the TensorFlow shared library using a helper script inside our source code::
 
-  src/3rdparty/tensorflow/setup_from_libtesnorflow.sh
+  src/3rdparty/tensorflow/setup_from_libtensorflow.sh
 
 
 
