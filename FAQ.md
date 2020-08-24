@@ -32,7 +32,7 @@ Linux/OSX static builds
 -----------------------
 
 Follow the steps below to create static build of the library and executable example extractors.
-
+-
 Install additional tools required to build some of the dependencies. 
 
 On Linux:
@@ -51,6 +51,8 @@ packaging/build_3rdparty_static_debian.sh
 ```
 
 Use ```--with-gaia``` flag to include Gaia.
+
+Use ```--with-tensorflow``` flag to include TensorFlow.
 
 Alternatively, you can build each dependency apart running the corresponding scripts inside ```packaging/debian_3rdparty``` folder:
 ```
