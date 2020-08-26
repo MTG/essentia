@@ -17,35 +17,37 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "tensorflowinputmusicnn.h"
+#include "tensorflowinputtempocnn.h"
 
 using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* TensorflowInputMusiCNN::name = "TensorflowInputMusiCNN";
-const char* TensorflowInputMusiCNN::category = "Spectral";
-const char* TensorflowInputMusiCNN::description = DOC(
-  "This algorithm computes mel-bands specific to the input of MusiCNN-based models.\n"
+const char* TensorflowInputTempoCNN::name = "TensorflowInputTempoCNN";
+const char* TensorflowInputTempoCNN::category = "Spectral";
+const char* TensorflowInputTempoCNN::description = DOC(
+  "This algorithm computes mel-bands specific to the input of TempoCNN-based models.\n"
   "\n"
   "References:\n"
-  "  [1] Pons, J., & Serra, X. (2019). musicnn: Pre-trained convolutional neural networks for music audio tagging. arXiv preprint arXiv:1909.06654.\n\n"
-  "  [2] Supported models at https://essentia.upf.edu/models/");
+  "  [1] Hendrik Schreiber, Meinard Müller, A Single-Step Approach to Musical Tempo Estimation Using a Convolutional Neural Network Proceedings of the 19th International Society for Music Information Retrieval Conference (ISMIR), Paris, France, Sept. 2018.\n"
+  "  [2] Hendrik Schreiber, Meinard Müller, Musical Tempo and Key Estimation using Convolutional Neural Networks with Directional Filters Proceedings of the Sound and Music Computing Conference (SMC), Málaga, Spain, 2019.\n"
+  "  [3] Original models and code at https://github.com/hendriks73/tempo-cnn\n"
+  "  [4] Supported models at https://essentia.upf.edu/models/");
 
 
-void TensorflowInputMusiCNN::configure() {
+void TensorflowInputTempoCNN::configure() {
 
   // Analysis parameters are hardcoded to make sure they match the values used on training:
-  // https://github.com/jordipons/musicnn-training/blob/master/src/config_file.py
-  int frameSize = 512;
-  int numberBands=96;
-  Real sampleRate = 16000.0;
+  // https://github.com/hendriks73/tempo-cnn/blob/master/tempocnn/feature.py
+  int frameSize = 1024;
+  int numberBands=40;
+  Real sampleRate = 11025.0;
+  Real lowFrequencyBound = 20;
+  Real highFrequencyBound = 5000;
   string warpingFormula = "slaneyMel";
   string weighting = "linear";
   string normalize = "unit_tri";
-  Real shift = 1;
-  Real scale = 10000;
-  string comp = "log10";
+  string type = "magnitude";
 
   _windowing->configure("normalized", false);
 
@@ -54,14 +56,12 @@ void TensorflowInputMusiCNN::configure() {
   _melBands->configure("inputSize", frameSize / 2 + 1,
                        "numberBands", numberBands,
                        "sampleRate", sampleRate,
-                       "highFrequencyBound", sampleRate / 2,
+                       "lowFrequencyBound", lowFrequencyBound,
+                       "highFrequencyBound", highFrequencyBound,
                        "warpingFormula", warpingFormula,
                        "weighting", weighting,
-                       "normalize", normalize);
-
-  _shift->configure("shift", shift, "scale", scale);
-
-  _compression->configure("type", comp);
+                       "normalize", normalize,
+                       "type", type);
 
   // Set the intermediate buffers.
   _windowing->output("frame").set(_windowedFrame);
@@ -70,28 +70,20 @@ void TensorflowInputMusiCNN::configure() {
   _spectrum->output("spectrum").set(_spectrumFrame);
 
   _melBands->input("spectrum").set(_spectrumFrame);
-  _melBands->output("bands").set(_melBandsFrame);
-
-  _shift->input("array").set(_melBandsFrame);
-  _shift->output("array").set(_shiftedFrame);
-
-  _compression->input("array").set(_shiftedFrame);
 }
 
 
-void TensorflowInputMusiCNN::compute() {
+void TensorflowInputTempoCNN::compute() {
   const std::vector<Real>& frame = _frame.get();
 
-  if (frame.size() != 512) {
-    throw(EssentiaException("TensorflowInputMusiCNN: This algorithm only accepts input frames of size 512."));
+  if (frame.size() != 1024) {
+    throw(EssentiaException("TensorflowInputTempoCNN: This algorithm only accepts input frames of size 1024."));
   }
 
   _windowing->input("frame").set(frame);
-  _compression->output("array").set(_bands.get());
+  _melBands->output("bands").set(_bands.get());
 
   _windowing->compute();
   _spectrum->compute();
   _melBands->compute();
-  _shift->compute();
-  _compression->compute();
 }

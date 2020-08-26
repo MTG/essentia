@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_TENSORFLOWPREDICTVGGISH_H
-#define ESSENTIA_TENSORFLOWPREDICTVGGISH_H
+#ifndef ESSENTIA_TENSORFLOWPREDICTTEMPOCNN_H
+#define ESSENTIA_TENSORFLOWPREDICTTEMPOCNN_H
 
 
 #include "streamingalgorithmcomposite.h"
@@ -29,11 +29,13 @@
 namespace essentia {
 namespace streaming {
 
-class TensorflowPredictVGGish : public AlgorithmComposite {
+class TensorflowPredictTempoCNN : public AlgorithmComposite {
  protected:
   Algorithm* _frameCutter;
-  Algorithm* _tensorflowInputVGGish;
+  Algorithm* _tensorflowInputTempoCNN;
   Algorithm* _vectorRealToTensor;
+  Algorithm* _tensorNormalize;
+  Algorithm* _tensorTranspose;
   Algorithm* _tensorToPool;
   Algorithm* _tensorflowPredict;
   Algorithm* _poolToTensor;
@@ -49,17 +51,16 @@ class TensorflowPredictVGGish : public AlgorithmComposite {
   void clearAlgos();
 
  public:
-  TensorflowPredictVGGish();
-  ~TensorflowPredictVGGish();
+  TensorflowPredictTempoCNN();
+  ~TensorflowPredictTempoCNN();
 
   void declareParameters() {
     declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
-    declareParameter("input", "the name of the input node in the TensorFlow graph", "", "model/Placeholder");
-    declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
-    declareParameter("isTrainingName", "the name of an additional input node to indicate the model if it is in training mode or not. Leave it empty when the model does not need such input", "", "");
-    declareParameter("patchHopSize", "the number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);
+    declareParameter("input", "the name of the input node in the TensorFlow graph", "", "input");
+    declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "output");
+    declareParameter("patchHopSize", "the number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 128);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
-    declareParameter("accumulate", "when true it runs a single TensorFlow session at the end of the stream. Otherwise, a session is run for every new patch", "{true,false}", false);
+    declareParameter("batchSize", "number of patches to process in parallel. Use -1 to accumulate all the patches and run a single TensorFlow session at the end of the stream.", "[-1,inf)", 1);
   }
 
   void declareProcessOrder() {
@@ -87,12 +88,12 @@ namespace standard {
 
 // Standard non-streaming algorithm comes after the streaming one as it
 // depends on it
-class TensorflowPredictVGGish : public Algorithm {
+class TensorflowPredictTempoCNN : public Algorithm {
  protected:
   Input<std::vector<Real> > _signal;
   Output<std::vector<std::vector<Real> > > _predictions;
 
-  streaming::Algorithm* _tensorflowPredictVGGish;
+  streaming::Algorithm* _tensorflowPredictTempoCNN;
   streaming::VectorInput<Real>* _vectorInput;
   scheduler::Network* _network;
   Pool _pool;
@@ -100,17 +101,16 @@ class TensorflowPredictVGGish : public Algorithm {
   void createInnerNetwork();
 
  public:
-  TensorflowPredictVGGish();
-  ~TensorflowPredictVGGish();
+  TensorflowPredictTempoCNN();
+  ~TensorflowPredictTempoCNN();
 
   void declareParameters() {
     declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
-    declareParameter("input", "the name of the input node in the Tensorflow graph", "", "model/Placeholder");
-    declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
-    declareParameter("isTrainingName", "the name of an additional input node indicating whether the model is to be run in a training mode (for models with a training mode, leave it empty otherwise)", "", "");
-    declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);
+    declareParameter("input", "the name of the input nodes in the Tensorflow graph", "", "input");
+    declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "output");
+    declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 128);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
-    declareParameter("accumulate", "when true it runs a single Tensorflow session at the end of the stream. Otherwise a session is run for every new patch", "{true,false}", false);
+    declareParameter("batchSize", "number of patches to process in parallel. Use -1 to accumulate all the patches and run a single TensorFlow session at the end of the stream.", "[-1,inf)", 1);
   }
 
   void configure();
@@ -125,4 +125,4 @@ class TensorflowPredictVGGish : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
-#endif // ESSENTIA_TENSORFLOWPREDICTVGGISH_H
+#endif // ESSENTIA_TENSORFLOWPREDICTTEMPOCNN_H

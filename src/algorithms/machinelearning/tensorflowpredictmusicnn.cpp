@@ -34,7 +34,7 @@ TensorflowPredictMusiCNN::TensorflowPredictMusiCNN() : AlgorithmComposite(),
     _tensorflowPredict(0), _poolToTensor(0), _tensorToVectorReal(0), _configured(false) {
 
   declareInput(_signal, 4096, "signal", "the input audio signal sampled at 16 kHz");
-  declareOutput(_predictions, 0, "predictions", "the model predictions");
+  declareOutput(_predictions, 0, "predictions", "the output values from the model node named after `output`");
 }
 
 
@@ -143,7 +143,7 @@ const char* TensorflowPredictMusiCNN::category = "Machine Learning";
 const char* TensorflowPredictMusiCNN::description = DOC(
   "This algorithm makes predictions using MusiCNN-based models.\n"
   "Internally, it uses TensorflowInputMusiCNN for the input feature extraction (mel bands). "
-  "It feeds the model with patches of 187 mel bands frames and jumps a constant amount of frames determined by patchHopSize.\n"
+  "It feeds the model with patches of 187 mel bands frames and jumps a constant amount of frames determined by `patchHopSize`.\n"
   "With the `accumulate` parameter the patches are stored to run a single TensorFlow session at the end of the stream. "
   "This allows to take advantage of parallelization when GPUs are available, but at the same time it can be memory exhausting for long files.\n"
   "The recommended pipeline is as follows:\n"
@@ -158,7 +158,7 @@ const char* TensorflowPredictMusiCNN::description = DOC(
 
 TensorflowPredictMusiCNN::TensorflowPredictMusiCNN() {
     declareInput(_signal, "signal", "the input audio signal sampled at 16 kHz");
-    declareOutput(_predictions, "predictions", "the predictions");
+    declareOutput(_predictions, "predictions", "the output values from the model node named after `output`");
 
     createInnerNetwork();
   }
