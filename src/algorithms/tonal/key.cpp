@@ -53,10 +53,10 @@ const char* Key::description = DOC("This algorithm computes key estimate given a
 "  2006.\n\n"
 "  [2] D. Temperley, \"What's key for key? The Krumhansl-Schmuckler\n"
 "  key-finding algorithm reconsidered\", Music Perception vol. 17, no. 1,\n"
-"  pp. 65-100, 1999."
+"  pp. 65-100, 1999.\n\n"
 "  [3] Á. Faraldo, E. Gómez, S. Jordà, P.Herrera, \"Key Estimation in Electronic\n"
 "  Dance Music. Proceedings of the 38th International Conference on information\n"
-"  Retrieval, Padova, 2016. (In Press.)\n"
+"  Retrieval, pp. 335-347, 2016.\n\n"
 "  [4] Faraldo, Á., Jordà, S., & Herrera, P. (2017, June). A multi-profile method\n"
 "  for key estimation in edm. In Audio Engineering Society Conference: 2017 AES\n"
 "  International Conference on Semantic Audio. Audio Engineering Society.");
