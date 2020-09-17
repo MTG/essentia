@@ -62,7 +62,7 @@ class KeyExtractor : public AlgorithmComposite {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("frameSize", "the framesize for computing tonal features", "(0,inf)", 4096);
     declareParameter("hopSize", "the hopsize for computing tonal features", "(0,inf)", 4096);
-    declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    declareParameter("windowType", "the window type", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
     declareParameter("minFrequency", "min frequency to apply whitening to [Hz]", "(0,inf)", 25.0);
     declareParameter("maxFrequency", "max frequency to apply whitening to [Hz]", "(0,inf)", 3500.0);
     declareParameter("spectralPeaksThreshold", "the threshold for the spectral peaks", "(0,inf)", 0.0001);
@@ -117,7 +117,7 @@ class KeyExtractor : public Algorithm {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("frameSize", "the framesize for computing tonal features", "(0,inf)", 4096);
     declareParameter("hopSize", "the hopsize for computing tonal features", "(0,inf)", 4096);
-    declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    declareParameter("windowType", "the window type", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
     declareParameter("minFrequency", "min frequency to apply whitening to [Hz]", "(0,inf)", 25.0);
     declareParameter("maxFrequency", "max frequency to apply whitening to [Hz]", "(0,inf)", 3500.0);
     declareParameter("spectralPeaksThreshold", "the threshold for the spectral peaks", "(0,inf)", 0.0001);
