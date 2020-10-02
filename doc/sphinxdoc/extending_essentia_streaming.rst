@@ -195,7 +195,7 @@ difficult to master, but also the most powerful.
 It requires you to grasp a few more concepts of what is going on in Essentia, mainly how
 the consumption model works and how algorithms get scheduled.
 
-Please refer to the `streaming architecture <streaming_architecture>`_ for an
+Please refer to the `streaming architecture </streaming_architecture>`_ for an
 explanation of these concepts.
 
 
