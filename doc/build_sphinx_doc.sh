@@ -22,7 +22,7 @@ doxygen doc/Doxyfile
 
 
 # now build Sphinx doc
-cd doc/sphinxdoc
+cd ./doc/sphinxdoc
 echo "******** GENERATE ALGORITHMS REFERENCE AND TUTORIALS ********"
 
 # force using default python3 if the the argument is not supplied
