@@ -8,9 +8,9 @@ Releases
 
 `Gaia releases <https://github.com/MTG/gaia/releases>`_
 
-`Essentia docker images <https://mtg.github.io/essentia-labs//news/2018/01/16/essentia-docker-images/>`_
+`Essentia docker images <https://mtg.github.io/essentia-labs/news/2018/01/16/essentia-docker-images/>`_
 
-Precompiled `extractor binaries <https://mtg.github.io/essentia-labs//news/2015/12/22/static-binaries-for-extractors/>`_ (Linux, OSX, Win)
+Precompiled `extractor binaries <https://mtg.github.io/essentia-labs/news/2015/12/22/static-binaries-for-extractors/>`_ (Linux, OSX, Win)
 
 AcousticBrainz `Music Extractor binaries <http://acousticbrainz.org/download>`_ (Linux, OSX, Win)
 
@@ -25,7 +25,10 @@ The latest updates are always available in the `master branch <https://github.co
 The latest development builds of Python wheels are available `here <https://owncloud.rp.upf.edu/index.php/s/TpwgF4XrZEpBTOI>`_ (Linux).
 
 
-Classifier models
------------------
 
-Pretrained `classifier models <http://essentia.upf.edu/documentation/svm_models/>`_ to be used with Music Extractor. 
+Machine learning models
+-----------------------
+
+Pretrained `TensorFlow models <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for music auto-tagging and classification.
+
+Pretrained `SVM classifier models <http://essentia.upf.edu/documentation/svm_models/>`_ to be used with Music Extractor.

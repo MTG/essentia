@@ -16,7 +16,9 @@ Essentia documentation contents
    essentia_python_tutorial
    extractors_out_of_box
    streaming_extractor_music
-   
+   machine_learning
+   demos
+
    design_overview
    howto_standard_extractor
    streaming_architecture

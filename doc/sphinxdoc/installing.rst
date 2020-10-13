@@ -244,6 +244,7 @@ Building Essentia on iOS
 
 A lightweight version of Essentia can be `cross-compiled for iOS <FAQ.html#cross-compiling-for-ios>`_ from Mac OSX.
 
+
 Building Essentia for Web using asm.js or WebAssembly
 -----------------------------------------------------
 
@@ -269,4 +270,4 @@ Using pre-trained TensorFlow models in Essentia
 
 Most recently, Essentia provides a wrapper for inference with TensorFlow deep learning models. Follow `these instructions <https://mtg.github.io/essentia-labs/news/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with this wrapper.
 
-We provide a number of `pre-trained TensorFlow models <https://mtg.github.io/essentia-labs/news/2020/01/16/tensorflow-models-released/>`_ for auto-tagging and music classification that can be used out of box. 
+We provide a number of `pre-trained TensorFlow models <https://mtg.github.io/essentia-labs/news/2020/01/16/tensorflow-models-released/>`_ for auto-tagging and music classification that can be used out of box.
