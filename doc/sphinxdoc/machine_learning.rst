@@ -40,7 +40,7 @@ Code examples and demos
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 
-See `Python examples of using TensorFlow models <essentia_python_examples.html>`_.
+See `Python examples of using TensorFlow models <essentia_python_examples.html#inference-with-tensorflow-models>`_.
 
 
 Some of our models can work in real-time, opening many possibilities for audio developers. For example, `see the demo and code <https://mtg.github.io/essentia-labs/news/tensorflow/2020/04/23/tensorflow-real-time/>`_ for the MusiCNN model performing music auto-tagging on a live audio stream.
