@@ -8,22 +8,50 @@ Essentia includes algorithms for running inference with two types of data-driven
 * TensorFlow models
 * Gaia's SVM classifiers
 
-We provide various pre-trained models of both types for various music classification tasks (see `downloads page <download.html>`_).
+We provide various pre-trained models of both types for various music analysis and classification tasks (see `downloads page <download.html>`_).
 
 
 
 Using pre-trained TensorFlow models
 -----------------------------------
 
-Most recently, Essentia provides a wrapper for TensorFlow deep learning models, designed to offer the flexibility of use, easy extensibility, and real-time inference. It allows using virtually any TensorFlow model within our audio analysis framework. Follow `these instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with this wrapper.
+Essentia provides wrapper algorithms for TensorFlow deep learning models, designed to offer the flexibility of use, easy extensibility, and real-time inference. It allows using virtually any TensorFlow model within our audio analysis framework.
 
-We provide many `pre-trained TensorFlow models <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for auto-tagging and music classification that can be used out of the box.
+We provide many pre-trained TensorFlow models for auto-tagging, music classification, tempo estimation, source separation, and feature embedding extraction for music and audio in general. See `our blog post <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ for further details about some of the models.
 
-See the demos of these models `here <demos.html>`_.
+
+TODO short text with recommendations how to build your own models.
+
+
+Installation
+^^^^^^^^^^^^
+
+Follow `these instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with the TensorFlow wrapper.
+
+Model downloads
+^^^^^^^^^^^^^^^
+
+https://essentia.upf.edu/models/
+
+All the models created by the MTG are available under `the CC BY-NC-ND 4.0 license <https://creativecommons.org/licenses/by-nc-nd/4.0/>`_ and are also available under a proprietary license `upon request <https://www.upf.edu/web/mtg/contact>`_. 
+
+
+Code examples and demos
+^^^^^^^^^^^^^^^^^^^^^^^
+
+
+See `Python examples of using TensorFlow models <essentia_python_examples.html>`_.
+
 
 Some of our models can work in real-time, opening many possibilities for audio developers. For example, `see the demo and code <https://mtg.github.io/essentia-labs/news/tensorflow/2020/04/23/tensorflow-real-time/>`_ for the MusiCNN model performing music auto-tagging on a live audio stream.
 
-TODO text with recommendations how to build your own models.
+.. raw:: html
+
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/xMUcY7_n4kQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+    <iframe width="560" height="315" src="https://www.youtube.com/embed/yssBE6oafLs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+Also, see the demos of some of the models `here <demos.html>`_.
 
 
 Using pre-trained SVM Gaia models
@@ -38,10 +66,11 @@ Essentia includes several `pre-trained SVM classifier models for genres, moods, 
 
 You can train your own classifier models as described below.
 
+Note that the more recent TensorFlow models now supersede many of the pre-trained SVM models we provide in accuracy.
 
 
 Training and running classifier models in Gaia
-----------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 To run SVM classification in Essentia you need to prepare a classifier model in Gaia and run the ``GaiaTransform`` algorithm configured to use this model. The example of using high-level models can be seen in the code of ``streaming_music_extractor``. Here we discuss the steps to be followed to train classifier models that can be used with this extractor.
 
 1. Compute music descriptors using ``streaming_music_extractor`` for all audio files.
