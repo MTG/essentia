@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 . ../build_config.sh
 
 rm -rf tmp
@@ -13,7 +14,7 @@ cd gaia-$GAIA_VERSION
 
 ./waf configure --prefix=$PREFIX
 ./waf
-./waf install 
+./waf install
 
 cd ../..
 rm -rf tmp

@@ -95,6 +95,12 @@ classifiers = [
     'Programming Language :: Python :: 3',
 ]
 
+description = 'Library for audio and music analysis, description and synthesis'
+long_description = '''
+Essentia is an open-source C++ library with Python bindings for audio analysis and audio-based music information retrieval. It contains an extensive collection of algorithms, including audio input/output functionality, standard digital signal processing blocks, statistical characterization of data, a large variety of spectral, temporal, tonal, and high-level music descriptors, and tools for inference with deep learning models. Designed with a focus on optimization in terms of robustness, computational speed, low memory usage, as well as flexibility, it is efficient for many industrial applications and allows fast prototyping and setting up research experiments very rapidly.
+
+Website: https://essentia.upf.edu
+'''
 
 setup_requires = ['numpy>=1.8.2', 'six']
 install_requires = setup_requires + ['pyyaml']
@@ -104,6 +110,7 @@ install_requires = setup_requires + ['pyyaml']
 # https://www.tensorflow.org/guide/versions
 if project_name == 'essentia-tensorflow':
     tensorflow_version = '1.15.0'
+    description += ', with TensorFlow support'
 
     var_tensorflow_version = 'ESSENTIA_TENSORFLOW_VERSION'
     if var_tensorflow_version in os.environ:
@@ -116,8 +123,8 @@ module = Extension('name', sources=[])
 setup(
     name=project_name,
     version=get_version(),
-    description='Library for audio and music analysis, description and synthesis',
-    long_description='C++ library for audio and music analysis, description and synthesis, including Python bindings',
+    description=description,
+    long_description=long_description,
     author='Dmitry Bogdanov',
     author_email='dmitry.bogdanov@upf.edu',
     url='http://essentia.upf.edu',

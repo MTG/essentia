@@ -1200,6 +1200,142 @@ std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >
   return pdist;
 }
 
+/**
+ * Sets `squeezeShape`, `summarizerShape`, `broadcastShape` to perform operations 
+ * on a Tensor with the shape of `tensor` along the `axis` dimension.
+ */
+template <typename T>
+void tensorGeometricalInfo(const Tensor<T>& tensor, int& axis,
+                           std::array<Eigen::Index, TENSORRANK - 1>& squeezeShape,
+                           std::array<Eigen::Index, TENSORRANK>& summarizerShape,
+                           std::array<Eigen::Index, TENSORRANK>& broadcastShape) {
+  // To perform tensor operations along an specific axis we need to get
+  // some geometrical information before:
+
+  // First, an array with dimensions to squeeze (all but the axis).
+  int i = 0;
+  for (int j = 0; j < TENSORRANK; j++) {
+    if (j != axis) {
+      squeezeShape[i] = j;
+      i++;
+    }
+  }
+
+  // An array with all singleton dimension but the axis of interest.
+  summarizerShape = {1, 1, 1, 1};
+  summarizerShape[axis] = tensor.dimension(axis);
+
+  // An array with the number of times we need to copy the accumulator
+  // tensors per dimension in order to match the input tensor shape.
+  broadcastShape = tensor.dimensions();
+  broadcastShape[axis] = 1;
+}
+
+/**
+ * Returns the mean of a tensor.
+ */
+template <typename T>
+T mean(const Tensor<T>& tensor) {
+  return (T)((TensorScalar)tensor.mean())(0);
+}
+
+/**
+ * Returns the mean of a tensor along the given axis.
+ */
+template <typename T>
+Tensor<T> mean(const Tensor<T>& tensor, int axis) {
+  std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
+
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
+  Tensor1D means = tensor.mean(squeezeShape);
+
+  return TensorMap<Real>(means.data(), summarizerShape);
+}
+
+/**
+ * Returns the standard deviation of a tensor.
+ */
+template <typename T>
+T stddev(const Tensor<T>& tensor, const T mean) {
+  // Substract the mean.
+  Tensor<Real> tmp = tensor - tensor.constant(mean);
+  // Sum of squares.
+  Real sos = ((TensorScalar)tmp.pow(2).sum())(0);
+
+  return sqrt(sos / tensor.size());
+}
+
+/**
+ * Returns the standard deviation of a tensor along the given axis.
+ */
+template <typename T>
+Tensor<T> stddev(const Tensor<T>& tensor, const Tensor<T> mean, int axis) {
+  std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
+
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
+
+  // Get the number of elements on each sub-tensor.
+  Real normalization = tensor.size() / tensor.dimension(axis);
+
+  // Substract the means along the axis using broadcast to replicate
+  // them along the rest of dimensions.
+  Tensor<Real> tmp = tensor - mean.broadcast(broadcastShape);
+
+  // Cumpute the sum of squares.
+  Tensor1D sos = tmp.pow(2).sum(squeezeShape);
+
+  // Compute the standard deviations and put them into a Tensor along the axis.
+  Tensor1D stds = (sos / normalization).sqrt();
+
+  return TensorMap<Real>(stds.data(), summarizerShape);
+}
+
+/**
+ * Returns the minimum of a tensor.
+ */
+template <typename T>
+T tensorMin(const Tensor<T>& tensor) {
+  return (T)((TensorScalar)tensor.minimum())(0);
+}
+
+/**
+ * Returns the minimum of a tensor along the given axis.
+ */
+template <typename T>
+Tensor<T> tensorMin(const Tensor<T>& tensor, int axis) {
+  std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
+
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
+  Tensor1D minima = tensor.minimum(squeezeShape);
+
+  return TensorMap<Real>(minima.data(), summarizerShape);
+}
+
+/**
+ * Returns the maximum of a tensor.
+ */
+template <typename T>
+T tensorMax(const Tensor<T>& tensor) {
+  return (T)((TensorScalar)tensor.maximum())(0);
+}
+
+/**
+ * Returns the maximum of a tensor along the given axis.
+ */
+template <typename T>
+Tensor<T> tensorMax(const Tensor<T>& tensor, int axis) {
+  std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
+
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
+  Tensor1D maxima = tensor.maximum(squeezeShape);
+
+  return TensorMap<Real>(maxima.data(), summarizerShape);
+}
+
 } // namespace essentia
 
 #endif // ESSENTIA_MATH_H

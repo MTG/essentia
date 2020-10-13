@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 BASEDIR=$(dirname $0)
 cd $BASEDIR/win32_3rdparty
 rm -rf bin dynamic include lib share

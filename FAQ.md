@@ -32,7 +32,7 @@ Linux/OSX static builds
 -----------------------
 
 Follow the steps below to create static build of the library and executable example extractors.
-
+-
 Install additional tools required to build some of the dependencies. 
 
 On Linux:
@@ -51,6 +51,8 @@ packaging/build_3rdparty_static_debian.sh
 ```
 
 Use ```--with-gaia``` flag to include Gaia.
+
+Use ```--with-tensorflow``` flag to include TensorFlow.
 
 Alternatively, you can build each dependency apart running the corresponding scripts inside ```packaging/debian_3rdparty``` folder:
 ```
@@ -146,21 +148,17 @@ A lightweight version of Essentia for iOS can be compiled using the ```--cross-c
 You can also compile it for iOS simulator (so that you can test on your desktop) using ```--cross-compile-ios-sim``` flag.
 
 
-Compiling Essentia to Javascript with Emscripten
-------------------------------------------------
-Use the instructions below to compile Essentia to Javascript. Among the dependencies, only FFTW3 is currently supported (see instructions to build it below). The rest of dependencies have not been tested, but they should work as well.
+Compiling Essentia to ASM.js or WebAssembly using Emscripten
+------------------------------------------------------------
+Use the instructions below to compile Essentia to intermediate [LLVM](https://llvm.org/) or [ASM.js](http://asmjs.org/) and [WebAssembly](https://webassembly.org/)(WASM) targets using [Emscripten](https://emscripten.org/). You can build Essentia with or without third party dependencies. Among the dependencies, only FFTW3 is currently supported (see instructions to build it below). The rest of dependencies have not been tested, but they should work as well. A lightweight WASM build of Essentia is used in our dedicated JavaScript wrapper [Essentia.js](https://essentia.upf.edu/essentiajs) which uses KISS FFT instead of FFTW3.
 
-Install Emscripten following the [instructions](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html) on their website. If you downloaded the SDK manually, make sure to activate the Emscripten environment by executing `emsdk_env.sh`.
-```
-./path/to/emsdk_env.sh
-```
-Alternatively, you can install from Ubuntu/Debian repository (the environment will be activated by default).
-```
-sudo apt-get install emscripten
-```
+- Install the latest stable Emscripten release following the [instructions](https://emscripten.org/docs/getting_started/downloads.html) on their website. If you downloaded the SDK manually, make sure to activate the Emscripten environment by executing `emsdk_env.sh`.
 
-Get the latest FFTW3 source code, and prepare it for compilation and installation as an Emscripten system library and build it.
-```
+
+(Optional with third party dependecies)
+- Get the latest [FFTW3](http://www.fftw.org/) source code, and prepare it for compilation and installation as an Emscripten system library and build it.
+  
+```bash
 tar xf fftw-3.3.4.tar.gz
 cd fftw-3.3.4
 # Spawn a subshell to be able to use $EMSCRIPTEN in the command's args
@@ -169,22 +167,30 @@ emmake make
 emmake make install
 ```
 
-Finally, compile Essentia for Emscripten.
-```
+- Finally, compile Essentia with Emscripten as an LLVM target which can be further used for linking with your application code.
+  
+```bash
 cd path/to/essentia
-emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=fftw --emscripten'
+# for using KISS FFT
+emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=KISS --emscripten'
+# OR
+# for using FFTW
+emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=FFTW --emscripten'
 emmake ./waf
 emmake ./waf install
 ```
-Essentia is now built. If you want to build applications with Essentia and Emscripten, be sure to read their [tutorial](https://kripken.github.io/emscripten-site/docs/getting_started/Tutorial.html). Use the emcc compiler, preferably the ```-Oz``` option for size optimization, and include the static libraries for Essentia and FFTW as you would with source files. An example would be:
-```
+Essentia is now built. If you want to build applications with Essentia and Emscripten, be sure to read their [tutorial](https://kripken.github.io/emscripten-site/docs/getting_started/Tutorial.html). Essentia.js Github [repository](https://github.com/MTG/essentia.js) also has some nice set of examples for you to get started. Use the emcc compiler, preferably the ```-Oz``` option for size optimization, and include the static libraries for Essentia and FFTW as you would with source files. An example would be:
+
+```bash
 # Make sure your script can access the variable $EMSCRIPTEN
 # (available to child processes of emconfigure and emmake)
 LIB_DIR=$EMSCRIPTEN/system/local/lib
 emcc -Oz -c application.cpp application.bc
-emcc -Oz application.bc ${LIB_DIR}/libessentia.a ${LIB_DIR}/libfftw3f.a -o out.js
+emcc -Oz application.bc ${LIB_DIR}/libessentia.a ${LIB_DIR}/libfftw3f.a -s WASM=1 -o out.js
 ```
+Alternatively you could also build your applicaitons for asm.js targets by changing the flag `-s WASM=0`.
 
+You can also find some examples of interfacing your Essentia cpp code to JavaScript [here](https://github.com/MTG/essentia.js/blob/master/docs/tutorials/2.%20Building%20from%20Source.md#writing-custom-essentia-c-extractor-and-cross-compile-to-js).
 
 OSX static builds and templates (JUCE/VST and openFrameworks)
 -------------------------------------------------------------

@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 . ../build_config.sh
 
 rm -rf tmp
@@ -17,7 +18,7 @@ cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DBUILD_SHARED_LIBS=OFF \
     -DZLIB_ROOT=$PREFIX \
-	. 
+	.
 make
 # patch taglib.cp (missing -lz flag)
 sed -i 's/-ltag/-ltag -lz/g' taglib.pc

@@ -100,7 +100,7 @@ class PitchMelodia : public Algorithm {
     declareParameter("filterIterations", "number of iterations for the octave errors / pitch outlier filtering process", "[1,inf)", 3);
     declareParameter("guessUnvoiced", "estimate pitch for non-voiced segments by using non-salient contours when no salient ones are present in a frame", "{false,true}", false);
     declareParameter("minFrequency", "the minimum allowed frequency for salience function peaks (ignore contours with peaks below) [Hz]", "[0,inf)", 40.0);
-    declareParameter("maxFrequency", "the minimum allowed frequency for salience function peaks (ignore contours with peaks above) [Hz]", "[0,inf)", 20000.0); // just some large value greater than anything we would need
+    declareParameter("maxFrequency", "the maximum allowed frequency for salience function peaks (ignore contours with peaks above) [Hz]", "[0,inf)", 20000.0); // just some large value greater than anything we would need
   }
 
 
