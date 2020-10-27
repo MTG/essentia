@@ -6,8 +6,7 @@ Music audio descriptors in the browser
 
 Examples of music audio analysis with Essentia algorithms using Essentia.js
 
-https://mtg.github.io/essentia.js-examples/
-
+https://mtg.github.io/essentia.js/examples/
 
 
 Essentia TensorFlow models
