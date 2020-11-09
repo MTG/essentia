@@ -121,7 +121,7 @@ Once your dependencies are installed, you can proceed to compiling Essentia. Dow
 
 - **master** branch is the most updated version of Essentia in development
 - **2.1 beta5** is the current stable version recommended to install.
- 
+
 
 Go into its source code directory and start by configuring it::
 
@@ -223,15 +223,14 @@ Building Essentia on Windows
 
 Essentia C++ library and extractors based on it can be compiled and run correctly on Windows, but python bindings are not supported yet. The easiest way to build Essentia is by `cross-compilation on Linux using MinGW <FAQ.html#cross-compiling-for-windows-on-linux>`_. However the resulting library binaries are only compatible within C++ projects using MinGW compilers, and therefore they are not compatible with Visual Studio. If you want to use Visual Studio, there is no project readily available, so you will have to setup one yourself and compile the dependencies too.
 
-Building Essentia on Windows 10 via Bash on Ubuntu
---------------------------------------------------
-It is possible to install Essentia easily via *bash on Ubuntu* on Windows 10. Bash on Ubuntu allows to run the same command-line utilities that could be run within a native Ubuntu 14.04 environment. Note that Bash on Ubuntu is still a beta product, hence there are some missing features and several issues. In addition, you cannot call Windows applications from bash.
+Building Essentia in Windows Subsystem for Linux (WSL)
+------------------------------------------------------
+It is possible to install Essentia easily in the *Windows Subsystem for Linux* on Windows 10. This environment allows to run the same command-line utilities that could be run within your favorite `distribution <https://aka.ms/wslstore>`_. Note that WSL is still in its infancy and the methods of interoperability between Windows applications and WSL are likely to change in the future.
 
-To install bash on Ubuntu, follow the `official guide <https://msdn.microsoft.com/commandline/wsl/install_guide>`_ in the Microsoft Developer Network.
+To install WSL, follow the `official guide <https://aka.ms/wsl2>`_.
 
-After bash on Ubuntu is successfully installed, you should open a bash terminal and install the dependencies (see: `Installing dependencies on Linux`_). Remember that bash on Windows runs on an Ubuntu 14.04 environment. Therefore, you may need to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
-
-Finally, you can compile Essentia (see: `Compiling Essentia from source`_).
+After WSL is successfully installed, you should open a bash terminal and install the dependencies (see: `Installing dependencies on Linux`_).
+Finally, you can compile Essentia (see: `Compiling Essentia`_).
 
 Building Essentia on Android
 ----------------------------
