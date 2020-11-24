@@ -36,6 +36,10 @@ class TestOnsetDetection(TestCase):
         fft = FFT()
         onset_hfc = OnsetDetection(method='hfc')
         onset_complex = OnsetDetection(method='complex')
+        onset_complex_phase = OnsetDetection(method='complex_phase')
+        onset_melflux = OnsetDetection(method='melflux')
+        onset_flux = OnsetDetection(method='flux')
+        onset_rms = OnsetDetection(method='rms')
         for frame in frames:
             fft_frame = fft(win(frame))
             mag, ph = CartesianToPolar()(fft_frame)
@@ -106,6 +110,10 @@ class TestOnsetDetection(TestCase):
         fft = FFT()
         onset_hfc = OnsetDetection(method='hfc')
         onset_complex = OnsetDetection(method='complex')
+        onset_flux = OnsetDetection(method='flux')
+        onset_melflux = OnsetDetection(method='melflux')
+        onset_rms = OnsetDetection(method='rms')
+        onset_complex_phase = OnsetDetection(method='complex_phase')
         found_complex = []
         found_hfc = []
         for frame in frames:
@@ -128,12 +136,22 @@ class TestOnsetDetection(TestCase):
         self.assertComputeFails(OnsetDetection(), spectrum, phase)
         spectrum = ones(1024)
         self.assertComputeFails(OnsetDetection(method='complex'), spectrum, phase)
-
+        self.assertComputeFails(OnsetDetection(method='complex_phase'), spectrum, phase)
+        #self.assertComputeFails(OnsetDetection(method='hfc'), spectrum,phase)
+        #self.assertComputeFails(OnsetDetection(method='flux'), spectrum,phase)
+        #self.assertComputeFails(OnsetDetection(method='melflux'), spectrum,phase)
+        #self.assertComputeFails(OnsetDetection(method='rms'), spectrum,phase)
 
     def testDifferentSizes(self):
-       spectrum = ones(1024)
-       phase = ones(512)
-       self.assertComputeFails(OnsetDetection(method='complex'),spectrum, phase)
+        spectrum = ones(1024)
+        phase = ones(512)
+        self.assertComputeFails(OnsetDetection(method='complex'),spectrum, phase)
+        self.assertComputeFails(OnsetDetection(method='complex_phase'), spectrum, phase)
+        #self.assertComputeFails(OnsetDetection(method='hfc'), spectrum,phase)
+        #self.assertComputeFails(OnsetDetection(method='flux'), spectrum,phase)
+        #self.assertComputeFails(OnsetDetection(method='melflux'), spectrum,phase)
+        #self.assertComputeFails(OnsetDetection(method='rms'), spectrum,phase)
+
 
 
 suite = allTests(TestOnsetDetection)
