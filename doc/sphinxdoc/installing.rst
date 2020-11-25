@@ -255,7 +255,7 @@ A lightweight version of Essentia can be `cross-compiled for iOS <FAQ.html#cross
 Building Essentia for Web using asm.js or WebAssembly
 -----------------------------------------------------
 
-A lightweight version of Essentia can be cross-compiled to asm.js or WebAssembly targets using Emscripten for it's usage on the Web. See [FAQ](https://essentia.upf.edu/FAQ.htm) for more details.
+A lightweight version of Essentia can be cross-compiled to asm.js or WebAssembly targets using Emscripten for it's usage on the Web. See `FAQ <https://essentia.upf.edu/FAQ.htm>`_ for more details.
 
 
 Using pre-trained high-level Gaia models in Essentia
@@ -275,6 +275,6 @@ You can `train your own classifier models <FAQ.html#training-and-running-classif
 Using pre-trained TensorFlow models in Essentia
 -----------------------------------------------
 
-Most recently, Essentia provides a wrapper for inference with TensorFlow deep learning models. Follow `these instructions <https://mtg.github.io/essentia-labs/news/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with this wrapper.
+Most recently, Essentia provides a wrapper for inference with TensorFlow deep learning models. Follow `these instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with this wrapper.
 
-We provide a number of `pre-trained TensorFlow models <https://mtg.github.io/essentia-labs/news/2020/01/16/tensorflow-models-released/>`_ for auto-tagging and music classification that can be used out of box.
+We provide a number of `pre-trained TensorFlow models <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for auto-tagging and music classification that can be used out of box.
