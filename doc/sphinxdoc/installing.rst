@@ -159,11 +159,11 @@ To install the C++ library, python bindings, extractors and Vamp plugin (if conf
 
 
 
-Compiling for Python3
+Compiling for Python 3
 ---------------------
 The waf build script is a python script itself. By default it will configure Essentia to be built for the same Python that was used to execute this script. Alternatively, you can specify a specific Python binary to build for using the ``--python=PYTHON`` configuration option.
 
-Therefore, to build for Python3, you can either run all waf commands with your python3::
+Therefore, to build for Python 3, you can either run all waf commands with your python3::
 
   python3 ./waf configure --build-static --with-python --with-cpptests --with-examples --with-vamp
   python3 ./waf
@@ -196,7 +196,7 @@ To run the python unit tests (include all unittests on algorithms, need python b
 
   ./waf run_python_tests
 
-or, in the case if your default python is not Python3::
+or, in the case if your default python is not Python 3::
 
   python3 ./waf run_python_tests
 
@@ -208,7 +208,7 @@ Building documentation (optional)
 
 All documentation is provided on the official website of Essentia library. Follow the steps below to generate it by yourself.
 
-Note that you should use Python3 for building documentation. We rely on sphinxcontrib-doxylink which has already dropped support for Python2.
+Note that you should use Python 3 for building documentation. We rely on sphinxcontrib-doxylink which has already dropped support for Python2.
 
 Install doxigen and pip3. If you are on Linux::
 
@@ -219,7 +219,7 @@ Install additional dependencies (you might need to run this command with sudo)::
   sudo pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults
   sudo apt-get install pandoc
 
-Make sure to build Essentia with Python3 bindings and run::
+Make sure to build Essentia with Python 3 bindings and run::
 
   python3 ./waf doc
 
