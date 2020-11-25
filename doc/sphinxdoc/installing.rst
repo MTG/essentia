@@ -175,6 +175,14 @@ or specify the ``--python`` option, for example: ::
   ./waf
   ./waf install
 
+Note that when installing to ``/usr/local``, some Linux distributions provide a wrong default installation prefix
+``/usr/local/lib/python3/dist-packages/`` for Python 3 extensions (for example, Ubuntu, see
+`here <https://bugs.launchpad.net/ubuntu/+source/python3-defaults/+bug/1814653>`_ and
+`here <https://bugs.launchpad.net/ubuntu/+source/python3-stdlib-extensions/+bug/1832215>`_).
+
+To avoid import errors on these systems, specify the correct path in ``waf configure`` using a ``--pythondir`` flag or the ``PYTHONDIR``
+environmental variable. For example, on Ubuntu 20.10 the correct path for the default Python 3.8 is ``/usr/local/lib/python3.8/dist-packages/``.
+
 
 Running tests (optional)
 ------------------------
