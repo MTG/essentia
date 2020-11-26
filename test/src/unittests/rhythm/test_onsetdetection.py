@@ -46,7 +46,10 @@ class TestOnsetDetection(TestCase):
             mag = zeros(len(mag))
             self.assertEqual(onset_hfc(mag, ph), 0)
             self.assertEqual(onset_complex(mag, ph), 0)
-
+            self.assertEqual(onset_complex_phase(mag, ph), 0)
+            self.assertEqual(onset_melflux(mag, ph), 0)
+            self.assertEqual(onset_flux(mag, ph), 0)
+            self.assertEqual(onset_rms(mag, ph), 0)
 
     def testImpulse(self):
         # tests that for an impulse will yield the correct position
@@ -116,15 +119,27 @@ class TestOnsetDetection(TestCase):
         onset_complex_phase = OnsetDetection(method='complex_phase')
         found_complex = []
         found_hfc = []
+        found_flux = []
+        found_melflux = []
+        found_rms = []
+        found_complex_phase = []
         for frame in frames:
             fft_frame = fft(win(frame))
             mag, ph = CartesianToPolar()(fft_frame)
             mag = zeros(len(mag))
             found_hfc += [onset_hfc(mag, ph)]
             found_complex += [onset_complex(mag, ph)]
+            found_flux +=  [onset_flux(mag, ph)]
+            found_melflux += [onset_melflux(mag, ph)]
+            found_rms += [onset_rms(mag, ph)]
+            found_complex_phase += [onset_complex_phase(mag, ph)]
         self.assertEqualVector(found_complex, zeros(len(found_complex)))
         self.assertEqualVector(found_hfc, zeros(len(found_hfc)))
-
+        self.assertEqualVector(found_flux, zeros(len(found_flux)))
+        self.assertEqualVector(found_melflux, zeros(len(found_melflux)))
+        self.assertEqualVector(found_rms, zeros(len(found_rms)))
+        self.assertEqualVector(found_hfc, zeros(len(found_hfc)))
+        self.assertEqualVector(found_complex_phase, zeros(len(found_complex_phase)))
     def testInvalidParam(self):
         self.assertConfigureFails(OnsetDetection(), { 'sampleRate':-1 })
         self.assertConfigureFails(OnsetDetection(), { 'method':'unknown' })
@@ -137,20 +152,12 @@ class TestOnsetDetection(TestCase):
         spectrum = ones(1024)
         self.assertComputeFails(OnsetDetection(method='complex'), spectrum, phase)
         self.assertComputeFails(OnsetDetection(method='complex_phase'), spectrum, phase)
-        #self.assertComputeFails(OnsetDetection(method='hfc'), spectrum,phase)
-        #self.assertComputeFails(OnsetDetection(method='flux'), spectrum,phase)
-        #self.assertComputeFails(OnsetDetection(method='melflux'), spectrum,phase)
-        #self.assertComputeFails(OnsetDetection(method='rms'), spectrum,phase)
-
+    
     def testDifferentSizes(self):
         spectrum = ones(1024)
         phase = ones(512)
         self.assertComputeFails(OnsetDetection(method='complex'),spectrum, phase)
         self.assertComputeFails(OnsetDetection(method='complex_phase'), spectrum, phase)
-        #self.assertComputeFails(OnsetDetection(method='hfc'), spectrum,phase)
-        #self.assertComputeFails(OnsetDetection(method='flux'), spectrum,phase)
-        #self.assertComputeFails(OnsetDetection(method='melflux'), spectrum,phase)
-        #self.assertComputeFails(OnsetDetection(method='rms'), spectrum,phase)
 
 
 
