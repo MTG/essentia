@@ -19,6 +19,20 @@ Essentia provides wrapper algorithms for TensorFlow deep learning models, design
 
 We provide many pre-trained TensorFlow models for auto-tagging, music classification, tempo estimation, source separation, and feature embedding extraction for music and audio in general. See our blog posts `[1] <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ `[2] <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for further details about some of the models.
 
+Our current models include:
+
+* Music auto-tagging (various architectures, trained on the Million Song Dataset and MagnaTagATune datasets).
+* Deep embeddings (OpenL3, VGGish-AudioSet).
+* Source separation (Spleeter)
+* Tempo (BPM) estimation (TempoCNN)
+* Transfer learning classifiers
+
+  - music genre (trained on 4 different datasets)
+  - moods: happy, sad, aggressive, relaxed, acoustic, electronic, party
+  - tonal / atonal
+  - danceability
+  - voice / instrumental
+  - gender (male, female singer)
 
 
 Installation
@@ -58,7 +72,7 @@ Essentia has a wrapper algorithm for LIBSVM for fast inference with SVM models.
 
 We provide various pre-trained SVM classifier models for genres, moods, and instrumentation:
 
-* musical genre (trained on 4 different databases)
+* music genre (trained on 4 different databases)
 * ballroom music classification
 * moods: happy, sad, aggressive, relaxed, acoustic, electronic, party
 * western / non-western music
