@@ -17,10 +17,8 @@ Using pre-trained TensorFlow models
 
 Essentia provides wrapper algorithms for TensorFlow deep learning models, designed to offer the flexibility of use, easy extensibility, and real-time inference. It allows using virtually any TensorFlow model within our audio analysis framework.
 
-We provide many pre-trained TensorFlow models for auto-tagging, music classification, tempo estimation, source separation, and feature embedding extraction for music and audio in general. See `our blog post <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ for further details about some of the models.
+We provide many pre-trained TensorFlow models for auto-tagging, music classification, tempo estimation, source separation, and feature embedding extraction for music and audio in general. See our blog posts `[1] <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ `[2] <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for further details about some of the models.
 
-
-TODO short text with recommendations how to build your own models.
 
 
 Installation
@@ -56,21 +54,54 @@ Also, see the demos of some of the models `here <demos.html>`_.
 
 Using pre-trained SVM Gaia models
 ----------------------------------------
+Essentia has a wrapper algorithm for LIBSVM for fast inference with SVM models.
 
-Essentia includes several `pre-trained SVM classifier models for genres, moods, and instrumentation
-<algorithms_overview.html#classifier-models>`_. To use them you need to:
+We provide various pre-trained SVM classifier models for genres, moods, and instrumentation:
 
-* Install `Gaia2 library <https://github.com/MTG/gaia/blob/master/README.md>`_ (supported on Linux/OSX)
-* Build Essentia with examples and Gaia (``--with-examples --with-gaia``)
-* Use ``essentia_streaming_extractor_music`` and configure it to include classifier models (see `detailed documentation <streaming_extractor_music.html>`_)
+* musical genre (trained on 4 different databases)
+* ballroom music classification
+* moods: happy, sad, aggressive, relaxed, acoustic, electronic, party
+* western / non-western music
+* tonal / atonal
+* danceability
+* voice / instrumental
+* gender (male, female singer)
+* timbre (dark, bright)
 
-You can train your own classifier models as described below.
+These models were trained on annotated music collections, including various inhouse collections created at Music Technology Group. See `more details <https://acousticbrainz.org/datasets/accuracy>`_ regarding their accuracies and the size of the employed datasets for training. To run the models, use the standalone `Music Extractor <streaming_extractor_music.html#high-level-classifier-models>`_ available in Essentia 2.1_beta2.
 
 Note that the more recent TensorFlow models now supersede many of the pre-trained SVM models we provide in accuracy.
 
 
-Training and running classifier models in Gaia
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Installation
+^^^^^^^^^^^^
+To use the SVM models you need to:
+
+* Install `Gaia2 library <https://github.com/MTG/gaia/blob/master/README.md>`_ (supported on Linux/OSX).
+* Build Essentia with examples and Gaia (``--with-examples --with-gaia``).
+* Use ``essentia_streaming_extractor_music`` and configure it to include classifier models (see `the detailed documentation <streaming_extractor_music.html>`_).
+
+
+SVM model downloads
+^^^^^^^^^^^^^^^^^^^
+
+https://essentia.upf.edu/svm_models/
+
+All the models created by the MTG are available under `the CC BY-NC-ND 4.0 license <https://creativecommons.org/licenses/by-nc-nd/4.0/>`_ and are also available under a proprietary license `upon request <https://www.upf.edu/web/mtg/contact>`_.
+
+
+Demos
+^^^^^
+* `AcousticBrainz <https://acousticbrainz.org>`_ is using our pre-trained SVM classifiers for large-scale music analysis on millions of tracks.
+
+* `AcousticBrainz Moods Playlist Generator <http://mtg.upf.edu/demos/acousticbrainz/moods>`_  is using SVM mood classifiers.
+
+
+Training your own SVM classifier models in Gaia
+-----------------------------------------------
+
+You can train your own SVM classifier models as described below.
+
 To run SVM classification in Essentia you need to prepare a classifier model in Gaia and run the ``GaiaTransform`` algorithm configured to use this model. The example of using high-level models can be seen in the code of ``streaming_music_extractor``. Here we discuss the steps to be followed to train classifier models that can be used with this extractor.
 
 1. Compute music descriptors using ``streaming_music_extractor`` for all audio files.

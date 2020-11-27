@@ -257,24 +257,3 @@ Building Essentia for Web using asm.js or WebAssembly
 
 A lightweight version of Essentia can be cross-compiled to asm.js or WebAssembly targets using Emscripten for it's usage on the Web. See `FAQ <https://essentia.upf.edu/FAQ.htm>`_ for more details.
 
-
-Using pre-trained high-level Gaia models in Essentia
-----------------------------------------------------
-
-Essentia includes a number of `pre-trained classifier models for genres, moods and instrumentation
-<algorithms_overview.html#classifier-models>`_. In order to use them you need to:
-
-* Install `Gaia2 library <https://github.com/MTG/gaia/blob/master/README.md>`_ (supported on Linux/OSX)
-* Build Essentia with examples and Gaia (``--with-examples --with-gaia``)
-* Use ``essentia_streaming_extractor_music`` (see `detailed documentation <streaming_extractor_music.html>`_)
-
-You can `train your own classifier models <FAQ.html#training-and-running-classifier-models-in-gaia>`_.
-
-
-
-Using pre-trained TensorFlow models in Essentia
------------------------------------------------
-
-Most recently, Essentia provides a wrapper for inference with TensorFlow deep learning models. Follow `these instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with this wrapper.
-
-We provide a number of `pre-trained TensorFlow models <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for auto-tagging and music classification that can be used out of box.
