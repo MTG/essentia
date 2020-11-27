@@ -8,7 +8,7 @@ Essentia includes algorithms for running inference with two types of data-driven
 * TensorFlow models
 * Gaia's SVM classifiers
 
-We provide various pre-trained models of both types for various music analysis and classification tasks (see `downloads page <download.html>`_).
+We provide various pre-trained models of both types for various music analysis and classification tasks.
 
 
 
