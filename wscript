@@ -353,6 +353,8 @@ def doc(ctx):
     os.system('mkdir -p build/python')
     os.system('cp -r src/python/essentia build/python/')
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
+    os.system('cp build/src/libessentia.so build/python/essentia')
 
     pythonpath = os.path.abspath('build/python')
-    os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, sys.executable))
+    ldpath = os.path.join(pythonpath, 'essentia')
+    os.system('PYTHONPATH=%s LD_LIBRARY_PATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, ldpath, sys.executable))
