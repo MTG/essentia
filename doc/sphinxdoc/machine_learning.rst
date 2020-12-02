@@ -82,7 +82,7 @@ We provide various pre-trained SVM classifier models for genres, moods, and inst
 * gender (male, female singer)
 * timbre (dark, bright)
 
-These models were trained on annotated music collections, including various inhouse collections created at Music Technology Group. See `more details <https://acousticbrainz.org/datasets/accuracy>`_ regarding their accuracies and the size of the employed datasets for training. To run the models, use the standalone `Music Extractor <streaming_extractor_music.html#high-level-classifier-models>`_ available in Essentia 2.1_beta2.
+These models were trained on annotated music collections, including various inhouse collections created at Music Technology Group. See `more details <https://acousticbrainz.org/datasets/accuracy>`_ regarding their accuracies and the size of the employed datasets for training. To run the models, use the standalone `Music Extractor <streaming_extractor_music.html#high-level-classifier-models>`_. The models are dependent on the version of Essentia, and we currently provide models for both `v2.1_beta1` (compatible with `v2.1_beta2`) and the latest `v2.1_beta5`.
 
 Note that the more recent TensorFlow models now supersede many of the pre-trained SVM models we provide in accuracy.
 
