@@ -8,9 +8,9 @@ cd tmp
 
 echo "Installing headers for Eigen $EIGEN_VERSION"
 
-curl -SLO https://bitbucket.org/eigen/eigen/get/$EIGEN_VERSION.tar.gz
-tar -xf $EIGEN_VERSION.tar.gz
-cd eigen-eigen*
+curl -SLO https://gitlab.com/libeigen/eigen/-/archive/$EIGEN_VERSION/eigen-$EIGEN_VERSION.tar.gz
+tar -xf eigen-$EIGEN_VERSION.tar.gz
+cd eigen-$EIGEN_VERSION
 
 mkdir build
 cd build
