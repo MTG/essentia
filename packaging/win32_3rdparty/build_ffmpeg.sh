@@ -35,12 +35,13 @@ cd $FFMPEG_VERSION
 make
 make install
 
-cp libavutil/avutil.dll $PREFIX/lib
-cp libavutil/avutil-51.dll $PREFIX/lib
-cp libavcodec/avcodec.dll $PREFIX/lib
-cp libavcodec/avcodec-53.dll $PREFIX/lib
-cp libavformat/avformat.dll $PREFIX/lib
-cp libavformat/avformat-53.dll $PREFIX/lib
+# TODO Unnecessary?
+#cp libavutil/avutil.dll $PREFIX/lib
+#cp libavutil/avutil-51.dll $PREFIX/lib
+#cp libavcodec/avcodec.dll $PREFIX/lib
+#cp libavcodec/avcodec-53.dll $PREFIX/lib
+#cp libavformat/avformat.dll $PREFIX/lib
+#cp libavformat/avformat-53.dll $PREFIX/lib
 
 cd ../..
 rm -r tmp

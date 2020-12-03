@@ -39,4 +39,5 @@ make install
 cd ../..
 rm -r tmp
 
-mv $PREFIX/bin/libtag.dll $PREFIX/lib
+# TODO Unnecessary?
+#mv $PREFIX/bin/libtag.dll $PREFIX/lib
