@@ -27,7 +27,7 @@ namespace standard {
 
 const char* MusicExtractorSVM::name = "MusicExtractorSVM";
 const char* MusicExtractorSVM::category = "Extractors";
-const char* MusicExtractorSVM::description = DOC("This algorithms computes SVM predictions given a pool with aggregated descriptor values computed by MusicExtractor.");
+const char* MusicExtractorSVM::description = DOC("This algorithms computes SVM predictions given a pool with aggregated descriptor values computed by MusicExtractor (or FreesoundExtractor).");
 
 // TODO explain better (reuse music extractor svm documentation)
 

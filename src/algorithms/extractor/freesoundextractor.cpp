@@ -105,7 +105,7 @@ void FreesoundExtractor::configure() {
   if (options.value<Real>("highlevel.compute")) {
 #if HAVE_GAIA2 
     svmModels = options.value<vector<string> >("highlevel.svm_models");
-    _svms = AlgorithmFactory::create("FreesoundExtractorSVM", "svms", svmModels);
+    _svms = AlgorithmFactory::create("MusicExtractorSVM", "svms", svmModels);
 #else
     E_WARNING("FreesoundExtractor: Gaia library is missing. Skipping configuration of SVM models.");
 #endif
