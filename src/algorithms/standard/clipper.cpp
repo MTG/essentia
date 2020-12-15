@@ -29,7 +29,7 @@ const char* Clipper::description = DOC("This algorithm clips the input signal to
 "\n"
 "References:\n"
 "  [1] Clipping - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Clipping_(audio)");
+"  http://en.wikipedia.org/wiki/Clipping_%28audio%29");
 
 void Clipper::configure() {
   _max = parameter("max").toReal();
