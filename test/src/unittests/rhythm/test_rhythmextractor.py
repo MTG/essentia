@@ -35,7 +35,6 @@ class TestRhythmExtractor(TestCase):
         self.assertAlmostEqualFixedPrecision(bpm, 126, 0) # exact value= 125.726791382
 
 
-
     def runInstance(self, input, tempoHints=None, useOnset=True, useBands=True, poolInit=False):
         print('TestRhythmExtractor: Warning - these tests are evaluated with high tolerances for error, please review these tests')
 
@@ -142,19 +141,19 @@ class TestRhythmExtractor(TestCase):
         self.assertEqualVector(result, expected)
 
     def testZero(self):
-        input = [0.0]*10*1024 # 100 frames of size 1024
+        input = [0.0]*100*1024 # 100 frames of size 1024
         expected = [0, [], [], []]
         result = self.runInstance(input, poolInit=True)
         self._assertEqualResults(result, expected)
 
     def testZeroUseBands(self):
-        input = array([0.0]*10*1024) # 100 frames of size 1024
+        input = array([0.0]*100*1024) # 100 frames of size 1024
         expected = [0, [], [], []]
         result = self.runInstance(input, useBands=True, useOnset=False, poolInit=True)
         self._assertEqualResults(result, expected)
 
     def testZeroUseOnset(self):
-        input = [0.0]*10*1024 # 100 frames of size 1024
+        input = [0.0]*100*1024 # 100 frames of size 1024
         expected = [0, [], [], []]
         result = self.runInstance(input, useBands=True, useOnset=False, poolInit=True)
         self._assertEqualResults(result, expected)
