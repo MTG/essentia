@@ -92,16 +92,6 @@ class TestRhythmExtractor(TestCase):
         return impulse
 
 
-    def assertVectorWithinVectorDifference(self, found, expected, precision=1e-7):
-        for i in range(len(found)):
-            for j in range(1,len(expected)):
-                if found[i] <= expected[j] and found[i] >= expected[j-1]:
-                    if fabs(found[i] - expected[j-1]) < fabs(expected[j] - found[i]):
-                        self.assertAlmostEqual(found[i]-expected[j-1], 0, precision)
-                    else:
-                        self.assertAlmostEqual(found[i]-expected[j], 0, precision)
-
-
     def assertVectorWithinVector(self, found, expected, precision=1e-7):
         for i in range(len(found)):
             for j in range(1,len(expected)):
@@ -110,16 +100,6 @@ class TestRhythmExtractor(TestCase):
                         self.assertAlmostEqual(found[i], expected[j-1], precision)
                     else:
                         self.assertAlmostEqual(found[i], expected[j], precision)
-
-    def assertVectorWithinVectorFixedPrecision(self, found, expected, precision=2):
-        for i in range(len(found)):
-            for j in range(1,len(expected)):
-                if found[i] <= expected[j] and found[i] >= expected[j-1]:
-                    if fabs(found[i] - expected[j-1]) < fabs(expected[j] - found[i]):
-                        self.assertAlmostEqualFixedPrecision(found[i], expected[j-1], precision)
-                    else:
-                        self.assertAlmostEqualFixedPrecision(found[i], expected[j], precision)
-
 
     def _assertEqualResults(self, result, expected):
         self.assertEqual(result[0], expected[0]) #bpm
