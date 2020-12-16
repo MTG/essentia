@@ -140,11 +140,12 @@ class TestOnsetDetection(TestCase):
         self.assertEqualVector(found_rms, zeros(len(found_rms)))
         self.assertEqualVector(found_hfc, zeros(len(found_hfc)))
         self.assertEqualVector(found_complex_phase, zeros(len(found_complex_phase)))
+    
     def testInvalidParam(self):
         self.assertConfigureFails(OnsetDetection(), { 'sampleRate':-1 })
         self.assertConfigureFails(OnsetDetection(), { 'method':'unknown' })
 
-    def testEmpty(self):
+    def testComplexInputSizeMismatch(self):
         # Empty input should raise an exception
         spectrum = []
         phase = []
