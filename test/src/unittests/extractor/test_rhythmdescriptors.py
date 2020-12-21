@@ -17,7 +17,13 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-
+# The interface of the Rhythm descriptors algorithm is similar to the BPMHistogramDescriptors
+# It has the additional outputs:
+# beats_position (vector_real) - See RhythmExtractor2013 algorithm documentation
+# confidence (real) - See RhythmExtractor2013 algorithm documentation
+# bpm (real) - See RhythmExtractor2013 algorithm documentation
+# bpm_estimates (vector_real) - See RhythmExtractor2013 algorithm documentation
+# bpm_intervals (vector_real) -  See RhythmExtractor2013 algorithm documentation
 
 from essentia_test import *
 

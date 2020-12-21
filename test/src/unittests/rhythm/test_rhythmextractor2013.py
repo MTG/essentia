@@ -110,7 +110,7 @@ class TestRhythmExtractor2013(TestCase):
 
     def _assertEqualResultsMultiFeature(self, result, expected):
         self.assertEqual(result[0], expected[0]) #bpm
-        self.assertEqualVector(result[1], expected[1]) # confidence
+        self.assertEqual(result[1], expected[1]) # confidence
         self.assertEqualVector(result[2], expected[2]) # ticks
         self.assertEqualVector(result[3], expected[3]) # estimates
         self.assertEqualVector(result[4], expected[4]) # bpmIntervals
@@ -137,7 +137,7 @@ class TestRhythmExtractor2013(TestCase):
 
     def testZeroUseMultiFeature(self):
         input = array([0.0]*10*1024) # 100 frames of size 1024
-        expected = [0, [], [], [], []] # extra frame for confidence
+        expected = [0, [], 0, [], []] # extra frame for confidence
         result = self.runInstance(input, useMultiFeature=True, useDegara=False )
         self._assertEqualResultsMultiFeature(result, expected)
 
@@ -145,13 +145,14 @@ class TestRhythmExtractor2013(TestCase):
         input = [0.0]*10*1024 # 100 frames of size 1024
         expected = [0, [], [], []]
         result = self.runInstance(input, useMultiFeature=False, useDegara=True )
-        self._assertEqualResultsiDegara(result, expected)
+        self._assertEqualResultsDegara(result, expected)
 
     def testUseMultiFeature(self):
         impulseTrain140 = self.pulseTrain(bpm=140, sr=44100., offset=.1, dur=10)
 
         # expected values
         expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
+        expectedConfidence = 0.5
         expectedBpm = 140.
         expectedRubatoStart = []
         expectedRubatoStop = []
@@ -160,18 +161,21 @@ class TestRhythmExtractor2013(TestCase):
         # bpm
         self.assertAlmostEqual(result[0], expectedBpm, 1e-2)
 
+        #confidence
+        self.assertAlmostEqual(result[1], expectedConfidence, 1e-2)
+        
         # ticks
-        self.assertVectorWithinVector(result[1], expectedTicks, .1)
+        self.assertVectorWithinVector(result[2], expectedTicks, .1)
 
         # estimated bpm
-        for i in range(len(result[2])):
-            self.assertAlmostEqual(result[2][i], expectedBpm, 1.)
+        for i in range(len(result[3])):
+            self.assertAlmostEqual(result[3][i], expectedBpm, 1.)
 
         # bpm intervals
-        for i in range(len(result[3])):
-            self.assertAlmostEqual(result[3][i], 60./expectedBpm, 0.2)
+        for i in range(len(result[4])):
+            self.assertAlmostEqual(result[4][i], 60./expectedBpm, 0.2)
 
-    def testImpulseTrain(self):
+    def testImpulseTrainDegara(self):
         
         impulseTrain140 = self.pulseTrain(bpm=140, sr=44100., offset=.1, dur=10)
         
@@ -249,6 +253,91 @@ class TestRhythmExtractor2013(TestCase):
 
         self.assertVectorWithinVector(result[3], expectedBpmIntervals, 0.5)
         
+    def testImpulseTrainMulifeature(self):
+        
+        impulseTrain140 = self.pulseTrain(bpm=140, sr=44100., offset=.1, dur=10)
+        
+        # expected values
+        expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
+
+        expectedBpm = 140.
+
+        result = self.runInstance(impulseTrain140)
+
+        # bpm
+        self.assertAlmostEqual(result[0], expectedBpm, 1e-2)
+
+        #confidence
+        self.assertAlmostEqual(result[1], expectedBpm, 1e-2)
+
+        # ticks
+        self.assertVectorWithinVector(result[2], expectedTicks, .1)
+
+        # estimated bpm
+        for i in range(len(result[3])):
+            self.assertAlmostEqual(result[3][i], expectedBpm, 1.)
+
+        # bpm intervals
+        for i in range(len(result[4])):
+            self.assertAlmostEqual(result[4][i], 60./expectedBpm, 0.2)
+
+        # impulse train at 90bpm no offset
+        impulseTrain90 = self.pulseTrain(bpm=90., sr=44100., offset=0., dur=20.)
+        
+        # impulse train at 200bpm with offset
+        impulseTrain200 = self.pulseTrain(bpm=200., sr=44100., offset=.2, dur=10.)
+
+        # impulse train at 200bpm with no offset
+        impulseTrain200b = self.pulseTrain(bpm=200., sr=44100., offset=0., dur=25.)
+
+        ## make a new impulse train at 140-90-200-200 bpm
+        impulseTrain = impulseTrain140 + impulseTrain90 + impulseTrain200 + \
+                       impulseTrain200b
+        
+        # expected values
+        # confidence
+        expectedConfidence = 0.5
+
+        # ticks
+        expectedTicks = [i/44100. for i in range(len(impulseTrain)) if impulseTrain[i]!= 0]
+        
+        result = self.runInstance(impulseTrain, expectedTicks)
+
+        # bpm
+        expectedBpm = 200
+        self.assertAlmostEqual(result[0], expectedBpm, .5)
+
+        # ticks
+        self.assertVectorWithinVector(result[1], expectedTicks, 0.03)
+
+        # bpm estimates
+        for i in range(len(result[2])):
+            self.assertAlmostEqual(result[2][i], expectedBpm, 0.5)
+
+        # bpm intervals: we may need to take into account also multiples of 90,
+        # 140 and 200.
+        expectedBpmIntervals = [60/90., 60/140., 60/200.]
+        self.assertVectorWithinVector(result[3], expectedBpmIntervals)
+        
+        ### run w/o tempoHints ###
+
+        result = self.runInstance(impulseTrain)
+
+        expectedBpmVector = [50, 100, 200]
+
+        # bpm: here rhythmextractor is choosing 0.5*expected_bpm, that's why we are
+        # comparing the resulting bpm with the expected_bpm_vector:
+        self.assertVectorWithinVector([result[0]], expectedBpmVector, 1.)
+        
+        # bpm estimates
+        self.assertVectorWithinVector(result[3], expectedBpmVector, 0.5)
+        
+        self.assertVectorWithinVector(result[2], expectedTicks, 0.03)
+
+        self.assertVectorWithinVector(result[4], expectedBpmIntervals, 0.05)
+
+        self.assertEqual(result[1], expectedConfidence, 0.5)
+
 suite = allTests(TestRhythmExtractor2013)
 
 if __name__ == '__main__':
