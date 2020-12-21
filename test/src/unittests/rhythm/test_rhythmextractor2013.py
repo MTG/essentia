@@ -34,15 +34,13 @@ class TestRhythmExtractor2013(TestCase):
         bpm, _, _, _ = rhythm(audio)
         self.assertAlmostEqualFixedPrecision(bpm, 126, 0) # exact value= 125.726791382
 
-    def runInstance(self, input, tempoHints=None, useDegara=True, useMultiFeature=True, poolInit=False):
+    def runInstance(self, input, tempoHints=None, useDegara=True, useMultiFeature=True):
         print('TestRhythmExtractor2013: Warning - these tests are evaluated with high tolerances for error, please review these tests')
 
         gen = VectorInput(input)
-        if (useDegara):
-            rhythm = RhythmExtractor2013()
-       
-        else:
-            rhythm = RhythmExtractor2013()
+        
+        # TODO differentiate Degara and Multinstance scenarios
+        rhythm = RhythmExtractor2013()
 
         p = Pool()
 
@@ -110,48 +108,44 @@ class TestRhythmExtractor2013(TestCase):
                     else:
                         self.assertAlmostEqual(found[i], expected[j], precision)
 
-    def _assertEqualResults(self, result, expected):
+    def _assertEqualResultsMultiFeature(self, result, expected):
+        self.assertEqual(result[0], expected[0]) #bpm
+        self.assertEqualVector(result[1], expected[1]) # confidence
+        self.assertEqualVector(result[2], expected[2]) # ticks
+        self.assertEqualVector(result[3], expected[3]) # estimates
+        self.assertEqualVector(result[4], expected[4]) # bpmIntervals
+
+
+    def _assertEqualResultsDegara(self, result, expected):
         self.assertEqual(result[0], expected[0]) #bpm
         self.assertEqualVector(result[1], expected[1]) # ticks
         self.assertEqualVector(result[2], expected[2]) # estimates
         self.assertEqualVector(result[3], expected[3]) # bpmIntervals
 
 
-    def testEmpty(self):
-        input = []
-        expected = [0, 0, 0, 0]
-        result = self.runInstance(input, poolInit=True)
-        self.assertEqualVector(result, expected)
-
     def testEmptyUseMultiFeature(self):
         input = []
-        expected = [0, 0, 0, 0]
-        result = self.runInstance(input, useMultiFeature=True, useDegara=False, poolInit=True)
+        expected = [0, 0, 0, 0, 0]
+        result = self.runInstance(input, useMultiFeature=True, useDegara=False )
         self.assertEqualVector(result, expected)
 
     def testEmptyUseDegara(self):
         input = []
         expected = [0, 0, 0, 0]
-        result = self.runInstance(input, useMultiFeature=False, useDegara=True, poolInit=True)
+        result = self.runInstance(input, useMultiFeature=False, useDegara=True )
         self.assertEqualVector(result, expected)
-
-    def testZero(self):
-        input = [0.0]*10*1024 # 100 frames of size 1024
-        expected = [0, [], [], []]
-        result = self.runInstance(input, poolInit=True)
-        self._assertEqualResults(result, expected)
 
     def testZeroUseMultiFeature(self):
         input = array([0.0]*10*1024) # 100 frames of size 1024
-        expected = [0, [], [], []]
-        result = self.runInstance(input, useMultiFeature=True, useDegara=False, poolInit=True)
-        self._assertEqualResults(result, expected)
+        expected = [0, [], [], [], []] # extra frame for confidence
+        result = self.runInstance(input, useMultiFeature=True, useDegara=False )
+        self._assertEqualResultsMultiFeature(result, expected)
 
     def testZeroUseDegara(self):
         input = [0.0]*10*1024 # 100 frames of size 1024
         expected = [0, [], [], []]
-        result = self.runInstance(input, useMultiFeature=True, useDegara=False, poolInit=True)
-        self._assertEqualResults(result, expected)
+        result = self.runInstance(input, useMultiFeature=False, useDegara=True )
+        self._assertEqualResultsiDegara(result, expected)
 
     def testUseMultiFeature(self):
         impulseTrain140 = self.pulseTrain(bpm=140, sr=44100., offset=.1, dur=10)
