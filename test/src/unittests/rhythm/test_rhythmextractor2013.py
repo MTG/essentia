@@ -43,7 +43,6 @@ class TestRhythmExtractor2013(TestCase):
         
         #output all the outputs in the natural order in the std mode
         return(rhythm(input))
-            rhythm.confidence >> (p, 'rhythm.confidence')
 
     def pulseTrain(self, bpm, sr, offset, dur):
         from math import floor
