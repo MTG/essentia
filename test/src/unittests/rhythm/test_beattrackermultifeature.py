@@ -16,6 +16,11 @@
 #
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
-# The unit test for multifeature tracking is taken care of in the file test_rhythmextractor2013.py
+
+# The unit test for "BeatTrackerMultiFeature" is taken care of in the file test_rhythmextractor2013.py.
 # This file is included here as a "dummy" to maintain consistency in file to file correspondence
 # between unit test and the algorithm.
+
+class TestBeatTrackerMultiFeature(TestCase):
+        def testDummy(self):
+                    self.assert(True)

@@ -17,9 +17,6 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-
-
-
 from essentia_test import *
 from essentia.standard import MonoLoader, RhythmExtractor2013
 from math import fabs
@@ -31,20 +28,11 @@ class TestRhythmExtractor2013(TestCase):
         rhythm = RhythmExtractor2013()
 
         bpm, _, _, _ ,_= rhythm(audio)
-        self.assertAlmostEqualFixedPrecision(bpm, 124.29265, 0) # exact value= 125.726791382
+        self.assertAlmostEqualFixedPrecision(bpm, 124, 0) # exact value= 124.29265
+    def _runInstance(self, input, method="degara"):
+        return RhythmExtractor2013(method=method)(input) 
 
-    def runInstance(self, input, method="degara"):
-        print('TestRhythmExtractor2013: Warning - these tests are evaluated with high tolerances for error, please review these tests')
-
-        gen = VectorInput(input)
-        
-        # TODO differentiate Degara and Multinstance scenarios
-        rhythm = RhythmExtractor2013(method=method)
-        
-        #output all the outputs in the natural order in the std mode
-        return(rhythm(input))
-
-    def pulseTrain(self, bpm, sr, offset, dur):
+    def _pulseTrain(self, bpm, sr, offset, dur):
         from math import floor
         period = int(floor(sr/(bpm/60.)))
         size = int(floor(sr*dur))
@@ -59,7 +47,7 @@ class TestRhythmExtractor2013(TestCase):
                 impulse[i] = 1.0
         return impulse
 
-    def assertVectorWithinVector(self, found, expected, precision=1e-7):
+    def _assertVectorWithinVector(self, found, expected, precision=1e-7):
         for i in range(len(found)):
             for j in range(1,len(expected)):
                 if found[i] <= expected[j] and found[i] >= expected[j-1]:
@@ -75,117 +63,161 @@ class TestRhythmExtractor2013(TestCase):
         self.assertEqualVector(result[3], expected[3]) # estimates
         self.assertEqualVector(result[4], expected[4]) # bpmIntervals
 
-    #TODO The exact expected values for the result oof passing empty parameters is TBD
-    # (see testZero)
     def testEmpty(self):
-        input = []
-        #expected = [0.0, [], 0.0, [], [],[]]# extra frame for confidence
-        #result = self.runInstance(input, method="multifeature")
-        #self.assertEqualVector(result, expected)
-        #result = self.runInstance(input, method="degara")
-        #self.assertEqualVector(result, expected)
-        #print(result) 
+        input = array([0.0]*100*1024) # 100 frames of size 1024
+        expected = [0.0, [], 0.0, [], []]
+        result = self._runInstance(input, method="multifeature")
+        self.assertEqualVector(result, expected)
+        result = self._runInstance(input, method="degara")
+        self.assertEqualVector(result, expected)
 
     def testZero(self):
-        input = array([0.0]*10*1024) # 100 frames of size 1024
-        expected = [0.0, [], 0.0, [], [],[]] # extra frame for confidence
-        result = self.runInstance(input, method="multifeature" )
+        input = array([0.0]*100*1024) # 100 frames of size 1024
+        expected = [150.0, [], 0.0, [], []] # extra frame for confidence
+        result = self._runInstance(input, method="multifeature" )
         self._assertEqualResults(result, expected)
         
-        expected = [1033.59375, [0.058049887,0.058049887], 0.0, [], [],[]] # extra frame for confidence
-        result = self.runInstance(input, method="degara" )
+        expected = [0.0, [0.058,0.058], 0.0, [], [],[]] # extra frame for confidence
+        result = self._runInstance(input, method="degara" )
         self._assertEqualResults(result, expected)
 
-    def testImpulseTrain(self):
-        
-        impulseTrain140 = self.pulseTrain(bpm=140, sr=44100., offset=.1, dur=10)
-        # expected values
+    def _createPulseTrain140(self): 
+        return(self._pulseTrain(bpm=140, sr=44100., offset=.1, dur=10))
+
+    def _createPulseTrainCombo(self):
+        # Define impulse train at 90bpm no offset
+        impulseTrain90 = self._pulseTrain(bpm=90., sr=44100., offset=0., dur=20.)
+        # Define impulse train at 140bpm no offset
+        impulseTrain140 = self._pulseTrain(bpm=140., sr=44100., offset=.1, dur=10.)
+        # Define impulse train at 200bpm with offset
+        impulseTrain200 = self._pulseTrain(bpm=200., sr=44100., offset=.2, dur=10.)
+        # Define impulse train at 200bpm with no offset
+        impulseTrain200b = self._pulseTrain(bpm=200., sr=44100., offset=0., dur=25.)
+        # Define Combination impulse train at 140-90-200-200 bpm
+        return(impulseTrain90 + impulseTrain140 + impulseTrain200 + impulseTrain200b)
+    
+    def testImpulseTrainMultifeature(self):
+        # Define expected values
+        impulseTrain140=self._createPulseTrain140()
+        expectedBpm = 139.68
         expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
-        expectedBpm = 139.6845550537109
-        expectedConfidence =3.785917 
-        result = self.runInstance(impulseTrain140,method="multifeature")
-        # bpm
+        expectedConfidence =3.79 
+        # Test Multifeature with impulseTrain140
+        result = self._runInstance(impulseTrain140,method="multifeature")
+        # Check bpm
         self.assertAlmostEqual(result[0], expectedBpm, 1e-2)
-        # ticks
+        # Check ticks
         tickTolerance = 1.214071e+01
-        self.assertVectorWithinVector(result[1], expectedTicks, tickTolerance)
-        #confidence
-        self.assertAlmostEqual(result[2], expectedConfidence, 1e-2)
-        # estimated bpm
+        self._assertVectorWithinVector(result[1], expectedTicks, tickTolerance)
+        # Check confidence
+        confidenceTolerance = 1.295166e-02
+        self.assertAlmostEqual(result[2], expectedConfidence,confidenceTolerance)
+        # Check estimated bpm
         for i in range(len(result[3])):
             self.assertAlmostEqual(result[3][i], expectedBpm, 1.)
-
-        # bpm intervals
+        # Check bpm intervals
         for i in range(len(result[4])):
             self.assertAlmostEqual(result[4][i], 60./expectedBpm, 0.2)
-
-        # impulse train at 90bpm no offset
-        impulseTrain90 = self.pulseTrain(bpm=90., sr=44100., offset=0., dur=20.)
-        
-        # impulse train at 200bpm with offset
-        impulseTrain200 = self.pulseTrain(bpm=200., sr=44100., offset=.2, dur=10.)
-
-        # impulse train at 200bpm with no offset
-        impulseTrain200b = self.pulseTrain(bpm=200., sr=44100., offset=0., dur=25.)
-
-        ## make a new impulse train at 140-90-200-200 bpm
-        impulseTrain = impulseTrain140 + impulseTrain90 + impulseTrain200 + \
-                       impulseTrain200b
-       
-
-        result = self.runInstance(impulseTrain,method="degara")
-
-        # expected values:
-        # confidence
+        # Test Multifeature with this combo impulseTrain
+        result = self._runInstance(self._createPulseTrainCombo(),method="multifeature")
+        # Define expected values
+        expectedBpm = 117 
+        expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
         expectedConfidence = 0.0
-
-        # ticks
-        expectedTicks = [i/44100. for i in range(len(impulseTrain)) if impulseTrain[i]!= 0]
-        
-        # bpm
-        expectedBpm = 200
+        # Check bpm
         self.assertAlmostEqual(result[0], expectedBpm, .5)
-
-        # ticks
-        tickTolerance= 3.0
-        self.assertVectorWithinVector(result[1], expectedTicks,tickTolerance )
-
-        #confidence
+        # Check ticks
+        tickTolerance= 0.5
+        self._assertVectorWithinVector(result[1], expectedTicks,tickTolerance )
+        # Check confidence
         expectedConfidence = 0.0
-        confidenceTolerance= 0.1
-
+        confidenceTolerance= 3.5
         self.assertAlmostEqual(result[2], expectedConfidence, confidenceTolerance)
-
-
-        # bpm estimates
-        # define tolerance
+        # Check estimate bpm
         for i in range(len(result[3])):
             self.assertAlmostEqual(result[3][i], expectedBpm, 5.0)
-
         # bpm intervals: we may need to take into account also multiples of 90,
         # 140 and 200.
+        # Check bpm intervals
         expectedBpmIntervals = [60/90., 60/140., 60/200.]
-        self.assertVectorWithinVector(result[4], expectedBpmIntervals)
-        
+        self._assertVectorWithinVector(result[4], expectedBpmIntervals)
 
-        result = self.runInstance(impulseTrain)
-
+        result = self._runInstance(self._createPulseTrainCombo(),method="multifeature")
         expectedBpmVector = [50, 100, 200]
 
         # bpm: here rhythmextractor is choosing 0.5*expected_bpm, that's why we are
         # comparing the resulting bpm with the expected_bpm_vector:
-        self.assertVectorWithinVector([result[0]], expectedBpmVector, 1.)
+        self._assertVectorWithinVector([result[0]], expectedBpmVector, 1.)
         
         #TODO decide on tolerance
-        #self.assertVectorWithinVector(result[1], expectedTicks, 0.03)
-
+        self._assertVectorWithinVector(result[1], expectedTicks, 0.03)
         self.assertEqual(result[2], expectedConfidence, confidenceTolerance)
-       
-        self.assertVectorWithinVector(result[3], expectedBpmVector, 0.5)
+        self._assertVectorWithinVector(result[3], expectedBpmVector, 0.5)
+        self._assertVectorWithinVector(result[4], expectedBpmIntervals, 0.05)
+
+
+    def testImpulseTrainDegara(self):
+        # Define expected values
+        impulseTrain140=self._createPulseTrain140()
+        expectedBpm = 139.68
+        expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
+        expectedConfidence =3.79 
+        # Test Multifeature with impulseTrain140
+        result = self._runInstance(impulseTrain140,method="degara")
+        # Check bpm
+        self.assertAlmostEqual(result[0], expectedBpm, 1e-2)
+        # Check ticks
+        tickTolerance = 1.214071e+01
+        self._assertVectorWithinVector(result[1], expectedTicks, tickTolerance)
+        # Check confidence
+        confidenceTolerance = 1.295166e-02
+        self.assertAlmostEqual(result[2], expectedConfidence,confidenceTolerance)
+        # Check estimated bpm
+        for i in range(len(result[3])):
+            self.assertAlmostEqual(result[3][i], expectedBpm, 1.)
+        # Check bpm intervals
+        for i in range(len(result[4])):
+            self.assertAlmostEqual(result[4][i], 60./expectedBpm, 0.2)
+        # Test Multifeature with this combo impulseTrain
+        result = self._runInstance(self._createPulseTrainCombo(),method="degara")
+        # Define expected values
+        expectedBpm = 117 
+        expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
+        expectedConfidence = 0.0
+        # Check bpm
+        self.assertAlmostEqual(result[0], expectedBpm, .5)
+        # Check ticks
+        tickTolerance= 0.5
+        self._assertVectorWithinVector(result[1], expectedTicks,tickTolerance )
+        # Check confidence
+        expectedConfidence = 0.0
+        confidenceTolerance= 3.5
+        self.assertAlmostEqual(result[2], expectedConfidence, confidenceTolerance)
+        # Check estimate bpm
+        for i in range(len(result[3])):
+            self.assertAlmostEqual(result[3][i], expectedBpm, 5.0)
+        # bpm intervals: we may need to take into account also multiples of 90,
+        # 140 and 200.
+        # Check bpm intervals
+        expectedBpmIntervals = [60/90., 60/140., 60/200.]
+        self._assertVectorWithinVector(result[4], expectedBpmIntervals)
+
+        result = self._runInstance(self._createPulseTrainCombo(),method="degara")
+        expectedBpmVector = [50, 100, 200]
+
+
+        # bpm: here rhythmextractor is choosing 0.5*expected_bpm, that's why we are
+        # comparing the resulting bpm with the expected_bpm_vector:
+        self._assertVectorWithinVector([result[0]], expectedBpmVector, 1.)
         
-        self.assertVectorWithinVector(result[4], expectedBpmIntervals, 0.05)
+        #TODO decide on tolerance
+        self._assertVectorWithinVector(result[1], expectedTicks, 0.03)
+        self.assertEqual(result[2], expectedConfidence, confidenceTolerance)
+        self._assertVectorWithinVector(result[3], expectedBpmVector, 0.5)
+        self._assertVectorWithinVector(result[4], expectedBpmIntervals, 0.05)
 
 
+        # bpm: here rhythmextractor is choosing 0.5*expected_bpm, that's why we are
 suite = allTests(TestRhythmExtractor2013)
 
 if __name__ == '__main__':

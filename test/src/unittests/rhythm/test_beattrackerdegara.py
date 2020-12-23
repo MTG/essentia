@@ -16,7 +16,11 @@
 #
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
-#
-# The unit test for degara beat tracking is taken care of in the file test_rhythmextractor2013.py
-# This file is included here as a "dummy" to maintain consistency in file to file correspondence
+
+# The unit test for "BeatTrackerDegara" is taken care of in the file "test_rhythmextractor2013.py".
+# This file is included here as a "dummy" to maintain consistency in "file to file" correspondence
 # between unit test and the algorithm.
+
+class TestBeatTrackerDegara(TestCase):
+        def testDummy(self):
+                    self.assert(True)
