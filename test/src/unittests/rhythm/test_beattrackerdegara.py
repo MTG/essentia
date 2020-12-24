@@ -21,6 +21,15 @@
 # This file is included here as a "dummy" to maintain consistency in "file to file" correspondence
 # between unit test and the algorithm.
 
-class TestBeatTrackerDegara(TestCase):
-        def testDummy(self):
-                    self.assert(True)
+
+from numpy import *
+from essentia_test import *
+
+class TestBeatTrackerDegara(TestCase): 
+    def testDummy(self):
+        self.assertEqual(0,0)
+
+suite = allTests(TestBeatTrackerDegara)
+
+if __name__ == '__main__':
+        TextTestRunner(verbosity=2).run(suite)

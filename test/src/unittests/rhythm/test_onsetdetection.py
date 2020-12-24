@@ -133,7 +133,6 @@ class TestOnsetDetection(TestCase):
             found_melflux += [onset_melflux(mag, ph)]
             found_rms += [onset_rms(mag, ph)]
             found_complex_phase += [onset_complex_phase(mag, ph)]
-        print(found_hfc)
         self.assertEqualVector(found_complex, zeros(len(found_complex)))
         self.assertEqualVector(found_hfc, zeros(len(found_hfc)))
         self.assertEqualVector(found_flux, zeros(len(found_flux)))

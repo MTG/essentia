@@ -30,7 +30,6 @@ hopsize = 512
 class TestOnsetDetectionGlobal(TestCase):
 
     def testZero(self):
-        # Inputting zeros should return no onsets (empty array)
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/techno_loop.wav'),
                            sampleRate = 44100)()
         frames = FrameGenerator(audio, frameSize=framesize, hopSize=hopsize)
@@ -86,9 +85,11 @@ class TestOnsetDetectionGlobal(TestCase):
         for frame in frames:
             found_infogain += [onset_infogain(frame)]
             found_beat_emphasis += [onset_beat_emphasis(frame)]
-        print(zeros(len(found_infogain)))
-        #self.assertEqualVector(found_infogain, zeros(len(found_infogain)))
-        #self.assertEqualVector(found_beat_emphasis, zeros(len(found_beat_emphasis)))
+        list_infogain= numpy.ndarray.tolist(found_infogain)
+        #TODO The correct zeroed array structure must be found for comparison
+        #Currently this UT fails.
+        self.assertEqualVector(list_infogain, zeros(len(found_infogain)))
+        self.assertEqualVector(found_beat_emphasis, zeros(len(found_beat_emphasis)))
     
     def testInvalidParam(self):
         self.assertConfigureFails(OnsetDetectionGlobal(), { 'sampleRate':-1 })
