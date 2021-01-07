@@ -65,7 +65,7 @@ class TestRhythmExtractor2013(TestCase):
 
     def testEmptyMultiFeature(self):
         input = array([0.0]*100*1024) # 100 frames of size 1024
-        expected = [0,0, [], 0.0, []]
+        expected = [0.0, [], 0.0, [],[]]
         result = self._runInstance(input, method="multifeature")
         self.assertEqualVector(result, expected)
 
@@ -109,12 +109,16 @@ class TestRhythmExtractor2013(TestCase):
         expectedBpm = 140
         expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
         expectedConfidence =3.8
+        #print("\nExpected Ticks Multifeature\n")
+        #print(expectedTicks)
         # Test Multifeature with impulseTrain140
         result = self._runInstance(impulseTrain140,method="multifeature")
         # Check bpm
         self.assertAlmostEqual(result[0], expectedBpm, 1e-2)
         # Check ticks
         self._assertVectorWithinVector(result[1], expectedTicks, 0.2)
+        #print("\nActual Ticks Multifeature\n")
+        #print(result[1])
         # Check confidence
         self.assertAlmostEqual(result[2], expectedConfidence,1.0)
         # Check estimated bpm
@@ -126,9 +130,12 @@ class TestRhythmExtractor2013(TestCase):
         # Test Multifeature with this combo impulseTrain
         result = self._runInstance(self._createPulseTrainCombo(),method="multifeature")
         # Define expected values
+        impulseTrainCombo= self._createPulseTrainCombo()
         expectedBpm = 117 
-        expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
+        expectedTicks = [i/44100. for i in range(len(impulseTrainCombo)) if impulseTrainCombo[i]!= 0]
         expectedConfidence = 0.0
+        #print("\nExpected Ticks Combo Multifeature\n")
+        #print(expectedTicks)
         # Check bpm
         self.assertAlmostEqual(result[0], expectedBpm, .5)
         # Check ticks
@@ -146,7 +153,8 @@ class TestRhythmExtractor2013(TestCase):
         self._assertVectorWithinVector(result[4], expectedBpmIntervals)
         result = self._runInstance(self._createPulseTrainCombo(),method="multifeature")
         expectedBpmVector = [50, 100, 200]
-
+        #print("Actual Ticks Combo Multifeature")
+        #print(result[1])
         # bpm: here rhythmextractor is choosing 0.5*expected_bpm, that's why we are
         # comparing the resulting bpm with the expected_bpm_vector:
         self._assertVectorWithinVector([result[0]], expectedBpmVector, 1.)
@@ -160,10 +168,14 @@ class TestRhythmExtractor2013(TestCase):
         impulseTrain140=self._createPulseTrain140()
         expectedBpm = 139.68
         expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
+        #print("\nExpected Ticks Degara\n")
+        #print(expectedTicks)
         # Degara has no confidence, set expected value to zero.
         expectedConfidence = 0.0  
         # Test Multifeature with impulseTrain140
         result = self._runInstance(impulseTrain140,method="degara")
+        #print("\nn Actual Ticks Degara\n")
+        #print(result[1])
         # Check bpm
         self.assertAlmostEqual(result[0], expectedBpm, 1e-2)
         # Check ticks
@@ -179,8 +191,11 @@ class TestRhythmExtractor2013(TestCase):
         # Test Multifeature with this combo impulseTrain
         result = self._runInstance(self._createPulseTrainCombo(),method="degara")
         # Define expected values
+        impulseTrainCombo=self._createPulseTrainCombo()
         expectedBpm = 117 
-        expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
+        expectedTicks = [i/44100. for i in range(len(impulseTrainCombo)) if impulseTrainCombo[i]!= 0]
+        #print("\nExpected Ticks Combo Degara\n")
+        #print(expectedTicks)
         # Check bpm
         self.assertAlmostEqual(result[0], expectedBpm, .5)
         # Check ticks
@@ -196,6 +211,8 @@ class TestRhythmExtractor2013(TestCase):
         expectedBpmIntervals = [60/90., 60/140., 60/200.]
         self._assertVectorWithinVector(result[4], expectedBpmIntervals)
         result = self._runInstance(self._createPulseTrainCombo(),method="degara")
+        #print("\nActual Ticks Combo Degara\n")
+        #print(result[1])
         expectedBpmVector = [50, 100, 200]
         # bpm: here rhythmextractor is choosing 0.5*expected_bpm, that's why we are
         # comparing the resulting bpm with the expected_bpm_vector:

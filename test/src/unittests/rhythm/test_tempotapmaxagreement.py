@@ -42,14 +42,15 @@ class TestTempoTapMaxAgreement(TestCase):
         self.assertEqualVector(ticks, expectedTicks)                 
         self.assertAlmostEqual(confidence, expectedConfidence,0.1)    
 
+    # Zero Test doens work because values must be increasing. An exception gets thrown.
+    # Because of this exception no possible assert subsequently (Assert Pass or Assert Fail, whatever) 
     """
-    Zero Test doens work because values must be increasing. An exception gets thrown.
     def testZero(self):
         tickCandidates = [[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0]] 
         ticks,confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
-        self.assert_(all(array(ticks) == 0.0))
-        self.assertAlmostEqual(confidence, 0.0,0.1)
-    """
+        self.assert_(all(array(ticks) != 0.0))
+        self.assertNotEqual(confidence, 0.0)
+    """ 
 
     def testEmpty(self):
         tickCandidates = [[],[],[],[],[]] 
