@@ -125,7 +125,6 @@ void BeatTrackerMultiFeature::configure() {
   if (_configured) {
     clearAlgos();
   }
-  printf("MF Configuring\n");
   _sampleRate = 44100.;
   // TODO will only work with _sampleRate = 44100, check what original
   // RhythmExtractor does with sampleRate parameter

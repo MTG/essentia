@@ -51,6 +51,12 @@ class TestTempoTapMaxAgreement(TestCase):
         self.assertAlmostEqual(confidence, 0.0,0.1)
     """
 
+    def testEmpty(self):
+        tickCandidates = [[],[],[],[],[]] 
+        ticks,confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
+        self.assert_(all(array(ticks) == 0.0))
+        self.assertEqual(confidence, 0.0)
+    
     def testDuplicates(self):
         tickCandidates = [[5.0,6.0,7.0,8.0,9.0],[5.0,6.0,7.0,8.0,9.0],[5.0,6.0,7.0,8.0,9.0],[5.0,6.0,7.0,8.0,9.0],[5.0,6.0,7.0,8.0,9.0]] 
         ticks,confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
