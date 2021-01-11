@@ -17,111 +17,21 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-# The interface of the "RhythmDescriptors" algorithm is similar to the "BpmHistogramDescriptors"
-# It has the additional outputs:
-# beats_position (vector_real) - See RhythmExtractor2013 algorithm documentation
-# confidence (real) - See RhythmExtractor2013 algorithm documentation
-# bpm (real) - See RhythmExtractor2013 algorithm documentation
-# bpm_estimates (vector_real) - See RhythmExtractor2013 algorithm documentation
-# bpm_intervals (vector_real) -  See RhythmExtractor2013 algorithm documentation
+# The unit test for this taken care of in the file test_rhythmextractor2013.py and
+# test_bpmhistogramdescriptors.py
+# This file is included here as a "dummy" to maintain consistency in file to file correspondence
+# between unit test and the algorithm.
 
+from numpy import *
 from essentia_test import *
 
 class TestRhythmDescriptors(TestCase):
-
-    def testEmpty(self):
-        beats_position,confidence,bpm,bpm_estimates,bpm_intervals,first_peak_bpm,first_peak_spread,first_peak_weight,second_peak_bpm,second_peak_spread,second_peak_weight,histogram=RhythmDescriptors()([])
-        self.assertEqualVector(beats_position, [0.] * len(beats_position))
-        self.assertEqual(confidence,0.0)
-        self.assertEqual(bpm,0.0)
-        self.assertEqualVector(bpm_estimates, [0.] * len(bpm_estimates))
-        self.assertEqualVector(bpm_intervals, [0.] * len(bpm_intervals))
-        self.assertEqual(first_peak_bpm,0.0)
-        self.assertEqual(first_peak_spread,0.0)
-        self.assertEqual(first_peak_weight,0.0)
-        self.assertEqual(second_peak_bpm,0.0)
-        self.assertEqual(second_peak_spread,0.0)
-        self.assertEqual(second_peak_weight,0.0)
-        self.assertEqualVector(histogram, [0.] * len(histogram))
-
-    def testZero(self):
-        beats_position,confidence,bpm,bpm_estimates,bpm_intervals,first_peak_bpm,first_peak_spread,first_peak_weight,second_peak_bpm,second_peak_spread,second_peak_weight,histogram=RhythmDescriptors()([0])
-        self.assertEqualVector(beats_position, [0.] * len(beats_position))
-        self.assertEqual(confidence,0.0)
-        self.assertEqual(bpm,0.0)
-        self.assertEqualVector(bpm_estimates, [0.] * len(bpm_estimates))
-        self.assertEqualVector(bpm_intervals, [0.] * len(bpm_intervals))
-        self.assertEqual(first_peak_bpm,0.0)
-        self.assertEqual(first_peak_spread,0.0)
-        self.assertEqual(first_peak_weight,0.0)
-        self.assertEqual(second_peak_bpm,0.0)
-        self.assertEqual(second_peak_spread,0.0)
-        self.assertEqual(second_peak_weight,0.0)
-        self.assertEqualVector(histogram, [0.] * len(histogram))
-
-    def testOne(self):
-        beats_position,confidence,bpm,bpm_estimates,bpm_intervals,first_peak_bpm,first_peak_spread,first_peak_weight,second_peak_bpm,second_peak_spread,second_peak_weight,histogram=RhythmDescriptors()([0.5])
-        self.assertEqualVector(beats_position, [0.] * len(beats_position))
-        self.assertEqual(confidence,0.0)
-        self.assertEqual(bpm,0.0)
-        self.assertEqualVector(bpm_estimates, [0.] * len(bpm_estimates))
-        self.assertEqualVector(bpm_intervals, [0.] * len(bpm_intervals))
-        self.assertEqual(first_peak_bpm,0.0)
-        self.assertEqual(first_peak_spread,0.0)
-        self.assertEqual(first_peak_weight,0.0)
-        self.assertEqual(second_peak_bpm,0.0)
-        self.assertEqual(second_peak_spread,0.0)
-        self.assertEqual(second_peak_weight,0.0)
-        self.assertEqualVector(histogram, [0.] * 120 + [1.] + [0.] * (len(histogram)-121))
-
-
-    def testAbnormalValues(self):
-        bpms = [-100, 300]
-        intervals = []
-        for bpm in bpms:
-           intervals.append(60. / bpm)
-           beats_position,confidence,bpm,bpm_estimates,bpm_intervals,first_peak_bpm,first_peak_spread,first_peak_weight,second_peak_bpm,second_peak_spread,second_peak_weight,histogram=RhythmDescriptors()([intervals])
-           self.assertEqualVector(beats_position, [0.] * len(beats_position))
-           self.assertEqual(confidence,0.0)
-           self.assertEqual(bpm,0.0)
-           self.assertEqualVector(bpm_estimates, [0.] * len(bpm_estimates))
-           self.assertEqualVector(bpm_intervals, [0.] * len(bpm_intervals))
-           self.assertEqual(first_peak_bpm,0.0)
-           self.assertEqual(first_peak_spread,0.0)
-           self.assertEqual(first_peak_weight,0.0)
-           self.assertEqual(second_peak_bpm,0.0)
-           self.assertEqual(second_peak_spread,0.0)
-           self.assertEqual(second_peak_weight,0.0)
-           self.assertEqualVector(histogram, [0.] * 120 + [1.] + [0.] * (len(histogram)-121))
-
-    def testRounding(self):
-        beats_position,confidence,bpm,bpm_estimates,bpm_intervals,first_peak_bpm,first_peak_spread,first_peak_weight,second_peak_bpm,second_peak_spread,second_peak_weight,histogram=RhythmDescriptors()([60. / 100.5])
-        self.assertEqual(bpm1, 101)
- 
-
-    def testRegression(self):
-        bpms = [118, 119, 120, 120, 121, 122, 98, 99, 99, 100, 100, 100, 100, 101, 101, 102]
-        intervals = []
-        for bpm in bpms:
-           intervals.append(60. / bpm)
-           intervals.append(0) # Add an extra zero to check if it gets properly dropped
-           beats_position,confidence,bpm,bpm_estimates,bpm_intervals,first_peak_bpm,first_peak_spread,first_peak_weight,second_peak_bpm,second_peak_spread,second_peak_weight,histogram=RhythmDescriptors()(intervals)
-           self.assertAlmostEqual(first_peak_bpm, 100, 1e-5)
-           self.assertAlmostEqual(first_peak_weight, 0.5, 1e-5)
-           self.assertAlmostEqual(first_peak_spread, 0.2, 1e-5)
-           self.assertAlmostEqual(second_peak_bpm, 120, 1e-5)
-           self.assertAlmostEqual(second_peak_weight, 0.25, 1e-5)
-           self.assertAlmostEqual(second_peak_spread, 0.333333, 1e-5)
-
-        correct_histogram = [0.] * len(histogram)
-        for bpm in bpms:
-           correct_histogram[bpm] += 1./len(bpms)
-        self.assertEqualVector(histogram, histogram)
+    
+    def testDummy(self):
+        self.assertEqual(0,0)
 
 
 suite = allTests(TestRhythmDescriptors)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
-
-

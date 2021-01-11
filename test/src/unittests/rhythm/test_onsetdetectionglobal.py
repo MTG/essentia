@@ -19,76 +19,30 @@
 
 from numpy import *
 from essentia_test import *
+from essentia.standard import MonoLoader, OnsetDetectionGlobal as stdOnsetDetectionGlobal
+from essentia.standard import Spectrum as stdSpectrum
 
 framesize = 1024
 hopsize = 512
 
 class TestOnsetDetectionGlobal(TestCase):
-    
+
+    def testRegression(self):
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
+        onsetdetectionglobal = stdOnsetDetectionGlobal()
+        onsetDetections = onsetdetectionglobal(audio)
+        self.assertAlmostEqual(onsetDetections[2640],91.23327,0.01)
+        self.assertAlmostEqual(onsetDetections[2641],74.447784,0.01)
+
     def testZero(self):
-       # Inputting zeros should return no onsets(empty array)
-       audio=MonoLoader(filename=join(testdata.audio_dir,'recorded/techno_loop.wav'),
-            sampleRate=44100)()
-       frames=FrameGenerator(audio,frameSize=framesize,hopSize=hopsize)
-       win=Windowing(type='hamming')
-       fft=FFT()
-       onset_beat_emphasis=OnsetDetectionGlobal(method='beat_emphasis')
-       onset_infogain=OnsetDetectionGlobal(method='infogain')
-       for frame in frames:
-          fft_frame=fft(win(frame))
-          mag,ph=CartesianToPolar()(fft_frame)
-          mag=zeros(len(mag))
-          self.assertEqual(onset_beat_emphasis(mag),0)
-          self.assertEqual(onset_infogain(mag),0)
-                
-    def testImpulse(self):
-       # tests that for an impulse will yield the correct position
-        audiosize=10000
-        audio=zeros(audiosize)
-        pos=5.5#impulse will be in between frames 4 and 5
-        audio[int(floor(pos*(hopsize)))]=1.
-        frames=FrameGenerator(audio,frameSize=framesize,hopSize=hopsize,startFromZero=True)
-        win=Windowing(type='hamming',zeroPadding=framesize)
-        fft=FFT()
-        onset_infogain=OnsetDetectionGlobal(method='infogain')
-        onset_beat_emphasis=OnsetDetectionGlobal(method='beat_emphasis')
-        nframe=0
-        for frame in frames:
-            mag,ph=CartesianToPolar()(fft(win(frame)))
-            if nframe==floor(pos)-1:#4thframe
-                self.assertEqual(onset_infogain(mag),0)
-                self.assertAlmostEqual(onset_beat_emphasis(mag),0)
-            elif nframe==ceil(pos)-1:#5thframe
-                self.assertNotEqual(onset_infogain(mag),0)
-                self.assertNotEqual(onset_beat_emphasis(mag),0)
-            elif nframe==ceil(pos):#6thframe
-                self.assertEqual(onset_infogain(mag),0)
-                self.assertNotEqual(onset_beat_emphasis(mag),0)
-            else:
-                print(onset_infogain(mag))
-                self.assertEqual(numpy.ndarray.tolist(onset_infogain(mag)),[0.])
-                self.assertEqual(onset_beat_emphasis(mag),0.)
-                nframe+=1
-
-
-    def testConstantInput(self):
-        audio=ones(44100*5)
-        frames=FrameGenerator(audio,frameSize=framesize,hopSize=hopsize)
-        win=Windowing(type='hamming')
-        fft=FFT()
+        # Inputting zeros should return no onsets(empty array)
+        audio=zeros(44100*5)
+        onsetdetectionglobal = stdOnsetDetectionGlobal()
         onset_beat_emphasis=OnsetDetectionGlobal(method='beat_emphasis')
         onset_infogain=OnsetDetectionGlobal(method='infogain')
-        found_beat_emphasis=[]
-        found_infogain=[]
-        for frame in frames:
-            fft_frame=fft(win(frame))
-            mag,ph=CartesianToPolar()(fft_frame)
-            mag=zeros(len(mag))
-            found_beat_emphasis+=[onset_beat_emphasis(mag)]
-            found_infogain+=[onset_infogain(mag)]
-            self.assertEqualVector(found_beat_emphasis,zeros(len(found_beat_emphasis)))
-            self.assertEqualVector(found_infogain,zeros(len(found_infogain)))
-    
+        self.assertEqualVector(onset_beat_emphasis(audio),zeros(len(onset_beat_emphasis(audio))))
+        self.assertEqualVector(onset_infogain(audio),zeros(len(onset_infogain(audio))))
+     
     def testInvalidParam(self):
         self.assertConfigureFails(OnsetDetectionGlobal(),{'sampleRate':-1})
         self.assertConfigureFails(OnsetDetectionGlobal(),{'method':'unknown'})

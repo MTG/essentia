@@ -27,12 +27,6 @@ import numpy as np
 
 class TestTempoTapMaxAgreement(TestCase):
 
-    #def testInvalidParam(self):
-    # testing that output is valid (not NaN nor inf nor negative time values)
-    # but not testing for correct result as no ground truth is supplied
-    #    self.assertConfigureFails(TempoTapTicks(), { 'frameHop': 0})
-
-
     def testRegression(self, tempotapmaxagreement = None):
         # to match with test_tempotap.py
         tickCandidates = [[5.0,6.0,7.0,8.0,9.0],[15.0,16.0,17.0,18.0,19.0],[25.0,35.0,45.0,55.0,65.0],[45.0,46.0,47.0,48.0,49],[81.0,82.0,85.0,88.0,92.0]] 
@@ -41,17 +35,12 @@ class TestTempoTapMaxAgreement(TestCase):
         expectedConfidence=4.11
         self.assertEqualVector(ticks, expectedTicks)                 
         self.assertAlmostEqual(confidence, expectedConfidence,0.1)    
-
-    # Zero Test doens work because values must be increasing. An exception gets thrown.
-    # Because of this exception no possible assert subsequently (Assert Pass or Assert Fail, whatever) 
-    """
+    
     def testZero(self):
         tickCandidates = [[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0]] 
-        ticks,confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
-        self.assert_(all(array(ticks) != 0.0))
-        self.assertNotEqual(confidence, 0.0)
-    """ 
-
+        # The values in teh above vectors shgould be increasing. If they are all the same a Runtime error occurs
+        self.assertRaises(RuntimeError, lambda: TempoTapMaxAgreement()(np.array(tickCandidates)))
+     
     def testEmpty(self):
         tickCandidates = [[],[],[],[],[]] 
         ticks,confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
