@@ -80,6 +80,8 @@ for PYBIN in /opt/python/cp3*/bin; do
         NUMPY_VERSION=1.8.2
 
         # Python 3.x
+        if [[ $PYBIN == *"cp39"* ]]; then
+            NUMPY_VERSION=1.19.3
         if [[ $PYBIN == *"cp38"* ]]; then
             NUMPY_VERSION=1.17.4
         elif [[ $PYBIN == *"cp37"* ]]; then
