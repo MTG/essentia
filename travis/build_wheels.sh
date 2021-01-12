@@ -50,6 +50,7 @@ for PYBIN in /opt/python/cp3*/bin; do
     # Don't build for python 3.8 while tensorflow doesn't create wheels for it
     # https://github.com/tensorflow/addons/issues/744
     if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp38"* ]]; then break; fi
+    if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp39"* ]]; then break; fi
 
     if [[ $WITH_TENSORFLOW ]]; then
     # The minimum numpy version required by tensorflow is always greater than
