@@ -128,7 +128,7 @@ for whl in wheelhouse/*.whl; do
 done
 
 # Install and test
-for PYBIN in /opt/python/*/bin/; do
+for PYBIN in /opt/python/cp3*/bin/; do
     # Skip essentia-tensorflow until it is available for Python 3.8
     if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp38"* ]]; then break; fi
 
