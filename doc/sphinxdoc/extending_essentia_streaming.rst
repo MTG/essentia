@@ -195,7 +195,7 @@ difficult to master, but also the most powerful.
 It requires you to grasp a few more concepts of what is going on in Essentia, mainly how
 the consumption model works and how algorithms get scheduled.
 
-Please refer to the `streaming architecture <streaming_architecture>`_ for an
+Please refer to the :doc:`streaming architecture overview <streaming_architecture>` for an
 explanation of these concepts.
 
 
@@ -203,7 +203,7 @@ More about the consumption model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Before actually processing the data, you need to acquire it. You saw in the
-:doc:`design overview </streaming_architecture>` page that ``Sinks`` and ``Sources`` do this
+:doc:`design overview <streaming_architecture>` page that ``Sinks`` and ``Sources`` do this
 by calling the ``StreamConnector::acquire(int n_tokens)`` method.
 
 For convenience, you can define a current acquire size (and release size) for each
