@@ -20,19 +20,11 @@
 from numpy import *
 from essentia_test import *
 from essentia.standard import MonoLoader, OnsetDetectionGlobal as stdOnsetDetectionGlobal
-from essentia.standard import Spectrum as stdSpectrum
 
 framesize = 1024
 hopsize = 512
 
 class TestOnsetDetectionGlobal(TestCase):
-
-    def testRegression(self):
-        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
-        onsetdetectionglobal = stdOnsetDetectionGlobal()
-        onsetDetections = onsetdetectionglobal(audio)
-        self.assertAlmostEqual(onsetDetections[2640],91.23327,0.01)
-        self.assertAlmostEqual(onsetDetections[2641],74.447784,0.01)
 
     def testZero(self):
         # Inputting zeros should return no onsets(empty array)
@@ -46,7 +38,48 @@ class TestOnsetDetectionGlobal(TestCase):
     def testInvalidParam(self):
         self.assertConfigureFails(OnsetDetectionGlobal(),{'sampleRate':-1})
         self.assertConfigureFails(OnsetDetectionGlobal(),{'method':'unknown'})
-    
+        self.assertConfigureFails(OnsetDetectionGlobal(),{'hopSize':-1})
+        self.assertConfigureFails(OnsetDetectionGlobal(),{'frameSize':-1})
+
+    def testRegressionTest(self):
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
+        frames = FrameGenerator(audio, frameSize=framesize, hopSize=hopsize)
+        
+        # This test was developed specifically with observed values from the "techno_loop.wav" file 
+        # 1. Print the first 3 and last 3 elements of beat_emphasis save these values in a beat_emphasis_list
+        # 2. Print the first 3 and last 3 elements of infogain like in 1.
+        # 3. These printed elements are the expected values 
+        # 4. Use these expected values for comparison in a self.assertAlmostEqual()
+        
+        onsetdetectionglobal_infogain = stdOnsetDetectionGlobal(method='infogain')
+        onsetdetectionglobal_beat_emphasis = stdOnsetDetectionGlobal(method = 'beat_emphasis')
+        beat_emphasis_list = onsetdetectionglobal_beat_emphasis(audio).tolist()
+        infogain_list = onsetdetectionglobal_infogain(audio).tolist()
+
+        
+        self.assertAlmostEqual(beat_emphasis_list[0], 5.7949586)
+        self.assertAlmostEqual(beat_emphasis_list[1], 1.1640115e+01 )
+        self.assertAlmostEqual(beat_emphasis_list[2],8.4264336e+00)
+        self.assertAlmostEqual(beat_emphasis_list[2460],31.080015182495117)
+        self.assertAlmostEqual(beat_emphasis_list[2461],18.669902801513672)
+        self.assertAlmostEqual(beat_emphasis_list[2462],6.2911224365234375)
+        self.assertAlmostEqual(infogain_list[0],0)
+        self.assertAlmostEqual(infogain_list[1],0)
+        self.assertAlmostEqual(infogain_list[2],0)
+        self.assertAlmostEqual(infogain_list[2640],91.23327)
+        self.assertAlmostEqual(infogain_list[2641],74.447784)
+        self.assertAlmostEqual(infogain_list[2642],64.83572)
+
+    # This unit test is s simplified verion of Regression Test but using default method
+    # and different array points.
+    # The default method of OnsetDEtectionGlobal is infogain
+    def testRegressionTestDefaultMethod(self):
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
+        onsetdetectionglobal = stdOnsetDetectionGlobal()
+        onsetDetections = onsetdetectionglobal(audio)
+        self.assertAlmostEqual(onsetDetections[2640],91.23327,0.01)
+        self.assertAlmostEqual(onsetDetections[2641],74.447784,0.01)
+
 
 suite=allTests(TestOnsetDetectionGlobal)
 
