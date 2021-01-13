@@ -62,15 +62,15 @@ Installing dependencies on Linux
 
 You can install those dependencies on a Debian/Ubuntu system from official repositories using the command below::
 
-  sudo apt-get install build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six
+  sudo apt-get install build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev libsamplerate0-dev libtag1-dev libchromaprint-dev
 
 In order to use Python 3 bindings for the library, you might also need to install python3-dev, python3-numpy-dev (or python3-numpy on Ubuntu) and python3-yaml for YAML support in python::
 
-  sudo apt-get install python3-dev python3-numpy-dev python3-numpy python3-yaml
+  sudo apt-get install python3-dev python3-numpy-dev python3-numpy python3-yaml python3-six
 
 Similarly, in the case of Python 2 install::
 
-  sudo apt-get install python-dev python-numpy-dev python-numpy python-yaml
+  sudo apt-get install python-dev python-numpy-dev python-numpy python-yaml python-six
 
 
 On Ubuntu/Debian, make sure that ``/usr/local/lib/python3/dist-packages/`` path is included in the list of Python 3 `module search paths <https://docs.python.org/3/tutorial/modules.html#the-module-search-path>`_. If it is not included by default, you can configure it in the PYTHONPATH variable.
