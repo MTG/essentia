@@ -18,45 +18,53 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-
 from essentia_test import *
 import math
 from essentia.standard import *
 import essentia.streaming as ess
 import numpy as np
 
+
 class TestTempoTapMaxAgreement(TestCase):
 
-    def testRegression(self, tempotapmaxagreement = None):
-        # to match with test_tempotap.py
-        tickCandidates = [[5.0,6.0,7.0,8.0,9.0],[15.0,16.0,17.0,18.0,19.0],[25.0,35.0,45.0,55.0,65.0],[45.0,46.0,47.0,48.0,49],[81.0,82.0,85.0,88.0,92.0]] 
-        ticks,confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
-        expectedTicks= [81., 82., 85., 88., 92.]
-        expectedConfidence=4.11
+    def testRegression(self):
+        tickCandidates = [[1.0, 3.0, 5.0, 7.0, 9.0], [1.1, 3.1 , 5.1 , 7.1 , 9.3], [1.0, 3.0, 5.0, 7.0, 9.0], [0.9, 2.9, 4.9, 6.9, 8.9]]
+        ticks, confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
+        expectedTicks = [1.0, 3.0, 5.0, 7.0, 9.0]    
+        expectedConfidence = 4.5 #  Trials have shown 4.5 to be a typical ballpark value
         self.assertEqualVector(ticks, expectedTicks)                 
-        self.assertAlmostEqual(confidence, expectedConfidence,0.1)    
+        self.assertAlmostEqual(confidence, expectedConfidence, 0.1)    
     
     def testZero(self):
-        tickCandidates = [[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0],[0.0,0.0,0.0,0.0,0.0]] 
-        # The values in teh above vectors shgould be increasing. If they are all the same a Runtime error occurs
+        tickCandidates = [[0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0], [0.0, 0.0, 0.0, 0.0, 0.0]] 
+        # A Runtime error occurs when all values are all zero
         self.assertRaises(RuntimeError, lambda: TempoTapMaxAgreement()(np.array(tickCandidates)))
      
+    def testDuplicateTickValues(self):
+        tickCandidates = [[5.0, 5.0, 5.0, 5.0, 5.0], [5.0, 5.0, 5.0, 5.0, 5.0], [5.0, 5.0, 5.0, 5.0, 5.0], [5.0, 5.0, 5.0, 5.0, 5.0]]
+        # A Runtime error occurs when all tick values in an array are the same
+        self.assertRaises(RuntimeError, lambda: TempoTapMaxAgreement()(np.array(tickCandidates)))     
+
     def testEmpty(self):
-        tickCandidates = [[],[],[],[],[]] 
-        ticks,confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
+        tickCandidates = [[], [], [], [], []] 
+        ticks, confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
         self.assert_(all(array(ticks) == 0.0))
         self.assertEqual(confidence, 0.0)
-    
+
     def testDuplicates(self):
-        tickCandidates = [[5.0,6.0,7.0,8.0,9.0],[5.0,6.0,7.0,8.0,9.0],[5.0,6.0,7.0,8.0,9.0],[5.0,6.0,7.0,8.0,9.0],[5.0,6.0,7.0,8.0,9.0]] 
+        tickCandidates = [[5.0, 6.0, 7.0, 8.0, 9.0], [5.0, 6.0, 7.0, 8.0, 9.0], [5.0, 6.0, 7.0, 8.0, 9.0], [5.0, 6.0, 7.0, 8.0, 9.0], [5.0, 6.0, 7.0, 8.0, 9.0]]
         ticks,confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
-        expectedTicks= [5.0,6.0,7.0,8.0,9.0]
-        expectedConfidence=5.0
+        expectedTicks = [5.0, 6.0, 7.0, 8.0, 9.0]
+        expectedConfidence = 5.32 # Max. value for confidence (see documentation)
         self.assertEqualVector(ticks, expectedTicks)                 
-        self.assertAlmostEqual(confidence, expectedConfidence,0.1)
+        self.assertAlmostEqual(confidence, expectedConfidence, 0.1)
+
+    def testIllegalDecreasing(self):
+        tickCandidates = [[9.0, 7.0, 5.0, 3.0, 1.0], [9.1, 7.1, 5.1, 3.1, 1.1], [9.2, 7.3, 5.1, 3.1, 1.1]]
+        self.assertRaises(RuntimeError, lambda: TempoTapMaxAgreement()(np.array(tickCandidates)))
+
 
 suite = allTests(TestTempoTapMaxAgreement)
 
 if __name__ == '__main__':
-    TextTestRunner(verbosity=2).run(suite)
-    
+    TextTestRunner(verbosity = 2).run(suite)
