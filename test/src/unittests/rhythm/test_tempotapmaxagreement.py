@@ -48,8 +48,13 @@ class TestTempoTapMaxAgreement(TestCase):
     def testEmpty(self):
         tickCandidates = [[], [], [], [], []] 
         ticks, confidence = TempoTapMaxAgreement()(np.array(tickCandidates))
-        self.assert_(all(array(ticks) == 0.0))
-        self.assertEqual(confidence, 0.0)
+        self.assertEqualVector(ticks, [] )                 
+        self.assertEqual(confidence, 0)    
+
+    def testNull(self):
+        tickCandidates = [] 
+        # A Runtime error occurs in a ttoally empty situation
+        self.assertRaises(RuntimeError, lambda: TempoTapMaxAgreement()(np.array(tickCandidates)))
 
     def testDuplicates(self):
         tickCandidates = [[5.0, 6.0, 7.0, 8.0, 9.0], [5.0, 6.0, 7.0, 8.0, 9.0], [5.0, 6.0, 7.0, 8.0, 9.0], [5.0, 6.0, 7.0, 8.0, 9.0], [5.0, 6.0, 7.0, 8.0, 9.0]]

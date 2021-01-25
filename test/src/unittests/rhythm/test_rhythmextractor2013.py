@@ -27,12 +27,12 @@ class TestRhythmExtractor2013(TestCase):
 
     def testRegressionDegara(self):
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
-        bpm = RhythmExtractor2013(method="multifeature")(audio)[0]
+        bpm = RhythmExtractor2013(method="degara")(audio)[0]
         self.assertAlmostEqualFixedPrecision(bpm, 124, 0) 
     
     def testRegressionMultifeature(self):
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
-        bpm = RhythmExtractor2013( method="degara")(audio)[0]
+        bpm = RhythmExtractor2013( method="multifeature")(audio)[0]
         self.assertAlmostEqualFixedPrecision(bpm, 124, 0) 
 
     def _runInstance(self, input, method="degara"):
@@ -75,8 +75,7 @@ class TestRhythmExtractor2013(TestCase):
 
     def testZeroMultiFeature(self):
         # TODO: Test currently failing.
-        # No zero BPM values are returned for zero input.
-        # Why using a array ? Alternative
+        # Non zero BPM values are returned for zero input.
         input = array([0.0]*100*1024) # 100 frames of size 1024
         expected = [0.0, [], 0.0, [], []] 
         result = self._runInstance(input, method="multifeature")
@@ -107,8 +106,16 @@ class TestRhythmExtractor2013(TestCase):
         
         expectedBpm = 140
         expectedTicks = [i/44100. for i in range(len(impulseTrain140)) if impulseTrain140[i]!= 0]
-        expectedConfidence =3.8 # This value was found by doing sample run tests.
+        
+        # In this tests a 200 ms tolerance for ticks is a good enough compromise 
+        # Hence the value 0.2 for BPM tolerance.
+        # In other algos (e.g. tempotapmaxagreement) the max. confidence values is 5.32
+        # Ballpark figure of 3.8 were observed in tests here.
+        # This is approx. 70% of max conf. value in tempotapmaxagreement
+        # On top of this we allow a margin of approx 20%
+        # Hence, the tolerance for expectedConfidence is  1.0.
 
+        expectedConfidence =3.8 
         self.assertAlmostEqual(bpm, expectedBpm, 0.2)
         self._assertVectorWithinVector(ticks, expectedTicks, 0.2)
         self.assertAlmostEqual(confidence, expectedConfidence, 1.0)

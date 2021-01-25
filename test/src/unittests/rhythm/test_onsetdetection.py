@@ -193,14 +193,14 @@ class TestOnsetDetection(TestCase):
         expected_hfc = load(join(filedir(), 'onsetdetection/hfc.npy'))
         expected_complex =  load(join(filedir(), 'onsetdetection/complex.npy'))
         expected_complex_phase =  load(join(filedir(), 'onsetdetection/complex_phase.npy'))
-        expected_melfflux = load(join(filedir(), 'onsetdetection/melflux.npy'))
+        expected_melflux = load(join(filedir(), 'onsetdetection/melflux.npy'))
         expected_flux =  load(join(filedir(), 'onsetdetection/flux.npy'))
         expected_rms =  load(join(filedir(), 'onsetdetection/rms.npy'))
 
         self.assertAlmostEqualVector(hfc_out, expected_hfc, 1e-7)
         self.assertAlmostEqualVector(complex_out, expected_complex  , 1e-7)
         self.assertAlmostEqualVector(complex_phase_out, expected_complex_phase, 1e-7)
-        self.assertAlmostEqualVector(melflux_out, expected_melfflux  , 1e-7)
+        self.assertAlmostEqualVector(melflux_out, expected_melflux  , 1e-7)
         self.assertAlmostEqualVector(flux_out, expected_flux, 1e-7)
         self.assertAlmostEqualVector(rms_out, expected_rms  , 1e-7)
 
