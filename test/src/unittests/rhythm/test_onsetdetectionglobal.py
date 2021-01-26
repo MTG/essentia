@@ -61,8 +61,8 @@ class TestOnsetDetectionGlobal(TestCase):
         expected_infogain = onsetdetectionglobal_infogain.tolist()
         expected_beat_emphasis = onsetdetectionglobal_beat_emphasis.tolist()
 
-        self.assertAlmostEqualVector(calculated_beat_emphasis, expected_beat_emphasis, 1e-7)
-        self.assertAlmostEqualVector(calculated_infogain, expected_infogain  , 1e-7)
+        self.assertAlmostEqualVectorFixedPrecision(calculated_beat_emphasis, expected_beat_emphasis)
+        self.assertAlmostEqualVectorFixedPrecision(calculated_infogain, expected_infogain)
 
 
 suite=allTests(TestOnsetDetectionGlobal)

@@ -197,12 +197,12 @@ class TestOnsetDetection(TestCase):
         expected_flux =  load(join(filedir(), 'onsetdetection/flux.npy'))
         expected_rms =  load(join(filedir(), 'onsetdetection/rms.npy'))
 
-        self.assertAlmostEqualVector(hfc_out, expected_hfc, 1e-7)
-        self.assertAlmostEqualVector(complex_out, expected_complex  , 1e-7)
-        self.assertAlmostEqualVector(complex_phase_out, expected_complex_phase, 1e-7)
-        self.assertAlmostEqualVector(melflux_out, expected_melflux  , 1e-7)
-        self.assertAlmostEqualVector(flux_out, expected_flux, 1e-7)
-        self.assertAlmostEqualVector(rms_out, expected_rms  , 1e-7)
+        self.assertAlmostEqualVectorFixedPrecision(hfc_out, expected_hfc,1)
+        self.assertAlmostEqualVectorFixedPrecision(complex_out, expected_complex,4)
+        self.assertAlmostEqualVectorFixedPrecision(complex_phase_out, expected_complex_phase,4)
+        self.assertAlmostEqualVectorFixedPrecision(melflux_out, expected_melflux,2)
+        self.assertAlmostEqualVectorFixedPrecision(flux_out, expected_flux,4)
+        self.assertAlmostEqualVectorFixedPrecision(rms_out, expected_rms,4)
 
 
 suite = allTests(TestOnsetDetection)
