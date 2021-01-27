@@ -50,7 +50,7 @@ class TestOnsetDetectionGlobal(TestCase):
         calculated_infogain = onsetdetectionglobal_beat_emphasis(audio).tolist()
 
         """
-        This code stores reference values in a file for later loading
+        This code stores reference values in a file for later loading.
         save('input_infogain.npy', calculated_beat_emphasis)
         save('input_beat_emphasis.npy', calculated_infogain)             
         """
