@@ -101,7 +101,7 @@ string demangle(const char* name) {
 // declared in src/base/types.h
 string nameOfType(const std::type_info& type) {
   try {
-    return TypeMap::instance()[type.name()];
+    return TypeMap::instance()[string(type.name())];
   }
   catch (EssentiaException&) {
     return demangle(type.name());

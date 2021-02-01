@@ -82,7 +82,7 @@ class TypeMap {
 
     _typeMap = new EssentiaMap<std::string, std::string>();
 
-#define registerEssentiaType(type) TypeMap::_typeMap->insert(typeid(type).name(), #type)
+#define registerEssentiaType(type) TypeMap::_typeMap->insert(std::string(typeid(type).name()), #type)
 
     registerEssentiaType(std::string);
     registerEssentiaType(Real);
