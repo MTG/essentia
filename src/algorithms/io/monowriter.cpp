@@ -154,7 +154,7 @@ void MonoWriter::compute() {
 }
 
 void MonoWriter::reset() {
-    _network->reset();
+  _network->reset();
 }
 
 } // namespace standard
