@@ -103,8 +103,8 @@ class AudioWriter : public Algorithm {
   }
 
   void configure();
-
   void compute();
+  void reset();
 
   static const char* name;
   static const char* category;

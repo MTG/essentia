@@ -163,8 +163,14 @@ void AudioWriter::compute() {
   _audiogen->setVector(&audio);
 
   _network->run();
+
+  // Reset, so that it is ready to write audio again
+  reset();
 }
 
+void AudioWriter::reset() {
+  _network->reset();
+}
 
 } // namespace standard
 } // namespace essentia
