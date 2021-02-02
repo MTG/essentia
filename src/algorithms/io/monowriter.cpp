@@ -149,9 +149,13 @@ void MonoWriter::compute() {
   _audiogen->setVector(&audio);
   _network->run();
 
-  // TODO: should we reset it here, same as MonoLoader to allow it to write twice in a row?
+  // Reset, so that it is ready to write audio again
+  reset();
 }
 
+void MonoWriter::reset() {
+    _network->reset();
+}
 
 } // namespace standard
 } // namespace essentia
