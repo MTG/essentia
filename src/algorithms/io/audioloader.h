@@ -100,6 +100,11 @@ class AudioLoader : public Algorithm {
     // use av_malloc, because we _need_ the buffer to be 16-byte aligned
     _buffer = (float*)av_malloc(FFMPEG_BUFFER_SIZE);
 
+    _decodedFrame = av_frame_alloc();
+    if (!_decodedFrame) {
+        throw EssentiaException("AudioLoader: Could not allocate audio frame");
+    }
+
     _md5Encoded = av_md5_alloc();
     if (!_md5Encoded) {
         throw EssentiaException("Error allocating the MD5 context");
