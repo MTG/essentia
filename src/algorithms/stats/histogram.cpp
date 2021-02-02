@@ -62,7 +62,7 @@ void Histogram::compute() {
 
   for(size_t i = 0; i < array.size(); i++){
     if(array[i] < _maxValue && array[i] >= _minValue)
-      histogram[floor(array[i]/(Real)binWidth)]++;
+      histogram[floor((array[i] - _minValue)/(Real)binWidth)]++;
     else if(array[i] == _maxValue) 
       histogram[_numberBins-1]++;
   }
