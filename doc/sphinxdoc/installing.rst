@@ -183,6 +183,8 @@ environmental variable. For example, on Ubuntu 20.10 the correct path for the de
 
 Alterantively, you can also configure the PYTHONPATH variable to include the `/usr/local/lib/python3/dist-packages/` path in the list of Python 3 `module search paths <https://docs.python.org/3/tutorial/modules.html#the-module-search-path>`_.
 
+Finally, if you are having ``ImportError: libessentia.so: cannot open shared object file: No such file or directory`` in Python after installation on Linux, make sure that `/usr/local/lib` is included to `LD_LIBRARY_PATH` or run `ldconfig`.
+
 
 Running tests (optional)
 ------------------------
