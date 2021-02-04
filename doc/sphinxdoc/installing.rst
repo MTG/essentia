@@ -73,8 +73,6 @@ Similarly, in the case of Python 2 install::
   sudo apt-get install python-dev python-numpy-dev python-numpy python-yaml python-six
 
 
-On Ubuntu/Debian, make sure that ``/usr/local/lib/python3/dist-packages/`` path is included in the list of Python 3 `module search paths <https://docs.python.org/3/tutorial/modules.html#the-module-search-path>`_. If it is not included by default, you can configure it in the PYTHONPATH variable.
-
 Note that, depending on the version of Essentia, different versions of ``libav*`` and ``libtag1-dev`` packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_.
 
 Since the 2.1-beta3 release of Essentia, the required version of TagLib (``libtag1-dev``) is greater or equal to ``1.9``. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu 14.10 or later, and in Debian wheezy-backports. If you want to install Essentia on older versions of Ubuntu/Debian, you will have to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
@@ -182,6 +180,8 @@ Note that when installing to ``/usr/local``, some Linux distributions provide a 
 
 To avoid import errors on these systems, specify the correct path in ``waf configure`` using a ``--pythondir`` flag or the ``PYTHONDIR``
 environmental variable. For example, on Ubuntu 20.10 the correct path for the default Python 3.8 is ``/usr/local/lib/python3.8/dist-packages/``.
+
+Alterantively, you can also configure the PYTHONPATH variable to include the `/usr/local/lib/python3/dist-packages/` path in the list of Python 3 `module search paths <https://docs.python.org/3/tutorial/modules.html#the-module-search-path>`_.
 
 
 Running tests (optional)
