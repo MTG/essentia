@@ -78,7 +78,6 @@ void BeatTrackerDegara::configure() {
   if (_configured) {
     clearAlgos();
   }
-
   _sampleRate = 44100.;
   // TODO will only work with _sampleRate = 44100, check what original
   // RhythmExtractor does with sampleRate parameter
