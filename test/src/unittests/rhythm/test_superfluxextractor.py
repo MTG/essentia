@@ -73,13 +73,11 @@ class TestSuperFluxExtractor(TestCase):
 
     def testSilence(self):
         # zeros should return no onsets (empty array)
-        self.assertEqualMatrix(SuperFluxExtractor()(zeros(44100)), [])
+        self.assertEqualVector(SuperFluxExtractor()(zeros(44100)), [])
 
     def testEmpty(self):
         # empty input should return no onsets (empty array)
-        self.assertEqualMatrix(SuperFluxExtractor()([]), [])
-        # Empty input should raise an exception
-        self.assertComputeFails(Onsets(), array([[]]), [])
+        self.assertEqualVector(SuperFluxExtractor()([]), [])
 
     def testImpulse(self):
         # Given an impulse should return its position
@@ -100,8 +98,8 @@ class TestSuperFluxExtractor(TestCase):
         # puts together consecutive peaks. This means that a peak will be
         # detected as soon as it is seen by a frame. Thus, the frame size
         # also influences the expected precision of the algorithm.
-        precission = (hopSize + frameSize) / sampleRate
-        self.assertAlmostEqualVectorAbs(result, expected, precission)
+        precision = (hopSize + frameSize) / sampleRate
+        self.assertAlmostEqualVectorAbs(result, expected, precision)
 
 suite = allTests(TestSuperFluxExtractor)
 
