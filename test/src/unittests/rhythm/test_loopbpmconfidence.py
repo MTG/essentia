@@ -29,31 +29,47 @@ class TestLoopBpmConfidence(TestCase):
 
     def testRegression(self):
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()        
+
+        # Test for different BPMs starting with correct one then with decreasing accuracy
+        # and corresponding levels decreasing confidence.
+        # Figures obtained from previous runs algorithm as of baseline 10-Feb-2021
+        # In keeping with regression tests principles , no future changes of algorothm
+        # should break these tests.
+        bpmEstimate = 125
+        expectedConfidence = 1
+        confidence = LoopBpmConfidence()(audio,bpmEstimate)        
+        self.assertAlmostEqual(expectedConfidence, confidence, 0.1)
+
         bpmEstimate = 120
         expectedConfidence = 0.87
-        confidence = LoopBpmConfidence()(audio,bpmEstimate)        
-        self.assertAlmostEqual( expectedConfidence, confidence,0.1)
+        confidence = LoopBpmConfidence()(audio, bpmEstimate)        
+        self.assertAlmostEqual(expectedConfidence, confidence, 0.1)
+
+        bpmEstimate = 70
+        expectedConfidence = 0.68
+        confidence = LoopBpmConfidence()(audio, bpmEstimate)                
+        self.assertAlmostEqual(expectedConfidence, confidence, 0.1)
 
     def testEmpty(self):
         emptyAudio = []
         bpmEstimate = 0
         expectedConfidence = 0
-        confidence = LoopBpmConfidence()(emptyAudio,bpmEstimate)                  
-        self.assertEquals( expectedConfidence, confidence)
+        confidence = LoopBpmConfidence()(emptyAudio, bpmEstimate)                  
+        self.assertEquals(expectedConfidence, confidence)
 
     def testZero(self):
         zeroAudio = zeros(1000)
         bpmEstimate = 0
         expectedConfidence = 0
-        confidence = LoopBpmConfidence()(zeroAudio,bpmEstimate)
-        self.assertEquals( expectedConfidence, confidence)
+        confidence = LoopBpmConfidence()(zeroAudio, bpmEstimate)
+        self.assertEquals(expectedConfidence, confidence)
 
     def testConstantInput(self):
         onesAudio = ones(100)
         bpmEstimate = 0
         expectedConfidence = 0
-        confidence = LoopBpmConfidence()(onesAudio,bpmEstimate)
-        self.assertEquals( expectedConfidence, confidence)
+        confidence = LoopBpmConfidence()(onesAudio, bpmEstimate)
+        self.assertEquals(expectedConfidence, confidence)
 
 suite = allTests(TestLoopBpmConfidence)
 
