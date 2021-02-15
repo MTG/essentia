@@ -30,7 +30,7 @@ class TestLoopBpmEstimator(TestCase):
     def testRegression(self):
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()        
       
-        expectedEstimate= 125
+        expectedEstimate = 125
         estimate = LoopBpmEstimator(confidenceThreshold=0.95)(audio)            
         self.assertEqual(expectedEstimate, estimate) 
         
@@ -42,61 +42,54 @@ class TestLoopBpmEstimator(TestCase):
         estimate = LoopBpmEstimator(confidenceThreshold=0)(audio)   
         self.assertEqual(expectedEstimate, estimate)
 
-        # Further integrity checks at randomly chosen points in audio.
+        # Define Markers for significant meaningful subsections 
+        # consistent with sampling rate
+        len90 = int(0.9*len(audio))  # End point for 90% loop
+        len50 = int(0.5*len(audio))  # Mid point                
+        len01 = int(0.01*len(audio)) # Begin point for subsection loop 
+
         # If any future changes break these asserts,
-        # then this will indicates algorithm is compromised.
+        # then this will indicate algorithm is compromised
+        # First test with default confidence value (0.95)
+        # Margin of 0.1 chosen based on accuracy of observed BPMs.
 
-        # Randomly chosen points, Section 1
-        # A segment of techno_loop gives a non-ideal estimation of BPM.
-        samplePoint1 = 1000
-        samplePoint2 = 6000
-        expectedEstimate = 100.0
-
-        # 0% confidence expectation triggers non-zero bpm close to estimate result in this section 1
-        estimate = LoopBpmEstimator(confidenceThreshold=0.0)(audio[samplePoint1:samplePoint2])                
+        # Loop is broken at end, we expect zero output
+        estimate = LoopBpmEstimator()(audio[0:len90])                
+        self.assertEqual(0, estimate)         
+      
+        # Loop is broken at beginning and end, we expect zero output.
+        estimate = LoopBpmEstimator()(audio[len01:len90])                
+        self.assertEqual(0, estimate) 
+        
+        # When the loop is halved we get close to the expected estimate to 1 place of decimal.
+        estimate = LoopBpmEstimator()(audio[0:len50])                
         self.assertAlmostEqual(expectedEstimate, estimate, 0.1) 
 
-        # 10% confidence expectation triggers non-zero result in this section 1
-        estimate = LoopBpmEstimator(confidenceThreshold=0.1)(audio[samplePoint1:samplePoint2])                
-        self.assertNotEqual(0, estimate) 
-
-        # Higher than 20% confidence expectation triggers non-zero bpm result in this section 1
-        estimate = LoopBpmEstimator(confidenceThreshold=0.25)(audio[samplePoint1:samplePoint2])                
-        self.assertNotEqual(0, estimate) 
-
-        # Higher than 50% confidence expectation triggers non-zero bpm result in this section 1
-        estimate = LoopBpmEstimator(confidenceThreshold=0.55)(audio[samplePoint1:samplePoint2])                
-        self.assertAlmostEqual(expectedEstimate, estimate, 5) 
-
-        # High confidence expectation triggers 0 bpm result in this section 1
-        estimate = LoopBpmEstimator(confidenceThreshold=0.95)(audio[samplePoint1:samplePoint2])            
-        self.assertEqual(0, estimate) 
-
-        # Randomly chosen points, Section 2
-        # A segment of techno_loop gives a non-ideal estimation of BPM.        
-        samplePoint1 = 22000
-        samplePoint2 = 38000
-        expectedEstimate = 100.0
-
-        # 0% confidence expectation triggers non-zero bpm close to estimate result in this section 2
-        estimate = LoopBpmEstimator(confidenceThreshold=0.0)(audio[samplePoint1:samplePoint2])             
+        # Repeat above tests with non-default confidence value of 0.5.
+        # Loop is broken at end, we expect zero output        
+        estimate = LoopBpmEstimator(confidenceThreshold=0.5)(audio[0:len90])                
+        self.assertEqual(0, estimate)         
+        
+        # Lower confidence, results in value close to expected estimate.
+        estimate = LoopBpmEstimator(confidenceThreshold=0.5)(audio[len01:len90])                
+        self.assertAlmostEqual(expectedEstimate, estimate, 0.1) 
+      
+        # Lower confidence, results in value close to expected estimate.
+        estimate = LoopBpmEstimator(confidenceThreshold=0.5)(audio[0:len50])                
         self.assertAlmostEqual(expectedEstimate, estimate, 0.1) 
 
-        # 10% confidence expectation triggers non-zero bpm result in this section 2
-        estimate = LoopBpmEstimator(confidenceThreshold=0.1)(audio[samplePoint1:samplePoint2])                
-        self.assertNotEqual(0, estimate) 
+        # Repeat above tests with non-default confidence value of 0.2.
+        # Loop is broken at end, we expect zero output
+        estimate = LoopBpmEstimator(confidenceThreshold=0.2)(audio[0:len90])                
+        self.assertEqual(0, estimate)         
+        
+        # Lower confidence, results in value close to expected estimate.
+        estimate = LoopBpmEstimator(confidenceThreshold=0.2)(audio[len01:len90])                
+        self.assertAlmostEqual(expectedEstimate, estimate, 0.1)
 
-        # Higher than 20% confidence expectation triggers 0 bpm result in this section 2
-        estimate = LoopBpmEstimator(confidenceThreshold=0.25)(audio[samplePoint1:samplePoint2])                
-        self.assertEqual(0, estimate) 
-
-        # Higher than 50% confidence expectation triggers 0 bpm result in this section 2
-        estimate = LoopBpmEstimator(confidenceThreshold=0.55)(audio[samplePoint1:samplePoint2])                
-        self.assertEqual(0, estimate) 
-
-        # High confidence expectation triggers 0 bpm result in this section 2
-        estimate = LoopBpmEstimator(confidenceThreshold=0.95)(audio[samplePoint1:samplePoint2])            
-        self.assertEqual(0, estimate) 
+        # Lower confidence, results in value close to expected estimate.
+        estimate = LoopBpmEstimator(confidenceThreshold=0.2)(audio[0:len50])                
+        self.assertAlmostEqual(expectedEstimate, estimate, 0.1) 
 
     # A series of assert checks on the BPM estimator for empty, zero or constant signals.
     # LoopBpmEstimator uses the percival estimator internally.
@@ -105,14 +98,14 @@ class TestLoopBpmEstimator(TestCase):
         emptyAudio = []
         self.assertRaises(RuntimeError, lambda: LoopBpmEstimator()(emptyAudio))
 
-    def testZero(self):
-        zeroAudio = zeros(1000)
+    def testZero(self):        
+        zeroAudio = zeros(100000)
         self.assertRaises(RuntimeError, lambda: LoopBpmEstimator()(zeroAudio))
 
     def testConstantInput(self):
-        onesAudio = ones(100)
-        self.assertRaises(RuntimeError, lambda: LoopBpmEstimator()(onesAudio))
-
+        onesAudio = ones(100000)
+        estimate = LoopBpmEstimator(confidenceThreshold=0.95)(onesAudio)            
+        self.assertEqual(0, estimate)
 
 suite = allTests(TestLoopBpmEstimator)
 
