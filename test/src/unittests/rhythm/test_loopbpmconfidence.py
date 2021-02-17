@@ -17,7 +17,6 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-
 from essentia_test import *
 from essentia.standard import MonoLoader, LoopBpmConfidence
 
@@ -116,7 +115,54 @@ class TestLoopBpmConfidence(TestCase):
         expectedConfidence =  0.79 # rounded from measured 0.7951852083206177
         confidence = LoopBpmConfidence()(audio[len01:len90], bpmEstimate)
         self.assertAlmostEqual(expectedConfidence, confidence, 0.01) 
-        
+
+
+    """
+    The confidence returned is based on comparing the duration of the audio signal with 
+    multiples of the BPM estimate. 
+    The algorithm considers edge cases in which the signal includes non-musical 
+    silence at the start or end of the audio signal (or both) and returns the confidence for the best fit.
+    For more details refer to paper: https://repositori.upf.edu/handle/10230/33113
+
+    Additional Tests were made with following loop
+    "458538__flowerpunkchip__mellifluousanonymous-120bpm-loop-youareevil.mp3'"
+    https://freesound.org/people/Flowerpunkchip/sounds/458538/
+
+    Front end slience Confidence is  0.9915646314620972
+    Back end silence Confidence  is  0.9915646314620972
+    Silence Both end confidence is  0.9915646314620972    
+    """
+    def testSilentEdges(self):
+
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))() 
+        bpmEstimate = 125
+        confidence = LoopBpmConfidence()(audio, bpmEstimate)              
+        lenSilence = int(0.01*len(audio)) # Choose a silent length 1% of audio
+        silentAudio = zeros(lenSilence)
+
+        # case 1: there is non-musical* silence before the loop starts
+        signal1  = numpy.append(silentAudio, audio)
+        confidence = LoopBpmConfidence()(signal1, bpmEstimate)              
+        self.assertGreater(confidence, 0.9) 
+
+        # Silent Edges dont always work.
+        # When adding silence to the end of this loop the confidence drops.
+        # This isnt a big problem since it is just a way 
+        # to try to better estimate confidence if the loop is not well cut.
+        # In any case, the "mellifluousanonymous" loop mentioned above
+        # works well with silence added at the end.
+
+        # case 2: there is non-musical silence after the loop ends        
+        signal2  = numpy.append(audio,silentAudio)
+        confidence = LoopBpmConfidence()(signal2, bpmEstimate)  
+        self.assertGreater(confidence, 0.27) 
+
+
+        # case 3: there is non-musical silence at both ends
+        signal3 = numpy.append(signal1, silentAudio)
+        confidence = LoopBpmConfidence()(signal3, bpmEstimate)              
+        self.assertGreater(confidence, 0.27) 
+          
     def testEmpty(self):
         # Zero estimate check results in zero confidence
         emptyAudio = []
@@ -125,6 +171,8 @@ class TestLoopBpmConfidence(TestCase):
         self.assertEquals(0, confidence)
 
         # Non-zero estimate check results in zero confidence
+        # The estimation is based on audio length.
+        # Different constant input length will result in different estimations.
         emptyAudio = []
         bpmEstimate = 125
         confidence = LoopBpmConfidence()(emptyAudio, bpmEstimate)                  
@@ -138,7 +186,8 @@ class TestLoopBpmConfidence(TestCase):
         self.assertEquals(0, confidence)
 
         # Non-zero estimate check results in non-zero confidence
-        # FIXME: Maybe given contant zero input, we should expect zero confidence
+        # The estimation is based on audio length.
+        # Different constant input length will result in different estimations.
         bpmEstimate = 125
         confidence = LoopBpmConfidence()(zeroAudio, bpmEstimate)
         self.assertNotEquals(0, confidence)
@@ -151,10 +200,11 @@ class TestLoopBpmConfidence(TestCase):
         self.assertEquals(0, confidence)
 
         # Non-zero estimate check results in non-zero confidence
-        # FIXME: Maybe given contant input, we should expect zero confidence
+        # The estimation is based on audio length.
+        # Different constant input length will result in different estimations.
         bpmEstimate = 125
         confidence = LoopBpmConfidence()(onesAudio, bpmEstimate)
-        self.assertNotEquals(0, confidence)
+        self.assertNotEquals(0, confidence)         
          
 suite = allTests(TestLoopBpmConfidence)
 
