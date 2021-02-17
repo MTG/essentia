@@ -135,34 +135,27 @@ class TestLoopBpmConfidence(TestCase):
     def testSilentEdges(self):
 
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))() 
-        bpmEstimate = 125
+        bpmEstimate = 120
         confidence = LoopBpmConfidence()(audio, bpmEstimate)              
         lenSilence = int(0.01*len(audio)) # Choose a silent length 1% of audio
         silentAudio = zeros(lenSilence)
+        benchmarkConfidence= 0.89  # This figure was arrived at emperically from the min. confidence observed with test runs 
 
         # case 1: there is non-musical* silence before the loop starts
         signal1  = numpy.append(silentAudio, audio)
         confidence = LoopBpmConfidence()(signal1, bpmEstimate)              
-        self.assertGreater(confidence, 0.9) 
-
-        # Silent Edges dont always work.
-        # When adding silence to the end of this loop the confidence drops.
-        # This isnt a big problem since it is just a way 
-        # to try to better estimate confidence if the loop is not well cut.
-        # In any case, the "mellifluousanonymous" loop mentioned above
-        # works well with silence added at the end.
+        self.assertGreater(confidence,benchmarkConfidence)
 
         # case 2: there is non-musical silence after the loop ends        
         signal2  = numpy.append(audio,silentAudio)
         confidence = LoopBpmConfidence()(signal2, bpmEstimate)  
-        self.assertGreater(confidence, 0.27) 
-
+        self.assertGreater(confidence, benchmarkConfidence) 
 
         # case 3: there is non-musical silence at both ends
         signal3 = numpy.append(signal1, silentAudio)
         confidence = LoopBpmConfidence()(signal3, bpmEstimate)              
-        self.assertGreater(confidence, 0.27) 
-          
+        self.assertGreater(confidence, benchmarkConfidence) 
+
     def testEmpty(self):
         # Zero estimate check results in zero confidence
         emptyAudio = []
