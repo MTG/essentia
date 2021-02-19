@@ -132,29 +132,37 @@ class TestLoopBpmConfidence(TestCase):
     Back end silence Confidence  is  0.9915646314620972
     Silence Both end confidence is  0.9915646314620972    
     """
-    def testSilentEdges(self):
-
+    def testSilentEdge(self):
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))() 
-        bpmEstimate = 120
+        bpmEstimate = 125
         confidence = LoopBpmConfidence()(audio, bpmEstimate)              
-        lenSilence = int(0.01*len(audio)) # Choose a silent length 1% of audio
+        lenSilence = 30000 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
         silentAudio = zeros(lenSilence)
-        benchmarkConfidence= 0.89  # This figure was arrived at emperically from the min. confidence observed with test runs 
+        benchmarkConfidence = 0.96 # This figure was arrived at emperically from the min. confidence observed with test runs 
 
-        # case 1: there is non-musical* silence before the loop starts
+        # Test addition of non-musical silence before the loop starts
+        # The length is not a beat period,
+        # Nonetheless, we can stillreliably estimate the starting point because it is a hard transient.
         signal1  = numpy.append(silentAudio, audio)
-        confidence = LoopBpmConfidence()(signal1, bpmEstimate)              
-        self.assertGreater(confidence,benchmarkConfidence)
+        confidence = LoopBpmConfidence()(signal1, bpmEstimate)      
+        self.assertGreater(confidence, benchmarkConfidence)
 
-        # case 2: there is non-musical silence after the loop ends        
-        signal2  = numpy.append(audio,silentAudio)
+    def testExactAudioLengthMatch(self):
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))() 
+        bpmEstimate = 125
+        beatPeriod =  21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
+        silentAudio = zeros(beatPeriod)
+        # Add non-musical silence to the beginnig of the audio 
+        signal1  = numpy.append(silentAudio, audio)
+        # Add non-musical silence to the end of the audio       
+        signal2  = numpy.append(audio, silentAudio)
         confidence = LoopBpmConfidence()(signal2, bpmEstimate)  
-        self.assertGreater(confidence, benchmarkConfidence) 
+        self.assertEquals(confidence, 1.0) 
 
-        # case 3: there is non-musical silence at both ends
+        # Concatenate silence at both ends
         signal3 = numpy.append(signal1, silentAudio)
         confidence = LoopBpmConfidence()(signal3, bpmEstimate)              
-        self.assertGreater(confidence, benchmarkConfidence) 
+        self.assertEquals(confidence, 1.0) 
 
     def testEmpty(self):
         # Zero estimate check results in zero confidence
@@ -197,7 +205,7 @@ class TestLoopBpmConfidence(TestCase):
         # Different constant input length will result in different estimations.
         bpmEstimate = 125
         confidence = LoopBpmConfidence()(onesAudio, bpmEstimate)
-        self.assertNotEquals(0, confidence)         
+        self.assertEquals(1, confidence)       
          
 suite = allTests(TestLoopBpmConfidence)
 
