@@ -31,7 +31,7 @@ const char* EqualLoudness::description = DOC("This algorithm implements an equal
 "\n"
 "References:\n"
 "  [1] Replay Gain - Equal Loudness Filter,\n"
-"  http://replaygain.hydrogenaudio.org/proposal/equal_loudness.html");
+"  http://replaygain.hydrogenaud.io/proposal/equal_loudness.html");
 
 
 void EqualLoudness::reset() {
