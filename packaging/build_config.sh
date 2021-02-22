@@ -6,15 +6,15 @@ if [ -z "${PREFIX}" ]; then
 fi
 echo Installing to: $PREFIX
 
-#SHARED_OR_STATIC="
-#--enable-shared \
-#--disable-static
-#"
-
 SHARED_OR_STATIC="
---disable-shared \
---enable-static
+--enable-shared \
+--disable-static
 "
+
+#SHARED_OR_STATIC="
+#--disable-shared \
+#--enable-static
+#"
 
 EIGEN_VERSION=3.3.7
 FFMPEG_VERSION=ffmpeg-2.8.12
@@ -25,8 +25,8 @@ FFTW_VERSION=fftw-3.3.2
 LIBSAMPLERATE_VERSION=libsamplerate-0.1.8
 LIBYAML_VERSION=yaml-0.1.5
 CHROMAPRINT_VERSION=1.4.3
-QT_SOURCE_URL=http://download.qt-project.org/archive/qt/4.8/4.8.6/qt-everywhere-opensource-src-4.8.6.tar.gz
-GAIA_VERSION=2.4.6
+QT_SOURCE_URL=https://download.qt.io/archive/qt/4.8/4.8.4/qt-everywhere-opensource-src-4.8.4.tar.gz
+GAIA_VERSION=2.4.6-86-ged433ed
 TENSORFLOW_VERSION=1.15.0
 
 
@@ -269,4 +269,5 @@ QT_FLAGS="
     -nomake demos
     -nomake examples
     -nomake tools
+    -nomake translations
 "

@@ -62,19 +62,19 @@ void Histogram::compute() {
 
   for(size_t i = 0; i < array.size(); i++){
     if(array[i] < _maxValue && array[i] >= _minValue)
-      histogram[floor(array[i]/(Real)binWidth)]++;
+      histogram[floor((array[i] - _minValue)/(Real)binWidth)]++;
     else if(array[i] == _maxValue) 
       histogram[_numberBins-1]++;
   }
 
-  if(_normalize != "none"){
+  if(_normalize != "none") {
     Real denominator = 0;
     if(_normalize == "unit_sum") {
       for(std::vector<Real>::iterator it = histogram.begin(); it != histogram.end(); it++) {
         denominator += *it;
       }
     }
-    if(_normalize == "unit_max") {
+    else if(_normalize == "unit_max") {
       for(std::vector<Real>::iterator it = histogram.begin(); it != histogram.end(); it++) {
         if(*it > denominator)
           denominator = *it;

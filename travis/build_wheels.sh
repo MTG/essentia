@@ -46,10 +46,11 @@ fi
 cd -
 
 # Compile wheels
-for PYBIN in /opt/python/*/bin; do
+for PYBIN in /opt/python/cp3*/bin; do
     # Don't build for python 3.8 while tensorflow doesn't create wheels for it
     # https://github.com/tensorflow/addons/issues/744
     if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp38"* ]]; then break; fi
+    if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp39"* ]]; then break; fi
 
     if [[ $WITH_TENSORFLOW ]]; then
     # The minimum numpy version required by tensorflow is always greater than
@@ -79,7 +80,9 @@ for PYBIN in /opt/python/*/bin; do
         NUMPY_VERSION=1.8.2
 
         # Python 3.x
-        if [[ $PYBIN == *"cp38"* ]]; then
+        if [[ $PYBIN == *"cp39"* ]]; then
+            NUMPY_VERSION=1.19.3
+        elif [[ $PYBIN == *"cp38"* ]]; then
             NUMPY_VERSION=1.17.4
         elif [[ $PYBIN == *"cp37"* ]]; then
             NUMPY_VERSION=1.14.5
@@ -125,7 +128,7 @@ for whl in wheelhouse/*.whl; do
 done
 
 # Install and test
-for PYBIN in /opt/python/*/bin/; do
+for PYBIN in /opt/python/cp3*/bin/; do
     # Skip essentia-tensorflow until it is available for Python 3.8
     if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp38"* ]]; then break; fi
 
