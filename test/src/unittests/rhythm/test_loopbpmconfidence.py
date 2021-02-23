@@ -52,7 +52,7 @@ class TestLoopBpmConfidence(TestCase):
 
         bpmEstimate = 70
         expectedConfidence = 0.68
-        confidence = LoopBpmConfidence()(audio, bpmEstimate)                
+        confidence = LoopBpmConfidence()(audio, bpmEstimate)
         self.assertAlmostEqual(expectedConfidence, confidence, 0.01)
 
         """
@@ -79,48 +79,48 @@ class TestLoopBpmConfidence(TestCase):
          The 3rd param in assertAlmostEqual() has been optimised, lowest possible value chosen.
         """
 
-        # Define Markers for significant meaningful subsections 
+        # Define Markers for significant meaningful subsections
         # consistent with sampling rate
-        len90 = int(0.9*len(audio))  # End point for 90% loop and subsection        
-        len01 = int(0.01*len(audio)) # Begin point for subsection loop 
+        len90 = int(0.9*len(audio))  # End point for 90% loop and subsection
+        len01 = int(0.01*len(audio)) # Begin point for subsection loop
 
         # Truncated Audios 90%
         bpmEstimate = 125
         expectedConfidence = 0.2 # rounded from measured 0.19992440938949585
-        confidence = LoopBpmConfidence()(audio[0:len90], bpmEstimate)              
-        self.assertAlmostEqual(expectedConfidence, confidence, 0.01) 
+        confidence = LoopBpmConfidence()(audio[0:len90], bpmEstimate)
+        self.assertAlmostEqual(expectedConfidence, confidence, 0.01)
 
         bpmEstimate = 120
         expectedConfidence = 0.43 # rounded from measured 0.4305669069290161
-        confidence = LoopBpmConfidence()(audio[0:len90], bpmEstimate)                          
-        self.assertAlmostEqual(expectedConfidence, confidence, 0.01) 
-        
+        confidence = LoopBpmConfidence()(audio[0:len90], bpmEstimate)
+        self.assertAlmostEqual(expectedConfidence, confidence, 0.01)
+
         bpmEstimate = 70
         expectedConfidence = 0.50 # rounded from measured 0.5011640191078186
-        confidence = LoopBpmConfidence()(audio[0:len90], bpmEstimate)                     
+        confidence = LoopBpmConfidence()(audio[0:len90], bpmEstimate)
         self.assertAlmostEqual(expectedConfidence, confidence, 0.01)
         
         # Truncated Audios 90% and 1% at beginning
         bpmEstimate = 125
         expectedConfidence = 0.92 # rounded from measured 0.9199735522270203
-        confidence = LoopBpmConfidence()(audio[len01:len90], bpmEstimate)                         
-        self.assertAlmostEqual(expectedConfidence, confidence, 0.01) 
+        confidence = LoopBpmConfidence()(audio[len01:len90], bpmEstimate)
+        self.assertAlmostEqual(expectedConfidence, confidence, 0.01)
 
         bpmEstimate = 120
-        expectedConfidence =  0.36 # rounded from measured 0.3631746172904968
-        confidence = LoopBpmConfidence()(audio[len01:len90], bpmEstimate)           
-        self.assertAlmostEqual(expectedConfidence, confidence, 0.01) 
-        
-        bpmEstimate = 70 
-        expectedConfidence =  0.79 # rounded from measured 0.7951852083206177
+        expectedConfidence = 0.36 # rounded from measured 0.3631746172904968
         confidence = LoopBpmConfidence()(audio[len01:len90], bpmEstimate)
-        self.assertAlmostEqual(expectedConfidence, confidence, 0.01) 
+        self.assertAlmostEqual(expectedConfidence, confidence, 0.01)
+
+        bpmEstimate = 70
+        expectedConfidence = 0.79 # rounded from measured 0.7951852083206177
+        confidence = LoopBpmConfidence()(audio[len01:len90], bpmEstimate)
+        self.assertAlmostEqual(expectedConfidence, confidence, 0.01)
 
 
     """
-    The confidence returned is based on comparing the duration of the audio signal with 
-    multiples of the BPM estimate. 
-    The algorithm considers edge cases in which the signal includes non-musical 
+    The confidence returned is based on comparing the duration of the audio signal with
+    multiples of the BPM estimate.
+    The algorithm considers edge cases in which the signal includes non-musical
     silence at the start or end of the audio signal (or both) and returns the confidence for the best fit.
     For more details refer to paper: https://repositori.upf.edu/handle/10230/33113
 
@@ -130,12 +130,11 @@ class TestLoopBpmConfidence(TestCase):
 
     Front end slience Confidence is  0.9915646314620972
     Back end silence Confidence  is  0.9915646314620972
-    Silence Both end confidence is  0.9915646314620972    
+    Silence Both end confidence is  0.9915646314620972
     """
     def testSilentEdge(self):
-        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))() 
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
         bpmEstimate = 125
-        confidence = LoopBpmConfidence()(audio, bpmEstimate)              
         lenSilence = 30000 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
         silentAudio = zeros(lenSilence)
         benchmarkConfidence = 0.96 # This figure was arrived at emperically from the min. confidence observed with test runs 
@@ -143,32 +142,38 @@ class TestLoopBpmConfidence(TestCase):
         # Test addition of non-musical silence before the loop starts
         # The length is not a beat period,
         # Nonetheless, we can stillreliably estimate the starting point because it is a hard transient.
-        signal1  = numpy.append(silentAudio, audio)
-        confidence = LoopBpmConfidence()(signal1, bpmEstimate)      
+        signal1 = numpy.append(silentAudio, audio)
+        confidence = LoopBpmConfidence()(signal1, bpmEstimate)
         self.assertGreater(confidence, benchmarkConfidence)
 
+    # In the previous test, the length of the silence is independent of the sample length
+    # This test examines response to adding silences of lengths equal to a multiple of the beat period.
     def testExactAudioLengthMatch(self):
-        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))() 
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
         bpmEstimate = 125
-        beatPeriod =  21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
+        beatPeriod = 21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
         silentAudio = zeros(beatPeriod)
-        # Add non-musical silence to the beginnig of the audio 
-        signal1  = numpy.append(silentAudio, audio)
-        # Add non-musical silence to the end of the audio       
-        signal2  = numpy.append(audio, silentAudio)
-        confidence = LoopBpmConfidence()(signal2, bpmEstimate)  
-        self.assertEquals(confidence, 1.0) 
+
+        # Add non-musical silence to the beginning of the audio
+        signal1 = numpy.append(silentAudio, audio)
+        confidence = LoopBpmConfidence()(signal1, bpmEstimate)
+        self.assertEquals(confidence, 1.0)
+
+        # Add non-musical silence to the end of the audio
+        signal2 = numpy.append(audio, silentAudio)
+        confidence = LoopBpmConfidence()(signal2, bpmEstimate)
+        self.assertEquals(confidence, 1.0)
 
         # Concatenate silence at both ends
         signal3 = numpy.append(signal1, silentAudio)
-        confidence = LoopBpmConfidence()(signal3, bpmEstimate)              
-        self.assertEquals(confidence, 1.0) 
+        confidence = LoopBpmConfidence()(signal3, bpmEstimate)
+        self.assertEquals(confidence, 1.0)
 
     def testEmpty(self):
         # Zero estimate check results in zero confidence
         emptyAudio = []
         bpmEstimate = 0
-        confidence = LoopBpmConfidence()(emptyAudio, bpmEstimate)                  
+        confidence = LoopBpmConfidence()(emptyAudio, bpmEstimate)
         self.assertEquals(0, confidence)
 
         # Non-zero estimate check results in zero confidence
@@ -176,12 +181,12 @@ class TestLoopBpmConfidence(TestCase):
         # Different constant input length will result in different estimations.
         emptyAudio = []
         bpmEstimate = 125
-        confidence = LoopBpmConfidence()(emptyAudio, bpmEstimate)                  
+        confidence = LoopBpmConfidence()(emptyAudio, bpmEstimate)
         self.assertEquals(0, confidence)
 
     def testZero(self):
-        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))() 
-        zeroAudio = zeros(len(audio))
+        beatPeriod = 21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
+        zeroAudio = zeros(beatPeriod)
         bpmEstimate = 0
         confidence = LoopBpmConfidence()(zeroAudio, bpmEstimate)
         self.assertEquals(0, confidence)
@@ -192,10 +197,16 @@ class TestLoopBpmConfidence(TestCase):
         bpmEstimate = 125
         confidence = LoopBpmConfidence()(zeroAudio, bpmEstimate)
         self.assertNotEquals(0, confidence)
-         
+
+        # A silent length of 4 Beat periods produces a confidence of 1.
+        zeroAudio4Beats = zeros(beatPeriod*4)
+        bpmEstimate = 125
+        confidence = LoopBpmConfidence()(zeroAudio4Beats, bpmEstimate)
+        self.assertEquals(1, confidence)
+
     def testConstantInput(self):
-        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))() 
-        onesAudio = ones(len(audio))
+        beatPeriod = 21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
+        onesAudio = ones(beatPeriod)
         bpmEstimate = 0
         confidence = LoopBpmConfidence()(onesAudio, bpmEstimate)
         self.assertEquals(0, confidence)
@@ -205,8 +216,8 @@ class TestLoopBpmConfidence(TestCase):
         # Different constant input length will result in different estimations.
         bpmEstimate = 125
         confidence = LoopBpmConfidence()(onesAudio, bpmEstimate)
-        self.assertEquals(1, confidence)       
-         
+        self.assertEquals(1, confidence)
+
 suite = allTests(TestLoopBpmConfidence)
 
 if __name__ == '__main__':
