@@ -52,7 +52,7 @@ class EqualLoudness : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "{8000,32000,44100,48000}", 44100.);
+    declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "{8000,16000,32000,44100,48000}", 44100.);
   }
 
   void reset();
