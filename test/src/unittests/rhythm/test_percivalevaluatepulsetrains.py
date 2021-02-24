@@ -17,20 +17,78 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-# This "empty" file is included here as a "dummy" returning FAIL.
-# The to open the Pull Request for Percival Unit Tests as draft to get started. 
-# DELETE ABOVE TWO LINES WHEN FINISHED
-
 
 from essentia_test import *
+from essentia.standard import MonoLoader, PercivalEvaluatePulseTrains, HarmonicBpm, FrequencyBands, NoveltyCurve 
 
 class TestPercivalEvaluatePulseTrains(TestCase):
-    def testDummy(self):
-        self.assertEqual(1,0)
 
+   def testRegression(self):
+        # Calculates the positions and Peaks
+		config = { 'range': inputSize -1, 'maxPosition': inputSize, 'minPosition': 0, 'orderBy': 'amplitude' }
+        pdetect = PeakDetection(**config)
+		
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()        
+	    inputSize = len(audio)
+
+        (posis, vals) = pdetect(audio)
+
+        # Calculates the OSS
+        fc = FrameCutter(frameSize=4096, hopSize=512)
+        windower = Windowing(type='blackmanharris62')
+        specAlg = Spectrum(size=4096)
+        fluxAlg = Flux()
+        # Calculate the average flux over all frames of audio
+        frame = fc(audio)
+        fluxSum = 0
+        count = 0
+        while len(frame) != 0:
+            spectrum = specAlg(windower(frame))
+            fluxSum += fluxAlg(spectrum)
+
+            count += 1
+            frame = fc(audio)
+
+        fluxAvg = float(fluxSum) / float(count)
+		filteredSignal = LowPass(cutoffFrequency=1000)(fluxAvg)
+		   
+        fc = FrameCutter(frameSize = inputSize,  hopSize = inputSize)
+		oss = fc(filteredSignal)		
+        lag = PercivalEvaluatePulseTrains()(oss,posis() )
+		print(lag)
+
+		
+
+    def testEmpty(self):
+        emptyOSS = []
+		emptypositions = []
+		lag = PercivalEvaluatePulseTrains()(emptyOSS, emptypositions)
+		print(lag)
+        #self.assertRaises(RuntimeError, lambda: PercivalEvaluatePulseTrains()(emptyAudio))
+
+    def testZero(self):
+		zeroOSS = zeros(10000)
+		zeropositions = zeros(10000)
+		lag = PercivalEvaluatePulseTrains()(zeroOSS, zeropositions)
+		print(lag)
+        #self.assertRaises(RuntimeError, lambda: PercivalEvaluatePulseTrains()(zeroAudio))
+
+    def testConstantInput(self):
+		onesOSS = ones(10000)
+		onespositions = ones(10000)
+		lag = PercivalEvaluatePulseTrains()(onesOSS, onespositions)
+		print(lag)                   
+        #self.assertNotEqual(0, estimate)
+    """
+    reset test commented out for nopw. 
+    TBD: what param do we send to reset(...)?
+    def testResetMethod(self):
+        self.testRegression()
+        PercivalEvaluatePulseTrains.reset()
+        self.testRegression()
+    """
 
 suite = allTests(TestPercivalEvaluatePulseTrains)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
-

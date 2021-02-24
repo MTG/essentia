@@ -17,20 +17,69 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-# This "empty" file is included here as a "dummy" returning FAIL.
-# The to open the Pull Request for Percival Unit Tests as draft to get started. 
-# DELETE ABOVE TWO LINES WHEN FINISHED
 
-
+from numpy import *
 from essentia_test import *
+from essentia.standard import MonoLoader, PercivalEnhanceHarmonics
 
 class TestPercivalEnhanceHarmonics(TestCase):
-    def testDummy(self):
-        self.assertEqual(1,0)
+             
+    def testRegression(self):
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()        
+
+        calculatedEnhancedHarmonics = PercivalEnhanceHarmonics()(audio)
+
+        """
+        This code stores reference values in a file for later loading.
+        save('enhancedharmonics.npy', calculatedEnhancedHarmonics)
+        """        
+       
+        # Reference samples are loaded as expected values
+        expectedEnhancedHarmonics = load(join(filedir(), 'percival/enhancedharmonics.npy'))
+        expectedEnhancedHarmonicsList = expectedEnhancedHarmonics.tolist()
+
+        self.assertAlmostEqualVectorFixedPrecision(calculatedEnhancedHarmonics, expectedEnhancedHarmonicsList,2)
+
+
+    # A series of assert checks on the BPM estimator for empty, zero or constant signals.
+    # PercivalEnhanceHarmonics uses the percival estimator internally.
+    # The runtime errors have their origin in that algorithm.
+    def testEmpty(self):
+        emptyAudio = []
+        enhancedHarmonics = PercivalEnhanceHarmonics()(emptyAudio)
+        self.assertEqualVector(enhancedHarmonics, [])
+
+
+    def testZero(self):
+        zeroAudio = zeros(100000)
+        enhancedHarmonics = PercivalEnhanceHarmonics()(zeroAudio)
+        self.assertEqualVector(enhancedHarmonics, zeros(100000))
+
+    def testConstantInput(self):
+        onesAudio = ones(100000)
+        constantHarmonics = PercivalEnhanceHarmonics()(onesAudio)     
+        """
+        This code stores reference values in a file for later loading.
+        save('constantharmonics.npy', constantHarmonics)     
+        """
+
+        # Reference samples are loaded as expected values
+        expectedConstantHarmonics = load(join(filedir(), 'percival/constantharmonics.npy'))
+        expectedConstantHarmonicsList = expectedConstantHarmonics.tolist()
+        self.assertEqualVector(constantHarmonics, expectedConstantHarmonicsList)
+
+    """
+    FIXME:
+    reset test fails
+    descriptor 'reset' of 'essentia.standard.Algorithm' object needs an argument
+    """
+    def testResetMethod(self):
+        self.testRegression()
+        PercivalEnhanceHarmonics.reset()
+        self.testRegression()
 
 
 suite = allTests(TestPercivalEnhanceHarmonics)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
-
