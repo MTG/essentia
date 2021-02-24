@@ -129,8 +129,8 @@ def configure(ctx):
     # force using SSE floating point (default for 64bit in gcc) instead of
     # 387 floating point (used for 32bit in gcc) to avoid numerical differences
     # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
-    if (not ctx.options.EMSCRIPTEN and 
-        not ctx.options.CROSS_COMPILE_ANDROID and 
+    if (not ctx.options.EMSCRIPTEN and
+        not ctx.options.CROSS_COMPILE_ANDROID and
         not ctx.options.CROSS_COMPILE_IOS and
         not ctx.options.NO_MSSE and
         sys.platform != 'win32'):
@@ -196,7 +196,10 @@ def configure(ctx):
         ctx.env.LINKFLAGS += ['-pthread']
 
     elif sys.platform == 'win32':
-        print ("Building on win32")
+        print ("→ Building on win32: search for pre-built dependencies in 'packaging/win32_3rdparty'")
+
+        os.environ["PKG_CONFIG_PATH"] = 'packaging/win32_3rdparty/lib/pkgconfig'
+        os.environ["PKG_CONFIG_LIBDIR"] = os.environ["PKG_CONFIG_PATH"]
 
         """
         # compile libgcc and libstd statically when using MinGW
@@ -221,7 +224,7 @@ def configure(ctx):
         # force the use of mingw gcc compiler instead of msvc
         #ctx.env.CC = 'gcc'
         #ctx.env.CXX = 'g++'
-        
+
         import distutils.dir_util
 
         print("copying pkgconfig ...")
@@ -292,11 +295,11 @@ def configure(ctx):
     if ctx.env.STATIC_DEPENDENCIES \
         and (sys.platform.startswith('linux') or sys.platform == 'darwin') \
         and not ctx.options.CROSS_COMPILE_MINGW32:
-        
+
         if not ctx.env.ONLY_PYTHON:
             print ("→ Building with static dependencies on Linux/OSX")
             os.environ["PKG_CONFIG_PATH"] = 'packaging/debian_3rdparty/lib/pkgconfig'
-        
+
         # flags required for linking to static ffmpeg libs
         # -Bsymbolic flag is not available on clang
         if ctx.env.CXX_NAME != "clang":
