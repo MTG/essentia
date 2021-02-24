@@ -1,0 +1,41 @@
+name: Native Windows CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install pkg-config through chocolatey
+        run: choco install pkgconfiglite
+
+      - name: Download & build eigen lib
+        env:
+          THIRD_PARTY: packaging\win32_3rdparty
+        run: |
+          $third_party_path = "$env:GITHUB_WORKSPACE\packaging\win32_3rdparty"
+          Invoke-WebRequest -OutFile eigen.zip https://gitlab.com/libeigen/eigen/-/archive/3.3.8/eigen-3.3.8.zip
+          Expand-Archive -LiteralPath eigen.zip -DestinationPath $env:THIRD_PARTY
+          Set-Location -Path $env:THIRD_PARTY\eigen*
+          New-Item -ItemType "directory" -Path .\build
+          sl build
+          cmake -DCMAKE_INSTALL_PREFIX="${third_party_path}\" -DEIGEN_BUILD_PKGCONFIG=ON -Wno-dev ..
+          cmake --install .
+          md "${third_party_path}\lib\pkgconfig\"
+          cp "${third_party_path}\share\pkgconfig\eigen3.pc" -Destination "${third_party_path}\lib\pkgconfig\"
+          dir "${third_party_path}\lib\pkgconfig\"
+
+      - name: Configure build
+        run: |
+          python -X utf8 waf configure
