@@ -51,53 +51,61 @@ void RhythmTransform::compute() {
   int nFrames = bands.size();
   int nBands = bands[0].size();
 
-  // derive and transpose
-  vector<vector<Real> > bandsDerivative(nBands);
-  for (int band=0; band<nBands; ++band) {
-    vector<Real> derivTemp(nFrames);
-    derivTemp[0] = 0.0;
-    for (int frame=1; frame<nFrames; frame++) {
-      derivTemp[frame] = bands[frame][band]-bands[frame-1][band];
-    }
-    bandsDerivative[band] = derivTemp;
-  }
-
-  int i = 0;
-  // in the original implementation, computation was stopped at:
-  // (i+_rtFrameSize<nFrames). However, there might be quite a lot of the
-  // signal not being analyzed. Therefore the new implementation computes the
-  // whole signal and zero pads if it i+rtFrameSize exceeds the number of
-  // melbands frames
-  while (i<nFrames) {
-    vector<Real> bandSpectrum(_rtFrameSize/2+1);
-    for (int band=0; band<nBands; band++) {
-      vector<Real> rhythmFrame(_rtFrameSize);
-      for (int j=0; j<_rtFrameSize; ++j) {
-        if (i+j<nFrames){
-	        rhythmFrame[j] = bandsDerivative[band][i+j];
-        }
-        else rhythmFrame[j] = 0.0; // zeropadding
+  // Check first that we have a valid populated input
+  // Otherwise core dump could happen.
+  if ((nFrames!=0) && (nFrames!=0))
+  {
+    // derive and transpose
+    vector<vector<Real> > bandsDerivative(nBands);
+    for (int band=0; band<nBands; ++band) {
+      vector<Real> derivTemp(nFrames);
+      derivTemp[0] = 0.0;
+      for (int frame=1; frame<nFrames; frame++) {
+        derivTemp[frame] = bands[frame][band]-bands[frame-1][band];
       }
-      vector<Real> windowedFrame;
-      vector<Real> rhythmSpectrum;
-
-      _w->input("frame").set(rhythmFrame);
-      _w->output("frame").set(windowedFrame);
-      _spec->input("frame").set(windowedFrame);
-      _spec->output("spectrum").set(rhythmSpectrum);
-
-      _w->compute();
-      _spec->compute();
-
-      // square the resulting spectrum, sum periodograms across bands
-      for (int bin=0; bin<(int)rhythmSpectrum.size(); ++bin)
-	      bandSpectrum[bin] += rhythmSpectrum[bin]*rhythmSpectrum[bin];
+      bandsDerivative[band] = derivTemp;
     }
-    output.push_back(bandSpectrum);
-    i += _rtHopSize;
+
+    int i = 0;
+    // in the original implementation, computation was stopped at:
+    // (i+_rtFrameSize<nFrames). However, there might be quite a lot of the
+    // signal not being analyzed. Therefore the new implementation computes the
+    // whole signal and zero pads if it i+rtFrameSize exceeds the number of
+    // melbands frames
+    while (i<nFrames) {
+      vector<Real> bandSpectrum(_rtFrameSize/2+1);
+      for (int band=0; band<nBands; band++) {
+        vector<Real> rhythmFrame(_rtFrameSize);
+        for (int j=0; j<_rtFrameSize; ++j) {
+          if (i+j<nFrames){
+            rhythmFrame[j] = bandsDerivative[band][i+j];
+          }
+          else rhythmFrame[j] = 0.0; // zeropadding
+        }
+        vector<Real> windowedFrame;
+        vector<Real> rhythmSpectrum;
+
+        _w->input("frame").set(rhythmFrame);
+        _w->output("frame").set(windowedFrame);
+        _spec->input("frame").set(windowedFrame);
+        _spec->output("spectrum").set(rhythmSpectrum);
+
+        _w->compute();
+        _spec->compute();
+
+        // square the resulting spectrum, sum periodograms across bands
+        for (int bin=0; bin<(int)rhythmSpectrum.size(); ++bin)
+          bandSpectrum[bin] += rhythmSpectrum[bin]*rhythmSpectrum[bin];
+      }
+      output.push_back(bandSpectrum);
+      i += _rtHopSize;
+    }
+    // skip the last couple of frames as they don't make up
+    // a full frame consisting of rmsSize rms values.    
+
   }
-  // skip the last couple of frames as they don't make up
-  // a full frame consisting of rmsSize rms values.
+
+
 }
 
 } // namespace standard
