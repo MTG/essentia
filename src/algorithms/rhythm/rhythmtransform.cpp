@@ -53,7 +53,6 @@ void RhythmTransform::compute() {
   // Check first that we have a valid populated input to avoid  core dump
   if (nFrames== 0) {
     throw EssentiaException("File looks like a completely silent file");
-    return;
   }
 
   // Gather individual band lengths
@@ -62,20 +61,14 @@ void RhythmTransform::compute() {
     bandSizes[nband] = bands[nband].size();
   }
 
-  // Check if a band is empty
-  if (std::find(bandSizes.begin(), bandSizes.end(), 0) != bandSizes.end())  
-  {
-    std::cout << "A Violation found empty band"<< std::endl;
-    throw EssentiaException("File looks like an empty band");
-    return;
+  // Check if a melband is empty
+  if (std::find(bandSizes.begin(), bandSizes.end(), 0) != bandSizes.end()) {
+    throw EssentiaException("File looks like an empty band");  
   }
 
-  // Check for an inconsistent input vector with inner vectors of different length
-  if(!( std::equal(bandSizes.begin() + 1, bandSizes.end(), bandSizes.begin()) ))
-  {
-    std::cout << "A Violation found different length" << std::endl;
-    throw EssentiaException("Inconsistent input vector with inner vectors of different length");
-    return;    
+  // Check for an inconsistent input vector with inner vectors of different lengths
+  if(!( std::equal(bandSizes.begin() + 1, bandSizes.end(), bandSizes.begin()) )) {
+    throw EssentiaException("Inconsistent input vector with inner vectors of different length");  
   }
 
   int nBands = bands[0].size();

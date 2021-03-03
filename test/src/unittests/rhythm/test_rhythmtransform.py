@@ -22,7 +22,14 @@
 from essentia_test import *
 from essentia.streaming import MonoLoader as sMonoLoader
 from essentia.streaming import RhythmExtractor as sRhythmExtractor
+import numpy as np
 
+listZeros=[[0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,
+  0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,
+  0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,
+  0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,
+  0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,
+  0.,0.,0.,0.,0.,0.,0.,0.,0.]]
 
 class TestRhythmTransform(TestCase):
 
@@ -52,7 +59,6 @@ class TestRhythmTransform(TestCase):
 
         rt = RhythmExtractor(frameSize=rmsFrameSize, hopSize=rmsHopSize)(bands)
 
-        print(rt)
         #FIXME forcing a fail to indocate Test Case is work in progress
         self.assertEqual(0, 1)
 
@@ -60,35 +66,52 @@ class TestRhythmTransform(TestCase):
         #bin_resoluion = 5.007721656976744
         #print("Estimated BPM: %0.1f" % float(numpy.argmax(rt_mean) * bin_resoluion))
 
-    def testZero(self):
-        # FIXME  Make array dims more realistic
-        # FIXME  sticking with defaults for now
-        bands = [zeros(256), zeros(256)]
+        """
+        assertEqual(len(rt), 1) only checks for whether a certain number of 
+        rhythm-domain frames is output for the given input. 
+        Can we test the expected value of the RD-frame output instead? 
+        What should it be?
+        """    
+
+    def testZeros1Darray(self):
+        bands = [zeros(1024)]
         rt = RhythmTransform()(bands)
-        self.assertEqual(len(rt), 1)
+        rt_list = rt.tolist()
+        self.assertEqualVector(listZeros,rt_list)
 
-        bands = [zeros(512), zeros(512), zeros(512)]
+    def testZeros2Darray(self):
+        bands = [zeros(1024),zeros(1024)]
         rt = RhythmTransform()(bands)
-        self.assertEqual(len(rt), 1)
+        rt_list = rt.tolist()
+        self.assertEqualVector(listZeros,rt_list)
 
-    def testConstantInput(self):
-        # FIXME  Make array dims more realistic
-        # FIXME  sticking with defaults for now        
-        bands = [ones(256), ones(256)]
+    def testConstantInput1Darray(self):
+        bands = [ones(1024)]
         rt = RhythmTransform()(bands)
-        self.assertEqual(len(rt), 1)
+        rt_list = rt.tolist()
+        self.assertEqualVector(listZeros,rt_list)
 
-        bands = [ones(512), ones(512), ones(512)]
+    def testConstantInput2Darray(self):
+        bands = [ones(1024),ones(1024)]
         rt = RhythmTransform()(bands)
-        self.assertEqual(len(rt), 1)
+        rt_list = rt.tolist()
+        self.assertEqualVector(listZeros,rt_list)
 
+    def testNonUniformInput(self):
+        bands = [ones(512), ones(1024)]
+        self.assertRaises(EssentiaException, lambda: RhythmTransform()(bands))
 
+    def testAllEmpty(self):
+        bandsAllEmpty = []
+        self.assertRaises(EssentiaException, lambda: RhythmTransform()(bandsAllEmpty))
 
-    def testEmpty(self):
-        # FIXME  Empty bands causes Segmentation fault (core dumped)
-        bands = []
-        rt = RhythmTransform()(bands) 
-        self.assertEqualVector(rt, [])
+    def testMultipleEmptySlots(self):
+        multipleEmptySlots = [[],[]]
+        self.assertRaises(EssentiaException, lambda: RhythmTransform()(multipleEmptySlots))
+
+    def testNonUniformEmptyInput(self):
+        nEmptySlots = [[],[0,0]]
+        self.assertRaises(EssentiaException, lambda: RhythmTransform()(nEmptySlots))
 
 
 suite = allTests(TestRhythmTransform)
