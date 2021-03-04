@@ -23,13 +23,31 @@ from essentia.standard import MonoLoader, PercivalEvaluatePulseTrains, HarmonicB
 
 class TestPercivalEvaluatePulseTrains(TestCase):
 
-   def testRegression(self):
+    def testEmpty(self):        
+        lag = PercivalEvaluatePulseTrains()([],[])
+        self.assertEqual(-1.0, lag)
+
+    def testZero(self):
+        zeroOSS = zeros(10000)
+        zeropositions = zeros(10000)
+        lag = PercivalEvaluatePulseTrains()(zeroOSS, zeropositions)
+        print(lag)
+        self.assertEqual(0.0, lag)
+
+    def testConstantInput(self):
+        onesOSS = ones(10000)
+        onespositions = ones(10000)
+        lag = PercivalEvaluatePulseTrains()(onesOSS, onespositions)              
+        self.assertEqual(1.0, lag)
+    
+    """
+    FIXME
+    def testRegression(self):
         # Calculates the positions and Peaks
-		config = { 'range': inputSize -1, 'maxPosition': inputSize, 'minPosition': 0, 'orderBy': 'amplitude' }
+        config = { 'range': inputSize -1, 'maxPosition': inputSize, 'minPosition': 0, 'orderBy': 'amplitude' }
         pdetect = PeakDetection(**config)
-		
-        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()        
-	    inputSize = len(audio)
+
+        audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
 
         (posis, vals) = pdetect(audio)
 
@@ -50,37 +68,15 @@ class TestPercivalEvaluatePulseTrains(TestCase):
             frame = fc(audio)
 
         fluxAvg = float(fluxSum) / float(count)
-		filteredSignal = LowPass(cutoffFrequency=1000)(fluxAvg)
-		   
-        fc = FrameCutter(frameSize = inputSize,  hopSize = inputSize)
-		oss = fc(filteredSignal)		
+        filteredSignal = LowPass(cutoffFrequency=1000)(fluxAvg)
+           
+        fc = FrameCutter(frameSize = len(audio),  hopSize = len(audio))
+        oss = fc(filteredSignal)
         lag = PercivalEvaluatePulseTrains()(oss,posis() )
-		print(lag)
-
-		
-
-    def testEmpty(self):
-        emptyOSS = []
-		emptypositions = []
-		lag = PercivalEvaluatePulseTrains()(emptyOSS, emptypositions)
-		print(lag)
-        #self.assertRaises(RuntimeError, lambda: PercivalEvaluatePulseTrains()(emptyAudio))
-
-    def testZero(self):
-		zeroOSS = zeros(10000)
-		zeropositions = zeros(10000)
-		lag = PercivalEvaluatePulseTrains()(zeroOSS, zeropositions)
-		print(lag)
-        #self.assertRaises(RuntimeError, lambda: PercivalEvaluatePulseTrains()(zeroAudio))
-
-    def testConstantInput(self):
-		onesOSS = ones(10000)
-		onespositions = ones(10000)
-		lag = PercivalEvaluatePulseTrains()(onesOSS, onespositions)
-		print(lag)                   
-        #self.assertNotEqual(0, estimate)
     """
-    reset test commented out for nopw. 
+
+    """
+    reset test commented out for now. 
     TBD: what param do we send to reset(...)?
     def testResetMethod(self):
         self.testRegression()
