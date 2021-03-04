@@ -116,21 +116,21 @@ class FreesoundExtractor : public Algorithm {
     //declareParameter("loudnessWindowType", "the window type for computing average loudness", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
     //declareParameter("loudnessSilentFrames", "whether to [keep/drop/add noise to] silent frames for computing average loudness", "{drop,keep,noise}", "noise");
 
-    declareParameter("rhythmMethod", "the method used for beat tracking", "{multifeature,degara}", "degara");
+    declareParameter("rhythmMethod", "the method used for beat tracking", "{multifeature,degara}", "multifeature");
     declareParameter("rhythmMinTempo", "the slowest tempo to detect [bpm]", "[40,180]", 40);
-    declareParameter("rhythmMaxTempo", "the fastest tempo to detect [bpm]", "[60,250]", 208);
+    declareParameter("rhythmMaxTempo", "the fastest tempo to detect [bpm]", "[60,250]", 210);
   
     const char* statsArray[] = { "mean", "var", "stdev", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
-    const char* cepstrumStatsArray[] = { "mean", "cov", "icov" };
     vector<string> stats = arrayToVector<string>(statsArray);
-    vector<string> cepstrumStats = arrayToVector<string>(cepstrumStatsArray);
-
     declareParameter("lowlevelStats", "the statistics to compute for low-level features", "", stats);
     declareParameter("tonalStats", "the statistics to compute for tonal features", "", stats);
     declareParameter("rhythmStats", "the statistics to compute for rhythm features", "", stats);
-    
-    declareParameter("mfccStats", "the statistics to compute for MFCC features", "", cepstrumStats);
-    declareParameter("gfccStats", "the statistics to compute for GFCC features", "", cepstrumStats);
+
+    // In FreesoundExtractor we use the same stats for MFCC and GFCC features for compatibility with previous extractor versions
+    //const char* cepstrumStatsArray[] = { "mean", "cov", "icov" };
+    //vector<string> cepstrumStats = arrayToVector<string>(cepstrumStatsArray);
+    declareParameter("mfccStats", "the statistics to compute for MFCC features", "", stats);
+    declareParameter("gfccStats", "the statistics to compute for GFCC features", "", stats);
 
 #if HAVE_GAIA2 
     declareParameter("highlevel", "list of high-level classifier models (gaia2 history filenames) to apply using extracted features. Skip classification if not specified (empty list)", "", Parameter::VECTOR_STRING);

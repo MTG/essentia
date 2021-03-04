@@ -45,7 +45,8 @@ void LoopBpmConfidence::configure() {
 }
 
 void LoopBpmConfidence::compute() {
-  const Real& bpmEstimate = _bpmEstimate.get();
+  // Get BPM estimate and round it as method only works for integer BPMs
+  const Real& bpmEstimate = round(_bpmEstimate.get());
   Real& confidence = _confidence.get();
 
   if (bpmEstimate == 0){

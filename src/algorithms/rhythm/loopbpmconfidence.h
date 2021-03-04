@@ -36,7 +36,7 @@ class LoopBpmConfidence : public Algorithm {
   public:
     LoopBpmConfidence() {
       declareInput(_signal, "signal", "loop audio signal");
-      declareInput(_bpmEstimate, "bpmEstimate", "estimated BPM for the audio signal");
+      declareInput(_bpmEstimate, "bpmEstimate", "estimated BPM for the audio signal (will be rounded to nearest integer)");
       declareOutput(_confidence, "confidence", "confidence value for the BPM estimation");
       _envelope = AlgorithmFactory::create("Envelope");
     }
@@ -68,7 +68,7 @@ namespace streaming {
 class LoopBpmConfidence : public StreamingAlgorithmWrapper {
 
  protected:
-  Sink<Real> _signal;
+  Sink<std::vector<Real> > _signal;
   Sink<Real> _bpmEstimate;
   Source<Real> _confidence;
 
