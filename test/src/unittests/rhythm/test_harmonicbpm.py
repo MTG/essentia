@@ -44,11 +44,12 @@ class TestHarmonicBpm(TestCase):
 
     """
     FIXME-This TC currently cause the program to hang.
+    """
+  
     def testZeros(self):
         # constant input reports bpms 0
-        testBpms = [0,0,0,0,0,0,0,0,0,0,0]
-        self.assertRaises(RuntimeError, lambda: HarmonicBpm()(testBpms))
-    """
+        testBpms = [0,100]
+        self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
 
     def testRegressionVariableTempoImpulse(self):
         testBpms = [100,101,102,103,104]

@@ -42,6 +42,13 @@ void HarmonicBpm::configure() {
 }
 
 vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
+
+  // A zero element in the bpms vector will cause program to hang.
+  // Ensure this value doesnt exist.
+  if (std::count(bpms.begin(), bpms.end(), 0)){ 
+    throw(EssentiaException("Zero bpm value found"));
+  }
+
   Real mingcd = std::numeric_limits<int>::max();
   vector<Real> harmonicBpms, harmonicRatios;
   harmonicBpms.reserve(bpms.size());
@@ -54,7 +61,7 @@ vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
       harmonicBpms.push_back(bpms[i]);
       if (gcd < mingcd) mingcd = gcd;
     }
-    //cout << bpm << "\t" << bpms[i] << "\t" << ratio << "\t" << gcd << endl;
+    //std::cout  << bpms[i] << "\t" << ratio << "\t" << gcd <<  std::endl;
   }
   sort(harmonicBpms.begin(), harmonicBpms.end());
   vector<Real> bestHarmonicBpms;
