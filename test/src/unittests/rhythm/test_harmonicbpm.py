@@ -20,53 +20,49 @@
 
 from essentia_test import *
 import essentia
-from essentia import Pool
-from essentia.standard import *
-import essentia.streaming as ess
-
-from math import ceil, fabs
-from numpy import argmax
-
 
 class TestHarmonicBpm(TestCase):
 
     def testInvalidParam(self):
         # Test that we must give valid frequency ranges or order
         self.assertConfigureFails(HarmonicBpm(), {'bpm': 0})
-        self.assertConfigureFails(HarmonicBpm(), { 'threshold': 0 })
-        self.assertConfigureFails(HarmonicBpm(), { 'tolerance': -1 })
+        self.assertConfigureFails(HarmonicBpm(), {'threshold': 0 })
+        self.assertConfigureFails(HarmonicBpm(), {'tolerance': -1 })
 
     def testConstantInput(self):
         # constant input reports bpms 0
-        testBpms = [120,120,120,120,120,120,120]
+        testBpms = [120, 120, 120, 120, 120, 120, 120]
         harmonicBpms = HarmonicBpm(bpm=120)(testBpms)
         self.assertEqual(harmonicBpms, 120)
-
-    """
-    FIXME-This TC currently cause the program to hang.
-    """
   
     def testZeros(self):
-        # constant input reports bpms 0
-        testBpms = [0,100]
+        # Ensure that an exception is thrown if any element contains a zero
+        testBpms = [0, 100]
+        self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
+        testBpms = [100, 100, 100, 100, 0]
+        self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
+        testBpms = zeros(100)
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
 
-    def testRegressionVariableTempoImpulse(self):
-        testBpms = [100,101,102,103,104]
+    # Do a regression test on a tempo impulse that varies a bit
+    def testRegression(self):
+        testBpms = [100, 101, 102, 103, 104]
         harmonicBpms = HarmonicBpm(bpm=100)(testBpms)
-        expectedBpm=102
-        self.assertAlmostEqual(harmonicBpms, expectedBpm, 1)
+        expectedBpm = 100
+        self.assertEqual(harmonicBpms, expectedBpm)
 
-    def testRegressionVariableTempoImpulse(self):
-        testBpms = [100,101,102,103,104,200,202,204,206,208]
+    # Do a regression test on a tempo impulse that varies a bit, for 2 octaves
+    def testRegressionMultipleOctave(self):
+        testBpms = [100, 101, 102, 103, 104, 200, 202, 204, 206, 208]
         harmonicBpms = HarmonicBpm(bpm=100)(testBpms)
-        expectedBpm=[100.0,200.0]
+        expectedBpm =[100.0, 200.0]
         self.assertEqualVector(harmonicBpms, expectedBpm)
 
     def testEmpty(self):
         # nothing should be computed and the resulting pool be empty
         harmonicBpms = HarmonicBpm(bpm=100)([])
         self.assertEqualVector(harmonicBpms, [])
+
 
 suite = allTests(TestHarmonicBpm)
 
