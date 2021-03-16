@@ -112,7 +112,7 @@ AlgorithmStatus RhythmExtractor2013::process() {
     _confidence.push(_pool.value<Real>("internal.confidence"));
   }
   else if (_method == "degara") {
-    _confidence.push((Real) 0);
+    _confidence.push((Real) 0.);
   }
   
   vector<Real> bpmIntervals;
