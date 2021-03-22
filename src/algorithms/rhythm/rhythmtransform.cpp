@@ -52,7 +52,7 @@ void RhythmTransform::compute() {
   // 
   // Check first that we have a valid populated input to avoid  core dump
   if (nFrames== 0) {
-    throw EssentiaException("File looks like a completely silent file");
+    throw EssentiaException("RhythmTransform: Input mel-spectrogram is empty");
   }
 
   // Gather individual band lengths
@@ -63,12 +63,12 @@ void RhythmTransform::compute() {
 
   // Check if a melband is empty
   if (std::find(bandSizes.begin(), bandSizes.end(), 0) != bandSizes.end()) {
-    throw EssentiaException("File looks like an empty band");  
+    throw EssentiaException("RhythmTransform: Input mel-spectrogram band is empty");  
   }
 
   // Check for an inconsistent input vector with inner vectors of different lengths
   if(!( std::equal(bandSizes.begin() + 1, bandSizes.end(), bandSizes.begin()) )) {
-    throw EssentiaException("Inconsistent input vector with inner vectors of different length");  
+    throw EssentiaException("RhythmTransform: Inconsistent input vector with inner vectors of different length");  
   }
 
   int nBands = bands[0].size();

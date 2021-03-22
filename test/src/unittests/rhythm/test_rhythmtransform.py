@@ -36,9 +36,7 @@ class TestRhythmTransform(TestCase):
     def testInvalidParam(self):
         self.assertConfigureFails(RhythmTransform(), {'frameSize': -1})
         self.assertConfigureFails(RhythmTransform(), {'hopSize': -1})
-    """
-    FIXME: Work in progress for Regression Test
-    """
+
     def testRegression(self):
         # Simple regression test, comparing normal behaviour
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav'),sampleRate = 44100)()
@@ -51,27 +49,42 @@ class TestRhythmTransform(TestCase):
         w = Windowing(type='blackmanharris62')
         spectrum = Spectrum()
         melbands = MelBands(sampleRate=sampleRate, numberBands=40, lowFrequencyBound=0, highFrequencyBound=sampleRate/2)
+
+        pool = Pool()
+
         # Maybe test this in streaming mode
         for frame in FrameGenerator(audio=audio, frameSize=frameSize, hopSize=hopSize, startFromZero=True):
             bands = melbands(spectrum(w(frame)))
-            #pool.add('melbands', bands)
-        
+            pool.add('melbands', bands)
 
-        rt = RhythmExtractor(frameSize=rmsFrameSize, hopSize=rmsHopSize)(bands)
+        #print("Mel band frames: %d" % len(pool['melbands']))
+        #print("Rhythm transform frames: %d" % int(len(pool['melbands']) / 32))
 
-        #FIXME forcing a fail to indocate Test Case is work in progress
-        self.assertEqual(0, 1)
+        rhythmtransform = RhythmTransform(frameSize=rmsFrameSize, hopSize=rmsHopSize)
+        rt = rhythmtransform(pool['melbands'])
 
-        #rt_mean = numpy.mean(rt, axis=0)
-        #bin_resoluion = 5.007721656976744
-        #print("Estimated BPM: %0.1f" % float(numpy.argmax(rt_mean) * bin_resoluion))
+        # This code stores reference values in a file for later loading.
+        # np.save('rhythmtransform.npy', rt)
+        # Reference samples are loaded as expected values
+        expected_rhythmtransform_npy = np.load(join(filedir(), 'rhythmtransform/rhythmtransform.npy'))
+        expected_rhythmtransform = expected_rhythmtransform_npy.tolist()
 
-        """
-        assertEqual(len(rt), 1) only checks for whether a certain number of 
-        rhythm-domain frames is output for the given input. 
-        Can we test the expected value of the RD-frame output instead? 
-        What should it be?
-        """    
+        self.assertAlmostEqualVectorFixedPrecision(expected_rhythmtransform[0], rt[0] ,2)
+        self.assertAlmostEqualVectorFixedPrecision(expected_rhythmtransform[1], rt[1] ,2)
+
+    def testAllEmpty(self):
+        # Testing for zero number of input mel-frames
+        bandsAllEmpty = []
+        self.assertRaises(EssentiaException, lambda: RhythmTransform()(bandsAllEmpty))
+     
+    def testMultipleEmptySlots(self):
+        # Testing for non-zero number of empty slots
+        multipleEmptySlots = [[],[]]
+        self.assertRaises(EssentiaException, lambda: RhythmTransform()(multipleEmptySlots))
+
+    def testNonUniformEmptyInput(self):
+        nEmptySlots = [[],[0,0]]
+        self.assertRaises(EssentiaException, lambda: RhythmTransform()(nEmptySlots))
 
     def testZeros1Darray(self):
         bands = [zeros(1024)]
@@ -80,6 +93,7 @@ class TestRhythmTransform(TestCase):
         self.assertEqualVector(listZeros,rt_list)
 
     def testZeros2Darray(self):
+        # non-zero number of input frames, but each mel-frame vector is empty
         bands = [zeros(1024),zeros(1024)]
         rt = RhythmTransform()(bands)
         rt_list = rt.tolist()
@@ -100,19 +114,6 @@ class TestRhythmTransform(TestCase):
     def testNonUniformInput(self):
         bands = [ones(512), ones(1024)]
         self.assertRaises(EssentiaException, lambda: RhythmTransform()(bands))
-
-    def testAllEmpty(self):
-        bandsAllEmpty = []
-        self.assertRaises(EssentiaException, lambda: RhythmTransform()(bandsAllEmpty))
-
-    def testMultipleEmptySlots(self):
-        multipleEmptySlots = [[],[]]
-        self.assertRaises(EssentiaException, lambda: RhythmTransform()(multipleEmptySlots))
-
-    def testNonUniformEmptyInput(self):
-        nEmptySlots = [[],[0,0]]
-        self.assertRaises(EssentiaException, lambda: RhythmTransform()(nEmptySlots))
-
 
 suite = allTests(TestRhythmTransform)
 
