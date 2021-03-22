@@ -23,67 +23,147 @@ import essentia
 
 class TestHarmonicBpm(TestCase):
 
+    def testEmpty(self):
+        # nothing should be computed and the resulting pool should be empty
+        harmonicBpms = HarmonicBpm(bpm=100)([])
+        self.assertEqualVector(harmonicBpms, [])
+
+    # Check that illegal parameters in configuration raise asserts
     def testInvalidParam(self):
         # Test that we must give valid frequency ranges or order
+        self.assertConfigureFails(HarmonicBpm(), {'bpm': -1})
         self.assertConfigureFails(HarmonicBpm(), {'bpm': 0})
+        self.assertConfigureFails(HarmonicBpm(), {'threshold': -1 })
         self.assertConfigureFails(HarmonicBpm(), {'threshold': 0 })
         self.assertConfigureFails(HarmonicBpm(), {'tolerance': -1 })
+        self.assertConfigureFails(HarmonicBpm(), {'tolerance': 0 })        
 
-    def testConstantInput(self):
-        # constant input reports bpms 0
+    # Check that illegal parameters in computation raise asserts
+    def testInvalidComputation(self):
+        testBpms = [120, 120, 120, 120, 120, 120, 120,
+                             240, 240, 240,240,240, 240, 240,
+                             180, 180, 180, 180, 180, 180, 180,
+                             90, 90, 90, 90, 90, 90, 90]
+        self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=0)(testBpms))
+        self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=-1)(testBpms))
+        self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=120, tolerance=0)(testBpms))
+        self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=120, tolerance=-1)(testBpms))
+        self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=120, threshold=0)(testBpms))
+        self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=120, threshold=-1)(testBpms))
+
+    # Simplest test case: All candidates the same returns a single value.
+    def testRegressionEqualCandidateValues(self):
         testBpms = [120, 120, 120, 120, 120, 120, 120]
         harmonicBpms = HarmonicBpm(bpm=120)(testBpms)
         self.assertEqual(harmonicBpms, 120)
+
+    # Test case with several values within a tolerance range
+    def testRegressionSmallRangeBpm(self):
+        testBpms = [100, 101, 102, 103, 104, 104.1]
+        harmonicBpms = HarmonicBpm(bpm=100, threshold=20, tolerance=5)(testBpms)
+        expectedBpm = 100      
+        self.assertEqual(harmonicBpms, expectedBpm)
+
+    # Check for bpm parameter at limit of tolerance range
+    # In this example: 104 + tolerance = 109
+    def testRegressionBpmInsideToleranceLimit(self):
+        testBpms = [100, 101, 102, 103, 104]
+        harmonicBpms = HarmonicBpm(bpm=109, threshold=20, tolerance=5)(testBpms)
+        expectedBpm =  [104]
+        self.assertEqualVector(harmonicBpms, expectedBpm)        
+
+    # Check for bpm parameter outside tolerance range
+    # In this example: 104 + tolerance < 110
+    def testRegressionBpmOutsideToleranceLimit(self):
+        testBpms = [100, 101, 102, 103, 104]
+        harmonicBpms = HarmonicBpm(bpm=110, threshold=20, tolerance=5)(testBpms)
+        self.assertEqualVector(harmonicBpms, [])
+
+    # Check the value below threshold is not included in harmonicBpms
+    def testRegressionTwoOctaveRange(self):
+        testBpms = [118, 120, 121, 122, 236, 240, 240, 240, 241]
+
+        # Check first with 100 bpm and threshold+tolerance at default
+        harmonicBpms = HarmonicBpm(bpm=100, threshold=20, tolerance=5)(testBpms)
+        expectedBpm = [121.]
+        self.assertEqualVector(harmonicBpms, expectedBpm)
+
+        #
+        # Threshold Checks
+        #       
+        # Threshold is the value below which greatest common divisors of BPM are discarded
+        # Check for more outputs included at lower threshold.
+        harmonicBpms = HarmonicBpm(bpm=100, threshold=1,tolerance=5)(testBpms)
+        expectedBpm = [118., 236]  
+        self.assertEqualVector(harmonicBpms, expectedBpm)
+
+        # Check that higher threshold value lead to higher discarding rate.
+        #  muliple BPMs are output and some of those are discarded due to being below threshold.
+        harmonicBpms = HarmonicBpm(bpm=100, threshold=25,tolerance=5)(testBpms)
+        self.assertEqualVector(harmonicBpms, [])
+
+        #
+        # Tolerance Checks
+        #
+        # Tolerance parameter:consideration of whether two BPM values are equal or "harmonically" equal
+        # Check for no outputs at reduced tolerance value
+        harmonicBpms = HarmonicBpm(bpm=100, threshold=20,tolerance=4)(testBpms)
+        self.assertEqualVector(harmonicBpms, [])
+
+        # Increase tolerance to 10 to check if 236 is included
+        harmonicBpms = HarmonicBpm(bpm=100, threshold=20,tolerance=10)(testBpms)
+        expectedBpm = [121., 236.]
+        self.assertEqualVector(harmonicBpms, expectedBpm)        
+          
+        harmonicBpms = HarmonicBpm(bpm=100, threshold=60,tolerance=5)(testBpms)
+        self.assertEqualVector(harmonicBpms, [])
   
+    def testRegressionThreeOctaveRange(self):
+        testBpms = [100, 101, 102, 103, 104, 200, 202, 204, 206, 208, 300, 302, 304, 306, 308]
+        harmonicBpms = HarmonicBpm(bpm=100)(testBpms)
+        expectedBpm =[100.0, 200.0, 300.0]
+        self.assertEqualVector(harmonicBpms, expectedBpm)
+
+    # Check multiple BPMs with diverse octaves ranges
+    def testRegressionMultipleValues(self):
+        testBpms = [120, 120, 120, 120, 120, 120, 120,
+                             240, 240, 240, 240, 240, 240, 240,
+                             180, 180, 180, 180, 180, 180, 180,              
+                             90, 90, 90, 90, 90, 90, 90]
+        
+        # Check with default threshold (20) and BPM = 120
+        expectedHarmonicBps = [90, 120, 180, 240] 
+        harmonicBpms = HarmonicBpm(bpm=120, threshold=20)(testBpms)
+        self.assertEqualVector(harmonicBpms, expectedHarmonicBps)  
+
+        # Check with default threshold (20) and BPM = 90
+        expectedHarmonicBps = [90, 120, 180, 240]
+        harmonicBpms = HarmonicBpm(bpm=90, threshold=20)(testBpms)
+        self.assertEqualVector(harmonicBpms, expectedHarmonicBps)
+
+        # Run a test with a higher threshold that will lead to some outputs being dicsarded.
+        # 
+        # Check with threshold=30 and BPM = 120
+        expectedHarmonicBps = [120, 180, 240]
+        harmonicBpms = HarmonicBpm(bpm=120, threshold=30)(testBpms)
+        self.assertEqualVector(harmonicBpms, expectedHarmonicBps)
+
+        # Check with threshold=30 and BPM = 90
+        expectedHarmonicBps = [90, 180]
+        harmonicBpms = HarmonicBpm(bpm=90, threshold=30)(testBpms)
+        self.assertEqualVector(harmonicBpms, expectedHarmonicBps)
+
     def testZeros(self):
-        # Ensure that an exception is thrown if any element contains a zero
+        # Ensure that an exception is thrown if any bpm element contains a zero
         testBpms = [0, 100]
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
         testBpms = [100, 100, 100, 100, 0]
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
         testBpms = zeros(100)
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
-
-    # Perform a series of 4 RTs that vary parameters
-    def testRegressionStandard(self):
-        testBpms = [100, 101, 102, 103, 104]
-        harmonicBpms = HarmonicBpm(bpm=100)(testBpms)
-        expectedBpm = 100
-        self.assertEqual(harmonicBpms, expectedBpm)
-
-    # Check the value below threshold is not included in harmonicBpms
-    def testRegressionThresholdLimit(self):
-        testBpms = [99, 100, 101, 102, 103, 104, 250]
-        harmonicBpms = HarmonicBpm(bpm=100, threshold=99)(testBpms)
-        expectedBpm = 100
-        self.assertEqual(harmonicBpms, expectedBpm)
-
-    # Reduce tolerance parameter
-    def testRegressionLowTolerance(self):
-        testBpms = [100, 101, 102, 103, 104]
-        harmonicBpms = HarmonicBpm(bpm=100, tolerance=1)(testBpms)
-        expectedBpm = [100., 101.]
-        self.assertEqualVector(harmonicBpms, expectedBpm)
-
-    # Check for bpm outside of input range
-    def testRegressionBpmHigh(self):
-        testBpms = [100, 101, 102, 103, 104]
-        harmonicBpms = HarmonicBpm(bpm=105)(testBpms)    
-        expectedBpm =  104
-        self.assertEqual(harmonicBpms, expectedBpm)
-
-    # Do a regression test on a tempo impulse that varies a bit, for 2 octaves
-    def testRegressionMultipleOctave(self):
-        testBpms = [100, 101, 102, 103, 104, 200, 202, 204, 206, 208, 300, 302, 304, 306, 308]
-        harmonicBpms = HarmonicBpm(bpm=100)(testBpms)   
-        expectedBpm =[100.0, 200.0, 300.0]
-        self.assertEqualVector(harmonicBpms, expectedBpm)
-
-    def testEmpty(self):
-        # nothing should be computed and the resulting pool should be empty
-        harmonicBpms = HarmonicBpm(bpm=100)([])
-        self.assertEqualVector(harmonicBpms, [])
-
+        testBpms = [100, 100, 100, 100, 100]
+        # Ensure that an exception is thrown if tolerance is zero
+        self.assertRaises(EssentiaException, lambda: HarmonicBpm(tolerance=0)(testBpms))
 
 suite = allTests(TestHarmonicBpm)
 

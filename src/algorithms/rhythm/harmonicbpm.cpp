@@ -39,14 +39,26 @@ void HarmonicBpm::configure() {
   _threshold = parameter("threshold").toReal();
   _bpm = parameter("bpm").toReal();
   _tolerance = parameter("tolerance").toReal();
+  // This patch was added to fix a crash that happens when a zero tolerance value is configured
+  if (_tolerance==0){ 
+    throw(EssentiaException("HarmonicBpm: Zero tolerance found in Configuration"));
+  }
+  if (_bpm==0){ 
+    throw(EssentiaException("HarmonicBpm: Zero bpm found in Configuration"));
+  }
 }
 
 vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
-
   // A zero element in the bpms vector will cause program to hang.
   // Ensure this value doesnt exist.
   if (std::count(bpms.begin(), bpms.end(), 0)){ 
-    throw(EssentiaException("Zero bpm value found"));
+    throw(EssentiaException("HarmonicBpm: Zero bpm value found"));
+  }
+
+  // Eventhough 0 is the min. documented value you can supply
+  // It can cause Essentia to crash
+  if (_tolerance == 0){ 
+    throw(EssentiaException("HarmonicBpm: Zero tolerance found"));
   }
 
   Real mingcd = std::numeric_limits<int>::max();
@@ -61,7 +73,6 @@ vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
       harmonicBpms.push_back(bpms[i]);
       if (gcd < mingcd) mingcd = gcd;
     }
-    //std::cout  << bpms[i] << "\t" << ratio << "\t" << gcd <<  std::endl;
   }
   sort(harmonicBpms.begin(), harmonicBpms.end());
   vector<Real> bestHarmonicBpms;
