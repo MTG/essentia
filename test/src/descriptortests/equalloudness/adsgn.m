@@ -1,4 +1,4 @@
-function [B,A] = adsgn(Fs); 
+function [B,A] = adsgn(Fs)
 % ADSGN  Design of a A-weighting filter.
 %    [B,A] = ADSGN(Fs) designs a digital A-weighting filter for 
 %    sampling frequency Fs. Usage: Y = FILTER(B,A,X). 
