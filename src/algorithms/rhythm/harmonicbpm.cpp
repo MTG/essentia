@@ -39,13 +39,6 @@ void HarmonicBpm::configure() {
   _threshold = parameter("threshold").toReal();
   _bpm = parameter("bpm").toReal();
   _tolerance = parameter("tolerance").toReal();
-  // This patch was added to fix a crash that happens when a zero tolerance value is configured
-  if (_tolerance==0){ 
-    throw(EssentiaException("HarmonicBpm: Zero tolerance found in Configuration"));
-  }
-  if (_bpm==0){ 
-    throw(EssentiaException("HarmonicBpm: Zero bpm found in Configuration"));
-  }
 }
 
 vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
@@ -55,10 +48,18 @@ vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
     throw(EssentiaException("HarmonicBpm: Zero bpm value found"));
   }
 
-  // Eventhough 0 is the min. documented value you can supply
-  // It can cause Essentia to crash
+  // FIXME 
+  // Eventhough 0 is the min. documented value you can supply, 
+  // A _tolerance = 0 causes an endless loop.
+  // Prevent this scenario until long term fix found in loop below.
   if (_tolerance == 0){ 
     throw(EssentiaException("HarmonicBpm: Zero tolerance found"));
+  }
+
+  // finding the minimum bpm and check it is above 20
+  int min = *min_element(bpms.begin(), bpms.end());
+  if (min < 20 ){
+    E_INFO ("HarmonicBpm: There are very low values among bpms candidates (below 20 BPM)");
   }
 
   Real mingcd = std::numeric_limits<int>::max();

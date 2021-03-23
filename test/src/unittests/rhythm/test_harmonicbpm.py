@@ -29,14 +29,13 @@ class TestHarmonicBpm(TestCase):
         self.assertEqualVector(harmonicBpms, [])
 
     # Check that illegal parameters in configuration raise asserts
-    def testInvalidParam(self):
+    def testInvalidParam(self): # REMOVE THIS CA
         # Test that we must give valid frequency ranges or order
         self.assertConfigureFails(HarmonicBpm(), {'bpm': -1})
         self.assertConfigureFails(HarmonicBpm(), {'bpm': 0})
         self.assertConfigureFails(HarmonicBpm(), {'threshold': -1 })
         self.assertConfigureFails(HarmonicBpm(), {'threshold': 0 })
-        self.assertConfigureFails(HarmonicBpm(), {'tolerance': -1 })
-        self.assertConfigureFails(HarmonicBpm(), {'tolerance': 0 })        
+        self.assertConfigureFails(HarmonicBpm(), {'tolerance': -1 })     
 
     # Check that illegal parameters in computation raise asserts
     def testInvalidComputation(self):
@@ -46,7 +45,6 @@ class TestHarmonicBpm(TestCase):
                              90, 90, 90, 90, 90, 90, 90]
         self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=0)(testBpms))
         self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=-1)(testBpms))
-        self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=120, tolerance=0)(testBpms))
         self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=120, tolerance=-1)(testBpms))
         self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=120, threshold=0)(testBpms))
         self.assertRaises(EssentiaException, lambda: HarmonicBpm(bpm=120, threshold=-1)(testBpms))
@@ -161,9 +159,12 @@ class TestHarmonicBpm(TestCase):
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
         testBpms = zeros(100)
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
-        testBpms = [100, 100, 100, 100, 100]
+        # FIXME
+        # Currently an exception is thrown in findHarmonicBpms to avoid         
         # Ensure that an exception is thrown if tolerance is zero
+        testBpms = [100, 100, 100, 100, 100]        
         self.assertRaises(EssentiaException, lambda: HarmonicBpm(tolerance=0)(testBpms))
+
 
 suite = allTests(TestHarmonicBpm)
 
