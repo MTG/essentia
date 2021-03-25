@@ -50,18 +50,15 @@ vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
      throw(EssentiaException("HarmonicBpm: Zero bpm value found"));
   }
 
-  // FIXME
-  // Eventhough 0 is the min. documented value you can supply,
-  // A _tolerance = 0 causes an endless loop.
-  // Prevent this scenario until long term fix found in loop below.
-  if (_tolerance == 0){
-     throw(EssentiaException("HarmonicBpm: Zero tolerance found"));
-  }
-  // finding the minimum bpm and check it is above 20
-  int min = *min_element(bpms.begin(), bpms.end());
-  if (min < 20 ){
+  // finding the minimum bpm and check it is above thresholds
+  Real min = *min_element(bpms.begin(), bpms.end());
+  if ((min > 1) && (min < 20)){
      E_INFO ("HarmonicBpm: There are very low values among bpms candidates (below 20 BPM)");
+  } 
+  else if (min < 1){
+     E_INFO ("HarmonicBpm: There are extremely low values among bpms candidates (equal or below 1 BPM)");
   }
+
   vector<Real> harmonicBpms, harmonicRatios;
   harmonicBpms.reserve(bpms.size());
   harmonicRatios.reserve(bpms.size());
@@ -72,7 +69,7 @@ vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
   for (int i=0; i<int(bpms.size()); i++) {
      Real gcd = greatestCommonDivisor(_bpm, bpms[i], _tolerance);
      if (gcd >= _threshold) {
-       cout << gcd << bpms[i] << endl;
+       //cout << gcd << "," <<bpms[i] << endl;
        harmonicBpms.push_back(bpms[i]);
        if (gcd < mingcd) mingcd = gcd;
      }
