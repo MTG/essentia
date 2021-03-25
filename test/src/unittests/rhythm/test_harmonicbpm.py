@@ -150,9 +150,26 @@ class TestHarmonicBpm(TestCase):
         expectedHarmonicBps = [90, 180]
         harmonicBpms = HarmonicBpm(bpm=90, threshold=30)(testBpms)
         self.assertEqualVector(harmonicBpms, expectedHarmonicBps)
-    
-    """
-    FIXME
+
+    # Check a range of tolerance values with wide range of BPMs
+    def testRegressionDifferentToleranceLowBpms(self):        
+        testBpms = [10, 20, 60, 120, 180]
+        expectedHarmonicBps = [20, 60, 120, 180]
+        #  We want to ensure nothing bad happens when tolerance = 0.
+        #
+        harmonicBpms = HarmonicBpm(bpm=60, tolerance=0, threshold=20)(testBpms)
+        print(harmonicBpms)
+        self.assertEqualVector(harmonicBpms, expectedHarmonicBps)
+        harmonicBpms = HarmonicBpm(bpm=60, tolerance=5, threshold=20)(testBpms)
+        print(harmonicBpms)        
+        self.assertEqualVector(harmonicBpms, expectedHarmonicBps)
+        harmonicBpms = HarmonicBpm(bpm=60, tolerance=10, threshold=20)(testBpms)
+        print(harmonicBpms)        
+        self.assertEqualVector(harmonicBpms, expectedHarmonicBps)
+        harmonicBpms = HarmonicBpm(bpm=60, tolerance=20, threshold=20)(testBpms)       
+        print(harmonicBpms)        
+        self.assertEqualVector(harmonicBpms, expectedHarmonicBps)        
+
     def testZeros(self):
         # Ensure that an exception is thrown if any bpm element contains a zero
         testBpms = [0, 100]
@@ -161,12 +178,6 @@ class TestHarmonicBpm(TestCase):
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
         testBpms = zeros(100)
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
-        # FIXME
-        # Currently an exception is thrown in findHarmonicBpms to avoid         
-        # Ensure that an exception is thrown if tolerance is zero
-        testBpms = [100, 100, 100, 100, 100]        
-        #self.assertRaises(EssentiaException, lambda: HarmonicBpm(tolerance=0)(testBpms))
-    """
 
 suite = allTests(TestHarmonicBpm)
 
