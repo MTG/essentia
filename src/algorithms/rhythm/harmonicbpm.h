@@ -44,7 +44,7 @@ class HarmonicBpm : public Algorithm {
   ~HarmonicBpm() {}
 
   void declareParameters() {
-    declareParameter("bpm", "the bpm used to find its harmonics", "[1,inf)", 60);
+    declareParameter("bpm", "the bpm used to find its harmonics", "[1,inf)", 60.0);
     declareParameter("threshold", "bpm threshold below which greatest common divisors are discarded", "[1,inf)", 20.0);
     declareParameter("tolerance", "percentage tolerance to consider two bpms are equal or equal to a harmonic", "[0,inf)", 5.0);
   }
