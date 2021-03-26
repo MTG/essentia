@@ -19,7 +19,9 @@
 
 
 from essentia_test import *
+from essentia import Pool, array
 from essentia.standard import MonoLoader, PercivalEvaluatePulseTrains, HarmonicBpm, FrequencyBands, NoveltyCurve 
+import numpy as np
 
 class TestPercivalEvaluatePulseTrains(TestCase):
 
@@ -31,7 +33,6 @@ class TestPercivalEvaluatePulseTrains(TestCase):
         zeroOSS = zeros(10000)
         zeropositions = zeros(10000)
         lag = PercivalEvaluatePulseTrains()(zeroOSS, zeropositions)
-        print(lag)
         self.assertEqual(0.0, lag)
 
     def testConstantInput(self):
@@ -40,40 +41,51 @@ class TestPercivalEvaluatePulseTrains(TestCase):
         lag = PercivalEvaluatePulseTrains()(onesOSS, onespositions)              
         self.assertEqual(1.0, lag)
     
-    """
-    FIXME
+    # FIXME- A better comparison model is required for this regression test.
+    # onsets and position inuts calculated using essentia functions.
+    # Alternative sources should be used.
+    # For original paper refer to 
+    # https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6879451
+    # https://github.com/marsyas/marsyas
     def testRegression(self):
+        fs = 44100
+        durInSecs = 5
+        inputSize=44100*durInSecs # Take 3 secs of samples
         # Calculates the positions and Peaks
         config = { 'range': inputSize -1, 'maxPosition': inputSize, 'minPosition': 0, 'orderBy': 'amplitude' }
         pdetect = PeakDetection(**config)
 
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
+        audio = audio[:durInSecs * fs]#let's use only the first two seconds of the signals
+        audio = audio / np.max(np.abs(audio))
 
+        # Loading Essentia functions required
+        # See Essenatia tutorial example: 
+        # https://github.com/MTG/essentia/blob/master/src/examples/tutorial/example_onsetdetection.py
+        od_hfc = OnsetDetection(method = 'hfc')
+        od_complex = OnsetDetection(method = 'complex')
+        w = Windowing(type = 'hann')
+        fft = FFT() # this gives us a complex FFT
+        c2p = CartesianToPolar() # and this turns it into a pair (magnitude, phase)
+        onsets = Onsets()
+
+        #Essentia beat tracking
+        pool = Pool()
+        for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512):
+            mag, phase, = c2p(fft(w(frame)))
+            pool.add('features.hfc', od_hfc(mag, phase))
+            pool.add('features.complex', od_complex(mag, phase))
+        
+        onsets_hfc = onsets(array([pool['features.hfc']]),[1])
+        onsets_hfc = onsets_hfc[onsets_hfc<durInSecs]                    
         (posis, vals) = pdetect(audio)
 
-        # Calculates the OSS
-        fc = FrameCutter(frameSize=4096, hopSize=512)
-        windower = Windowing(type='blackmanharris62')
-        specAlg = Spectrum(size=4096)
-        fluxAlg = Flux()
-        # Calculate the average flux over all frames of audio
-        frame = fc(audio)
-        fluxSum = 0
-        count = 0
-        while len(frame) != 0:
-            spectrum = specAlg(windower(frame))
-            fluxSum += fluxAlg(spectrum)
+        # oss (vector_real) - onset strength signal (or other novelty curve)
+        # positions (vector_real) - peak positions of BPM candidates
 
-            count += 1
-            frame = fc(audio)
-
-        fluxAvg = float(fluxSum) / float(count)
-        filteredSignal = LowPass(cutoffFrequency=1000)(fluxAvg)
-           
-        fc = FrameCutter(frameSize = len(audio),  hopSize = len(audio))
-        oss = fc(filteredSignal)
-        lag = PercivalEvaluatePulseTrains()(oss,posis() )
-    """
+        lag = PercivalEvaluatePulseTrains()(onsets_hfc, posis)              
+        # Previously measured value for lag was 107761
+        self.assertEqual(107761.0, lag)        
 
     """
     reset test commented out for now. 
