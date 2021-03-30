@@ -21,33 +21,48 @@
 from numpy import *
 from essentia_test import *
 
-class TestPitchContours(TestCase):
+class TestPitchContoursMelody(TestCase):
 
     def testInvalidParam(self):
-        self.assertConfigureFails(PitchContours(), {'binResolution': -1})
-        self.assertConfigureFails(PitchContours(), {'hopSize': -1})
-        self.assertConfigureFails(PitchContours(), {'minDuration': -1})
-        self.assertConfigureFails(PitchContours(), {'peakDistributionThreshold': -1})
-        self.assertConfigureFails(PitchContours(), {'peakFrameThreshold': -1})
-        self.assertConfigureFails(PitchContours(), {'pitchContinuity': -1})
-        self.assertConfigureFails(PitchContours(), {'sampleRate': -1})
-        self.assertConfigureFails(PitchContours(), {'timeContinuity': -1})
+        self.assertConfigureFails(PitchContoursMelody(), {'binResolution': -1})
+        self.assertConfigureFails(PitchContoursMelody(), {'filterIterations': -1})
+        self.assertConfigureFails(PitchContoursMelody(), {'hopSize': -1})
+        self.assertConfigureFails(PitchContoursMelody(), {'maxFrequency': -1})
+        self.assertConfigureFails(PitchContoursMelody(), {'minFrequency': -1})
+        self.assertConfigureFails(PitchContoursMelody(), {'referenceFrequency': -1})
+        self.assertConfigureFails(PitchContoursMelody(), {'sampleRate': -1})
+        self.assertConfigureFails(PitchContoursMelody(), {'voicingTolerance': -2})
+        self.assertConfigureFails(PitchContoursMelody(), {'voicingTolerance': 1.5})
         
     def testZero(self):
-        bins, saliences, startTimes, duration = PitchContours()(  array(zeros([2,256])),   array(zeros([2,256])))      
-        self.assertEqualVector(bins, [])
-        self.assertEqualVector(saliences, [])
-        self.assertEqualVector(startTimes, [])
-        self.assertAlmostEqual(duration, 0.0058, 3)
-        
-        peakBins = [zeros(4096), zeros(4096)]
-        peakSaliences = [zeros(1024), zeros(1024)]
-        self.assertRaises(RuntimeError, lambda: PitchContours()(peakBins, peakSaliences))
 
+        bins = [zeros(1024), zeros(1024)] 
+        saliences = [zeros(1024), zeros(1024)]
+        startTimes = zeros(1024)
+        duration =  0.0
+
+        pitch, pitchConfidence = PitchContoursMelody()( bins, saliences, startTimes, duration)
+        self.assertEqualVector(pitch, [])
+        self.assertEqualVector(pitchConfidence, [])
+
+
+
+    def testEmpty(self):
+        emptyBins = [[],[]]
+        emptySaliences = [[],[]]
+
+        pitch, pitchConfidence = PitchContoursMelody()( emptyBins, emptySaliences, [], 0)
+        self.assertEqualVector(pitch, [])
+        self.assertEqualVector(pitchConfidence, [])
+
+
+        #self.assertComputeFails(PitchContoursMelody()(emptyPeakBins, emptyPeakSaliences))
+
+    """
     def testOnes(self):
         peakBins = [ones(4096),ones(4096)]
         peakSaliences = [ones(4096),ones(4096)]
-        bins, saliences, startTimes, duration = PitchContours()(peakBins, peakSaliences)
+        bins, saliences, startTimes, duration = PitchContoursMelody()(peakBins, peakSaliences)
 
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
@@ -57,13 +72,9 @@ class TestPitchContours(TestCase):
     def testUnequalInputs(self):
         peakBins = [ones(4096), ones(4096)]
         peakSaliences = [ones(1024), ones(1024)]
-        self.assertRaises(RuntimeError, lambda: PitchContours()(peakBins, peakSaliences))
+        self.assertRaises(RuntimeError, lambda: PitchContoursMelody()(peakBins, peakSaliences))
 
-    def testEmpty(self):
-        emptyPeakBins = [[],[]]
-        emptyPeakSaliences = [[],[]]
-        #self.assertComputeFails(PitchContours()(emptyPeakBins, emptyPeakSaliences))
-    
+    """
     def testARealCase(self):
         frameSize = 1024
         sr = 44100
@@ -79,6 +90,7 @@ class TestPitchContours(TestCase):
         spectrum = Spectrum()
         spectralpeaks = SpectralPeaks()
         pc = PitchContours()
+        pcm = PitchContoursMelody()
 
         peakBins = []
         peakSaliences = []        
@@ -91,7 +103,6 @@ class TestPitchContours(TestCase):
             freq_peaks, mag_peaks = spectralpeaks(spectrum(w(frame)))
             len_freq_peaks = len(freq_peaks)
             len_mag_peaks = len(mag_peaks)
-
             freq_peaksp1 = freq_peaks[1:len_freq_peaks]
             mag_peaksp1 = mag_peaks[1:len_mag_peaks]
             salienceFunction = psf(freq_peaksp1, mag_peaksp1)
@@ -100,17 +111,19 @@ class TestPitchContours(TestCase):
             peakSaliences.append(values)
 
         bins, saliences, startTimes, duration = pc(peakBins, peakSaliences)
+        pitch, pitchConfidence = pcm(bins, saliences, startTimes, duration)   
         #This code stores reference values in a file for later loading.
-        save('pitchcountourbins.npy', bins)
-        save('pitchcountoursaliences.npy', bins)
-
-        #loadedPitchContours = load(join(filedir(), 'pitchsalience/pitchcountourbins.npy'))        
-        #loadedPitchSaliences = load(join(filedir(), 'pitchsalience/pitchcountoursaliences.npy'))
-        #expectedPitchContours = loadedPitchContours.tolist() 
-        #expectedPitchSaliences = loadedPitchSaliences.tolist() 
-        #self.assertAlmostEqualVectorFixedPrecision(calculatedPitchContour, expectedPitchContours,2)
-    
-suite = allTests(TestPitchContours)
+        #save('pitchcountourbins.npy', bins)
+        #save('pitchcountoursaliences.npy', bins)
+        """
+        loadedPitchBins = load(join(filedir(), 'pitchsalience/pitchcountourbins.npy'))        
+        loadedPitchSaliences = load(join(filedir(), 'pitchsalience/pitchcountoursaliences.npy'))
+        expectedPitchBins = loadedPitchBins.tolist() 
+        expectedPitchSaliences = loadedPitchSaliences.tolist() 
+        self.assertAlmostEqualVectorFixedPrecision(bins, expectedPitchBins,2)
+        self.assertAlmostEqualVectorFixedPrecision(saliences, expectedPitchSaliences,2)
+        """
+suite = allTests(TestPitchContoursMelody)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

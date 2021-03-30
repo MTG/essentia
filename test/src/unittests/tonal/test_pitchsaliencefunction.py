@@ -57,18 +57,16 @@ class TestPitchSalienceFunction(TestCase):
         hopSize = 512
         filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
-        audio = audio[0:136000] # make sure an even size
         # Get the frequencies and magnitudes of the spectral peaks
-        freq_speaks, mag_speaks= SpectralPeaks()(audio)
+        freq_speaks, mag_speaks = SpectralPeaks()(audio)
         # Start with default params
         psf = PitchSalienceFunction()
         calculatedPitchSalience = psf(freq_speaks,mag_speaks)
 
         """
         This code stores reference values in a file for later loading.
-        """
         save('pitchsaliencefunction.npy', calculatedPitchSalience)             
-      
+        """
         # Reference samples are loaded as expected values
         loadedPitchSalience = load(join(filedir(), 'pitchsalience/pitchsaliencefunction.npy'))
         expectedPitchSalience = loadedPitchSalience.tolist() 

@@ -53,11 +53,11 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         calculatedPitchSalienceBins,calculatedPitchSalienceValues = PitchSalienceFunctionPeaks()(pitchSalience)
 
         """
-        This code stores reference values in a file for later loading.
-        """
+        This code stores reference values in a file for later loading.        
         save('pitchsaliencebins.npy', calculatedPitchSalienceBins)             
         save('pitchsaliencevalues.npy', calculatedPitchSalienceValues)                
-      
+        """
+
         # Reference samples are loaded as expected values
         loadedPitchSalienceBins = load(join(filedir(), 'pitchsalience/pitchsaliencebins.npy'))
         loadedPitchSalienceValues = load(join(filedir(), 'pitchsalience/pitchsaliencevalues.npy')) 
