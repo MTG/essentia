@@ -35,12 +35,10 @@ class TestPitchContoursMelody(TestCase):
         self.assertConfigureFails(PitchContoursMelody(), {'voicingTolerance': 1.5})
         
     def testZero(self):
-
         bins = [zeros(1024), zeros(1024)] 
         saliences = [zeros(1024), zeros(1024)]
         startTimes = zeros(1024)
         duration =  0.0
-
         pitch, pitchConfidence = PitchContoursMelody()( bins, saliences, startTimes, duration)
         self.assertEqualVector(pitch, [])
         self.assertEqualVector(pitchConfidence, [])
@@ -50,31 +48,26 @@ class TestPitchContoursMelody(TestCase):
     def testEmpty(self):
         emptyBins = [[],[]]
         emptySaliences = [[],[]]
-
         pitch, pitchConfidence = PitchContoursMelody()( emptyBins, emptySaliences, [], 0)
         self.assertEqualVector(pitch, [])
         self.assertEqualVector(pitchConfidence, [])
-
-
         #self.assertComputeFails(PitchContoursMelody()(emptyPeakBins, emptyPeakSaliences))
 
-    """
     def testOnes(self):
-        peakBins = [ones(4096),ones(4096)]
-        peakSaliences = [ones(4096),ones(4096)]
-        bins, saliences, startTimes, duration = PitchContoursMelody()(peakBins, peakSaliences)
+        bins = [ones(1024), ones(1024)] 
+        saliences = [ones(1024), ones(1024)]
+        startTimes = ones(1024)
+        duration =  0.0
+        pitch, pitchConfidence = PitchContoursMelody()( bins, saliences, startTimes, duration)
+        self.assertEqualVector(pitch, [])
+        self.assertEqualVector(pitchConfidence, [])
 
-        self.assertEqualVector(bins, [])
-        self.assertEqualVector(saliences, [])
-        self.assertEqualVector(startTimes, [])
-        self.assertAlmostEqual(duration, 0.0058, 3)
-        
     def testUnequalInputs(self):
         peakBins = [ones(4096), ones(4096)]
         peakSaliences = [ones(1024), ones(1024)]
         self.assertRaises(RuntimeError, lambda: PitchContoursMelody()(peakBins, peakSaliences))
 
-    """
+
     def testARealCase(self):
         frameSize = 1024
         sr = 44100
@@ -113,16 +106,19 @@ class TestPitchContoursMelody(TestCase):
         bins, saliences, startTimes, duration = pc(peakBins, peakSaliences)
         pitch, pitchConfidence = pcm(bins, saliences, startTimes, duration)   
         #This code stores reference values in a file for later loading.
-        #save('pitchcountourbins.npy', bins)
-        #save('pitchcountoursaliences.npy', bins)
+        #save('pitchcountoursmelodypitch.npy', pitch)
+        #save('pitchcountoursmelodyconfidence.npy', pitchConfidence)
+
+        #FIXME
         """
-        loadedPitchBins = load(join(filedir(), 'pitchsalience/pitchcountourbins.npy'))        
-        loadedPitchSaliences = load(join(filedir(), 'pitchsalience/pitchcountoursaliences.npy'))
-        expectedPitchBins = loadedPitchBins.tolist() 
-        expectedPitchSaliences = loadedPitchSaliences.tolist() 
-        self.assertAlmostEqualVectorFixedPrecision(bins, expectedPitchBins,2)
-        self.assertAlmostEqualVectorFixedPrecision(saliences, expectedPitchSaliences,2)
+        loadedPitch = load(join(filedir(), 'pitchcountoursmelody/pitchcountoursmelodypitch.npy'))        
+        loadedPitchConfidence = load(join(filedir(), 'pitchcountoursmelody/pitchcountoursmelodyconfidence.npy'))
+        expectedPitch = loadedPitch.tolist() 
+        expectedPitchConfidence = loadedPitchConfidence.tolist() 
+        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitch,2)
+        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence,2)
         """
+
 suite = allTests(TestPitchContoursMelody)
 
 if __name__ == '__main__':

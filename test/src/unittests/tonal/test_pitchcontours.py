@@ -33,13 +33,14 @@ class TestPitchContours(TestCase):
         self.assertConfigureFails(PitchContours(), {'sampleRate': -1})
         self.assertConfigureFails(PitchContours(), {'timeContinuity': -1})
         
-    def testZero(self):
-        bins, saliences, startTimes, duration = PitchContours()(  array(zeros([2,256])),   array(zeros([2,256])))      
+    def testZeros(self):
+        bins, saliences, startTimes, duration = PitchContours()(array(zeros([2,256])), array(zeros([2,256])))      
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
         self.assertEqualVector(startTimes, [])
         self.assertAlmostEqual(duration, 0.0058, 3)
-        
+
+    def testZerosUnequalInputs(self):        
         peakBins = [zeros(4096), zeros(4096)]
         peakSaliences = [zeros(1024), zeros(1024)]
         self.assertRaises(RuntimeError, lambda: PitchContours()(peakBins, peakSaliences))
@@ -48,13 +49,12 @@ class TestPitchContours(TestCase):
         peakBins = [ones(4096),ones(4096)]
         peakSaliences = [ones(4096),ones(4096)]
         bins, saliences, startTimes, duration = PitchContours()(peakBins, peakSaliences)
-
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
         self.assertEqualVector(startTimes, [])
         self.assertAlmostEqual(duration, 0.0058, 3)
         
-    def testUnequalInputs(self):
+    def testOnesUnequalInputs(self):
         peakBins = [ones(4096), ones(4096)]
         peakSaliences = [ones(1024), ones(1024)]
         self.assertRaises(RuntimeError, lambda: PitchContours()(peakBins, peakSaliences))
@@ -62,17 +62,20 @@ class TestPitchContours(TestCase):
     def testEmpty(self):
         emptyPeakBins = [[],[]]
         emptyPeakSaliences = [[],[]]
-        #self.assertComputeFails(PitchContours()(emptyPeakBins, emptyPeakSaliences))
-    
-    def testARealCase(self):
+        bins, saliences, startTimes, duration = PitchContours()(emptyPeakBins, emptyPeakSaliences)       
+        self.assertEqualVector(bins, [])
+        self.assertEqualVector(saliences, [])
+        self.assertEqualVector(startTimes, [])
+        self.assertAlmostEqual(duration, 0.0058, 3)
+            
+    def testRegression(self):
         frameSize = 1024
         sr = 44100
         hopSize = 512
         filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()        
 
-
-        # Declare the algorithmns to be called
+        # Declare the algorithmns to be called (6 in total)
         psf = PitchSalienceFunction()
         psfp = PitchSalienceFunctionPeaks()
         w = Windowing(type='hann', normalized=False)
@@ -80,19 +83,19 @@ class TestPitchContours(TestCase):
         spectralpeaks = SpectralPeaks()
         pc = PitchContours()
 
+        # Populate an array of frame-wise vectors of cent bin values representing each contour
         peakBins = []
+        # Populate a frame-wise array of values of salience function peaks
         peakSaliences = []        
         for frame in FrameGenerator(audio, frameSize=1024, hopSize=hopSize,
                                     startFromZero=True):
-
-            freq_speaks, mag_speaks = SpectralPeaks()(audio)
-            # Start with default params         
-            calculatedPitchSalience = psf(freq_speaks,mag_speaks)
             freq_peaks, mag_peaks = spectralpeaks(spectrum(w(frame)))
             len_freq_peaks = len(freq_peaks)
             len_mag_peaks = len(mag_peaks)
-
+            
+            # Skip the first vector elements that correspond to zero frequency
             freq_peaksp1 = freq_peaks[1:len_freq_peaks]
+            # Do the same for mag. vector to keep the lengths the same
             mag_peaksp1 = mag_peaks[1:len_mag_peaks]
             salienceFunction = psf(freq_peaksp1, mag_peaksp1)
             bins, values = psfp(salienceFunction)
@@ -101,16 +104,26 @@ class TestPitchContours(TestCase):
 
         bins, saliences, startTimes, duration = pc(peakBins, peakSaliences)
         #This code stores reference values in a file for later loading.
-        save('pitchcountourbins.npy', bins)
-        save('pitchcountoursaliences.npy', bins)
+        #FIXME.  Only the first columns of bins and saliences are saved here for later comparison.
+        #The reason is that 2D vectors dont reload easily from files, using the method shown below.
+        save('pitchcountourbins.npy', bins[0])
+        save('pitchcountoursaliences.npy', saliences[0])
 
-        #loadedPitchContours = load(join(filedir(), 'pitchsalience/pitchcountourbins.npy'))        
-        #loadedPitchSaliences = load(join(filedir(), 'pitchsalience/pitchcountoursaliences.npy'))
-        #expectedPitchContours = loadedPitchContours.tolist() 
-        #expectedPitchSaliences = loadedPitchSaliences.tolist() 
-        #self.assertAlmostEqualVectorFixedPrecision(calculatedPitchContour, expectedPitchContours,2)
-    
+        # Captured from pervious runs of pitch contours on "vignesh" audio
+        expectedStartTimes = [0.02321995, 0.5543764,  0.22349206]
+        expectedDuration = 0.7720634937286377
+        
+        loadedPitchContourBins = load(join(filedir(), 'pitchcontours/pitchcountourbins.npy'))        
+        loadedPitchContourSaliences = load(join(filedir(), 'pitchcontours/pitchcountoursaliences.npy'))
+        expectedPitchContourBins = loadedPitchContourBins.tolist() 
+        expectedPitchContourSaliences = loadedPitchContourSaliences.tolist() 
+        self.assertEqualVector(bins[0], expectedPitchContourBins)
+        self.assertEqualVector(saliences[0], expectedPitchContourSaliences)
+        self.assertAlmostEqualVectorFixedPrecision(startTimes, expectedStartTimes, 5)
+        self.assertEqual( duration, expectedDuration)
+
 suite = allTests(TestPitchContours)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
+
