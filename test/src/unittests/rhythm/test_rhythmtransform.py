@@ -41,10 +41,10 @@ class TestRhythmTransform(TestCase):
         # Simple regression test, comparing normal behaviour
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav'),sampleRate = 44100)()
         sampleRate   = 44100
-        frameSize    = 8192
-        hopSize      = 1024
-        rmsFrameSize = 256
-        rmsHopSize   = 32
+        melFrameSize    = 8192
+        melHopSize      = 1024
+        rtFrameSize = 256
+        rtHopSize   = 32
 
         w = Windowing(type='blackmanharris62')
         spectrum = Spectrum()
@@ -53,30 +53,32 @@ class TestRhythmTransform(TestCase):
         pool = Pool()
 
         # Maybe test this in streaming mode
-        for frame in FrameGenerator(audio=audio, frameSize=frameSize, hopSize=hopSize, startFromZero=True):
+        for frame in FrameGenerator(audio=audio, frameSize=melFrameSize, hopSize=melHopSize, startFromZero=True):
             bands = melbands(spectrum(w(frame)))
             pool.add('melbands', bands)
 
         #print("Mel band frames: %d" % len(pool['melbands']))
         #print("Rhythm transform frames: %d" % int(len(pool['melbands']) / 32))
 
-        rhythmtransform = RhythmTransform(frameSize=rmsFrameSize, hopSize=rmsHopSize)
+        rhythmtransform = RhythmTransform(frameSize=rtFrameSize, hopSize=rtHopSize)
         rt = rhythmtransform(pool['melbands'])
 
         # This code stores reference values in a file for later loading.
-        # np.save('rhythmtransform.npy', rt)
+        np.save('rhythmtransform.npy', rt)
         # Reference samples are loaded as expected values
         expected_rhythmtransform_npy = np.load(join(filedir(), 'rhythmtransform/rhythmtransform.npy'))
-        expected_rhythmtransform = expected_rhythmtransform_npy.tolist()
 
-        self.assertAlmostEqualVectorFixedPrecision(expected_rhythmtransform[0], rt[0] ,2)
-        self.assertAlmostEqualVectorFixedPrecision(expected_rhythmtransform[1], rt[1] ,2)
+        # Loop through all Melframes to regression test each one against the file reference values.
+        index = 0
+        while index<len(expected_rhythmtransform_npy):
+           self.assertAlmostEqualVectorFixedPrecision(expected_rhythmtransform_npy[index], rt[index], 8)
+           index+=1
 
     def testAllEmpty(self):
         # Testing for zero number of input mel-frames
         bandsAllEmpty = []
         self.assertRaises(EssentiaException, lambda: RhythmTransform()(bandsAllEmpty))
-     
+
     def testMultipleEmptySlots(self):
         # Testing for non-zero number of empty slots
         multipleEmptySlots = [[],[]]
@@ -86,32 +88,20 @@ class TestRhythmTransform(TestCase):
         nEmptySlots = [[],[0,0]]
         self.assertRaises(EssentiaException, lambda: RhythmTransform()(nEmptySlots))
 
-    def testZeros1Darray(self):
-        bands = [zeros(1024)]
-        rt = RhythmTransform()(bands)
-        rt_list = rt.tolist()
-        self.assertEqualVector(listZeros,rt_list)
-
-    def testZeros2Darray(self):
+    def ZeroMelFrames(self):
         # non-zero number of input frames, but each mel-frame vector is empty
-        bands = [zeros(1024),zeros(1024)]
+        bands = [zeros(1024), zeros(1024), zeros(1024), zeros(1024), zeros(1024), zeros(1024), zeros(1024), zeros(1024)]
         rt = RhythmTransform()(bands)
         rt_list = rt.tolist()
         self.assertEqualVector(listZeros,rt_list)
 
-    def testConstantInput1Darray(self):
-        bands = [ones(1024)]
+    def testConstantMelFrames(self):
+        bands = [ones(1024), ones(1024), ones(1024), ones(1024), ones(1024), ones(1024), ones(1024), ones(1024)]
         rt = RhythmTransform()(bands)
         rt_list = rt.tolist()
         self.assertEqualVector(listZeros,rt_list)
 
-    def testConstantInput2Darray(self):
-        bands = [ones(1024),ones(1024)]
-        rt = RhythmTransform()(bands)
-        rt_list = rt.tolist()
-        self.assertEqualVector(listZeros,rt_list)
-
-    def testNonUniformInput(self):
+    def testIrregularMelFrameSizes(self):
         bands = [ones(512), ones(1024)]
         self.assertRaises(EssentiaException, lambda: RhythmTransform()(bands))
 
