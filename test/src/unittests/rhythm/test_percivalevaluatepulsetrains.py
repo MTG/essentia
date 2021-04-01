@@ -62,39 +62,34 @@ class TestPercivalEvaluatePulseTrains(TestCase):
         # Loading Essentia functions required
         # See Essenatia tutorial example: 
         # https://github.com/MTG/essentia/blob/master/src/examples/tutorial/example_onsetdetection.py
-        od_hfc = OnsetDetection(method = 'hfc')
-        od_complex = OnsetDetection(method = 'complex')
+        odf = OnsetDetection(method = 'flux')
         w = Windowing(type = 'hann')
         fft = FFT() # this gives us a complex FFT
-        c2p = CartesianToPolar() # and this turns it into a pair (magnitude, phase)
+        spectrum= Spectrum()
         onsets = Onsets()
 
+        
         #Essentia beat tracking
         pool = Pool()
         for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512):
-            mag, phase, = c2p(fft(w(frame)))
-            pool.add('features.hfc', od_hfc(mag, phase))
-            pool.add('features.complex', od_complex(mag, phase))
-        
-        onsets_hfc = onsets(array([pool['features.hfc']]),[1])
-        onsets_hfc = onsets_hfc[onsets_hfc<durInSecs]                    
+            pool.add('features.flux', odf(spectrum(w(frame)), zeros(len(frame))))            
+
+        onsets_flux = onsets(array([pool['features.flux']]),[1])
+        onsets_flux = onsets_flux[onsets_flux<durInSecs]                    
         (posis, vals) = pdetect(audio)
 
         # oss (vector_real) - onset strength signal (or other novelty curve)
         # positions (vector_real) - peak positions of BPM candidates
-
-        lag = PercivalEvaluatePulseTrains()(onsets_hfc, posis)              
+        lag = PercivalEvaluatePulseTrains()(onsets_flux, posis) 
+            
         # Previously measured value for lag was 107761
         self.assertEqual(107761.0, lag)        
-
-    """
-    reset test commented out for now. 
-    TBD: what param do we send to reset(...)?
+  
+    # FIXME: Failed Test Case. what param do we send to reset(...)?
     def testResetMethod(self):
         self.testRegression()
         PercivalEvaluatePulseTrains.reset()
         self.testRegression()
-    """
 
 suite = allTests(TestPercivalEvaluatePulseTrains)
 
