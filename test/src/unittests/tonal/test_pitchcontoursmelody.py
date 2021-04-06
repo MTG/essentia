@@ -43,8 +43,6 @@ class TestPitchContoursMelody(TestCase):
         self.assertEqualVector(pitch, [])
         self.assertEqualVector(pitchConfidence, [])
 
-
-
     def testEmpty(self):
         emptyBins = [[],[]]
         emptySaliences = [[],[]]
@@ -65,16 +63,18 @@ class TestPitchContoursMelody(TestCase):
     def testUnequalInputs(self):
         peakBins = [ones(4096), ones(4096)]
         peakSaliences = [ones(1024), ones(1024)]
-        self.assertRaises(RuntimeError, lambda: PitchContoursMelody()(peakBins, peakSaliences))
-
-
+        startTimes = ones(1024)
+        duration =  0.0        
+        pitch, pitchConfidence = PitchContoursMelody()( peakBins, peakSaliences, startTimes, duration)
+        self.assertEqualVector(pitch, [])
+        self.assertEqualVector(pitchConfidence, [])
+        
     def testARealCase(self):
         frameSize = 1024
         sr = 44100
         hopSize = 512
         filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()        
-
 
         # Declare the algorithmns to be called
         psf = PitchSalienceFunction()
@@ -106,18 +106,23 @@ class TestPitchContoursMelody(TestCase):
         bins, saliences, startTimes, duration = pc(peakBins, peakSaliences)
         pitch, pitchConfidence = pcm(bins, saliences, startTimes, duration)   
         #This code stores reference values in a file for later loading.
-        #save('pitchcountoursmelodypitch.npy', pitch)
-        #save('pitchcountoursmelodyconfidence.npy', pitchConfidence)
-
-        #FIXME
-        """
-        loadedPitch = load(join(filedir(), 'pitchcountoursmelody/pitchcountoursmelodypitch.npy'))        
-        loadedPitchConfidence = load(join(filedir(), 'pitchcountoursmelody/pitchcountoursmelodyconfidence.npy'))
+        save('pitchcontoursmelodypitch.npy', pitch)
+        save('pitchcontoursmelodyconfidence.npy', pitchConfidence)
+       
+        loadedPitch = load(join(filedir(), 'pitchcontoursmelody/pitchcontoursmelodypitch.npy'))        
+        loadedPitchConfidence = load(join(filedir(), 'pitchcontoursmelody/pitchcontoursmelodyconfidence.npy'))
         expectedPitch = loadedPitch.tolist() 
         expectedPitchConfidence = loadedPitchConfidence.tolist() 
         self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitch,2)
         self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence,2)
-        """
+        
+    def testResetMethod(self):
+        pitchcontoursmelody = PitchContoursMelody()
+
+        self.testARealCase()
+        pitchcontoursmelody.reset()
+        self.testARealCase()
+
 
 suite = allTests(TestPitchContoursMelody)
 

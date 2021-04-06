@@ -72,6 +72,15 @@ class TestPitchSalienceFunction(TestCase):
         expectedPitchSalience = loadedPitchSalience.tolist() 
         self.assertAlmostEqualVectorFixedPrecision(calculatedPitchSalience, expectedPitchSalience,2)
 
+    def testResetMethod(self):
+        pitchsaliencefunction = PitchSalienceFunction()
+
+        self.testRegression()
+        pitchsaliencefunction.reset()
+        self.testRegression()
+
+
+
 suite = allTests(TestPitchSalienceFunction)
 
 if __name__ == '__main__':

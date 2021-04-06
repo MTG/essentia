@@ -55,17 +55,14 @@ class TestPitchMelodia(TestCase):
     def testOnes(self):
         signal = ones(256)
         pitch, confidence = PitchMelodia()(signal)
-        print(pitch)
-        print(confidence)
         self.assertAlmostEqualVector(pitch, [0., 0., 0.])
         self.assertAlmostEqualVector(confidence, [0., 0., 0.])
 
     def testEmpty(self):
         pitch, confidence = PitchMelodia()([])
-        print(pitch)
-        print(confidence)
-        #self.assertComputeFails(PitchMelodia()(emptyPeakBins, emptyPeakSaliences))
-    
+        self.assertEqualVector(pitch, [])
+        self.assertEqualVector(confidence, [])
+
     def testARealCase(self):
         frameSize = 1024
         sr = 44100
@@ -87,6 +84,12 @@ class TestPitchMelodia(TestCase):
         expectedPitchConfidence = loadedPitchConfidence.tolist() 
         self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 2)
 
+    def testResetMethod(self):
+        pitchmelodia = PitchMelodia()
+
+        self.testARealCase()
+        pitchmelodia.reset()
+        self.testARealCase()
 
 suite = allTests(TestPitchMelodia)
 

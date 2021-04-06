@@ -106,21 +106,28 @@ class TestPitchContours(TestCase):
         #This code stores reference values in a file for later loading.
         #FIXME.  Only the first columns of bins and saliences are saved here for later comparison.
         #The reason is that 2D vectors dont reload easily from files, using the method shown below.
-        save('pitchcountourbins.npy', bins[0])
-        save('pitchcountoursaliences.npy', saliences[0])
+        save('pitchcontourbins.npy', bins[0])
+        save('pitchcontoursaliences.npy', saliences[0])
 
         # Captured from pervious runs of pitch contours on "vignesh" audio
         expectedStartTimes = [0.02321995, 0.5543764,  0.22349206]
         expectedDuration = 0.7720634937286377
         
-        loadedPitchContourBins = load(join(filedir(), 'pitchcontours/pitchcountourbins.npy'))        
-        loadedPitchContourSaliences = load(join(filedir(), 'pitchcontours/pitchcountoursaliences.npy'))
+        loadedPitchContourBins = load(join(filedir(), 'pitchcontours/pitchcontourbins.npy'))        
+        loadedPitchContourSaliences = load(join(filedir(), 'pitchcontours/pitchcontoursaliences.npy'))
         expectedPitchContourBins = loadedPitchContourBins.tolist() 
         expectedPitchContourSaliences = loadedPitchContourSaliences.tolist() 
         self.assertEqualVector(bins[0], expectedPitchContourBins)
         self.assertEqualVector(saliences[0], expectedPitchContourSaliences)
         self.assertAlmostEqualVectorFixedPrecision(startTimes, expectedStartTimes, 5)
         self.assertEqual( duration, expectedDuration)
+
+    def testResetMethod(self):
+        pitchcontours = PitchContours()
+
+        self.testRegression()
+        pitchcontours.reset()
+        self.testRegression()
 
 suite = allTests(TestPitchContours)
 
