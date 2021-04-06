@@ -18,10 +18,7 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-
 from essentia_test import *
-from essentia.streaming import MonoLoader as sMonoLoader
-from essentia.streaming import RhythmExtractor as sRhythmExtractor
 import numpy as np
 
 listZeros=[[0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,0.,
@@ -39,23 +36,20 @@ class TestRhythmTransform(TestCase):
 
     def testRegression(self):
         # Simple regression test, comparing normal behaviour
-        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav'),sampleRate = 44100)()
         sampleRate   = 44100
-        melFrameSize    = 8192
-        melHopSize      = 1024
-        rtFrameSize = 256
-        rtHopSize   = 32
+        melFrameSize = 8192
+        melHopSize   = 1024
+        rtFrameSize  = 256
+        rtHopSize    = 32
+        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav'),sampleRate=sampleRate)()
 
         w = Windowing(type='blackmanharris62')
         spectrum = Spectrum()
         melbands = MelBands(sampleRate=sampleRate, numberBands=40, lowFrequencyBound=0, highFrequencyBound=sampleRate/2)
 
         pool = Pool()
-
-        # Maybe test this in streaming mode
         for frame in FrameGenerator(audio=audio, frameSize=melFrameSize, hopSize=melHopSize, startFromZero=True):
-            bands = melbands(spectrum(w(frame)))
-            pool.add('melbands', bands)
+            pool.add('melbands', melbands(spectrum(w(frame))))
 
         #print("Mel band frames: %d" % len(pool['melbands']))
         #print("Rhythm transform frames: %d" % int(len(pool['melbands']) / 32))
@@ -64,7 +58,8 @@ class TestRhythmTransform(TestCase):
         rt = rhythmtransform(pool['melbands'])
 
         # This code stores reference values in a file for later loading.
-        np.save('rhythmtransform.npy', rt)
+        # np.save('rhythmtransform.npy', rt)
+
         # Reference samples are loaded as expected values
         expected_rhythmtransform_npy = np.load(join(filedir(), 'rhythmtransform/rhythmtransform.npy'))
 
@@ -105,7 +100,9 @@ class TestRhythmTransform(TestCase):
         bands = [ones(512), ones(1024)]
         self.assertRaises(EssentiaException, lambda: RhythmTransform()(bands))
 
+
 suite = allTests(TestRhythmTransform)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
+
