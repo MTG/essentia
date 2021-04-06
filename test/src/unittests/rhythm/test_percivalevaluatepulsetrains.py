@@ -20,7 +20,7 @@
 
 from essentia_test import *
 from essentia import Pool, array
-from essentia.standard import MonoLoader, PercivalEvaluatePulseTrains, HarmonicBpm, FrequencyBands, NoveltyCurve 
+from essentia.standard import MonoLoader, PercivalEvaluatePulseTrains
 import numpy as np
 
 class TestPercivalEvaluatePulseTrains(TestCase):
@@ -41,9 +41,13 @@ class TestPercivalEvaluatePulseTrains(TestCase):
         lag = PercivalEvaluatePulseTrains()(onesOSS, onespositions)              
         self.assertEqual(1.0, lag)
     
+<<<<<<< HEAD
+    # Perform regression tests for percivalevaluatepulsetrains
+=======
     # FIXME- A better comparison model is required for this regression test.
     # onsets and position inputs calculated using essentia functions.
     # Alternative sources should be used.
+>>>>>>> 9f36d719204a5bda5c8c656c6a8c23968e501335
     # For original paper refer to 
     # https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6879451
     # https://github.com/marsyas/marsyas
@@ -55,25 +59,23 @@ class TestPercivalEvaluatePulseTrains(TestCase):
         if not percivalevaluatepulsetrains:
             percivalevaluatepulsetrains = PercivalEvaluatePulseTrains()
 
-        # Calculates the positions and Peaks
+        # Set up configuration for Peak Detection
         config = { 'range': inputSize -1, 'maxPosition': inputSize, 'minPosition': 0, 'orderBy': 'amplitude' }
         pdetect = PeakDetection(**config)
 
+        # Load and truncate audio
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
-        audio = audio[:durInSecs * fs]#let's use only the first two seconds of the signals
+        audio = audio[:durInSecs * fs]#let's use only the first "durInSecs" seconds of the signals
         audio = audio / np.max(np.abs(audio))
 
-        # Loading Essentia functions required
-        # See Essenatia tutorial example: 
-        # https://github.com/MTG/essentia/blob/master/src/examples/tutorial/example_onsetdetection.py
+        # Define methods for use in framewise calculations
         odf = OnsetDetection(method = 'flux')
         w = Windowing(type = 'hann')
         fft = FFT() # this gives us a complex FFT
         spectrum= Spectrum()
         onsets = Onsets()
 
-        
-        #Essentia beat tracking
+        # Perform framewise calculation of onset detection function
         pool = Pool()
         for frame in FrameGenerator(audio, frameSize = 1024, hopSize = 512):
             pool.add('features.flux', odf(spectrum(w(frame)), zeros(len(frame))))            
@@ -89,10 +91,9 @@ class TestPercivalEvaluatePulseTrains(TestCase):
         # Previously measured value for lag was 107761
         self.assertEqual(107761.0, lag)        
   
-    # FIXME: Failed Test Case. what param do we send to reset(...)?
     def testResetMethod(self):
         percivalevaluatepulsetrains = PercivalEvaluatePulseTrains()
-        
+
         self.testRegression()
         percivalevaluatepulsetrains.reset()
         self.testRegression()
