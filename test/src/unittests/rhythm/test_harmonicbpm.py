@@ -29,7 +29,7 @@ class TestHarmonicBpm(TestCase):
         self.assertEqualVector(harmonicBpms, [])
 
     # Check that illegal parameters in configuration raise asserts
-    def testInvalidParam(self): 
+    def testInvalidParam(self):
         # Test that we must give valid frequency ranges, thresholds and tolerance.
         self.assertConfigureFails(HarmonicBpm(), {'bpm': -1})
         self.assertConfigureFails(HarmonicBpm(), {'bpm': 0})
@@ -76,9 +76,8 @@ class TestHarmonicBpm(TestCase):
         expectedBpm = [120, 240]
         self.assertEqualVector(harmonicBpms, expectedBpm)
 
-        #
         # Threshold Checks
-        #       
+
         # Threshold is the value below which greatest common divisors of BPM are discarded
         # Check for more outputs included at lower threshold.
         harmonicBpms = HarmonicBpm(bpm=100, threshold=1, tolerance=5)(testBpms)
@@ -90,9 +89,9 @@ class TestHarmonicBpm(TestCase):
         harmonicBpms = HarmonicBpm(bpm=100, threshold=25, tolerance=5)(testBpms)
         self.assertEqualVector(harmonicBpms, [])
 
-        #
+
         # Tolerance Checks
-        #
+
         # Tolerance parameter:consideration of whether two BPM values are equal or "harmonically" equal
         # Check for no outputs at reduced tolerance value
         harmonicBpms = HarmonicBpm(bpm=100, threshold=20, tolerance=4)(testBpms)
@@ -109,7 +108,7 @@ class TestHarmonicBpm(TestCase):
 
         harmonicBpms = HarmonicBpm(bpm=100, threshold=60, tolerance=5)(testBpms)
         self.assertEqualVector(harmonicBpms, [])
-  
+
     # Stretch the BPM range to cover 3 octaves within audible range.
     def testRegressionThreeOctaveRange(self):
         testBpms = [100, 101, 102, 103, 104, 200, 202, 204, 206, 208, 300, 302, 304, 306, 308]
@@ -121,21 +120,21 @@ class TestHarmonicBpm(TestCase):
     def testRegressionMultipleValues(self):
         testBpms = [120, 120, 120, 120, 120, 120, 120,
                              240, 240, 240, 240, 240, 240, 240,
-                             180, 180, 180, 180, 180, 180, 180,  
+                             180, 180, 180, 180, 180, 180, 180,
                              90, 90, 90, 90, 90, 90, 90]
-        
-        # Check with default threshold (20) and BPM = 120
+
+        # Check with default threshold (20) and BPM = 120.
         expectedHarmonicBpms = [90, 120, 180, 240]
         harmonicBpms = HarmonicBpm(bpm=120, threshold=20)(testBpms)
         self.assertEqualVector(harmonicBpms, expectedHarmonicBpms)
 
-        # Check with default threshold (20) and BPM = 90
+        # Check with default threshold (20) and BPM = 90.
         expectedHarmonicBpms = [90, 120, 180, 240]
         harmonicBpms = HarmonicBpm(bpm=90, threshold=20)(testBpms)
         self.assertEqualVector(harmonicBpms, expectedHarmonicBpms)
 
         # Run a test with a higher threshold that will lead to some outputs being discarded.
-        # 
+
         # Check with threshold=30 and BPM = 120
         # that all multiples of 30 are included.
         expectedHarmonicBpms = [90, 120, 180, 240]
@@ -148,36 +147,41 @@ class TestHarmonicBpm(TestCase):
         harmonicBpms = HarmonicBpm(bpm=90, threshold=30)(testBpms)
         self.assertEqualVector(harmonicBpms, expectedHarmonicBpms)
 
-    # Check a range of tolerance values with wide range of BPMs
+    # Check a range of tolerance values with wide range of BPMs.
     def testRegressionDifferentToleranceLowBpms(self):
         testBpms = [10, 20, 60, 120, 180]
         expectedHarmonicBpms = [20, 60, 120, 180]
-        #  We want to ensure nothing bad happens when tolerance = 0.
+        # We want to ensure nothing bad happens when tolerance = 0.
         harmonicBpms = HarmonicBpm(bpm=60, tolerance=0, threshold=20)(testBpms)
         self.assertEqualVector(harmonicBpms, expectedHarmonicBpms)
-        #  Check range tolerance values of multiples of 5.
+        # Check range tolerance values of multiples of 5.
         harmonicBpms = HarmonicBpm(bpm=60, tolerance=5, threshold=20)(testBpms)
         self.assertEqualVector(harmonicBpms, expectedHarmonicBpms)
         harmonicBpms = HarmonicBpm(bpm=60, tolerance=10, threshold=20)(testBpms)
         self.assertEqualVector(harmonicBpms, expectedHarmonicBpms)
-        harmonicBpms = HarmonicBpm(bpm=60, tolerance=20, threshold=20)(testBpms) 
+        harmonicBpms = HarmonicBpm(bpm=60, tolerance=20, threshold=20)(testBpms)
         self.assertEqualVector(harmonicBpms, expectedHarmonicBpms)
 
         # Additional tests to cover lower thresholds.
         # expectedHarmonicBpms should now match the input testBpms
         expectedHarmonicBpms = [10, 20, 60, 120, 180]
-        harmonicBpms = HarmonicBpm(bpm=60, tolerance=20, threshold=10)(testBpms) 
+        harmonicBpms = HarmonicBpm(bpm=60, tolerance=20, threshold=10)(testBpms)
         self.assertEqualVector(harmonicBpms, expectedHarmonicBpms)
-        harmonicBpms = HarmonicBpm(bpm=60, tolerance=20, threshold=1)(testBpms) 
+        harmonicBpms = HarmonicBpm(bpm=60, tolerance=20, threshold=1)(testBpms)
         self.assertEqualVector(harmonicBpms, expectedHarmonicBpms)
 
-    def testZeros(self):
-        # Ensure that an exception is thrown if any bpm element contains a zero or less
-        testBpms = [0, 100]
+    def testInvalidBpms(self):
+        # Ensure that an exception is thrown if any bpm element contains a value below 1
+
+        # BPM=1 is the lowest margin allowed.
+        self.assertEqualVector(HarmonicBpm(bpm=1, threshold=1)([1]), [1])
+
+        # Inputs with invalid BPMs.
+        testBpms = [0, 1, 100]
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
         testBpms = [0, -1]
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
-        testBpms = [100, 100, 100, 100, 0]
+        testBpms = [100, 100, 100, 100, 0.9999]
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
         testBpms = zeros(100)
         self.assertRaises(EssentiaException, lambda: HarmonicBpm()(testBpms))
@@ -186,3 +190,4 @@ suite = allTests(TestHarmonicBpm)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
+
