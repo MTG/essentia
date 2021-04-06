@@ -44,10 +44,10 @@ void HarmonicBpm::configure() {
 
 
 vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
-  // A zero element in the bpms vector will cause program to hang.
-  // Ensure this value doesnt exist. Check all are 1 bpm or above.
-  if (!(std::all_of(bpms.begin(), bpms.end(), [](int i){ return i >= 1;}))){
-     throw(EssentiaException("HarmonicBpm: illegal bpm value found"));
+  // Accept only BPM values >= 1 for consistency with the `bpm` parameter.
+  for(int i=0; i<int(bpms.size()); i++) {
+    if (bpms[i] < 1)
+      throw(EssentiaException("HarmonicBpm: bpm values below 1 are not allowed"));
   }
 
   vector<Real> harmonicBpms, harmonicRatios;
@@ -60,7 +60,6 @@ vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
   for (int i=0; i<int(bpms.size()); i++) {
      Real gcd = greatestCommonDivisor(_bpm, bpms[i], _tolerance);
      if (gcd >= _threshold) {
-       //cout << gcd << "," <<bpms[i] << endl;
        harmonicBpms.push_back(bpms[i]);
        if (gcd < mingcd) mingcd = gcd;
      }
