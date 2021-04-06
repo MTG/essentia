@@ -131,16 +131,14 @@ class TestPercivalBpmEstimator(TestCase):
         onesAudio = ones(beatPeriod)        
         estimate = PercivalBpmEstimator()(onesAudio)            
         self.assertNotEqual(0, estimate)
-    """
-    FIXME:
-    reset test fails
-    descriptor 'reset' of 'essentia.standard.Algorithm' object needs an argument
-    """
-    def testResetMethod(self):
-        self.testRegression()
-        PercivalBpmEstimator.reset()
-        self.testRegression()        
 
+    def testResetMethod(self):
+        percivalbpmestimator = PercivalBpmEstimator(frameSize =1024,frameSizeOSS=2048,
+            hopSize=128,hopSizeOSS=128,maxBPM=210,minBPM=50,sampleRate=44100)
+
+        self.testRegression()
+        percivalbpmestimator.reset()
+        self.testRegression()
 
 suite = allTests(TestPercivalBpmEstimator)
 

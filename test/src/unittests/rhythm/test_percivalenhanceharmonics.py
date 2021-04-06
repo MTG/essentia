@@ -68,14 +68,12 @@ class TestPercivalEnhanceHarmonics(TestCase):
         expectedConstantHarmonicsList = expectedConstantHarmonics.tolist()
         self.assertEqualVector(constantHarmonics, expectedConstantHarmonicsList)
 
-    """
-    FIXME:
-    reset test fails
-    descriptor 'reset' of 'essentia.standard.Algorithm' object needs an argument
-    """
+
     def testResetMethod(self):
+        percivalenhanceharmonics = PercivalEnhanceHarmonics()
+
         self.testRegression()
-        PercivalEnhanceHarmonics.reset()
+        percivalenhanceharmonics.reset()
         self.testRegression()
 
 

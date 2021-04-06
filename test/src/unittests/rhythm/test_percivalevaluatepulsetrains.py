@@ -47,10 +47,14 @@ class TestPercivalEvaluatePulseTrains(TestCase):
     # For original paper refer to 
     # https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6879451
     # https://github.com/marsyas/marsyas
-    def testRegression(self):
+    def testRegression(self, percivalevaluatepulsetrains=None):
         fs = 44100
-        durInSecs = 5
+        durInSecs = 3
         inputSize=44100*durInSecs # Take 3 secs of samples
+
+        if not percivalevaluatepulsetrains:
+            percivalevaluatepulsetrains = PercivalEvaluatePulseTrains()
+
         # Calculates the positions and Peaks
         config = { 'range': inputSize -1, 'maxPosition': inputSize, 'minPosition': 0, 'orderBy': 'amplitude' }
         pdetect = PeakDetection(**config)
@@ -87,8 +91,10 @@ class TestPercivalEvaluatePulseTrains(TestCase):
   
     # FIXME: Failed Test Case. what param do we send to reset(...)?
     def testResetMethod(self):
+        percivalevaluatepulsetrains = PercivalEvaluatePulseTrains()
+        
         self.testRegression()
-        PercivalEvaluatePulseTrains.reset()
+        percivalevaluatepulsetrains.reset()
         self.testRegression()
 
 suite = allTests(TestPercivalEvaluatePulseTrains)
