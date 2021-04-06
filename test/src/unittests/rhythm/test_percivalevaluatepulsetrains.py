@@ -42,7 +42,7 @@ class TestPercivalEvaluatePulseTrains(TestCase):
         self.assertEqual(1.0, lag)
     
     # FIXME- A better comparison model is required for this regression test.
-    # onsets and position inuts calculated using essentia functions.
+    # onsets and position inputs calculated using essentia functions.
     # Alternative sources should be used.
     # For original paper refer to 
     # https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=6879451
