@@ -40,6 +40,7 @@ class TestPercivalEvaluatePulseTrains(TestCase):
         lag = PercivalEvaluatePulseTrains()(onesOSS, onespositions)              
         self.assertEqual(1.0, lag)
     
+
     def testRegression(self):
         # Calculates the positions and Peaks
         
@@ -49,32 +50,38 @@ class TestPercivalEvaluatePulseTrains(TestCase):
 
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
 
-        # Calculates the positions and Peaks
+        print("# Calculates the positions and Peaks")
         config = { 'range': inputSize -1, 'maxPosition': inputSize, 'minPosition': 0, 'orderBy': 'amplitude' }
         pdetect = PeakDetection(**config)
 
-        # Calculates the OSS
+        print("# Calculates the OSS")
         fc = FrameCutter(frameSize=inputSize, hopSize=inputSize)
         windower = Windowing(type='blackmanharris62')
         specAlg = Spectrum(size=4096)
         fluxAlg = Flux()
-        # Calculate the average flux over all frames of audio
+        print("# Calculate the average flux over all frames of audio")
         frame = fc(audio)
         windowedSignal = windower(frame)
         outputSpectrum = specAlg(windowedSignal)
         fluxArray = []
         count = 0
         while len(frame) != 0:
+            print(".")
             spectrum = specAlg(windower(frame))
             fluxArray.append(fluxAlg(spectrum))
             count += 1
             frame = fc(audio)
+        print("While loop over")
         filteredSignal = LowPass(cutoffFrequency=8000)(fluxArray)
         fc = FrameCutter(frameSize = len(audio),  hopSize = len(audio))
         cutsignal = fc(filteredSignal)
         aSignal =  AutoCorrelation()(cutsignal)
+        print("While loop over 2")        
         pHarm= PercivalEnhanceHarmonics()(aSignal)
         oss, posis= pdetect(pHarm)
+        print("While loop over 3")        
+        print(len(oss))
+        print(len(posis))
         lag = PercivalEvaluatePulseTrains()(cutsignal,posis)
 
 suite = allTests(TestPercivalEvaluatePulseTrains)

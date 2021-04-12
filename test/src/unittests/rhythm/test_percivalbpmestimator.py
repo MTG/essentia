@@ -124,7 +124,8 @@ class TestPercivalBpmEstimator(TestCase):
     def testZero(self):
         beatPeriod = 21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
         zeroAudio = zeros(beatPeriod)
-        self.assertRaises(RuntimeError, lambda: PercivalBpmEstimator()(zeroAudio))
+        estimate = PercivalBpmEstimator()(zeroAudio)                
+        self.assertEqual(estimate, 0.0) 
 
     def testConstantInput(self):
         beatPeriod = 21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
