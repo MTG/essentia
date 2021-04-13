@@ -31,7 +31,6 @@ class TestPercivalEvaluatePulseTrains(TestCase):
         zeroOSS = zeros(1024)
         zeropositions = zeros(1024)
         lag = PercivalEvaluatePulseTrains()(zeroOSS, zeropositions)
-        print(lag)
         self.assertEqual(0.0, lag)
 
     def testConstantInput(self):
@@ -50,38 +49,32 @@ class TestPercivalEvaluatePulseTrains(TestCase):
 
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
 
-        print("# Calculates the positions and Peaks")
+        # Calculates the positions and Peaks")
         config = { 'range': inputSize -1, 'maxPosition': inputSize, 'minPosition': 0, 'orderBy': 'amplitude' }
         pdetect = PeakDetection(**config)
 
-        print("# Calculates the OSS")
+        # Calculates the OSS")
         fc = FrameCutter(frameSize=inputSize, hopSize=inputSize)
         windower = Windowing(type='blackmanharris62')
         specAlg = Spectrum(size=4096)
         fluxAlg = Flux()
-        print("# Calculate the average flux over all frames of audio")
+        # Calculate the average flux over all frames of audio")
         frame = fc(audio)
         windowedSignal = windower(frame)
         outputSpectrum = specAlg(windowedSignal)
         fluxArray = []
         count = 0
         while len(frame) != 0:
-            print(".")
             spectrum = specAlg(windower(frame))
             fluxArray.append(fluxAlg(spectrum))
             count += 1
             frame = fc(audio)
-        print("While loop over")
         filteredSignal = LowPass(cutoffFrequency=8000)(fluxArray)
         fc = FrameCutter(frameSize = len(audio),  hopSize = len(audio))
         cutsignal = fc(filteredSignal)
-        aSignal =  AutoCorrelation()(cutsignal)
-        print("While loop over 2")        
+        aSignal =  AutoCorrelation()(cutsignal)      
         pHarm= PercivalEnhanceHarmonics()(aSignal)
-        oss, posis= pdetect(pHarm)
-        print("While loop over 3")        
-        print(len(oss))
-        print(len(posis))
+        oss, posis= pdetect(pHarm)      
         lag = PercivalEvaluatePulseTrains()(cutsignal,posis)
 
 suite = allTests(TestPercivalEvaluatePulseTrains)

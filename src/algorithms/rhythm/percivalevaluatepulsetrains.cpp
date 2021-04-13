@@ -29,8 +29,12 @@ namespace standard {
 const char* PercivalEvaluatePulseTrains::name = "PercivalEvaluatePulseTrains";
 const char* PercivalEvaluatePulseTrains::category = "Rhythm";
 const char* PercivalEvaluatePulseTrains::description = DOC("This algorithm implements the 'Evaluate Pulse Trains' step as described in [1]."
-"Given an input onset strength signal (OSS) and a number of candidate tempo lag positions, the OSS is correlated with ideal expected pulse "
-"trains (for each candidate tempo lag) shifted in time by different amounts. The candidate tempo lag which generates the pulse train "
+"Given an input onset strength signal (OSS) and a number of candidate BPM peak positions, the OSS is correlated with ideal expected pulse "
+"trains (for each candidate tempo lag) shifted in time by different amounts. "
+"For example, you could have as input 1,  2000 samples of a particular OSS frame. "
+"As input two you could have  pulse train with different tempo lags from 0 to 178 samples."
+"A cross-correlation between these inputs is performed for the range of temp lags" 
+"The candidate tempo lag which generates the pulse train "
 "that better correlates with the OSS is returned as the preferred tempo candidate.\n"
 "For more details check the referenced paper."
 "\n"
@@ -95,8 +99,12 @@ void PercivalEvaluatePulseTrains::compute() {
   		int lag = (int) round(candidate);
   		Real magScore;
   		Real varScore;
+      // passing lag = 0 to calculatePulseTrains will result in crash
+      if (lag == 0 ) {
+        continue;
+      }
   		calculatePulseTrains(oss, lag, magScore, varScore);
-		tempoScores[i] = magScore;
+		  tempoScores[i] = magScore;
   		onsetScores[i] = varScore;
   	}
   }
