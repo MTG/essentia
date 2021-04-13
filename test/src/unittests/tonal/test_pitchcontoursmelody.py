@@ -116,13 +116,6 @@ class TestPitchContoursMelody(TestCase):
         self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitch,2)
         self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence,2)
         
-    def testResetMethod(self):
-        pitchcontoursmelody = PitchContoursMelody()
-
-        self.testARealCase()
-        pitchcontoursmelody.reset()
-        self.testARealCase()
-
 
 suite = allTests(TestPitchContoursMelody)
 

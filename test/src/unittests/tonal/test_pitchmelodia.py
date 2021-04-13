@@ -25,10 +25,10 @@ from essentia_test import *
 class TestPitchMelodia(TestCase):
 
     def testZero(self):
-        signal = zeros(256)
+        signal = zeros(1024)
         pitch, confidence = PitchMelodia()(signal)
-        self.assertAlmostEqualVector(pitch, [0., 0., 0.])
-        self.assertAlmostEqualVector(confidence, [0., 0., 0.])
+        self.assertAlmostEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
+        self.assertAlmostEqualVector(confidence, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
 
     def testInvalidParam(self):
         self.assertConfigureFails(PitchMelodia(), {'binResolution': -1})
@@ -53,10 +53,10 @@ class TestPitchMelodia(TestCase):
         self.assertConfigureFails(PitchMelodia(), {'timeContinuity': -1})
 
     def testOnes(self):
-        signal = ones(256)
+        signal = ones(1024)
         pitch, confidence = PitchMelodia()(signal)
-        self.assertAlmostEqualVector(pitch, [0., 0., 0.])
-        self.assertAlmostEqualVector(confidence, [0., 0., 0.])
+        self.assertAlmostEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
+        self.assertAlmostEqualVector(confidence, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
 
     def testEmpty(self):
         pitch, confidence = PitchMelodia()([])
@@ -83,13 +83,6 @@ class TestPitchMelodia(TestCase):
         loadedPitchConfidence = load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence.npy'))
         expectedPitchConfidence = loadedPitchConfidence.tolist() 
         self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 2)
-
-    def testResetMethod(self):
-        pitchmelodia = PitchMelodia()
-
-        self.testARealCase()
-        pitchmelodia.reset()
-        self.testARealCase()
 
 suite = allTests(TestPitchMelodia)
 
