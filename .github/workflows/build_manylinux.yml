@@ -1,0 +1,24 @@
+name: Manylinux Python wheels
+on: [push]
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: mtgupf/essentia-builds:manylinux1_x86_64
+    steps:
+      - uses: actions/checkout@v2 
+      - uses: docker://mtgupf/essentia-builds:manylinux1_x86_64
+        with:
+          entrypoint: ls
+            args: /github/workspace
+
