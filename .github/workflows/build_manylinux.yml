@@ -20,5 +20,5 @@ jobs:
       - uses: docker://mtgupf/essentia-builds:manylinux1_x86_64
         with:
           entrypoint: ls
-            args: /github/workspace
+          args: /github/workspace
 
