@@ -1,9 +1,9 @@
 name: Manylinux Python wheels
 on:
   push:
-    branches: [ master ]
+    branches: [ github_actions ]
   pull_request:
-    branches: [ master ]
+    branches: [ github_actions ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
