@@ -15,6 +15,5 @@ jobs:
       - uses: actions/checkout@v2 
       - uses: docker://mtgupf/essentia-builds:manylinux1_x86_64
         with:
-          entrypoint: ls
-          args: /github/workspace
+          entrypoint: /github/workspace/.github/workflows/build_manylinux_entrypoint.sh
 
