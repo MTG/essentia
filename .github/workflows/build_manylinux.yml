@@ -11,8 +11,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container:
-      image: mtgupf/essentia-builds:manylinux1_x86_64
     steps:
       - uses: actions/checkout@v2 
       - uses: docker://mtgupf/essentia-builds:manylinux1_x86_64
