@@ -78,11 +78,11 @@ class TestPitchMelodia(TestCase):
 
         loadedPitchMelodiaPitch = load(join(filedir(), 'pitchmelodia/pitchmelodiapitch.npy'))
         expectedPitchMelodiaPitch = loadedPitchMelodiaPitch.tolist() 
-        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitchMelodiaPitch, 2)
+        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitchMelodiaPitch, 8)
 
         loadedPitchConfidence = load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence.npy'))
         expectedPitchConfidence = loadedPitchConfidence.tolist() 
-        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 2)
+        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 8)
 
 suite = allTests(TestPitchMelodia)
 

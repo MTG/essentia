@@ -65,16 +65,8 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         expectedPitchSalienceBins = loadedPitchSalienceBins.tolist() 
         expectedPitchSalienceValues = loadedPitchSalienceValues.tolist() 
 
-        self.assertAlmostEqualVectorFixedPrecision(calculatedPitchSalienceBins, expectedPitchSalienceBins,2)
-        self.assertAlmostEqualVectorFixedPrecision(calculatedPitchSalienceValues, expectedPitchSalienceValues,2)        
-
-    def testResetMethod(self):
-        pitchsaliencefunctionpeaks = PitchSalienceFunctionPeaks()
-
-        self.testRegression()
-        pitchsaliencefunctionpeaks.reset()
-        self.testRegression()
-
+        self.assertAlmostEqualVectorFixedPrecision(calculatedPitchSalienceBins, expectedPitchSalienceBins, 8)
+        self.assertAlmostEqualVectorFixedPrecision(calculatedPitchSalienceValues, expectedPitchSalienceValues, 8)        
 
 suite = allTests(TestPitchSalienceFunctionPeaks)
 

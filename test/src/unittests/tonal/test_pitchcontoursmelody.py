@@ -113,8 +113,8 @@ class TestPitchContoursMelody(TestCase):
         loadedPitchConfidence = load(join(filedir(), 'pitchcontoursmelody/pitchcontoursmelodyconfidence.npy'))
         expectedPitch = loadedPitch.tolist() 
         expectedPitchConfidence = loadedPitchConfidence.tolist() 
-        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitch,2)
-        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence,2)
+        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitch, 8)
+        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 8)
         
 
 suite = allTests(TestPitchContoursMelody)

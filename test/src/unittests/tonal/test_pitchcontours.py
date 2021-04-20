@@ -37,7 +37,8 @@ class TestPitchContours(TestCase):
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
         self.assertEqualVector(startTimes, [])
-        self.assertAlmostEqual(duration, 0.0058, 3)
+        # Previous tests showed small duration of 0.0058 seconds for zero or empty inputs.
+        self.assertAlmostEqual(duration, 0.0058, 8)
 
     def testZerosUnequalInputs(self):        
         peakBins = [zeros(4096), zeros(4096)]
@@ -65,7 +66,8 @@ class TestPitchContours(TestCase):
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
         self.assertEqualVector(startTimes, [])
-        self.assertAlmostEqual(duration, 0.0058, 3)
+        # Previous tests showed small duration of 0.0058 seconds for zero or empty inputs.        
+        self.assertAlmostEqual(duration, 0.0058, 8)
 
     def testRegressionSynthetic(self):
         # Use synthetic audio for Regression Test. This keeps NPY files size low.     
