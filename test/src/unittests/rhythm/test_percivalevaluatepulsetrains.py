@@ -76,6 +76,8 @@ class TestPercivalEvaluatePulseTrains(TestCase):
         pHarm= PercivalEnhanceHarmonics()(aSignal)
         oss, posis= pdetect(pHarm)      
         lag = PercivalEvaluatePulseTrains()(cutsignal,posis)
+        # Based on previous observationbs with techno_loop recording.
+        self.assertEqual(7.0, lag)
 
 suite = allTests(TestPercivalEvaluatePulseTrains)
 
