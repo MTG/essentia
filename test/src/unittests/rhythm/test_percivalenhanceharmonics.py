@@ -53,18 +53,21 @@ class TestPercivalEnhanceHarmonics(TestCase):
     # PercivalEnhanceHarmonics uses the percival estimator internally.
     # The runtime errors have their origin in that algorithm.
     def testEmpty(self):
-        emptyAudio = []
-        enhancedHarmonics = PercivalEnhanceHarmonics()(emptyAudio)
+        # Define input vector, i.e. the autocorrelation vector
+        emptyInput = []
+        enhancedHarmonics = PercivalEnhanceHarmonics()(emptyInput)
         self.assertEqualVector(enhancedHarmonics, [])
 
     def testZero(self):
-        zeroAudio = zeros(1024)
-        enhancedHarmonics = PercivalEnhanceHarmonics()(zeroAudio)
-        self.assertEqualVector(enhancedHarmonics, zeroAudio)
+        # Define input vector, i.e. the autocorrelation vector        
+        zeroInput = zeros(1024)
+        enhancedHarmonics = PercivalEnhanceHarmonics()(zeroInput)
+        self.assertEqualVector(enhancedHarmonics, zeroInput)
 
     def testConstantInput(self):
-        onesAudio = ones(1024)
-        constantHarmonics = PercivalEnhanceHarmonics()(onesAudio)     
+        # Define input vector, i.e. the autocorrelation vector        
+        onesInput= ones(1024)
+        constantHarmonics = PercivalEnhanceHarmonics()(onesInput)     
         #This code stores reference values in a file for later loading.
         save('constantharmonics.npy', constantHarmonics)     
 

@@ -29,9 +29,7 @@ namespace standard {
 const char* PercivalEnhanceHarmonics::name = "PercivalEnhanceHarmonics";
 const char* PercivalEnhanceHarmonics::category = "Rhythm";
 const char* PercivalEnhanceHarmonics::description = DOC("This algorithm implements the 'Enhance Harmonics' step as described in [1]."
-"The autocorrelation of an audio signal contains peaks as well as other dominant periods related to rhythmic subdivisions."
-"Given an input autocorrelation signal, two time-stretched versions of it that are scaled by factors of 2 and 4, are added"
-"to the original. In this way, peaks with harmonic relations are boosted.\n"
+"Given an input autocorrelation signal, two time-stretched versions of it scaled by factors of 2 and 4 are added to the original."
 "For more details check the referenced paper."
 "\n"
 "\n"

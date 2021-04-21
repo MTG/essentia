@@ -41,43 +41,47 @@ class TestPercivalEvaluatePulseTrains(TestCase):
     
 
     def testRegression(self):
-        # Calculates the positions and Peaks
-        
+        # Regression tests on calculation of the positions and Peaks.
         inputSize=21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
-        config = { 'range': inputSize -1, 'maxPosition': inputSize, 'minPosition': 0, 'orderBy': 'amplitude' }
-        pdetect = PeakDetection(**config)
-
         audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded', 'techno_loop.wav'))()
 
-        # Calculates the positions and Peaks")
-        config = { 'range': inputSize -1, 'maxPosition': inputSize, 'minPosition': 0, 'orderBy': 'amplitude' }
-        pdetect = PeakDetection(**config)
+        # Calculates the positions and Peaks
+        pdetect = PeakDetection()
 
-        # Calculates the OSS")
+        # Calculates the OSS
         fc = FrameCutter(frameSize=inputSize, hopSize=inputSize)
         windower = Windowing(type='blackmanharris62')
         specAlg = Spectrum(size=4096)
         fluxAlg = Flux()
-        # Calculate the average flux over all frames of audio")
+
+        # Calculate the average flux over all frames of audio
         frame = fc(audio)
-        windowedSignal = windower(frame)
-        outputSpectrum = specAlg(windowedSignal)
         fluxArray = []
-        count = 0
-        while len(frame) != 0:
+      
+        for frame in FrameGenerator(audio, frameSize = inputSize, hopSize = inputSize):
             spectrum = specAlg(windower(frame))
             fluxArray.append(fluxAlg(spectrum))
-            count += 1
             frame = fc(audio)
         filteredSignal = LowPass(cutoffFrequency=8000)(fluxArray)
-        fc = FrameCutter(frameSize = len(audio),  hopSize = len(audio))
-        cutsignal = fc(filteredSignal)
-        aSignal =  AutoCorrelation()(cutsignal)      
+        
+        # Calculate PercivalEvaluatePulseTrains on fluxArray
+        aSignal =  AutoCorrelation()(fluxArray)      
         pHarm= PercivalEnhanceHarmonics()(aSignal)
         oss, posis= pdetect(pHarm)      
-        lag = PercivalEvaluatePulseTrains()(cutsignal,posis)
-        # Based on previous observationbs with techno_loop recording.
+        lag = PercivalEvaluatePulseTrains()(fluxArray,posis)
+        # Based on previous observations with fluxArray output originating from techno_loop
+        self.assertEqual(8.0, lag)
+
+        # Calculate PercivalEvaluatePulseTrains on filtered fluxArray
+        aSignal =  AutoCorrelation()(filteredSignal)      
+        pHarm= PercivalEnhanceHarmonics()(aSignal)
+        oss, posis= pdetect(pHarm)      
+        lag = PercivalEvaluatePulseTrains()(filteredSignal,posis)
+        # Based on previous observations with ffiltered luxArray output originating from techno_loop
         self.assertEqual(7.0, lag)
+
+        # TODO Add a test with an artificial signal (combination of sines) so by using peak alignment measures
+        # after running the autocorrelation function, we would be able to predict time lag.
 
 suite = allTests(TestPercivalEvaluatePulseTrains)
 

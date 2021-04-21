@@ -130,8 +130,19 @@ class TestPercivalBpmEstimator(TestCase):
     def testConstantInput(self):
         beatPeriod = 21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
         onesAudio = ones(beatPeriod)        
-        estimate = PercivalBpmEstimator()(onesAudio)            
-        self.assertNotEqual(0, estimate)
+        estimate = PercivalBpmEstimator()(onesAudio)  
+        # The observed BPM is also  104.4 for constant input of ones.
+        self.assertAlmostEqual(estimate, 104.40341,8) 
+
+        constantInput = [0.5 for i in range(21168)]
+        estimate = PercivalBpmEstimator()(constantInput)      
+        # The observed BPM is also around 104.4 for another constant input value, 0.5        
+        self.assertAlmostEqual(estimate, 104.40341,8) 
+
+        constantInput = [0.5 for i in range(21168)]
+        #Repeat test but, tweak a config. parameters out of its default value.
+        estimate = PercivalBpmEstimator(maxBPM=60)(constantInput)          
+        self.assertAlmostEqual(estimate, 104.40341,8) 
 
 suite = allTests(TestPercivalBpmEstimator)
 
