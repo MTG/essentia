@@ -14,6 +14,7 @@ Essentia documentation contents
    download
    algorithms_overview
    essentia_python_tutorial
+   essentia_python_examples
    extractors_out_of_box
    streaming_extractor_music
    machine_learning
