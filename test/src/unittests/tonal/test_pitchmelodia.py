@@ -19,65 +19,10 @@
 
 
 from numpy import *
-import numpy as np # FIXME
 from essentia_test import *
-
-samplerate= 44100
 
 class TestPitchMelodia(TestCase):
      
-
-    def get_wave(self, freq, duration=0.2):
-        '''
-        Function takes the "frequecy" and "time_duration" for a wave 
-        as the input and returns a "numpy array" of values at all points 
-        in time
-        '''
-        amplitude = 1
-        vector = vectorize(float)
-
-        t = np.linspace(0, duration, int(samplerate * duration))
-        wave=[]
-        for i in range(int(samplerate * duration)):
-            point = amplitude * sin(2 * np.pi * float(freq) * float(i))      
-            wave.append(point)
-        return(wave)
-
-    def get_piano_notes(self):
-        '''
-        Returns a dict object for all the piano 
-        note's frequencies
-        '''
-        # White keys are in Uppercase and black keys (sharps) are in lowercase
-        octave = ['C', 'c', 'D', 'd', 'E', 'F', 'f', 'G', 'g', 'A', 'a', 'B'] 
-        base_freq = 261.63 #Frequency of Note C4
-        
-        note_freqs = {octave[i]: base_freq * pow(2,(i/12)) for i in range(len(octave))}        
-        note_freqs[''] = 0.0 # silent note
-        return note_freqs
-
-    def get_song_data(self, music_notes):
-        '''
-        Function to concatenate all the waves (notes)
-        '''
-        note_freqs = self.get_piano_notes() # Function that we made earlier
-        song = [self.get_wave(note_freqs[note]) for note in music_notes.split('-')]
-        song = concatenate(song)
-        return song
-
-    # TODO This function not actually called yet in test code
-    def testTwinkle(self):
-        # Twinke twinkle little star.
-        music_notes = 'C-C-G-G-A-A-G--F-F-E-E-D-D-C--G-G-F-F-E-E-D--G-G-F-F-E-E-D--C-C-G-G-A-A-G--F-F-E-E-D-D-C'
-        data = self.get_song_data(music_notes)
-        return(data)
-
-    def testRootFifth(self):
-        # first 5 notes
-        music_notes = 'C-C-C-G-G-G'
-        data = self.get_song_data(music_notes)
-        return(data)
-
     def testZero(self):
         signal = zeros(1024)
         pitch, confidence = PitchMelodia()(signal)
@@ -118,13 +63,11 @@ class TestPitchMelodia(TestCase):
         self.assertEqualVector(confidence, [])
 
     def testARealCase(self):
-        frameSize = 1024
-        sr = 44100
-        hopSize = 512
         filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()      
         pm = PitchMelodia()
         pitch, pitchConfidence = pm(audio)
+       
         #This code stores reference values in a file for later loading.
         save('pitchmelodiapitch.npy', pitch)             
         save('pitchmelodiaconfidence.npy', pitchConfidence)             
@@ -137,77 +80,82 @@ class TestPitchMelodia(TestCase):
         expectedPitchConfidence = loadedPitchConfidence.tolist() 
         self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 8)
 
-    # TODO Check the outputs
-    def testArtificalSong(self): 
-        audio = self.testRootFifth()
-
+    def testARealCaseEqualLoud(self):
+        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
+        audio = MonoLoader(filename=filename, sampleRate=44100)()      
         pm = PitchMelodia()
-        pitch, pitchConfidence = pm(audio)
-        #print(pitch, pitchConfidence)
-        """
-        FIXME
+        eq = EqualLoudness()
+        eqAudio = eq(audio)
+        pitch, pitchConfidence = pm(eqAudio)
 
-        The above print is outputing the first half of the "pitch" array as zeros
-        and the second half with what appears to be the MIDI value 91 (G#6)
-        This is not corresponding to the C-C-C-G-G-G   Root Fifth sequnce
-        (also it is C4...G4 )
+        #This code stores reference values in a file for later loading.
+        save('pitchmelodiapitch_eqloud.npy', pitch)             
+        save('pitchmelodiaconfidence_eqloud.npy', pitchConfidence)             
 
-     
-         84.333275 86.80444  88.32176  89.34802  89.86561
-         90.909805 90.909805 91.43645  91.43645  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.43645  90.909805 89.34802  85.807396
-          0.        0.        0.        0.        0.        0.        0.
-         86.80444  89.86561  91.43645  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.43645  90.909805 89.34802  85.807396  0.
-          0.        0.        0.        0.        0.        0.       87.3073
-         90.3862   91.43645  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         91.96613  91.96613  91.96613  91.96613  91.96613  91.96613  91.96613
-         92.498886 92.498886
-    """
+        loadedPitchMelodiaPitch = load(join(filedir(), 'pitchmelodia/pitchmelodiapitch_eqloud.npy'))
+        expectedPitchMelodiaPitch = loadedPitchMelodiaPitch.tolist() 
+        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitchMelodiaPitch, 8)
 
-    def testArtificialSignal1(self):
+        loadedPitchConfidence = load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence_eqloud.npy'))
+        expectedPitchConfidence = loadedPitchConfidence.tolist() 
+        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 8)
 
+    def test110Hz(self):
         # generate test signal: sine 110Hz @44100kHz
         frameSize= 4096
         signalSize = 10 * frameSize
-        signal = 0.5 * numpy.sin( (array(range(signalSize))/44100.) * 110 * 2*math.pi)
+        signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
         pm = PitchMelodia()
         pitch, _ = pm(signal)
         index= int(len(pitch)/2) # Halfway point in pitch array
-        self.assertAlmostEqual(pitch[50], 110.0,10)
+        self.assertAlmostEqual(pitch[50], 110.0, 10)
 
+    def testMajorScale(self):
+        # generate test signal concatenating major scale notes.
+        frameSize= 2048
+        signalSize = 5 * frameSize
 
-    def testArtificialSignal2(self):
+        # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
+        c3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 130.81 * 2*math.pi)
+        d3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 146.83 * 2*math.pi)
+        e3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 164.81 * 2*math.pi)
+        f3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 174.61 * 2*math.pi)
+        g3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 196.00 * 2*math.pi)                                
+        a3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 220.00 * 2*math.pi)
+        b3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 246.94 * 2*math.pi)
+        c4 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 261.63 * 2*math.pi)
+    
+        # This signal is a "major scale ladder"
+        scale = concatenate([c3,d3,e3,f3,g3,a3,b3,c4])
 
-        # generate test signal: sine 1000Hz @44100kHz
-        frameSize= 4096
-        signalSize = 10 * frameSize
-        signal = 0.5 * numpy.sin( (array(range(signalSize))/44100.) * 1000 * 2*math.pi)
         pm = PitchMelodia()
-        pitch, _ = pm(signal)
-        index= int(len(pitch)/2) # Halfway point in pitch array
-        self.assertAlmostEqual(pitch[index], 1000.0,10)
+        pitch, confidence = pm(scale)
+
+        numPitchSamples = len(pitch)
+        numSinglePitchSamples = int(numPitchSamples/8)
+        midPointOffset =  int(numSinglePitchSamples/2)
+
+        # On each step of the "SCALE LADDER" we take the step mid point.
+        # We calculate array index mid point to allow checking the estimated pitch.
+        midpointC3 = midPointOffset
+        midpointD3 = int(1 * numSinglePitchSamples) + midPointOffset
+        midpointE3 = int(2 * numSinglePitchSamples) + midPointOffset
+        midpointF3 = int(3 * numSinglePitchSamples) + midPointOffset
+        midpointG3 = int(4 * numSinglePitchSamples) + midPointOffset
+        midpointA3 = int(5 * numSinglePitchSamples) + midPointOffset        
+        midpointB3 = int(6 * numSinglePitchSamples) + midPointOffset
+        midpointC4 = int(7 * numSinglePitchSamples) + midPointOffset                                        
+             
+        # Use high precision (10) for checking synthetic signals
+        # TODO: Check why returned confidence value is low (0.49)
+        self.assertAlmostEqual(pitch[midpointC3], 130.81, 10)
+        self.assertAlmostEqual(pitch[midpointD3], 146.83, 10)
+        self.assertAlmostEqual(pitch[midpointE3], 164.81, 10)
+        self.assertAlmostEqual(pitch[midpointF3], 174.61, 10)
+        self.assertAlmostEqual(pitch[midpointG3], 196.00, 10)
+        self.assertAlmostEqual(pitch[midpointA3], 220.00, 10)
+        self.assertAlmostEqual(pitch[midpointB3], 246.94, 10)
+        self.assertAlmostEqual(pitch[midpointC4], 261.63, 10)
 
 suite = allTests(TestPitchMelodia)
 
