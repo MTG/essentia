@@ -68,6 +68,61 @@ class TestPitchContoursMelody(TestCase):
         pitch, pitchConfidence = PitchContoursMelody()( peakBins, peakSaliences, startTimes, duration)
         self.assertEqualVector(pitch, [])
         self.assertEqualVector(pitchConfidence, [])
+
+    def testRegressionSynthetic(self):
+        # Use synthetic audio for Regression Test. This keeps NPY files size low.     
+        sr = 44100
+        frameSize = 1024
+        hopSize = 512
+
+        size = 1*sr
+        sine1 = [sin(2.0*pi*100.0*i/sr) for i in range(size)]
+        sine2 = [sin(2.0*pi*1000.0*i/sr) for i in range(size)]
+        fc1 = FrameCutter()
+        fc2 = FrameCutter()
+        frame1 = fc1(sine1)
+        frame2 = fc2(sine2)
+        audio = frame1+frame2
+
+        psf = PitchSalienceFunction()
+        psfp = PitchSalienceFunctionPeaks()
+        w = Windowing(type='hann', normalized=False)
+        spectrum = Spectrum()
+        spectralpeaks = SpectralPeaks()
+        pc = PitchContours()
+        pcm = PitchContoursMelody()        
+
+        # Populate an array of frame-wise vectors of cent bin values representing each contour
+        peakBins = []
+        # Populate a frame-wise array of values of salience function peaks
+        peakSaliences = []        
+        for frame in FrameGenerator(audio, frameSize=1024, hopSize=hopSize,
+                                    startFromZero=True):
+            freq_peaks, mag_peaks = spectralpeaks(spectrum(w(frame)))
+            len_freq_peaks = len(freq_peaks)
+            len_mag_peaks = len(mag_peaks)
+            
+            # Skip the first vector elements that correspond to zero frequency
+            freq_peaksp1 = freq_peaks[1:len_freq_peaks]
+            # Do the same for mag. vector to keep the lengths the same
+            mag_peaksp1 = mag_peaks[1:len_mag_peaks]
+            salienceFunction = psf(freq_peaksp1, mag_peaksp1)
+            bins, values = psfp(salienceFunction)
+            peakBins.append(bins)
+            peakSaliences.append(values)
+
+        bins, saliences, startTimes, duration = pc(peakBins, peakSaliences)
+        pitch, pitchConfidence = pcm(bins, saliences, startTimes, duration)   
+        #This code stores reference values in a file for later loading.
+        save('pitchcontoursmelodypitch_synthetic.npy', pitch)
+        save('pitchcontoursmelodyconfidence_synthetic.npy', pitchConfidence)
+       
+        loadedPitch = load(join(filedir(), 'pitchcontoursmelody/pitchcontoursmelodypitch_synthetic.npy'))        
+        loadedPitchConfidence = load(join(filedir(), 'pitchcontoursmelody/pitchcontoursmelodyconfidence_synthetic.npy'))
+        expectedPitch = loadedPitch.tolist() 
+        expectedPitchConfidence = loadedPitchConfidence.tolist() 
+        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitch, 8)
+        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 8)        
         
     def testARealCase(self):
         frameSize = 1024
@@ -116,7 +171,6 @@ class TestPitchContoursMelody(TestCase):
         self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitch, 8)
         self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 8)
         
-
 suite = allTests(TestPitchContoursMelody)
 
 if __name__ == '__main__':
