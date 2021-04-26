@@ -29,7 +29,7 @@ namespace standard {
 const char* PercivalEvaluatePulseTrains::name = "PercivalEvaluatePulseTrains";
 const char* PercivalEvaluatePulseTrains::category = "Rhythm";
 const char* PercivalEvaluatePulseTrains::description = DOC("This algorithm implements the 'Evaluate Pulse Trains' step as described in [1]."
-"Given an input onset detection function (ODF) and a number of candidate BPM peak positions, the ODF is correlated with ideal expected pulse "
+"Given an input onset detection function (ODF, called \"onset strength signal\", OSS, in the original paper) and a number of candidate BPM peak positions, the ODF is correlated with ideal expected pulse "
 "trains (for each candidate tempo lag) shifted in time by different amounts."
 "The candidate tempo lag that generates a periodic pulse train with the best correlation to the ODF is returned as the best tempo estimate.\n"
 "For more details check the referenced paper."
