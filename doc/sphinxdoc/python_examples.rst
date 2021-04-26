@@ -5,8 +5,8 @@ Here we provide a collection of Python tutorials and code examples grouped by va
 
 TODO: how to provide links to Python file examples?
 
-Spectral analysis
------------------
+Spectral representations
+------------------------
 
 
 Rhythm and onsets
@@ -20,8 +20,8 @@ Pitch and melody
 
 
 
-Music classification and auto-tagging
--------------------------------------
+Deep embeddings, music classification and auto-tagging
+------------------------------------------------------
 * `Real-time music auto-tagging <tutorial_tensorflow_real-time_auto-tagging.html>`_
 
 
