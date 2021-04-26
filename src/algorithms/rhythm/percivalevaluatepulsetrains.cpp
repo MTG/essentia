@@ -44,35 +44,34 @@ void PercivalEvaluatePulseTrains::configure() {
 }
 
 void PercivalEvaluatePulseTrains::calculatePulseTrains(const std::vector<Real>& ossWindow,
-											   const int lag,
-											   Real& magScore,
-											   Real& varScore) {
-    vector<Real> bpMagnitudes;
-    int period = lag;
-    bpMagnitudes.resize(lag);
-    //int samples = ossWindow.size();
-    for (int phase=0; phase < period; ++phase){
-    	Real currentMagScore;
-    	currentMagScore = 0.0;
-    	for (int b=0; b < 4; ++b){
-    		int ind;
-    		ind = (int)(phase + b * period);
-    		if (ind >= 0){
-    			currentMagScore += ossWindow[ind];
-    		}
-    		ind = (int)(phase + b * period * 2);
-    		if (ind >= 0){
-    			currentMagScore += 0.5 * ossWindow[ind];
-    		}
-    		ind = (int)(phase + b * period * 3 / 2);
-    		if (ind >= 0){
-    			currentMagScore += 0.5 * ossWindow[ind];
-    		}
-    	}
-    	bpMagnitudes[phase] = currentMagScore;
+                                               const int lag,
+                                               Real& magScore,
+                                               Real& varScore) {
+  vector<Real> bpMagnitudes;
+  int period = lag;
+  bpMagnitudes.resize(lag);
+  for (int phase=0; phase < period; ++phase) {
+    Real currentMagScore;
+    currentMagScore = 0.0;
+    for (int b=0; b < 4; ++b) {
+      int ind;
+      ind = (int)(phase + b * period);
+      if (ind >= 0) {
+        currentMagScore += ossWindow[ind];
+      }
+      ind = (int)(phase + b * period * 2);
+      if (ind >= 0) {
+        currentMagScore += 0.5 * ossWindow[ind];
+      }
+      ind = (int)(phase + b * period * 3 / 2);
+      if (ind >= 0) {
+        currentMagScore += 0.5 * ossWindow[ind];
+      }
     }
-    magScore = *std::max_element(bpMagnitudes.begin(), bpMagnitudes.end());
-    varScore = variance(bpMagnitudes, mean(bpMagnitudes));
+    bpMagnitudes[phase] = currentMagScore;
+  }
+  magScore = *std::max_element(bpMagnitudes.begin(), bpMagnitudes.end());
+  varScore = variance(bpMagnitudes, mean(bpMagnitudes));
 }
 
 void PercivalEvaluatePulseTrains::compute() {
@@ -80,37 +79,36 @@ void PercivalEvaluatePulseTrains::compute() {
   const vector<Real>& peakPositions = _peakPositions.get();
   Real& lag = _lag.get();
 
-	if (peakPositions.size() == 0){
-		// No peaks have been detected, return lag -1
-		lag = -1;
-		return;
-	}
+  if (peakPositions.size() == 0) {
+    // No peaks have been detected, return lag -1
+    lag = -1;
+    return;
+  }
 
   vector<Real> tempoScores;
-  tempoScores.resize(peakPositions.size());
   vector<Real> onsetScores;
-  onsetScores.resize(peakPositions.size());
+  tempoScores.reserve(peakPositions.size());
+  onsetScores.reserve(peakPositions.size());
   for (int i=0; i<(int)peakPositions.size(); ++i) {
-  	Real candidate = peakPositions[i];
-  	if (candidate != 0) {
-  		int lag = (int) round(candidate);
-  		Real magScore;
-  		Real varScore;
-      // TODO passing lag = 0 to calculatePulseTrains will result in crash
-      if (lag == 0 ) {
-        continue;
+    Real candidate = peakPositions[i];
+    if (candidate != 0) {
+      int lag = (int) round(candidate);
+      Real magScore = 0;
+      Real varScore = 0;
+      if (lag > 0) {
+        // Passing lag = 0 to calculatePulseTrains will result in crash
+        calculatePulseTrains(oss, lag, magScore, varScore);
       }
-  		calculatePulseTrains(oss, lag, magScore, varScore);
-		tempoScores[i] = magScore;
-  		onsetScores[i] = varScore;
-  	}
+      tempoScores[i] = magScore;
+      onsetScores[i] = varScore;
+    }
   }
   vector<Real> comboScores;
   comboScores.resize(peakPositions.size());
   Real sumTempoScores = sum(tempoScores);
   Real sumOnsetScroes = sum(onsetScores);
   for (int i=0; i<(int)peakPositions.size(); ++i) {
-  	comboScores[i] = tempoScores[i]/sumTempoScores + onsetScores[i]/sumOnsetScroes;
+    comboScores[i] = tempoScores[i]/sumTempoScores + onsetScores[i]/sumOnsetScroes;
   }
   // NOTE: original python implementation normalizes comboScores (like tempoScores and onsetScore).
   // As we are only taking argmax, we assume there is no need for this normalization.
