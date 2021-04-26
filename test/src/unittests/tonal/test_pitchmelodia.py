@@ -126,7 +126,7 @@ class TestPitchMelodia(TestCase):
         c4 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 261.63 * 2*math.pi)
     
         # This signal is a "major scale ladder"
-        scale = concatenate([c3,d3,e3,f3,g3,a3,b3,c4])
+        scale = concatenate([c3, d3, e3, f3, g3, a3, b3, c4])
 
         pm = PitchMelodia()
         pitch, confidence = pm(scale)

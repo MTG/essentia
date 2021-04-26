@@ -32,6 +32,16 @@ class TestPitchContours(TestCase):
         self.assertConfigureFails(PitchContours(), {'sampleRate': -1})
         self.assertConfigureFails(PitchContours(), {'timeContinuity': -1})
         
+    def testEmpty(self):
+        emptyPeakBins = [[],[]]
+        emptyPeakSaliences = [[],[]]
+        bins, saliences, startTimes, duration = PitchContours()(emptyPeakBins, emptyPeakSaliences)       
+        self.assertEqualVector(bins, [])
+        self.assertEqualVector(saliences, [])
+        self.assertEqualVector(startTimes, [])
+        # Previous tests showed small duration of 0.0058 seconds for zero or empty inputs.        
+        self.assertAlmostEqual(duration, 0.0058, 8)
+
     def testZeros(self):
         bins, saliences, startTimes, duration = PitchContours()(array(zeros([2,256])), array(zeros([2,256])))      
         self.assertEqualVector(bins, [])
@@ -58,16 +68,6 @@ class TestPitchContours(TestCase):
         peakBins = [ones(4096), ones(4096)]
         peakSaliences = [ones(1024), ones(1024)]
         self.assertRaises(RuntimeError, lambda: PitchContours()(peakBins, peakSaliences))
-
-    def testEmpty(self):
-        emptyPeakBins = [[],[]]
-        emptyPeakSaliences = [[],[]]
-        bins, saliences, startTimes, duration = PitchContours()(emptyPeakBins, emptyPeakSaliences)       
-        self.assertEqualVector(bins, [])
-        self.assertEqualVector(saliences, [])
-        self.assertEqualVector(startTimes, [])
-        # Previous tests showed small duration of 0.0058 seconds for zero or empty inputs.        
-        self.assertAlmostEqual(duration, 0.0058, 8)
 
     def testRegressionSynthetic(self):
         # Use synthetic audio for Regression Test. This keeps NPY files size low.     
@@ -113,16 +113,16 @@ class TestPitchContours(TestCase):
         bins, saliences, startTimes, duration = pc(peakBins, peakSaliences)
 
         #The reason is that 2D vectors dont reload easily from files, using the method shown below.
-        save('pitchcontourstarttimes.npy',startTimes) 
-        save('pitchcontourbins.npy', bins)               
-        save('pitchcontoursaliences.npy', saliences)
+        save('pitchcontourstarttimes_synthetic.npy',startTimes) 
+        save('pitchcontourbins_synthetic.npy', bins)               
+        save('pitchcontoursaliences_synthetic.npy', saliences)
 
         # Captured from previous runs of pitch contours on the synthesis
         expectedDuration = 0.00290249427780509
         
-        loadedPitchContourBins = load(join(filedir(), 'pitchcontours/pitchcontourbins.npy'))        
-        loadedPitchContourSaliences = load(join(filedir(), 'pitchcontours/pitchcontoursaliences.npy'))
-        loadedPitchContourStartTimes = load(join(filedir(), 'pitchcontours/pitchcontourstarttimes.npy'))
+        loadedPitchContourBins = load(join(filedir(), 'pitchcontours/pitchcontourbins_synthetic.npy'))        
+        loadedPitchContourSaliences = load(join(filedir(), 'pitchcontours/pitchcontoursaliences_synthetic.npy'))
+        loadedPitchContourStartTimes = load(join(filedir(), 'pitchcontours/pitchcontourstarttimes_synthetic.npy'))
 
         expectedPitchContourBins = loadedPitchContourBins.tolist() 
         expectedPitchContourSaliences = loadedPitchContourSaliences.tolist() 
@@ -142,7 +142,7 @@ class TestPitchContours(TestCase):
         self.assertAlmostEqual(expectedDuration,duration, 8)             
 
  
-    def testRegression(self):
+    def testARealCase(self):
         frameSize = 1024
         sr = 44100
         hopSize = 512
