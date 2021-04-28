@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -29,10 +29,11 @@ namespace standard {
 const char* PercivalEvaluatePulseTrains::name = "PercivalEvaluatePulseTrains";
 const char* PercivalEvaluatePulseTrains::category = "Rhythm";
 const char* PercivalEvaluatePulseTrains::description = DOC("This algorithm implements the 'Evaluate Pulse Trains' step as described in [1]."
-"Given an input onset strength signal (OSS) and a number of candidate tempo lag positions, the OSS is correlated with ideal expected pulse "
-"trains (for each candidate tempo lag) shifted in time by different amounts. The candidate tempo lag which generates the pulse train "
-"that better correlates with the OSS is returned as the preferred tempo candidate.\n"
+"Given an input onset detection function (ODF, called \"onset strength signal\", OSS, in the original paper) and a number of candidate BPM peak positions, the ODF is correlated with ideal expected pulse "
+"trains (for each candidate tempo lag) shifted in time by different amounts."
+"The candidate tempo lag that generates a periodic pulse train with the best correlation to the ODF is returned as the best tempo estimate.\n"
 "For more details check the referenced paper."
+"Please note that in the original paper, the term OSS (Onset Strength Signal) is used instead of ODF."
 "\n"
 "\n"
 "References:\n"
@@ -43,35 +44,34 @@ void PercivalEvaluatePulseTrains::configure() {
 }
 
 void PercivalEvaluatePulseTrains::calculatePulseTrains(const std::vector<Real>& ossWindow,
-											   const int lag,
-											   Real& magScore,
-											   Real& varScore) {
-    vector<Real> bpMagnitudes;
-    int period = lag;
-    bpMagnitudes.resize(lag);
-    //int samples = ossWindow.size();
-    for (int phase=0; phase < period; ++phase){
-    	Real currentMagScore;
-    	currentMagScore = 0.0;
-    	for (int b=0; b < 4; ++b){
-    		int ind;
-    		ind = (int)(phase + b * period);
-    		if (ind >= 0){
-    			currentMagScore += ossWindow[ind];
-    		}
-    		ind = (int)(phase + b * period * 2);
-    		if (ind >= 0){
-    			currentMagScore += 0.5 * ossWindow[ind];
-    		}
-    		ind = (int)(phase + b * period * 3 / 2);
-    		if (ind >= 0){
-    			currentMagScore += 0.5 * ossWindow[ind];
-    		}
-    	}
-    	bpMagnitudes[phase] = currentMagScore;
+                                               const int lag,
+                                               Real& magScore,
+                                               Real& varScore) {
+  vector<Real> bpMagnitudes;
+  int period = lag;
+  bpMagnitudes.resize(lag);
+  for (int phase=0; phase < period; ++phase) {
+    Real currentMagScore;
+    currentMagScore = 0.0;
+    for (int b=0; b < 4; ++b) {
+      int ind;
+      ind = (int)(phase + b * period);
+      if (ind >= 0) {
+        currentMagScore += ossWindow[ind];
+      }
+      ind = (int)(phase + b * period * 2);
+      if (ind >= 0) {
+        currentMagScore += 0.5 * ossWindow[ind];
+      }
+      ind = (int)(phase + b * period * 3 / 2);
+      if (ind >= 0) {
+        currentMagScore += 0.5 * ossWindow[ind];
+      }
     }
-    magScore = *std::max_element(bpMagnitudes.begin(), bpMagnitudes.end());
-    varScore = variance(bpMagnitudes, mean(bpMagnitudes));
+    bpMagnitudes[phase] = currentMagScore;
+  }
+  magScore = *std::max_element(bpMagnitudes.begin(), bpMagnitudes.end());
+  varScore = variance(bpMagnitudes, mean(bpMagnitudes));
 }
 
 void PercivalEvaluatePulseTrains::compute() {
@@ -79,33 +79,36 @@ void PercivalEvaluatePulseTrains::compute() {
   const vector<Real>& peakPositions = _peakPositions.get();
   Real& lag = _lag.get();
 
-	if (peakPositions.size() == 0){
-		// No peaks have been detected, return lag -1
-		lag = -1;
-		return;
-	}
+  if (peakPositions.size() == 0) {
+    // No peaks have been detected, return lag -1
+    lag = -1;
+    return;
+  }
 
   vector<Real> tempoScores;
-  tempoScores.resize(peakPositions.size());
   vector<Real> onsetScores;
-  onsetScores.resize(peakPositions.size());
+  tempoScores.reserve(peakPositions.size());
+  onsetScores.reserve(peakPositions.size());
   for (int i=0; i<(int)peakPositions.size(); ++i) {
-  	Real candidate = peakPositions[i];
-  	if (candidate != 0) {
-  		int lag = (int) round(candidate);
-  		Real magScore;
-  		Real varScore;
-  		calculatePulseTrains(oss, lag, magScore, varScore);
-		tempoScores[i] = magScore;
-  		onsetScores[i] = varScore;
-  	}
+    Real candidate = peakPositions[i];
+    if (candidate != 0) {
+      int lag = (int) round(candidate);
+      Real magScore = 0;
+      Real varScore = 0;
+      if (lag > 0) {
+        // Passing lag = 0 to calculatePulseTrains will result in crash
+        calculatePulseTrains(oss, lag, magScore, varScore);
+      }
+      tempoScores[i] = magScore;
+      onsetScores[i] = varScore;
+    }
   }
   vector<Real> comboScores;
   comboScores.resize(peakPositions.size());
   Real sumTempoScores = sum(tempoScores);
   Real sumOnsetScroes = sum(onsetScores);
   for (int i=0; i<(int)peakPositions.size(); ++i) {
-  	comboScores[i] = tempoScores[i]/sumTempoScores + onsetScores[i]/sumOnsetScroes;
+    comboScores[i] = tempoScores[i]/sumTempoScores + onsetScores[i]/sumOnsetScroes;
   }
   // NOTE: original python implementation normalizes comboScores (like tempoScores and onsetScore).
   // As we are only taking argmax, we assume there is no need for this normalization.
