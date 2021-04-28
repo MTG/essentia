@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -30,7 +30,7 @@ const char* PitchSalienceFunction::description = DOC("This algorithm computes th
 "\n"
 "This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the SpectralPeaks algorithm. The output is a vector of salience values computed for the cent bins. The 0th bin corresponds to the specified \"referenceFrequency\".\n"
 "\n"
-"When input vectors differ in size or are empty, an exception is thrown. Input vectors must contain positive frequencies and not contain negative magnitudes otherwise an exception is thrown. It is highly recommended to avoid erroneous peak duplicates (peaks of the same frequency occuring more than ones), but it is up to the user's own control and no exception will be thrown.\n"
+"If both input vectors are empty (i.e., no spectral peaks are provided), a zero salience function is returned. Input vectors must contain positive frequencies and not contain negative magnitudes otherwise an exception is thrown. It is highly recommended to avoid erroneous peak duplicates (peaks of the same frequency occuring more than ones), but it is up to the user's own control and no exception will be thrown.\n"
 "\n"
 "References:\n"
 "  [1] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
@@ -53,8 +53,15 @@ void PitchSalienceFunction::configure() {
 
   _harmonicWeights.clear();
   _harmonicWeights.reserve(_numberHarmonics);
-  for (int h=0; h<_numberHarmonics; h++) {
-    _harmonicWeights.push_back(pow(_harmonicWeight, h));
+
+  //the value of pow(0, 0) has undefined behavior. When weights is zero set the pow(0,0) value to 1
+  if (_harmonicWeight==0){
+      _harmonicWeights.push_back(1);
+  }
+  else {
+    for (int h=0; h<_numberHarmonics; h++) {
+      _harmonicWeights.push_back(pow(_harmonicWeight, h));
+    }
   }
 
   _nearestBinsWeights.resize(_binsInSemitone + 1);
