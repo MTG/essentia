@@ -34,16 +34,8 @@ class TestPitchSalienceFunction(TestCase):
         self.assertConfigureFails(PitchSalienceFunction(), {'numberHarmonics': -1})        
         self.assertConfigureFails(PitchSalienceFunction(), {'referenceFrequency': -1})
 
-    def testZero(self):
-        freqs = zeros(1024)
-        mags  = zeros(1024)
-        self.assertRaises(RuntimeError, lambda: PitchSalienceFunction()(freqs, mags))
-
     def testEmpty(self): 
         self.assertEqualVector(PitchSalienceFunction()([], []), zeros(600))
-
-    def testOne(self):        
-        self.assertEqualVector(PitchSalienceFunction()(ones(1024), ones(1024)), zeros(600))
 
     # Provide a single input peak with a unit magnitude at the reference frequency, and 
     # validate that the output salience function has only one non-zero element at the first bin.
@@ -51,29 +43,28 @@ class TestPitchSalienceFunction(TestCase):
         freq_speaks = [55] # length 1
         mag_speaks = [1] # length 4
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
-
         self.assertEqual(calculatedPitchSalience[0],1)
 
     def test3Peaks(self):
         freq_speaks = [55,100,340] # length 1
-        mag_speaks = [1,1,1] # length 4
+        mag_speaks = [1, 1, 1] # length 4
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
-        self.assertAlmostEqual(calculatedPitchSalience[0],1.16384,3)
-        self.assertEqual(len(calculatedPitchSalience),600)        
+        self.assertAlmostEqual(calculatedPitchSalience[0], 1.16384, 3)
+        self.assertEqual(len(calculatedPitchSalience), 600)        
 
     def test3PeaksHw0(self):
-        freq_speaks = [55,100,340] # length 1
-        mag_speaks = [1,1,1] # length 4
+        freq_speaks = [55, 100, 340] # length 1
+        mag_speaks = [1, 1, 1] # length 4
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
 
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks,mag_speaks)    
-        self.assertAlmostEqual(calculatedPitchSalience[0],1.16384,3)
-        self.assertEqual(len(calculatedPitchSalience),600)
+        self.assertAlmostEqual(calculatedPitchSalience[0], 1.16384,3)
+        self.assertEqual(len(calculatedPitchSalience), 600)
 
     def test3PeaksHw1(self):
-        freq_speaks = [55,100,340] # length 1
-        mag_speaks = [1,1,1] # length 4
+        freq_speaks = [55, 100, 340] # length 1
+        mag_speaks = [1, 1, 1] # length 4
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks,mag_speaks) 
         self.assertAlmostEqual(calculatedPitchSalience[0],1.5,3)
@@ -85,8 +76,8 @@ class TestPitchSalienceFunction(TestCase):
               
         mag_speaks = [0.5, 2] # length 4
         calculatedPitchSalience2 = PitchSalienceFunction()(freq_speaks,mag_speaks)
-        self.assertAlmostEqual(calculatedPitchSalience1[0],0.5,3)        
-        self.assertAlmostEqual(calculatedPitchSalience2[0],1.5,3)
+        self.assertAlmostEqual(calculatedPitchSalience1[0], 0.5, 3)        
+        self.assertAlmostEqual(calculatedPitchSalience2[0], 1.5, 3)
 
     def testBelowReferenceFrequency1(self):
         freq_speaks = [50] # length 1
@@ -102,6 +93,13 @@ class TestPitchSalienceFunction(TestCase):
         expectedPitchSalience = zeros(600)
         calculatedPitchSalience = PitchSalienceFunction(referenceFrequency=40)(freq_speaks,mag_speaks)        
         self.assertEqualVector(calculatedPitchSalience, expectedPitchSalience)      
+
+
+    def testMustContainPostiveFreq(self):
+        # Throw in a zero Freq to see what happens. 
+        freqs = [0, 250, 400, 1300, 2200, 3300] # length 6
+        mags = [1, 1, 1, 1, 1, 1] # length 6 
+        self.assertRaises(RuntimeError, lambda: PitchSalienceFunction()(freqs, mags))
 
     def testUnequalInputs(self):
         # Choose a sample set of frequencies and magnitude vectors of unqual length
