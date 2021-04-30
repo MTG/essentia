@@ -1,9 +1,9 @@
 Essentia Python examples
 ========================
 
-Here we provide a collection of Python tutorials and code examples grouped by various music/audio analysis tasks.
+Here we provide a collection of Python tutorials, grouped by various music/audio analysis tasks.
+You can also check various code examples located in the `src/examples/python <https://github.com/MTG/essentia/tree/master/src/examples/python>`__ folder in the source code.
 
-TODO: how to provide links to Python file examples?
 
 Spectral representations
 ------------------------
