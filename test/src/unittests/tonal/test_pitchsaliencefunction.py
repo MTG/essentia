@@ -46,7 +46,7 @@ class TestPitchSalienceFunction(TestCase):
         self.assertEqual(calculatedPitchSalience[0],1)
 
     def test3Peaks(self):
-        freq_speaks = [55,100,340] # length 1
+        freq_speaks = [55, 100, 340] # length 1
         mag_speaks = [1, 1, 1] # length 4
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
@@ -58,16 +58,16 @@ class TestPitchSalienceFunction(TestCase):
         mag_speaks = [1, 1, 1] # length 4
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
 
-        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks,mag_speaks)    
-        self.assertAlmostEqual(calculatedPitchSalience[0], 1.16384,3)
+        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks, mag_speaks)    
+        self.assertAlmostEqual(calculatedPitchSalience[0], 1.16384, 3)
         self.assertEqual(len(calculatedPitchSalience), 600)
 
     def test3PeaksHw1(self):
         freq_speaks = [55, 100, 340] # length 1
         mag_speaks = [1, 1, 1] # length 4
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
-        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks,mag_speaks) 
-        self.assertAlmostEqual(calculatedPitchSalience[0],1.5,3)
+        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks, mag_speaks) 
+        self.assertAlmostEqual(calculatedPitchSalience[0], 1.5, 3)
 
     def testDifferentPeaks(self):
         freq_speaks = [55, 85] # length 1
@@ -93,7 +93,6 @@ class TestPitchSalienceFunction(TestCase):
         expectedPitchSalience = zeros(600)
         calculatedPitchSalience = PitchSalienceFunction(referenceFrequency=40)(freq_speaks,mag_speaks)        
         self.assertEqualVector(calculatedPitchSalience, expectedPitchSalience)      
-
 
     def testMustContainPostiveFreq(self):
         # Throw in a zero Freq to see what happens. 
