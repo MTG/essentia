@@ -7,17 +7,22 @@ You can also check various code examples located in the `src/examples/python <ht
 
 Spectral representations
 ------------------------
-
+* `Spectrograms and mel-spectrograms <tutorial_spectral_representations.html>`_
 
 Rhythm and onsets
 -----------------
 * `Onset detection <tutorial_rhythm_onsetdetection.html>`_
+* `Beat detection and tempo (BPM) estimation <tutorial_rhythm_beatdetection.html>`_
 
 
 Pitch and melody
 ----------------
-* `example_pitch_predominantmelody.py <https://github.com/MTG/essentia/blob/master/src/examples/python/example_pitch_predominantmelody.py>`__
+* `Melody detection <tutorial_pitch_melody.html>`_
 
+
+Tonality
+--------
+* `HPCP, key and scale detection <tutorial_tonal_hpcpkeyscale.html>`_
 
 
 Deep embeddings, music classification and auto-tagging
