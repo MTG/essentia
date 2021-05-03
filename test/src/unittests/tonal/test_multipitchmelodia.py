@@ -51,46 +51,87 @@ class TestMultiPitchMelodia(TestCase):
         self.assertConfigureFails(MultiPitchMelodia(), {'sampleRate': -1})
         self.assertConfigureFails(MultiPitchMelodia(), {'timeContinuity': -1})
 
+
     def testOnes(self):
+        # FIXME. Need to derive a rational why this output occurs for a constant input
         signal = ones(1024)
         pitch = MultiPitchMelodia()(signal)
-        self.assertAlmostEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
+        expectedPitch=[[0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.]]
+        index=0
+        self.assertEqual(len(pitch), 9)
+        while (index<len(expectedPitch)):
+            self.assertAlmostEqualVector(pitch[index], expectedPitch[index],8)
+            index+=1
 
     def testEmpty(self):
         pitch = MultiPitchMelodia()([])
         self.assertEqualVector(pitch, [])
 
-    # FIXME-work in progress
-    def testARealCase(self):
-        frameSize = 1024
-        sr = 44100
-        hopSize = 512
-        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
-        audio = MonoLoader(filename=filename, sampleRate=44100)()
-        pm = MultiPitchMelodia()
-        pitch = pm(audio)
-        print(type(pitch))
-        print(type(array(pitch)))
+    def test110Hz(self):
+        # generate test signal: sine 110Hz @44100kHz
+        frameSize= 4096
+        signalSize = 10 * frameSize
+        signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
+        mpk = MultiPitchMelodia()
+        pitch = mpk(signal)
+        index= int(len(pitch)/2) # Halfway point in pitch array
+        self.assertAlmostEqual(pitch[index], 110.0, 10)
 
-        """
-        #This code stores reference values in a file for later loading.
-        save('multipitchmelodia.npy', array(pitch,dtype=object))             
+    def testMajorScale(self):
+        # generate test signal concatenating major scale notes.
+        frameSize= 2048
+        signalSize = 5 * frameSize
 
-        loadedMultiPitchMelodia = load(join(filedir(), 'pitchmelodia/multipitchmelodia.npy'))
-        expectedMultiPitchMelodia = loadedMultiPitchMelodia.tolist() 
-        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedMultiPitchMelodia, 2)
+        # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
+        c3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 130.81 * 2*math.pi)
+        d3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 146.83 * 2*math.pi)
+        e3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 164.81 * 2*math.pi)
+        f3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 174.61 * 2*math.pi)
+        g3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 196.00 * 2*math.pi)                                
+        a3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 220.00 * 2*math.pi)
+        b3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 246.94 * 2*math.pi)
+        c4 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 261.63 * 2*math.pi)
+    
+        # This signal is a "major scale ladder"
+        scale = concatenate([c3, d3, e3, f3, g3, a3, b3, c4])
 
-                # This code stores reference values in a file for later loading.
-        save('multipitchmelodia.npy', array(pitch))
-        # Reference samples are loaded as expected values
-        expected_multipitchmelodia_npy = load(join(filedir(), 'pitchmelodia/multipitchmelodia.npy'))
+        mpk = MultiPitchMelodia()
+        pitch = mpk(scale)
 
-        # Loop through all Melframes to regression test each one against the file reference values.
+        numPitchSamples = len(pitch)
+        numSinglePitchSamples = int(numPitchSamples/8)
+        midPointOffset =  int(numSinglePitchSamples/2)
+
+        theLen = len(pitch)
         index = 0
-        while index<len(expected_multipitchmelodia_npy):
-           self.assertAlmostEqualVectorFixedPrecision(expected_multipitchmelodia_npy[index], pitch[index], 8)
-           index+=1
-        """
+        klapArray = []  
+        while (index < theLen):
+            klapArray.append(pitch[index][0])
+            index+=1
+
+        # On each step of the "SCALE LADDER" we take the step mid point.
+        # We calculate array index mid point to allow checking the estimated pitch.
+
+        midpointC3 = midPointOffset
+        print()
+        midpointD3 = int(1 * numSinglePitchSamples) + midPointOffset
+        midpointE3 = int(2 * numSinglePitchSamples) + midPointOffset
+        midpointF3 = int(3 * numSinglePitchSamples) + midPointOffset
+        midpointG3 = int(4 * numSinglePitchSamples) + midPointOffset
+        midpointA3 = int(5 * numSinglePitchSamples) + midPointOffset        
+        midpointB3 = int(6 * numSinglePitchSamples) + midPointOffset
+        midpointC4 = int(7 * numSinglePitchSamples) + midPointOffset                                        
+             
+        # Use high precision (10) for checking synthetic signals
+        self.assertAlmostEqual(klapArray[midpointC3], 130.81, 10)
+        self.assertAlmostEqual(klapArray[midpointD3], 146.83, 10)
+        self.assertAlmostEqual(klapArray[midpointE3], 164.81, 10)
+        self.assertAlmostEqual(klapArray[midpointF3], 174.61, 10)
+        self.assertAlmostEqual(klapArray[midpointG3], 196.00, 10)
+        self.assertAlmostEqual(klapArray[midpointA3], 220.00, 10)
+        self.assertAlmostEqual(klapArray[midpointB3], 246.94, 10)
+        self.assertAlmostEqual(klapArray[midpointC4], 261.63, 10)
+        
 suite = allTests(TestMultiPitchMelodia)
 
 if __name__ == '__main__':
