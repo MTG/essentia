@@ -45,56 +45,74 @@ class TestPitchSalienceFunction(TestCase):
         freq_speaks = [55] 
         mag_speaks = [1] 
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)
+        # Check the first 11 elements are staring from vlaue "1" and degrading downwards
+        # as define in the expectedPitchSalience
         self.assertAlmostEqualVector(calculatedPitchSalience[:11],expectedPitchSalience,6)
+        # Check remaining elemenmts are zeros
         self.assertEqualVector(calculatedPitchSalience[12:600],zeros(600-12))
 
     def test3Peaks(self):
         freq_speaks = [55, 100, 340] 
         mag_speaks = [1, 1, 1] 
-        # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
-        expectedPitchSalience = [1.1638401e+00, 1.1899976e+00, 1.1646512e+00, 1.0902820e+00, 9.7416961e-01,
-        8.2767999e-01, 6.6515255e-01, 5.0249672e-01, 3.5563424e-01, 2.3894110e-01,
-        1.6384001e-01, 1.1321065e-01, 6.7537278e-02, 3.1290654e-02, 8.0189053e-03]
 
+        # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
-        self.assertAlmostEqual(calculatedPitchSalience[0], 1.16384, 3)
+  
+        save('calculatedPitchSalience_test3Peaks.npy', calculatedPitchSalience)
+        self.assertAlmostEqual(calculatedPitchSalience[0], 1.16384, 3)        
         self.assertEqual(len(calculatedPitchSalience), 600)        
-        self.assertAlmostEqualVector(calculatedPitchSalience[:15],expectedPitchSalience,6)
+        # Reference samples are loaded as expected values
+        expectedPitchSalience = load(join(filedir(), 'pitchsalience/calculatedPitchSalience_test3Peaks.npy'))
+        expectedPitchSalienceList = expectedPitchSalience.tolist()
+        self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList, calculatedPitchSalience,6)
 
     def test3PeaksHw0(self):
         freq_speaks = [55, 100, 340] 
         mag_speaks = [1, 1, 1] 
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
-
-        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks, mag_speaks)    
-        self.assertAlmostEqual(calculatedPitchSalience[0], 1.16384, 3)
+        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks, mag_speaks)            
+        self.assertEqual(calculatedPitchSalience[0], 1)
         self.assertEqual(len(calculatedPitchSalience), 600)
-        self.assertAlmostEqualVector(calculatedPitchSalience[:15],expectedPitchSalience,6)
-    
+                
     def test3PeaksHw1(self):
         freq_speaks = [55, 100, 340] 
         mag_speaks = [1, 1, 1] 
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks, mag_speaks) 
-        self.assertAlmostEqual(calculatedPitchSalience[0], 1.5, 3)
-        self.assertAlmostEqualVector(calculatedPitchSalience[:15],expectedPitchSalience,6)
+        save('calculatedPitchSalience_test3PeaksHw1.npy', calculatedPitchSalience)
 
+        # Reference samples are loaded as expected values
+        expectedPitchSalience = load(join(filedir(), 'pitchsalience/calculatedPitchSalience_test3PeaksHw1.npy'))
+        expectedPitchSalienceList = expectedPitchSalience.tolist()
+        self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList, calculatedPitchSalience,6)
+        
     def testDifferentPeaks(self):
         freq_speaks = [55, 85] 
         mag_speaks = [1, 1] 
-        calculatedPitchSalience1 = PitchSalienceFunction()(freq_speaks,mag_speaks)
-              
+        calculatedPitchSalience1 = PitchSalienceFunction()(freq_speaks,mag_speaks)             
+        save('calculatedPitchSalience_testDifferentPeaks1.npy', calculatedPitchSalience1)
+
         mag_speaks = [0.5, 2] 
         calculatedPitchSalience2 = PitchSalienceFunction()(freq_speaks,mag_speaks)
+        save('calculatedPitchSalience_testDifferentPeaks2.npy', calculatedPitchSalience2)
+ 
         self.assertAlmostEqual(calculatedPitchSalience1[0], 0.5, 3)        
         self.assertAlmostEqual(calculatedPitchSalience2[0], 1.5, 3)
-        self.assertAlmostEqualVector(calculatedPitchSalience[:15],expectedPitchSalience,6)
+
+        expectedPitchSalience = load(join(filedir(), 'pitchsalience/calculatedPitchSalience_testDifferentPeaks1.npy'))
+        expectedPitchSalienceList = expectedPitchSalience.tolist()
+        self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList, calculatedPitchSalience1,6)
+        
+        expectedPitchSalience = load(join(filedir(), 'pitchsalience/calculatedPitchSalience_testDifferentPeaks2.npy'))
+        expectedPitchSalienceList = expectedPitchSalience.tolist()
+        self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList, calculatedPitchSalience2,6)
+        
 
     def testBelowReferenceFrequency1(self):
         freq_speaks = [50] 
         mag_speaks = [1] 
         expectedPitchSalience = zeros(600)
-        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)        
+        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)            
         self.assertEqualVector(calculatedPitchSalience, expectedPitchSalience)
 
     def testBelowReferenceFrequency2(self):
@@ -124,11 +142,13 @@ class TestPitchSalienceFunction(TestCase):
     def testRegressionTest(self):
         filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
-
-        hopSize = 128
         frameSize = 2048
         sampleRate = 44100
         guessUnvoiced = True
+        hopSize = 512
+
+        #truncate the audio to take 0.5 sec(keep npy file size low)
+        audio = audio[:22050]
 
         run_windowing = Windowing(type='hann', zeroPadding=3*frameSize) # Hann window with x4 zero padding
         run_spectrum = Spectrum(size=frameSize * 4)
@@ -139,18 +159,11 @@ class TestPitchSalienceFunction(TestCase):
                                            magnitudeThreshold=0,
                                            orderBy="magnitude")
         run_pitch_salience_function = PitchSalienceFunction()
-        run_pitch_salience_function_peaks = PitchSalienceFunctionPeaks()
-        run_pitch_contours = PitchContours(hopSize=hopSize)
-        run_pitch_contours_melody = PitchContoursMelody(guessUnvoiced=guessUnvoiced,
-                                                        hopSize=hopSize)
-        run_predom_pitch_melodia = PredominantPitchMelodia()
-
+       
         # Now we are ready to start processing.
         # 1. pass it through the equal-loudness filter
         audio = EqualLoudness()(audio)
-
-        salience_peaks_bins_array = []
-        salience_peaks_saliences_array = []
+        calculatedPitchSalience = []
 
         # 2. Cut audio into frames and compute for each frame:
         #    spectrum -> spectral peaks -> pitch salience function -> pitch salience function peaks
@@ -159,19 +172,16 @@ class TestPitchSalienceFunction(TestCase):
             spectrum = run_spectrum(frame)
             peak_frequencies, peak_magnitudes = run_spectral_peaks(spectrum)
             salience = run_pitch_salience_function(peak_frequencies, peak_magnitudes)
-            salience_peaks_bins, salience_peaks_saliences = run_pitch_salience_function_peaks(salience)
-            salience_peaks_bins_array.append(salience_peaks_bins)
-            salience_peaks_saliences_array.append(salience_peaks_saliences)
+            calculatedPitchSalience.append(salience)
 
-        bins, saliences, startTimes, duration = run_pitch_contours(salience_peaks_bins_array, salience_peaks_saliences_array)
-        pitch1, pitchConfidence1 = run_pitch_contours_melody(bins, saliences, startTimes, duration) 
-        pitch2, pitchConfidence2 = run_predom_pitch_melodia(audio)
+        save('calculatedPitchSalience_vignesh.npy', calculatedPitchSalience)
+        expectedPitchSalience = load(join(filedir(), 'pitchsalience/calculatedPitchSalience_vignesh.npy'))
+        expectedPitchSalienceList = expectedPitchSalience.tolist()
 
-        self.assertAlmostEqualVectorFixedPrecision(pitch1[:600], pitch2[:600], 8)
-        #TODO why do the outputs align up to a certain array point?
-        self.assertAlmostEqualVectorFixedPrecision(pitch1[:721], pitch2[:721], 8)
-        #self.assertAlmostEqualVectorFixedPrecision(pitchConfidence1, pitchConfidence2, 8)        
-   
+        index=0
+        for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
+            self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList[index], calculatedPitchSalience[index], 6)              
+            index+=1        
 
     def testRegressionSynthetic(self):
         # Use synthetic audio for Regression Test. This keeps NPY files size low.      
@@ -194,8 +204,7 @@ class TestPitchSalienceFunction(TestCase):
         run_pitch_contours = PitchContours(hopSize=hopSize)
         run_pitch_contours_melody = PitchContoursMelody(guessUnvoiced=guessUnvoiced,
                                                         hopSize=hopSize)
-
-        signalSize = frameSize*10
+        signalSize = frameSize * 10
         # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
         c3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 130.81 * 2*math.pi)
         d3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 146.83 * 2*math.pi)

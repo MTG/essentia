@@ -34,18 +34,11 @@ class TestPitchSalienceFunctionPeaks(TestCase):
     
     # Check for empty output arrays for a salience function with all zero values
     def testZeros(self): 
-        bins, values = PitchSalienceFunctionPeaks()(zeros(128))
+        bins, values = PitchSalienceFunctionPeaks()(zeros(600))
         self.assertEqualVector(bins, [])
         self.assertEqualVector(values, [])    
 
-    # Check for empty output arrays for a salience function repeated values of different lengths
-    def testConstantInputs(self): 
-        bins, values = PitchSalienceFunctionPeaks()([0.5, 0.5, 0.5])
-        self.assertEqualVector(bins, [])    
-        self.assertEqualVector(values, [])    
-        bins, values = PitchSalienceFunctionPeaks()(ones(128))     
-        self.assertEqualVector(bins, [])    
-        self.assertEqualVector(values, [])    
+
 
     # Provide a single input peak with a unit magnitude at the reference frequency, and 
     # validate that the output salience function has only one non-zero element at the first bin.
@@ -57,75 +50,69 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         self.assertEqualVector(bins, [0.])
         self.assertEqualVector(values, [1.])   
 
-    # As above but with Harmonic Weight = 0
-    def testSinglePeakHw0(self):
-        freq_speaks = [55] 
-        mag_speaks = [1] 
-        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks,mag_speaks)    
-        bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
-        self.assertEqualVector(bins, [0.])
-        self.assertEqualVector(values, [1.])   
-    
-    # As above but with Harmonic Weight = 1
-    def testSinglePeakHw1(self):
-        freq_speaks = [55] 
-        mag_speaks = [1] 
-        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks,mag_speaks)    
-        bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
-        self.assertEqualVector(bins, [0.])
-        self.assertEqualVector(values, [1.])   
-        #self.assertEqual(calculatedPitchSalience[0],1)        
-
     # Provide 3 input peaks with a unit magnitude and 
     # validate that the output salience with previously calcualted values
     def testRegression3Peaks(self):
         freq_speaks = [55, 100, 340] 
         mag_speaks = [1, 1, 1] 
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
-        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
+        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)  
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
         self.assertEqualVector(bins, [ 1., 103., 315., 195., 125.,  75.,  37.] )
         self.assertAlmostEqualVectorFixedPrecision(values, [1.1899976, 1., 1., 0.8, 0.64000005, 0.512, 0.40960002], 6)
 
+    def testRegression3PeaksHighBinResolution(self):
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
+        # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
+        calculatedPitchSalience = PitchSalienceFunction(binResolution=2400)(freq_speaks,mag_speaks)  
+        bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
+        self.assertEqualVector(bins, [] )
+        self.assertEqualVector(values, [])
+
+
+    def testRegressionBadMaxFreq(self):
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
+        # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
+        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)  
+        self.assertRaises(RuntimeError, lambda: PitchSalienceFunctionPeaks(maxFrequency=50)(calculatedPitchSalience))
+
+
+    def testRegressionBadMinFreq(self):
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
+        # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
+        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks, mag_speaks)  
+        self.assertRaises(RuntimeError, lambda: PitchSalienceFunctionPeaks(minFrequency=20000)(calculatedPitchSalience))
+
+    def testRegressionBadRefFreq(self):
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
+        # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
+        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks, mag_speaks)  
+        self.assertRaises(RuntimeError, lambda: PitchSalienceFunctionPeaks(referenceFrequency=20000)(calculatedPitchSalience))
+        
     # As above but with Harmonic Weight = 0
     def testRegression3PeaksHw0(self):
         freq_speaks = [55, 100, 340]
         mag_speaks = [1, 1, 1] 
+        expectedBins = [1., 103., 315., 195., 125., 75.,  37.] 
+        expectedValues= [1.1899976, 1., 1., 0.8, 0.64000005, 0.512, 0.40960002]
 
-        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks, mag_speaks)    
+        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks, mag_speaks)  
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
-        self.assertEqualVector(bins, [1., 103., 315., 195., 125., 75., 37.])
-        self.assertAlmostEqualVectorFixedPrecision(values, [1.1899976, 1., 1., 0.8, 0.64000005, 0.512, 0.40960002], 6)
-
+        self.assertAlmostEqualVectorFixedPrecision(bins, expectedBins, 6)
+        self.assertAlmostEqualVectorFixedPrecision(values, expectedValues, 6)
+   
     # As above but with Harmonic Weight = 1
     def testRegression3PeaksHw1(self):
         freq_speaks = [55, 100, 340] 
         mag_speaks = [1, 1, 1] 
-
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks, mag_speaks) 
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
         self.assertEqualVector(bins, [2., 37., 75., 103., 125., 195., 315.])
         self.assertAlmostEqualVectorFixedPrecision(values, [1.6984011, 1., 1., 1., 1., 1., 1.], 6)
-
-    # Similar to testRegression3Peaks, but considering minFrequency and maxFrequency
-    def testRegression3PeaksAboveMaxFreq(self):
-        freq_speaks = [550, 1000, 3400] 
-        mag_speaks = [1, 1, 1] 
-        # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
-        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
-        bins, values = PitchSalienceFunctionPeaks(minFrequency=100, maxFrequency=101)(calculatedPitchSalience)
-        self.assertEqualVector(bins,  [103.])
-        self.assertAlmostEqualVectorFixedPrecision(values, [0.13421774], 6)
-
-    # Similar to testRegression3Peaks, but considering minFrequency and maxFrequency
-    def testRegression3PeaksBelowMinFreq(self):
-        freq_speaks = [55, 100, 340] 
-        mag_speaks = [1, 1, 1] 
-        # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
-        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
-        bins, values = PitchSalienceFunctionPeaks(minFrequency=350, maxFrequency=351)(calculatedPitchSalience)
-        self.assertEqualVector(bins,  [320.])
-        self.assertAlmostEqualVectorFixedPrecision(values, [0.5], 6)
 
     def testMinMaxFreqError(self): 
         freq_speaks = [55, 100, 340] 

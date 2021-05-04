@@ -60,16 +60,21 @@ void PitchSalienceFunction::configure() {
        for (int h=1; h<600; h++) {
           _harmonicWeights.push_back(0);
        }
+      _nearestBinsWeights.resize(_binsInSemitone + 1);
+      _nearestBinsWeights[0] = 1;      
+      for (int b=1; b <= _binsInSemitone; b++) {
+         _nearestBinsWeights[b] = 0;
+      }
   }
   else {
     for (int h=0; h<_numberHarmonics; h++) {
       _harmonicWeights.push_back(pow(_harmonicWeight, h));
     }
-  }
 
-  _nearestBinsWeights.resize(_binsInSemitone + 1);
-  for (int b=0; b <= _binsInSemitone; b++) {
-    _nearestBinsWeights[b] = pow(cos((Real(b)/_binsInSemitone)* M_PI/2), 2);
+    _nearestBinsWeights.resize(_binsInSemitone + 1);
+    for (int b=0; b <= _binsInSemitone; b++) {
+      _nearestBinsWeights[b] = pow(cos((Real(b)/_binsInSemitone)* M_PI/2), 2);
+    }
   }
 }
 
