@@ -50,28 +50,26 @@ class TestPitchSalienceFunctionPeaks(TestCase):
     # Provide a single input peak with a unit magnitude at the reference frequency, and 
     # validate that the output salience function has only one non-zero element at the first bin.
     def testSinglePeak(self):
-        freq_speaks = [55] # length 1
-        mag_speaks = [1] # length 4
+        freq_speaks = [55] 
+        mag_speaks = [1] 
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
         self.assertEqualVector(bins, [0.])
         self.assertEqualVector(values, [1.])   
-        #self.assertEqual(calculatedPitchSalience[0],1)
 
     # As above but with Harmonic Weight = 0
     def testSinglePeakHw0(self):
-        freq_speaks = [55] # length 1
-        mag_speaks = [1] # length 4
+        freq_speaks = [55] 
+        mag_speaks = [1] 
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks,mag_speaks)    
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
         self.assertEqualVector(bins, [0.])
         self.assertEqualVector(values, [1.])   
-        #self.assertEqual(calculatedPitchSalience[0],1)
     
     # As above but with Harmonic Weight = 1
     def testSinglePeakHw1(self):
-        freq_speaks = [55] # length 1
-        mag_speaks = [1] # length 4
+        freq_speaks = [55] 
+        mag_speaks = [1] 
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks,mag_speaks)    
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
         self.assertEqualVector(bins, [0.])
@@ -81,8 +79,8 @@ class TestPitchSalienceFunctionPeaks(TestCase):
     # Provide 3 input peaks with a unit magnitude and 
     # validate that the output salience with previously calcualted values
     def testRegression3Peaks(self):
-        freq_speaks = [55, 100, 340] # length 1
-        mag_speaks = [1, 1, 1] # length 4
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
@@ -111,8 +109,8 @@ class TestPitchSalienceFunctionPeaks(TestCase):
 
     # Similar to testRegression3Peaks, but considering minFrequency and maxFrequency
     def testRegression3PeaksAboveMaxFreq(self):
-        freq_speaks = [550, 1000, 3400] # length 1
-        mag_speaks = [1, 1, 1] # length 4
+        freq_speaks = [550, 1000, 3400] 
+        mag_speaks = [1, 1, 1] 
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
         bins, values = PitchSalienceFunctionPeaks(minFrequency=100, maxFrequency=101)(calculatedPitchSalience)
@@ -121,8 +119,8 @@ class TestPitchSalienceFunctionPeaks(TestCase):
 
     # Similar to testRegression3Peaks, but considering minFrequency and maxFrequency
     def testRegression3PeaksBelowMinFreq(self):
-        freq_speaks = [55, 100, 340] # length 1
-        mag_speaks = [1, 1, 1] # length 4
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
         bins, values = PitchSalienceFunctionPeaks(minFrequency=350, maxFrequency=351)(calculatedPitchSalience)
@@ -130,8 +128,8 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         self.assertAlmostEqualVectorFixedPrecision(values, [0.5], 6)
 
     def testMinMaxFreqError(self): 
-        freq_speaks = [55, 100, 340] # length 1
-        mag_speaks = [1, 1, 1] # length 4
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
         self.assertRaises(RuntimeError, lambda: PitchSalienceFunctionPeaks(minFrequency=150,maxFrequency=150)([]))
 
     def testRegressionDifferentPeaks(self):

@@ -40,56 +40,66 @@ class TestPitchSalienceFunction(TestCase):
     # Provide a single input peak with a unit magnitude at the reference frequency, and 
     # validate that the output salience function has only one non-zero element at the first bin.
     def testSinglePeak(self):
-        freq_speaks = [55] # length 1
-        mag_speaks = [1] # length 4
-        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
-        self.assertEqual(calculatedPitchSalience[0],1)
+        expectedPitchSalience = [1.0000000e+00, 9.7552824e-01, 9.0450847e-01, 7.9389262e-01, 6.5450847e-01,
+        5.0000000e-01, 3.4549147e-01, 2.0610739e-01, 9.5491491e-02, 2.4471754e-02, 3.7493994e-33]
+        freq_speaks = [55] 
+        mag_speaks = [1] 
+        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)
+        self.assertAlmostEqualVector(calculatedPitchSalience[:11],expectedPitchSalience,6)
+        self.assertEqualVector(calculatedPitchSalience[12:600],zeros(600-12))
 
     def test3Peaks(self):
-        freq_speaks = [55, 100, 340] # length 1
-        mag_speaks = [1, 1, 1] # length 4
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
+        expectedPitchSalience = [1.1638401e+00, 1.1899976e+00, 1.1646512e+00, 1.0902820e+00, 9.7416961e-01,
+        8.2767999e-01, 6.6515255e-01, 5.0249672e-01, 3.5563424e-01, 2.3894110e-01,
+        1.6384001e-01, 1.1321065e-01, 6.7537278e-02, 3.1290654e-02, 8.0189053e-03]
+
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)    
         self.assertAlmostEqual(calculatedPitchSalience[0], 1.16384, 3)
         self.assertEqual(len(calculatedPitchSalience), 600)        
+        self.assertAlmostEqualVector(calculatedPitchSalience[:15],expectedPitchSalience,6)
 
     def test3PeaksHw0(self):
-        freq_speaks = [55, 100, 340] # length 1
-        mag_speaks = [1, 1, 1] # length 4
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
 
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks, mag_speaks)    
         self.assertAlmostEqual(calculatedPitchSalience[0], 1.16384, 3)
         self.assertEqual(len(calculatedPitchSalience), 600)
-
+        self.assertAlmostEqualVector(calculatedPitchSalience[:15],expectedPitchSalience,6)
+    
     def test3PeaksHw1(self):
-        freq_speaks = [55, 100, 340] # length 1
-        mag_speaks = [1, 1, 1] # length 4
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
         # For a single frequency 55 Hz with unitary  amplitude the 10 non zero salience function values are the following
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks, mag_speaks) 
         self.assertAlmostEqual(calculatedPitchSalience[0], 1.5, 3)
+        self.assertAlmostEqualVector(calculatedPitchSalience[:15],expectedPitchSalience,6)
 
     def testDifferentPeaks(self):
-        freq_speaks = [55, 85] # length 1
-        mag_speaks = [1, 1] # length 4
+        freq_speaks = [55, 85] 
+        mag_speaks = [1, 1] 
         calculatedPitchSalience1 = PitchSalienceFunction()(freq_speaks,mag_speaks)
               
-        mag_speaks = [0.5, 2] # length 4
+        mag_speaks = [0.5, 2] 
         calculatedPitchSalience2 = PitchSalienceFunction()(freq_speaks,mag_speaks)
         self.assertAlmostEqual(calculatedPitchSalience1[0], 0.5, 3)        
         self.assertAlmostEqual(calculatedPitchSalience2[0], 1.5, 3)
+        self.assertAlmostEqualVector(calculatedPitchSalience[:15],expectedPitchSalience,6)
 
     def testBelowReferenceFrequency1(self):
-        freq_speaks = [50] # length 1
-        mag_speaks = [1] # length 4
+        freq_speaks = [50] 
+        mag_speaks = [1] 
         expectedPitchSalience = zeros(600)
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)        
         self.assertEqualVector(calculatedPitchSalience, expectedPitchSalience)
 
-    # Provide multiple duplicate peaks at the reference frequency.
     def testBelowReferenceFrequency2(self):
-        freq_speaks = [30] # length 1
-        mag_speaks = [1] # length 4
+        freq_speaks = [30] 
+        mag_speaks = [1] 
         expectedPitchSalience = zeros(600)
         calculatedPitchSalience = PitchSalienceFunction(referenceFrequency=40)(freq_speaks,mag_speaks)        
         self.assertEqualVector(calculatedPitchSalience, expectedPitchSalience)      

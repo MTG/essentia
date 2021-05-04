@@ -70,7 +70,6 @@ class TestPitchContours(TestCase):
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
         self.assertEqualVector(startTimes, [])
-        # Previous tests showed small duration of 0.0058 seconds for zero or empty inputs.        
         calculatedDuration = (2*defaultHopSize)/defaultSampleRate
         self.assertAlmostEqual(duration, calculatedDuration, 8)
 
@@ -82,7 +81,6 @@ class TestPitchContours(TestCase):
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
         self.assertEqualVector(startTimes, [])
-        # Previous tests showed small duration of 0.0058 seconds for zero or empty inputs.        
         calculatedDuration = (2*theHopSize)/defaultSampleRate
         self.assertAlmostEqual(duration, calculatedDuration, 8)
 
