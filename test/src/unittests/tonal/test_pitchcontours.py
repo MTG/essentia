@@ -53,24 +53,24 @@ class TestPitchContours(TestCase):
         nonEmptyPeakBins = testPeakBins
         nonEmptyPeakSaliences = testPeakSaliences
         theHopSize= 2 * defaultHopSize
-        _,  _, _, duration = PitchContours(hopSize=theHopSize)(nonEmptyPeakBins, nonEmptyPeakSaliences)       
+        _,  _, _, duration = PitchContours(hopSize=theHopSize)(nonEmptyPeakBins, nonEmptyPeakSaliences)
         calculatedDuration = (2 * theHopSize)/defaultSampleRate
         self.assertAlmostEqual(duration, calculatedDuration, 8)
         
-        theHopSize= 4 * defaultHopSize        
-        _,  _, _, duration = PitchContours(hopSize=theHopSize)(nonEmptyPeakBins, nonEmptyPeakSaliences)               
-        calculatedDuration = (2 * theHopSize)/defaultSampleRate        
+        theHopSize= 4 * defaultHopSize
+        _,  _, _, duration = PitchContours(hopSize=theHopSize)(nonEmptyPeakBins, nonEmptyPeakSaliences)
+        calculatedDuration = (2 * theHopSize)/defaultSampleRate
         self.assertAlmostEqual(duration, calculatedDuration, 8)
 
-        theHopSize= 8 * defaultHopSize        
-        _,  _, _, duration = PitchContours(hopSize=theHopSize)(nonEmptyPeakBins, nonEmptyPeakSaliences)               
-        calculatedDuration = (2 * theHopSize)/defaultSampleRate        
-        self.assertAlmostEqual(duration, calculatedDuration, 8)                        
-        
+        theHopSize= 8 * defaultHopSize
+        _,  _, _, duration = PitchContours(hopSize=theHopSize)(nonEmptyPeakBins, nonEmptyPeakSaliences)
+        calculatedDuration = (2 * theHopSize)/defaultSampleRate
+        self.assertAlmostEqual(duration, calculatedDuration, 8)                       
+    
     def testEmpty(self):
         emptyPeakBins = []
         emptyPeakSaliences = []
-        bins, saliences, startTimes, duration = PitchContours()(emptyPeakBins, emptyPeakSaliences)       
+        bins, saliences, startTimes, duration = PitchContours()(emptyPeakBins, emptyPeakSaliences)
 
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
@@ -82,7 +82,7 @@ class TestPitchContours(TestCase):
         emptyPeakBins = [[],[]]
         emptyPeakSaliences = [[],[]]
         theHopSize= 2*defaultHopSize
-        bins, saliences, startTimes, duration = PitchContours(hopSize=theHopSize)(emptyPeakBins, emptyPeakSaliences)       
+        bins, saliences, startTimes, duration = PitchContours(hopSize=theHopSize)(emptyPeakBins, emptyPeakSaliences)
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
         self.assertEqualVector(startTimes, [])
@@ -96,11 +96,11 @@ class TestPitchContours(TestCase):
         peakSaliences = array(zeros([1, 256]))
         # TODO  It is unclear why we need to change the default hop size recommended for pitch contour estimation.
         theHopSize = 1*defaultHopSize
-        bins, saliences, startTimes, duration = PitchContours(hopSize=theHopSize)(peakBins, peakSaliences)      
+        bins, saliences, startTimes, duration = PitchContours(hopSize=theHopSize)(peakBins, peakSaliences)
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
         self.assertEqualVector(startTimes, [])
-        calculatedDuration = (2*theHopSize)/defaultSampleRate     
+        calculatedDuration = (2*theHopSize)/defaultSampleRate
         self.assertAlmostEqual(duration, calculatedDuration, 8)
 
     #  We want to have different random frequency peaks at each frame.
@@ -109,28 +109,28 @@ class TestPitchContours(TestCase):
     #  The assert checks on random generated outputs are boundary checks/sanity checks
     def testVariousSaliencePeaks(self):
         testPeakBins=[]
-        f1 = random.randrange(50, 151, 1)   
-        f2 = random.randrange(500, 1001, 1)   
+        f1 = random.randrange(50, 151, 1)
+        f2 = random.randrange(500, 1001, 1)
         # We conisder 600 frames
         index= 0
         while index < 600:
             testPeakBins.append([f1 , f2])
             index+=1
         testPeakSaliences = np.random.random((600, 2))
-        bins, saliences, startTimes, duration = PitchContours(hopSize=defaultHopSize)(testPeakBins, testPeakSaliences)      
-        calculatedDuration = 600*(defaultHopSize)/defaultSampleRate    
+        bins, saliences, startTimes, duration = PitchContours(hopSize=defaultHopSize)(testPeakBins, testPeakSaliences)
+        calculatedDuration = 600*(defaultHopSize)/defaultSampleRate
         self.assertAlmostEqual(duration, calculatedDuration, 8)
         self.assertEqual(len(bins),len(saliences))
         self.assertEqual(len(bins),len(startTimes))
         self.assertGreater(len(bins),0)
 
-    def testUnequalInputs(self):        
+    def testUnequalInputs(self):
         peakBins = [zeros(4096), zeros(4096)]
         peakSaliences = [zeros(1024), zeros(1024)]
         self.assertRaises(RuntimeError, lambda: PitchContours()(peakBins, peakSaliences))
 
     def testRegressionSynthetic(self):
-        # Use synthetic audio for Regression Test. This keeps NPY files size low.      
+        # Use synthetic audio for Regression Test. This keeps NPY files size low.
         # First, create our algorithms:
         hopSize = defaultHopSize
         frameSize = defaultFrameSize
@@ -165,7 +165,7 @@ class TestPitchContours(TestCase):
 
         # Now we are ready to start processing.
         # 1. Load audio and pass it through the equal-loudness filter
-        audio = EqualLoudness()(scale)       
+        audio = EqualLoudness()(scale)
         calculatedContourBins = []
         calculatedContourSaliences = []
         calculatedContourStartTimes = []
@@ -196,13 +196,13 @@ class TestPitchContours(TestCase):
         save('calculatedcontour_bins_scale0.npy', contours_bins[0])
         save('calculatedcontour_saliences_scale0.npy', contours_saliences[0])
         save('calculatedcontour_bins_scale1.npy', contours_bins[1])
-        save('calculatedcontour_saliences_scale1.npy', contours_saliences[1])        
+        save('calculatedcontour_saliences_scale1.npy', contours_saliences[1])
         save('calculatedcontour_startTimes_scale.npy', contours_start_times)
 
         expectedBins0 = load(join(filedir(), 'pitchsalience/calculatedcontour_bins_scale0.npy'))
         expectedSaliences0 = load(join(filedir(), 'pitchsalience/calculatedcontour_saliences_scale0.npy'))
         expectedBins1 = load(join(filedir(), 'pitchsalience/calculatedcontour_bins_scale1.npy'))
-        expectedSaliences1 = load(join(filedir(), 'pitchsalience/calculatedcontour_saliences_scale1.npy'))        
+        expectedSaliences1 = load(join(filedir(), 'pitchsalience/calculatedcontour_saliences_scale1.npy'))
         expectedStartTimes = load(join(filedir(), 'pitchsalience/calculatedcontour_startTimes_scale.npy'))
    
         expectedBinsList0 = expectedBins0.tolist()
@@ -212,15 +212,14 @@ class TestPitchContours(TestCase):
         expectedStartTimesList = expectedStartTimes.tolist()
         expectedDuration = len(audio)/(44100)
 
-        self.assertAlmostEqualVectorFixedPrecision(expectedBinsList0, contours_bins[0], 8)    
-        self.assertAlmostEqualVectorFixedPrecision(expectedSaliencesList0, contours_saliences[0], 8)  
-        self.assertAlmostEqualVectorFixedPrecision(expectedBinsList1, contours_bins[1], 8)    
-        self.assertAlmostEqualVectorFixedPrecision(expectedSaliencesList1, contours_saliences[1], 8)  
-        self.assertAlmostEqualVectorFixedPrecision(expectedStartTimesList, contours_start_times, 8)                           
+        self.assertAlmostEqualVectorFixedPrecision(expectedBinsList0, contours_bins[0], 8)
+        self.assertAlmostEqualVectorFixedPrecision(expectedSaliencesList0, contours_saliences[0], 8)
+        self.assertAlmostEqualVectorFixedPrecision(expectedBinsList1, contours_bins[1], 8)
+        self.assertAlmostEqualVectorFixedPrecision(expectedSaliencesList1, contours_saliences[1], 8)
+        self.assertAlmostEqualVectorFixedPrecision(expectedStartTimesList, contours_start_times, 8)                        
         self.assertAlmostEqual( expectedDuration, duration, 8)                           
 
 suite = allTests(TestPitchContours)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
-
