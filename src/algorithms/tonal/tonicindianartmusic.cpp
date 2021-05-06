@@ -95,9 +95,18 @@ void TonicIndianArtMusic::configure() {
 
 
 void TonicIndianArtMusic::compute() {
+  
+  printf("DBG0");
+  std::cout<< "DEBUGGING"<< std::endl;
   const vector<Real>& signal = _signal.get();
   Real& tonic = _tonic.get();
+  printf("DBG1");
+  // Prevent segmentation fault
+  if (signal.size() == 0) { 
+    throw EssentiaException("TonicIndianArtMusic: Empty Audio passed"); 
+  }
 
+  printf("DBG2");
   // Pre-processing
   vector<Real> frame;
   _frameCutter->input("signal").set(signal);
