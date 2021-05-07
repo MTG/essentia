@@ -207,18 +207,23 @@ class TestPitchSalienceFunction(TestCase):
 
     The following test case has uncovered a situation where  divide by zero or some other 
     illegal operation has taken place because a NAN vlaue is found in output array element zero.
-    
+
     def testBinResolutionTooHigh(self):        
-        # Choose a sample set of frequencies and magnitude vectors of unequal length
         freq_speaks = [55] 
         mag_speaks = [1] 
         calculatedPitchSalience = PitchSalienceFunction(binResolution=55*2)(freq_speaks,mag_speaks)       
         print(calculatedPitchSalience)
 
-
         result:  calculatedPitchSalience[0] contains "nan"
 
     """
+    def testSinglePeakAboveMaxBin(self):
+        # Choose a sample set of frequencies and magnitude vectors of unequal length
+        freq_speaks = [800] 
+        mag_speaks = [1] 
+        calculatedPitchSalience = PitchSalienceFunction(binResolution=5)(freq_speaks,mag_speaks)       
+        print(len(calculatedPitchSalience))
+        print(calculatedPitchSalience)        
 
     def testNegativeMagnitudeTest(self):
         freqs = [250, 500, 1000] # length 3
