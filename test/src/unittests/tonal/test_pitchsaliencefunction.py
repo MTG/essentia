@@ -45,7 +45,7 @@ class TestPitchSalienceFunction(TestCase):
 
     # Provide a single input peak with a unit magnitude at the reference frequency, and 
     # validate that the output salience function has only one non-zero element at the first bin.
-    # Check also the remainin elements are zeros.
+    # Check also the remaining elements are zeros.
     def testSinglePeak(self):        
         binResolution = defaultBinResolution        
         # We have a non-zero element in bin 1. From then on, its all zeros.
@@ -61,7 +61,7 @@ class TestPitchSalienceFunction(TestCase):
         # The next 10 values are decreasing in magnitude.
         self.assertAlmostEqualVector(calculatedPitchSalience[:11], expectedPitchSalience, 8)
         # Check remaining elements are zeros
-        self.assertEqualVector(calculatedPitchSalience[12:outputLength],zeros(outputLength-(12)))
+        self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))
 
     # Same as above, but tweaking the bin resolution to ensure output length is consistent
     def testSinglePeakNonDefaultBR(self):   
@@ -74,11 +74,10 @@ class TestPitchSalienceFunction(TestCase):
         outputLength  = int(fiveOctaveFullRange/binResolution)        
         calculatedPitchSalience = PitchSalienceFunction(binResolution=binResolution)(freq_speaks,mag_speaks)
         self.assertEqual(len(calculatedPitchSalience), outputLength)
-        # Check the first 11 elements. The first has value "1" 
-        # The next 2 values are decreasing in magnitude.
+        # Check the first 3 elements. The first has value "1" 
         self.assertAlmostEqualVector(calculatedPitchSalience[:3], expectedPitchSalience, 8)
         # Check remaining elements are zeros
-        self.assertEqualVector(calculatedPitchSalience[4:outputLength],zeros(outputLength-4))
+        self.assertEqualVector(calculatedPitchSalience[4:outputLength], zeros(outputLength-4))
 
     # Provide multiple duplicate peaks at the reference frequency.    
     def test3DuplicatePeaks(self):
@@ -96,7 +95,7 @@ class TestPitchSalienceFunction(TestCase):
         # The next 10 values are decreasing in magnitude   
         self.assertAlmostEqualVector(calculatedPitchSalience[:binResolution+1], expectedPitchSalience, 8)
         # Check remaining elements are zeros
-        self.assertEqualVector(calculatedPitchSalience[binResolution+2:outputLength],zeros(outputLength-(binResolution+2)))
+        self.assertEqualVector(calculatedPitchSalience[binResolution+2:outputLength], zeros(outputLength-(binResolution+2)))
 
     # Test for diverse frequency peaks.
     def test3Peaks(self):
@@ -122,7 +121,7 @@ class TestPitchSalienceFunction(TestCase):
         outputLength  = int(fiveOctaveFullRange/binResolution)        
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks, mag_speaks)            
         self.assertEqual(calculatedPitchSalience[0], 1)
-        self.assertEqualVector(calculatedPitchSalience[1:outputLength],zeros(outputLength-1))
+        self.assertEqualVector(calculatedPitchSalience[1:outputLength], zeros(outputLength-1))
         self.assertEqual(len(calculatedPitchSalience), int(fiveOctaveFullRange/binResolution))
                 
     def testSinglePeakHw1(self):   
@@ -138,7 +137,7 @@ class TestPitchSalienceFunction(TestCase):
         # The next 10 values are decreasing in magnitude.
         self.assertAlmostEqualVector(calculatedPitchSalience[:11], expectedPitchSalience, 8)
         # Check remaining elements are zeros
-        self.assertEqualVector(calculatedPitchSalience[12:outputLength],zeros(outputLength-(12)))
+        self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))
 
     def test3PeaksHw1(self):
         freq_speaks = [55, 100, 340] 
@@ -179,7 +178,7 @@ class TestPitchSalienceFunction(TestCase):
         binResolution = defaultBinResolution        
         outputLength  = int(fiveOctaveFullRange/binResolution)   
         expectedPitchSalience = zeros(outputLength)
-        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)            
+        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks, mag_speaks)            
         self.assertEqualVector(calculatedPitchSalience, expectedPitchSalience)
 
     def testBelowReferenceFrequency2(self):
@@ -188,7 +187,7 @@ class TestPitchSalienceFunction(TestCase):
         binResolution = defaultBinResolution             
         outputLength  = int(fiveOctaveFullRange/binResolution)           
         expectedPitchSalience = zeros(outputLength)
-        calculatedPitchSalience = PitchSalienceFunction(referenceFrequency=40)(freq_speaks,mag_speaks)        
+        calculatedPitchSalience = PitchSalienceFunction(referenceFrequency=40)(freq_speaks, mag_speaks)        
         self.assertEqualVector(calculatedPitchSalience, expectedPitchSalience)      
 
     def testMustContainPostiveFreq(self):
@@ -216,15 +215,7 @@ class TestPitchSalienceFunction(TestCase):
 
         result:  calculatedPitchSalience[0] contains "nan"
 
-    """
-    def testSinglePeakAboveMaxBin(self):
-        # Choose a sample set of frequencies and magnitude vectors of unequal length
-        freq_speaks = [800] 
-        mag_speaks = [1] 
-        calculatedPitchSalience = PitchSalienceFunction(binResolution=5)(freq_speaks,mag_speaks)       
-        print(len(calculatedPitchSalience))
-        print(calculatedPitchSalience)        
-
+    """  
     def testNegativeMagnitudeTest(self):
         freqs = [250, 500, 1000] # length 3
         mag_speaks = [1, -1, 1] # length 3
@@ -271,11 +262,11 @@ class TestPitchSalienceFunction(TestCase):
 
         index=0
         for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
-            self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList[index], calculatedPitchSalience[index], 6)              
+            self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList[index], calculatedPitchSalience[index], 8)
             index+=1        
 
     def testRegressionSynthetic(self):
-        # Use synthetic audio for Regression Test. This keeps NPY files size low.      
+        # Use synthetic audio for Regression Test. This keeps NPY files size low.
         # First, create our algorithms:
         hopSize = 128
         frameSize = 2048
@@ -296,12 +287,12 @@ class TestPitchSalienceFunction(TestCase):
         run_pitch_contours_melody = PitchContoursMelody(guessUnvoiced=guessUnvoiced,
                                                         hopSize=hopSize)
         signalSize = frameSize * 10
-        # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
+        # Here are generated sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
         c3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 130.81 * 2*math.pi)
         d3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 146.83 * 2*math.pi)
         e3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 164.81 * 2*math.pi)
         f3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 174.61 * 2*math.pi)
-        g3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 196.00 * 2*math.pi)                                
+        g3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 196.00 * 2*math.pi)
         a3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 220.00 * 2*math.pi)
         b3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 246.94 * 2*math.pi)
         c4 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 261.63 * 2*math.pi)
@@ -324,8 +315,8 @@ class TestPitchSalienceFunction(TestCase):
                 
         expectedBins = [270., 150. ,80. ,30.]
         expectedPeaks =  [0.09777679, 0.07822143, 0.06257715, 0.05006172]
-        self.assertAlmostEqualVectorFixedPrecision(expectedBins, salience_peaks_bins, 6)
-        self.assertAlmostEqualVectorFixedPrecision(expectedPeaks, salience_peaks_saliences, 6)
+        self.assertAlmostEqualVectorFixedPrecision(expectedBins, salience_peaks_bins, 8)
+        self.assertAlmostEqualVectorFixedPrecision(expectedPeaks, salience_peaks_saliences, 8)
 
 suite = allTests(TestPitchSalienceFunction)
 
