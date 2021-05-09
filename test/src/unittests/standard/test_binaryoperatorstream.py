@@ -21,12 +21,12 @@
 
 from essentia_test import *
 
-class TestBinaryOperator(TestCase):
+class TestBinaryOperatorStream(TestCase):
 
-    div = BinaryOperator(type='divide')
-    prod = BinaryOperator(type='multiply')
-    add = BinaryOperator(type='add')
-    sub = BinaryOperator(type='subtract')
+    div = BinaryOperatorStream(type='divide')
+    prod = BinaryOperatorStream(type='multiply')
+    add = BinaryOperatorStream(type='add')
+    sub = BinaryOperatorStream(type='subtract')
 
     def testRegression(self):
         input1 = [1, 2, 3, 4]
@@ -44,29 +44,31 @@ class TestBinaryOperator(TestCase):
     def testZero(self):
         input1 = zeros(10)
         input2 = zeros(10)
+
         self.assertEqualVector(self.add(input1, input2), input1)
         self.assertEqualVector(self.sub(input1, input2), input1)
         self.assertEqualVector(self.prod(input1, input2),input1)
         self.assertComputeFails(self.div, input1, input2)
+
 
     def testEmpty(self):
         input1 = []
         input2 = []
         self.assertEqualVector(self.add(input1, input2), [])
         self.assertEqualVector(self.sub(input1, input2), [])
-        self.assertEqualVector(self.prod(input1, input2), [])
+        self.assertEqualVector(self.prod(input1, input2), [])    
         self.assertEqualVector(self.div(input1, input2), [])
 
 
     def testInvalidParam(self):
-        self.assertConfigureFails(BinaryOperator(), { 'type': '^'})
+        self.assertConfigureFails(BinaryOperatorStream(), { 'type': '^'})
 
     def testDiffSize(self):
         input1 = [1]
         input2 = [4,5]
         self.assertComputeFails(self.add, input1, input2)
 
-suite = allTests(TestBinaryOperator)
+suite = allTests(TestBinaryOperatorStream)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

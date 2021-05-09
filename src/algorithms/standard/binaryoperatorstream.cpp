@@ -88,7 +88,7 @@ void BinaryOperatorStream::compute() {
   case DIVIDE:
     {
       for (size_t i=0; i<input1.size(); ++i) {
-        if (input2[i] < 0) {
+        if (!input2[i]) {
           std::ostringstream e ;
           e <<  "BinaryOperatorStream: Divide by zero found in array position " << i;
           throw EssentiaException(e);
