@@ -22,17 +22,24 @@ from numpy import *
 from essentia_test import *
 
 class TestPitchMelodia(TestCase):
-     
+    
+    # Test for all the values above the boundary limits.
     def testInvalidParam(self):
         self.assertConfigureFails(PitchMelodia(), {'binResolution': -1})
+        self.assertConfigureFails(PitchMelodia(), {'binResolution': 0})        
         self.assertConfigureFails(PitchMelodia(), {'filterIterations': 0})
+        self.assertConfigureFails(PitchMelodia(), {'filterIterations': -1})        
         self.assertConfigureFails(PitchMelodia(), {'frameSize': -1})
+        self.assertConfigureFails(PitchMelodia(), {'frameSize': 0})        
         self.assertConfigureFails(PitchMelodia(), {'harmonicWeight': -1})
+        self.assertConfigureFails(PitchMelodia(), {'hopSize': 0})               
         self.assertConfigureFails(PitchMelodia(), {'hopSize': -1})        
         self.assertConfigureFails(PitchMelodia(), {'magnitudeCompression': -1})
+        self.assertConfigureFails(PitchMelodia(), {'magnitudeCompression': 0})        
         self.assertConfigureFails(PitchMelodia(), {'magnitudeCompression': 2})
         self.assertConfigureFails(PitchMelodia(), {'magnitudeThreshold': -1})
         self.assertConfigureFails(PitchMelodia(), {'maxFrequency': -1})
+        self.assertConfigureFails(PitchMelodia(), {'minDuration': 0})        
         self.assertConfigureFails(PitchMelodia(), {'minDuration': -1})
         self.assertConfigureFails(PitchMelodia(), {'minFrequency': -1})
         self.assertConfigureFails(PitchMelodia(), {'numberHarmonics': -1})
@@ -41,8 +48,11 @@ class TestPitchMelodia(TestCase):
         self.assertConfigureFails(PitchMelodia(), {'peakFrameThreshold': -1})
         self.assertConfigureFails(PitchMelodia(), {'peakFrameThreshold': 2})                
         self.assertConfigureFails(PitchMelodia(), {'pitchContinuity': -1})                
-        self.assertConfigureFails(PitchMelodia(), {'referenceFrequency': -1})             
+        self.assertConfigureFails(PitchMelodia(), {'referenceFrequency': 0})             
+        self.assertConfigureFails(PitchMelodia(), {'referenceFrequency': -1})              
+        self.assertConfigureFails(PitchMelodia(), {'sampleRate': 0})        
         self.assertConfigureFails(PitchMelodia(), {'sampleRate': -1})
+        self.assertConfigureFails(PitchMelodia(), {'timeContinuity': 0})
         self.assertConfigureFails(PitchMelodia(), {'timeContinuity': -1})
 
     def testEmpty(self):
@@ -106,15 +116,121 @@ class TestPitchMelodia(TestCase):
         signalSize = 10 * frameSize
         signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
         pm = PitchMelodia()
-        pitch, _ = pm(signal)
+        pitch, confidence = pm(signal)
         index= int(len(pitch)/2) # Halfway point in pitch array
         self.assertAlmostEqual(pitch[50], 110.0, 10)
+
+    def test110HzHw0(self):
+        # generate test signal: sine 110Hz @44100kHz
+        frameSize= 4096
+        signalSize = 10 * frameSize
+        signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
+        pm = PitchMelodia(peakFrameThreshold=0)
+        pitch, confidence = pm(signal)       
+        index= int(len(pitch)/2) # Halfway point in pitch array
+        self.assertAlmostEqual(pitch[50], 110.0, 10)
+
+    def test110HzHw1(self):
+        # generate test signal: sine 110Hz @44100kHz
+        frameSize= 4096
+        signalSize = 10 * frameSize
+        signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
+        pm = PitchMelodia(peakFrameThreshold=1)
+        pitch, confidence = pm(signal)    
+        index= int(len(pitch)/2) # Halfway point in pitch array
+        self.assertAlmostEqual(pitch[50], 110.0, 10)        
+
+
+    def testDifferentPeaks(self):  
+        frameSize= 4096
+        signalSize = 10 * frameSize          
+        signal_55Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 55 * 2*math.pi)
+        signal_85Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 85 * 2*math.pi)
+        signal = signal_55Hz+signal_85Hz
+        pm = PitchMelodia()
+        pitch, confidence = pm(signal)
+        index = 83
+        # Do a boundary check at the first bin location
+        while index < 83+46:
+            self.assertGreater(pitch[index], 55)  
+            self.assertLess(pitch[index], 85)  
+            index += 1        
+
+    # These are similar unit tests to pitch salience function
+    # This is really a regression test. Reference values amd locations are from previous runs.
+    def testBelowReferenceFrequency1(self):        
+        frameSize= 4096
+        signalSize = 10 * frameSize        
+        f = 50.0
+        signal_50Hz = 1.5 * numpy.sin((array(range(signalSize))/44100.) * f * 2*math.pi)
+        binResolution = 10  # defaut value           
+        fiveOctaveFullRange = 6000 # 6000 cents covers 5 octaves
+        outputLength  = int(fiveOctaveFullRange/binResolution)   
+        expectedPitchSalience = zeros(outputLength)
+        pitch, confidence  = PitchMelodia()(signal_50Hz)
+        index = 10
+        # Do an approximation  check at the first bin location
+        while index < 30:
+            self.assertAlmostEqual(pitch[index],2*f,2)
+            index += 1                
+
+    # These are similar unit tests to pitch salience function
+    # This is really a regression test. Reference values and locations are from previous runs.
+    def testBelowReferenceFrequency2(self):
+        frameSize= 4096
+        signalSize = 10 * frameSize        
+        f = 30.0        
+        signal_30Hz = 1.5 * numpy.sin((array(range(signalSize))/44100.) * f * 2*math.pi)
+        binResolution = 10 # defaut value             
+        fiveOctaveFullRange = 6000 # 6000 cents covers 5 octaves
+        outputLength  = int(fiveOctaveFullRange/binResolution)           
+        expectedPitchSalience = zeros(outputLength)
+        pitch, confidence  = PitchMelodia(referenceFrequency=40)(signal_30Hz)              
+        index = 10
+        # Do an approximation  check at the first bin location
+        while index < 30:
+            self.assertAlmostEqual(pitch[index],2*f,2)
+            index += 1                
+
+    #FIXME crash occurs in this unit test
+    """
+    def testBinResolutionTooHigh(self):        
+        frameSize= 4096
+        signalSize = 10 * frameSize        
+        signal_55Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 55 * 2*math.pi)
+        pitch, confidence   =  PitchMelodia(binResolution=55*2)(signal_55Hz)       
+        signal_55Hz = 0.5 * numpy.sin((array(range(40960))/44100.) * 55 * 2*math.pi)
+        pitch, confidence   =  PitchMelodia(binResolution=55*2)(signal_55Hz)       
+    """
+    def testSinglePeakAboveMaxBin(self):
+        frameSize= 4096
+        signalSize = 10 * frameSize   
+        binResolution = 10 # defaut value             
+        fiveOctaveFullRange = 6000 # 6000 cents covers 5 octaves
+        outputLength  = int(fiveOctaveFullRange/binResolution)              
+        # Choose a sample set of frequencies and magnitude vectors of unequal length
+        # Lets test at 800 Hz
+        signal_800Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 800 * 2*math.pi)
+        pitch, confidence   =  PitchMelodia(binResolution=5)(signal_800Hz)       
+        index = 0
+        while index < outputLength-11:
+            assertAlmostEqual(pitch[index], 800, 6)  
+            index += 1
+
+    def testSinglePeakAboveMaxBin(self):
+        frameSize= 4096
+        signalSize = 10 * frameSize        
+        binResolution = 10 # defaut value             
+        fiveOctaveFullRange = 6000 # 6000 cents covers 5 octaves
+        outputLength  = int(fiveOctaveFullRange/binResolution)           
+        # Choose a sample set of frequencies and magnitude vectors of unequal length
+        signal_800Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 800 * 2*math.pi)
+        pitch, confidence   =  PitchMelodia(binResolution=5)(signal_800Hz)       
 
     def testMajorScale(self):
         # generate test signal concatenating major scale notes.
         frameSize= 2048
         signalSize = 5 * frameSize
-
         # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
         c3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 130.81 * 2*math.pi)
         d3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 146.83 * 2*math.pi)
