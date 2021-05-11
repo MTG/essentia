@@ -29,6 +29,8 @@ class TestPitchSalienceFunction(TestCase):
         self.assertConfigureFails(PitchSalienceFunction(), {'binResolution': 0})        
         self.assertConfigureFails(PitchSalienceFunction(), {'harmonicWeight': -1})
         self.assertConfigureFails(PitchSalienceFunction(), {'harmonicWeight': 2})
+        self.assertConfigureFails(PitchSalienceFunction(), {'harmonicWeight': 1.0})
+        self.assertConfigureFails(PitchSalienceFunction(), {'harmonicWeight': 0.0})
         self.assertConfigureFails(PitchSalienceFunction(), {'magnitudeCompression': 0})        
         self.assertConfigureFails(PitchSalienceFunction(), {'magnitudeCompression': -1})
         self.assertConfigureFails(PitchSalienceFunction(), {'magnitudeCompression': 2})        
@@ -171,7 +173,7 @@ class TestPitchSalienceFunction(TestCase):
         freq_speaks = [55] 
         mag_speaks = [1] 
         outputLength  = 600        
-        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks, mag_speaks)            
+        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0.0)(freq_speaks, mag_speaks)            
         self.assertEqual(calculatedPitchSalience[0], 1)
         self.assertEqualVector(calculatedPitchSalience[1:outputLength], zeros(outputLength-1))
         self.assertEqual(len(calculatedPitchSalience), outputLength)
@@ -182,7 +184,7 @@ class TestPitchSalienceFunction(TestCase):
         outputLength  = 600        
         expectedPitchSalience = [1.0000000e+00, 9.7552824e-01, 9.0450847e-01, 7.9389262e-01, 6.5450847e-01,
         5.0000000e-01, 3.4549147e-01, 2.0610739e-01, 9.5491491e-02, 2.4471754e-02, 3.7493994e-33]
-        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks, mag_speaks)     
+        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1.0)(freq_speaks, mag_speaks)     
         self.assertEqual(len(calculatedPitchSalience), outputLength)        
         # Check the first 11 elements. The first has value "1" 
         # The next 10 values are decreasing in magnitude.
@@ -193,7 +195,7 @@ class TestPitchSalienceFunction(TestCase):
     def test3PeaksHw1(self):
         freq_speaks = [55, 100, 340] 
         mag_speaks = [1, 1, 1] 
-        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks, mag_speaks) 
+        calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1.0)(freq_speaks, mag_speaks) 
         save('calculatedPitchSalience_test3PeaksHw1.npy', calculatedPitchSalience)
         # Reference samples are loaded as expected values
         expectedPitchSalience = load(join(filedir(), 'pitchsalience/calculatedPitchSalience_test3PeaksHw1.npy'))
@@ -297,7 +299,8 @@ class TestPitchSalienceFunction(TestCase):
 
         index=0
         for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
-            self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList[index], calculatedPitchSalience[index], 8)
+            # Tolerance check to 6 decimal palces (for Linux Subsyst. compatibility.
+            self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList[index], calculatedPitchSalience[index], 6)
             index+=1        
 
     def testRegressionSyntheticInput(self):
