@@ -17,12 +17,10 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-from numpy import *
-from essentia_test import *
 
-#define useful constants for the Test cases
-defaultBinResolution = 10
-fiveOctaveFullRange = 6000
+from essentia_test import *
+from numpy import *
+
 
 class TestPitchSalienceFunction(TestCase):
   
@@ -41,50 +39,106 @@ class TestPitchSalienceFunction(TestCase):
         self.assertConfigureFails(PitchSalienceFunction(), {'referenceFrequency': 0})        
 
     def testEmpty(self): 
-        self.assertEqualVector(PitchSalienceFunction()([], []), zeros(int(fiveOctaveFullRange/defaultBinResolution)))
+        self.assertEqualVector(PitchSalienceFunction()([], []), zeros(600))
 
-    # Provide a single input peak with a unit magnitude at the reference frequency, and 
-    # validate that the output salience function has only one non-zero element at the first bin.
-    # Check also the remaining elements are zeros.
     def testSinglePeak(self):        
-        binResolution = defaultBinResolution        
-        # We have a non-zero element in bin 1. From then on, its all zeros.
-        # Length of expectedPitchSalience = 11
+        # Provide a single input peak with a unit magnitude at the reference frequency, and 
+        # validate that the output salience function has only one non-zero element at the first bin.       
+        # N.B: default value for bin Resolution is 10.
+        freq_speaks = [55] 
+        mag_speaks = [1] 
+        outputLength  = 600 # calculated by fiveOctaveFullRange/binResolution = 6000/10        
+         # Length of the non-zero values for this Pitch Salience = 11
         expectedPitchSalience = [1.0000000e+00, 9.7552824e-01, 9.0450847e-01, 7.9389262e-01, 6.5450847e-01,
         5.0000000e-01, 3.4549147e-01, 2.0610739e-01, 9.5491491e-02, 2.4471754e-02, 3.7493994e-33]
-        freq_speaks = [55] 
-        mag_speaks = [1] 
-        outputLength  = int(fiveOctaveFullRange/binResolution)        
+
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks)
-        self.assertEqual(len(calculatedPitchSalience), int(fiveOctaveFullRange/binResolution))        
-        # Check the first 11 elements. The first has value "1" 
-        # The next 10 values are decreasing in magnitude.
+        self.assertEqual(len(calculatedPitchSalience), outputLength)       
+        # Check the first 11 elements. The first element has value "1".
+        # The next returned 10 non-zero values decreasing in magnitude, should match "expected" above.
         self.assertAlmostEqualVector(calculatedPitchSalience[:11], expectedPitchSalience, 8)
-        # Check remaining elements are zeros
+        # Check remaining elements are zeros.
         self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))
 
-    # Same as above, but tweaking the bin resolution to ensure output length is consistent
     def testSinglePeakNonDefaultBR(self):   
-        binResolution = defaultBinResolution*4 # Lets test for a bin resolution of 40
+        # Same as above, but tweaking the Bin Resolution to ensure output length is consistant
         # Larger bin resolution reduces the number of non zero values in salience function
-        # Length of expectedPitchSalience = 3        
-        expectedPitchSalience = [1.0000000e+00, 5.0000000e-01, 3.7493994e-33]
+        binResolution = 40
         freq_speaks = [55] 
         mag_speaks = [1] 
-        outputLength  = int(fiveOctaveFullRange/binResolution)        
+        outputLength  = int (6000/binResolution)
+        # Length of the non-zero values for this Pitch Salience = 3        
+        expectedPitchSalience = [1.0000000e+00, 5.0000000e-01, 3.7493994e-33]
+
         calculatedPitchSalience = PitchSalienceFunction(binResolution=binResolution)(freq_speaks,mag_speaks)
         self.assertEqual(len(calculatedPitchSalience), outputLength)
-        # Check the first 3 elements. The first has value "1" 
+        # Check the first 3 elements. The first has value "1".
+        # The next returned 3 non-zero values decreasing in magnitude, should match "expected" above.        
         self.assertAlmostEqualVector(calculatedPitchSalience[:3], expectedPitchSalience, 8)
         # Check remaining elements are zeros
         self.assertEqualVector(calculatedPitchSalience[4:outputLength], zeros(outputLength-4))
 
-    # Provide multiple duplicate peaks at the reference frequency.    
+    def testSinglePeakLowCompression(self):        
+        # Provide a single input peak with a unit magnitude at the reference frequency, and 
+        # validate that the output salience function has only one non-zero element at the first bin.             
+        freq_speaks = [55] 
+        mag_speaks = [1] 
+        outputLength  = 600        
+         # Length of the non-zero values for this Pitch Salience = 11
+        expectedPitchSalience = [1.0000000e+00, 9.7552824e-01, 9.0450847e-01, 7.9389262e-01, 6.5450847e-01,
+        5.0000000e-01, 3.4549147e-01, 2.0610739e-01, 9.5491491e-02, 2.4471754e-02, 3.7493994e-33]
+
+        calculatedPitchSalience = PitchSalienceFunction(magnitudeCompression=0.0001)(freq_speaks,mag_speaks)
+        self.assertEqual(len(calculatedPitchSalience), outputLength)       
+        # Check the first 11 elements. The first element has value "1".
+        # The next returned 10 non-zero values decreasing in magnitude, should match "expected" above.
+        self.assertAlmostEqualVector(calculatedPitchSalience[:11], expectedPitchSalience, 8)
+        # Check remaining elements are zeros.
+        self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))        
+
+    def testSinglePeakLowestMagThreshold(self):        
+        # Provide a single input peak with a unit magnitude at the reference frequency, and 
+        # validate that the output salience function has only one non-zero element at the first bin.       
+        freq_speaks = [55] 
+        mag_speaks = [1] 
+        outputLength  = 600        
+         # Length of the non-zero values for this Pitch Salience = 11
+        expectedPitchSalience = [1.0000000e+00, 9.7552824e-01, 9.0450847e-01, 7.9389262e-01, 6.5450847e-01,
+        5.0000000e-01, 3.4549147e-01, 2.0610739e-01, 9.5491491e-02, 2.4471754e-02, 3.7493994e-33]
+
+        calculatedPitchSalience = PitchSalienceFunction(magnitudeThreshold=0)(freq_speaks,mag_speaks)
+        self.assertEqual(len(calculatedPitchSalience), outputLength)       
+        # Check the first 11 elements. The first element has value "1".
+        # The next returned 10 non-zero values decreasing in magnitude, should match "expected" above.
+        self.assertAlmostEqualVector(calculatedPitchSalience[:11], expectedPitchSalience, 8)
+        # Check remaining elements are zeros.
+        # Check remaining elements are zeros.
+        self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))        
+  
+    def testSinglePeakLowestHarmonics(self):        
+        # Provide a single input peak with a unit magnitude at the reference frequency, and 
+        # validate that the output salience function has only one non-zero element at the first bin.              
+        freq_speaks = [55] 
+        mag_speaks = [1] 
+        outputLength  = 600        
+         # Length of the non-zero values for this Pitch Salience = 11
+        expectedPitchSalience = [1.0000000e+00, 9.7552824e-01, 9.0450847e-01, 7.9389262e-01, 6.5450847e-01,
+        5.0000000e-01, 3.4549147e-01, 2.0610739e-01, 9.5491491e-02, 2.4471754e-02, 3.7493994e-33]
+
+        calculatedPitchSalience = PitchSalienceFunction(numberHarmonics=1)(freq_speaks,mag_speaks)
+        self.assertEqual(len(calculatedPitchSalience), outputLength)       
+        # Check the first 11 elements. The first element has value "1".
+        # The next returned 10 non-zero values decreasing in magnitude, should match "expected" above.
+        self.assertAlmostEqualVector(calculatedPitchSalience[:11], expectedPitchSalience, 8)
+        # Check remaining elements are zeros.
+        # Check remaining elements are zeros.
+        self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))        
+  
     def test3DuplicatePeaks(self):
+        # Provide multiple duplicate peaks at the reference frequency.    
         freq_speaks = [55, 55, 55] 
         mag_speaks = [1, 1, 1] 
-        binResolution = defaultBinResolution
-        outputLength  = int(fiveOctaveFullRange/binResolution)
+        outputLength  = 600        
         # The same expectedPitchSalience from testSinglePeak test case
         expectedPitchSalience = [1.0000000e+00, 9.7552824e-01, 9.0450847e-01, 7.9389262e-01, 6.5450847e-01,
         5.0000000e-01, 3.4549147e-01, 2.0610739e-01, 9.5491491e-02, 2.4471754e-02, 3.7493994e-33]
@@ -93,19 +147,18 @@ class TestPitchSalienceFunction(TestCase):
         arrayExpectedPitchSalience = 3*array(expectedPitchSalience)
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks,mag_speaks) 
         # The next 10 values are decreasing in magnitude   
-        self.assertAlmostEqualVector(calculatedPitchSalience[:binResolution+1], expectedPitchSalience, 8)
+        self.assertAlmostEqualVector(calculatedPitchSalience[:11], expectedPitchSalience, 8)
         # Check remaining elements are zeros
-        self.assertEqualVector(calculatedPitchSalience[binResolution+2:outputLength], zeros(outputLength-(binResolution+2)))
+        self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))
 
     # Test for diverse frequency peaks.
     def test3Peaks(self):
         freq_speaks = [55, 100, 340] 
         mag_speaks = [1, 1, 1] 
-        binResolution = defaultBinResolution
-        outputLength  = int(fiveOctaveFullRange/binResolution)        
+        outputLength  = 600        
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks, mag_speaks)    
         # First check the length of the ouput is 600 
-        self.assertEqual(len(calculatedPitchSalience), int(fiveOctaveFullRange/binResolution))        
+        self.assertEqual(len(calculatedPitchSalience), outputLength)       
         # This test case with diverser frequency to save ouput to NPY file since the output is more complex.
         # (i.e. the remining elements after salience fucntion  array element 11 are not all zeros)
         save('calculatedPitchSalience_test3Peaks.npy', calculatedPitchSalience)
@@ -117,22 +170,20 @@ class TestPitchSalienceFunction(TestCase):
     def testSinglePeakHw0(self):
         freq_speaks = [55] 
         mag_speaks = [1] 
-        binResolution = defaultBinResolution
-        outputLength  = int(fiveOctaveFullRange/binResolution)        
+        outputLength  = 600        
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks, mag_speaks)            
         self.assertEqual(calculatedPitchSalience[0], 1)
         self.assertEqualVector(calculatedPitchSalience[1:outputLength], zeros(outputLength-1))
-        self.assertEqual(len(calculatedPitchSalience), int(fiveOctaveFullRange/binResolution))
+        self.assertEqual(len(calculatedPitchSalience), outputLength)
                 
     def testSinglePeakHw1(self):   
         freq_speaks = [55] 
         mag_speaks = [1] 
-        binResolution = defaultBinResolution
-        outputLength  = int(fiveOctaveFullRange/binResolution)        
+        outputLength  = 600        
         expectedPitchSalience = [1.0000000e+00, 9.7552824e-01, 9.0450847e-01, 7.9389262e-01, 6.5450847e-01,
         5.0000000e-01, 3.4549147e-01, 2.0610739e-01, 9.5491491e-02, 2.4471754e-02, 3.7493994e-33]
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks, mag_speaks)     
-        self.assertEqual(len(calculatedPitchSalience), int(fiveOctaveFullRange/binResolution))        
+        self.assertEqual(len(calculatedPitchSalience), outputLength)        
         # Check the first 11 elements. The first has value "1" 
         # The next 10 values are decreasing in magnitude.
         self.assertAlmostEqualVector(calculatedPitchSalience[:11], expectedPitchSalience, 8)
@@ -170,22 +221,20 @@ class TestPitchSalienceFunction(TestCase):
         expectedPitchSalienceList = expectedPitchSalience.tolist()
         self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList, calculatedPitchSalience2, 8)
         
-    # Provide a single input peak below the reference frequency, so that the result is an empty pitch 
-    # salience function
     def testBelowReferenceFrequency1(self):
+        # Provide a single input peak below the reference frequency, so that the result is an empty pitch 
+        # salience function        
         freq_speaks = [50] 
-        mag_speaks = [1] 
-        binResolution = defaultBinResolution        
-        outputLength  = int(fiveOctaveFullRange/binResolution)   
+        mag_speaks = [1]     
+        outputLength  = 600        
         expectedPitchSalience = zeros(outputLength)
         calculatedPitchSalience = PitchSalienceFunction()(freq_speaks, mag_speaks)            
         self.assertEqualVector(calculatedPitchSalience, expectedPitchSalience)
 
     def testBelowReferenceFrequency2(self):
         freq_speaks = [30] 
-        mag_speaks = [1] 
-        binResolution = defaultBinResolution             
-        outputLength  = int(fiveOctaveFullRange/binResolution)           
+        mag_speaks = [1]            
+        outputLength  = 600        
         expectedPitchSalience = zeros(outputLength)
         calculatedPitchSalience = PitchSalienceFunction(referenceFrequency=40)(freq_speaks, mag_speaks)        
         self.assertEqualVector(calculatedPitchSalience, expectedPitchSalience)      
@@ -202,26 +251,12 @@ class TestPitchSalienceFunction(TestCase):
         mag_speaks = [1, 1, 1, 1] # length 4
         self.assertRaises(EssentiaException, lambda: PitchSalienceFunction()(freq_speaks, mag_speaks))
 
-    """ FIXME
-
-    The following test case has uncovered a situation where  divide by zero or some other 
-    illegal operation has taken place because a NAN vlaue is found in output array element zero.
-
-    def testBinResolutionTooHigh(self):        
-        freq_speaks = [55] 
-        mag_speaks = [1] 
-        calculatedPitchSalience = PitchSalienceFunction(binResolution=55*2)(freq_speaks,mag_speaks)       
-        print(calculatedPitchSalience)
-
-        result:  calculatedPitchSalience[0] contains "nan"
-
-    """  
     def testNegativeMagnitudeTest(self):
         freqs = [250, 500, 1000] # length 3
         mag_speaks = [1, -1, 1] # length 3
         self.assertRaises(EssentiaException, lambda: PitchSalienceFunction()(freqs, mag_speaks))
 
-    def testRegressionTest(self):
+    def testRegression(self):
         filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()
         frameSize = 2048
@@ -229,7 +264,7 @@ class TestPitchSalienceFunction(TestCase):
         guessUnvoiced = True
         hopSize = 512
 
-        #truncate the audio to take 0.5 sec (keep npy file size low)
+        # 1. Truncate the audio to take 0.5 sec (keep npy file size low)
         audio = audio[:22050]
 
         run_windowing = Windowing(type='hann', zeroPadding=3*frameSize) # Hann window with x4 zero padding
@@ -243,11 +278,11 @@ class TestPitchSalienceFunction(TestCase):
         run_pitch_salience_function = PitchSalienceFunction()
        
         # Now we are ready to start processing.
-        # 1. pass it through the equal-loudness filter
+        # 2. pass it through the equal-loudness filter
         audio = EqualLoudness()(audio)
         calculatedPitchSalience = []
 
-        # 2. Cut audio into frames and compute for each frame:
+        # 3. Cut audio into frames and compute for each frame:
         #    spectrum -> spectral peaks -> pitch salience function -> pitch salience function peaks
         for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
             frame = run_windowing(frame)
@@ -265,14 +300,15 @@ class TestPitchSalienceFunction(TestCase):
             self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList[index], calculatedPitchSalience[index], 8)
             index+=1        
 
-    def testRegressionSynthetic(self):
+    def testRegressionSyntheticInput(self):
         # Use synthetic audio for Regression Test. This keeps NPY files size low.
-        # First, create our algorithms:
+        # Define parameters :
         hopSize = 128
         frameSize = 2048
         sampleRate = 44100
         guessUnvoiced = True
 
+        # Create our algorithms:
         run_windowing = Windowing(type='hann', zeroPadding=3*frameSize) # Hann window with x4 zero padding
         run_spectrum = Spectrum(size=frameSize * 4)
         run_spectral_peaks = SpectralPeaks(minFrequency=1,
@@ -315,8 +351,22 @@ class TestPitchSalienceFunction(TestCase):
                 
         expectedBins = [270., 150. ,80. ,30.]
         expectedPeaks =  [0.09777679, 0.07822143, 0.06257715, 0.05006172]
-        self.assertAlmostEqualVectorFixedPrecision(expectedBins, salience_peaks_bins, 8)
-        self.assertAlmostEqualVectorFixedPrecision(expectedPeaks, salience_peaks_saliences, 8)
+        self.assertAlmostEqualVectorFixedPrecision(expectedBins, salience_peaks_bins, 6)
+        self.assertAlmostEqualVectorFixedPrecision(expectedPeaks, salience_peaks_saliences, 6)
+
+    """ FIXME
+
+    The following test case has uncovered a situation where  divide by zero or some other 
+    illegal operation has taken place because a NAN vlaue is found in output array element zero.
+
+    def testBinResolutionTooHigh(self):        
+        freq_speaks = [55] 
+        mag_speaks = [1] 
+        calculatedPitchSalience = PitchSalienceFunction(binResolution=55*2)(freq_speaks,mag_speaks)       
+        print(calculatedPitchSalience)
+
+        result:  calculatedPitchSalience[0] contains "nan"
+    """          
 
 suite = allTests(TestPitchSalienceFunction)
 
