@@ -61,15 +61,19 @@ void PitchContours::compute() {
   vector<Real>& contoursStartTimes = _contoursStartTimes.get();
   Real& duration = _duration.get();
 
-  // Set duration to zero with empty input and exit.
-  if ((peakBins.size() ==0 ) || (peakSaliences.size() ==0)){
-      duration = 0;
-      return;
-  }  
   // do sanity checks
   if (peakBins.size() != peakSaliences.size()) {
     throw EssentiaException("PitchContours: peakBins and peakSaliences input vectors must have the same size");
   }
+
+  // Set duration to zero with empty input and exit.
+  if (peakBins.size() ==0 ) {
+      contoursBins.clear();
+      contoursStartTimes.clear();
+      contoursSaliences.clear();
+      duration = 0;
+      return;
+  }  
 
   _numberFrames = peakBins.size();
   duration = _numberFrames * _frameDuration;
