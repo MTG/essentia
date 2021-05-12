@@ -90,39 +90,60 @@ class TestPitchContours(TestCase):
         # TODO This is a huge relative error threshold. Why is that?
         self.assertAlmostEqual(duration, calculatedDuration, 8)
 
-    #256 frames x single zero-salience peak at the same cent bin in each frame.
-    def testSingleZeroSaliencePeak(self):
-        peakBins = array(zeros([1, 256]))
-        peakSaliences = array(zeros([1, 256]))
-        # TODO  It is unclear why we need to change the default hop size recommended for pitch contour estimation.
-        theHopSize = 1*defaultHopSize
-        bins, saliences, startTimes, duration = PitchContours(hopSize=theHopSize)(peakBins, peakSaliences)
-        self.assertEqualVector(bins, [])
-        self.assertEqualVector(saliences, [])
-        self.assertEqualVector(startTimes, [])
-        calculatedDuration = (2*theHopSize)/defaultSampleRate
-        self.assertAlmostEqual(duration, calculatedDuration, 8)
+    # FIXME - This test case is failing
+    # The test is set up so that random frequency peaks are fed into PitchSalienceFunction, 
+    # chained to PitchSalienceFunctionPeaks and then fed to PitchContours.
+    # The end result produces empty output.
+    def testRandomPeaks(self):
+        freq_speaks = []
+        mag_speaks = []
 
-    #  We want to have different random frequency peaks at each frame.
-    #  Since a random generator is used bins, saliences, startTimes will be different every time
-    #  but the duration will always be deterministic for a given number of frames.
-    #  The assert checks on random generated outputs are boundary checks/sanity checks
-    def testVariousSaliencePeaks(self):
-        testPeakBins=[]
-        f1 = random.randrange(50, 151, 1)
-        f2 = random.randrange(500, 1001, 1)
-        # We conisder 600 frames
-        index= 0
-        while index < 600:
-            testPeakBins.append([f1 , f2])
+        # Randomize peak inputs
+        index = 0
+        while index < 4:
+            f1 = random.randrange(100, 500)
+            freq_speaks.append(f1) 
+            mag_speaks.append(1) 
             index+=1
-        testPeakSaliences = np.random.random((600, 2))
-        bins, saliences, startTimes, duration = PitchContours(hopSize=defaultHopSize)(testPeakBins, testPeakSaliences)
-        calculatedDuration = 600*(defaultHopSize)/defaultSampleRate
+
+        # Build up "vector_vector_real" salience bin and value inputs for pitchcontour
+        theBins = []
+        theValues = []
+        index = 0        
+        while index < 10:
+            calculatedPitchSalience = PitchSalienceFunction()(freq_speaks, mag_speaks)
+            bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
+            theBins.append(bins)
+            theValues.append(values)         
+            index+=1
+
+        bins, saliences, startTimes, duration = PitchContours()(theBins, theValues)
+        #print(theBins, theValues)
+        calculatedDuration = 600*(defaultHopSize)/defaultSampleRate 
         self.assertAlmostEqual(duration, calculatedDuration, 8)
-        self.assertEqual(len(bins),len(saliences))
-        self.assertEqual(len(bins),len(startTimes))
-        self.assertGreater(len(bins),0)
+        self.assertEqual(len(bins), len(saliences))
+        self.assertEqual(len(bins), len(startTimes))
+        self.assertGreater(len(bins), 0)    
+
+        # Test agina with some sample random bins and values
+        testBin =[[155., 106., 297., 344., 355., 396.,  60.,  18., 177., 224., 235.,
+        276., 206.,  35.,  76.],
+        [155., 106., 297., 344., 355., 396.,  60.,  18., 177., 224., 235.,
+        276., 206.,  35.,  76.]]
+
+        testVal = [[1.1238086 , 1.099976  , 1.        , 1.        , 1.        ,
+        1.        , 0.86700195, 0.8234954 , 0.8       , 0.8       ,
+        0.8       , 0.8       , 0.64000005, 0.52424425, 0.40960002],
+        [1.1238086 , 1.099976  , 1.        , 1.        , 1.        ,
+        1.        , 0.86700195, 0.8234954 , 0.8       , 0.8       ,
+        0.8       , 0.8       , 0.64000005, 0.52424425, 0.40960002]]
+
+        bins, saliences, startTimes, duration = PitchContours()(testBin, testVal)
+        calculatedDuration = 600*(defaultHopSize)/defaultSampleRate 
+        self.assertAlmostEqual(duration, calculatedDuration, 8)
+        self.assertEqual(len(bins), len(saliences))
+        self.assertEqual(len(bins), len(startTimes))
+        self.assertGreater(len(bins), 0)    
 
     def testUnequalInputs(self):
         peakBins = [zeros(4096), zeros(4096)]
