@@ -29,8 +29,6 @@ class TestPitchSalienceFunction(TestCase):
         self.assertConfigureFails(PitchSalienceFunction(), {'binResolution': 0})        
         self.assertConfigureFails(PitchSalienceFunction(), {'harmonicWeight': -1})
         self.assertConfigureFails(PitchSalienceFunction(), {'harmonicWeight': 2})
-        self.assertConfigureFails(PitchSalienceFunction(), {'harmonicWeight': 1.0})
-        self.assertConfigureFails(PitchSalienceFunction(), {'harmonicWeight': 0.0})
         self.assertConfigureFails(PitchSalienceFunction(), {'magnitudeCompression': 0})        
         self.assertConfigureFails(PitchSalienceFunction(), {'magnitudeCompression': -1})
         self.assertConfigureFails(PitchSalienceFunction(), {'magnitudeCompression': 2})        
