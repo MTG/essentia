@@ -19,8 +19,13 @@
 
 from numpy import *
 from essentia_test import *
+from essentia import Pool
+from essentia import array as e_array
+import essentia.standard as estd
 import random
 import numpy as np
+import warnings
+
 
 # recommended processing chain default parameters
 defaultHopSize = 128
@@ -59,15 +64,12 @@ class TestPitchContours(TestCase):
         _,  _, _, duration = PitchContours(hopSize=theHopSize)(nonEmptyPeakBins, nonEmptyPeakSaliences)
         calculatedDuration = (2 * theHopSize)/defaultSampleRate
         self.assertAlmostEqual(duration, calculatedDuration, 8)
-        
-
+     
         theHopSize= 4 * defaultHopSize
         _,  _, _, duration = PitchContours(hopSize=theHopSize)(nonEmptyPeakBins, nonEmptyPeakSaliences)
         calculatedDuration = (2 * theHopSize)/defaultSampleRate
         self.assertAlmostEqual(duration, calculatedDuration, 8)
 
-        #TODO Vary the number of frames
- 
     def testEmpty(self):
         emptyPeakBins = []
         emptyPeakSaliences = []
@@ -89,40 +91,6 @@ class TestPitchContours(TestCase):
         self.assertEqualVector(startTimes, [])
         calculatedDuration = (2*theHopSize)/defaultSampleRate
         self.assertAlmostEqual(duration, calculatedDuration, 8)
-
-    # FIXME - This test case is failing
-    # The test is set up so that random frequency peaks are fed into PitchSalienceFunction, 
-    # chained to PitchSalienceFunctionPeaks and then fed to PitchContours.
-    # The end result produces empty output.
-    """
-
-    This Test case maybe can be removed since testRegressionSynthetic gives sufficient coverage
-    def testVariousPeaks(self):
-        freq_speaks = [55, 110, 220, 440]
-        mag_speaks = [1, 1, 1, 1]
-
-        print(freq_speaks)
-        # Build up "vector_vector_real" salience bin and value inputs for pitchcontour
-        theBins = []
-        theValues = []
-   
-        for i in range(10):
-            calculatedPitchSalience = PitchSalienceFunction()(freq_speaks, mag_speaks)
-            bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
-            theBins.append(bins * 10)
-            theValues.append(values * 10)   
-
-        bins, saliences, startTimes, duration = PitchContours()(theBins, theValues)
-        print("the meaningful bins value for PitchContours")
-        print(bins, saliences, startTimes, duration)
-        calculatedDuration = 10*(defaultHopSize)/defaultSampleRate 
-        self.assertAlmostEqual(duration, calculatedDuration, 8)
-        self.assertEqual(len(bins), len(saliences))
-        self.assertEqual(len(bins), len(startTimes))  
-        print("the meaningful bins value")
-        print(bins)
-
-    """
 
     def testUnequalInputs(self):
         # Tests for unequal numbers of peaks in a frame and number of frames.
@@ -173,37 +141,40 @@ class TestPitchContours(TestCase):
         c4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 262 * 2*math.pi)
         d4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 294 * 2*math.pi)
         e4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 330 * 2*math.pi)
+        a5 = 1 * numpy.sin((array(range(signalSize))/44100.) * 440 * 2*math.pi)
+        a5plusSmallDelta = 1 * numpy.sin((array(range(signalSize))/44100.) * 445 * 2*math.pi)                                
+        a5plusMediumDelta = 1 * numpy.sin((array(range(signalSize))/44100.) * 447 * 2*math.pi)                                
+        gap150ms = zeros(15*int(defaultSampleRate/100)) 
+        gap100ms = zeros(int(defaultSampleRate/10)) 
+
+
+        # INPUT AUDIO FOR TEST SUITE 1   (variables shall have suffix _1 appended)
         # This signal is a "major scale ladder"
         scale = concatenate([const, f3, g3, a4, b4, c4, d4, e4])
+        
+        # INPUT AUDIO FOR TEST SUITE 2   (variables shall have suffix _2 appended)
+        # Test signals for time continuity
+        limitGapAudio = concatenate([const, f3, gap100ms, f3])
+        longGapAudio = concatenate([const, f3, gap150ms, f3])        
+        
+        # INPUT AUDIO FOR TEST SUITE 3   (variables shall have suffix _3 appended)
+        # Test signals for pitch continuity
+        sigSmalldelta = concatenate([const, a4, a5plusSmallDelta ])
+        sigMediumDelta = concatenate([const, a4, a5plusMediumDelta ])
 
-        # Now we are ready to start processing.
-        # 1. Load audio and pass it through the equal-loudness filter
-        audio = EqualLoudness()(scale)
-        calculatedContourBins = []
-        calculatedContourSaliences = []
-        calculatedContourStartTimes = []
-        calculatedDuration =[]
-        # ... and create a Pool
-        pool = Pool();
+        #####################################################################################################
+        contours_bins, contours_start_times, contour_saliences, duration =  self._extract_pitch_contours(scale, tc=defaultTimeContinuity, pc=defaultPitchContinuity)
 
-        # 2. Cut audio into frames and compute for each frame:
-        #    spectrum -> spectral peaks -> pitch salience function -> pitch salience function peaks
-        for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
-            peak_frequencies, peak_magnitudes = run_spectral_peaks( run_spectrum(run_windowing(frame)))
-            
-            salience = run_pitch_salience_function(peak_frequencies, peak_magnitudes)
-            salience_peaks_bins, salience_peaks_saliences = run_pitch_salience_function_peaks(salience)
-            
-            pool.add('allframes_salience_peaks_bins', salience_peaks_bins)
-            pool.add('allframes_salience_peaks_saliences', salience_peaks_saliences)
+        # run the simplified contour selection
+        [pitch, pitch_salience] = self.select_contours(
+            contours_bins, contour_saliences, contours_start_times, duration)
 
-        # 3. Now, as we have gathered the required per-frame data, we can feed it to the contour 
-        #    tracking and melody detection algorithms:
-        contours_bins, contours_saliences, contours_start_times, duration = run_pitch_contours(
-                pool['allframes_salience_peaks_bins'],
-                pool['allframes_salience_peaks_saliences'])
-
-        pitch, confidence = run_pitch_contours_melody(contours_bins, contours_saliences, contours_start_times, duration)
+        # cent to Hz conversion
+        pitch = [0. if p == 0
+                 else 55. * 2. ** (defaultBinResolution * p / 1200.)
+                 for p in pitch]
+        pitch = e_array(pitch)
+        pitch_salience = e_array(pitch_salience)
 
         # Do a round operation on the pitch
         rpitch = []
@@ -217,7 +188,6 @@ class TestPitchContours(TestCase):
         count_c4 = format(rpitch.count(262))
         count_d4 = format(rpitch.count(294))
         count_e4 = format(rpitch.count(330))
-
 
         # Do a check for a minimum number of occurences of each of the
         # originally generated frequencies from 174 to 330 Hz.
@@ -228,183 +198,219 @@ class TestPitchContours(TestCase):
         self.assertGreater(int(count_b4), minOccurences)    
         self.assertGreater(int(count_c4), minOccurences)    
         self.assertGreater(int(count_d4), minOccurences)    
-        self.assertGreater(int(count_e4), minOccurences)                
+        self.assertGreater(int(count_e4), minOccurences)        
 
-
-    def testRegressionSynthetic_PCtest(self):
-        # Lets tweak Pitch continuity
-        hopSize = defaultHopSize
-        frameSize = defaultFrameSize
-        sampleRate = defaultSampleRate
-        guessUnvoiced = True
-
-        run_windowing = Windowing(type='hann', zeroPadding=3*frameSize) # Hann window with x4 zero padding
-        run_spectrum = Spectrum(size=frameSize * 4)
-        run_spectral_peaks = SpectralPeaks(minFrequency=1,
-                                           maxFrequency=20000,
-                                           maxPeaks=100,
-                                           sampleRate=sampleRate,
-                                           magnitudeThreshold=0,
-                                           orderBy="magnitude")
-        run_pitch_salience_function = PitchSalienceFunction()
-        run_pitch_salience_function_peaks = PitchSalienceFunctionPeaks()
-        run_pitch_contours = PitchContours(hopSize=hopSize, sampleRate=sampleRate, pitchContinuity=5.0)
-        run_pitch_contours_melody = PitchContoursMelody(hopSize=hopSize, sampleRate=sampleRate)
-
-        signalSize = frameSize * 10
-        # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
-        # Lydian Scale of F
-        # Put a bit of constant input at the beginning.
-        const = ones(signalSize)
-        # These are appox. /rounded values of the notes listed.
-        # They might be 1 Hz out
-        f3 = 1 * numpy.sin((array(range(signalSize))/44100.) * 174 * 2*math.pi)
-        g3 = 1 * numpy.sin((array(range(signalSize))/44100.) * 196 * 2*math.pi)                                
-        a4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 220 * 2*math.pi)
-        b4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 246 * 2*math.pi)
-        c4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 262 * 2*math.pi)
-        d4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 294 * 2*math.pi)
-        e4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 330 * 2*math.pi)
-        # This signal is a "major scale ladder"
-        scale = concatenate([const, f3, g3, a4, b4, c4, d4, e4])
-
-        # Now we are ready to start processing.
-        # 1. Load audio and pass it through the equal-loudness filter
-        audio = EqualLoudness()(scale)
-        calculatedContourBins = []
-        calculatedContourSaliences = []
-        calculatedContourStartTimes = []
-        calculatedDuration =[]
-        # ... and create a Pool
-        pool = Pool();
-
-        # 2. Cut audio into frames and compute for each frame:
-        #    spectrum -> spectral peaks -> pitch salience function -> pitch salience function peaks
-        for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
-            peak_frequencies, peak_magnitudes = run_spectral_peaks( run_spectrum(run_windowing(frame)))
-            
-            salience = run_pitch_salience_function(peak_frequencies, peak_magnitudes)
-            salience_peaks_bins, salience_peaks_saliences = run_pitch_salience_function_peaks(salience)
-            
-            pool.add('allframes_salience_peaks_bins', salience_peaks_bins)
-            pool.add('allframes_salience_peaks_saliences', salience_peaks_saliences)
-
-        # 3. Now, as we have gathered the required per-frame data, we can feed it to the contour 
-        #    tracking and melody detection algorithms:
-        contours_bins, contours_saliences, contours_start_times, duration = run_pitch_contours(
-                pool['allframes_salience_peaks_bins'],
-                pool['allframes_salience_peaks_saliences'])
-
-        pitch, confidence = run_pitch_contours_melody(contours_bins, contours_saliences, contours_start_times, duration)
+        contours_bins, contours_start_times, contour_saliences, duration =  self._extract_pitch_contours(limitGapAudio, tc=defaultTimeContinuity, pc=defaultPitchContinuity)
+        # run the simplified contour selection
+        [pitch, pitch_salience] = self.select_contours(contours_bins, contour_saliences, contours_start_times, duration)
 
         # Do a round operation on the pitch
-        rpitch = []
+        rpitch = []        
         for i in range(len(pitch)):
             rpitch.append(round(pitch[i]))
+        count_199 = format(rpitch.count(199))
+        
+        # Check at least 304 instances of value 199
+        self.assertGreater(int(count_199), 303)    
 
+        contours_bins, contours_start_times, contour_saliences, duration =  self._extract_pitch_contours(sigSmalldelta, tc=defaultTimeContinuity, pc=defaultPitchContinuity)
+        # run the simplified contour selection
+        [pitch, pitch_salience] = self.select_contours(contours_bins, contour_saliences, contours_start_times, duration)
 
-        count_a4 = format(rpitch.count(220))
-        count_b4 = format(rpitch.count(246))
-        count_c4 = format(rpitch.count(262))
-        count_d4 = format(rpitch.count(294))
-        count_e4 = format(rpitch.count(330))
-
-        minOccurences= 147 
-        self.assertGreater(int(count_a4), minOccurences)    
-        self.assertGreater(int(count_b4), minOccurences)    
-        self.assertGreater(int(count_c4), minOccurences)    
-        self.assertGreater(int(count_d4), minOccurences)    
-        self.assertGreater(int(count_e4), minOccurences)                
-
-
-    def testRegressionSynthetic_TCtest(self):
-        # Lets tweak Time continuity
-        hopSize = defaultHopSize
-        frameSize = defaultFrameSize
-        sampleRate = defaultSampleRate
-        guessUnvoiced = True
-
-        run_windowing = Windowing(type='hann', zeroPadding=3*frameSize) # Hann window with x4 zero padding
-        run_spectrum = Spectrum(size=frameSize * 4)
-        run_spectral_peaks = SpectralPeaks(minFrequency=1,
-                                           maxFrequency=20000,
-                                           maxPeaks=100,
-                                           sampleRate=sampleRate,
-                                           magnitudeThreshold=0,
-                                           orderBy="magnitude")
-        run_pitch_salience_function = PitchSalienceFunction()
-        run_pitch_salience_function_peaks = PitchSalienceFunctionPeaks()
-        run_pitch_contours = PitchContours(hopSize=hopSize, sampleRate=sampleRate, timeContinuity=2000)
-        run_pitch_contours_melody = PitchContoursMelody(hopSize=hopSize, sampleRate=sampleRate)
-
-        signalSize = frameSize * 10
-        # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
-        # Lydian Scale of F
-        # Put a bit of constant input at the beginning.
-        const = ones(signalSize)
-        # These are appox. /rounded values of the notes listed.
-        # They might be 1 Hz out
-
-        # LETS ZERO OUT THE C4 notes to see what happens
-        f3 = 1 * numpy.sin((array(range(signalSize))/44100.) * 174 * 2*math.pi)
-        g3 = 1 * numpy.sin((array(range(signalSize))/44100.) * 196 * 2*math.pi)                           
-        a4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 220 * 2*math.pi)
-        b4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 246 * 2*math.pi)
-        c4 = zeros(signalSize)      
-        d4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 294 * 2*math.pi)
-        e4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 330 * 2*math.pi)
-        # This signal is a "major scale ladder"
-        scale = concatenate([const, f3, g3, a4, b4, c4, d4, e4])
-
-        # Now we are ready to start processing.
-        # 1. Load audio and pass it through the equal-loudness filter
-        audio = EqualLoudness()(scale)
-        calculatedContourBins = []
-        calculatedContourSaliences = []
-        calculatedContourStartTimes = []
-        calculatedDuration =[]
-        # ... and create a Pool
-        pool = Pool();
-
-        # 2. Cut audio into frames and compute for each frame:
-        #    spectrum -> spectral peaks -> pitch salience function -> pitch salience function peaks
-        for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
-            peak_frequencies, peak_magnitudes = run_spectral_peaks( run_spectrum(run_windowing(frame)))
-            
-            salience = run_pitch_salience_function(peak_frequencies, peak_magnitudes)
-            salience_peaks_bins, salience_peaks_saliences = run_pitch_salience_function_peaks(salience)
-            
-            pool.add('allframes_salience_peaks_bins', salience_peaks_bins)
-            pool.add('allframes_salience_peaks_saliences', salience_peaks_saliences)
-
-        # 3. Now, as we have gathered the required per-frame data, we can feed it to the contour 
-        #    tracking and melody detection algorithms:
-        contours_bins, contours_saliences, contours_start_times, duration = run_pitch_contours(
-                pool['allframes_salience_peaks_bins'],
-                pool['allframes_salience_peaks_saliences'])
-
-        pitch, confidence = run_pitch_contours_melody(contours_bins, contours_saliences, contours_start_times, duration)
 
         # Do a round operation on the pitch
-        rpitch = []
+        rpitch = []        
         for i in range(len(pitch)):
             rpitch.append(round(pitch[i]))
+        count_362 = format(rpitch.count(362))
 
-        count_f3 = format(rpitch.count(174))
-        count_g3 = format(rpitch.count(196))
-        count_a4 = format(rpitch.count(220))
-        count_b4 = format(rpitch.count(246))
-        count_d4 = format(rpitch.count(294))
-        count_e4 = format(rpitch.count(330))
+        # Check at least 156 instances of value 362
+        self.assertGreater(int(count_362), 156)    
 
+        contours_bins, contours_start_times, contour_saliences, duration =  self._extract_pitch_contours(sigMediumDelta, tc=defaultTimeContinuity, pc=defaultPitchContinuity)
+        # run the simplified contour selection
+        [pitch, pitch_salience] = self.select_contours(contours_bins, contour_saliences, contours_start_times, duration)
 
-        minOccurences= 147 
-        self.assertGreater(int(count_f3), minOccurences)    
-        self.assertGreater(int(count_g3), minOccurences)    
-        self.assertGreater(int(count_a4), minOccurences)    
-        self.assertGreater(int(count_b4), minOccurences)    
-        self.assertGreater(int(count_d4), minOccurences)    
-        self.assertGreater(int(count_e4), minOccurences)                
+        # Do a round operation on the pitch
+        rpitch = []        
+        for i in range(len(pitch)):
+            rpitch.append(round(pitch[i]))
+        count_363 = format(rpitch.count(363))
+
+        # Check at least 156 instances of value 362
+        self.assertGreater(int(count_363), 156)    
+    # Borrowed the following source the following functions
+    # select_contours, _extract_pitch_contours, _join_contours, _remove_overlaps
+    # https://github.com/sertansenturk/predominantmelodymakam    
+    def select_contours(self, pitch_contours, contour_saliences, start_times,
+                        duration):
+        sample_rate = defaultSampleRate
+        hop_size = defaultHopSize
+
+        # number in samples in the audio
+        num_samples = int(ceil((duration * sample_rate) / hop_size))
+
+        # Start points of the contours in samples
+        start_samples = [
+            int(round(start_times[i] * sample_rate / float(hop_size)))
+            for i in range(0, len(start_times))]
+
+        pitch_contours_no_overlap = []
+        start_samples_no_overlap = []
+        contour_saliences_no_overlap = []
+        lens_no_overlap = []
+        try:
+            # the pitch contours is a list of numpy arrays, parse them starting
+            # with the longest contour
+            while pitch_contours:  # terminate when all the contours are
+                # checked
+                # print len(pitchContours)
+
+                # get the lengths of the pitchContours
+                lens = [len(k) for k in pitch_contours]
+
+                # find the longest pitch contour
+                long_idx = lens.index(max(lens))
+
+                # pop the lists related to the longest pitchContour and append
+                # it to the new list
+                pitch_contours_no_overlap.append(pitch_contours.pop(long_idx))
+                contour_saliences_no_overlap.append(
+                    contour_saliences.pop(long_idx))
+                start_samples_no_overlap.append(start_samples.pop(long_idx))
+                lens_no_overlap.append(lens.pop(long_idx))
+
+                # accumulate the filled samples
+                acc_idx = range(start_samples_no_overlap[-1],
+                                start_samples_no_overlap[-1] +
+                                lens_no_overlap[-1])
+
+                # remove overlaps
+                [start_samples, pitch_contours, contour_saliences] = self._remove_overlaps(start_samples, pitch_contours, contour_saliences, lens, acc_idx)
+                #[start_samples, pitch_contours, contour_saliences] = self._remove_overlaps(start_samples, pitch_contours, contour_saliences, lens)
+        except ValueError:
+            # if the audio input is very short such that Essentia returns a
+            # single contour as a numpy array (of length 1) of numpy array
+            # (of length 1). In this case the while loop fails directly
+            # as it tries to check all the truth value of an all pitch values,
+            # instead of checking whether the list is empty or not.
+            # Here we handle the error in a Pythonic way by simply breaking the
+            # loop and assigning the inputs to outputs since a single contour
+            # means nothing to filter
+            pitch_contours_no_overlap = pitch_contours
+            contour_saliences_no_overlap = contour_saliences
+            start_samples_no_overlap = start_samples
+
+        pitch, salience = self._join_contours(pitch_contours_no_overlap,
+                                              contour_saliences_no_overlap,
+                                              start_samples_no_overlap,
+                                              num_samples)
+
+        return pitch, salience    
+
+    def _extract_pitch_contours(self, audio, tc, pc):
+
+        # Hann window with x4 zero padding
+        run_windowing = estd.Windowing(zeroPadding=3 *defaultFrameSize)
+        run_spectrum = estd.Spectrum(size=defaultFrameSize * 4)
+        run_spectral_peaks = estd.SpectralPeaks(minFrequency=1,
+                                           maxFrequency=20000,
+                                           maxPeaks=100,
+                                           sampleRate=defaultSampleRate,
+                                           magnitudeThreshold=0,
+                                           orderBy="magnitude")
+
+        # convert unit to cents, PitchSalienceFunction takes 55 Hz as the
+        # default reference
+        run_pitch_salience_function = estd.PitchSalienceFunction()
+        run_pitch_salience_function_peaks = estd.PitchSalienceFunctionPeaks()
+        run_pitch_contours = estd.PitchContours(pitchContinuity=pc,timeContinuity=tc) # default params
+
+        # compute frame by frame
+        pool = Pool()
+        for frame in estd.FrameGenerator(audio, frameSize=defaultFrameSize,
+                                         hopSize=defaultHopSize):
+            frame = run_windowing(frame)
+            spectrum = run_spectrum(frame)
+            peak_frequencies, peak_magnitudes = run_spectral_peaks(spectrum)
+            salience = run_pitch_salience_function(peak_frequencies,
+                                                   peak_magnitudes)
+            salience_peaks_bins, salience_peaks_contour_saliences = \
+                run_pitch_salience_function_peaks(salience)
+            if not np.size(salience_peaks_bins):
+                salience_peaks_bins = np.array([0])
+            if not np.size(salience_peaks_contour_saliences):
+                salience_peaks_contour_saliences = np.array([0])
+
+            pool.add('allframes_salience_peaks_bins', salience_peaks_bins)
+            pool.add('allframes_salience_peaks_contourSaliences',
+                     salience_peaks_contour_saliences)
+
+        # post-processing: contour tracking
+        contours_bins, contour_saliences, contours_start_times, duration = \
+            run_pitch_contours(
+                pool['allframes_salience_peaks_bins'],
+                pool['allframes_salience_peaks_contourSaliences'])
+        return contours_bins, contours_start_times, contour_saliences, duration
+
+    @staticmethod
+    def _join_contours(pitch_contours_no_overlap, contour_saliences_no_overlap,
+                       start_samples_no_overlap, num_samples):
+        # accumulate pitch and salience
+        pitch = np.array([0.] * num_samples)
+        salience = np.array([0.] * num_samples)
+        for i in range(0, len(pitch_contours_no_overlap)):
+            start_samp = start_samples_no_overlap[i]
+            end_samp = start_samples_no_overlap[i] + len(
+                pitch_contours_no_overlap[i])
+
+            try:
+                pitch[start_samp:end_samp] = pitch_contours_no_overlap[i]
+                salience[start_samp:end_samp] = contour_saliences_no_overlap[i]
+            except ValueError:
+                warnings.warn("The last pitch contour exceeds the audio "
+                              "length. Trimming...")
+
+                pitch[start_samp:] = pitch_contours_no_overlap[i][:len(
+                    pitch) - start_samp]
+                salience[start_samp:] = contour_saliences_no_overlap[i][:len(
+                    salience) - start_samp]
+        return pitch, salience
+
+    @staticmethod
+    def _remove_overlaps(start_samples, pitch_contours, contour_saliences,lens, acc_idx):
+        # remove overlaps
+        rmv_idx = []
+        for i in range(0, len(start_samples)):
+            # print '_' + str(i)
+            # create the sample index vector for the checked pitch contour
+            curr_samp_idx = range(start_samples[i], start_samples[i] + lens[i])
+
+            # get the non-overlapping samples
+            curr_samp_idx_no_overlap = list(set(curr_samp_idx) -
+                                            set(acc_idx))
+            if curr_samp_idx_no_overlap:
+                temp = min(curr_samp_idx_no_overlap)
+                keep_idx = range(temp - start_samples[i],
+                                 (max(curr_samp_idx_no_overlap) -
+                                  start_samples[i]) + 1)
+
+                # remove all overlapping values
+                pitch_contours[i] = np.array(pitch_contours[i])[keep_idx]
+                contour_saliences[i] = np.array(contour_saliences[i])[keep_idx]
+                # update the startSample
+                start_samples[i] = temp
+            else:  # totally overlapping
+                rmv_idx.append(i)
+
+        # remove totally overlapping pitch contours
+        rmv_idx = sorted(rmv_idx, reverse=True)
+        for r in rmv_idx:
+            pitch_contours.pop(r)
+            contour_saliences.pop(r)
+            start_samples.pop(r)
+
+        return start_samples, pitch_contours, contour_saliences
 
 suite = allTests(TestPitchContours)
 
