@@ -53,23 +53,6 @@ class TestPitchContours(TestCase):
         self.assertConfigureFails(PitchContours(), {'sampleRate': -1})
         self.assertConfigureFails(PitchContours(), {'timeContinuity': -1})
 
-    def testDuration(self):
-        # simple test for the duration output with small populated frames
-
-        # There are varying hopSize values but the expected duration (calculatedDuration) 
-        #is always wrongly the same.
-        nonEmptyPeakBins = testPeakBins
-        nonEmptyPeakSaliences = testPeakSaliences
-        theHopSize= 2 * defaultHopSize
-        _,  _, _, duration = PitchContours(hopSize=theHopSize)(nonEmptyPeakBins, nonEmptyPeakSaliences)
-        calculatedDuration = (2 * theHopSize)/defaultSampleRate
-        self.assertAlmostEqual(duration, calculatedDuration, 8)
-     
-        theHopSize= 4 * defaultHopSize
-        _,  _, _, duration = PitchContours(hopSize=theHopSize)(nonEmptyPeakBins, nonEmptyPeakSaliences)
-        calculatedDuration = (2 * theHopSize)/defaultSampleRate
-        self.assertAlmostEqual(duration, calculatedDuration, 8)
-
     def testEmpty(self):
         emptyPeakBins = []
         emptyPeakSaliences = []
@@ -81,7 +64,6 @@ class TestPitchContours(TestCase):
         self.assertEqual(duration, 0)
 
     def testEmptyFrames(self):
-        # TODO We shouldn't hard-code the number of frames as we can infer it with len(emptyPeakBins)
         emptyPeakBins = [[],[]]
         emptyPeakSaliences = [[],[]]
         theHopSize= 2*defaultHopSize
@@ -89,11 +71,11 @@ class TestPitchContours(TestCase):
         self.assertEqualVector(bins, [])
         self.assertEqualVector(saliences, [])
         self.assertEqualVector(startTimes, [])
-        calculatedDuration = (2*theHopSize)/defaultSampleRate
+        calculatedDuration = (len(emptyPeakBins)*theHopSize)/defaultSampleRate
         self.assertAlmostEqual(duration, calculatedDuration, 8)
 
     def testUnequalInputs(self):
-        # Tests for unequal numbers of peaks in a frame and number of frames.
+        # Suite o tests for unequal numbers of peaks in a frame, number of frames,etc.
         peakBins = [zeros(4096), zeros(4096)]
         peakSaliences = [zeros(1024), zeros(1024)]
         self.assertRaises(RuntimeError, lambda: PitchContours()(peakBins, peakSaliences))
@@ -105,9 +87,16 @@ class TestPitchContours(TestCase):
         peakBins = [zeros(4096), zeros(4096), zeros(4096)]
         peakSaliences =[zeros(4096), zeros(4096)]       
         self.assertRaises(RuntimeError, lambda: PitchContours()(peakBins, peakSaliences))
+    
+    # Helper function
+    def _roundArray(self, pitch):
+        rpitch = []
+        for i in range(len(pitch)):
+            rpitch.append(round(pitch[i]))
+        return rpitch
 
     def testRegressionSynthetic(self):
-        # Use synthetic audio for Regression Test. This keeps NPY files size low.
+        # Use synthetic audio for Regression Test.
         # First, create our algorithms:
         hopSize = defaultHopSize
         frameSize = defaultFrameSize
@@ -116,24 +105,21 @@ class TestPitchContours(TestCase):
 
         run_windowing = Windowing(type='hann', zeroPadding=3*frameSize) # Hann window with x4 zero padding
         run_spectrum = Spectrum(size=frameSize * 4)
-        run_spectral_peaks = SpectralPeaks(minFrequency=1,
-                                           maxFrequency=20000,
-                                           maxPeaks=100,
-                                           sampleRate=sampleRate,
-                                           magnitudeThreshold=0,
-                                           orderBy="magnitude")
+        run_spectral_peaks = SpectralPeaks(minFrequency=1, maxFrequency=20000,
+                                           maxPeaks=100, sampleRate=sampleRate,
+                                           magnitudeThreshold=0, orderBy="magnitude")
         run_pitch_salience_function = PitchSalienceFunction()
         run_pitch_salience_function_peaks = PitchSalienceFunctionPeaks()
         run_pitch_contours = PitchContours(hopSize=hopSize, sampleRate=sampleRate)
-        run_pitch_contours_melody = PitchContoursMelody(hopSize=hopSize, sampleRate=sampleRate)
 
         signalSize = frameSize * 10
-        # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
+        # Here are generate sine waves for each note of the scale, e.g. c3 is 130.81 Hz, etc
         # Lydian Scale of F
         # Put a bit of constant input at the beginning.
         const = ones(signalSize)
-        # These are appox. /rounded values of the notes listed.
-        # They might be 1 Hz out
+        # These are appox. /rounded values of the notes listed f3, g3...etc
+        # They might be (1 or 0.5) Hz out)
+        # 7 notes from Lydian scale
         f3 = 1 * numpy.sin((array(range(signalSize))/44100.) * 174 * 2*math.pi)
         g3 = 1 * numpy.sin((array(range(signalSize))/44100.) * 196 * 2*math.pi)                                
         a4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 220 * 2*math.pi)
@@ -141,23 +127,29 @@ class TestPitchContours(TestCase):
         c4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 262 * 2*math.pi)
         d4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 294 * 2*math.pi)
         e4 = 1 * numpy.sin((array(range(signalSize))/44100.) * 330 * 2*math.pi)
+
+        # a5 to be used for pitch continuity tests
         a5 = 1 * numpy.sin((array(range(signalSize))/44100.) * 440 * 2*math.pi)
         a5plusSmallDelta = 1 * numpy.sin((array(range(signalSize))/44100.) * 445 * 2*math.pi)                                
         a5plusMediumDelta = 1 * numpy.sin((array(range(signalSize))/44100.) * 447 * 2*math.pi)                                
+
+        # Create 150ms gap for time continuity tests
         gap150ms = zeros(15*int(defaultSampleRate/100)) 
+
+        # Create 100ms gap for time continuity tests
         gap100ms = zeros(int(defaultSampleRate/10)) 
 
-
-        # INPUT AUDIO FOR TEST SUITE 1   (variables shall have suffix _1 appended)
-        # This signal is a "major scale ladder"
+        # INPUT AUDIO FOR TEST SUITE 1  
+        # This signal is a "lydian scale ladder" with constant values at the beginning-
         scale = concatenate([const, f3, g3, a4, b4, c4, d4, e4])
         
-        # INPUT AUDIO FOR TEST SUITE 2   (variables shall have suffix _2 appended)
+        # INPUT AUDIO FOR TEST SUITE 2   
         # Test signals for time continuity
         limitGapAudio = concatenate([const, f3, gap100ms, f3])
-        longGapAudio = concatenate([const, f3, gap150ms, f3])        
-        
-        # INPUT AUDIO FOR TEST SUITE 3   (variables shall have suffix _3 appended)
+        longGapAudio = concatenate([const, f3, gap150ms, gap150ms,f3])        
+    
+
+        # INPUT AUDIO FOR TEST SUITE 3   
         # Test signals for pitch continuity
         sigSmalldelta = concatenate([const, a4, a5plusSmallDelta ])
         sigMediumDelta = concatenate([const, a4, a5plusMediumDelta ])
@@ -177,69 +169,52 @@ class TestPitchContours(TestCase):
         pitch_salience = e_array(pitch_salience)
 
         # Do a round operation on the pitch
-        rpitch = []
-        for i in range(len(pitch)):
-            rpitch.append(round(pitch[i]))
-
-        count_f3 = format(rpitch.count(174))
-        count_g3 = format(rpitch.count(196))
-        count_a4 = format(rpitch.count(220))
-        count_b4 = format(rpitch.count(246))
-        count_c4 = format(rpitch.count(262))
-        count_d4 = format(rpitch.count(294))
-        count_e4 = format(rpitch.count(330))
+        rpitch = self._roundArray(pitch)
 
         # Do a check for a minimum number of occurences of each of the
         # originally generated frequencies from 174 to 330 Hz.
+        # Regression test show 147 min. re-occurences.
         minOccurences= 147 
-        self.assertGreater(int(count_f3), minOccurences)    
-        self.assertGreater(int(count_g3), minOccurences)    
-        self.assertGreater(int(count_a4), minOccurences)    
-        self.assertGreater(int(count_b4), minOccurences)    
-        self.assertGreater(int(count_c4), minOccurences)    
-        self.assertGreater(int(count_d4), minOccurences)    
-        self.assertGreater(int(count_e4), minOccurences)        
+        self.assertGreater(int(format(rpitch.count(174))), minOccurences)    
+        self.assertGreater(int(format(rpitch.count(196))), minOccurences)    
+        self.assertGreater(int(format(rpitch.count(220))), minOccurences)    
+        self.assertGreater(int(format(rpitch.count(246))), minOccurences)    
+        self.assertGreater(int(format(rpitch.count(262))), minOccurences)    
+        self.assertGreater(int(format(rpitch.count(294))), minOccurences)    
+        self.assertGreater(int(format(rpitch.count(330))), minOccurences)        
 
+        # Default parameters for continuity shown explicitly to facilitate tweaking the tests.
         contours_bins, contours_start_times, contour_saliences, duration =  self._extract_pitch_contours(limitGapAudio, tc=defaultTimeContinuity, pc=defaultPitchContinuity)
         # run the simplified contour selection
         [pitch, pitch_salience] = self.select_contours(contours_bins, contour_saliences, contours_start_times, duration)
 
         # Do a round operation on the pitch
-        rpitch = []        
-        for i in range(len(pitch)):
-            rpitch.append(round(pitch[i]))
-        count_199 = format(rpitch.count(199))
-        
-        # Check at least 304 instances of value 199
-        self.assertGreater(int(count_199), 303)    
+        rpitch = self._roundArray(pitch)
+
+        # Check at least 303 instances of pitch value 199
+        self.assertGreater(int(format(rpitch.count(199))), 303)    
 
         contours_bins, contours_start_times, contour_saliences, duration =  self._extract_pitch_contours(sigSmalldelta, tc=defaultTimeContinuity, pc=defaultPitchContinuity)
         # run the simplified contour selection
         [pitch, pitch_salience] = self.select_contours(contours_bins, contour_saliences, contours_start_times, duration)
 
-
         # Do a round operation on the pitch
-        rpitch = []        
-        for i in range(len(pitch)):
-            rpitch.append(round(pitch[i]))
-        count_362 = format(rpitch.count(362))
+        rpitch = self._roundArray(pitch)
 
-        # Check at least 156 instances of value 362
-        self.assertGreater(int(count_362), 156)    
+        # Check at least 156 instances of pitch value 362
+        self.assertGreater(int(format(rpitch.count(362))), 156)    
 
         contours_bins, contours_start_times, contour_saliences, duration =  self._extract_pitch_contours(sigMediumDelta, tc=defaultTimeContinuity, pc=defaultPitchContinuity)
         # run the simplified contour selection
         [pitch, pitch_salience] = self.select_contours(contours_bins, contour_saliences, contours_start_times, duration)
 
         # Do a round operation on the pitch
-        rpitch = []        
-        for i in range(len(pitch)):
-            rpitch.append(round(pitch[i]))
-        count_363 = format(rpitch.count(363))
+        rpitch = self._roundArray(pitch)
 
-        # Check at least 156 instances of value 362
-        self.assertGreater(int(count_363), 156)    
-    # Borrowed the following source the following functions
+        # Check at least 156 instances of pitch value 363
+        self.assertGreater(int(format(rpitch.count(363))), 156)    
+
+    # Taken the following source code from the following functions
     # select_contours, _extract_pitch_contours, _join_contours, _remove_overlaps
     # https://github.com/sertansenturk/predominantmelodymakam    
     def select_contours(self, pitch_contours, contour_saliences, start_times,
