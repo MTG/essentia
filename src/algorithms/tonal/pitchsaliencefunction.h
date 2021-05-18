@@ -66,7 +66,7 @@ class PitchSalienceFunction : public Algorithm {
     declareParameter("magnitudeThreshold", "peak magnitude threshold (maximum allowed difference from the highest peak in dBs)", "[0,inf)",  40.0);
     declareParameter("magnitudeCompression", "magnitude compression parameter (=0 for maximum compression, =1 for no compression)", "(0,1]", 1.0);
     declareParameter("numberHarmonics", "number of considered harmonics", "[1,inf)", 20);
-    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);
+    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "[0,1]", 0.8);
   }
 
   void configure();
