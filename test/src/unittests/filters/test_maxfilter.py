@@ -32,9 +32,12 @@ class TestMaxFilter(TestCase):
 
     def testRegression(self):
       sr = 44100
-      index=0
+      index = 0
       original_signal = []
       clean_signal = []
+      # This format is not "typical python".
+      # This while loop format is easier in my notebook used for plotting and testing
+      # than the more python friendly "for i range() ....."
       while index < 1000:
         original_signal_pt = .25 * cos((index/sr)  * 5 * 2*pi) \
                             +.25 * cos((index/sr)  * 50 * 2*pi) \
@@ -44,16 +47,13 @@ class TestMaxFilter(TestCase):
         index+=1
 
       maxfilteredSignal = std.MaxFilter()(clean_signal)
-
       smf = std.Spectrum()(maxfilteredSignal)
-      print("smf[11]")
-      print(smf[11])
-      print("smf[113]")
-      print(smf[113])
-      print("smf[227]")
-      print(smf[227])
+      self.assertAlmostEqual(smf[11], 100.53416, 8)
+      self.assertAlmostEqual(smf[113], 76.10497, 8) 
+      self.assertAlmostEqual(smf[227], 27.911573, 8)
 
 suite = allTests(TestMaxFilter)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
+

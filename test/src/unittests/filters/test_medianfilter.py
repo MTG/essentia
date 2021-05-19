@@ -30,7 +30,7 @@ import essentia.standard as std
 
 class TestMedianFilter(TestCase):
 
-    def testRegression(self):
+    def testRegressionRange(self):
         sr = 44100.
         pi2 = 2*pi
         signal = [.25*cos(t*pi2*5/sr) + \
@@ -51,12 +51,14 @@ class TestMedianFilter(TestCase):
         for i in range(1001, len(sf)):
             if s[i] > 10:
                 self.assertTrue(sf[i] < 0.5*s[i])
-
-    def testRegression(self):
+    
+    def testRegressionPeaks(self):
         sr = 44100
         index=0
-        original_signal = []
         clean_signal = []
+        # The "unpython" While loop used because this code sample was tested like this on a 
+        # Jupyter notebook for plotting.
+        # The above "...for t...range()" threw errors in that environment.
         while index < 1000:
             original_signal_pt = .25 * cos((index/sr)  * 5 * 2*pi) \
                                 +.25 * cos((index/sr)  * 50 * 2*pi) \
@@ -65,13 +67,13 @@ class TestMedianFilter(TestCase):
             clean_signal.append(original_signal_pt)
             index+=1
 
-        maxfilteredSignal = std.MaxFilter()(clean_signal)
-
-        smf = std.Spectrum()(maxfilteredSignal)
-        self.assertAlmostEqual(smf[11], 6.3058047)      
-        self.assertAlmostEqual(smf[113], 35.78345)      
+        medianfilteredSignal = std.MedianFilter()(clean_signal)
+        smf = std.Spectrum()(medianfilteredSignal)
+        self.assertAlmostEqual(smf[11], 97.21687, 8)      
+        self.assertAlmostEqual(smf[113], 35.783447, 8)      
   
 suite = allTests(TestMedianFilter)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
+
