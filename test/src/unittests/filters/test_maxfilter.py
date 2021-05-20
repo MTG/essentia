@@ -18,7 +18,6 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-
 from essentia_test import *
 from math import *
 from numpy import *
@@ -27,30 +26,35 @@ from essentia import *
 from math import *
 import essentia.standard as std
 
-
 class TestMaxFilter(TestCase):
 
+    def testZeros(self):
+      original_signal = zeros(8)
+      maxfiltered_signal = MaxFilter()(original_signal)
+      self.assertEqualVector(maxfiltered_signal, original_signal)
+
+    def testEmpty(self):
+      original_signal = []
+      self.assertRaises(RuntimeError, lambda: MaxFilter()(original_signal))
+    
     def testRegression(self):
       sr = 44100
       index = 0
-      original_signal = []
-      clean_signal = []
-      # This format is not "typical python".
-      # This while loop format is easier in my notebook used for plotting and testing
-      # than the more python friendly "for i range() ....."
-      while index < 1000:
-        original_signal_pt = .25 * cos((index/sr)  * 5 * 2*pi) \
-                            +.25 * cos((index/sr)  * 50 * 2*pi) \
-                            +.25 * cos((index/sr)  * 500 * 2*pi) \
-                            +.25 * cos((index/sr)  * 5000 * 2*pi)
-        clean_signal.append(original_signal_pt)
-        index+=1
+      original_signal = [10, 10, 10, 20, 5, 5, 40, 5, 5, 80, 5, 5] 
+      
+      # Test with filter width = 3
+      # The values "5" are filtered out by the max filters
+      expected_output = [10, 10, 10, 20, 20, 20, 40, 40, 40, 80, 80, 80]
+      maxfiltered_signal = std.MaxFilter(width = 3)(original_signal)
+      self.assertEqualVector(maxfiltered_signal, expected_output)
 
-      maxfilteredSignal = std.MaxFilter()(clean_signal)
-      smf = std.Spectrum()(maxfilteredSignal)
-      self.assertAlmostEqual(smf[11], 100.53416, 8)
-      self.assertAlmostEqual(smf[113], 76.10497, 8) 
-      self.assertAlmostEqual(smf[227], 27.911573, 8)
+      # Test with filter width = 4
+      original_signal = [10, 10, 10, 20, 5, 15, 25, 40, 35, 25, 15, 80, 75, 65, 85]
+      # You can see the max values are "held" for every group of "width=4" elements
+      expected_output = [10, 10, 10, 20, 20, 20, 25, 40, 40, 40, 40, 80, 80, 80, 85]
+      #expected_output2 = [10, 10, 10, 20, 20, 20, 20, 40, 40, 40, 40, 80, 80, 80, 80]
+      maxfiltered_signal = std.MaxFilter(width = 4)(original_signal)
+      self.assertEqualVector(maxfiltered_signal, expected_output)
 
 suite = allTests(TestMaxFilter)
 

@@ -17,8 +17,6 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-
-
 from essentia_test import *
 from math import *
 from numpy import *
@@ -29,6 +27,23 @@ import essentia.standard as std
 
 
 class TestMedianFilter(TestCase):
+
+    def testInputTooSmall(self):
+        original_signal = ones(10)
+        self.assertRaises(RuntimeError, lambda: MedianFilter(kernelSize=11)(original_signal))
+
+    def testOddKernelSize(self):
+        original_signal = ones(256)
+        self.assertRaises(RuntimeError, lambda: MedianFilter(kernelSize=10)(original_signal))
+    
+    def testZeros(self):
+        original_signal = zeros(256)
+        medianfiltered_signal = MedianFilter()(original_signal)
+        self.assertEqualVector(medianfiltered_signal, original_signal)
+
+    def testEmpty(self):
+        original_signal = []
+        self.assertRaises(RuntimeError, lambda: MedianFilter()(original_signal))
 
     def testRegressionRange(self):
         sr = 44100.
@@ -52,26 +67,23 @@ class TestMedianFilter(TestCase):
             if s[i] > 10:
                 self.assertTrue(sf[i] < 0.5*s[i])
     
-    def testRegressionPeaks(self):
+    def testRegression(self):
         sr = 44100
-        index=0
-        clean_signal = []
-        # The "unpython" While loop used because this code sample was tested like this on a 
-        # Jupyter notebook for plotting.
-        # The above "...for t...range()" threw errors in that environment.
-        while index < 1000:
-            original_signal_pt = .25 * cos((index/sr)  * 5 * 2*pi) \
-                                +.25 * cos((index/sr)  * 50 * 2*pi) \
-                                +.25 * cos((index/sr)  * 500 * 2*pi) \
-                                +.25 * cos((index/sr)  * 5000 * 2*pi)
-            clean_signal.append(original_signal_pt)
-            index+=1
+        index = 0
+        original_signal = [10, 10, 10, 20, 5, 5, 40, 5, 5, 80, 5, 5]
+        # Test with kernel = 3
+        # The output is "smoothed" (outliers 20,40, 80 removed)
+        expected_output = [10., 10., 10., 10.,  5.,  5.,  5.,  5.,  5.,  5.,  5.,  5.]
+        medianfiltered_signal = std.MedianFilter(kernelSize = 3)(original_signal)
+        self.assertEqualVector(medianfiltered_signal, expected_output)
 
-        medianfilteredSignal = std.MedianFilter()(clean_signal)
-        smf = std.Spectrum()(medianfilteredSignal)
-        self.assertAlmostEqual(smf[11], 97.21687, 8)      
-        self.assertAlmostEqual(smf[113], 35.783447, 8)      
-  
+        # Test with kernel = 5 
+        original_signal = [10, 10, 10, 20, 5, 15, 25, 40, 35, 25, 15, 80, 75, 65, 85]
+        # You can see the edges are smoothed out
+        expected_output = [10, 10, 10, 10, 15, 20, 25, 25, 25, 35, 35, 65, 75, 80, 85] 
+        medianfiltered_signal = std.MedianFilter(kernelSize=5)(original_signal)
+        self.assertEqualVector(medianfiltered_signal, expected_output)
+   
 suite = allTests(TestMedianFilter)
 
 if __name__ == '__main__':
