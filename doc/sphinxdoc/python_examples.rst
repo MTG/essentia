@@ -27,6 +27,7 @@ Tonality
 
 Deep embeddings, music classification and auto-tagging
 ------------------------------------------------------
+* `Music auto-tagging, classification, and embedding extraction <tutorial_tensorflow_auto-tagging_classification_embeddings.html>`_
 * `Real-time music auto-tagging <tutorial_tensorflow_real-time_auto-tagging.html>`_
 
 
