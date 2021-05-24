@@ -24,6 +24,7 @@ from numpy import *
 from essentia import *
 from math import *
 import essentia.standard as std
+import statistics
 
 
 class TestMedianFilter(TestCase):
@@ -45,7 +46,7 @@ class TestMedianFilter(TestCase):
         original_signal = []
         self.assertRaises(RuntimeError, lambda: MedianFilter()(original_signal))
 
-    def testRegressionRange(self):
+    def testRangeChecks(self):
         sr = 44100.
         pi2 = 2*pi
         signal = [.25*cos(t*pi2*5/sr) + \
@@ -66,24 +67,43 @@ class TestMedianFilter(TestCase):
         for i in range(1001, len(sf)):
             if s[i] > 10:
                 self.assertTrue(sf[i] < 0.5*s[i])
-    
-    def testRegression(self):
-        sr = 44100
-        index = 0
-        original_signal = [10, 10, 10, 20, 5, 5, 40, 5, 5, 80, 5, 5]
-        # Test with kernel = 3
-        # The output is "smoothed" (outliers 20,40, 80 removed)
-        expected_output = [10., 10., 10., 10.,  5.,  5.,  5.,  5.,  5.,  5.,  5.,  5.]
-        medianfiltered_signal = std.MedianFilter(kernelSize = 3)(original_signal)
-        self.assertEqualVector(medianfiltered_signal, expected_output)
-
-        # Test with kernel = 5 
-        original_signal = [10, 10, 10, 20, 5, 15, 25, 40, 35, 25, 15, 80, 75, 65, 85]
-        # You can see the edges are smoothed out
-        expected_output = [10, 10, 10, 10, 15, 20, 25, 25, 25, 35, 35, 65, 75, 80, 85] 
-        medianfiltered_signal = std.MedianFilter(kernelSize=5)(original_signal)
-        self.assertEqualVector(medianfiltered_signal, expected_output)
    
+      
+    def testFilterPadding(self):
+        # Use Random input data and check that the beginning and the end 
+        # are padded with the first and last values in the input vector.    
+        x1 = [12, 2, 5, 6, 51, 45646, 614]         
+        x2 = [6, 51, 45646, 614, 1, 14, 6 ,7]         
+        x3 = [16, 51, 45, 41, 45, 51, 45, 4, 51, 45, 6, 46, 3]         
+
+        y1= std.MedianFilter(kernelSize = 3)(x1)
+        y2= std.MedianFilter(kernelSize = 5)(x2)
+        y3= std.MedianFilter(kernelSize = 7)(x3)
+        self.assertEqual(y1[0], x1[0])
+        self.assertEqual(y1[len(x1)-1], x1[len(x1)-1])        
+        self.assertEqual(y2[0], x2[0])
+        self.assertEqual(y2[len(x2)-1], x2[len(x2)-1])            
+        self.assertEqual(y3[0], x3[0])        
+        self.assertEqual(y3[len(x3)-1], x3[len(x3)-1])                
+
+    def testRegressionMedianPart(self):
+        # Manually pass a median filter through the x array below
+        x = [-2, 2, 13, 16, 9, 14, 4]         
+ 
+        # Use library median calculation on 4 shifted positions
+        y1 = statistics.median(x[0:3])
+        y2 = statistics.median(x[1:4])
+        y3 = statistics.median(x[2:5])
+        y4 = statistics.median(x[3:6])        
+        calculated_median= [ y1, y2, y3, y4]
+        
+        # Test with kernel = 3
+        y= std.MedianFilter(kernelSize = 3)(x)
+
+        # Clip off the padded parts and check against above values
+        y_pads_removed = y[1:len(y)-2]
+        self.assertEqualVector(calculated_median, y_pads_removed)
+
 suite = allTests(TestMedianFilter)
 
 if __name__ == '__main__':
