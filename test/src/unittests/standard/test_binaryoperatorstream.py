@@ -44,12 +44,10 @@ class TestBinaryOperatorStream(TestCase):
     def testZero(self):
         input1 = zeros(10)
         input2 = zeros(10)
-
         self.assertEqualVector(self.add(input1, input2), input1)
         self.assertEqualVector(self.sub(input1, input2), input1)
         self.assertEqualVector(self.prod(input1, input2),input1)
         self.assertComputeFails(self.div, input1, input2)
-
 
     def testEmpty(self):
         input1 = []
@@ -58,7 +56,6 @@ class TestBinaryOperatorStream(TestCase):
         self.assertEqualVector(self.sub(input1, input2), [])
         self.assertEqualVector(self.prod(input1, input2), [])    
         self.assertEqualVector(self.div(input1, input2), [])
-
 
     def testInvalidParam(self):
         self.assertConfigureFails(BinaryOperatorStream(), { 'type': '^'})
