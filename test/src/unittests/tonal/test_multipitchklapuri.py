@@ -111,7 +111,6 @@ class TestMultiPitchKlapuri(TestCase):
         # We calculate array index mid point to allow checking the estimated pitch.
 
         midpointC3 = midPointOffset
-        print()
         midpointD3 = int(1 * numSinglePitchSamples) + midPointOffset
         midpointE3 = int(2 * numSinglePitchSamples) + midPointOffset
         midpointF3 = int(3 * numSinglePitchSamples) + midPointOffset

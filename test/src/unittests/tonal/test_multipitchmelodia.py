@@ -72,8 +72,8 @@ class TestMultiPitchMelodia(TestCase):
         frameSize= 4096
         signalSize = 10 * frameSize
         signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
-        mpk = MultiPitchMelodia()
-        pitch = mpk(signal)
+        mpm = MultiPitchMelodia()
+        pitch = mpm(signal)
         index= int(len(pitch)/2) # Halfway point in pitch array
         self.assertAlmostEqual(pitch[index], 110.0, 10)
 
@@ -95,8 +95,8 @@ class TestMultiPitchMelodia(TestCase):
         # This signal is a "major scale ladder"
         scale = concatenate([c3, d3, e3, f3, g3, a3, b3, c4])
 
-        mpk = MultiPitchMelodia()
-        pitch = mpk(scale)
+        mpm = MultiPitchMelodia()
+        pitch = mpm(scale)
 
         numPitchSamples = len(pitch)
         numSinglePitchSamples = int(numPitchSamples/8)
@@ -104,16 +104,15 @@ class TestMultiPitchMelodia(TestCase):
 
         theLen = len(pitch)
         index = 0
-        klapArray = []  
+        multiArray = []  
         while (index < theLen):
-            klapArray.append(pitch[index][0])
+            multiArray.append(pitch[index][0])
             index+=1
 
         # On each step of the "SCALE LADDER" we take the step mid point.
         # We calculate array index mid point to allow checking the estimated pitch.
 
         midpointC3 = midPointOffset
-        print()
         midpointD3 = int(1 * numSinglePitchSamples) + midPointOffset
         midpointE3 = int(2 * numSinglePitchSamples) + midPointOffset
         midpointF3 = int(3 * numSinglePitchSamples) + midPointOffset
@@ -123,14 +122,14 @@ class TestMultiPitchMelodia(TestCase):
         midpointC4 = int(7 * numSinglePitchSamples) + midPointOffset                                        
              
         # Use high precision (10) for checking synthetic signals
-        self.assertAlmostEqual(klapArray[midpointC3], 130.81, 10)
-        self.assertAlmostEqual(klapArray[midpointD3], 146.83, 10)
-        self.assertAlmostEqual(klapArray[midpointE3], 164.81, 10)
-        self.assertAlmostEqual(klapArray[midpointF3], 174.61, 10)
-        self.assertAlmostEqual(klapArray[midpointG3], 196.00, 10)
-        self.assertAlmostEqual(klapArray[midpointA3], 220.00, 10)
-        self.assertAlmostEqual(klapArray[midpointB3], 246.94, 10)
-        self.assertAlmostEqual(klapArray[midpointC4], 261.63, 10)
+        self.assertAlmostEqual(multiArray[midpointC3], 130.81, 10)
+        self.assertAlmostEqual(multiArray[midpointD3], 146.83, 10)
+        self.assertAlmostEqual(multiArray[midpointE3], 164.81, 10)
+        self.assertAlmostEqual(multiArray[midpointF3], 174.61, 10)
+        self.assertAlmostEqual(multiArray[midpointG3], 196.00, 10)
+        self.assertAlmostEqual(multiArray[midpointA3], 220.00, 10)
+        self.assertAlmostEqual(multiArray[midpointB3], 246.94, 10)
+        self.assertAlmostEqual(multiArray[midpointC4], 261.63, 10)
         
 suite = allTests(TestMultiPitchMelodia)
 

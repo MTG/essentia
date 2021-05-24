@@ -120,26 +120,6 @@ class TestPitchMelodia(TestCase):
         index= int(len(pitch)/2) # Halfway point in pitch array
         self.assertAlmostEqual(pitch[50], 110.0, 10)
 
-    def test110HzHw0(self):
-        # generate test signal: sine 110Hz @44100kHz
-        frameSize = 4096
-        signalSize = 10 * frameSize
-        signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
-        pm = PitchMelodia(peakFrameThreshold=0)
-        pitch, confidence = pm(signal)       
-        index= int(len(pitch)/2) # Halfway point in pitch array
-        self.assertAlmostEqual(pitch[50], 110.0, 10)
-
-    def test110HzHw1(self):
-        # generate test signal: sine 110Hz @44100kHz
-        frameSize = 4096
-        signalSize = 10 * frameSize
-        signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
-        pm = PitchMelodia(peakFrameThreshold=1)
-        pitch, confidence = pm(signal)    
-        index = int(len(pitch)/2) # Halfway point in pitch array
-        self.assertAlmostEqual(pitch[50], 110.0, 10)        
-
     def testDifferentPeaks(self):  
         frameSize= 4096
         signalSize = 10 * frameSize          
@@ -170,7 +150,7 @@ class TestPitchMelodia(TestCase):
         index = 10
         # Do an approximation  check at the first bin location
         while index < 30:
-            self.assertAlmostEqual(pitch[index],2*f,2)
+            self.assertAlmostEqual(pitch[index], 2*f, 2)
             index += 1                
 
     # This is really a regression test. Reference values and locations are from previous runs.
@@ -200,17 +180,6 @@ class TestPitchMelodia(TestCase):
             self.assertAlmostEqual(pitch[index], 2*referenceFrequency, 2)
             index += 1                
 
-
-    #FIXME crash occurs in this unit test (Z prepended to ake it the last test)
-    """
-    def test_ZBinResolutionTooHigh(self):        
-        frameSize= 4096
-        signalSize = 10 * frameSize        
-        signal_55Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 55 * 2*math.pi)
-        pitch, confidence   =  PitchMelodia(binResolution=55*2)(signal_55Hz)       
-        signal_55Hz = 0.5 * numpy.sin((array(range(40960))/44100.) * 55 * 2*math.pi)
-        pitch, confidence   =  PitchMelodia(binResolution=55*2)(signal_55Hz)       
-    """
     def testSinglePeakAboveMaxBin(self):
         frameSize= 4096
         signalSize = 10 * frameSize   
@@ -223,7 +192,7 @@ class TestPitchMelodia(TestCase):
         pitch, confidence   =  PitchMelodia(binResolution=5)(signal_800Hz)       
         index = 0
         while index < outputLength-11:
-            assertAlmostEqual(pitch[index], 800, 6)  
+            assertAlmostEqual(pitch[index], 800, 8)  
             index += 1
 
     def testSinglePeakAboveMaxBin(self):
@@ -232,9 +201,9 @@ class TestPitchMelodia(TestCase):
         binResolution = 10 # defaut value             
         fiveOctaveFullRange = 6000 # 6000 cents covers 5 octaves
         outputLength  = int(fiveOctaveFullRange/binResolution)           
-        # Choose a sample set of frequencies and magnitude vectors of unequal length
+        # Choose a sample set of frequencies and magnitude vectorfs of unequal length
         signal_800Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 800 * 2*math.pi)
-        pitch, confidence   =  PitchMelodia(binResolution=5)(signal_800Hz)       
+        pitch, confidence = PitchMelodia(binResolution=5)(signal_800Hz)       
 
     def testMajorScale(self):
         # generate test signal concatenating major scale notes.
@@ -242,6 +211,7 @@ class TestPitchMelodia(TestCase):
         frameSize = 2048
         signalSize = 5 * frameSize
         # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
+
         c3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 130.81 * 2*math.pi)
         d3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 146.83 * 2*math.pi)
         e3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 164.81 * 2*math.pi)
@@ -249,37 +219,16 @@ class TestPitchMelodia(TestCase):
         g3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 196.00 * 2*math.pi)                                
         a4 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 220.00 * 2*math.pi)
         b4 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 246.94 * 2*math.pi)
-        
-        # a5 to be used for pitch continuity tests
-        a5 = 1 * numpy.sin((array(range(signalSize))/44100.) * 440 * 2*math.pi)
-        a5plusSmallDelta = 1 * numpy.sin((array(range(signalSize))/44100.) * 445 * 2*math.pi)
-        a5plusMediumDelta = 1 * numpy.sin((array(range(signalSize))/44100.) * 447 *  2*math.pi)
-
-        # Create 150ms gap for time continuity tests
-        gap150ms = zeros(15*int(defaultSampleRate/100)) 
-
-        # Create 100ms gap for time continuity tests
-        gap100ms = zeros(int(defaultSampleRate/10)) 
-    
+                
         # This signal is a "major scale ladder"
-        scale = concatenate([c3, d3, e3, f3, g3, a4, b4 ])
-
-        # INPUT AUDIO FOR TEST SUITE 2   
-        # Test signals for time continuity
-        limitGapAudio = concatenate([f3, gap100ms, f3])
-        longGapAudio = concatenate([f3, gap150ms, gap150ms,f3])        
-    
-        # INPUT AUDIO FOR TEST SUITE 3   
-        # Test signals for pitch continuity
-        sigSmalldelta = concatenate([a5, a5, a5plusSmallDelta])
-        sigMediumDelta = concatenate([a5, a5, a5plusMediumDelta])    
+        scale = concatenate([c3, d3, e3, f3, g3, a4, b4])
 
         pm = PitchMelodia()
         pitch, confidence = pm(scale)
 
         numPitchSamples = len(pitch)
-        numSinglePitchSamples = int(numPitchSamples/8)
-        midPointOffset =  int(numSinglePitchSamples/2)
+        numSinglePitchSamples = int(numPitchSamples / 8)
+        midPointOffset =  int(numSinglePitchSamples / 2)
 
         # On each step of the "SCALE LADDER" we take the step mid point.
         # We calculate array index mid point to allow checking the estimated pitch.
@@ -293,7 +242,6 @@ class TestPitchMelodia(TestCase):
         midpointC4 = int(7 * numSinglePitchSamples) + midPointOffset                                        
              
         # Use high precision (10) for checking synthetic signals
-        # TODO: Check why returned confidence value is low (0.49)
         self.assertAlmostEqual(pitch[midpointC3], 130.81, 10)
         self.assertAlmostEqual(pitch[midpointD3], 146.83, 10)
         self.assertAlmostEqual(pitch[midpointE3], 164.81, 10)
@@ -301,22 +249,7 @@ class TestPitchMelodia(TestCase):
         self.assertAlmostEqual(pitch[midpointG3], 196.00, 10)
         self.assertAlmostEqual(pitch[midpointA3], 220.00, 10)
         self.assertAlmostEqual(pitch[midpointB3], 246.94, 10)
-        self.assertAlmostEqual(pitch[midpointC4], 261.63, 10)
-
-        pitch2, confidence2 = pm(limitGapAudio)
-        print("pitch2")        
-        print(pitch2)
-        pitch2, confidence2 = pm(longGapAudio)
-        print("pitch2")        
-        print(pitch2)
-
-        pitch3, confidence3 = pm(sigSmalldelta)
-        print("pitch3")        
-        print(pitch3)                
-
-        pitch3, confidence3 = pm(sigMediumDelta)
-        print("pitch3")        
-        print(pitch3)                
+        self.assertAlmostEqual(pitch[midpointC4], 261.63, 10)              
 
 suite = allTests(TestPitchMelodia)
 
