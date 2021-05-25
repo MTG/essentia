@@ -96,16 +96,30 @@ void TonicIndianArtMusic::configure() {
 
 void TonicIndianArtMusic::compute() {
   
-  printf("DBG0");
+  printf("DBG0 \n");
   std::cout<< "DEBUGGING"<< std::endl;
+
+
+
+  printf("DBG0b \n");
   const vector<Real>& signal = _signal.get();
-  Real& tonic = _tonic.get();
-  printf("DBG1");
-  // Prevent segmentation fault
+    // Prevent segmentation fault
   if (signal.size() == 0) { 
     throw EssentiaException("TonicIndianArtMusic: Empty Audio passed"); 
   }
+  printf("DBG0c \n");  
 
+
+  Real& tonic = _tonic.get();
+  printf("DBG1 \n");
+  if (tonic == 0) { 
+    printf("TonicIzero \n"); 
+  }
+  else
+  {
+     printf("TonicNOJNzero \n"); 
+  }
+  print("CRASH HERE!!!!!! for    x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 99.1* 2*math.pi)")
   printf("DBG2");
   // Pre-processing
   vector<Real> frame;
@@ -127,6 +141,8 @@ void TonicIndianArtMusic::compute() {
   _spectralPeaks->output("frequencies").set(frameFrequencies);
   _spectralPeaks->output("magnitudes").set(frameMagnitudes);
 
+
+  printf("DBG3");
   // Pitch salience contours
   vector<Real> frameSalience;
   _pitchSalienceFunction->input("frequencies").set(frameFrequencies);
@@ -139,6 +155,8 @@ void TonicIndianArtMusic::compute() {
   _pitchSalienceFunctionPeaks->output("salienceBins").set(frameSalienceBins);
   _pitchSalienceFunctionPeaks->output("salienceValues").set(frameSalienceValues);
 
+
+  printf("DBG4");
   // histogram computation
   vector<Real> histogram;
   histogram.resize(_numberBins);
@@ -203,6 +221,10 @@ void TonicIndianArtMusic::compute() {
   Real f3 =peak_locs[2] - highest_peak_loc;
   Real f5 =peak_locs[4] - highest_peak_loc;
 
+  std::cout << histogram << std::endl;
+  std::cout << peak_locs << std::endl;  
+  std::cout << peak_amps << std::endl;
+
   if (f2>50){
     tonic_loc = peak_locs[0];
   }
@@ -241,6 +263,7 @@ void TonicIndianArtMusic::compute() {
   }
   //converting value of the tonic in cent to Hz scale
   Real _centToHertzBase = pow(2, _binResolution / 1200.0);
+
   tonic = _referenceFrequency * pow(_centToHertzBase, tonic_loc);
 }
 
