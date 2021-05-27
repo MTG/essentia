@@ -18,126 +18,100 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 
-
 from essentia_test import *
-from numpy import sin, float32, pi, arange, mean, log2, floor, ceil
-from numpy import *
-
+from numpy import sin, float32, pi, arange, mean, log2, floor, ceil, math, concatenate
 
 class TestTonicIndianArtMusic(TestCase):
-
-    """
-    def testEmpty(self):
-        #FIXME -Segmentation Fault occurs despite 
-        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic()([]))
-
-    def testZero(self):
-        #FIXME -Segmentation Fault occurs despite         
-        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic()([0]))
-    """
-
-    def testOnes(self):
-        tonic   = TonicIndianArtMusic()([1]*1024)
-        print(tonic)
-
-    def testNegativeInput(self):
-        # Negative vlues should be set to 0
-        tonic = TonicIndianArtMusic()([-1]*1024)
-        print(tonic)
 
     def testInvalidParam(self):
         self.assertConfigureFails(TonicIndianArtMusic(), { 'binResolution': -1 })
         self.assertConfigureFails(TonicIndianArtMusic(), { 'frameSize': -1 })
+        self.assertConfigureFails(TonicIndianArtMusic(), { 'binResolution': 0 })
+        self.assertConfigureFails(TonicIndianArtMusic(), { 'frameSize': 0 })        
         self.assertConfigureFails(TonicIndianArtMusic(), { 'harmonicWeight': -1 })
+        self.assertConfigureFails(TonicIndianArtMusic(), { 'harmonicWeight': 0 })
+        self.assertConfigureFails(TonicIndianArtMusic(), { 'harmonicWeight': 1 })
         self.assertConfigureFails(TonicIndianArtMusic(), { 'hopSize': -1 })
         self.assertConfigureFails(TonicIndianArtMusic(), { 'magnitudeCompression': -1 })
         self.assertConfigureFails(TonicIndianArtMusic(), { 'magnitudeThreshold': -1 })
         self.assertConfigureFails(TonicIndianArtMusic(), { 'maxTonicFrequency': -1 })
         self.assertConfigureFails(TonicIndianArtMusic(), { 'minTonicFrequency': -1 })
         self.assertConfigureFails(TonicIndianArtMusic(), { 'numberHarmonics': 0 })
+        self.assertConfigureFails(TonicIndianArtMusic(), { 'numberHarmonics': -1 })        
         self.assertConfigureFails(TonicIndianArtMusic(), { 'numberSaliencePeaks': 0})
         self.assertConfigureFails(TonicIndianArtMusic(), { 'referenceFrequency': -1 })
         self.assertConfigureFails(TonicIndianArtMusic(), { 'sampleRate':   -1 })
 
+    def testZeros(self):
+        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic()(zeros(1024)))   
+
+    def testOnes(self):
+        referenceTonic =108.86099243164062     
+        tonic   = TonicIndianArtMusic()(ones(1024))
+        self.assertAlmostEqual(referenceTonic, tonic, 8)
+
+    def testNegativeInput(self):
+        tonic = TonicIndianArtMusic()([-1]*1024)
+        referenceTonic =108.86099243164062     
+        tonic   = TonicIndianArtMusic()([-1]*1024)
+        self.assertAlmostEqual(referenceTonic, tonic, 8)
+
     def testRegression(self):
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'),
-                                           sampleRate = 44100)()
+                            sampleRate = 44100)()
         referenceTonic = 102.74                                       
-        tonicEst = TonicIndianArtMusic()(audio)
-        self.assertAlmostEqual(referenceTonic, tonicEst, 6)
-        print("PASSED")
-        #tonicEst = TonicIndianArtMusic(sampleRate=fs)(x.astype(float32))
-        #self.assertEqual(0, tonicEst.all())
+        tonic = TonicIndianArtMusic()(audio)
+        self.assertAlmostEqual(referenceTonic, tonic, 6)
 
+    def testMinMaxMismatch(self):
+        frameSize = 2048
+        signalSize = 15 * frameSize
+        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 99.1* 2*math.pi)
+        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic(minTonicFrequency=190, maxTonicFrequency=11)(x))
 
-    def testExtendDetectionThreshold(self):
-        #  Extend Min and Max default values are 50 and 250 cents so
-        #  this values  shouldn't be detected.
-        fs = 100  #Hz
-        f0 = 100  #Hz
-        x = ceil(f0 * (2**(250/1200.) -1) / (2**(250/1200.) + 1))
-        extent = 5 #Hz
-        tonic = 102
-        x2 = [f0] * 1024 +  extent * sin(2 * pi * tonic * arange(1024) / fs)
-        print(x2)
-        #tonicEst = TonicIndianArtMusic(sampleRate=44100)(x2.astype(float32))
-        #print(tonicEst)
-        #extent  = floor(f0 * (2**(50/1200.) -1) / (2**(50/1200.) + 1))
-        #x = [f0] * 1024 + extent  * sin(2 * pi * tonic * arange(1024) / fs)
-        #tonicEst = TonicIndianArtMusic(sampleRate=fs)(x.astype(float32))
-        #print(tonicEst)
-
-
-    def testMajorScale(self):
-        # generate test signal concatenating major scale notes.
+    def testBelowMinimumTonic(self):
+        # generate test signal 99 Hz, and put minFreq as 100 Hz in the TonicIndianArtMusic
         defaultSampleRate = 44100
         frameSize = 2048
         signalSize = 15 * frameSize
         # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
+        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 99* 2*math.pi)
+        self.assertRaises(EssentiaException, lambda: TonicIndianArtMusic(minTonicFrequency=100)(x))   
 
+    def testRegressionSyntheticSignal(self):
+
+        # generate test signal concatenating major scale notes.
+        defaultSampleRate = 44100
+        frameSize = 2048
+        signalSize = 15 * frameSize
+        # Concat 3 sine waves together of different frequencies
 
         x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 124 * 2*math.pi)
-
         y = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 100 * 2*math.pi)
-
         z = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 80 * 2*math.pi)
-        # This signal is a "major scale ladder"
         scale = concatenate([x, y, z])
 
-        tiam = TonicIndianArtMusic()
+        tiam = TonicIndianArtMusic(minTonicFrequency=50, maxTonicFrequency=111)
         tonic  = tiam(scale)        
-        print(tonic)
+        # Check that tonic is above minTonicFrequency
+        self.assertGreater(tonic, 50)
+        # Check that tonic is below highest frequency in signal
+        self.assertGreater(124, tonic)
 
+        ### Make a (unharmonic) chord
+        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 124 * 2*math.pi)
+        y = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 100 * 2*math.pi)
+        z = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 80 * 2*math.pi)
+        # This signal is a "major scale ladder"
+        chord =x+y+z
 
-    def testzReferenceFreq99(self):
-        # generate test signal concatenating major scale notes.
-        defaultSampleRate = 44100
-        frameSize = 2048
-        signalSize = 15 * frameSize
-        # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
-
-        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 99* 2*math.pi)
-
-
-        tiam = TonicIndianArtMusic()
-        tonic  = tiam(x)        
-        print(tonic)
-
-
-
-    def testReferenceFreq991(self):
-        # generate test signal concatenating major scale notes.
-        defaultSampleRate = 44100
-        frameSize = 2048
-        signalSize = 15 * frameSize
-        # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
-
-        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 99.1* 2*math.pi)
-
-
-        tiam = TonicIndianArtMusic()
-        tonic  = tiam(x)        
-        print(tonic)
+        tiam = TonicIndianArtMusic(minTonicFrequency=50, maxTonicFrequency=111)
+        tonic  = tiam(chord)         
+        
+        # Check that tonic is above min frequency in signal
+        self.assertGreater(tonic, 80)
+        # Check that tonic is below highest frequency in signal        
+        self.assertGreater(124, tonic)
 
 suite = allTests(TestTonicIndianArtMusic)
 
