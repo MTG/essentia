@@ -31,6 +31,10 @@ class TestMedianFilter(TestCase):
     def testInputTooSmall(self):
         original_signal = ones(10)
         self.assertRaises(RuntimeError, lambda: MedianFilter(kernelSize=11)(original_signal))
+    
+    def testInputEqKernalSize(self):
+        original_signal = ones(11)
+        self.assertRaises(RuntimeError, lambda: MedianFilter(kernelSize=11)(original_signal))
 
     def testOddKernelSize(self):
         original_signal = ones(256)
