@@ -20,6 +20,7 @@
 
 from essentia_test import *
 from numpy import sin, float32, pi, arange, mean, log2, floor, ceil, math, concatenate
+import numpy as np
 
 class TestTonicIndianArtMusic(TestCase):
 
@@ -42,57 +43,74 @@ class TestTonicIndianArtMusic(TestCase):
         self.assertConfigureFails(TonicIndianArtMusic(), { 'referenceFrequency': -1 })
         self.assertConfigureFails(TonicIndianArtMusic(), { 'sampleRate':   -1 })
 
-    def testZeros(self):
-        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic()(zeros(1024)))   
+    def testEmpty(self):
+        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic()([]))   
+
+    def testSilence(self):
+        silence = np.zeros(int(np.abs(np.random.randn()) * 30. * 44100))
+        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic()(silence))
 
     def testOnes(self):
-        referenceTonic =108.86099243164062     
-        tonic   = TonicIndianArtMusic()(ones(1024))
-        self.assertAlmostEqual(referenceTonic, tonic, 8)
-
-    def testNegativeInput(self):
-        tonic = TonicIndianArtMusic()([-1]*1024)
-        referenceTonic =108.86099243164062     
-        tonic   = TonicIndianArtMusic()([-1]*1024)
-        self.assertAlmostEqual(referenceTonic, tonic, 8)
+        referenceTonic =108.86
+        tonic   = TonicIndianArtMusic()(ones(4096))
+        self.assertAlmostEqual(tonic,referenceTonic, 6)
 
     def testRegression(self):
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'),
                             sampleRate = 44100)()
         referenceTonic = 102.74                                       
         tonic = TonicIndianArtMusic()(audio)
-        self.assertAlmostEqual(referenceTonic, tonic, 6)
+        self.assertAlmostEqual( tonic, referenceTonic, 6)
+        start_zero = np.zeros(int(np.abs(np.random.randn()) * 30. * 44100))
+        end_zero = np.zeros(int(np.abs(np.random.randn()) * 30. * 44100))
+        # Check result is the same with appended silences
+        real_audio = np.hstack([start_zero, audio, end_zero])
+        tonic = TonicIndianArtMusic()(real_audio)
+        self.assertAlmostEqual( tonic, referenceTonic, 6)
+
+    def testWhiteNoise(self):
+        from numpy.random import uniform
+        sig = array(uniform(size=10000))
+        tonic   = TonicIndianArtMusic()(sig)
+        # Sanity check to see if result is greater than or equal to referenceFrequency
+        # Check that tonic is below maxTonicFrequency
+        self.assertGreater(375, tonic)
+        # Check that tonic is above minTonicFrequency        
+        self.assertGreater(tonic,100)
+        # Sanity check for lowest possible reference frequency in this case
+        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic(referenceFrequency=1)(sig))
 
     def testMinMaxMismatch(self):
-        frameSize = 2048
-        signalSize = 15 * frameSize
-        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 99.1* 2*math.pi)
-        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic(minTonicFrequency=190, maxTonicFrequency=11)(x))
+        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic(minTonicFrequency=100, maxTonicFrequency=11)(ones(4096)))
 
     def testBelowMinimumTonic(self):
-        # generate test signal 99 Hz, and put minFreq as 100 Hz in the TonicIndianArtMusic
-        defaultSampleRate = 44100
         frameSize = 2048
         signalSize = 15 * frameSize
-        # Here are generate sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
+        # generate test signal 99 Hz, and put minTonicFreq as 100 Hz in the TonicIndianArtMusic
         x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 99* 2*math.pi)
-        self.assertRaises(EssentiaException, lambda: TonicIndianArtMusic(minTonicFrequency=100)(x))   
+        self.assertRaises(EssentiaException, lambda: TonicIndianArtMusic(minTonicFrequency=100, maxTonicFrequency=375)(x))   
 
-    def testRegressionSyntheticSignal(self):
-
-        # generate test signal concatenating major scale notes.
-        defaultSampleRate = 44100
+    def testAboveMaxTonic(self):
         frameSize = 2048
         signalSize = 15 * frameSize
-        # Concat 3 sine waves together of different frequencies
+        # generate test signal 101 Hz, and put maxTonicFreq as 100 Hz in the TonicIndianArtMusic        
+        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 101* 2*math.pi)        
+        self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic(minTonicFrequency=99, maxTonicFrequency=100)(x))
+ 
+    def testRegressionSyntheticSignal(self):
+        # generate a test signal concatenating different frequencies
+        frameSize = 2048
+        signalSize = 15 * frameSize
 
+        # Concat 3 sine waves together of different frequencies
         x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 124 * 2*math.pi)
         y = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 100 * 2*math.pi)
         z = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 80 * 2*math.pi)
-        scale = concatenate([x, y, z])
+        mix = concatenate([x, y, z])
 
+        # tiam = acronym for "Tonic Indian Art Music"
         tiam = TonicIndianArtMusic(minTonicFrequency=50, maxTonicFrequency=111)
-        tonic  = tiam(scale)        
+        tonic  = tiam(mix)        
         # Check that tonic is above minTonicFrequency
         self.assertGreater(tonic, 50)
         # Check that tonic is below highest frequency in signal
@@ -102,7 +120,6 @@ class TestTonicIndianArtMusic(TestCase):
         x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 124 * 2*math.pi)
         y = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 100 * 2*math.pi)
         z = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 80 * 2*math.pi)
-        # This signal is a "major scale ladder"
         chord =x+y+z
 
         tiam = TonicIndianArtMusic(minTonicFrequency=50, maxTonicFrequency=111)
