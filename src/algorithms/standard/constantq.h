@@ -81,6 +81,7 @@ class ConstantQ : public Algorithm {
   ~ConstantQ() {
     delete _fftc;
     delete _windowing;
+    delete _fft;
   }
 
   void declareParameters() {
