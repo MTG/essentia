@@ -21,36 +21,11 @@
 from essentia_test import *
 from essentia.streaming import *
 
-
 class TestFrameToReal(TestCase):
-
 
     def testInvalidParam(self):
         self.assertConfigureFails(FrameToReal(), {'frameSize': -1})
         self.assertConfigureFails(FrameToReal(), {'hopSize': -1})
-                # dimensions have to be different from 0.
-
-    def testARealCase(self):
-        filename = join(testdata.audio_dir, 'recorded', 'cat_purrrr.wav')
-
-        ml = MonoLoader(filename=filename)
-        fc = FrameCutter(frameSize=2048, hopSize=128)
-        ftr = FrameToReal()
-        fo = FileOutput()
-
-
-
-        pool = Pool()
-        ml.audio   >> fc.signal
-        fc.frame   >> ftr.signal
-        # FIXME How do deal with input and outputs having the same name? In this case signal.
-        """
-        ftr.signal   >> (pool, "signalIn")
-        ftr.signal >> (pool, "signalOut")
-
-        print(pool['signalIn'])
-        print(pool['signalOut'])
-        """
 
 suite = allTests(TestFrameToReal)
 
