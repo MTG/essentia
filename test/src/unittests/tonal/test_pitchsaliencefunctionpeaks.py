@@ -66,10 +66,12 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         # Checks on config. values binResolution being too high for the input in question
         freq_speaks = [55, 100, 340]
         mag_speaks = [1, 1, 1]
-        calculatedPitchSalience = PitchSalienceFunction(binResolution=2400)(freq_speaks,mag_speaks)
-        bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
-        self.assertEqualVector(bins, [])
-        self.assertEqualVector(values, [])
+        expectedBins = [ 0., 101.52542, 324.88135, 203.05084, 131.98305,  81.22034,  40.61017] 
+        expectedValues = [1., 1., 1., 0.8 , 0.64000005, 0.512, 0.40960002]
+        calculatedPitchSalience = PitchSalienceFunction(binResolution=100)(freq_speaks,mag_speaks)
+        bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)        
+        self.assertAlmostEqualVectorFixedPrecision(bins, expectedBins, 3)
+        self.assertAlmostEqualVectorFixedPrecision(values, expectedValues, 3)
 
     def testRegressionBadMaxFreq(self):
         # Checks on config. values maxFrequency being too low for a given set of spectral peaks
@@ -100,7 +102,7 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         expectedValues = [1., 1., 1.]
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks, mag_speaks)
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
-        self.assertAlmostEqualVectorFixedPrecision(bins, expectedBins, 6)
+        self.assertEqualVector(bins, expectedBins)
         self.assertAlmostEqualVectorFixedPrecision(values, expectedValues, 6)
     
     def testRegression3PeaksHw0HarmonicInput(self):
@@ -111,7 +113,7 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         expectedValues = [1., 1.]
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=0)(freq_speaks, mag_speaks)
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
-        self.assertAlmostEqualVectorFixedPrecision(bins, expectedBins, 6)
+        self.assertEqualVector(bins, expectedBins)
         self.assertAlmostEqualVectorFixedPrecision(values, expectedValues, 6)
 
     def testRegression3PeaksHw1UnHarmonicInput(self):
