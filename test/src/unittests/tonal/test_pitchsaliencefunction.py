@@ -91,7 +91,7 @@ class TestPitchSalienceFunction(TestCase):
         self.assertEqual(len(calculatedPitchSalience), outputLength)       
         # Check the first 11 elements. The first element has value "1".
         # The next returned 10 non-zero values decreasing in magnitude, should match "expected" above.
-        self.assertAlmostEqualVectorFixedPRecision(calculatedPitchSalience[:11], expectedPitchSalience, 8)
+        self.assertAlmostEqualVectorFixedPrecision(calculatedPitchSalience[:11], expectedPitchSalience, 8)
         # Check remaining elements are zeros.
         self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))        
 
@@ -109,7 +109,7 @@ class TestPitchSalienceFunction(TestCase):
         self.assertEqual(len(calculatedPitchSalience), outputLength)       
         # Check the first 11 elements. The first element has value "1".
         # The next returned 10 non-zero values decreasing in magnitude, should match "expected" above.
-        self.assertAlmostEqualVectoriFixedPrecision(calculatedPitchSalience[:11], expectedPitchSalience, 8)
+        self.assertAlmostEqualVectorFixedPrecision(calculatedPitchSalience[:11], expectedPitchSalience, 8)
         # Check remaining elements are zeros.
         # Check remaining elements are zeros.
         self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))        
@@ -128,7 +128,7 @@ class TestPitchSalienceFunction(TestCase):
         self.assertEqual(len(calculatedPitchSalience), outputLength)       
         # Check the first 11 elements. The first element has value "1".
         # The next returned 10 non-zero values decreasing in magnitude, should match "expected" above.
-        self.assertAlmostEqualVectoriFixedPrecision(calculatedPitchSalience[:11], expectedPitchSalience, 8)
+        self.assertAlmostEqualVectorFixedPrecision(calculatedPitchSalience[:11], expectedPitchSalience, 8)
         # Check remaining elements are zeros.
         # Check remaining elements are zeros.
         self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))        
@@ -159,7 +159,6 @@ class TestPitchSalienceFunction(TestCase):
         # First check the length of the ouput is 600 
         self.assertEqual(len(calculatedPitchSalience), outputLength)       
         # This test case with diverser frequency to save ouput to NPY file since the output is more complex.
-        # (i.e. the remining elements after salience fucntion  array element 11 are not all zeros)
         # Save operation is commented out. Uncomment to tweak parameters orinput to genrate new referencesw when required.        
         # save('calculatedPitchSalience_test3Peaks.npy', calculatedPitchSalience)
         # Reference samples are loaded as expected values
@@ -186,7 +185,7 @@ class TestPitchSalienceFunction(TestCase):
         self.assertEqual(len(calculatedPitchSalience), outputLength)        
         # Check the first 11 elements. The first has value "1" 
         # The next 10 values are decreasing in magnitude.
-        self.assertAlmostEqualVectoriFixedecision(calculatedPitchSalience[:11], expectedPitchSalience, 8)
+        self.assertAlmostEqualVectorFixedPrecision(calculatedPitchSalience[:11], expectedPitchSalience, 8)
         # Check remaining elements are zeros
         self.assertEqualVector(calculatedPitchSalience[12:outputLength], zeros(outputLength-(12)))
 
