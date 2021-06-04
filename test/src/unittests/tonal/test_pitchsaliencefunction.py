@@ -300,9 +300,9 @@ For example, to make it simple, we can add a few peaks with lower magnitudes tha
         expectedPitchSalience = load(join(filedir(), 'pitchsalience/calculatedPitchSalience_vignesh.npy'))
         expectedPitchSalienceList = expectedPitchSalience.tolist()
         
-        for i in len(calculatedPitchSalience):
+        for i in range(len(calculatedPitchSalience)):
             # Tolerance check to 6 decimal palces (for Linux Subsyst. compatibility.
-            self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList[index], calculatedPitchSalience[index], 8)     
+            self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList[i], calculatedPitchSalience[i], 8)     
 
     def testRegressionSyntheticInput(self):
         # Use synthetic audio for Regression Test. This keeps NPY files size low.
@@ -346,31 +346,30 @@ For example, to make it simple, we can add a few peaks with lower magnitudes tha
 
         # 2. Cut audio into frames and compute for each frame:
         #    spectrum -> spectral peaks -> pitch salience function -> pitch salience function peaks
+
+        # Do some spot checks on selected frequemtly occuring peaks in selected bin ranges.
+        expectedBins1 = [170.,  50.,  98., 222.,  32.] # 168 to 313
+        expectedBins2 = [220., 100.,  30., 167., 260.,  47., 140.,  70.] # 649 to 794   
+        expectedBins3 = [240., 120.,  50.,   0., 276., 194., 156.,  74.,  86.,  36.] # 807 bins 953 
+        expectedBins4 = [260., 140.,  70.,  20., 101., 293., 220., 173.,  53.] # 968 to 1112        
+
+        index = 0
         for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
             frame = run_windowing(frame)
             spectrum = run_spectrum(frame)
             peak_frequencies, peak_magnitudes = run_spectral_peaks(spectrum)
             salience = run_pitch_salience_function(peak_frequencies, peak_magnitudes)
-            salience_peaks_bins, salience_peaks_saliences = run_pitch_salience_function_peaks(salience)
+            salience_peaks_bins, _ = run_pitch_salience_function_peaks(salience)
 
-        expectedBins = [270., 150. ,80. ,30.]
-        expectedPeaks =  [0.09777679, 0.07822143, 0.06257715, 0.05006172]
-        self.assertAlmostEqualVector(expectedBins, salience_peaks_bins)
-        self.assertAlmostEqualVectorFixedPrecision(expectedPeaks, salience_peaks_saliences, 6)
-
-    """ FIXME
-
-    The following test case has uncovered a situation where  divide by zero or some other 
-    illegal operation has taken place because a NAN value is found in output array element zero.
-
-    def testBinResolutionTooHigh(self):        
-        freq_speaks = [55] 
-        mag_speaks = [1] 
-        calculatedPitchSalience = PitchSalienceFunction(binResolution=55*2)(freq_speaks,mag_speaks)       
-        print(calculatedPitchSalience)
-
-        result:  calculatedPitchSalience[0] contains "nan"
-    """          
+            if (index >= 168 ) and index < 313:
+                self.assertEqualVector(expectedBins1, salience_peaks_bins)                                                                                  
+            elif (index >= 649 ) and index < 794:
+                self.assertEqualVector(expectedBins2, salience_peaks_bins)                                     
+            elif (index >= 807 ) and index < 953:
+                self.assertEqualVector(expectedBins3, salience_peaks_bins)                                     
+            elif (index >= 968)  and index < 1112:             
+                self.assertEqualVector(expectedBins4, salience_peaks_bins)                                                                                                                                                    
+            index+=1
 
 suite = allTests(TestPitchSalienceFunction)
 

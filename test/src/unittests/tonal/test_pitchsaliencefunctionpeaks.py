@@ -70,7 +70,7 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         expectedValues = [1., 1., 1., 0.8 , 0.64000005, 0.512, 0.40960002]
         calculatedPitchSalience = PitchSalienceFunction(binResolution=100)(freq_speaks,mag_speaks)
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)        
-        self.assertAlmostEqualVectorFixedPrecision(bins, expectedBins, 3)
+        self.assertAlmostEqualVectorFixedPrecision(bins, expectedBins,3)
         self.assertAlmostEqualVectorFixedPrecision(values, expectedValues, 3)
 
     def testRegressionBadMaxFreq(self):
