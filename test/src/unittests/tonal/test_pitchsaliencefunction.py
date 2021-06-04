@@ -129,7 +129,7 @@ For example, to make it simple, we can add a few peaks with lower magnitudes tha
         self.assertEqual(len(calculatedPitchSalience1H), outputLength)               
         calculatedPitchSalience20H = PitchSalienceFunction(numberHarmonics=20)(freq_speaks, mag_speaks)        
         self.assertEqual(len(calculatedPitchSalience20H), outputLength)               
-        if (calculatedPitchSalience1H.tolist()!=calculatedPitchSalience20H.tolist())
+        if calculatedPitchSalience1H.tolist()!=calculatedPitchSalience20H.tolist():
         #  Return a TRUE result
            self.assertEqual(1,1)
         else:
@@ -352,9 +352,7 @@ For example, to make it simple, we can add a few peaks with lower magnitudes tha
             peak_frequencies, peak_magnitudes = run_spectral_peaks(spectrum)
             salience = run_pitch_salience_function(peak_frequencies, peak_magnitudes)
             salience_peaks_bins, salience_peaks_saliences = run_pitch_salience_function_peaks(salience)
-            print(salience_peaks_bins)
-            print(salience_peaks_saliences)
-                
+
         expectedBins = [270., 150. ,80. ,30.]
         expectedPeaks =  [0.09777679, 0.07822143, 0.06257715, 0.05006172]
         self.assertAlmostEqualVector(expectedBins, salience_peaks_bins)
