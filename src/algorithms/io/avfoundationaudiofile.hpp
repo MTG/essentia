@@ -6,8 +6,9 @@
 #include <stdexcept>
 
 class AVFoundationAudioFile {
-void *_file;
-void *_buffer;
+private:
+	void *_file;
+	void *_buffer;
 
 public:
 	// Note: Unfortunately, Apple's API demands reading buffers into AVAudioPCMBuffer.

@@ -13,7 +13,7 @@ const char* AVMonoLoader::description = DOC("A MonoLoader using AVFoundation.");
 
 
 AVMonoLoader::AVMonoLoader() : AlgorithmComposite(),
-						   _audioLoader(0), _mixer(0), _resample(0), _configured(false) {
+               _audioLoader(0), _mixer(0), _resample(0), _configured(false) {
 
   declareOutput(_audio, "audio", "the mono audio signal");
 
@@ -41,8 +41,8 @@ void AVMonoLoader::configure() {
   if (!filename.isConfigured()) return;
 
   _audioLoader->configure("filename", filename,
-						  "computeMD5", false,
-						  INHERIT("audioStream"));
+              "computeMD5", false,
+              INHERIT("audioStream"));
 
   int inputSampleRate = (int)lastTokenProduced<Real>(_audioLoader->output("sampleRate"));
 
@@ -52,7 +52,7 @@ void AVMonoLoader::configure() {
   _params.add("originalSampleRate", inputSampleRate);
 
   _resample->configure("inputSampleRate", inputSampleRate,
-					   "outputSampleRate", parameter("sampleRate"));
+             "outputSampleRate", parameter("sampleRate"));
 
   _mixer->configure("type", parameter("downmix"));
 
