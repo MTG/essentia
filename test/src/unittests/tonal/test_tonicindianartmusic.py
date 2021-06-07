@@ -59,10 +59,29 @@ class TestTonicIndianArtMusic(TestCase):
         tonic = TonicIndianArtMusic()(ones(1024))
         self.assertAlmostEqualFixedPrecision(tonic, referenceTonic, 2)
 
+    # Full reference set of values can be sourced from dataset
+    # Download https://compmusic.upf.edu/carnatic-varnam-dataset
+    # See  file "tonics.yaml" 
+    #
+    # vignesh: 138.59
+    # This tonic corresponds to the following mp3 file.
+    # "23582__gopalkoduri__carnatic-varnam-by-vignesh-in-abhogi-raaga.mp3'
+    # 
+    # 1. copy this file into essentia/test/audio/recorded.
+    # 2. Uncomment the test case below and run.
+
+    """
+    def testRegressionVignesh(self):
+        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/223582__gopalkoduri__carnatic-varnam-by-vignesh-in-abhogi-raaga.mp3'),
+                            sampleRate = 44100)()
+
+        # Reference tonic from YAML file is 138.59.  The measured is "138.8064422607422"
+        referenceTonic = 138.59                                      
+        tonic = TonicIndianArtMusic()(audio)
+        self.assertEqual(round(tonic), round(referenceTonic))
+    """
     def testRegression(self):
-        # Full reference set of values can be sourced from dataset
-        # https://compmusic.upf.edu/carnatic-varnam-dataset
-        # See tonic yaml values
+        # Regression test using existing vignesh audio file in "essentia/test/audio/recorded"
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'),
                             sampleRate = 44100)()
         referenceTonic = 102.74                                       
@@ -73,8 +92,8 @@ class TestTonicIndianArtMusic(TestCase):
         # Check result is the same with appended silences of constant length
         real_audio = np.hstack([start_zero, audio, end_zero])
         tonic = TonicIndianArtMusic()(real_audio)
-        self.assertAlmostEqualFixedPrecision(tonic, referenceTonic, 2)
-    
+        self.assertAlmostEqualFixedPrecision(tonic, referenceTonic, 2)    
+
     def testMinMaxMismatch(self):
         self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic(minTonicFrequency=100,maxTonicFrequency=11)(ones(4096)))
     
@@ -112,7 +131,7 @@ class TestTonicIndianArtMusic(TestCase):
         x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 124 * 2*math.pi)
         y = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 100 * 2*math.pi)
         z = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 80 * 2*math.pi)
-        chord =x+y+z
+        chord = x+y+z
 
         tiam = TonicIndianArtMusic(minTonicFrequency=50, maxTonicFrequency=111)
         tonic  = tiam(chord)         
