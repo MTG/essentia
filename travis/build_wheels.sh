@@ -55,7 +55,7 @@ for PYBIN in /opt/python/*/bin; do
         if [[ $PYBIN == *"cp34"* ]] || [[ $PYBIN == *"cp35"* ]] || [[ $PYBIN == *"cp36"* ]] || [[ $PYBIN == *"cp37"* ]]; then
             TENSORFLOW_VERSION=1.15.0
         elif [[ $PYBIN == *"cp38"* ]]; then
-            TENSORFLOW_VERSION=2.2.0
+            TENSORFLOW_VERSION=2.4.1
         elif [[ $PYBIN == *"cp39"* ]]; then
             TENSORFLOW_VERSION=2.5.0
         fi
