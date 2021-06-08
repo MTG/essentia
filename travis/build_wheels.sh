@@ -56,6 +56,8 @@ for PYBIN in /opt/python/*/bin; do
             TENSORFLOW_VERSION=1.15.0
         elif [[ $PYBIN == *"cp38"* ]]; then
             TENSORFLOW_VERSION=2.2.0
+        elif [[ $PYBIN == *"cp39"* ]]; then
+            TENSORFLOW_VERSION=2.5.0
         fi
 
         NUMPY_VERSION=$( "${PYBIN}/pip" check tensorflow |grep tensorflow |grep numpy |grep ">=" |awk -F"[>=',]+" '//{print $2}' )
@@ -82,7 +84,9 @@ for PYBIN in /opt/python/*/bin; do
         NUMPY_VERSION=1.8.2
 
         # Python 3.x
-        if [[ $PYBIN == *"cp38"* ]]; then
+        if [[ $PYBIN == *"cp39"* ]]; then
+            NUMPY_VERSION=1.19.3
+        elif [[ $PYBIN == *"cp38"* ]]; then
             NUMPY_VERSION=1.17.4
         elif [[ $PYBIN == *"cp37"* ]]; then
             NUMPY_VERSION=1.14.5
