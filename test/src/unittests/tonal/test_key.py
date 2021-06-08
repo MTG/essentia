@@ -24,6 +24,18 @@ from essentia_test import *
 
 class TestKey(TestCase):
 
+    def testEmpty(self):
+        self.assertRaises(RuntimeError, lambda: Key()([]))   
+
+    def testSilence(self):
+        self.assertRaises(RuntimeError, lambda: Key()(zeros(4096)))      
+
+    def testInvalidParam(self):
+        self.assertConfigureFails(Key(), { 'numHarmonics': 0 })
+        self.assertConfigureFails(Key(), { 'pcpSize': 11 })
+        self.assertConfigureFails(Key(), { 'profileType': 'invalid'})
+        self.assertConfigureFails(Key(), { 'slope': -1 })        
+
     # This is a helper method that just runs the algorithm on a recorded wav.
     # One is able to specify the arguments passed to the Key algorithm.
     def runAlg(self, usePolyphony=True,
