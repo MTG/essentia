@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,7 +27,7 @@ namespace standard {
 
 const char* MusicExtractorSVM::name = "MusicExtractorSVM";
 const char* MusicExtractorSVM::category = "Extractors";
-const char* MusicExtractorSVM::description = DOC("This algorithms computes SVM predictions given a pool with aggregated descriptor values computed by MusicExtractor.");
+const char* MusicExtractorSVM::description = DOC("This algorithms computes SVM predictions given a pool with aggregated descriptor values computed by MusicExtractor (or FreesoundExtractor).");
 
 // TODO explain better (reuse music extractor svm documentation)
 

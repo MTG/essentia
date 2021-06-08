@@ -32,7 +32,7 @@ Linux/OSX static builds
 -----------------------
 
 Follow the steps below to create static build of the library and executable example extractors.
-
+-
 Install additional tools required to build some of the dependencies. 
 
 On Linux:
@@ -51,6 +51,8 @@ packaging/build_3rdparty_static_debian.sh
 ```
 
 Use ```--with-gaia``` flag to include Gaia.
+
+Use ```--with-tensorflow``` flag to include TensorFlow.
 
 Alternatively, you can build each dependency apart running the corresponding scripts inside ```packaging/debian_3rdparty``` folder:
 ```
@@ -146,21 +148,17 @@ A lightweight version of Essentia for iOS can be compiled using the ```--cross-c
 You can also compile it for iOS simulator (so that you can test on your desktop) using ```--cross-compile-ios-sim``` flag.
 
 
-Compiling Essentia to Javascript with Emscripten
-------------------------------------------------
-Use the instructions below to compile Essentia to Javascript. Among the dependencies, only FFTW3 is currently supported (see instructions to build it below). The rest of dependencies have not been tested, but they should work as well.
+Compiling Essentia to ASM.js or WebAssembly using Emscripten
+------------------------------------------------------------
+Use the instructions below to compile Essentia to intermediate [LLVM](https://llvm.org/) or [ASM.js](http://asmjs.org/) and [WebAssembly](https://webassembly.org/)(WASM) targets using [Emscripten](https://emscripten.org/). You can build Essentia with or without third party dependencies. Among the dependencies, only FFTW3 is currently supported (see instructions to build it below). The rest of dependencies have not been tested, but they should work as well. A lightweight WASM build of Essentia is used in our dedicated JavaScript wrapper [Essentia.js](https://essentia.upf.edu/essentiajs) which uses KISS FFT instead of FFTW3.
 
-Install Emscripten following the [instructions](https://kripken.github.io/emscripten-site/docs/getting_started/downloads.html) on their website. If you downloaded the SDK manually, make sure to activate the Emscripten environment by executing `emsdk_env.sh`.
-```
-./path/to/emsdk_env.sh
-```
-Alternatively, you can install from Ubuntu/Debian repository (the environment will be activated by default).
-```
-sudo apt-get install emscripten
-```
+- Install the latest stable Emscripten release following the [instructions](https://emscripten.org/docs/getting_started/downloads.html) on their website. If you downloaded the SDK manually, make sure to activate the Emscripten environment by executing `emsdk_env.sh`.
 
-Get the latest FFTW3 source code, and prepare it for compilation and installation as an Emscripten system library and build it.
-```
+
+(Optional with third party dependecies)
+- Get the latest [FFTW3](http://www.fftw.org/) source code, and prepare it for compilation and installation as an Emscripten system library and build it.
+  
+```bash
 tar xf fftw-3.3.4.tar.gz
 cd fftw-3.3.4
 # Spawn a subshell to be able to use $EMSCRIPTEN in the command's args
@@ -169,22 +167,30 @@ emmake make
 emmake make install
 ```
 
-Finally, compile Essentia for Emscripten.
-```
+- Finally, compile Essentia with Emscripten as an LLVM target which can be further used for linking with your application code.
+  
+```bash
 cd path/to/essentia
-emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=fftw --emscripten'
+# for using KISS FFT
+emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=KISS --emscripten'
+# OR
+# for using FFTW
+emconfigure sh -c './waf configure --prefix=$EMSCRIPTEN/system/local/ --lightweight=FFTW --emscripten'
 emmake ./waf
 emmake ./waf install
 ```
-Essentia is now built. If you want to build applications with Essentia and Emscripten, be sure to read their [tutorial](https://kripken.github.io/emscripten-site/docs/getting_started/Tutorial.html). Use the emcc compiler, preferably the ```-Oz``` option for size optimization, and include the static libraries for Essentia and FFTW as you would with source files. An example would be:
-```
+Essentia is now built. If you want to build applications with Essentia and Emscripten, be sure to read their [tutorial](https://kripken.github.io/emscripten-site/docs/getting_started/Tutorial.html). Essentia.js Github [repository](https://github.com/MTG/essentia.js) also has some nice set of examples for you to get started. Use the emcc compiler, preferably the ```-Oz``` option for size optimization, and include the static libraries for Essentia and FFTW as you would with source files. An example would be:
+
+```bash
 # Make sure your script can access the variable $EMSCRIPTEN
 # (available to child processes of emconfigure and emmake)
 LIB_DIR=$EMSCRIPTEN/system/local/lib
 emcc -Oz -c application.cpp application.bc
-emcc -Oz application.bc ${LIB_DIR}/libessentia.a ${LIB_DIR}/libfftw3f.a -o out.js
+emcc -Oz application.bc ${LIB_DIR}/libessentia.a ${LIB_DIR}/libfftw3f.a -s WASM=1 -o out.js
 ```
+Alternatively you could also build your applicaitons for asm.js targets by changing the flag `-s WASM=0`.
 
+You can also find some examples of interfacing your Essentia cpp code to JavaScript [here](https://github.com/MTG/essentia.js/blob/master/docs/tutorials/2.%20Building%20from%20Source.md#writing-custom-essentia-c-extractor-and-cross-compile-to-js).
 
 OSX static builds and templates (JUCE/VST and openFrameworks)
 -------------------------------------------------------------
@@ -283,63 +289,6 @@ Because Essentia is a library you are very fexible in the ways you can compute d
 - using [premade extractors out-of-box](extractors_out_of_box.html) (the easiest way without programming)
 - using python (see [python tutorial](python_tutorial.html))
 - writing your own C++ extractor (see the premade extractors as examples)
-
-
-Training and running classifier models in Gaia
-----------------------------------------------
-In order to run classification in Essentia you need to prepare a classifier model in Gaia and run GaiaTransform algorithm configured to use this model. The example of using high-level models can be seen in the code of ```streaming_music_extractor```. Here we discuss the steps to be followed to train classifier models that can be used with this extractor.
-
-1. Compute music descriptors using ```streaming_music_extractor``` for all audio files.
-2. Install Gaia with python bindings.
-3. Prepare json [groundtruth](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/groundtruth_example.yaml) and [filelist](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/filelist_example.yaml) files (see examples).
-    - Groundtruth file maps identifiers for audio files (they can be paths to audio files or whatever id strings you want to use) to class labels. 
-    - Filelist file maps these identifiers to the actual paths to the descriptor files for each audio track. 
-4. Currently Gaia does not support loading descriptors in json format, as a workaround you can configure the extractor output to yaml format in Step 1, or run ```json_to_sig.py``` [conversion script](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/json_to_sig.py).  
-5. Run ```train_model.py``` script in Gaia ([here](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/train_model.py)) with these groundtruth and filelist files. The script will create the classifier model file. 
-
-6. The model file can now be used by a GaiaTransform algorithm inside ```streaming_music_extractor```. 
-
-Alternatively to steps 3-5, you can use a simplified [script](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/train_model_from_sigs.py) that trains a model given a folder with sub-folders corresponding to class names and containing descriptor files for these classes. 
-
-Note that using a specific classifier model implies that you are expected to give a pool with the same descriptor layout as the one used in training as an input to GaiaTransform Algorithm. 
-
-### How it works
-To train the SVMs Gaia internally uses [LibSVM](https://www.csie.ntu.edu.tw/~cjlin/libsvm/) library. The training script automatically creates an SVM model given a ground-truth dataset using the best combination of parameters for data preprocessing and SVM that it can find in a grid search. Testing all possible combinations the script conducts a 5-fold cross-validation for each one of them: The ground-truth dataset is randomly split into train and test sets, the model is trained on the train set and is evaluated on the test set. Results are averaged across 5 folds including the confusion matrix. After all combinations of parameters have been evaluated, the winner combination is selected according to the best accuracy obtained in cross-validation and the final SVM classifier model is trained using *all* ground-truth data. See the "Cross-validation and Grid-search" section in the [practical guide to SVM classification](https://www.csie.ntu.edu.tw/~cjlin/papers/guide/guide.pdf) for more details.
-
-The combinations of parameters tested in a grid search by default are mentioned [in the code](https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/classification_project_template.yaml). Users are able to modify these parameters according to their needs by creating such a classification project file on their own.
-
-The parameters include:
-- SVM kernel type: polynomial or RBF
-- SVM type: currently only C-SVC
-- SVM C and gamma parameters
-- preprocessing type:
-    - use all descriptors, no preprocessing
-    - use ```lowlevel.*``` descriptors only
-    - discard energy bands descriptors (```*barkbands*```, ```*energyband*```, ```*melbands*```, ```*erbbands*```)
-    - use all descriptors, normalize values
-    - use all descriptors, normalize and gaussianize values
-- number of folds in cross-validation: 5 by default
-
-In the preprocessing stage, training script loads all descriptor files according to the preprocessing type. Additionally, a number of descriptors are always ignored, including all ```metadata*``` that is the information not directly associated with audio analysis. The ```*.dmean```, ```*.dvar```, ```*.min```, ```*.max```, ```*.cov``` descriptors are also ignored, and therefore, currently only means and variances are used for descriptors summarized across frames. Non-numerical descriptors are enumerated (```tonal.chords_key```, ```tonal.chords_scale```, ```tonal.key_key```, ```tonal.key_scale```).
-
-Note that cross-validation script splits the ground-truth dataset into train and test sets randomly. In the case of music classification tasks one may want to assure artist/album filtering (that is, no artist/album occures in the test set if it occures in train set). Current way to achieve it is to ensure that the whole input dataset contains only one item per artist/album. Alternatively, you can adapt the scripts to suit your needs.
-
-### How to train an SVM model with a different set of parameters 
-Our training script generates a single model retrained on the whole dataset with the best parameters combination from the grid search. However, you may want to generate new models with custom parametrizations. Imagine, for instance, that you need a model that runs on a lighter set of features despite the accuracy drop, or that you believe that a different parameters set can improve results for your particular scenario.
-
-In order to generate a model given the `<project_file>` and your chosen `<param_file>` from the results folder, execute the following python lines,
-
-```
-from gaia2.scripts.classification.retrain_model import retrainModel
-retrainModel(project_file, param_file, output_file)
-
-```
-This creates a Gaia model and saves it into `<output_file>`. 
-
-*Also, note that the `retrain_model` can be called as a command line program.*
-
-### How to choose a parameter configuration
-At the end of the training process, a file called `<project_name>.report.csv` is created. It provides a ranking in terms of accuracy and normalized accuracy as well as the standard deviation between folds for every set of parameters. By having a look at this file you can get some insights about which parameters to try. You can, for instance, estimate the expected accuracy drop if you decide to go for a configuration with a smaller set of descriptors.
 
 
 How to know which other Algorithms an Algorithm uses?

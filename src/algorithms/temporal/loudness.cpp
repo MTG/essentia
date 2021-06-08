@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -29,7 +29,7 @@ const char* Loudness::description = DOC("This algorithm computes the loudness of
 "\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia\n"
-"  http://en.wikipedia.org/wiki/Energy_(signal_processing)\n\n"
+"  http://en.wikipedia.org/wiki/Energy_%28signal_processing%29\n\n"
 "  [2] Stevens' power law - Wikipedia, the free encyclopedia\n"
 "  http://en.wikipedia.org/wiki/Stevens%27_power_law\n\n"
 "  [3] S. S. Stevens, Psychophysics. Transaction Publishers, 1975.");

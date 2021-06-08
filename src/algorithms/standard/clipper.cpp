@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -29,7 +29,7 @@ const char* Clipper::description = DOC("This algorithm clips the input signal to
 "\n"
 "References:\n"
 "  [1] Clipping - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Clipping_(audio)");
+"  http://en.wikipedia.org/wiki/Clipping_%28audio%29");
 
 void Clipper::configure() {
   _max = parameter("max").toReal();

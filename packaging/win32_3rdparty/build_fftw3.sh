@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 . ../build_config.sh
 
 rm -rf tmp
@@ -23,7 +24,8 @@ cd $FFTW_VERSION
 make
 make install
 
-cp .libs/libfftw3f-3.dll $PREFIX/lib
+# TODO Unnecessary?
+#cp .libs/libfftw3f-3.dll $PREFIX/lib
 
 cd ../..
 rm -r tmp

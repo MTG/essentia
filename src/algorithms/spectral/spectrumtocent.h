@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -59,7 +59,7 @@ class SpectrumToCent : public Algorithm {
   void declareParameters() {
     declareParameter("inputSize", "the size of the spectrum", "(1,inf)", 32768);
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("log", "compute log-energies (log10 (1 + energy))","{true,false}", true);
+    declareParameter("log", "compute log-energies (log2 (1 + energy))","{true,false}", true);
     declareParameter("minimumFrequency","central frequency of the first band of the bank [Hz]", "(0, inf)", 164.);
     declareParameter("centBinResolution", "Width of each band in cents. Default is 10 cents","(0,inf)", 10.);
     declareParameter("bands", "number of bins to compute. Default is 720 (6 octaves with the default 'centBinResolution')","[1,inf)", 720);

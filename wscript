@@ -299,7 +299,7 @@ def configure(ctx):
         
         # flags required for linking to static ffmpeg libs
         # -Bsymbolic flag is not available on clang
-        if ctx.env.CXX_NAME is not "clang":
+        if ctx.env.CXX_NAME != "clang":
             ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
             ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 
@@ -339,7 +339,7 @@ def run_python_tests(ctx):
     os.system('cp -r src/python/essentia build/python/')
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
 
-    ret = os.system('PYTHONPATH=build/python %s test/src/unittests/all_tests.py' % sys.executable)
+    ret = os.system('PYTHONPATH=build/python:$PYTHONPATH %s test/src/unittests/all_tests.py' % sys.executable)
     if ret:
         ctx.fatal('failed to run python tests. Check test output')
 
@@ -353,6 +353,8 @@ def doc(ctx):
     os.system('mkdir -p build/python')
     os.system('cp -r src/python/essentia build/python/')
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
+    os.system('cp build/src/libessentia.so build/python/essentia')
 
     pythonpath = os.path.abspath('build/python')
-    os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, sys.executable))
+    ldpath = os.path.join(pythonpath, 'essentia')
+    os.system('PYTHONPATH=%s LD_LIBRARY_PATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, ldpath, sys.executable))

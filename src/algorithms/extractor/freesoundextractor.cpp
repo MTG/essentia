@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -105,7 +105,7 @@ void FreesoundExtractor::configure() {
   if (options.value<Real>("highlevel.compute")) {
 #if HAVE_GAIA2 
     svmModels = options.value<vector<string> >("highlevel.svm_models");
-    _svms = AlgorithmFactory::create("FreesoundExtractorSVM", "svms", svmModels);
+    _svms = AlgorithmFactory::create("MusicExtractorSVM", "svms", svmModels);
 #else
     E_WARNING("FreesoundExtractor: Gaia library is missing. Skipping configuration of SVM models.");
 #endif

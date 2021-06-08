@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -78,7 +78,6 @@ void BeatTrackerDegara::configure() {
   if (_configured) {
     clearAlgos();
   }
-
   _sampleRate = 44100.;
   // TODO will only work with _sampleRate = 44100, check what original
   // RhythmExtractor does with sampleRate parameter

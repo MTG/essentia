@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -58,7 +58,7 @@ class TensorflowPredictVGGish : public AlgorithmComposite {
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
     declareParameter("isTrainingName", "the name of an additional input node to indicate the model if it is in training mode or not. Leave it empty when the model does not need such input", "", "");
     declareParameter("patchHopSize", "the number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);
-    declareParameter("lastPatchMode", "what to do with the last frames. Options are to `repeat` them to fill the last patch or to `discard` them", "{discard,repeat}", "discard");
+    declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
     declareParameter("accumulate", "when true it runs a single TensorFlow session at the end of the stream. Otherwise, a session is run for every new patch", "{true,false}", false);
   }
 
@@ -109,7 +109,7 @@ class TensorflowPredictVGGish : public Algorithm {
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
     declareParameter("isTrainingName", "the name of an additional input node indicating whether the model is to be run in a training mode (for models with a training mode, leave it empty otherwise)", "", "");
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);
-    declareParameter("lastPatchMode", "what to do with the last frames. Options are to `repeat` them to fill the last patch or to discard them", "{discard,repeat}", "discard");
+    declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
     declareParameter("accumulate", "when true it runs a single Tensorflow session at the end of the stream. Otherwise a session is run for every new patch", "{true,false}", false);
   }
 

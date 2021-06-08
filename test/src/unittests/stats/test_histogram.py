@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -25,7 +25,7 @@ class TestHistogram(TestCase):
   def testZero(self):
     histogram, binEdges = Histogram(normalize="none", maxValue=1., minValue=0., numberBins=10)(zeros(1000))
     self.assertEqualVector(histogram, [1000., 0., 0., 0., 0., 0., 0., 0., 0., 0.])
-    self.assertAlmostEqualVector(binEdges, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], 0.0001) 
+    self.assertAlmostEqualVector(binEdges, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0], 0.0001)
 
   def testOutOfRangeConfiguration(self):
     self.assertConfigureFails(Histogram(), {'normalize' : 'y'})
@@ -42,8 +42,8 @@ class TestHistogram(TestCase):
     inputArray = readVector(join(filedir(), 'stats/input.txt'))
     expectedEdges = [ 0. ,  0.1,  0.2,  0.3,  0.4,  0.5,  0.6,  0.7,  0.8,  0.9,  1. ]
     expectedHistogramNone = [113,  87,  98, 104, 114,  86,  99,  88, 102, 109]
-    expectedHistogramUnitSum = [ 0.113,  0.087,  0.098,  0.104,  0.114,  0.086,  0.099,  0.088,  0.102,  0.109]  
-    expectedHistogramUnitMax = [ 0.99122807,  0.76315789,  0.85964912,  0.9122807 ,  1., 0.75438596,  0.86842105,  0.77192982,  0.89473684,  0.95614035] 
+    expectedHistogramUnitSum = [ 0.113,  0.087,  0.098,  0.104,  0.114,  0.086,  0.099,  0.088,  0.102,  0.109]
+    expectedHistogramUnitMax = [ 0.99122807,  0.76315789,  0.85964912,  0.9122807 ,  1., 0.75438596,  0.86842105,  0.77192982,  0.89473684,  0.95614035]
 
     (outputHistogramNone, outputEdgesNone) = Histogram(normalize="none", numberBins=10, minValue=0., maxValue=1.)(inputArray)
     (outputHistogramUnitSum, outputEdgesUnitSum) = Histogram(normalize="unit_sum", numberBins=10, minValue=0., maxValue=1.)(inputArray)
@@ -55,6 +55,22 @@ class TestHistogram(TestCase):
     self.assertAlmostEqualVector(outputHistogramUnitSum, expectedHistogramUnitSum, 0.001)
     self.assertAlmostEqualVector(outputEdgesUnitMax, expectedEdges, 0.001)
     self.assertAlmostEqualVector(outputHistogramUnitMax, expectedHistogramUnitMax, 0.001)
+
+    # Test minValue/maxValue ranges.
+    expectedEdgesNoneMin = expectedEdges[5:]
+    expectedHistogramNoneMin = expectedHistogramNone[5:]
+    expectedEdgesNoneMax = expectedEdges[:6]
+    expectedHistogramNoneMax = expectedHistogramNone[:5]
+
+    (outputHistogramNoneMin, outputEdgesNoneMin) = Histogram(normalize="none", numberBins=5, minValue=0.5, maxValue=1.)(inputArray)
+    (outputHistogramNoneMax, outputEdgesNoneMax) = Histogram(normalize="none", numberBins=5, minValue=0.0, maxValue=0.5)(inputArray)
+
+    self.assertAlmostEqualVector(outputEdgesNoneMin, expectedEdgesNoneMin, 0.001)
+    self.assertAlmostEqualVector(outputHistogramNoneMin, expectedHistogramNoneMin, 0.001)
+
+    self.assertAlmostEqualVector(outputEdgesNoneMax, expectedEdgesNoneMax, 0.001)
+    self.assertAlmostEqualVector(outputHistogramNoneMax, expectedHistogramNoneMax, 0.001)
+
 
 suite = allTests(TestHistogram)
 

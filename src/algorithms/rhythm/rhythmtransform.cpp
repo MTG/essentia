@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -49,8 +49,29 @@ void RhythmTransform::compute() {
   vector<vector<Real> >& output = _rhythmTransform.get();
 
   int nFrames = bands.size();
-  int nBands = bands[0].size();
+  // 
+  // Check first that we have a valid populated input to avoid  core dump
+  if (nFrames== 0) {
+    throw EssentiaException("RhythmTransform: Input mel-spectrogram is empty");
+  }
 
+  // Gather individual band lengths
+  vector<Real> bandSizes(nFrames);
+  for (int nband=0; nband<nFrames; ++nband) {
+    bandSizes[nband] = bands[nband].size();
+  }
+
+  // Check if a melband is empty
+  if (std::find(bandSizes.begin(), bandSizes.end(), 0) != bandSizes.end()) {
+    throw EssentiaException("RhythmTransform: Input mel-spectrogram band is empty");  
+  }
+
+  // Check for an inconsistent input vector with inner vectors of different lengths
+  if(!( std::equal(bandSizes.begin() + 1, bandSizes.end(), bandSizes.begin()) )) {
+    throw EssentiaException("RhythmTransform: Inconsistent input vector with inner vectors of different length");  
+  }
+
+  int nBands = bands[0].size();
   // derive and transpose
   vector<vector<Real> > bandsDerivative(nBands);
   for (int band=0; band<nBands; ++band) {
@@ -74,7 +95,7 @@ void RhythmTransform::compute() {
       vector<Real> rhythmFrame(_rtFrameSize);
       for (int j=0; j<_rtFrameSize; ++j) {
         if (i+j<nFrames){
-	        rhythmFrame[j] = bandsDerivative[band][i+j];
+          rhythmFrame[j] = bandsDerivative[band][i+j];
         }
         else rhythmFrame[j] = 0.0; // zeropadding
       }
@@ -91,13 +112,13 @@ void RhythmTransform::compute() {
 
       // square the resulting spectrum, sum periodograms across bands
       for (int bin=0; bin<(int)rhythmSpectrum.size(); ++bin)
-	      bandSpectrum[bin] += rhythmSpectrum[bin]*rhythmSpectrum[bin];
+        bandSpectrum[bin] += rhythmSpectrum[bin]*rhythmSpectrum[bin];
     }
     output.push_back(bandSpectrum);
     i += _rtHopSize;
   }
   // skip the last couple of frames as they don't make up
-  // a full frame consisting of rmsSize rms values.
+  // a full frame consisting of rmsSize rms values.    
 }
 
 } // namespace standard

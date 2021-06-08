@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,18 +24,33 @@ using namespace standard;
 
 const char* SNR::name = "SNR";
 const char* SNR::category = "Audio Problems";
-const char* SNR::description = DOC("This algorithm computes the SNR of the input audio in a frame-wise manner. The algorithm assumes that:\n"
-  "  1. The noise is gaussian.\n"
-  "  2. There is a region of noise (without signal) at the beginning of the stream in order to estimate the PSD of the noise.[1]\n"
-  "Once the noise PSD is estimated, the algorithm relies on the Ephraim-Malah [2] recursion to estimate the SNR for each frequency bin.\n"
-  "The algorithm also returns an overall (a single value for the whole spectrum) SNR estimation and an averaged overall SNR estimation using"
-  " Exponential Moving Average filtering.\n"
-  "This algorithm throws a Warning if less than 15 frames are used to estimte the noise PSD.\n"
+const char* SNR::description = DOC(
+  "This algorithm computes the SNR of the input audio in a frame-wise manner.\n"
+  "\n"
+  "The algorithm assumes that:\n"
+  "\n"
+  "- The noise is gaussian.\n"
+  "- There is a region of noise (without signal) at the beginning of the "
+  "stream in order to estimate the PSD of the noise [1].\n"
+  "\n"
+  "Once the noise PSD is estimated, the algorithm relies on the Ephraim-Malah "
+  "[2] recursion to estimate the SNR for each frequency bin.\n"
+  "\n"
+  "The algorithm also returns an overall (a single value for the whole "
+  "spectrum) SNR estimation and an averaged overall SNR estimation using "
+  "Exponential Moving Average filtering.\n"
+  "\n"
+  "This algorithm throws a warning if less than 15 frames are used to estimate "
+  "the noise PSD.\n"
   "\n"
   "References:\n"
-  "  [1] Vaseghi, S. V. (2008). Advanced digital signal processing and noise reduction. John Wiley & Sons. Page 336.\n"
-  "  [2] Ephraim, Y., & Malah, D. (1984). Speech enhancement using a minimum-mean square error short-time spectral amplitude estimator. "
-  "IEEE Transactions on acoustics, speech, and signal processing, 32(6), 1109-1121.\n");
+  "\n"
+  "1. Vaseghi, S. V. (2008). Advanced digital signal processing and noise "
+  "reduction. John Wiley & Sons. Page 336.\n\n"
+  "2. Ephraim, Y., & Malah, D. (1984). Speech enhancement using a "
+  "minimum-mean square error short-time spectral amplitude estimator. "
+  "IEEE Transactions on acoustics, speech, and signal processing, 32(6), "
+  "1109-1121.\n\n");
 
 
 void SNR::compute() {

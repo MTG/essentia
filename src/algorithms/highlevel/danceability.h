@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -43,7 +43,7 @@ class Danceability : public Algorithm {
   void declareParameters() {
     declareParameter("minTau", "minimum segment length to consider [ms]", "(0,inf)", 310.);
     declareParameter("maxTau", "maximum segment length to consider [ms]", "(0,inf)", 8800.);
-    declareParameter("tauMultiplier", "multiplier to increment from min to max tau", "[1,inf)", 1.1);
+    declareParameter("tauMultiplier", "multiplier to increment from min to max tau", "(1,inf)", 1.1);
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
   }
 
@@ -136,7 +136,7 @@ class Danceability : public AlgorithmComposite {
   void declareParameters() {
     declareParameter("minTau", "minimum segment length to consider [ms]", "(0,inf)", 310.);
     declareParameter("maxTau", "maximum segment length to consider [ms]", "(0,inf)", 8800.);
-    declareParameter("tauMultiplier", "multiplier to increment from min to max tau", "[1,inf)", 1.1);
+    declareParameter("tauMultiplier", "multiplier to increment from min to max tau", "(1,inf)", 1.1);
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
   }
 

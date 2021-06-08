@@ -67,10 +67,7 @@ example_sources_fileio = [
     ('streaming_stft', ),
     ('streaming_tuningfrequency', ),
     ('streaming_vibrato', ),
-    ('streaming_tensorflowpredict', ),
     ('streaming_yinprobabilistic', ),
-    ('streaming_musicnn_predict', ),
-    ('streaming_vggish_predict', ),
 
     ('streaming_extractor_music',
         ['music_extractor/extractor_utils']),
@@ -84,10 +81,17 @@ example_sources_with_gaia = [
         ['music_extractor/extractor_utils'])
 ]
 
+example_sources_with_tensorflow = [
+    ('streaming_tensorflowpredict', ),
+    ('streaming_musicnn_predict', ),
+    ('streaming_vggish_predict', )
+]
+
 
 def configure(ctx):
     example_list_fileio = [p[0] for p in example_sources_fileio]
     example_list_gaia = [p[0] for p in example_sources_with_gaia]
+    example_list_tensorflow = [p[0] for p in example_sources_with_tensorflow]
 
     example_list = []
 
@@ -97,6 +101,9 @@ def configure(ctx):
     if "HAVE_GAIA2" in ctx.env['define_key']:
         example_list += example_list_gaia
 
+    if "HAVE_TENSORFLOW" in ctx.env['define_key']:
+        example_list += example_list_tensorflow
+
     if ctx.env.WITH_EXAMPLES:
         ctx.env.EXAMPLE_LIST = example_list
 
@@ -105,6 +112,8 @@ def configure(ctx):
             e = e.strip()
             if e not in example_list and e in example_list_gaia:
                 raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because Gaia2 is missing" % e)
+            if e not in example_list and e in example_list_tensorflow:
+                raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because TensorFlow is missing" % e)
             if e not in example_list and e in example_list_fileio:
                 raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because LibAv/FFMpeg or libresample are missing" % e)
             elif e not in example_list:
@@ -138,10 +147,8 @@ def build(ctx):
             files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
 
             # If an `other` program has files in a directory we need
-            # to add an aditional includes
+            # to add an additional includes
             includes = ['.', '..']
-            if any((len(x.split("/")) > 1 for x in other or [])):
-                includes.append("../..")
 
             ctx(features='c cxx cxxprogram check_static',
                 source = ctx.path.ant_glob(' '.join(files)),
@@ -159,7 +166,7 @@ def build(ctx):
                         self.env.LINKFLAGS = ['-static']
                         self.env.SHLIB_MARKER = self.env.STLIB_MARKER
 
-        for e in example_sources_fileio + example_sources_with_gaia:
+        for e in example_sources_fileio + example_sources_with_gaia + example_sources_with_tensorflow:
             if e[0] in ctx.env.EXAMPLE_LIST:
                 if len(e) == 1:
                     build_example(e[0])

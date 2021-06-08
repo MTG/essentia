@@ -1,4 +1,5 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 . ../build_config.sh
 
 rm -rf tmp
@@ -20,7 +21,8 @@ cd $LIBSAMPLERATE_VERSION
 make
 make install
 
-cp src/.libs/libsamplerate-0.dll $PREFIX/lib/libsamplerate.dll
+# TODO Unnecessary?
+#cp src/.libs/libsamplerate-0.dll $PREFIX/lib/libsamplerate.dll
 
 cd ../..
 rm -r tmp

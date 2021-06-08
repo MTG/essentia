@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -66,7 +66,7 @@ class Welch : public Algorithm {
   void declareParameters() {
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("frameSize", "the expected size of the input audio signal (this is an optional parameter to optimize memory allocation)", "(0,inf)", 512);
-    declareParameter("windowType", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    declareParameter("windowType", "the window type", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
     declareParameter("fftSize", "size of the FFT. Zero padding is added if this is larger the input frame size.", "(0,inf)", 1024);  
     declareParameter("scaling", "'density' normalizes the result to the bandwidth while 'power' outputs the unnormalized power spectrum", "{density,power}", "density");  
     declareParameter("averagingFrames", "amount of frames to average", "(0,inf)", 10);  

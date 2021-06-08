@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -57,7 +57,7 @@ void disconnect(SourceBase& source, DevNullConnector devnull) {
     Algorithm* sinkAlg = sink.parent();
 
     // TODO: huh?
-    if (sinkAlg->name() == "DevNull") {
+    if ((sinkAlg) && (sinkAlg->name().find("DevNull") != std::string::npos)){
       disconnect(source, sink);
 
       // since the DevNull is no longer connected to a network, it must be

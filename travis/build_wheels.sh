@@ -46,8 +46,8 @@ fi
 cd -
 
 # Compile wheels
-for PYBIN in /opt/python/*/bin; do
 
+for PYBIN in /opt/python/*/bin; do
     if [[ $WITH_TENSORFLOW ]]; then
     # The minimum numpy version required by tensorflow is always greater than
     # the installed one. Install the oldest numpy supported by each tensorflow

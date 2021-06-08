@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -66,15 +66,17 @@ void bpmDistance(Real x, Real y, Real& error, Real& ratio) {
 inline
 bool areEqual(Real a, Real b, Real tolerance) {
   //return fabs(a-b) <= epsilon;
-  Real error=0;
-  Real ratio=0;
-  bpmDistance(a,b,error,ratio);
-  return (std::fabs(error)<tolerance) && (int(ratio)==1);
+  Real epsilon = std::max(tolerance, std::numeric_limits<Real>::epsilon());
+  Real error = 0;
+  Real ratio = 0;
+  bpmDistance(a, b, error, ratio);
+  return (std::fabs(error) <= epsilon && int(ratio)==1);
 }
 
 inline
 bool areHarmonics(Real x, Real y, Real epsilon, bool bPower2) {
-  // epsilon must be in %. a strict choice could be 3
+  // FIXME epsilon must be in %. a strict choice could be 3
+  epsilon = std::max(epsilon, std::numeric_limits<Real>::epsilon());
   Real ratio = 0;
   Real error = 0;
   bpmDistance(x, y, error, ratio);
@@ -88,21 +90,21 @@ bool areHarmonics(Real x, Real y, Real epsilon, bool bPower2) {
 
 inline
 Real greatestCommonDivisor(Real x, Real y, Real epsilon) {
-  // epsilon must be in %. a strict choice could be 3
-  if (x<y) return greatestCommonDivisor(y,x,epsilon);
+  // FIXME epsilon must be in %. a strict choice could be 3
+  epsilon = std::max(epsilon, std::numeric_limits<Real>::epsilon());
+  if (x<y) return greatestCommonDivisor(y, x, epsilon);
   if (x==0) return 0;
-  Real error = std::numeric_limits<int>::max(),
-  ratio=std::numeric_limits<int>::max();
-  bpmDistance(x,y,error,ratio);
-  if (fabs(error)<epsilon) return y;
+  Real error = std::numeric_limits<int>::max();
+  Real ratio = std::numeric_limits<int>::max();
+  bpmDistance(x, y, error, ratio);
+  if (fabs(error) <= epsilon) return y;
   int a = int(x+0.5);
   int b = int(y+0.5);
   while (fabs(error) > epsilon) {
-    bpmDistance(a,b,error,ratio);
+    bpmDistance(a, b, error, ratio);
     int remainder = a%b;
-    a=b;
-    b=remainder;
-    //if(x<1) return 1;
+    a = b;
+    b = remainder;
   }
   return a;
 }
@@ -125,7 +127,7 @@ std::vector<Real> roundBpms(const std::vector<Real>& bpms) {
     else {
       if ((ratio-iRatio) == 0.5) { // only interested in pure halfs
         harmonicBpms.push_back(bpms[i]);
-        harmonicBpms.push_back(greatestCommonDivisor(bpms[i], mainBpm,epsilon));
+        harmonicBpms.push_back(greatestCommonDivisor(bpms[i], mainBpm, epsilon));
       }
     }
   }

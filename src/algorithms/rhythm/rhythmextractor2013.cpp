@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -112,7 +112,7 @@ AlgorithmStatus RhythmExtractor2013::process() {
     _confidence.push(_pool.value<Real>("internal.confidence"));
   }
   else if (_method == "degara") {
-    _confidence.push((Real) 0);
+    _confidence.push((Real) 0.);
   }
   
   vector<Real> bpmIntervals;

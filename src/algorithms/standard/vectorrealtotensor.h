@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -55,7 +55,7 @@ class VectorRealToTensor : public Algorithm {
     declareParameter("shape", "shape of the output tensor (batchSize, channels, patchSize, featureSize). If batchSize is -1 a single tensor is generated when the end of the stream is reached", "", outputShape);
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 0);
     declareParameter("batchHopSize", "number of patches between the beginnings of adjacent batches. 0 to avoid overlap", "[0,inf)", 0);
-    declareParameter("lastPatchMode", "what to do with the last frames. Options are to `repeat` them to fill the last patch or to `discard` them", "{discard,repeat}", "repeat");
+    declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "repeat");
   }
 
   void configure();

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -54,66 +54,71 @@ void LoopBpmConfidence::compute() {
   } else {
     const vector<Real>& signal = _signal.get();
 
-    // Get original duration
+    // Get original duration.
     int duration_samples = signal.size();
 
-    // Compute envelope
-    vector<Real> envelope;
-    _envelope->input("signal").set(signal);
-    _envelope->output("signal").set(envelope);
-    _envelope->compute();
+    // Check first that the signal is non-empty
+    if (duration_samples!=0){
+      // Compute envelope
+      vector<Real> envelope;
+      _envelope->input("signal").set(signal);
+      _envelope->output("signal").set(envelope);
+      _envelope->compute();
 
-    // Compute threshold
-    Real threshold = *std::max_element(envelope.begin(), envelope.end()) * 0.05;
+      // Compute threshold
+      Real threshold = *std::max_element(envelope.begin(), envelope.end()) * 0.05;
 
-    // Find start position
-    int start_position = 0;
-    for (int i=0; i<(int)envelope.size(); i++){
-      if (envelope[i] >= threshold){
-        start_position = i;
-        break;
-      }
-    }
-
-    // Find end position
-    int end_position = 0;
-    for (int i=envelope.size() - 1; i>=0; i--){
-      if (envelope[i] >= threshold){
-        end_position = i;
-        break;
-      }
-    }
-
-    // Build vector with all durations to check
-    std::vector<int> durations_to_check;
-    durations_to_check.resize(4);
-    durations_to_check[0] = duration_samples;
-    durations_to_check[1] = duration_samples - start_position;
-    durations_to_check[2] = end_position;
-    durations_to_check[3] = end_position - start_position;
-
-    // Check all durations
-    std::vector<Real> confidences;
-    confidences.resize(4);
-    Real beatDuration = (60.0 * parameter("sampleRate").toReal()) / bpmEstimate;
-    Real lambdaThreshold = beatDuration * 0.5;
-    for (int i=0; i<(int)durations_to_check.size(); i++){
-      int duration = durations_to_check[i];
-      int minDistance = duration_samples; // Set maximum duration
-      for (int j=1; j<128; j++) { // Iterate over possible beat lengths (1-127)
-        int nBeatDuration = (int)round(beatDuration * j);
-        int distance = abs(duration - nBeatDuration);
-        if (distance < minDistance) {
-          minDistance = distance;
+      // Find start position
+      int start_position = 0;
+      for (int i=0; i<(int)envelope.size(); i++){
+        if (envelope[i] >= threshold){
+          start_position = i;
+          break;
         }
       }
-      if (minDistance > lambdaThreshold) {
-        confidences[i] = 0.0;
-      } else {
-        confidences[i] = 1.0 - (Real)minDistance / lambdaThreshold;
+
+      // Find end position
+      int end_position = 0;
+      for (int i=envelope.size() - 1; i>=0; i--){
+        if (envelope[i] >= threshold){
+          end_position = i;
+          break;
+        }
       }
-    }  
-    confidence = *std::max_element(confidences.begin(), confidences.end());
+
+      // Build vector with all durations to check
+      std::vector<int> durations_to_check;
+      durations_to_check.resize(4);
+      durations_to_check[0] = duration_samples;
+      durations_to_check[1] = duration_samples - start_position;
+      durations_to_check[2] = end_position;
+      durations_to_check[3] = end_position - start_position;
+
+      // Check all durations
+      std::vector<Real> confidences;
+      confidences.resize(4);
+      Real beatDuration = (60.0 * parameter("sampleRate").toReal()) / bpmEstimate;
+      Real lambdaThreshold = beatDuration * 0.5;
+      for (int i=0; i<(int)durations_to_check.size(); i++){
+        int duration = durations_to_check[i];
+        int minDistance = duration_samples; // Set maximum duration
+        for (int j=1; j<128; j++) { // Iterate over possible beat lengths (1-127)
+          int nBeatDuration = (int)round(beatDuration * j);
+          int distance = abs(duration - nBeatDuration);
+          if (distance < minDistance) {
+            minDistance = distance;
+          }
+        }
+        if (minDistance > lambdaThreshold) {
+          confidences[i] = 0.0;
+        } else {
+          confidences[i] = 1.0 - (Real)minDistance / lambdaThreshold;
+        }
+      }  
+      confidence = *std::max_element(confidences.begin(), confidences.end());
+    } else {
+      confidence = 0.0;  // Confidence set to zero for empty signals.
+    }
   }
 }
 

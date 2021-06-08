@@ -80,6 +80,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 ## Emotion detection
 
+- Y. Kim, L. M. Aiello, and D. Quercia. PepMusic: motivational qualities of songs for daily activities. EPJ Data Science, 9(1), 13, 2020.
+
 - Y. Hifny, A. Ali. Efficient Arabic Emotion Recognition Using Deep Neural Networks. In ICASSP 2019-2019 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), pages 6710-6714, 2019.
 
 - J. Grekow. Finding Musical Pieces with a Similar Emotional Distribution throughout the Same Composition. In 2019 IEEE International Symposium on INnovations in Intelligent SysTems and Applications (INISTA), pages 1-6, 2019.
@@ -156,6 +158,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 - S. Parekh, F. Font, and X. Serra. Improving Audio Retrieval through Loudness Profile Categorization. In IEEE International Symposium on Multimedia (ISM), pages 565-568, 2016.
 
+- D. Moffat and J. D. Reiss. Objective evaluations of synthesised environmental sounds. In International Conference on Digital Audio Effects (DAFx-18), 2018.
+
 - D. Moffat, D. Ronan, and J. D. Reiss. Unsupervised taxonomy of sound effects. In 20th International Conference on Digital Audio Effects (DAFx-17), 2017.
 
 - S. Böck. Event Detection in Musical Audio. PhD Thesis, Johannes Kepler University, Linz, Austria, 2016.
@@ -214,7 +218,7 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 
 - F. Fuhrmann, P. Herrera, and X. Serra. Detecting solo phrases in music using spectral and pitch-related descriptors. Journal of New Music Research, 38(4):343–356, 2009.
 
-## Audio source separation
+## Audio source separation
 
 F. R. Stöter. Separation and Count Estimation for Audio Sources Overlapping in Time and Frequency. PhD Thesis, Friedrich–Alexander University Erlangen–Nürnberg, Germany, 2020.
 

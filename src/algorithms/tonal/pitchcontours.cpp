@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -68,14 +68,6 @@ void PitchContours::compute() {
   _numberFrames = peakBins.size();
   duration = _numberFrames * _frameDuration;
 
-  if (!_numberFrames) {
-    // no peaks -> empty pitch contours output
-    contoursBins.clear();
-    contoursSaliences.clear();
-    contoursStartTimes.clear();
-    return;
-  }
-
   for (size_t i=0; i<_numberFrames; i++) {
 
     if (peakBins[i].size() != peakSaliences[i].size()) {
@@ -124,6 +116,14 @@ void PitchContours::compute() {
         salientInFrame.push_back(make_pair(i,j));
       }
     }
+  }
+
+  if (salientInFrame.size() == 0) {
+    // no peaks -> empty pitch contours output
+    contoursBins.clear();
+    contoursSaliences.clear();
+    contoursStartTimes.clear();
+    return;
   }
 
   // gather distribution statistics for overall peak filtering

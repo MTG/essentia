@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,7 +26,7 @@ using namespace standard;
 const char* TensorflowInputVGGish::name = "TensorflowInputVGGish";
 const char* TensorflowInputVGGish::category = "Spectral";
 const char* TensorflowInputVGGish::description = DOC(
-  "This algorithm computes mel-bands with a particular parametrization specific to VGGish based models.\n"
+  "This algorithm computes mel-bands specific to the input of VGGish-based models.\n"
   "\n"
   "References:\n"
   "  [1] Gemmeke, J. et. al., AudioSet: An ontology and human-labelled dataset for audio events, ICASSP 2017\n\n"

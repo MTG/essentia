@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -31,7 +31,7 @@ const char* EqualLoudness::description = DOC("This algorithm implements an equal
 "\n"
 "References:\n"
 "  [1] Replay Gain - Equal Loudness Filter,\n"
-"  http://replaygain.hydrogenaudio.org/proposal/equal_loudness.html");
+"  http://replaygain.hydrogenaud.io/proposal/equal_loudness.html");
 
 
 void EqualLoudness::reset() {
@@ -42,8 +42,8 @@ void EqualLoudness::reset() {
 void EqualLoudness::configure() {
   Real fs = parameter("sampleRate").toReal();
 
-  if ((fs != 44100.0) && (fs != 48000.0) && (fs != 32000.0) && (fs != 8000.0)) {
-    throw EssentiaException("EqualLoudness: the sample rate is neither 44100, 48000, 32000 nor 8000 Hz, it must be one of these values");
+  if ((fs != 44100.0) && (fs != 48000.0) && (fs != 32000.0) && (fs != 16000.0) && (fs != 8000.0)) {
+    throw EssentiaException("EqualLoudness: the sample rate is neither 44100, 48000, 32000, 16000 nor 8000 Hz, it must be one of these values");
   }
 
   vector<Real> By(11, 0.0);
@@ -160,6 +160,43 @@ void EqualLoudness::configure() {
     Ab[0] =  1.00000000000000;
     Ab[1] = -1.95835380975398;
     Ab[2] =  0.95920349965459;
+
+  }
+  else if (fs == 16000.0) {
+
+    // Yulewalk filtering
+    By[0] =   0.449152566084497;
+    By[1] =  -0.143517574645467;
+    By[2] =  -0.227843944297486;
+    By[3] =  -0.014191401005506;
+    By[4] =   0.040782627971394;
+    By[5] =  -0.123981633817477;
+    By[6] =   0.040975651356477;
+    By[7] =   0.104785036002506;
+    By[8] =  -0.018638878109271;
+    By[9] =  -0.031934284389146;
+    By[10] =  0.005419077487073;
+
+    Ay[0] =   1.000000000000000;
+    Ay[1] =  -0.628206192336707;
+    Ay[2] =   0.296617837063664;
+    Ay[3] =  -0.372563729423998;
+    Ay[4] =   0.002137678571238;
+    Ay[5] =  -0.420298201709172;
+    Ay[6] =   0.221996505648236;
+    Ay[7] =   0.006134243506816;
+    Ay[8] =   0.067476207446826;
+    Ay[9] =   0.057848203758009;
+    Ay[10] =  0.032227540721734;
+
+    // Butterworth filtering
+    Bb[0] =   0.959203149638338;
+    Bb[1] =  -1.918406299276675;
+    Bb[2] =   0.959203149638338;
+
+    Ab[0] =   1.000000000000000;
+    Ab[1] =  -1.916741223157623;
+    Ab[2] =   0.920071375395728;
 
   }
   else if (fs == 8000.0) {
