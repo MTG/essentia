@@ -67,10 +67,9 @@ class TestTonicIndianArtMusic(TestCase):
     # This tonic corresponds to the following mp3 file.
     # "23582__gopalkoduri__carnatic-varnam-by-vignesh-in-abhogi-raaga.mp3'
     # 
-    # 1. copy this file into essentia/test/audio/recorded.
-    # 2. Uncomment the test case below and run.
+    #  copy this file into essentia/test/audio/recorded.
 
-    """
+   
     def testRegressionVignesh(self):
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/223582__gopalkoduri__carnatic-varnam-by-vignesh-in-abhogi-raaga.mp3'),
                             sampleRate = 44100)()
@@ -79,7 +78,7 @@ class TestTonicIndianArtMusic(TestCase):
         referenceTonic = 138.59                                      
         tonic = TonicIndianArtMusic()(audio)
         self.assertEqual(round(tonic), round(referenceTonic))
-    """
+    
     def testRegression(self):
         # Regression test using existing vignesh audio file in "essentia/test/audio/recorded"
         audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'),
