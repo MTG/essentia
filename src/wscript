@@ -375,15 +375,6 @@ def configure(ctx):
         # For the static library, find all -l flags we'll need
         lflags = [l for lib in libs for l in ctx.env["LIB_" + lib]]
         lflags = ' '.join(['-l%s' % lib for lib in lflags])
-
-        # when TensorFlow is a static lib (tensorflow-core.a) it
-        # is inside LINKFLAGS_TENSORFLOW because it is wrapped
-        # with linker options:
-        # -Wl,--whole-archive,-ltensorflow-core,--no-whole-archive
-        if 'LINKFLAGS_TENSORFLOW' in ctx.env:
-            for flag in ctx.env['LINKFLAGS_TENSORFLOW']:
-                lflags += ' {}'.format(flag)
-
         lpaths = [l for lib in libs for l in ctx.env["LIBPATH_" + lib]]
         lpaths = ' '.join(['-L%s' % lib for lib in set(lpaths)])
     else:
