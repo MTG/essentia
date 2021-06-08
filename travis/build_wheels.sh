@@ -136,7 +136,7 @@ for PYBIN in /opt/python/*/bin/; do
     "${PYBIN}/pip" install "${PROJECT_NAME}" --no-index -f /io/wheelhouse
     if [[ $WITH_TENSORFLOW ]]; then
     # Test that essentia can be imported along with tensorflow
-        (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming; import tensorflow')
+        (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')
     else
         (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')
     fi
