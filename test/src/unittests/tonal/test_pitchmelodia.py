@@ -74,45 +74,7 @@ class TestPitchMelodia(TestCase):
         self.assertAlmostEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
         self.assertAlmostEqualVector(confidence, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
 
-    def testARealCase(self):
-        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
-        audio = MonoLoader(filename=filename, sampleRate=44100)()      
-        pm = PitchMelodia()
-        pitch, pitchConfidence = pm(audio)
-       
-        #This code stores reference values in a file for later loading.
-        save('pitchmelodiapitch.npy', pitch)             
-        save('pitchmelodiaconfidence.npy', pitchConfidence)             
-
-        loadedPitchMelodiaPitch = load(join(filedir(), 'pitchmelodia/pitchmelodiapitch.npy'))
-        expectedPitchMelodiaPitch = loadedPitchMelodiaPitch.tolist() 
-        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitchMelodiaPitch, 2)
-
-        loadedPitchConfidence = load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence.npy'))
-        expectedPitchConfidence = loadedPitchConfidence.tolist() 
-        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 2)
-
-    def testARealCaseEqualLoud(self):
-        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
-        audio = MonoLoader(filename=filename, sampleRate=44100)()      
-        pm = PitchMelodia()
-        eq = EqualLoudness()
-        eqAudio = eq(audio)
-        pitch, pitchConfidence = pm(eqAudio)
-
-        #This code stores reference values in a file for later loading.
-        save('pitchmelodiapitch_eqloud.npy', pitch)             
-        save('pitchmelodiaconfidence_eqloud.npy', pitchConfidence)             
-
-        loadedPitchMelodiaPitch = load(join(filedir(), 'pitchmelodia/pitchmelodiapitch_eqloud.npy'))
-        expectedPitchMelodiaPitch = loadedPitchMelodiaPitch.tolist() 
-        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitchMelodiaPitch, 2)
-
-        loadedPitchConfidence = load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence_eqloud.npy'))
-        expectedPitchConfidence = loadedPitchConfidence.tolist() 
-        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 2)
-
-    def test110Hz(self):
+    def testSinglePeak(self):
         # generate test signal: sine 110Hz @44100kHz
         frameSize = 4096
         signalSize = 10 * frameSize
@@ -121,6 +83,53 @@ class TestPitchMelodia(TestCase):
         pitch, confidence = pm(signal)
         index= int(len(pitch)/2) # Halfway point in pitch array
         self.assertAlmostEqualFixedPrecision(pitch[50], 110.0, 2)
+
+    def testSinglePeakNonDefaultBR(self):   
+        # Same as above, but tweaking the Bin Resolution to ensure output length is consistant
+        # Larger bin resolution reduces the number of non zero values in salience function
+        # generate test signal: sine 110Hz @44100kHz
+        binResolution = 40
+        frameSize = 4096
+        signalSize = 10 * frameSize
+        signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
+        pm = PitchMelodia(binResolution=binResolution)
+        pitch, confidence = pm(signal)
+        index= int(len(pitch)/2) # Halfway point in pitch array
+        self.assertAlmostEqualFixedPrecision(pitch[50], 110.0, 2)
+        self.assertAlmostEqualFixedPrecision(confidence[50], 0.5, 2)        
+
+    def testSinglePeakLowCompression(self):
+        # generate test signal: sine 110Hz @44100kHz
+        frameSize = 4096
+        signalSize = 10 * frameSize
+        signal = 0.2 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
+        pm = PitchMelodia(magnitudeCompression=0.0001)
+
+        pitch, confidence = pm(signal)
+        index = int(len(pitch)/2) # Halfway point in pitch array
+        self.assertAlmostEqualFixedPrecision(pitch[50], 110.0, 2)
+
+    def testSinglePeakLowestMagThreshold(self):
+        # Provide a single input peak with a unit magnitude at the reference frequency,
+        # generate test signal: sine 110Hz @44100kHz
+        frameSize = 4096
+        signalSize = 10 * frameSize
+        signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 55 * 2*math.pi)
+        pm = PitchMelodia(magnitudeThreshold=0)
+        pitch, confidence = pm(signal)
+        index = int(len(pitch)/2) # Halfway point in pitch array     
+        self.assertAlmostEqualFixedPrecision(pitch[50], 0.0, 2)
+
+    def testTwoPeaksHarmonics(self):
+        frameSize= 4096
+        signalSize = 10 * frameSize          
+        signal_55Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 55 * 2*math.pi)
+        signal_110Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
+        signal = signal_55Hz+signal_110Hz
+        pm = PitchMelodia()
+        pitch, confidence = pm(signal)  
+        self.assertAlmostEqualFixedPrecision(pitch[50], 110.0, 0)
+        self.assertAlmostEqualFixedPrecision(confidence[50], 0.5, 1)      
 
     def testDifferentPeaks(self):  
         frameSize= 4096
@@ -152,7 +161,7 @@ class TestPitchMelodia(TestCase):
         index = 10
         # Do an approximation  check at the first bin location
         while index < 30:
-            self.assertAlmostEqual(pitch[index], 2*f, 0.1)
+            self.assertAlmostEqualFixedPrecision(pitch[index], 2*f, 0)
             index += 1                
 
     # This is really a regression test. Reference values and locations are from previous runs.
@@ -171,7 +180,7 @@ class TestPitchMelodia(TestCase):
         index = 10
         # Do an approximation  check at the first bin location
         while index < 30:
-            self.assertAlmostEqual(pitch[index], 2*referenceFrequency, 0.1)
+            self.assertAlmostEqualFixedPrecision(pitch[index], 2*referenceFrequency, 0)
             index += 1                
 
         pitch, confidence  = PitchMelodia()(signal_30Hz)              
@@ -179,7 +188,7 @@ class TestPitchMelodia(TestCase):
         index = 10
         # Do an approximation  check at the first bin location
         while index < 30:
-            self.assertAlmostEqual(pitch[index], 2*referenceFrequency, 0.1)
+            self.assertAlmostEqualFixedPrecision(pitch[index], 2*referenceFrequency, 1)
             index += 1                
 
     def testSinglePeakAboveMaxBin(self):
@@ -198,7 +207,45 @@ class TestPitchMelodia(TestCase):
             self.assertGreater(confidence[index], 0.4)  
             index += 1        
 
-    def testMajorScale(self):
+    def testRegression(self):
+        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
+        audio = MonoLoader(filename=filename, sampleRate=44100)()      
+        pm = PitchMelodia()
+        pitch, pitchConfidence = pm(audio)
+       
+        #This code stores reference values in a file for later loading.
+        save('pitchmelodiapitch.npy', pitch)             
+        save('pitchmelodiaconfidence.npy', pitchConfidence)             
+
+        loadedPitchMelodiaPitch = load(join(filedir(), 'pitchmelodia/pitchmelodiapitch.npy'))
+        expectedPitchMelodiaPitch = loadedPitchMelodiaPitch.tolist() 
+        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitchMelodiaPitch, 2)
+
+        loadedPitchConfidence = load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence.npy'))
+        expectedPitchConfidence = loadedPitchConfidence.tolist() 
+        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 2)
+
+    def testRegressionEqualLoud(self):
+        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
+        audio = MonoLoader(filename=filename, sampleRate=44100)()      
+        pm = PitchMelodia()
+        eq = EqualLoudness()
+        eqAudio = eq(audio)
+        pitch, pitchConfidence = pm(eqAudio)
+
+        #This code stores reference values in a file for later loading.
+        save('pitchmelodiapitch_eqloud.npy', pitch)             
+        save('pitchmelodiaconfidence_eqloud.npy', pitchConfidence)             
+
+        loadedPitchMelodiaPitch = load(join(filedir(), 'pitchmelodia/pitchmelodiapitch_eqloud.npy'))
+        expectedPitchMelodiaPitch = loadedPitchMelodiaPitch.tolist() 
+        self.assertAlmostEqualVectorFixedPrecision(pitch, expectedPitchMelodiaPitch, 2)
+
+        loadedPitchConfidence = load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence_eqloud.npy'))
+        expectedPitchConfidence = loadedPitchConfidence.tolist() 
+        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 2)
+
+    def testRegressionSyntheticInput(self):
         # generate test signal concatenating major scale notes.
         defaultSampleRate = 44100
         frameSize = 2048
