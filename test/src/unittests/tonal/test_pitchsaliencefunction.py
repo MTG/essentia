@@ -104,16 +104,9 @@ class TestPitchSalienceFunction(TestCase):
         self.assertEqual(len(calculatedNormalPitchSalience), outputLength)
         self.assertAlmostEqualVectorFixedPrecision(calculatedNormalPitchSalience, expectedNormalPitchSalience, 8)
 
-    def testSinglePeakLowMagThreshold(self):
-        """ 
-        The intention here is to test if some peaks are correctly discarded, with magnitudeThreshold set low (to 0.01)
-        The magnitudeThreshold parameter defines the maximum allowed difference from the highest peak in dBs,
-        so the input list of peaks should be of different magnitudes to see it working.
-        We can add a few peaks with lower magnitudes than 1 and use magnitudeThreshold = 0. 
-        Then only the peak with the magnitude 1 will be selected and the current expectedPitchSalience will be still a correct expected test output
-        """        
-        freq_speaks = [55, 120, 280, 400] # Several peaks not harmonic
-        mag_speaks = [1, 0.25, 0.2, 0.2]
+    def testLowMagThreshold(self):
+        freq_speaks = [55, 80, 120] # 3 peaks not harmonic
+        mag_speaks = [1, 0.1, 0.2]
         outputLength  = 600
 
         # This is the expected pitch salience from 1 peak at ampl = 1  (testSinglePeak earlier)
@@ -121,14 +114,12 @@ class TestPitchSalienceFunction(TestCase):
         5.0000000e-01, 3.4549147e-01, 2.0610739e-01, 9.5491491e-02, 2.4471754e-02, 3.7493994e-33]
 
         # Append zeros to expected salience
-        expectedPitchSalience += [0] * (outputLength-11)        
-        calculatedPitchSalience = PitchSalienceFunction(magnitudeThreshold=0.01)(freq_speaks, mag_speaks)
+        expectedPitchSalience += [0] * (outputLength-11)  
+        # At magThreshold = 13 or lower, only first peak gets through
+        calculatedPitchSalience = PitchSalienceFunction(magnitudeThreshold=13)(freq_speaks, mag_speaks)
 
         self.assertEqual(len(calculatedPitchSalience), outputLength)       
-        # Check the first 11 elements. The first element has value "1".
-        # The next returned 10 non-zero values decreasing in magnitude, should match "expected" above.
         self.assertAlmostEqualVectorFixedPrecision(calculatedPitchSalience, expectedPitchSalience, 8)
-
 
     def testTwoPeaksHarmonics(self):
         # Provide a 2 input peaks with a unit magnitude and validate
