@@ -143,8 +143,8 @@ class TestPitchSalienceFunction(TestCase):
         self.assertEqual(len(calculatedPitchSalience20H), outputLength)
         
         # Save operation is commented out. Uncomment to tweak parameters orinput to genrate new referencesw when required.
-        save('calculatedPitchSalience_test2PeaksHarmonics1H.npy', calculatedPitchSalience1H)
-        save('calculatedPitchSalience_test2PeaksHarmonics20H.npy', calculatedPitchSalience20H)        
+        # save('calculatedPitchSalience_test2PeaksHarmonics1H.npy', calculatedPitchSalience1H)
+        # save('calculatedPitchSalience_test2PeaksHarmonics20H.npy', calculatedPitchSalience20H)        
         # Reference samples are loaded as expected values
 
         expectedPitchSalience1H = load(join(filedir(), 'pitchsalience/calculatedPitchSalience_test2PeaksHarmonics1H.npy'))
