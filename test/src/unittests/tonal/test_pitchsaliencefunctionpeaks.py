@@ -155,6 +155,21 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         self.assertEqualVector(bins,  [75., 0.])
         self.assertEqualVector(values, [2., 0.5])
 
+    # Test for diverse frequency peaks.
+    def test3Peaks(self):
+        freq_speaks = [55, 100, 340] 
+        mag_speaks = [1, 1, 1] 
+        outputLength  = 600        
+        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks, mag_speaks)    
+        # First check the length of the ouput is 600 
+        self.assertEqual(len(calculatedPitchSalience), outputLength)       
+        # This test case with diverse frequency values to save ouput to NPY file since the output is more complex.
+        # Save operation is commented out. Uncomment to tweak parameters orinput to genrate new referencesw when required.        
+        # save('calculatedPitchSalience_test3Peaks.npy', calculatedPitchSalience)
+        # Reference samples are loaded as expected values
+        expectedPitchSalience = load(join(filedir(), 'pitchsalience/calculatedPitchSalience_test3Peaks.npy'))
+        expectedPitchSalienceList = expectedPitchSalience.tolist()
+        self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList, calculatedPitchSalience, 8)
 
 suite = allTests(TestPitchSalienceFunctionPeaks)
 
