@@ -27,7 +27,7 @@ class TestMultiPitchKlapuri(TestCase):
     def testZero(self):
         signal = zeros(1024)
         pitch = MultiPitchMelodia()(signal)
-        self.assertAlmostEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
+        self.assertEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
 
     def testInvalidParam(self):
         self.assertConfigureFails(MultiPitchKlapuri(), {'binResolution': -1})
@@ -58,7 +58,8 @@ class TestMultiPitchKlapuri(TestCase):
         self.assertEqual(len(pitch), 7)
         index=0
         while (index<len(expectedPitch)):
-            self.assertAlmostEqualVector(pitch[index], expectedPitch[index],8)
+            print(pitch[index])
+            self.assertAlmostEqualFixedPrecision(pitch[index], expectedPitch[index],0)
             index+=1
 
     def testEmpty(self):
@@ -119,15 +120,14 @@ class TestMultiPitchKlapuri(TestCase):
         midpointB3 = int(6 * numSinglePitchSamples) + midPointOffset
         midpointC4 = int(7 * numSinglePitchSamples) + midPointOffset                                        
              
-        # Use high precision (10) for checking synthetic signals
-        self.assertAlmostEqual(klapArray[midpointC3], 130.81, 10)
-        self.assertAlmostEqual(klapArray[midpointD3], 146.83, 10)
-        self.assertAlmostEqual(klapArray[midpointE3], 164.81, 10)
-        self.assertAlmostEqual(klapArray[midpointF3], 174.61, 10)
-        self.assertAlmostEqual(klapArray[midpointG3], 196.00, 10)
-        self.assertAlmostEqual(klapArray[midpointA3], 220.00, 10)
-        self.assertAlmostEqual(klapArray[midpointB3], 246.94, 10)
-        self.assertAlmostEqual(klapArray[midpointC4], 261.63, 10)
+        self.assertAlmostEqualFixedPrecision(klapArray[midpointC3], 130.81, 1)
+        self.assertAlmostEqualFixedPrecision(klapArray[midpointD3], 146.83, 1)
+        self.assertAlmostEqualFixedPrecision(klapArray[midpointE3], 164.81, 1)
+        self.assertAlmostEqualFixedPrecision(klapArray[midpointF3], 174.61, 1)
+        self.assertAlmostEqualFixedPrecision(klapArray[midpointG3], 196.00, 1)
+        self.assertAlmostEqualFixedPrecision(klapArray[midpointA3], 220.00, 1)
+        self.assertAlmostEqualFixedPrecision(klapArray[midpointB3], 246.94, 1)
+        self.assertAlmostEqualFixedPrecision(klapArray[midpointC4], 261.63, 1)
 
 suite = allTests(TestMultiPitchKlapuri)
 

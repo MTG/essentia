@@ -24,11 +24,6 @@ from essentia_test import *
 
 class TestMultiPitchMelodia(TestCase):
 
-    def testZero(self):
-        signal = zeros(1024)
-        pitch = MultiPitchMelodia()(signal)
-        self.assertAlmostEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
-
     def testInvalidParam(self):
         self.assertConfigureFails(MultiPitchMelodia(), {'binResolution': -1})
         self.assertConfigureFails(MultiPitchMelodia(), {'filterIterations': 0})
@@ -51,31 +46,24 @@ class TestMultiPitchMelodia(TestCase):
         self.assertConfigureFails(MultiPitchMelodia(), {'sampleRate': -1})
         self.assertConfigureFails(MultiPitchMelodia(), {'timeContinuity': -1})
 
+    def testEmpty(self):
+        pitch = MultiPitchMelodia()([])
+        self.assertEqualVector(pitch, [])
+
+    def testZero(self):
+        signal = zeros(1024)
+        pitch = MultiPitchMelodia()(signal)
+        self.assertEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
 
     def testOnes(self):
-        # FIXME. Need to derive a rational why this output occurs for a constant input
         signal = ones(1024)
         pitch = MultiPitchMelodia()(signal)
         expectedPitch=[[0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.], [0.]]
         index=0
         self.assertEqual(len(pitch), 9)
         while (index<len(expectedPitch)):
-            self.assertAlmostEqualVector(pitch[index], expectedPitch[index],8)
+            self.assertEqualVector(pitch[index], expectedPitch[index])
             index+=1
-
-    def testEmpty(self):
-        pitch = MultiPitchMelodia()([])
-        self.assertEqualVector(pitch, [])
-
-    def test110Hz(self):
-        # generate test signal: sine 110Hz @44100kHz
-        frameSize= 4096
-        signalSize = 10 * frameSize
-        signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
-        mpm = MultiPitchMelodia()
-        pitch = mpm(signal)
-        index= int(len(pitch)/2) # Halfway point in pitch array
-        self.assertAlmostEqual(pitch[index], 110.0, 10)
 
     def testMajorScale(self):
         # generate test signal concatenating major scale notes.
@@ -109,9 +97,6 @@ class TestMultiPitchMelodia(TestCase):
             multiArray.append(pitch[index][0])
             index+=1
 
-        # On each step of the "SCALE LADDER" we take the step mid point.
-        # We calculate array index mid point to allow checking the estimated pitch.
-
         midpointC3 = midPointOffset
         midpointD3 = int(1 * numSinglePitchSamples) + midPointOffset
         midpointE3 = int(2 * numSinglePitchSamples) + midPointOffset
@@ -119,18 +104,18 @@ class TestMultiPitchMelodia(TestCase):
         midpointG3 = int(4 * numSinglePitchSamples) + midPointOffset
         midpointA3 = int(5 * numSinglePitchSamples) + midPointOffset        
         midpointB3 = int(6 * numSinglePitchSamples) + midPointOffset
-        midpointC4 = int(7 * numSinglePitchSamples) + midPointOffset                                        
-             
-        # Use high precision (10) for checking synthetic signals
-        self.assertAlmostEqual(multiArray[midpointC3], 130.81, 10)
-        self.assertAlmostEqual(multiArray[midpointD3], 146.83, 10)
-        self.assertAlmostEqual(multiArray[midpointE3], 164.81, 10)
-        self.assertAlmostEqual(multiArray[midpointF3], 174.61, 10)
-        self.assertAlmostEqual(multiArray[midpointG3], 196.00, 10)
-        self.assertAlmostEqual(multiArray[midpointA3], 220.00, 10)
-        self.assertAlmostEqual(multiArray[midpointB3], 246.94, 10)
-        self.assertAlmostEqual(multiArray[midpointC4], 261.63, 10)
+        midpointC4 = int(7 * numSinglePitchSamples) + midPointOffset                   
         
+        self.assertAlmostEqualFixedPrecision(multiArray[midpointC3], 130.81, 1)
+        self.assertAlmostEqualFixedPrecision(multiArray[midpointD3], 146.83, 1)
+        self.assertAlmostEqualFixedPrecision(multiArray[midpointE3], 164.81, 1)
+        self.assertAlmostEqualFixedPrecision(multiArray[midpointF3], 174.61, 1)
+        self.assertAlmostEqualFixedPrecision(multiArray[midpointG3], 196.00, 1)
+        self.assertAlmostEqualFixedPrecision(multiArray[midpointA3], 220.00, 1)
+        self.assertAlmostEqualFixedPrecision(multiArray[midpointB3], 246.94, 1)
+        self.assertAlmostEqualFixedPrecision(multiArray[midpointC4], 261.63, 1)
+
+
 suite = allTests(TestMultiPitchMelodia)
 
 if __name__ == '__main__':

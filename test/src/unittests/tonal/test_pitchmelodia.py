@@ -65,14 +65,14 @@ class TestPitchMelodia(TestCase):
     def testZeros(self):
         signal = zeros(1024)
         pitch, confidence = PitchMelodia()(signal)
-        self.assertAlmostEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
-        self.assertAlmostEqualVector(confidence, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
+        self.assertEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
+        self.assertEqualVector(confidence, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
 
     def testOnes(self):
         signal = ones(1024)
         pitch, confidence = PitchMelodia()(signal)   
-        self.assertAlmostEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
-        self.assertAlmostEqualVector(confidence, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
+        self.assertEqualVector(pitch, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
+        self.assertEqualVector(confidence, [0., 0., 0., 0., 0., 0., 0., 0., 0.])
 
     def testSinglePeak(self):
         # generate test signal: sine 110Hz @44100kHz
@@ -128,7 +128,7 @@ class TestPitchMelodia(TestCase):
         signal = signal_55Hz+signal_110Hz
         pm = PitchMelodia()
         pitch, confidence = pm(signal)  
-        self.assertAlmostEqualFixedPrecision(pitch[50], 110.0, 0)
+        self.assertAlmostEqual(pitch[50], 110.0, 1)
         self.assertAlmostEqualFixedPrecision(confidence[50], 0.5, 1)      
 
     def testDifferentPeaks(self):  
@@ -161,7 +161,7 @@ class TestPitchMelodia(TestCase):
         index = 10
         # Do an approximation  check at the first bin location
         while index < 30:
-            self.assertAlmostEqualFixedPrecision(pitch[index], 2*f, 0)
+            self.assertAlmostEqual(pitch[index], 2*f, 1)
             index += 1                
 
     # This is really a regression test. Reference values and locations are from previous runs.
@@ -180,7 +180,7 @@ class TestPitchMelodia(TestCase):
         index = 10
         # Do an approximation  check at the first bin location
         while index < 30:
-            self.assertAlmostEqualFixedPrecision(pitch[index], 2*referenceFrequency, 0)
+            self.assertAlmostEqual(pitch[index], 2*referenceFrequency, 1)
             index += 1                
 
         pitch, confidence  = PitchMelodia()(signal_30Hz)              
@@ -188,7 +188,7 @@ class TestPitchMelodia(TestCase):
         index = 10
         # Do an approximation  check at the first bin location
         while index < 30:
-            self.assertAlmostEqualFixedPrecision(pitch[index], 2*referenceFrequency, 1)
+            self.assertAlmostEqual(pitch[index], 2*referenceFrequency, 1)
             index += 1                
 
     def testSinglePeakAboveMaxBin(self):
@@ -281,14 +281,20 @@ class TestPitchMelodia(TestCase):
         midpointB3 = int(6 * numSinglePitchSamples) + midPointOffset                                    
              
         # check rounded freq. values of notes at middle points 
-        # They should alighn within +/- 1,2 Hz.
+        # They should align within +/- 1,2 Hz.
         self.assertEqual(round(pitch[midpointC3]), 131, 0)
         self.assertEqual(round(pitch[midpointD3]), 147, 0)
         self.assertEqual(round(pitch[midpointE3]), 165, 0)
         self.assertEqual(round(pitch[midpointF3]), 173, 0)
         self.assertEqual(round(pitch[midpointG3]), 174, 0)
         self.assertEqual(round(pitch[midpointA3]), 196, 0)
-        self.assertEqual(round(pitch[midpointB3]), 220, 0) 
+        self.assertEqual(round(pitch[midpointB3]), 220, 0)
+
+        # Perform a test for a range of values for the notes at the beginning and end (C3 and B4)
+        expectedC3=repeat(130.8,68)
+        expectedB4=repeat(246.9,62)
+        self.assertAlmostEqualVectorFixedPrecision(expectedC3 ,pitch[5:73],1)   
+        self.assertAlmostEqualVectorFixedPrecision(expectedB4, pitch[487:549],1)
 
 suite = allTests(TestPitchMelodia)
 
