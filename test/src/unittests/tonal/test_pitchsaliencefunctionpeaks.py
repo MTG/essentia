@@ -155,22 +155,73 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         self.assertEqualVector(bins,  [75., 0.])
         self.assertEqualVector(values, [2., 0.5])
 
-    # Test for diverse frequency peaks.
-    def test3Peaks(self):
-        freq_speaks = [55, 100, 340] 
-        mag_speaks = [1, 1, 1] 
-        outputLength  = 600        
-        calculatedPitchSalience = PitchSalienceFunction()(freq_speaks, mag_speaks)    
-        # First check the length of the ouput is 600 
-        self.assertEqual(len(calculatedPitchSalience), outputLength)       
-        # This test case with diverse frequency values to save ouput to NPY file since the output is more complex.
-        # Save operation is commented out. Uncomment to tweak parameters orinput to genrate new referencesw when required.        
-        # save('calculatedPitchSalience_test3Peaks.npy', calculatedPitchSalience)
-        # Reference samples are loaded as expected values
-        expectedPitchSalience = load(join(filedir(), 'pitchsalience/calculatedPitchSalience_test3Peaks.npy'))
-        expectedPitchSalienceList = expectedPitchSalience.tolist()
-        self.assertAlmostEqualVectorFixedPrecision(expectedPitchSalienceList, calculatedPitchSalience, 8)
+    def testRegressionSyntheticInput(self):
+        # Use synthetic audio for Regression Test. This keeps NPY files size low.
+        # Define parameters :
+        hopSize = 128
+        frameSize = 2048
+        sampleRate = 44100
+        guessUnvoiced = True
 
+        # Create our algorithms:
+        run_windowing = Windowing(type='hann', zeroPadding=3*frameSize) # Hann window with x4 zero padding
+        run_spectrum = Spectrum(size=frameSize * 4)
+        run_spectral_peaks = SpectralPeaks(minFrequency=1,
+                                           maxFrequency=20000,
+                                           maxPeaks=100,
+                                           sampleRate=sampleRate,
+                                           magnitudeThreshold=0,
+                                           orderBy="magnitude")
+        run_pitch_salience_function = PitchSalienceFunction()
+        run_pitch_salience_function_peaks = PitchSalienceFunctionPeaks()
+        run_pitch_contours = PitchContours(hopSize=hopSize)
+        run_pitch_contours_melody = PitchContoursMelody(guessUnvoiced=guessUnvoiced,
+                                                        hopSize=hopSize)
+        signalSize = frameSize * 10
+        # Here are generated sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
+        c3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 130.81 * 2*math.pi)
+        d3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 146.83 * 2*math.pi)
+        e3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 164.81 * 2*math.pi)
+        f3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 174.61 * 2*math.pi)
+        g3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 196.00 * 2*math.pi)
+        a3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 220.00 * 2*math.pi)
+        b3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 246.94 * 2*math.pi)
+        c4 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 261.63 * 2*math.pi)
+    
+        # This signal is a "major scale ladder"
+        scale = concatenate([c3, d3, e3, f3, g3, a3, b3, c4])
+
+        # Now we are ready to start processing.
+        # 1. Load audio and pass it through the equal-loudness filter
+        audio = EqualLoudness()(scale)
+
+        # 2. Cut audio into frames and compute for each frame:
+        #    spectrum -> spectral peaks -> pitch salience function -> pitch salience function peaks
+
+        # Do some spot checks on selected frequemtly occuring peaks in selected bin ranges.
+        expectedBins1 = [170.,  50.,  98., 222.,  32.] # 168 to 313
+        expectedBins2 = [220., 100.,  30., 167., 260.,  47., 140.,  70.] # 649 to 794   
+        expectedBins3 = [240., 120.,  50.,   0., 276., 194., 156.,  74.,  86.,  36.] # 807 bins 953 
+        expectedBins4 = [260., 140.,  70.,  20., 101., 293., 220., 173.,  53.] # 968 to 1112        
+
+        index = 0
+        for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
+            frame = run_windowing(frame)
+            spectrum = run_spectrum(frame)
+            peak_frequencies, peak_magnitudes = run_spectral_peaks(spectrum)
+            salience = run_pitch_salience_function(peak_frequencies, peak_magnitudes)
+            salience_peaks_bins, _ = run_pitch_salience_function_peaks(salience)
+
+            if (index >= 168 ) and index < 313:
+                self.assertEqualVector(expectedBins1, salience_peaks_bins)                                                                                  
+            elif (index >= 649 ) and index < 794:
+                self.assertEqualVector(expectedBins2, salience_peaks_bins)                                     
+            elif (index >= 807 ) and index < 953:
+                self.assertEqualVector(expectedBins3, salience_peaks_bins)                                     
+            elif (index >= 968)  and index < 1112:             
+                self.assertEqualVector(expectedBins4, salience_peaks_bins)                                                                                                                                                    
+            index+=1
+            
 suite = allTests(TestPitchSalienceFunctionPeaks)
 
 if __name__ == '__main__':
