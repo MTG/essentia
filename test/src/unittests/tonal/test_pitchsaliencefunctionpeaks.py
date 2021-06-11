@@ -174,9 +174,7 @@ class TestPitchSalienceFunctionPeaks(TestCase):
                                            orderBy="magnitude")
         run_pitch_salience_function = PitchSalienceFunction()
         run_pitch_salience_function_peaks = PitchSalienceFunctionPeaks()
-        run_pitch_contours = PitchContours(hopSize=hopSize)
-        run_pitch_contours_melody = PitchContoursMelody(guessUnvoiced=guessUnvoiced,
-                                                        hopSize=hopSize)
+
         signalSize = frameSize * 10
         # Here are generated sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
         c3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 130.81 * 2*math.pi)
@@ -221,7 +219,7 @@ class TestPitchSalienceFunctionPeaks(TestCase):
             elif (index >= 968)  and index < 1112:             
                 self.assertEqualVector(expectedBins4, salience_peaks_bins)                                                                                                                                                    
             index+=1
-            
+
 suite = allTests(TestPitchSalienceFunctionPeaks)
 
 if __name__ == '__main__':
