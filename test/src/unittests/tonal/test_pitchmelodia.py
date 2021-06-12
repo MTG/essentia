@@ -81,8 +81,23 @@ class TestPitchMelodia(TestCase):
         signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
         pm = PitchMelodia()
         pitch, confidence = pm(signal)
-        index= int(len(pitch)/2) # Halfway point in pitch array
-        self.assertAlmostEqualFixedPrecision(pitch[50], 110.0, 2)
+
+        rounded_pitch = [round(num) for num in pitch]
+        rounded_confidence= [round(num,1) for num in confidence]
+        
+        expectedPitch = repeat(110.0,len(pitch)-10)        
+        expectedConfidence = repeat(0.5,len(pitch)-10)
+
+        # Zero pad the expected values
+        paddedExpectedPitch = pad(expectedPitch, (5,5), 'constant')      
+        paddedExpectedConfidence = pad(expectedConfidence, (5,5), 'constant')             
+        # Small Patch
+        # In the boundary between zeros and valuies of 110.Hz
+        # there is an observed value of 109 Hz.
+        paddedExpectedPitch[5] = 109.0 
+        
+        self.assertAlmostEqualVectorFixedPrecision(paddedExpectedPitch, rounded_pitch,1)
+        self.assertAlmostEqualVectorFixedPrecision(paddedExpectedConfidence, rounded_confidence, 1)        
 
     def testSinglePeakNonDefaultBR(self):   
         # Same as above, but tweaking the Bin Resolution to ensure output length is consistant
@@ -94,9 +109,17 @@ class TestPitchMelodia(TestCase):
         signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
         pm = PitchMelodia(binResolution=binResolution)
         pitch, confidence = pm(signal)
-        index= int(len(pitch)/2) # Halfway point in pitch array
-        self.assertAlmostEqualFixedPrecision(pitch[50], 110.0, 2)
-        self.assertAlmostEqualFixedPrecision(confidence[50], 0.5, 2)        
+        rounded_pitch = [round(num) for num in pitch]
+        rounded_confidence= [round(num,1) for num in confidence]        
+        expectedPitch = repeat(110.0,len(pitch)-10)        
+        expectedConfidence = repeat(0.5,len(pitch)-10)
+
+        # Zero pad the expected values
+        paddedExpectedPitch = pad(expectedPitch, (5,5), 'constant')      
+        paddedExpectedConfidence = pad(expectedConfidence, (5,5), 'constant')             
+        
+        self.assertAlmostEqualVectorFixedPrecision(paddedExpectedPitch, rounded_pitch,1)
+        self.assertAlmostEqualVectorFixedPrecision(paddedExpectedConfidence, rounded_confidence, 1)        
 
     def testSinglePeakLowCompression(self):
         # generate test signal: sine 110Hz @44100kHz
@@ -106,8 +129,13 @@ class TestPitchMelodia(TestCase):
         pm = PitchMelodia(magnitudeCompression=0.0001)
 
         pitch, confidence = pm(signal)
-        index = int(len(pitch)/2) # Halfway point in pitch array
-        self.assertAlmostEqualFixedPrecision(pitch[50], 110.0, 2)
+
+        expectedPitch = repeat(110. ,len(pitch)-13)        
+        expectedConfidence = repeat(1. ,len(confidence))      
+        
+        self.assertAlmostEqualVectorFixedPrecision(expectedPitch, pitch[6:len(pitch)-7],1)
+        self.assertAlmostEqualVectorFixedPrecision(expectedConfidence, confidence, 1)        
+
 
     def testSinglePeakLowestMagThreshold(self):
         # Provide a single input peak with a unit magnitude at the reference frequency,
@@ -117,19 +145,35 @@ class TestPitchMelodia(TestCase):
         signal = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 55 * 2*math.pi)
         pm = PitchMelodia(magnitudeThreshold=0)
         pitch, confidence = pm(signal)
-        index = int(len(pitch)/2) # Halfway point in pitch array     
-        self.assertAlmostEqualFixedPrecision(pitch[50], 0.0, 2)
+        expectedPitch = repeat(0. ,len(pitch))        
+        expectedConfidence = repeat(0. ,len(confidence))              
+
+        self.assertAlmostEqualVectorFixedPrecision(expectedPitch, pitch,1)
+        self.assertAlmostEqualVectorFixedPrecision(expectedConfidence, confidence, 1)      
 
     def testTwoPeaksHarmonics(self):
         frameSize= 4096
         signalSize = 10 * frameSize          
         signal_55Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 55 * 2*math.pi)
         signal_110Hz = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 110 * 2*math.pi)
-        signal = signal_55Hz+signal_110Hz
+        signal = signal_55Hz + signal_110Hz
         pm = PitchMelodia()
         pitch, confidence = pm(signal)  
+
+        # Check sample points
         self.assertAlmostEqual(pitch[50], 110.0, 1)
         self.assertAlmostEqualFixedPrecision(confidence[50], 0.5, 1)      
+
+
+        rounded_confidence= [round(num,1) for num in confidence]        
+    
+        expectedConfidence = repeat(0.5,len(pitch)-8)
+
+        # Zero pad the expected values
+        paddedExpectedConfidence = pad(expectedConfidence, (4,4), 'constant')                             
+        self.assertAlmostEqualVectorFixedPrecision(paddedExpectedConfidence, rounded_confidence, 1)     
+        # FIXME add a test to see that the range of values in the pitch are between 109 and 113
+        # pitch also has 4 zeros at beginning and end.
 
     def testDifferentPeaks(self):  
         frameSize= 4096
@@ -146,8 +190,8 @@ class TestPitchMelodia(TestCase):
             self.assertLess(pitch[index], 85)  
             index += 1        
 
-    # These are similar unit tests to pitch salience function
-    # This is really a regression test. Reference values amd locations are from previous runs.
+    #  Similar unit tests to pitch salience function
+    #  This is really a regression test. Reference values and locations are from previous runs.
     def testBelowReferenceFrequency1(self):        
         frameSize= 4096
         signalSize = 10 * frameSize        
@@ -182,7 +226,6 @@ class TestPitchMelodia(TestCase):
         while index < 30:
             self.assertAlmostEqual(pitch[index], 2*referenceFrequency, 1)
             index += 1                
-
         pitch, confidence  = PitchMelodia()(signal_30Hz)              
 
         index = 10
@@ -214,8 +257,8 @@ class TestPitchMelodia(TestCase):
         pitch, pitchConfidence = pm(audio)
        
         #This code stores reference values in a file for later loading.
-        save('pitchmelodiapitch.npy', pitch)             
-        save('pitchmelodiaconfidence.npy', pitchConfidence)             
+        # save('pitchmelodiapitch.npy', pitch)             
+        # save('pitchmelodiaconfidence.npy', pitchConfidence)             
 
         loadedPitchMelodiaPitch = load(join(filedir(), 'pitchmelodia/pitchmelodiapitch.npy'))
         expectedPitchMelodiaPitch = loadedPitchMelodiaPitch.tolist() 
@@ -226,6 +269,8 @@ class TestPitchMelodia(TestCase):
         self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, expectedPitchConfidence, 2)
 
     def testRegressionEqualLoud(self):
+        # Since EqualLoudness() is typically used to preprocess an audio  prior
+        # to passing through with PitchMelodia, this real scenario is regression tested here.
         filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
         audio = MonoLoader(filename=filename, sampleRate=44100)()      
         pm = PitchMelodia()
@@ -234,8 +279,8 @@ class TestPitchMelodia(TestCase):
         pitch, pitchConfidence = pm(eqAudio)
 
         #This code stores reference values in a file for later loading.
-        save('pitchmelodiapitch_eqloud.npy', pitch)             
-        save('pitchmelodiaconfidence_eqloud.npy', pitchConfidence)             
+        # save('pitchmelodiapitch_eqloud.npy', pitch)             
+        # save('pitchmelodiaconfidence_eqloud.npy', pitchConfidence)             
 
         loadedPitchMelodiaPitch = load(join(filedir(), 'pitchmelodia/pitchmelodiapitch_eqloud.npy'))
         expectedPitchMelodiaPitch = loadedPitchMelodiaPitch.tolist() 
@@ -280,7 +325,7 @@ class TestPitchMelodia(TestCase):
         midpointA3 = int(5 * numSinglePitchSamples) + midPointOffset        
         midpointB3 = int(6 * numSinglePitchSamples) + midPointOffset                                    
              
-        # check rounded freq. values of notes at middle points 
+        # Check rounded freq. values of notes at middle points 
         # They should align within +/- 1,2 Hz.
         self.assertEqual(round(pitch[midpointC3]), 131, 0)
         self.assertEqual(round(pitch[midpointD3]), 147, 0)
@@ -290,7 +335,8 @@ class TestPitchMelodia(TestCase):
         self.assertEqual(round(pitch[midpointA3]), 196, 0)
         self.assertEqual(round(pitch[midpointB3]), 220, 0)
 
-        # Perform a test for a range of values for the notes at the beginning and end (C3 and B4)
+        # Perform a test for a range of values for the notes at the beginning 
+        # and the end of the scale (C3 and B4)
         expectedC3=repeat(130.8,68)
         expectedB4=repeat(246.9,62)
         self.assertAlmostEqualVectorFixedPrecision(expectedC3 ,pitch[5:73],1)   

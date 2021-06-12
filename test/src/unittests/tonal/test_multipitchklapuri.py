@@ -74,7 +74,7 @@ class TestMultiPitchKlapuri(TestCase):
         mpk = MultiPitchKlapuri()
         pitch = mpk(signal)
         index= int(len(pitch)/2) # Halfway point in pitch array
-        self.assertAlmostEqual(pitch[index], 110.0, 10)
+        self.assertAlmostEqual(pitch[index], 110.0, 1)
 
     def testMajorScale(self):
         # generate test signal concatenating major scale notes.
