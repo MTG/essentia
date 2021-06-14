@@ -49,7 +49,7 @@ void PitchYinProbabilitiesHMM::configure() {
   _transitionWidth = 5 * (_numberBinsPerSemitone / 2) + 1;
   _nPitch = 69 * _numberBinsPerSemitone;
   _freqs = vector<Real>( 2 * _nPitch);
-  for (size_t iPitch = 0; iPitch < _nPitch; ++iPitch) {
+  for (int iPitch = 0; iPitch < _nPitch; ++iPitch) {
       _freqs[iPitch] = _minFrequency * pow(2, iPitch * 1.0 / (12 * _numberBinsPerSemitone));
       _freqs[iPitch + _nPitch] = -_freqs[iPitch];
   }
@@ -63,16 +63,16 @@ void PitchYinProbabilitiesHMM::configure() {
   _init = vector<Real>(2 * _nPitch, 1.0 / 2 * _nPitch);
   
   // TRANSITIONS
-  for (size_t iPitch = 0; iPitch < _nPitch; ++iPitch)
+  for (int iPitch = 0; iPitch < _nPitch; ++iPitch)
   {
     int theoreticalMinNextPitch = static_cast<int>(iPitch)-static_cast<int>(_transitionWidth / 2);
-    size_t minNextPitch = iPitch > _transitionWidth/2 ? iPitch - _transitionWidth / 2 : 0;
-    size_t maxNextPitch = iPitch < _nPitch - _transitionWidth / 2 ? iPitch + _transitionWidth / 2 : _nPitch - 1;
+    int minNextPitch = iPitch > _transitionWidth/2 ? iPitch - _transitionWidth / 2 : 0;
+    int maxNextPitch = iPitch < _nPitch - _transitionWidth / 2 ? iPitch + _transitionWidth / 2 : _nPitch - 1;
     
     // WEIGHT VECTOR
     Real weightSum = 0;
     vector<Real> weights;
-    for (size_t i = minNextPitch; i <= maxNextPitch; ++i)
+    for (int i = minNextPitch; i <= maxNextPitch; ++i)
     {
       if (i <= iPitch)
       {
@@ -84,7 +84,7 @@ void PitchYinProbabilitiesHMM::configure() {
     }
     
     // TRANSITIONS TO CLOSE PITCH
-    for (size_t i = minNextPitch; i <= maxNextPitch; ++i)
+    for (int i = minNextPitch; i <= maxNextPitch; ++i)
     {
       _from.push_back(iPitch);
       _to.push_back(i);
@@ -110,12 +110,12 @@ const vector<Real> PitchYinProbabilitiesHMM::calculateObsProb(const vector<Real>
   vector<Real> out = vector<Real>(2 * _nPitch + 1);
   Real probYinPitched = 0;
   // BIN THE PITCHES
-  for (size_t iPair = 0; iPair < pitchCandidates.size(); ++iPair) {
+  for (int iPair = 0; iPair < (int)pitchCandidates.size(); ++iPair) {
     Real freq = 440. * pow(2, (pitchCandidates[iPair] - 69)/12);
     if (freq <= _minFrequency) continue;
     Real d = 0;
     Real oldd = 1000;
-    for (size_t iPitch = 0; iPitch < _nPitch; ++iPitch) {
+    for (int iPitch = 0; iPitch < _nPitch; ++iPitch) {
       d = abs(freq - _freqs[iPitch]);
       if (oldd < d && iPitch > 0) {
         // previous bin must have been the closest
@@ -129,7 +129,7 @@ const vector<Real> PitchYinProbabilitiesHMM::calculateObsProb(const vector<Real>
 
   Real probReallyPitched = _yinTrust * probYinPitched;
 
-  for (size_t iPitch = 0; iPitch < _nPitch; ++iPitch) {
+  for (int iPitch = 0; iPitch < _nPitch; ++iPitch) {
       if (probYinPitched > 0) out[iPitch] *= (probReallyPitched/probYinPitched);
       out[iPitch + _nPitch] = (1 - probReallyPitched) / _nPitch;
   }
@@ -148,7 +148,7 @@ void PitchYinProbabilitiesHMM::compute() {
   vector<Real>& pitch = _pitch.get();
   
   vector<vector<Real> > obsProb(pitchCandidates.size());
-  for (size_t iFrame = 0; iFrame < pitchCandidates.size(); ++iFrame) {
+  for (int iFrame = 0; iFrame < (int)pitchCandidates.size(); ++iFrame) {
       obsProb[iFrame] = calculateObsProb(pitchCandidates[iFrame], probabilities[iFrame]);
   }
 
@@ -164,14 +164,14 @@ void PitchYinProbabilitiesHMM::compute() {
   _tempPitch.resize(path.size());
 
   // time(&start1);
-  for (size_t iFrame = 0; iFrame < path.size(); ++iFrame)
+  for (int iFrame = 0; iFrame < (int)path.size(); ++iFrame)
   {
     Real hmmFreq = _freqs[path[iFrame]];
     Real bestFreq = 0;
     Real leastDist = 10000;
     if (hmmFreq > 0)
     {
-      for (size_t iPitch = 0; iPitch < pitchCandidates[iFrame].size(); ++iPitch)
+      for (int iPitch = 0; iPitch < (int)pitchCandidates[iFrame].size(); ++iPitch)
       {
         Real freq = 440. * pow(2, (pitchCandidates[iFrame][iPitch] - 69) / 12);
         Real dist = abs(hmmFreq - freq);
