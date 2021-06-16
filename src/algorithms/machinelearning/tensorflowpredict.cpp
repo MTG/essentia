@@ -49,8 +49,11 @@ static void DeallocateBuffer(void* data, size_t) {
 
 void TensorflowPredict::configure() {
   // If no file has been specified, do not do anything
-  if (!parameter("graphFilename").isConfigured()) return;
-  _graphFilename = parameter("graphFilename").toString();
+  if (parameter("savedModel").isConfigured()) _savedModel = parameter("savedModel").toString();
+  else if (parameter("graphFilename").isConfigured()) _graphFilename = parameter("graphFilename").toString();
+  else return;
+
+  _tags = parameter("tags").toVectorString();
 
   _inputNames = parameter("inputs").toVectorString();
   _outputNames = parameter("outputs").toVectorString();
@@ -113,49 +116,61 @@ void TensorflowPredict::configure() {
 
 
 void TensorflowPredict::openGraph() {
-  if (!parameter("graphFilename").isConfigured()) {
-    throw EssentiaException("TensorflowPredict: `graphFilename` parameter should be configured.");
+  // Prioritize savedModel when both are specified.
+  if (!_savedModel.empty()) {
+    std::vector<char*> tags_c;
+    tags_c.reserve(_tags.size());
+    for (size_t i = 0; i < _tags.size(); i++) {
+      tags_c.push_back(const_cast<char*>(_tags[i].c_str()));
+    }
+
+    TF_LoadSessionFromSavedModel(_sessionOptions, _runOptions,
+      _savedModel.c_str(), &tags_c[0], (int)tags_c.size(),
+      _graph, NULL, _status);
+    return;
   }
 
-  // First we load and initialize the model.
-  const auto f = fopen(_graphFilename.c_str(), "rb");
-  if (f == nullptr) {
-    throw EssentiaException(
-        "TensorflowPredict: could not open the Tensorflow graph file.");
-  }
+  if (!_graphFilename.empty()) {
+    // First we load and initialize the model.
+    const auto f = fopen(_graphFilename.c_str(), "rb");
+    if (f == nullptr) {
+      throw EssentiaException(
+          "TensorflowPredict: could not open the Tensorflow graph file.");
+    }
 
-  fseek(f, 0, SEEK_END);
-  const auto fsize = ftell(f);
-  fseek(f, 0, SEEK_SET);
+    fseek(f, 0, SEEK_END);
+    const auto fsize = ftell(f);
+    fseek(f, 0, SEEK_SET);
 
-  // Graph size sanity check.
-  if (fsize < 1) {
+    // Graph size sanity check.
+    if (fsize < 1) {
+      fclose(f);
+      throw(EssentiaException("TensorflowPredict: Graph file is empty."));
+    }
+
+    // Reserve memory and read the graph.
+    const auto data = malloc(fsize);
+    fread(data, fsize, 1, f);
     fclose(f);
-    throw(EssentiaException("TensorflowPredict: Graph file is empty."));
-  }
 
-  // Reserve memory and read the graph.
-  const auto data = malloc(fsize);
-  fread(data, fsize, 1, f);
-  fclose(f);
+    TF_Buffer* buffer = TF_NewBuffer();
+    buffer->data = data;
+    buffer->length = fsize;
+    buffer->data_deallocator = DeallocateBuffer;
 
-  TF_Buffer* buffer = TF_NewBuffer();
-  buffer->data = data;
-  buffer->length = fsize;
-  buffer->data_deallocator = DeallocateBuffer;
+    TF_GraphImportGraphDef(_graph, buffer, _options, _status);
 
-  TF_GraphImportGraphDef(_graph, buffer, _options, _status);
+    TF_DeleteBuffer(buffer);
 
-  TF_DeleteBuffer(buffer);
-
-  if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error importing graph. ", TF_Message(_status));
+    if (TF_GetCode(_status) != TF_OK) {
+      throw EssentiaException("TensorflowPredict: Error importing graph. ", TF_Message(_status));
+    }
   }
 }
 
 
 void TensorflowPredict::reset() {
-  if (!parameter("graphFilename").isConfigured()) return;
+  if ((_savedModel.empty()) and (_graphFilename.empty())) return;
 
   TF_CloseSession(_session, _status);
   if (TF_GetCode(_status) != TF_OK) {
