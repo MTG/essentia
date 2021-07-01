@@ -41,7 +41,7 @@ Fingerprinting
 
 Audio problems
 --------------
-* `Clicks detection <tutorial_audioproblems_clickdetector.html>`_
+* `Clicks and pops detection <tutorial_audioproblems_clickdetector.html>`_
 * `Discontinuity detection <tutorial_audioproblems_discontinuitydetector.html>`_
 * `Gaps detection <tutorial_audioproblems_gaps.html>`_
 * `Hum detection <tutorial_audioproblems_humdetector.html>`_
