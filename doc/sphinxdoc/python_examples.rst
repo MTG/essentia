@@ -47,7 +47,7 @@ Audio problems
 * `Hum detection <tutorial_audioproblems_humdetector.html>`_
 * `Inter-sample peaks detection <tutorial_audioproblems_interpeak_detection_estrategies.html>`_
 * `Saturation detection <tutorial_audioproblems_saturationdetector.html>`_
-* `Signal-to-noise ratio <tutorial_audioproblems_snr.html>`_
+* `Signal-to-noise ratio estimation <tutorial_audioproblems_snr.html>`_
 * `Start/stop cuts detection <tutorial_audioproblems_startstopcut.html>`_
 * `True peak detection <tutorial_audioproblems_truepeakdetector.html>`_
 
