@@ -49,5 +49,5 @@ Audio problems
 * `Saturation detection <tutorial_audioproblems_saturationdetector.html>`_
 * `Signal-to-noise ratio estimation <tutorial_audioproblems_snr.html>`_
 * `Start/stop cuts detection <tutorial_audioproblems_startstopcut.html>`_
-* `True peak detection <tutorial_audioproblems_truepeakdetector.html>`_
+* `True-peak detection <tutorial_audioproblems_truepeakdetector.html>`_
 
