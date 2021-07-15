@@ -85,9 +85,6 @@ for PYBIN in /opt/python/*/bin; do
     # Build numpy versions used by scikit-learn:
     # https://github.com/MacPython/scikit-learn-wheels/blob/master/.travis.yml
 
-        # Python 2.7
-        NUMPY_VERSION=1.8.2
-
         # Python 3.x
         if [[ $PYBIN == *"cp39"* ]]; then
             NUMPY_VERSION=1.19.3
@@ -97,8 +94,6 @@ for PYBIN in /opt/python/*/bin; do
             NUMPY_VERSION=1.14.5
         elif [[ $PYBIN == *"cp36"* ]]; then
             NUMPY_VERSION=1.11.3
-        elif [[ $PYBIN == *"cp34"* ]] || [[ $PYBIN == *"cp35"* ]]; then
-            NUMPY_VERSION=1.9.3
         fi
 
         "${PYBIN}/pip" install numpy==$NUMPY_VERSION
