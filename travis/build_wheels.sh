@@ -25,13 +25,20 @@ PYBIN=/opt/python/cp36-cp36m/bin/
 cd /io
 
 if [[ $WITH_TENSORFLOW ]]; then
-# Build essentia with tensorflow support using tensorflow 1.15.0 as it is the
-# newest version supported by the C API. It is backwards compatible for 1.X.X
-# https://www.tensorflow.org/guide/versions
-# Tensroflow >= 2.0 do not support libtensorflow for now
-# https://www.tensorflow.org/install/lang_c
+    rm -rf /opt/python/cp35-cp35m
+    rm -rf /opt/python/cp36-cp36m
+
+    PYBIN=/opt/python/cp37-cp37m/bin/
+
+    # Build Essentia with TensorFlow support using TensorFlow 2.5.0 as it is the
+    # newest version supported by the C API and it is (mostly) backwards compatible for 1.X.X
+    # https://www.tensorflow.org/guide/versions
     PROJECT_NAME='essentia-tensorflow'
-    TENSORFLOW_VERSION=1.15.0
+    TENSORFLOW_VERSION=2.5.0
+
+    # Install the oldest NumPy supported by TensorFlow
+    # to get the maximum forwards compatibility
+    NUMPY_VERSION=1.19.3
 
     "${PYBIN}/pip" install tensorflow==$TENSORFLOW_VERSION
     "${PYBIN}/python" src/3rdparty/tensorflow/setup_tensorflow.py -m python -c "${PREFIX}"
@@ -46,24 +53,22 @@ fi
 cd -
 
 # Compile wheels
-for PYBIN in /opt/python/cp3*/bin; do
-    # Don't build for python 3.8 while tensorflow doesn't create wheels for it
-    # https://github.com/tensorflow/addons/issues/744
-    if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp38"* ]]; then break; fi
-    if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp39"* ]]; then break; fi
 
+for PYBIN in /opt/python/*/bin; do
     if [[ $WITH_TENSORFLOW ]]; then
-    # The minimum numpy version required by tensorflow is always greater than
-    # the installed one. Install the oldest numpy supported by each tensorflow
-    # to get the maximum fordwards compatibility
-        NUMPY_VERSION=$( "${PYBIN}/pip" check tensorflow |grep tensorflow |grep numpy |grep ">=" |awk -F"[>=',]+" '//{print $2}' )
+        # Currently, all the active Python versions support TensorFlow 2.5.0
+        # Leaving this snippets here in case that what have to make the TensorFlow Python-version dependent again latter on
+        #
+        # if [[ $PYBIN == *"cp36"* ]] || [[ $PYBIN == *"cp37"* ]] || [[ $PYBIN == *"cp38"* ]] || [[ $PYBIN == *"cp39"* ]]; then
+        #     TENSORFLOW_VERSION=2.5.0
+        # fi
+        # NUMPY_VERSION=$( "${PYBIN}/pip" check tensorflow |grep tensorflow |grep numpy |grep ">=" |awk -F"[>=',]+" '//{print $2}' )
+        # if [[ ${NUMPY_VERSION} ]]; then
+        #     echo "Got numpy ${NUMPY_VERSION} from the Tensorflow requirements"
+        #     "${PYBIN}/pip" install numpy==$NUMPY_VERSION
+        # fi
 
-        if [[ ${NUMPY_VERSION} ]]; then
-            echo "Got numpy ${NUMPY_VERSION} from the Tensorflow requirements"
-            "${PYBIN}/pip" install numpy==$NUMPY_VERSION
-        fi
-
-        "${PYBIN}/pip" install tensorflow==$TENSORFLOW_VERSION
+        "${PYBIN}/pip" install numpy==$NUMPY_VERSION tensorflow==$TENSORFLOW_VERSION
 
         # Make the tensorflow symbolic links point to the shared libraries
         # installed with the tensorflow wheel
@@ -76,9 +81,6 @@ for PYBIN in /opt/python/cp3*/bin; do
     # Build numpy versions used by scikit-learn:
     # https://github.com/MacPython/scikit-learn-wheels/blob/master/.travis.yml
 
-        # Python 2.7
-        NUMPY_VERSION=1.8.2
-
         # Python 3.x
         if [[ $PYBIN == *"cp39"* ]]; then
             NUMPY_VERSION=1.19.3
@@ -88,8 +90,6 @@ for PYBIN in /opt/python/cp3*/bin; do
             NUMPY_VERSION=1.14.5
         elif [[ $PYBIN == *"cp36"* ]]; then
             NUMPY_VERSION=1.11.3
-        elif [[ $PYBIN == *"cp34"* ]] || [[ $PYBIN == *"cp35"* ]]; then
-            NUMPY_VERSION=1.9.3
         fi
 
         "${PYBIN}/pip" install numpy==$NUMPY_VERSION
@@ -128,13 +128,9 @@ for whl in wheelhouse/*.whl; do
 done
 
 # Install and test
-for PYBIN in /opt/python/cp3*/bin/; do
-    # Skip essentia-tensorflow until it is available for Python 3.8
-    if [[ $WITH_TENSORFLOW ]] && [[ $PYBIN == *"cp38"* ]]; then break; fi
-
+for PYBIN in /opt/python/*/bin/; do
     "${PYBIN}/pip" install "${PROJECT_NAME}" --no-index -f /io/wheelhouse
     if [[ $WITH_TENSORFLOW ]]; then
-    # Test that essentia can be imported along with tensorflow
         (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming; import tensorflow')
     else
         (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')

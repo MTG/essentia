@@ -8,7 +8,7 @@ PYTHON=python3
 MODE=libtensorflow
 PLATFORM=linux
 CONTEXT=/usr/local/  # run as sudo if the context directory is not owned
-VERSION=1.15.0
+VERSION=2.5.0
 
 # setup
 $PYTHON setup_tensorflow.py -m $MODE -p $PLATFORM -c $CONTEXT -v $VERSION
