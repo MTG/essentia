@@ -36,7 +36,11 @@ if [[ $WITH_TENSORFLOW ]]; then
     # Tensroflow >= 2.0 do not support libtensorflow for now
     # https://www.tensorflow.org/install/lang_c
     PROJECT_NAME='essentia-tensorflow'
-    TENSORFLOW_VERSION=1.15.0
+    TENSORFLOW_VERSION=2.5.0
+
+    # Install the oldest NumPy supported by TensorFlow
+    # to get the maximum forwards compatibility
+    NUMPY_VERSION=1.16.0
 
     "${PYBIN}/pip" install tensorflow==$TENSORFLOW_VERSION
     "${PYBIN}/python" src/3rdparty/tensorflow/setup_tensorflow.py -m python -c "${PREFIX}"
@@ -54,25 +58,19 @@ cd -
 
 for PYBIN in /opt/python/*/bin; do
     if [[ $WITH_TENSORFLOW ]]; then
-    # The minimum numpy version required by tensorflow is always greater than
-    # the installed one. Install the oldest numpy supported by each tensorflow
-    # to get the maximum fordwards compatibility
-        if [[ $PYBIN == *"cp34"* ]] || [[ $PYBIN == *"cp35"* ]] || [[ $PYBIN == *"cp36"* ]] || [[ $PYBIN == *"cp37"* ]]; then
-            TENSORFLOW_VERSION=1.15.0
-        elif [[ $PYBIN == *"cp38"* ]]; then
-            TENSORFLOW_VERSION=2.4.1
-        elif [[ $PYBIN == *"cp39"* ]]; then
-            TENSORFLOW_VERSION=2.5.0
-        fi
+        # Currently, all the active Python versions support TensorFlow 2.5.0
+        # Leaving this snippets here in case that what have to make the TensorFlow Python-version dependent again latter on
+        #
+        # if [[ $PYBIN == *"cp36"* ]] || [[ $PYBIN == *"cp37"* ]] || [[ $PYBIN == *"cp38"* ]] || [[ $PYBIN == *"cp39"* ]]; then
+        #     TENSORFLOW_VERSION=2.5.0
+        # fi
+        # NUMPY_VERSION=$( "${PYBIN}/pip" check tensorflow |grep tensorflow |grep numpy |grep ">=" |awk -F"[>=',]+" '//{print $2}' )
+        # if [[ ${NUMPY_VERSION} ]]; then
+        #     echo "Got numpy ${NUMPY_VERSION} from the Tensorflow requirements"
+        #     "${PYBIN}/pip" install numpy==$NUMPY_VERSION
+        # fi
 
-        NUMPY_VERSION=$( "${PYBIN}/pip" check tensorflow |grep tensorflow |grep numpy |grep ">=" |awk -F"[>=',]+" '//{print $2}' )
-
-        if [[ ${NUMPY_VERSION} ]]; then
-            echo "Got numpy ${NUMPY_VERSION} from the Tensorflow requirements"
-            "${PYBIN}/pip" install numpy==$NUMPY_VERSION
-        fi
-
-        "${PYBIN}/pip" install tensorflow==$TENSORFLOW_VERSION
+        "${PYBIN}/pip" install numpy==NUMPY_VERSION tensorflow==$TENSORFLOW_VERSION
 
         # Make the tensorflow symbolic links point to the shared libraries
         # installed with the tensorflow wheel
