@@ -133,9 +133,7 @@ done
 for PYBIN in /opt/python/*/bin/; do
     "${PYBIN}/pip" install "${PROJECT_NAME}" --no-index -f /io/wheelhouse
     if [[ $WITH_TENSORFLOW ]]; then
-    # We are not requiring TensorFlow and Essentia to be importable from the same Python session but this
-    # is known to crash in TF 2.0    
-        (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')
+        (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming; import tensorflow')
     else
         (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')
     fi
