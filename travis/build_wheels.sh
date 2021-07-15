@@ -38,7 +38,7 @@ if [[ $WITH_TENSORFLOW ]]; then
 
     # Install the oldest NumPy supported by TensorFlow
     # to get the maximum forwards compatibility
-    NUMPY_VERSION=1.16.0
+    NUMPY_VERSION=1.19.2
 
     "${PYBIN}/pip" install tensorflow==$TENSORFLOW_VERSION
     "${PYBIN}/python" src/3rdparty/tensorflow/setup_tensorflow.py -m python -c "${PREFIX}"
