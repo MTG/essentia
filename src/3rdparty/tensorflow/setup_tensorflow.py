@@ -104,7 +104,7 @@ if __name__ == "__main__":
         tgt = join(context, 'lib', 'lib{}.so'.format(pywrap_tensorflow_internal))
         force_symlink(pywrap_tensorflow_name, tgt)
 
-        libs = ('-l{} -l{}'.format(libtensorflow, pywrap_tensorflow_internal))
+        libs = ('-l{} -l{}'.format(pywrap_tensorflow_internal, libtensorflow))
 
         # copy headers to the context dir
         include_dir = join(context, 'include', 'tensorflow', 'c')
