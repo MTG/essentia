@@ -30,11 +30,9 @@ if [[ $WITH_TENSORFLOW ]]; then
 
     PYBIN=/opt/python/cp37-cp37m/bin/
 
-    # Build essentia with tensorflow support using tensorflow 1.15.0 as it is the
-    # newest version supported by the C API. It is backwards compatible for 1.X.X
+    # Build Essentia with TensorFlow support using TensorFlow 2.5.0 as it is the
+    # newest version supported by the C API and it is (mostly) backwards compatible for 1.X.X
     # https://www.tensorflow.org/guide/versions
-    # Tensroflow >= 2.0 do not support libtensorflow for now
-    # https://www.tensorflow.org/install/lang_c
     PROJECT_NAME='essentia-tensorflow'
     TENSORFLOW_VERSION=2.5.0
 
