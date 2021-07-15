@@ -68,7 +68,7 @@ for PYBIN in /opt/python/*/bin; do
         #     "${PYBIN}/pip" install numpy==$NUMPY_VERSION
         # fi
 
-        "${PYBIN}/pip" install numpy==NUMPY_VERSION tensorflow==$TENSORFLOW_VERSION
+        "${PYBIN}/pip" install numpy==$NUMPY_VERSION tensorflow==$TENSORFLOW_VERSION
 
         # Make the tensorflow symbolic links point to the shared libraries
         # installed with the tensorflow wheel
