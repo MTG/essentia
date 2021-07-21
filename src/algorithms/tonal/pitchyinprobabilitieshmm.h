@@ -35,16 +35,16 @@ class PitchYinProbabilitiesHMM : public Algorithm {
   Algorithm* _viterbi;
 
   Real _minFrequency;
-  size_t _numberBinsPerSemitone;
+  int _numberBinsPerSemitone;
   Real _selfTransition;
   Real _yinTrust;
-  size_t _nPitch;
-  size_t _transitionWidth;
+  int _nPitch;
+  int _transitionWidth;
   std::vector<Real> _freqs;
 
   std::vector<Real> _init;
-  std::vector<size_t> _from;
-  std::vector<size_t> _to;
+  std::vector<int> _from;
+  std::vector<int> _to;
   std::vector<Real> _transProb;
 
   std::vector<Real> _tempPitch;
