@@ -106,10 +106,10 @@ setup_requires = ['numpy>=1.8.2', 'six']
 install_requires = setup_requires + ['pyyaml']
 
 # Require tensorflow for the package essentia-tensorflow
-# We are using version 1.15.0 as it is the newest version supported by the C API
+# We are using version 2.5.0 as it is the newest version supported by the C API
 # https://www.tensorflow.org/guide/versions
 if project_name == 'essentia-tensorflow':
-    tensorflow_version = '1.15.0'
+    tensorflow_version = '2.5.0'
     description += ', with TensorFlow support'
 
     var_tensorflow_version = 'ESSENTIA_TENSORFLOW_VERSION'
