@@ -271,3 +271,49 @@ QT_FLAGS="
     -nomake tools
     -nomake translations
 "
+
+TENSORFLOW_FLAGS="
+    --config=opt
+    --config=monolithic
+    --config=v2
+    --config=noaws
+    --config=nohdfs
+    --config=nonccl
+"
+
+# The only known alternative to the interactive TensorFlow configuration is
+# through env variables:
+# https://github.com/tensorflow/tensorflow/issues/8527#issuecomment-289272898
+
+# TensorFlow build options
+export BAZEL_LINKLIBS=-l%:libstdc++.a
+
+# export CC_OPT_FLAGS="--copt=-mavx --copt=-mavx2 --copt=-mfma --copt=-msse4.2 --copt=-mfpmath=both --config=cuda"
+export TF_NEED_JEMALLOC=1
+export TF_NEED_GCP=0
+export TF_NEED_HDFS=0
+export TF_ENABLE_XLA=0
+export TF_NEED_OPENCL=0
+
+# TensorFlow CUDA versions intended for TensorFlow 2.5
+# For future updates check the GPU compatibility chart:
+# https://www.tensorflow.org/install/source#gpu
+export TF_NEED_CUDA=1
+export TF_CUDA_VERSION=11.2
+export TF_CUDNN_VERSION=8.1
+export CUDA_TOOLKIT_PATH=/usr/local/cuda
+export CUDNN_INSTALL_PATH=/usr/local/cuda
+
+# The compute capabilities define which GPUs can be used:
+# https://developer.nvidia.com/cuda-gpus#compute
+# Supporting more versions increases the library size, so
+# for the moment it is set to a conservative number that
+# covers some of the most popular dee'p learning GPUs:
+# 3.5: Geforce GT XXX
+# 5.2: Geforce GTX TITAN X
+# 7.5: Geforce RTX 2080 (Ti)
+# 8.6: Geforce RTX 30XX
+export TF_CUDA_COMPUTE_CAPABILITIES=3.5,5.2,7.5,8.6
+
+# TensorFlow Python options
+# export USE_DEFAULT_PYTHON_LIB_PATH=1
