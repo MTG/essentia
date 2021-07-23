@@ -96,8 +96,7 @@ for PYBIN in /opt/python/cp3*/bin; do
     fi
 
     ESSENTIA_WHEEL_SKIP_3RDPARTY=1 ESSENTIA_WHEEL_ONLY_PYTHON=1 \
-    ESSENTIA_PROJECT_NAME="${PROJECT_NAME}" ESSENTIA_TENSORFLOW_VERSION="${TENSORFLOW_VERSION}" \
-    "${PYBIN}/pip" wheel /io/ -w wheelhouse/
+    ESSENTIA_PROJECT_NAME="${PROJECT_NAME}" "${PYBIN}/pip" wheel /io/ -w wheelhouse/
 
     # Bundle external shared libraries into the essentia wheel now because
     # the tensorflow libraries are especific for each package version

@@ -109,14 +109,7 @@ install_requires = setup_requires + ['pyyaml']
 # We are using version 2.5.0 as it is the newest version supported by the C API
 # https://www.tensorflow.org/guide/versions
 if project_name == 'essentia-tensorflow':
-    tensorflow_version = '2.5.0'
     description += ', with TensorFlow support'
-
-    var_tensorflow_version = 'ESSENTIA_TENSORFLOW_VERSION'
-    if var_tensorflow_version in os.environ:
-        tensorflow_version = os.environ[var_tensorflow_version]
-
-    setup_requires.append('tensorflow=={}'.format(tensorflow_version))
 
 module = Extension('name', sources=[])
 
