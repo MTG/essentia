@@ -27,7 +27,7 @@ tar xzf bazel-bin/tensorflow/tools/lib_package/libtensorflow.tar.gz -C ${PREFIX}
 
 # Patch the pkg-config file to remove the dependency on libtensorflow_framework.so,
 # which is not required in monolithic builds.
-sed 's/ -ltensorflow_framework//' tensorflow.pc
+sed -i 's/ -ltensorflow_framework//' tensorflow.pc
 
 cp tensorflow.pc ${PREFIX}/lib/pkgconfig/
 
