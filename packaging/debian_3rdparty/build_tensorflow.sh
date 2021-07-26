@@ -32,8 +32,8 @@ sed -i 's/ -ltensorflow_framework//' tensorflow.pc
 cp tensorflow.pc ${PREFIX}/lib/pkgconfig/
 
 # Clean Bazel's cache (~9GB)
-bazel clean
+bazel clean --expunge
+rm -rf /root/.cache/bazel*
 
 cd ../..
 rm -r tmp
-
