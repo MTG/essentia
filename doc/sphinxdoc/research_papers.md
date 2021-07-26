@@ -80,6 +80,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 ## Emotion detection
 
+- Byun, S. W., Lee, S. P. A Study on a Speech Emotion Recognition System with Effective Acoustic Features Using Deep Learning Algorithms. Applied Sciences, 11(4), 1890, 2021.
+
 - Y. Kim, L. M. Aiello, and D. Quercia. PepMusic: motivational qualities of songs for daily activities. EPJ Data Science, 9(1), 13, 2020.
 
 - Y. Hifny, A. Ali. Efficient Arabic Emotion Recognition Using Deep Neural Networks. In ICASSP 2019-2019 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), pages 6710-6714, 2019.
