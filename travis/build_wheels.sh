@@ -17,6 +17,7 @@ set -e -x
 # We are dropping support for Python 3.4 since PyYaml is not supporting it anymore.
 # We can just remove the Python3.4 folder until ManyLinux1 drops the support too.
 rm -rf /opt/python/cp34-cp34m
+rm -rf /opt/python/cp35-cp35m
 
 # Build static libessentia.a library
 # Use Python3.6. CentOS 5's native python is too old...
