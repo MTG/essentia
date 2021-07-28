@@ -25,7 +25,7 @@ import os
 
 class TestTensorFlowPredictVGGish(TestCase):
 
-    def testRegression(self):
+    def testRegressionFrozenModel(self):
         expected = [0.49044114, 0.50241125]
 
         filename = join(testdata.audio_dir, 'recorded', 'hiphop.mp3')
@@ -39,6 +39,45 @@ class TestTensorFlowPredictVGGish(TestCase):
         # original and replicated features. However, they are close enough to
         # make valid predictions.
         self.assertAlmostEqualVector(found, expected, 1e-2)
+
+    def testRegressionSavedModel(self):
+        expected = [0.49044114, 0.50241125]
+
+        filename = join(testdata.audio_dir, 'recorded', 'hiphop.mp3')
+        model = join(testdata.models_dir, 'vggish', 'small_vggish_init')
+
+        audio = MonoLoader(filename=filename, sampleRate=16000)()
+        found = TensorflowPredictVGGish(savedModel=model, patchHopSize=0)(audio)
+        found = numpy.mean(found, axis=0)
+
+        # Setting a high tolerance value due to the mismatch between the
+        # original and replicated features. However, they are close enough to
+        # make valid predictions.
+        self.assertAlmostEqualVector(found, expected, 1e-2)
+
+    def testEmptyModelName(self):
+        # With empty or undefined model names the algorithm should skip the configuration without errors.
+        TensorflowPredictVGGish()
+        TensorflowPredictVGGish(graphFilename='')
+        TensorflowPredictVGGish(graphFilename='', input='')
+        TensorflowPredictVGGish(graphFilename='', input='wrong_input')
+        TensorflowPredictVGGish(savedModel='')
+        TensorflowPredictVGGish(savedModel='', input='')
+        TensorflowPredictVGGish(savedModel='', input='wrong_input')
+        TensorflowPredictVGGish(graphFilename='', savedModel='')
+        TensorflowPredictVGGish(graphFilename='', savedModel='', input='')
+        TensorflowPredictVGGish(graphFilename='', savedModel='', input='wrong_input')
+    
+    def testInvalidParam(self):
+        model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
+        self.assertConfigureFails(TensorflowPredictVGGish(), {'graphFilename': model,
+                                                              'input': 'wrong_input_name',
+                                                              'output': 'model/Softmax',
+                                                             })  # input does not exist in the model
+        self.assertConfigureFails(TensorflowPredictVGGish(), {'graphFilename': 'wrong_model_name',
+                                                              'input': 'model/Placeholder',
+                                                              'output': 'model/Softmax',
+                                                             })  # the model does not exist
 
 
 suite = allTests(TestTensorFlowPredictVGGish)

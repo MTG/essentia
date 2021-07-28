@@ -22,7 +22,7 @@ from essentia_test import *
 
 class TestTensorflowPredictTempoCNN(TestCase):
 
-    def testRegression(self):
+    def regression(self, parameters):
         # The expected values were self-generated with TensorflowPredictTempoCNN
         # from commit deb334ba01f849e74b0e6e8554b2e17d73bc6966
         expected = [6.81436131e-06, 5.18454181e-06, 5.18454181e-06, 5.18454181e-06,
@@ -91,13 +91,18 @@ class TestTensorflowPredictTempoCNN(TestCase):
                     5.18454181e-06, 5.18454181e-06, 5.18454181e-06, 5.18454181e-06]
 
         filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav')
-        model = join(testdata.models_dir, 'tempocnn', 'deeptemp_k16.pb')
 
         audio = MonoLoader(filename=filename, sampleRate=11025)()
-        found = TensorflowPredictTempoCNN(graphFilename=model)(audio)
+        found = TensorflowPredictTempoCNN(**parameters)(audio)
         found = numpy.mean(found, axis=0)
 
-        self.assertAlmostEqualVector(found, expected, 1e-6)
+        self.assertAlmostEqualVector(found, expected, 1e-5)
+
+    def testRegressionGraphFilename(self):
+        self.regression({'graphFilename': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16.pb')})
+
+    def testRegressionSavedModel(self):
+        self.regression({'savedModel': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16')})
 
     def testEmptyInput(self):
         model = join(testdata.models_dir, 'tempocnn', 'deeptemp_k16.pb')
@@ -114,6 +119,19 @@ class TestTensorflowPredictTempoCNN(TestCase):
                                                                 'output': 'non_existing'})
         self.assertConfigureFails(TensorflowPredictTempoCNN(), {'graphFilename': 'non_existing_model.pb',
                                                                 'output': 'non_existing'})
+
+    def testEmptyModelName(self):
+        # With empty or undefined model names the algorithm should skip the configuration without errors.
+        TensorflowPredictTempoCNN()
+        TensorflowPredictTempoCNN(graphFilename='')
+        TensorflowPredictTempoCNN(graphFilename='', input='')
+        TensorflowPredictTempoCNN(graphFilename='', input='wrong_input')
+        TensorflowPredictTempoCNN(savedModel='')
+        TensorflowPredictTempoCNN(savedModel='', input='')
+        TensorflowPredictTempoCNN(savedModel='', input='wrong_input')
+        TensorflowPredictTempoCNN(graphFilename='', savedModel='')
+        TensorflowPredictTempoCNN(graphFilename='', savedModel='', input='')
+        TensorflowPredictTempoCNN(graphFilename='', savedModel='', input='wrong_input')
 
 suite = allTests(TestTensorflowPredictTempoCNN)
 

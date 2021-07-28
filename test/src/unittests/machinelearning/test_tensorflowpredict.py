@@ -26,7 +26,7 @@ import os
 
 class TestTensorFlowPredict(TestCase):
 
-    def testRegression(self):
+    def regression(self, parameters):
         # Test a simple tensorflow model trained on Essentia features.
         # The ground true values were obtained with the following script:
         expectedValues = [9.9997020e-01, 5.3647455e-14, 2.9801236e-05, 4.9495230e-12]
@@ -36,7 +36,6 @@ class TestTensorFlowPredict(TestCase):
         frameSize = 1024
         hopSize = frameSize
 
-        model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
         filename = join(testdata.audio_dir, 'recorded', 'cat_purrrr.wav')
 
         audio = MonoLoader(filename=filename)()
@@ -59,19 +58,76 @@ class TestTensorFlowPredict(TestCase):
         pool = Pool()
         pool.set('model/Placeholder', batch)
 
-        tfp = TensorflowPredict(graphFilename=model,
-                                inputs=['model/Placeholder'],
-                                outputs=['model/Softmax'],
-                                isTraining=False,
-                                isTrainingName='model/Placeholder_1')
+        tfp = TensorflowPredict(**parameters)
         poolOut = tfp(pool)
 
         foundValues = poolOut['model/Softmax'].mean(axis=0).squeeze()
 
         self.assertAlmostEqualVector(foundValues, expectedValues, 1e-5)
 
-    def testInvalidFilename(self):
-        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': ''})
+    def testRegressionFrozenModel(self):
+        parameters = {
+            'graphFilename': join(testdata.models_dir, 'vgg', 'vgg4.pb'),
+            'inputs': ['model/Placeholder'],
+            'outputs': ['model/Softmax'],
+            'isTraining': False,
+            'isTrainingName': 'model/Placeholder_1',
+        }
+
+        self.regression(parameters)
+
+    def testRegressionSavedModel(self):
+        parameters = {
+            'savedModel': join(testdata.models_dir, 'vgg', 'vgg4'),
+            'inputs': ['model/Placeholder'],
+            'outputs': ['model/Softmax'],
+            'isTraining': False,
+            'isTrainingName': 'model/Placeholder_1',
+        }
+
+        self.regression(parameters)
+
+    def testSavedModelPreferecce(self):
+        # When both are specified, `savedModel` should be preferred.
+        # Test this by setting an invalid `graphFilename` that should be ignored.
+        parameters = {
+            'graphFilename': "wrong_model",
+            'savedModel': join(testdata.models_dir, 'vgg', 'vgg4'),
+            'inputs': ['model/Placeholder'],
+            'outputs': ['model/Softmax'],
+            'isTraining': False,
+            'isTrainingName': 'model/Placeholder_1',
+        }
+
+        self.regression(parameters)
+
+    def testEmptyModelName(self):
+        # With empty model names the algorithm should skip the configuration without errors.
+        TensorflowPredict()
+        TensorflowPredict(graphFilename='')
+        TensorflowPredict(graphFilename='', inputs=[''])
+        TensorflowPredict(graphFilename='', inputs=['wrong_input'])
+        TensorflowPredict(savedModel='')
+        TensorflowPredict(savedModel='', inputs=[''])
+        TensorflowPredict(savedModel='', inputs=['wrong_input'])
+        TensorflowPredict(graphFilename='', savedModel='')
+        TensorflowPredict(graphFilename='', savedModel='', inputs=[''])
+        TensorflowPredict(graphFilename='', savedModel='', inputs=['wrong_input'])
+    
+    def testInvalidParam(self):
+        model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': model})  # inputs and outputs are not defined
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': model,
+                                                        'inputs': ['model/Placeholder'],
+                                                       })  # outputs are not defined
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': model,
+                                                        'inputs': ['wrong_input_name'],
+                                                        'outputs': ['model/Softmax'],
+                                                        })  # input does not exist in the model
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': 'wrong_model_name',
+                                                        'inputs': ['model/Placeholder'],
+                                                        'outputs': ['model/Softmax'],
+                                                        })  # the model does not exist
 
     def testIdentityModel(self):
         # Perform the identity operation in Tensorflow to test if the data is
