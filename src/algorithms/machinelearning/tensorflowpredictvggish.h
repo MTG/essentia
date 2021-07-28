@@ -54,6 +54,7 @@ class TensorflowPredictVGGish : public AlgorithmComposite {
 
   void declareParameters() {
     declareParameter("graphFilename", "the name of the file containing the model to use", "", "");
+    declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("input", "the name of the input node in the TensorFlow graph", "", "model/Placeholder");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
     declareParameter("isTrainingName", "the name of an additional input node to indicate the model if it is in training mode or not. Leave it empty when the model does not need such input", "", "");
@@ -105,6 +106,7 @@ class TensorflowPredictVGGish : public Algorithm {
 
   void declareParameters() {
     declareParameter("graphFilename", "the name of the file containing the model to use", "", "");
+    declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("input", "the name of the input node in the Tensorflow graph", "", "model/Placeholder");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
     declareParameter("isTrainingName", "the name of an additional input node indicating whether the model is to be run in a training mode (for models with a training mode, leave it empty otherwise)", "", "");
