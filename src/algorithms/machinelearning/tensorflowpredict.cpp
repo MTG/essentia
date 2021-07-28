@@ -48,10 +48,14 @@ static void DeallocateBuffer(void* data, size_t) {
 
 
 void TensorflowPredict::configure() {
-  // If no file has been specified, do not do anything
+  _savedModel = "";
+  _graphFilename = "";
+
   if (parameter("savedModel").isConfigured()) _savedModel = parameter("savedModel").toString();
-  else if (parameter("graphFilename").isConfigured()) _graphFilename = parameter("graphFilename").toString();
-  else return;
+  if (parameter("graphFilename").isConfigured()) _graphFilename = parameter("graphFilename").toString();
+
+  // Do not do anything if we did not get a non-empty model name.
+  if ((_savedModel.empty()) and (_graphFilename.empty())) return;
 
   _tags = parameter("tags").toVectorString();
 

@@ -132,10 +132,6 @@ void TensorflowPredictTempoCNN::configure() {
 
   _poolToTensor->configure("namespace", output);
 
-  Parameter graphFilenameParam = parameter("graphFilename");
-  // if no file has been specified, do not do anything else
-  if (!graphFilenameParam.isConfigured()) return;
-
   string graphFilename = parameter("graphFilename").toString();
 
   _tensorflowPredict->configure("graphFilename", graphFilename,
