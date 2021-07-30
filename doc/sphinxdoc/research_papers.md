@@ -80,6 +80,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 ## Emotion detection
 
+- S. Chowdhury, and G. Widmer. On perceived emotion in expressive piano performance: Further experimental evidence for the relevance of mid-level perceptual features. In International Society for Music Information Retrieval (ISMIR 2021), 2021.
+
 - Y. Kim, L. M. Aiello, and D. Quercia. PepMusic: motivational qualities of songs for daily activities. EPJ Data Science, 9(1), 13, 2020.
 
 - Y. Hifny, A. Ali. Efficient Arabic Emotion Recognition Using Deep Neural Networks. In ICASSP 2019-2019 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), pages 6710-6714, 2019.
@@ -345,3 +347,4 @@ C. Fleitas and A. Moreno, Computational solution for the parametrization of bioa
 - D. Perna, and A. Tagarelli, A. Deep auscultation: Predicting respiratory anomalies and diseases via recurrent neural networks. In 2019 IEEE 32nd International Symposium on Computer-Based Medical Systems (CBMS), pages 50-55, 2019.
 
 - V. K. Cheung, P. M. Harrison, L. Meyer, M. T. Pearce, J. D. Haynes, and S. Koelsch. Uncertainty and surprise jointly predict musical pleasure and amygdala, hippocampus, and auditory cortex activity. Current Biology, 29(23), 4084-4092, 2019.
+
