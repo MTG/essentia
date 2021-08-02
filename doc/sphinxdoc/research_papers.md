@@ -80,7 +80,11 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 ## Emotion detection
 
+<<<<<<< HEAD
 - S. Chowdhury, and G. Widmer. On perceived emotion in expressive piano performance: Further experimental evidence for the relevance of mid-level perceptual features. In International Society for Music Information Retrieval (ISMIR 2021), 2021.
+=======
+- Byun, S. W., Lee, S. P. A Study on a Speech Emotion Recognition System with Effective Acoustic Features Using Deep Learning Algorithms. Applied Sciences, 11(4), 1890, 2021.
+>>>>>>> 0b119eb441b49fb0e2c309ba928b0e30f9c1f763
 
 - Y. Kim, L. M. Aiello, and D. Quercia. PepMusic: motivational qualities of songs for daily activities. EPJ Data Science, 9(1), 13, 2020.
 
