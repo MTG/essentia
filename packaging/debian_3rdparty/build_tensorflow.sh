@@ -10,9 +10,6 @@ cd tmp
 
 echo "Building Tensorflow $TENSORFLOW_VERSION"
 
-# NumPy is required by Bazel
-${PYTHON_BIN_PATH} -m pip install numpy
-
 curl -SLO https://github.com/tensorflow/tensorflow/archive/v$TENSORFLOW_VERSION.tar.gz
 tar -xf v$TENSORFLOW_VERSION.tar.gz
 cd tensorflow-$TENSORFLOW_VERSION
