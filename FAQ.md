@@ -58,7 +58,7 @@ Note that [Bazel](https://bazel.build/) has to be installed to build TensorFlow.
 For simplicity, we recommend to get Bazel through [Bazelisk](https://docs.bazel.build/versions/main/install-bazelisk.html).
 To build TensorFlow with GPU support [CUDA](https://developer.nvidia.com/cuda-toolkit) and [cuDNN](https://developer.nvidia.com/cudnn) have to be installed.
 Otherwise, GPU support can be deactivated by setting ```export TF_NEED_CUDA=0``` before building TensorFlow.
-More TensorFlow related configuration is available in the [build configuration file](https://github.com/MTG/essentia/blob/master/packaging/build_config.sh).
+More TensorFlow-related configuration is available in the [build configuration file](https://github.com/MTG/essentia/blob/master/packaging/build_config.sh).
 
 Alternatively, you can build each dependency apart running the corresponding scripts inside ```packaging/debian_3rdparty``` folder:
 ```
