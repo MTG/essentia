@@ -121,6 +121,7 @@ def build(ctx):
                 target = 'essentia_' + prog_name,
                 includes = includes,
                 use = 'essentia ', # + ctx.env.USES,
+                defines = ['ESSENTIA_EXPORTS=0'],
                 install_path = '${PREFIX}/bin')
             @feature('check_static')
             @before_method('apply_link')
