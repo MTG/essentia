@@ -87,7 +87,7 @@ class TestTensorFlowPredict(TestCase):
 
         self.regression(parameters)
 
-    def testSavedModelPreferecce(self):
+    def testSavedModelOverridesGraphFilename(self):
         # When both are specified, `savedModel` should be preferred.
         # Test this by setting an invalid `graphFilename` that should be ignored.
         parameters = {
