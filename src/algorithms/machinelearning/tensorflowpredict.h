@@ -99,7 +99,7 @@ class TensorflowPredict : public Algorithm {
     const char* defaultTagsC[] = { "serve" };
     std::vector<std::string> defaultTags = arrayToVector<std::string>(defaultTagsC);
 
-    declareParameter("graphFilename", "the name of the file from which to read the TensorFlow graph", "", Parameter::STRING);
+    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", Parameter::STRING);
     declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", Parameter::STRING);
     declareParameter("tags", "the tags of the savedModel", "", defaultTags);
     declareParameter("inputs", "will look for these namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", Parameter::VECTOR_STRING);

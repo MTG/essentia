@@ -55,7 +55,7 @@ class TensorflowPredictTempoCNN : public AlgorithmComposite {
   ~TensorflowPredictTempoCNN();
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file containing the model to use", "", "");
+    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
     declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("input", "the name of the input node in the TensorFlow graph", "", "input");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "output");
@@ -106,7 +106,7 @@ class TensorflowPredictTempoCNN : public Algorithm {
   ~TensorflowPredictTempoCNN();
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file containing the model to use", "", "");
+    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
     declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("input", "the name of the input nodes in the Tensorflow graph", "", "input");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "output");
