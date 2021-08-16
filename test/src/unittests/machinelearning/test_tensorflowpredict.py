@@ -103,16 +103,32 @@ class TestTensorFlowPredict(TestCase):
 
     def testEmptyModelName(self):
         # With empty model names the algorithm should skip the configuration without errors.
-        TensorflowPredict()
-        TensorflowPredict(graphFilename='')
-        TensorflowPredict(graphFilename='', inputs=[''])
-        TensorflowPredict(graphFilename='', inputs=['wrong_input'])
-        TensorflowPredict(savedModel='')
-        TensorflowPredict(savedModel='', inputs=[''])
-        TensorflowPredict(savedModel='', inputs=['wrong_input'])
-        TensorflowPredict(graphFilename='', savedModel='')
-        TensorflowPredict(graphFilename='', savedModel='', inputs=[''])
-        TensorflowPredict(graphFilename='', savedModel='', inputs=['wrong_input'])
+        self.assertConfigureSuccess(TensorflowPredict(), {})
+        self.assertConfigureSuccess(TensorflowPredict(), {'graphFilename': ''})
+        self.assertConfigureSuccess(TensorflowPredict(), {'graphFilename': '',
+                                                          'inputs': ['']
+                                                         })
+        self.assertConfigureSuccess(TensorflowPredict(), {'graphFilename': '',
+                                                          'inputs': ['wrong_input']
+                                                         })
+        self.assertConfigureSuccess(TensorflowPredict(), {'savedModel': ''})
+        self.assertConfigureSuccess(TensorflowPredict(), {'savedModel': '',
+                                                          'inputs':['']
+                                                         })
+        self.assertConfigureSuccess(TensorflowPredict(), {'savedModel': '',
+                                                          'inputs':['wrong_input']
+                                                         })
+        self.assertConfigureSuccess(TensorflowPredict(), {'graphFilename': '',
+                                                          'savedModel':''
+                                                         })
+        self.assertConfigureSuccess(TensorflowPredict(), {'graphFilename': '',
+                                                          'savedModel':'',
+                                                          'inputs': ['']
+                                                         })
+        self.assertConfigureSuccess(TensorflowPredict(), {'graphFilename': '',
+                                                          'savedModel':'',
+                                                          'inputs': ['wrong_input']
+                                                         })
     
     def testInvalidParam(self):
         model = join(testdata.models_dir, 'vgg', 'vgg4.pb')

@@ -50,18 +50,35 @@ class TestTensorFlowPredictMusiCNN(TestCase):
         self.assertAlmostEqualVector(found, expected, 1e-5)
 
     def testEmptyModelName(self):
-        # With empty or undefined model names the algorithm should skip the configuration without errors.
-        TensorflowPredictMusiCNN()
-        TensorflowPredictMusiCNN(graphFilename='')
-        TensorflowPredictMusiCNN(graphFilename='', input='')
-        TensorflowPredictMusiCNN(graphFilename='', input='wrong_input')
-        TensorflowPredictMusiCNN(savedModel='')
-        TensorflowPredictMusiCNN(savedModel='', input='')
-        TensorflowPredictMusiCNN(savedModel='', input='wrong_input')
-        TensorflowPredictMusiCNN(graphFilename='', savedModel='')
-        TensorflowPredictMusiCNN(graphFilename='', savedModel='', input='')
-        TensorflowPredictMusiCNN(graphFilename='', savedModel='', input='wrong_input')
-    
+        # With empty model names the algorithm should skip the configuration without errors.
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {})
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': ''})
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': '',
+                                                                 'input': '',
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': '',
+                                                                 'input': 'wrong_input'
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'savedModel': ''})
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'savedModel': '',
+                                                                 'input':'',
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'savedModel': '',
+                                                                 'input':'wrong_input',
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': '',
+                                                                 'savedModel':'',
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': '',
+                                                                 'savedModel':'',
+                                                                 'input': '',
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': '',
+                                                                 'savedModel':'',
+                                                                 'input': 'wrong_input',
+                                                                })
+
+
     def testInvalidParam(self):
         model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
         self.assertConfigureFails(TensorflowPredictMusiCNN(), {'graphFilename': model,

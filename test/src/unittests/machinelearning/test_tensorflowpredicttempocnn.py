@@ -121,17 +121,33 @@ class TestTensorflowPredictTempoCNN(TestCase):
                                                                 'output': 'non_existing'})
 
     def testEmptyModelName(self):
-        # With empty or undefined model names the algorithm should skip the configuration without errors.
-        TensorflowPredictTempoCNN()
-        TensorflowPredictTempoCNN(graphFilename='')
-        TensorflowPredictTempoCNN(graphFilename='', input='')
-        TensorflowPredictTempoCNN(graphFilename='', input='wrong_input')
-        TensorflowPredictTempoCNN(savedModel='')
-        TensorflowPredictTempoCNN(savedModel='', input='')
-        TensorflowPredictTempoCNN(savedModel='', input='wrong_input')
-        TensorflowPredictTempoCNN(graphFilename='', savedModel='')
-        TensorflowPredictTempoCNN(graphFilename='', savedModel='', input='')
-        TensorflowPredictTempoCNN(graphFilename='', savedModel='', input='wrong_input')
+        # With empty model names the algorithm should skip the configuration without errors.
+        self.assertConfigureSuccess(TensorflowPredictTempoCNN(), {})
+        self.assertConfigureSuccess(TensorflowPredictTempoCNN(), {'graphFilename': ''})
+        self.assertConfigureSuccess(TensorflowPredictTempoCNN(), {'graphFilename': '',
+                                                                  'input': '',
+                                                                 })
+        self.assertConfigureSuccess(TensorflowPredictTempoCNN(), {'graphFilename': '',
+                                                                  'input': 'wrong_input'
+                                                                 })
+        self.assertConfigureSuccess(TensorflowPredictTempoCNN(), {'savedModel': ''})
+        self.assertConfigureSuccess(TensorflowPredictTempoCNN(), {'savedModel': '',
+                                                                  'input':'',
+                                                                 })
+        self.assertConfigureSuccess(TensorflowPredictTempoCNN(), {'savedModel': '',
+                                                                  'input':'wrong_input',
+                                                                 })
+        self.assertConfigureSuccess(TensorflowPredictTempoCNN(), {'graphFilename': '',
+                                                                  'savedModel':'',
+                                                                 })
+        self.assertConfigureSuccess(TensorflowPredictTempoCNN(), {'graphFilename': '',
+                                                                  'savedModel':'',
+                                                                  'input': '',
+                                                                 })
+        self.assertConfigureSuccess(TensorflowPredictTempoCNN(), {'graphFilename': '',
+                                                                  'savedModel':'',
+                                                                  'input': 'wrong_input',
+                                                                 })
 
 suite = allTests(TestTensorflowPredictTempoCNN)
 

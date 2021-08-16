@@ -56,17 +56,33 @@ class TestTensorFlowPredictVGGish(TestCase):
         self.assertAlmostEqualVector(found, expected, 1e-2)
 
     def testEmptyModelName(self):
-        # With empty or undefined model names the algorithm should skip the configuration without errors.
-        TensorflowPredictVGGish()
-        TensorflowPredictVGGish(graphFilename='')
-        TensorflowPredictVGGish(graphFilename='', input='')
-        TensorflowPredictVGGish(graphFilename='', input='wrong_input')
-        TensorflowPredictVGGish(savedModel='')
-        TensorflowPredictVGGish(savedModel='', input='')
-        TensorflowPredictVGGish(savedModel='', input='wrong_input')
-        TensorflowPredictVGGish(graphFilename='', savedModel='')
-        TensorflowPredictVGGish(graphFilename='', savedModel='', input='')
-        TensorflowPredictVGGish(graphFilename='', savedModel='', input='wrong_input')
+        # With empty model names the algorithm should skip the configuration without errors.
+        self.assertConfigureSuccess(TensorflowPredictVGGish(), {})
+        self.assertConfigureSuccess(TensorflowPredictVGGish(), {'graphFilename': ''})
+        self.assertConfigureSuccess(TensorflowPredictVGGish(), {'graphFilename': '',
+                                                                'input': '',
+                                                               })
+        self.assertConfigureSuccess(TensorflowPredictVGGish(), {'graphFilename': '',
+                                                                'input': 'wrong_input'
+                                                               })
+        self.assertConfigureSuccess(TensorflowPredictVGGish(), {'savedModel': ''})
+        self.assertConfigureSuccess(TensorflowPredictVGGish(), {'savedModel': '',
+                                                                'input':'',
+                                                               })
+        self.assertConfigureSuccess(TensorflowPredictVGGish(), {'savedModel': '',
+                                                                'input':'wrong_input',
+                                                               })
+        self.assertConfigureSuccess(TensorflowPredictVGGish(), {'graphFilename': '',
+                                                                'savedModel':'',
+                                                               })
+        self.assertConfigureSuccess(TensorflowPredictVGGish(), {'graphFilename': '',
+                                                                'savedModel':'',
+                                                                'input': '',
+                                                               })
+        self.assertConfigureSuccess(TensorflowPredictVGGish(), {'graphFilename': '',
+                                                                'savedModel':'',
+                                                                'input': 'wrong_input',
+                                                               })
     
     def testInvalidParam(self):
         model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
