@@ -68,6 +68,7 @@ const Real _BPMOffset = 30.f;
 
 void TempoCNN::configure() {
   _tensorflowPredictTempoCNN->configure(INHERIT("graphFilename"),
+                                        INHERIT("savedModel"),
                                         INHERIT("input"),
                                         INHERIT("output"),
                                         INHERIT("patchHopSize"),
