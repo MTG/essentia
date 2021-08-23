@@ -132,13 +132,11 @@ void TensorflowPredictTempoCNN::configure() {
 
   _poolToTensor->configure("namespace", output);
 
-  Parameter graphFilenameParam = parameter("graphFilename");
-  // if no file has been specified, do not do anything else
-  if (!graphFilenameParam.isConfigured()) return;
-
   string graphFilename = parameter("graphFilename").toString();
+  string savedModel = parameter("savedModel").toString();
 
   _tensorflowPredict->configure("graphFilename", graphFilename,
+                                "savedModel", savedModel,
                                 "squeeze", false,
                                 "inputs", vector<string>({input}),
                                 "outputs", vector<string>({output}));
@@ -214,11 +212,12 @@ void TensorflowPredictTempoCNN::configure() {
   // if no file has been specified, do not do anything
   if (!parameter("graphFilename").isConfigured()) return;
   _tensorflowPredictTempoCNN->configure(INHERIT("graphFilename"),
-                                       INHERIT("input"),
-                                       INHERIT("output"),
-                                       INHERIT("patchHopSize"),
-                                       INHERIT("batchSize"),
-                                       INHERIT("lastPatchMode"));
+                                        INHERIT("savedModel"),
+                                        INHERIT("input"),
+                                        INHERIT("output"),
+                                        INHERIT("patchHopSize"),
+                                        INHERIT("batchSize"),
+                                        INHERIT("lastPatchMode"));
 }
 
 
