@@ -126,14 +126,16 @@ def configure(ctx):
     else:
         ctx.env.CXXFLAGS += ['-W2', '-EHsc']
 
-    # force using SSE floating point (default for 64bit in gcc) instead of
-    # 387 floating point (used for 32bit in gcc) to avoid numerical differences
-    # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
+    # Force using SSE floating point for all x86 platforms (default for 64-bit
+    # in gcc) instead of 387 floating point (used for 32-bit in gcc) to avoid
+    # numerical differences between 32/64-bit builds
+    # (see https://github.com/MTG/essentia/issues/179)
     if (not ctx.options.EMSCRIPTEN and 
         not ctx.options.CROSS_COMPILE_ANDROID and 
         not ctx.options.CROSS_COMPILE_IOS and
         not ctx.options.NO_MSSE and
-        sys.platform != 'win32'):
+        sys.platform != 'win32' and
+        any(arch in platform.machine() for arch in ['i386', 'i686', 'x86', 'x64'])):
         ctx.env.CXXFLAGS += ['-msse', '-msse2', '-mfpmath=sse']
 
     # define this to be stricter, but sometimes some libraries can give problems...
