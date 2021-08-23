@@ -166,6 +166,8 @@ def configure(ctx):
 
     if ctx.options.EMSCRIPTEN:
         ctx.env.CXXFLAGS += ['-I' + os.path.join(os.environ['EMSCRIPTEN'], 'system', 'lib', 'libcxxabi', 'include')]
+        # Optimize for code size:
+        # https://emscripten.org/docs/tools_reference/emcc.html#emcc-oz
         ctx.env.CXXFLAGS += ['-Oz']
     elif sys.platform == 'darwin':
         # clang fails on 10.7 using <atomic>, because libc++ is not new enough
