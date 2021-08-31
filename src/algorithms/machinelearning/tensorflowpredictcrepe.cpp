@@ -97,11 +97,16 @@ void TensorflowPredictCREPE::configure() {
   // to simplify testing but there is not much practical implication.
   _frameCutter->configure("frameSize", _frameSize,
                           "hopSize", hopSizeFrames,
-                          "validFrameThresholdRatio", 0.5);
+                          "validFrameThresholdRatio", 0.5,
+                          "silentFrames", "keep");
 
   _vectorRealToTensor->configure("shape", inputShape,
                                  "lastPatchMode", "discard",
                                  "patchHopSize", 0);
+
+  _tensorNormalize->configure("scaler", "standard",
+                              "axis", 0,
+                              "skipConstantSlices", false);
 
   _configured = true;
 
