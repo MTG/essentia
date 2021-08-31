@@ -63,6 +63,24 @@ class TestPitchCREPE(TestCase):
                                                  'output': 'model/classifier/Sigmoid',
                                                 })  # the model does not exist
 
+    def testEmptySignal(self):
+        model = join(testdata.models_dir, 'crepe', 'crepe-tiny-1.pb')
+        self.assertComputeFails(PitchCREPE(graphFilename=model), [])
+
+    def testZero(self):
+        model = join(testdata.models_dir, 'crepe', 'crepe-tiny-1.pb')
+
+        sampleLength = 1024
+        sampleRate = 16000
+        hopMilliseconds = 10
+        timestamps = int(numpy.ceil(sampleLength / (sampleRate * hopMilliseconds / 1000)))
+
+        zeros = numpy.zeros(sampleLength, dtype='float32')
+        _, frequency, confidence, _ = PitchCREPE(graphFilename=model, hopSize=hopMilliseconds)(zeros)
+
+        self.assertEqualVector(frequency, numpy.zeros(timestamps))
+        self.assertEqualVector(confidence, numpy.zeros(timestamps))
+
 suite = allTests(TestPitchCREPE)
 
 if __name__ == '__main__':
