@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_CREPE_H
-#define ESSENTIA_CREPE_H
+#ifndef ESSENTIA_PITCHCREPE_H
+#define ESSENTIA_PITCHCREPE_H
 
 #include "algorithmfactory.h"
 #include "essentiamath.h"
@@ -26,7 +26,7 @@
 namespace essentia {
 namespace standard {
 
-class CREPE : public Algorithm {
+class PitchCREPE : public Algorithm {
 
  protected:
   Input<std::vector<Real> > _audio;
@@ -51,7 +51,7 @@ class CREPE : public Algorithm {
   std::vector<Real> toLocalAverageCents(std::vector<std::vector<Real> > &activations);
 
  public:
-  CREPE() {
+  PitchCREPE() {
     declareInput(_audio, "audio", "the input audio signal sampled at 16000 Hz");
     declareOutput(_time, "time" , "the timestamps on which the pitch was estimated");
     declareOutput(_frequency, "frequency", "the predicted pitch values in Hz");
@@ -61,7 +61,7 @@ class CREPE : public Algorithm {
     _tensorflowPredictCREPE = AlgorithmFactory::create("TensorflowPredictCREPE");
   }
 
-  ~CREPE() {
+  ~PitchCREPE() {
     if (_tensorflowPredictCREPE) delete _tensorflowPredictCREPE;
   }
 
@@ -91,7 +91,7 @@ class CREPE : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class CREPE : public StreamingAlgorithmWrapper {
+class PitchCREPE : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<Real> > _audio;
@@ -101,8 +101,8 @@ class CREPE : public StreamingAlgorithmWrapper {
   Source<std::vector<std::vector<Real> > > _activations;
 
  public:
-  CREPE() {
-    declareAlgorithm("CREPE");
+  PitchCREPE() {
+    declareAlgorithm("PitchCREPE");
     declareInput(_audio, TOKEN, "audio");
     declareOutput(_time, TOKEN, "time");
     declareOutput(_frequency, TOKEN, "frequency");
@@ -114,4 +114,4 @@ class CREPE : public StreamingAlgorithmWrapper {
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_CREPE_H
+#endif // ESSENTIA_PITCHCREPE_H

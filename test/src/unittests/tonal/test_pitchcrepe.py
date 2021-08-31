@@ -20,7 +20,7 @@
 
 from essentia_test import *
 
-class TestCREPE(TestCase):
+class TestPitchCREPE(TestCase):
 
     def testRegression(self):
         expected_data = numpy.loadtxt(
@@ -38,7 +38,7 @@ class TestCREPE(TestCase):
         audio = MonoLoader(filename=filename, sampleRate=16000)()
         # The last value returned by CREPE are the activations that are already
         # tested in test_tensorflowpredictcrepe.
-        time, frequency, confidence, _ = CREPE(graphFilename=model)(audio)
+        time, frequency, confidence, _ = PitchCREPE(graphFilename=model)(audio)
 
         self.assertAlmostEqualVector(time, expected_time, 1e-5)
         self.assertAlmostEqualVector(frequency, expected_frequency, 1e-5)
@@ -47,23 +47,23 @@ class TestCREPE(TestCase):
     def testEmptyModelName(self):
         # With empty or undefined model names the algorithm should skip the configuration
         # without errors.
-        CREPE()
-        CREPE(graphFilename='')
-        CREPE(graphFilename='', input='')
-        CREPE(graphFilename='', input='wrong_input')
+        PitchCREPE()
+        PitchCREPE(graphFilename='')
+        PitchCREPE(graphFilename='', input='')
+        PitchCREPE(graphFilename='', input='wrong_input')
 
     def testInvalidParam(self):
         model = join(testdata.models_dir, 'crepe', 'crepe-tiny-1.pb')
-        self.assertConfigureFails(CREPE(), {'graphFilename': model,
-                                            'input': 'wrong_input_name',
-                                            'output': 'model/classifier/Sigmoid',
-                                           })  # input do not exist in the model
-        self.assertConfigureFails(CREPE(), {'graphFilename': 'wrong_model_name',
-                                            'input': 'frames',
-                                            'output': 'model/classifier/Sigmoid',
-                                           })  # the model does not exist
+        self.assertConfigureFails(PitchCREPE(), {'graphFilename': model,
+                                                 'input': 'wrong_input_name',
+                                                 'output': 'model/classifier/Sigmoid',
+                                                })  # input do not exist in the model
+        self.assertConfigureFails(PitchCREPE(), {'graphFilename': 'wrong_model_name',
+                                                 'input': 'frames',
+                                                 'output': 'model/classifier/Sigmoid',
+                                                })  # the model does not exist
 
-suite = allTests(TestCREPE)
+suite = allTests(TestPitchCREPE)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)
