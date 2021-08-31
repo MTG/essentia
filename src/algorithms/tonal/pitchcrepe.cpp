@@ -91,7 +91,8 @@ void PitchCREPE::compute() {
   frequency.resize(timestamps);
   confidence.resize(timestamps);
   
-  frequency.assign(timestamps, 0);
+  frequency.assign(timestamps, 0.0);
+  confidence.assign(timestamps, 0.0);
 
   // Activations to cents.
   vector<Real> cents = toLocalAverageCents(activations);
@@ -100,12 +101,12 @@ void PitchCREPE::compute() {
     // Get the timestamp of each pitch prediction.
     time[i] = i * _hopSize / 1000.0;
 
-    // Get the confidences (max Activation per timestamp).
-    confidence[i] = activations[i][argmax(activations[i])];
-
-    // Cents to frequencies.
     if (!isnan(cents[i])) {
+      // Cents to frequencies.
       frequency[i] = 10.0 * pow(2.0, (cents[i] / 1200.0));
+
+      // Get the confidences (max Activation per timestamp).
+      confidence[i] = activations[i][argmax(activations[i])];
     }
   }
 }
