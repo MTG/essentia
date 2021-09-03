@@ -237,10 +237,12 @@ namespace essentia {
 
 namespace standard {
   typedef EssentiaFactory<Algorithm> AlgorithmFactory;
+  template class EssentiaFactory<Algorithm>;
 }
 
 namespace streaming {
   typedef EssentiaFactory<Algorithm> AlgorithmFactory;
+  template class EssentiaFactory<Algorithm>;
 }
 
 } // namespace essentia
