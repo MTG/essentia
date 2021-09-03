@@ -102,6 +102,11 @@ def configure(ctx):
     if 'ACCELERATE' in ctx.env.FFT:
         ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
 
+    if sys.platform == 'win32':
+        # Dependencies for command-line argument parsing required by
+        # streaming_extractor_music and streaming_extractor_freesound
+        ctx.check_libs_msvc(['shell32', 'kernel32'])
+
 
 def build(ctx):
     print('→ building from ' + ctx.path.abspath())
@@ -116,11 +121,16 @@ def build(ctx):
             if any((len(x.split("/")) > 1 for x in other or [])):
                 includes.append("../..")
 
+            if sys.platform == 'win32':
+                use = 'essentia SHELL32 KERNEL32'
+            else:
+                use = 'essentia'
+
             ctx(features='c cxx cxxprogram check_static',
                 source = ctx.path.ant_glob(' '.join(files)),
                 target = 'essentia_' + prog_name,
                 includes = includes,
-                use = 'essentia ', # + ctx.env.USES,
+                use = use,
                 defines = ['ESSENTIA_EXPORTS=0'],
                 install_path = '${PREFIX}/bin')
             @feature('check_static')
