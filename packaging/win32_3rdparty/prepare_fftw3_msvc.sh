@@ -14,7 +14,7 @@ lib /def:libfftw3l-3.def
 mkdir -p $PREFIX/include; mkdir -p $PREFIX/lib
 mv fftw3.h $PREFIX/include/
 mv libfftw3f-3.def $PREFIX/lib/fftw3f.def
-mv libfftw3f-3.exp $PREFIX/lib/fftwf3.exp
+mv libfftw3f-3.exp $PREFIX/lib/fftw3f.exp
 mv libfftw3f-3.lib $PREFIX/lib/fftw3f.lib
 mv libfftw3f-3.dll $PREFIX/lib/
 
