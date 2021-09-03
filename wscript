@@ -126,11 +126,17 @@ def configure(ctx):
 
     if ctx.options.MODE == 'debug':
         print ('→ Building in debug mode')
-        ctx.env.CXXFLAGS += ['-g']
+        if sys.platform != 'win32':
+            ctx.env.CXXFLAGS += ['-g']
+        else:
+            ctx.env.CXXFLAGS += ['-MDd', '-bigobj']
 
     elif ctx.options.MODE == 'release':
         print ('→ Building in release mode')
-        ctx.env.CXXFLAGS += ['-O2']  # '-march=native' ] # '-msse3', '-mfpmath=sse' ]
+        if sys.platform != 'win32':
+          ctx.env.CXXFLAGS += ['-O2']  # '-march=native' ] # '-msse3', '-mfpmath=sse' ]
+        else:
+            ctx.env.CXXFLAGS += ['-MD', '-bigobj']
 
     else:
         raise ValueError('mode should be either "debug" or "release"')
@@ -283,7 +289,7 @@ def configure(ctx):
         
         # flags required for linking to static ffmpeg libs
         # -Bsymbolic flag is not available on clang
-        if ctx.env.CXX_NAME is not "clang":
+        if ctx.env.CXX_NAME != "clang":
             ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
             ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 

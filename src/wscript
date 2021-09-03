@@ -164,7 +164,7 @@ def configure(ctx):
         for key in includes:
             ctx.env[key] = [path if os.path.isabs(path) else os.path.abspath(path) for path in ctx.env[key]]
 
-        libs = [key for key in ctx.env.keys() if key.startswith('LIBPATH_') and key is not 'LIBPATH_ST']
+        libs = [key for key in ctx.env.keys() if key.startswith('LIBPATH_') and key != 'LIBPATH_ST']
         for key in libs:
             ctx.env[key] = [os.path.abspath(path) if path.startswith('packaging') else path for path in ctx.env[key]]
 
