@@ -32,11 +32,11 @@ class SourceProxyBase;
 class SinkBase;
 class Algorithm;
 
-void connect(SourceBase& source, SinkBase& sink);
-void disconnect(SourceBase& source, SinkBase& sink);
+ESSENTIA_API void connect(SourceBase& source, SinkBase& sink);
+ESSENTIA_API void disconnect(SourceBase& source, SinkBase& sink);
 
-void attach(SourceBase& innerSource, SourceProxyBase& proxy);
-void detach(SourceBase& innerSource, SourceProxyBase& proxy);
+ESSENTIA_API void attach(SourceBase& innerSource, SourceProxyBase& proxy);
+ESSENTIA_API void detach(SourceBase& innerSource, SourceProxyBase& proxy);
 
 
 /**

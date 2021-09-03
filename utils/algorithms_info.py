@@ -279,7 +279,7 @@ def create_registration_cpp(all_algos, registration_filename, use_streaming=True
             cpp_code += '#include "%s"\n' % all_algos[algo]['header']
 
     # register standard algorithms in factory
-    cpp_code += "\nnamespace essentia {\nnamespace standard {\n\nESSENTIA_API void registerAlgorithm() {\n"
+    cpp_code += "\nnamespace essentia {\nnamespace standard {\n\nvoid registerAlgorithm() {\n"
 
     for algo in all_algos:
         if all_algos[algo]['has_standard']:
@@ -292,7 +292,7 @@ def create_registration_cpp(all_algos, registration_filename, use_streaming=True
 
     # register streaming algorithms in factory
     if use_streaming:
-        cpp_code += "\nnamespace essentia {\nnamespace streaming {\n\nESSENTIA_API void registerAlgorithm() {\n"
+        cpp_code += "\nnamespace essentia {\nnamespace streaming {\n\nvoid registerAlgorithm() {\n"
 
         for algo in all_algos:
             if all_algos[algo]['has_streaming']:

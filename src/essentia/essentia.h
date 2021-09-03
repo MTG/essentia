@@ -34,8 +34,8 @@
 
 namespace essentia {
 
-extern const char* version;
-extern const char* version_git_sha;
+extern ESSENTIA_API const char* version;
+extern ESSENTIA_API const char* version_git_sha;
 
 /**
  * This function registers the algorithms in the factory, so that they are
@@ -55,7 +55,7 @@ namespace standard {
    * dynamically generates the contents of the file essentia_algorithms_reg.cpp
    * which implements this function.
    */
-  void ESSENTIA_API registerAlgorithm();
+  ESSENTIA_API void registerAlgorithm();
 }
 
 namespace streaming {
@@ -64,7 +64,7 @@ namespace streaming {
    * dynamically generates the contents of the file essentia_algorithms_reg.cpp
    * which implements this function.
    */
-  void ESSENTIA_API registerAlgorithm();
+  ESSENTIA_API void registerAlgorithm();
 }
 
 class TypeMap {

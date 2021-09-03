@@ -43,7 +43,7 @@ class ProcessTask;
 /**
  * Global function used for connecting algorithms.
  */
-void connect(SourceBase& source, SinkBase& sink);
+ESSENTIA_API void connect(SourceBase& source, SinkBase& sink);
 
 inline void operator>>(SourceBase& source, SinkBase& sink) {
   connect(source, sink);
@@ -60,7 +60,7 @@ inline void connect(SinkBase& sink, SourceBase& source) {
 /**
  * Global function used for disconnecting outputs from inputs.
  */
-void disconnect(SourceBase& source, SinkBase& sink);
+ESSENTIA_API void disconnect(SourceBase& source, SinkBase& sink);
 
 /**
  * Global function used for connecting algorithms. API is not as nice as the
