@@ -139,7 +139,7 @@ namespace standard {
 const char* TensorflowPredictCREPE::name = "TensorflowPredictCREPE";
 const char* TensorflowPredictCREPE::category = "Machine Learning";
 const char* TensorflowPredictCREPE::description = DOC(
-  "This algorithm generates activations from monophonic audio signals using CREPE models.\n"
+  "This algorithm generates activations of monophonic audio signals using CREPE models.\n"
   "\n"
   "`input` and `output` are the input and output node names in the neural network and are "
   "defaulted to the names of the official models. `hopSize` allows to change the pitch "
