@@ -105,7 +105,11 @@ void PitchCREPE::compute() {
       // Cents to frequencies.
       frequency[i] = 10.0 * pow(2.0, (cents[i] / 1200.0));
 
-      // Get the confidences (max Activation per timestamp).
+      // Get the confidences (higher activation per timestamp).
+      // Our argmax implementation relies on max_element,
+      // which returns the first element in case of multiple candidates.
+      // While this may result in unintended prediction flaws, for now we
+      // leave it like this so that we match the original implementation.
       confidence[i] = activations[i][argmax(activations[i])];
     }
   }
