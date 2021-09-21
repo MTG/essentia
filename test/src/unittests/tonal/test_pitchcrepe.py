@@ -63,7 +63,7 @@ class TestPitchCREPE(TestCase):
                                                  'output': 'model/classifier/Sigmoid',
                                                 })  # the model does not exist
 
-    def testEmptySignal(self):
+    def testEmpty(self):
         model = join(testdata.models_dir, 'crepe', 'crepe-tiny-1.pb')
         self.assertComputeFails(PitchCREPE(graphFilename=model), [])
 
