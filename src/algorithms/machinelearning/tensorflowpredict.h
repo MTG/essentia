@@ -56,7 +56,6 @@ class TensorflowPredict : public Algorithm {
   std::string _savedModel;
   std::vector<std::string> _tags;
   TF_Buffer* _runOptions;
-  TF_Buffer* _metaGraphDef;
 
   bool _isTraining;
   bool _isTrainingSet;
