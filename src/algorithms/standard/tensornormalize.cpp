@@ -47,6 +47,7 @@ const char* TensorNormalize::description = DOC("This algorithm performs normaliz
   void TensorNormalize::configure() {
     _scaler = scalerFromString(parameter("scaler").toString());
     _axis = parameter("axis").toInt();
+    _skipConstantSlices = parameter("skipConstantSlices").toBool();
   }
 
 void TensorNormalize::compute() {
@@ -61,8 +62,10 @@ void TensorNormalize::compute() {
 
         if (globalStd == 0) {
           E_INFO("TensorNormalize: Received tensor with constant value.");
-          // Set std to 1 so we return a vector of all 0s.
-          globalStd = 1;
+          if (_skipConstantSlices) {
+            // Set std to 1 so we return a vector of all 0s.
+            globalStd = 1;
+          }
         }
 
         output = (input - globalMean) / globalStd;
@@ -76,8 +79,10 @@ void TensorNormalize::compute() {
         Real* stds_data = stds.data();
         for (int i = 0; i < stds.size(); i++) {
           if (stds_data[i] == 0) {
-            stds_data[i] = 1;
             hasConstantSlice = true;
+            if (_skipConstantSlices) {
+              stds_data[i] = 1;
+            }
           }
         }
 
@@ -119,8 +124,10 @@ void TensorNormalize::compute() {
         Real* diff_data = diff.data();
         for (int i = 0; i < diff.size(); i++) {
           if (diff_data[i] == 0) {
-            diff_data[i] = 1;
             hasConstantSlice = true;
+            if (_skipConstantSlices) {
+              diff_data[i] = 1;
+            }
           }
         }
 

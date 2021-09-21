@@ -49,7 +49,7 @@ class VectorRealToTensor : public Algorithm {
 
   void declareParameters() {
     // Process 187 frames x 96 features by default.
-    // This is a common setup for mel-spectrogram based arquitectures.
+    // This is a common setup for mel-spectrogram based architectures.
     std::vector<int> outputShape = {1, 1, 187, 96};
 
     declareParameter("shape", "shape of the output tensor (batchSize, channels, patchSize, featureSize). If batchSize is -1 a single tensor is generated when the end of the stream is reached", "", outputShape);
