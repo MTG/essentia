@@ -71,7 +71,7 @@ class SingleBeatLoudness : public Algorithm {
     declareParameter("beatWindowDuration", "window size for the beat's onset detection [s]", "(0,inf)", 0.1);
     declareParameter("beatDuration", "window size for the beat's energy computation (the window starts at the onset) [s]", "(0,inf)", 0.05);
     declareParameter("frequencyBands", "frequency bands", "", arrayToVector<Real>(defaultBands));
-    declareParameter("onsetStart", "criteria for finding the start of the beat", "{sumEnergy, peakEnergy}", "sumEnergy");
+    declareParameter("onsetStart", "criteria for finding the start of the beat", "{sumEnergy,peakEnergy}", "sumEnergy");
   }
 
   void compute();
