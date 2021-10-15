@@ -6,15 +6,15 @@ if [ -z "${PREFIX}" ]; then
 fi
 echo Installing to: $PREFIX
 
-SHARED_OR_STATIC="
---enable-shared \
---disable-static
-"
-
 #SHARED_OR_STATIC="
-#--disable-shared \
-#--enable-static
+#--enable-shared \
+#--disable-static
 #"
+
+SHARED_OR_STATIC="
+--disable-shared \
+--enable-static
+"
 
 EIGEN_VERSION=3.3.7
 FFMPEG_VERSION=ffmpeg-2.8.12
