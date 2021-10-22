@@ -28,6 +28,7 @@ jobs:
       PRE_CMD: ${{ matrix.PRE_CMD }}
 
     steps:
+      - uses: actions/checkout@v2
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
