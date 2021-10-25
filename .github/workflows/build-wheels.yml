@@ -29,6 +29,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Fetch release tags from GitHub
+        # Workaround for https://github.com/actions/checkout/issues/290
+        run: git fetch --tags --force
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
