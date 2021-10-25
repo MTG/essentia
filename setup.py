@@ -70,6 +70,7 @@ def get_version():
     if version.count('-dev'):
         # Development version. Get the number of commits after the last release
         git_version = get_git_version()
+        print('git describe:', git_version)
         dev_commits = git_version.split('-')[-2] if git_version else ''
         if not dev_commits.isdigit():
             print('Error parsing the number of dev commits: %s', dev_commits)
