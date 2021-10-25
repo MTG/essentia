@@ -59,7 +59,7 @@ def get_git_version():
     version = None
     if os.path.exists(".git"):
         try:
-            version = os.popen("git describe --always").read().strip()
+            version = os.popen("git describe --always --tags").read().strip()
         except Exception as e:
             print(e)
     return version
