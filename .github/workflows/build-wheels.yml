@@ -46,5 +46,11 @@ jobs:
         run: | 
           ls wheelhouse/
           python setup.py sdist
-      - name: Upload wheels and sdist to transfer.sh
-        run: travis/deploy_transfer.sh
+      - name: Upload wheels and sdist
+        uses: actions/upload-artifact@v2
+        with:
+          name: essentia-python-wheels
+          path: |
+            wheelhouse/essentia*.whl
+            wheelhouse/essentia*.tar.gz
+          if-no-files-found: error
