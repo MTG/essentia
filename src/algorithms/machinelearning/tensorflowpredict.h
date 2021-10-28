@@ -53,6 +53,10 @@ class TensorflowPredict : public Algorithm {
   TF_SessionOptions* _sessionOptions;
   TF_Session* _session;
 
+  std::string _savedModel;
+  std::vector<std::string> _tags;
+  TF_Buffer* _runOptions;
+
   bool _isTraining;
   bool _isTrainingSet;
   std::string _isTrainingName;
@@ -75,7 +79,7 @@ class TensorflowPredict : public Algorithm {
  public:
   TensorflowPredict() : _graph(TF_NewGraph()), _status(TF_NewStatus()),
       _options(TF_NewImportGraphDefOptions()), _sessionOptions(TF_NewSessionOptions()),
-      _session(TF_NewSession(_graph, _sessionOptions, _status)) {
+      _session(TF_NewSession(_graph, _sessionOptions, _status)), _runOptions(NULL) {
     declareInput(_poolIn, "poolIn", "the pool where to get the feature tensors");
     declareOutput(_poolOut, "poolOut", "the pool where to store the output tensors");
   }
@@ -87,10 +91,16 @@ class TensorflowPredict : public Algorithm {
     TF_DeleteImportGraphDefOptions(_options);
     TF_DeleteStatus(_status);
     TF_DeleteGraph(_graph);
+    TF_DeleteBuffer(_runOptions);
   }
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file from which to read the Tensorflow graph", "", Parameter::STRING);
+    const char* defaultTagsC[] = { "serve" };
+    std::vector<std::string> defaultTags = arrayToVector<std::string>(defaultTagsC);
+
+    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
+    declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
+    declareParameter("tags", "the tags of the savedModel", "", defaultTags);
     declareParameter("inputs", "will look for these namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", Parameter::VECTOR_STRING);
     declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool. Set the first element of this list as an empty array to print all the available nodes in the graph", "", Parameter::VECTOR_STRING);
     declareParameter("isTraining", "run the model in training mode (normalized with statistics of the current batch) instead of inference mode (normalized with moving statistics). This only applies to some models", "{true,false}", false);

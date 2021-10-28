@@ -79,8 +79,8 @@ void VectorRealToTensor::configure() {
 
 
   if (shape[0] > 0) {
-    if (_batchHopSize > _timeStamps) {
-      throw EssentiaException("VectorRealToTensor: `batchHopSize` has to be smaller that the number batch size (shape[0])");
+    if (_batchHopSize > shape[0]) {
+      throw EssentiaException("VectorRealToTensor: `batchHopSize` has to be smaller than the batch size (shape[0])");
     }
   }
 
