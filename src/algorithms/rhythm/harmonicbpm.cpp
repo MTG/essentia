@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -44,6 +44,12 @@ void HarmonicBpm::configure() {
 
 
 vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
+  // Accept only BPM values >= 1 for consistency with the `bpm` parameter.
+  for(int i=0; i<int(bpms.size()); i++) {
+    if (bpms[i] < 1)
+      throw(EssentiaException("HarmonicBpm: bpm values below 1 are not allowed"));
+  }
+
   vector<Real> harmonicBpms, harmonicRatios;
   harmonicBpms.reserve(bpms.size());
   harmonicRatios.reserve(bpms.size());
@@ -52,12 +58,11 @@ vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
 
   // Discard BPM values with GCD below the threshold.
   for (int i=0; i<int(bpms.size()); i++) {
-    Real gcd = greatestCommonDivisor(_bpm, bpms[i], _tolerance);
-    if (gcd >= _threshold) {
-      cout << gcd << bpms[i] << endl;
-      harmonicBpms.push_back(bpms[i]);
-      if (gcd < mingcd) mingcd = gcd;
-    }
+     Real gcd = greatestCommonDivisor(_bpm, bpms[i], _tolerance);
+     if (gcd >= _threshold) {
+       harmonicBpms.push_back(bpms[i]);
+       if (gcd < mingcd) mingcd = gcd;
+     }
   }
 
   // Sort candidate BPMs in ascending order

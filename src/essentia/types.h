@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -172,7 +172,7 @@ class OrderedMap : public std::vector<std::pair<std::string, T*> > {
   }
 
   void insert(const std::string& key, T* value) {
-    this->push_back(make_pair(key, value));
+    this->push_back(std::make_pair(key, value));
   }
 };
 

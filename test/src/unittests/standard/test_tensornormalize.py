@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -143,6 +143,26 @@ class TestTensorNormalize(TestCase):
         self.assertConfigureFails(TensorNormalize(), { 'axis': 5 })
         self.assertConfigureFails(TensorNormalize(), { 'scaler': 'MAXMIN' })
 
+    def testSkipConstantSlicesOverall(self):
+        original = numpy.ones([2, 2], dtype='float32')
+
+        # Add singleton dimensions to trainsform the input vector into a tensor
+        original = numpy.expand_dims(original, axis=[0, 1])
+
+        result = TensorNormalize(scaler='standard', axis=-1, skipConstantSlices=False)(original)
+
+        self.assertTrue(numpy.isnan(result).all())
+
+    def testSkipConstantSlicesAlongAxis(self):
+        original = numpy.ones([2, 2], dtype='float32')
+
+        # Add singleton dimensions to trainsform the input vector into a tensor
+        original = numpy.expand_dims(original, axis=[0, 1])
+
+        # Testing one axis is enough
+        result = TensorNormalize(scaler='standard', axis=0, skipConstantSlices=False)(original)
+
+        self.assertTrue(numpy.isnan(result).all())
 
 
 suite = allTests(TestTensorNormalize)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -61,7 +61,7 @@ class TriangularBarkBands : public Algorithm {
     declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
     declareParameter("normalize", "'unit_max' makes the vertex of all the triangles equal to 1, 'unit_sum' makes the area of all the triangles equal to 1","{unit_sum,unit_max}", "unit_sum");
     declareParameter("type", "'power' to output squared units, 'magnitude' to keep it as the input","{magnitude,power}", "power");
-    declareParameter("log", "compute log-energies (log10 (1 + energy))","{true,false}", false);
+    declareParameter("log", "compute log-energies (log2 (1 + energy))","{true,false}", false);
 
   }
 

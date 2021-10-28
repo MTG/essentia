@@ -1,7 +1,7 @@
 #!/usr/local/bin/python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2019  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -68,6 +68,7 @@ const Real _BPMOffset = 30.f;
 
 void TempoCNN::configure() {
   _tensorflowPredictTempoCNN->configure(INHERIT("graphFilename"),
+                                        INHERIT("savedModel"),
                                         INHERIT("input"),
                                         INHERIT("output"),
                                         INHERIT("patchHopSize"),

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -53,7 +53,8 @@ class TensorflowPredictVGGish : public AlgorithmComposite {
   ~TensorflowPredictVGGish();
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
+    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
+    declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("input", "the name of the input node in the TensorFlow graph", "", "model/Placeholder");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
     declareParameter("isTrainingName", "the name of an additional input node to indicate the model if it is in training mode or not. Leave it empty when the model does not need such input", "", "");
@@ -104,7 +105,8 @@ class TensorflowPredictVGGish : public Algorithm {
   ~TensorflowPredictVGGish();
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
+    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
+    declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("input", "the name of the input node in the Tensorflow graph", "", "model/Placeholder");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/Sigmoid");
     declareParameter("isTrainingName", "the name of an additional input node indicating whether the model is to be run in a training mode (for models with a training mode, leave it empty otherwise)", "", "");

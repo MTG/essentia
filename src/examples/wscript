@@ -147,10 +147,8 @@ def build(ctx):
             files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
 
             # If an `other` program has files in a directory we need
-            # to add an aditional includes
+            # to add an additional includes
             includes = ['.', '..']
-            if any((len(x.split("/")) > 1 for x in other or [])):
-                includes.append("../..")
 
             ctx(features='c cxx cxxprogram check_static',
                 source = ctx.path.ant_glob(' '.join(files)),
