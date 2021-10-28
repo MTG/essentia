@@ -40,8 +40,8 @@ void Viterbi::compute() {
 
   const vector<vector<Real> >& obs = _observationProbabilities.get();
   const vector<Real>& init = _initialization.get();
-  const vector<size_t>& from = _fromIndex.get();
-  const vector<size_t>& to = _toIndex.get();
+  const vector<int>& from = _fromIndex.get();
+  const vector<int>& to = _toIndex.get();
   const vector<Real>&transProb = _transitionProbabilities.get();
 
   if (obs.size() == 0 || init.size() == 0 || from.size() == 0 || to.size() == 0 || transProb.size() == 0) {
@@ -50,11 +50,11 @@ void Viterbi::compute() {
 
   vector<int>& path = _path.get();
 
-  size_t nState = init.size();
-  size_t nFrame = obs.size();
+  int nState = init.size();
+  int nFrame = obs.size();
   
   // check for consistency    
-  size_t nTrans = transProb.size();
+  int nTrans = transProb.size();
   
   // declaring variables, use double for a better precision
   vector<double> delta = vector<double>(nState);
@@ -66,13 +66,13 @@ void Viterbi::compute() {
   double deltasum = 0;
 
   // initialise first frame
-  for (size_t iState = 0; iState < nState; ++iState)
+  for (int iState = 0; iState < nState; ++iState)
   {
       oldDelta[iState] = init[iState] * obs[0][iState];
       deltasum += oldDelta[iState];
   }
 
-  for (size_t iState = 0; iState < nState; ++iState)
+  for (int iState = 0; iState < nState; ++iState)
   {
       oldDelta[iState] /= deltasum; // normalise (scale)
   }
@@ -80,19 +80,19 @@ void Viterbi::compute() {
   psi.push_back(vector<int>(nState,0));
 
   // rest of forward step
-  for (size_t iFrame = 1; iFrame < nFrame; ++iFrame)
+  for (int iFrame = 1; iFrame < nFrame; ++iFrame)
   {
       deltasum = 0;
       psi.push_back(vector<int>(nState,0));
 
       // calculate best previous state for every current state
-      size_t fromState;
-      size_t toState;
+      int fromState;
+      int toState;
       double currentTransProb;
       double currentValue;
       
       // this is the "sparse" loop
-      for (size_t iTrans = 0; iTrans < nTrans; ++iTrans)
+      for (int iTrans = 0; iTrans < nTrans; ++iTrans)
       {
           fromState = from[iTrans];
           toState = to[iTrans];
@@ -106,7 +106,7 @@ void Viterbi::compute() {
           }            
       }
       
-      for (size_t jState = 0; jState < nState; ++jState)
+      for (int jState = 0; jState < nState; ++jState)
       {
           delta[jState] *= obs[iFrame][jState];
           deltasum += delta[jState];
@@ -114,7 +114,7 @@ void Viterbi::compute() {
 
       if (deltasum > 0)
       {
-          for (size_t iState = 0; iState < nState; ++iState)
+          for (int iState = 0; iState < nState; ++iState)
           {
               oldDelta[iState] = delta[iState] / deltasum; // normalise (scale)
               delta[iState] = 0;
@@ -122,7 +122,7 @@ void Viterbi::compute() {
       } else
       {
           E_WARNING("WARNING: Viterbi has been fed some zero probabilities, at least they become zero at frame " <<  iFrame << " in combination with the model.");
-          for (size_t iState = 0; iState < nState; ++iState)
+          for (int iState = 0; iState < nState; ++iState)
           {
               oldDelta[iState] = 1.0/nState;
               delta[iState] = 0;
@@ -132,7 +132,7 @@ void Viterbi::compute() {
 
   // initialise backward step, use double for a better precision
   double bestValue = 0;
-  for (size_t iState = 0; iState < nState; ++iState)
+  for (int iState = 0; iState < nState; ++iState)
   {
       double currentValue = oldDelta[iState];
       if (currentValue > bestValue)
