@@ -42,7 +42,7 @@ namespace standard {
      declareParameter("disOnset", "penalty for disruption onset", "[0,inf)", 0.5);
      declareParameter("disExtension", "penalty for disruption extension", "[0,inf)", 0.5);
      declareParameter("alignmentType", "choose either one of the given local-alignment constraints for smith-waterman algorithm as described in [2] or [3] respectively.", "{serra09,chen17}", "serra09");
-     declareParameter("distanceType", "choose the type of distance. By default the algorithm outputs a asymmetric disctance which is obtained by normalising the maximum score in the alignment score matrix with length of reference song", "{asymmetric,symmetric}", "asymmetric");
+     declareParameter("distanceType", "choose the type of distance. By default the algorithm outputs a asymmetric distance which is obtained by normalising the maximum score in the alignment score matrix with length of reference song", "{asymmetric,symmetric}", "asymmetric");
    }
 
    void configure();
@@ -110,7 +110,7 @@ class CoverSongSimilarity : public Algorithm {
   void declareParameters() {
     declareParameter("disOnset", "penalty for disruption onset", "[0,inf)", 0.5);
     declareParameter("disExtension", "penalty for disruption extension", "[0,inf)", 0.5);
-    declareParameter("distanceType", "choose the type of distance. By default the algorithm outputs a asymmetric disctance which is obtained by normalising the maximum score in the alignment score matrix with length of reference song", "{asymmetric,symmetric}", "asymmetric");
+    declareParameter("distanceType", "choose the type of distance. By default the algorithm outputs a asymmetric distance which is obtained by normalising the maximum score in the alignment score matrix with length of reference song", "{asymmetric,symmetric}", "asymmetric");
     declareParameter("pipeDistance", "whether to pipe-out the computed cover song similarity distance for each stream of input similarity matrix", "{true,false}", false);
   }
 

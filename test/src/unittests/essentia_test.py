@@ -187,6 +187,18 @@ class TestCase(BaseTestCase):
         conf = lambda: algo.configure(**params)
         self.assertRaises(EssentiaException, conf)
 
+    def assertConfigureSuccess(self, algo, params):
+        try:
+            algo.configure(**params)
+        except EssentiaException:
+            self.fail()
+
+    def assertComputeSuccess(self, algo, params):
+        try:
+            algo.compute(**params)
+        except EssentiaException:
+            self.fail()
+
     def assertComputeFails(self, algo, *args):
         comp = lambda: algo.compute(*args)
         self.assertRaises(EssentiaException, comp)

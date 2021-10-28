@@ -25,7 +25,7 @@ import os
 
 class TestTensorFlowPredictMusiCNN(TestCase):
 
-    def testRegression(self):
+    def testRegressionFrozenModel(self):
         expected = [0.00893995, 0.650628, 0.0017924, 0.10297492, 0.15139213,
                     0.13975027, 0.07960042, 0.01067388, 0.04935676]
 
@@ -35,8 +35,60 @@ class TestTensorFlowPredictMusiCNN(TestCase):
         audio = MonoLoader(filename=filename, sampleRate=16000)()
         found = TensorflowPredictMusiCNN(graphFilename=model)(audio)[0]
 
-        self.assertAlmostEqualVector(found, expected, 1e-6)
+        self.assertAlmostEqualVector(found, expected, 1e-5)
 
+    def testRegressionSavedModel(self):
+        expected = [0.00893995, 0.650628, 0.0017924, 0.10297492, 0.15139213,
+                    0.13975027, 0.07960042, 0.01067388, 0.04935676]
+
+        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
+        model = join(testdata.models_dir, 'musicnn', 'genre_dortmund_musicnn_msd')
+
+        audio = MonoLoader(filename=filename, sampleRate=16000)()
+        found = TensorflowPredictMusiCNN(savedModel=model)(audio)[0]
+
+        self.assertAlmostEqualVector(found, expected, 1e-5)
+
+    def testEmptyModelName(self):
+        # With empty model names the algorithm should skip the configuration without errors.
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {})
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': ''})
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': '',
+                                                                 'input': '',
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': '',
+                                                                 'input': 'wrong_input'
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'savedModel': ''})
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'savedModel': '',
+                                                                 'input':'',
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'savedModel': '',
+                                                                 'input':'wrong_input',
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': '',
+                                                                 'savedModel':'',
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': '',
+                                                                 'savedModel':'',
+                                                                 'input': '',
+                                                                })
+        self.assertConfigureSuccess(TensorflowPredictMusiCNN(), {'graphFilename': '',
+                                                                 'savedModel':'',
+                                                                 'input': 'wrong_input',
+                                                                })
+
+
+    def testInvalidParam(self):
+        model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
+        self.assertConfigureFails(TensorflowPredictMusiCNN(), {'graphFilename': model,
+                                                               'input': 'wrong_input_name',
+                                                               'output': 'model/Softmax',
+                                                               })  # input do not exist in the model
+        self.assertConfigureFails(TensorflowPredictMusiCNN(), {'graphFilename': 'wrong_model_name',
+                                                               'input': 'model/Placeholder',
+                                                               'output': 'model/Softmax',
+                                                               })  # the model does not exist
 
 suite = allTests(TestTensorFlowPredictMusiCNN)
 

@@ -59,7 +59,7 @@ def get_git_version():
     version = None
     if os.path.exists(".git"):
         try:
-            version = os.popen("git describe --always").read().strip()
+            version = os.popen("git describe --always --tags").read().strip()
         except Exception as e:
             print(e)
     return version
@@ -70,6 +70,7 @@ def get_version():
     if version.count('-dev'):
         # Development version. Get the number of commits after the last release
         git_version = get_git_version()
+        print('git describe:', git_version)
         dev_commits = git_version.split('-')[-2] if git_version else ''
         if not dev_commits.isdigit():
             print('Error parsing the number of dev commits: %s', dev_commits)
@@ -106,17 +107,10 @@ setup_requires = ['numpy>=1.8.2', 'six']
 install_requires = setup_requires + ['pyyaml']
 
 # Require tensorflow for the package essentia-tensorflow
-# We are using version 1.15.0 as it is the newest version supported by the C API
+# We are using version 2.5.0 as it is the newest version supported by the C API
 # https://www.tensorflow.org/guide/versions
 if project_name == 'essentia-tensorflow':
-    tensorflow_version = '1.15.0'
     description += ', with TensorFlow support'
-
-    var_tensorflow_version = 'ESSENTIA_TENSORFLOW_VERSION'
-    if var_tensorflow_version in os.environ:
-        tensorflow_version = os.environ[var_tensorflow_version]
-
-    setup_requires.append('tensorflow=={}'.format(tensorflow_version))
 
 module = Extension('name', sources=[])
 
