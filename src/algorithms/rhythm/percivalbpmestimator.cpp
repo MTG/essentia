@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -213,7 +213,7 @@ AlgorithmStatus PercivalBpmEstimator::process() {
 
   // If there are no lag estimates, return bpm 0
   if (lags.size() == 0) {
-    _bpm.push(0.0);
+    _bpm.push((Real) 0.);
     return FINISHED;
   }
 

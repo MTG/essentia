@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -186,6 +186,18 @@ class TestCase(BaseTestCase):
     def assertConfigureFails(self, algo, params):
         conf = lambda: algo.configure(**params)
         self.assertRaises(EssentiaException, conf)
+
+    def assertConfigureSuccess(self, algo, params):
+        try:
+            algo.configure(**params)
+        except EssentiaException:
+            self.fail()
+
+    def assertComputeSuccess(self, algo, params):
+        try:
+            algo.compute(**params)
+        except EssentiaException:
+            self.fail()
 
     def assertComputeFails(self, algo, *args):
         comp = lambda: algo.compute(*args)

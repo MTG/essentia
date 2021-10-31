@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -117,13 +117,11 @@ void TensorflowPredictVGGish::configure() {
 
   _poolToTensor->configure("namespace", output);
 
-  Parameter graphFilenameParam = parameter("graphFilename");
-  // if no file has been specified, do not do anything else
-  if (!graphFilenameParam.isConfigured()) return;
-
   string graphFilename = parameter("graphFilename").toString();
+  string savedModel = parameter("savedModel").toString();
 
   _tensorflowPredict->configure("graphFilename", graphFilename,
+                                "savedModel", savedModel,
                                 "inputs", vector<string>({input}),
                                 "outputs", vector<string>({output}),
                                 "isTrainingName", isTrainingName);
@@ -194,6 +192,7 @@ void TensorflowPredictVGGish::configure() {
   // if no file has been specified, do not do anything
   if (!parameter("graphFilename").isConfigured()) return;
   _tensorflowPredictVGGish->configure(INHERIT("graphFilename"),
+                                      INHERIT("savedModel"),
                                       INHERIT("input"),
                                       INHERIT("output"),
                                       INHERIT("isTrainingName"),

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -142,10 +142,8 @@ void PitchContoursMultiMelody::compute() {
 
   // no contours -> zero pitch vector output
   if (contoursBins.empty()) {
-      vector<Real> zero;
-      zero.push_back(0.0);
       for (int i=0; i<(int)pitch.size(); i++){
-          pitch.push_back(zero);
+          pitch[i].push_back(0.0);
       }
     return;
   }

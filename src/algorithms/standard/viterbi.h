@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -30,8 +30,8 @@ class Viterbi : public Algorithm {
  protected:
   Input<std::vector<std::vector<Real> > > _observationProbabilities;
   Input<std::vector<Real> > _initialization;
-  Input<std::vector<size_t> > _fromIndex;
-  Input<std::vector<size_t> > _toIndex;
+  Input<std::vector<int> > _fromIndex;
+  Input<std::vector<int> > _toIndex;
   Input<std::vector<Real> > _transitionProbabilities;
   Output<std::vector<int> > _path;
 
@@ -73,8 +73,8 @@ class Viterbi : public StreamingAlgorithmWrapper {
  protected:
   Sink<std::vector<std::vector<Real> > > _observationProbabilities;
   Sink<std::vector<Real> > _initialization;
-  Sink<std::vector<size_t> > _fromIndex;
-  Sink<std::vector<size_t> > _toIndex;
+  Sink<std::vector<int> > _fromIndex;
+  Sink<std::vector<int> > _toIndex;
   Sink<std::vector<Real> > _transitionProbabilities;
   Source<std::vector<int> > _path;
 

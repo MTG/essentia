@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -31,18 +31,20 @@ const char* NoveltyCurve::category = "Rhythm";
 const char* NoveltyCurve::description = DOC("This algorithm computes the \"novelty curve\" (Grosche & Müller, 2009) onset detection function. The algorithm expects as an input a frame-wise sequence of frequency-bands energies or spectrum magnitudes as originally proposed in [1] (see FrequencyBands and Spectrum algorithms). Novelty in each band (or frequency bin) is computed as a derivative between log-compressed energy (magnitude) values in consequent frames. The overall novelty value is then computed as a weighted sum that can be configured using 'weightCurve' parameter. The resulting novelty curve can be used for beat tracking and onset detection (see BpmHistogram and Onsets).\n"
 "\n"
 "Notes:\n"
+"\n"
 "- Recommended frame/hop size for spectrum computation is 2048/1024 samples (44.1 kHz sampling rate) [2].\n"
 "- Log compression is applied with C=1000 as in [1].\n"
 "- Frequency bands energies (see FrequencyBands) as well as bin magnitudes for the whole spectrum can be used as an input. The implementation for the original algorithm [2] works with spectrum bin magnitudes for which novelty functions are computed separately and are then summarized into bands.\n"
 "- In the case if 'weightCurve' is set to 'hybrid' a complex combination of flat, quadratic, linear and inverse quadratic weight curves is used. It was reported to improve performance of beat tracking in some informal in-house experiments (Note: this information is probably outdated).\n"
 "\n"
 "References:\n"
-"  [1] P. Grosche and M. Müller, \"A mid-level representation for capturing\n"
-"  dominant tempo and pulse information in music recordings,\" in\n"
-"  International Society for Music Information Retrieval Conference\n"
-"  (ISMIR’09), 2009, pp. 189–194.\n"
-"  [2] Tempogram Toolbox (Matlab implementation),\n"
-"  http://resources.mpi-inf.mpg.de/MIR/tempogramtoolbox\n");
+"\n"
+"1. Grosche, P. & Müller, M. (2009). A mid-level representation for capturing "
+"dominant tempo and pulse information in music recordings. "
+"International Society for Music Information Retrieval Conference (ISMIR 2009).\n"
+"\n"
+"2. Tempogram Toolbox (Matlab implementation), "
+"http://resources.mpi%2Dinf.mpg.de/MIR/tempogramtoolbox\n\n");
 
 
 vector<Real> NoveltyCurve::weightCurve(int size, WeightType type) {

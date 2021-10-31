@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -81,6 +81,7 @@ class ConstantQ : public Algorithm {
   ~ConstantQ() {
     delete _fftc;
     delete _windowing;
+    delete _fft;
   }
 
   void declareParameters() {

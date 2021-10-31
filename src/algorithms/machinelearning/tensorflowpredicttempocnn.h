@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -55,7 +55,8 @@ class TensorflowPredictTempoCNN : public AlgorithmComposite {
   ~TensorflowPredictTempoCNN();
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
+    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
+    declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("input", "the name of the input node in the TensorFlow graph", "", "input");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "output");
     declareParameter("patchHopSize", "the number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 128);
@@ -105,7 +106,8 @@ class TensorflowPredictTempoCNN : public Algorithm {
   ~TensorflowPredictTempoCNN();
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
+    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
+    declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("input", "the name of the input nodes in the Tensorflow graph", "", "input");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "output");
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 128);
