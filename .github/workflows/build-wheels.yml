@@ -49,7 +49,7 @@ jobs:
       - name: Build sdist
         run: | 
           ls wheelhouse/
-          python setup.py sdist
+          sudo python setup.py sdist
       - name: Upload wheels and sdist
         uses: actions/upload-artifact@v2
         with:
