@@ -24,14 +24,6 @@ from essentia.streaming import *
 
 class TestTensorToVectorReal(TestCase):
 
-
-    ##
-    ##   The Unit Test for TestVectorRealToTensor are centred around an identity operation.
-    ##   This identity operation tests both  TensorToVectorReal and VectorRealToTensor
-    ##   The test cases that use this identity operation tests both algorithms in 
-    ##   a variety of scenarios.    
-    ##   e.g. testFramesToTensor AndBackToFramesRepeatAccumulate
-    ##   The only test case added here is the one for checking the configuration.
     def testInvalidParam(self):
         # VectorRealToTensor only supports single chanel data
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 2, 1, 1]})
