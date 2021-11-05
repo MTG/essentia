@@ -25,15 +25,10 @@ from essentia.streaming import *
 class TestTensorToVectorReal(TestCase):
 
     def testInvalidParam(self):
-        # VectorRealToTensor only supports single chanel data
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 2, 1, 1]})
-
-        # dimensions have to be different from 0.
-
         self.assertConfigureFails(VectorRealToTensor(), {'batchHopSize': -1})
         self.assertConfigureFails(VectorRealToTensor(), {'lastPatchMode': 'invalidstring'})
         self.assertConfigureFails(VectorRealToTensor(), {'patchHopSize': -1})
-        # dimensions have to be different from 0.
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [0, 1, 1, 1]})
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 0, 1, 1]})
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 1, 0, 1]})
