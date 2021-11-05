@@ -19,6 +19,9 @@ set -e -x
 rm -rf /opt/python/cp34-cp34m
 rm -rf /opt/python/cp35-cp35m
 
+# NumPy has no support for Python 3.10 yet, therefore removing it too.
+rm -rf /opt/python/cp310-cp310
+
 # Build static libessentia.a library
 # Use Python3.6. CentOS 5's native python is too old...
 PYBIN=/opt/python/cp36-cp36m/bin/
