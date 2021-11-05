@@ -47,7 +47,7 @@ class TestPitchContourSegmentation(TestCase):
         # Expected values for onset is 0, with constant "ones" input.
         # Expected values for duration is 2.9692516, with constant "ones" input.
         # Expected values for MIDIpitch is -36., with constant "ones" input.        
-        # FIXME there should be no such thing as a negative pitch value-.
+        # FIXME there should be no such thing as a negative pitch value.
         self.assertEqualVector(onset, [0])
         self.assertAlmostEqualVector(duration, [2.9692516],8)
         self.assertEqualVector(MIDIpitch, [-36.])
@@ -119,7 +119,6 @@ class TestPitchContourSegmentation(TestCase):
         self.assertAlmostEqualVector(duration, referenceDurations, 8)
         self.assertAlmostEqualVector(MIDIpitch, referenceMIDIpitch, 8)
     
-
         onset, duration, MIDIpitch = PitchContourSegmentation(pitchDistanceThreshold=100,rmsThreshold=-3)( pitch,audio)
 
         referenceOnsets  = [0.1015873,  0.5834014,  0.68208617, 0.78077096, 0.88816327, 1.0071656,

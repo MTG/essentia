@@ -97,9 +97,6 @@ class TestPitchContours(TestCase):
 
     def testRegressionSynthetic(self):
         # Use synthetic audio for Regression Test.
-        #
-        #
-
         hopSize = defaultHopSize
         frameSize = defaultFrameSize
         sampleRate = defaultSampleRate
@@ -216,7 +213,6 @@ class TestPitchContours(TestCase):
         # Check at least 156 instances of pitch value 363
         self.assertGreater(int(format(rpitch.count(363))), 156)    
 
-    #
     # The following code ais  taken the following source code from the following functions
     # select_contours, _extract_pitch_contours, _join_contours, _remove_overlaps
     # https://github.com/sertansenturk/predominantmelodymakam    
@@ -295,7 +291,7 @@ class TestPitchContours(TestCase):
         run_windowing = estd.Windowing(zeroPadding=3 *defaultFrameSize)
         run_spectrum = estd.Spectrum(size=defaultFrameSize * 4)
         run_spectral_peaks = estd.SpectralPeaks(minFrequency=1,
-                                           maxFrequency=20000,
+                                           MaxFrequency=20000,
                                            maxPeaks=100,
                                            sampleRate=defaultSampleRate,
                                            magnitudeThreshold=0,
