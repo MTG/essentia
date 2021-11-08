@@ -1,6 +1,6 @@
 Essentia
 ========
-[![Build Status](https://travis-ci.org/MTG/essentia.svg?branch=master)](https://travis-ci.org/MTG/essentia)
+![Build wheels status](https://github.com/MTG/essentia/actions/workflows/build-wheels.yml/badge.svg)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 
