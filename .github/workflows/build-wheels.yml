@@ -12,14 +12,18 @@ jobs:
 
     strategy:
       matrix:
-        DOCKER_IMAGE:
-          - mtgupf/essentia-builds:manylinux1_x86_64
-          - mtgupf/essentia-builds:manylinux1_i686
-          - mtgupf/essentia-builds:manylinux2014_x86_64
+        WHEEL_TYPE:
+          - i686
+          - x86_64
+          - x86_64_tensorflow
         include:
-          - DOCKER_IMAGE: mtgupf/essentia-builds:manylinux1_i686
+          - WHEEL_TYPE: i686
+            DOCKER_IMAGE: mtgupf/essentia-builds:manylinux2014_i686
             PRE_CMD: linux32
-          - DOCKER_IMAGE: mtgupf/essentia-builds:manylinux2014_x86_64
+          - WHEEL_TYPE: x86_64
+            DOCKER_IMAGE: mtgupf/essentia-builds:manylinux2014_x86_64
+          - WHEEL_TYPE: x86_64_tensorflow
+            DOCKER_IMAGE: mtgupf/essentia-builds:manylinux2014_x86_64
             WITH_TENSORFLOW: 1
 
     env:
@@ -45,7 +49,7 @@ jobs:
       - name: Build sdist
         run: | 
           ls wheelhouse/
-          python setup.py sdist
+          sudo python setup.py sdist
       - name: Upload wheels and sdist
         uses: actions/upload-artifact@v2
         with:
