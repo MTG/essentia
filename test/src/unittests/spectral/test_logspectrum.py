@@ -87,12 +87,13 @@ _expected = array([ 29.521513 ,   27.441898 ,   26.655254 ,   26.23174  ,
                     67.440575 ,   55.217617 ,   40.645    ,   69.08143  ,
                     58.60874  ,   40.766853 ,   52.087135 ,   75.063484 ])
 
+
 def getLogSpectrumReference(frameSize=8192 + 1, n_octave=7):
-    audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'),
-                    sampleRate = 44100)()
+    audio = MonoLoader(filename=join(testdata.audio_dir, 'recorded/vignesh.wav'),
+                       sampleRate=44100)()
 
     w = Windowing(type='hann', normalized=False)
-    spectrum = Spectrum()  # FFT() would return the complex FFT, here we just want the magnitude spectrum
+    spectrum = Spectrum()
     logspectrum = LogSpectrum(frameSize=frameSize, nOctave=n_octave)
 
     logfreqspectrogram = []
@@ -103,60 +104,43 @@ def getLogSpectrumReference(frameSize=8192 + 1, n_octave=7):
     logfreqspectrogram = array(logfreqspectrogram).mean(axis=0)
     return logfreqspectrogram
 
+
 class TestLogSpectrum(TestCase):
 
     def testRegression(self):
-        logfreqspectrogram = getLogSpectrumReference()
-        self.assertAlmostEqualVector(logfreqspectrogram, _expected, 1e-4)
+        # Test the output for n_octave from 1 to 7 (higher octaves need more values at the expected vector).
+        for n_octave in range(1, 8):
+            output_size = 40 + 36 * (n_octave - 1)
+            logfreqspectrogram = getLogSpectrumReference(n_octave=n_octave)
+            self.assertAlmostEqualVector(logfreqspectrogram, _expected[:output_size], 1e-4)
 
     def testZeroInput(self):
         # Inputting zeros should return zero. Try with different sizes
         size = 1024
         while (size >= 256 ):
-            self.assertEqualVector(LogSpectrum(frameSize = size)(zeros(size))[0], zeros(256))
+            for n_octave in range(1, 9):
+                computed = LogSpectrum(frameSize=size, nOctave=n_octave)(zeros(size))[0]
+                output_size = 40 + 36 * (n_octave - 1)
+                self.assertEqualVector(computed, zeros(output_size))
             size = int(size/2)
-
-    def testZeronOctave(self):
-        # ensure the algorithm fails when nOctave=0
-        self.assertConfigureFails(LogSpectrum(), {"nOctave": 0})
 
     def testInvalidInput(self):
         self.assertComputeFails(LogSpectrum(), [])
         self.assertComputeFails(LogSpectrum(), [0.5])
-
 
     def testInvalidParam(self):
         self.assertConfigureFails(LogSpectrum(), { 'frameSize': 1 })
         self.assertConfigureFails(LogSpectrum(), { 'sampleRate': 0 })
         self.assertConfigureFails(LogSpectrum(), { 'rollOn': -1})
         self.assertConfigureFails(LogSpectrum(), {"nOctave": 10})
+        self.assertConfigureFails(LogSpectrum(), {"nOctave": 0})
 
-    def testOutputSizeNOctave(self):
-        # At an specific frame_size ensures the returned size is equal to the reference sizes
-        n_octave = 1
-        while n_octave <= 9:
-            self.assertEqualVector(
-                LogSpectrum(frameSize=1024, nOctave=n_octave)(zeros(1024))[0],
-                zeros(40 + 36 * (n_octave - 1)),
-            )
-            n_octave += 1
-
-    def testOutputSize(self):
-        # test the output for n_octave from 1 to 7 (higher octaves need more values at the expected vector)
-        n_octave_list = list(range(1, 8))
-        for n_octave in n_octave_list:
-            output_size = 40 + 36 * (n_octave - 1)
-            logfreqspectrogram = getLogSpectrumReference(n_octave=n_octave)
-            self.assertAlmostEqualVector(logfreqspectrogram, _expected[:output_size], 1e-4)
-
-    def testWrongInputSize(self):
+    def testWrongFrameSizeReconfigure(self):
         # This test makes sure that even though the frameSize given at
         # configure time does not match the input spectrum, the algorithm does
         # not crash and correctly resizes internal structures to avoid errors.
-        print('\n')
         logfreqspectrogram = getLogSpectrumReference(frameSize=1000)
         self.assertAlmostEqualVector(logfreqspectrogram, _expected, 1e-4)
-        print('...')
 
 
 suite = allTests(TestLogSpectrum)
