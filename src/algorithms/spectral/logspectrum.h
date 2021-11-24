@@ -47,6 +47,7 @@ class LogSpectrum : public Algorithm {
     declareParameter("sampleRate", "the input sample rate", "(0,inf)", 44100.);
     declareParameter("rollOn", "this removes low-frequency noise - useful in quiet recordings", "[0,5]", 0.f);
     declareParameter("binsPerSemitone", " bins per semitone", "(0,inf)", 3.0);
+    declareParameter("nOctave", "the number of octave of the output vector", "(0,10)", 7);
   }
 
   void configure();
@@ -74,7 +75,7 @@ class LogSpectrum : public Algorithm {
   std::vector<Real> _sinvalues;
   std::vector<Real> _cosvalues;
 
-  bool logFreqMatrix(Real fs, int frameSize, std::vector<Real> &outmatrix);
+  bool logFreqMatrix(Real fs, int frameSize, int maxOctave, std::vector<Real> &outmatrix);
   Real cospuls(Real x, Real centre, Real width);
   Real pitchCospuls(Real x, Real centre, int binsperoctave);
   void initialize();
