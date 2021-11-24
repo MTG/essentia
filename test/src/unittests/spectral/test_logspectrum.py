@@ -87,27 +87,27 @@ _expected = array([ 29.521513 ,   27.441898 ,   26.655254 ,   26.23174  ,
                     67.440575 ,   55.217617 ,   40.645    ,   69.08143  ,
                     58.60874  ,   40.766853 ,   52.087135 ,   75.063484 ])
 
-class TestLogSpectrum(TestCase):
-
-    def testRegression(self, frameSize=8192 + 1, n_octave=7, expected=_expected):
-
-        audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'),
+def getLogSpectrumReference(frameSize=8192 + 1, n_octave=7):
+    audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/vignesh.wav'),
                     sampleRate = 44100)()
 
-        w = Windowing(type='hann', normalized=False)
-        spectrum = Spectrum()  # FFT() would return the complex FFT, here we just want the magnitude spectrum
-        logspectrum = LogSpectrum(frameSize=frameSize, nOctave=n_octave)
+    w = Windowing(type='hann', normalized=False)
+    spectrum = Spectrum()  # FFT() would return the complex FFT, here we just want the magnitude spectrum
+    logspectrum = LogSpectrum(frameSize=frameSize, nOctave=n_octave)
 
-        logfreqspectrogram = []
-        for frame in FrameGenerator(audio, frameSize=16384, hopSize=2048,
-                                    startFromZero=True):
-            logfreqspectrum, _, _ = logspectrum(spectrum(w(frame)))
-            logfreqspectrogram.append(logfreqspectrum)
-        logfreqspectrogram = array(logfreqspectrogram).mean(axis=0)
+    logfreqspectrogram = []
+    for frame in FrameGenerator(audio, frameSize=16384, hopSize=2048,
+                                startFromZero=True):
+        logfreqspectrum, _, _ = logspectrum(spectrum(w(frame)))
+        logfreqspectrogram.append(logfreqspectrum)
+    logfreqspectrogram = array(logfreqspectrogram).mean(axis=0)
+    return logfreqspectrogram
 
-        print(len(logfreqspectrogram), len(expected))
-        #print(np.diff(logfreqspectrogram, expected))
-        self.assertAlmostEqualVector(logfreqspectrogram, expected, 1e-4)
+class TestLogSpectrum(TestCase):
+
+    def testRegression(self):
+        logfreqspectrogram = getLogSpectrumReference()
+        self.assertAlmostEqualVector(logfreqspectrogram, _expected, 1e-4)
 
     def testZeroInput(self):
         # Inputting zeros should return zero. Try with different sizes
@@ -144,18 +144,18 @@ class TestLogSpectrum(TestCase):
     def testOutputSize(self):
         # test the output for n_octave from 1 to 7 (higher octaves need more values at the expected vector)
         n_octave_list = list(range(1, 8))
-        print(n_octave_list)
         for n_octave in n_octave_list:
             output_size = 40 + 36 * (n_octave - 1)
-            print(n_octave, output_size)
-            self.testRegression(n_octave=n_octave, expected=_expected[:output_size])
+            logfreqspectrogram = getLogSpectrumReference(n_octave=n_octave)
+            self.assertAlmostEqualVector(logfreqspectrogram, _expected[:output_size], 1e-4)
 
     def testWrongInputSize(self):
         # This test makes sure that even though the frameSize given at
         # configure time does not match the input spectrum, the algorithm does
         # not crash and correctly resizes internal structures to avoid errors.
         print('\n')
-        self.testRegression(frameSize=1000)
+        logfreqspectrogram = getLogSpectrumReference(frameSize=1000)
+        self.assertAlmostEqualVector(logfreqspectrogram, _expected, 1e-4)
         print('...')
 
 
