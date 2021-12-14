@@ -45,7 +45,7 @@ void LogSpectrum::configure() {
   _sampleRate = parameter("sampleRate").toFloat();
   _rollon = parameter("rollOn").toFloat();
   _nBPS = parameter("binsPerSemitone").toInt();
-  _nOctave = 7;
+  _nOctave = parameter("nOctave").toInt();
   _nNote = _nOctave * 12 * _nBPS + 2 * (_nBPS/2+1); // a core over all octaves, plus some overlap at top and bottom
   initialize();
 }
@@ -147,14 +147,13 @@ void LogSpectrum::compute() {
   stupid, really. The main purpose of the function is to change the values in
   the "matrix" pointed to by outmatrix.
  */
-bool LogSpectrum::logFreqMatrix(Real fs, int frameSize, vector<Real> &outmatrix) {
+bool LogSpectrum::logFreqMatrix(Real fs, int frameSize, int maxOctave, vector<Real> &outmatrix) {
   // TODO: rewrite so that everyone understands what is done here.
   // TODO: make this more general, such that it works with all minoctave,
   // maxoctave and whatever _nBPS (or check if it already does)
 
   int binspersemitone = _nBPS; 
   int minoctave = 0;  // this must be 0
-  int maxoctave = 7;  // this must be 7
   int oversampling = 80;
 
   // Linear frequency vector.
@@ -175,7 +174,7 @@ bool LogSpectrum::logFreqMatrix(Real fs, int frameSize, vector<Real> &outmatrix)
   // Pitch-spaced frequency vector.
   int minMIDI =
       21 + minoctave * 12 - 1;        // this includes one additional semitone!
-  int maxMIDI = 21 + maxoctave * 12;  // this includes one additional semitone!
+  int maxMIDI = 21 + maxOctave * 12;  // this includes one additional semitone!
   vector<Real> cq_f;
   Real oob = 1.0 / binspersemitone;  // one over binspersemitone
   for (int i = minMIDI; i < maxMIDI; ++i) {
@@ -268,7 +267,7 @@ void LogSpectrum::initialize() {
   // Real *tempkernel;
   vector<Real> tempkernel(tempn);
 
-  logFreqMatrix(_sampleRate, _frameSize, tempkernel);
+  logFreqMatrix(_sampleRate, _frameSize, _nOctave, tempkernel);
   _kernelValue.clear();
   _kernelFftIndex.clear();
   _kernelNoteIndex.clear();
