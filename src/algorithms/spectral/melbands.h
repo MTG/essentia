@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -58,7 +58,7 @@ class MelBands : public Algorithm {
     declareParameter("weighting", "type of weighting function for determining triangle area","{warping,linear}","warping");
     declareParameter("normalize", "spectrum bin weights to use for each mel band: 'unit_max' to make each mel band vertex equal to 1, 'unit_sum' to make each mel band area equal to 1 summing the actual weights of spectrum bins, 'unit_area' to make each triangle mel band area equal to 1 normalizing the weights of each triangle by its bandwidth","{unit_sum,unit_tri,unit_max}", "unit_sum");
     declareParameter("type", "'power' to output squared units, 'magnitude' to keep it as the input","{magnitude,power}", "power");
-    declareParameter("log", "compute log-energies (log10 (1 + energy))","{true,false}", false);
+    declareParameter("log", "compute log-energies (log2 (1 + energy))","{true,false}", false);
 
   }
 

@@ -12,6 +12,9 @@ https://mtg.github.io/essentia.js/examples/
 Essentia TensorFlow models
 --------------------------
 
-Examples of inference with the pre-trained TensorFlow models for music auto-tagging and classification tasks.
+Examples of inference with the pre-trained TensorFlow models for music auto-tagging and classification tasks:
 
-https://essentia.upf.edu/demos/deep-learning/
+- Music classification by genre, mood, danceability, instrumentation: https://replicate.com/mtg/music-classifiers
+- Music style classification with the Discogs taxonomy (400 styles): https://replicate.com/mtg/effnet-discogs
+- Real-time music autotagging (50 tags) in the browser with Essentia.js: https://mtg.github.io/essentia.js/examples/autotagging-rt
+- Mood classification in the browser with Essentia.js: https://mtg.github.io/essentia.js/examples/mood-classifiers

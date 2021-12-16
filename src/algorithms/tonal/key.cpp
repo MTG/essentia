@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -40,8 +40,8 @@ const char* Key::description = DOC("This algorithm computes key estimate given a
 "  - 'Noland' - profiles from Bach's 'Well Tempered Klavier'.\n" 
 "  - 'edma' - automatic profiles extracted from corpus analysis of electronic dance music [3]. They normally perform better that Shaath's\n"
 "  - 'edmm' - automatic profiles extracted from corpus analysis of electronic dance music and manually tweaked according to heuristic observation. It will report major modes (which are poorly represented in EDM) as minor, but improve performance otherwise [3].\n"
-"  - 'braw' - profiles obtained by calculating the median profile for each mode from a subset of BeatPort dataset. There is an extra profile obtained from ambiguous tracks that are reported as minor[4]\n"
-"  - 'bgate' - same as braw but zeroing the 4 less relevant elements of each profile[4]\n"
+"  - 'braw' - profiles obtained by calculating the median profile for each mode from a subset of BeatPort dataset. There is an extra profile obtained from ambiguous tracks that are reported as minor [4]\n"
+"  - 'bgate' - same as braw but zeroing the 4 less relevant elements of each profile [4]\n"
 "\n"
 "The standard mode of the algorithm estimates key/scale for a given HPCP vector.\n"
 "\n"

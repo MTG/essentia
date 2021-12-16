@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -58,7 +58,7 @@ class AutoCorrelation : public Algorithm {
   void declareParameters() {
     declareParameter("normalization", "type of normalization to compute: either 'standard' (default) or 'unbiased'", "{standard,unbiased}", "standard");
     declareParameter("generalized", "bool value to indicate whether to compute the 'generalized' autocorrelation as described in [3]", "{true,false}", false);
-    declareParameter("frequencyDomainCompression", "factor at which FFT magnitude is compressed (only used if 'generalized' is set to true, see [3])", "(0, inf)", 0.5);
+    declareParameter("frequencyDomainCompression", "factor at which FFT magnitude is compressed (only used if 'generalized' is set to true, see [3])", "(0,inf)", 0.5);
   }
 
   void configure();

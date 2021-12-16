@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -22,7 +22,7 @@ from essentia_test import *
 
 class TestTempoCNN(TestCase):
 
-    def regression(self, aggregation_method='majority'):
+    def regression(self, parameters, aggregation_method='majority'):
         # The expected values were self-generated with TempoCNN
         # from commit deb334ba01f849e74b0e6e8554b2e17d73bc6966
         # The retrieved tempo values were manually validated (Pablo Alonso)
@@ -31,24 +31,55 @@ class TestTempoCNN(TestCase):
         expected_local_probs = [0.9679363, 0.9600502, 0.9681525, 0.9627014]
 
         filename = join(testdata.audio_dir, 'recorded', 'techno_loop.wav')
-        model = join(testdata.models_dir, 'tempocnn', 'deeptemp_k16.pb')
 
         audio = MonoLoader(filename=filename, sampleRate=11025)()
-        global_tempo, local_tempo, local_probs = TempoCNN(graphFilename=model,
-                                                          aggregationMethod=aggregation_method)(audio)
+        global_tempo, local_tempo, local_probs = TempoCNN(**parameters)(audio)
 
         self.assertEqual(global_tempo, expected_global_tempo)
         self.assertEqualVector(local_tempo, expected_local_tempo)
         self.assertAlmostEqualVector(local_probs, expected_local_probs, 1e-6)
 
     def testMajorityVotingRegression(self):
-        self.regression(aggregation_method='majority')
+        parameters = {
+            'graphFilename': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16.pb'),
+            'aggregationMethod':'majority',
+        }
+        self.regression(parameters)
 
     def testMeanRegression(self):
-        self.regression(aggregation_method='mean')
+        parameters = {
+            'graphFilename': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16.pb'),
+            'aggregationMethod':'mean',
+        }
+        self.regression(parameters)
 
     def testMedianRegression(self):
-        self.regression(aggregation_method='median')
+        parameters = {
+            'graphFilename': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16.pb'),
+            'aggregationMethod':'median',
+        }
+        self.regression(parameters)
+
+    def testMajorityVotingRegressionSavedModel(self):
+        parameters = {
+            'savedModel': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16'),
+            'aggregationMethod':'majority',
+        }
+        self.regression(parameters)
+
+    def testMeanRegressionSavedModel(self):
+        parameters = {
+            'savedModel': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16'),
+            'aggregationMethod':'mean',
+        }
+        self.regression(parameters)
+
+    def testMedianRegressionSavedModel(self):
+        parameters = {
+            'savedModel': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16'),
+            'aggregationMethod':'median',
+        }
+        self.regression(parameters)
 
     def testAggregationMethods(self):
         # Load an audio file without a clear rhythmic sense as we want

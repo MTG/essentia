@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -43,6 +43,7 @@ class TensorNormalize : public Algorithm {
 
   Scaler _scaler;
   int _axis;
+  bool _skipConstantSlices;
 
  public:
   TensorNormalize() {
@@ -52,7 +53,8 @@ class TensorNormalize : public Algorithm {
 
   void declareParameters() {
     declareParameter("scaler", "the type of the normalization to apply to input tensor", "{standard,minMax}", "standard");
-    declareParameter("axis", "Normalize along the given axis. -1 to normalize along all the dimensions", "[-1, 4)", 0);
+    declareParameter("axis", "Normalize along the given axis. -1 to normalize along all the dimensions", "[-1,4)", 0);
+    declareParameter("skipConstantSlices", "Whether to prevent dividing by zero constant slices (zero standard deviation)", "{false,true}", true);
   }
 
   void configure();

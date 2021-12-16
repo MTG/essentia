@@ -1,0 +1,60 @@
+name: Build Python wheels
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  build-wheels:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        WHEEL_TYPE:
+          - i686
+          - x86_64
+          - x86_64_tensorflow
+        include:
+          - WHEEL_TYPE: i686
+            DOCKER_IMAGE: mtgupf/essentia-builds:manylinux2014_i686
+            PRE_CMD: linux32
+          - WHEEL_TYPE: x86_64
+            DOCKER_IMAGE: mtgupf/essentia-builds:manylinux2014_x86_64
+          - WHEEL_TYPE: x86_64_tensorflow
+            DOCKER_IMAGE: mtgupf/essentia-builds:manylinux2014_x86_64
+            WITH_TENSORFLOW: 1
+
+    env:
+      DOCKER_IMAGE: ${{ matrix.DOCKER_IMAGE }} 
+      WITH_TENSORFLOW: ${{ matrix.WITH_TENSORFLOW }}
+      PRE_CMD: ${{ matrix.PRE_CMD }}
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Fetch release tags from GitHub
+        # Workaround for https://github.com/actions/checkout/issues/290
+        run: git fetch --tags --force
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Build wheels in a Docker image
+        run: |
+          docker pull $DOCKER_IMAGE > /dev/null
+          docker run --rm -v `pwd`:/io --env WITH_TENSORFLOW=$WITH_TENSORFLOW $DOCKER_IMAGE $PRE_CMD /io/travis/build_wheels.sh
+      - name: Build sdist
+        run: | 
+          ls wheelhouse/
+          sudo python setup.py sdist
+      - name: Upload wheels and sdist
+        uses: actions/upload-artifact@v2
+        with:
+          name: essentia-python-wheels
+          path: |
+            wheelhouse/essentia*.whl
+            wheelhouse/essentia*.tar.gz
+          if-no-files-found: error

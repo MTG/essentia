@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020 Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -41,7 +41,7 @@ class ChromaCrossSimilarity : public Algorithm {
     declareParameter("frameStackSize", "number of input frames to stack together and treat as a feature vector for similarity computation. Choose 'frameStackSize=1' to use the original input frames without stacking", "[0,inf)", 9);
     declareParameter("binarizePercentile", "maximum percent of distance values to consider as similar in each row and each column", "[0,1]", 0.095);
     declareParameter("oti", "whether to transpose the key of the reference song to the query song by Optimal Transposition Index [1]", "{true,false}", true);
-    declareParameter("noti", "number of circular shifts to be checked for Optimal Transposition Index [1]", "[0, inf)", 12);
+    declareParameter("noti", "number of circular shifts to be checked for Optimal Transposition Index [1]", "[0,inf)", 12);
     declareParameter("otiBinary", "whether to use the OTI-based chroma binary similarity method [3]", "{true,false}", false);
     declareParameter("streaming", "whether to accumulate the input 'queryFeature' in the euclidean similarity matrix calculation on each compute() method call", "{true,false}", false);
   }
@@ -123,7 +123,7 @@ class ChromaCrossSimilarity : public Algorithm {
     declareParameter("frameStackStride", "stride size to form a stack of frames (e.g., 'frameStackStride'=1 to use consecutive frames; 'frameStackStride'=2 for using every second frame)", "[1,inf)", 1);
     declareParameter("frameStackSize", "number of input frames to stack together and treat as a feature vector for similarity computation. Choose 'frameStackSize=1' to use the original input frames without stacking", "[0,inf)", 9);
     declareParameter("binarizePercentile", "maximum percent of distance values to consider as similar in each row and each column", "[0,1]", 0.095);
-    declareParameter("oti", "optimal transposition index of the query and reference song if known", "[0, inf]", 0);
+    declareParameter("oti", "optimal transposition index of the query and reference song if known", "[0,inf]", 0);
     declareParameter("otiBinary", "whether to use the OTI-based chroma binary similarity method", "{true,false}", false);
   }
 

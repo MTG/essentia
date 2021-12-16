@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -29,7 +29,7 @@ const char* BinaryOperator::category = "Standard";
 const char* BinaryOperator::description = DOC("This algorithm performs basic arithmetical operations element by element given two arrays.\n"
 "Note:\n"
 "  - using this algorithm in streaming mode can cause diamond shape graphs which have not been tested with the current scheduler. There is NO GUARANTEE of its correct work for diamond shape graphs.\n"
-"  - for y<0, x/y is invalid");
+"  - for y=0, x/y is invalid");
 
 BinaryOperator::OpType BinaryOperator::typeFromString(const std::string& name) const {
   if (name == "add") return ADD;
