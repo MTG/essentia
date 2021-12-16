@@ -25,10 +25,16 @@ Tonality
 * `HPCP, key and scale detection <tutorial_tonal_hpcpkeyscale.html>`_
 
 
+Music Extractor
+---------------
+* `Computing features with MusicExtractor <tutorial_extractors_musicextractor.html>`_
+
+
 Deep embeddings, music classification and auto-tagging
 ------------------------------------------------------
 * `Music auto-tagging, classification, and embedding extraction <tutorial_tensorflow_auto-tagging_classification_embeddings.html>`_
 * `Real-time music auto-tagging <tutorial_tensorflow_real-time_auto-tagging.html>`_
+* `Simultaneous real-time inference with multiple classifiers <tutorial_tensorflow_real-time_simultaneous_classifiers.html>`_
 
 
 Music similarity
