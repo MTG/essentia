@@ -8,13 +8,14 @@ Releases
 
 * `Gaia releases <https://github.com/MTG/gaia/releases>`_
 
-* `Essentia docker images <https://mtg.github.io/essentia-labs/news/2018/01/16/essentia-docker-images/>`_
+* `Essentia docker images <https://hub.docker.com/r/mtgupf/essentia/>`_
+
+* `Manylinux Python wheels <https://pypi.org/project/essentia/>`_ (Linux)
 
 * Precompiled `extractor binaries <https://mtg.github.io/essentia-labs/news/2015/12/22/static-binaries-for-extractors/>`_ (Linux, OSX, Win)
 
 * AcousticBrainz `Music Extractor binaries <http://acousticbrainz.org/download>`_ (Linux, OSX, Win)
 
-* `Manylinux1 Python wheels <https://pypi.org/project/essentia/>`_ (Linux)
 
 
 Development branch
