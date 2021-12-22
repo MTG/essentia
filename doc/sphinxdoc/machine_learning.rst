@@ -29,6 +29,7 @@ Our current models include:
 
   - music genre (trained on 4 different datasets)
   - moods: happy, sad, aggressive, relaxed, acoustic, electronic, party
+  - mood clusters
   - tonal / atonal
   - danceability
   - voice / instrumental
