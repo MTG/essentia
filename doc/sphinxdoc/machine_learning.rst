@@ -11,7 +11,6 @@ Essentia includes algorithms for running inference with two types of data-driven
 We provide various pre-trained models of both types for various music analysis and classification tasks.
 
 
-
 Using pre-trained TensorFlow models
 -----------------------------------
 
@@ -21,10 +20,12 @@ We provide many pre-trained TensorFlow models for auto-tagging, music classifica
 
 Our current models include:
 
-* Music auto-tagging (various architectures, trained on the Million Song Dataset and MagnaTagATune datasets).
-* Deep embeddings (OpenL3, VGGish-AudioSet).
+* Music auto-tagging (various architectures, trained on the Million Song Dataset and MagnaTagATune datasets)
+* Deep embeddings (OpenL3, VGGish-AudioSet, YAMNet-AudioSet)
+* Audio event recognition (YAMNet-AudioSet)
 * Source separation (Spleeter)
 * Tempo (BPM) estimation (TempoCNN)
+* Monophonic pitch tracker (CREPE)
 * Transfer learning classifiers
 
   - music genre (trained on 4 different datasets)
@@ -34,6 +35,8 @@ Our current models include:
   - danceability
   - voice / instrumental
   - gender (male, female singer)
+  - instrument role classification for music loops
+  - urban sound classification
 
 
 Installation
