@@ -37,12 +37,10 @@ Deep embeddings, music classification and auto-tagging
 * `Simultaneous real-time inference with multiple classifiers <tutorial_tensorflow_real-time_simultaneous_classifiers.html>`_
 
 
-Music similarity
-----------------
-
-
-Fingerprinting
---------------
+Fingerprinting & similarity
+---------------------------
+* `Music audio fingerprinting with Chromaprint <tutorial_fingerprinting_chromaprint.html>`_
+* `Cover song identification and similarity <tutorial_similarity_cover.html>`_
 
 
 Audio problems
