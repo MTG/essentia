@@ -245,3 +245,12 @@ body {
 .essnt-apps__app-description {
   text-align: center;
 }
+
+ /*XMAS*/
+.essnt-xmas-snowflake{
+    background-image: url("white_snow.png");
+    background-size: 63px;
+    background-repeat: no-repeat;
+    background-position-x: 255px;
+    background-position-y: 2px;
+}
