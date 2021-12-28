@@ -586,3 +586,68 @@ Models:
 
 * ``audioset-vggish``
 
+
+Pitch detection
+^^^^^^^^^^^^^^^
+
+Download: https://essentia.upf.edu/models/pitch/
+
+Monophonic pitch tracker (CREPE)
+--------------------------------
+
+Monophonic pìtch detection (360 20-cent pitch bins, C1-B7).
+
+Dataset: RWC-synth, MDB-stem-synth.
+
+Output: activations.
+
+Models:
+
+* ``crepe-full``
+* ``crepe-large``
+* ``crepe-medium``
+* ``crepe-small``
+* ``crepe-tiny``
+
+
+Source separation
+^^^^^^^^^^^^^^^^^
+
+Download: https://essentia.upf.edu/models/source-separation/
+
+Spleeter
+--------
+
+Source separation into 2 (`vocals`, `accompaniment`),  4, and 5 (`vocals`, `drums`, `bass`, `piano`, `other`) stems.
+
+Dataset: inhouse (Deezer).
+
+Output: waveforms.
+
+Models:
+
+* ``spleeter-2s``
+* ``spleeter-4s``
+* ``spleeter-5s``
+
+
+Tempo estimation
+^^^^^^^^^^^^^^^^
+
+Download: https://essentia.upf.edu/models/tempo/
+
+TempoCNN
+--------
+
+Tempo classification (256 BPM classes, 30-286 BPM).
+
+Dataset: Extended Ballroom, LMDTempo, MTGTempo.
+
+Output: activations.
+
+Models:
+
+* ``deepsquare-k16``
+* ``deeptemp-k4``
+* ``deeptemp-k16``
+
