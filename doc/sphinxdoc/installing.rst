@@ -116,16 +116,16 @@ Once your dependencies are installed, you can proceed to compiling Essentia. Dow
 - **2.1 beta5** is the current stable version recommended to install.
 
 
-Go into its source code directory and start by configuring it::
+Go into its source code directory and start by configuring the build::
 
-  ./waf configure --build-static --with-python --with-cpptests --with-examples --with-vamp
+  python3 waf configure --build-static --with-python --with-cpptests --with-examples --with-vamp
 
 Use these (optional) flags:
 
-- ``--with-python`` to enable python bindings,
+- ``--with-python`` to build with Python bindings,
 - ``--with-examples`` to build `command line extractors <extractors_out_of_box.html>`_ based on the library,
 - ``--with-vamp`` to build Vamp plugin wrapper,
-- ``--with-gaia`` to build with Gaia library support,
+- ``--with-gaia`` to build with Gaia support,
 - ``--with-tensorflow`` to build with TensorFlow support,
 - ``--mode=debug`` to build in debug mode,
 - ``--with-cpptests`` to build cpptests
@@ -134,51 +134,38 @@ NOTE: you must *always* configure at least once before building!
 
 The following will give you the full list of options::
 
-  ./waf --help
+  python3 waf --help
 
 If you want to build with a custom toolchain, you can pass in the CC and CXX variables for using another compiler. For example, to build the library and examples with clang::
 
-  CC=clang CXX=clang++ ./waf configure
+  CC=clang CXX=clang++ python3 waf configure
 
 To compile everything you've configured::
 
-  ./waf
+  python3 waf
 
 All built examples will be located in ``build/src/examples/`` folder, as well as the Vamp plugin file ``libvamp_essentia.so``.
 
 To install the C++ library, python bindings, extractors and Vamp plugin (if configured successfully; you might need to run this command with sudo)::
 
-  ./waf install
+  python3 waf install
 
 
+Python 3 bindings
+-----------------
+To build Essentia with Python 3 bindings, use the ``--with-python`` configuration flag.
 
-Compiling for Python 3
----------------------
-The waf build script is a python script itself. By default it will configure Essentia to be built for the same Python that was used to execute this script. Alternatively, you can specify a specific Python binary to build for using the ``--python=PYTHON`` configuration option.
+By default, the waf build script will auto-detect the ``site-packages`` (or ``dist-packages``) directory to install Essentia's Python package according to the Python binary used to execute it. Alternatively, you can set a specific Python binary using the ``--python=PYTHON`` configuration option.
 
-Therefore, to build for Python 3, you can either run all waf commands with your python3::
-
-  python3 ./waf configure --build-static --with-python --with-cpptests --with-examples --with-vamp
-  python3 ./waf
-  python3 ./waf install
-
-or specify the ``--python`` option, for example: ::
-
-  ./waf configure --build-static --with-python --python=/usr/bin/python3 --with-cpptests --with-examples --with-vamp
-  ./waf
-  ./waf install
-
-Note that when installing to ``/usr/local``, some Linux distributions provide a wrong default installation prefix
-``/usr/local/lib/python3/dist-packages/`` for Python 3 extensions (for example, Ubuntu, see
+Note that when installing Essentia to the default ``/usr/local`` prefix, on some Linux distributions this results in a wrong ``/usr/local/lib/python3/dist-packages/`` package installation path (for example, Ubuntu, see
 `here <https://bugs.launchpad.net/ubuntu/+source/python3-defaults/+bug/1814653>`_ and
 `here <https://bugs.launchpad.net/ubuntu/+source/python3-stdlib-extensions/+bug/1832215>`_).
 
-To avoid import errors on these systems, specify the correct path in ``waf configure`` using a ``--pythondir`` flag or the ``PYTHONDIR``
-environmental variable. For example, on Ubuntu 20.10 the correct path for the default Python 3.8 is ``/usr/local/lib/python3.8/dist-packages/``.
+To avoid import errors on such systems, specify the correct path in ``waf configure`` using a ``--pythondir`` option or the ``PYTHONDIR`` environmental variable. For example, on Ubuntu 20.10 the correct path for the default Python 3.8 is ``/usr/local/lib/python3.8/dist-packages/``.
 
-Alterantively, you can also configure the PYTHONPATH variable to include the `/usr/local/lib/python3/dist-packages/` path in the list of Python 3 `module search paths <https://docs.python.org/3/tutorial/modules.html#the-module-search-path>`_.
+Alternatively, you can also configure the ``PYTHONPATH`` variable to include the ``/usr/local/lib/python3/dist-packages/`` path in the list of Python 3 `module search paths <https://docs.python.org/3/tutorial/modules.html#the-module-search-path>`_.
 
-Finally, if you are having ``ImportError: libessentia.so: cannot open shared object file: No such file or directory`` in Python after installation on Linux, make sure that `/usr/local/lib` is included to `LD_LIBRARY_PATH` or run `ldconfig`.
+Finally, if you are having ``ImportError: libessentia.so: cannot open shared object file: No such file or directory`` in Python after installation on Linux, make sure that ``/usr/local/lib`` is included to ``LD_LIBRARY_PATH`` or run ``ldconfig``.
 
 
 Running tests (optional)
@@ -187,15 +174,15 @@ Run tests if you want to ensure that Essentia works correctly.
 
 To run the C++ base unit tests (only test basic library behavior)::
 
-  ./waf run_tests
+  python3 waf run_tests
 
 To run the Python unit tests (test all algorithms)::
 
-  ./waf run_python_tests
+  python3 waf run_python_tests
 
 or, in the case if your default python is not Python 3::
 
-  python3 ./waf run_python_tests
+  python3 waf run_python_tests
 
 To run Python unit tests, you need to install Python bindings first. Some of these tests require additional audio files and binaries stored in `essentia-audio <https://github.com/MTG/essentia-audio>`_ and `essentia-models <https://github.com/MTG/essentia-models/>`_ submodule repositories. Therefore, make sure to clone Essentia git repository recursively with its submodules (``git clone --recursive https://github.com/MTG/essentia.git``).
 
@@ -218,7 +205,7 @@ Install additional dependencies (you might need to run this command with sudo)::
 
 Make sure to build Essentia with Python 3 bindings and run::
 
-  python3 ./waf doc
+  python3 waf doc
 
 Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
 
