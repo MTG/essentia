@@ -183,13 +183,13 @@ Finally, if you are having ``ImportError: libessentia.so: cannot open shared obj
 
 Running tests (optional)
 ------------------------
-If you want to assure that Essentia works correctly, do the tests. Some of the tests require additional audio files, which are stored in a separate submodule repository `essentia-audio <https://github.com/MTG/essentia-audio>`_. Make sure to clone Essentia git repository including its submodules in order to be able to run the tests (``git clone --recursive https://github.com/MTG/essentia.git``).
+Run tests if you want to ensure that Essentia works correctly.
 
 To run the C++ base unit tests (only test basic library behavior)::
 
   ./waf run_tests
 
-To run the python unit tests (include all unittests on algorithms, need python bindings installed first)::
+To run the Python unit tests (test all algorithms)::
 
   ./waf run_python_tests
 
@@ -197,8 +197,10 @@ or, in the case if your default python is not Python 3::
 
   python3 ./waf run_python_tests
 
+To run Python unit tests, you need to install Python bindings first. Some of these tests require additional audio files and binaries stored in `essentia-audio <https://github.com/MTG/essentia-audio>`_ and `essentia-models <https://github.com/MTG/essentia-models/>`_ submodule repositories. Therefore, make sure to clone Essentia git repository recursively with its submodules (``git clone --recursive https://github.com/MTG/essentia.git``).
 
-More information about running tests is `in our FAQ <FAQ.html#running-tests>`_.
+See more information about running tests `in our FAQ <FAQ.html#running-tests>`_.
+
 
 Building documentation (optional)
 ---------------------------------
