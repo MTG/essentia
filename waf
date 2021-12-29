@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # encoding: latin-1
 # Thomas Nagy, 2005-2018
 #
