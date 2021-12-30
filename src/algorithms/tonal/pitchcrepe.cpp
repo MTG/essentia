@@ -59,6 +59,7 @@ const char* PitchCREPE::description = DOC(
 
 void PitchCREPE::configure() {
   _tensorflowPredictCREPE->configure(INHERIT("graphFilename"),
+                                     INHERIT("savedModel"),
                                      INHERIT("input"),
                                      INHERIT("output"),
                                      INHERIT("hopSize"),
