@@ -51,6 +51,11 @@ void TensorflowPredict::configure() {
   _savedModel = parameter("savedModel").toString();
   _graphFilename = parameter("graphFilename").toString();
 
+  if ((_savedModel.empty()) and (_graphFilename.empty()) and (_isConfigured)) {
+    E_WARNING("TensorflowPredict: You are trying to update a valid configuration with invalid parameters. "
+              "If you want to update the configuration specify a valid `graphFilename` or `savedModel` parameter.");
+  };
+
   // Do not do anything if we did not get a non-empty model name.
   if ((_savedModel.empty()) and (_graphFilename.empty())) return;
 
@@ -79,6 +84,7 @@ void TensorflowPredict::configure() {
 
   openGraph();
 
+  _isConfigured = true;
   reset();
 
   // If the first output name is empty just print out the list of nodes and return.
@@ -175,7 +181,7 @@ void TensorflowPredict::openGraph() {
 
 
 void TensorflowPredict::reset() {
-  if ((_savedModel.empty()) and (_graphFilename.empty())) return;
+  if (!_isConfigured) return;
 
   TF_CloseSession(_session, _status);
   if (TF_GetCode(_status) != TF_OK) {
@@ -195,6 +201,11 @@ void TensorflowPredict::reset() {
 
 
 void TensorflowPredict::compute() {
+  if (!_isConfigured) {
+    throw EssentiaException("TensorflowPredict: This algorithm is not configured. To configure this algorithm you "
+                            "should specify a valid `graphFilename` or `savedModel` as input parameter.");
+  }
+
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
 
