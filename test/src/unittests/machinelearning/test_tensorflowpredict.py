@@ -166,6 +166,13 @@ class TestTensorFlowPredict(TestCase):
 
         self.assertAlmostEqualMatrix(foundValues, batch)
 
+    def testComputeWithoutConfiguration(self):
+        pool = Pool()
+        pool.set('model/Placeholder', numpy.zeros((1, 1, 1, 1), dtype='float32'))
+
+        self.assertComputeFails(TensorflowPredict(), pool)
+
+
 suite = allTests(TestTensorFlowPredict)
 
 if __name__ == '__main__':
