@@ -102,7 +102,7 @@ class TestTensorFlowPredict(TestCase):
         self.regression(parameters)
 
     def testEmptyModelName(self):
-        # With empty model names the algorithm should skip the configuration without errors.
+        # With empty model name the algorithm should skip the configuration without errors.
         self.assertConfigureSuccess(TensorflowPredict(), {})
         self.assertConfigureSuccess(TensorflowPredict(), {'graphFilename': ''})
         self.assertConfigureSuccess(TensorflowPredict(), {'graphFilename': '',
@@ -141,6 +141,21 @@ class TestTensorFlowPredict(TestCase):
                                                         'outputs': ['model/Softmax'],
                                                         })  # input does not exist in the model
         self.assertConfigureFails(TensorflowPredict(), {'graphFilename': 'wrong_model_name',
+                                                        'inputs': ['model/Placeholder'],
+                                                        'outputs': ['model/Softmax'],
+                                                        })  # the model does not exist
+        
+        # Repeat tests for savedModel format.
+        model = join(testdata.models_dir, 'vgg', 'vgg4/')
+        self.assertConfigureFails(TensorflowPredict(), {'savedModel': model})  # inputs and outputs are not defined
+        self.assertConfigureFails(TensorflowPredict(), {'savedModel': model,
+                                                        'inputs': ['model/Placeholder'],
+                                                       })  # outputs are not defined
+        self.assertConfigureFails(TensorflowPredict(), {'savedModel': model,
+                                                        'inputs': ['wrong_input_name'],
+                                                        'outputs': ['model/Softmax'],
+                                                        })  # input does not exist in the model
+        self.assertConfigureFails(TensorflowPredict(), {'savedModel': 'wrong_model_name',
                                                         'inputs': ['model/Placeholder'],
                                                         'outputs': ['model/Softmax'],
                                                         })  # the model does not exist
