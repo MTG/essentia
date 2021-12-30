@@ -129,6 +129,10 @@ void TensorflowPredict::openGraph() {
       _savedModel.c_str(), &tags_c[0], (int)tags_c.size(),
       _graph, NULL, _status);
 
+      if (TF_GetCode(_status) != TF_OK) {
+        throw EssentiaException("TensorflowPredict: Error importing SavedModel. ", TF_Message(_status));
+      }
+
     E_INFO("Successfully loaded SavedModel: `" << _savedModel << "`");
     return;
   }
