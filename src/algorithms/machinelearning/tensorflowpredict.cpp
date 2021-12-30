@@ -111,7 +111,7 @@ void TensorflowPredict::configure() {
 
     if (isTrainingValue == nullptr) {
       TF_DeleteTensor(isTraining);
-      throw EssentiaException("Error generating traning phase flag");
+      throw EssentiaException("TensorflowPredict: Error generating training phase flag");
     }
 
     memcpy(isTrainingValue, &_isTraining, sizeof(bool));
@@ -135,7 +135,7 @@ void TensorflowPredict::openGraph() {
       _savedModel.c_str(), &tags_c[0], (int)tags_c.size(),
       _graph, NULL, _status);
 
-    E_INFO("Successfully loaded SavedModel: `" << _savedModel << "`");
+    E_INFO("TensorflowPredict: Successfully loaded SavedModel: `" << _savedModel << "`");
     return;
   }
 
@@ -175,7 +175,7 @@ void TensorflowPredict::openGraph() {
       throw EssentiaException("TensorflowPredict: Error importing graph. ", TF_Message(_status));
     }
 
-    E_INFO("Successfully loaded graph file: `" << _graphFilename << "`");
+    E_INFO("TensorflowPredict: Successfully loaded graph file: `" << _graphFilename << "`");
   }
 }
 
