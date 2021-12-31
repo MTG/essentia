@@ -28,7 +28,7 @@ To install LibAv from source:
 - [Configure and build Essentia](http://essentia.upf.edu/documentation/installing.html#compiling-essentia)
 
 
-Linux/OSX static builds
+Linux/macOS static builds
 -----------------------
 
 Follow the steps below to create static build of the library and executable example extractors.
@@ -40,12 +40,12 @@ On Linux:
 apt-get install yasm cmake
 ```
 
-On OSX:
+On macOS:
 ```
 brew install yasm cmake wget
 ```
 
-Prepare static builds for dependencies running a script (works both for Linux and OSX):
+Prepare static builds for dependencies running a script (works both for Linux and macOS):
 ```
 packaging/build_3rdparty_static_debian.sh
 ```
@@ -91,7 +91,7 @@ Avoid all dependencies including fftw and build with KissFFT instead (BSD, inclu
 ./waf configure --lightweight= --fft=KISS
 ```
 
-Avoid all dependencies and build with Accelerate FFT (native on OSX/iOS):
+Avoid all dependencies and build with Accelerate FFT (native on macOS/iOS):
 
 ```
 ./waf configure --lightweight= --fft=ACCELERATE
@@ -198,10 +198,10 @@ Alternatively you could also build your applicaitons for asm.js targets by chang
 
 You can also find some examples of interfacing your Essentia cpp code to JavaScript [here](https://github.com/MTG/essentia.js/blob/master/docs/tutorials/2.%20Building%20from%20Source.md#writing-custom-essentia-c-extractor-and-cross-compile-to-js).
 
-OSX static builds and templates (JUCE/VST and openFrameworks)
+macOS static builds and templates (JUCE/VST and openFrameworks)
 -------------------------------------------------------------
 
-Here you can find portable 32-bit static builds of the Essentia C++ library and its dependencies for OSX (thanks to Cárthach from GiantSteps) as well as templates for JUCE/VST and openFrameworks:
+Here you can find portable 32-bit static builds of the Essentia C++ library and its dependencies for macOS (thanks to Cárthach from GiantSteps) as well as templates for JUCE/VST and openFrameworks:
 
 https://github.com/GiantSteps/Essentia-Libraries
 
@@ -209,14 +209,14 @@ https://github.com/GiantSteps/Essentia-Libraries
 Building standalone Essentia Vamp plugin
 ----------------------------------------
 
-It is possible to create a standalone binary for Essentia's Vamp plugin (works for Linux and OSX).
+It is possible to create a standalone binary for Essentia's Vamp plugin (works for Linux and macOS).
 
 ```
 ./waf configure --build-static --with-vamp --mode=release --lightweight= --fft=KISS
 ./waf
 ```
 
-The resulting binary (```build/src/examples/libvamp_essentia.so``` on Linux, ```build/src/examples/libvamp_essentia.dylib``` on OSX) is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
+The resulting binary (```build/src/examples/libvamp_essentia.so``` on Linux, ```build/src/examples/libvamp_essentia.dylib``` on macOS) is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
 
 
 Running tests
@@ -284,7 +284,7 @@ Alternatively, if you want to create and build your own examples, the easiest wa
 
 If you would also like to use [waf](https://waf.io/) in your application as we do, we provide an [example waf template using Essentia](https://github.com/MTG/essentia-project-template/).
 
-You can build your application using XCode (OSX) following [these steps](https://github.com/MTG/essentia/issues/58#issuecomment-38530548).
+You can build your application using XCode (macOS) following [these steps](https://github.com/MTG/essentia/issues/58#issuecomment-38530548).
 
 
 How to compute music descriptors using Essentia?

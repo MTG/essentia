@@ -12,7 +12,7 @@ Documentation online: http://essentia.upf.edu
 Installation
 ------------
 
-The library is cross-platform and currently supports Linux, Mac OS X, Windows, iOS and Android systems. Read installation instructions:
+The library is cross-platform and currently supports Linux, macOS, Windows, iOS and Android systems. Read installation instructions:
 -  http://essentia.upf.edu/documentation/installing.html 
 -  [doc/sphinxdoc/installing.rst](doc/sphinxdoc/installing.rst)
 

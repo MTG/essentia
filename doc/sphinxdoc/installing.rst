@@ -3,9 +3,9 @@
 Installing Essentia
 ===================
 
-Mac OSX
--------
-The easiest way to install Essentia on OSX is by using `our Homebrew formula <https://github.com/MTG/homebrew-essentia>`_. You will need to install `Homebrew package manager <http://brew.sh>`_ first (and there are other good reasons to do so apart from Essentia).
+macOS
+-----
+The easiest way to install Essentia on macOS is by using `our Homebrew formula <https://github.com/MTG/homebrew-essentia>`_. You will need to install `Homebrew package manager <http://brew.sh>`_ first (and there are other good reasons to do so apart from Essentia).
 
 
 Note that packages location for Python installed via Homebrew is different from the system Python. If you plan to use Essentia with Python, make sure the Homebrew directory is at the top of your PATH environment variable. To this end, add the line::
@@ -26,18 +26,7 @@ For other needs, you need to compile Essentia from source (see below).
 
 Windows, Android, iOS
 ---------------------
-Cross-compile Essentia from Linux/OSX (see below).
-
-
-.. Installing Essentia is easily done using the precompiled packages that you can find on the
-.. `MIR-dev Essentia download page <http://static.mtg.upf.edu/mir-dev-download/essentia/>`_.
-.. Packages are available for Debian/Ubuntu, Windows and Mac OS X.
-
-.. These packages contain development headers to integrate Essentia in a C++ application, Python
-.. bindings to be able to work in a Matlab-like environment, and some C++ examples and extractors.
-
-.. Those who wish to write new descriptors can do it using the provided development headers,
-.. but it is highly recommended though that they compile Essentia from source.
+Cross-compile Essentia from Linux/macOS (see below).
 
 
 Compiling Essentia from source
@@ -79,8 +68,8 @@ If you are willing to use Essentia with a TensorFlow wrapper in C++, install the
 
 
 
-Installing dependencies on Mac OS X
------------------------------------
+Installing dependencies on macOS
+--------------------------------
 
 Install Command Line Tools for Xcode. Even if you install Xcode from the app store you must configure command-line compilation by running::
 
@@ -100,7 +89,7 @@ Install Essentia's dependencies::
 
   brew install eigen libyaml fftw ffmpeg libsamplerate libtag tensorflow
 
-`Install Python environment using Homebrew <http://docs.python-guide.org/en/latest/starting/install/osx>`_ (Note that you are advised to do as described here and there are `good reasons to do so <http://docs.python-guide.org/en/latest/starting/install/osx/>`_. You will most probably encounter installation errors when using Python/NumPy preinstalled with OSX.)::
+`Install Python environment using Homebrew <http://docs.python-guide.org/en/latest/starting/install/osx>`_ (Note that you are advised to do as described here and there are `good reasons to do so <http://docs.python-guide.org/en/latest/starting/install/osx/>`_. You will most probably encounter installation errors when using Python/NumPy preinstalled with macOS.)::
 
   brew install python --framework
   pip install ipython numpy matplotlib pyyaml
@@ -227,13 +216,13 @@ Finally, you can compile Essentia (see: `Compiling Essentia`_).
 Building Essentia on Android
 ----------------------------
 
-A lightweight version of Essentia can be `cross-compiled for Android <FAQ.html#cross-compiling-for-android>`_ from Linux or Mac OSX.
+A lightweight version of Essentia can be `cross-compiled for Android <FAQ.html#cross-compiling-for-android>`_ from Linux or macOS.
 
 
 Building Essentia on iOS
 ------------------------
 
-A lightweight version of Essentia can be `cross-compiled for iOS <FAQ.html#cross-compiling-for-ios>`_ from Mac OSX.
+A lightweight version of Essentia can be `cross-compiled for iOS <FAQ.html#cross-compiling-for-ios>`_ from macOS.
 
 
 Building Essentia for Web using asm.js or WebAssembly
