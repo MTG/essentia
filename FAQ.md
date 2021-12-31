@@ -228,25 +228,25 @@ The most important test is the basetest, it should never fail:
 ./build/basetest
 ```
 
-Run all python tests: 
+Run all Python tests:
 ```
-./waf run_python_tests
+python3 waf run_python_tests
 ```
     
 Run all tests except specific ones:
 ```
-python test/src/unittests/all_tests.py -audioloader_streaming
+python3 test/src/unittests/all_tests.py -audioloader_streaming
 ```
 
 Run a specific test
 ```
-python test/src/unittests/all_tests.py audioloader_streaming
+python3 test/src/unittests/all_tests.py audioloader_streaming
 ```
 
 
 Writing tests
 -------------
-It is manadatory to write python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittests).
+It is manadatory to write Python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittests).
 
 All unit tests for algorithms are located in ```test/src/unittests``` folder. They are organized by sub-folders similarly to the code for the algorithms. 
 
@@ -310,13 +310,13 @@ Note, that you cannot be sure this list of dependencies is 100% correct as the s
 
 The amount of algorithms counting streaming and standard mode separately:
 ```
-python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
+python3 src/examples/python/show_algo_dependencies.py > /tmp/all.txt
 cat /tmp/all.txt | grep -- "---------- " | wc -l
 ```
 
 The amount of algorithms counting both modes as one algorithm:
 ```
-python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
+python3 src/examples/python/show_algo_dependencies.py > /tmp/all.txt
 cat /tmp/all.txt | grep -- "---------- " | cut -c 12- | sed s/"streaming : "// | sed s/"standard : "// | sed s/" ----------"// | sort -u | wc -l
 ```
 
@@ -347,12 +347,12 @@ Many researchers are still unfamiliar with [JSON](https://en.wikipedia.org/wiki/
 
 For more help, run: 
 ```
-python src/examples/python/json_to_csv.py -h
+python3 src/examples/python/json_to_csv.py -h
 ```
 
 Example command that merges analysis for two recordings, ignoring a bunch of descriptors:
 ```
-python src/examples/python/json_to_csv.py -i /tmp/1.json /tmp/2.json -o /tmp/foo.csv --include metadata.audio_properties.* metadata.tags.musicbrainz_recordingid.0 lowlevel.* rhythm.* tonal.* --ignore *.min *.min.* *.max *.max.* *.dvar *.dvar2 *.dvar.* *.dvar2.* *.dmean *.dmean2 *.dmean.* *.dmean2.* *.cov.* *.icov.* rhythm.beats_position.*  --add-filename
+python3 src/examples/python/json_to_csv.py -i /tmp/1.json /tmp/2.json -o /tmp/foo.csv --include metadata.audio_properties.* metadata.tags.musicbrainz_recordingid.0 lowlevel.* rhythm.* tonal.* --ignore *.min *.min.* *.max *.max.* *.dvar *.dvar2 *.dvar.* *.dvar2.* *.dmean *.dmean2 *.dmean.* *.dmean2.* *.cov.* *.icov.* rhythm.beats_position.*  --add-filename
 ```
 
 
