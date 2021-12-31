@@ -263,16 +263,16 @@ from the 500th call to the generator until the end, and the EScheduler
 level only on the 782th call to the generator.
 
 
-Logging in python
+Logging in Python
 -----------------
 
-In python, you would usually log things using the standard ``logging`` module, but
+In Python, you would usually log things using the standard ``logging`` module, but
 Essentia also gives you access to its C++ logger in order to ensure that
 the output is not mangled between the 2 logging frameworks:
 
 .. code-block:: python
 
-    essentia.log.info("This is how you use Essentia's logger in python")
+    essentia.log.info("This is how you use Essentia's logger in Python")
     essentia.log.debug(essentia.EAlgorithm, 'Debugging modules are also available')
 
     essentia.log.infoActive = True                   # activate the info level

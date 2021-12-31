@@ -52,7 +52,7 @@ combination with the standard/streaming mode.
 As a next step, it is recommended to read the `Algorithms overview`_ page
 to familarize with the different types of available algorithms. You can then
 continue to the `Python tutorial`_ page for a more hands-on introduction to using
-Essentia in practice, with the python bindings for the Essentia's standard mode.
+Essentia in practice, with the Python bindings for the Essentia's standard mode.
 
 C++ developers can look at the `"Standard" mode how-to`_
 and `"Streaming" mode how-to`_ pages to get
@@ -156,7 +156,7 @@ Essentia 1.1
 
 Python bindings for the streaming mode that were implemented as ESX resulted to be a maintenance
 burden in the long-run and too limiting in the types of the possibilities it offered, and they
-were dropped. Instead, full python bindings for the streaming mode have been written.
+were dropped. Instead, full Python bindings for the streaming mode have been written.
 
 This release also introduced the new ffmpeg audio I/O, which allowed
 to get audio from pretty much any source and in any format (even works

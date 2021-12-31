@@ -30,7 +30,7 @@ You can download and use prebuilt static binaries for a number of Essentia's com
 Quick start
 -----------
 
-Quick start using python: 
+Quick start using Python:
 - http://essentia.upf.edu/documentation/essentia_python_tutorial.html
 - [Jupyter Notebook Essentia tutorial](/src/examples/tutorial/essentia_python_tutorial.ipynb)
 

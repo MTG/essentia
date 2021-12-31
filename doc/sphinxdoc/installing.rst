@@ -17,7 +17,7 @@ at the bottom of your ``~/.bash_profile`` file. More information about using Pyt
 
 Linux
 -----
-You can install Essentia python extension from PyPi::
+You can install Essentia Python extension from PyPi::
 
   pip install essentia
 
@@ -100,7 +100,7 @@ Install Essentia's dependencies::
 
   brew install eigen libyaml fftw ffmpeg libsamplerate libtag tensorflow
 
-`Install python environment using Homebrew <http://docs.python-guide.org/en/latest/starting/install/osx>`_ (Note that you are advised to do as described here and there are `good reasons to do so <http://docs.python-guide.org/en/latest/starting/install/osx/>`_. You will most probably encounter installation errors when using python/numpy preinstalled with OSX.)::
+`Install Python environment using Homebrew <http://docs.python-guide.org/en/latest/starting/install/osx>`_ (Note that you are advised to do as described here and there are `good reasons to do so <http://docs.python-guide.org/en/latest/starting/install/osx/>`_. You will most probably encounter installation errors when using Python/NumPy preinstalled with OSX.)::
 
   brew install python --framework
   pip install ipython numpy matplotlib pyyaml
@@ -146,7 +146,7 @@ To compile everything you've configured::
 
 All built examples will be located in ``build/src/examples/`` folder, as well as the Vamp plugin file ``libvamp_essentia.so``.
 
-To install the C++ library, python bindings, extractors and Vamp plugin (if configured successfully; you might need to run this command with sudo)::
+To install the C++ library, Python bindings, extractors and Vamp plugin (if configured successfully; you might need to run this command with sudo)::
 
   python3 waf install
 
@@ -213,7 +213,7 @@ Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
 Building Essentia on Windows
 ----------------------------
 
-Essentia C++ library and extractors based on it can be compiled and run correctly on Windows, but python bindings are not supported yet. The easiest way to build Essentia is by `cross-compilation on Linux using MinGW <FAQ.html#cross-compiling-for-windows-on-linux>`_. However the resulting library binaries are only compatible within C++ projects using MinGW compilers, and therefore they are not compatible with Visual Studio. If you want to use Visual Studio, there is no project readily available, so you will have to setup one yourself and compile the dependencies too.
+Essentia C++ library and extractors based on it can be compiled and run correctly on Windows, but Python bindings are not supported yet. The easiest way to build Essentia is by `cross-compilation on Linux using MinGW <FAQ.html#cross-compiling-for-windows-on-linux>`_. However the resulting library binaries are only compatible within C++ projects using MinGW compilers, and therefore they are not compatible with Visual Studio. If you want to use Visual Studio, there is no project readily available, so you will have to setup one yourself and compile the dependencies too.
 
 Building Essentia in Windows Subsystem for Linux (WSL)
 ------------------------------------------------------
