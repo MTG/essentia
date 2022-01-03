@@ -47,7 +47,9 @@ class TestTensorFlowPredictVGGish(TestCase):
         model = join(testdata.models_dir, 'vggish', 'small_vggish_init')
 
         audio = MonoLoader(filename=filename, sampleRate=16000)()
-        found = TensorflowPredictVGGish(savedModel=model, patchHopSize=0)(audio)
+
+        # This SavedModel was created with TensorFlow 1 so it does not expect a saver_filename input.
+        found = TensorflowPredictVGGish(savedModel=model, patchHopSize=0, saverFilenameSet=False)(audio)
         found = numpy.mean(found, axis=0)
 
         # Setting a high tolerance value due to the mismatch between the

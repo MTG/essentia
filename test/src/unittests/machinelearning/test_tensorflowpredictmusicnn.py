@@ -45,7 +45,9 @@ class TestTensorFlowPredictMusiCNN(TestCase):
         model = join(testdata.models_dir, 'musicnn', 'genre_dortmund_musicnn_msd')
 
         audio = MonoLoader(filename=filename, sampleRate=16000)()
-        found = TensorflowPredictMusiCNN(savedModel=model)(audio)[0]
+
+        # This SavedModel was created with TensorFlow 1 so it does not expect a saver_filename input.
+        found = TensorflowPredictMusiCNN(savedModel=model, saverFilenameSet=False)(audio)[0]
 
         self.assertAlmostEqualVector(found, expected, 1e-5)
 

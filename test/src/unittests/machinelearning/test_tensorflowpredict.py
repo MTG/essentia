@@ -83,6 +83,9 @@ class TestTensorFlowPredict(TestCase):
             'outputs': ['model/Softmax'],
             'isTraining': False,
             'isTrainingName': 'model/Placeholder_1',
+            # The SavedModel version of this model was created with TensorFlow 1
+            # so it does not expect a saver_filename input.
+            'saverFilenameSet': False,
         }
 
         self.regression(parameters)
@@ -97,6 +100,9 @@ class TestTensorFlowPredict(TestCase):
             'outputs': ['model/Softmax'],
             'isTraining': False,
             'isTrainingName': 'model/Placeholder_1',
+            # The SavedModel version of this model was created with TensorFlow 1
+            # so it does not expect a saver_filename input.
+            'saverFilenameSet': False,
         }
 
         self.regression(parameters)

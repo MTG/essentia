@@ -102,7 +102,8 @@ class TestTensorflowPredictTempoCNN(TestCase):
         self.regression({'graphFilename': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16.pb')})
 
     def testRegressionSavedModel(self):
-        self.regression({'savedModel': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16')})
+        # This SavedModel was created with TensorFlow 1 so it does not expect a saver_filename input.
+        self.regression({'savedModel': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16'), 'saverFilenameSet': False})
 
     def testEmptyInput(self):
         model = join(testdata.models_dir, 'tempocnn', 'deeptemp_k16.pb')

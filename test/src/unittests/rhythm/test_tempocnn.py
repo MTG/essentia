@@ -64,6 +64,8 @@ class TestTempoCNN(TestCase):
         parameters = {
             'savedModel': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16'),
             'aggregationMethod':'majority',
+            # This SavedModel was created with TensorFlow 1 so it does not expect a saver_filename input.
+            'saverFilenameSet': False,
         }
         self.regression(parameters)
 
@@ -71,6 +73,8 @@ class TestTempoCNN(TestCase):
         parameters = {
             'savedModel': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16'),
             'aggregationMethod':'mean',
+            # This SavedModel was created with TensorFlow 1 so it does not expect a saver_filename input.
+            'saverFilenameSet': False,
         }
         self.regression(parameters)
 
@@ -78,6 +82,8 @@ class TestTempoCNN(TestCase):
         parameters = {
             'savedModel': join(testdata.models_dir, 'tempocnn', 'deeptemp_k16'),
             'aggregationMethod':'median',
+            # This SavedModel was created with TensorFlow 1 so it does not expect a saver_filename input.
+            'saverFilenameSet': False,
         }
         self.regression(parameters)
 
