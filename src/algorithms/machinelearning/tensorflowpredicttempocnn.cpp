@@ -135,11 +135,16 @@ void TensorflowPredictTempoCNN::configure() {
   string graphFilename = parameter("graphFilename").toString();
   string savedModel = parameter("savedModel").toString();
 
+  string saverFilename = parameter("saverFilename").toString();
+  bool saverFilenameSet = parameter("saverFilenameSet").toBool();
+
   _tensorflowPredict->configure("graphFilename", graphFilename,
                                 "savedModel", savedModel,
                                 "squeeze", false,
                                 "inputs", vector<string>({input}),
-                                "outputs", vector<string>({output}));
+                                "outputs", vector<string>({output}),
+                                "saverFilename", saverFilename,
+                                "saverFilenameSet", saverFilenameSet);
 }
 
 } // namespace streaming
@@ -217,7 +222,9 @@ void TensorflowPredictTempoCNN::configure() {
                                         INHERIT("output"),
                                         INHERIT("patchHopSize"),
                                         INHERIT("batchSize"),
-                                        INHERIT("lastPatchMode"));
+                                        INHERIT("lastPatchMode"),
+                                        INHERIT("saverFilename"),
+                                        INHERIT("saverFilenameSet"));
 }
 
 

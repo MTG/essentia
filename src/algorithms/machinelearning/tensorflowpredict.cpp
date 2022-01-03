@@ -61,6 +61,8 @@ void TensorflowPredict::configure() {
   _isTraining = parameter("isTraining").toBool();
   _isTrainingName = parameter("isTrainingName").toString();
   _squeeze = parameter("squeeze").toBool();
+  _saverFilenameSet = parameter("saverFilenameSet").toBool();
+  _saverFilename = parameter("saverFilename").toString();
 
   (_isTrainingName == "") ? _isTrainingSet = false : _isTrainingSet = true;
 
@@ -68,8 +70,8 @@ void TensorflowPredict::configure() {
   _nOutputs = _outputNames.size();
 
   // Allocate input and output tensors.
-  _inputTensors.resize(_nInputs + int(_isTrainingSet));
-  _inputNodes.resize(_nInputs + int(_isTrainingSet));
+  _inputTensors.resize(_nInputs + int(_isTrainingSet) + int(_saverFilenameSet));
+  _inputNodes.resize(_nInputs + int(_isTrainingSet) + int(_saverFilenameSet));
 
   _outputTensors.resize(_nOutputs);
   _outputNodes.resize(_nOutputs);
@@ -113,8 +115,26 @@ void TensorflowPredict::configure() {
     _inputTensors[_nInputs] = isTraining;
     _inputNodes[_nInputs] = graphOperationByName(_isTrainingName.c_str(), 0);
   }
-}
 
+  // Add saver_filename if needed.
+  if (_saverFilenameSet and _usingSavedModel) {
+    const int64_t dims[1] = {};
+    TF_Tensor *saverFilename = TF_AllocateTensor(TF_STRING, dims, 0, _saverFilename.length());
+    void* saverFilenameValue = TF_TensorData(saverFilename);
+
+    if (saverFilenameValue == nullptr) {
+      TF_DeleteTensor(saverFilename);
+      throw EssentiaException("TensorflowPredict: Error generating `saver_filename` input tensor");
+    }
+
+    memcpy(saverFilenameValue, &_saverFilename, _saverFilename.length());
+
+    _inputTensors[_nInputs] = saverFilename;
+    _inputNodes[_nInputs] = graphOperationByName("saver_filename", 0);
+
+  }
+
+}
 
 void TensorflowPredict::openGraph() {
   // Prioritize savedModel when both are specified.
@@ -128,6 +148,8 @@ void TensorflowPredict::openGraph() {
     TF_LoadSessionFromSavedModel(_sessionOptions, _runOptions,
       _savedModel.c_str(), &tags_c[0], (int)tags_c.size(),
       _graph, NULL, _status);
+
+    _usingSavedModel = true;
 
     E_INFO("Successfully loaded SavedModel: `" << _savedModel << "`");
     return;
@@ -168,6 +190,8 @@ void TensorflowPredict::openGraph() {
     if (TF_GetCode(_status) != TF_OK) {
       throw EssentiaException("TensorflowPredict: Error importing graph. ", TF_Message(_status));
     }
+
+    _usingSavedModel = false;
 
     E_INFO("Successfully loaded graph file: `" << _graphFilename << "`");
   }

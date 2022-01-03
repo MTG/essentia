@@ -63,7 +63,13 @@ class TempoCNN : public Algorithm {
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
     declareParameter("batchSize", "number of patches to process in parallel. Use -1 to accumulate all the patches and run a single TensorFlow session at the end of the stream.", "[-1,inf)", 1);
     declareParameter("aggregationMethod", "method used to estimate the global tempo.", "{majority,mean,median}", "majority");
-
+    // We have noticed that most of the SavedModels expect a `saver_filename` input tensor. While TensorFlow doesn't provide
+    // official documentation, we found that this allows to re-save the model after a modification of the parameters:
+    // https://towardsdatascience.com/include-training-operations-in-saved-models-with-tensorflow-2-6494d304036d
+    // While we are not planning to support neither parameter modification nor model saving, we provide a functionality to set
+    // this tensor to an arbitrary string to allow inference when this tensor is required.
+    declareParameter("saverFilenameSet", "whether to set an additional `saver_filename` string input tensor with a value given by the saverFilename parameter. This option only applies for SavedModel input format.", "{true,false}", true);
+    declareParameter("saverFilename", "the value of the additional `saver_filename` string input tensor.", "", "");
   }
 
   void configure();

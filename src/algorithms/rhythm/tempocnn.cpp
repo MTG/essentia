@@ -73,7 +73,9 @@ void TempoCNN::configure() {
                                         INHERIT("output"),
                                         INHERIT("patchHopSize"),
                                         INHERIT("lastPatchMode"),
-                                        INHERIT("batchSize"));
+                                        INHERIT("batchSize"),
+                                        INHERIT("saverFilename"),
+                                        INHERIT("saverFilenameSet"));
 
   _aggregationMethod = parameter("aggregationMethod").toLower();
 }

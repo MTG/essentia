@@ -63,6 +63,13 @@ class TensorflowPredictCREPE : public AlgorithmComposite {
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/classifier/Sigmoid");
     declareParameter("hopSize", "the hop size in milliseconds for running pitch estimations", "(0,inf)", 10.0);
     declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to `-1` to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", -1);
+    // We have noticed that most of the SavedModels expect a `saver_filename` input tensor. While TensorFlow doesn't provide
+    // official documentation, we found that this allows to re-save the model after a modification of the parameters:
+    // https://towardsdatascience.com/include-training-operations-in-saved-models-with-tensorflow-2-6494d304036d
+    // While we are not planning to support neither parameter modification nor model saving, we provide a functionality to set
+    // this tensor to an arbitrary string to allow inference when this tensor is required.
+    declareParameter("saverFilenameSet", "whether to set an additional `saver_filename` string input tensor with a value given by the saverFilename parameter. This option only applies for SavedModel input format.", "{true,false}", true);
+    declareParameter("saverFilename", "the value of the additional `saver_filename` string input tensor.", "", "");
   }
 
   void declareProcessOrder() {
@@ -112,6 +119,13 @@ class TensorflowPredictCREPE : public Algorithm {
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/classifier/Sigmoid");
     declareParameter("hopSize", "the hop size in milliseconds for running pitch estimations", "(0,inf)", 10.0);
     declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to `-1` to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", -1);
+    // We have noticed that most of the SavedModels expect a `saver_filename` input tensor. While TensorFlow doesn't provide
+    // official documentation, we found that this allows to re-save the model after a modification of the parameters:
+    // https://towardsdatascience.com/include-training-operations-in-saved-models-with-tensorflow-2-6494d304036d
+    // While we are not planning to support neither parameter modification nor model saving, we provide a functionality to set
+    // this tensor to an arbitrary string to allow inference when this tensor is required.
+    declareParameter("saverFilenameSet", "whether to set an additional `saver_filename` string input tensor with a value given by the saverFilename parameter. This option only applies for SavedModel input format.", "{true,false}", true);
+    declareParameter("saverFilename", "the value of the additional `saver_filename` string input tensor.", "", "");
   }
 
   void configure();

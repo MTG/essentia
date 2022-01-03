@@ -123,9 +123,14 @@ void TensorflowPredictCREPE::configure() {
 
   string graphFilename = parameter("graphFilename").toString();
 
+  string saverFilename = parameter("saverFilename").toString();
+  bool saverFilenameSet = parameter("saverFilenameSet").toBool();
+
   _tensorflowPredict->configure("graphFilename", graphFilename,
                                 "inputs", vector<string>({input}),
-                                "outputs", vector<string>({output}));
+                                "outputs", vector<string>({output}),
+                                "saverFilename", saverFilename,
+                                "saverFilenameSet", saverFilenameSet);
 }
 
 } // namespace streaming
@@ -200,7 +205,9 @@ void TensorflowPredictCREPE::configure() {
                                      INHERIT("input"),
                                      INHERIT("output"),
                                      INHERIT("hopSize"),
-                                     INHERIT("batchSize"));
+                                     INHERIT("batchSize"),
+                                     INHERIT("saverFilename"),
+                                     INHERIT("saverFilenameSet"));
 }
 
 

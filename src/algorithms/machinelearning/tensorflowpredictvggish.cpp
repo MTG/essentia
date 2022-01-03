@@ -120,11 +120,16 @@ void TensorflowPredictVGGish::configure() {
   string graphFilename = parameter("graphFilename").toString();
   string savedModel = parameter("savedModel").toString();
 
+  string saverFilename = parameter("saverFilename").toString();
+  bool saverFilenameSet = parameter("saverFilenameSet").toBool();
+
   _tensorflowPredict->configure("graphFilename", graphFilename,
                                 "savedModel", savedModel,
                                 "inputs", vector<string>({input}),
                                 "outputs", vector<string>({output}),
-                                "isTrainingName", isTrainingName);
+                                "isTrainingName", isTrainingName,
+                                "saverFilename", saverFilename,
+                                "saverFilenameSet", saverFilenameSet);
 }
 
 } // namespace streaming
@@ -198,7 +203,9 @@ void TensorflowPredictVGGish::configure() {
                                       INHERIT("isTrainingName"),
                                       INHERIT("patchHopSize"),
                                       INHERIT("accumulate"),
-                                      INHERIT("lastPatchMode"));
+                                      INHERIT("lastPatchMode"),
+                                      INHERIT("saverFilename"),
+                                      INHERIT("saverFilenameSet"));
 }
 
 

@@ -63,6 +63,10 @@ class TensorflowPredict : public Algorithm {
 
   bool _squeeze;
 
+  bool _saverFilenameSet;
+  std::string _saverFilename;
+  bool _usingSavedModel;
+
   void openGraph();
   TF_Tensor* TensorToTF(const Tensor<Real>& tensorIn);
   const Tensor<Real> TFToTensor(const TF_Tensor* tensor, TF_Output node);
@@ -101,6 +105,13 @@ class TensorflowPredict : public Algorithm {
     declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
     declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("tags", "the tags of the savedModel", "", defaultTags);
+    // We have noticed that most of the SavedModels expect a `saver_filename` input tensor. While TensorFlow doesn't provide
+    // official documentation, we found that this allows to re-save the model after a modification of the parameters:
+    // https://towardsdatascience.com/include-training-operations-in-saved-models-with-tensorflow-2-6494d304036d
+    // While we are not planning to support neither parameter modification nor model saving, we provide a functionality to set
+    // this tensor to an arbitrary string to allow inference when this tensor is required.
+    declareParameter("saverFilenameSet", "whether to set an additional `saver_filename` string input tensor with a value given by the saverFilename parameter. This option only applies for SavedModel input format.", "{true,false}", true);
+    declareParameter("saverFilename", "the value of the additional `saver_filename` string input tensor.", "", "");
     declareParameter("inputs", "will look for these namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", Parameter::VECTOR_STRING);
     declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool. Set the first element of this list as an empty array to print all the available nodes in the graph", "", Parameter::VECTOR_STRING);
     declareParameter("isTraining", "run the model in training mode (normalized with statistics of the current batch) instead of inference mode (normalized with moving statistics). This only applies to some models", "{true,false}", false);

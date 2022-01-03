@@ -62,7 +62,9 @@ void PitchCREPE::configure() {
                                      INHERIT("input"),
                                      INHERIT("output"),
                                      INHERIT("hopSize"),
-                                     INHERIT("batchSize"));
+                                     INHERIT("batchSize"),
+                                     INHERIT("saverFilename"),
+                                     INHERIT("saverFilenameSet"));
 
   _hopSize = parameter("hopSize").toFloat();
   // _viterbi = parameter("viterbi").toBool();
