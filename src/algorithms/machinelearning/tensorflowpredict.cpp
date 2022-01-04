@@ -90,11 +90,11 @@ void TensorflowPredict::configure() {
 
   // Initialize the list of input and output node names.
   for (size_t i = 0; i < _nInputs; i++) {
-    _inputNodes[i] = graphOperationByName(_inputNames[i].c_str(), 0);
+    _inputNodes[i] = graphOperationByName(_inputNames[i]);
   }
 
   for (size_t i = 0; i < _nOutputs; i++) {
-    _outputNodes[i] = graphOperationByName(_outputNames[i].c_str(), 0);
+    _outputNodes[i] = graphOperationByName(_outputNames[i]);
   }
 
   // Add isTraining flag if needed.
@@ -111,7 +111,7 @@ void TensorflowPredict::configure() {
     memcpy(isTrainingValue, &_isTraining, sizeof(bool));
 
     _inputTensors[_nInputs] = isTraining;
-    _inputNodes[_nInputs] = graphOperationByName(_isTrainingName.c_str(), 0);
+    _inputNodes[_nInputs] = graphOperationByName(_isTrainingName);
   }
 }
 
@@ -319,10 +319,21 @@ const Tensor<Real> TensorflowPredict::TFToTensor(
 }
 
 
-TF_Output TensorflowPredict::graphOperationByName(const char* nodeName,
-                                                  int index) {
-  // I don't understand the fuction of index here.
-  TF_Output output = {TF_GraphOperationByName(_graph, nodeName), index};
+TF_Output TensorflowPredict::graphOperationByName(const string nodeName) {
+  int index = 0;
+  const char* name = nodeName.c_str();
+
+  // TensorFlow operations (or nodes from the graph perspective) return tensors named <nodeName:n>, where n goes
+  // from 0 to the number of outputs. The first output tensor of a node can be extracted implicitly (nodeName)
+  // or explicitly (nodeName:0). To extract the subsequent tensors, the index has to be specified (nodeName:1,
+  // nodeName:2).
+  string::size_type n = nodeName.find(':');
+  if (n != string::npos) {
+    index = stoi(nodeName.substr(n + 1));
+    name = nodeName.substr(0, n).c_str();
+  }
+
+  TF_Output output = {TF_GraphOperationByName(_graph, name), index};
 
   if (output.oper == nullptr) {
     throw EssentiaException("TensorflowPredict: '" + string(nodeName) +
