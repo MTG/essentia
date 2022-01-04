@@ -347,7 +347,7 @@ TF_Output TensorflowPredict::graphOperationByName(const string nodeName) {
   // TensorFlow operations (or nodes from the graph perspective) return tensors named <nodeName:n>, where n goes
   // from 0 to the number of outputs. The first output tensor of a node can be extracted implicitly (nodeName)
   // or explicitly (nodeName:0). To extract the subsequent tensors, the index has to be specified (nodeName:1,
-  // nodeName:2).
+  // nodeName:2, ...).
   string::size_type n = nodeName.find(':');
   if (n != string::npos) {
     index = stoi(nodeName.substr(n + 1));
