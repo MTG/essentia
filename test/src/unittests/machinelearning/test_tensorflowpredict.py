@@ -166,6 +166,29 @@ class TestTensorFlowPredict(TestCase):
 
         self.assertAlmostEqualMatrix(foundValues, batch)
 
+    def testImplicitOutputTensorIndex(self):
+        model = join(filedir(), 'tensorflowpredict', 'identity.pb')
+        batch = numpy.reshape(numpy.arange(4, dtype='float32'), (1, 1, 2, 2))
+
+        pool = Pool()
+        pool.set('model/Placeholder', batch)
+
+        implicit_output = 'model/Identity'
+        implicit = TensorflowPredict(
+            graphFilename=model,
+            inputs=['model/Placeholder'],
+            outputs=[implicit_output],
+        )(pool)[implicit_output].squeeze()
+
+        explicit_output = 'model/Identity:0'
+        explicit = TensorflowPredict(
+            graphFilename=model,
+            inputs=['model/Placeholder'],
+            outputs=[explicit_output],
+        )(pool)[explicit_output].squeeze()
+
+        self.assertAlmostEqualMatrix(implicit, explicit)
+
 suite = allTests(TestTensorFlowPredict)
 
 if __name__ == '__main__':
