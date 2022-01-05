@@ -11,31 +11,20 @@ All the models created by the MTG are licensed under CC BY-NC-SA 4.0 (https://cr
 
 The models are serialized in `Protocol Buffer <https://developers.google.com/protocol-buffers/>`_ files suitable for inference with Essentia and TensorFlow. Additionally, some models are also available in `TensorFlow.js <https://www.tensorflow.org/js/models>`_ format. Each ``.pb`` file is coupled with a ``.json`` file containing its metadata.
 
+We support models for the followings tasks:
 
-Model file naming conventions:
-
-- classifiers: ``<target_task>-<architecture>-<source_task>-<version>.pb``
-- MusiCNN: ``<task>-<architecture>-<version>.pb``
-- OpenL3: ``<architecture>-<params>-<version>.pb``
-- Spleeter: ``<architecture>-<params>-<version>.pb``
-- TempoCNN: ``<architecture>-<params>-<version>.pb``
-- VGG: ``<task>-<architecture>-<version>.pb``
-- VGGish: ``<task>-<architecture>-<version>.pb``
-- YAMNet: ``<task>-<architecture>-<version>.pb``
-
-Where:
-
-- ``<architecture>``: the architecture of the model (refers only to the source model on the transfer learning classifiers).
-- ``<task>`` and ``<source-task>``: the dataset in which the model, or the source model was trained.
-- ``<target-task>``: the dataset in which the target model was trained (only for the transfer learning classifiers).
-- ``params``: parameters specific to a particular family of models.
-- ``version``: represents the incremental version of the model. We do not guaranty full compatibility between different versions.
-
+* :ref:`Audio event recognition`
+* :ref:`Music auto-tagging`
+* :ref:`Transfer learning classifiers`
+* :ref:`Feature extractors`
+* :ref:`Pitch detection`
+* :ref:`Source separation`
+* :ref:`Tempo estimation`
 
 
 Audio event recognition
 ^^^^^^^^^^^^^^^^^^^^^^^
-Download: https://essentia.upf.edu/models/audio-event-recognition/
+`Download model files <https://essentia.upf.edu/models/audio-event-recognition/>`_
 
 AudioSet
 --------
@@ -154,11 +143,13 @@ Models:
 
 * ``audioset-yamnet``
 
+Naming convention: ``<task>-<architecture>-<version>.pb``
+
 
 Music auto-tagging
 ^^^^^^^^^^^^^^^^^^
 
-Download: https://essentia.upf.edu/models/autotagging/
+`Download model files <https://essentia.upf.edu/models/autotagging/>`_
 
 
 Million Song Dataset
@@ -179,6 +170,7 @@ Models:
 * ``msd-musicnn``
 * ``msd-vgg``
 
+Naming convention: ``<task>-<architecture>-<version>.pb``
 
 
 MagnaTagATune
@@ -199,16 +191,19 @@ Models:
 * ``mtt-musicnn``
 * ``mtt-vgg``
 
+Naming convention: ``<task>-<architecture>-<version>.pb``
+
 
 Transfer learning classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Classifiers trained on various datasets and audio embeddings.
 
-Download: https://essentia.upf.edu/models/classifiers/
+`Download model files <https://essentia.upf.edu/models/classifiers/>`_
 
 Demo: https://replicate.com/mtg/music-classifiers/
 
+Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
 
 Danceability
 ------------
@@ -549,7 +544,7 @@ Models:
 Feature extractors
 ^^^^^^^^^^^^^^^^^^
 
-Download: https://essentia.upf.edu/models/feature-extractors/
+`Download model files <https://essentia.upf.edu/models/feature-extractors/>`_
 
 
 OpenL3
@@ -572,6 +567,8 @@ Models:
 * ``openl3-music-mel256-emb512``
 * ``openl3-music-mel256-emb6144``
 
+Naming convention: ``<architecture>-<source_task>-<number_of_mel_bands>-<embedding_dimensions>-<version>.pb``
+
 
 AudioSet-VGGish
 ---------------
@@ -586,11 +583,13 @@ Models:
 
 * ``audioset-vggish``
 
+Naming convention: ``<task>-<architecture>-<version>.pb``
+
 
 Pitch detection
 ^^^^^^^^^^^^^^^
 
-Download: https://essentia.upf.edu/models/pitch/
+`Download model files <https://essentia.upf.edu/models/pitch/>`_
 
 Monophonic pitch tracker (CREPE)
 --------------------------------
@@ -613,7 +612,7 @@ Models:
 Source separation
 ^^^^^^^^^^^^^^^^^
 
-Download: https://essentia.upf.edu/models/source-separation/
+`Download model files <https://essentia.upf.edu/models/source-separation/>`_
 
 Spleeter
 --------
@@ -630,11 +629,12 @@ Models:
 * ``spleeter-4s``
 * ``spleeter-5s``
 
+Naming convention: ``<architecture>-<number_of_stems>-<version>.pb``
 
 Tempo estimation
 ^^^^^^^^^^^^^^^^
 
-Download: https://essentia.upf.edu/models/tempo/
+`Download model files <https://essentia.upf.edu/models/tempo/>`_
 
 TempoCNN
 --------
@@ -650,4 +650,6 @@ Models:
 * ``deepsquare-k16``
 * ``deeptemp-k4``
 * ``deeptemp-k16``
+
+Naming convention: - TempoCNN: ``<architecture>-<model_size>-<version>.pb``
 
