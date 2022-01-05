@@ -9,7 +9,7 @@ This is a list of pre-trained TensorFlow models available in Essentia for variou
 All the models created by the MTG are licensed under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/) and are also available under proprietary license upon request (https://www.upf.edu/web/mtg/contact).
 
 
-The models are serialized in `Protocol Buffer <https://developers.google.com/protocol-buffers/>`_ files suitable for inference with Essentia and TensorFlow. Additionally, some models are also available in `TensorFlow.js <https://www.tensorflow.org/js/models>`_) format. Each ``.pb`` file is coupled with a ``.json`` file containing its metadata.
+The models are serialized in `Protocol Buffer <https://developers.google.com/protocol-buffers/>`_ files suitable for inference with Essentia and TensorFlow. Additionally, some models are also available in `TensorFlow.js <https://www.tensorflow.org/js/models>`_ format. Each ``.pb`` file is coupled with a ``.json`` file containing its metadata.
 
 
 Model file naming conventions:
@@ -497,7 +497,7 @@ Music classification by mood (5 mood clusters):
 `4: humorous, silly, campy, quirky, whimsical, witty, wry`,
 `5: aggressive, fiery, tense/anxious, intense, volatile, visceral`
 
-Dataset: MIREX Audio Mood Classification Dataset
+Dataset: MIREX Audio Mood Classification Dataset.
 
 Output: activations.
 
@@ -576,9 +576,9 @@ Models:
 AudioSet-VGGish
 ---------------
 
-Audio embeddings model accompanying the AudioSet dataset, trained to predict tags from Youtube videos.
+Audio embeddings model accompanying the AudioSet dataset, trained in a supervised manner using tag information for YouTube videos.
 
-Dataset: preliminary subset of Youtube-8M.
+Dataset: Subset of Youtube-8M.
 
 Output: embeddings.
 
@@ -595,7 +595,7 @@ Download: https://essentia.upf.edu/models/pitch/
 Monophonic pitch tracker (CREPE)
 --------------------------------
 
-Monophonic pìtch detection (360 20-cent pitch bins, C1-B7).
+Monophonic pitch detection (360 20-cent pitch bins, C1-B7).
 
 Dataset: RWC-synth, MDB-stem-synth.
 
