@@ -698,6 +698,8 @@ Models:
 * ``crepe-small``
 * ``crepe-tiny``
 
+Naming convention: ``<architecture>-<model_size>-<version>.pb``
+
 Usage for embedding extraction:
 
 .. code-block:: python
@@ -751,7 +753,7 @@ Models:
 * ``deeptemp-k4``
 * ``deeptemp-k16``
 
-Naming convention: - TempoCNN: ``<architecture>-<model_size>-<version>.pb``
+Naming convention: ``<architecture>-<model_size>-<version>.pb``
 
 Usage for tempo estimation:
 
