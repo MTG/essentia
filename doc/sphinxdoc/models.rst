@@ -700,7 +700,7 @@ Models:
 
 Naming convention: ``<architecture>-<model_size>-<version>.pb``
 
-Usage for embedding extraction:
+Usage for pitch estimation:
 
 .. code-block:: python
 
