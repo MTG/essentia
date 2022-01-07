@@ -145,6 +145,26 @@ Models:
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
+Usage for audio event detection:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictVGGish(graphFilename="audioset-yamnet-1.pb", input="melspectrogram", output="activations")
+    activations = model(audio)
+
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictVGGish(graphFilename="audioset-yamnet-1.pb", input="melspectrogram", output="embeddings")
+    embeddings = model(audio)
+
 
 Music auto-tagging
 ^^^^^^^^^^^^^^^^^^
@@ -172,6 +192,26 @@ Models:
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
+Usage for audio event detection:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictMusiCNN(graphFilename="msd-musicnn-1.pb")
+    activations = model(audio)
+
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictMusiCNN(graphFilename="msd-musicnn-1.pb", output="model/dense/BiasAdd")
+    activations = model(audio)
+
 
 MagnaTagATune
 -------------
@@ -193,6 +233,26 @@ Models:
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
+Usage for audio event detection:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictMusiCNN(graphFilename="mtt-musicnn-1.pb")
+    activations = model(audio)
+
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictMusiCNN(graphFilename="mtt-musicnn-1.pb", output="model/dense/BiasAdd")
+    activations = model(audio)
+
 
 Transfer learning classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -204,6 +264,26 @@ Classifiers trained on various datasets and audio embeddings.
 Demo: https://replicate.com/mtg/music-classifiers/
 
 Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
+
+Usage for music classification with the `MusiCNN` or `VGG` architectures:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictMusiCNN(graphFilename="genre_rosamerica-musicnn-msd-2.pb")
+    activations = model(audio)
+
+Usage for music classification with the `VGGish` architecture:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictVGGish(graphFilename="genre_rosamerica-vggish-audioset-1.pb")
+    activations = model(audio)
 
 Danceability
 ------------
@@ -585,6 +665,16 @@ Models:
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictVGGish(graphFilename="audioset-vggish-3.pb", output='model/vggish/embeddings')
+    embeddings = model(audio)
+
 
 Pitch detection
 ^^^^^^^^^^^^^^^
@@ -607,6 +697,16 @@ Models:
 * ``crepe-medium``
 * ``crepe-small``
 * ``crepe-tiny``
+
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, PitchCREPE
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = PitchCREPE(graphFilename="crepe-full-1.pb")
+    time, frequency, confidence, activations = model(audio)
 
 
 Source separation
@@ -653,3 +753,12 @@ Models:
 
 Naming convention: - TempoCNN: ``<architecture>-<model_size>-<version>.pb``
 
+Usage for tempo estimation:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TempoCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=11025)()
+    model = TempoCNN(graphFilename="deepsquare-k16-3.pb")
+    global_tempo, local_tempo, local_tempo_probabilities = model(audio)
