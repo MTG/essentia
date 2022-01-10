@@ -23,18 +23,18 @@ import functools
 
 class TestLevelExtractor(TestCase):
 
-    def TestEmpty(self):
+    def testEmpty(self):
         empty_vec = np.array([], dtype=np.single)
         self.assertRaises(RuntimeError, lambda: LevelExtractor()(empty_vec))
         # TODO: Actual errmsg should be more readable.
 
-    def TestSilence(self):
-        silence_vec = np.pad(np.array([], dtype=np.single), (88200))
+    def testSilence(self):
+        silence_vec = np.pad(np.array([], dtype=np.single), 44100)
         res = LevelExtractor()(silence_vec)
         self.assertEqual(len(res), 1)
         self.assertAlmostEqualFixedPrecision(res[0], 0, 5)
 
-    def TestIllegalParam(self):
+    def testIllegalParam(self):
         def param_setting_entries(frameSize, hopSize):
             def param_setting_lambda(frameSize, hopSize):
                 le = LevelExtractor()
@@ -49,22 +49,22 @@ class TestLevelExtractor(TestCase):
         self.assertRaises(Warning, param_setting_entries(44100, 88200))  # Should have issue warning.
         param_setting_entries(44100, 22050)()  # Should execute successfully.
 
-    def TestRandomInput(self):
+    def testRandomInput(self):
         n = 10
         for _ in range(n):
-            rand_input = np.random.random(88200) * 2 - 1
+            rand_input = np.random.random(88200).astype(np.single) * 2 - 1
             res = LevelExtractor()(rand_input)
             expected_res = np.sum(rand_input * rand_input) ** 0.67
-            self.AssertAlmostEqual(res, expected_res)
+            self.assertAlmostEqual(res[0], expected_res, 1e-4)
 
-    def TestRealAudio(self):
+    def testRealAudio(self):
         input_filename = join(testdata.audio_dir, "recorded", "dubstep.wav")
         audio = MonoLoader(filename=input_filename)()
         
         def test(frameSize, hopSize, assertion=self.assertAlmostEqualVector, error=1e-4):
             def ground_truth():
                 res = []
-                for i in range(0, len(audio), hopSize):
+                for i in range(0, len(audio) - frameSize + hopSize, hopSize):
                     res.append(np.sum(np.square(audio[i: i+frameSize])) ** 0.67)
                 return np.array(res, dtype=np.single)
 

@@ -129,7 +129,8 @@ class TestCase(BaseTestCase):
             diff = abs(expected)
         else:
             diff = abs((expected - found) / abs(expected))
-        self.assert_(diff <= precision, 'Difference is %e while allowed deviation from the expected value is %e %%' % (diff, precision*100))
+        self.assert_(diff <= precision,
+                     """Difference is %e while allowed relative error is %e""" % (diff, precision))
 
     def assertAlmostEqualVector(self, found, expected, precision = 1e-7):
         # we can use the optimized version if the two arrays are 1D numpy float arrays
