@@ -246,7 +246,7 @@ python3 test/src/unittests/all_tests.py audioloader_streaming
 
 Writing tests
 -------------
-It is manadatory to write Python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittests).
+It is manadatory to write Python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittests). The tests are based on [unittest](https://docs.python.org/3/library/unittest.html).
 
 All unit tests for algorithms are located in ```test/src/unittests``` folder. They are organized by sub-folders similarly to the code for the algorithms. 
 
