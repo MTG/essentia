@@ -5,9 +5,16 @@ Here we provide a collection of Python tutorials, grouped by various music/audio
 You can also check various code examples located in the `src/examples/python <https://github.com/MTG/essentia/tree/master/src/examples/python>`__ folder in the source code.
 
 
+Audio input/output
+------------------
+* `Audio and metadata loaders <tutorial_io_audio.html>`_
+
+
 Spectral representations
 ------------------------
 * `Spectrograms and mel-spectrograms <tutorial_spectral_representations.html>`_
+* `Invertible Constant-Q based on non-stationary Gabor frames <tutorial_spectral_constantq-nsg.html>`_
+
 
 Rhythm and onsets
 -----------------
@@ -23,6 +30,12 @@ Pitch and melody
 Tonality
 --------
 * `HPCP, key and scale detection <tutorial_tonal_hpcpkeyscale.html>`_
+* `Chords <tutorial_tonal_chords.html>`_
+
+
+Loudness/envelope
+-----------------
+* `Loudness and envelope <tutorial_loudness_envelope.html>`_
 
 
 Music Extractor
