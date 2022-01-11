@@ -42,7 +42,7 @@ make html
 # remove rst files generated from markdown
 rm FAQ.rst
 rm research_papers.rst
-rm tutorial_*.rst
+rm -r tutorial_*.rst tutorial_*_files
 
 # and copy doxygen into sphinx resulting dir
 echo "******** MERGING DOCUMENTATION ********"
