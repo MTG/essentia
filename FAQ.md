@@ -28,7 +28,7 @@ To install LibAv from source:
 - [Configure and build Essentia](http://essentia.upf.edu/documentation/installing.html#compiling-essentia)
 
 
-Linux/OSX static builds
+Linux/macOS static builds
 -----------------------
 
 Follow the steps below to create static build of the library and executable example extractors.
@@ -40,12 +40,12 @@ On Linux:
 apt-get install yasm cmake
 ```
 
-On OSX:
+On macOS:
 ```
 brew install yasm cmake wget
 ```
 
-Prepare static builds for dependencies running a script (works both for Linux and OSX):
+Prepare static builds for dependencies running a script (works both for Linux and macOS):
 ```
 packaging/build_3rdparty_static_debian.sh
 ```
@@ -91,7 +91,7 @@ Avoid all dependencies including fftw and build with KissFFT instead (BSD, inclu
 ./waf configure --lightweight= --fft=KISS
 ```
 
-Avoid all dependencies and build with Accelerate FFT (native on OSX/iOS):
+Avoid all dependencies and build with Accelerate FFT (native on macOS/iOS):
 
 ```
 ./waf configure --lightweight= --fft=ACCELERATE
@@ -198,10 +198,10 @@ Alternatively you could also build your applicaitons for asm.js targets by chang
 
 You can also find some examples of interfacing your Essentia cpp code to JavaScript [here](https://github.com/MTG/essentia.js/blob/master/docs/tutorials/2.%20Building%20from%20Source.md#writing-custom-essentia-c-extractor-and-cross-compile-to-js).
 
-OSX static builds and templates (JUCE/VST and openFrameworks)
+macOS static builds and templates (JUCE/VST and openFrameworks)
 -------------------------------------------------------------
 
-Here you can find portable 32-bit static builds of the Essentia C++ library and its dependencies for OSX (thanks to Cárthach from GiantSteps) as well as templates for JUCE/VST and openFrameworks:
+Here you can find portable 32-bit static builds of the Essentia C++ library and its dependencies for macOS (thanks to Cárthach from GiantSteps) as well as templates for JUCE/VST and openFrameworks:
 
 https://github.com/GiantSteps/Essentia-Libraries
 
@@ -209,14 +209,14 @@ https://github.com/GiantSteps/Essentia-Libraries
 Building standalone Essentia Vamp plugin
 ----------------------------------------
 
-It is possible to create a standalone binary for Essentia's Vamp plugin (works for Linux and OSX).
+It is possible to create a standalone binary for Essentia's Vamp plugin (works for Linux and macOS).
 
 ```
 ./waf configure --build-static --with-vamp --mode=release --lightweight= --fft=KISS
 ./waf
 ```
 
-The resulting binary (```build/src/examples/libvamp_essentia.so``` on Linux, ```build/src/examples/libvamp_essentia.dylib``` on OSX) is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
+The resulting binary (```build/src/examples/libvamp_essentia.so``` on Linux, ```build/src/examples/libvamp_essentia.dylib``` on macOS) is a lightweight shared library that can be distributed as a single file without requirement to install Essentia's dependencies on the target machine.
 
 
 Running tests
@@ -228,25 +228,25 @@ The most important test is the basetest, it should never fail:
 ./build/basetest
 ```
 
-Run all python tests: 
+Run all Python tests:
 ```
-./waf run_python_tests
+python3 waf run_python_tests
 ```
     
 Run all tests except specific ones:
 ```
-python test/src/unittests/all_tests.py -audioloader_streaming
+python3 test/src/unittests/all_tests.py -audioloader_streaming
 ```
 
 Run a specific test
 ```
-python test/src/unittests/all_tests.py audioloader_streaming
+python3 test/src/unittests/all_tests.py audioloader_streaming
 ```
 
 
 Writing tests
 -------------
-It is manadatory to write python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittests).
+It is manadatory to write Python unit tests when developing new algorithms to be included in Essentia. The easiest way to start writing a test is to adapt [existing examples](https://github.com/MTG/essentia/tree/master/test/src/unittests). The tests are based on [unittest](https://docs.python.org/3/library/unittest.html).
 
 All unit tests for algorithms are located in ```test/src/unittests``` folder. They are organized by sub-folders similarly to the code for the algorithms. 
 
@@ -284,7 +284,7 @@ Alternatively, if you want to create and build your own examples, the easiest wa
 
 If you would also like to use [waf](https://waf.io/) in your application as we do, we provide an [example waf template using Essentia](https://github.com/MTG/essentia-project-template/).
 
-You can build your application using XCode (OSX) following [these steps](https://github.com/MTG/essentia/issues/58#issuecomment-38530548).
+You can build your application using XCode (macOS) following [these steps](https://github.com/MTG/essentia/issues/58#issuecomment-38530548).
 
 
 How to compute music descriptors using Essentia?
@@ -293,7 +293,7 @@ How to compute music descriptors using Essentia?
 Because Essentia is a library you are very fexible in the ways you can compute descriptors out of audio:
 
 - using [premade extractors out-of-box](extractors_out_of_box.html) (the easiest way without programming)
-- using python (see [python tutorial](python_tutorial.html))
+- using Python (see [Python tutorial](python_tutorial.html))
 - writing your own C++ extractor (see the premade extractors as examples)
 
 
@@ -302,7 +302,7 @@ How to know which other Algorithms an Algorithm uses?
 
 The most obvious answer is: by reading its code. However, it is also possible to generate such a list automatically. 
 
-Running the python script ```src/examples/python/show_algo_dependencies.py``` will output a list of all intermediate Algorithms created within each Algorithm in Essentia. It utilizes the logging framework and watches for messages generated by AlgorithmFactory at the moment of running ```create()``` method for each internal algorithm.  
+Running the Python script ```src/examples/python/show_algo_dependencies.py``` will output a list of all intermediate Algorithms created within each Algorithm in Essentia. It utilizes the logging framework and watches for messages generated by AlgorithmFactory at the moment of running ```create()``` method for each internal algorithm.
 
 Note, that you cannot be sure this list of dependencies is 100% correct as the script simply instantiates each algorithm to test for its dependencies, but does not run the ```compute``` stage. It is up to developers conscience to keep instantiations in a correct place, and if an Algorithm is being created on the ```compute``` stage, it will be unnoticed.
 
@@ -310,13 +310,13 @@ Note, that you cannot be sure this list of dependencies is 100% correct as the s
 
 The amount of algorithms counting streaming and standard mode separately:
 ```
-python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
+python3 src/examples/python/show_algo_dependencies.py > /tmp/all.txt
 cat /tmp/all.txt | grep -- "---------- " | wc -l
 ```
 
 The amount of algorithms counting both modes as one algorithm:
 ```
-python src/examples/python/show_algo_dependencies.py > /tmp/all.txt
+python3 src/examples/python/show_algo_dependencies.py > /tmp/all.txt
 cat /tmp/all.txt | grep -- "---------- " | cut -c 12- | sed s/"streaming : "// | sed s/"standard : "// | sed s/" ----------"// | sort -u | wc -l
 ```
 
@@ -343,16 +343,16 @@ Essentia Music Extractor
 
 ### Converting descriptor files to CSV
 
-Many researchers are still unfamiliar with [JSON](https://en.wikipedia.org/wiki/JSON) and instead commonly use [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) file format. We have provided a python script that can convert a bunch of input JSON descriptor files (produced by Music Extractor or Freesound extractor) into a CSV file, where each raw represents analysis results for a particular audio recording. 
+Many researchers are still unfamiliar with [JSON](https://en.wikipedia.org/wiki/JSON) and instead commonly use [CSV](https://en.wikipedia.org/wiki/Comma-separated_values) file format. We have provided a Python script that can convert a bunch of input JSON descriptor files (produced by Music Extractor or Freesound extractor) into a CSV file, where each raw represents analysis results for a particular audio recording. 
 
 For more help, run: 
 ```
-python src/examples/python/json_to_csv.py -h
+python3 src/examples/python/json_to_csv.py -h
 ```
 
 Example command that merges analysis for two recordings, ignoring a bunch of descriptors:
 ```
-python src/examples/python/json_to_csv.py -i /tmp/1.json /tmp/2.json -o /tmp/foo.csv --include metadata.audio_properties.* metadata.tags.musicbrainz_recordingid.0 lowlevel.* rhythm.* tonal.* --ignore *.min *.min.* *.max *.max.* *.dvar *.dvar2 *.dvar.* *.dvar2.* *.dmean *.dmean2 *.dmean.* *.dmean2.* *.cov.* *.icov.* rhythm.beats_position.*  --add-filename
+python3 src/examples/python/json_to_csv.py -i /tmp/1.json /tmp/2.json -o /tmp/foo.csv --include metadata.audio_properties.* metadata.tags.musicbrainz_recordingid.0 lowlevel.* rhythm.* tonal.* --ignore *.min *.min.* *.max *.max.* *.dvar *.dvar2 *.dvar.* *.dvar2.* *.dmean *.dmean2 *.dmean.* *.dmean2.* *.cov.* *.icov.* rhythm.beats_position.*  --add-filename
 ```
 
 

@@ -12,7 +12,7 @@ Documentation online: http://essentia.upf.edu
 Installation
 ------------
 
-The library is cross-platform and currently supports Linux, Mac OS X, Windows, iOS and Android systems. Read installation instructions:
+The library is cross-platform and currently supports Linux, macOS, Windows, iOS and Android systems. Read installation instructions:
 -  http://essentia.upf.edu/documentation/installing.html 
 -  [doc/sphinxdoc/installing.rst](doc/sphinxdoc/installing.rst)
 
@@ -30,7 +30,7 @@ You can download and use prebuilt static binaries for a number of Essentia's com
 Quick start
 -----------
 
-Quick start using python: 
+Quick start using Python:
 - http://essentia.upf.edu/documentation/essentia_python_tutorial.html
 - [Jupyter Notebook Essentia tutorial](/src/examples/tutorial/essentia_python_tutorial.ipynb)
 

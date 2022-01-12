@@ -123,7 +123,7 @@ You can train your own SVM classifier models as described below.
 To run SVM classification in Essentia you need to prepare a classifier model in Gaia and run the ``GaiaTransform`` algorithm configured to use this model. The example of using high-level models can be seen in the code of ``streaming_music_extractor``. Here we discuss the steps to be followed to train classifier models that can be used with this extractor.
 
 1. Compute music descriptors using ``streaming_music_extractor`` for all audio files.
-2. Install Gaia with python bindings.
+2. Install Gaia with Python bindings.
 3. Prepare JSON `groundtruth <https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/groundtruth_example.yaml>`_ and `filelist <https://github.com/MTG/gaia/blob/master/src/bindings/pygaia/scripts/classification/filelist_example.yaml>`_ files (see examples).
     - Groundtruth file maps identifiers for audio files (they can be paths to audio files or whatever id strings you want to use) to class labels. 
     - Filelist file maps these identifiers to the actual paths to the descriptor files for each audio track. 
@@ -167,7 +167,7 @@ How to train an SVM model with a different set of parameters
 
 Our training script generates a single model retrained on the whole dataset with the best parameters combination from the grid search. However, you may want to generate new models with custom parametrizations. Imagine, for instance, that you need a model that runs on a lighter set of features despite the accuracy drop, or that you believe that a different parameter set can improve results for your particular scenario.
 
-To generate a model given the ``<project_file>`` and your chosen ``<param_file>`` from the results folder, execute the following python lines::
+To generate a model given the ``<project_file>`` and your chosen ``<param_file>`` from the results folder, execute the following Python lines::
 
   from gaia2.scripts.classification.retrain_model import retrainModel
   retrainModel(project_file, param_file, output_file)

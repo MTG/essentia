@@ -23,8 +23,7 @@ doxygen doc/Doxyfile
 
 # now build Sphinx doc
 cd doc/sphinxdoc
-echo "******** GENERATE ALGORITHMS REFERENCE AND TUTORIALS ********"
-
+echo "******** GENERATE ALGORITHMS REFERENCE ********"
 # force using default python3 if the the argument is not supplied
 if [ -z "$1" ]
     then
@@ -32,13 +31,18 @@ if [ -z "$1" ]
     else
         "$1" generate_reference.py
 fi
+
 echo "******** BUILDING SPHINX DOCUMENTATION ********"
+pandoc ../../FAQ.md -o FAQ.rst
+pandoc research_papers.md -o research_papers.rst
+jupyter nbconvert ../../src/examples/python/*.ipynb --to rst --output-dir .
+
 make html
 
 # remove rst files generated from markdown
 rm FAQ.rst
 rm research_papers.rst
-
+rm -r tutorial_*.rst tutorial_*_files
 
 # and copy doxygen into sphinx resulting dir
 echo "******** MERGING DOCUMENTATION ********"

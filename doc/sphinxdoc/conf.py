@@ -62,7 +62,7 @@ master_doc = 'contents'
 
 # General information about the project.
 project = u'Essentia'
-copyright = u'2006-2017, Universitat Pompeu Fabra'
+copyright = u'2006-2022, Universitat Pompeu Fabra'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -208,10 +208,10 @@ htmlhelp_basename = 'Essentiadoc'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
-latex_documents = [
-  ('index', 'Essentia.tex', u'Essentia Documentation',
-   u'Nicolas Wack', 'manual'),
-]
+#latex_documents = [
+#  ('index', 'Essentia.tex', u'Essentia Documentation',
+#   u'Nicolas Wack', 'manual'),
+#]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -241,10 +241,10 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    ('index', 'essentia', u'Essentia Documentation',
-     [u'Nicolas Wack'], 1)
-]
+#man_pages = [
+#    ('index', 'essentia', u'Essentia Documentation',
+#     [u'Nicolas Wack'], 1)
+#]
 
 
 doxylink = {
