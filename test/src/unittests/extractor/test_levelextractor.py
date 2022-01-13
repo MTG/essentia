@@ -23,18 +23,18 @@ import functools
 
 class TestLevelExtractor(TestCase):
 
-    def testEmpty(self):
+    def test_empty(self):
         empty_vec = np.array([], dtype=np.single)
         self.assertRaises(RuntimeError, lambda: LevelExtractor()(empty_vec))
         # TODO: Actual errmsg should be more readable.
 
-    def testSilence(self):
-        silence_vec = np.pad(np.array([], dtype=np.single), 44100)
+    def test_silence(self):
+        silence_vec = np.zeros(44100, dtype=np.single)
         res = LevelExtractor()(silence_vec)
         self.assertEqual(len(res), 1)
         self.assertAlmostEqualFixedPrecision(res[0], 0, 5)
 
-    def testIllegalParam(self):
+    def test_illegal_param(self):
         def param_setting_entries(frameSize, hopSize):
             def param_setting_lambda(frameSize, hopSize):
                 le = LevelExtractor()
@@ -49,7 +49,7 @@ class TestLevelExtractor(TestCase):
         self.assertRaises(Warning, param_setting_entries(44100, 88200))  # Should have issue warning.
         param_setting_entries(44100, 22050)()  # Should execute successfully.
 
-    def testRandomInput(self):
+    def test_random_input(self):
         n = 10
         for _ in range(n):
             rand_input = np.random.random(88200).astype(np.single) * 2 - 1
@@ -57,7 +57,7 @@ class TestLevelExtractor(TestCase):
             expected_res = np.sum(rand_input * rand_input) ** 0.67
             self.assertAlmostEqual(res[0], expected_res, 1e-4)
 
-    def testRealAudio(self):
+    def test_real_audio(self):
         input_filename = join(testdata.audio_dir, "recorded", "dubstep.wav")
         audio = MonoLoader(filename=input_filename)()
         
