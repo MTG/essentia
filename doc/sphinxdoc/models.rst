@@ -652,6 +652,9 @@ Models:
 
 Naming convention: ``<architecture>-<source_task>-<number_of_mel_bands>-<embedding_dimensions>-<version>.pb``
 
+Usage for embedding extraction:
+
+We are currently working on a dedicated algorithm to extract embeddings with the OpenL3 models. For now this can be achieved with `this script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
 
 AudioSet-VGGish
 ---------------
