@@ -6,36 +6,28 @@ Essentia TensorFlow models
 This is a list of pre-trained TensorFlow models available in Essentia for various (music) audio analysis and classification tasks. To use the models in Essentia, see the `machine learning inference <machine_learning.html>`_ page.
 
 
-All the models created by the MTG are licensed under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/) and are also available under proprietary license upon request (https://www.upf.edu/web/mtg/contact).
+All the models created by the MTG are licensed under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/) and are also available under proprietary license upon request (https://www.upf.edu/web/mtg/contact). Check the `LICENSE <https://essentia.upf.edu/models/LICENSE>`_ of the models.
 
 
-The models are serialized in `Protocol Buffer <https://developers.google.com/protocol-buffers/>`_ files suitable for inference with Essentia and TensorFlow. Additionally, some models are also available in `TensorFlow.js <https://www.tensorflow.org/js/models>`_) format. Each ``.pb`` file is coupled with a ``.json`` file containing its metadata.
+The models are serialized in `Protocol Buffer <https://developers.google.com/protocol-buffers/>`_ files suitable for inference with Essentia and TensorFlow. Additionally, some models are also available in `TensorFlow.js <https://www.tensorflow.org/js/models>`_ format. Each ``.pb`` file is coupled with a ``.json`` file containing its metadata.
+
+As this is an ongoing project we expect to keep adding new models and improved versions of the existing ones. These changes are tracked in this `CHANGELOG <https://essentia.upf.edu/models/CHANGELOG.md>`_.
 
 
-Model file naming conventions:
+We support models for the followings tasks:
 
-- classifiers: ``<target_task>-<architecture>-<source_task>-<version>.pb``
-- MusiCNN: ``<task>-<architecture>-<version>.pb``
-- OpenL3: ``<architecture>-<params>-<version>.pb``
-- Spleeter: ``<architecture>-<params>-<version>.pb``
-- TempoCNN: ``<architecture>-<params>-<version>.pb``
-- VGG: ``<task>-<architecture>-<version>.pb``
-- VGGish: ``<task>-<architecture>-<version>.pb``
-- YAMNet: ``<task>-<architecture>-<version>.pb``
-
-Where:
-
-- ``<architecture>``: the architecture of the model (refers only to the source model on the transfer learning classifiers).
-- ``<task>`` and ``<source-task>``: the dataset in which the model, or the source model was trained.
-- ``<target-task>``: the dataset in which the target model was trained (only for the transfer learning classifiers).
-- ``params``: parameters specific to a particular family of models.
-- ``version``: represents the incremental version of the model. We do not guaranty full compatibility between different versions.
-
+* :ref:`Audio event recognition`
+* :ref:`Music auto-tagging`
+* :ref:`Transfer learning classifiers`
+* :ref:`Feature extractors`
+* :ref:`Pitch detection`
+* :ref:`Source separation`
+* :ref:`Tempo estimation`
 
 
 Audio event recognition
 ^^^^^^^^^^^^^^^^^^^^^^^
-Download: https://essentia.upf.edu/models/audio-event-recognition/
+`Download model files <https://essentia.upf.edu/models/audio-event-recognition/>`_
 
 AudioSet
 --------
@@ -154,11 +146,33 @@ Models:
 
 * ``audioset-yamnet``
 
+Naming convention: ``<task>-<architecture>-<version>.pb``
+
+Usage for audio event detection:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictVGGish(graphFilename="audioset-yamnet-1.pb", input="melspectrogram", output="activations")
+    activations = model(audio)
+
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictVGGish(graphFilename="audioset-yamnet-1.pb", input="melspectrogram", output="embeddings")
+    embeddings = model(audio)
+
 
 Music auto-tagging
 ^^^^^^^^^^^^^^^^^^
 
-Download: https://essentia.upf.edu/models/autotagging/
+`Download model files <https://essentia.upf.edu/models/autotagging/>`_
 
 
 Million Song Dataset
@@ -179,6 +193,27 @@ Models:
 * ``msd-musicnn``
 * ``msd-vgg``
 
+Naming convention: ``<task>-<architecture>-<version>.pb``
+
+Usage for audio event detection:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictMusiCNN(graphFilename="msd-musicnn-1.pb")
+    activations = model(audio)
+
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictMusiCNN(graphFilename="msd-musicnn-1.pb", output="model/dense/BiasAdd")
+    activations = model(audio)
 
 
 MagnaTagATune
@@ -199,16 +234,59 @@ Models:
 * ``mtt-musicnn``
 * ``mtt-vgg``
 
+Naming convention: ``<task>-<architecture>-<version>.pb``
+
+Usage for audio event detection:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictMusiCNN(graphFilename="mtt-musicnn-1.pb")
+    activations = model(audio)
+
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictMusiCNN(graphFilename="mtt-musicnn-1.pb", output="model/dense/BiasAdd")
+    activations = model(audio)
+
 
 Transfer learning classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Classifiers trained on various datasets and audio embeddings.
 
-Download: https://essentia.upf.edu/models/classifiers/
+`Download model files <https://essentia.upf.edu/models/classifiers/>`_
 
 Demo: https://replicate.com/mtg/music-classifiers/
 
+Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
+
+Usage for music classification with the `MusiCNN` or `VGG` architectures:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictMusiCNN(graphFilename="genre_rosamerica-musicnn-msd-2.pb")
+    activations = model(audio)
+
+Usage for music classification with the `VGGish` architecture:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictVGGish(graphFilename="genre_rosamerica-vggish-audioset-1.pb")
+    activations = model(audio)
 
 Danceability
 ------------
@@ -497,7 +575,7 @@ Music classification by mood (5 mood clusters):
 `4: humorous, silly, campy, quirky, whimsical, witty, wry`,
 `5: aggressive, fiery, tense/anxious, intense, volatile, visceral`
 
-Dataset: MIREX Audio Mood Classification Dataset
+Dataset: MIREX Audio Mood Classification Dataset.
 
 Output: activations.
 
@@ -549,7 +627,7 @@ Models:
 Feature extractors
 ^^^^^^^^^^^^^^^^^^
 
-Download: https://essentia.upf.edu/models/feature-extractors/
+`Download model files <https://essentia.upf.edu/models/feature-extractors/>`_
 
 
 OpenL3
@@ -572,13 +650,18 @@ Models:
 * ``openl3-music-mel256-emb512``
 * ``openl3-music-mel256-emb6144``
 
+Naming convention: ``<architecture>-<source_task>-<number_of_mel_bands>-<embedding_dimensions>-<version>.pb``
+
+Usage for embedding extraction:
+
+We are currently working on a dedicated algorithm to extract embeddings with the OpenL3 models. For now this can be achieved with `this script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
 
 AudioSet-VGGish
 ---------------
 
-Audio embeddings model accompanying the AudioSet dataset, trained to predict tags from Youtube videos.
+Audio embeddings model accompanying the AudioSet dataset, trained in a supervised manner using tag information for YouTube videos.
 
-Dataset: preliminary subset of Youtube-8M.
+Dataset: Subset of Youtube-8M.
 
 Output: embeddings.
 
@@ -586,16 +669,28 @@ Models:
 
 * ``audioset-vggish``
 
+Naming convention: ``<task>-<architecture>-<version>.pb``
+
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictVGGish(graphFilename="audioset-vggish-3.pb", output='model/vggish/embeddings')
+    embeddings = model(audio)
+
 
 Pitch detection
 ^^^^^^^^^^^^^^^
 
-Download: https://essentia.upf.edu/models/pitch/
+`Download model files <https://essentia.upf.edu/models/pitch/>`_
 
 Monophonic pitch tracker (CREPE)
 --------------------------------
 
-Monophonic pìtch detection (360 20-cent pitch bins, C1-B7).
+Monophonic pitch detection (360 20-cent pitch bins, C1-B7).
 
 Dataset: RWC-synth, MDB-stem-synth.
 
@@ -609,11 +704,23 @@ Models:
 * ``crepe-small``
 * ``crepe-tiny``
 
+Naming convention: ``<architecture>-<model_size>-<version>.pb``
+
+Usage for pitch estimation:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, PitchCREPE
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = PitchCREPE(graphFilename="crepe-full-1.pb")
+    time, frequency, confidence, activations = model(audio)
+
 
 Source separation
 ^^^^^^^^^^^^^^^^^
 
-Download: https://essentia.upf.edu/models/source-separation/
+`Download model files <https://essentia.upf.edu/models/source-separation/>`_
 
 Spleeter
 --------
@@ -630,11 +737,12 @@ Models:
 * ``spleeter-4s``
 * ``spleeter-5s``
 
+Naming convention: ``<architecture>-<number_of_stems>-<version>.pb``
 
 Tempo estimation
 ^^^^^^^^^^^^^^^^
 
-Download: https://essentia.upf.edu/models/tempo/
+`Download model files <https://essentia.upf.edu/models/tempo/>`_
 
 TempoCNN
 --------
@@ -651,3 +759,14 @@ Models:
 * ``deeptemp-k4``
 * ``deeptemp-k16``
 
+Naming convention: ``<architecture>-<model_size>-<version>.pb``
+
+Usage for tempo estimation:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TempoCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=11025)()
+    model = TempoCNN(graphFilename="deepsquare-k16-3.pb")
+    global_tempo, local_tempo, local_tempo_probabilities = model(audio)
