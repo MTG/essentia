@@ -739,6 +739,32 @@ Models:
 
 Naming convention: ``<architecture>-<number_of_stems>-<version>.pb``
 
+Performing source separation:
+
+.. code-block:: python
+
+    from essentia.standard import AudioLoader, TensorflowPredict
+    from essentia import Pool
+    import numpy as np
+
+    # Input should be audio @48kHz.
+    audio, sr, _, _, _, _ = AudioLoader(filename="audio.wav")()
+
+    pool = Pool()
+    # The input needs to have 4 dimensions so that it is interpreted as an Essentia tensor.
+    pool.set("waveform", audio[..., np.newaxis, np.newaxis])
+
+    model = TensorflowPredict(
+        graphFilename="spleeter-2s-3.pb",
+        inputs=["waveform"],
+        outputs=["waveform_vocals", "waveform_accompaniment"]
+    )
+
+    out_pool = model(pool)
+    vocals = out_pool["waveform_vocals"].squeeze()
+    accompaniment = out_pool["waveform_accompaniment"].squeeze()
+
+
 Tempo estimation
 ^^^^^^^^^^^^^^^^
 
@@ -770,3 +796,4 @@ Usage for tempo estimation:
     audio = MonoLoader(filename="audio.wav", sampleRate=11025)()
     model = TempoCNN(graphFilename="deepsquare-k16-3.pb")
     global_tempo, local_tempo, local_tempo_probabilities = model(audio)
+
