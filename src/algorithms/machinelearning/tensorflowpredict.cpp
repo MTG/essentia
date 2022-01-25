@@ -249,7 +249,7 @@ TF_Tensor* TensorflowPredict::TensorToTF(
   int dims = 1;
   vector<int64_t> shape;
 
-  // Batch dimensions is the only one allowed to be singleton
+  // With squeeze, the Batch dimension is the only one allowed to be singleton
   shape.push_back((int64_t)tensorIn.dimension(0));
 
   if (_squeeze) {
@@ -259,6 +259,13 @@ TF_Tensor* TensorflowPredict::TensorToTF(
         dims++;
       }
     }
+
+    // There should be at least 2 dimensions (batch, data)
+    if (dims == 1) {
+      shape.push_back((int64_t) 1);
+      dims++;
+    }
+
   } else {
     dims = tensorIn.rank();
     for(int i = 1; i < dims; i++) {
