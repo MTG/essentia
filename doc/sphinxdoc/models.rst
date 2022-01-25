@@ -293,7 +293,7 @@ Danceability
 
 Music danceability (2 classes):
 
-`danceable`, `danceable`
+`danceable`, `not_danceable`
 
 Dataset: inhouse (MTG).
 
