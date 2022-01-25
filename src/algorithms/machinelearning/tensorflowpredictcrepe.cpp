@@ -194,8 +194,6 @@ void TensorflowPredictCREPE::createInnerNetwork() {
 
 
 void TensorflowPredictCREPE::configure() {
-  // If no file has been specified, do not do anything.
-  if (!parameter("graphFilename").isConfigured()) return;
   _tensorflowPredictCREPE->configure(INHERIT("graphFilename"),
                                      INHERIT("input"),
                                      INHERIT("output"),

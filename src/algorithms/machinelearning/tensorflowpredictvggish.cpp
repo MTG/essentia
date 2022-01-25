@@ -189,8 +189,6 @@ void TensorflowPredictVGGish::createInnerNetwork() {
 
 
 void TensorflowPredictVGGish::configure() {
-  // if no file has been specified, do not do anything
-  if (!parameter("graphFilename").isConfigured()) return;
   _tensorflowPredictVGGish->configure(INHERIT("graphFilename"),
                                       INHERIT("savedModel"),
                                       INHERIT("input"),
