@@ -109,7 +109,7 @@ void TensorflowPredict::configure() {
     TF_Tensor *isTraining = TF_AllocateTensor(TF_BOOL, dims, 0, 1);
     void* isTrainingValue = TF_TensorData(isTraining);
 
-    if (isTrainingValue == nullptr) {
+    if (isTrainingValue == NULL) {
       TF_DeleteTensor(isTraining);
       throw EssentiaException("TensorflowPredict: Error generating training phase flag");
     }
@@ -142,7 +142,7 @@ void TensorflowPredict::openGraph() {
   if (!_graphFilename.empty()) {
     // First we load and initialize the model.
     const auto f = fopen(_graphFilename.c_str(), "rb");
-    if (f == nullptr) {
+    if (f == NULL) {
       throw EssentiaException(
           "TensorflowPredict: could not open the Tensorflow graph file.");
     }
@@ -218,20 +218,20 @@ void TensorflowPredict::compute() {
 
   // Initialize output tensors.
   for (size_t i = 0; i < _nOutputs; i++) {
-    _outputTensors[i] = nullptr;
+    _outputTensors[i] = NULL;
   }
 
   // Run the Tensorflow session.
   TF_SessionRun(_session,
-                nullptr,                         // Run options.
+                NULL,                            // Run options.
                 &_inputNodes[0],                 // Input node names.
                 &_inputTensors[0],               // input tensor values.
                 _nInputs + (int)_isTrainingSet,  // Number of inputs.
                 &_outputNodes[0],                // Output node names.
                 &_outputTensors[0],              // Output tensor values.
                 _nOutputs,                       // Number of outputs.
-                nullptr, 0,                      // Target operations, number of targets.
-                nullptr,                         // Run metadata.
+                NULL, 0,                         // Target operations, number of targets.
+                NULL,                            // Run metadata.
                 _status                          // Output status.
                );
 
@@ -281,14 +281,14 @@ TF_Tensor* TensorflowPredict::TensorToTF(
       TF_FLOAT, &shape[0], dims,
       (size_t)tensorIn.size() * sizeof(Real));
 
-  if (tensorOut == nullptr) {
+  if (tensorOut == NULL) {
     throw EssentiaException("TensorflowPredict: Error generating input tensor.");
   }
 
   // Get a pointer to the data and fill the tensor.
   void* tensorData = TF_TensorData(tensorOut);
 
-  if (tensorData == nullptr) {
+  if (tensorData == NULL) {
     TF_DeleteTensor(tensorOut);
     throw EssentiaException("TensorflowPredict: Error generating input tensors data.");
   }
@@ -335,7 +335,7 @@ TF_Output TensorflowPredict::graphOperationByName(const char* nodeName,
   // I don't understand the fuction of index here.
   TF_Output output = {TF_GraphOperationByName(_graph, nodeName), index};
 
-  if (output.oper == nullptr) {
+  if (output.oper == NULL) {
     throw EssentiaException("TensorflowPredict: '" + string(nodeName) +
                             "' is not a valid node name of this graph.\n" +
                             availableNodesInfo());
@@ -349,7 +349,7 @@ vector<string> TensorflowPredict::nodeNames() {
   TF_Operation *oper;
   vector<string> nodeNames;
 
-  while ((oper = TF_GraphNextOperation(_graph, &pos)) != nullptr) {
+  while ((oper = TF_GraphNextOperation(_graph, &pos)) != NULL) {
     nodeNames.push_back(string(TF_OperationName(oper)));
   }
 
