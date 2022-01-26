@@ -350,16 +350,39 @@ TF_Output TensorflowPredict::graphOperationByName(const string nodeName) {
   // nodeName:2, ...).
   string::size_type n = nodeName.find(':');
   if (n != string::npos) {
-    index = stoi(nodeName.substr(n + 1));
+    try {
+      string::size_type next_char;
+      index = stoi(nodeName.substr(n + 1), &next_char);
+
+      if (n + next_char + 1 != nodeName.size()) {
+        throw EssentiaException("TensorflowPredict: `" + nodeName + "` is not a valid node name, the index cannot "
+                                "be followed by other characters. Make sure that all your inputs and outputs follow "
+                                "the pattern `nodeName:n`, where `n` in an integer that goes from 0 to the number "
+                                "of outputs of the node - 1.");
+      }
+
+    } catch (const invalid_argument& ) {
+      throw EssentiaException("TensorflowPredict: `" + nodeName + "` is not a valid node name. Make sure that all "
+                              "your inputs and outputs follow the pattern `nodeName:n`, where `n` in an integer that "
+                              "goes from 0 to the number of outputs of the node - 1.");
+    } 
     name = nodeName.substr(0, n).c_str();
   }
 
-  TF_Output output = {TF_GraphOperationByName(_graph, name), index};
+  TF_Operation* oper = TF_GraphOperationByName(_graph, name);
+
+  TF_Output output = {oper, index};
 
   if (output.oper == nullptr) {
     throw EssentiaException("TensorflowPredict: '" + string(nodeName) +
                             "' is not a valid node name of this graph.\n" +
                             availableNodesInfo());
+  }
+
+  int n_outputs = TF_OperationNumOutputs(oper);
+  if (index > n_outputs - 1) {
+    throw EssentiaException("TensorflowPredict: Asked for the output with index `" + to_string(index) +
+                            "`, but the node `" + name + "` only has `" + to_string(n_outputs) + "` outputs.");
   }
 
   return output;
