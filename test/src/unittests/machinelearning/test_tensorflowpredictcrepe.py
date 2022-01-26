@@ -22,7 +22,7 @@ from essentia_test import *
 
 class TestTensorflowPredictCREPE(TestCase):
 
-    def testRegression(self):
+    def regression(self, parameters):
         expected_activations = numpy.load(
             join(filedir(),
             'tensorflowpredict_crepe',
@@ -33,9 +33,17 @@ class TestTensorflowPredictCREPE(TestCase):
         model = join(testdata.models_dir, 'crepe', 'crepe-tiny-1.pb')
 
         audio = MonoLoader(filename=filename, sampleRate=16000)()
-        activations = TensorflowPredictCREPE(graphFilename=model)(audio)
+        activations = TensorflowPredictCREPE(**parameters)(audio)
 
         self.assertAlmostEqualMatrix(activations, expected_activations, 1e-2)
+
+
+    def testRegressionGraphFilename(self):
+        self.regression({'graphFilename': join(testdata.models_dir, 'crepe', 'crepe-tiny-1.pb')})
+
+    def testRegressionSavedModel(self):
+        self.regression({'savedModel': join(testdata.models_dir, 'crepe', 'crepe-tiny-1')})
+
 
     def testEmptyModelName(self):
         # With empty or undefined model names the algorithm should skip the configuration
