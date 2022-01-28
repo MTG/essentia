@@ -129,7 +129,7 @@ class TestTensorFlowPredict(TestCase):
                                                           'savedModel':'',
                                                           'inputs': ['wrong_input']
                                                          })
-    
+
     def testInvalidParam(self):
         model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
         self.assertConfigureFails(TensorflowPredict(), {'graphFilename': model})  # inputs and outputs are not defined
@@ -180,6 +180,54 @@ class TestTensorFlowPredict(TestCase):
         foundValues = poolOut['model/Identity']
 
         self.assertAlmostEqualMatrix(foundValues, batch)
+
+    def testImplicitOutputTensorIndex(self):
+        model = join(filedir(), 'tensorflowpredict', 'identity.pb')
+        batch = numpy.reshape(numpy.arange(4, dtype='float32'), (1, 1, 2, 2))
+
+        pool = Pool()
+        pool.set('model/Placeholder', batch)
+
+        implicit_output = 'model/Identity'
+        implicit = TensorflowPredict(
+            graphFilename=model,
+            inputs=['model/Placeholder'],
+            outputs=[implicit_output],
+        )(pool)[implicit_output].squeeze()
+
+        explicit_output = 'model/Identity:0'
+        explicit = TensorflowPredict(
+            graphFilename=model,
+            inputs=['model/Placeholder'],
+            outputs=[explicit_output],
+        )(pool)[explicit_output].squeeze()
+
+        self.assertAlmostEqualMatrix(implicit, explicit)
+
+    def testNodeNameParser(self):
+        model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
+
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': model,
+                                                        'inputs': ['model/Placeholder'],
+                                                        'outputs': ['model/Softmax:0a'],
+                                                        })  # Invalid index.
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': model,
+                                                        'inputs': ['model/Placeholder'],
+                                                        'outputs': ['model/Softmax:'],
+                                                        })  # No index.
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': model,
+                                                        'inputs': ['model/Placeholder'],
+                                                        'outputs': ['model/Softmax:3'],
+                                                        })  # Index out of bounds.
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': model,
+                                                        'inputs': ['model/Placeholder'],
+                                                        'outputs': ['model/Softmax::0'],
+                                                        })  # Double colon.
+        self.assertConfigureFails(TensorflowPredict(), {'graphFilename': model,
+                                                        'inputs': ['model/Placeholder'],
+                                                        'outputs': ['model/Softmax:s:0'],
+                                                        })  # Several colons.
+
 
 suite = allTests(TestTensorFlowPredict)
 
