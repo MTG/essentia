@@ -68,7 +68,7 @@ class TensorflowPredict : public Algorithm {
   void openGraph();
   TF_Tensor* TensorToTF(const Tensor<Real>& tensorIn);
   const Tensor<Real> TFToTensor(const TF_Tensor* tensor, TF_Output node);
-  TF_Output graphOperationByName(const char* nodeName, int index=0);
+  TF_Output graphOperationByName(const std::string nodeName);
   std::vector<std::string> nodeNames();
 
   inline std::string availableNodesInfo() {

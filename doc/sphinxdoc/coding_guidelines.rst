@@ -35,7 +35,7 @@ guidelines for it now. Have a look at the examples to get the feeling of it.
 
 Specific points:
 
-* tabs are forbidden, use spaces. Used tabs sizes are 2 spaces in C++, 4 spaces in python.
+* tabs are forbidden, use spaces. Used tabs sizes are 2 spaces in C++, 4 spaces in Python.
 * a comma (',') is **always** followed by a space (' ')
 * curly brackets are NOT on a new line, except (maybe) for function definitions.
 * in C++ class declarations, put only one space before the access type (public, protected, private)
