@@ -63,6 +63,8 @@ class TensorflowPredict : public Algorithm {
 
   bool _squeeze;
 
+  bool _isConfigured;
+
   void openGraph();
   TF_Tensor* TensorToTF(const Tensor<Real>& tensorIn);
   const Tensor<Real> TFToTensor(const TF_Tensor* tensor, TF_Output node);
@@ -79,7 +81,8 @@ class TensorflowPredict : public Algorithm {
  public:
   TensorflowPredict() : _graph(TF_NewGraph()), _status(TF_NewStatus()),
       _options(TF_NewImportGraphDefOptions()), _sessionOptions(TF_NewSessionOptions()),
-      _session(TF_NewSession(_graph, _sessionOptions, _status)), _runOptions(NULL) {
+      _session(TF_NewSession(_graph, _sessionOptions, _status)), _runOptions(NULL),
+      _isConfigured(false) {
     declareInput(_poolIn, "poolIn", "the pool where to get the feature tensors");
     declareOutput(_poolOut, "poolOut", "the pool where to store the output tensors");
   }

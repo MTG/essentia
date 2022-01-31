@@ -72,6 +72,11 @@ void TensorflowPredict::configure() {
   _savedModel = parameter("savedModel").toString();
   _graphFilename = parameter("graphFilename").toString();
 
+  if ((_savedModel.empty()) and (_graphFilename.empty()) and (_isConfigured)) {
+    E_WARNING("TensorflowPredict: You are trying to update a valid configuration with invalid parameters. "
+              "If you want to update the configuration specify a valid `graphFilename` or `savedModel` parameter.");
+  };
+
   // Do not do anything if we did not get a non-empty model name.
   if ((_savedModel.empty()) and (_graphFilename.empty())) return;
 
@@ -100,6 +105,7 @@ void TensorflowPredict::configure() {
 
   openGraph();
 
+  _isConfigured = true;
   reset();
 
   // If the first output name is empty just print out the list of nodes and return.
@@ -124,9 +130,9 @@ void TensorflowPredict::configure() {
     TF_Tensor *isTraining = TF_AllocateTensor(TF_BOOL, dims, 0, 1);
     void* isTrainingValue = TF_TensorData(isTraining);
 
-    if (isTrainingValue == nullptr) {
+    if (isTrainingValue == NULL) {
       TF_DeleteTensor(isTraining);
-      throw EssentiaException("Error generating traning phase flag");
+      throw EssentiaException("TensorflowPredict: Error generating training phase flag");
     }
 
     memcpy(isTrainingValue, &_isTraining, sizeof(bool));
@@ -150,18 +156,19 @@ void TensorflowPredict::openGraph() {
       _savedModel.c_str(), &tags_c[0], (int)tags_c.size(),
       _graph, NULL, _status);
 
-      if (TF_GetCode(_status) != TF_OK) {
-        throw EssentiaException("TensorflowPredict: Error importing SavedModel specified in the `savedModel` parameter. ", TF_Message(_status));
-      }
+    if (TF_GetCode(_status) != TF_OK) {
+      throw EssentiaException("TensorflowPredict: Error importing SavedModel specified in the `savedModel` parameter. ", TF_Message(_status));
+    }
 
-    E_INFO("Successfully loaded SavedModel: `" << _savedModel << "`");
+    E_INFO("TensorflowPredict: Successfully loaded SavedModel: `" << _savedModel << "`");
+
     return;
   }
 
   if (!_graphFilename.empty()) {
     // First we load and initialize the model.
     const auto f = fopen(_graphFilename.c_str(), "rb");
-    if (f == nullptr) {
+    if (f == NULL) {
       throw EssentiaException(
           "TensorflowPredict: could not open the Tensorflow graph file.");
     }
@@ -194,13 +201,13 @@ void TensorflowPredict::openGraph() {
       throw EssentiaException("TensorflowPredict: Error importing graph. ", TF_Message(_status));
     }
 
-    E_INFO("Successfully loaded graph file: `" << _graphFilename << "`");
+    E_INFO("TensorflowPredict: Successfully loaded graph file: `" << _graphFilename << "`");
   }
 }
 
 
 void TensorflowPredict::reset() {
-  if ((_savedModel.empty()) and (_graphFilename.empty())) return;
+  if (!_isConfigured) return;
 
   TF_CloseSession(_session, _status);
   if (TF_GetCode(_status) != TF_OK) {
@@ -220,6 +227,11 @@ void TensorflowPredict::reset() {
 
 
 void TensorflowPredict::compute() {
+  if (!_isConfigured) {
+    throw EssentiaException("TensorflowPredict: This algorithm is not configured. To configure this algorithm you "
+                            "should specify a valid `graphFilename` or `savedModel` as input parameter.");
+  }
+
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
 
@@ -232,20 +244,20 @@ void TensorflowPredict::compute() {
 
   // Initialize output tensors.
   for (size_t i = 0; i < _nOutputs; i++) {
-    _outputTensors[i] = nullptr;
+    _outputTensors[i] = NULL;
   }
 
   // Run the Tensorflow session.
   TF_SessionRun(_session,
-                nullptr,                         // Run options.
+                NULL,                            // Run options.
                 &_inputNodes[0],                 // Input node names.
                 &_inputTensors[0],               // input tensor values.
                 _nInputs + (int)_isTrainingSet,  // Number of inputs.
                 &_outputNodes[0],                // Output node names.
                 &_outputTensors[0],              // Output tensor values.
                 _nOutputs,                       // Number of outputs.
-                nullptr, 0,                      // Target operations, number of targets.
-                nullptr,                         // Run metadata.
+                NULL, 0,                         // Target operations, number of targets.
+                NULL,                            // Run metadata.
                 _status                          // Output status.
                );
 
@@ -302,14 +314,14 @@ TF_Tensor* TensorflowPredict::TensorToTF(
       TF_FLOAT, &shape[0], dims,
       (size_t)tensorIn.size() * sizeof(Real));
 
-  if (tensorOut == nullptr) {
+  if (tensorOut == NULL) {
     throw EssentiaException("TensorflowPredict: Error generating input tensor.");
   }
 
   // Get a pointer to the data and fill the tensor.
   void* tensorData = TF_TensorData(tensorOut);
 
-  if (tensorData == nullptr) {
+  if (tensorData == NULL) {
     TF_DeleteTensor(tensorOut);
     throw EssentiaException("TensorflowPredict: Error generating input tensors data.");
   }
@@ -384,7 +396,7 @@ TF_Output TensorflowPredict::graphOperationByName(const string nodeName) {
 
   TF_Output output = {oper, index};
 
-  if (output.oper == nullptr) {
+  if (output.oper == NULL) {
     throw EssentiaException("TensorflowPredict: '" + string(nodeName) +
                             "' is not a valid node name of this graph.\n" +
                             availableNodesInfo());
@@ -404,7 +416,7 @@ vector<string> TensorflowPredict::nodeNames() {
   TF_Operation *oper;
   vector<string> nodeNames;
 
-  while ((oper = TF_GraphNextOperation(_graph, &pos)) != nullptr) {
+  while ((oper = TF_GraphNextOperation(_graph, &pos)) != NULL) {
     nodeNames.push_back(string(TF_OperationName(oper)));
   }
 

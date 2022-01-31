@@ -181,6 +181,33 @@ class TestTensorFlowPredict(TestCase):
 
         self.assertAlmostEqualMatrix(foundValues, batch)
 
+    def testComputeWithoutConfiguration(self):
+        pool = Pool()
+        pool.set('model/Placeholder', numpy.zeros((1, 1, 1, 1), dtype='float32'))
+
+        self.assertComputeFails(TensorflowPredict(), pool)
+
+    def testIgnoreInvalidReconfiguration(self):
+        pool = Pool()
+        pool.set('model/Placeholder', numpy.ones((1, 1, 1, 1), dtype='float32'))
+
+        model_name = join(filedir(), 'tensorflowpredict', 'identity.pb')
+        model = TensorflowPredict(
+            graphFilename=model_name,
+            inputs=['model/Placeholder'],
+            outputs=['model/Identity'],
+            squeeze=False,
+        )
+
+        firstResult = model(pool)['model/Identity']
+
+        # This attempt to reconfigure the algorithm should be ignored and trigger a Warning.
+        model.configure()
+
+        secondResult = model(pool)['model/Identity']
+
+        self.assertEqualMatrix(firstResult, secondResult)
+
     def testImplicitOutputTensorIndex(self):
         model = join(filedir(), 'tensorflowpredict', 'identity.pb')
         batch = numpy.reshape(numpy.arange(4, dtype='float32'), (1, 1, 2, 2))
@@ -227,6 +254,7 @@ class TestTensorFlowPredict(TestCase):
                                                         'inputs': ['model/Placeholder'],
                                                         'outputs': ['model/Softmax:s:0'],
                                                         })  # Several colons.
+
 
 
 suite = allTests(TestTensorFlowPredict)
