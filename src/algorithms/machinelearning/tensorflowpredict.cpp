@@ -25,13 +25,32 @@ using namespace standard;
 
 const char* TensorflowPredict::name = "TensorflowPredict";
 const char* TensorflowPredict::category = "Machine Learning";
-const char* TensorflowPredict::description = DOC("This algorithm runs a Tensorflow graph and stores the desired tensors in a pool.\n"
-"The Tensorflow graph should be stored in Protocol Buffer (.pb) binary format [1], and should contain both the architecture and the weights of the model.\n"
-"The parameter `inputs` should contain a list with the names of the input nodes that feed the model. The input Pool should contain the tensors corresponding to each input node stored using Essetia tensors."
+const char* TensorflowPredict::description = DOC("This algorithm runs a Tensorflow graph and stores the desired output tensors in a pool.\n"
+"The Tensorflow graph should be stored in Protocol Buffer (.pb) binary format [1] or as a SavedModel [2], and should contain both the architecture and the weights of the model.\n"
+"The parameter `inputs` should contain a list with the names of the input nodes that feed the model. The input Pool should contain the tensors corresponding to each input node stored using Essetia tensors. "
 "The pool namespace for each input tensor has to match the input node's name.\n"
-"In the same way, the `outputs` parameter should contain the names of the nodes whose tensors are desired to save. These tensors will be stored inside the output pool under a namespace that matches the name of the node. "
-"To print a list with all the available nodes in the graph set the first element of `outputs` as an empty string.\n"
-"This algorithm is a wrapper for the Tensorflow C API [2]. The first time it is configured with a non-empty `graphFilename` it will try to load the contained graph and to attach a Tensorflow session to it. "
+"In the same way, the `outputs` parameter should contain the names of the tensors to save. These tensors will be stored inside the output pool under a namespace that matches the tensor's name. "
+"TensorFlow nodes return tensors identified as `nodeName:n`, where `n` goes from 0 to the number of outputs of the node - 1. "
+"The first output tensor of a node can be referred implicitly (e.g., `nodeName`) or explicitly (e.g., `nodeName:0`), and the subsequent tensors require the specific index (e.g., nodeName:1, nodeName:2). "
+"In TensorFlow 2 SavedModels all the outputs of the model are contained in the `PartitionedCall` node (e.g., `PartitionedCall:0`, `PartitionedCall:1`). "
+"You can use TenorFlow's `saved_model_cli` to find the relation of outputs and `PartitionedCall` indices, for example:\n"
+"\n"
+">>>    saved_model_cli show --dir SavedModel/ --all\n"
+">>>    ...\n"
+">>>    The given SavedModel SignatureDef contains the following output(s):\n"
+">>>      outputs['activations'] tensor_info:\n"
+">>>          dtype: DT_FLOAT\n"
+">>>          shape: (1, 400)\n"
+">>>          name: PartitionedCall:0\n"
+">>>      outputs['embeddings'] tensor_info:\n"
+">>>          dtype: DT_FLOAT\n"
+">>>          shape: (1, 1280)\n"
+">>>          name: PartitionedCall:1\n"
+">>>    ...\n"
+"\n"
+"To print a list with all the available nodes in the graph set the first element of `outputs` as an empty string (i.e., \"\")."
+"\n"
+"This algorithm is a wrapper for the Tensorflow C API [3]. The first time it is configured with a non-empty `graphFilename` it will try to load the contained graph and to attach a Tensorflow session to it. "
 "The reset method deletes the current session (and the resources attached to it) and creates a new one relying on the available graph. "
 "By reconfiguring the algorithm the graph is reloaded and the reset method is called.\n"
 "\n"
@@ -39,6 +58,8 @@ const char* TensorflowPredict::description = DOC("This algorithm runs a Tensorfl
 "  [1] TensorFlow - An open source machine learning library for research and production.\n"
 "  https://www.tensorflow.org/extend/tool_developers/#protocol_buffers\n\n"
 "  [2] TensorFlow - An open source machine learning library for research and production.\n"
+"  https://www.tensorflow.org/guide/saved_model\n\n"
+"  [3] TensorFlow - An open source machine learning library for research and production.\n"
 "  https://www.tensorflow.org/api_docs/cc/");
 
 
@@ -50,6 +71,11 @@ static void DeallocateBuffer(void* data, size_t) {
 void TensorflowPredict::configure() {
   _savedModel = parameter("savedModel").toString();
   _graphFilename = parameter("graphFilename").toString();
+
+  if ((_savedModel.empty()) and (_graphFilename.empty()) and (_isConfigured)) {
+    E_WARNING("TensorflowPredict: You are trying to update a valid configuration with invalid parameters. "
+              "If you want to update the configuration specify a valid `graphFilename` or `savedModel` parameter.");
+  };
 
   // Do not do anything if we did not get a non-empty model name.
   if ((_savedModel.empty()) and (_graphFilename.empty())) return;
@@ -79,6 +105,7 @@ void TensorflowPredict::configure() {
 
   openGraph();
 
+  _isConfigured = true;
   reset();
 
   // If the first output name is empty just print out the list of nodes and return.
@@ -90,11 +117,11 @@ void TensorflowPredict::configure() {
 
   // Initialize the list of input and output node names.
   for (size_t i = 0; i < _nInputs; i++) {
-    _inputNodes[i] = graphOperationByName(_inputNames[i].c_str(), 0);
+    _inputNodes[i] = graphOperationByName(_inputNames[i]);
   }
 
   for (size_t i = 0; i < _nOutputs; i++) {
-    _outputNodes[i] = graphOperationByName(_outputNames[i].c_str(), 0);
+    _outputNodes[i] = graphOperationByName(_outputNames[i]);
   }
 
   // Add isTraining flag if needed.
@@ -103,15 +130,15 @@ void TensorflowPredict::configure() {
     TF_Tensor *isTraining = TF_AllocateTensor(TF_BOOL, dims, 0, 1);
     void* isTrainingValue = TF_TensorData(isTraining);
 
-    if (isTrainingValue == nullptr) {
+    if (isTrainingValue == NULL) {
       TF_DeleteTensor(isTraining);
-      throw EssentiaException("Error generating traning phase flag");
+      throw EssentiaException("TensorflowPredict: Error generating training phase flag");
     }
 
     memcpy(isTrainingValue, &_isTraining, sizeof(bool));
 
     _inputTensors[_nInputs] = isTraining;
-    _inputNodes[_nInputs] = graphOperationByName(_isTrainingName.c_str(), 0);
+    _inputNodes[_nInputs] = graphOperationByName(_isTrainingName);
   }
 }
 
@@ -129,14 +156,19 @@ void TensorflowPredict::openGraph() {
       _savedModel.c_str(), &tags_c[0], (int)tags_c.size(),
       _graph, NULL, _status);
 
-    E_INFO("Successfully loaded SavedModel: `" << _savedModel << "`");
+    if (TF_GetCode(_status) != TF_OK) {
+      throw EssentiaException("TensorflowPredict: Error importing SavedModel specified in the `savedModel` parameter. ", TF_Message(_status));
+    }
+
+    E_INFO("TensorflowPredict: Successfully loaded SavedModel: `" << _savedModel << "`");
+
     return;
   }
 
   if (!_graphFilename.empty()) {
     // First we load and initialize the model.
     const auto f = fopen(_graphFilename.c_str(), "rb");
-    if (f == nullptr) {
+    if (f == NULL) {
       throw EssentiaException(
           "TensorflowPredict: could not open the Tensorflow graph file.");
     }
@@ -169,13 +201,13 @@ void TensorflowPredict::openGraph() {
       throw EssentiaException("TensorflowPredict: Error importing graph. ", TF_Message(_status));
     }
 
-    E_INFO("Successfully loaded graph file: `" << _graphFilename << "`");
+    E_INFO("TensorflowPredict: Successfully loaded graph file: `" << _graphFilename << "`");
   }
 }
 
 
 void TensorflowPredict::reset() {
-  if ((_savedModel.empty()) and (_graphFilename.empty())) return;
+  if (!_isConfigured) return;
 
   TF_CloseSession(_session, _status);
   if (TF_GetCode(_status) != TF_OK) {
@@ -195,6 +227,11 @@ void TensorflowPredict::reset() {
 
 
 void TensorflowPredict::compute() {
+  if (!_isConfigured) {
+    throw EssentiaException("TensorflowPredict: This algorithm is not configured. To configure this algorithm you "
+                            "should specify a valid `graphFilename` or `savedModel` as input parameter.");
+  }
+
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
 
@@ -207,20 +244,20 @@ void TensorflowPredict::compute() {
 
   // Initialize output tensors.
   for (size_t i = 0; i < _nOutputs; i++) {
-    _outputTensors[i] = nullptr;
+    _outputTensors[i] = NULL;
   }
 
   // Run the Tensorflow session.
   TF_SessionRun(_session,
-                nullptr,                         // Run options.
+                NULL,                            // Run options.
                 &_inputNodes[0],                 // Input node names.
                 &_inputTensors[0],               // input tensor values.
                 _nInputs + (int)_isTrainingSet,  // Number of inputs.
                 &_outputNodes[0],                // Output node names.
                 &_outputTensors[0],              // Output tensor values.
                 _nOutputs,                       // Number of outputs.
-                nullptr, 0,                      // Target operations, number of targets.
-                nullptr,                         // Run metadata.
+                NULL, 0,                         // Target operations, number of targets.
+                NULL,                            // Run metadata.
                 _status                          // Output status.
                );
 
@@ -249,7 +286,7 @@ TF_Tensor* TensorflowPredict::TensorToTF(
   int dims = 1;
   vector<int64_t> shape;
 
-  // Batch dimensions is the only one allowed to be singleton
+  // With squeeze, the Batch dimension is the only one allowed to be singleton
   shape.push_back((int64_t)tensorIn.dimension(0));
 
   if (_squeeze) {
@@ -259,6 +296,13 @@ TF_Tensor* TensorflowPredict::TensorToTF(
         dims++;
       }
     }
+
+    // There should be at least 2 dimensions (batch, data)
+    if (dims == 1) {
+      shape.push_back((int64_t) 1);
+      dims++;
+    }
+
   } else {
     dims = tensorIn.rank();
     for(int i = 1; i < dims; i++) {
@@ -270,14 +314,14 @@ TF_Tensor* TensorflowPredict::TensorToTF(
       TF_FLOAT, &shape[0], dims,
       (size_t)tensorIn.size() * sizeof(Real));
 
-  if (tensorOut == nullptr) {
+  if (tensorOut == NULL) {
     throw EssentiaException("TensorflowPredict: Error generating input tensor.");
   }
 
   // Get a pointer to the data and fill the tensor.
   void* tensorData = TF_TensorData(tensorOut);
 
-  if (tensorData == nullptr) {
+  if (tensorData == NULL) {
     TF_DeleteTensor(tensorOut);
     throw EssentiaException("TensorflowPredict: Error generating input tensors data.");
   }
@@ -319,15 +363,49 @@ const Tensor<Real> TensorflowPredict::TFToTensor(
 }
 
 
-TF_Output TensorflowPredict::graphOperationByName(const char* nodeName,
-                                                  int index) {
-  // I don't understand the fuction of index here.
-  TF_Output output = {TF_GraphOperationByName(_graph, nodeName), index};
+TF_Output TensorflowPredict::graphOperationByName(const string nodeName) {
+  int index = 0;
+  const char* name = nodeName.c_str();
 
-  if (output.oper == nullptr) {
+  // TensorFlow operations (or nodes from the graph perspective) return tensors named <nodeName:n>, where n goes
+  // from 0 to the number of outputs. The first output tensor of a node can be extracted implicitly (nodeName)
+  // or explicitly (nodeName:0). To extract the subsequent tensors, the index has to be specified (nodeName:1,
+  // nodeName:2, ...).
+  string::size_type n = nodeName.find(':');
+  if (n != string::npos) {
+    try {
+      string::size_type next_char;
+      index = stoi(nodeName.substr(n + 1), &next_char);
+
+      if (n + next_char + 1 != nodeName.size()) {
+        throw EssentiaException("TensorflowPredict: `" + nodeName + "` is not a valid node name, the index cannot "
+                                "be followed by other characters. Make sure that all your inputs and outputs follow "
+                                "the pattern `nodeName:n`, where `n` in an integer that goes from 0 to the number "
+                                "of outputs of the node - 1.");
+      }
+
+    } catch (const invalid_argument& ) {
+      throw EssentiaException("TensorflowPredict: `" + nodeName + "` is not a valid node name. Make sure that all "
+                              "your inputs and outputs follow the pattern `nodeName:n`, where `n` in an integer that "
+                              "goes from 0 to the number of outputs of the node - 1.");
+    } 
+    name = nodeName.substr(0, n).c_str();
+  }
+
+  TF_Operation* oper = TF_GraphOperationByName(_graph, name);
+
+  TF_Output output = {oper, index};
+
+  if (output.oper == NULL) {
     throw EssentiaException("TensorflowPredict: '" + string(nodeName) +
                             "' is not a valid node name of this graph.\n" +
                             availableNodesInfo());
+  }
+
+  int n_outputs = TF_OperationNumOutputs(oper);
+  if (index > n_outputs - 1) {
+    throw EssentiaException("TensorflowPredict: Asked for the output with index `" + to_string(index) +
+                            "`, but the node `" + name + "` only has `" + to_string(n_outputs) + "` outputs.");
   }
 
   return output;
@@ -338,7 +416,7 @@ vector<string> TensorflowPredict::nodeNames() {
   TF_Operation *oper;
   vector<string> nodeNames;
 
-  while ((oper = TF_GraphNextOperation(_graph, &pos)) != nullptr) {
+  while ((oper = TF_GraphNextOperation(_graph, &pos)) != NULL) {
     nodeNames.push_back(string(TF_OperationName(oper)));
   }
 

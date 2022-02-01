@@ -58,7 +58,8 @@ class TensorflowPredictCREPE : public AlgorithmComposite {
   ~TensorflowPredictCREPE();
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
+    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
+    declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("input", "the name of the input node in the TensorFlow graph", "", "frames");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/classifier/Sigmoid");
     declareParameter("hopSize", "the hop size in milliseconds for running pitch estimations", "(0,inf)", 10.0);
@@ -107,7 +108,8 @@ class TensorflowPredictCREPE : public Algorithm {
   ~TensorflowPredictCREPE();
 
   void declareParameters() {
-    declareParameter("graphFilename", "the name of the file containing the model to use", "", Parameter::STRING);
+    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
+    declareParameter("savedModel", "the name of the TensorFlow SavedModel. Overrides parameter `graphFilename`", "", "");
     declareParameter("input", "the name of the input node in the TensorFlow graph", "", "frames");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/classifier/Sigmoid");
     declareParameter("hopSize", "the hop size in milliseconds for running pitch estimations", "(0,inf)", 10.0);
