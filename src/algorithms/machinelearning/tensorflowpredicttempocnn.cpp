@@ -209,8 +209,6 @@ void TensorflowPredictTempoCNN::createInnerNetwork() {
 
 
 void TensorflowPredictTempoCNN::configure() {
-  // if no file has been specified, do not do anything
-  if (!parameter("graphFilename").isConfigured()) return;
   _tensorflowPredictTempoCNN->configure(INHERIT("graphFilename"),
                                         INHERIT("savedModel"),
                                         INHERIT("input"),

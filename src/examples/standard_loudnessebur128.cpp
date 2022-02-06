@@ -10,52 +10,38 @@
 using namespace essentia;
 using namespace essentia::standard;
 using namespace std;
-int main (int argc,char* argv[]) {
 
+int main (int argc,char* argv[]) {
     if (argc != 3) {
     cout << "ERROR: incorrect number of arguments." << endl;
-    cout << "Usage: " << argv[0] << " audio_input yaml_output" << endl;
+    cout << "Usage: " << argv[0] << " input_audiofile output_jsonfile (use '-' for stdout)" << endl;
     exit(1);
   }
 
-  setDebugLevel(EAll);
-  string audioFilename1 = argv[1];
-  string audioFilename2 = argv[2];
-  // string outputFilename = argv[2];
+  string audioFilename = argv[1];
+  string outputFilename = argv[2];
 
   // register the algorithms in the factory(ies)
   essentia::init();
 
-
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
-
-  Algorithm* audio1 = factory.create("AudioLoader",
-                                    "filename", audioFilename1);
-
-  Algorithm* audio2 = factory.create("AudioLoader",
-                                    "filename", audioFilename2);
-
+  Algorithm* audio = factory.create("AudioLoader", "filename", audioFilename);
   Algorithm* le    = factory.create("LoudnessEBUR128");                                                             
-
-  cout << "-------- connecting algos ---------" << endl;
   Real sr;
   int ch, br;
   std::string md5, cod;
-  // Audio -> FrameCutter
 
   vector<StereoSample> audioBuffer;
-  audio1->output("audio").set(audioBuffer);
-  audio1->output("sampleRate").set(sr);
-  audio1->output("numberChannels").set(ch);
-  audio1->output("md5").set(md5);
-  audio1->output("bit_rate").set(br);
-  audio1->output("codec").set(cod);
-
+  audio->output("audio").set(audioBuffer);
+  audio->output("sampleRate").set(sr);
+  audio->output("numberChannels").set(ch);
+  audio->output("md5").set(md5);
+  audio->output("bit_rate").set(br);
+  audio->output("codec").set(cod);
 
   le->input("signal").set(audioBuffer);
 
-  // FrameCutter -> GapsDetector
   vector<Real> momentaryLoudness, shortTermLoudness;
   Real integratedLoudness, loudnessRange;
 
@@ -64,32 +50,24 @@ int main (int argc,char* argv[]) {
   le->output("integratedLoudness").set(integratedLoudness);
   le->output("loudnessRange").set(loudnessRange);
 
-
-  /////////// STARTING THE ALGORITHMS //////////////////
-  cout << "-------- start processing " << audioFilename1 << " --------" << endl;
-  audio1->compute();
+  audio->compute();
   le->compute();
 
-  // audioBuffer.clear();
-  audio2->output("audio").set(audioBuffer); 
-  audio2->output("audio").set(audioBuffer);
-  audio2->output("sampleRate").set(sr);
-  audio2->output("numberChannels").set(ch);
-  audio2->output("md5").set(md5);
-  audio2->output("bit_rate").set(br);
-  audio2->output("codec").set(cod);
-  /////////// STARTING THE ALGORITHMS //////////////////
-  cout << "-------- start processing " << audioFilename2 << " --------" << endl;
-  audio2->compute();
-  le->compute();
-                    
+  Pool pool = Pool();
+  pool.set("loudness_ebu128.momentary", momentaryLoudness);
+  pool.set("loudness_ebu128.short_term", shortTermLoudness);
+  pool.set("loudness_ebu128.integrated", integratedLoudness);
+  pool.set("loudness_ebu128.loudness_range", loudnessRange);
 
-  delete audio1;
-  delete audio2;
+  Algorithm* yaml_writer = factory.create("YamlOutput",
+                               "filename", outputFilename, "format", "json");
+  yaml_writer->input("pool").set(pool);
+  yaml_writer->compute();
+
+  delete audio;
   delete le;
+  delete yaml_writer;
 
   essentia::shutdown();
-
   return 0;
-
 }

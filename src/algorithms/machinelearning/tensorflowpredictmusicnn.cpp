@@ -189,8 +189,6 @@ void TensorflowPredictMusiCNN::createInnerNetwork() {
 
 
 void TensorflowPredictMusiCNN::configure() {
-  // if no file has been specified, do not do anything
-  if (!parameter("graphFilename").isConfigured()) return;
   _tensorflowPredictMusiCNN->configure(INHERIT("graphFilename"),
                                        INHERIT("savedModel"),
                                        INHERIT("input"),
