@@ -23,33 +23,31 @@ import functools
 
 class TestLevelExtractor(TestCase):
 
-    def test_empty(self):
+    def testEmpty(self):
         empty_vec = np.array([], dtype=np.single)
         self.assertRaises(RuntimeError, lambda: LevelExtractor()(empty_vec))
         # TODO: Actual errmsg should be more readable.
 
-    def test_silence(self):
+    def testSilence(self):
         silence_vec = np.zeros(44100, dtype=np.single)
         res = LevelExtractor()(silence_vec)
         self.assertEqual(len(res), 1)
         self.assertAlmostEqualFixedPrecision(res[0], 0, 5)
 
-    def test_illegal_param(self):
-        def param_setting_entries(frameSize, hopSize):
-            def param_setting_lambda(frameSize, hopSize):
-                le = LevelExtractor()
-                le.configure(frameSize=frameSize, hopSize=hopSize)
-            return functools.partial(param_setting_lambda, frameSize, hopSize)
+    def testInvalidParam(self):
+        self.assertConfigureFails(LevelExtractor(), {'frameSize': -1, 'hopSize': -1})
+        self.assertConfigureFails(LevelExtractor(), {'frameSize': -1, 'hopSize': 44100})
+        self.assertConfigureFails(LevelExtractor(), {'frameSize': 88200, 'hopSize': -1})
+        self.assertConfigureFails(LevelExtractor(), {'frameSize': 0, 'hopSize': 0})
+        self.assertConfigureFails(LevelExtractor(), {'frameSize': 88200, 'hopSize': 0})
 
-        self.assertRaises(RuntimeError, param_setting_entries(-1, -1))
-        self.assertRaises(RuntimeError, param_setting_entries(-1, 44100))
-        self.assertRaises(RuntimeError, param_setting_entries(88200, -1))
-        self.assertRaises(RuntimeError, param_setting_entries(0, 0))
-        self.assertRaises(RuntimeError, param_setting_entries(88200, 0))
-        self.assertRaises(Warning, param_setting_entries(44100, 88200))  # Should have issue warning.
-        param_setting_entries(44100, 22050)()  # Should execute successfully.
+        with self.assertRaises(Warning):  # Should have issue warning.
+            le = LevelExtractor()
+            le.configure(frameSize=44100, hopSize=88200)
 
-    def test_random_input(self):
+        self.assertConfigureSuccess(LevelExtractor(), {'frameSize': 44100, 'hopSize': 22050})
+
+    def testRandomInput(self):
         n = 10
         for _ in range(n):
             rand_input = np.random.random(88200).astype(np.single) * 2 - 1
@@ -57,7 +55,7 @@ class TestLevelExtractor(TestCase):
             expected_res = np.sum(rand_input * rand_input) ** 0.67
             self.assertAlmostEqual(res[0], expected_res, 1e-4)
 
-    def test_real_audio(self):
+    def testRealAudio(self):
         input_filename = join(testdata.audio_dir, "recorded", "dubstep.wav")
         audio = MonoLoader(filename=input_filename)()
         

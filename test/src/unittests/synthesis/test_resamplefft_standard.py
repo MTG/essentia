@@ -22,20 +22,20 @@ import numpy as np
 
 class TestResampleFFT(TestCase):
 
-    def test_empty(self):
+    def testEmpty(self):
         empty = np.array([], dtype=np.single)
         r = ResampleFFT()
         with self.assertRaises(RuntimeError):
             r(empty)
 
-    def test_silence(self):
+    def testSilence(self):
         silence = np.zeros(44100, dtype=np.single)
         r = ResampleFFT()
-        r.configure(outSize=10492 * 3)
+        r.configure(outSize=10492 * 3)  # Arbitrary value used
         output = r(silence)
         self.assertAlmostEqualVectorFixedPrecision(output, np.zeros(10492 * 3, dtype=np.single), 6)
 
-    def test_constant(self):
+    def testConstant(self):
         # Comparing with the results generated from scipy.signal.resample
         ones = np.ones(114, dtype=np.single)
         r = ResampleFFT()
@@ -45,30 +45,30 @@ class TestResampleFFT(TestCase):
         out = r(np.full(114, -1, dtype=np.single))
         self.assertAlmostEqualVector(out, np.full(128, -1, dtype=np.single), 1e-5)
 
-    def test_real_audio(self):
+    def testRecordedAudio(self):
         # Pre-stored are from real_audio PCM, and the expected result are pre-calculated with scipy.signal.resample
         # Due to the nature of FFT resample, it is improper to test with random input.
         import os.path as path
         import pathlib
-        with np.load(path.join(pathlib.Path(__file__).resolve().parent, "dubstep_first_second.npz")) as data:
+        with np.load(path.join(pathlib.Path(__file__).resolve().parent, "resamplefft", "dubstep_first_second.npz")) as data:
             raw = data["raw"]
             expected = data["expected"]
             r = ResampleFFT()
             r.configure(inSize=44100, outSize=32768)
             output = r(raw)
-            self.assertAlmostEqualVectorFixedPrecision(output, expected, 3)  # The error is a little bit too big
+            self.assertAlmostEqualVectorFixedPrecision(output, expected, 5)  # The error is a little bit too big
 
 
-    def test_odd_length(self):
+    def testOddLength(self):
         import os.path as path
         import pathlib
-        with np.load(path.join(pathlib.Path(__file__).resolve().parent, "mozart_c_major_fragment.npz")) as data:
+        with np.load(path.join(pathlib.Path(__file__).resolve().parent, "resamplefft", "mozart_c_major_fragment.npz")) as data:
             raw = data["raw"]
             expected = data["expected"]
             r = ResampleFFT()
             r.configure(inSize=110249, outSize=100001)
             output = r(raw)
-            self.assertAlmostEqualVectorFixedPrecision(output, expected, 3)
+            self.assertAlmostEqualVectorFixedPrecision(output, expected, 5)
 
 suite = allTests(TestResampleFFT)
 
