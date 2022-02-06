@@ -1,9 +1,9 @@
-.. Essentia TensorFlow models
+.. Essentia models
 
-Essentia TensorFlow models
-==========================
+Essentia models
+===============
 
-This is a list of pre-trained TensorFlow models available in Essentia for various (music) audio analysis and classification tasks. To use the models in Essentia, see the `machine learning inference <machine_learning.html>`_ page.
+This is a list of pre-trained TensorFlow models available in Essentia for various (music) audio analysis and classification tasks. To use the models in Essentia, see the `machine learning inference <machine_learning.html>`_ page. Some of the models are also available in other formats (ONNX, TensorFlow.js; contact us for more details).
 
 
 All the models created by the MTG are licensed under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/) and are also available under proprietary license upon request (https://www.upf.edu/web/mtg/contact). Check the `LICENSE <https://essentia.upf.edu/models/LICENSE>`_ of the models.
@@ -293,7 +293,7 @@ Danceability
 
 Music danceability (2 classes):
 
-`danceable`, `danceable`
+`danceable`, `not_danceable`
 
 Dataset: inhouse (MTG).
 
@@ -739,6 +739,32 @@ Models:
 
 Naming convention: ``<architecture>-<number_of_stems>-<version>.pb``
 
+Performing source separation:
+
+.. code-block:: python
+
+    from essentia.standard import AudioLoader, TensorflowPredict
+    from essentia import Pool
+    import numpy as np
+
+    # Input should be audio @48kHz.
+    audio, sr, _, _, _, _ = AudioLoader(filename="audio.wav")()
+
+    pool = Pool()
+    # The input needs to have 4 dimensions so that it is interpreted as an Essentia tensor.
+    pool.set("waveform", audio[..., np.newaxis, np.newaxis])
+
+    model = TensorflowPredict(
+        graphFilename="spleeter-2s-3.pb",
+        inputs=["waveform"],
+        outputs=["waveform_vocals", "waveform_accompaniment"]
+    )
+
+    out_pool = model(pool)
+    vocals = out_pool["waveform_vocals"].squeeze()
+    accompaniment = out_pool["waveform_accompaniment"].squeeze()
+
+
 Tempo estimation
 ^^^^^^^^^^^^^^^^
 
@@ -770,3 +796,4 @@ Usage for tempo estimation:
     audio = MonoLoader(filename="audio.wav", sampleRate=11025)()
     model = TempoCNN(graphFilename="deepsquare-k16-3.pb")
     global_tempo, local_tempo, local_tempo_probabilities = model(audio)
+

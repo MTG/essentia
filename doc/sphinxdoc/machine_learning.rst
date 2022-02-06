@@ -16,7 +16,9 @@ Using pre-trained TensorFlow models
 
 Essentia provides wrapper algorithms for TensorFlow deep learning models, designed to offer the flexibility of use, easy extensibility, and real-time inference. It allows using virtually any TensorFlow model within our audio analysis framework.
 
-We provide many pre-trained TensorFlow models for auto-tagging, music classification, tempo estimation, source separation, and feature embedding extraction for music and audio in general. See our blog posts `[1] <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ `[2] <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for further details about some of the models.
+We provide many pre-trained TensorFlow models for auto-tagging, music classification, tempo estimation, source separation, and feature embedding extraction for music and audio in general. See the `Essentia TensorFlow models page <models.html>`_ for a complete reference, usage examples, and download links.
+
+See our blog posts `[1] <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ `[2] <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for further details about some of the models.
 
 Our current models include:
 
@@ -44,30 +46,26 @@ Installation
 
 Follow `these instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with the TensorFlow wrapper.
 
-Model downloads
-^^^^^^^^^^^^^^^
 
-https://essentia.upf.edu/models/
+Models license
+^^^^^^^^^^^^^^
 
 All the models created by the MTG are available under `the CC BY-NC-ND 4.0 license <https://creativecommons.org/licenses/by-nc-nd/4.0/>`_ and are also available under a proprietary license `upon request <https://www.upf.edu/web/mtg/contact>`_. 
 
 
-Code examples and demos
+Demos and code examples
 ^^^^^^^^^^^^^^^^^^^^^^^
+See `interactive demos <demos.html>`_ of some of the models.
 
+Python examples are available on the `models reference page <models.html>`_.
 
-See `Python examples of using TensorFlow models <essentia_python_examples.html#inference-with-tensorflow-models>`_.
-
-
-Some of our models can work in real-time, opening many possibilities for audio developers. For example, `see the demo and code <https://mtg.github.io/essentia-labs/news/tensorflow/2020/04/23/tensorflow-real-time/>`_ for the MusiCNN model performing music auto-tagging on a live audio stream.
+Some of our models can work in real-time, opening many possibilities for audio developers. For example, see Python examples for MusiCNN-based `music auto-tagging <essentia-tensorflow_real-time_auto-tagging.html>`_ and `classification <essentia-tensorflow_real-time_simultaneous_classifiers.html>`_ of a live audio stream.
 
 .. raw:: html
 
     <iframe width="560" height="315" src="https://www.youtube.com/embed/xMUcY7_n4kQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
     <iframe width="560" height="315" src="https://www.youtube.com/embed/yssBE6oafLs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
-Also, see the demos of some of the models `here <demos.html>`_.
 
 
 Using pre-trained SVM Gaia models
