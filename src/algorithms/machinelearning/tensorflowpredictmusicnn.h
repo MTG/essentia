@@ -61,6 +61,7 @@ class TensorflowPredictMusiCNN : public AlgorithmComposite {
     declareParameter("patchHopSize", "the number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
     declareParameter("accumulate", "when true it runs a single TensorFlow session at the end of the stream. Otherwise, a session is run for every new patch", "{true,false}", false);
+    declareParameter("patchSize", "number of frames to feed to the model on each call. This parameter should match the model's expected input shape.", "[0,inf)", 187);
   }
 
   void declareProcessOrder() {
@@ -113,6 +114,7 @@ class TensorflowPredictMusiCNN : public Algorithm {
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
     declareParameter("accumulate", "when true it runs a single Tensorflow session at the end of the stream. Otherwise a session is run for every new patch", "{true,false}", false);
+    declareParameter("patchSize", "number of frames to feed to the model on each call. This parameter should match the model's expected input shape.", "[0,inf)", 187);
   }
 
   void configure();
