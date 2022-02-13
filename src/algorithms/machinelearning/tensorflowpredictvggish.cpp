@@ -90,6 +90,7 @@ void TensorflowPredictVGGish::configure() {
   int patchHopSize = parameter("patchHopSize").toInt();
   string lastPatchMode = parameter("lastPatchMode").toString();
   bool accumulate = parameter("accumulate").toBool();
+  int patchSize = parameter("patchSize").toInt();
 
   int batchSize = accumulate ? -1 : 1;
 
@@ -97,7 +98,6 @@ void TensorflowPredictVGGish::configure() {
   // https://github.com/tensorflow/models/blob/master/research/audioset/vggish/mel_features.py
   int frameSize = 400;
   int hopSize = 160;
-  int patchSize = 96;
   int numberBands = 64;
   vector<int> inputShape({batchSize, 1, patchSize, numberBands});
 
@@ -196,7 +196,8 @@ void TensorflowPredictVGGish::configure() {
                                       INHERIT("isTrainingName"),
                                       INHERIT("patchHopSize"),
                                       INHERIT("accumulate"),
-                                      INHERIT("lastPatchMode"));
+                                      INHERIT("lastPatchMode"),
+                                      INHERIT("patchSize"));
 }
 
 

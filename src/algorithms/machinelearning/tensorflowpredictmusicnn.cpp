@@ -91,6 +91,7 @@ void TensorflowPredictMusiCNN::configure() {
   int patchHopSize = parameter("patchHopSize").toInt();
   string lastPatchMode = parameter("lastPatchMode").toString();
   bool accumulate = parameter("accumulate").toBool();
+  int patchSize = parameter("patchSize").toInt();
 
   int batchSize = accumulate ? -1 : 1;
 
@@ -98,7 +99,6 @@ void TensorflowPredictMusiCNN::configure() {
   // https://github.com/jordipons/musicnn-training/blob/master/src/config_file.py
   int frameSize = 512;
   int hopSize = 256;
-  int patchSize = 187;
   int numberBands = 96;
   vector<int> inputShape({batchSize, 1, patchSize, numberBands});
 
@@ -196,7 +196,8 @@ void TensorflowPredictMusiCNN::configure() {
                                        INHERIT("isTrainingName"),
                                        INHERIT("patchHopSize"),
                                        INHERIT("accumulate"),
-                                       INHERIT("lastPatchMode"));
+                                       INHERIT("lastPatchMode"),
+                                       INHERIT("patchSize"));
 }
 
 

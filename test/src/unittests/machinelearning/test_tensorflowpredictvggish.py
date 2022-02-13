@@ -40,6 +40,30 @@ class TestTensorFlowPredictVGGish(TestCase):
         # make valid predictions.
         self.assertAlmostEqualVector(found, expected, 1e-2)
 
+    def testPatchSize(self):
+        model = join(testdata.models_dir, 'vggish', 'small_vggish_init.pb')
+        # One second of audio.
+        data = numpy.ones((16000)).astype("float32")
+
+        # VGGish expects a fixed batch size of 96 frames.
+        patch_size = 96
+        TensorflowPredictVGGish(
+            graphFilename=model,
+            patchHopSize=0,
+            patchSize=patch_size,
+        )(data)
+
+        # An exception should be risen otherwise.
+        patch_size = 65
+        self.assertComputeFails(
+            TensorflowPredictVGGish(
+                graphFilename=model,
+                patchHopSize=0,
+                patchSize=patch_size,
+            ),
+            data
+        )
+
     def testRegressionSavedModel(self):
         expected = [0.49044114, 0.50241125]
 
