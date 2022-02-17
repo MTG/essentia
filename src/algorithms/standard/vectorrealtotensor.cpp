@@ -74,7 +74,7 @@ void VectorRealToTensor::configure() {
   _push = false;
 
   if (_patchHopSize > _timeStamps) {
-    throw EssentiaException("VectorRealToTensor: `patchHopSize` has to be smaller that the number of timestamps");
+    throw EssentiaException("VectorRealToTensor: `patchHopSize` has to be smaller than the number of timestamps");
   }
 
 
@@ -215,7 +215,7 @@ AlgorithmStatus VectorRealToTensor::process() {
 
     Tensor<Real>& tensor = *(Tensor<Real> *)_tensor.getFirstToken();
 
-    // Explicit convertion of std:vector to std::array<Eigen::Index> for Clang.
+    // Explicit conversion of std:vector to std::array<Eigen::Index> for Clang.
     std::array<Eigen::Index, TENSORRANK> shapeEigenIndex;
     std::copy_n(shape.begin(), TENSORRANK, shapeEigenIndex.begin());
 
