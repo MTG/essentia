@@ -42,7 +42,7 @@ class VectorRealToTensor : public Algorithm {
   std::vector<std::vector<std::vector<Real> > > _acc;
 
  public:
-  VectorRealToTensor(){
+  VectorRealToTensor() : _push(false), _accumulate(false) {
     declareInput(_frame, 187,"frame", "the input frames");
     declareOutput(_tensor, 1, "tensor", "the accumulated frame in one single tensor");
   }

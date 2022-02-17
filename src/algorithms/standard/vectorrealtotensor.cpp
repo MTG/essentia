@@ -28,7 +28,7 @@ const char* VectorRealToTensor::name = "VectorRealToTensor";
 const char* VectorRealToTensor::category = "Standard";
 const char* VectorRealToTensor::description = DOC("This algorithm generates tensors "
 "out of a stream of input frames. The 4 dimensions of the tensors stand for (batchSize, channels, patchSize, featureSize):\n"
-"  - batchSize: Number of patches per tensor. If batchSize is set to 0 it will accumulate patches until the end of the stream is reached and then produce a single tensor. "
+"  - batchSize: Number of patches per tensor. If batchSize is set to -1 it will accumulate patches until the end of the stream is reached and then produce a single tensor. "
 "Warning: This option may exhaust memory depending on the size of the stream.\n"
 "  - channels: Number of channels per tensor. Currently, only single-channel tensors are supported. Otherwise, an exception is thrown.\n"
 "  - patchSize: Number of timestamps (i.e., number of frames) per patch.\n"
@@ -74,7 +74,7 @@ void VectorRealToTensor::configure() {
   _push = false;
 
   if (_patchHopSize > _timeStamps) {
-    throw EssentiaException("VectorRealToTensor: `patchHopSize` has to be smaller that the number of timestamps");
+    throw EssentiaException("VectorRealToTensor: `patchHopSize` has to be smaller than the number of timestamps");
   }
 
 
@@ -215,7 +215,7 @@ AlgorithmStatus VectorRealToTensor::process() {
 
     Tensor<Real>& tensor = *(Tensor<Real> *)_tensor.getFirstToken();
 
-    // Explicit convertion of std:vector to std::array<Eigen::Index> for Clang.
+    // Explicit conversion of std:vector to std::array<Eigen::Index> for Clang.
     std::array<Eigen::Index, TENSORRANK> shapeEigenIndex;
     std::copy_n(shape.begin(), TENSORRANK, shapeEigenIndex.begin());
 
