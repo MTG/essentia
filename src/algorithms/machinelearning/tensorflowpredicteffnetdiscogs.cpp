@@ -206,10 +206,12 @@ void TensorflowPredictEffnetDiscogs::compute() {
   }
 
   vector<Real> paddedSignal;
-  int missingPatches;
+  int paddingPatches;
   if (_lastBatchMode == "zeros" || _lastBatchMode == "same") {
-    missingPatches = padSignal(*signal, paddedSignal);
-    if (missingPatches) signal = &paddedSignal;
+    // Computes the number of patches required to fill the final batch and makes a
+    //  zero-padded copy of the input signal only when needed.
+    paddingPatches = padSignal(*signal, paddedSignal);
+    if (paddingPatches) signal = &paddedSignal;
   }
   _vectorInput->setVector(signal);
 
@@ -218,7 +220,7 @@ void TensorflowPredictEffnetDiscogs::compute() {
   try {
     predictions = _pool.value<vector<vector<Real> > >("predictions");
     if (_lastBatchMode == "same") {
-      predictions.erase(predictions.end() - missingPatches, predictions.end());
+      predictions.erase(predictions.end() - paddingPatches, predictions.end());
     }
   }
   catch (EssentiaException&) {
@@ -260,11 +262,11 @@ int TensorflowPredictEffnetDiscogs::padSignal(const std::vector<Real> &signal, s
   int nBatches = ceil((Real)nPatches / (Real)_batchSize);
 
   // How many patches to complete last batch?
-  int missingPatches = nBatches * _batchSize - nPatches;
+  int paddingPatches = nBatches * _batchSize - nPatches;
 
-  if (missingPatches) {
+  if (paddingPatches) {
     // How many frames to complete last batch?
-    int missingFrames = missingPatches * _patchHopSize;
+    int missingFrames = paddingPatches * _patchHopSize;
     
     // How many samples to complete the last batch?
     int missingSamples = missingFrames * _hopSize;
@@ -275,7 +277,7 @@ int TensorflowPredictEffnetDiscogs::padSignal(const std::vector<Real> &signal, s
     paddedSignal.insert(paddedSignal.end(), padding.begin(), padding.end());
   }
 
-  return missingPatches;
+  return paddingPatches;
 }
 
 } // namespace standard
