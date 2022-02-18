@@ -94,6 +94,14 @@ void TensorflowPredictEffnetDiscogs::configure() {
   int patchSize = parameter("patchSize").toInt();
   int batchSize = parameter("batchSize").toInt();
 
+  if (batchSize == 0) {
+    throw EssentiaException("TensorflowPredictEffnetDiscogs: `batchSize` cannot be 0");
+  }
+
+  if (patchSize == 0) {
+    throw EssentiaException("TensorflowPredictEffnetDiscogs: `patchSize` cannot be 0");
+  }
+
 
   vector<int> inputShape({batchSize, 1, patchSize, _numberBands});
 
