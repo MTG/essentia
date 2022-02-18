@@ -141,7 +141,7 @@ const char* TensorflowPredictEffnetDiscogs::description = DOC(
   "By setting the `batchSize` parameter to -1 the patches are stored to run a single "
   "TensorFlow session at the end of the stream. This allows to take advantage "
   "of parallelization when GPUs are available, but at the same time it can be "
-  "memory exhausting for long files. This option is not be supported by some EffnetDiscogs models.\n"
+  "memory exhausting for long files. This option is not supported by some EffnetDiscogs models.\n"
   "\n"
   "The recommended pipeline is as follows::\n"
   "\n"
