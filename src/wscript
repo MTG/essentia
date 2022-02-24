@@ -330,7 +330,7 @@ def configure(ctx):
 
     algos = [ 'TensorflowPredict', 'TensorflowPredictMusiCNN', 'TensorflowPredictVGGish',
               'TensorflowPredictTempoCNN', 'TensorflowPredictCREPE', 'PitchCREPE',
-              'TempoCNN' ]
+              'TempoCNN', 'TensorflowPredictEffnetDiscogs' ]
     if has('tensorflow'):
         print('- Tensorflow detected!')
         print('  The following algorithms will be included: %s\n' % algos)
