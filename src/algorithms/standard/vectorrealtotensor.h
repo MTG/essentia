@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -42,20 +42,20 @@ class VectorRealToTensor : public Algorithm {
   std::vector<std::vector<std::vector<Real> > > _acc;
 
  public:
-  VectorRealToTensor(){
+  VectorRealToTensor() : _push(false), _accumulate(false) {
     declareInput(_frame, 187,"frame", "the input frames");
     declareOutput(_tensor, 1, "tensor", "the accumulated frame in one single tensor");
   }
 
   void declareParameters() {
     // Process 187 frames x 96 features by default.
-    // This is a common setup for mel-spectrogram based arquitectures.
+    // This is a common setup for mel-spectrogram based architectures.
     std::vector<int> outputShape = {1, 1, 187, 96};
 
     declareParameter("shape", "shape of the output tensor (batchSize, channels, patchSize, featureSize). If batchSize is -1 a single tensor is generated when the end of the stream is reached", "", outputShape);
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 0);
     declareParameter("batchHopSize", "number of patches between the beginnings of adjacent batches. 0 to avoid overlap", "[0,inf)", 0);
-    declareParameter("lastPatchMode", "what to do with the last frames. Options are to `repeat` them to fill the last patch or to `discard` them", "{discard,repeat}", "repeat");
+    declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "repeat");
   }
 
   void configure();

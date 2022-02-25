@@ -1,11 +1,14 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 . ../build_config.sh
 
 rm -rf tmp
 mkdir tmp
 cd tmp
 
-wget http://www.fftw.org/$FFTW_VERSION.tar.gz
+echo "Building fftw $FFTW_VERSION"
+
+curl -SLO http://www.fftw.org/$FFTW_VERSION.tar.gz
 tar -xf $FFTW_VERSION.tar.gz
 cd $FFTW_VERSION
 
@@ -21,7 +24,8 @@ cd $FFTW_VERSION
 make
 make install
 
-cp .libs/libfftw3f-3.dll $PREFIX/lib
+# TODO Unnecessary?
+#cp .libs/libfftw3f-3.dll $PREFIX/lib
 
 cd ../..
 rm -r tmp

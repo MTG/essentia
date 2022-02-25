@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -40,7 +40,7 @@ class Windowing : public Algorithm {
   void declareParameters() {
     declareParameter("size", "the window size", "[2,inf)", 1024);
     declareParameter("zeroPadding", "the size of the zero-padding", "[0,inf)", 0);
-    declareParameter("type", "the window type, which can be 'hamming', 'hann', 'triangular', 'square' or 'blackmanharrisXX'", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
+    declareParameter("type", "the window type", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
     declareParameter("zeroPhase", "a boolean value that enables zero-phase windowing", "{true,false}", true);
     declareParameter("normalized", "a boolean value to specify whether to normalize windows (to have an area of 1) and then scale by a factor of 2", "{true,false}", true);
   }

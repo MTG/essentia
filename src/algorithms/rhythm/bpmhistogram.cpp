@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -541,7 +541,7 @@ AlgorithmStatus BpmHistogram::process() {
     vector<Real> zero(1,0);
     vector<Real> empty;
     TNT::Array2D<Real> emptyMatrix;
-    _bpm.push((Real)0.0);
+    _bpm.push((Real) 0.);
     _bpmCandidates.push(empty);
     _bpmMagnitudes.push(empty);
     _tempogram.push(emptyMatrix);

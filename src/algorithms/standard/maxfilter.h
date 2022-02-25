@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -51,7 +51,7 @@ class MaxFilter : public Algorithm {
   ~MaxFilter() {}
 
   void declareParameters() {
-    declareParameter("width", "the window size, has to be odd if the window is centered", "[2,inf)", 3);
+    declareParameter("width", "the window size, even size is auto-resized to the next odd value in the non-casual case", "[2,inf)", 3);
     declareParameter("causal", "use casual filter (window is behind current element otherwise it is centered around)", "{true,false}", true);
   }
 

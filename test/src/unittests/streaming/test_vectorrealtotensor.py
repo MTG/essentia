@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -156,6 +156,54 @@ class TestVectorRealToTensor(TestCase):
 
         self.assertAlmostEqualMatrix(found, expected, 1e-8)
 
+
+    def testOutputShapes(self):
+        # Test that the outputs shapes correspond to the expected values.
+
+        frame_size = 1
+        test_lens = (1, 2, 3)
+        for accumulate in (True, False):
+            for n_batches in test_lens:
+                for batch_size in test_lens:
+                    for patch_size in test_lens:
+                        if accumulate:
+                            # With batchSize = -1, the algorithm should return a single batch with as
+                            # many patches as possible
+                            shape = [-1, 1, patch_size, frame_size]
+                            expected_n_batches = 1
+                            expected_batch_shape = [n_batches * batch_size, 1, patch_size, frame_size]
+                        else:
+                            # With a fixed batch size the algorithm should return `n_batches` with a
+                            # fixed batch size.
+                            shape = [batch_size, 1, patch_size, frame_size]
+                            expected_batch_shape = [batch_size, 1, patch_size, frame_size]
+                            expected_n_batches = n_batches
+
+                        fc = FrameCutter(
+                            frameSize=frame_size,
+                            hopSize=frame_size,
+                            startFromZero=True,
+                            lastFrameToEndOfFile=True,
+                        )
+                        vtt = VectorRealToTensor(
+                            shape=shape,
+                            lastPatchMode="discard",
+                        )
+
+                        n_samples = n_batches * batch_size * patch_size * frame_size
+                        data = numpy.zeros((n_samples), dtype="float32")
+                        vi = VectorInput(data)
+                        pool = Pool()
+
+                        vi.data >> fc.signal
+                        fc.frame >> vtt.frame
+                        vtt.tensor >> (pool, "tensor")
+
+                        run(vi)
+                        batches = pool["tensor"]
+                        self.assertEqual(len(batches), expected_n_batches)
+                        for batch in batches:
+                            self.assertEqualVector(batch.shape, expected_batch_shape)
 
 suite = allTests(TestVectorRealToTensor)
 

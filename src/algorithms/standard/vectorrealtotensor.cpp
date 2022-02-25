@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,7 +28,7 @@ const char* VectorRealToTensor::name = "VectorRealToTensor";
 const char* VectorRealToTensor::category = "Standard";
 const char* VectorRealToTensor::description = DOC("This algorithm generates tensors "
 "out of a stream of input frames. The 4 dimensions of the tensors stand for (batchSize, channels, patchSize, featureSize):\n"
-"  - batchSize: Number of patches per tensor. If batchSize is set to 0 it will accumulate patches until the end of the stream is reached and then produce a single tensor. "
+"  - batchSize: Number of patches per tensor. If batchSize is set to -1 it will accumulate patches until the end of the stream is reached and then produce a single tensor. "
 "Warning: This option may exhaust memory depending on the size of the stream.\n"
 "  - channels: Number of channels per tensor. Currently, only single-channel tensors are supported. Otherwise, an exception is thrown.\n"
 "  - patchSize: Number of timestamps (i.e., number of frames) per patch.\n"
@@ -74,13 +74,13 @@ void VectorRealToTensor::configure() {
   _push = false;
 
   if (_patchHopSize > _timeStamps) {
-    throw EssentiaException("VectorRealToTensor: `patchHopSize` has to be smaller that the number of timestamps");
+    throw EssentiaException("VectorRealToTensor: `patchHopSize` has to be smaller than the number of timestamps");
   }
 
 
   if (shape[0] > 0) {
-    if (_batchHopSize > _timeStamps) {
-      throw EssentiaException("VectorRealToTensor: `batchHopSize` has to be smaller that the number batch size (shape[0])");
+    if (_batchHopSize > shape[0]) {
+      throw EssentiaException("VectorRealToTensor: `batchHopSize` has to be smaller than the batch size (shape[0])");
     }
   }
 
@@ -215,13 +215,12 @@ AlgorithmStatus VectorRealToTensor::process() {
 
     Tensor<Real>& tensor = *(Tensor<Real> *)_tensor.getFirstToken();
 
-    // Explicit convertion of std:vector to std::array<Eigen::Index> for Clang.
-    std::array<Eigen::Index, 4> shapeEigenIndex;
-    std::copy_n(shape.begin(), 4, shapeEigenIndex.begin());
+    // Explicit conversion of std:vector to std::array<Eigen::Index> for Clang.
+    std::array<Eigen::Index, TENSORRANK> shapeEigenIndex;
+    std::copy_n(shape.begin(), TENSORRANK, shapeEigenIndex.begin());
 
     tensor.resize(shapeEigenIndex);
 
-    // TODO: Add flag to swap frequency axis from 4 to 2.
     for (int i = 0; i < shape[0]; i++) {      // Batch axis
       for (int j = 0; j < shape[2]; j++) {    // Time axis
         for (int k = 0; k < shape[3]; k++) {  // Freq axis

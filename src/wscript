@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
@@ -145,6 +145,10 @@ def configure(ctx):
 
     ctx.check_cfg(package=lib_map['EIGEN3'], uselib_store='EIGEN3',
                   args=['eigen3 >= 3.3.4'] + check_cfg_args)
+
+    # Disable Eigen warnings related to meaningless type qualifiers
+    # https://gitlab.com/libeigen/eigen/-/issues/115
+    ctx.env.DEFINES += ['EIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS']
 
     if 'libav' in ctx.env.CHECK_LIBS:
         ctx.check_cfg(package=lib_map['AVCODEC'], uselib_store='AVCODEC',
@@ -324,7 +328,9 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s' % algos)
         ctx.env.ALGOIGNORE += algos 
 
-    algos = [ 'TensorflowPredict', 'TensorflowPredictMusiCNN', 'TensorflowPredictVGGish' ]
+    algos = [ 'TensorflowPredict', 'TensorflowPredictMusiCNN', 'TensorflowPredictVGGish',
+              'TensorflowPredictTempoCNN', 'TensorflowPredictCREPE', 'PitchCREPE',
+              'TempoCNN', 'TensorflowPredictEffnetDiscogs' ]
     if has('tensorflow'):
         print('- Tensorflow detected!')
         print('  The following algorithms will be included: %s\n' % algos)

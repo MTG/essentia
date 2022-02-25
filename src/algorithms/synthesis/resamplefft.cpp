@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,7 +27,7 @@ using namespace standard;
 
 const char* ResampleFFT::name = "ResampleFFT";
 const char* ResampleFFT::category = "Synthesis";
-const char* ResampleFFT::description = DOC("This algorithm resamples a sequence using FFT / IFFT. The input and output sizes must be an even number. (It is meant to be eqivalent to the resample function in Numpy).");
+const char* ResampleFFT::description = DOC("This algorithm resamples a sequence using FFT/IFFT. The input and output sizes must be an even number. The algorithm is a counterpart of the resample function in SciPy.");
 
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -40,7 +40,7 @@ class TestLowPass(TestCase):
 
         for i in range(1000):
             if s[i] > 10:
-                self.assertTrue(sf[i] > 0,5*s[i])
+                self.assertTrue(sf[i] > 0.5*s[i])
 
         for i in range(1001, len(sf)):
             if s[i] > 10:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -24,11 +24,14 @@ from essentia_test import *
 class TestUnaryOperator(TestCase):
 
     testInput = [1,2,3,4,3.4,-5.0008, 100034]
+    # Check that x is clipped to 1e-30 for x < 1e-30 for log, ln, log10 and lin2db.
+    # Check that results of operation with  x = 1e-31 or less results in the same output.
+    testInputLowX = [1e-31, 0.9e-31, 1e-32, 1e-33 ]
 
     def testEmpty(self):
         self.assertEqualVector(UnaryOperator()([]), [])
 
-    def testOne(self):
+    def testIdentity(self):
         self.assertEqualVector(UnaryOperator(type="identity")([101]), [101])
 
     def testAbs(self):
@@ -40,19 +43,37 @@ class TestUnaryOperator(TestCase):
             UnaryOperator(type="log10")(self.testInput),
             [0., 0.30103001, 0.4771212637, 0.60206002, 0.5314789414, -30., 5.0001478195])
 
+    def testLog10LowX(self):
+        self.assertAlmostEqualVector(
+            UnaryOperator(type="log10")(self.testInputLowX),
+             [-30., -30., -30., -30.])        
+
     def testLog(self):
         self.assertAlmostEqualVector(
             UnaryOperator(type="log")(self.testInput),
             [0., 0.6931471825, 1.0986123085, 1.3862943649, 1.223775506, -69.0775527954, 11.5132656097])
 
+    def testLogLowX(self):
+        self.assertAlmostEqualVector(
+            UnaryOperator(type="log")(self.testInputLowX),[-69.07755, -69.07755, -69.07755, -69.07755])        
+
     def testLn(self):
         self.assertAlmostEqualVector(UnaryOperator(type="ln")(self.testInput),
             [0, 0.693147181, 1.098612289, 1.386294361, 1.223775432, -69.07755279, 11.513265407])
+
+    def testLnLowX(self):        
+        self.assertAlmostEqualVector(UnaryOperator(type="ln")(self.testInputLowX),
+            [-69.07755, -69.07755, -69.07755, -69.07755])            
 
     def testLin2Db(self):
         self.assertAlmostEqualVector(
             UnaryOperator(type="lin2db")(self.testInput),
             [0., 3.01029992, 4.77121258, 6.02059984, 5.3147893, -100., 50.00147629])
+
+    def testLin2DbLowX(self):
+        self.assertAlmostEqualVector(
+            UnaryOperator(type="lin2db")(self.testInputLowX),
+             [-100., -100., -100., -100.])
 
     def testDb2Lin(self):
         # remove the last element because it causes an overflow because it is

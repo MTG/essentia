@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -530,10 +530,7 @@ PyObject* PyPool::value(PyPool* self, PyObject* pyArgs) {
       case VECTOR_VECTOR_STRING: return VectorVectorString::toPythonCopy(&p.value<vector<vector<string> > >(key));
       case VECTOR_MATRIX_REAL: return VectorMatrixReal::toPythonCopy(&p.value<vector<TNT::Array2D<Real> > >(key));
       case VECTOR_TENSOR_REAL: return VectorTensorReal::toPythonCopy(&p.value<vector<Tensor<Real> > >(key));
-      case TENSOR_REAL: {
-        Tensor<Real>* t = new Tensor<Real>(p.value<Tensor<Real> >(key));
-        return TensorReal::toPythonRef(t);
-      }
+      case TENSOR_REAL:  return TensorReal::toPythonCopy(&p.value<Tensor<Real> >(key));
       default:
         ostringstream msg;
         msg << "Pool.value does not support the type: " << edtToString(tp);

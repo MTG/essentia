@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -33,7 +33,7 @@ const char* CrossSimilarityMatrix::description = DOC("This algorithm computes a 
 "The default parameters for binarizing are optimized according to [1] for cover song identification using chroma features. \n\n"
 "The input feature arrays are vectors of frames of features in the shape (n_frames, n_features), where 'n_frames' is the number frames, 'n_features' is the number of frame features.\n\n"
 "An exception is also thrown if either one of the input feature arrays are empty or if the output similarity matrix is empty.\n\n"
-"References:\n"
+"References:\n\n"
 "[1] Serra, J., Serra, X., & Andrzejak, R. G. (2009). Cross recurrence quantification for cover song identification. New Journal of Physics.\n\n");
 
 

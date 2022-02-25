@@ -217,7 +217,7 @@ For more information about ``Algorithms``, please see the `complete reference <a
 
 For information on the other types and classes of Essentia which are not ``Algorithms``, see the `Design Overview <design_overview.html>`_ page.
 
-For a tutorial showing how to use these algorithms in practice, read the tutorial for either `python <python_tutorial.html>`_ or `C++ <howto_standard_extractor.html>`_.
+For a tutorial showing how to use these algorithms in practice, read the tutorial for either `Python <python_tutorial.html>`_ or `C++ <howto_standard_extractor.html>`_.
 
 For more advanced examples, you can also look at the `src/examples`_ directory of Essentia's git repository.
 

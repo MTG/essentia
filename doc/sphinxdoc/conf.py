@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -46,7 +46,8 @@ import sys, os
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.viewcode',
               'sphinxcontrib.doxylink',
-              'sphinxprettysearchresults']
+              'sphinxprettysearchresults',
+              'sphinx.ext.autosectionlabel']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -62,7 +63,7 @@ master_doc = 'contents'
 
 # General information about the project.
 project = u'Essentia'
-copyright = u'2006-2017, Universitat Pompeu Fabra'
+copyright = u'2006-2022, Universitat Pompeu Fabra'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -160,13 +161,13 @@ html_static_path = ['_static']
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-html_additional_pages = {'index': 'index.html',
-                         'algorithms_reference': 'algorithms_reference.html',
-                         'applications': 'applications.html',
-                         'documentation': 'documentation.html'}
+# html_additional_pages = {'index': 'index.html',
+#                          'algorithms_reference': 'algorithms_reference.html',
+#                          'applications': 'applications.html',
+#                          'documentation': 'documentation.html'}
 
-exec(compile(open("essentia_reference.py").read(), "essentia_reference.py", 'exec'))
-html_additional_pages.update(essentia_algorithms)
+# exec(compile(open("essentia_reference.py").read(), "essentia_reference.py", 'exec'))
+# html_additional_pages.update(essentia_algorithms)
 
 # If false, no module index is generated.
 #html_domain_indices = True
@@ -208,10 +209,10 @@ htmlhelp_basename = 'Essentiadoc'
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
-latex_documents = [
-  ('index', 'Essentia.tex', u'Essentia Documentation',
-   u'Nicolas Wack', 'manual'),
-]
+#latex_documents = [
+#  ('index', 'Essentia.tex', u'Essentia Documentation',
+#   u'Nicolas Wack', 'manual'),
+#]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -241,10 +242,10 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    ('index', 'essentia', u'Essentia Documentation',
-     [u'Nicolas Wack'], 1)
-]
+#man_pages = [
+#    ('index', 'essentia', u'Essentia Documentation',
+#     [u'Nicolas Wack'], 1)
+#]
 
 
 doxylink = {

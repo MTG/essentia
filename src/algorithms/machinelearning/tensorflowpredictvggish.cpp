@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -33,7 +33,7 @@ TensorflowPredictVGGish::TensorflowPredictVGGish() : AlgorithmComposite(),
     _tensorflowPredict(0), _poolToTensor(0), _tensorToVectorReal(0), _configured(false) {
 
   declareInput(_signal, 4096, "signal", "the input audio signal sampled at 16 kHz");
-  declareOutput(_predictions, 0, "predictions", "the model predictions");
+  declareOutput(_predictions, 0, "predictions", "the output values from the model node named after `output`");
 }
 
 
@@ -90,6 +90,7 @@ void TensorflowPredictVGGish::configure() {
   int patchHopSize = parameter("patchHopSize").toInt();
   string lastPatchMode = parameter("lastPatchMode").toString();
   bool accumulate = parameter("accumulate").toBool();
+  int patchSize = parameter("patchSize").toInt();
 
   int batchSize = accumulate ? -1 : 1;
 
@@ -97,7 +98,6 @@ void TensorflowPredictVGGish::configure() {
   // https://github.com/tensorflow/models/blob/master/research/audioset/vggish/mel_features.py
   int frameSize = 400;
   int hopSize = 160;
-  int patchSize = 96;
   int numberBands = 64;
   vector<int> inputShape({batchSize, 1, patchSize, numberBands});
 
@@ -117,13 +117,11 @@ void TensorflowPredictVGGish::configure() {
 
   _poolToTensor->configure("namespace", output);
 
-  Parameter graphFilenameParam = parameter("graphFilename");
-  // if no file has been specified, do not do anything else
-  if (!graphFilenameParam.isConfigured()) return;
-
   string graphFilename = parameter("graphFilename").toString();
+  string savedModel = parameter("savedModel").toString();
 
   _tensorflowPredict->configure("graphFilename", graphFilename,
+                                "savedModel", savedModel,
                                 "inputs", vector<string>({input}),
                                 "outputs", vector<string>({output}),
                                 "isTrainingName", isTrainingName);
@@ -133,7 +131,6 @@ void TensorflowPredictVGGish::configure() {
 } // namespace essentia
 
 
-
 namespace essentia {
 namespace standard {
 
@@ -141,26 +138,35 @@ const char* TensorflowPredictVGGish::name = "TensorflowPredictVGGish";
 const char* TensorflowPredictVGGish::category = "Machine Learning";
 const char* TensorflowPredictVGGish::description = DOC(
   "This algorithm makes predictions using VGGish-based models.\n"
-  "Internally, it uses TensorflowInputVGGish for the input feature extraction (mel bands). "
-  "It feeds the model with patches of 96 mel bands frames and jumps a constant amount of frames determined by patchHopSize.\n"
-  "With the accumulate parameter the patches are stored to run a single TensorFlow session at the end of the stream. "
-  "This allows to take advantage of parallelization when GPUs are available, but at the same time it can be memory exhausting for long files.\n"
-  "The recommended pipeline is as follows:\n"
-  "  MonoLoader(sampleRate=16000) >> TensorflowPredictVGGish"
   "\n"
+  "Internally, it uses TensorflowInputVGGish for the input feature extraction "
+  "(mel bands). It feeds the model with patches of 96 mel bands frames and "
+  "jumps a constant amount of frames determined by `patchHopSize`.\n"
   "\n"
-  "Note: This algorithm does not make any check on the input model so it is the user's responsibility to make sure it is a valid one."
+  "With the accumulate parameter the patches are stored to run a single "
+  "TensorFlow session at the end of the stream. This allows to take advantage "
+  "of parallelization when GPUs are available, but at the same time it can be "
+  "memory exhausting for long files.\n"
   "\n"
+  "The recommended pipeline is as follows::\n"
+  "\n"
+  "  MonoLoader(sampleRate=16000) >> TensorflowPredictVGGish\n"
+  "\n"
+  "Note: This algorithm does not make any check on the input model so it is "
+  "the user's responsibility to make sure it is a valid one.\n"
   "\n"
   "References:\n"
-  "  [1] Gemmeke, J. et. al., AudioSet: An ontology and human-labelled dataset for audio events, ICASSP 2017\n\n"
-  "  [2] Hershey, S. et. al., CNN Architectures for Large-Scale Audio Classification, ICASSP 2017\n\n"
-  "  [3] Supported models at https://essentia.upf.edu/models/");
+  "\n"
+  "1. Gemmeke, J. et. al., AudioSet: An ontology and human-labelled dataset "
+  "for audio events, ICASSP 2017\n\n"
+  "2. Hershey, S. et. al., CNN Architectures for Large-Scale Audio "
+  "Classification, ICASSP 2017\n\n"
+  "3. Supported models at https://essentia.upf.edu/models/\n\n");
 
 
 TensorflowPredictVGGish::TensorflowPredictVGGish() {
     declareInput(_signal, "signal", "the input audio signal sampled at 16 kHz");
-    declareOutput(_predictions, "predictions", "the predictions");
+    declareOutput(_predictions, "predictions", "the output values from the model node named after `output`");
 
     createInnerNetwork();
   }
@@ -183,15 +189,15 @@ void TensorflowPredictVGGish::createInnerNetwork() {
 
 
 void TensorflowPredictVGGish::configure() {
-  // if no file has been specified, do not do anything
-  if (!parameter("graphFilename").isConfigured()) return;
   _tensorflowPredictVGGish->configure(INHERIT("graphFilename"),
+                                      INHERIT("savedModel"),
                                       INHERIT("input"),
                                       INHERIT("output"),
                                       INHERIT("isTrainingName"),
                                       INHERIT("patchHopSize"),
                                       INHERIT("accumulate"),
-                                      INHERIT("lastPatchMode"));
+                                      INHERIT("lastPatchMode"),
+                                      INHERIT("patchSize"));
 }
 
 

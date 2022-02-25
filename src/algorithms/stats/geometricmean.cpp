@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -31,7 +31,7 @@ const char* GeometricMean::description = DOC("This algorithm computes the geomet
 "\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Energy_(signal_processing)\n\n"
+"  http://en.wikipedia.org/wiki/Energy_%28signal_processing%29\n\n"
 "  [2] Geometric Mean -- from Wolfram MathWorld,\n"
 "  http://mathworld.wolfram.com/GeometricMean.html");
 

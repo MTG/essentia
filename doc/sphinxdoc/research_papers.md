@@ -80,6 +80,12 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 ## Emotion detection
 
+- S. Chowdhury, and G. Widmer. On perceived emotion in expressive piano performance: Further experimental evidence for the relevance of mid-level perceptual features. In International Society for Music Information Retrieval (ISMIR 2021), 2021.
+
+- Byun, S. W., Lee, S. P. A Study on a Speech Emotion Recognition System with Effective Acoustic Features Using Deep Learning Algorithms. Applied Sciences, 11(4), 1890, 2021.
+
+- Y. Kim, L. M. Aiello, and D. Quercia. PepMusic: motivational qualities of songs for daily activities. EPJ Data Science, 9(1), 13, 2020.
+
 - Y. Hifny, A. Ali. Efficient Arabic Emotion Recognition Using Deep Neural Networks. In ICASSP 2019-2019 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP), pages 6710-6714, 2019.
 
 - J. Grekow. Finding Musical Pieces with a Similar Emotional Distribution throughout the Same Composition. In 2019 IEEE International Symposium on INnovations in Intelligent SysTems and Applications (INISTA), pages 1-6, 2019.
@@ -156,6 +162,8 @@ focused on weblogs. In 7th International Conference on Music Information Retriev
 
 - S. Parekh, F. Font, and X. Serra. Improving Audio Retrieval through Loudness Profile Categorization. In IEEE International Symposium on Multimedia (ISM), pages 565-568, 2016.
 
+- D. Moffat and J. D. Reiss. Objective evaluations of synthesised environmental sounds. In International Conference on Digital Audio Effects (DAFx-18), 2018.
+
 - D. Moffat, D. Ronan, and J. D. Reiss. Unsupervised taxonomy of sound effects. In 20th International Conference on Digital Audio Effects (DAFx-17), 2017.
 
 - S. Böck. Event Detection in Musical Audio. PhD Thesis, Johannes Kepler University, Linz, Austria, 2016.
@@ -213,6 +221,10 @@ Ecological acoustics perspective for content-based retrieval of environmental so
 - F. Fuhrmann and P. Herrera. Quantifying the relevance of locally extracted information for musical instrument recognition from entire pieces of music. In International Society for Music Information Retrieval Conference (ISMIR’11), 2011.
 
 - F. Fuhrmann, P. Herrera, and X. Serra. Detecting solo phrases in music using spectral and pitch-related descriptors. Journal of New Music Research, 38(4):343–356, 2009.
+
+## Audio source separation
+
+F. R. Stöter. Separation and Count Estimation for Audio Sources Overlapping in Time and Frequency. PhD Thesis, Friedrich–Alexander University Erlangen–Nürnberg, Germany, 2020.
 
 ## Music segmentation
 
@@ -305,6 +317,8 @@ arXiv preprint arXiv:1911.04952, 2019.
 
 R. T. Dean, A. J. Milne, and F. Bailes. Spectral Pitch Similarity is a Predictor of Perceived Change in Sound-as Well as Note-Based Music. Music & Science, 2, 2059204319847351, 2019.
 
+P. Harrison and M. T. Pearce. Simultaneous consonance in music perception and composition. Psychological Review, 127(2), 2019.
+
 
 ## Bioacoustic analyis
 
@@ -333,3 +347,6 @@ C. Fleitas and A. Moreno, Computational solution for the parametrization of bioa
 - A. Rao, E. Huynh, T. J. Royston, A. Kornblith, and S. Roy. Acoustic Methods for Pulmonary Diagnosis. IEEE reviews in biomedical engineering, 12, 221-239, 2018.
 
 - D. Perna, and A. Tagarelli, A. Deep auscultation: Predicting respiratory anomalies and diseases via recurrent neural networks. In 2019 IEEE 32nd International Symposium on Computer-Based Medical Systems (CBMS), pages 50-55, 2019.
+
+- V. K. Cheung, P. M. Harrison, L. Meyer, M. T. Pearce, J. D. Haynes, and S. Koelsch. Uncertainty and surprise jointly predict musical pleasure and amygdala, hippocampus, and auditory cortex activity. Current Biology, 29(23), 4084-4092, 2019.
+

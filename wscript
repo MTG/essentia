@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 from __future__ import print_function
@@ -126,14 +126,16 @@ def configure(ctx):
     else:
         ctx.env.CXXFLAGS += ['-W2', '-EHsc']
 
-    # force using SSE floating point (default for 64bit in gcc) instead of
-    # 387 floating point (used for 32bit in gcc) to avoid numerical differences
-    # between 32 and 64bit builds (see https://github.com/MTG/essentia/issues/179)
+    # Force using SSE floating point for all x86 platforms (default for 64-bit
+    # in gcc) instead of 387 floating point (used for 32-bit in gcc) to avoid
+    # numerical differences between 32/64-bit builds
+    # (see https://github.com/MTG/essentia/issues/179)
     if (not ctx.options.EMSCRIPTEN and 
         not ctx.options.CROSS_COMPILE_ANDROID and 
         not ctx.options.CROSS_COMPILE_IOS and
         not ctx.options.NO_MSSE and
-        sys.platform != 'win32'):
+        sys.platform != 'win32' and
+        any(arch in platform.machine() for arch in ['i386', 'i686', 'x86', 'x64'])):
         ctx.env.CXXFLAGS += ['-msse', '-msse2', '-mfpmath=sse']
 
     # define this to be stricter, but sometimes some libraries can give problems...
@@ -166,6 +168,8 @@ def configure(ctx):
 
     if ctx.options.EMSCRIPTEN:
         ctx.env.CXXFLAGS += ['-I' + os.path.join(os.environ['EMSCRIPTEN'], 'system', 'lib', 'libcxxabi', 'include')]
+        # Optimize for code size:
+        # https://emscripten.org/docs/tools_reference/emcc.html#emcc-oz
         ctx.env.CXXFLAGS += ['-Oz']
     elif sys.platform == 'darwin':
         # clang fails on 10.7 using <atomic>, because libc++ is not new enough
@@ -299,7 +303,7 @@ def configure(ctx):
         
         # flags required for linking to static ffmpeg libs
         # -Bsymbolic flag is not available on clang
-        if ctx.env.CXX_NAME is not "clang":
+        if ctx.env.CXX_NAME != "clang":
             ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
             ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
 
@@ -339,7 +343,7 @@ def run_python_tests(ctx):
     os.system('cp -r src/python/essentia build/python/')
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
 
-    ret = os.system('PYTHONPATH=build/python %s test/src/unittests/all_tests.py' % sys.executable)
+    ret = os.system('PYTHONPATH=build/python:$PYTHONPATH %s test/src/unittests/all_tests.py' % sys.executable)
     if ret:
         ctx.fatal('failed to run python tests. Check test output')
 
@@ -353,6 +357,8 @@ def doc(ctx):
     os.system('mkdir -p build/python')
     os.system('cp -r src/python/essentia build/python/')
     os.system('cp build/src/python/_essentia*.so build/python/essentia')
+    os.system('cp build/src/libessentia.so build/python/essentia')
 
     pythonpath = os.path.abspath('build/python')
-    os.system('PYTHONPATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, sys.executable))
+    ldpath = os.path.join(pythonpath, 'essentia')
+    os.system('PYTHONPATH=%s LD_LIBRARY_PATH=%s doc/build_sphinx_doc.sh %s' % (pythonpath, ldpath, sys.executable))

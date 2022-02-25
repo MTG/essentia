@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -32,7 +32,7 @@ const char* Tristimulus::description = DOC("This algorithm calculates the tristi
 
 "References:\n"
 "  [1] Tristimulus (audio) - Wikipedia, the free encyclopedia\n"
-"  http://en.wikipedia.org/wiki/Tristimulus_(audio)\n\n"
+"  http://en.wikipedia.org/wiki/Tristimulus_%28audio%29\n\n"
 "  [2] G. Peeters, \"A large set of audio features for sound description\n" 
 "  (similarity and classification) in the CUIDADO project,\" CUIDADO I.S.T.\n" 
 "  Project Report, 2004");

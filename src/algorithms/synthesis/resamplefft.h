@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -58,8 +58,8 @@ class ResampleFFT : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("inSize", "the size of the input sequence. It needss to be even-sized.", "[1,inf)", 128);
-    declareParameter("outSize", "the size of the output sequence. It needss to be even-sized.", "[1,inf)", 128);
+    declareParameter("inSize", "the size of the input sequence. It needs to be even-sized.", "[1,inf)", 128);
+    declareParameter("outSize", "the size of the output sequence. It needs to be even-sized.", "[1,inf)", 128);
   }
 
   void configure();

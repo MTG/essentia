@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2016  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -417,16 +417,6 @@ and hence are not available in python.</p>
 
     open('_templates/algorithms_reference.html', 'w').write(html)
 
-
-    # Copy convert FAQ.md to rst and copy to documenation folder
-    subprocess.call(['pandoc', '../../FAQ.md', '-o', 'FAQ.rst'])
-
-    # Convert research_papers.md to rst
-    subprocess.call(['pandoc', 'research_papers.md', '-o', 'research_papers.rst'])
-
-
-    # Convert python notebook tutorials to rst
-    subprocess.call(['jupyter', 'nbconvert', '../../src/examples/tutorial/*.ipynb', '--to', 'rst', '--output-dir', '.'])
 
 if __name__ == '__main__':
     print("Loading Essentia with python=%s" % sys.executable)

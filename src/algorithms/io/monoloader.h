@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2020  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -40,6 +40,12 @@ class MonoLoader : public AlgorithmComposite {
   MonoLoader();
 
   ~MonoLoader() {
+    // Disconnect all null connections to delete the corresponding DevNull objects created.
+    disconnect(_audioLoader->output("md5"), NOWHERE);
+    disconnect(_audioLoader->output("bit_rate"), NOWHERE);
+    disconnect(_audioLoader->output("codec"), NOWHERE);
+    disconnect(_audioLoader->output("sampleRate"), NOWHERE);
+    
     delete _audioLoader;
     delete _mixer;
     delete _resample;
