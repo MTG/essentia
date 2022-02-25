@@ -91,8 +91,9 @@ void TensorflowPredictVGGish::configure() {
   string lastPatchMode = parameter("lastPatchMode").toString();
   bool accumulate = parameter("accumulate").toBool();
   int patchSize = parameter("patchSize").toInt();
+  int batchSize = parameter("batchSize").toInt();
 
-  int batchSize = accumulate ? -1 : 1;
+  if (accumulate) batchSize = -1;
 
   // Hardcoded parameters matching the training setup:
   // https://github.com/tensorflow/models/blob/master/research/audioset/vggish/mel_features.py
@@ -143,7 +144,7 @@ const char* TensorflowPredictVGGish::description = DOC(
   "(mel bands). It feeds the model with patches of 96 mel bands frames and "
   "jumps a constant amount of frames determined by `patchHopSize`.\n"
   "\n"
-  "With the accumulate parameter the patches are stored to run a single "
+  "By setting the `batchSize` parameter to -1 or 0 the patches are stored to run a single "
   "TensorFlow session at the end of the stream. This allows to take advantage "
   "of parallelization when GPUs are available, but at the same time it can be "
   "memory exhausting for long files.\n"
@@ -197,7 +198,8 @@ void TensorflowPredictVGGish::configure() {
                                       INHERIT("patchHopSize"),
                                       INHERIT("accumulate"),
                                       INHERIT("lastPatchMode"),
-                                      INHERIT("patchSize"));
+                                      INHERIT("patchSize"),
+                                      INHERIT("batchSize"));
 }
 
 

@@ -60,7 +60,8 @@ class TensorflowPredictMusiCNN : public AlgorithmComposite {
     declareParameter("isTrainingName", "the name of an additional input node to indicate the model if it is in training mode or not. Leave it empty when the model does not need such input", "", "");
     declareParameter("patchHopSize", "the number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
-    declareParameter("accumulate", "when true it runs a single TensorFlow session at the end of the stream. Otherwise, a session is run for every new patch", "{true,false}", false);
+    declareParameter("accumulate", "(outdated, use `batchSize`) when true it runs a single Tensorflow session at the end of the stream. Otherwise a session is run for every new patch", "{true,false}", false);
+    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 64);
     declareParameter("patchSize", "number of frames required for each inference. This parameter should match the model's expected input shape.", "[0,inf)", 187);
   }
 
@@ -113,7 +114,8 @@ class TensorflowPredictMusiCNN : public Algorithm {
     declareParameter("isTrainingName", "the name of an additional input node indicating whether the model is to be run in a training mode (for models with a training mode, leave it empty otherwise)", "", "");
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 93);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
-    declareParameter("accumulate", "when true it runs a single Tensorflow session at the end of the stream. Otherwise a session is run for every new patch", "{true,false}", false);
+    declareParameter("accumulate", "(outdated, use `batchSize`) when true it runs a single Tensorflow session at the end of the stream. Otherwise a session is run for every new patch", "{true,false}", false);
+    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 64);
     declareParameter("patchSize", "number of frames required for each inference. This parameter should match the model's expected input shape.", "[0,inf)", 187);
   }
 
