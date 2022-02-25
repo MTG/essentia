@@ -134,11 +134,14 @@ class TestVectorRealToTensor(TestCase):
         # VectorRealToTensor only supports single chanel data
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 2, 1, 1]})
 
-        # dimensions have to be different from 0.
-        self.assertConfigureFails(VectorRealToTensor(), {'shape': [0, 1, 1, 1]})
+        # the batch size has  be greater -1 or bigger.
+        self.assertConfigureFails(VectorRealToTensor(), {'shape': [-2, 1, 1, 1]})
+
+        # the rest of dimensions have to be positive.
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 0, 1, 1]})
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 1, 0, 1]})
-        self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 1, 0, 0]})
+        self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 1, 1, 0]})
+        self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, -1, -1, -1]})
 
     def testRepeatMode(self):
         # The test audio file has 430 frames. If patchSize is set to 428 with
@@ -155,7 +158,6 @@ class TestVectorRealToTensor(TestCase):
                                 (numberOfFrames // loopFrames))  # number of repetitions to fill the second patch
 
         self.assertAlmostEqualMatrix(found, expected, 1e-8)
-
 
     def testOutputShapes(self):
         # Test that the outputs shapes correspond to the expected values.
@@ -204,6 +206,42 @@ class TestVectorRealToTensor(TestCase):
                         self.assertEqual(len(batches), expected_n_batches)
                         for batch in batches:
                             self.assertEqualVector(batch.shape, expected_batch_shape)
+
+
+    def testDynamicBatchSizeIndicator(self):
+        # Test that -1 and 0 are equivalent.
+
+        frame_size, patch_size, batch_size, n_batches = 1, 3, 3 ,3
+        for batch_shape in (-1, 0):
+            shape = [batch_shape, 1, patch_size, frame_size]
+            expected_n_batches = 1
+            expected_batch_shape = [n_batches * batch_size, 1, patch_size, frame_size]
+
+            fc = FrameCutter(
+                frameSize=frame_size,
+                hopSize=frame_size,
+                startFromZero=True,
+                lastFrameToEndOfFile=True,
+            )
+            vtt = VectorRealToTensor(
+                shape=shape,
+                lastPatchMode="discard",
+            )
+
+            n_samples = n_batches * batch_size * patch_size * frame_size
+            data = numpy.zeros((n_samples), dtype="float32")
+            vi = VectorInput(data)
+            pool = Pool()
+
+            vi.data >> fc.signal
+            fc.frame >> vtt.frame
+            vtt.tensor >> (pool, "tensor")
+
+            run(vi)
+            batches = pool["tensor"]
+            self.assertEqual(len(batches), expected_n_batches)
+            for batch in batches:
+                self.assertEqualVector(batch.shape, expected_batch_shape)
 
 suite = allTests(TestVectorRealToTensor)
 

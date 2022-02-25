@@ -28,7 +28,7 @@ const char* VectorRealToTensor::name = "VectorRealToTensor";
 const char* VectorRealToTensor::category = "Standard";
 const char* VectorRealToTensor::description = DOC("This algorithm generates tensors "
 "out of a stream of input frames. The 4 dimensions of the tensors stand for (batchSize, channels, patchSize, featureSize):\n"
-"  - batchSize: Number of patches per tensor. If batchSize is set to -1 it will accumulate patches until the end of the stream is reached and then produce a single tensor. "
+"  - batchSize: Number of patches per tensor. If batchSize is set to -1 or 0 it will accumulate patches until the end of the stream is reached and then produce a single tensor. "
 "Warning: This option may exhaust memory depending on the size of the stream.\n"
 "  - channels: Number of channels per tensor. Currently, only single-channel tensors are supported. Otherwise, an exception is thrown.\n"
 "  - patchSize: Number of timestamps (i.e., number of frames) per patch.\n"
@@ -44,12 +44,18 @@ void VectorRealToTensor::configure() {
 
   _shape.resize(shape.size());
   for (size_t i = 0; i < shape.size(); i++) {
-    if (shape[i] == 0) {
-    throw EssentiaException("VectorRealToTensor: All dimensions should have a non-zero size.");
+
+    if ((i == 0) && (shape[i] < -1)) {
+    throw EssentiaException("VectorRealToTensor: The first dimension (batch size) cannot smaller than -1.");
+    }
+    if ((i > 0) && (shape[i] <= 0)) {
+    throw EssentiaException("VectorRealToTensor: Only the first dimension (batch size) can have size 0 or -1.");
     }
 
     _shape[i] = shape[i];
   }
+
+
 
   if (shape[1] != 1) {
     throw EssentiaException("VectorRealToTensor: Currently only single-channel tensors are supported.");
@@ -58,7 +64,7 @@ void VectorRealToTensor::configure() {
   _timeStamps = shape[2];
   _frame.setAcquireSize(_timeStamps);
 
-  if (shape[0] == -1) {
+  if ((shape[0] == -1) or (shape[0] == 0)) {
     _accumulate = true;
   }
 
