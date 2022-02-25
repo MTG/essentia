@@ -65,7 +65,7 @@ class TensorflowPredictEffnetDiscogs : public AlgorithmComposite {
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "PartitionedCall");
     declareParameter("patchHopSize", "the number of frames between the beginnings of adjacent patches. 0 to avoid overlap. The default value is 62 frames which corresponds to a prediction rate of 1.008 Hz", "[0,inf)", 62);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
-    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to `-1` to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 64);
+    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 64);
     declareParameter("patchSize", "number of frames required for each inference. This parameter should match the model's expected input shape.", "[0,inf)", 128);
   }
 
@@ -130,7 +130,7 @@ class TensorflowPredictEffnetDiscogs : public Algorithm {
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "PartitionedCall");
     declareParameter("patchHopSize", "the number of frames between the beginnings of adjacent patches. 0 to avoid overlap. The default value is 62 frames which corresponds to a prediction rate of 1.008 Hz", "[0,inf)", 62);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
-    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to `-1` to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 64);
+    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 64);
     declareParameter("patchSize", "number of frames required for each inference. This parameter should match the model's expected input shape.", "[0,inf)", 128);
     declareParameter("lastBatchMode", "some EffnetDiscogs models operate on a fixed batch size. The options are to `discard` the last patches or to pad with `zeros` to make a final batch. Additionally `same` zero-pads the input but returns only the predictions corresponding to patches with signal", "{discard,zeros,same}", "same");
   }
