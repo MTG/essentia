@@ -33,7 +33,7 @@ By default all frame-based features are computed with frame/hop sizes equal to 2
 
 * **dynamic_complexity**: dynamic complexity computed on 2sec windows with 1sec overlap. Algorithms: `DynamicComplexity <reference/streaming_DynamicComplexity.html>`_
 
-* **silence_rate_20dB**, **silence_rate_30dB**, **silence_rate_60dB**: rate of silent frames in a signal for thresholds of 20, 30, and 60 dBs. Algorithms: `SilenceRate <reference/streaming_SilenceRate.html>`_
+* **silence_rate_20dB**, **silence_rate_30dB**, **silence_rate_60dB**, **silence_rate_90dB**: rate of silent frames in a signal for thresholds of 20, 30, 60, and 90 dBs. Algorithms: `SilenceRate <reference/streaming_SilenceRate.html>`_
 
 * **spectral_rms**: spectral RMS. Algorithms: `RMS <reference/streaming_RMS.html>`_
 
