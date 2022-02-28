@@ -23,34 +23,19 @@ from essentia_test import *
 class TestFreesoundExtractor(TestCase):
 
     def testRegression(self):
-        test_filenames = ['cat_purrrr.wav']
+        test_filenames = ['cat_purrrr.wav', 'dubstep.wav', 'spaceambient.wav']
         for test_filename in test_filenames:
-            # Load expected results
+            # Load expected results pool
             expectedOutputFilename = join(filedir(), 'freesoundextractor', test_filename + '.json')
-            expected = json.load(open(expectedOutputFilename))
+            pool_expected = YamlInput(filename=expectedOutputFilename, format='json')()
             
             # Process test file
             inputFilename = join(testdata.audio_dir, 'recorded', test_filename)
-            pool, poolFrames = FreesoundExtractor()(inputFilename)
+            pool_found, _ = FreesoundExtractor()(inputFilename)
 
-            # TODO: assert value per value that expected is similar to pool
-            # check if funcion already exists to compare dicts, or make a reusable one
-            def walk_dict(v, prefix=''):
-                if isinstance(v, dict):
-                    for k, v2 in v.items():
-                        p2 = "{}['{}']".format(prefix, k)
-                        walk_dict(v2, p2)
-                elif isinstance(v, list):
-                    for i, v2 in enumerate(v):
-                        p2 = "{}[{}]".format(prefix, i)
-                        walk_dict(v2, p2)
-                else:
-                    print('{} = {}'.format(prefix, repr(v)))
-
-            walk_dict(expected)
-
+            # Assert the two pools are nearly the same
+            self.assertPoolAlmostEqual(pool_found, pool_expected)
             
-
     def testEmpty(self):
         inputFilename = join(testdata.audio_dir, 'generated', 'empty', 'empty.aiff')
         # NOTE: AudioLoader will through exception on "empty.wav" complaining that
@@ -60,7 +45,6 @@ class TestFreesoundExtractor(TestCase):
     def testSilence(self):
         inputFilename = join(testdata.audio_dir, 'generated', 'silence', 'silence.flac')
         self.assertRaises(RuntimeError, lambda: FreesoundExtractor()(inputFilename))
-        return
 
     def testCorruptFile(self):
         inputFilename = join(testdata.audio_dir, 'generated', 'unsupported.au')
