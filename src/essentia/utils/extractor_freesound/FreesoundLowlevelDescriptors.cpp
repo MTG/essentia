@@ -52,7 +52,7 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   w->output("frame") >> spec->input("frame");
 
   // Silence Rate
-  Real thresholds_dB[] = { -20, -30, -60 };
+  Real thresholds_dB[] = { -20, -30, -60, -90 };
 
   vector<Real> thresholds(ARRAY_SIZE(thresholds_dB));
   for (uint i=0; i<thresholds.size(); i++) {
@@ -63,6 +63,7 @@ void FreesoundLowlevelDescriptors::createNetwork(SourceBase& source, Pool& pool)
   sr->output("threshold_0") >> PC(pool, nameSpace + "silence_rate_20dB");
   sr->output("threshold_1") >> PC(pool, nameSpace + "silence_rate_30dB");
   sr->output("threshold_2") >> PC(pool, nameSpace + "silence_rate_60dB");
+  sr->output("threshold_3") >> PC(pool, nameSpace + "silence_rate_90dB");
 
   // Zero crossing rate
   Algorithm* zcr = factory.create("ZeroCrossingRate");

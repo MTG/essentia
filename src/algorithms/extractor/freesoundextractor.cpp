@@ -253,6 +253,11 @@ void FreesoundExtractor::compute() {
   E_INFO("FreesoundExtractor: Compute aggregation");
   stats = computeAggregation(results);
 
+  // Check if whole audio is silence and raise exception if that is the case
+  if(stats.value<Real>("lowlevel.silence_rate_90dB.mean") == 1.0){
+    throw EssentiaException("File looks like a completely silent file... Aborting...");
+  }
+
   if (options.value<Real>("highlevel.compute")) {
 #if HAVE_GAIA2    
     E_INFO("FreesoundExtractor: SVM models");
