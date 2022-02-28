@@ -34,7 +34,7 @@ class TestFreesoundExtractor(TestCase):
             pool_found, _ = FreesoundExtractor()(inputFilename)
 
             # Assert the two pools are nearly the same
-            self.assertPoolAlmostEqual(pool_found, pool_expected)
+            self.assertAlmostEqualPool(pool_found, pool_expected)
             
     def testEmpty(self):
         inputFilename = join(testdata.audio_dir, 'generated', 'empty', 'empty.aiff')

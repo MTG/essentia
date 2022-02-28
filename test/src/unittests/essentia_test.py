@@ -181,27 +181,7 @@ class TestCase(BaseTestCase):
         for val1, val2 in zip(found, expected):
           self.assertAlmostEqualAudio(val1, val2, precision)
 
-    def assertConfigureFails(self, algo, params):
-        conf = lambda: algo.configure(**params)
-        self.assertRaises(EssentiaException, conf)
-
-    def assertConfigureSuccess(self, algo, params):
-        try:
-            algo.configure(**params)
-        except EssentiaException:
-            self.fail()
-
-    def assertComputeSuccess(self, algo, params):
-        try:
-            algo.compute(**params)
-        except EssentiaException:
-            self.fail()
-
-    def assertComputeFails(self, algo, *args):
-        comp = lambda: algo.compute(*args)
-        self.assertRaises(EssentiaException, comp)
-
-    def assertPoolAlmostEqual(self, pool_found, pool_expected, precision = 1e-7):
+    def assertAlmostEqualPool(self, pool_found, pool_expected, precision = 1e-7):
         # Assert both pools have the same descriptors
         self.assertListEqual(sorted(pool_found.descriptorNames()), sorted(pool_expected.descriptorNames()))
 
@@ -234,3 +214,23 @@ class TestCase(BaseTestCase):
                     self.assertAlmostEqualMatrix(found, expected, precision=precision)         
             else:
                 self.assertEqual(found, expected)
+
+    def assertConfigureFails(self, algo, params):
+        conf = lambda: algo.configure(**params)
+        self.assertRaises(EssentiaException, conf)
+
+    def assertConfigureSuccess(self, algo, params):
+        try:
+            algo.configure(**params)
+        except EssentiaException:
+            self.fail()
+
+    def assertComputeSuccess(self, algo, params):
+        try:
+            algo.compute(**params)
+        except EssentiaException:
+            self.fail()
+
+    def assertComputeFails(self, algo, *args):
+        comp = lambda: algo.compute(*args)
+        self.assertRaises(EssentiaException, comp)
