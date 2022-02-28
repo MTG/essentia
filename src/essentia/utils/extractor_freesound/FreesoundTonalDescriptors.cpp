@@ -113,43 +113,11 @@ void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
   key_extractor->output("scale") >> PC(pool, nameSpace + "key.scale");
   key_extractor->output("strength") >> PC(pool, nameSpace + "key.strength");
 
-  // Compute chords
-  // TODO review these parameters to improve chords detection. Keeping old code for now
-  Algorithm* hpcp_chord = factory.create("HPCP",
-                                         "size", 36,
-                                         "referenceFrequency", tuningFreq,
-                                         "harmonics", 8,
-                                         "bandPreset", true,
-                                         "minFrequency", 40.0,
-                                         "maxFrequency", 5000.0,
-                                         "bandSplitFrequency", 500.0,
-                                         "weightType", "cosine",
-                                         "nonLinear", true,
-                                         "windowSize", 0.5);
-  peaks->output("frequencies") >> hpcp_chord->input("frequencies");
-  peaks->output("magnitudes") >> hpcp_chord->input("magnitudes");
-
-  Algorithm* schord = factory.create("ChordsDetection");
-  hpcp_chord->output("hpcp") >> schord->input("pcp");
-  schord->output("chords") >> PC(pool, nameSpace + "chords_progression");
-  schord->output("strength") >> PC(pool, nameSpace + "chords_strength");
-  
-  Algorithm* schords_desc = factory.create("ChordsDescriptors");
-  schord->output("chords") >> schords_desc->input("chords");
-  key_extractor->output("key") >> schords_desc->input("key");
-  key_extractor->output("scale") >> schords_desc->input("scale");
-
-  schords_desc->output("chordsHistogram") >> PC(pool, nameSpace + "chords_histogram");
-  schords_desc->output("chordsNumberRate") >> PC(pool, nameSpace + "chords_number_rate");
-  schords_desc->output("chordsChangesRate") >> PC(pool, nameSpace + "chords_changes_rate");
-  schords_desc->output("chordsKey") >> PC(pool, nameSpace + "chords_key");
-  schords_desc->output("chordsScale") >> PC(pool, nameSpace + "chords_scale");
-     
   Algorithm* entropy = factory.create("Entropy");
-  hpcp_chord->output("hpcp") >> entropy->input("array");
+  hpcp_key->output("hpcp") >> entropy->input("array");
   entropy->output("entropy") >> PC(pool, nameSpace + "hpcp_entropy");
 
   Algorithm* crest = factory.create("Crest");
-  hpcp_chord->output("hpcp") >> crest->input("array");
+  hpcp_key->output("hpcp") >> crest->input("array");
   crest->output("crest") >> PC(pool, nameSpace + "hpcp_crest");
 }

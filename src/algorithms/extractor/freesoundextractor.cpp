@@ -325,14 +325,11 @@ Pool FreesoundExtractor::computeAggregation(Pool& pool){
   aggregator->output("output").set(poolStats);
   aggregator->compute();
 
-
   // variable descriptor length counts
   poolStats.set(string("rhythm.onset_count"),
                 pool.value<vector<Real> >("rhythm.onset_times").size());
   poolStats.set(string("rhythm.beats_count"),
                 pool.value<vector<Real> >("rhythm.beats_position").size());
-  poolStats.set(string("tonal.chords_count"),
-                pool.value<vector<string> >("tonal.chords_progression").size());
     
   // hpcp_mean peak count
   vector<Real> hpcp_peak_amps, hpcp_peak_pos;
