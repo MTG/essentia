@@ -38,6 +38,7 @@ class VectorRealToTensor : public Algorithm {
   bool _push;
   bool _accumulate;
   std::string _lastPatchMode;
+  std::string _lastBatchMode;
 
   std::vector<std::vector<std::vector<Real> > > _acc;
 
@@ -56,6 +57,7 @@ class VectorRealToTensor : public Algorithm {
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. Use `0` to avoid overlap", "[0,inf)", 0);
     declareParameter("batchHopSize", "number of patches between the beginnings of adjacent batches. Use `0` to avoid overlap", "[0,inf)", 0);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "repeat");
+    declareParameter("lastBatchMode", "what to do with the last patches: `push` an incomplete batch (if the models accepts dynamic batches) or `discard` them", "{discard,push}", "push");
   }
 
   void configure();

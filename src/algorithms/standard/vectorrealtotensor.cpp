@@ -41,6 +41,7 @@ void VectorRealToTensor::configure() {
   _patchHopSize = parameter("patchHopSize").toInt();
   _batchHopSize = parameter("batchHopSize").toInt();
   _lastPatchMode = parameter("lastPatchMode").toString();
+  _lastBatchMode = parameter("lastBatchMode").toString();
 
   _shape.resize(shape.size());
   for (size_t i = 0; i < shape.size(); i++) {
@@ -54,8 +55,6 @@ void VectorRealToTensor::configure() {
 
     _shape[i] = shape[i];
   }
-
-
 
   if (shape[1] != 1) {
     throw EssentiaException("VectorRealToTensor: Currently only single-channel tensors are supported.");
@@ -115,9 +114,14 @@ AlgorithmStatus VectorRealToTensor::process() {
     if (_lastPatchMode == "repeat" && available > 0) {
       addPatch = true;
       _push = true;
-  
+    }
+
+    if (_lastBatchMode == "push" && _acc.size() >= 1) {
+      _push = true;
+    }
+
     // or if we have been accumulating.
-    } else if (_accumulate && _acc.size() >= 1) {
+    if (_accumulate && _acc.size() >= 1) {
       addPatch = true;
       _push = true;
     }
@@ -198,17 +202,27 @@ AlgorithmStatus VectorRealToTensor::process() {
     }
   }
 
-  // We only push if when we have filled the whole batch
-  // or if we have reached the end of the stream in
-  // accumulate mode.
+  // We push if we are in one of these cases:
+  // 1) we have filled a batch
+  // 2) we have reached the end of the stream in accumulate mode
+  // 3) we have reached the end of the stream with lastBatchMode = "push"
   if (_push) {
     vector<int> shape = _shape;
     int batchHopSize = _batchHopSize;
 
-    // If we have been accumulating we have to get the
-    // tensor's shape from the current status of the
-    // accumulator.
+    bool reshapeBatch = false;
+    
+    // Reshape the output tensor if we are in accumulate mode
     if (_accumulate) {
+      reshapeBatch = true;
+    
+    // or if we have reached the end of the stream with lastBatchModel = "push"
+    // and there are not enough patches to fill a regular batch.   
+    } else if (shouldStop() and _acc.size() < _shape[0]) {
+      reshapeBatch = true;
+    }
+
+    if (reshapeBatch) {
       shape[0] = _acc.size();
       batchHopSize = _acc.size();
 
@@ -237,7 +251,7 @@ AlgorithmStatus VectorRealToTensor::process() {
 
     // Empty the accumulator.
     _acc.erase(_acc.begin(), _acc.begin() + batchHopSize);
-  
+
     _push = false;
     outStatus = OK;
   }
