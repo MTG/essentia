@@ -79,7 +79,7 @@ class TestTensorFlowPredictEffnetDiscogs(TestCase):
                                                                      'batchSize': -2,
                                                                     })  # Cannot be < -1.
         self.assertConfigureFails(TensorflowPredictEffnetDiscogs(), {'graphFilename': model,
-                                                                     'patchSze': 0,
+                                                                     'patchSize': 0,
                                                                     })  # Cannot be 0.
 
 suite = allTests(TestTensorFlowPredictEffnetDiscogs)
