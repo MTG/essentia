@@ -76,8 +76,8 @@ class TestTensorFlowPredictEffnetDiscogs(TestCase):
     def testInvalidParam(self):
         model = join(testdata.models_dir, 'effnetdiscogs', 'effnetdiscogs-bs64-1.pb')
         self.assertConfigureFails(TensorflowPredictEffnetDiscogs(), {'graphFilename': model,
-                                                                     'batchSize': 0,
-                                                                    })  # Cannot be 0.
+                                                                     'batchSize': -2,
+                                                                    })  # Cannot be < -1.
         self.assertConfigureFails(TensorflowPredictEffnetDiscogs(), {'graphFilename': model,
                                                                      'patchSze': 0,
                                                                     })  # Cannot be 0.
