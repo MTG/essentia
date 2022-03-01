@@ -71,7 +71,7 @@ class PitchCREPE : public Algorithm {
     declareParameter("input", "the name of the input node in the TensorFlow graph", "", "frames");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/classifier/Sigmoid");
     declareParameter("hopSize", "the hop size in milliseconds for running pitch estimation", "(0,inf)", 10.0);
-    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when a GPU are available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end", "[-1,inf)", -1);
+    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when a GPU are available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end", "[-1,inf)", 64);
     // CREPE implements temporal smoothing via Viterbi but it is not applied by default and we will leave it unimplemented for now.
     // declareParameter("viterbi", "whether to use Viterbi decoding for temporal smoothing", "{true,false}", true);
   }

@@ -61,7 +61,7 @@ class TensorflowPredictTempoCNN : public AlgorithmComposite {
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "output");
     declareParameter("patchHopSize", "the number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 128);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
-    declareParameter("batchSize", "number of patches to process in parallel. Use -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream.", "[-1,inf)", 1);
+    declareParameter("batchSize", "number of patches to process in parallel. Use -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream.", "[-1,inf)", 64);
   }
 
   void declareProcessOrder() {
@@ -112,7 +112,7 @@ class TensorflowPredictTempoCNN : public Algorithm {
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "output");
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 128);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
-    declareParameter("batchSize", "number of patches to process in parallel. Use -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream.", "[-1,inf)", 1);
+    declareParameter("batchSize", "number of patches to process in parallel. Use -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream.", "[-1,inf)", 16);
   }
 
   void configure();

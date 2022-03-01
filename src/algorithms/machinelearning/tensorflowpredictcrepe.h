@@ -63,7 +63,7 @@ class TensorflowPredictCREPE : public AlgorithmComposite {
     declareParameter("input", "the name of the input node in the TensorFlow graph", "", "frames");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/classifier/Sigmoid");
     declareParameter("hopSize", "the hop size in milliseconds for running pitch estimations", "(0,inf)", 10.0);
-    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when a GPU is available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", -1);
+    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when a GPU is available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 64);
   }
 
   void declareProcessOrder() {
@@ -113,7 +113,7 @@ class TensorflowPredictCREPE : public Algorithm {
     declareParameter("input", "the name of the input node in the TensorFlow graph", "", "frames");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "model/classifier/Sigmoid");
     declareParameter("hopSize", "the hop size in milliseconds for running pitch estimations", "(0,inf)", 10.0);
-    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when a GPU is available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", -1);
+    declareParameter("batchSize", "the batch size for prediction. This allows parallelization when a GPU is available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 16);
   }
 
   void configure();
