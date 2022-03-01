@@ -105,7 +105,8 @@ void TensorflowPredictEffnetDiscogs::configure() {
 
   _vectorRealToTensor->configure("shape", inputShape,
                                  "lastPatchMode", lastPatchMode,
-                                 "patchHopSize", patchHopSize);
+                                 "patchHopSize", patchHopSize,
+                                 "lastBatchMode", "discard");
 
   _configured = true;
 
