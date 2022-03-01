@@ -324,6 +324,26 @@ Models:
 * ``fs_loop_ds-musicnn-msd``
 
 
+Voice / Instrumental
+--------------------
+
+Classification of music by presence or absence of voice (2 classes):
+
+`instrumental`, `voice`
+
+Dataset: inhouse (MTG).
+
+Output: activations.
+
+Models:
+
+* ``voice_instrumental-musicnn-msd``
+* ``voice_instrumental-musicnn-mtt``
+* ``voice_instrumental-vgg-msd``
+* ``voice_instrumental-vgg-mtt``
+* ``voice_instrumental-vggish-audioset``
+
+
 Gender
 ------
 
