@@ -19,9 +19,6 @@ set -e -x
 rm -rf /opt/python/cp34-cp34m
 rm -rf /opt/python/cp35-cp35m
 
-# NumPy has no support for Python 3.10 yet, therefore removing it too.
-rm -rf /opt/python/cp310-cp310
-
 # Build static libessentia.a library
 # Use Python3.6. CentOS 5's native python is too old...
 PYBIN=/opt/python/cp36-cp36m/bin/
@@ -45,13 +42,16 @@ for PYBIN in /opt/python/cp3*/bin; do
     # Use the oldest version of numpy for each Python version
     # for backwards compatibility of its C API
     # https://github.com/numpy/numpy/issues/5888
-    # Build numpy versions used by scikit-learn:
+
+    # Use `oldest-supported-numpy` as a reference.
+    # https://github.com/scipy/oldest-supported-numpy/blob/main/setup.cfg
+
+    # Previously used this as a reference:
     # https://github.com/MacPython/scikit-learn-wheels/blob/master/.travis.yml
 
-    # Python 2.7
-    # NUMPY_VERSION=1.8.2
-
     # Python 3.x
+    if [[ $PYBIN == *"cp310"* ]]; then
+        NUMPY_VERSION=1.21.4
     if [[ $PYBIN == *"cp39"* ]]; then
         NUMPY_VERSION=1.19.3
     elif [[ $PYBIN == *"cp38"* ]]; then
