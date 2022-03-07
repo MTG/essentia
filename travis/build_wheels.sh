@@ -52,7 +52,7 @@ for PYBIN in /opt/python/cp3*/bin; do
     # Python 3.x
     if [[ $PYBIN == *"cp310"* ]]; then
         NUMPY_VERSION=1.21.4
-    if [[ $PYBIN == *"cp39"* ]]; then
+    elif [[ $PYBIN == *"cp39"* ]]; then
         NUMPY_VERSION=1.19.3
     elif [[ $PYBIN == *"cp38"* ]]; then
         NUMPY_VERSION=1.17.4
