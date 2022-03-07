@@ -94,10 +94,6 @@ void TensorflowPredictEffnetDiscogs::configure() {
   int patchSize = parameter("patchSize").toInt();
   int batchSize = parameter("batchSize").toInt();
 
-  if (batchSize == 0) {
-    throw EssentiaException("TensorflowPredictEffnetDiscogs: `batchSize` cannot be 0");
-  }
-
   if (patchSize == 0) {
     throw EssentiaException("TensorflowPredictEffnetDiscogs: `patchSize` cannot be 0");
   }
@@ -109,7 +105,8 @@ void TensorflowPredictEffnetDiscogs::configure() {
 
   _vectorRealToTensor->configure("shape", inputShape,
                                  "lastPatchMode", lastPatchMode,
-                                 "patchHopSize", patchHopSize);
+                                 "patchHopSize", patchHopSize,
+                                 "lastBatchMode", "discard");
 
   _configured = true;
 
@@ -146,10 +143,11 @@ const char* TensorflowPredictEffnetDiscogs::description = DOC(
   "(mel-spectrograms). It feeds the model with patches of 128 frames and "
   "jumps a constant amount of frames determined by `patchHopSize`.\n"
   "\n"
-  "By setting the `batchSize` parameter to -1 the patches are stored to run a single "
+  "By setting the `batchSize` parameter to -1 or 0 the patches are stored to run a single "
   "TensorFlow session at the end of the stream. This allows to take advantage "
   "of parallelization when GPUs are available, but at the same time it can be "
-  "memory exhausting for long files. This option is not supported by some EffnetDiscogs models.\n"
+  "memory exhausting for long files. "
+  "This option is not supported by some EffnetDiscogs models that require a fixed batch size.\n"
   "\n"
   "The recommended pipeline is as follows::\n"
   "\n"
@@ -215,12 +213,15 @@ void TensorflowPredictEffnetDiscogs::compute() {
 
   vector<Real> paddedSignal;
   int paddingPatches;
-  if (_lastBatchMode == "zeros" || _lastBatchMode == "same") {
-    // Computes the number of patches required to fill the final batch and makes a
-    //  zero-padded copy of the input signal only when needed.
-    paddingPatches = padSignal(*signal, paddedSignal);
-    if (paddingPatches) signal = &paddedSignal;
+  if (_batchSize > 0) {
+    if (_lastBatchMode == "zeros" || _lastBatchMode == "same") {
+      // Computes the number of patches required to fill the final batch and makes a
+      //  zero-padded copy of the input signal only when needed.
+      paddingPatches = padSignal(*signal, paddedSignal);
+      if (paddingPatches) signal = &paddedSignal;
+    }
   }
+
   _vectorInput->setVector(signal);
 
   _network->run();

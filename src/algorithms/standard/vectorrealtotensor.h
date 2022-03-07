@@ -38,6 +38,7 @@ class VectorRealToTensor : public Algorithm {
   bool _push;
   bool _accumulate;
   std::string _lastPatchMode;
+  std::string _lastBatchMode;
 
   std::vector<std::vector<std::vector<Real> > > _acc;
 
@@ -52,10 +53,11 @@ class VectorRealToTensor : public Algorithm {
     // This is a common setup for mel-spectrogram based architectures.
     std::vector<int> outputShape = {1, 1, 187, 96};
 
-    declareParameter("shape", "shape of the output tensor (batchSize, channels, patchSize, featureSize). If batchSize is -1 a single tensor is generated when the end of the stream is reached", "", outputShape);
-    declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 0);
-    declareParameter("batchHopSize", "number of patches between the beginnings of adjacent batches. 0 to avoid overlap", "[0,inf)", 0);
+    declareParameter("shape", "shape of the output tensor (batchSize, channels, patchSize, featureSize). If batchSize is set to -1 or 0 a single tensor is generated when the end of the stream is reached", "", outputShape);
+    declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. Use `0` to avoid overlap", "[0,inf)", 0);
+    declareParameter("batchHopSize", "number of patches between the beginnings of adjacent batches. Use `0` to avoid overlap", "[0,inf)", 0);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "repeat");
+    declareParameter("lastBatchMode", "what to do with the last patches: `push` an incomplete batch (if the models accepts dynamic batches) or `discard` them", "{discard,push}", "push");
   }
 
   void configure();

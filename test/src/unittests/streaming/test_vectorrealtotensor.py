@@ -49,6 +49,25 @@ class TestVectorRealToTensor(TestCase):
 
         return pool['framesOut'], pool['framesIn']
 
+    def streamingPipeline(self, n_samples, params, frame_size=1):
+        fc = FrameCutter(
+            frameSize=frame_size,
+            hopSize=frame_size,
+            startFromZero=True,
+            lastFrameToEndOfFile=True,
+        )
+        vtt = VectorRealToTensor(**params)
+
+        data = numpy.zeros((n_samples), dtype="float32")
+        vi = VectorInput(data)
+        pool = Pool()
+
+        vi.data >> fc.signal
+        fc.frame >> vtt.frame
+        vtt.tensor >> (pool, "tensor")
+
+        run(vi)
+        return pool["tensor"]
 
     def testFramesToTensorAndBackToFramesDiscard(self):
         # The test audio file has 430 frames.
@@ -131,14 +150,17 @@ class TestVectorRealToTensor(TestCase):
         self.assertAlmostEqualMatrix(found[:expected.shape[0], :], expected, 1e-8)
 
     def testInvalidParam(self):
-        # VectorRealToTensor only supports single chanel data
+        # VectorRealToTensor only supports single chanel data.
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 2, 1, 1]})
 
-        # dimensions have to be different from 0.
-        self.assertConfigureFails(VectorRealToTensor(), {'shape': [0, 1, 1, 1]})
+        # the batch size has  be greater -1 or bigger.
+        self.assertConfigureFails(VectorRealToTensor(), {'shape': [-2, 1, 1, 1]})
+
+        # the rest of dimensions have to be positive.
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 0, 1, 1]})
         self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 1, 0, 1]})
-        self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 1, 0, 0]})
+        self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, 1, 1, 0]})
+        self.assertConfigureFails(VectorRealToTensor(), {'shape': [1, -1, -1, -1]})
 
     def testRepeatMode(self):
         # The test audio file has 430 frames. If patchSize is set to 428 with
@@ -156,7 +178,6 @@ class TestVectorRealToTensor(TestCase):
 
         self.assertAlmostEqualMatrix(found, expected, 1e-8)
 
-
     def testOutputShapes(self):
         # Test that the outputs shapes correspond to the expected values.
 
@@ -168,7 +189,7 @@ class TestVectorRealToTensor(TestCase):
                     for patch_size in test_lens:
                         if accumulate:
                             # With batchSize = -1, the algorithm should return a single batch with as
-                            # many patches as possible
+                            # many patches as possible.
                             shape = [-1, 1, patch_size, frame_size]
                             expected_n_batches = 1
                             expected_batch_shape = [n_batches * batch_size, 1, patch_size, frame_size]
@@ -179,31 +200,80 @@ class TestVectorRealToTensor(TestCase):
                             expected_batch_shape = [batch_size, 1, patch_size, frame_size]
                             expected_n_batches = n_batches
 
-                        fc = FrameCutter(
-                            frameSize=frame_size,
-                            hopSize=frame_size,
-                            startFromZero=True,
-                            lastFrameToEndOfFile=True,
-                        )
-                        vtt = VectorRealToTensor(
-                            shape=shape,
-                            lastPatchMode="discard",
-                        )
-
                         n_samples = n_batches * batch_size * patch_size * frame_size
-                        data = numpy.zeros((n_samples), dtype="float32")
-                        vi = VectorInput(data)
-                        pool = Pool()
+                        params = {"shape": shape, "lastPatchMode": "discard", "lastBatchMode": "discard"}
 
-                        vi.data >> fc.signal
-                        fc.frame >> vtt.frame
-                        vtt.tensor >> (pool, "tensor")
+                        batches = self.streamingPipeline(n_samples, params)
 
-                        run(vi)
-                        batches = pool["tensor"]
                         self.assertEqual(len(batches), expected_n_batches)
                         for batch in batches:
                             self.assertEqualVector(batch.shape, expected_batch_shape)
+
+
+    def testDynamicBatchSizeIndicator(self):
+        # Test that -1 and 0 are equivalent.
+        frame_size, patch_size, batch_size, n_batches = 1, 3, 3, 3
+        expected_batch_shape = [n_batches * batch_size, 1, patch_size, frame_size]
+        n_samples = n_batches * batch_size * patch_size * frame_size
+
+        for batch_shape in (-1, 0):
+            shape = [batch_shape, 1, patch_size, frame_size]
+            params = {"shape": shape, "lastPatchMode": "discard"}
+
+            batches = self.streamingPipeline(n_samples, params)
+
+            expected_n_batches = 1
+            self.assertEqual(len(batches), expected_n_batches)
+            for batch in batches:
+                self.assertEqualVector(batch.shape, expected_batch_shape)
+
+    def testLastBatchMode(self):
+        # Test that the algorithm pushes an incomplete patch.
+        frame_size, patch_size, batch_size = 1, 3, 3
+        shape = [batch_size, 1, patch_size, frame_size]
+
+        # 1 complete batch plus 2 patches.
+        extra_patches = 2
+        n_samples = (batch_size + extra_patches) * (patch_size * frame_size)
+
+        for last_patch_model in ("repeat", "discard"):
+            params = {
+                "shape": shape,
+                "lastPatchMode": last_patch_model,
+                "lastBatchMode": "push",
+            }
+
+            batches = self.streamingPipeline(n_samples, params)
+
+            # In `push` mode we expect two patches.
+            expected_n_batches = 2
+            self.assertEqual(len(batches), expected_n_batches)
+
+            # The first one should be complete.
+            expected_shape_first = [batch_size, 1, patch_size, frame_size]
+            self.assertEqualVector(batches[0].shape, expected_shape_first)
+
+            # The second one should contain just two patches.
+            expected_shape_second = [extra_patches, 1, patch_size, frame_size]
+            self.assertEqualVector(batches[1].shape, expected_shape_second)
+
+        for last_patch_model in ("repeat", "discard"):
+            params = {
+                "shape": shape,
+                "lastPatchMode": last_patch_model,
+                "lastBatchMode": "discard",
+            }
+
+            batches = self.streamingPipeline(n_samples, params)
+
+            # In `discard` mode we expect a single complete batch.
+            expected_n_batches = 1
+            self.assertEqual(len(batches), expected_n_batches)
+
+            # It should be complete.
+            expected_shape_first = [batch_size, 1, patch_size, frame_size]
+            self.assertEqualVector(batches[0].shape, expected_shape_first)
+
 
 suite = allTests(TestVectorRealToTensor)
 
