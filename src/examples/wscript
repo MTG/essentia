@@ -39,6 +39,7 @@ example_sources_fileio = [
     ('standard_extractor_la-cupula', ),
     ('standard_gapsdetector', ),
     ('standard_humdetector', ),
+    ('standard_loudnessebur128', ),
     ('standard_loudnessebur128_double_input', ),
     ('standard_saturationdetector', ),
     ('standard_snr', ),
