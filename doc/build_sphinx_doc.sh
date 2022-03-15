@@ -39,6 +39,9 @@ jupyter nbconvert ../../src/examples/python/*.ipynb --to rst --output-dir .
 
 make html
 
+# remove generated algorithm reference rst files
+rm -r reference
+
 # remove rst files generated from markdown
 rm FAQ.rst
 rm research_papers.rst
