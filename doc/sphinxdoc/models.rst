@@ -17,8 +17,9 @@ As this is an ongoing project we expect to keep adding new models and improved v
 We support models for the followings tasks:
 
 * :ref:`Audio event recognition`
-* :ref:`Music auto-tagging`
-* :ref:`Transfer learning classifiers`
+* :ref:`Music style classification`
+* :ref:`Music auto-tagging (genre, mood, epoch, instrumentation, etc.)`
+* :ref:`Transfer learning classifiers (genre, mood, danceability, voice, instrumentation, etc.)`
 * :ref:`Feature extractors`
 * :ref:`Pitch detection`
 * :ref:`Source separation`
