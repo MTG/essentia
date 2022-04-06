@@ -170,6 +170,29 @@ Usage for embedding extraction:
     embeddings = model(audio)
 
 
+Music style classification
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+`Download model files <https://essentia.upf.edu/models/music-style-classification/>`_
+
+
+Discogs-Effnet
+--------------
+
+Music style classification by 400 styles from the Discogs taxonomy:
+
+TODO styles
+
+Dataset: inhouse (MTG).
+
+Output: activations.
+
+Models:
+
+* ``discogs-effnet``
+
+
+
 Music auto-tagging
 ^^^^^^^^^^^^^^^^^^
 
