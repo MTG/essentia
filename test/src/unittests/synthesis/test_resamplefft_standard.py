@@ -46,7 +46,7 @@ class TestResampleFFT(TestCase):
         self.assertAlmostEqualVector(out, np.full(128, -1, dtype=np.single), 1e-5)
 
     def testRecordedAudio(self):
-        # Pre-stored are from real_audio PCM, and the expected result are pre-calculated with scipy.signal.resample
+        # Test data is from real_audio PCM, and the expected result is precalculated with scipy.signal.resample
         # Due to the nature of FFT resample, it is improper to test with random input.
         import os.path as path
         import pathlib
