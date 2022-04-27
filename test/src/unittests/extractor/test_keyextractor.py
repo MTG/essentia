@@ -28,16 +28,26 @@ class TestKeyExtractor(TestCase):
         self.assertAlmostEqualFixedPrecision(strength, 0.0, 5)
 
     def testSilence(self):
-        _, _, strength = KeyExtractor()(np.zeros(30 * 44100), dtype=np.float32)
+        _, _, strength = KeyExtractor()(np.zeros(30 * 44100, dtype=np.float32))
         self.assertAlmostEqualFixedPrecision(strength, 0.0, 5)
 
     def testRegression(self):
-        def test_on_real_audio(path, expected_key, expected_scale, strength_threshold):
-            audio = MonoLoader(filename=path)()
-            key, scale, strength = KeyExtractor()(audio)
-            self.assertEqual(key, expected_key)
-            self.assertEqual(scale, expected_scale)
-            self.assertGreater(strength, strength_threshold)
+        def test_on_real_audio(path, expected_key, expected_scale, strength_threshold=0.5, wrong_answer_tolerance=2):
+            profile_types = ["diatonic", "krumhansl", "temperley", "tonictriad", "temperley2005", "thpcp",
+                             "shaath", "gomez", "noland", "edmm", "edma", "bgate", "braw"]
+            correct_cnt = 0
+            strengths = []
+            for profile in profile_types:
+                audio = MonoLoader(filename=path)()
+                key, scale, strength = KeyExtractor(profileType=profile)(audio)
+                if key == expected_key and scale == expected_scale:
+                    correct_cnt += 1
+                    strengths.append(strength)
+                else:
+                    strengths.append(-strength)
+
+            self.assertGreaterEqual(correct_cnt, len(profile_types) - wrong_answer_tolerance)
+            self.assertGreater(np.array(strengths).mean(), strength_threshold)
 
         test_on_real_audio(join(testdata.audio_dir, "recorded", "mozart_c_major_30sec.wav"), 'C', 'major', 0.5)
         test_on_real_audio(join(testdata.audio_dir, "recorded", "Vivaldi_Sonata_5_II_Allegro.wav"), "E", "minor", 0.5)
