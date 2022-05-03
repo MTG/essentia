@@ -367,21 +367,21 @@ void Key::compute() {
 
 
   if (maxMajor > maxMinor && maxMajor > maxOther) {
-    keyIndex = std::roundl(keyIndexMajor *  12 / pcpsize);
+    keyIndex = std::lround(keyIndexMajor *  12 / pcpsize);
     scale = MAJOR;
     max = maxMajor;
     max2 = max2Major;
   }
 
   else if (maxMinor >= maxMajor && maxMinor >= maxOther) {
-    keyIndex = std::roundl(keyIndexMinor * 12 / pcpsize);
+    keyIndex = std::lround(keyIndexMinor * 12 / pcpsize);
     scale = MINOR;
     max = maxMinor;
     max2 = max2Minor;
     }
 
 	else if (maxOther > maxMajor && maxOther > maxMinor) {
-    keyIndex = std::roundl(keyIndexOther * 12 / pcpsize);
+    keyIndex = std::lround(keyIndexOther * 12 / pcpsize);
     scale = MAJMIN;
     max = maxOther;
     max2 = max2Other;

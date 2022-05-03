@@ -16,7 +16,7 @@
 #
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
-
+import os.path
 
 from essentia_test import *
 import numpy as np
@@ -32,25 +32,30 @@ class TestKeyExtractor(TestCase):
         self.assertAlmostEqualFixedPrecision(strength, 0.0, 5)
 
     def testRegression(self):
-        def test_on_real_audio(path, expected_key, expected_scale, strength_threshold=0.5, wrong_answer_tolerance=2):
-            profile_types = ["diatonic", "krumhansl", "temperley", "tonictriad", "temperley2005", "thpcp",
-                             "shaath", "gomez", "noland", "edmm", "edma", "bgate", "braw"]
-            correct_cnt = 0
-            strengths = []
-            for profile in profile_types:
-                audio = MonoLoader(filename=path)()
+        profile_types = ["diatonic", "krumhansl", "temperley", "temperley2005", "thpcp", "shaath", "gomez", "noland",
+                         "edmm", "edma", "bgate", "braw"]
+        print()
+
+        def test_on_real_audio(path, expected_key, expected_scale, profiles=profile_types, strength_threshold=0.5):
+            audio = MonoLoader(filename=path)()
+            print(f"Test on file {os.path.basename(path)}")
+
+            if type(strength_threshold) is float:
+                strength_threshold = [strength_threshold for p in profiles]
+            elif type(strength_threshold) != list:
+                raise TypeError("Unsupported type of profile")
+
+            for profile, thres in zip(profiles, strength_threshold):
                 key, scale, strength = KeyExtractor(profileType=profile)(audio)
-                if key == expected_key and scale == expected_scale:
-                    correct_cnt += 1
-                    strengths.append(strength)
-                else:
-                    strengths.append(-strength)
+                print(profile, key, scale, strength)
+                self.assertEqual(key, expected_key)
+                self.assertEqual(scale, expected_scale)
+                self.assertGreater(strength, thres)
 
-            self.assertGreaterEqual(correct_cnt, len(profile_types) - wrong_answer_tolerance)
-            self.assertGreater(np.array(strengths).mean(), strength_threshold)
-
-        test_on_real_audio(join(testdata.audio_dir, "recorded", "mozart_c_major_30sec.wav"), 'C', 'major', 0.5)
-        test_on_real_audio(join(testdata.audio_dir, "recorded", "Vivaldi_Sonata_5_II_Allegro.wav"), "E", "minor", 0.5)
+        test_on_real_audio(join(testdata.audio_dir, "recorded", "mozart_c_major_30sec.wav"), 'C', 'major',
+                           ['diatonic', 'temperley2005', 'temperley'], 0.7)
+        test_on_real_audio(join(testdata.audio_dir, "recorded", "Vivaldi_Sonata_5_II_Allegro.wav"), "E", "minor",
+                           ['diatonic', 'temperley2005', 'temperley'], 0.7)
 
 suite = allTests(TestKeyExtractor)
 

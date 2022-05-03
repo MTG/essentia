@@ -207,14 +207,25 @@ void KeyExtractor::createInnerNetwork() {
 
 void KeyExtractor::compute() {
   const vector<Real>& audio = _audio.get();
-  _vectorInput->setVector(&audio);
-
-  _network->run();
 
   string& key      = _key.get();
   string& scale    = _scale.get();
   Real&   strength = _strength.get();
 
+  if(audio.size() == 0)
+  {
+    /* It is only a temporary solution. After the empty pool issue (https://github.com/MTG/essentia/pull/1252#issuecomment-1115062252)
+     * got resolved, this if-clause should be safe be removed.
+     */
+    key = "C";
+    scale = "major";
+    strength = 0.0;
+    return;
+  }
+
+  _vectorInput->setVector(&audio);
+
+  _network->run();
   key      = _pool.value<string>("key");
   scale    = _pool.value<string>("scale");
   strength = _pool.value<Real>("strength");
