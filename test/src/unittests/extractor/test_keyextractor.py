@@ -24,8 +24,8 @@ import numpy as np
 
 class TestKeyExtractor(TestCase):
     def testEmpty(self):
-        _, _, strength = KeyExtractor()(np.array([], dtype=np.float32))
-        self.assertAlmostEqualFixedPrecision(strength, 0.0, 5)
+        with self.assertRaises(RuntimeError):
+            _, _, strength = KeyExtractor()(np.array([], dtype=np.float32))
 
     def testSilence(self):
         _, _, strength = KeyExtractor()(np.zeros(30 * 44100, dtype=np.float32))
@@ -53,9 +53,9 @@ class TestKeyExtractor(TestCase):
                 self.assertGreater(strength, thres)
 
         test_on_real_audio(join(testdata.audio_dir, "recorded", "mozart_c_major_30sec.wav"), 'C', 'major',
-                           ['diatonic', 'temperley2005', 'temperley'], 0.7)
+                           ['temperley2005', 'temperley'], 0.7)
         test_on_real_audio(join(testdata.audio_dir, "recorded", "Vivaldi_Sonata_5_II_Allegro.wav"), "E", "minor",
-                           ['diatonic', 'temperley2005', 'temperley'], 0.7)
+                           ['temperley2005', 'temperley'], 0.7)
 
 suite = allTests(TestKeyExtractor)
 

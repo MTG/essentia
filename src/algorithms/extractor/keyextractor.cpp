@@ -214,13 +214,16 @@ void KeyExtractor::compute() {
 
   if(audio.size() == 0)
   {
-    /* It is only a temporary solution. After the empty pool issue (https://github.com/MTG/essentia/pull/1252#issuecomment-1115062252)
-     * got resolved, this if-clause should be safe be removed.
+//    key = "C";
+//    scale = "major";
+//    strength = 0.0;
+//    return;
+    /**
+     * It has been considered that return 0.0 strength (confidence) as the result if input is empty. However for the
+     * consistency, and to bring the awareness of such a potentially problematic scenario to the user, we decided to
+     * raise an exceptiong
      */
-    key = "C";
-    scale = "major";
-    strength = 0.0;
-    return;
+     throw EssentiaException("KeyExtractor: empty input signal");
   }
 
   _vectorInput->setVector(&audio);
