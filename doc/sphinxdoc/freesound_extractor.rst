@@ -107,11 +107,11 @@ For implementation details, see `the code of extractor <https://github.com/MTG/e
 
 * **beats_count**: number of detected beats
 
-* **bpm**, **bpm_confidence**: BPM value according to detected beats and confidence value for the prediction. Note that the confidence values goes from 0 to 5.32. Algorithms: Algorithms: `RhythmExtractor2013 <reference/streaming_RhythmExtractor2013.html>`_
+* **bpm**, **bpm_confidence**: BPM value according to detected beats and confidence value for the prediction. Note that the confidence values goes from 0 to 5.32. Algorithms: `RhythmExtractor2013 <reference/streaming_RhythmExtractor2013.html>`_
 
-* **bpm_loop**, **bpm_loop_confidence**: BPM value according to detected beats using an algorithm specilized in loops, and confidence value for the prediction. Note that the confidence values goes from 0 to 1. A confidence of 1 could be used to determine whether the sound is a loop or not. Algorithms: Algorithms: `LoopBpmEstimator <reference/streaming_LoopBpmEstimator.html>`_, `LoopBpmConfidence <reference/streaming_LoopBpmConfidence.html>`_
+* **bpm_loop**, **bpm_loop_confidence**: BPM value according to detected beats using an algorithm specilized in loops, and confidence value for the prediction. Note that the confidence values goes from 0 to 1. A confidence of 1 could be used to determine whether the sound is a loop or not. Algorithms: `LoopBpmEstimator <reference/streaming_LoopBpmEstimator.html>`_, `LoopBpmConfidence <reference/streaming_LoopBpmConfidence.html>`_
 
-* **bpm_histogram**: BPM histogram. Algorithms: Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
+* **bpm_histogram**: BPM histogram. Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
 
 * **bpm_histogram_first_peak_bpm**, **bpm_histogram_first_peak_spread**, **bpm_histogram_first_peak_weight**, **bpm_histogram_second_peak_bpm**, **bpm_histogram_second_peak_spread**, **bpm_histogram_second_peak_weight**: descriptors characterizing highest and second highest peak of the BPM histogram. Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
 
