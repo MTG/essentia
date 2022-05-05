@@ -188,7 +188,7 @@ class TestCase(BaseTestCase):
         # Compare descriptor values one by one
         for descriptorName in pool_found.descriptorNames():
             if 'essentia_git_sha' in descriptorName:
-                # Do not compare descriptor 'essentia_git_sha' as it will aleays be different when essentia is built 
+                # Do not compare descriptor 'essentia_git_sha' as it will always be different when essentia is built 
                 # with uncommitted changes
                 continue
 
