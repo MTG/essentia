@@ -47,6 +47,21 @@ class TestStrongDecay_Streaming(TestCase):
 
         self.assertRaises(EssentiaException, lambda: run(gen))
 
+    
+    def testZero(self):
+        input = [0.0] * 10
+
+        gen = VectorInput(input)
+        strongDecay = sStrongDecay()
+        p = Pool()
+
+        gen.data >> strongDecay.signal
+        strongDecay.strongDecay >> (p, 'strongDecay')
+
+        run(gen)
+
+        self.assertEqual( StrongDecay()(input), 0.0)
+
 
     def testRegression(self):
         # borrowing lpc's input vector for this regression test

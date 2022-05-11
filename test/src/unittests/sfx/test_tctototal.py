@@ -54,7 +54,7 @@ class TestTCToTotal(TestCase):
         self.assertAlmostEqual(TCToTotal()([1]*100), 0.5)
 
     def testZero(self):
-        self.assertComputeFails(TCToTotal(), [0]*100)
+        self.assertEqual(TCToTotal()([0]*100), 0.5)
 
     def testGaussian(self):
         data = [x/100. for x in range(-50, 50)]
@@ -62,7 +62,7 @@ class TestTCToTotal(TestCase):
         self.assertAlmostEqual(TCToTotal()(envelope), 0.5, 1e-3)
 
     def testAlternating(self):
-        self.assertComputeFails(TCToTotal(), [1,-1,1,-1,1,-1,1,-1])
+        self.assertEqual(TCToTotal()([1,-1,1,-1,1,-1,1,-1]), 0.5)
 
 
 suite = allTests(TestTCToTotal)

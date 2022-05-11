@@ -78,13 +78,15 @@ void TCToTotal::consume() {
 }
 
 void TCToTotal::finalProduce() {
+  
+  if (_idx < 2) {
+    throw EssentiaException("TCToTotal: the given envelope is not larger than 1 element");
+  }
+  
   if (_den == 0) {
     // Singal envelope consists of 0 or integral of singal is 0, then set normalizez temporal centroid to 0.5 (middle position)
     _TCToTotal.push(Real(0.5));
-  }
-
-  if (_idx < 2) {
-    throw EssentiaException("TCToTotal: the given envelope is not larger than 1 element");
+    return;
   }
 
   double centroid = _num / _den;
