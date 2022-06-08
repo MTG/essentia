@@ -37,7 +37,7 @@ class TestTuningFrequencyExtractor(TestCase):
         self.assertConfigureFails(TuningFrequencyExtractor(), {'frameSize': 0, 'hopSize': 0})
         self.assertConfigureFails(TuningFrequencyExtractor(), {'frameSize': 8192, 'hopSize': 0})
 
-        with self.assertRaises(Warning):
+        with self.assertWarns(Warning):
             tfe = TuningFrequencyExtractor()
             tfe.configure(frameSize=2048, hopSize=4096)
 
