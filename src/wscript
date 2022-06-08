@@ -14,7 +14,7 @@ lib_map = {
     'AVCODEC': 'libavcodec',
     'AVFORMAT': 'libavformat',
     'AVUTIL': 'libavutil',
-    'AVRESAMPLE': 'libavresample',
+    'SWRESAMPLE': 'libswresample',
     'SAMPLERATE': 'samplerate',
     'TAGLIB': 'taglib',
     'YAML': 'yaml-0.1',
@@ -162,7 +162,7 @@ def configure(ctx):
         ctx.check_cfg(package=lib_map['AVUTIL'], uselib_store='AVUTIL',
                       args=check_cfg_args, mandatory=False)
 
-        ctx.check_cfg(package=lib_map['AVRESAMPLE'], uselib_store='AVRESAMPLE',
+        ctx.check_cfg(package=lib_map['SWRESAMPLE'], uselib_store='SWRESAMPLE',
                       args=check_cfg_args, mandatory=False)
 
     if 'libsamplerate' in ctx.env.CHECK_LIBS:
@@ -261,9 +261,9 @@ def configure(ctx):
 
     # MonoLoader, EqloudLoader, and EasyLoader are dependent on Resample
     algos = [ 'AudioLoader', 'MonoLoader', 'EqloudLoader', 'EasyLoader', 'MonoWriter', 'AudioWriter' ]
-    if has('avcodec') and has('avformat') and has('avutil') and has('avresample'):
+    if has('avcodec') and has('avformat') and has('avutil') and has('swresample'):
         print('- FFmpeg / libav detected!')
-        ctx.env.USE_LIBS += ' AVFORMAT AVCODEC AVUTIL AVRESAMPLE'
+        ctx.env.USE_LIBS += ' AVFORMAT AVCODEC AVUTIL SWRESAMPLE'
 
     else:
         print('- FFmpeg (or LibAv on debian/ubuntu) seems to be missing.')
