@@ -119,8 +119,8 @@ void AudioLoader::openAudioFile(const string& filename) {
     E_DEBUG(EAlgorithm, "AudioLoader: converting from " << (fmt ? fmt : "unknown") << " to FLT");
     */
 
-    E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libavresample");
-    _convertCtxAv = avresample_alloc_context();
+    E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libswresample");
+    _convertCtxAv = swr_alloc();
         
     av_opt_set_int(_convertCtxAv, "in_channel_layout", layout, 0);
     av_opt_set_int(_convertCtxAv, "out_channel_layout", layout, 0);
@@ -129,8 +129,8 @@ void AudioLoader::openAudioFile(const string& filename) {
     av_opt_set_int(_convertCtxAv, "in_sample_fmt", _audioCtx->sample_fmt, 0);
     av_opt_set_int(_convertCtxAv, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
 
-    if (avresample_open(_convertCtxAv) < 0) {
-        throw EssentiaException("AudioLoader: Could not initialize avresample context");
+    if (swr_init(_convertCtxAv) < 0) {
+        throw EssentiaException("AudioLoader: Could not initialize swresample context");
     }
 
     av_init_packet(&_packet);
@@ -150,8 +150,8 @@ void AudioLoader::closeAudioFile() {
     }
 
     if (_convertCtxAv) {
-        avresample_close(_convertCtxAv);
-        avresample_free(&_convertCtxAv);
+        swr_close(_convertCtxAv);
+        swr_free(&_convertCtxAv);
     }
 
     // Close the codec
@@ -286,17 +286,15 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
             memcpy(output, _decodedFrame->data[0], inputPlaneSize);
         }
         else {
-          int samplesWrittern = avresample_convert(_convertCtxAv, 
+          int samplesWrittern = swr_convert(_convertCtxAv,
                                           (uint8_t**) &output, 
-                                          outputPlaneSize,
                                           outputBufferSamples, 
-                                          (uint8_t**)_decodedFrame->data,               
-                                          inputPlaneSize, 
+                                          (const uint8_t**)_decodedFrame->data,
                                           inputSamples);
 
           if (samplesWrittern < inputSamples) {
               // TODO: there may be data remaining in the internal FIFO buffer
-              // to get this data: call avresample_convert() with NULL input 
+              // to get this data: call swr_convert() with NULL input
               // Test if this happens in practice
               ostringstream msg;
               msg << "AudioLoader: Incomplete format conversion (some samples missing)"
