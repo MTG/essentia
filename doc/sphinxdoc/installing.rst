@@ -169,11 +169,11 @@ To run the Python unit tests (test all algorithms)::
 
   python3 waf run_python_tests
 
-or, in the case if your default python is not Python 3::
-
-  python3 waf run_python_tests
-
 To run Python unit tests, you need to install Python bindings first. Some of these tests require additional audio files and binaries stored in `essentia-audio <https://github.com/MTG/essentia-audio>`_ and `essentia-models <https://github.com/MTG/essentia-models/>`_ submodule repositories. Therefore, make sure to clone Essentia git repository recursively with its submodules (``git clone --recursive https://github.com/MTG/essentia.git``).
+
+Also, some tests require additional dependencies. Install those with::
+
+  pip3 install scikit-learn
 
 See more information about running tests `in our FAQ <FAQ.html#running-tests>`_.
 
