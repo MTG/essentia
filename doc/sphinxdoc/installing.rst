@@ -150,7 +150,7 @@ Note that when installing Essentia to the default ``/usr/local`` prefix, on some
 `here <https://bugs.launchpad.net/ubuntu/+source/python3-defaults/+bug/1814653>`_ and
 `here <https://bugs.launchpad.net/ubuntu/+source/python3-stdlib-extensions/+bug/1832215>`_).
 
-To avoid import errors on such systems, specify the correct path in ``waf configure`` using a ``--pythondir`` option or the ``PYTHONDIR`` environmental variable. For example, on Ubuntu 21.04 the correct path for the default Python 3.9 is ``/usr/local/lib/python3.9/dist-packages/``.
+To avoid import errors on such systems, specify the correct path in ``waf configure`` using a ``--pythondir`` option or the ``PYTHONDIR`` environmental variable. For example, on Ubuntu 22.04 the correct path for the default Python 3.10 is ``/usr/local/lib/python3.10/dist-packages/``.
 
 Alternatively, you can also configure the ``PYTHONPATH`` variable to include the ``/usr/local/lib/python3/dist-packages/`` path in the list of Python 3 `module search paths <https://docs.python.org/3/tutorial/modules.html#the-module-search-path>`_.
 
