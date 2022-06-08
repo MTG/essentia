@@ -228,5 +228,5 @@ A lightweight version of Essentia can be `cross-compiled for iOS <FAQ.html#cross
 Building Essentia for Web using asm.js or WebAssembly
 -----------------------------------------------------
 
-A lightweight version of Essentia can be cross-compiled to asm.js or WebAssembly targets using Emscripten for it's usage on the Web. See `FAQ <https://essentia.upf.edu/FAQ.htm>`_ for more details.
+A lightweight version of Essentia can be cross-compiled to asm.js or WebAssembly targets using Emscripten for it's usage on the Web. See `FAQ <https://essentia.upf.edu/FAQ.html>`_ for more details.
 
