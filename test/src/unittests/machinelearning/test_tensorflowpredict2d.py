@@ -82,7 +82,7 @@ class TestTensorFlowPredict2D(TestCase):
         self.assertAlmostEqualMatrix(found, self.expected)
 
     def testRegressionStandardCustomDimension(self):
-        # In standard mode, `dimesions` should be overridden by the
+        # In standard mode, `dimensions` should be overridden by the
         # actual input data shape.
         classification_head = TensorflowPredict2D(
             graphFilename=self.head_model_name,
