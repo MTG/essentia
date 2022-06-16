@@ -50,7 +50,10 @@ for PYBIN in /opt/python/cp3*/bin; do
     # https://github.com/MacPython/scikit-learn-wheels/blob/master/.travis.yml
 
     # Python 3.x
-    if [[ $PYBIN == *"cp310"* ]]; then
+    if [[ $PYBIN == *"cp311"* ]]; then
+        # FIXME Not supported by NumPy yet. Update ASAP.
+        continue
+    elif [[ $PYBIN == *"cp310"* ]]; then
         NUMPY_VERSION=1.21.4
     elif [[ $PYBIN == *"cp39"* ]]; then
         NUMPY_VERSION=1.19.3
