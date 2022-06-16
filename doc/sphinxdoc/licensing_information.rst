@@ -46,7 +46,7 @@ This is the set of libraries which can be used within Essentia:
 2. `LGPL`_ (the original copyright notice as well as a copy of the LGPL has to be supplied
    This can be achieved through dynamic linking)
    
-   * libavcodec/libavformat/libavutil/libavresample - https://www.ffmpeg.org - used by the AudioLoader, MonoLoader, EasyLoader and EqloudLoader algorithms
+   * libavcodec/libavformat/libavutil/libswresample - https://www.ffmpeg.org - used by the AudioLoader, MonoLoader, EasyLoader and EqloudLoader algorithms
    * Taglib - http://developer.kde.org/~wheeler/taglib.html - used by the MetadataReader algorithm
    * Chromaprint - https://github.com/acoustid/chromaprint - used by the Chromaprinter algorithm
    * splineutil.hpp and splineutil.cpp - http://people.sc.fsu.edu/~jburkardt/cpp_src/spline/spline.html - used by the Spline and CubicSpline algorithms

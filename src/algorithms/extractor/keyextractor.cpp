@@ -207,14 +207,28 @@ void KeyExtractor::createInnerNetwork() {
 
 void KeyExtractor::compute() {
   const vector<Real>& audio = _audio.get();
-  _vectorInput->setVector(&audio);
-
-  _network->run();
 
   string& key      = _key.get();
   string& scale    = _scale.get();
   Real&   strength = _strength.get();
 
+  if(audio.size() == 0)
+  {
+//    key = "C";
+//    scale = "major";
+//    strength = 0.0;
+//    return;
+    /**
+     * It has been considered that return 0.0 strength (confidence) as the result if input is empty. However for the
+     * consistency, and to bring the awareness of such a potentially problematic scenario to the user, we decided to
+     * raise an exceptiong
+     */
+     throw EssentiaException("KeyExtractor: empty input signal");
+  }
+
+  _vectorInput->setVector(&audio);
+
+  _network->run();
   key      = _pool.value<string>("key");
   scale    = _pool.value<string>("scale");
   strength = _pool.value<Real>("strength");
