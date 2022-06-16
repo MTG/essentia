@@ -102,6 +102,10 @@ done
 
 # Install and test
 for PYBIN in /opt/python/cp3*/bin/; do
+    if [[ $PYBIN == *"cp311"* ]]; then
+        # FIXME Not supported by NumPy yet. Skip.
+        continue
+    fi
     "${PYBIN}/pip" install "${PROJECT_NAME}" --no-index -f /io/wheelhouse
     if [[ $WITH_TENSORFLOW ]]; then
     # Test that essentia can be imported along with the latest TensorFlow for each Python version
