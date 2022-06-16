@@ -40,7 +40,7 @@ class TestLevelExtractor(TestCase):
         self.assertConfigureFails(LevelExtractor(), {'frameSize': 0, 'hopSize': 0})
         self.assertConfigureFails(LevelExtractor(), {'frameSize': 88200, 'hopSize': 0})
 
-        with self.assertRaises(Warning):  # Should have issued warning.
+        with self.assertWarns(Warning):  # Should have issued warning.
             le = LevelExtractor()
             le.configure(frameSize=44100, hopSize=88200)
 
