@@ -24,11 +24,20 @@ import numpy as np
 class TestTuningFrequencyExtractor(TestCase):
     def testEmpty(self):
         with self.assertRaises(RuntimeError):
-            est = TuningFrequencyExtractor()(np.array([], dtype=np.float32))[-1]
+            est = TuningFrequencyExtractor()(np.array([], dtype=np.float32))
 
     def testSilence(self):
-        with self.assertRaises(RuntimeError):
-            est = TuningFrequencyExtractor()(np.zeros((88200,), dtype=np.float32))[-1]
+        # The algorithm always produces output on any non-empty input audio.
+        # It applies a magnitude thresholding for peak detection. Complete
+        # silence gets some noise added by FrameCutter with peak magnitudes
+        # below this threshold. Therefore, the output for the contant-valued
+        # input varies: 440 when there are no peaks above the threshold and
+        # 434.1931 otherwise.
+
+        self.assertAlmostEqualAbs(TuningFrequencyExtractor()(
+            np.zeros((88200,), dtype=np.float32))[-1], 440.0, 4.0)
+        self.assertAlmostEqualAbs(TuningFrequencyExtractor()(
+            np.ones((88200,), dtype=np.float32))[-1], 434.1931, 4.0)
 
     def testInvalidParam(self):
         self.assertConfigureFails(TuningFrequencyExtractor(), {'frameSize': -1, 'hopSize': -1})
@@ -36,10 +45,6 @@ class TestTuningFrequencyExtractor(TestCase):
         self.assertConfigureFails(TuningFrequencyExtractor(), {'frameSize': 8192, 'hopSize': -1})
         self.assertConfigureFails(TuningFrequencyExtractor(), {'frameSize': 0, 'hopSize': 0})
         self.assertConfigureFails(TuningFrequencyExtractor(), {'frameSize': 8192, 'hopSize': 0})
-
-        with self.assertWarns(Warning):
-            tfe = TuningFrequencyExtractor()
-            tfe.configure(frameSize=2048, hopSize=4096)
 
         self.assertConfigureSuccess(TuningFrequencyExtractor(), {'frameSize': 8192, 'hopSize': 1024})
 
