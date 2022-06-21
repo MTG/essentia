@@ -50,7 +50,10 @@ for PYBIN in /opt/python/cp3*/bin; do
     # https://github.com/MacPython/scikit-learn-wheels/blob/master/.travis.yml
 
     # Python 3.x
-    if [[ $PYBIN == *"cp310"* ]]; then
+    if [[ $PYBIN == *"cp311"* ]]; then
+        # FIXME Not supported by NumPy yet. Update ASAP.
+        continue
+    elif [[ $PYBIN == *"cp310"* ]]; then
         NUMPY_VERSION=1.21.4
     elif [[ $PYBIN == *"cp39"* ]]; then
         NUMPY_VERSION=1.19.3
@@ -99,6 +102,10 @@ done
 
 # Install and test
 for PYBIN in /opt/python/cp3*/bin/; do
+    if [[ $PYBIN == *"cp311"* ]]; then
+        # FIXME Not supported by NumPy yet. Skip.
+        continue
+    fi
     "${PYBIN}/pip" install "${PROJECT_NAME}" --no-index -f /io/wheelhouse
     if [[ $WITH_TENSORFLOW ]]; then
     # Test that essentia can be imported along with the latest TensorFlow for each Python version

@@ -45,7 +45,7 @@ class AudioContext {
   float* _buffer;      // input FLT buffer interleaved
   uint8_t* _buffer_test; // input buffer in converted to codec sample format
 
-  struct AVAudioResampleContext* _convertCtxAv;
+  struct SwrContext* _convertCtxAv;
 
   //const static int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
   // MAX_AUDIO_FRAME_SIZE is in bytes, multiply it by 2 to get some margin
