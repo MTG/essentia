@@ -62,7 +62,7 @@ class PitchYinProbabilitiesHMM : public Algorithm {
     declareParameter("minFrequency", "minimum detected frequency", "(0,inf)", 61.735);
     declareParameter("numberBinsPerSemitone", "number of bins per semitone", "(1,inf)", 5);
     declareParameter("selfTransition", "the self transition probabilities", "(0,1)", 0.99);  
-    declareParameter("yinTrust", "the yin trust parameter", "(0, 1)", 0.5);
+    declareParameter("yinTrust", "the yin trust parameter", "(0,1)", 0.5);
   }
 
   void configure();
