@@ -43,7 +43,7 @@ class PCA : public Algorithm {
   void declareParameters() {
     declareParameter("namespaceIn", "will look for this namespace in poolIn", "", "spectral contrast");
     declareParameter("namespaceOut", "will save to this namespace in poolOut", "", "spectral contrast pca");
-    declareParameter("dimensions", "number of dimension to reduce the input to", "[0, inf)", 0);
+    declareParameter("dimensions", "number of dimension to reduce the input to", "[0,inf)", 0);
   }
 
   void configure(){}
