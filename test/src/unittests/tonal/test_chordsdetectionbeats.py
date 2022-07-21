@@ -24,6 +24,15 @@ class TestChordsDetectionBeats(TestCase):
         with self.assertRaises(EssentiaException):
             ChordsDetectionBeats()(np.zeros(shape=(0, 12), dtype=np.single), np.zeros(shape=(0,), dtype=np.single))
 
+        with self.assertRaises(EssentiaException):
+            ChordsDetectionBeats()(
+                np.random.rand(100, 12).astype(dtype=np.single), np.zeros(shape=(0,), dtype=np.single))
+
+        chords, strength = ChordsDetectionBeats()(
+            np.zeros(shape=(0, 12), dtype=np.single), [0.75 * i for i in range(10)]
+        )
+        self.assertEqual(len(chords), 0)
+
     @staticmethod
     def get_hpcp(audio_path):
         audio = MonoLoader(filename=audio_path)()
@@ -68,7 +77,6 @@ class TestChordsDetectionBeats(TestCase):
                               'Em', 'Em', 'E', 'A', 'D', 'E', 'E', 'A', 'D', 'Em']
         strength_threshold[3] = 0.4
 
-        print(chords, strength)
         for detected_chord, expected_chord, s, threshold in \
                 zip(chords, chords_groundtruth, strength, strength_threshold):
             self.assertEqual(detected_chord, expected_chord)
