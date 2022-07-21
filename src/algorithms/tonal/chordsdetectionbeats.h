@@ -47,7 +47,10 @@ class ChordsDetectionBeats : public Algorithm {
       _chordsAlgo->configure("profileType", "tonictriad", "usePolyphony", false);
 
       declareInput(_pcp, "pcp", "the pitch class profile from which to detect the chord");
-      declareInput(_ticks, "ticks", "the list of beat positions (in seconds)");
+      declareInput(_ticks, "ticks", "the list of beat positions (in seconds). "
+                                    "One chord will be outputted for each segment between two adjacent ticks. "
+                                    "If number of ticks is smaller than 2, exception will be thrown. "
+                                    "Those ticks that exceeded the pcp time length will be ignored.");
       declareOutput(_chords, "chords", "the resulting chords, from A to G");
       declareOutput(_strength, "strength", "the strength of the chords");
     }

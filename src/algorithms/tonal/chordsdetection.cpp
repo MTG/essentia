@@ -27,7 +27,7 @@ namespace standard {
 
 const char* ChordsDetection::name = "ChordsDetection";
 const char* ChordsDetection::category = "Tonal";
-const char* ChordsDetection::description = DOC("This algorithm estimates chords given an input sequence of harmonic pitch class profiles (HPCPs). It finds the best matching major or minor triad and outputs the result as a string (e.g. A#, Bm, G#m, C). The note names used as output is listed follow:\n"
+const char* ChordsDetection::description = DOC("This algorithm estimates chords given an input sequence of harmonic pitch class profiles (HPCPs). It finds the best matching major or minor triad and outputs the result as a string (e.g. A#, Bm, G#m, C). The following note names are used in the output:\n"
 "\"A\", \"Bb\", \"B\", \"C\", \"C#\", \"D\", \"Eb\", \"E\", \"F\", \"F#\", \"G\", \"Ab\"."
 "\n"
 "Note:\n"
