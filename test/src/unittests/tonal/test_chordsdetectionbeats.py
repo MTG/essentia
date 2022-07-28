@@ -67,6 +67,9 @@ class TestChordsDetectionBeats(TestCase):
         pcp = TestChordsDetectionBeats.get_hpcp(
             join(testdata.audio_dir, "recorded", "guitar_triads.flac")
         )
+        # FIXME The algorithm fails in detecting major/minor for one of the
+        # chords in the sequence, even though the root note is identified
+        # correctly.
 
         ticks = [2.2, 5.7, 9.0, 12.0, 16.0, 18.8, 22.6, 25.4, 28.7, 31.6,
                  34.7, 38.5, 40.6, 43.0, 45.2, 48.5, 50.5, 53.3, 56.5]
