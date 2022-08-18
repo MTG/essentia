@@ -30,7 +30,7 @@ class TestTuningFrequencyExtractor(TestCase):
         # The algorithm always produces output on any non-empty input audio.
         # It applies a magnitude thresholding for peak detection. Complete
         # silence gets some noise added by FrameCutter with peak magnitudes
-        # below this threshold. Therefore, the output for the contant-valued
+        # below this threshold. Therefore, the output for the constant-valued
         # input varies: 440 when there are no peaks above the threshold and
         # 434.1931 otherwise.
 
