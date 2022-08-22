@@ -20,11 +20,11 @@ We support models for the followings tasks:
 * :ref:`Music style classification`
 * :ref:`Music auto-tagging (genre, mood, epoch, instrumentation, etc.)<Music auto-tagging>`
 * :ref:`Transfer learning classifiers (genre, mood, danceability, voice, instrumentation, etc.)<Transfer learning classifiers>`
-* :ref:`Feature extractors`
+* :ref:`Feature extractors (embeddings)`
+* :ref:`Embedding-based classification heads (genre, instrument, moods, engagement, approachability, etc.)<Classification heads>`
 * :ref:`Pitch detection`
 * :ref:`Source separation`
 * :ref:`Tempo estimation`
-* :ref:`Classification heads (genre, instrument, moods, etc.)<Classification heads>`
 
 
 Audio event recognition
@@ -946,7 +946,7 @@ Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
 *Note: The classification heads operate on embeddings that are generally not the default output of the base models. Check the attached JSON files to find the name of the embedding layer on each case.*
 
 Approachability
-------------
+---------------
 
 Music approachability predicting whether the music is likely to be accessible for the general public (e.g., belonging to common mainstream music genres vs. niche and experimental genres).
 
@@ -967,7 +967,7 @@ Models:
 * ``approachability_regression-effnet_discogs``
 
 DEAM
-------------
+----
 
 Music arousal and valence regression with the DEAM dataset.
 
@@ -985,7 +985,7 @@ Models:
 * ``deam-vggish-audioset``
 
 emoMusic
-------------
+--------
 
 Music arousal and valence regression with the emoMusic dataset.
 
@@ -1003,7 +1003,7 @@ Models:
 * ``emomusic-vggish-audioset``
 
 Engagement
-------------
+----------
 
 Music engagement predicting whether the music evokes active attention of the listener (high-engagement "lean forward" active listening vs. low-engagement "lean back" background listening).
 
@@ -1023,14 +1023,14 @@ Models:
 * ``engagement_3c-effnet_discogs``
 * ``engagement_regression-effnet_discogs``
 
-FMA_small
----------
+Free Music Archive small
+------------------------
 
 Music genre classfication (10 classes):
 
 `Electronic`, `Experimental`, `Folk`, `Hip-Hop`, `Instrumental`, `International`, `Pop`, `Rock`
 
-Dataset: in-house (MTG).
+Dataset: Free Music Archive small.
 
 Output: activations.
 
@@ -1044,7 +1044,7 @@ Models:
 * ``fma_small-effnet-discogs_release_embeddings``
 * ``fma_small-effnet-discogs_track_embeddings``
 
-mtg_jamendo_genre
+MTG-Jamendo genre
 -----------------
 
 Multi-label genre classification (87 classes):
@@ -1065,7 +1065,7 @@ Models:
 * ``mtg_jamendo_genre-effnet-discogs_release_embeddings``
 * ``mtg_jamendo_genre-effnet-discogs_track_embeddings``
 
-mtg_jamendo_instrument
+MTG-Jamendo instrument
 ----------------------
 
 Multi-label instrument classification (40 classes):
@@ -1086,10 +1086,10 @@ Models:
 * ``mtg_jamendo_instrument-effnet-discogs_release_embeddings``
 * ``mtg_jamendo_instrument-effnet-discogs_track_embeddings``
 
-mtg_jamendo_moodtheme
+MTG-Jamendo moodtheme
 ---------------------
 
-Multi-label mood and theme classification (56 classes)
+Multi-label mood/theme classification (56 classes):
 
 `action`, `adventure`, `advertising`, `background`, `ballad`, `calm`, `children`, `christmas`, `commercial`, `cool`, `corporate`, `dark`, `deep`, `documentary`, `drama`, `dramatic`, `dream`, `emotional`, `energetic`, `epic`, `fast`, `film`, `fun`, `funny`, `game`, `groovy`, `happy`, `heavy`, `holiday`, `hopeful`, `inspiring`, `love`, `meditative`, `melancholic`, `melodic`, `motivational`, `movie`, `nature`, `party`, `positive`, `powerful`, `relaxing`, `retro`, `romantic`, `sad`, `sexy`, `slow`, `soft`, `soundscape`, `space`, `sport`, `summer`, `trailer`, `travel`, `upbeat`, `uplifting`
 
@@ -1107,8 +1107,8 @@ Models:
 * ``mtg_jamendo_moodtheme-effnet-discogs_release_embeddings``
 * ``mtg_jamendo_moodtheme-effnet-discogs_track_embeddings``
 
-mtg_jamendo_top50tags
-----------------------
+MTG-Jamendo top50tags
+---------------------
 
 Auto-tagging with top-50 MTG-Jamendo classes:
 
@@ -1129,7 +1129,7 @@ Models:
 * ``mtg_jamendo_top50tags-effnet-discogs_track_embeddings``
 
 MagnaTagATune
----
+-------------
 
 Auto-tagging with the top-50 MagnaTagATune classes:
 
@@ -1150,9 +1150,9 @@ Models:
 * ``mtt-effnet-discogs_track_embeddings``
 
 MuSe
-------------
+----
 
-Music aoural and valence regression with the MuSe dataset.
+Music arousal and valence regression with the MuSe dataset.
 
 Demo: https://replicate.com/mtg/music-arousal-valence
 
