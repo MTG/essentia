@@ -24,6 +24,7 @@ We support models for the followings tasks:
 * :ref:`Pitch detection`
 * :ref:`Source separation`
 * :ref:`Tempo estimation`
+* :ref:`Classification heads (genre, instrument, moods, etc.)<Classification heads>`
 
 
 Audio event recognition
@@ -199,7 +200,7 @@ Music style classification by 400 styles from the Discogs taxonomy:
 
 Demo: https://replicate.com/mtg/effnet-discogs
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -356,7 +357,7 @@ Music danceability (2 classes):
 
 `danceable`, `not_danceable`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -392,7 +393,7 @@ Classification of music by presence or absence of voice (2 classes):
 
 `instrumental`, `voice`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -412,7 +413,7 @@ Classification of music by singing voice gender (2 classes):
 
 `female`, `male`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -452,7 +453,7 @@ Electronic music genre classification (5 genres)
 
 `ambient`, `dnb`, `house`, `techno`, `trance`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -472,7 +473,7 @@ Music genre classification (8 genres):
 
 `classical`, `dance`, `hip hop`, `jazz`, `pop`, `rhythm and blues`, `rock`, `speech`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -492,7 +493,7 @@ Music genre classification (10 genres):
 
 `blues`, `classic`, `country`, `disco`, `hip hop`, `jazz`, `metal`, `pop`, `reggae`, `rock`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -512,7 +513,7 @@ Music classification by type of sound (2 classes):
 
 `acoustic`, `non_acoustic`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -532,7 +533,7 @@ Music classification by mood (2 classes):
 
 `aggressive`, `non_aggressive`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -552,7 +553,7 @@ Music classification by type of sound (2 classes):
 
 `electronic`, `non_electronic`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -572,7 +573,7 @@ Music classification by mood (2 classes):
 
 `happy`, `non_happy`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -592,7 +593,7 @@ Music classification by mood (2 classes):
 
 `party`, `non_party`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -612,7 +613,7 @@ Music classification by mood (2 classes):
 
 `relaxed`, `non_relaxed`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -632,7 +633,7 @@ Music classification by mood (2 classes):
 
 `sad`, `non_sad`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -676,7 +677,7 @@ Music classification by tonality (classes):
 
 `tonal`, `atonal`
 
-Dataset: inhouse (MTG).
+Dataset: in-house (MTG).
 
 Output: activations.
 
@@ -740,7 +741,7 @@ We are currently working on a dedicated algorithm to extract embeddings with the
 AudioSet-VGGish
 ---------------
 
-Audio embeddings model accompanying the AudioSet dataset, trained in a supervised manner using tag information for YouTube videos.
+Audio embedding model accompanying the AudioSet dataset, trained in a supervised manner using tag information for YouTube videos.
 
 Dataset: Subset of Youtube-8M.
 
@@ -760,6 +761,39 @@ Usage for embedding extraction:
 
     audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
     model = TensorflowPredictVGGish(graphFilename="audioset-vggish-3.pb", output='model/vggish/embeddings')
+    embeddings = model(audio)
+
+
+EffNet-Discogs
+--------------
+
+Audio embedding models trained with a contrastive objective using Discogs metadata.
+There are different versions trained to predict artist, label, release, and track similarity as well as a multi-task model trained in all of them simusltaneously.
+The main purpose of this models is to produce embeddings suitable for downstream music classification tasks.
+
+Dataset: In-house dataset annotated with Discogs metadata
+
+Output: embeddings.
+
+Models:
+
+* ``discogs_artist_embeddings-effnet-bs64``
+* ``discogs_label_embeddings-effnet-bs64``
+* ``discogs_multi_embeddings-effnet-bs64``
+* ``discogs_release_embeddings-effnet-bs64``
+* ``discogs_track_embeddings-effnet-bs64``
+
+
+Naming convention: ``<dataset>_<task>_embeddings-<architecture>-<inference-batch-size>-<version>.pb``
+
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    model = TensorflowPredictEffnetDiscogs(graphFilename="discogs_artist_embeddings-effnet-bs64-1.pb")
     embeddings = model(audio)
 
 
@@ -808,7 +842,7 @@ Spleeter
 
 Source separation into 2 (`vocals`, `accompaniment`),  4, and 5 (`vocals`, `drums`, `bass`, `piano`, `other`) stems.
 
-Dataset: inhouse (Deezer).
+Dataset: in-house (Deezer).
 
 Output: waveforms.
 
@@ -878,3 +912,257 @@ Usage for tempo estimation:
     model = TempoCNN(graphFilename="deepsquare-k16-3.pb")
     global_tempo, local_tempo, local_tempo_probabilities = model(audio)
 
+
+Classification heads
+^^^^^^^^^^^^^^^^^^^^
+
+Classification and regression neural networks intended to operate on top of pre-extracted embeddings.
+
+
+`Download model files <https://essentia.upf.edu/models/classification-heads/>`_
+
+Music classification example:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs, TensorflowPredict2D
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    embeddings_model = TensorflowPredictEffnetDiscogs(
+        graphFilename="discogs-effnet-bs64-1.pb",
+        output="PartitionedCall:1",
+    )
+    classification_model = TensorflowPredict2D(
+        graphFilename="approachability_2c-effnet_discogs-1.pb",
+        output="model/Softmax",
+    )
+
+    embeddings = embeddings_model(audio)
+    activations = classification_model(embeddings)
+
+Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
+
+
+*Note: The classification heads operate on embeddings that are generally not the default output of the base models. Check the attached JSON files to find the name of the embedding layer on each case.*
+
+Approachability
+------------
+
+Music approachability predicting whether the music is likely to be accessible for the general public (e.g., belonging to common mainstream music genres vs. niche and experimental genres).
+
+Demo: https://replicate.com/mtg/music-approachability-engagement
+
+The models output rather two or three levels of approachability or continous values (regression).
+
+Dataset: in-house (MTG).
+
+Output: class activations or regression values.
+
+Naming convention: ``<task>-<n_classes>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``approachability_2c-effnet_discogs``
+* ``approachability_3c-effnet_discogs``
+* ``approachability_regression-effnet_discogs``
+
+DEAM
+------------
+
+Music arousal and valence regression with the DEAM dataset.
+
+Demo: https://replicate.com/mtg/music-arousal-valence
+
+Dataset: DEAM.
+
+Output: (arousal, valence) pairs values in the range {1,9}.
+
+Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``deam-musicnn-msd``
+* ``deam-vggish-audioset``
+
+emoMusic
+------------
+
+Music arousal and valence regression with the emoMusic dataset.
+
+Demo: https://replicate.com/mtg/music-arousal-valence
+
+Dataset: Emomusic.
+
+Output: (arousal, valence) pairs values in the range {1,9}.
+
+Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``emomusic-musicnn-msd``
+* ``emomusic-vggish-audioset``
+
+Engagement
+------------
+
+Music engagement predicting whether the music evokes active attention of the listener (high-engagement "lean forward" active listening vs. low-engagement "lean back" background listening).
+
+Demo: https://replicate.com/mtg/music-approachability-engagement
+
+The models output rather two or three levels of engagement or continous values (regression).
+
+Dataset: in-house (MTG).
+
+Output: class activations or regression values.
+
+Naming convention: ``<task>-<n_classes>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``engagement_2c-effnet_discogs``
+* ``engagement_3c-effnet_discogs``
+* ``engagement_regression-effnet_discogs``
+
+FMA_small
+---------
+
+Music genre classfication (10 classes):
+
+`Electronic`, `Experimental`, `Folk`, `Hip-Hop`, `Instrumental`, `International`, `Pop`, `Rock`
+
+Dataset: in-house (MTG).
+
+Output: activations.
+
+Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``fma_small-effnet-discogs_artist_embeddings``
+* ``fma_small-effnet-discogs_label_embeddings``
+* ``fma_small-effnet-discogs_multi_embeddings``
+* ``fma_small-effnet-discogs_release_embeddings``
+* ``fma_small-effnet-discogs_track_embeddings``
+
+mtg_jamendo_genre
+-----------------
+
+Multi-label genre classification (87 classes):
+
+`60s`, `70s`, `80s`, `90s`, `acidjazz`, `alternative`, `alternativerock`, `ambient`, `atmospheric`, `blues`, `bluesrock`, `bossanova`, `breakbeat`, `celtic`, `chanson`, `chillout`, `choir`, `classical`, `classicrock`, `club`, `contemporary`, `country`, `dance`, `darkambient`, `darkwave`, `deephouse`, `disco`, `downtempo`, `drumnbass`, `dub`, `dubstep`, `easylistening`, `edm`, `electronic`, `electronica`, `electropop`, `ethno`, `eurodance`, `experimental`, `folk`, `funk`, `fusion`, `groove`, `grunge`, `hard`, `hardrock`, `hiphop`, `house`, `idm`, `improvisation`, `indie`, `industrial`, `instrumentalpop`, `instrumentalrock`, `jazz`, `jazzfusion`, `latin`, `lounge`, `medieval`, `metal`, `minimal`, `newage`, `newwave`, `orchestral`, `pop`, `popfolk`, `poprock`, `postrock`, `progressive`, `psychedelic`, `punkrock`, `rap`, `reggae`, `rnb`, `rock`, `rocknroll`, `singersongwriter`, `soul`, `soundtrack`, `swing`, `symphonic`, `synthpop`, `techno`, `trance`, `triphop`, `world`, `worldfusio`
+
+Dataset: MTG-Jamendo Dataset (genre subset).
+
+Output: activations.
+
+Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``mtg_jamendo_genre-effnet-discogs_artist_embeddings``
+* ``mtg_jamendo_genre-effnet-discogs_label_embeddings``
+* ``mtg_jamendo_genre-effnet-discogs_multi_embeddings``
+* ``mtg_jamendo_genre-effnet-discogs_release_embeddings``
+* ``mtg_jamendo_genre-effnet-discogs_track_embeddings``
+
+mtg_jamendo_instrument
+----------------------
+
+Multi-label instrument classification (40 classes):
+
+`accordion`, `acousticbassguitar`, `acousticguitar`, `bass`, `beat`, `bell`, `bongo`, `brass`, `cello`, `clarinet`, `classicalguitar`, `computer`, `doublebass`, `drummachine`, `drums`, `electricguitar`, `electricpiano`, `flute`, `guitar`, `harmonica`, `harp`, `horn`, `keyboard`, `oboe`, `orchestra`, `organ`, `pad`, `percussion`, `piano`, `pipeorgan`, `rhodes`, `sampler`, `saxophone`, `strings`, `synthesizer`, `trombone`, `trumpet`, `viola`, `violin`, `voice`
+
+Dataset: MTG-Jamendo Dataset (instrument subset).
+
+Output: activations.
+
+Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``mtg_jamendo_instrument-effnet-discogs_artist_embeddings``
+* ``mtg_jamendo_instrument-effnet-discogs_label_embeddings``
+* ``mtg_jamendo_instrument-effnet-discogs_multi_embeddings``
+* ``mtg_jamendo_instrument-effnet-discogs_release_embeddings``
+* ``mtg_jamendo_instrument-effnet-discogs_track_embeddings``
+
+mtg_jamendo_moodtheme
+---------------------
+
+Multi-label mood and theme classification (56 classes)
+
+`action`, `adventure`, `advertising`, `background`, `ballad`, `calm`, `children`, `christmas`, `commercial`, `cool`, `corporate`, `dark`, `deep`, `documentary`, `drama`, `dramatic`, `dream`, `emotional`, `energetic`, `epic`, `fast`, `film`, `fun`, `funny`, `game`, `groovy`, `happy`, `heavy`, `holiday`, `hopeful`, `inspiring`, `love`, `meditative`, `melancholic`, `melodic`, `motivational`, `movie`, `nature`, `party`, `positive`, `powerful`, `relaxing`, `retro`, `romantic`, `sad`, `sexy`, `slow`, `soft`, `soundscape`, `space`, `sport`, `summer`, `trailer`, `travel`, `upbeat`, `uplifting`
+
+Dataset: MTG-Jamendo Dataset (moodtheme subset).
+
+Output: activations.
+
+Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``mtg_jamendo_moodtheme-effnet-discogs_artist_embeddings``
+* ``mtg_jamendo_moodtheme-effnet-discogs_label_embeddings``
+* ``mtg_jamendo_moodtheme-effnet-discogs_multi_embeddings``
+* ``mtg_jamendo_moodtheme-effnet-discogs_release_embeddings``
+* ``mtg_jamendo_moodtheme-effnet-discogs_track_embeddings``
+
+mtg_jamendo_top50tags
+----------------------
+
+Auto-tagging with top-50 MTG-Jamendo classes:
+
+`alternative`, `ambient`, `atmospheric`, `chillout`, `classical`, `dance`, `downtempo`, `easylistening`, `electronic`, `experimental`, `folk`, `funk`, `hiphop`, `house`, `indie`, `instrumentalpop`, `jazz`, `lounge`, `metal`, `newage`, `orchestral`, `pop`, `popfolk`, `poprock`, `reggae`, `rock`, `soundtrack`, `techno`, `trance`, `triphop`, `world`, `acousticguitar`, `bass`, `computer`, `drummachine`, `drums`, `electricguitar`, `electricpiano`, `guitar`, `keyboard`, `piano`, `strings`, `synthesizer`, `violin`, `voice`, `emotional`, `energetic`, `film`, `happy`, `relaxing`
+
+Dataset: MTG-Jamendo Dataset (top50tags subset).
+
+Output: activations.
+
+Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``mtg_jamendo_top50tags-effnet-discogs_artist_embeddings``
+* ``mtg_jamendo_top50tags-effnet-discogs_label_embeddings``
+* ``mtg_jamendo_top50tags-effnet-discogs_multi_embeddings``
+* ``mtg_jamendo_top50tags-effnet-discogs_release_embeddings``
+* ``mtg_jamendo_top50tags-effnet-discogs_track_embeddings``
+
+MagnaTagATune
+---
+
+Auto-tagging with the top-50 MagnaTagATune classes:
+
+`ambient`, `beat`, `beats`, `cello`, `choir`, `choral`, `classic`, `classical`, `country`, `dance`, `drums`, `electronic`, `fast`, `female`, `female vocal`, `female voice`, `flute`, `guitar`, `harp`, `harpsichord`, `indian`, `loud`, `male`, `male vocal`, `male voice`, `man`, `metal`, `new age`, `no vocal`, `no vocals`, `no voice`, `opera`, `piano`, `pop`, `quiet`, `rock`, `singing`, `sitar`, `slow`, `soft`, `solo`, `strings`, `synth`, `techno`, `violin`, `vocal`, `vocals`, `voice`, `weird`, `woman`
+
+Dataset: MagnaTagATune.
+
+Output: activations.
+
+Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``mtt-effnet-discogs_artist_embeddings``
+* ``mtt-effnet-discogs_label_embeddings``
+* ``mtt-effnet-discogs_multi_embeddings``
+* ``mtt-effnet-discogs_release_embeddings``
+* ``mtt-effnet-discogs_track_embeddings``
+
+MuSe
+------------
+
+Music aoural and valence regression with the MuSe dataset.
+
+Demo: https://replicate.com/mtg/music-arousal-valence
+
+Dataset: MuSe.
+
+Output: (arousal, valence) pairs values in the range {1,9}.
+
+Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``muse-musicnn-msd``
+* ``muse-vggish-audioset``
