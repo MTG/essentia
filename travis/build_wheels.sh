@@ -51,8 +51,7 @@ for PYBIN in /opt/python/cp3*/bin; do
 
     # Python 3.x
     if [[ $PYBIN == *"cp311"* ]]; then
-        # FIXME Not supported by NumPy yet. Update ASAP.
-        continue
+        NUMPY_VERSION=1.23.2
     elif [[ $PYBIN == *"cp310"* ]]; then
         NUMPY_VERSION=1.21.4
     elif [[ $PYBIN == *"cp39"* ]]; then
