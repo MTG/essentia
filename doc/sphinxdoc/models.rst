@@ -966,8 +966,8 @@ Models:
 * ``approachability_3c-effnet_discogs``
 * ``approachability_regression-effnet_discogs``
 
-DEAM
-----
+Arousal/valence DEAM
+--------------------
 
 Music arousal and valence regression with the DEAM dataset.
 
@@ -984,8 +984,8 @@ Models:
 * ``deam-musicnn-msd``
 * ``deam-vggish-audioset``
 
-emoMusic
---------
+Arousal/valence emoMusic
+------------------------
 
 Music arousal and valence regression with the emoMusic dataset.
 
@@ -1001,6 +1001,24 @@ Models:
 
 * ``emomusic-musicnn-msd``
 * ``emomusic-vggish-audioset``
+
+Arousal/valence MuSe
+--------------------
+
+Music arousal and valence regression with the MuSe dataset.
+
+Demo: https://replicate.com/mtg/music-arousal-valence
+
+Dataset: MuSe.
+
+Output: (arousal, valence) pairs values in the range {1,9}.
+
+Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+
+Models:
+
+* ``muse-musicnn-msd``
+* ``muse-vggish-audioset``
 
 Engagement
 ----------
@@ -1149,20 +1167,3 @@ Models:
 * ``mtt-effnet-discogs_release_embeddings``
 * ``mtt-effnet-discogs_track_embeddings``
 
-MuSe
-----
-
-Music arousal and valence regression with the MuSe dataset.
-
-Demo: https://replicate.com/mtg/music-arousal-valence
-
-Dataset: MuSe.
-
-Output: (arousal, valence) pairs values in the range {1,9}.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
-
-Models:
-
-* ``muse-musicnn-msd``
-* ``muse-vggish-audioset``
