@@ -14,6 +14,9 @@ set -e -x
 #PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 #PKG_CONFIG_PATH=/io/packaging/debian_3rdparty/lib/pkgconfig
 
+# To prevent errors parsing version with `git describe`.
+git config --global --add safe.directory /io
+
 # We are dropping support for Python 3.4 since PyYaml is not supporting it anymore.
 # We can just remove the Python3.4 folder until ManyLinux1 drops the support too.
 rm -rf /opt/python/cp34-cp34m
