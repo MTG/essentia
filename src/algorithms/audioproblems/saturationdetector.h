@@ -51,9 +51,9 @@ class SaturationDetector : public Algorithm {
     declareParameter("sampleRate", "sample rate used for the analysis", "(0,inf)", 44100.);
     declareParameter("frameSize", "expected input frame size", "(0,inf)", 512);
     declareParameter("hopSize", "hop size used for the analysis", "(0,inf)", 256);
-    declareParameter("energyThreshold", "mininimum energy of the samples in the saturated regions [dB]", "(-inf,0])", -1.f);
-    declareParameter("differentialThreshold", "minimum difference between contiguous samples of the salturated regions", "[0,inf))", 0.001f);
-    declareParameter("minimumDuration", "minimum duration of the saturated regions [ms]", "[0,inf))", 0.005f);
+    declareParameter("energyThreshold", "mininimum energy of the samples in the saturated regions [dB]", "(-inf,0]", -1.f);
+    declareParameter("differentialThreshold", "minimum difference between contiguous samples of the salturated regions", "[0,inf)", 0.001f);
+    declareParameter("minimumDuration", "minimum duration of the saturated regions [ms]", "[0,inf)", 0.005f);
   }
 
   void configure();
