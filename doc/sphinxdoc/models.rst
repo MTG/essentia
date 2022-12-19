@@ -21,7 +21,7 @@ We support models for the followings tasks:
 * :ref:`Music auto-tagging (genre, mood, epoch, instrumentation, etc.)<Music auto-tagging>`
 * :ref:`Transfer learning classifiers (genre, mood, danceability, voice, instrumentation, etc.)<Transfer learning classifiers>`
 * :ref:`Feature extractors (embeddings)<Feature extractors>`
-* :ref:`Embedding-based classification heads (genre, instrument, moods, engagement, approachability, etc.)<Classification heads>`
+* :ref:`Embedding-based classification heads (genre, instrument, moods, arousal/valence, engagement, approachability, etc.)<Classification heads>`
 * :ref:`Pitch detection`
 * :ref:`Source separation`
 * :ref:`Tempo estimation`
