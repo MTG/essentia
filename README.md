@@ -1,6 +1,6 @@
 Essentia
 ========
-![Build wheels status](https://github.com/MTG/essentia/actions/workflows/build-wheels.yml/badge.svg)
+[![Build wheels status](https://github.com/MTG/essentia/actions/workflows/build-wheels.yml/badge.svg)](https://github.com/MTG/essentia/actions/workflows/build-wheels.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![PyPI downloads: essentia](https://img.shields.io/pypi/dm/essentia.svg?label=PyPI%20downloads:%20essentia)](https://pypi.org/project/essentia/)
 [![PyPI downloads: essentia-tensorflow](https://img.shields.io/pypi/dm/essentia-tensorflow.svg?label=PyPI%20downloads:%20essentia-tensorflow)](https://pypi.org/project/essentia-tensorflow/)
