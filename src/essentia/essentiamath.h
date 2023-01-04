@@ -1336,6 +1336,17 @@ Tensor<T> tensorMax(const Tensor<T>& tensor, int axis) {
   return TensorMap<Real>(maxima.data(), summarizerShape);
 }
 
+/**
+ * Rounds x up to the desired decimal place.
+ */
+template <typename T>
+T roundToDecimal(T x, int decimal) {
+  if (decimal < 0) {
+    throw EssentiaException("the number of decimals has to be 0 or positive");
+  }
+  return round(pow(10, decimal) * x) / pow(10, decimal);
+}
+
 } // namespace essentia
 
 #endif // ESSENTIA_MATH_H
