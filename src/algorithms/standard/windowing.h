@@ -43,6 +43,7 @@ class Windowing : public Algorithm {
     declareParameter("type", "the window type", "{hamming,hann,hannnsgcq,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
     declareParameter("zeroPhase", "a boolean value that enables zero-phase windowing", "{true,false}", true);
     declareParameter("normalized", "a boolean value to specify whether to normalize windows (to have an area of 1) and then scale by a factor of 2", "{true,false}", true);
+    declareParameter("constantsDecimals", "number of decimals considered in the constants for the formulation of the hamming and blackmanharris* windows ", "[1,5]", 5);
   }
 
   void configure();
@@ -73,6 +74,7 @@ protected:
 
   std::vector<Real> _window;
   int _zeroPadding;
+  int _constantsDecimals;
   bool _zeroPhase;
   bool _normalized;
 };
