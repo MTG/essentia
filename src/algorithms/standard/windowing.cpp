@@ -127,6 +127,11 @@ void Windowing::compute() {
 // values which were 0.54 and 0.46 are actually approximations.
 // More precise values are 0.53836 and 0.46164 (found on wikipedia)
 // @todo find a more "scientific" reference than wikipedia
+//
+// Pablo A.: Even if the current values are more precise, the user
+// may want to replicate the 2-decimal version sometimes used in
+// other implementations (e.g., SciPy). Added a parameter to support
+// that use-case.
 void Windowing::hamming() {
   const int size = _window.size();
   double a0 = 0.53836, a1 = 0.46164;
