@@ -161,6 +161,35 @@ class TestWindowing(TestCase):
     def testInvalidParam(self):
         self.assertConfigureFails(Windowing(), { 'type': 'unknown' })
 
+    def testSplitPadding(self):
+        """Compare the implementation of splitPadding to the logic of Librosa's pad_center
+
+        Reference implementation:
+        https://librosa.org/doc/main/_modules/librosa/util/utils.html#pad_center
+        """
+
+        # Check with both even and odd signals and paddings.
+        for input_size in (3, 4):
+            for padding_size in (3, 4):
+                input_signal = [1] * input_size
+                found = Windowing(
+                    type="square",
+                    zeroPhase=False,
+                    normalized=False,
+                    zeroPadding=padding_size,
+                    splitPadding=True,
+                )(input_signal)
+
+                # padding logic ported from Librosa.
+                target_size = input_size + padding_size
+                lpad = int((target_size - input_size) // 2)
+                lengths = (lpad, int(target_size - input_size - lpad))
+
+                expected = numpy.pad(input_signal, lengths)
+ 
+                # Checks whether the windows are as expected.
+                self.assertAlmostEqualVector(found, expected, 1e-6)
+
 suite = allTests(TestWindowing)
 
 if __name__ == '__main__':
