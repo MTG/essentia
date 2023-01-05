@@ -161,6 +161,25 @@ class TestWindowing(TestCase):
     def testInvalidParam(self):
         self.assertConfigureFails(Windowing(), { 'type': 'unknown' })
 
+    def testScipyAsymmetricWindow(self):
+        """Checks that we obtain a Hanning window equivalent to the SciPy implementation with sync=False.
+        """
+        from scipy.signal.windows import hanning
+
+        input_size = 1024
+        input_signal = [1] * input_size
+        found = Windowing(
+            type="hann",
+            zeroPhase=False,
+            normalized=False,
+            symmetric=False,
+        )(input_signal)
+
+        expected = hanning(input_size, sym=False)
+
+        # Checks whether the windows are as expected
+        self.assertAlmostEqualVector(found, expected, 1e-6)
+
 suite = allTests(TestWindowing)
 
 if __name__ == '__main__':
