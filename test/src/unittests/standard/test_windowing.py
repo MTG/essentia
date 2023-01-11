@@ -156,7 +156,7 @@ class TestWindowing(TestCase):
 
     def testOne(self):
         # Checks for a single value
-        self.assertComputeFails(Windowing(type='hann'),  [1])
+        self.assertComputeFails(Windowing(type='hann'), [1])
 
     def testInvalidParam(self):
         self.assertConfigureFails(Windowing(), { 'type': 'unknown' })
@@ -165,7 +165,6 @@ class TestWindowing(TestCase):
         """Checks that we obtain a Hanning window equivalent to the SciPy implementation with sync=False.
         """
         from scipy.signal.windows import hanning
-
         input_size = 1024
         input_signal = [1] * input_size
         found = Windowing(
@@ -176,6 +175,25 @@ class TestWindowing(TestCase):
         )(input_signal)
 
         expected = hanning(input_size, sym=False)
+
+        # Checks whether the windows are as expected
+        self.assertAlmostEqualVector(found, expected, 1e-6)
+
+    def testScipyHammingWindow(self):
+        """Checks that we obtain a Hamming window equivalent to the default SciPy implementation.
+        """
+        from scipy.signal.windows import hamming
+
+        input_size = 1024
+        input_signal = [1] * input_size
+        found = Windowing(
+            type="hamming",
+            zeroPhase=False,
+            normalized=False,
+            constantsDecimals=2
+        )(input_signal)
+
+        expected = hamming(input_size, sym=True)
 
         # Checks whether the windows are as expected
         self.assertAlmostEqualVector(found, expected, 1e-6)
