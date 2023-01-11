@@ -1,14 +1,14 @@
-name: Build MacOS
+name: Build Python wheels (cibuildwheel)
 
 on: [push, pull_request]
 
 jobs:
   build_wheels:
-    name: Build wheels on ${{ matrix.os }} with ${{ matrix.config }}
+    name: ${{ matrix.os }} / ${{ matrix.config }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-11]
+        os: [ubuntu-20.04, macos-11]
         config: [pyproject-tensorflow.toml, pyproject.toml]
 
     steps:
@@ -20,9 +20,6 @@ jobs:
         run: git fetch --tags --force
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.11.4
-        # env:
-        #   CIBW_SOME_OPTION: value
-        #    ...
         with:
           config-file: ${{ matrix.config }}
 
