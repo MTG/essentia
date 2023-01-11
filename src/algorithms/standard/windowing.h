@@ -45,6 +45,7 @@ class Windowing : public Algorithm {
     declareParameter("normalized", "a boolean value to specify whether to normalize windows (to have an area of 1) and then scale by a factor of 2", "{true,false}", true);
     declareParameter("symmetric", "whether to create a symmetric or asymmetric window as implemented in SciPy", "{true,false}", true);
     declareParameter("constantsDecimals", "number of decimals considered in the constants for the formulation of the hamming and blackmanharris* windows ", "[1,5]", 5);
+    declareParameter("splitPadding", "whether to split the padding to the edges of the signal (_/\\_) or to add it to the right (/\\__). This option is ignored when zeroPhase (\\__/) is true", "{true,false}", false);
   }
 
   void configure();
@@ -79,6 +80,7 @@ protected:
   bool _zeroPhase;
   bool _normalized;
   bool _symmetric;
+  bool _splitPadding;
 };
 
 } // namespace standard

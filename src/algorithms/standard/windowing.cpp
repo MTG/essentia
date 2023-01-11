@@ -58,6 +58,7 @@ void Windowing::configure() {
   if (!_symmetric) _window.pop_back();
   _zeroPadding = parameter("zeroPadding").toInt();
   _zeroPhase = parameter("zeroPhase").toBool();
+  _splitPadding = parameter("splitPadding").toBool();
 }
 
 void Windowing::createWindow(const std::string& windowtype) {
@@ -124,6 +125,11 @@ void Windowing::compute() {
     for (int j=0; j<_zeroPadding; j++) {
       windowedSignal[i++] = 0.0;
     }
+  }
+  if (_splitPadding) {
+    // rotate windowedSignal to split the padding to the edges of the signal
+    int shift = signalSize + ceil(_zeroPadding / 2.0);
+    rotate(windowedSignal.begin(), windowedSignal.begin() + shift, windowedSignal.end());
   }
 }
 
