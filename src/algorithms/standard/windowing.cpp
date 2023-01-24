@@ -41,14 +41,14 @@ void Windowing::configure() {
   _normalized = parameter("normalized").toBool();
   _window.resize(parameter("size").toInt());
   _symmetric = parameter("symmetric").toBool();
-  if (!_symmetric) _window.resize(_window.size() + 1);
   createWindow(parameter("type").toLower());
-  if (!_symmetric) _window.pop_back();
   _zeroPadding = parameter("zeroPadding").toInt();
   _zeroPhase = parameter("zeroPhase").toBool();
 }
 
 void Windowing::createWindow(const std::string& windowtype) {
+  if (!_symmetric) _window.resize(_window.size() + 1);
+
   if (windowtype == "hamming") hamming();
   else if (windowtype == "hann") hann();
   else if (windowtype == "hannnsgcq") hannNSGCQ();
@@ -59,8 +59,10 @@ void Windowing::createWindow(const std::string& windowtype) {
   else if (windowtype == "blackmanharris74") blackmanHarris74();
   else if (windowtype == "blackmanharris92") blackmanHarris92();
 
+  if (!_symmetric) _window.pop_back();
+
   if (_normalized) {
-    normalize();  
+    normalize();
   }
 }
 
