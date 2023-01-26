@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2023  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -22,32 +22,76 @@ from essentia_test import *
 
 
 class TestTensorFlowPredictFSDSINet(TestCase):
+    sr = 22050
 
-    def testRegressionFrozenModel(self):
-        """ Checks inference starting from the audio.
+    def testRegressionDC(self):
+        """Regression of the activations for a DC signal"""
 
-        This test has a high tolerance because it is not possible to replicate the input melspectrogram 
-        """
-        model = join(testdata.models_dir, 'fsd-sinet', 'fsd-sinet-vgg41-tlpf-ibp-1.pb')
-        audio_file = join(filedir(), 'tensorflowpredictfsdsinet', 'patch_id1013_t55_156_f96_waterdrip_audio.npy')
-        expected_file = join(filedir(), 'tensorflowpredictfsdsinet', 'patch_id1013_t55_156_f96_waterdrip_scores_TLPF5x5_IBP_vgg41.npy')
-
-        audio = numpy.load(audio_file)
+        expected_file = join(
+            filedir(),
+            'tensorflowpredictfsdsinet',
+            'dc_activations_fsd-sinet-vgg41-tlpf-ibp-1.npy'
+        )
         expected = numpy.load(expected_file)
-        found = TensorflowPredictFSDSINet(graphFilename=model)(audio)[0]
 
-        self.assertAlmostEqualVector(found, expected, 1e1)
+        audio = numpy.ones(self.sr, dtype="float32")
 
+        model = join(
+            testdata.models_dir,
+            'fsd-sinet',
+            'fsd-sinet-vgg41-tlpf-ibp-1.pb'
+        )
+        found = TensorflowPredictFSDSINet(graphFilename=model)(audio).squeeze()
+
+        self.assertAlmostEqualVector(found, expected, 1e-3)
+
+    def testRegressionVoiceSignal(self):
+        """Regression of the activations for a voice signal"""
+
+        expected_file = join(
+            filedir(),
+            'tensorflowpredictfsdsinet',
+            'vignesh_activations_fsd-sinet-vgg41-tlpf-ibp-1.npy'
+        )
+        expected = numpy.load(expected_file)
+
+        audio_file = join(testdata.audio_dir, 'recorded/vignesh.wav')
+        audio = MonoLoader(filename=audio_file, sampleRate=self.sr)()
+
+        segment = audio[:self.sr]
+
+        model = join(
+            testdata.models_dir,
+            'fsd-sinet',
+            'fsd-sinet-vgg41-tlpf-ibp-1.pb'
+        )
+        found = TensorflowPredictFSDSINet(graphFilename=model)(segment).squeeze()
+        import matplotlib.pyplot as plt
+
+        self.assertAlmostEqualVector(found, expected, 1e-3)
 
     def testRegressionFrozenModelFromSpecPatch(self):
-        """ Checks inference starting from a pre-computed melspectrogram patch.
+        """ Regression of the activations from a pre-computed mel-spectrogram patch
 
-        This test skips the melspectrogram computation part to focus on possible
+        This test skips the mel-spectrogram computation part to focus on possible
         problems with the tensorflow backend.
         """
-        model = join(testdata.models_dir, 'fsd-sinet', 'fsd-sinet-vgg41-tlpf-ibp-1.pb')
-        melspectrogram_file = join(filedir(), 'tensorflowpredictfsdsinet', 'patch_id1013_t55_156_f96_waterdrip_mel_spectrogram.npy')
-        expected_file = join(filedir(), 'tensorflowpredictfsdsinet', 'patch_id1013_t55_156_f96_waterdrip_scores_TLPF5x5_IBP_vgg41.npy')
+
+        model = join(
+            testdata.models_dir,
+            'fsd-sinet',
+            'fsd-sinet-vgg41-tlpf-ibp-1.pb'
+        )
+        melspectrogram_file = join(
+            filedir(),
+            'tensorflowpredictfsdsinet',
+            'patch_id1013_t55_156_f96_waterdrip_mel_spectrogram.npy'
+        )
+        expected_file = join(
+            filedir(),
+            'tensorflowpredictfsdsinet',
+            'patch_id1013_t55_156_f96_waterdrip_scores_TLPF5x5_IBP_vgg41.npy'
+        )
 
         mel_spectrogram = numpy.load(melspectrogram_file).astype("float32")
 
@@ -74,6 +118,8 @@ class TestTensorFlowPredictFSDSINet(TestCase):
         self.assertAlmostEqualVector(found, expected, 1e-3)
 
     def testEmptyModelName(self):
+        """Test empty model names"""
+
         # With empty model names the algorithm should skip the configuration without errors.
         self.assertConfigureSuccess(TensorflowPredictFSDSINet(), {})
         self.assertConfigureSuccess(TensorflowPredictFSDSINet(), {'graphFilename': ''})
@@ -104,6 +150,8 @@ class TestTensorFlowPredictFSDSINet(TestCase):
 
 
     def testInvalidParam(self):
+        """Test invalid parameters"""
+
         model = join(testdata.models_dir, 'vgg', 'vgg4.pb')
         self.assertConfigureFails(TensorflowPredictFSDSINet(), {'graphFilename': model,
                                                                'input': 'wrong_input_name',
