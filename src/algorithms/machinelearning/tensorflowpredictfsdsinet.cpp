@@ -18,6 +18,7 @@
  */
 
 #include "tensorflowpredictfsdsinet.h"
+#include "essentiamath.h"
 
 using namespace std;
 
