@@ -41,7 +41,7 @@ class TestTensorFlowPredictFSDSINet(TestCase):
             'fsd-sinet',
             'fsd-sinet-vgg41-tlpf-ibp-1.pb'
         )
-        found = TensorflowPredictFSDSINet(graphFilename=model)(audio).squeeze()
+        found = TensorflowPredictFSDSINet(graphFilename=model, normalize=False)(audio).squeeze()
 
         self.assertAlmostEqualVector(found, expected, 1e-3)
 
@@ -66,7 +66,6 @@ class TestTensorFlowPredictFSDSINet(TestCase):
             'fsd-sinet-vgg41-tlpf-ibp-1.pb'
         )
         found = TensorflowPredictFSDSINet(graphFilename=model)(segment).squeeze()
-        import matplotlib.pyplot as plt
 
         self.assertAlmostEqualVector(found, expected, 1e-3)
 
