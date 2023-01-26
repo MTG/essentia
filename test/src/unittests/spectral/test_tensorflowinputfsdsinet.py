@@ -24,7 +24,8 @@ from essentia_test import *
 class TestTensorflowInputFSDSINet(TestCase):
 
     def melspectrogram(self, signal):
-        """Compute the mel-spectrogram from a signal"""
+        """Compute the mel-spectrogram of a signal"""
+
         frame_size = 660
         hop_size = 220
 
@@ -38,11 +39,12 @@ class TestTensorflowInputFSDSINet(TestCase):
         return numpy.array(frames)
 
     def testZeroSpectrum(self):
-        """Check inputting a vector of zeros
+        """Test inputting a vector of zeros
 
-        Inputting zeros should return the cutoff value set at UnaryOperator (i.e., 1e-30).
+        Inputting zeros should return the cutoff value from UnaryOperator (i.e., 1e-30).
         https://essentia.upf.edu/reference/std_UnaryOperator.html
         """
+
         log_cutoff = -30
         frame_size = 660
 
@@ -61,24 +63,26 @@ class TestTensorflowInputFSDSINet(TestCase):
         sr = 22050
         dc = numpy.ones(sr, dtype="float32")
         found = self.melspectrogram(dc)
-        # Essentia generates and additional frame because of the zero-padding strategy.
+
+        # Essentia generates and additional frame because of its zero-padding strategy.
         # We can discard it for testing purposes.
         found = found[:expected.shape[0], :]
 
         # The high relative error w.r.t. the original implementation comes mainly from using
         # floats instead of double precision. Two points where the precision plays an important
         # role are:
-        # - 1. The FFT. If the signal is very tonal (or DC) the energy of the signal (and the
-        #  truncation error) accumulates in certain FFT bins.
+        # - 1. The FFT. If the signal is very tonal (or DC), the energy (and the truncation
+        #  error) accumulates at certain FFT bins.
         # - 2. The mel-spectrogram frequency calculation. Some bins can suffer deviations in the
         #  order of the hundreds of Hz.
         #
-        # While we acknowledge this deviation, it does not have a significant impact in our final
+        # While we acknowledge this deviation, it does not have a significant impact in our target
         # applications (i.e., inference with neural networks). - Pablo A.
         self.assertAlmostEqualMatrix(found, expected, 1e0)
 
     def testRegressionVoiceSignal(self):
         """Regression of the mel-spectrogram for a voice signal"""
+
         sr = 22050
 
         audio = MonoLoader(
@@ -100,13 +104,14 @@ class TestTensorflowInputFSDSINet(TestCase):
         self.assertAlmostEqualMatrix(found, expected, 1e0)
 
     def testInvalidInput(self):
-        """Check an empty input"""
+        """Test an empty input"""
+
         self.assertComputeFails(TensorflowInputFSDSINet(), [])
 
     def testWrongInputSize(self):
-        """Check wrong input sizes
+        """Test wrong input sizes
 
-        # mel bands should fail for input size different to 660
+        The algorithm should fail for input size different to 660.
         """
 
         self.assertComputeFails(TensorflowInputFSDSINet(), [0.5] * 1)
