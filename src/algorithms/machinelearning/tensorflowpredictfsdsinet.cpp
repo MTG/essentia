@@ -141,10 +141,10 @@ namespace standard {
 const char* TensorflowPredictFSDSINet::name = "TensorflowPredictFSDSINet";
 const char* TensorflowPredictFSDSINet::category = "Machine Learning";
 const char* TensorflowPredictFSDSINet::description = DOC(
-  "This algorithm makes predictions using FSD-SINet-based models.\n"
+  "This algorithm makes predictions using FSD-SINet models.\n"
   "\n"
   "Internally, it uses TensorflowInputFSDSINet for the input feature extraction "
-  "(mel bands). It feeds the model with patches of 101 mel bands frames and "
+  "(mel bands). It feeds the model with patches of 101 mel-band frames and "
   "jumps a constant amount of frames determined by `patchHopSize`.\n"
   "\n"
   "By setting the `batchSize` parameter to -1 or 0 the patches are stored to run a single "
@@ -160,8 +160,8 @@ const char* TensorflowPredictFSDSINet::description = DOC(
   "the user's responsibility to make sure it is a valid one.\n"
   "\n"
   "Note II: The FSD-SINet models were trained on normalized audio clips. "
-  "Clip-level normalization is only implemented in standard mode since in streaming there is no access to the entire clip."
-  "In this case, it is the responsibility of the user to feed the algorithm with audio with an healthy dynamic range.\n"
+  "Clip-level normalization is only implemented in standard mode since in streaming there is no access to the entire audio clip. "
+  "In this case, it is the responsibility of the user to feed the algorithm with audio featuring a healthy dynamic range.\n\n"
   "References:\n"
   "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623.\n"
   "  [2] https://github.com/edufonseca/shift_sec"
