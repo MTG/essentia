@@ -23,17 +23,20 @@ from essentia_test import *
 
 class TestTensorflowInputFSDSINet(TestCase):
 
+    # mel-spectrogram analysis parameters
+    sr = 22050
+    frame_size = 660
+    hop_size = 220
+    n_bands = 96
+
     def melspectrogram(self, signal):
         """Compute the mel-spectrogram of a signal"""
-
-        frame_size = 660
-        hop_size = 220
 
         algo = TensorflowInputFSDSINet()
         frames = [algo(frame) for frame in FrameGenerator(
             signal,
-            frameSize=frame_size,
-            hopSize=hop_size,
+            frameSize=self.frame_size,
+            hopSize=self.hop_size,
         )]
 
         return numpy.array(frames)
@@ -46,9 +49,8 @@ class TestTensorflowInputFSDSINet(TestCase):
         """
 
         log_cutoff = -30
-        frame_size = 660
 
-        self.assertEqualVector(TensorflowInputFSDSINet()(zeros(frame_size)), log_cutoff * ones(96))
+        self.assertEqualVector(TensorflowInputFSDSINet()(zeros(self.frame_size)), log_cutoff * ones(self.n_bands))
 
     def testRegressionDC(self):
         """Regression of the mel-spectrogram for a continuous (DC) signal"""
@@ -60,8 +62,7 @@ class TestTensorflowInputFSDSINet(TestCase):
         )
         expected = numpy.load(expected_file)
 
-        sr = 22050
-        dc = numpy.ones(sr, dtype="float32")
+        dc = numpy.ones(self.sr, dtype="float32")
         found = self.melspectrogram(dc)
 
         # Essentia generates and additional frame because of its zero-padding strategy.
@@ -83,11 +84,9 @@ class TestTensorflowInputFSDSINet(TestCase):
     def testRegressionVoiceSignal(self):
         """Regression of the mel-spectrogram for a voice signal"""
 
-        sr = 22050
-
         audio = MonoLoader(
             filename=join(testdata.audio_dir, 'recorded/vignesh.wav'),
-            sampleRate=sr,
+            sampleRate=self.sr,
         )()
 
         expected_file = join(
