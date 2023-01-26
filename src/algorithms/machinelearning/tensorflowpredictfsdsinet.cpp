@@ -33,7 +33,7 @@ TensorflowPredictFSDSINet::TensorflowPredictFSDSINet() : AlgorithmComposite(),
     _frameCutter(0), _tensorflowInputFSDSINet(0), _vectorRealToTensor(0), _tensorToPool(0),
     _tensorTranspose(0), _tensorflowPredict(0), _poolToTensor(0), _tensorToVectorReal(0), _configured(false) {
 
-  declareInput(_signal, 4096, "signal", "the input audio signal sampled at 16 kHz");
+  declareInput(_signal, 4096, "signal", "the input audio signal sampled at 22.05 kHz");
   declareOutput(_predictions, 0, "predictions", "the output values from the model node named after `output`");
 }
 
@@ -98,7 +98,7 @@ void TensorflowPredictFSDSINet::configure() {
   int hopSize = 220;
   int numberBands = 96;
   int patchSize = 101;
-  
+
   vector<int> inputShape({batchSize, 1, patchSize, numberBands});
 
   _frameCutter->configure("frameSize", frameSize, "hopSize", hopSize);
@@ -140,10 +140,10 @@ namespace standard {
 const char* TensorflowPredictFSDSINet::name = "TensorflowPredictFSDSINet";
 const char* TensorflowPredictFSDSINet::category = "Machine Learning";
 const char* TensorflowPredictFSDSINet::description = DOC(
-  "This algorithm makes predictions using FSDSINet-based models.\n"
+  "This algorithm makes predictions using FSD-SINet-based models.\n"
   "\n"
   "Internally, it uses TensorflowInputFSDSINet for the input feature extraction "
-  "(mel bands). It feeds the model with patches of 187 mel bands frames and "
+  "(mel bands). It feeds the model with patches of 101 mel bands frames and "
   "jumps a constant amount of frames determined by `patchHopSize`.\n"
   "\n"
   "By setting the `batchSize` parameter to -1 or 0 the patches are stored to run a single "
@@ -153,19 +153,20 @@ const char* TensorflowPredictFSDSINet::description = DOC(
   "\n"
   "The recommended pipeline is as follows::\n"
   "\n"
-  "  MonoLoader(sampleRate=16000) >> TensorflowPredictFSDSINet\n"
+  "  MonoLoader(sampleRate=22050) >> TensorflowPredictFSDSINet\n"
   "\n"
   "Note: This algorithm does not make any check on the input model so it is "
   "the user's responsibility to make sure it is a valid one.\n"
   "\n"
+  "Note II: The FSD-SINet models were trained on normalized audio clips. "
+  "Clip-level normalization is only implemented in standard mode since in streaming there is no access to the entire clip."
+  "In this case, it is the responsibility of the user to feed the algorithm with audio with an healthy dynamic range.\n"
   "References:\n"
-  "\n"
-  "1. Pons, J., & Serra, X. (2019). FSDSINet: Pre-trained convolutional neural "
-  "networks for music audio tagging. arXiv preprint arXiv:1909.06654.\n\n"
-  "2. Supported models at https://essentia.upf.edu/models/\n\n");
+  "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623.\n"
+  "  [2] https://github.com/edufonseca/shift_sec"
+);
 
-
-TensorflowPredictFSDSINet::TensorflowPredictFSDSINet() {
+TensorflowPredictFSDSINet::TensorflowPredictFSDSINet() : _normalize(true) {
     declareInput(_signal, "signal", "the input audio signal sampled at 22050 Hz");
     declareOutput(_predictions, "predictions", "the output values from the model node named after `output`");
 
