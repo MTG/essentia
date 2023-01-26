@@ -97,8 +97,10 @@ class TensorflowPredictFSDSINet : public Algorithm {
   streaming::VectorInput<Real>* _vectorInput;
   scheduler::Network* _network;
   Pool _pool;
+  bool _normalize;
 
   void createInnerNetwork();
+  void normalizeFSDSINet(std::vector<Real> &x);
 
  public:
   TensorflowPredictFSDSINet();
@@ -112,6 +114,7 @@ class TensorflowPredictFSDSINet : public Algorithm {
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 50);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
     declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 64);
+    declareParameter("normalize", "whether to normalize the input audio signal. Note that this parameter is only available in standard mode.", "{false,true}", true);
   }
 
   void configure();

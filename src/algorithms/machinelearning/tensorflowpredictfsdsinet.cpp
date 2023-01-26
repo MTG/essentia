@@ -188,8 +188,17 @@ void TensorflowPredictFSDSINet::createInnerNetwork() {
   _network = new scheduler::Network(_vectorInput);
 }
 
+void TensorflowPredictFSDSINet::normalizeFSDSINet(vector<Real> &x) {
+  Real meanValue = mean(x);
+  for (int i=0; i<(int)x.size(); i++) x[i] -= meanValue;
+
+  // Custom headroom used in the original implementation.
+  Real headroom = 0.005;
+  normalizeAbs(x, headroom);
+}
 
 void TensorflowPredictFSDSINet::configure() {
+  _normalize = parameter("normalize").toBool();
   _tensorflowPredictFSDSINet->configure(INHERIT("graphFilename"),
                                        INHERIT("savedModel"),
                                        INHERIT("input"),
@@ -201,14 +210,21 @@ void TensorflowPredictFSDSINet::configure() {
 
 
 void TensorflowPredictFSDSINet::compute() {
-  const vector<Real>& signal = _signal.get();
+  const vector<Real>* signal = &_signal.get();
   vector<vector<Real> >& predictions = _predictions.get();
+  vector<Real> normalizedSignal;
 
-  if (!signal.size()) {
+  if (_normalize) {
+    normalizedSignal = *signal;
+    normalizeFSDSINet(normalizedSignal);
+    signal = &normalizedSignal;
+  }
+
+  if (!signal->size()) {
     throw EssentiaException("TensorflowPredictFSDSINet: empty input signal");
   }
 
-  _vectorInput->setVector(&signal);
+  _vectorInput->setVector(signal);
 
   _network->run();
 
