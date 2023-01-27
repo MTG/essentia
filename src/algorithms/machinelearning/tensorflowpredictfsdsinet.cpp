@@ -163,13 +163,13 @@ const char* TensorflowPredictFSDSINet::description = DOC(
   "Clip-level normalization is only implemented in standard mode since in streaming there is no access to the entire audio clip. "
   "In this case, it is the responsibility of the user to feed the algorithm with audio featuring a healthy dynamic range.\n\n"
   "References:\n"
-  "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623.\n"
-  "  [2] https://github.com/edufonseca/shift_sec"
+  "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623."
 );
+// todo: refer also the github repository if it is updated with the source code https://github.com/edufonseca/shift_sec
 
 TensorflowPredictFSDSINet::TensorflowPredictFSDSINet() : _normalize(true) {
     declareInput(_signal, "signal", "the input audio signal sampled at 22050 Hz");
-    declareOutput(_predictions, "predictions", "the output values from the model node named after `output`");
+    declareOutput(_predictions, "predictions", "the output values from the model's node (layer) named after the `output` parameter");
 
     createInnerNetwork();
   }

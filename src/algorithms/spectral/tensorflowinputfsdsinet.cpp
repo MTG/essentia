@@ -26,13 +26,13 @@ using namespace standard;
 const char* TensorflowInputFSDSINet::name = "TensorflowInputFSDSINet";
 const char* TensorflowInputFSDSINet::category = "Spectral";
 const char* TensorflowInputFSDSINet::description = DOC(
-  "This algorithm computes mel bands with a specific parametrization for the FSD-SINet models."
+  "This algorithm computes mel bands from an audio frame with the specific parametrization required by the FSD-SINet models."
   "\n\n"
   "References:\n"
-  "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623.\n"
-  "  [2] https://github.com/edufonseca/shift_sec"
+  "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623."
 );
 
+// todo: refer also the github repository if it is updated with the source code https://github.com/edufonseca/shift_sec
 
 void TensorflowInputFSDSINet::configure() {
 
