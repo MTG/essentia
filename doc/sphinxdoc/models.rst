@@ -231,13 +231,13 @@ Models:
 * ``fsd-sinet-vgg42-tlpf-ibp`` [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1.json>`_]
 
 
-Naming convention: ``<task>-<architecture>-<variation>-<filter_type>-<pooling_type>-<version>.pb``
+Naming convention: ``<task>-<architecture>-<variation>-<pooling_filters>-<si_technique>-<version>.pb``
 
 * ``task``: multi-label classification based on FSD50K (``fsd``).
 * ``architecture``: shift invariant net (``sinet``).
 * ``variation``: ``vgg42`` is a variation of ``vgg41`` with twice the number of filters for each convolutional layer.
-* ``filter_type``: the model may have trainable low-pass filters (``tlpf``) or not (``no_tlpf``).
-* ``pooling_type``: can be adaptative polyphase sampling (``aps``) or intra-block pooling (``ibp``).
+* ``pooling_filters``: the pooling layers may feature trainable low-pass filters (``tlpf``) or not (``no_tlpf``).
+* ``si_technique``: the shift-invariance technique may be adaptative polyphase sampling (``aps``) or intra-block pooling (``ibp``).
 * ``version``: the model version.
 
 
