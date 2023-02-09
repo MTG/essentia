@@ -150,6 +150,10 @@ Models:
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
+* ``task``: multi-label classification based on audioset (``audioset``).
+* ``architecture``: a Mobilenet architecture (``yamnet``).
+* ``version``: the version of the model.
+
 Usage for audio event detection:
 
 .. code-block:: python
@@ -208,9 +212,15 @@ This model is useful for music audio embeddings.
 
 Models:
 
-* ``discogs-effnet``
+* ``discogs-effnet-bs64``
 
 Naming convention: ``<task>-<architecture>-bs<batch_size>-<version>.pb``
+
+* ``task``: multi-label classification based on discogs labels (``discogs``).
+* ``architecture``: an efficientnet b0 architecture (``effnet``).
+* ``batch_size``: the model is only available with a fixed batch size of 64.
+
+*Note: The batch size limitation is a work-arround due to a problem porting the model from ONNX to TensorFlow. Additionally, an ONNX version of the model with* `dynamic batch <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bsdynamic-1.onnx>`_ *size is provided.*
 
 Usage for music style classification:
 
@@ -257,6 +267,10 @@ Models:
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
+* ``task``: multi-label classification based on the Million Song Dataset (``msd``).
+* ``architecture``: musicnn (``musicnn``) or vgg-like (``vgg``) architecture.
+* ``version``: the version of the model.
+
 Usage for audio event detection:
 
 .. code-block:: python
@@ -298,6 +312,10 @@ Models:
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
+* ``task``: multi-label classification based on the MagnaTagATune dataset (``mtt``).
+* ``architecture``: musicnn (``musicnn``) or vgg-like (``vgg``) architecture.
+* ``version``: the version of the model.
+
 Usage for audio event detection:
 
 .. code-block:: python
@@ -330,7 +348,10 @@ Demo: https://replicate.com/mtg/music-classifiers/
 
 Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
 
-Usage for music classification with the `MusiCNN` or `VGG` architectures:
+* ``target_task``: single-class classification for multiple tasks. See models below.
+* ``architecture``: musicnn (``musicnn``) or vgg-like (``vgg``) architecture.
+* ``source_task``: the task in which the models were pre-trained. Can be the Million Song DAtaset (``msd``) or the MagnaTagATune (``mtt``).
+* ``version``: the version of the model.
 
 .. code-block:: python
 
@@ -732,7 +753,13 @@ Models:
 * ``openl3-music-mel256-emb512``
 * ``openl3-music-mel256-emb6144``
 
-Naming convention: ``<architecture>-<source_task>-<number_of_mel_bands>-<embedding_dimensions>-<version>.pb``
+Naming convention: ``<architecture>-<source_task>-mel<n_mel_bands>-emb<n_embeddings>-<version>.pb``
+
+* ``architecture``: the OpenL3 architecture (``openl3``).
+* ``source_task``: the source task can be enviromental sounds (``env``) or music (``music``).
+* ``n_mel_bands``: number of input mel-bands.
+* ``n_embeddings``: the number of dimensions in the output embedding layer.
+* ``version``: the version of the model.
 
 Usage for embedding extraction:
 
@@ -752,6 +779,10 @@ Models:
 * ``audioset-vggish``
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
+
+* ``task``: multi-label classification using an in-house dataset related to AudioSet (``audioset``).
+* ``architecture``: a CNN models with vgg-like convolutional laers (``vggish``).
+* ``version``: the model version.
 
 Usage for embedding extraction:
 
@@ -784,7 +815,12 @@ Models:
 * ``discogs_track_embeddings-effnet-bs64``
 
 
-Naming convention: ``<dataset>_<task>_embeddings-<architecture>-<inference-batch-size>-<version>.pb``
+Naming convention: ``discogs_<task>_embeddings-<architecture>-bs<batch-size>-<version>.pb``
+
+* ``task``: contrastive learning targeting artist (``artist``), label (``label``), album (``release``), track (``track``), or a multi-task (``multi``) similarity objective.
+* ``architecture``: an efficientnet b0 architecture (``effnet``).
+* ``batch_size``: for now, the models are only available with a fixed batch size of 64.
+* ``version``: the version of the model.
 
 Usage for embedding extraction:
 
@@ -821,6 +857,10 @@ Models:
 
 Naming convention: ``<architecture>-<model_size>-<version>.pb``
 
+* ``architecture``: the CREPE architecture (``crepe``).
+* ``model_size``: the architecture complexity ranging from ``tiny`` to ``full``. A larger model is expected to show enhanced performance at the expense of additional computational cost.
+* ``version``: the version of the model.
+
 Usage for pitch estimation:
 
 .. code-block:: python
@@ -852,7 +892,12 @@ Models:
 * ``spleeter-4s``
 * ``spleeter-5s``
 
-Naming convention: ``<architecture>-<number_of_stems>-<version>.pb``
+Naming convention: ``<architecture>-<number_of_stems>s-<version>.pb``
+
+* ``architecture``: a spleeter architecture (``spleeter``).
+* ``number_of_stems``: can be 2 (vocals and accompaniment), 4 (vocals, drums, bass, and other separation) or 5 (vocals, drums, bass, piano, and other separation).
+* ``version``: the version of the model.
+
 
 Performing source separation:
 
@@ -900,7 +945,11 @@ Models:
 * ``deeptemp-k4``
 * ``deeptemp-k16``
 
-Naming convention: ``<architecture>-<model_size>-<version>.pb``
+Naming convention: ``<architecture>-k<model_size>-<version>.pb``
+
+* ``architecture``: a TempoCNN architecture feature square filters (``deepsquare``) or longitudinal ones (``deeptemp``).
+* ``model_size``: the model size that can be 4 or 16. A larger model is expected to show enhanced performance at the expense of additional computational cost.
+* ``version``: the version of the model.
 
 Usage for tempo estimation:
 
@@ -921,29 +970,70 @@ Classification and regression neural networks intended to operate on top of pre-
 
 `Download model files <https://essentia.upf.edu/models/classification-heads/>`_
 
-Music classification example:
+Naming convention: ``<target_task>-<embedding_model>-<version>.pb``
+
+* ``target_task``: the single-class, multi-class, or regression task to perform. See options below.
+* ``embedding_model``: the model that needs to be used to compute the input embeddings.
+* ``version``: the model version.
+
+Using the classification heads require to pre-extract embeddings with the correspodent ``embedding_model``.
+
+This code extracts embeddings with the `effnet_discogs <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.pb>`_, the `effnet-discogs_artist <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_artist_embeddings-effnet-bs64-1.pb>`_, the `effnet-discogs_label <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_label_embeddings-effnet-bs64-1.pb>`_, the `effnet-discogs_multi <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_multi_embeddings-effnet-bs64-1.pb>`_, the `effnet-discogs_release <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_release_embeddings-effnet-bs64-1.pb>`_, and the `effnet-discogs_track <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_track_embeddings-effnet-bs64-1.pb>`_:
 
 .. code-block:: python
 
-    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs, TensorflowPredict2D
+    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs
 
     audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
     embeddings_model = TensorflowPredictEffnetDiscogs(
-        graphFilename="discogs-effnet-bs64-1.pb",
+        graphFilename="embedding_model.pb",
         output="PartitionedCall:1",
     )
+
+    embeddings = embeddings_model(audio)
+
+This code extracts embeddings with the `musicnn-msd <https://essentia.upf.edu/models/autotagging/msd/msd-musicnn-1.pb>`_ auto-tagging model:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    embeddings_model = TensorflowPredictMusiCNN(
+        graphFilename="msd-musicnn-1.pb",
+        output="model/dense/BiasAdd",
+    )
+
+    embeddings = embeddings_model(audio)
+
+This code extracts embeddings with the `vggish-audioset <https://essentia.upf.edu/models/feature-extractors/vggish/audioset-vggish-3.pb>`_ embedding extractor:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
+    embeddings_model = TensorflowPredictVGGish(
+        graphFilename="discogs-effnet-bs64-1.pb",
+        output="model/vggish/embeddings",
+    )
+
+    embeddings = embeddings_model(audio)
+
+This code computes activations with a classification head based on pre-extracted embeddings:
+
+.. code-block:: python
+
+    from essentia.standard import TensorflowPredict2D
+
     classification_model = TensorflowPredict2D(
         graphFilename="approachability_2c-effnet_discogs-1.pb",
         output="model/Softmax",
     )
 
-    embeddings = embeddings_model(audio)
     activations = classification_model(embeddings)
 
-Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
-
-
-*Note: The classification heads operate on embeddings that are generally not the default output of the base models. Check the attached JSON files to find the name of the embedding layer on each case.*
+*Note: TensorflowPredict2D has to be configured with the correct output layer name for each classification head. Check the attached JSON file to find the name of the output layer on each case.*
 
 Approachability
 ---------------
