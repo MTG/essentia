@@ -1,0 +1,28 @@
+name: Build Python wheels (cibuildwheel)
+
+on: [push, pull_request]
+
+jobs:
+  build_wheels:
+    name: ${{ matrix.os }} / ${{ matrix.config }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-11]
+        config: [pyproject-tensorflow.toml, pyproject.toml]
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Fetch release tags from GitHub
+        # Workaround for https://github.com/actions/checkout/issues/290
+        run: git fetch --tags --force
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.11.4
+        with:
+          config-file: ${{ matrix.config }}
+
+      - uses: actions/upload-artifact@v3
+        with:
+          path: ./wheelhouse/*.whl

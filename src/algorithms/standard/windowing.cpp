@@ -53,6 +53,7 @@ void Windowing::configure() {
   _window.resize(parameter("size").toInt());
   _constantsDecimals = parameter("constantsDecimals").toInt();
   _symmetric = parameter("symmetric").toBool();
+  _constantsDecimals = parameter("constantsDecimals").toInt();
   createWindow(parameter("type").toLower());
   _zeroPadding = parameter("zeroPadding").toInt();
   _zeroPhase = parameter("zeroPhase").toBool();
