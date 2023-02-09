@@ -1,0 +1,39 @@
+[tool.cibuildwheel.linux]
+
+manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"
+
+# Only support x86_64 for essentia-tensorflow
+build = "cp**-manylinux_x86_64"
+skip = ["pp*", "*-musllinux*"]
+
+environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
+
+before-all = [
+  "PYBIN=/opt/python/cp36-cp36m/bin/",
+  "\"${PYBIN}/python\" waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
+  "\"${PYBIN}/python\" waf",
+  "\"${PYBIN}/python\" waf install"
+]
+
+test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter, TensorflowPredict'"
+
+
+[tool.cibuildwheel.macos]
+
+skip = ["pp*"]
+
+environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
+
+before-all = [
+  "brew install pkg-config gcc readline sqlite gdbm freetype libpng",
+  "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag chromaprint",
+  "brew install tensorflow",
+  "brew link --force ffmpeg@2.8",
+  #"brew tap MTG/essentia",
+  #"brew install gaia --HEAD",
+  "python waf configure --with-tensorflow --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
+  "python waf",
+  "python waf install"
+]
+
+test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter, TensorflowPredict'"
