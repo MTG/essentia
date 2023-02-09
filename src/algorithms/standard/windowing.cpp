@@ -51,6 +51,7 @@ const char* Windowing::description = DOC("This algorithm applies windowing to an
 void Windowing::configure() {
   _normalized = parameter("normalized").toBool();
   _window.resize(parameter("size").toInt());
+  _symmetric = parameter("symmetric").toBool();
   _constantsDecimals = parameter("constantsDecimals").toInt();
   createWindow(parameter("type").toLower());
   _zeroPadding = parameter("zeroPadding").toInt();
@@ -58,6 +59,8 @@ void Windowing::configure() {
 }
 
 void Windowing::createWindow(const std::string& windowtype) {
+  if (!_symmetric) _window.resize(_window.size() + 1);
+
   if (windowtype == "hamming") hamming();
   else if (windowtype == "hann") hann();
   else if (windowtype == "hannnsgcq") hannNSGCQ();
@@ -67,6 +70,8 @@ void Windowing::createWindow(const std::string& windowtype) {
   else if (windowtype == "blackmanharris70") blackmanHarris70();
   else if (windowtype == "blackmanharris74") blackmanHarris74();
   else if (windowtype == "blackmanharris92") blackmanHarris92();
+
+  if (!_symmetric) _window.pop_back();
 
   if (_normalized) {
     normalize();
