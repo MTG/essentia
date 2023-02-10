@@ -81,7 +81,6 @@ protected:
   bool _normalized;
   bool _splitPadding;
   bool _symmetric;
-  bool _splitPadding;
 };
 
 } // namespace standard
