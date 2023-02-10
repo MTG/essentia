@@ -217,15 +217,16 @@ void TensorflowPredictFSDSINet::compute() {
   vector<vector<Real> >& predictions = _predictions.get();
   vector<Real> normalizedSignal;
 
+  if (!signal->size()) {
+    throw EssentiaException("TensorflowPredictFSDSINet: empty input signal");
+  }
+
   if (_normalize) {
     normalizedSignal = *signal;
     normalizeFSDSINet(normalizedSignal);
     signal = &normalizedSignal;
   }
 
-  if (!signal->size()) {
-    throw EssentiaException("TensorflowPredictFSDSINet: empty input signal");
-  }
 
   _vectorInput->setVector(signal);
 
