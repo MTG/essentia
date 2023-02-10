@@ -65,7 +65,7 @@ class TestTensorflowInputFSDSINet(TestCase):
         dc = numpy.ones(self.sr, dtype="float32")
         found = self.melspectrogram(dc)
 
-        # Essentia generates and additional frame because of its zero-padding strategy.
+        # Essentia generates an additional frame because of its zero-padding strategy.
         # We can discard it for testing purposes.
         found = found[:expected.shape[0], :]
 

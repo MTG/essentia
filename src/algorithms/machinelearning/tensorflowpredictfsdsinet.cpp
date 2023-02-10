@@ -159,14 +159,14 @@ const char* TensorflowPredictFSDSINet::description = DOC(
   "Note: This algorithm does not make any check on the input model so it is "
   "the user's responsibility to make sure it is a valid one.\n"
   "\n"
-  "Note II: The FSD-SINet models were trained on normalized audio clips. "
+  "Note: The FSD-SINet models were trained on normalized audio clips. "
   "Clip-level normalization is only implemented in standard mode since in streaming there is no access to the entire audio clip. "
-  "In this case, it is the responsibility of the user to feed the algorithm with audio featuring a healthy dynamic range.\n\n"
+  "In the streaming case, the user is responsible for controlling the dynamic range of the input signal. "
+  "Ideally, the signal should be zero-mean (no DC) and normalized to the full dynamic range (-1, 1).\n\n"
   "References:\n"
   "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623.\n"
-  "  [2] https://github.com/edufonseca/shift_sec"
+  m"  [2] https://github.com/edufonseca/shift_sec"
 );
-// todo: refer also the github repository if it is updated with the source code https://github.com/edufonseca/shift_sec
 
 TensorflowPredictFSDSINet::TensorflowPredictFSDSINet() : _normalize(true) {
     declareInput(_signal, "signal", "the input audio signal sampled at 22050 Hz");
