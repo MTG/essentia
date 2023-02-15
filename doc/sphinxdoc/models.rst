@@ -140,13 +140,7 @@ natural`, `Reverberation`, `Echo`, `Noise`, `Environmental noise`, `Static`,
 
 Dataset: AudioSet.
 
-Output: activations.
-
-This model is useful for audio embeddings.
-
-Models:
-
-* ``audioset-yamnet``
+Outputs: audio event predictions and embeddings.
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
@@ -154,25 +148,19 @@ Naming convention: ``<task>-<architecture>-<version>.pb``
 * ``architecture``: a Mobilenet architecture (``yamnet``).
 * ``version``: the version of the model.
 
-Usage for audio event detection:
+Models:
 
-.. code-block:: python
+* .. collapse:: <a class="reference external">audioset-yamnet</a>
 
-    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+    [`weights <https://essentia.upf.edu/models/audio-event-recognition/yamnet/audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/yamnet/audioset-yamnet-1.json>`_]
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictVGGish(graphFilename="audioset-yamnet-1.pb", input="melspectrogram", output="activations")
-    activations = model(audio)
+    predictions:
 
-Usage for embedding extraction:
+    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_activations.py
 
-.. code-block:: python
+    embedding extraction:
 
-    from essentia.standard import MonoLoader, TensorflowPredictVGGish
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictVGGish(graphFilename="audioset-yamnet-1.pb", input="melspectrogram", output="embeddings")
-    embeddings = model(audio)
+    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_embeddings.py
 
 
 Music style classification
@@ -206,13 +194,7 @@ Demo: https://replicate.com/mtg/effnet-discogs
 
 Dataset: in-house (MTG).
 
-Output: activations.
-
-This model is useful for music audio embeddings.
-
-Models:
-
-* ``discogs-effnet-bs64``
+Outputs: music style predictions and embeddings.
 
 Naming convention: ``<task>-<architecture>-bs<batch_size>-<version>.pb``
 
@@ -220,25 +202,11 @@ Naming convention: ``<task>-<architecture>-bs<batch_size>-<version>.pb``
 * ``architecture``: an efficientnet b0 architecture (``effnet``).
 * ``batch_size``: the model is only available with a fixed batch size of 64.
 
+Models:
+
+* ``discogs-effnet-bs64``
+
 *Note: The batch size limitation is a work-arround due to a problem porting the model from ONNX to TensorFlow. Additionally, an ONNX version of the model with* `dynamic batch <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bsdynamic-1.onnx>`_ *size is provided.*
-
-Usage for music style classification:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictEffnetDiscogs(graphFilename="discogs-effnet-bs64-1.pb")
-    activations = model(audio)
-
-Usage for embedding extraction:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictEffnetDiscogs(graphFilename="discogs-effnet-bs64-1.pb", output="PartitionedCall:1")
-    activations = model(audio)
 
 
 Music auto-tagging
@@ -256,14 +224,7 @@ Music auto-tagging with 50 common music tags:
 
 Dataset: Million Song Dataset.
 
-Output: activations.
-
-This model is useful for music audio embeddings.
-
-Models:
-
-* ``msd-musicnn``
-* ``msd-vgg``
+Outputs: auto-tagging predictions and embeddings.
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
@@ -271,25 +232,10 @@ Naming convention: ``<task>-<architecture>-<version>.pb``
 * ``architecture``: musicnn (``musicnn``) or vgg-like (``vgg``) architecture.
 * ``version``: the version of the model.
 
-Usage for audio event detection:
+Models:
 
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictMusiCNN(graphFilename="msd-musicnn-1.pb")
-    activations = model(audio)
-
-Usage for embedding extraction:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictMusiCNN(graphFilename="msd-musicnn-1.pb", output="model/dense/BiasAdd")
-    activations = model(audio)
+* ``msd-musicnn``
+* ``msd-vgg``
 
 
 MagnaTagATune
@@ -301,14 +247,7 @@ Music auto-tagging with 50 common music tags:
 
 Dataset: MagnaTagATune.
 
-Output: activations.
-
-This model is useful for music audio embeddings.
-
-Models:
-
-* ``mtt-musicnn``
-* ``mtt-vgg``
+Outputs: auto-tagging predictions and embeddings.
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
@@ -316,33 +255,18 @@ Naming convention: ``<task>-<architecture>-<version>.pb``
 * ``architecture``: musicnn (``musicnn``) or vgg-like (``vgg``) architecture.
 * ``version``: the version of the model.
 
-Usage for audio event detection:
+Models:
 
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictMusiCNN(graphFilename="mtt-musicnn-1.pb")
-    activations = model(audio)
-
-Usage for embedding extraction:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictMusiCNN(graphFilename="mtt-musicnn-1.pb", output="model/dense/BiasAdd")
-    activations = model(audio)
+* ``mtt-musicnn``
+* ``mtt-vgg``
 
 
 Transfer learning classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Classifiers trained on various datasets and audio embeddings.
-
 `Download model files <https://essentia.upf.edu/models/classifiers/>`_
+
+Classifiers trained on various datasets and audio embeddings.
 
 Demo: https://replicate.com/mtg/music-classifiers/
 
@@ -353,23 +277,6 @@ Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
 * ``source_task``: the task in which the models were pre-trained. Can be the Million Song DAtaset (``msd``) or the MagnaTagATune (``mtt``).
 * ``version``: the version of the model.
 
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictMusiCNN(graphFilename="genre_rosamerica-musicnn-msd-2.pb")
-    activations = model(audio)
-
-Usage for music classification with the `VGGish` architecture:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictVGGish
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictVGGish(graphFilename="genre_rosamerica-vggish-audioset-1.pb")
-    activations = model(audio)
 
 Danceability
 ------------
@@ -380,7 +287,7 @@ Music danceability (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: danceability predictions.
 
 Models:
 
@@ -390,7 +297,6 @@ Models:
 * ``danceability-vgg-mtt``
 * ``danceability-vggish-audioset``
 
-
 Music loop instrument role
 --------------------------
 
@@ -398,9 +304,9 @@ Classification of music loops by their instrument role (5 classes):
 
 `bass`, `chords`, `fx`, `melody`, `percussion`
 
-Dataset: Freesound Loop Dataset.
+Dataset: `Freesound Loop Dataset <https://zenodo.org/record/3967852>`_.
 
-Output: activations.
+Output: music loop instrument role predictions.
 
 Models:
 
@@ -416,7 +322,7 @@ Classification of music by presence or absence of voice (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: voice / instrumental predictions.
 
 Models:
 
@@ -436,7 +342,7 @@ Classification of music by singing voice gender (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: singing voice gender predictions.
 
 Models:
 
@@ -456,7 +362,7 @@ Music genre classification (9 genres):
 
 Dataset: Music Audio Benchmark Data Set.
 
-Output: activations.
+Output: genre predictions.
 
 Models:
 
@@ -470,13 +376,13 @@ Models:
 Genre Electronic
 ----------------
 
-Electronic music genre classification (5 genres)
+Electronic music genre classification (5 genres):
 
 `ambient`, `dnb`, `house`, `techno`, `trance`
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: genre predictions.
 
 Models:
 
@@ -496,7 +402,7 @@ Music genre classification (8 genres):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: genre predictions.
 
 Models:
 
@@ -516,7 +422,7 @@ Music genre classification (10 genres):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: genre predictions.
 
 Models:
 
@@ -536,7 +442,7 @@ Music classification by type of sound (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood acoustic predictions.
 
 Models:
 
@@ -556,7 +462,7 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood aggressive predictions.
 
 Models:
 
@@ -576,7 +482,7 @@ Music classification by type of sound (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood electronic predictions.
 
 Models:
 
@@ -596,7 +502,7 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood happy predictions.
 
 Models:
 
@@ -616,7 +522,7 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood pary predictions.
 
 Models:
 
@@ -636,7 +542,7 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: moosd relaxed predictions.
 
 Models:
 
@@ -656,7 +562,7 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood sad predictions.
 
 Models:
 
@@ -680,7 +586,7 @@ Music classification by mood (5 mood clusters):
 
 Dataset: MIREX Audio Mood Classification Dataset.
 
-Output: activations.
+Output: mood predictions.
 
 Models:
 
@@ -700,7 +606,7 @@ Music classification by tonality (classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: tonal / atonal predictions.
 
 Models:
 
@@ -718,9 +624,9 @@ Urban environment sound classification (10 classes):
 
 `air conditioner`, `car horn`, `children playing`, `dog bark`, `drilling`, `engine idling`, `gun shot`, `jackhammer`, `siren`, `street music`
 
-Dataset: UrbanSound8K.
+Dataset: `UrbanSound8K <https://urbansounddataset.weebly.com/urbansound8k.html>`_.
 
-Output: activations.
+Output: urban sound multi-class predictions.
 
 Models:
 
@@ -742,6 +648,14 @@ Dataset: AudioSet subsets of videos with environmental sounds and musical conten
 
 Output: embeddings.
 
+Naming convention: ``<architecture>-<source_task>-mel<n_mel_bands>-emb<n_embeddings>-<version>.pb``
+
+* ``architecture``: the OpenL3 architecture (``openl3``).
+* ``source_task``: the source task can be enviromental sounds (``env``) or music (``music``).
+* ``n_mel_bands``: number of input mel-bands.
+* ``n_embeddings``: the number of dimensions in the output embedding layer.
+* ``version``: the version of the model.
+
 Models:
 
 * ``openl3-env-mel128-emb512``
@@ -753,30 +667,17 @@ Models:
 * ``openl3-music-mel256-emb512``
 * ``openl3-music-mel256-emb6144``
 
-Naming convention: ``<architecture>-<source_task>-mel<n_mel_bands>-emb<n_embeddings>-<version>.pb``
-
-* ``architecture``: the OpenL3 architecture (``openl3``).
-* ``source_task``: the source task can be enviromental sounds (``env``) or music (``music``).
-* ``n_mel_bands``: number of input mel-bands.
-* ``n_embeddings``: the number of dimensions in the output embedding layer.
-* ``version``: the version of the model.
-
-Usage for embedding extraction:
-
 We are currently working on a dedicated algorithm to extract embeddings with the OpenL3 models. For now this can be achieved with `this script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
 
 AudioSet-VGGish
 ---------------
 
 Audio embedding model accompanying the AudioSet dataset, trained in a supervised manner using tag information for YouTube videos.
 
-Dataset: Subset of Youtube-8M.
+Dataset: a subset of Youtube-8M.
 
 Output: embeddings.
-
-Models:
-
-* ``audioset-vggish``
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
@@ -784,15 +685,9 @@ Naming convention: ``<task>-<architecture>-<version>.pb``
 * ``architecture``: a CNN models with vgg-like convolutional laers (``vggish``).
 * ``version``: the model version.
 
-Usage for embedding extraction:
+Models:
 
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictVGGish
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictVGGish(graphFilename="audioset-vggish-3.pb", output='model/vggish/embeddings')
-    embeddings = model(audio)
+* ``audioset-vggish``
 
 
 EffNet-Discogs
@@ -802,18 +697,9 @@ Audio embedding models trained with a contrastive objective using Discogs metada
 There are different versions trained to predict artist, label, release, and track similarity as well as a multi-task model trained in all of them simusltaneously.
 The main purpose of this models is to produce embeddings suitable for downstream music classification tasks.
 
-Dataset: In-house dataset annotated with Discogs metadata
+Dataset: In-house dataset annotated with Discogs metadata.
 
 Output: embeddings.
-
-Models:
-
-* ``discogs_artist_embeddings-effnet-bs64``
-* ``discogs_label_embeddings-effnet-bs64``
-* ``discogs_multi_embeddings-effnet-bs64``
-* ``discogs_release_embeddings-effnet-bs64``
-* ``discogs_track_embeddings-effnet-bs64``
-
 
 Naming convention: ``discogs_<task>_embeddings-<architecture>-bs<batch-size>-<version>.pb``
 
@@ -822,15 +708,13 @@ Naming convention: ``discogs_<task>_embeddings-<architecture>-bs<batch-size>-<ve
 * ``batch_size``: for now, the models are only available with a fixed batch size of 64.
 * ``version``: the version of the model.
 
-Usage for embedding extraction:
+Models:
 
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictEffnetDiscogs(graphFilename="discogs_artist_embeddings-effnet-bs64-1.pb")
-    embeddings = model(audio)
+* ``discogs_artist_embeddings-effnet-bs64``
+* ``discogs_label_embeddings-effnet-bs64``
+* ``discogs_multi_embeddings-effnet-bs64``
+* ``discogs_release_embeddings-effnet-bs64``
+* ``discogs_track_embeddings-effnet-bs64``
 
 
 Pitch detection
@@ -845,7 +729,13 @@ Monophonic pitch detection (360 20-cent pitch bins, C1-B7).
 
 Dataset: RWC-synth, MDB-stem-synth.
 
-Output: activations.
+Output: pitch predictions.
+
+Naming convention: ``<architecture>-<model_size>-<version>.pb``
+
+* ``architecture``: the CREPE architecture (``crepe``).
+* ``model_size``: the architecture complexity ranging from ``tiny`` to ``full``. A larger model is expected to show enhanced performance at the expense of additional computational cost.
+* ``version``: the version of the model.
 
 Models:
 
@@ -854,22 +744,6 @@ Models:
 * ``crepe-medium``
 * ``crepe-small``
 * ``crepe-tiny``
-
-Naming convention: ``<architecture>-<model_size>-<version>.pb``
-
-* ``architecture``: the CREPE architecture (``crepe``).
-* ``model_size``: the architecture complexity ranging from ``tiny`` to ``full``. A larger model is expected to show enhanced performance at the expense of additional computational cost.
-* ``version``: the version of the model.
-
-Usage for pitch estimation:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, PitchCREPE
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = PitchCREPE(graphFilename="crepe-full-1.pb")
-    time, frequency, confidence, activations = model(audio)
 
 
 Source separation
@@ -884,19 +758,19 @@ Source separation into 2 (`vocals`, `accompaniment`),  4, and 5 (`vocals`, `drum
 
 Dataset: in-house (Deezer).
 
-Output: waveforms.
-
-Models:
-
-* ``spleeter-2s``
-* ``spleeter-4s``
-* ``spleeter-5s``
+Output: waveform of the separated sources.
 
 Naming convention: ``<architecture>-<number_of_stems>s-<version>.pb``
 
 * ``architecture``: a spleeter architecture (``spleeter``).
 * ``number_of_stems``: can be 2 (vocals and accompaniment), 4 (vocals, drums, bass, and other separation) or 5 (vocals, drums, bass, piano, and other separation).
 * ``version``: the version of the model.
+
+Models:
+
+* ``spleeter-2s``
+* ``spleeter-4s``
+* ``spleeter-5s``
 
 
 Performing source separation:
@@ -937,13 +811,7 @@ Tempo classification (256 BPM classes, 30-286 BPM).
 
 Dataset: Extended Ballroom, LMDTempo, MTGTempo.
 
-Output: activations.
-
-Models:
-
-* ``deepsquare-k16``
-* ``deeptemp-k4``
-* ``deeptemp-k16``
+Output: tempo predictions.
 
 Naming convention: ``<architecture>-k<model_size>-<version>.pb``
 
@@ -951,24 +819,19 @@ Naming convention: ``<architecture>-k<model_size>-<version>.pb``
 * ``model_size``: the model size that can be 4 or 16. A larger model is expected to show enhanced performance at the expense of additional computational cost.
 * ``version``: the version of the model.
 
-Usage for tempo estimation:
+Models:
 
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TempoCNN
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=11025)()
-    model = TempoCNN(graphFilename="deepsquare-k16-3.pb")
-    global_tempo, local_tempo, local_tempo_probabilities = model(audio)
+* ``deepsquare-k16``
+* ``deeptemp-k4``
+* ``deeptemp-k16``
 
 
 Classification heads
 ^^^^^^^^^^^^^^^^^^^^
 
-Classification and regression neural networks intended to operate on top of pre-extracted embeddings.
-
-
 `Download model files <https://essentia.upf.edu/models/classification-heads/>`_
+
+Classification and regression neural networks operating on top of pre-extracted embeddings.
 
 Naming convention: ``<target_task>-<embedding_model>-<version>.pb``
 
@@ -976,62 +839,7 @@ Naming convention: ``<target_task>-<embedding_model>-<version>.pb``
 * ``embedding_model``: the model that needs to be used to compute the input embeddings.
 * ``version``: the model version.
 
-Using the classification heads require to pre-extract embeddings with the correspodent ``embedding_model``.
-
-This code extracts embeddings with the `effnet_discogs <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.pb>`_, the `effnet-discogs_artist <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_artist_embeddings-effnet-bs64-1.pb>`_, the `effnet-discogs_label <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_label_embeddings-effnet-bs64-1.pb>`_, the `effnet-discogs_multi <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_multi_embeddings-effnet-bs64-1.pb>`_, the `effnet-discogs_release <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_release_embeddings-effnet-bs64-1.pb>`_, and the `effnet-discogs_track <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_track_embeddings-effnet-bs64-1.pb>`_:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    embeddings_model = TensorflowPredictEffnetDiscogs(
-        graphFilename="embedding_model.pb",
-        output="PartitionedCall:1",
-    )
-
-    embeddings = embeddings_model(audio)
-
-This code extracts embeddings with the `musicnn-msd <https://essentia.upf.edu/models/autotagging/msd/msd-musicnn-1.pb>`_ auto-tagging model:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    embeddings_model = TensorflowPredictMusiCNN(
-        graphFilename="msd-musicnn-1.pb",
-        output="model/dense/BiasAdd",
-    )
-
-    embeddings = embeddings_model(audio)
-
-This code extracts embeddings with the `vggish-audioset <https://essentia.upf.edu/models/feature-extractors/vggish/audioset-vggish-3.pb>`_ embedding extractor:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictVGGish
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    embeddings_model = TensorflowPredictVGGish(
-        graphFilename="discogs-effnet-bs64-1.pb",
-        output="model/vggish/embeddings",
-    )
-
-    embeddings = embeddings_model(audio)
-
-This code computes activations with a classification head based on pre-extracted embeddings:
-
-.. code-block:: python
-
-    from essentia.standard import TensorflowPredict2D
-
-    classification_model = TensorflowPredict2D(
-        graphFilename="approachability_2c-effnet_discogs-1.pb",
-        output="model/Softmax",
-    )
-
-    activations = classification_model(embeddings)
+*Note: Using the classification heads require to pre-extract embeddings with the correspodent embedding_model.*
 
 *Note: TensorflowPredict2D has to be configured with the correct output layer name for each classification head. Check the attached JSON file to find the name of the output layer on each case.*
 
@@ -1039,16 +847,13 @@ Approachability
 ---------------
 
 Music approachability predicting whether the music is likely to be accessible for the general public (e.g., belonging to common mainstream music genres vs. niche and experimental genres).
+The models output rather two (``approachability_2c``) or three (``approachability_3c``) levels of approachability or continous values (``approachability_regression``).
 
 Demo: https://replicate.com/mtg/music-approachability-engagement
 
-The models output rather two or three levels of approachability or continous values (regression).
-
 Dataset: in-house (MTG).
 
-Output: class activations or regression values.
-
-Naming convention: ``<task>-<n_classes>-<input_embedding_model>-<version>.pb``
+Output: approachability predictions as class activations or regression values.
 
 Models:
 
@@ -1059,15 +864,15 @@ Models:
 Arousal/valence DEAM
 --------------------
 
-Music arousal and valence regression with the DEAM dataset.
+Music arousal and valence regression with the DEAM dataset:
+
+`valence`, `arousal`
 
 Demo: https://replicate.com/mtg/music-arousal-valence
 
-Dataset: DEAM.
+Dataset: `DEAM <https://cvml.unige.ch/databases/DEAM/>`_.
 
-Output: (arousal, valence) pairs values in the range {1,9}.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: arousal/valence predictions in the range [1,9].
 
 Models:
 
@@ -1077,15 +882,15 @@ Models:
 Arousal/valence emoMusic
 ------------------------
 
-Music arousal and valence regression with the emoMusic dataset.
+Music arousal and valence regression with the emoMusic dataset:
+
+`valence`, `arousal`
 
 Demo: https://replicate.com/mtg/music-arousal-valence
 
-Dataset: Emomusic.
+Dataset: `emoMusic <https://cvml.unige.ch/databases/emoMusic/>`_.
 
-Output: (arousal, valence) pairs values in the range {1,9}.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: arousal/valence predictions in the range [1,9].
 
 Models:
 
@@ -1097,13 +902,13 @@ Arousal/valence MuSe
 
 Music arousal and valence regression with the MuSe dataset.
 
+`valence`, `arousal`
+
 Demo: https://replicate.com/mtg/music-arousal-valence
 
-Dataset: MuSe.
+Dataset: `MuSE <https://aclanthology.org/2020.lrec-1.187/>`_.
 
-Output: (arousal, valence) pairs values in the range {1,9}.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: arousal/valence predictions in the range [1,9].
 
 Models:
 
@@ -1114,16 +919,13 @@ Engagement
 ----------
 
 Music engagement predicting whether the music evokes active attention of the listener (high-engagement "lean forward" active listening vs. low-engagement "lean back" background listening).
+The models output rather two  (``engagement_2c``) or three (``engagement_3c``) levels of engagement or continous (``engagement_regression``) values (regression).
 
 Demo: https://replicate.com/mtg/music-approachability-engagement
 
-The models output rather two or three levels of engagement or continous values (regression).
-
 Dataset: in-house (MTG).
 
-Output: class activations or regression values.
-
-Naming convention: ``<task>-<n_classes>-<input_embedding_model>-<version>.pb``
+Output: engagement predictions as class activations or regression values.
 
 Models:
 
@@ -1138,11 +940,9 @@ Music genre classfication (10 classes):
 
 `Electronic`, `Experimental`, `Folk`, `Hip-Hop`, `Instrumental`, `International`, `Pop`, `Rock`
 
-Dataset: Free Music Archive small.
+Dataset: `Free Music Archive small <https://www.kaggle.com/datasets/imsparsh/fma-free-music-archive-small-medium>`_.
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: genre predictions.
 
 Models:
 
@@ -1157,13 +957,11 @@ MTG-Jamendo genre
 
 Multi-label genre classification (87 classes):
 
-`60s`, `70s`, `80s`, `90s`, `acidjazz`, `alternative`, `alternativerock`, `ambient`, `atmospheric`, `blues`, `bluesrock`, `bossanova`, `breakbeat`, `celtic`, `chanson`, `chillout`, `choir`, `classical`, `classicrock`, `club`, `contemporary`, `country`, `dance`, `darkambient`, `darkwave`, `deephouse`, `disco`, `downtempo`, `drumnbass`, `dub`, `dubstep`, `easylistening`, `edm`, `electronic`, `electronica`, `electropop`, `ethno`, `eurodance`, `experimental`, `folk`, `funk`, `fusion`, `groove`, `grunge`, `hard`, `hardrock`, `hiphop`, `house`, `idm`, `improvisation`, `indie`, `industrial`, `instrumentalpop`, `instrumentalrock`, `jazz`, `jazzfusion`, `latin`, `lounge`, `medieval`, `metal`, `minimal`, `newage`, `newwave`, `orchestral`, `pop`, `popfolk`, `poprock`, `postrock`, `progressive`, `psychedelic`, `punkrock`, `rap`, `reggae`, `rnb`, `rock`, `rocknroll`, `singersongwriter`, `soul`, `soundtrack`, `swing`, `symphonic`, `synthpop`, `techno`, `trance`, `triphop`, `world`, `worldfusio`
+`60s`, `70s`, `80s`, `90s`, `acidjazz`, `alternative`, `alternativerock`, `ambient`, `atmospheric`, `blues`, `bluesrock`, `bossanova`, `breakbeat`, `celtic`, `chanson`, `chillout`, `choir`, `classical`, `classicrock`, `club`, `contemporary`, `country`, `dance`, `darkambient`, `darkwave`, `deephouse`, `disco`, `downtempo`, `drumnbass`, `dub`, `dubstep`, `easylistening`, `edm`, `electronic`, `electronica`, `electropop`, `ethno`, `eurodance`, `experimental`, `folk`, `funk`, `fusion`, `groove`, `grunge`, `hard`, `hardrock`, `hiphop`, `house`, `idm`, `improvisation`, `indie`, `industrial`, `instrumentalpop`, `instrumentalrock`, `jazz`, `jazzfusion`, `latin`, `lounge`, `medieval`, `metal`, `minimal`, `newage`, `newwave`, `orchestral`, `pop`, `popfolk`, `poprock`, `postrock`, `progressive`, `psychedelic`, `punkrock`, `rap`, `reggae`, `rnb`, `rock`, `rocknroll`, `singersongwriter`, `soul`, `soundtrack`, `swing`, `symphonic`, `synthpop`, `techno`, `trance`, `triphop`, `world`, `worldfusion`
 
 Dataset: MTG-Jamendo Dataset (genre subset).
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: genre predictions.
 
 Models:
 
@@ -1182,9 +980,7 @@ Multi-label instrument classification (40 classes):
 
 Dataset: MTG-Jamendo Dataset (instrument subset).
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: instrument class predictions.
 
 Models:
 
@@ -1203,9 +999,7 @@ Multi-label mood/theme classification (56 classes):
 
 Dataset: MTG-Jamendo Dataset (moodtheme subset).
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: mood/theme predictions.
 
 Models:
 
@@ -1224,9 +1018,7 @@ Auto-tagging with top-50 MTG-Jamendo classes:
 
 Dataset: MTG-Jamendo Dataset (top50tags subset).
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: top-50 tag predictions.
 
 Models:
 
@@ -1245,9 +1037,7 @@ Auto-tagging with the top-50 MagnaTagATune classes:
 
 Dataset: MagnaTagATune.
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: auto-tagging predictions.
 
 Models:
 
@@ -1256,4 +1046,3 @@ Models:
 * ``mtt-effnet-discogs_multi_embeddings``
 * ``mtt-effnet-discogs_release_embeddings``
 * ``mtt-effnet-discogs_track_embeddings``
-
