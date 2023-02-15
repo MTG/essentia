@@ -29,7 +29,6 @@ We support models for the followings tasks:
 
 Audio event recognition
 ^^^^^^^^^^^^^^^^^^^^^^^
-`Download model files <https://essentia.upf.edu/models/audio-event-recognition/>`_
 
 AudioSet
 --------
@@ -166,9 +165,6 @@ Models:
 Music style classification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-`Download model files <https://essentia.upf.edu/models/music-style-classification/>`_
-
-
 Discogs-Effnet
 --------------
 
@@ -222,8 +218,6 @@ Models:
 
 Music auto-tagging
 ^^^^^^^^^^^^^^^^^^
-
-`Download model files <https://essentia.upf.edu/models/autotagging/>`_
 
 
 Million Song Dataset
@@ -318,8 +312,6 @@ Models:
 
 Transfer learning classifiers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-`Download model files <https://essentia.upf.edu/models/classifiers/>`_
 
 Classifiers trained on various datasets and audio embeddings.
 
@@ -1265,8 +1257,6 @@ Models:
 Feature extractors
 ^^^^^^^^^^^^^^^^^^
 
-`Download model files <https://essentia.upf.edu/models/feature-extractors/>`_
-
 
 OpenL3
 ------
@@ -1431,8 +1421,6 @@ Models:
 Pitch detection
 ^^^^^^^^^^^^^^^
 
-`Download model files <https://essentia.upf.edu/models/pitch/>`_
-
 Monophonic pitch tracker (CREPE)
 --------------------------------
 
@@ -1494,8 +1482,6 @@ Models:
 
 Source separation
 ^^^^^^^^^^^^^^^^^
-
-`Download model files <https://essentia.upf.edu/models/source-separation/>`_
 
 Spleeter
 --------
@@ -1610,8 +1596,6 @@ Models:
 Tempo estimation
 ^^^^^^^^^^^^^^^^
 
-`Download model files <https://essentia.upf.edu/models/tempo/>`_
-
 TempoCNN
 --------
 
@@ -1657,8 +1641,6 @@ Models:
 
 Classification heads
 ^^^^^^^^^^^^^^^^^^^^
-
-`Download model files <https://essentia.upf.edu/models/classification-heads/>`_
 
 Classification and regression neural networks operating on top of pre-extracted embeddings.
 
