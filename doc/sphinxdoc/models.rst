@@ -1052,9 +1052,9 @@ Naming convention: ``<task>-<n_classes>-<input_embedding_model>-<version>.pb``
 
 Models:
 
-* ``approachability_2c-effnet_discogs``
-* ``approachability_3c-effnet_discogs``
-* ``approachability_regression-effnet_discogs``
+* ``approachability_2c-effnet-discogs``
+* ``approachability_3c-effnet-discogs``
+* ``approachability_regression-effnet-discogs``
 
 Arousal/valence DEAM
 --------------------
@@ -1127,9 +1127,9 @@ Naming convention: ``<task>-<n_classes>-<input_embedding_model>-<version>.pb``
 
 Models:
 
-* ``engagement_2c-effnet_discogs``
-* ``engagement_3c-effnet_discogs``
-* ``engagement_regression-effnet_discogs``
+* ``engagement_2c-effnet-discogs``
+* ``engagement_3c-effnet-discogs``
+* ``engagement_regression-effnet-discogs``
 
 Free Music Archive small
 ------------------------
