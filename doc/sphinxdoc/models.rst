@@ -1137,11 +1137,7 @@ Output: genre predictions.
 
 Models:
 
-* ``genre_electronic-audioset-vggish``
-* ``genre_electronic-audioset-yamnet``
 * ``genre_electronic-effnet-discogs``
-* ``genre_electronic-msd-musicnn``
-* ``genre_electronic-openl3-music-mel128-emb512``
 
 Genre Rosamerica
 ----------------
@@ -1213,11 +1209,11 @@ Output: mood aggressive predictions.
 
 Models:
 
-* ``mood_aggresive-audioset-vggish``
-* ``mood_aggresive-audioset-yamnet``
-* ``mood_aggresive-effnet-discogs``
-* ``mood_aggresive-msd-musicnn``
-* ``mood_aggresive-openl3-music-mel128-emb512``
+* ``mood_aggressive-audioset-vggish``
+* ``mood_aggressive-audioset-yamnet``
+* ``mood_aggressive-effnet-discogs``
+* ``mood_aggressive-msd-musicnn``
+* ``mood_aggressive-openl3-music-mel128-emb512``
 
 Mood Electronic
 ---------------
