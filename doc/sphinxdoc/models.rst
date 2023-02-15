@@ -1046,3 +1046,304 @@ Models:
 * ``mtt-effnet-discogs_multi_embeddings``
 * ``mtt-effnet-discogs_release_embeddings``
 * ``mtt-effnet-discogs_track_embeddings``
+
+
+Danceability
+------------
+
+Music danceability (2 classes):
+
+`danceable`, `not_danceable`
+
+Dataset: in-house (MTG).
+
+Output: danceability predictions.
+
+Models:
+
+* ``danceability-audioset-vggish``
+* ``danceability-audioset-yamnet``
+* ``danceability-effnet-discogs``
+* ``danceability-msd-musicnn``
+* ``danceability-openl3-music-mel128-emb512``
+
+Voice / Instrumental
+--------------------
+
+Classification of music by presence or absence of voice (2 classes):
+
+`instrumental`, `voice`
+
+Dataset: in-house (MTG).
+
+Output: voice / instrumental predictions.
+
+Models:
+
+* ``voice_instrumental-audioset-vggish``
+* ``voice_instrumental-audioset-yamnet``
+* ``voice_instrumental-effnet-discogs``
+* ``voice_instrumental-msd-musicnn``
+* ``voice_instrumental-openl3-music-mel128-emb512``
+
+Gender
+------
+
+Classification of music by singing voice gender (2 classes):
+
+`female`, `male`
+
+Dataset: in-house (MTG).
+
+Output: singing voice gender predictions.
+
+Models:
+
+* ``gender-audioset-vggish``
+* ``gender-audioset-yamnet``
+* ``gender-effnet-discogs``
+* ``gender-msd-musicnn``
+* ``gender-openl3-music-mel128-emb512``
+
+Genre Dortmund
+--------------
+
+Music genre classification (9 genres):
+
+`alternative`, `blues`, `electronic`, `folkcountry`, `funksoulrnb`, `jazz`, `pop`, `raphiphop`, `rock`
+
+Dataset: Music Audio Benchmark Data Set.
+
+Output: genre predictions.
+
+Models:
+
+* ``genre_dortmund-audioset-vggish``
+* ``genre_dortmund-audioset-yamnet``
+* ``genre_dortmund-effnet-discogs``
+* ``genre_dortmund-msd-musicnn``
+* ``genre_dortmund-openl3-music-mel128-emb512``
+
+Genre Electronic
+----------------
+
+Electronic music genre classification (5 genres):
+
+`ambient`, `dnb`, `house`, `techno`, `trance`
+
+Dataset: in-house (MTG).
+
+Output: genre predictions.
+
+Models:
+
+* ``genre_electronic-audioset-vggish``
+* ``genre_electronic-audioset-yamnet``
+* ``genre_electronic-effnet-discogs``
+* ``genre_electronic-msd-musicnn``
+* ``genre_electronic-openl3-music-mel128-emb512``
+
+Genre Rosamerica
+----------------
+
+Music genre classification (8 genres):
+
+`classical`, `dance`, `hip hop`, `jazz`, `pop`, `rhythm and blues`, `rock`, `speech`
+
+Dataset: in-house (MTG).
+
+Output: genre predictions.
+
+Models:
+
+* ``genre_rosamerica-audioset-vggish``
+* ``genre_rosamerica-audioset-yamnet``
+* ``genre_rosamerica-effnet-discogs``
+* ``genre_rosamerica-msd-musicnn``
+* ``genre_rosamerica-openl3-music-mel128-emb512``
+
+Genre Tzanetakis
+----------------
+
+Music genre classification (10 genres):
+
+`blues`, `classic`, `country`, `disco`, `hip hop`, `jazz`, `metal`, `pop`, `reggae`, `rock`
+
+Dataset: in-house (MTG).
+
+Output: genre predictions.
+
+Models:
+
+* ``genre_tzanetakis-audioset-vggish``
+* ``genre_tzanetakis-audioset-yamnet``
+* ``genre_tzanetakis-effnet-discogs``
+* ``genre_tzanetakis-msd-musicnn``
+* ``genre_tzanetakis-openl3-music-mel128-emb512``
+
+Mood Acoustic
+-------------
+
+Music classification by type of sound (2 classes):
+
+`acoustic`, `non_acoustic`
+
+Dataset: in-house (MTG).
+
+Output: mood acoustic predictions.
+
+Models:
+
+* ``mood_acoustic-audioset-vggish``
+* ``mood_acoustic-audioset-yamnet``
+* ``mood_acoustic-effnet-discogs``
+* ``mood_acoustic-msd-musicnn``
+* ``mood_acoustic-openl3-music-mel128-emb512``
+
+Mood Aggressive
+---------------
+
+Music classification by mood (2 classes):
+
+`aggressive`, `non_aggressive`
+
+Dataset: in-house (MTG).
+
+Output: mood aggressive predictions.
+
+Models:
+
+* ``mood_aggresive-audioset-vggish``
+* ``mood_aggresive-audioset-yamnet``
+* ``mood_aggresive-effnet-discogs``
+* ``mood_aggresive-msd-musicnn``
+* ``mood_aggresive-openl3-music-mel128-emb512``
+
+Mood Electronic
+---------------
+
+Music classification by type of sound (2 classes):
+
+`electronic`, `non_electronic`
+
+Dataset: in-house (MTG).
+
+Output: mood electronic predictions.
+
+Models:
+
+* ``mood_electronic-audioset-vggish``
+* ``mood_electronic-audioset-yamnet``
+* ``mood_electronic-effnet-discogs``
+* ``mood_electronic-msd-musicnn``
+* ``mood_electronic-openl3-music-mel128-emb512``
+
+Mood Happy
+----------
+
+Music classification by mood (2 classes):
+
+`happy`, `non_happy`
+
+Dataset: in-house (MTG).
+
+Output: mood happy predictions.
+
+Models:
+
+* ``mood_happy-audioset-vggish``
+* ``mood_happy-audioset-yamnet``
+* ``mood_happy-effnet-discogs``
+* ``mood_happy-msd-musicnn``
+* ``mood_happy-openl3-music-mel128-emb512``
+
+Mood Party
+----------
+
+Music classification by mood (2 classes):
+
+`party`, `non_party`
+
+Dataset: in-house (MTG).
+
+Output: mood pary predictions.
+
+Models:
+
+* ``mood_party-audioset-vggish``
+* ``mood_party-audioset-yamnet``
+* ``mood_party-effnet-discogs``
+* ``mood_party-msd-musicnn``
+* ``mood_party-openl3-music-mel128-emb512``
+
+Mood Relaxed
+------------
+
+Music classification by mood (2 classes):
+
+`relaxed`, `non_relaxed`
+
+Dataset: in-house (MTG).
+
+Output: moosd relaxed predictions.
+
+Models:
+
+* ``mood_relaxed-audioset-vggish``
+* ``mood_relaxed-audioset-yamnet``
+* ``mood_relaxed-effnet-discogs``
+* ``mood_relaxed-msd-musicnn``
+* ``mood_relaxed-openl3-music-mel128-emb512``
+
+Mood Sad
+--------
+
+Music classification by mood (2 classes):
+
+`sad`, `non_sad`
+
+Dataset: in-house (MTG).
+
+Output: mood sad predictions.
+
+Models:
+
+* ``mood_sad-audioset-vggish``
+* ``mood_sad-audioset-yamnet``
+* ``mood_sad-effnet-discogs``
+* ``mood_sad-msd-musicnn``
+* ``mood_sad-openl3-music-mel128-emb512``
+
+Timbre
+------
+
+Classification of music by timbre color (dark/bright timbre):
+
+`bright`, `dark`
+
+Dataset: in-house (MTG).
+
+Output: timbre predictions.
+
+Models:
+
+* ``timbre-effnet-discogs``
+
+Tonal / Atonal
+--------------
+
+Music classification by tonality (2 classes):
+
+`tonal`, `atonal`
+
+Dataset: in-house (MTG).
+
+Output: tonal / atonal predictions.
+
+Models:
+
+* ``tonal_atonal-audioset-vggish``
+* ``tonal_atonal-audioset-yamnet``
+* ``tonal_atonal-effnet-discogs``
+* ``tonal_atonal-msd-musicnn``
+* ``tonal_atonal-openl3-music-mel128-emb512``
