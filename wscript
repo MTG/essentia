@@ -348,6 +348,19 @@ def run_python_tests(ctx):
         ctx.fatal('failed to run python tests. Check test output')
 
 
+def run_model_scripts_tests(ctx):
+    print("Running python model scripts tests using %s" % sys.executable)
+
+    # create a local python package folder
+    os.system('mkdir -p build/python')
+    os.system('cp -r src/python/essentia build/python/')
+    os.system('cp build/src/python/_essentia*.so build/python/essentia')
+
+    ret = os.system('PYTHONPATH=build/python:$PYTHONPATH %s test/src/modelstests/test_modelscripts.py' % sys.executable)
+    if ret:
+        ctx.fatal('failed to run python tests. Check test output')
+
+
 def ipython(ctx):
     os.system('ipython --pylab')
 
