@@ -186,8 +186,6 @@ Music style classification by 400 styles from the Discogs taxonomy:
 * Rock: `AOR`, `Acid Rock`, `Acoustic`, `Alternative Rock`, `Arena Rock`, `Art Rock`, `Atmospheric Black Metal`, `Avantgarde`, `Beat`, `Black Metal`, `Blues Rock`, `Brit Pop`, `Classic Rock`, `Coldwave`, `Country Rock`, `Crust`, `Death Metal`, `Deathcore`, `Deathrock`, `Depressive Black Metal`, `Doo Wop`, `Doom Metal`, `Dream Pop`, `Emo`, `Ethereal`, `Experimental`, `Folk Metal`, `Folk Rock`, `Funeral Doom Metal`, `Funk Metal`, `Garage Rock`, `Glam`, `Goregrind`, `Goth Rock`, `Gothic Metal`, `Grindcore`, `Grunge`, `Hard Rock`, `Hardcore`, `Heavy Metal`, `Indie Rock`, `Industrial`, `Krautrock`, `Lo-Fi`, `Lounge`, `Math Rock`, `Melodic Death Metal`, `Melodic Hardcore`, `Metalcore`, `Mod`, `Neofolk`, `New Wave`, `No Wave`, `Noise`, `Noisecore`, `Nu Metal`, `Oi`, `Parody`, `Pop Punk`, `Pop Rock`, `Pornogrind`, `Post Rock`, `Post-Hardcore`, `Post-Metal`, `Post-Punk`, `Power Metal`, `Power Pop`, `Power Violence`, `Prog Rock`, `Progressive Metal`, `Psychedelic Rock`, `Psychobilly`, `Pub Rock`, `Punk`, `Rock & Roll`, `Rockabilly`, `Shoegaze`, `Ska`, `Sludge Metal`, `Soft Rock`, `Southern Rock`, `Space Rock`, `Speed Metal`, `Stoner Rock`, `Surf`, `Symphonic Rock`, `Technical Death Metal`, `Thrash`, `Twist`, `Viking Metal`, `Yé-Yé`
 * Stage & Screen: `Musical`, `Score`, `Soundtrack`, `Theme`
 
-Demo: https://replicate.com/mtg/effnet-discogs
-
 Dataset: in-house (MTG).
 
 Outputs: music style predictions and embeddings.
@@ -202,7 +200,7 @@ Models:
 
 * .. collapse:: <a class="reference external">discogs-effnet-bs64</a>
 
-    [`weights <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.pb>`_, `metadata <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.pb>`_, `metadata <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.json>`_, `demo <https://replicate.com/mtg/effnet-discogs>`_]
 
     Python code for predictions:
 
@@ -315,8 +313,6 @@ Transfer learning classifiers
 
 Classifiers trained on various datasets and audio embeddings.
 
-Demo: https://replicate.com/mtg/music-classifiers/
-
 Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
 
 * ``target_task``: single-class classification for multiple tasks. See models below.
@@ -340,7 +336,7 @@ Models:
 
 * .. collapse:: <a class="reference external">danceability-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -348,7 +344,7 @@ Models:
 
 * .. collapse:: <a class="reference external">danceability-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -372,7 +368,7 @@ Models:
 
 * .. collapse:: <a class="reference external">danceability-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -417,7 +413,7 @@ Models:
 
 * .. collapse:: <a class="reference external">voice_instrumental-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -425,7 +421,7 @@ Models:
 
 * .. collapse:: <a class="reference external">voice_instrumental-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -449,7 +445,7 @@ Models:
 
 * .. collapse:: <a class="reference external">voice_instrumental-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -472,7 +468,7 @@ Models:
 
 * .. collapse:: <a class="reference external">gender-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -480,7 +476,7 @@ Models:
 
 * .. collapse:: <a class="reference external">gender-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -504,7 +500,7 @@ Models:
 
 * .. collapse:: <a class="reference external">gender-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -527,7 +523,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_dortmund-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -535,7 +531,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_dortmund-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -559,7 +555,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_dortmund-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -582,7 +578,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_electronic-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -590,7 +586,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_electronic-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -614,7 +610,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_electronic-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -637,7 +633,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_rosamerica-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -645,7 +641,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_rosamerica-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -669,7 +665,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_rosamerica-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -692,7 +688,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_tzanetakis-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -700,7 +696,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_tzanetakis-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -724,7 +720,7 @@ Models:
 
 * .. collapse:: <a class="reference external">genre_tzanetakis-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -747,7 +743,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_acoustic-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -755,7 +751,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_acoustic-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -779,7 +775,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_acoustic-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -802,7 +798,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_aggressive-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -810,7 +806,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_aggressive-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -834,7 +830,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_aggressive-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -857,7 +853,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_electronic-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -865,7 +861,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_electronic-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -889,7 +885,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_electronic-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -912,7 +908,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_happy-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -920,7 +916,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_happy-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -944,7 +940,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_happy-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -967,7 +963,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_party-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -975,7 +971,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_party-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -999,7 +995,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_party-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -1022,7 +1018,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_relaxed-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -1030,7 +1026,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_relaxed-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -1054,7 +1050,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_relaxed-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -1077,7 +1073,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_sad-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -1085,7 +1081,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_sad-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -1109,7 +1105,7 @@ Models:
 
 * .. collapse:: <a class="reference external">mood_sad-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -1191,7 +1187,7 @@ Models:
 
 * .. collapse:: <a class="reference external">tonal_atonal-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-msd-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -1199,7 +1195,7 @@ Models:
 
 * .. collapse:: <a class="reference external">tonal_atonal-musicnn-mtt</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-mtt-2.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -1223,7 +1219,7 @@ Models:
 
 * .. collapse:: <a class="reference external">tonal_atonal-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
 
     Python code for predictions:
 
@@ -1660,8 +1656,6 @@ Approachability
 Music approachability predicting whether the music is likely to be accessible for the general public (e.g., belonging to common mainstream music genres vs. niche and experimental genres).
 The models output rather two (``approachability_2c``) or three (``approachability_3c``) levels of approachability or continous values (``approachability_regression``).
 
-Demo: https://replicate.com/mtg/music-approachability-engagement
-
 Dataset: in-house (MTG).
 
 Output: approachability predictions as class activations or regression values.
@@ -1670,7 +1664,7 @@ Models:
 
 * .. collapse:: <a class="reference external">approachability_2c-effnet-discogs</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/approachability/approachability_2c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/approachability/approachability_2c-effnet-discogs-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/approachability/approachability_2c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/approachability/approachability_2c-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
 
     Python code for predictions:
 
@@ -1678,7 +1672,7 @@ Models:
 
 * .. collapse:: <a class="reference external">approachability_3c-effnet-discogs</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/approachability/approachability_3c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/approachability/approachability_3c-effnet-discogs-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/approachability/approachability_3c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/approachability/approachability_3c-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
 
     Python code for predictions:
 
@@ -1686,7 +1680,7 @@ Models:
 
 * .. collapse:: <a class="reference external">approachability_regression-effnet-discogs</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/approachability/approachability_regression-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/approachability/approachability_regression-effnet-discogs-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/approachability/approachability_regression-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/approachability/approachability_regression-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
 
     Python code for predictions:
 
@@ -1700,8 +1694,6 @@ Music arousal and valence regression with the DEAM dataset:
 
 `valence`, `arousal`
 
-Demo: https://replicate.com/mtg/music-arousal-valence
-
 Dataset: `DEAM <https://cvml.unige.ch/databases/DEAM/>`_.
 
 Output: arousal/valence predictions in the range [1,9].
@@ -1710,7 +1702,7 @@ Models:
 
 * .. collapse:: <a class="reference external">deam-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/deam/deam-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/deam/deam-musicnn-msd-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/deam/deam-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/deam/deam-musicnn-msd-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
@@ -1718,7 +1710,7 @@ Models:
 
 * .. collapse:: <a class="reference external">deam-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/deam/deam-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/deam/deam-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/deam/deam-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/deam/deam-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
@@ -1732,8 +1724,6 @@ Music arousal and valence regression with the emoMusic dataset:
 
 `valence`, `arousal`
 
-Demo: https://replicate.com/mtg/music-arousal-valence
-
 Dataset: `emoMusic <https://cvml.unige.ch/databases/emoMusic/>`_.
 
 Output: arousal/valence predictions in the range [1,9].
@@ -1742,7 +1732,7 @@ Models:
 
 * .. collapse:: <a class="reference external">emomusic-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-musicnn-msd-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-musicnn-msd-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
@@ -1750,7 +1740,7 @@ Models:
 
 * .. collapse:: <a class="reference external">emomusic-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
@@ -1764,8 +1754,6 @@ Music arousal and valence regression with the MuSe dataset.
 
 `valence`, `arousal`
 
-Demo: https://replicate.com/mtg/music-arousal-valence
-
 Dataset: `MuSE <https://aclanthology.org/2020.lrec-1.187/>`_.
 
 Output: arousal/valence predictions in the range [1,9].
@@ -1774,7 +1762,7 @@ Models:
 
 * .. collapse:: <a class="reference external">muse-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/muse/muse-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/muse/muse-musicnn-msd-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/muse/muse-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/muse/muse-musicnn-msd-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
@@ -1782,7 +1770,7 @@ Models:
 
 * .. collapse:: <a class="reference external">muse-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/muse/muse-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/muse/muse-vggish-audioset-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/muse/muse-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/muse/muse-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
@@ -1795,17 +1783,14 @@ Engagement
 Music engagement predicting whether the music evokes active attention of the listener (high-engagement "lean forward" active listening vs. low-engagement "lean back" background listening).
 The models output rather two  (``engagement_2c``) or three (``engagement_3c``) levels of engagement or continous (``engagement_regression``) values (regression).
 
-Demo: https://replicate.com/mtg/music-approachability-engagement
-
 Dataset: in-house (MTG).
 
-Output: engagement predictions as class activations or regression values.
 
 Models:
 
 * .. collapse:: <a class="reference external">engagement_2c-effnet-discogs</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/engagement/engagement_2c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/engagement/engagement_2c-effnet-discogs-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/engagement/engagement_2c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/engagement/engagement_2c-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
 
     Python code for predictions:
 
@@ -1813,7 +1798,7 @@ Models:
 
 * .. collapse:: <a class="reference external">engagement_3c-effnet-discogs</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/engagement/engagement_3c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/engagement/engagement_3c-effnet-discogs-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/engagement/engagement_3c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/engagement/engagement_3c-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
 
     Python code for predictions:
 
@@ -1821,7 +1806,7 @@ Models:
 
 * .. collapse:: <a class="reference external">engagement_regression-effnet-discogs</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/engagement/engagement_regression-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/engagement/engagement_regression-effnet-discogs-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/engagement/engagement_regression-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/engagement/engagement_regression-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
 
     Python code for predictions:
 
