@@ -198,6 +198,10 @@ Make sure to build Essentia with Python 3 bindings and run::
 
 Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
 
+The documentation of Essentia Models relies on a series of example scripts available at `src/examples/python/models/scripts`.
+These scripts can be automatically regenerated with `src/examples/python/models/generate_example_scripts.sh`.
+If the `black <https://black.readthedocs.io/en/stable/>`_ formatter is installed, the script will use it on the generated example files.
+
 
 Building Essentia on Windows
 ----------------------------
