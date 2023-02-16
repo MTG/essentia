@@ -1,7 +1,7 @@
 import json
 from argparse import ArgumentParser
 from pathlib import Path
-from urllib.request import urlopen
+from urllib.request import urlopen, urlretrieve
 from subprocess import run
 
 import yaml
@@ -126,6 +126,7 @@ def process_model(
     local_jsons: bool,
     models_base_dir: str,
     audio_file: str,
+    download_models: str,
 ):
     metadata = get_metadata(
         task_type,
@@ -138,6 +139,7 @@ def process_model(
     # get algorithm name
     algo_name = metadata["inference"]["algorithm"]
 
+
     # check if we need a custom output node
     additional_parameters = get_additional_parameters(metadata, output, algo_name)
 
@@ -146,6 +148,10 @@ def process_model(
     graph_filename = f"{model}.pb"
     if models_base_dir:
         graph_filename = Path(models_base_dir, task_type, family_name, graph_filename)
+
+    if download_models and not graph_filename.exists():
+        urlretrieve(metadata["link"], graph_filename)
+
     sample_rate = metadata["inference"]["sample_rate"]
 
     if task_type == "classification-heads":
@@ -162,6 +168,10 @@ def process_model(
             models_base_dir=models_base_dir,
         )
         embedding_graph_filename = embedding_model_name + ".pb"
+
+        if download_models and not embedding_graph_filename.exists():
+            urlretrieve(embedding_metadata["link"], embedding_graph_filename)
+
         if models_base_dir:
             embedding_graph_filename = Path(
                 models_base_dir,
@@ -204,6 +214,7 @@ def generate_example_scripts(
     force: bool = False,
     local_jsons: bool = False,
     format_with_black: bool = False,
+    download_models: bool = False,
 ):
     models_file = Path(__file__).parent / "models.yaml"
     with open(models_file, "r") as models_f:
@@ -229,6 +240,7 @@ def generate_example_scripts(
                         local_jsons=local_jsons,
                         models_base_dir=models_base_dir,
                         audio_file=audio_file,
+                        download_models=download_models,
                     )
 
                     if not file.exists():
@@ -254,7 +266,6 @@ if __name__ == "__main__":
         "--force",
         "-f",
         action="store_true",
-        type=bool,
         help="whether to recompute existing scripts",
     )
     parser.add_argument(
@@ -279,23 +290,21 @@ if __name__ == "__main__":
     parser.add_argument(
         "--format-with-black",
         action="store_true",
-        type=bool,
         help="whether to format with black if available",
+    )
+    parser.add_argument(
+        "--download-models",
+        action="store_true",
+        help="whether to download models next to the script location",
     )
     args = parser.parse_args()
 
-    force = args.force
-    output_dir = Path(args.output_dir).resolve()
-    models_base_dir = args.models_base_dir
-    audio_file = args.audio_file
-    local_jsons = args.local_jsons
-    format_with_black = args.format_with_black
-
     generate_example_scripts(
-        output_dir,
-        models_base_dir=models_base_dir,
-        audio_file=audio_file,
-        force=force,
-        local_jsons=local_jsons,
-        format_with_black=format_with_black,
+        Path(args.output_dir).resolve(),
+        models_base_dir=args.models_base_dir,
+        audio_file=args.audio_file,
+        force=args.force,
+        local_jsons=args.local_jsons,
+        format_with_black=args.format_with_black,
+        download_models=args.download_models,
     )
