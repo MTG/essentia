@@ -2,6 +2,7 @@ import json
 from argparse import ArgumentParser
 from pathlib import Path
 from urllib.request import urlopen, urlretrieve
+from urllib.error import HTTPError
 from subprocess import run
 
 import yaml
@@ -102,11 +103,11 @@ def get_additional_parameters(metadata: dict, output: str, algo_name: str):
 
 
 def get_metadata(
-    task_type: str, family_name: str, model: str, local_jsons=False, models_base_dir=""
+    task_type: str, family_name: str, model: str, metadata_base_dir=False
 ):
-    if local_jsons:
+    if metadata_base_dir:
         metadata_path = str(
-            Path(models_base_dir, task_type, family_name, f"{model}.json")
+            Path(metadata_base_dir, task_type, family_name, f"{model}.json")
         )
         metadata = read_metadata(metadata_path)
     else:
@@ -123,34 +124,39 @@ def process_model(
     family_name: str,
     model: str,
     output: str,
-    local_jsons: bool,
+    metadata_base_dir: str,
     models_base_dir: str,
     audio_file: str,
     download_models: str,
+    script_dir: Path,
 ):
     metadata = get_metadata(
         task_type,
         family_name,
         model,
-        local_jsons=local_jsons,
-        models_base_dir=models_base_dir,
+        metadata_base_dir=metadata_base_dir,
     )
 
     # get algorithm name
     algo_name = metadata["inference"]["algorithm"]
-
 
     # check if we need a custom output node
     additional_parameters = get_additional_parameters(metadata, output, algo_name)
 
     # set algos with custom output
     algo_returns = CUSTOM_ALGO_OUTPUTS.get(algo_name, output)
-    graph_filename = f"{model}.pb"
+    graph_filename = Path(f"{model}.pb")
     if models_base_dir:
         graph_filename = Path(models_base_dir, task_type, family_name, graph_filename)
 
-    if download_models and not graph_filename.exists():
-        urlretrieve(metadata["link"], graph_filename)
+    graph_filename_tgt = script_dir / graph_filename
+    if download_models and (not graph_filename_tgt.exists()):
+        assert not models_base_dir, "downloading the models is incompatible with specifying `models_base_dir`"
+        try:
+            script_dir.mkdir(parents=True, exist_ok=True)
+            urlretrieve(metadata["link"], graph_filename_tgt)
+        except HTTPError:
+            print(f"Failed downloading {metadata['link']}")
 
     sample_rate = metadata["inference"]["sample_rate"]
 
@@ -164,13 +170,9 @@ def process_model(
             embedding_task_type,
             embedding_family_name,
             embedding_model_name,
-            local_jsons=local_jsons,
-            models_base_dir=models_base_dir,
+            metadata_base_dir=metadata_base_dir,
         )
-        embedding_graph_filename = embedding_model_name + ".pb"
-
-        if download_models and not embedding_graph_filename.exists():
-            urlretrieve(embedding_metadata["link"], embedding_graph_filename)
+        embedding_graph_filename = Path(embedding_model_name + ".pb")
 
         if models_base_dir:
             embedding_graph_filename = Path(
@@ -179,6 +181,14 @@ def process_model(
                 embedding_family_name,
                 embedding_graph_filename,
             )
+
+        embedding_graph_filename_tgt = script_dir / embedding_graph_filename
+        if download_models and not embedding_graph_filename_tgt.exists():
+            try:
+                urlretrieve(embedding_metadata["link"], embedding_graph_filename_tgt)
+            except HTTPError:
+                print(f"Failed downloading {metadata['link']}")
+
         embedding_additional_parameters = get_additional_parameters(
             embedding_metadata, "embeddings", embedding_algo_name
         )
@@ -210,9 +220,9 @@ def process_model(
 def generate_example_scripts(
     output_dir: Path,
     models_base_dir: str = "",
+    metadata_base_dir: str = "",
     audio_file: str = "audio.wav",
     force: bool = False,
-    local_jsons: bool = False,
     format_with_black: bool = False,
     download_models: bool = False,
 ):
@@ -237,10 +247,11 @@ def generate_example_scripts(
                         family_name,
                         model,
                         output,
-                        local_jsons=local_jsons,
+                        metadata_base_dir=metadata_base_dir,
                         models_base_dir=models_base_dir,
                         audio_file=audio_file,
                         download_models=download_models,
+                        script_dir=file.parent,
                     )
 
                     if not file.exists():
@@ -282,10 +293,10 @@ if __name__ == "__main__":
         help="the audio file to use in the audio examples",
     )
     parser.add_argument(
-        "--local-jsons",
+        "--metadata-base-dir",
         type=str,
         default="",
-        help="if not empty, .json files are read from a local directory",
+        help="if not empty, .json files are read from this directory",
     )
     parser.add_argument(
         "--format-with-black",
@@ -302,9 +313,9 @@ if __name__ == "__main__":
     generate_example_scripts(
         Path(args.output_dir).resolve(),
         models_base_dir=args.models_base_dir,
+        metadata_base_dir=args.metadata_base_dir,
         audio_file=args.audio_file,
         force=args.force,
-        local_jsons=args.local_jsons,
         format_with_black=args.format_with_black,
         download_models=args.download_models,
     )
