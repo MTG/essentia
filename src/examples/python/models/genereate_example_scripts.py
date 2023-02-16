@@ -7,7 +7,6 @@ from subprocess import run
 import yaml
 
 ESSENTIA_MODELS_SITE = "https://essentia.upf.edu/models"
-ESSENTIA_MODELS_DIR = "/home/pablo/reps/essentia/src/examples/python/models/new_jsons"
 
 INPUT_DEFAULTS = {
     "TensorflowPredictMusiCNN": "model/Placeholder",
@@ -102,21 +101,17 @@ def get_additional_parameters(metadata: dict, output: str, algo_name: str):
     return additional_parameters
 
 
-def get_metadata(task_type: str, family_name: str, model: str, local_jsons=False):
+def get_metadata(
+    task_type: str, family_name: str, model: str, local_jsons=False, models_base_dir=""
+):
     if local_jsons:
-        metadata_path = (
-            ESSENTIA_MODELS_DIR
-            + "/"
-            + task_type
-            + "/"
-            + family_name
-            + "/"
-            + f"{model}.json"
+        metadata_path = str(
+            Path(models_base_dir, task_type, family_name, f"{model}.json")
         )
         metadata = read_metadata(metadata_path)
     else:
-        metadata_path = str(
-            Path(ESSENTIA_MODELS_SITE, task_type, family_name, f"{model}.json")
+        metadata_path = "/".join(
+            [ESSENTIA_MODELS_SITE, task_type, family_name, f"{model}.json"]
         )
         metadata = download_metadata(metadata_path)
 
@@ -129,10 +124,16 @@ def process_model(
     model: str,
     output: str,
     local_jsons: bool,
-    models_from_folder: str,
+    models_base_dir: str,
     audio_file: str,
 ):
-    metadata = get_metadata(task_type, family_name, model, local_jsons=local_jsons)
+    metadata = get_metadata(
+        task_type,
+        family_name,
+        model,
+        local_jsons=local_jsons,
+        models_base_dir=models_base_dir,
+    )
 
     # get algorithm name
     algo_name = metadata["inference"]["algorithm"]
@@ -143,10 +144,8 @@ def process_model(
     # set algos with custom output
     algo_returns = CUSTOM_ALGO_OUTPUTS.get(algo_name, output)
     graph_filename = f"{model}.pb"
-    if models_from_folder:
-        graph_filename = Path(
-            models_from_folder, task_type, family_name, graph_filename
-        )
+    if models_base_dir:
+        graph_filename = Path(models_base_dir, task_type, family_name, graph_filename)
     sample_rate = metadata["inference"]["sample_rate"]
 
     if task_type == "classification-heads":
@@ -160,11 +159,12 @@ def process_model(
             embedding_family_name,
             embedding_model_name,
             local_jsons=local_jsons,
+            models_base_dir=models_base_dir,
         )
         embedding_graph_filename = embedding_model_name + ".pb"
-        if models_from_folder:
+        if models_base_dir:
             embedding_graph_filename = Path(
-                models_from_folder,
+                models_base_dir,
                 embedding_task_type,
                 embedding_family_name,
                 embedding_graph_filename,
@@ -197,37 +197,19 @@ def process_model(
     return script
 
 
-if __name__ == "__main__":
-    parser = ArgumentParser()
-
-    parser.add_argument(
-        "--force",
-        "-f",
-        action="store_true",
-        help="whether to recompute existing scripts",
-    )
-    parser.add_argument(
-        "--output-dir", "-o", default="scripts", help="path to store the output scripts"
-    )
-    parser.add_argument(
-        "--models-from-folder",
-        default="",
-        help="whether to se a relative path for the models",
-    )
-    parser.add_argument(
-        "--audio-file",
-        default="audio.wav",
-        help="the audio file to use in the audio examples",
-    )
-    args = parser.parse_args()
-    force = args.force
-    output_dir = Path(args.output_dir)
-    models_from_folder = args.models_from_folder
-    audio_file = args.audio_file
-
+def generate_example_scripts(
+    output_dir: Path,
+    models_base_dir: str = "",
+    audio_file: str = "audio.wav",
+    force: bool = False,
+    local_jsons: bool = False,
+    format_with_black: bool = False,
+):
     models_file = Path(__file__).parent / "models.yaml"
     with open(models_file, "r") as models_f:
         models_data = yaml.load(models_f, Loader=yaml.FullLoader)
+
+    scripts = []
 
     for task_type, task_data in models_data.items():
         for family_name, family_data in task_data.items():
@@ -244,8 +226,8 @@ if __name__ == "__main__":
                         family_name,
                         model,
                         output,
-                        local_jsons=True,
-                        models_from_folder=models_from_folder,
+                        local_jsons=local_jsons,
+                        models_base_dir=models_base_dir,
                         audio_file=audio_file,
                     )
 
@@ -255,10 +237,65 @@ if __name__ == "__main__":
                     with open(file, "w") as script_file:
                         script_file.write(script)
 
+                    scripts.append(str(file))
                     print(f"generated script {file}")
 
     # format scripts with black if available
-    try:
-        run(["black", "--line-length", "120", output_dir], check=True)
-    except:
-        print("Black formatter not available")
+    if format_with_black:
+        run(["black", "--line-length", "120", str(output_dir) + "/"], check=True)
+
+    return scripts
+
+
+if __name__ == "__main__":
+    parser = ArgumentParser()
+
+    parser.add_argument(
+        "--force",
+        "-f",
+        action="store_true",
+        type=bool,
+        help="whether to recompute existing scripts",
+    )
+    parser.add_argument(
+        "--output-dir", "-o", default="scripts", help="path to store the output scripts"
+    )
+    parser.add_argument(
+        "--models-base-dir",
+        default="",
+        help="whether to set model paths relative to a given directory",
+    )
+    parser.add_argument(
+        "--audio-file",
+        default="audio.wav",
+        help="the audio file to use in the audio examples",
+    )
+    parser.add_argument(
+        "--local-jsons",
+        type=str,
+        default="",
+        help="if not empty, .json files are read from a local directory",
+    )
+    parser.add_argument(
+        "--format-with-black",
+        action="store_true",
+        type=bool,
+        help="whether to format with black if available",
+    )
+    args = parser.parse_args()
+
+    force = args.force
+    output_dir = Path(args.output_dir).resolve()
+    models_base_dir = args.models_base_dir
+    audio_file = args.audio_file
+    local_jsons = args.local_jsons
+    format_with_black = args.format_with_black
+
+    generate_example_scripts(
+        output_dir,
+        models_base_dir=models_base_dir,
+        audio_file=audio_file,
+        force=force,
+        local_jsons=local_jsons,
+        format_with_black=format_with_black,
+    )
