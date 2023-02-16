@@ -358,7 +358,7 @@ def run_model_scripts_tests(ctx):
 
     ret = os.system('PYTHONPATH=build/python:$PYTHONPATH %s test/src/modelstests/test_modelscripts.py' % sys.executable)
     if ret:
-        ctx.fatal('failed to run python tests. Check test output')
+        ctx.fatal('failed to run model scripts tests. Check test output')
 
 
 def ipython(ctx):
