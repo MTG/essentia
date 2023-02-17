@@ -1431,7 +1431,7 @@ Output: pitch predictions.
 Naming convention: ``<architecture>-<model_size>-<version>.pb``
 
 * ``architecture``: the CREPE architecture (``crepe``).
-* ``model_size``: the architecture complexity ranging from ``tiny`` to ``full``. A larger model is expected to show enhanced performance at the expense of additional computational cost.
+* ``model_size``: the model size ranging from ``tiny`` to ``full``. A larger model is expected to perform better at the expense of additional computational cost.
 * ``version``: the version of the model.
 
 Models:
@@ -1484,7 +1484,7 @@ Source separation
 Spleeter
 --------
 
-Source separation into 2 (`vocals`, `accompaniment`),  4, and 5 (`vocals`, `drums`, `bass`, `piano`, `other`) stems.
+Source separation into 2, 4, or 5 stems.
 
 Dataset: in-house (Deezer).
 
@@ -1547,7 +1547,7 @@ Models:
         pool.set("waveform", audio[..., np.newaxis, np.newaxis])
 
         model = TensorflowPredict(
-            graphFilename="spleeter-2s-3.pb",
+            graphFilename="spleeter-4s-3.pb",
             inputs=["waveform"],
             outputs=["waveform_vocals", "waveform_drums", "waveform_bass", "waveform_other"]
         )
@@ -1578,7 +1578,7 @@ Models:
         pool.set("waveform", audio[..., np.newaxis, np.newaxis])
 
         model = TensorflowPredict(
-            graphFilename="spleeter-2s-3.pb",
+            graphFilename="spleeter-5s-3.pb",
             inputs=["waveform"],
             outputs=["waveform_vocals", "waveform_drums", "waveform_bass", "waveform_piano", "waveform_other"]
         )
@@ -1606,7 +1606,7 @@ Output: tempo predictions.
 Naming convention: ``<architecture>-k<model_size>-<version>.pb``
 
 * ``architecture``: a TempoCNN architecture feature square filters (``deepsquare``) or longitudinal ones (``deeptemp``).
-* ``model_size``: the model size that can be 4 or 16. A larger model is expected to show enhanced performance at the expense of additional computational cost.
+* ``model_size``: a model size factor (4 or 16). A larger model is expected to perform better at the expense of additional computational cost.
 * ``version``: the version of the model.
 
 Models:
