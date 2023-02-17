@@ -51,8 +51,8 @@ const char* Windowing::description = DOC("This algorithm applies windowing to an
 void Windowing::configure() {
   _normalized = parameter("normalized").toBool();
   _window.resize(parameter("size").toInt());
-  _symmetric = parameter("symmetric").toBool();
   _constantsDecimals = parameter("constantsDecimals").toInt();
+  _symmetric = parameter("symmetric").toBool();
   createWindow(parameter("type").toLower());
   _zeroPadding = parameter("zeroPadding").toInt();
   _zeroPhase = parameter("zeroPhase").toBool();

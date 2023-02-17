@@ -171,6 +171,97 @@ Usage for embedding extraction:
     embeddings = model(audio)
 
 
+FSD50K
+------
+
+Audio event recognition using the `FSD50K <https://zenodo.org/record/4060432>`_ dataset targeting 200 classes drawn from the `AudioSet Ontology <https://research.google.com/audioset/ontology/index.html>`_:
+
+`Accelerating and revving and vroom`, `Accordion`, `Acoustic guitar`,
+`Aircraft`, `Alarm`, `Animal`, `Applause`, `Bark`, `Bass drum`, `Bass guitar`,
+`Bathtub (filling or washing)`, `Bell`, `Bicycle`, `Bicycle bell`, `Bird`, `Bird
+vocalization and bird call and bird song`, `Boat and Water vehicle`, `Boiling`,
+`Boom`, `Bowed string instrument`, `Brass instrument`, `Breathing`, `Burping and
+eructation`, `Bus`, `Buzz`, `Camera`, `Car`, `Car passing by`, `Cat`, `Chatter`,
+`Cheering`, `Chewing and mastication`, `Chicken and rooster`, `Child speech and
+kid speaking`, `Chime`, `Chink and clink`, `Chirp and tweet`, `Chuckle and
+chortle`, `Church bell`, `Clapping`, `Clock`, `Coin (dropping)`, `Computer
+keyboard`, `Conversation`, `Cough`, `Cowbell`, `Crack`, `Crackle`, `Crash
+cymbal`, `Cricket`, `Crow`, `Crowd`, `Crumpling and crinkling`, `Crushing`,
+`Crying and sobbing`, `Cupboard open or close`, `Cutlery and silverware`,
+`Cymbal`, `Dishes and pots and pans`, `Dog`, `Domestic animals and pets`,
+`Domestic sounds and home sounds`, `Door`, `Doorbell`, `Drawer open or close`,
+`Drill`, `Drip`, `Drum`, `Drum kit`, `Electric guitar`, `Engine`, `Engine
+starting`, `Explosion`, `Fart`, `Female singing`, `Female speech and woman
+speaking`, `Fill (with liquid)`, `Finger snapping`, `Fire`, `Fireworks`,
+`Fixed-wing aircraft and airplane`, `Fowl`, `Frog`, `Frying (food)`, `Gasp`,
+`Giggle`, `Glass`, `Glockenspiel`, `Gong`, `Growling`, `Guitar`, `Gull and
+seagull`, `Gunshot and gunfire`, `Gurgling`, `Hammer`, `Hands`, `Harmonica`,
+`Harp`, `Hi-hat`, `Hiss`, `Human group actions`, `Human voice`, `Idling`,
+`Insect`, `Keyboard (musical)`, `Keys jangling`, `Knock`, `Laughter`, `Liquid`,
+`Livestock and farm animals and working animals`, `Male singing`, `Male speech
+and man speaking`, `Mallet percussion`, `Marimba and xylophone`, `Mechanical
+fan`, `Mechanisms`, `Meow`, `Microwave oven`, `Motor vehicle (road)`,
+`Motorcycle`, `Music`, `Musical instrument`, `Ocean`, `Organ`, `Packing tape and
+duct tape`, `Percussion`, `Piano`, `Plucked string instrument`, `Pour`, `Power
+tool`, `Printer`, `Purr`, `Race car and auto racing`, `Rail transport`, `Rain`,
+`Raindrop`, `Ratchet and pawl`, `Rattle`, `Rattle (instrument)`, `Respiratory
+sounds`, `Ringtone`, `Run`, `Sawing`, `Scissors`, `Scratching (performance
+technique)`, `Screaming`, `Screech`, `Shatter`, `Shout`, `Sigh`, `Singing`,
+`Sink (filling or washing)`, `Siren`, `Skateboard`, `Slam`, `Sliding door`,
+`Snare drum`, `Sneeze`, `Speech`, `Speech synthesizer`, `Splash and splatter`,
+`Squeak`, `Stream`, `Strum`, `Subway and metro and underground`, `Tabla`,
+`Tambourine`, `Tap`, `Tearing`, `Telephone`, `Thump and thud`, `Thunder`,
+`Thunderstorm`, `Tick`, `Tick-tock`, `Toilet flush`, `Tools`, `Traffic noise and
+roadway noise`, `Train`, `Trickle and dribble`, `Truck`, `Trumpet`,
+`Typewriter`, `Typing`, `Vehicle`, `Vehicle horn and car horn and honking`,
+`Walk and footsteps`, `Water`, `Water tap and faucet`, `Waves and surf`,
+`Whispering`, `Whoosh and swoosh and swish`, `Wild animals`, `Wind`, `Wind
+chime`, `Wind instrument and woodwind instrument`, `Wood`, `Writing`, `Yell`,
+`Zipper (clothing)`
+
+Dataset: FSD50K.
+
+Output: class activations or embeddings.
+
+Models:
+
+* ``fsd-sinet-vgg41-tlpf-ibp`` [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1.json>`_]
+* ``fsd-sinet-vgg42-no_tlpf-aps`` [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1.json>`_]
+* ``fsd-sinet-vgg42-tlpf-aps`` [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1.json>`_]
+* ``fsd-sinet-vgg42-tlpf-ibp`` [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1.json>`_]
+
+
+Naming convention: ``<task>-<architecture>-<variation>-<pooling_filters>-<si_technique>-<version>.pb``
+
+* ``task``: multi-label classification based on FSD50K (``fsd``).
+* ``architecture``: shift invariant net (``sinet``).
+* ``variation``: ``vgg42`` is a variation of ``vgg41`` with twice the number of filters for each convolutional layer.
+* ``pooling_filters``: the pooling layers may feature trainable low-pass filters (``tlpf``) or not (``no_tlpf``).
+* ``si_technique``: the shift-invariance technique may be adaptative polyphase sampling (``aps``) or intra-block pooling (``ibp``).
+* ``version``: the model version.
+
+
+
+Usage for audio event detection:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictFSDSINet
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=22050)()
+    model = TensorflowPredictFSDSINet(graphFilename="fsd-sinet-vgg41-tlpf-ibp-1.pb")
+    activations = model(audio)
+
+Usage for embedding extraction:
+
+.. code-block:: python
+
+    from essentia.standard import MonoLoader, TensorflowPredictFSDSINet
+
+    audio = MonoLoader(filename="audio.wav", sampleRate=22050)()
+    model = TensorflowPredictFSDSINet(graphFilename="fsd-sinet-vgg41-tlpf-ibp-1.pb", output="model/global_max_pooling1d/Max")
+    embeddings = model(audio)
+
 Music style classification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
