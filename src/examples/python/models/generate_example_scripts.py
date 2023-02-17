@@ -23,7 +23,7 @@ OUTPUT_DEFAULTS = {
     "TensorflowPredictMusiCNN": "model/Sigmoid",
     "TensorflowPredictVGGish": "model/Sigmoid",
     "TensorflowPredict2D": "model/Sigmoid",
-    "TensorflowPredictEffnetDiscogs": "PartitionedCall",
+    "TensorflowPredictEffnetDiscogs": "PartitionedCall:0",
     "TensorflowPredictFSDSINet": "model/predictions/Sigmoid",
     "PitchCREPE": "model/classifier/Sigmoid",
     "TempoCNN": "output",
