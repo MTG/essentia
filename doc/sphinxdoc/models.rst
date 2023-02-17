@@ -1704,19 +1704,19 @@ Models:
 
 * .. collapse:: <a class="reference external">deam-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/deam/deam-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/deam/deam-musicnn-msd-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/deam/deam-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/deam/deam-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
-    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/deam/deam-musicnn-msd-1_predictions.py
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/deam/deam-musicnn-msd-2_predictions.py
 
 * .. collapse:: <a class="reference external">deam-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/deam/deam-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/deam/deam-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/deam/deam-vggish-audioset-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/deam/deam-vggish-audioset-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
-    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/deam/deam-vggish-audioset-1_predictions.py
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/deam/deam-vggish-audioset-2_predictions.py
 
 
 Arousal/valence emoMusic
@@ -1734,19 +1734,19 @@ Models:
 
 * .. collapse:: <a class="reference external">emomusic-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-musicnn-msd-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
-    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/emomusic/emomusic-musicnn-msd-1_predictions.py
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/emomusic/emomusic-musicnn-msd-2_predictions.py
 
 * .. collapse:: <a class="reference external">emomusic-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-vggish-audioset-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-vggish-audioset-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
-    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/emomusic/emomusic-vggish-audioset-1_predictions.py
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/emomusic/emomusic-vggish-audioset-2_predictions.py
 
 
 Arousal/valence MuSe
@@ -1764,19 +1764,19 @@ Models:
 
 * .. collapse:: <a class="reference external">muse-musicnn-msd</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/muse/muse-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/muse/muse-musicnn-msd-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/muse/muse-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/muse/muse-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
-    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/muse/muse-musicnn-msd-1_predictions.py
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/muse/muse-musicnn-msd-2_predictions.py
 
 * .. collapse:: <a class="reference external">muse-vggish-audioset</a>
 
-    [`weights <https://essentia.upf.edu/models/classification-heads/muse/muse-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/muse/muse-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+    [`weights <https://essentia.upf.edu/models/classification-heads/muse/muse-vggish-audioset-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/muse/muse-vggish-audioset-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
 
     Python code for predictions:
 
-    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/muse/muse-vggish-audioset-1_predictions.py
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/muse/muse-vggish-audioset-2_predictions.py
 
 
 Engagement
