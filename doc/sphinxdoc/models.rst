@@ -1263,7 +1263,7 @@ Feature extractors
 OpenL3
 ------
 
-Audio embeddings model trained in a self-supervised manner using audio-visual correspondence information.
+Audio embedding model trained on audio-visual correspondence in a self-supervised manner.
 
 Dataset: AudioSet subsets of videos with environmental sounds and musical content.
 
@@ -1272,7 +1272,7 @@ Output: embeddings.
 Naming convention: ``<architecture>-<source_task>-mel<n_mel_bands>-emb<n_embeddings>-<version>.pb``
 
 * ``architecture``: the OpenL3 architecture (``openl3``).
-* ``source_task``: the source task can be enviromental sounds (``env``) or music (``music``).
+* ``source_task``: can be enviromental sounds (``env``) or music (``music``).
 * ``n_mel_bands``: number of input mel-bands.
 * ``n_embeddings``: the number of dimensions in the output embedding layer.
 * ``version``: the version of the model.
@@ -1326,9 +1326,6 @@ Models:
     [`weights <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-music-mel256-emb6144-3.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-music-mel256-emb6144-3.json>`_]
 
     We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
-
-
-We are currently working on a dedicated algorithm to extract embeddings with the OpenL3 models. For now this can be achieved with `this script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
 
 
 AudioSet-VGGish
