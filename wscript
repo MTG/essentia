@@ -332,7 +332,7 @@ def build(ctx):
 def run_tests(ctx):
     ret = os.system(out + '/basetest')
     if ret:
-        ctx.fatal('failed to run tests. Check test output')
+        ctx.fatal('Failed to run tests. Check test output')
 
 
 def run_python_tests(ctx):
@@ -345,7 +345,7 @@ def run_python_tests(ctx):
 
     ret = os.system('PYTHONPATH=build/python:$PYTHONPATH %s test/src/unittests/all_tests.py' % sys.executable)
     if ret:
-        ctx.fatal('failed to run python tests. Check test output')
+        ctx.fatal('Failed to run python tests. Check test output')
 
 
 def run_model_scripts_tests(ctx):
@@ -358,7 +358,7 @@ def run_model_scripts_tests(ctx):
 
     ret = os.system('PYTHONPATH=build/python:$PYTHONPATH %s test/src/modelstests/test_modelscripts.py' % sys.executable)
     if ret:
-        ctx.fatal('failed to run model scripts tests. Check test output')
+        ctx.fatal('Failed to run model scripts tests. Check test output')
 
 
 def ipython(ctx):
