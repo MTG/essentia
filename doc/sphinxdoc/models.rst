@@ -1358,9 +1358,8 @@ Models:
 EffNet-Discogs
 --------------
 
-Audio embedding models trained with a contrastive objective using Discogs metadata.
-There are different versions trained to predict artist, label, release, and track similarity as well as a multi-task model trained in all of them simusltaneously.
-The main purpose of this models is to produce embeddings suitable for downstream music classification tasks.
+Audio embedding models trained with a contrastive learning objective using Discogs metadata.
+There are versions trained on artist, label, release, and track similarity, as well as a multi-task model trained in all of them simusltaneously.
 
 Dataset: In-house dataset annotated with Discogs metadata.
 
@@ -1370,7 +1369,7 @@ Naming convention: ``discogs_<task>_embeddings-<architecture>-bs<batch-size>-<ve
 
 * ``task``: contrastive learning targeting artist (``artist``), label (``label``), album (``release``), track (``track``), or a multi-task (``multi``) similarity objective.
 * ``architecture``: an efficientnet b0 architecture (``effnet``).
-* ``batch_size``: for now, the models are only available with a fixed batch size of 64.
+* ``batch_size``: for now, the models are only available with a fixed batch size of 64 samples.
 * ``version``: the version of the model.
 
 Models:
