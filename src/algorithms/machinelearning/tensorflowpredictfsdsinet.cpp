@@ -165,7 +165,7 @@ const char* TensorflowPredictFSDSINet::description = DOC(
   "Ideally, the signal should be zero-mean (no DC) and normalized to the full dynamic range (-1, 1).\n\n"
   "References:\n"
   "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623.\n"
-  m"  [2] https://github.com/edufonseca/shift_sec"
+  "  [2] https://github.com/edufonseca/shift_sec"
 );
 
 TensorflowPredictFSDSINet::TensorflowPredictFSDSINet() : _normalize(true) {
