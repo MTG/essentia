@@ -1340,7 +1340,7 @@ Output: embeddings.
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
 * ``task``: multi-label classification using an in-house dataset related to AudioSet (``audioset``).
-* ``architecture``: a CNN models with vgg-like convolutional laers (``vggish``).
+* ``architecture``: a CNN model with vgg-like convolutional layers (``vggish``).
 * ``version``: the model version.
 
 Models:
