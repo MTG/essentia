@@ -316,10 +316,16 @@ Classifiers trained on various datasets and audio embeddings.
 Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
 
 * ``target_task``: single-class classification for multiple tasks. See models below.
-* ``architecture``: musicnn (``musicnn``) or vgg-like (``vgg``) architecture.
-* ``source_task``: the task in which the models were pre-trained. Can be the Million Song DAtaset (``msd``) or the MagnaTagATune (``mtt``).
+* ``architecture``: musicnn (``musicnn``) [1], vgg-like (``vgg``) [1], or vggish (``vggish``) architecture [2].
+* ``source_task``: the task in which the models were pre-trained. Can be the Million Song Dataset (``msd``) or the MagnaTagATune (``mtt``).
 * ``version``: the version of the model.
 
+
+[1] Pons, Jordi, and Xavier Serra. "musicnn: Pre-trained convolutional neural networks for music audio tagging." ISMIR, 2019.
+[`code <https://github.com/jordipons/musicnn>`_]
+
+[2] Hershey, Shawn, et al. "CNN architectures for large-scale audio classification." ICASSP, 2017.
+[`code <https://github.com/tensorflow/models/tree/master/research/audioset/vggish>`_]
 
 Danceability
 ------------
