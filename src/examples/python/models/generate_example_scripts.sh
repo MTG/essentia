@@ -2,4 +2,4 @@
 
 set -e
 
-python3 generate_example_scripts.py --force --format-with-black
+python3 generate_example_scripts.py --force
