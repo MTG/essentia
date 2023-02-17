@@ -119,7 +119,7 @@ Use these (optional) flags:
 - ``--mode=debug`` to build in debug mode,
 - ``--with-cpptests`` to build cpptests
 
-NOTE: you must *always* configure at least once before building!
+Note: you must *always* configure at least once before building!
 
 The following will give you the full list of options::
 
@@ -198,8 +198,9 @@ Make sure to build Essentia with Python 3 bindings and run::
 
 Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
 
-The documentation of Essentia Models relies on a series of example scripts available at `src/examples/python/models/scripts`.
-These scripts can be automatically regenerated with `src/examples/python/models/generate_example_scripts.sh`.
+Note: Code examples embedded in the documentation page for Essentia Models require Python example files located in ``src/examples/python/models/scripts/``. These scripts can be automatically regenerated with ``src/examples/python/models/generate_example_scripts.sh``.
+
+
 
 
 Building Essentia on Windows
