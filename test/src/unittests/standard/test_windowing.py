@@ -156,10 +156,100 @@ class TestWindowing(TestCase):
 
     def testOne(self):
         # Checks for a single value
-        self.assertComputeFails(Windowing(type='hann'),  [1])
+        self.assertComputeFails(Windowing(type='hann'), [1])
 
     def testInvalidParam(self):
         self.assertConfigureFails(Windowing(), { 'type': 'unknown' })
+
+    def testSplitPadding(self):
+        """Compare the implementation of splitPadding to the logic of Librosa's pad_center
+
+        Reference implementation:
+        https://librosa.org/doc/main/_modules/librosa/util/utils.html#pad_center
+        """
+
+        # Check with both even and odd signals and paddings.
+        for input_size in (3, 4):
+            for padding_size in (3, 4):
+                input_signal = [1] * input_size
+                found = Windowing(
+                    type="square",
+                    zeroPhase=False,
+                    normalized=False,
+                    zeroPadding=padding_size,
+                    splitPadding=True,
+                )(input_signal)
+
+                # padding logic ported from Librosa.
+                target_size = input_size + padding_size
+                lpad = int((target_size - input_size) // 2)
+                lengths = (lpad, int(target_size - input_size - lpad))
+
+                expected = numpy.pad(input_signal, lengths)
+ 
+                # Checks whether the windows are as expected.
+                self.assertAlmostEqualVector(found, expected, 1e-6)
+
+    def testScipyAsymmetricHammingWindow(self):
+        """Checks that we obtain a Hamming window equivalent to the SciPy implementation with sync=False.
+        """
+        from scipy.signal.windows import hamming
+
+        # Cover default/non-default window sizes so that the window is recomputed on compute().
+        # Also check for even and odd sizes.
+        for input_size in (2, 3, 4, 1024):
+            input_signal = [1] * input_size
+            found = Windowing(
+                type="hamming",
+                zeroPhase=False,
+                normalized=False,
+                symmetric=False,
+            )(input_signal)
+
+            expected = hamming(input_size, sym=False)
+
+            # Checks whether the windows are as expected
+            self.assertAlmostEqualVector(found, expected, 1e-6)
+
+    def testScipyAsymmetricHannWindow(self):
+        """Checks that we obtain a Hann window equivalent to the SciPy implementation with sync=False.
+        """
+        from scipy.signal.windows import hann
+
+        # Cover default/non-default window sizes so that the window is recomputed on compute().
+        # Also check for even and odd sizes.
+        for input_size in (2, 3, 4, 1024):
+            input_signal = [1] * input_size
+            found = Windowing(
+                type="hann",
+                zeroPhase=False,
+                normalized=False,
+                symmetric=False,
+            )(input_signal)
+
+            expected = hann(input_size, sym=False)
+
+            # Checks whether the windows are as expected
+            self.assertAlmostEqualVector(found, expected, 1e-6)
+
+    def testScipyHammingWindow(self):
+        """Checks that we obtain a Hamming window equivalent to the default SciPy implementation.
+        """
+        from scipy.signal.windows import hamming
+
+        input_size = 1024
+        input_signal = [1] * input_size
+        found = Windowing(
+            type="hamming",
+            zeroPhase=False,
+            normalized=False,
+            constantsDecimals=2
+        )(input_signal)
+
+        expected = hamming(input_size, sym=True)
+
+        # Checks whether the windows are as expected
+        self.assertAlmostEqualVector(found, expected, 1e-6)
 
 suite = allTests(TestWindowing)
 
