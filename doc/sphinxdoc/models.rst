@@ -1018,7 +1018,7 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: moosd relaxed predictions.
+Output: mood relaxed predictions.
 
 Models:
 
