@@ -3,7 +3,6 @@ from argparse import ArgumentParser
 from pathlib import Path
 from urllib.request import urlopen, urlretrieve
 from urllib.error import HTTPError
-from subprocess import run
 
 import yaml
 
@@ -263,10 +262,6 @@ def generate_example_scripts(
                     scripts.append(str(file))
                     print(f"generated script {file}")
 
-    # format scripts with black if available
-    if format_with_black:
-        run(["black", "--line-length", "120", str(output_dir) + "/"], check=True)
-
     return scripts
 
 
@@ -299,11 +294,6 @@ if __name__ == "__main__":
         help="if not empty, .json files are read from this directory",
     )
     parser.add_argument(
-        "--format-with-black",
-        action="store_true",
-        help="whether to format with black if available",
-    )
-    parser.add_argument(
         "--download-models",
         action="store_true",
         help="whether to download models next to the script location",
@@ -316,6 +306,5 @@ if __name__ == "__main__":
         metadata_base_dir=args.metadata_base_dir,
         audio_file=args.audio_file,
         force=args.force,
-        format_with_black=args.format_with_black,
         download_models=args.download_models,
     )
