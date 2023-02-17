@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -47,6 +47,8 @@ class EasyLoader : public AlgorithmComposite {
     declareParameter("endTime", "the end time of the slice to be extracted [s]", "[0,inf)", 1e6);
     declareParameter("replayGain", "the value of the replayGain that should be used to normalize the signal [dB]", "(-inf,inf)", -6.0);
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
+    declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
+
   }
 
   void declareProcessOrder() {
@@ -56,6 +58,7 @@ class EasyLoader : public AlgorithmComposite {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -100,6 +103,8 @@ class EasyLoader : public Algorithm {
     declareParameter("endTime", "the end time of the slice to be extracted [s]", "[0,inf)", 1e6);
     declareParameter("replayGain", "the value of the replayGain that should be used to normalize the signal [dB]", "(-inf,inf)", -6.0);
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
+    declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
+
   }
 
   void configure();
@@ -108,6 +113,7 @@ class EasyLoader : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

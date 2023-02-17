@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -40,20 +40,25 @@ class DCT : public Algorithm {
   void declareParameters() {
     declareParameter("inputSize", "the size of the input array", "[1,inf)", 10);
     declareParameter("outputSize", "the number of output coefficients", "[1,inf)", 10);
+    declareParameter("dctType", "the DCT type", "[2,3]", 2);
+    declareParameter("liftering", "the liftering coefficient. Use '0' to bypass it", "[0,inf)", 0);
   }
 
   void configure();
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 
  protected:
   int _outputSize;
-  void createDctTable(int inputSize, int outputSize);
-
+  Real _lifter;
+  void createDctTableII(int inputSize, int outputSize);
+  void createDctTableIII(int inputSize, int outputSize);
   std::vector<std::vector<Real> > _dctTable;
+  int _type;
 };
 
 } // namespace essentia

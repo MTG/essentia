@@ -1,6 +1,6 @@
 
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -35,14 +35,14 @@ void pcmMetadata(const std::string& filename, int& sr, int& ch, int& bitrate) {
   if (pos != std::string::npos) {
       std::string ext = filename.substr(pos, std::string::npos);
       if (ext != ".wav" && ext != ".aiff" && ext != ".aif") {
-        throw EssentiaException("metadatautils: pcmMetadata cannot read files which are neither \"wav\" nor \"aiff");
+        throw EssentiaException("metadatautils: pcmMetadata cannot read files which are neither \"wav\" nor \"aiff\"");
       }
   } else {
       throw EssentiaException("metadatautils: pcmMetadata cannot guess the filetype by extension");
   }
 
   // (trick) create an audioloader to know the original samplerate
-  std::auto_ptr<streaming::Algorithm> audioloader(streaming::AlgorithmFactory::create("AudioLoader",
+  std::unique_ptr<streaming::Algorithm> audioloader(streaming::AlgorithmFactory::create("AudioLoader",
                                                                                       "filename", filename));
 
   sr = (int)streaming::lastTokenProduced<Real>(audioloader->output("sampleRate"));

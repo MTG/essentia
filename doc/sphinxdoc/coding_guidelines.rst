@@ -35,7 +35,7 @@ guidelines for it now. Have a look at the examples to get the feeling of it.
 
 Specific points:
 
-* tabs are forbidden, use spaces. Used tabs sizes are 2 spaces in C++, 4 spaces in python.
+* tabs are forbidden, use spaces. Used tabs sizes are 2 spaces in C++, 4 spaces in Python.
 * a comma (',') is **always** followed by a space (' ')
 * curly brackets are NOT on a new line, except (maybe) for function definitions.
 * in C++ class declarations, put only one space before the access type (public, protected, private)
@@ -73,6 +73,24 @@ is *not* correct. If you look at other files, they are all written like this:
 
 For Windows users: make sure that you do not use Windows end-of-lines, but Unix ones.
 Basically, any editor that is not Notepad should be able to deal with that.
+
+
+Code comments
+-------------
+
+We prefer the following style in both C++ and Python code:
+
+* Use "TODO comment." for To-Do comments.
+* Capitalize the first letter of each sentence and use periods.
+::
+
+  // TODO text of your To-Do comment.
+  // Text of your comment.
+
+::
+
+  # TODO text of your To-Do comment.
+  # Text of your comment.
 
 
 General C++ pitfalls

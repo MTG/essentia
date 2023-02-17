@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -31,17 +31,19 @@ class Danceability : public Algorithm {
  protected:
   Input<std::vector<Real> > _signal;
   Output<Real> _danceability;
+  Output<std::vector<Real> > _dfa;
 
  public:
   Danceability() {
     declareInput(_signal, "signal", "the input signal");
     declareOutput(_danceability, "danceability", "the danceability value. Normal values range from 0 to ~3. The higher, the more danceable.");
+    declareOutput(_dfa, "dfa", "the DFA exponent vector for considered segment length (tau) values");
   }
 
   void declareParameters() {
     declareParameter("minTau", "minimum segment length to consider [ms]", "(0,inf)", 310.);
     declareParameter("maxTau", "maximum segment length to consider [ms]", "(0,inf)", 8800.);
-    declareParameter("tauMultiplier", "multiplier to increment from min to max tau", "[1,inf)", 1.1);
+    declareParameter("tauMultiplier", "multiplier to increment from min to max tau", "(1,inf)", 1.1);
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
   }
 
@@ -49,6 +51,7 @@ class Danceability : public Algorithm {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
  protected:
@@ -120,6 +123,7 @@ class Danceability : public AlgorithmComposite {
  protected:
   SinkProxy<Real> _signal;
   Source<Real> _danceability;
+  Source<std::vector<Real> > _dfa;
 
   Pool _pool;
   Algorithm* _poolStorage;
@@ -132,7 +136,7 @@ class Danceability : public AlgorithmComposite {
   void declareParameters() {
     declareParameter("minTau", "minimum segment length to consider [ms]", "(0,inf)", 310.);
     declareParameter("maxTau", "maximum segment length to consider [ms]", "(0,inf)", 8800.);
-    declareParameter("tauMultiplier", "multiplier to increment from min to max tau", "[1,inf)", 1.1);
+    declareParameter("tauMultiplier", "multiplier to increment from min to max tau", "(1,inf)", 1.1);
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
   }
 
@@ -152,6 +156,7 @@ class Danceability : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };                                                                              
 

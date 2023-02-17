@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -68,4 +68,4 @@ for input_file in all_files:
 
     (r, rSegments, patternOnsets, patternRate) = patterndetection(chroma);
 
-    print patternRate , os.path.basename(input_file)
+    print(patternRate , os.path.basename(input_file))

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,10 +26,13 @@ namespace essentia {
 namespace standard {
 
 const char* ChordsDetection::name = "ChordsDetection";
-const char* ChordsDetection::description = DOC("Using pitch profile classes, this algorithm calculates the best matching major or minor triad and outputs the result as a string (e.g. A#, Bm, G#m, C). This algorithm uses the Sharp versions of each Flatted note (i.e. Bb -> A#).\n"
+const char* ChordsDetection::category = "Tonal";
+const char* ChordsDetection::description = DOC("This algorithm estimates chords given an input sequence of harmonic pitch class profiles (HPCPs). It finds the best matching major or minor triad and outputs the result as a string (e.g. A#, Bm, G#m, C). The following note names are used in the output:\n"
+"\"A\", \"Bb\", \"B\", \"C\", \"C#\", \"D\", \"Eb\", \"E\", \"F\", \"F#\", \"G\", \"Ab\"."
 "\n"
 "Note:\n"
-"  - This algorithm assumes that input pcps have been computed with framesize = 2*hopsize\n"
+"  - The algorithm assumes that the sequence of the input HPCP frames has been computed with framesize = 2*hopsize\n"
+"  - The algorithm estimates a sequence of chord values corresponding to the input HPCP frames (one chord value for each frame, estimated using a temporal window of HPCPs centered at that frame).\n"
 "\n"
 "Quality: experimental (prone to errors, algorithm needs improvement)\n"
 "\n"

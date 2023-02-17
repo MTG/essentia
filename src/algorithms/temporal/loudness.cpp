@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,11 +24,12 @@ using namespace essentia;
 using namespace standard;
 
 const char* Loudness::name = "Loudness";
-const char* Loudness::description = DOC("This algorithm extracts the loudness of a signal, which is defined by Steven's power law as its energy raised to the power of 0.67.\n"
+const char* Loudness::category = "Loudness/dynamics";
+const char* Loudness::description = DOC("This algorithm computes the loudness of an audio signal defined by Steven's power law. It computes loudness as the energy of the signal raised to the power of 0.67.\n"
 "\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia\n"
-"  http://en.wikipedia.org/wiki/Energy_(signal_processing)\n\n"
+"  http://en.wikipedia.org/wiki/Energy_%28signal_processing%29\n\n"
 "  [2] Stevens' power law - Wikipedia, the free encyclopedia\n"
 "  http://en.wikipedia.org/wiki/Stevens%27_power_law\n\n"
 "  [3] S. S. Stevens, Psychophysics. Transaction Publishers, 1975.");

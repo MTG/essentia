@@ -1,0 +1,53 @@
+git:
+  depth: 500
+  quiet: true
+
+notifications:
+  email: false
+
+sudo: false
+language: python
+cache: pip
+
+matrix:
+  include:
+    - sudo: required
+      services:
+        - docker
+      env: DOCKER_IMAGE=mtgupf/essentia-builds:manylinux1_x86_64
+    - sudo: required
+      services:
+        - docker
+      env: DOCKER_IMAGE=mtgupf/essentia-builds:manylinux1_i686
+           PRE_CMD=linux32
+    - sudo: required
+      services:
+        - docker
+      env: DOCKER_IMAGE=mtgupf/essentia-builds:manylinux2014_x86_64
+           WITH_TENSORFLOW=1
+
+install:
+  - docker pull $DOCKER_IMAGE > /dev/null
+
+script:
+  - docker run --rm -v `pwd`:/io --env WITH_TENSORFLOW=$WITH_TENSORFLOW $DOCKER_IMAGE $PRE_CMD /io/travis/build_wheels.sh
+  - ls wheelhouse/
+  - if [ ! "$TRAVIS_PULL_REQUEST" = "false" ]; then
+    python setup.py sdist;
+    travis/deploy_transfer.sh;
+    fi
+
+deploy:
+  skip_cleanup: true
+  provider: script
+  script:
+    python setup.py sdist;
+    travis/deploy_owncloud.sh python-pip
+  on:
+    branch: master
+    condition: $TRAVIS_BRANCH == "master" || -n $TRAVIS_TAG
+
+env:
+  global:
+  - secure: "MCX3GqjhLwLLkhm3OTPKUy7BbNEPrO0YxfXA+kHihimADG23nkbESq54e3/RKc/+M8yCiOLjfUP8hNp+YdgzxQKcxotcuNQ4K/24TVrckPejJL6XZCtTkvmN6KsjvdKM8xwR5LiHjrHStC3yvlyZ87PUjfpv7y6lyQiXfVP2xBM="
+  - secure: "tnJPOcBtnYQiY+HRu7hX6iP7/JWYufHGenRROyTiqxylaEB9df/9aqeBrqNtH13eCW6eY4uoXXFdatmfU0S+QWR0TPOfUhPCYMSyX3cNQ7HMbialdRKwNGrwbWUv9bru1hqKoLRFeFlWHouoJHiuyFymWnGT5seIjKfbwfLRkXs="

@@ -1,11 +1,14 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 . ../build_config.sh
 
 rm -rf tmp
 mkdir tmp
 cd tmp
 
-wget http://www.mega-nerd.com/SRC/$LIBSAMPLERATE_VERSION.tar.gz
+echo "Building libsamplerate $LIBSAMPLERATE_VERSION"
+
+curl -SLO http://www.mega-nerd.com/SRC/$LIBSAMPLERATE_VERSION.tar.gz
 tar -xf $LIBSAMPLERATE_VERSION.tar.gz
 cd $LIBSAMPLERATE_VERSION
 
@@ -18,7 +21,8 @@ cd $LIBSAMPLERATE_VERSION
 make
 make install
 
-cp src/.libs/libsamplerate-0.dll $PREFIX/lib/libsamplerate.dll
+# TODO Unnecessary?
+#cp src/.libs/libsamplerate-0.dll $PREFIX/lib/libsamplerate.dll
 
 cd ../..
 rm -r tmp

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -30,7 +30,7 @@ PyObject* VectorVectorReal::toPythonCopy(const vector<vector<Real> >* v) {
 
   bool isRectangular = true;
 
-  // check all rows have the same size
+  // check if all rows have the same size and convert to numpy array
   for (int i=1; i<dims[0]; i++) {
     if ((int)(*v)[i].size() != dims[1]) {
       isRectangular = false;
@@ -56,18 +56,32 @@ PyObject* VectorVectorReal::toPythonCopy(const vector<vector<Real> >* v) {
     return (PyObject*)result;
   }
 
-  // added this to vectorvectorreal could be made from unequal sizes
+  // convert to list of numpy arrays otherwise
   PyObject* result = PyList_New(v->size());
 
   for (int i=0; i<(int)v->size(); ++i) {
+    npy_intp itemDims[1] = {(int)(*v)[i].size()};
+    PyArrayObject* item = (PyArrayObject*)PyArray_SimpleNew(1, itemDims, PyArray_FLOAT);
+    assert(item->strides[0] == sizeof(Real));
+    if (item == NULL) {
+      throw EssentiaException("VectorVectorReal: dang null object (list of numpy arrays)");
+    }
+
+    Real* dest = (Real*)(item->data);
+    const Real* src = &((*v)[i][0]);
+    fastcopy(dest, src, itemDims[0]);
+
+    // old code to convert to list of lists
+    /*
     PyObject* item = PyList_New((*v)[i].size());
 
     for (int j=0; j<(int)(*v)[i].size(); ++j) {
       double val = double((*v)[i][j]);
       PyList_SET_ITEM(item, j, PyFloat_FromDouble(val));
     }
+    */
 
-    PyList_SET_ITEM(result, i, item);
+    PyList_SET_ITEM(result, i, (PyObject*) item);
   }
 
   return result;
@@ -84,21 +98,47 @@ void* VectorVectorReal::fromPythonCopy(PyObject* obj) {
 
   for (int i=0; i<size; i++) {
     PyObject* row = PyList_GetItem(obj, i);
-    if (!PyList_Check(obj)) {
-      delete v;
-      throw EssentiaException("VectorVectorReal::fromPythonCopy: input is not a list of lists");
+
+    // List of floats
+    if (PyList_Check(row)) {
+      int rowsize = PyList_Size(row);
+      (*v)[i].resize(rowsize);
+
+      for (int j=0; j<rowsize; j++) {
+        PyObject* item = PyList_GetItem(row, j);
+        if (!PyFloat_Check(item)) {
+          delete v;
+          throw EssentiaException("VectorVectorReal::fromPythonCopy: input is not a list of lists of floats");
+        }
+        (*v)[i][j] = PyFloat_AsDouble(item);
+      }
     }
 
-    int rowsize = PyList_Size(row);
-    (*v)[i].resize(rowsize);
-
-    for (int j=0; j<rowsize; j++) {
-      PyObject* item = PyList_GetItem(row, j);
-      if (!PyFloat_Check(item)) {
-        delete v;
-        throw EssentiaException("VectorVectorReal::fromPythonCopy: input is not a list of lists of floats");
+    // Numpy array of floats
+    else if (PyArray_Check(row)) {
+      if (PyArray_NDIM(row) != 1) {
+        throw EssentiaException("VectorVectorReal::fromPythonCopy: the element of input list "
+                                "is not a 1-dimensional numpy array: ", PyArray_NDIM(row));
       }
-      (*v)[i][j] = PyFloat_AsDouble(item);
+      PyArrayObject* array = (PyArrayObject*)row;
+      if (array == NULL) {
+        throw EssentiaException("VectorVectorReal::fromPythonCopy: dang null object (list of numpy arrays)");
+      }
+      if (array->descr->type_num != PyArray_FLOAT) {
+        throw EssentiaException("VectorVectorReal::fromPythonCopy: this NumPy array doesn't contain Reals (maybe you forgot dtype='f4')");
+      }
+      assert(array->strides[0] == sizeof(Real));
+      npy_intp rowsize = array->dimensions[0];
+      (*v)[i].resize(rowsize);
+      const Real* src = (Real*)(array->data);
+      Real* dest = &((*v)[i][0]);
+      fastcopy(dest, src, rowsize);
+    }
+
+    // Unsupported
+    else {
+      delete v;
+      throw EssentiaException("VectorVectorReal::fromPythonCopy: input is not a list of lists nor a list of numpy arrays");
     }
   }
 

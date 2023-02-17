@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,6 +24,7 @@
 
 #ifdef CPP_11
 #  include <random>
+#  include <ctime>
 #else
 // The implementation for non C++11 compilers uses the MersenneTwister.h file
 // downloaded from:
@@ -67,6 +68,7 @@ class NoiseAdder : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_VAMPWRAPPER_H_
+#ifndef ESSENTIA_VAMPWRAPPER_H
 #define ESSENTIA_VAMPWRAPPER_H
 
 #include "vamp-sdk/Plugin.h"
@@ -62,7 +62,7 @@ public:
   InputDomain getInputDomain() const { return FrequencyDomain; }
 
   std::string getMaker() const { return "Music Technology Group"; }
-  std::string getCopyright() const { return "(C) 2012 MTG, Universitat Pompeu Fabra"; }
+  std::string getCopyright() const { return "(C) 2020 MTG, Universitat Pompeu Fabra"; }
   int getPluginVersion() const { return 2; }
 
   essentia::AlgorithmInfo<essentia::standard::Algorithm> info() const {

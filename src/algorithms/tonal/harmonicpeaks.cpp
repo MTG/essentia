@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* HarmonicPeaks::name = "HarmonicPeaks";
+const char* HarmonicPeaks::category = "Tonal";
 const char* HarmonicPeaks::description = DOC("This algorithm finds the harmonic peaks of a signal given its spectral peaks and its fundamental frequency.\n"
 "Note:\n"
 "  - \"tolerance\" parameter defines the allowed fixed deviation from ideal harmonics, being a percentage over the F0. For example: if the F0 is 100Hz you may decide to allow a deviation of 20%, that is a fixed deviation of 20Hz; for the harmonic series it is: [180-220], [280-320], [380-420], etc.\n" 
@@ -104,7 +105,7 @@ void HarmonicPeaks::compute() {
     int harmonicNumber = round(ratio);
 
     Real distance = abs(ratio - harmonicNumber);
-    if (distance <= _ratioTolerance && ratio <= _ratioMax) { 
+    if (distance <= _ratioTolerance && ratio <= _ratioMax && harmonicNumber>0) {
       if (candidates[harmonicNumber-1].first == -1 || 
             distance < candidates[harmonicNumber-1].second) {
         // first occured candidate or a better candidate for harmonic

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -32,7 +32,8 @@ using streaming::connect;
 using streaming::VectorInput;
 
 const char* Extractor::name = "Extractor";
-const char* Extractor::description = DOC("This algorithm extracts all low level, mid level and high level features from an audio signal and stores them in a pool.");
+const char* Extractor::category = "Extractors";
+const char* Extractor::description = DOC("This algorithm extracts all low-level, mid-level and high-level features from an audio signal and stores them in a pool.");
 
 void Extractor::configure() {
   _lowLevelFrameSize = parameter("lowLevelFrameSize").toInt();
@@ -74,7 +75,6 @@ void Extractor::compute() {
   scheduler::Network network(gen);
   network.run();
   if (_rhythm) postProcessOnsetRate(gen, pool);
-  //deleteNetwork(gen); // done automatically when network goes out of scope
   if (_midLevel) computeMidLevel(signal, pool);
   if (_highLevel) computeHighLevel(pool);
   if (_relativeIoi) computeRelativeIoi(pool);

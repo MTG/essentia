@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,10 +26,10 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* LowLevelSpectralEqloudExtractor::name = "LowLevelSpectralEqloudExtractor";
-const char* LowLevelSpectralEqloudExtractor::description = DOC("This algorithm extracts a set of level spectral features for which it is recommended to apply a preliminary equal-loudness filter over an input audio signal (according to the internal evaluations conducted at Music Technology Group). To this end, you are expected to provide the output of EqualLoudness algorithm as an input for this algorithm. Still, you are free to provide an unprocessed audio input in the case you want to compute these features without equal-loudness filter.\n"
-"\n"
-"Note that at present we do not dispose any reference to justify the necessity of equal-loudness filter. Our recommendation is grounded on internal evaluations conducted at Music Technology Group that have shown the increase in numeric robustness as a function of the audio encoders used (mp3, ogg, ...) for these features.");
+const char* LowLevelSpectralEqloudExtractor::name = essentia::standard::LowLevelSpectralEqloudExtractor::name;
+const char* LowLevelSpectralEqloudExtractor::category = essentia::standard::LowLevelSpectralEqloudExtractor::category;
+const char* LowLevelSpectralEqloudExtractor::description = essentia::standard::LowLevelSpectralEqloudExtractor::description;
+
 
 LowLevelSpectralEqloudExtractor::LowLevelSpectralEqloudExtractor() : _configured(false) {
 
@@ -119,9 +119,11 @@ namespace essentia {
 namespace standard {
 
 const char* LowLevelSpectralEqloudExtractor::name = "LowLevelSpectralEqloudExtractor";
+const char* LowLevelSpectralEqloudExtractor::category = "Extractors";
 const char* LowLevelSpectralEqloudExtractor::description = DOC("This algorithm extracts a set of level spectral features for which it is recommended to apply a preliminary equal-loudness filter over an input audio signal (according to the internal evaluations conducted at Music Technology Group). To this end, you are expected to provide the output of EqualLoudness algorithm as an input for this algorithm. Still, you are free to provide an unprocessed audio input in the case you want to compute these features without equal-loudness filter.\n"
 "\n"
 "Note that at present we do not dispose any reference to justify the necessity of equal-loudness filter. Our recommendation is grounded on internal evaluations conducted at Music Technology Group that have shown the increase in numeric robustness as a function of the audio encoders used (mp3, ogg, ...) for these features.");
+
 
 LowLevelSpectralEqloudExtractor::LowLevelSpectralEqloudExtractor() {
   declareInput(_signal,      "signal", "the input audio signal");
@@ -145,7 +147,15 @@ void LowLevelSpectralEqloudExtractor::configure() {
 }
 
 void LowLevelSpectralEqloudExtractor::reset() {
-  delete _network;
+  _network->reset();
+
+  _pool.remove("internal.dissonance");
+  _pool.remove("internal.sccoeffs");
+  _pool.remove("internal.scvalleys");
+  _pool.remove("internal.centroid");
+  _pool.remove("internal.kurtosis");
+  _pool.remove("internal.skewness");
+  _pool.remove("internal.spread");
 }
 
 void LowLevelSpectralEqloudExtractor::createInnerNetwork() {

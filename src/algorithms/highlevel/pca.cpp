@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -30,7 +30,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* PCA::name = "PCA";
-const char* PCA::description = DOC("Karhunen Loeve Transform || Principal Component Analysis based on the covariance matrix of the signal.\n"
+const char* PCA::category = "Transformations";
+const char* PCA::description = DOC("This algorithm applies Principal Component Analysis based on the covariance matrix of the signal.\n"
 "\n"
 "References:\n"
 "  [1] Principal component analysis - Wikipedia, the free enciclopedia\n"
@@ -90,14 +91,15 @@ void PCA::compute() {
 
   // transform all the frames and add to the output
   Array2D<Real> featVector(1,bands, 0.0);
+  Array2D<Real> outFeatVector(1,requiredDimensions, 0.0);
   vector<Real> results = vector<Real>(requiredDimensions, 0.0);
   for (int row=0; row<nFrames; row++) {
     for (int col=0; col<bands; col++) {
       featVector[0][col] = rawFeats[row][col];
     }
-    featVector = matmult(featVector, reducedEig);
+    outFeatVector = matmult(featVector, reducedEig);
     for (int i=0; i<requiredDimensions; i++) {
-      results[i] = featVector[0][i];
+      results[i] = outFeatVector[0][i];
     }
     poolOut.add(nameOut, results);
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -50,10 +50,13 @@ class FFTW : public Algorithm {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
  protected:
   friend class IFFTW;
+  friend class FFTWComplex;
+  friend class IFFTWComplex;
   static ForcedMutex globalFFTWMutex;
 
   fftwf_plan _fftPlan;

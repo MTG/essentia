@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -36,7 +36,8 @@ static const Real _weightMask[] = {-75.8, -70.1, -60.8, -52.1, -44.2, -37.5,
 	-12.2, -7.4, -17.8, -17.8, -17.8};
 
 const char* PitchYinFFT::name = "PitchYinFFT";
-const char* PitchYinFFT::description = DOC("This algorithm estimates the fundamental frequency from a given spectrum. It is an implementation of YinFFT algorithm [1], which is an optimizated version of Yin algorithm for computations in the frequency domain. It is recommended to window the input spectrum with a Hann window. The raw spectrum can be computed with the Spectrum algorithm.\n"
+const char* PitchYinFFT::category = "Pitch";
+const char* PitchYinFFT::description = DOC("This algorithm estimates the fundamental frequency given the spectrum of a monophonic music signal. It is an implementation of YinFFT algorithm [1], which is an optimized version of Yin algorithm for computation in the frequency domain. It is recommended to window the input spectrum with a Hann window. The raw spectrum can be computed with the Spectrum algorithm.\n"
 "\n"
 "An exception is thrown if an empty spectrum is provided.\n"
 "\n"
@@ -54,6 +55,7 @@ void PitchYinFFT::configure() {
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toReal();
   _interpolate = parameter("interpolate").toBool();
+  _tolerance = parameter("tolerance").toReal();
   _sqrMag.resize(_frameSize);
   _weight.resize(_frameSize/2+1);
   _yin.resize(_frameSize/2+1);
@@ -159,18 +161,29 @@ void PitchYinFFT::compute() {
     _yin[tau] *= tau/tmp;
   }
 
+  // this tolerance threshold only works when it is lower than 1.0.
+  // This way we preserve the legacy behavior by default without any extra
+  // overhead unless it is specified by the user
+  if (_tolerance < 1.0) {
+    if (*min_element(_yin.begin(), _yin.end()) >= _tolerance) {
+      pitch = 0.0;
+      pitchConfidence = 0.0;
+      return;
+    }
+  }
+
   // search for argmin within minTau/maxTau range
   if (_interpolate) {
     // yin values are in the range [0,inf], because we want to detect the minima and peak detection detects the maxima,
     // yin values will be inverted
-    for(int n=0; n<=_yin.size(); ++n) {
+    for(int n=0; n<int(_yin.size()); ++n) {
       _yin[n] = -_yin[n];
     }
     // use interal peak detection algorithm
     _peakDetect->input("array").set(_yin);
     _peakDetect->output("positions").set(_positions);
     _peakDetect->output("amplitudes").set(_amplitudes);
-    _peakDetect->compute();    
+    _peakDetect->compute();
     try {
 	if (_positions.size() > 0 && _amplitudes.size() > 0) {
 	    tau = _positions[0];
@@ -207,6 +220,6 @@ void PitchYinFFT::compute() {
   else {
     pitch = 0.0;
     pitchConfidence = 0.0;
-  }      
+  }
 
 }

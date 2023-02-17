@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -31,12 +31,8 @@ class LoudnessEBUR128Filter : public AlgorithmComposite {
 
  protected:
   Algorithm* _stereoDemuxer;
-  Algorithm* _resampleLeft;
-  Algorithm* _resampleRight;
-  Algorithm* _filterLeft1;
-  Algorithm* _filterLeft2;
-  Algorithm* _filterRight1;
-  Algorithm* _filterRight2;
+  Algorithm* _filterLeft;
+  Algorithm* _filterRight; 
   Algorithm* _squareLeft;
   Algorithm* _squareRight;
   Algorithm* _sum;
@@ -62,6 +58,7 @@ class LoudnessEBUR128Filter : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

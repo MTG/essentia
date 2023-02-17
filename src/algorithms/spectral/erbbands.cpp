@@ -1,6 +1,20 @@
 /*
- * Copyright (C) 2006-2008 Music Technology Group (MTG)
- *                         Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
+ *
+ * This file is part of Essentia
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
 #include "erbbands.h"
@@ -10,8 +24,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* ERBBands::name = "ERBBands";
-const char* ERBBands::version = "1.0";
-const char* ERBBands::description = DOC("This algorithm computes energies/magnitudes in bands spaced on an Equivalent Rectangular Bandwidth (ERB) scale, given a spectrum. It applies a frequency domain filterbank using gammatone filters. Adapted from matlab code in:  D. P. W. Ellis (2009). 'Gammatone-like spectrograms', web resource [1].\n"
+const char* ERBBands::category = "Spectral";
+const char* ERBBands::description = DOC("This algorithm computes energies/magnitudes in ERB bands of a spectrum. The Equivalent Rectangular Bandwidth (ERB) scale is used. The algorithm applies a frequency domain filterbank using gammatone filters. Adapted from matlab code in:  D. P. W. Ellis (2009). 'Gammatone-like spectrograms', web resource [1].\n"
 "\n"
 "References:\n"
 "  [1] http://www.ee.columbia.edu/~dpwe/resources/matlab/gammatonegram/\n\n"
@@ -136,7 +150,7 @@ void ERBBands::compute() {
 
   if (_filterCoefficients.empty() ||
       int(_filterCoefficients[0].size()) != spectrumSize) {
-    cout << "ERBBands: input spectrum size does not correspond to the \"inputSize\" parameter. Recomputing the filter bank." << endl;
+    E_INFO("ERBBands: input spectrum size (" << spectrumSize << ") does not correspond to the \"inputSize\" parameter (" << _filterCoefficients[0].size() << "). Recomputing the filter bank.");
     createFilters(spectrumSize);
   }
 
@@ -148,8 +162,6 @@ void ERBBands::compute() {
   // working with sound effects.  Band magnitudes option is required for 
   // OnsetDetectionGlobal algorithm.
 
-  // TODO: probably all *Bands algorithms should have an option {magnitude,energy} 
-
   if (_type=="magnitude") {
     for (int i=0; i<filterSize; ++i) {
       bands[i] = 0;
@@ -158,7 +170,7 @@ void ERBBands::compute() {
       }
     }
   }
-  else if (_type=="energy") {
+  else if (_type=="power") {
     for (int i=0; i<filterSize; ++i) {
       bands[i] = 0;
       for (int j=0; j<spectrumSize; ++j) {

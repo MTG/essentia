@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -47,12 +47,12 @@ int save_onsets(const std::string& outputName,const vector<Real>& onsets)
   }
   catch(const char* text)
   {
-    cout << "Fatal error : " << text << ", exiting... " << std::endl;
+    cerr << "Error : " << text << ", exiting... " << std::endl;
     return EXIT_FAILURE;
   }
   catch(std::exception& e)
   {
-    cout << e.what() << "" << std::endl;
+    cerr << e.what() << "" << std::endl;
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;

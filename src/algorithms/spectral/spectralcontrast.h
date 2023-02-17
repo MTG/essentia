@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -49,7 +49,7 @@ public:
     declareParameter("frameSize", "the size of the fft frames", "[2,inf)", 2048);
     declareParameter("sampleRate", "the sampling rate of the audio signal", "(0,inf)", 22050.);
     declareParameter("numberBands", "the number of bands in the filter", "(0,inf)", 6);
-    declareParameter("lowFrequencyBound", "the lower bound of the lowest band", "[0,inf)", 20.);
+    declareParameter("lowFrequencyBound", "the lower bound of the lowest band", "(0,inf)", 20.);
     declareParameter("highFrequencyBound", "the upper bound of the highest band", "(0,inf)", 11000.);
     declareParameter("neighbourRatio", "the ratio of the bins in the sub band used to calculate the peak and valley", "(0,1]", 0.4);
     declareParameter("staticDistribution", "the ratio of the bins to distribute equally", "[0,1]", 0.15);
@@ -59,6 +59,7 @@ public:
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

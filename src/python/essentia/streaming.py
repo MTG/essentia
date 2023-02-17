@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -15,11 +15,12 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-import _essentia
+from six import iteritems
+from . import _essentia
 import essentia
 import sys as _sys
-import common as _c
-from _essentia import skeys as algorithmNames, sinfo as algorithmInfo
+from . import common as _c
+from ._essentia import skeys as algorithmNames, sinfo as algorithmInfo
 
 # Used as a place-holder for sources and sinks, implements the right shift
 # operator
@@ -173,11 +174,11 @@ def _create_streaming_algo(givenname):
 
         def configure(self, **kwargs):
             # verify that all types match and do any necessary conversions
-            for name, val in kwargs.iteritems():
+            for name, val in iteritems(kwargs):
                 goalType = self.paramType(name)
                 try:
                     convertedVal = _c.convertData(val, goalType)
-                except TypeError, e:
+                except TypeError as e:
                     raise TypeError('Error verifying \''+name+'\' parameter: '+str(e))
 
                 kwargs[name] = convertedVal
@@ -207,6 +208,14 @@ class VectorInput(_essentia.VectorInput):
               '  Description:\n\n'+\
               '    Can be used as the starting point of a streaming network. Its constructor\n'+\
               '    takes in a vector that is to be streamed one token at a time.'
+    __struct__ = {'category': 'Input/output',
+                  'description': 'Can be used as the starting point of a streaming network. Its constructor\ntakes in a vector that is to be streamed one token at a time.',
+                  'inputs': [],
+                  'name': 'VectorInput',
+                  'outputs': [{'description': 'the given data',
+                               'name': 'data',
+                               'type': 'vector_<real>'}],
+                  'parameters': []}
 
 
     def __init__(self, data):

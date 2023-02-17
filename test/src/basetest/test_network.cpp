@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -66,9 +66,25 @@ TEST(Network, SimpleExecutionNetwork) {
   };
 
   const char* expanded[] = {
-    " +---------------+    +-------------+   +------------+  ",
-    " |  AudioLoader  |----|  MonoMixer  |---|  Resample  |  ",
-    " +---------------+    +-------------+   +------------+  "
+    "                      +---------+                   ",
+    "                   +--| DevNull |                   ",
+    "                   |  +---------+                   ",
+    "                   |                                ",
+    "                   |  +---------+                   ",
+    "                   +--| DevNull |                   ",
+    "                   |  +---------+                   ",
+    "                   |                                ",
+    "                   |  +---------+                   ",
+    "                   +--| DevNull |                   ",
+    "                   |  +---------+                   ",
+    "                   |                                ",
+    "                   |  +---------+                   ",
+    "                   +--| DevNull |                   ",
+    "                   |  +---------+                   ",
+    "                   |                                ",
+    " +---------------+ |  +-----------+   +----------+  ",
+    " |  AudioLoader  |-+--| MonoMixer |---| Resample |  ",
+    " +---------------+    +-----------+   +----------+  "
   };
 
   // create the expanded network by hand because AudioLoader and MonoMixer don't
@@ -81,6 +97,11 @@ TEST(Network, SimpleExecutionNetwork) {
   loader->output("audio")           >>  mixer->input("audio");
   loader->output("numberChannels")  >>  mixer->input("numberChannels");
   mixer->output("audio")            >>  resample->input("signal");
+
+  loader->output("md5")        >> NOWHERE;
+  loader->output("bit_rate")   >> NOWHERE;
+  loader->output("codec")      >> NOWHERE;
+  loader->output("sampleRate") >> NOWHERE;
 
   Network n1(loader);
   NetworkParser np2(expanded, false);
@@ -108,9 +129,25 @@ TEST(Network, ExecutionNetworkWithComposite) {
   Network network(loader);
 
   const char* expected[] = {
-   " +---------------+    +-------------+   +------------+  +----------+  +---------+",
-   " |  AudioLoader  |----|  MonoMixer  |---|  Resample  |--| LowPass  |--| DevNull |",
-   " +---------------+    +-------------+   +------------+  +----------+  +---------+"
+    "                      +---------+                                               ",
+    "                   +--| DevNull |                                               ",
+    "                   |  +---------+                                               ",
+    "                   |                                                            ",
+    "                   |  +---------+                                               ",
+    "                   +--| DevNull |                                               ",
+    "                   |  +---------+                                               ",
+    "                   |                                                            ",
+    "                   |  +---------+                                               ",
+    "                   +--| DevNull |                                               ",
+    "                   |  +---------+                                               ",
+    "                   |                                                            ",
+    "                   |  +---------+                                               ",
+    "                   +--| DevNull |                                               ",
+    "                   |  +---------+                                               ",
+    "                   |                                                            ",
+    " +---------------+ |  +-----------+   +----------+   +---------+   +---------+  ",
+    " |  AudioLoader  |-+--| MonoMixer |---| Resample |---| LowPass |---| DevNull |  ",
+    " +---------------+    +-----------+   +----------+   +---------+   +---------+  "
   };
 
   ASSERT_TRUE(areNetworkTopologiesEqual(network.executionNetworkRoot(),
@@ -126,29 +163,46 @@ TEST(Network, ExecutionNetworkKeyExtractor) {
   };
 
   const char* expanded[] = {
-    "                 MonoLoader                                                            ",
-    "  <------------------------------------------------>                                   ",
-    "                                                                                       ",
-    " +---------------+    +-------------+   +------------+                                 ",
-    " |  AudioLoader  |----|  MonoMixer  |---|  Resample  |--+                              ",
-    " +---------------+    +-------------+   +------------+  |                              ",
-    "                                                        |                              ",
-    "   +----------------------------------------------------+                              ",
-    "   |                                                                                   ",
-    "   |  <------------------------ KeyExtractor ------------------------------>           ",
-    "   |                                                                                   ",
-    "   |   +---------------+    +-------------+   +------------+                           ",
-    "   +---|  FrameCutter  |----|  Windowing  |---|  Spectrum  |--+                        ",
-    "       +---------------+    +-------------+   +------------+  |                        ",
-    "                                                              |                        ",
-    "         +----------------------------------------------------+                        ",
-    "         |                                                                             ",
-    "         | +---------------+    +-------+   +-------------+    +-------+               ",
-    "         +-| SpectralPeaks |----| HPCP  |---| PoolStorage |----|  Key  |               ",
-    "           +---------------+    +-------+   +-------------+    +-------+               ",
-    "                                                                                       ",
-    "                                             <---------- Key --------->                ",
-    "                                                                                       "
+    "                 MonoLoader                                                  ",
+    "  <------------------------------------------------>                         ",
+    "                                                                             ",
+    "                      +---------+                                            ",
+    "                   +--| DevNull |                                            ",
+    "                   |  +---------+                                            ",
+    "                   |                                                         ",
+    "                   |  +---------+                                            ",
+    "                   +--| DevNull |                                            ",
+    "                   |  +---------+                                            ",
+    "                   |                                                         ",
+    "                   |  +---------+                                            ",
+    "                   +--| DevNull |                                            ",
+    "                   |  +---------+                                            ",
+    "                   |                                                         ",
+    "                   |  +---------+                                            ",
+    "                   +--| DevNull |                                            ",
+    "                   |  +---------+                                            ",
+    "                   |                                                         ",
+    " +---------------+ |  +-----------+   +----------+                           ",
+    " |  AudioLoader  |-+--| MonoMixer |---| Resample |--+                        ",
+    " +---------------+    +-----------+   +----------+  |                        ",
+    "                                                    |                        ", 
+    " +--------------------------------------------------+                        ",
+    " |                                                                           ",
+    " |   <----------------------- KeyExtractor ----------------------------->    ",
+    " |                                                                           ",
+    " |  +-------------+   +-----------+   +----------+   +---------------+       ",
+    " +--| FrameCutter |---| Windowing |---| Spectrum |-+-| SpectralPeaks |--+    ",
+    "    +-------------+   +-----------+   +----------+ | +---------------+  |    ",
+    "                                                   |                    |    ",  
+    "   +-----------------------------------------------+                    |    ",
+    "   | +------------------------+-----------------------------------------+    ",
+    "   | |                        |                                              ",
+    "   | |  +-------------------+ |  +------+   +-------------+    +-------+     ",
+    "   | +--| SpectralWhitening | +--| HPCP |---| PoolStorage |----|  Key  |     ",
+    "   |    |                   |    |      |   +-------------+    +-------+     ",
+    "   +----|                   |----|      |                                    ",
+    "        +-------------------+    +------+   <------------ Key --------->     ",
+    "                                                                             "
   };
 
   NetworkParser np(extractor);
@@ -165,29 +219,46 @@ TEST(Network, ExecutionNetworkKeyExtractorConnected) {
   };
 
   const char* expanded[] = {
-    "                 MonoLoader                                                            ",
-    "  <------------------------------------------------>                                   ",
-    "                                                                                       ",
-    " +---------------+    +-------------+   +------------+                                 ",
-    " |  AudioLoader  |----|  MonoMixer  |---|  Resample  |--+                              ",
-    " +---------------+    +-------------+   +------------+  |                              ",
-    "                                                        |                              ",
-    "   +----------------------------------------------------+                              ",
-    "   |                                                                                   ",
-    "   |  <------------------------ KeyExtractor ------------------------------>           ",
-    "   |                                                                                   ",
-    "   |   +---------------+    +-------------+   +------------+                           ",
-    "   +---|  FrameCutter  |----|  Windowing  |---|  Spectrum  |--+                +------------+  ",
-    "       +---------------+    +-------------+   +------------+  |           +----|  DevNull   |  ",
-    "                                                              |           |    +------------+  ",
-    "         +----------------------------------------------------+           |                    ",
-    "         |                                                                |    +------------+  ",
-    "         | +---------------+    +-------+   +-------------+    +-------+  +----|  DevNull   |  ",
-    "         +-| SpectralPeaks |----| HPCP  |---| PoolStorage |----|  Key  |--+    +------------+  ",
-    "           +---------------+    +-------+   +-------------+    +-------+  |                    ",
-    "                                                                          |    +------------+  ",
-    "                                             <---------- Key --------->   +----|  DevNull   |  ",
-    "                                                                               +------------+  ",
+    "                 MonoLoader                                                                 ",
+    "  <------------------------------------------------>                                        ",
+    "                                                                                            ",
+    "                      +---------+                                                           ",
+    "                   +--| DevNull |                                                           ",
+    "                   |  +---------+                                                           ",
+    "                   |                                                                        ",
+    "                   |  +---------+                                                           ",
+    "                   +--| DevNull |                                                           ",
+    "                   |  +---------+                                                           ",
+    "                   |                                                                        ",
+    "                   |  +---------+                                                           ",
+    "                   +--| DevNull |                                                           ",
+    "                   |  +---------+                                                           ",
+    "                   |                                                                        ",
+    "                   |  +---------+                                                           ",
+    "                   +--| DevNull |                                                           ",
+    "                   |  +---------+                                                           ",
+    "                   |                                                                        ",
+    " +---------------+ |  +-----------+   +----------+                                          ",
+    " |  AudioLoader  |-+--| MonoMixer |---| Resample |--+                                       ",
+    " +---------------+    +-----------+   +----------+  |                                       ",
+    "                                                    |                                       ", 
+    " +--------------------------------------------------+                                       ",
+    " |                                                                                          ",
+    " |   <----------------------- KeyExtractor ----------------------------->                   ",
+    " |                                                                                          ",
+    " |  +-------------+   +-----------+   +----------+   +---------------+                      ",
+    " +--| FrameCutter |---| Windowing |---| Spectrum |-+-| SpectralPeaks |--+                   ",
+    "    +-------------+   +-----------+   +----------+ | +---------------+  |      +---------+  ",
+    "                                                   |                    | +----| DevNull |  ",  
+    "   +-----------------------------------------------+                    | |    +---------+  ",
+    "   | +------------------------+-----------------------------------------+ |                 ",
+    "   | |                        |                                           |    +---------+  ",
+    "   | |  +-------------------+ |  +------+   +-------------+    +-------+  +----| DevNull |  ",
+    "   | +--| SpectralWhitening | +--| HPCP |---| PoolStorage |----|  Key  |--+    +---------+  ",
+    "   |    |                   |    |      |   +-------------+    +-------+  |                 ",
+    "   +----|                   |----|      |                                 |    +---------+  ",
+    "        +-------------------+    +------+   <------------ Key --------->  +----| DevNull |  ",
+    "                                                                               +---------+  "
   };
 
   NetworkParser np(extractor);
@@ -744,10 +815,55 @@ TEST(Network, DiamondShape) {
 
   ASSERT_TRUE(areNetworkTopologiesEqual(n.executionNetworkRoot(),
                                         VISIBLE_NETWORK(expanded)));
-
 }
 
 TEST(Network, DiamondShape2) {
+  AlgorithmFactory& factory = AlgorithmFactory::instance();
+
+  Algorithm* A = factory.create("A");
+  Algorithm* B = factory.create("B");
+  Algorithm* F = factory.create("F1");
+
+  A->output("out") >> B->input("in");
+  B->output("out") >> F->input("in1");
+  A->output("out") >> F->input("in2");
+
+  Network n(A);
+
+  const char* expanded[] = {
+    "                                         ",
+    "                  +----+      +----+     ",
+    "              +---| B  |------| F1 |     ",
+    "     +----+   |   +----+      |    |     ",
+    "     | A  |---+---------------|    |     ",
+    "     +----+                   +----+     ",
+    "                                         "
+  };
+
+  const char* expandedWrong[] = {
+    "                                         ",
+    "                  +----+         +----+  ",
+    "              +---| B  |---------| F1 |  ",
+    "     +----+   |   +----+         +----+  ",
+    "     | A  |---+                          ",
+    "     +----+   |                  +----+  ",
+    "              +------------------| F1 |  ",
+    "                                 +----+  ",
+    "                                         "
+  };
+
+  ASSERT_TRUE(areNetworkTopologiesEqual(n.visibleNetworkRoot(),
+                                        VISIBLE_NETWORK(expanded)));
+
+  ASSERT_FALSE(areNetworkTopologiesEqual(n.executionNetworkRoot(),
+                                         VISIBLE_NETWORK(expandedWrong)));
+
+  ASSERT_TRUE(areNetworkTopologiesEqual(n.executionNetworkRoot(),
+                                        VISIBLE_NETWORK(expanded)));
+}
+
+
+TEST(Network, DiamondShape3) {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   Algorithm* A = factory.create("A");

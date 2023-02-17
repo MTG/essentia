@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -113,9 +113,23 @@ int PyStreamingAlgorithm::tp_init(PyStreamingAlgorithm *self, PyObject *args, Py
 void PyStreamingAlgorithm::tp_dealloc (PyObject* obj) {
   PyStreamingAlgorithm* self = reinterpret_cast<PyStreamingAlgorithm*>(obj);
   // FIXME: need to deallocate something here I guess...
-  //if (self->isGenerator) streaming::deleteNetwork(self->algo);
+  
+  if (self->isGenerator) {
+    scheduler::deleteNetwork(self->algo);
+    
+    // Another way to do that is by creating a network and running its clear() method
+    /*    
+    try {
+      scheduler::Network(self->algo).clear();
+    }
+    catch (const exception& e) {
+      PyErr_SetString(PyExc_RuntimeError, e.what());
+      return;
+    }
+    */
+  }
 
-  self->ob_type->tp_free(obj);
+  Py_TYPE(self)->tp_free(obj);
 }
 
 PyObject* PyStreamingAlgorithm::configure (PyStreamingAlgorithm* self, PyObject* args, PyObject* keywds) {
@@ -152,7 +166,7 @@ PyObject* PyStreamingAlgorithm::configure (PyStreamingAlgorithm* self, PyObject*
 }
 
 PyObject* PyStreamingAlgorithm::hasSink(PyStreamingAlgorithm* self, PyObject* obj) {
-  char* name = PyString_AsString(obj);
+  const char* name = PyString_AsString(obj);
   if (name == NULL) {
     PyErr_SetString(PyExc_ValueError, "Algorithm.hasSink requires 1 string argument");
     return NULL;
@@ -163,7 +177,7 @@ PyObject* PyStreamingAlgorithm::hasSink(PyStreamingAlgorithm* self, PyObject* ob
 }
 
 PyObject* PyStreamingAlgorithm::hasSource(PyStreamingAlgorithm* self, PyObject* obj) {
-  char* name = PyString_AsString(obj);
+  const char* name = PyString_AsString(obj);
   if (name == NULL) {
     PyErr_SetString(PyExc_ValueError, "Algorithm.hasSource requires 1 string argument");
     return NULL;
@@ -236,7 +250,7 @@ PyObject* PyStreamingAlgorithm::push(PyStreamingAlgorithm* self, PyObject* args)
 }
 
 PyObject* PyStreamingAlgorithm::getInputType(PyStreamingAlgorithm* self, PyObject* obj) {
-  char* name = PyString_AsString(obj);
+  const char* name = PyString_AsString(obj);
   if (name == NULL) {
     PyErr_SetString(PyExc_TypeError, "Algorithm.getInputType requires 1 string argument");
     return NULL;
@@ -256,7 +270,7 @@ PyObject* PyStreamingAlgorithm::getInputType(PyStreamingAlgorithm* self, PyObjec
 }
 
 PyObject* PyStreamingAlgorithm::getOutputType(PyStreamingAlgorithm* self, PyObject* obj) {
-  char* name = PyString_AsString(obj);
+  const char* name = PyString_AsString(obj);
   if (name == NULL) {
     PyErr_SetString(PyExc_TypeError, "Algorithm.getOutputType requires 1 string argument");
     return NULL;
@@ -334,7 +348,7 @@ PyObject* PyStreamingAlgorithm::getDoc(PyStreamingAlgorithm* self) {
 
 PyObject* PyStreamingAlgorithm::getStruct(PyStreamingAlgorithm* self) {
   const AlgorithmInfo<streaming::Algorithm>& inf = streaming::AlgorithmFactory::getInfo(self->algo->name());
-  return generateDocStruct<streaming::Algorithm>(*(self->algo), inf.description);
+  return generateDocStruct<streaming::Algorithm>(*(self->algo), inf);
 }
 
 static PyMethodDef PyStreamingAlgorithm_methods[] = {
@@ -384,8 +398,12 @@ static PyMethodDef PyStreamingAlgorithm_methods[] = {
 };
 
 static PyTypeObject PyStreamingAlgorithmType = {
+#if PY_MAJOR_VERSION >= 3
+  PyVarObject_HEAD_INIT(NULL, 0)
+#else
   PyObject_HEAD_INIT(NULL)
   0,                                                      // ob_size
+#endif
   "essentia.streaming.Algorithm",                          // tp_name
   sizeof(PyStreamingAlgorithm),                           // tp_basicsize
   0,                                                      // tp_itemsize

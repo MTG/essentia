@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -61,19 +61,19 @@ class PitchSalienceFunction : public Algorithm {
   };
 
   void declareParameters() {
-    declareParameter("binResolution", "salience function bin resolution [cents]", "(0,inf)", 10.0);
+    declareParameter("binResolution", "salience function bin resolution [cents]", "(0,100]", 10.0);
     declareParameter("referenceFrequency", "the reference frequency for Hertz to cent convertion [Hz], corresponding to the 0th cent bin", "(0,inf)", 55.0);
     declareParameter("magnitudeThreshold", "peak magnitude threshold (maximum allowed difference from the highest peak in dBs)", "[0,inf)",  40.0);
     declareParameter("magnitudeCompression", "magnitude compression parameter (=0 for maximum compression, =1 for no compression)", "(0,1]", 1.0);
     declareParameter("numberHarmonics", "number of considered harmonics", "[1,inf)", 20);
-    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);
+    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "[0,1]", 0.8);
   }
-
+  
   void configure();
   void compute();
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 
 }; // class PitchSalienceFunction

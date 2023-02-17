@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,15 +26,9 @@ using namespace std;
 namespace essentia {
 namespace standard {
 
-
 const char* DynamicComplexity::name = "DynamicComplexity";
-const char* DynamicComplexity::description = DOC(
-"The dynamic complexity is the average absolute deviation from the global\n"
-"loudness level estimate on the dB scale. It is related to the dynamic\n"
-"range and to the amount of fluctuation in loudness present in a recording.\n"
-"\n"
-"Silence at the beginning and at the end of a track are ignored in the\n"
-"computation in order not to deteriorate the results.\n\n"
+const char* DynamicComplexity::category = "Loudness/dynamics";
+const char* DynamicComplexity::description = DOC("This algorithm computes the dynamic complexity defined as the average absolute deviation from the global loudness level estimate on the dB scale. It is related to the dynamic range and to the amount of fluctuation in loudness present in a recording. Silence at the beginning and at the end of a track are ignored in the computation in order not to deteriorate the results.\n\n"
 "References:\n"
 "  [1] S. Streich, Music complexity: a multi-faceted description of audio\n"
 "  content, UPF, Barcelona, Spain, 2007.");
@@ -52,7 +46,7 @@ void DynamicComplexity::compute() {
 
   if (signal.empty()) {
     complexity = 0;
-    loudness = -90;
+    loudness = DB_SILENCE_CUTOFF;
     return;
   }
 
@@ -90,12 +84,12 @@ void DynamicComplexity::compute() {
 
   // erase silence at beginning
   int beginIdx = 0;
-  while ((beginIdx < framenum) && (VdB[beginIdx] == -90.0)) beginIdx++;
+  while ((beginIdx < framenum) && (VdB[beginIdx] == DB_SILENCE_CUTOFF)) beginIdx++;
   VdB.erase(VdB.begin(), VdB.begin() + beginIdx);
 
   // erase silence at end
   int endIdx = VdB.size() - 1;
-  while ((endIdx >= 0) && (VdB[endIdx] == -90.0)) endIdx--;
+  while ((endIdx >= 0) && (VdB[endIdx] == DB_SILENCE_CUTOFF)) endIdx--;
   if (endIdx == -1) // if we don't do this it crashes in VS8.0
     VdB.clear();
   else
@@ -118,12 +112,12 @@ void DynamicComplexity::compute() {
     complexity /= VdB.size();
   }
   else { // silent input
-    loudness = -90.0;
+    loudness = DB_SILENCE_CUTOFF;
     complexity = 0.0;
   }
 
   // normalization
-  // loudness levels are limited to -90 dB .. 0 dB so if a signal would be
+  // loudness levels are limited to -100 dB .. 0 dB so if a signal would be
   // half of the time totally silent and the other half at full scale, we
   // would get a value of 45 as the Dynamic Complexity then a safe
   // normalization would be using 45.

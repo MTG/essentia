@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* EnergyBandRatio::name = "EnergyBandRatio";
+const char* EnergyBandRatio::category = "Spectral";
 const char* EnergyBandRatio::description = DOC("This algorithm computes the ratio of the spectral energy in the range [startFrequency, stopFrequency] over the total energy.\n"
 "\n"
 "An exception is thrown when startFrequency is larger than stopFrequency\n"
@@ -32,7 +33,7 @@ const char* EnergyBandRatio::description = DOC("This algorithm computes the rati
 "\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Energy_(signal_processing)");
+"  http://en.wikipedia.org/wiki/Energy_%28signal_processing%29");
 
 
 void EnergyBandRatio::configure() {

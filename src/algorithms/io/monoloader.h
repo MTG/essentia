@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -40,6 +40,12 @@ class MonoLoader : public AlgorithmComposite {
   MonoLoader();
 
   ~MonoLoader() {
+    // Disconnect all null connections to delete the corresponding DevNull objects created.
+    disconnect(_audioLoader->output("md5"), NOWHERE);
+    disconnect(_audioLoader->output("bit_rate"), NOWHERE);
+    disconnect(_audioLoader->output("codec"), NOWHERE);
+    disconnect(_audioLoader->output("sampleRate"), NOWHERE);
+    
     delete _audioLoader;
     delete _mixer;
     delete _resample;
@@ -49,6 +55,8 @@ class MonoLoader : public AlgorithmComposite {
     declareParameter("filename", "the name of the file from which to read", "", Parameter::STRING);
     declareParameter("sampleRate", "the desired output sampling rate [Hz]", "(0,inf)", 44100.);
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
+    declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
+
   }
 
   void declareProcessOrder() {
@@ -58,6 +66,7 @@ class MonoLoader : public AlgorithmComposite {
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -99,6 +108,8 @@ class MonoLoader : public Algorithm {
     declareParameter("filename", "the name of the file from which to read", "", Parameter::STRING);
     declareParameter("sampleRate", "the desired output sampling rate [Hz]", "(0,inf)", 44100.);
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
+    declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
+
   }
 
   void configure();
@@ -106,6 +117,7 @@ class MonoLoader : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

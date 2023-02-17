@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,8 +28,8 @@ namespace standard {
 
 
 const char* TonicIndianArtMusic::name = "TonicIndianArtMusic";
-const char* TonicIndianArtMusic::version = "1.0";
-const char* TonicIndianArtMusic::description = DOC("This algorithm estimates the tonic frequency of the lead artist in Indian art music. It uses multipitch representation of the audio signal (pitch salience) to compute a histogram using which the tonic is identified as one of its peak. The decision is made based on the distance between the prominent peaks, the classification is done using a decision tree.\n"
+const char* TonicIndianArtMusic::category = "Tonal";
+const char* TonicIndianArtMusic::description = DOC("This algorithm estimates the tonic frequency of the lead artist in Indian art music. It uses multipitch representation of the audio signal (pitch salience) to compute a histogram using which the tonic is identified as one of its peak. The decision is made based on the distance between the prominent peaks, the classification is done using a decision tree. An empty input signal will throw an exception. An exception will also be thrown if no predominant pitch salience peaks are detected within the maxTonicFrequency to minTonicFrequency range. \n"
 "\n"
 "References:\n"
 "  [1] J. Salamon, S. Gulati, and X. Serra, \"A Multipitch Approach to Tonic\n"
@@ -95,7 +95,13 @@ void TonicIndianArtMusic::configure() {
 
 
 void TonicIndianArtMusic::compute() {
+  
   const vector<Real>& signal = _signal.get();
+  // Prevent segmentation fault
+  if (signal.size() == 0) { 
+    throw EssentiaException("TonicIndianArtMusic: Empty Audio passed"); 
+  }
+
   Real& tonic = _tonic.get();
 
   // Pre-processing
@@ -117,6 +123,7 @@ void TonicIndianArtMusic::compute() {
   _spectralPeaks->input("spectrum").set(frameSpectrum);
   _spectralPeaks->output("frequencies").set(frameFrequencies);
   _spectralPeaks->output("magnitudes").set(frameMagnitudes);
+
 
   // Pitch salience contours
   vector<Real> frameSalience;
@@ -189,6 +196,15 @@ void TonicIndianArtMusic::compute() {
 
   // this is the decision tree hardcoded to choose the peak in the histogram which corresponds o the tonic
   /*implementing the decision tree*/
+
+  // Prevent segmentation fault
+  if (peak_locs.size() == 0){ 
+    throw EssentiaException("TonicIndianArtMusic: No peak locations"); 
+  }
+
+  // Peak detection should guarantee the equal number of both types of value.
+  assert(peak_locs.size() == peak_amps.size());
+  
   Real highest_peak_loc = peak_locs[0];
   Real f2 =peak_locs[1] - highest_peak_loc;
   Real f3 =peak_locs[2] - highest_peak_loc;
@@ -232,6 +248,7 @@ void TonicIndianArtMusic::compute() {
   }
   //converting value of the tonic in cent to Hz scale
   Real _centToHertzBase = pow(2, _binResolution / 1200.0);
+
   tonic = _referenceFrequency * pow(_centToHertzBase, tonic_loc);
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -37,6 +37,11 @@ class GFCC : public Algorithm {
 
   std::vector<Real> _logbands;
 
+  std::string _logType;
+  Real _silenceThreshold;
+  Real _dbSilenceThreshold;
+  Real _logSilenceThreshold;
+
  public:
   GFCC() {
     declareInput(_spectrum, "spectrum", "the audio spectrum");
@@ -53,18 +58,23 @@ class GFCC : public Algorithm {
   }
 
   void declareParameters() {
+    declareParameter("inputSize", "the size of input spectrum", "(1,inf)", 1025);
     declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("numberBands", "the number of bands in the filter", "[1,inf)", 40);
     declareParameter("numberCoefficients", "the number of output cepstrum coefficients", "[1,inf)", 13);
     declareParameter("lowFrequencyBound", "the lower bound of the frequency range [Hz]", "[0,inf)", 40.);
     declareParameter("highFrequencyBound", "the upper bound of the frequency range [Hz]", "(0,inf)", 22050.);
+    declareParameter("type", "use magnitude or power spectrum","{magnitude,power}", "power");
+    declareParameter("silenceThreshold", "silence threshold for computing log-energy bands", "(0,inf)", 1e-10);
+    declareParameter("logType","logarithmic compression type. Use 'dbpow' if working with power and 'dbamp' if working with magnitudes","{natural,dbpow,dbamp,log}","dbamp");
+    declareParameter("dctType", "the DCT type", "[2,3]", 2);
   }
 
   void configure();
   void compute();
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 
 };

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -21,9 +21,10 @@
 #define ESSENTIA_PYTHON_TYPEDEFS_H
 
 #include <Python.h>
+#include "python3.h"
 #include <complex>
 #define NO_IMPORT_ARRAY
-#include "numpy/ndarrayobject.h"
+#include <numpy/ndarrayobject.h>
 #include "types.h"
 #include "parameter.h"
 #include "pytypes/pypool.h"
@@ -45,8 +46,11 @@ enum Edt {
   VECTOR_STEREOSAMPLE,
   VECTOR_BOOL,
   VECTOR_VECTOR_REAL,
+  VECTOR_VECTOR_COMPLEX,
   VECTOR_VECTOR_STRING,
   VECTOR_VECTOR_STEREOSAMPLE,
+  TENSOR_REAL,
+  VECTOR_TENSOR_REAL,
   MATRIX_REAL,
   VECTOR_MATRIX_REAL,
   POOL,
@@ -67,8 +71,11 @@ inline Edt typeInfoToEdt(const std::type_info& tp) {
   if (essentia::sameType(tp, typeid(std::vector<int>))) return VECTOR_INTEGER;
   if (essentia::sameType(tp, typeid(std::vector<essentia::StereoSample>))) return VECTOR_STEREOSAMPLE;
   if (essentia::sameType(tp, typeid(std::vector<std::vector<essentia::Real> >))) return VECTOR_VECTOR_REAL;
+  if (essentia::sameType(tp, typeid(std::vector<std::vector<std::complex<essentia::Real> > >))) return VECTOR_VECTOR_COMPLEX;
   if (essentia::sameType(tp, typeid(std::vector<std::vector<std::string> >))) return VECTOR_VECTOR_STRING;
   if (essentia::sameType(tp, typeid(std::vector<std::vector<essentia::StereoSample> >))) return VECTOR_VECTOR_STEREOSAMPLE;
+  if (essentia::sameType(tp, typeid(essentia::Tensor<essentia::Real>))) return TENSOR_REAL;
+  if (essentia::sameType(tp, typeid(std::vector<essentia::Tensor<essentia::Real> >))) return VECTOR_TENSOR_REAL;
   if (essentia::sameType(tp, typeid(TNT::Array2D<essentia::Real>))) return MATRIX_REAL;
   if (essentia::sameType(tp, typeid(std::vector<TNT::Array2D<essentia::Real> >))) return VECTOR_MATRIX_REAL;
   if (essentia::sameType(tp, typeid(essentia::Pool))) return POOL;
@@ -88,8 +95,11 @@ inline std::string edtToString(Edt tp) {
     case VECTOR_INTEGER: return "VECTOR_INTEGER";
     case VECTOR_STEREOSAMPLE: return "VECTOR_STEREOSAMPLE";
     case VECTOR_VECTOR_REAL: return "VECTOR_VECTOR_REAL";
+    case VECTOR_VECTOR_COMPLEX: return "VECTOR_VECTOR_COMPLEX";
     case VECTOR_VECTOR_STRING: return "VECTOR_VECTOR_STRING";
     case VECTOR_VECTOR_STEREOSAMPLE: return "VECTOR_VECTOR_STEREOSAMPLE";
+    case TENSOR_REAL: return "TENSOR_REAL";
+    case VECTOR_TENSOR_REAL: return "VECTOR_TENSOR_REAL";
     case MATRIX_REAL: return "MATRIX_REAL";
     case VECTOR_MATRIX_REAL: return "VECTOR_MATRIX_REAL";
     case POOL: return "POOL";
@@ -110,8 +120,11 @@ inline Edt stringToEdt(const std::string& tpName) {
   if (tpName == "VECTOR_INTEGER") return VECTOR_INTEGER;
   if (tpName == "VECTOR_STEREOSAMPLE") return VECTOR_STEREOSAMPLE;
   if (tpName == "VECTOR_VECTOR_REAL") return VECTOR_VECTOR_REAL;
+  if (tpName == "VECTOR_VECTOR_COMPLEX") return VECTOR_VECTOR_COMPLEX;
   if (tpName == "VECTOR_VECTOR_STRING") return VECTOR_VECTOR_STRING;
   if (tpName == "VECTOR_VECTOR_STEREOSAMPLE") return VECTOR_VECTOR_STEREOSAMPLE;
+  if (tpName == "TENSOR_REAL") return TENSOR_REAL;
+  if (tpName == "VECTOR_TENSOR_REAL") return VECTOR_TENSOR_REAL;
   if (tpName == "MATRIX_REAL") return MATRIX_REAL;
   if (tpName == "VECTOR_MATRIX_REAL") return VECTOR_MATRIX_REAL;
   if (tpName == "POOL") return POOL;
@@ -134,6 +147,7 @@ inline Edt paramTypeToEdt(const essentia::Parameter::ParamType& p) {
     case essentia::Parameter::VECTOR_STEREOSAMPLE: return VECTOR_STEREOSAMPLE;
     case essentia::Parameter::MAP_VECTOR_REAL: return MAP_VECTOR_REAL;
     case essentia::Parameter::MAP_VECTOR_STRING: return MAP_VECTOR_STRING;
+    case essentia::Parameter::VECTOR_VECTOR_REAL: return VECTOR_VECTOR_REAL;
 
     default:
       std::ostringstream msg;
@@ -155,8 +169,11 @@ inline void* allocate(Edt tp) {
     case VECTOR_COMPLEX: return new essentia::RogueVector<std::complex<essentia::Real> >;
     case VECTOR_STEREOSAMPLE: return new std::vector<essentia::StereoSample>;
     case VECTOR_VECTOR_REAL: return new std::vector<std::vector<essentia::Real> >;
+    case VECTOR_VECTOR_COMPLEX: return new std::vector<std::vector<std::complex<essentia::Real> > >;
     case VECTOR_VECTOR_STRING: return new std::vector<std::vector<std::string> >;
     case VECTOR_VECTOR_STEREOSAMPLE: return new std::vector<std::vector<essentia::StereoSample> >;
+    case TENSOR_REAL: return new essentia::Tensor<essentia::Real>;
+    case VECTOR_TENSOR_REAL: return new std::vector<essentia::Tensor<essentia::Real> >;
     case MATRIX_REAL: return new TNT::Array2D<essentia::Real>;
     case VECTOR_MATRIX_REAL: return new std::vector<TNT::Array2D<essentia::Real> >;
     case POOL: return new essentia::Pool;
@@ -178,8 +195,11 @@ inline void dealloc(void* ptr, Edt tp) {
     case VECTOR_STRING: delete (std::vector<std::string>*)ptr; break;
     case VECTOR_STEREOSAMPLE: delete (std::vector<essentia::StereoSample>*)ptr; break;
     case VECTOR_VECTOR_REAL: delete (std::vector<std::vector<essentia::Real> >*)ptr; break;
+    case VECTOR_VECTOR_COMPLEX: delete (std::vector<std::vector<std::complex<essentia::Real> > >*)ptr; break;
     case VECTOR_VECTOR_STRING: delete (std::vector<std::vector<std::string> >*)ptr; break;
     case VECTOR_VECTOR_STEREOSAMPLE: delete (std::vector<std::vector<essentia::StereoSample> >*)ptr; break;
+    case TENSOR_REAL: delete (essentia::Tensor<essentia::Real>*)ptr; break;
+    case VECTOR_TENSOR_REAL: delete (std::vector<essentia::Tensor<essentia::Real> >*)ptr; break;
     case MATRIX_REAL: delete (TNT::Array2D<essentia::Real>*)ptr; break;
     case VECTOR_MATRIX_REAL: delete (std::vector<TNT::Array2D<essentia::Real> >*)ptr; break;
     case POOL: delete (essentia::Pool*)ptr; break;
@@ -222,8 +242,17 @@ DECLARE_PYTHON_TYPE(VectorComplex);
 DECLARE_PROXY_TYPE(VectorStereoSample, std::vector<essentia::StereoSample>);
 DECLARE_PYTHON_TYPE(VectorStereoSample);
 
+DECLARE_PROXY_TYPE(TensorReal, essentia::Tensor<essentia::Real>);
+DECLARE_PYTHON_TYPE(TensorReal);
+
+DECLARE_PROXY_TYPE(VectorTensorReal, std::vector<essentia::Tensor<essentia::Real> >);
+DECLARE_PYTHON_TYPE(VectorTensorReal);
+
 DECLARE_PROXY_TYPE(VectorVectorReal, std::vector<std::vector<essentia::Real> >);
 DECLARE_PYTHON_TYPE(VectorVectorReal);
+
+DECLARE_PROXY_TYPE(VectorVectorComplex, std::vector<std::vector<std::complex<essentia::Real> > >);
+DECLARE_PYTHON_TYPE(VectorVectorComplex);
 
 DECLARE_PROXY_TYPE(VectorVectorString, std::vector<std::vector<std::string> >);
 DECLARE_PYTHON_TYPE(VectorVectorString);

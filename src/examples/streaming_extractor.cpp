@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
     compute(audioFilename, outputFilename, neqloudPool, eqloudPool, options);
   }
   catch (EssentiaException& e) {
-    cout << e.what() << endl;
+    cerr << e.what() << endl;
     throw;
   }
 
@@ -257,7 +257,7 @@ void computeSegments(const string& audioFilename, Pool& neqloudPool,
     else features = neqloudPool.value<vector<vector<Real> > >("lowlevel.mfcc");
   }
   catch(const EssentiaException&) {
-    cout << "Error: could not find MFCC features in low level pool. Aborting..." << endl;
+    cerr << "Error: could not find MFCC features in low level pool. Aborting..." << endl;
     exit(3);
   }
 
@@ -355,7 +355,7 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, Pool& eql
         continue;
       }
       else {
-        cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+        cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
         exit(4);
       }
     }
@@ -378,7 +378,7 @@ void computeReplayGain(const string& audioFilename, Pool& neqloudPool, Pool& eql
         eqloudPool.remove("metadata.audio_properties.replay_gain");
       }
       else {
-        cout << "ERROR: File looks like a completely silent file... Aborting..." << endl;
+        cerr << "ERROR: File looks like a completely silent file... Aborting..." << endl;
         exit(5);
       }
     }
@@ -582,7 +582,7 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
       else neqloudPool.value<vector<Real> >(llspace + "loudness")[0];
     }
     catch (EssentiaException&) {
-      cout << "ERROR: File is too short (< 2sec)... Aborting..." << endl;
+      cerr << "ERROR: File is too short (< 2sec)... Aborting..." << endl;
       exit(6);
     }
   }
@@ -600,11 +600,6 @@ void computeLowLevel(const string& audioFilename, Pool& neqloudPool, Pool& eqlou
                      * eqloudPool.value<Real>("metadata.audio_properties.analysis_sample_rate"));
     }
   }
-
-
-  // delete network only now, because we needed audio_2->output("audio") to
-  // compute the onset rate on the previous line.
-  //deleteNetwork(audio_2);
 }
 
 // outdated beat tracker

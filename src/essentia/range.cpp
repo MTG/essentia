@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -22,6 +22,7 @@
 #include "range.h"
 #include "stringutil.h"
 
+
 using namespace std;
 using namespace essentia;
 
@@ -40,12 +41,16 @@ Range* Range::create(const std::string& s) {
     return new Set(s);
   }
   else {
-    throw EssentiaException("Invalid range");
+  throw EssentiaException("Invalid range '" + s + "' for parameter. Should contain '[]', '()' or '{}' to specify the range of given parameter.");
   }
 }
 
 Interval::Interval(const string& strrange) {
   string s = strrange;
+
+  if(strrange.find_first_of(' ') != std::string::npos) {
+    throw EssentiaException("Invalid interval, should not contain space characters");
+  }
 
   string::size_type idx = s.find(",");
   if (idx == string::npos) {
@@ -83,24 +88,20 @@ Interval::Interval(const string& strrange) {
     _lbound = false;
   }
   else {
-    char* ptr;
     _lbound = true;
-    _lvalue = strtod(sleft.c_str(), &ptr);
-    if (sleft.c_str() == ptr) {
-      throw EssentiaException("Invalid interval, could not parse '", sleft, "' as a number");
-    }
+    std::istringstream isleft(sleft);
+    isleft.imbue(std::locale("C"));
+    isleft >> _lvalue;
   }
 
   if (sright == "inf") {
     _ubound = false;
   }
   else {
-    char* ptr;
     _ubound = true;
-    _uvalue = strtod(sright.c_str(), &ptr);
-    if (sright.c_str() == ptr) {
-      throw EssentiaException("Invalid interval, could not parse '", sright, "' as a number");
-    }
+    std::istringstream isright(sright);
+    isright.imbue(std::locale("C"));
+    isright >> _uvalue;
   }
 }
 

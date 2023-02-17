@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,13 +24,14 @@ using namespace essentia;
 using namespace standard;
 
 const char* GeometricMean::name = "GeometricMean";
-const char* GeometricMean::description = DOC("This algorithm computes the geometric mean of an array of positive Reals.\n"
+const char* GeometricMean::category = "Statistics";
+const char* GeometricMean::description = DOC("This algorithm computes the geometric mean of an array of positive values.\n"
 "\n"
-"An exception is thrown if the input array does not contain strict positive numbers or the array is empty.\n"
+"An exception is thrown if the input array does not contain strictly positive numbers or the array is empty.\n"
 "\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Energy_(signal_processing)\n\n"
+"  http://en.wikipedia.org/wiki/Energy_%28signal_processing%29\n\n"
 "  [2] Geometric Mean -- from Wolfram MathWorld,\n"
 "  http://mathworld.wolfram.com/GeometricMean.html");
 

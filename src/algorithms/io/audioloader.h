@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -58,19 +58,13 @@ class AudioLoader : public Algorithm {
   AVMD5 *_md5Encoded;
   uint8_t _checksum[16];
   bool _computeMD5;
-
-
-#if LIBAVCODEC_VERSION_INT >= AVCODEC_AUDIO_DECODE4
   AVFrame* _decodedFrame;
-#endif
 
-#if HAVE_AVRESAMPLE
-  struct AVAudioResampleContext* _convertCtxAv;
-#elif HAVE_SWRESAMPLE
-  struct SwrContext* _convertCtx;
-#endif
+  struct SwrContext* _convertCtxAv;
 
   int _streamIdx; // index of the audio stream among all the streams contained in the file
+  std::vector<int> _streams;
+  int _selectedStream;
   bool _configured;
 
 
@@ -89,12 +83,7 @@ class AudioLoader : public Algorithm {
  public:
   AudioLoader() : Algorithm(), _buffer(0),  _demuxCtx(0),
 	          _audioCtx(0), _audioCodec(0), _decodedFrame(0),
-#if HAVE_AVRESAMPLE
-                  _convertCtxAv(0),
-#elif HAVE_SWRESAMPLE
-                  _convertCtx(0),
-#endif
-                  _configured(false) {
+            _convertCtxAv(0), _configured(false) {
 
     declareOutput(_audio, 1, "audio", "the input audio signal");
     declareOutput(_sampleRate, 0, "sampleRate", "the sampling rate of the audio signal [Hz]");
@@ -111,11 +100,7 @@ class AudioLoader : public Algorithm {
     // use av_malloc, because we _need_ the buffer to be 16-byte aligned
     _buffer = (float*)av_malloc(FFMPEG_BUFFER_SIZE);
 
-#if LIBAVUTIL_VERSION_INT < AVUTIL_51_43_0
-    _md5Encoded = (AVMD5*) av_malloc(av_md5_size);
-#else
     _md5Encoded = av_md5_alloc();
-#endif
     if (!_md5Encoded) {
         throw EssentiaException("Error allocating the MD5 context");
     }
@@ -129,11 +114,13 @@ class AudioLoader : public Algorithm {
   void declareParameters() {
     declareParameter("filename", "the name of the file from which to read", "", Parameter::STRING);
     declareParameter("computeMD5", "compute the MD5 checksum", "{true,false}", false);
+    declareParameter("audioStream", "audio stream index to be loaded. Other streams are not taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
   }
 
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -188,6 +175,7 @@ class AudioLoader : public Algorithm {
   void declareParameters() {
     declareParameter("filename", "the name of the file from which to read", "", Parameter::STRING);
     declareParameter("computeMD5", "compute the MD5 checksum", "{true,false}", false);
+    declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
   }
 
   void configure();
@@ -196,6 +184,7 @@ class AudioLoader : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

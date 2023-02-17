@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,10 +25,11 @@ using namespace essentia;
 using namespace standard;
 
 const char* BinaryOperatorStream::name = "BinaryOperatorStream";
-const char* BinaryOperatorStream::description = DOC("Given two vectors of Reals, this algorithm will perform basic arithmetical operations on it, element by element.\n"
+const char* BinaryOperatorStream::category = "Standard";
+const char* BinaryOperatorStream::description = DOC("This algorithm performs basic arithmetical operations element by element given two arrays.\n"
 "Note:\n"
 "  - using this algorithm in streaming mode can cause diamond shape graphs which have not been tested with the current scheduler. There is NO GUARANTEE of its correct work for diamond shape graphs.\n"
-"  - for y<0, x/y is invalid");
+"  - for y=0, x/y is invalid");
 
 BinaryOperatorStream::OpType BinaryOperatorStream::typeFromString(const std::string& name) const {
   if (name == "add") return ADD;
@@ -87,7 +88,7 @@ void BinaryOperatorStream::compute() {
   case DIVIDE:
     {
       for (size_t i=0; i<input1.size(); ++i) {
-        if (input2[i] < 0) {
+        if (!input2[i]) {
           std::ostringstream e ;
           e <<  "BinaryOperatorStream: Divide by zero found in array position " << i;
           throw EssentiaException(e);

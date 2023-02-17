@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,10 +25,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* Slicer::name = "Slicer";
-const char* Slicer::description = DOC("This algorithm returns a vector of slices, which start and end times are given as parameters.\n"
-"\n"
-"The parameters, \"startTimes\" and \"endTimes\" must be coherent. If these parameters differ in size, an exception is thrown. If a particular startTime is larger than its corresponding endTime, an exception is thrown.");
+const char* Slicer::name = essentia::standard::Slicer::name;
+const char* Slicer::category = essentia::standard::Slicer::category;
+const char* Slicer::description = essentia::standard::Slicer::description;
 
 void Slicer::configure() {
   _sampleRate = parameter("sampleRate").toReal();
@@ -211,9 +210,11 @@ namespace essentia {
 namespace standard {
 
 const char* Slicer::name = "Slicer";
-const char* Slicer::description = DOC("This algorithm returns a vector of slices, which start and end times are given as parameters.\n"
+const char* Slicer::category = "Standard";
+const char* Slicer::description = DOC("This algorithm splits an audio signal into segments given their start and end times.\n"
 "\n"
 "The parameters, \"startTimes\" and \"endTimes\" must be coherent. If these parameters differ in size, an exception is thrown. If a particular startTime is larger than its corresponding endTime, an exception is thrown.");
+
 
 void Slicer::configure() {
   _slicer->configure(INHERIT("sampleRate"),

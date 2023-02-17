@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -112,7 +112,16 @@ void Configurable::setParameters(const ParameterMap& params) {
 
     // check that the parameter fits in its valid range, if specified
     const string& srange = parameterRange[name];
-    auto_ptr<Range> r(Range::create(srange));
+
+    unique_ptr<Range> r;
+    try {
+      r = unique_ptr<Range>{Range::create(srange)};
+    }
+    catch (EssentiaException& e) {
+      ostringstream msg;
+      msg << "Parameter " << name << ": " << e.what() << ": \"" << srange << "\"";
+      throw EssentiaException(msg);
+    }
 
     if (!r->contains(value)) {
       ostringstream msg;

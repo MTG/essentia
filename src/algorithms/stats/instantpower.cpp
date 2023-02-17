@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,13 +24,14 @@ using namespace essentia;
 using namespace standard;
 
 const char* InstantPower::name = "InstantPower";
+const char* InstantPower::category = "Statistics";
 const char* InstantPower::description = DOC("This algorithm computes the instant power of an array. That is, the energy of the array over its size.\n"
 "\n"
 "An exception is thrown when input array is empty.\n"
 "\n"
 "References:\n"
 "  [1] Energy (signal processing) - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Energy_(signal_processing)");
+"  http://en.wikipedia.org/wiki/Energy_%28signal_processing%29");
 
 void InstantPower::compute() {
   const std::vector<Real>& array = _array.get();

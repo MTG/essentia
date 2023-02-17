@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -91,7 +91,7 @@ class TonicIndianArtMusic : public Algorithm {
     declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.85);
 
     // tonic identification using multipitch histogram
-    declareParameter("numberSaliencePeaks", " number of top peaks of the salience function which should be considered for constructing histogram", "[1, 15]", 5);
+    declareParameter("numberSaliencePeaks", "number of top peaks of the salience function which should be considered for constructing histogram", "[1,15]", 5);
     declareParameter("minTonicFrequency", "the minimum allowed tonic frequency [Hz]", "[0,inf)", 100.0);
     declareParameter("maxTonicFrequency", "the maximum allowed tonic frequency [Hz]", "[0,inf)", 375.0);
   }
@@ -109,7 +109,7 @@ class TonicIndianArtMusic : public Algorithm {
   }
 
   static const char* name;
-  static const char* version;
+  static const char* category;
   static const char* description;
 
 };

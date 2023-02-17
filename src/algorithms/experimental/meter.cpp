@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,7 +26,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Meter::name = "Meter";
-const char* Meter::version = "1.0";
+const char* Meter::category = "Rhythm";
 const char* Meter::description = DOC("This algorithm estimates the time signature of a given beatogram by finding the highest correlation between beats.\n"
 "\n"
 "Quality: experimental (not evaluated, do not use)");
@@ -56,7 +56,8 @@ void Meter::compute() {
   AlgorithmFactory& factory = AlgorithmFactory::instance();
   Algorithm* acorr=factory.create("AutoCorrelation");
   vector<vector<Real> > bandCorr(nbands);
-  Real maxBand=0, maxBandValue=0;
+  //Real maxBand=0;
+  Real maxBandValue=0;
   vector<Real> maxCorr(nbands);
   vector<int> maxCorrIdx(nbands);
   for (int iBand=0; iBand<nbands; iBand++) {
@@ -69,7 +70,7 @@ void Meter::compute() {
      maxCorr[iBand]=corr[maxCorrIdx[iBand]];
      if (maxCorr[iBand] > maxBandValue) {
        maxBandValue = maxCorr[iBand];
-       maxBand = iBand;
+       //maxBand = iBand;
      }
   }
   delete acorr;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,6 +24,7 @@
 #define _USE_MATH_DEFINES
 #endif
 
+#include <math.h>
 #include <cmath>
 #include <vector>
 #include <numeric>
@@ -81,7 +82,9 @@ template <> inline long long int nextPowerTwo(long long int n) {
   return ++n;
 }
 
-// returns the L2-norm of an array
+/**
+ * Returns the L2-norm of an array
+ */
 template <typename T> T norm(const std::vector<T>& array) {
   if (array.empty()) {
     throw EssentiaException("trying to calculate norm of empty array");
@@ -94,6 +97,17 @@ template <typename T> T norm(const std::vector<T>& array) {
   }
 
   return sqrt(sum);
+}
+
+/**
+ * Returns the sum of squared values of an array
+ */
+template <typename T> T sumSquare(const std::vector<T> array) {
+  T sum = 0.0;
+  for (size_t i = 0; i < array.size(); ++i) {
+    sum += array[i] * array[i];
+  }
+  return sum;
 }
 
 /**
@@ -271,6 +285,24 @@ std::vector<T> varianceFrames(const std::vector<std::vector<T> >& frames) {
 }
 
 
+// returns the sum of frames 
+template <typename T>
+std::vector<T> sumFrames(const std::vector<std::vector<T> >& frames) {
+  if (frames.empty()) {
+    throw EssentiaException("sumFrames: trying to calculate sum of empty input frames");
+  }
+  size_t nframes = frames.size();
+  size_t vsize = frames[0].size();
+  std::vector<T> result(vsize, (T)0);
+  for (size_t j=0; j<vsize; j++) {
+    for (size_t i=0; i<nframes; i++) {
+      result[j] += frames[i][j];
+    }
+  }
+  return result;
+}
+
+
 template <typename T>
 std::vector<T> skewnessFrames(const std::vector<std::vector<T> >& frames) {
   if (frames.empty()) {
@@ -296,7 +328,8 @@ std::vector<T> skewnessFrames(const std::vector<std::vector<T> >& frames) {
   for (uint j=0; j<vsize; j++) {
     m2[j] /= nframes;
     m3[j] /= nframes;
-    result[j] = m3[j] / pow(m2[j], (T)1.5);
+    if (m2[j] == (T)0.) result[j] = (T)0.;
+    else result[j] = m3[j] / pow(m2[j], (T)1.5);
   }
 
   return result;
@@ -327,7 +360,8 @@ std::vector<T> kurtosisFrames(const std::vector<std::vector<T> >& frames) {
   for (uint j=0; j<vsize; j++) {
     m2[j] /= nframes;
     m4[j] /= nframes;
-    result[j] = m4[j] / (m2[j]*m2[j]) - 3;
+    if (m2[j] == (T)0.) result[j] = (T)(-3.);
+    else result[j] = m4[j] / (m2[j]*m2[j]) - 3;
   }
 
   return result;
@@ -386,12 +420,13 @@ template <typename T> T instantPower(const std::vector<T>& array) {
 // first. For this reason we set the silence cutoff as what should be silence
 // on a 16bit pcm file, that is (16bit - 1bit)*6.02 which yields -90.3 dB thus
 // aproximately -90
-#define silenceCutoff 1e-9
-#define dbSilenceCutoff -90
+#define SILENCE_CUTOFF 1e-10
+#define DB_SILENCE_CUTOFF -100
+#define LOG_SILENCE_CUTOFF -23.025850929940457
 
 // returns true if the signal average energy is below a cutoff value, here -90dB
 template <typename T> bool isSilent(const std::vector<T>& array) {
-  return instantPower(array) < silenceCutoff;
+  return instantPower(array) < SILENCE_CUTOFF;
 }
 
 // returns the variance of an array of TNT::Array2D<T> elements
@@ -458,8 +493,11 @@ template <typename T> T skewness(const std::vector<T>& array, const T mean) {
 
   m2 /= n; m3 /= n;
 
-  T result = m3 / pow(m2, (T)1.5);
-  if (std::isnan(result) || std::isinf(result)) return 0;
+  T result;
+  //if (std::isnan(result) || std::isinf(result)) return 0;
+  if (m2 == (T)0.) result = (T)0.;
+  else result = m3 / pow(m2, (T)1.5);
+
   return result;
 }
 
@@ -479,11 +517,13 @@ template <typename T> T kurtosis(const std::vector<T>& array, const T mean) {
 
   m2 /= n; m4 /= n;
 
-  T result = m4 / (m2*m2) - 3;
-  if (std::isnan(result) || std::isinf(result)) return 0;
+  T result;
+  //if (std::isnan(result) || std::isinf(result)) return 0;
+  if (m2 == (T)0.) result = (T)(-3.);
+  else result = m4 / (m2*m2) - 3;
+
   return result;
 }
-
 
 
 // returns the standard deviation of an array
@@ -501,9 +541,12 @@ template <typename T> T round(const T value) {
 
 
 inline Real lin2db(Real value) {
-  return value < silenceCutoff ? dbSilenceCutoff : (Real)10.0 * log10(value);
+  return value < SILENCE_CUTOFF ? DB_SILENCE_CUTOFF : (Real)10.0 * log10(value);
 }
 
+inline Real lin2db(Real value, Real silenceCutoff, Real dbSilenceCutoff) {
+  return value < silenceCutoff ? dbSilenceCutoff : (Real)10.0 * log10(value);
+}
 
 inline Real db2lin(Real value) {
   return pow((Real)10.0, value/(Real)10.0);
@@ -511,6 +554,10 @@ inline Real db2lin(Real value) {
 
 inline Real pow2db(Real power) {
   return lin2db(power);
+}
+
+inline Real pow2db(Real power, Real silenceCutoff, Real dbSilenceCutoff) {
+  return lin2db(power, silenceCutoff, dbSilenceCutoff);  
 }
 
 inline Real db2pow(Real power) {
@@ -521,9 +568,26 @@ inline Real amp2db(Real amplitude) {
   return Real(2.0)*lin2db(amplitude);
 }
 
+inline Real amp2db(Real amplitude, Real silenceCutoff, Real dbSilenceCutoff) {
+  return Real(2.0)*lin2db(amplitude, silenceCutoff, dbSilenceCutoff);  
+}
+
 inline Real db2amp(Real amplitude) {
   return db2lin(0.5*amplitude);
 }
+
+inline Real linear(Real input) {
+  return input;
+}
+
+inline Real lin2log(Real value) {
+  return value < SILENCE_CUTOFF ? LOG_SILENCE_CUTOFF : log(value);
+}
+
+inline Real lin2log(Real input, Real silenceCutoff, Real logSilenceCutoff) {
+  return input < silenceCutoff ? logSilenceCutoff : log(input);
+}
+
 
 #ifdef OS_WIN32
 // The following function hz2bark needs the function asinh,
@@ -624,16 +688,69 @@ inline Real mel2hz(Real mel) {
   return 700.0 * (exp(mel/1127.01048) - 1.0);
 }
 
+inline Real mel102hz(Real mel) {
+  return 700.0 * (pow(10.0, mel/2595.0) - 1.0);
+}
+
+// Convert Mel to Hz based on Slaney's formula in MATLAB Auditory Toolbox
+inline Real mel2hzSlaney(Real mel) {
+  const Real minLogHz = 1000.0;
+  const Real linSlope = 3 / 200.;
+  const Real minLogMel = minLogHz * linSlope;
+
+  if (mel < minLogMel) {
+    // Linear part: 0 - 1000 Hz.
+    return mel / linSlope;
+  }
+  else {
+    // Log-scale part: >= 1000 Hz.
+    const Real logStep = log(6.4) / 27.0;
+    return minLogHz * exp((mel - minLogMel) * logStep);
+  }
+}
+
 inline Real hz2mel(Real hz) {
   return 1127.01048 * log(hz/700.0 + 1.0);
 }
 
+inline Real hz2mel10(Real hz) {
+  return 2595.0 * log10(hz/700.0 + 1.0);
+}
+
+// Convert Hz to Mel based on Slaney's formula in MATLAB Auditory Toolbox
+inline Real hz2melSlaney(Real hz) {
+  const Real minLogHz = 1000.0;
+  const Real linSlope = 3 / 200.;
+
+  if (hz < minLogHz) {
+    // Linear part: 0 - 1000 Hz.
+    return hz * linSlope;
+  }
+  else {
+    // Log-scale part: >= 1000 Hz.
+    const Real minLogMel = minLogHz * linSlope;
+    const Real logStep = log(6.4) / 27.0;
+    return minLogMel + log(hz/minLogHz) / logStep;
+  }
+}
+
+inline Real hz2hz(Real hz){
+  return hz;
+}
+
+inline Real hz2cents(Real hz) {
+  return 12 * std::log(hz/440)/std::log(2.) + 69;
+}
 
 inline int argmin(const std::vector<Real>& input) {
+  if (input.empty())
+    throw EssentiaException("trying to get argmin of empty array");
   return std::min_element(input.begin(), input.end()) - input.begin();
 }
 
 inline int argmax(const std::vector<Real>& input) {
+  if (input.empty())
+    throw EssentiaException("trying to get argmax of empty array");
   return std::max_element(input.begin(), input.end()) - input.begin();
 }
 
@@ -647,6 +764,34 @@ template <typename T> void normalize(std::vector<T>& array) {
   if (maxElement != (T) 0.0) {
     for (uint i=0; i<array.size(); i++) {
       array[i] /= maxElement;
+    }
+  }
+}
+
+// normalize to the max(abs(array))
+template <typename T> void normalizeAbs(std::vector<T>& array) {
+  if (array.empty()) return;
+  std::vector<T> absArray = array;
+  rectify(absArray);
+  T maxElement = *std::max_element(absArray.begin(), absArray.end());
+
+  if (maxElement != (T) 0.0) {
+    for (uint i=0; i<array.size(); i++) {
+      array[i] /= maxElement;
+    }
+  }
+}
+
+// normalize to the max(abs(array)) with a headroom value
+template <typename T> void normalizeAbs(std::vector<T>& array, T headroom) {
+  if (array.empty()) return;
+  std::vector<T> absArray = array;
+  rectify(absArray);
+  T maxElement = *std::max_element(absArray.begin(), absArray.end());
+
+  if (maxElement != (T) 0.0) {
+    for (uint i=0; i<array.size(); i++) {
+      array[i] /= (maxElement + headroom);
     }
   }
 }
@@ -801,15 +946,15 @@ void hist(const T* array, uint n, int* n_array, T* x_array, uint n_bins) {
  */
 template <typename T>
 void bincount(const std::vector<T>& input, std::vector<T>& output) {
-   output.clear();
-   output.resize( (int) ( std::max<Real>( input[argmax(input)], 0.) + 0.5 ) + 1);
-   uint index = 0;
-   for (uint i=0; i< input.size(); i++) {
-     index = int(std::max<Real>(input[i],0) + 0.5);
-     if (index < output.size() ) {
-       output[index] += 1.;
-     }
-   }
+  output.clear();
+  output.resize( (int) ( std::max<Real>( input[argmax(input)], 0.) + 0.5 ) + 1);
+  uint index = 0;
+  for (uint i=0; i< input.size(); i++) {
+    index = int(std::max<Real>(input[i],0) + 0.5);
+    if (index < output.size() ) {
+      output[index] += 1.;
+    }
+  }
 }
 
 
@@ -857,6 +1002,363 @@ TNT::Array2D<T> transpose(const TNT::Array2D<T>& m) {
   }
 
   return result;
+}
+
+inline std::string equivalentKey(const std::string key) {
+  if (key == "C")
+    return "C";
+
+  if (key == "C#")
+    return "Db";
+
+  if (key == "Db")
+    return "C#";
+
+  if (key == "D")
+    return "D";
+
+  if (key == "D#")
+    return "Eb";
+
+  if (key == "Eb")
+    return "D#";
+
+  if (key == "E")
+    return "E";
+
+  if (key == "F")
+    return "F";
+
+  if (key == "F#")
+    return "Gb";
+
+  if (key == "Gb")
+    return "F#";
+
+  if (key == "G")
+    return "G";
+
+  if (key == "G#")
+    return "Ab";
+
+  if (key == "Ab")
+    return "G#";
+
+  if (key == "A")
+    return "A";
+
+  if (key == "A#")
+    return "Bb";
+
+  if (key == "Bb")
+    return "A#";
+
+  if (key == "B")
+    return "B";
+
+  return "";
+}
+
+
+/** Circularly rotate an input chromagram by an specified optimal transposition index (oti).
+ * Expects input chromagram to be in the shape (frames , n_bins) where frames is no of frames and n_bins is no of chroma bins.
+ * Throws an exception if the input chromagram is empty.
+ */
+template <typename T>
+void rotateChroma(std::vector<std::vector<T> >& inputMatrix, int oti) {
+  if (inputMatrix.empty())
+    throw EssentiaException("rotateChroma: trying to rotate an empty matrix");
+  for (size_t i=0; i<inputMatrix.size(); i++) {
+    std::rotate(inputMatrix[i].begin(), inputMatrix[i].end() - oti, inputMatrix[i].end());
+  }
+}
+
+
+/**
+ * returns the dot product of two 1D vectors.
+ * Throws an exception either one of the input arrays are empty.
+ */
+template <typename T>
+T dotProduct(const std::vector<T>& xArray, const std::vector<T>& yArray) {
+  if (xArray.empty() || yArray.empty())
+    throw EssentiaException("dotProduct: trying to calculate the dotProduct of empty arrays!");
+  return std::inner_product(xArray.begin(), xArray.end(), yArray.begin(), 0.0);
+}
+
+
+/**	
+ * returns the q-th percentile of an 1D input array (same as numpy percentile implementation).	
+ * Throws an exception if the input array is empty.	
+ */ 
+template <typename T> T percentile(const std::vector<T>& array, Real qpercentile) {
+  if (array.empty())
+    throw EssentiaException("percentile: trying to calculate percentile of empty array");
+
+  std::vector<T> sorted_array = array;
+  // sort the array
+  std::sort(sorted_array.begin(), sorted_array.end());
+  qpercentile /= 100.;
+
+  Real k;
+  int sortArraySize = sorted_array.size();
+  if (sortArraySize > 1) {
+    k = (sortArraySize - 1) * qpercentile;
+  }
+  else {
+    // to avoid zero value in arrays with single element
+    k = sortArraySize * qpercentile;
+  }
+  // apply interpolation
+  Real d0 = sorted_array[int(std::floor(k))] * (std::ceil(k) - k);
+  Real d1 = sorted_array[int(std::ceil(k))] * (k - std::floor(k));
+  return d0 + d1;
+}
+
+
+/**
+ * Sample covariance
+ */
+template <typename T> T covariance(const std::vector<T>& x, const T xMean, const std::vector<T>& y, const T yMean) {
+  if (x.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (y.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (x.size() != y.size())
+    throw EssentiaException("x and y should have the same size");
+
+  T cov = (T) 0.0;
+
+  for (uint i=0; i<x.size(); i++) {
+    cov += (x[i] - xMean) * (y[i] - yMean);
+  }
+
+  return (T)(cov / (Real)x.size());
+}
+
+
+/**
+ * Returns the sample Pearson correlation coefficient of a pair of vectors as described in,
+ * https://en.wikipedia.org/wiki/Pearson_correlation_coefficient
+ */
+template <typename T> T pearsonCorrelationCoefficient(const std::vector<T>& x, const std::vector<T>& y) {
+  if (x.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (y.empty())
+    throw EssentiaException("trying to calculate covariance of empty array");
+  if (x.size() != y.size())
+    throw EssentiaException("x and y should have the same size");
+
+  T xMean = mean(x);
+  T yMean = mean(y);
+  
+  T cov = covariance(x, xMean, y, yMean);
+
+  T xStddev = stddev(x, xMean);
+  T yStddev = stddev(y, yMean);
+
+  // When dealing with constants corraltion is 0 by convention. 
+  if ((xStddev == (T)0.0) || (xStddev == (T)0.0) || (xStddev == (T)0.0)) return (T) 0.0;
+  
+  T corr = cov / (xStddev * yStddev);
+
+  // Numerical error can yield results slightly outside the analytical range [-1, 1].
+  // Clipping the output is a cheap way to mantain this contrain.
+  // Seen in https://github.com/numpy/numpy/blob/v1.15.0/numpy/lib/function_base.py#L2403-L2406
+  return std::max(std::min(corr, (T)1.0), (T)-1.0);
+}
+
+
+/**
+ * Apply heaviside step function to an input m X n dimentional vector.
+ * f(x) = if x<0: x=0; if x>=0: x=1
+ * Throws an exception if the input array is empty.
+ * returns a 2D binary vector of m X n shape
+ */
+template <typename T>
+void heavisideStepFunction(std::vector<std::vector<T> >& inputArray) {
+  if (inputArray.empty())
+    throw EssentiaException("heavisideStepFunction: found empty array as input!");
+
+  for (size_t i=0; i<inputArray.size(); i++) {
+    for (size_t j=0; j<inputArray[i].size(); j++) {
+      // initialize all non negative elements as zero otherwise as one
+      inputArray[i][j] = (inputArray[i][j] < 0) ? 0 : 1;
+    }
+  }
+}
+
+
+/**
+ * Pairwise euclidean distances between two 2D vectors.
+ * Throws an exception if the input array is empty.
+ * Returns a (m.shape[0], n.shape[0]) dimentional vector where m and n are the two input arrays
+ * TODO: [add other distance metrics beside euclidean such as cosine, mahanalobis etc as a configurable parameter]
+ */
+template <typename T>
+std::vector<std::vector<T> > pairwiseDistance(const std::vector<std::vector<T> >& m, const std::vector<std::vector<T> >& n) {
+
+  if (m.empty() || n.empty())
+    throw EssentiaException("pairwiseDistance: found empty array as input!");
+
+  size_t mSize = m.size();
+  size_t nSize = n.size();
+  std::vector<std::vector<T> > pdist(mSize, std::vector<T>(nSize));
+  for (size_t i=0; i<mSize; i++) {
+      for (size_t j=0; j<nSize; j++) {
+          Real item = dotProduct(m[i], m[i]) - 2*dotProduct(m[i], n[j]) + dotProduct(n[j], n[j]);
+          pdist[i][j] = sqrt(item);
+      }
+  }
+  if (pdist.empty())
+      throw EssentiaException("pairwiseDistance: outputs an empty similarity matrix!");
+  return pdist;
+}
+
+/**
+ * Sets `squeezeShape`, `summarizerShape`, `broadcastShape` to perform operations 
+ * on a Tensor with the shape of `tensor` along the `axis` dimension.
+ */
+template <typename T>
+void tensorGeometricalInfo(const Tensor<T>& tensor, int& axis,
+                           std::array<Eigen::Index, TENSORRANK - 1>& squeezeShape,
+                           std::array<Eigen::Index, TENSORRANK>& summarizerShape,
+                           std::array<Eigen::Index, TENSORRANK>& broadcastShape) {
+  // To perform tensor operations along an specific axis we need to get
+  // some geometrical information before:
+
+  // First, an array with dimensions to squeeze (all but the axis).
+  int i = 0;
+  for (int j = 0; j < TENSORRANK; j++) {
+    if (j != axis) {
+      squeezeShape[i] = j;
+      i++;
+    }
+  }
+
+  // An array with all singleton dimension but the axis of interest.
+  summarizerShape = {1, 1, 1, 1};
+  summarizerShape[axis] = tensor.dimension(axis);
+
+  // An array with the number of times we need to copy the accumulator
+  // tensors per dimension in order to match the input tensor shape.
+  broadcastShape = tensor.dimensions();
+  broadcastShape[axis] = 1;
+}
+
+/**
+ * Returns the mean of a tensor.
+ */
+template <typename T>
+T mean(const Tensor<T>& tensor) {
+  return (T)((TensorScalar)tensor.mean())(0);
+}
+
+/**
+ * Returns the mean of a tensor along the given axis.
+ */
+template <typename T>
+Tensor<T> mean(const Tensor<T>& tensor, int axis) {
+  std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
+
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
+  Tensor1D means = tensor.mean(squeezeShape);
+
+  return TensorMap<Real>(means.data(), summarizerShape);
+}
+
+/**
+ * Returns the standard deviation of a tensor.
+ */
+template <typename T>
+T stddev(const Tensor<T>& tensor, const T mean) {
+  // Substract the mean.
+  Tensor<Real> tmp = tensor - tensor.constant(mean);
+  // Sum of squares.
+  Real sos = ((TensorScalar)tmp.pow(2).sum())(0);
+
+  return sqrt(sos / tensor.size());
+}
+
+/**
+ * Returns the standard deviation of a tensor along the given axis.
+ */
+template <typename T>
+Tensor<T> stddev(const Tensor<T>& tensor, const Tensor<T> mean, int axis) {
+  std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
+
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
+
+  // Get the number of elements on each sub-tensor.
+  Real normalization = tensor.size() / tensor.dimension(axis);
+
+  // Substract the means along the axis using broadcast to replicate
+  // them along the rest of dimensions.
+  Tensor<Real> tmp = tensor - mean.broadcast(broadcastShape);
+
+  // Cumpute the sum of squares.
+  Tensor1D sos = tmp.pow(2).sum(squeezeShape);
+
+  // Compute the standard deviations and put them into a Tensor along the axis.
+  Tensor1D stds = (sos / normalization).sqrt();
+
+  return TensorMap<Real>(stds.data(), summarizerShape);
+}
+
+/**
+ * Returns the minimum of a tensor.
+ */
+template <typename T>
+T tensorMin(const Tensor<T>& tensor) {
+  return (T)((TensorScalar)tensor.minimum())(0);
+}
+
+/**
+ * Returns the minimum of a tensor along the given axis.
+ */
+template <typename T>
+Tensor<T> tensorMin(const Tensor<T>& tensor, int axis) {
+  std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
+
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
+  Tensor1D minima = tensor.minimum(squeezeShape);
+
+  return TensorMap<Real>(minima.data(), summarizerShape);
+}
+
+/**
+ * Returns the maximum of a tensor.
+ */
+template <typename T>
+T tensorMax(const Tensor<T>& tensor) {
+  return (T)((TensorScalar)tensor.maximum())(0);
+}
+
+/**
+ * Returns the maximum of a tensor along the given axis.
+ */
+template <typename T>
+Tensor<T> tensorMax(const Tensor<T>& tensor, int axis) {
+  std::array<Eigen::Index, TENSORRANK - 1> squeezeShape;
+  std::array<Eigen::Index, TENSORRANK> summarizerShape, broadcastShape;
+
+  tensorGeometricalInfo(tensor, axis, squeezeShape, summarizerShape, broadcastShape);
+  Tensor1D maxima = tensor.maximum(squeezeShape);
+
+  return TensorMap<Real>(maxima.data(), summarizerShape);
+}
+
+/**
+ * Rounds x up to the desired decimal place.
+ */
+template <typename T>
+T roundToDecimal(T x, int decimal) {
+  if (decimal < 0) {
+    throw EssentiaException("the number of decimals has to be 0 or positive");
+  }
+  return round(pow(10, decimal) * x) / pow(10, decimal);
 }
 
 } // namespace essentia

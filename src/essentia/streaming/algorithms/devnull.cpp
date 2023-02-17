@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -18,6 +18,7 @@
  */
 
 #include "devnull.h"
+#include "pool.h"
 #include "../../utils/tnt/tnt.h"
 using namespace std;
 
@@ -37,7 +38,9 @@ void connect(SourceBase& source, DevNullConnector dummy) {
   CREATE_DEVNULL(string);
   CREATE_DEVNULL(vector<string>);
   CREATE_DEVNULL(TNT::Array2D<Real>);
+  CREATE_DEVNULL(Tensor<Real>);
   CREATE_DEVNULL(StereoSample);
+  CREATE_DEVNULL(Pool);
 
   if (!devnull) throw EssentiaException("DevNull class doesn't work for type: ", nameOfType(sourceType));
 
@@ -54,7 +57,7 @@ void disconnect(SourceBase& source, DevNullConnector devnull) {
     Algorithm* sinkAlg = sink.parent();
 
     // TODO: huh?
-    if (sinkAlg->name() == "DevNull") {
+    if ((sinkAlg) && (sinkAlg->name().find("DevNull") != std::string::npos)){
       disconnect(source, sink);
 
       // since the DevNull is no longer connected to a network, it must be

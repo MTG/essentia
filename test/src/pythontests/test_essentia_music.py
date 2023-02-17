@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -31,5 +31,5 @@ def test():
     return 0
   except:
     raise
-    print "Failed to run essentia_music"
+    print("Failed to run essentia_music")
     return 1

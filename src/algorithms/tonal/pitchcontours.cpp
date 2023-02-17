@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,8 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchContours::name = "PitchContours";
-const char* PitchContours::version = "1.0";
-const char* PitchContours::description = DOC("This algorithm tracks a set of predominant pitch contours from an audio signal. This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the PitchSalienceFunctionPeaks algorithm outputs aggregated over all frames in the sequence. The output is a vector of estimated melody pitch values.\n"
+const char* PitchContours::category = "Pitch";
+const char* PitchContours::description = DOC("This algorithm tracks a set of predominant pitch contours of an audio signal. This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the PitchSalienceFunctionPeaks algorithm outputs aggregated over all frames in the sequence. The output is a vector of estimated melody pitch values.\n"
 "\n"
 "When input vectors differ in size, an exception is thrown. Input vectors must not contain negative salience values otherwise an exception is thrown. Avoiding erroneous peak duplicates (peaks of the same cent bin) is up to the user's own control and is highly recommended, but no exception will be thrown.\n"
 "\n"
@@ -67,14 +67,6 @@ void PitchContours::compute() {
   }
   _numberFrames = peakBins.size();
   duration = _numberFrames * _frameDuration;
-
-  if (!_numberFrames) {
-    // no peaks -> empty pitch contours output
-    contoursBins.clear();
-    contoursSaliences.clear();
-    contoursStartTimes.clear();
-    return;
-  }
 
   for (size_t i=0; i<_numberFrames; i++) {
 
@@ -124,6 +116,14 @@ void PitchContours::compute() {
         salientInFrame.push_back(make_pair(i,j));
       }
     }
+  }
+
+  if (salientInFrame.size() == 0) {
+    // no peaks -> empty pitch contours output
+    contoursBins.clear();
+    contoursSaliences.clear();
+    contoursStartTimes.clear();
+    return;
   }
 
   // gather distribution statistics for overall peak filtering
@@ -202,8 +202,8 @@ void PitchContours::removePeak(vector<vector<Real> >& peaksBins, vector<vector<R
 
 void PitchContours::trackPitchContour(size_t& index, vector<Real>& contourBins, vector<Real>& contourSaliences) {
   // find the highest salient peak through all frames
-  size_t max_i;
-  int max_j;
+  size_t max_i = 0;
+  int max_j = 0;
   Real maxSalience = 0;
 
   for (size_t i=0; i<_numberFrames; i++) {

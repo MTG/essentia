@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -23,6 +23,12 @@
 import essentia.standard
 import essentia.streaming
 import os, re, subprocess
+import sys
+
+
+std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
+streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase'] ]
+
 
 def replace_math_symbols(s):
     while True:
@@ -66,11 +72,47 @@ def TR_DESC(s):
 
     return s
 
-def doc2rst(algo_doc):
-    lines = [ algo_doc['name'],
-              '=' * len(algo_doc['name']),
-              ''
-              ]
+def algo_link(algoname, mode):
+    mode_abbr = 'std' if mode == 'standard' else 'streaming'
+    return "%s `(%s) <%s_%s.html>`__" % (algoname, mode, mode_abbr, algoname)
+
+
+def related_algos(algo_doc):
+
+    lines = []
+    if algo_doc['mode'] == 'standard mode' and algo_doc['name'] in streaming_algo_list:
+        lines.append(algo_link(algo_doc['name'], 'streaming'))
+    elif algo_doc['mode'] == 'streaming mode' and algo_doc['name'] in std_algo_list:
+        lines.append(algo_link(algo_doc['name'], 'standard'))
+
+    lines += [algo_link(a, 'standard') for a in std_algo_list
+                                            if a != algo_doc['name'] and
+                                            algo_doc['description'].count(a)]
+
+    lines += [algo_link(a, 'streaming') for a in streaming_algo_list
+                                            if a != algo_doc['name'] and
+                                            algo_doc['description'].count(a)]
+
+    if lines:
+        return ['See also',
+                '--------',
+                '',
+                '\n'.join(sorted(lines))]
+    return []
+
+
+def doc2rst(algo_doc, sphinxsearch=False):
+    if sphinxsearch:
+        # dummy rst files used to append algorithms to the sphinx HTML search
+        lines = [':orphan:',
+                 ''
+                 ]
+        header = 'Algorithm reference - ' + algo_doc['name'] + ' (' + algo_doc['mode'] + ')'
+        lines += [header, '=' * len(header), '']
+    else:
+        # actual rst files used to render HTMLs
+        lines = [ algo_doc['name'], '=' * len(algo_doc['name']), '']
+        lines += [algo_doc['mode'] + ' | ' + algo_doc['category'] + ' category', '']
 
     if algo_doc['inputs']:
         lines += [ 'Inputs',
@@ -79,7 +121,7 @@ def doc2rst(algo_doc):
                    ]
 
         for inp in algo_doc['inputs']:
-            lines.append(' - **%s** (*%s*) - %s' % (inp['name'], inp['type'], TR(inp['description'])))
+            lines.append(' - ``%s`` (*%s*) - %s' % (inp['name'], inp['type'], TR(inp['description'])))
 
         lines.append('')
 
@@ -90,7 +132,7 @@ def doc2rst(algo_doc):
                    ]
 
         for out in algo_doc['outputs']:
-            lines.append(' - **%s** (*%s*) - %s' % (out['name'], out['type'], TR(out['description'])))
+            lines.append(' - ``%s`` (*%s*) - %s' % (out['name'], out['type'], TR(out['description'])))
 
         lines.append('')
 
@@ -107,7 +149,7 @@ def doc2rst(algo_doc):
             if param['default'] is not None:
                 range_str += ', default = ' + TR(param['default'])
 
-            lines.append(' - **%s** (*%s*) :' % (param['name'], range_str))
+            lines.append(' - ``%s`` (*%s*) :' % (param['name'], range_str))
             lines.append('     ' + TR(param['description']))
 
         lines.append('')
@@ -118,27 +160,32 @@ def doc2rst(algo_doc):
                TR_DESC(algo_doc['description'])
                ]
 
+    lines += related_algos(algo_doc)
+
     return '\n'.join(lines)
 
 
 def write_doc(filename, algo_doc):
-    open(filename, 'w').write(doc2rst(algo_doc))
-
+    open(filename, 'w').write(doc2rst(algo_doc, sphinxsearch=True))
 
 
 def rst2html(rst, layout_type):
     try:
         html, _ = subprocess.Popen([ 'rst2html.py', '-v', '--initial-header-level=2', '--input-encoding=UTF-8:strict' ],
-                                   stdin=subprocess.PIPE, stdout = subprocess.PIPE).communicate(rst)
+                                   stdin=subprocess.PIPE,
+                                   stdout = subprocess.PIPE,
+                                   encoding='utf8').communicate(rst)
     except OSError:
         try:
             html, _ = subprocess.Popen([ 'rst2html', '-v', '--initial-header-level=2', '--input-encoding=UTF-8:strict' ],
-                                       stdin=subprocess.PIPE, stdout = subprocess.PIPE).communicate(rst)
+                                       stdin=subprocess.PIPE,
+                                       stdout = subprocess.PIPE,
+                                       encoding='utf8').communicate(rst)
 
         except OSError:
-            print '*'*100
-            print 'ERROR: You need to install rst2html! (in the python docutils package)'
-            print '*'*100
+            print('*'*100)
+            print('ERROR: You need to install rst2html! (in the python docutils package)')
+            print('*'*100)
             raise
 
     html = re.search('<body>(.*)</body>', html, re.DOTALL).groups()[0]
@@ -172,63 +219,77 @@ def write_algorithms_reference():
      - write the templates for both std & streaming algos to have the full list of algos as a sidebar
     '''
 
+    # folder for storing HTMLs
     try: os.mkdir('_templates/reference')
     except: pass
 
-    # write the doc for all the std algorithms
-    std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
-    std_algo_html_list = []
+    # folder for storing RSTs for sphinx search index
+    try: os.mkdir('reference')
+    except: pass
 
+
+    # write the algorithms reference organized by categories
+    # generate html documentation for each algorithm and create an overall list of algorithms
+    algos = {}
     for algoname in std_algo_list:
-        print 'generating doc for standard algorithm:', algoname, '...'
+        algos.setdefault(algoname, {})
+        algos[algoname]['standard'] = getattr(essentia.standard, algoname).__struct__
+        # __struct__ does not contain mode (perhaps it should),
+        # therefore, doing a workaround so that doc2rst can know the mode
+        algos[algoname]['standard']['mode'] = 'standard mode'
 
-        std_algo_html_list += [ '<a class="reference internal" href="reference/std_' + algoname + '.html">' +
-                                '<em>' + algoname + '</em></a> / ' ]
+        # Ugly patch for MusicExtractor and FreesoundExtractor to add links to
+        # their detailed documentation.
+        if algoname == 'MusicExtractor':
+            algos[algoname]['standard']['description'] = \
+                algos[algoname]['standard']['description'].replace("essentia_streaming_extractor_music",
+                    "`essentia_streaming_extractor_music <../streaming_extractor_music.html>`__")
 
+        elif algoname == 'FreesoundExtractor':
+            algos[algoname]['standard']['description'] = \
+                algos[algoname]['standard']['description'].replace("essentia_streaming_extractor_freesound",
+                    "`essentia_streaming_extractor_freesound <../freesound_extractor.html>`__")
+
+        print('generating doc for standard algorithm: %s ...' % algoname)
+        write_doc('reference/std_' + algoname + '.rst', algos[algoname]['standard'])
         write_html_doc('_templates/reference/std_' + algoname + '.html',
-                       getattr(essentia.standard, algoname).__struct__,
+                       algos[algoname]['standard'],
                        layout_type = 'std')
+
+    for algoname in streaming_algo_list:
+        algos.setdefault(algoname, {})
+        algos[algoname]['streaming'] = getattr(essentia.streaming, algoname).__struct__
+        algos[algoname]['streaming']['mode'] = 'streaming mode'
+
+        print('generating doc for streaming algorithm: %s ...' % algoname)
+        write_doc('reference/streaming_' + algoname + '.rst', algos[algoname]['streaming'])
+        write_html_doc('_templates/reference/streaming_' + algoname + '.html',
+                       algos[algoname]['streaming'],
+                       layout_type = 'streaming')
+
 
     # write the template for the std algorithms
     html = '''
 {% extends "layout.html" %}
 {% block body %}
 
-<div class="sphinxsidebar">
-  <div class="sphinxsidebarwrapper">
-
-    <p><strong>Standard algorithms</strong></p>
-
-'''
-
-    for algoname in std_algo_list:
-        html += '<div><a href="std_%s.html">%s</a></div>\n' % (algoname, algoname)
-
-    html += '''
-  </div>
-</div>
-
+<div class="algo-description-container">
 {% block algo_description %}
 {% endblock %}
+</div>
+<div class="algo-list">
+    <h4><strong>Standard algorithms</strong></h4>
+'''
+
+    links = ['<a href="std_%s.html">%s</a>' % (algoname, algoname) for algoname in std_algo_list]
+    html += ' | '.join(links)
+
+    html += '''
+</div>
 
 {% endblock %}
 '''
     open('_templates/algo_description_layout_std.html', 'w').write(html)
-
-
-    # write the doc for all the streaming algorithms
-    streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase', 'VectorInput' ] ]
-    streaming_algo_html_list = []
-
-    for algoname in streaming_algo_list:
-        print 'generating doc for streaming algorithm:', algoname, '...'
-
-        streaming_algo_html_list += [ '<a class="reference internal" href="reference/streaming_' + algoname + '.html">' +
-                                      '<em>' + algoname + '</em></a> / ' ]
-
-        write_html_doc('_templates/reference/streaming_' + algoname + '.html',
-                       getattr(essentia.streaming, algoname).__struct__,
-                       layout_type = 'streaming')
 
 
     # write the template for the streaming algorithms
@@ -236,22 +297,21 @@ def write_algorithms_reference():
 {% extends "layout.html" %}
 {% block body %}
 
-<div class="sphinxsidebar">
-  <div class="sphinxsidebarwrapper">
+<div class="algo-description-container">
+{% block algo_description %}
+{% endblock %}
+</div>
 
-    <p><strong>Streaming algorithms</strong></p>
+<div class="algo-list">
+    <h4><strong>Streaming algorithms</strong></h4>
 
 '''
 
-    for algoname in streaming_algo_list:
-        html += '<div><a href="streaming_%s.html">%s</a></div>\n' % (algoname, algoname)
+    links = ['<a href="streaming_%s.html">%s</a>' % (algoname, algoname) for algoname in streaming_algo_list]
+    html += ' | '.join(links)
 
     html += '''
-  </div>
 </div>
-
-{% block algo_description %}
-{% endblock %}
 
 {% endblock %}
 '''
@@ -284,6 +344,51 @@ essentia_algorithms.update(streaming_algorithms)
 
 
     # write the algorithms_reference.html file (main ref file)
+    algo_categories_html = {}
+    for algoname in algos:
+        std_algo = None
+        streaming_algo = None
+        if 'standard' in algos[algoname]:
+            std_algo = algos[algoname]['standard']
+        if 'streaming' in algos[algoname]:
+            streaming_algo = algos[algoname]['streaming']
+
+        if std_algo and streaming_algo:
+            # both standard and streaming mode exist
+            if (std_algo['category'] == streaming_algo['category']):
+                category = std_algo['category']
+            else:
+                print("WARNING: %s categories differ for standard (%s) and streaming (%s) modes" % (algoname, std_algo['category'], streaming_algo['category']))
+                sys.exit()
+
+            if (std_algo['description'] == streaming_algo['description']):
+                description = std_algo['description'].split('.')[0]
+            else:
+                print("WARNING: %s description differ for standard (%s) and streaming (%s) modes" % (algoname, std_algo['description'], streaming_algo['description']))
+                sys.exit()
+
+        if std_algo:
+            category = std_algo['category']
+            description = std_algo['description'].split('.')[0]
+        else:
+            category = streaming_algo['category']
+            description = streaming_algo['description'].split('.')[0]
+
+        # Description for many algorithms starts with "This algorithm..." and we do not want to show that
+        description = description.replace('This algorithm ', '')
+        if len(description):
+            description = description[0].capitalize() + description[1:]
+
+        links = []
+        if std_algo:
+            links.append('<a class="reference internal" href="reference/std_' + algoname + '.html"><em>standard</em></a>')
+        if streaming_algo:
+            links.append('<a class="reference internal" href="reference/streaming_' + algoname + '.html"><em>streaming</em></a>')
+        algo_html = '<div class="algo-info">' + '<header><h3>' + algoname + '</h3></header>' + '<span>(' + ', '.join(links) + ')</span>' + '<div>' + description + '</div></div>'
+        algo_categories_html.setdefault(category, [])
+        algo_categories_html[category].append(algo_html)
+
+
     html = '''
 {% extends "layout.html" %}
 {% set title = "Algorithms reference" %}
@@ -295,24 +400,16 @@ essentia_algorithms.update(streaming_algorithms)
 <p>The C++ interface allows access to the same algorithms, and also some more which are templated
 and hence are not available in python.</p>
 
-<div class="section" id="standard-algorithms">
-<h2>Standard algorithms<a class="headerlink" href="#standard-algorithms" title="Permalink to this headline">¶</a></h2>
-<p>
+<div class="section" id="algorithms">
 '''
-    html += '\n'.join(std_algo_html_list)[:-3]
-
+    for category in algo_categories_html:
+        category_id = re.sub('[^0-9a-zA-Z]+', '', category.lower())
+        html += '<section><h2 id=' + category_id + '>' + category + '</h2>'
+        html += '\n'.join(sorted(algo_categories_html[category]))
+        html += '</section>'
     html += '''
-</p></div>
-
-<div class="section" id="streaming-algorithms">
-<h2>Streaming algorithms<a class="headerlink" href="#streaming-algorithms" title="Permalink to this headline">¶</a></h2>
-<p>
-'''
-    html += '\n'.join(streaming_algo_html_list)[:-3]
-
-    html += '''
-</p>
 </div>
+
 </div>
 
 {% endblock %}
@@ -321,6 +418,6 @@ and hence are not available in python.</p>
     open('_templates/algorithms_reference.html', 'w').write(html)
 
 
-
 if __name__ == '__main__':
+    print("Loading Essentia with python=%s" % sys.executable)
     write_algorithms_reference()

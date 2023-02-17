@@ -1,0 +1,14 @@
+prefix=../packaging/win32_3rdparty/libav-0.8.9
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: libavfilter
+Description: Libav video filtering library
+Version: 2.15.0
+Requires: 
+Requires.private: 
+Conflicts:
+Libs: -L${libdir} -lavfilter 
+Libs.private: -lavicap32 -lws2_32 -lx264 -lvpx -lvpx -lvorbisenc -lvorbis -logg -lvo-aacenc -L/usr/i686-w64-mingw32/usr/lib -lrtmp -lz -lpolarssl -lws2_32 -lwinmm -lmp3lame -lavifil32 -lm -lz -lpsapi
+Cflags: -I${includedir}

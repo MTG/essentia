@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,7 +26,8 @@ namespace essentia {
 namespace standard {
 
 const char* Trimmer::name = "Trimmer";
-const char* Trimmer::description = DOC("Given an audio signal, this algorithm it extracts a slice of the signal between startTime and endTime.\n"
+const char* Trimmer::category = "Standard";
+const char* Trimmer::description = DOC("This algorithm extracts a segment of an audio signal given its start and end times.\n"
 "Giving \"startTime\" greater than \"endTime\" will raise an exception.");
 
 void Trimmer::configure() {
@@ -36,6 +37,7 @@ void Trimmer::configure() {
   if (_startIndex > _endIndex) {
     throw EssentiaException("Trimmer: startTime cannot be larger than endTime.");
   }
+  _checkRange = parameter("checkRange").toBool();
 }
 
 void Trimmer::compute() {
@@ -43,9 +45,12 @@ void Trimmer::compute() {
   vector<Real>& output = _output.get();
   int size = input.size();
 
-  if (_startIndex < 0) _startIndex = 0;
+  if (_startIndex < 0) _startIndex = 0; // should never happen
   if (_startIndex > size) {
-    //throw EssentiaException("Trimmer: cannot trim beyond the size of the input signal");
+    if (_checkRange) {
+      throw EssentiaException("Trimmer: cannot trim beyond the size of the input signal");
+    }
+    E_WARNING("Trimmer: empty output due to insufficient input signal size");
     _startIndex = size;
   }
   if (_endIndex > size) _endIndex = size;
@@ -62,9 +67,9 @@ void Trimmer::compute() {
 namespace essentia {
 namespace streaming {
 
-const char* Trimmer::name = "Trimmer";
-const char* Trimmer::description = DOC("Given an audio signal, this algorithm it extracts a slice of the signal between startTime and endTime.\n"
-"Giving \"startTime\" greater than \"endTime\" will raise an exception.");
+const char* Trimmer::name = essentia::standard::Trimmer::name;
+const char* Trimmer::category = essentia::standard::Trimmer::category;
+const char* Trimmer::description = essentia::standard::Trimmer::description;
 
 void Trimmer::configure() {
   Real sampleRate = parameter("sampleRate").toReal();
@@ -161,6 +166,19 @@ AlgorithmStatus Trimmer::process() {
 
   return OK;
 }
+
+
+void Trimmer::reset() {
+  Algorithm::reset();
+  _consumed = 0;
+  _preferredSize = defaultPreferredSize;
+
+  // make sure to reset I/O sizes
+  _input.setAcquireSize(_preferredSize);
+  _input.setReleaseSize(_preferredSize);
+  _output.setAcquireSize(_preferredSize);
+  _output.setReleaseSize(_preferredSize);
+} 
 
 } // namespace streaming
 } // namespace essentia

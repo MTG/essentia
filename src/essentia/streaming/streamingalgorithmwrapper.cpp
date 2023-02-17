@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -107,21 +107,40 @@ void StreamingAlgorithmWrapper::declareOutput(SourceBase& source, NumeralType ty
 
 
 void StreamingAlgorithmWrapper::synchronizeInput(const std::string& name) {
-  if (_inputType[name] == TOKEN) {
-    _algorithm->input(name).setSinkFirstToken(*_inputs[name]);
+  try {
+    if (_inputType[name] == TOKEN) {
+      _algorithm->input(name).setSinkFirstToken(*_inputs[name]);
+    }
+    else if (_inputType[name] == STREAM) {
+      _algorithm->input(name).setSinkTokens(*_inputs[name]);
+    }
   }
-  else if (_inputType[name] == STREAM) {
-    _algorithm->input(name).setSinkTokens(*_inputs[name]);
+  catch(EssentiaException& e) {
+    std::ostringstream msg;
+    msg << "While wrapping '" << _algorithm->input(name).name()
+        << "' input in the streaming algorithm wrapper for " 
+        << _algorithm->name() << ":\n" << e.what();
+    throw EssentiaException(msg);
   }
 }
 
 
 void StreamingAlgorithmWrapper::synchronizeOutput(const std::string& name) {
-  if (_outputType[name] == TOKEN) {
-    _algorithm->output(name).setSourceFirstToken(*_outputs[name]);
+  try {
+    if (_outputType[name] == TOKEN) {
+      _algorithm->output(name).setSourceFirstToken(*_outputs[name]);
+    }
+    else if (_outputType[name] == STREAM) {
+      _algorithm->output(name).setSourceTokens(*_outputs[name]);
+    }
   }
-  else if (_outputType[name] == STREAM) {
-    _algorithm->output(name).setSourceTokens(*_outputs[name]);
+  catch(EssentiaException& e) {
+    std::ostringstream msg;
+    msg << "While wrapping '" << _algorithm->output(name).name()
+        << "' output in the streaming algorithm wrapper for " 
+        << _algorithm->name() << ":\n" << e.what();
+    throw EssentiaException(msg);
+    throw EssentiaException(msg);
   }
 }
 

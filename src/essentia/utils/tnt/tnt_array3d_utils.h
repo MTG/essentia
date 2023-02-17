@@ -47,7 +47,7 @@ std::istream& operator>>(std::istream &s, Array3D<T> &A)
 			for (int k=0; k<K; k++)
             	s >>  B[i][j][k];
 
-	A = B;
+    A = B;
     return s;
 }
 

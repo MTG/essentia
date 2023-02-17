@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -66,27 +66,32 @@ def create_python_algorithms(essentia):
     setattr(essentia, 'AudioCentralMoments', AudioCentralMoments)
     '''
 
+    default_fc = essentia.FrameCutter()
+
+
+
     # FrameGenerator
     class FrameGenerator(object):
         __struct__ = { 'name': 'FrameGenerator',
+                       'category': 'Standard',
                        'inputs': [],
                        'outputs': [],
-                       'parameters': [],
-                       'description': '''The FrameGenerator is a special algorithm in the sense
-that it is not a "normal" Essentia algorithm but a Python generator. It is thus not available in
-C++.
+                       'parameters': default_fc.__struct__['parameters'],
+                       'description': '''The FrameGenerator is a Python generator for the FrameCutter algorithm. It is not available in C++.
 
-The way to use it is the following:
+FrameGenerator inherits all the parameters of the FrameCutter. The way to use it in Python is the following:
 
   for frame in FrameGenerator(audio, frameSize, hopSize):
-      do_sth()
+      do_something()
 
 ''' }
 
 
-        def __init__(self, audio, frameSize = 1024, hopSize = 512,
-                     startFromZero = False, validFrameThresholdRatio = 0,
-                     lastFrameToEndOfFile=False):
+        def __init__(self, audio, frameSize = default_fc.paramValue('frameSize'), 
+                                  hopSize = default_fc.paramValue('hopSize'),
+                                  startFromZero = default_fc.paramValue('startFromZero'),
+                                  validFrameThresholdRatio = default_fc.paramValue('validFrameThresholdRatio'),
+                                  lastFrameToEndOfFile=default_fc.paramValue('lastFrameToEndOfFile')):
 
             self.audio = audio
             self.frameSize = frameSize
@@ -103,6 +108,15 @@ The way to use it is the following:
         def __iter__(self):
             return self
 
+        def __next__(self):
+            frame = self.frame_creator.compute(self.audio)
+            if frame.size == 0:
+                raise StopIteration
+            else:
+                return frame
+
+        next = __next__  # Python 2
+
         def num_frames(self):
             if self.startFromZero:
                 if not self.lastFrameToEndOfFile:
@@ -113,12 +127,16 @@ The way to use it is the following:
                 size = int(round((len(self.audio)+self.frameSize/2.0)/float(self.hopSize)))
             return size
 
-
-        def next(self):
-            frame = self.frame_creator.compute(self.audio)
-            if frame.size == 0:
-                raise StopIteration
+        def frame_times(self, sampleRate):
+            times = []
+            if self.startFromZero:
+                start = self.frameSize/2.0
             else:
-                return frame
+                start = 0.
+
+            for i in range(self.num_frames()):
+                times.append((start + self.hopSize * i) / sampleRate)
+            return times
+
 
     setattr(essentia, 'FrameGenerator', FrameGenerator)

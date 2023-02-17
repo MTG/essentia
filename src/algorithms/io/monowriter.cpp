@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -24,12 +24,9 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* MonoWriter::name = "MonoWriter";
-const char* MonoWriter::description = DOC("This algorithm writes a mono audio stream to a file.\n\n"
-
-"Supported formats are wav, aiff, mp3, flac and ogg. An exception is thrown when other extensions are given. Note that to encode in mp3 format it is mandatory that ffmpeg was configured with mp3 enabled.\n\n"
-
-"If the file specified by filename could not be opened or the header of the file omits channel's information, an exception is thrown.");
+const char* MonoWriter::name = essentia::standard::MonoWriter::name;
+const char* MonoWriter::category = essentia::standard::MonoWriter::category;
+const char* MonoWriter::description = essentia::standard::MonoWriter::description;
 
 
 void MonoWriter::reset() {
@@ -118,9 +115,10 @@ namespace essentia {
 namespace standard {
 
 const char* MonoWriter::name = "MonoWriter";
+const char* MonoWriter::category = "Input/output";
 const char* MonoWriter::description = DOC("This algorithm writes a mono audio stream to a file.\n\n"
 
-"Supported formats are wav, aiff, mp3, flac and ogg. An exception is thrown when other extensions are given. Note that to encode in mp3 format it is mandatory that ffmpeg was configured with mp3 enabled.\n\n"
+"The algorithm uses FFmpeg. Supported formats are wav, aiff, mp3, flac and ogg. An exception is thrown when other extensions are given. The default FFmpeg encoders are used for each format. Note that to encode in mp3 format it is mandatory that FFmpeg was configured with mp3 enabled.\n\n"
 
 "If the file specified by filename could not be opened or the header of the file omits channel's information, an exception is thrown.");
 

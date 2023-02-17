@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -38,6 +38,7 @@ class ChordsDetectionBeats : public Algorithm {
     Algorithm* _chordsAlgo;
     Real _sampleRate; 
     int _hopSize;
+    std::string _chromaPick;
 
   public:
     ChordsDetectionBeats() {
@@ -46,7 +47,10 @@ class ChordsDetectionBeats : public Algorithm {
       _chordsAlgo->configure("profileType", "tonictriad", "usePolyphony", false);
 
       declareInput(_pcp, "pcp", "the pitch class profile from which to detect the chord");
-      declareInput(_ticks, "ticks", "the list of beat positions (in seconds)");
+      declareInput(_ticks, "ticks", "the list of beat positions (in seconds). "
+                                    "One chord will be outputted for each segment between two adjacent ticks. "
+                                    "If number of ticks is smaller than 2, exception will be thrown. "
+                                    "Those ticks that exceeded the pcp time length will be ignored.");
       declareOutput(_chords, "chords", "the resulting chords, from A to G");
       declareOutput(_strength, "strength", "the strength of the chords");
     }
@@ -54,6 +58,7 @@ class ChordsDetectionBeats : public Algorithm {
     void declareParameters() {
       declareParameter("sampleRate", "the sampling rate of the audio signal [Hz]", "(0,inf)", 44100.);
       declareParameter("hopSize", "the hop size with which the input PCPs were computed", "(0,inf)", 2048);
+      declareParameter("chromaPick", "method of calculating singleton chroma for interbeat interval", "{starting_beat,interbeat_median}", "interbeat_median");
     }
 
     ~ChordsDetectionBeats() {
@@ -65,6 +70,7 @@ class ChordsDetectionBeats : public Algorithm {
     void compute();
 
     static const char* name;
+    static const char* category;    
     static const char* description;
 };
 

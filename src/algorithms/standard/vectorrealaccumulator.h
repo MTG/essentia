@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -48,6 +48,7 @@ class VectorRealAccumulator : public AlgorithmComposite {
   }
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -19,6 +19,7 @@
 
 #include "debugging.h"
 #include <iostream>
+
 using namespace std;
 
 namespace essentia {
@@ -107,7 +108,8 @@ void setDebugLevelForTimeIndex(int index) {
 
 void Logger::flush() {
   while (!_msgQueue.empty()) {
-    std::cout << _msgQueue.front() << std::flush;
+    std::cerr << _msgQueue.front();
+    //std::cout << _msgQueue.front() << std::flush;
     _msgQueue.pop_front();
   }
 }
@@ -130,24 +132,18 @@ void Logger::debug(DebuggingModule module, const string& msg, bool resetHeader) 
 
 void Logger::info(const string& msg) {
   if (!infoLevelActive) return;
-  static const string GREEN_FONT = "\x1B[0;32m";
-  static const string RESET_FONT = "\x1B[0m";
   _msgQueue.push_back(E_STRINGIFY(GREEN_FONT << "[   INFO   ] " << RESET_FONT << msg << '\n'));
   flush();
 }
 
 void Logger::warning(const string& msg) {
   if (!warningLevelActive) return;
-  static const string YELLOW_FONT = "\x1B[0;33m";
-  static const string RESET_FONT = "\x1B[0m";
   _msgQueue.push_back(E_STRINGIFY(YELLOW_FONT << "[ WARNING  ] " << RESET_FONT << msg << '\n'));
   flush();
 }
 
 void Logger::error(const string& msg) {
   if (!errorLevelActive) return;
-  static const string RED_FONT = "\x1B[0;31m";
-  static const string RESET_FONT = "\x1B[0m";
   _msgQueue.push_back(E_STRINGIFY(RED_FONT << "[  ERROR   ] " << RESET_FONT << msg << '\n'));
   flush();
 }

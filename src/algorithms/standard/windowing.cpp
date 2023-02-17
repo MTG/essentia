@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,10 +25,16 @@ using namespace essentia;
 using namespace standard;
 
 const char* Windowing::name = "Windowing";
-const char* Windowing::description = DOC("This algorithm applies windowing to audio signals.\n"
-"It optionally applies zero-phase windowing and optionally adds zero-padding.\n"
-"The resulting windowed frame size is equal to the incoming frame size plus the number of padded zeros.\n"
-"The available windows are normalized (to have an area of 1) and then scaled by a factor of 2.\n"
+const char* Windowing::category = "Standard";
+const char* Windowing::description = DOC("This algorithm applies windowing to an audio signal. "
+"It optionally applies zero-phase windowing and optionally adds zero-padding. "
+"The resulting windowed frame size is equal to the incoming frame size plus the number of padded zeros. "
+"By default, the available windows are normalized (to have an area of 1) and then scaled by a factor of 2.\n"
+"\n"
+"The parameter constantsDecimals allows choosing the number of decimals used in the constants for the formulation "
+"of the Hamming and Blackman-Harris windows, which allows replicating alternative windowing implementations. "
+"For example, setting type='hamming', constantsDecimals=2, normalized=False, and zeroPhase=False results in a "
+"Hamming window similar to the default SciPy implementation [3].\n"
 "\n"
 "An exception is thrown if the size of the frame is less than 2.\n"
 "\n"
@@ -37,19 +43,28 @@ const char* Windowing::description = DOC("This algorithm applies windowing to au
 "  discrete Fourier transform, Proceedings of the IEEE, vol. 66, no. 1,\n"
 "  pp. 51-83, Jan. 1978\n\n"
 "  [2] Window function - Wikipedia, the free encyclopedia,\n"
-"  http://en.wikipedia.org/wiki/Window_function");
+"  http://en.wikipedia.org/wiki/Window_function\n\n"
+"  [3] Hamming window - SciPy documentation,\n"
+"  https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.windows.hamming.html"
+);
 
 void Windowing::configure() {
+  _normalized = parameter("normalized").toBool();
   _window.resize(parameter("size").toInt());
+  _constantsDecimals = parameter("constantsDecimals").toInt();
+  _symmetric = parameter("symmetric").toBool();
   createWindow(parameter("type").toLower());
-
   _zeroPadding = parameter("zeroPadding").toInt();
   _zeroPhase = parameter("zeroPhase").toBool();
+  _splitPadding = parameter("splitPadding").toBool();
 }
 
 void Windowing::createWindow(const std::string& windowtype) {
+  if (!_symmetric) _window.resize(_window.size() + 1);
+
   if (windowtype == "hamming") hamming();
   else if (windowtype == "hann") hann();
+  else if (windowtype == "hannnsgcq") hannNSGCQ();
   else if (windowtype == "triangular") triangular();
   else if (windowtype == "square") square();
   else if (windowtype == "blackmanharris62") blackmanHarris62();
@@ -57,10 +72,15 @@ void Windowing::createWindow(const std::string& windowtype) {
   else if (windowtype == "blackmanharris74") blackmanHarris74();
   else if (windowtype == "blackmanharris92") blackmanHarris92();
 
-  normalize();
+  if (!_symmetric) _window.pop_back();
+
+  if (_normalized) {
+    normalize();
+  }
 }
 
 void Windowing::compute() {
+
   const std::vector<Real>& signal = _frame.get();
   std::vector<Real>& windowedSignal = _windowedFrame.get();
 
@@ -108,16 +128,30 @@ void Windowing::compute() {
       windowedSignal[i++] = 0.0;
     }
   }
+  if (_splitPadding) {
+    // rotate windowedSignal to split the padding to the edges of the signal
+    int shift = signalSize + ceil(_zeroPadding / 2.0);
+    rotate(windowedSignal.begin(), windowedSignal.begin() + shift, windowedSignal.end());
+  }
 }
 
 // values which were 0.54 and 0.46 are actually approximations.
 // More precise values are 0.53836 and 0.46164 (found on wikipedia)
 // @todo find a more "scientific" reference than wikipedia
+//
+// Pablo A.: Even if the current values are more precise, the user
+// may want to replicate the 2-decimal version sometimes used in
+// other implementations (e.g., SciPy). Added a parameter to support
+// that use-case.
 void Windowing::hamming() {
   const int size = _window.size();
+  double a0 = 0.53836, a1 = 0.46164;
+
+  a0 = roundToDecimal(a0, _constantsDecimals);
+  a1 = roundToDecimal(a1, _constantsDecimals);
 
   for (int i=0; i<size; i++) {
-    _window[i] = 0.53836 - 0.46164 * cos((2.0*M_PI*i) / (size - 1.0));
+    _window[i] = a0 - a1 * cos((2.0*M_PI*i) / (size - 1.0));
   }
 }
 
@@ -126,6 +160,19 @@ void Windowing::hann() {
 
   for (int i=0; i<size; i++) {
     _window[i] = 0.5 - 0.5 * cos((2.0*M_PI*i) / (size - 1.0));
+  }
+}
+// note: Zero-centered windows are very important for the NSQConstantQ algorithm.
+// As the algorithm sometimes uses very short windows, this can have a big impact on the transform.
+// Thus, this window was created to return a zero-centered window also with even sizes.
+void Windowing::hannNSGCQ() {
+
+  const int size = _window.size();
+  for (int i=0; i<=size/2 ; i++) {
+    _window[i] = 0.5 + 0.5 * cos(2.0*M_PI*i / size);
+  }
+  for (int i=size/2+1; i<size ; i++) {
+    _window[i] = 0.5 + 0.5 * cos(-2.0*M_PI*i / size);
   }
 }
 
@@ -148,6 +195,11 @@ void Windowing::square() {
 // @todo lookup implementation of windows on wikipedia and other resources
 void Windowing::blackmanHarris(double a0, double a1, double a2, double a3) {
   int size = _window.size();
+
+  a0 = roundToDecimal(a0, _constantsDecimals);
+  a1 = roundToDecimal(a1, _constantsDecimals);
+  a2 = roundToDecimal(a2, _constantsDecimals);
+  a3 = roundToDecimal(a3, _constantsDecimals);
 
   double fConst = 2.0 * M_PI / (size-1);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,8 +25,8 @@ using namespace essentia;
 using namespace standard;
 
 const char* GFCC::name = "GFCC";
-const char* GFCC::version = "1.0";
-const char* GFCC::description = DOC("This algorithm computes the equivalent of MFCCs but using a gammatone filterbank (ERBBands) scaled on an Equivalent Rectangular Bandwidth (ERB) scale. These coefficients could be called 'Gammatone Feature Cepstral Coefficients.\n"
+const char* GFCC::category = "Spectral";
+const char* GFCC::description = DOC("This algorithm computes the Gammatone-frequency cepstral coefficients of a spectrum. This is an equivalent of MFCCs, but using a gammatone filterbank (ERBBands) scaled on an Equivalent Rectangular Bandwidth (ERB) scale.\n"
 "\n"
 "References:\n"
 "  [1] Y. Shao, Z. Jin, D. Wang, and S. Srinivasan, \"An auditory-based feature\n"
@@ -35,14 +35,21 @@ const char* GFCC::description = DOC("This algorithm computes the equivalent of M
 "  pp. 4625-4628.");
 
 void GFCC::configure() {
-  _gtFilter->configure("sampleRate", parameter("sampleRate"),
-                        "numberBands", parameter("numberBands"),
-                        "lowFrequencyBound", parameter("lowFrequencyBound"),
-                        "highFrequencyBound", parameter("highFrequencyBound"),
-                        "type", "energy");
+  _gtFilter->configure(INHERIT("inputSize"),
+                       INHERIT("sampleRate"),
+                       INHERIT("numberBands"),
+                       INHERIT("lowFrequencyBound"),
+                       INHERIT("highFrequencyBound"),
+                       INHERIT("type"));
   _dct->configure("inputSize", parameter("numberBands"),
-                  "outputSize", parameter("numberCoefficients"));
+                  "outputSize", parameter("numberCoefficients"),
+                  INHERIT("dctType"));
   _logbands.resize(parameter("numberBands").toInt());
+
+  _logType = parameter("logType").toLower();
+  _silenceThreshold = parameter("silenceThreshold").toReal();
+  _dbSilenceThreshold = 10 * log10(_silenceThreshold);
+  _logSilenceThreshold = log(_silenceThreshold);
 }
 
 void GFCC::compute() {
@@ -56,9 +63,22 @@ void GFCC::compute() {
   _gtFilter->output("bands").set(bands);
   _gtFilter->compute();
 
-
   for (int i=0; i<int(bands.size()); ++i) {
-    _logbands[i] = amp2db(bands[i]);
+    if (_logType == "dbpow") {
+       _logbands[i] = pow2db(bands[i], _silenceThreshold, _dbSilenceThreshold);
+     }
+     else if (_logType == "dbamp") {
+       _logbands[i] = amp2db(bands[i], _silenceThreshold, _dbSilenceThreshold);
+     }
+     else if (_logType == "log") {
+      _logbands[i] = lin2log(bands[i], _silenceThreshold, _logSilenceThreshold);
+     }
+     else if (_logType == "natural") {
+       _logbands[i] = bands[i];
+     }
+     else {
+       throw EssentiaException("GFCC: Bad 'logType' parameter");
+     }
   }
 
   // compute the DCT of these bands
@@ -66,3 +86,4 @@ void GFCC::compute() {
   _dct->output("dct").set(gfcc);
   _dct->compute();
 }
+

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -231,9 +231,11 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
         case BOOL:                 SET_PORT_COPY(Boolean, bool);
         case INTEGER:              SET_PORT_COPY(Integer, int);
         case VECTOR_VECTOR_REAL:   SET_PORT_COPY(VectorVectorReal, vector<vector<Real> >);
+        case VECTOR_VECTOR_COMPLEX:SET_PORT_COPY(VectorVectorComplex, vector<vector<complex<Real> > >);
         case VECTOR_VECTOR_STRING: SET_PORT_COPY(VectorVectorString, vector<vector<string> >);
         case VECTOR_STEREOSAMPLE:  SET_PORT_COPY(VectorStereoSample, vector<StereoSample>);
         case MATRIX_REAL:          SET_PORT_COPY(MatrixReal, TNT::Array2D<Real>);
+        case TENSOR_REAL:          SET_PORT_COPY(TensorReal, Tensor<Real>);
 
         case POOL:                 SET_PORT_REF(PyPool, Pool);
         case VECTOR_REAL:          SET_PORT_REF(VectorReal, vector<Real>);
@@ -306,7 +308,12 @@ PyObject* PyAlgorithm::compute(PyAlgorithm* self, PyObject* args) {
       case VECTOR_STRING: SET_PORT(vector<string>);
       case VECTOR_STEREOSAMPLE: SET_PORT(vector<StereoSample>);
       case VECTOR_VECTOR_REAL: SET_PORT(vector<vector<Real> >);
+      case VECTOR_VECTOR_COMPLEX: SET_PORT(vector<vector<complex<Real> > >);
       case VECTOR_VECTOR_STRING: SET_PORT(vector<vector<string> >);
+      case TENSOR_REAL:
+        outputs[i] = (void*)new Tensor<Real>();
+        port.set(*(Tensor<Real>*)outputs[i]);
+        break;
       case MATRIX_REAL: SET_PORT(TNT::Array2D<Real>);
       case POOL: SET_PORT(Pool);
 
@@ -469,7 +476,7 @@ PyObject* PyAlgorithm::getDoc(PyAlgorithm* self) {
 
 PyObject* PyAlgorithm::getStruct(PyAlgorithm* self) {
   const AlgorithmInfo<Algorithm>& inf = AlgorithmFactory::getInfo(self->algo->name());
-  return generateDocStruct<Algorithm>(*(self->algo), inf.description);
+  return generateDocStruct<Algorithm>(*(self->algo), inf);
 }
 
 static PyMethodDef PyAlgorithm_methods[] = {
@@ -500,10 +507,15 @@ static PyMethodDef PyAlgorithm_methods[] = {
   { NULL }  /* Sentinel */
 };
 
+
 static PyTypeObject PyAlgorithmType = {
+#if PY_MAJOR_VERSION >= 3
+    PyVarObject_HEAD_INIT(NULL, 0)
+#else
     PyObject_HEAD_INIT(NULL)
     0,                                                    // ob_size
-    "essentia.standard.Algorithm",                                 // tp_name
+#endif
+    "essentia.standard.Algorithm",                        // tp_name
     sizeof(PyAlgorithm),                                  // tp_basicsize
     0,                                                    // tp_itemsize
     PyAlgorithm::dealloc,                                 // tp_dealloc
@@ -522,7 +534,7 @@ static PyTypeObject PyAlgorithmType = {
     0,                                                    // tp_setattro
     0,                                                    // tp_as_buffer
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,             // tp_flags
-    "essentia::standard::Algorithm wrapper objects",                // tp_doc
+    "essentia::standard::Algorithm wrapper objects",      // tp_doc
     0,                                                    // tp_traverse
     0,                                                    // tp_clear
     0,                                                    // tp_richcompare

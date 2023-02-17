@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -15,8 +15,8 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-import common as _c
-import _essentia
+from . import common as _c
+from . import _essentia
 
 def isSilent(arg):
     return _essentia.isSilent( _c.convertData(arg, _c.Edt.VECTOR_REAL) )
@@ -48,6 +48,9 @@ def amp2db(arg):
 def db2amp(arg):
     return _essentia.db2amp( _c.convertData(arg, _c.Edt.REAL) )
 
+def lin2log(arg):
+    return _essentia.lin2log( _c.convertData(arg, _c.Edt.REAL) )
+
 def bark2hz(arg):
     return _essentia.bark2hz( _c.convertData(arg, _c.Edt.REAL) )
 
@@ -59,6 +62,9 @@ def mel2hz(arg):
 
 def hz2mel(arg):
     return _essentia.hz2mel( _c.convertData(arg, _c.Edt.REAL) )
+
+def equivalentKey(arg):
+    return _essentia.equivalentKey( _c.convertData(arg, _c.Edt.STRING) )
 
 def postProcessTicks(arg1, arg2=None, arg3=None):
     if arg2 != None and arg3 != None:
@@ -81,4 +87,5 @@ __all__ = [ 'isSilent', 'instantPower',
             'bark2hz', 'hz2bark',
             'mel2hz', 'hz2mel',
             'postProcessTicks',
-            'normalize', 'derivative']
+            'normalize', 'derivative',
+            'equivalentKey', 'lin2log']

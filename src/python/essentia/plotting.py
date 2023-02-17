@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -40,7 +40,7 @@ def descriptorPlot(name, xData, yData, pool, options):
     if not os.path.exists('plots'):
         os.mkdir('plots')
     figureName = 'plots/' + name + '.png'
-    print 'Plotting ' + name + '...'
+    print('Plotting ' + name + '...')
     pylab.savefig(figureName)
 
     return figureName
@@ -52,7 +52,7 @@ def descriptorPlotHTML(namespace, name, audio, pool, options):
         # plot name
         descName = namespace + '.' + name
         # plot x data
-        scopes = pool.value(namespace + '.' + name + '.' + 'scope']
+        scopes = pool.value(namespace + '.' + name + '.' + 'scope')
         descScopes = []
         for scope in scopes:
             descScopes.append(scope[0])
@@ -75,7 +75,7 @@ def descriptorPlotHTML(namespace, name, audio, pool, options):
 
     except KeyError:
         htmlCode = ''
-        print "WARNING: the descriptor", descName, "doesn't exist"
+        print("WARNING: the descriptor", descName, "doesn't exist")
 
     return htmlCode
 

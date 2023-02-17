@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -157,6 +157,14 @@ inline bool isValid(const TNT::Array2D<T> & mat) {
   return true;
 }
 
+template <typename T>
+inline bool isValid(const Tensor<T>& tensor) {
+  for (const T* i = tensor.data(); i < (tensor.data() + tensor.size()); ++i){
+    if (!isValid(*i)) return false;
+  }
+  return true;
+}
+
 #ifdef OS_WIN32
 int mkstemp(char *tmpl);
 #endif // OS_WIN32
@@ -180,14 +188,6 @@ inline void fastcopy<Real>(Real* dest, const Real* src, int n) {
   memcpy(dest, src, n*sizeof(Real));
 }
 
-// overload for iterators, which allow us to fastcopy(dest.begin(), src.begin(), 0) and not crash
-inline void fastcopy(std::vector<Real>::iterator dest, std::vector<Real>::const_iterator src, int n) {
-  // need to test this because otherwise it is not legal to dereference the iterator
-  if (n > 0) {
-    fastcopy(&*dest, &*src, n);
-  }
-}
-
 template <>
 inline void fastcopy<StereoSample>(StereoSample* dest, const StereoSample* src, int n) {
   memcpy(dest, src, n*sizeof(StereoSample));
@@ -198,8 +198,19 @@ inline void fastcopy<int>(int* dest, const int* src, int n) {
   memcpy(dest, src, n*sizeof(int));
 }
 
+// overload for iterators, which allow us to fastcopy(dest.begin(), src.begin(), 0) and not crash
+inline void fastcopy(std::vector<Real>::iterator dest, std::vector<Real>::const_iterator src, int n) {
+  // need to test this because otherwise it is not legal to dereference the iterator
+  if (n > 0) {
+    fastcopy(&*dest, &*src, n);
+  }
+}
 
-
+inline void fastcopy(std::vector<StereoSample>::iterator dest, std::vector<StereoSample>::const_iterator src, int n) {
+  if (n > 0) {
+    fastcopy(&*dest, &*src, n);
+  }
+}
 
 } // namespace essentia
 

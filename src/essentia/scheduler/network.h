@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -110,7 +110,26 @@ class Network {
 
   ~Network();
 
+  /**
+   * Executes all the algorithms in the network until all the tokens given by
+   * the source generator are processed by all the algorithms.
+   *
+   * Internally it just calls runPrepare and then runStep repeatedly.
+   */
   void run();
+
+  /**
+   * Does the preparation needed to process the tokens of the network
+   */
+  void runPrepare();
+
+  /**
+   * Processes all tokens generated with one call of process() on the
+   * generator.
+   *
+   * Returns False if there are no more tokens to process.
+   */
+  bool runStep();
 
   /**
    * Rebuilds the visible and execution network.
@@ -247,6 +266,13 @@ class Network {
   void clearExecutionNetwork();
 };
 
+
+/**
+* Delete the algorithm together with its all visible dependencies without 
+* creating a network object.
+*/
+void deleteNetwork(const streaming::Algorithm* algo);
+
 /**
  * Prints the fill state of all the buffers in the last created network.
  */
@@ -263,7 +289,6 @@ AlgoVector computeCompositeDependencies(const streaming::Algorithm* algo);
  * and also avoid doing any allocation while running the network.
  */
 void cacheDependencies(streaming::Algorithm* algo);
-
 
 /**
  * Returns the list of all algorithms which live inside of the given composite

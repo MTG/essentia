@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -51,12 +51,11 @@ class ReplayGain : public Algorithm {
   }
 
   void configure();
-
   void reset();
-
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -105,6 +104,9 @@ class ReplayGain : public AlgorithmComposite {
   AlgorithmStatus process();
   void reset();
 
+  static const char* name;
+  static const char* category;
+  static const char* description;
 };
 
 } // namespace streaming

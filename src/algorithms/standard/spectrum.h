@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -39,7 +39,7 @@ class Spectrum : public Algorithm {
  public:
   Spectrum() {
     declareInput(_signal, "frame", "the input audio frame");
-    declareOutput(_spectrum, "spectrum", "the magnitude spectrum of the input audio signal");
+    declareOutput(_spectrum, "spectrum", "magnitude spectrum of the input audio signal");
 
     _fft = AlgorithmFactory::create("FFT");
     _magnitude = AlgorithmFactory::create("Magnitude");
@@ -58,6 +58,7 @@ class Spectrum : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

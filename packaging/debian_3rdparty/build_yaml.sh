@@ -1,19 +1,19 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 . ../build_config.sh
 
 rm -rf tmp
 mkdir tmp
 cd tmp
 
-echo $PREFIX
+echo "Building libyaml $LIBYAML_VERSION"
 
-
-wget http://pyyaml.org/download/libyaml/$LIBYAML_VERSION.tar.gz
+curl -SLO http://pyyaml.org/download/libyaml/$LIBYAML_VERSION.tar.gz
 tar -xf $LIBYAML_VERSION.tar.gz
 cd $LIBYAML_VERSION
 
 # fails to compile shared library, building only static
-CFLAGS="-DYAML_DECLARE_STATIC" ./configure \
+CFLAGS="-DYAML_DECLARE_STATIC -fPIC" ./configure \
     --prefix=$PREFIX \
     $SHARED_OR_STATIC
 make

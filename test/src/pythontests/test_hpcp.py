@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -57,4 +57,4 @@ magnitudes = [0.0003832988, 0.000289413, 0.0002247146, 0.0001418052,
               0.000018821, 0.0000168285]
 
 hpcp_value = hpcp(frequencies, magnitudes)
-print hpcp_value
+print(hpcp_value)

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -25,6 +25,7 @@ using namespace essentia;
 using namespace standard;
 
 const char* Entropy::name = "Entropy";
+const char* Entropy::category = "Statistics";
 const char* Entropy::description = DOC("This algorithm computes the Shannon entropy of an array. Entropy can be used to quantify the peakiness of a distribution. This has been used for voiced/unvoiced decision in automatic speech recognition. \n"
 "\n"
 "Entropy cannot be computed neither on empty arrays nor arrays which contain negative values. In such cases, exceptions will be thrown.\n"
@@ -42,7 +43,7 @@ void Entropy::compute() {
         throw EssentiaException("Entropy: array does not contain any values");
     }
     
-    if (find_if(array.begin(), array.end(), bind2nd(less<Real>(), 0)) != array.end()) {
+    if (find_if(array.begin(), array.end(), [](Real value){ return value < 0; }) != array.end()) {
         throw EssentiaException("Entropy: array must not contain negative values");
     }
     

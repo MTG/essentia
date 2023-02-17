@@ -1,37 +1,29 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 . ../build_config.sh
 
 rm -rf tmp
 mkdir tmp
 cd tmp
 
-wget http://taglib.github.io/releases/$TAGLIB_VERSION.tar.gz
+echo "Building taglib $TAGLIB_VERSION"
+
+curl -SLO http://taglib.github.io/releases/$TAGLIB_VERSION.tar.gz
 tar -xf $TAGLIB_VERSION.tar.gz
 cd $TAGLIB_VERSION/
 
 cmake \
+    -D CMAKE_CXX_FLAGS="-fPIC" \
     -DCMAKE_INSTALL_PREFIX=$PREFIX \
     -DCMAKE_BUILD_TYPE=Release \
-    -DENABLE_STATIC=ON \
-	. 
+    -DBUILD_SHARED_LIBS=OFF \
+    -DZLIB_ROOT=$PREFIX \
+	.
 make
+# patch taglib.cp (missing -lz flag)
+sed -i 's/-ltag/-ltag -lz/g' taglib.pc
 make install
 
 cd ../..
 rm -r tmp
-
-TAGLIB_PC="
-prefix=$PREFIX
-exec_prefix=\${prefix}
-includedir=\${prefix}/include
-libdir=\${exec_prefix}/lib
-
-Name: TagLib
-Description: Audio meta-data library
-Requires:
-Version: 1.9.1
-Cflags: -I\${includedir}
-Libs: -L\${libdir} -ltag
-"
-#echo "$TAGLIB_PC" > $PREFIX/lib/pkgconfig/taglib.pc
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,7 +26,8 @@ using namespace standard;
 
 
 const char* PitchYin::name = "PitchYin";
-const char* PitchYin::description = DOC("This algorithm estimates the fundamental frequency from a given spectrum. It is an implementation of the Yin algorithm [1] for computations in the time domain.\n"
+const char* PitchYin::category = "Pitch";
+const char* PitchYin::description = DOC("This algorithm estimates the fundamental frequency given the frame of a monophonic music signal. It is an implementation of the Yin algorithm [1] for computations in the time domain.\n"
 "\n"
 "An exception is thrown if an empty signal is provided.\n"
 "\n"
@@ -46,7 +47,7 @@ void PitchYin::configure() {
   _tolerance = parameter("tolerance").toReal();
   _interpolate = parameter("interpolate").toBool();
 
-  _yin.resize(_frameSize/2+1);
+  _yin.resize(_frameSize/2 + 1);
 
   _tauMax = min(int(ceil(_sampleRate / parameter("minFrequency").toReal())), _frameSize/2);
   _tauMin = min(int(floor(_sampleRate / parameter("maxFrequency").toReal())), _frameSize/2);
@@ -77,16 +78,19 @@ void PitchYin::compute() {
   if (signal.empty()) {
     throw EssentiaException("PitchYin: Cannot compute pitch detection on empty signal frame.");
   }
+  if ((int) signal.size() != _frameSize) {
+    Algorithm::configure( "frameSize", int(signal.size()) );
+  } 
+
   Real& pitch = _pitch.get();
   Real& pitchConfidence = _pitchConfidence.get();
   
-
   _yin[0] = 1.;
 
   // Compute difference function
   for (int tau=1; tau < (int) _yin.size(); ++tau) {
     _yin[tau] = 0.;
-    for (int j=0; j < (int) _yin.size(); ++j) {
+    for (int j=0; j < (int) _yin.size()-1; ++j) {
       _yin[tau] += pow(signal[j] - signal[j+tau], 2);
     }
   }
@@ -96,17 +100,27 @@ void PitchYin::compute() {
   for (int tau=1; tau < (int) _yin.size(); ++tau) {
     sum += _yin[tau];
     _yin[tau] = _yin[tau] * tau / sum;
+
+    // Cannot simply check for sum==0 because NaN will be also produced by 
+    // infinitely small values 
+    if (isnan(_yin[tau])) {
+      _yin[tau] = 1;
+    }
   }
+
+  // _yin[tau] is equal to 1 in the case if the df value for 
+  // this tau is the same as the mean across all df values from 1 to tau
 
   // Detect best period
   Real period = 0.;
-  int yinMin = 0.;
+  Real yinMin = 0.;
 
   // Select the local minima below the absolute threshold with the smallest 
   // period value. Use global minimum if no minimas were found below threshold.
 
   // invert yin values because we want to detect the minima while PeakDetection
   // detects the maxima
+ 
   for(int tau=0; tau < (int) _yin.size(); ++tau) {
     _yin[tau] = -_yin[tau];
   }
@@ -126,12 +140,10 @@ void PitchYin::compute() {
     _peakDetectGlobal->output("positions").set(_positions);
     _peakDetectGlobal->output("amplitudes").set(_amplitudes);
     _peakDetectGlobal->compute();    
-    try {
+
+    if (_positions.size()) {
       period = _positions[0];
       yinMin = -_amplitudes[0];
-    }
-    catch (const EssentiaException&) {
-      throw EssentiaException("PitchYin: it appears that no peaks were found by PeakDetection. If you read this message, PLEASE, report this issue to the developers with an example of audio on which it happened.");
     }
   }
 
@@ -139,16 +151,19 @@ void PitchYin::compute() {
   // peaks and process the values manually instead of running peak detection 
   // twice and detecting only two peaks. 
 
-  // TODO: how to compute confidence?
-  // Aubio computes it as 1 - min(_yin), but this does not correspond to the peak
-  // dound by peakDetectLocal
 
+  // Treat minimas with yin values >= 1 and respective negative confidence values 
+  // as completely unreliable (in the case if they occur in results). 
+  
   if (period) {
     pitch = _sampleRate / period;
     pitchConfidence = 1. - yinMin;
+    if (pitchConfidence < 0) {
+      pitchConfidence = 0.;
+    }
   }
   else {
-    pitch = 0.0;
-    pitchConfidence = 0.0;
+    pitch = 0.;
+    pitchConfidence = 0.;
   }      
 }

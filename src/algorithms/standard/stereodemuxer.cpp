@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,11 +26,10 @@ using namespace std;
 namespace essentia {
 namespace streaming {
 
-const char* StereoDemuxer::name = "StereoDemuxer";
-const char* StereoDemuxer::description = DOC(
-"Given a stereo signal, this algorithm outputs left and right channel separately."
-"If the signal is monophonic, it outputs a zero signal on the right channel."
-);
+const char* StereoDemuxer::name = essentia::standard::StereoDemuxer::name;
+const char* StereoDemuxer::category = essentia::standard::StereoDemuxer::category;
+const char* StereoDemuxer::description = essentia::standard::StereoDemuxer::description;
+
 
 AlgorithmStatus StereoDemuxer::process() {
   EXEC_DEBUG("process()");
@@ -82,10 +81,9 @@ namespace essentia {
 namespace standard {
 
 const char* StereoDemuxer::name = "StereoDemuxer";
-const char* StereoDemuxer::description = DOC(
-"Given a stereo signal, this algorithm outputs left and right channel separately."
-"If the signal is monophonic, it outputs a zero signal on the right channel."
-);
+const char* StereoDemuxer::category = "Standard";
+const char* StereoDemuxer::description = DOC("This algorithm outputs left and right channel separately given a stereo signal. If the signal is monophonic, it outputs a zero signal on the right channel.");
+
 
 void StereoDemuxer::createInnerNetwork() {
   _demuxer = streaming::AlgorithmFactory::create("StereoDemuxer");

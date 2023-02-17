@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -83,8 +83,9 @@ void parseParameters(ParameterMap* pm, PyObject* args, PyObject* keywds) {
         delete p;
         break;
       }
-      case VECTOR_REAL:       pm->add(name, VectorReal::toParameter(obj)); break;
-      case VECTOR_INTEGER:    pm->add(name, VectorInteger::toParameter(obj)); break;
+      case VECTOR_REAL:        pm->add(name, VectorReal::toParameter(obj)); break;
+      case VECTOR_INTEGER:     pm->add(name, VectorInteger::toParameter(obj)); break;
+      case VECTOR_VECTOR_REAL: pm->add(name, VectorVectorReal::toParameter(obj)); break;
 
       default:
         ostringstream msg;
@@ -153,8 +154,11 @@ PyObject* toPython(void* obj, Edt tp) {
     case VECTOR_INTEGER: return VectorInteger::toPythonRef((RogueVector<int>*)obj);
     case VECTOR_STEREOSAMPLE: return VectorStereoSample::toPythonCopy((vector<StereoSample>*)obj);
     case VECTOR_VECTOR_REAL: return VectorVectorReal::toPythonCopy((vector<vector<Real> >*)obj);
+    case VECTOR_VECTOR_COMPLEX: return VectorVectorComplex::toPythonCopy((vector<vector<complex<Real> > >*)obj);
     case VECTOR_VECTOR_STRING: return VectorVectorString::toPythonCopy((vector<vector<string> >*)obj);
     case VECTOR_VECTOR_STEREOSAMPLE: return VectorVectorStereoSample::toPythonCopy((vector<vector<StereoSample> >*)obj);
+    case TENSOR_REAL: return TensorReal::toPythonCopy((Tensor<Real>*)obj);
+    case VECTOR_TENSOR_REAL: return VectorTensorReal::toPythonCopy((vector<Tensor<Real> >*)obj);
     case MATRIX_REAL: return MatrixReal::toPythonRef((TNT::Array2D<Real>*)obj);
     case VECTOR_MATRIX_REAL: return VectorMatrixReal::toPythonCopy((vector<TNT::Array2D<Real> >*)obj);
     case POOL: return PyPool::toPythonRef((Pool*)obj);

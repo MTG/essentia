@@ -1,15 +1,16 @@
-#!/bin/sh
+#!/usr/bin/env bash
+set -e
 . ../build_config.sh
 
 rm -rf tmp
 mkdir tmp
 cd tmp
 
-echo $PREFIX
+echo "Building qt from $QT_SOURCE_URL"
 
 QT_FILE=${QT_SOURCE_URL##*/}
 
-wget $QT_SOURCE_URL
+curl -SLO $QT_SOURCE_URL
 
 tar -xf $QT_FILE
 cd $(basename $QT_FILE .tar.gz)

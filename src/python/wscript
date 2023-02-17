@@ -1,5 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+from __future__ import print_function
 
 import distutils.sysconfig
 import os
@@ -10,9 +12,25 @@ def options(ctx):
 
 
 def configure(ctx):
-    ctx.load('python')
-    ctx.check_python_version((2,6,0))
-    ctx.check_python_headers()
+    ctx.load('compiler_c python')
+    ctx.check_python_version((2,7,0))
+    if int(ctx.env.PYTHON_VERSION[0]) == 2:
+        print ('→ Configuring for python2')
+    else:
+        print ('→ Configuring for python3')
+
+    ctx.check_python_headers(features='pyext')
+    ctx.check_python_module('numpy')
+
+    # A monkey patch to remove the -lpythonX.Ym flag. PEP 513 recommends to
+    # avoid explicit linking to libpythonX.Y.so.1, however python-config still
+    # outputs this flag.
+    # https://www.python.org/dev/peps/pep-0513
+    # https://github.com/pypa/manylinux/issues/85
+    ctx.env.LIB_PYEMBED = [f for f in ctx.env.LIB_PYEMBED
+                                   if not f.startswith('python')]
+    ctx.env.LIB_PYEXT = [f for f in ctx.env.LIB_PYEMBED
+                                   if not f.startswith('python')]
 
 def adjust(objs, path):
     return [ '%s/%s' % (path, obj) for obj in objs ]
@@ -22,9 +40,7 @@ def build(ctx):
 
     # gets the path from the active virtualenv
     PYLIB = distutils.sysconfig.get_python_lib()
-    #print('-'*100)
-    #print('ctx.env', ctx.env)
-    #print('-'*100)
+
     NUMPY_INCPATH = [ # importable numpy path
                       __import__('numpy').get_include(),
                       # virtualenv path
@@ -36,12 +52,11 @@ def build(ctx):
         source   = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp'),
         target   = '_essentia',
         features = 'pyext',
-        includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + adjust(ctx.env.INCLUDES, '..'),
+        includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + (ctx.env.INCLUDES_ESSENTIA if ctx.env.ONLY_PYTHON else adjust(ctx.env.INCLUDES, '..')),
         cxxflags = [ '-w' ],
         install_path = '${PYTHONDIR}/essentia',
-        use      = 'essentia ' + ctx.env.USES
+        use      = ctx.env.USE_LIBS if ctx.env.ONLY_PYTHON else 'essentia ' #+ ctx.env.USE_LIBS
     )
 
-    # FIXME: this doesn't install in the active virtualenv but in the system python...
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
                       relative_trick=True)

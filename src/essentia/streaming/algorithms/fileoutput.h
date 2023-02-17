@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -27,6 +27,18 @@
 namespace essentia {
 namespace streaming {
 
+
+template <typename TokenType> inline void write_binary(std::ostream* _stream,
+                                                const TokenType& value) {
+  _stream->write((const char*) &value, sizeof(TokenType));
+}
+
+template <> void inline write_binary<std::vector<Real> >(std::ostream* _stream,
+                                                  const std::vector<Real>& value) {
+  _stream->write((const char*) &value[0], value.size() * sizeof(Real));
+}
+
+
 template <typename TokenType, typename StorageType = TokenType>
 class FileOutput : public Algorithm {
  protected:
@@ -48,7 +60,7 @@ class FileOutput : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("filename", "the name of the output file", "", "out.txt");
+    declareParameter("filename", "the name of the output file (use '-' for stdout)", "", "out.txt");
     declareParameter("mode", "output mode", "{text,binary}", "text");
   }
 
@@ -99,7 +111,7 @@ class FileOutput : public Algorithm {
   void write(const TokenType& value) {
     if (!_stream) throw EssentiaException("FileOutput: not configured properly");
     if (_binary) {
-      _stream->write((const char*) &value, sizeof(TokenType));
+      write_binary(_stream, value);
     }
     else {
       *_stream << value << "\n";

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -26,11 +26,12 @@ namespace essentia {
 namespace standard {
 
 const char* ChordsDescriptors::name = "ChordsDescriptors";
+const char* ChordsDescriptors::category = "Tonal";
 const char* ChordsDescriptors::description = DOC("Given a chord progression this algorithm describes it by means of key, scale, histogram, and rate of change.\n"
 "Note:\n"
 "  - chordsHistogram indexes follow the circle of fifths order, while being shifted to the input key and scale\n"
 "  - key and scale are taken from the most frequent chord. In the case where multiple chords are equally frequent, the chord is hierarchically chosen from the circle of fifths.\n"
-"  - valid chords are C, Em, G, Bm, D, F#m, A, C#m, E, G#m, B, D#m, F#, A#m, C#, Fm, G#, Cm, D#, Gm, A#, Dm, F, Am. Chords that not follow this terminology (i.e. Gb) will raise an exception.\n"
+"  - chords should follow this name convention `<A-G>[<#/b><m>]` (i.e. C, C# or C#m are valid chords). Chord names not fitting this convention will throw an exception.\n"
 "\n"
 "Input chords vector may not be empty, otherwise an exception is thrown.\n"
 "\n"
@@ -40,13 +41,14 @@ const char* ChordsDescriptors::description = DOC("Given a chord progression this
 "  [2] Circle of fifths - Wikipedia, the free encyclopedia,\n"
 "  http://en.wikipedia.org/wiki/Circle_of_fifths");
 
-const char* ChordsDescriptors::circleOfFifth[] = { "C", "Em", "G", "Bm", "D", "F#m", "A", "C#m", "E", "G#m", "B", "D#m", "F#", "A#m", "C#", "Fm", "G#", "Cm", "D#", "Gm", "A#", "Dm", "F", "Am"};
+const char* ChordsDescriptors::circleOfFifth[] = { "C", "Em", "G", "Bm", "D", "F#m", "A", "C#m", "E", "Abm", "B", "Ebm", "F#", "Bbm", "C#", "Fm", "Ab", "Cm", "Eb", "Gm", "Bb", "Dm", "F", "Am"};
+const char* ChordsDescriptors::circleOfFifthAlternativeNames[] = { "C", "Em", "G", "Bm", "D", "Gbm", "A", "Dbm", "E", "G#m", "B", "D#m", "Gb", "A#m", "Db", "Fm", "G#", "Cm", "D#", "Gm", "A#", "Dm", "F", "Am"};
 
 
 
 int ChordsDescriptors::chordIndex(const string& chord) {
   for (int i=0; i<int(ARRAY_SIZE(circleOfFifth)); ++i) {
-    if (chord == circleOfFifth[i]) {
+    if (chord == circleOfFifth[i] || chord ==  circleOfFifthAlternativeNames[i]) {
       return i;
     }
   }
@@ -54,22 +56,22 @@ int ChordsDescriptors::chordIndex(const string& chord) {
 }
 
 
-map<string, Real> ChordsDescriptors::chordsHistogram(const vector<string>& chords) {
-  map<string, Real> histogram;
+map<int, Real> ChordsDescriptors::chordsHistogram(const vector<string>& chords) {
+  map<int, Real> histogram;
 
   // Initialize
   for (int i=0; i<int(ARRAY_SIZE(circleOfFifth)); ++i) {
-    histogram[circleOfFifth[i]] = 0.0;
+    histogram[i] = 0.0;
   }
 
   // Increment
   for (int i=0; i<int(chords.size()); ++i) {
-    histogram[chords[i]] += 1.0;
+    histogram[chordIndex(chords[i])] += 1.0;
   }
 
   // Normalize
   for (int i=0; i<int(histogram.size()); ++i) {
-    histogram[circleOfFifth[i]] *= 100.0 / (Real)chords.size();
+    histogram[i] *= 100.0 / (Real)chords.size();
   }
 
   return histogram;
@@ -77,16 +79,16 @@ map<string, Real> ChordsDescriptors::chordsHistogram(const vector<string>& chord
 
 
 // offset the list of indices making key as the root index (or 0-index)
-map<string, Real> ChordsDescriptors::chordsHistogramNorm(map<string, Real>& histogram, const string& key) {
+map<int, Real> ChordsDescriptors::chordsHistogramNorm(map<int, Real>& histogram, const string& key) {
   int keyIndex = chordIndex(key);
-  map<string, Real> histogramNorm = histogram;
+  map<int, Real> histogramNorm = histogram;
 
   for (int i=0; i<int(histogramNorm.size()); ++i) {
     int chordIndex = i - keyIndex;
     if (chordIndex < 0) {
       chordIndex += ARRAY_SIZE(circleOfFifth);
     }
-    histogramNorm[circleOfFifth[chordIndex]] = histogram[circleOfFifth[i]];
+    histogramNorm[chordIndex] = histogram[i];
   }
 
   return histogramNorm;
@@ -100,21 +102,32 @@ void ChordsDescriptors::compute() {
     throw EssentiaException("ChordsDescriptors: Chords input empty");
   }
 
-  string key = toUpper(_key.get());
+  string key = _key.get();
+  
+  if (key.empty()) {
+    throw EssentiaException("ChordsDescriptors: Key input empty");
+  }
+
+  key[0] = toUpper(string(1, key[0]))[0];
+  
   string scale = toLower(_scale.get());
+
+  if (scale.empty()) {
+    throw EssentiaException("ChordsDescriptors: Scale input empty");
+  }
 
   if (_scale.get() == "minor") {
     key += "m";
   }
 
     // Chords Histogram
-  map<string, Real> chordsHist = chordsHistogram(chords);
-  map<string, Real> chordsHistNorm = chordsHistogramNorm(chordsHist, key);
+  map<int, Real> chordsHist = chordsHistogram(chords);
+  map<int, Real> chordsHistNorm = chordsHistogramNorm(chordsHist, key);
 
   vector<Real>& chordsHistNormVect = _chordsHistogram.get();
   chordsHistNormVect.resize(0); // erase anything that was in there
   for (int i=0; i<int(ARRAY_SIZE(circleOfFifth)); ++i) {
-    chordsHistNormVect.push_back(chordsHistNorm[circleOfFifth[i]]);
+    chordsHistNormVect.push_back(chordsHistNorm[i]);
   }
 
   // Chords Number Rate
@@ -144,8 +157,8 @@ void ChordsDescriptors::compute() {
   Real maxValue = 0.0;
 
   for (int i=0; i<int(ARRAY_SIZE(circleOfFifth)); ++i) {
-    if (chordsHist[circleOfFifth[i]] > maxValue) {
-      maxValue = chordsHist[circleOfFifth[i]];
+    if (chordsHist[i] > maxValue) {
+      maxValue = chordsHist[i];
       chordsKey = circleOfFifth[i];
     }
   }

@@ -1,49 +1,66 @@
 Essentia
 ========
+[![Build wheels status](https://github.com/MTG/essentia/actions/workflows/build-wheels.yml/badge.svg)](https://github.com/MTG/essentia/actions/workflows/build-wheels.yml)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![PyPI downloads: essentia](https://img.shields.io/pypi/dm/essentia.svg?label=PyPI%20downloads:%20essentia)](https://pypi.org/project/essentia/)
+[![PyPI downloads: essentia-tensorflow](https://img.shields.io/pypi/dm/essentia-tensorflow.svg?label=PyPI%20downloads:%20essentia-tensorflow)](https://pypi.org/project/essentia-tensorflow/)
 
-Essentia is an open-source C++ library for audio analysis and audio-based music information retrieval released under the Affero GPL license. It contains an extensive collection of reusable algorithms which implement audio input/output functionality, standard digital signal processing blocks, statistical characterization of data, and a large set of spectral, temporal, tonal and high-level music descriptors. The library is also wrapped in Python and includes a number of predefined executable extractors for the available music descriptors, which facilitates its use for fast prototyping and allows setting up research experiments very rapidly. Furthermore, it includes a Vamp plugin to be used with Sonic Visualiser for visualization purposes. The library is cross-platform and currently supports Linux, Mac OS X, and Windows systems. Essentia is designed with a focus on the robustness of the provided music descriptors and is optimized in terms of the computational cost of the algorithms. The provided functionality, specifically the music descriptors included in-the-box and signal processing algorithms, is easily expandable and allows for both research experiments and development of large-scale industrial applications.
 
-Documentation online: http://essentia.upf.edu/
+Essentia is an open-source C++ library for audio analysis and audio-based music information retrieval released under the Affero GPLv3 license. It contains an extensive collection of reusable algorithms which implement audio input/output functionality, standard digital signal processing blocks, statistical characterization of data, and a large set of spectral, temporal, tonal and high-level music descriptors. The library is also wrapped in Python and includes a number of predefined executable extractors for the available music descriptors, which facilitates its use for fast prototyping and allows setting up research experiments very rapidly. Furthermore, it includes a Vamp plugin to be used with Sonic Visualiser for visualization purposes. Essentia is designed with a focus on the robustness of the provided music descriptors and is optimized in terms of the computational cost of the algorithms. The provided functionality, specifically the music descriptors included in-the-box and signal processing algorithms, is easily expandable and allows for both research experiments and development of large-scale industrial applications.
+
+Documentation online: http://essentia.upf.edu
 
 
 Installation
 ------------
 
-Read installation instructions:
+The library is cross-platform and currently supports Linux, macOS, Windows, iOS and Android systems. Read installation instructions:
+-  http://essentia.upf.edu/documentation/installing.html 
+-  [doc/sphinxdoc/installing.rst](doc/sphinxdoc/installing.rst)
 
-  * online at http://essentia.upf.edu/documentation/installing.html 
+Install from master for the latest updates.
 
-  * in doc/sphinxdoc/installing.rst file in the code.
+To use in Python (Linux `x86_64`, `i686`): `pip install essentia` or `pip install essentia-tensorflow`.
 
-Essentia does compile and run correctly on Windows, however there is no Visual Studio project readily available, so you will have to setup one yourself and compile the dependencies too. We will be working on Windows installer in the near future.
+Docker images: https://hub.docker.com/r/mtgupf/essentia/
+
+
+You can download and use prebuilt static binaries for a number of Essentia's command-line music extractors instead of installing the complete library
+- [doc/sphinxdoc/extractors_out_of_box.rst](doc/sphinxdoc/extractors_out_of_box.rst)
 
 
 Quick start
 -----------
 
-Quick start using python: http://essentia.upf.edu/documentation/python_tutorial.html
+Quick start using Python:
+- http://essentia.upf.edu/documentation/essentia_python_tutorial.html
+- [Jupyter Notebook Essentia tutorial](/src/examples/tutorial/essentia_python_tutorial.ipynb)
+
+Command-line tools to compute common music descriptors:
+- [doc/sphinxdoc/extractors_out_of_box.rst](doc/sphinxdoc/extractors_out_of_box.rst)
+
+
+Asking for help
+---------------
+
+[Read frequently asked questions](FAQ.md).
+
+[Create an issue on github](https://github.com/MTG/essentia/issues) or [open a new discussion](https://github.com/MTG/essentia/discussions) if your question was not answered before.
 
 
 Versions
 --------
 
-Official releases: 
-
-  * https://github.com/MTG/essentia/releases
+Official releases: https://github.com/MTG/essentia/releases
 
 Github branches:
-
-  * 2.0: minor bugfixes/improvements following the official release. 
-    
-    These fixes should not affect algorithms' results, you may be assured in the identity of the results generated by example feature extractors, i.e. computed descriptors will be compatible with the official 2.0 release.
-
-  * 2.0.1: the same as 2.0 plus enabled high-level classifier models.
-
-  * master: development branch for major improvements, code refactoring, new algorithms, fixes that break descriptor compatibility between versions.
+- [master](https://github.com/MTG/essentia/tree/master): latest updates; if you got any problem, try it first.
 
 If you use example extractors (located in src/examples), or your own code employing Essentia algorithms to compute descriptors, you should be aware of possible incompatibilities when using different versions of Essentia.
 
 How to contribute
 -----------------
-We are more than happy to collaborate and receive your contributions to Essentia. The best practice of submitting your code is by creating pull requests to [our github repository](https://github.com/MTG/essentia) following our contribution policy. By submitting your code you authorize that it complies with the Developer's Certificate of Origin. For more detailes see: http://essentia.upf.edu/contribute
+We are more than happy to collaborate and receive your contributions to Essentia. The best practice of submitting your code is by creating pull requests to [our GitHub repository](https://github.com/MTG/essentia) following our contribution policy. By submitting your code you authorize that it complies with the Developer's Certificate of Origin. For more details see: http://essentia.upf.edu/documentation/contribute.html
+
+You are also more than welcome to [suggest any improvements](https://github.com/MTG/essentia/issues/254), including proposals for new algorithms, etc.
 

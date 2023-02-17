@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -33,14 +33,14 @@ class NoveltyCurve : public Algorithm {
 
   enum WeightType {
     FLAT, TRIANGLE, INVERSE_TRIANGLE, PARABOLA, INVERSE_PARABOLA,
-    LINEAR, QUADRATIC, INVERSE_QUADRATIC, SUPPLIED
+    LINEAR, QUADRATIC, INVERSE_QUADRATIC, SUPPLIED, HYBRID
   };
 
   Real _frameRate;
   WeightType _type;
   bool _normalize;
 
-  std::vector<Real> weightCurve(int size);
+  std::vector<Real> weightCurve(int size, WeightType type);
   std::vector<Real> noveltyFunction(const std::vector<Real>& spec, Real C, int meanSize);
 
  public:
@@ -54,8 +54,8 @@ class NoveltyCurve : public Algorithm {
 
   void declareParameters() {
     declareParameter("frameRate", "the sampling rate of the input audio", "[1,inf)", 44100./128.);
-    declareParameter("weightCurveType", "the type of weighting to be used for the bands novelty","{flat,triangle,inverse_triangle,parabola,inverse_parabola,linear,quadratic,inverse_quadratic,supplied}",
-                     "inverse_quadratic");
+    declareParameter("weightCurveType", "the type of weighting to be used for the bands novelty","{flat,triangle,inverse_triangle,parabola,inverse_parabola,linear,quadratic,inverse_quadratic,hybrid,supplied}",
+                     "hybrid");
     declareParameter("weightCurve", "vector containing the weights for each frequency band. Only if weightCurveType==supplied", "", std::vector<Real>(0));
     declareParameter("normalize", "whether to normalize each band's energy", "{true,false}", false);
   }
@@ -65,6 +65,7 @@ class NoveltyCurve : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 
@@ -116,6 +117,7 @@ class NoveltyCurve : public AlgorithmComposite {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

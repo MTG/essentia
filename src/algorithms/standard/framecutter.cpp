@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -28,22 +28,13 @@ namespace essentia {
 namespace standard {
 
 const char* FrameCutter::name = "FrameCutter";
-const char* FrameCutter::description = DOC("Given an input buffer this algorithm will return a "
-"frame (slice) of constant size every time it is called, and then jump a constant amount of "
-"samples in the future.\n"
-"When no more frames can be extracted from the input buffer, it will return empty frames\n"
-"If any frame could not be complete, because we start before the beginning of the input buffer or "
-"go past its end, the output frame will be zero-padded.\n"
+const char* FrameCutter::category = "Standard";
+const char* FrameCutter::description = DOC("This algorithm slices the input buffer into frames. It returns a frame of a constant size and jumps a constant amount of samples forward in the buffer on every compute() call until no more frames can be extracted; empty frame vectors are returned afterwards. Incomplete frames (frames starting before the beginning of the input buffer or going past its end) are zero-padded or dropped according to the \"validFrameThresholdRatio\" parameter.\n"
 "\n"
-"The rationale for deciding which is the last frame is the following: we should return "
-"as many frames as needed to consume all the information contained in the buffer, but no more.\n"
-"This translates into 2 different conditions, depending on whether the algorithm has been "
-"configured with startFromZero = true or startFromZero = false:\n"
-"  - startFromZero = true: a frame is the last one, whenever we are at or beyond the end of the stream. The last frame will be zero-padded if its size is less than \"frameSize\"\n"
-"  - startFromZero = false: a frame is the last one if and only if the center of that frame is at or beyond the end of the stream\n"
-"then it is the last one\n"
-"In both cases, if the start of a frame is past the end of the buffer, we don't return it and "
-"stop processing, meaning that the previous frame that we returned was the last one.");
+"The algorithm outputs as many frames as needed to consume all the information contained in the input buffer. Depending on the \"startFromZero\" parameter:\n"
+"  - startFromZero = true: a frame is the last one if its end position is at or beyond the end of the stream. The last frame will be zero-padded if its size is less than \"frameSize\"\n"
+"  - startFromZero = false: a frame is the last one if its center position is at or beyond the end of the stream\n"
+"In both cases the start time of the last frame is never beyond the end of the stream.\n");
 
 
 void FrameCutter::configure() {
@@ -156,14 +147,13 @@ void FrameCutter::compute() {
 namespace essentia {
 namespace streaming {
 
-
 const char* FrameCutter::name = standard::FrameCutter::name;
-const char* FrameCutter::description = DOC("This algorithm slices the input stream into frames of constant size, which are separated by a constant amount of samples, and outputs them as single tokens in the output stream. If any frame could not be complete because we reached the end of the input stream, the output frame will be zero-padded (if it needs to be output).\n"
+const char* FrameCutter::description = DOC("This algorithm slices the input stream into frames. The frames are of constant size and are separated by a constant amount of samples. The algorithm outputs frames as single tokens in the output stream. Incomplete frames (frames starting before the beginning of the input stream or going past its end) are zero-padded or dropped according to the \"validFrameThresholdRatio\" parameter.\n"
 "\n"
-"The rationale for deciding which is the last frame is the following: we should return as many frames as needed to consume all the information contained in the stream, but no more. This translates into 2 different conditions, depending on whether the algorithm has been configured with startFromZero = true or startFromZero = false:\n"
-"  - startFromZero = true: a frame is the last one, whenever we are at or beyond the end of the stream. The last frame will be zero-padded if it's size is less than \"frameSize\"\n"
-"  - startFromZero = false: a frame is the last one if and only if the center of that frame is at or beyond the end of the stream\n"
-"In both cases, if the start of a frame is past the end of the stream, we don't return it and stop processing, meaning that the previous frame that we returned was the last one.\n");
+"The algorithm outputs as many frames as needed to consume all the information contained in the stream. Depending on the \"startFromZero\" parameter:\n"
+"  - startFromZero = true: a frame is the last one if its end position is at or beyond the end of the stream. The last frame will be zero-padded if its size is less than \"frameSize\"\n"
+"  - startFromZero = false: a frame is the last one if its center position is at or beyond the end of the stream\n"
+"In both cases the start time of the last frame is never beyond the end of the stream.\n");
 
 
 void FrameCutter::reset() {

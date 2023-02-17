@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -48,11 +48,11 @@ class Progress:
 
     def updateDisplay(self):
         if self.verbose():
-            print self.format % self.percent(self.current),
-            sys.stdout.flush()
+            print (self.format % self.percent(self.current),
+                   sys.stdout.flush())
 
     def finish(self):
         self.update(self.total)
         # also account for the final end of line
         if self.verbose():
-            print
+            print()

@@ -1,4 +1,4 @@
-# Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -23,5 +23,5 @@ def test():
     import essentia
     return 0
   except ImportError:
-    print "Failed to import essentia module"
+    print("Failed to import essentia module")
     return 1

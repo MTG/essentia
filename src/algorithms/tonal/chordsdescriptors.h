@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -39,9 +39,10 @@ class ChordsDescriptors : public Algorithm {
   Output<std::string> _chordsScale;
 
   static const char* circleOfFifth[];
+  static const char* circleOfFifthAlternativeNames[];
   int chordIndex(const std::string& chord);
-  std::map<std::string, Real> chordsHistogram(const std::vector<std::string>& chords);
-  std::map<std::string, Real> chordsHistogramNorm(std::map<std::string, Real>& histogram,
+  std::map<int, Real> chordsHistogram(const std::vector<std::string>& chords);
+  std::map<int, Real> chordsHistogramNorm(std::map<int, Real>& histogram,
                                                   const std::string& key);
 
  public:
@@ -64,6 +65,7 @@ class ChordsDescriptors : public Algorithm {
   void compute();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -118,6 +120,7 @@ class ChordsDescriptors : public Algorithm {
   void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 };
 

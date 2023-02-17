@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2013  Music Technology Group - Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
  * This file is part of Essentia
  *
@@ -33,6 +33,7 @@ class Trimmer : public Algorithm {
 
   long long _startIndex;
   long long _endIndex;
+  bool _checkRange;
 
  public:
   Trimmer() {
@@ -44,12 +45,14 @@ class Trimmer : public Algorithm {
     declareParameter("sampleRate", "the sampling rate of the input audio signal [Hz]", "(0,inf)", 44100.);
     declareParameter("startTime", "the start time of the slice you want to extract [s]", "[0,inf)", 0.0);
     declareParameter("endTime", "the end time of the slice you want to extract [s]", "[0,inf)", 1.0e6);
+    declareParameter("checkRange", "check whether the specified time range for a slice fits the size of input signal (throw exception if not)", "{true,false}", false);
   }
 
   void compute();
   void configure();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };
@@ -92,13 +95,10 @@ class Trimmer : public Algorithm {
 
   void configure();
   AlgorithmStatus process();
-
-  void reset() {
-    Algorithm::reset();
-    _consumed = 0;
-  }
+  void reset();
 
   static const char* name;
+  static const char* category;
   static const char* description;
 
 };

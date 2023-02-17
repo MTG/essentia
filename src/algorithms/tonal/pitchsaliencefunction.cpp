@@ -1,7 +1,20 @@
 /*
- * Copyright (C) 2006-2012 Music Technology Group (MTG)
- *                         Universitat Pompeu Fabra
+ * Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
  *
+ * This file is part of Essentia
+ *
+ * Essentia is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU Affero General Public License as published by the Free
+ * Software Foundation (FSF), either version 3 of the License, or (at your
+ * option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the Affero GNU General Public License
+ * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
 #include "pitchsaliencefunction.h"
@@ -12,12 +25,12 @@ using namespace essentia;
 using namespace standard;
 
 const char* PitchSalienceFunction::name = "PitchSalienceFunction";
-const char* PitchSalienceFunction::version = "1.0";
+const char* PitchSalienceFunction::category = "Pitch";
 const char* PitchSalienceFunction::description = DOC("This algorithm computes the pitch salience function of a signal frame given its spectral peaks. The salience function covers a pitch range of nearly five octaves (i.e., 6000 cents), starting from the \"referenceFrequency\", and is quantized into cent bins according to the specified \"binResolution\". The salience of a given frequency is computed as the sum of the weighted energies found at integer multiples (harmonics) of that frequency. \n"
 "\n"
-"This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the SpectralPeaks algorithm. The output is a vector of salience values computed for the cent bins.\n"
+"This algorithm is intended to receive its \"frequencies\" and \"magnitudes\" inputs from the SpectralPeaks algorithm. The output is a vector of salience values computed for the cent bins. The 0th bin corresponds to the specified \"referenceFrequency\".\n"
 "\n"
-"When input vectors differ in size or are empty, an exception is thrown. Input vectors must contain positive frequencies and not contain negative magnitudes otherwise an exception is thrown. It is highly recommended to avoid erroneous peak duplicates (peaks of the same frequency occuring more than ones), but it is up to the user's own control and no exception will be thrown.\n"
+"If both input vectors are empty (i.e., no spectral peaks are provided), a zero salience function is returned. Input vectors must contain positive frequencies, must not contain negative magnitudes and these input vectors must be of the same size, otherwise an exception is thrown. It is highly recommended to avoid erroneous peak duplicates (peaks of the same frequency occurring more than once), but it is up to the user's own control and no exception will be thrown.\n"
 "\n"
 "References:\n"
 "  [1] J. Salamon and E. Gómez, \"Melody extraction from polyphonic music\n"
@@ -40,13 +53,28 @@ void PitchSalienceFunction::configure() {
 
   _harmonicWeights.clear();
   _harmonicWeights.reserve(_numberHarmonics);
-  for (int h=0; h<_numberHarmonics; h++) {
-    _harmonicWeights.push_back(pow(_harmonicWeight, h));
-  }
 
-  _nearestBinsWeights.resize(_binsInSemitone + 1);
-  for (int b=0; b <= _binsInSemitone; b++) {
-    _nearestBinsWeights[b] = pow(cos((Real(b)/_binsInSemitone)* M_PI/2), 2);
+  //the value of pow(0, 0) has undefined behavior. When weights is zero set the pow(0,0) value to 1
+  if (_harmonicWeight==0){
+      _harmonicWeights.push_back(1);
+       for (int h=1; h<600; h++) {
+          _harmonicWeights.push_back(0);
+       }
+      _nearestBinsWeights.resize(_binsInSemitone + 1);
+      _nearestBinsWeights[0] = 1;      
+      for (int b=1; b <= _binsInSemitone; b++) {
+         _nearestBinsWeights[b] = 0;
+      }
+  }
+  else {
+    for (int h=0; h<_numberHarmonics; h++) {
+      _harmonicWeights.push_back(pow(_harmonicWeight, h));
+    }
+
+    _nearestBinsWeights.resize(_binsInSemitone + 1);
+    for (int b=0; b <= _binsInSemitone; b++) {
+      _nearestBinsWeights[b] = pow(cos((Real(b)/_binsInSemitone)* M_PI/2), 2);
+    }
   }
 }
 
