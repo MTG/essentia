@@ -1242,7 +1242,7 @@ Urban environment sound classification (10 classes):
 
 Dataset: `UrbanSound8K <https://urbansounddataset.weebly.com/urbansound8k.html>`_.
 
-Output: urban sound multi-class predictions.
+Output: multi-class urban sound predictions.
 
 Models:
 
