@@ -183,13 +183,13 @@ void PitchYinFFT::compute() {
     _peakDetect->input("array").set(_yin);
     _peakDetect->output("positions").set(_positions);
     _peakDetect->output("amplitudes").set(_amplitudes);
-    _peakDetect->compute();
-    try {
+    _peakDetect->compute();    
+    if (_positions.size() > 0 && _amplitudes.size() > 0) {
       tau = _positions[0];
       yinMin = -_amplitudes[0];
     }
-    catch (const EssentiaException&) {
-      // TODO this should never happen, but some people reported it happening in their real time applications
+    else {
+      // TODO this should never happen, but some people reported it happening in their real time applications.
       throw EssentiaException("PitchYinFFT: it appears that no peaks were found by PeakDetection. If you read this message, PLEASE, report this issue to the developers with an example of audio on which it happened.");
     }
   }
