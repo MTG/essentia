@@ -47,7 +47,8 @@ import sys, os
 extensions = ['sphinx.ext.viewcode',
               'sphinxcontrib.doxylink',
               'sphinxprettysearchresults',
-              'sphinx.ext.autosectionlabel']
+              'sphinx.ext.autosectionlabel',
+              'sphinx_toolbox.collapse']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
