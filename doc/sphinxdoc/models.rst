@@ -9,8 +9,9 @@ This is a list of pre-trained TensorFlow models available in Essentia for variou
 All the models created by the MTG are licensed under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/) and are also available under proprietary license upon request (https://www.upf.edu/web/mtg/contact). Check the `LICENSE <https://essentia.upf.edu/models/LICENSE>`_ of the models.
 
 
-The models are serialized in `Protocol Buffer <https://developers.google.com/protocol-buffers/>`_ files suitable for inference with Essentia and TensorFlow. Additionally, some models are also available in `TensorFlow.js <https://www.tensorflow.org/js/models>`_ format. Each ``.pb`` file is coupled with a ``.json`` file containing its metadata.
-
+The models are serialized in `Protocol Buffer <https://developers.google.com/protocol-buffers/>`_ files suitable for inference with Essentia and TensorFlow. 
+All available models in Protocol Buffer (``.pb``), `TensorFlow.js <https://www.tensorflow.org/js>`_ (``tfjs.zip``) and `ONNX <https://onnx.ai/>`_ (``.onnx``) formats can be found in our model repository.
+For convenience, the documentation of each model includes direct links to the ``.pb`` and metadata ``.json`` files.
 As this is an ongoing project we expect to keep adding new models and improved versions of the existing ones. These changes are tracked in this `CHANGELOG <https://essentia.upf.edu/models/CHANGELOG.md>`_.
 
 
@@ -29,7 +30,6 @@ We support models for the followings tasks:
 
 Audio event recognition
 ^^^^^^^^^^^^^^^^^^^^^^^
-`Download model files <https://essentia.upf.edu/models/audio-event-recognition/>`_
 
 AudioSet
 --------
@@ -140,35 +140,27 @@ natural`, `Reverberation`, `Echo`, `Noise`, `Environmental noise`, `Static`,
 
 Dataset: AudioSet.
 
-Output: activations.
-
-This model is useful for audio embeddings.
-
-Models:
-
-* ``audioset-yamnet``
+Outputs: audio event predictions and embeddings.
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
-Usage for audio event detection:
+* ``task``: multi-label classification based on audioset (``audioset``).
+* ``architecture``: a Mobilenet architecture (``yamnet``).
+* ``version``: the version of the model.
 
-.. code-block:: python
+Models:
 
-    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+* .. collapse:: <a class="reference external">audioset-yamnet</a>
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictVGGish(graphFilename="audioset-yamnet-1.pb", input="melspectrogram", output="activations")
-    activations = model(audio)
+    [`weights <https://essentia.upf.edu/models/audio-event-recognition/yamnet/audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/yamnet/audioset-yamnet-1.json>`_]
 
-Usage for embedding extraction:
+    Python code for predictions:
 
-.. code-block:: python
+    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_predictions.py
 
-    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+    Python code for embedding extraction:
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictVGGish(graphFilename="audioset-yamnet-1.pb", input="melspectrogram", output="embeddings")
-    embeddings = model(audio)
+    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_embeddings.py
 
 
 FSD50K
@@ -221,15 +213,7 @@ chime`, `Wind instrument and woodwind instrument`, `Wood`, `Writing`, `Yell`,
 
 Dataset: FSD50K.
 
-Output: class activations or embeddings.
-
-Models:
-
-* ``fsd-sinet-vgg41-tlpf-ibp`` [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1.json>`_]
-* ``fsd-sinet-vgg42-no_tlpf-aps`` [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1.json>`_]
-* ``fsd-sinet-vgg42-tlpf-aps`` [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1.json>`_]
-* ``fsd-sinet-vgg42-tlpf-ibp`` [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1.json>`_]
-
+Output: audio event predictions or embeddings.
 
 Naming convention: ``<task>-<architecture>-<variation>-<pooling_filters>-<si_technique>-<version>.pb``
 
@@ -240,33 +224,60 @@ Naming convention: ``<task>-<architecture>-<variation>-<pooling_filters>-<si_tec
 * ``si_technique``: the shift-invariance technique may be adaptative polyphase sampling (``aps``) or intra-block pooling (``ibp``).
 * ``version``: the model version.
 
+Models:
+
+* .. collapse:: <a class="reference external">fsd-sinet-vgg41-tlpf-ibp</a>
+
+    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1_predictions.py
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1_embeddings.py
+
+* .. collapse:: <a class="reference external">fsd-sinet-vgg42-no_tlpf-aps</a>
+
+    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1_predictions.py
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1_embeddings.py
+
+* .. collapse:: <a class="reference external">fsd-sinet-vgg42-tlpf-aps</a>
+
+    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1_predictions.py
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1_embeddings.py
+
+* .. collapse:: <a class="reference external">fsd-sinet-vgg42-tlpf-ibp</a>
+
+    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1_predictions.py
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1_embeddings.py
 
 
-Usage for audio event detection:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictFSDSINet
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=22050)()
-    model = TensorflowPredictFSDSINet(graphFilename="fsd-sinet-vgg41-tlpf-ibp-1.pb")
-    activations = model(audio)
-
-Usage for embedding extraction:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictFSDSINet
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=22050)()
-    model = TensorflowPredictFSDSINet(graphFilename="fsd-sinet-vgg41-tlpf-ibp-1.pb", output="model/global_max_pooling1d/Max")
-    embeddings = model(audio)
 
 Music style classification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-`Download model files <https://essentia.upf.edu/models/music-style-classification/>`_
-
 
 Discogs-Effnet
 --------------
@@ -289,43 +300,36 @@ Music style classification by 400 styles from the Discogs taxonomy:
 * Rock: `AOR`, `Acid Rock`, `Acoustic`, `Alternative Rock`, `Arena Rock`, `Art Rock`, `Atmospheric Black Metal`, `Avantgarde`, `Beat`, `Black Metal`, `Blues Rock`, `Brit Pop`, `Classic Rock`, `Coldwave`, `Country Rock`, `Crust`, `Death Metal`, `Deathcore`, `Deathrock`, `Depressive Black Metal`, `Doo Wop`, `Doom Metal`, `Dream Pop`, `Emo`, `Ethereal`, `Experimental`, `Folk Metal`, `Folk Rock`, `Funeral Doom Metal`, `Funk Metal`, `Garage Rock`, `Glam`, `Goregrind`, `Goth Rock`, `Gothic Metal`, `Grindcore`, `Grunge`, `Hard Rock`, `Hardcore`, `Heavy Metal`, `Indie Rock`, `Industrial`, `Krautrock`, `Lo-Fi`, `Lounge`, `Math Rock`, `Melodic Death Metal`, `Melodic Hardcore`, `Metalcore`, `Mod`, `Neofolk`, `New Wave`, `No Wave`, `Noise`, `Noisecore`, `Nu Metal`, `Oi`, `Parody`, `Pop Punk`, `Pop Rock`, `Pornogrind`, `Post Rock`, `Post-Hardcore`, `Post-Metal`, `Post-Punk`, `Power Metal`, `Power Pop`, `Power Violence`, `Prog Rock`, `Progressive Metal`, `Psychedelic Rock`, `Psychobilly`, `Pub Rock`, `Punk`, `Rock & Roll`, `Rockabilly`, `Shoegaze`, `Ska`, `Sludge Metal`, `Soft Rock`, `Southern Rock`, `Space Rock`, `Speed Metal`, `Stoner Rock`, `Surf`, `Symphonic Rock`, `Technical Death Metal`, `Thrash`, `Twist`, `Viking Metal`, `Yé-Yé`
 * Stage & Screen: `Musical`, `Score`, `Soundtrack`, `Theme`
 
-Demo: https://replicate.com/mtg/effnet-discogs
-
 Dataset: in-house (MTG).
 
-Output: activations.
-
-This model is useful for music audio embeddings.
-
-Models:
-
-* ``discogs-effnet``
+Outputs: music style predictions and embeddings.
 
 Naming convention: ``<task>-<architecture>-bs<batch_size>-<version>.pb``
 
-Usage for music style classification:
+* ``task``: multi-label classification based on discogs labels (``discogs``).
+* ``architecture``: an efficientnet b0 architecture (``effnet``).
+* ``batch_size``: the model is only available with a fixed batch size of 64.
 
-.. code-block:: python
+Models:
 
-    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictEffnetDiscogs(graphFilename="discogs-effnet-bs64-1.pb")
-    activations = model(audio)
+* .. collapse:: <a class="reference external">discogs-effnet-bs64</a>
 
-Usage for embedding extraction:
+    [`weights <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.pb>`_, `metadata <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.json>`_, `demo <https://replicate.com/mtg/effnet-discogs>`_]
 
-.. code-block:: python
+    Python code for predictions:
 
-    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictEffnetDiscogs(graphFilename="discogs-effnet-bs64-1.pb", output="PartitionedCall:1")
-    activations = model(audio)
+    .. literalinclude :: ../../src/examples/python/models/scripts/music-style-classification/discogs-effnet/discogs-effnet-bs64-1_predictions.py
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/music-style-classification/discogs-effnet/discogs-effnet-bs64-1_embeddings.py
+
+
+*Note: The batch size limitation is a work-arround due to a problem porting the model from ONNX to TensorFlow. Additionally, an ONNX version of the model with* `dynamic batch <https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bsdynamic-1.onnx>`_ *size is provided.*
 
 
 Music auto-tagging
 ^^^^^^^^^^^^^^^^^^
-
-`Download model files <https://essentia.upf.edu/models/autotagging/>`_
 
 
 Million Song Dataset
@@ -337,36 +341,40 @@ Music auto-tagging with 50 common music tags:
 
 Dataset: Million Song Dataset.
 
-Output: activations.
-
-This model is useful for music audio embeddings.
-
-Models:
-
-* ``msd-musicnn``
-* ``msd-vgg``
+Outputs: auto-tagging predictions and embeddings.
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
-Usage for audio event detection:
+* ``task``: multi-label classification based on the Million Song Dataset (``msd``).
+* ``architecture``: musicnn (``musicnn``) or vgg-like (``vgg``) architecture.
+* ``version``: the version of the model.
 
-.. code-block:: python
+Models:
 
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+* .. collapse:: <a class="reference external">msd-musicnn</a>
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictMusiCNN(graphFilename="msd-musicnn-1.pb")
-    activations = model(audio)
+    [`weights <https://essentia.upf.edu/models/autotagging/msd/msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/autotagging/msd/msd-musicnn-1.json>`_]
 
-Usage for embedding extraction:
+    Python code for predictions:
 
-.. code-block:: python
+    .. literalinclude :: ../../src/examples/python/models/scripts/autotagging/msd/msd-musicnn-1_predictions.py
 
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+    Python code for embedding extraction:
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictMusiCNN(graphFilename="msd-musicnn-1.pb", output="model/dense/BiasAdd")
-    activations = model(audio)
+    .. literalinclude:: ../../src/examples/python/models/scripts/autotagging/msd/msd-musicnn-1_embeddings.py
+
+* .. collapse:: <a class="reference external">msd-vgg</a>
+
+    [`weights <https://essentia.upf.edu/models/autotagging/msd/msd-vgg-1.pb>`_, `metadata <https://essentia.upf.edu/models/autotagging/msd/msd-vgg-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/autotagging/msd/msd-vgg-1_predictions.py
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/autotagging/msd/msd-vgg-1_embeddings.py
+
 
 
 MagnaTagATune
@@ -378,36 +386,40 @@ Music auto-tagging with 50 common music tags:
 
 Dataset: MagnaTagATune.
 
-Output: activations.
-
-This model is useful for music audio embeddings.
-
-Models:
-
-* ``mtt-musicnn``
-* ``mtt-vgg``
+Outputs: auto-tagging predictions and embeddings.
 
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
-Usage for audio event detection:
+* ``task``: multi-label classification based on the MagnaTagATune dataset (``mtt``).
+* ``architecture``: musicnn (``musicnn``) or vgg-like (``vgg``) architecture.
+* ``version``: the version of the model.
 
-.. code-block:: python
+Models:
 
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+* .. collapse:: <a class="reference external">mtt-musicnn</a>
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictMusiCNN(graphFilename="mtt-musicnn-1.pb")
-    activations = model(audio)
+    [`weights <https://essentia.upf.edu/models/autotagging/mtt/mtt-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/autotagging/mtt/mtt-musicnn-1.json>`_]
 
-Usage for embedding extraction:
+    Python code for predictions:
 
-.. code-block:: python
+    .. literalinclude :: ../../src/examples/python/models/scripts/autotagging/mtt/mtt-musicnn-1_predictions.py
 
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+    Python code for embedding extraction:
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictMusiCNN(graphFilename="mtt-musicnn-1.pb", output="model/dense/BiasAdd")
-    activations = model(audio)
+    .. literalinclude:: ../../src/examples/python/models/scripts/autotagging/mtt/mtt-musicnn-1_embeddings.py
+
+* .. collapse:: <a class="reference external">mtt-vgg</a>
+
+    [`weights <https://essentia.upf.edu/models/autotagging/mtt/mtt-vgg-1.pb>`_, `metadata <https://essentia.upf.edu/models/autotagging/mtt/mtt-vgg-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/autotagging/mtt/mtt-vgg-1_predictions.py
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/autotagging/mtt/mtt-vgg-1_embeddings.py
+
 
 
 Transfer learning classifiers
@@ -415,31 +427,19 @@ Transfer learning classifiers
 
 Classifiers trained on various datasets and audio embeddings.
 
-`Download model files <https://essentia.upf.edu/models/classifiers/>`_
-
-Demo: https://replicate.com/mtg/music-classifiers/
-
 Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
 
-Usage for music classification with the `MusiCNN` or `VGG` architectures:
+* ``target_task``: single-class classification for multiple tasks. See models below.
+* ``architecture``: musicnn (``musicnn``) [1], vgg-like (``vgg``) [1], or vggish (``vggish``) architecture [2].
+* ``source_task``: the task in which the models were pre-trained. Can be the Million Song Dataset (``msd``) or the MagnaTagATune (``mtt``).
+* ``version``: the version of the model.
 
-.. code-block:: python
 
-    from essentia.standard import MonoLoader, TensorflowPredictMusiCNN
+[1] Pons, Jordi, and Xavier Serra. "musicnn: Pre-trained convolutional neural networks for music audio tagging." ISMIR, 2019.
+[`code <https://github.com/jordipons/musicnn>`_]
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictMusiCNN(graphFilename="genre_rosamerica-musicnn-msd-2.pb")
-    activations = model(audio)
-
-Usage for music classification with the `VGGish` architecture:
-
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictVGGish
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictVGGish(graphFilename="genre_rosamerica-vggish-audioset-1.pb")
-    activations = model(audio)
+[2] Hershey, Shawn, et al. "CNN architectures for large-scale audio classification." ICASSP, 2017.
+[`code <https://github.com/tensorflow/models/tree/master/research/audioset/vggish>`_]
 
 Danceability
 ------------
@@ -450,15 +450,49 @@ Music danceability (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: danceability predictions.
 
 Models:
 
-* ``danceability-musicnn-msd``
-* ``danceability-musicnn-mtt``
-* ``danceability-vgg-msd``
-* ``danceability-vgg-mtt``
-* ``danceability-vggish-audioset``
+* .. collapse:: <a class="reference external">danceability-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/danceability/danceability-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">danceability-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/danceability/danceability-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">danceability-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/danceability/danceability-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">danceability-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/danceability/danceability-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">danceability-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/danceability/danceability-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/danceability/danceability-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/danceability/danceability-vggish-audioset-1_predictions.py
 
 
 Music loop instrument role
@@ -468,13 +502,20 @@ Classification of music loops by their instrument role (5 classes):
 
 `bass`, `chords`, `fx`, `melody`, `percussion`
 
-Dataset: Freesound Loop Dataset.
+Dataset: `Freesound Loop Dataset <https://zenodo.org/record/3967852>`_.
 
-Output: activations.
+Output: music loop instrument role predictions.
 
 Models:
 
-* ``fs_loop_ds-musicnn-msd``
+* .. collapse:: <a class="reference external">fs_loop_ds-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/fs_loop_ds/fs_loop_ds-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/fs_loop_ds/fs_loop_ds-musicnn-msd-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/fs_loop_ds/fs_loop_ds-musicnn-msd-1_predictions.py
+
 
 
 Voice / Instrumental
@@ -486,15 +527,50 @@ Classification of music by presence or absence of voice (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: voice / instrumental predictions.
 
 Models:
 
-* ``voice_instrumental-musicnn-msd``
-* ``voice_instrumental-musicnn-mtt``
-* ``voice_instrumental-vgg-msd``
-* ``voice_instrumental-vgg-mtt``
-* ``voice_instrumental-vggish-audioset``
+* .. collapse:: <a class="reference external">voice_instrumental-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/voice_instrumental/voice_instrumental-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">voice_instrumental-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/voice_instrumental/voice_instrumental-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">voice_instrumental-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/voice_instrumental/voice_instrumental-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">voice_instrumental-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/voice_instrumental/voice_instrumental-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">voice_instrumental-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/voice_instrumental/voice_instrumental-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/voice_instrumental/voice_instrumental-vggish-audioset-1_predictions.py
+
 
 
 Gender
@@ -506,15 +582,50 @@ Classification of music by singing voice gender (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: singing voice gender predictions.
 
 Models:
 
-* ``gender-musicnn-msd``
-* ``gender-musicnn-mtt``
-* ``gender-vgg-msd``
-* ``gender-vgg-mtt``
-* ``gender-vggish-audioset``
+* .. collapse:: <a class="reference external">gender-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/gender/gender-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">gender-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/gender/gender-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">gender-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/gender/gender-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">gender-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/gender/gender-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">gender-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/gender/gender-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/gender/gender-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/gender/gender-vggish-audioset-1_predictions.py
+
 
 
 Genre Dortmund
@@ -526,35 +637,105 @@ Music genre classification (9 genres):
 
 Dataset: Music Audio Benchmark Data Set.
 
-Output: activations.
+Output: genre predictions.
 
 Models:
 
-* ``genre_dortmund-musicnn-msd``
-* ``genre_dortmund-musicnn-mtt``
-* ``genre_dortmund-vgg-msd``
-* ``genre_dortmund-vgg-mtt``
-* ``genre_dortmund-vggish-audioset``
+* .. collapse:: <a class="reference external">genre_dortmund-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_dortmund/genre_dortmund-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_dortmund-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_dortmund/genre_dortmund-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_dortmund-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_dortmund/genre_dortmund-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_dortmund-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_dortmund/genre_dortmund-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_dortmund-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_dortmund/genre_dortmund-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_dortmund/genre_dortmund-vggish-audioset-1_predictions.py
+
 
 
 Genre Electronic
 ----------------
 
-Electronic music genre classification (5 genres)
+Electronic music genre classification (5 genres):
 
 `ambient`, `dnb`, `house`, `techno`, `trance`
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: genre predictions.
 
 Models:
 
-* ``genre_electronic-musicnn-msd``
-* ``genre_electronic-musicnn-mtt``
-* ``genre_electronic-vgg-msd``
-* ``genre_electronic-vgg-mtt``
-* ``genre_electronic-vggish-audioset``
+* .. collapse:: <a class="reference external">genre_electronic-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_electronic/genre_electronic-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_electronic-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_electronic/genre_electronic-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_electronic-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_electronic/genre_electronic-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_electronic-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_electronic/genre_electronic-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_electronic-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_electronic/genre_electronic-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_electronic/genre_electronic-vggish-audioset-1_predictions.py
+
 
 
 Genre Rosamerica
@@ -566,15 +747,50 @@ Music genre classification (8 genres):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: genre predictions.
 
 Models:
 
-* ``genre_rosamerica-musicnn-msd``
-* ``genre_rosamerica-musicnn-mtt``
-* ``genre_rosamerica-vgg-msd``
-* ``genre_rosamerica-vgg-mtt``
-* ``genre_rosamerica-vggish-audioset``
+* .. collapse:: <a class="reference external">genre_rosamerica-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_rosamerica/genre_rosamerica-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_rosamerica-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_rosamerica/genre_rosamerica-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_rosamerica-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_rosamerica/genre_rosamerica-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_rosamerica-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_rosamerica/genre_rosamerica-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_rosamerica-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_rosamerica/genre_rosamerica-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_rosamerica/genre_rosamerica-vggish-audioset-1_predictions.py
+
 
 
 Genre Tzanetakis
@@ -586,15 +802,50 @@ Music genre classification (10 genres):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: genre predictions.
 
 Models:
 
-* ``genre_tzanetakis-musicnn-msd``
-* ``genre_tzanetakis-musicnn-mtt``
-* ``genre_tzanetakis-vgg-msd``
-* ``genre_tzanetakis-vgg-mtt``
-* ``genre_tzanetakis-vggish-audioset``
+* .. collapse:: <a class="reference external">genre_tzanetakis-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_tzanetakis-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_tzanetakis/genre_tzanetakis-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_tzanetakis-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_tzanetakis/genre_tzanetakis-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_tzanetakis-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_tzanetakis/genre_tzanetakis-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">genre_tzanetakis-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/genre_tzanetakis/genre_tzanetakis-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/genre_tzanetakis/genre_tzanetakis-vggish-audioset-1_predictions.py
+
 
 
 Mood Acoustic
@@ -606,15 +857,50 @@ Music classification by type of sound (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood acoustic predictions.
 
 Models:
 
-* ``mood_acoustic-musicnn-msd``
-* ``mood_acoustic-musicnn-mtt``
-* ``mood_acoustic-vgg-msd``
-* ``mood_acoustic-vgg-mtt``
-* ``mood_acoustic-vggish-audioset``
+* .. collapse:: <a class="reference external">mood_acoustic-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_acoustic/mood_acoustic-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_acoustic-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_acoustic/mood_acoustic-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_acoustic-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_acoustic/mood_acoustic-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_acoustic-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_acoustic/mood_acoustic-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_acoustic-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_acoustic/mood_acoustic-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_acoustic/mood_acoustic-vggish-audioset-1_predictions.py
+
 
 
 Mood Aggressive
@@ -626,15 +912,50 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood aggressive predictions.
 
 Models:
 
-* ``mood_aggressive-musicnn-msd``
-* ``mood_aggressive-musicnn-mtt``
-* ``mood_aggressive-vgg-msd``
-* ``mood_aggressive-vgg-mtt``
-* ``mood_aggressive-vggish-audioset``
+* .. collapse:: <a class="reference external">mood_aggressive-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_aggressive/mood_aggressive-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_aggressive-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_aggressive/mood_aggressive-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_aggressive-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_aggressive/mood_aggressive-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_aggressive-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_aggressive/mood_aggressive-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_aggressive-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_aggressive/mood_aggressive-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_aggressive/mood_aggressive-vggish-audioset-1_predictions.py
+
 
 
 Mood Electronic
@@ -646,15 +967,50 @@ Music classification by type of sound (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood electronic predictions.
 
 Models:
 
-* ``mood_electronic-musicnn-msd``
-* ``mood_electronic-musicnn-mtt``
-* ``mood_electronic-vgg-msd``
-* ``mood_electronic-vgg-mtt``
-* ``mood_electronic-vggish-audioset``
+* .. collapse:: <a class="reference external">mood_electronic-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_electronic/mood_electronic-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_electronic-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_electronic/mood_electronic-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_electronic-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_electronic/mood_electronic-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_electronic-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_electronic/mood_electronic-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_electronic-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_electronic/mood_electronic-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_electronic/mood_electronic-vggish-audioset-1_predictions.py
+
 
 
 Mood Happy
@@ -666,15 +1022,50 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood happy predictions.
 
 Models:
 
-* ``mood_happy-musicnn-msd``
-* ``mood_happy-musicnn-mtt``
-* ``mood_happy-vgg-msd``
-* ``mood_happy-vgg-mtt``
-* ``mood_happy-vggish-audioset``
+* .. collapse:: <a class="reference external">mood_happy-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_happy/mood_happy-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_happy-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_happy/mood_happy-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_happy-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_happy/mood_happy-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_happy-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_happy/mood_happy-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_happy-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_happy/mood_happy-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_happy/mood_happy-vggish-audioset-1_predictions.py
+
 
 
 Mood Party
@@ -686,15 +1077,50 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood pary predictions.
 
 Models:
 
-* ``mood_party-musicnn-msd``
-* ``mood_party-musicnn-mtt``
-* ``mood_party-vgg-msd``
-* ``mood_party-vgg-mtt``
-* ``mood_party-vggish-audioset``
+* .. collapse:: <a class="reference external">mood_party-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_party/mood_party-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_party-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_party/mood_party-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_party-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_party/mood_party-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_party-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_party/mood_party-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_party-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_party/mood_party-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_party/mood_party-vggish-audioset-1_predictions.py
+
 
 
 Mood Relaxed
@@ -706,15 +1132,50 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood relaxed predictions.
 
 Models:
 
-* ``mood_relaxed-musicnn-msd``
-* ``mood_relaxed-musicnn-mtt``
-* ``mood_relaxed-vgg-msd``
-* ``mood_relaxed-vgg-mtt``
-* ``mood_relaxed-vggish-audioset``
+* .. collapse:: <a class="reference external">mood_relaxed-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_relaxed/mood_relaxed-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_relaxed-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_relaxed/mood_relaxed-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_relaxed-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_relaxed/mood_relaxed-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_relaxed-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_relaxed/mood_relaxed-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_relaxed-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_relaxed/mood_relaxed-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_relaxed/mood_relaxed-vggish-audioset-1_predictions.py
+
 
 
 Mood Sad
@@ -726,15 +1187,50 @@ Music classification by mood (2 classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: mood sad predictions.
 
 Models:
 
-* ``mood_sad-musicnn-msd``
-* ``mood_sad-musicnn-mtt``
-* ``mood_sad-vgg-msd``
-* ``mood_sad-vgg-mtt``
-* ``mood_sad-vggish-audioset``
+* .. collapse:: <a class="reference external">mood_sad-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_sad/mood_sad-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_sad-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_sad/mood_sad-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_sad-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_sad/mood_sad-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_sad-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_sad/mood_sad-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">mood_sad-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/mood_sad/mood_sad-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/mood_sad/mood_sad-vggish-audioset-1_predictions.py
+
 
 
 Moods MIREX
@@ -750,15 +1246,50 @@ Music classification by mood (5 mood clusters):
 
 Dataset: MIREX Audio Mood Classification Dataset.
 
-Output: activations.
+Output: mood predictions.
 
 Models:
 
-* ``moods_mirex-musicnn-msd``
-* ``moods_mirex-musicnn-mtt``
-* ``moods_mirex-vgg-msd``
-* ``moods_mirex-vgg-mtt``
-* ``moods_mirex-vggish-audioset``
+* .. collapse:: <a class="reference external">moods_mirex-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/moods_mirex/moods_mirex-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/moods_mirex/moods_mirex-musicnn-msd-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/moods_mirex/moods_mirex-musicnn-msd-1_predictions.py
+
+* .. collapse:: <a class="reference external">moods_mirex-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/moods_mirex/moods_mirex-musicnn-mtt-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/moods_mirex/moods_mirex-musicnn-mtt-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/moods_mirex/moods_mirex-musicnn-mtt-1_predictions.py
+
+* .. collapse:: <a class="reference external">moods_mirex-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/moods_mirex/moods_mirex-vgg-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/moods_mirex/moods_mirex-vgg-msd-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/moods_mirex/moods_mirex-vgg-msd-1_predictions.py
+
+* .. collapse:: <a class="reference external">moods_mirex-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/moods_mirex/moods_mirex-vgg-mtt-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/moods_mirex/moods_mirex-vgg-mtt-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/moods_mirex/moods_mirex-vgg-mtt-1_predictions.py
+
+* .. collapse:: <a class="reference external">moods_mirex-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/moods_mirex/moods_mirex-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/moods_mirex/moods_mirex-vggish-audioset-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/moods_mirex/moods_mirex-vggish-audioset-1_predictions.py
+
 
 
 Tonal / Atonal
@@ -770,15 +1301,50 @@ Music classification by tonality (classes):
 
 Dataset: in-house (MTG).
 
-Output: activations.
+Output: tonal / atonal predictions.
 
 Models:
 
-* ``tonal_atonal-musicnn-msd``
-* ``tonal_atonal-musicnn-mtt``
-* ``tonal_atonal-vgg-msd``
-* ``tonal_atonal-vgg-mtt``
-* ``tonal_atonal-vggish-audioset``
+* .. collapse:: <a class="reference external">tonal_atonal-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/tonal_atonal/tonal_atonal-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">tonal_atonal-musicnn-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-musicnn-mtt-2.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/tonal_atonal/tonal_atonal-musicnn-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">tonal_atonal-vgg-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-vgg-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-vgg-msd-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/tonal_atonal/tonal_atonal-vgg-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">tonal_atonal-vgg-mtt</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-vgg-mtt-2.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-vgg-mtt-2.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/tonal_atonal/tonal_atonal-vgg-mtt-2_predictions.py
+
+* .. collapse:: <a class="reference external">tonal_atonal-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/tonal_atonal/tonal_atonal-vggish-audioset-1.json>`_, `demo <https://replicate.com/mtg/music-classifiers/>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/tonal_atonal/tonal_atonal-vggish-audioset-1_predictions.py
+
 
 
 Urban sound classification
@@ -788,110 +1354,184 @@ Urban environment sound classification (10 classes):
 
 `air conditioner`, `car horn`, `children playing`, `dog bark`, `drilling`, `engine idling`, `gun shot`, `jackhammer`, `siren`, `street music`
 
-Dataset: UrbanSound8K.
+Dataset: `UrbanSound8K <https://urbansounddataset.weebly.com/urbansound8k.html>`_.
 
-Output: activations.
+Output: multi-class urban sound predictions.
 
 Models:
 
-* ``urbansound8k-musicnn-msd``
+* .. collapse:: <a class="reference external">urbansound8k-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classifiers/urbansound8k/urbansound8k-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classifiers/urbansound8k/urbansound8k-musicnn-msd-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classifiers/urbansound8k/urbansound8k-musicnn-msd-1_predictions.py
+
 
 
 Feature extractors
 ^^^^^^^^^^^^^^^^^^
 
-`Download model files <https://essentia.upf.edu/models/feature-extractors/>`_
-
 
 OpenL3
 ------
 
-Audio embeddings model trained in a self-supervised manner using audio-visual correspondence information.
+Audio embedding model trained on audio-visual correspondence in a self-supervised manner.
 
 Dataset: AudioSet subsets of videos with environmental sounds and musical content.
 
 Output: embeddings.
 
+Naming convention: ``<architecture>-<source_task>-mel<n_mel_bands>-emb<n_embeddings>-<version>.pb``
+
+* ``architecture``: the OpenL3 architecture (``openl3``).
+* ``source_task``: can be enviromental sounds (``env``) or music (``music``).
+* ``n_mel_bands``: number of input mel-bands.
+* ``n_embeddings``: the number of dimensions in the output embedding layer.
+* ``version``: the version of the model.
+
 Models:
 
-* ``openl3-env-mel128-emb512``
-* ``openl3-env-mel128-emb6144``
-* ``openl3-env-mel256-emb512``
-* ``openl3-env-mel256-emb6144``
-* ``openl3-music-mel128-emb512``
-* ``openl3-music-mel128-emb6144``
-* ``openl3-music-mel256-emb512``
-* ``openl3-music-mel256-emb6144``
+* .. collapse:: <a class="reference external">openl3-env-mel128-emb512</a>
 
-Naming convention: ``<architecture>-<source_task>-<number_of_mel_bands>-<embedding_dimensions>-<version>.pb``
+    [`weights <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-env-mel128-emb512-3.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-env-mel128-emb512-3.json>`_]
 
-Usage for embedding extraction:
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
 
-We are currently working on a dedicated algorithm to extract embeddings with the OpenL3 models. For now this can be achieved with `this script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+* .. collapse:: <a class="reference external">openl3-env-mel128-emb6144</a>
+
+    [`weights <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-env-mel128-emb6144-3.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-env-mel128-emb6144-3.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+* .. collapse:: <a class="reference external">openl3-env-mel256-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-env-mel256-emb512-3.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-env-mel256-emb512-3.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+* .. collapse:: <a class="reference external">openl3-env-mel256-emb6144</a>
+
+    [`weights <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-env-mel256-emb6144-3.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-env-mel256-emb6144-3.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+* .. collapse:: <a class="reference external">openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-music-mel128-emb512-3.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-music-mel128-emb512-3.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+* .. collapse:: <a class="reference external">openl3-music-mel128-emb6144</a>
+
+    [`weights <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-music-mel128-emb6144-3.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-music-mel128-emb6144-3.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+* .. collapse:: <a class="reference external">openl3-music-mel256-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-music-mel256-emb512-3.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-music-mel256-emb512-3.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+* .. collapse:: <a class="reference external">openl3-music-mel256-emb6144</a>
+
+    [`weights <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-music-mel256-emb6144-3.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/openl3/openl3-music-mel256-emb6144-3.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
 
 AudioSet-VGGish
 ---------------
 
 Audio embedding model accompanying the AudioSet dataset, trained in a supervised manner using tag information for YouTube videos.
 
-Dataset: Subset of Youtube-8M.
+Dataset: a subset of Youtube-8M.
 
 Output: embeddings.
 
-Models:
-
-* ``audioset-vggish``
-
 Naming convention: ``<task>-<architecture>-<version>.pb``
 
-Usage for embedding extraction:
+* ``task``: multi-label classification using an in-house dataset related to AudioSet (``audioset``).
+* ``architecture``: a CNN model with vgg-like convolutional layers (``vggish``).
+* ``version``: the model version.
 
-.. code-block:: python
+Models:
 
-    from essentia.standard import MonoLoader, TensorflowPredictVGGish
+* .. collapse:: <a class="reference external">audioset-vggish</a>
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictVGGish(graphFilename="audioset-vggish-3.pb", output='model/vggish/embeddings')
-    embeddings = model(audio)
+    [`weights <https://essentia.upf.edu/models/feature-extractors/vggish/audioset-vggish-3.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/vggish/audioset-vggish-3.json>`_]
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/vggish/audioset-vggish-3_embeddings.py
+
 
 
 EffNet-Discogs
 --------------
 
-Audio embedding models trained with a contrastive objective using Discogs metadata.
-There are different versions trained to predict artist, label, release, and track similarity as well as a multi-task model trained in all of them simusltaneously.
-The main purpose of this models is to produce embeddings suitable for downstream music classification tasks.
+Audio embedding models trained with a contrastive learning objective using Discogs metadata.
+There are versions trained on artist, label, release, and track similarity, as well as a multi-task model trained in all of them simusltaneously.
 
-Dataset: In-house dataset annotated with Discogs metadata
+Dataset: In-house dataset annotated with Discogs metadata.
 
 Output: embeddings.
 
+Naming convention: ``discogs_<task>_embeddings-<architecture>-bs<batch-size>-<version>.pb``
+
+* ``task``: contrastive learning targeting artist (``artist``), label (``label``), album (``release``), track (``track``), or a multi-task (``multi``) similarity objective.
+* ``architecture``: an efficientnet b0 architecture (``effnet``).
+* ``batch_size``: for now, the models are only available with a fixed batch size of 64 samples.
+* ``version``: the version of the model.
+
 Models:
 
-* ``discogs_artist_embeddings-effnet-bs64``
-* ``discogs_label_embeddings-effnet-bs64``
-* ``discogs_multi_embeddings-effnet-bs64``
-* ``discogs_release_embeddings-effnet-bs64``
-* ``discogs_track_embeddings-effnet-bs64``
+* .. collapse:: <a class="reference external">discogs_artist_embeddings-effnet-bs64</a>
 
+    [`weights <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_artist_embeddings-effnet-bs64-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_artist_embeddings-effnet-bs64-1.json>`_]
 
-Naming convention: ``<dataset>_<task>_embeddings-<architecture>-<inference-batch-size>-<version>.pb``
+    Python code for embedding extraction:
 
-Usage for embedding extraction:
+    .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/discogs-effnet/discogs_artist_embeddings-effnet-bs64-1_embeddings.py
 
-.. code-block:: python
+* .. collapse:: <a class="reference external">discogs_label_embeddings-effnet-bs64</a>
 
-    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs
+    [`weights <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_label_embeddings-effnet-bs64-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_label_embeddings-effnet-bs64-1.json>`_]
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = TensorflowPredictEffnetDiscogs(graphFilename="discogs_artist_embeddings-effnet-bs64-1.pb")
-    embeddings = model(audio)
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/discogs-effnet/discogs_label_embeddings-effnet-bs64-1_embeddings.py
+
+* .. collapse:: <a class="reference external">discogs_multi_embeddings-effnet-bs64</a>
+
+    [`weights <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_multi_embeddings-effnet-bs64-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_multi_embeddings-effnet-bs64-1.json>`_]
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/discogs-effnet/discogs_multi_embeddings-effnet-bs64-1_embeddings.py
+
+* .. collapse:: <a class="reference external">discogs_release_embeddings-effnet-bs64</a>
+
+    [`weights <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_release_embeddings-effnet-bs64-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_release_embeddings-effnet-bs64-1.json>`_]
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/discogs-effnet/discogs_release_embeddings-effnet-bs64-1_embeddings.py
+
+* .. collapse:: <a class="reference external">discogs_track_embeddings-effnet-bs64</a>
+
+    [`weights <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_track_embeddings-effnet-bs64-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs_track_embeddings-effnet-bs64-1.json>`_]
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/discogs-effnet/discogs_track_embeddings-effnet-bs64-1_embeddings.py
+
 
 
 Pitch detection
 ^^^^^^^^^^^^^^^
-
-`Download model files <https://essentia.upf.edu/models/pitch/>`_
 
 Monophonic pitch tracker (CREPE)
 --------------------------------
@@ -900,81 +1540,173 @@ Monophonic pitch detection (360 20-cent pitch bins, C1-B7).
 
 Dataset: RWC-synth, MDB-stem-synth.
 
-Output: activations.
-
-Models:
-
-* ``crepe-full``
-* ``crepe-large``
-* ``crepe-medium``
-* ``crepe-small``
-* ``crepe-tiny``
+Output: pitch predictions.
 
 Naming convention: ``<architecture>-<model_size>-<version>.pb``
 
-Usage for pitch estimation:
+* ``architecture``: the CREPE architecture (``crepe``).
+* ``model_size``: the model size ranging from ``tiny`` to ``full``. A larger model is expected to perform better at the expense of additional computational cost.
+* ``version``: the version of the model.
 
-.. code-block:: python
+Models:
 
-    from essentia.standard import MonoLoader, PitchCREPE
+* .. collapse:: <a class="reference external">crepe-full</a>
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    model = PitchCREPE(graphFilename="crepe-full-1.pb")
-    time, frequency, confidence, activations = model(audio)
+    [`weights <https://essentia.upf.edu/models/pitch/crepe/crepe-full-1.pb>`_, `metadata <https://essentia.upf.edu/models/pitch/crepe/crepe-full-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/pitch/crepe/crepe-full-1_predictions.py
+
+* .. collapse:: <a class="reference external">crepe-large</a>
+
+    [`weights <https://essentia.upf.edu/models/pitch/crepe/crepe-large-1.pb>`_, `metadata <https://essentia.upf.edu/models/pitch/crepe/crepe-large-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/pitch/crepe/crepe-large-1_predictions.py
+
+* .. collapse:: <a class="reference external">crepe-medium</a>
+
+    [`weights <https://essentia.upf.edu/models/pitch/crepe/crepe-medium-1.pb>`_, `metadata <https://essentia.upf.edu/models/pitch/crepe/crepe-medium-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/pitch/crepe/crepe-medium-1_predictions.py
+
+* .. collapse:: <a class="reference external">crepe-small</a>
+
+    [`weights <https://essentia.upf.edu/models/pitch/crepe/crepe-small-1.pb>`_, `metadata <https://essentia.upf.edu/models/pitch/crepe/crepe-small-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/pitch/crepe/crepe-small-1_predictions.py
+
+* .. collapse:: <a class="reference external">crepe-tiny</a>
+
+    [`weights <https://essentia.upf.edu/models/pitch/crepe/crepe-tiny-1.pb>`_, `metadata <https://essentia.upf.edu/models/pitch/crepe/crepe-tiny-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/pitch/crepe/crepe-tiny-1_predictions.py
+
 
 
 Source separation
 ^^^^^^^^^^^^^^^^^
 
-`Download model files <https://essentia.upf.edu/models/source-separation/>`_
-
 Spleeter
 --------
 
-Source separation into 2 (`vocals`, `accompaniment`),  4, and 5 (`vocals`, `drums`, `bass`, `piano`, `other`) stems.
+Source separation into 2, 4, or 5 stems.
 
 Dataset: in-house (Deezer).
 
-Output: waveforms.
+Output: waveform of the separated sources.
+
+Naming convention: ``<architecture>-<number_of_stems>s-<version>.pb``
+
+* ``architecture``: a spleeter architecture (``spleeter``).
+* ``number_of_stems``: can be 2 (vocals and accompaniment), 4 (vocals, drums, bass, and other separation) or 5 (vocals, drums, bass, piano, and other separation).
+* ``version``: the version of the model.
 
 Models:
 
-* ``spleeter-2s``
-* ``spleeter-4s``
-* ``spleeter-5s``
+* .. collapse:: <a class="reference external">speeter-2s</a>
 
-Naming convention: ``<architecture>-<number_of_stems>-<version>.pb``
+    [`weights <https://essentia.upf.edu/models/source-separation/spleeter/spleeter-2s-3.pb>`_, `metadata <https://essentia.upf.edu/models/source-separation/spleeter/spleeter-2s-3.json>`_]
 
-Performing source separation:
+    Python code for source separation:
 
-.. code-block:: python
+    .. code-block:: python
 
-    from essentia.standard import AudioLoader, TensorflowPredict
-    from essentia import Pool
-    import numpy as np
+        from essentia.standard import AudioLoader, TensorflowPredict
+        from essentia import Pool
+        import numpy as np
 
-    # Input should be audio @48kHz.
-    audio, sr, _, _, _, _ = AudioLoader(filename="audio.wav")()
+        # Input should be audio @48kHz.
+        audio, sr, _, _, _, _ = AudioLoader(filename="audio.wav")()
 
-    pool = Pool()
-    # The input needs to have 4 dimensions so that it is interpreted as an Essentia tensor.
-    pool.set("waveform", audio[..., np.newaxis, np.newaxis])
+        pool = Pool()
+        # The input needs to have 4 dimensions so that it is interpreted as an Essentia tensor.
+        pool.set("waveform", audio[..., np.newaxis, np.newaxis])
 
-    model = TensorflowPredict(
-        graphFilename="spleeter-2s-3.pb",
-        inputs=["waveform"],
-        outputs=["waveform_vocals", "waveform_accompaniment"]
-    )
+        model = TensorflowPredict(
+            graphFilename="spleeter-2s-3.pb",
+            inputs=["waveform"],
+            outputs=["waveform_vocals", "waveform_accompaniment"]
+        )
 
-    out_pool = model(pool)
-    vocals = out_pool["waveform_vocals"].squeeze()
-    accompaniment = out_pool["waveform_accompaniment"].squeeze()
+        out_pool = model(pool)
+        vocals = out_pool["waveform_vocals"].squeeze()
+        accompaniment = out_pool["waveform_accompaniment"].squeeze()
+
+* .. collapse:: <a class="reference external">speeter-4s</a>
+
+    [`weights <https://essentia.upf.edu/models/source-separation/spleeter/spleeter-4s-3.pb>`_, `metadata <https://essentia.upf.edu/models/source-separation/spleeter/spleeter-4s-3.json>`_]
+
+    Python code for source separation:
+
+    .. code-block:: python
+
+        from essentia.standard import AudioLoader, TensorflowPredict
+        from essentia import Pool
+        import numpy as np
+
+        # Input should be audio @48kHz.
+        audio, sr, _, _, _, _ = AudioLoader(filename="audio.wav")()
+
+        pool = Pool()
+        # The input needs to have 4 dimensions so that it is interpreted as an Essentia tensor.
+        pool.set("waveform", audio[..., np.newaxis, np.newaxis])
+
+        model = TensorflowPredict(
+            graphFilename="spleeter-4s-3.pb",
+            inputs=["waveform"],
+            outputs=["waveform_vocals", "waveform_drums", "waveform_bass", "waveform_other"]
+        )
+
+        out_pool = model(pool)
+        vocals = out_pool["waveform_vocals"].squeeze()
+        drums = out_pool["waveform_drums"].squeeze()
+        bass = out_pool["waveform_bass"].squeeze()
+        other = out_pool["waveform_other"].squeeze()
+
+* .. collapse:: <a class="reference external">speeter-5s</a>
+
+    [`weights <https://essentia.upf.edu/models/source-separation/spleeter/spleeter-5s-3.pb>`_, `metadata <https://essentia.upf.edu/models/source-separation/spleeter/spleeter-5s-3.json>`_]
+
+    Python code for source separation:
+
+    .. code-block:: python
+
+        from essentia.standard import AudioLoader, TensorflowPredict
+        from essentia import Pool
+        import numpy as np
+
+        # Input should be audio @48kHz.
+        audio, sr, _, _, _, _ = AudioLoader(filename="audio.wav")()
+
+        pool = Pool()
+        # The input needs to have 4 dimensions so that it is interpreted as an Essentia tensor.
+        pool.set("waveform", audio[..., np.newaxis, np.newaxis])
+
+        model = TensorflowPredict(
+            graphFilename="spleeter-5s-3.pb",
+            inputs=["waveform"],
+            outputs=["waveform_vocals", "waveform_drums", "waveform_bass", "waveform_piano", "waveform_other"]
+        )
+
+        out_pool = model(pool)
+        vocals = out_pool["waveform_vocals"].squeeze()
+        drums = out_pool["waveform_drums"].squeeze()
+        bass = out_pool["waveform_bass"].squeeze()
+        bass = out_pool["waveform_piano"].squeeze()
+        other = out_pool["waveform_other"].squeeze()
 
 
 Tempo estimation
 ^^^^^^^^^^^^^^^^
-
-`Download model files <https://essentia.upf.edu/models/tempo/>`_
 
 TempoCNN
 --------
@@ -983,154 +1715,219 @@ Tempo classification (256 BPM classes, 30-286 BPM).
 
 Dataset: Extended Ballroom, LMDTempo, MTGTempo.
 
-Output: activations.
+Output: tempo predictions.
+
+Naming convention: ``<architecture>-k<model_size>-<version>.pb``
+
+* ``architecture``: a TempoCNN architecture feature square filters (``deepsquare``) or longitudinal ones (``deeptemp``).
+* ``model_size``: a model size factor (4 or 16). A larger model is expected to perform better at the expense of additional computational cost.
+* ``version``: the version of the model.
 
 Models:
 
-* ``deepsquare-k16``
-* ``deeptemp-k4``
-* ``deeptemp-k16``
+* .. collapse:: <a class="reference external">deepsquare-k16</a>
 
-Naming convention: ``<architecture>-<model_size>-<version>.pb``
+    [`weights <https://essentia.upf.edu/models/tempo/tempocnn/deepsquare-k16-3.pb>`_, `metadata <https://essentia.upf.edu/models/tempo/tempocnn/deepsquare-k16-3.json>`_]
 
-Usage for tempo estimation:
+    Python code for predictions:
 
-.. code-block:: python
+    .. literalinclude :: ../../src/examples/python/models/scripts/tempo/tempocnn/deepsquare-k16-3_predictions.py
 
-    from essentia.standard import MonoLoader, TempoCNN
+* .. collapse:: <a class="reference external">deeptemp-k4</a>
 
-    audio = MonoLoader(filename="audio.wav", sampleRate=11025)()
-    model = TempoCNN(graphFilename="deepsquare-k16-3.pb")
-    global_tempo, local_tempo, local_tempo_probabilities = model(audio)
+    [`weights <https://essentia.upf.edu/models/tempo/tempocnn/deeptemp-k4-3.pb>`_, `metadata <https://essentia.upf.edu/models/tempo/tempocnn/deeptemp-k4-3.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/tempo/tempocnn/deeptemp-k4-3_predictions.py
+
+* .. collapse:: <a class="reference external">deeptemp-k16</a>
+
+    [`weights <https://essentia.upf.edu/models/tempo/tempocnn/deeptemp-k16-3.pb>`_, `metadata <https://essentia.upf.edu/models/tempo/tempocnn/deeptemp-k16-3.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/tempo/tempocnn/deeptemp-k16-3_predictions.py
+
 
 
 Classification heads
 ^^^^^^^^^^^^^^^^^^^^
 
-Classification and regression neural networks intended to operate on top of pre-extracted embeddings.
+Classification and regression neural networks operating on top of pre-extracted embeddings.
 
+Naming convention: ``<target_task>-<embedding_model>-<version>.pb``
 
-`Download model files <https://essentia.upf.edu/models/classification-heads/>`_
+* ``target_task``: the single-class, multi-class, or regression task to perform. See options below.
+* ``embedding_model``: the model that needs to be used to compute the input embeddings.
+* ``version``: the model version.
 
-Music classification example:
+*Note: Using the classification heads require to pre-extract embeddings with the correspodent embedding_model.*
 
-.. code-block:: python
-
-    from essentia.standard import MonoLoader, TensorflowPredictEffnetDiscogs, TensorflowPredict2D
-
-    audio = MonoLoader(filename="audio.wav", sampleRate=16000)()
-    embeddings_model = TensorflowPredictEffnetDiscogs(
-        graphFilename="discogs-effnet-bs64-1.pb",
-        output="PartitionedCall:1",
-    )
-    classification_model = TensorflowPredict2D(
-        graphFilename="approachability_2c-effnet_discogs-1.pb",
-        output="model/Softmax",
-    )
-
-    embeddings = embeddings_model(audio)
-    activations = classification_model(embeddings)
-
-Naming convention: ``<target_task>-<architecture>-<source_task>-<version>.pb``
-
-
-*Note: The classification heads operate on embeddings that are generally not the default output of the base models. Check the attached JSON files to find the name of the embedding layer on each case.*
+*Note: TensorflowPredict2D has to be configured with the correct output layer name for each classification head. Check the attached JSON file to find the name of the output layer on each case.*
 
 Approachability
 ---------------
 
 Music approachability predicting whether the music is likely to be accessible for the general public (e.g., belonging to common mainstream music genres vs. niche and experimental genres).
-
-Demo: https://replicate.com/mtg/music-approachability-engagement
-
-The models output rather two or three levels of approachability or continous values (regression).
+The models output rather two (``approachability_2c``) or three (``approachability_3c``) levels of approachability or continous values (``approachability_regression``).
 
 Dataset: in-house (MTG).
 
-Output: class activations or regression values.
-
-Naming convention: ``<task>-<n_classes>-<input_embedding_model>-<version>.pb``
+Output: approachability predictions as class activations or regression values.
 
 Models:
 
-* ``approachability_2c-effnet_discogs``
-* ``approachability_3c-effnet_discogs``
-* ``approachability_regression-effnet_discogs``
+* .. collapse:: <a class="reference external">approachability_2c-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/approachability/approachability_2c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/approachability/approachability_2c-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/approachability/approachability_2c-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">approachability_3c-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/approachability/approachability_3c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/approachability/approachability_3c-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/approachability/approachability_3c-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">approachability_regression-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/approachability/approachability_regression-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/approachability/approachability_regression-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/approachability/approachability_regression-effnet-discogs-1_predictions.py
+
 
 Arousal/valence DEAM
 --------------------
 
-Music arousal and valence regression with the DEAM dataset.
+Music arousal and valence regression with the DEAM dataset:
 
-Demo: https://replicate.com/mtg/music-arousal-valence
+`valence`, `arousal`
 
-Dataset: DEAM.
+Dataset: `DEAM <https://cvml.unige.ch/databases/DEAM/>`_.
 
-Output: (arousal, valence) pairs values in the range {1,9}.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: arousal/valence predictions in the range [1,9].
 
 Models:
 
-* ``deam-musicnn-msd``
-* ``deam-vggish-audioset``
+* .. collapse:: <a class="reference external">deam-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/deam/deam-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/deam/deam-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/deam/deam-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">deam-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/deam/deam-vggish-audioset-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/deam/deam-vggish-audioset-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/deam/deam-vggish-audioset-2_predictions.py
+
 
 Arousal/valence emoMusic
 ------------------------
 
-Music arousal and valence regression with the emoMusic dataset.
+Music arousal and valence regression with the emoMusic dataset:
 
-Demo: https://replicate.com/mtg/music-arousal-valence
+`valence`, `arousal`
 
-Dataset: Emomusic.
+Dataset: `emoMusic <https://cvml.unige.ch/databases/emoMusic/>`_.
 
-Output: (arousal, valence) pairs values in the range {1,9}.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: arousal/valence predictions in the range [1,9].
 
 Models:
 
-* ``emomusic-musicnn-msd``
-* ``emomusic-vggish-audioset``
+* .. collapse:: <a class="reference external">emomusic-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/emomusic/emomusic-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">emomusic-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-vggish-audioset-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/emomusic/emomusic-vggish-audioset-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/emomusic/emomusic-vggish-audioset-2_predictions.py
+
 
 Arousal/valence MuSe
 --------------------
 
 Music arousal and valence regression with the MuSe dataset.
 
-Demo: https://replicate.com/mtg/music-arousal-valence
+`valence`, `arousal`
 
-Dataset: MuSe.
+Dataset: `MuSE <https://aclanthology.org/2020.lrec-1.187/>`_.
 
-Output: (arousal, valence) pairs values in the range {1,9}.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: arousal/valence predictions in the range [1,9].
 
 Models:
 
-* ``muse-musicnn-msd``
-* ``muse-vggish-audioset``
+* .. collapse:: <a class="reference external">muse-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/muse/muse-musicnn-msd-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/muse/muse-musicnn-msd-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/muse/muse-musicnn-msd-2_predictions.py
+
+* .. collapse:: <a class="reference external">muse-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/muse/muse-vggish-audioset-2.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/muse/muse-vggish-audioset-2.json>`_, `demo <https://replicate.com/mtg/music-arousal-valence>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/muse/muse-vggish-audioset-2_predictions.py
+
 
 Engagement
 ----------
 
 Music engagement predicting whether the music evokes active attention of the listener (high-engagement "lean forward" active listening vs. low-engagement "lean back" background listening).
-
-Demo: https://replicate.com/mtg/music-approachability-engagement
-
-The models output rather two or three levels of engagement or continous values (regression).
+The models output rather two  (``engagement_2c``) or three (``engagement_3c``) levels of engagement or continous (``engagement_regression``) values (regression).
 
 Dataset: in-house (MTG).
 
-Output: class activations or regression values.
-
-Naming convention: ``<task>-<n_classes>-<input_embedding_model>-<version>.pb``
 
 Models:
 
-* ``engagement_2c-effnet_discogs``
-* ``engagement_3c-effnet_discogs``
-* ``engagement_regression-effnet_discogs``
+* .. collapse:: <a class="reference external">engagement_2c-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/engagement/engagement_2c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/engagement/engagement_2c-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/engagement/engagement_2c-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">engagement_3c-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/engagement/engagement_3c-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/engagement/engagement_3c-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/engagement/engagement_3c-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">engagement_regression-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/engagement/engagement_regression-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/engagement/engagement_regression-effnet-discogs-1.json>`_, `demo <https://replicate.com/mtg/music-approachability-engagement>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/engagement/engagement_regression-effnet-discogs-1_predictions.py
+
 
 Free Music Archive small
 ------------------------
@@ -1139,40 +1936,106 @@ Music genre classfication (10 classes):
 
 `Electronic`, `Experimental`, `Folk`, `Hip-Hop`, `Instrumental`, `International`, `Pop`, `Rock`
 
-Dataset: Free Music Archive small.
+Dataset: `Free Music Archive small <https://www.kaggle.com/datasets/imsparsh/fma-free-music-archive-small-medium>`_.
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: genre predictions.
 
 Models:
 
-* ``fma_small-effnet-discogs_artist_embeddings``
-* ``fma_small-effnet-discogs_label_embeddings``
-* ``fma_small-effnet-discogs_multi_embeddings``
-* ``fma_small-effnet-discogs_release_embeddings``
-* ``fma_small-effnet-discogs_track_embeddings``
+* .. collapse:: <a class="reference external">fma_small-effnet-discogs_artist_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/fma_small/fma_small-effnet-discogs_artist_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/fma_small/fma_small-effnet-discogs_artist_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/fma_small/fma_small-effnet-discogs_artist_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">fma_small-effnet-discogs_label_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/fma_small/fma_small-effnet-discogs_label_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/fma_small/fma_small-effnet-discogs_label_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/fma_small/fma_small-effnet-discogs_label_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">fma_small-effnet-discogs_multi_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/fma_small/fma_small-effnet-discogs_multi_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/fma_small/fma_small-effnet-discogs_multi_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/fma_small/fma_small-effnet-discogs_multi_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">fma_small-effnet-discogs_release_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/fma_small/fma_small-effnet-discogs_release_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/fma_small/fma_small-effnet-discogs_release_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/fma_small/fma_small-effnet-discogs_release_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">fma_small-effnet-discogs_track_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/fma_small/fma_small-effnet-discogs_track_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/fma_small/fma_small-effnet-discogs_track_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/fma_small/fma_small-effnet-discogs_track_embeddings-1_predictions.py
+
 
 MTG-Jamendo genre
 -----------------
 
 Multi-label genre classification (87 classes):
 
-`60s`, `70s`, `80s`, `90s`, `acidjazz`, `alternative`, `alternativerock`, `ambient`, `atmospheric`, `blues`, `bluesrock`, `bossanova`, `breakbeat`, `celtic`, `chanson`, `chillout`, `choir`, `classical`, `classicrock`, `club`, `contemporary`, `country`, `dance`, `darkambient`, `darkwave`, `deephouse`, `disco`, `downtempo`, `drumnbass`, `dub`, `dubstep`, `easylistening`, `edm`, `electronic`, `electronica`, `electropop`, `ethno`, `eurodance`, `experimental`, `folk`, `funk`, `fusion`, `groove`, `grunge`, `hard`, `hardrock`, `hiphop`, `house`, `idm`, `improvisation`, `indie`, `industrial`, `instrumentalpop`, `instrumentalrock`, `jazz`, `jazzfusion`, `latin`, `lounge`, `medieval`, `metal`, `minimal`, `newage`, `newwave`, `orchestral`, `pop`, `popfolk`, `poprock`, `postrock`, `progressive`, `psychedelic`, `punkrock`, `rap`, `reggae`, `rnb`, `rock`, `rocknroll`, `singersongwriter`, `soul`, `soundtrack`, `swing`, `symphonic`, `synthpop`, `techno`, `trance`, `triphop`, `world`, `worldfusio`
+`60s`, `70s`, `80s`, `90s`, `acidjazz`, `alternative`, `alternativerock`, `ambient`, `atmospheric`, `blues`, `bluesrock`, `bossanova`, `breakbeat`, `celtic`, `chanson`, `chillout`, `choir`, `classical`, `classicrock`, `club`, `contemporary`, `country`, `dance`, `darkambient`, `darkwave`, `deephouse`, `disco`, `downtempo`, `drumnbass`, `dub`, `dubstep`, `easylistening`, `edm`, `electronic`, `electronica`, `electropop`, `ethno`, `eurodance`, `experimental`, `folk`, `funk`, `fusion`, `groove`, `grunge`, `hard`, `hardrock`, `hiphop`, `house`, `idm`, `improvisation`, `indie`, `industrial`, `instrumentalpop`, `instrumentalrock`, `jazz`, `jazzfusion`, `latin`, `lounge`, `medieval`, `metal`, `minimal`, `newage`, `newwave`, `orchestral`, `pop`, `popfolk`, `poprock`, `postrock`, `progressive`, `psychedelic`, `punkrock`, `rap`, `reggae`, `rnb`, `rock`, `rocknroll`, `singersongwriter`, `soul`, `soundtrack`, `swing`, `symphonic`, `synthpop`, `techno`, `trance`, `triphop`, `world`, `worldfusion`
 
 Dataset: MTG-Jamendo Dataset (genre subset).
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: genre predictions.
 
 Models:
 
-* ``mtg_jamendo_genre-effnet-discogs_artist_embeddings``
-* ``mtg_jamendo_genre-effnet-discogs_label_embeddings``
-* ``mtg_jamendo_genre-effnet-discogs_multi_embeddings``
-* ``mtg_jamendo_genre-effnet-discogs_release_embeddings``
-* ``mtg_jamendo_genre-effnet-discogs_track_embeddings``
+* .. collapse:: <a class="reference external">mtg_jamendo_genre-effnet-discogs_artist_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_artist_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_artist_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_artist_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_genre-effnet-discogs_label_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_label_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_label_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_label_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_genre-effnet-discogs_multi_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_multi_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_multi_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_multi_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_genre-effnet-discogs_release_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_release_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_release_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_release_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_genre-effnet-discogs_track_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_track_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_track_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-effnet-discogs_track_embeddings-1_predictions.py
+
 
 MTG-Jamendo instrument
 ----------------------
@@ -1183,17 +2046,50 @@ Multi-label instrument classification (40 classes):
 
 Dataset: MTG-Jamendo Dataset (instrument subset).
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: instrument class predictions.
 
 Models:
 
-* ``mtg_jamendo_instrument-effnet-discogs_artist_embeddings``
-* ``mtg_jamendo_instrument-effnet-discogs_label_embeddings``
-* ``mtg_jamendo_instrument-effnet-discogs_multi_embeddings``
-* ``mtg_jamendo_instrument-effnet-discogs_release_embeddings``
-* ``mtg_jamendo_instrument-effnet-discogs_track_embeddings``
+* .. collapse:: <a class="reference external">mtg_jamendo_instrument-effnet-discogs_artist_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_artist_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_artist_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_artist_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_instrument-effnet-discogs_label_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_label_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_label_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_label_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_instrument-effnet-discogs_multi_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_multi_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_multi_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_multi_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_instrument-effnet-discogs_release_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_release_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_release_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_release_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_instrument-effnet-discogs_track_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_track_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_track_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-effnet-discogs_track_embeddings-1_predictions.py
+
 
 MTG-Jamendo moodtheme
 ---------------------
@@ -1204,17 +2100,50 @@ Multi-label mood/theme classification (56 classes):
 
 Dataset: MTG-Jamendo Dataset (moodtheme subset).
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: mood/theme predictions.
 
 Models:
 
-* ``mtg_jamendo_moodtheme-effnet-discogs_artist_embeddings``
-* ``mtg_jamendo_moodtheme-effnet-discogs_label_embeddings``
-* ``mtg_jamendo_moodtheme-effnet-discogs_multi_embeddings``
-* ``mtg_jamendo_moodtheme-effnet-discogs_release_embeddings``
-* ``mtg_jamendo_moodtheme-effnet-discogs_track_embeddings``
+* .. collapse:: <a class="reference external">mtg_jamendo_moodtheme-effnet-discogs_artist_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_artist_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_artist_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_artist_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_moodtheme-effnet-discogs_label_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_label_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_label_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_label_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_moodtheme-effnet-discogs_multi_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_multi_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_multi_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_multi_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_moodtheme-effnet-discogs_release_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_release_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_release_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_release_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_moodtheme-effnet-discogs_track_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_track_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_track_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_moodtheme/mtg_jamendo_moodtheme-effnet-discogs_track_embeddings-1_predictions.py
+
 
 MTG-Jamendo top50tags
 ---------------------
@@ -1225,17 +2154,50 @@ Auto-tagging with top-50 MTG-Jamendo classes:
 
 Dataset: MTG-Jamendo Dataset (top50tags subset).
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: top-50 tag predictions.
 
 Models:
 
-* ``mtg_jamendo_top50tags-effnet-discogs_artist_embeddings``
-* ``mtg_jamendo_top50tags-effnet-discogs_label_embeddings``
-* ``mtg_jamendo_top50tags-effnet-discogs_multi_embeddings``
-* ``mtg_jamendo_top50tags-effnet-discogs_release_embeddings``
-* ``mtg_jamendo_top50tags-effnet-discogs_track_embeddings``
+* .. collapse:: <a class="reference external">mtg_jamendo_top50tags-effnet-discogs_artist_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_artist_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_artist_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_artist_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_top50tags-effnet-discogs_label_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_label_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_label_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_label_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_top50tags-effnet-discogs_multi_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_multi_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_multi_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_multi_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_top50tags-effnet-discogs_release_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_release_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_release_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_release_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtg_jamendo_top50tags-effnet-discogs_track_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_track_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_track_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_top50tags/mtg_jamendo_top50tags-effnet-discogs_track_embeddings-1_predictions.py
+
 
 MagnaTagATune
 -------------
@@ -1246,15 +2208,820 @@ Auto-tagging with the top-50 MagnaTagATune classes:
 
 Dataset: MagnaTagATune.
 
-Output: activations.
-
-Naming convention: ``<task>-<input_embedding_model>-<version>.pb``
+Output: auto-tagging predictions.
 
 Models:
 
-* ``mtt-effnet-discogs_artist_embeddings``
-* ``mtt-effnet-discogs_label_embeddings``
-* ``mtt-effnet-discogs_multi_embeddings``
-* ``mtt-effnet-discogs_release_embeddings``
-* ``mtt-effnet-discogs_track_embeddings``
+* .. collapse:: <a class="reference external">mtt-effnet-discogs_artist_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtt/mtt-effnet-discogs_artist_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtt/mtt-effnet-discogs_artist_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtt/mtt-effnet-discogs_artist_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtt-effnet-discogs_label_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtt/mtt-effnet-discogs_label_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtt/mtt-effnet-discogs_label_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtt/mtt-effnet-discogs_label_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtt-effnet-discogs_multi_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtt/mtt-effnet-discogs_multi_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtt/mtt-effnet-discogs_multi_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtt/mtt-effnet-discogs_multi_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtt-effnet-discogs_release_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtt/mtt-effnet-discogs_release_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtt/mtt-effnet-discogs_release_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtt/mtt-effnet-discogs_release_embeddings-1_predictions.py
+
+* .. collapse:: <a class="reference external">mtt-effnet-discogs_track_embeddings</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mtt/mtt-effnet-discogs_track_embeddings-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtt/mtt-effnet-discogs_track_embeddings-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtt/mtt-effnet-discogs_track_embeddings-1_predictions.py
+
+
+
+Danceability
+------------
+
+Music danceability (2 classes):
+
+`danceable`, `not_danceable`
+
+Dataset: in-house (MTG).
+
+Output: danceability predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">danceability-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/danceability/danceability-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/danceability/danceability-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/danceability/danceability-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">danceability-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/danceability/danceability-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/danceability/danceability-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/danceability/danceability-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">danceability-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/danceability/danceability-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/danceability/danceability-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/danceability/danceability-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">danceability-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/danceability/danceability-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/danceability/danceability-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/danceability/danceability-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">danceability-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/danceability/danceability-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/danceability/danceability-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Voice / Instrumental
+--------------------
+
+Classification of music by presence or absence of voice (2 classes):
+
+`instrumental`, `voice`
+
+Dataset: in-house (MTG).
+
+Output: voice / instrumental predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">voice_instrumental-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/voice_instrumental/voice_instrumental-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/voice_instrumental/voice_instrumental-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/voice_instrumental/voice_instrumental-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">voice_instrumental-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/voice_instrumental/voice_instrumental-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/voice_instrumental/voice_instrumental-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/voice_instrumental/voice_instrumental-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">voice_instrumental-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/voice_instrumental/voice_instrumental-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/voice_instrumental/voice_instrumental-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/voice_instrumental/voice_instrumental-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">voice_instrumental-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/voice_instrumental/voice_instrumental-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/voice_instrumental/voice_instrumental-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/voice_instrumental/voice_instrumental-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">voice_instrumental-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/voice_instrumental/voice_instrumental-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/voice_instrumental/voice_instrumental-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Gender
+------
+
+Classification of music by singing voice gender (2 classes):
+
+`female`, `male`
+
+Dataset: in-house (MTG).
+
+Output: singing voice gender predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">gender-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/gender/gender-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/gender/gender-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/gender/gender-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">gender-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/gender/gender-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/gender/gender-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/gender/gender-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">gender-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/gender/gender-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/gender/gender-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/gender/gender-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">gender-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/gender/gender-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/gender/gender-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/gender/gender-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">gender-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/gender/gender-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/gender/gender-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Genre Dortmund
+--------------
+
+Music genre classification (9 genres):
+
+`alternative`, `blues`, `electronic`, `folkcountry`, `funksoulrnb`, `jazz`, `pop`, `raphiphop`, `rock`
+
+Dataset: Music Audio Benchmark Data Set.
+
+Output: genre predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">genre_dortmund-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_dortmund/genre_dortmund-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_dortmund/genre_dortmund-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_dortmund/genre_dortmund-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_dortmund-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_dortmund/genre_dortmund-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_dortmund/genre_dortmund-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_dortmund/genre_dortmund-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_dortmund-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_dortmund/genre_dortmund-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_dortmund/genre_dortmund-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_dortmund/genre_dortmund-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_dortmund-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_dortmund/genre_dortmund-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_dortmund/genre_dortmund-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_dortmund/genre_dortmund-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_dortmund-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_dortmund/genre_dortmund-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_dortmund/genre_dortmund-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Genre Electronic
+----------------
+
+Electronic music genre classification (5 genres):
+
+`ambient`, `dnb`, `house`, `techno`, `trance`
+
+Dataset: in-house (MTG).
+
+Output: genre predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">genre_electronic-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_electronic/genre_electronic-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_electronic/genre_electronic-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_electronic/genre_electronic-effnet-discogs-1_predictions.py
+
+
+Genre Rosamerica
+----------------
+
+Music genre classification (8 genres):
+
+`classical`, `dance`, `hip hop`, `jazz`, `pop`, `rhythm and blues`, `rock`, `speech`
+
+Dataset: in-house (MTG).
+
+Output: genre predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">genre_rosamerica-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_rosamerica/genre_rosamerica-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_rosamerica/genre_rosamerica-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_rosamerica/genre_rosamerica-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_rosamerica-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_rosamerica/genre_rosamerica-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_rosamerica/genre_rosamerica-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_rosamerica/genre_rosamerica-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_rosamerica-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_rosamerica/genre_rosamerica-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_rosamerica/genre_rosamerica-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_rosamerica/genre_rosamerica-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_rosamerica-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_rosamerica/genre_rosamerica-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_rosamerica/genre_rosamerica-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_rosamerica/genre_rosamerica-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_rosamerica-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_rosamerica/genre_rosamerica-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_rosamerica/genre_rosamerica-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Genre Tzanetakis
+----------------
+
+Music genre classification (10 genres):
+
+`blues`, `classic`, `country`, `disco`, `hip hop`, `jazz`, `metal`, `pop`, `reggae`, `rock`
+
+Dataset: in-house (MTG).
+
+Output: genre predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">genre_tzanetakis-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_tzanetakis/genre_tzanetakis-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_tzanetakis/genre_tzanetakis-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_tzanetakis/genre_tzanetakis-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_tzanetakis-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_tzanetakis/genre_tzanetakis-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_tzanetakis/genre_tzanetakis-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_tzanetakis/genre_tzanetakis-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_tzanetakis-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_tzanetakis/genre_tzanetakis-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_tzanetakis/genre_tzanetakis-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_tzanetakis/genre_tzanetakis-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_tzanetakis-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_tzanetakis/genre_tzanetakis-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_tzanetakis/genre_tzanetakis-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_tzanetakis/genre_tzanetakis-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">genre_tzanetakis-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/genre_tzanetakis/genre_tzanetakis-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_tzanetakis/genre_tzanetakis-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Mood Acoustic
+-------------
+
+Music classification by type of sound (2 classes):
+
+`acoustic`, `non_acoustic`
+
+Dataset: in-house (MTG).
+
+Output: mood acoustic predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">mood_acoustic-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_acoustic-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_acoustic-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_acoustic-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_acoustic-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Mood Aggressive
+---------------
+
+Music classification by mood (2 classes):
+
+`aggressive`, `non_aggressive`
+
+Dataset: in-house (MTG).
+
+Output: mood aggressive predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">mood_aggressive-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_aggressive/mood_aggressive-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_aggressive-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_aggressive/mood_aggressive-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_aggressive-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_aggressive/mood_aggressive-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_aggressive-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_aggressive/mood_aggressive-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_aggressive-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Mood Electronic
+---------------
+
+Music classification by type of sound (2 classes):
+
+`electronic`, `non_electronic`
+
+Dataset: in-house (MTG).
+
+Output: mood electronic predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">mood_electronic-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_electronic-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_electronic-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_electronic-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_electronic-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Mood Happy
+----------
+
+Music classification by mood (2 classes):
+
+`happy`, `non_happy`
+
+Dataset: in-house (MTG).
+
+Output: mood happy predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">mood_happy-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_happy/mood_happy-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_happy/mood_happy-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_happy/mood_happy-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_happy-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_happy/mood_happy-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_happy/mood_happy-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_happy/mood_happy-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_happy-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_happy/mood_happy-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_happy/mood_happy-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_happy/mood_happy-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_happy-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_happy/mood_happy-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_happy/mood_happy-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_happy/mood_happy-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_happy-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_happy/mood_happy-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_happy/mood_happy-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Mood Party
+----------
+
+Music classification by mood (2 classes):
+
+`party`, `non_party`
+
+Dataset: in-house (MTG).
+
+Output: mood pary predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">mood_party-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_party/mood_party-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_party/mood_party-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_party/mood_party-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_party-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_party/mood_party-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_party/mood_party-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_party/mood_party-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_party-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_party/mood_party-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_party/mood_party-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_party/mood_party-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_party-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_party/mood_party-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_party/mood_party-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_party/mood_party-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_party-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_party/mood_party-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_party/mood_party-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Mood Relaxed
+------------
+
+Music classification by mood (2 classes):
+
+`relaxed`, `non_relaxed`
+
+Dataset: in-house (MTG).
+
+Output: moosd relaxed predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">mood_relaxed-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_relaxed/mood_relaxed-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_relaxed/mood_relaxed-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_relaxed/mood_relaxed-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_relaxed-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_relaxed/mood_relaxed-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_relaxed/mood_relaxed-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_relaxed/mood_relaxed-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_relaxed-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_relaxed/mood_relaxed-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_relaxed/mood_relaxed-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_relaxed/mood_relaxed-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_relaxed-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_relaxed/mood_relaxed-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_relaxed/mood_relaxed-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_relaxed/mood_relaxed-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_relaxed-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_relaxed/mood_relaxed-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_relaxed/mood_relaxed-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Mood Sad
+--------
+
+Music classification by mood (2 classes):
+
+`sad`, `non_sad`
+
+Dataset: in-house (MTG).
+
+Output: mood sad predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">mood_sad-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_sad/mood_sad-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_sad/mood_sad-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_sad/mood_sad-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_sad-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_sad/mood_sad-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_sad/mood_sad-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_sad/mood_sad-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_sad-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_sad/mood_sad-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_sad/mood_sad-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_sad/mood_sad-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_sad-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_sad/mood_sad-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_sad/mood_sad-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_sad/mood_sad-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">mood_sad-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/mood_sad/mood_sad-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_sad/mood_sad-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Timbre
+------
+
+Classification of music by timbre color (dark/bright timbre):
+
+`bright`, `dark`
+
+Dataset: in-house (MTG).
+
+Output: timbre predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">timbre-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/timbre/timbre-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/timbre/timbre-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/timbre/timbre-effnet-discogs-1_predictions.py
+
+
+Tonal / Atonal
+--------------
+
+Music classification by tonality (2 classes):
+
+`tonal`, `atonal`
+
+Dataset: in-house (MTG).
+
+Output: tonal / atonal predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">tonal_atonal-audioset-vggish</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/tonal_atonal/tonal_atonal-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/tonal_atonal/tonal_atonal-audioset-vggish-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/tonal_atonal/tonal_atonal-audioset-vggish-1_predictions.py
+
+* .. collapse:: <a class="reference external">tonal_atonal-audioset-yamnet</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/tonal_atonal/tonal_atonal-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/tonal_atonal/tonal_atonal-audioset-yamnet-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/tonal_atonal/tonal_atonal-audioset-yamnet-1_predictions.py
+
+* .. collapse:: <a class="reference external">tonal_atonal-effnet-discogs</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/tonal_atonal/tonal_atonal-effnet-discogs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/tonal_atonal/tonal_atonal-effnet-discogs-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/tonal_atonal/tonal_atonal-effnet-discogs-1_predictions.py
+
+* .. collapse:: <a class="reference external">tonal_atonal-msd-musicnn</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/tonal_atonal/tonal_atonal-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/tonal_atonal/tonal_atonal-msd-musicnn-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/tonal_atonal/tonal_atonal-msd-musicnn-1_predictions.py
+
+* .. collapse:: <a class="reference external">tonal_atonal-openl3-music-mel128-emb512</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/tonal_atonal/tonal_atonal-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/tonal_atonal/tonal_atonal-openl3-music-mel128-emb512-1.json>`_]
+
+    We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
 
