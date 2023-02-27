@@ -163,7 +163,7 @@ Models:
     .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_embeddings.py
 
 
-FSD50K
+FSD-SINet
 ------
 
 Audio event recognition using the `FSD50K <https://zenodo.org/record/4060432>`_ dataset targeting 200 classes drawn from the `AudioSet Ontology <https://research.google.com/audioset/ontology/index.html>`_:
@@ -215,64 +215,63 @@ Dataset: FSD50K.
 
 Output: audio event predictions or embeddings.
 
-Naming convention: ``<task>-<architecture>-<variation>-<pooling_filters>-<si_technique>-<version>.pb``
+Naming convention: ``<task>-<architecture>-<variation>-<si_technique>-<version>.pb``
 
 * ``task``: multi-label classification based on FSD50K (``fsd``).
 * ``architecture``: shift invariant net (``sinet``).
 * ``variation``: ``vgg42`` is a variation of ``vgg41`` with twice the number of filters for each convolutional layer.
-* ``pooling_filters``: the pooling layers may feature trainable low-pass filters (``tlpf``) or not (``no_tlpf``).
-* ``si_technique``: the shift-invariance technique may be adaptative polyphase sampling (``aps``) or intra-block pooling (``ibp``).
+* ``si_technique``: the shift-invariance technique may be trainable low-pass filters (``tlpf``), or adaptative polyphase sampling (``aps``), or both (``tlpf_aps``).
 * ``version``: the model version.
 
 Models:
 
-* .. collapse:: <a class="reference external">fsd-sinet-vgg41-tlpf-ibp</a>
+* .. collapse:: <a class="reference external">fsd-sinet-vgg41-tlpf</a>
 
-    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1.json>`_]
-
-    Python code for predictions:
-
-    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1_predictions.py
-
-    Python code for embedding extraction:
-
-    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-ibp-1_embeddings.py
-
-* .. collapse:: <a class="reference external">fsd-sinet-vgg42-no_tlpf-aps</a>
-
-    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-1.json>`_]
 
     Python code for predictions:
 
-    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1_predictions.py
+    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-1_predictions.py
 
     Python code for embedding extraction:
 
-    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-no_tlpf-aps-1_embeddings.py
+    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg41-tlpf-1_embeddings.py
 
-* .. collapse:: <a class="reference external">fsd-sinet-vgg42-tlpf-aps</a>
+* .. collapse:: <a class="reference external">fsd-sinet-vgg42-aps</a>
 
-    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-aps-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-aps-1.json>`_]
 
     Python code for predictions:
 
-    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1_predictions.py
+    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-aps-1_predictions.py
 
     Python code for embedding extraction:
 
-    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-aps-1_embeddings.py
+    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-aps-1_embeddings.py
 
-* .. collapse:: <a class="reference external">fsd-sinet-vgg42-tlpf-ibp</a>
+* .. collapse:: <a class="reference external">fsd-sinet-vgg42-tlpf_aps</a>
 
-    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1.json>`_]
+    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf_aps-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf_aps-1.json>`_]
 
     Python code for predictions:
 
-    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1_predictions.py
+    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf_aps-1_predictions.py
 
     Python code for embedding extraction:
 
-    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-ibp-1_embeddings.py
+    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf_aps-1_embeddings.py
+
+* .. collapse:: <a class="reference external">fsd-sinet-vgg42-tlpf</a>
+
+    [`weights <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-1_predictions.py
+
+    Python code for embedding extraction:
+
+    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/fsd-sinet/fsd-sinet-vgg42-tlpf-1_embeddings.py
 
 
 
