@@ -15,10 +15,10 @@ audio-event-recognition:
      - predictions
      - embeddings
     models:
-     - fsd-sinet-vgg41-tlpf-ibp-1
-     - fsd-sinet-vgg42-no_tlpf-aps-1
-     - fsd-sinet-vgg42-tlpf-aps-1
-     - fsd-sinet-vgg42-tlpf-ibp-1
+     - fsd-sinet-vgg41-tlpf-1
+     - fsd-sinet-vgg42-aps-1
+     - fsd-sinet-vgg42-tlpf_aps-1
+     - fsd-sinet-vgg42-tlpf-1
 
 music-style-classification:
   discogs-effnet:
