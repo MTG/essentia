@@ -23,7 +23,7 @@ jobs:
           sudo apt-get install -y doxygen python3-pip pandoc
           pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults sphinx-toolbox
           # Install Gaia dependencies
-          sudo apt-get install apt-get install qtbase5-dev swig pkg-config
+          sudo apt-get install qtbase5-dev swig pkg-config
       - name: Build Essentia
         run: | 
           python3 waf configure --with-python --with-gaia
