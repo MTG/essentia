@@ -23,7 +23,7 @@ jobs:
           sudo apt-get install -y doxygen python3-pip pandoc
           pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults sphinx-toolbox
           # Install TensorFlow
-          sh src/3rdparty/tensorflow/setup_from_libtensorflow.sh
+          sudo sh src/3rdparty/tensorflow/setup_from_libtensorflow.sh
           # Install Gaia dependencies
           sudo apt-get install qtbase5-dev swig pkg-config
       - name: Build Gaia
