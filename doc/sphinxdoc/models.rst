@@ -164,7 +164,7 @@ Models:
 
 
 FSD-SINet
-------
+---------
 
 Audio event recognition using the `FSD50K <https://zenodo.org/record/4060432>`_ dataset targeting 200 classes drawn from the `AudioSet Ontology <https://research.google.com/audioset/ontology/index.html>`_:
 

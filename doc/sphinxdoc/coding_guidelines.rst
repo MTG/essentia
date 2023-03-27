@@ -82,6 +82,7 @@ We prefer the following style in both C++ and Python code:
 
 * Use "TODO comment." for To-Do comments.
 * Capitalize the first letter of each sentence and use periods.
+
 ::
 
   // TODO text of your To-Do comment.
