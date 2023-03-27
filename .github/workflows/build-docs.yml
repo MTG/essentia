@@ -26,8 +26,10 @@ jobs:
         run: | 
           python3 waf configure --with-python
           python3 waf
-          python3 waf doc
 
+      - name: Build documentation
+        run: |
+          python3 waf doc
       - name: Upload built documentation
         uses: actions/upload-artifact@v2
         with:
