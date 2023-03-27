@@ -24,6 +24,14 @@ jobs:
           pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults sphinx-toolbox
           # Install Gaia dependencies
           sudo apt-get install qtbase5-dev swig pkg-config
+      - name: Build Gaia
+        run: |
+          git clone https://github.com/MTG/gaia.git
+          cd gaia
+          python3 waf configure --with-python-bindings
+          python3 waf
+          sudo python3 waf install
+
       - name: Build Essentia
         run: | 
           python3 waf configure --with-python --with-gaia
