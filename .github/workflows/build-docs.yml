@@ -22,9 +22,11 @@ jobs:
           sudo apt-get install -y build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python3-dev python3-numpy-dev python3-numpy python3-yaml python3-six
           sudo apt-get install -y doxygen python3-pip pandoc
           pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults sphinx-toolbox
+          # Install Gaia dependencies
+          sudo apt-get install apt-get install qtbase5-dev swig pkg-config
       - name: Build Essentia
         run: | 
-          python3 waf configure --with-python
+          python3 waf configure --with-python --with-gaia
           python3 waf
 
       - name: Build documentation
