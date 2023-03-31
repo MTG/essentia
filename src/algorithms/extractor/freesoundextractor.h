@@ -116,9 +116,9 @@ class FreesoundExtractor : public Algorithm {
     //declareParameter("loudnessWindowType", "the window type for computing average loudness", "{hamming,hann,triangular,square,blackmanharris62,blackmanharris70,blackmanharris74,blackmanharris92}", "hann");
     //declareParameter("loudnessSilentFrames", "whether to [keep/drop/add noise to] silent frames for computing average loudness", "{drop,keep,noise}", "noise");
 
-    declareParameter("rhythmMethod", "the method used for beat tracking", "{multifeature,degara}", "degara");
+    declareParameter("rhythmMethod", "the method used for beat tracking", "{multifeature,degara}", "multifeature");
     declareParameter("rhythmMinTempo", "the slowest tempo to detect [bpm]", "[40,180]", 40);
-    declareParameter("rhythmMaxTempo", "the fastest tempo to detect [bpm]", "[60,250]", 208);
+    declareParameter("rhythmMaxTempo", "the fastest tempo to detect [bpm]", "[60,250]", 210);
   
     const char* statsArray[] = { "mean", "var", "stdev", "median", "min", "max", "dmean", "dmean2", "dvar", "dvar2" };
     const char* cepstrumStatsArray[] = { "mean", "cov", "icov" };

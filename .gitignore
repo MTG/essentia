@@ -70,6 +70,7 @@ src/examples/python/streaming_extractor/streaming_extractortuningfrequency.h
 
 # editor stuff
 *.swp
+.idea
 
 # this shouldn't be here, but yeah well...
 test/src/basetest/test_*.o

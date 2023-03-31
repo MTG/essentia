@@ -74,7 +74,20 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   Algorithm* onset = factory.create("OnsetRate");
   source >> onset->input("signal");
   onset->output("onsetTimes") >> PC(pool, nameSpace + "onset_times");
-  onset->output("onsetRate") >> PC(pool, nameSpace + "onset_rate"); 
+  onset->output("onsetRate") >> PC(pool, nameSpace + "onset_rate");
+
+  // Loop BPM estimation
+  Algorithm* percivalBPM = factory.create("PercivalBpmEstimator");
+  source >> percivalBPM->input("signal");
+  percivalBPM->output("bpm") >> PC(pool, nameSpace + "bpm_loop");
+
+  // Compute loop BPM estimation confidence
+  Algorithm* loopBpmConfidence = factory.create("LoopBpmConfidence");
+  Algorithm* realAccumulator = factory.create("RealAccumulator");
+  source >> realAccumulator->input("data"); // Wait until all the signal is accumulated
+  realAccumulator->output("array") >> loopBpmConfidence->input("signal");
+  percivalBPM->output("bpm") >> loopBpmConfidence->input("bpmEstimate");
+  loopBpmConfidence->output("confidence") >> PC(pool, nameSpace + "bpm_loop_confidence");
 }
 
 void FreesoundRhythmDescriptors::createNetworkBeatsLoudness(SourceBase& source, Pool& pool){
