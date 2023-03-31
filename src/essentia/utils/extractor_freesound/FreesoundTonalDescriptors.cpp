@@ -96,6 +96,7 @@ void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
 
   // Compute key
   Algorithm* key_extractor = factory.create("KeyExtractor",
+                                           "profileType", "bgate",
                                            "frameSize", frameSize,
                                            "hopSize", frameSize,  // No overlapp (that's how KeyExtractor sets the defaults)
                                            "hpcpSize", 12);
