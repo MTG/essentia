@@ -99,16 +99,7 @@ void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
                                            "frameSize", frameSize,
                                            "hopSize", frameSize,  // No overlapp (that's how KeyExtractor sets the defaults)
                                            "hpcpSize", 12);
-  Algorithm* high_pass_1 = factory.create("HighPass",
-                                          "cutoffFrequency", 200.);
-  Algorithm* high_pass_2 = factory.create("HighPass",
-                                          "cutoffFrequency", 200.);
-  Algorithm* high_pass_3 = factory.create("HighPass",
-                                          "cutoffFrequency", 200.);
-  source >> high_pass_1->input("signal");
-  high_pass_1->output("signal") >> high_pass_2->input("signal");
-  high_pass_2->output("signal") >> high_pass_3->input("signal");
-  high_pass_3->output("signal") >> key_extractor->input("audio");  // 3rd order 200Hz high pass filter
+  source >> key_extractor->input("audio");
   key_extractor->output("key") >> PC(pool, nameSpace + "key.key");
   key_extractor->output("scale") >> PC(pool, nameSpace + "key.scale");
   key_extractor->output("strength") >> PC(pool, nameSpace + "key.strength");
