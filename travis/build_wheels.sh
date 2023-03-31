@@ -14,13 +14,13 @@ set -e -x
 #PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 #PKG_CONFIG_PATH=/io/packaging/debian_3rdparty/lib/pkgconfig
 
+# To prevent errors parsing version with `git describe`.
+git config --global --add safe.directory /io
+
 # We are dropping support for Python 3.4 since PyYaml is not supporting it anymore.
 # We can just remove the Python3.4 folder until ManyLinux1 drops the support too.
 rm -rf /opt/python/cp34-cp34m
 rm -rf /opt/python/cp35-cp35m
-
-# NumPy has no support for Python 3.10 yet, therefore removing it too.
-rm -rf /opt/python/cp310-cp310
 
 # Build static libessentia.a library
 # Use Python3.6. CentOS 5's native python is too old...
@@ -45,14 +45,20 @@ for PYBIN in /opt/python/cp3*/bin; do
     # Use the oldest version of numpy for each Python version
     # for backwards compatibility of its C API
     # https://github.com/numpy/numpy/issues/5888
-    # Build numpy versions used by scikit-learn:
+
+    # Use `oldest-supported-numpy` as a reference.
+    # https://github.com/scipy/oldest-supported-numpy/blob/main/setup.cfg
+
+    # Previously used this as a reference:
     # https://github.com/MacPython/scikit-learn-wheels/blob/master/.travis.yml
 
-    # Python 2.7
-    # NUMPY_VERSION=1.8.2
-
     # Python 3.x
-    if [[ $PYBIN == *"cp39"* ]]; then
+    if [[ $PYBIN == *"cp311"* ]]; then
+        # FIXME Not supported by NumPy yet. Update ASAP.
+        continue
+    elif [[ $PYBIN == *"cp310"* ]]; then
+        NUMPY_VERSION=1.21.4
+    elif [[ $PYBIN == *"cp39"* ]]; then
         NUMPY_VERSION=1.19.3
     elif [[ $PYBIN == *"cp38"* ]]; then
         NUMPY_VERSION=1.17.4
@@ -99,11 +105,14 @@ done
 
 # Install and test
 for PYBIN in /opt/python/cp3*/bin/; do
+    if [[ $PYBIN == *"cp311"* ]]; then
+        # FIXME Not supported by NumPy yet. Skip.
+        continue
+    fi
     "${PYBIN}/pip" install "${PROJECT_NAME}" --no-index -f /io/wheelhouse
     if [[ $WITH_TENSORFLOW ]]; then
-    # Test that essentia can be imported along with TensorFlow
-        TENSORFLOW_VERSION=2.5.0
-        "${PYBIN}/pip" install tensorflow==${TENSORFLOW_VERSION}
+    # Test that essentia can be imported along with the latest TensorFlow for each Python version
+        "${PYBIN}/pip" install tensorflow
         (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming; import tensorflow')
     else
         (cd "$HOME"; ${PYBIN}/python -c 'import essentia; import essentia.standard; import essentia.streaming')

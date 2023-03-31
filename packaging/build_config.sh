@@ -20,7 +20,7 @@ EIGEN_VERSION=3.3.7
 FFMPEG_VERSION=ffmpeg-2.8.12
 LAME_VERSION=3.100
 TAGLIB_VERSION=taglib-1.11.1
-ZLIB_VERSION=zlib-1.2.11
+ZLIB_VERSION=zlib-1.2.12
 FFTW_VERSION=fftw-3.3.2
 LIBSAMPLERATE_VERSION=libsamplerate-0.1.8
 LIBYAML_VERSION=yaml-0.1.5
@@ -36,11 +36,11 @@ FFMPEG_AUDIO_FLAGS="
     --disable-debug
 
     --disable-avdevice
-    --disable-swresample
+    --disable-avresample
     --disable-swscale
     --disable-postproc
     --disable-avfilter
-    --enable-avresample
+    --enable-swresample
 
     --disable-network
     --disable-indevs

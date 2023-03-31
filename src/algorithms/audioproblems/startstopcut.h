@@ -58,9 +58,9 @@ class StartStopCut : public Algorithm {
     declareParameter("sampleRate", "the sample rate", "(0,inf)", 44100.);
     declareParameter("frameSize", "the frame size for the internal power analysis", "(0,inf)", 256);
     declareParameter("hopSize", "the hop size for the internal power analysis", "(0,inf)", 256);
-    declareParameter("threshold", "the threshold below which average energy is defined as silence [dB]", "(-inf,0])", -60);
-    declareParameter("maximumStartTime", "if the first non-silent frame occurs before maximumStartTime startCut is activated [ms]", "[0,inf))", 10.0f);
-    declareParameter("maximumStopTime", "if the last non-silent frame occurs after maximumStopTime to the end stopCut is activated [ms]", "[0,inf))", 10.0f);
+    declareParameter("threshold", "the threshold below which average energy is defined as silence [dB]", "(-inf,0]", -60);
+    declareParameter("maximumStartTime", "if the first non-silent frame occurs before maximumStartTime startCut is activated [ms]", "[0,inf)", 10.0f);
+    declareParameter("maximumStopTime", "if the last non-silent frame occurs after maximumStopTime to the end stopCut is activated [ms]", "[0,inf)", 10.0f);
   }
 
   void configure();

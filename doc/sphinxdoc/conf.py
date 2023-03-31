@@ -47,7 +47,8 @@ import sys, os
 extensions = ['sphinx.ext.viewcode',
               'sphinxcontrib.doxylink',
               'sphinxprettysearchresults',
-              'sphinx.ext.autosectionlabel']
+              'sphinx.ext.autosectionlabel',
+              'sphinx_toolbox.collapse']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -161,13 +162,13 @@ html_static_path = ['_static']
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
-# html_additional_pages = {'index': 'index.html',
-#                          'algorithms_reference': 'algorithms_reference.html',
-#                          'applications': 'applications.html',
-#                          'documentation': 'documentation.html'}
+html_additional_pages = {'index': 'index.html',
+                         'algorithms_reference': 'algorithms_reference.html',
+                         'applications': 'applications.html',
+                         'documentation': 'documentation.html'}
 
-# exec(compile(open("essentia_reference.py").read(), "essentia_reference.py", 'exec'))
-# html_additional_pages.update(essentia_algorithms)
+exec(compile(open("essentia_reference.py").read(), "essentia_reference.py", 'exec'))
+html_additional_pages.update(essentia_algorithms)
 
 # If false, no module index is generated.
 #html_domain_indices = True

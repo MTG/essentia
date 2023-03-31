@@ -36,7 +36,7 @@ Essentia depends on (at least) the following libraries:
 
 - `Eigen <http://eigen.tuxfamily.org/>`_: for linear algebra
 - `FFTW <http://www.fftw.org>`_: for the FFT implementation *(optional)*
-- `libavcodec/libavformat/libavutil/libavresample <http://ffmpeg.org/>`_ (from the FFmpeg/LibAv project): for loading/saving any type of audio files *(optional)*
+- `libavcodec/libavformat/libavutil/libswresample <http://ffmpeg.org/>`_ (from the FFmpeg/LibAv project): for loading/saving any type of audio files *(optional)*
 - `libsamplerate <http://www.mega-nerd.com/SRC/>`_: for resampling audio *(optional)*
 - `TagLib <http://developer.kde.org/~wheeler/taglib.html>`_: for reading audio metadata tags *(optional)*
 - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
@@ -51,7 +51,7 @@ Installing dependencies on Linux
 
 You can install those dependencies on a Debian/Ubuntu system from official repositories using the command below::
 
-  sudo apt-get install build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev libsamplerate0-dev libtag1-dev libchromaprint-dev
+  sudo apt-get install build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libsamplerate0-dev libtag1-dev libchromaprint-dev
 
 In order to use Python 3 bindings for the library, you might also need to install python3-dev, python3-numpy-dev (or python3-numpy on Ubuntu) and python3-yaml for YAML support in python::
 
@@ -59,7 +59,7 @@ In order to use Python 3 bindings for the library, you might also need to instal
 
 Note that, depending on the version of Essentia, different versions of ``libav*`` and ``libtag1-dev`` packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_.
 
-Since the 2.1-beta3 release of Essentia, the required version of TagLib (``libtag1-dev``) is greater or equal to ``1.9``. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libavresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu 14.10 or later, and in Debian wheezy-backports. If you want to install Essentia on older versions of Ubuntu/Debian, you will have to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
+Since the 2.1-beta3 release of Essentia, the required version of TagLib (``libtag1-dev``) is greater or equal to ``1.9``. The required version of LibAv (``libavcodec-dev``, ``libavformat-dev``, ``libavutil-dev`` and ``libswresample-dev``) is greater or equal to ``10``. The appropriate versions are distributed in Ubuntu 14.10 or later, and in Debian wheezy-backports. If you want to install Essentia on older versions of Ubuntu/Debian, you will have to `install a proper LibAv version from source <FAQ.html#build-essentia-on-ubuntu-14-04-or-earlier>`_.
 
 If you are willing to use Essentia with a TensorFlow wrapper in C++, install the TensorFlow shared library using a helper script inside our source code::
 
@@ -119,7 +119,7 @@ Use these (optional) flags:
 - ``--mode=debug`` to build in debug mode,
 - ``--with-cpptests`` to build cpptests
 
-NOTE: you must *always* configure at least once before building!
+Note: you must *always* configure at least once before building!
 
 The following will give you the full list of options::
 
@@ -150,7 +150,7 @@ Note that when installing Essentia to the default ``/usr/local`` prefix, on some
 `here <https://bugs.launchpad.net/ubuntu/+source/python3-defaults/+bug/1814653>`_ and
 `here <https://bugs.launchpad.net/ubuntu/+source/python3-stdlib-extensions/+bug/1832215>`_).
 
-To avoid import errors on such systems, specify the correct path in ``waf configure`` using a ``--pythondir`` option or the ``PYTHONDIR`` environmental variable. For example, on Ubuntu 20.10 the correct path for the default Python 3.8 is ``/usr/local/lib/python3.8/dist-packages/``.
+To avoid import errors on such systems, specify the correct path in ``waf configure`` using a ``--pythondir`` option or the ``PYTHONDIR`` environmental variable. For example, on Ubuntu 22.04 the correct path for the default Python 3.10 is ``/usr/local/lib/python3.10/dist-packages/``.
 
 Alternatively, you can also configure the ``PYTHONPATH`` variable to include the ``/usr/local/lib/python3/dist-packages/`` path in the list of Python 3 `module search paths <https://docs.python.org/3/tutorial/modules.html#the-module-search-path>`_.
 
@@ -169,11 +169,11 @@ To run the Python unit tests (test all algorithms)::
 
   python3 waf run_python_tests
 
-or, in the case if your default python is not Python 3::
-
-  python3 waf run_python_tests
-
 To run Python unit tests, you need to install Python bindings first. Some of these tests require additional audio files and binaries stored in `essentia-audio <https://github.com/MTG/essentia-audio>`_ and `essentia-models <https://github.com/MTG/essentia-models/>`_ submodule repositories. Therefore, make sure to clone Essentia git repository recursively with its submodules (``git clone --recursive https://github.com/MTG/essentia.git``).
+
+Also, some tests require additional dependencies. Install those with::
+
+  pip3 install scikit-learn
 
 See more information about running tests `in our FAQ <FAQ.html#running-tests>`_.
 
@@ -189,7 +189,7 @@ Install doxigen and pip3. If you are on Linux::
 
 Install additional dependencies (you might need to run this command with sudo)::
 
-  sudo pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults
+  pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinxprettysearchresults sphinx-toolbox
   sudo apt-get install pandoc
 
 Make sure to build Essentia with Python 3 bindings and run::
@@ -197,6 +197,10 @@ Make sure to build Essentia with Python 3 bindings and run::
   python3 waf doc
 
 Documentation will be located in ``doc/sphinxdoc/_build/html/`` folder.
+
+Note: Code examples embedded in the documentation page for Essentia Models require Python example files located in ``src/examples/python/models/scripts/``. These scripts can be automatically regenerated with ``src/examples/python/models/generate_example_scripts.sh``.
+
+
 
 
 Building Essentia on Windows
@@ -228,5 +232,5 @@ A lightweight version of Essentia can be `cross-compiled for iOS <FAQ.html#cross
 Building Essentia for Web using asm.js or WebAssembly
 -----------------------------------------------------
 
-A lightweight version of Essentia can be cross-compiled to asm.js or WebAssembly targets using Emscripten for it's usage on the Web. See `FAQ <https://essentia.upf.edu/FAQ.htm>`_ for more details.
+A lightweight version of Essentia can be cross-compiled to asm.js or WebAssembly targets using Emscripten for it's usage on the Web. See `FAQ <https://essentia.upf.edu/FAQ.html>`_ for more details.
 

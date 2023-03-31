@@ -369,21 +369,21 @@ void Key::compute() {
 
 
   if (maxMajor > maxMinor && maxMajor > maxOther) {
-    keyIndex = (int) (keyIndexMajor *  12 / pcpsize + 0.5);
+    keyIndex = std::lround(keyIndexMajor *  12 / pcpsize);
     scale = MAJOR;
     max = maxMajor;
     max2 = max2Major;
   }
 
   else if (maxMinor >= maxMajor && maxMinor >= maxOther) {
-    keyIndex = (int) (keyIndexMinor * 12 / pcpsize + 0.5);
+    keyIndex = std::lround(keyIndexMinor * 12 / pcpsize);
     scale = MINOR;
     max = maxMinor;
     max2 = max2Minor;
     }
 
 	else if (maxOther > maxMajor && maxOther > maxMinor) {
-    keyIndex = (int) (keyIndexOther * 12 / pcpsize + 0.5);
+    keyIndex = std::lround(keyIndexOther * 12 / pcpsize);
     scale = MAJMIN;
     max = maxOther;
     max2 = max2Other;
@@ -505,6 +505,10 @@ void Key::resize(int pcpsize) {
 // just like a cross-correlation
 Real Key::correlation(const vector<Real>& v1, const Real mean1, const Real std1, const vector<Real>& v2, const Real mean2, const Real std2, const int shift) const
 {
+  if (std1 == static_cast<Real>(0.0) or std2 == static_cast<Real>(0.0))
+  {
+    return 0.0;
+  }
   Real r = 0.0;
   int size = (int)v1.size();
 

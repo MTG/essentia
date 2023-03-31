@@ -97,10 +97,6 @@ void TensorflowPredictTempoCNN::configure() {
   string lastPatchMode = parameter("lastPatchMode").toString();
   int batchSize = parameter("batchSize").toInt();
 
-  if (batchSize == 0) {
-    throw EssentiaException("TensorflowPredictTempoCNN: 0 is not a valid `batchSize` value.");
-  }
-
   // Hardcoded parameters matching the training setup:
   // https://github.com/hendriks73/tempo-cnn/blob/master/tempocnn/feature.py
   int frameSize = 1024;
@@ -159,7 +155,7 @@ const char* TensorflowPredictTempoCNN::description = DOC(
   "extraction (mel bands). It feeds the model with patches of 256 mel bands "
   "frames and jumps a constant amount of frames determined by `patchHopSize`.\n"
   "\n"
-  "With the `batchSize` parameter set to -1 the patches are stored to run a "
+  "With the `batchSize` parameter set to -1 or 0 the patches are stored to run a "
   "single TensorFlow session at the end of the stream. This allows to take "
   "advantage of parallelization when GPUs are available, but at the same time "
   "it can be memory exhausting for long files.\n"

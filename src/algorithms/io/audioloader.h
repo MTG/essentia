@@ -60,7 +60,7 @@ class AudioLoader : public Algorithm {
   bool _computeMD5;
   AVFrame* _decodedFrame;
 
-  struct AVAudioResampleContext* _convertCtxAv;
+  struct SwrContext* _convertCtxAv;
 
   int _streamIdx; // index of the audio stream among all the streams contained in the file
   std::vector<int> _streams;

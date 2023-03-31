@@ -41,11 +41,13 @@ const char* LPC::description = DOC("This algorithm computes Linear Predictive Co
 
 void LPC::configure() {
   _p = parameter("order").toInt();
+  Real sampleRate = parameter("sampleRate").toReal();
 
   delete _correlation;
   if (parameter("type").toString() == "warped") {
     _correlation = AlgorithmFactory::create("WarpedAutoCorrelation",
-                                            "maxLag", _p+1);
+                                            "maxLag", _p+1,
+                                            "sampleRate", sampleRate);
     _correlation->output("warpedAutoCorrelation").set(_r);
   }
   else {

@@ -51,31 +51,30 @@ Indexing music by mood: design and integration of an automatic content-based ann
 
 ## Music preferences, similarity and recommendation
 
-- D. Bogdanov. From music similarity to music recommendation: Com-
-putational approaches based on audio and metadata analysis. PhD
-thesis, UPF, Barcelona, Spain, 2013.
-
-- D. Bogdanov, M. Haro, F. Fuhrmann, A. Xambó, E. Gómez, and
-P. Herrera. Semantic audio content-based music recommendation and
-visualization based on user preference examples. Information Pro-
-cessing & Management, 49(1):13–33, Jan. 2013.
-
-- D. Bogdanov, J. Serrà, N. Wack, P. Herrera, and X. Serra. Unifying
-low-level and high-level music similarity measures. IEEE Transactiions on
-Multimedia, 13(4):687–701, 2011.
-
-- O. Celma, P. Cano, and P. Herrera. Search sounds an audio crawler
-focused on weblogs. In 7th International Conference on Music Information Retrieval (ISMIR'06), 2006.
-
-- J. Kaitila. A content-based music recommender system. Master Thesis, University of Tampere, Finland, 2017.
-
-- K. Yadati, C. Liem, M. Larson, and A. Hanjalic. On the Automatic Identification of Music for Common Activities. In 2017 ACM on International Conference on Multimedia Retrieval, pages 192-200, 2017.
-
-- K. R. Fricke, D.M. Greenberg, P.J. Rentfrow, and P.Y. Herzberg. Computer-based music feature analysis mirrors human perception and can be used to measure individual music preference. Journal of Research in Personality, 75:94-102, 2018.
+- F. Korzeniowski, S. Oramas, and F. Gouyon.  Artist Similarity with Graph Neural Networks. In 22nd International Society for Music Information Retrieval Conference (ISMIR 2021), 2021.
 
 - K. R., Fricke, D. M. Greenberg, P. J. Rentfrow, and P. Y. Herzberg. Measuring musical preferences from listening behavior: Data from one million people and 200,000 songs. Psychology of Music, 0305735619868280, 2019.
 
 - K. Fricke, and P. Herzberg. Know your big data: De-biasing subsamples of large datasets for personality research using importance sampling and kNN matching. 10.31234/osf.io/4ftb7, 2019.
+
+- K. R. Fricke, D.M. Greenberg, P.J. Rentfrow, and P.Y. Herzberg. Computer-based music feature analysis mirrors human perception and can be used to measure individual music preference. Journal of Research in Personality, 75:94-102, 2018.
+
+- K. Yadati, C. Liem, M. Larson, and A. Hanjalic. On the Automatic Identification of Music for Common Activities. In 2017 ACM on International Conference on Multimedia Retrieval, pages 192-200, 2017.
+
+- D. Bogdanov. From music similarity to music recommendation: Computational approaches based on audio and metadata analysis. PhD thesis, UPF, Barcelona, Spain, 2013.
+
+- D. Bogdanov, M. Haro, F. Fuhrmann, A. Xambó, E. Gómez, and P. Herrera. Semantic audio content-based music recommendation and visualization based on user preference examples. Information Processing & Management, 49(1):13–33, Jan. 2013.
+
+- D. Bogdanov, J. Serrà, N. Wack, P. Herrera, and X. Serra. Unifying low-level and high-level music similarity measures. IEEE Transactiions on Multimedia, 13(4):687–701, 2011.
+
+- O. Celma, P. Cano, and P. Herrera. Search sounds an audio crawler focused on weblogs. In 7th International Conference on Music Information Retrieval (ISMIR'06), 2006.
+
+- J. Kaitila. A content-based music recommender system. Master Thesis, University of Tampere, Finland, 2017.
+
+
+
+
+
 
 
 ## Emotion detection
