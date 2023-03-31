@@ -160,7 +160,6 @@ class TestCase(BaseTestCase):
             self.assertEqual(len(v1), len(v2))
             self.assertAlmostEqualVector(array(v1).flatten(), array(v2).flatten(), precision)
 
-
     def assertAlmostEqualAbs(self, found, expected, precision = 0.1):
         diff = abs(expected - found)
         self.assert_(diff <= precision, 'Difference is %e while allowed absolute error is %e' % (diff, precision))
@@ -169,7 +168,6 @@ class TestCase(BaseTestCase):
         self.assertEqual(len(found), len(expected))
         for val1, val2 in zip(found, expected):
             self.assertAlmostEqualAbs(val1, val2, precision)
-
 
     def assertAlmostEqualAudio(self, found, expected, precision = 1e-7):
         # we can use the optimized version if the two arrays are 1D numpy float arrays
@@ -183,6 +181,40 @@ class TestCase(BaseTestCase):
         self.assertEqual(len(found), len(expected))
         for val1, val2 in zip(found, expected):
           self.assertAlmostEqualAudio(val1, val2, precision)
+
+    def assertAlmostEqualPool(self, pool_found, pool_expected, precision = 1e-7):
+        # Assert both pools have the same descriptors
+        self.assertListEqual(sorted(pool_found.descriptorNames()), sorted(pool_expected.descriptorNames()))
+
+        # Compare descriptor values one by one
+        for descriptorName in pool_found.descriptorNames():
+            if 'essentia_git_sha' in descriptorName:
+                # Do not compare descriptor 'essentia_git_sha' as it will always be different when essentia is built 
+                # with uncommitted changes
+                continue
+
+            found = pool_found[descriptorName]
+            expected = pool_expected[descriptorName]
+            
+            # Check type is the same
+            self.assertEqual(type(found), type(expected))
+
+            # Check value is almost the same
+            if type(found) == float:
+                self.assertAlmostEqual(found, expected, precision=precision)
+            elif type(found) == str:
+                self.assertEqual(found, expected)
+            elif type(found) == list:
+                # Lists are compared wit assertEqual because these will be lists of strings, otherwise 
+                # these would be represented as numpy.ndarray and fall in the next elif clause
+                self.assertEqual(found, expected)
+            elif type(found) == numpy.ndarray:
+                if found.ndim == 1:
+                    self.assertAlmostEqualVector(found, expected, precision=precision)         
+                else:
+                    self.assertAlmostEqualMatrix(found, expected, precision=precision)         
+            else:
+                self.assertEqual(found, expected)
 
     def assertConfigureFails(self, algo, params):
         conf = lambda: algo.configure(**params)

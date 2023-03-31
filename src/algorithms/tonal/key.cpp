@@ -77,6 +77,8 @@ void Key::configure() {
       _useMajMin = false;
     }
   }
+  // TODO: choose which set of key names we want to use
+  //const char* keyNames[] = { "A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab" };
   const char* keyNames[] = { "A", "Bb", "B", "C", "C#", "D", "Eb", "E", "F", "F#", "G", "Ab" };
   _keys = arrayToVector<string>(keyNames);
 

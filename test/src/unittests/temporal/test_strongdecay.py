@@ -42,7 +42,7 @@ class TestStrongDecay(TestCase):
                 strongDecay)
 
     def testZero(self):
-        self.assertComputeFails(StrongDecay(), [0]*10)
+        self.assertEqual(StrongDecay()([0]*10), 0.0)
 
     def testSanity(self):
         growingSignal = [.1,.2,.3,.4,.5,.6,.7,.8,.9,1]

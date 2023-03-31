@@ -60,7 +60,7 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   // connect as single value otherwise PoolAggregator will compute statistics
   connectSingleValue(bpmhist->output("firstPeakBPM"), pool, nameSpace + "bpm_histogram_first_peak_bpm");
   connectSingleValue(bpmhist->output("firstPeakWeight"), pool, nameSpace + "bpm_histogram_first_peak_weight");
-  connectSingleValue(bpmhist->output("firstPeakSpread"), pool, nameSpace + "bpm_histogram_first_peak_weight");
+  connectSingleValue(bpmhist->output("firstPeakSpread"), pool, nameSpace + "bpm_histogram_first_peak_spread");
   connectSingleValue(bpmhist->output("secondPeakBPM"), pool, nameSpace + "bpm_histogram_second_peak_bpm");
   connectSingleValue(bpmhist->output("secondPeakWeight"), pool, nameSpace + "bpm_histogram_second_peak_weight");
   connectSingleValue(bpmhist->output("secondPeakSpread"), pool, nameSpace + "bpm_histogram_second_peak_spread");
@@ -87,7 +87,7 @@ void  FreesoundRhythmDescriptors::createNetwork(SourceBase& source, Pool& pool){
   source >> realAccumulator->input("data"); // Wait until all the signal is accumulated
   realAccumulator->output("array") >> loopBpmConfidence->input("signal");
   percivalBPM->output("bpm") >> loopBpmConfidence->input("bpmEstimate");
-  loopBpmConfidence->output("confidence") >> PC(pool, nameSpace + "bpm_loop_confidence");
+  connectSingleValue(loopBpmConfidence->output("confidence"), pool, nameSpace + "bpm_loop_confidence");
 }
 
 void FreesoundRhythmDescriptors::createNetworkBeatsLoudness(SourceBase& source, Pool& pool){
@@ -98,7 +98,6 @@ void FreesoundRhythmDescriptors::createNetworkBeatsLoudness(SourceBase& source, 
   
   // assume there is only one beat centered at zero if there were not beats detected
   if (ticks.size()==0) {
-    cout<<"adding 0 to ticks"<<endl;
     ticks.push_back(0);
   }
   Algorithm* beatsLoudness = factory.create("BeatsLoudness",

@@ -48,6 +48,22 @@ class TestTCToTotal(TestCase):
         self.assertRaises(RuntimeError, lambda: run(gen))
 
 
+    def testZero(self):
+        envelope = [0] * 100
+
+        gen = VectorInput(envelope)
+        tcToTotal = sTCToTotal()
+        p = Pool()
+
+        gen.data >> tcToTotal.envelope
+        tcToTotal.TCToTotal >> (p, 'lowlevel.tctototal')
+
+        run(gen)
+
+        print(p.descriptorNames())
+        self.assertEqual(p['lowlevel.tctototal'], TCToTotal()(envelope))
+        
+
     def testRegression(self):
         envelope = list(range(22050))
         envelope.reverse()
