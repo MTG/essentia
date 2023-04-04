@@ -34,7 +34,7 @@ Quick start
 
 Quick start using Python:
 - http://essentia.upf.edu/documentation/essentia_python_tutorial.html
-- [Jupyter Notebook Essentia tutorial](/src/examples/tutorial/essentia_python_tutorial.ipynb)
+- [Jupyter Notebook Essentia tutorial](/src/examples/python/essentia_python_tutorial.ipynb)
 
 Command-line tools to compute common music descriptors:
 - [doc/sphinxdoc/extractors_out_of_box.rst](doc/sphinxdoc/extractors_out_of_box.rst)
