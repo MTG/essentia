@@ -797,9 +797,9 @@
     },
     "hpcp_peak_count": 4,
     "key": {
-        "strength": 0.529188632965,
-        "key": "A",
-        "scale": "minor"
+        "strength": 0.747491717338562,
+        "key": "C",
+        "scale": "major"
     },
     "tuning_frequency": {
         "dmean": 0,
