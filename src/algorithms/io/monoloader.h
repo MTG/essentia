@@ -56,7 +56,7 @@ class MonoLoader : public AlgorithmComposite {
     declareParameter("sampleRate", "the desired output sampling rate [Hz]", "(0,inf)", 44100.);
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
     declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
-
+    declareParameter("resampleQuality", "the resampling quality, 0 for best quality, 4 for fast linear approximation", "[0,4]", 1);
   }
 
   void declareProcessOrder() {
@@ -109,7 +109,7 @@ class MonoLoader : public Algorithm {
     declareParameter("sampleRate", "the desired output sampling rate [Hz]", "(0,inf)", 44100.);
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
     declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
-
+    declareParameter("resampleQuality", "the resampling quality, 0 for best quality, 4 for fast linear approximation", "[0,4]", 1);
   }
 
   void configure();
