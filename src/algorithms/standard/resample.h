@@ -41,7 +41,7 @@ class Resample : public Algorithm {
   void declareParameters() {
     declareParameter("inputSampleRate", "the sampling rate of the input signal [Hz]", "(0,inf)", 44100.);
     declareParameter("outputSampleRate", "the sampling rate of the output signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("quality", "the quality of the conversion, 0 for best quality", "[0,4]", 1);
+    declareParameter("quality", "the quality of the conversion, 0 for best quality, 4 for fast linear approximation", "[0,4]", 1);
   }
 
   void configure();
@@ -93,7 +93,7 @@ class Resample : public Algorithm {
   void declareParameters() {
     declareParameter("inputSampleRate", "the sampling rate of the input signal [Hz]", "(0,inf)", 44100.);
     declareParameter("outputSampleRate", "the sampling rate of the output signal [Hz]", "(0,inf)", 44100.);
-    declareParameter("quality", "the quality of the conversion, 0 for best quality", "[0,4]", 1);
+    declareParameter("quality", "the quality of the conversion, 0 for best quality, 4 for fast linear approximation", "[0,4]", 1);
   }
 
   void configure();
