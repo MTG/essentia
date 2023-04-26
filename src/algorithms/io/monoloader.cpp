@@ -108,7 +108,8 @@ void MonoLoader::configure() {
   _loader->configure(INHERIT("filename"),
                      INHERIT("sampleRate"),
                      INHERIT("downmix"),
-                     INHERIT("audioStream"));
+                     INHERIT("audioStream"),
+                     INHERIT("resampleQuality"));
 }
 
 void MonoLoader::compute() {
