@@ -276,7 +276,7 @@ Models:
 Music style classification
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Discogs-Effnet
+Discogs-EffNet
 --------------
 
 Music style classification by 400 styles from the Discogs taxonomy:
