@@ -1817,3 +1817,63 @@ Models:
 
     .. literalinclude :: ../../src/examples/python/models/scripts/autotagging/msd/msd-musicnn-1_predictions.py
 
+
+Music loop instrument role
+--------------------------
+
+Classification of music loops by their instrument role (5 classes):
+
+`bass`, `chords`, `fx`, `melody`, `percussion`
+
+Dataset: `Freesound Loop Dataset <https://zenodo.org/record/3967852>`_.
+
+Output: music loop instrument role predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">fs_loop_ds-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/fs_loop_ds/fs_loop_ds-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/fs_loop_ds/fs_loop_ds-musicnn-msd-1.json>`_]
+
+     Python code for predictions:
+
+     .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/fs_loop_ds/fs_loop_ds-musicnn-msd-1_predictions.py
+
+
+Moods MIREX
+-----------
+
+Music classification by mood (5 mood clusters):
+
+1. `passionate, rousing, confident, boisterous, rowdy`.
+
+2. `rollicking, cheerful, fun, sweet, amiable/good natured`.
+
+3. `literate, poignant, wistful, bittersweet, autumnal, brooding`.
+
+4. `humorous, silly, campy, quirky, whimsical, witty, wry`.
+
+5. `aggressive, fiery, tense/anxious, intense, volatile, visceral`.
+
+Dataset: MIREX Audio Mood Classification Dataset.
+
+Output: mood predictions.
+
+Models:
+
+* .. collapse:: <a class="reference external">moods_mirex-musicnn-msd</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/moods_mirex/moods_mirex-musicnn-msd-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/moods_mirex/moods_mirex-musicnn-msd-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/moods_mirex/moods_mirex-musicnn-msd-1_predictions.py
+
+
+* .. collapse:: <a class="reference external">moods_mirex-vggish-audioset</a>
+
+    [`weights <https://essentia.upf.edu/models/classification-heads/moods_mirex/moods_mirex-vggish-audioset-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/moods_mirex/moods_mirex-vggish-audioset-1.json>`_]
+
+    Python code for predictions:
+
+    .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/moods_mirex/moods_mirex-vggish-audioset-1_predictions.py
