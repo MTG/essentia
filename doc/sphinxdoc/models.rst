@@ -501,7 +501,7 @@ MSD-MusiCNN
 
 Music embedding extraction based on  auto-tagging with 50 common music tags.
 
-Dataset: Million Song Dataset.
+Dataset: `Million Song Dataset <http://millionsongdataset.com/>`_.
 
 Outputs: embeddings.
 
@@ -2034,7 +2034,7 @@ Music auto-tagging with 50 common music tags:
 
 `rock`, `pop`, `alternative`, `indie`, `electronic`, `female vocalists`, `dance`, `00s`, `alternative rock`, `jazz`, `beautiful`, `metal`, `chillout`, `male vocalists`, `classic rock`, `soul`, `indie rock`, `Mellow`, `electronica`, `80s`, `folk`, `90s`, `chill`, `instrumental`, `punk`, `oldies`, `blues`, `hard rock`, `ambient`, `acoustic`, `experimental`, `female vocalist`, `guitar`, `Hip-Hop`, `70s`, `party`, `country`, `easy listening`, `sexy`, `catchy`, `funk`, `electro`, `heavy metal`, `Progressive rock`, `60s`, `rnb`, `indie pop`, `sad`, `House`, `happy`
 
-Dataset: Million Song Dataset.
+Dataset: `Million Song Dataset <http://millionsongdataset.com/>`_.
 
 Outputs: Auto-tagging with the top-50 Million Song Dataset classes.
 
