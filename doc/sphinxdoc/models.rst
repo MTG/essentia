@@ -19,11 +19,11 @@ We support models for the followings tasks:
 
 * :ref:`Audio event recognition`
 * :ref:`Music style classification`
-* :ref:`Classifiers`
 * :ref:`Feature extractors (embeddings)<Feature extractors>`
 * :ref:`Pitch detection`
 * :ref:`Source separation`
 * :ref:`Tempo estimation`
+* :ref:`Classifiers`
 
 
 Audio event recognition
