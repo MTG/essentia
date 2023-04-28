@@ -101,7 +101,7 @@ For implementation details, see `the code of extractor <https://github.com/MTG/e
 
 * **bpm**: BPM value according to detected beats
 
-* **bpm_histogram**: BPM histogram. Algorithms: Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
+* **bpm_histogram**: BPM histogram. Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
 
 * **bpm_histogram_first_peak_bpm**, **bpm_histogram_first_peak_spread**, **bpm_histogram_first_peak_weight**, **bpm_histogram_second_peak_bpm**, **bpm_histogram_second_peak_spread**, **bpm_histogram_second_peak_weight**: descriptors characterizing highest and second highest peak of the BPM histogram. Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
 

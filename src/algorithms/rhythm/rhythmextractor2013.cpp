@@ -280,6 +280,7 @@ void RhythmExtractor2013::compute() {
   //  // no rubato regions then
   //}
 
+  reset();
 }
 
 void RhythmExtractor2013::reset() {

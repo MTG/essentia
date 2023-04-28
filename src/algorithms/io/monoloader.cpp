@@ -70,7 +70,8 @@ void MonoLoader::configure() {
   _params.add("originalSampleRate", inputSampleRate);
 
   _resample->configure("inputSampleRate", inputSampleRate,
-                       "outputSampleRate", parameter("sampleRate"));
+                       "outputSampleRate", parameter("sampleRate"),
+                       "quality", parameter("resampleQuality"));
 
   _mixer->configure("type", parameter("downmix"));
 
@@ -86,7 +87,7 @@ namespace standard {
 
 const char* MonoLoader::name = "MonoLoader";
 const char* MonoLoader::category = "Input/output";
-const char* MonoLoader::description = DOC("This algorithm loads the raw audio data from an audio file and downmixes it to mono. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal.\n"
+const char* MonoLoader::description = DOC("This algorithm loads the raw audio data from an audio file and downmixes it to mono. Audio is resampled using Resample in case the given sampling rate does not match the sampling rate of the input signal.\n"
 "\n"
 "This algorithm uses AudioLoader and thus inherits all of its input requirements and exceptions.");
 
@@ -107,7 +108,8 @@ void MonoLoader::configure() {
   _loader->configure(INHERIT("filename"),
                      INHERIT("sampleRate"),
                      INHERIT("downmix"),
-                     INHERIT("audioStream"));
+                     INHERIT("audioStream"),
+                     INHERIT("resampleQuality"));
 }
 
 void MonoLoader::compute() {

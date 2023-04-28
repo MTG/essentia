@@ -61,10 +61,12 @@ void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
   tuning->output("tuningFrequency") >> PC(pool, nameSpace + "tuning_frequency");
   tuning->output("tuningCents") >> NOWHERE;
 
-  // Compute HPCP and key
-
-  // TODO: Tuning frequency is currently provided but not used for HPCP 
-  // computation, not clear if it would make an improvement for freesound sounds
+  // Compute HPCP
+  // NOTE: HPCP is no longer directly used for key extraction because we use KeyExtractor
+  // which does the HPCP computation inside. Nevertheless, we keep HPCP computation here
+  // so it can be added to the POOL.
+  // NOTE: Tuning frequency is currently provided but not used for HPCP 
+  // computation, not clear if it would make an improvement for Freesound sounds
   Real tuningFreq = 440;
   //Real tuningFreq = pool.value<vector<Real> >(nameSpace + "tuning_frequency").back();
 
@@ -87,97 +89,27 @@ void FreesoundTonalDescriptors ::createNetwork(SourceBase& source, Pool& pool) {
                                        "weightType", "cosine",
                                        "nonLinear", false,
                                        "windowSize", 1.);
-  // Previously used parameter values: 
-  // - nonLinear = false
-  // - weightType = squaredCosine
-  // - windowSize = 4.0/3.0
-  // - bandPreset = false
-  // - minFrequency = 40
-  // - maxFrequency = 5000
-
-  Algorithm* skey_temperley = factory.create("Key",
-                                   "numHarmonics", 4,
-                                   "pcpSize", 36,
-                                   "profileType", "temperley",
-                                   "slope", 0.6,
-                                   "usePolyphony", true,
-                                   "useThreeChords", true);
-
-  Algorithm* skey_krumhansl = factory.create("Key",
-                                   "numHarmonics", 4,
-                                   "pcpSize", 36,
-                                   "profileType", "krumhansl",
-                                   "slope", 0.6,
-                                   "usePolyphony", true,
-                                   "useThreeChords", true);
-
-  Algorithm* skey_edma = factory.create("Key",
-                                   "numHarmonics", 4,
-                                   "pcpSize", 36,
-                                   "profileType", "edma",
-                                   "slope", 0.6,
-                                   "usePolyphony", true,
-                                   "useThreeChords", true);
-
   spec->output("spectrum") >> hpcp_peaks->input("spectrum");
   hpcp_peaks->output("frequencies") >> hpcp_key->input("frequencies");
   hpcp_peaks->output("magnitudes")  >> hpcp_key->input("magnitudes");
-
   hpcp_key->output("hpcp")     >> PC(pool, nameSpace + "hpcp");
-  
-  hpcp_key->output("hpcp")     >> skey_temperley->input("pcp");
-  hpcp_key->output("hpcp")     >> skey_krumhansl->input("pcp");
-  hpcp_key->output("hpcp")     >> skey_edma->input("pcp");
 
-  skey_temperley->output("key")          >> PC(pool, nameSpace + "key_temperley.key");
-  skey_temperley->output("scale")        >> PC(pool, nameSpace + "key_temperley.scale");
-  skey_temperley->output("strength")     >> PC(pool, nameSpace + "key_temperley.strength");
+  // Compute key
+  Algorithm* key_extractor = factory.create("KeyExtractor",
+                                           "profileType", "bgate",
+                                           "frameSize", frameSize,
+                                           "hopSize", frameSize,  // No overlapp (that's how KeyExtractor sets the defaults)
+                                           "hpcpSize", 12);
+  source >> key_extractor->input("audio");
+  key_extractor->output("key") >> PC(pool, nameSpace + "key.key");
+  key_extractor->output("scale") >> PC(pool, nameSpace + "key.scale");
+  key_extractor->output("strength") >> PC(pool, nameSpace + "key.strength");
 
-  skey_krumhansl->output("key")          >> PC(pool, nameSpace + "key_krumhansl.key");
-  skey_krumhansl->output("scale")        >> PC(pool, nameSpace + "key_krumhansl.scale");
-  skey_krumhansl->output("strength")     >> PC(pool, nameSpace + "key_krumhansl.strength");
-
-  skey_edma->output("key")          >> PC(pool, nameSpace + "key_edma.key");
-  skey_edma->output("scale")        >> PC(pool, nameSpace + "key_edma.scale");
-  skey_edma->output("strength")     >> PC(pool, nameSpace + "key_edma.strength");
-
-  // Compute chords
-  // TODO review these parameters to improve chords detection. Keeping old code for now
-  Algorithm* hpcp_chord = factory.create("HPCP",
-                                         "size", 36,
-                                         "referenceFrequency", tuningFreq,
-                                         "harmonics", 8,
-                                         "bandPreset", true,
-                                         "minFrequency", 40.0,
-                                         "maxFrequency", 5000.0,
-                                         "bandSplitFrequency", 500.0,
-                                         "weightType", "cosine",
-                                         "nonLinear", true,
-                                         "windowSize", 0.5);
-  peaks->output("frequencies") >> hpcp_chord->input("frequencies");
-  peaks->output("magnitudes") >> hpcp_chord->input("magnitudes");
-
-  Algorithm* schord = factory.create("ChordsDetection");
-  hpcp_chord->output("hpcp") >> schord->input("pcp");
-  schord->output("chords") >> PC(pool, nameSpace + "chords_progression");
-  schord->output("strength") >> PC(pool, nameSpace + "chords_strength");
-  
-  Algorithm* schords_desc = factory.create("ChordsDescriptors");
-  schord->output("chords") >> schords_desc->input("chords");
-  skey_temperley->output("key") >> schords_desc->input("key");
-  skey_temperley->output("scale") >> schords_desc->input("scale");
-
-  schords_desc->output("chordsHistogram") >> PC(pool, nameSpace + "chords_histogram");
-  schords_desc->output("chordsNumberRate") >> PC(pool, nameSpace + "chords_number_rate");
-  schords_desc->output("chordsChangesRate") >> PC(pool, nameSpace + "chords_changes_rate");
-  schords_desc->output("chordsKey") >> PC(pool, nameSpace + "chords_key");
-  schords_desc->output("chordsScale") >> PC(pool, nameSpace + "chords_scale");
-     
   Algorithm* entropy = factory.create("Entropy");
-  hpcp_chord->output("hpcp") >> entropy->input("array");
+  hpcp_key->output("hpcp") >> entropy->input("array");
   entropy->output("entropy") >> PC(pool, nameSpace + "hpcp_entropy");
 
   Algorithm* crest = factory.create("Crest");
-  hpcp_chord->output("hpcp") >> crest->input("array");
+  hpcp_key->output("hpcp") >> crest->input("array");
   crest->output("crest") >> PC(pool, nameSpace + "hpcp_crest");
 }

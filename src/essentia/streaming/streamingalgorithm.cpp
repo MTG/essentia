@@ -33,7 +33,9 @@ void connect(SourceBase& source, SinkBase& sink) {
     //     this is a requirement for ProxyConnectors
     E_DEBUG(EConnectors, "Connecting " << source.fullName() << " to " << sink.fullName());
     sink.connect(source);
+    E_DEBUG(EConnectors, "  " << source.fullName() << " ok");
     source.connect(sink);
+    E_DEBUG(EConnectors, "  " << sink.fullName() << " ok");
   }
   catch (EssentiaException& e) {
     std::ostringstream msg;

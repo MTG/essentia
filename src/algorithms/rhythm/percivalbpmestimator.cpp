@@ -201,19 +201,21 @@ Real PercivalBpmEstimator::energyInRange(const std::vector<Real>& array,
 AlgorithmStatus PercivalBpmEstimator::process() {
   if (!shouldStop()) return PASS;
 
-  // Skip invalid lag candidates (lag=-1)
   std::vector<int> lags;
-  lags.reserve(_pool.value<vector<Real> >("lags").size());
-  for (int i=0; i<(int)_pool.value<vector<Real> >("lags").size(); ++i) {
-    int lag = (int)_pool.value<vector<Real> >("lags")[i];
-    if (lag > -1) {
-        lags.push_back(lag);
+  if (_pool.contains<vector<Real> >("lags")){
+    // Skip invalid lag candidates (lag=-1)
+    lags.reserve(_pool.value<vector<Real> >("lags").size());
+    for (int i=0; i<(int)_pool.value<vector<Real> >("lags").size(); ++i) {
+      int lag = (int)_pool.value<vector<Real> >("lags")[i];
+      if (lag > -1) {
+          lags.push_back(lag);
+      }
     }
   }
 
-  // If there are no lag estimates, return bpm 0
+  // If there are no valid lag estimates, return bpm 0
   if (lags.size() == 0) {
-    _bpm.push((Real) 0.);
+    _bpm.push((Real) 0.0);
     return FINISHED;
   }
 

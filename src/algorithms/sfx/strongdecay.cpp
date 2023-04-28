@@ -29,7 +29,7 @@ const char* StrongDecay::name = "StrongDecay";
 const char* StrongDecay::category = "Envelope/SFX";
 const char* StrongDecay::description = DOC("This algorithm computes the Strong Decay of an audio signal. The Strong Decay is built from the non-linear combination of the signal energy and the signal temporal centroid, the latter being the balance of the absolute value of the signal. A signal containing a temporal centroid near its start boundary and a strong energy is said to have a strong decay.\n"
 "\n"
-"This algorithm is not defined for zero signals (i.e. silence) nor when the signal's size is less than two, as it could not compute its centroid.\n"
+"This algorithm returns 0.0 for zero signals (i.e. silence), and throws an exception when the signal's size is less than two as it can't compute its centroid.\n"
 "\n"
 "References:\n"
 "  [1] F. Gouyon and P. Herrera, \"Exploration of techniques for automatic\n"
@@ -53,7 +53,9 @@ void StrongDecay::compute() {
   _centroid->compute();
 
   if (centroid <= 0.0) {
-    throw EssentiaException("StrongDecay: the strong decay is not defined for a zero signal");
+    // Zero signals (silence) has no strong decay
+    strongDecay = 0.0;
+    return;
   }
 
   Real signalEnergy = energy(signal);
@@ -107,7 +109,9 @@ void StrongDecay::finalProduce() {
   }
 
   if (_centroid <= 0.0) {
-    throw EssentiaException("StrongDecay: the strong decay is not defined for a zero signal");
+    // Zero signals (silence) has no strong decay
+    _strongDecay.push((Real)0.0);
+    return;
   }
 
   _strongDecay.push((Real)sqrt(_energy/_centroid));

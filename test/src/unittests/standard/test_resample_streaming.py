@@ -24,12 +24,12 @@ from essentia.streaming import *
 
 class TestResample_Streaming(TestCase):
 
-    def resample(self, input, factor):
+    def resample(self, input, factor, quality=0):
         if input: sr = len(input)
         else: sr = 44100
         resample = Resample(inputSampleRate = sr,
                             outputSampleRate = int(factor*sr),
-                            quality = 0)
+                            quality = quality)
         pool = Pool()
         gen = VectorInput(input)
         gen.data >> resample.signal
@@ -38,8 +38,8 @@ class TestResample_Streaming(TestCase):
         if not pool.descriptorNames() : return []
         return pool['signal']
 
-    def assertResults(self, input, expected, factor, epsilon=1e-5):
-        result = self.resample(input, factor)
+    def assertResults(self, input, expected, factor, epsilon=1e-5, quality=0):
+        result = self.resample(input, factor, quality=quality)
         self.assertEqual(len(result), len(expected))
         self.assertAlmostEqual(sum(result[200:]), sum(expected[200:]), epsilon)
 
@@ -90,6 +90,14 @@ class TestResample_Streaming(TestCase):
         input = [1]*sr
         expected = [1]*int(sr*factor)
         self.assertResults(input, expected, factor)
+
+    def testLinear(self):
+        sr = 44100
+        factor = 4
+        input = [1, 0]*int(sr/2)
+        expected = [1, 0.75, 0.5, 0.25, 0., 0.25, 0.5, 0.75]*int(sr/2)
+        self.assertResults(input, expected, factor, quality=4)
+
 
     #def testLeftLimits(self):
     #    # SRC resampling capabilites are limited to the range [1/256, 256]

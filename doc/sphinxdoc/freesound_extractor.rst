@@ -33,7 +33,7 @@ By default all frame-based features are computed with frame/hop sizes equal to 2
 
 * **dynamic_complexity**: dynamic complexity computed on 2sec windows with 1sec overlap. Algorithms: `DynamicComplexity <reference/streaming_DynamicComplexity.html>`_
 
-* **silence_rate_20dB**, **silence_rate_30dB**, **silence_rate_60dB**: rate of silent frames in a signal for thresholds of 20, 30, and 60 dBs. Algorithms: `SilenceRate <reference/streaming_SilenceRate.html>`_
+* **silence_rate_20dB**, **silence_rate_30dB**, **silence_rate_60dB**, **silence_rate_90dB**: rate of silent frames in a signal for thresholds of 20, 30, 60, and 90 dBs. Algorithms: `SilenceRate <reference/streaming_SilenceRate.html>`_
 
 * **spectral_rms**: spectral RMS. Algorithms: `RMS <reference/streaming_RMS.html>`_
 
@@ -107,9 +107,11 @@ For implementation details, see `the code of extractor <https://github.com/MTG/e
 
 * **beats_count**: number of detected beats
 
-* **bpm**: beats per minute (BPM) value according to detected beats
+* **bpm**, **bpm_confidence**: BPM value according to detected beats and confidence value for the prediction. Note that the confidence values goes from 0 to 5.32. Algorithms: `RhythmExtractor2013 <reference/streaming_RhythmExtractor2013.html>`_
 
-* **bpm_histogram**: BPM histogram. Algorithms: Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
+* **bpm_loop**, **bpm_loop_confidence**: BPM value according to detected beats using an algorithm specilized in loops, and confidence value for the prediction. Note that the confidence values goes from 0 to 1. A confidence of 1 could be used to determine whether the sound is a loop or not. Algorithms: `LoopBpmEstimator <reference/streaming_LoopBpmEstimator.html>`_, `LoopBpmConfidence <reference/streaming_LoopBpmConfidence.html>`_
+
+* **bpm_histogram**: BPM histogram. Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
 
 * **bpm_histogram_first_peak_bpm**, **bpm_histogram_first_peak_spread**, **bpm_histogram_first_peak_weight**, **bpm_histogram_second_peak_bpm**, **bpm_histogram_second_peak_spread**, **bpm_histogram_second_peak_weight**: descriptors characterizing highest and second highest peak of the BPM histogram. Algorithms: `BpmHistogramDescriptors <reference/streaming_BpmHistogramDescriptors.html>`_
 
@@ -125,15 +127,15 @@ For implementation details, see `the code of extractor <https://github.com/MTG/e
 
 * **tuning_frequency**: estimated tuning frequency [Hz]. Algorithms: `TuningFrequency <reference/streaming_TuningFrequency.html>`_
 
-* **hpcp**, **thpcp**: 32-dimensional harmonic pitch class profile (HPCP) and its transposed version. Algorithms: `HPCP <reference/streaming_HPCP.html>`_
+* **hpcp**: 32-dimensional harmonic pitch class profile (HPCP). Algorithms: `HPCP <reference/streaming_HPCP.html>`_
+
+* **hpcp_peak_count**: number of peaks detected in the mean of HPCPs (number of active pitch classes). Algorithms: `PeakDetection <reference/streaming_PeakDetection.html>`_
 
 * **hpcp_entropy**: Shannon entropy of a HPCP vector. Algorithms: `Entropy <reference/streaming_Entropy.html>`_
 
 * **hpcp_crest**: crest of the HPCP vector. Algorithms: `Crest <reference/streaming_Crest.html>`_
 
-* **key_temperley**, **key_krumhansl**, **key_edma**; key estimation, its scale and strength using three different HPCP key profiles. Algorithms: `Key <reference/streaming_Key.html>`_
-
-* **chords_progression**, **chords_count**, **chords_strength**, **chords_histogram**, **chords_changes_rate**, **chords_number_rate**, **chords_key**, **chords_scale**: estimated chords progression, number and strength of estimated chords, normalized histogram, chords change rate in the progression,  ratio of different chords from the total number of chords in the progression, key of the progression, taken as the most frequent chord, and scale of the progression, whether major or minor. Algorithms: `ChordsDetection <reference/streaming_ChordsDetection.html>`_, `ChordsDescriptors <reference/streaming_ChordsDescriptors.html>`_
+* **key**, **scale**, **strength**; key estimation, its scale and strength using a default HPCP key profile. Algorithms: `Key <reference/streaming_Key.html>`_
 
 * **tuning_diatonic_strength**: key strength estimated from high-resolution HPCP (120 dimensions) using diatonic profile. Algorithms: `Key <reference/streaming_Key.html>`_
 
@@ -176,8 +178,6 @@ Sound envelope descriptors:
 * **logattacktime**:  the log10 of the attack time. Algorithms: `LogAttackTime <reference/streaming_LogAttackTime.html>`_.
 
 * **max_to_total**: the maximum amplitude position to total envelope length ratio. Algorithms: `MaxToTotal <reference/streaming_MaxToTotal.html>`_.
-
-* **tc_to_total**: the temporal centroid to total envelope length ratio. Algorithms: `TCToTotal <reference/streaming_TCToTotal.html>`_.
 
 * **strongdecay**: the Strong Decay. Algorithms: `StrongDecay <reference/streaming_StrongDecay.html>`_.
 

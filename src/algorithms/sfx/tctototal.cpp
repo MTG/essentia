@@ -28,8 +28,8 @@ const char* TCToTotal::name = "TCToTotal";
 const char* TCToTotal::category = "Envelope/SFX";
 const char* TCToTotal::description = DOC("This algorithm calculates the ratio of the temporal centroid to the total length of a signal envelope. This ratio shows how the sound is 'balanced'. Its value is close to 0 if most of the energy lies at the beginning of the sound (e.g. decrescendo or impulsive sounds), close to 0.5 if the sound is symetric (e.g. 'delta unvarying' sounds), and close to 1 if most of the energy lies at the end of the sound (e.g. crescendo sounds).\n"
 "\n"
-"Please note that the TCToTotal ratio is not defined for a zero signal (a signal consisting of only zeros), nor it is defined for a signal of less than 2 elements."
-"An exception is thrown if the given envelope's size is not larger than 1. And also if the integral of the input envelope is 0 (i.e. envelope is only zeros or if its sum is 0).\n\n"
+"Please note that the TCToTotal ratio will return 0.5 for a zero signal (a signal consisting of only zeros) as 0.5 is the middle point of the signal. TCToTotal is not defined for a signal of less than 2 elements."
+"An exception is thrown if the given envelope's size is not larger than 1.\n\n"
 "This algorithm is intended to be plugged after the Envelope algorithm");
 
 void TCToTotal::compute() {
@@ -49,11 +49,12 @@ void TCToTotal::compute() {
   }
 
   if (den == 0) {
-    throw EssentiaException("TCToTotal: the given envelope consists only of zeros, or the integral of the signal is zero (i.e. given data is not a signal envelope)");
+    // Singal envelope consists of 0 or integral of singal is 0, then set normalizez temporal centroid to 0.5 (middle position)
+    TCToTotal = 0.5;
+  } else {
+    double centroid = num / den;
+    TCToTotal = centroid / double(envelope.size()-1);
   }
-
-  double centroid = num / den;
-  TCToTotal = centroid / double(envelope.size()-1);
 }
 
 } // namespace standard
@@ -77,11 +78,15 @@ void TCToTotal::consume() {
 }
 
 void TCToTotal::finalProduce() {
-  if (_den == 0) {
-    throw EssentiaException("TCToTotal: the given envelope consists only of zeros, or the integral of the signal is zero (i.e. given data is not a signal envelope)");
-  }
+  
   if (_idx < 2) {
     throw EssentiaException("TCToTotal: the given envelope is not larger than 1 element");
+  }
+  
+  if (_den == 0) {
+    // Singal envelope consists of 0 or integral of singal is 0, then set normalizez temporal centroid to 0.5 (middle position)
+    _TCToTotal.push(Real(0.5));
+    return;
   }
 
   double centroid = _num / _den;

@@ -22,6 +22,20 @@ from essentia_test import *
 
 class TestFreesoundExtractor(TestCase):
 
+    def testRegression(self):
+        test_filenames = ['cat_purrrr.wav', 'dubstep.wav', 'spaceambient.wav']
+        for test_filename in test_filenames:
+            # Load expected results pool
+            expectedOutputFilename = join(filedir(), 'freesoundextractor', test_filename + '.json')
+            pool_expected = YamlInput(filename=expectedOutputFilename, format='json')()
+
+            # Process test file
+            inputFilename = join(testdata.audio_dir, 'recorded', test_filename)
+            pool_found, _ = FreesoundExtractor()(inputFilename)
+
+            # Assert the two pools are nearly the same
+            self.assertAlmostEqualPool(pool_found, pool_expected, precision=1e-4)
+
     def testEmpty(self):
         inputFilename = join(testdata.audio_dir, 'generated', 'empty', 'empty.aiff')
         # NOTE: AudioLoader will through exception on "empty.wav" complaining that
@@ -31,7 +45,6 @@ class TestFreesoundExtractor(TestCase):
     def testSilence(self):
         inputFilename = join(testdata.audio_dir, 'generated', 'silence', 'silence.flac')
         self.assertRaises(RuntimeError, lambda: FreesoundExtractor()(inputFilename))
-        return
 
     def testCorruptFile(self):
         inputFilename = join(testdata.audio_dir, 'generated', 'unsupported.au')
