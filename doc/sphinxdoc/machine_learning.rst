@@ -11,8 +11,8 @@ Essentia includes algorithms for running inference with two types of data-driven
 We provide various pre-trained models of both types for various music analysis and classification tasks.
 
 
-Using pre-trained TensorFlow models
------------------------------------
+Essentia Models
+---------------
 
 Essentia provides wrapper algorithms for TensorFlow deep learning models, designed to offer the flexibility of use, easy extensibility, and real-time inference. It allows using virtually any TensorFlow model within our audio analysis framework.
 
@@ -44,7 +44,13 @@ Our current models include:
 Installation
 ^^^^^^^^^^^^
 
-Follow `these instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with the TensorFlow wrapper.
+`essentia-tensoflow` is available for Linux and macOS through `PyPI <https://pypi.org/project/essentia-tensorflow/>`_:
+
+.. code-block::
+
+    pip install essentia-tensorflow
+
+Additionally, we provide `instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to build and use Essentia with the TensorFlow wrapper.
 
 
 Inference with GPU
@@ -97,8 +103,8 @@ Some of our models can work in real-time, opening many possibilities for audio d
     <iframe width="560" height="315" src="https://www.youtube.com/embed/yssBE6oafLs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 
-Using pre-trained SVM Gaia models
-----------------------------------------
+SVM Gaia models [deprecated]
+----------------------------
 Essentia has a wrapper algorithm for LIBSVM for fast inference with SVM models.
 
 We provide various pre-trained SVM classifier models for genres, moods, and instrumentation:
