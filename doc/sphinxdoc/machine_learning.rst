@@ -47,6 +47,35 @@ Installation
 Follow `these instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to install and use Essentia with the TensorFlow wrapper.
 
 
+Inference with GPU
+^^^^^^^^^^^^^^^^^^
+It is possible to run inference with Essentia Models using GPU when the correct version of the CUDA and CuDNN libraries are installed on your system.
+We recommend using a package manager such as `Conda <https://docs.conda.io/en/latest/>`_ to install the required components.
+
+These are the recommended steps to follow:
+
+1. Install `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ (or Anaconda).
+2. Create and activate a Conda environment: 
+
+.. code-block::
+
+    conda create -n ess python=3.10
+    conda activate ess
+
+3. Install CUDA, CuDNN, and essentia-tensorflow:
+
+.. code-block::
+
+    conda install -c conda-forge -y cudatoolkit=11.2 cudnn=8.1
+    pip install essentia-tensorflow
+
+It is possible to use CUDA environment variable to control the GPU usage.
+For example, the following line of code launches a script using GPU 1:
+
+.. code-block::
+
+  CUDA_VISIBLE_DEVICES=1 python my_script.py 
+
 Models license
 ^^^^^^^^^^^^^^
 
