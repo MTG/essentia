@@ -16,7 +16,7 @@ Essentia Models
 
 Essentia provides wrapper algorithms for TensorFlow deep learning models, designed to offer the flexibility of use, easy extensibility, and real-time inference. It allows using virtually any TensorFlow model within our audio analysis framework.
 
-We provide many pre-trained TensorFlow models for auto-tagging, music classification, tempo estimation, source separation, and feature embedding extraction for music and audio in general. See the `Essentia TensorFlow models page <models.html>`_ for a complete reference, usage examples, and download links.
+We provide many pre-trained models for auto-tagging, music classification, tempo estimation, source separation, and feature embedding extraction for music and audio in general. See the `Essentia TensorFlow models page <models.html>`_ for a complete reference, usage examples, and download links for the weights and metadata.
 
 See our blog posts `[1] <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ `[2] <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for further details about some of the models.
 
