@@ -22,15 +22,14 @@ See our blog posts `[1] <https://mtg.github.io/essentia-labs/news/tensorflow/201
 
 Our current models include:
 
-* Music auto-tagging (various architectures, trained on the Million Song Dataset and MagnaTagATune datasets)
-* Deep embeddings (OpenL3, VGGish-AudioSet, YAMNet-AudioSet)
-* Audio event recognition (YAMNet-AudioSet)
+* Deep embeddings (OpenL3, VGGish-AudioSet, YAMNet-AudioSet, MsiCNN-MSD, EffNet-Discogs)
+* Audio event recognition (YAMNet-AudioSet, FSD-SINet)
 * Source separation (Spleeter)
 * Tempo (BPM) estimation (TempoCNN)
 * Monophonic pitch tracker (CREPE)
-* Transfer learning classifiers
+* Deep-embeddings-based classifiers
 
-  - music genre (trained on 4 different datasets)
+  - music genre and style
   - moods: happy, sad, aggressive, relaxed, acoustic, electronic, party
   - mood clusters
   - tonal / atonal
@@ -38,7 +37,8 @@ Our current models include:
   - voice / instrumental
   - gender (male, female singer)
   - instrument role classification for music loops
-  - urban sound classification
+  - approachability and engagement
+  - music arousal and valence regression
 
 
 Installation
