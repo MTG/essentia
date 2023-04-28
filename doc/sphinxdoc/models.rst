@@ -3,7 +3,8 @@
 Essentia models
 ===============
 
-This is a list of pre-trained TensorFlow models available in Essentia for various (music) audio analysis and classification tasks. To use the models in Essentia, see the `machine learning inference <machine_learning.html>`_ page. Some of the models are also available in other formats (ONNX, TensorFlow.js; contact us for more details).
+This is a list of selected pre-trained TensorFlow models available in Essentia for various (music) audio analysis and classification tasks. To use the models in Essentia, see the `using machine learning models <machine_learning.html>`_ page or check the example code snippets attached to each model below. Some of these models are available in other formats (ONNX, TensorFlow.js; contact us for more details).
+Some additional non-maintained models are available in our `model repository <https://essentia.upf.edu/models/>`_.
 
 
 All the models created by the MTG are licensed under CC BY-NC-SA 4.0 (https://creativecommons.org/licenses/by-nc-sa/4.0/) and are also available under proprietary license upon request (https://www.upf.edu/web/mtg/contact). Check the `LICENSE <https://essentia.upf.edu/models/LICENSE>`_ of the models.
@@ -13,6 +14,38 @@ The models are serialized in `Protocol Buffer <https://developers.google.com/pro
 All available models in Protocol Buffer (``.pb``), `TensorFlow.js <https://www.tensorflow.org/js>`_ (``tfjs.zip``) and `ONNX <https://onnx.ai/>`_ (``.onnx``) formats can be found in our model repository.
 For convenience, the documentation of each model includes direct links to the ``.pb`` and metadata ``.json`` files.
 As this is an ongoing project we expect to keep adding new models and improved versions of the existing ones. These changes are tracked in this `CHANGELOG <https://essentia.upf.edu/models/CHANGELOG.md>`_.
+
+
+See `interactive demos <demos.html>`_ of some of the models.
+
+Some of our models can work in real-time, opening many possibilities for audio developers. For example, see Python examples for MusiCNN-based `music auto-tagging <essentia-tensorflow_real-time_auto-tagging.html>`_ and `classification <essentia-tensorflow_real-time_simultaneous_classifiers.html>`_ of a live audio stream.
+
+Our current models include:
+
+* Deep audio embeddings (OpenL3, VGGish-AudioSet, YAMNet-AudioSet, MsiCNN-MSD, EffNet-Discogs)
+* Embedding-based classifiers and automatic tagging
+ 
+  * music genre and style
+  * moods and context 
+
+      * happy, sad, aggressive, relaxed, acoustic, electronic, party, etc.
+      * approachability and engagement
+      * music arousal and valence regression
+      * danceability
+
+  * instrumentation
+
+      * timbre (dark, bright)
+      * voice / instrumental
+      * voice gender (male, female)
+      * instrument role classification for music loops
+
+  * tonality: tonal / atonal
+
+* Tempo (BPM) estimation (TempoCNN)
+* Monophonic pitch tracker (CREPE)
+* Source separation (Spleeter)
+* Audio event recognition (YAMNet-AudioSet, FSD-SINet)
 
 
 We support models for the followings tasks:
