@@ -37,3 +37,8 @@ before-all = [
 ]
 
 test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter, TensorflowPredict'"
+
+
+[build-system]
+
+requires = ["wheel", "setuptools", "oldest-supported-numpy"]
