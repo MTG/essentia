@@ -40,13 +40,13 @@ Our models are organized as follows:
 
 
 License
-^^^^^^^
+-------
 
 All the models created by the MTG are licensed under `CC BY-NC-SA 4.0 <https://creativecommons.org/licenses/by-nc-sa/4.0/>`_ and are also available under proprietary license upon `request <https://www.upf.edu/web/mtg/contact>`_. Check the `LICENSE <https://essentia.upf.edu/models/LICENSE>`_ of the models.
 
 
 Demos
-^^^^^
+-----
 
 See `interactive demos <demos.html>`_ of some of the models.
 
@@ -54,7 +54,7 @@ Some of our models can work in real-time, opening many possibilities for audio d
 
 
 Citation
-^^^^^^^^
+--------
 
 If you use any of the models in your research, please cite the following paper::
 
@@ -67,11 +67,11 @@ If you use any of the models in your research, please cite the following paper::
 
 
 Feature extractors
-^^^^^^^^^^^^^^^^^^
+------------------
 
 
 AudioSet-VGGish
----------------
+^^^^^^^^^^^^^^^
 
 Audio embedding model accompanying the AudioSet dataset, trained in a supervised manner using tag information for YouTube videos.
 
@@ -91,7 +91,7 @@ Models:
 
 
 Discogs-EffNet
---------------
+^^^^^^^^^^^^^^
 
 Audio embedding models trained with a classification or contrastive learning objective using Discogs metadata.
 There are versions trained on music style labels, and  artist, label, release, and track similarity, as well as a multi-task model trained in all of them simusltaneously.
@@ -166,7 +166,7 @@ Models:
 
 
 OpenL3
-------
+^^^^^^
 
 Audio embedding model trained on audio-visual correspondence in a self-supervised manner.
 There are different versions of OpenL3 trained on environmental sound (``env``) or music (``music``) datasets, using 128 (``mel128``) or 256 (``mel256``) mel-bands, and with 512 (``emb512``) or 6144 (``emb6144``) embedding dimensions.
@@ -227,7 +227,7 @@ Models:
 
 
 MSD-MusiCNN
------------
+^^^^^^^^^^^
 
 Music embedding extraction based on  auto-tagging with 50 common music tags.
 
@@ -248,7 +248,7 @@ Models:
 
 
 Classifiers
-^^^^^^^^^^^
+-----------
 
 Classification and regression models based on pre-extracted embeddings.
 The name of these models is a combination of the classification/regression task and the name of the :ref:`embedding model<Feature extractors>` that should be used  to pre-extract embeddings (``<classification_task>-<embedding_model>``).
@@ -257,7 +257,7 @@ The name of these models is a combination of the classification/regression task 
 
 
 Music genre and style 
----------------------
+^^^^^^^^^^^^^^^^^^^^^
 
 
 Genre Discogs400
@@ -362,7 +362,7 @@ Models:
 
 
 Moods and context
------------------
+^^^^^^^^^^^^^^^^^
 
 Approachability
 ~~~~~~~~~~~~~~~
@@ -1046,7 +1046,7 @@ Models:
 
 
 Instrumentation
----------------
+^^^^^^^^^^^^^^^
 
 
 
@@ -1262,7 +1262,7 @@ Models:
 
 
 Tonality
---------
+^^^^^^^^
 
 
 
@@ -1320,8 +1320,7 @@ Models:
 
 
 Miscelaneous
-------------
-
+^^^^^^^^^^^^
 
 
 
@@ -1464,11 +1463,11 @@ Models:
 
 
 Audio event recognition
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 
 AudioSet-YAMNet
----------------
+^^^^^^^^^^^^^^^
 
 Audio event recognition (520 audio event classes):
 
@@ -1594,7 +1593,7 @@ Models:
 
 
 FSD-SINet
----------
+^^^^^^^^^
 
 Audio event recognition using the `FSD50K <https://zenodo.org/record/4060432>`_ dataset targeting 200 classes drawn from the `AudioSet Ontology <https://research.google.com/audioset/ontology/index.html>`_:
 
@@ -1701,10 +1700,10 @@ Models:
 
 
 Pitch detection
-^^^^^^^^^^^^^^^
+---------------
 
 Monophonic pitch tracker (CREPE)
---------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Monophonic pitch detection (360 20-cent pitch bins, C1-B7).
 
@@ -1759,10 +1758,10 @@ Models:
 
 
 Source separation
-^^^^^^^^^^^^^^^^^
+-----------------
 
 Spleeter
---------
+^^^^^^^^
 
 Source separation into 2, 4, or 5 stems.
 
@@ -1868,10 +1867,10 @@ Models:
 
 
 Tempo estimation
-^^^^^^^^^^^^^^^^
+----------------
 
 TempoCNN
---------
+^^^^^^^^
 
 Tempo classification (256 BPM classes, 30-286 BPM).
 
