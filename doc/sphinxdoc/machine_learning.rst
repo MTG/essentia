@@ -22,10 +22,6 @@ Essentia with TensorFlow support is available for Linux and macOS as a separate 
 
     pip install essentia-tensorflow
 
-Additionally, we provide `instructions <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ to build and use Essentia with the TensorFlow wrapper.
-See our blog posts `[1] <https://mtg.github.io/essentia-labs/news/tensorflow/2019/10/19/tensorflow-models-in-essentia/>`_ `[2] <https://mtg.github.io/essentia-labs/news/tensorflow/2020/01/16/tensorflow-models-released/>`_ for further details about some of the models.
-
-
 Building Essentia with TensorFlow support 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Alternatively, we provide instructions to build Essentia from source and link it against the shared TensorFlow libraries.
