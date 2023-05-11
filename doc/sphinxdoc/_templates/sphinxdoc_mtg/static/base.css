@@ -245,3 +245,73 @@ body {
 .essnt-apps__app-description {
   text-align: center;
 }
+
+div.flex-container {
+    display: flex;
+}
+
+div.sphinxsidebar {
+    float: left;
+    flex: 0 0.1 250px;
+    min-width: 150px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    font-size: 100%;
+    height: 100vh;
+    overflow-y: auto;
+    word-wrap: break-word;
+    overflow-wrap : break-word;
+    overflow: scroll;
+    padding-left: 15px;
+    padding-right: 10px;
+    padding-top: 80px;
+}
+
+div.sphinxsidebar h3 {
+    font-family: {{ theme_headfont }};
+    font-size: 1.4em;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+div.sphinxsidebar h3 a {
+    color: {{ theme_sidebartextcolor }};
+}
+
+div.sphinxsidebar h4 {
+    font-family: {{ theme_headfont }};
+    color: {{ theme_sidebartextcolor }};
+    font-size: 1.3em;
+    font-weight: normal;
+    margin: 5px 0 0 0;
+    padding: 0;
+}
+
+div.sphinxsidebar p {
+    color: {{ theme_sidebartextcolor }};
+}
+
+div.sphinxsidebar p.topless {
+    margin: 5px 10px 10px 10px;
+}
+
+div.sphinxsidebar ul {
+    margin-left: 10px;
+    margin-bottom: 5px;
+    padding: 0;
+    color: {{ theme_sidebartextcolor }};
+}
+
+div.sphinxsidebar a {
+    color: {{ theme_sidebarlinkcolor }};
+}
+
+div.sphinxsidebar input {
+    border: 1px solid {{ theme_sidebarlinkcolor }};
+    font-family: sans-serif;
+    font-size: 1em;
+}
+

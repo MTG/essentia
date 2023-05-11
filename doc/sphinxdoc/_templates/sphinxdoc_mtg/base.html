@@ -1,4 +1,48 @@
 <!doctype html>
+
+{%- set render_sidebar = (not embedded) and (not theme_nosidebar|tobool) and
+                         (sidebars != []) %}
+
+{%- macro sidebar() %}
+      {%- if render_sidebar %}
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+          {%- block sidebarlogo %}
+          {%- if logo_url %}
+            <p class="logo"><a href="{{ pathto(root_doc)|e }}">
+              <img class="logo" src="{{ logo_url|e }}" alt="Logo"/>
+            </a></p>
+          {%- endif %}
+          {%- endblock %}
+          {%- if sidebars != None %}
+            {#- new style sidebar: explicitly include/exclude templates #}
+            {%- for sidebartemplate in sidebars %}
+            {%- include sidebartemplate %}
+            {%- endfor %}
+          {%- else %}
+            {#- old style sidebars: using blocks -- should be deprecated #}
+            {%- block sidebartoc %}
+            {%- include "localtoc.html" %}
+            {%- endblock %}
+            {%- block sidebarrel %}
+            {%- include "relations.html" %}
+            {%- endblock %}
+            {%- block sidebarsourcelink %}
+            {%- include "sourcelink.html" %}
+            {%- endblock %}
+            {%- if customsidebar %}
+            {%- include customsidebar %}
+            {%- endif %}
+            {%- block sidebarsearch %}
+            {%- include "searchbox.html" %}
+            {%- endblock %}
+          {%- endif %}
+        </div>
+        {%- block sidebarextra %}{%- endblock %}
+      </div>
+      {%- endif %}
+{%- endmacro %}
+
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -51,8 +95,20 @@
         <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
       <![endif]-->
       <main>
+        {%- if render_sidebar %}
+          <div class="flex-container">
+	    {%- block sidebar2 %}
+            {{ sidebar() }}
+            <div class="clearer"></div>
+            {% endblock %}
+            <div class="bodywrapper">
+        {%- endif %}
         {% block content %}
         {% endblock %}
+        {%- if render_sidebar %}
+            <div class="clearer"></div>
+          </div>
+        {%- endif %}
       </main>
       <footer>
         <section class="essnt-footer">
