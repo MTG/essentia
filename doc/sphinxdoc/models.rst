@@ -1,4 +1,4 @@
-.. Essentia models
+i. Essentia models
 
 Essentia models
 ===============
@@ -56,7 +56,7 @@ Discogs-EffNet
 ^^^^^^^^^^^^^^
 
 Audio embedding models trained with a classification or contrastive learning objective using an in-house dataset annotated with Discogs metadata.
-The classification model was trained on music style labels and the contrastive learning models were trained on ``artist``, ``label`` (record label), ``release`` (album), and ``track`` (self-supervised) similarity. Additionally, ``multi`` was trained in multiple similarity tasks simusltaneously.
+The classification model was trained on music style labels and the contrastive learning models were trained on ``artist``, ``label`` (record label), ``release`` (album), and ``track`` (self-supervised) similarity. Additionally, ``multi`` was trained in multiple similarity tasks simultaneously.
 
 Models:
 
@@ -323,7 +323,7 @@ Moods and context
 Approachability
 ~~~~~~~~~~~~~~~
 
-Music approachability predicting whether the music is likely to be accessible for the general public (e.g., belonging to common mainstream music genres vs. niche and experimental genres).
+Music approachability predicts whether the music is likely to be accessible to the general public (e.g., belonging to common mainstream music genres vs. niche and experimental genres).
 The models output rather two (``approachability_2c``) or three (``approachability_3c``) levels of approachability or continous values (``approachability_regression``).
 
 Models:
@@ -357,8 +357,8 @@ Models:
 Engagement
 ~~~~~~~~~~
 
-Music engagement predicting whether the music evokes active attention of the listener (high-engagement "lean forward" active listening vs. low-engagement "lean back" background listening).
-The models output rather two  (``engagement_2c``) or three (``engagement_3c``) levels of engagement or continous (``engagement_regression``) values (regression).
+Music engagement predicts whether the music evokes active attention of the listener (high-engagement "lean forward" active listening vs. low-engagement "lean back" background listening).
+The models output rather two  (``engagement_2c``) or three (``engagement_3c``) levels of engagement or continuous (``engagement_regression``) values (regression).
 
 Models:
 
@@ -1016,7 +1016,7 @@ Nsynth dark/bright
 
 Classification of monophonic sources by timbre color using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (2 classes)::
 
-    brigth, dark
+    bright, dark
 
 Models:
 
@@ -1034,7 +1034,7 @@ Nsynth Instrument
 
 Classification of monophonic sources by instrument family using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (13 classes)::
 
-    mallet, string, reed, guitar, synth_lead, vocal, bass, flute, keyboard, brass, organ, brigth, dark
+    mallet, string, reed, guitar, synth_lead, vocal, bass, flute, keyboard, brass, organ, bright, dark
 
 Models:
 
@@ -1495,17 +1495,17 @@ Audio event recognition (520 audio event classes)::
 
 Models:
 
-.. collapse:: ⬇️ <a class="reference external">audioset-yamnet</a>
+    .. collapse:: ⬇️ <a class="reference external">audioset-yamnet</a>
 
-    [`weights <https://essentia.upf.edu/models/audio-event-recognition/yamnet/audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/yamnet/audioset-yamnet-1.json>`_]
+        [`weights <https://essentia.upf.edu/models/audio-event-recognition/yamnet/audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/audio-event-recognition/yamnet/audioset-yamnet-1.json>`_]
 
-    Python code for predictions:
+        Python code for predictions:
 
-    .. literalinclude :: ../../src/examples/python/mogels/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_predictions.py
+        .. literalinclude :: ../../src/examples/python/mogels/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_predictions.py
 
-    Python code for embedding extraction:
+        Python code for embedding extraction:
 
-    .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_embeddings.py
+        .. literalinclude:: ../../src/examples/python/models/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_embeddings.py
 
 
 FSD-SINet
@@ -1602,7 +1602,7 @@ CREPE
 ^^^^^
 
 Monophonic pitch detection (360 20-cent pitch bins, C1-B7) trained on the RWC-synth and the MDB-stem-synth datasets.
-CREPE is offered with difference model sizes ranging from ``tiny`` to ``full``. A larger model is expected to perform better at the expense of additional computational cost.
+CREPE is offered with different model sizes ranging from ``tiny`` to ``full``. A larger model is expected to perform better at the expense of additional computational costs.
 
 Models:
 
@@ -1655,7 +1655,7 @@ Spleeter
 ^^^^^^^^
 
 Source separation into 2, 4, or 5 stems.
-Spleeter can separate music in different number of stems: ``2`` (vocals and accompaniment), ``4`` (vocals, drums, bass, and other separation), or ``5`` (vocals, drums, bass, piano, and other separation).
+Spleeter can separate music in different numbers of stems: ``2`` (vocals and accompaniment), ``4`` (vocals, drums, bass, and other separation), or ``5`` (vocals, drums, bass, piano, and other separation).
 
 Models:
 
@@ -1763,7 +1763,7 @@ TempoCNN
 
 Tempo classification (256 BPM classes, 30-286 BPM) trained on the Extended Ballroom, LMDTempo, and MTGTempo datasets.
 TempoCNN may feature square filters (``deepsquare``) or longitudinal ones (``deeptemp``) and a model size factor of 4 (``k4``) or 16 (``k16``).
-A larger model is expected to perform better at the expense of additional computational cost.
+A larger model is expected to perform better at the expense of additional computational costs.
 
 Models:
 
