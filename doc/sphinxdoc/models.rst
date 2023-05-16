@@ -1011,7 +1011,7 @@ Models:
         .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/nsynth_acoustic_electronic/nsynth_acoustic_electronic-discogs-effnet-1_predictions.py
 
 
-Nsynth dark/bright
+Nsynth bright/dark
 ~~~~~~~~~~~~~~~~~~
 
 Classification of monophonic sources by timbre color using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (2 classes)::
@@ -1029,7 +1029,7 @@ Models:
         .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/nsynth_bright_dark/nsynth_bright_dark-discogs-effnet-1_predictions.py
 
 
-Nsynth Instrument
+Nsynth instrument
 ~~~~~~~~~~~~~~~~~
 
 Classification of monophonic sources by instrument family using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (11 classes)::
