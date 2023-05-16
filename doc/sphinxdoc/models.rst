@@ -1032,9 +1032,9 @@ Models:
 Nsynth Instrument
 ~~~~~~~~~~~~~~~~~
 
-Classification of monophonic sources by instrument family using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (13 classes)::
+Classification of monophonic sources by instrument family using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (11 classes)::
 
-    mallet, string, reed, guitar, synth_lead, vocal, bass, flute, keyboard, brass, organ, bright, dark
+    mallet, string, reed, guitar, synth_lead, vocal, bass, flute, keyboard, brass, organ
 
 Models:
 
