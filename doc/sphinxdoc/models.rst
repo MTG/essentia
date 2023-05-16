@@ -62,7 +62,7 @@ Models:
 
     .. collapse:: ⬇️ <a class="reference external">discogs-effnet-bs64</a>
 
-        [`weights <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs-effnet-bs64-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs-effnet-bs64-1.json>`_, `demo <https://replicate.com/mtg/discogs-effnet>`_]
+        [`weights <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs-effnet-bs64-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs-effnet-bs64-1.json>`_]
 
         Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
@@ -240,7 +240,7 @@ Models:
 
     .. collapse:: ⬇️ <a class="reference external">genre_discogs400</a>
 
-        [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-effnet-1.json>`_, `demo <https://replicate.com/mtg/discogs-effnet>`_]
+        [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-effnet-1.json>`_, `demo <https://replicate.com/mtg/effnet-discogs>`_]
 
         Python code for predictions:
 
