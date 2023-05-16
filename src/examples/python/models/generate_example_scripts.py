@@ -55,7 +55,7 @@ def generate_single_step_algorithm(
     return (
         f"from essentia.standard import MonoLoader, {algo_name}\n"
         f"\n"
-        f'audio = MonoLoader(filename="{audio_file}", sampleRate={sample_rate})()\n'
+        f'audio = MonoLoader(filename="{audio_file}", sampleRate={sample_rate}, resampleQuality=4)()\n'
         f'model = {algo_name}(graphFilename="{graph_filename}"{output_node})\n'
         f"{algo_returns} = model(audio)\n"
     )
@@ -75,7 +75,7 @@ def generate_two_steps_algorithm(
     return (
         f"from essentia.standard import MonoLoader, {first_algo_name}, {second_algo_name}\n"
         "\n"
-        f'audio = MonoLoader(filename="{audio_file}", sampleRate={sample_rate})()\n'
+        f'audio = MonoLoader(filename="{audio_file}", sampleRate={sample_rate}, resampleQuality=4)()\n'
         f'embedding_model = {first_algo_name}(graphFilename="{first_graph_filename}"{first_output_node})\n'
         f"embeddings = embedding_model(audio)\n"
         "\n"
@@ -113,7 +113,11 @@ def get_metadata(
         metadata_path = "/".join(
             [ESSENTIA_MODELS_SITE, task_type, family_name, f"{model}.json"]
         )
-        metadata = download_metadata(metadata_path)
+        try:
+            metadata = download_metadata(metadata_path)
+        except HTTPError:
+            print(f"Failed downloading {metadata_path}")
+            exit(1)
 
     return metadata
 
@@ -129,6 +133,7 @@ def process_model(
     download_models: str,
     script_dir: Path,
 ):
+    print("processing", model)
     metadata = get_metadata(
         task_type,
         family_name,
@@ -156,6 +161,7 @@ def process_model(
             urlretrieve(metadata["link"], graph_filename_tgt)
         except HTTPError:
             print(f"Failed downloading {metadata['link']}")
+            exit(1)
 
     sample_rate = metadata["inference"]["sample_rate"]
 
@@ -187,6 +193,7 @@ def process_model(
                 urlretrieve(embedding_metadata["link"], embedding_graph_filename_tgt)
             except HTTPError:
                 print(f"Failed downloading {metadata['link']}")
+                exit(1)
 
         embedding_additional_parameters = get_additional_parameters(
             embedding_metadata, "embeddings", embedding_algo_name
