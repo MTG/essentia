@@ -25,7 +25,7 @@ Essentia with TensorFlow support is available for Linux and macOS as a separate 
 Building Essentia with TensorFlow support 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Alternatively, we provide instructions to build Essentia from source and link it against the shared TensorFlow libraries.
-To avoid collisions when importing both Essentia and TensorFlow in Python, we use the shared libraries whithin the Python package of TensorFlow itself instead of linking against the official `libtensorflow <https://www.tensorflow.org/install/lang_c>`_.
+To avoid collisions when importing both Essentia and TensorFlow in Python, we use the shared libraries within the Python package of TensorFlow itself instead of linking against the official `libtensorflow <https://www.tensorflow.org/install/lang_c>`_.
 
 Steps: 
 
@@ -101,7 +101,7 @@ These are the recommended steps to follow:
         pip install essentia-tensorflow
 
  
-    It is possible to use CUDA environment variables to control the GPU usage.
+    It is possible to use CUDA environment variables to control GPU usage.
     For example, the following line of code launches a script using GPU 1:
 
     .. code-block::
