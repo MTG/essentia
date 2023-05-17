@@ -1,5 +1,3 @@
-i. Essentia models
-
 Essentia models
 ===============
 
