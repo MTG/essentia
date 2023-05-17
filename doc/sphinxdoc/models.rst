@@ -1752,7 +1752,7 @@ Models:
 
             Python code for predictions:
 
-            .. literalinclude :: ../../src/examples/python/mogels/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_predictions.py
+            .. literalinclude :: ../../src/examples/python/models/scripts/audio-event-recognition/yamnet/audioset-yamnet-1_predictions.py
 
             Python code for embedding extraction:
 
