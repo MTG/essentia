@@ -334,12 +334,3 @@ div.sphinxsidebarwrapper > div > ul {
 section > section > section > blockquote {
     border-left: 0px;
 }
-
-details p {
-    margin-left: 30px;
-}
-
-details div.highlight-default {
-    margin-left: 30px;
-    margin-bottom: 30px;
-}
