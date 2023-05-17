@@ -841,7 +841,7 @@ Music classification by mood (2 classes)::
 
 Models:
 
-    .. collapse:: <a class="reference external">mood_sad-audioset-vggish</a>
+    .. collapse:: ⬇️ <a class="reference external">mood_sad-audioset-yvggish</a>
 
         |
 
