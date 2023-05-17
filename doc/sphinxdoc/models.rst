@@ -4,7 +4,7 @@ Essentia models
 This page provides a list of pre-trained models available in Essentia for various music and audio analysis tasks. To use Essentia with TensorFlow support refer to the guide on `Using machine learning models <machine_learning.html>`_.
 Click on the models below to access the weights (``.pb``) and metadata (``.json``) files, as well as example code snippets.
 
-Additional non-maintained models are available in our `model repository <https://essentia.upf.edu/models/>`_.
+Additional legacy models are available in our `model repository <https://essentia.upf.edu/models/>`_.
 Some models are also available in `TensorFlow.js <https://www.tensorflow.org/js>`_ (``tfjs.zip``) and `ONNX <https://onnx.ai/>`_ (``.onnx``) formats.
 As this is an ongoing project, we expect to keep adding new models and improved versions of the existing ones. These changes are tracked in this `CHANGELOG <https://essentia.upf.edu/models/CHANGELOG.md>`_.
 
@@ -20,9 +20,9 @@ Some of our models can work in real-time, opening many possibilities for audio d
 If you use any of the models in your research, please cite the following paper::
 
     @inproceedings{alonso2020tensorflow,
-      title={Tensorflow audio models in essentia},
+      title={Tensorflow Audio Models in {Essentia}},
       author={Alonso-Jim{\'e}nez, Pablo and Bogdanov, Dmitry and Pons, Jordi and Serra, Xavier},
-      booktitle={Intl. Conf. on Acoustics, Speech and Signal Processing (ICASSP)},
+      booktitle={International Conference on Acoustics, Speech and Signal Processing ({ICASSP})},
       year={2020}
     }
     
