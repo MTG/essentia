@@ -21,7 +21,13 @@ Examples of inference with the pre-trained TensorFlow models for music auto-tagg
 - Mood classification in the browser with Essentia.js: https://mtg.github.io/essentia.js/examples/demos/mood-classifiers/
 - Music emotion arousal/valence regression: https://replicate.com/mtg/music-arousal-valence
 - Music approachability and engagement: https://replicate.com/mtg/music-approachability-engagement
+- Jupyter notebook for real-time music `auto-tagging <https://github.com/MTG/essentia/blob/master/src/examples/python/tutorial_tensorflow_real-time_auto-tagging.ipynb>`_ and `classification <https://github.com/MTG/essentia/blob/master/src/examples/python/tutorial_tensorflow_real-time_simultaneous_classifiers.ipynb>`_.
 
+    .. raw:: html
+
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/xMUcY7_n4kQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/yssBE6oafLs" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
 Essentia SVM models
 -------------------

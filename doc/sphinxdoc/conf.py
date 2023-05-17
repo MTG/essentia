@@ -123,8 +123,9 @@ html_theme_path = ['_templates']
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    "nosidebar": "true"
+    "nosidebar": "false",
 }
+
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
@@ -159,6 +160,12 @@ html_static_path = ['_static']
 # Custom sidebar templates, maps document names to template names.
 #html_sidebars = { 'index': [ 'indexsidebar.html', 'searchbox.html' ] }
 #html_sidebars = { '**': [] } # disable sidebar on all pages
+
+# We only want a sidebar on the models page.
+html_sidebars = {
+    '**': [],
+    'models': ['localtoc.html'],
+}
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.

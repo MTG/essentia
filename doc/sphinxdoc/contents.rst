@@ -7,7 +7,7 @@ Essentia documentation contents
 ===============================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    introduction
    installing
@@ -18,6 +18,7 @@ Essentia documentation contents
    extractors_out_of_box
    streaming_extractor_music
    machine_learning
+   models
    demos
 
    design_overview
