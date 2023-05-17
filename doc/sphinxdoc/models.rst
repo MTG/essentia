@@ -53,8 +53,10 @@ Models:
 Discogs-EffNet
 ^^^^^^^^^^^^^^
 
-Audio embedding models trained with a classification or contrastive learning objective using an in-house dataset annotated with Discogs metadata.
-The classification model was trained on music style labels and the contrastive learning models were trained on ``artist``, ``label`` (record label), ``release`` (album), and ``track`` (self-supervised) similarity. Additionally, ``multi`` was trained in multiple similarity tasks simultaneously.
+Audio embedding models trained with classification and contrastive learning objectives using an in-house dataset annotated with Discogs metadata.
+The classification model was trained to predict music style labels.
+The contrastive learning models were trained to learn music similarity capable of grouping audio tracks coming from the same artist, ``label`` (record label), ``release`` (album), or segments of the same ``track`` itself (self-supervised learning).
+Additionally, ``multi`` was trained in multiple similarity targets simultaneously.
 
 Models:
 
@@ -199,8 +201,9 @@ Models:
 Classifiers
 -----------
 
-Classification and regression models based on pre-extracted embeddings.
-The name of these models is a combination of the classification/regression task and the name of the :ref:`embedding model<Feature extractors>` that should be used  to pre-extract embeddings (``<classification_task>-<embedding_model>``).
+Classification and regression models based on embeddings.
+Instead of working with mel-spectrograms, these models require embeddings as input.
+The name of these models is a combination of the classification/regression task and the name of the :ref:`embedding model<Feature extractors>` that should be used to extract embeddings (``<classification_task>-<embedding_model>``).
 
 *Note: TensorflowPredict2D has to be configured with the correct output layer name for each classifier. Check the attached JSON file to find the name of the output layer on each case.*
 
