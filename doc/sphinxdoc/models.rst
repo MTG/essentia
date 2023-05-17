@@ -519,53 +519,6 @@ Models:
 
 
 
-Mood Acoustic
-~~~~~~~~~~~~~
-
-Music classification by type of sound (2 classes)::
-
-    acoustic, non_acoustic
-
-Models:
-
-    .. collapse:: ⬇️ <a class="reference external">mood_acoustic-audioset-vggish</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-vggish-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-audioset-vggish-1_predictions.py
-
-    .. collapse:: ⬇️ <a class="reference external">mood_acoustic-audioset-yamnet</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-yamnet-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-audioset-yamnet-1_predictions.py
-
-    .. collapse:: ⬇️ <a class="reference external">mood_acoustic-discogs-effnet</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-discogs-effnet-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-discogs-effnet-1_predictions.py
-
-    .. collapse:: ⬇️ <a class="reference external">mood_acoustic-msd-musicnn</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-msd-musicnn-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-msd-musicnn-1_predictions.py
-
-    .. collapse:: ⬇️ <a class="reference external">mood_acoustic-openl3-music-mel128-emb512</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-openl3-music-mel128-emb512-1.json>`_]
-
-        We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
-
 
 Mood Aggressive
 ~~~~~~~~~~~~~~~
@@ -611,54 +564,6 @@ Models:
     .. collapse:: ⬇️ <a class="reference external">mood_aggressive-openl3-music-mel128-emb512</a>
 
         [`weights <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_aggressive/mood_aggressive-openl3-music-mel128-emb512-1.json>`_]
-
-        We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
-
-
-Mood Electronic
-~~~~~~~~~~~~~~~
-
-Music classification by type of sound (2 classes)::
-
-    electronic, non_electronic
-
-Models:
-
-    .. collapse:: ⬇️ <a class="reference external">mood_electronic-audioset-vggish</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-vggish-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-audioset-vggish-1_predictions.py
-
-    .. collapse:: ⬇️ <a class="reference external">mood_electronic-audioset-yamnet</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-yamnet-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-audioset-yamnet-1_predictions.py
-
-    .. collapse:: ⬇️ <a class="reference external">mood_electronic-discogs-effnet</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-discogs-effnet-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-discogs-effnet-1_predictions.py
-
-    .. collapse:: ⬇️ <a class="reference external">mood_electronic-msd-musicnn</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-msd-musicnn-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-msd-musicnn-1_predictions.py
-
-    .. collapse:: ⬇️ <a class="reference external">mood_electronic-openl3-music-mel128-emb512</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-openl3-music-mel128-emb512-1.json>`_]
 
         We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
 
@@ -958,6 +863,68 @@ Instrumentation
 
 
 
+MTG-Jamendo instrument
+~~~~~~~~~~~~~~~~~~~~~~
+
+Multi-label classification using the instrument subset of the MTG-Jamendo Dataset (40 classes)::
+
+    accordion, acousticbassguitar, acousticguitar, bass, beat, bell, bongo, brass, cello, clarinet, classicalguitar, computer,
+    doublebass, drummachine, drums, electricguitar, electricpiano, flute, guitar, harmonica, harp, horn, keyboard, oboe,
+    orchestra, organ, pad, percussion, piano, pipeorgan, rhodes, sampler, saxophone, strings, synthesizer, trombone, trumpet,
+    viola, violin, voice
+
+
+Models:
+
+    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs-effnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs-effnet-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs_artist_embeddings-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_artist_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_artist_embeddings-effnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_artist_embeddings-effnet-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs_label_embeddings-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_label_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_label_embeddings-effnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_label_embeddings-effnet-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs_multi_embeddings-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_multi_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_multi_embeddings-effnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_multi_embeddings-effnet-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs_release_embeddings-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_release_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_release_embeddings-effnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_release_embeddings-effnet-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs_track_embeddings-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_track_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_track_embeddings-effnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_track_embeddings-effnet-1_predictions.py
+
+
 Music loop instrument role
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -976,94 +943,101 @@ Models:
         .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/fs_loop_ds/fs_loop_ds-msd-musicnn-1_predictions.py
 
 
-Timbre
-~~~~~~
-
-Classification of music by timbre color (2 classes)::
-
-    bright, dark
-
-Models:
-
-    .. collapse:: ⬇️ <a class="reference external">timbre-discogs-effnet</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/timbre/timbre-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/timbre/timbre-discogs-effnet-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/timbre/timbre-discogs-effnet-1_predictions.py
-
-
-Nsynth acoustic/electronic
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Classification of monophonic sources into acoustic or electronic origin using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (2 classes)::
-
-    acoustic, electronic
-
-Models:
-
-    .. collapse:: ⬇️ <a class="reference external">nsynth_acoustic_electronic-discogs-effnet</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/nsynth_acoustic_electronic/nsynth_acoustic_electronic-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/nsynth_acoustic_electronic/nsynth_acoustic_electronic-discogs-effnet-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/nsynth_acoustic_electronic/nsynth_acoustic_electronic-discogs-effnet-1_predictions.py
-
-
-Nsynth bright/dark
-~~~~~~~~~~~~~~~~~~
-
-Classification of monophonic sources by timbre color using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (2 classes)::
-
-    bright, dark
-
-Models:
-
-    .. collapse:: ⬇️ <a class="reference external">nsynth_bright_dark-discogs-effnet</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/nsynth_bright_dark/nsynth_bright_dark-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/nsynth_bright_dark/nsynth_bright_dark-discogs-effnet-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/nsynth_bright_dark/nsynth_bright_dark-discogs-effnet-1_predictions.py
-
-
-Nsynth instrument
-~~~~~~~~~~~~~~~~~
-
-Classification of monophonic sources by instrument family using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (11 classes)::
-
-    mallet, string, reed, guitar, synth_lead, vocal, bass, flute, keyboard, brass, organ
-
-Models:
-
-    .. collapse:: ⬇️ <a class="reference external">nsynth_instrument-discogs-effnet</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/nsynth_instrument/nsynth_instrument-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/nsynth_instrument/nsynth_instrument-discogs-effnet-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/nsynth_instrument/nsynth_instrument-discogs-effnet-1_predictions.py
-
-
-Nsynth reverb
+Mood Acoustic
 ~~~~~~~~~~~~~
 
-Detection of reverb in monophonic sources using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (2 classes)::
+Music classification by type of sound (2 classes)::
 
-    dry, wet
+    acoustic, non_acoustic
 
 Models:
 
-    .. collapse:: ⬇️ <a class="reference external">nsynth_reverb-discogs-effnet</a>
+    .. collapse:: ⬇️ <a class="reference external">mood_acoustic-audioset-vggish</a>
 
-        [`weights <https://essentia.upf.edu/models/classification-heads/nsynth_reverb/nsynth_reverb-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/nsynth_reverb/nsynth_reverb-discogs-effnet-1.json>`_]
+        [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-vggish-1.json>`_]
 
         Python code for predictions:
 
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/nsynth_reverb/nsynth_reverb-discogs-effnet-1_predictions.py
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-audioset-vggish-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mood_acoustic-audioset-yamnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-audioset-yamnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-audioset-yamnet-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mood_acoustic-discogs-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-discogs-effnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-discogs-effnet-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mood_acoustic-msd-musicnn</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-msd-musicnn-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_acoustic/mood_acoustic-msd-musicnn-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mood_acoustic-openl3-music-mel128-emb512</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_acoustic/mood_acoustic-openl3-music-mel128-emb512-1.json>`_]
+
+        We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
+
+Mood Electronic
+~~~~~~~~~~~~~~~
+
+Music classification by type of sound (2 classes)::
+
+    electronic, non_electronic
+
+Models:
+
+    .. collapse:: ⬇️ <a class="reference external">mood_electronic-audioset-vggish</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-vggish-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-vggish-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-audioset-vggish-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mood_electronic-audioset-yamnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-yamnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-audioset-yamnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-audioset-yamnet-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mood_electronic-discogs-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-discogs-effnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-discogs-effnet-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mood_electronic-msd-musicnn</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-msd-musicnn-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-msd-musicnn-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mood_electronic/mood_electronic-msd-musicnn-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">mood_electronic-openl3-music-mel128-emb512</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-openl3-music-mel128-emb512-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mood_electronic/mood_electronic-openl3-music-mel128-emb512-1.json>`_]
+
+        We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
+
 
 
 Voice/instrumental
@@ -1162,66 +1136,96 @@ Models:
         We do not have a dedicated algorithm to extract embeddings with this model. For now, OpenL3 embeddings can be extracted using this `script <https://gist.github.com/palonso/cfebe37e5492b5a3a31775d8eae8d9a8>`_.
 
 
-MTG-Jamendo instrument
-~~~~~~~~~~~~~~~~~~~~~~
 
-Multi-label classification using the instrument subset of the MTG-Jamendo Dataset (40 classes)::
+Timbre
+~~~~~~
 
-    accordion, acousticbassguitar, acousticguitar, bass, beat, bell, bongo, brass, cello, clarinet, classicalguitar, computer,
-    doublebass, drummachine, drums, electricguitar, electricpiano, flute, guitar, harmonica, harp, horn, keyboard, oboe,
-    orchestra, organ, pad, percussion, piano, pipeorgan, rhodes, sampler, saxophone, strings, synthesizer, trombone, trumpet,
-    viola, violin, voice
+Classification of music by timbre color (2 classes)::
 
+    bright, dark
 
 Models:
 
-    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs-effnet</a>
+    .. collapse:: ⬇️ <a class="reference external">timbre-discogs-effnet</a>
 
-        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs-effnet-1.json>`_]
-
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs-effnet-1_predictions.py
-
-    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs_artist_embeddings-effnet</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_artist_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_artist_embeddings-effnet-1.json>`_]
+        [`weights <https://essentia.upf.edu/models/classification-heads/timbre/timbre-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/timbre/timbre-discogs-effnet-1.json>`_]
 
         Python code for predictions:
 
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_artist_embeddings-effnet-1_predictions.py
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/timbre/timbre-discogs-effnet-1_predictions.py
 
-    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs_label_embeddings-effnet</a>
 
-        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_label_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_label_embeddings-effnet-1.json>`_]
+Nsynth acoustic/electronic
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        Python code for predictions:
+Classification of monophonic sources into acoustic or electronic origin using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (2 classes)::
 
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_label_embeddings-effnet-1_predictions.py
+    acoustic, electronic
 
-    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs_multi_embeddings-effnet</a>
+Models:
 
-        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_multi_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_multi_embeddings-effnet-1.json>`_]
+    .. collapse:: ⬇️ <a class="reference external">nsynth_acoustic_electronic-discogs-effnet</a>
 
-        Python code for predictions:
-
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_multi_embeddings-effnet-1_predictions.py
-
-    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs_release_embeddings-effnet</a>
-
-        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_release_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_release_embeddings-effnet-1.json>`_]
+        [`weights <https://essentia.upf.edu/models/classification-heads/nsynth_acoustic_electronic/nsynth_acoustic_electronic-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/nsynth_acoustic_electronic/nsynth_acoustic_electronic-discogs-effnet-1.json>`_]
 
         Python code for predictions:
 
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_release_embeddings-effnet-1_predictions.py
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/nsynth_acoustic_electronic/nsynth_acoustic_electronic-discogs-effnet-1_predictions.py
 
-    .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_instrument-discogs_track_embeddings-effnet</a>
 
-        [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_track_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_track_embeddings-effnet-1.json>`_]
+Nsynth bright/dark
+~~~~~~~~~~~~~~~~~~
+
+Classification of monophonic sources by timbre color using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (2 classes)::
+
+    bright, dark
+
+Models:
+
+    .. collapse:: ⬇️ <a class="reference external">nsynth_bright_dark-discogs-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/nsynth_bright_dark/nsynth_bright_dark-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/nsynth_bright_dark/nsynth_bright_dark-discogs-effnet-1.json>`_]
 
         Python code for predictions:
 
-        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/mtg_jamendo_instrument/mtg_jamendo_instrument-discogs_track_embeddings-effnet-1_predictions.py
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/nsynth_bright_dark/nsynth_bright_dark-discogs-effnet-1_predictions.py
+
+
+Nsynth instrument
+~~~~~~~~~~~~~~~~~
+
+Classification of monophonic sources by instrument family using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (11 classes)::
+
+    mallet, string, reed, guitar, synth_lead, vocal, bass, flute, keyboard, brass, organ
+
+Models:
+
+    .. collapse:: ⬇️ <a class="reference external">nsynth_instrument-discogs-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/nsynth_instrument/nsynth_instrument-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/nsynth_instrument/nsynth_instrument-discogs-effnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/nsynth_instrument/nsynth_instrument-discogs-effnet-1_predictions.py
+
+
+Nsynth reverb
+~~~~~~~~~~~~~
+
+Detection of reverb in monophonic sources using the `Nsynth <https://magenta.tensorflow.org/datasets/nsynth>`_ dataset (2 classes)::
+
+    dry, wet
+
+Models:
+
+    .. collapse:: ⬇️ <a class="reference external">nsynth_reverb-discogs-effnet</a>
+
+        [`weights <https://essentia.upf.edu/models/classification-heads/nsynth_reverb/nsynth_reverb-discogs-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/nsynth_reverb/nsynth_reverb-discogs-effnet-1.json>`_]
+
+        Python code for predictions:
+
+        .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/nsynth_reverb/nsynth_reverb-discogs-effnet-1_predictions.py
+
 
 
 
@@ -1279,8 +1283,8 @@ Models:
 
 
 
-Miscellaneous
-^^^^^^^^^^^^^
+Miscellaneous tags
+^^^^^^^^^^^^^^^^^^
 
 
 
