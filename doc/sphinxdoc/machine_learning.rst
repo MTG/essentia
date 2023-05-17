@@ -18,6 +18,8 @@ Installation
 
 Essentia with TensorFlow support is available for Linux and macOS as a separate Python package, `essentia-tensoflow <https://pypi.org/project/essentia-tensorflow/>`_:
 
+.. highlight:: none
+
 .. code-block::
 
     pip install essentia-tensorflow
@@ -27,55 +29,57 @@ Building Essentia with TensorFlow support
 Alternatively, we provide instructions to build Essentia from source and link it against the shared TensorFlow libraries.
 To avoid collisions when importing both Essentia and TensorFlow in Python, we use the shared libraries within the Python package of TensorFlow itself instead of linking against the official `libtensorflow <https://www.tensorflow.org/install/lang_c>`_.
 
-Steps: 
+Follow these steps to build and install Essentia with TensorFlow support:
 
-1. At least pip version ≥19.3 is required:
+At least pip version ≥19.3 is required:
 
-    .. code-block::
+.. code-block::
 
-        pip3 install --upgrade pip
+    pip3 install --upgrade pip
 
-2. Install TensorFlow (tested for TensorFlow 2.5, 2.8, 2.12):
+Install TensorFlow (tested for TensorFlow 2.5, 2.8, 2.12):
 
-    .. code-block::
+.. code-block::
 
-        pip3 install tensorflow
+    pip3 install tensorflow
 
-3. Clone Essentia: 
+Clone Essentia: 
 
-    .. code-block::
+.. code-block::
 
-        git clone https://github.com/MTG/essentia.git
+    git clone https://github.com/MTG/essentia.git
 
-4. Run `setup_from_python.sh` (may require `sudo`). This script exposes the shared libraries contained in the TensorFlow wheel so we can link against them:
+Run `setup_from_python.sh` (may require `sudo`). This script exposes the shared libraries contained in the TensorFlow wheel so we can link against them:
 
-    .. code-block::
+.. code-block::
 
-        cd essentia && src/3rdparty/tensorflow/setup_from_python.sh
+    cd essentia && src/3rdparty/tensorflow/setup_from_python.sh
 
-5. Install the `dependencies <https://essentia.upf.edu/installing.html#installing-dependencies-on-linux>`_ for Essentia with Python 3 (may require `sudo`):
+Install the `dependencies <https://essentia.upf.edu/installing.html#installing-dependencies-on-linux>`_ for Essentia with Python 3 (may require `sudo`):
 
-    .. code-block::
+.. code-block::
 
-        apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six python3-dev python3-numpy-dev python3-numpy python3-yaml libeigen3-dev
+    apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six python3-dev python3-numpy-dev python3-numpy python3-yaml libeigen3-dev
 
-6. Configure Essentia with TensorFlow and Python 3:
+Configure Essentia with TensorFlow and Python 3:
 
-    .. code-block::
 
-        python3 waf configure --build-static --with-python --with-tensorflow
+.. code-block::
 
-7. Build everything:
+    python3 waf configure --build-static --with-python --with-tensorflow
 
-    .. code-block::
 
-        python3 waf
+Build everything:
 
-8. Install:
+.. code-block::
 
-    .. code-block::
+    python3 waf
 
-        python3 waf install
+Install:
+
+.. code-block::
+
+    python3 waf install
 
 
 Inference with GPU
@@ -85,26 +89,27 @@ We recommend using a package manager such as `Conda <https://docs.conda.io/en/la
 
 These are the recommended steps to follow:
 
-1. Install `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ (or Anaconda).
-2. Create and activate a Conda environment: 
+Install `Miniconda <https://docs.conda.io/en/latest/miniconda.html>`_ (or Anaconda).
+Create and activate a Conda environment: 
 
-    .. code-block::
+.. code-block::
 
-        conda create -n ess python=3.10
-        conda activate ess
+    conda create -n ess python=3.10
+    conda activate ess
 
-3. Install CUDA, CuDNN, and essentia-tensorflow:
+Install CUDA, CuDNN, and essentia-tensorflow:
 
-    .. code-block::
+.. code-block::
 
-        conda install -c conda-forge -y cudatoolkit=11.2 cudnn=8.1
-        pip install essentia-tensorflow
+    conda install -c conda-forge -y cudatoolkit=11.2 cudnn=8.1
+    pip install essentia-tensorflow
 
- 
-    It is possible to use CUDA environment variables to control GPU usage.
-    For example, the following line of code launches a script using GPU 1:
 
-    .. code-block::
+It is possible to use CUDA environment variables to control GPU usage.
+For example, the following line of code launches a script using GPU 1:
 
-      CUDA_VISIBLE_DEVICES=1 python my_script.py 
+.. code-block::
 
+  CUDA_VISIBLE_DEVICES=1 python my_script.py 
+
+.. highlight:: default
