@@ -97,7 +97,7 @@ Avoid all dependencies and build with Accelerate FFT (native on macOS/iOS):
 ./waf configure --lightweight= --fft=ACCELERATE
 ```
 
-It is also possible to specify algorithms to be ignored using the ```--ignore-algos``` flag, although you need to take care that the ignored algorithm are not required by any of the algorithms and examples that will be compiled. 
+It is also possible to specify algorithms to be ignored using the ```--ignore-algos``` flag, although you need to take care that the ignored algorithm are not required by any of the algorithms and examples that will be compiled. Alternatively, with the ```--include-algos``` you can specify the only algorithms to be included.
 
 Note, that Essentia includes in its code the Spline library (LGPLv3) which is used by Spline and CubicSpline algorithms and is built by default. To ignore this library, use the following flag in ```./waf configure``` command:
 ```
