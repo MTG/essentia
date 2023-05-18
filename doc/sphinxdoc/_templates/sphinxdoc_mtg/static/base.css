@@ -12,6 +12,12 @@ body {
   }
 }
 
+@media (max-width: 768px) {
+  .sphinxsidebar {
+    display: none;
+  }
+}
+
 .navbar-default {
   background-color: #0b3954;
   -webkit-box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5);
@@ -244,4 +250,87 @@ body {
 
 .essnt-apps__app-description {
   text-align: center;
+}
+
+div.flex-container {
+    display: flex;
+}
+
+div.bodywrapper {
+    padding-left: 20px;
+}
+
+div.sphinxsidebar {
+    float: left;
+    flex: 0 0.1 275px;
+    min-width: 200px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    font-size: 95%;
+    height: 100vh;
+    overflow-y: auto;
+    word-wrap: break-word;
+    overflow-wrap : break-word;
+    overflow: scroll;
+    padding-left: 15px;
+    padding-right: 10px;
+    padding-top: 80px;
+}
+
+div.sphinxsidebar h3 {
+    font-family: {{ theme_headfont }};
+    font-size: 1.4em;
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+div.sphinxsidebar h3 a {
+    color: {{ theme_sidebartextcolor }};
+}
+
+div.sphinxsidebar h4 {
+    font-family: {{ theme_headfont }};
+    color: {{ theme_sidebartextcolor }};
+    font-size: 1.3em;
+    font-weight: normal;
+    margin: 5px 0 0 0;
+    padding: 0;
+}
+
+div.sphinxsidebar p {
+    color: {{ theme_sidebartextcolor }};
+}
+
+div.sphinxsidebar p.topless {
+    margin: 5px 10px 10px 10px;
+}
+
+div.sphinxsidebar ul {
+    margin-left: 15px;
+    padding: 0;
+    color: {{ theme_sidebartextcolor }};
+}
+
+div.sphinxsidebar a {
+    color: {{ theme_sidebarlinkcolor }};
+}
+
+div.sphinxsidebar input {
+    border: 1px solid {{ theme_sidebarlinkcolor }};
+    font-family: sans-serif;
+    font-size: 1em;
+}
+
+div.sphinxsidebarwrapper > div > ul > li {
+    list-style-type: none;
+}
+div.sphinxsidebarwrapper > div > ul {
+    margin-left: 0px;
+}
+
+section > section > section > blockquote {
+    border-left: 0px;
 }
