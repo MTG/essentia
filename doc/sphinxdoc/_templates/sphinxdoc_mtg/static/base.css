@@ -258,6 +258,12 @@ div.flex-container {
 
 div.bodywrapper {
     padding-left: 20px;
+    min-width: 0px;
+    max-width: 1270px;
+}
+
+div.bodywrapper > div.main-container {
+    width: 100%;
 }
 
 div.sphinxsidebar {
