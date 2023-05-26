@@ -169,7 +169,7 @@ const char* TensorflowPredictFSDSINet::description = DOC(
   "In the streaming case, the user is responsible for controlling the dynamic range of the input signal. "
   "Ideally, the signal should be zero-mean (no DC) and normalized to the full dynamic range (-1, 1).\n\n"
   "References:\n"
-  "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623.\n"
+  "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623.\n\n"
   "  [2] https://github.com/edufonseca/shift_sec"
 );
 
