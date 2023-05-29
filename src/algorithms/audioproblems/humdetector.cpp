@@ -388,7 +388,7 @@ const char* HumDetector::description = DOC("This algorithm detects low frequency
 "\n"
 "References:\n"
 "  [1] Brandt, M., & Bitzer, J. (2014). Automatic Detection of Hum in Audio\n"
-"  Signals. Journal of the Audio Engineering Society, 62(9), 584-595.\n"
+"  Signals. Journal of the Audio Engineering Society, 62(9), 584-595.\n\n"
 "  [2] J. Salamon and E. Gómez, Melody extraction from polyphonic music signals\n"
 "  using pitch contour characteristics, IEEE Transactions on Audio, Speech,\n"
 "  and Language Processing, vol. 20, no. 6, pp. 1759–1770, 2012.\n");
