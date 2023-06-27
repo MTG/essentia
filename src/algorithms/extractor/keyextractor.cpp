@@ -232,6 +232,8 @@ void KeyExtractor::compute() {
   key      = _pool.value<string>("key");
   scale    = _pool.value<string>("scale");
   strength = _pool.value<Real>("strength");
+
+  reset();
 }
 
 } // namespace standard
