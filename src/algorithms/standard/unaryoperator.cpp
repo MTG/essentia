@@ -58,7 +58,7 @@ inline Real square_func(Real x) {
   for (int i=0; i<int(input.size()); ++i) { \
     output[i] = f(input[i]);            \
   }                                     \
-  return;                               \
+  break;                                \
 }
 
 void UnaryOperator::compute() {
