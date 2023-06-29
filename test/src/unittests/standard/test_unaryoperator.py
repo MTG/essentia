@@ -46,7 +46,7 @@ class TestUnaryOperator(TestCase):
     def testLog10LowX(self):
         self.assertAlmostEqualVector(
             UnaryOperator(type="log10")(self.testInputLowX),
-             [-30., -30., -30., -30.])        
+             [-30., -30., -30., -30.])
 
     def testLog(self):
         self.assertAlmostEqualVector(
@@ -55,15 +55,15 @@ class TestUnaryOperator(TestCase):
 
     def testLogLowX(self):
         self.assertAlmostEqualVector(
-            UnaryOperator(type="log")(self.testInputLowX),[-69.07755, -69.07755, -69.07755, -69.07755])        
+            UnaryOperator(type="log")(self.testInputLowX),[-69.07755, -69.07755, -69.07755, -69.07755])
 
     def testLn(self):
         self.assertAlmostEqualVector(UnaryOperator(type="ln")(self.testInput),
             [0, 0.693147181, 1.098612289, 1.386294361, 1.223775432, -69.07755279, 11.513265407])
 
-    def testLnLowX(self):        
+    def testLnLowX(self):
         self.assertAlmostEqualVector(UnaryOperator(type="ln")(self.testInputLowX),
-            [-69.07755, -69.07755, -69.07755, -69.07755])            
+            [-69.07755, -69.07755, -69.07755, -69.07755])
 
     def testLin2Db(self):
         self.assertAlmostEqualVector(
@@ -107,6 +107,20 @@ class TestUnaryOperator(TestCase):
     def testInvalidParam(self):
         self.assertConfigureFails(UnaryOperator(), {'type':'exp'})
 
+    def testOperatorScaleShift(self):
+        functions = ["identity", "abs", "log10", "log", "ln", "lin2db", "db2lin", "sin", "cos", "sqrt", "square"]
+
+        shift = 1
+        scale = 2
+        test_data = [1]
+
+        for type in functions:
+            with self.subTest(i=type):
+
+                expected = UnaryOperator(type=type)(test_data) * scale + shift
+                found = UnaryOperator(type=type, shift=shift, scale=scale)(test_data)
+
+                self.assertAlmostEqualVector(expected, found)
 
 suite = allTests(TestUnaryOperator)
 
