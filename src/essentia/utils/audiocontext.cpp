@@ -310,6 +310,7 @@ void AudioContext::encodePacket(int size) {
   frame->nb_samples = _codecCtx->frame_size;
   frame->format = _codecCtx->sample_fmt;
   frame->channel_layout = _codecCtx->channel_layout;
+  frame->channels = _codecCtx->channels;
 
   int result = avcodec_fill_audio_frame(frame, _codecCtx->channels, _codecCtx->sample_fmt,
                                         bufferFmt, outputPlaneSize * _codecCtx->channels, 0);
@@ -328,8 +329,13 @@ void AudioContext::encodePacket(int size) {
   packet.size = 0;
 
   int got_output;
-  if (avcodec_encode_audio2(_codecCtx, &packet, frame, &got_output) < 0) {
-     throw EssentiaException("Error while encoding audio frame");
+  result = avcodec_encode_audio2(_codecCtx, &packet, frame, &got_output);
+  if (result < 0) {
+    char errstring[1204];
+    av_strerror(result, errstring, sizeof(errstring));
+    ostringstream msg;
+    msg << "Error while encoding audio frame: " << errstring;
+    throw EssentiaException(msg);
   }
 
   if (got_output) { // packet is not empty, write the frame in the media file
