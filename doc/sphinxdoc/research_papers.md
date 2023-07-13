@@ -79,6 +79,8 @@ Indexing music by mood: design and integration of an automatic content-based ann
 
 ## Emotion detection
 
+- Azuaje, G., Liew, K., Epure, E., Yada, S., Wakamiya, S., & Aramaki, E. (2023). Visualyre: multimodal album art generation for independent musicians. Personal and Ubiquitous Computing, 1-12.
+
 - S. Chowdhury, and G. Widmer. On perceived emotion in expressive piano performance: Further experimental evidence for the relevance of mid-level perceptual features. In International Society for Music Information Retrieval (ISMIR 2021), 2021.
 
 - Byun, S. W., Lee, S. P. A Study on a Speech Emotion Recognition System with Effective Acoustic Features Using Deep Learning Algorithms. Applied Sciences, 11(4), 1890, 2021.
