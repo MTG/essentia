@@ -34,6 +34,7 @@ class FrameBuffer : public Algorithm {
   std::vector<Real> _buffer;
   int _bufferSize;
   bool _zeroPadding;
+  int _bufferUndefined;  // Number of undefined values in the buffer (= buffer size for the empty buffer on reset).
 
  public:
   FrameBuffer() {

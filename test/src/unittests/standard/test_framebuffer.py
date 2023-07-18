@@ -34,6 +34,13 @@ class TestFrameBuffer(TestCase):
         self.assertEqualVector(buffer([7, 8]), [1., 2., 3., 4., 5., 6., 7., 8.])
         self.assertEqualVector(buffer([9, 10]), [3., 4., 5., 6., 7.,  8., 9., 10.])
 
+    def testBufferNoZeroPadding(self):
+        buffer = FrameBuffer(bufferSize=8, zeroPadding=False)
+        self.assertEqualVector(buffer([1, 2]), [])
+        self.assertEqualVector(buffer([3, 4]), [])
+        self.assertEqualVector(buffer([5, 6]), [])
+        self.assertEqualVector(buffer([7, 8]), [1., 2., 3., 4., 5., 6., 7., 8.])
+
     def testFrameSizeEqualsBufferSize(self):
         buffer = FrameBuffer(bufferSize=8)
         self.assertEqualVector(buffer([1, 2, 3, 4, 5, 6, 7, 8]), [1., 2., 3., 4., 5., 6., 7., 8.])
@@ -48,8 +55,11 @@ class TestFrameBuffer(TestCase):
         buffer.reset()  # Sets the buffer to zero vector.
         self.assertEqualVector(buffer([1, 2]), [0., 0., 0., 0., 0., 0., 1., 2.])
 
-        # TODO testResetNoZeroPadding() without zero padding
-
+    def testResetNoZeroPadding(self):
+        buffer = FrameBuffer(bufferSize=8, zeroPadding=False)
+        buffer([1, 2, 3, 4, 5, 6, 7, 8])
+        buffer.reset()
+        self.assertEqualVector(buffer([1, 2]), [])
 
 
 suite = allTests(TestFrameBuffer)

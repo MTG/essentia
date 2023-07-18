@@ -45,6 +45,10 @@ void FrameBuffer::configure() {
 void FrameBuffer::reset() {
   if (_zeroPadding) {
     std::fill(_buffer.begin(), _buffer.end(), (Real) 0.);
+    _bufferUndefined = 0;
+  }
+  else {
+    _bufferUndefined = _bufferSize;
   }
 }
 
@@ -59,14 +63,27 @@ void FrameBuffer::compute() {
   if (shift >= _bufferSize) {
     // Overwrite the entire buffer.
     std::copy(frame.end() - _bufferSize, frame.end(), _buffer.begin());
+    _bufferUndefined = 0;
     // TODO E_WARNING for the case of shift > _bufferSize (not all input values fit the buffer)
   }
   else {
     std::copy(_buffer.begin() + shift, _buffer.end(), _buffer.begin());
     std::copy(frame.begin(), frame.end(), _buffer.begin() + _bufferSize - shift);
+    if (_bufferUndefined) {
+        _bufferUndefined -= shift;
+        if (_bufferUndefined < 0) {
+            _bufferUndefined = 0;
+        }
+    }
   }
 
   // output
-  bufferedFrame.resize(_bufferSize);
-  std::copy(_buffer.begin(), _buffer.end(), bufferedFrame.begin());
+  if (!_bufferUndefined) {
+    bufferedFrame.resize(_bufferSize);
+    std::copy(_buffer.begin(), _buffer.end(), bufferedFrame.begin());
+  }
+  else {
+    // Return emtpy frames until a full buffer is available.
+    bufferedFrame.clear();
+  }
 }
