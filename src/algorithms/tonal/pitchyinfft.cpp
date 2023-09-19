@@ -189,9 +189,8 @@ void PitchYinFFT::compute() {
       yinMin = -_amplitudes[0];
     }
     else {
-      tau = 0.0; // it will provide zero-pitch and zero-pitch confidence.
-      // launch warning message for user feedbacking
-      E_WARNING("PitchYinFFT: it appears that no peaks were found by PeakDetection algorithm. So, pitch and confidence will be set to zero.");
+      // TODO this should never happen, but some people reported it happening in their real time applications.
+      throw EssentiaException("PitchYinFFT: it appears that no peaks were found by PeakDetection. If you read this message, PLEASE, report this issue to the developers with an example of audio on which it happened.");
     }
   }
   else {
