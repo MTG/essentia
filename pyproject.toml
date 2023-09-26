@@ -15,7 +15,7 @@ before-all = [
   "\"${PYBIN}/python\" waf install"
 ]
 
-before-test = "pip install numpy -C-Dallow-noblas=true"
+before-test = "pip install numpy --config-settings=setup-args='-Dallow-noblas=true'"
 
 test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter'"
 
