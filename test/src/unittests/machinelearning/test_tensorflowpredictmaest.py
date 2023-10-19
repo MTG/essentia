@@ -25,9 +25,9 @@ class TestTensorFlowPredictMAEST(TestCase):
     @classmethod
     def setUpClass(self):
         # Since loading the Transformers takes a lot of time, we do it only once as reusable class members.
-        # When using these algos, Essentia complains that other networks (e.g., MonoLoader' network) were
-        # destroyed in the meantime. These warnings are not relevant for the tests, so we disable
-        # Warnings temporally.
+        # When using these algos, Essentia complains that other networks (e.g., MonoLoader's network) were
+        # destroyed in the meantime. These warnings are not relevant for the tests and difficult readability,
+        # so we disable them temporally.
 
         essentia.log.warningActive = False
 
