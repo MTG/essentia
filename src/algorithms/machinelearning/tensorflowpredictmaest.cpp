@@ -31,7 +31,7 @@ const char* TensorflowPredictMAEST::description = essentia::standard::Tensorflow
 
 TensorflowPredictMAEST::TensorflowPredictMAEST() : AlgorithmComposite(),
     _frameCutter(0), _tensorflowInputMusiCNN(0), _shift(0), _scale(0), _vectorRealToTensor(0),
-    _tensorToPool(0), _tensorflowPredict(0), _poolToTensor(0), _tensorToVectorReal(0), _configured(false) {
+    _tensorToPool(0), _tensorflowPredict(0), _poolToTensor(0), _configured(false) {
 
   declareInput(_signal, 480000, "signal", "the input audio signal sampled at 16 kHz");
   declareOutput(_predictions, 1, "predictions", "the output values from the model node named after `output`");
@@ -49,7 +49,6 @@ void TensorflowPredictMAEST::createInnerNetwork() {
   _tensorToPool           = factory.create("TensorToPool");
   _tensorflowPredict      = factory.create("TensorflowPredict");
   _poolToTensor           = factory.create("PoolToTensor");
-  _tensorToVectorReal     = factory.create("TensorToVectorReal");
 
   _shift->output("array").setBufferType(BufferUsage::forMultipleFrames);
   _scale->output("array").setBufferType(BufferUsage::forMultipleFrames);
@@ -63,10 +62,8 @@ void TensorflowPredictMAEST::createInnerNetwork() {
   _vectorRealToTensor->output("tensor")    >> _tensorToPool->input("tensor");
   _tensorToPool->output("pool")            >> _tensorflowPredict->input("poolIn");
   _tensorflowPredict->output("poolOut")    >> _poolToTensor->input("pool");
-  _poolToTensor->output("tensor")          >> _tensorToVectorReal->input("tensor");
 
-
-  attach(_tensorToVectorReal->output("frame"), _predictions);
+  attach(_poolToTensor->output("tensor"), _predictions);
 
   _network = new scheduler::Network(_frameCutter);
 }
@@ -180,14 +177,25 @@ const char* TensorflowPredictMAEST::category = "Machine Learning";
 const char* TensorflowPredictMAEST::description = DOC(
   "This algorithm makes predictions using MAEST-based models.\n"
   "\n"
-  "Internally, it uses TensorflowInputMusiCNN for the input feature extraction "
-  "(mel bands). It feeds the model with mel-spectrogram patches and "
-  "jumps a constant amount of frames determined by `patchHopSize`.\n"
+  "Internally, it uses TensorflowInputMusiCNN for the input feature extraction. "
+  "It feeds the model with mel-spectrogram patches and jumps a constant amount "
+  "of frames determined by `patchHopSize`.\n"
   "\n"
   "By setting the `batchSize` parameter to -1 or 0 the patches are stored to run a single "
   "TensorFlow session at the end of the stream. This allows to take advantage "
   "of parallelization when GPUs are available, but at the same time it can be "
   "memory exhausting for long files.\n"
+  "\n"
+  "For the official MAEST models, the algorithm outputs the probabilities for "
+  "400 music style labels by default. Additionally, it is possible to retrieve "
+  "the output of each attention layer by setting `output=StatefulParitionedCall:n`, "
+  "where `n` is the index of the layer (starting from 1).\n"
+  "The output from the attention layers should be interpreted as follows:\n"
+  "  [batch_index, 1, token_number, embeddings_size]\n"
+  "Where the the fist and second tokens (e.g., [0, 0, :2, :]) correspond to the "
+  "CLS and DIST tokens respectively, and the following ones to input signal ( "
+  "refer to the original paper for details [1]).\n"
+
   "\n"
   "The recommended pipeline is as follows::\n"
   "\n"
@@ -247,7 +255,7 @@ void TensorflowPredictMAEST::configure() {
 
 void TensorflowPredictMAEST::compute() {
   const vector<Real>& signal = _signal.get();
-  vector<vector<Real> >& predictions = _predictions.get();
+  Tensor<Real>& predictions = _predictions.get();
 
   if (!signal.size()) {
     throw EssentiaException("TensorflowPredictMAEST: empty input signal");
@@ -258,10 +266,15 @@ void TensorflowPredictMAEST::compute() {
   _network->run();
 
   try {
-    predictions = _pool.value<vector<vector<Real> > >("predictions");
+    vector<Tensor<Real> > predictions_vector = _pool.value<vector<Tensor<Real> > >("predictions");
+    predictions = predictions_vector[0];
+
+    for (int i = 1; i < (int)predictions_vector.size(); i++) {
+       Tensor<Real> new_predictions = predictions.concatenate(predictions_vector[i], 0).eval();
+       predictions = new_predictions;
+    }
   }
   catch (EssentiaException&) {
-    predictions.clear();
     reset();
 
     throw EssentiaException("TensorflowPredictMAEST: input signal is too short.");

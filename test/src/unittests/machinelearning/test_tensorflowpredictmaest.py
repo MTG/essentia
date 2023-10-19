@@ -45,7 +45,7 @@ class TestTensorFlowPredictMAEST(TestCase):
     def tearDownClass(self):
         essentia.log.warningActive = True
 
-    def testRegressionFrozenModel(self):
+    def testRegression(self):
         expected = numpy.load(
             join(
                 filedir(),
@@ -58,7 +58,7 @@ class TestTensorFlowPredictMAEST(TestCase):
         audio = MonoLoader(filename=filename, sampleRate=16000, resampleQuality=4)()
 
         activations = self.model30s(audio)
-        found = numpy.mean(activations, axis=0)
+        found = numpy.mean(activations, axis=0).squeeze()
 
         self.assertAlmostEqualVector(found, expected, 1e-1)
 

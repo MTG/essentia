@@ -39,10 +39,9 @@ class TensorflowPredictMAEST : public AlgorithmComposite {
   Algorithm* _tensorToPool;
   Algorithm* _tensorflowPredict;
   Algorithm* _poolToTensor;
-  Algorithm* _tensorToVectorReal;
 
   SinkProxy<Real> _signal;
-  SourceProxy<std::vector<Real> > _predictions;
+  SourceProxy<Tensor<Real> > _predictions;
 
   scheduler::Network* _network;
   bool _configured;
@@ -101,7 +100,7 @@ namespace standard {
 class TensorflowPredictMAEST : public Algorithm {
  protected:
   Input<std::vector<Real> > _signal;
-  Output<std::vector<std::vector<Real> > > _predictions;
+  Output<Tensor<Real> > _predictions;
 
   streaming::Algorithm* _tensorflowPredictMAEST;
   streaming::VectorInput<Real>* _vectorInput;
@@ -120,7 +119,7 @@ class TensorflowPredictMAEST : public Algorithm {
     declareParameter("input", "the name of the input nodes in the Tensorflow graph", "", "serving_default_melspectrogram");
     declareParameter("output", "the name of the node from which to retrieve the output tensors", "", "StatefulPartitionedCall");
     declareParameter("isTrainingName", "the name of an additional input node indicating whether the model is to be run in a training mode (for models with a training mode, leave it empty otherwise)", "", "");
-    declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 1876);
+    declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. 0 to avoid overlap", "[0,inf)", 1875);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
     declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 1);
     declareParameter("patchSize", "number of frames required for each inference. This parameter should match the model's expected input shape.", "[0,inf)", 1876);
