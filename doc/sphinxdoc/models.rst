@@ -25,7 +25,7 @@ If you use any of the models in your research, please cite the following paper::
       booktitle={International Conference on Acoustics, Speech and Signal Processing ({ICASSP})},
       year={2020}
     }
-    
+
 .. highlight:: default
 
 
@@ -137,6 +137,102 @@ Models:
 *Note: We provide models operating with a fixed batch size of 64 samples since it was not possible to port the version with dynamic batch size from ONNX to TensorFlow. Additionally, an ONNX version of the model with* `dynamic batch <https://essentia.upf.edu/models/feature-extractors/discogs-effnet/discogs-effnet-bsdynamic-1.onnx>`_ *size is provided.*
 
 
+Discogs-MAEST
+^^^^^^^^^^^^^
+
+Music Audio Efficient Spectrogram Transformer (`MAEST <https://github.com/palonso/MAEST/>`_) trained to predict music style labels using an in-house dataset annotated with Discogs metadata.
+
+Models:
+
+    .. collapse:: ⬇️ <a class="reference external">discogs-maest-30s-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-1.json>`_]
+
+            Model trained with a multi-label classification objective targeting 400 Discogs styles.
+
+            Python code for embedding extraction:
+
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-1_embeddings.py
+
+    .. collapse:: ⬇️ <a class="reference external">discogs-maest-30s-pw-ts</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-ts-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-ts-1.json>`_]
+
+            Model trained with a multi-label classification objective targeting 400 Discogs styles.
+
+            Python code for embedding extraction:
+
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-ts-1_embeddings.py
+
+    .. collapse:: ⬇️ <a class="reference external">discogs-maest-20s-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-20s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-20s-pw-1.json>`_]
+
+            Model trained with a multi-label classification objective targeting 400 Discogs styles.
+
+            Python code for embedding extraction:
+
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-20s-pw-1_embeddings.py
+
+    .. collapse:: ⬇️ <a class="reference external">discogs-maest-10s-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-pw-1.json>`_]
+
+            Model trained with a multi-label classification objective targeting 400 Discogs styles.
+
+            Python code for embedding extraction:
+
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-pw-1_embeddings.py
+
+    .. collapse:: ⬇️ <a class="reference external">discogs-maest-10s-fs</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-fs-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-fs-1.json>`_]
+
+            Model trained with a multi-label classification objective targeting 400 Discogs styles.
+
+            Python code for embedding extraction:
+
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-fs-1_embeddings.py
+
+    .. collapse:: ⬇️ <a class="reference external">discogs-maest-10s-dw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-dw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-dw-1.json>`_]
+
+            Model trained with a multi-label classification objective targeting 400 Discogs styles.
+
+            Python code for embedding extraction:
+
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-dw-1_embeddings.py
+
+    .. collapse:: ⬇️ <a class="reference external">discogs-maest-5s-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-5s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-5s-pw-1.json>`_]
+
+            Model trained with a multi-label classification objective targeting 400 Discogs styles.
+
+            Python code for embedding extraction:
+
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-5s-pw-1_embeddings.py
+
+
+*Note: It is possible to retrieve the output of each attention layer by setting* ``output=StatefulParitionedCall:n`` *, where* ``n`` *is the index of the layer (starting from 1).*
+*The output from the attention layers should be interpreted as* ``[batch_index, 1, token_number, embeddings_size]``
+*, where the fist and second tokens (i.e.,* ``[0, 0, :2, :]`` *) correspond to the*  ``CLS`` *and* ``DIST`` *tokens respectively, and the following ones to input signal (refer to the* `paper <https://repositori.upf.edu/handle/10230/58023>`_  *for details).*
+
 OpenL3
 ^^^^^^
 
@@ -240,7 +336,7 @@ The name of these models is a combination of the classification/regression task 
 *Note: TensorflowPredict2D has to be configured with the correct output layer name for each classifier. Check the attached JSON file to find the name of the output layer on each case.*
 
 
-Music genre and style 
+Music genre and style
 ^^^^^^^^^^^^^^^^^^^^^
 
 
@@ -2071,6 +2167,3 @@ Models:
             Python code for predictions:
 
             .. literalinclude :: ../../src/examples/python/models/scripts/tempo/tempocnn/deeptemp-k16-3_predictions.py
-
-
-

@@ -7,7 +7,7 @@ audio-event-recognition:
      - embeddings
     models:
       - audioset-yamnet-1
-  
+
   fsd-sinet:
     algo_name: TensorflowPredictFSDSINet
     sample_rate: 22050
@@ -64,6 +64,20 @@ feature-extractors:
      - discogs_multi_embeddings-effnet-bs64-1
      - discogs_release_embeddings-effnet-bs64-1
      - discogs_track_embeddings-effnet-bs64-1
+
+  maest:
+    algo_name: TensorflowPredictMAEST
+    sample_rate: 16000
+    outputs:
+     - embeddings
+    models:
+     - discogs-maest-10s-dw-1
+     - discogs-maest-10s-fs-1
+     - discogs-maest-10s-pw-1
+     - discogs-maest-20s-pw-1
+     - discogs-maest-30s-pw-1
+     - discogs-maest-30s-pw-ts-1
+     - discogs-maest-5s-pw-1
 
 pitch:
   crepe:

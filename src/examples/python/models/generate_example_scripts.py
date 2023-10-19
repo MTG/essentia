@@ -14,6 +14,7 @@ INPUT_DEFAULTS = {
     "TensorflowPredict2D": "model/Placeholder",
     "TensorflowPredictEffnetDiscogs": "serving_default_melspectrogram",
     "TensorflowPredictFSDSINet": "x",
+    "TensorflowPredictMAEST": "serving_default_melspectrogram",
     "PitchCREPE": "frames",
     "TempoCNN": "input",
 }
@@ -24,6 +25,7 @@ OUTPUT_DEFAULTS = {
     "TensorflowPredict2D": "model/Sigmoid",
     "TensorflowPredictEffnetDiscogs": "PartitionedCall:0",
     "TensorflowPredictFSDSINet": "model/predictions/Sigmoid",
+    "TensorflowPredictMAEST": "PartitionedCall:0",
     "PitchCREPE": "model/classifier/Sigmoid",
     "TempoCNN": "output",
 }
@@ -97,13 +99,14 @@ def get_additional_parameters(metadata: dict, output: str, algo_name: str):
             model_output["output_purpose"] == output
             and model_output["name"] != OUTPUT_DEFAULTS[algo_name]
         ):
-            additional_parameters += f', output="{model_output["name"]}"'
+            if metadata["name"] == "MAEST" and ":7" in model_output["name"]:
+                # In maest models we recomend the embeddings from the 7th layer.
+                additional_parameters += f', output="{model_output["name"]}"'
+
     return additional_parameters
 
 
-def get_metadata(
-    task_type: str, family_name: str, model: str, metadata_base_dir=False
-):
+def get_metadata(task_type: str, family_name: str, model: str, metadata_base_dir=False):
     if metadata_base_dir:
         metadata_path = str(
             Path(metadata_base_dir, task_type, family_name, f"{model}.json")
@@ -155,7 +158,9 @@ def process_model(
 
     graph_filename_tgt = script_dir / graph_filename
     if download_models and (not graph_filename_tgt.exists()):
-        assert not models_base_dir, "downloading the models is incompatible with specifying `models_base_dir`"
+        assert (
+            not models_base_dir
+        ), "downloading the models is incompatible with specifying `models_base_dir`"
         try:
             script_dir.mkdir(parents=True, exist_ok=True)
             urlretrieve(metadata["link"], graph_filename_tgt)
