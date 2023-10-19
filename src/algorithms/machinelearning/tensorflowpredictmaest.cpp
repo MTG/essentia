@@ -192,7 +192,7 @@ const char* TensorflowPredictMAEST::description = DOC(
   "where `n` is the index of the layer (starting from 1).\n"
   "The output from the attention layers should be interpreted as follows:\n"
   "  [batch_index, 1, token_number, embeddings_size]\n"
-  "Where the the fist and second tokens (e.g., [0, 0, :2, :]) correspond to the "
+  "Where the first and second tokens (e.g., [0, 0, :2, :]) correspond to the "
   "CLS and DIST tokens respectively, and the following ones to input signal ( "
   "refer to the original paper for details [1]).\n"
 

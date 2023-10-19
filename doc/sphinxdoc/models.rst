@@ -231,7 +231,7 @@ Models:
 
 *Note: It is possible to retrieve the output of each attention layer by setting* ``output=StatefulParitionedCall:n`` *, where* ``n`` *is the index of the layer (starting from 1).*
 *The output from the attention layers should be interpreted as* ``[batch_index, 1, token_number, embeddings_size]``
-*, where the fist and second tokens (i.e.,* ``[0, 0, :2, :]`` *) correspond to the*  ``CLS`` *and* ``DIST`` *tokens respectively, and the following ones to input signal (refer to the* `paper <https://repositori.upf.edu/handle/10230/58023>`_  *for details).*
+*, where the first and second tokens (i.e.,* ``[0, 0, :2, :]`` *) correspond to the*  ``CLS`` *and* ``DIST`` *tokens respectively, and the following ones to input signal (refer to the* `paper <https://repositori.upf.edu/handle/10230/58023>`_  *for details).*
 
 OpenL3
 ^^^^^^
