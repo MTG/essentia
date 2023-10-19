@@ -99,9 +99,11 @@ def get_additional_parameters(metadata: dict, output: str, algo_name: str):
             model_output["output_purpose"] == output
             and model_output["name"] != OUTPUT_DEFAULTS[algo_name]
         ):
-            if metadata["name"] == "MAEST" and ":7" in model_output["name"]:
+            if metadata["name"] == "MAEST" and ":7" not in model_output["name"]:
                 # For MAEST we recommend using the embeddings from the 7th layer.
-                additional_parameters += f', output="{model_output["name"]}"'
+                continue
+
+            additional_parameters += f', output="{model_output["name"]}"'
 
     return additional_parameters
 
