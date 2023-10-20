@@ -55,12 +55,12 @@ class TestTensorFlowPredictMAEST(TestCase):
         )
 
         filename = join(testdata.audio_dir, "recorded", "techno_loop.wav")
-        audio = MonoLoader(filename=filename, sampleRate=16000, resampleQuality=4)()
+        audio = MonoLoader(filename=filename, sampleRate=16000)()
 
         activations = self.model30s(audio)
         found = numpy.mean(activations, axis=0).squeeze()
 
-        self.assertAlmostEqualVector(found, expected, 1e-1)
+        self.assertAlmostEqualVector(found, expected, 1e-3)
 
     def testInvalidParam(self):
         self.assertConfigureFails(
