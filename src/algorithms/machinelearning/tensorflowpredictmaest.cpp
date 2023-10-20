@@ -113,26 +113,26 @@ void TensorflowPredictMAEST::configure() {
 
   if (parameter("patchSize").isConfigured()) {
     if (graphFilename.find("20s") != std::string::npos) {
-      E_INFO("TensorFlowPredictMAEST: We detected that the default patchSize is not suitable for the graph `" << graphFilename.c_str() << "`. Setting it to 1258, which is adequate for the 20s model.");
+      E_INFO("TensorFlowPredictMAEST: The default `patchSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 1258, which is adequate for the 20s model.");
       patchSize = 1258;
     } else if (graphFilename.find("10s") != std::string::npos) {
-      E_INFO("TensorFlowPredictMAEST: We detected that the default patchSize is not suitable for the graph `" << graphFilename.c_str() << "`. Setting it to 626, which is adequate for the 10s model.");
+      E_INFO("TensorFlowPredictMAEST: The default `patchSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 626, which is adequate for the 10s model.");
       patchSize = 626;
     } else if (graphFilename.find("5s") != std::string::npos) {
-      E_INFO("TensorFlowPredictMAEST: We detected that the default patchSize is not suitable for the graph `" << graphFilename.c_str() << "`. Setting it to 316, which is adequate for the 5s model.");
+      E_INFO("TensorFlowPredictMAEST: The default `patchSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 316, which is adequate for the 5s model.");
       patchSize = 316;
     }
   }
 
   if (parameter("patchHopSize").isConfigured()) {
     if (graphFilename.find("20s") != std::string::npos) {
-      E_INFO("TensorFlowPredictMAEST: Setting patchHopSize to 1250, which is adequate for the 20s model.\n");
+      E_INFO("TensorFlowPredictMAEST: The default `patchHopSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 1250, which is adequate for the 20s model.\n");
       patchHopSize = 1250;
     } else if (graphFilename.find("10s") != std::string::npos) {
-      E_INFO("TensorFlowPredictMAEST: Setting patchHopSize to 625, which is adequate for the 10s model.\n");
+      E_INFO("TensorFlowPredictMAEST: The default `patchHopSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 625, which is adequate for the 10s model.\n");
       patchHopSize = 625;
     } else if (graphFilename.find("5s") != std::string::npos) {
-      E_INFO("TensorFlowPredictMAEST: Setting patchHopSize to 313, which is adequate for the 5s model.\n");
+      E_INFO("TensorFlowPredictMAEST: The default `patchHopSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 313, which is adequate for the 5s model.\n");
       patchHopSize = 313;
     }
   }
@@ -205,7 +205,7 @@ const char* TensorflowPredictMAEST::description = DOC(
   "the user's responsibility to make sure it is a valid one.\n"
   "\n"
   "Note: when `patchHopSize` and `patchSize` are not specified, the algorithm "
-  "will parse `graphFilename` to try to set appropriate values.\n"
+  "will parse the `graphFilename` string to try to set appropriate values.\n"
   "\n"
   "References:\n"
   "\n"
