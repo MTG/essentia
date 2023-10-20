@@ -141,6 +141,9 @@ Discogs-MAEST
 ^^^^^^^^^^^^^
 
 Music Audio Efficient Spectrogram Transformer (`MAEST <https://github.com/palonso/MAEST/>`_) trained to predict music style labels using an in-house dataset annotated with Discogs metadata.
+We offer versions of MAEST trained with sequence lengths ranging from 5 to 30 seconds (``5s``, ``10s``, ``20s``, and ``30s``), and trained starting from different intial weights: from random initialization (``fs``), from `DeiT <https://doi.org/10.48550/arXiv.2012.12877>`_ pre-trained weights (``dw``), and from `PaSST <https://doi.org/10.48550/arXiv.2106.07139>`_ pre-trained weights (``pw``). Additionally, we offer a version of MAEST trained following a teacher student setup (``ts``).
+According to our study ``discogs-maest-30s-pw``, achieved the most competitive performance in most downstream tasks (refer to the `paper <http://hdl.handle.net/10230/58023>`_ for details).
+
 
 Models:
 
@@ -231,7 +234,7 @@ Models:
 
 *Note: It is possible to retrieve the output of each attention layer by setting* ``output=StatefulParitionedCall:n`` *, where* ``n`` *is the index of the layer (starting from 1).*
 *The output from the attention layers should be interpreted as* ``[batch_index, 1, token_number, embeddings_size]``
-*, where the first and second tokens (i.e.,* ``[0, 0, :2, :]`` *) correspond to the*  ``CLS`` *and* ``DIST`` *tokens respectively, and the following ones to input signal (refer to the* `paper <http://hdl.handle.net/10230/58023>`_  *for details).*
+*, where the first and second tokens (i.e.,* ``[0, 0, :2, :]`` *) correspond to the*  ``CLS`` *and* ``DIST`` *tokens respectively, and the following ones to input signal.*
 
 OpenL3
 ^^^^^^
