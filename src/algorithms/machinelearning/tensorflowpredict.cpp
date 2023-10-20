@@ -366,6 +366,7 @@ const Tensor<Real> TensorflowPredict::TFToTensor(
 TF_Output TensorflowPredict::graphOperationByName(const string nodeName) {
   int index = 0;
   const char* name = nodeName.c_str();
+  string newNodeName;
 
   // TensorFlow operations (or nodes from the graph perspective) return tensors named <nodeName:n>, where n goes
   // from 0 to the number of outputs. The first output tensor of a node can be extracted implicitly (nodeName)
@@ -374,22 +375,16 @@ TF_Output TensorflowPredict::graphOperationByName(const string nodeName) {
   string::size_type n = nodeName.find(':');
   if (n != string::npos) {
     try {
-      string::size_type next_char;
-      index = stoi(nodeName.substr(n + 1), &next_char);
-
-      if (n + next_char + 1 != nodeName.size()) {
-        throw EssentiaException("TensorflowPredict: `" + nodeName + "` is not a valid node name, the index cannot "
-                                "be followed by other characters. Make sure that all your inputs and outputs follow "
-                                "the pattern `nodeName:n`, where `n` in an integer that goes from 0 to the number "
-                                "of outputs of the node - 1.");
-      }
+      newNodeName = nodeName.substr(0, n);
+      name = newNodeName.c_str();
+      index = stoi(nodeName.substr(n + 1, nodeName.size()));
 
     } catch (const invalid_argument& ) {
       throw EssentiaException("TensorflowPredict: `" + nodeName + "` is not a valid node name. Make sure that all "
                               "your inputs and outputs follow the pattern `nodeName:n`, where `n` in an integer that "
                               "goes from 0 to the number of outputs of the node - 1.");
-    } 
-    name = nodeName.substr(0, n).c_str();
+    }
+
   }
 
   TF_Operation* oper = TF_GraphOperationByName(_graph, name);
