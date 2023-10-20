@@ -112,26 +112,26 @@ void TensorflowPredictMAEST::configure() {
  // https://cs231n.github.io/convolutional-networks/#conv
 
   if (parameter("patchSize").isConfigured()) {
-    if (graphFilename.find("20s") != std::string::npos) {
+    if (graphFilename.find("discogs-maest-20s-") != std::string::npos) {
       E_INFO("TensorFlowPredictMAEST: The default `patchSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 1258, which is adequate for the 20s model.");
       patchSize = 1258;
-    } else if (graphFilename.find("10s") != std::string::npos) {
+    } else if (graphFilename.find("discogs-maest-10s-") != std::string::npos) {
       E_INFO("TensorFlowPredictMAEST: The default `patchSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 626, which is adequate for the 10s model.");
       patchSize = 626;
-    } else if (graphFilename.find("5s") != std::string::npos) {
+    } else if (graphFilename.find("discogs-maest-5s-") != std::string::npos) {
       E_INFO("TensorFlowPredictMAEST: The default `patchSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 316, which is adequate for the 5s model.");
       patchSize = 316;
     }
   }
 
   if (parameter("patchHopSize").isConfigured()) {
-    if (graphFilename.find("20s") != std::string::npos) {
+    if (graphFilename.find("discogs-maest-20s-") != std::string::npos) {
       E_INFO("TensorFlowPredictMAEST: The default `patchHopSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 1250, which is adequate for the 20s model.\n");
       patchHopSize = 1250;
-    } else if (graphFilename.find("10s") != std::string::npos) {
+    } else if (graphFilename.find("discogs-maest-10s-") != std::string::npos) {
       E_INFO("TensorFlowPredictMAEST: The default `patchHopSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 625, which is adequate for the 10s model.\n");
       patchHopSize = 625;
-    } else if (graphFilename.find("5s") != std::string::npos) {
+    } else if (graphFilename.find("discogs-maest-5s-") != std::string::npos) {
       E_INFO("TensorFlowPredictMAEST: The default `patchHopSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 313, which is adequate for the 5s model.\n");
       patchHopSize = 313;
     }
