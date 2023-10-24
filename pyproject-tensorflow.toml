@@ -46,7 +46,7 @@ before-build = [
   "brew install ",
   "PACKAGES=(eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag chromaprint); for PACKAGE in \"${PACKAGES[@]}\"; do brew fetch --force --bottle-tag=arm64_monterrey $PACKAGE; result=$(brew --cache --bottle-tag=arm64_monterrey $PACKAGE) brew install $result; done",
   "PACKAGES=(pkg-config gcc readline sqlite gdbm freetype libpng); for PACKAGE in \"${PACKAGES[@]}\"; do brew fetch --force --bottle-tag=arm64_monterrey $PACKAGE; result=$(brew --cache --bottle-tag=arm64_monterrey $PACKAGE) brew install $result; done",
-  "PACKAGES=(tensorflow); for PACKAGE in \"${PACKAGES[@]}\"; do brew fetch --force --bottle-tag=arm64_monterrey $PACKAGE; result=$(brew --cache --bottle-tag=arm64_monterrey $PACKAGE) brew install $result; done"
+  "PACKAGES=(tensorflow); for PACKAGE in \"${PACKAGES[@]}\"; do brew fetch --force --bottle-tag=arm64_monterrey $PACKAGE; result=$(brew --cache --bottle-tag=arm64_monterrey $PACKAGE) brew install $result; done",
   "brew link --force ffmpeg@2.8",
   "python waf configure --with-tensorflow --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
