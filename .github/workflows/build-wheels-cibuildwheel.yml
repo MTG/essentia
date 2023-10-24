@@ -22,6 +22,8 @@ jobs:
         uses: pypa/cibuildwheel@v2.11.4
         with:
           config-file: ${{ matrix.config }}
+        env:
+          CIBW_ARCHS_MACOS: x86_64 arm64
 
       - uses: actions/upload-artifact@v3
         with:

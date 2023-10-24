@@ -37,6 +37,17 @@ before-all = [
 
 test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter'"
 
+[[tool.cibuildwheel.overrides]]
+select = "*arm64*"
+
+before-all = [
+  "brew install pkg-config gcc readline sqlite gdbm freetype libpng",
+  "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag chromaprint",
+  "brew link --force ffmpeg@2.8",
+  "python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
+  "python waf",
+  "python waf install"
+]
 
 [build-system]
 
