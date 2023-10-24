@@ -23,7 +23,7 @@ jobs:
         with:
           config-file: ${{ matrix.config }}
         env:
-          CIBW_ARCHS_MACOS: x86_64 arm64
+          CIBW_ARCHS_MACOS: arm64 x86_64 
 
       - uses: actions/upload-artifact@v3
         with:
