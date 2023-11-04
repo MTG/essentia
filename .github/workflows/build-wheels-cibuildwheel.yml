@@ -8,8 +8,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-11]
-        config: [pyproject-tensorflow.toml, pyproject.toml]
+        os: [macos-11]
+        config: [pyproject.toml]
 
     steps:
       - uses: actions/checkout@v3
@@ -23,7 +23,7 @@ jobs:
         with:
           config-file: ${{ matrix.config }}
         env:
-          CIBW_ARCHS_MACOS: arm64 x86_64 
+          CIBW_ARCHS_MACOS: arm64
 
       - uses: actions/upload-artifact@v3
         with:
