@@ -41,8 +41,8 @@ test-command = "python -c 'import essentia; import essentia.standard; import ess
 select = "*macosx_arm64*"
 
 before-build = [
-  "PACKAGES=(eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag chromaprint); for PACKAGE in ${PACKAGES[@]}; do brew fetch --force --bottle-tag=arm64_monterey $PACKAGE; result=$(brew --cache --bottle-tag=arm64_monterey $PACKAGE); brew install $result; done",
-  "PACKAGES=(pkg-config gcc readline sqlite gdbm freetype libpng); for PACKAGE in ${PACKAGES[@]}; do brew fetch --force --bottle-tag=arm64_monterey $PACKAGE; result=$(brew --cache --bottle-tag=arm64_monterey $PACKAGE); brew install $result; done",
+  "PACKAGES=(pkg-config gcc readline sqlite gdbm freetype libpng); for PACKAGE in ${PACKAGES[@]}; do brew fetch --force --bottle-tag=arm64_monterey $PACKAGE; result=$(brew --cache --bottle-tag=arm64_monterey $PACKAGE); brew reinstall $result; done",
+  "PACKAGES=(eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag chromaprint); for PACKAGE in ${PACKAGES[@]}; do brew fetch --force --bottle-tag=arm64_monterey $PACKAGE; result=$(brew --cache --bottle-tag=arm64_monterey $PACKAGE); brew reinstall $result; done",
   "brew link --force ffmpeg@2.8",
   "python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
