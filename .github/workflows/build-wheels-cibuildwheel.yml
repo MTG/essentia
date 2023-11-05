@@ -23,7 +23,8 @@ jobs:
         with:
           config-file: ${{ matrix.config }}
         env:
-          CIBW_ARCHS_MACOS: arm64
+          - CIBW_ARCHS_MACOS: arm64
+          - CIBW_SKIP: cp38-macosx_*
 
       - uses: actions/upload-artifact@v3
         with:
