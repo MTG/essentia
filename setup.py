@@ -45,10 +45,10 @@ class EssentiaBuildExtension(build_ext):
         if var_only_python in os.environ and os.environ[var_only_python]=='1':
             print('Skipping building the core libessentia library (%s=1)' %  var_only_python)
             subprocess.run([PYTHON,  'waf', 'configure', '--only-python', '--static-dependencies',
-                      '--prefix=tmp'], check=True)
+                      '--prefix=tmp','--arch=arm64', '--no-msse'], check=True)
         else:
             subprocess.run([PYTHON, 'waf', 'configure', '--build-static', '--static-dependencies'
-                      '--with-python --prefix=tmp'], check=True)
+                      '--with-python --prefix=tmp', '--arch=arm64', '--no-msse'], check=True)
         subprocess.run([PYTHON, 'waf'], check=True)
         subprocess.run([PYTHON, 'waf', 'install'], check=True)
 
