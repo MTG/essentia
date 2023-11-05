@@ -195,6 +195,7 @@ def configure(ctx):
             ctx.env.LDFLAGS = ['-arch', 'i386', '-arch', 'x86_64']
 
         if ctx.options.ARCH == 'arm64':
+            ctx.env.CFLAGS += ['-arch', 'arm64']
             ctx.env.CXXFLAGS += ['-arch', 'arm64']
             ctx.env.LINKFLAGS += ['-arch', 'arm64']
             ctx.env.LDFLAGS += ['-arch', 'arm64']
