@@ -15,8 +15,9 @@ Essentia TensorFlow models
 Examples of inference with the pre-trained TensorFlow models for music auto-tagging and classification tasks:
 
 - Music classification by genre, mood, danceability, instrumentation: https://replicate.com/mtg/music-classifiers
-- Music style classification with the Discogs taxonomy (400 styles). Overall track-level predictions: https://replicate.com/mtg/effnet-discogs
-- Music style classification with the Discogs taxonomy (400 styles). Segment-level real-time predictions with Essentia.js: https://essentia.upf.edu/essentiajs-discogs
+- Music style classification with the Discogs taxonomy (400 styles, MAEST model). Overall track-level predictions: https://replicate.com/mtg/maest
+- Music style classification with the Discogs taxonomy (400 styles, Effnet-Discogs model). Overall track-level predictions: https://replicate.com/mtg/effnet-discogs
+- Music style classification with the Discogs taxonomy (400 styles, Effnet-Discogs model). Segment-level real-time predictions with Essentia.js: https://essentia.upf.edu/essentiajs-discogs
 - Real-time music autotagging (50 tags) in the browser with Essentia.js: https://mtg.github.io/essentia.js/examples/demos/autotagging-rt/
 - Mood classification in the browser with Essentia.js: https://mtg.github.io/essentia.js/examples/demos/mood-classifiers/
 - Music emotion arousal/valence regression: https://replicate.com/mtg/music-arousal-valence
