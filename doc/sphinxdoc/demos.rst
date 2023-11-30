@@ -9,6 +9,12 @@ Examples of music audio analysis with Essentia algorithms using Essentia.js
 https://mtg.github.io/essentia.js/examples/
 
 
+Tempo estimation
+----------------
+
+Tempo BPM estimation with Essentia: https://replicate.com/mtg/essentia-bpm
+
+
 Essentia TensorFlow models
 --------------------------
 
