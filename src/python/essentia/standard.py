@@ -22,15 +22,28 @@ from . import common as _c
 import sys as _sys
 from ._essentia import keys as algorithmNames, info as algorithmInfo
 from copy import copy
+from os import getenv
+
+
+# Whether to skip loading algorithms for reading their metadata (faster import).
+ESSENTIA_PYTHON_NODOC = getenv('ESSENTIA_PYTHON_NODOC', False)
+ESSENTIA_PYTHON_NODOC = (ESSENTIA_PYTHON_NODOC == 'True' or
+                         ESSENTIA_PYTHON_NODOC == 'true' or
+                         ESSENTIA_PYTHON_NODOC == '1')
 
 # given an essentia algorithm name, create the corresponding class
 def _create_essentia_class(name, moduleName = __name__):
     essentia.log.debug(essentia.EPython, 'Creating essentia.standard class: %s' % name)
 
-    _algoInstance = _essentia.Algorithm(name)
-    _algoDoc = _algoInstance.getDoc()
-    _algoStruct = _algoInstance.getStruct()
-    del _algoInstance
+
+   if not ESSENTIA_PYTHON_NODOC or name == "FrameCutter":
+        _algoInstance = _essentia.Algorithm(name)
+        _algoDoc = _algoInstance.getDoc()
+        _algoStruct = _algoInstance.getStruct()
+        del _algoInstance
+    else:
+        _algoDoc = None
+        _algoStruct = None
 
     class Algo(_essentia.Algorithm):
         __doc__ = _algoDoc

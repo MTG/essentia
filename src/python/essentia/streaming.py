@@ -21,6 +21,14 @@ import essentia
 import sys as _sys
 from . import common as _c
 from ._essentia import skeys as algorithmNames, sinfo as algorithmInfo
+from os import getenv
+
+
+# Whether to skip loading algorithms for reading their metadata (faster import).
+ESSENTIA_PYTHON_NODOC = getenv('ESSENTIA_PYTHON_NODOC', False)
+ESSENTIA_PYTHON_NODOC = (ESSENTIA_PYTHON_NODOC == 'True' or
+                         ESSENTIA_PYTHON_NODOC == 'true' or
+                         ESSENTIA_PYTHON_NODOC == '1')
 
 # Used as a place-holder for sources and sinks, implements the right shift
 # operator
@@ -139,10 +147,14 @@ class _StreamConnector:
 def _create_streaming_algo(givenname):
     essentia.log.debug(essentia.EPython, 'Creating essentia.streaming class: %s' % givenname)
 
-    _algoInstance = _essentia.StreamingAlgorithm(givenname)
-    _algoDoc = _algoInstance.getDoc()
-    _algoStruct = _algoInstance.getStruct()
-    del _algoInstance
+    if not ESSENTIA_PYTHON_NODOC or givenname == 'FrameCutter':
+        _algoInstance = _essentia.StreamingAlgorithm(givenname)
+        _algoDoc = _algoInstance.getDoc()
+        _algoStruct = _algoInstance.getStruct()
+        del _algoInstance
+    else:
+        _algoDoc = None
+        _algoStruct = None
 
     class StreamingAlgo(_essentia.StreamingAlgorithm):
         __doc__ = _algoDoc
