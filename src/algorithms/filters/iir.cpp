@@ -26,7 +26,7 @@ using namespace standard;
 
 const char* IIR::name = "IIR";
 const char* IIR::category = "Filters";
-const char* IIR::description = DOC("This algorithm implements a standard IIR filter. It filters the data in the input vector with the filter described by parameter vectors 'numerator' and 'denominator' to create the output filtered vector. In the litterature, the numerator is often referred to as the 'B' coefficients and the denominator as the 'A' coefficients.\n"
+const char* IIR::description = DOC("This algorithm implements a standard IIR filter. It filters the data in the input vector with the filter described by parameter vectors 'numerator' and 'denominator' to create the output filtered vector. In the literature, the numerator is often referred to as the 'B' coefficients and the denominator as the 'A' coefficients.\n"
 "\n"
 "The filter is a Direct Form II Transposed implementation of the standard difference equation:\n"
 "  a(0)*y(n) = b(0)*x(n) + b(1)*x(n-1) + ... + b(nb-1)*x(n-nb+1) - a(1)*y(n-1) - ... - a(nb-1)*y(n-na+1)\n"
