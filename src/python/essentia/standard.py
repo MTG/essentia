@@ -35,8 +35,7 @@ ESSENTIA_PYTHON_NODOC = (ESSENTIA_PYTHON_NODOC == 'True' or
 def _create_essentia_class(name, moduleName = __name__):
     essentia.log.debug(essentia.EPython, 'Creating essentia.standard class: %s' % name)
 
-
-   if not ESSENTIA_PYTHON_NODOC or name == "FrameCutter":
+    if not ESSENTIA_PYTHON_NODOC or name == "FrameCutter":
         _algoInstance = _essentia.Algorithm(name)
         _algoDoc = _algoInstance.getDoc()
         _algoStruct = _algoInstance.getStruct()
