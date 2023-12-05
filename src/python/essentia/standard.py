@@ -22,27 +22,16 @@ from . import common as _c
 import sys as _sys
 from ._essentia import keys as algorithmNames, info as algorithmInfo
 from copy import copy
-from os import getenv
+import os.path
+import json
 
-
-# Whether to skip loading algorithms for reading their metadata (faster import).
-ESSENTIA_PYTHON_NODOC = getenv('ESSENTIA_PYTHON_NODOC', False)
-ESSENTIA_PYTHON_NODOC = (ESSENTIA_PYTHON_NODOC == 'True' or
-                         ESSENTIA_PYTHON_NODOC == 'true' or
-                         ESSENTIA_PYTHON_NODOC == '1')
 
 # given an essentia algorithm name, create the corresponding class
-def _create_essentia_class(name, moduleName = __name__):
+def _create_essentia_class(name, meta, moduleName = __name__):
     essentia.log.debug(essentia.EPython, 'Creating essentia.standard class: %s' % name)
 
-    if not ESSENTIA_PYTHON_NODOC or name == "FrameCutter":
-        _algoInstance = _essentia.Algorithm(name)
-        _algoDoc = _algoInstance.getDoc()
-        _algoStruct = _algoInstance.getStruct()
-        del _algoInstance
-    else:
-        _algoDoc = None
-        _algoStruct = None
+    _algoDoc = meta[name]['__doc__']
+    _algoStruct = meta[name]['__struct__']
 
     class Algo(_essentia.Algorithm):
         __doc__ = _algoDoc
@@ -147,8 +136,17 @@ def _create_essentia_class(name, moduleName = __name__):
 
 # load all classes into python
 def _reloadAlgorithms(moduleName = __name__):
-    for name in _essentia.keys():
-        _create_essentia_class(name, moduleName)
+    meta_file = 'standard.meta.json'
+    essentia.log.debug(essentia.EPython, f'Loading __doc__ and __struct__ metadata for essentia.standard from {meta_file}')
+    # Looking for a metadata file in the same directory as `standard.py`
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, meta_file)
+    with open(file_path, 'r') as f:
+        meta = json.load(f)
+
+    for name in algorithmNames():
+        _create_essentia_class(name, meta, moduleName)
+
 
 _reloadAlgorithms()
 

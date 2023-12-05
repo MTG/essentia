@@ -21,14 +21,9 @@ import essentia
 import sys as _sys
 from . import common as _c
 from ._essentia import skeys as algorithmNames, sinfo as algorithmInfo
-from os import getenv
+import os.path
+import json
 
-
-# Whether to skip loading algorithms for reading their metadata (faster import).
-ESSENTIA_PYTHON_NODOC = getenv('ESSENTIA_PYTHON_NODOC', False)
-ESSENTIA_PYTHON_NODOC = (ESSENTIA_PYTHON_NODOC == 'True' or
-                         ESSENTIA_PYTHON_NODOC == 'true' or
-                         ESSENTIA_PYTHON_NODOC == '1')
 
 # Used as a place-holder for sources and sinks, implements the right shift
 # operator
@@ -144,17 +139,11 @@ class _StreamConnector:
 
 
 
-def _create_streaming_algo(givenname):
+def _create_streaming_algo(givenname, meta):
     essentia.log.debug(essentia.EPython, 'Creating essentia.streaming class: %s' % givenname)
 
-    if not ESSENTIA_PYTHON_NODOC or givenname == 'FrameCutter':
-        _algoInstance = _essentia.StreamingAlgorithm(givenname)
-        _algoDoc = _algoInstance.getDoc()
-        _algoStruct = _algoInstance.getStruct()
-        del _algoInstance
-    else:
-        _algoDoc = None
-        _algoStruct = None
+    _algoDoc = meta[givenname]['__doc__']
+    _algoStruct = meta[givenname]['__struct__']
 
     class StreamingAlgo(_essentia.StreamingAlgorithm):
         __doc__ = _algoDoc
@@ -207,10 +196,20 @@ def _create_streaming_algo(givenname):
 
 # load all streaming algorithms into module
 def _reloadStreamingAlgorithms():
+    meta_file = 'streaming.meta.json'
+    essentia.log.debug(essentia.EPython, f'Loading __doc__ and __struct__ metadata for essentia.streaming from {meta_file}')
+    # Looking for a metadata file in the same directory as `streaming.py`
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, meta_file)
+    with open(file_path, 'r') as f:
+        meta = json.load(f)
+
     for name in algorithmNames():
-        _create_streaming_algo(name)
+        _create_streaming_algo(name, meta)
+
 
 _reloadStreamingAlgorithms()
+
 
 # This subclass provides some more functionality for VectorInput
 class VectorInput(_essentia.VectorInput):

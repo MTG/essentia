@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import distutils.sysconfig
 import os
+import sys
 
 
 def options(ctx):
@@ -58,5 +59,24 @@ def build(ctx):
         use      = ctx.env.USE_LIBS if ctx.env.ONLY_PYTHON else 'essentia ' #+ ctx.env.USE_LIBS
     )
 
+    # Create local python package folder.
+    print("Precompute algorithms' help metadata (__doc__ and __struct__)")
+    PYTHONPATH = 'build/python'
+    os.system(f'rm -rf {PYTHONPATH}')
+    os.system(f'mkdir -p {PYTHONPATH}')
+    os.system(f'cp -r src/python/essentia {PYTHONPATH}/')
+
+    # TODO These filenames only work for Linux.
+    os.system(f'cp build/src/python/_essentia*.so {PYTHONPATH}/essentia')
+    os.system(f'cp build/src/libessentia.so {PYTHONPATH}/essentia')
+
+    pythonpath = os.path.abspath(PYTHONPATH)
+    ldpath = os.path.join(pythonpath, 'essentia')
+    python_code = f'from essentia.meta import _extract_metadata; _extract_metadata(\"{PYTHONPATH}/essentia\")'
+    os.system(f"PYTHONPATH={pythonpath} LD_LIBRARY_PATH={ldpath} {sys.executable} -c '{python_code}'")
+    print("Algorithms' metadata created")
+
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
                       relative_trick=True)
+    ctx.install_files('${PYTHONDIR}/essentia', ctx.path.parent.parent.ant_glob(f'{PYTHONPATH}/essentia/*.meta.json'),
+                      relative_trick=False)
