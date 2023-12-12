@@ -15,7 +15,6 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-from six import iteritems
 from . import _essentia
 import essentia
 import sys as _sys
@@ -175,7 +174,7 @@ def _create_streaming_algo(givenname, meta):
 
         def configure(self, **kwargs):
             # verify that all types match and do any necessary conversions
-            for name, val in iteritems(kwargs):
+            for name, val in iter(kwargs.items()):
                 goalType = self.paramType(name)
                 try:
                     convertedVal = _c.convertData(val, goalType)
