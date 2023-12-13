@@ -49,34 +49,48 @@ def build(ctx):
                       # system python path
                       os.path.join(ctx.env.PYTHONDIR, 'numpy', 'core', 'include') ]
 
-    pybindings = ctx.shlib(
-        source   = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp'),
-        target   = '_essentia',
+    ctx.shlib(
+        source = ctx.path.ant_glob('essentia.cpp parsing.cpp pytypes/*.cpp'),
+        target = '_essentia',
         features = 'pyext',
         includes = NUMPY_INCPATH + [ '.', 'pytypes' ] + (ctx.env.INCLUDES_ESSENTIA if ctx.env.ONLY_PYTHON else adjust(ctx.env.INCLUDES, '..')),
         cxxflags = [ '-w' ],
         install_path = '${PYTHONDIR}/essentia',
-        use      = ctx.env.USE_LIBS if ctx.env.ONLY_PYTHON else 'essentia ' #+ ctx.env.USE_LIBS
+        use = ctx.env.USE_LIBS if ctx.env.ONLY_PYTHON else 'essentia ',  #+ ctx.env.USE_LIBS
+        name = 'pybindings'
     )
 
-    # Create local python package folder.
-    print("Precompute algorithms' help metadata (__doc__ and __struct__)")
-    PYTHONPATH = 'build/python'
-    os.system(f'rm -rf {PYTHONPATH}')
-    os.system(f'mkdir -p {PYTHONPATH}')
-    os.system(f'cp -r src/python/essentia {PYTHONPATH}/')
-
-    # TODO These filenames only work for Linux.
-    os.system(f'cp build/src/python/_essentia*.so {PYTHONPATH}/essentia')
-    os.system(f'cp build/src/libessentia.so {PYTHONPATH}/essentia')
-
-    pythonpath = os.path.abspath(PYTHONPATH)
-    ldpath = os.path.join(pythonpath, 'essentia')
-    python_code = f'from essentia.meta import _extract_metadata; _extract_metadata(\"{PYTHONPATH}/essentia\")'
-    os.system(f"PYTHONPATH={pythonpath} LD_LIBRARY_PATH={ldpath} {sys.executable} -c '{python_code}'")
-    print("Algorithms' metadata created")
+    ctx.add_group()
+    ctx(rule=create_algo_metadata,
+        target=['standard.meta.json', 'streaming.meta.json'],
+        name='pybindings_algo_meta')
 
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
                       relative_trick=True)
-    ctx.install_files('${PYTHONDIR}/essentia', ctx.path.parent.parent.ant_glob(f'{PYTHONPATH}/essentia/*.meta.json'),
-                      relative_trick=False)
+    ctx.install_files('${PYTHONDIR}/essentia', ['standard.meta.json', 'streaming.meta.json'])
+
+
+def create_algo_metadata(task):
+    output_paths = (task.outputs[0].abspath(), task.outputs[1].abspath())
+    python_code = 'from essentia.meta import _extract_metadata; _extract_metadata("%s", "%s")' % output_paths
+    if task.env.ONLY_PYTHON:
+        ldpath = task.env.LIBPATH_ESSENTIA[0]
+    else:
+        ldpath = "../build/src"
+
+    command = """
+echo "Precompute algorithms' help metadata (__doc__ and __struct__)"
+echo `pwd`
+echo "Using libessentia.so at %s"
+set -x
+rm -rf ../build/python
+mkdir -p ../build/python
+cp -r ../src/python/essentia ../build/python/
+cp ../build/src/python/_essentia*.so ../build/python/essentia/
+cp %s/libessentia.so ../build/python/essentia/
+
+PYTHONPATH=../build/python LD_LIBRARY_PATH=../build/python/essentia %s -c '%s'
+set +x
+echo "Algorithms' metadata created"
+""" % (ldpath, ldpath, sys.executable, python_code)
+    task.exec_command(command)

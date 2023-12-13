@@ -28,8 +28,8 @@ def _metadata_streaming():
     return meta
 
 
-def _extract_metadata(filedir):
+def _extract_metadata(filepath_standard, filepath_streaming):
     """ Loads algorithms' metadata (__doc__ and __struct__) from the C extension
     and stores it to files in a filedir"""
-    dump(_metadata_standard(), open(join(filedir, 'standard.meta.json'), 'w'))
-    dump(_metadata_streaming(), open(join(filedir, 'streaming.meta.json'), 'w'))
+    dump(_metadata_standard(), open(filepath_standard, 'w'))
+    dump(_metadata_streaming(), open(filepath_streaming, 'w'))
