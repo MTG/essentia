@@ -550,10 +550,10 @@ def build(ctx):
             install_path = '${PREFIX}/lib'
         )
 
-    ctx(source='../essentia.pc.in', **ctx.env.pcfile_opts)
+    # pkgconfig file
+    ctx(source='../essentia.pc.in', **ctx.env.pcfile_opts, install_path='${PREFIX}/lib/pkgconfig')
 
     ctx.add_group()
-
 
     # install headers if asked to
     headers = ctx.path.ant_glob('essentia/**/*.h')
@@ -562,12 +562,6 @@ def build(ctx):
         ctx.install_files('${PREFIX}/include/' + install_dir, h)
     # version.h
     ctx.install_files('${PREFIX}/include/essentia', 'version.h')
-
-    # install pkgconfig file
-    #pc = ctx.path.ant_glob('essentia/build/essentia.pc') #TODO remove
-    #ctx.install_files('${PREFIX}/lib/pkgconfig', pc)     #TODO remove
-    ctx.install_files('${PREFIX}/lib/pkgconfig', '../build/essentia.pc')
-
 
     if ctx.env.EXAMPLE_LIST or ctx.env.WITH_VAMP:
         ctx.recurse('examples')
