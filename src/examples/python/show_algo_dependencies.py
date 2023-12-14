@@ -26,7 +26,6 @@ import yaml
 import argparse
 
 
-
 def find_dependencies(mode, algo):
     if algo in ['MusicExtractor', 'FreesoundExtractor']:
         # FIXME These are special algorithms that instantiate all dependencies
@@ -56,6 +55,10 @@ loader = es.%s()
 
     proc = subprocess.Popen([sys.executable, "-c", code], stderr=subprocess.PIPE)
     stderr = proc.communicate()[1].decode('utf8').split('\n')
+    exit_code = proc.wait()
+
+    if exit_code != 0:
+        raise Exception(f"Python script running {algo} algorithms failed with error:\n" + "-" * 80 + "\n" + "\n".join(stderr))
 
     # function to assign nested dict elements by a list of nested keys
     def set_val(d, keys, val):
@@ -71,7 +74,7 @@ loader = es.%s()
     # NOTE: the code relies heavily on indentification of output in Essentia's logger
     for line in stderr:
         if line.startswith("[Factory   ] "):
-        
+
             line = line.replace("[Factory   ] ", "")
             if line.count("Streaming: Creating algorithm: "):
                 tab, a = line.split("Streaming: Creating algorithm: ")
@@ -79,12 +82,12 @@ loader = es.%s()
             elif line.count("Standard : Creating algorithm: "):
                 tab, a = line.split("Standard : Creating algorithm: ")
                 m = "standard"
-            else: 
+            else:
                 continue
 
             lines.append(line)
             algos.append((m, a))
-            
+
             indent = len(tab)
 
             if indent < previous_indent:
@@ -93,10 +96,10 @@ loader = es.%s()
                 previous_key = previous_key[:-1]
 
             set_val(tree, previous_key + [(m,a)], {})
-            previous_key += [(m, a)]          
+            previous_key += [(m, a)]
 
             previous_indent = indent
- 
+
     algos = sorted(list(set(algos)))
     #algos = sorted(list(set(algos) - set([(mode, algo)])))
     return algos, tree, lines
@@ -125,12 +128,12 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Analyze Essentia's algorithm dependencies.")
 
-    parser.add_argument("-a", "--algorithm", dest="algo", 
+    parser.add_argument("-a", "--algorithm", dest="algo",
                                              help="algorithm to inspect",
                                              action="append",
                                              choices=set(essentia.standard.algorithmNames() + essentia.streaming.algorithmNames()))
-    parser.add_argument("-m", "--mode", dest="mode", 
-                                        help="mode (streaming, standard)", 
+    parser.add_argument("-m", "--mode", dest="mode",
+                                        help="mode (streaming, standard)",
                                         choices=set(("standard", "streaming")))
 
     args = vars(parser.parse_args())
@@ -151,7 +154,7 @@ if __name__ == "__main__":
     else:
         print("Algorithm was not specified. Analyze dependencies for all algorithms")
 
-    if args['mode']: 
+    if args['mode']:
         algos = [(a, m) for a, m in algos if m==args['mode']]
     else:
         print("Mode was not specified. Analyze dependencies for both modes")
@@ -164,7 +167,7 @@ if __name__ == "__main__":
 
     for algo, mode in algos:
         print("---------- %s : %s ----------" % (mode, algo))
-        dependencies, tree, _ = find_dependencies(mode, algo)  
+        dependencies, tree, _ = find_dependencies(mode, algo)
         #print_dependencies(dependencies, tree)
         print_dependencies(dependencies)
         all_dependencies += dependencies
