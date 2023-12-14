@@ -77,7 +77,8 @@ def create_algo_metadata(task):
         ldpath = task.env.LIBPATH_ESSENTIA[0]
     else:
         ldpath = "../build/src"
-
+ 
+    # TODO Use DYLD_LIBRARY_PATH on MacOS
     command = """
 echo "Precompute algorithms' help metadata (__doc__ and __struct__)"
 echo `pwd`
@@ -87,10 +88,10 @@ rm -rf ../build/python
 mkdir -p ../build/python
 cp -r ../src/python/essentia ../build/python/
 cp ../build/src/python/_essentia*.so ../build/python/essentia/
-cp %s/libessentia.so ../build/python/essentia/
+#cp %s/libessentia.{so,a} ../build/python/essentia/
 
-PYTHONPATH=../build/python LD_LIBRARY_PATH=../build/python/essentia %s -c '%s'
+PYTHONPATH=../build/python LD_LIBRARY_PATH=%s %s -c '%s'
 set +x
 echo "Algorithms' metadata created"
-""" % (ldpath, ldpath, sys.executable, python_code)
+""" % (ldpath, ldpath, ldpath, sys.executable, python_code)
     task.exec_command(command)
