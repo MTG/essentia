@@ -38,6 +38,7 @@ class EssentiaBuildExtension(build_ext):
         var_only_python = 'ESSENTIA_WHEEL_ONLY_PYTHON'
 
         var_macos_arm64 = os.getenv('ESSENTIA_MACOSX_ARM64')
+        macos_arm64_flags = []
         if var_macos_arm64 == '1':
             macos_arm64_flags = ['--arch=arm64', '--no-msse']
 
