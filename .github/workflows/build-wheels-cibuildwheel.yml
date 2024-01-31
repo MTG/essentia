@@ -15,6 +15,8 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - name: Install pipx
+        run: brew install pipx
       - name: Fetch release tags from GitHub
         # Workaround for https://github.com/actions/checkout/issues/290
         run: git fetch --tags --force
