@@ -46,7 +46,7 @@ import sys, os
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.viewcode',
               'sphinxcontrib.doxylink',
-              'sphinxprettysearchresults',
+              # 'sphinxprettysearchresults',
               'sphinx.ext.autosectionlabel',
               'sphinx_toolbox.collapse']
 
