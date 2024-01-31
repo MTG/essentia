@@ -116,6 +116,10 @@ pygments_style = 'friendly'
 # a list of builtin themes.
 html_theme = 'sphinxdoc_mtg'
 
+# If true, the text around the keyword is shown as summary of each search result.
+# Default is True.
+html_show_search_summary = False
+
 # Add any paths that contain custom themes here, relative to this directory.
 html_theme_path = ['_templates']
 
