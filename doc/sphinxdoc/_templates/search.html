@@ -24,20 +24,8 @@
 {% endblock %}
 
 {% block extrafooter %}
-<script>
-  jQuery = $;
-  $('#fallback').hide();
-  var DOCUMENTATION_OPTIONS = {
-    URL_ROOT: './',
-    VERSION: '{{version}}',
-    COLLAPSE_INDEX: false,
-    SOURCELINK_SUFFIX: '.txt',
-    FILE_SUFFIX: '.html',
-    HAS_SOURCE: true
-  };
-
-</script>
 <script src="{{ pathto("_static/doctools.js", 1) }}"></script>
+<script src="{{ pathto("_static/documentation_options.js", 1) }}"></script>
 <script src="{{ pathto("_static/searchtools.js", 1) }}"></script>
 <script src="{{ pathto("_static/language_data.js", 1) }}"></script>
 <script src="{{ pathto("searchindex.js", 1) }}" defer></script>
