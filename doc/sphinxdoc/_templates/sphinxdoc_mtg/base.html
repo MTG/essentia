@@ -43,7 +43,7 @@
       {%- endif %}
 {%- endmacro %}
 
-<html lang="en">
+<html{% if language is not none %} lang="{{ language }}"{% endif %} data-content_root="{{ content_root }}">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
