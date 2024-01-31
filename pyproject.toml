@@ -42,8 +42,7 @@ select = "*macosx_arm64*"
 
 before-build = [
   "brew install pkg-config gcc readline sqlite gdbm libpng",
-  "PACKAGES=(freetype); for PACKAGE in ${PACKAGES[@]}; do brew fetch --force --bottle-tag=arm64_ventura $PACKAGE; result=$(brew --cache --bottle-tag=arm64_ventura $PACKAGE); brew reinstall $result; done",
-  "PACKAGES=(eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag chromaprint); for PACKAGE in ${PACKAGES[@]}; do brew fetch --force --bottle-tag=arm64_ventura $PACKAGE; result=$(brew --cache --bottle-tag=arm64_ventura $PACKAGE); brew reinstall $result; done",
+  "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag chromaprint",
   "brew link --force ffmpeg@2.8",
   "python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
