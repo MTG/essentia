@@ -46,10 +46,9 @@ before-build = [
   "brew link --force ffmpeg@2.8",
   "brew install chromaprint",
   "brew link --overwrite ffmpeg@2.8",
-  "mkdir -p /usr/local/lib",
   "python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
-  "python waf install"
+  "sudo python waf install"
 ]
 
 # On Mac arm64, libavcodec.56.60.100, libavformat.56.40.101 and
