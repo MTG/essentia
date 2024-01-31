@@ -48,7 +48,8 @@ before-build = [
   "brew link --overwrite ffmpeg@2.8",
   "python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
-  "sudo python waf install"
+  "sudo python waf install",
+  "ESSENTIA_MACOSX_ARM64=1",
 ]
 
 # On Mac arm64, libavcodec.56.60.100, libavformat.56.40.101 and
