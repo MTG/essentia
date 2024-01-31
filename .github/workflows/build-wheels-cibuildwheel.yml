@@ -16,6 +16,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Install pipx
+        if: ${{ matrix.os == macos-14 }}
         run: brew install pipx
       - name: Fetch release tags from GitHub
         # Workaround for https://github.com/actions/checkout/issues/290
