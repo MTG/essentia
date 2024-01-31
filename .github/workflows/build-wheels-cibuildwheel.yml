@@ -8,8 +8,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-14]
-        config: [pyproject.toml]
+        os: [ubuntu-20.04, macos-12, macos-14]
+        config: [pyproject.toml, pyproject-tensorflow.toml]
 
     steps:
       - uses: actions/checkout@v3
@@ -24,9 +24,6 @@ jobs:
         uses: pypa/cibuildwheel@v2.11.4
         with:
           config-file: ${{ matrix.config }}
-        env:
-          CIBW_SKIP: cp38-macosx_*
-
       - uses: actions/upload-artifact@v3
         with:
           path: ./wheelhouse/*.whl
