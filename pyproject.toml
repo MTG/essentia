@@ -46,6 +46,7 @@ before-build = [
   "brew link --force ffmpeg@2.8",
   "brew install chromaprint",
   "brew link --overwrite ffmpeg@2.8",
+  "mkdir -p /usr/local/lib",
   "python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
   "python waf install"
