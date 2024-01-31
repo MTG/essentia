@@ -26,8 +26,10 @@ environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}"
 
 before-build = [
   "brew install pkg-config gcc readline sqlite gdbm freetype libpng",
-  "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag chromaprint",
+  "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag",
   "brew link --force ffmpeg@2.8",
+  "brew install chromaprint",
+  "brew link --overwrite ffmpeg@2.8",
   #"brew tap MTG/essentia",
   #"brew install gaia --HEAD",
   "python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
