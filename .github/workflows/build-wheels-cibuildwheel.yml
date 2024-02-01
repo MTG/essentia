@@ -28,4 +28,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
-          name: artifact-{{ matrix.os }}-{{ matrix.config }}
+          name: artifact-${{ matrix.os }}-${{ matrix.config }}
