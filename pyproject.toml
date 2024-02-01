@@ -4,7 +4,7 @@
 manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"
 manylinux-i686-image = "mtgupf/essentia-builds:manylinux2014_i686"
 
-# TODO: skipping Python 3.12 for now until we create manylinux wheels supporting this version.
+# TODO: skipping Python 3.12 for now until we create manylinux images supporting this version.
 skip = ["pp*", "*-musllinux*", "*i686", "*cp312*"]
 
 environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
