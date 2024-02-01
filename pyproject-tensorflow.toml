@@ -44,7 +44,7 @@ test-command = "python -c 'import essentia; import essentia.standard; import ess
 [[tool.cibuildwheel.overrides]]
 select = "*macosx_arm64*"
 
-skip = ["pp*", "cp38-macosx_*"]
+skip = ["pp*"]
 
 environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1 }
 
