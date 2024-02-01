@@ -14,7 +14,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          using: 'node20'
           fetch-depth: 0
 
       - name: Install pipx
@@ -28,10 +27,8 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.11.4
         with:
-          using: 'node20'
           config-file: ${{ matrix.config }}
 
       - uses: actions/upload-artifact@v3
         with:
-          using: 'node20'
           path: ./wheelhouse/*.whl
