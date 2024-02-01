@@ -14,17 +14,24 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          using: 'node20'
           fetch-depth: 0
+
       - name: Install pipx
         if: ${{ matrix.os == 'macos-14' }}
         run: brew install pipx
+
       - name: Fetch release tags from GitHub
         # Workaround for https://github.com/actions/checkout/issues/290
         run: git fetch --tags --force
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.11.4
         with:
+          using: 'node20'
           config-file: ${{ matrix.config }}
+
       - uses: actions/upload-artifact@v3
         with:
+          using: 'node20'
           path: ./wheelhouse/*.whl
