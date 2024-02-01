@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-20.04, macos-12, macos-14]
-        config: [pyproject.toml, pyproject-tensorflow.toml]
+        config: [pyproject, pyproject-tensorflow]
 
     steps:
       - uses: actions/checkout@v4
@@ -23,8 +23,9 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.5
         with:
-          config-file: ${{ matrix.config }}
+          config-file: ${{ matrix.config }}.toml
 
       - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
+          name: artifact-{{ matrix.os }}-{{ matrix.config }}
