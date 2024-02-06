@@ -58,6 +58,7 @@ class PitchYinFFT : public Algorithm {
   int _tauMin;
   int _tauMax;
   Real _tolerance;
+  std::string _weighting;
 
  public:
   PitchYinFFT() {
@@ -83,12 +84,13 @@ class PitchYinFFT : public Algorithm {
     declareParameter("maxFrequency", "the maximum allowed frequency [Hz]", "(0,inf)", 22050.0);
     declareParameter("interpolate", "boolean flag to enable interpolation", "{true,false}", true);
     declareParameter("tolerance", "tolerance for peak detection", "[0,1]", 1.0);
+    declareParameter("weighting", "string to assign a weighting function", "{default,A,B,C,D,Z}", "default");
   }
 
   void configure();
   void compute();
 
-  void spectralWeights();
+  void spectralWeights(std::string weighting);
 
   static const char* name;
   static const char* category;

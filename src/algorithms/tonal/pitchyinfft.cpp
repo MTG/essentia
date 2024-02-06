@@ -30,10 +30,38 @@ static const Real _freqsMask[] = {0., 20., 25., 31.5, 40., 50., 63., 80.,
 	1600., 2000., 2500., 3150., 4000., 5000., 6300., 8000., 9000., 10000.,
 	12500., 15000., 20000.,  25100};
 
-static const Real _weightMask[] = {-75.8, -70.1, -60.8, -52.1, -44.2, -37.5,
+static Real _weightMask[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+
+static const Real _weights[] = {-75.8, -70.1, -60.8, -52.1, -44.2, -37.5,
 	-31.3, -25.6, -20.9, -16.5, -12.6, -9.6, -7.0, -4.7, -3.0, -1.8, -0.8,
 	-0.2, -0.0, 0.5, 1.6, 3.2, 5.4, 7.8, 8.1, 5.3, -2.4, -11.1, -12.8,
-	-12.2, -7.4, -17.8, -17.8, -17.8};
+	-12.2, -7.4, -17.8, -17.8, -17.8}; // by default the original one is selected
+
+static const Real _aWeighting[] = {-148.6, -50.4, -44.8, -39.5, -34.5, -30.3,
+    -26.2, -22.4, -19.1, -16.2, -13.2, -10.8, -8.7, -6.6, -4.8, -3.2, -1.9,
+    -0.8, 0.0, 0.6, 1.0, 1.2, 1.3, 1.2, 1.0, 0.6, -0.1, -1.1, -1.8, -2.5,
+    -4.3, -6.0, -9.3, -12.4};
+
+static const Real _bWeighting[] = {-96.4, -24.2, -20.5, -17.1, -14.1, -11.6,
+    -9.4, -7.3, -5.6, -4.2, -2.9, -2.0, -1.4, -0.9, -0.5, -0.3, -0.1, -0.0,
+    0.0, 0.0, -0.0, -0.1, -0.2, -0.4, -0.7, -1.2, -1.9, -2.9, -3.6, -4.3,
+    -6.1, -7.8, -11.2, -14.2};
+
+static const Real _cWeighting[] = {-52.5, -6.2, -4.4, -3.0, -2.0, -1.3, -0.8,
+    -0.5, -0.3, -0.2, -0.1, -0.0, -0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.0,
+    -0.1, -0.2, -0.3, -0.5, -0.8, -1.3, -2.0, -3.0, -3.7, -4.4, -6.2,
+    -7.9, -11.3, -14.3};
+
+static const Real _dWeighting[] = {-46.6, -20.6, -18.7, -16.7, -14.7, -12.8,
+    -10.9, -8.9, -7.2, -5.6, -3.9, -2.6, -1.6, -0.8, -0.4, -0.3, -0.5, -0.6,
+    0.0, 1.9, 5.0, 7.9, 10.3, 11.5, 11.1, 9.6, 7.6, 5.5, 4.4, 3.4, 1.4,
+    -0.2, -2.7, -4.7};
+
+static const Real _zWeighting[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+    0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
 
 const char* PitchYinFFT::name = "PitchYinFFT";
 const char* PitchYinFFT::category = "Pitch";
@@ -56,13 +84,19 @@ void PitchYinFFT::configure() {
   _sampleRate = parameter("sampleRate").toReal();
   _interpolate = parameter("interpolate").toBool();
   _tolerance = parameter("tolerance").toReal();
+  _weighting = parameter("weighting").toString();
   _sqrMag.resize(_frameSize);
   _weight.resize(_frameSize/2+1);
   _yin.resize(_frameSize/2+1);
   // configure algorithms
   _fft->configure("size", _frameSize);
+    
+  if (_weighting != "default" && _weighting != "A" && _weighting != "B" && _weighting != "C" && _weighting != "D" && _weighting != "Z") {
+    E_INFO("PitchYinFFT: 'weighting' = "<<_weighting<<"\n");
+    throw EssentiaException("PitchYinFFT: Bad 'weighting' parameter");
+  }
   // allocate memory
-  spectralWeights();
+  spectralWeights(_weighting);
 
   _tauMax = min(int(ceil(_sampleRate / parameter("minFrequency").toReal())), _frameSize/2);
   _tauMin = min(int(floor(_sampleRate / parameter("maxFrequency").toReal())), _frameSize/2);
@@ -80,9 +114,31 @@ void PitchYinFFT::configure() {
                         "orderBy", "amplitude");
 }
 
-void PitchYinFFT::spectralWeights() {
+void PitchYinFFT::spectralWeights(std::string weighting) {
   int i = 0, j = 1;
   Real freq = 0, a0 = 0, a1 = 0, f0 = 0, f1 = 0;
+  int _maskSize = 34;
+  if (weighting == "default") {
+    for (int n=0; n<_maskSize; n++)
+      _weightMask[n] = _weights[n];
+  }
+  else if (weighting == "A") {
+    for (int n=0; n<_maskSize; n++)
+      _weightMask[n] = _aWeighting[n];
+  }
+  else if (weighting == "B") {
+    for (int n=0; n<_maskSize; n++)
+      _weightMask[n] = _bWeighting[n];
+  }
+  else if (weighting == "C") {
+    for (int n=0; n<_maskSize; n++)
+      _weightMask[n] = _cWeighting[n];
+  }
+  else if (weighting == "D") {
+    for (int n=0; n<_maskSize; n++)
+      _weightMask[n] = _dWeighting[n];
+  }
+    
   for (i=0; i < int(_weight.size()); ++i) {
     freq = (Real)i/(Real)_frameSize*_sampleRate;
     while (freq > _freqsMask[j]) {
@@ -189,8 +245,9 @@ void PitchYinFFT::compute() {
       yinMin = -_amplitudes[0];
     }
     else {
-      // TODO this should never happen, but some people reported it happening in their real time applications.
-      throw EssentiaException("PitchYinFFT: it appears that no peaks were found by PeakDetection. If you read this message, PLEASE, report this issue to the developers with an example of audio on which it happened.");
+      tau = 0.0; // it will provide zero-pitch and zero-pitch confidence.
+      // launch warning message for user feedbacking
+      E_WARNING("PitchYinFFT: it appears that no peaks were found by PeakDetection algorithm. So, pitch and confidence will be set to zero.");
     }
   }
   else {
