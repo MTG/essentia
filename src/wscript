@@ -326,12 +326,12 @@ def configure(ctx):
     else:
         print('- Essentia is configured without Chromaprint.')
         print('  The following algorithms will be ignored: %s' % algos)
-        ctx.env.ALGOIGNORE += algos 
+        ctx.env.ALGOIGNORE += algos
 
     algos = [ 'TensorflowPredict', 'TensorflowPredictMusiCNN', 'TensorflowPredictVGGish',
               'TensorflowPredictTempoCNN', 'TensorflowPredictCREPE', 'PitchCREPE',
               'TempoCNN', 'TensorflowPredictEffnetDiscogs', 'TensorflowPredict2D',
-              'TensorflowPredictFSDSINet']
+              'TensorflowPredictFSDSINet', 'TensorflowPredictMAEST',]
     if has('tensorflow'):
         print('- Tensorflow detected!')
         print('  The following algorithms will be included: %s\n' % algos)

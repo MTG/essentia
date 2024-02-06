@@ -229,6 +229,8 @@ void PredominantPitchMelodia::compute() {
   _pitchContoursMelody->output("pitchConfidence").set(pitchConfidence);
 
   _pitchContoursMelody->compute();
+
+  reset();
 }
 
 PredominantPitchMelodia::~PredominantPitchMelodia() {
