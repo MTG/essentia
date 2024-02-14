@@ -8,21 +8,24 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-11]
-        config: [pyproject-tensorflow.toml, pyproject.toml]
+        os: [ubuntu-20.04, macos-12, macos-14]
+        config: [pyproject, pyproject-tensorflow]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Fetch release tags from GitHub
         # Workaround for https://github.com/actions/checkout/issues/290
         run: git fetch --tags --force
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.4
-        with:
-          config-file: ${{ matrix.config }}
 
-      - uses: actions/upload-artifact@v3
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.5
+        with:
+          config-file: ${{ matrix.config }}.toml
+
+      - uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
+          name: artifact-${{ matrix.os }}-${{ matrix.config }}

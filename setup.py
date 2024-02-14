@@ -1,6 +1,7 @@
 import shutil
 import os
 import glob
+import subprocess
 import sys
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
@@ -36,20 +37,25 @@ class EssentiaBuildExtension(build_ext):
         var_skip_3rdparty = 'ESSENTIA_WHEEL_SKIP_3RDPARTY'
         var_only_python = 'ESSENTIA_WHEEL_ONLY_PYTHON'
 
+        var_macos_arm64 = os.getenv('ESSENTIA_MACOSX_ARM64')
+        macos_arm64_flags = []
+        if var_macos_arm64 == '1':
+            macos_arm64_flags = ['--arch=arm64', '--no-msse']
+
         if var_skip_3rdparty in os.environ and os.environ[var_skip_3rdparty]=='1':
             print('Skipping building static 3rdparty dependencies (%s=1)' %  var_skip_3rdparty)
         else:
-            os.system('./packaging/build_3rdparty_static_debian.sh')
+            subprocess.run('./packaging/build_3rdparty_static_debian.sh', check=True)
 
         if var_only_python in os.environ and os.environ[var_only_python]=='1':
             print('Skipping building the core libessentia library (%s=1)' %  var_only_python)
-            os.system('%s waf configure --only-python --static-dependencies '
-                      '--prefix=tmp' % PYTHON)
+            subprocess.run([PYTHON,  'waf', 'configure', '--only-python', '--static-dependencies',
+                      '--prefix=tmp'] + macos_arm64_flags, check=True)
         else:
-            os.system('%s waf configure --build-static --static-dependencies '
-                      '--with-python --prefix=tmp' % PYTHON)
-        os.system('%s waf' % PYTHON)
-        os.system('%s waf install' % PYTHON)
+            subprocess.run([PYTHON, 'waf', 'configure', '--build-static', '--static-dependencies'
+                      '--with-python --prefix=tmp'] + macos_arm64_flags, check=True)
+        subprocess.run([PYTHON, 'waf'], check=True)
+        subprocess.run([PYTHON, 'waf', 'install'], check=True)
 
         library = glob.glob('tmp/lib/python*/*-packages/essentia')[0]
 

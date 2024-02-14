@@ -194,6 +194,12 @@ def configure(ctx):
             ctx.env.LINKFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
             ctx.env.LDFLAGS = ['-arch', 'i386', '-arch', 'x86_64']
 
+        if ctx.options.ARCH == 'arm64':
+            ctx.env.CFLAGS += ['-arch', 'arm64']
+            ctx.env.CXXFLAGS += ['-arch', 'arm64']
+            ctx.env.LINKFLAGS += ['-arch', 'arm64']
+            ctx.env.LDFLAGS += ['-arch', 'arm64']
+
     elif sys.platform.startswith('linux'):
         # include -pthread flag because not all versions of gcc provide it automatically
         ctx.env.CXXFLAGS += ['-pthread']
