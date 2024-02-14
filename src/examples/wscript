@@ -184,7 +184,7 @@ def build(ctx):
         if sys.platform == 'darwin':
             install_path = os.environ['HOME'] + '/Library/Audio/Plug-Ins/Vamp'
         elif sys.platform.startswith('linux'):
-            install_path = '${PREFIX}/vamp'
+            install_path = '${PREFIX}/lib/vamp'
         else:
             install_path = None
 
