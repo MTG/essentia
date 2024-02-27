@@ -30,7 +30,7 @@ class TestTonalExtractor(TestCase):
             chords_changes_rate, _, _, chords_number_rate, _, _, _, _, _, _, _, key_strength = TonalExtractor()(np.array([], dtype=np.float32))
 
     def testSilence(self):
-        # In this test we jiuts check three of the output parameters of type real
+        # In this test we check three of the output parameters of type real
         silence_vec = np.zeros(44100, dtype=np.single)
         chords_changes_rate, _, _, chords_number_rate, _, _, _, _, _, _, _, key_strength = TonalExtractor()(silence_vec)
         self.assertEqual(chords_changes_rate, 0.0)
@@ -112,8 +112,8 @@ class TestTonalExtractor(TestCase):
 
     def testRealAudio(self):
 
-        # These reference values could also be compared with th results of tonal extractors of alternative a
-        # audio libraries (e.g. MadMom, libs fromn Alexander Lerch etc.)
+        # These reference values could also be compared with the results of tonal extractors of alternative 
+        # audio libraries (e.g. MadMom, libs from Alexander Lerch etc.)
         # ccr = chord changes rate ; cnr = chord number rate; ks = key strength
         mozart_ccr = 0.03400309011340141
         mozart_cnr = 0.010819165036082268
