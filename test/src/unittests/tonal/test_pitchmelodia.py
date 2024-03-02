@@ -19,6 +19,8 @@
 
 
 from essentia_test import *
+import math as math
+import numpy as np
 
 class TestPitchMelodia(TestCase):
 
@@ -55,7 +57,7 @@ class TestPitchMelodia(TestCase):
         self.assertConfigureFails(PitchMelodia(), {'timeContinuity': -1})
 
     def testDefaultParameters(self):
-        signal = randn(1024)
+        signal = np.random.random(1024)
         pitch, confidence = PitchMelodia()(signal)
         # Assert that default parameters produce valid outputs
         self.assertIsNotNone(pitch)
@@ -69,17 +71,17 @@ class TestPitchMelodia(TestCase):
     def testZerosInput(self):
         signal = zeros(1024)
         pitch, confidence = PitchMelodia()(signal)
-        self.assertAlmostEqualVector(pitch, [0.] * 9)  # Use [0.] * 9 for flexibility
+        self.assertAlmostEqualVector(pitch, [0.] * 9)
         self.assertAlmostEqualVector(confidence, [0.] * 9)
 
     def testOnesInput(self):
         signal = ones(1024)
         pitch, confidence = PitchMelodia()(signal)   
-        self.assertAlmostEqualVector(pitch, [0.] * 9)  # Use [0.] * 9 for flexibility
+        self.assertAlmostEqualVector(pitch, [0.] * 9) 
         self.assertAlmostEqualVector(confidence, [0.] * 9)
 
     def testCustomParameters(self):
-        signal = randn(2048)
+        signal = np.random.random(2048)
         # Use custom parameters
         params = {
             'binResolution': 5,
@@ -107,54 +109,55 @@ class TestPitchMelodia(TestCase):
         self.assertIsNotNone(confidence)
 
     def testInputWithSilence(self):
-        signal = concatenate([zeros(512), randn(1024), zeros(512)])
+        rand_signal = np.random.random(512)
+        signal = np.concatenate([zeros(512), rand_signal, zeros(512)])
         pitch, confidence = PitchMelodia()(signal)
         # Assert that silent portions don't have pitch information
         self.assertTrue(all(p == 0.0 for p in pitch[:512]))
         self.assertTrue(all(c == 0.0 for c in confidence[:512]))
 
     def testHighPitchResolution(self):
-        signal = randn(1024)
-        pitch, confidence = PitchMelodia(binResolution=1)(signal)
-        # Assert that using high bin resolution produces valid outputs
+        rand_signal = np.random.random(1024)
+        pitch, confidence = PitchMelodia(binResolution=1)(rand_signal)
+        # Assert that using high bin resolution produces valid outputs  
         self.assertIsNotNone(pitch)
         self.assertIsNotNone(confidence)
-        self.assertEqual(len(pitch), 3)
-        self.assertEqual(len(confidence), 3)
+        self.assertEqual(len(pitch), 9)
+        self.assertEqual(len(confidence), 9)
 
     def testRealCase(self):
         filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
-        audio = MonoLoader(filename=filename, sampleRate=44100)()      
+        audio = MonoLoader(filename=filename)()      
         pm = PitchMelodia()
         pitch, pitchConfidence = pm(audio)
 
-        # Save reference values for later loading
-        save('pitchmelodiapitch.npy', pitch)             
-        save('pitchmelodiaconfidence.npy', pitchConfidence)             
+        # np.save reference values for later np.loading
+        #np.save('pitchmelodiapitch.npy', pitch)             
+        #np.save('pitchmelodiaconfidence.npy', pitchConfidence)             
 
-        loadedPitchMelodiaPitch = load(join(filedir(), 'pitchmelodia/pitchmelodiapitch.npy'))
-        self.assertAlmostEqualVectorFixedPrecision(pitch, loadedPitchMelodiaPitch.tolist(), 8)
+        np.loadedPitchMelodiaPitch = np.load(join(filedir(), 'pitchmelodia/pitchmelodiapitch.npy'))
+        self.assertAlmostEqualVectorFixedPrecision(pitch, np.loadedPitchMelodiaPitch.tolist(), 8)
 
-        loadedPitchConfidence = load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence.npy'))
-        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, loadedPitchConfidence.tolist(), 8)
+        np.loadedPitchConfidence = np.load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence.npy'))
+        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, np.loadedPitchConfidence.tolist(), 8)
 
     def testRealCaseEqualLoudness(self):
         filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
-        audio = MonoLoader(filename=filename, sampleRate=44100)()      
+        audio = MonoLoader(filename=filename)()      
         pm = PitchMelodia()
         eq = EqualLoudness()
         eqAudio = eq(audio)
         pitch, pitchConfidence = pm(eqAudio)
 
-        # Save reference values for later loading
-        save('pitchmelodiapitch_eqloud.npy', pitch)             
-        save('pitchmelodiaconfidence_eqloud.npy', pitchConfidence)             
+        # np.save reference values for later np.loading
+        #np.save('pitchmelodiapitch_eqloud.npy', pitch)             
+        #np.save('pitchmelodiaconfidence_eqloud.npy', pitchConfidence)             
 
-        loadedPitchMelodiaPitch = load(join(filedir(), 'pitchmelodia/pitchmelodiapitch_eqloud.npy'))
-        self.assertAlmostEqualVectorFixedPrecision(pitch, loadedPitchMelodiaPitch.tolist(), 8)
+        np.loadedPitchMelodiaPitch = np.load(join(filedir(), 'pitchmelodia/pitchmelodiapitch_eqloud.npy'))
+        self.assertAlmostEqualVectorFixedPrecision(pitch, np.loadedPitchMelodiaPitch.tolist(), 8)
 
-        loadedPitchConfidence = load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence_eqloud.npy'))
-        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, loadedPitchConfidence.tolist(), 8)
+        np.loadedPitchConfidence = np.load(join(filedir(), 'pitchmelodia/pitchmelodiaconfidence_eqloud.npy'))
+        self.assertAlmostEqualVectorFixedPrecision(pitchConfidence, np.loadedPitchConfidence.tolist(), 8)
 
     def test110Hz(self):
         signal = 0.5 * numpy.sin((array(range(10 * 4096))/44100.) * 110 * 2*math.pi)
