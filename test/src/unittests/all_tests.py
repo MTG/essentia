@@ -42,7 +42,7 @@ if tests_dir:
     # Add sys path to make python recognize tests/src/unittests as a module
     parent_dir = os.path.abspath(os.path.dirname(tests_dir))
     sys.path.insert(0, parent_dir)
-    
+
     # Chdir into the tests dir so that the paths work out right
     os.chdir(tests_dir)
 
@@ -109,7 +109,8 @@ def computeResetCompute(algo, *args, **kwargs):
                 'BandReject', 'EqualLoudness', 'MovingAverage' ]
     special = [ 'FrameCutter', 'OverlapAdd', 'TempoScaleBands', 'TempoTap', 'TempoTapTicks',
                 'Panning','OnsetDetection', 'MonoWriter', 'Flux', 'StartStopSilence',
-                'LogSpectrum', 'ClickDetector', 'SNR', 'SaturationDetector', 'Welch' ]
+                'LogSpectrum', 'ClickDetector', 'SNR', 'SaturationDetector', 'Welch',
+                'FrameBuffer']
 
     if algo.name() in audioLoaders + filters + special:
         return algo.normalCompute(*args, **kwargs)
