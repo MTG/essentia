@@ -23,7 +23,6 @@
 
 // Defines for Python3 wrapper
 
-#if PY_MAJOR_VERSION >= 3
 #define PyString_AsString PyUnicode_AsUTF8
 #define PyString_AS_STRING PyUnicode_AsUTF8
 #define PyString_Check PyUnicode_Check
@@ -35,6 +34,5 @@
 #define PyInt_Check  PyLong_Check
 
 #define init_essentia PyInit__essentia
-#endif
 
 #endif // ESSENTIA_PYTHON3_H

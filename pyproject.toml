@@ -1,4 +1,6 @@
 [tool.cibuildwheel]
+build-verbosity = 3
+
 
 [tool.cibuildwheel.linux]
 manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"

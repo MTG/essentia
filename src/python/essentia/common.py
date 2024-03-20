@@ -16,7 +16,6 @@
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
 import numpy
-from six import iteritems
 from . import _essentia
 
 
@@ -231,7 +230,7 @@ def determineEdt(obj):
             firstType = None
             allKeysAreStrings = True
             allTypesEqual = True
-            for key, val in iteritems(obj):
+            for key, val in iter(obj.items()):
                 if not isinstance(key, str):
                     allKeysAreStrings = False
                     break
@@ -360,7 +359,7 @@ class Pool:
 
         elif isinstance(poolRep, dict):
             self.cppPool = _essentia.Pool()
-            for key, val in iteritems(poolRep):
+            for key, val in iter(poolRep.items()):
                 for v in val:
                     self.add(key, v)
 

@@ -55,7 +55,7 @@ You can install those dependencies on a Debian/Ubuntu system from official repos
 
 In order to use Python 3 bindings for the library, you might also need to install python3-dev, python3-numpy-dev (or python3-numpy on Ubuntu) and python3-yaml for YAML support in python::
 
-  sudo apt-get install python3-dev python3-numpy-dev python3-numpy python3-yaml python3-six
+  sudo apt-get install python3-dev python3-numpy-dev python3-numpy python3-yaml
 
 Note that, depending on the version of Essentia, different versions of ``libav*`` and ``libtag1-dev`` packages are required. See `release notes for official releases <https://github.com/MTG/essentia/releases>`_.
 
