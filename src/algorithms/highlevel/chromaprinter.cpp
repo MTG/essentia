@@ -21,6 +21,10 @@
 
 using namespace std;
 
+#if __cplusplus >= 201103L
+using namespace std::placeholders;
+#endif
+
 namespace essentia {
 namespace standard {
 
@@ -53,8 +57,13 @@ void Chromaprinter::compute() {
 
   // Copy the signal to new vector to expand it to the int16_t dynamic range before the cast.
   std::vector<Real> signalScaled = signal;
+#if __cplusplus >= 201103L
+  std::transform(signalScaled.begin(), signalScaled.end(), signalScaled.begin(),
+                 std::bind(std::multiplies<Real>(), pow(2,15), _1));
+#else
   std::transform(signalScaled.begin(), signalScaled.end(), signalScaled.begin(),
                  std::bind1st(std::multiplies<Real>(), pow(2,15)));
+#endif
 
   std::vector<int16_t> signalCast(signalScaled.begin(), signalScaled.end());
 
@@ -159,8 +168,13 @@ AlgorithmStatus Chromaprinter::process() {
 
     // Copy the signal to new vector to expand it to the int16_t dynamic range before the cast.
     std::vector<Real> signalScaled = signal;
+#if __cplusplus >= 201103L
+    std::transform(signalScaled.begin(), signalScaled.end(), signalScaled.begin(),
+                   std::bind(std::multiplies<Real>(), pow(2,15), _1));
+#else
     std::transform(signalScaled.begin(), signalScaled.end(), signalScaled.begin(),
                    std::bind1st(std::multiplies<Real>(), pow(2,15)));
+#endif
 
     std::vector<int16_t> signalCast(signalScaled.begin(), signalScaled.end());
 
