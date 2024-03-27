@@ -189,7 +189,7 @@ Install doxigen and pip3. If you are on Linux::
 
 Install additional dependencies (you might need to run this command with sudo)::
 
-  pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinx-toolbox
+  pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinx-toolbox nbformat
   sudo apt-get install pandoc
 
 Make sure to build Essentia with Python 3 bindings and run::

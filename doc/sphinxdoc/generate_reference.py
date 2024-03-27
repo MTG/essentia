@@ -24,11 +24,13 @@ import essentia.standard
 import essentia.streaming
 import os, re, subprocess
 import sys
+from pathlib import Path
+import nbformat
 
 
 std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
 streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase'] ]
-
+python_tutorials_list = [tut for tut in Path('../../src/examples/python').glob('*.ipynb')]
 
 def replace_math_symbols(s):
     while True:
@@ -76,7 +78,6 @@ def algo_link(algoname, mode):
     mode_abbr = 'std' if mode == 'standard' else 'streaming'
     return "%s `(%s) <%s_%s.html>`__" % (algoname, mode, mode_abbr, algoname)
 
-
 def related_algos(algo_doc):
 
     lines = []
@@ -100,6 +101,51 @@ def related_algos(algo_doc):
                 '\n'.join(sorted(lines))]
     return []
 
+def tutorial_link(tutorial_name):
+    """
+    Create link given tutorial file name
+    """
+    return f"{tutorial_name} `(Link) <../{tutorial_name}.html>`__"
+
+    ## NOTE: Possible Improvements
+    ## 1. Check if a more robust way exists to get the file link
+    ## 2. Display the title of tutorial instead of file name
+
+def is_word_in_jupyternb(word, path):
+    """
+    Finds if a word is used in the code cells of given notebook
+    Return True if word found, False if not
+    """
+    with open(path) as f:
+        nbcontent = nbformat.read(f, as_version=nbformat.NO_CONVERT)
+
+    for cell in nbcontent['cells']:
+        if cell['cell_type'] == "code":
+            if(cell['source'].find(word) != -1):
+                return True
+    return False
+
+def related_tutorials(algo_doc):
+    """
+    Get all python tutorials related to the algorithm
+    """
+    lines = []
+    
+    lines += [tutorial_link(tut_file.stem) for tut_file in python_tutorials_list 
+                                        if is_word_in_jupyternb(algo_doc['name'], tut_file)]
+
+    if lines:
+        return ['Related Tutorials',
+                '-----------------',
+                '',
+                '\n \n'.join(sorted(lines)),
+                '']
+    return []
+    
+    ## NOTE: Possible Optimizations
+    ## 1. This function currently runs once for each algorithm. Each algorithm will go through all the files.
+    ## 2. First Optimization - Create an index from each algorithm to file.
+    ## 3. Use this mapping to go from algorithm to list of tutorial files in O(1) time.
 
 def doc2rst(algo_doc, sphinxsearch=False):
     if sphinxsearch:
@@ -160,6 +206,7 @@ def doc2rst(algo_doc, sphinxsearch=False):
                TR_DESC(algo_doc['description'])
                ]
 
+    lines += related_tutorials(algo_doc)
     lines += related_algos(algo_doc)
 
     return '\n'.join(lines)
