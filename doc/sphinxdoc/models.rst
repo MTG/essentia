@@ -1548,7 +1548,7 @@ Tonal/atonal
 
 Music classification by tonality (2 classes)::
 
-    tonal, atonal
+    atonal, tonal
 
 Models:
 
