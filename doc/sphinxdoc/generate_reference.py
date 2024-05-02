@@ -26,6 +26,7 @@ import os, re, subprocess
 import sys
 from pathlib import Path
 import nbformat
+import git
 
 
 std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
@@ -147,6 +148,37 @@ def related_tutorials(algo_doc):
     ## 2. First Optimization - Create an index from each algorithm to file.
     ## 3. Use this mapping to go from algorithm to list of tutorial files in O(1) time.
 
+def source_links(algo_doc):
+    """
+    Get the source cpp and header links for the algorithm
+    """
+    # Get build commit
+    repo = git.Repo(search_parent_directories=True)
+    commit_id = repo.git.describe('--long')
+
+    # Source Directory and URL Prefix
+    SOURCE_PATH = '../../src/algorithms'
+    URL_PREFIX = f'https://github.com/MTG/essentia/blob/{commit_id}/'
+
+    # Convert the algorithm name to lower case
+    algo = algo_doc['name'].lower()
+
+    # Find the path of the cpp file in the given directory
+    path_list = list(Path(SOURCE_PATH).rglob(f'*/{algo}.cpp'))
+
+    # Return URL if only a single cpp file is found
+    if len(path_list) == 1:
+        cpp_path = path_list[0].relative_to(SOURCE_PATH[:SOURCE_PATH.find('src/')])
+        header_path = cpp_path.with_suffix('.h')
+        return [URL_PREFIX+ str(cpp_path), URL_PREFIX + str(header_path)]
+    else:
+        return None
+    
+    ## NOTE: Future Modifications
+    ## 1. Check if source code path can be added in algo doc itself
+    ## 2. Make the URL Prefix dynamic to link to the current release version
+    ## 3. Would be required when we support multiple versions of the documentation
+
 def doc2rst(algo_doc, sphinxsearch=False):
     if sphinxsearch:
         # dummy rst files used to append algorithms to the sphinx HTML search
@@ -205,6 +237,15 @@ def doc2rst(algo_doc, sphinxsearch=False):
                '',
                TR_DESC(algo_doc['description'])
                ]
+    
+    links = source_links(algo_doc)
+    if links:
+        lines += ['Source code',
+                    '-----------',
+                    '',
+                    ' - `C++ source code <%s>`__' % links[0],
+                    ' - `C++ header file <%s>`__' % links[1],
+                    '']
 
     lines += related_tutorials(algo_doc)
     lines += related_algos(algo_doc)
