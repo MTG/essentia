@@ -32,6 +32,8 @@ import git
 std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
 streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase'] ]
 python_tutorials_list = [tut for tut in Path('../../src/examples/python').glob('*.ipynb')]
+pattern_name = re.compile(r'const char(\s\*|\*\s)\w+::name = "(\w+)";')
+algo_path_dict = {pattern_name.search(algo_path.read_text()).group(2) : algo_path.relative_to('../../') for algo_path in Path('../../src/algorithms').rglob('*.cpp')}
 
 def replace_math_symbols(s):
     while True:
@@ -136,10 +138,10 @@ def related_tutorials(algo_doc):
                                         if is_word_in_jupyternb(algo_doc['name'], tut_file)]
 
     if lines:
-        return ['Related Tutorials',
+        return ['Related tutorials',
                 '-----------------',
                 '',
-                '\n \n'.join(sorted(lines)),
+                ' | '.join(sorted(lines)),
                 '']
     return []
     
@@ -157,27 +159,21 @@ def source_links(algo_doc):
     commit_id = repo.git.describe('--long')
 
     # Source Directory and URL Prefix
-    SOURCE_PATH = '../../src/algorithms'
     URL_PREFIX = f'https://github.com/MTG/essentia/blob/{commit_id}/'
 
-    # Convert the algorithm name to lower case
-    algo = algo_doc['name'].lower()
-
-    # Find the path of the cpp file in the given directory
-    path_list = list(Path(SOURCE_PATH).rglob(f'*/{algo}.cpp'))
-
-    # Return URL if only a single cpp file is found
-    if len(path_list) == 1:
-        cpp_path = path_list[0].relative_to(SOURCE_PATH[:SOURCE_PATH.find('src/')])
+    # Get the path of the cpp file
+    cpp_path = algo_path_dict.get(algo_doc['name'], None)
+    if cpp_path:
         header_path = cpp_path.with_suffix('.h')
-        return [URL_PREFIX+ str(cpp_path), URL_PREFIX + str(header_path)]
+        return [URL_PREFIX + str(cpp_path), URL_PREFIX + str(header_path)]
     else:
         return None
-    
+
     ## NOTE: Future Modifications
-    ## 1. Check if source code path can be added in algo doc itself
-    ## 2. Make the URL Prefix dynamic to link to the current release version
+    ## 1. Check if source code path can be added in algo doc itself - DONE
+    ## 2. Make the URL Prefix dynamic to link to the current release version - DONE
     ## 3. Would be required when we support multiple versions of the documentation
+    ## 4. Can move the URL_PREFIX to a global variable, but it looks cleaner here
 
 def doc2rst(algo_doc, sphinxsearch=False):
     if sphinxsearch:
