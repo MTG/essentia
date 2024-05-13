@@ -243,8 +243,8 @@ def doc2rst(algo_doc, sphinxsearch=False):
                     ' - `C++ header file <%s>`__' % links[1],
                     '']
 
-    lines += related_tutorials(algo_doc)
     lines += related_algos(algo_doc)
+    lines += related_tutorials(algo_doc)
 
     return '\n'.join(lines)
 
