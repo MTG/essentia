@@ -33,7 +33,7 @@ std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
 streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase'] ]
 python_tutorials_list = [tut for tut in Path('../../src/examples/python').glob('*.ipynb')]
 pattern_name = re.compile(r'const char(\s\*|\*\s)\w+::name = "(\w+)";')
-algo_path_dict = {pattern_name.search(algo_path.read_text()).group(2) : algo_path.relative_to('../../') for algo_path in Path('../../src/algorithms').rglob('*.cpp')}
+algo_path_dict = {pattern_name.search(algo_path.read_text()).group(2) : algo_path.relative_to('../../') for algo_path in Path('../../src/algorithms').rglob('*/*.cpp')}
 
 def replace_math_symbols(s):
     while True:
@@ -133,8 +133,8 @@ def related_tutorials(algo_doc):
     Get all python tutorials related to the algorithm
     """
     lines = []
-    
-    lines += [tutorial_link(tut_file.stem) for tut_file in python_tutorials_list 
+
+    lines += [tutorial_link(tut_file.stem) for tut_file in python_tutorials_list
                                         if is_word_in_jupyternb(algo_doc['name'], tut_file)]
 
     if lines:
@@ -144,7 +144,7 @@ def related_tutorials(algo_doc):
                 ' | '.join(sorted(lines)),
                 '']
     return []
-    
+
     ## NOTE: Possible Optimizations
     ## 1. This function currently runs once for each algorithm. Each algorithm will go through all the files.
     ## 2. First Optimization - Create an index from each algorithm to file.
@@ -233,7 +233,7 @@ def doc2rst(algo_doc, sphinxsearch=False):
                '',
                TR_DESC(algo_doc['description'])
                ]
-    
+
     links = source_links(algo_doc)
     if links:
         lines += ['Source code',
