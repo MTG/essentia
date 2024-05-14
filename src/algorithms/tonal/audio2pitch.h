@@ -27,7 +27,6 @@ class Audio2Pitch : public Algorithm {
     Real _maxFrequency;
     std::string _pitchAlgorithmName;
     std::string _loudnessAlgorithmName;
-    std::string _weighting;
     Real _tolerance;
     Real _pitchConfidenceThreshold;
     Real _loudnessThreshold;

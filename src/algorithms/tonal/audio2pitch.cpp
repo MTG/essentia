@@ -19,7 +19,6 @@ void Audio2Pitch::configure() {
   _maxFrequency = parameter("maxFrequency").toReal();
   _pitchAlgorithmName = parameter("pitchAlgorithm").toString();
   _loudnessAlgorithmName = parameter("loudnessAlgorithm").toString();
-  _weighting = parameter("weighting").toString();
   _tolerance = parameter("tolerance").toReal();
   _pitchConfidenceThreshold = parameter("pitchConfidenceThreshold").toReal();
   _loudnessThreshold = parameter("loudnessThreshold").toReal();
