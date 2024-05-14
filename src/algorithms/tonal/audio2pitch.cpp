@@ -87,9 +87,6 @@ void Audio2Pitch::compute() {
   Real& loudness = _loudness.get();
   int& voiced = _voiced.get();
 
-  // initially assumed the frame is unvoiced
-  voiced = 0;
-
   if (frame.empty()) {
     throw EssentiaException("Audio2Pitch: cannot compute the pitch of an empty frame");
   }
@@ -122,13 +119,13 @@ void Audio2Pitch::compute() {
     _pitchAlgorithm->input("signal").set(frame);
   }
 
-  // define voiced by thresholding
-  if (isAboveThresholds(pitchConfidence, loudness))
-      voiced = 1;
-
   _pitchAlgorithm->output("pitch").set(pitch);
   _pitchAlgorithm->output("pitchConfidence").set(pitchConfidence);
-  _pitchAlgorithm->output("voiced").set(voiced);
   _pitchAlgorithm->compute();
 
+  // define voiced by thresholding
+  voiced = 0; // initially assumes an unvoiced frame
+  if (isAboveThresholds(pitchConfidence, loudness)) {
+    voiced = 1;
+  }
 }
