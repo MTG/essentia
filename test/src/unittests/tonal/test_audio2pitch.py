@@ -19,7 +19,7 @@
 
 
 from essentia_test import *
-from numpy import sin, pi, mean, random
+from numpy import sin, pi, mean, random, sqrt
 
 
 class TestAudio2Pitch(TestCase):
@@ -33,6 +33,32 @@ class TestAudio2Pitch(TestCase):
         self.assertEqual(confidence, 0)
         self.assertEqual(voiced, 0)
         self.assertEqual(loudness, 0)
+
+    def testSine(self):
+        sr = 44100
+        size = sr * 1
+        freq = 440
+        signal = [sin(2.0 * pi * freq * i / sr) for i in range(size)]
+        self.runTest(signal, sr, freq)
+
+    def runTest(self, signal, sr, freq, pitch_precision=1, conf_precision=0.1):
+        frameSize = 1024
+        hopsize = frameSize
+
+        frames = FrameGenerator(signal, frameSize=frameSize, hopSize=hopsize)
+        pitchDetect = Audio2Pitch(frameSize=frameSize, sampleRate=sr)
+        pitch, confidence, loudness, voiced = ([] for _ in range(4))
+        for frame in frames:
+            f, conf, l, v = pitchDetect(frame)
+            pitch += [f]
+            confidence += [conf]
+            loudness += [l]
+            voiced += [v]
+        self.assertAlmostEqual(mean(f), freq, pitch_precision)
+        self.assertAlmostEqual(mean(confidence), 1, conf_precision)
+        print(mean(loudness))
+        self.assertAlmostEqual(mean(loudness), 1 / sqrt(2), conf_precision)
+        self.assertAlmostEqual(mean(voiced), 1, conf_precision)
 
 
 suite = allTests(TestAudio2Pitch)
