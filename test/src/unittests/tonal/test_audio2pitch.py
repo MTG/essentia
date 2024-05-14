@@ -27,6 +27,13 @@ class TestAudio2Pitch(TestCase):
     def testEmpty(self):
         self.assertComputeFails(Audio2Pitch(), [])
 
+    def testZero(self):
+        pitch, confidence, voiced, loudness = Audio2Pitch()(zeros(1024))
+        self.assertEqual(pitch, 0)
+        self.assertEqual(confidence, 0)
+        self.assertEqual(voiced, 0)
+        self.assertEqual(loudness, 0)
+
 
 suite = allTests(TestAudio2Pitch)
 
