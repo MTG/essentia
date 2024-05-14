@@ -121,6 +121,25 @@ class TestAudio2Pitch(TestCase):
         self.assertAlmostEqual(mean(loudness), amplitude / sqrt(2), conf_precision)
         self.assertAlmostEqual(mean(voiced), 1, conf_precision)
 
+    def testInvalidParam(self):
+        self.assertConfigureFails(Audio2Pitch(), {"frameSize": 1})
+        self.assertConfigureFails(Audio2Pitch(), {"sampleRate": 0})
+        self.assertConfigureFails(
+            Audio2Pitch(), {"sampleRate": 44100, "maxFrequency": 44100}
+        )
+        self.assertConfigureFails(
+            Audio2Pitch(),
+            {"sampleRate": 44100, "maxFrequency": 200, "minFrequency": 250},
+        )
+        self.assertConfigureFails(
+            Audio2Pitch(),
+            {"sampleRate": 44100, "pitchAlgorithm": "yin_fft"},
+        )
+        self.assertConfigureFails(
+            Audio2Pitch(),
+            {"sampleRate": 44100, "loudnessAlgorithm": "ebur128"},
+        )
+
 
 suite = allTests(TestAudio2Pitch)
 
