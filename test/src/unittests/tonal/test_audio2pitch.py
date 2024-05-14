@@ -39,9 +39,27 @@ class TestAudio2Pitch(TestCase):
         size = sr * 1
         freq = 440
         signal = [sin(2.0 * pi * freq * i / sr) for i in range(size)]
-        self.runTest(signal, sr, freq)
+        self.runTest(signal, sr, 1, freq)
 
-    def runTest(self, signal, sr, freq, pitch_precision=1, conf_precision=0.1):
+    def testBandLimitedSquare(self):
+        sr = 44100
+        size = sr * 1
+        freq = 660
+        w = 2.0 * pi * freq
+        nharms = 10
+        amplitude = 0.5
+        signal = zeros(size)
+        for i in range(size):
+            for harm in range(nharms):
+                signal[i] += (
+                    amplitude / (2.0 * harm + 1) * sin((2 * harm + 1) * i * w / sr)
+                )
+
+        self.runTest(signal, sr, amplitude, freq)
+
+    def runTest(
+        self, signal, sr, amplitude, freq, pitch_precision=1, conf_precision=0.1
+    ):
         frameSize = 1024
         hopsize = frameSize
 
@@ -56,8 +74,7 @@ class TestAudio2Pitch(TestCase):
             voiced += [v]
         self.assertAlmostEqual(mean(f), freq, pitch_precision)
         self.assertAlmostEqual(mean(confidence), 1, conf_precision)
-        print(mean(loudness))
-        self.assertAlmostEqual(mean(loudness), 1 / sqrt(2), conf_precision)
+        self.assertAlmostEqual(mean(loudness), amplitude / sqrt(2), conf_precision)
         self.assertAlmostEqual(mean(voiced), 1, conf_precision)
 
 
