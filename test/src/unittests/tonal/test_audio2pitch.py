@@ -109,7 +109,8 @@ class TestAudio2Pitch(TestCase):
 
         frames = FrameGenerator(signal, frameSize=frameSize, hopSize=hopsize)
         pitchDetect = Audio2Pitch(frameSize=frameSize, sampleRate=sample_rate)
-        pitch, confidence, loudness, voiced = ([] for _ in range(4))
+        n_outputs = len(pitchDetect.outputNames())
+        pitch, confidence, loudness, voiced = ([] for _ in range(n_outputs))
         for frame in frames:
             f, conf, l, v = pitchDetect(frame)
             pitch += [f]
@@ -139,6 +140,51 @@ class TestAudio2Pitch(TestCase):
             Audio2Pitch(),
             {"sampleRate": 44100, "loudnessAlgorithm": "ebur128"},
         )
+
+    def testARealCase(self):
+        # The expected values were recomputed from commit
+        # 2d37c0713fb6cc5f637b3d8f5d65aa90b36d4277
+        #
+        # The expeted values were compared with the vamp pYIN
+        # implementation of the YIN algorithm producing very
+        # similar values.
+        #
+        # https://code.soundsoftware.ac.uk/projects/pyin
+
+        frameSize = 1024
+        sample_rate = 44100
+        hopSize = 512
+        filename = join(testdata.audio_dir, "recorded", "vignesh.wav")
+        if sys.platform == "darwin":
+            import soundfile as sf
+
+            audio, _ = sf.read(filename, dtype="float32")
+        else:
+            audio = MonoLoader(filename=filename, sampleRate=44100)()
+        frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
+        pitchDetect = Audio2Pitch(
+            frameSize=frameSize,
+            sampleRate=sample_rate,
+            pitchConfidenceThreshold=0.15,
+            loudnessThreshold=0.0001,
+        )
+
+        n_outputs = len(pitchDetect.outputNames())
+        pitch, confidence, loudness, voiced = ([] for _ in range(n_outputs))
+        for frame in frames:
+            f, conf, l, v = pitchDetect(frame)
+            pitch += [f]
+            confidence += [conf]
+            loudness += [l]
+            voiced += [v]
+        expected_pitch = numpy.load(join(filedir(), "pitchyinfft/vignesh_pitch.npy"))
+        expected_conf = numpy.load(
+            join(filedir(), "pitchyinfft/vignesh_confidence.npy")
+        )
+        expected_voiced = [1] * len(expected_pitch)
+        self.assertAlmostEqualVector(pitch, expected_pitch, 1e-6)
+        self.assertAlmostEqualVector(confidence, expected_conf, 5e-5)
+        self.assertAlmostEqualVector(voiced, expected_voiced)
 
 
 suite = allTests(TestAudio2Pitch)
