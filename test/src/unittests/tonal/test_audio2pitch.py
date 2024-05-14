@@ -37,34 +37,78 @@ class TestAudio2Pitch(TestCase):
     def testSine(self):
         sr = 44100
         size = sr * 1
-        freq = 440
-        signal = [sin(2.0 * pi * freq * i / sr) for i in range(size)]
-        self.runTest(signal, sr, 1, freq)
+        frequency = 440
+        signal = [sin(2.0 * pi * frequency * i / sr) for i in range(size)]
+        self.runTest(signal, sr, 1, frequency)
 
     def testBandLimitedSquare(self):
-        sr = 44100
-        size = sr * 1
-        freq = 660
-        w = 2.0 * pi * freq
+        sample_rate = 44100
+        size = sample_rate * 1
+        frequency = 660
+        w = 2.0 * pi * frequency
         nharms = 10
         amplitude = 0.5
         signal = zeros(size)
         for i in range(size):
             for harm in range(nharms):
                 signal[i] += (
-                    amplitude / (2.0 * harm + 1) * sin((2 * harm + 1) * i * w / sr)
+                    amplitude
+                    / (2.0 * harm + 1)
+                    * sin((2 * harm + 1) * i * w / sample_rate)
                 )
 
-        self.runTest(signal, sr, amplitude, freq)
+        self.runTest(signal, sample_rate, amplitude, frequency)
+
+    def testBandLimitedSaw(self):
+        sample_rate = 44100
+        size = sample_rate * 1
+        frequency = 660
+        w = 2.0 * pi * frequency
+        nharms = 10
+        amplitude = 1.0
+        signal = zeros(size)
+        for i in range(1, size):
+            for harm in range(1, nharms + 1):
+                signal[i] += amplitude / harm * sin(harm * i * w / sample_rate)
+        self.runTest(signal, sample_rate, 1.2, frequency, 1.1, 0.1)
+
+    def testBandLimitedSawMasked(self):
+        sr = 44100
+        size = sr * 1
+        freq = 440
+        w = 2.0 * pi * freq
+        subw = 2.0 * pi * (freq - 100)
+        nharms = 10
+        signal = zeros(size)
+        for i in range(1, size):
+            # masking noise:
+            whitenoise = 2 * (random.rand(1) - 0.5)
+            signal[i] += 2 * whitenoise
+            for harm in range(1, nharms):
+                signal[i] += 1.0 / harm * sin(i * harm * w / sr)
+        signal = 5 * LowPass()(signal)
+        for i in range(1, size):
+            for harm in range(1, nharms + 1):
+                signal[i] += 0.1 / harm * sin(i * harm * w / sr)
+            signal[i] += 0.5 * sin(i * subw / sr)
+        max_signal = max(signal) + 1
+        signal = signal / max_signal
+        self.runTest(signal, sr, 0.5, freq, 1.5, 0.3)
 
     def runTest(
-        self, signal, sr, amplitude, freq, pitch_precision=1, conf_precision=0.1
+        self,
+        signal: numpy.ndarray,
+        sample_rate: int,
+        amplitude: float,
+        frequency: float,
+        pitch_precision: float = 1,
+        conf_precision: float = 0.1,
     ):
         frameSize = 1024
         hopsize = frameSize
 
         frames = FrameGenerator(signal, frameSize=frameSize, hopSize=hopsize)
-        pitchDetect = Audio2Pitch(frameSize=frameSize, sampleRate=sr)
+        pitchDetect = Audio2Pitch(frameSize=frameSize, sampleRate=sample_rate)
         pitch, confidence, loudness, voiced = ([] for _ in range(4))
         for frame in frames:
             f, conf, l, v = pitchDetect(frame)
@@ -72,7 +116,7 @@ class TestAudio2Pitch(TestCase):
             confidence += [conf]
             loudness += [l]
             voiced += [v]
-        self.assertAlmostEqual(mean(f), freq, pitch_precision)
+        self.assertAlmostEqual(mean(f), frequency, pitch_precision)
         self.assertAlmostEqual(mean(confidence), 1, conf_precision)
         self.assertAlmostEqual(mean(loudness), amplitude / sqrt(2), conf_precision)
         self.assertAlmostEqual(mean(voiced), 1, conf_precision)
