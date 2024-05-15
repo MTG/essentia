@@ -31,8 +31,7 @@ void Audio2Pitch::configure() {
   }
 
   if (_pitchAlgorithmName != "pyin_fft" && _pitchAlgorithmName != "pyin") {
-    E_INFO("Audio2Pitch: 'pitchAlgorithm' = "<<_pitchAlgorithmName<<"\n");
-    throw EssentiaException("Audio2Pitch: Bad 'pitchAlgorithm' parameter");
+    throw EssentiaException("Audio2Pitch: Bad 'pitchAlgorithm' ="<<_pitchAlgorithmName<<"\n");
   }
   if (_pitchAlgorithmName == "pyin_fft") _isSpectral = true;
   if (_pitchAlgorithmName == "pyin") _isSpectral = false;
@@ -57,8 +56,7 @@ void Audio2Pitch::configure() {
     _loudnessAlgorithm = AlgorithmFactory::create("RMS");
   }
   else {
-    E_INFO("Audio2Pitch: 'loudnessAlgorithm' = "<<_loudnessAlgorithmName<<"\n");
-    throw EssentiaException("Audio2Pitch: Bad 'loudnessAlgorithm' parameter");
+    throw EssentiaException("Audio2Pitch: Bad 'loudnessAlgorithm' ="<<_loudnessAlgorithmName<<"\n");
   }
 
   // switch between pyin and pyin_fft to propagate the weighting parameter
