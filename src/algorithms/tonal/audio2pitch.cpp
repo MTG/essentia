@@ -5,7 +5,7 @@ using namespace standard;
 
 const char* Audio2Pitch::name = "Audio2Pitch";
 const char* Audio2Pitch::category = "Pitch";
-const char* Audio2Pitch::description = DOC("Extractor algorithm to compute pitch with several possible pitch algorithms, specifically targeted for real-time pitch detection on saxophone signals.");
+const char* Audio2Pitch::description = DOC("This algorithm computes pitch with several possible pitch algorithms, specifically targeted for real-time pitch detection on audio signals.");
 
 bool Audio2Pitch::isAboveThresholds(Real pitchConfidence, Real loudness) {
   return (pitchConfidence >= _pitchConfidenceThreshold) && (loudness >= _loudnessThreshold);
