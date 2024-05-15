@@ -27,7 +27,7 @@ void Audio2Pitch::configure() {
     throw EssentiaException("Audio2Pitch: Max frequency cannot be higher than Nyquist frequency");
   }
   if (_maxFrequency <= _minFrequency) {
-    throw EssentiaException("Audio2Pitch: Max frequency cannot be lower than min frequency");
+    throw EssentiaException("Audio2Pitch: Max frequency cannot be lower or equal than the minimum frequency");
   }
 
   if (_pitchAlgorithmName != "pyin_fft" && _pitchAlgorithmName != "pyin") {
