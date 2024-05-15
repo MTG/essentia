@@ -28,18 +28,21 @@ class TestAudio2Pitch(TestCase):
         self.assertComputeFails(Audio2Pitch(), [])
 
     def testZero(self):
-        pitch, confidence, voiced, loudness = Audio2Pitch()(zeros(1024))
+        pitch, confidence, loudness, voiced = Audio2Pitch()(zeros(1024))
         self.assertEqual(pitch, 0)
         self.assertEqual(confidence, 0)
+        self.assertEqual(loudness, -200)
         self.assertEqual(voiced, 0)
-        self.assertEqual(loudness, 0)
 
     def testSine(self):
-        sr = 44100
-        size = sr * 1
+        sample_rate = 44100
+        size = sample_rate * 1
         frequency = 440
-        signal = [sin(2.0 * pi * frequency * i / sr) for i in range(size)]
-        self.runTest(signal, sr, 1, frequency)
+        amplitude_in_db = -6
+        signal = [sin(2.0 * pi * frequency * i / sample_rate) for i in range(size)]
+        self.runTest(
+            signal, sample_rate, amplitude_in_db, frequency, loudness_precision=0.5
+        )
 
     def testBandLimitedSquare(self):
         sample_rate = 44100
@@ -48,6 +51,7 @@ class TestAudio2Pitch(TestCase):
         w = 2.0 * pi * frequency
         nharms = 10
         amplitude = 0.5
+        amplitude_in_db = -9
         signal = zeros(size)
         for i in range(size):
             for harm in range(nharms):
@@ -57,7 +61,7 @@ class TestAudio2Pitch(TestCase):
                     * sin((2 * harm + 1) * i * w / sample_rate)
                 )
 
-        self.runTest(signal, sample_rate, amplitude, frequency)
+        self.runTest(signal, sample_rate, amplitude_in_db, frequency)
 
     def testBandLimitedSaw(self):
         sample_rate = 44100
@@ -66,15 +70,23 @@ class TestAudio2Pitch(TestCase):
         w = 2.0 * pi * frequency
         nharms = 10
         amplitude = 1.0
+        amplitude_in_db = -1.43
         signal = zeros(size)
         for i in range(1, size):
             for harm in range(1, nharms + 1):
                 signal[i] += amplitude / harm * sin(harm * i * w / sample_rate)
-        self.runTest(signal, sample_rate, 1.2, frequency, 1.1, 0.1)
+        self.runTest(
+            signal,
+            sample_rate,
+            amplitude_in_db,
+            frequency,
+            pitch_precision=1.1,
+            loudness_precision=0.2,
+        )
 
     def testBandLimitedSawMasked(self):
-        sr = 44100
-        size = sr * 1
+        sample_rate = 44100
+        size = sample_rate * 1
         freq = 440
         w = 2.0 * pi * freq
         subw = 2.0 * pi * (freq - 100)
@@ -85,24 +97,33 @@ class TestAudio2Pitch(TestCase):
             whitenoise = 2 * (random.rand(1) - 0.5)
             signal[i] += 2 * whitenoise
             for harm in range(1, nharms):
-                signal[i] += 1.0 / harm * sin(i * harm * w / sr)
+                signal[i] += 1.0 / harm * sin(i * harm * w / sample_rate)
         signal = 5 * LowPass()(signal)
         for i in range(1, size):
             for harm in range(1, nharms + 1):
-                signal[i] += 0.1 / harm * sin(i * harm * w / sr)
-            signal[i] += 0.5 * sin(i * subw / sr)
+                signal[i] += 0.1 / harm * sin(i * harm * w / sample_rate)
+            signal[i] += 0.5 * sin(i * subw / sample_rate)
         max_signal = max(signal) + 1
         signal = signal / max_signal
-        self.runTest(signal, sr, 0.5, freq, 1.5, 0.3)
+        amplitude_in_db = -9
+        self.runTest(
+            signal,
+            sample_rate,
+            amplitude_in_db,
+            freq,
+            pitch_precision=1.5,
+            conf_precision=0.3,
+        )
 
     def runTest(
         self,
         signal: numpy.ndarray,
         sample_rate: int,
-        amplitude: float,
+        amplitude_in_db: float,
         frequency: float,
         pitch_precision: float = 1,
         conf_precision: float = 0.1,
+        loudness_precision: float = 0.1,
     ):
         frameSize = 1024
         hopsize = frameSize
@@ -119,7 +140,7 @@ class TestAudio2Pitch(TestCase):
             voiced += [v]
         self.assertAlmostEqual(mean(f), frequency, pitch_precision)
         self.assertAlmostEqual(mean(confidence), 1, conf_precision)
-        self.assertAlmostEqual(mean(loudness), amplitude / sqrt(2), conf_precision)
+        self.assertAlmostEqual(mean(loudness), amplitude_in_db, loudness_precision)
         self.assertAlmostEqual(mean(voiced), 1, conf_precision)
 
     def testInvalidParam(self):
@@ -140,6 +161,18 @@ class TestAudio2Pitch(TestCase):
             Audio2Pitch(),
             {"sampleRate": 44100, "loudnessAlgorithm": "ebur128"},
         )
+        self.assertConfigureFails(
+            Audio2Pitch(),
+            {"sampleRate": 44100, "loudnessThreshold": 1.0},
+        )
+        self.assertConfigureFails(
+            Audio2Pitch(),
+            {"sampleRate": 44100, "pitchConfidenceThreshold": -0.5},
+        )
+        self.assertConfigureFails(
+            Audio2Pitch(),
+            {"sampleRate": 44100, "pitchConfidenceThreshold": 1.5},
+        )
 
     def testARealCase(self):
         # The expected values were recomputed from commit
@@ -154,6 +187,7 @@ class TestAudio2Pitch(TestCase):
         frameSize = 1024
         sample_rate = 44100
         hopSize = 512
+        loudness_threshold = -80
         filename = join(testdata.audio_dir, "recorded", "vignesh.wav")
         if sys.platform == "darwin":
             import soundfile as sf
@@ -166,7 +200,7 @@ class TestAudio2Pitch(TestCase):
             frameSize=frameSize,
             sampleRate=sample_rate,
             pitchConfidenceThreshold=0.15,
-            loudnessThreshold=0.0001,
+            loudnessThreshold=loudness_threshold,
         )
 
         n_outputs = len(pitchDetect.outputNames())
