@@ -40,7 +40,7 @@ class Audio2Pitch : public Algorithm {
       declareInput(_frame, "frame", "the input frame to analyse");
       declareOutput(_pitch, "pitch", "detected pitch in Hz");
       declareOutput(_pitchConfidence, "pitchConfidence", "confidence of detected pitch from 0.0 - 1.0");
-      declareOutput(_loudness, "loudness", "detected loudness in dBFS");
+      declareOutput(_loudness, "loudness", "detected loudness in decibels");
       declareOutput(_voiced, "voiced", "voiced frame categorization, 1 for voiced and 0 for unvoiced frame");
 
       _isSpectral = true;
@@ -63,8 +63,8 @@ class Audio2Pitch : public Algorithm {
       declareParameter("weighting", "string to assign a weighting function", "{default,A,B,C,D,Z}", "default");
       declareParameter("tolerance", "sets tolerance for peak detection on pitch algorithm", "[0,1]", 1.0);
       declareParameter("pitchConfidenceThreshold", "level of pitch confidence above used for voiced frame detection", "[0,1]", 0.25);
-      declareParameter("loudnessThreshold", "loudness level above which note ON/OFF start to be considered, in linear values", "[0,1]", 0.0031); // ~ -50dB
-    }
+      declareParameter("loudnessThreshold", "loudness level above which note ON/OFF start to be considered, in linear values", "[-inf, 0]", -51);
+        }
 
     void configure();
     void compute();
