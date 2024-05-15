@@ -1,4 +1,5 @@
 #include "audio2pitch.h"
+#include "essentiamath.h"
 
 using namespace essentia;
 using namespace standard;
@@ -31,7 +32,7 @@ void Audio2Pitch::configure() {
   }
 
   if (_pitchAlgorithmName != "pyin_fft" && _pitchAlgorithmName != "pyin") {
-    throw EssentiaException("Audio2Pitch: Bad 'pitchAlgorithm' ="<<_pitchAlgorithmName<<"\n");
+    throw EssentiaException("Audio2Pitch: Bad 'pitchAlgorithm' =", _pitchAlgorithmName);
   }
   if (_pitchAlgorithmName == "pyin_fft") _isSpectral = true;
   if (_pitchAlgorithmName == "pyin") _isSpectral = false;
@@ -56,7 +57,7 @@ void Audio2Pitch::configure() {
     _loudnessAlgorithm = AlgorithmFactory::create("RMS");
   }
   else {
-    throw EssentiaException("Audio2Pitch: Bad 'loudnessAlgorithm' ="<<_loudnessAlgorithmName<<"\n");
+    throw EssentiaException("Audio2Pitch: Bad 'loudnessAlgorithm' =", _loudnessAlgorithmName);
   }
 
   // switch between pyin and pyin_fft to propagate the weighting parameter
@@ -101,6 +102,9 @@ void Audio2Pitch::compute() {
     _loudnessAlgorithm->output("rms").set(loudness);
   }
   _loudnessAlgorithm->compute();
+  
+  // convert lineal loudness to decibels
+  loudness = amp2db(loudness);
 
   std::vector<Real> windowedFrame, spectrum;
   if (_isSpectral) {
