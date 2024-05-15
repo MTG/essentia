@@ -56,12 +56,12 @@ class Audio2Pitch : public Algorithm {
     void declareParameters() {
       declareParameter("sampleRate", "sample rate of incoming audio frames", "[8000,inf)", 44100);
       declareParameter("frameSize", "size of input frame in samples", "[1,inf)", 1024);
-      declareParameter("minFrequency", "minimum frequency to detect in Hz", "[10,20000]", 60.f);
-      declareParameter("maxFrequency", "maximum frequency to detect in Hz", "[10,20000]", 2300.f);
+      declareParameter("minFrequency", "minimum frequency to detect in Hz", "[10,20000]", 60.0);
+      declareParameter("maxFrequency", "maximum frequency to detect in Hz", "[10,20000]", 2300.0);
       declareParameter("pitchAlgorithm", "pitch algorithm to use", "{pyin,pyin_fft}", "pyin_fft");
       declareParameter("loudnessAlgorithm", "loudness algorithm to use", "{loudness,rms}", "rms");
       declareParameter("weighting", "string to assign a weighting function", "{default,A,B,C,D,Z}", "default");
-      declareParameter("tolerance", "sets tolerance for peak detection on pitch algorithm", "[0,1]", 1.0f);
+      declareParameter("tolerance", "sets tolerance for peak detection on pitch algorithm", "[0,1]", 1.0);
       declareParameter("pitchConfidenceThreshold", "level of pitch confidence above which note ON/OFF start to be considered", "[0,1]", 0.25);
       declareParameter("loudnessThreshold", "loudness level above which note ON/OFF start to be considered, in linear values", "[0,1]", 0.0031); // ~ -50dB
     }
