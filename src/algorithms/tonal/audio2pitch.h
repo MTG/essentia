@@ -62,7 +62,7 @@ class Audio2Pitch : public Algorithm {
       declareParameter("loudnessAlgorithm", "loudness algorithm to use", "{loudness,rms}", "rms");
       declareParameter("weighting", "string to assign a weighting function", "{default,A,B,C,D,Z}", "default");
       declareParameter("tolerance", "sets tolerance for peak detection on pitch algorithm", "[0,1]", 1.0);
-      declareParameter("pitchConfidenceThreshold", "level of pitch confidence above which note ON/OFF start to be considered", "[0,1]", 0.25);
+      declareParameter("pitchConfidenceThreshold", "level of pitch confidence above used for voiced frame detection", "[0,1]", 0.25);
       declareParameter("loudnessThreshold", "loudness level above which note ON/OFF start to be considered, in linear values", "[0,1]", 0.0031); // ~ -50dB
     }
 
