@@ -738,10 +738,6 @@ inline Real hz2hz(Real hz){
   return hz;
 }
 
-inline Real hz2cents(Real hz) {
-  return 12 * std::log(hz/440)/std::log(2.) + 69;
-}
-
 // TODO: implement dB to velocity
 // TODO: implements velocity to dBs
 
