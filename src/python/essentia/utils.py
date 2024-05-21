@@ -63,6 +63,12 @@ def mel2hz(arg):
 def hz2mel(arg):
     return _essentia.hz2mel( _c.convertData(arg, _c.Edt.REAL) )
 
+def midi2hz(arg):
+    return _essentia.midi2hz( _c.convertData(arg, _c.Edt.REAL) )
+
+def hz2midi(arg):
+    return _essentia.hz2midi( _c.convertData(arg, _c.Edt.REAL) )
+
 def equivalentKey(arg):
     return _essentia.equivalentKey( _c.convertData(arg, _c.Edt.STRING) )
 
@@ -86,6 +92,7 @@ __all__ = [ 'isSilent', 'instantPower',
             'amp2db', 'db2amp',
             'bark2hz', 'hz2bark',
             'mel2hz', 'hz2mel',
+            'midi2hz', 'hz2midi',
             'postProcessTicks',
             'normalize', 'derivative',
             'equivalentKey', 'lin2log']
