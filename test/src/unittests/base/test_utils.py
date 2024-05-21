@@ -117,6 +117,12 @@ class TestUtils(TestCase):
         expected_midi = 69
         self.assertAlmostEqual(expected_midi, hz2midi(hz))
 
+    def testHzToCents(self):
+        tuning = 440
+        midi = 70
+        expected_cents = 100
+        self.assertAlmostEqual(expected_cents, hz2cents(midi2hz(midi), tuning))
+
 
 suite = allTests(TestUtils)
 

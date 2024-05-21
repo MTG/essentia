@@ -413,6 +413,20 @@ hzToMidi(PyObject* notUsed, PyObject* arg) {
 }
 
 static PyObject*
+hzToCents(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+
+  if (argsV.size() != 2 || !PyFloat_Check(argsV[0]) || !PyFloat_Check(argsV[1])) {
+    PyErr_SetString(PyExc_TypeError, (char*)"argument must be a float");
+    return NULL;
+  }
+
+  int cents = hz2cents( Real( PyFloat_AS_DOUBLE(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
+  return PyFloat_FromDouble( int(cents) );
+}
+
+static PyObject*
 getEquivalentKey(PyObject* notUsed, PyObject* arg) {
   if (!PyString_Check(arg)) {
     PyErr_SetString(PyExc_TypeError, (char*)"argument must be an string");
@@ -1025,6 +1039,7 @@ static PyMethodDef Essentia__Methods[] = {
   { "hz2mel",        hzToMel,          METH_O, "Converts a frequency in Hz to a mel band" },
   { "midi2hz",       midiToHz,         METH_O, "Converts a midi note number to frequency in Hz" },
   { "hz2midi",       hzToMidi,         METH_O, "Converts a frequency in Hz to a midi note number" },
+  { "hz2cents",      hzToCents,        METH_VARARGS, "Converts a frequency in Hz to cents" },
   { "lin2db",        linToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },
   { "db2lin",        dbToLin,          METH_O, "Converts a dB measure of power to a linear measure" },
   { "db2pow",        dbToPow,          METH_O, "Converts a dB measure of power to a linear measure" },
