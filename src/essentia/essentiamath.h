@@ -738,10 +738,6 @@ inline Real hz2hz(Real hz){
   return hz;
 }
 
-inline Real hz2cents(Real hz) {
-  return 12 * std::log(hz/440)/std::log(2.) + 69;
-}
-
 inline Real hz2cents(Real frequencyA, Real frequencyB) {
   return 1200 * log2(frequencyA / frequencyB);
 }
@@ -761,10 +757,6 @@ inline std::string midi2note(int midiNoteNumber, std::vector<std::string> allNot
     }
     std::string closest_note = allNotes[idx] + std::to_string(octave);
     return closest_note;
-}
-
-inline Real midi2hz(int midiNoteNumber) {
-    return 440.0 * powf(2, (midiNoteNumber - 69) / 12.0);
 }
 
 inline Real midi2hz(int midiNoteNumber, Real tuningFrequency) {
