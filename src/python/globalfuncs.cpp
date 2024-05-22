@@ -390,6 +390,19 @@ hzToMel(PyObject* notUsed, PyObject* arg) {
 }
 
 static PyObject*
+midiToHz(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if  (argsV.size() != 2 ||
+    (!PyLong_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (int midiNoteNumber, Real tuningFrequency)");
+    return NULL;
+  }
+  Real hz = midi2hz( long( PyLong_AsLong(argsV[0]) ),  Real( PyFloat_AS_DOUBLE(argsV[1])) );
+  return PyFloat_FromDouble( double(hz) );
+}
+
+static PyObject*
 hzToMidi(PyObject* notUsed, PyObject* args) {
   // parse args to get Source alg, name and source alg and source name
   vector<PyObject*> argsV = unpack(args);
@@ -1014,6 +1027,7 @@ static PyMethodDef Essentia__Methods[] = {
   { "hz2bark",       hzToBark,         METH_O, "Converts a frequency in Hz to a bark band" },
   { "mel2hz",        melToHz,          METH_O, "Converts a mel band to frequency in Hz" },
   { "hz2mel",        hzToMel,          METH_O, "Converts a frequency in Hz to a mel band" },
+  { "midi2hz",       midiToHz,         METH_VARARGS, "Converts a midi note number to frequency in Hz" },
   { "hz2midi",       hzToMidi,         METH_VARARGS, "Converts a frequency in Hz to a midi note number" },
   { "lin2db",        linToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },
   { "db2lin",        dbToLin,          METH_O, "Converts a dB measure of power to a linear measure" },
