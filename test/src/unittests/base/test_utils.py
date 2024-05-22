@@ -123,6 +123,11 @@ class TestUtils(TestCase):
         expected_cents = 100
         self.assertAlmostEqual(expected_cents, hz2cents(midi2hz(midi), tuning))
 
+    def testMidiToNote(self):
+        midi = 69
+        expected_note = "A4"
+        self.assertEqual(expected_note, midi2note(midi))
+
 
 suite = allTests(TestUtils)
 

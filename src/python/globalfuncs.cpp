@@ -427,6 +427,19 @@ hzToCents(PyObject* notUsed, PyObject* args) {
 }
 
 static PyObject*
+midiToNote(PyObject* notUsed, PyObject* arg) {
+
+  if (!PyLong_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"argument must be an integer");
+    return NULL;
+  }
+
+  std::string note = midi2note( long( PyLong_AsLong(arg) ) );
+  const char *c_note = note.c_str();
+  return PyString_FromString( c_note );
+}
+
+static PyObject*
 getEquivalentKey(PyObject* notUsed, PyObject* arg) {
   if (!PyString_Check(arg)) {
     PyErr_SetString(PyExc_TypeError, (char*)"argument must be an string");
@@ -1040,6 +1053,7 @@ static PyMethodDef Essentia__Methods[] = {
   { "midi2hz",       midiToHz,         METH_O, "Converts a midi note number to frequency in Hz" },
   { "hz2midi",       hzToMidi,         METH_O, "Converts a frequency in Hz to a midi note number" },
   { "hz2cents",      hzToCents,        METH_VARARGS, "Converts a frequency in Hz to cents" },
+  { "midi2note",     midiToNote,       METH_O, "Converts a midi note number in the root note" },
   { "lin2db",        linToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },
   { "db2lin",        dbToLin,          METH_O, "Converts a dB measure of power to a linear measure" },
   { "db2pow",        dbToPow,          METH_O, "Converts a dB measure of power to a linear measure" },
