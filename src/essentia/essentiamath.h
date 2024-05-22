@@ -742,6 +742,43 @@ inline Real hz2cents(Real hz) {
   return 12 * std::log(hz/440)/std::log(2.) + 69;
 }
 
+inline Real hz2cents(Real frequencyA, Real frequencyB) {
+  return 1200 * log2(frequencyA / frequencyB);
+}
+
+inline int hz2midi(Real hz, Real tuningFrequency) {
+    return 69 + (int) round(log2(hz / tuningFrequency) * 12);
+}
+
+// TODO: check MIDI standard conventions
+
+inline std::string midi2note(int midiNoteNumber, std::vector<std::string> allNotes) {
+    int noteIdx = midiNoteNumber - 69;
+    int idx = abs(noteIdx) % 12;
+    int octave = 4 + floor((noteIdx + 9) / 12.0);
+    if (noteIdx < 0) {
+        idx = abs(idx - 12) % 12;
+    }
+    std::string closest_note = allNotes[idx] + std::to_string(octave);
+    return closest_note;
+}
+
+inline Real midi2hz(int midiNoteNumber) {
+    return 440.0 * powf(2, (midiNoteNumber - 69) / 12.0);
+}
+
+inline Real midi2hz(int midiNoteNumber, Real tuningFrequency) {
+    return tuningFrequency * powf(2, (midiNoteNumber - 69) / 12.0);
+}
+
+inline int db2velocity (Real decibels, Real hearingThreshold) {
+    int velocity = 0;
+    if (decibels > hearingThreshold) {
+        velocity = (int)((hearingThreshold - decibels) * 127 / hearingThreshold);  // decibels should be negative
+    }
+    return velocity;
+}
+
 inline int argmin(const std::vector<Real>& input) {
   if (input.empty())
     throw EssentiaException("trying to get argmin of empty array");
