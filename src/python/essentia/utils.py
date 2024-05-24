@@ -63,11 +63,11 @@ def mel2hz(arg):
 def hz2mel(arg):
     return _essentia.hz2mel( _c.convertData(arg, _c.Edt.REAL) )
 
-def midi2hz(arg1, arg2):
+def midi2hz(arg1, arg2=440.0):
     return _essentia.midi2hz( _c.convertData(arg1, _c.Edt.INTEGER),
                               _c.convertData(arg2, _c.Edt.REAL) )
 
-def hz2midi(arg1, arg2):
+def hz2midi(arg1, arg2=440.0):
     return _essentia.hz2midi( _c.convertData(arg1, _c.Edt.REAL),
                               _c.convertData(arg2, _c.Edt.REAL) )
 
