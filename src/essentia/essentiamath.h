@@ -739,7 +739,7 @@ inline Real hz2hz(Real hz){
 }
 
 inline Real cents2hz(Real frequencyB, Real cents) {
-  return frequencyB * powf(2, cents/1200)
+  return frequencyB * powf(2, cents/1200);
 }
 
 inline Real hz2cents(Real frequencyA, Real frequencyB) {
@@ -747,31 +747,31 @@ inline Real hz2cents(Real frequencyA, Real frequencyB) {
 }
 
 inline int hz2midi(Real hz, Real tuningFrequency) {
-    return 69 + (int) round(log2(hz / tuningFrequency) * 12);
+  return 69 + (int) round(log2(hz / tuningFrequency) * 12);
 }
 
 inline std::string midi2note(int midiNoteNumber) {
-    const std::vector<std::string> ALL_NOTES { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
-    int noteIdx = midiNoteNumber - 69;
-    int idx = abs(noteIdx) % 12;
-    int octave = 4 + floor((noteIdx + 9) / 12.0);
-    if (noteIdx < 0) {
-        idx = abs(idx - 12) % 12;
-    }
-    std::string closest_note = ALL_NOTES[idx] + std::to_string(octave);
-    return closest_note;
+  const std::vector<std::string> ALL_NOTES { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+  int noteIdx = midiNoteNumber - 69;
+  int idx = abs(noteIdx) % 12;
+  int octave = 4 + floor((noteIdx + 9) / 12.0);
+  if (noteIdx < 0) {
+    idx = abs(idx - 12) % 12;
+  }
+  std::string closest_note = ALL_NOTES[idx] + std::to_string(octave);
+  return closest_note;
 }
 
 inline Real midi2hz(int midiNoteNumber, Real tuningFrequency) {
-    return tuningFrequency * powf(2, (midiNoteNumber - 69) / 12.0);
+  return tuningFrequency * powf(2, (midiNoteNumber - 69) / 12.0);
 }
 
 inline int db2velocity (Real decibels, Real hearingThreshold) {
-    int velocity = 0;
-    if (decibels > hearingThreshold) {
-        velocity = (int)((hearingThreshold - decibels) * 127 / hearingThreshold);  // decibels should be negative
-    }
-    return velocity;
+  int velocity = 0;
+  if (decibels > hearingThreshold) {
+    velocity = (int)((hearingThreshold - decibels) * 127 / hearingThreshold);  // decibels should be negative
+  }
+  return velocity;
 }
 
 inline int argmin(const std::vector<Real>& input) {
