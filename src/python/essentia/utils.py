@@ -71,6 +71,10 @@ def hz2midi(arg1, arg2=440.0):
     return _essentia.hz2midi( _c.convertData(arg1, _c.Edt.REAL),
                               _c.convertData(arg2, _c.Edt.REAL) )
 
+def cents2hz(arg1, arg2):
+    return _essentia.hz2cents(_c.convertData(arg1, _c.Edt.REAL),
+                              _c.convertData(arg2, _c.Edt.REAL) )
+
 def hz2cents(arg1, arg2):
     return _essentia.hz2cents(_c.convertData(arg1, _c.Edt.REAL),
                               _c.convertData(arg2, _c.Edt.REAL) )
