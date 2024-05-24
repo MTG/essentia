@@ -738,6 +738,10 @@ inline Real hz2hz(Real hz){
   return hz;
 }
 
+inline Real cents2hz(Real frequencyB, Real cents) {
+  return frequencyB * powf(2, cents/1200)
+}
+
 inline Real hz2cents(Real frequencyA, Real frequencyB) {
   return 1200 * log2(frequencyA / frequencyB);
 }
