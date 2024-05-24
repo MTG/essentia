@@ -746,16 +746,15 @@ inline int hz2midi(Real hz, Real tuningFrequency) {
     return 69 + (int) round(log2(hz / tuningFrequency) * 12);
 }
 
-// TODO: check MIDI standard conventions
-
-inline std::string midi2note(int midiNoteNumber, std::vector<std::string> allNotes) {
+inline std::string midi2note(int midiNoteNumber) {
+    const std::vector<std::string> ALL_NOTES { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
     int noteIdx = midiNoteNumber - 69;
     int idx = abs(noteIdx) % 12;
     int octave = 4 + floor((noteIdx + 9) / 12.0);
     if (noteIdx < 0) {
         idx = abs(idx - 12) % 12;
     }
-    std::string closest_note = allNotes[idx] + std::to_string(octave);
+    std::string closest_note = ALL_NOTES[idx] + std::to_string(octave);
     return closest_note;
 }
 
