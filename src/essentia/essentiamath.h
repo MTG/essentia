@@ -765,11 +765,14 @@ inline int note2octave(std::string note) {
 
 inline std::string midi2note(int midiNoteNumber) {
   const std::vector<std::string> ALL_NOTES { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+  int nNotes = ALL_NOTES.size();
+  int CIdx = 3;
+  int diffCIdx = nNotes - CIdx;
   int noteIdx = midiNoteNumber - 69;
-  int idx = abs(noteIdx) % 12;
-  int octave = 4 + floor((noteIdx + 9) / 12.0);
+  int idx = abs(noteIdx) % nNotes;
+  int octave = (CIdx + 1) + floor((noteIdx + diffCIdx) / nNotes);
   if (noteIdx < 0) {
-    idx = abs(idx - 12) % 12;
+    idx = abs(idx - nNotes) % nNotes;
   }
   std::string closest_note = ALL_NOTES[idx] + std::to_string(octave);
   return closest_note;
