@@ -91,6 +91,14 @@ def note2root(arg):
 def note2octave(arg):
     return _essentia.note2octave( _c.convertData(arg, _c.Edt.STRING) )
 
+def hz2note(arg1, arg2=440.0):
+    return _essentia.hz2note( _c.convertData(arg1, _c.Edt.REAL),
+                              _c.convertData(arg2, _c.Edt.REAL) )
+
+def note2hz(arg1, arg2=440.0):
+    return _essentia.note2hz( _c.convertData(arg1, _c.Edt.STRING),
+                              _c.convertData(arg2, _c.Edt.REAL) )
+
 def equivalentKey(arg):
     return _essentia.equivalentKey( _c.convertData(arg, _c.Edt.STRING) )
 
@@ -118,6 +126,7 @@ __all__ = [ 'isSilent', 'instantPower',
 	    'cents2hz', 'hz2cents',
 	    'note2root', 'note2octave',
             'midi2note', 'note2midi',
+            'hz2note', 'note2hz',
             'postProcessTicks',
             'normalize', 'derivative',
             'equivalentKey', 'lin2log']

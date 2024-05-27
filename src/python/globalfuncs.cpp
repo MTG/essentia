@@ -495,6 +495,35 @@ noteToOctave(PyObject* notUsed, PyObject* arg) {
 }
 
 static PyObject*
+hzToNote(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if (argsV.size() != 2 ||
+  (!PyFloat_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (Real hertz, Real tuningFrequency)");
+    return NULL;
+  }
+
+  std::string note = hz2note( Real( PyFloat_AS_DOUBLE(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1])) );
+  const char *c_note = note.c_str();
+  return PyString_FromString( c_note );
+}
+
+static PyObject*
+noteToHz(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if (argsV.size() != 2 ||
+  (!PyString_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (string note, Real tuningFrequency)");
+    return NULL;
+  }
+
+  Real hz = note2hz( PyString_AS_STRING(argsV[0]), Real( PyFloat_AS_DOUBLE(argsV[1])) );
+  return PyFloat_FromDouble( hz );
+}
+
+static PyObject*
 getEquivalentKey(PyObject* notUsed, PyObject* arg) {
   if (!PyString_Check(arg)) {
     PyErr_SetString(PyExc_TypeError, (char*)"argument must be an string");
@@ -1113,6 +1142,8 @@ static PyMethodDef Essentia__Methods[] = {
   { "note2midi",     noteToMidi,       METH_O, "Converts note (applying the international pitch standard A4=440Hz) to midi note number" },
   { "note2root",     noteToRoot,       METH_O, "Returns the root of a note" },
   { "note2octave",   noteToOctave,     METH_O, "Returns the octave of a note" },
+  { "hz2note",       hzToNote,         METH_VARARGS, "Converts a frequency in Hz to a note - applying the international pitch standard A4=440Hz" },
+  { "note2hz",       noteToHz,         METH_VARARGS, "Converts a note - applying the international pitch standard A4=440Hz - into a frequency in Hz" },
   { "lin2db",        linToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },
   { "db2lin",        dbToLin,          METH_O, "Converts a dB measure of power to a linear measure" },
   { "db2pow",        dbToPow,          METH_O, "Converts a dB measure of power to a linear measure" },

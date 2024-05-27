@@ -160,6 +160,16 @@ class TestUtils(TestCase):
         expected_octave = int(note[1])
         self.assertEqual(expected_octave, note2octave(note))
 
+    def testHzToNote(self):
+        hz = 440
+        expected_note = "A4"
+        self.assertEqual(expected_note, hz2note(hz))
+
+    def testNoteToHz(self):
+        note = "A4"
+        expected_hz = 440
+        self.assertEqual(expected_hz, note2hz(note))
+
 
 suite = allTests(TestUtils)
 

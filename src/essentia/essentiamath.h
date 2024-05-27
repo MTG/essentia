@@ -800,6 +800,16 @@ inline int note2midi(std::string note) {
   return midiNote;
 }
 
+inline std::string hz2note(Real hz, Real tuningFrequency) {
+    int midiNoteNumber = hz2midi(hz, tuningFrequency);
+    return midi2note(midiNoteNumber);
+}
+
+inline int note2hz(std::string note, Real tuningFrequency) {
+    int midiNoteNumber = note2midi(note);
+    return midi2hz(midiNoteNumber, tuningFrequency);
+}
+
 inline int db2velocity (Real decibels, Real hearingThreshold) {
   int velocity = 0;
   if (decibels > hearingThreshold) {
