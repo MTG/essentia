@@ -818,6 +818,10 @@ inline int db2velocity (Real decibels, Real hearingThreshold) {
   return velocity;
 }
 
+inline Real velocity2db(int velocity, Real hearingThreshold) {
+  return -(hearingThreshold * velocity / 127 -hearingThreshold);
+}
+
 inline int argmin(const std::vector<Real>& input) {
   if (input.empty())
     throw EssentiaException("trying to get argmin of empty array");

@@ -504,7 +504,7 @@ hzToNote(PyObject* notUsed, PyObject* args) {
     return NULL;
   }
 
-  std::string note = hz2note( Real( PyFloat_AS_DOUBLE(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1])) );
+  std::string note = hz2note( Real( PyFloat_AS_DOUBLE(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
   const char *c_note = note.c_str();
   return PyString_FromString( c_note );
 }
@@ -519,8 +519,36 @@ noteToHz(PyObject* notUsed, PyObject* args) {
     return NULL;
   }
 
-  Real hz = note2hz( PyString_AS_STRING(argsV[0]), Real( PyFloat_AS_DOUBLE(argsV[1])) );
+  Real hz = note2hz( PyString_AS_STRING(argsV[0]), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
   return PyFloat_FromDouble( hz );
+}
+
+static PyObject*
+velocityToDb(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if (argsV.size() != 2 ||
+  (!PyLong_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (int velocity, Real hearingThreshold)");
+    return NULL;
+  }
+
+  Real db = velocity2db( long( PyLong_AsLong(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
+  return PyFloat_FromDouble( db );
+}
+
+static PyObject*
+dbToVelocity(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if (argsV.size() != 2 ||
+  (!PyFloat_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (Real decibels, Real hearingThreshold)");
+    return NULL;
+  }
+
+  long velocity = db2velocity( Real( PyFloat_AS_DOUBLE(argsV[0])), Real( PyFloat_AS_DOUBLE(argsV[1])) );
+  return PyLong_FromLong( int(velocity) );
 }
 
 static PyObject*
@@ -1144,6 +1172,8 @@ static PyMethodDef Essentia__Methods[] = {
   { "note2octave",   noteToOctave,     METH_O, "Returns the octave of a note" },
   { "hz2note",       hzToNote,         METH_VARARGS, "Converts a frequency in Hz to a note - applying the international pitch standard A4=440Hz" },
   { "note2hz",       noteToHz,         METH_VARARGS, "Converts a note - applying the international pitch standard A4=440Hz - into a frequency in Hz" },
+  { "velocity2db",   velocityToDb,     METH_VARARGS, "Converts a velocity to a measure in dB" },
+  { "db2velocity",   dbToVelocity,     METH_VARARGS, "Converts a dB measure of power to velocity [0-127]" },
   { "lin2db",        linToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },
   { "db2lin",        dbToLin,          METH_O, "Converts a dB measure of power to a linear measure" },
   { "db2pow",        dbToPow,          METH_O, "Converts a dB measure of power to a linear measure" },

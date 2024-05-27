@@ -170,6 +170,22 @@ class TestUtils(TestCase):
         expected_hz = 440
         self.assertEqual(expected_hz, note2hz(note))
 
+    def testDbToVelocity(self):
+        decibels = 0
+        expected_velocity = 127
+        self.assertEqual(expected_velocity, db2velocity(decibels))
+        decibels = -96
+        expected_velocity = 0
+        self.assertEqual(expected_velocity, db2velocity(decibels))
+
+    def testVelocityToDb(self):
+        velocity = 127
+        expected_decibels = 0
+        self.assertEqual(expected_decibels, velocity2db(velocity))
+        velocity = 0
+        expected_decibels = -96
+        self.assertEqual(expected_decibels, velocity2db(velocity))
+
 
 suite = allTests(TestUtils)
 

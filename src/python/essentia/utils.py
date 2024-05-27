@@ -99,6 +99,14 @@ def note2hz(arg1, arg2=440.0):
     return _essentia.note2hz( _c.convertData(arg1, _c.Edt.STRING),
                               _c.convertData(arg2, _c.Edt.REAL) )
 
+def velocity2db(arg1, arg2=-96):
+    return _essentia.velocity2db( _c.convertData(arg1, _c.Edt.INTEGER),
+                                  _c.convertData(arg2, _c.Edt.REAL) )
+
+def db2velocity(arg1, arg2=-96):
+    return _essentia.db2velocity( _c.convertData(arg1, _c.Edt.REAL),
+                                  _c.convertData(arg2, _c.Edt.REAL) )
+
 def equivalentKey(arg):
     return _essentia.equivalentKey( _c.convertData(arg, _c.Edt.STRING) )
 
@@ -127,6 +135,7 @@ __all__ = [ 'isSilent', 'instantPower',
 	    'note2root', 'note2octave',
             'midi2note', 'note2midi',
             'hz2note', 'note2hz',
+            'velocity2db', 'db2velocity',
             'postProcessTicks',
             'normalize', 'derivative',
             'equivalentKey', 'lin2log']
