@@ -440,8 +440,21 @@ centsToHz(PyObject* notUsed, PyObject* args) {
     return NULL;
   }
 
-  int hz = cents2hz( Real( PyFloat_AS_DOUBLE(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
-  return PyFloat_FromDouble( int(hz) );
+  Real hz = cents2hz( Real( PyFloat_AS_DOUBLE(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
+  return PyFloat_FromDouble( hz );
+}
+
+static PyObject*
+midiToNote(PyObject* notUsed, PyObject* arg) {
+
+  if (!PyLong_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (int midiNoteNumber)");
+    return NULL;
+  }
+
+  std::string note = midi2note( long( PyLong_AsLong(arg) ) );
+  const char *c_note = note.c_str();
+  return PyString_FromString( c_note );
 }
 
 static PyObject*
@@ -1059,6 +1072,7 @@ static PyMethodDef Essentia__Methods[] = {
   { "hz2midi",       hzToMidi,         METH_VARARGS, "Converts a frequency in Hz to a midi note number" },
   { "hz2cents",      hzToCents,        METH_VARARGS, "Returns the cents distance between two frequencies in Hz" },
   { "cents2hz",      centsToHz,        METH_VARARGS, "Returns the frequency from a frequency in Hz and cents distance" },
+  { "midi2note",     midiToNote,       METH_O, "Converts a midi note number to note applying the international pitch standard (A4=440Hz)" },
   { "lin2db",        linToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },
   { "db2lin",        dbToLin,          METH_O, "Converts a dB measure of power to a linear measure" },
   { "db2pow",        dbToPow,          METH_O, "Converts a dB measure of power to a linear measure" },
