@@ -458,6 +458,18 @@ midiToNote(PyObject* notUsed, PyObject* arg) {
 }
 
 static PyObject*
+noteToMidi(PyObject* notUsed, PyObject* arg) {
+
+  if (!PyString_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (string note)");
+    return NULL;
+  }
+
+  int octave = note2midi( PyString_AS_STRING(arg) );
+  return PyLong_FromLong( int(octave) );
+}
+
+static PyObject*
 noteToRoot(PyObject* notUsed, PyObject* arg) {
 
   if (!PyString_Check(arg)) {
@@ -1098,6 +1110,7 @@ static PyMethodDef Essentia__Methods[] = {
   { "hz2cents",      hzToCents,        METH_VARARGS, "Returns the cents distance between two frequencies in Hz" },
   { "cents2hz",      centsToHz,        METH_VARARGS, "Returns the frequency from a frequency in Hz and cents distance" },
   { "midi2note",     midiToNote,       METH_O, "Converts a midi note number to note applying the international pitch standard (A4=440Hz)" },
+  { "note2midi",     noteToMidi,       METH_O, "Converts note (applying the international pitch standard A4=440Hz) to midi note number" },
   { "note2root",     noteToRoot,       METH_O, "Returns the root of a note" },
   { "note2octave",   noteToOctave,     METH_O, "Returns the octave of a note" },
   { "lin2db",        linToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },

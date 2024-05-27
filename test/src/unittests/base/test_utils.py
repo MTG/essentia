@@ -139,6 +139,17 @@ class TestUtils(TestCase):
         expected_note = "A4"
         self.assertEqual(expected_note, midi2note(midi))
 
+    def testNoteToMidi(self):
+        note = "A4"
+        expected_midi = 69
+        self.assertEqual(expected_midi, note2midi(note))
+        note = "C4"
+        expected_midi = 60
+        self.assertEqual(expected_midi, note2midi(note))
+        note = "C5"
+        expected_midi = 72
+        self.assertEqual(expected_midi, note2midi(note))
+
     def testNoteToRoot(self):
         note = "A4"
         expected_root = note[0]

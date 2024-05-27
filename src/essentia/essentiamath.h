@@ -750,6 +750,19 @@ inline int hz2midi(Real hz, Real tuningFrequency) {
   return 69 + (int) round(log2(hz / tuningFrequency) * 12);
 }
 
+inline Real midi2hz(int midiNoteNumber, Real tuningFrequency) {
+  return tuningFrequency * powf(2, (midiNoteNumber - 69) / 12.0);
+}
+
+inline std::string note2root(std::string note) {
+    return note.substr(0, note.size()-1);
+}
+
+inline int note2octave(std::string note) {
+    char octaveChar = note.back();
+    return octaveChar - '0';
+}
+
 inline std::string midi2note(int midiNoteNumber) {
   const std::vector<std::string> ALL_NOTES { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
   int noteIdx = midiNoteNumber - 69;
@@ -762,17 +775,26 @@ inline std::string midi2note(int midiNoteNumber) {
   return closest_note;
 }
 
-inline std::string note2root(std::string note) {
-    return note.substr(0, note.size()-1);
-}
+inline int note2midi(std::string note) {
+  const std::vector<std::string> ALL_NOTES { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+  int octave = note2octave(note);
+  std::string root = note2root(note);
+  int nNotes = ALL_NOTES.size();
+  int CIdx = 3;
 
-inline int note2octave(std::string note) {
-    char octaveChar = note.back();
-    return octaveChar - '0';
-}
-
-inline Real midi2hz(int midiNoteNumber, Real tuningFrequency) {
-  return tuningFrequency * powf(2, (midiNoteNumber - 69) / 12.0);
+  int noteIdx = floor((octave - (CIdx + 1)) * nNotes);
+  int idx = 0;
+  for (int i = 0; i < nNotes; i++) {
+      if (ALL_NOTES[i] == root) {
+        idx = i;
+        if (idx >= CIdx) {
+          idx = idx - nNotes;
+        }
+        i = nNotes;
+      }
+  }
+  int midiNote = noteIdx + 69 + idx;
+  return midiNote;
 }
 
 inline int db2velocity (Real decibels, Real hearingThreshold) {
