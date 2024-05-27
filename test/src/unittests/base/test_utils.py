@@ -139,6 +139,16 @@ class TestUtils(TestCase):
         expected_note = "A4"
         self.assertEqual(expected_note, midi2note(midi))
 
+    def testNoteToRoot(self):
+        note = "A4"
+        expected_root = note[0]
+        self.assertEqual(expected_root, note2root(note))
+
+    def testNoteToOctave(self):
+        note = "A4"
+        expected_octave = int(note[1])
+        self.assertEqual(expected_octave, note2octave(note))
+
 
 suite = allTests(TestUtils)
 

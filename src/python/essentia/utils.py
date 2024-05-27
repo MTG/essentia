@@ -82,6 +82,12 @@ def hz2cents(arg1, arg2):
 def midi2note(arg):
     return _essentia.midi2note( _c.convertData(arg, _c.Edt.INTEGER) )
 
+def note2root(arg):
+    return _essentia.note2root( _c.convertData(arg, _c.Edt.STRING) )
+
+def note2octave(arg):
+    return _essentia.note2octave( _c.convertData(arg, _c.Edt.STRING) )
+
 def equivalentKey(arg):
     return _essentia.equivalentKey( _c.convertData(arg, _c.Edt.STRING) )
 
@@ -107,6 +113,7 @@ __all__ = [ 'isSilent', 'instantPower',
             'mel2hz', 'hz2mel',
             'midi2hz', 'hz2midi',
 	    'cents2hz', 'hz2cents',
+	    'note2root', 'note2octave',
             'midi2note',
             'postProcessTicks',
             'normalize', 'derivative',

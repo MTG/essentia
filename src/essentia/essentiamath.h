@@ -762,6 +762,15 @@ inline std::string midi2note(int midiNoteNumber) {
   return closest_note;
 }
 
+inline std::string note2root(std::string note) {
+    return note.substr(0, note.size()-1);
+}
+
+inline int note2octave(std::string note) {
+    char octaveChar = note.back();
+    return octaveChar - '0';
+}
+
 inline Real midi2hz(int midiNoteNumber, Real tuningFrequency) {
   return tuningFrequency * powf(2, (midiNoteNumber - 69) / 12.0);
 }
