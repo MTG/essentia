@@ -788,13 +788,13 @@ inline int note2midi(std::string note) {
   int noteIdx = floor((octave - (CIdx + 1)) * nNotes);
   int idx = 0;
   for (int i = 0; i < nNotes; i++) {
-      if (ALL_NOTES[i] == root) {
-        idx = i;
-        if (idx >= CIdx) {
-          idx = idx - nNotes;
-        }
-        break;
+    if (ALL_NOTES[i] == root) {
+      idx = i;
+      if (idx >= CIdx) {
+        idx = idx - nNotes;
       }
+      break;
+    }
   }
   int midiNote = noteIdx + 69 + idx;
   return midiNote;
