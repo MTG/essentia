@@ -793,7 +793,7 @@ inline int note2midi(std::string note) {
         if (idx >= CIdx) {
           idx = idx - nNotes;
         }
-        i = nNotes;
+        break;
       }
   }
   int midiNote = noteIdx + 69 + idx;
