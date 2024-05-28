@@ -132,7 +132,7 @@ class TestUtils(TestCase):
         tuning = 440
         cents = 100
         expected_hz = 466.16378
-        self.assertAlmostEqual(expected_hz, cents2hz(tuning, cents))
+        self.assertAlmostEqual(expected_hz, cents2hz(cents, tuning))
 
     def testMidiToNote(self):
         midi = 69
