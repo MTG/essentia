@@ -422,7 +422,7 @@ hzToCents(PyObject* notUsed, PyObject* args) {
   vector<PyObject*> argsV = unpack(args);
 
   if (argsV.size() != 2 || !PyFloat_Check(argsV[0]) || !PyFloat_Check(argsV[1])) {
-    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (Real frequencyA, Real frequencyB)");
+    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (Real hertz, Real referenceFrequency)");
     return NULL;
   }
 
@@ -436,7 +436,7 @@ centsToHz(PyObject* notUsed, PyObject* args) {
   vector<PyObject*> argsV = unpack(args);
 
   if (argsV.size() != 2 || !PyFloat_Check(argsV[0]) || !PyFloat_Check(argsV[1])) {
-    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (Real frequencyB, Real cents)");
+    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (Real cents, Real referenceFrequency)");
     return NULL;
   }
 
@@ -1164,8 +1164,8 @@ static PyMethodDef Essentia__Methods[] = {
   { "hz2mel",        hzToMel,          METH_O, "Converts a frequency in Hz to a mel band" },
   { "midi2hz",       midiToHz,         METH_VARARGS, "Converts a midi note number to frequency in Hz" },
   { "hz2midi",       hzToMidi,         METH_VARARGS, "Converts a frequency in Hz to a midi note number" },
-  { "hz2cents",      hzToCents,        METH_VARARGS, "Returns the cents distance between two frequencies in Hz" },
-  { "cents2hz",      centsToHz,        METH_VARARGS, "Returns the frequency from a frequency in Hz and cents distance" },
+  { "hz2cents",      hzToCents,        METH_VARARGS, "Returns the cents distance between a frequency and a reference frequency in Hz" },
+  { "cents2hz",      centsToHz,        METH_VARARGS, "Returns the frequency from a cents distance [0-1200] and a reference frequency in Hz" },
   { "midi2note",     midiToNote,       METH_O, "Converts a midi note number to note applying the international pitch standard (A4=440Hz)" },
   { "note2midi",     noteToMidi,       METH_O, "Converts note (applying the international pitch standard A4=440Hz) to midi note number" },
   { "note2root",     noteToRoot,       METH_O, "Returns the root of a note" },

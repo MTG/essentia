@@ -738,12 +738,12 @@ inline Real hz2hz(Real hz){
   return hz;
 }
 
-inline Real cents2hz(Real frequencyB, Real cents) {
-  return frequencyB * powf(2.0, cents / 1200.0);
+inline Real cents2hz(Real cents, Real referenceFrequency) {
+  return referenceFrequency * powf(2.0, cents / 1200.0);
 }
 
-inline Real hz2cents(Real frequencyA, Real frequencyB) {
-  return 1200 * log2(frequencyA / frequencyB);
+inline Real hz2cents(Real hz, Real referenceFrequency) {
+  return 1200 * log2(hz / referenceFrequency);
 }
 
 inline int hz2midi(Real hz, Real tuningFrequency) {
