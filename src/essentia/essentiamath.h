@@ -39,6 +39,7 @@
 #include "utils/tnt/tnt2essentiautils.h"
 
 #define M_2PI (2 * M_PI)
+#define ALL_NOTES "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"
 
 namespace essentia {
 
@@ -764,8 +765,9 @@ inline int note2octave(std::string note) {
 }
 
 inline std::string midi2note(int midiNoteNumber) {
-  const std::vector<std::string> ALL_NOTES { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
-  int nNotes = ALL_NOTES.size();
+  std::string NOTES[] = {ALL_NOTES};
+  //int nNotes = NOTES.size();
+  int nNotes = *(&NOTES + 1) - NOTES;
   int CIdx = 3;
   int diffCIdx = nNotes - CIdx;
   int noteIdx = midiNoteNumber - 69;
@@ -774,21 +776,23 @@ inline std::string midi2note(int midiNoteNumber) {
   if (noteIdx < 0) {
     idx = abs(idx - nNotes) % nNotes;
   }
-  std::string closest_note = ALL_NOTES[idx] + std::to_string(octave);
+  std::string closest_note = NOTES[idx] + std::to_string(octave);
   return closest_note;
 }
 
 inline int note2midi(std::string note) {
-  const std::vector<std::string> ALL_NOTES { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+  //const std::vector<std::string> ALL_NOTES { "A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#" };
+  std::string NOTES[] = {ALL_NOTES};
   int octave = note2octave(note);
   std::string root = note2root(note);
-  int nNotes = ALL_NOTES.size();
+  int nNotes = *(&NOTES + 1) - NOTES;
+  //int nNotes = NOTES.size();
   int CIdx = 3;
 
   int noteIdx = floor((octave - (CIdx + 1)) * nNotes);
   int idx = 0;
   for (int i = 0; i < nNotes; i++) {
-    if (ALL_NOTES[i] == root) {
+    if (NOTES[i] == root) {
       idx = i;
       if (idx >= CIdx) {
         idx = idx - nNotes;
