@@ -321,7 +321,7 @@ void PitchYinProbabilities::compute() {
   bool isLowAmplitude = (RMS < _lowAmp);
 
   for (size_t iCandidate = 0; iCandidate < _freq.size(); ++iCandidate) {
-    Real pitchCents = hz2cents(_freq[iCandidate]);
+    Real pitchCents = hz2midi(_freq[iCandidate], 440.0);
     _freq[iCandidate] = pitchCents;
     if (isLowAmplitude) {
       // lower the probabilities of the frequencies by calculating the weighted sum
