@@ -138,6 +138,15 @@ FrameGenerator inherits all the parameters of the FrameCutter. The way to use it
                 times.append((start + self.hopSize * i) / sampleRate)
             return times
 
+    # Copy the docstring from FrameCutter and modify for FrameGenerator
+    docstr = default_fc.__doc__
+    docstr = docstr.replace('FrameCutter', 'FrameGenerator')
+    # change input name for consistency with class definition
+    docstr = docstr.replace('Inputs:\n\n  [vector_real] signal', 'Inputs:\n\n  [vector_real] audio')
+    docstr = docstr.replace('Outputs:\n\n  [vector_real] frame - the frame to write to',
+                            'Outputs:\n\n  An iterator that returns each frame [vector_real] of the input signal.')
+    docstr = docstr[0:docstr.find('Description:')]
+    docstr += ('Description:\n\n ' + FrameGenerator.__struct__['description'])
+    setattr(FrameGenerator, '__doc__', docstr)
 
     setattr(essentia, 'FrameGenerator', FrameGenerator)
-    setattr(FrameGenerator, '__doc__', '''Test docstring 3''')
