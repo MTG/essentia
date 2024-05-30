@@ -140,3 +140,4 @@ FrameGenerator inherits all the parameters of the FrameCutter. The way to use it
 
 
     setattr(essentia, 'FrameGenerator', FrameGenerator)
+    setattr(FrameGenerator, '__doc__', '''Test docstring 3''')
