@@ -144,7 +144,7 @@ FrameGenerator inherits all the parameters of the FrameCutter. The way to use it
     # change input name for consistency with class definition
     docstr = docstr.replace('Inputs:\n\n  [vector_real] signal', 'Inputs:\n\n  [vector_real] audio')
     docstr = docstr.replace('Outputs:\n\n  [vector_real] frame - the frame to write to',
-                            'Outputs:\n\n  An iterator that returns each frame [vector_real] of the input signal.')
+                            'Outputs:\n\n  An iterator that returns each frame [vector_real] of the input audio.')
     docstr = docstr[0:docstr.find('Description:')]
     docstr += ('Description:\n\n ' + FrameGenerator.__struct__['description'])
     setattr(FrameGenerator, '__doc__', docstr)
