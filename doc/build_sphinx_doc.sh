@@ -37,6 +37,7 @@ pandoc ../../FAQ.md -o FAQ.rst
 pandoc research_papers.md -o research_papers.rst
 jupyter nbconvert ../../src/examples/python/*.ipynb --to rst --output-dir .
 
+make clean
 make html
 
 # remove generated algorithm reference rst and temporary html files
