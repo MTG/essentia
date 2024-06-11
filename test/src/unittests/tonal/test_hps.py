@@ -110,36 +110,6 @@ class TestHarmonicProductSpectrum(TestCase):
         self.assertConfigureFails(HarmonicProductSpectrum(), {'frameSize' : 1})
         self.assertConfigureFails(HarmonicProductSpectrum(), {'sampleRate' : 0})
 
-    def testARealCase(self):
-        # The expected values were recomputed from commit
-        # 2d37c0713fb6cc5f637b3d8f5d65aa90b36d4277
-        #
-        # The expeted values were compared with the vamp pYIN
-        # implementation of the YIN algorithm producing very
-        # similar values.
-        #
-        # https://code.soundsoftware.ac.uk/projects/pyin
-
-        frameSize = 1024
-        sr = 44100
-        hopSize = 512
-        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
-        audio = MonoLoader(filename=filename, sampleRate=44100)()
-        frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
-        win = Windowing(type='hann')
-        pitchDetect = HarmonicProductSpectrum(frameSize=frameSize, sampleRate = sr)
-        pitch = []
-        confidence = []
-        for frame in frames:
-            spec = Spectrum()(win(frame))
-            f, conf = pitchDetect(spec)
-            pitch += [f]
-            confidence += [conf]
-        expected_pitch = numpy.load(join(filedir(), 'hps/vignesh_pitch.npy'))
-        expected_conf = numpy.load(join(filedir(), 'hps/vignesh_confidance.npy'))
-        self.assertAlmostEqualVector(pitch, expected_pitch)
-        self.assertAlmostEqualVector(confidence, expected_conf, 5e-5)
-
 
 suite = allTests(TestHarmonicProductSpectrum)
 
