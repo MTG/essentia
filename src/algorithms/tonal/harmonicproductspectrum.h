@@ -42,10 +42,14 @@ class HarmonicProductSpectrum : public Algorithm {
 
   Algorithm* _peakDetect;
 
+  std::vector<Real> _positions;   /** peak positions */
+  std::vector<Real> _amplitudes;  /** peak amplitudes */
   Real _sampleRate;               /** sampling rate of the audio signal */
   int _frameSize;
   int _tauMin;
   int _tauMax;
+  int _numHarmonics;
+  Real _magnitudeThreshold;
 
  public:
   HarmonicProductSpectrum() {
@@ -65,6 +69,8 @@ class HarmonicProductSpectrum : public Algorithm {
     declareParameter("sampleRate", "sampling rate of the input spectrum [Hz]", "(0,inf)", 44100.);
     declareParameter("minFrequency", "the minimum allowed frequency [Hz]", "(0,inf)", 20.0);
     declareParameter("maxFrequency", "the maximum allowed frequency [Hz]", "(0,inf)", 22050.0);
+    declareParameter("numHarmonics", "number of harmonics to consider", "[1,inf)", 5);
+    declareParameter("magnitudeThreshold", "threshold ratio for the amplitude filtering [0,1]", "[0,1]", 0.2);
   }
 
   void configure();

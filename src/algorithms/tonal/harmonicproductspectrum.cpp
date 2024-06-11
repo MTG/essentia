@@ -44,6 +44,8 @@ void HarmonicProductSpectrum::configure() {
   // compute buffer sizes
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toReal();
+  _numHarmonics = parameter("numHarmonics").toInt();
+  _magnitudeThreshold = parameter("magnitudeThreshold").toReal();
 
 
   _tauMax = min(int(ceil(_sampleRate / parameter("minFrequency").toReal())), _frameSize/2);
@@ -55,7 +57,6 @@ void HarmonicProductSpectrum::configure() {
 
   // configure peak detection algorithm
   _peakDetect->configure("range", _frameSize/2+1,
-                        "maxPeaks", 1,
                         "minPosition", _tauMin,
                         "maxPosition", _tauMax,
                         "orderBy", "amplitude");
@@ -73,7 +74,35 @@ void HarmonicProductSpectrum::compute() {
     Algorithm::configure( "frameSize", int(2*(spectrum.size()-1)) );
   }
 
-  pitch = 0.0;
-  pitchConfidence = 0.0;
+  vector<Real> hps(spectrum);
 
+  for (int h=2; h < _numHarmonics; h++) {
+
+      vector<Real> downsampled(spectrum.size()/h, 1.0);
+      for (int bin=0; bin < downsampled.size(); bin++) {
+          downsampled[bin] = spectrum[bin*h];
+      }
+      for (int bin=0; bin < downsampled.size(); bin++) {
+          hps[bin] *= downsampled[bin];
+      }
+  }
+
+  for (int bin=hps.size()/_numHarmonics; bin < hps.size(); bin++) {
+      hps[bin] = 0;
+  }
+  vector<Real> _positions;
+  vector<Real> _amplitudes;
+
+  _peakDetect->input("array").set(hps);
+  _peakDetect->output("positions").set(_positions);
+  _peakDetect->output("amplitudes").set(_amplitudes);
+  _peakDetect->compute();
+
+  if (_positions.size() == 0) {
+    pitch = 0.0;
+    pitchConfidence = 0.0;
+  } else {
+    pitch = _positions[0] * _sampleRate / _frameSize;
+    pitchConfidence = 1.0;
+  }
 }

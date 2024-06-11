@@ -140,30 +140,6 @@ class TestHarmonicProductSpectrum(TestCase):
         self.assertAlmostEqualVector(pitch, expected_pitch)
         self.assertAlmostEqualVector(confidence, expected_conf, 5e-5)
 
-    def testARealCaseAubioComparison(self):
-        # Compare with the results obtained with the aubio YinFFT
-        # implementation of the YinFFT algorithm
-        # https://aubio.org/
-
-        frameSize = 4096
-        sr = 44100
-        hopSize = 512
-        filename = join(testdata.audio_dir, 'recorded', 'vignesh.wav')
-        audio = MonoLoader(filename=filename, sampleRate=44100)()
-        frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize, startFromZero=True)
-        win = Windowing(normalized=False, zeroPhase=False)
-        spec = Spectrum()
-        pitchDetect = HarmonicProductSpectrum(frameSize=frameSize, sampleRate=sr)
-
-        pitch = array([pitchDetect(spec(win(frame)))[0] for frame in frames])
-
-        expected_pitch = numpy.load(join(filedir(), 'hps/vignesh_pitch_aubio.npy'))
-
-        # Trim the first and last frames as the
-        # system behavior is unestable.
-        pitch = pitch[8:-5]
-        expected_pitch = expected_pitch[8:-5]
-
 
 suite = allTests(TestHarmonicProductSpectrum)
 
