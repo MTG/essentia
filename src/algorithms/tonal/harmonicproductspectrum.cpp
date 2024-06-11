@@ -27,18 +27,17 @@ using namespace standard;
 
 const char* HarmonicProductSpectrum::name = "HarmonicProductSpectrum";
 const char* HarmonicProductSpectrum::category = "Pitch";
-const char* HarmonicProductSpectrum::description = DOC("This algorithm estimates the fundamental frequency given the spectrum of a monophonic music signal. It is an implementation of YinFFT algorithm [1], which is an optimized version of Yin algorithm for computation in the frequency domain. It is recommended to window the input spectrum with a Hann window. The raw spectrum can be computed with the Spectrum algorithm.\n"
+const char* HarmonicProductSpectrum::description = DOC("This algorithm estimates the fundamental frequency given the spectrum of a monophonic music signal. It is an implementation of Harmonic Product Spectrum algorithm [1], computed in the frequency-domain. It is recommended to window the input spectrum with a Hann window. The raw spectrum can be computed with the Spectrum algorithm.\n"
 "\n"
 "An exception is thrown if an empty spectrum is provided.\n"
 "\n"
-"Please note that if \"pitchConfidence\" is zero, \"pitch\" is undefined and should not be used for other algorithms.\n"
-"Also note that a null \"pitch\" is never ouput by the algorithm and that \"pitchConfidence\" must always be checked out.\n"
+"Note that a null “pitch” is never output by the algorithm.\n"
 "\n"
 "References:\n"
-"  [1] P. M. Brossier, \"Automatic Annotation of Musical Audio for Interactive\n"
-"  Applications,” QMUL, London, UK, 2007.\n\n"
-"  [2] Pitch detection algorithm - Wikipedia, the free encyclopedia\n"
-"  http://en.wikipedia.org/wiki/Pitch_detection_algorithm");
+"  [1] Noll, A. M. (1970). Pitch Determination of Human Speech by the\n"
+"  Harmonic Product Spectrum, the Harmonic Sum Spectrum, and a Maximum\n"
+"  Likelihood Estimate. Symposium on Computer Processing in Communication,\n"
+"  Ed., 19, 779–797.");
 
 void HarmonicProductSpectrum::configure() {
   // compute buffer sizes
