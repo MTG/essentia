@@ -22,13 +22,13 @@
 from essentia_test import *
 from numpy import sin, pi, mean, random
 
-class TestHarmonicProductSpectrum(TestCase):
+class TestPitchHPS(TestCase):
 
     def testEmpty(self):
-        self.assertComputeFails(HarmonicProductSpectrum(), [])
+        self.assertComputeFails(PitchHPS(), [])
 
     def testZero(self):
-        pitch, confidence = HarmonicProductSpectrum()(zeros(1024))
+        pitch, confidence = PitchHPS()(zeros(1024))
         self.assertEqual(pitch, 0)
         self.assertEqual(confidence, 0)
 
@@ -95,7 +95,7 @@ class TestHarmonicProductSpectrum(TestCase):
 
         frames = FrameGenerator(signal, frameSize=frameSize, hopSize=hopsize)
         win = Windowing(type='hann')
-        pitchDetect = HarmonicProductSpectrum(frameSize=frameSize, sampleRate = sr)
+        pitchDetect = PitchHPS(frameSize=frameSize, sampleRate = sr)
         pitch = []
         confidence = []
         for frame in frames:
@@ -107,11 +107,11 @@ class TestHarmonicProductSpectrum(TestCase):
         self.assertAlmostEqual(mean(confidence), 1, conf_precision)
 
     def testInvalidParam(self):
-        self.assertConfigureFails(HarmonicProductSpectrum(), {'frameSize' : 1})
-        self.assertConfigureFails(HarmonicProductSpectrum(), {'sampleRate' : 0})
+        self.assertConfigureFails(PitchHPS(), {'frameSize' : 1})
+        self.assertConfigureFails(PitchHPS(), {'sampleRate' : 0})
 
 
-suite = allTests(TestHarmonicProductSpectrum)
+suite = allTests(TestPitchHPS)
 
 if __name__ == '__main__':
     TextTestRunner(verbosity=2).run(suite)

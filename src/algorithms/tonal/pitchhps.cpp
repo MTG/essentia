@@ -17,7 +17,7 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#include "harmonicproductspectrum.h"
+#include "pitchhps.h"
 #include "essentiamath.h"
 #include <complex>
 
@@ -25,9 +25,9 @@ using namespace std;
 using namespace essentia;
 using namespace standard;
 
-const char* HarmonicProductSpectrum::name = "HarmonicProductSpectrum";
-const char* HarmonicProductSpectrum::category = "Pitch";
-const char* HarmonicProductSpectrum::description = DOC("This algorithm estimates the fundamental frequency given the spectrum of a monophonic music signal. It is an implementation of Harmonic Product Spectrum algorithm [1], computed in the frequency-domain. It is recommended to window the input spectrum with a Hann window. The raw spectrum can be computed with the Spectrum algorithm.\n"
+const char* PitchHPS::name = "PitchHPS";
+const char* PitchHPS::category = "Pitch";
+const char* PitchHPS::description = DOC("This algorithm estimates the fundamental frequency given the spectrum of a monophonic music signal. It is an implementation of Harmonic Product Spectrum algorithm [1], computed in the frequency-domain. It is recommended to window the input spectrum with a Hann window. The raw spectrum can be computed with the Spectrum algorithm.\n"
 "\n"
 "An exception is thrown if an empty spectrum is provided.\n"
 "\n"
@@ -39,7 +39,7 @@ const char* HarmonicProductSpectrum::description = DOC("This algorithm estimates
 "  Likelihood Estimate. Symposium on Computer Processing in Communication,\n"
 "  Ed., 19, 779–797.");
 
-void HarmonicProductSpectrum::configure() {
+void PitchHPS::configure() {
   // compute buffer sizes
   _frameSize = parameter("frameSize").toInt();
   _sampleRate = parameter("sampleRate").toReal();
@@ -51,7 +51,7 @@ void HarmonicProductSpectrum::configure() {
   _tauMin = min(int(floor(_sampleRate / parameter("maxFrequency").toReal())), _frameSize/2);
 
   if (_tauMax <= _tauMin) {
-    throw EssentiaException("HarmonicProductSpectrum: maxFrequency is lower than minFrequency, or they are too close, or they are out of the interval of detectable frequencies with respect to the specified frameSize. Minimum detectable frequency is ", _sampleRate / (_frameSize/2), " Hz");
+    throw EssentiaException("PitchHPS: maxFrequency is lower than minFrequency, or they are too close, or they are out of the interval of detectable frequencies with respect to the specified frameSize. Minimum detectable frequency is ", _sampleRate / (_frameSize/2), " Hz");
   }
 
   // configure peak detection algorithm
@@ -61,10 +61,10 @@ void HarmonicProductSpectrum::configure() {
                         "orderBy", "amplitude");
 }
 
-void HarmonicProductSpectrum::compute() {
+void PitchHPS::compute() {
   const vector<Real>& spectrum = _spectrum.get();
   if (spectrum.empty()) {
-    throw EssentiaException("HarmonicProductSpectrum: Cannot compute pitch detection on empty spectrum.");
+    throw EssentiaException("PitchHPS: Cannot compute pitch detection on empty spectrum.");
   }
   Real& pitch = _pitch.get();
   Real& pitchConfidence = _pitchConfidence.get();

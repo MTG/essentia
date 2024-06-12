@@ -17,23 +17,15 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-/*
- * This file is a port of the file harmonicproductspectrum.h from aubio,
- * http://aubio.piem.org/, in its version 0.3.2.
- *
- * The port was written by the author of aubio, Paul Brossier
- * <piem@altern.org>.
- */
-
-#ifndef ESSENTIA_HARMONICPRODUCTSPECTRUM_H
-#define ESSENTIA_HARMONICPRODUCTSPECTRUM_H
+#ifndef ESSENTIA_PITCHHPS_H
+#define ESSENTIA_PITCHHPS_H
 
 #include "algorithmfactory.h"
 
 namespace essentia {
 namespace standard {
 
-class HarmonicProductSpectrum : public Algorithm {
+class PitchHPS : public Algorithm {
 
  private:
   Input<std::vector<Real> > _spectrum;
@@ -52,7 +44,7 @@ class HarmonicProductSpectrum : public Algorithm {
   Real _magnitudeThreshold;
 
  public:
-  HarmonicProductSpectrum() {
+  PitchHPS() {
     declareInput(_spectrum, "spectrum", "the input spectrum (preferably created with a hann window)");
     declareOutput(_pitch, "pitch", "detected pitch [Hz]");
     declareOutput(_pitchConfidence, "pitchConfidence", "confidence with which the pitch was detected [0,1]");
@@ -60,7 +52,7 @@ class HarmonicProductSpectrum : public Algorithm {
     _peakDetect = AlgorithmFactory::create("PeakDetection");
   }
 
-  ~HarmonicProductSpectrum() {
+  ~PitchHPS() {
     delete _peakDetect;
   };
 
@@ -80,7 +72,7 @@ class HarmonicProductSpectrum : public Algorithm {
   static const char* category;
   static const char* description;
 
-}; // class HarmonicProductSpectrum
+}; // class PitchHPS
 
 } // namespace standard
 } // namespace essentia
@@ -91,7 +83,7 @@ class HarmonicProductSpectrum : public Algorithm {
 namespace essentia {
 namespace streaming {
 
-class HarmonicProductSpectrum : public StreamingAlgorithmWrapper {
+class PitchHPS : public StreamingAlgorithmWrapper {
 
  protected:
   Sink<std::vector<Real> > _spectrum;
@@ -99,8 +91,8 @@ class HarmonicProductSpectrum : public StreamingAlgorithmWrapper {
   Source<Real> _pitchConfidence;
 
  public:
-  HarmonicProductSpectrum() {
-    declareAlgorithm("HarmonicProductSpectrum");
+  PitchHPS() {
+    declareAlgorithm("PitchHPS");
     declareInput(_spectrum, TOKEN, "spectrum");
     declareOutput(_pitch, TOKEN, "pitch");
   }
@@ -109,4 +101,4 @@ class HarmonicProductSpectrum : public StreamingAlgorithmWrapper {
 } // namespace streaming
 } // namespace essentia
 
-#endif // ESSENTIA_HARMONICPRODUCTSPECTRUM_H
+#endif // ESSENTIA_PITCHHPS_H
