@@ -37,6 +37,7 @@ class TensorToVectorReal : public Algorithm {
   int _channels;
   int _timeStamps;
   int _featsSize;
+  bool _warned;
 
  public:
   TensorToVectorReal(){
