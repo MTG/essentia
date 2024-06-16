@@ -86,8 +86,9 @@ void PitchHPS::compute() {
   }
 
   Real minAmplitude = filteredSpectrum[argmax(filteredSpectrum)] * _magnitudeThreshold;
+  int maxFreqPos = min(int(_numHarmonics * _tauMax), int(filteredSpectrum.size()));
 
-  for (int i = _tauMax; i < _tauMin; i++) {
+  for (int i = _tauMin; i < maxFreqPos; i++) {
     if (filteredSpectrum[i] < minAmplitude) {
       filteredSpectrum[i] = 0.0;
     }
