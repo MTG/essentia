@@ -46,7 +46,6 @@ void PitchHPS::configure() {
   _numHarmonics = parameter("numHarmonics").toInt();
   _magnitudeThreshold = parameter("magnitudeThreshold").toReal();
 
-
   _tauMax = min(int(ceil(_sampleRate / parameter("minFrequency").toReal())), _frameSize/2);
   _tauMin = min(int(floor(_sampleRate / parameter("maxFrequency").toReal())), _frameSize/2);
 
@@ -73,13 +72,33 @@ void PitchHPS::compute() {
     Algorithm::configure( "frameSize", int(2*(spectrum.size()-1)) );
   }
 
-  vector<Real> hps(spectrum);
+  vector<Real> filteredSpectrum(spectrum);
+
+  if (_tauMin < _tauMax) {
+    for (int i = 0; i < _tauMin; i++) {
+      filteredSpectrum[i] = 0.0;
+    }
+
+    for (int i = _tauMax * _numHarmonics; i < filteredSpectrum.size(); i++) {
+      filteredSpectrum[i] = 0.0;
+    }
+  }
+
+  Real minAmplitude = filteredSpectrum[argmax(filteredSpectrum)] * _magnitudeThreshold;
+
+  for (int i = _tauMax; i < _tauMin; i++) {
+    if (filteredSpectrum[i] < minAmplitude) {
+      filteredSpectrum[i] = 0.0;
+    }
+  }
+
+  vector<Real> hps(filteredSpectrum);
 
   for (int h=2; h < _numHarmonics; h++) {
 
-      vector<Real> downsampled(spectrum.size()/h, 1.0);
+      vector<Real> downsampled(filteredSpectrum.size()/h, 1.0);
       for (int bin=0; bin < downsampled.size(); bin++) {
-          downsampled[bin] = spectrum[bin*h];
+          downsampled[bin] = filteredSpectrum[bin*h];
       }
       for (int bin=0; bin < downsampled.size(); bin++) {
           hps[bin] *= downsampled[bin];
