@@ -46,6 +46,7 @@ void PitchHPS::configure() {
   _numHarmonics = parameter("numHarmonics").toInt();
   _magnitudeThreshold = parameter("magnitudeThreshold").toReal();
 
+
   _tauMax = min(int(ceil(_sampleRate / parameter("minFrequency").toReal())), _frameSize/2);
   _tauMin = min(int(floor(_sampleRate / parameter("maxFrequency").toReal())), _frameSize/2);
 
