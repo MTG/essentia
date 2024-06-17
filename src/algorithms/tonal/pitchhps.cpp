@@ -27,7 +27,7 @@ using namespace standard;
 
 const char* PitchHPS::name = "PitchHPS";
 const char* PitchHPS::category = "Pitch";
-const char* PitchHPS::description = DOC("This algorithm estimates the fundamental frequency given the spectrum of a monophonic music signal. It is an implementation of Harmonic Product Spectrum algorithm [1], computed in the frequency-domain. It is recommended to window the input spectrum with a Hann window. The raw spectrum can be computed with the Spectrum algorithm.\n"
+const char* PitchHPS::description = DOC("This algorithm estimates the fundamental frequency given the spectrum of a monophonic music signal. It is an implementation of Harmonic Product Spectrum algorithm [1], computed in the frequency domain. It is recommended to window the input spectrum with a Hann window. The raw spectrum can be computed with the Spectrum algorithm.\n"
 "\n"
 "An exception is thrown if an empty spectrum is provided.\n"
 "\n"
@@ -83,16 +83,17 @@ void PitchHPS::compute() {
     for (int i = _tauMax * _numHarmonics; i < filteredSpectrum.size(); i++) {
       filteredSpectrum[i] = 0.0;
     }
+
+//    Real minAmplitude = filteredSpectrum[argmax(filteredSpectrum)] * _magnitudeThreshold;
+//    int maxFreqPos = min(int(_numHarmonics * _tauMax), int(filteredSpectrum.size()));
+//
+//    for (int i = _tauMin; i < maxFreqPos; i++) {
+//      if (filteredSpectrum[i] < minAmplitude) {
+//        filteredSpectrum[i] = 0.0;
+//      }
+//    }
   }
 
-//  Real minAmplitude = filteredSpectrum[argmax(filteredSpectrum)] * _magnitudeThreshold;
-//  int maxFreqPos = min(int(_numHarmonics * _tauMax), int(filteredSpectrum.size()));
-//
-//  for (int i = _tauMin; i < maxFreqPos; i++) {
-//    if (filteredSpectrum[i] < minAmplitude) {
-//      filteredSpectrum[i] = 0.0;
-//    }
-//  }
 
   vector<Real> hps(filteredSpectrum);
 
