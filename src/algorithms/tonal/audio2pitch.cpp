@@ -9,7 +9,7 @@ const char* Audio2Pitch::category = "Pitch";
 const char* Audio2Pitch::description = DOC("This algorithm computes pitch with several possible pitch algorithms, specifically targeted for real-time pitch detection on audio signals.");
 
 bool Audio2Pitch::isAboveThresholds(Real pitchConfidence, Real loudness) {
-  return (pitchConfidence >= _pitchConfidenceThreshold) && (loudness >= _loudnessThreshold);
+  return (pitchConfidence >= _pitchConfidenceThreshold) && (loudness >= _loudnessThresholdGain);
 }
 
 void Audio2Pitch::configure() {
@@ -23,8 +23,9 @@ void Audio2Pitch::configure() {
   _tolerance = parameter("tolerance").toReal();
   _pitchConfidenceThreshold = parameter("pitchConfidenceThreshold").toReal();
   _loudnessThreshold = parameter("loudnessThreshold").toReal();
+  _loudnessThresholdGain = db2amp(_loudnessThreshold);
 
-  if (_maxFrequency > _sampleRate*0.5 ) {
+  if (_maxFrequency > _sampleRate * 0.5) {
     throw EssentiaException("Audio2Pitch: Max frequency cannot be higher than Nyquist frequency");
   }
   if (_maxFrequency <= _minFrequency) {

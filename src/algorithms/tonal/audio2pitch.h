@@ -30,6 +30,7 @@ class Audio2Pitch : public Algorithm {
     Real _tolerance;
     Real _pitchConfidenceThreshold;
     Real _loudnessThreshold;
+    Real _loudnessThresholdGain;
 
     bool _isSpectral;
     
@@ -63,7 +64,7 @@ class Audio2Pitch : public Algorithm {
       declareParameter("weighting", "string to assign a weighting function", "{custom,A,B,C,D,Z}", "custom");
       declareParameter("tolerance", "sets tolerance for peak detection on pitch algorithm", "[0,1]", 1.0);
       declareParameter("pitchConfidenceThreshold", "level of pitch confidence above/below which note ON/OFF start to be considered", "[0,1]", 0.25);
-      declareParameter("loudnessThreshold", "loudness level above which note ON/OFF start to be considered, in linear values", "[-inf,0]", -51.0);
+      declareParameter("loudnessThreshold", "loudness level above/below which note ON/OFF start to be considered, in decibels", "[-inf,0]", -51.0);
         }
 
     void configure();
