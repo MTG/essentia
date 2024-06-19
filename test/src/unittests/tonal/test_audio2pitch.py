@@ -31,14 +31,14 @@ class TestAudio2Pitch(TestCase):
         pitch, confidence, loudness, voiced = Audio2Pitch()(zeros(1024))
         self.assertEqual(pitch, 0)
         self.assertEqual(confidence, 0)
-        self.assertEqual(loudness, -200)
+        self.assertEqual(loudness, 0.0)
         self.assertEqual(voiced, 0)
 
     def testSine(self):
         sample_rate = 44100
         size = sample_rate * 1
         frequency = 440
-        amplitude_in_db = -6
+        amplitude_in_db = -3
         signal = [sin(2.0 * pi * frequency * i / sample_rate) for i in range(size)]
         self.runTest(
             signal, sample_rate, amplitude_in_db, frequency, loudness_precision=0.5
@@ -136,7 +136,7 @@ class TestAudio2Pitch(TestCase):
             f, conf, l, v = pitchDetect(frame)
             pitch += [f]
             confidence += [conf]
-            loudness += [l]
+            loudness += [amp2db(l)]
             voiced += [v]
         self.assertAlmostEqual(mean(f), frequency, pitch_precision)
         self.assertAlmostEqual(mean(confidence), 1, conf_precision)
