@@ -43,8 +43,6 @@ class Audio2Pitch : public Algorithm {
       declareOutput(_pitchConfidence, "pitchConfidence", "confidence of detected pitch from 0.0 - 1.0");
       declareOutput(_loudness, "loudness", "detected loudness in decibels");
       declareOutput(_voiced, "voiced", "voiced frame categorization, 1 for voiced and 0 for unvoiced frame");
-
-      _isSpectral = true;
     }
 
     ~Audio2Pitch() {

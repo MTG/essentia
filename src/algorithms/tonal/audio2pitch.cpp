@@ -35,10 +35,8 @@ void Audio2Pitch::configure() {
   if (_pitchAlgorithmName != "pyin_fft" && _pitchAlgorithmName != "pyin") {
     throw EssentiaException("Audio2Pitch: Bad 'pitchAlgorithm' =", _pitchAlgorithmName);
   }
-  if (_pitchAlgorithmName == "pyin_fft") _isSpectral = true;
-  if (_pitchAlgorithmName == "pyin") _isSpectral = false;
 
-  if (_isSpectral) {
+  if (_pitchAlgorithmName == "pyin_fft") {
     _windowing = AlgorithmFactory::create("Windowing");
     _spectrum = AlgorithmFactory::create("Spectrum");
     _pitchAlgorithm = AlgorithmFactory::create("PitchYinFFT");
@@ -105,10 +103,10 @@ void Audio2Pitch::compute() {
   _loudnessAlgorithm->compute();
   
   // convert lineal loudness to decibels
-  loudness = amp2db(loudness);
+  //loudness = amp2db(loudness);
 
   std::vector<Real> windowedFrame, spectrum;
-  if (_isSpectral) {
+  if (_pitchAlgorithmName == "pyin_fft") {
     _windowing->input("frame").set(frame);
     _windowing->output("frame").set(windowedFrame);
     _windowing->compute();
