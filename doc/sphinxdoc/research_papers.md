@@ -69,7 +69,7 @@ Indexing music by mood: design and integration of an automatic content-based ann
 - K. R. Fricke, D.M. Greenberg, P.J. Rentfrow, and P.Y. Herzberg. Computer-based music feature analysis mirrors human perception and can be used to measure individual music preference. Journal of Research in Personality, 75:94-102, 2018.
 
 
-## Music version / cover song identification
+## Music version identification
 - Yesiler, F., Miron, M., Serrà, J., & Gómez, E. (2022, February). Assessing algorithmic biases for musical version identification. In Proceedings of the Fifteenth ACM International Conference on Web Search and Data Mining (pp. 1284-1290).
 - Yesiler, F., Molina, E., Serrà, J., & Gómez, E. (2021, June). Investigating the efficacy of music version retrieval systems for setlist identification. In ICASSP 2021-2021 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) (pp. 541-545). IEEE.
 - C. J. Tralie. Early MFCC And HPCP Fusion for Robust Cover Song Identification. arXiv preprint arXiv:1707.04680, 2017.
@@ -130,6 +130,7 @@ Indexing music by mood: design and integration of an automatic content-based ann
 
 
 ## Sound indexing, music production, and intelligent audio processing
+- A. Wang, Y. F. Cheng, and D. Lindlbauer. (2024). MARingBA: Music-adaptive ringtones for blended audio notification delivery. In Proceedings of the CHI Conference on Human Factors in Computing Systems (CHI '24), article 729, 1–15.
 - Ma, A. B., & Lerch, A. (2022). Representation Learning for the Automatic Indexing of Sound Effects Libraries. arXiv preprint arXiv:2208.09096.
 - Rashid, U., Saleem, K., & Ahmed, A. (2021). MIRRE approach: nonlinear and multimodal exploration of MIR aggregated search results. Multimedia Tools and Applications, 80, 20217-20253.
 - Shier, J., McNally, K., Tzanetakis, G., & Brooks, K. G. (2021). Manifold learning methods for visualization and browsing of drum machine samples. Journal of the Audio Engineering Society, 69(1/2), 40-53.
@@ -163,6 +164,7 @@ Indexing music by mood: design and integration of an automatic content-based ann
 - D. Moffat and J. D. Reiss. Objective evaluations of synthesised environmental sounds. In International Conference on Digital Audio Effects (DAFx-18), 2018.
 
 ### Singing voice analysis
+- Bruder, C., Poeppel, D., & Larrouy-Maestri, P. (2024). Perceptual (but not acoustic) features predict singing voice preferences. Scientific reports, 14(1), 8977.
 - Faghih, B., Chakraborty, S., Yaseen, A., & Timoney, J. (2022). A new method for detecting onset and offset for singing in real-time and offline environments. Applied Sciences, 12(15), 7391.
 
 ### Audio analysis tools for assisting music education
@@ -180,6 +182,7 @@ Indexing music by mood: design and integration of an automatic content-based ann
 - Alonso-Jiménez, P., Joglar-Ongay, L., Serra, X., & Bogdanov, D. (2019). Automatic detection of audio problems for quality control in digital music distribution. In Audio Engineering Society Convention 146. 146th Convention of the Audio Engineering Society; 2019 Mar 20-23; Dublin, Ireland. New York: AES; 2019.. Audio Engineering Society.
 
 ### Generative music, live coding, audio synthesis, style transfer
+- Plitsis, M., Kouzelis, T., Paraskevopoulos, G., Katsouros, V., & Panagakis, Y. (2024). Investigating personalization methods in text to music generation. In IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) (pp. 1081-1085). IEEE.
 - Singh, N. (2021, April). The Sound Sketchpad: Expressively Combining Large and Diverse Audio Collections. In 26th International Conference on Intelligent User Interfaces (pp. 297-301).
 - Cífka, O., Ozerov, A., Şimşekli, U., & Richard, G. (2021, June). Self-supervised vq-vae for one-shot music style transfer. In ICASSP 2021-2021 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP) (pp. 96-100). IEEE.
 - Lee, K. J. (2021). Computer evaluation of musical timbre transfer on drum tracks (Master thesis).
@@ -238,6 +241,7 @@ arXiv preprint arXiv:1911.04952, 2019.
 - A. Haron. A step towards automatic identification of influene: Lick detection in a musical passage. In 15th International Society for Music Information Retrieval Conference (ISMIR'14) Late-Breaking/Demo Session.
 
 ### Melodic analysis
+- Kuriakose, J., Suresh, V., Dutta, S., Murthy, H. A., & Murthy, M. V. N. (2022). On the concept of Raga parentage in Carnatic music. Journal of New Music Research, 51(4-5), 321-345.
 - Rengaswamy, P., Reddy, M. K., Rao, K. S., & Dasgupta, P. (2020). Robust f0 extraction from monophonic signals using adaptive sub-band filtering. Speech Communication, 116, 77-85.
 - Viraraghavan, V. S., Pal, A., Aravind, R., & Murthy, H. A. (2020). Data-driven measurement of precision of components of pitch curves in Carnatic music. The Journal of the Acoustical Society of America, 147(5), 3657-3666.
 - Y. P. Chen, L. Su, and Y. H. Yang. Electric Guitar Playing Technique Detection in Real-World Recording Based on F0 Sequence Pattern Recognition. In 16th International Society for Music Information Retrieval Conference (ISMIR'15), pages 708-714, 2015.
