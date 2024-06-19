@@ -60,7 +60,7 @@ class Audio2Pitch : public Algorithm {
       declareParameter("maxFrequency", "maximum frequency to detect in Hz", "[10,20000]", 2300.0);
       declareParameter("pitchAlgorithm", "pitch algorithm to use", "{pyin,pyin_fft}", "pyin_fft");
       declareParameter("loudnessAlgorithm", "loudness algorithm to use", "{loudness,rms}", "rms");
-      declareParameter("weighting", "string to assign a weighting function", "{default,A,B,C,D,Z}", "default");
+      declareParameter("weighting", "string to assign a weighting function", "{custom,A,B,C,D,Z}", "custom");
       declareParameter("tolerance", "sets tolerance for peak detection on pitch algorithm", "[0,1]", 1.0);
       declareParameter("pitchConfidenceThreshold", "level of pitch confidence above used for voiced frame detection", "[0,1]", 0.25);
       declareParameter("loudnessThreshold", "loudness level above which note ON/OFF start to be considered, in linear values", "[-inf,0]", -51.0);
