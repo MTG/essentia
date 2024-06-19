@@ -101,9 +101,6 @@ void Audio2Pitch::compute() {
     _loudnessAlgorithm->output("rms").set(loudness);
   }
   _loudnessAlgorithm->compute();
-  
-  // convert lineal loudness to decibels
-  //loudness = amp2db(loudness);
 
   std::vector<Real> windowedFrame, spectrum;
   if (_pitchAlgorithmName == "pyin_fft") {

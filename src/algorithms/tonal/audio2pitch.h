@@ -31,8 +31,6 @@ class Audio2Pitch : public Algorithm {
     Real _pitchConfidenceThreshold;
     Real _loudnessThreshold;
     Real _loudnessThresholdGain;
-
-    bool _isSpectral;
     
     bool isAboveThresholds(Real pitchConfidence, Real loudness);
 
