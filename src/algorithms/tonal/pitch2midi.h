@@ -21,11 +21,21 @@ namespace standard {
       Input<int> _voiced;
 
       // Outputs
+      /*
       Output<int> _midiNoteNumberOut;
       Output<int> _previousMidiNoteNumberOut;
       Output<Real> _onsetTimeCompensation;
       Output<Real> _offsetTimeCompensation;
       Output<int> _messageType;
+      */
+      
+      // define outputs as vectors - index vector connects the ouputs
+      // output vector for _messageType ("note_off", "note_on")
+      Output<std::vector<std::string> > _messageTypeOut;
+      // output vector for midiNoteNumber (<note_off>, <note_on>)
+      Output<std::vector<Real> > _midiNoteNumberOut;
+      // output vector for timeCompensation (offsetCompensation, onsetCompensation)
+      Output<std::vector<Real> > _timeCompensationOut;
 
       bool _noteOn;
       bool _noteOff;
@@ -59,6 +69,9 @@ namespace standard {
       // Containers
       std::vector<Real> _midiNoteNumberVector; // always size 1, but frameBuffer algo expects vectors as input
       std::vector<Real> _buffer;
+      std::vector<Real> _midiNoteNumberBin;     // should be a vector of integers
+      std::vector<Real> _timeCompensationBin;
+      std::vector<std::string> _messageTypeBin;
 
       int capacity();
       bool hasCoherence();
@@ -86,6 +99,7 @@ namespace standard {
       // former Pitch2Midi outputs, now interal vars
       int _midiNoteNumberTransposed;
 
+      // TODO: replace by essentiamath conversions
       int inline getMIDINoteIndex(Real& pitch) {
         return (int) round(log2(pitch / _tuningFreq) * 12); // it should be added +69 to get midiNote
       }
@@ -99,13 +113,18 @@ namespace standard {
       Pitch2Midi() : _maxVoted(2), _midiNoteNumberVector(1) {
         declareInput(_pitch, "pitch", "pitch given in Hz for conversion");
         declareInput(_voiced, "voiced", "whether the frame is voiced or not");
-        declareOutput(_midiNoteNumberOut, "midiNoteNumber", "detected MIDI note number, as integer, in range [0,127]");
+        /*declareOutput(_midiNoteNumberOut, "midiNoteNumber", "detected MIDI note number, as integer, in range [0,127]");
         declareOutput(_previousMidiNoteNumberOut, "previousMidiNoteNumber", "detected MIDI note number in previous compute call, as integer, in range [0,127]");
         declareOutput(_onsetTimeCompensation, "onsetTimeCompensation", "time to be compensated in the onset message");
         declareOutput(_offsetTimeCompensation, "offsetTimeCompensation", "time to be compensated in the offset message");
-        declareOutput(_messageType, "messageType", "defines MIDI message type, as integer, where 0: offset, 1: onset, 2: offset-onset");
+        declareOutput(_messageType, "messageType", "defines MIDI message type, as integer, where 0: offset, 1: onset, 2: offset-onset");*/
+        declareOutput(_messageTypeOut, "messageType", "the output of MIDI message type, as string, {noteoff, noteon, noteoff-noteon}");
+        declareOutput(_midiNoteNumberOut, "midiNoteNumber", "the output of detected MIDI note number, as integer, in range [0,127]");
+        declareOutput(_timeCompensationOut, "timeCompensation", "time to be compensated in the messages");
       }
 
+      // TODO: redefine outputs: messageType, timeCompensations, midiNoteNumbers
+      
       ~Pitch2Midi() {
         delete _framebuffer;
 

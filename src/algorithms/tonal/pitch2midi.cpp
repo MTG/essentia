@@ -28,10 +28,14 @@ void Pitch2Midi::configure()
   _minOnsetCheckThreshold = _minOnsetCheckPeriod / _frameTime;
   _minOffsetCheckThreshold = _minOffsetCheckPeriod / _frameTime;
   _minNoteChangeThreshold = _minNoteChangePeriod / _frameTime;
-    
+
+  // deactivate E_INFO
+  // TODO: remove E_INFO
+  /*
   E_INFO("_minOnsetCheckThreshold: " << _minOnsetCheckThreshold);
   E_INFO("_minOffsetCheckThreshold: " << _minOffsetCheckThreshold);
   E_INFO("_minNoteChangeThreshold: " << _minNoteChangeThreshold);
+  */
 
   _unvoicedFrameCounter = 0;
   _offsetCheckCounter = 0;
@@ -51,12 +55,6 @@ void Pitch2Midi::getMidiNoteNumber(Real pitch)
   _detectedPitch = pitch;
     
   if (pitch <= 0) { _detectedPitch = 1e-05; }
-
-  /*
-   int idx = getMIDINoteIndex(_detectedPitch);
-  int transposed_idx = idx + _transposition;
-  _midiNoteNumberTransposed = getMidiNoteNumberFromNoteIndex(transposed_idx);
-   */
   int idx = hz2midi(pitch, _tuningFreq);
   _midiNoteNumberTransposed = idx + _transposition;
 }
@@ -113,39 +111,71 @@ bool Pitch2Midi::isMaxVotedCountGreaterThanMinOcurrenceRate() {
 }
 
 void Pitch2Midi::setOutputs(int midiNoteNumber, float onsetTimeCompensation, float offsetTimeCompensation) {
+  // TODO: update outputs as vectors
   // get refs to outputs
-  int& midiNoteNumberOut = _midiNoteNumberOut.get();
-  int& previousMidiNoteNumberOut = _previousMidiNoteNumberOut.get();
-  Real& onsetTimeCompensationOut = _onsetTimeCompensation.get();
-  Real& offsetTimeCompensationOut = _offsetTimeCompensation.get();
-  int& messageTypeOut = _messageType.get();
+  //int& midiNoteNumberOut = _midiNoteNumberOut.get();
+  //int& previousMidiNoteNumberOut = _previousMidiNoteNumberOut.get();
+  //Real& onsetTimeCompensationOut = _onsetTimeCompensation.get();
+  //Real& offsetTimeCompensationOut = _offsetTimeCompensation.get();
+  //int& messageTypeOut = _messageType.get();
 
+  vector<string>& messageTypeOut = _messageTypeOut.get();
+  vector<Real>& midiNoteNumberOut = _midiNoteNumberOut.get();
+  vector<Real>& timeCompensationOut = _timeCompensationOut.get();
+    
+  // reuse bins
+  _messageTypeBin.resize(0);
+  _midiNoteNumberBin.resize(0);
+  _timeCompensationBin.resize(0);
+
+  // TODO: this is not clear because it might remove an note_off message which is defined by dnote.
+  //#! it would be better just to provide some code for midiNoteNumbre when this happens
   if (midiNoteNumber <= 0 && midiNoteNumber >= 127) {
-    E_INFO("SCAPE");
+    //E_INFO("SCAPE");
     return;
   }
+
+  // let's define first the message type
+  // TODO: define outputs in vector format
+
+  //if (_noteOff && !_noteOn) {
+  if (_noteOff) {
+    //messageTypeOut = 0;
+    _messageTypeBin.push_back("note_off");
+  }
+
+  //if (_noteOn && !_noteOff) {
+  if (_noteOn) {
+    //messageTypeOut = 1;
+    _messageTypeBin.push_back("note_on");
+  }
+
+  /*
+  if (_noteOn && _noteOff) {
+    //messageTypeOut = 2;
+    _messageTypeBin.push_back("note_off");
+    _messageTypeBin.push_back("note_on");
+  }
+   */
 
   if (!_applyCompensation) {
     onsetTimeCompensation = 0.f;
     offsetTimeCompensation = 0.f;
   }
 
-  midiNoteNumberOut = midiNoteNumber;
+  /*midiNoteNumberOut = midiNoteNumber;
   previousMidiNoteNumberOut = dnote_->midiNote;
   onsetTimeCompensationOut = onsetTimeCompensation;
-  offsetTimeCompensationOut = offsetTimeCompensation;
+  offsetTimeCompensationOut = offsetTimeCompensation;*/
 
-  if (_noteOff && !_noteOn) {
-    messageTypeOut = 0;
-  }
-
-  if (_noteOn && !_noteOff) {
-    messageTypeOut = 1;
-  }
-
-  if (_noteOn && _noteOff) {
-    messageTypeOut = 2;
-  }
+  _midiNoteNumberBin.push_back(static_cast<Real>(dnote_->midiNote));
+  _midiNoteNumberBin.push_back(static_cast<Real>(midiNoteNumber));
+  _timeCompensationBin.push_back(offsetTimeCompensation);
+  _timeCompensationBin.push_back(onsetTimeCompensation);
+    
+  messageTypeOut = _messageTypeBin;
+  midiNoteNumberOut = _midiNoteNumberBin;
+  timeCompensationOut = _timeCompensationBin;
 }
 
 void Pitch2Midi::push(int midiNoteNumber) {
@@ -162,11 +192,18 @@ void Pitch2Midi::compute()
   // all we need is to run the conversions:
   const Real& pitch = _pitch.get();
   const int& voiced = _voiced.get();
+    
+  // do sanity checks
+  if (pitch < 0) {
+    throw EssentiaException("PitchContoursMultiMelody: specified duration of the input signal must be non-negative");
+  }
+
   getMidiNoteNumber(pitch);
 
-  int& messageTypeOut = _messageType.get();
+  // TODO: update messageTypeOut as vector
+  //int& messageTypeOut = _messageType.get();
   // initialize messageType to null value
-  messageTypeOut = -1;
+  //messageTypeOut = -1;
     
   // refresh note_on and note_off timestamps
   _noteOn = false;
@@ -181,7 +218,7 @@ void Pitch2Midi::compute()
         _noteOff = true;
         updateDnote();
         setOutputs(dnote_->midiNote, 0.f, _minNoteChangePeriod);
-        E_INFO("offset(unvoiced frame)");
+        //E_INFO("offset(unvoiced frame)");
         _unvoicedFrameCounter = 0;
         _offsetCheckCounter = 0;
         _onsetCheckCounter = 0;
@@ -203,9 +240,11 @@ void Pitch2Midi::compute()
   // update max_voting
   getMaxVoted();
 
-
+  /*
   E_INFO("onset thresholds: "<< _onsetCheckCounter <<" - " << _minOnsetCheckThreshold);
   E_INFO("offset thresholds: "<< _offsetCheckCounter <<" - " << _minOffsetCheckThreshold);
+  */
+
   // analyze pitch buffer
   if (hasCoherence() && _NOTED_ON) {
     if (isCurrentMidiNoteEqualToMaxVoted()) {
@@ -223,7 +262,7 @@ void Pitch2Midi::compute()
         _noteOn = true;
         _offsetCheckCounter = 0;
         _onsetCheckCounter = 0;
-        E_INFO("off-onset(coherent & NOTED)");
+        //E_INFO("off-onset(" << _buffer[0] << ", coherent & NOTED)");
       }
     }
     setOutputs(_midiNoteNumberTransposed, _minOffsetCheckPeriod, _minOffsetCheckPeriod);
@@ -239,7 +278,7 @@ void Pitch2Midi::compute()
       note = new Note(_buffer[0]);
       _noteOn = true;
       _NOTED_ON = true;
-      E_INFO("onset(coherent & !NOTED): "<< _onsetCheckCounter <<" - " << _minOnsetCheckThreshold);
+      //E_INFO("onset(" << _buffer[0] << ", coherent & !NOTED): "<< _onsetCheckCounter <<" - " << _minOnsetCheckThreshold);
       _onsetCheckCounter = 0;
       _offsetCheckCounter = 0;
     }
@@ -258,7 +297,7 @@ void Pitch2Midi::compute()
         updateDnote();
         delete note;
         note = new Note(_maxVoted[0]);
-        E_INFO("off-onset(uncoherent & NOTED): " << _onsetCheckCounter << " - " << _minOcurrenceRateThreshold);
+        //E_INFO("off-onset(" << _maxVoted[0] << ", uncoherent & NOTED): " << _onsetCheckCounter << " - " << _minOcurrenceRateThreshold);
         _offsetCheckCounter = 0;
         _onsetCheckCounter = 0;
       }
@@ -277,7 +316,7 @@ void Pitch2Midi::compute()
           note = new Note(_maxVoted[0]);
           _NOTED_ON = true;
           _noteOn = true;
-          E_INFO("onset(uncoherent & unNOTED)");
+          //E_INFO("onset(" << _maxVoted[0] << ", uncoherent & unNOTED)");
           _onsetCheckCounter = 0;
           _offsetCheckCounter = 0;
         }
@@ -286,7 +325,7 @@ void Pitch2Midi::compute()
     setOutputs(_midiNoteNumberTransposed, _minOnsetCheckPeriod, _minOffsetCheckPeriod);
     return;
   }
-  E_INFO("Compute() -END");
+  // E_INFO("Compute() -END");
 }
 
 
