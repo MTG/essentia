@@ -29,7 +29,6 @@ void Pitch2Midi::configure()
   _minOffsetCheckThreshold = _minOffsetCheckPeriod / _frameTime;
   _minNoteChangeThreshold = _minNoteChangePeriod / _frameTime;
 
-  // deactivate E_INFO
   // TODO: remove E_INFO
   /*
   E_INFO("_minOnsetCheckThreshold: " << _minOnsetCheckThreshold);
@@ -111,14 +110,6 @@ bool Pitch2Midi::isMaxVotedCountGreaterThanMinOcurrenceRate() {
 }
 
 void Pitch2Midi::setOutputs(int midiNoteNumber, float onsetTimeCompensation, float offsetTimeCompensation) {
-  // TODO: update outputs as vectors
-  // get refs to outputs
-  //int& midiNoteNumberOut = _midiNoteNumberOut.get();
-  //int& previousMidiNoteNumberOut = _previousMidiNoteNumberOut.get();
-  //Real& onsetTimeCompensationOut = _onsetTimeCompensation.get();
-  //Real& offsetTimeCompensationOut = _offsetTimeCompensation.get();
-  //int& messageTypeOut = _messageType.get();
-
   vector<string>& messageTypeOut = _messageTypeOut.get();
   vector<Real>& midiNoteNumberOut = _midiNoteNumberOut.get();
   vector<Real>& timeCompensationOut = _timeCompensationOut.get();
@@ -136,37 +127,18 @@ void Pitch2Midi::setOutputs(int midiNoteNumber, float onsetTimeCompensation, flo
   }
 
   // let's define first the message type
-  // TODO: define outputs in vector format
-
-  //if (_noteOff && !_noteOn) {
   if (_noteOff) {
-    //messageTypeOut = 0;
     _messageTypeBin.push_back("note_off");
   }
 
-  //if (_noteOn && !_noteOff) {
   if (_noteOn) {
-    //messageTypeOut = 1;
     _messageTypeBin.push_back("note_on");
   }
-
-  /*
-  if (_noteOn && _noteOff) {
-    //messageTypeOut = 2;
-    _messageTypeBin.push_back("note_off");
-    _messageTypeBin.push_back("note_on");
-  }
-   */
 
   if (!_applyCompensation) {
     onsetTimeCompensation = 0.f;
     offsetTimeCompensation = 0.f;
   }
-
-  /*midiNoteNumberOut = midiNoteNumber;
-  previousMidiNoteNumberOut = dnote_->midiNote;
-  onsetTimeCompensationOut = onsetTimeCompensation;
-  offsetTimeCompensationOut = offsetTimeCompensation;*/
 
   _midiNoteNumberBin.push_back(static_cast<Real>(dnote_->midiNote));
   _midiNoteNumberBin.push_back(static_cast<Real>(midiNoteNumber));
@@ -199,11 +171,6 @@ void Pitch2Midi::compute()
   }
 
   getMidiNoteNumber(pitch);
-
-  // TODO: update messageTypeOut as vector
-  //int& messageTypeOut = _messageType.get();
-  // initialize messageType to null value
-  //messageTypeOut = -1;
     
   // refresh note_on and note_off timestamps
   _noteOn = false;

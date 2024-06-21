@@ -21,20 +21,8 @@ namespace standard {
       Input<int> _voiced;
 
       // Outputs
-      /*
-      Output<int> _midiNoteNumberOut;
-      Output<int> _previousMidiNoteNumberOut;
-      Output<Real> _onsetTimeCompensation;
-      Output<Real> _offsetTimeCompensation;
-      Output<int> _messageType;
-      */
-      
-      // define outputs as vectors - index vector connects the ouputs
-      // output vector for _messageType ("note_off", "note_on")
       Output<std::vector<std::string> > _messageTypeOut;
-      // output vector for midiNoteNumber (<note_off>, <note_on>)
       Output<std::vector<Real> > _midiNoteNumberOut;
-      // output vector for timeCompensation (offsetCompensation, onsetCompensation)
       Output<std::vector<Real> > _timeCompensationOut;
 
       bool _noteOn;
