@@ -19,33 +19,30 @@
 
 
 from essentia_test import *
-from numpy import sin, pi, mean, random
+from numpy import sin, pi, mean, random, array, float32
 
 
 class TestPitch2Midi(TestCase):
-    # def testEmpty(self):
-    #     self.assertComputeFails(Pitch2Midi(), None, None)
+    def testEmpty(self):
+        self.assertComputeFails(Pitch2Midi(), -1, 0)
 
-    # def testZero(self):
-    #     midi_note, dmidi_note, onset_compensation, offset_compensation, message_type = (
-    #         Pitch2Midi()(0, 0)
-    #     )
-    #     self.assertEqual(midi_note, 0)
-    #     self.assertEqual(dmidi_note, 0)
-    #     self.assertEqual(onset_compensation, 0)
-    #     self.assertEqual(offset_compensation, 0)
-    #     self.assertEqual(message_type, -1)
+    def testZero(self):
+        message_type, midi_note, time_compensation = Pitch2Midi()(0, 0)
+        self.assertEqual(message_type, [])
+        self.assertEqual(midi_note.tolist(), array([], dtype=float32).tolist())
+        self.assertEqual(time_compensation.tolist(), array([], dtype=float32).tolist())
 
     def testOnset(self):
         sample_rate = 44100
         hop_size = 128
         onset_compensation = 0.075
+        pitch = 440.0
         nblocks_for_onset = round(onset_compensation / (hop_size / sample_rate))
-        print(f"nblocks_for_onset: {nblocks_for_onset}")
-        pitches = [440.0] * nblocks_for_onset
+        pitches = [pitch] * nblocks_for_onset
         voicings = [1] * nblocks_for_onset
+        expected_message_type = ["note_on"]
 
-        self.runTest(sample_rate, hop_size, pitches, voicings, 1)
+        self.runTest(sample_rate, hop_size, pitches, voicings, expected_message_type)
 
     def testUnvoicedFrame(self):
         sample_rate = 44100
@@ -56,8 +53,9 @@ class TestPitch2Midi(TestCase):
         nblocks_for_offset = round(minNoteChangePeriod / (hop_size / sample_rate)) + 1
         pitches = ([440.0] * nblocks_for_onset) + ([0] * nblocks_for_offset)
         voicings = ([1] * nblocks_for_onset) + ([0] * nblocks_for_offset)
+        expected_message_type = ["note_off"]
 
-        self.runTest(sample_rate, hop_size, pitches, voicings, 0)
+        self.runTest(sample_rate, hop_size, pitches, voicings, expected_message_type)
 
     def testOffset(self):
         sample_rate = 44100
@@ -72,8 +70,9 @@ class TestPitch2Midi(TestCase):
             [pitches[1]] * nblocks_for_offset
         )
         voicings = [1] * (nblocks_for_onset + nblocks_for_offset)
+        expected_message_type = ["note_off", "note_on"]
 
-        self.runTest(sample_rate, hop_size, pitches, voicings, 2)
+        self.runTest(sample_rate, hop_size, pitches, voicings, expected_message_type)
 
     def runTest(
         self,
@@ -86,23 +85,18 @@ class TestPitch2Midi(TestCase):
         p2m = Pitch2Midi(sampleRate=sample_rate, hopSize=hop_size)
         (
             midi_notes,
-            dmidi_notes,
-            onset_compensation,
-            offset_compensation,
-            message_type,
-        ) = ([] for i in range(5))
+            time_compensations,
+            message_types,
+        ) = ([] for i in range(3))
 
         for n, (pitch, voiced) in enumerate(zip(pitches, voicings)):
-            # print(f"pitch: {pitch}")
-            # print(f"voiced: {voiced}")
-            note, dnote, on_comp, off_comp, message = p2m(pitch, voiced)
+            message, midi_note, time_compensation = p2m(pitch, voiced)
+            # print(n, message, midi_note, time_compensation)
             # print(n, note, dnote, on_comp, off_comp, message)
-            midi_notes += [note]
-            dmidi_notes += [dnote]
-            onset_compensation += [on_comp]
-            offset_compensation += [off_comp]
-            message_type += [message]
-        self.assertEqual(message_type[-1], expected_value)
+            message_types.append(message)
+            midi_notes += [midi_note]
+            time_compensations += [time_compensation]
+        self.assertEqual(message_types[-1], expected_value)
 
     # def testSine(self):
     #     sr = 44100
