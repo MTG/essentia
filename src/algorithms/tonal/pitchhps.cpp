@@ -45,10 +45,12 @@ void PitchHPS::configure() {
   _sampleRate = parameter("sampleRate").toReal();
   _numHarmonics = parameter("numHarmonics").toInt();
   _magnitudeThreshold = parameter("magnitudeThreshold").toReal();
+  _minFrequency = parameter("minFrequency").toReal();
+  _maxFrequency = parameter("maxFrequency").toReal();
 
 
-  _tauMax = min(int(ceil(_sampleRate / parameter("minFrequency").toReal())), _frameSize/2);
-  _tauMin = min(int(floor(_sampleRate / parameter("maxFrequency").toReal())), _frameSize/2);
+  _tauMax = min(int(ceil(_sampleRate / _minFrequency)), _frameSize/2);
+  _tauMin = min(int(floor(_sampleRate / _maxFrequency)), _frameSize/2);
 
   if (_tauMax <= _tauMin) {
     throw EssentiaException("PitchHPS: maxFrequency is lower than minFrequency, or they are too close, or they are out of the interval of detectable frequencies with respect to the specified frameSize. Minimum detectable frequency is ", _sampleRate / (_frameSize/2), " Hz");
@@ -76,13 +78,13 @@ void PitchHPS::compute() {
   vector<Real> filteredSpectrum(spectrum);
 
   if (_tauMin < _tauMax) {
-    for (int i = 0; i < _tauMin; i++) {
-      filteredSpectrum[i] = 0.0;
-    }
+    double frequencyResolution = _sampleRate / spectrum.size();
 
-    for (int i = _tauMax * _numHarmonics; i < filteredSpectrum.size(); i++) {
-      filteredSpectrum[i] = 0.0;
-    }
+    size_t minBin = static_cast<size_t>(std::floor(_minFrequency / frequencyResolution));
+    size_t maxBin = static_cast<size_t>(std::floor(_maxFrequency / frequencyResolution));
+
+    std::fill(filteredSpectrum.begin(), filteredSpectrum.begin() + minBin, 0);
+    std::fill(filteredSpectrum.begin() + maxBin + 1, filteredSpectrum.end(), 0);
 
 //    Real minAmplitude = filteredSpectrum[argmax(filteredSpectrum)] * _magnitudeThreshold;
 //    int maxFreqPos = min(int(_numHarmonics * _tauMax), int(filteredSpectrum.size()));

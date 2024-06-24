@@ -41,6 +41,8 @@ class PitchHPS : public Algorithm {
   int _tauMin;
   int _tauMax;
   int _numHarmonics;
+  int _minFrequency;
+  int _maxFrequency;
   Real _magnitudeThreshold;
 
  public:
@@ -95,6 +97,7 @@ class PitchHPS : public StreamingAlgorithmWrapper {
     declareAlgorithm("PitchHPS");
     declareInput(_spectrum, TOKEN, "spectrum");
     declareOutput(_pitch, TOKEN, "pitch");
+    declareOutput(_pitchConfidence, TOKEN, "pitchConfidence");
   }
 };
 
