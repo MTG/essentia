@@ -74,6 +74,31 @@ class TestPitch2Midi(TestCase):
 
         self.runTest(sample_rate, hop_size, pitches, voicings, expected_message_type)
 
+    def testContinuousChromaticSequence(self):
+        sample_rate = 44100
+        hop_size = 128
+        onset_compensation = 0.075
+        minNoteChangePeriod = 0.03
+        midi_buffer_duration = 0.015
+        min_occurrence_rate = 0.5
+        min_occurrence_period = midi_buffer_duration * min_occurrence_rate
+        nblocks_for_onset = round(onset_compensation / (hop_size / sample_rate))
+        nblocks_for_offset = round(minNoteChangePeriod / (hop_size / sample_rate))
+        nblocks_for_transition = round(min_occurrence_period / (hop_size / sample_rate))
+        n_notes = 12
+        midi_notes = list(range(69, 69 + n_notes))
+        #print(midi_notes)
+        pitches = [midi2hz(note) for note in midi_notes]
+        pitch_list = list()
+        for pitch in pitches:
+            pitch_list += [pitch] * (nblocks_for_transition + nblocks_for_onset)
+        pitch_list += [pitch] * (nblocks_for_offset + 1)
+        voicings = [1] * n_notes * (nblocks_for_onset + nblocks_for_transition)
+        voicings += [0] * (nblocks_for_offset + 2)
+        #print(len(pitch_list), len(voicings))
+        expected_message_type = ["note_off"]
+        self.runTest(sample_rate, hop_size, pitch_list, voicings, expected_message_type)
+
     def runTest(
         self,
         sample_rate: int,
@@ -91,37 +116,11 @@ class TestPitch2Midi(TestCase):
 
         for n, (pitch, voiced) in enumerate(zip(pitches, voicings)):
             message, midi_note, time_compensation = p2m(pitch, voiced)
-            # print(n, message, midi_note, time_compensation)
-            # print(n, note, dnote, on_comp, off_comp, message)
+            #print(n, message, midi_note, time_compensation)
             message_types.append(message)
             midi_notes += [midi_note]
             time_compensations += [time_compensation]
         self.assertEqual(message_types[-1], expected_value)
-
-    # def testSine(self):
-    #     sr = 44100
-    #     size = sr * 1
-    #     freq = 440
-    #     signal = [sin(2.0 * pi * freq * i / sr) for i in range(size)]
-    #     self.runTest(signal, sr, freq)
-
-    # def runTest(self, signal, sr, freq, pitch_precision=1, conf_precision=0.1):
-    #     frameSize = 1024
-    #     hopsize = frameSize
-
-    #     frames = FrameGenerator(signal, frameSize=frameSize, hopSize=hopsize)
-    #     win = Windowing(type="hann")
-    #     pitchDetect = PitchYinFFT(frameSize=frameSize, sampleRate=sr)
-    #     pitch = []
-    #     confidence = []
-    #     for frame in frames:
-    #         spec = Spectrum()(win(frame))
-    #         f, conf = pitchDetect(spec)
-    #         # TODO process pitch with Pitch2Midi instance
-    #         pitch += [f]
-    #         confidence += [conf]
-    #     self.assertAlmostEqual(mean(f), freq, pitch_precision)
-    #     self.assertAlmostEqual(mean(confidence), 1, conf_precision)
 
 
 suite = allTests(TestPitch2Midi)
