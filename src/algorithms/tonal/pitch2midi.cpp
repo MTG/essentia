@@ -29,13 +29,6 @@ void Pitch2Midi::configure()
   _minOffsetCheckThreshold = _minOffsetCheckPeriod / _frameTime;
   _minNoteChangeThreshold = _minNoteChangePeriod / _frameTime;
 
-  // TODO: remove E_INFO
-  /*
-  E_INFO("_minOnsetCheckThreshold: " << _minOnsetCheckThreshold);
-  E_INFO("_minOffsetCheckThreshold: " << _minOffsetCheckThreshold);
-  E_INFO("_minNoteChangeThreshold: " << _minNoteChangeThreshold);
-  */
-
   _unvoicedFrameCounter = 0;
   _offsetCheckCounter = 0;
   _onsetCheckCounter = 0;
