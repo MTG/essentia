@@ -101,11 +101,6 @@ namespace standard {
       Pitch2Midi() : _maxVoted(2), _midiNoteNumberVector(1) {
         declareInput(_pitch, "pitch", "pitch given in Hz for conversion");
         declareInput(_voiced, "voiced", "whether the frame is voiced or not");
-        /*declareOutput(_midiNoteNumberOut, "midiNoteNumber", "detected MIDI note number, as integer, in range [0,127]");
-        declareOutput(_previousMidiNoteNumberOut, "previousMidiNoteNumber", "detected MIDI note number in previous compute call, as integer, in range [0,127]");
-        declareOutput(_onsetTimeCompensation, "onsetTimeCompensation", "time to be compensated in the onset message");
-        declareOutput(_offsetTimeCompensation, "offsetTimeCompensation", "time to be compensated in the offset message");
-        declareOutput(_messageType, "messageType", "defines MIDI message type, as integer, where 0: offset, 1: onset, 2: offset-onset");*/
         declareOutput(_messageTypeOut, "messageType", "the output of MIDI message type, as string, {noteoff, noteon, noteoff-noteon}");
         declareOutput(_midiNoteNumberOut, "midiNoteNumber", "the output of detected MIDI note number, as integer, in range [0,127]");
         declareOutput(_timeCompensationOut, "timeCompensation", "time to be compensated in the messages");
