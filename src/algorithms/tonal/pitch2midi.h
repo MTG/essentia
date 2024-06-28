@@ -115,7 +115,7 @@ namespace standard {
 
       void declareParameters() {
         declareParameter("sampleRate", "Audio sample rate", "[8000,inf)", 44100);
-        declareParameter("hopSize", "analysis hop size in samples, equivalent to I/O buffer size", "[1,inf)", 128);
+        declareParameter("hopSize", "Pitch Detection analysis hop size in samples, equivalent to I/O buffer size", "[1,inf)", 128);
         declareParameter("minFrequency", "minimum detectable frequency", "[20,20000]", 60.f);
         declareParameter("minOcurrenceRate", "minimum number of times a midi note has to ocur compared to total capacity", "[0,1]", 0.5f);
         declareParameter("midiBufferDuration", "duration in seconds of buffer used for voting in the note toggle detection algorithm", "[0.005,0.5]", 0.015); // 15ms
