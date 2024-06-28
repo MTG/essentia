@@ -6,14 +6,6 @@
 namespace essentia {
 namespace standard {
 
-  class Note {
-    public:
-      const Real midiNote;
-    
-      Note (Real midiNote) : midiNote(midiNote) {}
-      ~Note () {}
-  };
-
   class Pitch2Midi : public Algorithm {
     protected:
       // Inputs
@@ -50,8 +42,8 @@ namespace standard {
       bool _NOTED_ON = false;
       std::vector<Real> _maxVoted;
       bool _COHERENCE;
-      Note* note = new Note(0);
-      Note* dnote_ = new Note(0);
+      Real note = 0.0;
+      Real dnote = 0.0;
       Real _detectedPitch;
 
       // Containers
@@ -70,7 +62,7 @@ namespace standard {
       bool isMaxVotedZero();
       bool isCurrentMidiNoteEqualToMaxVoted();
       bool isMaxVotedCountGreaterThanMinOcurrenceRate();
-      void setOutputs(int midiNoteNumber, float onsetTimeCompensation, float offsetTimeCompensation);
+      void setOutputs(Real midiNoteNumber, float onsetTimeCompensation, float offsetTimeCompensation);
       
       Real _minOnsetCheckThreshold;
       Real _minOffsetCheckThreshold;
@@ -85,17 +77,7 @@ namespace standard {
       Real _minOcurrenceRatePeriod;
 
       // former Pitch2Midi outputs, now interal vars
-      int _midiNoteNumberTransposed;
-
-      // TODO: replace by essentiamath conversions
-      int inline getMIDINoteIndex(Real& pitch) {
-        return (int) round(log2(pitch / _tuningFreq) * 12); // it should be added +69 to get midiNote
-      }
-
-      // convert pitch in MIDI note
-      int inline getMidiNoteNumberFromNoteIndex(int idx) {
-        return 69 + idx;
-      }
+      Real _midiNoteNumberTransposed;
 
     public:
       Pitch2Midi() : _maxVoted(2), _midiNoteNumberVector(1) {
@@ -108,9 +90,6 @@ namespace standard {
       
       ~Pitch2Midi() {
         delete _framebuffer;
-
-        delete note;
-        delete dnote_;
       };
 
       void declareParameters() {
@@ -130,11 +109,9 @@ namespace standard {
 
       void configure();
       void compute();
-      void getMidiNoteNumber(Real pitch);
+      void inline getMidiNoteNumber(Real pitch);
 
-      void push(int midiNoteNumber);
-
-      const Note* dnote() const { return dnote_; }
+      void push(Real midiNoteNumber);
 
       static const char* name;
       static const char* category;
