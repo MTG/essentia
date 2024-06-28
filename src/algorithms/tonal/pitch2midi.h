@@ -21,9 +21,9 @@ namespace standard {
       Input<int> _voiced;
 
       // Outputs
-      Output<std::vector<std::string> > _messageTypeOut;
-      Output<std::vector<Real> > _midiNoteNumberOut;
-      Output<std::vector<Real> > _timeCompensationOut;
+      Output<std::vector<std::string> > _messageType;
+      Output<std::vector<Real> > _midiNoteNumber;
+      Output<std::vector<Real> > _timeCompensation;
 
       bool _noteOn;
       bool _noteOff;
@@ -101,9 +101,9 @@ namespace standard {
       Pitch2Midi() : _maxVoted(2), _midiNoteNumberVector(1) {
         declareInput(_pitch, "pitch", "pitch given in Hz for conversion");
         declareInput(_voiced, "voiced", "whether the frame is voiced or not");
-        declareOutput(_messageTypeOut, "messageType", "the output of MIDI message type, as string, {noteoff, noteon, noteoff-noteon}");
-        declareOutput(_midiNoteNumberOut, "midiNoteNumber", "the output of detected MIDI note number, as integer, in range [0,127]");
-        declareOutput(_timeCompensationOut, "timeCompensation", "time to be compensated in the messages");
+        declareOutput(_messageType, "messageType", "the output of MIDI message type, as string, {noteoff, noteon, noteoff-noteon}");
+        declareOutput(_midiNoteNumber, "midiNoteNumber", "the output of detected MIDI note number, as integer, in range [0,127]");
+        declareOutput(_timeCompensation, "timeCompensation", "time to be compensated in the messages");
       }
       
       ~Pitch2Midi() {
