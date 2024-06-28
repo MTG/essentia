@@ -39,7 +39,7 @@ namespace standard {
       Real _minOffsetCheckPeriod;
       Real _minNoteChangePeriod;
       Real _bufferDuration;
-      bool _applyCompensation = true;
+      bool _applyCompensation;
       // former Pitch2Midi params
       Real _tuningFreq;
       int _transposition;
