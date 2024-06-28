@@ -38,7 +38,7 @@ namespace standard {
       Real _minOnsetCheckPeriod;
       Real _minOffsetCheckPeriod;
       Real _minNoteChangePeriod;
-      Real _bufferDuration = 0.015;// 15ms default
+      Real _bufferDuration;
       bool _applyCompensation = true;
       // former Pitch2Midi params
       Real _tuningFreq;
@@ -105,8 +105,6 @@ namespace standard {
         declareOutput(_midiNoteNumberOut, "midiNoteNumber", "the output of detected MIDI note number, as integer, in range [0,127]");
         declareOutput(_timeCompensationOut, "timeCompensation", "time to be compensated in the messages");
       }
-
-      // TODO: redefine outputs: messageType, timeCompensations, midiNoteNumbers
       
       ~Pitch2Midi() {
         delete _framebuffer;
