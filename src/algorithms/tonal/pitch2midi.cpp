@@ -72,6 +72,7 @@ bool Pitch2Midi::hasCoherence()
 // this should NOT be called until framebuffer.compute has been called and _capacity has been set on the configure
 void Pitch2Midi::getMaxVoted()
 {
+  // estimates the max voted MIDI note in the midi note buffer
   map<Real, Real> counts;
   for (Real value : _buffer) {
     counts[value]++;
