@@ -1,5 +1,8 @@
-Licensing Essentia
+Licensing Information
 ==================
+
+Licensing Essentia
+------------------
 
 Essentia is the result of more than 10 years of research and development at Music Technology Group and it 
 incorporates the work done by many researchers during all this time. The library has been designed to support 
@@ -16,14 +19,14 @@ more information about licensing conditions and for consulting how Essentia can 
 
 
 Licensing Essentia models
-=========================
+-------------------------
 In addition to Essentia, Music Technology Group provides various pre-trained machine learning models for music analysis and classification tasks.
 All the models are available under the `CC BY-NC-ND 4.0 license <https://creativecommons.org/licenses/by-nc-nd/4.0/>`_ for non-commercial use,
 and are also available under a proprietary license upon request.
 
 
 Licensing dependencies
-======================
+----------------------
 
 Some Essentia library algorithms use third-party libraries with licenses such as `GPL`_, `LGPL`_,
 and others for which UPF is not able to provide full sublicensing rights to third parties.

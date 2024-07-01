@@ -1,7 +1,7 @@
 .. highlight:: cpp
 
-General development guidelines
-==============================
+Coding Guidelines
+=================
 
 Fixing bugs
 -----------
@@ -21,9 +21,6 @@ Doing commits in Github
 * use explicit and useful and descriptive messages. That doesn't prevent you from being
   humorous in them, but messages such as "bsdjfh" are *not* allowed.
 
-
-Coding Guidelines
-=================
 
 Coding style guidelines
 -----------------------
