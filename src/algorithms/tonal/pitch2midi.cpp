@@ -98,9 +98,9 @@ void Pitch2Midi::setOutputs(Real midiNoteNumberValue, float onsetTimeCompensatio
   vector<Real>& timeCompensation = _timeCompensation.get();
     
   // reuse bins
-  _messageTypeBin.resize(0);
-  _midiNoteNumberBin.resize(0);
-  _timeCompensationBin.resize(0);
+  messageType.resize(0);
+  midiNoteNumber.resize(0);
+  timeCompensation.resize(0);
 
   // TODO: this is not clear because it might remove an note_off message which is defined by dnote.
   //#! it would be better just to provide some code for midiNoteNumbre when this happens
@@ -111,11 +111,11 @@ void Pitch2Midi::setOutputs(Real midiNoteNumberValue, float onsetTimeCompensatio
 
   // let's define first the message type
   if (_noteOff) {
-    _messageTypeBin.push_back("note_off");
+    messageType.push_back("note_off");
   }
 
   if (_noteOn) {
-    _messageTypeBin.push_back("note_on");
+    messageType.push_back("note_on");
   }
 
   if (!_applyCompensation) {
@@ -123,14 +123,10 @@ void Pitch2Midi::setOutputs(Real midiNoteNumberValue, float onsetTimeCompensatio
     offsetTimeCompensation = 0.f;
   }
 
-  _midiNoteNumberBin.push_back(dnote);
-  _midiNoteNumberBin.push_back(midiNoteNumberValue);
-  _timeCompensationBin.push_back(offsetTimeCompensation);
-  _timeCompensationBin.push_back(onsetTimeCompensation);
-    
-  messageType = _messageTypeBin;
-  midiNoteNumber = _midiNoteNumberBin;
-  timeCompensation = _timeCompensationBin;
+  midiNoteNumber.push_back(dnote);
+  midiNoteNumber.push_back(midiNoteNumberValue);
+  timeCompensation.push_back(offsetTimeCompensation);
+  timeCompensation.push_back(onsetTimeCompensation);
 }
 
 void Pitch2Midi::push(Real midiNoteNumber) {

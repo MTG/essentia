@@ -49,9 +49,6 @@ namespace standard {
       // Containers
       std::vector<Real> _midiNoteNumberVector; // always size 1, but frameBuffer algo expects vectors as input
       std::vector<Real> _buffer;
-      std::vector<Real> _midiNoteNumberBin;     // should be a vector of integers
-      std::vector<Real> _timeCompensationBin;
-      std::vector<std::string> _messageTypeBin;
 
       int capacity();
       bool hasCoherence();
@@ -91,8 +88,8 @@ namespace standard {
       void declareParameters() {
         declareParameter("sampleRate", "Audio sample rate", "[8000,inf)", 44100);
         declareParameter("hopSize", "Pitch Detection analysis hop size in samples, equivalent to I/O buffer size", "[1,inf)", 128);
-        declareParameter("minFrequency", "minimum detectable frequency", "[20,20000]", 60.f);
-        declareParameter("minOcurrenceRate", "minimum number of times a midi note has to ocur compared to total capacity", "[0,1]", 0.5f);
+        declareParameter("minFrequency", "minimum detectable frequency", "[20,20000]", 60.0);
+        declareParameter("minOcurrenceRate", "minimum number of times a midi note has to ocur compared to total capacity", "[0,1]", 0.5);
         declareParameter("midiBufferDuration", "duration in seconds of buffer used for voting in the note toggle detection algorithm", "[0.005,0.5]", 0.015); // 15ms
         declareParameter("minNoteChangePeriod", "minimum time to wait until a note change is detected", "(0,1]", 0.030);
         declareParameter("minOnsetCheckPeriod", "minimum time to wait until an onset is detected", "(0,1]", 0.075);
