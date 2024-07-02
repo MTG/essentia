@@ -92,18 +92,6 @@ void Pitch2Midi::getMaxVoted()
   _maxVoted[1] = maxCount / _capacity;
 }
 
-bool Pitch2Midi::isMaxVotedZero() {
-  return _maxVoted[0] == 0.0;
-}
-
-bool Pitch2Midi::isCurrentMidiNoteEqualToMaxVoted() {
-  return note == _maxVoted[0];
-}
-
-bool Pitch2Midi::isMaxVotedCountGreaterThanMinOcurrenceRate() {
-  return _maxVoted[1] > _minOcurrenceRate;
-}
-
 void Pitch2Midi::setOutputs(Real midiNoteNumberValue, float onsetTimeCompensation, float offsetTimeCompensation) {
   vector<string>& messageType = _messageType.get();
   vector<Real>& midiNoteNumber = _midiNoteNumber.get();
@@ -204,7 +192,7 @@ void Pitch2Midi::compute()
 
   // analyze pitch buffer
   if (hasCoherence() && _NOTED_ON) {
-    if (isCurrentMidiNoteEqualToMaxVoted()) {
+    if (note == _maxVoted[0]) {
       _offsetCheckCounter = 0;
       _onsetCheckCounter = 0;
     }
@@ -242,7 +230,7 @@ void Pitch2Midi::compute()
   }
 
   if (!hasCoherence() && _NOTED_ON) {
-    if (!isMaxVotedZero()) {
+    if (_maxVoted[0] != 0.0) {
       _onsetCheckCounter++;
       // combines checker with minOcurrenceRate
       if (_onsetCheckCounter > _minOcurrenceRateThreshold){
@@ -261,11 +249,11 @@ void Pitch2Midi::compute()
   }
 
   if (!hasCoherence() && !_NOTED_ON) {
-    if (isMaxVotedCountGreaterThanMinOcurrenceRate()) {
+    if (_maxVoted[1] > _minOcurrenceRate) {
       _onsetCheckCounter++;
 
       if (_onsetCheckCounter > _minOnsetCheckThreshold) {
-        if (!isMaxVotedZero()) {
+        if (_maxVoted[0] != 0.0) {
           note = _maxVoted[0];
           _NOTED_ON = true;
           _noteOn = true;

@@ -58,10 +58,6 @@ namespace standard {
       void getMaxVoted();
       
       void updateDnote();
-      // condition checkers
-      bool isMaxVotedZero();
-      bool isCurrentMidiNoteEqualToMaxVoted();
-      bool isMaxVotedCountGreaterThanMinOcurrenceRate();
       void setOutputs(Real midiNoteNumber, float onsetTimeCompensation, float offsetTimeCompensation);
       
       Real _minOnsetCheckThreshold;
