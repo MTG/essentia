@@ -72,7 +72,7 @@ def get_git_version():
 
 
 def get_version():
-    version = '2.1-beta6-dev'
+    version = open('VERSION', 'r').read().strip('\n')
     if version.count('-dev'):
         # Development version. Get the number of commits after the last release
         git_version = get_git_version()

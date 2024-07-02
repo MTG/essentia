@@ -87,8 +87,8 @@ def allTests(testClass):
 class TestCase(BaseTestCase):
 
     def assertValidNumber(self, x):
-        self.assertTrue(not numpy.isnan(x))
-        self.assertTrue(not numpy.isinf(x))
+        self.assert_(not numpy.isnan(x))
+        self.assert_(not numpy.isinf(x))
 
     def assertValidPool(self, pool):
         for key in pool.descriptorNames():
@@ -96,8 +96,8 @@ class TestCase(BaseTestCase):
             if type(x) is float:
                 self.assertValidNumber(x)
             elif type(x) is numpy.ndarray:
-                self.assertTrue(not numpy.isnan(x).any())
-                self.assertTrue(not numpy.isinf(x).any())
+                self.assert_(not numpy.isnan(x).any())
+                self.assert_(not numpy.isinf(x).any())
 
     def assertEqualVector(self, found, expected):
         self.assertEqual(len(found), len(expected))
@@ -129,7 +129,7 @@ class TestCase(BaseTestCase):
             diff = abs(expected)
         else:
             diff = abs((expected - found) / abs(expected))
-        self.assertTrue(diff <= precision,
+        self.assert_(diff <= precision,
                      """Difference is %e while allowed relative error is %e""" % (diff, precision))
 
     def assertAlmostEqualVector(self, found, expected, precision = 1e-7):
@@ -162,7 +162,7 @@ class TestCase(BaseTestCase):
 
     def assertAlmostEqualAbs(self, found, expected, precision = 0.1):
         diff = abs(expected - found)
-        self.assertTrue(diff <= precision, 'Difference is %e while allowed absolute error is %e' % (diff, precision))
+        self.assert_(diff <= precision, 'Difference is %e while allowed absolute error is %e' % (diff, precision))
 
     def assertAlmostEqualVectorAbs(self, found, expected, precision = 0.1):
         self.assertEqual(len(found), len(expected))
