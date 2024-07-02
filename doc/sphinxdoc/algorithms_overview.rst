@@ -7,7 +7,7 @@ as well as a small description.
 
 Please note that this is not an exhaustive list but rather a quick overview of the most used
 algorithms in Essentia. For the full list of algorithms and their detailed documentation,
-please see the `complete reference <algorithms_reference.html>`_.
+please see the :doc:`complete reference <algorithms_reference>`.
 
 
 Audio input / output
