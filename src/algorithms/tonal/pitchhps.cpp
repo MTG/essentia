@@ -69,7 +69,7 @@ void PitchHPS::compute() {
     throw EssentiaException("PitchHPS: Cannot compute pitch detection on empty spectrum.");
   }
   Real& pitch = _pitch.get();
-  Real& pitchConfidence = _pitchConfidence.get();
+//  Real& pitchConfidence = _pitchConfidence.get();
 
   if ((int)spectrum.size() != _frameSize/2+1) {//_sqrMag.size()/2+1) {
     Algorithm::configure( "frameSize", int(2*(spectrum.size()-1)) );
@@ -81,7 +81,7 @@ void PitchHPS::compute() {
     double frequencyResolution = _sampleRate / spectrum.size();
 
     size_t minBin = static_cast<size_t>(std::floor(_minFrequency / frequencyResolution));
-    size_t maxBin = static_cast<size_t>(std::floor(_maxFrequency / frequencyResolution));
+    size_t maxBin = static_cast<size_t>(std::floor(_maxFrequency * _numHarmonics / frequencyResolution));
 
     std::fill(filteredSpectrum.begin(), filteredSpectrum.begin() + minBin, 0);
     std::fill(filteredSpectrum.begin() + maxBin + 1, filteredSpectrum.end(), 0);
@@ -123,9 +123,9 @@ void PitchHPS::compute() {
 
   if (_positions.size() == 0) {
     pitch = 0.0;
-    pitchConfidence = 0.0;
+//    pitchConfidence = 0.0;
   } else {
     pitch = _positions[0] * _sampleRate / _frameSize;
-    pitchConfidence = 1.0;
+//    pitchConfidence = 1.0;
   }
 }

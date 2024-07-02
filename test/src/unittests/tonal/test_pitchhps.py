@@ -28,9 +28,8 @@ class TestPitchHPS(TestCase):
         self.assertComputeFails(PitchHPS(), [])
 
     def testZero(self):
-        pitch, confidence = PitchHPS()(zeros(1024))
+        pitch = PitchHPS()(zeros(1024))
         self.assertEqual(pitch, 0)
-        self.assertEqual(confidence, 0)
 
 
     def testSine(self):
@@ -63,7 +62,7 @@ class TestPitchHPS(TestCase):
         for i in range(1,size):
             for harm in range(1,nharms+1):
                 signal[i] += 1./harm*sin(harm*i*w/sr)
-        self.runTest(signal, sr, freq, 1.1, 0.1)
+        self.runTest(signal, sr, freq, 1.1)
 
     def testBandLimitedSawMasked(self):
         sr = 44100
@@ -86,10 +85,10 @@ class TestPitchHPS(TestCase):
             signal[i] += 0.5*sin(i*subw/sr)
         max_signal = max(signal) + 1
         signal = signal/max_signal
-        self.runTest(signal, sr, freq, 1.5, 0.3)
+        self.runTest(signal, sr, freq, 1.5)
 
 
-    def runTest(self, signal, sr, freq, pitch_precision = 1, conf_precision = 0.1):
+    def runTest(self, signal, sr, freq, pitch_precision = 1):
         frameSize = 1024
         hopsize = frameSize
 
@@ -97,14 +96,12 @@ class TestPitchHPS(TestCase):
         win = Windowing(type='hann')
         pitchDetect = PitchHPS(frameSize=frameSize, sampleRate = sr)
         pitch = []
-        confidence = []
         for frame in frames:
             spec = Spectrum()(win(frame))
-            f, conf = pitchDetect(spec)
+            f = pitchDetect(spec)
             pitch += [f]
-            confidence += [conf]
+
         self.assertAlmostEqual(mean(f), freq, pitch_precision)
-        self.assertAlmostEqual(mean(confidence), 1, conf_precision)
 
     def testInvalidParam(self):
         self.assertConfigureFails(PitchHPS(), {'frameSize' : 1})

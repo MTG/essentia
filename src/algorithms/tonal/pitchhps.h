@@ -30,7 +30,7 @@ class PitchHPS : public Algorithm {
  private:
   Input<std::vector<Real> > _spectrum;
   Output<Real> _pitch;
-  Output<Real> _pitchConfidence;
+//  Output<Real> _pitchConfidence;
 
   Algorithm* _peakDetect;
 
@@ -49,7 +49,7 @@ class PitchHPS : public Algorithm {
   PitchHPS() {
     declareInput(_spectrum, "spectrum", "the input spectrum (preferably created with a hann window)");
     declareOutput(_pitch, "pitch", "detected pitch [Hz]");
-    declareOutput(_pitchConfidence, "pitchConfidence", "confidence with which the pitch was detected [0,1]");
+//    declareOutput(_pitchConfidence, "pitchConfidence", "confidence with which the pitch was detected [0,1]");
 
     _peakDetect = AlgorithmFactory::create("PeakDetection");
   }
@@ -90,14 +90,14 @@ class PitchHPS : public StreamingAlgorithmWrapper {
  protected:
   Sink<std::vector<Real> > _spectrum;
   Source<Real> _pitch;
-  Source<Real> _pitchConfidence;
+//  Source<Real> _pitchConfidence;
 
  public:
   PitchHPS() {
     declareAlgorithm("PitchHPS");
     declareInput(_spectrum, TOKEN, "spectrum");
     declareOutput(_pitch, TOKEN, "pitch");
-    declareOutput(_pitchConfidence, TOKEN, "pitchConfidence");
+//    declareOutput(_pitchConfidence, TOKEN, "pitchConfidence");
   }
 };
 
