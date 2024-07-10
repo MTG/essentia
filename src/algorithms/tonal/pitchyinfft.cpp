@@ -37,7 +37,7 @@ static Real _weightMask[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 static const Real _weights[] = {-75.8, -70.1, -60.8, -52.1, -44.2, -37.5,
 	-31.3, -25.6, -20.9, -16.5, -12.6, -9.6, -7.0, -4.7, -3.0, -1.8, -0.8,
 	-0.2, -0.0, 0.5, 1.6, 3.2, 5.4, 7.8, 8.1, 5.3, -2.4, -11.1, -12.8,
-	-12.2, -7.4, -17.8, -17.8, -17.8}; // by default the original and custom one is selected
+	-12.2, -7.4, -17.8, -17.8, -17.8}; // by default use custom weights designed specifically for the PitchYinFFT algorithm
 
 static const Real _aWeighting[] = {-148.6, -50.4, -44.8, -39.5, -34.5, -30.3,
     -26.2, -22.4, -19.1, -16.2, -13.2, -10.8, -8.7, -6.6, -4.8, -3.2, -1.9,
