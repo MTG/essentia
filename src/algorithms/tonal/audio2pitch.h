@@ -38,7 +38,7 @@ class Audio2Pitch : public Algorithm {
     Audio2Pitch() {
       declareInput(_frame, "frame", "the input frame to analyse");
       declareOutput(_pitch, "pitch", "detected pitch in Hz");
-      declareOutput(_pitchConfidence, "pitchConfidence", "confidence of detected pitch from 0.0 - 1.0");
+      declareOutput(_pitchConfidence, "pitchConfidence", "confidence of detected pitch (from 0.0 to 1.0)");
       declareOutput(_loudness, "loudness", "detected loudness in decibels");
       declareOutput(_voiced, "voiced", "voiced frame categorization, 1 for voiced and 0 for unvoiced frame");
     }
