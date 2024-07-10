@@ -96,7 +96,7 @@ void Audio2Pitch::compute() {
     _loudnessAlgorithm->input("signal").set(frame);
     _loudnessAlgorithm->output("loudness").set(loudness);
   }
-  else {
+  else if (_loudnessAlgorithmName == "rms") {
     _loudnessAlgorithm->input("array").set(frame);
     _loudnessAlgorithm->output("rms").set(loudness);
   }
@@ -112,7 +112,7 @@ void Audio2Pitch::compute() {
     _spectrum->compute();
     _pitchAlgorithm->input("spectrum").set(spectrum);
   }
-  else {
+  else if (_pitchAlgorithmName == "pyin") {
     _pitchAlgorithm->input("signal").set(frame);
   }
 
