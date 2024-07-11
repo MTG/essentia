@@ -185,12 +185,7 @@ class TestAudio2Pitch(TestCase):
         hopSize = 512
         loudness_threshold = -80
         filename = join(testdata.audio_dir, "recorded", "vignesh.wav")
-        if sys.platform == "darwin":
-            import soundfile as sf
-
-            audio, _ = sf.read(filename, dtype="float32")
-        else:
-            audio = MonoLoader(filename=filename, sampleRate=44100)()
+        audio = MonoLoader(filename=filename, sampleRate=44100)()
         frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
         pitchDetect = Audio2Pitch(
             frameSize=frameSize,
