@@ -159,10 +159,6 @@ class TestAudio2Pitch(TestCase):
         )
         self.assertConfigureFails(
             Audio2Pitch(),
-            {"sampleRate": 44100, "loudnessAlgorithm": "ebur128"},
-        )
-        self.assertConfigureFails(
-            Audio2Pitch(),
             {"sampleRate": 44100, "loudnessThreshold": 1.0},
         )
         self.assertConfigureFails(

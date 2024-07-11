@@ -19,7 +19,6 @@ void Audio2Pitch::configure() {
   _minFrequency = parameter("minFrequency").toReal();
   _maxFrequency = parameter("maxFrequency").toReal();
   _pitchAlgorithmName = parameter("pitchAlgorithm").toString();
-  _loudnessAlgorithmName = parameter("loudnessAlgorithm").toString();
   _tolerance = parameter("tolerance").toReal();
   _pitchConfidenceThreshold = parameter("pitchConfidenceThreshold").toReal();
   _loudnessThreshold = parameter("loudnessThreshold").toReal();
@@ -49,15 +48,7 @@ void Audio2Pitch::configure() {
     _pitchAlgorithm = AlgorithmFactory::create("PitchYin");
   }
 
-  if (_loudnessAlgorithmName == "loudness") {
-    _loudnessAlgorithm = AlgorithmFactory::create("Loudness");
-  }
-  else if (_loudnessAlgorithmName == "rms") {
-    _loudnessAlgorithm = AlgorithmFactory::create("RMS");
-  }
-  else {
-    throw EssentiaException("Audio2Pitch: Bad 'loudnessAlgorithm' =", _loudnessAlgorithmName);
-  }
+  _loudnessAlgorithm = AlgorithmFactory::create("RMS");
 
   // switch between pyin and pyin_fft to propagate the weighting parameter
   if (_pitchAlgorithmName == "pyin") {
@@ -92,14 +83,8 @@ void Audio2Pitch::compute() {
     throw EssentiaException("Audio2Pitch: cannot compute the pitch of a frame of size 1");
   }
 
-  if (_loudnessAlgorithmName == "loudness") {
-    _loudnessAlgorithm->input("signal").set(frame);
-    _loudnessAlgorithm->output("loudness").set(loudness);
-  }
-  else if (_loudnessAlgorithmName == "rms") {
-    _loudnessAlgorithm->input("array").set(frame);
-    _loudnessAlgorithm->output("rms").set(loudness);
-  }
+  _loudnessAlgorithm->input("array").set(frame);
+  _loudnessAlgorithm->output("rms").set(loudness);
   _loudnessAlgorithm->compute();
 
   std::vector<Real> windowedFrame, spectrum;

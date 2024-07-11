@@ -26,7 +26,6 @@ class Audio2Pitch : public Algorithm {
     Real _minFrequency;
     Real _maxFrequency;
     std::string _pitchAlgorithmName;
-    std::string _loudnessAlgorithmName;
     Real _tolerance;
     Real _pitchConfidenceThreshold;
     Real _loudnessThreshold;
@@ -56,7 +55,6 @@ class Audio2Pitch : public Algorithm {
       declareParameter("minFrequency", "minimum frequency to detect in Hz", "[10,20000]", 60.0);
       declareParameter("maxFrequency", "maximum frequency to detect in Hz", "[10,20000]", 2300.0);
       declareParameter("pitchAlgorithm", "pitch algorithm to use", "{pyin,pyin_fft}", "pyin_fft");
-      declareParameter("loudnessAlgorithm", "loudness algorithm to use", "{loudness,rms}", "rms");
       declareParameter("weighting", "string to assign a weighting function", "{custom,A,B,C,D,Z}", "custom");
       declareParameter("tolerance", "sets tolerance for peak detection on pitch algorithm", "[0,1]", 1.0);
       declareParameter("pitchConfidenceThreshold", "level of pitch confidence above/below which note ON/OFF start to be considered", "[0,1]", 0.25);
