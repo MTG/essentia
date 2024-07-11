@@ -37,7 +37,7 @@ static Real _weightMask[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
 static const Real _weights[] = {-75.8, -70.1, -60.8, -52.1, -44.2, -37.5,
 	-31.3, -25.6, -20.9, -16.5, -12.6, -9.6, -7.0, -4.7, -3.0, -1.8, -0.8,
 	-0.2, -0.0, 0.5, 1.6, 3.2, 5.4, 7.8, 8.1, 5.3, -2.4, -11.1, -12.8,
-	-12.2, -7.4, -17.8, -17.8, -17.8}; // by default the original one is selected
+	-12.2, -7.4, -17.8, -17.8, -17.8}; // by default use custom weights designed specifically for the PitchYinFFT algorithm
 
 static const Real _aWeighting[] = {-148.6, -50.4, -44.8, -39.5, -34.5, -30.3,
     -26.2, -22.4, -19.1, -16.2, -13.2, -10.8, -8.7, -6.6, -4.8, -3.2, -1.9,
@@ -91,7 +91,7 @@ void PitchYinFFT::configure() {
   // configure algorithms
   _fft->configure("size", _frameSize);
     
-  if (_weighting != "default" && _weighting != "A" && _weighting != "B" && _weighting != "C" && _weighting != "D" && _weighting != "Z") {
+  if (_weighting != "custom" && _weighting != "A" && _weighting != "B" && _weighting != "C" && _weighting != "D" && _weighting != "Z") {
     E_INFO("PitchYinFFT: 'weighting' = "<<_weighting<<"\n");
     throw EssentiaException("PitchYinFFT: Bad 'weighting' parameter");
   }
@@ -118,7 +118,7 @@ void PitchYinFFT::spectralWeights(std::string weighting) {
   int i = 0, j = 1;
   Real freq = 0, a0 = 0, a1 = 0, f0 = 0, f1 = 0;
   int _maskSize = 34;
-  if (weighting == "default") {
+  if (weighting == "custom") {
     for (int n=0; n<_maskSize; n++)
       _weightMask[n] = _weights[n];
   }
