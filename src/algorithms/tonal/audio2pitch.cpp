@@ -6,7 +6,7 @@ using namespace standard;
 
 const char* Audio2Pitch::name = "Audio2Pitch";
 const char* Audio2Pitch::category = "Pitch";
-const char* Audio2Pitch::description = DOC("This algorithm computes pitch with various pitch algorithms, specifically targeted for real-time pitch detection on audio signals.");
+const char* Audio2Pitch::description = DOC("This algorithm computes pitch with various pitch algorithms, specifically targeted for real-time pitch detection on audio signals. The algorithm internally uses pitch estimation with PitchYin (pitchyin) and PitchYinFFT (pitchyinfft).");
 
 bool Audio2Pitch::isAboveThresholds(Real pitchConfidence, Real loudness) {
   return (pitchConfidence >= _pitchConfidenceThreshold) && (loudness >= _loudnessThresholdGain);
@@ -31,11 +31,11 @@ void Audio2Pitch::configure() {
     throw EssentiaException("Audio2Pitch: Max frequency cannot be lower or equal than the minimum frequency");
   }
 
-  if (_pitchAlgorithmName != "pyin_fft" && _pitchAlgorithmName != "pyin") {
+  if (_pitchAlgorithmName != "pitchyinfft" && _pitchAlgorithmName != "pitchyin") {
     throw EssentiaException("Audio2Pitch: Bad 'pitchAlgorithm' =", _pitchAlgorithmName);
   }
 
-  if (_pitchAlgorithmName == "pyin_fft") {
+  if (_pitchAlgorithmName == "pitchyinfft") {
     _windowing = AlgorithmFactory::create("Windowing");
     _spectrum = AlgorithmFactory::create("Spectrum");
     _pitchAlgorithm = AlgorithmFactory::create("PitchYinFFT");
@@ -51,7 +51,7 @@ void Audio2Pitch::configure() {
   _loudnessAlgorithm = AlgorithmFactory::create("RMS");
 
   // switch between pyin and pyin_fft to propagate the weighting parameter
-  if (_pitchAlgorithmName == "pyin") {
+  if (_pitchAlgorithmName == "pitchyin") {
     _pitchAlgorithm->configure(INHERIT("frameSize"),
                                INHERIT("maxFrequency"),
                                INHERIT("minFrequency"),
@@ -88,7 +88,7 @@ void Audio2Pitch::compute() {
   _loudnessAlgorithm->compute();
 
   std::vector<Real> windowedFrame, spectrum;
-  if (_pitchAlgorithmName == "pyin_fft") {
+  if (_pitchAlgorithmName == "pitchyinfft") {
     _windowing->input("frame").set(frame);
     _windowing->output("frame").set(windowedFrame);
     _windowing->compute();
@@ -97,7 +97,7 @@ void Audio2Pitch::compute() {
     _spectrum->compute();
     _pitchAlgorithm->input("spectrum").set(spectrum);
   }
-  else if (_pitchAlgorithmName == "pyin") {
+  else if (_pitchAlgorithmName == "pitchyin") {
     _pitchAlgorithm->input("signal").set(frame);
   }
 
