@@ -17,8 +17,8 @@
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
 
-#ifndef ESSENTIA_SCALETRANSFORM_H
-#define ESSENTIA_SCALETRANSFORM_H
+#ifndef ESSENTIA_DIRECTSCALETRANSFORM_H
+#define ESSENTIA_DIRECTSCALETRANSFORM_H
 
 #include "algorithm.h"
 
@@ -27,6 +27,50 @@ namespace standard {
 
 class DirectScaleTransform : public Algorithm {
 
-}
-}
-}
+ protected:
+   Input<std::vector<std::vector<Real>> > _matrix;
+   Output<std::vector<std::vector<Real>> > _result;
+
+ public:
+    DirectScaleTransform() {
+      declareInput(_matrix, "matrix", "the input matrix");
+      declareOutput(_result, "result", "the result of the direct scale transform");
+    }
+    
+    void declareParameters() {}
+    
+    void compute();
+
+  static const char* name;
+  static const char* category;
+  static const char* description;
+
+};
+
+}  // namespace standard
+}  // namespace essentia
+
+// #include <streamingalgorithmwrapper.h>
+
+// namespace essentia {
+// namespace streaming {
+
+// class DirectScaleTransform : public StreamingAlgorithmWrapper {
+
+//  protected:
+//   Sink<std::vector<std::vector<Real>>> _matrix;
+//   Source<std::vector<std::vector<Real>>> _result;
+
+//  public:
+//     DirectScaleTransform() {
+//         declareAlgorithm("DirectScaleTransform");
+//         declareInput(_matrix, TOKEN, "the input matrix");
+//         declareOutput(_result, TOKEN, "the result of the direct scale transform");
+//   }
+// };
+
+// } // namespace streaming
+// } // namespace essentia
+
+
+#endif // ESSENTIA_DIRECTSCALETRANSFORM_H

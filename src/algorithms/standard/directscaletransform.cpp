@@ -16,6 +16,8 @@
  * You should have received a copy of the Affero GNU General Public License
  * version 3 along with this program.  If not, see http://www.gnu.org/licenses/
  */
+#include "directscaletransform.h"
+
 
 #include <iostream>
 #include <vector>
@@ -24,6 +26,15 @@
 using namespace std;
 
 #define FOR(i,l,r) for(int i=l; i<r; i++)
+
+
+const char* DirectScaleTransform::name = "DirectScaleTransform";
+const char* DirectScaleTransform::description = 
+DOC("Computes Direct Scale Transform on a given matrix.\n" 
+    "This code was derived from the original DST paper:\n"
+    "[1] Williams, W. J., and E. J. Zalubas. Helicopter transmission fault detection via "
+    "time-frequency, scale and spectral methods. Mechanical systems and signal processing"
+    "14.4 (2000): 545-559.");
 
 vector<vector< complex<double> >> DirectScaleTransform(int N=10, int C=6, int fs=1) {
     complex<double> zi = 1i;
