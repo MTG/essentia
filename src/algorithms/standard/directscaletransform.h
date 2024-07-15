@@ -31,14 +31,21 @@ class DirectScaleTransform : public Algorithm {
    Input<std::vector<std::vector<Real>> > _matrix;
    Output<std::vector<std::vector<Real>> > _result;
 
+   int _C;
+   int _fs;
+
  public:
     DirectScaleTransform() {
       declareInput(_matrix, "matrix", "the input matrix");
       declareOutput(_result, "result", "the result of the direct scale transform");
     }
     
-    void declareParameters() {}
+    void declareParameters() {
+      declareParameter("C", "desired scale for the direct scale transform", 500);
+      declareParameter("fs", "the sampling rate of the input autocorrelation", 1);
+    }
     
+    void configure();
     void compute();
 
   static const char* name;
