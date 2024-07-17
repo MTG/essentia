@@ -41,8 +41,8 @@ class DirectScaleTransform : public Algorithm {
     }
     
     void declareParameters() {
-      declareParameter("C", "desired scale for the direct scale transform", 500);
-      declareParameter("fs", "the sampling rate of the input autocorrelation", 1);
+      declareParameter("C", "desired scale for the direct scale transform", "(0,inf)", 500);
+      declareParameter("fs", "the sampling rate of the input autocorrelation", "(0,inf)", 1);
     }
     
     void configure();

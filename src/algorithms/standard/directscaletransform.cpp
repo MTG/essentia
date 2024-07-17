@@ -45,14 +45,14 @@ void DirectScaleTransform::compute() {
     std::vector<std::vector<Real>>& result = _result.get();
 
 
-    std::complex<Real> zi = 1i;
+    std::complex<Real> zi = std::complex<Real>(0, 1);
     int N = matrix.size();
     Real step = M_PI/log(N+1);
     int num_rows = _C/step;
     result.resize(num_rows, std::vector<Real>(N-1, 0));
 
     // Compute Scale Transform Matrix
-    std::vector<std::vector< std::complex<Real>>> dst_mat(num_rows, vector<std::complex<Real>>(N-1, 0));
+    std::vector<std::vector< std::complex<Real>>> dst_mat(num_rows, std::vector<std::complex<Real>>(N-1, 0));
     Real Ts = 1/_fs;
     FOR(i, 0, num_rows) {
         FOR(j, 0, N-1) {
@@ -61,7 +61,7 @@ void DirectScaleTransform::compute() {
             std::complex<Real> k_ = std::complex<Real>(k * Ts);
             std::complex<Real> c_ = std::complex<Real>(0.5) - zi * c; 
 
-            std::complex<Real> M = pow(k_, c_)/(c_ * sqrt(2*M_PI));
+            std::complex<Real> M = pow(k_, c_)/(c_ * Real(sqrt(M_2PI)));
             dst_mat[i][j] = M;
         }
     }
@@ -83,12 +83,12 @@ void DirectScaleTransform::compute() {
     FOR(i, 0, num_rows) FOR(j, 0, P) result[i][j] = std::abs(result_mat[i][j]);
 }
 
-// vector<vector< std::complex<double> >> DirectScaleTransform(int N=10, int C=6, int fs=1) {
+// std::vector<std::vector< std::complex<double> >> DirectScaleTransform(int N=10, int C=6, int fs=1) {
 //     std::complex<double> zi = 1i;
 //     double step = M_PI/log(N+1);
 //     int num_rows = C/step;
 
-//     vector<vector< std::complex<double> >> result(num_rows, vector< std::complex<double> >(N-1, 0));
+//     std::vector<std::vector< std::complex<double> >> result(num_rows, std::vector< std::complex<double> >(N-1, 0));
 //     double Ts = 1/fs;
 
 //     FOR(i, 0, num_rows) {
@@ -106,7 +106,7 @@ void DirectScaleTransform::compute() {
 // }
 
 // int main() {
-//     vector<vector< std::complex<double> >> result = DirectScaleTransform();
+//     std::vector<std::vector< std::complex<double> >> result = DirectScaleTransform();
 //     for(auto row: result){
 //         for(auto elem: row){
 //             cout << elem.real() << "+" << elem.imag() << "j ";
