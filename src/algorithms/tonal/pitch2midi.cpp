@@ -21,7 +21,7 @@ void Pitch2Midi::configure()
   _minNoteChangePeriod = parameter("minNoteChangePeriod").toReal();
   _applyCompensation = parameter("applyTimeCompensation").toBool();
   // former Pitch2Midi only parameters
-  _tuningFreq = parameter("tuningFreq").toReal();
+  _tuningFreq = parameter("tuningFrequency").toReal();
   _transposition = parameter("transpositionAmount").toInt();
 
   _frameTime = _hopSize / _sampleRate;
@@ -196,15 +196,19 @@ void Pitch2Midi::compute()
       // IMPORTANT: this hardly happens so if hasCoherence() current MIDI note is equals to max voted.
       _offsetCheckCounter++;
       if (_offsetCheckCounter > _minOffsetCheckThreshold) {
-        updateDnote();
-        note = _buffer[0];
-        _noteOff = true;
-        _noteOn = true;
+        _NOTED_ON = true;
+        if (note != _buffer[0]){  // avoid note slicing effect
+            updateDnote();
+            note = _buffer[0];
+            _noteOff = true;
+            _noteOn = true;
+        }
         _offsetCheckCounter = 0;
         _onsetCheckCounter = 0;
-        //E_INFO("off-onset(" << _buffer[0] << ", coherent & NOTED)");
+        //E_WARNING("off-onset(" << _buffer[0] << ", coherent & NOTED)");
       }
     }
+    // in coherence output the _midiNoteNumberTransposed coincides with _buffer[0] value
     setOutputs(_midiNoteNumberTransposed, _minOffsetCheckPeriod, _minOffsetCheckPeriod);
     return;
   }
@@ -221,6 +225,7 @@ void Pitch2Midi::compute()
       _onsetCheckCounter = 0;
       _offsetCheckCounter = 0;
     }
+    // in coherence output the _midiNoteNumberTransposed coincides with _buffer[0] value
     setOutputs(_midiNoteNumberTransposed, _minOnsetCheckPeriod, _minOffsetCheckPeriod);
     return;
   }
@@ -229,18 +234,21 @@ void Pitch2Midi::compute()
     if (_maxVoted[0] != 0.0) {
       _onsetCheckCounter++;
       // combines checker with minOcurrenceRate
-      if (_onsetCheckCounter > _minOcurrenceRateThreshold){
-        _noteOff = true;
-        _noteOn = true;
+      if ((_onsetCheckCounter > _minOcurrenceRateThreshold)){
         _NOTED_ON = true;
-        updateDnote();
-        note = _maxVoted[0];
+        if (note != _maxVoted[0]){  // avoid note slicing effect
+            _noteOff = true;
+            _noteOn = true;
+            updateDnote();
+            note = _maxVoted[0];
+        }
         //E_INFO("off-onset(" << _maxVoted[0] << ", uncoherent & NOTED): " << _onsetCheckCounter << " - " << _minOcurrenceRateThreshold);
         _offsetCheckCounter = 0;
         _onsetCheckCounter = 0;
       }
     }
-    setOutputs(_midiNoteNumberTransposed, _minOcurrenceRatePeriod, _minOcurrenceRatePeriod);
+    // output the max-voted midi note to avoid unestable midi note numbers
+    setOutputs(_maxVoted[0], _minOcurrenceRatePeriod, _minOcurrenceRatePeriod);
     return;
   }
 
@@ -259,7 +267,8 @@ void Pitch2Midi::compute()
         }
       }
     }
-    setOutputs(_midiNoteNumberTransposed, _minOnsetCheckPeriod, _minOffsetCheckPeriod);
+    // output the max-voted midi note to avoid unestable midi note numbers
+    setOutputs(_maxVoted[0], _minOnsetCheckPeriod, _minOffsetCheckPeriod);
     return;
   }
   // E_INFO("Compute() -END");
