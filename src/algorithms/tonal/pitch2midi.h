@@ -96,7 +96,7 @@ namespace standard {
         declareParameter("minOffsetCheckPeriod", "minimum time to wait until an offset is detected", "(0,1]", 0.2);
         declareParameter("applyTimeCompensation", "whether to apply time compensation in the timestamp of the note toggle messages.", "{true,false}", true);
         // former Pitch2Midi params
-        declareParameter("tuningFreq", "reference tuning frequency in Hz", "{432,440}", 440);
+        declareParameter("tuningFrequency", "reference tuning frequency in Hz", "{432,440}", 440);
         declareParameter("transpositionAmount", "amount of semitones to apply for transposed instruments", "(-69,50)", 0);
       }
 
