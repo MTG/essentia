@@ -20,6 +20,7 @@
 
 from essentia_test import *
 from numpy import sin, pi, mean, random, array, float32, square
+from pathlib import Path
 
 
 class TestPitch2Midi(TestCase):
@@ -124,163 +125,36 @@ class TestPitch2Midi(TestCase):
         self.assertEqual(message_types[expected_idx], expected_value)
         # TODO: think in an strategy similar to real cases that assess the number of notes, messages and timestamp tolerance
 
-    def testARealCase(self):
-
-        frameSize = 8192
-        sample_rate = 44100
-        hopSize = 128
-        loudness_threshold = -50
-        pitch_confidence_threshold = 0.25
-
-        filename = join(testdata.audio_dir, "recorded", "sax-test_min.wav")
-        if sys.platform == "darwin":
-            import soundfile as sf
-
-            audio, _ = sf.read(filename, dtype="float32")
-            audio = audio[:, 0]
-        else:
-            audio = MonoLoader(filename=filename, sampleRate=44100)()
-        frames = FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize)
-
-        n_frames = (audio.shape[0] - (frameSize - hopSize)) / hopSize
-
-        # print(f"n_frames: {n_frames}")
-        # pitchDetect = Audio2Pitch(
-        #     frameSize=frameSize,
-        #     sampleRate=sample_rate,
-        #     pitchConfidenceThreshold=0.15,
-        #     loudnessThreshold=loudness_threshold,
-        # )
-
-        win = Windowing(normalized=False, zeroPhase=False)
-        spec = Spectrum()
-        pitchDetect = PitchYinFFT(
-            frameSize=frameSize,
-            sampleRate=sample_rate,
-            weighting="custom",
-            tolerance=1.0,
-        )
-        rmsDetect = RMS()
-
-        n_outputs = len(pitchDetect.outputNames())
-        pitch, confidence = ([] for _ in range(n_outputs))
-        loudness = []
-        voiced = []
-        n = 0
-        for frame in frames:
-            # print(n, end="\r")
-            # print(frame.shape)
-            # out = pitchDetect(frame)
-            _spec = spec(win(frame))
-            f, conf = pitchDetect(_spec)
-            pitch += [f]
-            confidence += [conf]
-            loudness += [rmsDetect(frame)]
-            if (
-                amp2db(loudness[n]) > loudness_threshold
-                and confidence[n] > pitch_confidence_threshold
-            ):
-                voiced += [1]
-            else:
-                voiced += [0]
-            n += 1
-
-        expected_value = ["note_off"]
-        expected_idx = 2869
-        # TODO: create an annotation file for assessing the note toggle events
-        # TODO: apply audio2pitch module and assess with note metrics
-        self.runTest(sample_rate, hopSize, pitch, voiced, expected_value, expected_idx)
-
     def testARealCaseWithEMajorScale(self):
         frame_size = 8192
         sample_rate = 48000
         hop_size = 64
         loudness_threshold = -40
         pitch_confidence_threshold = 0.25
+        min_frequency = 103.83
+        max_frequency = 659.26
+        n_notes_tolerance = 0
+        onset_tolerance = 0.01
+        midi_note_tolerance = 0
 
-        filename = join(
-            testdata.audio_dir, "recorded", "359500__mtg__sax-tenor-e-major.wav"
+        stem = "359500__mtg__sax-tenor-e-major"
+        audio_path = Path("recorded") / f"{stem}.wav"
+        reference_path = Path("pitch2midi") / f"{stem}.npy"
+
+        self.runARealCase(
+            audio_path=audio_path,
+            reference_path=reference_path,
+            sample_rate=sample_rate,
+            frame_size=frame_size,
+            hop_size=hop_size,
+            pitch_confidence_threshold=pitch_confidence_threshold,
+            loudness_threshold=loudness_threshold,
+            max_frequency=max_frequency,
+            min_frequency=min_frequency,
+            n_notes_tolerance=n_notes_tolerance,
+            onset_tolerance=onset_tolerance,
+            midi_note_tolerance=midi_note_tolerance,
         )
-        # TODO: save the below code in a function and reuse it for testARealCases
-
-        if sys.platform == "darwin":
-            import soundfile as sf
-
-            audio, _ = sf.read(filename, dtype="float32")
-            if audio.ndim > 1:
-                audio = audio[:, 0]
-        else:
-            audio = MonoLoader(filename=filename, sampleRate=sample_rate)()
-        frames = FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size)
-
-        n_frames = (audio.shape[0] - (frame_size - hop_size)) / hop_size
-        step_time = hop_size / sample_rate
-
-        # initialize audio2pitch & pitch2midi instances
-        pitchDetect = Audio2Pitch(
-            frameSize=frame_size,
-            sampleRate=sample_rate,
-            pitchConfidenceThreshold=pitch_confidence_threshold,
-            loudnessThreshold=loudness_threshold,
-        )
-
-        p2m = Pitch2Midi(
-            sampleRate=sample_rate,
-            hopSize=hop_size,
-            midiBufferDuration=0.05,
-        )
-
-        # define estimate bin and some counters
-        estimated = []
-        n = 0
-        time_stamp = 0
-        n_notes = 0
-
-        # simulates real-time process
-        for frame in frames:
-            _pitch, _confidence, _loudness, _voiced = pitchDetect(frame)
-            message, midi_note, time_compensation = p2m(_pitch, _voiced)
-            time_stamp += step_time
-            if _voiced:
-                if message:
-                    estimated.append(
-                        [
-                            n_notes,
-                            time_stamp - time_compensation[1],
-                            time_stamp - time_compensation[0],
-                            int(midi_note[1]),
-                        ]
-                    )
-                    # print(
-                    #     f"[{n_notes}][{n}]:{(time_stamp-time_compensation[1]):.3f}, {midi2note(int(midi_note[1]))}({int(midi_note[1])})~{_pitch:.2f}Hz"  # , {time_compensation}, {midi_note}, {message}
-                    # )
-                    if "note_on" in message:
-                        n_notes += 1
-            n += 1
-
-        ## convert note toggle messages to note features
-        expected_notes = numpy.load(
-            join(filedir(), "pitch2midi/359500__mtg__sax-tenor-e-major.npy")
-        )
-
-        # estimate the number of notes for expected and detected
-        n_detected_notes = len(estimated)
-        n_expected_notes = len(expected_notes)
-
-        # estimate the onset error for each note and estimate the mean
-        onset_mse = mean(
-            [square(note[1] - estimated[int(note[0])][1]) for note in expected_notes]
-        )
-
-        # estimate the midi note error for each note and estimate the mean
-        midi_note_mse = mean(
-            [square(note[-1] - estimated[int(note[0])][-1]) for note in expected_notes]
-        )
-
-        # assert outputs
-        self.assertAlmostEqual(onset_mse, 0, 0.01)
-        self.assertAlmostEqual(n_detected_notes, n_expected_notes, 0)
-        self.assertAlmostEqual(midi_note_mse, midi_note_mse, 0)
 
     def testARealCaseWithDMinorScale(self):
         frame_size = 8192
@@ -290,11 +164,45 @@ class TestPitch2Midi(TestCase):
         pitch_confidence_threshold = 0.25
         min_frequency = 103.83
         max_frequency = 659.26
+        n_notes_tolerance = 0
+        onset_tolerance = 0.01
+        midi_note_tolerance = 0
 
-        filename = join(
-            testdata.audio_dir, "recorded", "359628__mtg__sax-tenor-d-minor.wav"
+        stem = "359628__mtg__sax-tenor-d-minor"
+        audio_path = Path("recorded") / f"{stem}.wav"
+        reference_path = Path("pitch2midi") / f"{stem}.npy"
+
+        self.runARealCase(
+            audio_path=audio_path,
+            reference_path=reference_path,
+            sample_rate=sample_rate,
+            frame_size=frame_size,
+            hop_size=hop_size,
+            pitch_confidence_threshold=pitch_confidence_threshold,
+            loudness_threshold=loudness_threshold,
+            max_frequency=max_frequency,
+            min_frequency=min_frequency,
+            n_notes_tolerance=n_notes_tolerance,
+            onset_tolerance=onset_tolerance,
+            midi_note_tolerance=midi_note_tolerance,
         )
 
+    def runARealCase(
+        self,
+        audio_path: str,
+        reference_path: str,
+        sample_rate: int,
+        frame_size: int,
+        hop_size: int,
+        pitch_confidence_threshold: float,
+        loudness_threshold: float,
+        max_frequency: float,
+        min_frequency: float,
+        n_notes_tolerance: int = 0,
+        onset_tolerance: float = 0.01,
+        midi_note_tolerance: int = 0,
+    ):
+        filename = join(testdata.audio_dir, audio_path)
         if sys.platform == "darwin":
             import soundfile as sf
 
@@ -353,12 +261,12 @@ class TestPitch2Midi(TestCase):
                         n_notes += 1
             n += 1
 
-        ## convert note toggle messages to note features
-        expected_notes = numpy.load(
-            join(filedir(), f"pitch2midi/359628__mtg__sax-tenor-d-minor.npy")
-        )
+        # read the expected notes file manually annotated
+        expected_notes = numpy.load(join(filedir(), reference_path))
         # print("Expected notes:")
         # print(expected_notes)
+
+        ## convert note toggle messages to note features
 
         # estimate the number of notes for expected and detected
         n_detected_notes = len(estimated)
@@ -375,11 +283,13 @@ class TestPitch2Midi(TestCase):
         )
 
         # assert outputs
-        onset_tolerance = 0.01
-        self.assertAlmostEqual(n_detected_notes, n_expected_notes, 0)
-        self.assertAlmostEqual(onset_mse, 0, onset_tolerance)
-        self.assertAlmostEqual(midi_note_mse, midi_note_mse, 0)
 
+        self.assertAlmostEqual(n_detected_notes, n_expected_notes, n_notes_tolerance)
+        self.assertAlmostEqual(onset_mse, 0, onset_tolerance)
+        self.assertAlmostEqual(midi_note_mse, midi_note_mse, midi_note_tolerance)
+
+
+# TODO: create a new unittest for separated notes to assess offset in a REALCASE!
 
 suite = allTests(TestPitch2Midi)
 
