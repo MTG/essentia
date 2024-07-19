@@ -122,6 +122,7 @@ class TestPitch2Midi(TestCase):
             midi_notes += [midi_note]
             time_compensations += [time_compensation]
         self.assertEqual(message_types[expected_idx], expected_value)
+        # TODO: think in an strategy similar to real cases that assess the number of notes, messages and timestamp tolerance
 
     def testARealCase(self):
 
@@ -187,15 +188,8 @@ class TestPitch2Midi(TestCase):
         expected_value = ["note_off"]
         expected_idx = 2869
         # TODO: create an annotation file for assessing the note toggle events
+        # TODO: apply audio2pitch module and assess with note metrics
         self.runTest(sample_rate, hopSize, pitch, voiced, expected_value, expected_idx)
-        # expected_pitch = numpy.load(join(filedir(), "pitchyinfft/vignesh_pitch.npy"))
-        # expected_conf = numpy.load(
-        #     join(filedir(), "pitchyinfft/vignesh_confidence.npy")
-        # )
-        # expected_voiced = [1] * len(expected_pitch)
-        # self.assertAlmostEqualVector(pitch, expected_pitch, 1e-6)
-        # self.assertAlmostEqualVector(confidence, expected_conf, 5e-5)
-        # self.assertAlmostEqualVector(voiced, expected_voiced)
 
     def testARealCaseWithEMajorScale(self):
         frame_size = 8192
@@ -207,6 +201,7 @@ class TestPitch2Midi(TestCase):
         filename = join(
             testdata.audio_dir, "recorded", "359500__mtg__sax-tenor-e-major.wav"
         )
+        # TODO: save the below code in a function and reuse it for testARealCases
 
         if sys.platform == "darwin":
             import soundfile as sf
