@@ -34,22 +34,23 @@ DOC("Computes Direct Scale Transform on a given matrix.\n"
     "14.4 (2000): 545-559.");
 
 void DirectScaleTransform::configure() {
-    _C = parameter("C").toInt();
-    _fs = parameter("fs").toInt();
+    _C = parameter("C").toReal();
+    _fs = parameter("fs").toReal();
 }
-
 
 void DirectScaleTransform::compute() {
 
     const std::vector<std::vector<Real>>& matrix = _matrix.get();
     std::vector<std::vector<Real>>& result = _result.get();
 
+    int N = matrix.size();
+    if (N == 0) throw EssentiaException("Input matrix is empty");
 
     std::complex<Real> zi = std::complex<Real>(0, 1);
-    int N = matrix.size();
     Real step = M_PI/log(N+1);
-    int num_rows = _C/step;
-    result.resize(num_rows, std::vector<Real>(N-1, 0));
+    int num_rows = _C/step+1;       // Number of rows. +1 because need to include the first row which is the 0th multiple of step
+    int P = matrix[0].size();
+    result.resize(num_rows, std::vector<Real>(P, 0));
 
     // Compute Scale Transform Matrix
     std::vector<std::vector< std::complex<Real>>> dst_mat(num_rows, std::vector<std::complex<Real>>(N-1, 0));
@@ -67,7 +68,6 @@ void DirectScaleTransform::compute() {
     }
     
     // First Order Difference of the input matrix
-    int P = matrix[0].size();
     std::vector<std::vector<Real>> diff_matrix(N-1, std::vector<Real>(P, 0));
     FOR(i, 0, N-1) FOR(j, 0, P) diff_matrix[i][j] = matrix[i][j] - matrix[i+1][j];
 
@@ -82,36 +82,3 @@ void DirectScaleTransform::compute() {
     // Absolute value of the result matrix
     FOR(i, 0, num_rows) FOR(j, 0, P) result[i][j] = std::abs(result_mat[i][j]);
 }
-
-// std::vector<std::vector< std::complex<double> >> DirectScaleTransform(int N=10, int C=6, int fs=1) {
-//     std::complex<double> zi = 1i;
-//     double step = M_PI/log(N+1);
-//     int num_rows = C/step;
-
-//     std::vector<std::vector< std::complex<double> >> result(num_rows, std::vector< std::complex<double> >(N-1, 0));
-//     double Ts = 1/fs;
-
-//     FOR(i, 0, num_rows) {
-//         FOR(j, 0, N-1) {
-//             double c = step * i;
-//             double k = j + 1;
-//             std::complex<double> k_ = std::complex<double>(k * Ts);
-//             std::complex<double> c_ = std::complex<double>(0.5) - zi * c; 
-
-//             std::complex<double> M = pow(k_, c_)/(c_ * sqrt(2*M_PI));
-//             result[i][j] = M;
-//         }
-//     }
-//     return result;
-// }
-
-// int main() {
-//     std::vector<std::vector< std::complex<double> >> result = DirectScaleTransform();
-//     for(auto row: result){
-//         for(auto elem: row){
-//             cout << elem.real() << "+" << elem.imag() << "j ";
-//         }
-//         cout << endl;
-//     }
-//     return 0;
-// }

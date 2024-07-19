@@ -31,8 +31,8 @@ class DirectScaleTransform : public Algorithm {
    Input<std::vector<std::vector<Real>> > _matrix;
    Output<std::vector<std::vector<Real>> > _result;
 
-   int _C;
-   int _fs;
+   Real _C;
+   Real _fs;
 
  public:
     DirectScaleTransform() {
@@ -57,27 +57,27 @@ class DirectScaleTransform : public Algorithm {
 }  // namespace standard
 }  // namespace essentia
 
-// #include <streamingalgorithmwrapper.h>
+#include <streamingalgorithmwrapper.h>
 
-// namespace essentia {
-// namespace streaming {
+namespace essentia {
+namespace streaming {
 
-// class DirectScaleTransform : public StreamingAlgorithmWrapper {
+class DirectScaleTransform : public StreamingAlgorithmWrapper {
 
-//  protected:
-//   Sink<std::vector<std::vector<Real>>> _matrix;
-//   Source<std::vector<std::vector<Real>>> _result;
+ protected:
+  Sink<std::vector<std::vector<Real>>> _matrix;
+  Source<std::vector<std::vector<Real>>> _result;
 
-//  public:
-//     DirectScaleTransform() {
-//         declareAlgorithm("DirectScaleTransform");
-//         declareInput(_matrix, TOKEN, "the input matrix");
-//         declareOutput(_result, TOKEN, "the result of the direct scale transform");
-//   }
-// };
+ public:
+    DirectScaleTransform() {
+        declareAlgorithm("DirectScaleTransform");
+        declareInput(_matrix, TOKEN, "the input matrix");
+        declareOutput(_result, TOKEN, "the result of the direct scale transform");
+  }
+};
 
-// } // namespace streaming
-// } // namespace essentia
+} // namespace streaming
+} // namespace essentia
 
 
 #endif // ESSENTIA_DIRECTSCALETRANSFORM_H
