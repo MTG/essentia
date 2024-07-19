@@ -257,7 +257,7 @@ class TestPitch2Midi(TestCase):
                         ]
                     )
                     # print(
-                    #     f"[{n_notes}][{n}]:{(time_stamp-time_compensation[1]):.3f}, {midi2note(int(midi_note[1]))}({int(midi_note[1])}):{_pitch:.2f}, {time_compensation}, {midi_note}, {message}"
+                    #     f"[{n_notes}][{n}]:{(time_stamp-time_compensation[1]):.3f}, {midi2note(int(midi_note[1]))}({int(midi_note[1])})~{_pitch:.2f}Hz"  # , {time_compensation}, {midi_note}, {message}
                     # )
                     if "note_on" in message:
                         n_notes += 1
@@ -285,6 +285,104 @@ class TestPitch2Midi(TestCase):
         # assert outputs
         self.assertAlmostEqual(onset_mse, 0, 0.01)
         self.assertAlmostEqual(n_detected_notes, n_expected_notes, 0)
+        self.assertAlmostEqual(midi_note_mse, midi_note_mse, 0)
+
+    def testARealCaseWithDMinorScale(self):
+        frame_size = 8192
+        sample_rate = 48000
+        hop_size = 64
+        loudness_threshold = -40
+        pitch_confidence_threshold = 0.25
+        min_frequency = 103.83
+        max_frequency = 659.26
+
+        filename = join(
+            testdata.audio_dir, "recorded", "359628__mtg__sax-tenor-d-minor.wav"
+        )
+
+        if sys.platform == "darwin":
+            import soundfile as sf
+
+            audio, _ = sf.read(filename, dtype="float32")
+            if audio.ndim > 1:
+                audio = audio[:, 0]
+        else:
+            audio = MonoLoader(filename=filename, sampleRate=sample_rate)()
+        frames = FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size)
+
+        n_frames = (audio.shape[0] - (frame_size - hop_size)) / hop_size
+        step_time = hop_size / sample_rate
+
+        # initialize audio2pitch & pitch2midi instances
+        pitchDetect = Audio2Pitch(
+            frameSize=frame_size,
+            sampleRate=sample_rate,
+            pitchConfidenceThreshold=pitch_confidence_threshold,
+            loudnessThreshold=loudness_threshold,
+            maxFrequency=max_frequency,
+            minFrequency=min_frequency,
+        )
+
+        p2m = Pitch2Midi(
+            sampleRate=sample_rate,
+            hopSize=hop_size,
+            midiBufferDuration=0.05,
+        )
+
+        # define estimate bin and some counters
+        estimated = []
+        n = 0
+        time_stamp = 0
+        n_notes = 0
+        # print("Estimated notes:")
+
+        # simulates real-time process
+        for frame in frames:
+            _pitch, _confidence, _loudness, _voiced = pitchDetect(frame)
+            message, midi_note, time_compensation = p2m(_pitch, _voiced)
+            time_stamp += step_time
+            if _voiced:
+                if message:
+                    estimated.append(
+                        [
+                            n_notes,
+                            time_stamp - time_compensation[1],
+                            time_stamp - time_compensation[0],
+                            int(midi_note[1]),
+                        ]
+                    )
+                    # print(
+                    #     f"[{n_notes}][{n}]:{(time_stamp-time_compensation[1]):.3f}, {midi2note(int(midi_note[1]))}({int(midi_note[1])})~{_pitch:.2f}Hz"  # , {time_compensation}, {midi_note}, {message}
+                    # )
+                    if "note_on" in message:
+                        n_notes += 1
+            n += 1
+
+        ## convert note toggle messages to note features
+        expected_notes = numpy.load(
+            join(filedir(), f"pitch2midi/359628__mtg__sax-tenor-d-minor.npy")
+        )
+        # print("Expected notes:")
+        # print(expected_notes)
+
+        # estimate the number of notes for expected and detected
+        n_detected_notes = len(estimated)
+        n_expected_notes = len(expected_notes)
+
+        # estimate the onset error for each note and estimate the mean
+        onset_mse = mean(
+            [square(note[1] - estimated[int(note[0])][1]) for note in expected_notes]
+        )
+
+        # estimate the midi note error for each note and estimate the mean
+        midi_note_mse = mean(
+            [square(note[-1] - estimated[int(note[0])][-1]) for note in expected_notes]
+        )
+
+        # assert outputs
+        onset_tolerance = 0.01
+        self.assertAlmostEqual(n_detected_notes, n_expected_notes, 0)
+        self.assertAlmostEqual(onset_mse, 0, onset_tolerance)
         self.assertAlmostEqual(midi_note_mse, midi_note_mse, 0)
 
 
