@@ -41,9 +41,15 @@ class TestPitch2Midi(TestCase):
         nblocks_for_onset = round(onset_compensation / (hop_size / sample_rate))
         pitches = [pitch] * nblocks_for_onset
         voicings = [1] * nblocks_for_onset
-        expected_message_type = ["note_on"]
+        reference_path = "pitch2midi/test_onset.npy"
 
-        self.runTest(sample_rate, hop_size, pitches, voicings, expected_message_type)
+        self.runTest(
+            sample_rate,
+            hop_size,
+            pitches,
+            voicings,
+            reference_path=reference_path,
+        )
 
     def testUnvoicedFrame(self):
         sample_rate = 44100
@@ -54,9 +60,11 @@ class TestPitch2Midi(TestCase):
         nblocks_for_offset = round(minNoteChangePeriod / (hop_size / sample_rate)) + 1
         pitches = ([440.0] * nblocks_for_onset) + ([0] * nblocks_for_offset)
         voicings = ([1] * nblocks_for_onset) + ([0] * nblocks_for_offset)
-        expected_message_type = ["note_off"]
+        reference_path = "pitch2midi/test_onset.npy"
 
-        self.runTest(sample_rate, hop_size, pitches, voicings, expected_message_type)
+        self.runTest(
+            sample_rate, hop_size, pitches, voicings, reference_path=reference_path
+        )
 
     def testOffset(self):
         sample_rate = 44100
@@ -71,20 +79,22 @@ class TestPitch2Midi(TestCase):
             [pitches[1]] * nblocks_for_offset
         )
         voicings = [1] * (nblocks_for_onset + nblocks_for_offset)
-        expected_message_type = ["note_off", "note_on"]
+        reference_path = "pitch2midi/test_offset.npy"
 
-        self.runTest(sample_rate, hop_size, pitches, voicings, expected_message_type)
+        self.runTest(
+            sample_rate, hop_size, pitches, voicings, reference_path=reference_path
+        )
 
     def testContinuousChromaticSequence(self):
         sample_rate = 44100
         hop_size = 128
         onset_compensation = 0.075
-        minNoteChangePeriod = 0.03
+        min_note_change_period = 0.03
         midi_buffer_duration = 0.015
         min_occurrence_rate = 0.5
         min_occurrence_period = midi_buffer_duration * min_occurrence_rate
         nblocks_for_onset = round(onset_compensation / (hop_size / sample_rate))
-        nblocks_for_offset = round(minNoteChangePeriod / (hop_size / sample_rate))
+        nblocks_for_offset = round(min_note_change_period / (hop_size / sample_rate))
         nblocks_for_transition = round(min_occurrence_period / (hop_size / sample_rate))
         n_notes = 12
         midi_notes = list(range(69, 69 + n_notes))
@@ -96,9 +106,44 @@ class TestPitch2Midi(TestCase):
         pitch_list += [pitch] * (nblocks_for_offset + 1)
         voicings = [1] * n_notes * (nblocks_for_onset + nblocks_for_transition)
         voicings += [0] * (nblocks_for_offset + 2)
-        # print(len(pitch_list), len(voicings))
-        expected_message_type = ["note_off"]
-        self.runTest(sample_rate, hop_size, pitch_list, voicings, expected_message_type)
+        reference_path = "pitch2midi/test_chromatic_sequence.npy"
+        self.runTest(
+            sample_rate, hop_size, pitch_list, voicings, reference_path=reference_path
+        )
+
+    def assessNoteList(
+        self,
+        reference_path: str,
+        estimated: list,
+        n_notes_tolerance: int = 0,
+        onset_tolerance: float = 0.01,
+        midi_note_tolerance: int = 0,
+    ):
+        # read the expected notes file manually annotated
+        expected_notes = numpy.load(join(filedir(), reference_path))
+        # print("Expected notes:")
+        # print(expected_notes)
+
+        ## convert note toggle messages to note features
+
+        # estimate the number of notes for expected and detected
+        n_detected_notes = len(estimated)
+        n_expected_notes = len(expected_notes)
+
+        # estimate the onset error for each note and estimate the mean
+        onset_mse = mean(
+            [square(note[1] - estimated[int(note[0])][1]) for note in expected_notes]
+        )
+
+        # estimate the midi note error for each note and estimate the mean
+        midi_note_mse = mean(
+            [square(note[-1] - estimated[int(note[0])][-1]) for note in expected_notes]
+        )
+
+        # assert outputs
+        self.assertAlmostEqual(n_detected_notes, n_expected_notes, n_notes_tolerance)
+        self.assertAlmostEqual(onset_mse, 0, onset_tolerance)
+        self.assertAlmostEqual(midi_note_mse, midi_note_mse, midi_note_tolerance)
 
     def runTest(
         self,
@@ -106,24 +151,49 @@ class TestPitch2Midi(TestCase):
         hop_size: int,
         pitches: list,
         voicings: list,
-        expected_value: int,
-        expected_idx: int = -1,
+        n_notes_tolerance: int = 0,
+        onset_tolerance: float = 0.01,
+        midi_note_tolerance: int = 0,
+        reference_path: str = "",
     ):
         p2m = Pitch2Midi(sampleRate=sample_rate, hopSize=hop_size)
-        (
-            midi_notes,
-            time_compensations,
-            message_types,
-        ) = ([] for i in range(3))
+
+        step_time = hop_size / sample_rate
+
+        # define estimate bin and some counters
+        estimated = []
+        n = 0
+        time_stamp = 0
+        n_notes = 0
 
         for n, (pitch, voiced) in enumerate(zip(pitches, voicings)):
             message, midi_note, time_compensation = p2m(pitch, voiced)
-            # print(n, message, midi_note, time_compensation)
-            message_types.append(message)
-            midi_notes += [midi_note]
-            time_compensations += [time_compensation]
-        self.assertEqual(message_types[expected_idx], expected_value)
-        # TODO: think in an strategy similar to real cases that assess the number of notes, messages and timestamp tolerance
+            time_stamp += step_time
+            if voiced:
+                if message:
+                    estimated.append(
+                        [
+                            n_notes,
+                            time_stamp - time_compensation[1],
+                            time_stamp - time_compensation[0],
+                            int(midi_note[1]),
+                        ]
+                    )
+                    # print(estimated)
+                    # print(
+                    #     f"[{n_notes}][{n}]:{(time_stamp-time_compensation[1]):.3f}, {midi2note(int(midi_note[1]))}({int(midi_note[1])})~{pitch:.2f}Hz"  # , {time_compensation}, {midi_note}, {message}
+                    # )
+                    if "note_on" in message:
+                        n_notes += 1
+            n += 1
+
+        self.assessNoteList(
+            reference_path,
+            estimated,
+            n_notes_tolerance=n_notes_tolerance,
+            onset_tolerance=onset_tolerance,
+            midi_note_tolerance=midi_note_tolerance,
+        )
 
     def testARealCaseWithEMajorScale(self):
         frame_size = 8192
@@ -212,8 +282,6 @@ class TestPitch2Midi(TestCase):
         else:
             audio = MonoLoader(filename=filename, sampleRate=sample_rate)()
         frames = FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size)
-
-        n_frames = (audio.shape[0] - (frame_size - hop_size)) / hop_size
         step_time = hop_size / sample_rate
 
         # initialize audio2pitch & pitch2midi instances
@@ -241,7 +309,7 @@ class TestPitch2Midi(TestCase):
 
         # simulates real-time process
         for frame in frames:
-            _pitch, _confidence, _loudness, _voiced = pitchDetect(frame)
+            _pitch, _, _, _voiced = pitchDetect(frame)
             message, midi_note, time_compensation = p2m(_pitch, _voiced)
             time_stamp += step_time
             if _voiced:
@@ -261,35 +329,17 @@ class TestPitch2Midi(TestCase):
                         n_notes += 1
             n += 1
 
-        # read the expected notes file manually annotated
-        expected_notes = numpy.load(join(filedir(), reference_path))
-        # print("Expected notes:")
-        # print(expected_notes)
-
-        ## convert note toggle messages to note features
-
-        # estimate the number of notes for expected and detected
-        n_detected_notes = len(estimated)
-        n_expected_notes = len(expected_notes)
-
-        # estimate the onset error for each note and estimate the mean
-        onset_mse = mean(
-            [square(note[1] - estimated[int(note[0])][1]) for note in expected_notes]
+        self.assessNoteList(
+            reference_path,
+            estimated,
+            n_notes_tolerance=n_notes_tolerance,
+            onset_tolerance=onset_tolerance,
+            midi_note_tolerance=midi_note_tolerance,
         )
-
-        # estimate the midi note error for each note and estimate the mean
-        midi_note_mse = mean(
-            [square(note[-1] - estimated[int(note[0])][-1]) for note in expected_notes]
-        )
-
-        # assert outputs
-
-        self.assertAlmostEqual(n_detected_notes, n_expected_notes, n_notes_tolerance)
-        self.assertAlmostEqual(onset_mse, 0, onset_tolerance)
-        self.assertAlmostEqual(midi_note_mse, midi_note_mse, midi_note_tolerance)
 
 
 # TODO: create a new unittest for separated notes to assess offset in a REALCASE!
+# TODO: search for a file in Freesound
 
 suite = allTests(TestPitch2Midi)
 
