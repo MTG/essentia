@@ -117,12 +117,13 @@ class TestPitch2Midi(TestCase):
         estimated: list,
         n_notes_tolerance: int = 0,
         onset_tolerance: float = 0.01,
+        offset_tolerance: float = 0.01,
         midi_note_tolerance: int = 0,
     ):
         # read the expected notes file manually annotated
         expected_notes = numpy.load(join(filedir(), reference_path))
-        # print("Expected notes:")
-        # print(expected_notes)
+        print("Expected notes:")
+        print(expected_notes)
 
         ## convert note toggle messages to note features
 
@@ -132,7 +133,12 @@ class TestPitch2Midi(TestCase):
 
         # estimate the onset error for each note and estimate the mean
         onset_mse = mean(
-            [square(note[1] - estimated[int(note[0])][1]) for note in expected_notes]
+            [square(note[1] - estimated[int(note[0])][0]) for note in expected_notes]
+        )
+
+        # estimate the onset error for each note and estimate the mean
+        offset_mse = mean(
+            [square(note[2] - estimated[int(note[0])][1]) for note in expected_notes]
         )
 
         # estimate the midi note error for each note and estimate the mean
@@ -143,6 +149,7 @@ class TestPitch2Midi(TestCase):
         # assert outputs
         self.assertAlmostEqual(n_detected_notes, n_expected_notes, n_notes_tolerance)
         self.assertAlmostEqual(onset_mse, 0, onset_tolerance)
+        self.assertAlmostEqual(offset_mse, 0, offset_tolerance)
         self.assertAlmostEqual(midi_note_mse, midi_note_mse, midi_note_tolerance)
 
     def runTest(
@@ -153,6 +160,7 @@ class TestPitch2Midi(TestCase):
         voicings: list,
         n_notes_tolerance: int = 0,
         onset_tolerance: float = 0.01,
+        offset_tolerance: float = 0.05,
         midi_note_tolerance: int = 0,
         reference_path: str = "",
     ):
@@ -161,7 +169,7 @@ class TestPitch2Midi(TestCase):
         step_time = hop_size / sample_rate
 
         # define estimate bin and some counters
-        estimated = []
+        nte_list = []
         n = 0
         time_stamp = 0
         n_notes = 0
@@ -171,12 +179,13 @@ class TestPitch2Midi(TestCase):
             time_stamp += step_time
             if voiced:
                 if message:
-                    estimated.append(
+                    nte_list.append(
                         [
                             n_notes,
                             time_stamp - time_compensation[1],
                             time_stamp - time_compensation[0],
                             int(midi_note[1]),
+                            message,
                         ]
                     )
                     # print(estimated)
@@ -187,11 +196,15 @@ class TestPitch2Midi(TestCase):
                         n_notes += 1
             n += 1
 
+        # from the nte_list extracts the note list using note_off messages
+        note_list = self.ntes_to_notes(nte_list)
+
         self.assessNoteList(
             reference_path,
-            estimated,
+            note_list,
             n_notes_tolerance=n_notes_tolerance,
             onset_tolerance=onset_tolerance,
+            offset_tolerance=offset_tolerance,
             midi_note_tolerance=midi_note_tolerance,
         )
 
@@ -203,6 +216,8 @@ class TestPitch2Midi(TestCase):
         pitch_confidence_threshold = 0.25
         min_frequency = 103.83
         max_frequency = 659.26
+        midi_buffer_duration = 0.05
+        min_note_change_period = 0.03
         n_notes_tolerance = 0
         onset_tolerance = 0.01
         midi_note_tolerance = 0
@@ -219,6 +234,8 @@ class TestPitch2Midi(TestCase):
             hop_size=hop_size,
             pitch_confidence_threshold=pitch_confidence_threshold,
             loudness_threshold=loudness_threshold,
+            midi_buffer_duration=midi_buffer_duration,
+            min_note_change_period=min_note_change_period,
             max_frequency=max_frequency,
             min_frequency=min_frequency,
             n_notes_tolerance=n_notes_tolerance,
@@ -234,6 +251,8 @@ class TestPitch2Midi(TestCase):
         pitch_confidence_threshold = 0.25
         min_frequency = 103.83
         max_frequency = 659.26
+        midi_buffer_duration = 0.05
+        min_note_change_period = 0.03
         n_notes_tolerance = 0
         onset_tolerance = 0.01
         midi_note_tolerance = 0
@@ -250,12 +269,53 @@ class TestPitch2Midi(TestCase):
             hop_size=hop_size,
             pitch_confidence_threshold=pitch_confidence_threshold,
             loudness_threshold=loudness_threshold,
+            midi_buffer_duration=midi_buffer_duration,
+            min_note_change_period=min_note_change_period,
             max_frequency=max_frequency,
             min_frequency=min_frequency,
             n_notes_tolerance=n_notes_tolerance,
             onset_tolerance=onset_tolerance,
             midi_note_tolerance=midi_note_tolerance,
         )
+
+    # def testSeparatedNotes(self):
+    #     # 387517__deleted_user_7267864__saxophone-going-up
+    #     frame_size = 8192
+    #     sample_rate = 44100
+    #     hop_size = 64
+    #     loudness_threshold = -40
+    #     pitch_confidence_threshold = 0.75
+    #     min_frequency = 103.83
+    #     max_frequency = 659.26
+    #     midi_buffer_duration = 0.05
+    #     min_note_change_period = 0.01
+    #     n_notes_tolerance = 0
+    #     onset_tolerance = 0.01
+    #     midi_note_tolerance = 0
+
+    #     stem = (
+    #         "387517__deleted_user_7267864__saxophone-going-up"  # "46793__uauaua__mec2"
+    #     )
+    #     audio_path = Path("recorded") / f"{stem}.wav"
+    #     reference_path = Path("pitch2midi") / f"{stem}.npy"
+    #     # TODO: create a reference file
+
+    #     self.runARealCase(
+    #         audio_path=audio_path,
+    #         reference_path=reference_path,
+    #         sample_rate=sample_rate,
+    #         frame_size=frame_size,
+    #         hop_size=hop_size,
+    #         pitch_confidence_threshold=pitch_confidence_threshold,
+    #         loudness_threshold=loudness_threshold,
+    #         max_frequency=max_frequency,
+    #         min_frequency=min_frequency,
+    #         midi_buffer_duration=midi_buffer_duration,
+    #         min_note_change_period=min_note_change_period,
+    #         n_notes_tolerance=n_notes_tolerance,
+    #         onset_tolerance=onset_tolerance,
+    #         midi_note_tolerance=midi_note_tolerance,
+    #     )
 
     def runARealCase(
         self,
@@ -268,8 +328,11 @@ class TestPitch2Midi(TestCase):
         loudness_threshold: float,
         max_frequency: float,
         min_frequency: float,
+        midi_buffer_duration: float,
+        min_note_change_period: float,
         n_notes_tolerance: int = 0,
         onset_tolerance: float = 0.01,
+        offset_tolerance: float = 0.05,
         midi_note_tolerance: int = 0,
     ):
         filename = join(testdata.audio_dir, audio_path)
@@ -297,11 +360,13 @@ class TestPitch2Midi(TestCase):
         p2m = Pitch2Midi(
             sampleRate=sample_rate,
             hopSize=hop_size,
-            midiBufferDuration=0.05,
+            midiBufferDuration=midi_buffer_duration,
+            minNoteChangePeriod=min_note_change_period,
         )
+        print(p2m.parameterNames())
 
         # define estimate bin and some counters
-        estimated = []
+        nte_list = []  # note toggle event list
         n = 0
         time_stamp = 0
         n_notes = 0
@@ -312,34 +377,61 @@ class TestPitch2Midi(TestCase):
             _pitch, _, _, _voiced = pitchDetect(frame)
             message, midi_note, time_compensation = p2m(_pitch, _voiced)
             time_stamp += step_time
-            if _voiced:
-                if message:
-                    estimated.append(
-                        [
-                            n_notes,
-                            time_stamp - time_compensation[1],
-                            time_stamp - time_compensation[0],
-                            int(midi_note[1]),
-                        ]
-                    )
-                    # print(
-                    #     f"[{n_notes}][{n}]:{(time_stamp-time_compensation[1]):.3f}, {midi2note(int(midi_note[1]))}({int(midi_note[1])})~{_pitch:.2f}Hz"  # , {time_compensation}, {midi_note}, {message}
-                    # )
-                    if "note_on" in message:
-                        n_notes += 1
+            # print(n, time_stamp, message, midi_note, time_compensation)
+            if message:
+                nte_list.append(
+                    [
+                        n_notes,
+                        time_stamp - time_compensation[1],
+                        time_stamp - time_compensation[0],
+                        int(midi_note[1]),
+                        message,
+                    ]
+                )
+                print(
+                    f"[{n_notes}][{n}]:{(time_stamp-time_compensation[1]):.3f}, {midi2note(int(midi_note[1]))}({int(midi_note[1])})~{_pitch:.2f}Hz, {message}"  # , {time_compensation}, {midi_note}, {message}
+                )
+                if "note_on" in message:
+                    n_notes += 1
             n += 1
+
+        print(f"nte_list: {nte_list}")
+        # from the nte_list extracts the note list using note_off messages
+        note_list = self.ntes_to_notes(nte_list)
+        print(f"note_list: {note_list}")
 
         self.assessNoteList(
             reference_path,
-            estimated,
+            note_list,
             n_notes_tolerance=n_notes_tolerance,
             onset_tolerance=onset_tolerance,
+            offset_tolerance=offset_tolerance,
             midi_note_tolerance=midi_note_tolerance,
         )
 
+    def ntes_to_notes(self, nte_list: list):
+        note_list = list()
+        for n, nte_message in enumerate(nte_list):
+            if "note_on" in nte_message[4]:
+                # extract time stamp
+                start_time = nte_message[1]
 
-# TODO: create a new unittest for separated notes to assess offset in a REALCASE!
-# TODO: search for a file in Freesound
+                # in some cases the compensation might generate negative values
+                if start_time < 0:
+                    start_time = 0
+
+                # to get the note offset it is need to get time stamps in the next message (note-off)
+                if n + 1 < len(nte_list):  # when a note off message is provided
+                    # define timestamp for offset
+                    end_time = nte_list[n + 1][1]
+                else:  # there is a non-closed note at the end
+                    # define timestamp for offset
+                    end_time = nte_list[-1][1]
+                note = int(nte_message[3])
+                # define annotation in a list
+                note_list.append([float(start_time), float(end_time), note])
+        return note_list
+
 
 suite = allTests(TestPitch2Midi)
 
