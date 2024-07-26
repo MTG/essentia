@@ -46,7 +46,7 @@ void Pitch2Midi::getMidiNoteNumber(Real pitch)
 {
   _detectedPitch = pitch;
     
-  if (pitch <= 0) { _detectedPitch = 1e-05; }
+  if (pitch < 0) { _detectedPitch = 1e-05; }
   int idx = hz2midi(pitch, _tuningFreq);
   _midiNoteNumberTransposed = static_cast<Real>(idx + _transposition);
 }
