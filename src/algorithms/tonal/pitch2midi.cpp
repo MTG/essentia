@@ -36,7 +36,9 @@ void Pitch2Midi::configure()
   _minOcurrenceRatePeriod = _minOcurrenceRate * _bufferDuration;
   _minOcurrenceRateThreshold = _minOcurrenceRatePeriod / _frameTime;
 
-  _capacity = capacity();
+  // estimate buffer capacity
+  int c = static_cast<int>( round( _sampleRate / float(_hopSize) * _bufferDuration ) );
+  _capacity =  max(_minCapacity, c);
   _framebuffer = AlgorithmFactory::create("FrameBuffer");
   _framebuffer->configure("bufferSize", _capacity);
 
@@ -49,14 +51,6 @@ void Pitch2Midi::getMidiNoteNumber(Real pitch)
   if (pitch < 0) { _detectedPitch = 1e-05; }
   int idx = hz2midi(pitch, _tuningFreq);
   _midiNoteNumberTransposed = static_cast<Real>(idx + _transposition);
-}
-
-int Pitch2Midi::capacity()
-{
-  float hopSizeFloat = _hopSize; // ensure no int/int division happens
-  float sampleRateFloat = _sampleRate;
-  int c = static_cast<int>( round( sampleRateFloat / hopSizeFloat * _bufferDuration ) );
-  return max(_minCapacity, c);
 }
 
 // this should NOT be called until framebuffer.compute has been called
