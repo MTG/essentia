@@ -261,6 +261,6 @@ void Pitch2Midi::compute()
   // E_INFO("Compute() -END");
 }
 
-void Pitch2Midi::updateDnote () {
+void Pitch2Midi::updateDnote() {
   dnote = note;
 }
