@@ -75,7 +75,7 @@ namespace standard {
     public:
       Pitch2Midi() : _maxVoted(2), _midiNoteNumberVector(1) {
         declareInput(_pitch, "pitch", "pitch given in Hz for conversion");
-        declareInput(_voiced, "voiced", "whether the frame is voiced or not");
+        declareInput(_voiced, "voiced", "whether the frame is voiced or not, (0, 1)");
         declareOutput(_messageType, "messageType", "the output of MIDI message type, as string, {noteoff, noteon, noteoff-noteon}");
         declareOutput(_midiNoteNumber, "midiNoteNumber", "the output of detected MIDI note number, as integer, in range [0,127]");
         declareOutput(_timeCompensation, "timeCompensation", "time to be compensated in the messages");
