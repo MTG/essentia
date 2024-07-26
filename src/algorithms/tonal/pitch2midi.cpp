@@ -44,15 +44,6 @@ void Pitch2Midi::configure()
 
 }
 
-void Pitch2Midi::getMidiNoteNumber(Real pitch)
-{
-  _detectedPitch = pitch;
-    
-  if (pitch < 0) { _detectedPitch = 1e-05; }
-  int idx = hz2midi(pitch, _tuningFreq);
-  _midiNoteNumberTransposed = static_cast<Real>(idx + _transposition);
-}
-
 // this should NOT be called until framebuffer.compute has been called
 bool Pitch2Midi::hasCoherence()
 {
@@ -143,7 +134,9 @@ void Pitch2Midi::compute()
     throw EssentiaException("Pitch2Midi: specified duration of the input signal must be non-negative");
   }
 
-  getMidiNoteNumber(pitch);
+  _detectedPitch = pitch;
+  if (pitch < 0) { _detectedPitch = 1e-05; }
+  _midiNoteNumberTransposed = hz2midi(_detectedPitch, _tuningFreq) + _transposition;
     
   // refresh note_on and note_off timestamps
   _noteOn = false;
