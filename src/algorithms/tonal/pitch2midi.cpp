@@ -140,7 +140,7 @@ void Pitch2Midi::compute()
     
   // do sanity checks
   if (pitch < 0) {
-    throw EssentiaException("PitchContoursMultiMelody: specified duration of the input signal must be non-negative");
+    throw EssentiaException("Pitch2Midi: specified duration of the input signal must be non-negative");
   }
 
   getMidiNoteNumber(pitch);
