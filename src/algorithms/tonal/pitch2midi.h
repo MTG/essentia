@@ -91,9 +91,9 @@ namespace standard {
         declareParameter("minFrequency", "minimum detectable frequency", "[20,20000]", 60.0);
         declareParameter("minOcurrenceRate", "minimum number of times a midi note has to ocur compared to total capacity", "[0,1]", 0.5);
         declareParameter("midiBufferDuration", "duration in seconds of buffer used for voting in the note toggle detection algorithm", "[0.005,0.5]", 0.015); // 15ms
-        declareParameter("minNoteChangePeriod", "minimum time to wait until a note change is detected", "(0,1]", 0.030);
-        declareParameter("minOnsetCheckPeriod", "minimum time to wait until an onset is detected", "(0,1]", 0.075);
-        declareParameter("minOffsetCheckPeriod", "minimum time to wait until an offset is detected", "(0,1]", 0.2);
+        declareParameter("minNoteChangePeriod", "minimum time to wait until a note change is detected (s)", "(0,1]", 0.030);
+        declareParameter("minOnsetCheckPeriod", "minimum time to wait until an onset is detected (s)", "(0,1]", 0.075);
+        declareParameter("minOffsetCheckPeriod", "minimum time to wait until an offset is detected (s)", "(0,1]", 0.2);
         declareParameter("applyTimeCompensation", "whether to apply time compensation in the timestamp of the note toggle messages.", "{true,false}", true);
         // former Pitch2Midi params
         declareParameter("tuningFrequency", "reference tuning frequency in Hz", "{432,440}", 440);
