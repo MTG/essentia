@@ -125,7 +125,8 @@ class TestPitch2Midi(TestCase):
         print("Expected notes:")
         print(expected_notes)
 
-        ## convert note toggle messages to note features
+        print("\ndiffs")
+        print(array(estimated) - expected_notes[:, 1:])
 
         # estimate the number of notes for expected and detected
         n_detected_notes = len(estimated)
@@ -278,44 +279,45 @@ class TestPitch2Midi(TestCase):
             midi_note_tolerance=midi_note_tolerance,
         )
 
-    # def testSeparatedNotes(self):
-    #     # 387517__deleted_user_7267864__saxophone-going-up
-    #     frame_size = 8192
-    #     sample_rate = 44100
-    #     hop_size = 64
-    #     loudness_threshold = -40
-    #     pitch_confidence_threshold = 0.75
-    #     min_frequency = 103.83
-    #     max_frequency = 659.26
-    #     midi_buffer_duration = 0.05
-    #     min_note_change_period = 0.01
-    #     n_notes_tolerance = 0
-    #     onset_tolerance = 0.01
-    #     midi_note_tolerance = 0
+    def testSeparatedNotes(self):
+        frame_size = 8192
+        sample_rate = 44100
+        hop_size = 32
+        loudness_threshold = -42
+        pitch_confidence_threshold = 0.6
+        min_frequency = 103.83
+        max_frequency = 659.26
+        midi_buffer_duration = 0.05
+        min_note_change_period = 0.03
+        min_offset_period = 0.1
+        n_notes_tolerance = 0
+        onset_tolerance = 0.01
+        midi_note_tolerance = 0
 
-    #     stem = (
-    #         "387517__deleted_user_7267864__saxophone-going-up"  # "46793__uauaua__mec2"
-    #     )
-    #     audio_path = Path("recorded") / f"{stem}.wav"
-    #     reference_path = Path("pitch2midi") / f"{stem}.npy"
-    #     # TODO: create a reference file
+        # TODO: reduce offset period
+        stem = (
+            "387517__deleted_user_7267864__saxophone-going-up"  # "46793__uauaua__mec2"
+        )
+        audio_path = Path("recorded") / f"{stem}.wav"
+        reference_path = Path("pitch2midi") / f"{stem}.npy"
 
-    #     self.runARealCase(
-    #         audio_path=audio_path,
-    #         reference_path=reference_path,
-    #         sample_rate=sample_rate,
-    #         frame_size=frame_size,
-    #         hop_size=hop_size,
-    #         pitch_confidence_threshold=pitch_confidence_threshold,
-    #         loudness_threshold=loudness_threshold,
-    #         max_frequency=max_frequency,
-    #         min_frequency=min_frequency,
-    #         midi_buffer_duration=midi_buffer_duration,
-    #         min_note_change_period=min_note_change_period,
-    #         n_notes_tolerance=n_notes_tolerance,
-    #         onset_tolerance=onset_tolerance,
-    #         midi_note_tolerance=midi_note_tolerance,
-    #     )
+        self.runARealCase(
+            audio_path=audio_path,
+            reference_path=reference_path,
+            sample_rate=sample_rate,
+            frame_size=frame_size,
+            hop_size=hop_size,
+            pitch_confidence_threshold=pitch_confidence_threshold,
+            loudness_threshold=loudness_threshold,
+            max_frequency=max_frequency,
+            min_frequency=min_frequency,
+            midi_buffer_duration=midi_buffer_duration,
+            min_note_change_period=min_note_change_period,
+            min_offset_period=min_offset_period,
+            n_notes_tolerance=n_notes_tolerance,
+            onset_tolerance=onset_tolerance,
+            midi_note_tolerance=midi_note_tolerance,
+        )
 
     def runARealCase(
         self,
@@ -330,6 +332,7 @@ class TestPitch2Midi(TestCase):
         min_frequency: float,
         midi_buffer_duration: float,
         min_note_change_period: float,
+        min_offset_period: float = 0.2,
         n_notes_tolerance: int = 0,
         onset_tolerance: float = 0.01,
         offset_tolerance: float = 0.05,
@@ -362,6 +365,7 @@ class TestPitch2Midi(TestCase):
             hopSize=hop_size,
             midiBufferDuration=midi_buffer_duration,
             minNoteChangePeriod=min_note_change_period,
+            minOffsetCheckPeriod=min_offset_period,
         )
         print(p2m.parameterNames())
 
@@ -432,6 +436,11 @@ class TestPitch2Midi(TestCase):
                 note_list.append([float(start_time), float(end_time), note])
         return note_list
 
+
+# TODO - make a function that plot the pitch curve and the log rectified signal
+# TODO - make a function that plot the log rectified signal and the note toggle events.
+# TODO - it might all together.
+# TODO - use this functions in the real cases to inspect the misalignment between features and signal
 
 suite = allTests(TestPitch2Midi)
 
