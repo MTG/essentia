@@ -19,7 +19,7 @@
 
 
 from essentia_test import *
-from numpy import sin, pi, mean, random, array, float32, square
+from numpy import mean, array, float32, square
 from pathlib import Path
 
 
@@ -98,7 +98,6 @@ class TestPitch2Midi(TestCase):
         nblocks_for_transition = round(min_occurrence_period / (hop_size / sample_rate))
         n_notes = 12
         midi_notes = list(range(69, 69 + n_notes))
-        # print(midi_notes)
         pitches = [midi2hz(note) for note in midi_notes]
         pitch_list = list()
         for pitch in pitches:
@@ -294,10 +293,7 @@ class TestPitch2Midi(TestCase):
         onset_tolerance = 0.01
         midi_note_tolerance = 0
 
-        # TODO: reduce offset period
-        stem = (
-            "387517__deleted_user_7267864__saxophone-going-up"  # "46793__uauaua__mec2"
-        )
+        stem = "387517__deleted_user_7267864__saxophone-going-up"
         audio_path = Path("recorded") / f"{stem}.wav"
         reference_path = Path("pitch2midi") / f"{stem}.npy"
 
@@ -374,7 +370,6 @@ class TestPitch2Midi(TestCase):
         n = 0
         time_stamp = 0
         n_notes = 0
-        # print("Estimated notes:")
 
         # simulates real-time process
         for frame in frames:
@@ -436,11 +431,6 @@ class TestPitch2Midi(TestCase):
                 note_list.append([float(start_time), float(end_time), note])
         return note_list
 
-
-# TODO - make a function that plot the pitch curve and the log rectified signal
-# TODO - make a function that plot the log rectified signal and the note toggle events.
-# TODO - it might all together.
-# TODO - use this functions in the real cases to inspect the misalignment between features and signal
 
 suite = allTests(TestPitch2Midi)
 
