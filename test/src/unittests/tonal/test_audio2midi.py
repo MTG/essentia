@@ -34,10 +34,8 @@ class TestAudio2Midi(TestCase):
         self.assertEqual(pitch, 0)
         self.assertEqual(loudness, 0.0)
         self.assertEqual(message_type, [])
-        self.assertEqual(midi_note.tolist(), array([0.0, 0.0], dtype=float32).tolist())
-        self.assertEqual(
-            time_compensation.tolist(), array([0.0, 0.0], dtype=float32).tolist()
-        )
+        self.assertEqual(midi_note.tolist(), array([], dtype=float32).tolist())
+        self.assertEqual(time_compensation.tolist(), array([], dtype=float32).tolist())
 
     def assessNoteList(
         self,

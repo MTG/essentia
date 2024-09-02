@@ -151,7 +151,6 @@ void Pitch2Midi::compute()
         _noteOff = true;
         updateDnote();
         setOutputs(dnote, 0.0, _minNoteChangePeriod);
-        //E_INFO("offset(unvoiced frame)");
         _unvoicedFrameCounter = 0;
         _offsetCheckCounter = 0;
         _onsetCheckCounter = 0;
