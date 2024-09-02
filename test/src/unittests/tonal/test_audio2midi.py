@@ -97,7 +97,7 @@ class TestAudio2Midi(TestCase):
 
         stem = "359500__mtg__sax-tenor-e-major"
         audio_path = Path("recorded") / f"{stem}.wav"
-        reference_path = Path("pitch2midi") / f"{stem}.npy"
+        reference_path = Path("audio2midi") / f"{stem}.npy"
 
         self.runARealCase(
             audio_path=audio_path,
@@ -132,7 +132,7 @@ class TestAudio2Midi(TestCase):
 
         stem = "359628__mtg__sax-tenor-d-minor"
         audio_path = Path("recorded") / f"{stem}.wav"
-        reference_path = Path("pitch2midi") / f"{stem}.npy"
+        reference_path = Path("audio2midi") / f"{stem}.npy"
 
         self.runARealCase(
             audio_path=audio_path,
@@ -155,20 +155,21 @@ class TestAudio2Midi(TestCase):
         frame_size = 8192
         sample_rate = 44100
         hop_size = 32
-        loudness_threshold = -42
-        pitch_confidence_threshold = 0.6
+        loudness_threshold = -45
+        pitch_confidence_threshold = 0.7
         min_frequency = 103.83
         max_frequency = 659.26
-        midi_buffer_duration = 0.05
-        min_note_change_period = 0.03
-        min_offset_period = 0.1
+        midi_buffer_duration = 0.03
+        min_note_change_period = 0.01
+        min_onset_period = 0.05
+        min_offset_period = 0.015
         n_notes_tolerance = 0
         onset_tolerance = 0.01
         midi_note_tolerance = 0
 
         stem = "387517__deleted_user_7267864__saxophone-going-up"
         audio_path = Path("recorded") / f"{stem}.wav"
-        reference_path = Path("pitch2midi") / f"{stem}.npy"
+        reference_path = Path("audio2midi") / f"{stem}.npy"
 
         self.runARealCase(
             audio_path=audio_path,
@@ -182,6 +183,7 @@ class TestAudio2Midi(TestCase):
             min_frequency=min_frequency,
             midi_buffer_duration=midi_buffer_duration,
             min_note_change_period=min_note_change_period,
+            min_onset_period=min_onset_period,
             min_offset_period=min_offset_period,
             n_notes_tolerance=n_notes_tolerance,
             onset_tolerance=onset_tolerance,
@@ -201,6 +203,7 @@ class TestAudio2Midi(TestCase):
         min_frequency: float,
         midi_buffer_duration: float,
         min_note_change_period: float,
+        min_onset_period: float = 0.075,
         min_offset_period: float = 0.2,
         n_notes_tolerance: int = 0,
         onset_tolerance: float = 0.01,
@@ -225,6 +228,7 @@ class TestAudio2Midi(TestCase):
             hopSize=hop_size,
             midiBufferDuration=midi_buffer_duration,
             minNoteChangePeriod=min_note_change_period,
+            minOnsetCheckPeriod=min_onset_period,
             minOffsetCheckPeriod=min_offset_period,
             pitchConfidenceThreshold=pitch_confidence_threshold,
             loudnessThreshold=loudness_threshold,
