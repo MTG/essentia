@@ -152,15 +152,16 @@ class TestAudio2Midi(TestCase):
     def testSeparatedNotes(self):
         frame_size = 8192
         sample_rate = 44100
-        hop_size = 32
-        loudness_threshold = -45
-        pitch_confidence_threshold = 0.7
+        hop_size = 16
+        loudness_threshold = -50
+        pitch_confidence_threshold = 0.8
         min_frequency = 103.83
         max_frequency = 659.26
-        midi_buffer_duration = 0.03
-        min_note_change_period = 0.01
-        min_onset_period = 0.05
+        midi_buffer_duration = 0.05
+        min_note_change_period = 0.02
+        min_onset_period = 0.015
         min_offset_period = 0.015
+        min_occurrence_rate = 0.05
         n_notes_tolerance = 0
         onset_tolerance = 0.01
         midi_note_tolerance = 0
@@ -183,6 +184,7 @@ class TestAudio2Midi(TestCase):
             min_note_change_period=min_note_change_period,
             min_onset_period=min_onset_period,
             min_offset_period=min_offset_period,
+            min_occurrence_rate=min_occurrence_rate,
             n_notes_tolerance=n_notes_tolerance,
             onset_tolerance=onset_tolerance,
             midi_note_tolerance=midi_note_tolerance,
@@ -203,6 +205,7 @@ class TestAudio2Midi(TestCase):
         min_note_change_period: float,
         min_onset_period: float = 0.075,
         min_offset_period: float = 0.2,
+        min_occurrence_rate: float = 0.5,
         n_notes_tolerance: int = 0,
         onset_tolerance: float = 0.01,
         offset_tolerance: float = 0.05,
@@ -232,6 +235,7 @@ class TestAudio2Midi(TestCase):
             loudnessThreshold=loudness_threshold,
             maxFrequency=max_frequency,
             minFrequency=min_frequency,
+            minOccurrenceRate=min_occurrence_rate,
         )
         print(a2m.parameterNames())
 
