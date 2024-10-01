@@ -15,22 +15,22 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-from six import iteritems
 from . import _essentia
 import essentia
 from . import common as _c
 import sys as _sys
 from ._essentia import keys as algorithmNames, info as algorithmInfo
 from copy import copy
+import os.path
+import json
+
 
 # given an essentia algorithm name, create the corresponding class
-def _create_essentia_class(name, moduleName = __name__):
+def _create_essentia_class(name, meta, moduleName = __name__):
     essentia.log.debug(essentia.EPython, 'Creating essentia.standard class: %s' % name)
 
-    _algoInstance = _essentia.Algorithm(name)
-    _algoDoc = _algoInstance.getDoc()
-    _algoStruct = _algoInstance.getStruct()
-    del _algoInstance
+    _algoDoc = meta[name]['__doc__']
+    _algoStruct = meta[name]['__struct__']
 
     class Algo(_essentia.Algorithm):
         __doc__ = _algoDoc
@@ -45,7 +45,7 @@ def _create_essentia_class(name, moduleName = __name__):
 
         def configure(self, **kwargs):
             # verify that all types match and do any necessary conversions
-            for name, val in iteritems(kwargs):
+            for name, val in iter(kwargs.items()):
                 goalType = self.paramType(name)
 
                 if type(val).__module__ == 'numpy':
@@ -135,8 +135,17 @@ def _create_essentia_class(name, moduleName = __name__):
 
 # load all classes into python
 def _reloadAlgorithms(moduleName = __name__):
-    for name in _essentia.keys():
-        _create_essentia_class(name, moduleName)
+    meta_file = 'standard.meta.json'
+    essentia.log.debug(essentia.EPython, f'Loading __doc__ and __struct__ metadata for essentia.standard from {meta_file}')
+    # Looking for a metadata file in the same directory as `standard.py`
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, meta_file)
+    with open(file_path, 'r') as f:
+        meta = json.load(f)
+
+    for name in algorithmNames():
+        _create_essentia_class(name, meta, moduleName)
+
 
 _reloadAlgorithms()
 

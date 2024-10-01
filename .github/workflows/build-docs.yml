@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: | 
           sudo apt-get update
-          sudo apt-get install -y build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python3-dev python3-numpy-dev python3-numpy python3-yaml python3-six
+          sudo apt-get install -y build-essential libeigen3-dev libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libswresample-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python3-dev python3-numpy-dev python3-numpy python3-yaml
           sudo apt-get install -y doxygen python3-pip pandoc
           pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinx-toolbox nbformat gitpython sphinx-copybutton
           # Install TensorFlow
