@@ -29,7 +29,7 @@ namespace standard {
       Real _minFrequency;
       Real _maxFrequency;
       int _tuningFrequency;
-      Real _pitchConfidenceThreshold, _loudnessThreshold, _minOcurrenceRate;
+      Real _pitchConfidenceThreshold, _loudnessThreshold, _minOccurrenceRate;
       Real _midiBufferDuration;
       Real _minNoteChangePeriod;
       Real _minOnsetCheckPeriod;
@@ -70,7 +70,6 @@ namespace standard {
       }
 
       void declareParameters() {
-        // TODO: revise parameter description
         declareParameter("sampleRate", "sample rate of incoming audio frames", "[8000,inf)", 44100);
         declareParameter("hopSize", "equivalent to I/O buffer size", "[1,inf)", 32);
         // declareParameter("pitchAlgorithm", "pitch algorithm to use", "{pyin,pyin_fft}", "pyin_fft");
@@ -81,7 +80,7 @@ namespace standard {
         declareParameter("pitchConfidenceThreshold", "level of pitch confidence above which note ON/OFF start to be considered", "[0,1]", 0.25);
         declareParameter("loudnessThreshold", "loudness level above/below which note ON/OFF start to be considered, in decibels", "[-inf,0]", -51.0);
         declareParameter("transpositionAmount", "Apply transposition (in semitones) to the detected MIDI notes.", "(-69,50)", 0);
-        declareParameter("minOcurrenceRate", "rate of predominant pitch ocurrence in MidiPool buffer to consider note ON event", "[0,1]", 0.5);
+        declareParameter("minOccurrenceRate", "rate of predominant pitch occurrence in MidiPool buffer to consider note ON event", "[0,1]", 0.5);
         declareParameter("midiBufferDuration", "duration in seconds of buffer used for voting in MidiPool algorithm", "[0.005,0.5]", 0.05); // 15ms
         declareParameter("minNoteChangePeriod", "minimum time to wait until a note change is detected (testing only)", "(0,1]", 0.030);
         declareParameter("minOnsetCheckPeriod", "minimum time to wait until an onset is detected (testing only)", "(0,1]", 0.075);

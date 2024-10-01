@@ -14,7 +14,7 @@ void Pitch2Midi::configure()
   _sampleRate = parameter("sampleRate").toReal();
   _hopSize = parameter("hopSize").toInt();
   _minFrequency = parameter("minFrequency").toReal();
-  _minOcurrenceRate = parameter("minOcurrenceRate").toReal();
+  _minOccurrenceRate = parameter("minOccurrenceRate").toReal();
   _bufferDuration = parameter("midiBufferDuration").toReal();
   _minOnsetCheckPeriod = parameter("minOnsetCheckPeriod").toReal();
   _minOffsetCheckPeriod = parameter("minOffsetCheckPeriod").toReal();
@@ -33,8 +33,8 @@ void Pitch2Midi::configure()
   _offsetCheckCounter = 0;
   _onsetCheckCounter = 0;
     
-  _minOcurrenceRatePeriod = _minOcurrenceRate * _bufferDuration;
-  _minOcurrenceRateThreshold = _minOcurrenceRatePeriod / _frameTime;
+  _minOccurrenceRatePeriod = _minOccurrenceRate * _bufferDuration;
+  _minOccurrenceRateThreshold = _minOccurrenceRatePeriod / _frameTime;
 
   // estimate buffer capacity
   int c = static_cast<int>( round( _sampleRate / float(_hopSize) * _bufferDuration ) );
@@ -219,8 +219,8 @@ void Pitch2Midi::compute()
   if (!hasCoherence() && _NOTED_ON) {
     if (_maxVoted[0] != 0.0) {
       _onsetCheckCounter++;
-      // combines checker with minOcurrenceRate
-      if ((_onsetCheckCounter > _minOcurrenceRateThreshold)){
+      // combines checker with minOccurrenceRate
+      if ((_onsetCheckCounter > _minOccurrenceRateThreshold)){
         _NOTED_ON = true;
         if (note != _maxVoted[0]){  // avoid note slicing effect
             _noteOff = true;
@@ -228,18 +228,18 @@ void Pitch2Midi::compute()
             updateDnote();
             note = _maxVoted[0];
         }
-        //E_INFO("off-onset(" << _maxVoted[0] << ", uncoherent & NOTED): " << _onsetCheckCounter << " - " << _minOcurrenceRateThreshold);
+        //E_INFO("off-onset(" << _maxVoted[0] << ", uncoherent & NOTED): " << _onsetCheckCounter << " - " << _minOccurrenceRateThreshold);
         _offsetCheckCounter = 0;
         _onsetCheckCounter = 0;
       }
     }
     // output the max-voted midi note to avoid unestable midi note numbers
-    setOutputs(_maxVoted[0], _minOcurrenceRatePeriod, _minOcurrenceRatePeriod);
+    setOutputs(_maxVoted[0], _minOccurrenceRatePeriod, _minOccurrenceRatePeriod);
     return;
   }
 
   if (!hasCoherence() && !_NOTED_ON) {
-    if (_maxVoted[1] > _minOcurrenceRate) {
+    if (_maxVoted[1] > _minOccurrenceRate) {
       _onsetCheckCounter++;
 
       if (_onsetCheckCounter > _minOnsetCheckThreshold) {

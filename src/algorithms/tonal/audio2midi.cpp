@@ -21,7 +21,7 @@ void Audio2Midi::configure()
   _pitchConfidenceThreshold = parameter("pitchConfidenceThreshold").toReal();
   _loudnessThreshold = parameter("loudnessThreshold").toReal();
   _transposition = parameter("transpositionAmount").toInt();
-  _minOcurrenceRate = parameter("minOcurrenceRate").toReal();
+  _minOccurrenceRate = parameter("minOccurrenceRate").toReal();
   _midiBufferDuration = parameter("midiBufferDuration").toReal();
   _minNoteChangePeriod = parameter("minNoteChangePeriod").toReal();
   _minOnsetCheckPeriod = parameter("minOnsetCheckPeriod").toReal();
@@ -65,7 +65,7 @@ void Audio2Midi::configure()
   
   _pitch2midi->configure(INHERIT("sampleRate"),
                        INHERIT("hopSize"),
-                       INHERIT("minOcurrenceRate"),
+                       INHERIT("minOccurrenceRate"),
                        INHERIT("applyTimeCompensation"),
                        "minOnsetCheckPeriod", _minOnsetCheckPeriod,
                        "minOffsetCheckPeriod", _minOffsetCheckPeriod,
