@@ -26,7 +26,7 @@ namespace standard {
       Real _sampleRate;
       int _hopSize;
       Real _minFrequency;
-      Real _minOcurrenceRate;
+      Real _minOccurrenceRate;
       Real _minOnsetCheckPeriod;
       Real _minOffsetCheckPeriod;
       Real _minNoteChangePeriod;
@@ -66,8 +66,8 @@ namespace standard {
       int _onsetCheckCounter;
       
       Real _frameTime;
-      Real _minOcurrenceRateThreshold;
-      Real _minOcurrenceRatePeriod;
+      Real _minOccurrenceRateThreshold;
+      Real _minOccurrenceRatePeriod;
 
       // former Pitch2Midi outputs, now interal vars
       Real _midiNoteNumberTransposed;
@@ -89,7 +89,7 @@ namespace standard {
         declareParameter("sampleRate", "Audio sample rate", "[8000,inf)", 44100);
         declareParameter("hopSize", "Pitch Detection analysis hop size in samples, equivalent to I/O buffer size", "[1,inf)", 128);
         declareParameter("minFrequency", "minimum detectable frequency", "[20,20000]", 60.0);
-        declareParameter("minOcurrenceRate", "minimum number of times a midi note has to ocur compared to total capacity", "[0,1]", 0.5);
+        declareParameter("minOccurrenceRate", "minimum number of times a midi note has to ocur compared to total capacity", "[0,1]", 0.5);
         declareParameter("midiBufferDuration", "duration in seconds of buffer used for voting in the note toggle detection algorithm", "[0.005,0.5]", 0.015); // 15ms
         declareParameter("minNoteChangePeriod", "minimum time to wait until a note change is detected (s)", "(0,1]", 0.030);
         declareParameter("minOnsetCheckPeriod", "minimum time to wait until an onset is detected (s)", "(0,1]", 0.075);
