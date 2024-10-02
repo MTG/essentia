@@ -48,12 +48,14 @@ int main(int argc, char* argv[]) {
 
   /////// PARAMS //////////////
   Real sampleRate = 11025.0;
+  int resampleQuality = 4;
 
   AlgorithmFactory& factory = AlgorithmFactory::instance();
 
   Algorithm* audioLoader = factory.create("MonoLoader",
                                           "filename", audioFilename,
-                                          "sampleRate", sampleRate);
+                                          "sampleRate", sampleRate,
+                                          "resampleQuality", resampleQuality);
 
   Algorithm* tempoCNN = factory.create("TempoCNN",
                                         "graphFilename", graphFilePath);
