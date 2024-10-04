@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
   string outputFilename = argv[2];
 
   // define graphFilePath
-  string graphFilePath = argv[3]
+  string graphFilePath = argv[3];
 
   // register the algorithms in the factory(ies)
   essentia::init();
