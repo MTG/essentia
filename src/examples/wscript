@@ -43,6 +43,7 @@ example_sources_fileio = [
     ('standard_loudnessebur128_double_input', ),
     ('standard_saturationdetector', ),
     ('standard_snr', ),
+    ('standard_tempo_cnn',),
     ('standard_welch', ),
     ('streaming_humdetector', ),
 
