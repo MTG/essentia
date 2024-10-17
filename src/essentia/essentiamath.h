@@ -766,13 +766,12 @@ inline int note2octave(std::string note) {
 
 inline std::string midi2note(int midiNoteNumber) {
   std::string NOTES[] = {ALL_NOTES};
-  //int nNotes = NOTES.size();
   int nNotes = *(&NOTES + 1) - NOTES;
   int CIdx = 3;
   int diffCIdx = nNotes - CIdx;
   int noteIdx = midiNoteNumber - 69;
   int idx = abs(noteIdx) % nNotes;
-  int octave = (CIdx + 1) + floor((noteIdx + diffCIdx) / nNotes);
+  int octave = (CIdx + 1) + floor(float(noteIdx + diffCIdx) / nNotes);
   if (noteIdx < 0) {
     idx = abs(idx - nNotes) % nNotes;
   }

@@ -1,5 +1,5 @@
 #!/bin/sh
-
+set -e
 
 # update Essentia version number in the Doxyfile
 cp doc/Doxyfile doc/Doxyfile.tmp
