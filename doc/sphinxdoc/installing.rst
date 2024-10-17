@@ -87,7 +87,7 @@ Install prerequisites::
 
 Install Essentia's dependencies::
 
-  brew install eigen libyaml fftw ffmpeg libsamplerate libtag tensorflow
+  brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag chromaprint tensorflow
 
 `Install Python environment using Homebrew <http://docs.python-guide.org/en/latest/starting/install/osx>`_ (Note that you are advised to do as described here and there are `good reasons to do so <http://docs.python-guide.org/en/latest/starting/install/osx/>`_. You will most probably encounter installation errors when using Python/NumPy preinstalled with macOS.)::
 
