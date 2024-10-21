@@ -76,6 +76,10 @@ int main(int argc, char* argv[]) {
   tempoCNN->output("localTempoProbabilities").set(localTempoProbabilities);
   tempoCNN->compute();
 
+  pool.add("tempoCNN.global_tempo", globalTempo);
+  pool.add("tempoCNN.localTempo", localTempo);
+  pool.add("tempoCNN.localTempoProbabilities", localTempoProbabilities);
+
   // output results
   cout << "------------- writing results to file " << outputFilename << " -------------" << endl;
 
