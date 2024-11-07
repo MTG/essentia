@@ -102,30 +102,5 @@ void Audio2Midi::compute()
   // E_INFO("sax2midi: a2p compute");
   _pitch2midi->compute();
   // E_INFO("sax2midi: p2m compute");
-  
-  // TODO: assign outputs
-    
-  // set outputs
-  // get pitchMessage from log_message_formatter
-  /*pitchMessage = _formatter->pitch_loudness(midiNoteNumber, pitch, pitchConfidence, loudness);
 
-  switch (messageType)
-  {
-  case 0:
-    noteOffMessage = _formatter->note_off(midiNoteNumber, offsetTimeCompensation);
-    break;
-  case 1:
-    noteOnMessage = _formatter->note_on(midiNoteNumber, pitch, pitchConfidence, onsetTimeCompensation);
-    break;
-  case 2:
-    noteOffMessage = _formatter->note_off(previousMidiNoteNumber, offsetTimeCompensation);
-    noteOnMessage = _formatter->note_on(midiNoteNumber, pitch, pitchConfidence, onsetTimeCompensation);
-    break;
-  default:
-    noteOnMessage = "";
-    noteOffMessage = "";
-    break;
-  }*/
-
-  // E_INFO("sax2midi compute is done");
 }
