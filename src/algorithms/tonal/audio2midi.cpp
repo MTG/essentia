@@ -36,13 +36,13 @@ void Audio2Midi::configure()
       _frameSize = 4096;
       break;
     case 44100:
-      _frameSize = _fixedFrameSize;
+      _frameSize = 8192;
       break;
     case 48000:
-      _frameSize = _fixedFrameSize;
+      _frameSize = 8192;
       break;
     default:
-      _frameSize = _fixedFrameSize;
+      _frameSize = 8192;
   }
 
   _applyTimeCompensation = parameter("applyTimeCompensation").toBool();

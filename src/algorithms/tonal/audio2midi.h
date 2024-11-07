@@ -22,7 +22,6 @@ namespace standard {
 
       Real _sampleRate;
       int _frameSize;
-      int _fixedFrameSize = 8192;
       int _hopSize;
       std::string _pitchAlgorithm = "pitchyinfft";
       std::string _loudnessAlgorithm = "rms";
