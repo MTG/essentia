@@ -28,21 +28,14 @@ void Audio2Midi::configure()
   _minOffsetCheckPeriod = parameter("minOffsetCheckPeriod").toReal();
   
   // define frameSize depending on sampleRate
-  switch (static_cast<int>(_sampleRate)) {
-    case 16000:
-      _frameSize = 2048;
-      break;
-    case 24000:
-      _frameSize = 4096;
-      break;
-    case 44100:
-      _frameSize = 8192;
-      break;
-    case 48000:
-      _frameSize = 8192;
-      break;
-    default:
-      _frameSize = 8192;
+  if (static_cast<int>(_sampleRate) <= 16000){
+    _frameSize = 2048;
+  }
+  else if (static_cast<int>(_sampleRate) <= 24000){
+    _frameSize = 4096;
+  }
+  else {
+    _frameSize = 8192;
   }
 
   _applyTimeCompensation = parameter("applyTimeCompensation").toBool();
