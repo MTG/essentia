@@ -42,7 +42,7 @@ void Audio2Midi::configure()
 
   if (_frameSize > _sampleRate * 0.5)
   {
-    throw EssentiaException("Sax2Pitch: Frame size cannot be higher than Nyquist frequency");
+    throw EssentiaException("Audio2Midi: Frame size cannot be higher than Nyquist frequency");
   }
 
   _lowpass->configure(INHERIT("sampleRate"),
