@@ -6,7 +6,7 @@ using namespace standard;
 
 const char *Audio2Midi::name = "Audio2Midi";
 const char *Audio2Midi::category = "Pitch";
-const char *Audio2Midi::description = DOC("Wrapper around Audio2Pitch and Pitch2Midi for real time application");
+const char *Audio2Midi::description = DOC("Wrapper around Audio2Pitch and Pitch2Midi for real time application. This algorithm has a state that is used to estimate note on/off events based on consequent compute() calls.");
 
 void Audio2Midi::configure()
 {
