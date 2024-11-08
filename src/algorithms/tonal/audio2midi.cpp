@@ -11,10 +11,7 @@ const char *Audio2Midi::description = DOC("Wrapper around Audio2Pitch and Pitch2
 void Audio2Midi::configure()
 {
   _sampleRate = parameter("sampleRate").toReal();
-  // _frameSize = parameter("frameSize").toInt();
   _hopSize = parameter("hopSize").toInt();
-  // _pitchAlgorithm = parameter("pitchAlgorithm").toString();
-  // _loudnessAlgorithm = parameter("loudnessAlgorithm").toString();
   _minFrequency = parameter("minFrequency").toReal();
   _maxFrequency = parameter("maxFrequency").toReal();
   _tuningFrequency = parameter("tuningFrequency").toInt();
@@ -92,15 +89,9 @@ void Audio2Midi::compute()
   _pitch2midi->output("timeCompensation").set(timeCompensation);
   _pitch2midi->output("messageType").set(messageType);
     
-  // E_INFO("\nsax2midi: algorithm inputs and outputs set");
   _lowpass->compute();
-  // E_INFO("sax2midi: lp compute");
   _framebuffer->compute();
-  // E_INFO("sax2midi: framebuffer compute");
-  // std::cout << "frame: \n" << frame << "\nanalysisFrame: \n" << analysisFrame << "\n";
   _audio2pitch->compute();
-  // E_INFO("sax2midi: a2p compute");
   _pitch2midi->compute();
-  // E_INFO("sax2midi: p2m compute");
 
 }
