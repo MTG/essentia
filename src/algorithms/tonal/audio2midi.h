@@ -71,8 +71,6 @@ namespace standard {
       void declareParameters() {
         declareParameter("sampleRate", "sample rate of incoming audio frames", "[8000,inf)", 44100);
         declareParameter("hopSize", "equivalent to I/O buffer size", "[1,inf)", 32);
-        // declareParameter("pitchAlgorithm", "pitch algorithm to use", "{pyin,pyin_fft}", "pyin_fft");
-        // declareParameter("loudnessAlgorithm", "loudness algorithm to use", "{loudness,rms}", "rms");
         declareParameter("minFrequency", "minimum frequency to detect in Hz", "[10,20000]", 60.0);
         declareParameter("maxFrequency", "maximum frequency to detect in Hz", "[10,20000]", 2300.0);
         declareParameter("tuningFrequency", "tuning frequency for semitone index calculation, corresponding to A3 [Hz]", "{432,440}", 440);
