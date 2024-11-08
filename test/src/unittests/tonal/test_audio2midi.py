@@ -88,9 +88,13 @@ class TestAudio2Midi(TestCase):
         min_frequency = 103.83
         max_frequency = 659.26
         midi_buffer_duration = 0.05
+        min_onset_period = 0.075
+        min_offset_period = 0.2
+        min_occurrence_rate = 0.5
         min_note_change_period = 0.03
         n_notes_tolerance = 0
         onset_tolerance = 0.01
+        offset_tolerance = 0.05
         midi_note_tolerance = 0
 
         stem = "359500__mtg__sax-tenor-e-major"
@@ -109,8 +113,12 @@ class TestAudio2Midi(TestCase):
             min_note_change_period=min_note_change_period,
             max_frequency=max_frequency,
             min_frequency=min_frequency,
+            min_onset_period=min_onset_period,
+            min_offset_period=min_offset_period,
+            min_occurrence_rate=min_occurrence_rate,
             n_notes_tolerance=n_notes_tolerance,
             onset_tolerance=onset_tolerance,
+            offset_tolerance=offset_tolerance,
             midi_note_tolerance=midi_note_tolerance,
         )
 
@@ -123,9 +131,13 @@ class TestAudio2Midi(TestCase):
         min_frequency = 103.83
         max_frequency = 659.26
         midi_buffer_duration = 0.05
+        min_onset_period = 0.075
+        min_offset_period = 0.2
+        min_occurrence_rate = 0.5
         min_note_change_period = 0.03
         n_notes_tolerance = 0
         onset_tolerance = 0.01
+        offset_tolerance = 0.05
         midi_note_tolerance = 0
 
         stem = "359628__mtg__sax-tenor-d-minor"
@@ -141,11 +153,15 @@ class TestAudio2Midi(TestCase):
             pitch_confidence_threshold=pitch_confidence_threshold,
             loudness_threshold=loudness_threshold,
             midi_buffer_duration=midi_buffer_duration,
+            min_onset_period=min_onset_period,
+            min_offset_period=min_offset_period,
+            min_occurrence_rate=min_occurrence_rate,
             min_note_change_period=min_note_change_period,
             max_frequency=max_frequency,
             min_frequency=min_frequency,
             n_notes_tolerance=n_notes_tolerance,
             onset_tolerance=onset_tolerance,
+            offset_tolerance=offset_tolerance,
             midi_note_tolerance=midi_note_tolerance,
         )
 
@@ -164,6 +180,7 @@ class TestAudio2Midi(TestCase):
         min_occurrence_rate = 0.05
         n_notes_tolerance = 0
         onset_tolerance = 0.01
+        offset_tolerance = 0.05
         midi_note_tolerance = 0
 
         stem = "387517__deleted_user_7267864__saxophone-going-up"
@@ -187,6 +204,7 @@ class TestAudio2Midi(TestCase):
             min_occurrence_rate=min_occurrence_rate,
             n_notes_tolerance=n_notes_tolerance,
             onset_tolerance=onset_tolerance,
+            offset_tolerance=offset_tolerance,
             midi_note_tolerance=midi_note_tolerance,
         )
 
@@ -203,13 +221,13 @@ class TestAudio2Midi(TestCase):
         min_frequency: float,
         midi_buffer_duration: float,
         min_note_change_period: float,
-        min_onset_period: float = 0.075,
-        min_offset_period: float = 0.2,
-        min_occurrence_rate: float = 0.5,
-        n_notes_tolerance: int = 0,
-        onset_tolerance: float = 0.01,
-        offset_tolerance: float = 0.05,
-        midi_note_tolerance: int = 0,
+        min_onset_period: float,
+        min_offset_period: float,
+        min_occurrence_rate: float,
+        n_notes_tolerance: int,
+        onset_tolerance: float,
+        offset_tolerance: float,
+        midi_note_tolerance: int,
     ):
         filename = join(testdata.audio_dir, audio_path)
         if sys.platform == "darwin":
