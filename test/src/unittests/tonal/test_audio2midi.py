@@ -255,7 +255,6 @@ class TestAudio2Midi(TestCase):
             minFrequency=min_frequency,
             minOccurrenceRate=min_occurrence_rate,
         )
-        print(a2m.parameterNames())
 
         # define estimate bin and some counters
         nte_list = []  # note toggle event list
