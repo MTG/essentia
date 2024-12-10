@@ -41,45 +41,45 @@ void StereoResample::configure() {
   _quality = parameter("quality").toInt();
   _factor = parameter("outputSampleRate").toReal() / parameter("inputSampleRate").toReal();
 
-  // check to make sure Real is typedef'd as float
-  if (sizeof(Real) != sizeof(float)) {
-    throw EssentiaException("Resample: Error, Essentia has to be compiled with Real=float for resampling to work.");
-  }
+  // create and configure algorithms
+  _stereoDemuxer = AlgorithmFactory::create("StereoDemuxer");
+  _stereoMuxer = AlgorithmFactory::create("StereoMuxer");
+  _resample = AlgorithmFactory::create("Resample");
+
+  _resample->configure(INHERIT("inputSampleRate"),
+                       INHERIT("outputSampleRate"),
+                       INHERIT("quality"));
 }
 
 void StereoResample::compute() {
   const std::vector<StereoSample>& signal = _signal.get();
   std::vector<StereoSample>& resampled = _resampled.get();
 
-  if (_factor == 1.0) {
-    resampled = signal;
-    return;
-  }
+  // compute resampling for left and right channel
+  _stereoDemuxer->input("audio").set(signal);
+  _stereoDemuxer->output("left").set(_leftStorage);
+  _stereoDemuxer->output("right").set(_rightStorage);
 
-  if (signal.empty()) return;
+  _resample->input("signal").set(_leftStorage);
+  _resample->output("signal").set(_left);
 
-  SRC_DATA src;
-  src.input_frames = (long)signal.size();
-  src.data_in = const_cast<float*>(&(signal[0]));
+  _stereoDemuxer->compute();
+  _resample->compute();
 
-  // add some samples to make sure we don't crash in a stupid way...
-  src.output_frames = (long)((double)signal.size()*_factor + 100.0);
-  resampled.resize(src.output_frames);
-  src.data_out = &(resampled[0]);
+  _resample->input("signal").set(_rightStorage);
+  _resample->output("signal").set(_right);
 
-  src.src_ratio = _factor;
+  _stereoMuxer->input("left").set(_left);
+  _stereoMuxer->input("right").set(_right);
+  _stereoMuxer->output("audio").set(resampled);
 
-  // do the conversion
-  int error = src_simple(&src, _quality, 2);
-
-  if (error) throw EssentiaException("Resample: Error in resampling: ", src_strerror(error));
-
-  resampled.resize(src.output_frames_gen);
+  _resample->compute();
+  _stereoMuxer->compute();
 }
 
 } // namespace standard
 } // namespace essentia
-
+/*
 namespace essentia {
 namespace streaming {
 
@@ -217,3 +217,4 @@ void StereoResample::reset() {
 
 } // namespace streaming
 } // namespace essentia
+*/

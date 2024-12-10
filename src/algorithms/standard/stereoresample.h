@@ -20,8 +20,8 @@
 #ifndef ESSENTIA_STEREORESAMPLE_H
 #define ESSENTIA_STEREORESAMPLE_H
 
-#include <samplerate.h>
-#include "algorithm.h"
+//#include "algorithm.h"
+#include "algorithmfactory.h"
 
 namespace essentia {
 namespace standard {
@@ -30,12 +30,20 @@ class StereoResample : public Algorithm {
 
  protected:
   Input<std::vector<StereoSample> > _signal;
-  Output<std::vector<StereoSample> > _StereoResampled;
+  Output<std::vector<StereoSample> > _resampled;
+  Algorithm* _stereoDemuxer;
+  Algorithm* _stereoMuxer;
+  Algorithm* _resample;
+
+  double _factor;
+  int _quality;
+  std::vector<Real> _left, _right;
+  std::vector<Real> _leftStorage, _rightStorage;
 
  public:
   StereoResample() {
-    declareInput(_signal, "signal", "the input signal");
-    declareOutput(_StereoResampled, "signal", "the StereoResampled signal");
+    declareInput(_signal, "signal", "the input stereo signal");
+    declareOutput(_resampled, "signal", "the resampled stereo signal");
   }
 
   void declareParameters() {
@@ -45,16 +53,13 @@ class StereoResample : public Algorithm {
   }
 
   void configure();
-
   void compute();
+  void reset();
 
   static const char* name;
   static const char* category;
   static const char* description;
 
- protected:
-  double _factor;
-  int _quality;
 };
 
 } // namespace standard
@@ -71,15 +76,15 @@ class StereoResample : public Algorithm {
  protected:
   Sink<StereoSample> _signal;
   Source<StereoSample> _resampled;
+
+  Algorithm* _stereoDemuxer;
+  Algorithm* _stereoMuxer;
+  Algorithm* _resample;
+
   int _preferredSize;
 
-  SRC_STATE* _state;
-  SRC_DATA _data;
-  int _errorCode;
-  float _delay;
-
  public:
-  StereoResample() : _state(0) {
+  StereoResample() {
     _preferredSize = 4096; // arbitrary
     declareInput(_signal, _preferredSize, "signal", "the input stereo signal");
     declareOutput(_resampled, _preferredSize, "signal", "the stereo resampled signal");
@@ -88,7 +93,11 @@ class StereoResample : public Algorithm {
     //_StereoResampled.setBufferType(BufferUsage::forAudioStream);
   }
 
-  ~StereoResample();
+  ~StereoResample(){
+    if (_stereoDemuxer) delete _stereoDemuxer;
+    if (_stereoMuxer) delete _stereoMuxer;
+    if (_resample) delete _resample;
+  };
 
   void declareParameters() {
     declareParameter("inputSampleRate", "the sampling rate of the input stereo signal [Hz]", "(0,inf)", 44100.);
