@@ -30,7 +30,7 @@ class StereoResample : public Algorithm {
 
  protected:
   Input<std::vector<StereoSample> > _signal;
-  Output<std::vector<StereoSample> > _StereoResampled;
+  Output<std::vector<StereoSample> > _resampled;
 
  public:
   StereoResample() {
