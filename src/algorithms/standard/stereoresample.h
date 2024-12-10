@@ -35,7 +35,7 @@ class StereoResample : public Algorithm {
  public:
   StereoResample() {
     declareInput(_signal, "signal", "the input signal");
-    declareOutput(_StereoResampled, "signal", "the StereoResampled signal");
+    declareOutput(_resampled, "signal", "the StereoResampled signal");
   }
 
   void declareParameters() {
