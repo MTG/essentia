@@ -65,13 +65,17 @@ class StereoResample : public Algorithm {
 } // namespace standard
 } // namespace essentia
 
-
-#include "streamingalgorithm.h"
+/*
+//#include "streamingalgorithm.h"
+#include "streamingalgorithmcomposite.h"
+#include "pool.h"
+#include "algorithm.h"
+#include "network.h"
 
 namespace essentia {
 namespace streaming {
 
-class StereoResample : public Algorithm {
+class StereoResample : public AlgorithmComposite {
 
  protected:
   Sink<StereoSample> _signal;
@@ -81,23 +85,16 @@ class StereoResample : public Algorithm {
   Algorithm* _stereoMuxer;
   Algorithm* _resample;
 
+  scheduler::Network* _network;
+
+  bool _configured;
   int _preferredSize;
 
+  void clearAlgos();
+
  public:
-  StereoResample() {
-    _preferredSize = 4096; // arbitrary
-    declareInput(_signal, _preferredSize, "signal", "the input stereo signal");
-    declareOutput(_resampled, _preferredSize, "signal", "the stereo resampled signal");
-
-    // useless as we do it anyway in the configure() method
-    //_StereoResampled.setBufferType(BufferUsage::forAudioStream);
-  }
-
-  ~StereoResample(){
-    if (_stereoDemuxer) delete _stereoDemuxer;
-    if (_stereoMuxer) delete _stereoMuxer;
-    if (_resample) delete _resample;
-  };
+  StereoResample();
+  ~StereoResample();
 
   void declareParameters() {
     declareParameter("inputSampleRate", "the sampling rate of the input stereo signal [Hz]", "(0,inf)", 44100.);
@@ -106,12 +103,42 @@ class StereoResample : public Algorithm {
   }
 
   void configure();
-  AlgorithmStatus process();
+  //AlgorithmStatus process();
   void reset();
+  void createInnerNetwork();
 
   static const char* name;
   static const char* category;
   static const char* description;
+
+};
+
+} // namespace streaming
+} // namespace essentia
+*/
+
+
+#include "streamingalgorithmwrapper.h"
+
+namespace essentia {
+namespace streaming {
+
+class StereoResample : public StreamingAlgorithmWrapper {
+
+ protected:
+  Sink<std::vector<StereoSample> > _signal;
+  Source<std::vector<StereoSample> > _resampled;
+
+ public:
+
+  StereoResample() {
+    declareAlgorithm("StereoResample");
+    declareInput(_signal, TOKEN, "signal");
+    declareOutput(_resampled, TOKEN, "signal");
+
+    // useless as we do it anyway in the configure() method
+    //_StereoResampled.setBufferType(BufferUsage::forAudioStream);
+  }
 
 };
 

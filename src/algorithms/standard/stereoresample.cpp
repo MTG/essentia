@@ -36,10 +36,8 @@ const char* StereoResample::description = DOC("This algorithm resamples the inpu
 "  http://en.wikipedia.org/wiki/Resampling\n\n"
 "  [3] http://www.mega-nerd.com/SRC/api_misc.html#Converters");
 
-
 void StereoResample::configure() {
-  _quality = parameter("quality").toInt();
-  _factor = parameter("outputSampleRate").toReal() / parameter("inputSampleRate").toReal();
+  //_quality = parameter("quality").toInt();
 
   // create and configure algorithms
   _stereoDemuxer = AlgorithmFactory::create("StereoDemuxer");
@@ -79,6 +77,8 @@ void StereoResample::compute() {
 
 } // namespace standard
 } // namespace essentia
+
+
 /*
 namespace essentia {
 namespace streaming {
@@ -86,133 +86,56 @@ namespace streaming {
 const char* StereoResample::name = standard::StereoResample::name;
 const char* StereoResample::description = standard::StereoResample::description;
 
-// NOTE: streaming process differs slightly from the standard in that there is a transport delay inside the streaming version of the SRC converter: http://www.mega-nerd.com/SRC/faq.html#Q006. For this reason less amount of samples than the expected are found and thus the zeropadding at the end.
+StereoResample::StereoResample() : _configured(false) {
+  _preferredSize = 4096; // arbitrary
+  declareInput(_signal, _preferredSize, "signal", "the input stereo signal");
+  declareOutput(_resampled, _preferredSize, "signal", "the stereo resampled signal");
 
-StereoResample::~StereoResample() {
-  if (_state) src_delete(_state);
+  createInnerNetwork();
+}
+
+void StereoResample::createInnerNetwork(){
+  AlgorithmFactory& factory = AlgorithmFactory::instance();
+  _stereoDemuxer = AlgorithmFactory::create("StereoDemuxer");
+  _stereoMuxer = AlgorithmFactory::create("StereoMuxer");
+  _resample = AlgorithmFactory::create("Resample");
+
+  _resample->configure(INHERIT("inputSampleRate"),
+                       INHERIT("outputSampleRate"),
+                       INHERIT("quality"));
+
+  // wire algorithms
+  _signal >> _stereoDemuxer->input("audio");
+  _stereoDemuxer->output("left") >> _resample->input("signal");
+  _resample->output("signal") >> _stereoMuxer->input("left");
+  _stereoDemuxer->output("right") >> _resample->input("signal");
+  _resample->output("signal") >> _stereoMuxer->input("right");
+  _stereoMuxer->output("audio") >> _resampled;
+
+  // create network
+  _network = new scheduler::Network(_stereoDemuxer);
 }
 
 void StereoResample::configure() {
-  int quality = parameter("quality").toInt();
-  Real factor = parameter("outputSampleRate").toReal() / parameter("inputSampleRate").toReal();
+  // TODO: initialize algorithms
+  // TODO: create network
+  // create and configure algorithms
+  _stereoDemuxer = AlgorithmFactory::create("StereoDemuxer");
+  _stereoMuxer = AlgorithmFactory::create("StereoMuxer");
+  _resample = AlgorithmFactory::create("Resample");
 
-  if (_state) src_delete(_state);
-  int nChannels = 2;
-  _state = src_new(quality, nChannels, &_errorCode);
-
-  _data.src_ratio = factor;
-
-  reset();
-}
-
-AlgorithmStatus StereoResample::process() {
-  EXEC_DEBUG("process()");
-
-  EXEC_DEBUG("Trying to acquire data");
-  AlgorithmStatus status = acquireData();
-
-  if (status != OK) {
-    // FIXME: are we sure this still works?
-    // if status == NO_OUTPUT, we should temporarily stop the resampler,
-    // return from this function so its dependencies can process the frames,
-    // and reschedule the framecutter to run when all this is done.
-    if (status == NO_OUTPUT) {
-      EXEC_DEBUG("no more output available for resampling; mark it for rescheduling and return");
-      //_reschedule = true;
-      return NO_OUTPUT; // if the buffer is full, we need to have produced something!
-    }
-
-    // if shouldStop is true, that means there is no more audio, so we need
-    // to take what's left to fill in the output, instead of waiting for more
-    // data to come in (which would have done by returning from this function)
-    if (!shouldStop()) return NO_INPUT;
-
-    int available = input("signal").available();
-    EXEC_DEBUG("There are " << available << " available tokens");
-    if (available == 0) return NO_INPUT;
-
-    input("signal").setAcquireSize(available);
-    input("signal").setReleaseSize(available);
-    output("signal").setAcquireSize((int)(_data.src_ratio * available + 100 + (int)_delay));
-    _data.end_of_input = 1;
-
-    return process();
-  }
-
-  EXEC_DEBUG("data acquired");
-
-  const vector<StereoSample>& signal = _signal.tokens();
-  vector<StereoSample>& resampled = _resampled.tokens();
-
-  EXEC_DEBUG("signal size:" << signal.size());
-  EXEC_DEBUG("resampled size:" << resampled.size());
-
-  _data.data_in = const_cast<float*>(&(signal[0]));
-  _data.input_frames = (long)signal.size();
-
-  _data.data_out = &(resampled[0]);
-  _data.output_frames = (long)resampled.size();
-
-
-  if (_data.src_ratio == 1.0) {
-    assert(_data.output_frames >= _data.input_frames);
-    fastcopy(_data.data_out, _data.data_in, _data.input_frames);
-    _data.input_frames_used = _data.input_frames;
-    _data.output_frames_gen = _data.input_frames;
-  }
-  else {
-    int error = src_process(_state, &_data);
-
-    if (error) {
-      throw EssentiaException("Resample: ", src_strerror(error));
-    }
-
-    if (_data.input_frames_used == 0) {
-      throw EssentiaException("Resample: Internal consumption problem while resampling");
-    }
-  }
-
-  EXEC_DEBUG("input frames:" << _data.input_frames_used);
-  EXEC_DEBUG("produced:" << _data.output_frames_gen);
-
-  _delay += (Real)_data.input_frames_used*_data.src_ratio - (Real)_data.output_frames_gen;
-
-  assert((int)resampled.size() >= _data.output_frames_gen);
-  assert((int)signal.size() >= _data.input_frames_used);
-
-  _signal.setReleaseSize(_data.input_frames_used);
-  _resampled.setReleaseSize(_data.output_frames_gen);
-
-  releaseData();
-
-  EXEC_DEBUG("released");
-
-  return OK;
+  _resample->configure(INHERIT("inputSampleRate"),
+                       INHERIT("outputSampleRate"),
+                       INHERIT("quality"));
 }
 
 void StereoResample::reset() {
-  Algorithm::reset();
-  _data.end_of_input = 0;
-  _delay = 0;
+  clearAlgos();
+}
 
-  // make sure to reset I/O sizes, failure to do this causes inconsitent behavior with libsamplerate
-  // my theory is that because the signal is being chopped up in different intervals than before,
-  // the sampling is performed differently
-  _signal.setAcquireSize(_preferredSize);
-  _signal.setReleaseSize(_preferredSize);
-  _resampled.setAcquireSize(_preferredSize);
-  _resampled.setReleaseSize(_preferredSize);
-
-  int maxElementsAtOnce = (int)(_data.src_ratio * _signal.acquireSize()) + 100;
-  _resampled.setAcquireSize(maxElementsAtOnce);
-
-  BufferInfo buf;
-  buf.size = maxElementsAtOnce * 32;
-  buf.maxContiguousElements = maxElementsAtOnce*2;
-  _resampled.setBufferInfo(buf);
-
-  int error = src_reset(_state);
-  if (error) throw EssentiaException("StereoResample: ", src_strerror(error));
+void StereoResample::clearAlgos() {
+  if (!_configured) return;
+  delete _network;
 }
 
 } // namespace streaming
