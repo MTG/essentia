@@ -27,7 +27,7 @@ using namespace standard;
 const char* PitchContoursMultiMelody::name = "PitchContoursMultiMelody";
 const char* PitchContoursMultiMelody::category = "Pitch";
 const char* PitchContoursMultiMelody::description = DOC("This algorithm post-processes a set of pitch contours into a sequence of mutliple f0 values in Hz.\n"
-"This algorithm is intended to receive its \"contoursBins\", \"contoursSaliences\", and \"contoursStartTimes\" inputs from the PitchContours algorithm. The \"duration\" input corresponds to the time duration of the input signal. The output is a vector of estimated pitch values\n"
+"This algorithm is intended to receive its \"contoursBins\", \"contoursSaliences\", and \"contoursStartTimes\" inputs from the PitchContours algorithm. The \"duration\" input corresponds to the time duration of the input signal. The output is a vector of vectors of estimated pitch values for each frame.\n"
 "\n"
 "When input vectors differ in size, or \"numberFrames\" is negative, an exception is thrown. Input vectors must not contain negative start indices nor negative bin and salience values otherwise an exception is thrown.\n"
 "\n"

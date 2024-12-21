@@ -167,19 +167,22 @@ html_static_path = ['_static']
 
 # We only want a sidebar on the models page.
 html_sidebars = {
+    # 'index': [],
     '**': [],
+    'algorithms_reference': ['localtoc.html'],
     'models': ['localtoc.html'],
 }
 
 # Additional templates that should be rendered to pages, maps page names to
 # template names.
 html_additional_pages = {'index': 'index.html',
-                         'algorithms_reference': 'algorithms_reference.html',
+                        #  'algorithms_reference': 'algorithms_reference.html',
                          'applications': 'applications.html',
                          'documentation': 'documentation.html'}
 
-exec(compile(open("essentia_reference.py").read(), "essentia_reference.py", 'exec'))
-html_additional_pages.update(essentia_algorithms)
+# Deprecating this. Generating algorithm docs directly from rst files is better for sidebar. 
+# exec(compile(open("essentia_reference.py").read(), "essentia_reference.py", 'exec'))
+# html_additional_pages.update(essentia_algorithms)
 
 # If false, no module index is generated.
 #html_domain_indices = True

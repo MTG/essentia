@@ -389,6 +389,167 @@ hzToMel(PyObject* notUsed, PyObject* arg) {
   return PyFloat_FromDouble( double(mel) );
 }
 
+static PyObject*
+midiToHz(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if  (argsV.size() != 2 ||
+    (!PyLong_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (int midiNoteNumber, Real tuningFrequency)");
+    return NULL;
+  }
+  Real hz = midi2hz( long( PyLong_AsLong(argsV[0]) ),  Real( PyFloat_AS_DOUBLE(argsV[1])) );
+  return PyFloat_FromDouble( double(hz) );
+}
+
+static PyObject*
+hzToMidi(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if (argsV.size() != 2 ||
+  (!PyFloat_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (Real hertz, Real tuningFrequency)");
+    return NULL;
+  }
+
+  int midi = hz2midi( Real( PyFloat_AS_DOUBLE(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1])) );
+  return PyLong_FromLong( int(midi) );
+}
+
+static PyObject*
+hzToCents(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+
+  if (argsV.size() != 2 || !PyFloat_Check(argsV[0]) || !PyFloat_Check(argsV[1])) {
+    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (Real hertz, Real referenceFrequency)");
+    return NULL;
+  }
+
+  int cents = hz2cents( Real( PyFloat_AS_DOUBLE(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
+  return PyFloat_FromDouble( int(cents) );
+}
+
+static PyObject*
+centsToHz(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+
+  if (argsV.size() != 2 || !PyFloat_Check(argsV[0]) || !PyFloat_Check(argsV[1])) {
+    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (Real cents, Real referenceFrequency)");
+    return NULL;
+  }
+
+  Real hz = cents2hz( Real( PyFloat_AS_DOUBLE(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
+  return PyFloat_FromDouble( hz );
+}
+
+static PyObject*
+midiToNote(PyObject* notUsed, PyObject* arg) {
+
+  if (!PyLong_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (int midiNoteNumber)");
+    return NULL;
+  }
+
+  std::string note = midi2note( long( PyLong_AsLong(arg) ) );
+  const char *c_note = note.c_str();
+  return PyString_FromString( c_note );
+}
+
+static PyObject*
+noteToMidi(PyObject* notUsed, PyObject* arg) {
+
+  if (!PyString_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (string note)");
+    return NULL;
+  }
+
+  int octave = note2midi( PyString_AS_STRING(arg) );
+  return PyLong_FromLong( int(octave) );
+}
+
+static PyObject*
+noteToRoot(PyObject* notUsed, PyObject* arg) {
+
+  if (!PyString_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (string note)");
+    return NULL;
+  }
+
+  std::string root = note2root( PyString_AS_STRING(arg) );
+  const char *c_root = root.c_str();
+  return PyString_FromString( c_root );
+}
+
+static PyObject*
+noteToOctave(PyObject* notUsed, PyObject* arg) {
+
+  if (!PyString_Check(arg)) {
+    PyErr_SetString(PyExc_TypeError, (char*)"expecting arguments (string note)");
+    return NULL;
+  }
+
+  int octave = note2octave( PyString_AS_STRING(arg) );
+  return PyLong_FromLong( int(octave) );
+}
+
+static PyObject*
+hzToNote(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if (argsV.size() != 2 ||
+  (!PyFloat_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (Real hertz, Real tuningFrequency)");
+    return NULL;
+  }
+
+  std::string note = hz2note( Real( PyFloat_AS_DOUBLE(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
+  const char *c_note = note.c_str();
+  return PyString_FromString( c_note );
+}
+
+static PyObject*
+noteToHz(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if (argsV.size() != 2 ||
+  (!PyString_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (string note, Real tuningFrequency)");
+    return NULL;
+  }
+
+  Real hz = note2hz( PyString_AS_STRING(argsV[0]), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
+  return PyFloat_FromDouble( hz );
+}
+
+static PyObject*
+velocityToDb(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if (argsV.size() != 2 ||
+  (!PyLong_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (int velocity, Real hearingThreshold)");
+    return NULL;
+  }
+
+  Real db = velocity2db( long( PyLong_AsLong(argsV[0]) ), Real( PyFloat_AS_DOUBLE(argsV[1]) ) );
+  return PyFloat_FromDouble( db );
+}
+
+static PyObject*
+dbToVelocity(PyObject* notUsed, PyObject* args) {
+  // parse args to get Source alg, name and source alg and source name
+  vector<PyObject*> argsV = unpack(args);
+  if (argsV.size() != 2 ||
+  (!PyFloat_Check(argsV[0]) || !PyFloat_Check(argsV[1]))) {
+    PyErr_SetString(PyExc_ValueError, "expecting arguments (Real decibels, Real hearingThreshold)");
+    return NULL;
+  }
+
+  long velocity = db2velocity( Real( PyFloat_AS_DOUBLE(argsV[0])), Real( PyFloat_AS_DOUBLE(argsV[1])) );
+  return PyLong_FromLong( int(velocity) );
+}
 
 static PyObject*
 getEquivalentKey(PyObject* notUsed, PyObject* arg) {
@@ -1001,6 +1162,18 @@ static PyMethodDef Essentia__Methods[] = {
   { "hz2bark",       hzToBark,         METH_O, "Converts a frequency in Hz to a bark band" },
   { "mel2hz",        melToHz,          METH_O, "Converts a mel band to frequency in Hz" },
   { "hz2mel",        hzToMel,          METH_O, "Converts a frequency in Hz to a mel band" },
+  { "midi2hz",       midiToHz,         METH_VARARGS, "Converts a midi note number to frequency in Hz" },
+  { "hz2midi",       hzToMidi,         METH_VARARGS, "Converts a frequency in Hz to a midi note number" },
+  { "hz2cents",      hzToCents,        METH_VARARGS, "Returns the cents distance between a frequency and a reference frequency in Hz" },
+  { "cents2hz",      centsToHz,        METH_VARARGS, "Returns the frequency from a cents distance [0-1200] and a reference frequency in Hz" },
+  { "midi2note",     midiToNote,       METH_O, "Converts a midi note number to note applying the international pitch standard (A4=440Hz)" },
+  { "note2midi",     noteToMidi,       METH_O, "Converts note (applying the international pitch standard A4=440Hz) to midi note number" },
+  { "note2root",     noteToRoot,       METH_O, "Returns the root of a note" },
+  { "note2octave",   noteToOctave,     METH_O, "Returns the octave of a note" },
+  { "hz2note",       hzToNote,         METH_VARARGS, "Converts a frequency in Hz to a note - applying the international pitch standard A4=440Hz" },
+  { "note2hz",       noteToHz,         METH_VARARGS, "Converts a note - applying the international pitch standard A4=440Hz - into a frequency in Hz" },
+  { "velocity2db",   velocityToDb,     METH_VARARGS, "Converts a velocity to a measure in dB" },
+  { "db2velocity",   dbToVelocity,     METH_VARARGS, "Converts a dB measure of power to velocity [0-127]" },
   { "lin2db",        linToDb,          METH_O, "Converts a linear measure of power to a measure in dB" },
   { "db2lin",        dbToLin,          METH_O, "Converts a dB measure of power to a linear measure" },
   { "db2pow",        dbToPow,          METH_O, "Converts a dB measure of power to a linear measure" },

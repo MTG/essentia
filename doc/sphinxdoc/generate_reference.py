@@ -24,11 +24,16 @@ import essentia.standard
 import essentia.streaming
 import os, re, subprocess
 import sys
+from pathlib import Path
+import nbformat
+import git
 
 
 std_algo_list = [ algo for algo in dir(essentia.standard) if algo[0].isupper() ]
 streaming_algo_list = [ algo for algo in dir(essentia.streaming) if algo[0].isupper() and algo not in [ 'CompositeBase'] ]
-
+python_tutorials_list = [tut for tut in Path('../../src/examples/python').glob('*.ipynb')]
+pattern_name = re.compile(r'const char(\s\*|\*\s)\w+::name = "(\w+)";')
+algo_path_dict = {pattern_name.search(algo_path.read_text()).group(2) : algo_path.relative_to('../../') for algo_path in Path('../../src/algorithms').rglob('*/*.cpp')}
 
 def replace_math_symbols(s):
     while True:
@@ -76,7 +81,6 @@ def algo_link(algoname, mode):
     mode_abbr = 'std' if mode == 'standard' else 'streaming'
     return "%s `(%s) <%s_%s.html>`__" % (algoname, mode, mode_abbr, algoname)
 
-
 def related_algos(algo_doc):
 
     lines = []
@@ -100,15 +104,104 @@ def related_algos(algo_doc):
                 '\n'.join(sorted(lines))]
     return []
 
+def tutorial_link(tutorial_name):
+    """
+    Create link given tutorial file name
+    """
+    return f"{tutorial_name} `(Link) <../{tutorial_name}.html>`__"
+
+    ## NOTE: Possible Improvements
+    ## 1. Check if a more robust way exists to get the file link
+    ## 2. Display the title of tutorial instead of file name
+
+def is_word_in_jupyternb(word, path):
+    """
+    Finds if a word is used in the code cells of given notebook
+    Return True if word found, False if not
+    """
+    with open(path) as f:
+        nbcontent = nbformat.read(f, as_version=nbformat.NO_CONVERT)
+
+    for cell in nbcontent['cells']:
+        if cell['cell_type'] == "code":
+            if(cell['source'].find(word) != -1):
+                return True
+    return False
+
+def related_tutorials(algo_doc):
+    """
+    Get all python tutorials related to the algorithm
+    """
+    lines = []
+
+    lines += [tutorial_link(tut_file.stem) for tut_file in python_tutorials_list
+                                        if is_word_in_jupyternb(algo_doc['name'], tut_file)]
+
+    if lines:
+        return ['Related tutorials',
+                '-----------------',
+                '',
+                ' | '.join(sorted(lines)),
+                '']
+    return []
+
+    ## NOTE: Possible Optimizations
+    ## 1. This function currently runs once for each algorithm. Each algorithm will go through all the files.
+    ## 2. First Optimization - Create an index from each algorithm to file.
+    ## 3. Use this mapping to go from algorithm to list of tutorial files in O(1) time.
+
+def source_links(algo_doc):
+    """
+    Get the source cpp and header links for the algorithm
+    """
+    # Get build commit
+    repo = git.Repo(search_parent_directories=True)
+    commit_id = repo.git.describe('--long')
+
+    # Source Directory and URL Prefix
+    URL_PREFIX = f'https://github.com/MTG/essentia/blob/{commit_id}/'
+
+    # Get the path of the cpp file
+    cpp_path = algo_path_dict.get(algo_doc['name'], None)
+    if cpp_path:
+        header_path = cpp_path.with_suffix('.h')
+        return [URL_PREFIX + str(cpp_path), URL_PREFIX + str(header_path)]
+    else:
+        return None
+
+    ## NOTE: Future Modifications
+    ## 1. Check if source code path can be added in algo doc itself - DONE
+    ## 2. Make the URL Prefix dynamic to link to the current release version - DONE
+    ## 3. Would be required when we support multiple versions of the documentation
+    ## 4. Can move the URL_PREFIX to a global variable, but it looks cleaner here
 
 def doc2rst(algo_doc, sphinxsearch=False):
+    """
+    Convert the algorithm documentation to RST format
+
+    algo_doc: dict
+        Dictionary containing the algorithm documentation
+    sphinxsearch: bool
+        Flag to indicate if the RST is for sphinx search index or for HTML rendering
+
+    Returns
+    -------
+    str: RST formatted string
+    """
     if sphinxsearch:
         # dummy rst files used to append algorithms to the sphinx HTML search
-        lines = [':orphan:',
-                 ''
-                 ]
-        header = 'Algorithm reference - ' + algo_doc['name'] + ' (' + algo_doc['mode'] + ')'
-        lines += [header, '=' * len(header), '']
+############################################################
+# Deprecated header format.
+############################################################
+        # lines = [':orphan:',
+        #          ''
+        #          ]
+        # header = 'Algorithm reference - ' + algo_doc['name'] + ' (' + algo_doc['mode'] + ')'
+        # lines += [header, '=' * len(header), '']
+############################################################
+############################################################
+        lines = [ algo_doc['name'], '=' * len(algo_doc['name']), '']
+        lines += [algo_doc['mode'] + ' | ' + algo_doc['category'] + ' category', '']
     else:
         # actual rst files used to render HTMLs
         lines = [ algo_doc['name'], '=' * len(algo_doc['name']), '']
@@ -160,6 +253,16 @@ def doc2rst(algo_doc, sphinxsearch=False):
                TR_DESC(algo_doc['description'])
                ]
 
+    links = source_links(algo_doc)
+    if links:
+        lines += ['Source code',
+                    '-----------',
+                    '',
+                    ' - `C++ source code <%s>`__' % links[0],
+                    ' - `C++ header file <%s>`__' % links[1],
+                    '']
+
+    lines += related_tutorials(algo_doc)
     lines += related_algos(algo_doc)
 
     return '\n'.join(lines)
@@ -211,7 +314,8 @@ def write_html_doc(filename, algo_doc, layout_type):
 
 
 def write_algorithms_reference():
-    '''Write all files necessary to have a complete algorithms reference in the sphinx doc.
+    '''
+    Write all files necessary to have a complete algorithms reference in the sphinx doc.
     That includes:
      - write the _templates/algorithms_reference.html template
      - write each separate algo doc as an html template in the _templates/reference folder
@@ -252,9 +356,9 @@ def write_algorithms_reference():
 
         print('generating doc for standard algorithm: %s ...' % algoname)
         write_doc('reference/std_' + algoname + '.rst', algos[algoname]['standard'])
-        write_html_doc('_templates/reference/std_' + algoname + '.html',
-                       algos[algoname]['standard'],
-                       layout_type = 'std')
+        # write_html_doc('_templates/reference/std_' + algoname + '.html',
+        #                algos[algoname]['standard'],
+        #                layout_type = 'std')
 
     for algoname in streaming_algo_list:
         algos.setdefault(algoname, {})
@@ -263,10 +367,12 @@ def write_algorithms_reference():
 
         print('generating doc for streaming algorithm: %s ...' % algoname)
         write_doc('reference/streaming_' + algoname + '.rst', algos[algoname]['streaming'])
-        write_html_doc('_templates/reference/streaming_' + algoname + '.html',
-                       algos[algoname]['streaming'],
-                       layout_type = 'streaming')
+        # write_html_doc('_templates/reference/streaming_' + algoname + '.html',
+        #                algos[algoname]['streaming'],
+        #                layout_type = 'streaming')
 
+############################################################
+############################################################
 
     # write the template for the std algorithms
     html = '''
@@ -317,6 +423,8 @@ def write_algorithms_reference():
 '''
     open('_templates/algo_description_layout_streaming.html', 'w').write(html)
 
+############################################################
+############################################################
 
     # write the essentia_reference.py file (to be included in conf.py)
     with open('essentia_reference.py', 'w') as algo_ref:
@@ -342,9 +450,11 @@ essentia_algorithms.update(streaming_algorithms)
 
 ''')
 
+############################################################
+############################################################
 
-    # write the algorithms_reference.html file (main ref file)
-    algo_categories_html = {}
+    # write the algorithms_reference.rst file (main ref file)
+    algo_categories_rst = {}
     for algoname in algos:
         std_algo = None
         streaming_algo = None
@@ -379,43 +489,70 @@ essentia_algorithms.update(streaming_algorithms)
         if len(description):
             description = description[0].capitalize() + description[1:]
 
+############################################################
+# Deprecated code for generating html file.
+############################################################
+
+#         links = []
+#         if std_algo:
+#             links.append('<a class="reference internal" href="reference/std_' + algoname + '.html"><em>standard</em></a>')
+#         if streaming_algo:
+#             links.append('<a class="reference internal" href="reference/streaming_' + algoname + '.html"><em>streaming</em></a>')
+#         algo_html = '<div class="algo-info">' + '<header><h3>' + algoname + '</h3></header>' + '<span>(' + ', '.join(links) + ')</span>' + '<div>' + description + '</div></div>'
+#         algo_categories_html.setdefault(category, [])
+#         algo_categories_html[category].append(algo_html)
+
+
+#     html = '''
+# {% extends "layout.html" %}
+# {% set title = "Algorithms reference" %}
+# {% block body %}
+
+# <div class="section" id="algorithms-reference">
+# <h1>Algorithms reference<a class="headerlink" href="#algorithms-reference" title="Permalink to this headline">¶</a></h1>
+# <p>Here is the complete list of algorithms which you can access from the Python interface.</p>
+# <p>The C++ interface allows access to the same algorithms, and also some more which are templated
+# and hence are not available in python.</p>
+
+# <div class="section" id="algorithms">
+# '''
+#     for category in algo_categories_html:
+#         category_id = re.sub('[^0-9a-zA-Z]+', '', category.lower())
+#         html += '<section><h2 id=' + category_id + '>' + category + '</h2>'
+#         html += '\n'.join(sorted(algo_categories_html[category]))
+#         html += '</section>'
+#     html += '''
+# </div>
+
+# </div>
+
+# {% endblock %}
+# '''
+
+#     open('_templates/algorithms_reference.html', 'w').write(html)
+
+############################################################
+############################################################
+
         links = []
         if std_algo:
-            links.append('<a class="reference internal" href="reference/std_' + algoname + '.html"><em>standard</em></a>')
+            links.append(':doc:`standard <reference/std_' + algoname + '>`')
         if streaming_algo:
-            links.append('<a class="reference internal" href="reference/streaming_' + algoname + '.html"><em>streaming</em></a>')
-        algo_html = '<div class="algo-info">' + '<header><h3>' + algoname + '</h3></header>' + '<span>(' + ', '.join(links) + ')</span>' + '<div>' + description + '</div></div>'
-        algo_categories_html.setdefault(category, [])
-        algo_categories_html[category].append(algo_html)
+            links.append(':doc:`streaming <reference/streaming_' + algoname + '>`')
+        algo_rst = algoname + '\n' + '^' * len(algoname) + '\n\n' + '(' + ', '.join(links) + ')' + '\n\n' + description + '\n\n'
+        algo_categories_rst.setdefault(category, [])
+        algo_categories_rst[category].append(algo_rst)
 
+    rst =  "Algorithms reference" + \
+        "\n=====================\n\n" + \
+        "Here is the complete list of algorithms which you can access from the Python interface.\n\n" + \
+        "The C++ interface allows access to the same algorithms, and also some more which are templated and hence are not available in python.\n\n"
+    for category in algo_categories_rst:
+        rst += category + '\n' + '-' * len(category) + '\n\n'
+        rst += '\n'.join(sorted(algo_categories_rst[category]))
+    rst += '\n'
 
-    html = '''
-{% extends "layout.html" %}
-{% set title = "Algorithms reference" %}
-{% block body %}
-
-  <div class="section" id="algorithms-reference">
-<h1>Algorithms reference<a class="headerlink" href="#algorithms-reference" title="Permalink to this headline">¶</a></h1>
-<p>Here is the complete list of algorithms which you can access from the Python interface.</p>
-<p>The C++ interface allows access to the same algorithms, and also some more which are templated
-and hence are not available in python.</p>
-
-<div class="section" id="algorithms">
-'''
-    for category in algo_categories_html:
-        category_id = re.sub('[^0-9a-zA-Z]+', '', category.lower())
-        html += '<section><h2 id=' + category_id + '>' + category + '</h2>'
-        html += '\n'.join(sorted(algo_categories_html[category]))
-        html += '</section>'
-    html += '''
-</div>
-
-</div>
-
-{% endblock %}
-'''
-
-    open('_templates/algorithms_reference.html', 'w').write(html)
+    open('algorithms_reference.rst', 'w').write(rst)
 
 
 if __name__ == '__main__':
