@@ -248,14 +248,7 @@ class TestAudio2Midi(TestCase):
         midi_note_tolerance: int,
     ):
         filename = join(testdata.audio_dir, audio_path)
-        if sys.platform == "darwin":
-            import soundfile as sf
-
-            audio, _ = sf.read(filename, dtype="float32")
-            if audio.ndim > 1:
-                audio = audio[:, 0]
-        else:
-            audio = MonoLoader(filename=filename, sampleRate=sample_rate)()
+        audio = MonoLoader(filename=filename, sampleRate=sample_rate)()
         frames = FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size)
         step_time = hop_size / sample_rate
 
