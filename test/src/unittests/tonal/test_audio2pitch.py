@@ -19,7 +19,7 @@
 
 
 from essentia_test import *
-from numpy import sin, pi, mean, random, sqrt
+from numpy import sin, pi, mean, random
 
 
 class TestAudio2Pitch(TestCase):
