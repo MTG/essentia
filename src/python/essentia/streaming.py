@@ -15,12 +15,14 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-from six import iteritems
 from . import _essentia
 import essentia
 import sys as _sys
 from . import common as _c
 from ._essentia import skeys as algorithmNames, sinfo as algorithmInfo
+import os.path
+import json
+
 
 # Used as a place-holder for sources and sinks, implements the right shift
 # operator
@@ -136,13 +138,11 @@ class _StreamConnector:
 
 
 
-def _create_streaming_algo(givenname):
+def _create_streaming_algo(givenname, meta):
     essentia.log.debug(essentia.EPython, 'Creating essentia.streaming class: %s' % givenname)
 
-    _algoInstance = _essentia.StreamingAlgorithm(givenname)
-    _algoDoc = _algoInstance.getDoc()
-    _algoStruct = _algoInstance.getStruct()
-    del _algoInstance
+    _algoDoc = meta[givenname]['__doc__']
+    _algoStruct = meta[givenname]['__struct__']
 
     class StreamingAlgo(_essentia.StreamingAlgorithm):
         __doc__ = _algoDoc
@@ -174,7 +174,7 @@ def _create_streaming_algo(givenname):
 
         def configure(self, **kwargs):
             # verify that all types match and do any necessary conversions
-            for name, val in iteritems(kwargs):
+            for name, val in iter(kwargs.items()):
                 goalType = self.paramType(name)
                 try:
                     convertedVal = _c.convertData(val, goalType)
@@ -195,10 +195,20 @@ def _create_streaming_algo(givenname):
 
 # load all streaming algorithms into module
 def _reloadStreamingAlgorithms():
+    meta_file = 'streaming.meta.json'
+    essentia.log.debug(essentia.EPython, f'Loading __doc__ and __struct__ metadata for essentia.streaming from {meta_file}')
+    # Looking for a metadata file in the same directory as `streaming.py`
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    file_path = os.path.join(dir_path, meta_file)
+    with open(file_path, 'r') as f:
+        meta = json.load(f)
+
     for name in algorithmNames():
-        _create_streaming_algo(name)
+        _create_streaming_algo(name, meta)
+
 
 _reloadStreamingAlgorithms()
+
 
 # This subclass provides some more functionality for VectorInput
 class VectorInput(_essentia.VectorInput):

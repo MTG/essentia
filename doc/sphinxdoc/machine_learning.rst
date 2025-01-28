@@ -59,7 +59,7 @@ Install the `dependencies <https://essentia.upf.edu/installing.html#installing-d
 
 .. code-block::
 
-    apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six python3-dev python3-numpy-dev python3-numpy python3-yaml libeigen3-dev
+    apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python3-dev python3-numpy-dev python3-numpy python3-yaml libeigen3-dev
 
 Configure Essentia with TensorFlow and Python 3:
 

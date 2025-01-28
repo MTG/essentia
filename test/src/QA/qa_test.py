@@ -291,7 +291,7 @@ class QaTest:
             gt = self.solutions.get((gt_name, key_inst), None)
             if gt is not None:
                 if key_wrap != gt_name:
-                    for key_metric, metric in self.metrics.iteritems():
+                    for key_metric, metric in iter(self.metrics.items()):
                         self.score(key_wrap, key_inst, solution, key_metric, metric, gt)
                     continue
             if self.verbose:

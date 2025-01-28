@@ -509,12 +509,7 @@ static PyMethodDef PyAlgorithm_methods[] = {
 
 
 static PyTypeObject PyAlgorithmType = {
-#if PY_MAJOR_VERSION >= 3
     PyVarObject_HEAD_INIT(NULL, 0)
-#else
-    PyObject_HEAD_INIT(NULL)
-    0,                                                    // ob_size
-#endif
     "essentia.standard.Algorithm",                        // tp_name
     sizeof(PyAlgorithm),                                  // tp_basicsize
     0,                                                    // tp_itemsize
