@@ -144,97 +144,116 @@ Music Audio Efficient Spectrogram Transformer (`MAEST <https://github.com/palons
 We offer versions of MAEST trained with sequence lengths ranging from 5 to 30 seconds (``5s``, ``10s``, ``20s``, and ``30s``), and trained starting from different intial weights: from random initialization (``fs``), from `DeiT <https://doi.org/10.48550/arXiv.2012.12877>`_ pre-trained weights (``dw``), and from `PaSST <https://doi.org/10.48550/arXiv.2106.07139>`_ pre-trained weights (``pw``). Additionally, we offer a version of MAEST trained following a teacher student setup (``ts``).
 According to our study ``discogs-maest-30s-pw``, achieved the most competitive performance in most downstream tasks (refer to the `paper <http://hdl.handle.net/10230/58023>`_ for details).
 
+The output embeddings have shape ``[batch_size, 1, tokens, embedding_size]``, where the first and second tokens (i.e., ``[0, 0, :2, :]`` ) correspond to the  ``CLS`` and ``DIST`` tokens respectively, and the following ones to input signal.
+To  train downstream models, we recommend using the embeddings from the ``CLS`` token, or stacking the ``CLS``, ``DIST``, and the average of the input signal tokens for slightly better performance (refer to the `paper <http://hdl.handle.net/10230/58023>`_ for details).
+
+In the following examples, we extract embeddings from the 7th layer of the transformer since this is what performed the best in our downstream classification tasks.
+To extract embeddings from other layers, change the ``output`` parameter according to the layer names provided in the metadata files.
+
 
 Models:
+
+    .. collapse:: ⬇️ <a class="reference external">discogs-maest-30s-pw-519l</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-519l-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-519l-2.json>`_]
+
+            Model trained with a multi-label classification objective targeting 519 Discogs styles on an extended dataset of 4M tracks.
+
+            Python code for embedding extraction:
+
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-519l-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-30s-pw</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-30s-pw-ts</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-ts-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-ts-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-ts-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-ts-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-ts-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-ts-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-20s-pw</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-20s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-20s-pw-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-20s-pw-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-20s-pw-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-20s-pw-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-20s-pw-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-10s-pw</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-pw-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-pw-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-pw-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-pw-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-pw-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-10s-fs</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-fs-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-fs-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-fs-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-fs-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-fs-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-fs-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-10s-dw</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-dw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-dw-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-dw-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-dw-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-dw-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-dw-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-5s-pw</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-5s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-5s-pw-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-5s-pw-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-5s-pw-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-5s-pw-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-5s-pw-2_embeddings.py
 
 
-*Note: It is possible to retrieve the output of each attention layer by setting* ``output=StatefulParitionedCall:n`` *, where* ``n`` *is the index of the layer (starting from 1).*
-*The output from the attention layers should be interpreted as* ``[batch_index, 1, token_number, embeddings_size]``
-*, where the first and second tokens (i.e.,* ``[0, 0, :2, :]`` *) correspond to the*  ``CLS`` *and* ``DIST`` *tokens respectively, and the following ones to input signal.*
+*Note:* ``discogs-maest-30s-pw-519l`` *is an updated version of MAEST trained on a larger dataset of 4M tracks and 519 music style lables. It is expected to show slightly better performance.*
+
+*Note: We provide TensorFlow models operating with a fixed batch size of 1. Additionally, ONNX version of the models supporting dynamic batch sizes are provided.*
+
 
 OpenL3
 ^^^^^^
@@ -370,7 +389,7 @@ Music style classification by 400 styles from the Discogs taxonomy::
 
 Models:
 
-    .. collapse:: ⬇️ <a class="reference external">genre_discogs400</a>
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-effnet</a>
 
         |
 
@@ -380,6 +399,99 @@ Models:
 
             .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-effnet-1_predictions.py
 
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-5s-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-5s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-5s-pw-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-5s-pw-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-10-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-pw-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-pw-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-10s-fs</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-fs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-fs-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-fs-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-30s-dw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-dw-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-dw-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-dw-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-20s-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-20s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-20s-pw-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-20s-pw-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-30s-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-30s-pw-ts</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-ts-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-ts-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-ts-1_predictions.py
+
+
+Genre Discogs519
+~~~~~~~~~~~~~~~~
+
+.. highlight:: none
+
+Music style classification by 519 styles from the Discogs taxonomy::
+
+    Lol
+
+.. highlight:: default
+
+Models:
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs519</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs519/genre_discogs519-discogs-maest-30s-pw-519l-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs519/genre_discogs519-discogs-maest-30s-pw-519l-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs519/genre_discogs519-discogs-maest-30s-pw-519l-1_predictions.py
 
 
 MTG-Jamendo genre
@@ -414,7 +526,6 @@ Models:
     .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_genre-discogs_artist_embeddings-effnet</a>
 
         |
-
 
             [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-discogs_artist_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-discogs_artist_embeddings-effnet-1.json>`_]
 
