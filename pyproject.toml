@@ -83,6 +83,8 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
+name="essentia"
+dynamic = ["version"]
 dependencies = [
     "numpy>=1.25",
     "pyyaml",

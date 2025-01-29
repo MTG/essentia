@@ -118,7 +118,6 @@ if project_name == 'essentia-tensorflow':
 module = Extension('name', sources=[])
 
 setup(
-    name=project_name,
     version=get_version(),
     description=description,
     long_description=long_description,
