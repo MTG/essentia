@@ -14,7 +14,7 @@ INPUT_DEFAULTS = {
     "TensorflowPredict2D": "model/Placeholder",
     "TensorflowPredictEffnetDiscogs": "serving_default_melspectrogram",
     "TensorflowPredictFSDSINet": "x",
-    "TensorflowPredictMAEST": "serving_default_melspectrogram",
+    "TensorflowPredictMAEST": "melspectrogram",
     "PitchCREPE": "frames",
     "TempoCNN": "input",
 }
@@ -25,7 +25,7 @@ OUTPUT_DEFAULTS = {
     "TensorflowPredict2D": "model/Sigmoid",
     "TensorflowPredictEffnetDiscogs": "PartitionedCall:0",
     "TensorflowPredictFSDSINet": "model/predictions/Sigmoid",
-    "TensorflowPredictMAEST": "PartitionedCall:0",
+    "TensorflowPredictMAEST": "Identity",
     "PitchCREPE": "model/classifier/Sigmoid",
     "TempoCNN": "output",
 }
@@ -95,14 +95,13 @@ def get_additional_parameters(metadata: dict, output: str, algo_name: str):
 
     outputs = metadata["schema"]["outputs"]
     for model_output in outputs:
+        if "output_purpose" not in model_output:
+            continue
+
         if (
             model_output["output_purpose"] == output
             and model_output["name"] != OUTPUT_DEFAULTS[algo_name]
         ):
-            if metadata["name"] == "MAEST" and ":7" not in model_output["name"]:
-                # For MAEST we recommend using the embeddings from the 7th layer.
-                continue
-
             additional_parameters += f', output="{model_output["name"]}"'
 
     return additional_parameters
@@ -160,9 +159,9 @@ def process_model(
 
     graph_filename_tgt = script_dir / graph_filename
     if download_models and (not graph_filename_tgt.exists()):
-        assert (
-            not models_base_dir
-        ), "downloading the models is incompatible with specifying `models_base_dir`"
+        assert not models_base_dir, (
+            "downloading the models is incompatible with specifying `models_base_dir`"
+        )
         try:
             script_dir.mkdir(parents=True, exist_ok=True)
             urlretrieve(metadata["link"], graph_filename_tgt)
