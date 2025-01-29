@@ -5,7 +5,7 @@ manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"
 manylinux-i686-image = "mtgupf/essentia-builds:manylinux2014_i686"
 
 # TODO: skipping Python 3.12 for now until we create manylinux images supporting this version.
-skip = ["pp*", "*-musllinux*", "*i686", "*cp312*"]
+skip = ["pp*", "*-musllinux*", "*i686", "*cp36*", "*cp37*", "*cp38*"]
 
 environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
 
@@ -74,5 +74,17 @@ repair-wheel-command = [
 ]
 
 [build-system]
+requires = [
+    "wheel >= 0.29.0",
+    "setuptools >= 48",
+    "numpy>=2.0.0rc1",
+    "six",
+]
+build-backend = "setuptools.build_meta"
 
-requires = ["wheel", "setuptools", "oldest-supported-numpy"]
+[project]
+dependencies = [
+    "numpy>=1.25",
+    "pyyaml",
+    "six",
+]
