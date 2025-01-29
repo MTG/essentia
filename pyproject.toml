@@ -84,7 +84,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name="essentia"
-dynamic = ["version"]
+dynamic = ["version", "description", "readme", "license", "authors", "keywords", "classifiers", "urls"]
 dependencies = [
     "numpy>=1.25",
     "pyyaml",
