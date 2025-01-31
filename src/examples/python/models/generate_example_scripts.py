@@ -12,6 +12,7 @@ INPUT_DEFAULTS = {
     "TensorflowPredictMusiCNN": "model/Placeholder",
     "TensorflowPredictVGGish": "model/Placeholder",
     "TensorflowPredict2D": "model/Placeholder",
+    "TensorflowPredict": "model/Placeholder",
     "TensorflowPredictEffnetDiscogs": "serving_default_melspectrogram",
     "TensorflowPredictFSDSINet": "x",
     "TensorflowPredictMAEST": "melspectrogram",
@@ -23,6 +24,7 @@ OUTPUT_DEFAULTS = {
     "TensorflowPredictMusiCNN": "model/Sigmoid",
     "TensorflowPredictVGGish": "model/Sigmoid",
     "TensorflowPredict2D": "model/Sigmoid",
+    "TensorflowPredict": "model/Sigmoid",
     "TensorflowPredictEffnetDiscogs": "PartitionedCall:0",
     "TensorflowPredictFSDSINet": "model/predictions/Sigmoid",
     "TensorflowPredictMAEST": "Identity",
@@ -69,29 +71,53 @@ def generate_two_steps_algorithm(
     first_output_node: str,
     second_graph_filename: str,
     second_algo_name: str,
-    second_output_node: str,
+    second_algo_parameters: str,
     sample_rate: int,
     algo_returns: str,
     audio_file: str,
 ):
-    return (
-        f"from essentia.standard import MonoLoader, {first_algo_name}, {second_algo_name}\n"
-        "\n"
-        f'audio = MonoLoader(filename="{audio_file}", sampleRate={sample_rate}, resampleQuality=4)()\n'
-        f'embedding_model = {first_algo_name}(graphFilename="{first_graph_filename}"{first_output_node})\n'
-        f"embeddings = embedding_model(audio)\n"
-        "\n"
-        f'model = {second_algo_name}(graphFilename="{second_graph_filename}"{second_output_node})\n'
-        f"{algo_returns} = model(embeddings)\n"
-    )
+    if second_algo_name == "TensorflowPredict2D":
+        return (
+            f"from essentia.standard import MonoLoader, {first_algo_name}, {second_algo_name}\n"
+            "\n"
+            f'audio = MonoLoader(filename="{audio_file}", sampleRate={sample_rate}, resampleQuality=4)()\n'
+            f'embedding_model = {first_algo_name}(graphFilename="{first_graph_filename}"{first_output_node})\n'
+            f"embeddings = embedding_model(audio)\n"
+            "\n"
+            f'model = {second_algo_name}(graphFilename="{second_graph_filename}"{second_algo_parameters})\n'
+            f"{algo_returns} = model(embeddings)\n"
+        )
+    elif second_algo_name == "TensorflowPredict":
+        first_output = second_algo_parameters.split('"')[-2]
+        return (
+            "from essentia import Pool\n"
+            f"from essentia.standard import MonoLoader, {first_algo_name}, {second_algo_name}\n"
+            "\n"
+            f'audio = MonoLoader(filename="{audio_file}", sampleRate={sample_rate}, resampleQuality=4)()\n'
+            f'embedding_model = {first_algo_name}(graphFilename="{first_graph_filename}"{first_output_node})\n'
+            f"embeddings = embedding_model(audio)\n"
+            "\n"
+            "pool = Pool()\n"
+            'pool.set("embeddings", embeddings)\n'
+            "\n"
+            f'model = {second_algo_name}(graphFilename="{second_graph_filename}"{second_algo_parameters})\n'
+            f'{algo_returns} = model(pool)["{first_output}"]\n'
+        )
+    else:
+        raise ValueError(f"Unknown second_algo_name: {second_algo_name}")
 
 
 def get_additional_parameters(metadata: dict, output: str, algo_name: str):
     additional_parameters = ""
 
+    algo_name = metadata["inference"]["algorithm"]
+
     input = metadata["schema"]["inputs"][0]["name"]
     if input != INPUT_DEFAULTS[algo_name]:
-        additional_parameters = f', input="{input}"'
+        if algo_name == "TensorflowPredict":
+            additional_parameters = f', inputs=["{input}"]'
+        else:
+            additional_parameters = f', input="{input}"'
 
     outputs = metadata["schema"]["outputs"]
     for model_output in outputs:
@@ -102,7 +128,10 @@ def get_additional_parameters(metadata: dict, output: str, algo_name: str):
             model_output["output_purpose"] == output
             and model_output["name"] != OUTPUT_DEFAULTS[algo_name]
         ):
-            additional_parameters += f', output="{model_output["name"]}"'
+            if algo_name == "TensorflowPredict":
+                additional_parameters += f', outputs=["{model_output["name"]}"]'
+            else:
+                additional_parameters += f', output="{model_output["name"]}"'
 
     return additional_parameters
 
@@ -204,7 +233,6 @@ def process_model(
         embedding_additional_parameters = get_additional_parameters(
             embedding_metadata, "embeddings", embedding_algo_name
         )
-
         script = generate_two_steps_algorithm(
             embedding_graph_filename,
             embedding_algo_name,
