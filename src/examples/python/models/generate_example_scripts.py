@@ -68,72 +68,86 @@ def generate_single_step_algorithm(
 def generate_two_steps_algorithm(
     first_graph_filename: str,
     first_algo_name: str,
-    first_output_node: str,
+    first_algo_params: str,
     second_graph_filename: str,
     second_algo_name: str,
-    second_algo_parameters: str,
+    second_algo_parms: str,
     sample_rate: int,
     algo_returns: str,
     audio_file: str,
+    output_name: str | None = None,
 ):
     if second_algo_name == "TensorflowPredict2D":
         return (
             f"from essentia.standard import MonoLoader, {first_algo_name}, {second_algo_name}\n"
             "\n"
             f'audio = MonoLoader(filename="{audio_file}", sampleRate={sample_rate}, resampleQuality=4)()\n'
-            f'embedding_model = {first_algo_name}(graphFilename="{first_graph_filename}"{first_output_node})\n'
+            f'embedding_model = {first_algo_name}(graphFilename="{first_graph_filename}"{first_algo_params})\n'
             f"embeddings = embedding_model(audio)\n"
             "\n"
-            f'model = {second_algo_name}(graphFilename="{second_graph_filename}"{second_algo_parameters})\n'
+            f'model = {second_algo_name}(graphFilename="{second_graph_filename}"{second_algo_parms})\n'
             f"{algo_returns} = model(embeddings)\n"
         )
     elif second_algo_name == "TensorflowPredict":
-        first_output = second_algo_parameters.split('"')[-2]
+        assert output_name is not None, (
+            "output_name must be specified for TensorflowPredict"
+        )
         return (
             "from essentia import Pool\n"
             f"from essentia.standard import MonoLoader, {first_algo_name}, {second_algo_name}\n"
             "\n"
             f'audio = MonoLoader(filename="{audio_file}", sampleRate={sample_rate}, resampleQuality=4)()\n'
-            f'embedding_model = {first_algo_name}(graphFilename="{first_graph_filename}"{first_output_node})\n'
+            f'embedding_model = {first_algo_name}(graphFilename="{first_graph_filename}"{first_algo_params})\n'
             f"embeddings = embedding_model(audio)\n"
             "\n"
             "pool = Pool()\n"
             'pool.set("embeddings", embeddings)\n'
             "\n"
-            f'model = {second_algo_name}(graphFilename="{second_graph_filename}"{second_algo_parameters})\n'
-            f'{algo_returns} = model(pool)["{first_output}"]\n'
+            f'model = {second_algo_name}(graphFilename="{second_graph_filename}"{second_algo_parms})\n'
+            f'{algo_returns} = model(pool)["{output_name}"]\n'
         )
     else:
         raise ValueError(f"Unknown second_algo_name: {second_algo_name}")
 
 
-def get_additional_parameters(metadata: dict, output: str, algo_name: str):
-    additional_parameters = ""
+def get_output_node_name(metadata: dict, output_purpose: str):
+    """Get the output node name for a given output purpose"""
+    outputs = metadata["schema"]["outputs"]
+
+    for output in outputs:
+        if "output_purpose" not in output:
+            continue
+        if output["output_purpose"] == output_purpose:
+            return output["name"]
+
+    raise ValueError(f"Output node not found for `output_purpose`: {output_purpose}")
+
+
+def get_kwargs_string(metadata: dict, output_purpose: str, algo_name: str):
+    """Get kwargs string for a given algorithm"""
+
+    kwargs_str = ""
 
     algo_name = metadata["inference"]["algorithm"]
-
     input = metadata["schema"]["inputs"][0]["name"]
+
+    # Set input related params
     if input != INPUT_DEFAULTS[algo_name]:
         if algo_name == "TensorflowPredict":
-            additional_parameters = f', inputs=["{input}"]'
+            kwargs_str += f', inputs=["{input}"]'
         else:
-            additional_parameters = f', input="{input}"'
+            kwargs_str += f', input="{input}"'
 
-    outputs = metadata["schema"]["outputs"]
-    for model_output in outputs:
-        if "output_purpose" not in model_output:
-            continue
+    # Set output related params
+    output_node_name = get_output_node_name(metadata, output_purpose)
 
-        if (
-            model_output["output_purpose"] == output
-            and model_output["name"] != OUTPUT_DEFAULTS[algo_name]
-        ):
-            if algo_name == "TensorflowPredict":
-                additional_parameters += f', outputs=["{model_output["name"]}"]'
-            else:
-                additional_parameters += f', output="{model_output["name"]}"'
+    if output_node_name != OUTPUT_DEFAULTS[algo_name]:
+        if algo_name == "TensorflowPredict":
+            kwargs_str += f', outputs=["{output_node_name}"]'
+        else:
+            kwargs_str += f', output="{output_node_name}"'
 
-    return additional_parameters
+    return kwargs_str
 
 
 def get_metadata(task_type: str, family_name: str, model: str, metadata_base_dir=False):
@@ -178,7 +192,7 @@ def process_model(
     algo_name = metadata["inference"]["algorithm"]
 
     # check if we need a custom output node
-    additional_parameters = get_additional_parameters(metadata, output, algo_name)
+    algo_kwargs = get_kwargs_string(metadata, output, algo_name)
 
     # set algos with custom output
     algo_returns = CUSTOM_ALGO_OUTPUTS.get(algo_name, output)
@@ -206,6 +220,7 @@ def process_model(
         metadata_link = metadata["inference"]["embedding_model"]["link"]
         embedding_task_type = Path(metadata_link).parent.parent.stem
         embedding_family_name = Path(metadata_link).parent.stem
+
         embedding_metadata = get_metadata(
             embedding_task_type,
             embedding_family_name,
@@ -230,9 +245,13 @@ def process_model(
                 print(f"Failed downloading {metadata['link']}")
                 exit(1)
 
-        embedding_additional_parameters = get_additional_parameters(
-            embedding_metadata, "embeddings", embedding_algo_name
+        embedding_algo_kwargs = get_kwargs_string(
+            embedding_metadata,
+            "embeddings",
+            embedding_algo_name,
         )
+        output_node_name = get_output_node_name(metadata, output)
+
         # Exceptions:
         # - MAEST-based genre discogs models use the 12th layer instead of the 7th
         if "Genre Discogs" in metadata["name"]:
@@ -241,20 +260,21 @@ def process_model(
         script = generate_two_steps_algorithm(
             embedding_graph_filename,
             embedding_algo_name,
-            embedding_additional_parameters,
+            embedding_algo_kwargs,
             graph_filename,
             algo_name,
-            additional_parameters,
+            algo_kwargs,
             sample_rate,
             algo_returns,
             audio_file,
+            output_name=output_node_name,
         )
     else:
         script = generate_single_step_algorithm(
             graph_filename,
             algo_name,
             sample_rate,
-            additional_parameters,
+            algo_kwargs,
             algo_returns,
             audio_file,
         )
