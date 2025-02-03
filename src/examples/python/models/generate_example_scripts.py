@@ -233,6 +233,11 @@ def process_model(
         embedding_additional_parameters = get_additional_parameters(
             embedding_metadata, "embeddings", embedding_algo_name
         )
+        # Exceptions:
+        # - MAEST-based genre discogs models use the 12th layer instead of the 7th
+        if "Genre Discogs" in metadata["name"]:
+            embedding_algo_kwargs = embedding_algo_kwargs.replace("7", "12")
+
         script = generate_two_steps_algorithm(
             embedding_graph_filename,
             embedding_algo_name,
