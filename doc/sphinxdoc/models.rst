@@ -144,97 +144,116 @@ Music Audio Efficient Spectrogram Transformer (`MAEST <https://github.com/palons
 We offer versions of MAEST trained with sequence lengths ranging from 5 to 30 seconds (``5s``, ``10s``, ``20s``, and ``30s``), and trained starting from different intial weights: from random initialization (``fs``), from `DeiT <https://doi.org/10.48550/arXiv.2012.12877>`_ pre-trained weights (``dw``), and from `PaSST <https://doi.org/10.48550/arXiv.2106.07139>`_ pre-trained weights (``pw``). Additionally, we offer a version of MAEST trained following a teacher student setup (``ts``).
 According to our study ``discogs-maest-30s-pw``, achieved the most competitive performance in most downstream tasks (refer to the `paper <http://hdl.handle.net/10230/58023>`_ for details).
 
+The output embeddings have shape ``[batch_size, 1, tokens, embedding_size]``, where the first and second tokens (i.e., ``[0, 0, :2, :]`` ) correspond to the  ``CLS`` and ``DIST`` tokens respectively, and the following ones to input signal.
+To  train downstream models, we recommend using the embeddings from the ``CLS`` token, or stacking the ``CLS``, ``DIST``, and the average of the input signal tokens for slightly better performance (refer to the `paper <http://hdl.handle.net/10230/58023>`_ for details).
+
+In the following examples, we extract embeddings from the 7th layer of the transformer since this is what performed the best in our downstream classification tasks.
+To extract embeddings from other layers, change the ``output`` parameter according to the layer names provided in the metadata files.
+
 
 Models:
+
+    .. collapse:: ⬇️ <a class="reference external">discogs-maest-30s-pw-519l</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-519l-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-519l-2.json>`_]
+
+            Model trained with a multi-label classification objective targeting 519 Discogs styles on an extended dataset of 4M tracks.
+
+            Python code for embedding extraction:
+
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-519l-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-30s-pw</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-30s-pw-ts</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-ts-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-ts-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-ts-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-30s-pw-ts-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-ts-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-30s-pw-ts-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-20s-pw</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-20s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-20s-pw-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-20s-pw-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-20s-pw-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-20s-pw-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-20s-pw-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-10s-pw</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-pw-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-pw-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-pw-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-pw-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-pw-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-10s-fs</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-fs-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-fs-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-fs-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-fs-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-fs-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-fs-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-10s-dw</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-dw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-dw-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-dw-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-10s-dw-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-dw-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-10s-dw-2_embeddings.py
 
     .. collapse:: ⬇️ <a class="reference external">discogs-maest-5s-pw</a>
 
         |
 
-            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-5s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-5s-pw-1.json>`_]
+            [`weights <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-5s-pw-2.pb>`_, `metadata <https://essentia.upf.edu/models/feature-extractors/maest/discogs-maest-5s-pw-2.json>`_]
 
             Model trained with a multi-label classification objective targeting 400 Discogs styles.
 
             Python code for embedding extraction:
 
-            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-5s-pw-1_embeddings.py
+            .. literalinclude:: ../../src/examples/python/models/scripts/feature-extractors/maest/discogs-maest-5s-pw-2_embeddings.py
 
 
-*Note: It is possible to retrieve the output of each attention layer by setting* ``output=StatefulParitionedCall:n`` *, where* ``n`` *is the index of the layer (starting from 1).*
-*The output from the attention layers should be interpreted as* ``[batch_index, 1, token_number, embeddings_size]``
-*, where the first and second tokens (i.e.,* ``[0, 0, :2, :]`` *) correspond to the*  ``CLS`` *and* ``DIST`` *tokens respectively, and the following ones to input signal.*
+*Note:* ``discogs-maest-30s-pw-519l`` *is an updated version of MAEST trained on a larger dataset of 4M tracks and 519 music style lables. It is expected to show slightly better performance.*
+
+*Note: We provide TensorFlow models operating with a fixed batch size of 1. Additionally, ONNX version of the models supporting dynamic batch sizes are provided.*
+
 
 OpenL3
 ^^^^^^
@@ -370,7 +389,7 @@ Music style classification by 400 styles from the Discogs taxonomy::
 
 Models:
 
-    .. collapse:: ⬇️ <a class="reference external">genre_discogs400</a>
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-effnet</a>
 
         |
 
@@ -380,6 +399,114 @@ Models:
 
             .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-effnet-1_predictions.py
 
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-5s-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-5s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-5s-pw-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-5s-pw-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-10-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-pw-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-pw-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-10s-fs</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-fs-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-fs-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-fs-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-30s-dw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-dw-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-dw-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-10s-dw-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-20s-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-20s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-20s-pw-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-20s-pw-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-30s-pw</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-1_predictions.py
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs400-discogs-maest-30s-pw-ts</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-ts-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-ts-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs400/genre_discogs400-discogs-maest-30s-pw-ts-1_predictions.py
+
+
+Genre Discogs519
+~~~~~~~~~~~~~~~~
+
+.. highlight:: none
+
+Music style classification by 519 styles from the Discogs taxonomy::
+
+    Blues: Boogie Woogie, Chicago Blues, Country Blues, Delta Blues, East Coast Blues, Electric Blues, Harmonica Blues, Jump Blues, Louisiana Blues, Memphis Blues, Modern Electric Blues, Piano Blues, Piedmont Blues, Rhythm & Blues, Texas Blues
+    Brass & Military: Brass Band, Marches, Military, Pipe & Drum
+    Children's: Educational, Nursery Rhymes, Story
+    Classical: Baroque, Choral, Classical, Contemporary, Early, Impressionist, Medieval, Modern, Neo-Classical, Neo-Romantic, Opera, Operetta, Oratorio, Post-Modern, Renaissance, Romantic, Twelve-tone
+    Electronic: Abstract, Acid, Acid House, Acid Jazz, Ambient, Baltimore Club, Bassline, Beatdown, Berlin-School, Big Beat, Bleep, Breakbeat, Breakcore, Breaks, Broken Beat, Chillwave, Chiptune, Dance-pop, Dark Ambient, Darkwave, Deep House, Deep Techno, Disco, Disco Polo, Donk, Doomcore, Downtempo, Drone, Drum n Bass, Dub, Dub Techno, Dubstep, Dungeon Synth, EBM, Electro, Electro House, Electroacoustic, Electroclash, Euro House, Euro-Disco, Eurobeat, Eurodance, Experimental, Footwork, Freestyle, Future Jazz, Gabber, Garage House, Ghetto, Ghetto House, Ghettotech, Glitch, Glitch Hop, Goa Trance, Grime, Halftime, Hands Up, Happy Hardcore, Hard Beat, Hard House, Hard Techno, Hard Trance, Hardcore, Hardstyle, Harsh Noise Wall, Hi NRG, Hip Hop, Hip-House, House, IDM, Illbient, Industrial, Italo House, Italo-Disco, Italodance, J-Core, Jazzdance, Juke, Jumpstyle, Jungle, Latin, Leftfield, Lento Violento, Makina, Minimal, Minimal Techno, Modern Classical, Musique Concrète, Neo Trance, Neofolk, New Age, New Beat, New Wave, Noise, Nu-Disco, Power Electronics, Progressive Breaks, Progressive House, Progressive Trance, Psy-Trance, Rhythmic Noise, Schranz, Sound Collage, Speed Garage, Speedcore, Synth-pop, Synthwave, Tech House, Tech Trance, Techno, Trance, Tribal, Tribal House, Trip Hop, Tropical House, UK Funky, UK Garage, Vaporwave, Witch House
+    Folk, World, & Country: Aboriginal, African, Andalusian Classical, Andean Music, Appalachian Music, Basque Music, Bhangra, Bluegrass, Cajun, Canzone Napoletana, Carnatic, Catalan Music, Celtic, Chacarera, Chinese Classical, Chutney, Copla, Country, Cretan, Dangdut, Fado, Flamenco, Folk, Funaná, Gamelan, Ghazal, Gospel, Griot, Hawaiian, Highlife, Hillbilly, Hindustani, Honky Tonk, Indian Classical, Kaseko, Klezmer, Laïkó, Luk Thung, Maloya, Mbalax, Min'yō, Mizrahi, Nhạc Vàng, Nordic, Népzene, Ottoman Classical, Overtone Singing, Pacific, Pasodoble, Persian Classical, Phleng Phuea Chiwit, Polka, Qawwali, Raï, Rebetiko, Romani, Salegy, Sea Shanties, Soukous, Séga, Volksmusik, Western Swing, Zouk, Zydeco, Éntekhno
+    Funk / Soul: Afrobeat, Bayou Funk, Boogie, Contemporary R&B, Disco, Free Funk, Funk, Gogo, Gospel, Minneapolis Sound, Neo Soul, New Jack Swing, P.Funk, Psychedelic, Rhythm & Blues, Soul, Swingbeat, UK Street Soul
+    Hip Hop: Bass Music, Beatbox, Boom Bap, Bounce, Britcore, Cloud Rap, Conscious, Crunk, Cut-up/DJ, DJ Battle Tool, Electro, Favela Funk, G-Funk, Gangsta, Go-Go, Grime, Hardcore Hip-Hop, Hiplife, Horrorcore, Hyphy, Instrumental, Jazzy Hip-Hop, Kwaito, Miami Bass, Pop Rap, Ragga HipHop, RnB/Swing, Screw, Thug Rap, Trap, Trip Hop, Turntablism
+    Jazz: Afro-Cuban Jazz, Afrobeat, Avant-garde Jazz, Big Band, Bop, Bossa Nova, Cape Jazz, Contemporary Jazz, Cool Jazz, Dixieland, Easy Listening, Free Improvisation, Free Jazz, Fusion, Gypsy Jazz, Hard Bop, Jazz-Funk, Jazz-Rock, Latin Jazz, Modal, Post Bop, Ragtime, Smooth Jazz, Soul-Jazz, Space-Age, Swing
+    Latin: Afro-Cuban, Axé, Bachata, Baião, Batucada, Beguine, Bolero, Boogaloo, Bossanova, Carimbó, Cha-Cha, Charanga, Choro, Compas, Conjunto, Corrido, Cubano, Cumbia, Danzon, Descarga, Forró, Gaita, Guaguancó, Guajira, Guaracha, Jibaro, Lambada, MPB, Mambo, Mariachi, Marimba, Merengue, Música Criolla, Norteño, Nueva Cancion, Nueva Trova, Pachanga, Plena, Porro, Quechua, Ranchera, Reggaeton, Rumba, Salsa, Samba, Samba-Canção, Son, Son Montuno, Sonero, Tango, Tejano, Timba, Trova, Vallenato
+    Non-Music: Audiobook, Comedy, Dialogue, Education, Erotic, Field Recording, Health-Fitness, Interview, Monolog, Movie Effects, Poetry, Political, Promotional, Public Broadcast, Radioplay, Religious, Sermon, Sound Art, Sound Poetry, Special Effects, Speech, Spoken Word, Technical, Therapy
+    Pop: Ballad, Barbershop, Bollywood, Break-In, Bubblegum, Chanson, City Pop, Enka, Ethno-pop, Europop, Indie Pop, J-pop, K-pop, Karaoke, Kayōkyoku, Levenslied, Light Music, Music Hall, Novelty, Parody, Schlager, Vocal
+    Reggae: Calypso, Dancehall, Dub, Dub Poetry, Lovers Rock, Mento, Ragga, Reggae, Reggae Gospel, Reggae-Pop, Rocksteady, Roots Reggae, Ska, Soca, Steel Band
+    Rock: AOR, Acid Rock, Acoustic, Alternative Rock, Arena Rock, Art Rock, Atmospheric Black Metal, Avantgarde, Beat, Black Metal, Blues Rock, Brit Pop, Classic Rock, Coldwave, Country Rock, Crust, Death Metal, Deathcore, Deathrock, Depressive Black Metal, Doo Wop, Doom Metal, Dream Pop, Emo, Ethereal, Experimental, Folk Metal, Folk Rock, Funeral Doom Metal, Funk Metal, Garage Rock, Glam, Goregrind, Goth Rock, Gothic Metal, Grindcore, Groove Metal, Grunge, Hard Rock, Hardcore, Heavy Metal, Horror Rock, Indie Rock, Industrial, Industrial Metal, J-Rock, Jangle Pop, K-Rock, Krautrock, Lo-Fi, Lounge, Math Rock, Melodic Death Metal, Melodic Hardcore, Metalcore, Mod, NDW, Neofolk, New Wave, No Wave, Noise, Noisecore, Nu Metal, Oi, Parody, Pop Punk, Pop Rock, Pornogrind, Post Rock, Post-Hardcore, Post-Metal, Post-Punk, Power Metal, Power Pop, Power Violence, Prog Rock, Progressive Metal, Psychedelic Rock, Psychobilly, Pub Rock, Punk, Rock & Roll, Rock Opera, Rockabilly, Shoegaze, Ska, Skiffle, Sludge Metal, Soft Rock, Southern Rock, Space Rock, Speed Metal, Stoner Rock, Surf, Swamp Pop, Symphonic Rock, Technical Death Metal, Thrash, Twist, Viking Metal, Yé-Yé
+    Stage & Screen: Musical, Score, Soundtrack, Theme
+
+
+.. highlight:: default
+
+Models:
+
+    .. collapse:: ⬇️ <a class="reference external">genre_discogs519</a>
+
+        |
+
+            [`weights <https://essentia.upf.edu/models/classification-heads/genre_discogs519/genre_discogs519-discogs-maest-30s-pw-519l-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/genre_discogs519/genre_discogs519-discogs-maest-30s-pw-519l-1.json>`_, `demo <https://replicate.com/mtg/maest>`_]
+
+            python code for predictions:
+
+            .. literalinclude :: ../../src/examples/python/models/scripts/classification-heads/genre_discogs519/genre_discogs519-discogs-maest-30s-pw-519l-1_predictions.py
 
 
 MTG-Jamendo genre
@@ -414,7 +541,6 @@ Models:
     .. collapse:: ⬇️ <a class="reference external">mtg_jamendo_genre-discogs_artist_embeddings-effnet</a>
 
         |
-
 
             [`weights <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-discogs_artist_embeddings-effnet-1.pb>`_, `metadata <https://essentia.upf.edu/models/classification-heads/mtg_jamendo_genre/mtg_jamendo_genre-discogs_artist_embeddings-effnet-1.json>`_]
 
