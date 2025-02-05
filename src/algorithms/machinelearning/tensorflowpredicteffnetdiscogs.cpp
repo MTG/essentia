@@ -156,6 +156,11 @@ const char* TensorflowPredictEffnetDiscogs::description = DOC(
   "Note: This algorithm does not make any check on the input model so it is "
   "the user's responsibility to make sure it is a valid one.\n"
   "\n"
+  "Note: The output of this algorithm is 2D, which is suitable for extracting embeddings or "
+  "class activations (the output shape is, e.g., [time, number of classes]). If the output "
+  "parameter is set to an intermediate layer with more dimensions, the output will be "
+  "flattened to 2D.\n"
+  "\n"
   "References:\n"
   "\n"
   "1. Supported models at https://essentia.upf.edu/models/\n\n");
