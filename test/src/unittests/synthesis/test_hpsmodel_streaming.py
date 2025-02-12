@@ -30,13 +30,13 @@ import essentia.standard as std
 def cutFrames(params, input = range(100)):
 
     if not 'validFrameThresholdRatio' in params:
-      params['validFrameThresholdRatio'] = 0
+        params['validFrameThresholdRatio'] = 0
     framegen = std.FrameGenerator(input,
                                 frameSize=params['frameSize'],
                                 hopSize=params['hopSize'],
                                 validFrameThresholdRatio=params['validFrameThresholdRatio'],
                                 startFromZero=params['startFromZero'])
-              
+
     return [frame for frame in framegen]
 
 
@@ -80,14 +80,12 @@ def cleaningHarmonicTracks(freqsTotal, minFrames, pitchConf):
 # converts audio frames to a single array
 def framesToAudio(frames):
 
-    audio = frames.flatten()   
+    audio = frames.flatten()
     return audio
 
 
 # computes  analysis only
 def analHpsModelStreaming(params, signal):
-
-    #out = numpy.array(0)
     pool = essentia.Pool()
     fcut = es.FrameCutter(frameSize=params['frameSize'],
                           hopSize=params['hopSize'],
@@ -110,9 +108,8 @@ def analHpsModelStreaming(params, signal):
                              stocf=params['stocf'])
 
     # add half window of zeros to input signal to reach same ooutput length
-    signal = numpy.append(signal, zeros(params['frameSize'] // 2))
-    insignal = VectorInput (signal)
-
+    signal = numpy.append(signal, essentia.zeros(params['frameSize'] // 2))
+    insignal = VectorInput(signal)
 
     # analysis
     insignal.data >> fcut.signal
@@ -129,7 +126,6 @@ def analHpsModelStreaming(params, signal):
     smanal.phases >> (pool, 'phases')
     smanal.stocenv >> (pool, 'stocenv')
 
-
     essentia.run(insignal)
 
     # remove first half window frames
@@ -141,26 +137,21 @@ def analHpsModelStreaming(params, signal):
     # remove short tracks
     minFrames = int(params['minSineDur'] * params['sampleRate'] / params['hopSize'])
     freqsClean = cleaningHarmonicTracks(freqs, minFrames, pitchConf)
-    pool['frequencies'].data = freqsClean
 
     return mags, freqsClean, phases
 
 
-
-
 # computes analysis/stynthesis
 def analsynthHpsModelStreaming(params, signal):
-
-    out = array([0.])
-
     pool = essentia.Pool()
+
     # windowing and FFT
     fcut = es.FrameCutter(frameSize = params['frameSize'], hopSize = params['hopSize'], startFromZero =  False)
-    w = es.Windowing(type = "blackmanharris92")  
+    w = es.Windowing(type = "blackmanharris92")
     spec = es.Spectrum(size = params['frameSize'])
 
     # pitch detection
-    pitchDetect = es.PitchYinFFT(frameSize=params['frameSize'], sampleRate =  params['sampleRate']) 
+    pitchDetect = es.PitchYinFFT(frameSize=params['frameSize'], sampleRate =  params['sampleRate'])
 
     smanal = es.HpsModelAnal(sampleRate=params['sampleRate'],
                              hopSize=params['hopSize'],
@@ -179,9 +170,8 @@ def analsynthHpsModelStreaming(params, signal):
                              stocf=params['stocf'])
 
     # add half window of zeros to input signal to reach same ooutput length
-    signal  = numpy.append(signal, zeros(params['frameSize'] // 2))
-    insignal = VectorInput (signal)
-
+    signal  = numpy.append(signal, essentia.zeros(params['frameSize'] // 2))
+    insignal = VectorInput(signal)
 
     # analysis
     insignal.data >> fcut.signal
@@ -206,15 +196,11 @@ def analsynthHpsModelStreaming(params, signal):
 
     essentia.run(insignal)
 
-    outaudio = framesToAudio(pool['frames'])        
+    outaudio = framesToAudio(pool['frames'])
     outaudio = outaudio [2*params['hopSize']:]
-
 
     return outaudio, pool
 
-
-
-#-------------------------------------
 
 class TestHpsModel(TestCase):
 
@@ -231,7 +217,7 @@ class TestHpsModel(TestCase):
 
         # generate test signal
         signalSize = 20 * self.params['frameSize']
-        signal = zeros(signalSize)
+        signal = essentia.zeros(signalSize)
 
         [mags, freqs, phases] = analHpsModelStreaming(self.params, signal)
 
@@ -244,7 +230,7 @@ class TestHpsModel(TestCase):
         from random import random
         # generate test signal
         signalSize = 20 * self.params['frameSize']
-        signal = array([2*(random()-0.5)*i for i in ones(signalSize)])
+        signal = array([2*(random()-0.5)*i for i in essentia.ones(signalSize)])
 
         # for white noise test set sine minimum duration to 350ms, and min threshold of -20dB
         self.params['minSineDur'] = 0.35  # limit pitch tracks of a nimumim length of 500ms for the case of white noise input
@@ -264,7 +250,7 @@ class TestHpsModel(TestCase):
 
         # generate noise components
         from random import random
-        noise = 0.01 * array([2*(random()-0.5)*i for i in ones(signalSize)])  # -40dB
+        noise = 0.01 * array([2*(random()-0.5)*i for i in essentia.ones(signalSize)])  # -40dB
         signal = signal + noise
 
         outsignal, pool = analsynthHpsModelStreaming(self.params, signal)
