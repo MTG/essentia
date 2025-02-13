@@ -40,7 +40,7 @@ PyObject* VectorVectorReal::toPythonCopy(const vector<vector<Real> >* v) {
   if (isRectangular && dims[0] > 0 && dims[1] > 0) {
     PyArrayObject* result;
 
-    result = (PyArrayObject*)PyArray_SimpleNew(2, dims, PyArray_FLOAT);
+    result = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_FLOAT);
     assert(result->strides[1] == sizeof(Real));
 
     if (result == NULL) {
@@ -61,7 +61,7 @@ PyObject* VectorVectorReal::toPythonCopy(const vector<vector<Real> >* v) {
 
   for (int i=0; i<(int)v->size(); ++i) {
     npy_intp itemDims[1] = {(int)(*v)[i].size()};
-    PyArrayObject* item = (PyArrayObject*)PyArray_SimpleNew(1, itemDims, PyArray_FLOAT);
+    PyArrayObject* item = (PyArrayObject*)PyArray_SimpleNew(1, itemDims, NPY_FLOAT);
     assert(item->strides[0] == sizeof(Real));
     if (item == NULL) {
       throw EssentiaException("VectorVectorReal: dang null object (list of numpy arrays)");
@@ -116,15 +116,16 @@ void* VectorVectorReal::fromPythonCopy(PyObject* obj) {
 
     // Numpy array of floats
     else if (PyArray_Check(row)) {
-      if (PyArray_NDIM(row) != 1) {
-        throw EssentiaException("VectorVectorReal::fromPythonCopy: the element of input list "
-                                "is not a 1-dimensional numpy array: ", PyArray_NDIM(row));
-      }
       PyArrayObject* array = (PyArrayObject*)row;
+      if (PyArray_NDIM(array) != 1) {
+        throw EssentiaException("VectorVectorReal::fromPythonCopy: the element of input list "
+                                "is not a 1-dimensional numpy array: ", PyArray_NDIM(array));
+      }
+
       if (array == NULL) {
         throw EssentiaException("VectorVectorReal::fromPythonCopy: dang null object (list of numpy arrays)");
       }
-      if (array->descr->type_num != PyArray_FLOAT) {
+      if (array->descr->type_num != NPY_FLOAT) {
         throw EssentiaException("VectorVectorReal::fromPythonCopy: this NumPy array doesn't contain Reals (maybe you forgot dtype='f4')");
       }
       assert(array->strides[0] == sizeof(Real));
