@@ -21,6 +21,8 @@ if var_project_name in os.environ:
 class EssentiaInstall(install_lib):
     def install(self):
         global library
+        if library is None:
+            raise Exception("lib path is undefined")
         install_dir = os.path.join(self.install_dir, library.split(os.sep)[-1])
         res = shutil.move(library, install_dir)
         os.system("ls -l %s" % self.install_dir)
@@ -31,6 +33,9 @@ class EssentiaBuildExtension(build_ext):
     def run(self):
         global library
         os.system('rm -rf tmp; mkdir tmp')
+
+        HOMEBREW_PATH = subprocess.check_output(["brew", "--prefix"], text=True).strip()
+        ld_flags = [f'LDFLAGS="-L{HOMEBREW_PATH}/lib"']
 
         # Ugly hack using an enviroment variable... There's no way to pass a
         # custom flag to python setup.py bdist_wheel
@@ -50,10 +55,10 @@ class EssentiaBuildExtension(build_ext):
         if var_only_python in os.environ and os.environ[var_only_python]=='1':
             print('Skipping building the core libessentia library (%s=1)' %  var_only_python)
             subprocess.run([PYTHON,  'waf', 'configure', '--only-python', '--static-dependencies',
-                      '--prefix=tmp'] + macos_arm64_flags, check=True)
+                      '--prefix=tmp'] + macos_arm64_flags + ld_flags, check=True)
         else:
-            subprocess.run([PYTHON, 'waf', 'configure', '--build-static', '--static-dependencies'
-                      '--with-python --prefix=tmp'] + macos_arm64_flags, check=True)
+            subprocess.run([PYTHON, 'waf', 'configure', '--build-static', '--static-dependencies',
+                      '--with-python', '--prefix=tmp'] + macos_arm64_flags + ld_flags, check=True)
         subprocess.run([PYTHON, 'waf'], check=True)
         subprocess.run([PYTHON, 'waf', 'install'], check=True)
 
