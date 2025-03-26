@@ -54,7 +54,7 @@ void Chromaprinter::compute() {
   // Copy the signal to new vector to expand it to the int16_t dynamic range before the cast.
   std::vector<Real> signalScaled = signal;
   std::transform(signalScaled.begin(), signalScaled.end(), signalScaled.begin(),
-                 std::bind1st(std::multiplies<Real>(), pow(2,15)));
+                 std::bind(std::multiplies<Real>(), pow(2,15), std::placeholders::_1));
 
   std::vector<int16_t> signalCast(signalScaled.begin(), signalScaled.end());
 
@@ -160,7 +160,7 @@ AlgorithmStatus Chromaprinter::process() {
     // Copy the signal to new vector to expand it to the int16_t dynamic range before the cast.
     std::vector<Real> signalScaled = signal;
     std::transform(signalScaled.begin(), signalScaled.end(), signalScaled.begin(),
-                   std::bind1st(std::multiplies<Real>(), pow(2,15)));
+                   std::bind(std::multiplies<Real>(), pow(2,15), std::placeholders::_1));
 
     std::vector<int16_t> signalCast(signalScaled.begin(), signalScaled.end());
 
