@@ -26,7 +26,7 @@ cd $FFMPEG_VERSION
     --extra-ldflags=-L$PREFIX/lib \
     --extra-cflags=-I$PREFIX/include \
     $SHARED_OR_STATIC
-make
+make -j"$(nproc)"
 make install
 
 cd ../..

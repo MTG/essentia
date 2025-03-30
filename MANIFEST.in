@@ -3,6 +3,7 @@ include Changelog
 include COPYING.txt Essentia*Licensing.txt
 include FAQ.md README.md
 include VERSION
+include essentia.pc.in
 include waf
 include wscript src/wscript src/python/wscript
 recursive-include utils/ *.py

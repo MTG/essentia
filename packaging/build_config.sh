@@ -1,10 +1,15 @@
 #!/bin/sh
 
+# shellcheck disable=SC2034  # Unused variables left for readability
+
 HOST=i686-w64-mingw32
 if [ -z "${PREFIX}" ]; then
-    PREFIX=`pwd`
+    PREFIX=$(pwd)
 fi
-echo Installing to: $PREFIX
+
+arch=$(uname -m)
+
+echo Installing to: "$PREFIX"
 
 #SHARED_OR_STATIC="
 #--enable-shared \
@@ -19,10 +24,10 @@ SHARED_OR_STATIC="
 EIGEN_VERSION=3.3.7
 FFMPEG_VERSION=ffmpeg-2.8.12
 LAME_VERSION=3.100
-TAGLIB_VERSION=taglib-1.11.1
-ZLIB_VERSION=zlib-1.2.12
+TAGLIB_VERSION=taglib-1.13.1
+ZLIB_VERSION=zlib-1.3.1
 FFTW_VERSION=fftw-3.3.2
-LIBSAMPLERATE_VERSION=libsamplerate-0.1.8
+LIBSAMPLERATE_VERSION=libsamplerate-0.1.9
 LIBYAML_VERSION=yaml-0.1.5
 CHROMAPRINT_VERSION=1.4.3
 QT_SOURCE_URL=https://download.qt.io/archive/qt/4.8/4.8.4/qt-everywhere-opensource-src-4.8.4.tar.gz
@@ -209,18 +214,39 @@ FFMPEG_AUDIO_FLAGS_MUXERS="
     --enable-encoder=flac
 "
 
-# see http://www.fftw.org/install/windows.html
-FFTW_FLAGS="
-    --enable-float \
-    --enable-sse2 \
-    --with-incoming-stack-boundary=2 \
-    --with-our-malloc16
-"
 
-LIBSAMPLERATE_FLAGS="
-    --disable-fftw \
-    --disable-sndfile
-"
+if [ "$arch" = "aarch64" ] || [ "$arch" = "arm64" ] 
+then 
+    FFTW_FLAGS="
+        --enable-float \
+        --with-incoming-stack-boundary=2 \
+        --with-our-malloc16
+    "
+else
+	# see http://www.fftw.org/install/windows.html
+    FFTW_FLAGS="
+        --enable-float \
+        --enable-sse2 \
+        --with-incoming-stack-boundary=2 \
+        --with-our-malloc16
+    "
+fi
+
+if [ "$arch" = "aarch64" ]
+then 
+    LIBSAMPLERATE_FLAGS="
+        --build=aarch64-unknown-linux-gnu \
+        --disable-fftw \
+        --disable-sndfile
+    "
+else
+    LIBSAMPLERATE_FLAGS="
+        --disable-fftw \
+        --disable-sndfile
+    "
+fi
+
+
 
 QT_FLAGS="
     -no-accessibility

@@ -16,7 +16,7 @@ cd $LIBYAML_VERSION
 CFLAGS="-DYAML_DECLARE_STATIC -fPIC" ./configure \
     --prefix=$PREFIX \
     $SHARED_OR_STATIC
-make
+make -j"$(nproc)"
 make install
 
 cd ../..

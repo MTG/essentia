@@ -3,6 +3,7 @@ import os
 import glob
 import subprocess
 import sys
+import platform
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 from setuptools.command.install_lib import install_lib
@@ -33,9 +34,11 @@ class EssentiaBuildExtension(build_ext):
     def run(self):
         global library
         os.system('rm -rf tmp; mkdir tmp')
-
-        HOMEBREW_PATH = subprocess.check_output(["brew", "--prefix"], text=True).strip()
-        ld_flags = [f'LDFLAGS="-L{HOMEBREW_PATH}/lib"']
+        ld_flags = []
+        
+        if platform.system() == 'Darwin':
+            HOMEBREW_PATH = subprocess.check_output(["brew", "--prefix"], text=True).strip()
+            ld_flags = [f'LDFLAGS="-L{HOMEBREW_PATH}/lib"']
 
         # Ugly hack using an enviroment variable... There's no way to pass a
         # custom flag to python setup.py bdist_wheel
@@ -58,7 +61,7 @@ class EssentiaBuildExtension(build_ext):
                       '--prefix=tmp'] + macos_arm64_flags + ld_flags, check=True)
         else:
             subprocess.run([PYTHON, 'waf', 'configure', '--build-static', '--static-dependencies',
-                      '--with-python', '--prefix=tmp'] + macos_arm64_flags + ld_flags, check=True)
+                      '--with-python', '--prefix=tmp'] + ld_flags, check=True)
         subprocess.run([PYTHON, 'waf'], check=True)
         subprocess.run([PYTHON, 'waf', 'install'], check=True)
 
@@ -91,7 +94,7 @@ def get_version():
 
 
 classifiers = [
-    'License :: OSI Approved :: GNU Affero General Public License v3',
+    # 'License :: OSI Approved :: GNU Affero General Public License v3',
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
     'Intended Audience :: Science/Research',
@@ -141,5 +144,5 @@ setup(
     cmdclass={
         'build_ext': EssentiaBuildExtension,
         'install_lib': EssentiaInstall
-    }
+    },
 )
