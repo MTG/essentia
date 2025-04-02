@@ -9,7 +9,8 @@ Why this fork
 -------------
 This repository does not contain actual improvements in respect to the original algorithms developed in the main repository, but it focuses on 2 main aspects:
 - compatibility with `numpy2`
-- a better python packaging system
+- an updated python packaging system
+- development of python stubs
 
 ### How to create and install the essentia python package
 #### Dependencies on MacOS
