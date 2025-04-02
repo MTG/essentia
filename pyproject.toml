@@ -49,10 +49,10 @@ environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}"
 
 before-build = [
   "brew install pkg-config gcc readline sqlite gdbm libpng",
-  "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag",
-  "brew link --force ffmpeg@2.8",
+  "brew install eigen libyaml fftw ffmpeg@4 libsamplerate libtag",
+  "brew link --force ffmpeg@4",
   "brew install chromaprint",
-  "brew link --overwrite ffmpeg@2.8",
+  "brew link --overwrite ffmpeg@4",
   "python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
   "sudo python waf install",

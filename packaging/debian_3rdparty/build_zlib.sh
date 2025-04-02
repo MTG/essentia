@@ -16,7 +16,7 @@ cd $ZLIB_VERSION/
 CFLAGS=-fPIC ./configure \
     --prefix=$PREFIX \
     --static
-make
+make -j"$(nproc)"
 make install
 
 cd ../..

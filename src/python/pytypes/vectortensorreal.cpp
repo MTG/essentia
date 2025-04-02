@@ -39,7 +39,7 @@ PyObject* VectorTensorReal::toPythonCopy(const vector<Tensor<Real> >* tenVec) {
     for (int j = 0; j< nd; j++)
       dims[j] = tensor.dimension(j);
 
-    PyArrayObject* numpyarr = (PyArrayObject*)PyArray_SimpleNew(nd, dims, PyArray_FLOAT);
+    PyArrayObject* numpyarr = (PyArrayObject*)PyArray_SimpleNew(nd, dims, NPY_FLOAT);
     
     if (numpyarr == NULL) {
       throw EssentiaException("VectorTensorReal::toPythonCopy: dang null object");

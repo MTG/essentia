@@ -16,7 +16,7 @@ CPPFLAGS=-fPIC ./configure \
     --prefix=$PREFIX \
     $LIBSAMPLERATE_FLAGS \
     $SHARED_OR_STATIC
-make
+make -j"$(nproc)"
 make install
 
 cd ../..

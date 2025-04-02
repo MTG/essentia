@@ -36,7 +36,7 @@ PyObject* VectorVectorStereoSample::toPythonCopy(const vector<vector<StereoSampl
   }
 
   if (isRectangular) {
-    PyArrayObject* result = (PyArrayObject*)PyArray_SimpleNew(2, dims, PyArray_OBJECT);
+    PyArrayObject* result = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_OBJECT);
 
     if (result == NULL) {
       throw EssentiaException("VectorVectorStereoSample: dang null object");

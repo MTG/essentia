@@ -40,7 +40,7 @@ PyObject* VectorVectorComplex::toPythonCopy(const vector<vector<complex<Real> > 
   if (isRectangular && dims[0] > 0 && dims[1] > 0) {
     PyArrayObject* result;
 
-    result = (PyArrayObject*)PyArray_SimpleNew(2, dims, PyArray_COMPLEX64);
+    result = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_COMPLEX64);
     assert(result->strides[1] == sizeof(complex<Real>));
 
     if (result == NULL) {

@@ -24,7 +24,7 @@ cmake \
     -DCMAKE_VERBOSE_MAKEFILE=ON \
     .
 
-make
+make -j"$(nproc)"
 make install
 
 cd ../..

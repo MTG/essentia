@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
-BASEDIR=$(dirname $0)
-cd $BASEDIR/debian_3rdparty
+BASEDIR=$(dirname "$0")
+cd "$BASEDIR/debian_3rdparty"
 ./build_eigen3.sh
 ./build_fftw3.sh
 ./build_lame.sh

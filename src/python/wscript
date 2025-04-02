@@ -60,3 +60,5 @@ def build(ctx):
 
     ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.py'),
                       relative_trick=True)
+    ctx.install_files('${PYTHONDIR}', ctx.path.ant_glob('essentia/**/*.pyi'),
+                      relative_trick=True)

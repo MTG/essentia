@@ -33,7 +33,7 @@ PyObject* VectorMatrixReal::toPythonCopy(const vector<TNT::Array2D<Real> >* matV
     dims[0] = (*matVec)[i].dim1();
     dims[1] = (*matVec)[i].dim2();
 
-    PyArrayObject* mat = (PyArrayObject*)PyArray_SimpleNew(2, dims, PyArray_FLOAT);
+    PyArrayObject* mat = (PyArrayObject*)PyArray_SimpleNew(2, dims, NPY_FLOAT);
 
     if (mat == NULL) {
       throw EssentiaException("VectorMatrixReal::toPythonCopy: dang null object");

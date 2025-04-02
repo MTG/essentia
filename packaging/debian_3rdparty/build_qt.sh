@@ -17,7 +17,7 @@ cd $(basename $QT_FILE .tar.gz)
 
 ./configure -prefix $PREFIX -static -opensource -confirm-license $QT_FLAGS
 
-make
+make -j"$(nproc)"
 make install
 
 cd ../..
