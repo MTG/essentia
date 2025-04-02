@@ -63,7 +63,7 @@ FFMPEG_AUDIO_FLAGS="
     --enable-protocol=file
     --enable-protocol=pipe
 
-    --disable-sdl
+    --disable-sdl2
     --disable-lzma
     --disable-zlib
     --disable-xlib
