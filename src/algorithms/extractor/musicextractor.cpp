@@ -168,7 +168,8 @@ void MusicExtractor::setExtractorDefaultOptions() {
   options.set("highlevel.compute", false);
 #if HAVE_GAIA2
   if (!svmModels.empty()) {
-    options.add("highlevel.svm_models", svmModels);
+    for (const string &model: svmModels)
+        options.add("highlevel.svm_models", model);
     options.set("highlevel.compute", true);
   }
 #endif
