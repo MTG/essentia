@@ -35,13 +35,12 @@ PyObject* TensorReal::toPythonCopy(const essentia::Tensor<essentia::Real>* tenso
   for (int i = 0; i < nd; i++)
     dims[i] = tensor->dimension(i);
 
-  result = PyArray_SimpleNew(nd, dims, PyArray_FLOAT);
+  result = PyArray_SimpleNew(nd, dims, NPY_FLOAT);
 
   Real* dest = (Real*)(((PyArrayObject*)result)->data);
   const Real* src = tensor->data();
   fastcopy(dest, src, tensor->size());
-
-  assert(result->strides[3] == sizeof(Real));
+  assert(((PyArrayObject*)result)->strides[3] == sizeof(Real));
 
   if (result == NULL) {
     throw EssentiaException("TensorReal: dang null object");
@@ -55,19 +54,19 @@ void* TensorReal::fromPythonCopy(PyObject* obj) {
   if (!PyArray_Check(obj)) {
     throw EssentiaException("TensorReal::fromPythonRef: expected PyArray, received: ", strtype(obj));
   }
-  if (PyArray_NDIM(obj) != TENSORRANK) {
+  if (PyArray_NDIM((PyArrayObject*)obj) != TENSORRANK) {
     throw EssentiaException("TensorReal::fromPythonCopy: argument is not a 4-dimensional PyArray");
   }
 
   // // copy data from numpy array to matrix
   PyArrayObject* numpyarr = (PyArrayObject*)obj;
-  if (numpyarr->descr->type_num != PyArray_FLOAT) {
+  if (numpyarr->descr->type_num != NPY_FLOAT) {
      throw EssentiaException("TensorReal::fromPythonRef: this NumPy array doesn't contain Reals (maybe you forgot dtype='f4')");
    }
 
   return new Tensor<Real>(TensorMap<Real>((Real *)PyArray_DATA(numpyarr),
-                                                  PyArray_DIM(obj, 0),
-                                                  PyArray_DIM(obj, 1),
-                                                  PyArray_DIM(obj, 2),
-                                                  PyArray_DIM(obj, 3)));
+                                                  PyArray_DIM((PyArrayObject*)obj, 0),
+                                                  PyArray_DIM((PyArrayObject*)obj, 1),
+                                                  PyArray_DIM((PyArrayObject*)obj, 2),
+                                                  PyArray_DIM((PyArrayObject*)obj, 3)));
 }

@@ -14,7 +14,7 @@ tar -xf  lame-$LAME_VERSION.tar.gz
 cd lame-$LAME_VERSION
 CPPFLAGS=-fPIC ./configure --prefix=$PREFIX \
     $SHARED_OR_STATIC
-make
+make -j"$(nproc)"
 make install
 
 cd ../..
