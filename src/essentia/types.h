@@ -115,8 +115,7 @@ inline bool case_insensitive_char_cmp(char a, char b) {
 /**
  * Function object for comparing two strings in a case-insensitive manner.
  */
-struct case_insensitive_str_cmp
-  : public std::binary_function<const std::string&, const std::string&, bool> {
+struct case_insensitive_str_cmp {
   bool operator()(const std::string& str1, const std::string& str2) const {
     return std::lexicographical_compare(str1.begin(), str1.end(),
                                         str2.begin(), str2.end(),
