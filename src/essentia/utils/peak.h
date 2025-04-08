@@ -71,7 +71,7 @@ class Peak {
 // the positions are equal it sorts by descending magnitude
 template<typename Comp1=std::less<Real>,
          typename Comp2=std::greater_equal<Real> >
-class ComparePeakPosition : public std::binary_function<Real, Real, bool> {
+class ComparePeakPosition {
   Comp1 _cmp1;
   Comp2 _cmp2;
   public:
@@ -86,7 +86,7 @@ class ComparePeakPosition : public std::binary_function<Real, Real, bool> {
 // the magnitudes are equal it sorts by ascending position
 template<typename Comp1=std::greater<Real>,
          typename Comp2=std::less_equal<Real> >
-class ComparePeakMagnitude : public std::binary_function<Real, Real, bool> {
+class ComparePeakMagnitude {
   Comp1 _cmp1;
   Comp2 _cmp2;
   public:
