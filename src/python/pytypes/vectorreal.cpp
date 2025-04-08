@@ -34,9 +34,10 @@ PyObject* VectorReal::toPythonRef(RogueVector<Real>* v) {
     throw EssentiaException("VectorReal: dang null object");
   }
 
-  PyObject* resultBase;
-  resultBase = PyArray_BASE((PyArrayObject*) result);
-  resultBase = TO_PYTHON_PROXY(VectorReal, v);
+  if (PyArray_SetBaseObject((PyArrayObject*)result, TO_PYTHON_PROXY(VectorReal, v)) < 0) {
+    Py_DECREF(result);
+    throw EssentiaException("VectorReal: failed to set base object");
+  }
 
   return result;
 }

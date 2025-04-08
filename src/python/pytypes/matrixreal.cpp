@@ -42,9 +42,10 @@ PyObject* MatrixReal::toPythonRef(TNT::Array2D<Real>* mat) {
     throw EssentiaException("MatrixReal: dang null object");
   }
 
-  PyObject* resultBase;
-  resultBase = PyArray_BASE((PyArrayObject*) result);
-  resultBase = TO_PYTHON_PROXY(MatrixReal, mat);
+  if (PyArray_SetBaseObject((PyArrayObject*)result, TO_PYTHON_PROXY(MatrixReal, mat)) < 0) {
+    Py_DECREF(result);
+    throw EssentiaException("MatrixReal: failed to set base object");
+  }
 
   return result;
 }

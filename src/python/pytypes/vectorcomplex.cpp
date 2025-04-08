@@ -37,9 +37,10 @@ PyObject* VectorComplex::toPythonRef(RogueVector<complex<Real> >* v) {
 
   // set the PyArray pointer to our vector, so it can be released when the
   // PyArray is released
-  PyObject* resultBase;
-  resultBase = PyArray_BASE((PyArrayObject*) result);
-  resultBase = TO_PYTHON_PROXY(VectorComplex, v);
+  if (PyArray_SetBaseObject((PyArrayObject*)result, TO_PYTHON_PROXY(VectorComplex, v)) < 0) {
+    Py_DECREF(result);
+    throw EssentiaException("VectorComplex: failed to set base object");
+  }
 
   return result;
 }

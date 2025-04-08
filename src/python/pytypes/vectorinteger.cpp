@@ -34,9 +34,10 @@ PyObject* VectorInteger::toPythonRef(RogueVector<int>* v) {
     throw EssentiaException("VectorInteger::toPythonRef: could not create PyArray of type NPY_INT");
   }
 
-  PyObject* resultBase;
-  resultBase = PyArray_BASE((const PyArrayObject *) result);
-  resultBase = TO_PYTHON_PROXY(VectorInteger, v);
+  if (PyArray_SetBaseObject((PyArrayObject*)result, TO_PYTHON_PROXY(VectorInteger, v)) < 0) {
+    Py_DECREF(result);
+    throw EssentiaException("VectorInteger: failed to set base object");
+  }
 
   return result;
 }
