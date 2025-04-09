@@ -71,13 +71,14 @@ feature-extractors:
     outputs:
      - embeddings
     models:
-     - discogs-maest-10s-dw-1
-     - discogs-maest-10s-fs-1
-     - discogs-maest-10s-pw-1
-     - discogs-maest-20s-pw-1
-     - discogs-maest-30s-pw-1
-     - discogs-maest-30s-pw-ts-1
-     - discogs-maest-5s-pw-1
+     - discogs-maest-5s-pw-2
+     - discogs-maest-10s-dw-2
+     - discogs-maest-10s-fs-2
+     - discogs-maest-10s-pw-2
+     - discogs-maest-20s-pw-2
+     - discogs-maest-30s-pw-2
+     - discogs-maest-30s-pw-ts-2
+     - discogs-maest-30s-pw-519l-2
 
 pitch:
   crepe:
@@ -419,4 +420,19 @@ classification-heads:
     outputs:
      - predictions
     models:
-     - genre_discogs400-discogs-effnet-1
+      - genre_discogs400-discogs-effnet-1
+      - genre_discogs400-discogs-maest-5s-pw-1
+      - genre_discogs400-discogs-maest-10s-dw-1
+      - genre_discogs400-discogs-maest-10s-fs-1
+      - genre_discogs400-discogs-maest-10s-pw-1
+      - genre_discogs400-discogs-maest-20s-pw-1
+      - genre_discogs400-discogs-maest-30s-pw-1
+      - genre_discogs400-discogs-maest-30s-pw-ts-1
+
+  genre_discogs519:
+    sample_rate: 16000
+    outputs:
+      - predictions
+    models:
+      - genre_discogs519-discogs-maest-30s-pw-519l-1
+
