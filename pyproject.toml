@@ -83,7 +83,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name="essentia"
-dynamic = ["version", "description", "readme", "license", "authors", "keywords", "classifiers", "urls"]
+license = "AGPL-3.0-only"
+dynamic = ["version", "description", "readme", "authors", "keywords", "classifiers", "urls"]
 dependencies = [
     "numpy>=1.25",
     "pyyaml",

@@ -86,7 +86,6 @@ def get_version():
 
 
 classifiers = [
-    'License :: OSI Approved :: GNU Affero General Public License v3',
     'Development Status :: 4 - Beta',
     'Intended Audience :: Developers',
     'Intended Audience :: Science/Research',
