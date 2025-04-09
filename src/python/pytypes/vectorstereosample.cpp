@@ -49,18 +49,19 @@ void* VectorStereoSample::fromPythonCopy(PyObject* obj) {
                             "is not a numpy array: ", strtype(obj));
   }
 
-  if (PyArray_NDIM(obj) != 2) {
-    throw EssentiaException("VectorStereoSample::fromPythonCopy: given input "
-                            "is not a 2-dimensional numpy array: ", PyArray_NDIM(obj));
-  }
-
-  if (PyArray_DIM(obj, 1) != 2) {
-    throw EssentiaException("VectorStereoSample::fromPythonCopy: given input's "
-                            "second dimension is not 2: ", PyArray_DIM(obj, 1));
-  }
-
-  Py_ssize_t total = PyArray_DIM(obj, 0);
   PyArrayObject* arr = (PyArrayObject*)obj;
+  
+  if (PyArray_NDIM(arr) != 2) {
+    throw EssentiaException("VectorStereoSample::fromPythonCopy: given input "
+                            "is not a 2-dimensional numpy array: ", PyArray_NDIM(arr));
+  }
+
+  if (PyArray_DIM(arr, 1) != 2) {
+    throw EssentiaException("VectorStereoSample::fromPythonCopy: given input's "
+                            "second dimension is not 2: ", PyArray_DIM(arr, 1));
+  }
+
+  Py_ssize_t total = PyArray_DIM(arr, 0);
   vector<StereoSample>* result = new vector<StereoSample>(total);
 
   for (int i=0; i<int(total); ++i) {
