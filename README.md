@@ -18,7 +18,7 @@ Install the main dependencies with [Brew](https://brew.sh/)
 ```zsh
 % brew update
 % brew install pkg-config gcc readline sqlite gdbm freetype libpng
-% brew install eigen libsamplerate taglib libyaml fftw ffempeg@4 numpy
+% brew install eigen libsamplerate taglib libyaml fftw ffmpeg@4 numpy
 ```
 It is then important to link `ffmpeg@4` manually
 ```zsh
