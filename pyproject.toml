@@ -22,7 +22,7 @@ test-command = "python -c 'import essentia; import essentia.standard; import ess
 
 skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
 
-environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
+environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, MACOSX_DEPLOYMENT_TARGET=13.0 }
 
 before-build = [
   "brew install pkg-config gcc readline sqlite gdbm freetype libpng",
@@ -45,7 +45,7 @@ select = "*macosx_arm64*"
 
 skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
 
-environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1 }
+environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1, MACOSX_DEPLOYMENT_TARGET=14.0 }
 
 before-build = [
   "brew install pkg-config gcc readline sqlite gdbm libpng",
