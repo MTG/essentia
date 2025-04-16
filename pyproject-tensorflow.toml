@@ -33,7 +33,7 @@ before-build = [
   "brew link --overwrite ffmpeg@2.8",
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
   # Tensorflow bottle a has minimum target of 14.2 which is too new, therefore, building from source.
-  "brew install --build-from-source tensorflow",
+  "SDKROOT=$(xcrun --sdk macosx13.0 --show-sdk-path) brew install --build-from-source tensorflow",
   #"brew tap MTG/essentia",
   #"brew install gaia --HEAD",
   # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
@@ -60,7 +60,7 @@ before-build = [
   "brew link --overwrite ffmpeg@2.8",
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
   # Tensorflow bottle has a minumum target of 15.2, which is too new, therefore, building from source.
-  "brew install --build-from-source tensorflow",
+  "SDKROOT=$(xcrun --sdk macosx14.0 --show-sdk-path) brew install --build-from-source tensorflow",
   # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
   "VIRTUAL_ENV=/usr/local python waf configure --with-tensorflow --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
