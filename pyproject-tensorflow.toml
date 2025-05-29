@@ -34,7 +34,7 @@ before-build = [
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
   # Tensorflow bottle a has minimum target of 14.2 which is too new, therefore, building from source.
   # Workaroud to SDK not being found: https://github.com/actions/runner-images/issues/9811
-  "sudo xcode-select -s /Library/Developer/CommandLineTools",
+  #"sudo xcode-select -s /Library/Developer/CommandLineTools",
   "echo Checking available SDKs:",
   "xcodebuild -showsdks",
   "SDKROOT=$(xcrun --sdk macosx13.0 --show-sdk-path) brew install --build-from-source tensorflow",
@@ -65,7 +65,7 @@ before-build = [
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
   # Tensorflow bottle has a minumum target of 15.2, which is too new, therefore, building from source.
   # Workaroud to SDK not being found: https://github.com/actions/runner-images/issues/9811
-  "sudo xcode-select -s /Library/Developer/CommandLineTools",
+  #"sudo xcode-select -s /Library/Developer/CommandLineTools",
   "echo Checking available SDKs:",
   "xcodebuild -showsdks",
   "SDKROOT=$(xcrun --sdk macosx14.0 --show-sdk-path) brew install --build-from-source tensorflow",
