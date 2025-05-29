@@ -35,6 +35,8 @@ before-build = [
   # Tensorflow bottle a has minimum target of 14.2 which is too new, therefore, building from source.
   # Workaroud to SDK not being found: https://github.com/actions/runner-images/issues/9811
   "sudo xcode-select -s /Library/Developer/CommandLineTools",
+  "echo Checking available SDKs:",
+  "xcodebuild -showsdks",
   "SDKROOT=$(xcrun --sdk macosx13.0 --show-sdk-path) brew install --build-from-source tensorflow",
   #"brew tap MTG/essentia",
   #"brew install gaia --HEAD",
@@ -64,6 +66,8 @@ before-build = [
   # Tensorflow bottle has a minumum target of 15.2, which is too new, therefore, building from source.
   # Workaroud to SDK not being found: https://github.com/actions/runner-images/issues/9811
   "sudo xcode-select -s /Library/Developer/CommandLineTools",
+  "echo Checking available SDKs:",
+  "xcodebuild -showsdks",
   "SDKROOT=$(xcrun --sdk macosx14.0 --show-sdk-path) brew install --build-from-source tensorflow",
   # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
   "VIRTUAL_ENV=/usr/local python waf configure --with-tensorflow --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
