@@ -32,14 +32,16 @@ before-build = [
   "brew install chromaprint",
   "brew link --overwrite ffmpeg@2.8",
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
-  # Tensorflow bottle a has minimum target of 14.2 which is too new, therefore, building from source.
-  # Workaroud to SDK not being found: https://github.com/actions/runner-images/issues/9811
-  #"sudo xcode-select -s /Library/Developer/CommandLineTools",
-  "echo Checking available SDKs:",
-  "xcodebuild -showsdks",
-  "SDKROOT=$(xcrun --sdk macosx13.0 --show-sdk-path) brew install --build-from-source tensorflow",
-  #"brew tap MTG/essentia",
-  #"brew install gaia --HEAD",
+  # Tensorflow bottle a has minimum target of 14.2 which is too new.
+  # We could build from source as a workaround, however, it takes too much time on the CI worker.
+  # To keep it simple, just use the bottles available for tensorflow.
+  "brew install tensorflow",
+  # ---
+  # Building tensorflow from source:
+  #"echo Checking available SDKs:",
+  #"xcodebuild -showsdks",
+  #"SDKROOT=$(xcrun --sdk macosx13.0 --show-sdk-path) brew install --build-from-source tensorflow",
+  # ---
   # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
   "VIRTUAL_ENV=/usr/local python waf configure --with-tensorflow --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
   "python waf",
@@ -63,12 +65,16 @@ before-build = [
   "brew install chromaprint",
   "brew link --overwrite ffmpeg@2.8",
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
-  # Tensorflow bottle has a minumum target of 15.2, which is too new, therefore, building from source.
-  # Workaroud to SDK not being found: https://github.com/actions/runner-images/issues/9811
-  #"sudo xcode-select -s /Library/Developer/CommandLineTools",
-  "echo Checking available SDKs:",
-  "xcodebuild -showsdks",
-  "SDKROOT=$(xcrun --sdk macosx14.0 --show-sdk-path) brew install --build-from-source tensorflow",
+  # Tensorflow bottle a has minimum target of 15.2 which is too new.
+  # We could build from source as a workaround, however, it takes too much time on the CI worker.
+  # To keep it simple, just use the bottles available for tensorflow.
+  "brew install tensorflow",
+  # ---
+  # Building tensorflow from source:
+  #"echo Checking available SDKs:",
+  #"xcodebuild -showsdks",
+  #"SDKROOT=$(xcrun --sdk macosx14.0 --show-sdk-path) brew install --build-from-source tensorflow",
+  # ---
   # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
   "VIRTUAL_ENV=/usr/local python waf configure --with-tensorflow --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
