@@ -21,7 +21,9 @@ lib_map = {
     'FFTW': 'fftw3f',
     'LIBCHROMAPRINT': 'libchromaprint',
     'GAIA2': 'gaia2',
-    'TENSORFLOW': 'tensorflow'}
+    'TENSORFLOW': 'tensorflow',
+    'ONNXRUNTIME': 'onnxruntime',
+    }
 
 
 def options(ctx):
@@ -199,6 +201,10 @@ def configure(ctx):
 
     if 'tensorflow' in ctx.env.CHECK_LIBS:
         ctx.check_cfg(package=lib_map['TENSORFLOW'], uselib_store='TENSORFLOW',
+                      args=check_cfg_args, mandatory=True)
+    
+    if 'onnxruntime' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['ONNXRUNTIME'], uselib_store='ONNXRUNTIME',
                       args=check_cfg_args, mandatory=True)
 
     # needed by ffmpeg for the INT64_C macros
