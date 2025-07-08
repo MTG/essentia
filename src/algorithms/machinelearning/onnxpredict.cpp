@@ -116,7 +116,6 @@ void OnnxPredict::configure() {
     
     
   _env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "default");
-  //_session = Ort::Session{env, _graphFilename.c_str(), options_ort};
     
   try{
     _session = Ort::Session(_env, _graphFilename.c_str(), _sessionOptions);
@@ -273,18 +272,18 @@ void OnnxPredict::reset() {
   // Ort::ReleaseSession(_session); // error: no type named 'ReleaseSession' in namespace 'Ort'
 
     
-  if (Ort::Status::GetErrorCode(_status) != Ort::Status::IsOK()) {
-    throw EssentiaException("OnnxPredict: Error closing session. ",  Ort::Status::GetErrorMessage(_status));
+  if (_status->GetErrorCode() != _status->IsOK()) {
+    throw EssentiaException("OnnxPredict: Error closing session. ",  _status->GetErrorMessage());
   }
 
   //TF_DeleteSession(_session, _status);
-  if (Ort::Status::GetErrorCode(_status) != Ort::Status::IsOK) {
-    throw EssentiaException("OnnxPredict: Error deleting session. ", Ort::Status::GetErrorMessage(_status));
+  if (_status->GetErrorCode() != _status->IsOK()) {
+    throw EssentiaException("OnnxPredict: Error deleting session. ", _status->GetErrorMessage());
   }
 
   // TODO: do we need this for ORT?
   /*_session = TF_NewSession(_graph, _sessionOptions, _status);
-  if (Ort::Status::GetErrorCode(_status) != Ort::Status::IsOK) {
+  if (Ort::Status::GetErrorCode(_status) != Ort::Status::IsOK(_status)) {
     throw EssentiaException("OnnxPredict: Error creating new session after reset. ", Ort::Status::GetErrorMessage(_status));
   }*/
 }
@@ -304,6 +303,7 @@ void OnnxPredict::compute() {
   /*input_tensor_ = Ort::Value::CreateTensor<float>(memory_info, input_image_.data(), input_image_.size(), input_shape_.data(), input_shape_.size());
   output_tensor_ = Ort::Value::CreateTensor<float>(memory_info, results_.data(), results_.size(), output_shape_.data(), output_shape_.size());*/
  
+  // TODO: implement TensorToOrt() taht converts Pool tensors into Ort tensors
   // Parse the input tensors from the pool into Tensorflow tensors.
   for (size_t i = 0; i < _nInputs; i++) {
     const Tensor<Real>& inputData =
@@ -344,8 +344,8 @@ void OnnxPredict::compute() {
                 _status                          // Output status.
                );*/
 
-  if (Ort::Status::GetErrorCode(_status) != Ort::Status::IsOK()) {
-    throw EssentiaException("OnnxPredict: Error running the OnnxRuntime session. ", Ort::Status::GetErrorMessage(_status));
+  if (_status->GetErrorCode() != _status->IsOK()) {
+    throw EssentiaException("OnnxPredict: Error running the OnnxRuntime session. ", _status->GetErrorMessage());
   }
     
   // Copy the desired tensors into the output pool.
