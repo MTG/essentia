@@ -52,8 +52,8 @@ class EssentiaBuildExtension(build_ext):
             subprocess.run([PYTHON,  'waf', 'configure', '--only-python', '--static-dependencies',
                       '--prefix=tmp'] + macos_arm64_flags, check=True)
         else:
-            subprocess.run([PYTHON, 'waf', 'configure', '--build-static', '--static-dependencies'
-                      '--with-python --prefix=tmp'] + macos_arm64_flags, check=True)
+            subprocess.run([PYTHON, 'waf', 'configure', '--build-static', '--static-dependencies',
+                      '--with-python', '--prefix=tmp'] + macos_arm64_flags, check=True)
         subprocess.run([PYTHON, 'waf'], check=True)
         subprocess.run([PYTHON, 'waf', 'install'], check=True)
 
