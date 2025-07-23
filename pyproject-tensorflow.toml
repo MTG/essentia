@@ -108,7 +108,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name="essentia"
+name="essentia-tensorflow"
 license = "AGPL-3.0-only"
 dynamic = ["version", "description", "readme", "authors", "keywords", "classifiers", "urls"]
 dependencies = [
