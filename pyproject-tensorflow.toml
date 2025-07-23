@@ -48,7 +48,8 @@ before-all = [
   "python waf install"
 ]
 
-test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter, TensorflowPredict'"
+# FIXME Temporarily disable testing on macos-13 runner. The wheel is tagged as macosx_14_2 due to the Tensorflow dependency, so it can't be installed by pip ("not a supported wheel on this platform").
+#test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter, TensorflowPredict'"
 
 
 [[tool.cibuildwheel.overrides]]
