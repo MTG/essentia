@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04, macos-13, macos-15]
-        config: [pyproject, pyproject-tensorflow]
+        config: [cibuildwheel, cibuildwheel-tensorflow]
 
     steps:
       - uses: actions/checkout@v4

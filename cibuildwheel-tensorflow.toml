@@ -13,7 +13,10 @@ before-all = [
   "PYBIN=/opt/python/cp36-cp36m/bin/",
   "\"${PYBIN}/python\" waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
   "\"${PYBIN}/python\" waf",
-  "\"${PYBIN}/python\" waf install"
+  "\"${PYBIN}/python\" waf install",
+  # Monkey-patch package name.
+  # We could have a separate pyproject.toml configuration, but the build backend does not accept custom configuration filepaths.
+  "sed 's/^name *= *\"essentia\"$/name = \"essentia-tensorflow\"/' pyproject.toml > pyproject.toml.patched && mv pyproject.toml.patched pyproject.toml"
 ]
 
 test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter, TensorflowPredict'"
@@ -45,7 +48,10 @@ before-all = [
   # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
   "VIRTUAL_ENV=/usr/local python waf configure --with-tensorflow --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
   "python waf",
-  "python waf install"
+  "python waf install",
+  # Monkey-patch package name.
+  # We could have a separate pyproject.toml configuration, but the build backend does not accept custom configuration filepaths.
+  "sed 's/^name *= *\"essentia\"$/name = \"essentia-tensorflow\"/' pyproject.toml > pyproject.toml.patched && mv pyproject.toml.patched pyproject.toml"
 ]
 
 # FIXME Temporarily disable testing on macos-13 runner. The wheel is tagged as macosx_14_2 due to the Tensorflow dependency, so it can't be installed by pip ("not a supported wheel on this platform").
@@ -80,6 +86,9 @@ before-all = [
   "VIRTUAL_ENV=/usr/local python waf configure --with-tensorflow --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
   "sudo python waf install",
+  # Monkey-patch package name.
+  # We could have a separate pyproject.toml configuration, but the build backend does not accept custom configuration filepaths.
+  "sed 's/^name *= *\"essentia\"$/name = \"essentia-tensorflow\"/' pyproject.toml > pyproject.toml.patched && mv pyproject.toml.patched pyproject.toml"
 ]
 
 # On Mac arm64, libavcodec.56.60.100, libavformat.56.40.101 and
@@ -95,24 +104,4 @@ repair-wheel-command = [
   "cp /opt/homebrew/opt/sdl2/lib/libSDL2*.dylib {dest_dir}/essentia/.dylibs",
   "wheel_rel=$(echo {wheel} | grep -o '[^/]*$')",
   "cd {dest_dir} && zip -u {dest_dir}/$wheel_rel essentia/.dylibs/*"
-]
-
-
-[build-system]
-requires = [
-    "wheel >= 0.29.0",
-    "setuptools >= 48",
-    "numpy>=2.0.0rc1",
-    "six",
-]
-build-backend = "setuptools.build_meta"
-
-[project]
-name="essentia-tensorflow"
-license = "AGPL-3.0-only"
-dynamic = ["version", "description", "readme", "authors", "keywords", "classifiers", "urls"]
-dependencies = [
-    "numpy>=1.25",
-    "pyyaml",
-    "six",
 ]
