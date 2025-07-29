@@ -78,7 +78,9 @@ void AudioLoader::openAudioFile(const string& filename) {
     // Check that we have only 1 audio stream in the file
     _streams.clear();
     for (int i=0; i<(int)_demuxCtx->nb_streams; i++) {
-        if (_demuxCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_AUDIO) {
+        // Use modern API to get codec parameters
+        const AVCodecParameters* codecParams = _demuxCtx->streams[i]->codecpar;
+        if (codecParams->codec_type == AVMEDIA_TYPE_AUDIO) {
             _streams.push_back(i);
         }
     }
@@ -98,20 +100,39 @@ void AudioLoader::openAudioFile(const string& filename) {
 
     _streamIdx = _streams[_selectedStream];
 
-    // Load corresponding audio codec
-    _audioCtx = _demuxCtx->streams[_streamIdx]->codec;
-    _audioCodec = avcodec_find_decoder(_audioCtx->codec_id);
+    // Create codec context from stream parameters (modern approach)
+    const AVCodecParameters* codecParams = _demuxCtx->streams[_streamIdx]->codecpar;
+    _audioCodec = avcodec_find_decoder(codecParams->codec_id);
 
     if (!_audioCodec) {
         throw EssentiaException("AudioLoader: Unsupported codec!");
     }
 
+    _audioCtx = avcodec_alloc_context3(_audioCodec);
+    if (!_audioCtx) {
+        throw EssentiaException("AudioLoader: Could not allocate codec context");
+    }
+
+    // Copy parameters from stream to codec context
+    if (avcodec_parameters_to_context(_audioCtx, codecParams) < 0) {
+        avcodec_free_context(&_audioCtx);
+        throw EssentiaException("AudioLoader: Could not copy codec parameters");
+    }
+
     if (avcodec_open2(_audioCtx, _audioCodec, NULL) < 0) {
+        avcodec_free_context(&_audioCtx);
         throw EssentiaException("AudioLoader: Unable to instantiate codec...");
     }
   
-    // Configure format convertion  (no samplerate conversion yet)
-    int64_t layout = av_get_default_channel_layout(_audioCtx->channels);
+    // Configure format conversion (no samplerate conversion yet)
+    // Use modern channel layout API
+    AVChannelLayout layout;
+    if (_audioCtx->ch_layout.nb_channels > 0) {
+        layout = _audioCtx->ch_layout;
+    } else {
+        // Fallback for older codecs that might not have channel layout set
+        av_channel_layout_default(&layout, _audioCtx->ch_layout.nb_channels);
+    }
 
     /*
     const char* fmt = 0;
@@ -122,8 +143,9 @@ void AudioLoader::openAudioFile(const string& filename) {
     E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libswresample");
     _convertCtxAv = swr_alloc();
         
-    av_opt_set_int(_convertCtxAv, "in_channel_layout", layout, 0);
-    av_opt_set_int(_convertCtxAv, "out_channel_layout", layout, 0);
+    // Use modern channel layout API for swresample configuration
+    av_opt_set_chlayout(_convertCtxAv, "in_chlayout", &layout, 0);
+    av_opt_set_chlayout(_convertCtxAv, "out_chlayout", &layout, 0);
     av_opt_set_int(_convertCtxAv, "in_sample_rate", _audioCtx->sample_rate, 0);
     av_opt_set_int(_convertCtxAv, "out_sample_rate", _audioCtx->sample_rate, 0);
     av_opt_set_int(_convertCtxAv, "in_sample_fmt", _audioCtx->sample_fmt, 0);
@@ -154,14 +176,16 @@ void AudioLoader::closeAudioFile() {
         swr_free(&_convertCtxAv);
     }
 
-    // Close the codec
-    if (_audioCtx) avcodec_close(_audioCtx);
+    // Close the codec using modern API
+    if (_audioCtx) {
+        avcodec_free_context(&_audioCtx);
+    }
     // Close the audio file
     if (_demuxCtx) avformat_close_input(&_demuxCtx);
 
-    // free AVPacket
+    // free AVPacket using modern API
     // TODO: use a variable for whether _packet is initialized or not
-    av_free_packet(&_packet);
+    av_packet_unref(&_packet);
     _demuxCtx = 0;
     _audioCtx = 0;
     _streams.clear();
@@ -243,8 +267,8 @@ AlgorithmStatus AudioLoader::process() {
         if (!decodePacket()) break;
         copyFFmpegOutput();
     }
-    // neds to be freed !!
-    av_free_packet(&_packet);
+    // needs to be freed using modern API !!
+    av_packet_unref(&_packet);
     
     return OK;
 }
@@ -259,11 +283,21 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
     //           output = number of bytes actually written (actual: FLT data)
     //E_DEBUG(EAlgorithm, "decode_audio_frame, available bytes in buffer = " << _dataSize);
     int gotFrame = 0;
-    av_frame_unref(_decodedFrame); //avcodec_get_frame_defaults(_decodedFrame);
+    av_frame_unref(_decodedFrame);
 
-    int len = avcodec_decode_audio4(audioCtx, _decodedFrame, &gotFrame, packet);
+    // Use modern decoding API: send packet to decoder
+    int send_result = avcodec_send_packet(audioCtx, packet);
+    if (send_result < 0) return send_result; // error handling should be done outside
 
-    if (len < 0) return len; // error handling should be done outside
+    // Receive decoded frame from decoder
+    int receive_result = avcodec_receive_frame(audioCtx, _decodedFrame);
+    if (receive_result == AVERROR(EAGAIN) || receive_result == AVERROR_EOF) {
+        gotFrame = 0;
+        return packet->size; // Packet was sent successfully, but no frame available yet
+    } else if (receive_result < 0) {
+        return receive_result; // error handling should be done outside
+    }
+    gotFrame = 1;
 
     if (gotFrame) {
         int inputSamples = _decodedFrame->nb_samples;
@@ -310,7 +344,7 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
       *outputSize = 0;
     }
 
-    return len;
+    return packet->size; // Return the size of the packet that was processed
 }
 
 
@@ -474,7 +508,7 @@ void AudioLoader::reset() {
     closeAudioFile();
     openAudioFile(filename);
 
-    pushChannelsSampleRateInfo(_audioCtx->channels, _audioCtx->sample_rate);
+    pushChannelsSampleRateInfo(_audioCtx->ch_layout.nb_channels, _audioCtx->sample_rate);
     pushCodecInfo(_audioCodec->name, _audioCtx->bit_rate);
 }
 
