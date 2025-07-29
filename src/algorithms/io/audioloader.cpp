@@ -293,7 +293,9 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
     int receive_result = avcodec_receive_frame(audioCtx, _decodedFrame);
     if (receive_result == AVERROR(EAGAIN) || receive_result == AVERROR_EOF) {
         gotFrame = 0;
-        return packet->size; // Packet was sent successfully, but no frame available yet
+        // Return the number of bytes that would have been consumed
+        // For flush packets (empty packets), return 0
+        return (packet->size > 0) ? packet->size : 0;
     } else if (receive_result < 0) {
         return receive_result; // error handling should be done outside
     }
@@ -344,7 +346,9 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
       *outputSize = 0;
     }
 
-    return packet->size; // Return the size of the packet that was processed
+    // Return the number of bytes consumed from the packet
+    // For the modern API, we consume the entire packet when we send it
+    return packet->size;
 }
 
 
@@ -357,7 +361,10 @@ void AudioLoader::flushPacket() {
         empty.size = 0;
 
         int len = decode_audio_frame(_audioCtx, _buffer, &_dataSize, &empty);
-        if (len < 0) {
+        if (len == AVERROR_EOF) {
+            // This is expected when flushing - no more frames to decode
+            break;
+        } else if (len < 0) {
             char errstring[1204];
             av_strerror(len, errstring, sizeof(errstring));
             ostringstream msg;
