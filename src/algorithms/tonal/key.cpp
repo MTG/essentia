@@ -716,7 +716,7 @@ void Key::shiftPcp(vector<Real>& pcp) {
 
   vector<Real>::iterator newBegin;
   if (maxValIndex > (tuningResolution / 2)) {
-    newBegin = pcp.end() + maxValIndex - tuningResolution;
+    newBegin = pcp.end() + (maxValIndex - tuningResolution);
   }
   else {
     newBegin = pcp.begin() + maxValIndex;
