@@ -132,6 +132,17 @@ class Network {
   bool runStep();
 
   /**
+   * Processes all tokens generated with one call of process() on the
+   * generator.
+   *
+   * Returns 
+   * - FINISHED if processing is done (i.e. EOF has been reached)
+   * - CONTINUE if the frame was processed correctly 
+   * - PASS if there is no more data in the generator
+   */
+  streaming::AlgorithmStatus runOnce();
+
+  /**
    * Rebuilds the visible and execution network.
    */
   void update() {
