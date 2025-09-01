@@ -2,8 +2,8 @@
 set -e
 . ../build_config.sh
 
-# rm -rf tmp
-# mkdir tmp
+rm -rf tmp
+mkdir tmp
 cd tmp
 
 # Prerequisites:        python>=3.10
@@ -11,24 +11,36 @@ cd tmp
 
 echo "Building onnxruntime $LIBONNXRUNTIME_VERSION"
 
-#curl -SLO "https://github.com/microsoft/onnxruntime/archive/refs/tags/v$LIBONNXRUNTIME_VERSION.tar.gz"
-#! this file has an issue https://github.com/microsoft/onnxruntime/issues/24861
-#! it is fixed manually for testing https://github.com/microsoft/onnxruntime/commit/f57db79743c4d1a3553aa05cf95bcd10966030e6
-#! should be done in three-steps: first, downloading the package, editing the deps.txt file and running the script
-#! in the main branch it is fixed, it should be replaced when a release is available.
+curl -SLO "https://github.com/microsoft/onnxruntime/archive/refs/tags/v$LIBONNXRUNTIME_VERSION.tar.gz"
 
-#tar -xf v$LIBONNXRUNTIME_VERSION.tar.gz
+tar -xf v$LIBONNXRUNTIME_VERSION.tar.gz
 cd onnxruntime-$LIBONNXRUNTIME_VERSION
 
 python3 -m pip install cmake
 
-# compile library with cmake
+# Build the dynamic library for Linux
+# ./build.sh \
+#   --config RelWithDebInfo \
+#   --build_shared_lib \
+#   --parallel \
+#   --compile_no_warning_as_error \
+#   --skip_submodule_sync
+
+# Build the dynamic library for MacOS (build for Intel and Apple silicon CPUs --> "x86_64;arm64")
 ./build.sh \
   --config RelWithDebInfo \
   --build_shared_lib \
   --parallel \
   --compile_no_warning_as_error \
-  --skip_submodule_sync
+  --skip_submodule_sync \
+  --cmake_extra_defines CMAKE_OSX_ARCHITECTURES="arm64" FETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER CMAKE_INSTALL_PREFIX=$PREFIX
+
+#! We have found some issues building for cross-platforms, it looks it is much better to build it in a docker
+#! In MacOS, we have experienced issues with the brew package. So, it needs to uninstall brew applications first (brew unsnstall onnxruntime)
+
+# copying .pc file
+mkdir -p "${PREFIX}"/lib/pkgconfig/
+cp build/MacOS/RelWithDebInfo/libonnxruntime.pc ${PREFIX}/lib/pkgconfig/
 
 cd ../..
-# rm -fr tmp
+rm -fr tmp
