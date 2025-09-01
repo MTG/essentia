@@ -26,53 +26,27 @@ using namespace standard;
 const char* OnnxPredict::name = "OnnxPredict";
 const char* OnnxPredict::category = "Machine Learning";
 
-// TODO: update description with ONNX
 const char* OnnxPredict::description = DOC("This algorithm runs a Onnx graph and stores the desired output tensors in a pool.\n"
-"The Tensorflow graph should be stored in Protocol Buffer (.pb) binary format [1] or as a SavedModel [2], and should contain both the architecture and the weights of the model.\n"
-"The parameter `inputs` should contain a list with the names of the input nodes that feed the model. The input Pool should contain the tensors corresponding to each input node stored using Essetia tensors. "
+"The Onnx graph should be stored in Open Neural Network Exchange (.onnx) binary format [1], and should contain both the architecture and the weights of the model.\n"
+"The parameter `inputs` should contain a list with the names of the input nodes that feed the model. The input Pool should contain the tensors corresponding to each input node stored using Essentia tensors. "
 "The pool namespace for each input tensor has to match the input node's name.\n"
 "In the same way, the `outputs` parameter should contain the names of the tensors to save. These tensors will be stored inside the output pool under a namespace that matches the tensor's name. "
-"TensorFlow nodes return tensors identified as `nodeName:n`, where `n` goes from 0 to the number of outputs of the node - 1. "
-"The first output tensor of a node can be referred implicitly (e.g., `nodeName`) or explicitly (e.g., `nodeName:0`), and the subsequent tensors require the specific index (e.g., nodeName:1, nodeName:2). "
-"In TensorFlow 2 SavedModels all the outputs of the model are contained in the `PartitionedCall` node (e.g., `PartitionedCall:0`, `PartitionedCall:1`). "
-"You can use TenorFlow's `saved_model_cli` to find the relation of outputs and `PartitionedCall` indices, for example:\n"
-"\n"
-">>>    saved_model_cli show --dir SavedModel/ --all\n"
-">>>    ...\n"
-">>>    The given SavedModel SignatureDef contains the following output(s):\n"
-">>>      outputs['activations'] tensor_info:\n"
-">>>          dtype: DT_FLOAT\n"
-">>>          shape: (1, 400)\n"
-">>>          name: PartitionedCall:0\n"
-">>>      outputs['embeddings'] tensor_info:\n"
-">>>          dtype: DT_FLOAT\n"
-">>>          shape: (1, 1280)\n"
-">>>          name: PartitionedCall:1\n"
-">>>    ...\n"
-"\n"
 "To print a list with all the available nodes in the graph set the first element of `outputs` as an empty string (i.e., \"\")."
 "\n"
-"This algorithm is a wrapper for the Tensorflow C API [3]. The first time it is configured with a non-empty `graphFilename` it will try to load the contained graph and to attach a Tensorflow session to it. "
-"The reset method deletes the current session (and the resources attached to it) and creates a new one relying on the available graph. "
+"This algorithm is a wrapper for the ONNX Runtime Inferencing API [2]. The first time it is configured with a non-empty `graphFilename` it will try to load the contained graph and to attach a ONNX session to it. "
+"The reset method deletes the model inputs and outputs internally stored in a vector. "
 "By reconfiguring the algorithm the graph is reloaded and the reset method is called.\n"
 "\n"
 "References:\n"
-"  [1] TensorFlow - An open source machine learning library for research and production.\n"
-"  https://www.tensorflow.org/extend/tool_developers/#protocol_buffers\n\n"
-"  [2] TensorFlow - An open source machine learning library for research and production.\n"
-"  https://www.tensorflow.org/guide/saved_model\n\n"
-"  [3] TensorFlow - An open source machine learning library for research and production.\n"
-"  https://www.tensorflow.org/api_docs/cc/");
-
-
-static void DeallocateBuffer(void* data, size_t) {
-  free(data);
-}
+"  [1] ONNX - The open standard for machine learning interoperability.\n"
+"  https://onnx.ai/onnx/intro/\n\n"
+"  [2] ONNX Runtime API - a cross-platform machine-learning model accelerator, with a flexible interface to integrate hardware-specific libraries.\n"
+"  https://onnxruntime.ai/docs/");
 
 
 void OnnxPredict::configure() {
   _graphFilename = parameter("graphFilename").toString();
-
+    
   if ((_graphFilename.empty()) and (_isConfigured)) {
     E_WARNING("OnnxPredict: You are trying to update a valid configuration with invalid parameters. "
               "If you want to update the configuration specify a valid `graphFilename` parameter.");
@@ -80,216 +54,187 @@ void OnnxPredict::configure() {
 
   // Do not do anything if we did not get a non-empty model name.
   if (_graphFilename.empty()) return;
-
-
-  _inputs = parameter("inputs").toVectorString();
-  _outputs = parameter("outputs").toVectorString();
-  _isTraining = parameter("isTraining").toBool();
-  _isTrainingName = parameter("isTrainingName").toString();
-  _squeeze = parameter("squeeze").toBool();
-
-  (_isTrainingName == "") ? _isTrainingSet = false : _isTrainingSet = true;
-
-  _nInputs = _inputs.size();
-  _nOutputs = _outputs.size();
-
-  // Allocate input and output tensors.
-  _inputTensors.resize(_nInputs + int(_isTrainingSet));
-  _inputNodes.resize(_nInputs + int(_isTrainingSet));
-
-  _outputTensors.resize(_nOutputs);
-  _outputNodes.resize(_nOutputs);
-
-  /* Set graph optimization level
-  // https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
-  session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
-
-  // To enable model serialization after graph optimization set this
-  session_options.SetOptimizedModelFilePath("optimized_file_path");*/
-
-
-  // DONE: reset graph and create a new empty one
-  /*Ort::ReleaseGraph(_graph);
-  _graph = Ort::Graph();
-
-  openGraph();*/
-    
-    
-  _env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "default");
     
   try{
+    // Define environment
+    _env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "multi_io_inference"); // {"default", "test", "multi_io_inference"}
+      
+    // Set graph optimization level - check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
+    _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+    // To enable model serialization after graph optimization set this
+    _sessionOptions.SetOptimizedModelFilePath("optimized_file_path");
+    _sessionOptions.SetIntraOpNumThreads(1);
+        
+    // Initialize session
     _session = Ort::Session(_env, _graphFilename.c_str(), _sessionOptions);
   }
   catch (Ort::Exception oe) {
-    std::cout << "ONNX exception caught: " << oe.what() << ". Code: " << oe.GetOrtErrorCode() <<   ".\n";
-  //return -1;
+    cout << "ONNX exception caught: " << oe.what() << ". Code: " << oe.GetOrtErrorCode() <<   ".\n";
+    return;
+  }
+      
+  // get input and output info (names, type and shapes)
+  all_input_infos = setTensorInfos(_session, _allocator, true);
+  all_output_infos = setTensorInfos(_session, _allocator, false);
+    
+  // read inputs and outputs as input parameter
+  _inputs = parameter("inputs").toVectorString();
+  _outputs = parameter("outputs").toVectorString();
+    
+  _squeeze = parameter("squeeze").toBool();
+
+  _nInputs = _inputs.size();
+  _nOutputs = _outputs.size();
+    
+  cout << "_inputs.size(): " << _nInputs << ".\n";
+    
+  // use the first input when no input is defined
+  if (_nInputs == 0){
+    // take the first input
+    _inputs.push_back(_session.GetInputNames()[0]);
+    _nInputs = _inputs.size();
+    // inform the first model input will be used
+    E_INFO("OnnxPredict: using the first model input '" + _inputs[0] + "'");
   }
 
-  _isConfigured = true;
-  reset();
+  // define _outputs with the first model output when no output is provided
+  if (_nOutputs == 0){
+    // take the first output
+    _outputs.push_back(_session.GetOutputNames()[0]);
+    _nOutputs = _outputs.size();
+    // inform the first model input will be used
+    E_INFO("OnnxPredict: using the first model output '" + _outputs[0] + "'");
+  }
 
   // If the first output name is empty just print out the list of nodes and return.
   if (_outputs[0] == "") {
-    E_INFO(availableNodesInfo());
-
+    E_INFO(getTensorInfos(all_input_infos, "Model Inputs"));
+    E_INFO(getTensorInfos(all_output_infos, "Model Outputs"));
     return;
   }
     
-  try {
-    memory_info = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-  }
-  catch (Ort::Exception oe) {
-    std::cout << "ONNX exception caught: " << oe.what() << ". Code: " << oe.GetOrtErrorCode() << ".\n";
-    //return -1;
-  }
+  // check model has input and output https://github.com/microsoft/onnxruntime-inference-examples/blob/7a635daae48450ff142e5c0848a564b245f04112/c_cxx/model-explorer/model-explorer.cpp#L99C3-L100C63
 
+  for (int i = 0; i < _inputs.size(); i++) {
+    for (int j = 0; j < all_input_infos.size(); j++) {
+      if (_inputs[i] == all_input_infos[j].name){
+        _inputNodes.push_back(all_input_infos[j]);
+      }
+    }
+  }
+  
+  if (_inputNodes.size() == 0){
+    std::string s;
+    for (const auto &piece : _inputs) {
+      s += piece;
+      s += " ";
+    }
+    throw EssentiaException("ONNXRuntimePredict: '" + s +
+                            "' are not valid input name of this model.\n" +
+                            getTensorInfos(all_input_infos, "Model Inputs"));
+  }
     
-  /* Initialize the list of input and output node names.
+  for (int i = 0; i < _outputs.size(); i++) {
+    for (int j = 0; j < all_output_infos.size(); j++) {
+      if (_outputs[i] == all_output_infos[j].name){
+        _outputNodes.push_back(all_output_infos[j]);
+      }
+    }
+  }
+ 
+  if (_outputNodes.size() == 0){
+    std::string s;
+    for (const auto &piece : _outputs) {
+      s += piece;
+      s += " ";
+    }
+    throw EssentiaException("ONNXRuntimePredict: '" + s +
+                            "' has not a valid output name of this model.\n" +
+                            getTensorInfos(all_output_infos, "Model Outputs"));
+  }
+    
+  _isConfigured = true;
+  reset();
+    
   for (size_t i = 0; i < _nInputs; i++) {
-    _inputNodes[i] = graphOperationByName(_inputs[i]);
+    checkName(_inputs[i], all_input_infos);
   }
-
+    
   for (size_t i = 0; i < _nOutputs; i++) {
-    _outputNodes[i] = graphOperationByName(_outputs[i]);
-  }*/
-    
-
-  // print name/shape of inputs
-  auto input_names = _session.GetInputNames();
-  auto input_shapes = _session.GetInputShapes();
-  cout << "Input Node Name/Shape (" << input_names.size() << "):" << endl;
-  for (size_t i = 0; i < input_names.size(); i++) {
-    cout << "\t" << input_names[i] << " : " << print_shape(input_shapes[i]) << endl;
-  }
-
-  // print name/shape of outputs
-  auto output_names = _session.GetOutputNames();
-  auto output_shapes = _session.GetOutputShapes();
-  cout << "Output Node Name/Shape (" << output_names.size() << "):" << endl;
-  for (size_t i = 0; i < output_names.size(); i++) {
-    cout << "\t" << output_names[i] << " : " << print_shape(output_shapes[i]) << endl;
-  }
-    
-
-  /* Add isTraining flag if needed.
-  if (_isTrainingSet) {
-    const int64_t dims[1] = {};
-    TF_Tensor *isTraining = TF_AllocateTensor(TF_BOOL, dims, 0, 1);
-    void* isTrainingValue = TF_TensorData(isTraining);
-
-    if (isTrainingValue == NULL) {
-      TF_DeleteTensor(isTraining);
-      throw EssentiaException("OnnxPredict: Error generating training phase flag");
-    }
-
-    memcpy(isTrainingValue, &_isTraining, sizeof(bool));
-
-    _inputTensors[_nInputs] = isTraining;
-    _inputNodes[_nInputs] = graphOperationByName(_isTrainingName);
-  }
-   */
-}
-
-/*
-void OnnxPredict::openGraph() {
-
-  if (!_graphFilename.empty()) {
-      
-    // Create a ModelProto instance
-    onnx::ModelProto model;
-
-    // Open file input stream
-    std::ifstream input(model_path, std::ios::binary);
-    if (!input.is_open()) {
-        std::cerr << "Error opening model file: " << model_path << std::endl;
-        return 1;
-    }
-
-    // Parse the binary ONNX model into the ModelProto
-    if (!model.ParseFromIstream(&input)) {
-        std::cerr << "Failed to parse ONNX model." << std::endl;
-        return 1;
-    }
-
-    // Access the graph
-    onnx::GraphProto* graph = model.mutable_graph();
-
-    // Print some basic info
-    std::cout << "Model graph name: " << graph->name() << std::endl;
-    std::cout << "Number of nodes: " << graph->node_size() << std::endl;
-    
-    // First we load and initialize the model.
-    const auto f = fopen(_graphFilename.c_str(), "rb");
-    if (f == NULL) {
-      throw EssentiaException(
-          "OnnxPredict: could not open the Tensorflow graph file.");
-    }
-
-    fseek(f, 0, SEEK_END);
-    const auto fsize = ftell(f);
-    fseek(f, 0, SEEK_SET);
-
-    // Graph size sanity check.
-    if (fsize < 1) {
-      fclose(f);
-      throw(EssentiaException("OnnxPredict: Graph file is empty."));
-    }
-
-    // Reserve memory and read the graph.
-    const auto data = malloc(fsize);
-    fread(data, fsize, 1, f);
-    fclose(f);
-      
-    // TODO: this should be updated to ONNX. Maybe it is not needed?
-
-    TF_Buffer* buffer = TF_NewBuffer();
-    buffer->data = data;
-    buffer->length = fsize;
-    buffer->data_deallocator = DeallocateBuffer;
-
-    TF_GraphImportGraphDef(_graph, buffer, _options, _status);
-
-    TF_DeleteBuffer(buffer);
-
-    if (TF_GetCode(_status) != TF_OK) {
-      throw EssentiaException("OnnxPredict: Error importing graph. ", TF_Message(_status));
-    }
-
-    E_INFO("OnnxPredict: Successfully loaded graph file: `" << _graphFilename << "`");
-     
-    
+    checkName(_outputs[i], all_output_infos);
   }
 }
-*/
 
+std::vector<TensorInfo> OnnxPredict::setTensorInfos(const Ort::Session& session, Ort::AllocatorWithDefaultOptions& allocator, bool is_input) {
+    size_t count = is_input ? session.GetInputCount() : session.GetOutputCount();
+    std::vector<TensorInfo> infos;
+    
+    auto names_raw = is_input
+        ? session.GetInputNames()
+        : session.GetOutputNames();
+
+    for (size_t i = 0; i < count; ++i) {
+        auto name_raw = names_raw[i];
+
+        std::string name(name_raw);
+        
+        Ort::TypeInfo type_info = is_input
+            ? session.GetInputTypeInfo(i)
+            : session.GetOutputTypeInfo(i);
+
+        auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
+
+        TensorInfo info;
+        info.name = name;
+        info.type = tensor_info.GetElementType();
+        info.shape = tensor_info.GetShape();
+
+        infos.push_back(std::move(info));
+    }
+
+    return infos;
+}
+
+void OnnxPredict::printTensorInfos(const std::vector<TensorInfo>& infos, const std::string& label) {
+    std::cout << "=== " << label << " ===\n";
+    for (const auto& info : infos) {
+        std::cout << "[Name] " << info.name << "\n";
+        std::cout << "  [Type] " << info.type << "\n";
+        std::cout << "  [Shape] [";
+        for (size_t j = 0; j < info.shape.size(); ++j) {
+            std::cout << info.shape[j];
+            if (j + 1 < info.shape.size()) std::cout << ", ";
+        }
+        std::cout << "]\n";
+    }
+}
+
+std::string OnnxPredict::getTensorInfos(const std::vector<TensorInfo>& infos, const std::string& label) {
+  std::string out;
+  out += "=== " + label + " ===\n";
+  for (const auto& info : infos) {
+    out += "[Name] " + info.name + "\n";
+    //cout << "info.type: " << typeid(info.type).name() << endl;
+    std::string type_str = onnxTypeToString(info.type);
+    out += "\t[Type] " + type_str + "\n";
+    out += "\t[Shape] [";
+    for (size_t j = 0; j < info.shape.size(); ++j) {
+      out += info.shape[j];
+      if (j + 1 < info.shape.size()) out += ", ";
+    }
+    out += "]\n";
+  }
+}
 
 void OnnxPredict::reset() {
   if (!_isConfigured) return;
     
-  // TODO: update this part using ONNX functionalities
-
-  // this should close the session
-  // Ort::ReleaseSession(_session); // error: no type named 'ReleaseSession' in namespace 'Ort'
-
-    
-  if (_status->GetErrorCode() != _status->IsOK()) {
-    throw EssentiaException("OnnxPredict: Error closing session. ",  _status->GetErrorMessage());
-  }
-
-  //TF_DeleteSession(_session, _status);
-  if (_status->GetErrorCode() != _status->IsOK()) {
-    throw EssentiaException("OnnxPredict: Error deleting session. ", _status->GetErrorMessage());
-  }
-
-  // TODO: do we need this for ORT?
-  /*_session = TF_NewSession(_graph, _sessionOptions, _status);
-  if (Ort::Status::GetErrorCode(_status) != Ort::Status::IsOK(_status)) {
-    throw EssentiaException("OnnxPredict: Error creating new session after reset. ", Ort::Status::GetErrorMessage(_status));
-  }*/
+  input_names.clear();
+  output_names.clear();
 }
 
-
 void OnnxPredict::compute() {
+    
   if (!_isConfigured) {
     throw EssentiaException("OnnxPredict: This algorithm is not configured. To configure this algorithm you "
                             "should specify a valid `graphFilename` as input parameter.");
@@ -297,210 +242,163 @@ void OnnxPredict::compute() {
 
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
-
     
-  // TODO: update to ONNX if needed
-  /*input_tensor_ = Ort::Value::CreateTensor<float>(memory_info, input_image_.data(), input_image_.size(), input_shape_.data(), input_shape_.size());
-  output_tensor_ = Ort::Value::CreateTensor<float>(memory_info, results_.data(), results_.size(), output_shape_.data(), output_shape_.size());*/
- 
-  // TODO: implement TensorToOrt() taht converts Pool tensors into Ort tensors
-  // Parse the input tensors from the pool into Tensorflow tensors.
+  std::vector<int64_t> shape;
+    
+  // Parse the input tensors from the pool into ONNX Runtime tensors.
   for (size_t i = 0; i < _nInputs; i++) {
-    const Tensor<Real>& inputData =
-        poolIn.value<Tensor<Real> >(_inputs[i]);
-    _inputTensors[i] = TensorToTF(inputData);
-  }
-
-  // TODO: update to ONNX if needed
-  // Initialize output tensors.
-  for (size_t i = 0; i < _nOutputs; i++) {
-    _outputTensors[i] = NULL;
-  }
-
-  // TODO: okay this is the session run
-  // TODO: define input_names
-  _session.Run(run_options,                     // Run options.
-               input_names,                     // Input node names.
-               &_inputTensors,                  // Input tensro values.
-               1,                               // Number of inputs.
-               output_names,                    // Output node names.
-               &_outputTensors,                 // Output tensor values.
-               1                                // Number of outputs.
-               );
-
     
+    cout << "_inputs[i]: " << _inputs[i] << endl;
+    const Tensor<Real>& inputData = poolIn.value<Tensor<Real> >(_inputs[i]);
+      
+    // Convert data to float32
+    std::vector<float> float_data(inputData.size());
+    for (size_t j = 0; j < inputData.size(); ++j) {
+      float_data[j] = static_cast<float>(inputData.data()[j]);
+    }
+      
+    // Step 2: Get shape
+    int dims = 1;
+
+    shape.push_back((int64_t)inputData.dimension(0));
     
-  /* Run the Tensorflow session.
-  TF_SessionRun(_session,
-                NULL,                            // Run options.
-                &_inputNodes[0],                 // Input node names.
-                &_inputTensors[0],               // input tensor values.
-                _nInputs + (int)_isTrainingSet,  // Number of inputs.
-                &_outputNodes[0],                // Output node names.
-                &_outputTensors[0],              // Output tensor values.
-                _nOutputs,                       // Number of outputs.
-                NULL, 0,                         // Target operations, number of targets.
-                NULL,                            // Run metadata.
-                _status                          // Output status.
-               );*/
-
-  if (_status->GetErrorCode() != _status->IsOK()) {
-    throw EssentiaException("OnnxPredict: Error running the OnnxRuntime session. ", _status->GetErrorMessage());
-  }
-    
-  // Copy the desired tensors into the output pool.
-  for (size_t i = 0; i < _nOutputs; i++) {
-    poolOut.set(_outputs[i], TFToTensor(_outputTensors[i], _outputNodes[i]));
-  }
-
-  // TODO: replace with ONNX functionalities
-  // Deallocate tensors.
-  for (size_t i = 0; i < _nInputs; i++) {
-    TF_DeleteTensor(_inputTensors[i]);
-  }
-
-  for (size_t i = 0; i < _nOutputs; i++) {
-    TF_DeleteTensor(_outputTensors[i]);
-  }
-}
-
-// TODO: do we need this functionalities?
-
-/*
-TF_Tensor* OnnxPredict::TensorToTF(
-    const Tensor<Real>& tensorIn) {
-  int dims = 1;
-  vector<int64_t> shape;
-
-  // With squeeze, the Batch dimension is the only one allowed to be singleton
-  shape.push_back((int64_t)tensorIn.dimension(0));
-
-  if (_squeeze) {
-    for(int i = 1; i < tensorIn.rank(); i++) {
-      if (tensorIn.dimension(i) > 1) {
-        shape.push_back((int64_t)tensorIn.dimension(i));
+    if (_squeeze) {
+      for(int i = 1; i < inputData.rank(); i++) {
+        if (inputData.dimension(i) > 1) {
+          shape.push_back((int64_t)inputData.dimension(i));
+          dims++;
+        }
+      }
+          
+      // There should be at least 2 dimensions (batch, data)
+      if (dims == 1) {
+        shape.push_back((int64_t) 1);
         dims++;
       }
-    }
-
-    // There should be at least 2 dimensions (batch, data)
-    if (dims == 1) {
-      shape.push_back((int64_t) 1);
-      dims++;
-    }
-
-  } else {
-    dims = tensorIn.rank();
-    for(int i = 1; i < dims; i++) {
-        shape.push_back((int64_t)tensorIn.dimension(i));
+    } else {
+      dims = inputData.rank();
+      for(int j = 1; j < dims; j++) {   // HERE we need to jump i = 1 - 4D tensor input
+          //cout << inputData.dimension(j) << endl;
+        shape.push_back((int64_t)inputData.dimension(j));
       }
+    }
+            
+    // Step 3: Create ONNX Runtime tensor
+    _memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+      
+    if (_memoryInfo == NULL) {
+      throw EssentiaException("OnnxRuntimePredict: Error allocating memory for input tensor.");
+    }
+
+    input_tensors.emplace_back(Ort::Value::CreateTensor<float>(_memoryInfo, float_data.data(), float_data.size(), shape.data(), shape.size()));
+
   }
 
-  TF_Tensor* tensorOut = TF_AllocateTensor(
-      TF_FLOAT, &shape[0], dims,
-      (size_t)tensorIn.size() * sizeof(Real));
-
-  if (tensorOut == NULL) {
-    throw EssentiaException("OnnxPredict: Error generating input tensor.");
+  // Define input and output names
+  for (const auto& tensorInfo : _inputNodes) {
+    input_names.push_back(tensorInfo.name.c_str());
+  }
+    
+  for (const auto& tensorInfo : _outputNodes) {
+    output_names.push_back(tensorInfo.name.c_str());
+  }
+    
+  // Run the Onnxruntime session.
+  auto output_tensors = _session.Run(_runOptions,                     // Run options.
+                                     input_names.data(),         // Input node names.
+                                     input_tensors.data(),            // Input tensor values.
+                                     _nInputs,                        // Number of inputs.
+                                     output_names.data(),        // Output node names.
+                                     _nOutputs                        // Number of outputs.
+                                     );
+    
+  // Map output tensors to pool
+  for (size_t i = 0; i < output_tensors.size(); ++i) {
+    
+    const Real* outputData = output_tensors[i].GetTensorData<Real>();
+    
+    // Create and array to store the tensor shape.
+    array<long int, 4> _shape {1, 1, 1, 1};
+    //_shape[0] = (int)outputShapes[0];
+    _shape[0] = (int)shape[0];
+    for (size_t j = 1; j < _outputNodes[i].shape.size(); j++){
+        _shape[j+1] = (int)_outputNodes[i].shape[j];
+    }
+    
+    // Store tensor in pool
+    const Tensor<Real> tensorMap = TensorMap<const Real>(outputData, _shape);
+    poolOut.set(_outputs[i], tensorMap);
   }
 
-  // Get a pointer to the data and fill the tensor.
-  void* tensorData = TF_TensorData(tensorOut);
-
-  if (tensorData == NULL) {
-    TF_DeleteTensor(tensorOut);
-    throw EssentiaException("OnnxPredict: Error generating input tensors data.");
+  /* Cleanup
+  for (const auto& tensorInfo : all_input_infos) {
+    _allocator.Free((void*)tensorInfo.name.c_str());
   }
-
-  memcpy(tensorData, tensorIn.data(),
-         std::min(tensorIn.size() * sizeof(Real),
-                  TF_TensorByteSize(tensorOut)));
-
-  return tensorOut;
+    
+  for (const auto& tensorInfo : all_output_infos) {
+    _allocator.Free((void*)tensorInfo.name.c_str());
+  }*/
+    
 }
 
 
-const Tensor<Real> OnnxPredict::TFToTensor(
-    const TF_Tensor* tensor, TF_Output node) {
-  const Real* outputData = static_cast<Real*>(TF_TensorData(tensor));
+void OnnxPredict::checkName(const string nodeName, std::vector<TensorInfo> _infos) {
 
-  // Get the output tensor's shape.
-  size_t outNDims = TF_GraphGetTensorNumDims(_graph, node, _status);
-
-  if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("OnnxPredict: Error getting the output tensor's shape. ", TF_Message(_status));
+  vector<string> _names;
+    
+  for(int i = 0; i< _infos.size(); i++) {
+      _names.push_back(_infos[i].name);
   }
 
-  // Create and array to store the shape of the tensor.
-  array<long int, 4> shape {1, 1, 1, 1};
-  shape[0] = (int)TF_Dim(tensor, 0);
+  std::unordered_set<std::string> lookup(_names.begin(), _names.end());
+  if (lookup.find(nodeName) == lookup.end())
+    throw EssentiaException("OnnxPredict: `" + nodeName + "` is not a valid input node name. Make sure that all "
+                            "your inputs are defined in the node list.");
+}
 
-  // We are assuming one of the following cases:
-  //       1 - outNDims = 2 -> Batch + Feats
-  //       2 - outNDims = 3 -> Batch + Timestamps + Feats
-  //       3 - outNDims = 4 -> Batch + Channels + Timestamps + Feats
-  size_t idx = 1;
-  for (size_t i = shape.size() - outNDims + 1; i < shape.size(); i++, idx++) {
-    shape[i] = (int)TF_Dim(tensor, idx);
+
+vector<string> OnnxPredict::inputNames() {
+  
+  vector<string> inputNames;
+  
+  // inputs
+  for(int i = 0; i< all_input_infos.size(); i++) {
+     inputNames.push_back(all_input_infos[i].name);
   }
 
-  // Return a const reference to the data in Eigen format.
-  return TensorMap<const Real>(outputData, shape);
-}*/
+  return inputNames;
+}
 
-/*
-TF_Output OnnxPredict::graphOperationByName(const string nodeName) {
-  int index = 0;
-  const char* name = nodeName.c_str();
-  string newNodeName;
+vector<string> OnnxPredict::outputNames() {
+  
+  vector<string> outputNames;
+  
+  // inputs
+  for(int i = 0; i< all_input_infos.size(); i++) {
+     outputNames.push_back(all_input_infos[i].name);
+  }
 
-  // TensorFlow operations (or nodes from the graph perspective) return tensors named <nodeName:n>, where n goes
-  // from 0 to the number of outputs. The first output tensor of a node can be extracted implicitly (nodeName)
-  // or explicitly (nodeName:0). To extract the subsequent tensors, the index has to be specified (nodeName:1,
-  // nodeName:2, ...).
-  string::size_type n = nodeName.find(':');
-  if (n != string::npos) {
-    try {
-      newNodeName = nodeName.substr(0, n);
-      name = newNodeName.c_str();
-      index = stoi(nodeName.substr(n + 1, nodeName.size()));
+  return outputNames;
+}
 
-    } catch (const invalid_argument& ) {
-      throw EssentiaException("OnnxPredict: `" + nodeName + "` is not a valid node name. Make sure that all "
-                              "your inputs and outputs follow the pattern `nodeName:n`, where `n` in an integer that "
-                              "goes from 0 to the number of outputs of the node - 1.");
+std::string OnnxPredict::onnxTypeToString(ONNXTensorElementDataType type) {
+    switch (type) {
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT: return "float32";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT8: return "uint8";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT8: return "int8";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT16: return "uint16";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT16: return "int16";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT32: return "int32";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_INT64: return "int64";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_STRING: return "string";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_BOOL: return "bool";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_FLOAT16: return "float16";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_DOUBLE: return "float64";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT32: return "uint32";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_UINT64: return "uint64";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX64: return "complex64";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_COMPLEX128: return "complex128";
+        case ONNX_TENSOR_ELEMENT_DATA_TYPE_BFLOAT16: return "bfloat16";
+        default: return "unknown";
     }
-
-  }
-
-  TF_Operation* oper = TF_GraphOperationByName(_graph, name);
-
-  TF_Output output = {oper, index};
-
-  if (output.oper == NULL) {
-    throw EssentiaException("OnnxPredict: '" + string(nodeName) +
-                            "' is not a valid node name of this graph.\n" +
-                            availableNodesInfo());
-  }
-
-  int n_outputs = TF_OperationNumOutputs(oper);
-  if (index > n_outputs - 1) {
-    throw EssentiaException("OnnxPredict: Asked for the output with index `" + to_string(index) +
-                            "`, but the node `" + name + "` only has `" + to_string(n_outputs) + "` outputs.");
-  }
-
-  return output;
-}*/
-
-// TODO: use ONNX functionalities
-vector<string> OnnxPredict::nodeNames() {
-  size_t pos = 0;
-  TF_Operation *oper;
-  vector<string> nodeNames;
-
-  while ((oper = TF_GraphNextOperation(_graph, &pos)) != NULL) {
-    nodeNames.push_back(string(TF_OperationName(oper)));
-  }
-
-  return nodeNames;
 }
