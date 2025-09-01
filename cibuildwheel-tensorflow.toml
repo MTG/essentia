@@ -2,18 +2,21 @@
 
 manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"
 
-# Only support x86_64 for essentia-tensorflow
+# Only support x86_64 for essentia-tensorflow.
 build = "cp**-manylinux_x86_64"
 
 skip = ["pp*", "*-musllinux*", "*i686", "*cp36*", "*cp37*", "*cp38*"]
 
 environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
 
-before-build = [
+before-all = [
   "PYBIN=/opt/python/cp36-cp36m/bin/",
   "\"${PYBIN}/python\" waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
   "\"${PYBIN}/python\" waf",
-  "\"${PYBIN}/python\" waf install"
+  "\"${PYBIN}/python\" waf install",
+  # Monkey-patch package name.
+  # We could have a separate pyproject.toml configuration, but the build backend does not accept custom configuration filepaths.
+  "sed 's/^name *= *\"essentia\"$/name = \"essentia-tensorflow\"/' pyproject.toml > pyproject.toml.patched && mv pyproject.toml.patched pyproject.toml"
 ]
 
 test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter, TensorflowPredict'"
@@ -23,28 +26,36 @@ test-command = "python -c 'import essentia; import essentia.standard; import ess
 
 skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
 
-environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, MACOSX_DEPLOYMENT_TARGET=13.0 }
+environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, MACOSX_DEPLOYMENT_TARGET=14.2 }
 
-before-build = [
+before-all = [
   "brew install pkg-config gcc readline sqlite gdbm freetype libpng",
   "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag",
   "brew link --force ffmpeg@2.8",
   "brew install chromaprint",
   "brew link --overwrite ffmpeg@2.8",
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
-  # Tensorflow bottle a has minimum target of 14.2 which is too new, therefore, building from source.
-  # Workaroud to SDK not being found: https://github.com/actions/runner-images/issues/9811
-  "sudo xcode-select -s /Library/Developer/CommandLineTools",
-  "SDKROOT=$(xcrun --sdk macosx13.0 --show-sdk-path) brew install --build-from-source tensorflow",
-  #"brew tap MTG/essentia",
-  #"brew install gaia --HEAD",
+  # Tensorflow bottle a has minimum target of 14.2 which is too new.
+  # We could build from source as a workaround, however, it takes too much time on the CI worker.
+  # To keep it simple, just use the bottles available for tensorflow.
+  "brew install tensorflow",
+  # ---
+  # Building tensorflow from source:
+  #"echo Checking available SDKs:",
+  #"xcodebuild -showsdks",
+  #"SDKROOT=$(xcrun --sdk macosx13.0 --show-sdk-path) brew install --build-from-source tensorflow",
+  # ---
   # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
   "VIRTUAL_ENV=/usr/local python waf configure --with-tensorflow --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
   "python waf",
-  "python waf install"
+  "python waf install",
+  # Monkey-patch package name.
+  # We could have a separate pyproject.toml configuration, but the build backend does not accept custom configuration filepaths.
+  "sed 's/^name *= *\"essentia\"$/name = \"essentia-tensorflow\"/' pyproject.toml > pyproject.toml.patched && mv pyproject.toml.patched pyproject.toml"
 ]
 
-test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter, TensorflowPredict'"
+# FIXME Temporarily disable testing on macos-13 runner. The wheel is tagged as macosx_14_2 due to the Tensorflow dependency, so it can't be installed by pip ("not a supported wheel on this platform").
+#test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter, TensorflowPredict'"
 
 
 [[tool.cibuildwheel.overrides]]
@@ -52,23 +63,32 @@ select = "*macosx_arm64*"
 
 skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
 
-environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1, MACOSX_DEPLOYMENT_TARGET=14.0 }
+environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1, MACOSX_DEPLOYMENT_TARGET=15.2 }
 
-before-build = [
+before-all = [
   "brew install pkg-config gcc readline sqlite gdbm libpng",
   "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag",
   "brew link --force ffmpeg@2.8",
   "brew install chromaprint",
   "brew link --overwrite ffmpeg@2.8",
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
-  # Tensorflow bottle has a minumum target of 15.2, which is too new, therefore, building from source.
-  # Workaroud to SDK not being found: https://github.com/actions/runner-images/issues/9811
-  "sudo xcode-select -s /Library/Developer/CommandLineTools",
-  "SDKROOT=$(xcrun --sdk macosx14.0 --show-sdk-path) brew install --build-from-source tensorflow",
+  # Tensorflow bottle a has minimum target of 15.2 which is too new.
+  # We could build from source as a workaround, however, it takes too much time on the CI worker.
+  # To keep it simple, just use the bottles available for tensorflow.
+  "brew install tensorflow",
+  # ---
+  # Building tensorflow from source:
+  #"echo Checking available SDKs:",
+  #"xcodebuild -showsdks",
+  #"SDKROOT=$(xcrun --sdk macosx14.0 --show-sdk-path) brew install --build-from-source tensorflow",
+  # ---
   # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
   "VIRTUAL_ENV=/usr/local python waf configure --with-tensorflow --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
   "sudo python waf install",
+  # Monkey-patch package name.
+  # We could have a separate pyproject.toml configuration, but the build backend does not accept custom configuration filepaths.
+  "sed 's/^name *= *\"essentia\"$/name = \"essentia-tensorflow\"/' pyproject.toml > pyproject.toml.patched && mv pyproject.toml.patched pyproject.toml"
 ]
 
 # On Mac arm64, libavcodec.56.60.100, libavformat.56.40.101 and
@@ -84,24 +104,4 @@ repair-wheel-command = [
   "cp /opt/homebrew/opt/sdl2/lib/libSDL2*.dylib {dest_dir}/essentia/.dylibs",
   "wheel_rel=$(echo {wheel} | grep -o '[^/]*$')",
   "cd {dest_dir} && zip -u {dest_dir}/$wheel_rel essentia/.dylibs/*"
-]
-
-
-[build-system]
-requires = [
-    "wheel >= 0.29.0",
-    "setuptools >= 48",
-    "numpy>=2.0.0rc1",
-    "six",
-]
-build-backend = "setuptools.build_meta"
-
-[project]
-name="essentia"
-license = "AGPL-3.0-only"
-dynamic = ["version", "description", "readme", "authors", "keywords", "classifiers", "urls"]
-dependencies = [
-    "numpy>=1.25",
-    "pyyaml",
-    "six",
 ]

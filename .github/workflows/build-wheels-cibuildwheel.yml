@@ -8,8 +8,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-13, macos-14]
-        config: [pyproject, pyproject-tensorflow]
+        os: [ubuntu-22.04, macos-13, macos-15]
+        config: [cibuildwheel, cibuildwheel-tensorflow]
 
     steps:
       - uses: actions/checkout@v4

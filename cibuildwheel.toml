@@ -1,0 +1,75 @@
+[tool.cibuildwheel]
+
+[tool.cibuildwheel.linux]
+manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"
+manylinux-i686-image = "mtgupf/essentia-builds:manylinux2014_i686"
+
+skip = ["pp*", "*-musllinux*", "*i686", "*cp36*", "*cp37*", "*cp38*"]
+
+environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
+
+before-all = [
+  "PYBIN=/opt/python/cp36-cp36m/bin/",
+  "\"${PYBIN}/python\" waf configure --with-gaia --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
+  "\"${PYBIN}/python\" waf",
+  "\"${PYBIN}/python\" waf install"
+]
+
+test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter'"
+
+
+[tool.cibuildwheel.macos]
+
+skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
+
+environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, MACOSX_DEPLOYMENT_TARGET=13.0 }
+
+before-all = [
+  "brew install pkg-config gcc readline sqlite gdbm freetype libpng",
+  "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag",
+  "brew link --force ffmpeg@2.8",
+  "brew install chromaprint",
+  "brew link --overwrite ffmpeg@2.8",
+  #"brew tap MTG/essentia",
+  #"brew install gaia --HEAD",
+  # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
+  "VIRTUAL_ENV=/usr/local python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
+  "python waf",
+  "python waf install"
+]
+
+test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter'"
+
+[[tool.cibuildwheel.overrides]]
+select = "*macosx_arm64*"
+
+skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
+
+environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1, MACOSX_DEPLOYMENT_TARGET=15.0 }
+
+before-all = [
+  "brew install pkg-config gcc readline sqlite gdbm libpng",
+  "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag",
+  "brew link --force ffmpeg@2.8",
+  "brew install chromaprint",
+  "brew link --overwrite ffmpeg@2.8",
+  # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
+  "VIRTUAL_ENV=/usr/local python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
+  "python waf",
+  "sudo python waf install",
+]
+
+# On Mac arm64, libavcodec.56.60.100, libavformat.56.40.101 and
+# libavutil.54.31.100, depend on libSDL1.2-compat, which is a compatibility
+# layer for SDL2. libSDL1.2-compat expects SDL2 to be installed in the default
+# brew location (i.e., /opt/homebrew/opt/sdl2/lib), so the user would need to
+# install it via brew manually. Alternativelly, we can manualy copy the SDL2
+# libs into the wheel. This is a temporary solution, and in the long term we
+# should move to FFmpeg > 2.X.
+repair-wheel-command = [
+  "delocate-wheel --require-archs {delocate_archs} -w {dest_dir} -v {wheel}",
+  "mkdir -p {dest_dir}/essentia/.dylibs",
+  "cp /opt/homebrew/opt/sdl2/lib/libSDL2*.dylib {dest_dir}/essentia/.dylibs",
+  "wheel_rel=$(echo {wheel} | grep -o '[^/]*$')",
+  "cd {dest_dir} && zip -u {dest_dir}/$wheel_rel essentia/.dylibs/*"
+]
