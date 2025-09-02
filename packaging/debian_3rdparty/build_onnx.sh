@@ -18,29 +18,33 @@ cd onnxruntime-$LIBONNXRUNTIME_VERSION
 
 python3 -m pip install cmake
 
-# Build the dynamic library for Linux
-# ./build.sh \
-#   --config RelWithDebInfo \
-#   --build_shared_lib \
-#   --parallel \
-#   --compile_no_warning_as_error \
-#   --skip_submodule_sync
+# Build the dynamic library for Linux or MacOS
+# build for Intel and Apple silicon CPUs --> "x86_64;arm64"
 
-# Build the dynamic library for MacOS (build for Intel and Apple silicon CPUs --> "x86_64;arm64")
-./build.sh \
-  --config RelWithDebInfo \
-  --build_shared_lib \
-  --parallel \
-  --compile_no_warning_as_error \
-  --skip_submodule_sync \
-  --cmake_extra_defines CMAKE_OSX_ARCHITECTURES="arm64" FETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER CMAKE_INSTALL_PREFIX=$PREFIX
+CMAKE_EXTRA_DEFINES="FETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER CMAKE_INSTALL_PREFIX=${PREFIX}"
+OS=$(uname -s)
 
-#! We have found some issues building for cross-platforms, it looks it is much better to build it in a docker
-#! In MacOS, we have experienced issues with the brew package. So, it needs to uninstall brew applications first (brew unsnstall onnxruntime)
+if [ "$OS" = "Darwin" ]; then
+    DIR_OS="MacOS"
+    CMAKE_EXTRA_DEFINES+=' CMAKE_OSX_ARCHITECTURES="arm64"'
+else
+    DIR_OS="Linux"
+fi
+
+CONFIG="Release"
+./build.sh                                \
+            --config $CONFIG              \
+            --build_shared_lib            \
+            --parallel                    \
+            --compile_no_warning_as_error \
+            --skip_submodule_sync         \
+            --allow_running_as_root       \
+            --skip_tests                  \
+            --cmake_extra_defines $CMAKE_EXTRA_DEFINES
 
 # copying .pc file
 mkdir -p "${PREFIX}"/lib/pkgconfig/
-cp build/MacOS/RelWithDebInfo/libonnxruntime.pc ${PREFIX}/lib/pkgconfig/
+cp -r build/$DIR_OS/$CONFIG/libonnxruntime.* ${PREFIX}/lib/pkgconfig/
 
 cd ../..
 rm -fr tmp
