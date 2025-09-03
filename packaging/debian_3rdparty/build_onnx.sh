@@ -27,8 +27,10 @@ OS=$(uname -s)
 if [ "$OS" = "Darwin" ]; then
     DIR_OS="MacOS"
     CMAKE_EXTRA_DEFINES+=' CMAKE_OSX_ARCHITECTURES="arm64"'
+    SUFFIX="${LIBONNXRUNTIME_VERSION}.dylib"
 else
     DIR_OS="Linux"
+    SUFFIX="so.${LIBONNXRUNTIME_VERSION}"
 fi
 
 CONFIG="Release"
@@ -42,9 +44,16 @@ CONFIG="Release"
             --skip_tests                  \
             --cmake_extra_defines $CMAKE_EXTRA_DEFINES
 
-# copying .pc file
+# copying onnxruntime files
 mkdir -p "${PREFIX}"/lib/pkgconfig/
-cp -r build/$DIR_OS/$CONFIG/libonnxruntime.* ${PREFIX}/lib/pkgconfig/
+mkdir -p "${PREFIX}"/include/onnxruntime/
+
+cp build/$DIR_OS/$CONFIG/libonnxruntime.pc ${PREFIX}/lib/pkgconfig/
+cp build/$DIR_OS/$CONFIG/libonnxruntime.$SUFFIX ${PREFIX}/lib/
+cp include/onnxruntime/core/session/onnxruntime_cxx_inline.h ${PREFIX}/include/onnxruntime/
+cp include/onnxruntime/core/session/onnxruntime_float16.h ${PREFIX}/include/onnxruntime/
+cp include/onnxruntime/core/session/onnxruntime_c_api.h ${PREFIX}/include/onnxruntime/
+cp include/onnxruntime/core/session/onnxruntime_cxx_api.h ${PREFIX}/include/onnxruntime/
 
 cd ../..
 rm -fr tmp
