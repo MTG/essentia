@@ -67,7 +67,7 @@ class TestOnnxPredict(TestCase):
             outputs=[output_layer_name0, output_layer_name1]
             )
 
-        stem = "387517__deleted_user_7267864__saxophone-going-up"
+        stem = "359500__mtg__sax-tenor-e-major"
         audio_path = join(testdata.audio_dir, Path("recorded"), f"{stem}.wav")
 
         audio, sample_rate = sf.read(audio_path, dtype=numpy.float32)
