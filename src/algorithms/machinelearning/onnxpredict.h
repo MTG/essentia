@@ -67,8 +67,7 @@ class OnnxPredict : public Algorithm {
     
   Ort::RunOptions _runOptions;
   Ort::AllocatorWithDefaultOptions _allocator;
-  Ort::MemoryInfo _memoryInfo{ nullptr };     // Used to allocate memory for input
-  Ort::Model _model;
+  Ort::MemoryInfo _memoryInfo{ nullptr };     // Used to allocate memory for inputs
     
   std::vector<TensorInfo> all_input_infos;
   std::vector<TensorInfo> all_output_infos;
@@ -94,7 +93,7 @@ class OnnxPredict : public Algorithm {
  public:
     
   OnnxPredict() : _env(Ort::Env(ORT_LOGGING_LEVEL_WARNING, "test")),
-    _sessionOptions(Ort::SessionOptions()), _session(Ort::Session(nullptr)), _runOptions(NULL), _isConfigured(false) , _model(Ort::Model(nullptr)){
+    _sessionOptions(Ort::SessionOptions()), _session(Ort::Session(nullptr)), _runOptions(NULL), _isConfigured(false){
     declareInput(_poolIn, "poolIn", "the pool where to get the feature tensors");
     declareOutput(_poolOut, "poolOut", "the pool where to store the output tensors");
   }
