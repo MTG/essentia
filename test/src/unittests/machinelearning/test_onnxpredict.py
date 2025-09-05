@@ -111,6 +111,19 @@ class TestOnnxPredict(TestCase):
 
         AssertionError()
 
+    def testEmptyModelName(self):
+        # With empty model name the algorithm should skip the configuration without errors.
+        self.assertConfigureSuccess(OnnxPredict(), {})
+        self.assertConfigureSuccess(OnnxPredict(), {"graphFilename": ""})
+        self.assertConfigureSuccess(
+            OnnxPredict(), {"graphFilename": "", "inputs": [""]}
+        )
+        self.assertConfigureSuccess(
+            OnnxPredict(), {"graphFilename": "", "inputs": ["wrong_input"]}
+        )
+
+    # TODO: addapt TensorPredict unittests such as testIdentityModel, testComputeWithoutConfiguration, testIgnoreInvalidReconfiguration, testInvalidParameters
+
     """
     def regression(self, parameters):
         # Test a simple tensorflow model trained on Essentia features.
