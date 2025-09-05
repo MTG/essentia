@@ -113,11 +113,9 @@ class OnnxPredict : public Algorithm {
     const char* defaultTagsC[] = { "serve" };
     std::vector<std::string> defaultTags = arrayToVector<std::string>(defaultTagsC);
 
-    declareParameter("graphFilename", "the name of the file from which to load the TensorFlow graph", "", "");
-    declareParameter("inputs", "will look for these namespaces in poolIn. Should match the names of the input nodes in the Tensorflow graph", "", Parameter::VECTOR_STRING);
-    // TODO: fix the empty input and output parameters.
-    declareParameter("outputs", "will save the tensors on the graph nodes named after `outputs` to the same namespaces in the output pool. Set the first element of this list as an empty array to print all the available nodes in the graph", "", Parameter::VECTOR_STRING);
-    declareParameter("isTraining", "run the model in training mode (normalized with statistics of the current batch) instead of inference mode (normalized with moving statistics). This only applies to some models", "{true,false}", false);
+    declareParameter("graphFilename", "the name of the file from which to load the ONNX model", "", "");
+    declareParameter("inputs", "will look for these namespaces in poolIn. Should match the names of the inputs in the ONNX model", "", Parameter::VECTOR_STRING);
+    declareParameter("outputs", "will save the tensors on the model outputs named after `outputs` to the same namespaces in the output pool. Set the first element of this list as an empty array to print all the available model outputs", "", Parameter::VECTOR_STRING);
     declareParameter("squeeze", "remove singleton dimensions of the inputs tensors. Does not apply to the batch dimension", "{true,false}", true);
   }
 
