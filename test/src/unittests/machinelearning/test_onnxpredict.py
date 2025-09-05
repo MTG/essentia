@@ -26,35 +26,36 @@ import soundfile as sf
 
 
 class TestOnnxPredict(TestCase):
-    # def testIONameParser(self):
-    #     model = join(testdata.models_dir, "discogs-effnet-bsdynamic-1.onnx")
-    #     print(f"\nmodel: {model}")
-    #     configs = [
-    #         {
-    #             "graphFilename": model,
-    #             "inputs": ["model/Placeholder"],
-    #             "outputs": ["model/Softmax:"],
-    #         },  # No index.
-    #         {
-    #             "graphFilename": model,
-    #             "inputs": ["model/Placeholder"],
-    #             "outputs": ["model/Softmax:3"],
-    #         },  # Index out of bounds.
-    #         {
-    #             "graphFilename": model,
-    #             "inputs": ["model/Placeholder"],
-    #             "outputs": ["model/Softmax::0"],
-    #         },  # Double colon.
-    #         {
-    #             "graphFilename": model,
-    #             "inputs": ["model/Placeholder"],
-    #             "outputs": ["model/Softmax:s:0"],
-    #         },  # Several colons.
-    #     ]
+    def testIONameParser(self):
+        model = join(testdata.models_dir, "discogs-effnet-bsdynamic-1.onnx")
+        print(f"\nmodel: {model}")
+        configs = [
+            {
+                "graphFilename": model,
+                "inputs": ["model/Placeholder"],
+                "outputs": ["model/Softmax:"],
+            },  # No index.
+            {
+                "graphFilename": model,
+                "inputs": ["model/Placeholder"],
+                "outputs": ["model/Softmax:3"],
+            },  # Index out of bounds.
+            {
+                "graphFilename": model,
+                "inputs": ["model/Placeholder"],
+                "outputs": ["model/Softmax::0"],
+            },  # Double colon.
+            {
+                "graphFilename": model,
+                "inputs": ["model/Placeholder"],
+                "outputs": ["model/Softmax:s:0"],
+            },  # Several colons.
+        ]
 
-    #     for config in configs[1:]:
-    #         with self.subTest(f"{config} failed"):
-    #             self.assertConfigureFails(OnnxPredict(), config)
+        for config in configs[1:]:
+            with self.subTest(f"{config} failed"):
+                print(config)
+                self.assertConfigureFails(OnnxPredict(), config)
 
     def testInference(self,):
         model = join(testdata.models_dir, "discogs-effnet-bsdynamic-1.onnx")
@@ -101,7 +102,6 @@ class TestOnnxPredict(TestCase):
 
         pool_out = onxx_predict(pool)
 
-        # print(f"op: {dir(pool_out)}")
         print(f"descriptorNames: {pool_out.descriptorNames()}")
         print(f"result['{output_layer_name0}']: {pool_out[output_layer_name0]}")
         print(f"result['{output_layer_name0}'].shape(): {pool_out[output_layer_name0].shape}")
