@@ -86,7 +86,7 @@ void OnnxPredict::configure() {
   _nInputs = _inputs.size();
   _nOutputs = _outputs.size();
     
-  cout << "_inputs.size(): " << _nInputs << ".\n";
+  // cout << "_inputs.size(): " << _nInputs << ".\n";
     
   // use the first input when no input is defined
   if (_nInputs == 0){
@@ -124,14 +124,14 @@ void OnnxPredict::configure() {
   }
   
   if (_inputNodes.size() == 0){
+
     std::string s;
     for (const auto &piece : _inputs) {
       s += piece;
       s += " ";
     }
-    throw EssentiaException("ONNXRuntimePredict: '" + s +
-                            "' are not valid input name of this model.\n" +
-                            getTensorInfos(all_input_infos, "Model Inputs"));
+      
+    throw EssentiaException(availableInputInfo());
   }
     
   for (int i = 0; i < _outputs.size(); i++) {
@@ -148,9 +148,7 @@ void OnnxPredict::configure() {
       s += piece;
       s += " ";
     }
-    throw EssentiaException("ONNXRuntimePredict: '" + s +
-                            "' has not a valid output name of this model.\n" +
-                            getTensorInfos(all_output_infos, "Model Outputs"));
+    throw EssentiaException(availableOutputInfo());
   }
     
   _isConfigured = true;
@@ -198,8 +196,8 @@ std::vector<TensorInfo> OnnxPredict::setTensorInfos(const Ort::Session& session,
 void OnnxPredict::printTensorInfos(const std::vector<TensorInfo>& infos, const std::string& label) {
     std::cout << "=== " << label << " ===\n";
     for (const auto& info : infos) {
-        std::cout << "[Name] " << info.name << "\n";
-        std::cout << "  [Type] " << info.type << "\n";
+        std::cout << "[Name] " << info.name << endl;
+        std::cout << "  [Type] " << info.type << endl;
         std::cout << "  [Shape] [";
         for (size_t j = 0; j < info.shape.size(); ++j) {
             std::cout << info.shape[j];
@@ -224,6 +222,7 @@ std::string OnnxPredict::getTensorInfos(const std::vector<TensorInfo>& infos, co
     }
     out += "]\n";
   }
+  return out;
 }
 
 void OnnxPredict::reset() {
