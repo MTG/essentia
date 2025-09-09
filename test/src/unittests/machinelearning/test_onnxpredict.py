@@ -27,7 +27,7 @@ import soundfile as sf
 
 class TestOnnxPredict(TestCase):
     def testIONameParser(self):
-        model = join(testdata.models_dir, "discogs-effnet-bsdynamic-1.onnx")
+        model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
         print(f"\nmodel: {model}")
         configs = [
             {
@@ -58,7 +58,7 @@ class TestOnnxPredict(TestCase):
                 self.assertConfigureFails(OnnxPredict(), config)
 
     def testInference(self,):
-        model = join(testdata.models_dir, "discogs-effnet-bsdynamic-1.onnx")
+        model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
         # TODO: store model card and to extract model output shapes to assert the ouputs
 
         print(f"\nmodel: {model}")
@@ -126,7 +126,7 @@ class TestOnnxPredict(TestCase):
         )
 
     def testInvalidParam(self):
-        model = join(testdata.models_dir, "discogs-effnet-bsdynamic-1.onnx")
+        model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
         self.assertConfigureFails(
             OnnxPredict(),
             {
