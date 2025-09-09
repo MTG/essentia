@@ -69,9 +69,9 @@ void OnnxPredict::configure() {
     _session = Ort::Session(_env, _graphFilename.c_str(), _sessionOptions);
   }
   catch (Ort::Exception oe) {
-    cout << "ONNX exception caught: " << oe.what() << ". Code: " << oe.GetOrtErrorCode() <<   ".\n";
-    return;
+      throw EssentiaException(string("OnnxPredict:") + oe.what(), oe.GetOrtErrorCode());
   }
+  E_INFO("OnnxPredict: Successfully loaded graph file: `" << _graphFilename << "`");
       
   // get input and output info (names, type and shapes)
   all_input_infos = setTensorInfos(_session, _allocator, true);
