@@ -59,6 +59,8 @@ class TestOnnxPredict(TestCase):
 
     def testInference(self,):
         model = join(testdata.models_dir, "discogs-effnet-bsdynamic-1.onnx")
+        # TODO: store model card and to extract model output shapes to assert the ouputs
+
         print(f"\nmodel: {model}")
         output_layer_name0 = "activations"
         output_layer_name1 = "embeddings"
@@ -110,6 +112,7 @@ class TestOnnxPredict(TestCase):
         print(f"result['{output_layer_name0}'].shape(): {pool_out[output_layer_name1].shape}")
 
         AssertionError()
+        # TODO: assert the output shapes
 
     def testEmptyModelName(self):
         # With empty model name the algorithm should skip the configuration without errors.
@@ -122,7 +125,29 @@ class TestOnnxPredict(TestCase):
             OnnxPredict(), {"graphFilename": "", "inputs": ["wrong_input"]}
         )
 
-    # TODO: addapt TensorPredict unittests such as testIdentityModel, testComputeWithoutConfiguration, testIgnoreInvalidReconfiguration, testInvalidParameters
+    def testInvalidParam(self):
+        model = join(testdata.models_dir, "discogs-effnet-bsdynamic-1.onnx")
+        self.assertConfigureFails(
+            OnnxPredict(),
+            {
+                "graphFilename": model,
+                "inputs": ["wrong_input_name"],
+                "outputs": ["embeddings"],
+            },
+        )  # input does not exist in the model
+        self.assertConfigureFails(
+            OnnxPredict(),
+            {
+                "graphFilename": "wrong_model_name",    #! I suspect the issue is here with OnnxExceptions
+                "inputs": ["melspectrogram"],
+                "outputs": ["embeddings"],
+            },
+        )  # the model does not exist
+
+    # TODO: adapt TensorPredict unittests such as testIdentityModel, testComputeWithoutConfiguration, testIgnoreInvalidReconfiguration
+    # TODO: make a test for squeeze, showing that it fails when it is not applied with 2D models
+    # TODO: make a test for squeeze, showing that it works well when it is applied for a 2D model
+
 
     """
     def regression(self, parameters):
