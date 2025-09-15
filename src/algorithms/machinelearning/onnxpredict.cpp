@@ -242,29 +242,28 @@ void OnnxPredict::compute() {
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
     
-  std::vector<int64_t> shape;
+  std:vector<std::vector<int64_t>> shapes;
     
   // Parse the input tensors from the pool into ONNX Runtime tensors.
   for (size_t i = 0; i < _nInputs; i++) {
     
-    cout << "_inputs[i]: " << _inputs[i] << endl;
+    cout << "_inputs[" << i << "]: " << _inputs[i] << endl;
     const Tensor<Real>& inputData = poolIn.value<Tensor<Real> >(_inputs[i]);
-      
-    // Convert data to float32
-    std::vector<float> float_data(inputData.size());
-    for (size_t j = 0; j < inputData.size(); ++j) {
-      float_data[j] = static_cast<float>(inputData.data()[j]);
-    }
-      
-    // Step 2: Get shape
+    cout << "inputData.size(): " << inputData.size() << endl;
+    
+    // Step 1: Get tensor shape
+    std::vector<int64_t> shape;
     int dims = 1;
 
     shape.push_back((int64_t)inputData.dimension(0));
     
     if (_squeeze) {
-      for(int i = 1; i < inputData.rank(); i++) {
-        if (inputData.dimension(i) > 1) {
-          shape.push_back((int64_t)inputData.dimension(i));
+      //cout << "Applying squeeze!!!" << endl;
+      //cout << "inputData.rank(): " << inputData.rank() << endl;
+    
+      for(int j = 1; j < inputData.rank(); j++) {
+        if (inputData.dimension(j) > 1) {
+          shape.push_back((int64_t)inputData.dimension(j));
           dims++;
         }
       }
@@ -274,14 +273,21 @@ void OnnxPredict::compute() {
         shape.push_back((int64_t) 1);
         dims++;
       }
+        
     } else {
       dims = inputData.rank();
-      for(int j = 1; j < dims; j++) {   // HERE we need to jump i = 1 - 4D tensor input
-          //cout << inputData.dimension(j) << endl;
+      for(int j = 1; j < dims; j++) {
+        //cout << inputData.dimension(j) << endl;
         shape.push_back((int64_t)inputData.dimension(j));
       }
     }
-            
+             
+    // Step 2: Convert data to float32
+    std::vector<float> float_data(inputData.size());
+    for (size_t j = 0; j < inputData.size(); ++j) {
+      float_data[j] = static_cast<float>(inputData.data()[j]);
+    }
+    
     // Step 3: Create ONNX Runtime tensor
     _memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
       
@@ -289,8 +295,24 @@ void OnnxPredict::compute() {
       throw EssentiaException("OnnxRuntimePredict: Error allocating memory for input tensor.");
     }
 
+    // display shape
+    cout << "shape: [";
+    for (size_t j = 0; j < shape.size(); ++j) {
+      cout << shape[j];
+      if (j + 1 < shape.size()) std::cout << ", ";
+    }
+    cout << "]" << endl;
+      
+    // display float_data
+    cout << "float_data: [";
+    for (size_t j = 0; j < float_data.size(); ++j) {
+      cout << float_data[j];
+      if (j + 1 < float_data.size()) std::cout << ", ";
+    }
+    cout << "]" << endl;
+    
     input_tensors.emplace_back(Ort::Value::CreateTensor<float>(_memoryInfo, float_data.data(), float_data.size(), shape.data(), shape.size()));
-
+    shapes.push_back(shape);
   }
 
   // Define input and output names
@@ -303,12 +325,12 @@ void OnnxPredict::compute() {
   }
     
   // Run the Onnxruntime session.
-  auto output_tensors = _session.Run(_runOptions,                     // Run options.
-                                     input_names.data(),         // Input node names.
-                                     input_tensors.data(),            // Input tensor values.
-                                     _nInputs,                        // Number of inputs.
-                                     output_names.data(),        // Output node names.
-                                     _nOutputs                        // Number of outputs.
+  auto output_tensors = _session.Run(_runOptions,                       // Run options.
+                                     input_names.data(),                // Input node names.
+                                     input_tensors.data(),              // Input tensor values.
+                                     _nInputs,                          // Number of inputs.
+                                     output_names.data(),               // Output node names.
+                                     _nOutputs                          // Number of outputs.
                                      );
     
   // Map output tensors to pool
@@ -316,27 +338,42 @@ void OnnxPredict::compute() {
     
     const Real* outputData = output_tensors[i].GetTensorData<Real>();
     
-    // Create and array to store the tensor shape.
+      
+    auto outputInfo = output_tensors[i].GetTensorTypeAndShapeInfo();
+    cout << "GetElementType: " << outputInfo.GetElementType() << endl;
+    cout << "Dimensions of the output: " << outputInfo.GetShape().size() << endl;
+    cout << "Shape of the output: [";
+    auto tensor_size = 1;
+    for (unsigned int shapeI = 0; shapeI < outputInfo.GetShape().size(); shapeI++){
+      tensor_size *= outputInfo.GetShape()[shapeI];
+      cout << outputInfo.GetShape()[shapeI];
+      if (shapeI + 1 <outputInfo.GetShape().size()) cout << ", ";
+    }
+    cout << "]" << endl;
+    
+    cout << "tensor_size: " << tensor_size << endl;
+
+    // display outputData
+    cout << "outputData" << i << ": [";
+    for (size_t j = 0; j < tensor_size; ++j) {
+      cout << outputData[j];
+      if (j + 1 < tensor_size) std::cout << ", ";
+    }
+    cout << "]" << endl;
+    
+    // Create and array to store the output tensor shape.
     array<long int, 4> _shape {1, 1, 1, 1};
-    //_shape[0] = (int)outputShapes[0];
-    _shape[0] = (int)shape[0];
+    _shape[0] = (int)shapes[0][0];
+    
     for (size_t j = 1; j < _outputNodes[i].shape.size(); j++){
-        _shape[j+1] = (int)_outputNodes[i].shape[j];
+      int shape_idx = _shape.size() - j;
+      _shape[shape_idx] = (int)_outputNodes[i].shape[_outputNodes[i].shape.size() - j];
     }
     
     // Store tensor in pool
     const Tensor<Real> tensorMap = TensorMap<const Real>(outputData, _shape);
     poolOut.set(_outputs[i], tensorMap);
   }
-
-  /* Cleanup
-  for (const auto& tensorInfo : all_input_infos) {
-    _allocator.Free((void*)tensorInfo.name.c_str());
-  }
-    
-  for (const auto& tensorInfo : all_output_infos) {
-    _allocator.Free((void*)tensorInfo.name.c_str());
-  }*/
     
 }
 
