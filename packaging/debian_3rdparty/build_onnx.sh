@@ -23,18 +23,25 @@ python3 -m pip install cmake
 
 CMAKE_EXTRA_DEFINES="FETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER CMAKE_INSTALL_PREFIX=${PREFIX}"
 OS=$(uname -s)
+CONFIG=Release
 
 if [ "$OS" = "Darwin" ]; then
     DIR_OS="MacOS"
-    CMAKE_EXTRA_DEFINES+=' CMAKE_OSX_ARCHITECTURES="arm64"'
+    CMAKE_EXTRA_DEFINES+=' CMAKE_OSX_ARCHITECTURES=arm64'
     SUFFIX="${LIBONNXRUNTIME_VERSION}.dylib*"
+
+    ./build.sh                            \
+            --config $CONFIG              \
+            --build_shared_lib            \
+            --parallel                    \
+            --skip_submodule_sync         \
+            --skip_tests                  \
+            --cmake_extra_defines $CMAKE_EXTRA_DEFINES
 else
     DIR_OS="Linux"
     SUFFIX="so*"
-fi
 
-CONFIG="Release"
-./build.sh                                \
+    ./build.sh                            \
             --config $CONFIG              \
             --build_shared_lib            \
             --parallel                    \
@@ -43,6 +50,7 @@ CONFIG="Release"
             --allow_running_as_root       \
             --skip_tests                  \
             --cmake_extra_defines $CMAKE_EXTRA_DEFINES
+fi
 
 # copying onnxruntime files
 mkdir -p "${PREFIX}"/lib/pkgconfig/
