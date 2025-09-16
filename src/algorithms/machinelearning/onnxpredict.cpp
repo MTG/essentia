@@ -85,9 +85,7 @@ void OnnxPredict::configure() {
 
   _nInputs = _inputs.size();
   _nOutputs = _outputs.size();
-    
-  // cout << "_inputs.size(): " << _nInputs << ".\n";
-    
+        
   // use the first input when no input is defined
   if (_nInputs == 0){
     // take the first input
@@ -212,7 +210,6 @@ std::string OnnxPredict::getTensorInfos(const std::vector<TensorInfo>& infos, co
   out += "=== " + label + " ===\n";
   for (const auto& info : infos) {
     out += "[Name] " + info.name + "\n";
-    //cout << "info.type: " << typeid(info.type).name() << endl;
     std::string type_str = onnxTypeToString(info.type);
     out += "\t[Type] " + type_str + "\n";
     out += "\t[Shape] [";
@@ -241,15 +238,14 @@ void OnnxPredict::compute() {
 
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
-    
-  std:vector<std::vector<int64_t>> shapes;
+
+  std::vector<std::vector<float>> input_datas;  // <-- keeps inputs alive
+  std:vector<std::vector<int64_t>> shapes;      // <-- keeps shapes alive
     
   // Parse the input tensors from the pool into ONNX Runtime tensors.
   for (size_t i = 0; i < _nInputs; i++) {
     
-    cout << "_inputs[" << i << "]: " << _inputs[i] << endl;
     const Tensor<Real>& inputData = poolIn.value<Tensor<Real> >(_inputs[i]);
-    cout << "inputData.size(): " << inputData.size() << endl;
     
     // Step 1: Get tensor shape
     std::vector<int64_t> shape;
@@ -258,8 +254,6 @@ void OnnxPredict::compute() {
     shape.push_back((int64_t)inputData.dimension(0));
     
     if (_squeeze) {
-      //cout << "Applying squeeze!!!" << endl;
-      //cout << "inputData.rank(): " << inputData.rank() << endl;
     
       for(int j = 1; j < inputData.rank(); j++) {
         if (inputData.dimension(j) > 1) {
@@ -277,41 +271,24 @@ void OnnxPredict::compute() {
     } else {
       dims = inputData.rank();
       for(int j = 1; j < dims; j++) {
-        //cout << inputData.dimension(j) << endl;
         shape.push_back((int64_t)inputData.dimension(j));
       }
     }
              
     // Step 2: Convert data to float32
-    std::vector<float> float_data(inputData.size());
+    input_datas.emplace_back(inputData.size());
     for (size_t j = 0; j < inputData.size(); ++j) {
-      float_data[j] = static_cast<float>(inputData.data()[j]);
+        input_datas.back()[j] = static_cast<float>(inputData.data()[j]);
     }
     
     // Step 3: Create ONNX Runtime tensor
-    _memoryInfo = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
+    _memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
       
     if (_memoryInfo == NULL) {
       throw EssentiaException("OnnxRuntimePredict: Error allocating memory for input tensor.");
     }
-
-    // display shape
-    cout << "shape: [";
-    for (size_t j = 0; j < shape.size(); ++j) {
-      cout << shape[j];
-      if (j + 1 < shape.size()) std::cout << ", ";
-    }
-    cout << "]" << endl;
-      
-    // display float_data
-    cout << "float_data: [";
-    for (size_t j = 0; j < float_data.size(); ++j) {
-      cout << float_data[j];
-      if (j + 1 < float_data.size()) std::cout << ", ";
-    }
-    cout << "]" << endl;
     
-    input_tensors.emplace_back(Ort::Value::CreateTensor<float>(_memoryInfo, float_data.data(), float_data.size(), shape.data(), shape.size()));
+    input_tensors.emplace_back(Ort::Value::CreateTensor<float>(_memoryInfo, input_datas.back().data(), input_datas.back().size(), shape.data(), shape.size()));
     shapes.push_back(shape);
   }
 
@@ -332,34 +309,12 @@ void OnnxPredict::compute() {
                                      output_names.data(),               // Output node names.
                                      _nOutputs                          // Number of outputs.
                                      );
-    
+
   // Map output tensors to pool
   for (size_t i = 0; i < output_tensors.size(); ++i) {
     
     const Real* outputData = output_tensors[i].GetTensorData<Real>();
-    
-      
-    auto outputInfo = output_tensors[i].GetTensorTypeAndShapeInfo();
-    cout << "GetElementType: " << outputInfo.GetElementType() << endl;
-    cout << "Dimensions of the output: " << outputInfo.GetShape().size() << endl;
-    cout << "Shape of the output: [";
-    auto tensor_size = 1;
-    for (unsigned int shapeI = 0; shapeI < outputInfo.GetShape().size(); shapeI++){
-      tensor_size *= outputInfo.GetShape()[shapeI];
-      cout << outputInfo.GetShape()[shapeI];
-      if (shapeI + 1 <outputInfo.GetShape().size()) cout << ", ";
-    }
-    cout << "]" << endl;
-    
-    cout << "tensor_size: " << tensor_size << endl;
-
-    // display outputData
-    cout << "outputData" << i << ": [";
-    for (size_t j = 0; j < tensor_size; ++j) {
-      cout << outputData[j];
-      if (j + 1 < tensor_size) std::cout << ", ";
-    }
-    cout << "]" << endl;
+    const float* outputFloat = output_tensors[i].GetTensorData<float>();
     
     // Create and array to store the output tensor shape.
     array<long int, 4> _shape {1, 1, 1, 1};
