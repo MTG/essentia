@@ -152,14 +152,8 @@ class TestOnnxPredict(TestCase):
 
         n, m = input1.shape
 
-        print(f"input1.shape: {(n, m)}")
         batch1 = input1.reshape(n, 1, 1, m)
         batch2 = input2.reshape(n, 1, 1, m)
-
-        print(f"batch1.shape: {batch1.shape}")
-        print(f"batch2.shape: {batch2.shape}")
-
-        print(f"batch1: {batch1}")
 
         pool = Pool()
         pool.set("input1", batch1)
@@ -174,11 +168,6 @@ class TestOnnxPredict(TestCase):
 
         found_values1 = poolOut["output1"]
         found_values2 = poolOut["output2"]
-
-        print(f"found_values1.shape: {found_values1.shape}")
-        print(f"found_values2.shape: {found_values2.shape}")
-
-        print(f"found_values1: {found_values1}")
 
         self.assertAlmostEqualMatrix(found_values1, batch1)
         self.assertAlmostEqualMatrix(found_values2, batch2)
