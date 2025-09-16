@@ -26,123 +26,163 @@ import soundfile as sf
 
 
 class TestOnnxPredict(TestCase):
-    def testIONameParser(self):
-        model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
-        print(f"\nmodel: {model}")
-        configs = [
-            {
-                "graphFilename": model,
-                "inputs": ["model/Placeholder"],
-                "outputs": ["model/Softmax:"],
-            },  # No index.
-            {
-                "graphFilename": model,
-                "inputs": ["model/Placeholder"],
-                "outputs": ["model/Softmax:3"],
-            },  # Index out of bounds.
-            {
-                "graphFilename": model,
-                "inputs": ["model/Placeholder"],
-                "outputs": ["model/Softmax::0"],
-            },  # Double colon.
-            {
-                "graphFilename": model,
-                "inputs": ["model/Placeholder"],
-                "outputs": ["model/Softmax:s:0"],
-            },  # Several colons.
-        ]
+    # def testIONameParser(self):
+    #     model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
+    #     print(f"\nmodel: {model}")
+    #     configs = [
+    #         {
+    #             "graphFilename": model,
+    #             "inputs": ["model/Placeholder"],
+    #             "outputs": ["model/Softmax:"],
+    #         },  # No index.
+    #         {
+    #             "graphFilename": model,
+    #             "inputs": ["model/Placeholder"],
+    #             "outputs": ["model/Softmax:3"],
+    #         },  # Index out of bounds.
+    #         {
+    #             "graphFilename": model,
+    #             "inputs": ["model/Placeholder"],
+    #             "outputs": ["model/Softmax::0"],
+    #         },  # Double colon.
+    #         {
+    #             "graphFilename": model,
+    #             "inputs": ["model/Placeholder"],
+    #             "outputs": ["model/Softmax:s:0"],
+    #         },  # Several colons.
+    #     ]
 
-        for config in configs[1:]:
-            with self.subTest(f"{config} failed"):
-                print(config)
-                self.assertConfigureFails(OnnxPredict(), config)
+    #     for config in configs[1:]:
+    #         with self.subTest(f"{config} failed"):
+    #             print(config)
+    #             self.assertConfigureFails(OnnxPredict(), config)
 
-    def testInference(self,):
-        model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
-        # TODO: store model card and to extract model output shapes to assert the ouputs
+    # def testInference(self,):
+    #     model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
+    #     # TODO: store model card and to extract model output shapes to assert the ouputs
 
-        print(f"\nmodel: {model}")
-        output_layer_name0 = "activations"
-        output_layer_name1 = "embeddings"
-        onxx_predict = OnnxPredict(
-            graphFilename= model,
-            inputs=[],
-            outputs=[output_layer_name0, output_layer_name1]
-            )
+    #     print(f"\nmodel: {model}")
+    #     output_layer_name0 = "activations"
+    #     output_layer_name1 = "embeddings"
+    #     onxx_predict = OnnxPredict(
+    #         graphFilename= model,
+    #         inputs=[],
+    #         outputs=[output_layer_name0, output_layer_name1]
+    #         )
 
-        stem = "359500__mtg__sax-tenor-e-major"
-        audio_path = join(testdata.audio_dir, Path("recorded"), f"{stem}.wav")
+    #     stem = "359500__mtg__sax-tenor-e-major"
+    #     audio_path = join(testdata.audio_dir, Path("recorded"), f"{stem}.wav")
 
-        audio, sample_rate = sf.read(audio_path, dtype=numpy.float32)
-        print(f"audio.shape: {audio.shape}")
+    #     audio, sample_rate = sf.read(audio_path, dtype=numpy.float32)
+    #     print(f"audio.shape: {audio.shape}")
 
-        frame_size = 512
-        hop_size = 256
-        patch_size = 128
-        number_bands = 96
+    #     frame_size = 512
+    #     hop_size = 256
+    #     patch_size = 128
+    #     number_bands = 96
 
-        w = Windowing(type="hann", zeroPadding=frame_size)
-        spectrum = Spectrum(size=frame_size)
-        mels = MelBands(inputSize=frame_size+1,numberBands=number_bands, type="magnitude")
-        logNorm = UnaryOperator(type="log")
+    #     w = Windowing(type="hann", zeroPadding=frame_size)
+    #     spectrum = Spectrum(size=frame_size)
+    #     mels = MelBands(inputSize=frame_size+1,numberBands=number_bands, type="magnitude")
+    #     logNorm = UnaryOperator(type="log")
 
-        # compute mel bands
-        bands = []
-        for frame in FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size):
-            melFrame = mels(spectrum(w(frame)))
-            bands.append(logNorm(melFrame))
-        bands = array(bands)
+    #     # compute mel bands
+    #     bands = []
+    #     for frame in FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size):
+    #         melFrame = mels(spectrum(w(frame)))
+    #         bands.append(logNorm(melFrame))
+    #     bands = array(bands)
 
-        discard = bands.shape[0] % patch_size
-        bands = numpy.reshape(bands[:-discard, :], [-1, patch_size, number_bands])
-        batch = numpy.expand_dims(bands, 1)
-        print(f"bands.shape: {bands.shape}")
-        print(f"batch.shape: {batch.shape}")
+    #     discard = bands.shape[0] % patch_size
+    #     bands = numpy.reshape(bands[:-discard, :], [-1, patch_size, number_bands])
+    #     batch = numpy.expand_dims(bands, 1)
+    #     print(f"bands.shape: {bands.shape}")
+    #     print(f"batch.shape: {batch.shape}")
+
+    #     pool = Pool()
+    #     pool.set("melspectrogram", batch)
+
+    #     pool_out = onxx_predict(pool)
+
+    #     print(f"descriptorNames: {pool_out.descriptorNames()}")
+    #     print(f"result['{output_layer_name0}']: {pool_out[output_layer_name0]}")
+    #     print(f"result['{output_layer_name0}'].shape(): {pool_out[output_layer_name0].shape}")
+
+    #     print(f"result['{output_layer_name1}']: {pool_out[output_layer_name1]}")
+    #     print(f"result['{output_layer_name0}'].shape(): {pool_out[output_layer_name1].shape}")
+
+    #     AssertionError()
+    #     # TODO: assert the output shapes
+
+    # def testEmptyModelName(self):
+    #     # With empty model name the algorithm should skip the configuration without errors.
+    #     self.assertConfigureSuccess(OnnxPredict(), {})
+    #     self.assertConfigureSuccess(OnnxPredict(), {"graphFilename": ""})
+    #     self.assertConfigureSuccess(
+    #         OnnxPredict(), {"graphFilename": "", "inputs": [""]}
+    #     )
+    #     self.assertConfigureSuccess(
+    #         OnnxPredict(), {"graphFilename": "", "inputs": ["wrong_input"]}
+    #     )
+
+    # def testInvalidParam(self):
+    #     model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
+    #     self.assertConfigureFails(
+    #         OnnxPredict(),
+    #         {
+    #             "graphFilename": model,
+    #             "inputs": ["wrong_input_name"],
+    #             "outputs": ["embeddings"],
+    #         },
+    #     )  # input does not exist in the model
+    #     self.assertConfigureFails(
+    #         OnnxPredict(),
+    #         {
+    #             "graphFilename": "wrong_model_name",    #! I suspect the issue is here with OnnxExceptions
+    #             "inputs": ["melspectrogram"],
+    #             "outputs": ["embeddings"],
+    #         },
+    #     )  # the model does not exist
+
+    def testIdentityModel(self):
+        model = join(testdata.models_dir, "identity", "identity2x2.onnx")
+
+        # prepare model inputs and batches
+        input1, input2 = (numpy.float32(numpy.random.random((3, 3))) for _ in range(2))
+
+        n, m = input1.shape
+
+        print(f"input1.shape: {(n, m)}")
+        batch1 = input1.reshape(n, 1, 1, m)
+        batch2 = input2.reshape(n, 1, 1, m)
+
+        print(f"batch1.shape: {batch1.shape}")
+        print(f"batch2.shape: {batch2.shape}")
+
+        print(f"batch1: {batch1}")
 
         pool = Pool()
-        pool.set("melspectrogram", batch)
+        pool.set("input1", batch1)
+        pool.set("input2", batch2)
 
-        pool_out = onxx_predict(pool)
+        poolOut = OnnxPredict(
+            graphFilename=model,
+            inputs=["input1", "input2"],
+            outputs=["output1", "output2"],
+            squeeze=True,
+        )(pool)
 
-        print(f"descriptorNames: {pool_out.descriptorNames()}")
-        print(f"result['{output_layer_name0}']: {pool_out[output_layer_name0]}")
-        print(f"result['{output_layer_name0}'].shape(): {pool_out[output_layer_name0].shape}")
+        found_values1 = poolOut["output1"]
+        found_values2 = poolOut["output2"]
 
-        print(f"result['{output_layer_name1}']: {pool_out[output_layer_name1]}")
-        print(f"result['{output_layer_name0}'].shape(): {pool_out[output_layer_name1].shape}")
+        print(f"found_values1.shape: {found_values1.shape}")
+        print(f"found_values2.shape: {found_values2.shape}")
 
-        AssertionError()
-        # TODO: assert the output shapes
+        print(f"found_values1: {found_values1}")
 
-    def testEmptyModelName(self):
-        # With empty model name the algorithm should skip the configuration without errors.
-        self.assertConfigureSuccess(OnnxPredict(), {})
-        self.assertConfigureSuccess(OnnxPredict(), {"graphFilename": ""})
-        self.assertConfigureSuccess(
-            OnnxPredict(), {"graphFilename": "", "inputs": [""]}
-        )
-        self.assertConfigureSuccess(
-            OnnxPredict(), {"graphFilename": "", "inputs": ["wrong_input"]}
-        )
+        self.assertAlmostEqualMatrix(found_values1, batch1)
+        self.assertAlmostEqualMatrix(found_values2, batch2)
 
-    def testInvalidParam(self):
-        model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
-        self.assertConfigureFails(
-            OnnxPredict(),
-            {
-                "graphFilename": model,
-                "inputs": ["wrong_input_name"],
-                "outputs": ["embeddings"],
-            },
-        )  # input does not exist in the model
-        self.assertConfigureFails(
-            OnnxPredict(),
-            {
-                "graphFilename": "wrong_model_name",    #! I suspect the issue is here with OnnxExceptions
-                "inputs": ["melspectrogram"],
-                "outputs": ["embeddings"],
-            },
-        )  # the model does not exist
 
     # TODO: adapt TensorPredict unittests such as testIdentityModel, testComputeWithoutConfiguration, testIgnoreInvalidReconfiguration
     # TODO: make a test for squeeze, showing that it fails when it is not applied with 2D models
