@@ -240,8 +240,7 @@ class TestOnnxPredict(TestCase):
         )
         self.assertComputeFails(onnx_predict, pool)
 
-    # TODO: make a test reusing the algorithm for two models (effnet and identity)
-    def testConfiguration(self):
+    def testConfigure(self):
         # define output metadata
         outputs = [
             {
