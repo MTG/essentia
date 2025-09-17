@@ -180,9 +180,31 @@ class TestOnnxPredict(TestCase):
 
         self.assertComputeFails(OnnxPredict(), pool)
 
-    # TODO: adapt TensorPredict unittests such as testIgnoreInvalidReconfiguration
-    # TODO: make a test for squeeze, showing that it works well when it is applied for a 2D model
+    def testIgnoreInvalidReconfiguration(self):
+        pool = Pool()
+        pool.set("input1", numpy.ones((1, 1, 1, 3), dtype="float32"))
+        pool.set("input2", numpy.ones((1, 1, 1, 3), dtype="float32"))
 
+        #model_name = join(filedir(), "tensorflowpredict", "identity.pb")
+        model_name = join(testdata.models_dir, "identity", "identity2x2.onnx")
+        model = OnnxPredict(
+            graphFilename=model_name,
+            inputs=["input1", "input2"],
+            outputs=["output1"],
+            squeeze=True,
+        )
+
+        firstResult = model(pool)
+
+        # This attempt to reconfigure the algorithm should be ignored and trigger a Warning.
+        model.configure()
+
+        secondResult = model(pool)
+
+        self.assertEqualMatrix(firstResult["output1"], secondResult["output1"])
+
+    # TODO: make a test for squeeze, showing that it works well when it is applied for a 2D model
+    # TODO: make a test reusing the algorithm for two models (effnet and identity)
 
     """
     def regression(self, parameters):
