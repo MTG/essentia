@@ -110,9 +110,11 @@ void OnnxPredict::configure() {
     E_INFO(getTensorInfos(all_output_infos, "Model Outputs"));
     return;
   }
-    
-  // check model has input and output https://github.com/microsoft/onnxruntime-inference-examples/blob/7a635daae48450ff142e5c0848a564b245f04112/c_cxx/model-explorer/model-explorer.cpp#L99C3-L100C63
 
+  _isConfigured = true;
+  reset();
+
+  // check model has input and output https://github.com/microsoft/onnxruntime-inference-examples/blob/7a635daae48450ff142e5c0848a564b245f04112/c_cxx/model-explorer/model-explorer.cpp#L99C3-L100C63
   for (int i = 0; i < _inputs.size(); i++) {
     for (int j = 0; j < all_input_infos.size(); j++) {
       if (_inputs[i] == all_input_infos[j].name){
@@ -148,9 +150,6 @@ void OnnxPredict::configure() {
     }
     throw EssentiaException(availableOutputInfo());
   }
-    
-  _isConfigured = true;
-  reset();
     
   for (size_t i = 0; i < _nInputs; i++) {
     checkName(_inputs[i], all_input_infos);
@@ -224,9 +223,11 @@ std::string OnnxPredict::getTensorInfos(const std::vector<TensorInfo>& infos, co
 
 void OnnxPredict::reset() {
   if (!_isConfigured) return;
-    
   input_names.clear();
   output_names.clear();
+  _inputNodes.clear();
+  _outputNodes.clear();
+  input_tensors.clear();
 }
 
 void OnnxPredict::compute() {
