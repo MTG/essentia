@@ -204,6 +204,29 @@ class TestOnnxPredict(TestCase):
         self.assertEqualMatrix(firstResult["output1"], secondResult["output1"])
 
     # TODO: make a test for squeeze, showing that it works well when it is applied for a 2D model
+    def testInvalidSqueezeConfiguration(self):
+        model = join(testdata.models_dir, "identity", "identity2x2.onnx")
+
+        # prepare model inputs and batches
+        input1, input2 = (numpy.float32(numpy.random.random((3, 3))) for _ in range(2))
+
+        n, m = input1.shape
+
+        batch1 = input1.reshape(n, 1, 1, m)
+        batch2 = input2.reshape(n, 1, 1, m)
+
+        pool = Pool()
+        pool.set("input1", batch1)
+        pool.set("input2", batch2)
+
+        onnx_predict = OnnxPredict(
+            graphFilename=model,
+            inputs=["input1", "input2"],
+            outputs=["output1", "output2"],
+            squeeze=False,
+        )
+        self.assertComputeFails(onnx_predict, pool)
+
     # TODO: make a test reusing the algorithm for two models (effnet and identity)
 
     """
