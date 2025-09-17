@@ -54,6 +54,7 @@ void OnnxPredict::configure() {
 
   // Do not do anything if we did not get a non-empty model name.
   if (_graphFilename.empty()) return;
+  cout << "after return" << endl;
     
   try{
     // Define environment
@@ -227,7 +228,6 @@ void OnnxPredict::reset() {
   output_names.clear();
   _inputNodes.clear();
   _outputNodes.clear();
-  input_tensors.clear();
 }
 
 void OnnxPredict::compute() {
@@ -242,6 +242,10 @@ void OnnxPredict::compute() {
 
   std::vector<std::vector<float>> input_datas;  // <-- keeps inputs alive
   std:vector<std::vector<int64_t>> shapes;      // <-- keeps shapes alive
+  
+  if (!input_tensors.empty())
+      input_tensors.clear();                        // <-- destroy input tensors
+
     
   // Parse the input tensors from the pool into ONNX Runtime tensors.
   for (size_t i = 0; i < _nInputs; i++) {
@@ -315,7 +319,6 @@ void OnnxPredict::compute() {
   for (size_t i = 0; i < output_tensors.size(); ++i) {
     
     const Real* outputData = output_tensors[i].GetTensorData<Real>();
-    const float* outputFloat = output_tensors[i].GetTensorData<float>();
     
     // Create and array to store the output tensor shape.
     array<long int, 4> _shape {1, 1, 1, 1};
