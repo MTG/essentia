@@ -174,9 +174,13 @@ class TestOnnxPredict(TestCase):
         self.assertAlmostEqualMatrix(found_values1, batch1)
         self.assertAlmostEqualMatrix(found_values2, batch2)
 
+    def testComputeWithoutConfiguration(self):
+        pool = Pool()
+        pool.set("melspectrogram", numpy.zeros((1, 1, 1, 1), dtype="float32"))
 
-    # TODO: adapt TensorPredict unittests such as testIdentityModel, testComputeWithoutConfiguration, testIgnoreInvalidReconfiguration
-    # TODO: make a test for squeeze, showing that it fails when it is not applied with 2D models
+        self.assertComputeFails(OnnxPredict(), pool)
+
+    # TODO: adapt TensorPredict unittests such as testIgnoreInvalidReconfiguration
     # TODO: make a test for squeeze, showing that it works well when it is applied for a 2D model
 
 
