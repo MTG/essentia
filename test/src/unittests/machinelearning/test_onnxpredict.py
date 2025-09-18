@@ -26,95 +26,37 @@ import soundfile as sf
 
 
 class TestOnnxPredict(TestCase):
-    # def testIONameParser(self):
-    #     model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
-    #     print(f"\nmodel: {model}")
-    #     configs = [
-    #         {
-    #             "graphFilename": model,
-    #             "inputs": ["model/Placeholder"],
-    #             "outputs": ["model/Softmax:"],
-    #         },  # No index.
-    #         {
-    #             "graphFilename": model,
-    #             "inputs": ["model/Placeholder"],
-    #             "outputs": ["model/Softmax:3"],
-    #         },  # Index out of bounds.
-    #         {
-    #             "graphFilename": model,
-    #             "inputs": ["model/Placeholder"],
-    #             "outputs": ["model/Softmax::0"],
-    #         },  # Double colon.
-    #         {
-    #             "graphFilename": model,
-    #             "inputs": ["model/Placeholder"],
-    #             "outputs": ["model/Softmax:s:0"],
-    #         },  # Several colons.
-    #     ]
 
-    #     for config in configs[1:]:
-    #         with self.subTest(f"{config} failed"):
-    #             print(config)
-    #             self.assertConfigureFails(OnnxPredict(), config)
+    def testIONameParser(self):
+        model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
+        print(f"\nmodel: {model}")
+        configs = [
+            {
+                "graphFilename": model,
+                "inputs": ["model/Placeholder"],
+                "outputs": ["model/Softmax:"],
+            },  # No index.
+            {
+                "graphFilename": model,
+                "inputs": ["model/Placeholder"],
+                "outputs": ["model/Softmax:3"],
+            },  # Index out of bounds.
+            {
+                "graphFilename": model,
+                "inputs": ["model/Placeholder"],
+                "outputs": ["model/Softmax::0"],
+            },  # Double colon.
+            {
+                "graphFilename": model,
+                "inputs": ["model/Placeholder"],
+                "outputs": ["model/Softmax:s:0"],
+            },  # Several colons.
+        ]
 
-    # def testInference(self,):
-    #     model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
-
-    #     # define input and output metadata
-    #     input_shape = (1, 128, 96)
-    #     outputs = [
-    #         {
-    #             "name": "activations",
-    #             "shape": (1, 400),
-    #         },
-    #         {
-    #             "name": "embeddings",
-    #             "shape": (1, 1280),
-    #         }
-    #     ]
-
-    #     onxx_predict = OnnxPredict(
-    #         graphFilename= model,
-    #         inputs=[],
-    #         outputs=[output["name"] for output in outputs],
-    #         )
-
-    #     stem = "359500__mtg__sax-tenor-e-major"
-    #     audio_path = join(testdata.audio_dir, Path("recorded"), f"{stem}.wav")
-
-    #     audio, sample_rate = sf.read(audio_path, dtype=numpy.float32)
-
-    #     frame_size = 512
-    #     hop_size = 256
-    #     patch_size = 128
-    #     number_bands = 96
-
-    #     w = Windowing(type="hann", zeroPadding=frame_size)
-    #     spectrum = Spectrum(size=frame_size)
-    #     mels = MelBands(inputSize=frame_size+1,numberBands=number_bands, type="magnitude")
-    #     logNorm = UnaryOperator(type="log")
-
-    #     # compute mel bands
-    #     bands = []
-    #     for frame in FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size):
-    #         melFrame = mels(spectrum(w(frame)))
-    #         bands.append(logNorm(melFrame))
-    #     bands = array(bands)
-
-    #     discard = bands.shape[0] % patch_size
-    #     bands = numpy.reshape(bands[:-discard, :], [-1, patch_size, number_bands])
-    #     batch = numpy.expand_dims(bands, 1)
-
-    #     pool = Pool()
-    #     pool.set("melspectrogram", batch)
-
-    #     pool_out = onxx_predict(pool)
-
-    #     self.assertEqualVector(input_shape, batch.shape[1:])
-    #     self.assertEqualVector(outputs[0]["shape"], pool_out[outputs[0]["name"]].shape[2:])
-    #     self.assertEqualVector(outputs[1]["shape"], pool_out[outputs[1]["name"]].shape[2:])
-    #     self.assertEqual(pool_out.descriptorNames()[0], outputs[0]["name"])
-    #     self.assertEqual(pool_out.descriptorNames()[1], outputs[1]["name"])
+        for config in configs[1:]:
+            with self.subTest(f"{config} failed"):
+                print(config)
+                self.assertConfigureFails(OnnxPredict(), config)
 
     def testInference(self,):
 
