@@ -61,7 +61,7 @@ void OnnxPredict::configure() {
       
     // Set graph optimization level - check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
     _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
-    _sessionOptions.SetIntraOpNumThreads(1);
+    _sessionOptions.SetIntraOpNumThreads(0);
         
     // Initialize session
     _session = Ort::Session(_env, _graphFilename.c_str(), _sessionOptions);
