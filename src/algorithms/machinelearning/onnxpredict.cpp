@@ -86,11 +86,7 @@ void OnnxPredict::configure() {
         
   // use the first input when no input is defined
   if (_nInputs == 0){
-    // take the first input
-    _inputs.push_back(_session.GetInputNames()[0]);
-    _nInputs = _inputs.size();
-    // inform the first model input will be used
-    E_INFO("OnnxPredict: using the first model input '" + _inputs[0] + "'");
+    throw EssentiaException("No model input was defined.\n" + availableInputInfo());
   }
 
   // define _outputs with the first model output when no output is provided
