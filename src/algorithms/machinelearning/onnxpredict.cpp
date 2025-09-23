@@ -61,8 +61,6 @@ void OnnxPredict::configure() {
       
     // Set graph optimization level - check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
     _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
-    // To enable model serialization after graph optimization set this
-    _sessionOptions.SetOptimizedModelFilePath("optimized_file_path");
     _sessionOptions.SetIntraOpNumThreads(1);
         
     // Initialize session
