@@ -26,8 +26,8 @@ using namespace standard;
 const char* OnnxPredict::name = "OnnxPredict";
 const char* OnnxPredict::category = "Machine Learning";
 
-const char* OnnxPredict::description = DOC("This algorithm runs a Onnx graph and stores the desired output tensors in a pool.\n"
-"The Onnx graph should be stored in Open Neural Network Exchange (.onnx) binary format [1], and should contain both the architecture and the weights of the model.\n"
+const char* OnnxPredict::description = DOC("This algorithm runs a Onnx model and stores the desired output tensors in a pool.\n"
+"The Onnx model should be saved in Open Neural Network Exchange (.onnx) binary format [1], and should contain both the architecture and the weights of the model.\n"
 "The parameter `inputs` should contain a list with the names of the input nodes that feed the model. The input Pool should contain the tensors corresponding to each input node stored using Essentia tensors. "
 "The pool namespace for each input tensor has to match the input node's name.\n"
 "In the same way, the `outputs` parameter should contain the names of the tensors to save. These tensors will be stored inside the output pool under a namespace that matches the tensor's name. "
@@ -54,7 +54,6 @@ void OnnxPredict::configure() {
 
   // Do not do anything if we did not get a non-empty model name.
   if (_graphFilename.empty()) return;
-  cout << "after return" << endl;
     
   try{
     // Define environment
