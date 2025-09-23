@@ -72,8 +72,8 @@ void OnnxPredict::configure() {
   E_INFO("OnnxPredict: Successfully loaded graph file: `" << _graphFilename << "`");
       
   // get input and output info (names, type and shapes)
-  all_input_infos = setTensorInfos(_session, _allocator, true);
-  all_output_infos = setTensorInfos(_session, _allocator, false);
+  all_input_infos = setTensorInfos(_session, _allocator, "inputs");
+  all_output_infos = setTensorInfos(_session, _allocator, "outputs");
     
   // read inputs and outputs as input parameter
   _inputs = parameter("inputs").toVectorString();
@@ -158,22 +158,18 @@ void OnnxPredict::configure() {
   }
 }
 
-std::vector<TensorInfo> OnnxPredict::setTensorInfos(const Ort::Session& session, Ort::AllocatorWithDefaultOptions& allocator, bool is_input) {
-    size_t count = is_input ? session.GetInputCount() : session.GetOutputCount();
+std::vector<TensorInfo> OnnxPredict::setTensorInfos(const Ort::Session& session, Ort::AllocatorWithDefaultOptions& allocator, const std::string& port) {
+    
     std::vector<TensorInfo> infos;
     
-    auto names_raw = is_input
-        ? session.GetInputNames()
-        : session.GetOutputNames();
+    size_t count = (port == "inputs") ? session.GetInputCount() : session.GetOutputCount();
+    auto names_raw = (port == "inputs") ? session.GetInputNames() : session.GetOutputNames();
 
     for (size_t i = 0; i < count; ++i) {
         auto name_raw = names_raw[i];
 
         std::string name(name_raw);
-        
-        Ort::TypeInfo type_info = is_input
-            ? session.GetInputTypeInfo(i)
-            : session.GetOutputTypeInfo(i);
+        Ort::TypeInfo type_info = (port == "inputs") ? session.GetInputTypeInfo(i) : session.GetOutputTypeInfo(i);
 
         auto tensor_info = type_info.GetTensorTypeAndShapeInfo();
 

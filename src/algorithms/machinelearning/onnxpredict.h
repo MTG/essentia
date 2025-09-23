@@ -77,7 +77,7 @@ class OnnxPredict : public Algorithm {
     
   std::vector<std::string> inputNames();
   std::vector<std::string> outputNames();
-  std::vector<TensorInfo> setTensorInfos(const Ort::Session&, Ort::AllocatorWithDefaultOptions&, bool);
+  std::vector<TensorInfo> setTensorInfos(const Ort::Session&, Ort::AllocatorWithDefaultOptions&, const std::string&);
   void printTensorInfos(const std::vector<TensorInfo>&, const std::string&);
   std::string getTensorInfos(const std::vector<TensorInfo>&, const std::string&);
   void checkName(const std::string, std::vector<TensorInfo>);
