@@ -227,7 +227,7 @@ def runEffnetDiscogsInference(onnx_predict, outputs, pool) -> Pool:
 
     onnx_predict.configure(
         graphFilename= model,
-        inputs=[],
+        inputs=["melspectrogram"],
         outputs=[output["name"] for output in outputs],
         )
 
