@@ -84,18 +84,14 @@ void OnnxPredict::configure() {
   _nInputs = _inputs.size();
   _nOutputs = _outputs.size();
         
-  // excepts if no input is provided
+  // excepts if no inputs are defined
   if (_nInputs == 0){
     throw EssentiaException("No model input was defined.\n" + availableInputInfo());
   }
 
-  // define _outputs with the first model output when no output is provided
+  // excepts if no outputs are defined
   if (_nOutputs == 0){
-    // take the first output
-    _outputs.push_back(_session.GetOutputNames()[0]);
-    _nOutputs = _outputs.size();
-    // inform the first model input will be used
-    E_INFO("OnnxPredict: using the first model output '" + _outputs[0] + "'");
+    throw EssentiaException("No model output was defined.\n" + availableOutputInfo());
   }
 
   // If the first output name is empty just print out the list of nodes and return.
