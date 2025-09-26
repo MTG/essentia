@@ -84,7 +84,7 @@ void OnnxPredict::configure() {
   _nInputs = _inputs.size();
   _nOutputs = _outputs.size();
         
-  // use the first input when no input is defined
+  // excepts if no input is provided
   if (_nInputs == 0){
     throw EssentiaException("No model input was defined.\n" + availableInputInfo());
   }
