@@ -85,16 +85,16 @@ class OnnxPredict : public Algorithm {
 
   inline std::string availableInputInfo() {
     std::vector<std::string> inputs = inputNames();
-    std::string info = "OnnxPredict: Available input names are:\n";
+    std::string info = "Available input names are:\n";
     for (std::vector<std::string>::const_iterator i = inputs.begin(); i != inputs.end() - 1; ++i) info += *i + ", ";
-    return info + inputs.back() + ".\n\nReconfigure this algorithm with valid input names before starting the processing.";
+    return info + inputs.back() + "\n\nReconfigure this algorithm with valid input names before starting the processing.";
   }
 
   inline std::string availableOutputInfo() {
     std::vector<std::string> outputs = outputNames();
     std::string info = "OnnxPredict: Available output names are:\n";
     for (std::vector<std::string>::const_iterator i = outputs.begin(); i != outputs.end() - 1; ++i) info += *i + ", ";
-    return info + outputs.back() + ".\n\nReconfigure this algorithm with valid output names before starting the processing.";
+    return info + outputs.back() + "\n\nReconfigure this algorithm with valid output names before starting the processing.";
   }
 
  public:
