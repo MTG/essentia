@@ -157,16 +157,16 @@ std::vector<TensorInfo> OnnxPredict::setTensorInfos(const Ort::Session& session,
 }
 
 void OnnxPredict::printTensorInfos(const std::vector<TensorInfo>& infos, const std::string& label) {
-    std::cout << "=== " << label << " ===\n";
+    E_INFO("=== " << label << " ===\n");
     for (const auto& info : infos) {
-        std::cout << "[Name] " << info.name << endl;
-        std::cout << "  [Type] " << info.type << endl;
-        std::cout << "  [Shape] [";
+        E_INFO("[Name] " << info.name);
+        E_INFO("  [Type] " << info.type);
+        E_INFO("  [Shape] [");
         for (size_t j = 0; j < info.shape.size(); ++j) {
-            std::cout << info.shape[j];
-            if (j + 1 < info.shape.size()) std::cout << ", ";
+            E_INFO(info.shape[j]);
+            if (j + 1 < info.shape.size()) E_INFO(", ");
         }
-        std::cout << "]\n";
+        E_INFO("]\n");
     }
 }
 
