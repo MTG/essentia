@@ -112,17 +112,6 @@ void OnnxPredict::configure() {
       }
     }
   }
-  
-  if (_inputNodes.size() == 0){
-
-    std::string s;
-    for (const auto &piece : _inputs) {
-      s += piece;
-      s += " ";
-    }
-      
-    throw EssentiaException(availableInputInfo());
-  }
     
   for (int i = 0; i < _outputs.size(); i++) {
     for (int j = 0; j < all_output_infos.size(); j++) {
@@ -130,15 +119,6 @@ void OnnxPredict::configure() {
         _outputNodes.push_back(all_output_infos[j]);
       }
     }
-  }
- 
-  if (_outputNodes.size() == 0){
-    std::string s;
-    for (const auto &piece : _outputs) {
-      s += piece;
-      s += " ";
-    }
-    throw EssentiaException(availableOutputInfo());
   }
     
   for (size_t i = 0; i < _nInputs; i++) {
