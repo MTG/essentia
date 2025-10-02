@@ -58,6 +58,21 @@ void OnnxPredict::configure() {
   try{
     // Define environment
     _env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "multi_io_inference"); // {"default", "test", "multi_io_inference"}
+    
+    // Auto-detect EPs
+    auto providers = Ort::GetAvailableProviders();
+    if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") != providers.end()) {
+      OrtSessionOptionsAppendExecutionProvider_CUDA(session_options, 0);    // device_id = 0
+      E_INFO("✅ Using CUDA Execution Provider");
+    } else if (std::find(providers.begin(), providers.end(), "MetalExecutionProvider") != providers.end()) {
+      OrtSessionOptionsAppendExecutionProvider_Metal(session_options, 0);   // device_id = 0
+      E_INFO("✅ Using Metal Execution Provider");
+    } else if (std::find(providers.begin(), providers.end(), "CoreMLExecutionProvider") != providers.end()) {
+      OrtSessionOptionsAppendExecutionProvider_CoreML(session_options, 0);  // device_id = 0
+      E_INFO("✅ Using Core ML Execution Provider");
+    } else {
+      // Default = CPU -  CPU is always available, no need to append explicitly
+    }
       
     // Set graph optimization level - check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
     _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
@@ -112,6 +127,7 @@ void OnnxPredict::configure() {
       }
     }
   }
+// TODO: check if _inputNodes is empty - release an error instead
     
   for (int i = 0; i < _outputs.size(); i++) {
     for (int j = 0; j < all_output_infos.size(); j++) {
@@ -120,7 +136,8 @@ void OnnxPredict::configure() {
       }
     }
   }
-    
+    // TODO: check if _outputNodes is empty - release an error instead
+    // TODO: remove
   for (size_t i = 0; i < _nInputs; i++) {
     checkName(_inputs[i], all_input_infos);
   }
@@ -193,13 +210,15 @@ void OnnxPredict::reset() {
   output_names.clear();
   _inputNodes.clear();
   _outputNodes.clear();
+    // TODO: execute the reset() at the beginning in configure()
+    // TODO: include here the model and session creation
 }
 
 void OnnxPredict::compute() {
     
   if (!_isConfigured) {
     throw EssentiaException("OnnxPredict: This algorithm is not configured. To configure this algorithm you "
-                            "should specify a valid `graphFilename` as input parameter.");
+                            "should specify a valid `graphFilename`, `inputs` and `outputs` as input parameter.");
   }
 
   const Pool& poolIn = _poolIn.get();
