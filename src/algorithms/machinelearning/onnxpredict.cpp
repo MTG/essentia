@@ -59,20 +59,41 @@ void OnnxPredict::configure() {
     // Define environment
     _env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "multi_io_inference"); // {"default", "test", "multi_io_inference"}
     
-    // Auto-detect EPs
+    /* Auto-detect EPs
     auto providers = Ort::GetAvailableProviders();
     if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_CUDA(session_options, 0);    // device_id = 0
+      OrtSessionOptionsAppendExecutionProvider_CUDA(_sessionOptions, 0);    // device_id = 0
       E_INFO("✅ Using CUDA Execution Provider");
     } else if (std::find(providers.begin(), providers.end(), "MetalExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_Metal(session_options, 0);   // device_id = 0
+      OrtSessionOptionsAppendExecutionProvider_Metal(_sessionOptions, 0);   // device_id = 0
       E_INFO("✅ Using Metal Execution Provider");
     } else if (std::find(providers.begin(), providers.end(), "CoreMLExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_CoreML(session_options, 0);  // device_id = 0
+      OrtSessionOptionsAppendExecutionProvider_CoreML(_sessionOptions, 0);  // device_id = 0
       E_INFO("✅ Using Core ML Execution Provider");
-    } else {
+    }else {
       // Default = CPU -  CPU is always available, no need to append explicitly
+    }*/
+      
+    #ifdef USE_CUDA
+    if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") != providers.end()) {
+      OrtSessionOptionsAppendExecutionProvider_CUDA(_sessionOptions, 0);
+      E_INFO("✅ Using CUDA Execution Provider");
     }
+    #endif
+
+    #ifdef USE_METAL
+    if (std::find(providers.begin(), providers.end(), "MetalExecutionProvider") != providers.end()) {
+      OrtSessionOptionsAppendExecutionProvider_Metal(_sessionOptions, 0);
+      E_INFO("✅ Using Metal Execution Provider");
+    }
+    #endif
+
+    #ifdef USE_COREML
+    if (std::find(providers.begin(), providers.end(), "CoreMLExecutionProvider") != providers.end()) {
+      OrtSessionOptionsAppendExecutionProvider_CoreML(_sessionOptions, 0);
+      E_INFO("✅ Using Core ML Execution Provider");
+    }
+    #endif
       
     // Set graph optimization level - check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
     _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
