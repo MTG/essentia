@@ -141,8 +141,11 @@ void OnnxPredict::configure() {
       }
     }
   }
-// TODO: check if _inputNodes is empty - release an error instead
-    
+
+  // Check if _inputNodes is empty - release an exception instead
+  if (!_inputNodes.size)
+    throw EssentiaException("No input node was found.\n" + availableInputInfo());
+      
   for (int i = 0; i < _outputs.size(); i++) {
     for (int j = 0; j < all_output_infos.size(); j++) {
       if (_outputs[i] == all_output_infos[j].name){
@@ -150,8 +153,11 @@ void OnnxPredict::configure() {
       }
     }
   }
-    // TODO: check if _outputNodes is empty - release an error instead
-    // TODO: remove
+  
+  // Check if _outputNodes is empty - release an exception instead
+  if (!_outputNodes.size)
+    throw EssentiaException("No output node was found.\n" + availableOutputInfo());
+    
   for (size_t i = 0; i < _nInputs; i++) {
     checkName(_inputs[i], all_input_infos);
   }
