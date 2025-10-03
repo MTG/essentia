@@ -58,22 +58,14 @@ void OnnxPredict::configure() {
   try{
     // Define environment
     _env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "multi_io_inference"); // {"default", "test", "multi_io_inference"}
-    
-    /* Auto-detect EPs
-    auto providers = Ort::GetAvailableProviders();
-    if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_CUDA(_sessionOptions, 0);    // device_id = 0
-      E_INFO("✅ Using CUDA Execution Provider");
-    } else if (std::find(providers.begin(), providers.end(), "MetalExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_Metal(_sessionOptions, 0);   // device_id = 0
-      E_INFO("✅ Using Metal Execution Provider");
-    } else if (std::find(providers.begin(), providers.end(), "CoreMLExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_CoreML(_sessionOptions, 0);  // device_id = 0
-      E_INFO("✅ Using Core ML Execution Provider");
-    }else {
-      // Default = CPU -  CPU is always available, no need to append explicitly
-    }*/
       
+    // Reset session
+    _session.reset();
+    
+    // Reset SessionOptions by constructing a fresh object
+    _sessionOptions = Ort::SessionOptions{};
+    
+    // Auto-detect EPs
     #ifdef USE_CUDA
     if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") != providers.end()) {
       OrtSessionOptionsAppendExecutionProvider_CUDA(_sessionOptions, 0);
@@ -100,7 +92,8 @@ void OnnxPredict::configure() {
     _sessionOptions.SetIntraOpNumThreads(0);
         
     // Initialize session
-    _session = Ort::Session(_env, _graphFilename.c_str(), _sessionOptions);
+    _session = std::make_unique<Ort::Session>(_env, _graphFilename.c_str(), _sessionOptions);
+
   }
   catch (Ort::Exception oe) {
       throw EssentiaException(string("OnnxPredict:") + oe.what(), oe.GetOrtErrorCode());
@@ -108,8 +101,8 @@ void OnnxPredict::configure() {
   E_INFO("OnnxPredict: Successfully loaded graph file: `" << _graphFilename << "`");
       
   // get input and output info (names, type and shapes)
-  all_input_infos = setTensorInfos(_session, _allocator, "inputs");
-  all_output_infos = setTensorInfos(_session, _allocator, "outputs");
+  all_input_infos = setTensorInfos(*_session, _allocator, "inputs");
+  all_output_infos = setTensorInfos(*_session, _allocator, "outputs");
     
   // read inputs and outputs as input parameter
   _inputs = parameter("inputs").toVectorString();
@@ -312,13 +305,13 @@ void OnnxPredict::compute() {
   }
     
   // Run the Onnxruntime session.
-  auto output_tensors = _session.Run(_runOptions,                       // Run options.
-                                     input_names.data(),                // Input node names.
-                                     input_tensors.data(),              // Input tensor values.
-                                     _nInputs,                          // Number of inputs.
-                                     output_names.data(),               // Output node names.
-                                     _nOutputs                          // Number of outputs.
-                                     );
+  auto output_tensors = _session->Run(_runOptions,                       // Run options.
+                                      input_names.data(),                // Input node names.
+                                      input_tensors.data(),              // Input tensor values.
+                                      _nInputs,                          // Number of inputs.
+                                      output_names.data(),               // Output node names.
+                                      _nOutputs                          // Number of outputs.
+                                      );
 
   // Map output tensors to pool
   for (size_t i = 0; i < output_tensors.size(); ++i) {

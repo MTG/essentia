@@ -63,7 +63,9 @@ class OnnxPredict : public Algorithm {
     
   Ort::Env _env{nullptr};
   Ort::SessionOptions _sessionOptions{nullptr};
-  Ort::Session _session{nullptr};
+  //Ort::Session _session{nullptr};
+  std::unique_ptr<Ort::Session> _session;
+
     
   Ort::RunOptions _runOptions;
   Ort::AllocatorWithDefaultOptions _allocator;
@@ -100,7 +102,7 @@ class OnnxPredict : public Algorithm {
  public:
     
   OnnxPredict() : _env(Ort::Env(ORT_LOGGING_LEVEL_WARNING, "test")),
-    _sessionOptions(Ort::SessionOptions()), _session(Ort::Session(nullptr)), _runOptions(NULL), _isConfigured(false){
+    _sessionOptions(Ort::SessionOptions()), _session(nullptr), _runOptions(NULL), _isConfigured(false){
     declareInput(_poolIn, "poolIn", "the pool where to get the feature tensors");
     declareOutput(_poolOut, "poolOut", "the pool where to store the output tensors");
   }
