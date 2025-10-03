@@ -181,19 +181,14 @@ std::string OnnxPredict::getTensorInfos(const std::vector<TensorInfo>& infos, co
 }
 
 void OnnxPredict::reset() {
-  //if (!_isConfigured) return;
+
   input_names.clear();
   output_names.clear();
   _inputNodes.clear();
   _outputNodes.clear();
-  
-  // TODO: execute the reset() at the beginning in configure()
-  // TODO: include here the model and session creation
 
   try{
-    // Define environment
-    _env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "multi_io_inference"); // {"default", "test", "multi_io_inference"}
-    
+
     // Reset session
     _session.reset();
   

@@ -101,7 +101,7 @@ class OnnxPredict : public Algorithm {
 
  public:
     
-  OnnxPredict() : _env(Ort::Env(ORT_LOGGING_LEVEL_WARNING, "test")),
+  OnnxPredict() : _env(Ort::Env(ORT_LOGGING_LEVEL_WARNING, "multi_io_inference")),      // {"default", "test", "multi_io_inference"} - reuse it for all sessions
     _sessionOptions(Ort::SessionOptions()), _session(nullptr), _runOptions(NULL), _isConfigured(false){
     declareInput(_poolIn, "poolIn", "the pool where to get the feature tensors");
     declareOutput(_poolOut, "poolOut", "the pool where to store the output tensors");
