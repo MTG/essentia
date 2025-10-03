@@ -55,50 +55,7 @@ void OnnxPredict::configure() {
   // Do not do anything if we did not get a non-empty model name.
   if (_graphFilename.empty()) return;
     
-  try{
-    // Define environment
-    _env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "multi_io_inference"); // {"default", "test", "multi_io_inference"}
-      
-    // Reset session
-    _session.reset();
-    
-    // Reset SessionOptions by constructing a fresh object
-    _sessionOptions = Ort::SessionOptions{};
-    
-    // Auto-detect EPs
-    #ifdef USE_CUDA
-    if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_CUDA(_sessionOptions, 0);
-      E_INFO("✅ Using CUDA Execution Provider");
-    }
-    #endif
-
-    #ifdef USE_METAL
-    if (std::find(providers.begin(), providers.end(), "MetalExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_Metal(_sessionOptions, 0);
-      E_INFO("✅ Using Metal Execution Provider");
-    }
-    #endif
-
-    #ifdef USE_COREML
-    if (std::find(providers.begin(), providers.end(), "CoreMLExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_CoreML(_sessionOptions, 0);
-      E_INFO("✅ Using Core ML Execution Provider");
-    }
-    #endif
-      
-    // Set graph optimization level - check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
-    _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
-    _sessionOptions.SetIntraOpNumThreads(0);
-        
-    // Initialize session
-    _session = std::make_unique<Ort::Session>(_env, _graphFilename.c_str(), _sessionOptions);
-
-  }
-  catch (Ort::Exception oe) {
-      throw EssentiaException(string("OnnxPredict:") + oe.what(), oe.GetOrtErrorCode());
-  }
-  E_INFO("OnnxPredict: Successfully loaded graph file: `" << _graphFilename << "`");
+  reset();
       
   // get input and output info (names, type and shapes)
   all_input_infos = setTensorInfos(*_session, _allocator, "inputs");
@@ -131,7 +88,6 @@ void OnnxPredict::configure() {
   }
 
   _isConfigured = true;
-  reset();
 
   // check model has input and output https://github.com/microsoft/onnxruntime-inference-examples/blob/7a635daae48450ff142e5c0848a564b245f04112/c_cxx/model-explorer/model-explorer.cpp#L99C3-L100C63
   for (int i = 0; i < _inputs.size(); i++) {
@@ -143,7 +99,7 @@ void OnnxPredict::configure() {
   }
 
   // Check if _inputNodes is empty - release an exception instead
-  if (!_inputNodes.size)
+  if (!_inputNodes.size())
     throw EssentiaException("No input node was found.\n" + availableInputInfo());
       
   for (int i = 0; i < _outputs.size(); i++) {
@@ -155,7 +111,7 @@ void OnnxPredict::configure() {
   }
   
   // Check if _outputNodes is empty - release an exception instead
-  if (!_outputNodes.size)
+  if (!_outputNodes.size())
     throw EssentiaException("No output node was found.\n" + availableOutputInfo());
     
   for (size_t i = 0; i < _nInputs; i++) {
@@ -225,13 +181,60 @@ std::string OnnxPredict::getTensorInfos(const std::vector<TensorInfo>& infos, co
 }
 
 void OnnxPredict::reset() {
-  if (!_isConfigured) return;
+  //if (!_isConfigured) return;
   input_names.clear();
   output_names.clear();
   _inputNodes.clear();
   _outputNodes.clear();
-    // TODO: execute the reset() at the beginning in configure()
-    // TODO: include here the model and session creation
+  
+  // TODO: execute the reset() at the beginning in configure()
+  // TODO: include here the model and session creation
+
+  try{
+    // Define environment
+    _env = Ort::Env(ORT_LOGGING_LEVEL_WARNING, "multi_io_inference"); // {"default", "test", "multi_io_inference"}
+    
+    // Reset session
+    _session.reset();
+  
+    // Reset SessionOptions by constructing a fresh object
+    _sessionOptions = Ort::SessionOptions{};
+  
+    // Auto-detect EPs
+    #ifdef USE_CUDA
+    if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") != providers.end()) {
+      OrtSessionOptionsAppendExecutionProvider_CUDA(_sessionOptions, 0);
+      E_INFO("✅ Using CUDA Execution Provider");
+    }
+    #endif
+
+    #ifdef USE_METAL
+    if (std::find(providers.begin(), providers.end(), "MetalExecutionProvider") != providers.end()) {
+      OrtSessionOptionsAppendExecutionProvider_Metal(_sessionOptions, 0);
+      E_INFO("✅ Using Metal Execution Provider");
+    }
+    #endif
+
+    #ifdef USE_COREML
+    if (std::find(providers.begin(), providers.end(), "CoreMLExecutionProvider") != providers.end()) {
+      OrtSessionOptionsAppendExecutionProvider_CoreML(_sessionOptions, 0);
+      E_INFO("✅ Using Core ML Execution Provider");
+    }
+    #endif
+    
+    // Set graph optimization level - check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
+    _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+    _sessionOptions.SetIntraOpNumThreads(0);
+      
+    // Initialize session
+    _session = std::make_unique<Ort::Session>(_env, _graphFilename.c_str(), _sessionOptions);
+
+  }
+  catch (Ort::Exception oe) {
+    throw EssentiaException(string("OnnxPredict:") + oe.what(), oe.GetOrtErrorCode());
+  }
+  
+  E_INFO("OnnxPredict: Successfully loaded graph file: `" << _graphFilename << "`");
 }
 
 void OnnxPredict::compute() {
