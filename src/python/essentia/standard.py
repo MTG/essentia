@@ -27,6 +27,7 @@ from copy import copy
 def _create_essentia_class(name, moduleName = __name__):
     essentia.log.debug(essentia.EPython, 'Creating essentia.standard class: %s' % name)
 
+    # print(f"name: {name}")
     _algoInstance = _essentia.Algorithm(name)
     _algoDoc = _algoInstance.getDoc()
     _algoStruct = _algoInstance.getStruct()
@@ -71,7 +72,7 @@ def _create_essentia_class(name, moduleName = __name__):
 
             # we have to make some exceptions for YamlOutput and PoolAggregator
             # because they expect cpp Pools
-            if name in ('YamlOutput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'TensorflowPredict'):
+            if name in ('YamlOutput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'TensorflowPredict', 'OnnxPredict'):
                 args = (args[0].cppPool,)
 
             # verify that all types match and do any necessary conversions
@@ -105,7 +106,7 @@ def _create_essentia_class(name, moduleName = __name__):
 
             # we have to make an exceptional case for YamlInput, because we need
             # to wrap the Pool that it outputs w/ our python Pool from common.py
-            if name in ('YamlInput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'Extractor', 'TensorflowPredict'):
+            if name in ('YamlInput', 'PoolAggregator', 'SvmClassifier', 'PCA', 'GaiaTransform', 'Extractor', 'TensorflowPredict', 'OnnxPredict'):
                 return _c.Pool(results)
 
             # MusicExtractor and FreesoundExtractor output two pools
