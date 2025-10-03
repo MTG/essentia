@@ -47,6 +47,7 @@ class OnnxPredict : public Algorithm {
   std::string _graphFilename;
   std::vector<std::string> _inputs;
   std::vector<std::string> _outputs;
+  size_t _deviceId;
   
   bool _squeeze;
   bool _isConfigured;
@@ -125,6 +126,7 @@ class OnnxPredict : public Algorithm {
     declareParameter("inputs", "will look for these namespaces in poolIn. Should match the names of the inputs in the ONNX model", "", Parameter::VECTOR_STRING);
     declareParameter("outputs", "will save the tensors on the model outputs named after `outputs` to the same namespaces in the output pool. Set the first element of this list as an empty array to print all the available model outputs", "", Parameter::VECTOR_STRING);
     declareParameter("squeeze", "remove singleton dimensions of the inputs tensors. Does not apply to the batch dimension", "{true,false}", true);
+    declareParameter("deviceId", "the gpu device id when CUDA support is available", "[0,inf)", 0);
   }
 
   void configure();

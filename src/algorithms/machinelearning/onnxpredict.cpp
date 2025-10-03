@@ -46,6 +46,7 @@ const char* OnnxPredict::description = DOC("This algorithm runs a Onnx model and
 
 void OnnxPredict::configure() {
   _graphFilename = parameter("graphFilename").toString();
+  _deviceId = parameter("deviceId").toInt();
     
   if ((_graphFilename.empty()) and (_isConfigured)) {
     E_WARNING("OnnxPredict: You are trying to update a valid configuration with invalid parameters. "
@@ -198,21 +199,21 @@ void OnnxPredict::reset() {
     // Auto-detect EPs
     #ifdef USE_CUDA
     if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_CUDA(_sessionOptions, 0);
+      OrtSessionOptionsAppendExecutionProvider_CUDA(_sessionOptions, _deviceId);
       E_INFO("✅ Using CUDA Execution Provider");
     }
     #endif
 
     #ifdef USE_METAL
     if (std::find(providers.begin(), providers.end(), "MetalExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_Metal(_sessionOptions, 0);
+      OrtSessionOptionsAppendExecutionProvider_Metal(_sessionOptions, _deviceId);
       E_INFO("✅ Using Metal Execution Provider");
     }
     #endif
 
     #ifdef USE_COREML
     if (std::find(providers.begin(), providers.end(), "CoreMLExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_CoreML(_sessionOptions, 0);
+      OrtSessionOptionsAppendExecutionProvider_CoreML(_sessionOptions, _deviceId);
       E_INFO("✅ Using Core ML Execution Provider");
     }
     #endif
