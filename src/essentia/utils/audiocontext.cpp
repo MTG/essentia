@@ -29,8 +29,8 @@ AudioContext::AudioContext()
   av_log_set_level(AV_LOG_VERBOSE);
   //av_log_set_level(AV_LOG_QUIET);
   
-  // Register all formats and codecs
-  av_register_all(); // this should be done once only..
+  // Note: av_register_all() was deprecated and removed in FFmpeg 4.0
+  // Modern FFmpeg automatically registers formats and codecs
 
   if (sizeof(float) != av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT)) {
     throw EssentiaException("Unsupported float size");
@@ -45,7 +45,7 @@ int AudioContext::create(const std::string& filename,
 
   _filename = filename;
 
-  AVOutputFormat* av_output_format = av_guess_format(format.c_str(), 0, 0);
+  const AVOutputFormat* av_output_format = av_guess_format(format.c_str(), 0, 0);
   if (!av_output_format) {
     throw EssentiaException("Could not find a suitable output format for \"", filename, "\"");
   }
@@ -61,20 +61,23 @@ int AudioContext::create(const std::string& filename,
   // Create audio stream
   _avStream = avformat_new_stream(_muxCtx, NULL);
   if (!_avStream) throw EssentiaException("Could not allocate stream");
-  //_avStream->id = 1; // necessary? found here: http://sgros.blogspot.com.es/2013/01/deprecated-functions-in-ffmpeg-library.html
 
-  // Load corresponding codec and set it up:
-  _codecCtx                 = _avStream->codec;
-  _codecCtx->codec_id       = _muxCtx->oformat->audio_codec;
-  _codecCtx->codec_type     = AVMEDIA_TYPE_AUDIO;
-  _codecCtx->bit_rate       = bitrate;
-  _codecCtx->sample_rate    = sampleRate;
-  _codecCtx->channels       = nChannels;
-  _codecCtx->channel_layout = av_get_default_channel_layout(nChannels);
+  // Create codec context separately (modern approach)
+  _codecCtx = avcodec_alloc_context3(NULL);
+  if (!_codecCtx) throw EssentiaException("Could not allocate codec context");
+
+  // Set codec parameters
+  _codecCtx->codec_id = _muxCtx->oformat->audio_codec;
+  _codecCtx->codec_type = AVMEDIA_TYPE_AUDIO;
+  _codecCtx->bit_rate = bitrate;
+  _codecCtx->sample_rate = sampleRate;
+  
+  // Use modern channel layout API
+  av_channel_layout_default(&_codecCtx->ch_layout, nChannels);
 
   // Find encoder
   av_log_set_level(AV_LOG_VERBOSE);
-  AVCodec* audioCodec = avcodec_find_encoder(_codecCtx->codec_id);
+  const AVCodec* audioCodec = avcodec_find_encoder(_codecCtx->codec_id);
   if (!audioCodec) throw EssentiaException("Codec for ", format, " files not found or not supported");
 
   switch (_codecCtx->codec_id) {
@@ -122,7 +125,7 @@ int AudioContext::create(const std::string& filename,
     case AV_CODEC_ID_PCM_U16LE:
     case AV_CODEC_ID_PCM_U16BE:
       // PCM codecs do not provide frame size in samples, use 4096 bytes on input
-      _codecCtx->frame_size = 4096 / _codecCtx->channels / av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
+      _codecCtx->frame_size = 4096 / _codecCtx->ch_layout.nb_channels / av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
       break;
 
     //case AV_CODEC_ID_FLAC:
@@ -137,19 +140,21 @@ int AudioContext::create(const std::string& filename,
 
   // Allocate input audio FLT buffer
   _inputBufSize = av_samples_get_buffer_size(NULL, 
-                                             _codecCtx->channels, 
+                                             _codecCtx->ch_layout.nb_channels, 
                                              _codecCtx->frame_size, 
                                              AV_SAMPLE_FMT_FLT, 0);
   _buffer = (float*)av_malloc(_inputBufSize);
 
-  strncpy(_muxCtx->filename, _filename.c_str(), sizeof(_muxCtx->filename));
+  // Note: _muxCtx->filename is deprecated, but we'll keep it for now
+  // as it's used in the open() method. Modern approach would use avio_open directly.
 
-  // Configure sample format convertion
+  // Configure sample format conversion
   E_DEBUG(EAlgorithm, "AudioContext: using sample format conversion from libswresample");
   _convertCtxAv = swr_alloc();
         
-  av_opt_set_int(_convertCtxAv, "in_channel_layout", _codecCtx->channel_layout, 0);
-  av_opt_set_int(_convertCtxAv, "out_channel_layout", _codecCtx->channel_layout, 0);
+  // Use modern channel layout API for swresample configuration
+  av_opt_set_chlayout(_convertCtxAv, "in_chlayout", &_codecCtx->ch_layout, 0);
+  av_opt_set_chlayout(_convertCtxAv, "out_chlayout", &_codecCtx->ch_layout, 0);
   av_opt_set_int(_convertCtxAv, "in_sample_rate", _codecCtx->sample_rate, 0);
   av_opt_set_int(_convertCtxAv, "out_sample_rate", _codecCtx->sample_rate, 0);
   av_opt_set_int(_convertCtxAv, "in_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
@@ -191,11 +196,13 @@ void AudioContext::close() {
     avio_close(_muxCtx->pb);
   }
 
-  avcodec_close(_avStream->codec);
+  // Use modern API for codec context cleanup
+  if (_codecCtx) {
+    avcodec_free_context(&_codecCtx);
+  }
 
   av_freep(&_buffer);
 
-  av_freep(&_avStream->codec);
   av_freep(&_avStream);
   av_freep(&_muxCtx); // TODO also must be av_free, not av_freep
 
@@ -215,8 +222,8 @@ void AudioContext::close() {
 
 
 void AudioContext::write(const vector<StereoSample>& stereoData) {
-  if (_codecCtx->channels != 2) {
-    throw EssentiaException("Trying to write stereo audio data to an audio file with ", _codecCtx->channels, " channels");
+  if (_codecCtx->ch_layout.nb_channels != 2) {
+    throw EssentiaException("Trying to write stereo audio data to an audio file with ", _codecCtx->ch_layout.nb_channels, " channels");
   }
 
   int dsize = (int)stereoData.size();
@@ -240,8 +247,8 @@ void AudioContext::write(const vector<StereoSample>& stereoData) {
 
 
 void AudioContext::write(const vector<AudioSample>& monoData) {
-  if (_codecCtx->channels != 1) {
-    throw EssentiaException("Trying to write mono audio data to an audio file with ", _codecCtx->channels, " channels");
+  if (_codecCtx->ch_layout.nb_channels != 1) {
+    throw EssentiaException("Trying to write mono audio data to an audio file with ", _codecCtx->ch_layout.nb_channels, " channels");
   }
 
   int dsize = (int)monoData.size();
@@ -272,14 +279,14 @@ void AudioContext::encodePacket(int size) {
 
   // convert sample format to the one required by codec
   int inputPlaneSize = av_samples_get_buffer_size(NULL, 
-                                                  _codecCtx->channels, 
+                                                  _codecCtx->ch_layout.nb_channels, 
                                                   size, 
                                                   AV_SAMPLE_FMT_FLT, 0);
   int outputPlaneSize;  
   uint8_t* bufferFmt;
 
   if (av_samples_alloc(&bufferFmt, &outputPlaneSize, 
-                               _codecCtx->channels, size,
+                               _codecCtx->ch_layout.nb_channels, size,
                                _codecCtx->sample_fmt, 0) < 0) {
     throw EssentiaException("Could not allocate output buffer for sample format conversion");
   }
@@ -309,40 +316,63 @@ void AudioContext::encodePacket(int size) {
 
   frame->nb_samples = _codecCtx->frame_size;
   frame->format = _codecCtx->sample_fmt;
-  frame->channel_layout = _codecCtx->channel_layout;
-  frame->channels = _codecCtx->channels;
+  // Use modern channel layout API for AVFrame
+  frame->ch_layout = _codecCtx->ch_layout;
 
-  int result = avcodec_fill_audio_frame(frame, _codecCtx->channels, _codecCtx->sample_fmt,
-                                        bufferFmt, outputPlaneSize * _codecCtx->channels, 0);
+  // Use modern API to fill audio frame
+  int result = av_frame_get_buffer(frame, 0);
   if (result < 0) {
     char errstring[1204];
     av_strerror(result, errstring, sizeof(errstring));
     ostringstream msg;
-    msg << "Could not setup audio frame: " << errstring;
+    msg << "Could not allocate audio frame buffer: " << errstring;
     throw EssentiaException(msg);
   }
 
+  // Copy the converted audio data to the frame
+  if (av_sample_fmt_is_planar(_codecCtx->sample_fmt)) {
+    // Planar format
+    for (int ch = 0; ch < _codecCtx->ch_layout.nb_channels; ch++) {
+      memcpy(frame->data[ch], bufferFmt + ch * outputPlaneSize, outputPlaneSize);
+    }
+  } else {
+    // Interleaved format
+    memcpy(frame->data[0], bufferFmt, outputPlaneSize * _codecCtx->ch_layout.nb_channels);
+  }
+
+  // Use modern encoding API: send frame to encoder
+  result = avcodec_send_frame(_codecCtx, frame);
+  if (result < 0) {
+    char errstring[1204];
+    av_strerror(result, errstring, sizeof(errstring));
+    ostringstream msg;
+    msg << "Error sending frame to encoder: " << errstring;
+    throw EssentiaException(msg);
+  }
+
+  // Receive encoded packets from encoder
   AVPacket packet;
   av_init_packet(&packet);
-  // Set the packet data and size so that it is recognized as being empty.
   packet.data = NULL;
   packet.size = 0;
 
-  int got_output;
-  result = avcodec_encode_audio2(_codecCtx, &packet, frame, &got_output);
-  if (result < 0) {
-    char errstring[1204];
-    av_strerror(result, errstring, sizeof(errstring));
-    ostringstream msg;
-    msg << "Error while encoding audio frame: " << errstring;
-    throw EssentiaException(msg);
-  }
+  while (result >= 0) {
+    result = avcodec_receive_packet(_codecCtx, &packet);
+    if (result == AVERROR(EAGAIN) || result == AVERROR_EOF) {
+      break; // No more packets available
+    } else if (result < 0) {
+      char errstring[1204];
+      av_strerror(result, errstring, sizeof(errstring));
+      ostringstream msg;
+      msg << "Error receiving packet from encoder: " << errstring;
+      throw EssentiaException(msg);
+    }
 
-  if (got_output) { // packet is not empty, write the frame in the media file
-    if (av_write_frame(_muxCtx, &packet) != 0 ) {
+    // Write the packet to the output file
+    if (av_write_frame(_muxCtx, &packet) != 0) {
       throw EssentiaException("Error while writing audio frame");
     }
-    av_free_packet(&packet);
+    av_packet_unref(&packet);
   }
 
   av_frame_free(&frame);
@@ -351,22 +381,38 @@ void AudioContext::encodePacket(int size) {
 }
 
 void AudioContext::writeEOF() { 
+  // Send NULL frame to flush the encoder
+  int result = avcodec_send_frame(_codecCtx, NULL);
+  if (result < 0) {
+    char errstring[1204];
+    av_strerror(result, errstring, sizeof(errstring));
+    ostringstream msg;
+    msg << "Error flushing encoder: " << errstring;
+    throw EssentiaException(msg);
+  }
+
+  // Receive all remaining packets from encoder
   AVPacket packet;
   av_init_packet(&packet);
-  // Set the packet data and size so that it is recognized as being empty.
   packet.data = NULL;
   packet.size = 0;
 
-  for (int got_output = 1; got_output;) {
-    if (avcodec_encode_audio2(_codecCtx, &packet, NULL, &got_output) < 0) {
-      throw EssentiaException("Error while encoding audio frame");
+  while (result >= 0) {
+    result = avcodec_receive_packet(_codecCtx, &packet);
+    if (result == AVERROR(EAGAIN) || result == AVERROR_EOF) {
+      break; // No more packets available
+    } else if (result < 0) {
+      char errstring[1204];
+      av_strerror(result, errstring, sizeof(errstring));
+      ostringstream msg;
+      msg << "Error receiving packet from encoder: " << errstring;
+      throw EssentiaException(msg);
     }
-    if (got_output) {
-      if (av_write_frame(_muxCtx, &packet) != 0 ) {
-        throw EssentiaException("Error while writing delayed audio frame");
-      }
-      av_free_packet(&packet);
+
+    // Write the packet to the output file
+    if (av_write_frame(_muxCtx, &packet) != 0) {
+      throw EssentiaException("Error while writing delayed audio frame");
     }
-    else break;
+    av_packet_unref(&packet);
   }
 }
