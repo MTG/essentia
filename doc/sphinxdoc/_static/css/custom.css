@@ -1,0 +1,25 @@
+div.wy-side-scroll {
+    background: #0b3954;
+}
+
+
+div.wy-side-nav-search {
+    background: #0b3954;
+}
+
+div.wy-side-nav-search .version {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+div.wy-menu.wy-menu-vertical {
+    background: #0b3954;
+}
+
+
+span.caption-text {
+    color: #404040;
+}
+
+div.wy-menu .caption-text {
+    color: #C8152F;
+}
