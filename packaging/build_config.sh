@@ -2,14 +2,9 @@
 
 HOST=i686-w64-mingw32
 if [ -z "${PREFIX}" ]; then
-  PREFIX=$(pwd)
+  PREFIX=`pwd`
 fi
 echo Installing to: $PREFIX
-
-#SHARED_OR_STATIC="
-#--enable-shared \
-#--disable-static
-#"
 
 SHARED_OR_STATIC="
 --disable-shared \
