@@ -48,7 +48,8 @@ class AudioLoader : public Algorithm {
   // each time we decode a frame we need to have at least a full buffer of free space.
   const static int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
 
-  float* _buffer;
+  // float* _buffer;
+  uint8_t* _buffer;   // byte-oriented buffer, clearer semantics
   int _dataSize;
 
   AVFormatContext* _demuxCtx;
@@ -97,8 +98,11 @@ class AudioLoader : public Algorithm {
     // Note: av_register_all() was deprecated and removed in FFmpeg 4.0
     // Modern FFmpeg automatically registers formats and codecs
 
-    // use av_malloc, because we _need_ the buffer to be 16-byte aligned
-    _buffer = (float*)av_malloc(FFMPEG_BUFFER_SIZE);
+    // use av_malloc, allocate bytes; interpret as float* when needed
+    _buffer = (uint8_t*)av_malloc(FFMPEG_BUFFER_SIZE);
+    if (!_buffer) {
+      throw EssentiaException("Error allocating FFmpeg buffer");
+    }
 
     _md5Encoded = av_md5_alloc();
     if (!_md5Encoded) {
