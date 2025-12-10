@@ -71,9 +71,6 @@ void AudioLoader::openAudioFile(const string& filename) {
         throw EssentiaException("AudioLoader: Could not find stream information, error = ", error);
     }
 
-    // Dump information about file onto standard error
-    //dump_format(_demuxCtx, 0, filename.c_str(), 0);
-
     // Check that we have only 1 audio stream in the file
     _streams.clear();
     for (int i=0; i<(int)_demuxCtx->nb_streams; i++) {
@@ -132,12 +129,6 @@ void AudioLoader::openAudioFile(const string& filename) {
         // Fallback for older codecs that might not have channel layout set
         av_channel_layout_default(&layout, _audioCtx->ch_layout.nb_channels);
     }
-
-    /*
-    const char* fmt = 0;
-    get_format_from_sample_fmt(&fmt, _audioCtx->sample_fmt);
-    E_DEBUG(EAlgorithm, "AudioLoader: converting from " << (fmt ? fmt : "unknown") << " to FLT");
-    */
 
     E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libswresample");
     _convertCtxAv = swr_alloc();
@@ -258,12 +249,6 @@ AlgorithmStatus AudioLoader::process() {
     if (_computeMD5) {
         av_md5_update(_md5Encoded, _packet.data, _packet.size);
     }
-
-    /* decode frames in packet
-    while(_packet.size > 0) {
-        if (!decodePacket()) break;
-        copyFFmpegOutput();
-    }*/
     
     // decode ONE frame from this packet (if any). decodePacket() will
     // *not* mutate _packet.data/_packet.size. It will set _dataSize to number of bytes written.
@@ -495,87 +480,6 @@ int AudioLoader::decodePacket() {
 }
 
 
-/*
-int AudioLoader::decodePacket() {
-    
-    //E_DEBUG(EAlgorithm, "-----------------------------------------------------");
-    //E_DEBUG(EAlgorithm, "decoding packet of " << _packet.size << " bytes");
-    //E_DEBUG(EAlgorithm, "pts: " << _packet.pts << " - dts: " << _packet.dts); //" - pos: " << pkt->pos);
-    //E_DEBUG(EAlgorithm, "flags: " << _packet.flags);
-    //E_DEBUG(EAlgorithm, "duration: " << _packet.duration);
-    
-    int len = 0;
-
-    // buff is an offset in our output buffer, it points to where we should start
-    // writing the next decoded samples
-    float* buff = _buffer;
-
-    // _dataSize gets the size of the buffer, in bytes
-    _dataSize = FFMPEG_BUFFER_SIZE;
-
-    // Note: md5 should be computed before decoding frame, as the decoding may
-    // change the content of a packet. Still, not sure if it is correct to
-    // compute md5 over packet which contains incorrect frames, potentially
-    // belonging to id3 metadata (TODO: or is it just a missing header issue?),
-    // but computing md5 hash using ffmpeg will also treat it as audio:
-    //      ffmpeg -i file.mp3 -acodec copy -f md5 -
-
-    len = decode_audio_frame(_audioCtx, buff, &_dataSize, &_packet);
-
-    if (len < 0) {
-        char errstring[1204];
-        av_strerror(len, errstring, sizeof(errstring));
-        ostringstream msg;
-
-        if (_audioCtx->codec_id == AV_CODEC_ID_MP3) {
-            msg << "AudioLoader: invalid frame, skipping it: " << errstring;
-            // mp3 streams can have tag frames (id3v2?) which libavcodec tries to
-            // read as audio anyway, and we probably don't want print an error
-            // message for that...
-            // TODO: Are these frames really id3 tags?
-
-            //E_DEBUG(EAlgorithm, msg);
-            E_WARNING(msg.str());
-        }
-        else {
-            msg << "AudioLoader: error while decoding, skipping frame: " << errstring;
-            E_WARNING(msg.str());
-        }
-        return 0;
-    }
-
-    if (len != _packet.size) {
-        // https://www.ffmpeg.org/doxygen/trunk/group__lavc__decoding.html#ga834bb1b062fbcc2de4cf7fb93f154a3e
-
-        // Some decoders may support multiple frames in a single AVPacket. Such
-        // decoders would then just decode the first frame and the return value
-        // would be less than the packet size. In this case, avcodec_decode_audio4
-        // has to be called again with an AVPacket containing the remaining data
-        // in order to decode the second frame, etc... Even if no frames are
-        // returned, the packet needs to be fed to the decoder with remaining
-        // data until it is completely consumed or an error occurs.
-
-        E_WARNING("AudioLoader: more than 1 frame in packet, decoding remaining bytes...");
-        E_WARNING("at sample index: " << output("audio").totalProduced());
-        E_WARNING("decoded samples: " << len);
-        E_WARNING("packet size: " << _packet.size);
-    }
-
-    // update packet data pointer to data left undecoded (if any)
-    _packet.size -= len;
-    _packet.data += len;
-
-
-    if (_dataSize <= 0) {
-        // No data yet, get more frames
-        // cout << "no data yet, get more frames" << endl;
-        _dataSize = 0;
-    }
-
-    return len;
-}
-*/
-
 void AudioLoader::copyFFmpegOutput() {
     int bytesPerSample = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT);
     int nsamples = _dataSize / (bytesPerSample * _nChannels);
@@ -606,47 +510,6 @@ void AudioLoader::copyFFmpegOutput() {
     _audio.release(nsamples);
 }
 
-
-/*
-void AudioLoader::copyFFmpegOutput() {
-    int nsamples = _dataSize / (av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT)  * _nChannels);
-    if (nsamples == 0) return;
-
-    // acquire necessary data
-    bool ok = _audio.acquire(nsamples);
-    if (!ok) {
-        throw EssentiaException("AudioLoader: could not acquire output for audio");
-    }
-
-    vector<StereoSample>& audio = *((vector<StereoSample>*)_audio.getTokens());
-
-    if (_nChannels == 1) {
-        for (int i=0; i<nsamples; i++) {
-          audio[i].left() = _buffer[i];
-          //audio[i].left() = scale(_buffer[i]);
-        }
-    }
-    else { // _nChannels == 2
-      // The output format is always AV_SAMPLE_FMT_FLT, which is interleaved
-      for (int i=0; i<nsamples; i++) {
-        audio[i].left() = _buffer[2*i];
-        audio[i].right() = _buffer[2*i+1];
-        //audio[i].left() = scale(_buffer[2*i]);
-        //audio[i].right() = scale(_buffer[2*i+1]);
-      }
-      
-      // planar
-      //for (int i=0; i<nsamples; i++) {
-      //    audio[i].left() = scale(_buffer[i]);
-      //    audio[i].right() = scale(_buffer[nsamples+i]);
-      //}
-      
-    }
-
-    // release data
-    _audio.release(nsamples);
-}
-*/
 
 void AudioLoader::reset() {
     Algorithm::reset();
