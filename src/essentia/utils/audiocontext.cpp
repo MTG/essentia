@@ -115,7 +115,7 @@ int AudioContext::create(const std::string& filename,
     throw EssentiaException(msg);
   }
 
-  avformat_new_stream
+  // Copy codec parameters to muxer stream (modern API)
   result = avcodec_parameters_from_context(_avStream->codecpar, _codecCtx);
   if (result < 0) {
     char errstring[1204];
@@ -402,12 +402,10 @@ void AudioContext::encodePacket(int size) {
       // ensure stream index set
       packet.stream_index = _avStream->index;
 
-      // assign PTS/DTS if encoder didn't set
-      //if (packet.pts != AV_NOPTS_VALUE) {
+      // assign PTS/DTS
       packet.pts = _pts;
       packet.dts = _pts;
       _pts += frame->nb_samples;
-      //}
 
       // write packet (interleaved)
       if (av_write_frame(_muxCtx, &packet) != 0) {
@@ -464,12 +462,10 @@ void AudioContext::writeEOF() {
       // Assign stream index
       packet.stream_index = _avStream->index;
 
-      // Ensure timestamps exist
-      //if (packet.pts == AV_NOPTS_VALUE) {
+      // Update ptd and dts packet
       packet.pts = _pts;
       packet.dts = _pts;
       _pts += _codecCtx->frame_size;
-      //}
 
       // Write with interleaving
       if (av_write_frame(_muxCtx, &packet) < 0) {
