@@ -42,8 +42,7 @@ AudioLoader::~AudioLoader() {
 void AudioLoader::configure() {
     // set ffmpeg to be silent by default, so we don't have these annoying
     // "invalid new backstep" messages anymore, when everything is actually fine
-    av_log_set_level(AV_LOG_QUIET);
-    //av_log_set_level(AV_LOG_VERBOSE);
+    av_log_set_level(AV_LOG_QUIET);   // choices: {AV_LOG_VERBOSE, AV_LOG_QUIET}
     _computeMD5 = parameter("computeMD5").toBool();
     _selectedStream = parameter("audioStream").toInt();
     reset();
@@ -240,8 +239,6 @@ AlgorithmStatus AudioLoader::process() {
                 msg << "AudioLoader: Error reading frame: " << errstring;
                 E_WARNING(msg.str());
             }
-            // TODO: should try reading again on EAGAIN error?
-            //       https://github.com/FFmpeg/FFmpeg/blob/master/ffmpeg.c
             shouldStop(true);
             flushPacket();
             closeAudioFile();
@@ -262,11 +259,24 @@ AlgorithmStatus AudioLoader::process() {
         av_md5_update(_md5Encoded, _packet.data, _packet.size);
     }
 
-    // decode frames in packet
+    /* decode frames in packet
     while(_packet.size > 0) {
         if (!decodePacket()) break;
         copyFFmpegOutput();
+    }*/
+    
+    // decode ONE frame from this packet (if any). decodePacket() will
+    // *not* mutate _packet.data/_packet.size. It will set _dataSize to number of bytes written.
+    int consumed = decodePacket();
+
+    // After decodePacket we may have produced audio in _buffer (bytes in _dataSize).
+    if (_dataSize > 0) {
+        // copyFFmpegOutput will acquire once and release once
+        copyFFmpegOutput();
+        // reset _dataSize so we don't accidentally reuse it
+        _dataSize = 0;
     }
+    
     // needs to be freed using modern API !!
     av_packet_unref(&_packet);
     
@@ -351,29 +361,54 @@ int AudioLoader::decode_audio_frame(AVCodecContext* audioCtx,
     return packet->size;
 }
 
-
 void AudioLoader::flushPacket() {
+    // Sending a NULL packet tells the decoder to flush internal buffers
+    av_packet_unref(&_packet);
     AVPacket empty;
     av_init_packet(&empty);
-    do {
-        _dataSize = FFMPEG_BUFFER_SIZE;
-        empty.data = NULL;
-        empty.size = 0;
+    empty.data = NULL;
+    empty.size = 0;
 
-        int len = decode_audio_frame(_audioCtx, _buffer, &_dataSize, &empty);
-        if (len == AVERROR_EOF) {
-            // This is expected when flushing - no more frames to decode
+    // keep draining until decoder stops returning frames
+    while (true) {
+        _dataSize = 0;
+        int send_result = avcodec_send_packet(_audioCtx, &empty);
+        if (send_result < 0 && send_result != AVERROR(EAGAIN)) {
             break;
-        } else if (len < 0) {
-            char errstring[1204];
-            av_strerror(len, errstring, sizeof(errstring));
-            ostringstream msg;
-            msg << "AudioLoader: decoding error while flushing a packet:" << errstring;
-            E_WARNING(msg.str());
         }
-        copyFFmpegOutput();
+        int receive_result = avcodec_receive_frame(_audioCtx, _decodedFrame);
+        if (receive_result == AVERROR(EAGAIN) || receive_result == AVERROR_EOF) {
+            break;
+        } else if (receive_result < 0) {
+            break;
+        }
 
-    } while (_dataSize > 0);
+        // got a frame -> convert to floats as in decodePacket()
+        int inputSamples = _decodedFrame->nb_samples;
+        int outPlaneSize = av_samples_get_buffer_size(NULL, _nChannels, inputSamples, AV_SAMPLE_FMT_FLT, 1);
+        if (outPlaneSize > 0) {
+            if (_audioCtx->sample_fmt == AV_SAMPLE_FMT_FLT) {
+                memcpy(_buffer, _decodedFrame->data[0], std::min(outPlaneSize, FFMPEG_BUFFER_SIZE));
+                _dataSize = std::min(outPlaneSize, FFMPEG_BUFFER_SIZE);
+            } else {
+                float* outBuff = (float*)_buffer;
+                int samplesWritten = swr_convert(_convertCtxAv,
+                                                 (uint8_t**)&outBuff,
+                                                 inputSamples,
+                                                 (const uint8_t**)_decodedFrame->data,
+                                                 inputSamples);
+                if (samplesWritten > 0) {
+                    _dataSize = std::min(samplesWritten * _nChannels * av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT),
+                                         FFMPEG_BUFFER_SIZE);
+                }
+            }
+        }
+
+        if (_dataSize > 0) {
+            copyFFmpegOutput();
+            _dataSize = 0;
+        }
+    }
 }
 
 
@@ -381,14 +416,94 @@ void AudioLoader::flushPacket() {
  * Gets the AVPacket stored in _packet, and decodes all the samples it can from it,
  * putting them in _buffer, the total number of bytes written begin stored in _dataSize.
  */
+
 int AudioLoader::decodePacket() {
-    /*
-    E_DEBUG(EAlgorithm, "-----------------------------------------------------");
-    E_DEBUG(EAlgorithm, "decoding packet of " << _packet.size << " bytes");
-    E_DEBUG(EAlgorithm, "pts: " << _packet.pts << " - dts: " << _packet.dts); //" - pos: " << pkt->pos);
-    E_DEBUG(EAlgorithm, "flags: " << _packet.flags);
-    E_DEBUG(EAlgorithm, "duration: " << _packet.duration);
-    */
+    // Prepare float-view of the output buffer
+    float* outBuff = (float*)_buffer;
+    // Default: no bytes produced yet
+    _dataSize = 0;
+
+    // Modern API: send the full packet to the decoder once
+    int send_result = avcodec_send_packet(_audioCtx, &_packet);
+    if (send_result == AVERROR(EAGAIN)) {
+        // decoder not ready to accept packet; try receiving frames first
+        // but for streaming we simply try to receive a frame below
+    } else if (send_result < 0) {
+        // fatal decoding error for this packet
+        char errstring[1204];
+        av_strerror(send_result, errstring, sizeof(errstring));
+        E_WARNING("AudioLoader: avcodec_send_packet error: " << errstring);
+        return 0;
+    }
+
+    // Try to receive ONE frame
+    int receive_result = avcodec_receive_frame(_audioCtx, _decodedFrame);
+    if (receive_result == AVERROR(EAGAIN) || receive_result == AVERROR_EOF) {
+        // No frame ready from this packet
+        return 0;
+    } else if (receive_result < 0) {
+        char errstring[1204];
+        av_strerror(receive_result, errstring, sizeof(errstring));
+        E_WARNING("AudioLoader: avcodec_receive_frame error: " << errstring);
+        return 0;
+    }
+
+    // We got a frame -> convert it to float interleaved
+    int inputSamples = _decodedFrame->nb_samples;
+    // compute expected number of output bytes for these samples
+    int outPlaneSize = av_samples_get_buffer_size(NULL, _nChannels, inputSamples, AV_SAMPLE_FMT_FLT, 1);
+    if (outPlaneSize <= 0) {
+        E_WARNING("AudioLoader: computed non-positive outPlaneSize");
+        return 0;
+    }
+
+    // Ensure output buffer is large enough
+    if (outPlaneSize > FFMPEG_BUFFER_SIZE) {
+        // this shouldn't normally happen; guard and shrink to prevent overflow
+        ostringstream msg;
+        msg << "AudioLoader: required buffer " << outPlaneSize << " exceeds allocated " << FFMPEG_BUFFER_SIZE;
+        E_WARNING(msg.str());
+        // clamp to buffer size (will avoid overflow but may drop data)
+    }
+
+    // Perform conversion if needed
+    if (_audioCtx->sample_fmt == AV_SAMPLE_FMT_FLT) {
+        // direct copy - frame data is interleaved in data[0] for packed formats
+        memcpy(outBuff, _decodedFrame->data[0], std::min(outPlaneSize, FFMPEG_BUFFER_SIZE));
+    } else {
+        // Use swr_convert; use pointer to uint8_t* for API compatibility
+        int samplesWritten = swr_convert(_convertCtxAv,
+                                         (uint8_t**)&outBuff,
+                                         inputSamples,
+                                         (const uint8_t**)_decodedFrame->data,
+                                         inputSamples);
+        if (samplesWritten <= 0) {
+            E_WARNING("AudioLoader: swr_convert returned no samples");
+            return 0;
+        }
+        // recompute bytes produced
+        outPlaneSize = samplesWritten * _nChannels * av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT);
+    }
+
+    // commit produced bytes
+    _dataSize = std::min(outPlaneSize, FFMPEG_BUFFER_SIZE);
+
+    // Return number of bytes logically consumed from the packet.
+    // With modern API we don't need to tell caller how many bytes consumed;
+    // we return the original packet size as a hint (caller will unref packet).
+    return _packet.size;
+}
+
+
+/*
+int AudioLoader::decodePacket() {
+    
+    //E_DEBUG(EAlgorithm, "-----------------------------------------------------");
+    //E_DEBUG(EAlgorithm, "decoding packet of " << _packet.size << " bytes");
+    //E_DEBUG(EAlgorithm, "pts: " << _packet.pts << " - dts: " << _packet.dts); //" - pos: " << pkt->pos);
+    //E_DEBUG(EAlgorithm, "flags: " << _packet.flags);
+    //E_DEBUG(EAlgorithm, "duration: " << _packet.duration);
+    
     int len = 0;
 
     // buff is an offset in our output buffer, it points to where we should start
@@ -459,13 +574,40 @@ int AudioLoader::decodePacket() {
 
     return len;
 }
-
-/*
-inline Real scale(int16_t value) {
-    return value / (Real)32767;
-}
 */
 
+void AudioLoader::copyFFmpegOutput() {
+    int bytesPerSample = av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT);
+    int nsamples = _dataSize / (bytesPerSample * _nChannels);
+    if (nsamples == 0) return;
+
+    // acquire necessary data
+    bool ok = _audio.acquire(nsamples);
+    if (!ok) {
+        throw EssentiaException("AudioLoader: could not acquire output for audio");
+    }
+
+    vector<StereoSample>& audio = *((vector<StereoSample>*)_audio.getTokens());
+
+    float* fbuf = (float*)_buffer; // interpret buffer as floats for copying
+
+    if (_nChannels == 1) {
+        for (int i=0; i<nsamples; i++) {
+          audio[i].left() = fbuf[i];
+        }
+    }
+    else { // _nChannels == 2
+      for (int i=0; i<nsamples; i++) {
+        audio[i].left() = fbuf[2*i];
+        audio[i].right() = fbuf[2*i+1];
+      }
+    }
+
+    _audio.release(nsamples);
+}
+
+
+/*
 void AudioLoader::copyFFmpegOutput() {
     int nsamples = _dataSize / (av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT)  * _nChannels);
     if (nsamples == 0) return;
@@ -492,18 +634,19 @@ void AudioLoader::copyFFmpegOutput() {
         //audio[i].left() = scale(_buffer[2*i]);
         //audio[i].right() = scale(_buffer[2*i+1]);
       }
-      /*
+      
       // planar
-      for (int i=0; i<nsamples; i++) {
-          audio[i].left() = scale(_buffer[i]);
-          audio[i].right() = scale(_buffer[nsamples+i]);
-      }
-      */
+      //for (int i=0; i<nsamples; i++) {
+      //    audio[i].left() = scale(_buffer[i]);
+      //    audio[i].right() = scale(_buffer[nsamples+i]);
+      //}
+      
     }
 
     // release data
     _audio.release(nsamples);
 }
+*/
 
 void AudioLoader::reset() {
     Algorithm::reset();
