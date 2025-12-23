@@ -289,7 +289,7 @@ void OnnxPredict::compute() {
   const Pool& poolIn = _poolIn.get();
   Pool& poolOut = _poolOut.get();
 
-  std::vector<std::vector<float>> input_datas;  // <-- keeps inputs alive
+  std::vector<std::vector<float>> inputDataVector;  // <-- keeps inputs alive
   std:vector<std::vector<int64_t>> shapes;      // <-- keeps shapes alive
   
   if (!input_tensors.empty())
@@ -330,9 +330,9 @@ void OnnxPredict::compute() {
     }
              
     // Step 2: Convert data to float32
-    input_datas.emplace_back(inputData.size());
+    inputDataVector.emplace_back(inputData.size());
     for (size_t j = 0; j < inputData.size(); ++j) {
-        input_datas.back()[j] = static_cast<float>(inputData.data()[j]);
+        inputDataVector.back()[j] = static_cast<float>(inputData.data()[j]);
     }
     
     // Step 3: Create ONNX Runtime tensor
@@ -342,7 +342,7 @@ void OnnxPredict::compute() {
       throw EssentiaException("OnnxRuntimePredict: Error allocating memory for input tensor.");
     }
     
-    input_tensors.emplace_back(Ort::Value::CreateTensor<float>(_memoryInfo, input_datas.back().data(), input_datas.back().size(), shape.data(), shape.size()));
+    input_tensors.emplace_back(Ort::Value::CreateTensor<float>(_memoryInfo, inputDataVector.back().data(), inputDataVector.back().size(), shape.data(), shape.size()));
     shapes.push_back(shape);
   }
 
