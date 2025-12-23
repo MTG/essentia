@@ -217,8 +217,49 @@ class TestOnnxPredict(TestCase):
         self.assertAlmostEqualMatrix(found_values1, batch1)
         self.assertAlmostEqualMatrix(found_values2, batch2)
 
+    def test_default_optimization_level(self):
+        """Check that the default optimization level is 'extended'."""
+        onnx = OnnxPredict()
+        # Create a minimal pool with dummy input
+        n, m = (3 for _ in range(2))
+        batch1 = ones((n, 1, 1, m))
+        batch2 = ones((n, 1, 1, m),)
+        pool = Pool()
+        pool.set("input1", batch1)
+        pool.set("input2", batch2)
+
+        # Run inference to fully configure OnnxPredict
+        runIdentityModelInference(onnx, pool)
+        self.assertEqual(onnx.paramValue("optimizationLevel"), "extended")
+
+    def test_set_valid_optimization_levels(self):
+        """Check that valid optimization levels can be set without errors."""
+
+        n = 3    # n = batch size, m = feature dimension
+        input1 = array([0, 1, 2])
+        input2 = array([3, 4, 5])  # different values
+        batch1 = input1.reshape(1, n, 1, 1)
+        batch2 = input2.reshape(1, n, 1, 1)
+
+        pool = Pool()
+        pool.set("input1", batch1)
+        pool.set("input2", batch2)
+        valid_levels = ["disable_all", "basic", "extended", "all"]
+
+        for level in valid_levels:
+            out1, out2 = runIdentityModelInference(OnnxPredict(), pool, level)
+            # verify outputs match inputs
+            self.assertEqualVector(out1.flatten(), input1)
+            self.assertEqualVector(out2.flatten(), input2)
+
+    def test_set_invalid_optimization_level(self):
+        """Check that invalid optimization levels raise an error."""
+        # We don’t need a pool because the configuration itself should fail
+        with self.assertRaises(RuntimeError):
+            OnnxPredict(optimizationLevel="super_extended")
+
 def runEffnetDiscogsInference(onnx_predict, outputs, pool) -> Pool:
-    model = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
+    model_path = join(testdata.models_dir, "effnetdiscogs", "effnetdiscogs-bsdynamic-1.onnx")
 
     stem = "359500__mtg__sax-tenor-e-major"
     audio_path = join(testdata.audio_dir, Path("recorded"), f"{stem}.wav")
@@ -226,7 +267,7 @@ def runEffnetDiscogsInference(onnx_predict, outputs, pool) -> Pool:
     audio, _ = sf.read(audio_path, dtype=numpy.float32)
 
     onnx_predict.configure(
-        graphFilename= model,
+        graphFilename= model_path,
         inputs=["melspectrogram"],
         outputs=[output["name"] for output in outputs],
         )
@@ -256,14 +297,15 @@ def runEffnetDiscogsInference(onnx_predict, outputs, pool) -> Pool:
 
     return onnx_predict(pool)
 
-def runIdentityModelInference(onnx_predict, pool):
-    model = join(testdata.models_dir, "identity", "identity2x2.onnx")
+def runIdentityModelInference(onnx_predict, pool, optimizationLevel="extended"):
+    model_path = join(testdata.models_dir, "identity", "identity2x2.onnx")
 
     onnx_predict.configure(
-        graphFilename=model,
+        graphFilename=model_path,
         inputs=["input1", "input2"],
         outputs=["output1", "output2"],
         squeeze=True,
+        optimizationLevel=optimizationLevel,
     )
 
     poolOut = onnx_predict(pool)
