@@ -28,6 +28,16 @@
 
 #include <unordered_set>
 
+enum class OnnxOptimizationLevel {
+  DISABLE_ALL,
+  BASIC,
+  EXTENDED,
+  ALL
+};
+
+std::ostream& operator<<(std::ostream&, OnnxOptimizationLevel);
+std::istream& operator>>(std::istream&, OnnxOptimizationLevel&);
+
 namespace essentia {
 namespace standard {
 
@@ -48,6 +58,7 @@ class OnnxPredict : public Algorithm {
   std::vector<std::string> _inputs;
   std::vector<std::string> _outputs;
   size_t _deviceId;
+  OnnxOptimizationLevel _optimizationLevel;
   
   bool _squeeze;
   bool _isConfigured;
@@ -64,7 +75,6 @@ class OnnxPredict : public Algorithm {
     
   Ort::Env _env{nullptr};
   Ort::SessionOptions _sessionOptions{nullptr};
-  //Ort::Session _session{nullptr};
   std::unique_ptr<Ort::Session> _session;
 
     
@@ -127,6 +137,7 @@ class OnnxPredict : public Algorithm {
     declareParameter("outputs", "will save the tensors on the model outputs named after `outputs` to the same namespaces in the output pool. Set the first element of this list as an empty array to print all the available model outputs", "", Parameter::VECTOR_STRING);
     declareParameter("squeeze", "remove singleton dimensions of the inputs tensors. Does not apply to the batch dimension", "{true,false}", true);
     declareParameter("deviceId", "the gpu device id when CUDA support is available", "[0,inf)", 0);
+    declareParameter("optimizationLevel", "ONNX graph optimization level to use.", "{disable_all,basic,extended,all}", "extended");
   }
 
   void configure();

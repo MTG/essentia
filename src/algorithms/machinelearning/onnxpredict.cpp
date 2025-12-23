@@ -47,6 +47,25 @@ const char* OnnxPredict::description = DOC("This algorithm runs a Onnx model and
 void OnnxPredict::configure() {
   _graphFilename = parameter("graphFilename").toString();
   _deviceId = parameter("deviceId").toInt();
+  std::string opt = parameter("optimizationLevel").toString();
+
+  if (opt == "disable_all") {
+    _optimizationLevel = OnnxOptimizationLevel::DISABLE_ALL;
+  }
+  else if (opt == "basic") {
+    _optimizationLevel = OnnxOptimizationLevel::BASIC;
+  }
+  else if (opt == "extended") {
+    _optimizationLevel = OnnxOptimizationLevel::EXTENDED;
+  }
+  else if (opt == "all") {
+    _optimizationLevel = OnnxOptimizationLevel::ALL;
+  }
+  else {
+    throw EssentiaException(
+      "OnnxPredict: invalid optimizationLevel: " + opt + ". Choices: {disable_all,basic,extended,all}"
+    );
+  }
     
   if ((_graphFilename.empty()) and (_isConfigured)) {
     E_WARNING("OnnxPredict: You are trying to update a valid configuration with invalid parameters. "
@@ -217,17 +236,44 @@ void OnnxPredict::reset() {
       E_INFO("✅ Using Core ML Execution Provider");
     }
     #endif
-    
-    // Set graph optimization level - check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
-    _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+        
+    // Set graph optimization level - Map our enum to ONNX Runtime | Check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
+    switch (_optimizationLevel) {
+      case OnnxOptimizationLevel::DISABLE_ALL:
+        _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_DISABLE_ALL);
+        break;
+      case OnnxOptimizationLevel::BASIC:
+        _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_BASIC);
+        break;
+      case OnnxOptimizationLevel::EXTENDED:
+        _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+        break;
+      case OnnxOptimizationLevel::ALL:
+        _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
+        break;
+    }
     _sessionOptions.SetIntraOpNumThreads(0);
       
     // Initialize session
     _session = std::make_unique<Ort::Session>(_env, _graphFilename.c_str(), _sessionOptions);
 
   }
-  catch (Ort::Exception oe) {
-    throw EssentiaException(string("OnnxPredict:") + oe.what(), oe.GetOrtErrorCode());
+  catch (Ort::Exception e) {
+    // Fallback only if optimization > BASIC
+    if (_optimizationLevel != OnnxOptimizationLevel::BASIC &&
+        _optimizationLevel != OnnxOptimizationLevel::DISABLE_ALL) {
+      E_WARNING(
+                "OnnxPredict: graph optimization level failed ("
+                + std::string(e.what())
+                + "), retrying with BASIC optimization"
+                );
+      // Fallback to BASIC
+      _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_BASIC);
+      _session = std::make_unique<Ort::Session>(_env, _graphFilename.c_str(), _sessionOptions);
+    }
+    else
+      // No fallback possible
+      throw EssentiaException("OnnxPredict: session creation failed: " + std::string(e.what()), e.GetOrtErrorCode());
   }
   
   E_INFO("OnnxPredict: Successfully loaded graph file: `" << _graphFilename << "`");
