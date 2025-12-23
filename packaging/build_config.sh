@@ -2,7 +2,7 @@
 
 HOST=i686-w64-mingw32
 if [ -z "${PREFIX}" ]; then
-    PREFIX=`pwd`
+  PREFIX=$(pwd)
 fi
 echo Installing to: $PREFIX
 
@@ -28,7 +28,7 @@ CHROMAPRINT_VERSION=1.5.1
 QT_SOURCE_URL=https://download.qt.io/archive/qt/4.8/4.8.4/qt-everywhere-opensource-src-4.8.4.tar.gz
 GAIA_VERSION=2.4.6-86-ged433ed
 TENSORFLOW_VERSION=2.5.0
-
+LIBONNXRUNTIME_VERSION=1.22.1
 
 FFMPEG_AUDIO_FLAGS="
     --disable-programs

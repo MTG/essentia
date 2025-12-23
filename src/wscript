@@ -21,7 +21,9 @@ lib_map = {
     'FFTW': 'fftw3f',
     'LIBCHROMAPRINT': 'libchromaprint',
     'GAIA2': 'gaia2',
-    'TENSORFLOW': 'tensorflow'}
+    'TENSORFLOW': 'tensorflow',
+    'ONNXRUNTIME': 'libonnxruntime',
+    }
 
 
 def options(ctx):
@@ -55,6 +57,9 @@ def options(ctx):
     ctx.add_option('--with-tensorflow', action='store_true',
                    dest='WITH_TENSORFLOW', default=False,
                    help='build with Tensorflow support')
+    ctx.add_option('--with-onnx', action='store_true',
+                   dest='WITH_ONNXRUNTIME', default=False,
+                   help='build with Onnx-Runtime support')
     ctx.add_option('--lightweight', action='store',
                    dest='LIGHTWEIGHT', default=False,
                    help='build lightweight version with specified dependencies (comma separated: =' + ','.join(default_libs) + ')')
@@ -109,6 +114,9 @@ def configure(ctx):
 
     if ctx.env.WITH_TENSORFLOW:
         ctx.env.CHECK_LIBS.append('tensorflow')
+
+    if ctx.env.WITH_ONNXRUNTIME:
+        ctx.env.CHECK_LIBS.append('onnxruntime')
 
     if ctx.env.IGNORE_ALGOS:
         for a in ctx.env.IGNORE_ALGOS.split(","):
@@ -200,6 +208,10 @@ def configure(ctx):
     if 'tensorflow' in ctx.env.CHECK_LIBS:
         ctx.check_cfg(package=lib_map['TENSORFLOW'], uselib_store='TENSORFLOW',
                       args=check_cfg_args, mandatory=True)
+
+    if 'onnxruntime' in ctx.env.CHECK_LIBS:
+        ctx.check_cfg(package=lib_map['ONNXRUNTIME'], uselib_store='ONNXRUNTIME',
+                      args=['libonnxruntime >= 1.21.1'] + check_cfg_args, mandatory=True)
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += ['__STDC_CONSTANT_MACROS']
@@ -341,6 +353,17 @@ def configure(ctx):
         print('  The following algorithms will be ignored: %s' % algos)
         ctx.env.ALGOIGNORE += algos
 
+
+    algos = [ 'OnnxPredict' ]
+    if has('onnxruntime'):
+        print('- OnnxRuntime detected!')
+        print('  The following algorithms will be included: %s\n' % algos)
+        ctx.env.USE_LIBS += ' ONNXRUNTIME'
+    else:
+        print('- Essentia is configured without Onnx-Runtime.')
+        print('  The following algorithms will be ignored: %s' % algos)
+        ctx.env.ALGOIGNORE += algos
+    
     lel = len(ctx.env.EXAMPLE_LIST)
     if lel:
         print('- Compiling %s example%s' % (lel, "" if lel == 1 else "s"))
