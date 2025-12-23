@@ -27,7 +27,6 @@ from copy import copy
 def _create_essentia_class(name, moduleName = __name__):
     essentia.log.debug(essentia.EPython, 'Creating essentia.standard class: %s' % name)
 
-    # print(f"name: {name}")
     _algoInstance = _essentia.Algorithm(name)
     _algoDoc = _algoInstance.getDoc()
     _algoStruct = _algoInstance.getStruct()
