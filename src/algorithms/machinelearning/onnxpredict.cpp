@@ -329,11 +329,11 @@ void OnnxPredict::compute() {
       }
     }
              
-    // Step 2: Convert data to float32
+    // Step 2: keep Real (float32) as-is ---
     inputDataVector.emplace_back(inputData.size());
-    for (size_t j = 0; j < inputData.size(); ++j) {
-        inputDataVector.back()[j] = static_cast<float>(inputData.data()[j]);
-    }
+    // Essentia::Real is already float32 by default, so no need to cast.
+    // We copy directly into the input vector that will be fed to ONNX tensor.
+    std::copy(inputData.data(), inputData.data() + inputData.size(), inputDataVector.back().begin());
     
     // Step 3: Create ONNX Runtime tensor
     _memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
