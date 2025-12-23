@@ -219,21 +219,21 @@ void OnnxPredict::reset() {
     #ifdef USE_CUDA
     if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") != providers.end()) {
       OrtSessionOptionsAppendExecutionProvider_CUDA(_sessionOptions, _deviceId);
-      E_INFO("✅ Using CUDA Execution Provider");
+      E_INFO("✅ Using CUDA Execution Provider (GPU " << _deviceId << ")");
     }
     #endif
 
     #ifdef USE_METAL
     if (std::find(providers.begin(), providers.end(), "MetalExecutionProvider") != providers.end()) {
       OrtSessionOptionsAppendExecutionProvider_Metal(_sessionOptions, _deviceId);
-      E_INFO("✅ Using Metal Execution Provider");
+      E_INFO("✅ Using Metal Execution Provider (GPU " << _deviceId << ")");
     }
     #endif
 
     #ifdef USE_COREML
     if (std::find(providers.begin(), providers.end(), "CoreMLExecutionProvider") != providers.end()) {
       OrtSessionOptionsAppendExecutionProvider_CoreML(_sessionOptions, _deviceId);
-      E_INFO("✅ Using Core ML Execution Provider");
+      E_INFO("✅ Using Core ML Execution Provider (GPU " << _deviceId << ")");
     }
     #endif
         
@@ -336,7 +336,19 @@ void OnnxPredict::compute() {
     std::copy(inputData.data(), inputData.data() + inputData.size(), inputDataVector.back().begin());
     
     // Step 3: Create ONNX Runtime tensor
-    _memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    #ifdef USE_CUDA
+    if (_sessionOptions.GetExecutionProviderCount() > 0 &&
+        std::string(_sessionOptions.GetExecutionProviderName(0)) == "CUDAExecutionProvider") {
+        _memoryInfo = Ort::MemoryInfo::CreateCuda(_deviceId, OrtMemTypeDefault);
+    } else
+    #endif
+    {
+        _memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
+    }
+
+    if (_memoryInfo == nullptr) {
+        throw EssentiaException("OnnxPredict: Error allocating memory for input tensor.");
+    }
       
     if (_memoryInfo == NULL) {
       throw EssentiaException("OnnxRuntimePredict: Error allocating memory for input tensor.");
