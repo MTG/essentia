@@ -16,6 +16,8 @@
 #
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
+
+# Author cvf_bcn, Dec. 2025
 import os.path
 
 from essentia_test import *
