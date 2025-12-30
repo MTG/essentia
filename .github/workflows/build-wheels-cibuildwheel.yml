@@ -8,8 +8,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, macos-12, macos-14]
-        config: [pyproject, pyproject-tensorflow]
+        os: [ubuntu-22.04, macos-13, macos-15]
+        config: [cibuildwheel, cibuildwheel-tensorflow]
 
     steps:
       - uses: actions/checkout@v4
@@ -21,7 +21,7 @@ jobs:
         run: git fetch --tags --force
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.5
+        uses: pypa/cibuildwheel@v2.23.2
         with:
           config-file: ${{ matrix.config }}.toml
 

@@ -63,6 +63,50 @@ def mel2hz(arg):
 def hz2mel(arg):
     return _essentia.hz2mel( _c.convertData(arg, _c.Edt.REAL) )
 
+def midi2hz(arg1, arg2=440.0):
+    return _essentia.midi2hz( _c.convertData(arg1, _c.Edt.INTEGER),
+                              _c.convertData(arg2, _c.Edt.REAL) )
+
+def hz2midi(arg1, arg2=440.0):
+    return _essentia.hz2midi( _c.convertData(arg1, _c.Edt.REAL),
+                              _c.convertData(arg2, _c.Edt.REAL) )
+
+def cents2hz(arg1, arg2):
+    return _essentia.cents2hz(_c.convertData(arg1, _c.Edt.REAL),
+                              _c.convertData(arg2, _c.Edt.REAL) )
+
+def hz2cents(arg1, arg2):
+    return _essentia.hz2cents(_c.convertData(arg1, _c.Edt.REAL),
+                              _c.convertData(arg2, _c.Edt.REAL) )
+
+def midi2note(arg):
+    return _essentia.midi2note( _c.convertData(arg, _c.Edt.INTEGER) )
+
+def note2midi(arg):
+    return _essentia.note2midi( _c.convertData(arg, _c.Edt.STRING) )
+
+def note2root(arg):
+    return _essentia.note2root( _c.convertData(arg, _c.Edt.STRING) )
+
+def note2octave(arg):
+    return _essentia.note2octave( _c.convertData(arg, _c.Edt.STRING) )
+
+def hz2note(arg1, arg2=440.0):
+    return _essentia.hz2note( _c.convertData(arg1, _c.Edt.REAL),
+                              _c.convertData(arg2, _c.Edt.REAL) )
+
+def note2hz(arg1, arg2=440.0):
+    return _essentia.note2hz( _c.convertData(arg1, _c.Edt.STRING),
+                              _c.convertData(arg2, _c.Edt.REAL) )
+
+def velocity2db(arg1, arg2=-96):
+    return _essentia.velocity2db( _c.convertData(arg1, _c.Edt.INTEGER),
+                                  _c.convertData(arg2, _c.Edt.REAL) )
+
+def db2velocity(arg1, arg2=-96):
+    return _essentia.db2velocity( _c.convertData(arg1, _c.Edt.REAL),
+                                  _c.convertData(arg2, _c.Edt.REAL) )
+
 def equivalentKey(arg):
     return _essentia.equivalentKey( _c.convertData(arg, _c.Edt.STRING) )
 
@@ -86,6 +130,12 @@ __all__ = [ 'isSilent', 'instantPower',
             'amp2db', 'db2amp',
             'bark2hz', 'hz2bark',
             'mel2hz', 'hz2mel',
+            'midi2hz', 'hz2midi',
+	    'cents2hz', 'hz2cents',
+	    'note2root', 'note2octave',
+            'midi2note', 'note2midi',
+            'hz2note', 'note2hz',
+            'velocity2db', 'db2velocity',
             'postProcessTicks',
             'normalize', 'derivative',
             'equivalentKey', 'lin2log']

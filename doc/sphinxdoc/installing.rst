@@ -87,7 +87,7 @@ Install prerequisites::
 
 Install Essentia's dependencies::
 
-  brew install eigen libyaml fftw ffmpeg libsamplerate libtag tensorflow
+  brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag chromaprint tensorflow
 
 `Install Python environment using Homebrew <http://docs.python-guide.org/en/latest/starting/install/osx>`_ (Note that you are advised to do as described here and there are `good reasons to do so <http://docs.python-guide.org/en/latest/starting/install/osx/>`_. You will most probably encounter installation errors when using Python/NumPy preinstalled with macOS.)::
 
@@ -189,7 +189,7 @@ Install doxigen and pip3. If you are on Linux::
 
 Install additional dependencies (you might need to run this command with sudo)::
 
-  pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinx-toolbox
+  pip3 install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinx-toolbox nbformat gitpython
   sudo apt-get install pandoc
 
 Make sure to build Essentia with Python 3 bindings and run::

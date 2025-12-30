@@ -113,8 +113,8 @@ void TensorflowPredictMAEST::configure() {
 
   if (parameter("patchSize").isConfigured()) {
     if (graphFilename.find("discogs-maest-20s-") != std::string::npos) {
-      E_INFO("TensorFlowPredictMAEST: The default `patchSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 1258, which is adequate for the 20s model.");
-      patchSize = 1258;
+      E_INFO("TensorFlowPredictMAEST: The default `patchSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 1256, which is adequate for the 20s model.");
+      patchSize = 1256;
     } else if (graphFilename.find("discogs-maest-10s-") != std::string::npos) {
       E_INFO("TensorFlowPredictMAEST: The default `patchSize` is not suitable according to the graph filename `" << graphFilename.c_str() << "`. Setting it to 626, which is adequate for the 10s model.");
       patchSize = 626;

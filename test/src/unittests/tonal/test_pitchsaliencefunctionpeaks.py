@@ -19,19 +19,19 @@
 
 
 from essentia_test import *
-from numpy import *
+from numpy import sin, pi, concatenate
 
 class TestPitchSalienceFunctionPeaks(TestCase):
-  
+
     def testInvalidParam(self):
         self.assertConfigureFails(PitchSalienceFunctionPeaks(), {'binResolution': -1})
         self.assertConfigureFails(PitchSalienceFunctionPeaks(), {'maxFrequency': -1})
         self.assertConfigureFails(PitchSalienceFunctionPeaks(), {'minFrequency': -1})
-        self.assertConfigureFails(PitchSalienceFunctionPeaks(), {'referenceFrequency': -1})          
+        self.assertConfigureFails(PitchSalienceFunctionPeaks(), {'referenceFrequency': -1})
 
     def testEmpty(self):
         self.assertRaises(RuntimeError, lambda: PitchSalienceFunctionPeaks()([]))
-    
+
     def testSinglePeak(self):
         # Provide a single input peak with a unit magnitude at the reference frequency, and
         # validate that the output salience function has only one non-zero element at the first bin.
@@ -66,10 +66,10 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         # Checks on config. values binResolution being too high for the input in question
         freq_speaks = [55, 100, 340]
         mag_speaks = [1, 1, 1]
-        expectedBins = [ 0., 101.52542, 324.88135, 203.05084, 131.98305,  81.22034,  40.61017] 
+        expectedBins = [ 0., 101.52542, 324.88135, 203.05084, 131.98305,  81.22034,  40.61017]
         expectedValues = [1., 1., 1., 0.8 , 0.64000005, 0.512, 0.40960002]
         calculatedPitchSalience = PitchSalienceFunction(binResolution=100)(freq_speaks,mag_speaks)
-        bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)        
+        bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
         self.assertAlmostEqualVectorFixedPrecision(bins, expectedBins,3)
         self.assertAlmostEqualVectorFixedPrecision(values, expectedValues, 3)
 
@@ -95,7 +95,7 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         self.assertRaises(RuntimeError, lambda: PitchSalienceFunctionPeaks(referenceFrequency=20000)(calculatedPitchSalience))
 
     def testRegression3PeaksHw0UnharmonicInput(self):
-        # As in testRegression3Peaks but with Harmonic Weight = 0, non multiple freq. inputs        
+        # As in testRegression3Peaks but with Harmonic Weight = 0, non multiple freq. inputs
         freq_speaks = [55, 100, 340]
         mag_speaks = [1, 1, 1]
         expectedBins =  [0., 103., 315.]
@@ -104,9 +104,9 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
         self.assertEqualVector(bins, expectedBins)
         self.assertAlmostEqualVectorFixedPrecision(values, expectedValues, 6)
-    
+
     def testRegression3PeaksHw0HarmonicInput(self):
-        # As in testRegression3Peaks but with Harmonic Weight = 0, multiple freq. inputs        
+        # As in testRegression3Peaks but with Harmonic Weight = 0, multiple freq. inputs
         freq_speaks = [110, 220]
         mag_speaks = [1, 1]
         expectedBins =  [120., 240.]
@@ -117,14 +117,14 @@ class TestPitchSalienceFunctionPeaks(TestCase):
         self.assertAlmostEqualVectorFixedPrecision(values, expectedValues, 6)
 
     def testRegression3PeaksHw1UnHarmonicInput(self):
-        # As in testRegression3Peaks but with Harmonic Weight = 0,  non multiple freq. inputs        
+        # As in testRegression3Peaks but with Harmonic Weight = 0,  non multiple freq. inputs
         freq_speaks = [55, 100, 340]
         mag_speaks = [1, 1, 1]
         calculatedPitchSalience = PitchSalienceFunction(harmonicWeight=1)(freq_speaks, mag_speaks)
         bins, values = PitchSalienceFunctionPeaks()(calculatedPitchSalience)
         self.assertEqualVector(bins, [2., 37., 75., 103., 125., 195., 315.])
         self.assertAlmostEqualVectorFixedPrecision(values, [1.6984011, 1., 1., 1., 1., 1., 1.], 6)
-    
+
     def testRegression3PeaksHw1HarmonicInput(self):
         # As in testRegression3Peaks but with Harmonic Weight = 1, multiple freq. inputs
         freq_speaks = [110, 220]
@@ -177,15 +177,15 @@ class TestPitchSalienceFunctionPeaks(TestCase):
 
         signalSize = frameSize * 10
         # Here are generated sine waves for each note of the scale, e.g. C3 is 130.81 Hz, etc
-        c3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 130.81 * 2*math.pi)
-        d3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 146.83 * 2*math.pi)
-        e3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 164.81 * 2*math.pi)
-        f3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 174.61 * 2*math.pi)
-        g3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 196.00 * 2*math.pi)
-        a3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 220.00 * 2*math.pi)
-        b3 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 246.94 * 2*math.pi)
-        c4 = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 261.63 * 2*math.pi)
-    
+        c3 = 0.5 * sin((array(range(signalSize))/44100.) * 130.81 * 2*pi)
+        d3 = 0.5 * sin((array(range(signalSize))/44100.) * 146.83 * 2*pi)
+        e3 = 0.5 * sin((array(range(signalSize))/44100.) * 164.81 * 2*pi)
+        f3 = 0.5 * sin((array(range(signalSize))/44100.) * 174.61 * 2*pi)
+        g3 = 0.5 * sin((array(range(signalSize))/44100.) * 196.00 * 2*pi)
+        a3 = 0.5 * sin((array(range(signalSize))/44100.) * 220.00 * 2*pi)
+        b3 = 0.5 * sin((array(range(signalSize))/44100.) * 246.94 * 2*pi)
+        c4 = 0.5 * sin((array(range(signalSize))/44100.) * 261.63 * 2*pi)
+
         # This signal is a "major scale ladder"
         scale = concatenate([c3, d3, e3, f3, g3, a3, b3, c4])
 
@@ -198,9 +198,9 @@ class TestPitchSalienceFunctionPeaks(TestCase):
 
         # Do some spot checks on selected frequemtly occuring peaks in selected bin ranges.
         expectedBins1 = [170.,  50.,  98., 222.,  32.] # 168 to 313
-        expectedBins2 = [220., 100.,  30., 167., 260.,  47., 140.,  70.] # 649 to 794   
-        expectedBins3 = [240., 120.,  50.,   0., 276., 194., 156.,  74.,  86.,  36.] # 807 bins 953 
-        expectedBins4 = [260., 140.,  70.,  20., 101., 293., 220., 173.,  53.] # 968 to 1112        
+        expectedBins2 = [220., 100.,  30., 167., 260.,  47., 140.,  70.] # 649 to 794
+        expectedBins3 = [240., 120.,  50.,   0., 276., 194., 156.,  74.,  86.,  36.] # 807 bins 953
+        expectedBins4 = [260., 140.,  70.,  20., 101., 293., 220., 173.,  53.] # 968 to 1112
 
         index = 0
         for frame in FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
@@ -211,13 +211,13 @@ class TestPitchSalienceFunctionPeaks(TestCase):
             salience_peaks_bins, _ = run_pitch_salience_function_peaks(salience)
 
             if (index >= 168 ) and index < 313:
-                self.assertEqualVector(expectedBins1, salience_peaks_bins)                                                                                  
+                self.assertEqualVector(expectedBins1, salience_peaks_bins)
             elif (index >= 649 ) and index < 794:
-                self.assertEqualVector(expectedBins2, salience_peaks_bins)                                     
+                self.assertEqualVector(expectedBins2, salience_peaks_bins)
             elif (index >= 807 ) and index < 953:
-                self.assertEqualVector(expectedBins3, salience_peaks_bins)                                     
-            elif (index >= 968)  and index < 1112:             
-                self.assertEqualVector(expectedBins4, salience_peaks_bins)                                                                                                                                                    
+                self.assertEqualVector(expectedBins3, salience_peaks_bins)
+            elif (index >= 968)  and index < 1112:
+                self.assertEqualVector(expectedBins4, salience_peaks_bins)
             index+=1
 
 suite = allTests(TestPitchSalienceFunctionPeaks)

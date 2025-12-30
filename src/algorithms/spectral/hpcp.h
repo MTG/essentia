@@ -48,7 +48,7 @@ class HPCP : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("size", "the size of the output HPCP (must be a positive nonzero multiple of 12)", "[12,inf)", 12);
+    declareParameter("size", "the size of the output HPCP (defines bin resolution, must be a positive nonzero multiple of 12)", "[12,inf)", 12);
     declareParameter("referenceFrequency", "the reference frequency for semitone index calculation, corresponding to A3 [Hz]", "(0,inf)", 440.0);
     declareParameter("harmonics", "number of harmonics for frequency contribution, 0 indicates exclusive fundamental frequency contribution", "[0,inf)", 0); // 8 for chord estimation
     declareParameter("bandPreset", "enables whether to use a band preset", "{true,false}", true);

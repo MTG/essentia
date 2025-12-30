@@ -19,7 +19,7 @@
 
 
 from essentia_test import *
-from numpy import sin, float32, pi, arange, mean, log2, floor, ceil, math, concatenate
+from numpy import sin, float32, pi, arange, mean, log2, floor, ceil, concatenate
 import numpy as np
 
 class TestTonicIndianArtMusic(TestCase):
@@ -99,13 +99,13 @@ class TestTonicIndianArtMusic(TestCase):
     def testBelowMinimumTonic(self):
         signalSize = 15 * 2048
         # generate test signal 99 Hz, and put minTonicFreq as 100 Hz in the TonicIndianArtMusic
-        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 99* 2*math.pi)
+        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 99* 2*pi)
         self.assertRaises(EssentiaException, lambda: TonicIndianArtMusic(minTonicFrequency=100,maxTonicFrequency=375)(x))
 
     def testAboveMaxTonic(self):
         signalSize = 15 * 2048
         # generate test signal 101 Hz, and put maxTonicFreq as 100 Hz in the TonicIndianArtMusic
-        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 101* 2*math.pi)
+        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 101* 2*pi)
         self.assertRaises(RuntimeError, lambda: TonicIndianArtMusic(minTonicFrequency=99,maxTonicFrequency=100)(x))
 
     def testRegressionSyntheticSignal(self):
@@ -113,9 +113,9 @@ class TestTonicIndianArtMusic(TestCase):
         signalSize = 15 * 2048
 
         # Concat 3 sine waves together of different frequencies
-        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 124 * 2*math.pi)
-        y = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 100 * 2*math.pi)
-        z = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 80 * 2*math.pi)
+        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 124 * 2*pi)
+        y = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 100 * 2*pi)
+        z = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 80 * 2*pi)
         mix = concatenate([x, y, z])
 
         # tiam = acronym for "Tonic Indian Art Music"
@@ -127,9 +127,9 @@ class TestTonicIndianArtMusic(TestCase):
         self.assertGreater(124, tonic)
 
         ### Make a (unharmonic) chord
-        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 124 * 2*math.pi)
-        y = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 100 * 2*math.pi)
-        z = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 80 * 2*math.pi)
+        x = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 124 * 2*pi)
+        y = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 100 * 2*pi)
+        z = 0.5 * numpy.sin((array(range(signalSize))/44100.) * 80 * 2*pi)
         chord = x+y+z
 
         tiam = TonicIndianArtMusic(minTonicFrequency=50, maxTonicFrequency=111)
