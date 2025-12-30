@@ -27,14 +27,17 @@ PyObject* VectorInteger::toPythonRef(RogueVector<int>* v) {
   npy_intp dim = v->size();
   PyObject* result;
 
-  if (dim > 0) result = PyArray_SimpleNewFromData(1, &dim, PyArray_INT, &((*v)[0]));
-  else         result = PyArray_SimpleNew(1, &dim, PyArray_INT);
+  if (dim > 0) result = PyArray_SimpleNewFromData(1, &dim, NPY_INT, &((*v)[0]));
+  else         result = PyArray_SimpleNew(1, &dim, NPY_INT);
 
   if (result == NULL) {
-    throw EssentiaException("VectorInteger::toPythonRef: could not create PyArray of type PyArray_INT");
+    throw EssentiaException("VectorInteger::toPythonRef: could not create PyArray of type NPY_INT");
   }
 
-  PyArray_BASE(result) = TO_PYTHON_PROXY(VectorInteger, v);
+  if (PyArray_SetBaseObject((PyArrayObject*)result, TO_PYTHON_PROXY(VectorInteger, v)) < 0) {
+    Py_DECREF(result);
+    throw EssentiaException("VectorInteger: failed to set base object");
+  }
 
   return result;
 }
@@ -48,14 +51,14 @@ void* VectorInteger::fromPythonRef(PyObject* obj) {
 
   PyArrayObject* array = (PyArrayObject*)obj;
 
-  if (array->descr->type_num != PyArray_INT32) {
+  if (array->descr->type_num != NPY_INT32) {
     throw EssentiaException("VectorInteger::fromPythonRef: this NumPy array doesn't contain ints (maybe you forgot dtype='int'), type code: ", array->descr->type_num);
   }
   if (array->nd != 1) {
     throw EssentiaException("VectorInteger::fromPythonRef: this NumPy array has dimension ", array->nd, " (expected 1)");
   }
 
-  return new RogueVector<int>((int*)PyArray_DATA(obj), PyArray_SIZE(obj));
+  return new RogueVector<int>((int*)PyArray_DATA(array), PyArray_SIZE(array));
 }
 
 Parameter* VectorInteger::toParameter(PyObject* obj) {

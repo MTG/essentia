@@ -203,11 +203,12 @@ derivative(PyObject* self, PyObject* arg) {
 static double
 internal_instant_power(PyObject* obj) {
   double p = 0;
-  for (int i=0; i<PyArray_SIZE(obj); i++) {
-    double x = ((float*)PyArray_DATA(obj))[i];
+  PyArrayObject* array = (PyArrayObject*)obj;
+  for (int i=0; i<PyArray_SIZE(array); i++) {
+    double x = ((float*)PyArray_DATA(array))[i];
     p += x * x;
   }
-  p /= PyArray_SIZE(obj);
+  p /= PyArray_SIZE(array);
   return p;
 }
 
@@ -1034,16 +1035,19 @@ static PyObject* almostEqualArray(PyObject* notUsed, PyObject* args) {
 
   if (argv.size() != 3 ||
       !PyArray_Check(argv[0]) || !PyArray_Check(argv[1]) ||
-      PyArray_TYPE(argv[0]) != PyArray_TYPE(argv[1]) ||
-      PyArray_TYPE(argv[0]) != NPY_FLOAT ||
+      PyArray_TYPE((const PyArrayObject *) argv[0]) != PyArray_TYPE((const PyArrayObject *) argv[1]) ||
+      PyArray_TYPE((const PyArrayObject *) argv[0]) != NPY_FLOAT ||
       !PyFloat_Check(argv[2])) {
     PyErr_SetString(PyExc_TypeError, "expecting arguments (numpy.array(floats) m1, numpy.array(floats) m2, float precision)");
     return NULL;
   }
 
-  if (PyArray_NDIM(argv[0]) != PyArray_NDIM(argv[1])) Py_RETURN_FALSE;
+  PyArrayObject* array0 = (PyArrayObject*) argv[0];
+  PyArrayObject* array1 = (PyArrayObject*) argv[1];
 
-  if (PyArray_NDIM(argv[0]) > 2) {
+  if (PyArray_NDIM(array0) != PyArray_NDIM(array1)) Py_RETURN_FALSE;
+
+  if (PyArray_NDIM(array0) > 2) {
     PyErr_SetString(PyExc_TypeError, "comparing numpy arrays of more than 2 dimensions not implemented");
     return NULL;
   }
@@ -1051,12 +1055,12 @@ static PyObject* almostEqualArray(PyObject* notUsed, PyObject* args) {
   float precision = PyFloat_AS_DOUBLE(argv[2]);
 
   // 1-dimensional arrays
-  if (PyArray_NDIM(argv[0]) == 1) {
-    if (PyArray_DIM(argv[0], 0) != PyArray_DIM(argv[1], 0)) Py_RETURN_FALSE;
+  if (PyArray_NDIM(array0) == 1) {
+    if (PyArray_DIM(array0, 0) != PyArray_DIM(array1, 0)) Py_RETURN_FALSE;
 
-    for (int i=0; i<int(PyArray_DIM(argv[0], 0)); ++i) {
-      Real* x = (Real*)(PyArray_BYTES(argv[0]) + i*PyArray_STRIDE(argv[0], 0));
-      Real* y = (Real*)(PyArray_BYTES(argv[1]) + i*PyArray_STRIDE(argv[1], 0));
+    for (int i=0; i<int(PyArray_DIM(array0, 0)); ++i) {
+      Real* x = (Real*)(PyArray_BYTES(array0) + i*PyArray_STRIDE(array0, 0));
+      Real* y = (Real*)(PyArray_BYTES(array1) + i*PyArray_STRIDE(array1, 0));
       Real diff = 0;
       if (*y == 0) diff = abs(*x);
       else if (*x == 0) diff = abs(*y);
@@ -1071,16 +1075,16 @@ static PyObject* almostEqualArray(PyObject* notUsed, PyObject* args) {
   }
 
   // 2-dimensional arrays
-  else if (PyArray_NDIM(argv[0]) == 2) {
-    if (PyArray_DIM(argv[0], 0) != PyArray_DIM(argv[1], 0) ||
-        PyArray_DIM(argv[0], 1) != PyArray_DIM(argv[1], 1)) {
+  else if (PyArray_NDIM(array0) == 2) {
+    if (PyArray_DIM(array0, 0) != PyArray_DIM(array1, 0) ||
+        PyArray_DIM(array0, 1) != PyArray_DIM(array1, 1)) {
       Py_RETURN_FALSE;
     }
 
-    for (int i=0; i<int(PyArray_DIM(argv[0], 0)); ++i) {
-      for (int j=0; j<int(PyArray_DIM(argv[0], 1)); ++j) {
-        Real* x = (Real*)(PyArray_BYTES(argv[0]) + i*PyArray_STRIDE(argv[0], 0) + j*PyArray_STRIDE(argv[0], 1));
-        Real* y = (Real*)(PyArray_BYTES(argv[1]) + i*PyArray_STRIDE(argv[1], 0) + j*PyArray_STRIDE(argv[1], 1));
+    for (int i=0; i<int(PyArray_DIM(array0, 0)); ++i) {
+      for (int j=0; j<int(PyArray_DIM(array0, 1)); ++j) {
+        Real* x = (Real*)(PyArray_BYTES(array0) + i*PyArray_STRIDE(array0, 0) + j*PyArray_STRIDE(array0, 1));
+        Real* y = (Real*)(PyArray_BYTES(array1) + i*PyArray_STRIDE(array1, 0) + j*PyArray_STRIDE(array1, 1));
         Real diff = 0;
         if (*y == 0) diff = abs(*x);
         else if (*x == 0) diff = abs(*y);

@@ -32,17 +32,20 @@ PyObject* MatrixReal::toPythonRef(TNT::Array2D<Real>* mat) {
 
   PyObject* result;
   if (dims[0] == 0 || dims[1] == 0) {
-    result = PyArray_SimpleNew(2, dims, PyArray_FLOAT);
+    result = PyArray_SimpleNew(2, dims, NPY_FLOAT);
   }
   else {
-    result = PyArray_SimpleNewFromData(2, dims, PyArray_FLOAT, &((*mat)[0][0]));
+    result = PyArray_SimpleNewFromData(2, dims, NPY_FLOAT, &((*mat)[0][0]));
   }
 
   if (result == NULL) {
     throw EssentiaException("MatrixReal: dang null object");
   }
 
-  PyArray_BASE(result) = TO_PYTHON_PROXY(MatrixReal, mat);
+  if (PyArray_SetBaseObject((PyArrayObject*)result, TO_PYTHON_PROXY(MatrixReal, mat)) < 0) {
+    Py_DECREF(result);
+    throw EssentiaException("MatrixReal: failed to set base object");
+  }
 
   return result;
 }
@@ -65,11 +68,11 @@ void* MatrixReal::fromPythonCopy(PyObject* obj) {
   if (!PyArray_Check(obj)) {
     throw EssentiaException("MatrixReal::fromPythonRef: argument not a PyArray");
   }
-  if (PyArray_NDIM(obj) != 2) {
+  if (PyArray_NDIM((const PyArrayObject *) obj) != 2) {
     throw EssentiaException("MatrixReal::fromPythonRef: argument is not a 2-dimensional PyArray");
   }
 
-  TNT::Array2D<Real>* tntmat = new TNT::Array2D<Real>(PyArray_DIM(obj, 0), PyArray_DIM(obj, 1), 0.0);
+  TNT::Array2D<Real>* tntmat = new TNT::Array2D<Real>(PyArray_DIM((const PyArrayObject *) obj, 0), PyArray_DIM((const PyArrayObject *) obj, 1), 0.0);
 
   // copy data from numpy array to matrix
   PyArrayObject* numpyarr = (PyArrayObject*)obj;

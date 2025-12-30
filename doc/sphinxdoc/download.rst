@@ -10,7 +10,9 @@ Releases
 
 * `Essentia docker images <https://hub.docker.com/r/mtgupf/essentia/>`_
 
-* `Manylinux Python wheels <https://pypi.org/project/essentia/>`_ (Linux)
+* `Python wheels <https://pypi.org/project/essentia/>`_ (Linux, MacOS)
+
+* `Python wheels with TensorFlow support <https://pypi.org/project/essentia-tensorflow/>`_ (Linux, MacOS)
 
 * Precompiled `extractor binaries <https://mtg.github.io/essentia-labs/news/2015/12/22/static-binaries-for-extractors/>`_ (Linux, OSX, Win)
 
@@ -23,7 +25,7 @@ Development branch
 
 * The latest updates are available in the `master branch <https://github.com/MTG/essentia/tree/master/>`_.
 
-* The latest development builds of Python wheels are available `here <https://owncloud.rp.upf.edu/index.php/s/TpwgF4XrZEpBTOI>`_ (Linux).
+* The latest development builds of Python wheels are available `here <https://github.com/MTG/essentia/actions/workflows/build-wheels-cibuildwheel.yml>`_ (Linux, MacOS).
 
 
 

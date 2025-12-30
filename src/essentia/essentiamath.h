@@ -914,7 +914,7 @@ std::vector<T> derivative(const std::vector<T>& array) {
 }
 
 template<typename T, typename U, typename Comparator=std::greater<T> >
-class PairCompare : public std::binary_function<T, U, bool> {
+class PairCompare {
   Comparator _cmp;
   public:
     bool operator () (const std::pair<T,U>& p1, const std::pair<T,U>& p2) const {

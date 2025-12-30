@@ -230,7 +230,7 @@ The most important test is the basetest, it should never fail:
 ./build/basetest
 ```
 
-Run all Python tests:
+Run all Python tests (all Essentia algorithms, including based on TensorFlow):
 ```
 python3 waf run_python_tests
 ```
