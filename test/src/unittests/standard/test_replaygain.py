@@ -20,10 +20,57 @@
 
 
 from essentia_test import *
+import gc
+import weakref
 
 #testdir = join(filedir(), 'replaygain')
 
 class TestReplayGain(TestCase):
+
+    def testInitialization(self):
+        rg = ReplayGain()
+        self.assertIsInstance(rg, ReplayGain)
+
+    def testConfigureViaCompute(self):
+        sampleRate = 48000
+        input = [0.0] * int(sampleRate * 0.1)
+
+        rg = ReplayGain(sampleRate=sampleRate)
+        gain = rg(input)
+
+        self.assertIsInstance(gain, float)
+
+    def testReset(self):
+        sampleRate = 44100
+        input = [0.0] * int(sampleRate * 0.1)
+
+        rg = ReplayGain(sampleRate=sampleRate)
+        first = rg(input)
+
+        rg.reset()
+        second = rg(input)
+
+        self.assertAlmostEqual(first, second)
+
+    def testMultipleComputesProduceDifferentResults(self):
+        sampleRate = 44100
+        rg = ReplayGain(sampleRate=sampleRate)
+
+        input1 = [0.0] * int(sampleRate * 0.1)
+        input2 = [0.1] * int(sampleRate * 0.1)
+
+        g1 = rg(input1)
+        g2 = rg(input2)
+
+        self.assertNotEqual(g1, g2)
+
+    def testDestructor(self):
+        rg = ReplayGain(sampleRate=44100)
+        ref = weakref.ref(rg)
+
+        del rg
+        gc.collect()
+        self.assertIsNone(ref())
 
     def testZero(self):
         sampleRate = 44100
