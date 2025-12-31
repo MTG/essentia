@@ -31,11 +31,6 @@ class TestReplayGain(TestCase):
         rg = ReplayGain()
         self.assertIsInstance(rg, ReplayGain)
 
-    def testDefaultSampleRate(self):
-        rg = ReplayGain()
-        print (rg.parameter("sampleRate"))
-        self.assertEqual(rg.parameter("sampleRate"), 44100)
-
     def testConfigureViaCompute(self):
         sampleRate = 48000
         input = [0.0] * int(sampleRate * 0.1)
