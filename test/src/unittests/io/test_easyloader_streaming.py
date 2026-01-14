@@ -62,9 +62,9 @@ class TestEasyLoader_Streaming(TestCase):
     def testResample(self):
         filename = join(testdata.audio_dir, 'generated','synthesised','impulse','resample',
                         'impulses_1samp_44100.wav')
-        self.load(44100, 22050, filename, "left" , 0., 0., 10.);
-        self.load(44100, 48000, filename, "right", -15., 3.34, 5.68);
-        self.load(44100, 11025, filename, "mix"  , 30., 0.168, 8.32);
+        self.load(44100, 22050, filename, "left" , 0., 0., 10.)
+        self.load(44100, 48000, filename, "right", -15., 3.34, 5.68)
+        self.load(44100, 11025, filename, "mix"  , 30., 0.168, 8.32)
 
     def testInvalidParam(self):
         filename = join(testdata.audio_dir, 'generated','synthesised','impulse','resample',
@@ -80,10 +80,10 @@ class TestEasyLoader_Streaming(TestCase):
         from essentia.standard import EasyLoader as stdEasyLoader
         audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
         loader = stdEasyLoader(filename=audiofile, startTime=0, endTime=70)
-        audio1 = loader();
-        audio2 = loader();
-        loader.reset();
-        audio3 = loader();
+        audio1 = loader()
+        audio2 = loader()
+        loader.reset()
+        audio3 = loader()
         self.assertAlmostEqualVector(audio3, audio1)
         self.assertEqualVector(audio2, audio3)
 
@@ -95,9 +95,9 @@ class TestEasyLoader_Streaming(TestCase):
         audio1 = algo()
         audio2 = algo()
         audio3 = algo()
-        self.assertEquals(len(audio1), 441000);
-        self.assertEquals(len(audio2), 441000);
-        self.assertEquals(len(audio3), 441000);
+        self.assertEqual(len(audio1), 441000)
+        self.assertEqual(len(audio2), 441000)
+        self.assertEqual(len(audio3), 441000)
         self.assertEqualVector(audio2, audio1)
         self.assertEqualVector(audio2, audio3)
 

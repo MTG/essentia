@@ -2,22 +2,17 @@
 
 HOST=i686-w64-mingw32
 if [ -z "${PREFIX}" ]; then
-    PREFIX=`pwd`
+  PREFIX=$(pwd)
 fi
 echo Installing to: $PREFIX
 
-#SHARED_OR_STATIC="
-#--enable-shared \
-#--disable-static
-#"
-
 SHARED_OR_STATIC="
---disable-shared \
+--disable-shared
 --enable-static
 "
 
 EIGEN_VERSION=3.3.7
-FFMPEG_VERSION=ffmpeg-2.8.12
+FFMPEG_VERSION=ffmpeg-7.1.1
 LAME_VERSION=3.100
 TAGLIB_VERSION=taglib-1.11.1
 ZLIB_VERSION=zlib-1.2.12
@@ -29,14 +24,13 @@ QT_SOURCE_URL=https://download.qt.io/archive/qt/4.8/4.8.4/qt-everywhere-opensour
 GAIA_VERSION=2.4.6-86-ged433ed
 TENSORFLOW_VERSION=2.5.0
 
-
 FFMPEG_AUDIO_FLAGS="
     --disable-programs
     --disable-doc
     --disable-debug
 
     --disable-avdevice
-    --disable-avresample
+    --disable-swresample
     --disable-swscale
     --disable-postproc
     --disable-avfilter
@@ -58,7 +52,7 @@ FFMPEG_AUDIO_FLAGS="
     --enable-protocol=file
     --enable-protocol=pipe
 
-    --disable-sdl
+    --disable-sdl2
     --disable-lzma
     --disable-zlib
     --disable-xlib
@@ -178,7 +172,6 @@ FFMPEG_AUDIO_FLAGS="
     --enable-decoder=pcm_u24le
     --enable-decoder=pcm_u32be
     --enable-decoder=pcm_u32le
-    --enable-decoder=pcm_zork
 
     --enable-parser=aac
     --enable-parser=aac_latm
@@ -211,14 +204,14 @@ FFMPEG_AUDIO_FLAGS_MUXERS="
 
 # see http://www.fftw.org/install/windows.html
 FFTW_FLAGS="
-    --enable-float \
-    --enable-sse2 \
-    --with-incoming-stack-boundary=2 \
+    --enable-float
+    --enable-sse2
+    --with-incoming-stack-boundary=2
     --with-our-malloc16
 "
 
 LIBSAMPLERATE_FLAGS="
-    --disable-fftw \
+    --disable-fftw
     --disable-sndfile
 "
 

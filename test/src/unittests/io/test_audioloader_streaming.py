@@ -176,9 +176,9 @@ class TestAudioLoader_Streaming(TestCase):
         audio1, _, _, _, _, _ = algo()
         audio2, _, _, _, _, _ = algo()
         audio3, _, _, _, _, _ = algo()
-        self.assertEquals(len(audio1), 441000);
-        self.assertEquals(len(audio2), 441000);
-        self.assertEquals(len(audio3), 441000);
+        self.assertEqual(len(audio1), 441000)
+        self.assertEqual(len(audio2), 441000)
+        self.assertEqual(len(audio3), 441000)
         self.assertEqualMatrix(audio2, audio1)
         self.assertEqualMatrix(audio2, audio3)
 
@@ -220,12 +220,12 @@ class TestAudioLoader_Streaming(TestCase):
 
     def testMD5(self):
 
-        dir = join(testdata.audio_dir,'recorded')
-        _, _, _, md5_wav, _, _ = AudioLoader(filename=join(dir,"dubstep.wav"), computeMD5=True)()
-        _, _, _, md5_flac, _, _ = AudioLoader(filename=join(dir,"dubstep.flac"), computeMD5=True)()
-        _, _, _, md5_mp3, _, _ = AudioLoader(filename=join(dir,"dubstep.mp3"), computeMD5=True)()
-        _, _, _, md5_ogg, _, _ = AudioLoader(filename=join(dir,"dubstep.ogg"), computeMD5=True)()
-        _, _, _, md5_aac, _, _ = AudioLoader(filename=join(dir,"dubstep.aac"), computeMD5=True)()
+        directory = join(testdata.audio_dir,'recorded')
+        _, _, _, md5_wav, _, _ = AudioLoader(filename=join(directory,"dubstep.wav"), computeMD5=True)()
+        _, _, _, md5_flac, _, _ = AudioLoader(filename=join(directory,"dubstep.flac"), computeMD5=True)()
+        _, _, _, md5_mp3, _, _ = AudioLoader(filename=join(directory,"dubstep.mp3"), computeMD5=True)()
+        _, _, _, md5_ogg, _, _ = AudioLoader(filename=join(directory,"dubstep.ogg"), computeMD5=True)()
+        _, _, _, md5_aac, _, _ = AudioLoader(filename=join(directory,"dubstep.aac"), computeMD5=True)()
 
         # results should correspond to ffmpeg output (computed on debian wheezy)
         #   ffmpeg -i dubstep.wav -acodec copy -f md5 -
