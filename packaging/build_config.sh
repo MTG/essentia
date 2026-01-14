@@ -172,7 +172,6 @@ FFMPEG_AUDIO_FLAGS="
     --enable-decoder=pcm_u24le
     --enable-decoder=pcm_u32be
     --enable-decoder=pcm_u32le
-    --enable-decoder=pcm_zork
 
     --enable-parser=aac
     --enable-parser=aac_latm
