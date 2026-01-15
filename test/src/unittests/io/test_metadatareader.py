@@ -39,9 +39,9 @@ class TestMetadataReader(TestCase):
         result = MetadataReader(filename = join(self.audioDir, 'test.flac'))()
         tagsPool = result[7]
         tags = tagsPool.descriptorNames() + [tagsPool[t][0] for t in tagsPool.descriptorNames()]
-        
+
         self.assertEqualVector(result[:7], ('test flac', 'mtg', 'essentia', '', 'Thrash Metal', '01', '2009'))
-        
+
         # FIXME: Taglib 1.11.0 on OSX outputs bitrate inconsistent with 1.9.1 on Linux for FLAC and OGG
         # It might be due to different versions of Taglib or due to different platforms (we have not tested)
         # Therefore accept both bitrates as correct
@@ -50,11 +50,11 @@ class TestMetadataReader(TestCase):
         self.assertTrue(result[9] == 2201 or result[9] == 2202)
 
         self.assertEqualVector(
-                tags, 
-                ['metadata.tags.album', 'metadata.tags.artist', 'metadata.tags.composer', 'metadata.tags.copyright', 
-                 'metadata.tags.date', 'metadata.tags.description', 'metadata.tags.discnumber', 'metadata.tags.genre', 
-                 'metadata.tags.performer', 'metadata.tags.title', 'metadata.tags.tracknumber', 'metadata.tags.tracktotal', 
-                 'essentia', 'mtg', 'roberto.toscano', 'mtg.upf.edu', '2009', 'This is not thrash metal', '01', 'Thrash Metal', 
+                tags,
+                ['metadata.tags.album', 'metadata.tags.artist', 'metadata.tags.composer', 'metadata.tags.copyright',
+                 'metadata.tags.date', 'metadata.tags.description', 'metadata.tags.discnumber', 'metadata.tags.genre',
+                 'metadata.tags.performer', 'metadata.tags.title', 'metadata.tags.tracknumber', 'metadata.tags.tracktotal',
+                 'essentia', 'mtg', 'roberto.toscano', 'mtg.upf.edu', '2009', 'This is not thrash metal', '01', 'Thrash Metal',
                  'roberto.toscano', 'test flac', '01', '01']
             )
 
@@ -62,7 +62,6 @@ class TestMetadataReader(TestCase):
         result = MetadataReader(filename = join(self.audioDir, 'test.ogg'))()
         tagsPool = result[7]
         tags = tagsPool.descriptorNames() + [tagsPool[t][0] for t in tagsPool.descriptorNames()]
-
         self.assertEqualVector(result[:7], ('test ogg', 'mtg', 'essentia', 'this is not psychadelic', 'Psychadelic', '01', '2009'))
 
         # see the FIXME note above
@@ -70,11 +69,11 @@ class TestMetadataReader(TestCase):
         self.assertTrue(result[9] == 96 or result[9] == 20)
 
         self.assertEqualVector(
-                tags, 
-                ['metadata.tags.album', 'metadata.tags.artist', 'metadata.tags.comment', 'metadata.tags.composer', 
-                 'metadata.tags.copyright', 'metadata.tags.date', 'metadata.tags.description', 'metadata.tags.discnumber', 
-                 'metadata.tags.genre', 'metadata.tags.performer', 'metadata.tags.title', 'metadata.tags.tracknumber', 
-                 'metadata.tags.tracktotal', 'essentia', 'mtg', 'this is not psychadelic', 'roberto.toscano', 'mtg.upf.edu', 
+                tags,
+                ['metadata.tags.album', 'metadata.tags.artist', 'metadata.tags.comment', 'metadata.tags.composer',
+                 'metadata.tags.copyright', 'metadata.tags.date', 'metadata.tags.description', 'metadata.tags.discnumber',
+                 'metadata.tags.genre', 'metadata.tags.performer', 'metadata.tags.title', 'metadata.tags.tracknumber',
+                 'metadata.tags.tracktotal', 'essentia', 'mtg', 'this is not psychadelic', 'roberto.toscano', 'mtg.upf.edu',
                  '2009', 'this is not psychadelic', '1', 'Psychadelic', 'roberto.toscano', 'test ogg', '01', '01']
             )
 
@@ -86,9 +85,9 @@ class TestMetadataReader(TestCase):
         self.assertEqualVector(result[:7], ('test sound', 'mtg', 'essentia', 'this is not reggae', 'Reggae', '01', '2009'))
         self.assertEqualVector(result[8:], (5, 128, 44100, 1))
         self.assertEqualVector(
-                tags, 
-                ['metadata.tags.album', 'metadata.tags.artist', 'metadata.tags.comment', 'metadata.tags.date', 
-                 'metadata.tags.genre', 'metadata.tags.title', 'metadata.tags.tracknumber', 'essentia', 'mtg', 
+                tags,
+                ['metadata.tags.album', 'metadata.tags.artist', 'metadata.tags.comment', 'metadata.tags.date',
+                 'metadata.tags.genre', 'metadata.tags.title', 'metadata.tags.tracknumber', 'essentia', 'mtg',
                  'this is not reggae', '2009', 'Reggae', 'test sound', '01']
             )
 
@@ -100,16 +99,16 @@ class TestMetadataReader(TestCase):
         self.assertEqualVector(result[:7], ('ape test file', 'mtg', 'essentia', 'this is not porn', 'Porn Groove', "01/01", "2009"))
         self.assertEqualVector(result[8:], (5, 722, 44100, 1))
         self.assertEqualVector(
-                tags, 
-                ['metadata.tags.album', 'metadata.tags.artist', 'metadata.tags.comment', 'metadata.tags.composer', 
-                 'metadata.tags.copyright', 'metadata.tags.date', 'metadata.tags.genre', 'metadata.tags.original artist', 
-                 'metadata.tags.part', 'metadata.tags.title', 'metadata.tags.tracknumber', 'essentia', 'mtg', 'this is not porn', 
+                tags,
+                ['metadata.tags.album', 'metadata.tags.artist', 'metadata.tags.comment', 'metadata.tags.composer',
+                 'metadata.tags.copyright', 'metadata.tags.date', 'metadata.tags.genre', 'metadata.tags.original artist',
+                 'metadata.tags.part', 'metadata.tags.title', 'metadata.tags.tracknumber', 'essentia', 'mtg', 'this is not porn',
                  'roberto.toscano', 'mtg.upf.edu', '2009', 'Porn Groove', 'roberto.toscano', '1', 'ape test file', '01/01']
             )
 
     def testPCM(self):
         result = MetadataReader(filename = join(testdata.audio_dir, 'recorded', 'musicbox.wav'), failOnError=True)()
-        
+
         self.assertTrue(not len(result[7].descriptorNames()))
         self.assertEqualVector(result[:7], ('', '', '', '', '', '', ''))
         self.assertEqualVector(result[8:], (45, 1444, 44100, 2))
@@ -117,7 +116,7 @@ class TestMetadataReader(TestCase):
     def testFailOnError(self):
         self.assertComputeFails(
             MetadataReader(filename = join(self.audioDir, 'random_file_that_doesnt_exist.ape'), failOnError=True))
-        
+
         result = MetadataReader(filename = join(self.audioDir, 'random_file_that_doesnt_exist.ape'), failOnError=False)()
 
         self.assertTrue(result[7].descriptorNames() == [])
