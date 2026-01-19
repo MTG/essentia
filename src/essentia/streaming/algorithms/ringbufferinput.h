@@ -44,6 +44,7 @@ class RingBufferInput : public Algorithm {
 
   void declareParameters() {
     declareParameter("bufferSize", "the size of the ringbuffer", "", 8192);
+    declareParameter("shouldBlock", "whether the process() should block on empty input", "", true);
   }
 
   void configure();
