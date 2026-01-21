@@ -13,6 +13,7 @@ Essentia documentation contents
    installing
    download
    algorithms_overview
+   algorithms_reference
    essentia_python_tutorial
    python_examples
    extractors_out_of_box
