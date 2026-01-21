@@ -159,12 +159,17 @@ const char* TensorflowPredictFSDSINet::description = DOC(
   "Note: This algorithm does not make any check on the input model so it is "
   "the user's responsibility to make sure it is a valid one.\n"
   "\n"
+  "Note: The output of this algorithm is 2D, which is suitable for extracting embeddings or "
+  "class activations (the output shape is, e.g., [time, number of classes]). If the output "
+  "parameter is set to an intermediate layer with more dimensions, the output will be "
+  "flattened to 2D.\n"
+  "\n"
   "Note: The FSD-SINet models were trained on normalized audio clips. "
   "Clip-level normalization is only implemented in standard mode since in streaming there is no access to the entire audio clip. "
   "In the streaming case, the user is responsible for controlling the dynamic range of the input signal. "
   "Ideally, the signal should be zero-mean (no DC) and normalized to the full dynamic range (-1, 1).\n\n"
   "References:\n"
-  "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623.\n"
+  "  [1] Fonseca, E., Ferraro, A., & Serra, X. (2021). Improving sound event classification by increasing shift invariance in convolutional neural networks. arXiv preprint arXiv:2107.00623.\n\n"
   "  [2] https://github.com/edufonseca/shift_sec"
 );
 
