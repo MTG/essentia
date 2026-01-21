@@ -52,6 +52,10 @@ void PitchContourSegmentation::reSegment() {
   // find sequences of consecutive non-zero pitch values
   startC.clear();
   endC.clear();
+
+  if (pitch.size()==0){
+     throw(EssentiaException("PitchContourSegmentation, resegment: Empty pitch values."));   
+  }
   
   if (pitch[0] > 0) {
     startC.push_back(0);
@@ -79,6 +83,16 @@ void PitchContourSegmentation::compute() {
   vector<Real>& duration = _duration.get();
   vector<Real>& MIDIpitch = _MIDIpitch.get();
 
+
+
+  if (pitchGlob.size()==0){
+     throw(EssentiaException("PitchContourSegmentation: Empty pitch values."));   
+  }
+
+
+  if (signal.size()==0){
+     throw(EssentiaException("PitchContourSegmentation: Empty signal values."));   
+  }
   // we do not want to access the actual pitch contour -> create copy
   pitch = pitchGlob;
   
