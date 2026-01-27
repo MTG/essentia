@@ -46,7 +46,7 @@ class AudioLoader : public Algorithm {
   // because we might want to decode multiple frames in this buffer (all the 
   // frames contained in a packet, which can be more than 1 as in flac), and 
   // each time we decode a frame we need to have at least a full buffer of free space.
-  const static int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
+  const int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
 
   // float* _buffer;
   uint8_t* _buffer;   // byte-oriented buffer, clearer semantics
