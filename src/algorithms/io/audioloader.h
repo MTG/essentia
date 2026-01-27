@@ -48,7 +48,6 @@ class AudioLoader : public Algorithm {
   // each time we decode a frame we need to have at least a full buffer of free space.
   const int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
 
-  // float* _buffer;
   uint8_t* _buffer;   // byte-oriented buffer, clearer semantics
   int _dataSize;
 
