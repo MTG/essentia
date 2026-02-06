@@ -214,29 +214,48 @@ void OnnxPredict::reset() {
   
     // Reset SessionOptions by constructing a fresh object
     _sessionOptions = Ort::SessionOptions{};
-  
-    // Auto-detect EPs
-    #ifdef USE_CUDA
-    if (std::find(providers.begin(), providers.end(), "CUDAExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_CUDA(_sessionOptions, _deviceId);
-      E_INFO("✅ Using CUDA Execution Provider (GPU " << _deviceId << ")");
-    }
-    #endif
 
-    #ifdef USE_METAL
-    if (std::find(providers.begin(), providers.end(), "MetalExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_Metal(_sessionOptions, _deviceId);
-      E_INFO("✅ Using Metal Execution Provider (GPU " << _deviceId << ")");
-    }
-    #endif
+// Check execution providers for GPU accelerators
+    auto providers = Ort::GetAvailableProviders();
 
-    #ifdef USE_COREML
-    if (std::find(providers.begin(), providers.end(), "CoreMLExecutionProvider") != providers.end()) {
-      OrtSessionOptionsAppendExecutionProvider_CoreML(_sessionOptions, _deviceId);
-      E_INFO("✅ Using Core ML Execution Provider (GPU " << _deviceId << ")");
-    }
+    for (const auto& p : providers) {
+
+        // ===== CUDA (Linux / Windows only) =====
+        if (p == "CUDAExecutionProvider") {
+    #if !defined(__APPLE__)
+            Ort::ThrowOnError(
+                OrtSessionOptionsAppendExecutionProvider_CUDA(
+                    _sessionOptions,
+                    _deviceId   // int device id
+                )
+            );
     #endif
-        
+        }
+
+        // ===== CoreML (macOS only) =====
+        if (p == "CoreMLExecutionProvider") {
+    #if defined(__APPLE__)
+            Ort::ThrowOnError(
+                OrtSessionOptionsAppendExecutionProvider_CoreML(
+                    _sessionOptions,
+                    0
+                )
+            );
+            E_INFO("Using " << p << " provider!");
+    #endif
+        }
+
+        // ===== Metal (macOS only) =====
+        if (p == "MetalExecutionProvider") {
+    #if defined(__APPLE__)
+            // Metal auto-initializes internally
+            // No explicit C API call required
+    #endif
+        }
+
+        // ===== CPU fallback always exists =====
+    }
+
     // Set graph optimization level - Map our enum to ONNX Runtime | Check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
     switch (_optimizationLevel) {
       case OnnxOptimizationLevel::DISABLE_ALL:
