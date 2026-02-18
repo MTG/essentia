@@ -369,23 +369,59 @@ void AudioLoader::flushPacket() {
         }
 
         // got a frame -> convert to floats as in decodePacket()
+        // Guard: null frame data — corrupt decoder output
+        if (!_decodedFrame->data[0]) {
+            E_WARNING("AudioLoader: flushed frame has null data pointer, skipping frame");
+            continue;
+        }
+        // Guard: channel count mismatch — swr was configured for _nChannels in openAudioFile()
+        if (_decodedFrame->ch_layout.nb_channels != _nChannels) {
+            ostringstream msg;
+            msg << "AudioLoader: channel count mismatch in flushed frame: got " << _decodedFrame->ch_layout.nb_channels
+                << " channels but expected " << _nChannels
+                << " (codec=" << _audioCodec->name << "), skipping frame";
+            E_WARNING(msg.str());
+            continue;
+        }
+
         int inputSamples = _decodedFrame->nb_samples;
+
+        // Guard: nb_samples sanity — prevent integer overflow in av_samples_get_buffer_size
+        int maxSamplesForBuffer = FFMPEG_BUFFER_SIZE / (av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT) * _nChannels);
+        if (inputSamples <= 0 || inputSamples > maxSamplesForBuffer) {
+            ostringstream msg;
+            msg << "AudioLoader: flushed frame invalid nb_samples=" << inputSamples
+                << " (max=" << maxSamplesForBuffer << ", channels=" << _nChannels
+                << ", codec=" << _audioCodec->name << "), skipping frame";
+            E_WARNING(msg.str());
+            continue;
+        }
+
         int outPlaneSize = av_samples_get_buffer_size(NULL, _nChannels, inputSamples, AV_SAMPLE_FMT_FLT, 1);
-        if (outPlaneSize > 0) {
-            if (_audioCtx->sample_fmt == AV_SAMPLE_FMT_FLT) {
-                memcpy(_buffer, _decodedFrame->data[0], std::min(outPlaneSize, FFMPEG_BUFFER_SIZE));
-                _dataSize = std::min(outPlaneSize, FFMPEG_BUFFER_SIZE);
-            } else {
-                float* outBuff = (float*)_buffer;
-                int samplesWritten = swr_convert(_convertCtxAv,
-                                                 (uint8_t**)&outBuff,
-                                                 inputSamples,
-                                                 (const uint8_t**)_decodedFrame->data,
-                                                 inputSamples);
-                if (samplesWritten > 0) {
-                    _dataSize = std::min(samplesWritten * _nChannels * av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT),
-                                         FFMPEG_BUFFER_SIZE);
-                }
+
+        // Guard: output buffer overflow — skip frame entirely (no partial writes)
+        if (outPlaneSize <= 0 || outPlaneSize > FFMPEG_BUFFER_SIZE) {
+            ostringstream msg;
+            msg << "AudioLoader: flushed frame outPlaneSize=" << outPlaneSize
+                << " invalid or exceeds buffer " << FFMPEG_BUFFER_SIZE
+                << " (nb_samples=" << inputSamples << ", channels=" << _nChannels
+                << ", codec=" << _audioCodec->name << "), skipping frame";
+            E_WARNING(msg.str());
+            continue;
+        }
+
+        if (_audioCtx->sample_fmt == AV_SAMPLE_FMT_FLT) {
+            memcpy(_buffer, _decodedFrame->data[0], outPlaneSize);
+            _dataSize = outPlaneSize;
+        } else {
+            float* outBuff = (float*)_buffer;
+            int samplesWritten = swr_convert(_convertCtxAv,
+                                             (uint8_t**)&outBuff,
+                                             inputSamples,
+                                             (const uint8_t**)_decodedFrame->data,
+                                             inputSamples);
+            if (samplesWritten > 0) {
+                _dataSize = samplesWritten * _nChannels * av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT);
             }
         }
 
@@ -434,7 +470,32 @@ int AudioLoader::decodePacket() {
     }
 
     // We got a frame -> convert it to float interleaved
+    // Guard: null frame data — corrupt decoder output
+    if (!_decodedFrame->data[0]) {
+        E_WARNING("AudioLoader: decoded frame has null data pointer, skipping frame");
+        return 0;
+    }
+    // Guard: channel count mismatch — swr was configured for _nChannels in openAudioFile()
+    if (_decodedFrame->ch_layout.nb_channels != _nChannels) {
+        ostringstream msg;
+        msg << "AudioLoader: channel count mismatch: frame has " << _decodedFrame->ch_layout.nb_channels
+            << " channels but expected " << _nChannels
+            << " (codec=" << _audioCodec->name << "), skipping frame";
+        E_WARNING(msg.str());
+        return 0;
+    }
     int inputSamples = _decodedFrame->nb_samples;
+    // Guard: nb_samples sanity — prevent integer overflow in av_samples_get_buffer_size
+    int maxSamplesForBuffer = FFMPEG_BUFFER_SIZE / (av_get_bytes_per_sample(AV_SAMPLE_FMT_FLT) * _nChannels);
+    if (inputSamples <= 0 || inputSamples > maxSamplesForBuffer) {
+        ostringstream msg;
+        msg << "AudioLoader: invalid nb_samples=" << inputSamples
+            << " (max=" << maxSamplesForBuffer << ", channels=" << _nChannels
+            << ", codec=" << _audioCodec->name << "), skipping frame";
+        E_WARNING(msg.str());
+        return 0;
+    }
+
     // compute expected number of output bytes for these samples
     int outPlaneSize = av_samples_get_buffer_size(NULL, _nChannels, inputSamples, AV_SAMPLE_FMT_FLT, 1);
     if (outPlaneSize <= 0) {
@@ -442,13 +503,14 @@ int AudioLoader::decodePacket() {
         return 0;
     }
 
-    // Ensure output buffer is large enough
+    // Guard: output buffer overflow — skip frame entirely (no partial writes)
     if (outPlaneSize > FFMPEG_BUFFER_SIZE) {
-        // this shouldn't normally happen; guard and shrink to prevent overflow
         ostringstream msg;
-        msg << "AudioLoader: required buffer " << outPlaneSize << " exceeds allocated " << FFMPEG_BUFFER_SIZE;
+        msg << "AudioLoader: required buffer " << outPlaneSize << " exceeds allocated " << FFMPEG_BUFFER_SIZE
+            << " (nb_samples=" << inputSamples << ", channels=" << _nChannels
+            << ", codec=" << _audioCodec->name << "), skipping frame";
         E_WARNING(msg.str());
-        // clamp to buffer size (will avoid overflow but may drop data)
+        return 0;
     }
 
     // Perform conversion if needed
