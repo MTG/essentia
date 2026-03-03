@@ -25,7 +25,9 @@
 
 #define ORT_ENABLE_EXTENDED_API
 #include <onnxruntime_cxx_api.h>
+#ifdef HAVE_ONNXRUNTIME_COREML
 #include <coreml_provider_factory.h>
+#endif
 #include <unordered_set>
 
 enum class OnnxOptimizationLevel {
