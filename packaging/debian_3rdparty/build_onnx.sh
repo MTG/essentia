@@ -3,7 +3,7 @@ set -e
 . ../build_config.sh
 
 rm -rf tmp
-mkdir tmp
+mkdir -p tmp
 cd tmp
 
 # Prerequisites:        python>=3.10
@@ -19,15 +19,27 @@ cd onnxruntime-$LIBONNXRUNTIME_VERSION
 python3 -m pip install cmake
 
 # Build the dynamic library
-./build.sh                            \
-        --config Release              \
-        --build_shared_lib            \
-        --parallel                    \
-        --compile_no_warning_as_error \
-        --skip_submodule_sync         \
-        --allow_running_as_root       \
-        --skip_tests                  \
-        --cmake_extra_defines FETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER CMAKE_INSTALL_PREFIX=${PREFIX}
+ONNXRUNTIME_FLAGS="--config Release \
+  --build_shared_lib \
+  --parallel \
+  --compile_no_warning_as_error \
+  --skip_submodule_sync \
+  --allow_running_as_root \
+  --skip_tests \
+  --disable_ml_ops \
+  --disable_contrib_ops \
+  --disable_rtti \
+  --cmake_extra_defines FETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER CMAKE_INSTALL_PREFIX=${PREFIX}
+"
+
+if $USE_CUDA; then
+  ONNXRUNTIME_FLAGS+="--use_cuda \
+    --cuda_home=${PREFIX}/cuda \
+    --cudnn_home=${PREFIX}/cuda \
+  "
+fi
+
+./build.sh $ONNXRUNTIME_FLAGS
 
 # copying onnxruntime files
 mkdir -p "${PREFIX}"/lib/pkgconfig/
@@ -35,6 +47,7 @@ mkdir -p "${PREFIX}"/include/onnxruntime/
 
 cp build/Linux/Release/libonnxruntime.pc ${PREFIX}/lib/pkgconfig/
 cp -r build/Linux/Release/libonnxruntime.so* ${PREFIX}/lib/
+cp -r build/Linux/Release/libonnxruntime*.so ${PREFIX}/lib/
 
 cp include/onnxruntime/core/session/onnxruntime_cxx_inline.h ${PREFIX}/include/onnxruntime/
 cp include/onnxruntime/core/session/onnxruntime_float16.h ${PREFIX}/include/onnxruntime/
