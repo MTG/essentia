@@ -44,6 +44,7 @@ class AudioContext {
   int _inputBufSize;   // input buffer size
   float* _buffer;      // input FLT buffer interleaved
   uint8_t* _buffer_test; // input buffer in converted to codec sample format
+  int64_t _pts = 0;  // initialize to 0 by default
 
   struct SwrContext* _convertCtxAv;
 

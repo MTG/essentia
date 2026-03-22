@@ -39,25 +39,23 @@ class TestMonoLoader(TestCase):
 
     def testInvalidParam(self):
         filename = join(wav_dir, 'impulses_1second_44100_st.wav')
-        self.assertConfigureFails(MonoLoader(sampleRate=44100), { 'filename'   : filename,
-                                                                  'downmix'    : 'stereo',
-                                                                  'sampleRate' : 44100})
+        cfg = {'filename': filename, 'downmix': 'stereo', 'sampleRate': 44100}
+        self.assertConfigureFails(MonoLoader(sampleRate=44100), cfg)
 
-        self.assertConfigureFails(MonoLoader(sampleRate=44100), { 'filename'   : filename,
-                                                                'downmix'    : 'left',
-                                                                'sampleRate' : 0})
+        cfg = {'filename': filename, 'downmix': 'left', 'sampleRate': 0}
+        self.assertConfigureFails(MonoLoader(sampleRate=44100), cfg)
+
         filename = 'unknown.wav'
-        self.assertConfigureFails(MonoLoader(), {  'filename' : filename,
-                                                    'downmix' : 'left',
-                                                 'sampleRate' : 44100})
+        cfg = {'filename': filename, 'downmix': 'left', 'sampleRate': 44100}
+        self.assertConfigureFails(MonoLoader(), cfg)
 
 
     def testWav44100(self):
         # files with 9 impulses in each channel
         filename = join(wav_dir, 'impulses_1second_44100_st.wav')
-        left = self.load(filename, 'left', 44100);
-        right = self.load(filename, 'right', 44100);
-        mix = self.load(filename, 'mix', 44100);
+        left = self.load(filename, 'left', 44100)
+        right = self.load(filename, 'right', 44100)
+        mix = self.load(filename, 'mix', 44100)
         self.assertEqual(self.round(sum(left)), 9)
         self.assertEqual(self.round(sum(right)), 9)
         self.assertEqual(self.round(sum(mix)), 9)
@@ -65,9 +63,9 @@ class TestMonoLoader(TestCase):
     def testWav22050(self):
         # files with 9 impulses in each channel
         filename = join(wav_dir, 'impulses_1second_22050_st.wav')
-        left = self.load(filename, 'left', 22050);
-        right = self.load(filename, 'right', 22050);
-        mix = self.load(filename, 'mix', 22050);
+        left = self.load(filename, 'left', 22050)
+        right = self.load(filename, 'right', 22050)
+        mix = self.load(filename, 'mix', 22050)
         self.assertEqual(self.round(sum(left)), 9)
         self.assertEqual(self.round(sum(right)), 9)
         self.assertEqual(self.round(sum(mix)), 9)
@@ -75,9 +73,9 @@ class TestMonoLoader(TestCase):
     def testWav48000(self):
         # files with 9 impulses in each channel
         filename = join(wav_dir, 'impulses_1second_48000_st.wav')
-        left = self.load(filename, 'left', 48000);
-        right = self.load(filename, 'right', 48000);
-        mix = self.load(filename, 'mix', 48000);
+        left = self.load(filename, 'left', 48000)
+        right = self.load(filename, 'right', 48000)
+        mix = self.load(filename, 'mix', 48000)
         self.assertEqual(self.round(sum(left)), 9)
         self.assertEqual(self.round(sum(right)), 9)
         self.assertEqual(self.round(sum(mix)), 9)
@@ -90,9 +88,9 @@ class TestMonoLoader(TestCase):
         # file with 9 impulses in right channel and 10 in left channel
         dir = join(testdata.audio_dir, 'generated', 'synthesised', 'impulse', 'left_right_offset')
         filename = join(dir, 'impulses_1second_44100.wav')
-        left = self.load(filename, 'left', 44100);
-        right = self.load(filename, 'right', 44100);
-        mix = self.load(filename, 'mix', 44100);
+        left = self.load(filename, 'left', 44100)
+        right = self.load(filename, 'right', 44100)
+        mix = self.load(filename, 'mix', 44100)
         self.assertEqual(self.round(sum(left)), 10)
         self.assertEqual(self.round(sum(right)), 9)
         self.assertAlmostEqualFixedPrecision(sum(mix), 9.5, 3) # 0.5*left + 0.5*right
@@ -106,15 +104,15 @@ class TestMonoLoader(TestCase):
         noisefloor = 0.003
         for i in range(len(l)):
             if fabs(l[i]) > noisefloor:
-               result+= l[i]
+                result+= l[i]
         return self.round(result)
 
     def testMp344100(self):
         # files with 9 impulses in each channel
         filename = join(mp3_dir, 'impulses_1second_44100_st.mp3')
-        left = self.load(filename, 'left', 44100);
-        right = self.load(filename, 'right', 44100);
-        mix = self.load(filename, 'mix', 44100);
+        left = self.load(filename, 'left', 44100)
+        right = self.load(filename, 'right', 44100)
+        mix = self.load(filename, 'mix', 44100)
 
         self.assertEqual(self.sum(left), 9)
         self.assertEqual(self.sum(right), 9)
@@ -123,9 +121,9 @@ class TestMonoLoader(TestCase):
     def testMp322050(self):
         # files with 9 impulses in each channel
         filename = join(mp3_dir, 'impulses_1second_22050_st.mp3')
-        left = self.load(filename, 'left', 22050);
-        right = self.load(filename, 'right', 22050);
-        mix = self.load(filename, 'mix', 22050);
+        left = self.load(filename, 'left', 22050)
+        right = self.load(filename, 'right', 22050)
+        mix = self.load(filename, 'mix', 22050)
 
         self.assertEqual(self.sum(left), 9)
         self.assertEqual(self.sum(right), 9)
@@ -134,20 +132,20 @@ class TestMonoLoader(TestCase):
     def testMp348000(self):
         # files with 9 impulses in each channel
         filename = join(mp3_dir, 'impulses_1second_48000_st.mp3')
-        left = self.load(filename, 'left', 48000);
-        right = self.load(filename, 'right', 48000);
-        mix = self.load(filename, 'mix', 48000);
+        left = self.load(filename, 'left', 48000)
+        right = self.load(filename, 'right', 48000)
+        mix = self.load(filename, 'mix', 48000)
         self.assertEqual(self.sum(left), 9)
         self.assertEqual(self.sum(right), 9)
         self.assertEqual(self.sum(mix), 9)
 
     def testMp3TimeShift(self):
-        # test mp3s are loaded with no time shift (lost frames) 
+        # test mp3s are loaded with no time shift (lost frames)
         filename_mp3 = join(mp3_dir, 'impulses_1second_44100.mp3')
         filename_wav = join(wav_dir, 'impulses_1second_44100.wav')
         mp3 = self.load(filename_mp3, 'mix', 44100)
         wav = self.load(filename_wav, 'mix', 44100)
-        
+
         # find time shift between impulse positions
         impulses_mp3 = [x for x in range(len(mp3)) if mp3[x]>0.9]
         impulses_wav = [x for x in range(len(wav)) if wav[x]>0.9]
@@ -168,9 +166,9 @@ class TestMonoLoader(TestCase):
 
     def testOgg44100(self):
         filename = join(ogg_dir, 'impulses_1second_44100_st.ogg')
-        left = self.load(filename, 'left', 44100);
-        right = self.load(filename, 'right', 44100);
-        mix = self.load(filename, 'mix', 44100);
+        left = self.load(filename, 'left', 44100)
+        right = self.load(filename, 'right', 44100)
+        mix = self.load(filename, 'mix', 44100)
         self.assertEqual(abs(self.sum(left)),  9)
         self.assertEqual(abs(self.sum(right)), 9)
         self.assertEqual(abs(self.sum(mix)),   9)
@@ -181,9 +179,9 @@ class TestMonoLoader(TestCase):
     def testOgg22050(self):
         # files with 9 impulses in each channel
         filename = join(ogg_dir, 'impulses_1second_22050_st.ogg')
-        left = self.load(filename, 'left', 22050);
-        right = self.load(filename, 'right', 22050);
-        mix = self.load(filename, 'mix', 22050);
+        left = self.load(filename, 'left', 22050)
+        right = self.load(filename, 'right', 22050)
+        mix = self.load(filename, 'mix', 22050)
         self.assertEqual(abs(self.sum(left)),  9)
         self.assertEqual(abs(self.sum(right)), 9)
         self.assertEqual(abs(self.sum(mix)),   9)
@@ -194,9 +192,9 @@ class TestMonoLoader(TestCase):
     def testOgg48000(self):
         # files with 9 impulses in each channel
         filename = join(ogg_dir, 'impulses_1second_48000_st.ogg')
-        left = self.load(filename, 'left', 48000);
-        right = self.load(filename, 'right', 48000);
-        mix = self.load(filename, 'mix', 48000);
+        left = self.load(filename, 'left', 48000)
+        right = self.load(filename, 'right', 48000)
+        mix = self.load(filename, 'mix', 48000)
         self.assertEqual(abs(self.sum(left)),  9)
         self.assertEqual(abs(self.sum(right)), 9)
         self.assertEqual(abs(self.sum(mix)),   9)
@@ -208,27 +206,27 @@ class TestMonoLoader(TestCase):
         # files of 30s with impulses at every sample
         # from 44100 to 22050
         filename = join(resamp_dir, 'impulses_1samp_44100.wav')
-        left = self.load(filename, 'left', 22050);
+        left = self.load(filename, 'left', 22050)
         self.assertAlmostEqual(sum(left), 30.*22050, 1e-4)
         # from 48000 to 44100
         filename = join(resamp_dir, 'impulses_1samp_48000.wav')
-        left = self.load(filename, 'left', 44100);
+        left = self.load(filename, 'left', 44100)
         self.assertAlmostEqual(sum(left), 30.*44100, 1e-4)
         # from 48000 to 22050
-        left = self.load(filename, 'left', 22050);
+        left = self.load(filename, 'left', 22050)
         self.assertAlmostEqual(sum(left), 30.*22050, 1e-4)
 
     def testUpSampling(self):
         # from 44100 to 48000
         filename = join(resamp_dir, 'impulses_1samp_44100.wav')
-        left = self.load(filename, 'right', 48000);
+        left = self.load(filename, 'right', 48000)
         self.assertAlmostEqual(sum(left), 30.*48000, 1e-4)
         # from 22050 to 44100
         filename = join(resamp_dir, 'impulses_1samp_22050.wav')
-        left = self.load(filename, 'right', 44100);
+        left = self.load(filename, 'right', 44100)
         self.assertAlmostEqual(sum(left), 30.*44100, 1e-4)
         # from 22050 to 48000
-        left = self.load(filename, 'right', 48000);
+        left = self.load(filename, 'right', 48000)
         self.assertAlmostEqual(sum(left), 30.*48000, 1e-4)
 
     def testInvalidFilename(self):
@@ -237,10 +235,10 @@ class TestMonoLoader(TestCase):
     def testResetStandard(self):
         audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
         loader = MonoLoader(filename=audiofile)
-        audio1 = loader();
-        audio2 = loader();
-        loader.reset();
-        audio3 = loader();
+        audio1 = loader()
+        audio2 = loader()
+        loader.reset()
+        audio3 = loader()
         self.assertAlmostEqualVector(audio3, audio1)
         self.assertEqualVector(audio2, audio1)
 
@@ -251,14 +249,11 @@ class TestMonoLoader(TestCase):
         audio1 = algo()
         audio2 = algo()
         audio3 = algo()
-        self.assertEquals(len(audio1), 441000);
-        self.assertEquals(len(audio2), 441000);
-        self.assertEquals(len(audio3), 441000);
+        self.assertEqual(len(audio1), 441000)
+        self.assertEqual(len(audio2), 441000)
+        self.assertEqual(len(audio3), 441000)
         self.assertEqualVector(audio2, audio1)
         self.assertEqualVector(audio2, audio3)
-
-
-
 
 suite = allTests(TestMonoLoader)
 
