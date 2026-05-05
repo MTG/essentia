@@ -4,7 +4,14 @@
 manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"
 manylinux-i686-image = "mtgupf/essentia-builds:manylinux2014_i686"
 
-skip = ["pp*", "*-musllinux*", "*i686", "*cp36*", "*cp37*", "*cp38*"]
+# Skip selectors:
+# - cp38: project does not target Python 3.8.
+# - *t-*: free-threaded (no-GIL) builds. The Essentia C bindings rely on
+#   legacy PyTypeObject definitions that fail to instantiate under
+#   cp313t/cp314t ("Type does not define the tp_name field"). Re-enable
+#   once the bindings are audited for free-threading compatibility.
+# - *-musllinux*, *i686: not supported by our manylinux2014 build images.
+skip = ["*cp38*", "*t-*", "*-musllinux*", "*i686"]
 
 environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
 
@@ -20,7 +27,8 @@ test-command = "python -c 'import essentia; import essentia.standard; import ess
 
 [tool.cibuildwheel.macos]
 
-skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
+# See linux section for skip rationale.
+skip = ["*cp38*", "*t-*"]
 
 environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, MACOSX_DEPLOYMENT_TARGET=15.0 }
 
@@ -40,7 +48,8 @@ test-command = "python -c 'import essentia; import essentia.standard; import ess
 [[tool.cibuildwheel.overrides]]
 select = "*macosx_arm64*"
 
-skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
+# See linux section for skip rationale.
+skip = ["*cp38*", "*t-*"]
 
 environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1, MACOSX_DEPLOYMENT_TARGET=15.0 }
 
