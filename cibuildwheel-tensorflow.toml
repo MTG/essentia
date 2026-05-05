@@ -11,7 +11,7 @@ environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PRO
 
 # Use system's Python3 to build Essentia.
 before-all = [
-  "python3 waf configure --with-gaia --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
+  "python3 waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
   "python3 waf",
   "python3 waf install",
   # Monkey-patch package name.
