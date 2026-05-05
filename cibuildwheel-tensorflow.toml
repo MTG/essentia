@@ -61,14 +61,14 @@ select = "*macosx_arm64*"
 
 skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
 
-environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1, MACOSX_DEPLOYMENT_TARGET=15.2 }
+environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1, MACOSX_DEPLOYMENT_TARGET=15.4 }
 
 before-all = [
   "brew install pkg-config gcc readline sqlite gdbm libpng",
   "brew install eigen libyaml fftw ffmpeg libsamplerate libtag",
   "brew install chromaprint",
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
-  # Tensorflow bottle a has minimum target of 15.2 which is too new.
+  # Tensorflow bottle has a minimum target of 15.4 which is too new.
   # We could build from source as a workaround, however, it takes too much time on the CI worker.
   # To keep it simple, just use the bottles available for tensorflow.
   "brew install tensorflow",
