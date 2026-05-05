@@ -32,16 +32,16 @@ jobs:
       PRE_CMD: ${{ matrix.PRE_CMD }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Fetch release tags from GitHub
         # Workaround for https://github.com/actions/checkout/issues/290
         run: git fetch --tags --force
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v6
         with:
-          python-version: 3.8
+          python-version: '3.12'
       - name: Build wheels in a Docker image
         run: |
           docker pull $DOCKER_IMAGE > /dev/null
@@ -51,7 +51,7 @@ jobs:
           ls wheelhouse/
           sudo python setup.py sdist
       - name: Upload wheels and sdist
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: essentia-python-wheels
           path: |
