@@ -9,8 +9,6 @@ on:
 jobs:
   build-docs:
     runs-on: ubuntu-22.04
-    container:
-      image: mtgupf/essentia-builds:manylinux2014_x86_64
 
     steps:
       - uses: actions/checkout@v4
@@ -21,22 +19,27 @@ jobs:
         # Workaround for https://github.com/actions/checkout/issues/290
         run: git fetch --tags --force
 
-      - name: Install documentation dependencies
+      - name: Build Essentia and documentation
+        # Run inside the same image used by cibuildwheel.toml so the
+        # docs are generated against the same toolchain and static deps as the
+        # published wheels. We invoke Docker manually (rather than via the job's
+        # `container:`) because manylinux2014 ships glibc 2.17, which is too old
+        # for the Node 20 runtime that GitHub Actions injects into containers.
         run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinx-toolbox nbformat gitpython sphinx-copybutton
-          yum install -y doxygen pandoc
+          docker run --rm \
+            -v "${PWD}:/project" \
+            -w /project \
+            mtgupf/essentia-builds:manylinux2014_x86_64 \
+            bash -euxc '
+              python3 -m pip install --upgrade pip
+              python3 -m pip install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinx-toolbox nbformat gitpython sphinx-copybutton
+              yum install -y doxygen pandoc
 
-      - name: Build Essentia
-        # Mirror the Linux before-all from cibuildwheel-tensorflow.toml so the
-        # docs build matches what the published wheels are built against.
-        run: |
-          python3 waf configure --with-python --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
-          python3 waf
-          python3 waf install
-
-      - name: Build documentation
-        run: python3 waf doc
+              python3 waf configure --with-python --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
+              python3 waf
+              python3 waf install
+              python3 waf doc
+            '
 
       - name: Upload built documentation
         uses: actions/upload-artifact@v4
