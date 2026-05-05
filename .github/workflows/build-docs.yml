@@ -31,6 +31,10 @@ jobs:
             -w /project \
             mtgupf/essentia-builds:manylinux2014_x86_64 \
             bash -euxc '
+              # Repo is bind-mounted from the host runner; container runs as
+              # root, so git refuses to touch it without this exception.
+              git config --global --add safe.directory /project
+
               python3 -m pip install --upgrade pip
               python3 -m pip install sphinx pyparsing sphinxcontrib-doxylink docutils jupyter sphinx-toolbox nbformat gitpython sphinx-copybutton
               yum install -y doxygen pandoc
