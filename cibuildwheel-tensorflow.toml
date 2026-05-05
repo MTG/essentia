@@ -33,7 +33,7 @@ before-all = [
   "brew install eigen libyaml fftw ffmpeg libsamplerate libtag",
   "brew install chromaprint",
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
-  # Tensorflow bottle a has minimum target of 14.2 which is too new.
+  # Tensorflow bottle has a minimum target of 15.2 which is too new.
   # We could build from source as a workaround, however, it takes too much time on the CI worker.
   # To keep it simple, just use the bottles available for tensorflow.
   "brew install tensorflow",
