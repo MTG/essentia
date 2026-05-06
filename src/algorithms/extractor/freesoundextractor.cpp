@@ -18,6 +18,7 @@
  */
 
 #include "freesoundextractor.h"
+#include "extractor_freesound/FreesoundSimSpaceDescriptorsData.h"
 
 using namespace std;
 
@@ -84,6 +85,20 @@ void FreesoundExtractor::configure() {
   rhythmStats = parameter("rhythmStats").toVectorString();
   mfccStats = parameter("mfccStats").toVectorString();
   gfccStats = parameter("gfccStats").toVectorString();
+
+  // Define hard-coded list of descriptors to be included in the similarity space, along with extra data needed for the projection
+  if (parameter("includeSimilarityVector").toBool()) {
+    includeSimilarityVector = true;
+  } else {
+    includeSimilarityVector = false;
+  }
+  if (includeSimilarityVector) {
+    simSpaceDescriptorNames = simspace::kSimSpaceDescriptorNames;
+    simSpaceDescriptorDimensions = simspace::kSimSpaceDescriptorDimensions;
+    simSpaceDescriptorACoefficients = simspace::kSimSpaceDescriptorACoefficients;
+    simSpaceDescriptorBCoefficients = simspace::kSimSpaceDescriptorBCoefficients;
+    simSpacePCAMatrix = simspace::kSimSpacePCAMatrix;
+  }
 
 #if HAVE_GAIA2 
   if (parameter("highlevel").isConfigured()) { 
@@ -252,6 +267,11 @@ void FreesoundExtractor::compute() {
 
   E_INFO("FreesoundExtractor: Compute aggregation");
   stats = computeAggregation(results);
+
+  if (includeSimilarityVector) {
+    E_INFO("FreesoundExtractor: Compute similarity vector");
+    computeSimilarityVector(stats);
+  }
 
   if (options.value<Real>("highlevel.compute")) {
 #if HAVE_GAIA2    
@@ -548,6 +568,61 @@ void FreesoundExtractor::computeReplayGain(const string& audioFilename, Pool& re
       //exit(5);
     }
   }
+}
+
+
+void FreesoundExtractor::computeSimilarityVector(Pool& results) {
+  // 1) Iterate over all descriptor names from simSpaceDescriptorNames, retrieve their values from the pool, and concatenate them in a single vector
+  // For compatibility with the legacy Freesound classic space computed with older extractors, there's a modification we need to make for the "barkbands" descriptors: we need
+  // to repeat the penultimate value at the very end of each barkband vector, so they get 1 more dimension
+  // If the value does not exist, insert as many zeros as the expected dimension for that descriptor, as defined in simSpaceDescriptorDimensions
+  // Add the corresponding normalization for each value according to the A and B coefficients defined in simSpaceDescriptorACoefficients and simSpaceDescriptorBCoefficients (ax+b)
+  vector<Real> simVectorRaw;
+  for (size_t i=0; i<simSpaceDescriptorNames.size(); i++) {
+    const string& descName = simSpaceDescriptorNames[i];
+    int expectedDim = simSpaceDescriptorDimensions[i];
+
+    if (results.contains<vector<Real> >(descName)) {
+      vector<Real> descValues = results.value<vector<Real> >(descName);
+      // check if this is a "barkbands" descriptor and if it has one dimension less than expected, in which case we repeat the penultimate value at the end
+      if (descName.find("barkbands") != string::npos && (int)descValues.size() == expectedDim - 1) {
+        descValues.push_back(descValues[descValues.size() - 1]);
+      }
+      // Apply per-dimension normalization using the A and B coefficients.
+      for (int j = 0; j < expectedDim; j++) {
+        Real value = (j < (int)descValues.size()) ? descValues[j] : 0.0;
+        value = simSpaceDescriptorACoefficients[i][j] * value + simSpaceDescriptorBCoefficients[i][j];
+        if (j < (int)descValues.size()) {
+          descValues[j] = value;
+        } else {
+          descValues.push_back(value);
+        }
+      }
+      simVectorRaw.insert(simVectorRaw.end(), descValues.begin(), descValues.end());
+    } else {
+      simVectorRaw.insert(simVectorRaw.end(), expectedDim, 0.0);
+    }
+  }
+
+  // Project raw descriptor vector (N=843) onto PCA space (N x 100) to get a 100-D sim vector.
+  vector<Real> simVectorProjected;
+  if (simSpacePCAMatrix.empty()) {
+    simVectorProjected.assign(100, 0.0);
+  } else {
+    const size_t projectedDim = simSpacePCAMatrix[0].size();
+    simVectorProjected.assign(projectedDim, 0.0);
+
+    const size_t rowsToUse = min(simVectorRaw.size(), simSpacePCAMatrix.size());
+    for (size_t i = 0; i < rowsToUse; i++) {
+      const size_t colsToUse = min(projectedDim, simSpacePCAMatrix[i].size());
+      for (size_t j = 0; j < colsToUse; j++) {
+        simVectorProjected[j] += simVectorRaw[i] * simSpacePCAMatrix[i][j];
+      }
+    }
+  }
+
+  // Add the similarity vector to the results pool
+  results.set("sim_vector", simVectorProjected);
 }
 
 

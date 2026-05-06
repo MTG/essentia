@@ -5,15 +5,22 @@ manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"
 # Only support x86_64 for essentia-tensorflow.
 build = "cp**-manylinux_x86_64"
 
-skip = ["pp*", "*-musllinux*", "*i686", "*cp36*", "*cp37*", "*cp38*"]
+# Skip selectors:
+# - cp38: project does not target Python 3.8.
+# - *t-*: free-threaded (no-GIL) builds. The Essentia C bindings rely on
+#   legacy PyTypeObject definitions that fail to instantiate under
+#   cp313t/cp314t ("Type does not define the tp_name field"). Re-enable
+#   once the bindings are audited for free-threading compatibility.
+# - *-musllinux*, *i686: not supported by our manylinux2014 build images.
+skip = ["*cp38*", "*t-*", "*-musllinux*", "*i686"]
 
 environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
 
+# Use system's Python3 to build Essentia.
 before-all = [
-  "PYBIN=/opt/python/cp36-cp36m/bin/",
-  "\"${PYBIN}/python\" waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
-  "\"${PYBIN}/python\" waf",
-  "\"${PYBIN}/python\" waf install",
+  "python3 waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
+  "python3 waf",
+  "python3 waf install",
   # Monkey-patch package name.
   # We could have a separate pyproject.toml configuration, but the build backend does not accept custom configuration filepaths.
   "sed 's/^name *= *\"essentia\"$/name = \"essentia-tensorflow\"/' pyproject.toml > pyproject.toml.patched && mv pyproject.toml.patched pyproject.toml"
@@ -24,18 +31,17 @@ test-command = "python -c 'import essentia; import essentia.standard; import ess
 
 [tool.cibuildwheel.macos]
 
-skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
+# See linux section for skip rationale.
+skip = ["*cp38*", "*t-*"]
 
-environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, MACOSX_DEPLOYMENT_TARGET=14.2 }
+environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, MACOSX_DEPLOYMENT_TARGET=15.2 }
 
 before-all = [
   "brew install pkg-config gcc readline sqlite gdbm freetype libpng",
-  "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag",
-  "brew link --force ffmpeg@2.8",
+  "brew install eigen libyaml fftw ffmpeg libsamplerate libtag",
   "brew install chromaprint",
-  "brew link --overwrite ffmpeg@2.8",
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
-  # Tensorflow bottle a has minimum target of 14.2 which is too new.
+  # Tensorflow bottle has a minimum target of 15.2 which is too new.
   # We could build from source as a workaround, however, it takes too much time on the CI worker.
   # To keep it simple, just use the bottles available for tensorflow.
   "brew install tensorflow",
@@ -61,18 +67,17 @@ before-all = [
 [[tool.cibuildwheel.overrides]]
 select = "*macosx_arm64*"
 
-skip = ["pp*", "*cp36*", "*cp37*", "*cp38*"]
+# See linux section for skip rationale.
+skip = ["*cp38*", "*t-*"]
 
-environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1, MACOSX_DEPLOYMENT_TARGET=15.2 }
+environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1, MACOSX_DEPLOYMENT_TARGET=15.4 }
 
 before-all = [
   "brew install pkg-config gcc readline sqlite gdbm libpng",
-  "brew install eigen libyaml fftw ffmpeg@2.8 libsamplerate libtag",
-  "brew link --force ffmpeg@2.8",
+  "brew install eigen libyaml fftw ffmpeg libsamplerate libtag",
   "brew install chromaprint",
-  "brew link --overwrite ffmpeg@2.8",
   # Delocate checks for the min OS version (LC_BUILD_VERSION or C_VERSION_MIN_MACOSX).
-  # Tensorflow bottle a has minimum target of 15.2 which is too new.
+  # Tensorflow bottle has a minimum target of 15.4 which is too new.
   # We could build from source as a workaround, however, it takes too much time on the CI worker.
   # To keep it simple, just use the bottles available for tensorflow.
   "brew install tensorflow",
