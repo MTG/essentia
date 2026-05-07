@@ -582,8 +582,13 @@ void FreesoundExtractor::computeSimilarityVector(Pool& results) {
     const string& descName = simSpaceDescriptorNames[i];
     int expectedDim = simSpaceDescriptorDimensions[i];
 
-    if (results.contains<vector<Real> >(descName)) {
-      vector<Real> descValues = results.value<vector<Real> >(descName);
+    if (results.contains<vector<Real> >(descName) || results.contains<Real>(descName)) {
+      vector<Real> descValues;
+      if (results.contains<vector<Real> >(descName)) {
+        descValues = results.value<vector<Real> >(descName);
+      } else {
+        descValues.push_back(results.value<Real>(descName));
+      }
       // check if this is a "barkbands" descriptor and if it has one dimension less than expected, in which case we repeat the penultimate value at the end
       if (descName.find("barkbands") != string::npos && (int)descValues.size() == expectedDim - 1) {
         descValues.push_back(descValues[descValues.size() - 1]);
