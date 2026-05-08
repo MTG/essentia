@@ -273,6 +273,8 @@ void FreesoundExtractor::compute() {
     computeSimilarityVector(stats);
   }
 
+  postProcessResultsPool(stats);
+
   if (options.value<Real>("highlevel.compute")) {
 #if HAVE_GAIA2    
     E_INFO("FreesoundExtractor: SVM models");
@@ -572,6 +574,10 @@ void FreesoundExtractor::computeReplayGain(const string& audioFilename, Pool& re
 
 
 void FreesoundExtractor::computeSimilarityVector(Pool& results) {
+  // This methods takes as input the pool of results including aggregated descriptors and computes a 100-dimensional vector representation
+  // by projecting a specific set of descriptors onto a PCA space. The resulting embedding space is the one used in the Freesound for
+  // "classic" similarity search.
+
   // 1) Iterate over all descriptor names from simSpaceDescriptorNames, retrieve their values from the pool, and concatenate them in a single vector
   // For compatibility with the legacy Freesound classic space computed with older extractors, there's a modification we need to make for the "barkbands" descriptors: we need
   // to repeat the penultimate value at the very end of each barkband vector, so they get 1 more dimension
@@ -609,7 +615,7 @@ void FreesoundExtractor::computeSimilarityVector(Pool& results) {
     }
   }
 
-  // Project raw descriptor vector (N=843) onto PCA space (N x 100) to get a 100-D sim vector.
+  // 2) Project raw descriptor vector (N=843) onto PCA space (N x 100) to get a 100-D sim vector.
   vector<Real> simVectorProjected;
   if (simSpacePCAMatrix.empty()) {
     simVectorProjected.assign(100, 0.0);
@@ -628,6 +634,68 @@ void FreesoundExtractor::computeSimilarityVector(Pool& results) {
 
   // Add the similarity vector to the results pool
   results.set("sim_vector", simVectorProjected);
+}
+
+void FreesoundExtractor::postProcessResultsPool(Pool& results) {
+  // This method takes as input the pool of results with aggregated descriptors and does some minor post-processing to make descriptors
+  // ready for indexing in Freesound.
+
+  // Create a new lowlevel.sound_start_time descriptor based on lowlevel.sound_start_frame by converting from frames to seconds using the 
+  // analysis hop size and sample rate. This is needed for Freesound indexing.
+  if (results.contains<Real>("lowlevel.sound_start_frame")) {
+    Real startFrame = results.value<Real>("lowlevel.sound_start_frame");
+    Real startTime = startFrame * lowlevelHopSize / analysisSampleRate;
+    results.set("lowlevel.sound_start_time", startTime);
+  }
+
+  // Create a new lowlevel.sound_stop_time descriptor based on lowlevel.sound_stop_frame
+  if (results.contains<Real>("lowlevel.sound_stop_frame")) {
+    Real stopFrame = results.value<Real>("lowlevel.sound_stop_frame");
+    Real stopTime = stopFrame * lowlevelHopSize / analysisSampleRate;
+    results.set("lowlevel.sound_stop_time", stopTime);
+  }
+
+  // Add post-processed tempo-related descriptors
+  if (results.contains<Real>("rhythm.bpm_loop_confidence")) {
+    bool isLoop = results.value<Real>("rhythm.bpm_loop_confidence") > 0.95;
+    results.set("fs.loopable", isLoop);
+    if (isLoop) {
+      // We use bpm_loop descriptors to set tempo and tempo confidence
+      int tempo = static_cast<int>(round(results.value<Real>("rhythm.bpm_loop")));
+      results.set("fs.bpm", tempo);
+      results.set("fs.bpm_confidence", results.value<Real>("rhythm.bpm_loop_confidence"));
+    } else {
+      // We use bpm descriptors to set tempo and tempo confidence
+      // Tempo confidence requires some extra normalisation as vale goes typically from 0 to 5.0
+      // Also make sure confidence is between 0 and 1
+      int tempo = static_cast<int>(round(results.value<Real>("rhythm.bpm")));
+      results.set("fs.bpm", tempo);
+      float confidence = results.value<Real>("rhythm.bpm_confidence") / 5.0;
+      confidence = std::min(std::max(confidence, 0.0f), 1.0f);
+      results.set("fs.bpm_confidence", confidence);
+    }
+  }
+
+  // Add post-processed note-related descriptors
+  if (results.contains<Real>("lowlevel.pitch.median")) {
+    // Convert pitch from Hz to MIDI
+    Real pitchHz = results.value<Real>("lowlevel.pitch.median");
+    results.set("fs.note_frequency", pitchHz);
+    int pitchMidi = 69 + 12 * log2(pitchHz / 440.0);
+    results.set("fs.note_midi", pitchMidi);
+    int note_number = pitchMidi % 12;
+    int octave = pitchMidi / 12;
+    static const char* noteNames[] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
+    string noteName = noteNames[note_number] + to_string(octave - 1);
+    results.set("fs.note_name", noteName);
+    results.set("fs.note_confidence", results.value<Real>("lowlevel.pitch_instantaneous_confidence.median"));
+  }
+
+  // Add post-processed tonality-related descriptors
+  if (results.contains<string>("tonal.key_key")) {
+    results.set("fs.tonality", results.value<string>("tonal.key_key") + " " + results.value<string>("tonal.key_scale"));
+    results.set("fs.tonality_confidence", results.value<Real>("tonal.key_strength"));
+  }
 }
 
 

@@ -91,6 +91,7 @@ class FreesoundExtractor : public Algorithm {
   void computeAudioMetadata(const std::string& audioFilename, Pool& results);
   void computeReplayGain(const std::string& audioFilename, Pool& results);
   void computeSimilarityVector(Pool& results);
+  void postProcessResultsPool(Pool& results);
 
   Pool computeAggregation(Pool& pool);
 
