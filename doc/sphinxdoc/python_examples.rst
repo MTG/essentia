@@ -68,3 +68,8 @@ Audio problems
 * `Start/stop cuts detection <tutorial_audioproblems_startstopcut.html>`_
 * `True-peak detection <tutorial_audioproblems_truepeakdetector.html>`_
 
+
+Jupyter notebook real-time
+--------------------------
+* `Music auto-tagging <https://github.com/MTG/essentia/blob/master/src/examples/python/tutorial_tensorflow_real-time_auto-tagging.ipynb>`_
+* `Music classification <https://github.com/MTG/essentia/blob/master/src/examples/python/tutorial_tensorflow_real-time_simultaneous_classifiers.ipynb>`_
