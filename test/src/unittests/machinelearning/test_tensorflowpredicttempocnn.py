@@ -112,7 +112,7 @@ class TestTensorflowPredictTempoCNN(TestCase):
     def testInvalidParam(self):
         model = join(testdata.models_dir, 'tempocnn', 'deeptemp_k16.pb')
         self.assertConfigureFails(TensorflowPredictTempoCNN(), {'graphFilename': model,
-                                                                'batchSize': 0})
+                                                                'batchSize': -2})
         self.assertConfigureFails(TensorflowPredictTempoCNN(), {'graphFilename': model,
                                                                 'input': 'non_existing'})
         self.assertConfigureFails(TensorflowPredictTempoCNN(), {'graphFilename': model,
