@@ -48,6 +48,8 @@ Deep embeddings, music classification and auto-tagging
 * `Music auto-tagging, classification, and embedding extraction <tutorial_tensorflow_auto-tagging_classification_embeddings.html>`_
 * `Real-time music auto-tagging <tutorial_tensorflow_real-time_auto-tagging.html>`_
 * `Simultaneous real-time inference with multiple classifiers <tutorial_tensorflow_real-time_simultaneous_classifiers.html>`_
+* `Music auto-tagging <https://github.com/MTG/essentia/blob/master/src/examples/python/tutorial_tensorflow_real-time_auto-tagging.ipynb>`_
+* `Music classification <https://github.com/MTG/essentia/blob/master/src/examples/python/tutorial_tensorflow_real-time_simultaneous_classifiers.ipynb>`_
 
 
 Fingerprinting & similarity
@@ -67,9 +69,3 @@ Audio problems
 * `Signal-to-noise ratio estimation <tutorial_audioproblems_snr.html>`_
 * `Start/stop cuts detection <tutorial_audioproblems_startstopcut.html>`_
 * `True-peak detection <tutorial_audioproblems_truepeakdetector.html>`_
-
-
-Jupyter notebook real-time
---------------------------
-* `Music auto-tagging <https://github.com/MTG/essentia/blob/master/src/examples/python/tutorial_tensorflow_real-time_auto-tagging.ipynb>`_
-* `Music classification <https://github.com/MTG/essentia/blob/master/src/examples/python/tutorial_tensorflow_real-time_simultaneous_classifiers.ipynb>`_
