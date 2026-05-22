@@ -6,7 +6,7 @@ from __future__ import print_function
 import os
 import sys
 import platform
-
+import subprocess 
 
 def get_git_version():
     """ try grab the current version number from git"""
@@ -192,7 +192,10 @@ def configure(ctx):
         if ctx.options.ARCH == 'FAT':
             ctx.env.CXXFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
             ctx.env.LINKFLAGS += ['-arch', 'i386', '-arch', 'x86_64']
-            ctx.env.LDFLAGS = ['-arch', 'i386', '-arch', 'x86_64']
+            ctx.env.LDFLAGS = ['-arch', 'i386', '-arch', 'x86_64']        
+            
+        # Need this for clang
+        ctx.env.CXXFLAGS += ['-Wno-undefined-var-template']
 
         if ctx.options.ARCH == 'arm64':
             ctx.env.CFLAGS += ['-arch', 'arm64']
@@ -257,7 +260,8 @@ def configure(ctx):
         ctx.env.LINKFLAGS += ['-Wl,-soname,libessentia.so', '-latomic']
 
     if ctx.options.CROSS_COMPILE_IOS:
-        print ("→ Cross-compiling for iOS (ARMv7 and ARM64)")
+        developer_dir = subprocess.check_output("xcode-select -p", shell=True).strip()
+        print ("→ Cross-compiling for iOS (ARMv7 and ARM64) with sysroot=", developer_dir)
         ctx.env.CXXFLAGS += ['-arch', 'armv7']
         ctx.env.LINKFLAGS += ['-arch', 'armv7']
         ctx.env.LDFLAGS += ['-arch', 'armv7']
@@ -267,11 +271,12 @@ def configure(ctx):
 
         ctx.env.CXXFLAGS += ['-stdlib=libc++']
         ctx.env.CXXFLAGS += ['-miphoneos-version-min=5.0']
-        ctx.env.CXXFLAGS += ['-isysroot', '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk']
+        ctx.env.CXXFLAGS += ['-isysroot', os.path.join(developer_dir, 'Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk')]
         ctx.env.CXXFLAGS += ['-fembed-bitcode']
 
     if ctx.options.CROSS_COMPILE_IOS_SIM:
-        print ("→ Cross-compiling for iOS Simulator (i386)")
+        developer_dir = subprocess.check_output("xcode-select -p", shell=True).strip()
+        print ("→ Cross-compiling for iOS Simulator (i386) with sysroot=", developer_dir)
         ctx.env.CXXFLAGS += ['-arch', 'i386']
         ctx.env.LINKFLAGS += ['-arch', 'i386']
         ctx.env.LDFLAGS += ['-arch', 'i386']
@@ -281,7 +286,7 @@ def configure(ctx):
 
         ctx.env.CXXFLAGS += ['-stdlib=libc++']
         ctx.env.CXXFLAGS += ['-miphoneos-version-min=5.0']
-        ctx.env.CXXFLAGS += ['-isysroot', '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk']
+        ctx.env.CXXFLAGS += ['-isysroot', os.path.join(developer_dir, 'Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk')]
 
     # use manually prebuilt dependencies in the case of static examples or mingw cross-build
     if ctx.options.CROSS_COMPILE_MINGW32:
