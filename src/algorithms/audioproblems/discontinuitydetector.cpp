@@ -45,7 +45,7 @@ void DiscontinuityDetector::configure() {
   _medianFilter->configure(INHERIT("kernelSize"));
   _LPC->configure(INHERIT("order"));
   _windowing->configure("size", _frameSize, "zeroPhase", false, "type",
-                        "triangular");
+                        "hamming");
 
   if (_frameSize <= _order)
     throw(
@@ -95,7 +95,7 @@ void DiscontinuityDetector::compute() {
   if (inputSize != _frameSize) {
     _frameSize = inputSize;
     _windowing->configure("size", _frameSize, "zeroPhase", false, "type",
-                          "triangular");
+                          "hamming");
   }
 
   // the analysisSize is set so the the same region is never processed twice on
