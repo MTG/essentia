@@ -52,6 +52,10 @@ void PitchContourSegmentation::reSegment() {
   // find sequences of consecutive non-zero pitch values
   startC.clear();
   endC.clear();
+
+  if (pitch.size()==0){
+     throw(EssentiaException("PitchContourSegmentation: Empty pitch values"));   
+  }
   
   if (pitch[0] > 0) {
     startC.push_back(0);
