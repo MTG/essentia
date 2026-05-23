@@ -36,6 +36,7 @@ void TensorToVectorReal::configure() {
   _channels = 0;
   _timeStamps = 0;
   _featsSize = 0;
+  _warned = false;
 }
 
 
@@ -44,6 +45,7 @@ void TensorToVectorReal::reset() {
   _channels = 0;
   _timeStamps = 0;
   _featsSize = 0;
+  _warned = false;
 }
 
 
@@ -65,6 +67,11 @@ AlgorithmStatus TensorToVectorReal::process() {
     _channels = tensor.dimension(1);
     _timeStamps = tensor.dimension(2);
     _featsSize = tensor.dimension(3);
+
+    if (_channels != 1 && !_warned) {
+        E_WARNING("TensorToVectorReal: The channel axis (dimension 1) of the input tensor has size larger than 1, but the output of this algorithm is 2D. The batch, channel, and time axes (dimensions 0, 1, 2) will be flattened to the first dimension of the output matrix.");
+        _warned = true;
+    }
 
     _frame.setAcquireSize(_timeStamps * _channels * _batchSize);
     _frame.setReleaseSize(_timeStamps * _channels *_batchSize);
