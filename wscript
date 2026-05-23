@@ -222,16 +222,16 @@ def configure(ctx):
 
         # make pkgconfig find 3rdparty libraries in packaging/win32_3rdparty
         # libs_3rdparty = ['yaml-0.1.5', 'fftw-3.3.3', 'libav-0.8.9', 'libsamplerate-0.1.8', 'chromaprint-1.4.2']
-        # libs_paths = [';packaging\win32_3rdparty\\' + lib + '\lib\pkgconfig' for lib in libs_3rdparty]
+        # libs_paths = [os.path.join(';packaging', 'win32_3rdparty' , lib,  'lib', 'pkgconfig') for lib in libs_3rdparty]
         # os.environ["PKG_CONFIG_PATH"] = ';'.join(libs_paths)
 
-        os.environ["PKG_CONFIG_PATH"] = tdm_root + '\lib\pkgconfig'
+        os.environ["PKG_CONFIG_PATH"] = os.path.join(tdm_root, 'lib', 'pkgconfig')
 
         # TODO why this code does not work?
         # force the use of mingw gcc compiler instead of msvc
         #ctx.env.CC = 'gcc'
         #ctx.env.CXX = 'g++'
-        
+
         import distutils.dir_util
 
         print("copying pkgconfig ...")
