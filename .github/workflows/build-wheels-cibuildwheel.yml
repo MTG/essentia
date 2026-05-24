@@ -7,9 +7,14 @@ jobs:
     name: ${{ matrix.os }} / ${{ matrix.config }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        os: [ubuntu-24.04, macos-15-intel, macos-15]
+        os: [ubuntu-24.04, macos-15-intel, macos-15, windows-latest]
         config: [cibuildwheel, cibuildwheel-tensorflow]
+        exclude:
+          # TensorFlow Windows support is not yet implemented.
+          - os: windows-latest
+            config: cibuildwheel-tensorflow
 
     steps:
       - uses: actions/checkout@v6
@@ -19,6 +24,12 @@ jobs:
       - name: Fetch release tags from GitHub
         # Workaround for https://github.com/actions/checkout/issues/290
         run: git fetch --tags --force
+
+      - name: Set up MSVC environment (Windows only)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.1

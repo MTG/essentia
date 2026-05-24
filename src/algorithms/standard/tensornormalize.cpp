@@ -93,7 +93,11 @@ void TensorNormalize::compute() {
         array<Eigen::Index, TENSORRANK> broadcastShape = input.dimensions();
         broadcastShape[_axis] = 1;
 
-        output = (input - means.broadcast(broadcastShape)) / stds.broadcast(broadcastShape);
+        // Materialize broadcasts before combining to avoid deeply-nested
+        // Eigen expression templates that cause extremely long MSVC compile times.
+        Tensor<Real> bcastMeans = means.broadcast(broadcastShape);
+        Tensor<Real> bcastStds  = stds.broadcast(broadcastShape);
+        output = (input - bcastMeans) / bcastStds;
       }
       break;
     }
@@ -135,7 +139,11 @@ void TensorNormalize::compute() {
           E_INFO("TensorNormalize: Received tensor with constant value.");
         }
 
-        output = (input - minima.broadcast(broadcastShape)) / diff.broadcast(broadcastShape);
+        // Materialize broadcasts before combining to avoid deeply-nested
+        // Eigen expression templates that cause extremely long MSVC compile times.
+        Tensor<Real> bcastMinima = minima.broadcast(broadcastShape);
+        Tensor<Real> bcastDiff   = diff.broadcast(broadcastShape);
+        output = (input - bcastMinima) / bcastDiff;
       }
       break;
     }

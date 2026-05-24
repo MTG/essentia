@@ -3,7 +3,7 @@
 
 from __future__ import print_function
 
-import distutils.sysconfig
+import sysconfig
 import os
 
 
@@ -39,7 +39,7 @@ def build(ctx):
     print('→ building from ' + ctx.path.abspath())
 
     # gets the path from the active virtualenv
-    PYLIB = distutils.sysconfig.get_python_lib()
+    PYLIB = sysconfig.get_path('platlib')
 
     NUMPY_INCPATH = [ # importable numpy path
                       __import__('numpy').get_include(),

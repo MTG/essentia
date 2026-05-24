@@ -29,11 +29,11 @@ class TestLarm(TestCase):
 
     def testZero(self):
         input = zeros(44100)
-        self.assertEquals(Larm()(input), -100)
+        self.assertEqual(Larm()(input), -100)
 
     def testZerodB(self):
         input = ones(44100)
-        self.assertEquals(Larm(attackTime=0,releaseTime=0)(input), 0.0)
+        self.assertEqual(Larm(attackTime=0,releaseTime=0)(input), 0.0)
 
     def testOneElement(self):
         input = [1]
