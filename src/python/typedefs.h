@@ -37,7 +37,7 @@ enum Edt {
   REAL,
   STRING,
   INTEGER,
-  BOOL,
+  EDT_BOOL,
   STEREOSAMPLE,
   VECTOR_REAL,
   VECTOR_STRING,
@@ -63,7 +63,7 @@ inline Edt typeInfoToEdt(const std::type_info& tp) {
   if (essentia::sameType(tp, typeid(essentia::Real))) return REAL;
   if (essentia::sameType(tp, typeid(std::string))) return STRING;
   if (essentia::sameType(tp, typeid(int))) return INTEGER;
-  if (essentia::sameType(tp, typeid(bool))) return BOOL;
+  if (essentia::sameType(tp, typeid(bool))) return EDT_BOOL;
   if (essentia::sameType(tp, typeid(essentia::StereoSample))) return STEREOSAMPLE;
   if (essentia::sameType(tp, typeid(std::vector<essentia::Real>))) return VECTOR_REAL;
   if (essentia::sameType(tp, typeid(std::vector<std::string>))) return VECTOR_STRING;
@@ -87,7 +87,7 @@ inline std::string edtToString(Edt tp) {
     case REAL: return "REAL";
     case STRING: return "STRING";
     case INTEGER: return "INTEGER";
-    case BOOL: return "BOOL";
+    case EDT_BOOL: return "BOOL";
     case STEREOSAMPLE: return "STEREOSAMPLE";
     case VECTOR_REAL: return "VECTOR_REAL";
     case VECTOR_STRING: return "VECTOR_STRING";
@@ -112,7 +112,7 @@ inline Edt stringToEdt(const std::string& tpName) {
   if (tpName == "REAL") return REAL;
   if (tpName == "STRING") return STRING;
   if (tpName == "INTEGER") return INTEGER;
-  if (tpName == "BOOL") return BOOL;
+  if (tpName == "BOOL") return EDT_BOOL;
   if (tpName == "STEREOSAMPLE") return STEREOSAMPLE;
   if (tpName == "VECTOR_REAL") return VECTOR_REAL;
   if (tpName == "VECTOR_STRING") return VECTOR_STRING;
@@ -137,7 +137,7 @@ inline Edt paramTypeToEdt(const essentia::Parameter::ParamType& p) {
     case essentia::Parameter::UNDEFINED: return UNDEFINED;
     case essentia::Parameter::STRING: return STRING;
     case essentia::Parameter::REAL: return REAL;
-    case essentia::Parameter::BOOL: return BOOL;
+    case essentia::Parameter::BOOL: return EDT_BOOL;
     case essentia::Parameter::INT: return INTEGER;
     case essentia::Parameter::STEREOSAMPLE: return STEREOSAMPLE;
     case essentia::Parameter::MATRIX_REAL: return MATRIX_REAL;
@@ -160,7 +160,7 @@ inline void* allocate(Edt tp) {
   switch (tp) {
     case REAL: return new essentia::Real;
     case STRING: return new std::string;
-    case BOOL: return new bool;
+    case EDT_BOOL: return new bool;
     case INTEGER: return new int;
     case STEREOSAMPLE: return new essentia::StereoSample;
     case VECTOR_REAL: return new essentia::RogueVector<essentia::Real>;
@@ -186,7 +186,7 @@ inline void dealloc(void* ptr, Edt tp) {
   switch (tp) {
     case REAL: delete (essentia::Real*)ptr; break;
     case STRING: delete (std::string*)ptr; break;
-    case BOOL: delete (bool*)ptr; break;
+    case EDT_BOOL: delete (bool*)ptr; break;
     case INTEGER: delete (int*)ptr; break;
     case STEREOSAMPLE: delete (essentia::StereoSample*)ptr; break;
     case VECTOR_REAL: delete (essentia::RogueVector<essentia::Real>*)ptr; break;

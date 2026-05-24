@@ -30,7 +30,7 @@ PyObject* TensorReal::toPythonCopy(const essentia::Tensor<essentia::Real>* tenso
   PyObject* result;
 
   int nd = tensor->rank();
-  npy_intp dims[nd];
+  npy_intp dims[TENSORRANK];
 
   for (int i = 0; i < nd; i++)
     dims[i] = tensor->dimension(i);

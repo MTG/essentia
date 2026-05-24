@@ -84,18 +84,22 @@ void RogueVector<T>::setSize(size_t size) {
   this->_M_impl._M_end_of_storage = this->_M_impl._M_start + size;
 }
 
-// Windows implementation
+// Windows / MSVC implementation.
+// VS 2019+ restructured std::vector internals so _Myfirst()/_Mylast()/_Myend()
+// are no longer accessible from derived classes.  Use the same raw-pointer
+// approach as the Clang branch: MSVC's std::vector layout is identical to
+// libc++ (three consecutive T* pointers: data, end-of-size, end-of-capacity)
+// with EBO collapsing the empty std::allocator, so offset 0 is _Myfirst.
 #elif defined(OS_WIN32)
 
 template <typename T>
-void RogueVector<T>::setData(T* data) {
-  this->_Myfirst() = data;
-}
+void RogueVector<T>::setData(T* data) { *reinterpret_cast<T**>(this) = data; }
 
 template <typename T>
 void RogueVector<T>::setSize(size_t size) {
-  this->_Mylast() = this->_Myfirst() + size;
-  this->_Myend() = this->_Myfirst() + size;
+  T** start = reinterpret_cast<T**>(this);
+  *(start+1) = *start + size;
+  *(start+2) = *start + size;
 }
 
 #endif

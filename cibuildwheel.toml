@@ -95,15 +95,16 @@ skip = ["*t-*"]
 # PKG_CONFIG_PATH (semicolon-separated on Windows):
 #   - C:/essentia-install  : libessentia installed by before-all
 #   - vcpkg installed dir  : fftw3, ffmpeg, taglib, chromaprint, etc.
-environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, PKG_CONFIG_PATH="C:/essentia-install/lib/pkgconfig;$VCPKG_INSTALLATION_ROOT/installed/x64-windows-static-md/lib/pkgconfig" }
+environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, PYTHONUTF8=1, PKG_CONFIG_PATH="C:/essentia-install/lib/pkgconfig;$VCPKG_INSTALLATION_ROOT/installed/x64-windows-static-md/lib/pkgconfig" }
 
 before-all = [
   # pkg-config binary needed by waf to discover C++ library paths.
   "choco install pkgconfiglite --yes --no-progress",
-  # Install C++ dependencies. Community triplet x64-windows-static-md
-  # builds static .lib files linked against the shared MSVC CRT (/MD),
-  # matching the runtime used by official Python Windows installers.
-  "vcpkg install eigen3 fftw3[core,float] ffmpeg[avcodec,avformat,avutil,swresample] libsamplerate libyaml taglib chromaprint --triplet x64-windows-static-md",
+  # Install C++ dependencies. Triplet x64-windows-static-md builds static
+  # .lib files linked against the shared MSVC CRT (/MD), matching the
+  # runtime used by official Python Windows installers.
+  # --vcpkg-root avoids conflict with the VS-bundled vcpkg at VCPKG_ROOT.
+  "vcpkg install eigen3 fftw3 \"ffmpeg[avcodec,avformat,swresample]\" libsamplerate libyaml taglib chromaprint --triplet x64-windows-static-md --vcpkg-root %VCPKG_INSTALLATION_ROOT%",
   # delvewheel bundles any remaining non-system DLLs into the wheel.
   "pip install delvewheel",
   # Build and install the essentia C++ static library to a fixed prefix

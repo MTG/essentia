@@ -63,7 +63,7 @@ void VectorRealToTensor::configure() {
   _timeStamps = shape[2];
   _frame.setAcquireSize(_timeStamps);
 
-  if ((shape[0] == -1) or (shape[0] == 0)) {
+  if ((shape[0] == -1) || (shape[0] == 0)) {
     _accumulate = true;
   }
 
@@ -218,7 +218,7 @@ AlgorithmStatus VectorRealToTensor::process() {
     
     // or if we have reached the end of the stream with lastBatchModel = "push"
     // and there are not enough patches to fill a regular batch.   
-    } else if (shouldStop() and _acc.size() < _shape[0]) {
+    } else if (shouldStop() && _acc.size() < _shape[0]) {
       reshapeBatch = true;
     }
 

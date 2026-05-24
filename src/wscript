@@ -139,6 +139,11 @@ def configure(ctx):
        print("→ Building only Essentia's python bindings (libessentia should be pre-installed)")
        ctx.check_cfg(package='essentia', uselib_store='ESSENTIA',
                       args=check_cfg_args, mandatory=True)
+       if sys.platform == 'win32':
+           # Remove the math library (-lm) which is in the Windows CRT; m.lib
+           # does not exist on Windows and would cause a linker error.
+           for key in [k for k in ctx.env.keys() if k.startswith('LIB_')]:
+               ctx.env[key] = [lib for lib in ctx.env[key] if lib != 'm']
        ctx.env.USE_LIBS = 'ESSENTIA'
        ctx.recurse('python')
        return
@@ -381,6 +386,9 @@ def configure(ctx):
     if ctx.env.BUILD_STATIC:
         # For the static library, find all -l flags we'll need
         lflags = [l for lib in libs for l in ctx.env["LIB_" + lib]]
+        if sys.platform == 'win32':
+            # Remove -lm: math functions are in the Windows CRT; m.lib does not exist.
+            lflags = [l for l in lflags if l != 'm']
         lflags = ' '.join(['-l%s' % lib for lib in lflags])
         lpaths = [l for lib in libs for l in ctx.env["LIBPATH_" + lib]]
         lpaths = ' '.join(['-L%s' % lib for lib in set(lpaths)])
