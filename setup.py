@@ -23,14 +23,16 @@ class EssentiaInstall(install_lib):
         global library
         install_dir = os.path.join(self.install_dir, library.split(os.sep)[-1])
         res = shutil.move(library, install_dir)
-        os.system("ls -l %s" % self.install_dir)
+        print("Installed files:", os.listdir(self.install_dir))
         return [install_dir]
 
 
 class EssentiaBuildExtension(build_ext):
     def run(self):
         global library
-        os.system('rm -rf tmp; mkdir tmp')
+        if os.path.exists('tmp'):
+            shutil.rmtree('tmp')
+        os.makedirs('tmp')
 
         # Ugly hack using an enviroment variable... There's no way to pass a
         # custom flag to python setup.py bdist_wheel
@@ -94,7 +96,7 @@ classifiers = [
     'Topic :: Multimedia :: Sound/Audio :: Sound Synthesis',
     'Operating System :: POSIX',
     'Operating System :: MacOS :: MacOS X',
-    #'Operating System :: Microsoft :: Windows',
+    'Operating System :: Microsoft :: Windows',
     'Programming Language :: C++',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2',
