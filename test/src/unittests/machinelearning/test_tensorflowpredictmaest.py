@@ -38,8 +38,16 @@ class TestTensorFlowPredictMAEST(TestCase):
             testdata.models_dir, "maest", "discogs-maest-10s-pw-1.pb"
         )
 
-        self.model30s = TensorflowPredictMAEST(graphFilename=self.graphFilename30s)
-        self.model10s = TensorflowPredictMAEST(graphFilename=self.graphFilename10s)
+        self.model30s = TensorflowPredictMAEST(
+            graphFilename=self.graphFilename30s,
+            input="serving_default_melspectrogram",
+            output="StatefulPartitionedCall:0",
+        )
+        self.model10s = TensorflowPredictMAEST(
+            graphFilename=self.graphFilename10s,
+            input="serving_default_melspectrogram",
+            output="StatefulPartitionedCall:0",
+        )
 
     @classmethod
     def tearDownClass(self):

@@ -22,7 +22,7 @@ LIBYAML_VERSION=yaml-0.1.5
 CHROMAPRINT_VERSION=1.5.1
 QT_SOURCE_URL=https://download.qt.io/archive/qt/4.8/4.8.4/qt-everywhere-opensource-src-4.8.4.tar.gz
 GAIA_VERSION=2.4.6-86-ged433ed
-TENSORFLOW_VERSION=2.5.0
+TENSORFLOW_VERSION=2.17.0
 
 FFMPEG_AUDIO_FLAGS="
     --disable-programs
@@ -272,6 +272,8 @@ TENSORFLOW_FLAGS="
     --config=noaws
     --config=nohdfs
     --config=nonccl
+    --local_ram_resources=HOST_RAM*.6
+    --jobs=$(nproc)
 "
 
 # The only known alternative to the interactive TensorFlow configuration is
@@ -280,7 +282,7 @@ TENSORFLOW_FLAGS="
 #
 # Set the required TensorFlow build env variables with CUDA support if they
 # were not cofigured yet:
-export PYTHON_BIN_PATH="${PYTHON_BIN_PATH:-python3}"
+export PYTHON_BIN_PATH="${PYTHON_BIN_PATH:-$(which python3)}"
 export USE_DEFAULT_PYTHON_LIB_PATH="${USE_DEFAULT_PYTHON_LIB_PATH:-1}"
 export BAZEL_LINKLIBS="${BAZEL_LINKLIBS:--l%:libstdc++.a}"
 
@@ -289,13 +291,14 @@ export TF_NEED_GCP="${TF_NEED_GCP:-0}"
 export TF_NEED_HDFS="${TF_NEED_HDFS:-0}"
 export TF_ENABLE_XLA="${TF_ENABLE_XLA:-0}"
 export TF_NEED_OPENCL="${TF_NEED_OPENCL:-0}"
+export TF_NEED_ROCM=0
 
-# TensorFlow CUDA versions intended for TensorFlow 2.5
+# TensorFlow CUDA versions intended for TensorFlow 2.17.0
 # For future updates check the GPU compatibility chart:
 # https://www.tensorflow.org/install/source#gpu
 export TF_NEED_CUDA="${TF_NEED_CUDA:-1}"
-export TF_CUDA_VERSION="${TF_CUDA_VERSION:-11.2}"
-export TF_CUDNN_VERSION="${TF_CUDNN_VERSION:-8.1}"
+export TF_CUDA_VERSION="${TF_CUDA_VERSION:-12}"
+export TF_CUDNN_VERSION="${TF_CUDNN_VERSION:-9}"
 export CUDA_TOOLKIT_PATH="${CUDA_TOOLKIT_PATH:-/usr/local/cuda}"
 export CUDNN_INSTALL_PATH="${CUDNN_INSTALL_PATH:-/usr/local/cuda}"
 
@@ -304,8 +307,11 @@ export CUDNN_INSTALL_PATH="${CUDNN_INSTALL_PATH:-/usr/local/cuda}"
 # Supporting more versions increases the library size, so
 # for the moment it is set to a conservative number that
 # covers some of the most popular dee'p learning GPUs:
-# 3.5: Geforce GT XXX
-# 5.2: Geforce GTX TITAN X
 # 7.5: Geforce RTX 2080 (Ti)
+# 8.0: Geforce RTX 3090 - 3080 (Ti)
 # 8.6: Geforce RTX 30XX
-export TF_CUDA_COMPUTE_CAPABILITIES="${TF_CUDA_COMPUTE_CAPABILITIES:-3.5,5.2,7.5,8.6}"
+# 8.9: Geforce RTX 4080
+export TF_CUDA_COMPUTE_CAPABILITIES="${TF_CUDA_COMPUTE_CAPABILITIES:-7.5,8.0,8.6,8.9}"
+
+# Silence interactive configure questions
+export TF_SET_ANDROID_WORKSPACE=0
