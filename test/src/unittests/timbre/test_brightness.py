@@ -20,6 +20,8 @@
 from essentia_test import *
 from essentia.standard import Brightness
 
+from .example_sounds_data import example_sounds_data
+
 class TestBrightness(TestCase):
 
     def setUp(self):
@@ -27,14 +29,12 @@ class TestBrightness(TestCase):
 
     def testFiles(self):
 
-        for filename, expected_brightness in [
-            ('recorded/musicbox.wav', 50.0)
-        ]:
-            audio = MonoLoader(filename = join(testdata.audio_dir, 'recorded/musicbox.wav'),
+        for example_sound in example_sounds_data:
+            expected_brightness = example_sound["brightness"]
+            audio = MonoLoader(filename = join(testdata.audio_dir, example_sound["path"]),
                             sampleRate = 44100)()
             brightness = self.brightness(audio)
             self.assert_(brightness == expected_brightness)
-        
 
 suite = allTests(TestBrightness)
 
