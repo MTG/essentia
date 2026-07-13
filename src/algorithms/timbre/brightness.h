@@ -34,6 +34,7 @@ class Brightness : public Algorithm {
 
  public:
   Brightness() {
+    // TODO: proper documentation
     declareInput(_signal, "signal", "the input audio signal");
     declareOutput(_brightness, "brightness", "the brightness of the input signal");
   }
@@ -42,6 +43,10 @@ class Brightness : public Algorithm {
   }
 
   void declareParameters() {
+    declareParameter("thresholdDB", "threshold in dB", "(-inf,inf)", 0.);
+    declareParameter("ratioCrossover", "ratio crossover frequency", "(0,inf)", 2000.);
+    declareParameter("centroidCrossover", "centroid crossover frequency", "(0,inf)", 100.);
+    declareParameter("lowPassFreq", "low pass frequency", "(0,inf)", 20.);
   }
 
   void configure();

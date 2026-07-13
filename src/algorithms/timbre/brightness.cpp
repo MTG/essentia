@@ -34,6 +34,13 @@ void Brightness::configure() {
 void Brightness::compute() {
 
   const vector<Real>& signal = _signal.get();
+  
+  const Real lowPassFreq = parameter("lowPassFreq").toReal();
+  const Real thresholdDB = parameter("thresholdDB").toReal();
+  const Real ratioCrossover = parameter("ratioCrossover").toReal();
+  const Real centroidCrossover = parameter("centroidCrossover").toReal();
+
+
   Real& brightness = _brightness.get();
   brightness = 50.0;
 }
