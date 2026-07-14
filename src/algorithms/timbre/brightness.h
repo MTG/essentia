@@ -43,10 +43,12 @@ class Brightness : public Algorithm {
   }
 
   void declareParameters() {
-    declareParameter("thresholdDB", "threshold in dB", "(-inf,inf)", 0.);
-    declareParameter("ratioCrossover", "ratio crossover frequency", "(0,inf)", 2000.);
-    declareParameter("centroidCrossover", "centroid crossover frequency", "(0,inf)", 100.);
-    declareParameter("lowPassFreq", "low pass frequency", "(0,inf)", 20.);
+    declareParameter("energyThreshold", "threshold below which to ignore the energy in a time window", "[0,inf)", 0.);
+    declareParameter("ratioCrossover", "crossover frequency for calculating the HF energy ratio", "(0,inf)", 2000.);
+    declareParameter("centroidCrossover", "highpass frequency for calculating the spectral centroid", "(0,inf)", 100.);
+    declareParameter("hopSize", "step size for calculating spectrogram", "[0,inf)", 1024);
+    declareParameter("windowSize", "block size (fft length) for calculating spectrogram", "[0,inf)", 2048);
+    declareParameter("minFreq", "frequency for high-pass filtering audio prior to all analysis", "(0,inf)", 20.);
   }
 
   void configure();

@@ -25,7 +25,13 @@ using namespace standard;
 
 const char* Brightness::name = "Brightness";
 const char* Brightness::category = "Timbre";
-const char* Brightness::description = DOC("TODO");
+const char* Brightness::description = DOC("This algorithm computes the brightness of the analyzed audio in a scale from [0-100]. A bright sound is one that is clear/vibrant and/or contains significant high-pitched elements.\n"
+"\n"
+"References:\n"
+"  [1] A. Pearce, S. Safavi, T. Brookes, R. Mason, W. Wang, and M. Plumbley, \"AudioCommons Timbral Models,\" Github Repository, "
+"  https://github.com/AudioCommons/timbral_models.\n\n"
+"  [2] A. Pearce, S. Safavi, T. Brookes, R. Mason, W. Wang, and M. Plumbley, \"D5.8: Release of timbral characterisation "
+"  tools for semantically annotating non-musical content\", January 2019. https://audiocommons.github.io/materials/.\n");
 
 
 void Brightness::configure() {
@@ -35,10 +41,12 @@ void Brightness::compute() {
 
   const vector<Real>& signal = _signal.get();
   
-  const Real lowPassFreq = parameter("lowPassFreq").toReal();
-  const Real thresholdDB = parameter("thresholdDB").toReal();
+  const Real energyThreshold = parameter("energyThreshold").toReal();
   const Real ratioCrossover = parameter("ratioCrossover").toReal();
   const Real centroidCrossover = parameter("centroidCrossover").toReal();
+  const int hopSize = parameter("hopSize").toInt();
+  const int windowSize = parameter("windowSize").toInt();
+  const Real minFreq = parameter("minFreq").toReal();
 
 
   Real& brightness = _brightness.get();

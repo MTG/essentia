@@ -31,8 +31,7 @@ class TestBrightness(TestCase):
 
         for example_sound in example_sounds_data:
             expected_brightness = example_sound["brightness"]
-            audio = MonoLoader(filename = join(testdata.audio_dir, example_sound["path"]),
-                            sampleRate = 44100)()
+            audio = MonoLoader(filename = join(testdata.audio_dir, example_sound["path"]), sampleRate = 44100)()
             brightness = self.brightness(audio)
             self.assert_(brightness == expected_brightness)
 
