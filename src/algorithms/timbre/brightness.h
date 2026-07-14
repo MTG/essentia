@@ -31,22 +31,44 @@ class Brightness : public Algorithm {
   Input<std::vector<Real> > _signal;
   Output<Real> _brightness;
 
+  Algorithm* _minFreqHighPass;
+  Algorithm* _centroidCrossoverHighPass;
+  Algorithm* _ratioCrossoverHighPass;
+  Algorithm* _spectrum;
+  Algorithm* _scaler;
+  Algorithm* _frameCutter;
+  Algorithm* _centroid;
+
+  void computeFrameSpectrumEnergies(const std::vector<Real>& signal, std::vector<Real>& energies, uint nFrames);
 
  public:
   Brightness() {
     // TODO: proper documentation
     declareInput(_signal, "signal", "the input audio signal");
     declareOutput(_brightness, "brightness", "the brightness of the input signal");
+
+    _minFreqHighPass = AlgorithmFactory::create("HighPass");
+    _centroidCrossoverHighPass = AlgorithmFactory::create("HighPass");
+    _ratioCrossoverHighPass = AlgorithmFactory::create("HighPass");
+    _scaler = AlgorithmFactory::create("Scale");
+    _spectrum = AlgorithmFactory::create("Spectrum");
+    _frameCutter = AlgorithmFactory::create("FrameCutter");
+    _centroid = AlgorithmFactory::create("Centroid");
   }
 
   ~Brightness() {
+    delete _minFreqHighPass;
+    delete _centroidCrossoverHighPass;
+    delete _ratioCrossoverHighPass;
+    delete _scaler;
+    delete _spectrum;
+    delete _frameCutter;
+    delete _centroid;
   }
 
   void declareParameters() {
-    declareParameter("energyThreshold", "threshold below which to ignore the energy in a time window", "[0,inf)", 0.);
     declareParameter("ratioCrossover", "crossover frequency for calculating the HF energy ratio", "(0,inf)", 2000.);
     declareParameter("centroidCrossover", "highpass frequency for calculating the spectral centroid", "(0,inf)", 100.);
-    declareParameter("hopSize", "step size for calculating spectrogram", "[0,inf)", 1024);
     declareParameter("windowSize", "block size (fft length) for calculating spectrogram", "[0,inf)", 2048);
     declareParameter("minFreq", "frequency for high-pass filtering audio prior to all analysis", "(0,inf)", 20.);
   }
