@@ -34,25 +34,26 @@ class Brightness : public Algorithm {
   Algorithm* _minFreqHighPass;
   Algorithm* _centroidCrossoverHighPass;
   Algorithm* _ratioCrossoverHighPass;
-  Algorithm* _spectrum;
-  Algorithm* _scaler;
+  Algorithm* _powerSpectrum;
   Algorithm* _frameCutter;
+  Algorithm* _windowing;
   Algorithm* _centroid;
+  
 
   void computeFrameSpectrumEnergies(const std::vector<Real>& signal, std::vector<Real>& energies, uint nFrames);
 
  public:
   Brightness() {
     // TODO: proper documentation
-    declareInput(_signal, "signal", "the input audio signal");
+    declareInput(_signal, "signal", "the input audio signal. a mono signal is expected");
     declareOutput(_brightness, "brightness", "the brightness of the input signal");
 
     _minFreqHighPass = AlgorithmFactory::create("HighPass");
     _centroidCrossoverHighPass = AlgorithmFactory::create("HighPass");
     _ratioCrossoverHighPass = AlgorithmFactory::create("HighPass");
-    _scaler = AlgorithmFactory::create("Scale");
-    _spectrum = AlgorithmFactory::create("Spectrum");
+    _powerSpectrum = AlgorithmFactory::create("PowerSpectrum");
     _frameCutter = AlgorithmFactory::create("FrameCutter");
+    _windowing = AlgorithmFactory::create("Windowing");
     _centroid = AlgorithmFactory::create("Centroid");
   }
 
@@ -60,9 +61,9 @@ class Brightness : public Algorithm {
     delete _minFreqHighPass;
     delete _centroidCrossoverHighPass;
     delete _ratioCrossoverHighPass;
-    delete _scaler;
-    delete _spectrum;
+    delete _powerSpectrum;
     delete _frameCutter;
+    delete _windowing;
     delete _centroid;
   }
 
@@ -71,6 +72,7 @@ class Brightness : public Algorithm {
     declareParameter("centroidCrossover", "highpass frequency for calculating the spectral centroid", "(0,inf)", 100.);
     declareParameter("windowSize", "block size (fft length) for calculating spectrogram", "[0,inf)", 2048);
     declareParameter("minFreq", "frequency for high-pass filtering audio prior to all analysis", "(0,inf)", 20.);
+    declareParameter("samplingRate", "sampling rate of the input signal", "(0,inf)", 44100);
   }
 
   void configure();
