@@ -38,9 +38,10 @@ class Brightness : public Algorithm {
   Algorithm* _frameCutter;
   Algorithm* _windowing;
   Algorithm* _centroid;
-  
 
-  void computeFrameSpectrumEnergies(const std::vector<Real>& signal, std::vector<Real>& energies, uint nFrames);
+  void computeFramesSpectrumPower(const std::vector<Real>& signal, std::vector<Real>& energies, uint nFrames);
+  void computeFramesCentroids(const std::vector<Real>& signal, std::vector<Real>& centroids, uint nFrames);
+  void applyFilterNPasses(Algorithm* filter, const std::vector<Real>& inputSignal, std::vector<Real>& outputSignal, int nPasses);
 
  public:
   Brightness() {

@@ -34,23 +34,19 @@ const char* Brightness::description = DOC("This algorithm computes the brightnes
 "  tools for semantically annotating non-musical content\", January 2019. https://audiocommons.github.io/materials/.\n");
 
 
-void Brightness::computeFrameSpectrumEnergies(const vector<Real>& signal, vector<Real>& energies, uint nFrames) {
-  // TODO: not sure if we are actually computing energies here, as we're simply summing.
-  // Should this be renamed?
+void Brightness::computeFramesSpectrumPower(const vector<Real>& signal, vector<Real>& framesSpectrumPower, uint nFrames) {
   vector<Real> frame;
   
-  energies.clear();
-  energies.reserve(nFrames);
+  framesSpectrumPower.clear();
+  framesSpectrumPower.reserve(nFrames);
 
-  _frameCutter->reset();
+  _frameCutter->reset();  // Needs to be reset before processing a new signal
   _frameCutter->input("signal").set(signal);
   _frameCutter->output("frame").set(frame);
 
   for (uint nFrame = 0; nFrame < nFrames; ++nFrame) {  
     _frameCutter->compute();
     
-    // NOTE: for some reason windowedFrame and spectrum need to be defined inside the loop? otherwise results change...
-    // Maybe windowing and power spectrum algorithms need reset() to be called?
     vector<Real> windowedFrame;
     vector<Real> spectrum;
 
@@ -62,124 +58,122 @@ void Brightness::computeFrameSpectrumEnergies(const vector<Real>& signal, vector
     _powerSpectrum->output("powerSpectrum").set(spectrum);
     _powerSpectrum->compute();
 
-    // Sum the spectrum to get the energy for this frame
-    Real energy = 0.0;
+    Real powerSum = 0.0;
     for (const auto& bin : spectrum) {
-      energy += bin;
+      powerSum += bin;
     }
-    energies.push_back(energy);
+    framesSpectrumPower.push_back(powerSum);
   }
+}
+
+void Brightness::applyFilterNPasses(Algorithm* filter, const vector<Real>& inputSignal, vector<Real>& outputSignal, int nPasses) {
+  vector<Real> currentInput = inputSignal;
+  vector<Real> currentOutput;
+  for (int i = 0; i < nPasses; ++i) {
+    filter->input("signal").set(currentInput);
+    filter->output("signal").set(currentOutput);
+    filter->compute();
+    currentInput = currentOutput;  // For the next pass
+  }
+  outputSignal = currentOutput;  // Final output after n passes
 }
 
 
 void Brightness::configure() {
-
-  _minFreqHighPass->configure("cutoffFrequency", parameter("minFreq").toReal());
-  _centroidCrossoverHighPass->configure("cutoffFrequency", parameter("centroidCrossover").toReal());
-  _ratioCrossoverHighPass->configure("cutoffFrequency", parameter("ratioCrossover").toReal());
-
+  const Real samplingRate = parameter("samplingRate").toReal();
   const int windowSize = parameter("windowSize").toInt();
   const int hopSize = windowSize / 4;  
+  const Real minFreq = parameter("minFreq").toReal();
+  const Real centroidCrossover = parameter("centroidCrossover").toReal();
+  const Real ratioCrossover = parameter("ratioCrossover").toReal();
+  
+  _minFreqHighPass->configure("cutoffFrequency", minFreq, "sampleRate", samplingRate);
+  _centroidCrossoverHighPass->configure("cutoffFrequency", centroidCrossover, "sampleRate", samplingRate);
+  _ratioCrossoverHighPass->configure("cutoffFrequency", ratioCrossover, "sampleRate", samplingRate);
   _windowing->configure("type", "hamming", "size", windowSize);
   _frameCutter->configure("frameSize", windowSize, "hopSize", hopSize, "startFromZero", true);
   _powerSpectrum->configure("size", windowSize);
-
-  const Real samplingRate = parameter("samplingRate").toReal();
   _centroid->configure("range", samplingRate / 2.0);
+}
+
+void Brightness::computeFramesCentroids(const vector<Real>& signal, vector<Real>& centroids, uint nFrames) {
+  vector<Real> frame;
   
+  centroids.clear();
+  centroids.reserve(nFrames);
+
+  _frameCutter->reset();  // Needs to be reset before processing a new signal
+  _frameCutter->input("signal").set(signal);
+  _frameCutter->output("frame").set(frame);
+
+  for (uint nFrame = 0; nFrame < nFrames; ++nFrame) {  
+    _frameCutter->compute();
+    
+    vector<Real> windowedFrame;
+    vector<Real> spectrum;
+
+    _windowing->input("frame").set(frame);
+    _windowing->output("frame").set(windowedFrame);
+    _windowing->compute();
+
+    _powerSpectrum->input("signal").set(windowedFrame);
+    _powerSpectrum->output("powerSpectrum").set(spectrum);
+    _powerSpectrum->compute();
+
+    Real centroid = 0.0;
+    _centroid->input("array").set(spectrum);
+    _centroid->output("centroid").set(centroid);
+    _centroid->compute();
+    
+    centroids.push_back(centroid);
+  }
 }
 
 void Brightness::compute() {
   const vector<Real>& signal = _signal.get();
   Real& brightness = _brightness.get();
 
-  // 0) Normalization step: we skip it as it does not seem to affect results in a significant way
+  // TODO: this algorithm expects a mono signal of the sampling rate specified in the parameters. Should we check for that and throw an exception if not?
 
-  // 1) Apply _minFreqHighPass to signal nPasses=3 times
-  // We apply it multiple times to better approximate original filter response
-  int nPasses = 3;
-  vector<Real> signalMinFreq = signal;
-  for (int i = 0; i < nPasses; ++i) {
-    _minFreqHighPass->input("signal").set(signalMinFreq);
-    _minFreqHighPass->output("signal").set(signalMinFreq);
-    _minFreqHighPass->compute();
-  }
+  // Loudness normalization step: the original algorithm has a loudness normalization step which we skip because, according to our evaluation,
+  // it does not lead to significant changes in the results
 
-  // 2) Apply _centroidCrossoverHighPass to signalMinFreq 3 times to get signalCentroid
-  vector<Real> signalCentroid = signalMinFreq;
-  for (int i = 0; i < nPasses; ++i) {
-    _centroidCrossoverHighPass->input("signal").set(signalCentroid);
-    _centroidCrossoverHighPass->output("signal").set(signalCentroid);
-    _centroidCrossoverHighPass->compute();
-  }
-
-  // 3) Apply _ratioCrossoverHighPass to signalMinFreq 3 times to get signalRatio
-  vector<Real> signalRatio = signalMinFreq;
-  for (int i = 0; i < nPasses; ++i) {
-    _ratioCrossoverHighPass->input("signal").set(signalRatio);
-    _ratioCrossoverHighPass->output("signal").set(signalRatio);
-    _ratioCrossoverHighPass->compute();
-  }
-
-    // print 10000 first samples of signalRatio separated by commas
-  /*for (uint i = 0; i < std::min(signalRatio.size(), (size_t)5000); ++i) {
-    std::cout << signalRatio[i] << ", ";
-  }
-  std::cout << std::endl;*/
+  // Create 3 filtered versions of the original signal using given cutoff frequencies
+  int nPasses = 3; // We apply it multiple times to better approximate original implementation's filter response
+  vector<Real> signalMinFreq;
+  vector<Real> signalCentroid;
+  vector<Real> signalRatio;
+  applyFilterNPasses(_minFreqHighPass, signal, signalMinFreq, nPasses);
+  applyFilterNPasses(_centroidCrossoverHighPass, signalMinFreq, signalCentroid, nPasses);
+  applyFilterNPasses(_ratioCrossoverHighPass, signalMinFreq, signalRatio, nPasses);
   
-  // 4) Noramlize the signals according to maximum absolute value for signalMinFreq
-  // 4.1) Get maximum absolute value of signalMinFreq. TODO: is there a better way to do this?
+  // Normalize the signals according to maximum absolute value for signalMinFreq
   Real maxAbs = 0.0;
-  for (const auto& sample : signalMinFreq) {
-    maxAbs = std::max(maxAbs, std::abs(sample));
-  }
-  if (maxAbs == 0.0) {
-    // Silence signal, set brightness to 0 and return
-    // TODO: should this be checked before filtering?
-    brightness = 0.0;
-    return;
-  }
+  for (const auto& sample : signalMinFreq) { maxAbs = std::max(maxAbs, std::abs(sample)); }
+  if (maxAbs == 0.0) { brightness = 0.0; return; }  // Avoid division by zero, and if the signal is completely silent, brightness is 0
+  for (auto& sample : signalMinFreq) { sample /= maxAbs; }
+  for (auto& sample : signalCentroid) { sample /= maxAbs; }
+  for (auto& sample : signalRatio) { sample /= maxAbs; }
 
-  // 4.2) Normalize signalMinFreq, signalCentroid, and signalRatio by maxAbs
-  for (auto& sample : signalMinFreq) {
-    sample /= maxAbs;
-  }
-  for (auto& sample : signalCentroid) {
-    sample /= maxAbs;
-  }
-  for (auto& sample : signalRatio) {
-    sample /= maxAbs;
-  }
-
-  // 5) Split the signal in frames and save spectrum energy for each
-  vector<Real> signalMinFreqEnergies;
-  vector<Real> signalCentroidEnergies;
-  vector<Real> signalRatioEnergies;
+  // Calculate frame-by-frame power spectrum sum for each of the 3 signals. Will be used later for estimating brightness
   uint nFrames = (signalMinFreq.size() - _frameCutter->parameter("frameSize").toInt()) / _frameCutter->parameter("hopSize").toInt() + 1;
+  vector<Real> signalMinFreqFramesSpectrumPower;
+  vector<Real> signalCentroidFramesSpectrumPower;
+  vector<Real> signalRatioFramesSpectrumPower;
+  computeFramesSpectrumPower(signalMinFreq, signalMinFreqFramesSpectrumPower, nFrames);
+  computeFramesSpectrumPower(signalCentroid, signalCentroidFramesSpectrumPower, nFrames);
+  computeFramesSpectrumPower(signalRatio, signalRatioFramesSpectrumPower, nFrames);
 
-  // 5.1) Get energies for signalMinFreq
-  computeFrameSpectrumEnergies(signalMinFreq, signalMinFreqEnergies, nFrames);
-
-  // 5.2) Get energies for signalCentroid
-  computeFrameSpectrumEnergies(signalCentroid, signalCentroidEnergies, nFrames);
-
-  // 5.3) Get energies for signalRatio
-  computeFrameSpectrumEnergies(signalRatio, signalRatioEnergies, nFrames);
-
-  // Print first 5 values of signalMinFreqEnergies, signalCentroidEnergies, and signalRatioEnergies for debugging
-  /*std::cout  << std::endl << "signalRatioEnergies: " << std::endl;
-  for (uint i = 0; i < std::min(nFrames, (uint)100); ++i) {
-    std::cout << signalRatioEnergies[i] << ", ";
-  }
-  std::cout << std::endl;*/
-
+  // Caculate frame-by-frame spectral centroids for the centroid-filtered signal. Will be used later for estimating brightness
+  vector<Real> signalCentroidCentroids;
+  computeFramesCentroids(signalCentroid, signalCentroidCentroids, nFrames);
   
-  // 6) Weighted average of the ratio values
+  // Compute R, weighted average of the ratio values
   Real sumRatios = 0.0;  // sum of ratios
   Real sumWeights = 0.0;  // sum of weights
   for (uint t = 0; t < nFrames; ++t) {
-    Real P_all = signalMinFreqEnergies[t];
-    Real P_ratio = signalRatioEnergies[t];
+    Real P_all = signalMinFreqFramesSpectrumPower[t];
+    Real P_ratio = signalRatioFramesSpectrumPower[t];
     if (P_all > 0.0) {
       Real ratio_t = P_ratio / P_all;
       sumRatios += ratio_t * P_all;
@@ -188,37 +182,11 @@ void Brightness::compute() {
   }
   Real R = (sumWeights > 0.0) ? sumRatios / sumWeights : 0.0;
 
-  // 7) Weighted average of the centroid values
-  // 7.1) Get the centroid for each frame of signalCentroid
-  vector<Real> signalCentroidCentroids;
-  vector<Real> frame;
-  signalCentroidCentroids.reserve(nFrames);
-  _frameCutter->reset();
-  _frameCutter->input("signal").set(signalCentroid);
-  _frameCutter->output("frame").set(frame);
-  for (uint nFrame = 0; nFrame < nFrames; ++nFrame) {
-    Real centroid = 0.0;
-    _frameCutter->compute();
-
-    _windowing->input("frame").set(frame);
-    _windowing->output("frame").set(frame);
-    _windowing->compute();
-
-    vector<Real> frameSpectrum;
-    _powerSpectrum->input("signal").set(frame);
-    _powerSpectrum->output("powerSpectrum").set(frameSpectrum);
-    _powerSpectrum->compute();
-
-    _centroid->input("array").set(frameSpectrum);
-    _centroid->output("centroid").set(centroid);
-    _centroid->compute();
-    signalCentroidCentroids.push_back(centroid);
-  }
-  // 7.2) Compute the weighted average of the centroid values
+  // Compute C, weighted average of the centroid values
   Real sumCentroids = 0.0;  // sum of centroids
   sumWeights = 0.0;  // sum of weights
   for (uint t = 0; t < nFrames; ++t) {
-    Real P_cent = signalCentroidEnergies[t];
+    Real P_cent = signalCentroidFramesSpectrumPower[t];
     if (P_cent > 0.0) {
       sumCentroids += signalCentroidCentroids[t] * P_cent;
       sumWeights += P_cent;
@@ -226,12 +194,10 @@ void Brightness::compute() {
   }
   Real C = (sumWeights > 0.0) ? sumCentroids / sumWeights : 0.0;
 
-  //std::cout << "log10R: " << log10(R) << ", log10CC: " << log10(C)<< std::endl;
-
-  // 8) Apply linear model to get brightness from R and C
+  // Apply linear model to get brightness from R and C
   brightness = 4.6131280180 * log10(R) + 17.3788893093 * log10(C) + 17.4347337506;
 
-  // 9) Clip signal to be in range [0, 100] and set output
+  // Clip signal to be in range [0, 100] and set output
   if (brightness < 0.0) {
     brightness = 0.0;
   } else if (brightness > 100.0) {
