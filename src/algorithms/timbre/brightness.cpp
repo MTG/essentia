@@ -34,6 +34,23 @@ const char* Brightness::description = DOC("This algorithm computes the brightnes
 "  tools for semantically annotating non-musical content\", January 2019. https://audiocommons.github.io/materials/.\n");
 
 
+void Brightness::configure() {
+  const Real samplingRate = parameter("samplingRate").toReal();
+  const int windowSize = parameter("windowSize").toInt();
+  const int hopSize = windowSize / 4;  
+  const Real minFreq = parameter("minFreq").toReal();
+  const Real centroidCrossover = parameter("centroidCrossover").toReal();
+  const Real ratioCrossover = parameter("ratioCrossover").toReal();
+  
+  _minFreqHighPass->configure("cutoffFrequency", minFreq, "sampleRate", samplingRate);
+  _centroidCrossoverHighPass->configure("cutoffFrequency", centroidCrossover, "sampleRate", samplingRate);
+  _ratioCrossoverHighPass->configure("cutoffFrequency", ratioCrossover, "sampleRate", samplingRate);
+  _windowing->configure("type", "hamming", "size", windowSize);
+  _frameCutter->configure("frameSize", windowSize, "hopSize", hopSize, "startFromZero", true);
+  _powerSpectrum->configure("size", windowSize);
+  _centroid->configure("range", samplingRate / 2.0);
+}
+
 void Brightness::computeFramesSpectrumPower(const vector<Real>& signal, vector<Real>& framesSpectrumPower, uint nFrames) {
   vector<Real> frame;
   
@@ -76,24 +93,6 @@ void Brightness::applyFilterNPasses(Algorithm* filter, const vector<Real>& input
     currentInput = currentOutput;  // For the next pass
   }
   outputSignal = currentOutput;  // Final output after n passes
-}
-
-
-void Brightness::configure() {
-  const Real samplingRate = parameter("samplingRate").toReal();
-  const int windowSize = parameter("windowSize").toInt();
-  const int hopSize = windowSize / 4;  
-  const Real minFreq = parameter("minFreq").toReal();
-  const Real centroidCrossover = parameter("centroidCrossover").toReal();
-  const Real ratioCrossover = parameter("ratioCrossover").toReal();
-  
-  _minFreqHighPass->configure("cutoffFrequency", minFreq, "sampleRate", samplingRate);
-  _centroidCrossoverHighPass->configure("cutoffFrequency", centroidCrossover, "sampleRate", samplingRate);
-  _ratioCrossoverHighPass->configure("cutoffFrequency", ratioCrossover, "sampleRate", samplingRate);
-  _windowing->configure("type", "hamming", "size", windowSize);
-  _frameCutter->configure("frameSize", windowSize, "hopSize", hopSize, "startFromZero", true);
-  _powerSpectrum->configure("size", windowSize);
-  _centroid->configure("range", samplingRate / 2.0);
 }
 
 void Brightness::computeFramesCentroids(const vector<Real>& signal, vector<Real>& centroids, uint nFrames) {
