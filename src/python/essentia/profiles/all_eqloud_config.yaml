@@ -1,0 +1,113 @@
+#### GENERAL ####
+
+# whether to print information while computing the descriptors
+verbose: True
+
+# output format ('xml' or 'yaml')
+outputFormat: yaml
+
+# this is the desired analysis sampleRate, not that of the file
+# if the file has a different sampleRate, it will be resampled
+# to have the same sampleRate as specified here.
+sampleRate: 44100
+
+# compute the audio file from start time to end time (in seconds)
+# end_time: 'end' means no time limit
+startTime: 0.0
+endTime: 600.0
+
+# list of extractors that will be called
+extractors: [ 'lowlevel',
+              'average_loudness',
+              'tonal',
+              'chords',
+              'onsetdetection',
+              'relativeioi',
+              'sfx',
+              'highlevel' ]
+
+# the desired window type to be used before computing the FFT.
+# this setting (as all the others) can be overriden in the specific section
+# for an extractor.
+windowType: blackmanharris62
+
+# in case you want to skip silent frames or not.
+# this setting (as all the others) can be overriden in the specific section
+# for an extractor.
+skipSilence: true
+
+# global preprocessing steps that will be applied for all algorithms. You can also
+# define this in a specific extractor to add more preprocessing steps.
+preprocessing: [ 'dckiller', 'normalize', 'eqloud' ]
+
+plots: false # creates 'audio.wav.html' folder 'plots' with PNG files
+
+plotsList:
+    lowlevel: [ spectral_centroid, spectral_mfcc ]
+    tonal: [ chords_strength ]
+
+segmentation:
+    doSegmentation: false
+    type: bic # { maxEnergy | bic } (bic = for Bayesian Information Criterion)
+    bicSettings: # only apply when type: bic
+        lowlevel: [ spectral_mfcc ]
+        cpw: 5
+        size1: 1000
+        inc1: 300
+        size2: 600
+        inc2: 50
+    minimumSegmentsLength: 10.0 # seconds
+    writeSegmentsAudioFile: false # create: original wav file + segments onsets
+    computeSegments: true # compute descriptors for all segments
+    thumbnailing: false # compute most relevant segment THIS REQUIRES GAIA library
+
+
+
+#### OPTIONS SPECIFIC TO EACH EXTRACTOR ####
+specific:
+
+    # options for the low-level features extractor
+    lowlevel:
+        frameSize: 2048
+        hopSize:   1024
+        #skipSilence: false
+        #preprocess: eqloud
+
+    # options for the average_loudness extractor
+    average_loudness:
+        #preprocessing: eqloud
+        frameSize: 88200
+        hopSize:   44100
+
+    # options for the onset detection extractor
+    onsetdetection:
+        frameSize:   1024
+        hopSize:      512
+        zeroPadding:    0
+        windowType:  hann
+
+    # options for the tempotap extractor
+    tempotap:
+        # whether or not to use onsets as periodicity function
+        useOnset: true
+        # whether or not to use energy bands as periodicity function
+        useBands: true
+        doplots:  false
+
+        # sizes of frames. Note that frameNumber*hopSize ~= about 6 seconds
+        frameNumber: 1024
+        hopSize:      256
+        frameSize:   1024
+        frameHop:    1024
+        windowType:  hann
+
+    # options for the tonal extractor (key, chords, tuning, etc...)
+    tonal:
+        frameSize:   4096
+        hopSize:     2048
+        zeroPadding:    0
+
+    # options for the SFX features extractor
+    sfx:
+        frameSize: 2048
+        hopSize:   1024

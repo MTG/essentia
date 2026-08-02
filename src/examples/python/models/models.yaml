@@ -1,0 +1,438 @@
+audio-event-recognition:
+  yamnet:
+    algo_name: TensorflowPredictVGGish
+    sample_rate: 16000
+    outputs:
+     - predictions
+     - embeddings
+    models:
+      - audioset-yamnet-1
+
+  fsd-sinet:
+    algo_name: TensorflowPredictFSDSINet
+    sample_rate: 22050
+    outputs:
+     - predictions
+     - embeddings
+    models:
+     - fsd-sinet-vgg41-tlpf-1
+     - fsd-sinet-vgg42-aps-1
+     - fsd-sinet-vgg42-tlpf_aps-1
+     - fsd-sinet-vgg42-tlpf-1
+
+feature-extractors:
+  musicnn:
+    algo_name: TensorflowPredictMusiCNN
+    sample_rate: 16000
+    outputs:
+     - embeddings
+    models:
+     - msd-musicnn-1
+
+  vggish:
+    algo_name: TensorflowPredictVGGish
+    sample_rate: 16000
+    outputs:
+     - embeddings
+    models:
+     - audioset-vggish-3
+
+  openl3:
+    algo-name: NULL
+    sample_rate: 48000
+    outputs:
+     - NULL
+    models:
+     - openl3-env-mel128-emb512-3
+     - openl3-env-mel128-emb6144-3
+     - openl3-env-mel256-emb512-3
+     - openl3-env-mel256-emb6144-3
+     - openl3-music-mel128-emb512-3
+     - openl3-music-mel128-emb6144-3
+     - openl3-music-mel256-emb512-3
+     - openl3-music-mel256-emb6144-3
+
+  discogs-effnet:
+    algo_name: TensorflowPredictEffnetDiscogs
+    sample_rate: 16000
+    outputs:
+     - embeddings
+    models:
+     - discogs-effnet-bs64-1
+     - discogs_artist_embeddings-effnet-bs64-1
+     - discogs_label_embeddings-effnet-bs64-1
+     - discogs_multi_embeddings-effnet-bs64-1
+     - discogs_release_embeddings-effnet-bs64-1
+     - discogs_track_embeddings-effnet-bs64-1
+
+  maest:
+    algo_name: TensorflowPredictMAEST
+    sample_rate: 16000
+    outputs:
+     - embeddings
+    models:
+     - discogs-maest-5s-pw-2
+     - discogs-maest-10s-dw-2
+     - discogs-maest-10s-fs-2
+     - discogs-maest-10s-pw-2
+     - discogs-maest-20s-pw-2
+     - discogs-maest-30s-pw-2
+     - discogs-maest-30s-pw-ts-2
+     - discogs-maest-30s-pw-519l-2
+
+pitch:
+  crepe:
+    algo_name: PitchCREPE
+    sample_rate: 16000
+    outputs:
+     - predictions
+    models:
+     - crepe-full-1
+     - crepe-large-1
+     - crepe-medium-1
+     - crepe-small-1
+     - crepe-tiny-1
+
+tempo:
+  tempocnn:
+    algo_name: TempoCNN
+    sample_rate: 11025
+    outputs:
+     - predictions
+    models:
+     - deepsquare-k16-3
+     - deeptemp-k4-3
+     - deeptemp-k16-3
+
+classification-heads:
+  approachability:
+    outputs:
+     - predictions
+    models:
+     - approachability_2c-discogs-effnet-1
+     - approachability_3c-discogs-effnet-1
+     - approachability_regression-discogs-effnet-1
+
+  engagement:
+    outputs:
+     - predictions
+    models:
+     - engagement_2c-discogs-effnet-1
+     - engagement_3c-discogs-effnet-1
+     - engagement_regression-discogs-effnet-1
+
+  danceability:
+    outputs:
+     - predictions
+    models:
+     - danceability-audioset-vggish-1
+     - danceability-audioset-yamnet-1
+     - danceability-discogs-effnet-1
+     - danceability-msd-musicnn-1
+     - danceability-openl3-music-mel128-emb512-1
+
+  gender:
+    outputs:
+     - predictions
+    models:
+     - gender-audioset-vggish-1
+     - gender-audioset-yamnet-1
+     - gender-discogs-effnet-1
+     - gender-msd-musicnn-1
+     - gender-openl3-music-mel128-emb512-1
+
+  genre_dortmund:
+    outputs:
+     - predictions
+    models:
+     - genre_dortmund-audioset-vggish-1
+     - genre_dortmund-audioset-yamnet-1
+     - genre_dortmund-discogs-effnet-1
+     - genre_dortmund-msd-musicnn-1
+     - genre_dortmund-openl3-music-mel128-emb512-1
+
+  genre_electronic:
+    outputs:
+     - predictions
+    models:
+     - genre_electronic-discogs-effnet-1
+
+  genre_rosamerica:
+    outputs:
+     - predictions
+    models:
+     - genre_rosamerica-audioset-vggish-1
+     - genre_rosamerica-audioset-yamnet-1
+     - genre_rosamerica-discogs-effnet-1
+     - genre_rosamerica-msd-musicnn-1
+     - genre_rosamerica-openl3-music-mel128-emb512-1
+
+  genre_tzanetakis:
+    outputs:
+     - predictions
+    models:
+     - genre_tzanetakis-audioset-vggish-1
+     - genre_tzanetakis-audioset-yamnet-1
+     - genre_tzanetakis-discogs-effnet-1
+     - genre_tzanetakis-msd-musicnn-1
+     - genre_tzanetakis-openl3-music-mel128-emb512-1
+
+  mood_acoustic:
+    outputs:
+     - predictions
+    models:
+     - mood_acoustic-audioset-vggish-1
+     - mood_acoustic-audioset-yamnet-1
+     - mood_acoustic-discogs-effnet-1
+     - mood_acoustic-msd-musicnn-1
+     - mood_acoustic-openl3-music-mel128-emb512-1
+
+  mood_aggressive:
+    outputs:
+     - predictions
+    models:
+     - mood_aggressive-audioset-vggish-1
+     - mood_aggressive-audioset-yamnet-1
+     - mood_aggressive-discogs-effnet-1
+     - mood_aggressive-msd-musicnn-1
+     - mood_aggressive-openl3-music-mel128-emb512-1
+
+  mood_electronic:
+    outputs:
+     - predictions
+    models:
+     - mood_electronic-audioset-vggish-1
+     - mood_electronic-audioset-yamnet-1
+     - mood_electronic-discogs-effnet-1
+     - mood_electronic-msd-musicnn-1
+     - mood_electronic-openl3-music-mel128-emb512-1
+
+  mood_happy:
+    outputs:
+     - predictions
+    models:
+     - mood_happy-audioset-vggish-1
+     - mood_happy-audioset-yamnet-1
+     - mood_happy-discogs-effnet-1
+     - mood_happy-msd-musicnn-1
+     - mood_happy-openl3-music-mel128-emb512-1
+
+  mood_party:
+    outputs:
+     - predictions
+    models:
+     - mood_party-audioset-vggish-1
+     - mood_party-audioset-yamnet-1
+     - mood_party-discogs-effnet-1
+     - mood_party-msd-musicnn-1
+     - mood_party-openl3-music-mel128-emb512-1
+
+  mood_relaxed:
+    outputs:
+     - predictions
+    models:
+     - mood_relaxed-audioset-vggish-1
+     - mood_relaxed-audioset-yamnet-1
+     - mood_relaxed-discogs-effnet-1
+     - mood_relaxed-msd-musicnn-1
+     - mood_relaxed-openl3-music-mel128-emb512-1
+
+  mood_sad:
+    outputs:
+     - predictions
+    models:
+     - mood_sad-audioset-vggish-1
+     - mood_sad-audioset-yamnet-1
+     - mood_sad-discogs-effnet-1
+     - mood_sad-msd-musicnn-1
+     - mood_sad-openl3-music-mel128-emb512-1
+
+  timbre:
+    outputs:
+     - predictions
+    models:
+     - timbre-discogs-effnet-1
+
+  tonal_atonal:
+    outputs:
+     - predictions
+    models:
+     - tonal_atonal-audioset-vggish-1
+     - tonal_atonal-audioset-yamnet-1
+     - tonal_atonal-discogs-effnet-1
+     - tonal_atonal-msd-musicnn-1
+     - tonal_atonal-openl3-music-mel128-emb512-1
+
+  voice_instrumental:
+    outputs:
+     - predictions
+    models:
+     - voice_instrumental-audioset-vggish-1
+     - voice_instrumental-audioset-yamnet-1
+     - voice_instrumental-discogs-effnet-1
+     - voice_instrumental-msd-musicnn-1
+     - voice_instrumental-openl3-music-mel128-emb512-1
+
+  mtg_jamendo_genre:
+    outputs:
+     - predictions
+    models:
+     - mtg_jamendo_genre-discogs-effnet-1
+     - mtg_jamendo_genre-discogs_artist_embeddings-effnet-1
+     - mtg_jamendo_genre-discogs_label_embeddings-effnet-1
+     - mtg_jamendo_genre-discogs_multi_embeddings-effnet-1
+     - mtg_jamendo_genre-discogs_release_embeddings-effnet-1
+     - mtg_jamendo_genre-discogs_track_embeddings-effnet-1
+
+  mtg_jamendo_instrument:
+    outputs:
+     - predictions
+    models:
+     - mtg_jamendo_instrument-discogs-effnet-1
+     - mtg_jamendo_instrument-discogs_artist_embeddings-effnet-1
+     - mtg_jamendo_instrument-discogs_label_embeddings-effnet-1
+     - mtg_jamendo_instrument-discogs_multi_embeddings-effnet-1
+     - mtg_jamendo_instrument-discogs_release_embeddings-effnet-1
+     - mtg_jamendo_instrument-discogs_track_embeddings-effnet-1
+
+  mtg_jamendo_moodtheme:
+    outputs:
+     - predictions
+    models:
+     - mtg_jamendo_moodtheme-discogs-effnet-1
+     - mtg_jamendo_moodtheme-discogs_artist_embeddings-effnet-1
+     - mtg_jamendo_moodtheme-discogs_label_embeddings-effnet-1
+     - mtg_jamendo_moodtheme-discogs_multi_embeddings-effnet-1
+     - mtg_jamendo_moodtheme-discogs_release_embeddings-effnet-1
+     - mtg_jamendo_moodtheme-discogs_track_embeddings-effnet-1
+
+  mtg_jamendo_top50tags:
+    outputs:
+     - predictions
+    models:
+     - mtg_jamendo_top50tags-discogs-effnet-1
+     - mtg_jamendo_top50tags-discogs_artist_embeddings-effnet-1
+     - mtg_jamendo_top50tags-discogs_label_embeddings-effnet-1
+     - mtg_jamendo_top50tags-discogs_multi_embeddings-effnet-1
+     - mtg_jamendo_top50tags-discogs_release_embeddings-effnet-1
+     - mtg_jamendo_top50tags-discogs_track_embeddings-effnet-1
+
+  mtt:
+    outputs:
+     - predictions
+    models:
+     - mtt-discogs-effnet-1
+     - mtt-discogs_artist_embeddings-effnet-1
+     - mtt-discogs_label_embeddings-effnet-1
+     - mtt-discogs_multi_embeddings-effnet-1
+     - mtt-discogs_release_embeddings-effnet-1
+     - mtt-discogs_track_embeddings-effnet-1
+
+  fma_small:
+    outputs:
+     - predictions
+    models:
+     - fma_small-discogs_artist_embeddings-effnet-1
+     - fma_small-discogs_label_embeddings-effnet-1
+     - fma_small-discogs_multi_embeddings-effnet-1
+     - fma_small-discogs_release_embeddings-effnet-1
+     - fma_small-discogs_track_embeddings-effnet-1
+
+  deam:
+    outputs:
+     - predictions
+    models:
+     - deam-msd-musicnn-1
+     - deam-audioset-vggish-1
+     - deam-msd-musicnn-2
+     - deam-audioset-vggish-2
+
+  emomusic:
+    outputs:
+     - predictions
+    models:
+     - emomusic-msd-musicnn-1
+     - emomusic-audioset-vggish-1
+     - emomusic-msd-musicnn-2
+     - emomusic-audioset-vggish-2
+
+  muse:
+    outputs:
+     - predictions
+    models:
+     - muse-msd-musicnn-1
+     - muse-audioset-vggish-1
+     - muse-msd-musicnn-2
+     - muse-audioset-vggish-2
+
+  fs_loop_ds:
+    sample_rate: 16000
+    outputs:
+     - predictions
+    models:
+     - fs_loop_ds-msd-musicnn-1
+
+  moods_mirex:
+    sample_rate: 16000
+    outputs:
+     - predictions
+    models:
+     - moods_mirex-msd-musicnn-1
+     - moods_mirex-audioset-vggish-1
+
+  msd:
+    sample_rate: 16000
+    outputs:
+     - predictions
+    models:
+     - msd-msd-musicnn-1
+
+  nsynth_acoustic_electronic:
+    sample_rate: 16000
+    outputs:
+     - predictions
+    models:
+     - nsynth_acoustic_electronic-discogs-effnet-1
+
+  nsynth_bright_dark:
+    sample_rate: 16000
+    outputs:
+     - predictions
+    models:
+     - nsynth_bright_dark-discogs-effnet-1
+
+  nsynth_instrument:
+    sample_rate: 16000
+    outputs:
+     - predictions
+    models:
+     - nsynth_instrument-discogs-effnet-1
+
+  nsynth_reverb:
+    sample_rate: 16000
+    outputs:
+     - predictions
+    models:
+     - nsynth_reverb-discogs-effnet-1
+
+  genre_discogs400:
+    sample_rate: 16000
+    outputs:
+     - predictions
+    models:
+      - genre_discogs400-discogs-effnet-1
+      - genre_discogs400-discogs-maest-5s-pw-1
+      - genre_discogs400-discogs-maest-10s-dw-1
+      - genre_discogs400-discogs-maest-10s-fs-1
+      - genre_discogs400-discogs-maest-10s-pw-1
+      - genre_discogs400-discogs-maest-20s-pw-1
+      - genre_discogs400-discogs-maest-30s-pw-1
+      - genre_discogs400-discogs-maest-30s-pw-ts-1
+
+  genre_discogs519:
+    sample_rate: 16000
+    outputs:
+      - predictions
+    models:
+      - genre_discogs519-discogs-maest-30s-pw-519l-1
+

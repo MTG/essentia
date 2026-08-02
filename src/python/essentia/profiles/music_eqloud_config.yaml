@@ -1,0 +1,122 @@
+#### GENERAL ####
+
+verbose: true
+
+outputFormat: yaml  # { xml | yaml }
+
+sampleRate: 44100 # Required analysis sampleRate. Input files will be resampled if needed.
+
+startTime: 0.0 # seconds
+endTime: 600.0 # { seconds | end }
+
+extractors: [ lowlevel,
+              average_loudness,
+              tonal,
+              chords,
+              onsetdetection,
+              #relativeioi,
+              highlevel ]
+
+windowType: blackmanharris62
+
+skipSilence: true # skip frames with energy below XXX dB with respect to ???
+
+preprocessing: [ dckiller, normalize, eqloud ]
+
+plots: false # creates 'audio.wav.html' folder 'plots' with PNG files
+
+plotsList:
+    lowlevel: [ spectral_centroid, mfcc ]
+    tonal: [ chords_strength ]
+
+segmentation:
+    doSegmentation: false
+    type: bic # { maxEnergy | bic } (bic = for Bayesian Information Criterion)
+    bicSettings: # only apply when type: bic
+        lowlevel: [ mfcc ]
+        cpw: 5
+        size1: 1000
+        inc1: 300
+        size2: 600
+        inc2: 50
+    minimumSegmentsLength: 10.0 # seconds
+    writeSegmentsAudioFile: false # create: original wav file + segments onsets
+    computeSegments: true # compute descriptors for all segments
+    thumbnailing: false # compute most relevant segment THIS REQUIRES GAIA library
+
+
+#### OPTIONS SPECIFIC TO EACH EXTRACTOR ####
+#### THESE OVERRIDE THE ABOVE SETTINGS  ####
+
+specific:
+
+    lowlevel:
+        frameSize: 2048
+        hopSize:   1024
+        #skipSilence: false
+
+        output:
+            barkbands_kurtosis: [ mean, var ]
+            barkbands_skewness: [ mean, var ]
+            barkbands_spread: [ mean, var ]
+            spectral_centroid: [ mean, var, percentile_5, percentile_95 ]
+            dissonance: [ mean ]
+            spectral_energyband_high: [ mean, dmean ]
+            spectral_energyband_low:  [ mean, dmean ]
+            spectral_energyband_middle_high: [ mean, dmean ]
+            spectral_energyband_middle_low:  [ mean, dmean ]
+            spectral_flatness_db: mean
+            hfc: [ mean ]
+            mfcc: [ single_gaussian ]
+            spectral_rms: [ mean, var, dmean ]
+            zerocrossingrate: [ mean ]
+
+    average_loudness:
+        frameSize:     88200
+        hopSize:       44100
+
+    onsetdetection:
+        frameSize:   1024
+        hopSize:      512
+        zeroPadding:    0
+        windowType:  hann
+
+        output:
+            onset_rate: value
+
+    tempotap:
+        # whether or not to use onsets as periodicity function
+        useOnset: true
+        # whether or not to use energy bands as periodicity function
+        useBands: true
+        doplots:  false
+
+        # sizes of frames. Note that frameNumber*hopSize ~= about 6 seconds
+        frameNumber: 1024
+        hopSize:      256
+        frameSize:   1024
+        frameHop:    1024
+        windowType:  hann
+
+        output:
+            bpm: value
+
+    tonal:
+        frameSize:   4096
+        hopSize:     2048
+        zeroPadding:    0
+        output:
+            key_key: value
+            key_scale: value
+            key_strength: mean
+            chords_strength: mean
+
+    chords:
+        output:
+            chords_changes_rate: value
+
+    beats:
+        output:
+            beats_loudness: mean
+            beats_loudness_bass: mean
+

@@ -1,0 +1,19 @@
+include ACKNOWLEDGEMENTS AUTHORS
+include Changelog
+include COPYING.txt Essentia*Licensing.txt
+include FAQ.md README.md
+include VERSION
+include waf
+include wscript src/wscript src/python/wscript
+recursive-include utils/ *.py
+recursive-include src/python/ essentia/**/*.py *.h *.cpp
+recursive-include src/algorithms *.h *.cpp
+recursive-include src/essentia *.h *.cpp
+recursive-include src/3rdparty *
+recursive-include packaging/ *.sh
+
+prune src/python/essentia/extractor
+exclude src/python/essentia_extractor 
+exclude src/python/essentia/essentia_extractor.py
+prune src/python/essentia/weka
+prune src/3rdparty/vamp-plugin-sdk-2.4

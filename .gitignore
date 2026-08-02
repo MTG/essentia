@@ -1,84 +1,25 @@
 ```
-# Build artifacts and dependencies
-build/
-dist/
-*.o
-*.obj
-*.a
-*.lib
-*.so
-*.dll
-*.dylib
-*.exe
+# CMake build artifacts
+build_test/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+CMAKE_BUILD.md
+
+# Generated config files
+EssentiaConfig.cmake
+EssentiaConfigVersion.cmake
+essentia.pc
+
+# Compiler artifacts
+*.bin
 *.out
-
-# Python specific
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.egg-info/
-.eggs/
-.Python
-env/
-venv/
-.venv/
-.ENV
-.env
-.env.local
-.env.*
-
-# Virtual environments
-venv/
-env/
-ENV/
-
-# Testing
-.coverage
-coverage/
-htmlcov/
-.nyc_output/
-.pytest_cache/
-.mypy_cache/
-
-# IDE and editor files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
+*.so
+*.a
+*.dll
+*.exe
 
 # Logs
-*.log
-
-# Temporary files
-*.tmp
-*.temp
-*.bak
-
-# Distribution / packaging
-*.tar.gz
-*.zip
-*.whl
-
-# CMake and Waf
-CMakeFiles/
-CMakeCache.txt
-cmake_install_manifest.txt
-waf-*
-.deps/
-
-# VCPKG
-vcpkg_installed/
-vcpkg-manifest-lock.json
-
-# Audio/test data (if they follow common patterns)
-*.wav
-*.mp3
-*.flac
-*.aac
-*.ogg
-
+CMakeOutput.log
 ```

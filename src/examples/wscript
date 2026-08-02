@@ -1,0 +1,197 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+from __future__ import print_function
+
+from waflib.TaskGen import feature, before_method
+import distutils.sysconfig
+import os
+import sys
+
+# This is a list of 1- or 2-tuples. The first element is the name of
+# the source file (less the .cpp extension) and is also used as the
+# binary name. The second element (if it exists) is a list of
+# additional files for the extractor
+
+example_sources_fileio = [
+    ('standard_beatsmarker', ),
+    ('standard_fadedetection', ),
+    ('standard_mfcc', ),
+    ('standard_onsetrate', ),
+    ('standard_pitchdemo', ),
+    ('standard_rhythmtransform', ),
+    ('standard_spectralcontrast', ),
+    ('standard_vibrato', ),
+
+    ('standard_harmonicmodel', ),
+    ('standard_hpsmodel', ),
+    ('standard_hprmodel', ),
+    ('standard_predominantmask', ),
+    ('standard_sinemodel', ),
+    ('standard_sinesubtraction', ),
+    ('standard_sprmodel', ),
+    ('standard_spsmodel', ),
+    ('standard_stft', ),
+    ('standard_stochasticmodel', ),
+    ('standard_chromaprinter', ),
+    ('standard_pca', ),
+
+    ('standard_discontinuitydetector', ),
+    ('standard_extractor_la-cupula', ),
+    ('standard_gapsdetector', ),
+    ('standard_humdetector', ),
+    ('standard_loudnessebur128', ),
+    ('standard_loudnessebur128_double_input', ),
+    ('standard_saturationdetector', ),
+    ('standard_snr', ),
+    ('standard_tempocnn',),
+    ('standard_welch', ),
+    ('streaming_humdetector', ),
+
+    ('standard_crosssimilaritymatrix', ),
+    ('standard_chromacrosssimilarity', ),
+    ('standard_coversongsimilarity', ),
+
+    ('streaming_beatsmarker', ),
+    ('streaming_beattracker_multifeature_mirex2013', ),
+    ('streaming_key', ),
+    ('streaming_gfcc', ),
+    ('streaming_md5', ),
+    ('streaming_mfcc', ),
+    ('streaming_spectrogram',
+        ['music_extractor/extractor_utils']),
+    ('streaming_rhythmextractor_multifeature', ),
+    ('streaming_onsetrate', ),
+    ('streaming_panning', ),
+    ('streaming_pitchyinfft', ),
+    ('streaming_predominantpitchmelodia', ),
+    ('streaming_chromacrosssimilarity', ),
+    ('streaming_coversongsimilarity', ),
+    ('streaming_stft', ),
+    ('streaming_tuningfrequency', ),
+    ('streaming_vibrato', ),
+    ('streaming_yinprobabilistic', ),
+
+    ('streaming_extractor_music',
+        ['music_extractor/extractor_utils']),
+
+    ('streaming_extractor_freesound',
+        ['music_extractor/extractor_utils'])
+]
+
+example_sources_with_gaia = [
+    ('streaming_extractor_music_svm',
+        ['music_extractor/extractor_utils'])
+]
+
+example_sources_with_tensorflow = [
+    ('streaming_tensorflowpredict', ),
+    ('streaming_musicnn_predict', ),
+    ('streaming_vggish_predict', )
+]
+
+
+def configure(ctx):
+    example_list_fileio = [p[0] for p in example_sources_fileio]
+    example_list_gaia = [p[0] for p in example_sources_with_gaia]
+    example_list_tensorflow = [p[0] for p in example_sources_with_tensorflow]
+
+    example_list = []
+
+    if "HAVE_AVCODEC" in ctx.env['define_key'] and "HAVE_SAMPLERATE" in ctx.env['define_key']:
+        example_list += example_list_fileio
+
+    if "HAVE_GAIA2" in ctx.env['define_key']:
+        example_list += example_list_gaia
+
+    if "HAVE_TENSORFLOW" in ctx.env['define_key']:
+        example_list += example_list_tensorflow
+
+    if ctx.env.WITH_EXAMPLES:
+        ctx.env.EXAMPLE_LIST = example_list
+
+    if ctx.env.EXAMPLES:
+        for e in ctx.env.EXAMPLES.split(","):
+            e = e.strip()
+            if e not in example_list and e in example_list_gaia:
+                raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because Gaia2 is missing" % e)
+            if e not in example_list and e in example_list_tensorflow:
+                raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because TensorFlow is missing" % e)
+            if e not in example_list and e in example_list_fileio:
+                raise ctx.errors.ConfigurationError("Specified example [%s] cannot be included because LibAv/FFMpeg or libresample are missing" % e)
+            elif e not in example_list:
+                raise ctx.errors.ConfigurationError("Specified example [%s] does not exist" % e)
+            ctx.env.EXAMPLE_LIST.append(e)
+
+    if ctx.env.WITH_STATIC_EXAMPLES:
+        #ctx.env.LIB = ['avformat', 'avcodec', 'avutil', 'tag']
+
+        if "HAVE_GAIA2" in ctx.env['define_key']:
+            ctx.env.LIB += ['gaia2']
+            ctx.env['LIB_GAIA2'] += ['dl'] # -ldl is required when building with static QtCore
+
+        if "HAVE_TENSORFLOW" in ctx.env['define_key']:
+            ctx.env.LDFLAGS += ['-ldl']
+
+        if ctx.options.CROSS_COMPILE_MINGW32:
+            # otherwise the __imp__ symbols will be expected at link time
+            ctx.env.CXXFLAGS += ['-DYAML_DECLARE_STATIC', '-DTAGLIB_STATIC']
+
+    # add flags for support of Accelerate FFT on OSX
+    if 'ACCELERATE' in ctx.env.FFT:
+        ctx.env.LINKFLAGS += ['-framework', 'Accelerate']
+
+
+def build(ctx):
+    print('→ building from ' + ctx.path.abspath())
+
+    if len(ctx.env.EXAMPLE_LIST):
+        def build_example(prog_name, other=None):
+            files = ['%s.cpp' % f for f in [prog_name] + (other or [])]
+
+            # If an `other` program has files in a directory we need
+            # to add an additional includes
+            includes = ['.', '..']
+
+            ctx(features='c cxx cxxprogram check_static',
+                source = ctx.path.ant_glob(' '.join(files)),
+                target = 'essentia_' + prog_name,
+                includes = includes,
+                use = 'essentia ', # + ctx.env.USE_LIBS,
+                install_path = '${PREFIX}/bin')
+            @feature('check_static')
+            @before_method('apply_link')
+            def check_static(self):
+                if ctx.env.WITH_STATIC_EXAMPLES:
+                    if sys.platform != 'darwin':
+                        # skip -static flag on OSX, otherwise it will complain because
+                        # static linking to system libraries is not supported on OSX
+                        self.env.LINKFLAGS = ['-static']
+                        self.env.SHLIB_MARKER = self.env.STLIB_MARKER
+
+        for e in example_sources_fileio + example_sources_with_gaia + example_sources_with_tensorflow:
+            if e[0] in ctx.env.EXAMPLE_LIST:
+                if len(e) == 1:
+                    build_example(e[0])
+                elif len(e) == 2:
+                    build_example(e[0], e[1])
+
+
+    if ctx.env.WITH_VAMP:
+        ctx.env.INCLUDES += [ '3rdparty/vamp-plugin-sdk-2.4' ]
+        vamp_sdk_files = ctx.path.parent.ant_glob('3rdparty/vamp-plugin-sdk-2.4/src/vamp-sdk/*.cpp')
+        # remove this file, it is already included by FFT.cpp
+        vamp_sdk_files = [ f for f in vamp_sdk_files if os.path.basename(f.srcpath()) != 'FFTimpl.cpp' ]
+
+        if sys.platform == 'darwin':
+            install_path = os.environ['HOME'] + '/Library/Audio/Plug-Ins/Vamp'
+        elif sys.platform.startswith('linux'):
+            install_path = '${PREFIX}/lib/vamp'
+        else:
+            install_path = None
+
+        vamp = ctx.shlib(
+            source   = ctx.path.ant_glob('vamp*.cpp') + vamp_sdk_files,
+            target   = 'vamp_essentia',
+            includes = [ '.', '..', '../3rdparty/vamp-plugin-sdk-2.4' ],
+            use      = 'essentia ', #+ ctx.env.USE_LIBS,
+            install_path = install_path)
