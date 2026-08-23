@@ -118,13 +118,19 @@ def configure(ctx):
     ctx.env.WITH_CPPTESTS = ctx.options.WITH_CPPTESTS
 
     # compiler flags
-    ctx.env.CXXFLAGS = ['-std=' + ctx.options.STD]  # c++11 by default
-
     if sys.platform != 'win32':
-        # msvc does not support -pipe
+        ctx.env.CXXFLAGS = ['-std=' + ctx.options.STD]  # c++11 by default
         ctx.env.CXXFLAGS += ['-pipe', '-Wall']
     else:
-        ctx.env.CXXFLAGS += ['-W2', '-EHsc']
+        # MSVC does not accept GCC-style -std=<lang> flags; use /std:c++14.
+        # VS 2022 already defaults to C++14, but set it explicitly for clarity.
+        # /bigobj raises the 65536-section limit — required by Eigen::Tensor
+        # and other heavily-templatized headers.
+        # /MD: use the DLL CRT — required so essentia.lib links into Python
+        # extensions (.pyd), which are DLLs that use /MD. Apply to both C and
+        # C++ so that bundled C files (e.g. 3rdparty/nnls/nnls.c) match.
+        ctx.env.CFLAGS   = ['/MD']
+        ctx.env.CXXFLAGS = ['/std:c++14', '/W2', '/EHsc', '/bigobj', '/MD']
 
     # Force using SSE floating point for all x86 platforms (default for 64-bit
     # in gcc) instead of 387 floating point (used for 32-bit in gcc) to avoid
@@ -165,6 +171,15 @@ def configure(ctx):
 
     # global defines
     ctx.env.DEFINES = []
+
+    if sys.platform == 'win32':
+        # Prevent windows.h from defining min/max macros that conflict with
+        # std::min / std::max.
+        ctx.env.DEFINES += ['NOMINMAX']
+        # Enable M_PI, M_E, M_SQRT2, etc. from <cmath>/<math.h>.
+        # These are POSIX extensions not part of the C++ standard; MSVC only
+        # defines them when _USE_MATH_DEFINES is set before the include.
+        ctx.env.DEFINES += ['_USE_MATH_DEFINES']
 
     if ctx.options.EMSCRIPTEN:
         ctx.env.CXXFLAGS += ['-I' + os.path.join(os.environ['EMSCRIPTEN'], 'system', 'lib', 'libcxxabi', 'include')]

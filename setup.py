@@ -23,14 +23,16 @@ class EssentiaInstall(install_lib):
         global library
         install_dir = os.path.join(self.install_dir, library.split(os.sep)[-1])
         res = shutil.move(library, install_dir)
-        os.system("ls -l %s" % self.install_dir)
+        print("Installed files:", os.listdir(self.install_dir))
         return [install_dir]
 
 
 class EssentiaBuildExtension(build_ext):
     def run(self):
         global library
-        os.system('rm -rf tmp; mkdir tmp')
+        if os.path.exists('tmp'):
+            shutil.rmtree('tmp')
+        os.makedirs('tmp')
 
         # Ugly hack using an enviroment variable... There's no way to pass a
         # custom flag to python setup.py bdist_wheel
@@ -47,17 +49,25 @@ class EssentiaBuildExtension(build_ext):
         else:
             subprocess.run('./packaging/build_3rdparty_static_debian.sh', check=True)
 
+        # Compute the Python package install directory explicitly using sysconfig so
+        # that the path is correct on both POSIX (lib/python3.x/site-packages) and
+        # Windows (Lib/site-packages).  Waf's --prefix substitution does not reliably
+        # rewrite PYTHONDIR on Windows when building inside a virtualenv.
+        import sysconfig
+        tmp_prefix = os.path.abspath('tmp')
+        pythondir = sysconfig.get_path('purelib', vars={'base': tmp_prefix, 'platbase': tmp_prefix})
+
         if var_only_python in os.environ and os.environ[var_only_python]=='1':
             print('Skipping building the core libessentia library (%s=1)' %  var_only_python)
             subprocess.run([PYTHON,  'waf', 'configure', '--only-python', '--static-dependencies',
-                      '--prefix=tmp'] + macos_arm64_flags, check=True)
+                      '--prefix=' + tmp_prefix, '--pythondir=' + pythondir] + macos_arm64_flags, check=True)
         else:
             subprocess.run([PYTHON, 'waf', 'configure', '--build-static', '--static-dependencies',
-                      '--with-python', '--prefix=tmp'] + macos_arm64_flags, check=True)
+                      '--with-python', '--prefix=' + tmp_prefix, '--pythondir=' + pythondir] + macos_arm64_flags, check=True)
         subprocess.run([PYTHON, 'waf'], check=True)
         subprocess.run([PYTHON, 'waf', 'install'], check=True)
 
-        library = glob.glob('tmp/lib/python*/*-packages/essentia')[0]
+        library = os.path.join(pythondir, 'essentia')
 
 
 def get_git_version():
@@ -94,7 +104,7 @@ classifiers = [
     'Topic :: Multimedia :: Sound/Audio :: Sound Synthesis',
     'Operating System :: POSIX',
     'Operating System :: MacOS :: MacOS X',
-    #'Operating System :: Microsoft :: Windows',
+    'Operating System :: Microsoft :: Windows',
     'Programming Language :: C++',
     'Programming Language :: Python',
     'Programming Language :: Python :: 2',

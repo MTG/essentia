@@ -323,7 +323,7 @@ AlgorithmStatus HumDetector::process() {
     peakBins[j] = salienceBins;
     peakSaliences[j] = salienceValues;
 
-    if (not salienceBins.empty())
+    if (!salienceBins.empty())
       peakBinsNotEmpty = true;
   }
 

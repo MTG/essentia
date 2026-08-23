@@ -25,6 +25,9 @@
 #include <vector>
 #include <exception>
 #include <sstream>
+#ifndef YAML_DECLARE_STATIC
+#define YAML_DECLARE_STATIC
+#endif
 #include <yaml.h>
 
 namespace essentia {

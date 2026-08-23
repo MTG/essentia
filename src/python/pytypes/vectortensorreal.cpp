@@ -34,7 +34,7 @@ PyObject* VectorTensorReal::toPythonCopy(const vector<Tensor<Real> >* tenVec) {
     const Tensor<Real>& tensor = (*tenVec)[i];
 
     int nd = tensor.rank();
-    npy_intp dims[nd];
+    npy_intp dims[TENSORRANK];
 
     for (int j = 0; j< nd; j++)
       dims[j] = tensor.dimension(j);

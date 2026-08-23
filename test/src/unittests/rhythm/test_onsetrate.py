@@ -69,7 +69,7 @@ class TestOnsetRate(TestCase):
         size = int(dur*sr)
         signal = ones(size)*0.1
         for i in range(size):
-            signal[i] += random.rand(1)*0.01
+            signal[i] += float(random.rand())*0.01
         expectedTimes = [0.01, 0.17, 0.73, 0.99]
         for i in range(len(expectedTimes)):
             expectedTimes[i] *= dur

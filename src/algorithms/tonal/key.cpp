@@ -505,7 +505,7 @@ void Key::resize(int pcpsize) {
 // just like a cross-correlation
 Real Key::correlation(const vector<Real>& v1, const Real mean1, const Real std1, const vector<Real>& v2, const Real mean2, const Real std2, const int shift) const
 {
-  if (std1 == static_cast<Real>(0.0) or std2 == static_cast<Real>(0.0))
+  if (std1 == static_cast<Real>(0.0) || std2 == static_cast<Real>(0.0))
   {
     return 0.0;
   }

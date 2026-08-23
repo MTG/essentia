@@ -84,8 +84,10 @@ void RogueVector<T>::setSize(size_t size) {
   this->_M_impl._M_end_of_storage = this->_M_impl._M_start + size;
 }
 
-// Windows implementation
-#elif defined(OS_WIN32)
+// Windows / MSVC implementation, VS2017 and earlier.
+// _Myfirst()/_Mylast()/_Myend() are accessible protected member functions
+// on std::vector's internal base classes on these toolsets.
+#elif defined(OS_WIN32) && defined(_MSC_VER) && _MSC_VER <= 1916
 
 template <typename T>
 void RogueVector<T>::setData(T* data) {
@@ -96,6 +98,43 @@ template <typename T>
 void RogueVector<T>::setSize(size_t size) {
   this->_Mylast() = this->_Myfirst() + size;
   this->_Myend() = this->_Myfirst() + size;
+}
+
+// Windows / MSVC implementation, VS2019 and later.
+// VS 2019+ restructured std::vector internals so _Myfirst()/_Mylast()/_Myend()
+// are no longer accessible from derived classes.  Fall back to the same
+// raw-pointer approach as the Clang branch above: MSVC's std::vector stores
+// three consecutive T* (_Myfirst, _Mylast, _Myend), with EBO collapsing the
+// empty std::allocator<T>.
+//
+// When iterator debugging is enabled (_ITERATOR_DEBUG_LEVEL != 0, the
+// default for Debug configurations), MSVC's STL additionally prepends a
+// hidden _Container_proxy* as the very first member of the vector object
+// (used to track debug iterators), which shifts the three data pointers one
+// slot to the right. Skipping that offset corrupts the vector object -- the
+// write lands on the proxy pointer instead of _Myfirst -- and the vector
+// triggers a "vector subscript out of range" assertion the moment it is
+// next used. See https://github.com/MTG/essentia/pull/1514.
+#elif defined(OS_WIN32) && defined(_MSC_VER)
+
+template <typename T>
+void RogueVector<T>::setData(T* data) {
+#if _ITERATOR_DEBUG_LEVEL != 0
+  *(reinterpret_cast<T**>(this) + 1) = data;
+#else
+  *reinterpret_cast<T**>(this) = data;
+#endif
+}
+
+template <typename T>
+void RogueVector<T>::setSize(size_t size) {
+#if _ITERATOR_DEBUG_LEVEL != 0
+  T** start = reinterpret_cast<T**>(this) + 1;
+#else
+  T** start = reinterpret_cast<T**>(this);
+#endif
+  *(start+1) = *start + size;
+  *(start+2) = *start + size;
 }
 
 #endif
