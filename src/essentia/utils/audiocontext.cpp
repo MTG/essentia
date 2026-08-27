@@ -85,24 +85,10 @@ int AudioContext::create(const std::string& filename,
   // set time_base for codec (1/sample_rate)
   _codecCtx->time_base = AVRational{1, sampleRate};
 
-  // Choose a sample format: prefer common defaults but check codec supports it
+  // Choose a sample format: prefer common defaults and let avcodec_open2 validate it
   enum AVSampleFormat desired_fmt = AV_SAMPLE_FMT_S16;
   if (audioCodec->id == AV_CODEC_ID_VORBIS) desired_fmt = AV_SAMPLE_FMT_FLTP;
   if (audioCodec->id == AV_CODEC_ID_MP3) desired_fmt = AV_SAMPLE_FMT_S16P; // keep MP3 as planar s16 if desired
-
-  // If codec provides supported list, pick one from it (prefer desired_fmt)
-  if (audioCodec->sample_fmts) {
-    const enum AVSampleFormat* p = audioCodec->sample_fmts;
-    bool found = false;
-    while (*p != AV_SAMPLE_FMT_NONE) {
-      if (*p == desired_fmt) { found = true; break; }
-      ++p;
-    }
-    if (!found) {
-      // fallback to first supported format
-      desired_fmt = audioCodec->sample_fmts[0];
-    }
-  }
   _codecCtx->sample_fmt = desired_fmt;
 
   // Open codec
