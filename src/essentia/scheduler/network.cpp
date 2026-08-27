@@ -60,12 +60,39 @@ set<Algorithm*> visibleDependencies(const Algorithm* algo, bool logWarnings=true
 }
 
 void deleteNetwork(const streaming::Algorithm* algo) {
-  set<Algorithm*> dependencies = visibleDependencies(algo, false);
+  if (!algo) return;
 
-  for (set<Algorithm*>::iterator it = dependencies.begin(); it != dependencies.end(); ++it) {
+  // Collect the whole visible network reachable downstream of this algorithm,
+  // not only its first-level dependencies. Anything deeper (e.g. the second
+  // and further levels of a processing chain, or the PoolStorage/DevNull sink
+  // algorithms created by connecting a source to a Pool or to NOWHERE) would
+  // otherwise be leaked, which is what its documentation ("the algorithm
+  // together with all its visible dependencies") and its callers expect this
+  // function to delete.
+  set<const Algorithm*> visited;
+  stack<const Algorithm*> toVisit;
+  toVisit.push(algo);
+
+  while (!toVisit.empty()) {
+    const Algorithm* current = toVisit.top();
+    toVisit.pop();
+
+    if (visited.find(current) != visited.end()) continue;
+    visited.insert(current);
+
+    set<Algorithm*> dependencies = visibleDependencies(current, false);
+    for (set<Algorithm*>::iterator it = dependencies.begin(); it != dependencies.end(); ++it) {
+      if (visited.find(*it) == visited.end()) toVisit.push(*it);
+    }
+  }
+
+  // Deleting an algorithm automatically severs its remaining connections on
+  // both ends (Sources and Sinks disconnect themselves on destruction), so
+  // every algorithm is visited and deleted exactly once, in any order, even
+  // when the traversal contains diamond shapes.
+  for (set<const Algorithm*>::iterator it = visited.begin(); it != visited.end(); ++it) {
     delete *it;
   }
-  delete algo;
 }
 
 /**
