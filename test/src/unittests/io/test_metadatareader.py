@@ -21,6 +21,9 @@
 
 from essentia_test import *
 import os
+import shutil
+import subprocess
+import tempfile
 
 
 def taglibVersion():
@@ -113,6 +116,82 @@ class TestMetadataReader(TestCase):
         self.assertTrue(not len(result[7].descriptorNames()))
         self.assertEqualVector(result[:7], ('', '', '', '', '', '', ''))
         self.assertEqualVector(result[8:], (45, 1444, 44100, 2))
+
+    def _ffmpeg(self, *args):
+        ffmpeg = shutil.which('ffmpeg')
+        if ffmpeg is None:
+            self.skipTest('ffmpeg command-line tool is not available')
+        subprocess.run([ffmpeg, '-nostdin', '-loglevel', 'error', '-y'] + list(args),
+                       check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    def testMatroska(self):
+        # Matroska containers are only supported by TagLib >= 2.2. Builds
+        # linking an older TagLib must still report correct audio properties
+        # via the libavformat fallback instead of duration=0/sampleRate=0
+        # (upstream issue 1530 on MTG/essentia).
+        tmpdir = tempfile.mkdtemp()
+        try:
+            mka = join(tmpdir, 'sine.mka')
+            self._ffmpeg('-f', 'lavfi', '-i', 'sine=frequency=440:duration=90',
+                         '-c:a', 'aac',
+                         '-metadata', 'title=mka test', '-metadata', 'artist=mtg',
+                         mka)
+            result = MetadataReader(filename=mka, failOnError=True)()
+
+            # NOTE: the title is not checked because ffmpeg stores it in the
+            # Matroska SegmentInfo title element, which TagLib does not map to
+            # its TITLE tag (the libavformat fallback does).
+            self.assertEqual(result[1], 'mtg')
+            self.assertTrue(abs(result[8] - 90) <= 1)   # duration in seconds
+            self.assertTrue(result[9] > 0)              # bitrate
+            self.assertEqual(result[10], 44100)         # sample rate
+            self.assertEqual(result[11], 1)             # channels
+        finally:
+            shutil.rmtree(tmpdir)
+
+    def testMatroskaRemux(self):
+        # An mp3 stream remuxed into Matroska (stream copy, no re-encoding)
+        # must report the same duration and sample rate from both containers.
+        tmpdir = tempfile.mkdtemp()
+        try:
+            mp3 = join(tmpdir, 'sine.mp3')
+            mka = join(tmpdir, 'sine_remux.mka')
+            self._ffmpeg('-f', 'lavfi', '-i', 'sine=frequency=440:duration=90',
+                         '-c:a', 'libmp3lame', '-b:a', '128k', mp3)
+            self._ffmpeg('-i', mp3, '-c:a', 'copy', mka)
+
+            resultMp3 = MetadataReader(filename=mp3, failOnError=True)()
+            resultMka = MetadataReader(filename=mka, failOnError=True)()
+
+            # the mp3 values come from TagLib and are the reference
+            self.assertTrue(abs(resultMp3[8] - 90) <= 1)
+            self.assertEqual(resultMp3[10], 44100)
+
+            self.assertTrue(abs(resultMka[8] - resultMp3[8]) <= 1)
+            self.assertEqual(resultMka[10], resultMp3[10])
+            self.assertEqual(resultMka[11], resultMp3[11])
+        finally:
+            shutil.rmtree(tmpdir)
+
+    def testUnsupportedContainerFallback(self):
+        # No TagLib version parses AVI containers, so this exercises the
+        # libavformat fallback on every build: audio properties (and tags)
+        # must come from libavformat instead of being all zeros.
+        tmpdir = tempfile.mkdtemp()
+        try:
+            avi = join(tmpdir, 'sine.avi')
+            self._ffmpeg('-f', 'lavfi', '-i', 'sine=frequency=440:duration=90',
+                         '-c:a', 'libmp3lame', '-b:a', '128k',
+                         '-metadata', 'artist=mtg', avi)
+            result = MetadataReader(filename=avi, failOnError=True)()
+
+            self.assertEqual(result[1], 'mtg')
+            self.assertTrue(abs(result[8] - 90) <= 1)   # duration in seconds
+            self.assertTrue(result[9] > 0)              # bitrate
+            self.assertEqual(result[10], 44100)         # sample rate
+            self.assertEqual(result[11], 1)             # channels
+        finally:
+            shutil.rmtree(tmpdir)
 
     def testFailOnError(self):
         self.assertComputeFails(

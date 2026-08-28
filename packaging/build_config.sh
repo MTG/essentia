@@ -14,7 +14,12 @@ SHARED_OR_STATIC="
 EIGEN_VERSION=3.3.7
 FFMPEG_VERSION=ffmpeg-7.1.1
 LAME_VERSION=3.100
-TAGLIB_VERSION=taglib-1.11.1
+# TagLib >= 2.2 is required for Matroska (.mka/.mkv/.webm) support in
+# MetadataReader. TagLib 1.11.1 silently returned duration=0/sampleRate=0
+# for Matroska files in the Linux wheels (macOS wheels use brew's TagLib 2.x).
+# TagLib 2.x requires a C++17 compiler and CMake >= 3.10; the release tarball
+# bundles the utfcpp dependency.
+TAGLIB_VERSION=taglib-2.3.1
 ZLIB_VERSION=zlib-1.2.12
 FFTW_VERSION=fftw-3.3.2
 LIBSAMPLERATE_VERSION=libsamplerate-0.1.9
