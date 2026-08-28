@@ -64,6 +64,39 @@ class TestOnsetDetectionGlobal(TestCase):
         self.assertAlmostEqualVectorFixedPrecision(calculated_beat_emphasis, expected_beat_emphasis,2)
         self.assertAlmostEqualVectorFixedPrecision(calculated_infogain, expected_infogain,2)
 
+    def testLongInputStreamingBufferResize(self):
+        # Regression test for the output buffer overflow on long audio inputs
+        # (RhythmExtractor2013/BeatTrackerMultiFeature failing with
+        # "OnsetDetectionGlobal::onsetDetections: Could not push 1 value,
+        # output buffer is full"). The streaming OnsetDetectionGlobal pushes
+        # the whole detection function at once, and its output buffer used to
+        # have a fixed capacity of 327680 values (~63 min of audio at the
+        # default hopSize of 512). Use a small hopSize so that the number of
+        # ODF frames exceeds the old capacity with a moderately-sized input
+        # instead of an hour-long one (the buffer capacity is defined in
+        # frames, independently of hopSize).
+        from essentia.streaming import OnsetDetectionGlobal as strOnsetDetectionGlobal
+
+        hopSize = 128
+        frameSize = 256
+        # yields 327690 ODF frames, just above the old capacity of 327680
+        # (note: not 327681, as a number of frames equal to 1 modulo the
+        # buffer's maxContiguousElements of 163840 triggers an unrelated
+        # pre-existing PoolStorage issue mixing Pool::append and Pool::set)
+        nSamples = 327691 * hopSize
+
+        gen = VectorInput(zeros(nSamples))
+        odg = strOnsetDetectionGlobal(method='infogain', frameSize=frameSize, hopSize=hopSize)
+        p = Pool()
+
+        gen.data >> odg.signal
+        odg.onsetDetections >> (p, 'odf')
+
+        # this used to raise RuntimeError: output buffer is full
+        run(gen)
+
+        self.assertTrue(len(p['odf']) > 327680)
+
 
 suite=allTests(TestOnsetDetectionGlobal)
 
