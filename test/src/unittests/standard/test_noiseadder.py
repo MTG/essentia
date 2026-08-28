@@ -60,6 +60,27 @@ class TestNoiseAdder(TestCase):
         for i in range(10):
             self.assertNotEqual(a[i], b[i])
 
+    def testFixSeedDefault(self):
+        # The documented default of the public algorithm is fixSeed=false
+        # (time-based seed); only FrameCutter's internal instance uses
+        # fixSeed=true. Make sure the default was not changed by accident.
+        self.assertEqual(NoiseAdder().paramValue('fixSeed'), False)
+
+    def testFixSeedReset(self):
+        # With fixSeed=true, reset() must re-seed the generator so that a
+        # reused (reset) instance produces exactly the same noise sequence
+        # as a fresh one.
+        ng = NoiseAdder(fixSeed=True)
+        a = ng(zeros(1000))
+        ng.reset()
+        b = ng(zeros(1000))
+        self.assertEqualVector(a, b)
+
+        # Without a reset the generator keeps advancing: the next compute
+        # must continue the sequence, not restart it.
+        c = ng(zeros(1000))
+        self.assertTrue(any(b[i] != c[i] for i in range(1000)))
+
 
 
 suite = allTests(TestNoiseAdder)

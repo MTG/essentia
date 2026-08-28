@@ -173,6 +173,59 @@ class TestRhythmExtractor2013(TestCase):
         for i in range(len(estimates)):
             self.assertAlmostEqual(estimates[i], expectedBpm, 5.0)
 
+    def _createClickTrack(self, dur=20.0, bpm=120.0, sr=44100):
+        # A music-like synthetic signal: short decaying 1 kHz clicks every
+        # 60/bpm seconds plus a low-level fixed-seed noise floor, so that
+        # onset detection gets realistic input. Fully deterministic
+        # (fixed-seed numpy generator, no audio files needed).
+        rng = numpy.random.RandomState(42)
+        signal = ((rng.rand(int(sr*dur)) * 2 - 1) * 1e-4).astype(numpy.float32)
+        clickDur = int(0.03*sr)
+        t = numpy.arange(clickDur, dtype=numpy.float32) / sr
+        click = (numpy.sin(2*numpy.pi*1000.*t) * numpy.exp(-t/0.005)).astype(numpy.float32)
+        period = int(sr*60./bpm)
+        for start in range(0, len(signal) - clickDur, period):
+            signal[start:start+clickDur] += 0.9*click
+        return signal
+
+    def _assertBitwiseEqualResults(self, result, expected):
+        # exact equality, no tolerance
+        self.assertEqual(result[0], expected[0])                     # bpm
+        self.assertTrue(numpy.array_equal(result[1], expected[1]))   # ticks
+        self.assertEqual(result[2], expected[2])                     # confidence
+        self.assertTrue(numpy.array_equal(result[3], expected[3]))   # estimates
+        self.assertTrue(numpy.array_equal(result[4], expected[4]))   # bpmIntervals
+
+    def _assertDeterministic(self, method, numFreshRuns, numReusedRuns):
+        # Regression test for https://github.com/MTG/essentia/issues/1097:
+        # TempoTapDegara used to draw its Viterbi tie-breaking noise from the
+        # process-global, never-seeded rand(), so repeated analyses of the
+        # same audio within one process could return different
+        # bpm/ticks/confidence. All outputs must now be bitwise identical
+        # across repeated computes, both with fresh instances and when
+        # reusing one instance.
+        audio = self._createClickTrack()
+
+        results = []
+        for _ in range(numFreshRuns):
+            results.append(RhythmExtractor2013(method=method)(audio))
+
+        extractor = RhythmExtractor2013(method=method)
+        for _ in range(numReusedRuns):
+            results.append(extractor(audio))
+
+        # sanity check: the click track is correctly detected at 120 bpm
+        self.assertTrue(abs(results[0][0] - 120.) < 2.)
+
+        for result in results[1:]:
+            self._assertBitwiseEqualResults(result, results[0])
+
+    def testDeterministicMultifeature(self):
+        self._assertDeterministic("multifeature", numFreshRuns=5, numReusedRuns=5)
+
+    def testDeterministicDegara(self):
+        self._assertDeterministic("degara", numFreshRuns=3, numReusedRuns=3)
+
 
 suite = allTests(TestRhythmExtractor2013)
 
