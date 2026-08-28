@@ -67,9 +67,19 @@ class AudioLoader : public Algorithm {
   int _selectedStream;
   bool _configured;
 
+  // --- startTime/endTime seeking (issue #771) -------------------------------------------
+  Real _startTime;          // requested start position [s], 0 = beginning of stream
+  Real _endTime;            // requested end position [s], >= _maxEndTime = end of stream
+  int64_t _startSample;     // _startTime converted to a sample index at the NATIVE rate
+  int64_t _endSample;       // _endTime likewise; -1 means "no end bound"
+  int64_t _currentSample;   // position of the next sample to be produced, native rate
+  bool _anchorPending;      // true right after a seek: adopt the next frame's pts as position
+  bool _reachedEndTime;     // set once _endSample has been produced
 
   void openAudioFile(const std::string& filename);
   void closeAudioFile();
+  void seekToStartTime();
+  void anchorPositionFromFrame();
 
   void pushChannelsSampleRateInfo(int nChannels, Real sampleRate);
   void pushCodecInfo(std::string codec, int bit_rate);
@@ -83,7 +93,9 @@ class AudioLoader : public Algorithm {
  public:
   AudioLoader() : Algorithm(), _buffer(0),  _demuxCtx(0),
 	          _audioCtx(0), _audioCodec(0), _decodedFrame(0),
-            _convertCtxAv(0), _configured(false) {
+            _convertCtxAv(0), _configured(false),
+            _startTime(0), _endTime(0), _startSample(0), _endSample(-1),
+            _currentSample(0), _anchorPending(false), _reachedEndTime(false) {
 
     declareOutput(_audio, 1, "audio", "the input audio signal");
     declareOutput(_sampleRate, 0, "sampleRate", "the sampling rate of the audio signal [Hz]");
@@ -118,6 +130,8 @@ class AudioLoader : public Algorithm {
     declareParameter("filename", "the name of the file from which to read", "", Parameter::STRING);
     declareParameter("computeMD5", "compute the MD5 checksum", "{true,false}", false);
     declareParameter("audioStream", "audio stream index to be loaded. Other streams are not taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
+    declareParameter("startTime", "the start time of the slice to be extracted [s]. The decoder SEEKS to this position instead of decoding and discarding the audio before it.", "[0,inf)", 0.0);
+    declareParameter("endTime", "the end time of the slice to be extracted [s]. Decoding stops here instead of continuing to the end of the stream.", "[0,inf)", 1.0e6);
   }
 
   void configure();
@@ -179,6 +193,8 @@ class AudioLoader : public Algorithm {
     declareParameter("filename", "the name of the file from which to read", "", Parameter::STRING);
     declareParameter("computeMD5", "compute the MD5 checksum", "{true,false}", false);
     declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
+    declareParameter("startTime", "the start time of the slice to be extracted [s]. The decoder SEEKS to this position instead of decoding and discarding the audio before it.", "[0,inf)", 0.0);
+    declareParameter("endTime", "the end time of the slice to be extracted [s]. Decoding stops here instead of continuing to the end of the stream.", "[0,inf)", 1.0e6);
   }
 
   void configure();
