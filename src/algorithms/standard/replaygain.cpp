@@ -127,7 +127,7 @@ ReplayGain::ReplayGain() : _applyEqloud(false) {
 
 
 ReplayGain::~ReplayGain() {
-  if (!_network) {
+  if (_network) {
     _network->deleteAlgorithms();
     delete _network;
   }

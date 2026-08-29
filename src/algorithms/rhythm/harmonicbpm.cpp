@@ -75,7 +75,7 @@ vector<Real> HarmonicBpm::findHarmonicBpms(const vector<Real>& bpms) {
   while (i<int(harmonicBpms.size())) {
     Real prevBpm = harmonicBpms[i];
     Real minError = std::numeric_limits<int>::max();
-    Real bestBpm;
+    Real bestBpm = -1;
 
     // Select the best candidate among aproximately the same (within tolerance) BPMs.
     while (i < (int)harmonicBpms.size() &&

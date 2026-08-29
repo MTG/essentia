@@ -218,7 +218,7 @@ AlgorithmStatus VectorRealToTensor::process() {
     
     // or if we have reached the end of the stream with lastBatchModel = "push"
     // and there are not enough patches to fill a regular batch.   
-    } else if (shouldStop() and _acc.size() < _shape[0]) {
+    } else if (shouldStop() and _acc.size() < static_cast<size_t>(_shape[0])) {
       reshapeBatch = true;
     }
 
