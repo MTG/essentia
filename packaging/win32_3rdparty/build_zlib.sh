@@ -8,14 +8,15 @@ cd tmp
 
 echo "Building zlib $ZLIB_VERSION"
 
-curl -SLO https://zlib.net/$ZLIB_VERSION.tar.gz
-tar -xf $ZLIB_VERSION.tar.gz
-cd $ZLIB_VERSION/
+curl -SLO https://github.com/madler/zlib/releases/download/v$ZLIB_VERSION/zlib-$ZLIB_VERSION.tar.gz
+tar -xzf zlib-$ZLIB_VERSION.tar.gz
+cd zlib-$ZLIB_VERSION/
 
 
  CC=$HOST-gcc AR="$HOST-ar" RANLIB=$HOST-ranlib ./configure \
     --prefix=$PREFIX \
     --static
+
 make
 make install
 
