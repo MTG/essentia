@@ -4,11 +4,26 @@
 from __future__ import print_function
 
 import os
+import sys
 import sysconfig
 
 
 def options(ctx):
     ctx.load('python')
+
+
+def _filter_foreign_arch_flags(flags, wanted_archs):
+    filtered = []
+    i = 0
+    while i < len(flags):
+        if flags[i] == '-arch' and i + 1 < len(flags):
+            if flags[i + 1] in wanted_archs:
+                filtered += flags[i:i + 2]
+            i += 2
+        else:
+            filtered.append(flags[i])
+            i += 1
+    return filtered
 
 
 def configure(ctx):
@@ -21,6 +36,30 @@ def configure(ctx):
 
     ctx.check_python_headers(features='pyext')
     ctx.check_python_module('numpy')
+
+    # python.org universal2 CPython builds report '-arch arm64 -arch x86_64'
+    # in their CFLAGS, and starting with the 3.13 installers the substitution
+    # that ARCHFLAGS is supposed to perform leaves the trailing '-arch x86_64'
+    # in place (the regex in _osx_support._override_all_archs only matches an
+    # '-arch X' followed by whitespace, and 3.13 dropped the trailing '-g').
+    # python-config then hands waf both arches and the extension links as a
+    # fat binary against a single-arch libessentia, which delocate rejects.
+    # When this build targets an explicit set of arches, drop any other
+    # '-arch' flags that python-config injected.
+    if sys.platform == 'darwin':
+        wanted = set()
+        for var in ('CXXFLAGS', 'LINKFLAGS'):
+            flags = ctx.env[var] or []
+            wanted.update(flags[i + 1] for i, f in enumerate(flags)
+                          if f == '-arch' and i + 1 < len(flags))
+        if not wanted and 'ARCHFLAGS' in os.environ:
+            archflags = os.environ['ARCHFLAGS'].split()
+            wanted.update(archflags[i + 1] for i, f in enumerate(archflags)
+                          if f == '-arch' and i + 1 < len(archflags))
+        if wanted:
+            for var in ('CFLAGS_PYEXT', 'CXXFLAGS_PYEXT', 'LINKFLAGS_PYEXT',
+                        'CFLAGS_PYEMBED', 'CXXFLAGS_PYEMBED', 'LINKFLAGS_PYEMBED'):
+                ctx.env[var] = _filter_foreign_arch_flags(ctx.env[var] or [], wanted)
 
     # A monkey patch to remove the -lpythonX.Ym flag. PEP 513 recommends to
     # avoid explicit linking to libpythonX.Y.so.1, however python-config still
