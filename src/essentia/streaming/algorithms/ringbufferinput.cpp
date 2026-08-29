@@ -47,7 +47,7 @@ RingBufferInput::~RingBufferInput()
 void RingBufferInput::configure()
 {
 	delete _impl;
-	_impl = new RingBufferImpl(RingBufferImpl::kAvailable,parameter("bufferSize").toInt());
+	_impl = new RingBufferImpl(RingBufferImpl::kAvailable,parameter("bufferSize").toInt(), parameter("shouldBlock").toBool());
 }
 
 void RingBufferInput::add(Real* inputData, int size)
@@ -59,7 +59,9 @@ void RingBufferInput::add(Real* inputData, int size)
 
 AlgorithmStatus RingBufferInput::process() {
   //std::cerr << "ringbufferinput waiting" << std::endl;
-  _impl->waitAvailable();
+  if (false == _impl->waitAvailable()) {
+    return NO_INPUT;
+  }
   //std::cerr << "ringbufferinput waiting done" << std::endl;
 
   AlgorithmStatus status = acquireData();
