@@ -20,7 +20,13 @@ The library is cross-platform and currently supports Linux, macOS, Windows, iOS 
 
 Install from master for the latest updates.
 
-To use in Python (Linux `x86_64`, `i686`): `pip install essentia` or `pip install essentia-tensorflow`.
+To use in Python (Linux `x86_64`/`aarch64`, macOS `x86_64`/`arm64`, CPython 3.9-3.14):
+`pip install essentia` or `pip install essentia-tensorflow`. `essentia-tensorflow` is a
+superset of `essentia` with TensorFlow inference support built in and its TensorFlow C
+library vendored inside the wheel; install exactly one of the two, never both. See
+[doc/sphinxdoc/installing.rst](doc/sphinxdoc/installing.rst) for the full
+supported-platform matrix and [doc/sphinxdoc/machine_learning.rst](doc/sphinxdoc/machine_learning.rst)
+for using the TensorFlow algorithms.
 
 Docker images: https://hub.docker.com/r/mtgupf/essentia/
 

@@ -174,7 +174,13 @@ class TestSprModel(TestCase):
 
 
     def testWhiteNoise(self):
-        from random import random
+        from random import random, seed
+        # Seeded so the test is deterministic: unseeded, this failed once
+        # (macOS) out of six attempts across platforms/passes with the same
+        # code -- it's a statistical check on random noise, not a fixed
+        # regression fixture, so an unlucky draw could occasionally exceed
+        # the tolerance.
+        seed(0)
         # generate test signal
         signalSize = 10 * self.params['frameSize']
         signal = array([2*(random()-0.5)*i for i in essentia.ones(signalSize)])

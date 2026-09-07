@@ -23,6 +23,355 @@ lib_map = {
     'GAIA2': 'gaia2',
     'TENSORFLOW': 'tensorflow'}
 
+# FFmpeg / libav version floor.
+#
+# src/essentia/utils/audiocontext.cpp and src/algorithms/io/audioloader.cpp use
+# AVChannelLayout / AVCodecContext.ch_layout unconditionally, an API FFmpeg introduced in
+# its 5.1 release (libavcodec 59.37). Any older FFmpeg/LibAv passes the pre-5.1 pkg-config
+# check that used to live here (libavcodec >= 55.34.1, set in 2015 for LibAv 10) but then
+# fails to compile on `ch_layout`, or -- worse -- silently resolves against the wrong one
+# of two installed FFmpeg versions. Keep every component's floor in this single dict so a
+# future bump only touches these lines; keep it in sync with doc/sphinxdoc/installing.rst.
+FFMPEG_MIN_RELEASE = 'FFmpeg >= 5.1 (or an equivalent LibAv release)'
+FFMPEG_MIN_VERSIONS = {
+    'AVCODEC': '59.37',      # AVCodecContext.ch_layout / AVChannelLayout
+    'AVFORMAT': '59.27',
+    'AVUTIL': '57.28',
+    'SWRESAMPLE': '4.7',
+}
+
+
+def _pkgconfig_query(ctx, pkg, arg):
+    """Run `pkg-config <arg> <pkg>` and return its stripped stdout, or None on failure
+    (package not found, or the pkg-config in use does not support <arg>)."""
+    # ctx.env.PKGCONFIG is stored waf-style, as a one-element list (like ctx.env.CC).
+    pkgconfig = ctx.env.PKGCONFIG
+    if not isinstance(pkgconfig, list):
+        pkgconfig = [pkgconfig]
+    try:
+        return ctx.cmd_and_log(pkgconfig + [arg, pkg], env=ctx.env.env or None).strip()
+    except ctx.errors.WafError:
+        return None
+
+
+def _ffmpeg_version_atleast(found, minimum):
+    """Compare dotted version strings numerically (not lexicographically), tolerating
+    trailing non-numeric suffixes in a version component."""
+    def to_tuple(v):
+        parts = []
+        for chunk in v.split('.'):
+            digits = ''
+            for c in chunk:
+                if c.isdigit():
+                    digits += c
+                else:
+                    break
+            parts.append(int(digits) if digits else 0)
+        return tuple(parts)
+    return to_tuple(found) >= to_tuple(minimum)
+
+
+def _ffmpeg_floor_message(pkg, found_version, pc_path, minimum, reason=None):
+    return (
+        "essentia requires {release}: '{pkg}' {found} (via {pcpath}) {reason}, "
+        "need >= {minimum}.\n"
+        "  -> Install a newer FFmpeg (or LibAv) and/or point PKG_CONFIG_PATH at its "
+        "pkg-config directory (see doc/sphinxdoc/installing.rst).".format(
+            release=FFMPEG_MIN_RELEASE, pkg=pkg,
+            found=found_version if found_version else 'not found',
+            pcpath=pc_path or 'unknown .pc path',
+            reason=reason or 'is older than required',
+            minimum=minimum))
+
+
+# Oldest TensorFlow we support. The 1.x C API was exported by the Python wrapper
+# extension; from 2.x it lives in a standalone shared library, which is the layout
+# every TensorflowPredict* algorithm is developed and tested against.
+TENSORFLOW_MIN_VERSION = '2.0'
+
+# Header Essentia's TensorflowPredict* algorithms include, relative to an include dir.
+TENSORFLOW_HEADER = os.path.join('tensorflow', 'c', 'c_api.h')
+
+# TF_Version proves we found *a* TensorFlow library. TF_DeleteSession proves it exports
+# the full C API rather than one of the Python wrapper shims: linking against
+# _pywrap_tensorflow_internal or libtensorflow_framework alone satisfies
+# `pkg-config --exists tensorflow` but leaves TF_DeleteSession undefined, so the build
+# used to succeed and fail only when the extension was imported (MTG#1350, MTG#1308).
+TENSORFLOW_FRAGMENT = '''
+#include <tensorflow/c/c_api.h>
+
+int main() {
+    TF_Status* status = TF_NewStatus();
+    TF_DeleteSession((TF_Session*)0, status);
+    TF_DeleteStatus(status);
+    return TF_Version() == 0;
+}
+'''
+
+TENSORFLOW_HELP = '''
+Essentia links against the TensorFlow C API. Provide it in one of these ways:
+  - install a TensorFlow C library that ships a tensorflow.pc, for example
+    `brew install libtensorflow` or a distribution package;
+  - generate a tensorflow.pc from a pip TensorFlow >= 2.13 wheel:
+        python3 src/3rdparty/tensorflow/setup_tensorflow.py --prefix <dir>
+    then add <dir>/lib/pkgconfig to PKG_CONFIG_PATH;
+  - point PKG_CONFIG_PATH at a directory holding your own tensorflow.pc.
+Re-run `./waf configure --with-tensorflow` afterwards, or drop --with-tensorflow to
+build Essentia without the TensorflowPredict* algorithms.'''
+
+
+# Opt-in switch for wheel builds that link the TensorFlow C API straight out of a pip
+# `tensorflow` wheel rather than vendoring a copy of the library into the wheel. Read
+# from the environment as well as from --with-tensorflow-pip-rpath because a wheel build
+# runs `waf configure` twice -- once for libessentia and once, from setup.py, for the
+# bindings alone (--only-python) -- and only the environment reaches both invocations.
+# Accepted values: a directory (the pip tensorflow package to point the build-time rpath
+# at, which also turns the switch on), or a boolean-ish "1"/"true"/"yes"/"on".
+TENSORFLOW_PIP_RPATH_VAR = 'ESSENTIA_TENSORFLOW_PIP_RPATH'
+
+# Where a pip `tensorflow` package sits relative to the two binaries that carry a NEEDED
+# on its C API once they are installed from a wheel. `essentia/_essentia*.so` and the
+# vendored libessentia (auditwheel puts it in `essentia*.libs/`, delocate in
+# `essentia/.dylibs/`) both resolve TensorFlow through site-packages, and dyld/ld.so
+# search the loading binary's rpaths too, so one relative entry serves both.
+TENSORFLOW_PIP_RPATHS = {
+    'darwin': ['@loader_path/../tensorflow'],
+    'default': ['$ORIGIN/../tensorflow'],
+}
+
+# A last rpath entry, on ELF only, whose sole job is to not end in "tensorflow".
+#
+# ld packs .dynstr by letting a string share storage with any longer string it is a
+# suffix of. DT_RUNPATH is one colon-joined string, so an rpath ending in
+# ".../tensorflow" swallows the "tensorflow" symbol-version name that every TF_* symbol
+# reference in libessentia is tagged with. auditwheel then calls patchelf to rewrite the
+# rpath, and patchelf overwrites the whole old string with 'X' before writing the new,
+# shorter one -- which takes the version name with it. The wheel installs and then fails
+# at import with:
+#
+#   ImportError: libtensorflow_cc.so.2: version `XXXXXXXXXX' not found
+#                (required by .../essentia.libs/libessentia-<hash>.so)
+#
+# Ending the rpath with $ORIGIN keeps "tensorflow" a string of its own. $ORIGIN is a
+# sensible entry in its own right -- it is what auditwheel gives vendored libraries --
+# so this costs nothing beyond the explanation. Mach-O keeps each LC_RPATH in its own
+# string and install_name_tool rewrites them individually, so macOS needs no guard.
+TENSORFLOW_PIP_RPATH_GUARD = '$ORIGIN'
+
+
+def pkg_config_query(ctx, args):
+    """Ask pkg-config a question and return its stripped stdout, or None if it fails.
+
+    Only used to build diagnostics, so a failing query is reported as unknown rather
+    than raised.
+    """
+    from subprocess import CalledProcessError, STDOUT, check_output
+
+    cmd = list(ctx.env.PKGCONFIG or ['pkg-config']) + args
+    try:
+        out = check_output(cmd, env=ctx.env.env, stderr=STDOUT)
+    except (OSError, CalledProcessError):
+        return None
+    return out.decode('utf-8', 'replace').strip()
+
+
+def tensorflow_report(ctx):
+    """Summarise what pkg-config told us about TensorFlow, to attach to configure errors."""
+    package = lib_map['TENSORFLOW']
+
+    def joined(key):
+        return ', '.join(ctx.env[key]) or '(none)'
+
+    return '\n'.join([
+        '  PKG_CONFIG_PATH:  %s' % (ctx.env.env.get('PKG_CONFIG_PATH')
+                                    or '(unset; pkg-config default paths)'),
+        '  %s.pc found in: %s' % (package,
+                                  pkg_config_query(ctx, ['--variable=pcfiledir', package])
+                                  or '(not found)'),
+        '  Version:          %s' % (pkg_config_query(ctx, ['--modversion', package])
+                                    or '(unknown)'),
+        '  Cflags:           %s' % (pkg_config_query(ctx, ['--cflags', package]) or '(none)'),
+        '  Libs:             %s' % (pkg_config_query(ctx, ['--libs', package]) or '(none)'),
+        '  Include dirs:     %s' % joined('INCLUDES_TENSORFLOW'),
+        '  Library dirs:     %s' % joined('LIBPATH_TENSORFLOW'),
+        '  Libraries tried:  %s' % joined('LIB_TENSORFLOW'),
+    ])
+
+
+def check_tensorflow(ctx, check_cfg_args):
+    """Find TensorFlow and prove its C API is usable before building against it.
+
+    `pkg-config --exists tensorflow` is not enough on its own: it is satisfied by any
+    tensorflow.pc, including ones naming a library that does not export the C API. Such a
+    .pc used to configure and build cleanly and then fail at `import essentia.standard`
+    with `undefined symbol: TF_DeleteSession`. Fail here instead, and say what to fix.
+    """
+    package = lib_map['TENSORFLOW']
+    if not ctx.env.PKGCONFIG:
+        ctx.find_program('pkg-config', var='PKGCONFIG')
+
+    # 1. Locate tensorflow.pc and enforce the 2.x floor from its Version field.
+    try:
+        ctx.check_cfg(package=package, uselib_store='TENSORFLOW',
+                      args=['%s >= %s' % (package, TENSORFLOW_MIN_VERSION)] + check_cfg_args,
+                      msg="Checking for '%s' >= %s" % (package, TENSORFLOW_MIN_VERSION),
+                      mandatory=True)
+    except ctx.errors.ConfigurationError:
+        found = pkg_config_query(ctx, ['--modversion', package])
+        if found:
+            reason = ('TensorFlow %s is too old: Essentia needs >= %s.'
+                      % (found, TENSORFLOW_MIN_VERSION))
+        else:
+            reason = 'No %s.pc was found.' % package
+        raise ctx.errors.ConfigurationError(
+            '\n'.join([reason, '', tensorflow_report(ctx), TENSORFLOW_HELP]))
+
+    # 2. Normalise the include path. Essentia includes <tensorflow/c/c_api.h>, but some
+    #    installations set includedir to the tensorflow/ directory itself rather than to
+    #    its parent — Homebrew's libtensorflow.pc uses <prefix>/include/tensorflow — so the
+    #    header only resolves from the parent. Add it when that is what makes it resolve.
+    includes = list(ctx.env['INCLUDES_TENSORFLOW'])
+    for path in list(includes):
+        if os.path.exists(os.path.join(path, TENSORFLOW_HEADER)):
+            continue
+        parent = os.path.dirname(os.path.normpath(path))
+        if parent and os.path.exists(os.path.join(parent, TENSORFLOW_HEADER)):
+            includes.append(parent)
+    ctx.env['INCLUDES_TENSORFLOW'] = includes
+
+    # 3. Compile against those headers, then link against those libraries. Splitting the
+    #    two tells the user which half is wrong instead of just "the check failed".
+    if not ctx.check_cxx(fragment=TENSORFLOW_FRAGMENT, use='TENSORFLOW', features='cxx',
+                         msg='Checking for the TensorFlow C API headers',
+                         errmsg='not found', mandatory=False):
+        raise ctx.errors.ConfigurationError('\n'.join([
+            '<%s> does not resolve with the include flags from %s.pc.'
+            % (TENSORFLOW_HEADER.replace(os.sep, '/'), package),
+            '', tensorflow_report(ctx), TENSORFLOW_HELP]))
+
+    if not ctx.check_cxx(fragment=TENSORFLOW_FRAGMENT, use='TENSORFLOW', execute=False,
+                         msg='Checking that the TensorFlow C API links',
+                         errmsg='unresolved', mandatory=False):
+        raise ctx.errors.ConfigurationError('\n'.join([
+            'The TensorFlow C API headers were found, but TF_Version and TF_DeleteSession '
+            'did not resolve against the libraries named by %s.pc.' % package,
+            '',
+            'That .pc most likely names something other than the TensorFlow C library. The '
+            'Python wrapper shim (_pywrap_tensorflow_internal) and libtensorflow_framework '
+            'do not export the C API on their own. Since TensorFlow 2.13 it is exported by '
+            'libtensorflow_cc (pip wheels) or by libtensorflow (the standalone C library).',
+            '', tensorflow_report(ctx), TENSORFLOW_HELP]))
+
+
+def tensorflow_pip_rpath_requested(ctx):
+    """Return the raw value of the pip-rpath switch, or '' when it is off.
+
+    The command-line flag only turns the switch on; a directory can only come from the
+    environment variable, which is the form a wheel build needs anyway.
+    """
+    if ctx.env.TENSORFLOW_PIP_RPATH:
+        return '1'
+    value = os.environ.get(TENSORFLOW_PIP_RPATH_VAR, '').strip()
+    if value.lower() in ('', '0', 'false', 'no', 'off'):
+        return ''
+    return value
+
+
+def tensorflow_package_dir(ctx, requested):
+    """Locate the pip tensorflow package directory the build links against.
+
+    Three sources, most explicit first: the directory named by the switch itself; the
+    `package_dir` variable that setup_tensorflow.py writes into the tensorflow.pc it
+    generates; and the tensorflow package importable by the interpreter running this
+    configure. Returns None when none of them resolves -- that is not fatal, since only
+    the absolute build-time rpath depends on it.
+    """
+    if requested.lower() not in ('1', 'true', 'yes', 'on'):
+        candidate = os.path.abspath(os.path.expanduser(requested))
+        if os.path.isdir(candidate):
+            return candidate
+        ctx.fatal('%s points at %s, which is not a directory.'
+                  % (TENSORFLOW_PIP_RPATH_VAR, requested))
+
+    from_pc = pkg_config_query(ctx, ['--variable=package_dir', lib_map['TENSORFLOW']])
+    if from_pc and os.path.isdir(from_pc):
+        return os.path.abspath(from_pc)
+
+    # find_spec locates the package without executing it. Importing TensorFlow costs
+    # seconds and drags in numpy; a configure needs neither, only the path.
+    try:
+        import importlib.util
+        spec = importlib.util.find_spec('tensorflow')
+    except (ImportError, ValueError):
+        spec = None
+    for path in list(getattr(spec, 'submodule_search_locations', None) or []):
+        if os.path.isdir(path):
+            return os.path.abspath(path)
+    return None
+
+
+def configure_tensorflow_pip_rpath(ctx):
+    """Give libessentia and the Python extension a load-time path to a pip TensorFlow.
+
+    Wheels built this way ship no TensorFlow of their own: `auditwheel repair --exclude`
+    and `delocate-wheel --exclude` leave libtensorflow_cc / libtensorflow_framework out,
+    and these rpaths are what make the installed wheel find them next door in
+    site-packages, with no ctypes preload and no code in essentia/__init__.py.
+
+    Three things go in, all on ctx.env.LINKFLAGS so that every link task gets them --
+    both binaries carry a NEEDED on the C API, so an rpath on only one of them is not
+    enough, and LINKFLAGS is the one place both the libessentia build and the
+    --only-python bindings build read from:
+
+      - the relative rpath (@loader_path/../tensorflow, $ORIGIN/../tensorflow), which is
+        the entry that survives into the shipped wheel;
+      - an absolute rpath to the build-time package, needed only so that the repair tools
+        can *resolve* the excluded libraries -- exclusion happens after resolution, so
+        without it `delocate-wheel --exclude` dies with "Could not find all dependencies".
+        delocate's default --sanitize-rpaths then deletes it again, and auditwheel keeps
+        only $ORIGIN-relative rpaths, so it does not reach users;
+      - -Wl,-headerpad_max_install_names on macOS, so delocate has room to rewrite the
+        install names of the libraries it does vendor.
+
+    Off unless asked for: a plain source build links and runs exactly as it did before.
+    """
+    requested = tensorflow_pip_rpath_requested(ctx)
+    if not requested:
+        return
+
+    if not ctx.env.PKGCONFIG:
+        ctx.find_program('pkg-config', var='PKGCONFIG', mandatory=False)
+
+    flags = []
+    if sys.platform == 'darwin':
+        flags.append('-Wl,-headerpad_max_install_names')
+
+    rpaths = TENSORFLOW_PIP_RPATHS.get(sys.platform, TENSORFLOW_PIP_RPATHS['default'])
+
+    package_dir = tensorflow_package_dir(ctx, requested)
+    if package_dir:
+        rpaths = rpaths + [package_dir]
+    if sys.platform != 'darwin':
+        rpaths = rpaths + [TENSORFLOW_PIP_RPATH_GUARD]
+    if not package_dir:
+        # Not fatal: the shipped rpath is the relative one, and a build that is not going
+        # to be repaired into a wheel does not need the absolute entry at all.
+        print('- WARNING: could not locate a pip tensorflow package to point the '
+              'build-time rpath at.\n'
+              '  `delocate-wheel --exclude` / `auditwheel repair --exclude` will then be '
+              'unable to resolve\n'
+              '  libtensorflow_cc unless it is reachable some other way. Set %s to the\n'
+              '  site-packages/tensorflow directory to fix this.' % TENSORFLOW_PIP_RPATH_VAR)
+
+    flags += ['-Wl,-rpath,%s' % rpath for rpath in rpaths]
+
+    # Keep the switch idempotent: `waf configure` may be re-run over an existing env.
+    ctx.env.LINKFLAGS += [flag for flag in flags if flag not in ctx.env.LINKFLAGS]
+
+    print('- linking against a pip TensorFlow wheel (%s)' % TENSORFLOW_PIP_RPATH_VAR)
+    print('    tensorflow package:  %s' % (package_dir or '(not found)'))
+    print('    added LINKFLAGS:     %s' % ' '.join(flags))
+
 
 def options(ctx):
     ctx.add_option('--with-python', action='store_true',
@@ -55,6 +404,15 @@ def options(ctx):
     ctx.add_option('--with-tensorflow', action='store_true',
                    dest='WITH_TENSORFLOW', default=False,
                    help='build with Tensorflow support')
+    ctx.add_option('--with-tensorflow-pip-rpath', action='store_true',
+                   dest='TENSORFLOW_PIP_RPATH', default=False,
+                   help='link for a wheel that finds TensorFlow in a pip `tensorflow` '
+                        'install rather than vendoring it: adds an rpath to '
+                        'site-packages/tensorflow to libessentia and to the python '
+                        'extension, plus -headerpad_max_install_names on macOS. '
+                        'Equivalent to setting %s=1; set that variable to a directory '
+                        'instead to name the pip tensorflow package explicitly.'
+                        % TENSORFLOW_PIP_RPATH_VAR)
     ctx.add_option('--lightweight', action='store',
                    dest='LIGHTWEIGHT', default=False,
                    help='build lightweight version with specified dependencies (comma separated: =' + ','.join(default_libs) + ')')
@@ -135,6 +493,10 @@ def configure(ctx):
     #if ctx.env.STATIC_DEPENDENCIES:
     #    check_cfg_args += ['--static']
 
+    # Before the --only-python early return below: a wheel build configures twice, and
+    # both the libessentia link and the bindings link need these rpaths.
+    configure_tensorflow_pip_rpath(ctx)
+
     if ctx.env.ONLY_PYTHON:
        print("→ Building only Essentia's python bindings (libessentia should be pre-installed)")
        ctx.check_cfg(package='essentia', uselib_store='ESSENTIA',
@@ -151,19 +513,67 @@ def configure(ctx):
     ctx.env.DEFINES += ['EIGEN_PERMANENTLY_DISABLE_STUPID_WARNINGS']
 
     if 'libav' in ctx.env.CHECK_LIBS:
-        ctx.check_cfg(package=lib_map['AVCODEC'], uselib_store='AVCODEC',
-                      args=['{} >= 55.34.1'.format(lib_map['AVCODEC'])] + check_cfg_args,
-                      msg="Checking for '{}' >= 55.34.1".format(lib_map['AVCODEC']),
-                      mandatory=False)
+        if not ctx.env.PKGCONFIG:
+            ctx.find_program('pkg-config', var='PKGCONFIG')
 
-        ctx.check_cfg(package=lib_map['AVFORMAT'], uselib_store='AVFORMAT',
-                      args=check_cfg_args, mandatory=False)
+        ffmpeg_versions_found = {}
 
-        ctx.check_cfg(package=lib_map['AVUTIL'], uselib_store='AVUTIL',
-                      args=check_cfg_args, mandatory=False)
+        for lib_key in ('AVCODEC', 'AVFORMAT', 'AVUTIL', 'SWRESAMPLE'):
+            pkg = lib_map[lib_key]
+            min_version = FFMPEG_MIN_VERSIONS[lib_key]
 
-        ctx.check_cfg(package=lib_map['SWRESAMPLE'], uselib_store='SWRESAMPLE',
-                      args=check_cfg_args, mandatory=False)
+            # Query the installed version directly (independent of the check_cfg version
+            # constraint below) so a too-old package can be reported with a precise
+            # diagnostic instead of the generic "not found" that a failed check_cfg gives.
+            found_version = _pkgconfig_query(ctx, pkg, '--modversion')
+            pc_path = _pkgconfig_query(ctx, pkg, '--path')
+            ffmpeg_versions_found[lib_key] = (found_version, pc_path)
+
+            if found_version is not None and not _ffmpeg_version_atleast(found_version, min_version):
+                ctx.fatal(_ffmpeg_floor_message(pkg, found_version, pc_path, min_version))
+
+            ctx.check_cfg(package=pkg, uselib_store=lib_key,
+                          args=['{} >= {}'.format(pkg, min_version)] + check_cfg_args,
+                          msg="Checking for '{}' >= {}".format(pkg, min_version),
+                          mandatory=False)
+
+        def _ffmpeg_have(*keys):
+            return all(('HAVE_%s' % k) in ctx.env['define_key'] for k in keys)
+
+        # Guard against a distro backporting the AVChannelLayout API onto an
+        # older-looking .pc version string (or vice versa): compile the exact API surface
+        # essentia's FFmpeg glue relies on, rather than trusting the version string alone.
+        if _ffmpeg_have('AVCODEC', 'AVUTIL'):
+            have_ch_layout = ctx.check_cxx(
+                fragment='''
+                    extern "C" {
+                    #include <libavcodec/avcodec.h>
+                    }
+                    int main() {
+                        AVCodecContext codec_ctx;
+                        av_channel_layout_default(&codec_ctx.ch_layout, 2);
+                        return 0;
+                    }
+                ''',
+                use=['AVCODEC', 'AVUTIL'],
+                msg='Checking for AVChannelLayout / AVCodecContext.ch_layout',
+                mandatory=False)
+
+            if not have_ch_layout:
+                found_version, pc_path = ffmpeg_versions_found['AVCODEC']
+                ctx.fatal(_ffmpeg_floor_message(
+                    lib_map['AVCODEC'], found_version, pc_path, FFMPEG_MIN_VERSIONS['AVCODEC'],
+                    reason='reports a satisfying version but does not provide '
+                           'AVChannelLayout / AVCodecContext.ch_layout'))
+
+        # Print the selected FFmpeg / libav component versions and .pc paths so that, with
+        # two installs on PKG_CONFIG_PATH, the one actually picked up is visible here.
+        if _ffmpeg_have('AVCODEC', 'AVFORMAT', 'AVUTIL', 'SWRESAMPLE'):
+            print('- FFmpeg / libav components selected (required: {}):'.format(FFMPEG_MIN_RELEASE))
+            for lib_key in ('AVCODEC', 'AVFORMAT', 'AVUTIL', 'SWRESAMPLE'):
+                found_version, pc_path = ffmpeg_versions_found[lib_key]
+                print('    {} {}  ({})'.format(lib_map[lib_key], found_version,
+                                                pc_path or 'unknown .pc path'))
 
     if 'libsamplerate' in ctx.env.CHECK_LIBS:
         ctx.check_cfg(package=lib_map['SAMPLERATE'], uselib_store='SAMPLERATE',
@@ -198,8 +608,15 @@ def configure(ctx):
                       args=check_cfg_args, mandatory=True)
 
     if 'tensorflow' in ctx.env.CHECK_LIBS:
-        ctx.check_cfg(package=lib_map['TENSORFLOW'], uselib_store='TENSORFLOW',
-                      args=check_cfg_args, mandatory=True)
+        check_tensorflow(ctx, check_cfg_args)
+        # A tensorflow.pc generated by setup_tensorflow.py carries its own -Wl,-rpath to
+        # the pip package, which check_cfg stores as RPATH_TENSORFLOW. With the pip-rpath
+        # switch on, that same path is already in the global LINKFLAGS and ld warns about
+        # the duplicate on every link; keep the global entry, which also reaches targets
+        # that do not use the TENSORFLOW uselib.
+        ctx.env['RPATH_TENSORFLOW'] = [
+            path for path in ctx.env['RPATH_TENSORFLOW']
+            if ('-Wl,-rpath,%s' % path) not in ctx.env.LINKFLAGS]
 
     # needed by ffmpeg for the INT64_C macros
     ctx.env.DEFINES += ['__STDC_CONSTANT_MACROS']

@@ -144,13 +144,13 @@ class TestSpectralContrast(TestCase):
         sc = SC(spec)
 
         # First check that the first 5 bands are empty.
-        self.assertAlmostEquals(numpy.mean(sc[0][:5]), -2.7182817459)
+        self.assertAlmostEqual(numpy.mean(sc[0][:5]), -2.7182817459)
 
         # Then check that the last bands constains one bin.
-        self.assertAlmostEquals(numpy.mean(sc[0][-1]), -1)
+        self.assertAlmostEqual(numpy.mean(sc[0][-1]), -1)
 
         # In any case the valley values should be 0.
-        self.assertAlmostEquals(numpy.mean(sc[1]), 0)
+        self.assertAlmostEqual(numpy.mean(sc[1]), 0)
 
 
 suite = allTests(TestSpectralContrast)

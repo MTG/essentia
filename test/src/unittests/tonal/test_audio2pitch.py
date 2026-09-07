@@ -94,7 +94,7 @@ class TestAudio2Pitch(TestCase):
         signal = zeros(size)
         for i in range(1, size):
             # masking noise:
-            whitenoise = 2 * (random.rand(1) - 0.5)
+            whitenoise = 2 * (random.rand() - 0.5)
             signal[i] += 2 * whitenoise
             for harm in range(1, nharms):
                 signal[i] += 1.0 / harm * sin(i * harm * w / sample_rate)

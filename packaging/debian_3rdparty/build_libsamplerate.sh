@@ -12,6 +12,8 @@ curl -SLO https://github.com/libsndfile/libsamplerate/releases/download/0.1.9/$L
 tar -xf $LIBSAMPLERATE_VERSION.tar.gz
 cd $LIBSAMPLERATE_VERSION
 
+refresh_autotools_config .
+
 CPPFLAGS=-fPIC ./configure \
     --prefix=$PREFIX \
     $LIBSAMPLERATE_FLAGS \

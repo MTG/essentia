@@ -29,7 +29,7 @@ class TestPowerMean(TestCase):
 
     def testZero(self):
         zeroInput = [0]*10
-        self.assertEquals(PowerMean()(zeroInput), 0)
+        self.assertEqual(PowerMean()(zeroInput), 0)
 
         # this test passes, but its behavior is undefined
         #self.assertAlmostEqual(PowerMean(power=0), 0);

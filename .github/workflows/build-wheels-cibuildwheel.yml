@@ -7,6 +7,9 @@ jobs:
     name: ${{ matrix.os }} / ${{ matrix.config }}
     runs-on: ${{ matrix.os }}
     strategy:
+      # One platform failing says nothing about the other five, and the wheels
+      # are independent artifacts. Let them all report.
+      fail-fast: false
       matrix:
         os: [ubuntu-24.04, macos-15-intel, macos-15]
         config: [cibuildwheel, cibuildwheel-tensorflow]
@@ -20,6 +23,75 @@ jobs:
         # Workaround for https://github.com/actions/checkout/issues/290
         run: git fetch --tags --force
 
+      # -----------------------------------------------------------------------------
+      # essentia-tensorflow only. cibuildwheel-tensorflow.toml's test-command now runs
+      # packaging/verify_wheel_effnet.py for every interpreter it builds, so the model
+      # has to exist at the project root (staged for test-sources) before "Build
+      # wheels" starts, not after. The cache uses its own key, separate from the
+      # existing post-build restore/fetch pair below (which this leaves untouched):
+      # sharing one key across two different `path`s would make a hit here register
+      # as a hit there too, without actually restoring anything to that path.
+      #
+      # A dead essentia.upf.edu must not fail the build -- the model download was
+      # moved below the build once already (see fedef66e) for exactly that reason --
+      # so both steps are continue-on-error and the fetch script always exits 0,
+      # leaving nothing at .cache/ on failure so a transient outage can never get
+      # cached as a permanent empty result.
+      # -----------------------------------------------------------------------------
+      - name: Restore the discogs-effnet model for cibuildwheel
+        if: matrix.config == 'cibuildwheel-tensorflow'
+        id: effnet-model-pretest
+        continue-on-error: true
+        uses: actions/cache@v4
+        with:
+          path: .cache/discogs-effnet-bs64-1.pb
+          key: discogs-effnet-bs64-1-pretest-3ed9af50d5367c0b9c795b294b00e7599e4943244f4cbd376869f3bfc87721b1
+
+      - name: Fetch the discogs-effnet model for cibuildwheel
+        if: matrix.config == 'cibuildwheel-tensorflow' && steps.effnet-model-pretest.outputs.cache-hit != 'true'
+        continue-on-error: true
+        shell: bash
+        env:
+          MODEL_URL: https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.pb
+          MODEL_SHA256: 3ed9af50d5367c0b9c795b294b00e7599e4943244f4cbd376869f3bfc87721b1
+        run: |
+          set +e
+          mkdir -p .cache
+          curl --retry 8 --retry-all-errors --retry-delay 15 --retry-max-time 300 \
+               -sSfL -o .cache/discogs-effnet-bs64-1.pb "$MODEL_URL"
+          status=$?
+          if [ $status -eq 0 ]; then
+            if command -v sha256sum > /dev/null 2>&1; then
+              actual=$(sha256sum .cache/discogs-effnet-bs64-1.pb | cut -d' ' -f1)
+            else
+              actual=$(shasum -a 256 .cache/discogs-effnet-bs64-1.pb | cut -d' ' -f1)
+            fi
+            if [ "$actual" = "$MODEL_SHA256" ]; then
+              echo "discogs-effnet-bs64-1.pb verified ($(wc -c < .cache/discogs-effnet-bs64-1.pb) bytes)"
+            else
+              echo "::warning::discogs-effnet-bs64-1.pb checksum mismatch (expected $MODEL_SHA256, got $actual);" \
+                   "test-command will degrade to imports only"
+              rm -f .cache/discogs-effnet-bs64-1.pb
+            fi
+          else
+            echo "::warning::failed to fetch discogs-effnet-bs64-1.pb from essentia.upf.edu after retries" \
+                 "(curl exit $status); test-command will degrade to imports only"
+          fi
+          exit 0
+
+      - name: Stage the discogs-effnet model for cibuildwheel
+        if: matrix.config == 'cibuildwheel-tensorflow'
+        shell: bash
+        run: |
+          if [ -s .cache/discogs-effnet-bs64-1.pb ]; then
+            cp .cache/discogs-effnet-bs64-1.pb discogs-effnet-bs64-1.pb
+            echo "staged discogs-effnet-bs64-1.pb ($(wc -c < discogs-effnet-bs64-1.pb) bytes) for test-sources"
+          else
+            echo "::warning::no verified discogs-effnet-bs64-1.pb available; staging an empty placeholder" \
+                 "so test-command's inference check degrades to imports only instead of failing the build"
+            : > discogs-effnet-bs64-1.pb
+          fi
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.1
         with:
@@ -29,3 +101,562 @@ jobs:
         with:
           path: ./wheelhouse/*.whl
           name: artifact-${{ matrix.os }}-${{ matrix.config }}
+
+      # -----------------------------------------------------------------------------
+      # Plain essentia. The aarch64 job has had a clean-container check since it was
+      # added; Linux x86_64 has one above, added for the same reason macOS gets one
+      # here: an import break reaching PyPI unnoticed because the only checks run
+      # against the manylinux builder or the cibuildwheel test venv, both of which
+      # have more installed than a user's machine does. Same script, both ends of the
+      # supported interpreter range, on every platform this job builds for.
+      # -----------------------------------------------------------------------------
+      - name: Check out the test audio
+        if: success() && matrix.config == 'cibuildwheel' && (matrix.os == 'ubuntu-24.04' || startsWith(matrix.os, 'macos'))
+        run: git submodule update --init --depth 1 test/audio
+
+      - name: Decode audio with the cp312 and cp314 wheels on stock Debian images
+        if: success() && matrix.config == 'cibuildwheel' && matrix.os == 'ubuntu-24.04'
+        shell: bash
+        run: |
+          for pair in "python:3.12-slim cp312" "python:3.14-slim-bookworm cp314"; do
+            set -- $pair
+            echo "=== $2 on $1"
+            docker run --rm --volume "$PWD":/w --workdir /w "$1" \
+              bash -euxo pipefail -c "pip install --no-cache-dir wheelhouse/essentia-*-$2-$2-manylinux*_x86_64.whl && python packaging/verify_wheel_audio.py test/audio/recorded/*.mp3"
+          done
+
+      # macOS has no container to install into, so this uses fresh venvs on the
+      # runner instead -- the same shape as the essentia-tensorflow clean-venv check
+      # below, minus the model. This is the gap that let the Linux x86_64 spurious
+      # libatomic NEEDED (see fedef66e) reach PyPI unnoticed for the plain wheel: it
+      # has no clean-container/clean-venv import check on any platform before now.
+      - name: Decode audio with the cp312 and cp314 wheels in clean venvs
+        if: success() && matrix.config == 'cibuildwheel' && startsWith(matrix.os, 'macos')
+        shell: bash
+        run: |
+          for version in 3.12 3.14; do
+            tag=cp$(echo "$version" | tr -d .)
+            python=$(command -v "python$version" || true)
+            [ -n "$python" ] || python="/Library/Frameworks/Python.framework/Versions/$version/bin/python$version"
+            echo "=== $tag using $python"
+            "$python" -m venv "/tmp/audio-$version"
+            "/tmp/audio-$version/bin/pip" install --quiet --no-cache-dir \
+              wheelhouse/essentia-*-"$tag"-"$tag"-macosx_*.whl
+            "/tmp/audio-$version/bin/python" packaging/verify_wheel_audio.py test/audio/recorded/*.mp3
+          done
+
+      # -----------------------------------------------------------------------------
+      # essentia-tensorflow only. The wheel carries its own TensorFlow C library, so
+      # the two things worth proving are that the library is in there and that an
+      # installed wheel runs inference somewhere that has nothing else installed.
+      # -----------------------------------------------------------------------------
+      - name: Record the wheel contents, tags and sizes
+        if: success() && matrix.config == 'cibuildwheel-tensorflow'
+        shell: bash
+        # Informational listing only: the vendoring assertion this used to make with
+        # `unzip -l | grep -qi libtensorflow` now lives in packaging/verify_wheel_effnet.py,
+        # which cibuildwheel's test-command (cibuildwheel-tensorflow.toml) runs against
+        # every built interpreter's *installed* package -- a stronger check (it follows
+        # the same import/rpath resolution a user gets) than grepping the archive here,
+        # and it runs six times per platform instead of once. One script, not two
+        # divergent implementations of the same assertion.
+        run: |
+          shopt -s nullglob
+          wheels=(wheelhouse/*.whl)
+          if [ ${#wheels[@]} -eq 0 ]; then echo "no wheels were built"; exit 1; fi
+          for wheel in "${wheels[@]}"; do
+            echo "=== $(basename "$wheel")  ($(wc -c < "$wheel") bytes)"
+            unzip -l "$wheel"
+          done
+
+      # Two stock Debian images, not the manylinux builder: no libtensorflow, no
+      # libessentia, no toolchain, and nothing installed but the wheel itself.
+      # 3.14 is the interpreter that matters most -- it is the one downstream
+      # pins -- and it is also the one no upstream TensorFlow wheel exists for,
+      # which is why the library is vendored rather than depended on.
+      - name: Run EfficientNet inference with the cp312 wheel on python:3.12-slim
+        if: success() && matrix.config == 'cibuildwheel-tensorflow' && matrix.os == 'ubuntu-24.04'
+        shell: bash
+        run: |
+          # The check still runs without a model. verify_wheel_effnet.py's import,
+          # vendored-libtensorflow and no-tensorflow-dependency assertions need neither
+          # the model nor the network, and they are the part only a clean container can
+          # prove; the script skips just the inference, with its own loud warning. This
+          # line puts the same fact in the job summary.
+          if [ ! -s discogs-effnet-bs64-1.pb ]; then
+            echo "::warning::no discogs-effnet-bs64-1.pb staged (essentia.upf.edu was unreachable" \
+                 "or served a bad checksum); the clean-container checks run without inference"
+          fi
+          docker run --rm --volume "$PWD":/w --workdir /w python:3.12-slim \
+            bash -euxo pipefail -c 'pip install --no-cache-dir wheelhouse/essentia_tensorflow-*-cp312-cp312-manylinux*_x86_64.whl && python packaging/verify_wheel_effnet.py discogs-effnet-bs64-1.pb'
+
+      - name: Run EfficientNet inference with the cp314 wheel on python:3.14-slim-bookworm
+        if: success() && matrix.config == 'cibuildwheel-tensorflow' && matrix.os == 'ubuntu-24.04'
+        shell: bash
+        run: |
+          # The check still runs without a model. verify_wheel_effnet.py's import,
+          # vendored-libtensorflow and no-tensorflow-dependency assertions need neither
+          # the model nor the network, and they are the part only a clean container can
+          # prove; the script skips just the inference, with its own loud warning. This
+          # line puts the same fact in the job summary.
+          if [ ! -s discogs-effnet-bs64-1.pb ]; then
+            echo "::warning::no discogs-effnet-bs64-1.pb staged (essentia.upf.edu was unreachable" \
+                 "or served a bad checksum); the clean-container checks run without inference"
+          fi
+          docker run --rm --volume "$PWD":/w --workdir /w python:3.14-slim-bookworm \
+            bash -euxo pipefail -c 'pip install --no-cache-dir wheelhouse/essentia_tensorflow-*-cp314-cp314-manylinux*_x86_64.whl && python packaging/verify_wheel_effnet.py discogs-effnet-bs64-1.pb'
+
+      # The macOS equivalent: empty venvs on the runner, one per end of the
+      # supported range. The interpreters are the framework builds cibuildwheel
+      # installed for the wheels themselves.
+      - name: Run EfficientNet inference with the cp312 and cp314 wheels in clean venvs
+        if: success() && matrix.config == 'cibuildwheel-tensorflow' && startsWith(matrix.os, 'macos')
+        shell: bash
+        run: |
+          # The check still runs without a model. verify_wheel_effnet.py's import,
+          # vendored-libtensorflow and no-tensorflow-dependency assertions need neither
+          # the model nor the network, and they are the part only a clean venv can
+          # prove; the script skips just the inference, with its own loud warning. This
+          # line puts the same fact in the job summary.
+          if [ ! -s discogs-effnet-bs64-1.pb ]; then
+            echo "::warning::no discogs-effnet-bs64-1.pb staged (essentia.upf.edu was unreachable" \
+                 "or served a bad checksum); the clean-venv checks run without inference"
+          fi
+          for version in 3.12 3.14; do
+            tag=cp$(echo "$version" | tr -d .)
+            python=$(command -v "python$version" || true)
+            [ -n "$python" ] || python="/Library/Frameworks/Python.framework/Versions/$version/bin/python$version"
+            echo "=== $tag using $python"
+            "$python" -m venv "/tmp/effnet-$version"
+            "/tmp/effnet-$version/bin/pip" install --quiet --no-cache-dir \
+              wheelhouse/essentia_tensorflow-*-"$tag"-"$tag"-macosx_*.whl
+            "/tmp/effnet-$version/bin/pip" show essentia-tensorflow | grep -E '^(Name|Version|Requires):'
+            "/tmp/effnet-$version/bin/python" packaging/verify_wheel_effnet.py discogs-effnet-bs64-1.pb
+          done
+
+  # ---------------------------------------------------------------------------------
+  # sdist: publish a source distribution and verify `pip install --no-binary` builds
+  # it from source against apt-provided system dependencies. See MTG/essentia#1462.
+  # ---------------------------------------------------------------------------------
+  build_sdist:
+    name: Build sdist
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Fetch release tags from GitHub
+        # Workaround for https://github.com/actions/checkout/issues/290
+        run: git fetch --tags --force
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install the build front-end
+        run: python -m pip install --upgrade build
+
+      - name: Build the sdist
+        run: python -m build --sdist
+
+      - uses: actions/upload-artifact@v6
+        with:
+          name: sdist
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  test_sdist:
+    name: Install sdist from source / Python ${{ matrix.python-version }}
+    needs: build_sdist
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.12', '3.14']
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Fetch the test audio fixtures submodule
+        run: git submodule update --init test/audio
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: actions/download-artifact@v6
+        with:
+          name: sdist
+          path: dist
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libeigen3-dev libyaml-dev libfftw3-dev \
+            libavcodec-dev libavformat-dev libavutil-dev libswresample-dev \
+            libsamplerate0-dev libtag1-dev libchromaprint-dev
+
+      - name: Install essentia from the sdist
+        # ESSENTIA_WHEEL_SKIP_3RDPARTY=1 uses the apt-provided libraries above
+        # instead of building static 3rdparty dependencies from source.
+        env:
+          ESSENTIA_WHEEL_SKIP_3RDPARTY: '1'
+        run: python -m pip install --no-binary essentia dist/essentia-*.tar.gz
+
+      - name: Import essentia.standard and decode an mp3 with MonoLoader
+        run: |
+          python - <<'PY'
+          import glob
+
+          import essentia.standard as es
+
+          mp3_files = glob.glob('test/audio/**/*.mp3', recursive=True)
+          assert mp3_files, 'no mp3 fixtures found under test/audio'
+
+          audio = es.MonoLoader(filename=mp3_files[0])()
+          assert len(audio) > 0, 'MonoLoader decoded 0 samples'
+          print(f'Decoded {mp3_files[0]}: {len(audio)} samples')
+          PY
+
+  # Linux aarch64, on a native arm64 runner (no QEMU).
+  #
+  # Deliberately a separate job rather than more rows of the build_wheels matrix
+  # above: aarch64 has to build its own static 3rdparty dependencies -- there is
+  # no mtgupf/essentia-builds image for it -- behind a cache, and no other row
+  # needs that step.
+  #
+  # It carries the same `config` axis, both configs in one job rather than two
+  # jobs, because everything except the file handed to cibuildwheel is identical
+  # and the two rows want the same dependencies out of the same image. One cache
+  # entry serves both, so the second row's dependency build is free on a warm run
+  # and, cold, is the same three minutes either shape would pay. A parallel job
+  # would be a seventy-line copy of this one differing in a single argument.
+  build_wheels_linux_aarch64:
+    name: ubuntu-24.04-arm / ${{ matrix.config }}
+    runs-on: ubuntu-24.04-arm
+    strategy:
+      # Same reasoning as build_wheels: the two configs are independent
+      # artifacts and one failing says nothing about the other.
+      fail-fast: false
+      matrix:
+        config: [cibuildwheel, cibuildwheel-tensorflow]
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Fetch release tags from GitHub
+        # Workaround for https://github.com/actions/checkout/issues/290
+        run: git fetch --tags --force
+
+      - name: Resolve the manylinux aarch64 builder image
+        id: image
+        # Read the image back out of the config file this row will build with, so
+        # the dependency prebuild below and the wheel build cannot drift apart,
+        # and so the cache is invalidated when the image is bumped. Both configs
+        # pin the same image, which is what lets them share one cache entry; if
+        # they ever diverge they simply stop sharing it rather than poisoning it.
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_OUTPUT"
+          import re, tomllib
+
+          with open("${{ matrix.config }}.toml", "rb") as f:
+              image = tomllib.load(f)["tool"]["cibuildwheel"]["linux"]["manylinux-aarch64-image"]
+
+          print(f"image={image}")
+          print(f"slug={re.sub(r'[^A-Za-z0-9._-]', '-', image)}")
+          EOF
+
+      - name: Restore the static 3rdparty dependencies
+        id: deps-cache
+        uses: actions/cache@v4
+        with:
+          # packaging/build_3rdparty_static_debian.sh installs into
+          # packaging/debian_3rdparty and deletes bin/ and share/ when it is
+          # done, so lib/ and include/ are the whole product. cibuildwheel
+          # copies the project directory into the build container, so anything
+          # restored here is visible to before-all at the same absolute path
+          # (/project/packaging/debian_3rdparty) it was built at.
+          #
+          # The key deliberately does not mention matrix.config: the dependencies
+          # are the same libraries built by the same script either way, and
+          # TensorFlow is not among them.
+          path: |
+            packaging/debian_3rdparty/lib
+            packaging/debian_3rdparty/include
+          key: essentia-3rdparty-aarch64-${{ steps.image.outputs.slug }}-${{ hashFiles('packaging/build_config.sh', 'packaging/build_3rdparty_static_debian.sh', 'packaging/build_3rdparty_static_aarch64_manylinux.sh', 'packaging/debian_3rdparty/build_*.sh') }}
+
+      - name: Build the static 3rdparty dependencies
+        if: steps.deps-cache.outputs.cache-hit != 'true'
+        # Built in the same image cibuildwheel will use, bind-mounted at the
+        # same path (/project) cibuildwheel uses, because the generated .pc
+        # files record absolute paths. Around 3 minutes on a 4-vCPU runner; the
+        # cache above makes a warm run skip this step entirely.
+        run: |
+          docker run --rm \
+            --volume "$PWD":/project \
+            --workdir /project \
+            "${{ steps.image.outputs.image }}" \
+            ./packaging/build_3rdparty_static_aarch64_manylinux.sh
+          sudo chown -R "$(id -u):$(id -g)" packaging/debian_3rdparty
+
+      # -----------------------------------------------------------------------------
+      # essentia-tensorflow only, and the same three steps the build_wheels job runs
+      # for the same reason. cibuildwheel-tensorflow.toml's test-command runs
+      # packaging/verify_wheel_effnet.py for every interpreter it builds, and
+      # test-sources copies discogs-effnet-bs64-1.pb in from the project root, so the
+      # file has to be staged before "Build wheels" starts. Not staging it is not a
+      # degraded check but a hard failure: cibuildwheel's copy_test_sources raises
+      # FatalError on a path that does not exist, before the script it would have run
+      # gets a chance to handle a missing model.
+      #
+      # The cache key and path are the pretest pair's, distinct from the post-build
+      # restore this job used to carry: one key across two different `path`s would
+      # make a hit on one register as a hit on the other without restoring anything.
+      # The post-build inference steps below now read this same staged copy, so the
+      # job holds one model cache rather than two.
+      #
+      # A dead essentia.upf.edu must not fail the build -- the download was moved
+      # below the build once already (fedef66e) for exactly that reason -- so both
+      # steps are continue-on-error, the fetch always exits 0, and nothing is left at
+      # .cache/ on failure, so a transient outage cannot be cached as a permanent
+      # empty result. verify_wheel_effnet.py degrades to its no-model checks, loudly.
+      # -----------------------------------------------------------------------------
+      - name: Restore the discogs-effnet model for cibuildwheel
+        if: matrix.config == 'cibuildwheel-tensorflow'
+        id: effnet-model-pretest
+        continue-on-error: true
+        uses: actions/cache@v4
+        with:
+          path: .cache/discogs-effnet-bs64-1.pb
+          key: discogs-effnet-bs64-1-pretest-3ed9af50d5367c0b9c795b294b00e7599e4943244f4cbd376869f3bfc87721b1
+
+      - name: Fetch the discogs-effnet model for cibuildwheel
+        if: matrix.config == 'cibuildwheel-tensorflow' && steps.effnet-model-pretest.outputs.cache-hit != 'true'
+        continue-on-error: true
+        shell: bash
+        env:
+          MODEL_URL: https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.pb
+          MODEL_SHA256: 3ed9af50d5367c0b9c795b294b00e7599e4943244f4cbd376869f3bfc87721b1
+        run: |
+          set +e
+          mkdir -p .cache
+          curl --retry 8 --retry-all-errors --retry-delay 15 --retry-max-time 300 \
+               -sSfL -o .cache/discogs-effnet-bs64-1.pb "$MODEL_URL"
+          status=$?
+          if [ $status -eq 0 ]; then
+            actual=$(sha256sum .cache/discogs-effnet-bs64-1.pb | cut -d' ' -f1)
+            if [ "$actual" = "$MODEL_SHA256" ]; then
+              echo "discogs-effnet-bs64-1.pb verified ($(wc -c < .cache/discogs-effnet-bs64-1.pb) bytes)"
+            else
+              echo "::warning::discogs-effnet-bs64-1.pb checksum mismatch (expected $MODEL_SHA256, got $actual);" \
+                   "test-command will degrade to imports only"
+              rm -f .cache/discogs-effnet-bs64-1.pb
+            fi
+          else
+            echo "::warning::failed to fetch discogs-effnet-bs64-1.pb from essentia.upf.edu after retries" \
+                 "(curl exit $status); test-command will degrade to imports only"
+          fi
+          exit 0
+
+      - name: Stage the discogs-effnet model for cibuildwheel
+        if: matrix.config == 'cibuildwheel-tensorflow'
+        shell: bash
+        run: |
+          if [ -s .cache/discogs-effnet-bs64-1.pb ]; then
+            cp .cache/discogs-effnet-bs64-1.pb discogs-effnet-bs64-1.pb
+            echo "staged discogs-effnet-bs64-1.pb ($(wc -c < discogs-effnet-bs64-1.pb) bytes) for test-sources"
+          else
+            echo "::warning::no verified discogs-effnet-bs64-1.pb available; staging an empty placeholder" \
+                 "so test-command's inference check degrades to imports only instead of failing the build"
+            : > discogs-effnet-bs64-1.pb
+          fi
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.2.1
+        with:
+          config-file: ${{ matrix.config }}.toml
+
+      - uses: actions/upload-artifact@v6
+        with:
+          path: ./wheelhouse/*.whl
+          name: artifact-ubuntu-24.04-arm-${{ matrix.config }}
+
+      # essentia-tensorflow only. Informational listing: the vendoring assertion this
+      # used to make with `unzip -l | grep -qi libtensorflow` now lives in
+      # packaging/verify_wheel_effnet.py, which cibuildwheel's test-command runs
+      # against every built interpreter's *installed* package. That follows the same
+      # import and rpath resolution a user gets, rather than grepping the archive,
+      # and it runs six times here instead of once. One script, not two divergent
+      # implementations of one assertion.
+      - name: Record the wheel contents, tags and sizes
+        if: success() && matrix.config == 'cibuildwheel-tensorflow'
+        shell: bash
+        run: |
+          shopt -s nullglob
+          wheels=(wheelhouse/*.whl)
+          if [ ${#wheels[@]} -eq 0 ]; then echo "no wheels were built"; exit 1; fi
+          for wheel in "${wheels[@]}"; do
+            echo "=== $(basename "$wheel")  ($(wc -c < "$wheel") bytes)"
+            unzip -l "$wheel"
+          done
+
+      - name: Check out the test audio
+        run: git submodule update --init --depth 1 test/audio
+
+      - name: Decode audio with the cp312 and cp314 wheels on stock arm64 Debian images
+        # End-to-end check on stock arm64 Debian images rather than the manylinux
+        # builder: the wheel has to install and decode MP3s with no system
+        # FFmpeg, no libessentia and no build toolchain present. Both ends of the
+        # supported interpreter range, and both configs -- the essentia-tensorflow
+        # wheel vendors the same FFmpeg and has the same decoding path.
+        shell: bash
+        run: |
+          case "${{ matrix.config }}" in
+            cibuildwheel-tensorflow) package=essentia_tensorflow ;;
+            *)                       package=essentia ;;
+          esac
+          for pair in "arm64v8/python:3.12-slim cp312" "arm64v8/python:3.14-slim-bookworm cp314"; do
+            set -- $pair
+            echo "=== $2 on $1"
+            docker run --rm --volume "$PWD":/w --workdir /w "$1" \
+              bash -euxo pipefail -c "pip install --no-cache-dir wheelhouse/$package-*-$2-$2-manylinux*_aarch64.whl && python packaging/verify_wheel_audio.py test/audio/recorded/*.mp3"
+          done
+
+      # The model here is the copy staged before the build, read straight out of the
+      # workspace the container bind-mounts. cibuildwheel's test-command has already
+      # run the same script inside its own test environment for all six interpreters;
+      # this repeats it for two of them somewhere with nothing else installed at all
+      # -- no libtensorflow, no libessentia, no toolchain -- which the cibuildwheel
+      # test venv, sitting inside the manylinux builder, cannot prove.
+      #
+      # `pip show` is printed as well as the inference result: the point of vendoring
+      # libtensorflow is that the runtime dependency list stays numpy, pyyaml and six,
+      # with no `tensorflow` package anywhere. cp314 is the case that decides the
+      # design -- no upstream TensorFlow wheel exists for 3.14 at any version, on any
+      # architecture.
+      - name: Run EfficientNet inference with the cp312 and cp314 wheels on stock arm64 Debian images
+        if: success() && matrix.config == 'cibuildwheel-tensorflow'
+        shell: bash
+        run: |
+          # The containers still run without a model. verify_wheel_effnet.py's import,
+          # vendored-libtensorflow and no-tensorflow-dependency checks need neither the
+          # model nor the network, and they are the part only a clean container can
+          # prove; the script skips just the inference, with its own loud warning. This
+          # line puts the same fact in the job summary, where a degraded run is visible
+          # without opening the log.
+          if [ ! -s discogs-effnet-bs64-1.pb ]; then
+            echo "::warning::no discogs-effnet-bs64-1.pb staged (essentia.upf.edu was unreachable" \
+                 "or served a bad checksum); the clean-container checks run without inference"
+          fi
+          for pair in "arm64v8/python:3.12-slim cp312" "arm64v8/python:3.14-slim-bookworm cp314"; do
+            set -- $pair
+            echo "=== $2 on $1"
+            docker run --rm --volume "$PWD":/w --workdir /w "$1" \
+              bash -euxo pipefail -c "pip install --no-cache-dir wheelhouse/essentia_tensorflow-*-$2-$2-manylinux*_aarch64.whl && pip show essentia-tensorflow | grep -E '^(Name|Version|Requires):' && python packaging/verify_wheel_effnet.py discogs-effnet-bs64-1.pb"
+          done
+
+  # =====================================================================================
+  # test_wheels: run the Python unit test suite (test/src/unittests) against an
+  # INSTALLED cp312 wheel, per platform, rather than an in-tree build -- this proves
+  # what a `pip install essentia` user actually gets. See ess-rirg.6.
+  #
+  # Tests that cannot pass here (TensorflowPredict* and its wrapper algorithms, absent
+  # from the base non-tensorflow wheel; Gaia2, only ever linked into the x86_64 Linux
+  # base wheel) are excluded through test/src/unittests/ci_skiplist.txt, one documented
+  # reason per entry. io/AudioLoader, streaming and FrameCutter run unskipped everywhere.
+  #
+  # Where an essentia-tensorflow wheel exists for the platform -- Linux x86_64, Linux
+  # aarch64 and macOS arm64, which is every platform these workflows build one for --
+  # a separate step installs THAT wheel into an isolated venv and smoke-tests
+  # TensorflowPredictEffnetDiscogs end-to-end against a downloaded model.
+  # =====================================================================================
+  test_wheels:
+    name: Test wheel / ${{ matrix.os }}
+    needs: [build_wheels, build_wheels_linux_aarch64]
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            artifact: artifact-ubuntu-24.04-cibuildwheel
+            tf_artifact: artifact-ubuntu-24.04-cibuildwheel-tensorflow
+          - os: ubuntu-24.04-arm
+            artifact: artifact-ubuntu-24.04-arm-cibuildwheel
+            tf_artifact: artifact-ubuntu-24.04-arm-cibuildwheel-tensorflow
+          - os: macos-15
+            artifact: artifact-macos-15-cibuildwheel
+            tf_artifact: artifact-macos-15-cibuildwheel-tensorflow
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Fetch the test audio fixtures submodule
+        run: git submodule update --init test/audio
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - uses: actions/download-artifact@v6
+        with:
+          name: ${{ matrix.artifact }}
+          path: wheelhouse
+
+      - name: Install the cp312 wheel and test-only dependencies
+        # numpy/pyyaml/six ride in as the wheel's own install_requires.
+        # scikit-learn is test-only (test/src/unittests/standard/test_tensornormalize.py).
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install wheelhouse/essentia-*-cp312-*.whl scikit-learn
+
+      - name: Run the Python unit test suite
+        run: |
+          skip_args=$(awk 'NF && $1 !~ /^#/ {print "-"$1}' test/src/unittests/ci_skiplist.txt)
+          echo "Skipping (see test/src/unittests/ci_skiplist.txt): $skip_args"
+          python3 test/src/unittests/all_tests.py $skip_args
+
+      - name: Download the essentia-tensorflow wheel
+        if: matrix.tf_artifact != ''
+        uses: actions/download-artifact@v6
+        with:
+          name: ${{ matrix.tf_artifact }}
+          path: wheelhouse-tensorflow
+
+      - name: TensorFlow smoke test (TensorflowPredictEffnetDiscogs)
+        if: matrix.tf_artifact != ''
+        # Isolated venv: essentia-tensorflow conflicts with the plain essentia wheel
+        # installed above (same import name, different shared objects).
+        run: |
+          python3 -m venv /tmp/tf-venv
+          source /tmp/tf-venv/bin/activate
+          python3 -m pip install --upgrade pip
+
+          if ! pip install wheelhouse-tensorflow/essentia_tensorflow-*-cp312-*.whl; then
+            echo "SKIP: the essentia-tensorflow wheel refused to install on this runner" \
+                 "(expected on macos-15 for the arm64 build, which is tagged for a newer" \
+                 "macOS than this runner ships). Skipping the TensorFlow smoke test."
+            exit 0
+          fi
+
+          curl -fsSL -o /tmp/discogs-effnet-bs64-1.pb \
+            https://essentia.upf.edu/models/music-style-classification/discogs-effnet/discogs-effnet-bs64-1.pb
+
+          python3 - <<'PY'
+          import essentia.standard as es
+
+          audio = es.MonoLoader(filename='test/audio/recorded/techno_loop.wav', sampleRate=16000)()
+          assert len(audio) > 0, 'MonoLoader decoded 0 samples'
+
+          activations = es.TensorflowPredictEffnetDiscogs(graphFilename='/tmp/discogs-effnet-bs64-1.pb')(audio)
+          assert len(activations) > 0, 'TensorflowPredictEffnetDiscogs produced no output'
+          print(f'OK: {len(activations)} activation frames from techno_loop.wav')
+          PY

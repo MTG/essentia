@@ -4,6 +4,23 @@
 manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"
 manylinux-i686-image = "mtgupf/essentia-builds:manylinux2014_i686"
 
+# There is no MTG-owned builder image for aarch64, so that architecture uses the
+# upstream PyPA image and builds the static 3rdparty dependencies itself (see the
+# build_wheels_linux_aarch64 job in
+# .github/workflows/build-wheels-cibuildwheel.yml).
+#
+# manylinux_2_28 (AlmaLinux 8, glibc 2.28, GCC 14) rather than manylinux2014
+# (CentOS 7, glibc 2.17): every arm64 base image these wheels target is newer
+# than glibc 2.28 -- Debian 12 bookworm, the base of the python:3.x-slim images,
+# is 2.36 -- while manylinux2014_aarch64 is frozen on a toolchain so old that
+# recent numpy releases no longer publish wheels for it, which is exactly the
+# problem packaging/manylinux2014-constraints.txt works around on x86_64.
+#
+# Pinned by tag, not :latest, so the actions/cache key for the prebuilt
+# dependencies stays stable and a rebuilt upstream image cannot silently change
+# the toolchain under a warm cache.
+manylinux-aarch64-image = "quay.io/pypa/manylinux_2_28_aarch64:2026.09.02-0"
+
 # Skip selectors:
 # - cp38: project does not target Python 3.8.
 # - *t-*: free-threaded (no-GIL) builds. The Essentia C bindings rely on
@@ -13,10 +30,27 @@ manylinux-i686-image = "mtgupf/essentia-builds:manylinux2014_i686"
 # - *-musllinux*, *i686: not supported by our manylinux2014 build images.
 skip = ["*cp38*", "*t-*", "*-musllinux*", "*i686"]
 
-environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
+# PIP_CONSTRAINT caps numpy below 2.5: newer releases only ship
+# manylinux_2_28 wheels and their sdist needs GCC >= 10.3, which the
+# manylinux2014 images do not have.
+environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, PIP_CONSTRAINT="/project/packaging/manylinux2014-constraints.txt" }
 
 # Use system's Python3 to build Essentia.
 before-all = [
+  # The builder image's FFmpeg .pc files carry -latomic, and this toolchain
+  # links with --no-as-needed, so the Python extension comes out with a NEEDED
+  # on libatomic.so.1 whether or not it uses one. It does not: `nm -D
+  # --undefined-only` on the built extension finds no __atomic_* or libat_*
+  # symbol at all. auditwheel then leaves libatomic external, because it is on
+  # the manylinux policy allowlist, and the wheel dies at import on any image
+  # that does not ship libatomic1 -- python:3.x-slim, for one. Drop the flag.
+  #
+  # aarch64 solves the same problem in packaging/build_ffmpeg.sh by rewriting
+  # -latomic to -l:libatomic.a. That is not available here: these .pc files come
+  # from the image rather than from our scripts, and the devtoolset-10
+  # libatomic.a is not built PIC, so linking it into a shared object fails with
+  # "relocation R_X86_64_32 against hidden symbol ... can not be used".
+  "sed -i -e 's/ -latomic//g' /usr/local/lib/pkgconfig/lib*.pc",
   "python3 waf configure --with-gaia --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
   "python3 waf",
   "python3 waf install",
@@ -44,6 +78,39 @@ before-all = [
 ]
 
 test-command = "python -c 'import essentia; import essentia.standard; import essentia.streaming; from essentia.standard import MonoLoader, MetadataReader, YamlInput, Chromaprinter'"
+
+[[tool.cibuildwheel.overrides]]
+select = "*-manylinux_aarch64"
+
+# Same shape as the x86_64 build -- static 3rdparty dependencies, libessentia
+# built once per container in before-all, then one python extension per
+# interpreter -- with three differences:
+#
+#  - The dependencies are not baked into the builder image. They are built by
+#    the workflow into packaging/debian_3rdparty (which cibuildwheel copies into
+#    the container along with the rest of the project), so pkg-config is pointed
+#    at /project/packaging/debian_3rdparty/lib/pkgconfig. /usr/local/lib/pkgconfig
+#    is kept on PKG_CONFIG_PATH so the per-interpreter `waf configure
+#    --only-python` in setup.py can still find the essentia.pc that
+#    `waf install` writes there.
+#
+#  - No --with-gaia. gaia needs Qt 4.8.4 (2012), which ships no AArch64 mkspec
+#    and does not build on this toolchain. Nothing in the wheel's tested surface
+#    -- MonoLoader, MetadataReader, YamlInput, Chromaprinter -- needs gaia; only
+#    the gaia-backed classifier algorithms do, and they are absent from the
+#    aarch64 wheels. Revisit if/when gaia gains a Qt5 build.
+#
+#  - No PIP_CONSTRAINT. The numpy < 2.5 cap exists only because manylinux2014
+#    has no GCC >= 10.3 to compile the numpy sdist; manylinux_2_28 ships GCC 14
+#    and numpy publishes manylinux_2_28 aarch64 wheels.
+environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, PKG_CONFIG_PATH="/project/packaging/debian_3rdparty/lib/pkgconfig:/usr/local/lib/pkgconfig" }
+
+before-all = [
+  "python3 waf configure --build-static --static-dependencies --pkg-config-path=\"/project/packaging/debian_3rdparty/lib/pkgconfig\"",
+  "python3 waf",
+  "python3 waf install",
+]
+
 
 [[tool.cibuildwheel.overrides]]
 select = "*macosx_arm64*"

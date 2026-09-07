@@ -58,7 +58,7 @@ class TestGaiaTransform(TestCase):
 
         for f in testfiles:
             predicted = transfo(YamlInput(filename = f)())['genre']
-            self.assertEquals(predicted, gt[os.path.split(f)[-1][:-4]])
+            self.assertEqual(predicted, gt[os.path.split(f)[-1][:-4]])
 
     def testSingleDesc(self):
         self.dotest('singledesc')
@@ -78,10 +78,10 @@ class TestGaiaTransform(TestCase):
 
         for f in testfiles:
             predicted = transfo(YamlInput(filename = f)())
-            self.assertEquals(predicted['genre.value'], gt[os.path.split(f)[-1][:-4]])
+            self.assertEqual(predicted['genre.value'], gt[os.path.split(f)[-1][:-4]])
             classes = [ d for d in predicted.descriptorNames() if d.startswith('genre.all') ]
             probs = [ predicted[d] for d in classes ]
-            self.assertEquals(predicted['genre.probability'], max(probs))
+            self.assertEqual(predicted['genre.probability'], max(probs))
 
     def testEmpty(self):
         pass
