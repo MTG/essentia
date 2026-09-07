@@ -12,12 +12,23 @@
 #                   tarball needs exactly that; the Homebrew bottle needs 2.27.
 #   linux aarch64   Homebrew `libtensorflow` bottle 2.21.0, from ghcr.io. Google
 #                   publishes no linux-arm64 libtensorflow, at any version.
-#   macOS arm64     Google tarball 2.18.1, the last macOS release published.
-#   macOS x86_64    Google tarball 2.16.2, the last darwin-x86_64 release.
+#   macOS arm64     Homebrew `libtensorflow` bottle 2.21.0 (arm64_sequoia), from
+#                   ghcr.io, built for macOS 15.0 since the formula started
+#                   pinning its deployment target (Homebrew/homebrew-core#302294).
+#   macOS x86_64    Google tarball 2.16.2, the last darwin-x86_64 release. Homebrew
+#                   no longer builds an Intel macOS bottle for this formula.
 #
 # Every URL, checksum and version is pinned in packaging/build_config.sh and read
 # from there, so this script has no version knowledge of its own. Downloads are
 # verified against the pinned SHA256 before anything is unpacked.
+#
+# A macOS bottle is not usable as unpacked: it is bottled `cellar: :any`, so its
+# dylib ids read `@@HOMEBREW_PREFIX@@/opt/libtensorflow/lib/<name>`, a placeholder
+# `brew` rewrites when it pours. Linking against it as-is records that placeholder
+# in the extension and delocate cannot resolve it. This script does what brew
+# does: rewrites each id to its real location under <prefix>/lib, then re-signs
+# ad hoc, because install_name_tool invalidates the signature and the arm64
+# kernel kills any process that loads an invalidly signed library.
 #
 # The generated tensorflow.pc carries `-Wl,-rpath,${libdir}`, which is not
 # decoration: without it the linker records a NEEDED on libtensorflow.so.2 /
@@ -157,11 +168,56 @@ root=${header%/include/tensorflow/c/c_api.h}
 # under the headers installed here.
 rm -rf "$PREFIX"/lib/libtensorflow.so* "$PREFIX"/lib/libtensorflow_framework.so* \
        "$PREFIX"/lib/libtensorflow.*dylib "$PREFIX"/lib/libtensorflow_framework.*dylib \
-       "$PREFIX"/lib/pkgconfig/tensorflow.pc "$PREFIX"/include/tensorflow
+       "$PREFIX"/lib/pkgconfig/tensorflow.pc \
+       "$PREFIX"/include/tensorflow "$PREFIX"/include/tsl "$PREFIX"/include/xla
 
+# A Homebrew bottle also ships lib/pkgconfig/tensorflow.pc, but with placeholder
+# paths and without the rpath the comment at the top explains; the one written
+# below replaces it, so it is not copied at all.
 mkdir -p "$PREFIX/lib/pkgconfig" "$PREFIX/include"
 cp -a "$root/include/." "$PREFIX/include/"
-cp -a "$root/lib/." "$PREFIX/lib/"
+for entry in "$root"/lib/*; do
+    case "$(basename "$entry")" in
+        pkgconfig) continue ;;
+    esac
+    cp -a "$entry" "$PREFIX/lib/"
+done
+
+# A bottle's files unpack read-only (444) and cp -a keeps that. As root, which
+# is what the Linux build containers run as, it makes no difference; as a user,
+# which is what the macOS runners are, nothing could later overwrite them in
+# place. Google's tarballs are already writable, so this is a no-op for them.
+for entry in "$root"/include/* "$root"/lib/*; do
+    [ -e "$PREFIX/${entry#"$root/"}" ] || continue
+    chmod -R u+w "$PREFIX/${entry#"$root/"}"
+done
+
+# Relocate a Homebrew macOS bottle (see the header). Only regular files: the
+# versioned dylib carries the id, the symlinks just point at it. Only ids whose
+# value is a Homebrew placeholder, so Google's tarballs (id @rpath/<name>) and
+# any already-relocated prefix are left alone. Neither library loads the other
+# through a placeholder path (libtensorflow is monolithic here), so LC_LOAD_DYLIB
+# entries need no rewriting; the loop asserts that rather than assuming it.
+case "$PLATFORM" in
+    macos-*)
+        for lib in "$PREFIX"/lib/libtensorflow*.dylib; do
+            [ -f "$lib" ] && [ ! -L "$lib" ] || continue
+            id=$(otool -D "$lib" | sed -n '2p')
+            case "$id" in
+                @@HOMEBREW_*)
+                    echo "  relocating $(basename "$lib"): $id"
+                    install_name_tool -id "$PREFIX/lib/${id##*/}" "$lib"
+                    codesign --force --sign - "$lib"
+                    ;;
+            esac
+            if otool -L "$lib" | grep -q '@@HOMEBREW_'; then
+                echo "error: $(basename "$lib") still references a Homebrew placeholder:" >&2
+                otool -L "$lib" | grep '@@HOMEBREW_' >&2
+                exit 1
+            fi
+        done
+        ;;
+esac
 
 cat > "$PREFIX/lib/pkgconfig/tensorflow.pc" <<EOF
 prefix=$PREFIX

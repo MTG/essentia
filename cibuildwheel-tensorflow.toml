@@ -7,18 +7,22 @@
 #
 # What changed is only where the library comes from. It used to be a Bazel-built
 # libtensorflow 2.5 baked into the Linux builder image, and `brew install
-# tensorflow` on macOS. The Homebrew bottle is the reason MACOSX_DEPLOYMENT_TARGET
-# had been raised to 26.2 -- delocate takes the highest minimum OS version of
-# everything it vendors -- which in turn made the x86_64 wheel uninstallable on
-# the runner that built it and left its test-command commented out.
+# tensorflow` on macOS, whichever bottle the runner happened to pour. That is
+# how MACOSX_DEPLOYMENT_TARGET came to be raised to 26.2: the libtensorflow
+# formula let Bazel default the deployment target to the builder's SDK, delocate
+# takes the highest minimum OS version of everything it vendors, and the x86_64
+# wheel ended up uninstallable on the runner that built it, with its
+# test-command commented out.
 #
-# packaging/fetch_libtensorflow.sh now installs a prebuilt library per platform,
-# from pins in packaging/build_config.sh: Google's official libtensorflow-cpu
-# tarballs on macOS, whose minimum OS versions are 12.0 and 10.15 and so impose
-# no floor of their own, and Homebrew's Linux bottles, which are the only
-# prebuilt libtensorflow still published for aarch64. It writes a tensorflow.pc,
-# and `waf configure --with-tensorflow` then proves the C API links before
-# anything is built.
+# packaging/fetch_libtensorflow.sh now installs a pinned prebuilt library per
+# platform, from packaging/build_config.sh: Homebrew's 2.21.0 bottles on Linux
+# aarch64 and macOS arm64, addressed by digest rather than poured by brew (the
+# formula pins its deployment target since Homebrew/homebrew-core#302294, so the
+# arm64_sequoia bottle is built for 15.0, the floor the wheels target anyway),
+# and Google's official libtensorflow-cpu tarballs on Linux x86_64 (glibc 2.17)
+# and macOS x86_64 (no Homebrew bottle exists any more). It writes a
+# tensorflow.pc, and `waf configure --with-tensorflow` then proves the C API
+# links before anything is built.
 #
 # The repair step is the stock one, with no --exclude: auditwheel and delocate
 # vendor libtensorflow exactly as they vendor FFmpeg and the rest.
@@ -121,8 +125,9 @@ test-sources = ["packaging/verify_wheel_effnet.py", "discogs-effnet-bs64-1.pb"]
 skip = ["*cp38*", "*t-*"]
 
 # MACOSX_DEPLOYMENT_TARGET matches cibuildwheel.toml. It no longer has to follow
-# whatever floor a Homebrew libtensorflow bottle was last built with, because the
-# library now comes from the official tarball, built at 10.15 on this platform.
+# whatever floor a Homebrew libtensorflow bottle was last built with: on this
+# platform (x86_64) the library comes from the official tarball, built at 10.15,
+# and on arm64 (override below) from a bottle pinned by digest and built for 15.0.
 #
 # PKG_CONFIG_PATH is prepended to pkg-config's own search path, which is how the
 # Homebrew .pc files for eigen, FFmpeg and the rest keep being found. Note that
@@ -202,6 +207,11 @@ select = "*macosx_arm64*"
 # See linux section for skip rationale.
 skip = ["*cp38*", "*t-*"]
 
+# libtensorflow here is Homebrew's arm64_sequoia bottle, fetched by digest and
+# relocated by packaging/fetch_libtensorflow.sh (it is not `brew install`ed, so
+# nothing depends on which bottle this runner would pour). Its minimum macOS is
+# 15.0, the same as the audio bottles installed below, so the wheel tag stays
+# macosx_15_0 and MACOSX_DEPLOYMENT_TARGET stays in step with cibuildwheel.toml.
 environment = { PROJECT_NAME="essentia-tensorflow", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, ESSENTIA_MACOSX_ARM64=1, MACOSX_DEPLOYMENT_TARGET=15.0, PKG_CONFIG_PATH="$HOME/libtensorflow/lib/pkgconfig" }
 
 before-all = [

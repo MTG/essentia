@@ -53,14 +53,14 @@ Both ``essentia`` and ``essentia-tensorflow`` publish wheels for CPython 3.9 thr
        Qt 4.8, which has no AArch64 build.
    * - macOS arm64
      - ``macosx_15_0``
-     - Google's official tarball, TensorFlow 2.18.1
-     - The library itself only requires macOS 12.0; the 15.0 wheel floor comes from the
-       Homebrew audio libraries the wheel also vendors (FFmpeg, TagLib, ...), not from
-       TensorFlow.
+     - Homebrew ``libtensorflow`` 2.21.0 bottle (``arm64_sequoia``)
+     - Built for macOS 15.0, the same floor as the Homebrew audio libraries the wheel also
+       vendors (FFmpeg, TagLib, ...).
    * - macOS x86_64
      - ``macosx_15_0``
      - Google's official tarball, TensorFlow 2.16.2
-     - 2.16.2 is the last darwin-x86_64 release Google published.
+     - 2.16.2 is the last darwin-x86_64 release Google published, and Homebrew no longer
+       builds an Intel macOS bottle for ``libtensorflow``.
 
 A source distribution (sdist) is also published, for any platform or Python version without
 a prebuilt wheel; see `Installing from the sdist`_ below.
@@ -280,18 +280,21 @@ The reproducible path the published wheels use
     packaging/fetch_libtensorflow.sh --prefix ~/.local
     export PKG_CONFIG_PATH=~/.local/lib/pkgconfig:$PKG_CONFIG_PATH
 
-  These are Google's official ``libtensorflow-cpu`` tarballs, at
-  ``https://storage.googleapis.com/tensorflow/versions/<version>/libtensorflow-cpu-<platform>.tar.gz``.
-  Google only ever published that ``versions/<version>/`` layout for TensorFlow 2.16
-  through 2.18.1 -- the channel is frozen there, on every platform where it exists, and it
-  never included a linux-arm64 build. The older
-  ``.../tensorflow/libtensorflow/libtensorflow-cpu-<platform>-<version>.tar.gz`` path was
-  retired at the same point and no longer resolves; don't probe it when checking whether a
-  given platform/version has a tarball, it will falsely look unavailable. On
-  linux/aarch64, where Google has never published a tarball under either path,
-  ``fetch_libtensorflow.sh`` instead pulls the Homebrew ``libtensorflow`` bottle. On macOS
-  x86_64, 2.16.2 is the newest version Google published a tarball for; every other platform
-  goes up to 2.18.1.
+  On linux/aarch64 and macOS arm64 these are Homebrew's ``libtensorflow`` 2.21.0 bottles,
+  downloaded by digest from the GitHub Container Registry rather than installed with
+  ``brew`` (so the pin does not move when Homebrew rebuilds). On macOS the script also
+  rewrites the bottle's install names from Homebrew's placeholder to the prefix and re-signs
+  the libraries, which is what ``brew`` does when it pours a bottle. On linux x86_64 and
+  macOS x86_64 they are Google's official ``libtensorflow-cpu`` tarballs, at
+  ``https://storage.googleapis.com/tensorflow/versions/<version>/libtensorflow-cpu-<platform>.tar.gz``:
+  the linux x86_64 wheel is built on a glibc 2.17 image the bottle is too new for, and no
+  Homebrew bottle exists for Intel macOS. Google only ever published that
+  ``versions/<version>/`` layout for TensorFlow 2.16 through 2.18.1 -- the channel is frozen
+  there, on every platform where it exists, and it never included a linux-arm64 build. The
+  older ``.../tensorflow/libtensorflow/libtensorflow-cpu-<platform>-<version>.tar.gz`` path
+  was retired at the same point and no longer resolves; don't probe it when checking whether
+  a given platform/version has a tarball, it will falsely look unavailable. On macOS x86_64,
+  2.16.2 is the newest version Google published a tarball for.
 
 Your own ``tensorflow.pc``
   Write one and put its directory on ``PKG_CONFIG_PATH``. Its ``Cflags`` must make

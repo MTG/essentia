@@ -448,3 +448,37 @@ Free-threaded (`*t-*`) builds stay skipped for the separate reason already docum
    `libtensorflow-cpu-darwin-arm64` 2.17.0 tarball on macOS and the Homebrew `arm64_linux`
    bottle on linux, keeping the self-contained contract and accepting the 2.18.0 ceiling on
    the darwin channel.
+
+## Postscript (2026-09-07): the Homebrew floor is fixed; macOS arm64 moved to the bottle
+
+The measurements above stand as taken, but the premise of Candidate C's NO-GO no longer
+holds. The 26.2 floor was a formula bug, reported as
+[Homebrew/homebrew-core#302034](https://github.com/Homebrew/homebrew-core/issues/302034)
+and fixed by [Homebrew/homebrew-core#302294](https://github.com/Homebrew/homebrew-core/pull/302294)
+(merged 2026-09-07): Bazel's Apple toolchain passes an explicit `-target` whose macOS
+version defaults to the SDK, so every bottle carried its builder's SDK as `minos`. The
+formula now passes `--macos_minimum_os=#{MacOS.version}`, and the rebuilt 2.21.0 bottles
+(`rebuild 1`) measure, again from `LC_BUILD_VERSION` after pulling from ghcr.io:
+
+| bottle tag | minos | sdk | notes |
+| --- | --- | --- | --- |
+| `arm64_sequoia` (`4646a8c4…0690f176`) | **15.0** on all 9 Mach-O files | 26.2 | replaces the Google 2.18.1 tarball on macOS arm64 |
+| `arm64_linux` (`b761769c…9293484444`) | max GLIBC 2.27 | — | unchanged floor; pin bumped from the pre-rebuild digest |
+| `sonoma` (x86_64) | not published | — | the rebuild dropped the Intel bottle; macOS x86_64 stays on the Google 2.16.2 tarball |
+
+Two things the bottle route needs that the tarball did not, both handled in
+`packaging/fetch_libtensorflow.sh`:
+
+- The macOS bottle is `cellar: :any`, so its dylib ids are
+  `@@HOMEBREW_PREFIX@@/opt/libtensorflow/lib/<name>`, a placeholder `brew` rewrites at pour
+  time. Linked as-is, the extension records the placeholder and delocate cannot resolve it.
+  The script rewrites each id to `<prefix>/lib/<name>` with `install_name_tool -id`.
+- `install_name_tool` invalidates the ad-hoc signature, and the arm64 kernel kills a process
+  that loads an invalidly signed dylib (verified: a smoke program exits 137 before, prints
+  `TF_Version: 2.21.0` after `codesign --force --sign -`). `libtensorflow.2.dylib` in this
+  build does not load `libtensorflow_framework` at all, so only the ids change.
+
+Fetching by digest rather than `brew install` is what keeps this from regressing: the pin
+names one bottle whose floor was measured, and a future rebuild cannot move it. The
+`arm64_sonoma` bottle (minos 14.0) was not chosen because the other Homebrew audio bottles
+on the `macos-15` runner already set the wheel floor to 15.0, so it would buy nothing.
