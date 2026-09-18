@@ -33,7 +33,7 @@ except:
     pass
 
 # we don't want to get too chatty when running all the tests
-essentia.log.info = False
+# essentia.log.info = False
 # essentia.log.debug += essentia.EAll
 # essentia.log.debug -= essentia.EConnectors
 
