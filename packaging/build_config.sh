@@ -21,7 +21,7 @@ LIBSAMPLERATE_VERSION=libsamplerate-0.1.9
 LIBYAML_VERSION=yaml-0.1.5
 CHROMAPRINT_VERSION=1.5.1
 QT_SOURCE_URL=https://download.qt.io/archive/qt/4.8/4.8.4/qt-everywhere-opensource-src-4.8.4.tar.gz
-GAIA_VERSION=2.4.6-86-ged433ed
+GAIA_VERSION=2.4.7
 TENSORFLOW_VERSION=2.17.0
 
 FFMPEG_AUDIO_FLAGS="
