@@ -13,9 +13,11 @@ QT_FILE=${QT_SOURCE_URL##*/}
 curl -SLO $QT_SOURCE_URL
 
 tar -xf $QT_FILE
-cd $(basename $QT_FILE .tar.gz)
 
-./configure -prefix $PREFIX -static -opensource -confirm-license $QT_FLAGS
+QT_DIR=$(find . -mindepth 1 -maxdepth 1 -type d | head -n 1)
+cd "$QT_DIR"
+
+./configure -prefix $PREFIX -shared -opensource -confirm-license $QT_FLAGS
 
 make
 make install
