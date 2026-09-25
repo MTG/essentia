@@ -153,6 +153,7 @@ void AudioLoader::openAudioFile(const string& filename) {
     }
 
     av_init_packet(&_packet);
+    _packetPending = false;
 
     _decodedFrame = av_frame_alloc();
     if (!_decodedFrame) {
@@ -183,6 +184,7 @@ void AudioLoader::closeAudioFile() {
     // free AVPacket using modern API
     // TODO: use a variable for whether _packet is initialized or not
     av_packet_unref(&_packet);
+    _packetPending = false;
     _demuxCtx = 0;
     _audioCtx = 0;
     _streams.clear();
@@ -224,39 +226,45 @@ AlgorithmStatus AudioLoader::process() {
         throw EssentiaException("AudioLoader: Trying to call process() on an AudioLoader algo which hasn't been correctly configured.");
     }
 
-    // read frames until we get a good one
-    do {
-        int result = av_read_frame(_demuxCtx, &_packet);
-        //E_DEBUG(EAlgorithm, "AudioLoader: called av_read_frame(), got result = " << result);
-        if (result != 0) {
-            // 0 = OK, < 0 = error or EOF
-            if (result != AVERROR_EOF) {
-                char errstring[1204];
-                av_strerror(result, errstring, sizeof(errstring));
-                ostringstream msg;
-                msg << "AudioLoader: Error reading frame: " << errstring;
-                E_WARNING(msg.str());
+    // read frames until we get a good one -- unless the decoder refused the
+    // previous packet (EAGAIN from avcodec_send_packet): that packet has NOT
+    // been consumed yet, so it must be resent, not replaced. decodePacket()
+    // tracks this in _packetPending.
+    if (!_packetPending) {
+        do {
+            int result = av_read_frame(_demuxCtx, &_packet);
+            //E_DEBUG(EAlgorithm, "AudioLoader: called av_read_frame(), got result = " << result);
+            if (result != 0) {
+                // 0 = OK, < 0 = error or EOF
+                if (result != AVERROR_EOF) {
+                    char errstring[1204];
+                    av_strerror(result, errstring, sizeof(errstring));
+                    ostringstream msg;
+                    msg << "AudioLoader: Error reading frame: " << errstring;
+                    E_WARNING(msg.str());
+                }
+                shouldStop(true);
+                flushPacket();
+                closeAudioFile();
+                if (_computeMD5) {
+                    av_md5_final(_md5Encoded, _checksum);
+                    _md5.push(uint8_t_to_hex(_checksum, 16));
+                }
+                else {
+                    string md5 = "";
+                    _md5.push(md5);
+                }
+                return FINISHED;
             }
-            shouldStop(true);
-            flushPacket();
-            closeAudioFile();
-            if (_computeMD5) {
-                av_md5_final(_md5Encoded, _checksum);
-                _md5.push(uint8_t_to_hex(_checksum, 16));
-            }
-            else {
-                string md5 = "";
-                _md5.push(md5);
-            }
-            return FINISHED;
-        }
-    } while (_packet.stream_index != _streamIdx);
+        } while (_packet.stream_index != _streamIdx);
 
-    // compute md5 first
-    if (_computeMD5) {
-        av_md5_update(_md5Encoded, _packet.data, _packet.size);
+        // compute md5 first (once per packet: a pending packet being resent
+        // has already been hashed)
+        if (_computeMD5) {
+            av_md5_update(_md5Encoded, _packet.data, _packet.size);
+        }
     }
-    
+
     // decode ONE frame from this packet (if any). decodePacket() will
     // *not* mutate _packet.data/_packet.size. It will set _dataSize to number of bytes written.
     int consumed = decodePacket();
@@ -269,9 +277,14 @@ AlgorithmStatus AudioLoader::process() {
         _dataSize = 0;
     }
     
-    // needs to be freed using modern API !!
-    av_packet_unref(&_packet);
-    
+    // Unref the packet ONLY once the decoder has accepted it. A pending packet
+    // (send returned EAGAIN) stays alive to be resent on the next call; unrefing
+    // it here would silently drop its compressed audio.
+    if (!_packetPending) {
+        // needs to be freed using modern API !!
+        av_packet_unref(&_packet);
+    }
+
     return OK;
 }
 
@@ -361,17 +374,20 @@ void AudioLoader::flushPacket() {
     empty.data = NULL;
     empty.size = 0;
 
-    // keep draining until decoder stops returning frames
+    // Enter draining mode ONCE, then receive until the decoder is empty. Sending
+    // the drain packet again on every iteration would answer AVERROR_EOF from the
+    // second send onwards, which used to abort the loop with frames still buffered
+    // -- with multi-frame packets that silently truncated the tail of the stream.
+    int send_result = avcodec_send_packet(_audioCtx, &empty);
+    if (send_result < 0 && send_result != AVERROR(EAGAIN) && send_result != AVERROR_EOF) {
+        return;
+    }
+
     while (true) {
         _dataSize = 0;
-        int send_result = avcodec_send_packet(_audioCtx, &empty);
-        if (send_result < 0 && send_result != AVERROR(EAGAIN)) {
-            break;
-        }
         int receive_result = avcodec_receive_frame(_audioCtx, _decodedFrame);
-        if (receive_result == AVERROR(EAGAIN) || receive_result == AVERROR_EOF) {
-            break;
-        } else if (receive_result < 0) {
+        if (receive_result < 0) {
+            // AVERROR_EOF: fully drained; anything else: nothing more to do either
             break;
         }
 
@@ -415,13 +431,21 @@ int AudioLoader::decodePacket() {
     // Default: no bytes produced yet
     _dataSize = 0;
 
-    // Modern API: send the full packet to the decoder once
+    // Modern API: send the packet to the decoder. This is also how a packet the
+    // decoder previously refused (EAGAIN) gets resent -- FFmpeg's contract is
+    // that after EAGAIN the SAME packet must be sent again once output has been
+    // received, so we send unconditionally and track acceptance in _packetPending.
     int send_result = avcodec_send_packet(_audioCtx, &_packet);
-    if (send_result == AVERROR(EAGAIN)) {
-        // decoder not ready to accept packet; try receiving frames first
-        // but for streaming we simply try to receive a frame below
-    } else if (send_result < 0) {
-        // fatal decoding error for this packet
+    if (send_result == 0) {
+        // packet accepted: process() may unref it and read the next one
+        _packetPending = false;
+    } else if (send_result == AVERROR(EAGAIN)) {
+        // decoder holds buffered output and refused the packet: receive one
+        // frame below and keep the packet alive so the next call resends it
+        _packetPending = true;
+    } else {
+        // fatal decoding error for this packet; drop it and move on
+        _packetPending = false;
         char errstring[1204];
         av_strerror(send_result, errstring, sizeof(errstring));
         E_WARNING("AudioLoader: avcodec_send_packet error: " << errstring);
