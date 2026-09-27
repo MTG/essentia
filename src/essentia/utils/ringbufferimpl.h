@@ -125,13 +125,16 @@ class RingBufferImpl {
     kAvailable, kSpace
   } _waitingCondition;
 
-  RingBufferImpl(WaitingCondition c, int bufferSize)
+  bool _shouldBlock;
+
+  RingBufferImpl(WaitingCondition c, int bufferSize, bool shouldBlock = true)
   : _bufferSize(bufferSize)
   , _writeIndex(0)
   , _readIndex(0)
   , _available(0)
   , _space(_bufferSize)
   , _waitingCondition(c)
+  , _shouldBlock(shouldBlock)
   {
     _buffer = new Real[_bufferSize];
   }
@@ -150,7 +153,7 @@ class RingBufferImpl {
     _buffer = new Real[_bufferSize];
   }
 
-  void waitAvailable(void)
+  bool waitAvailable(void)
   {
     // this function should only be called if the waiting condition
     // has been set accordingly
@@ -158,15 +161,17 @@ class RingBufferImpl {
 
     condition.lock();
 
-    while (_available == 0)
+    while (_available == 0 && _shouldBlock)
     {
       condition.wait();
     }
 
+    bool result = _available > 0;
     condition.unlock();
+    return result;
   }
 
-  void waitSpace(void)
+  bool waitSpace(void)
   {
     // this function should only be called if the waiting condition
     // has been set accordingly
@@ -174,12 +179,14 @@ class RingBufferImpl {
 
     condition.lock();
 
-    while (_space == 0)
+    while (_space == 0 && _shouldBlock)
     {
       condition.wait();
     }
 
+    bool result = _space > 0;
     condition.unlock();
+    return result;
   }
 
   int add(const Real* inputData, int inputSize)
