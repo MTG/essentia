@@ -65,6 +65,17 @@ void PitchContours::compute() {
   if (peakBins.size() != peakSaliences.size()) {
     throw EssentiaException("PitchContours: peakBins and peakSaliences input vectors must have the same size");
   }
+
+
+  // set duration to zero with empty input and exit
+  if (peakBins.size() ==0 ) {
+     contoursBins.clear();
+     contoursStartTimes.clear();
+     contoursSaliences.clear();
+     duration = 0;
+     return;
+  }  
+
   _numberFrames = peakBins.size();
   duration = _numberFrames * _frameDuration;
 
