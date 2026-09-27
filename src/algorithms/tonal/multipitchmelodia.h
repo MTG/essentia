@@ -84,7 +84,7 @@ class MultiPitchMelodia : public Algorithm {
     declareParameter("magnitudeThreshold", "spectral peak magnitude threshold (maximum allowed difference from the highest peak in dBs)", "[0,inf)",  40);
     declareParameter("magnitudeCompression", "magnitude compression parameter for the salience function (=0 for maximum compression, =1 for no compression)", "(0,1]", 1.0);
     declareParameter("numberHarmonics", "number of considered harmonics", "[1,inf)", 20);
-    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);
+    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "[0,1]", 0.8);
 
     // pitch contour tracking
     declareParameter("peakFrameThreshold", "per-frame salience threshold factor (fraction of the highest peak salience in a frame)", "[0,1]", 0.9);
@@ -167,7 +167,7 @@ class MultiPitchMelodia : public AlgorithmComposite {
     declareParameter("magnitudeThreshold", "peak magnitude threshold (maximum allowed difference from the highest peak in dBs)", "[0,inf)",  40);
     declareParameter("magnitudeCompression", "magnitude compression parameter (=0 for maximum compression, =1 for no compression)", "(0,1]", 1.0);
     declareParameter("numberHarmonics", "number of considered hamonics", "[1,inf)", 20);
-    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "(0,1)", 0.8);
+    declareParameter("harmonicWeight", "harmonic weighting parameter (weight decay ratio between two consequent harmonics, =1 for no decay)", "[0,1]", 0.8);
 
     // pitch salience function peaks
     declareParameter("minFrequency", "the minimum allowed frequency for salience function peaks (ignore peaks below) [Hz]", "[0,inf)", 80.0);
