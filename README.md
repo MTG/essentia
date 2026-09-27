@@ -20,7 +20,8 @@ The library is cross-platform and currently supports Linux, macOS, Windows, iOS 
 
 Install from master for the latest updates.
 
-To use in Python (Linux `x86_64`, `i686`): `pip install essentia` or `pip install essentia-tensorflow`.
+To use in Python (Linux `x86_64`, `i686`): `pip install essentia` or `pip install essentia-tensorflow`.\
+Note: Python `3.12` and newer are not supported.
 
 Docker images: https://hub.docker.com/r/mtgupf/essentia/
 
