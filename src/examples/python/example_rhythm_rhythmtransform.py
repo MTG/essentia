@@ -5,12 +5,12 @@ from essentia import Pool
 try:
     input_file = sys.argv[1]
 except:
-    print("usage: %s <input_file>" % sys.argv[0])
+    print(f"usage: {sys.argv[0]} <input_file>")
     sys.exit()
 
 
 """
-Explanation of Rhythm Transform: 
+Explanation of Rhythm Transform:
 - Mel bands are computed on frames of the size 8192 with the frames sample rate = sampleRate/hopSize = 22050/1024 = 21.5Hz
 - Rhythm transform frame size is equal to 256 Mel bands frames
 - Output vector is of size 256/2 + 1 = 129.
@@ -22,34 +22,40 @@ Explanation of Rhythm Transform:
 """
 
 
-sampleRate   = 22050
-frameSize    = 8192
-hopSize      = 1024
+sampleRate = 22050
+frameSize = 8192
+hopSize = 1024
 rmsFrameSize = 256
-rmsHopSize   = 32
+rmsHopSize = 32
 
 
 loader = MonoLoader(filename=input_file, sampleRate=sampleRate)
-w = Windowing(type='blackmanharris62')
+w = Windowing(type="blackmanharris62")
 spectrum = Spectrum()
-melbands = MelBands(sampleRate=sampleRate, numberBands=40, lowFrequencyBound=0, highFrequencyBound=sampleRate/2)
+melbands = MelBands(
+    sampleRate=sampleRate,
+    numberBands=40,
+    lowFrequencyBound=0,
+    highFrequencyBound=sampleRate / 2,
+)
 
 pool = Pool()
 
-for frame in FrameGenerator(audio=loader(), frameSize=frameSize, hopSize=hopSize, startFromZero=True):
+for frame in FrameGenerator(
+    audio=loader(), frameSize=frameSize, hopSize=hopSize, startFromZero=True
+):
     bands = melbands(spectrum(w(frame)))
-    pool.add('melbands', bands)
+    pool.add("melbands", bands)
 
-print("Mel band frames: %d" % len(pool['melbands']))
-print("Rhythm transform frames: %d" % int(len(pool['melbands']) / 32))
+print("Mel band frames: %d" % len(pool["melbands"]))
+print("Rhythm transform frames: %d" % int(len(pool["melbands"]) / 32))
 
 rhythmtransform = RhythmTransform(frameSize=rmsFrameSize, hopSize=rmsHopSize)
-rt = rhythmtransform(pool['melbands'])
+rt = rhythmtransform(pool["melbands"])
 
 import matplotlib.pyplot as plt
-plt.imshow(rt.T[:,:], aspect = 'auto')
-plt.xlabel('Frames')
-plt.ylabel('Rhythm Transform coefficients')
+
+plt.imshow(rt.T[:, :], aspect="auto")
+plt.xlabel("Frames")
+plt.ylabel("Rhythm Transform coefficients")
 plt.show()
-
-
