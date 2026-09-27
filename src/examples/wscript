@@ -24,7 +24,9 @@ example_sources_fileio = [
 
     ('standard_harmonicmodel', ),
     ('standard_hpsmodel', ),
+    ('standard_HPSS', ),
     ('standard_hprmodel', ),
+    ('standard_HPSS', ),
     ('standard_predominantmask', ),
     ('standard_sinemodel', ),
     ('standard_sinesubtraction', ),
