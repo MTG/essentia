@@ -20,6 +20,7 @@
 #include "tempotapdegara.h"
 #include "essentiamath.h"
 #include <limits>
+#include <random>
 
 using namespace std;
 
@@ -427,10 +428,20 @@ void TempoTapDegara::computeBeatPeriodsDavies(vector<Real> detections,
   _frameCutter->reset();  // TODO reset here for consequent signal inputs, or should the user do it always?
 
   _numberFramesODF = observations.size();
-  // Add noise
+  // Add low-amplitude noise to break ties in the Viterbi path search.
+  // Use a fixed-seed PRNG, re-seeded on every compute, so that repeated
+  // analyses of the same audio produce bitwise-identical results
+  // (https://github.com/MTG/essentia/issues/1097). The previous
+  // implementation used the process-global rand(), whose state advances
+  // across calls, making the output depend on how many times the algorithm
+  // (or anything else using rand()) had run before in the same process.
+  // std::mt19937 with a fixed seed is fully specified by the C++ standard,
+  // so the generated noise is also identical across platforms.
+  std::mt19937 rng(83);
   for (size_t t=0; t<_numberFramesODF; ++t) {
     for (int i=0; i<_hopSizeODF; ++i) {
-      observations[t][i] += 0.0001 * observationsMax * (Real) rand() / RAND_MAX;
+      observations[t][i] += 0.0001 * observationsMax *
+          (Real) rng() / (Real) std::mt19937::max();
     }
   }
 
