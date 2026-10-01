@@ -59,9 +59,26 @@ void EqloudLoader::configure() {
                          INHERIT("sampleRate"),
                          INHERIT("downmix"));
 
-  _trimmer->configure(INHERIT("sampleRate"),
-                      INHERIT("startTime"),
-                      INHERIT("endTime"));
+  // Same change, and the same one exception, as EasyLoader::configure() -- see the comment
+  // there. The loader seeks to startTime and stops at endTime unless a resampler is in the way,
+  // in which case the old decode-and-trim path is kept so existing output does not move.
+  if (_monoLoader->parameter("originalSampleRate").toReal()
+      == parameter("sampleRate").toReal()) {
+    _monoLoader->configure(INHERIT("filename"),
+                           INHERIT("sampleRate"),
+                           INHERIT("downmix"),
+                           INHERIT("startTime"),
+                           INHERIT("endTime"));
+
+    _trimmer->configure("sampleRate", parameter("sampleRate"),
+                        "startTime", 0.0,
+                        "endTime", 1.0e6);
+  }
+  else {
+    _trimmer->configure(INHERIT("sampleRate"),
+                        INHERIT("startTime"),
+                        INHERIT("endTime"));
+  }
 
   // apply a 6dB preamp, as done by all audio players.
   Real scalingFactor = db2amp(parameter("replayGain").toReal() + 6.0);
