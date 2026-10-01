@@ -62,6 +62,13 @@ class _StreamConnector:
             # update connections
             left.output_algo.connections[left].append(right)
 
+            # also keep a back-reference on the sink algorithm: connections
+            # are C++-side, so a connected network must only ever be reclaimed
+            # as a whole. Without this, dropping all references to a source
+            # algorithm would let the garbage collector delete the underlying
+            # C++ network while sink algorithms are still referenced.
+            right.input_algo._upstream.append(left)
+
             return right
 
 
@@ -70,6 +77,12 @@ class _StreamConnector:
 
             # update connections
             left.output_algo.connections[left].append(right)
+
+            # back-reference, see above (a raw _essentia.StreamingAlgorithm
+            # has no instance dictionary, hence the getattr)
+            upstream = getattr(right, '_upstream', None)
+            if upstream is not None:
+                upstream.append(left)
 
             return right
 
@@ -114,6 +127,11 @@ class _StreamConnector:
 
         # call internal disconnect based on connector type
         if isinstance(connector, _StreamConnector):
+            # drop the back-reference that kept the source algorithm alive
+            upstream = getattr(connector.input_algo, '_upstream', None)
+            if upstream is not None and self in upstream:
+                upstream.remove(self)
+
             return _essentia.disconnect(self.output_algo, self.name, connector.input_algo, connector.name)
 
         elif isinstance(connector, tuple):
@@ -156,6 +174,13 @@ def _create_streaming_algo(givenname):
             # keys should be StreamConnectors (outputs) and values should be lists
             # of StreamConnectors/pool tuples/None (inputs)
             self.connections = {}
+
+            # _StreamConnectors of the sources that are connected to this
+            # algorithm's sinks (the reverse direction of 'connections'),
+            # appended to by _StreamConnector.__rshift__. This keeps every
+            # upstream algorithm alive for as long as this algorithm is, so
+            # that a connected network is only ever reclaimed as a whole.
+            self._upstream = []
 
             # populate instance members from sources and sinks
             # we don't descriminate b/w inputs and outputs at this point, put
@@ -314,3 +339,56 @@ class CompositeBase(object):
         elif self.hasInput(name):  return self.inputs[name]
         elif self.hasOutput(name): return self.outputs[name]
         raise NameError('The '+self.name()+ ' CompositeBase algorithm does not have a connector named \''+name+'\'')
+
+
+def disconnectNetwork(*algos):
+    '''Disconnect every connection of the streaming network(s) that contain the
+    given algorithm(s).
+
+    The network is walked in both directions (from sources down to sinks and
+    back up), so passing any single algorithm of a network -- for instance its
+    generator -- is enough to tear the whole network down. Severing a
+    connection immediately releases the C++ resources held by that connection
+    (among others, the internal PoolStorage algorithm that is created when a
+    source is connected to a Pool). Each algorithm then releases its own
+    resources (e.g. its output buffers) as soon as its Python object is
+    reclaimed.
+
+    Note that dropping all references to a network without calling this
+    function also releases all of its C++ resources, but only once the cyclic
+    garbage collector has run: streaming algorithm objects live in reference
+    cycles, so they are not reclaimed by reference counting alone. Call
+    gc.collect() to force immediate reclamation in either case.
+
+    This function accepts partially built networks and algorithms whose
+    connections were already severed; disconnecting is idempotent.
+    '''
+    toVisit = [algo for algo in algos if algo is not None]
+    # keep a strong reference to every visited algorithm so that ids stay
+    # unambiguous while we are still walking
+    visited = {}
+
+    while toVisit:
+        algo = toVisit.pop()
+        if id(algo) in visited: continue
+        visited[id(algo)] = algo
+
+        # walk upstream, so that the whole network is covered no matter which
+        # of its algorithms we were given
+        for source in list(getattr(algo, '_upstream', ())):
+            toVisit.append(source.output_algo)
+
+        # walk downstream, severing every connection on the way
+        connections = getattr(algo, 'connections', None)
+        if not connections: continue
+        for connector, targets in list(connections.items()):
+            for target in list(targets):
+                if isinstance(target, _StreamConnector):
+                    toVisit.append(target.input_algo)
+                    connector.disconnect(target)
+                elif isinstance(target, tuple) or target is None:
+                    connector.disconnect(target)
+                else:
+                    # a FileOutput algorithm: no disconnect is exposed for it,
+                    # it is reclaimed together with the rest of the network
+                    toVisit.append(target)

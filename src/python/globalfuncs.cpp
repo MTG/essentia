@@ -799,6 +799,11 @@ static PyObject* fileOutputConnect(PyObject* notUsed, PyObject* args) {
 
   try {
     streaming::connect(sourceAlg->algo->output(sourceName), *fileout);
+
+    // the FileOutput is now connected to a network: it is not a generator
+    // anymore and will be deleted by the deleteNetwork call of its
+    // generator(s), exactly as in connect() above
+    sinkAlg->isGenerator = false;
   }
   catch (const exception& e) {
     PyErr_SetString(PyExc_TypeError, e.what());
