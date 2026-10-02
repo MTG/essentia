@@ -227,6 +227,38 @@ QT_FLAGS="
     -no-gui
     -qt-zlib
 
+    -skip qt3d
+    -skip qtactiveqt
+    -skip qtandroidextras
+    -skip qtcharts
+    -skip qtconnectivity
+    -skip qtdatavis3d
+    -skip qtdeclarative
+    -skip qtgamepad
+    -skip qtgraphicaleffects
+    -skip qtimageformats
+    -skip qtlocation
+    -skip qtlottie
+    -skip qtmultimedia
+    -skip qtnetworkauth
+    -skip qtpurchasing
+    -skip qtquickcontrols
+    -skip qtquickcontrols2
+    -skip qtremoteobjects
+    -skip qtscript
+    -skip qtscxml
+    -skip qtsensors
+    -skip qtserialbus
+    -skip qtserialport
+    -skip qtspeech
+    -skip qtsvg
+    -skip qtwebchannel
+    -skip qtwebsockets
+    -skip qtwebview
+    -skip qtwinextras
+    -skip qtx11extras
+    -skip qtxmlpatterns
+
     -nomake examples
     -nomake tests
 "
