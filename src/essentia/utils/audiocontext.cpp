@@ -90,9 +90,28 @@ int AudioContext::create(const std::string& filename,
   if (audioCodec->id == AV_CODEC_ID_VORBIS) desired_fmt = AV_SAMPLE_FMT_FLTP;
   if (audioCodec->id == AV_CODEC_ID_MP3) desired_fmt = AV_SAMPLE_FMT_S16P; // keep MP3 as planar s16 if desired
 
-  // If codec provides supported list, pick one from it (prefer desired_fmt)
-  if (audioCodec->sample_fmts) {
-    const enum AVSampleFormat* p = audioCodec->sample_fmts;
+  // If the codec provides a supported-formats list, pick one from it (prefer
+  // desired_fmt, fall back to the first supported format otherwise). This
+  // fallback is required for correctness, not just a nicety: avcodec_open2()
+  // does not negotiate formats, it simply fails — e.g. FFmpeg's native AAC
+  // encoder only accepts FLTP, and the encode path below converts through
+  // swresample to whatever format is negotiated here.
+  //
+  // AVCodec::sample_fmts was deprecated in FFmpeg 7.1 (libavcodec 61.13) in
+  // favor of avcodec_get_supported_config(), and removed in FFmpeg 8.
+  const enum AVSampleFormat* supported_fmts = NULL;
+#if LIBAVCODEC_VERSION_INT >= AV_VERSION_INT(61, 13, 100)
+  int num_supported_fmts = 0;
+  if (avcodec_get_supported_config(NULL, audioCodec, AV_CODEC_CONFIG_SAMPLE_FORMAT,
+                                   0, (const void**)&supported_fmts,
+                                   &num_supported_fmts) < 0) {
+    supported_fmts = NULL;
+  }
+#else
+  supported_fmts = audioCodec->sample_fmts;
+#endif
+  if (supported_fmts) {
+    const enum AVSampleFormat* p = supported_fmts;
     bool found = false;
     while (*p != AV_SAMPLE_FMT_NONE) {
       if (*p == desired_fmt) { found = true; break; }
@@ -100,7 +119,7 @@ int AudioContext::create(const std::string& filename,
     }
     if (!found) {
       // fallback to first supported format
-      desired_fmt = audioCodec->sample_fmts[0];
+      desired_fmt = supported_fmts[0];
     }
   }
   _codecCtx->sample_fmt = desired_fmt;
