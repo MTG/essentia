@@ -20,12 +20,13 @@ cd $FFMPEG_VERSION
 
 ./configure \
   --enable-pic \
+  --disable-static \
+  --enable-shared \
   $FFMPEG_AUDIO_FLAGS \
   $FFMPEG_AUDIO_FLAGS_MUXERS \
   --prefix=$PREFIX \
   --extra-ldflags="-L$PREFIX/lib" \
-  --extra-cflags="-I$PREFIX/include" \
-  $SHARED_OR_STATIC
+  --extra-cflags="-I$PREFIX/include"
 make
 make install
 
