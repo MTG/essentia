@@ -1,0 +1,6 @@
+{
+  "name": "quiettune-essentia-bridge",
+  "private": true,
+  "version": "1.0.0",
+  "dependencies": { "essentia.js": "0.1.3" }
+}

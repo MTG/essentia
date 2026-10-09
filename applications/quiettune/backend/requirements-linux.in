@@ -1,0 +1,2 @@
+-r requirements.txt
+essentia-tensorflow==2.1b6.dev1389

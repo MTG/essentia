@@ -1,0 +1,106 @@
+{
+  "name": "quiettune-desktop",
+  "version": "1.1.2",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "description": "本地音乐舒适度分析与个人偏好学习",
+  "author": "QuietTune",
+  "main": "desktop/main.cjs",
+  "scripts": {
+    "postinstall": "node desktop/install-electron.cjs",
+    "start": "electron .",
+    "build:ui": "npm run build --prefix frontend",
+    "prepare:runtime": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"& ([ScriptBlock]::Create([IO.File]::ReadAllText('desktop/prepare-runtime.ps1',[Text.Encoding]::UTF8)))\"",
+    "prepack": "node desktop/check-package.cjs",
+    "pack": "electron-builder --win --x64 --dir",
+    "predist": "node desktop/check-package.cjs",
+    "dist": "electron-builder --win nsis --x64",
+    "test:desktop": "python .Codex/desktop-smoke.py"
+  },
+  "devDependencies": {
+    "electron": "44.7.0",
+    "electron-builder": "26.15.3",
+    "undici": "7.30.0"
+  },
+  "build": {
+    "appId": "local.quiettune.desktop",
+    "productName": "QuietTune",
+    "directories": {
+      "output": ".Codex/releases"
+    },
+    "files": [
+      "desktop/main.cjs",
+      "desktop/service.cjs",
+      "desktop/preload.cjs",
+      "desktop/startup.html",
+      "desktop/icon.png",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": ".Codex/desktop-runtime",
+        "to": "runtime"
+      },
+      {
+        "from": "backend",
+        "to": "app/backend",
+        "filter": [
+          "app/**",
+          "desktop_server.py",
+          "!**/__pycache__/**"
+        ]
+      },
+      {
+        "from": "backend/node_modules/essentia.js/dist",
+        "to": "app/backend/essentia-runtime",
+        "filter": [
+          "essentia-wasm.umd.js",
+          "essentia.js-core.umd.js"
+        ]
+      },
+      {
+        "from": "backend/node_modules/essentia.js/LICENSE",
+        "to": "app/backend/essentia-runtime/LICENSE"
+      },
+      {
+        "from": "frontend/dist",
+        "to": "app/frontend/dist"
+      },
+      {
+        "from": "models",
+        "to": "models",
+        "filter": [
+          "*.pb",
+          "*.json"
+        ]
+      },
+      {
+        "from": "LICENSE-NOTICES.md",
+        "to": "LICENSE-NOTICES.md"
+      },
+      {
+        "from": "LICENSE",
+        "to": "QuietTune-LICENSE.txt"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "desktop/icon.ico",
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "QuietTune 音乐舒适度分析",
+      "artifactName": "QuietTune-${version}-Windows-x64-安装.exe",
+      "installerLanguages": [
+        "zh_CN"
+      ],
+      "displayLanguageSelector": false,
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

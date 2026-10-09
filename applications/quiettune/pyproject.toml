@@ -1,0 +1,7 @@
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+addopts = "-ra --basetemp=.Codex/test-tmp"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"

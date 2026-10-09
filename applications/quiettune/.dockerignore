@@ -1,0 +1,9 @@
+.venv
+data
+models
+.Codex
+**/node_modules
+**/dist
+**/__pycache__
+.pytest_cache
+.git

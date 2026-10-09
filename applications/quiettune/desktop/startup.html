@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>QuietTune — 正在启动</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#10141b;color:#e8edf5;font:15px/1.7 "Segoe UI","Microsoft YaHei",sans-serif;display:grid;place-items:center;height:100vh;padding-top:52px}
+    .titlebar{position:fixed;top:0;left:0;right:0;height:52px;display:flex;align-items:center;padding:0 18px;app-region:drag;user-select:none;background:#10141b}
+    .titlebar button{display:grid;place-items:center;width:32px;height:32px;margin:0;padding:0;border:0;border-radius:6px;background:transparent;color:#9aa6ba;app-region:no-drag}.titlebar button:hover{background:#262d41;color:#e8edf5}.titlebar button:focus-visible{outline:2px solid #ad9fff;outline-offset:2px}
+    main{width:min(540px,90vw);text-align:center;padding:45px;background:linear-gradient(145deg,#1e2431,#131a23);border:1px solid #303849;border-radius:24px;box-shadow:0 20px 90px #0005}
+    img{width:84px;height:84px}h1{margin:14px 0 4px;letter-spacing:-1px;font-size:32px}p{color:#9aa6ba;margin:8px 0 22px}.status{min-height:48px;color:#cbd5e3;overflow-wrap:anywhere}
+    .loader{width:24px;height:24px;margin:18px auto;border:3px solid #353c53;border-top-color:#ad9fff;border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    button{border:1px solid #444b67;background:#262d41;border-radius:10px;color:#e8e4ff;padding:10px 18px;font:inherit;cursor:pointer;margin:4px}#actions button:first-child{background:#7564ce}[hidden]{display:none!important}
+    footer{font-size:12px;color:#68768d;margin-top:22px}
+  </style>
+</head>
+<body><header class="titlebar" aria-label="窗口工具栏"><button id="menu" aria-label="应用菜单" title="应用菜单"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></button></header><main>
+  <img src="icon.png" alt="QuietTune"><h1>QuietTune</h1><p>找到更适合你的声音</p>
+  <div class="loader" id="loader"></div><div class="status" id="message">正在准备本地分析环境…</div>
+  <div id="actions" hidden><button id="retry">重新启动</button><button id="logs">查看日志</button></div>
+  <footer>音乐、分析结果与个人评价保存在本机</footer>
+</main><script>
+  function update(value){document.getElementById('message').textContent=value.message;document.getElementById('loader').hidden=value.status==='error';document.getElementById('actions').hidden=value.status!=='error'}
+  window.quiettuneDesktop.onState(update);window.quiettuneDesktop.state().then(update)
+  document.getElementById('retry').onclick=()=>window.quiettuneDesktop.retry()
+  document.getElementById('logs').onclick=()=>window.quiettuneDesktop.logs()
+  document.getElementById('menu').onclick=()=>window.quiettuneDesktop.menu()
+</script></body></html>

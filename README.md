@@ -1,3 +1,17 @@
+# QuietTune — 基于 Essentia 的音乐舒适度桌面应用
+
+本 fork 的 develop 分支在 `applications/quiettune/` 中提供完整的 Electron + React + FastAPI 应用，包括真实声学与官方模型分析、分段试听和个人偏好学习。
+
+- [应用源码与中文启动说明](applications/quiettune/README.md)
+- [应用开源许可](applications/quiettune/LICENSE)
+- [第三方与模型许可说明](applications/quiettune/LICENSE-NOTICES.md)
+
+应用代码采用 GNU AGPL v3。音乐、模型权重、安装包和本机数据不随本次源码发布。
+
+以下为保留的 Essentia 上游说明。
+
+---
+
 Essentia
 ========
 [![Build wheels status](https://github.com/MTG/essentia/actions/workflows/build-wheels-cibuildwheel.yml/badge.svg)](https://github.com/MTG/essentia/actions/workflows/build-wheels-cibuildwheel.yml)
