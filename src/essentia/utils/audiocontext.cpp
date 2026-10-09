@@ -90,17 +90,20 @@ int AudioContext::create(const std::string& filename,
   if (audioCodec->id == AV_CODEC_ID_VORBIS) desired_fmt = AV_SAMPLE_FMT_FLTP;
   if (audioCodec->id == AV_CODEC_ID_MP3) desired_fmt = AV_SAMPLE_FMT_S16P; // keep MP3 as planar s16 if desired
 
-  // If codec provides supported list, pick one from it (prefer desired_fmt)
-  if (audioCodec->sample_fmts) {
-    const enum AVSampleFormat* p = audioCodec->sample_fmts;
+  // If codec provides supported list, pick one from it (prefer desired_fmt).
+  // FFmpeg 8+ removed AVCodec::sample_fmts; use avcodec_get_supported_config() instead.
+  const enum AVSampleFormat* sample_fmts = NULL;
+  int nb_sample_fmts = 0;
+  if (avcodec_get_supported_config(NULL, audioCodec, AV_CODEC_CONFIG_SAMPLE_FORMAT, 0,
+                                    (const void**)&sample_fmts, &nb_sample_fmts) == 0 &&
+      sample_fmts) {
     bool found = false;
-    while (*p != AV_SAMPLE_FMT_NONE) {
-      if (*p == desired_fmt) { found = true; break; }
-      ++p;
+    for (int i = 0; i < nb_sample_fmts; ++i) {
+      if (sample_fmts[i] == desired_fmt) { found = true; break; }
     }
     if (!found) {
       // fallback to first supported format
-      desired_fmt = audioCodec->sample_fmts[0];
+      desired_fmt = sample_fmts[0];
     }
   }
   _codecCtx->sample_fmt = desired_fmt;
