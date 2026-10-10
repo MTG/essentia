@@ -501,6 +501,65 @@ class TestFrameCutter_Streaming(TestCase):
         run(gen)
         self.assertTrue(len(pool.descriptorNames())==0)
 
+    def _cutSilentFramesWithNoise(self, input):
+        # Runs a fresh streaming FrameCutter with silentFrames="noise" over
+        # the given input and returns the resulting frames as a numpy matrix.
+        gen = VectorInput(input)
+        pool = Pool()
+        frameCutter = es.FrameCutter(frameSize = 1024,
+                                     hopSize = 512,
+                                     startFromZero = True,
+                                     silentFrames = "noise")
+        gen.data >> frameCutter.signal
+        frameCutter.frame >> (pool, 'frames')
+        run(gen)
+        return numpy.array(pool['frames'])
+
+    def testSilentFramesNoiseDeterministic(self):
+        # Regression test for https://github.com/MTG/essentia/issues/1006:
+        # the noise injected into silent frames (silentFrames="noise", the
+        # default) used to be seeded from time(NULL) ^ clock(), so every run
+        # produced different frames and every descriptor computed over
+        # silence was irreproducible. The noise must now be a fixed
+        # pseudorandom sequence: two identical runs must produce bitwise
+        # identical frames.
+        input = [0.]*44100  # 1 second of silence
+
+        frames1 = self._cutSilentFramesWithNoise(input)
+        frames2 = self._cutSilentFramesWithNoise(input)
+
+        self.assertEqual(frames1.shape, frames2.shape)
+        # bitwise identity, no tolerance
+        self.assertTrue(numpy.array_equal(frames1, frames2))
+        # sanity check: the frames do contain noise (not silence)
+        self.assertTrue((frames1 != 0).any())
+
+    def testSilentFramesNoiseDeterministicAfterReset(self):
+        # A reused (reset) FrameCutter must produce the same frames as a
+        # fresh one: FrameCutter::reset() re-seeds its internal NoiseAdder.
+        input = [0.]*44100  # 1 second of silence
+        gen = VectorInput(input)
+        pool = Pool()
+        frameCutter = es.FrameCutter(frameSize = 1024,
+                                     hopSize = 512,
+                                     startFromZero = True,
+                                     silentFrames = "noise")
+        gen.data >> frameCutter.signal
+        frameCutter.frame >> (pool, 'frames')
+
+        run(gen)
+        frames1 = numpy.array(pool['frames'])
+
+        pool.remove('frames')
+        reset(gen)
+
+        run(gen)
+        frames2 = numpy.array(pool['frames'])
+
+        self.assertEqual(frames1.shape, frames2.shape)
+        # bitwise identity, no tolerance
+        self.assertTrue(numpy.array_equal(frames1, frames2))
+        self.assertTrue((frames1 != 0).any())
 
 
 suite = allTests(TestFrameCutter_Streaming)
