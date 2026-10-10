@@ -18,7 +18,7 @@ more information about licensing conditions and for consulting how Essentia can 
 Licensing Essentia models
 =========================
 In addition to Essentia, Music Technology Group provides various pre-trained machine learning models for music analysis and classification tasks.
-All the models are available under the `CC BY-NC-ND 4.0 license <https://creativecommons.org/licenses/by-nc-nd/4.0/>`_ for non-commercial use,
+All the models are available under the `CC BY-NC-SA 4.0 license <https://creativecommons.org/licenses/by-nc-sa/4.0/>`_ for non-commercial use,
 and are also available under a proprietary license upon request.
 
 
