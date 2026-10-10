@@ -264,6 +264,9 @@ def configure(ctx):
     if has('avcodec') and has('avformat') and has('avutil') and has('swresample'):
         print('- FFmpeg / libav detected!')
         ctx.env.USE_LIBS += ' AVFORMAT AVCODEC AVUTIL SWRESAMPLE'
+        # MetadataReader uses libavformat as a fallback for audio files that
+        # TagLib cannot parse (e.g., Matroska with TagLib < 2.2)
+        ctx.env.DEFINES += ['ESSENTIA_HAVE_LIBAVFORMAT']
 
     else:
         print('- FFmpeg (or LibAv on debian/ubuntu) seems to be missing.')
