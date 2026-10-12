@@ -129,17 +129,26 @@ void AudioLoader::openAudioFile(const string& filename) {
   
     // Configure format conversion (no samplerate conversion yet)
     // Use modern channel layout API
+    // Containers such as WAV commonly leave the layout unspecified (order
+    // AV_CHANNEL_ORDER_UNSPEC); swr_init() rejects that, so derive the default
+    // layout for the channel count instead.
     AVChannelLayout layout;
-    if (_audioCtx->ch_layout.nb_channels > 0) {
-        layout = _audioCtx->ch_layout;
-    } else {
-        // Fallback for older codecs that might not have channel layout set
+    av_channel_layout_uninit(&layout);
+
+    if (_audioCtx->ch_layout.nb_channels <= 0) {
+        throw EssentiaException("AudioLoader: Stream reports no audio channels");
+    }
+
+    if (_audioCtx->ch_layout.order == AV_CHANNEL_ORDER_UNSPEC ||
+        !av_channel_layout_check(&_audioCtx->ch_layout)) {
         av_channel_layout_default(&layout, _audioCtx->ch_layout.nb_channels);
+    } else if (av_channel_layout_copy(&layout, &_audioCtx->ch_layout) < 0) {
+        throw EssentiaException("AudioLoader: Could not copy channel layout");
     }
 
     E_DEBUG(EAlgorithm, "AudioLoader: using sample format conversion from libswresample");
     _convertCtxAv = swr_alloc();
-        
+
     // Use modern channel layout API for swresample configuration
     av_opt_set_chlayout(_convertCtxAv, "in_chlayout", &layout, 0);
     av_opt_set_chlayout(_convertCtxAv, "out_chlayout", &layout, 0);
@@ -148,8 +157,20 @@ void AudioLoader::openAudioFile(const string& filename) {
     av_opt_set_int(_convertCtxAv, "in_sample_fmt", _audioCtx->sample_fmt, 0);
     av_opt_set_int(_convertCtxAv, "out_sample_fmt", AV_SAMPLE_FMT_FLT, 0);
 
-    if (swr_init(_convertCtxAv) < 0) {
-        throw EssentiaException("AudioLoader: Could not initialize swresample context");
+    // av_opt_set_chlayout() copies the layout, so our local copy can go now.
+    const int swrStatus = swr_init(_convertCtxAv);
+    av_channel_layout_uninit(&layout);
+
+    if (swrStatus < 0) {
+        char errbuf[AV_ERROR_MAX_STRING_SIZE] = {0};
+        av_strerror(swrStatus, errbuf, sizeof(errbuf));
+        ostringstream msg;
+        msg << "AudioLoader: Could not initialize swresample context: " << errbuf
+            << " (channels: " << _audioCtx->ch_layout.nb_channels
+            << ", layout order: " << (int)_audioCtx->ch_layout.order
+            << ", sample_rate: " << _audioCtx->sample_rate
+            << ", sample_fmt: " << (int)_audioCtx->sample_fmt << ")";
+        throw EssentiaException(msg.str());
     }
 
     av_init_packet(&_packet);
