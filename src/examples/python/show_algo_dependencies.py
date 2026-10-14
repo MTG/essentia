@@ -19,6 +19,7 @@
 
 import sys
 import subprocess
+import json
 import essentia.standard
 import essentia.streaming
 import yaml
@@ -26,7 +27,24 @@ import yaml
 import argparse
 
 
-def find_dependencies(mode, algo):
+def find_dependencies(mode, algo, parameters=None):
+    parameterized = parameters is not None
+    parameters = parameters or {}
+    parameters_json = json.dumps(parameters)
+    if parameterized:
+        # Suppress the factory's initial default configuration. Composite
+        # algorithms may create default inner algorithms before Python applies
+        # the requested parameters.
+        setup = (
+            "essentia.log.debugLevels = essentia.log.debugLevels - essentia.EFactory\n"
+            "loader = es.%s()\n"
+            "essentia.log.debugLevels = essentia.log.debugLevels + essentia.EFactory\n"
+            "print(\"[Factory   ] %s: Creating algorithm: %s\", file=sys.stderr)\n"
+            "loader.configure(**parameters)\n"
+        ) % (algo, "Standard " if mode == "standard" else "Streaming", algo)
+    else:
+        setup = "loader = es.%s()\n" % algo
+
     if algo in ['MusicExtractor', 'FreesoundExtractor']:
         # FIXME These are special algorithms that instantiate all dependencies
         # inside compute(). Ideally, they should be rewritten to do that in
@@ -36,22 +54,29 @@ def find_dependencies(mode, algo):
         code = """
 import essentia.%s as es
 import essentia
+import json
+import sys
+parameters = json.loads(%r)
 from essentia.pytools.io import test_audiofile
 test_audio = test_audiofile()
 
 essentia.log.infoActive = True
 essentia.log.debugLevels += essentia.EFactory
-es.%s()(test_audio)
-""" % (mode, algo)
+%s
+loader(test_audio)
+""" % (mode, parameters_json, setup)
     else:
         code = """
 import essentia.%s as es
 import essentia
+import json
+import sys
+parameters = json.loads(%r)
 
 essentia.log.infoActive = True
 essentia.log.debugLevels += essentia.EFactory
-loader = es.%s()
-""" % (mode, algo)
+%s
+""" % (mode, parameters_json, setup)
 
     proc = subprocess.Popen([sys.executable, "-c", code], stderr=subprocess.PIPE)
     stderr = proc.communicate()[1].decode('utf8').split('\n')
@@ -136,6 +161,32 @@ if __name__ == "__main__":
                                         help="mode (streaming, standard)",
                                         choices=set(("standard", "streaming")))
 
+    def parse_parameters(value):
+        try:
+            parameters = json.loads(value)
+        except ValueError as error:
+            raise argparse.ArgumentTypeError("parameters must be a JSON object: %s" % error)
+        if not isinstance(parameters, dict):
+            raise argparse.ArgumentTypeError("parameters must be a JSON object")
+        return parameters
+
+    class ParametersAction(argparse.Action):
+        def __call__(self, parser, namespace, values, option_string=None):
+            selected_algorithms = getattr(namespace, "algo", None) or []
+            if not selected_algorithms:
+                parser.error("--parameters must follow an --algorithm")
+            parameters_by_selection = getattr(namespace, "parameters_by_selection", {})
+            selection_index = len(selected_algorithms) - 1
+            if selection_index in parameters_by_selection:
+                parser.error("parameters were already specified for the preceding -a")
+            parameters_by_selection[selection_index] = values
+            namespace.parameters_by_selection = parameters_by_selection
+
+    parser.add_argument("-p", "--parameters", dest="parameters_by_selection",
+                        type=parse_parameters,
+                        action=ParametersAction, default={},
+                        help="JSON parameters for the preceding -a/--algorithm (repeatable)")
+
     args = vars(parser.parse_args())
 
     streaming = essentia.streaming.algorithmNames()
@@ -147,27 +198,36 @@ if __name__ == "__main__":
     print("%d algorithms in total" % len(set(streaming) | set(standard)))
     print('')
 
-    algos = [(a, "standard") for a in standard] + [(a, "streaming") for a in streaming]
-
     if args['algo']:
-        algos = [(a, m) for a, m in algos if a in args['algo']]
+        algos = []
+        for selection_index, algo in enumerate(args['algo']):
+            modes = []
+            if algo in standard:
+                modes.append("standard")
+            if algo in streaming:
+                modes.append("streaming")
+            if args['mode']:
+                modes = [mode for mode in modes if mode == args['mode']]
+            parameters = args['parameters_by_selection'].get(selection_index)
+            algos.extend((algo, mode, parameters) for mode in modes)
     else:
+        algos = [(a, "standard", None) for a in standard] + [(a, "streaming", None) for a in streaming]
+        if args['mode']:
+            algos = [(a, mode, parameters) for a, mode, parameters in algos if mode == args['mode']]
         print("Algorithm was not specified. Analyze dependencies for all algorithms")
 
-    if args['mode']:
-        algos = [(a, m) for a, m in algos if m==args['mode']]
-    else:
+    if not args['mode']:
         print("Mode was not specified. Analyze dependencies for both modes")
 
     if not algos and args['algo'] and args['mode']:
-        print('Algorithm "' + args['algo'] + '" not found in essentia.' + args['mode'])
+        print('No selected algorithm was found in essentia.' + args['mode'])
         sys.exit()
 
     all_dependencies = []
 
-    for algo, mode in algos:
+    for algo, mode, parameters in algos:
         print("---------- %s : %s ----------" % (mode, algo))
-        dependencies, tree, _ = find_dependencies(mode, algo)
+        dependencies, tree, _ = find_dependencies(mode, algo, parameters)
         #print_dependencies(dependencies, tree)
         print_dependencies(dependencies)
         all_dependencies += dependencies
