@@ -47,7 +47,7 @@ def options(ctx):
                    help='debug, release or default')
 
     ctx.add_option('--std', action='store',
-                   dest='STD', default='c++11',
+                   dest='STD', default='c++14',
                    help='C++ standard to compile for [c++11 c++14 c++17 ...]')
 
     ctx.add_option('--arch', action='store',

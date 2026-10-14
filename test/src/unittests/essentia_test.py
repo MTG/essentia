@@ -86,6 +86,11 @@ def allTests(testClass):
 
 class TestCase(BaseTestCase):
 
+    def assert_(self, expr, msg=None):
+        """Compatibility shim for Python < 3.12 style assert_."""
+        if not expr:
+            raise self.failureException(msg or f"Expression is not true: {expr}")
+
     def assertValidNumber(self, x):
         self.assert_(not numpy.isnan(x))
         self.assert_(not numpy.isinf(x))

@@ -37,7 +37,7 @@ Essentia depends on (at least) the following libraries:
 - `Eigen <http://eigen.tuxfamily.org/>`_: for linear algebra
 - `FFTW <http://www.fftw.org>`_: for the FFT implementation *(optional)*
 - `libavcodec/libavformat/libavutil/libswresample <http://ffmpeg.org/>`_ (from the FFmpeg/LibAv project): for loading/saving any type of audio files *(optional)*
-- `libsamplerate <http://www.mega-nerd.com/SRC/>`_: for resampling audio *(optional)*
+- `libsamplerate <https://libsndfile.github.io/libsamplerate/>`_: for resampling audio *(optional)*
 - `TagLib <http://developer.kde.org/~wheeler/taglib.html>`_: for reading audio metadata tags *(optional)*
 - `LibYAML <http://pyyaml.org/wiki/LibYAML>`_: for YAML files input/output *(optional)*
 - `Gaia <https://github.com/MTG/gaia>`_: for using SVM classifier models *(optional)*

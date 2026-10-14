@@ -31,10 +31,10 @@ const char* Resample::description = DOC("This algorithm resamples the input sign
 "This algorithm is only supported if essentia has been compiled with Real=float, otherwise it will throw an exception. It may also throw an exception if there is an internal error in the SRC library during conversion.\n\n"
 
 "References:\n"
-"  [1] Secret Rabbit Code, http://www.mega-nerd.com/SRC\n\n"
+"  [1] Secret Rabbit Code, https://libsndfile.github.io/libsamplerate/\n\n"
 "  [2] Resampling - Wikipedia, the free encyclopedia\n"
 "  http://en.wikipedia.org/wiki/Resampling\n\n"
-"  [3] http://www.mega-nerd.com/SRC/api_misc.html#Converters");
+"  [3] https://libsndfile.github.io/libsamplerate/api_misc.html#Converters");
 
 
 void Resample::configure() {
@@ -86,7 +86,7 @@ namespace streaming {
 const char* Resample::name = standard::Resample::name;
 const char* Resample::description = standard::Resample::description;
 
-// NOTE: streaming process differs slightly from the standard in that there is a transport delay inside the streaming version of the SRC converter: http://www.mega-nerd.com/SRC/faq.html#Q006. For this reason less amount of samples than the expected are found and thus the zeropadding at the end.
+// NOTE: streaming process differs slightly from the standard in that there is a transport delay inside the streaming version of the SRC converter: https://libsndfile.github.io/libsamplerate/faq.html#Q006. For this reason less amount of samples than the expected are found and thus the zeropadding at the end.
 
 Resample::~Resample() {
   if (_state) src_delete(_state);

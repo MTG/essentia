@@ -46,14 +46,14 @@ class AudioLoader : public Algorithm {
   // because we might want to decode multiple frames in this buffer (all the 
   // frames contained in a packet, which can be more than 1 as in flac), and 
   // each time we decode a frame we need to have at least a full buffer of free space.
-  const static int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
+  const int FFMPEG_BUFFER_SIZE = MAX_AUDIO_FRAME_SIZE * 2;
 
-  float* _buffer;
+  uint8_t* _buffer;   // byte-oriented buffer, clearer semantics
   int _dataSize;
 
   AVFormatContext* _demuxCtx;
   AVCodecContext* _audioCtx;
-  AVCodec* _audioCodec;
+  const AVCodec* _audioCodec;
   AVPacket _packet;
   AVMD5 *_md5Encoded;
   uint8_t _checksum[16];
@@ -94,11 +94,14 @@ class AudioLoader : public Algorithm {
 
     _audio.setBufferType(BufferUsage::forLargeAudioStream);
 
-    // Register all formats and codecs
-    av_register_all();
+    // Note: av_register_all() was deprecated and removed in FFmpeg 4.0
+    // Modern FFmpeg automatically registers formats and codecs
 
-    // use av_malloc, because we _need_ the buffer to be 16-byte aligned
-    _buffer = (float*)av_malloc(FFMPEG_BUFFER_SIZE);
+    // use av_malloc, allocate bytes; interpret as float* when needed
+    _buffer = (uint8_t*)av_malloc(FFMPEG_BUFFER_SIZE);
+    if (!_buffer) {
+      throw EssentiaException("Error allocating FFmpeg buffer");
+    }
 
     _md5Encoded = av_md5_alloc();
     if (!_md5Encoded) {
