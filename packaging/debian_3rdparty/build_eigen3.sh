@@ -15,7 +15,7 @@ cd eigen-$EIGEN_VERSION
 mkdir build
 cd build
 
-cmake ../ -DCMAKE_INSTALL_PREFIX=$PREFIX
+cmake ../ -DCMAKE_INSTALL_PREFIX=$PREFIX -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 make install
 mkdir -p "$PREFIX"/lib/pkgconfig/
 cp "$PREFIX"/share/pkgconfig/eigen3.pc "$PREFIX"/lib/pkgconfig/

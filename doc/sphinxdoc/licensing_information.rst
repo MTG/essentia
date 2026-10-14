@@ -18,7 +18,7 @@ more information about licensing conditions and for consulting how Essentia can 
 Licensing Essentia models
 =========================
 In addition to Essentia, Music Technology Group provides various pre-trained machine learning models for music analysis and classification tasks.
-All the models are available under the `CC BY-NC-ND 4.0 license <https://creativecommons.org/licenses/by-nc-nd/4.0/>`_ for non-commercial use,
+All the models are available under the `CC BY-NC-SA 4.0 license <https://creativecommons.org/licenses/by-nc-sa/4.0/>`_ for non-commercial use,
 and are also available under a proprietary license upon request.
 
 
@@ -53,7 +53,7 @@ This is the set of libraries which can be used within Essentia:
 
 3. Others (the original copyright notice must be retained. They can be linked dynamically or statically)
 
-   * Libsamplerate - http://www.mega-nerd.com/SRC/ - used by the Resample algorithm, and MonoLoader, EasyLoader and EqloudLoader. Originally released under GPL, it is licensed under `BSD-2-Clause`_ since 2016
+   * Libsamplerate - https://libsndfile.github.io/libsamplerate/ - used by the Resample algorithm, and MonoLoader, EasyLoader and EqloudLoader. Originally released under GPL, it is licensed under `BSD-2-Clause`_ since 2016
    * MersenneTwister - http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html (`BSD-style license`_)
    * TNT - http://math.nist.gov/tnt/ (`Public domain`_)
    * VAMP SDK - http://www.vamp-plugins.org/develop.html (`MIT license`_) (for building vamp plugins)

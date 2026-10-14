@@ -2,12 +2,12 @@
 set -e
 . ../build_config.sh
 
-echo "Building FFmpeg $FFMPEG_VERSION"
+echo "Building $FFMPEG_VERSION"
 
 mux=$1
 if test "$1" = "--no-muxers"; then
-    echo Building FFmpeg without muxers
-    FFMPEG_AUDIO_FLAGS_MUXERS=""
+  echo Building FFmpeg without muxers
+  FFMPEG_AUDIO_FLAGS_MUXERS=""
 fi
 
 rm -rf tmp
@@ -19,13 +19,13 @@ tar xf $FFMPEG_VERSION.tar.gz
 cd $FFMPEG_VERSION
 
 ./configure \
-    --enable-pic \
-    $FFMPEG_AUDIO_FLAGS \
-    $FFMPEG_AUDIO_FLAGS_MUXERS \
-    --prefix=$PREFIX \
-    --extra-ldflags=-L$PREFIX/lib \
-    --extra-cflags=-I$PREFIX/include \
-    $SHARED_OR_STATIC
+  --enable-pic \
+  $FFMPEG_AUDIO_FLAGS \
+  $FFMPEG_AUDIO_FLAGS_MUXERS \
+  --prefix=$PREFIX \
+  --extra-ldflags="-L$PREFIX/lib" \
+  --extra-cflags="-I$PREFIX/include" \
+  $SHARED_OR_STATIC
 make
 make install
 

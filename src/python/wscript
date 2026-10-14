@@ -3,8 +3,8 @@
 
 from __future__ import print_function
 
-import distutils.sysconfig
 import os
+import sysconfig
 
 
 def options(ctx):
@@ -20,6 +20,16 @@ def configure(ctx):
         print ('→ Configuring for python3')
 
     ctx.check_python_headers(features='pyext')
+    # MacOS Python 3.13 adds universal2 flags that conflict with our arm64-only Essentia build.
+    # Remove Python's architecture flags when building for arm64.
+    if ctx.env.DEST_OS == 'darwin' and ctx.options.ARCH == 'arm64':
+        for key in ('CFLAGS_PYEXT', 'CXXFLAGS_PYEXT', 'LINKFLAGS_PYEXT', 'LDFLAGS_PYEXT'):
+            flags = iter(ctx.env[key])
+            ctx.env[key] = [
+                flag for flag in flags
+                if flag != '-arch' or next(flags, None) is None
+            ]
+
     ctx.check_python_module('numpy')
 
     # A monkey patch to remove the -lpythonX.Ym flag. PEP 513 recommends to
@@ -39,7 +49,7 @@ def build(ctx):
     print('→ building from ' + ctx.path.abspath())
 
     # gets the path from the active virtualenv
-    PYLIB = distutils.sysconfig.get_python_lib()
+    PYLIB = sysconfig.get_paths()['purelib']
 
     NUMPY_INCPATH = [ # importable numpy path
                       __import__('numpy').get_include(),

@@ -6,28 +6,23 @@ if [ -z "${PREFIX}" ]; then
 fi
 echo Installing to: $PREFIX
 
-#SHARED_OR_STATIC="
-#--enable-shared \
-#--disable-static
-#"
-
 SHARED_OR_STATIC="
---disable-shared \
+--disable-shared
 --enable-static
 "
 
 EIGEN_VERSION=3.3.7
-FFMPEG_VERSION=ffmpeg-2.8.12
+FFMPEG_VERSION=ffmpeg-7.1.1
 LAME_VERSION=3.100
-TAGLIB_VERSION=taglib-1.11.1
+TAGLIB_VERSION=taglib-1.13.1
 ZLIB_VERSION=zlib-1.2.12
 FFTW_VERSION=fftw-3.3.2
-LIBSAMPLERATE_VERSION=libsamplerate-0.1.8
+LIBSAMPLERATE_VERSION=libsamplerate-0.1.9
 LIBYAML_VERSION=yaml-0.1.5
-CHROMAPRINT_VERSION=1.4.3
-QT_SOURCE_URL=https://download.qt.io/archive/qt/4.8/4.8.4/qt-everywhere-opensource-src-4.8.4.tar.gz
-GAIA_VERSION=2.4.6-86-ged433ed
-TENSORFLOW_VERSION=2.5.0
+CHROMAPRINT_VERSION=1.5.1
+QT_SOURCE_URL=https://download.qt.io/archive/qt/5.15/5.15.19/single/qt-everywhere-opensource-src-5.15.19.tar.xz
+GAIA_VERSION=2.4.7
+TENSORFLOW_VERSION=2.17.0
 LIBONNXRUNTIME_VERSION=1.22.1
 
 FFMPEG_AUDIO_FLAGS="
@@ -36,7 +31,7 @@ FFMPEG_AUDIO_FLAGS="
     --disable-debug
 
     --disable-avdevice
-    --disable-avresample
+    --disable-swresample
     --disable-swscale
     --disable-postproc
     --disable-avfilter
@@ -58,7 +53,7 @@ FFMPEG_AUDIO_FLAGS="
     --enable-protocol=file
     --enable-protocol=pipe
 
-    --disable-sdl
+    --disable-sdl2
     --disable-lzma
     --disable-zlib
     --disable-xlib
@@ -178,7 +173,6 @@ FFMPEG_AUDIO_FLAGS="
     --enable-decoder=pcm_u24le
     --enable-decoder=pcm_u32be
     --enable-decoder=pcm_u32le
-    --enable-decoder=pcm_zork
 
     --enable-parser=aac
     --enable-parser=aac_latm
@@ -211,65 +205,63 @@ FFMPEG_AUDIO_FLAGS_MUXERS="
 
 # see http://www.fftw.org/install/windows.html
 FFTW_FLAGS="
-    --enable-float \
-    --enable-sse2 \
-    --with-incoming-stack-boundary=2 \
+    --enable-float
+    --enable-sse2
+    --with-incoming-stack-boundary=2
     --with-our-malloc16
 "
 
 LIBSAMPLERATE_FLAGS="
-    --disable-fftw \
+    --disable-fftw
     --disable-sndfile
 "
 
 QT_FLAGS="
     -no-accessibility
-    -no-webkit
     -no-glib
-    -no-xkb
-    -no-xinput
-    -no-fontconfig
-    -no-mitshm
-    -no-xrender
-    -no-xrandr
-    -no-xfixes
-    -no-xcursor
-    -no-xinerama
-    -no-xsync
-    -no-xvideo
-    -no-xshape
-    -no-sm
-    -no-openvg
-    -no-opengl
-    -no-nas-sound
-    -no-gtkstyle
     -no-dbus
-    -no-pch
     -no-iconv
     -no-cups
-    -no-nis
-    -no-gui
     -no-openssl
-    -no-libjpeg
-    -no-libmng
-    -no-libpng
-    -no-libtiff
-    -no-gif
-    -no-scripttools
-    -no-script
-    -no-javascript-jit
-    -no-svg
-    -no-phonon-backend
-    -no-phonon
-    -no-audio-backend
-    -no-multimedia
-    -no-xmlpatterns
-    -no-qt3support
+    -no-opengl
+    -no-pch
+    -no-gui
     -qt-zlib
-    -nomake demos
+
+    -skip qt3d
+    -skip qtactiveqt
+    -skip qtandroidextras
+    -skip qtcharts
+    -skip qtconnectivity
+    -skip qtdatavis3d
+    -skip qtdeclarative
+    -skip qtgamepad
+    -skip qtgraphicaleffects
+    -skip qtimageformats
+    -skip qtlocation
+    -skip qtlottie
+    -skip qtmultimedia
+    -skip qtnetworkauth
+    -skip qtpurchasing
+    -skip qtquickcontrols
+    -skip qtquickcontrols2
+    -skip qtremoteobjects
+    -skip qtscript
+    -skip qtscxml
+    -skip qtsensors
+    -skip qtserialbus
+    -skip qtserialport
+    -skip qtspeech
+    -skip qtsvg
+    -skip qtwebchannel
+    -skip qtwebsockets
+    -skip qtwebview
+    -skip qtwinextras
+    -skip qtx11extras
+    -skip qtxmlpatterns
+
     -nomake examples
-    -nomake tools
-    -nomake translations
+    -nomake tests
 "
 
 TENSORFLOW_FLAGS="
@@ -279,6 +271,8 @@ TENSORFLOW_FLAGS="
     --config=noaws
     --config=nohdfs
     --config=nonccl
+    --local_ram_resources=HOST_RAM*.6
+    --jobs=$(nproc)
 "
 
 # The only known alternative to the interactive TensorFlow configuration is
@@ -287,7 +281,7 @@ TENSORFLOW_FLAGS="
 #
 # Set the required TensorFlow build env variables with CUDA support if they
 # were not cofigured yet:
-export PYTHON_BIN_PATH="${PYTHON_BIN_PATH:-python3}"
+export PYTHON_BIN_PATH="${PYTHON_BIN_PATH:-$(which python3)}"
 export USE_DEFAULT_PYTHON_LIB_PATH="${USE_DEFAULT_PYTHON_LIB_PATH:-1}"
 export BAZEL_LINKLIBS="${BAZEL_LINKLIBS:--l%:libstdc++.a}"
 
@@ -296,13 +290,14 @@ export TF_NEED_GCP="${TF_NEED_GCP:-0}"
 export TF_NEED_HDFS="${TF_NEED_HDFS:-0}"
 export TF_ENABLE_XLA="${TF_ENABLE_XLA:-0}"
 export TF_NEED_OPENCL="${TF_NEED_OPENCL:-0}"
+export TF_NEED_ROCM=0
 
-# TensorFlow CUDA versions intended for TensorFlow 2.5
+# TensorFlow CUDA versions intended for TensorFlow 2.17.0
 # For future updates check the GPU compatibility chart:
 # https://www.tensorflow.org/install/source#gpu
 export TF_NEED_CUDA="${TF_NEED_CUDA:-1}"
-export TF_CUDA_VERSION="${TF_CUDA_VERSION:-11.2}"
-export TF_CUDNN_VERSION="${TF_CUDNN_VERSION:-8.1}"
+export TF_CUDA_VERSION="${TF_CUDA_VERSION:-12}"
+export TF_CUDNN_VERSION="${TF_CUDNN_VERSION:-9}"
 export CUDA_TOOLKIT_PATH="${CUDA_TOOLKIT_PATH:-/usr/local/cuda}"
 export CUDNN_INSTALL_PATH="${CUDNN_INSTALL_PATH:-/usr/local/cuda}"
 
@@ -311,8 +306,11 @@ export CUDNN_INSTALL_PATH="${CUDNN_INSTALL_PATH:-/usr/local/cuda}"
 # Supporting more versions increases the library size, so
 # for the moment it is set to a conservative number that
 # covers some of the most popular dee'p learning GPUs:
-# 3.5: Geforce GT XXX
-# 5.2: Geforce GTX TITAN X
 # 7.5: Geforce RTX 2080 (Ti)
+# 8.0: Geforce RTX 3090 - 3080 (Ti)
 # 8.6: Geforce RTX 30XX
-export TF_CUDA_COMPUTE_CAPABILITIES="${TF_CUDA_COMPUTE_CAPABILITIES:-3.5,5.2,7.5,8.6}"
+# 8.9: Geforce RTX 4080
+export TF_CUDA_COMPUTE_CAPABILITIES="${TF_CUDA_COMPUTE_CAPABILITIES:-7.5,8.0,8.6,8.9}"
+
+# Silence interactive configure questions
+export TF_SET_ANDROID_WORKSPACE=0

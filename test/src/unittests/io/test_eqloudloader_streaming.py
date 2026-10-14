@@ -57,15 +57,15 @@ class TestEqloudLoader_Streaming(TestCase):
     def testNoResample(self):
         eqloud=join(testdata.audio_dir,'generated','doublesize','sin_30_seconds_eqloud.wav')
         normal=join(testdata.audio_dir,'generated','doublesize','sin_30_seconds.wav')
-        self.load(44100, 44100, eqloud, normal, "left" , -6.0, 0., 30.);
-        self.load(44100, 44100, eqloud, normal, "left", -6.0, 3.35, 5.68);
-        self.load(44100, 44100, eqloud, normal, "left"  , -6.0, 0.169, 8.333);
+        self.load(44100, 44100, eqloud, normal, "left" , -6.0, 0., 30.)
+        self.load(44100, 44100, eqloud, normal, "left", -6.0, 3.35, 5.68)
+        self.load(44100, 44100, eqloud, normal, "left"  , -6.0, 0.169, 8.333)
 
     def testResample(self):
         eqloud=join(testdata.audio_dir,'generated','doublesize','sin_30_seconds_eqloud.wav')
         normal=join(testdata.audio_dir,'generated','doublesize','sin_30_seconds.wav')
-        self.load(44100, 48000, eqloud, normal, "left", -6.0, 3.35, 5.68);
-        self.load(44100, 32000, eqloud, normal, "left", -6.0, 3.35, 5.68);
+        self.load(44100, 48000, eqloud, normal, "left", -6.0, 3.35, 5.68)
+        self.load(44100, 32000, eqloud, normal, "left", -6.0, 3.35, 5.68)
 
 
 
@@ -83,10 +83,10 @@ class TestEqloudLoader_Streaming(TestCase):
         from essentia.standard import EqloudLoader as stdEqloudLoader
         audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
         loader = stdEqloudLoader(filename=audiofile, endTime=31)
-        audio1 = loader();
-        audio2 = loader();
-        loader.reset();
-        audio3 = loader();
+        audio1 = loader()
+        audio2 = loader()
+        loader.reset()
+        audio3 = loader()
         self.assertAlmostEqualVector(audio3, audio1)
         self.assertEqualVector(audio2, audio1)
 
@@ -98,9 +98,9 @@ class TestEqloudLoader_Streaming(TestCase):
         audio1 = algo()
         audio2 = algo()
         audio3 = algo()
-        self.assertEquals(len(audio1), 441000);
-        self.assertEquals(len(audio2), 441000);
-        self.assertEquals(len(audio3), 441000);
+        self.assertEqual(len(audio1), 441000)
+        self.assertEqual(len(audio2), 441000)
+        self.assertEqual(len(audio3), 441000)
         self.assertEqualVector(audio2, audio1)
         self.assertEqualVector(audio2, audio3)
 

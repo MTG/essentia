@@ -10,18 +10,19 @@ echo "Building chromaprint $CHROMAPRINT_VERSION"
 
 curl -SLO https://github.com/acoustid/chromaprint/releases/download/v$CHROMAPRINT_VERSION/chromaprint-$CHROMAPRINT_VERSION.tar.gz
 tar -xf chromaprint-$CHROMAPRINT_VERSION.tar.gz
-cd chromaprint-v$CHROMAPRINT_VERSION
+cd chromaprint-$CHROMAPRINT_VERSION
 
-cmake \
-    -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-    -DCMAKE_INSTALL_PREFIX=$PREFIX \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_SHARED_LIBS=OFF \
-    -DBUILD_TOOLS=OFF \
-    -DFFMPEG_ROOT=$PREFIX \
-    -DFFT_LIB=fftw3f \
-    -DFFTW3_DIR=$PREFIX \
-    -DCMAKE_VERBOSE_MAKEFILE=ON \
+cmake                                       \
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON    \
+    -DCMAKE_INSTALL_PREFIX=$PREFIX          \
+    -DCMAKE_BUILD_TYPE=Release              \
+    -DBUILD_SHARED_LIBS=OFF                 \
+    -DBUILD_TOOLS=OFF                       \
+    -DFFMPEG_ROOT=$PREFIX                   \
+    -DFFT_LIB=fftw3f                        \
+    -DFFTW3_DIR=$PREFIX                     \
+    -DCMAKE_VERBOSE_MAKEFILE=ON             \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 		\
     .
 
 make
