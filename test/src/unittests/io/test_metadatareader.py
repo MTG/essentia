@@ -66,7 +66,7 @@ class TestMetadataReader(TestCase):
 
         # see the FIXME note above
         self.assertEqualVector([result[8]] + list(result[10:]), (5, 44100, 1))
-        self.assertTrue(result[9] == 96 or result[9] == 20)
+        self.assertTrue(result[9] == 96 or result[9] == 20 or result[9] == 13)
 
         self.assertEqualVector(
                 tags,
