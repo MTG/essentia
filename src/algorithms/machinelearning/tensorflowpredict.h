@@ -79,22 +79,27 @@ class TensorflowPredict : public Algorithm {
   }
 
  public:
-  TensorflowPredict() : _graph(TF_NewGraph()), _status(TF_NewStatus()),
-      _options(TF_NewImportGraphDefOptions()), _sessionOptions(TF_NewSessionOptions()),
-      _session(TF_NewSession(_graph, _sessionOptions, _status)), _runOptions(NULL),
+  // Lazy initialization: TF objects are created in configure(), not here.
+  // This prevents GPU initialization when the algorithm is just registered.
+  TensorflowPredict() : _graph(NULL), _status(NULL),
+      _options(NULL), _sessionOptions(NULL),
+      _session(NULL), _runOptions(NULL),
       _isConfigured(false) {
     declareInput(_poolIn, "poolIn", "the pool where to get the feature tensors");
     declareOutput(_poolOut, "poolOut", "the pool where to store the output tensors");
   }
 
   ~TensorflowPredict(){
-    TF_CloseSession(_session, _status);
-    TF_DeleteSessionOptions(_sessionOptions);
-    TF_DeleteSession(_session, _status);
-    TF_DeleteImportGraphDefOptions(_options);
-    TF_DeleteStatus(_status);
-    TF_DeleteGraph(_graph);
-    TF_DeleteBuffer(_runOptions);
+    // Guard against destruction before configure() was ever called
+    if (_session) {
+      TF_CloseSession(_session, _status);
+      TF_DeleteSession(_session, _status);
+    }
+    if (_sessionOptions) TF_DeleteSessionOptions(_sessionOptions);
+    if (_options) TF_DeleteImportGraphDefOptions(_options);
+    if (_status) TF_DeleteStatus(_status);
+    if (_graph) TF_DeleteGraph(_graph);
+    if (_runOptions) TF_DeleteBuffer(_runOptions);
   }
 
   void declareParameters() {

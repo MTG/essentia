@@ -80,6 +80,14 @@ void TensorflowPredict::configure() {
   // Do not do anything if we did not get a non-empty model name.
   if ((_savedModel.empty()) and (_graphFilename.empty())) return;
 
+  // Lazy initialization: Create TF objects on first real configure() call.
+  // This prevents GPU initialization when the algorithm is just registered.
+  if (!_status) {
+    _status = TF_NewStatus();
+    _options = TF_NewImportGraphDefOptions();
+    _sessionOptions = TF_NewSessionOptions();
+  }
+
   _tags = parameter("tags").toVectorString();
 
   _inputNames = parameter("inputs").toVectorString();
@@ -100,7 +108,8 @@ void TensorflowPredict::configure() {
   _outputTensors.resize(_nOutputs);
   _outputNodes.resize(_nOutputs);
 
-  TF_DeleteGraph(_graph);
+  // Clean up previous graph if reconfiguring
+  if (_graph) TF_DeleteGraph(_graph);
   _graph = TF_NewGraph();
 
   openGraph();
@@ -209,16 +218,20 @@ void TensorflowPredict::openGraph() {
 void TensorflowPredict::reset() {
   if (!_isConfigured) return;
 
-  TF_CloseSession(_session, _status);
-  if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error closing session. ", TF_Message(_status));
+  // Close and delete existing session if present (reconfiguration case)
+  if (_session) {
+    TF_CloseSession(_session, _status);
+    if (TF_GetCode(_status) != TF_OK) {
+      throw EssentiaException("TensorflowPredict: Error closing session. ", TF_Message(_status));
+    }
+
+    TF_DeleteSession(_session, _status);
+    if (TF_GetCode(_status) != TF_OK) {
+      throw EssentiaException("TensorflowPredict: Error deleting session. ", TF_Message(_status));
+    }
   }
 
-  TF_DeleteSession(_session, _status);
-  if (TF_GetCode(_status) != TF_OK) {
-    throw EssentiaException("TensorflowPredict: Error deleting session. ", TF_Message(_status));
-  }
-
+  // Create new session (this is where TF GPU initialization happens)
   _session = TF_NewSession(_graph, _sessionOptions, _status);
   if (TF_GetCode(_status) != TF_OK) {
     throw EssentiaException("TensorflowPredict: Error creating new session after reset. ", TF_Message(_status));
