@@ -23,6 +23,7 @@ CHROMAPRINT_VERSION=1.5.1
 QT_SOURCE_URL=https://download.qt.io/archive/qt/5.15/5.15.19/single/qt-everywhere-opensource-src-5.15.19.tar.xz
 GAIA_VERSION=2.4.7
 TENSORFLOW_VERSION=2.17.0
+LIBONNXRUNTIME_VERSION=1.22.1
 
 FFMPEG_AUDIO_FLAGS="
     --disable-programs
