@@ -266,6 +266,66 @@ class TestAudioLoader_Streaming(TestCase):
         # An exception should be thrown if the required audioStream is out of bounds
         self.assertConfigureFails(sAudioLoader(), {'filename': join(testdata.audio_dir, 'generated', 'multistream', 'multistream1.mka'), 'audioStream': 2})
 
+    # ------------------------------------------------------------------------------------
+    # multi-frame packets -- upstream issue 1532
+    #
+    # For most codecs libavcodec maps one packet to one frame, so avcodec_send_packet()
+    # never refuses input. But a packet can carry SEVERAL frames (MS ADPCM in wav does,
+    # reliably: one packet per ~1012-sample block times 4), and then the decoder answers
+    # EAGAIN to the next send until its buffered frames are drained. The FFmpeg contract
+    # requires resending the SAME packet after draining; a loader that instead moves on
+    # to the next packet silently drops compressed audio and the decode comes out SHORT.
+    # These tests pin the only observable that matters: the full duration is decoded.
+
+    def multiFramePacketFixture(self, codec, filename, duration=10, rate=44100):
+        # Generate with the ffmpeg CLI at test time; skip the test if unavailable.
+        import subprocess, tempfile
+        path = join(tempfile.gettempdir(), filename)
+        for tool in ('ffmpeg', 'avconv'):
+            try:
+                subprocess.run([tool, '-v', 'quiet', '-y',
+                                '-f', 'lavfi', '-i', 'sine=frequency=440:duration=%d' % duration,
+                                '-ar', str(rate), '-ac', '2', '-c:a', codec, path],
+                               check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return path
+            except (OSError, subprocess.CalledProcessError):
+                continue
+        return None
+
+    def assertDecodesFullDuration(self, path, duration):
+        from essentia.standard import AudioLoader as stdAudioLoader
+        audio, sampleRate, _, _, _, _ = stdAudioLoader(filename=path)()
+        decoded = len(audio) / float(sampleRate)
+        # encoders pad/trim at block boundaries, so allow a small tolerance; a loader
+        # dropping packets on EAGAIN loses most of the file, far outside this margin
+        self.assertTrue(abs(decoded - duration) < 0.1,
+                        'decoded %.3f s of a %.1f s file: packets were dropped' % (decoded, duration))
+
+    def testMultiFramePacketsAdpcm(self):
+        # MS ADPCM in wav: libavcodec returns 4 frames per demuxed packet, exercising the
+        # send/EAGAIN/resend path on every packet. Fails if refused packets are dropped.
+        path = self.multiFramePacketFixture('adpcm_ms', 'essentia_multiframe_adpcm.wav')
+        if path is None:
+            print('WARNING: ffmpeg CLI not available, skipping multi-frame ADPCM test')
+            return
+        self.assertDecodesFullDuration(path, 10.)
+
+    def testMultiFramePacketsOpus(self):
+        # 120 ms Opus packets each carry six 20 ms frames at the codec level. libavcodec
+        # currently decodes them as one frame per packet, so (unlike the ADPCM case) this
+        # does not reach the EAGAIN path today -- kept as a guard against that changing.
+        import subprocess, tempfile
+        path = join(tempfile.gettempdir(), 'essentia_multiframe_opus.ogg')
+        try:
+            subprocess.run(['ffmpeg', '-v', 'quiet', '-y',
+                            '-f', 'lavfi', '-i', 'sine=frequency=440:duration=10',
+                            '-c:a', 'libopus', '-frame_duration', '120', path],
+                           check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except (OSError, subprocess.CalledProcessError):
+            print('WARNING: ffmpeg CLI with libopus not available, skipping multi-frame Opus test')
+            return
+        self.assertDecodesFullDuration(path, 10.)
+
 
 suite = allTests(TestAudioLoader_Streaming)
 
