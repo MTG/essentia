@@ -31,9 +31,17 @@ const char* Trimmer::description = DOC("This algorithm extracts a segment of an 
 "Giving \"startTime\" greater than \"endTime\" will raise an exception.");
 
 void Trimmer::configure() {
-  Real sampleRate = parameter("sampleRate").toReal();
-  _startIndex = (long long)(parameter("startTime").toReal() * sampleRate);
-  _endIndex = (long long)(parameter("endTime").toReal() * sampleRate);
+  // Convert seconds to samples in double precision: a float32 product drifts
+  // off the sample grid past 2^24 samples (~380 s at 44.1 kHz). The parameter
+  // values themselves are stored as Real (float32), so we widen them once and
+  // round once to the nearest sample (llrint, ties-to-even in the default
+  // rounding mode) so that a seconds value carrying float32 representation
+  // error still lands on the intended sample; truncation would fall one
+  // sample short whenever float32 stores the seconds value slightly below
+  // the intended instant.
+  double sampleRate = (double)parameter("sampleRate").toReal();
+  _startIndex = llrint((double)parameter("startTime").toReal() * sampleRate);
+  _endIndex = llrint((double)parameter("endTime").toReal() * sampleRate);
   if (_startIndex > _endIndex) {
     throw EssentiaException("Trimmer: startTime cannot be larger than endTime.");
   }
@@ -72,9 +80,12 @@ const char* Trimmer::category = essentia::standard::Trimmer::category;
 const char* Trimmer::description = essentia::standard::Trimmer::description;
 
 void Trimmer::configure() {
-  Real sampleRate = parameter("sampleRate").toReal();
-  _startIndex = (long long)(parameter("startTime").toReal() * sampleRate);
-  _endIndex = (long long)(parameter("endTime").toReal() * sampleRate);
+  // See standard::Trimmer::configure(): seconds->samples in double, rounded
+  // once to the nearest sample (llrint), to stay on the sample grid past
+  // 2^24 samples.
+  double sampleRate = (double)parameter("sampleRate").toReal();
+  _startIndex = llrint((double)parameter("startTime").toReal() * sampleRate);
+  _endIndex = llrint((double)parameter("endTime").toReal() * sampleRate);
   if (_startIndex > _endIndex) {
     throw EssentiaException("Trimmer: startTime cannot be larger than endTime.");
   }
