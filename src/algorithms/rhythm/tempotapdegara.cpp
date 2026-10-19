@@ -430,13 +430,13 @@ void TempoTapDegara::computeBeatPeriodsDavies(vector<Real> detections,
   _numberFramesODF = observations.size();
   // Add low-amplitude noise to break ties in the Viterbi path search.
   // Use a fixed-seed PRNG, re-seeded on every compute, so that repeated
-  // analyses of the same audio produce bitwise-identical results
+  // analyses of the same audio on the same platform produce identical results
   // (https://github.com/MTG/essentia/issues/1097). The previous
   // implementation used the process-global rand(), whose state advances
   // across calls, making the output depend on how many times the algorithm
   // (or anything else using rand()) had run before in the same process.
-  // std::mt19937 with a fixed seed is fully specified by the C++ standard,
-  // so the generated noise is also identical across platforms.
+  // The integer sequence from std::mt19937 is standardized; conversion to
+  // Real and floating-point arithmetic can still vary across platforms.
   std::mt19937 rng(83);
   for (size_t t=0; t<_numberFramesODF; ++t) {
     for (int i=0; i<_hopSizeODF; ++i) {
