@@ -104,29 +104,25 @@ int PyStreamingAlgorithm::tp_init(PyStreamingAlgorithm *self, PyObject *args, Py
 
 // Deleting a streaming algorithm is not as simple as deleting the pointer. If
 // the algorithm is configured to be a generator algorithm (has only its
-// sources connected), then we need to call deleteNetwork on that algorithm.
-// If the algorithm is not connected to anything, we can safely delete it (we
-// can also call deleteNetwork on it). If
+// sources connected), then we need to call deleteNetwork on that algorithm,
+// which deletes the whole network reachable downstream of it (including the
+// PoolStorage/DevNull instances created when connecting a source to a Pool or
+// to NOWHERE, which have no Python proxy of their own). If
 // the algorithm has either both its sources and sinks connected, or just its
 // sinks, do not delete it, because it is connected to a network and will be
-// eventually deleted with the deleteNetwork function.
+// eventually deleted by the deleteNetwork call of its generator(s). The
+// Python layer (essentia/streaming.py) guarantees that a connected network is
+// only ever reclaimed as a whole: every connection also stores a
+// back-reference from the sink algorithm to the source connector, so no
+// algorithm of a network can be garbage-collected while any other part of the
+// network is still referenced.
 void PyStreamingAlgorithm::tp_dealloc (PyObject* obj) {
   PyStreamingAlgorithm* self = reinterpret_cast<PyStreamingAlgorithm*>(obj);
-  // FIXME: need to deallocate something here I guess...
-  
-  if (self->isGenerator) {
+
+  // self->algo can be NULL for a VectorInput whose inner C++ algorithm was
+  // never initialized (it is only created at connection time)
+  if (self->isGenerator && self->algo) {
     scheduler::deleteNetwork(self->algo);
-    
-    // Another way to do that is by creating a network and running its clear() method
-    /*    
-    try {
-      scheduler::Network(self->algo).clear();
-    }
-    catch (const exception& e) {
-      PyErr_SetString(PyExc_RuntimeError, e.what());
-      return;
-    }
-    */
   }
 
   Py_TYPE(self)->tp_free(obj);
