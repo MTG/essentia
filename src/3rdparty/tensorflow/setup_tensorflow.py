@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# Copyright (C) 2006-2021  Music Technology Group - Universitat Pompeu Fabra
+# Copyright (C) 2006-2025  Music Technology Group - Universitat Pompeu Fabra
 #
 # This file is part of Essentia
 #
@@ -17,145 +17,263 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program.  If not, see http://www.gnu.org/licenses/
 
+"""Generate a tensorflow.pc describing the TensorFlow C API inside a pip package.
+
+Essentia links against the TensorFlow C API and finds it with pkg-config. Some
+platforms ship a packaged C library that already provides tensorflow.pc (Homebrew's
+libtensorflow, several distributions); where they do not, the pip `tensorflow` wheel
+is the only maintained source of the C API, and this script points pkg-config at it.
+
+The wheel exports the C API from libtensorflow_cc, next to libtensorflow_framework,
+and carries a matching header tree under tensorflow/include. Those files are used
+where they are: this script only writes a handful of symlinks with linker-friendly
+names plus the .pc itself, so it never copies the ~600 MB library.
+
+TensorFlow 2.13 is the floor. Earlier wheels exported the C API from the Python
+wrapper extension (_pywrap_tensorflow_internal), which is not linkable on its own.
+"""
 
 import argparse
-from os import symlink, remove, makedirs
-from os.path import join, dirname, abspath
-from shutil import copytree, rmtree
-from subprocess import call
+import os
+import subprocess
+import sys
+from os.path import abspath, basename, dirname, exists, isdir, join
+
+# Minimum pip TensorFlow whose layout this script understands.
+MIN_VERSION = (2, 13)
+
+# Library stems that may export the C API, most specific first. Wheels ship
+# libtensorflow_cc; a standalone C library build ships libtensorflow.
+C_API_STEMS = ('tensorflow_cc', 'tensorflow')
+
+# Linked alongside the C API library when the package ships it.
+SUPPORT_STEMS = ('tensorflow_framework',)
+
+# The header every TensorflowPredict* algorithm includes, relative to an include dir.
+C_API_HEADER = join('tensorflow', 'c', 'c_api.h')
+
+PC_TEMPLATE = """prefix={prefix}
+libdir={libdir}
+includedir={includedir}
+package_dir={package_dir}
+
+Name: tensorflow
+Description: TensorFlow C API from the pip tensorflow package
+Version: {version}
+Requires:
+Libs: -L${{libdir}} {libs} -Wl,-rpath,{rpath}{rpath_link}
+Cflags: -I${{includedir}}
+"""
+
+# `package_dir` above is not consumed by the linker. It records where the pip package
+# actually lives, so that `pkg-config --variable=package_dir tensorflow` answers the
+# question without importing TensorFlow. src/wscript reads it when
+# --with-tensorflow-pip-rpath / ESSENTIA_TENSORFLOW_PIP_RPATH asks for a wheel build,
+# and the libdir above is no help there: it holds symlinks, not the real libraries.
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser('Sets up Tensorflow for linking against it.'
-        'This can be done in two ways:'
-        ' - python: By symlinking to an existing Tensorflow Python package. '
-        '     This is the recommended way if Tensorflow is avaialble from Python.'
-        ' - libtensorflow: By downloading and installing the C API. This mode does not '
-        '     allow simultaneous use of Essentia and Tensorflow from Python due to symbol name conflicts.')
+def die(message):
+    """Report a fatal problem and exit non-zero."""
+    sys.stderr.write('error: %s\n' % message)
+    raise SystemExit(1)
 
-    parser.add_argument('--mode', '-m', default='python',
-                        choices=['python', 'libtensorflow'])
-    parser.add_argument('--platform', '-p', default='linux',
-                        choices=['linux', 'macos', 'windows'])
-    parser.add_argument('--context', '-c', default='/usr/local/')
-    parser.add_argument('--version', '-v', default='1.14.0')
-    parser.add_argument('--with_gpu', action='store_true')
 
+def locate_package(python):
+    """Return the directory of the tensorflow package importable by `python`.
+
+    Only stdout is read. Importing TensorFlow writes an unconditional line to
+    stderr -- "Could not find cuda drivers" on linux, "This TensorFlow binary is
+    optimized to use available CPU instructions" on macOS -- and folding that
+    into stdout puts a log line in the middle of the path. stderr is still
+    captured, but separately, so a failing import can still be reported in full.
+    """
+    code = 'import os.path, tensorflow; print(os.path.dirname(tensorflow.__file__))'
+    try:
+        process = subprocess.Popen([python, '-c', code],
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = process.communicate()
+    except OSError as error:
+        die('could not run %s: %s' % (python, error))
+    if process.returncode != 0:
+        detail = err.decode('utf-8', 'replace').strip()
+        die('%s cannot import tensorflow.\n\n%s\n\n'
+            'Install it (`%s -m pip install "tensorflow>=%d.%d"`), or pass --package-dir '
+            'to point at an unpacked wheel.'
+            % (python, detail, python, MIN_VERSION[0], MIN_VERSION[1]))
+    return out.decode('utf-8', 'replace').strip()
+
+
+def read_version(package_dir):
+    """Read the TensorFlow version from the dist-info directory beside the package.
+
+    Reading the metadata rather than importing keeps this usable against an unpacked
+    wheel, including one built for a different Python version or platform than the
+    interpreter running this script.
+    """
+    parent = dirname(package_dir)
+    for entry in sorted(os.listdir(parent)):
+        if entry.startswith('tensorflow') and entry.endswith('.dist-info'):
+            name = entry[:-len('.dist-info')]
+            if '-' in name:
+                return name.rsplit('-', 1)[1]
+    return None
+
+
+def check_version(version):
+    """Reject TensorFlow releases whose layout this script does not understand."""
+    if version is None:
+        sys.stderr.write('warning: could not determine the TensorFlow version; '
+                         'assuming it is at least %d.%d\n' % MIN_VERSION)
+        return '%d.%d' % MIN_VERSION
+
+    try:
+        numbers = tuple(int(part) for part in version.split('.')[:2])
+    except ValueError:
+        sys.stderr.write('warning: unparseable TensorFlow version %r; continuing\n' % version)
+        return version
+
+    if numbers < MIN_VERSION:
+        die('found TensorFlow %s, but this script needs >= %d.%d.\n'
+            'Older wheels export the C API from the Python wrapper extension, which '
+            'cannot be linked against.' % (version, MIN_VERSION[0], MIN_VERSION[1]))
+    return version
+
+
+def find_libraries(package_dir):
+    """Return (stem, filename) for each library to link, C API first.
+
+    Wheels ship versioned filenames only (libtensorflow_cc.2.dylib,
+    libtensorflow_cc.so.2), which no linker will find from -ltensorflow_cc.
+    """
+    found = {}
+    for name in sorted(os.listdir(package_dir)):
+        for stem in C_API_STEMS + SUPPORT_STEMS:
+            if name.startswith('lib%s.' % stem) and ('.so' in name or '.dylib' in name):
+                found.setdefault(stem, name)
+
+    c_api = [stem for stem in C_API_STEMS if stem in found]
+    if not c_api:
+        die('no TensorFlow C API library in %s.\nExpected one of: %s.'
+            % (package_dir, ', '.join('lib%s' % stem for stem in C_API_STEMS)))
+
+    stems = [c_api[0]] + [stem for stem in SUPPORT_STEMS if stem in found]
+    return [(stem, found[stem]) for stem in stems]
+
+
+def find_rpath_link_dirs(package_dir):
+    """Return directories ld needs on its *link-time* search path, as -rpath-link flags.
+
+    auditwheel builds the linux tensorflow wheel by moving the libraries it vendored into
+    a sibling `<distribution>.libs` directory and pointing libtensorflow_cc's RPATH at it.
+    That is enough at run time, but not when ld links an executable against
+    libtensorflow_cc: ld resolves DT_NEEDED transitively and stops with
+    "undefined reference to `__kmpc_fork_call'" unless it can find libomp-<hash>.so.5.
+    -rpath-link puts the directory on ld's search path without recording it in the binary,
+    which is what we want -- at run time libtensorflow_cc finds its own dependencies.
+
+    Empty on macOS, where the dylibs have no such sibling directory and ld64 has no
+    -rpath-link.
+    """
+    if sys.platform == 'darwin':
+        return []
+
+    parent = dirname(package_dir)
+    prefix = basename(package_dir)
+    dirs = []
+    for entry in sorted(os.listdir(parent)):
+        if (entry.startswith(prefix) and entry.endswith('.libs')
+                and isdir(join(parent, entry))):
+            dirs.append(join(parent, entry))
+    return dirs
+
+
+def find_includedir(package_dir):
+    """Return the include dir from which <tensorflow/c/c_api.h> resolves."""
+    includedir = join(package_dir, 'include')
+    if not exists(join(includedir, C_API_HEADER)):
+        die('no C API headers in %s (expected %s).\n'
+            'This does not look like a complete TensorFlow wheel.'
+            % (includedir, C_API_HEADER))
+    return includedir
+
+
+def link(source, target):
+    """Create or replace a symlink at `target` pointing to `source`."""
+    if os.path.islink(target) or exists(target):
+        os.remove(target)
+    os.symlink(source, target)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description=__doc__.split('\n\n')[0],
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='After running this, add <prefix>/lib/pkgconfig to PKG_CONFIG_PATH and\n'
+               'configure Essentia with `./waf configure --with-tensorflow`.')
+    parser.add_argument('--prefix', '-p', default='/usr/local',
+                        help='where to write lib/pkgconfig/tensorflow.pc and the library '
+                             'symlinks (default: %(default)s; must be writable)')
+    parser.add_argument('--package-dir', '-d', default=None,
+                        help='use this tensorflow package directory instead of importing '
+                             'tensorflow; accepts the tensorflow/ directory of an '
+                             'unpacked wheel')
+    parser.add_argument('--python', default=sys.executable,
+                        help='interpreter used to locate the tensorflow package '
+                             '(default: %(default)s)')
     args = parser.parse_args()
 
-    context = args.context
-
-    if args.mode == 'python':
-        print('looking for the tensorflow python package...')
-        try:
-            import tensorflow
-        except ImportError as error:
-            print(error.__class__.__name__ + ": " + error.message)
-            raise(Exception('tensorflow is not available from this interpreter.\n'
-                            'Suggestion: `pip install tensorflow`'))
-
-        tf_dir = dirname(tensorflow.__file__)
-        version = tensorflow.__version__
-
-        version_list = version.split('.')
-        major_version = int(version_list[0])
-        minor_version = int(version_list[1])
-
-        # From Tensorflow 1.15. libraries are stored in `tensorflow_core`
-        if major_version >= 1:
-            if minor_version >= 15:
-                tf_dir = tf_dir + '_core'
-
-        print('found tensorflow in "{}"'.format(tf_dir))
-        print('tensorflow version: {}'.format(version))
-
-        file_dir = dirname(abspath(__file__))
-
-        # create symbolic links fo the libraries
-        print('creating symbolic links...')
-
-        libtensorflow = 'tensorflow_framework'
-        pywrap_tensorflow_internal = 'pywrap_tensorflow_internal'
-
-        libtensorflow_name = 'lib{}.so.{}'.format(libtensorflow, major_version)
-        src = join(tf_dir, libtensorflow_name)
-        tgt = join(context, 'lib', libtensorflow_name)
-        call(['ln', '-sf', src, tgt])
-
-        pywrap_tensorflow_name = '_{}.so'.format(pywrap_tensorflow_internal)
-        src = join(tf_dir, 'python', pywrap_tensorflow_name)
-        tgt = join(context, 'lib', pywrap_tensorflow_name)
-        call(['ln', '-sf', src, tgt])
-
-        # add also symbolic links with standarized library names
-        tgt = join(context, 'lib', 'lib{}.so'.format(libtensorflow))
-        call(['ln', '-sf', libtensorflow_name, tgt])
-
-        tgt = join(context, 'lib', 'lib{}.so'.format(pywrap_tensorflow_internal))
-        call(['ln', '-sf', pywrap_tensorflow_name, tgt])
-
-        libs = ('-l{} -l{}'.format(pywrap_tensorflow_internal, libtensorflow))
-
-        # copy headers to the context dir
-        include_dir = join(context, 'include', 'tensorflow', 'c')
-        rmtree(include_dir, ignore_errors=True)
-        copytree(join(dirname(__file__), 'c'), include_dir)
-
-    elif args.mode == 'libtensorflow':
-        # WARNING. With `--mode libtensorflow`, the following problem is known
-        # to arise when importing Essentia and Tensorflow in Python at the same time.
-        #   In [1]: import tensorflow
-        #   In [2]: import essentia
-        #
-        #   ImportError: /usr/local/lib/libtensorflow.so.1: undefined symbol:
-        #  _ZN6google8protobuf5Arena18CreateMaybeMessageIN10tensorflow16OptimizerOptionsEIEEEPT_PS1_DpOT0_
-
-        # The recommended solution is to link Essentia against the Tensorflow shared
-        # libraries shipped with the Tensorflow wheel with `--mode python`
-
-        print('downloading libtensorflow...')
-        with_gpu = args.with_gpu
-        platform = args.platform
-        version = args.version
-
-        hardware = 'gpu' if with_gpu else 'cpu'
-
-        tarball = ('libtensorflow-{}-{}-x86_64-{}.tar.gz'.format(hardware, platform, version))
-        url = ('https://storage.googleapis.com/tensorflow/libtensorflow/{}'.format(tarball))
-
-        # download the tarball
-        call(['wget', url])
-
-        # copy it to the given context
-        print('extracting...')
-        call(['tar', '-C', context, '-xzf', tarball])
-        remove(tarball)
-
-        libs = '-ltensorflow'
-
+    if args.package_dir:
+        package_dir = abspath(args.package_dir)
+        if not isdir(package_dir):
+            die('%s is not a directory' % package_dir)
     else:
-        raise(Exception('Not valid operation mode chosen.'))
+        package_dir = locate_package(args.python)
 
-    # create the pkg-config file
+    print('using the tensorflow package in %s' % package_dir)
 
-    print('preparing pkg-config file...')
-    includes = '-I' + join(context, 'include/tensorflow')
-    lib_dirs = '-L' + join(context, 'lib')
+    version = check_version(read_version(package_dir))
+    print('tensorflow version: %s' % version)
 
-    pkg_config = ('Name: tensorflow\n'
-                  'Description: machine learning lib -- development files\n'
-                  'Version: {}\n'
-                  'Libs: {} {}\n'
-                  'Cflags: {}\n').format(version, lib_dirs, libs, includes)
+    libraries = find_libraries(package_dir)
+    includedir = find_includedir(package_dir)
+    rpath_link_dirs = find_rpath_link_dirs(package_dir)
 
-    pkgconfig_dir = join(context, 'lib', 'pkgconfig')
-    makedirs(pkgconfig_dir, exist_ok=True)
+    libdir = join(abspath(args.prefix), 'lib')
+    pkgconfig_dir = join(libdir, 'pkgconfig')
+    try:
+        os.makedirs(pkgconfig_dir)
+    except OSError:
+        if not isdir(pkgconfig_dir):
+            raise
 
-    with open(join(pkgconfig_dir, 'tensorflow.pc'), 'w') as f:
-        f.write(pkg_config)
+    # Give each versioned library a name the linker accepts from -l<stem>. The loader
+    # still resolves the versioned SONAME/install_name at run time, which is what the
+    # -Wl,-rpath in the .pc points at.
+    suffix = '.dylib' if sys.platform == 'darwin' else '.so'
+    for stem, filename in libraries:
+        target = join(libdir, 'lib%s%s' % (stem, suffix))
+        link(join(package_dir, filename), target)
+        print('%s -> %s' % (target, filename))
 
-    # sometimes the dynamic linker has to be reconfigured
-    print('reconfiguring the linker...')
-    call(['ldconfig'])
+    pkg_config = PC_TEMPLATE.format(
+        prefix=abspath(args.prefix),
+        libdir=libdir,
+        includedir=includedir,
+        version=version,
+        libs=' '.join('-l%s' % stem for stem, _ in libraries),
+        rpath=package_dir,
+        rpath_link=''.join(' -Wl,-rpath-link,%s' % path for path in rpath_link_dirs),
+        package_dir=package_dir)
 
-    print('done!')
+    path = join(pkgconfig_dir, 'tensorflow.pc')
+    with open(path, 'w') as pcfile:
+        pcfile.write(pkg_config)
+
+    print('\nwrote %s:\n' % path)
+    print(pkg_config)
+    print('add %s to PKG_CONFIG_PATH, then run:\n'
+          '    ./waf configure --with-tensorflow' % pkgconfig_dir)
+
+
+if __name__ == '__main__':
+    main()

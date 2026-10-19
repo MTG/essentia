@@ -1,7 +1,7 @@
 .. How to use TensorFlow models and Gaia SVM classifiers 
 
 Using machine learning models
-=======================
+==============================
 
 Essentia includes algorithms for running inference with data-driven machine learning models that can be used for high-level annotation of music audio.
 Specifically, Essentia provides a wrapper for TensorFlow that allows using virtually any TensorFlow model within our audio analysis framework.
@@ -16,7 +16,9 @@ These models have been superseded by our current models.
 Installation
 ------------
 
-Essentia with TensorFlow support is available for Linux and macOS as a separate Python package, `essentia-tensoflow <https://pypi.org/project/essentia-tensorflow/>`_:
+TensorFlow inference support is available for Linux (x86_64, aarch64) and macOS
+(x86_64, arm64) as a separate Python package, `essentia-tensorflow
+<https://pypi.org/project/essentia-tensorflow/>`_:
 
 .. highlight:: none
 
@@ -24,66 +26,34 @@ Essentia with TensorFlow support is available for Linux and macOS as a separate 
 
     pip install essentia-tensorflow
 
-Building Essentia with TensorFlow support 
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Alternatively, we provide instructions to build Essentia from source and link it against the shared TensorFlow libraries.
-To avoid collisions when importing both Essentia and TensorFlow in Python, we use the shared libraries within the Python package of TensorFlow itself instead of linking against the official `libtensorflow <https://www.tensorflow.org/install/lang_c>`_.
-
-Follow these steps to build and install Essentia with TensorFlow support:
-
-At least pip version ≥19.3 is required:
+``essentia-tensorflow`` is a superset of ``essentia``: install **exactly one of the two**,
+never both, since both install into the same ``essentia`` Python package name and the one
+installed second shadows the first. There is no separate ``essentia.tensorflow`` module,
+and there never has been one -- the TensorFlow algorithms simply appear alongside every
+other algorithm in ``essentia.standard`` and ``essentia.streaming`` once
+``essentia-tensorflow`` is the package installed:
 
 .. code-block::
 
-    pip3 install --upgrade pip
+    from essentia.standard import TensorflowPredictEffnetDiscogs
 
-Install TensorFlow (tested for TensorFlow 2.5, 2.8, 2.12):
+See `Installing from PyPI (wheels) <installing.html#installing-from-pypi-wheels>`_ for the
+full supported-platform matrix, including which TensorFlow C library each platform's wheel
+vendors.
 
-.. code-block::
+Building Essentia with TensorFlow support
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    pip3 install tensorflow
-
-Clone Essentia: 
-
-.. code-block::
-
-    git clone https://github.com/MTG/essentia.git
-
-Run `setup_from_python.sh` (may require `sudo`). This script exposes the shared libraries contained in the TensorFlow wheel so we can link against them:
-
-.. code-block::
-
-    cd essentia && src/3rdparty/tensorflow/setup_from_python.sh
-
-Install the `dependencies <https://essentia.upf.edu/installing.html#installing-dependencies-on-linux>`_ for Essentia with Python 3 (may require `sudo`):
-
-.. code-block::
-
-    apt-get install build-essential libyaml-dev libfftw3-dev libavcodec-dev libavformat-dev libavutil-dev libavresample-dev python-dev libsamplerate0-dev libtag1-dev libchromaprint-dev python-six python3-dev python3-numpy-dev python3-numpy python3-yaml libeigen3-dev
-
-Configure Essentia with TensorFlow and Python 3:
-
-
-.. code-block::
-
-    python3 waf configure --build-static --with-python --with-tensorflow
-
-
-Build everything:
-
-.. code-block::
-
-    python3 waf
-
-Install:
-
-.. code-block::
-
-    python3 waf install
+To build Essentia from source with TensorFlow support instead, see `Installing TensorFlow
+<installing.html#installing-tensorflow>`_ in the installation guide: it covers providing a
+TensorFlow C library (a packaged ``libtensorflow``, a pip TensorFlow wheel, or
+``packaging/fetch_libtensorflow.sh``, the reproducible path the published wheels use), the
+``--with-tensorflow`` configure flag, and the configure-time link test that catches a
+``tensorflow.pc`` naming the wrong library before the build starts.
 
 
 Inference with GPU
------------------
+--------------------
 It is possible to run inference with Essentia Models using GPU when the correct version of the CUDA and CuDNN libraries are installed on your system.
 We recommend using a package manager such as `Conda <https://docs.conda.io/en/latest/>`_ to install the required components.
 

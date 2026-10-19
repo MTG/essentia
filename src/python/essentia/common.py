@@ -130,6 +130,12 @@ def determineEdt(obj):
         if firstElmtType == Edt.REAL:
             return Edt(Edt.LIST_REAL)
 
+        if firstElmtType == Edt.NUMPY_FLOAT:
+            # e.g. accumulating essentia VECTOR_REAL output (numpy.float32
+            # scalars) into a plain Python list, as opposed to a REAL built
+            # from a Python float -- convert the same way as a list of floats.
+            return Edt(Edt.LIST_REAL)
+
         if firstElmtType == Edt.STRING:
             return Edt(Edt.VECTOR_STRING)
 

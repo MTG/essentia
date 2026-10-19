@@ -371,7 +371,7 @@ stereosample: [{left: 3, right: 6}, {left: -1, right: 2}]
         p.set('array', arr)
 
         YamlOutput(filename='test.yaml')(p)
-        actual = yaml.load(getYaml('test.yaml'))
+        actual = yaml.safe_load(getYaml('test.yaml'))
 
         # Assert that the tensors are not written
         self.assertEqual(['metadata', 'array'], list(actual.keys()))

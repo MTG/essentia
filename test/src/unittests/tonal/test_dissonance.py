@@ -50,7 +50,7 @@ class TestDissonance(TestCase):
     def testEnharmonic(self):
         size = 32
         fund_freq = 440
-        harms = [fund_freq*(pi/3+ 3*float(random.rand(1))) for i in range(1, size+1)]
+        harms = [fund_freq*(pi/3+ 3*float(random.rand())) for i in range(1, size+1)]
         harms[0] = fund_freq
         harms = array(sort(harms))
         mags = zeros(size)
@@ -60,7 +60,7 @@ class TestDissonance(TestCase):
         mags[3] = 0.555555
         mags[7] = 0.211
         mags[15] = 0.05
-        self.assertNotEquals(Dissonance()(harms, mags), 0)
+        self.assertNotEqual(Dissonance()(harms, mags), 0)
 
     def testHarmonic(self):
         size = 32
@@ -69,7 +69,7 @@ class TestDissonance(TestCase):
         harms = [fund_freq*i for i in range(1, size+1)]
 
         # enharmonics:
-        enharms = [fund_freq*(pi/3.0*(1+float(random.rand(1))/2.0)) for i in range(size)]
+        enharms = [fund_freq*(pi/3.0*(1+float(random.rand())/2.0)) for i in range(size)]
         enharms[0] = fund_freq
         enharms = array(sort(enharms))
 

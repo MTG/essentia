@@ -45,7 +45,13 @@ class EssentiaBuildExtension(build_ext):
         if var_skip_3rdparty in os.environ and os.environ[var_skip_3rdparty]=='1':
             print('Skipping building static 3rdparty dependencies (%s=1)' %  var_skip_3rdparty)
         else:
-            subprocess.run('./packaging/build_3rdparty_static_debian.sh', check=True)
+            # Invoke with an explicit bash interpreter rather than relying on the
+            # script's shebang + execute bit: sdist tarballs and some build
+            # front-ends don't reliably preserve the executable bit, which can
+            # cause the script to fall back to being run under /bin/sh (dash on
+            # Debian/Ubuntu), which doesn't understand its `[[ ... ]]` tests
+            # (see MTG/essentia#1462: "[[: not found").
+            subprocess.run(['bash', './packaging/build_3rdparty_static_debian.sh'], check=True)
 
         if var_only_python in os.environ and os.environ[var_only_python]=='1':
             print('Skipping building the core libessentia library (%s=1)' %  var_only_python)

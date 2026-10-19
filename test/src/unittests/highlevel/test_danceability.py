@@ -83,6 +83,12 @@ class TestDanceability(TestCase):
     def testWhiteNoise(self):
         # we expect a constant value of 0.5 for all DFA exponents for white noise
         # the values vary a little, so let's permit up to 0.1 absolute deviation
+        #
+        # Seeded so the test is deterministic: unseeded, this measured
+        # 0.1006668 against this already-generous 0.1 tolerance (aarch64,
+        # one pass out of six across platforms/passes) -- right at the
+        # boundary the comment above admits is approximate.
+        numpy.random.seed(0)
         wn_44100 = array(numpy.random.normal(loc=0, scale=1, size=44100*60*10))
         d, dfa = Danceability()(wn_44100)
         self.assertAlmostEqualVectorAbs(dfa, [0.5] * 35, 0.1)

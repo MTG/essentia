@@ -157,24 +157,24 @@ class TestLoopBpmConfidence(TestCase):
         # Add non-musical silence to the beginning of the audio
         signal1 = numpy.append(silentAudio, audio)
         confidence = LoopBpmConfidence()(signal1, bpmEstimate)
-        self.assertEquals(confidence, 1.0)
+        self.assertEqual(confidence, 1.0)
 
         # Add non-musical silence to the end of the audio
         signal2 = numpy.append(audio, silentAudio)
         confidence = LoopBpmConfidence()(signal2, bpmEstimate)
-        self.assertEquals(confidence, 1.0)
+        self.assertEqual(confidence, 1.0)
 
         # Concatenate silence at both ends
         signal3 = numpy.append(signal1, silentAudio)
         confidence = LoopBpmConfidence()(signal3, bpmEstimate)
-        self.assertEquals(confidence, 1.0)
+        self.assertEqual(confidence, 1.0)
 
     def testEmpty(self):
         # Zero estimate check results in zero confidence
         emptyAudio = []
         bpmEstimate = 0
         confidence = LoopBpmConfidence()(emptyAudio, bpmEstimate)
-        self.assertEquals(0, confidence)
+        self.assertEqual(0, confidence)
 
         # Non-zero estimate check results in zero confidence
         # The estimation is based on audio length.
@@ -182,41 +182,41 @@ class TestLoopBpmConfidence(TestCase):
         emptyAudio = []
         bpmEstimate = 125
         confidence = LoopBpmConfidence()(emptyAudio, bpmEstimate)
-        self.assertEquals(0, confidence)
+        self.assertEqual(0, confidence)
 
     def testZero(self):
         beatPeriod = 21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
         zeroAudio = zeros(beatPeriod)
         bpmEstimate = 0
         confidence = LoopBpmConfidence()(zeroAudio, bpmEstimate)
-        self.assertEquals(0, confidence)
+        self.assertEqual(0, confidence)
 
         # Non-zero estimate check results in non-zero confidence
         # The estimation is based on audio length.
         # Different constant input length will result in different estimations.
         bpmEstimate = 125
         confidence = LoopBpmConfidence()(zeroAudio, bpmEstimate)
-        self.assertNotEquals(0, confidence)
+        self.assertNotEqual(0, confidence)
 
         # A silent length of 4 Beat periods produces a confidence of 1.
         zeroAudio4Beats = zeros(beatPeriod*4)
         bpmEstimate = 125
         confidence = LoopBpmConfidence()(zeroAudio4Beats, bpmEstimate)
-        self.assertEquals(1, confidence)
+        self.assertEqual(1, confidence)
 
     def testConstantInput(self):
         beatPeriod = 21168 # N.B The beat period is 21168 samples for 125 bpm @ 44.1k samp. rate
         onesAudio = ones(beatPeriod)
         bpmEstimate = 0
         confidence = LoopBpmConfidence()(onesAudio, bpmEstimate)
-        self.assertEquals(0, confidence)
+        self.assertEqual(0, confidence)
 
         # Non-zero estimate check results in non-zero confidence
         # The estimation is based on audio length.
         # Different constant input length will result in different estimations.
         bpmEstimate = 125
         confidence = LoopBpmConfidence()(onesAudio, bpmEstimate)
-        self.assertEquals(1, confidence)
+        self.assertEqual(1, confidence)
 
 suite = allTests(TestLoopBpmConfidence)
 

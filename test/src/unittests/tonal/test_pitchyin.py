@@ -74,7 +74,7 @@ class TestPitchYin(TestCase):
         signal = zeros(size)
         for i in range(1, size):
             # masking noise:
-            whitenoise = 2 * (random.rand(1) - 0.5)
+            whitenoise = 2 * (random.rand() - 0.5)
             signal[i] += 2 * whitenoise
             for harm in range(1, nharms):
                 signal[i] += 1.0 / harm * sin(i * harm * w / sr)
@@ -131,7 +131,7 @@ class TestPitchYin(TestCase):
             confidence += [conf]
 
         expected_pitch = numpy.load(join(filedir(), "pitchyin/vignesh_pitch.npy"))
-        expected_conf = numpy.load(join(filedir(), "pitchyin/vignesh_confidence.npy"))
+        expected_conf = numpy.load(join(filedir(), "pitchyin/vignesh_confidance.npy"))
 
         self.assertAlmostEqualVector(pitch, expected_pitch)
         self.assertAlmostEqualVector(confidence, expected_conf, 5e-6)

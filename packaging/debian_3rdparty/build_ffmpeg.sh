@@ -29,5 +29,18 @@ cd $FFMPEG_VERSION
 make
 make install
 
+# On AArch64 FFmpeg links against libatomic for the 128-bit atomics it uses and
+# records -latomic in libavutil.pc, which propagates into essentia.pc and into
+# the Python extension. libatomic.so.1 is on the manylinux policy whitelist, so
+# auditwheel leaves it as an external dependency -- but the Debian slim images
+# that most arm64 deployments are built on do not ship libatomic1, and importing
+# the wheel there dies with "libatomic.so.1: cannot open shared object file".
+# Ask for the static libatomic instead; nothing else in the wheel is dynamic.
+case "$(uname -m)" in
+  aarch64|arm64)
+    sed -i -e 's/-latomic/-l:libatomic.a/g' "$PREFIX"/lib/pkgconfig/lib*.pc
+    ;;
+esac
+
 cd ../..
 rm -r tmp

@@ -129,7 +129,7 @@ class TestPitchSalience(TestCase):
         self.assertTrue(PitchSalience(lowBoundary=41, highBoundary=41)(spectrum) < .1)
 
     def testSilence(self):
-        self.assertEquals(PitchSalience()([0]*1024), 0)
+        self.assertEqual(PitchSalience()([0]*1024), 0)
 
     def testEmpty(self):
         self.assertComputeFails(PitchSalience(), [])
