@@ -31,6 +31,10 @@
 #include "metadatautils.h"
 #include "essentiautil.h"
 
+#ifdef ESSENTIA_HAVE_LIBAVFORMAT
+#include "ffmpegapi.h"
+#endif
+
 
 using namespace std;
 
@@ -165,17 +169,121 @@ string formatString(const TagLib::StringList& strList) {
   return result;
 }
 
+// Populate a pool with the tags found in a TagLib::PropertyMap, optionally
+// filtering them with a white-list of tag names.
+static void fillTagPool(const TagLib::PropertyMap& tags,
+                        bool filterMetadata,
+                        const std::vector<std::string>& filterMetadataTags,
+                        const std::string& tagPoolName,
+                        essentia::Pool& tagPool) {
+  for(TagLib::PropertyMap::ConstIterator i = tags.begin(); i != tags.end(); ++i) {
+    string key = i->first.to8Bit(true);
+    if (!filterMetadata || std::find(filterMetadataTags.begin(), filterMetadataTags.end(), key) != filterMetadataTags.end()) {
+        // remove '.' chars which are used in Pool descriptor names as a separator
+        // convert to lowercase
+        std::replace(key.begin(), key.end(), '.', '_');
+        std::transform(key.begin(), key.end(), key.begin(), ::tolower);
+        key = tagPoolName + "." + key;
+
+        for(TagLib::StringList::ConstIterator str = i->second.begin(); str != i->second.end(); ++str) {
+          tagPool.add(key, str->to8Bit(true));
+        }
+    }
+  }
+}
+
+
+#ifdef ESSENTIA_HAVE_LIBAVFORMAT
+
+// Merge an avformat metadata dictionary into a TagLib::PropertyMap so that
+// tags found by the libavformat fallback can be processed by the same code
+// that processes tags found by TagLib. Keys already present in the map are
+// appended to.
+static void mergeAVDictionary(const AVDictionary* dict, TagLib::PropertyMap& tags) {
+  if (!dict) return;
+  const AVDictionaryEntry* entry = NULL;
+  while ((entry = av_dict_get(dict, "", entry, AV_DICT_IGNORE_SUFFIX)) != NULL) {
+    if (!entry->key || !entry->value || !*entry->value) continue;
+    string key = entry->key;
+    std::transform(key.begin(), key.end(), key.begin(), ::toupper);
+    // translate ffmpeg's generic tag name to the TagLib naming convention
+    if (key == "TRACK") key = "TRACKNUMBER";
+    TagLib::String tagKey(key, TagLib::String::UTF8);
+    TagLib::String tagValue(entry->value, TagLib::String::UTF8);
+    if (tags.contains(tagKey)) {
+      tags[tagKey].append(tagValue);
+    }
+    else {
+      tags.insert(tagKey, TagLib::StringList(tagValue));
+    }
+  }
+}
+
+// Fallback metadata reader based on libavformat, which Essentia already uses
+// for audio decoding (AudioLoader). It is used when TagLib cannot parse the
+// audio file at all -- e.g., Matroska (.mka/.mkv/.webm) requires TagLib >= 2.2,
+// which not all builds ship with -- or when TagLib parses the file but cannot
+// provide its audio properties. Returns true if libavformat could open the
+// file and find an audio stream in it.
+static bool avformatMetadata(const string& filename,
+                             int& duration, int& bitrate,
+                             int& sampleRate, int& channels,
+                             TagLib::PropertyMap* tags = NULL) {
+  AVFormatContext* fmtCtx = NULL;
+  if (avformat_open_input(&fmtCtx, filename.c_str(), NULL, NULL) != 0) {
+    return false;
+  }
+  if (avformat_find_stream_info(fmtCtx, NULL) < 0) {
+    avformat_close_input(&fmtCtx);
+    return false;
+  }
+
+  int streamIdx = av_find_best_stream(fmtCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
+  if (streamIdx < 0) {
+    avformat_close_input(&fmtCtx);
+    return false;
+  }
+
+  const AVStream* stream = fmtCtx->streams[streamIdx];
+  const AVCodecParameters* codecParams = stream->codecpar;
+
+  // container duration in AV_TIME_BASE units; fall back to the stream
+  // duration when the container does not provide one
+  int64_t durationUs = fmtCtx->duration;
+  if (durationUs <= 0 && stream->duration > 0) {
+    durationUs = av_rescale_q(stream->duration, stream->time_base, AV_TIME_BASE_Q);
+  }
+  // round to the nearest second, as TagLib::AudioProperties::length()
+  // reports integer seconds
+  duration = durationUs > 0 ? (int)((durationUs + AV_TIME_BASE / 2) / AV_TIME_BASE) : 0;
+
+  int64_t bitRate = fmtCtx->bit_rate > 0 ? fmtCtx->bit_rate : codecParams->bit_rate;
+  bitrate = bitRate > 0 ? (int)(bitRate / 1000) : 0;  // kb/s, as TagLib reports it
+
+  sampleRate = codecParams->sample_rate;
+  channels = codecParams->ch_layout.nb_channels;
+
+  if (tags) {
+    mergeAVDictionary(fmtCtx->metadata, *tags);
+    mergeAVDictionary(stream->metadata, *tags);
+  }
+
+  avformat_close_input(&fmtCtx);
+  return true;
+}
+
+#endif // ESSENTIA_HAVE_LIBAVFORMAT
+
+
 namespace essentia {
 namespace standard {
 
 const char* MetadataReader::name = "MetadataReader";
 const char* MetadataReader::category = "Input/output";
-const char* MetadataReader::description = DOC("This algorithm loads the metadata tags from an audio file as well as outputs its audio properties. Supported audio file types are:\n"
-"  - mp3\n"
-"  - flac\n"
-"  - ogg\n"
-"An exception is thrown if unsupported filetype is given or if the file does not exist.\n"
-"Please observe that the .wav format is not supported. Also note that this algorithm incorrectly calculates the number of channels for a file in mp3 format only for versions less than 1.5 of taglib in Linux and less or equal to 1.5 in Mac OS X\n"
+const char* MetadataReader::description = DOC("This algorithm loads the metadata tags from an audio file as well as outputs its audio properties. Tags and audio properties are read with TagLib for the file types it supports (mp3, ogg, flac, mp4/m4a, and others). When TagLib cannot parse a file, two fallbacks apply in order:\n"
+"  - raw PCM files (.wav, .aiff) are handled by a built-in header reader that outputs audio properties only (no tags);\n"
+"  - any other file type falls back to FFmpeg's libavformat, which reads both the audio properties (duration, bitrate, sample rate, channels) and the metadata tags, when Essentia is built with FFmpeg support (e.g., Matroska containers require TagLib >= 2.2 to be read natively).\n"
+"An exception is thrown if the file does not exist. If no available reader can parse the file, an exception is thrown when 'failOnError' is enabled; otherwise all outputs are left empty or zero.\n"
 "If using this algorithm on Windows, you must ensure that the filename is encoded as UTF-8.\n"
 "This algorithm also contains some heuristic to try to deal with encoding errors in the tags and tries to do the appropriate conversion if a problem was found (mostly twice latin1->utf8 conversion).\n"
 "\n"
@@ -214,36 +322,59 @@ void MetadataReader::compute() {
   Pool tagPool;
 
   if (f.isNull()) {
-    // in case TagLib can't get metadata out of this file, try some basic PCM approach
-    int pcmSampleRate = 0;
-    int pcmChannels = 0;
-    int pcmBitrate = 0;
+    // TagLib cannot parse this file at all. This happens for containers that
+    // the linked TagLib version does not support (e.g., Matroska requires
+    // TagLib >= 2.2) as well as for raw PCM files.
+    // First try some basic PCM approach, then fall back to libavformat.
+    int fallbackDuration = 0;
+    int fallbackSampleRate = 0;
+    int fallbackChannels = 0;
+    int fallbackBitrate = 0;
+    bool foundMetadata = false;
+    string pcmError;
 
     try {
-      pcmMetadata(_filename, pcmSampleRate, pcmChannels, pcmBitrate);
-      // works only for 16bit wavs/pcm; it should output incorrect value for 
+      pcmMetadata(_filename, fallbackSampleRate, fallbackChannels, fallbackBitrate);
+      // works only for 16bit wavs/pcm; it should output incorrect value for
       // 24bit or 32bit float files, therefore, print a warning
       E_WARNING("MetadataReader: TagLib could not get metadata for this file. The output bitrate is estimated treating the input as 16-bit PCM, and therefore may be incorrect.");
+      foundMetadata = true;
     }
     catch (EssentiaException& e) {
-      if (parameter("failOnError").toBool())
-        throw EssentiaException("MetadataReader: File does not exist or does not seem to be of a supported filetype. ", e.what());
+      pcmError = e.what();
     }
 
-    _title.get()   = "";
-    _artist.get()  = "";
-    _album.get()   = "";
-    _comment.get() = "";
-    _genre.get()   = "";
-    _track.get()   = "";
-    _date.get()    = "";
+    TagLib::PropertyMap fallbackTags;
+
+#ifdef ESSENTIA_HAVE_LIBAVFORMAT
+    if (!foundMetadata) {
+      // not a PCM file either: read audio properties (and tags) via
+      // libavformat, which supports every container Essentia can decode
+      foundMetadata = avformatMetadata(_filename, fallbackDuration, fallbackBitrate,
+                                       fallbackSampleRate, fallbackChannels, &fallbackTags);
+    }
+#endif
+
+    if (!foundMetadata && parameter("failOnError").toBool()) {
+      throw EssentiaException("MetadataReader: File does not exist or does not seem to be of a supported filetype. ", pcmError);
+    }
+
+    _title.get()   = formatString(fallbackTags["TITLE"]);
+    _artist.get()  = formatString(fallbackTags["ARTIST"]);
+    _album.get()   = formatString(fallbackTags["ALBUM"]);
+    _comment.get() = formatString(fallbackTags["COMMENT"]);
+    _genre.get()   = formatString(fallbackTags["GENRE"]);
+    _track.get()   = formatString(fallbackTags["TRACKNUMBER"]);
+    _date.get()    = formatString(fallbackTags["DATE"]);
+
+    fillTagPool(fallbackTags, _filterMetadata, _filterMetadataTags, _tagPoolName, tagPool);
 
     _tagPool.get()  = tagPool;
 
-    _duration.get()   = 0;
-    _bitrate.get()    = pcmBitrate;
-    _sampleRate.get() = pcmSampleRate;
-    _channels.get()   = pcmChannels;
+    _duration.get()   = fallbackDuration;
+    _bitrate.get()    = fallbackBitrate;
+    _sampleRate.get() = fallbackSampleRate;
+    _channels.get()   = fallbackChannels;
 
     return;
   }
@@ -259,27 +390,34 @@ void MetadataReader::compute() {
   _date.get()    = formatString(tags["DATE"]);
 
   // populate tag pool
-  for(TagLib::PropertyMap::ConstIterator i = tags.begin(); i != tags.end(); ++i) {
-    string key = i->first.to8Bit(true);
-    if (!_filterMetadata || std::find(_filterMetadataTags.begin(), _filterMetadataTags.end(), key) != _filterMetadataTags.end()) {
-        // remove '.' chars which are used in Pool descriptor names as a separator
-        // convert to lowercase
-        std::replace(key.begin(), key.end(), '.', '_');
-        std::transform(key.begin(), key.end(), key.begin(), ::tolower);
-        key = _tagPoolName + "." + key;
-
-        for(TagLib::StringList::ConstIterator str = i->second.begin(); str != i->second.end(); ++str) {
-          tagPool.add(key, str->to8Bit(true));
-        }
-    }
-  }
+  fillTagPool(tags, _filterMetadata, _filterMetadataTags, _tagPoolName, tagPool);
 
   _tagPool.get()  = tagPool;
 
-  _duration.get()     = f.audioProperties()->length();
-  _bitrate.get()    = f.audioProperties()->bitrate();
-  _sampleRate.get() = f.audioProperties()->sampleRate();
-  _channels.get()   = f.audioProperties()->channels();
+  TagLib::AudioProperties* audioProperties = f.audioProperties();
+  int duration   = audioProperties ? audioProperties->length() : 0;
+  int bitrate    = audioProperties ? audioProperties->bitrate() : 0;
+  int sampleRate = audioProperties ? audioProperties->sampleRate() : 0;
+  int channels   = audioProperties ? audioProperties->channels() : 0;
+
+#ifdef ESSENTIA_HAVE_LIBAVFORMAT
+  if (duration == 0 && sampleRate == 0) {
+    // TagLib recognized the file but could not read its audio properties;
+    // fill the numeric audio properties from libavformat instead
+    int avDuration = 0, avBitrate = 0, avSampleRate = 0, avChannels = 0;
+    if (avformatMetadata(_filename, avDuration, avBitrate, avSampleRate, avChannels)) {
+      duration   = avDuration;
+      bitrate    = avBitrate;
+      sampleRate = avSampleRate;
+      channels   = avChannels;
+    }
+  }
+#endif
+
+  _duration.get()   = duration;
+  _bitrate.get()    = bitrate;
+  _sampleRate.get() = sampleRate;
+  _channels.get()   = channels;
 
   // fix for taglib incorrectly returning the bitrate for wave files
   string ext = toLower(_filename.substr(_filename.size()-3));
@@ -312,31 +450,52 @@ AlgorithmStatus MetadataReader::process() {
   //Pool tagPool;
 
   if (f.isNull()) {
-    // in case TagLib can't get metadata out of this file, try some basic PCM approach
-    int pcmSampleRate = 0;
-    int pcmChannels = 0;
-    int pcmBitrate = 0;
+    // TagLib cannot parse this file at all. This happens for containers that
+    // the linked TagLib version does not support (e.g., Matroska requires
+    // TagLib >= 2.2) as well as for raw PCM files.
+    // First try some basic PCM approach, then fall back to libavformat.
+    int fallbackDuration = 0;
+    int fallbackSampleRate = 0;
+    int fallbackChannels = 0;
+    int fallbackBitrate = 0;
+    bool foundMetadata = false;
+    string pcmError;
 
     try {
-      pcmMetadata(_filename, pcmSampleRate, pcmChannels, pcmBitrate);
+      pcmMetadata(_filename, fallbackSampleRate, fallbackChannels, fallbackBitrate);
+      foundMetadata = true;
     }
     catch (EssentiaException& e) {
-      if (parameter("failOnError").toBool())
-        throw EssentiaException("MetadataReader: File does not exist or does not seem to be of a supported filetype. ", e.what());
+      pcmError = e.what();
     }
-    string ns = "";
-    _title.push(ns);
-    _artist.push(ns);
-    _album.push(ns);
-    _comment.push(ns);
-    _genre.push(ns);
-    _track.push(ns);
-    _date.push(ns);
+
+    TagLib::PropertyMap fallbackTags;
+
+#ifdef ESSENTIA_HAVE_LIBAVFORMAT
+    if (!foundMetadata) {
+      // not a PCM file either: read audio properties (and tags) via
+      // libavformat, which supports every container Essentia can decode
+      foundMetadata = avformatMetadata(_filename, fallbackDuration, fallbackBitrate,
+                                       fallbackSampleRate, fallbackChannels, &fallbackTags);
+    }
+#endif
+
+    if (!foundMetadata && parameter("failOnError").toBool()) {
+      throw EssentiaException("MetadataReader: File does not exist or does not seem to be of a supported filetype. ", pcmError);
+    }
+
+    _title.push(formatString(fallbackTags["TITLE"]));
+    _artist.push(formatString(fallbackTags["ARTIST"]));
+    _album.push(formatString(fallbackTags["ALBUM"]));
+    _comment.push(formatString(fallbackTags["COMMENT"]));
+    _genre.push(formatString(fallbackTags["GENRE"]));
+    _track.push(formatString(fallbackTags["TRACKNUMBER"]));
+    _date.push(formatString(fallbackTags["DATE"]));
     //_tagPool.push(tagPool);
-    _duration.push(0);
-    _bitrate.push(pcmBitrate);
-    _sampleRate.push(pcmSampleRate);
-    _channels.push(pcmChannels);
+    _duration.push(fallbackDuration);
+    _bitrate.push(fallbackBitrate);
+    _sampleRate.push(fallbackSampleRate);
+    _channels.push(fallbackChannels);
   }
   else {
     TagLib::PropertyMap tags = f.file()->properties();
@@ -360,9 +519,28 @@ AlgorithmStatus MetadataReader::process() {
     _tagPool.push(tagPool);
     */
 
-    _duration.push((int)f.audioProperties()->length());
+    TagLib::AudioProperties* audioProperties = f.audioProperties();
+    int duration   = audioProperties ? audioProperties->length() : 0;
+    int bitrate    = audioProperties ? audioProperties->bitrate() : 0;
+    int sampleRate = audioProperties ? audioProperties->sampleRate() : 0;
+    int channels   = audioProperties ? audioProperties->channels() : 0;
 
-    int bitrate = f.audioProperties()->bitrate();
+#ifdef ESSENTIA_HAVE_LIBAVFORMAT
+    if (duration == 0 && sampleRate == 0) {
+      // TagLib recognized the file but could not read its audio properties;
+      // fill the numeric audio properties from libavformat instead
+      int avDuration = 0, avBitrate = 0, avSampleRate = 0, avChannels = 0;
+      if (avformatMetadata(_filename, avDuration, avBitrate, avSampleRate, avChannels)) {
+        duration   = avDuration;
+        bitrate    = avBitrate;
+        sampleRate = avSampleRate;
+        channels   = avChannels;
+      }
+    }
+#endif
+
+    _duration.push(duration);
+
     // fix for taglib incorrectly returning the bitrate for wave files
     string ext = toLower(_filename.substr(_filename.size()-3));
     if (ext == "wav") {
@@ -370,8 +548,8 @@ AlgorithmStatus MetadataReader::process() {
     }
 
     _bitrate.push((int)bitrate);
-    _sampleRate.push((int)f.audioProperties()->sampleRate());
-    _channels.push((int)f.audioProperties()->channels());
+    _sampleRate.push((int)sampleRate);
+    _channels.push((int)channels);
   }
 
   _newlyConfigured = false;
