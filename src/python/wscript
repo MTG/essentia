@@ -20,6 +20,16 @@ def configure(ctx):
         print ('→ Configuring for python3')
 
     ctx.check_python_headers(features='pyext')
+    # MacOS Python 3.13 adds universal2 flags that conflict with our arm64-only Essentia build.
+    # Remove Python's architecture flags when building for arm64.
+    if ctx.env.DEST_OS == 'darwin' and ctx.options.ARCH == 'arm64':
+        for key in ('CFLAGS_PYEXT', 'CXXFLAGS_PYEXT', 'LINKFLAGS_PYEXT', 'LDFLAGS_PYEXT'):
+            flags = iter(ctx.env[key])
+            ctx.env[key] = [
+                flag for flag in flags
+                if flag != '-arch' or next(flags, None) is None
+            ]
+
     ctx.check_python_module('numpy')
 
     # A monkey patch to remove the -lpythonX.Ym flag. PEP 513 recommends to
