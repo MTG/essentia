@@ -69,6 +69,57 @@ class TestEqloudLoader_Streaming(TestCase):
 
 
 
+    # ------------------------------------------------------------------------------------
+    # EqloudLoader gained the same seeking as EasyLoader (issue #771), and the same
+    # obligation: the slice it returns must be the slice a full read would have given.
+
+    def readSlice(self, filename, sampleRate, startTime, endTime):
+        loader = EqloudLoader(filename=filename, sampleRate=sampleRate, downmix='mix',
+                              startTime=startTime, endTime=endTime, replayGain=-6.)
+        pool = Pool()
+        loader.audio >> (pool, 'audio')
+        run(loader)
+        if 'audio' not in pool.descriptorNames():
+            return numpy.array([], dtype='float32')
+        return numpy.array(pool['audio'])
+
+    def sliceIsExact(self, name, sampleRate, spans):
+        # The reference cannot be a slice of a full EqloudLoader read: the equal-loudness
+        # filter is an IIR whose state depends on everything it has already seen, so a slice
+        # of a whole-file read has never equalled a read of that slice, patch or no patch.
+        # EqloudLoader IS EasyLoader followed by EqualLoudness, so compose the reference
+        # that way instead -- exact, and independent of where the loader started.
+        from essentia.standard import EqualLoudness
+        filename = join(testdata.audio_dir, name)
+        for startTime, endTime in spans:
+            found = self.readSlice(filename, sampleRate, startTime, endTime)
+            easy = EasyLoader(filename=filename, sampleRate=sampleRate, downmix='mix',
+                              startTime=startTime, endTime=endTime, replayGain=-6.)
+            pool = Pool()
+            easy.audio >> (pool, 'audio')
+            run(easy)
+            expected = EqualLoudness(sampleRate=sampleRate)(pool['audio'])
+            self.assertEqual(len(found), len(expected))
+            self.assertAlmostEqualVector(found, expected, 1e-6)
+
+    def testSeek(self):
+        self.sliceIsExact(join('recorded', 'musicbox.wav'), 44100,
+                          [(0., 2.), (1.5, 3.5), (12.345, 14.345)])
+        self.sliceIsExact(join('recorded', 'techno_loop.mp3'), 44100,
+                          [(1.5, 3.5), (25., 30.)])
+
+    def testSeekResampledIsUnchanged(self):
+        # see EasyLoader: a resampled slice deliberately keeps the decode-and-trim path
+        self.sliceIsExact(join('recorded', 'musicbox.wav'), 32000, [(1.5, 3.5), (5., 6.)])
+
+    def testSeekBoundaries(self):
+        filename = join(testdata.audio_dir, 'recorded', 'musicbox.wav')
+        whole = self.readSlice(filename, 44100, 0., 1e6)
+        duration = len(whole)/44100.
+        self.assertEqual(len(self.readSlice(filename, 44100, 0., duration)), len(whole))
+        self.assertEqual(len(self.readSlice(filename, 44100, duration + 10., duration + 20.)), 0)
+        self.assertEqual(len(self.readSlice(filename, 44100, 3., 3.)), 0)
+
     def testInvalidParam(self):
         filename = join(testdata.audio_dir, 'generated','synthesised','impulse','resample',
                         'impulses_1samp_44100.wav')
