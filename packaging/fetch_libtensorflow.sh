@@ -8,8 +8,8 @@
 # TensorFlow from source on a CI runner is not viable, so the library comes from
 # whichever upstream still publishes a prebuilt one for the platform in hand:
 #
-#   linux x86_64    Google tarball 2.18.1. manylinux2014 is glibc 2.17 and this
-#                   tarball needs exactly that; the Homebrew bottle needs 2.27.
+#   linux x86_64    Google tarball 2.18.1, retained from the manylinux2014
+#                   builder and compatible with the current manylinux_2_28 image.
 #   linux aarch64   Homebrew `libtensorflow` bottle 2.21.0, from ghcr.io. Google
 #                   publishes no linux-arm64 libtensorflow, at any version.
 #   macOS arm64     Homebrew `libtensorflow` bottle 2.21.0 (arm64_sequoia), from

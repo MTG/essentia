@@ -14,7 +14,7 @@ SHARED_OR_STATIC="
 EIGEN_VERSION=3.3.7
 FFMPEG_VERSION=ffmpeg-7.1.1
 LAME_VERSION=3.100
-TAGLIB_VERSION=taglib-1.11.1
+TAGLIB_VERSION=taglib-1.13.1
 ZLIB_VERSION=zlib-1.2.12
 # FFTW 3.3.2 (2012) predates AArch64: its bundled config.sub does not know the
 # aarch64-*-linux-gnu triplet and it has no NEON codelets for 64-bit ARM. Use
@@ -26,8 +26,8 @@ esac
 LIBSAMPLERATE_VERSION=libsamplerate-0.1.9
 LIBYAML_VERSION=yaml-0.1.5
 CHROMAPRINT_VERSION=1.5.1
-QT_SOURCE_URL=https://download.qt.io/archive/qt/4.8/4.8.4/qt-everywhere-opensource-src-4.8.4.tar.gz
-GAIA_VERSION=2.4.6-86-ged433ed
+QT_SOURCE_URL=https://download.qt.io/archive/qt/5.15/5.15.19/single/qt-everywhere-opensource-src-5.15.19.tar.xz
+GAIA_VERSION=2.4.7
 # The version the Bazel build below compiles. Read by
 # packaging/debian_3rdparty/build_tensorflow.sh and by the CUDA block further
 # down, which was written against it. Nothing else reads it.
@@ -39,11 +39,9 @@ TENSORFLOW_VERSION=2.17.0
 # platforms, so each names the newest release that works there and says why.
 # Every pin the wheels use lives here and nowhere else.
 
-# Linux x86_64: Google's official tarball rather than the Homebrew bottle. The
-# bottle is newer but is built against glibc 2.27, and the manylinux2014 image
-# these wheels come from is glibc 2.17, so the configure-time C API link test
-# rejects it. The tarball's highest versioned symbol requirement is GLIBC_2.17,
-# exactly what that image provides.
+# Linux x86_64: retain Google's official tarball, originally selected for
+# manylinux2014 compatibility (GLIBC_2.17). It also works with the current
+# manylinux_2_28 builder; updating the builder does not change this library pin.
 TENSORFLOW_LINUX_X86_64_VERSION=2.18.1
 TENSORFLOW_LINUX_X86_64_URL=https://storage.googleapis.com/tensorflow/versions/2.18.1/libtensorflow-cpu-linux-x86_64.tar.gz
 TENSORFLOW_LINUX_X86_64_SHA256=b692795f3ad198c531b02aeb2bc8146568d24aaf6a5dbf5faa43907c4028fd73
@@ -316,52 +314,50 @@ LIBSAMPLERATE_FLAGS="
 
 QT_FLAGS="
     -no-accessibility
-    -no-webkit
     -no-glib
-    -no-xkb
-    -no-xinput
-    -no-fontconfig
-    -no-mitshm
-    -no-xrender
-    -no-xrandr
-    -no-xfixes
-    -no-xcursor
-    -no-xinerama
-    -no-xsync
-    -no-xvideo
-    -no-xshape
-    -no-sm
-    -no-openvg
-    -no-opengl
-    -no-nas-sound
-    -no-gtkstyle
     -no-dbus
-    -no-pch
     -no-iconv
     -no-cups
-    -no-nis
-    -no-gui
     -no-openssl
-    -no-libjpeg
-    -no-libmng
-    -no-libpng
-    -no-libtiff
-    -no-gif
-    -no-scripttools
-    -no-script
-    -no-javascript-jit
-    -no-svg
-    -no-phonon-backend
-    -no-phonon
-    -no-audio-backend
-    -no-multimedia
-    -no-xmlpatterns
-    -no-qt3support
+    -no-opengl
+    -no-pch
+    -no-gui
     -qt-zlib
-    -nomake demos
+
+    -skip qt3d
+    -skip qtactiveqt
+    -skip qtandroidextras
+    -skip qtcharts
+    -skip qtconnectivity
+    -skip qtdatavis3d
+    -skip qtdeclarative
+    -skip qtgamepad
+    -skip qtgraphicaleffects
+    -skip qtimageformats
+    -skip qtlocation
+    -skip qtlottie
+    -skip qtmultimedia
+    -skip qtnetworkauth
+    -skip qtpurchasing
+    -skip qtquickcontrols
+    -skip qtquickcontrols2
+    -skip qtremoteobjects
+    -skip qtscript
+    -skip qtscxml
+    -skip qtsensors
+    -skip qtserialbus
+    -skip qtserialport
+    -skip qtspeech
+    -skip qtsvg
+    -skip qtwebchannel
+    -skip qtwebsockets
+    -skip qtwebview
+    -skip qtwinextras
+    -skip qtx11extras
+    -skip qtxmlpatterns
+
     -nomake examples
-    -nomake tools
-    -nomake translations
+    -nomake tests
 "
 
 TENSORFLOW_FLAGS="

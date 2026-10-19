@@ -48,7 +48,7 @@ test-command = "python packaging/verify_wheel_effnet.py discogs-effnet-bs64-1.pb
 
 [tool.cibuildwheel.linux]
 
-manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux2014_x86_64"
+manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux_2_28_x86_64"
 
 # aarch64 has no MTG-owned builder image, so it uses the upstream PyPA one --
 # pinned to the same tag as cibuildwheel.toml, because the two configs share the
@@ -65,14 +65,11 @@ manylinux-aarch64-image = "quay.io/pypa/manylinux_2_28_aarch64:2026.09.02-0"
 # of the same workflow matrix on their own hardware.
 build = ["cp**-manylinux_x86_64", "cp**-manylinux_aarch64"]
 
-# Skip selectors:
-# - cp38: project does not target Python 3.8.
-# - *t-*: free-threaded (no-GIL) builds. The Essentia C bindings rely on
-#   legacy PyTypeObject definitions that fail to instantiate under
-#   cp313t/cp314t ("Type does not define the tp_name field"). Re-enable
-#   once the bindings are audited for free-threading compatibility.
-# - *-musllinux*, *i686: not supported by our manylinux2014 build images.
-skip = ["*cp38*", "*t-*", "*-musllinux*", "*i686"]
+# Skip *t-*: free-threaded (no-GIL) builds. The Essentia C bindings rely on
+# legacy PyTypeObject definitions that fail to instantiate under cp313t/cp314t
+# ("Type does not define the tp_name field"). Re-enable once the bindings are
+# audited for free-threading compatibility.
+skip = ["*t-*", "*-musllinux*", "*i686"]
 
 # PIP_CONSTRAINT caps numpy below 2.5: newer releases only ship
 # manylinux_2_28 wheels and their sdist needs GCC >= 10.3, which the
@@ -122,7 +119,7 @@ test-sources = ["packaging/verify_wheel_effnet.py", "discogs-effnet-bs64-1.pb"]
 [tool.cibuildwheel.macos]
 
 # See linux section for skip rationale.
-skip = ["*cp38*", "*t-*"]
+skip = ["*t-*"]
 
 # MACOSX_DEPLOYMENT_TARGET matches cibuildwheel.toml. It no longer has to follow
 # whatever floor a Homebrew libtensorflow bottle was last built with: on this
@@ -205,7 +202,7 @@ before-all = [
 select = "*macosx_arm64*"
 
 # See linux section for skip rationale.
-skip = ["*cp38*", "*t-*"]
+skip = ["*t-*"]
 
 # libtensorflow here is Homebrew's arm64_sequoia bottle, fetched by digest and
 # relocated by packaging/fetch_libtensorflow.sh (it is not `brew install`ed, so

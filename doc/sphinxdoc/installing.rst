@@ -43,14 +43,13 @@ Both ``essentia`` and ``essentia-tensorflow`` publish wheels for CPython 3.9 thr
      - ``essentia-tensorflow``'s TensorFlow C library
      - Notes
    * - Linux x86_64
-     - ``manylinux2014`` (glibc 2.17)
+     - ``manylinux_2_28`` (glibc 2.28)
      - Google's official tarball, TensorFlow 2.18.1
      -
    * - Linux aarch64
      - ``manylinux_2_28`` (glibc 2.28)
      - Homebrew ``libtensorflow`` 2.21.0 bottle
-     - No gaia-backed algorithms (``GaiaTransform``, ``MusicExtractorSVM``): Gaia needs
-       Qt 4.8, which has no AArch64 build.
+     - Built without gaia-backed algorithms (``GaiaTransform``, ``MusicExtractorSVM``).
    * - macOS arm64
      - ``macosx_15_0``
      - Homebrew ``libtensorflow`` 2.21.0 bottle (``arm64_sequoia``)
@@ -287,8 +286,8 @@ The reproducible path the published wheels use
   the libraries, which is what ``brew`` does when it pours a bottle. On linux x86_64 and
   macOS x86_64 they are Google's official ``libtensorflow-cpu`` tarballs, at
   ``https://storage.googleapis.com/tensorflow/versions/<version>/libtensorflow-cpu-<platform>.tar.gz``:
-  the linux x86_64 wheel is built on a glibc 2.17 image the bottle is too new for, and no
-  Homebrew bottle exists for Intel macOS. Google only ever published that
+  the linux x86_64 pin is retained from the previous manylinux2014 builder and also works
+  with the current manylinux_2_28 image; no Homebrew bottle exists for Intel macOS. Google only ever published that
   ``versions/<version>/`` layout for TensorFlow 2.16 through 2.18.1 -- the channel is frozen
   there, on every platform where it exists, and it never included a linux-arm64 build. The
   older ``.../tensorflow/libtensorflow/libtensorflow-cpu-<platform>-<version>.tar.gz`` path
