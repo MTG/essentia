@@ -54,7 +54,7 @@ class EssentiaBuildExtension(build_ext):
         else:
             subprocess.run([PYTHON, 'waf', 'configure', '--build-static', '--static-dependencies',
                       '--with-python', '--prefix=tmp'] + macos_arm64_flags, check=True)
-        subprocess.run([PYTHON, 'waf'], check=True)
+        subprocess.run([PYTHON, 'waf', '-v'], check=True)
         subprocess.run([PYTHON, 'waf', 'install'], check=True)
 
         library = glob.glob('tmp/lib/python*/*-packages/essentia')[0]
