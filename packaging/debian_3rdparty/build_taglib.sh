@@ -20,12 +20,13 @@ cmake \
     -DCMAKE_CXX_STANDARD_REQUIRED=ON \
     -DBUILD_SHARED_LIBS=OFF \
     -DZLIB_ROOT=$PREFIX \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
 	.
 make
-# patch taglib.cp (missing -lz flag)
+
+# Patch taglib.cp (missing -lz flag)
 sed -i 's/-ltag/-ltag -lz/g' taglib.pc
 make install
 
 cd ../..
 rm -r tmp
-

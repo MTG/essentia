@@ -25,8 +25,8 @@ FFTW_VERSION=fftw-3.3.2
 LIBSAMPLERATE_VERSION=libsamplerate-0.1.9
 LIBYAML_VERSION=yaml-0.1.5
 CHROMAPRINT_VERSION=1.5.1
-QT_SOURCE_URL=https://download.qt.io/archive/qt/4.8/4.8.4/qt-everywhere-opensource-src-4.8.4.tar.gz
-GAIA_VERSION=2.4.6-86-ged433ed
+QT_SOURCE_URL=https://download.qt.io/archive/qt/5.15/5.15.19/single/qt-everywhere-opensource-src-5.15.19.tar.xz
+GAIA_VERSION=2.4.7
 TENSORFLOW_VERSION=2.17.0
 
 FFMPEG_AUDIO_FLAGS="
@@ -222,52 +222,50 @@ LIBSAMPLERATE_FLAGS="
 
 QT_FLAGS="
     -no-accessibility
-    -no-webkit
     -no-glib
-    -no-xkb
-    -no-xinput
-    -no-fontconfig
-    -no-mitshm
-    -no-xrender
-    -no-xrandr
-    -no-xfixes
-    -no-xcursor
-    -no-xinerama
-    -no-xsync
-    -no-xvideo
-    -no-xshape
-    -no-sm
-    -no-openvg
-    -no-opengl
-    -no-nas-sound
-    -no-gtkstyle
     -no-dbus
-    -no-pch
     -no-iconv
     -no-cups
-    -no-nis
-    -no-gui
     -no-openssl
-    -no-libjpeg
-    -no-libmng
-    -no-libpng
-    -no-libtiff
-    -no-gif
-    -no-scripttools
-    -no-script
-    -no-javascript-jit
-    -no-svg
-    -no-phonon-backend
-    -no-phonon
-    -no-audio-backend
-    -no-multimedia
-    -no-xmlpatterns
-    -no-qt3support
+    -no-opengl
+    -no-pch
+    -no-gui
     -qt-zlib
-    -nomake demos
+
+    -skip qt3d
+    -skip qtactiveqt
+    -skip qtandroidextras
+    -skip qtcharts
+    -skip qtconnectivity
+    -skip qtdatavis3d
+    -skip qtdeclarative
+    -skip qtgamepad
+    -skip qtgraphicaleffects
+    -skip qtimageformats
+    -skip qtlocation
+    -skip qtlottie
+    -skip qtmultimedia
+    -skip qtnetworkauth
+    -skip qtpurchasing
+    -skip qtquickcontrols
+    -skip qtquickcontrols2
+    -skip qtremoteobjects
+    -skip qtscript
+    -skip qtscxml
+    -skip qtsensors
+    -skip qtserialbus
+    -skip qtserialport
+    -skip qtspeech
+    -skip qtsvg
+    -skip qtwebchannel
+    -skip qtwebsockets
+    -skip qtwebview
+    -skip qtwinextras
+    -skip qtx11extras
+    -skip qtxmlpatterns
+
     -nomake examples
-    -nomake tools
-    -nomake translations
+    -nomake tests
 "
 
 TENSORFLOW_FLAGS="
