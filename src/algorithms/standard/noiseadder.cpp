@@ -36,11 +36,22 @@ const char* NoiseAdder::description = DOC("This algorithm adds noise to an input
 
 void NoiseAdder::configure() {
   _level = db2pow(parameter("level").toReal());
-  if (parameter("fixSeed").toBool()) {
+  _fixSeed = parameter("fixSeed").toBool();
+  if (_fixSeed) {
     unsigned long seed = 0;
     _mtrand.seed(seed);
   }
 
+}
+
+void NoiseAdder::reset() {
+  Algorithm::reset();
+  // Re-seed on reset when a fixed seed is requested, so that a reused
+  // (reset) instance generates the same noise sequence as a fresh one.
+  if (_fixSeed) {
+    unsigned long seed = 0;
+    _mtrand.seed(seed);
+  }
 }
 
 void NoiseAdder::compute() {

@@ -48,11 +48,14 @@ class NoiseAdder : public Algorithm {
 #endif
 
   Real _level;
+  bool _fixSeed;
 
  public:
   NoiseAdder()
 #ifdef CPP_11
-      : _mtrand(time(NULL) ^ clock())
+      : _mtrand(time(NULL) ^ clock()), _fixSeed(false)
+#else
+      : _fixSeed(false)
 #endif
   {
     declareInput(_signal, "signal", "the input signal");
@@ -66,6 +69,7 @@ class NoiseAdder : public Algorithm {
 
   void configure();
   void compute();
+  void reset();
 
   static const char* name;
   static const char* category;
