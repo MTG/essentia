@@ -201,103 +201,99 @@ std::string OnnxPredict::getTensorInfos(const std::vector<TensorInfo>& infos, co
 }
 
 void OnnxPredict::reset() {
-
   input_names.clear();
   output_names.clear();
   _inputNodes.clear();
   _outputNodes.clear();
 
-  try{
-
-    // Reset session
+  try {
+    // Reset the previous session and its options.
     _session.reset();
-  
-    // Reset SessionOptions by constructing a fresh object
     _sessionOptions = Ort::SessionOptions{};
 
-// Check execution providers for GPU accelerators
-    auto providers = Ort::GetAvailableProviders();
+    // Detect execution providers available in this ONNX Runtime build.
+    const auto providers = Ort::GetAvailableProviders();
 
-    for (const auto& p : providers) {
+    // Register accelerator providers in the intended priority order.
+    // CPU remains ONNX Runtime's default fallback.
+    for (const auto& provider : providers) {
+      if (provider == "CUDAExecutionProvider") {
+        // Preserve the configured CUDA device ID.
+        const std::unordered_map<std::string, std::string>
+            cudaOptions = {
+                {"device_id", std::to_string(_deviceId)}
+            };
 
-        // ===== CUDA (Linux / Windows only) =====
-    #if defined(HAVE_ONNXRUNTIME_CUDA)
-        if (p == "CUDAExecutionProvider") {
-            Ort::ThrowOnError(
-                OrtSessionOptionsAppendExecutionProvider_CUDA(
-                    _sessionOptions,
-                    _deviceId   // int device id
-                )
-            );
-            E_INFO("Using " << p << " provider!");
-        }
-    #endif
+        _sessionOptions.AppendExecutionProvider(
+            "CUDAExecutionProvider", cudaOptions);
 
-        // ===== CoreML (macOS only) =====
-        if (p == "CoreMLExecutionProvider") {
-    #if defined(__APPLE__)
-            Ort::ThrowOnError(
-                OrtSessionOptionsAppendExecutionProvider_CoreML(
-                    _sessionOptions,
-                    0
-                )
-            );
-            E_INFO("Using " << p << " provider!");
-    #endif
-        }
+        E_INFO("Using CUDAExecutionProvider provider!");
+      }
+      else if (provider == "CoreMLExecutionProvider") {
+        // Use default CoreML provider options.
+        _sessionOptions.AppendExecutionProvider(
+            "CoreMLExecutionProvider", {});
 
-        // ===== Metal (macOS only) =====
-        if (p == "MetalExecutionProvider") {
-    #if defined(__APPLE__)
-            // Metal auto-initializes internally
-            // No explicit C API call required
-            E_INFO("Using " << p << " provider!");
-    #endif
-        }
-
-        // ===== CPU fallback always exists =====
+        E_INFO("Using CoreMLExecutionProvider provider!");
+      }
+      E_INFO("Provider: " + provider);
     }
 
-    // Set graph optimization level - Map our enum to ONNX Runtime | Check https://onnxruntime.ai/docs/performance/model-optimizations/graph-optimizations.html
+    // Configure graph optimization.
     switch (_optimizationLevel) {
       case OnnxOptimizationLevel::DISABLE_ALL:
-        _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_DISABLE_ALL);
+        _sessionOptions.SetGraphOptimizationLevel(
+            GraphOptimizationLevel::ORT_DISABLE_ALL);
         break;
+
       case OnnxOptimizationLevel::BASIC:
-        _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_BASIC);
+        _sessionOptions.SetGraphOptimizationLevel(
+            GraphOptimizationLevel::ORT_ENABLE_BASIC);
         break;
+
       case OnnxOptimizationLevel::EXTENDED:
-        _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+        _sessionOptions.SetGraphOptimizationLevel(
+            GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
         break;
+
       case OnnxOptimizationLevel::ALL:
-        _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
+        _sessionOptions.SetGraphOptimizationLevel(
+            GraphOptimizationLevel::ORT_ENABLE_ALL);
         break;
     }
-    _sessionOptions.SetIntraOpNumThreads(0);
-      
-    // Initialize session
-    _session = std::make_unique<Ort::Session>(_env, _graphFilename.c_str(), _sessionOptions);
 
+    _sessionOptions.SetIntraOpNumThreads(0);
+
+    // Initialize the session.
+    _session = std::make_unique<Ort::Session>(
+        _env, _graphFilename.c_str(), _sessionOptions);
   }
-  catch (Ort::Exception e) {
-    // Fallback only if optimization > BASIC
+  catch (const Ort::Exception& e) {
+    // Preserve the existing optimization fallback behavior.
     if (_optimizationLevel != OnnxOptimizationLevel::BASIC &&
         _optimizationLevel != OnnxOptimizationLevel::DISABLE_ALL) {
       E_WARNING(
-                "OnnxPredict: graph optimization level failed ("
-                + std::string(e.what())
-                + "), retrying with BASIC optimization"
-                );
-      // Fallback to BASIC
-      _sessionOptions.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_BASIC);
-      _session = std::make_unique<Ort::Session>(_env, _graphFilename.c_str(), _sessionOptions);
+          "OnnxPredict: graph optimization level failed (" +
+          std::string(e.what()) +
+          "), retrying with BASIC optimization");
+
+      _sessionOptions.SetGraphOptimizationLevel(
+          GraphOptimizationLevel::ORT_ENABLE_BASIC);
+
+      _session = std::make_unique<Ort::Session>(
+          _env, _graphFilename.c_str(), _sessionOptions);
     }
-    else
-      // No fallback possible
-      throw EssentiaException("OnnxPredict: session creation failed: " + std::string(e.what()), e.GetOrtErrorCode());
+    else {
+      throw EssentiaException(
+          "OnnxPredict: session creation failed: " +
+          std::string(e.what()),
+          e.GetOrtErrorCode());
+    }
   }
-  
-  E_INFO("OnnxPredict: Successfully loaded graph file: `" << _graphFilename << "`");
+
+  E_INFO(
+      "OnnxPredict: Successfully loaded graph file: `"
+      << _graphFilename << "`");
 }
 
 void OnnxPredict::compute() {
