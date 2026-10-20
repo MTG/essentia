@@ -16,8 +16,6 @@ curl -SLO "https://github.com/microsoft/onnxruntime/archive/refs/tags/v$LIBONNXR
 tar -xf v$LIBONNXRUNTIME_VERSION.tar.gz
 cd onnxruntime-$LIBONNXRUNTIME_VERSION
 
-python3 -m pip install cmake
-
 # Build the dynamic library
 ./build.sh                            \
         --config Release              \
