@@ -47,7 +47,7 @@ def options(ctx):
                    help='debug, release or default')
 
     ctx.add_option('--std', action='store',
-                   dest='STD', default='c++11',
+                   dest='STD', default='c++14',
                    help='C++ standard to compile for [c++11 c++14 c++17 ...]')
 
     ctx.add_option('--arch', action='store',
@@ -313,6 +313,40 @@ def configure(ctx):
         if ctx.env.CXX_NAME != "clang":
             ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
             ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
+
+    # ------------------------------------------------------------
+    # ONNX Runtime CUDA provider detection (Linux, shared providers)
+    # ------------------------------------------------------------
+    ctx.env.HAVE_ONNXRUNTIME_CUDA = False
+
+    if sys.platform.startswith('linux') and ctx.env.WITH_ONNXRUNTIME:
+        prefix = ctx.env.PREFIX
+
+        candidate_libpaths = [
+            os.path.join(prefix, 'lib'),
+            os.path.join(prefix, 'lib64'),
+        ]
+
+        provider_libs = [
+            'libonnxruntime_providers_shared.so',
+            'libonnxruntime_providers_cuda.so',
+        ]
+
+        found = False
+        for libpath in candidate_libpaths:
+            for lib in provider_libs:
+                if os.path.exists(os.path.join(libpath, lib)):
+                    found = True
+                    break
+            if found:
+                break
+
+        if found:
+            ctx.env.HAVE_ONNXRUNTIME_CUDA = True
+            ctx.env.DEFINES += ['HAVE_ONNXRUNTIME_CUDA']
+            print('→ ONNX Runtime CUDA provider library found')
+        else:
+            print('→ ONNX Runtime CUDA provider library NOT found')
 
     ctx.recurse('src')
 

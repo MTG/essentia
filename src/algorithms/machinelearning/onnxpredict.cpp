@@ -221,16 +221,17 @@ void OnnxPredict::reset() {
     for (const auto& p : providers) {
 
         // ===== CUDA (Linux / Windows only) =====
+    #if defined(HAVE_ONNXRUNTIME_CUDA)
         if (p == "CUDAExecutionProvider") {
-    #if !defined(__APPLE__)
             Ort::ThrowOnError(
                 OrtSessionOptionsAppendExecutionProvider_CUDA(
                     _sessionOptions,
                     _deviceId   // int device id
                 )
             );
-    #endif
+            E_INFO("Using " << p << " provider!");
         }
+    #endif
 
         // ===== CoreML (macOS only) =====
         if (p == "CoreMLExecutionProvider") {
@@ -250,6 +251,7 @@ void OnnxPredict::reset() {
     #if defined(__APPLE__)
             // Metal auto-initializes internally
             // No explicit C API call required
+            E_INFO("Using " << p << " provider!");
     #endif
         }
 
@@ -354,16 +356,8 @@ void OnnxPredict::compute() {
     // We copy directly into the input vector that will be fed to ONNX tensor.
     std::copy(inputData.data(), inputData.data() + inputData.size(), inputDataVector.back().begin());
     
-    // Step 3: Create ONNX Runtime tensor
-    #ifdef USE_CUDA
-    if (_sessionOptions.GetExecutionProviderCount() > 0 &&
-        std::string(_sessionOptions.GetExecutionProviderName(0)) == "CUDAExecutionProvider") {
-        _memoryInfo = Ort::MemoryInfo::CreateCuda(_deviceId, OrtMemTypeDefault);
-    } else
-    #endif
-    {
-        _memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
-    }
+    // Step 3: Create ONNX Runtime tensor (CPU memory; EP handles transfers)
+    _memoryInfo = Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault);
 
     if (_memoryInfo == nullptr) {
         throw EssentiaException("OnnxPredict: Error allocating memory for input tensor.");
