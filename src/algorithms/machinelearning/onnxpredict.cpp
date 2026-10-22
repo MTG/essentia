@@ -215,28 +215,18 @@ void OnnxPredict::reset() {
     const auto providers = Ort::GetAvailableProviders();
 
     // Register accelerator providers in the intended priority order.
+    // Do not append CPUExecutionProvider explicitly.
     // CPU remains ONNX Runtime's default fallback.
-    for (const auto& provider : providers) {
-      if (provider == "CUDAExecutionProvider") {
-        // Preserve the configured CUDA device ID.
-        const std::unordered_map<std::string, std::string>
-            cudaOptions = {
-                {"device_id", std::to_string(_deviceId)}
-            };
-
-        _sessionOptions.AppendExecutionProvider(
-            "CUDAExecutionProvider", cudaOptions);
-
+    if (std::find(providers.begin(), providers.end(),
+                  "CUDAExecutionProvider") != providers.end()) {
+        OrtCUDAProviderOptions cuda_options{};
+        _sessionOptions.AppendExecutionProvider_CUDA(cuda_options);
         E_INFO("Using CUDAExecutionProvider provider!");
-      }
-      else if (provider == "CoreMLExecutionProvider") {
-        // Use default CoreML provider options.
-        _sessionOptions.AppendExecutionProvider(
-            "CoreMLExecutionProvider", {});
-
+    }
+    else if (std::find(providers.begin(), providers.end(),
+                       "CoreMLExecutionProvider") != providers.end()) {
+        _sessionOptions.AppendExecutionProvider("CoreMLExecutionProvider");
         E_INFO("Using CoreMLExecutionProvider provider!");
-      }
-      E_INFO("Provider: " + provider);
     }
 
     // Configure graph optimization.
