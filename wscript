@@ -92,6 +92,7 @@ def configure(ctx):
     ctx.env.PKG_CONFIG_PATH      = ctx.options.PKG_CONFIG_PATH
     ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
     ctx.env.WITH_TENSORFLOW      = ctx.options.WITH_TENSORFLOW
+    ctx.env.WITH_ONNXRUNTIME     = ctx.options.WITH_ONNXRUNTIME
     ctx.env.LIGHTWEIGHT          = ctx.options.LIGHTWEIGHT
     ctx.env.EXAMPLES             = ctx.options.EXAMPLES
     ctx.env.EXAMPLE_LIST         = []
@@ -312,6 +313,40 @@ def configure(ctx):
         if ctx.env.CXX_NAME != "clang":
             ctx.env.LINKFLAGS += ['-Wl,-Bsymbolic']
             ctx.env.LDFLAGS += ['-Wl,-Bsymbolic']
+
+    # ------------------------------------------------------------
+    # ONNX Runtime CUDA provider detection (Linux, shared providers)
+    # ------------------------------------------------------------
+    ctx.env.HAVE_ONNXRUNTIME_CUDA = False
+
+    if sys.platform.startswith('linux') and ctx.env.WITH_ONNXRUNTIME:
+        prefix = ctx.env.PREFIX
+
+        candidate_libpaths = [
+            os.path.join(prefix, 'lib'),
+            os.path.join(prefix, 'lib64'),
+        ]
+
+        provider_libs = [
+            'libonnxruntime_providers_shared.so',
+            'libonnxruntime_providers_cuda.so',
+        ]
+
+        found = False
+        for libpath in candidate_libpaths:
+            for lib in provider_libs:
+                if os.path.exists(os.path.join(libpath, lib)):
+                    found = True
+                    break
+            if found:
+                break
+
+        if found:
+            ctx.env.HAVE_ONNXRUNTIME_CUDA = True
+            ctx.env.DEFINES += ['HAVE_ONNXRUNTIME_CUDA']
+            print('→ ONNX Runtime CUDA provider library found')
+        else:
+            print('→ ONNX Runtime CUDA provider library NOT found')
 
     ctx.recurse('src')
 
