@@ -9,7 +9,10 @@ manylinux-x86_64-image = "mtgupf/essentia-builds:manylinux_2_28_x86_64"
 # audited for free-threading compatibility.
 skip = ["*t-*", "*-musllinux*", "*i686"]
 
-environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1 }
+# PIP_CONSTRAINT caps numpy below 2.5: newer releases only ship
+# manylinux_2_28 wheels and their sdist needs GCC >= 10.3, which the
+# manylinux2014 images do not have.
+environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}", ESSENTIA_WHEEL_SKIP_3RDPARTY=1, ESSENTIA_WHEEL_ONLY_PYTHON=1, PIP_CONSTRAINT="/project/packaging/manylinux2014-constraints.txt" }
 
 # Use system's Python3 to build Essentia.
 before-all = [
