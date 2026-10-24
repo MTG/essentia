@@ -98,7 +98,7 @@ def melspectrogram(filename, npy_file=None, force=False, verbose=False, sample_r
         string ∈ {unit_sum,unit_tri,unit_max} (default = "unit_sum")
         spectrum bin weights to use for each mel band: 'unit_max' to make each mel
         band vertex equal to 1, 'unit_sum' to make each mel band area equal to 1
-        summing the actual weights of spectrum bins, 'unit_area' to make each
+        summing the actual weights of spectrum bins, 'unit_tri' to make each
         triangle mel band area equal to 1 normalizing the weights of each triangle
         by its bandwidth
 
@@ -220,7 +220,7 @@ if __name__ == '__main__':
     parser.add_argument('--weighting', '-we', type=str, default=WEIGHTING, choices=('warping','linear'),
                         help='type of weighting function for determining triangle area')
     parser.add_argument('--normalize', '-n', type=str, default=NORMALIZE, choices=('unit_sum', 'unit_tri', 'unit_max'),
-                        help='spectrum bin weights to use for each mel band: `unit_max` to make each mel band vertex equal to 1, `unit_sum` to make each mel band area equal to 1 summing the actual weights of spectrum bins, `unit_area` to make each triangle mel band area equal to 1 normalizing the weights of each triangle by its bandwidth')
+                        help='spectrum bin weights to use for each mel band: `unit_max` to make each mel band vertex equal to 1, `unit_sum` to make each mel band area equal to 1 summing the actual weights of spectrum bins, `unit_tri` to make each triangle mel band area equal to 1 normalizing the weights of each triangle by its bandwidth')
     parser.add_argument('--bands-type', '-bt', type=str, default=BANDS_TYPE, choices=('magnitude','power'),
                         help='`power` to output squared units, `magnitude` to keep it as the input')
     parser.add_argument('--compression-type', '-ct', type=str, default=COMPRESSION_TYPE, choices=('dB', 'shift_scale_log', 'none'),
