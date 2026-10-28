@@ -470,8 +470,9 @@ OnsetDetectionGlobal::OnsetDetectionGlobal() : AlgorithmComposite() {
   //_onsetDetections.setBufferType(BufferUsage::forMultipleFrames); // too small
   
   // estimation for required buffer size: 1sec = 44100 samples ~ 87 frames
-  // we want to cover recordings up to 60 min = 3600secs = 310078 frames
-   _onsetDetections.setBufferInfo(BufferInfo(327680, 163840)); // too large?
+  // the default size covers recordings up to ~60 min (at the default hopSize
+  // of 512); process() grows the buffer on the fly for longer inputs
+  _onsetDetections.setBufferInfo(BufferInfo(327680, 163840));
 
   _signal >> _poolStorage->input("data"); // attach input proxy
 }
@@ -495,6 +496,20 @@ AlgorithmStatus OnsetDetectionGlobal::process() {
   _onsetDetectionGlobal->input("signal").set(_pool.value<vector<Real> >("internal.signal"));
   _onsetDetectionGlobal->output("onsetDetections").set(detections);
   _onsetDetectionGlobal->compute();
+
+  // All detection values are pushed to the output at once, while consumers
+  // can only run after this process() returns. Therefore, the output buffer
+  // must be able to hold the entire detection function. The default buffer
+  // size (see the constructor) only covers ~60 minutes of audio at the
+  // default hopSize of 512, and longer inputs used to abort with a "buffer
+  // is full" exception. Grow the buffer to fit the actual number of values.
+  // Resizing is safe at this point because nothing has been pushed to this
+  // source yet, so the buffer is empty.
+  BufferInfo info = _onsetDetections.bufferInfo();
+  if ((int)detections.size() > info.size) {
+    info.size = detections.size();
+    _onsetDetections.setBufferInfo(info);
+  }
 
   for (size_t i=0; i<detections.size(); ++i) {
     _onsetDetections.push(detections[i]);
