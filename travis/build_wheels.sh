@@ -28,12 +28,18 @@ PYBIN=/opt/python/cp36-cp36m/bin/
 
 cd /io
 
+# Cache the C/C++ compilation with sccache (https://github.com/mozilla/sccache).
+# Objects are shared across the per-Python builds below and, on GitHub
+# Actions, across runs (see .github/workflows/build-wheels.yml).
+./packaging/install_sccache.sh
+export ESSENTIA_WITH_SCCACHE=1
+
 if [[ $WITH_TENSORFLOW ]]; then
     PROJECT_NAME='essentia-tensorflow'
-    "${PYBIN}/python" waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
+    "${PYBIN}/python" waf configure --with-gaia --with-tensorflow --build-static --static-dependencies --with-sccache --pkg-config-path="${PKG_CONFIG_PATH}"
 else
     PROJECT_NAME='essentia'
-    "${PYBIN}/python" waf configure --with-gaia --build-static --static-dependencies --pkg-config-path="${PKG_CONFIG_PATH}"
+    "${PYBIN}/python" waf configure --with-gaia --build-static --static-dependencies --with-sccache --pkg-config-path="${PKG_CONFIG_PATH}"
 fi
 
 "${PYBIN}/python" waf
@@ -102,6 +108,8 @@ for whl in wheelhouse/*.whl; do
         fi
     fi
 done
+
+sccache --show-stats
 
 # Install and test
 for PYBIN in /opt/python/cp3*/bin/; do

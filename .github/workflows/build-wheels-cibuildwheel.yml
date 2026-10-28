@@ -11,6 +11,12 @@ jobs:
         os: [ubuntu-24.04, macos-15-intel, macos-15]
         config: [cibuildwheel, cibuildwheel-tensorflow]
 
+    env:
+      # Store the sccache compilation cache in the GitHub Actions cache so the
+      # C++ object files are shared across runs. See cibuildwheel*.toml for
+      # how the credentials reach the Linux build container.
+      SCCACHE_GHA_ENABLED: "true"
+
     steps:
       - uses: actions/checkout@v6
         with:
@@ -19,6 +25,23 @@ jobs:
       - name: Fetch release tags from GitHub
         # Workaround for https://github.com/actions/checkout/issues/290
         run: git fetch --tags --force
+
+      - name: Set up sccache
+        # Provides sccache on the macOS runners (where cibuildwheel builds
+        # natively) and reports cache statistics after the job.
+        uses: mozilla-actions/sccache-action@v0.0.11
+        with:
+          version: "v0.17.0"
+
+      - name: Export the GitHub Actions cache credentials for sccache
+        # sccache's GHA backend needs these two variables, which are not
+        # exposed to workflow steps by default:
+        # https://github.com/mozilla/sccache/blob/main/docs/GHA.md
+        uses: actions/github-script@v9
+        with:
+          script: |
+            core.exportVariable('ACTIONS_RESULTS_URL', process.env.ACTIONS_RESULTS_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v4.3.0

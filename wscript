@@ -58,6 +58,10 @@ def options(ctx):
                    dest='NO_MSSE', default=False,
                    help='never add compiler flags for msse')
 
+    ctx.add_option('--with-sccache', action='store_true',
+                   dest='WITH_SCCACHE', default=False,
+                   help='wrap the C/C++ compilers with sccache (https://github.com/mozilla/sccache) to cache compilation results')
+
     ctx.add_option('--cross-compile-mingw32', action='store_true',
                    dest='CROSS_COMPILE_MINGW32', default=False,
                    help='cross-compile for windows using mingw32 on linux')
@@ -299,6 +303,17 @@ def configure(ctx):
 
 
     ctx.load('compiler_cxx compiler_c')
+
+    if ctx.options.WITH_SCCACHE:
+        # Prefix the detected compilers with sccache so that every object file
+        # goes through the compilation cache. This is done after compiler
+        # detection so the toolchain checks (CXX_NAME, DEST_OS, ...) see the
+        # real compiler, and LINK_CXX keeps pointing at it: linking is never
+        # cached, so there is no point in routing it through the wrapper.
+        ctx.find_program('sccache', var='SCCACHE')
+        ctx.env.CC = ctx.env.SCCACHE + ctx.env.CC
+        ctx.env.CXX = ctx.env.SCCACHE + ctx.env.CXX
+        ctx.msg('Wrapping the compilers with sccache', ' '.join(ctx.env.CXX))
 
     if ctx.env.STATIC_DEPENDENCIES \
         and (sys.platform.startswith('linux') or sys.platform == 'darwin') \

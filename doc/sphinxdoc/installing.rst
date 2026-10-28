@@ -129,6 +129,12 @@ If you want to build with a custom toolchain, you can pass in the CC and CXX var
 
   CC=clang CXX=clang++ python3 waf configure
 
+Rebuilds can be sped up considerably with `sccache <https://github.com/mozilla/sccache>`_, a compiler cache that stores every compiled object file and reuses it whenever the same source is compiled again with the same flags (e.g. after ``waf distclean``, across worktrees or across CI runs). Install it (``brew install sccache`` on macOS, ``cargo install sccache`` or a `release binary <https://github.com/mozilla/sccache/releases>`_ elsewhere) and configure with the ``--with-sccache`` flag::
+
+  python3 waf configure --with-sccache
+
+By default sccache keeps its cache on the local disk (``~/Library/Caches/Mozilla.sccache`` on macOS, ``~/.cache/sccache`` on Linux); see its documentation for the shared cloud backends. Use ``sccache --show-stats`` to check the hit rate. The wheel builds in CI use it with the GitHub Actions cache backend (see ``cibuildwheel.toml``); set ``ESSENTIA_WITH_SCCACHE=1`` in the environment to enable it in a ``pip wheel`` / ``pip install`` build from source.
+
 To compile everything you've configured::
 
   python3 waf
