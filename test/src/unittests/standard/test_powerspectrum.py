@@ -62,7 +62,7 @@ class TestPowerSpectrum(TestCase):
         specSize = size/2+1
         signal = zeros(size);
         signal[0] = 1
-        self.assertEquals(sum(PowerSpectrum()(signal)), specSize)
+        self.assertEqual(sum(PowerSpectrum()(signal)), specSize)
 
     def testZero(self):
         input = [0]*1024

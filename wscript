@@ -93,6 +93,7 @@ def configure(ctx):
     ctx.env.WITH_GAIA            = ctx.options.WITH_GAIA
     ctx.env.WITH_TENSORFLOW      = ctx.options.WITH_TENSORFLOW
     ctx.env.WITH_ONNXRUNTIME     = ctx.options.WITH_ONNXRUNTIME
+    ctx.env.TENSORFLOW_PIP_RPATH = ctx.options.TENSORFLOW_PIP_RPATH
     ctx.env.LIGHTWEIGHT          = ctx.options.LIGHTWEIGHT
     ctx.env.EXAMPLES             = ctx.options.EXAMPLES
     ctx.env.EXAMPLE_LIST         = []

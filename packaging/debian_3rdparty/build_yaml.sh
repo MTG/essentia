@@ -12,6 +12,8 @@ curl -SLO http://pyyaml.org/download/libyaml/$LIBYAML_VERSION.tar.gz
 tar -xf $LIBYAML_VERSION.tar.gz
 cd $LIBYAML_VERSION
 
+refresh_autotools_config .
+
 # fails to compile shared library, building only static
 CFLAGS="-DYAML_DECLARE_STATIC -fPIC" ./configure \
     --prefix=$PREFIX \

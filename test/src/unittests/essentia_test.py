@@ -128,6 +128,14 @@ class TestCase(BaseTestCase):
             self.assertAlmostEqualFixedPrecision(val1, val2, digits)
 
     def assertAlmostEqual(self, found, expected, precision = 1e-7):
+        # Coerce size-1 numpy arrays (e.g. a single-band loudnessBandRatio
+        # frame) to plain Python scalars: newer numpy no longer implicitly
+        # converts a non-0-d array via float()/"%e" formatting, even when it
+        # holds a single element.
+        if isinstance(found, numpy.ndarray):
+            found = found.item() if found.size == 1 else found
+        if isinstance(expected, numpy.ndarray):
+            expected = expected.item() if expected.size == 1 else expected
         if expected == 0:
             diff = abs(found)
         elif found == 0:

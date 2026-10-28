@@ -167,7 +167,7 @@ class TestChordsDescriptors(TestCase):
         self.assertEqual(chordsKeyA, chordsKeyB)
         self.assertEqualVector(chordsScaleA, chordsScaleB)
 
-        self.assertNotEquals(sum(abs(chordsHistogramA - chordsHistogramC)), 0)
+        self.assertNotEqual(sum(abs(chordsHistogramA - chordsHistogramC)), 0)
         self.assertNotEqual(chordsNumberRateA, chordsNumberRateC)
         self.assertNotEqual(chordsKeyA, chordsKeyC)
 
