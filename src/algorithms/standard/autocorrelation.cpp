@@ -98,9 +98,16 @@ void AutoCorrelation::compute() {
                                     _fftBuffer[i].imag() * _fftBuffer[i].imag(), // Generalized, todo 0.5 -> c
                                     0.0); // squared amplitude -> complex part = 0
     } else {
-      // Apply magnitude compression
+      // Apply magnitude compression. The FFT-size normalization must be applied
+      // after raising to the compression exponent, not before: dividing by
+      // sizeFFT and then applying pow(..., k) scales the result by
+      // 1/sizeFFT^k, making the output magnitude depend on the (zero-padded)
+      // FFT size and inconsistent with the non-generalized path above, which
+      // is normalized exactly once (via the IFFT's own 1/sizeFFT scaling).
+      // Normalizing once here, after the compression, keeps both paths on the
+      // same scale and makes them match exactly when k == 2.
       _fftBuffer[i] = complex<Real>(
-        pow(sqrt(pow(_fftBuffer[i].real() / sizeFFT, 2) + pow(_fftBuffer[i].imag() / sizeFFT, 2)), _frequencyDomainCompression),
+        pow(sqrt(pow(_fftBuffer[i].real(), 2) + pow(_fftBuffer[i].imag(), 2)), _frequencyDomainCompression) / sizeFFT,
         0.0); // squared amplitude -> complex part = 0
     }
   }

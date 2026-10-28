@@ -68,6 +68,52 @@ class TestAutoCorrelation(TestCase):
     def testInvalidParam(self):
         self.assertConfigureFails(AutoCorrelation(), {'normalization': 'unknown'})
 
+    def testGeneralizedCompression2MatchesStandard(self):
+        # With frequencyDomainCompression == 2, the generalized formula (|X|^k)
+        # collapses to the same squared-magnitude spectrum used by the
+        # non-generalized path, so both should produce the same output
+        # regardless of the (zero-padded) FFT size used internally.
+        # Regression for https://github.com/MTG/essentia/issues/1373.
+        inputv = readVector(join(testdir, 'input_pow2.txt'))
+
+        standard = AutoCorrelation(generalized=False)(inputv)
+        generalized = AutoCorrelation(generalized=True,
+                                       frequencyDomainCompression=2)(inputv)
+
+        self.assertAlmostEqualVector(standard, generalized, 1e-4)
+
+    def testGeneralizedInvariantToFFTSizePadding(self):
+        # The generalized output must not depend on the internal (zero-padded)
+        # FFT size, only on the actual signal content. Two inputs sharing the
+        # same non-zero prefix but zero-padded to different total lengths
+        # (forcing different internal FFT sizes) must agree on the lags within
+        # that shared prefix. Regression for
+        # https://github.com/MTG/essentia/issues/1373.
+        #
+        # For a non-integer compression exponent k, |X(w)|^k is not the
+        # spectrum of a time-limited sequence, so the two FFT sizes leave a
+        # small circular-aliasing tail difference: the invariance is only
+        # approximate, not exact. That tail is tiny in absolute terms but can
+        # dominate the near-zero values at the highest lags in *relative*
+        # terms, so this uses an absolute-tolerance comparison rather than
+        # assertAlmostEqualVector's per-element relative one.
+        inputv = readVector(join(testdir, 'input_pow2.txt'))
+        prefixLen = 32
+
+        prefix = inputv[:prefixLen]
+        # nextPowerTwo(2*40) == 128, nextPowerTwo(2*100) == 256: different
+        # internal FFT sizes for the same non-zero content.
+        shortSignal = prefix + [0.0] * (40 - prefixLen)
+        longSignal = prefix + [0.0] * (100 - prefixLen)
+
+        ac = AutoCorrelation(generalized=True, frequencyDomainCompression=1.5)
+        shortOutput = ac(shortSignal)
+        ac = AutoCorrelation(generalized=True, frequencyDomainCompression=1.5)
+        longOutput = ac(longSignal)
+
+        self.assertAlmostEqualVectorAbs(shortOutput[:prefixLen],
+                                         longOutput[:prefixLen], 0.02)
+
 
 suite = allTests(TestAutoCorrelation)
 
