@@ -50,8 +50,16 @@ ReaderID PhantomBuffer<T>::addReader(bool startFromZero) {
 
 template <typename T>
 void PhantomBuffer<T>::removeReader(ReaderID id) {
-  _readView.erase(_readView.begin() + id);
   _readWindow.erase(_readWindow.begin() + id);
+
+  // NB: do not erase the corresponding element of _readView, as that would
+  // shift the remaining views down by assigning them to each other. A view is
+  // only a window onto _buffer, so instead drop the last one and recompute the
+  // views of all the readers whose ID has just been decreased by one.
+  _readView.pop_back();
+  for (int i=id; i<(int)_readView.size(); i++) {
+    updateReadView(i);
+  }
 }
 
 

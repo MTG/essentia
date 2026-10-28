@@ -502,6 +502,63 @@ class TestFrameCutter_Streaming(TestCase):
         self.assertTrue(len(pool.descriptorNames())==0)
 
 
+    def testTwoFrameCuttersOnSameSource(self):
+        # Fanning a single source out to two FrameCutters with a different
+        # frameSize used to corrupt the heap, see
+        # https://github.com/MTG/essentia/issues/841
+        signal = [float(x) for x in range(44100)]
+        options = {'hopSize': 1024, 'startFromZero': True}
+
+        expected1 = self.cutFrames(dict(options, frameSize=2048), signal)
+        expected2 = self.cutFrames(dict(options, frameSize=4096), signal)
+
+        gen = VectorInput(signal)
+        pool = Pool()
+        fc1 = es.FrameCutter(frameSize=2048, hopSize=1024, startFromZero=True)
+        fc2 = es.FrameCutter(frameSize=4096, hopSize=1024, startFromZero=True)
+
+        gen.data >> fc1.signal
+        gen.data >> fc2.signal
+        fc1.frame >> (pool, 'frame1')
+        fc2.frame >> (pool, 'frame2')
+        run(gen)
+
+        self.assertEqual(len(pool['frame1']), len(expected1))
+        self.assertEqual(len(pool['frame2']), len(expected2))
+        self.assertEqualMatrix(pool['frame1'], expected1)
+        self.assertEqualMatrix(pool['frame2'], expected2)
+
+    def testDisconnectOneOfTwoFrameCutters(self):
+        # Disconnecting the first of the two FrameCutters removes a reader
+        # which is not the last one of the source, so the read views of the
+        # remaining readers have to be shifted down. Doing that by assigning
+        # them to each other used to free memory the views do not own.
+        signal = [float(x) for x in range(44100)]
+        expected = self.cutFrames({'frameSize': 4096, 'hopSize': 1024,
+                                   'startFromZero': True}, signal)
+
+        gen = VectorInput(signal)
+        pool = Pool()
+        fc1 = es.FrameCutter(frameSize=2048, hopSize=1024, startFromZero=True)
+        fc2 = es.FrameCutter(frameSize=4096, hopSize=1024, startFromZero=True)
+
+        gen.data >> fc1.signal
+        gen.data >> fc2.signal
+        fc1.frame >> (pool, 'frame1')
+        fc2.frame >> (pool, 'frame2')
+        run(gen)
+
+        # fc1 is reader 0 of gen.data and fc2 is reader 1, so this removes a
+        # reader which still has a reader after it
+        gen.data.disconnect(fc1.signal)
+
+        # the surviving reader must keep reading its own data
+        pool.remove('frame2')
+        reset(gen)
+        run(gen)
+
+        self.assertEqualMatrix(pool['frame2'], expected)
+
 
 suite = allTests(TestFrameCutter_Streaming)
 
