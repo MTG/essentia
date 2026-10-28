@@ -88,6 +88,21 @@ class TestNSGConstantQ(TestCase):
         output = np.abs(np.mean(self.initNsgconstantq()(signalZero)[0]))
         self.assertEqual(0, output)
 
+    def testNoneNormalization(self):
+        for inputSize in (2**11, 2**12):
+            input = essentia.array(np.sin(2 * np.pi * 1000 * np.arange(inputSize) / 44100))
+            nsg = self.initNsgconstantq(inputSize=inputSize, normalize='sine')
+
+            for normalize in ('sine', 'impulse', 'none'):
+                nsg.configure(inputSize=inputSize, minFrequency=27, maxFrequency=10000,
+                              binsPerOctave=24, sampleRate=44100, rasterize='full',
+                              phaseMode='global', gamma=0, window='hannnsgcq',
+                              normalize=normalize)
+                output = np.asarray(nsg(input)[0])
+                expected = np.asarray(self.initNsgconstantq(inputSize=inputSize,
+                                                             normalize=normalize)(input)[0])
+                np.testing.assert_allclose(output, expected, rtol=0, atol=1e-7)
+
     def testEmpty(self):
         # Checks whether an empty input vector yields an exception
         self.assertComputeFails(self.initNsgconstantq(),  [])

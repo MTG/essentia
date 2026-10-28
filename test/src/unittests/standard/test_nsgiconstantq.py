@@ -43,6 +43,23 @@ class TestNSGIConstantQ(TestCase):
 
         self.assertAlmostEqualVectorFixedPrecision(x, y, 3)
 
+    def testSynthetiseNoneNormalization(self):
+        for inputSize in (2**11, 2**12):
+            x = essentia.array(np.sin(2 * np.pi * 1000 * np.arange(inputSize) / 44100))
+            CQ, CQDC, DCNF = NSGConstantQ(inputSize=inputSize, normalize='none')(x)
+            nsgi = NSGIConstantQ(inputSize=inputSize, normalize='sine')
+
+            for normalize in ('sine', 'impulse', 'none'):
+                nsgi.configure(inputSize=inputSize, normalize=normalize)
+                y = np.asarray(nsgi(CQ, CQDC, DCNF))
+                expected = np.asarray(NSGIConstantQ(inputSize=inputSize,
+                                                     normalize=normalize)(CQ, CQDC, DCNF))
+                np.testing.assert_allclose(y, expected, rtol=0, atol=1e-7)
+
+                # Match the existing reconstruction test size for the round-trip tolerance.
+                if normalize == 'none' and inputSize == 2**12:
+                    self.assertAlmostEqualVectorFixedPrecision(x, y, 3)
+
     def testSynthetiseSineLocalPhase(self):
         x = essentia.array(np.sin(2 * np.pi * 1000 * np.arange(2**12) / 44100))
 
