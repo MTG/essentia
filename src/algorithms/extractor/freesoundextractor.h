@@ -69,6 +69,13 @@ class FreesoundExtractor : public Algorithm {
   std::vector<std::string> mfccStats;
   std::vector<std::string> gfccStats;
 
+  bool includeSimilarityVector;
+  std::vector<std::string> simSpaceDescriptorNames;
+  std::vector<int> simSpaceDescriptorDimensions;
+  std::vector<std::vector<Real>> simSpaceDescriptorACoefficients;
+  std::vector<std::vector<Real>> simSpaceDescriptorBCoefficients;
+  std::vector<std::vector<Real>> simSpacePCAMatrix;
+
 #if HAVE_GAIA2 
   std::vector<std::string> svmModels;
 #endif
@@ -83,6 +90,8 @@ class FreesoundExtractor : public Algorithm {
   void readMetadata(const std::string& audioFilename, Pool& results);
   void computeAudioMetadata(const std::string& audioFilename, Pool& results);
   void computeReplayGain(const std::string& audioFilename, Pool& results);
+  void computeSimilarityVector(Pool& results);
+  void postProcessResultsPool(Pool& results);
 
   Pool computeAggregation(Pool& pool);
 
@@ -131,6 +140,8 @@ class FreesoundExtractor : public Algorithm {
     //vector<string> cepstrumStats = arrayToVector<string>(cepstrumStatsArray);
     declareParameter("mfccStats", "the statistics to compute for MFCC features", "", stats);
     declareParameter("gfccStats", "the statistics to compute for GFCC features", "", stats);
+
+    declareParameter("includeSimilarityVector", "bool value to indicate whether to compute the similarity vector projection of the Freesound classic similarity space", "{true,false}", true);
 
 #if HAVE_GAIA2 
     declareParameter("highlevel", "list of high-level classifier models (gaia2 history filenames) to apply using extracted features. Skip classification if not specified (empty list)", "", Parameter::VECTOR_STRING);
