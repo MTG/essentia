@@ -77,7 +77,7 @@ before-all = [
   # Tensorflow bottle has a minimum target of 26.2 which is too new.
   # We could build from source as a workaround, however, it takes too much time on the CI worker.
   # To keep it simple, just use the bottles available for tensorflow.
-  "brew install tensorflow",
+  "brew install libtensorflow",
   # ---
   # Building tensorflow from source:
   #"echo Checking available SDKs:",
