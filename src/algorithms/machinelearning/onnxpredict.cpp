@@ -297,7 +297,7 @@ void OnnxPredict::compute() {
   Pool& poolOut = _poolOut.get();
 
   std::vector<std::vector<float>> inputDataVector;  // <-- keeps inputs alive
-  std:vector<std::vector<int64_t>> shapes;      // <-- keeps shapes alive
+  std::vector<std::vector<int64_t>> shapes;      // <-- keeps shapes alive
   
   if (!input_tensors.empty())
       input_tensors.clear();                        // <-- destroy input tensors
