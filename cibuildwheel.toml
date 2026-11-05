@@ -13,7 +13,7 @@ environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}"
 
 # Use system's Python3 to build Essentia.
 before-all = [
-  "python3 waf configure --with-gaia --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
+  "python3 waf configure --with-gaia --with-onnx --build-static --static-dependencies --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
   "python3 waf",
   "python3 waf install",
 ]
@@ -34,6 +34,7 @@ before-all = [
   #"brew tap MTG/essentia",
   #"brew install gaia --HEAD",
   # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
+  # Skip --with-onnx because on Homebrew onnxruntime is not available for Intel MacOS
   "VIRTUAL_ENV=/usr/local python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\"",
   "python waf",
   "python waf install"
@@ -52,8 +53,9 @@ environment = { PROJECT_NAME="essentia", ESSENTIA_PROJECT_NAME="${PROJECT_NAME}"
 before-all = [
   "brew install pkg-config gcc readline sqlite gdbm libpng",
   "brew install eigen libyaml fftw ffmpeg libsamplerate libtag chromaprint",
+  "brew install onnxruntime",
   # Override VIRTUAL_ENV set by cibuildwheel to ensure global install
-  "VIRTUAL_ENV=/usr/local python waf configure --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
+  "VIRTUAL_ENV=/usr/local python waf configure --with-onnx --std=c++17 --pkg-config-path=\"${PKG_CONFIG_PATH}\" --arch arm64 --no-msse",
   "python waf",
   "sudo python waf install",
 ]
