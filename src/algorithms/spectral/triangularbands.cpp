@@ -176,7 +176,7 @@ void TriangularBands::setWeightingFunctions(std::string weighting) {
       _weighter = hz2hz;
   }
   else if (weighting == "slaneyMel") {
-    _weighter = hz2mel;
+    _weighter = hz2melSlaney;
   }
   else if (weighting == "htkMel") {
     _weighter = hz2mel10;
