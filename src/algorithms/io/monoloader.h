@@ -57,6 +57,9 @@ class MonoLoader : public AlgorithmComposite {
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
     declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
     declareParameter("resampleQuality", "the resampling quality, 0 for best quality, 4 for fast linear approximation", "[0,4]", 1);
+    declareParameter("startTime", "the start time of the slice to be extracted [s]. The decoder SEEKS to this position instead of decoding and discarding the audio before it.", "[0,inf)", 0.0);
+    declareParameter("endTime", "the end time of the slice to be extracted [s]. Decoding stops here instead of continuing to the end of the stream.", "[0,inf)", 1.0e6);
+    declareParameter("gapless", "how to handle the encoder delay and padding that lossy codecs add at the beginning and the end of the decoded signal. \"metadata\" trims exactly the amount the container declares (e.g. the Xing/LAME header of an mp3), which is what a gapless player does and leaves the output sample-aligned with the signal that was encoded. \"decoder\" additionally drops the decoder's own constant latency (529 samples for MPEG Layer III) on streams that declare nothing, removing the decoder's share of the shift but not the encoder's. \"none\" returns the raw decoder output, delay and padding included; 'startTime' and 'endTime' then refer to positions in that raw output, which the decoder reaches by decoding and discarding rather than by seeking.", "{none,metadata,decoder}", "metadata");
   }
 
   void declareProcessOrder() {
@@ -110,6 +113,9 @@ class MonoLoader : public Algorithm {
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
     declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
     declareParameter("resampleQuality", "the resampling quality, 0 for best quality, 4 for fast linear approximation", "[0,4]", 1);
+    declareParameter("startTime", "the start time of the slice to be extracted [s]. The decoder SEEKS to this position instead of decoding and discarding the audio before it.", "[0,inf)", 0.0);
+    declareParameter("endTime", "the end time of the slice to be extracted [s]. Decoding stops here instead of continuing to the end of the stream.", "[0,inf)", 1.0e6);
+    declareParameter("gapless", "how to handle the encoder delay and padding that lossy codecs add at the beginning and the end of the decoded signal. \"metadata\" trims exactly the amount the container declares (e.g. the Xing/LAME header of an mp3), which is what a gapless player does and leaves the output sample-aligned with the signal that was encoded. \"decoder\" additionally drops the decoder's own constant latency (529 samples for MPEG Layer III) on streams that declare nothing, removing the decoder's share of the shift but not the encoder's. \"none\" returns the raw decoder output, delay and padding included; 'startTime' and 'endTime' then refer to positions in that raw output, which the decoder reaches by decoding and discarding rather than by seeking.", "{none,metadata,decoder}", "metadata");
   }
 
   void configure();

@@ -57,11 +57,30 @@ void EqloudLoader::configure() {
 
   _monoLoader->configure(INHERIT("filename"),
                          INHERIT("sampleRate"),
-                         INHERIT("downmix"));
+                         INHERIT("downmix"),
+                         INHERIT("gapless"));
 
-  _trimmer->configure(INHERIT("sampleRate"),
-                      INHERIT("startTime"),
-                      INHERIT("endTime"));
+  // Same change, and the same one exception, as EasyLoader::configure() -- see the comment
+  // there. The loader seeks to startTime and stops at endTime unless a resampler is in the way,
+  // in which case the old decode-and-trim path is kept so existing output does not move.
+  if (_monoLoader->parameter("originalSampleRate").toReal()
+      == parameter("sampleRate").toReal()) {
+    _monoLoader->configure(INHERIT("filename"),
+                           INHERIT("sampleRate"),
+                           INHERIT("downmix"),
+                           INHERIT("startTime"),
+                           INHERIT("endTime"),
+                           INHERIT("gapless"));
+
+    _trimmer->configure("sampleRate", parameter("sampleRate"),
+                        "startTime", 0.0,
+                        "endTime", 1.0e6);
+  }
+  else {
+    _trimmer->configure(INHERIT("sampleRate"),
+                        INHERIT("startTime"),
+                        INHERIT("endTime"));
+  }
 
   // apply a 6dB preamp, as done by all audio players.
   Real scalingFactor = db2amp(parameter("replayGain").toReal() + 6.0);
@@ -82,6 +101,10 @@ const char* EqloudLoader::category = "Input/output";
 const char* EqloudLoader::description = DOC("This algorithm loads the raw audio data from an audio file, downmixes it to mono and normalizes using replayGain and equal-loudness filter. Audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and normalized by the given replayGain gain. In addition, audio data is filtered through an equal-loudness filter.\n"
 "\n"
 "This algorithm uses MonoLoader and thus inherits all of its input requirements and exceptions.\n"
+"\n"
+"The 'gapless' parameter is handed to AudioLoader and decides whether the encoder delay "
+"and padding that lossy codecs add at both ends of the signal are trimmed; the default "
+"trims exactly what the file declares. See AudioLoader for what each value means.\n"
 "\n"
 "References:\n"
 "  [1] Replay Gain - A Proposed Standard,\n"
@@ -110,7 +133,8 @@ void EqloudLoader::configure() {
                      INHERIT("startTime"),
                      INHERIT("endTime"),
                      INHERIT("replayGain"),
-                     INHERIT("downmix"));
+                     INHERIT("downmix"),
+                     INHERIT("gapless"));
 }
 
 void EqloudLoader::compute() {
