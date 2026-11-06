@@ -17,16 +17,24 @@
 # You should have received a copy of the Affero GNU General Public License
 # version 3 along with this program. If not, see http://www.gnu.org/licenses/
 
-# The unit test for "TempoTapDegara" is taken care of in the file "test_rhythmextractor2013.py".
-# This file is included here as a "dummy" to maintain consistency in "file to file" correspondence
-# between unit test and the algorithm.
-
-
 from essentia_test import *
+from essentia.standard import TempoTapDegara
+
 
 class TestTempoTapDegara(TestCase):
-    def testDummy(self):
-        self.assertEqual(0,0)
+    def testDeterministicGap(self):
+        # Regular onsets with a missing middle section leave competing
+        # Viterbi paths through the gap. The previous process-global rand()
+        # noise produced different ticks across repeated calls on this input.
+        onsets = zeros(2048)
+        onsets[::43] = 1
+        onsets[len(onsets)//3:2*len(onsets)//3] = 0
+
+        expected = TempoTapDegara()(onsets)
+        tracker = TempoTapDegara()
+        for _ in range(5):
+            self.assertEqualVector(TempoTapDegara()(onsets), expected)
+            self.assertEqualVector(tracker(onsets), expected)
 
 
 suite = allTests(TestTempoTapDegara)

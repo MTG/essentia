@@ -158,6 +158,9 @@ const char* FrameCutter::description = DOC("This algorithm slices the input stre
 
 void FrameCutter::reset() {
   Algorithm::reset();
+  // Re-seed the internal noise generator so that a reused (reset) instance
+  // produces the same frames as a fresh one (determinism across resets).
+  _noiseAdder->reset();
   //_reschedule = false;
   _streamIndex = 0;
   if (_startFromZero) _startIndex = 0;
@@ -201,8 +204,12 @@ void FrameCutter::configure() {
   // Adding noise to avoid divisions by zero (in case the user chooses to do so
   // by setting the silentFrames parameter to ADD_NOISE).  The level of such noise
   // is chosen to be -100dB because it will still be detected as a silent frame
-  // by essentia::isSilent() and is unhearable by humans
-  _noiseAdder->configure("fixSeed", false, "level", -100);
+  // by essentia::isSilent() and is unhearable by humans.
+  // Use a fixed seed so that analysis results are reproducible across runs
+  // (https://github.com/MTG/essentia/issues/1006): with a time-based seed,
+  // any extractor relying on silentFrames="noise" (e.g. MusicExtractor)
+  // returned different values on every execution.
+  _noiseAdder->configure("fixSeed", true, "level", -100);
   reset();
 }
 
