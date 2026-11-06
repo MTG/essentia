@@ -33,7 +33,10 @@ const char* VectorRealToTensor::description = DOC("This algorithm generates tens
 "  - channels: Number of channels per tensor. Currently, only single-channel tensors are supported. Otherwise, an exception is thrown.\n"
 "  - patchSize: Number of timestamps (i.e., number of frames) per patch.\n"
 "  - featureSize: Expected number of features (e.g., mel bands) of every input frame. This algorithm throws an exception if the size of any frame is different from featureSize.\n"
-"Additionally, the patchHopSize and batchHopSize parameters provide control over the amount of overlap on those dimensions.");
+"Additionally, the patchHopSize and batchHopSize parameters provide control over the amount of overlap on those dimensions.\n"
+"When the stream ends before the current batch is complete, lastBatchMode decides whether the remaining patches are discarded, "
+"pushed as a smaller batch (which requires a model accepting dynamic batches), or padded with zeros up to batchSize "
+"(which keeps the batch size fixed, at the cost of also returning patches without signal).");
 
 
 void VectorRealToTensor::configure() {
@@ -116,7 +119,7 @@ AlgorithmStatus VectorRealToTensor::process() {
       _push = true;
     }
 
-    if (_lastBatchMode == "push" && _acc.size() >= 1) {
+    if ((_lastBatchMode == "push" || _lastBatchMode == "zeros") && _acc.size() >= 1) {
       _push = true;
     }
 
@@ -205,21 +208,30 @@ AlgorithmStatus VectorRealToTensor::process() {
   // We push if we are in one of these cases:
   // 1) we have filled a batch
   // 2) we have reached the end of the stream in accumulate mode
-  // 3) we have reached the end of the stream with lastBatchMode = "push"
+  // 3) we have reached the end of the stream with lastBatchMode = "push" or "zeros"
   if (_push) {
     vector<int> shape = _shape;
     int batchHopSize = _batchHopSize;
 
     bool reshapeBatch = false;
-    
+    bool padBatch = false;
+
     // Reshape the output tensor if we are in accumulate mode
     if (_accumulate) {
       reshapeBatch = true;
-    
-    // or if we have reached the end of the stream with lastBatchModel = "push"
-    // and there are not enough patches to fill a regular batch.   
-    } else if (shouldStop() and _acc.size() < _shape[0]) {
-      reshapeBatch = true;
+
+    // or if we have reached the end of the stream and there are not enough
+    // patches to fill a regular batch.
+    } else if (shouldStop() and (int)_acc.size() < _shape[0]) {
+      // With `zeros` the batch size is preserved by padding with silent patches so
+      // that models exported with a fixed batch dimension can still run on the last
+      // patches. `push` instead shrinks the batch, which requires a model accepting
+      // a dynamic batch size.
+      if (_lastBatchMode == "zeros" && _acc.size() >= 1) {
+        padBatch = true;
+      } else {
+        reshapeBatch = true;
+      }
     }
 
     if (reshapeBatch) {
@@ -231,6 +243,16 @@ AlgorithmStatus VectorRealToTensor::process() {
                                 "produce a patch of the desired size. Consider setting the `lastPatchMode` "
                                 "parameter to `repeat` in order to produce a batch.");
       }
+    }
+
+    if (padBatch) {
+      EXEC_DEBUG("VectorRealToTensor: Padding the last batch with " << _shape[0] - (int)_acc.size()
+                 << " silent patches.");
+      _acc.resize(_shape[0], vector<vector<Real> >(_shape[2], vector<Real>(_shape[3], 0.0)));
+
+      // Consume the whole accumulator: no more frames are coming, so any batch
+      // overlap left by `batchHopSize` would only repeat the padding.
+      batchHopSize = _shape[0];
     }
 
     Tensor<Real>& tensor = *(Tensor<Real> *)_tensor.getFirstToken();

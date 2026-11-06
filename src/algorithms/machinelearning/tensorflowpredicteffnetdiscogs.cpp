@@ -93,6 +93,7 @@ void TensorflowPredictEffnetDiscogs::configure() {
   string lastPatchMode = parameter("lastPatchMode").toString();
   int patchSize = parameter("patchSize").toInt();
   int batchSize = parameter("batchSize").toInt();
+  string lastBatchMode = parameter("lastBatchMode").toString();
 
   if (patchSize == 0) {
     throw EssentiaException("TensorflowPredictEffnetDiscogs: `patchSize` cannot be 0");
@@ -106,7 +107,7 @@ void TensorflowPredictEffnetDiscogs::configure() {
   _vectorRealToTensor->configure("shape", inputShape,
                                  "lastPatchMode", lastPatchMode,
                                  "patchHopSize", patchHopSize,
-                                 "lastBatchMode", "discard");
+                                 "lastBatchMode", lastBatchMode);
 
   _configured = true;
 
@@ -148,6 +149,24 @@ const char* TensorflowPredictEffnetDiscogs::description = DOC(
   "of parallelization when GPUs are available, but at the same time it can be "
   "memory exhausting for long files. "
   "This option is not supported by some EffnetDiscogs models that require a fixed batch size.\n"
+  "\n"
+  "Most EffnetDiscogs models are exported with a fixed batch size, so the model only runs once "
+  "`batchSize` patches have been gathered. With the default parameters a patch advances the stream "
+  "by about one second, which means that inputs shorter than roughly `batchSize` seconds do not fill "
+  "a single batch. `lastBatchMode` decides what happens with such an incomplete last batch:\n"
+  "\n"
+  "  - `zeros`: pad the batch with silent patches so that it can still be fed to a fixed-batch model. "
+  "The predictions for the padded patches are returned too, so the number of predictions is a "
+  "multiple of `batchSize`.\n"
+  "  - `same` (standard mode only, and the default there): as `zeros`, but only the predictions "
+  "matching patches that contain signal are returned.\n"
+  "  - `push` (streaming mode only): push a smaller batch. Only valid for models that accept a "
+  "dynamic batch size.\n"
+  "  - `discard`: drop the last patches. Inputs shorter than one batch return no predictions at all.\n"
+  "\n"
+  "Note that an input shorter than `patchSize` frames (about 2 seconds with the default parameters) "
+  "does not produce even a single patch, and therefore returns no predictions for any `lastBatchMode` "
+  "unless `lastPatchMode` is set to `repeat`.\n"
   "\n"
   "The recommended pipeline is as follows::\n"
   "\n"
@@ -193,7 +212,12 @@ void TensorflowPredictEffnetDiscogs::configure() {
                                              INHERIT("patchHopSize"),
                                              INHERIT("lastPatchMode"),
                                              INHERIT("batchSize"),
-                                             INHERIT("patchSize"));
+                                             INHERIT("patchSize"),
+                                             // In standard mode the last batch is completed by
+                                             // zero-padding the input signal (see `padSignal`), so
+                                             // the inner network never sees an incomplete batch and
+                                             // must not pad a second time.
+                                             "lastBatchMode", "discard");
 
   _patchHopSize = parameter("patchHopSize").toInt();
   _patchSize = parameter("patchSize").toInt();
@@ -212,7 +236,9 @@ void TensorflowPredictEffnetDiscogs::compute() {
   }
 
   vector<Real> paddedSignal;
-  int paddingPatches;
+  // Stays 0 when no padding is applied, e.g. with `batchSize` <= 0, where the whole
+  // stream is a single batch and there is nothing to trim afterwards.
+  int paddingPatches = 0;
   if (_batchSize > 0) {
     if (_lastBatchMode == "zeros" || _lastBatchMode == "same") {
       // Computes the number of patches required to fill the final batch and makes a

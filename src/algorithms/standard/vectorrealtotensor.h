@@ -57,7 +57,7 @@ class VectorRealToTensor : public Algorithm {
     declareParameter("patchHopSize", "number of frames between the beginnings of adjacent patches. Use `0` to avoid overlap", "[0,inf)", 0);
     declareParameter("batchHopSize", "number of patches between the beginnings of adjacent batches. Use `0` to avoid overlap", "[0,inf)", 0);
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "repeat");
-    declareParameter("lastBatchMode", "what to do with the last patches: `push` an incomplete batch (if the models accepts dynamic batches) or `discard` them", "{discard,push}", "push");
+    declareParameter("lastBatchMode", "what to do with the last patches when they are not enough to fill a batch: `push` them as a smaller batch (only valid if the model accepts dynamic batches), pad the batch with `zeros` up to the batch size (valid for models with a fixed batch size, at the cost of also producing patches without signal), or `discard` them", "{discard,push,zeros}", "push");
   }
 
   void configure();
