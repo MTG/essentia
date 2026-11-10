@@ -55,6 +55,11 @@ class AudioLoader : public Algorithm {
   AVCodecContext* _audioCtx;
   const AVCodec* _audioCodec;
   AVPacket _packet;
+  // True while the decoder has REFUSED _packet (avcodec_send_packet() returned
+  // AVERROR(EAGAIN)): the FFmpeg contract then requires receiving buffered
+  // frames and resending the SAME packet. While set, process() must neither
+  // unref _packet nor read the next one.
+  bool _packetPending;
   AVMD5 *_md5Encoded;
   uint8_t _checksum[16];
   bool _computeMD5;
@@ -82,7 +87,7 @@ class AudioLoader : public Algorithm {
 
  public:
   AudioLoader() : Algorithm(), _buffer(0),  _demuxCtx(0),
-	          _audioCtx(0), _audioCodec(0), _decodedFrame(0),
+	          _audioCtx(0), _audioCodec(0), _packetPending(false), _decodedFrame(0),
             _convertCtxAv(0), _configured(false) {
 
     declareOutput(_audio, 1, "audio", "the input audio signal");
