@@ -55,8 +55,6 @@ void AutoCorrelation::configure() {
   _generalized = parameter("generalized").toBool();
   _frequencyDomainCompression = parameter("frequencyDomainCompression").toReal();
 
-  _ifft->configure("normalize", !_generalized);
-
   _fft->output("fft").set(_fftBuffer);
   _ifft->input("fft").set(_fftBuffer);
 }
@@ -100,7 +98,7 @@ void AutoCorrelation::compute() {
     } else {
       // Apply magnitude compression
       _fftBuffer[i] = complex<Real>(
-        pow(sqrt(pow(_fftBuffer[i].real() / sizeFFT, 2) + pow(_fftBuffer[i].imag() / sizeFFT, 2)), _frequencyDomainCompression),
+        pow(sqrt(pow(_fftBuffer[i].real(), 2) + pow(_fftBuffer[i].imag(), 2)), _frequencyDomainCompression),
         0.0); // squared amplitude -> complex part = 0
     }
   }
