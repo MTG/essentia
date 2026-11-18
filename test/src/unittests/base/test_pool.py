@@ -328,7 +328,7 @@ class TestPool(TestCase):
         self.assertEqualMatrix(p['foo.bar'], expected)
 
     # Test adding an empty matrix
-    def testVectorEmpty(self):
+    def testMatrixEmpty(self):
         p = Pool()
         p.add('foo.bar', zeros((10, 10)))
         p.add('foo.bar', array([[]]))
