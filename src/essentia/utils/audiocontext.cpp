@@ -92,6 +92,7 @@ int AudioContext::create(const std::string& filename,
 
   // If codec provides supported list, pick one from it (prefer desired_fmt).
   // FFmpeg 8+ removed AVCodec::sample_fmts; use avcodec_get_supported_config() instead.
+#if LIBAVCODEC_VERSION_MAJOR >= 61
   const enum AVSampleFormat* sample_fmts = NULL;
   int nb_sample_fmts = 0;
   if (avcodec_get_supported_config(NULL, audioCodec, AV_CODEC_CONFIG_SAMPLE_FORMAT, 0,
@@ -106,6 +107,19 @@ int AudioContext::create(const std::string& filename,
       desired_fmt = sample_fmts[0];
     }
   }
+#else
+  if (audioCodec->sample_fmts) {
+    const enum AVSampleFormat* p = audioCodec->sample_fmts;
+    bool found = false;
+    while (*p != AV_SAMPLE_FMT_NONE) {
+      if (*p == desired_fmt) { found = true; break; }
+      ++p;
+    }
+    if (!found) {
+      desired_fmt = audioCodec->sample_fmts[0];
+    }
+  }
+#endif
   _codecCtx->sample_fmt = desired_fmt;
 
   // Open codec
