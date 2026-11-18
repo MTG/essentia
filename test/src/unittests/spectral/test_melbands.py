@@ -62,6 +62,16 @@ class TestMelBands(TestCase):
         self.assertAlmostEqualVector(mbands, [1]*128, 1e-5)
 
 
+    def testSlaneyLinearWeightsBelow1000Hz(self):
+        spectrum = [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0]
+        mbands = MelBands(inputSize=11, sampleRate=2000, numberBands=2,
+                          lowFrequencyBound=100, highFrequencyBound=900,
+                          warpingFormula='slaneyMel')(spectrum)
+        # Below 1000 Hz, the Slaney scale is linear. The 300 Hz bin has
+        # weight 3/4 in the first triangle, whose weights sum to 21/8.
+        self.assertAlmostEqualVector(mbands, [2.0 / 7, 0], 1e-6)
+
+
     def testZeroSpectrum(self):
         # Inputting zeros should return zero. Try with different sizes.
         size = 1024
