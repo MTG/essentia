@@ -45,7 +45,121 @@ void AudioLoader::configure() {
     av_log_set_level(AV_LOG_QUIET);   // choices: {AV_LOG_VERBOSE, AV_LOG_QUIET}
     _computeMD5 = parameter("computeMD5").toBool();
     _selectedStream = parameter("audioStream").toInt();
+
+    _startTime = parameter("startTime").toReal();
+    _endTime   = parameter("endTime").toReal();
+    // Same rule Trimmer has always enforced for the composites that expose these parameters
+    // (EasyLoader, EqloudLoader): an inverted range is an error, an EMPTY range is not -- it
+    // simply yields no audio. Rejecting startTime == endTime here would break callers that
+    // work today.
+    if (_endTime < _startTime) {
+        throw EssentiaException("AudioLoader: 'startTime' cannot be larger than 'endTime'");
+    }
+
     reset();
+}
+
+
+// How much audio to decode-and-discard BEFORE the requested startTime.
+//
+// Seeking a compressed stream lands on a packet boundary, never on a sample, and the packet
+// it lands on is not necessarily decodable in isolation: MP3 carries a bit reservoir across
+// frames and every MDCT codec needs the previous window to reconstruct the current one. So a
+// seek that jumps straight to the target packet produces samples that differ from the ones a
+// decode-from-zero would have produced at the same position -- not by much, but audibly and
+// measurably, and enough to move a BPM or key estimate.
+//
+// The fix is the standard one: ask for a position SEEK_PREROLL_SEC earlier than we want, then
+// decode forward and throw the result away until the exact target sample. By the time the
+// target arrives the decoder has been running long enough for its history to be identical to
+// the from-zero case, and the output is bit-exact (verified in the test suite).
+//
+// 0.5 s is ~19 MP3 frames / ~21 AAC frames, far beyond any codec's actual history, and costs
+// well under a millisecond of decode. Making it bigger buys nothing; making it much smaller
+// starts to matter for codecs with long overlap windows.
+static const Real SEEK_PREROLL_SEC = 0.5;
+
+
+// Position the demuxer at (startTime - preroll) and put the decoder in a clean state.
+//
+// This is the whole of the actual "seek". It is deliberately conservative: AVSEEK_FLAG_BACKWARD
+// guarantees ffmpeg lands at or BEFORE the requested timestamp (never after, which would lose
+// audio the caller asked for), and if the seek fails for any reason we simply do not seek --
+// _startSample trimming in copyFFmpegOutput() then degrades to the old decode-and-discard
+// behaviour, which is slow but still CORRECT. A format with a broken index gets the answer it
+// always got, not an error.
+void AudioLoader::seekToStartTime() {
+    _currentSample   = 0;
+    _reachedEndTime  = false;
+    _anchorPending   = false;
+
+    int sampleRate = _audioCtx->sample_rate;
+
+    // TRUNCATION, not rounding, and in double: this is exactly Trimmer's seconds -> samples
+    // rule, which is what EasyLoader/EqloudLoader have always used to cut their slices. Keeping
+    // the same rule is what allows those composites to switch from decode-and-trim to seeking
+    // without moving a single sample. (Trimmer does the multiplication in Real, i.e. float32,
+    // whose 24-bit mantissa cannot represent every sample index past ~380 s at 44.1 kHz; doing
+    // it in double here removes that drift, so a slice taken deep into a long file lands where
+    // the parameters say it should.)
+    _startSample = (int64_t)((double)_startTime * sampleRate);
+    _endSample   = (_endTime >= 1.0e6) ? -1 : (int64_t)((double)_endTime * sampleRate);
+
+    if (_startSample <= 0) return;   // nothing to seek to
+
+    AVStream* stream = _demuxCtx->streams[_streamIdx];
+
+    Real seekTime = _startTime - SEEK_PREROLL_SEC;
+    if (seekTime < 0) seekTime = 0;
+
+    int64_t startOffset = (stream->start_time == AV_NOPTS_VALUE) ? 0 : stream->start_time;
+    int64_t target = startOffset + (int64_t)(seekTime / av_q2d(stream->time_base) + 0.5);
+
+    int errnum = av_seek_frame(_demuxCtx, _streamIdx, target, AVSEEK_FLAG_BACKWARD);
+    if (errnum < 0) {
+        // Not fatal: fall back to decoding from the beginning and discarding. Slow, correct.
+        E_WARNING("AudioLoader: seek to " << seekTime << "s failed; "
+                  "falling back to decoding from the start of the stream");
+        return;
+    }
+
+    avcodec_flush_buffers(_audioCtx);
+    if (_convertCtxAv) swr_init(_convertCtxAv);   // drop any samples held by the converter
+
+    // We no longer know where we are; the next decoded frame's pts tells us.
+    _anchorPending = true;
+}
+
+
+// Adopt the freshly decoded frame's presentation timestamp as our absolute sample position.
+//
+// Called once after each seek. Converting pts -> sample index is what makes the result
+// SAMPLE-ACCURATE rather than packet-accurate: we learn exactly how far before the target the
+// seek actually landed, and copyFFmpegOutput() then discards exactly that many samples.
+void AudioLoader::anchorPositionFromFrame() {
+    AVStream* stream = _demuxCtx->streams[_streamIdx];
+
+    int64_t pts = _decodedFrame->pts;
+    if (pts == AV_NOPTS_VALUE) pts = _decodedFrame->best_effort_timestamp;
+    if (pts == AV_NOPTS_VALUE) {
+        // No timing information at all. We cannot know where we are, so the only safe reading
+        // is "we are at the target" -- the caller gets packet-accurate audio rather than a
+        // silently shifted stream. Formats reaching this branch would not have been seekable
+        // in any useful sense anyway.
+        E_WARNING("AudioLoader: no timestamp on the first frame after seeking; "
+                  "the slice may not be sample-accurate");
+        _currentSample = _startSample;
+        _anchorPending = false;
+        return;
+    }
+
+    int64_t startOffset = (stream->start_time == AV_NOPTS_VALUE) ? 0 : stream->start_time;
+    _currentSample = av_rescale_q(pts - startOffset, stream->time_base,
+                                  (AVRational){1, _audioCtx->sample_rate});
+
+
+    if (_currentSample < 0) _currentSample = 0;
+    _anchorPending = false;
 }
 
 
@@ -160,6 +274,10 @@ void AudioLoader::openAudioFile(const string& filename) {
     }
 
     av_md5_init(_md5Encoded);
+
+    // Everything above is stream setup; the file is now positioned at the start. If the caller
+    // asked for a later startTime, move there NOW rather than making process() read past it.
+    seekToStartTime();
 }
 
 
@@ -271,7 +389,18 @@ AlgorithmStatus AudioLoader::process() {
     
     // needs to be freed using modern API !!
     av_packet_unref(&_packet);
-    
+
+    // endTime reached: stop here rather than reading the rest of the file. This is the half of
+    // issue #771 that saves work at the TAIL of a slice, exactly as the seek saves it at the head.
+    if (_reachedEndTime) {
+        shouldStop(true);
+        closeAudioFile();
+        // An endTime slice never reads the whole payload, so an MD5 over it would not be the
+        // file's MD5. Report the empty string rather than a checksum that means nothing.
+        _md5.push(string(""));
+        return FINISHED;
+    }
+
     return OK;
 }
 
@@ -492,6 +621,35 @@ void AudioLoader::copyFFmpegOutput() {
     int nsamples = _dataSize / (bytesPerSample * _nChannels);
     if (nsamples == 0) return;
 
+    if (_reachedEndTime) return;
+
+    // This block is where startTime/endTime become sample-accurate. The decoder hands us whole
+    // frames; the slice the caller asked for starts and ends inside one. `skip` is how many
+    // samples of THIS frame fall before startTime -- after a seek that is however far the seek
+    // undershot plus the preroll, and with no seek at all it is the whole decode-and-discard
+    // prefix.
+    int skip = 0;
+
+    if (_anchorPending) anchorPositionFromFrame();
+
+    if (_currentSample < _startSample) {
+        int64_t toSkip = _startSample - _currentSample;
+        if (toSkip >= nsamples) {
+            // Entirely before the slice: drop the frame and do not touch the output at all.
+            _currentSample += nsamples;
+            return;
+        }
+        skip = (int)toSkip;
+        _currentSample += toSkip;
+        nsamples -= skip;
+    }
+
+    if (_endSample >= 0 && _currentSample + nsamples >= _endSample) {
+        nsamples = (int)(_endSample - _currentSample);
+        _reachedEndTime = true;      // process() turns this into FINISHED
+        if (nsamples <= 0) return;
+    }
+
     // acquire necessary data
     bool ok = _audio.acquire(nsamples);
     if (!ok) {
@@ -504,16 +662,17 @@ void AudioLoader::copyFFmpegOutput() {
 
     if (_nChannels == 1) {
         for (int i=0; i<nsamples; i++) {
-          audio[i].left() = fbuf[i];
+          audio[i].left() = fbuf[skip + i];
         }
     }
     else { // _nChannels == 2
       for (int i=0; i<nsamples; i++) {
-        audio[i].left() = fbuf[2*i];
-        audio[i].right() = fbuf[2*i+1];
+        audio[i].left()  = fbuf[2*(skip + i)];
+        audio[i].right() = fbuf[2*(skip + i)+1];
       }
     }
 
+    _currentSample += nsamples;
     _audio.release(nsamples);
 }
 
@@ -575,7 +734,9 @@ void AudioLoader::createInnerNetwork() {
 void AudioLoader::configure() {
     _loader->configure(INHERIT("filename"),
                        INHERIT("computeMD5"),
-                       INHERIT("audioStream"));
+                       INHERIT("audioStream"),
+                       INHERIT("startTime"),
+                       INHERIT("endTime"));
 }
 
 void AudioLoader::compute() {

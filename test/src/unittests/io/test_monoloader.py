@@ -232,6 +232,66 @@ class TestMonoLoader(TestCase):
     def testInvalidFilename(self):
         self.assertConfigureFails(MonoLoader(),{'filename':'unknown.wav'})
 
+    # ------------------------------------------------------------------------------------
+    # startTime / endTime -- issue #771. MonoLoader forwards them to AudioLoader, which
+    # seeks. The reference is the decode-and-discard path: load the whole file and cut the
+    # slice out afterwards, using Trimmer's seconds -> samples rule.
+
+    def slice(self, audio, sampleRate, startTime, endTime):
+        return numpy.array(audio)[int(startTime*sampleRate):int(endTime*sampleRate)]
+
+    def testSeek(self):
+        # at the file's own rate Resample is a fastcopy, so the seeked read is EXACT
+        for name, sampleRate in [(join('recorded', 'musicbox.wav'), 44100),
+                                 (join('recorded', 'techno_loop.mp3'), 44100),
+                                 (join('recorded', 'dubstep.flac'), 44100),
+                                 (join('recorded', 'guitar_triads.flac'), 48000)]:
+            filename = join(testdata.audio_dir, name)
+            whole = MonoLoader(filename=filename, sampleRate=sampleRate)()
+            for startTime, endTime in [(0., 2.), (1.5, 3.5), (5., 6.)]:
+                found = numpy.array(MonoLoader(filename=filename, sampleRate=sampleRate,
+                                               startTime=startTime, endTime=endTime)())
+                expected = self.slice(whole, sampleRate, startTime, endTime)
+                self.assertEqual(len(found), len(expected))
+                self.assert_(numpy.array_equal(found, expected),
+                             '%s: seeked read differs from the reference at %s s'
+                             % (name, startTime))
+
+    def testSeekResampled(self):
+        # When the loader also RESAMPLES, the seeked read is close but not identical, and
+        # the reason is libsamplerate rather than the seek: its output depends on how much
+        # input it has already consumed (filter history plus a phase accumulator), so a
+        # converter started at startTime is not in the same state as one started at 0. The
+        # difference is uniform across the slice rather than a startup transient, and no
+        # bounded amount of preroll removes it. This test pins the size of that residual so
+        # a regression in the seek itself -- which would be far larger -- is still caught.
+        filename = join(testdata.audio_dir, 'recorded', 'musicbox.wav')
+        whole = MonoLoader(filename=filename, sampleRate=22050)()
+        for startTime, endTime in [(1.5, 3.5), (5., 6.)]:
+            found = numpy.array(MonoLoader(filename=filename, sampleRate=22050,
+                                           startTime=startTime, endTime=endTime)())
+            expected = self.slice(whole, 22050, startTime, endTime)
+            # the length may differ by a sample, as it does between architectures
+            self.assert_(abs(len(found) - len(expected)) <= 1)
+            n = min(len(found), len(expected))
+            residual = numpy.sqrt(numpy.mean((found[:n] - expected[:n])**2.))
+            reference = numpy.sqrt(numpy.mean(expected[:n]**2.))
+            self.assert_(residual < reference/100.,
+                         'resampled seek residual %e is too large against %e'
+                         % (residual, reference))
+
+    def testSeekBoundaries(self):
+        filename = join(testdata.audio_dir, 'recorded', 'musicbox.wav')
+        whole = MonoLoader(filename=filename)()
+        duration = len(whole)/44100.
+
+        self.assertEqualVector(MonoLoader(filename=filename, startTime=0., endTime=1e6)(), whole)
+        self.assertEqual(len(MonoLoader(filename=filename, startTime=duration + 10.,
+                                        endTime=duration + 20.)()), 0)
+        self.assertEqual(len(MonoLoader(filename=filename, startTime=2., endTime=2.)()), 0)
+        self.assertConfigureFails(MonoLoader(), {'filename': filename,
+                                                 'startTime': 10., 'endTime': 1.})
+
     def testResetStandard(self):
         audiofile = join(testdata.audio_dir,'recorded','musicbox.wav')
         loader = MonoLoader(filename=audiofile)
