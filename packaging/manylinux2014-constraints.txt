@@ -1,0 +1,8 @@
+# Pip constraints applied inside the manylinux2014 build containers
+# (wired up via PIP_CONSTRAINT in cibuildwheel.toml / cibuildwheel-tensorflow.toml).
+#
+# numpy >= 2.5 ships manylinux_2_28 wheels only, so on manylinux2014
+# (glibc 2.17) pip falls back to building it from the sdist, which fails
+# with "NumPy requires GCC >= 10.3" against the image's GCC 10.2.1.
+# numpy 2.4.x still builds from source there (and supports Python 3.11-3.14).
+numpy<2.5
