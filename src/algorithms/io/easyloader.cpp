@@ -61,13 +61,47 @@ void EasyLoader::configure() {
   _monoLoader->configure(INHERIT("filename"),
                          INHERIT("sampleRate"),
                          INHERIT("downmix"),
-                         INHERIT("audioStream"));
+                         INHERIT("audioStream"),
+                         INHERIT("gapless"));
 
-  _params.add("originalSampleRate", _monoLoader->parameter("originalSampleRate"));
+  Parameter originalSampleRate = _monoLoader->parameter("originalSampleRate");
+  _params.add("originalSampleRate", originalSampleRate);
 
-  _trimmer->configure(INHERIT("sampleRate"),
-                      INHERIT("startTime"),
-                      INHERIT("endTime"));
+  // Issue #771: startTime/endTime used to be applied by the Trimmer AFTER the whole stream had
+  // been decoded, so a 10 s slice of a 2 h recording cost the whole 2 h. Hand them to the
+  // loader instead -- it seeks to startTime and stops at endTime, making the cost proportional
+  // to the slice. The parameters keep exactly their meaning, and they select exactly the same
+  // samples: the loader converts seconds to samples with Trimmer's own truncation rule.
+  //
+  // ONE CASE STAYS ON THE OLD PATH, and it is not laziness: when the output rate differs from
+  // the file's rate, libsamplerate's output depends on how much input it has already consumed
+  // (filter history plus a phase accumulator). A converter started at startTime therefore does
+  // not produce the samples a converter started at 0 produces -- measured at about -49 dB
+  // relative RMS, uniformly across the slice, and NOT removable by any bounded amount of
+  // preroll. Seeking here would silently change what EasyLoader returns for every existing
+  // caller that resamples, so we do not. Callers that want the win and can accept that residual
+  // have MonoLoader's own startTime/endTime.
+  // Equality of the two rates is exactly Resample's own `src_ratio == 1.0` short circuit, i.e.
+  // precisely the condition under which the converter is a fastcopy and carries no state.
+  if (originalSampleRate.toReal() == parameter("sampleRate").toReal()) {
+    _monoLoader->configure(INHERIT("filename"),
+                           INHERIT("sampleRate"),
+                           INHERIT("downmix"),
+                           INHERIT("audioStream"),
+                           INHERIT("startTime"),
+                           INHERIT("endTime"),
+                           INHERIT("gapless"));
+
+    // The loader already delivered exactly the requested slice.
+    _trimmer->configure("sampleRate", parameter("sampleRate"),
+                        "startTime", 0.0,
+                        "endTime", 1.0e6);
+  }
+  else {
+    _trimmer->configure(INHERIT("sampleRate"),
+                        INHERIT("startTime"),
+                        INHERIT("endTime"));
+  }
 
   // apply a 6dB preamp, as done by all audio players.
   Real scalingFactor = db2amp(parameter("replayGain").toReal() + 6.0);
@@ -87,6 +121,11 @@ const char* EasyLoader::category = "Input/output";
 const char* EasyLoader::description = DOC("This algorithm loads the raw audio data from an audio file, downmixes it to mono and normalizes using replayGain. The audio is resampled in case the given sampling rate does not match the sampling rate of the input signal and is normalized by the given replayGain value.\n"
 "\n"
 "This algorithm uses MonoLoader and therefore inherits all of its input requirements and exceptions.\n"
+"\n"
+"The 'gapless' parameter is handed to AudioLoader and decides whether the encoder delay "
+"and padding that lossy codecs add at both ends of the signal are trimmed; the default "
+"trims exactly what the file declares. See AudioLoader for what each value means."
+"\n"
 "\n"
 "References:\n"
 "  [1] Replay Gain - A Proposed Standard,\n"
@@ -114,7 +153,8 @@ void EasyLoader::configure() {
                      INHERIT("endTime"),
                      INHERIT("replayGain"),
                      INHERIT("downmix"),
-                     INHERIT("audioStream"));
+                     INHERIT("audioStream"),
+                     INHERIT("gapless"));
 }
 
 void EasyLoader::compute() {

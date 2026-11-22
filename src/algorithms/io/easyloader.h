@@ -48,6 +48,7 @@ class EasyLoader : public AlgorithmComposite {
     declareParameter("replayGain", "the value of the replayGain that should be used to normalize the signal [dB]", "(-inf,inf)", -6.0);
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
     declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
+    declareParameter("gapless", "how to handle the encoder delay and padding that lossy codecs add at the beginning and the end of the decoded signal. \"metadata\" trims exactly the amount the container declares (e.g. the Xing/LAME header of an mp3), which is what a gapless player does and leaves the output sample-aligned with the signal that was encoded. \"decoder\" additionally drops the decoder's own constant latency (529 samples for MPEG Layer III) on streams that declare nothing, removing the decoder's share of the shift but not the encoder's. \"none\" returns the raw decoder output, delay and padding included; 'startTime' and 'endTime' then refer to positions in that raw output, which the decoder reaches by decoding and discarding rather than by seeking.", "{none,metadata,decoder}", "metadata");
 
   }
 
@@ -104,6 +105,7 @@ class EasyLoader : public Algorithm {
     declareParameter("replayGain", "the value of the replayGain that should be used to normalize the signal [dB]", "(-inf,inf)", -6.0);
     declareParameter("downmix", "the mixing type for stereo files", "{left,right,mix}", "mix");
     declareParameter("audioStream", "audio stream index to be loaded. Other streams are no taken into account (e.g. if stream 0 is video and 1 is audio use index 0 to access it.)", "[0,inf)", 0);
+    declareParameter("gapless", "how to handle the encoder delay and padding that lossy codecs add at the beginning and the end of the decoded signal. \"metadata\" trims exactly the amount the container declares (e.g. the Xing/LAME header of an mp3), which is what a gapless player does and leaves the output sample-aligned with the signal that was encoded. \"decoder\" additionally drops the decoder's own constant latency (529 samples for MPEG Layer III) on streams that declare nothing, removing the decoder's share of the shift but not the encoder's. \"none\" returns the raw decoder output, delay and padding included; 'startTime' and 'endTime' then refer to positions in that raw output, which the decoder reaches by decoding and discarding rather than by seeking.", "{none,metadata,decoder}", "metadata");
 
   }
 

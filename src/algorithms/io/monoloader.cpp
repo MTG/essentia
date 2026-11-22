@@ -60,7 +60,10 @@ void MonoLoader::configure() {
 
   _audioLoader->configure("filename", filename,
                           "computeMD5", false,
-                          INHERIT("audioStream"));
+                          INHERIT("audioStream"),
+                          INHERIT("startTime"),
+                          INHERIT("endTime"),
+                          INHERIT("gapless"));
 
   int inputSampleRate = (int)lastTokenProduced<Real>(_audioLoader->output("sampleRate"));
 
@@ -89,7 +92,11 @@ const char* MonoLoader::name = "MonoLoader";
 const char* MonoLoader::category = "Input/output";
 const char* MonoLoader::description = DOC("This algorithm loads the raw audio data from an audio file and downmixes it to mono. Audio is resampled using Resample in case the given sampling rate does not match the sampling rate of the input signal.\n"
 "\n"
-"This algorithm uses AudioLoader and thus inherits all of its input requirements and exceptions.");
+"This algorithm uses AudioLoader and thus inherits all of its input requirements and exceptions.\n"
+"\n"
+"The 'gapless' parameter is handed to AudioLoader and decides whether the encoder delay "
+"and padding that lossy codecs add at both ends of the signal are trimmed; the default "
+"trims exactly what the file declares. See AudioLoader for what each value means.");
 
 
 void MonoLoader::createInnerNetwork() {
@@ -109,7 +116,10 @@ void MonoLoader::configure() {
                      INHERIT("sampleRate"),
                      INHERIT("downmix"),
                      INHERIT("audioStream"),
-                     INHERIT("resampleQuality"));
+                     INHERIT("resampleQuality"),
+                     INHERIT("startTime"),
+                     INHERIT("endTime"),
+                     INHERIT("gapless"));
 }
 
 void MonoLoader::compute() {
