@@ -67,7 +67,8 @@ it *1* single token as input. Let's have a quick look at the "standard" Centroid
     }
 
     void declareParameters() {
-      declareParameter("range", "the range of the input array, used for normalizing the results", 1.0);
+      declareParameter("range", "the range of the input array, used for normalizing the results",
+                       "(0,inf)", 1.0);
     }
   };
 
