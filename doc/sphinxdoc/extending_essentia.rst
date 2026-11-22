@@ -79,21 +79,31 @@ There is a function that you will always have to fill-in, which is the
 ``void declareParameters()`` method.
 This is used to tell what are the parameters that are used by this algorithm, so that it
 is able to make sure you will get all the parameters you need. For this, you will need to
-declare the names and description of the parameters you are expecting, as well as an
-optional default value. There are 2 methods you can use in order to do this::
+declare the name and description of the parameters you are expecting, the range of the
+values they accept, and their default value. There is a single method you can use in
+order to do this::
 
-  void declareParameter(const std::string& name, const std::string& description);
-  void declareParameter(const std::string& name, const std::string& description, const Parameter& default_value);
+  void declareParameter(const std::string& name, const std::string& description,
+                        const std::string& range,
+                        const Parameter& default_value);
 
-The first version is to declare a single Parameter, the second one does the same but also
-specifies a default value. An example of the declareParameters() method follows::
+The ``range`` argument is checked when the algorithm is configured, and is also shown in
+the documentation that is generated for the algorithm. It can be written as an interval,
+using ``[`` or ``(`` for its lower bound and ``]`` or ``)`` for its upper bound, with
+``inf`` and ``-inf`` available as endpoints (for example, ``"[1,inf)"`` or
+``"(-inf,inf)"``), as a set of accepted values between curly braces (for example,
+``"{hann,hamming,blackman}"``), or as an empty string when the parameter is not
+constrained. Spaces are not allowed inside an interval.
+
+An example of the declareParameters() method follows::
 
 
-  void declareParameters() const {
-    declareParameter("sampleRate", "the sampling rate of the analyzed track");
-    declareParameter("nbCoeffs", "the number of coefficients to be output", 12);
-    declareParameter("floatParam", "a random floating point parameter", 23.8);
-    declareParameter("windowType", "the type of window used before doing the FFT", "Hann");
+  void declareParameters() {
+    declareParameter("sampleRate", "the sampling rate of the analyzed track", "(0,inf)", 44100);
+    declareParameter("nbCoeffs", "the number of coefficients to be output", "[1,inf)", 12);
+    declareParameter("floatParam", "a random floating point parameter", "(-inf,inf)", 23.8);
+    declareParameter("windowType", "the type of window used before the FFT",
+                     "{hann,hamming,blackman}", "hann");
   }
 
 
