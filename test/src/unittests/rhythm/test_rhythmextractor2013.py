@@ -173,6 +173,26 @@ class TestRhythmExtractor2013(TestCase):
         for i in range(len(estimates)):
             self.assertAlmostEqual(estimates[i], expectedBpm, 5.0)
 
+    def _assertDeterministic(self, method):
+        # Compare every output across fresh and reused instances. Reuse the
+        # inputs from the existing accuracy tests; no fixed BPM is required.
+        inputs = [self._createPulseTrain140(), self._createPulseTrainCombo(),
+                  MonoLoader(filename=join(testdata.audio_dir, 'recorded',
+                                           'techno_loop.wav'))()]
+        for audio in inputs:
+            expected = RhythmExtractor2013(method=method)(audio)
+            extractor = RhythmExtractor2013(method=method)
+            for _ in range(5):
+                self._assertEqualResults(
+                    RhythmExtractor2013(method=method)(audio), expected)
+                self._assertEqualResults(extractor(audio), expected)
+
+    def testDeterministicMultifeature(self):
+        self._assertDeterministic("multifeature")
+
+    def testDeterministicDegara(self):
+        self._assertDeterministic("degara")
+
 
 suite = allTests(TestRhythmExtractor2013)
 
