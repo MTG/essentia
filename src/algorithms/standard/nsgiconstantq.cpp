@@ -253,6 +253,8 @@ void NSGIConstantQ::createCoefficients() {
 
 
 void NSGIConstantQ::normalize() {
+  if (_normalize == "none") return;
+
   vector<Real> normalizeWeights(_binsNum + 2, 1);
 
   if (_normalize == "sine") {
