@@ -263,12 +263,16 @@ void Network::runPrepare() {
 
 // returns False when there are no more steps to run
 bool Network::runStep() {
+  return runOnce() != FINISHED;
+}
+
+AlgorithmStatus Network::runOnce() {
   // 5- actually run the network
-  if (_toposortedNetwork.empty()) return false;
+  if (_toposortedNetwork.empty()) return FINISHED;
 
   streaming::Algorithm* gen = _toposortedNetwork[0];
 
-  if(gen->shouldStop()) return false;
+  if(gen->shouldStop()) return FINISHED;
 
 #if DEBUGGING_ENABLED
   string dash(24, '-');
@@ -282,7 +286,7 @@ bool Network::runStep() {
 #endif
 
   // first run the generator once
-  gen->process();
+  AlgorithmStatus generatorStatus = gen->process();
 
   bool endOfStream = gen->shouldStop();
 
@@ -341,7 +345,10 @@ bool Network::runStep() {
   }
   E_DEBUG(EScheduler, dash << " Buffer states after running the generator and all the nodes " << dash);
   printBufferFillState();
-  return true;
+
+  // only return NO_INPUT if the generator has no more input
+  // otherwise return CONTINUE, meaning that there may be more data to process
+  return generatorStatus == NO_INPUT ? NO_INPUT : CONTINUE;
 }
 
 Algorithm* Network::findAlgorithm(const std::string& name) {
