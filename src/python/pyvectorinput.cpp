@@ -51,6 +51,11 @@ static int vectorinput_init(PyStreamingAlgorithm* self, PyObject *args, PyObject
   }
   Edt tp = stringToEdt( PyString_AS_STRING(argsV[1]) );
 
+  // A VectorInput has no sinks, so it is always a generator. Without this
+  // flag, tp_dealloc (shared with PyStreamingAlgorithm) never deletes the
+  // underlying C++ algorithm and every VectorInput leaks its data.
+  self->isGenerator = true;
+
   // NOTE:
   // Everywhere we use fromPythonCopy, we need to give ownership of that newly created variable to the
   // VectorInput instance, so that it knows it has to delete it later. This is done by using own=true in
