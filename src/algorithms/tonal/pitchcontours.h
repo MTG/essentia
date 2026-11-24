@@ -77,7 +77,7 @@ class PitchContours : public Algorithm {
     declareParameter("binResolution", "salience function bin resolution [cents]", "(0,inf)", 10.0);
     declareParameter("peakFrameThreshold", "per-frame salience threshold factor (fraction of the highest peak salience in a frame)", "[0,1]", 0.9);
     declareParameter("peakDistributionThreshold", "allowed deviation below the peak salience mean over all frames (fraction of the standard deviation)", "[0,2]", 0.9);
-    declareParameter("pitchContinuity", "pitch continuity cue (maximum allowed pitch change durig 1 ms time period) [cents]", "[0,inf)", 27.5625);
+    declareParameter("pitchContinuity", "pitch continuity cue (maximum allowed pitch change during 1 ms time period) [cents]", "[0,inf)", 27.5625);
     declareParameter("timeContinuity", "time continuity cue (the maximum allowed gap duration for a pitch contour) [ms]", "(0,inf)", 100.);
     declareParameter("minDuration", "the minimum allowed contour duration [ms]", "(0,inf)", 100.);
   }
