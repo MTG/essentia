@@ -56,6 +56,32 @@ class TestAutoCorrelation(TestCase):
         self.assertAlmostEqualVector(expected[:int(len(expected)/2)], output, 1e-4)
 
 
+    def testGeneralizedSquared(self):
+        inputv = readVector(join(testdir, 'octave_input.txt'))
+
+        for x in [inputv[:234], inputv]:
+            for normalization in ['standard', 'unbiased']:
+                expected = AutoCorrelation(normalization=normalization)(x)
+                output = AutoCorrelation(normalization=normalization,
+                                         generalized=True,
+                                         frequencyDomainCompression=2)(x)
+
+                self.assertAlmostEqualVector(expected, output, 1e-4)
+
+
+    def testGeneralized(self):
+        inputv = readVector(join(testdir, 'octave_input.txt'))
+
+        for x in [inputv[:234], inputv]:
+            sizeFFT = 2 ** int(numpy.ceil(numpy.log2(2 * len(x))))
+            for c in [0.5, 1.]:
+                spectrum = numpy.abs(numpy.fft.fft(x, sizeFFT)) ** c
+                expected = numpy.fft.ifft(spectrum).real[:len(x)]
+                output = AutoCorrelation(generalized=True, frequencyDomainCompression=c)(x)
+
+                self.assertAlmostEqualVectorAbs(output / expected[0], expected / expected[0], 1e-5)
+
+
     def testZero(self):
         self.assertEqualVector(AutoCorrelation()(zeros(1024)), zeros(1024))
 
