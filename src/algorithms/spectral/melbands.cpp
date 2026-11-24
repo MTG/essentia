@@ -25,16 +25,18 @@ using namespace standard;
 
 const char* MelBands::name = "MelBands";
 const char* MelBands::category = "Spectral";
-const char* MelBands::description = DOC("This algorithm computes energy in mel bands of a spectrum. It applies a frequency-domain filterbank (MFCC FB-40, [1]), which consists of equal area triangular filters spaced according to the mel scale. The filterbank is normalized in such a way that the sum of coefficients for every filter equals one. It is recommended that the input \"spectrum\" be calculated by the Spectrum algorithm.\n"
+const char* MelBands::description = DOC("This algorithm computes energy in mel bands of a spectrum. It applies a frequency-domain filterbank of overlapping triangular filters with center frequencies equally spaced on the mel scale. The mel scale is selected with the \"warpingFormula\" parameter: 'htkMel' from the HTK toolkit [3] (default) or 'slaneyMel' from the Auditory Toolbox [4]. Unlike the original MFCC FB-24 HTK and MFCC FB-40 implementations [1], the number of filters is not fixed and is set with the \"numberBands\" parameter.\n"
 "\n"
-"It is required that parameter \"highMelFrequencyBound\" not be larger than the Nyquist frequency, but must be larger than the parameter, \"lowMelFrequencyBound\". Also, The input spectrum must contain at least two elements. If any of these requirements are violated, an exception is thrown.\n"
+"The filter weights are normalized with the \"normalize\" parameter, independently of the chosen mel scale: 'unit_sum' (default) makes the sum of the coefficients of every filter equal to one, 'unit_tri' divides the coefficients of every filter by the theoretical area of its triangle, and 'unit_max' makes the peak of every filter equal to one. It is recommended that the input \"spectrum\" be calculated by the Spectrum algorithm.\n"
+"\n"
+"It is required that parameter \"highFrequencyBound\" not be larger than the Nyquist frequency, but must be larger than the parameter \"lowFrequencyBound\". Also, the input spectrum must contain at least two elements. If any of these requirements are violated, an exception is thrown.\n"
 "\n"
 "Note: an exception will be thrown in the case when the number of spectrum bins (FFT size) is insufficient to compute the specified number of mel bands: in such cases the start and end bin of a band can be the same bin or adjacent bins, which will result in zero energy when summing bins for that band. Use zero padding to increase the number of spectrum bins in these cases.\n"
 "\n"
 "References:\n"
 "  [1] T. Ganchev, N. Fakotakis, and G. Kokkinakis, \"Comparative evaluation\n"
 "  of various MFCC implementations on the speaker verification task,\" in\n"
-"  International Conference on Speach and Computer (SPECOM’05), 2005,\n"
+"  International Conference on Speech and Computer (SPECOM’05), 2005,\n"
 "  vol. 1, pp. 191–194.\n\n"
 "  [2] Mel-frequency cepstrum - Wikipedia, the free encyclopedia,\n"
 "  http://en.wikipedia.org/wiki/Mel_frequency_cepstral_coefficient\n\n"
