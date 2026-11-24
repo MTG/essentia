@@ -73,6 +73,50 @@ class TestTensorFlowPredictEffnetDiscogs(TestCase):
 
             self.assertEqual(found, expected)
 
+    def streamingPredictions(self, audio, **parameters):
+        # `essentia.streaming` is imported locally to avoid shadowing the standard
+        # algorithms this test file relies on.
+        from essentia.streaming import TensorflowPredictEffnetDiscogs as StreamingModel
+
+        model = StreamingModel(**parameters)
+        vectorInput = VectorInput(audio)
+        pool = Pool()
+
+        vectorInput.data >> model.signal
+        model.predictions >> (pool, 'predictions')
+
+        run(vectorInput)
+
+        if 'predictions' not in pool.descriptorNames():
+            return []
+        return pool['predictions']
+
+    def testStreamingLastBatchMode(self):
+        # In streaming mode the last batch used to be discarded unconditionally, so
+        # inputs shorter than `batchSize` patches (about 64 seconds with the default
+        # parameters) produced no predictions at all.
+        # See https://github.com/MTG/essentia/issues/1247
+        sr = 16000
+        seconds = 10
+        batch_size = 64
+        audio = numpy.ones((sr * seconds), dtype="float32")
+        model = join(testdata.models_dir, 'effnetdiscogs', 'effnetdiscogs-bs64-1.pb')
+
+        # The default mode zero-pads the last batch, so a fixed batch size model
+        # still runs and returns one full batch of predictions.
+        found = self.streamingPredictions(audio, graphFilename=model,
+                                          batchSize=batch_size)
+        self.assertEqual(len(found), batch_size)
+
+        # `discard` keeps the legacy behavior: nothing is returned.
+        found = self.streamingPredictions(audio, graphFilename=model,
+                                          batchSize=batch_size,
+                                          lastBatchMode='discard')
+        self.assertEqual(len(found), 0)
+
+        # `push` is not exercised here: it shrinks the batch, which this model
+        # (exported with a fixed batch size of 64) does not accept.
+
     def testInvalidParam(self):
         model = join(testdata.models_dir, 'effnetdiscogs', 'effnetdiscogs-bs64-1.pb')
         self.assertConfigureFails(TensorflowPredictEffnetDiscogs(), {'graphFilename': model,

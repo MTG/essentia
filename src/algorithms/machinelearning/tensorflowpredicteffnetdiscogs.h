@@ -67,6 +67,7 @@ class TensorflowPredictEffnetDiscogs : public AlgorithmComposite {
     declareParameter("lastPatchMode", "what to do with the last frames: `repeat` them to fill the last patch or `discard` them", "{discard,repeat}", "discard");
     declareParameter("batchSize", "the batch size for prediction. This allows parallelization when GPUs are available. Set it to -1 or 0 to accumulate all the patches and run a single TensorFlow session at the end of the stream", "[-1,inf)", 64);
     declareParameter("patchSize", "number of frames required for each inference. This parameter should match the model's expected input shape.", "[0,inf)", 128);
+    declareParameter("lastBatchMode", "what to do when the stream ends before the last batch is complete: pad it with `zeros` up to `batchSize` (works with any model, but predictions for the padded patches are also returned), `push` it as a smaller batch (only valid for models accepting a dynamic batch size), or `discard` it (no predictions are returned for the last patches, and none at all for streams shorter than `batchSize` patches)", "{discard,push,zeros}", "zeros");
   }
 
   void declareProcessOrder() {

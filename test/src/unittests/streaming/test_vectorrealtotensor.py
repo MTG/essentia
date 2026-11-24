@@ -49,7 +49,7 @@ class TestVectorRealToTensor(TestCase):
 
         return pool['framesOut'], pool['framesIn']
 
-    def streamingPipeline(self, n_samples, params, frame_size=1):
+    def streamingPipeline(self, n_samples, params, frame_size=1, data=None):
         fc = FrameCutter(
             frameSize=frame_size,
             hopSize=frame_size,
@@ -58,7 +58,8 @@ class TestVectorRealToTensor(TestCase):
         )
         vtt = VectorRealToTensor(**params)
 
-        data = numpy.zeros((n_samples), dtype="float32")
+        if data is None:
+            data = numpy.zeros((n_samples), dtype="float32")
         vi = VectorInput(data)
         pool = Pool()
 
@@ -67,6 +68,8 @@ class TestVectorRealToTensor(TestCase):
         vtt.tensor >> (pool, "tensor")
 
         run(vi)
+        if "tensor" not in pool.descriptorNames():
+            return []
         return pool["tensor"]
 
     def testFramesToTensorAndBackToFramesDiscard(self):
@@ -273,6 +276,82 @@ class TestVectorRealToTensor(TestCase):
             # It should be complete.
             expected_shape_first = [batch_size, 1, patch_size, frame_size]
             self.assertEqualVector(batches[0].shape, expected_shape_first)
+
+    def testLastBatchModeZeros(self):
+        # In `zeros` mode the incomplete last batch is padded with silent patches
+        # instead of being discarded or reshaped, so that models exported with a
+        # fixed batch size still get predictions for the last patches.
+        frame_size, patch_size, batch_size = 1, 3, 3
+        shape = [batch_size, 1, patch_size, frame_size]
+
+        # 1 complete batch plus 2 patches.
+        extra_patches = 2
+        n_samples = (batch_size + extra_patches) * (patch_size * frame_size)
+
+        # A constant non-zero signal so that the padding is distinguishable.
+        data = numpy.ones((n_samples), dtype="float32")
+
+        for last_patch_mode in ("repeat", "discard"):
+            params = {
+                "shape": shape,
+                "lastPatchMode": last_patch_mode,
+                "lastBatchMode": "zeros",
+            }
+
+            batches = self.streamingPipeline(n_samples, params, data=data)
+
+            # Two batches, both keeping the configured batch size.
+            self.assertEqual(len(batches), 2)
+
+            expected_shape = [batch_size, 1, patch_size, frame_size]
+            for batch in batches:
+                self.assertEqualVector(batch.shape, expected_shape)
+
+            # The first batch and the real patches of the second one carry signal.
+            self.assertEqualVector(
+                batches[0].flatten(), numpy.ones(batch_size * patch_size * frame_size)
+            )
+            self.assertEqualVector(
+                batches[1][:extra_patches].flatten(),
+                numpy.ones(extra_patches * patch_size * frame_size),
+            )
+
+            # The patches added to complete the last batch are silent.
+            self.assertEqualVector(
+                batches[1][extra_patches:].flatten(),
+                numpy.zeros((batch_size - extra_patches) * patch_size * frame_size),
+            )
+
+    def testLastBatchModeZerosShortStream(self):
+        # A stream shorter than a single batch used to produce no output at all
+        # with `lastBatchMode='discard'`. In `zeros` mode it produces one batch.
+        # See https://github.com/MTG/essentia/issues/1247
+        frame_size, patch_size, batch_size = 1, 3, 8
+        shape = [batch_size, 1, patch_size, frame_size]
+
+        n_patches = 2
+        n_samples = n_patches * (patch_size * frame_size)
+        data = numpy.ones((n_samples), dtype="float32")
+
+        params = {"shape": shape, "lastPatchMode": "discard", "lastBatchMode": "zeros"}
+        batches = self.streamingPipeline(n_samples, params, data=data)
+
+        self.assertEqual(len(batches), 1)
+        self.assertEqualVector(
+            batches[0].shape, [batch_size, 1, patch_size, frame_size]
+        )
+        self.assertEqualVector(
+            batches[0][:n_patches].flatten(),
+            numpy.ones(n_patches * patch_size * frame_size),
+        )
+        self.assertEqualVector(
+            batches[0][n_patches:].flatten(),
+            numpy.zeros((batch_size - n_patches) * patch_size * frame_size),
+        )
+
+        # For reference, `discard` returns nothing for the same stream.
+        params["lastBatchMode"] = "discard"
+        self.assertEqual(len(self.streamingPipeline(n_samples, params, data=data)), 0)
 
 
 suite = allTests(TestVectorRealToTensor)
