@@ -44,6 +44,26 @@ class RogueVector : public std::vector<T> {
     setSize(v.size());
   }
 
+  /**
+   * A RogueVector must never use std::vector's assignment operator when it does
+   * not own its memory: that operator may free the buffer the vector points to,
+   * which in that case belongs to someone else (and was very likely never
+   * malloc'ed on its own). Rebind the view instead, which is the same semantics
+   * as the copy constructor above.
+   */
+  RogueVector<T>& operator=(const RogueVector<T>& v) {
+    if (this != &v) {
+      if (_ownsMemory) {
+        std::vector<T>::operator=(v);
+      }
+      else {
+        setData(const_cast<T*>(v.data()));
+        setSize(v.size());
+      }
+    }
+    return *this;
+  }
+
   ~RogueVector() {
     if (!_ownsMemory) {
       setData(0);

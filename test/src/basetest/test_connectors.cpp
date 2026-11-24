@@ -336,6 +336,60 @@ TEST(Connectors, MultiConnectDisconnect) {
 
 }
 
+// Removing a reader which is not the last one of a source has to shift the read
+// views of the readers behind it. Doing that by assigning the views to each
+// other used to free memory they only borrow from the buffer, aborting the
+// process. See https://github.com/MTG/essentia/issues/841
+TEST(Connectors, DisconnectReaderWithLiveViews) {
+  Source<Real> source("source1");
+  Sink<Real> sink1("sink1"), sink2("sink2");
+
+  source.setBufferType(BufferUsage::forAudioStream);
+  connect(source, sink1);
+  connect(source, sink2);
+
+  for (int i=0; i<64; i++) source.push((Real)i);
+
+  // leave the two readers holding views of a different size, which is what
+  // makes assigning one to the other reallocate
+  ASSERT_TRUE(sink1.acquire(4));
+  ASSERT_TRUE(sink2.acquire(32));
+
+  disconnect(source, sink1);
+
+  ASSERT_EQ(1, source.typedBuffer().numberReaders());
+  ASSERT_EQ(0, sink2.id());
+
+  // the surviving reader keeps reading its own tokens through its new ID
+  const vector<Real>& tokens = sink2.tokens();
+  ASSERT_EQ((size_t)32, tokens.size());
+  for (int i=0; i<32; i++) EXPECT_EQ((Real)i, tokens[i]);
+}
+
+// Connecting more sinks makes the vector of read views grow while the views of
+// the readers already connected are live.
+TEST(Connectors, AddReaderWithLiveViews) {
+  const int nsinks = 8;
+  Source<Real> source("source1");
+  Sink<Real>* sinks[nsinks];
+  for (int i=0; i<nsinks; i++) sinks[i] = new Sink<Real>("sink");
+
+  source.setBufferType(BufferUsage::forAudioStream);
+  connect(source, *sinks[0]);
+  for (int i=0; i<64; i++) source.push((Real)i);
+  ASSERT_TRUE(sinks[0]->acquire(16));
+
+  for (int i=1; i<nsinks; i++) {
+    connect(source, *sinks[i]);
+    // the view of the first reader must survive the reallocation
+    const vector<Real>& tokens = sinks[0]->tokens();
+    ASSERT_EQ((size_t)16, tokens.size());
+    for (int j=0; j<16; j++) EXPECT_EQ((Real)j, tokens[j]);
+  }
+
+  for (int i=0; i<nsinks; i++) delete sinks[i];
+}
+
 TEST(Connectors, ForwardSourceProxy) {
   Source<int> source1("source1");
   SourceProxy<int> sourcep1("sourcep1"), sourcep2("sourcep2");
