@@ -1,6 +1,6 @@
+from configparser import Interpolation
 import sys
 import essentia.standard as es
-from essentia import *
 import numpy
 import pylab
 
@@ -8,34 +8,49 @@ import pylab
 try:
     input_file = sys.argv[1]
 except:
-    print ("usage: %s <input_file>" % sys.argv[0])
+    print("usage: {sys.argv[0]} <input_file>")
     sys.exit()
 
+sample_rate = 44100
+frame_size = 2048
+hop_size = 128
+weight = "hybrid"
 
-frameSize = 2048
-hopSize = 128
-weight = 'hybrid'
-
-print("Frame size: %d" % frameSize)
-print("Hop size: %d" % hopSize)
-print("weight: %s" % weight)
+print(f"Sample rate: {sample_rate}")
+print(f"Frame size: {frame_size}")
+print(f"Hop size: {hop_size}")
+print(f"weight: {weight}")
 
 audio = es.MonoLoader(filename=input_file)()
 
-w = es.Windowing(type='hann')
+w = es.Windowing(type="hann")
 s = es.Spectrum()
 freq_bands = es.FrequencyBands()
 
 bands_energies = []
-for frame in es.FrameGenerator(audio, frameSize=frameSize, hopSize=hopSize):
+for frame in es.FrameGenerator(audio, frameSize=frame_size, hopSize=hop_size):
     bands_energies.append(freq_bands(s(w(frame))))
 
-novelty = es.NoveltyCurve(frameRate=44100./hopSize, weightCurveType=weight)(numpy.array(bands_energies))
-bpm, candidates, magnitudes, tempogram, _, ticks, ticks_strength, sinusoid = es.BpmHistogram(frameRate=44100./hopSize)(novelty)
+novelty = es.NoveltyCurve(
+    frameRate=sample_rate / hop_size, weightCurveType=weight
+)(numpy.array(bands_energies))
+(
+    bpm,
+    candidates,
+    magnitudes,
+    tempogram,
+    _,
+    ticks,
+    ticks_strength,
+    sinusoid,
+) = es.BpmHistogram(frameRate=sample_rate / hop_size)(novelty)
 
-print("BPM = %0.1f" % bpm)
-   
-#pylab.plot(novelty)
-#pylab.show()
-pylab.matshow(tempogram.transpose(), origin='lower', aspect='auto')
+print(f"BPM: {bpm:.1f}")
+
+pylab.plot(novelty)
+pylab.suptitle("novelty")
+pylab.show()
+
+pylab.matshow(tempogram.T, origin="upper", aspect="auto", interpolation=None)
+pylab.suptitle("tempogram")
 pylab.show()
